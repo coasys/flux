@@ -4,6 +4,7 @@ const { app, BrowserWindow } = require('electron');
 const ad4m = require("ad4m-core-executor");
 
 app.whenReady().then(() => {
+    console.log(ad4m);
     console.log("Init AD4M...", ad4m);
     let ad4mCore = ad4m.init("");
     console.log("Starting account creation splash screen");
