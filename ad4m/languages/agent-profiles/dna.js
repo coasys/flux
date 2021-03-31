@@ -1,4 +1,4 @@
-import dna from './profiles.dna.gz'
+import dna from './profiles.dna'
 
 export const DNA = Buffer.from(dna, 'base64')
 export const DNA_NICK = "profiles"

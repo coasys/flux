@@ -1,1 +1,0 @@
-{"name":"Social-Context","uuid":"","properties":{"seed":"jibsters"},"zomes":{"social_context_acai":{"wasm_path":"./social_context_acai.wasm"}}}
