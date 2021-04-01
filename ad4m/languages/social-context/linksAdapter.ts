@@ -26,34 +26,40 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     }
 
     async others(): Promise<Agent[]> {
-        return await this.#socialContextDna.call(DNA_NICK, "social_context_acai", "get_others", {})
+        return await this.#socialContextDna.call(DNA_NICK, "social_context", "get_others", {})
     }
 
     async addLink(link: Expression) {
         let data = prepareExpressionLink(link);
         console.debug("Holochain Social Context: ADDING LINK!: ", data);
-        await this.#socialContextDna.call(DNA_NICK, "social_context_acai", "add_link", data)
+        await this.#socialContextDna.call(DNA_NICK, "social_context", "add_link", data)
     }
 
     async updateLink(oldLinkExpression: Expression, newLinkExpression: Expression) {
         let source_link = prepareExpressionLink(oldLinkExpression);
         let target_link = prepareExpressionLink(newLinkExpression);
-        await this.#socialContextDna.call(DNA_NICK, "social_context_acai", "update_link", {source: source_link, target: target_link})
+        await this.#socialContextDna.call(DNA_NICK, "social_context", "update_link", {source: source_link, target: target_link})
     }
 
     async removeLink(link: Expression) {
         let data = prepareExpressionLink(link);
-        await this.#socialContextDna.call(DNA_NICK, "social_context_acai", "remove_link", data)
+        await this.#socialContextDna.call(DNA_NICK, "social_context", "remove_link", data)
     }
 
-    async getLinks(query: LinkQuery): Promise<Expression[]> {
+    async getLinks(query: LinkQuery, from?: Date, until?: Date): Promise<Expression[]> {
         query = new LinkQuery(query)
         let link_query = Object.assign(query);  
         if (!link_query.source) {
             link_query.source = "root";
         };
         console.debug("Holochain Social Context: Getting Links With: ", link_query); 
-        let links = await this.#socialContextDna.call(DNA_NICK, "social_context_acai", "get_links", link_query)
+        if (from) {
+            link_query.from = from
+        };
+        if (until) {
+            link_query.until = until;
+        };
+        let links = await this.#socialContextDna.call(DNA_NICK, "social_context", "get_links", link_query)
         console.debug("Holchain Social Context: Got Links", links);
 
         return links.filter(link => query.isMatch(link.data as Link))
