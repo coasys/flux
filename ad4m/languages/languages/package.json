@@ -1,7 +1,7 @@
 {
-  "name": "shared-perspectives",
+  "name": "note-ipfs",
   "version": "0.0.1",
-  "description": "This is a Language about Perspectives - a way to share Perspectives and create social and collaboration contexts",
+  "description": "An AD4M Language for simple text notes build on IPFS",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -11,13 +11,12 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "ad4m": "file:../../../../ad4m",
+    "language-context": "file:../../../../language-context",
     "@rollup/plugin-commonjs": "^14.0.0",
     "@rollup/plugin-node-resolve": "^8.0.0",
     "@rollup/plugin-typescript": "^4.0.0",
     "@tsconfig/svelte": "^1.0.0",
-    "@types/node": "^14.14.37",
-    "ad4m": "file:../../../../ad4m",
-    "language-context": "file:../../../../language-context",
     "node-sass": "^4.14.1",
     "rollup": "^2.3.4",
     "rollup-plugin-postcss": "^3.1.8",
@@ -29,5 +28,8 @@
     "svelte-preprocess": "^4.0.0",
     "tslib": "^2.0.0",
     "typescript": "^3.9.3"
+  },
+  "dependencies": {
+    "@types/node": "^14.14.37"
   }
 }
