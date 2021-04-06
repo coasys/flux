@@ -7,3 +7,4 @@
 !/ad4m/languages/**/rollup.config.icons.js
 /ad4m/languages/**/*.js.map
 /ad4m/languages/**/node_modules
+.hc

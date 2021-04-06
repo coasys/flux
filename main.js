@@ -4,18 +4,22 @@ const { app, BrowserWindow } = require('electron');
 const ad4m = require("ad4m-core-executor");
 
 app.whenReady().then(() => {
-    console.log(ad4m);
-    console.log("Init AD4M...", ad4m);
-    let ad4mCore = ad4m.init("");
-    console.log("Starting account creation splash screen");
-
-    const splash = createSplash()
-    ad4mCore.waitForAgent().then(() => {
-        console.log("Controllers init");
+    const execPath = "./resources/linux";
+    console.log("Resource path", execPath);
+    
+    console.log("Init AD4M...");
+    ad4m.init(app.getPath('appData'), execPath, "./ad4m/languages", ["languages", "agent-profiles", "shared-perspectives"]).then(ad4mCore => {
+        console.log("Starting account creation splash screen");
         ad4mCore.initControllers();
-        createWindow()
-        splash.close()
-    })
+    
+        const splash = createSplash()
+        ad4mCore.waitForAgent().then(() => {
+            console.log("Controllers init");
+            ad4mCore.initControllers();
+            splash.close();
+            createWindow();
+        })
+    });
 })
 
 /// This is the window where a user should create their DID

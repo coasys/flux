@@ -29,10 +29,22 @@
     "@types/mocha": "^8.2.1",
     "ad4m": "file:../ad4m",
     "ad4m-core-executor": "file:../ad4m-core-executor",
+    "app-root-dir": "^1.0.2",
     "esm": "^3.2.25",
     "graphql": "^15.5.0",
     "link": "^0.1.5",
     "typescript": "^4.2.3",
     "uuid": "^8.3.2"
+  },
+  "build": {
+    "extraFiles": [
+      {
+        "from": "resources/${os}",
+        "to": "Resources/bin",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
   }
 }
