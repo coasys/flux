@@ -5,7 +5,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="js">
 import { defineComponent } from "vue";
 import HelloWorld from "@/components/HelloWorld.vue"; // @ is an alias to /src
 
@@ -14,5 +14,9 @@ export default defineComponent({
   components: {
     HelloWorld,
   },
+  mounted() {
+    console.log(window);
+    window.api.send("toMain");
+  }
 });
 </script>
