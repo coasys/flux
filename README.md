@@ -1,7 +1,28 @@
-# Communities
+# Junto
 
-A holochain powered chat app leveraging the ad4m ontology for agent centric design patterns from UI to backend.
+## Environment
+Node version: 14.16.0<br>
+Linux OS for running HC & Holochain binaries (see `./resources`)
 
-## Tested Working Configuration
+## Project setup
+```
+npm run build-languages && npm install
+```
 
-Node version: v14.16.0
+### Compiles and hot-reloads for development
+```
+npm run electron:serve
+```
+
+### Compiles and minifies for production
+```
+npm run electron:build
+```
+
+### Lints and fixes files
+```
+npm run lint
+```
+
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).
