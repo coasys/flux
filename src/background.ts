@@ -12,6 +12,7 @@ process.on("unhandledRejection", (reason, p) => {
 });
 
 let win: BrowserWindow;
+let Core: ad4m.PerspectivismCore;
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 // This method will be called when Electron has finished
@@ -29,7 +30,7 @@ app.on("ready", async () => {
 
   //TODO: this needs to be derived from host os
   const execPath = "./resources/linux";
-  console.log("Resource path", execPath);
+  console.log("\x1b[1m", "Using Resource path", execPath);
 
   console.log("\x1b[36m%s\x1b[0m", "Init AD4M...");
   ad4m
@@ -38,7 +39,8 @@ app.on("ready", async () => {
       "agent-profiles",
       "shared-perspectives",
     ])
-    .then((ad4mCore) => {
+    .then((ad4mCore: ad4m.PerspectivismCore) => {
+      Core = ad4mCore;
       console.log(
         "\x1b[36m%s\x1b[0m",
         "Starting account creation splash screen"
@@ -108,6 +110,8 @@ app.on("window-all-closed", () => {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== "darwin") {
+    //Quit PerspectivismCore
+    Core.exit();
     app.quit();
   }
 });
