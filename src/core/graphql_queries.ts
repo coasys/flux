@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql } from "@apollo/client/core";
 
 export const OPEN_LINK = gql `
     mutation openLinkExtern($url: String) {

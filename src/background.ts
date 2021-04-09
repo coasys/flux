@@ -79,9 +79,8 @@ async function createWindow() {
   }
 }
 
-ipcMain.on("toMain", (event, args) => {
-  console.log("Got message", args);
-  win.webContents.send("fromMain", "Hello from main thread!");
+ipcMain.on("ping", (event, args) => {
+  win.webContents.send("pong", "Hello from main thread!");
 });
 
 // Scheme must be registered before the app is ready
