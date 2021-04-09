@@ -15,6 +15,7 @@ let win: BrowserWindow;
 let Core: ad4m.PerspectivismCore;
 
 const isDevelopment = process.env.NODE_ENV !== "production";
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -66,7 +67,7 @@ async function createWindow() {
       nodeIntegration: false,
       contextIsolation: true, // protect against prototype pollution
       enableRemoteModule: false, // turn off remote
-      preload: path.join(__dirname, "preload.js") // use a preload script
+      preload: path.join(__dirname, "preload.js"), // use a preload script
     },
   });
 
@@ -114,6 +115,12 @@ app.on("window-all-closed", () => {
     Core.exit();
     app.quit();
   }
+});
+
+// Quit when all windows are closed.
+app.on("will-quit", () => {
+  //Quit PerspectivismCore
+  Core.exit();
 });
 
 app.on("activate", () => {
