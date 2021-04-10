@@ -59,8 +59,8 @@ app.on("ready", async () => {
 async function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1920,
+    height: 1080,
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
@@ -120,7 +120,7 @@ app.on("window-all-closed", () => {
 // Quit when all windows are closed.
 app.on("will-quit", () => {
   //Quit PerspectivismCore
-  Core.exit();
+  //Core.exit();
 });
 
 app.on("activate", () => {

@@ -1,45 +1,183 @@
 <template>
-  <div class="welcomeViewRight">
+  <div class="welcomeViewRight" v-if="isInit">
+    <div class="welcomeViewRight__spec">
+      <h1 class="welcomeViewRight__spec--title">Welcome Back!</h1>
+      <h3 class="welcomeViewRight__spec--title">Password:</h3>
+      <div class="welcomeViewRight__input" v-if="isInit">
+        <input
+          type="text"
+          class="welcomeViewRight__input--field"
+          v-model="password"
+        />
+      </div>
+    </div>
+    <button class="welcomeViewRight__button" @click="unlockDidStoreMethod">
+      Unlock
+    </button>
+  </div>
+
+  <div class="welcomeViewRight" v-if="!isInit">
     <div class="welcomeViewRight__spec">
       <h3 class="welcomeViewRight__spec--title">Name</h3>
       <div class="welcomeViewRight__input">
-        <input type="text" class="welcomeViewRight__input--field" />
+        <input
+          type="text"
+          class="welcomeViewRight__input--field"
+          v-model="name"
+        />
       </div>
     </div>
 
-    <div class="welcomeViewRight__spec">
+    <div class="welcomeViewRight__spec" v-if="!isInit">
       <h3 class="welcomeViewRight__spec--title">Username</h3>
       <div class="welcomeViewRight__input">
-        <input type="text" class="welcomeViewRight__input--field" />
+        <input
+          type="text"
+          class="welcomeViewRight__input--field"
+          v-model="username"
+        />
       </div>
     </div>
-    <div class="welcomeViewRight__spec">
+    <div class="welcomeViewRight__spec" v-if="!isInit">
       <h3 class="welcomeViewRight__spec--title">Email</h3>
       <div class="welcomeViewRight__input">
-        <input type="text" class="welcomeViewRight__input--field" />
+        <input
+          type="text"
+          class="welcomeViewRight__input--field"
+          v-model="email"
+        />
       </div>
     </div>
-    <div class="welcomeViewRight__spec">
+    <div class="welcomeViewRight__spec" v-if="!isInit">
       <h3 class="welcomeViewRight__spec--title">Password</h3>
       <div class="welcomeViewRight__input">
-        <input type="text" class="welcomeViewRight__input--field" />
+        <input
+          type="text"
+          class="welcomeViewRight__input--field"
+          v-model="password"
+        />
       </div>
     </div>
-    <button class="welcomeViewRight__button" @click="navigateToApp">
+
+    <button
+      class="welcomeViewRight__button"
+      @click="submitUserInfo"
+      v-if="!isInit"
+    >
       Create
     </button>
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent, ref } from "vue";
+import {
+  INITIALIZE_AGENT,
+  AGENT_SERVICE_STATUS,
+  UNLOCK_AGENT,
+  LOCK_AGENT,
+} from "../../../core/graphql_queries";
+import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
+import ad4m from "ad4m-core-executor";
+
+export default defineComponent({
+  name: "WelcomeViewRight",
+  setup() {
+    const name = ref("");
+    const username = ref("");
+    const email = ref("");
+    const password = ref("");
+    const isInit = ref(false);
+    const { mutate: initAgent, error: initAgentError } = useMutation<{
+      initializeAgent: ad4m.AgentService;
+    }>(INITIALIZE_AGENT, () => ({
+      variables: {},
+    }));
+    const { mutate: unlockDidStore, error: unlockDidStoreError } = useMutation<{
+      unlockAgent: ad4m.AgentService;
+      passphrase: string;
+    }>(UNLOCK_AGENT, () => ({
+      variables: { passphrase: password.value },
+    }));
+    const { mutate: lockAgent, error: lockAgentError } = useMutation<{
+      lockAgent: ad4m.AgentService;
+      passphrase: string;
+    }>(LOCK_AGENT, () => ({
+      variables: { passphrase: password.value },
+    }));
+
+    return {
+      name,
+      username,
+      email,
+      password,
+      isInit,
+      initAgent,
+      initAgentError,
+      unlockDidStore,
+      unlockDidStoreError,
+      lockAgent,
+      lockAgentError,
+    };
+  },
+  beforeCreate() {
+    const { onResult, onError } = useQuery<{
+      agent: ad4m.AgentService;
+    }>(AGENT_SERVICE_STATUS);
+    onResult((val) => {
+      this.isInit = val.data.agent.isInitialized!;
+    });
+    onError((error) => {
+      console.log("WelcomeViewRight: AGENT_SERVICE_STATUS, error:", error);
+    });
+  },
   methods: {
-    navigateToApp() {
-      this.$router.push("/home");
+    submitUserInfo() {
+      console.log("WelcomeViewRight: submitUserInfo() called");
+      console.log("Got name", this.name);
+      let res = this.initAgent();
+      res.then((val) => {
+        console.log(val);
+        console.log(val.data?.initializeAgent.isInitialized);
+        if (this.initAgentError == null) {
+          this.lockAgent().then((lockAgentRes) => {
+            console.log("Post lock result", lockAgentRes);
+            if (this.lockAgentError == null) {
+              //TODO: then send the profile information to a public Junto DNA
+              this.isInit = true;
+              this.$router.push("/home");
+            } else {
+              console.log("Got error", this.lockAgentError);
+            }
+          });
+        } else {
+          //TODO: this needs to go to an error handler function
+          console.log("Got error", this.initAgentError);
+        }
+      });
+    },
+    unlockDidStoreMethod() {
+      console.log("WelcomeViewRight: unlockDidStore() called");
+      let res = this.unlockDidStore();
+      res.then((val) => {
+        console.log("Unlock result", val);
+        if (
+          this.unlockDidStoreError == null &&
+          val.data?.unlockAgent.isInitialized &&
+          val.data.unlockAgent.isUnlocked
+        ) {
+          this.isInit = true;
+          this.$router.push("/home");
+        } else {
+          //TODO: this needs to go to an error handler function
+          console.log("Got error", this.unlockDidStoreError);
+        }
+      });
     },
   },
-};
+});
 </script>
+
 <style lang="scss" scoped>
 .welcomeViewRight {
   display: flex;

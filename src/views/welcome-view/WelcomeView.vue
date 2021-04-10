@@ -21,21 +21,23 @@ import WelcomeViewRight from "./components/WelcomeViewRight.vue";
 export default defineComponent({
   name: "Welcome",
   components: { WelcomeViewHeader, WelcomeViewLeft, WelcomeViewRight },
-  mounted() {
-    window.api.send("ping");
-    window.api.receive("pong", (data: any) => {
-      console.log(`Received pong: ${data}`);
-    });
+  beforeCreate() {
+    // window.api.send("ping");
+    // window.api.receive("pong", (data: any) => {
+    //   console.log(`Received pong: ${data}`);
+    // });
 
-    const { onResult } = useQuery<{ agent: ad4m.AgentService }>(
-      AGENT_SERVICE_STATUS
-    );
-    onResult((queryResult) => {
-      console.log(queryResult.data);
-      console.log("init", queryResult.data.agent.isInitialized);
-      console.log(queryResult.loading);
-      console.log(queryResult.networkStatus);
-    });
+    // const { onResult, onError } = useQuery<{ agent: ad4m.AgentService }>(
+    //   AGENT_SERVICE_STATUS
+    // );
+    // onResult((queryResult) => {
+    //   if (queryResult.data.agent.isInitialized == true) {
+    //     this.$router.push("/home");
+    //   }
+    // });
+    // onError((error) => {
+    //   console.log("Got error when calling ad4m graphql:", error);
+    // });
   },
 });
 </script>

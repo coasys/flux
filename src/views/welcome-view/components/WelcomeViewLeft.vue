@@ -4,6 +4,11 @@
     <p class="welcomeViewLeft__subtitle">
       Welcome to the next generation <br />of social media.
     </p>
+    <br />
+    <p class="welcomeViewLeft__subtitle">
+      Submitting user information will register you in the public junto DNA but
+      this is not required to use private groups.
+    </p>
   </div>
 </template>
 
