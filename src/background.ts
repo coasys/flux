@@ -46,12 +46,15 @@ app.on("ready", async () => {
         "\x1b[36m%s\x1b[0m",
         "Starting account creation splash screen"
       );
-      ad4mCore.initControllers();
 
       createWindow();
       ad4mCore.waitForAgent().then(() => {
-        console.log("\x1b[36m%s\x1b[0m", "Controllers init");
+        console.log(
+          "\x1b[36m%s\x1b[0m",
+          "Agent has been init'd. Controllers now starting init..."
+        );
         ad4mCore.initControllers();
+        console.log("\x1b[32m", "Controllers init complete!");
       });
     });
 });
