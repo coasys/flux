@@ -50,6 +50,7 @@ export default async function createGroup(name: string): Promise<[string, string
 // - init shared perspective
 // - duplicate social context & expr dna's w/ dna prop insert
 // - use language of languages to upload to IPFS
+//     - encrypt languages before upload to ipfs
 //     - gql: getLang(hashoflanglang)
 // - Install language using language controller
 //     - blocked: need gql interface for installLanguage() on AD4M
