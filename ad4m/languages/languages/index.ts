@@ -1,43 +1,43 @@
-import type Address from 'ad4m/Address'
-import type Agent from 'ad4m/Agent'
-import type Language from 'ad4m/Language'
-import type LanguageContext from 'ad4m/LanguageContext'
-import type { Interaction } from 'ad4m/Language'
-import type HolochainLanguageDelegate from "language-context/lib/Holochain/HolochainLanguageDelegate"
+import type Address from "ad4m/Address";
+import type Agent from "ad4m/Agent";
+import type Language from "ad4m/Language";
+import type LanguageContext from "ad4m/LanguageContext";
+import type { Interaction } from "ad4m/Language";
+import type HolochainLanguageDelegate from "language-context/lib/Holochain/HolochainLanguageDelegate";
 import type { ExpressionUI as ExpressionUIInterface } from "ad4m/Language";
-import LanguageAdapter from './languageAdapter'
-import { DNA, DNA_NICK } from './dna'
-import Adapter from './adapter'
+import LanguageAdapter from "./languageAdapter";
+import { DNA, DNA_NICK } from "./dna";
+import Adapter from "./adapter";
 
-export const name: string = "languages"
+export const name = "languages";
 
 export class ExpressionUI implements ExpressionUIInterface {
-    icon(): string {
-        return ""
-    }
+  icon(): string {
+    return "";
+  }
 
-    constructorIcon(): string {
-        return ""
-    }
+  constructorIcon(): string {
+    return "";
+  }
 }
 
 function interactions(a: Agent, expression: Address): Interaction[] {
-    return []
+  return [];
 }
 
 export default function create(context: LanguageContext): Language {
-    const Holochain = context.Holochain as HolochainLanguageDelegate
-    Holochain.registerDNAs([{file: DNA, nick: DNA_NICK}])
+  const Holochain = context.Holochain as HolochainLanguageDelegate;
+  Holochain.registerDNAs([{ file: DNA, nick: DNA_NICK }]);
 
-    const expressionAdapter = new Adapter(context)
-    const expressionUI = new ExpressionUI()
-    const languageAdapter = new LanguageAdapter(context)
+  const expressionAdapter = new Adapter(context);
+  const expressionUI = new ExpressionUI();
+  const languageAdapter = new LanguageAdapter(context);
 
-    return {
-        name,
-        expressionAdapter,
-        expressionUI,
-        languageAdapter,
-        interactions,
-    } as Language
+  return {
+    name,
+    expressionAdapter,
+    expressionUI,
+    languageAdapter,
+    interactions,
+  } as Language;
 }

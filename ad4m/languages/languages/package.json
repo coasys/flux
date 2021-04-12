@@ -1,7 +1,7 @@
 {
-  "name": "note-ipfs",
+  "name": "languages",
   "version": "0.0.1",
-  "description": "An AD4M Language for simple text notes build on IPFS",
+  "description": "An AD4M Language for storing of language bundles on IPFS",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
