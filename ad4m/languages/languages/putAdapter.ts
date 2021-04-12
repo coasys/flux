@@ -19,7 +19,7 @@ export class IpfsPutAdapter implements PublicSharing {
 
   async createPublic(languageData: object): Promise<Address> {
     // @ts-ignore
-    const { bundleFile, name, description } = languageData;
+    const { bundleFile, name, description, encrypted } = languageData;
 
     const ipfsAddress = await this.#IPFS.add({
       content: bundleFile.toString(),
@@ -28,7 +28,11 @@ export class IpfsPutAdapter implements PublicSharing {
     const hash = ipfsAddress.cid.toString();
 
     const agent = this.#agent;
-    const expression = agent.createSignedExpression({ name, description });
+    const expression = agent.createSignedExpression({
+      name,
+      description,
+      encrypted,
+    });
     expression.data = Buffer.from(JSON.stringify(expression.data));
     await this.#holochain.call(
       DNA_NICK,
