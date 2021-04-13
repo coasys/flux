@@ -1,8 +1,11 @@
+import LanguageRef from "ad4m/LanguageRef";
 import { createStore } from "vuex";
 
 export interface CommunityState {
   name: string;
   channels: string[];
+  perspective: string;
+  expressionLanguages: ExpressionReference[];
 }
 
 export interface CommunityView {
@@ -22,6 +25,15 @@ export interface State {
   communities: CommunityState[];
 }
 
+export enum ExpressionTypes {
+  ShortForm,
+}
+
+export interface ExpressionReference {
+  languageAddress: LanguageRef;
+  expressionType: ExpressionTypes;
+}
+
 export default createStore({
   state() {
     const state: State = {
@@ -29,16 +41,35 @@ export default createStore({
       currentCommunity: {
         name: "JUNTO",
         channels: ["home", "inspiration", "events"],
+        perspective: "",
+        expressionLanguages: [],
       },
       currentCommunityView: { name: "main", type: FeedType.Feed },
       communities: [
-        { name: "JUNTO", channels: ["home", "inspiration", "events"] },
+        {
+          name: "JUNTO",
+          channels: ["home", "inspiration", "events"],
+          perspective: "",
+          expressionLanguages: [],
+        },
         {
           name: "Holochain",
           channels: ["home", "holo-fuel", "meetups", "when-moon"],
+          perspective: "",
+          expressionLanguages: [],
         },
-        { name: "Naruto", channels: ["home", "anbu"] },
-        { name: "Hoops", channels: ["home", "hoopiddydoops"] },
+        {
+          name: "Naruto",
+          channels: ["home", "anbu"],
+          perspective: "",
+          expressionLanguages: [],
+        },
+        {
+          name: "Hoops",
+          channels: ["home", "hoopiddydoops"],
+          perspective: "",
+          expressionLanguages: [],
+        },
       ],
     };
     return state;
