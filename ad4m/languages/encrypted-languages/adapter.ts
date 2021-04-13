@@ -28,11 +28,17 @@ export default class Adapter implements ExpressionAdapter {
   }
 
   async get(address: Address): Promise<void | Expression> {
+    let parsedAddress;
+    if (address.split("?passphrase=").length > 0) {
+      parsedAddress = address.split("?passphrase=")[0];
+    } else {
+      parsedAddress = address;
+    }
     const { expressions } = await this.#holochain.call(
       DNA_NICK,
       "anchored-expression",
       "get_expressions",
-      { key: address }
+      { key: parsedAddress }
     );
 
     if (expressions.length === 0) return null;

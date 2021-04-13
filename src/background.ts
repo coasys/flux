@@ -40,8 +40,8 @@ app.on("ready", async () => {
       "encrypted-languages",
       "agent-profiles",
       "shared-perspectives",
-      "shortform",
-      "social-context"
+      //"shortform",
+      //"social-context"
     ])
     .then((ad4mCore: ad4m.PerspectivismCore) => {
       Core = ad4mCore;
