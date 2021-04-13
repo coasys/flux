@@ -20,8 +20,8 @@ export enum FeedType {
 
 export interface State {
   currentTheme: string;
-  currentCommunity: CommunityState;
-  currentCommunityView: CommunityView;
+  currentCommunity: CommunityState | null;
+  currentCommunityView: CommunityView | null;
   communities: CommunityState[];
 }
 
@@ -36,41 +36,47 @@ export interface ExpressionReference {
 
 export default createStore({
   state() {
+    // const state: State = {
+    //   currentTheme: "light",
+    //   currentCommunity: {
+    //     name: "JUNTO",
+    //     channels: ["home", "inspiration", "events"],
+    //     perspective: "",
+    //     expressionLanguages: [],
+    //   },
+    //   currentCommunityView: { name: "main", type: FeedType.Feed },
+    //   communities: [
+    //     {
+    //       name: "JUNTO",
+    //       channels: ["home", "inspiration", "events"],
+    //       perspective: "",
+    //       expressionLanguages: [],
+    //     },
+    //     {
+    //       name: "Holochain",
+    //       channels: ["home", "holo-fuel", "meetups", "when-moon"],
+    //       perspective: "",
+    //       expressionLanguages: [],
+    //     },
+    //     {
+    //       name: "Naruto",
+    //       channels: ["home", "anbu"],
+    //       perspective: "",
+    //       expressionLanguages: [],
+    //     },
+    //     {
+    //       name: "Hoops",
+    //       channels: ["home", "hoopiddydoops"],
+    //       perspective: "",
+    //       expressionLanguages: [],
+    //     },
+    //   ],
+    // };
     const state: State = {
       currentTheme: "light",
-      currentCommunity: {
-        name: "JUNTO",
-        channels: ["home", "inspiration", "events"],
-        perspective: "",
-        expressionLanguages: [],
-      },
-      currentCommunityView: { name: "main", type: FeedType.Feed },
-      communities: [
-        {
-          name: "JUNTO",
-          channels: ["home", "inspiration", "events"],
-          perspective: "",
-          expressionLanguages: [],
-        },
-        {
-          name: "Holochain",
-          channels: ["home", "holo-fuel", "meetups", "when-moon"],
-          perspective: "",
-          expressionLanguages: [],
-        },
-        {
-          name: "Naruto",
-          channels: ["home", "anbu"],
-          perspective: "",
-          expressionLanguages: [],
-        },
-        {
-          name: "Hoops",
-          channels: ["home", "hoopiddydoops"],
-          perspective: "",
-          expressionLanguages: [],
-        },
-      ],
+      currentCommunity: null,
+      currentCommunityView: null,
+      communities: [],
     };
     return state;
   },
@@ -112,6 +118,10 @@ export default createStore({
     },
   },
   getters: {
+    //Dump the whole state
+    dumpState(state: State) {
+      return state;
+    },
     // Get the list of communities a user is a part of
     getCommunities(state: State) {
       console.log(state.communities);
