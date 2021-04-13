@@ -5,7 +5,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import CommunitiesList from "./CommunitiesList.vue";
 import BottomSection from "./BottomSection.vue";
 

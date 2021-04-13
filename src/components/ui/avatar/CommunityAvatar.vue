@@ -6,15 +6,17 @@
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from "vue";
+
+export default defineComponent({
   props: ["community"],
   methods: {
     navToCommunity() {
       this.$store.commit({ type: "changeCommunity", value: this.community });
     },
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

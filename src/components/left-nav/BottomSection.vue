@@ -5,7 +5,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import ProfileAvatar from "./../ui/avatar/ProfileAvatar.vue";
 import ToggleThemeButton from "./../ui/theme/ToggleThemeButton.vue";
 
