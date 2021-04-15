@@ -23,6 +23,7 @@ export interface State {
   currentCommunity: CommunityState | null;
   currentCommunityView: CommunityView | null;
   communities: CommunityState[];
+  localLanguagesPath: string;
 }
 
 export enum ExpressionTypes {
@@ -36,51 +37,56 @@ export interface ExpressionReference {
 
 export default createStore({
   state() {
-    // const state: State = {
-    //   currentTheme: "light",
-    //   currentCommunity: {
-    //     name: "JUNTO",
-    //     channels: ["home", "inspiration", "events"],
-    //     perspective: "",
-    //     expressionLanguages: [],
-    //   },
-    //   currentCommunityView: { name: "main", type: FeedType.Feed },
-    //   communities: [
-    //     {
-    //       name: "JUNTO",
-    //       channels: ["home", "inspiration", "events"],
-    //       perspective: "",
-    //       expressionLanguages: [],
-    //     },
-    //     {
-    //       name: "Holochain",
-    //       channels: ["home", "holo-fuel", "meetups", "when-moon"],
-    //       perspective: "",
-    //       expressionLanguages: [],
-    //     },
-    //     {
-    //       name: "Naruto",
-    //       channels: ["home", "anbu"],
-    //       perspective: "",
-    //       expressionLanguages: [],
-    //     },
-    //     {
-    //       name: "Hoops",
-    //       channels: ["home", "hoopiddydoops"],
-    //       perspective: "",
-    //       expressionLanguages: [],
-    //     },
-    //   ],
-    // };
     const state: State = {
       currentTheme: "light",
-      currentCommunity: null,
-      currentCommunityView: null,
-      communities: [],
+      currentCommunity: {
+        name: "JUNTO",
+        channels: ["home", "inspiration", "events"],
+        perspective: "",
+        expressionLanguages: [],
+      },
+      currentCommunityView: { name: "main", type: FeedType.Feed },
+      communities: [
+        {
+          name: "JUNTO",
+          channels: ["home", "inspiration", "events"],
+          perspective: "",
+          expressionLanguages: [],
+        },
+        {
+          name: "Holochain",
+          channels: ["home", "holo-fuel", "meetups", "when-moon"],
+          perspective: "",
+          expressionLanguages: [],
+        },
+        {
+          name: "Naruto",
+          channels: ["home", "anbu"],
+          perspective: "",
+          expressionLanguages: [],
+        },
+        {
+          name: "Hoops",
+          channels: ["home", "hoopiddydoops"],
+          perspective: "",
+          expressionLanguages: [],
+        },
+      ],
+      localLanguagesPath: "",
     };
+    // const state: State = {
+    //   currentTheme: "light",
+    //   currentCommunity: null,
+    //   currentCommunityView: null,
+    //   communities: [],
+    // };
     return state;
   },
   mutations: {
+    setLanguagesPath(state: State, payload: string) {
+      state.localLanguagesPath = payload;
+    },
+
     // navigate to a new community
     changeCommunity(state: State, payload) {
       console.log("changing community");
@@ -140,6 +146,10 @@ export default createStore({
     // Get current theme
     getCurrentTheme(state: State) {
       return state.currentTheme;
+    },
+
+    getLanguagePath(state: State) {
+      return state.localLanguagesPath;
     },
   },
 });

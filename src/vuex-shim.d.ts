@@ -8,6 +8,7 @@ declare module "@vue/runtime-core" {
     currentCommunity: CommunityState | null;
     currentCommunityView: CommunityView | null;
     communities: CommunityState[];
+    localLanguagesPath: string;
   }
 
   // provide typings for `this.$store`

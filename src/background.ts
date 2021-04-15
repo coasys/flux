@@ -2,17 +2,14 @@
 
 import { app, protocol, BrowserWindow, ipcMain } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
-import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
+// import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 import ad4m from "ad4m-core-executor";
 import path from "path";
-
-process.on("unhandledRejection", (reason, p) => {
-  console.log("Unhandled Rejection at: Promise", p, "reason:", reason);
-  // application specific logging, throwing an error, or other logic here
-});
+import os from "os";
 
 let win: BrowserWindow;
 let Core: ad4m.PerspectivismCore;
+let builtInLangPath: string;
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
@@ -29,9 +26,28 @@ app.on("ready", async () => {
   //   }
   // }
 
-  //TODO: this needs to be derived from host os
-  const execPath = "./resources/linux";
-  console.log("\x1b[1m", "Using Resource path", execPath);
+  let execPath;
+  if (app.isPackaged) {
+    console.log("App is running in production mode");
+    //TODO: this code is probably somewhat broken
+    builtInLangPath = path.resolve(
+      `${process.resourcesPath}/../packaged-resources/languages`
+    );
+    execPath = path.resolve(
+      `${process.resourcesPath}/../packaged-resources/bin`
+    );
+  } else {
+    console.log("App is running in dev mode");
+    builtInLangPath = path.resolve(`${__dirname}/../ad4m/languages`);
+    execPath = path.resolve(`${__dirname}/../resources/${os.platform}/`);
+  }
+  console.log(
+    "\x1b[1m",
+    "Using Resource path",
+    execPath,
+    "built in language path",
+    builtInLangPath
+  );
 
   console.log("\x1b[36m%s\x1b[0m", "Init AD4M...");
   ad4m
@@ -40,8 +56,6 @@ app.on("ready", async () => {
       "encrypted-languages",
       "agent-profiles",
       "shared-perspectives",
-      //"shortform",
-      //"social-context"
     ])
     .then((ad4mCore: ad4m.PerspectivismCore) => {
       Core = ad4mCore;
@@ -88,8 +102,12 @@ async function createWindow() {
   }
 }
 
-ipcMain.on("ping", (event, args) => {
+ipcMain.on("ping", () => {
   win.webContents.send("pong", "Hello from main thread!");
+});
+
+ipcMain.on("getLangPath", () => {
+  win.webContents.send("getLangPathResponse", builtInLangPath);
 });
 
 // Scheme must be registered before the app is ready
@@ -133,4 +151,9 @@ app.on("activate", () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
+});
+
+process.on("unhandledRejection", (reason, p) => {
+  console.log("Unhandled Rejection at: Promise", p, "reason:", reason);
+  // application specific logging, throwing an error, or other logic here
 });
