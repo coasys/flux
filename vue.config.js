@@ -2,7 +2,7 @@ module.exports = {
   pluginOptions: {
     electronBuilder: {
       preload: "src/preload.js",
-      externals: ["ad4m-core-executor"],
+      externals: ["ad4m-core-executor", "fs"],
       builderOptions: {
         productName: "Communities",
         extraResources: [

@@ -10,9 +10,6 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { AGENT_SERVICE_STATUS } from "../../core/graphql_queries";
-import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
-import ad4m from "ad4m-core-executor";
 
 import WelcomeViewHeader from "./components/WelcomeViewHeader.vue";
 import WelcomeViewLeft from "./components/WelcomeViewLeft.vue";
