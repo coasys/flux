@@ -215,7 +215,10 @@ export const PUBLISH_PERSPECTIVE = gql`
       name
       description
       type
-      linkLanguages
+      linkLanguages {
+        address
+        name
+      }
       allowedExpressionLanguages
       requiredExpressionLanguages
     }
