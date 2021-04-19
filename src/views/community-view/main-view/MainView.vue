@@ -1,5 +1,5 @@
 <template>
-  <div class="mainView">
+  <div class="mainView" v-if="community != null">
     <main-view-top-bar :currentView="getCurrentView"></main-view-top-bar>
     <feed-view v-if="getCurrentView.type === 'feed'"> </feed-view>
     <channel-view v-if="getCurrentView.type === 'channel'"> </channel-view>

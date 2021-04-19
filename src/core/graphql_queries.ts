@@ -128,8 +128,20 @@ export const SET_LANGUAGE_SETTINGS = gql`
 export const PERSPECTIVES = gql`
   query perspectives {
     perspectives {
-      uuid
       name
+      uuid
+      sharedPerspective {
+        name
+        description
+        type
+        linkLanguages {
+          address
+          name
+        }
+        allowedExpressionLanguages
+        requiredExpressionLanguages
+      }
+      sharedURL
     }
   }
 `;

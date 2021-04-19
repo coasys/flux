@@ -1,5 +1,5 @@
 <template>
-  <div class="left-drawer">
+  <div class="left-drawer" v-if="community != null">
     <community-name :title="community.name"></community-name>
     <left-drawer-section type="Feed"></left-drawer-section>
     <left-drawer-section
