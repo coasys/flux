@@ -5,12 +5,14 @@
       :key="community.name"
       :community="community"
     ></community-avatar>
+    <create-community-icon></create-community-icon>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import CommunityAvatar from "./../ui/avatar/CommunityAvatar.vue";
+import CreateCommunityIcon from './create-community/CreateCommunityIcon.vue';
 
 export default defineComponent({
   computed: {
@@ -19,7 +21,7 @@ export default defineComponent({
     },
   },
 
-  components: { CommunityAvatar },
+  components: { CommunityAvatar, CreateCommunityIcon },
 });
 </script>
 
