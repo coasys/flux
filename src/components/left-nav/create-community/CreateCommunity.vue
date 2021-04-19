@@ -24,6 +24,7 @@
             maxLength="50"
             title="Name"
             description="Name your community here"
+            v-bind="perspectiveName"
           ></text-field-full>
           <spacer></spacer>
           <text-field-full
@@ -41,7 +42,7 @@
         </div>
 
         <div class="createCommunity__dialog--bottom">
-          <create-button></create-button>
+          <create-button @click="createPerspective"></create-button>
         </div>
       </div>
     </div>
@@ -49,11 +50,137 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import TextFieldFull from '../../ui/textfields/TextFieldFull.vue';
-import CreateButton from '../../ui/buttons/CreateButton.vue';
-import Spacer from '../../ui/spacer/Spacer.vue';
+import { defineComponent, ref } from "vue";
+import TextFieldFull from "../../ui/textfields/TextFieldFull.vue";
+import CreateButton from "../../ui/buttons/CreateButton.vue";
+import Spacer from "../../ui/spacer/Spacer.vue";
+import {
+  CREATE_UNIQUE_EXPRESSION_LANGUAGE,
+  PUBLISH_PERSPECTIVE,
+  ADD_PERSPECTIVE,
+} from "../../../core/graphql_queries";
+import { useMutation } from "@vue/apollo-composable";
+import ad4m from "ad4m-core-executor";
+import path from "path";
+import { v4 as uuidv4 } from "uuid";
+import { FeedType } from "../../../store";
+
 export default defineComponent({
+  setup() {
+    const languagePath = ref("");
+    const dnaNick = ref("");
+    const encrypt = ref(false);
+    const passphrase = ref("");
+    const perspectiveName = ref("");
+    const description = ref("");
+    const perspectiveUuid = ref("");
+    const expressionLangs = ref([""]);
+
+    //TODO: setup error handlers for all error variants below
+    const {
+      mutate: createUniqueExprLang,
+      error: createUniqueExprLangError,
+    } = useMutation<{
+      createUniqueHolochainExpressionLanguageFromTemplate: ad4m.LanguageRef;
+    }>(CREATE_UNIQUE_EXPRESSION_LANGUAGE, () => ({
+      variables: {
+        languagePath: languagePath.value,
+        dnaNick: dnaNick.value,
+        encrypt: encrypt.value,
+        passphrase: passphrase.value,
+      },
+    }));
+
+    const { mutate: addPerspective, error: addPerspectiveError } = useMutation<{
+      addPerspective: ad4m.Perspective;
+    }>(ADD_PERSPECTIVE, () => ({
+      variables: {
+        name: perspectiveName.value,
+      },
+    }));
+
+    const {
+      mutate: publishSharedPerspective,
+      error: publishSharedPerspectiveError,
+    } = useMutation<{ pubishPerspective: ad4m.SharedPerspective }>(
+      PUBLISH_PERSPECTIVE,
+      () => ({
+        variables: {
+          uuid: perspectiveUuid.value,
+          name: perspectiveName.value,
+          description: description.value,
+          type: "holochain",
+          encrypt: false,
+          passphrase: passphrase.value,
+          requiredExpressionLanguages: expressionLangs.value,
+          allowedExpressionLanguages: expressionLangs.value,
+        },
+      })
+    );
+
+    return {
+      createUniqueExprLang,
+      createUniqueExprLangError,
+      addPerspective,
+      addPerspectiveError,
+      publishSharedPerspective,
+      publishSharedPerspectiveError,
+      languagePath,
+      dnaNick,
+      encrypt,
+      passphrase,
+      perspectiveName,
+      perspectiveUuid,
+      description,
+      expressionLangs,
+    };
+  },
+  methods: {
+    createPerspective() {
+      //TODO: @eric: show loading animation here
+      this.addPerspective().then((createPerspectiveResp) => {
+        console.log("Response from create perpspective", createPerspectiveResp);
+        this.perspectiveUuid = createPerspectiveResp.data!.addPerspective.uuid!;
+        var builtInLangPath = this.$store.getters.getLanguagePath;
+        //TODO iterate over langs in src/core/junto-langs.ts and create those vs hard code short form
+        this.languagePath = path.join(builtInLangPath.value, "shortform/build");
+        this.dnaNick = "shortform";
+        this.passphrase = uuidv4().toString();
+        let createExp = this.createUniqueExprLang();
+
+        createExp.then((createExpResp) => {
+          console.log("Response from create exp lang", createExpResp);
+          this.expressionLangs = [
+            createExpResp.data!
+              .createUniqueHolochainExpressionLanguageFromTemplate.address!,
+          ];
+          let publishPerspective = this.publishSharedPerspective();
+
+          publishPerspective.then((publishResp) => {
+            console.log("Published perspective with response", publishResp);
+            this.$store.commit({
+              type: "addCommunity",
+              value: {
+                name: this.perspectiveName,
+                channels: [],
+                perspective: createPerspectiveResp.data?.addPerspective.uuid,
+                expressionLanguages: [
+                  createExpResp.data!
+                    .createUniqueHolochainExpressionLanguageFromTemplate
+                    .address!,
+                ],
+              },
+            });
+            this.$store.commit({
+              type: "changeCommunityView",
+              value: { name: "main", type: FeedType.Feed },
+            });
+            this.showCreateCommunity!();
+          });
+        });
+      });
+    },
+  },
   components: {
     TextFieldFull,
     CreateButton,
@@ -66,7 +193,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-@import '../../../assets/sass/main.scss';
+@import "../../../assets/sass/main.scss";
 .createCommunity {
   position: absolute;
   top: 0;

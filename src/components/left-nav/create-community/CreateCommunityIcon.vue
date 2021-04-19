@@ -14,8 +14,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import CreateCommunity from './CreateCommunity.vue';
+import { defineComponent } from "vue";
+import CreateCommunity from "./CreateCommunity.vue";
 export default defineComponent({
   data() {
     return {
@@ -34,14 +34,14 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/sass/main.scss';
+@import "@/assets/sass/main.scss";
 .create-community-icon {
   height: 5rem;
   width: 5rem;
   background-color: var(--junto-border-color);
   border-radius: 100px;
   margin-bottom: 2rem;
-  background-image: url('../../../../src/assets/images/junto_web_rainbow.png');
+  background-image: url("../../../../src/assets/images/junto_web_rainbow.png");
   background-size: cover;
   position: relative;
   display: flex;
