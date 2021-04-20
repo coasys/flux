@@ -150,55 +150,72 @@ export default defineComponent({
     };
   },
   methods: {
+    async createUniqueExpressionDNA(path: string, dnaNick: string) {
+      this.languagePath = path;
+      this.dnaNick = dnaNick;
+
+      return await this.createUniqueExprLang();
+    },
+
     createPerspective() {
       //TODO: @eric: show loading animation here
       this.addPerspective().then((createPerspectiveResp) => {
         console.log("Response from create perpspective", createPerspectiveResp);
         this.perspectiveUuid = createPerspectiveResp.data!.addPerspective.uuid!;
+        this.passphrase = uuidv4().toString();
         var builtInLangPath = this.$store.getters.getLanguagePath;
         //TODO iterate over langs in src/core/junto-langs.ts and create those vs hard code short form
-        this.languagePath = path.join(builtInLangPath.value, "shortform/build");
-        this.dnaNick = "shortform";
-        this.passphrase = uuidv4().toString();
-
-        this.createUniqueExprLang().then((createExpResp) => {
+        //First create shortform DNA
+        this.createUniqueExpressionDNA(
+          path.join(builtInLangPath.value, "shortform/build"),
+          "shortform"
+        ).then((createExpResp) => {
           console.log("Response from create exp lang", createExpResp);
           this.expressionLangs = [
             createExpResp.data!
               .createUniqueHolochainExpressionLanguageFromTemplate.address!,
           ];
+          //Then create group-expression DNA
+          this.createUniqueExpressionDNA(
+            path.join(builtInLangPath.value, "group-expression/build"),
+            "group-expression"
+          ).then((createExpResp) => {
+            console.log("Response from create exp lang", createExpResp);
+            this.expressionLangs.push(
+              createExpResp.data!
+                .createUniqueHolochainExpressionLanguageFromTemplate.address!
+            );
 
-          this.publishSharedPerspective().then((publishResp) => {
-            console.log("Published perspective with response", publishResp);
-            this.$store.commit({
-              type: "addCommunity",
-              value: {
-                name: this.perspectiveName,
-                channels: [],
-                perspective: createPerspectiveResp.data?.addPerspective.uuid,
-                expressionLanguages: [
-                  createExpResp.data!
-                    .createUniqueHolochainExpressionLanguageFromTemplate
-                    .address!,
-                ],
-              },
-            });
-            this.$store.commit({
-              type: "changeCommunityView",
-              value: { name: "main", type: FeedType.Feed },
-            });
-            this.showCreateCommunity!();
+            //Then publish perspective
+            this.publishSharedPerspective().then((publishResp) => {
+              console.log("Published perspective with response", publishResp);
+              this.$store.commit({
+                type: "addCommunity",
+                value: {
+                  name: this.perspectiveName,
+                  channels: [],
+                  perspective: createPerspectiveResp.data?.addPerspective.uuid,
+                  expressionLanguages: this.expressionLangs,
+                },
+              });
+              this.$store.commit({
+                type: "changeCommunityView",
+                value: { name: "main", type: FeedType.Feed },
+              });
+              this.showCreateCommunity!();
 
-            //Now create default links & expressions for group
-            this.linkData = {
-              source: `${
-                publishResp.data!.publishPerspective.linkLanguages![0]?.address
-              }://self`,
-              target: "foaf://group",
-              predicate: "rdf://type",
-            };
-            this.addLink().then((addLinkResp) => {
-              console.log("Added link with response", addLinkResp);
+              //Now create default links & expressions for group
+              this.linkData = {
+                source: `${
+                  publishResp.data!.publishPerspective.linkLanguages![0]
+                    ?.address
+                }://self`,
+                target: "foaf://group",
+                predicate: "rdf://type",
+              };
+              this.addLink().then((addLinkResp) => {
+                console.log("Added link with response", addLinkResp);
+              });
             });
           });
         });
