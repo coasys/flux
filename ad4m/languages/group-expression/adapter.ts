@@ -53,7 +53,6 @@ export default class ShortFormAdapter implements ExpressionAdapter {
       hash
     );
     if (expression != null) {
-      console.log("Got expression====", expression);
       const acai_expression: Expression = Object.assign(
         expression.expression_data
       );

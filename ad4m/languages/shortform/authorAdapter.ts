@@ -1,16 +1,8 @@
 import type Expression from "ad4m/Expression";
-import type Address from "ad4m/Address";
-import Agent from "ad4m/Agent";
-import type {
-  ExpressionAdapter,
-  GetByAuthorAdapter,
-  PublicSharing,
-} from "ad4m/Language";
+import type Agent from "ad4m/Agent";
+import type { GetByAuthorAdapter } from "ad4m/Language";
 import type LanguageContext from "ad4m/LanguageContext";
-import type {
-  default as HolochainLanguageDelegate,
-  HolochainService,
-} from "language-context/lib/Holochain/HolochainLanguageDelegate";
+import type { default as HolochainLanguageDelegate } from "language-context/lib/Holochain/HolochainLanguageDelegate";
 import { DNA_NICK } from "./dna";
 export default class ShortFormAuthorAdapter implements GetByAuthorAdapter {
   #shortFormDNA: HolochainLanguageDelegate;

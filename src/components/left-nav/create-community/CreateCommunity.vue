@@ -240,7 +240,7 @@ export default defineComponent({
               });
 
               //TODO: sometimes this fails as the expression language has not finished installing, there should be a check for the language here
-              this.sleep(100);
+              this.sleep(1000);
               this.createExpression().then((createExpResp) => {
                 //Create link between source of social context language -> new group expression
                 this.linkData = {

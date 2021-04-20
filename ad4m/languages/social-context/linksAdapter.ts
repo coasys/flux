@@ -39,7 +39,7 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
 
   async addLink(link: Expression) {
     const data = prepareExpressionLink(link);
-    console.debug("Holochain Social Context: ADDING LINK!: ", data);
+    //console.debug("Holochain Social Context: ADDING LINK!: ", data);
     await this.#socialContextDna.call(
       DNA_NICK,
       "social_context",
@@ -82,7 +82,7 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     if (!link_query.source) {
       link_query.source = "root";
     }
-    console.debug("Holochain Social Context: Getting Links With: ", link_query);
+    //console.debug("Holochain Social Context: Getting Links With: ", link_query);
     if (from) {
       link_query.from = from;
     }
@@ -95,7 +95,7 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
       "get_links",
       link_query
     );
-    console.debug("Holchain Social Context: Got Links", links);
+    //console.debug("Holchain Social Context: Got Links", links);
 
     return links.filter((link) => query.isMatch(link.data as Link));
   }
