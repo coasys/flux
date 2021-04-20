@@ -1,22 +1,15 @@
 import type Expression from "ad4m/Expression";
-import type Address from "ad4m/Address";
-import Agent from "ad4m/Agent";
-import type {
-  ExpressionAdapter,
-  GetByAuthorAdapter,
-  PublicSharing,
-} from "ad4m/Language";
+import type Agent from "ad4m/Agent";
+import type { GetByAuthorAdapter } from "ad4m/Language";
 import type LanguageContext from "ad4m/LanguageContext";
-import type {
-  default as HolochainLanguageDelegate,
-  HolochainService,
-} from "language-context/lib/Holochain/HolochainLanguageDelegate";
+import type { default as HolochainLanguageDelegate } from "language-context/lib/Holochain/HolochainLanguageDelegate";
 import { DNA_NICK } from "./dna";
+
 export default class ShortFormAuthorAdapter implements GetByAuthorAdapter {
-  #shortFormDNA: HolochainLanguageDelegate;
+  #hcDNA: HolochainLanguageDelegate;
 
   constructor(context: LanguageContext) {
-    this.#shortFormDNA = context.Holochain as HolochainLanguageDelegate;
+    this.#hcDNA = context.Holochain as HolochainLanguageDelegate;
   }
 
   //Question: For this author; assuming we resolved with profile DHT; how do we know which agent to use if they have multiple listed?
@@ -28,9 +21,9 @@ export default class ShortFormAuthorAdapter implements GetByAuthorAdapter {
     page: number
   ): Promise<void | Expression[]> {
     //TODO: resolve did
-    const res = await this.#shortFormDNA.call(
+    const res = await this.#hcDNA.call(
       DNA_NICK,
-      "shortform",
+      "group-expression",
       "get_by_author",
       { author: author.did, page_size: count, page_number: page }
     );

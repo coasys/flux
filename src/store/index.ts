@@ -95,7 +95,6 @@ export default createStore({
 
     // navigate to a new community
     changeCommunity(state: State, payload) {
-      console.log("changing community");
       state.currentCommunity = payload.value;
     },
 

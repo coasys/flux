@@ -2,7 +2,7 @@
 
 import { app, protocol, BrowserWindow, ipcMain } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
-// import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
+//import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 import ad4m from "ad4m-core-executor";
 import path from "path";
 import os from "os";

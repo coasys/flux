@@ -24,7 +24,7 @@
             maxLength="50"
             title="Name"
             description="Name your community here"
-            v-bind="perspectiveName"
+            v-model="perspectiveName"
           ></text-field-full>
           <spacer></spacer>
           <text-field-full
@@ -188,7 +188,6 @@ export default defineComponent({
               value: { name: "main", type: FeedType.Feed },
             });
             this.showCreateCommunity!();
-            console.log(publishResp.data!.publishPerspective);
 
             //Now create default links & expressions for group
             this.linkData = {
