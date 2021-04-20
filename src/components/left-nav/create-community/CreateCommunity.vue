@@ -59,6 +59,7 @@ import {
   PUBLISH_PERSPECTIVE,
   ADD_PERSPECTIVE,
   ADD_LINK,
+  CREATE_EXPRESSION,
 } from "../../../core/graphql_queries";
 import { useMutation } from "@vue/apollo-composable";
 import ad4m from "ad4m-core-executor";
@@ -77,6 +78,11 @@ export default defineComponent({
     const perspectiveUuid = ref("");
     const expressionLangs = ref([""]);
     const linkData = ref({});
+    const groupExpressionLangHash = ref("");
+    const groupExpression = ref({
+      name: perspectiveName,
+      description: description,
+    });
 
     //TODO: setup error handlers for all error variants below
     const {
@@ -129,6 +135,16 @@ export default defineComponent({
       },
     }));
 
+    const {
+      mutate: createExpression,
+      error: createExpressionError,
+    } = useMutation<{ createExpression: string }>(CREATE_EXPRESSION, () => ({
+      variables: {
+        languageAddress: groupExpressionLangHash.value,
+        content: JSON.stringify(groupExpression.value),
+      },
+    }));
+
     return {
       createUniqueExprLang,
       createUniqueExprLangError,
@@ -138,6 +154,8 @@ export default defineComponent({
       publishSharedPerspectiveError,
       addLink,
       addLinkError,
+      createExpression,
+      createExpressionError,
       languagePath,
       dnaNick,
       encrypt,
@@ -147,6 +165,7 @@ export default defineComponent({
       description,
       expressionLangs,
       linkData,
+      groupExpressionLangHash,
     };
   },
   methods: {
@@ -156,7 +175,9 @@ export default defineComponent({
 
       return await this.createUniqueExprLang();
     },
-
+    sleep(ms: number) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    },
     createPerspective() {
       //TODO: @eric: show loading animation here
       this.addPerspective().then((createPerspectiveResp) => {
@@ -181,6 +202,7 @@ export default defineComponent({
             "group-expression"
           ).then((createExpResp) => {
             console.log("Response from create exp lang", createExpResp);
+            this.groupExpressionLangHash = createExpResp.data!.createUniqueHolochainExpressionLanguageFromTemplate.address!;
             this.expressionLangs.push(
               createExpResp.data!
                 .createUniqueHolochainExpressionLanguageFromTemplate.address!
@@ -215,6 +237,23 @@ export default defineComponent({
               };
               this.addLink().then((addLinkResp) => {
                 console.log("Added link with response", addLinkResp);
+              });
+
+              //TODO: sometimes this fails as the expression language has not finished installing, there should be a check for the language here
+              this.sleep(100);
+              this.createExpression().then((createExpResp) => {
+                //Create link between source of social context language -> new group expression
+                this.linkData = {
+                  source: `${
+                    publishResp.data!.publishPerspective.linkLanguages![0]
+                      ?.address
+                  }://self`,
+                  target: "foaf://class",
+                  predicate: createExpResp.data?.createExpression,
+                };
+                this.addLink().then((addLinkResp) => {
+                  console.log("Added link with response", addLinkResp);
+                });
               });
             });
           });

@@ -349,3 +349,11 @@ export const ADD_LINK = gql`
     }
   }
 `;
+
+export const CREATE_EXPRESSION = gql`
+  mutation createExpression($languageAddress: String, $content: String) {
+    createExpression(
+      input: { languageAddress: $languageAddress, content: $content }
+    )
+  }
+`;
