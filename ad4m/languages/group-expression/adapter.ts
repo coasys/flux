@@ -16,17 +16,20 @@ class GroupExpPutAdapter implements PublicSharing {
     this.#hcDna = context.Holochain as HolochainLanguageDelegate;
   }
 
-  async createPublic(shortForm: object): Promise<Address> {
-    //@ts-ignore
-    const obj = JSON.parse(shortForm);
-    const expression = this.#agent.createSignedExpression(shortForm);
-
+  async createPublic(obj: object): Promise<Address> {
+    const expression = this.#agent.createSignedExpression(obj);
     const res = await this.#hcDna.call(
       DNA_NICK,
       "group-expression",
       "create_public_expression",
-      expression
+      {
+        author: expression.author,
+        data: JSON.stringify(expression.data),
+        timestamp: expression.timestamp,
+        proof: expression.proof,
+      }
     );
+    //TODO: add error handling here
     return res.holochain_data.element.signed_header.header.hash.toString("hex");
   }
 }
