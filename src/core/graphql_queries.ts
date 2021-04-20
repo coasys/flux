@@ -331,3 +331,21 @@ export const CHILD_LINKS_QUERY = gql`
     }
   }
 `;
+
+export const ADD_LINK = gql`
+  mutation addLink($perspectiveUUID: String, $link: String) {
+    addLink(input: { perspectiveUUID: $perspectiveUUID, link: $link }) {
+      author {
+        did
+        email
+        name
+      }
+      timestamp
+      data {
+        source
+        predicate
+        target
+      }
+    }
+  }
+`;

@@ -58,6 +58,7 @@ import {
   CREATE_UNIQUE_EXPRESSION_LANGUAGE,
   PUBLISH_PERSPECTIVE,
   ADD_PERSPECTIVE,
+  ADD_LINK,
 } from "../../../core/graphql_queries";
 import { useMutation } from "@vue/apollo-composable";
 import ad4m from "ad4m-core-executor";
@@ -75,6 +76,7 @@ export default defineComponent({
     const description = ref("");
     const perspectiveUuid = ref("");
     const expressionLangs = ref([""]);
+    const linkData = ref({});
 
     //TODO: setup error handlers for all error variants below
     const {
@@ -102,7 +104,7 @@ export default defineComponent({
     const {
       mutate: publishSharedPerspective,
       error: publishSharedPerspectiveError,
-    } = useMutation<{ pubishPerspective: ad4m.SharedPerspective }>(
+    } = useMutation<{ publishPerspective: ad4m.SharedPerspective }>(
       PUBLISH_PERSPECTIVE,
       () => ({
         variables: {
@@ -118,6 +120,15 @@ export default defineComponent({
       })
     );
 
+    const { mutate: addLink, error: addLinkError } = useMutation<{
+      addLink: ad4m.LinkExpression;
+    }>(ADD_LINK, () => ({
+      variables: {
+        perspectiveUUID: perspectiveUuid.value,
+        link: JSON.stringify(linkData.value),
+      },
+    }));
+
     return {
       createUniqueExprLang,
       createUniqueExprLangError,
@@ -125,6 +136,8 @@ export default defineComponent({
       addPerspectiveError,
       publishSharedPerspective,
       publishSharedPerspectiveError,
+      addLink,
+      addLinkError,
       languagePath,
       dnaNick,
       encrypt,
@@ -133,6 +146,7 @@ export default defineComponent({
       perspectiveUuid,
       description,
       expressionLangs,
+      linkData,
     };
   },
   methods: {
@@ -146,17 +160,15 @@ export default defineComponent({
         this.languagePath = path.join(builtInLangPath.value, "shortform/build");
         this.dnaNick = "shortform";
         this.passphrase = uuidv4().toString();
-        let createExp = this.createUniqueExprLang();
 
-        createExp.then((createExpResp) => {
+        this.createUniqueExprLang().then((createExpResp) => {
           console.log("Response from create exp lang", createExpResp);
           this.expressionLangs = [
             createExpResp.data!
               .createUniqueHolochainExpressionLanguageFromTemplate.address!,
           ];
-          let publishPerspective = this.publishSharedPerspective();
 
-          publishPerspective.then((publishResp) => {
+          this.publishSharedPerspective().then((publishResp) => {
             console.log("Published perspective with response", publishResp);
             this.$store.commit({
               type: "addCommunity",
@@ -176,6 +188,19 @@ export default defineComponent({
               value: { name: "main", type: FeedType.Feed },
             });
             this.showCreateCommunity!();
+            console.log(publishResp.data!.publishPerspective);
+
+            //Now create default links & expressions for group
+            this.linkData = {
+              source: `${
+                publishResp.data!.publishPerspective.linkLanguages![0]?.address
+              }://self`,
+              target: "foaf://group",
+              predicate: "rdf://type",
+            };
+            this.addLink().then((addLinkResp) => {
+              console.log("Added link with response", addLinkResp);
+            });
           });
         });
       });
