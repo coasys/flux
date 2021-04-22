@@ -2,12 +2,18 @@
 
 ## Environment
 Node version: 14.16.0<br>
-Linux OS for running HC & Holochain binaries (see `./resources`)
+Linux OS for running HC & Holochain binaries (see `./resources`). Only linux is supported currently.
 
 ## Project setup
 ```
 npm run build-languages && npm install
 ```
+
+Also ensure that you have the following packages in the same directory that this repository is located in:<br>
+
+[AD4M](https://github.com/perspect3vism/ad4m)<br>
+[AD4M-core-executor](https://github.com/perspect3vism/ad4m-executor)<br>
+[language-context](https://github.com/perspect3vism/language-context)<br>
 
 ### Compiles and hot-reloads for development
 ```
