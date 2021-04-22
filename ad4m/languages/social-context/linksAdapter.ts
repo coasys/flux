@@ -35,12 +35,10 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
   async addLink(link: Expression) {
     const data = prepareExpressionLink(link);
     //console.debug("Holochain Social Context: ADDING LINK!: ", data);
-    await this.#socialContextDna.call(
-      DNA_NICK,
-      "social_context",
-      "add_link",
-      data
-    );
+    await this.#socialContextDna.call(DNA_NICK, "social_context", "add_link", {
+      link: data,
+      index_strategy: "Simple",
+    });
   }
 
   async updateLink(
