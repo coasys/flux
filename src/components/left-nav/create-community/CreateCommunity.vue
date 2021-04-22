@@ -42,7 +42,7 @@
         </div>
 
         <div class="createCommunity__dialog--bottom">
-          <create-button @click="createPerspective"></create-button>
+          <create-button @click="createCommunity"></create-button>
         </div>
       </div>
     </div>
@@ -242,7 +242,7 @@ export default defineComponent({
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
 
-    async createPerspective() {
+    async createCommunity() {
       //TODO: @eric: show loading animation here
       let createPerspective = await this.createPerspectiveMethod();
       console.log("Created perspective", createPerspective);
@@ -306,6 +306,9 @@ export default defineComponent({
         predicate: "rdf://class",
       });
       console.log("Created group expression link", addGroupExpLink);
+
+      //Next steps: create another perspective + share with social-context-channel link language and add above expression DNA's onto it
+      //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel 
     },
   },
   components: {

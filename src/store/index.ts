@@ -4,9 +4,14 @@ import { createStore } from "vuex";
 export interface CommunityState {
   name: string;
   //TODO: this should not be here
-  channels: string[];
+  channels: [ChannelState];
   perspective: string;
   expressionLanguages: ExpressionReference[];
+}
+
+export interface ChannelState {
+  name: string;
+  perspective: string;
 }
 
 export interface CommunityView {

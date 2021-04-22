@@ -357,3 +357,9 @@ export const CREATE_EXPRESSION = gql`
     )
   }
 `;
+
+export const PUB_KEY_FOR_LANG = gql`
+  query pubKeyForLanguage($lang: String) {
+    pubKeyForLanguage(lang: $lang)
+  }
+`;

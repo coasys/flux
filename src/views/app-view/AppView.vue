@@ -39,6 +39,9 @@ export default defineComponent({
               perspectives.data.perspectives[i].uuid
             ) == undefined
           ) {
+            //NOTE: this logic is actually incorrect; there is no mapping between perspective -> community
+            //since a community can contain more than one perspective (one for each channel)
+            //There is also the possiblity that we add a database perspective in the future and of course this will also not be a community
             this.$store.commit({
               type: "addCommunity",
               value: {
