@@ -15,6 +15,8 @@ Also ensure that you have the following packages in the same directory that this
 [AD4M-core-executor](https://github.com/perspect3vism/ad4m-executor)<br>
 [language-context](https://github.com/perspect3vism/language-context)<br>
 
+(You will need to run `npm install && npm run build` in each of these also)
+
 ### Compiles and hot-reloads for development
 ```
 npm run electron:serve
