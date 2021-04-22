@@ -60,8 +60,9 @@ import {
   ADD_PERSPECTIVE,
   ADD_LINK,
   CREATE_EXPRESSION,
+  PUB_KEY_FOR_LANG,
 } from "../../../core/graphql_queries";
-import { useMutation } from "@vue/apollo-composable";
+import { useMutation, useQuery } from "@vue/apollo-composable";
 import ad4m from "ad4m-core-executor";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
@@ -83,6 +84,7 @@ export default defineComponent({
       name: perspectiveName,
       description: description,
     });
+    const currentQueryLang = ref("");
 
     //TODO: setup error handlers for all error variants below
     const {
@@ -145,6 +147,10 @@ export default defineComponent({
       },
     }));
 
+    const { query: pubKeyForLang, error: pubKeyForLangError } = useQuery<{
+      pubKeyForLanguage: string;
+    }>(PUB_KEY_FOR_LANG, { lang: currentQueryLang.value });
+
     return {
       createUniqueExprLang,
       createUniqueExprLangError,
@@ -156,6 +162,8 @@ export default defineComponent({
       addLinkError,
       createExpression,
       createExpressionError,
+      pubKeyForLang,
+      pubKeyForLangError,
       languagePath,
       dnaNick,
       encrypt,
@@ -166,6 +174,7 @@ export default defineComponent({
       expressionLangs,
       linkData,
       groupExpressionLangHash,
+      currentQueryLang,
     };
   },
   methods: {
@@ -175,90 +184,128 @@ export default defineComponent({
 
       return await this.createUniqueExprLang();
     },
+
+    getPubKeyForLang(lang: string): Promise<string> {
+      this.currentQueryLang = lang;
+      return new Promise((resolve, reject) => {
+        this.pubKeyForLang.result().then((result) => {
+          resolve(result.data.pubKeyForLanguage);
+        });
+      });
+    },
+
+    createUniqueExprDNA(path: string, name: string): Promise<ad4m.LanguageRef> {
+      return new Promise((resolve, reject) => {
+        this.createUniqueExpressionDNA(path, name).then((createExpResp) => {
+          resolve(
+            createExpResp.data!
+              .createUniqueHolochainExpressionLanguageFromTemplate
+          );
+        });
+      });
+    },
+
+    publishSharedPerspectiveMethod(): Promise<ad4m.SharedPerspective> {
+      return new Promise((resolve, reject) => {
+        this.publishSharedPerspective().then((publishPersp) => {
+          resolve(publishPersp.data!.publishPerspective);
+        });
+      });
+    },
+
+    createLink(link: ad4m.Link): Promise<ad4m.LinkExpression> {
+      this.linkData = link;
+      return new Promise((resolve, reject) => {
+        this.addLink().then((addLinkResp) => {
+          resolve(addLinkResp.data!.addLink);
+        });
+      });
+    },
+
+    createExpressionMethod(): Promise<string> {
+      return new Promise((resolve, reject) => {
+        this.createExpression().then((createExp) => {
+          resolve(createExp.data!.createExpression);
+        });
+      });
+    },
+
+    createPerspectiveMethod(): Promise<ad4m.Perspective> {
+      return new Promise((resolve, reject) => {
+        this.addPerspective().then((addPerspective) => {
+          resolve(addPerspective.data!.addPerspective);
+        });
+      });
+    },
+
     sleep(ms: number) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
-    createPerspective() {
+
+    async createPerspective() {
       //TODO: @eric: show loading animation here
-      this.addPerspective().then((createPerspectiveResp) => {
-        console.log("Response from create perpspective", createPerspectiveResp);
-        this.perspectiveUuid = createPerspectiveResp.data!.addPerspective.uuid!;
-        this.passphrase = uuidv4().toString();
-        var builtInLangPath = this.$store.getters.getLanguagePath;
-        //TODO iterate over langs in src/core/junto-langs.ts and create those vs hard code short form
-        //First create shortform DNA
-        this.createUniqueExpressionDNA(
-          path.join(builtInLangPath.value, "shortform/build"),
-          "shortform"
-        ).then((createExpResp) => {
-          console.log("Response from create exp lang", createExpResp);
-          this.expressionLangs = [
-            createExpResp.data!
-              .createUniqueHolochainExpressionLanguageFromTemplate.address!,
-          ];
-          //Then create group-expression DNA
-          this.createUniqueExpressionDNA(
-            path.join(builtInLangPath.value, "group-expression/build"),
-            "group-expression"
-          ).then((createExpResp) => {
-            console.log("Response from create exp lang", createExpResp);
-            this.groupExpressionLangHash = createExpResp.data!.createUniqueHolochainExpressionLanguageFromTemplate.address!;
-            this.expressionLangs.push(
-              createExpResp.data!
-                .createUniqueHolochainExpressionLanguageFromTemplate.address!
-            );
+      let createPerspective = await this.createPerspectiveMethod();
+      console.log("Created perspective", createPerspective);
+      this.perspectiveUuid = createPerspective.uuid!;
+      this.passphrase = uuidv4().toString();
+      var builtInLangPath = this.$store.getters.getLanguagePath;
 
-            //Then publish perspective
-            this.publishSharedPerspective().then((publishResp) => {
-              console.log("Published perspective with response", publishResp);
-              this.$store.commit({
-                type: "addCommunity",
-                value: {
-                  name: this.perspectiveName,
-                  channels: [],
-                  perspective: createPerspectiveResp.data?.addPerspective.uuid,
-                  expressionLanguages: this.expressionLangs,
-                },
-              });
-              this.$store.commit({
-                type: "changeCommunityView",
-                value: { name: "main", type: FeedType.Feed },
-              });
-              this.showCreateCommunity!();
+      //Create shortform expression language
+      let expressionLang = await this.createUniqueExprDNA(
+        path.join(builtInLangPath.value, "shortform/build"),
+        "shortform"
+      );
+      console.log("Response from create exp lang", expressionLang);
+      this.expressionLangs = [expressionLang.address!];
 
-              //Now create default links & expressions for group
-              this.linkData = {
-                source: `${
-                  publishResp.data!.publishPerspective.linkLanguages![0]
-                    ?.address
-                }://self`,
-                target: "foaf://group",
-                predicate: "rdf://type",
-              };
-              this.addLink().then((addLinkResp) => {
-                console.log("Added link with response", addLinkResp);
-              });
+      //Create group expression language
+      let groupExpressionLang = await this.createUniqueExprDNA(
+        path.join(builtInLangPath.value, "group-expression/build"),
+        "group-expression"
+      );
+      console.log("Response from create exp lang", groupExpressionLang);
+      this.groupExpressionLangHash = groupExpressionLang.address!;
+      this.expressionLangs.push(groupExpressionLang.address!);
 
-              //TODO: sometimes this fails as the expression language has not finished installing, there should be a check for the language here
-              this.sleep(1000);
-              this.createExpression().then((createExpResp) => {
-                //Create link between source of social context language -> new group expression
-                this.linkData = {
-                  source: `${
-                    publishResp.data!.publishPerspective.linkLanguages![0]
-                      ?.address
-                  }://self`,
-                  target: "foaf://class",
-                  predicate: createExpResp.data?.createExpression,
-                };
-                this.addLink().then((addLinkResp) => {
-                  console.log("Added link with response", addLinkResp);
-                });
-              });
-            });
-          });
-        });
+      //Publish perspective
+      let publish = await this.publishSharedPerspectiveMethod();
+      console.log("Published perspective with response", publish);
+      //Add the perspective to community store
+      this.$store.commit({
+        type: "addCommunity",
+        value: {
+          name: this.perspectiveName,
+          channels: [],
+          perspective: this.perspectiveUuid,
+          expressionLanguages: this.expressionLangs,
+        },
       });
+      this.$store.commit({
+        type: "changeCommunityView",
+        value: { name: "main", type: FeedType.Feed },
+      });
+      this.showCreateCommunity!();
+
+      //Create link denoting type of community
+      let addLink = await this.createLink({
+        source: `${publish.linkLanguages![0]?.address}://self`,
+        target: "foaf://group",
+        predicate: "rdf://type",
+      });
+      console.log("Added typelink with response", addLink);
+      await this.sleep(200);
+
+      //Create the group expression
+      let createExp = await this.createExpressionMethod();
+      console.log("Created group expression with response", createExp);
+
+      //Create link between perspective and group expression
+      let addGroupExpLink = await this.createLink({
+        source: `${publish.linkLanguages![0]?.address}://self`,
+        target: createExp,
+        predicate: "rdf://class",
+      });
+      console.log("Created group expression link", addGroupExpLink);
     },
   },
   components: {
