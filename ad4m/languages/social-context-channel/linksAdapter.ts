@@ -1,14 +1,9 @@
 import type Expression from "ad4m/Expression";
 import type { LinksAdapter, NewLinksObserver } from "ad4m/Language";
-import { parseExprURL } from "ad4m/ExpressionRef";
 import type Agent from "ad4m/Agent";
 import type Link from "ad4m/Links";
 import type LanguageContext from "ad4m/LanguageContext";
-import type ExpressionRef from "ad4m/ExpressionRef";
-import type {
-  default as HolochainLanguageDelegate,
-  HolochainService,
-} from "language-context/lib/Holochain/HolochainLanguageDelegate";
+import type { default as HolochainLanguageDelegate } from "language-context/lib/Holochain/HolochainLanguageDelegate";
 import { DNA_NICK } from "./dna";
 import { LinkQuery } from "ad4m/Links";
 

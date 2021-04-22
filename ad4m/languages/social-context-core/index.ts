@@ -1,7 +1,8 @@
 import type Address from 'ad4m/Address'
 import type Agent from 'ad4m/Agent'
 import type Language from 'ad4m/Language'
-import type LanguageContext from 'ad4m/LanguageContext'
+import type P
+LanguageContext from 'ad4m/LanguageContext'
 import type { Interaction } from 'ad4m/Language'
 import type HolochainLanguageDelegate from 'language-context/lib/Holochain/HolochainLanguageDelegate'
 import { JuntoSocialContextLinkAdapter } from './linksAdapter'
