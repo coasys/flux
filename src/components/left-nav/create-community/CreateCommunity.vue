@@ -61,6 +61,7 @@ import {
   ADD_LINK,
   CREATE_EXPRESSION,
   PUB_KEY_FOR_LANG,
+  PERSPECTIVE,
 } from "../../../core/graphql_queries";
 import { useMutation, useQuery } from "@vue/apollo-composable";
 import ad4m from "ad4m-core-executor";
@@ -70,6 +71,7 @@ import { FeedType } from "../../../store";
 
 export default defineComponent({
   setup() {
+    //TODO: I hate this code block here, needs to be refactored
     const languagePath = ref("");
     const dnaNick = ref("");
     const encrypt = ref(false);
@@ -85,6 +87,7 @@ export default defineComponent({
       description: description,
     });
     const currentQueryLang = ref("");
+    const sharedPerspectiveType = ref("holochain");
 
     //TODO: setup error handlers for all error variants below
     const {
@@ -119,7 +122,7 @@ export default defineComponent({
           uuid: perspectiveUuid.value,
           name: perspectiveName.value,
           description: description.value,
-          type: "holochain",
+          type: sharedPerspectiveType.value,
           encrypt: false,
           passphrase: passphrase.value,
           requiredExpressionLanguages: expressionLangs.value,
@@ -151,6 +154,14 @@ export default defineComponent({
       pubKeyForLanguage: string;
     }>(PUB_KEY_FOR_LANG, { lang: currentQueryLang.value });
 
+    const { query: getPerspective, error: getPerspectiveError } = useQuery<{
+      perspective: ad4m.Perspective;
+    }>(PERSPECTIVE, () => {
+      {
+        perspectiveUuid.value;
+      }
+    });
+
     return {
       createUniqueExprLang,
       createUniqueExprLangError,
@@ -164,6 +175,8 @@ export default defineComponent({
       createExpressionError,
       pubKeyForLang,
       pubKeyForLangError,
+      getPerspective,
+      getPerspectiveError,
       languagePath,
       dnaNick,
       encrypt,
@@ -175,6 +188,7 @@ export default defineComponent({
       linkData,
       groupExpressionLangHash,
       currentQueryLang,
+      sharedPerspectiveType,
     };
   },
   methods: {
@@ -238,6 +252,14 @@ export default defineComponent({
       });
     },
 
+    getPerspectiveMethod(): Promise<ad4m.Perspective> {
+      return new Promise((resolve, reject) => {
+        this.getPerspective.result().then((getPerspective) => {
+          resolve(getPerspective.data!.perspective);
+        });
+      });
+    },
+
     sleep(ms: number) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
@@ -287,8 +309,10 @@ export default defineComponent({
       this.showCreateCommunity!();
 
       //Create link denoting type of community
+      //TODO: this things should be abstracted into their own high level function with type safety for given contexts
+      //This would avoid re-writing the same link logic as well as allow for easy changing of link logic
       let addLink = await this.createLink({
-        source: `${publish.linkLanguages![0]?.address}://self`,
+        source: `${publish.linkLanguages![0]!.address!}://self`,
         target: "foaf://group",
         predicate: "rdf://type",
       });
@@ -301,14 +325,75 @@ export default defineComponent({
 
       //Create link between perspective and group expression
       let addGroupExpLink = await this.createLink({
-        source: `${publish.linkLanguages![0]?.address}://self`,
+        source: `${publish.linkLanguages![0]!.address!}://self`,
         target: createExp,
         predicate: "rdf://class",
       });
       console.log("Created group expression link", addGroupExpLink);
 
       //Next steps: create another perspective + share with social-context-channel link language and add above expression DNA's onto it
-      //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel 
+      //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel
+      //This logic and the above logic should be in their own functions, for now its monolithic
+      let channelPerspective = await this.createPerspectiveMethod();
+      console.log(
+        "Created channel perspective with result",
+        channelPerspective
+      );
+      this.perspectiveUuid = channelPerspective.uuid!;
+      //TODO: add channel expression language here
+      this.expressionLangs = [expressionLang.address!];
+      this.perspectiveName = this.perspectiveName + " Default Message Channel";
+      this.sharedPerspectiveType = "holochainChannel";
+
+      //Publish the perspective and add a social-context backend
+      let shareChannelPerspective = await this.publishSharedPerspectiveMethod();
+      console.log(
+        "Shared channel perspective with result",
+        shareChannelPerspective
+      );
+
+      //Get the perspective again so that we have the SharedPerspective URL
+      let perspective = await this.getPerspectiveMethod();
+      console.log("Got the channel perspective back with result", perspective);
+
+      //Set the perspectiveUUID in question back to original
+      this.perspectiveUuid = createPerspective.uuid!;
+      //Link from source social context to new sharedperspective
+      let addLinkToChannel = await this.createLink({
+        source: createExp,
+        target: perspective.sharedURL!,
+        predicate: "sioc://has_space",
+      });
+      console.log(
+        "Added link from source social context to new SharedPerspective with result",
+        addLinkToChannel
+      );
+
+      //Reset perspectiveUuid back to channels
+      this.perspectiveUuid = perspective.uuid!;
+
+      //Note this is temporary code to check the functioning of signals; but it should actually remain in the logic later on
+      let channelScPubKey = await this.getPubKeyForLang(
+        shareChannelPerspective.linkLanguages![0]!.address!
+      );
+      console.log("Got pub key for social context channel", channelScPubKey);
+      let addActiveAgentLink = await this.createLink({
+        source: "active_agent",
+        target: channelScPubKey,
+        predicate: "*",
+      });
+      console.log("Created active agent link with result", addActiveAgentLink);
+
+      //Add link on channel social context declaring type
+      let addChannelTypeLink = await this.createLink({
+        source: `${shareChannelPerspective.linkLanguages![0]!.address!}://self`,
+        target: "sioc://space",
+        predicate: "rdf://type",
+      });
+      console.log(
+        "Added link on channel social context with result",
+        addChannelTypeLink
+      );
     },
   },
   components: {
