@@ -17,6 +17,17 @@ Also ensure that you have the following packages in the same directory that this
 
 (You will need to run `npm install && npm run build` in each of these also)
 
+## Holochain DNA's
+
+This project makes use of the following holochain DNA's.
+
+[Social-Context](https://github.com/juntofoundation/Social-Context) link store DNA for persistence & signaling of links <br>
+[ShortForm-Expression](https://github.com/juntofoundation/Short-Form-Expression) DNA for text posting (more expression types to follow soon)<br>
+[Agent-Profiles](https://github.com/jdeepee/profiles) DNA for basic profile registration (optional for each agent)<br>
+[Language-Persistence](https://github.com/perspect3vism/language-persistence) DNA for the storing of language meta information under a given key<br>
+
+These DNA's come bundled with the builtin languages, links above are provided for reference to anyone interested.
+
 ### Compiles and hot-reloads for development
 ```
 npm run electron:serve
