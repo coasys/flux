@@ -12,6 +12,7 @@ export interface CommunityState {
 export interface ChannelState {
   name: string;
   perspective: string;
+  type: FeedType;
 }
 
 export interface CommunityView {

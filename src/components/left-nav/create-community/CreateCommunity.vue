@@ -156,11 +156,9 @@ export default defineComponent({
 
     const { query: getPerspective, error: getPerspectiveError } = useQuery<{
       perspective: ad4m.Perspective;
-    }>(PERSPECTIVE, () => {
-      {
-        perspectiveUuid.value;
-      }
-    });
+    }>(PERSPECTIVE, () => ({
+      uuid: perspectiveUuid.value,
+    }));
 
     return {
       createUniqueExprLang,
@@ -254,7 +252,7 @@ export default defineComponent({
 
     getPerspectiveMethod(): Promise<ad4m.Perspective> {
       return new Promise((resolve, reject) => {
-        this.getPerspective.result().then((getPerspective) => {
+        this.getPerspective.refetch().then((getPerspective) => {
           resolve(getPerspective.data!.perspective);
         });
       });
@@ -292,21 +290,6 @@ export default defineComponent({
       //Publish perspective
       let publish = await this.publishSharedPerspectiveMethod();
       console.log("Published perspective with response", publish);
-      //Add the perspective to community store
-      this.$store.commit({
-        type: "addCommunity",
-        value: {
-          name: this.perspectiveName,
-          channels: [],
-          perspective: this.perspectiveUuid,
-          expressionLanguages: this.expressionLangs,
-        },
-      });
-      this.$store.commit({
-        type: "changeCommunityView",
-        value: { name: "main", type: FeedType.Feed },
-      });
-      this.showCreateCommunity!();
 
       //Create link denoting type of community
       //TODO: this things should be abstracted into their own high level function with type safety for given contexts
@@ -370,7 +353,7 @@ export default defineComponent({
       );
 
       //Reset perspectiveUuid back to channels
-      this.perspectiveUuid = perspective.uuid!;
+      this.perspectiveUuid = channelPerspective.uuid!;
 
       //Note this is temporary code to check the functioning of signals; but it should actually remain in the logic later on
       let channelScPubKey = await this.getPubKeyForLang(
@@ -394,6 +377,29 @@ export default defineComponent({
         "Added link on channel social context with result",
         addChannelTypeLink
       );
+
+      //Add the perspective to community store
+      this.$store.commit({
+        type: "addCommunity",
+        value: {
+          name: this.perspectiveName,
+          channels: [
+            {
+              name: channelPerspective.name!,
+              perspective: channelPerspective.uuid!,
+              type: FeedType.Dm,
+            },
+          ],
+          perspective: this.perspectiveUuid,
+          expressionLanguages: this.expressionLangs,
+        },
+      });
+      this.$store.commit({
+        type: "changeCommunityView",
+        value: { name: "main", type: FeedType.Feed },
+      });
+
+      this.showCreateCommunity!();
     },
   },
   components: {
