@@ -64,7 +64,7 @@ import {
   PERSPECTIVE,
 } from "../../../core/graphql_queries";
 import { useMutation, useQuery } from "@vue/apollo-composable";
-import ad4m from "ad4m-core-executor";
+import ad4m from "ad4m-executor";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { FeedType } from "../../../store";

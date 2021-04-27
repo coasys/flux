@@ -12,7 +12,7 @@ import CommunityView from "./../community-view/CommunityView.vue";
 import { defineComponent } from "vue";
 import { PERSPECTIVES } from "../../core/graphql_queries";
 import { useQuery } from "@vue/apollo-composable";
-import ad4m from "ad4m-core-executor";
+import ad4m from "ad4m-executor";
 
 export default defineComponent({
   name: "MainAppView",

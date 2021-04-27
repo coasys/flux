@@ -22,7 +22,7 @@
     "@types/mocha": "^8.2.1",
     "@vue/apollo-composable": "^4.0.0-alpha.12",
     "ad4m": "file:../ad4m",
-    "ad4m-core-executor": "file:../ad4m-executor",
+    "ad4m-executor": "file:../ad4m-executor",
     "core-js": "^3.6.5",
     "esm": "^3.2.25",
     "graphql": "^15.5.0",
