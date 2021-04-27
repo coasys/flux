@@ -16,48 +16,48 @@ import ad4m from "ad4m-core-executor";
 
 export default defineComponent({
   name: "MainAppView",
-  setup() {
-    const {
-      onResult: getPerspectives,
-      onError: getPerspectivesError,
-    } = useQuery<{
-      perspectives: [ad4m.Perspective];
-    }>(PERSPECTIVES);
+  // setup() {
+  //   const {
+  //     onResult: getPerspectives,
+  //     onError: getPerspectivesError,
+  //   } = useQuery<{
+  //     perspectives: [ad4m.Perspective];
+  //   }>(PERSPECTIVES);
 
-    return {
-      getPerspectives,
-      getPerspectivesError,
-    };
-  },
-  mounted() {
-    this.getPerspectives((perspectives) => {
-      console.log("Found perspectives", perspectives);
-      if (perspectives.data.perspectives.length > 0) {
-        for (var i = 0; i < perspectives.data.perspectives.length; i++) {
-          if (
-            this.$store.getters.getCommunityById(
-              perspectives.data.perspectives[i].uuid
-            ) == undefined
-          ) {
-            //NOTE: this logic is actually incorrect; there is no mapping between perspective -> community
-            //since a community can contain more than one perspective (one for each channel)
-            //There is also the possiblity that we add a database perspective in the future and of course this will also not be a community
-            this.$store.commit({
-              type: "addCommunity",
-              value: {
-                name: perspectives.data.perspectives[i].name,
-                channels: [],
-                perspective: perspectives.data.perspectives[i].uuid,
-                expressionLanguages:
-                  perspectives.data.perspectives[i].sharedPerspective
-                    ?.requiredExpressionLanguages,
-              },
-            });
-          }
-        }
-      }
-    });
-  },
+  //   return {
+  //     getPerspectives,
+  //     getPerspectivesError,
+  //   };
+  // },
+  // mounted() {
+  //   this.getPerspectives((perspectives) => {
+  //     console.log("Found perspectives", perspectives);
+  //     if (perspectives.data.perspectives.length > 0) {
+  //       for (var i = 0; i < perspectives.data.perspectives.length; i++) {
+  //         if (
+  //           this.$store.getters.getCommunityById(
+  //             perspectives.data.perspectives[i].uuid
+  //           ) == undefined
+  //         ) {
+  //           //NOTE: this logic is actually incorrect; there is no mapping between perspective -> community
+  //           //since a community can contain more than one perspective (one for each channel)
+  //           //There is also the possiblity that we add a database perspective in the future and of course this will also not be a community
+  //           this.$store.commit({
+  //             type: "addCommunity",
+  //             value: {
+  //               name: perspectives.data.perspectives[i].name,
+  //               channels: [],
+  //               perspective: perspectives.data.perspectives[i].uuid,
+  //               expressionLanguages:
+  //                 perspectives.data.perspectives[i].sharedPerspective
+  //                   ?.requiredExpressionLanguages,
+  //             },
+  //           });
+  //         }
+  //       }
+  //     }
+  //   });
+  // },
   components: {
     LeftNav,
     CommunityView,

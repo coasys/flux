@@ -1,5 +1,6 @@
 import LanguageRef from "ad4m/LanguageRef";
 import { createStore } from "vuex";
+import VuexPersistence from "vuex-persist";
 
 export interface CommunityState {
   name: string;
@@ -42,8 +43,19 @@ export interface ExpressionReference {
   expressionType: ExpressionTypes;
 }
 
+const vuexLocal = new VuexPersistence<State>({
+  storage: window.localStorage,
+});
+
 export default createStore({
-  plugins: [],
+  state: {
+    currentTheme: "light",
+    currentCommunity: null,
+    currentCommunityView: null,
+    communities: [],
+    localLanguagesPath: "",
+  },
+  plugins: [vuexLocal.plugin],
   mutations: {
     addCommunity(state: State, payload: CommunityState) {
       state.communities.push(payload);
