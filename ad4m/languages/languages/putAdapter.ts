@@ -1,8 +1,8 @@
 import type Address from "ad4m/Address";
 import type AgentService from "ad4m/AgentService";
 import type { PublicSharing } from "ad4m/Language";
-import type LanguageContext from "ad4m/LanguageContext";
-import type { IPFSNode } from "ad4m/LanguageContext";
+import type LanguageContext from "language-context/lib/LanguageContext";
+import type { IPFSNode } from "language-context/lib/LanguageContext";
 import type HolochainLanguageDelegate from "language-context/lib/Holochain/HolochainLanguageDelegate";
 import { DNA_NICK } from "./dna";
 

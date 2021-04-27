@@ -1,11 +1,11 @@
 import type Address from "ad4m/Address";
 import type Expression from "ad4m/Expression";
 import type { ExpressionAdapter, PublicSharing } from "ad4m/Language";
-import type LanguageContext from "ad4m/LanguageContext";
+import type LanguageContext from "language-context/lib/LanguageContext";
 //import type { default as HolochainLanguageDelegate } from "language-context/lib/Holochain/HolochainLanguageDelegate";
 import type AgentService from "ad4m/AgentService";
 //import { DNA_NICK } from "./dna";
-import type { IPFSNode } from "ad4m/LanguageContext";
+import type { IPFSNode } from "language-context/lib/LanguageContext";
 
 const _appendBuffer = (buffer1, buffer2) => {
   const tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);

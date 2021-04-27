@@ -1,7 +1,7 @@
 import type Address from "ad4m/Address";
 import type Expression from "ad4m/Expression";
 import type { ExpressionAdapter, PublicSharing } from "ad4m/Language";
-import type LanguageContext from "ad4m/LanguageContext";
+import type LanguageContext from "language-context/lib/LanguageContext";
 import type HolochainLanguageDelegate from "language-context/lib/Holochain/HolochainLanguageDelegate";
 import { IpfsPutAdapter } from "./putAdapter";
 import { DNA_NICK } from "./dna";

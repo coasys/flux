@@ -1,7 +1,7 @@
 import type Address from "ad4m/Address";
 import type Agent from "ad4m/Agent";
 import type Language from "ad4m/Language";
-import type LanguageContext from "ad4m/LanguageContext";
+import type LanguageContext from "language-context/lib/LanguageContext";
 import type { Interaction } from "ad4m/Language";
 import Adapter from "./adapter";
 import type { ExpressionUI as Interface } from "ad4m/Language";

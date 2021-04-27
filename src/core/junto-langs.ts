@@ -1,3 +1,7 @@
+// This is the name of the perspective which contains a local database link language and is used by us for storing
+// of perspective/community data
+export const databasePerspectiveName = "a031bd57-fabb-4ee1-96af-b3f039183931";
+
 export enum JuntoLanguageTypes {
   SocialContext = "path/to/language",
   ShortForm = "path/to/language",

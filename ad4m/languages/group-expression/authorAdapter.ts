@@ -1,7 +1,7 @@
 import type Expression from "ad4m/Expression";
 import type Agent from "ad4m/Agent";
 import type { GetByAuthorAdapter } from "ad4m/Language";
-import type LanguageContext from "ad4m/LanguageContext";
+import type LanguageContext from "language-context/lib/LanguageContext";
 import type { default as HolochainLanguageDelegate } from "language-context/lib/Holochain/HolochainLanguageDelegate";
 import { DNA_NICK } from "./dna";
 
