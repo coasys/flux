@@ -37,7 +37,7 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     //console.debug("Holochain Social Context: ADDING LINK!: ", data);
     //If target is an agent pub key, then we are just trying mark agent as active
     //@ts-ignore
-    if (data.data.source.slice(0, 4) == "hCAk") {
+    if (data.data.source == "active_agent") {
       await this.#socialContextDna.call(
         DNA_NICK,
         "social_context",
