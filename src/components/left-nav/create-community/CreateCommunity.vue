@@ -264,9 +264,9 @@ export default defineComponent({
 
     async createCommunity() {
       //TODO: @eric: show loading animation here
-      let createPerspective = await this.createPerspectiveMethod();
-      console.log("Created perspective", createPerspective);
-      this.perspectiveUuid = createPerspective.uuid!;
+      let createSourcePerspective = await this.createPerspectiveMethod();
+      console.log("Created perspective", createSourcePerspective);
+      this.perspectiveUuid = createSourcePerspective.uuid!;
       this.passphrase = uuidv4().toString();
       var builtInLangPath = this.$store.getters.getLanguagePath;
 
@@ -286,6 +286,9 @@ export default defineComponent({
       console.log("Response from create exp lang", groupExpressionLang);
       this.groupExpressionLangHash = groupExpressionLang.address!;
       this.expressionLangs.push(groupExpressionLang.address!);
+      //Save variables for store
+      const submittedCommunityName = Object.assign("", this.perspectiveName);
+      const fullExpressionLangs = Object.assign([], this.expressionLangs);
 
       //Publish perspective
       let publish = await this.publishSharedPerspectiveMethod();
@@ -340,7 +343,7 @@ export default defineComponent({
       console.log("Got the channel perspective back with result", perspective);
 
       //Set the perspectiveUUID in question back to original
-      this.perspectiveUuid = createPerspective.uuid!;
+      this.perspectiveUuid = createSourcePerspective.uuid!;
       //Link from source social context to new sharedperspective
       let addLinkToChannel = await this.createLink({
         source: createExp,
@@ -382,7 +385,7 @@ export default defineComponent({
       this.$store.commit({
         type: "addCommunity",
         value: {
-          name: this.perspectiveName,
+          name: submittedCommunityName,
           channels: [
             {
               name: channelPerspective.name!,
@@ -390,13 +393,9 @@ export default defineComponent({
               type: FeedType.Dm,
             },
           ],
-          perspective: this.perspectiveUuid,
-          expressionLanguages: this.expressionLangs,
+          perspective: createSourcePerspective.uuid!,
+          expressionLanguages: fullExpressionLangs,
         },
-      });
-      this.$store.commit({
-        type: "changeCommunityView",
-        value: { name: "main", type: FeedType.Feed },
       });
 
       this.showCreateCommunity!();
