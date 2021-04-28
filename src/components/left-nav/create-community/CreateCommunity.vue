@@ -63,7 +63,12 @@ import {
   PUB_KEY_FOR_LANG,
   PERSPECTIVE,
 } from "../../../core/graphql_queries";
-import { useMutation, useQuery } from "@vue/apollo-composable";
+import {
+  useLazyQuery,
+  useMutation,
+  useQuery,
+  useResult,
+} from "@vue/apollo-composable";
 import ad4m from "ad4m-executor";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
@@ -150,11 +155,11 @@ export default defineComponent({
       },
     }));
 
-    const { query: pubKeyForLang, error: pubKeyForLangError } = useQuery<{
+    const pubKeyForLang = useLazyQuery<{
       pubKeyForLanguage: string;
-    }>(PUB_KEY_FOR_LANG, { lang: currentQueryLang.value });
+    }>(PUB_KEY_FOR_LANG, () => ({ lang: currentQueryLang.value }));
 
-    const { query: getPerspective, error: getPerspectiveError } = useQuery<{
+    const getPerspective = useLazyQuery<{
       perspective: ad4m.Perspective;
     }>(PERSPECTIVE, () => ({
       uuid: perspectiveUuid.value,
@@ -172,9 +177,7 @@ export default defineComponent({
       createExpression,
       createExpressionError,
       pubKeyForLang,
-      pubKeyForLangError,
       getPerspective,
-      getPerspectiveError,
       languagePath,
       dnaNick,
       encrypt,
@@ -200,9 +203,27 @@ export default defineComponent({
     getPubKeyForLang(lang: string): Promise<string> {
       this.currentQueryLang = lang;
       return new Promise((resolve, reject) => {
-        this.pubKeyForLang.result().then((result) => {
+        this.pubKeyForLang.onResult((result) => {
           resolve(result.data.pubKeyForLanguage);
         });
+        this.pubKeyForLang.onError((error) => {
+          console.log("Got error in getPubKeyForLang", error);
+          reject(error);
+        });
+        this.pubKeyForLang.load();
+      });
+    },
+
+    getPerspectiveMethod(): Promise<ad4m.Perspective> {
+      return new Promise((resolve, reject) => {
+        this.getPerspective.onResult((result) => {
+          resolve(result.data!.perspective);
+        });
+        this.getPerspective.onError((error) => {
+          console.log("Got error in getPerspectiveMethod", error);
+          reject(error);
+        });
+        this.getPerspective.load();
       });
     },
 
@@ -250,14 +271,6 @@ export default defineComponent({
       });
     },
 
-    getPerspectiveMethod(): Promise<ad4m.Perspective> {
-      return new Promise((resolve, reject) => {
-        this.getPerspective.refetch().then((getPerspective) => {
-          resolve(getPerspective.data!.perspective);
-        });
-      });
-    },
-
     sleep(ms: number) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
@@ -268,6 +281,7 @@ export default defineComponent({
       console.log("Created perspective", createSourcePerspective);
       this.perspectiveUuid = createSourcePerspective.uuid!;
       this.passphrase = uuidv4().toString();
+
       var builtInLangPath = this.$store.getters.getLanguagePath;
 
       //Create shortform expression language
@@ -358,7 +372,7 @@ export default defineComponent({
       //Reset perspectiveUuid back to channels
       this.perspectiveUuid = channelPerspective.uuid!;
 
-      //Note this is temporary code to check the functioning of signals; but it should actually remain in the logic later on
+      //Note this is temporary code to check the functioning of signals; but it should actually remain in the logic later on (post base creation)
       let channelScPubKey = await this.getPubKeyForLang(
         shareChannelPerspective.linkLanguages![0]!.address!
       );
