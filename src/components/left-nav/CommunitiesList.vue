@@ -2,7 +2,7 @@
   <div class="left-nav__communities-list">
     <community-avatar
       v-for="community in getCommunities"
-      :key="community.name"
+      :key="community.value.perspective"
       :community="community"
     ></community-avatar>
     <create-community-icon></create-community-icon>

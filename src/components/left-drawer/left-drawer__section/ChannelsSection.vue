@@ -7,25 +7,26 @@
     </div>
     <div class="left-drawer__section--items">
       <left-drawer-section-item
-        v-for="channel in community.channels"
-        :key="channel"
-        :title="channel"
+        v-for="channel in community.value.channels"
+        :key="channel.perspective"
+        :title="channel.name"
         type="channel"
       ></left-drawer-section-item>
     </div>
   </div>
 </template>
-<script>
+
+<script lang="ts">
+import { defineComponent } from "vue";
 import LeftDrawerSectionItem from "./LeftDrawerSectionItem.vue";
 import CreateChannelIcon from "./create-channel/CreateChannelIcon.vue";
-export default {
-  props: {
-    community: Object,
-  },
+
+export default defineComponent({
+  props: ["community"],
 
   components: {
     LeftDrawerSectionItem,
     CreateChannelIcon,
   },
-};
+});
 </script>

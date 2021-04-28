@@ -1,7 +1,10 @@
 <template>
   <div class="left-drawer" v-if="community != null">
-    <community-name :title="community.name"></community-name>
-    <left-drawer-section type="Feed"></left-drawer-section>
+    <community-name :title="community.value.name"></community-name>
+    <left-drawer-section
+      type="Feed"
+      :community="community"
+    ></left-drawer-section>
     <left-drawer-section
       type="Channel"
       :community="community"

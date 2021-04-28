@@ -1,7 +1,7 @@
 <template>
   <div class="community-avatar" @click="navToCommunity()">
     <div class="community-avatar__name">
-      <p class="community-avatar__name--text">{{ community.name }}</p>
+      <p class="community-avatar__name--text">{{ community.value.name }}</p>
     </div>
   </div>
 </template>
