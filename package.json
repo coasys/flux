@@ -12,7 +12,8 @@
     "electron:serve": "vue-cli-service electron:serve",
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps",
-    "rebuild": "./node_modules/.bin/electron-rebuild -f -w ad4m-core-executor"
+    "rebuild": "./node_modules/.bin/electron-rebuild -f -w ad4m-core-executor",
+    "clean-state": "rm -rf ~/.config/ad4m && rm -rf .hc"
   },
   "main": "background.js",
   "dependencies": {
