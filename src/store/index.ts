@@ -32,6 +32,7 @@ export interface State {
   currentCommunityView: CommunityView | null;
   communities: CommunityState[];
   localLanguagesPath: string;
+  databasePerspective: string;
 }
 
 export enum ExpressionTypes {
@@ -54,6 +55,7 @@ export default createStore({
     currentCommunityView: null,
     communities: [],
     localLanguagesPath: "",
+    databasePerspective: "",
   },
   plugins: [vuexLocal.plugin],
   mutations: {
@@ -99,6 +101,10 @@ export default createStore({
         root.style.setProperty("--junto-background-color", "#333");
       }
     },
+
+    addDatabasePerspective(state: State, payload) {
+      state.databasePerspective = payload;
+    },
   },
   getters: {
     //Dump the whole state
@@ -130,6 +136,10 @@ export default createStore({
 
     getCommunityById: (state) => (id: string) => {
       return state.communities.find((todo) => todo.perspective === id);
+    },
+
+    getDatabasePerspective(state: State) {
+      return state.databasePerspective;
     },
   },
 });

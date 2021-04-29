@@ -10,7 +10,7 @@ export default defineComponent({
   beforeCreate() {
     window.api.send("getLangPath");
     window.api.receive("getLangPathResponse", (data: string) => {
-      console.log(`Received language path: ${data}`);
+      console.log(`Received language path from main thread: ${data}`);
       this.$store.commit({
         type: "setLanguagesPath",
         value: data,

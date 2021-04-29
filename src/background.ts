@@ -6,7 +6,6 @@ import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import ad4m from "ad4m-executor";
 import path from "path";
 import os from "os";
-import { handleAppSignalCallback } from "./core/handler";
 
 let win: BrowserWindow;
 let Core: ad4m.PerspectivismCore;
@@ -52,18 +51,12 @@ app.on("ready", async () => {
 
   console.log("\x1b[36m%s\x1b[0m", "Init AD4M...");
   ad4m
-    .init(
-      app.getPath("appData"),
-      execPath,
-      "./ad4m/languages",
-      [
-        "languages",
-        "encrypted-languages",
-        "agent-profiles",
-        "shared-perspectives",
-      ],
-      handleAppSignalCallback
-    )
+    .init(app.getPath("appData"), execPath, "./ad4m/languages", [
+      "languages",
+      "encrypted-languages",
+      "agent-profiles",
+      "shared-perspectives",
+    ])
     .then((ad4mCore: ad4m.PerspectivismCore) => {
       Core = ad4mCore;
       console.log(

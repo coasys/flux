@@ -76,9 +76,11 @@ import {
   AGENT_SERVICE_STATUS,
   UNLOCK_AGENT,
   LOCK_AGENT,
+  ADD_PERSPECTIVE,
 } from "../../../core/graphql_queries";
-import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
+import { useQuery, useMutation } from "@vue/apollo-composable";
 import ad4m from "ad4m-executor";
+import { databasePerspectiveName } from "../../../core/junto-langs";
 
 export default defineComponent({
   name: "WelcomeViewRight",
@@ -88,6 +90,7 @@ export default defineComponent({
     const email = ref("");
     const password = ref("");
     const isInit = ref(false);
+    const perspectiveName = ref(databasePerspectiveName);
     const { mutate: initAgent, error: initAgentError } = useMutation<{
       initializeAgent: ad4m.AgentService;
     }>(INITIALIZE_AGENT, () => ({
@@ -105,6 +108,13 @@ export default defineComponent({
     }>(LOCK_AGENT, () => ({
       variables: { passphrase: password.value },
     }));
+    const { mutate: addPerspective, error: addPerspectiveError } = useMutation<{
+      addPerspective: ad4m.Perspective;
+    }>(ADD_PERSPECTIVE, () => ({
+      variables: {
+        name: perspectiveName.value,
+      },
+    }));
 
     return {
       name,
@@ -118,6 +128,8 @@ export default defineComponent({
       unlockDidStoreError,
       lockAgent,
       lockAgentError,
+      addPerspective,
+      addPerspectiveError,
     };
   },
   beforeCreate() {
@@ -126,6 +138,16 @@ export default defineComponent({
     }>(AGENT_SERVICE_STATUS);
     onResult((val) => {
       this.isInit = val.data.agent.isInitialized!;
+      if (this.isInit == true) {
+        //Get database perspective from store
+        let databasePerspective = this.$store.getters.getDatabasePerspective;
+        if (databasePerspective == "") {
+          console.warn(
+            "Does not have databasePerspective in store but has already been init'd! Add logic for getting databasePerspective as found with name",
+            databasePerspectiveName
+          );
+        };
+      }
     });
     onError((error) => {
       console.log("WelcomeViewRight: AGENT_SERVICE_STATUS, error:", error);
@@ -145,7 +167,21 @@ export default defineComponent({
             if (this.lockAgentError == null) {
               //TODO: then send the profile information to a public Junto DNA
               this.isInit = true;
-              this.$router.push("/home");
+              this.addPerspective().then((addPerspectiveResult) => {
+                console.log(
+                  "Created perspective for local database with result",
+                  addPerspectiveResult
+                );
+                if (this.addPerspectiveError == null) {
+                  this.$store.commit({
+                    type: "addDatabasePerspective",
+                    value: addPerspectiveResult.data?.addPerspective.uuid,
+                  });
+                  this.$router.push("/home");
+                } else {
+                  console.log("Got error", this.addPerspectiveError);
+                }
+              });
             } else {
               console.log("Got error", this.lockAgentError);
             }
