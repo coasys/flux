@@ -3,10 +3,20 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { useSubscription } from "@vue/apollo-composable";
+import { defineComponent, watch } from "vue";
+import { AD4M_SIGNAL } from "./core/graphql_queries";
 
 export default defineComponent({
   name: "App",
+  setup() {
+    const { result } = useSubscription(AD4M_SIGNAL);
+    watch(result, (data) => {
+      console.log("\n\nSIGNAL RECEIVED IN UI:", data);
+    });
+
+    return {};
+  },
   beforeCreate() {
     window.api.send("getLangPath");
     window.api.receive("getLangPathResponse", (data: string) => {

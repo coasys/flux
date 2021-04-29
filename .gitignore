@@ -9,6 +9,7 @@
 /ad4m/languages/**/node_modules
 .hc
 .hc_live_0
+out.log
 
 .DS_Store
 node_modules

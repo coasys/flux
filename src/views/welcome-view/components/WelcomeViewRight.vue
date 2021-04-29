@@ -146,7 +146,8 @@ export default defineComponent({
             "Does not have databasePerspective in store but has already been init'd! Add logic for getting databasePerspective as found with name",
             databasePerspectiveName
           );
-        };
+          //TODO: add the retrieval/state saving logic here
+        }
       }
     });
     onError((error) => {

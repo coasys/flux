@@ -363,3 +363,12 @@ export const PUB_KEY_FOR_LANG = gql`
     pubKeyForLanguage(lang: $lang)
   }
 `;
+
+export const AD4M_SIGNAL = gql`
+  subscription signal {
+    signal {
+      language
+      signal
+    }
+  }
+`;
