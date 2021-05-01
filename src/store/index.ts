@@ -1,24 +1,45 @@
-import LanguageRef from "ad4m/LanguageRef";
+import LanguageRef from "@perspect3vism/ad4m/LanguageRef";
 import { createStore } from "vuex";
 import VuexPersistence from "vuex-persist";
+import type Expression from "@perspect3vism/ad4m/Expression";
 
 export interface CommunityState {
   name: string;
   //TODO: this should not be here
   channels: [ChannelState];
   perspective: string;
+  linkLanguageAddress: string;
   expressionLanguages: ExpressionReference[];
 }
 
+// Vuex state of a given channel; note that links or expression data is not cached here since that will occur on the perspectives local data
 export interface ChannelState {
   name: string;
   perspective: string;
+  linkLanguageAddress: string;
   type: FeedType;
+  //This tells us how much time passed since last query at this channel
+  lastSeenMessageTimestamp: Date | undefined;
+  firstSeenMessageTimestamp: Date | undefined;
+  createdAt: Date;
+  syncLevel: SyncLevel;
+  maxSyncSize: number;
+  //Note: this is temporary measure until we can use a perspective to cache links and perspective syncing is implemented
+  currentExpressionLinks: [Expression];
+  currentExpressionMessages: [Expression];
+}
+
+export enum SyncLevel {
+  Full,
+  Rolling,
 }
 
 export interface CommunityView {
   name: string;
   type: FeedType;
+  perspective: string;
+  // currentExpressionLinks: [Expression];
+  // currentExpressionMessages: [Expression];
 }
 
 export enum FeedType {
@@ -33,6 +54,9 @@ export interface State {
   communities: CommunityState[];
   localLanguagesPath: string;
   databasePerspective: string;
+  //This tells us when the application was started; this tells us that between startTime -> now all messages should have been received
+  //via signals and thus we do not need to query for this time period
+  applicationStartTime: Date;
 }
 
 export enum ExpressionTypes {
@@ -56,6 +80,7 @@ export default createStore({
     communities: [],
     localLanguagesPath: "",
     databasePerspective: "",
+    applicationStartTime: new Date(),
   },
   plugins: [vuexLocal.plugin],
   mutations: {
@@ -102,6 +127,17 @@ export default createStore({
       }
     },
 
+    pushLinkExpression(state: State, payload: [string, Expression]) {
+      state.communities.forEach((community) => {
+        community.channels.forEach((channel) => {
+          if (channel.linkLanguageAddress == payload[0]) {
+            console.log("Pushing link to channel!");
+            channel.currentExpressionLinks.push(payload[1]);
+          }
+        });
+      });
+    },
+
     addDatabasePerspective(state: State, payload) {
       state.databasePerspective = payload;
     },
@@ -140,6 +176,30 @@ export default createStore({
 
     getDatabasePerspective(state: State) {
       return state.databasePerspective;
+    },
+
+    getCurrentChannelsLinks(state) {
+      return state.currentCommunity?.channels.find(
+        (channel) =>
+          channel.perspective == state.currentCommunityView!.perspective
+      )!.currentExpressionLinks;
+    },
+
+    getPerspectiveFromLinkLanguage: (state) => (linkLanguage: string) => {
+      state.communities.forEach((community) => {
+        //@ts-ignore
+        console.log("Searching community", community.value);
+        //@ts-ignore
+        if (community.value.linkLanguageAddress == linkLanguage) {
+          return community;
+        }
+        //@ts-ignore
+        community.value.channels.forEach((channel) => {
+          if (channel.linkLanguageAddress == linkLanguage) {
+            return channel;
+          }
+        });
+      });
     },
   },
 });
