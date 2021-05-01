@@ -79,7 +79,7 @@ import {
   ADD_PERSPECTIVE,
 } from "../../../core/graphql_queries";
 import { useQuery, useMutation } from "@vue/apollo-composable";
-import ad4m from "ad4m-executor";
+import ad4m from "@perspect3vism/ad4m-executor";
 import { databasePerspectiveName } from "../../../core/junto-langs";
 
 export default defineComponent({

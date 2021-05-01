@@ -2,7 +2,7 @@ module.exports = {
   pluginOptions: {
     electronBuilder: {
       preload: "src/preload.js",
-      externals: ["ad4m-executor", "fs"],
+      externals: ["@perspect3vism/ad4m-executor", "fs"],
       builderOptions: {
         productName: "Communities",
         extraResources: [

@@ -69,7 +69,7 @@ import {
   useQuery,
   useResult,
 } from "@vue/apollo-composable";
-import ad4m from "ad4m-executor";
+import ad4m from "@perspect3vism/ad4m-executor";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { FeedType } from "../../../store";
@@ -352,6 +352,30 @@ export default defineComponent({
         shareChannelPerspective
       );
 
+      //Add the perspective to community store
+      let now = new Date();
+      this.$store.commit({
+        type: "addCommunity",
+        value: {
+          name: submittedCommunityName,
+          linkLanguageAddress: publish.linkLanguages![0]!.address!,
+          channels: [
+            {
+              name: channelPerspective.name!,
+              perspective: channelPerspective.uuid!,
+              type: FeedType.Dm,
+              lastSeenMessageTimestamp: now,
+              firstSeenMessageTimestamp: now,
+              createdAt: now,
+              linkLanguageAddress: shareChannelPerspective.linkLanguages![0]!
+                .address!,
+            },
+          ],
+          perspective: createSourcePerspective.uuid!,
+          expressionLanguages: fullExpressionLangs,
+        },
+      });
+
       //Get the perspective again so that we have the SharedPerspective URL
       let perspective = await this.getPerspectiveMethod();
       console.log("Got the channel perspective back with result", perspective);
@@ -394,23 +418,6 @@ export default defineComponent({
         "Added link on channel social context with result",
         addChannelTypeLink
       );
-
-      //Add the perspective to community store
-      this.$store.commit({
-        type: "addCommunity",
-        value: {
-          name: submittedCommunityName,
-          channels: [
-            {
-              name: channelPerspective.name!,
-              perspective: channelPerspective.uuid!,
-              type: FeedType.Dm,
-            },
-          ],
-          perspective: createSourcePerspective.uuid!,
-          expressionLanguages: fullExpressionLangs,
-        },
-      });
 
       this.showCreateCommunity!();
     },
