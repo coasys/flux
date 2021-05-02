@@ -17,11 +17,15 @@ function interactions(a: Agent, expression: Address): Interaction[] {
 
 export default function create(context: LanguageContext): Language {
   const Holochain = context.Holochain as HolochainLanguageDelegate;
-  Holochain.registerDNAs([{ file: DNA, nick: DNA_NICK }]);
 
   const agentAdapter = new AgentAdapter(context);
   const expressionAdapter = new ExpressionAdapter(context);
   const expressionUI = new AgentExpressionUI();
+
+  Holochain.registerDNAs(
+    [{ file: DNA, nick: DNA_NICK }],
+    expressionAdapter.handleHolochainSignal
+  );
 
   return {
     name,

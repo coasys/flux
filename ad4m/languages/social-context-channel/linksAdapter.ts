@@ -113,7 +113,6 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
   }
 
   addCallback(callback: NewLinksObserver) {
-    console.error("No callbacks can be added to this link language");
     return 0;
   }
 

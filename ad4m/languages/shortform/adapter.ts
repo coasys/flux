@@ -17,15 +17,19 @@ class ShortFormPutAdapter implements PublicSharing {
   }
 
   async createPublic(shortForm: object): Promise<Address> {
-    //@ts-ignore
-    const obj = JSON.parse(shortForm);
     const expression = this.#agent.createSignedExpression(shortForm);
-
+    const expressionPostData = {
+      author: expression.author,
+      timestamp: expression.timestamp,
+      data: JSON.stringify(expression.data),
+      proof: expression.proof,
+    };
+    console.log("Posting", expressionPostData);
     const res = await this.#shortFormDNA.call(
       DNA_NICK,
       "shortform",
       "create_public_expression",
-      expression
+      expressionPostData
     );
     return res.holochain_data.element.signed_header.header.hash.toString("hex");
   }
