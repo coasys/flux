@@ -80,7 +80,7 @@ import {
 } from "../../../core/graphql_queries";
 import { useQuery, useMutation } from "@vue/apollo-composable";
 import ad4m from "@perspect3vism/ad4m-executor";
-import { databasePerspectiveName } from "../../../core/junto-langs";
+import { databasePerspectiveName } from "../../../core/juntoTypes";
 
 export default defineComponent({
   name: "WelcomeViewRight",
@@ -168,6 +168,7 @@ export default defineComponent({
             if (this.lockAgentError == null) {
               //TODO: then send the profile information to a public Junto DNA
               this.isInit = true;
+              //NOTE: this code is potentially not needed
               this.addPerspective().then((addPerspectiveResult) => {
                 console.log(
                   "Created perspective for local database with result",

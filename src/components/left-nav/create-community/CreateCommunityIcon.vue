@@ -27,6 +27,7 @@ export default defineComponent({
   },
   methods: {
     showCreateCommunity() {
+      console.log("Closing create community view");
       this.activateCreateCommunity = !this.activateCreateCommunity;
     },
   },

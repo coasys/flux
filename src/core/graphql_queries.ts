@@ -358,6 +358,27 @@ export const CREATE_EXPRESSION = gql`
   }
 `;
 
+export const QUERY_EXPRESSION = gql`
+  query expression($url: string) {
+    expression(url: $url) {
+      url
+      author {
+        did
+        email
+        name
+      }
+      timestamp
+      data
+      proof {
+        signature
+        key
+        valid
+        invalid
+      }
+    }
+  }
+`;
+
 export const PUB_KEY_FOR_LANG = gql`
   query pubKeyForLanguage($lang: String) {
     pubKeyForLanguage(lang: $lang)

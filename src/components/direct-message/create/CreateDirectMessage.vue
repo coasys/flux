@@ -16,6 +16,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { JuntoShortForm } from "@/core/juntoTypes";
 
 export default defineComponent({
   props: ["createMessage"],
@@ -26,11 +27,11 @@ export default defineComponent({
   },
   methods: {
     createDirectMessage() {
-      const message = {
-        id: Date.now().toString,
-        username: "junto",
-        type: "TextMessage",
-        message: this.message,
+      //Note: the logic here is really wrong; we should instead get the expression component from ad4m and then use that to render
+      //the expression create component which will then call this function with an object to be posted to ad4m
+      const message: JuntoShortForm = {
+        body: this.message,
+        background: [""],
       };
       //   Validate whether message is empty or not
       if (this.message !== "") {
