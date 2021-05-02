@@ -72,7 +72,7 @@ import {
 import ad4m from "@perspect3vism/ad4m-executor";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
-import { FeedType } from "../../../store";
+import { FeedType, SyncLevel } from "../../../store";
 
 export default defineComponent({
   setup() {
@@ -334,6 +334,7 @@ export default defineComponent({
       //Next steps: create another perspective + share with social-context-channel link language and add above expression DNA's onto it
       //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel
       //This logic and the above logic should be in their own functions, for now its monolithic
+      this.perspectiveName = this.perspectiveName + " Default Message Channel";
       let channelPerspective = await this.createPerspectiveMethod();
       console.log(
         "Created channel perspective with result",
@@ -342,7 +343,6 @@ export default defineComponent({
       this.perspectiveUuid = channelPerspective.uuid!;
       //TODO: add channel expression language here
       this.expressionLangs = [expressionLang.address!];
-      this.perspectiveName = this.perspectiveName + " Default Message Channel";
       this.sharedPerspectiveType = "holochainChannel";
 
       //Publish the perspective and add a social-context backend
@@ -369,6 +369,10 @@ export default defineComponent({
               createdAt: now,
               linkLanguageAddress: shareChannelPerspective.linkLanguages![0]!
                 .address!,
+              syncLevel: SyncLevel.Full,
+              maxSyncSize: -1,
+              currentExpressionLinks: [],
+              currentExpressionMessages: [],
             },
           ],
           perspective: createSourcePerspective.uuid!,

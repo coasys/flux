@@ -9,7 +9,7 @@
 
 <script>
 export default {
-  props: ["title", "type"],
+  props: ["title", "type", "perspective"],
   computed: {
     setIcon() {
       let icon;
@@ -34,6 +34,7 @@ export default {
         value: {
           name: this.title,
           type: this.type,
+          perspective: this.perspective,
         },
       });
     },

@@ -14,8 +14,10 @@
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from "vue";
+
+export default defineComponent({
   props: ["createMessage"],
   data() {
     return {
@@ -40,9 +42,8 @@ export default {
       this.message = "";
     },
   },
-};
+});
 </script>
-
 
 <style lang="scss" scoped>
 @import "../../../assets/sass/main.scss";

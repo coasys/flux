@@ -179,10 +179,23 @@ export default createStore({
     },
 
     getCurrentChannelsLinks(state) {
-      return state.currentCommunity?.channels.find(
-        (channel) =>
-          channel.perspective == state.currentCommunityView!.perspective
-      )!.currentExpressionLinks;
+      //@ts-ignore
+      const foundChannel = state.currentCommunity.value.channels.find(
+        (channel: ChannelState) => {
+          //@ts-ignore
+          return (
+            channel.perspective === state.currentCommunityView!.perspective
+          );
+        }
+      );
+      if (foundChannel != undefined) {
+        return foundChannel.currentExpressionLinks;
+      } else {
+        console.error(
+          "did not find given channel when expected to, returning empty array"
+        );
+        return [];
+      }
     },
 
     getPerspectiveFromLinkLanguage: (state) => (linkLanguage: string) => {

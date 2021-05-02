@@ -14,106 +14,31 @@
   </div>
 </template>
 
-
-
-<script>
+<script lang="ts">
+import { defineComponent } from "vue";
+import type Expression from "@perspect3vism/ad4m/Expression";
 import DirectMessage from "../../../../components/direct-message/display/DirectMessage.vue";
 import CreateDirectMessage from "../../../../components/direct-message/create/CreateDirectMessage.vue";
-export default {
+
+export default defineComponent({
+  props: ["community"],
   mounted() {
+    console.log("Messages in channel view", this.messages);
     this.scrollToBottom();
   },
   data() {
     return {
-      messages: [
-        {
-          id: 12345,
-          username: "urkyang",
-          profilePicture: "./../../../assets/images/junto_app_icon.png",
-          type: "TextMessage",
-          message: "Hey what is up everyone!",
-        },
-        {
-          id: 56779,
-          username: "jdeepee",
-          profilePicture: "./../../../assets/images/junto_app_icon.png",
-          type: "TextMessage",
-          message: "Welcome to Junto!",
-        },
-        {
-          id: 1,
-          username: "urkyang",
-          profilePicture: "./../../../assets/images/junto_app_icon.png",
-          type: "TextMessage",
-          message: "Hey what is up everyone!",
-        },
-        {
-          id: 2,
-          username: "jdeepee",
-          profilePicture: "./../../../assets/images/junto_app_icon.png",
-          type: "TextMessage",
-          message: "Welcome to Junto!",
-        },
-        {
-          id: 3,
-          username: "urkyang",
-          profilePicture: "./../../../assets/images/junto_app_icon.png",
-          type: "TextMessage",
-          message: "Hey what is up everyone!",
-        },
-        {
-          id: 4,
-          username: "jdeepee",
-          profilePicture: "./../../../assets/images/junto_app_icon.png",
-          type: "TextMessage",
-          message: "Welcome to Junto!",
-        },
-        {
-          id: 5,
-          username: "urkyang",
-          profilePicture: "./../../../assets/images/junto_app_icon.png",
-          type: "TextMessage",
-          message: "Hey what is up everyone!",
-        },
-        {
-          id: 6,
-          username: "jdeepee",
-          profilePicture: "./../../../assets/images/junto_app_icon.png",
-          type: "TextMessage",
-          message: "Welcome to Junto!",
-        },
-        {
-          id: 7,
-          username: "urkyang",
-          profilePicture: "./../../../assets/images/junto_app_icon.png",
-          type: "TextMessage",
-          message: "Welcome to Junto!",
-        },
-        {
-          id: 8,
-          username: "jdeepee",
-          profilePicture: "./../../../assets/images/junto_app_icon.png",
-          type: "TextMessage",
-          message: "Welcome to Junto!",
-        },
-        {
-          id: 9,
-          username: "urkyang",
-          profilePicture: "./../../../assets/images/junto_app_icon.png",
-          type: "TextMessage",
-          message: "Welcome to Junto!",
-        },
-      ],
+      messages: this.$store.getters.getCurrentChannelsLinks,
     };
   },
   methods: {
-    createDirectMessage(message) {
-      this.messages.push(message);
+    createDirectMessage(message: Expression) {
       setTimeout(this.scrollToBottom, 300);
     },
 
     scrollToBottom() {
       const container = this.$refs.messagesContainer;
+      //@ts-ignore
       container.scrollTop = container.scrollHeight;
     },
   },
@@ -122,7 +47,7 @@ export default {
     DirectMessage,
     CreateDirectMessage,
   },
-};
+});
 </script>
 
 <style lang="scss">

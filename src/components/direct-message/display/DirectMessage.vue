@@ -5,16 +5,18 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from "vue";
 import TextMessage from "./types/TextMessage.vue";
 import DirectMessageMeta from "./DirectMessageMeta.vue";
-export default {
+
+export default defineComponent({
   props: ["message"],
   components: {
     TextMessage,
     DirectMessageMeta,
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

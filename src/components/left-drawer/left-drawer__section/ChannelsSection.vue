@@ -10,6 +10,7 @@
         v-for="channel in community.value.channels"
         :key="channel.perspective"
         :title="channel.name"
+        :perspective="channel.perspective"
         type="channel"
       ></left-drawer-section-item>
     </div>

@@ -7,7 +7,6 @@ import { useSubscription } from "@vue/apollo-composable";
 import { defineComponent, watch } from "vue";
 import { AD4M_SIGNAL } from "./core/graphql_queries";
 import { useStore } from "vuex";
-import Expression from "@perspect3vism/ad4m/Expression";
 
 declare global {
   interface Window {
@@ -26,9 +25,11 @@ export default defineComponent({
       console.log("Coming from language", data.signal.language);
       let expression = data.signal.signal.data.payload;
       console.log("Parse as exp", expression);
-      if (Object.prototype.hasOwnProperty.call(expression.data, "source") 
-        && Object.prototype.hasOwnProperty.call(expression.data, "target") 
-          && Object.prototype.hasOwnProperty.call(expression.data, "predicate")) {
+      if (
+        Object.prototype.hasOwnProperty.call(expression.data, "source") &&
+        Object.prototype.hasOwnProperty.call(expression.data, "target") &&
+        Object.prototype.hasOwnProperty.call(expression.data, "predicate")
+      ) {
         //@ts-ignore
         if (expression.data.predicate == "sioc://content_of") {
           store.commit({
