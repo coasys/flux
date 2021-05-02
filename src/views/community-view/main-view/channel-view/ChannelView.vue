@@ -25,12 +25,7 @@ import {
   QUERY_EXPRESSION,
 } from "@/core/graphql_queries";
 import ad4m from "@perspect3vism/ad4m-executor";
-import {
-  useLazyQuery,
-  useMutation,
-  useQuery,
-  useResult,
-} from "@vue/apollo-composable";
+import { useLazyQuery, useMutation } from "@vue/apollo-composable";
 
 export default defineComponent({
   props: ["community"],
@@ -48,10 +43,8 @@ export default defineComponent({
       },
     }));
 
-    const getExpression = useQuery(QUERY_EXPRESSION, () => ({
-      variables: {
-        url: expressionUrl.value,
-      },
+    const getExpression = useLazyQuery(QUERY_EXPRESSION, () => ({
+      url: expressionUrl.value,
     }));
 
     const addLink = useMutation<{
@@ -71,6 +64,7 @@ export default defineComponent({
       postExpression,
       addLink,
       getExpression,
+      expressionUrl,
     };
   },
   mounted() {
@@ -115,6 +109,20 @@ export default defineComponent({
       });
     },
 
+    getExpressionMethod(url: string) {
+      this.expressionUrl = url;
+      return new Promise((resolve, reject) => {
+        this.getExpression.onResult((result) => {
+          resolve(result.data);
+        });
+        this.getExpression.onError((error) => {
+          console.log("Got error in getExpression", error);
+          reject(error);
+        });
+        this.getExpression.load();
+      });
+    },
+
     async createDirectMessage(message: JuntoShortForm) {
       let shortFormExpressionLanguage = this.community.value
         .expressionLanguages[0]!;
@@ -122,14 +130,18 @@ export default defineComponent({
         "Posting shortForm expression to language",
         shortFormExpressionLanguage
       );
-      let expressionHash = await this.createExpression(
+      let exprUrl = await this.createExpression(
         message,
         shortFormExpressionLanguage
       );
-      console.log("Created expression with hash", expressionHash);
+      console.log("Created expression with hash", exprUrl);
+      var t0 = performance.now();
+      let getExp = await this.getExpressionMethod(exprUrl);
+      var t1 = performance.now()
+      console.log('Got expression back with res', getExp, 'in time (ms):', (t1 - t0));
       let addLink = await this.createLink({
         source: "sioc://chatchannel",
-        target: expressionHash,
+        target: exprUrl,
         predicate: "sioc://content_of",
       });
       console.log("Adding link with response", addLink);
