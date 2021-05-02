@@ -178,9 +178,9 @@ export default createStore({
       return state.databasePerspective;
     },
 
-    getCurrentChannelsLinks(state) {
+    getCurrentChannel(state) {
       //@ts-ignore
-      const foundChannel = state.currentCommunity.value.channels.find(
+      return state.currentCommunity.value.channels.find(
         (channel: ChannelState) => {
           //@ts-ignore
           return (
@@ -188,14 +188,6 @@ export default createStore({
           );
         }
       );
-      if (foundChannel != undefined) {
-        return foundChannel.currentExpressionLinks;
-      } else {
-        console.error(
-          "did not find given channel when expected to, returning empty array"
-        );
-        return [];
-      }
     },
 
     getPerspectiveFromLinkLanguage: (state) => (linkLanguage: string) => {

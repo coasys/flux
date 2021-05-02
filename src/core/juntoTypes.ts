@@ -2,6 +2,11 @@
 // of perspective/community data
 export const databasePerspectiveName = "a031bd57-fabb-4ee1-96af-b3f039183931";
 
+export interface JuntoShortForm {
+  body: string;
+  background: [string];
+}
+
 export enum JuntoLanguageTypes {
   SocialContext = "path/to/language",
   ShortForm = "path/to/language",

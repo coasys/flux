@@ -23,21 +23,21 @@ export default defineComponent({
     watch(result, (data) => {
       console.log("\n\nSIGNAL RECEIVED IN UI:", JSON.parse(data.signal.signal));
       console.log("Coming from language", data.signal.language);
-      let expression = data.signal.signal.data.payload;
-      console.log("Parse as exp", expression);
-      if (
-        Object.prototype.hasOwnProperty.call(expression.data, "source") &&
-        Object.prototype.hasOwnProperty.call(expression.data, "target") &&
-        Object.prototype.hasOwnProperty.call(expression.data, "predicate")
-      ) {
-        //@ts-ignore
-        if (expression.data.predicate == "sioc://content_of") {
-          store.commit({
-            type: "pushLinkExpression",
-            value: [data.signal.language, expression],
-          });
-        }
-      }
+      // let expression = data.signal.signal.data.payload;
+      // console.log("Parse as exp", expression);
+      // if (
+      //   Object.prototype.hasOwnProperty.call(expression.data, "source") &&
+      //   Object.prototype.hasOwnProperty.call(expression.data, "target") &&
+      //   Object.prototype.hasOwnProperty.call(expression.data, "predicate")
+      // ) {
+      //   //@ts-ignore
+      //   if (expression.data.predicate == "sioc://content_of") {
+      //     store.commit({
+      //       type: "pushLinkExpression",
+      //       value: [data.signal.language, expression],
+      //     });
+      //   }
+      // }
     });
 
     return {};
