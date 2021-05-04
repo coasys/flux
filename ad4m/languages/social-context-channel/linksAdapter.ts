@@ -47,11 +47,29 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
           index_strategy: "Simple",
         }
       );
+      await this.#socialContextDna.call(
+        DNA_NICK,
+        "social_context",
+        "index_link",
+        {
+          link: data,
+          index_strategy: "Simple",
+        }
+      );
     } else {
       await this.#socialContextDna.call(
         DNA_NICK,
         "social_context",
         "add_link",
+        {
+          link: data,
+          index_strategy: "Full",
+        }
+      );
+      await this.#socialContextDna.call(
+        DNA_NICK,
+        "social_context",
+        "index_link",
         {
           link: data,
           index_strategy: "Full",
