@@ -1,10 +1,10 @@
-import type Address from "ad4m/Address";
-import type Agent from "ad4m/Agent";
-import type Language from "ad4m/Language";
-import type LanguageContext from "language-context/lib/LanguageContext";
-import type { Interaction } from "ad4m/Language";
+import type Address from "@perspect3vism/ad4m/Address";
+import type Agent from "@perspect3vism/ad4m/Agent";
+import type Language from "@perspect3vism/ad4m/Language";
+import type LanguageContext from "@perspect3vism/ad4m-language-context/LanguageContext";
+import type { Interaction } from "@perspect3vism/ad4m/Language";
 import Adapter from "./adapter";
-import type { ExpressionUI as Interface } from "ad4m/Language";
+import type { ExpressionUI as Interface } from "@perspect3vism/ad4m/Language";
 
 function interactions(a: Agent, expression: Address): Interaction[] {
   return [];

@@ -1,11 +1,11 @@
-import type Address from "ad4m/Address";
-import type Expression from "ad4m/Expression";
-import type { ExpressionAdapter, PublicSharing } from "ad4m/Language";
-import type LanguageContext from "language-context/lib/LanguageContext";
-//import type { default as HolochainLanguageDelegate } from "language-context/lib/Holochain/HolochainLanguageDelegate";
-import type AgentService from "ad4m/AgentService";
+import type Address from "@perspect3vism/ad4m/Address";
+import type Expression from "@perspect3vism/ad4m/Expression";
+import type { ExpressionAdapter, PublicSharing } from "@perspect3vism/ad4m/Language";
+import type LanguageContext from "@perspect3vism/ad4m-language-context/LanguageContext";
+//import type { default as HolochainLanguageDelegate } from "@perspect3vism/ad4m-language-context/Holochain/HolochainLanguageDelegate";
+import type AgentService from "@perspect3vism/ad4m/AgentService";
 //import { DNA_NICK } from "./dna";
-import type { IPFSNode } from "language-context/lib/LanguageContext";
+import type { IPFSNode } from "@perspect3vism/ad4m-language-context/LanguageContext";
 
 const _appendBuffer = (buffer1, buffer2) => {
   const tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
