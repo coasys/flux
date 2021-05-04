@@ -20,13 +20,7 @@ export class IpfsPutAdapter implements PublicSharing {
 
   async createPublic(languageData: object): Promise<Address> {
     // @ts-ignore
-    const {
-      bundleFile,
-      name,
-      description,
-      passphrase,
-      encrypted,
-    } = languageData;
+    const {bundleFile, name, description, passphrase, encrypted} = languageData;
 
     const encryptedBundle = aes256.encrypt(passphrase, bundleFile);
 
