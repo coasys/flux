@@ -1,7 +1,7 @@
 <template>
   <div class="directMessage">
     <direct-message-meta :message="message"></direct-message-meta>
-    <text-message :text="message.message"></text-message>
+    <text-message :text="message.body"></text-message>
   </div>
 </template>
 

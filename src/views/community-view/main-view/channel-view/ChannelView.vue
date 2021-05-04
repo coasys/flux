@@ -2,9 +2,9 @@
   <div class="channelView">
     <div class="channelView__messages" ref="messagesContainer">
       <direct-message
-        v-for="message in currentChannel.currentExpressionLinks"
-        :key="message.id"
-        :message="message"
+        v-for="message in getCurrentChannel.currentExpressionMessages"
+        :key="message.url"
+        :message="JSON.parse(message.data)"
       ></direct-message>
     </div>
 
@@ -26,6 +26,7 @@ import {
 } from "@/core/graphql_queries";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { useLazyQuery, useMutation } from "@vue/apollo-composable";
+import { ChannelState } from "@/store/index";
 
 export default defineComponent({
   props: ["community"],
@@ -68,15 +69,15 @@ export default defineComponent({
     };
   },
   mounted() {
-    console.log("Current mounted channel", this.currentChannel);
-    this.currentPerspective = this.currentChannel.perspective;
+    console.log("Current mounted channel", this.getCurrentChannel);
+    this.currentPerspective = this.getCurrentChannel.perspective;
     console.log("Perspective set in composition fn", this.currentPerspective);
     this.scrollToBottom();
   },
-  data() {
-    return {
-      currentChannel: this.$store.getters.getCurrentChannel,
-    };
+  computed: {
+    getCurrentChannel(): ChannelState {
+      return this.$store.getters.getCurrentChannel;
+    },
   },
   methods: {
     createExpression(
@@ -135,10 +136,6 @@ export default defineComponent({
         shortFormExpressionLanguage
       );
       console.log("Created expression with hash", exprUrl);
-      var t0 = performance.now();
-      let getExp = await this.getExpressionMethod(exprUrl);
-      var t1 = performance.now()
-      console.log('Got expression back with res', getExp, 'in time (ms):', (t1 - t0));
       let addLink = await this.createLink({
         source: "sioc://chatchannel",
         target: exprUrl,

@@ -400,6 +400,7 @@ export default defineComponent({
       //Reset perspectiveUuid back to channels
       this.perspectiveUuid = channelPerspective.uuid!;
 
+      //TODO: set a callback which will add another active_agent link in 10 minutes; callback should also call itself again 10 mins later
       //Note this is temporary code to check the functioning of signals; but it should actually remain in the logic later on (post base creation)
       let channelScPubKey = await this.getPubKeyForLang(
         shareChannelPerspective.linkLanguages![0]!.address!

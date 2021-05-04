@@ -127,19 +127,25 @@ export default createStore({
       }
     },
 
-    pushLinkExpression(state: State, payload: [string, Expression]) {
+    addDatabasePerspective(state: State, payload) {
+      state.databasePerspective = payload;
+    },
+
+    addExpressionAndLinkFromLanguageAddress: (state: State, payload) => {
       state.communities.forEach((community) => {
-        community.channels.forEach((channel) => {
-          if (channel.linkLanguageAddress == payload[0]) {
-            console.log("Pushing link to channel!");
-            channel.currentExpressionLinks.push(payload[1]);
+        //@ts-ignore
+        // if (community.value.linkLanguageAddress == payload.linkLanguage) {
+        //   return;
+        // }
+        //@ts-ignore
+        community.value.channels.forEach((channel) => {
+          if (channel.linkLanguageAddress == payload.value.linkLanguage) {
+            console.log("Adding to link and exp to channel!");
+            channel.currentExpressionLinks.push(payload.value.link);
+            channel.currentExpressionMessages.push(payload.value.message);
           }
         });
       });
-    },
-
-    addDatabasePerspective(state: State, payload) {
-      state.databasePerspective = payload;
     },
   },
   getters: {
@@ -180,7 +186,7 @@ export default createStore({
 
     getCurrentChannel(state) {
       //@ts-ignore
-      return state.currentCommunity.value.channels.find(
+      const cha = state.currentCommunity.value.channels.find(
         (channel: ChannelState) => {
           //@ts-ignore
           return (
@@ -188,12 +194,13 @@ export default createStore({
           );
         }
       );
+      console.log(cha);
+      return cha;
     },
 
     getPerspectiveFromLinkLanguage: (state) => (linkLanguage: string) => {
+      let perspective;
       state.communities.forEach((community) => {
-        //@ts-ignore
-        console.log("Searching community", community.value);
         //@ts-ignore
         if (community.value.linkLanguageAddress == linkLanguage) {
           return community;
@@ -201,10 +208,11 @@ export default createStore({
         //@ts-ignore
         community.value.channels.forEach((channel) => {
           if (channel.linkLanguageAddress == linkLanguage) {
-            return channel;
+            perspective = channel;
           }
         });
       });
+      return perspective;
     },
   },
 });

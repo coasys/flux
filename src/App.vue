@@ -3,9 +3,9 @@
 </template>
 
 <script lang="ts">
-import { useSubscription } from "@vue/apollo-composable";
-import { defineComponent, watch } from "vue";
-import { AD4M_SIGNAL } from "./core/graphql_queries";
+import { useSubscription, useLazyQuery } from "@vue/apollo-composable";
+import { defineComponent, watch, ref } from "vue";
+import { AD4M_SIGNAL, QUERY_EXPRESSION } from "./core/graphql_queries";
 import { useStore } from "vuex";
 
 declare global {
@@ -19,25 +19,46 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const { result } = useSubscription(AD4M_SIGNAL);
+    const expressionUrl = ref("");
+    const getExpression = useLazyQuery(QUERY_EXPRESSION, () => ({
+      url: expressionUrl.value,
+    }));
 
     watch(result, (data) => {
-      console.log("\n\nSIGNAL RECEIVED IN UI:", JSON.parse(data.signal.signal));
-      console.log("Coming from language", data.signal.language);
-      // let expression = data.signal.signal.data.payload;
-      // console.log("Parse as exp", expression);
-      // if (
-      //   Object.prototype.hasOwnProperty.call(expression.data, "source") &&
-      //   Object.prototype.hasOwnProperty.call(expression.data, "target") &&
-      //   Object.prototype.hasOwnProperty.call(expression.data, "predicate")
-      // ) {
-      //   //@ts-ignore
-      //   if (expression.data.predicate == "sioc://content_of") {
-      //     store.commit({
-      //       type: "pushLinkExpression",
-      //       value: [data.signal.language, expression],
-      //     });
-      //   }
-      // }
+      let signal = JSON.parse(data.signal.signal);
+      let language = data.signal.language;
+      let expression = signal.data.payload;
+      console.log(
+        "SIGNAL RECEIVED IN UI: Coming from language",
+        language,
+        "with exp",
+        expression
+      );
+      if (
+        Object.prototype.hasOwnProperty.call(expression.data, "source") &&
+        Object.prototype.hasOwnProperty.call(expression.data, "target") &&
+        Object.prototype.hasOwnProperty.call(expression.data, "predicate")
+      ) {
+        //@ts-ignore
+        if (expression.data.predicate == "sioc://content_of") {
+          expressionUrl.value = expression.data.target;
+          getExpression.onResult((result) => {
+            store.commit({
+              type: "addExpressionAndLinkFromLanguageAddress",
+              value: {
+                linkLanguage: language,
+                link: expression,
+                message: result.data.expression,
+              },
+            });
+          });
+          getExpression.onError((error) => {
+            console.log("Got error in getExpression", error);
+            //Show error dialogue
+          });
+          getExpression.load();
+        }
+      }
     });
 
     return {};
