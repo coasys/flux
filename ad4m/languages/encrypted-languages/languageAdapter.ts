@@ -1,10 +1,10 @@
-import type Address from "ad4m/Address";
+import type Address from "@perspect3vism/ad4m/Address";
 import type {
   LanguageAdapter as Interface,
   PublicSharing,
-} from "ad4m/Language";
-import type LanguageContext from "language-context/lib/LanguageContext";
-import type { IPFSNode } from "language-context/lib/LanguageContext";
+} from "@perspect3vism/ad4m/Language";
+import type LanguageContext from "@perspect3vism/ad4m-language-context/lib/LanguageContext";
+import type { IPFSNode } from "@perspect3vism/ad4m-language-context/lib/LanguageContext";
 import aes256 from "aes256";
 
 const _appendBuffer = (buffer1, buffer2) => {

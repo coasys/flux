@@ -1,9 +1,9 @@
-import type Address from "ad4m/Address";
-import type AgentService from "ad4m/AgentService";
-import type { PublicSharing } from "ad4m/Language";
-import type LanguageContext from "language-context/lib/LanguageContext";
-import type { IPFSNode } from "language-context/lib/LanguageContext";
-import type HolochainLanguageDelegate from "language-context/lib/Holochain/HolochainLanguageDelegate";
+import type Address from "@perspect3vism/ad4m/Address";
+import type AgentService from "@perspect3vism/ad4m/AgentService";
+import type { PublicSharing } from "@perspect3vism/ad4m/Language";
+import type LanguageContext from "@perspect3vism/ad4m-language-context/lib/LanguageContext";
+import type { IPFSNode } from "@perspect3vism/ad4m-language-context/lib/LanguageContext";
+import type HolochainLanguageDelegate from "@perspect3vism/ad4m-language-context/lib/Holochain/HolochainLanguageDelegate";
 import { DNA_NICK } from "./dna";
 import aes256 from "aes256";
 
@@ -20,7 +20,13 @@ export class IpfsPutAdapter implements PublicSharing {
 
   async createPublic(languageData: object): Promise<Address> {
     // @ts-ignore
-    const {bundleFile, name, description, passphrase, encrypted} = languageData;
+    const {
+      bundleFile,
+      name,
+      description,
+      passphrase,
+      encrypted,
+    } = languageData;
 
     const encryptedBundle = aes256.encrypt(passphrase, bundleFile);
 
