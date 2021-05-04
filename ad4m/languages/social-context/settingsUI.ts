@@ -1,4 +1,4 @@
-import type { SettingsUI } from "ad4m/Language";
+import type { SettingsUI } from "@perspect3vism/ad4m/Language";
 import SettingsIcon from "./build/SettingsIcon.js";
 
 export class JuntoSettingsUI implements SettingsUI {
