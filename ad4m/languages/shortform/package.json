@@ -12,8 +12,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "ad4m": "file:../../../../ad4m",
-    "language-context": "file:../../../../language-context",
+    "@perspect3vism/ad4m": "file:../../../../ad4m",
+    "@perspect3vism/ad4m-language-context": "file:../../../../ad4m-language-context",
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^8.0.0",

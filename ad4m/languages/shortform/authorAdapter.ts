@@ -1,8 +1,8 @@
-import type Expression from "ad4m/Expression";
-import type Agent from "ad4m/Agent";
-import type { GetByAuthorAdapter } from "ad4m/Language";
-import type LanguageContext from "language-context/lib/LanguageContext";
-import type { default as HolochainLanguageDelegate } from "language-context/lib/Holochain/HolochainLanguageDelegate";
+import type Expression from "@perspect3vism/ad4m/Expression";
+import type Agent from "@perspect3vism/ad4m/Agent";
+import type { GetByAuthorAdapter } from "@perspect3vism/ad4m/Language";
+import type LanguageContext from "@perspect3vism/ad4m-language-context/LanguageContext";
+import type { default as HolochainLanguageDelegate } from "@perspect3vism/ad4m-language-context/Holochain/HolochainLanguageDelegate";
 import { DNA_NICK } from "./dna";
 export default class ShortFormAuthorAdapter implements GetByAuthorAdapter {
   #shortFormDNA: HolochainLanguageDelegate;
