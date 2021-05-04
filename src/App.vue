@@ -23,39 +23,40 @@ export default defineComponent({
     const getExpression = useLazyQuery(QUERY_EXPRESSION, () => ({
       url: expressionUrl.value,
     }));
+    var language = "";
+    var expression = {};
+    getExpression.onResult((result) => {
+      store.commit({
+        type: "addExpressionAndLinkFromLanguageAddress",
+        value: {
+          linkLanguage: language,
+          link: expression,
+          message: result.data.expression,
+        },
+      });
+    });
+    getExpression.onError((error) => {
+      console.log("Got error in getExpression", error);
+      //Show error dialogue
+    });
 
     watch(result, (data) => {
       let signal = JSON.parse(data.signal.signal);
-      let language = data.signal.language;
-      let expression = signal.data.payload;
-      console.log(
-        "SIGNAL RECEIVED IN UI: Coming from language",
-        language,
-        "with exp",
-        expression
-      );
+      language = data.signal.language;
+      expression = signal.data.payload;
+      console.log("SIGNAL RECEIVED IN UI: Coming from language", language);
       if (
+        //@ts-ignore
         Object.prototype.hasOwnProperty.call(expression.data, "source") &&
+        //@ts-ignore
         Object.prototype.hasOwnProperty.call(expression.data, "target") &&
+        //@ts-ignore
         Object.prototype.hasOwnProperty.call(expression.data, "predicate")
       ) {
         //@ts-ignore
         if (expression.data.predicate == "sioc://content_of") {
+          //@ts-ignore
           expressionUrl.value = expression.data.target;
-          getExpression.onResult((result) => {
-            store.commit({
-              type: "addExpressionAndLinkFromLanguageAddress",
-              value: {
-                linkLanguage: language,
-                link: expression,
-                message: result.data.expression,
-              },
-            });
-          });
-          getExpression.onError((error) => {
-            console.log("Got error in getExpression", error);
-            //Show error dialogue
-          });
           getExpression.load();
         }
       }
