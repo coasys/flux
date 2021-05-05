@@ -5,8 +5,13 @@
 <script lang="ts">
 import { useSubscription, useLazyQuery } from "@vue/apollo-composable";
 import { defineComponent, watch, ref } from "vue";
-import { AD4M_SIGNAL, QUERY_EXPRESSION } from "./core/graphql_queries";
+import {
+  AD4M_SIGNAL,
+  QUERY_EXPRESSION,
+  LANGUAGE,
+} from "./core/graphql_queries";
 import { useStore } from "vuex";
+import { ExpressionUIIcons } from "./store";
 
 declare global {
   interface Window {
@@ -20,11 +25,16 @@ export default defineComponent({
     const store = useStore();
     const { result } = useSubscription(AD4M_SIGNAL);
     const expressionUrl = ref("");
+    const languageAddress = ref("");
+    var language = "";
+    var expression = {};
     const getExpression = useLazyQuery(QUERY_EXPRESSION, () => ({
       url: expressionUrl.value,
     }));
-    var language = "";
-    var expression = {};
+    const getLanguage = useLazyQuery(LANGUAGE, () => ({
+      address: languageAddress.value,
+    }));
+
     getExpression.onResult((result) => {
       store.commit({
         type: "addExpressionAndLinkFromLanguageAddress",
@@ -39,6 +49,47 @@ export default defineComponent({
       console.log("Got error in getExpression", error);
       //Show error dialogue
     });
+
+    let resultPromise = new Promise((resolve, reject) => {
+      getLanguage.onResult((result) => {
+        console.log(result);
+        let uiData: ExpressionUIIcons = {
+          languageAddress: languageAddress.value,
+          createIcon: result.data.language.constructorIcon.code,
+          viewIcon: result.data.language.iconFor.code,
+        };
+        store.commit({
+          type: "addExpressionUI",
+          value: uiData,
+        });
+        resolve("");
+      });
+      getLanguage.onError((error) => {
+        reject(error);
+      });
+    });
+
+    function sleep(ms: number) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    store.watch(
+      (state) => state.agentUnlocked,
+      async (newValue) => {
+        if (newValue.value == true) {
+          //TODO: these are the kind of operations that are best done in a loading screen
+          let expressionLangs =
+            store.getters.getAllExpressionLanguagesNotLoaded;
+          for (const [, lang] of expressionLangs.entries()) {
+            console.log("App.vue: Fetching UI lang:", lang);
+            languageAddress.value = lang;
+            getLanguage.load();
+            await sleep(40);
+            await resultPromise;
+          }
+        }
+      }
+    );
 
     watch(result, (data) => {
       let signal = JSON.parse(data.signal.signal);

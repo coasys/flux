@@ -359,7 +359,7 @@ export const CREATE_EXPRESSION = gql`
 `;
 
 export const QUERY_EXPRESSION = gql`
-  query expression($url: string) {
+  query expression($url: String) {
     expression(url: $url) {
       url
       author {
@@ -390,6 +390,25 @@ export const AD4M_SIGNAL = gql`
     signal {
       language
       signal
+    }
+  }
+`;
+
+export const LANGUAGE = gql`
+  query langauge($address: String) {
+    language(address: $address) {
+      name
+      address
+      constructorIcon {
+        code
+      }
+      iconFor {
+        code
+      }
+      settings
+      settingsIcon {
+        code
+      }
     }
   }
 `;

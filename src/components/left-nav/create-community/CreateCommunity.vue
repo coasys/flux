@@ -63,12 +63,7 @@ import {
   PUB_KEY_FOR_LANG,
   PERSPECTIVE,
 } from "@/core/graphql_queries";
-import {
-  useLazyQuery,
-  useMutation,
-  useQuery,
-  useResult,
-} from "@vue/apollo-composable";
+import { useLazyQuery, useMutation } from "@vue/apollo-composable";
 import ad4m from "@perspect3vism/ad4m-executor";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";

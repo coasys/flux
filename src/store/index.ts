@@ -2,11 +2,11 @@ import LanguageRef from "@perspect3vism/ad4m/LanguageRef";
 import { createStore } from "vuex";
 import VuexPersistence from "vuex-persist";
 import type Expression from "@perspect3vism/ad4m/Expression";
+import Address from "@perspect3vism/ad4m/Address";
 
 export interface CommunityState {
   name: string;
-  //TODO: this should not be here
-  channels: [ChannelState];
+  channels: ChannelState[];
   perspective: string;
   linkLanguageAddress: string;
   expressionLanguages: ExpressionReference[];
@@ -25,8 +25,8 @@ export interface ChannelState {
   syncLevel: SyncLevel;
   maxSyncSize: number;
   //Note: this is temporary measure until we can use a perspective to cache links and perspective syncing is implemented
-  currentExpressionLinks: [Expression];
-  currentExpressionMessages: [Expression];
+  currentExpressionLinks: Expression[];
+  currentExpressionMessages: Expression[];
 }
 
 export enum SyncLevel {
@@ -57,6 +57,16 @@ export interface State {
   //This tells us when the application was started; this tells us that between startTime -> now all messages should have been received
   //via signals and thus we do not need to query for this time period
   applicationStartTime: Date;
+  //TODO: this is a horrible type for this use; would be better to have a real map with values pointing to same strings where appropriate
+  //fow now this is fine
+  expressionUI: ExpressionUIIcons[];
+  agentUnlocked: boolean;
+}
+
+export interface ExpressionUIIcons {
+  languageAddress: string;
+  createIcon: string;
+  viewIcon: string;
 }
 
 export enum ExpressionTypes {
@@ -81,6 +91,8 @@ export default createStore({
     localLanguagesPath: "",
     databasePerspective: "",
     applicationStartTime: new Date(),
+    expressionUI: [],
+    agentUnlocked: false,
   },
   plugins: [vuexLocal.plugin],
   mutations: {
@@ -146,6 +158,14 @@ export default createStore({
           }
         });
       });
+    },
+
+    updateAgentLockState(state: State, payload: boolean) {
+      state.agentUnlocked = payload;
+    },
+
+    addExpressionUI(state: State, payload: ExpressionUIIcons) {
+      state.expressionUI.push(payload);
     },
   },
   getters: {
@@ -213,6 +233,29 @@ export default createStore({
         });
       });
       return perspective;
+    },
+
+    getAllExpressionLanguagesNotLoaded(state: State): Address[] {
+      const expressionLangs: Address[] = [];
+      state.communities.forEach((community) => {
+        //@ts-ignore
+        community.value.expressionLanguages.forEach((expLang) => {
+          if (
+            expressionLangs.indexOf(expLang) === -1 &&
+            //@ts-ignore
+            state.expressionUI.find(
+              (val: ExpressionUIIcons) => val.languageAddress === expLang.value
+            ) === undefined
+          ) {
+            expressionLangs.push(expLang);
+          }
+        });
+      });
+      return expressionLangs;
+    },
+
+    getAgentLockStatus(state: State): boolean {
+      return state.agentUnlocked;
     },
   },
 });

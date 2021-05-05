@@ -138,6 +138,7 @@ export default defineComponent({
     }>(AGENT_SERVICE_STATUS);
     onResult((val) => {
       this.isInit = val.data.agent.isInitialized!;
+      this.$store.commit({ type: "updateAgentLockState", value: false });
       if (this.isInit == true) {
         //Get database perspective from store
         let databasePerspective = this.$store.getters.getDatabasePerspective;
@@ -166,8 +167,6 @@ export default defineComponent({
           this.lockAgent().then((lockAgentRes) => {
             console.log("Post lock result", lockAgentRes);
             if (this.lockAgentError == null) {
-              //TODO: then send the profile information to a public Junto DNA
-              this.isInit = true;
               //NOTE: this code is potentially not needed
               this.addPerspective().then((addPerspectiveResult) => {
                 console.log(
@@ -183,6 +182,12 @@ export default defineComponent({
                 } else {
                   console.log("Got error", this.addPerspectiveError);
                 }
+              });
+              //TODO: then send the profile information to a public Junto DNA
+              this.isInit = true;
+              this.$store.commit({
+                type: "updateAgentLockState",
+                value: true,
               });
             } else {
               console.log("Got error", this.lockAgentError);
@@ -205,6 +210,10 @@ export default defineComponent({
           val.data.unlockAgent.isUnlocked
         ) {
           this.isInit = true;
+          this.$store.commit({
+            type: "updateAgentLockState",
+            value: true,
+          });
           this.$router.push("/home");
         } else {
           //TODO: this needs to go to an error handler function
