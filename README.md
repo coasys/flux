@@ -17,6 +17,16 @@ Also ensure that you have the following packages in the same directory that this
 
 (You will need to run `npm install && npm run build` in each of these also)
 
+## Cleaning local state
+
+The following commands will remove all installed ad4m languages (except defaults), holochain DNA's, ad4m did store & vuex store.
+
+```
+npm run clean-state
+```
+
+Once complete inside the browser windows console run localStorage.clear(). Restart application and you will have a fresh state.
+
 ## Holochain DNA's
 
 This project makes use of the following holochain DNA's.
