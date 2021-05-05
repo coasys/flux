@@ -74,6 +74,16 @@ export default defineComponent({
     console.log("Perspective set in composition fn", this.currentPerspective);
     this.scrollToBottom();
   },
+  watch: {
+    getCurrentChannel: {
+      handler: function (newVal) {
+        console.log("Updating current perspective", newVal);
+        if (newVal != undefined) {
+          this.currentPerspective = newVal.perspective;
+        }
+      },
+    },
+  },
   computed: {
     getCurrentChannel(): ChannelState {
       return this.$store.getters.getCurrentChannel;
@@ -128,7 +138,7 @@ export default defineComponent({
       let shortFormExpressionLanguage = this.community.value
         .expressionLanguages[0]!;
       console.log(
-        "Posting shortForm expression to language",
+        new Date().toISOString(), "Posting shortForm expression to language",
         shortFormExpressionLanguage
       );
       let exprUrl = await this.createExpression(
