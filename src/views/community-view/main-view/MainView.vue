@@ -30,7 +30,7 @@ export default {
   },
   computed: {
     getCurrentView() {
-      return this.$store.getters.getCurrentCommunityView;
+      return this.$store.getters.getCurrentCommunityView ?? this.$store.getters.getCommunities[0];
     },
   },
 };

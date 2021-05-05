@@ -2,7 +2,7 @@
   <div class="textFieldFull">
     <h2 class="textFieldFull__title">{{ title }}</h2>
     <div class="textFieldFull__input">
-      <input class="textFieldFull__input--field" :maxlength="maxLength" />
+      <input class="textFieldFull__input--field" :maxlength="maxLength" @input="handleInput" :value="modelValue" />
     </div>
     <p class="textFieldFull__description">
       {{ description }}
@@ -18,7 +18,20 @@ export default defineComponent({
     title: { type: String, required: true },
     description: { type: String, required: true },
     maxLength: Number,
+    modelValue: { type:String, required: true },
   },
+  data() {
+    console.log('hello', this.modelValue);
+    return {
+      content: this.modelValue,
+    }
+  },
+  methods: {
+    handleInput(e: any) {
+      console.log(`changed: ${e.target.value}`);
+      this.$emit('update:modelValue', e.target.value);
+    }
+  }
 });
 </script>
 
