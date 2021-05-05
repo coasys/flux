@@ -296,7 +296,7 @@ export default defineComponent({
       this.groupExpressionLangHash = groupExpressionLang.address!;
       this.expressionLangs.push(groupExpressionLang.address!);
       //Save variables for store
-      const submittedCommunityName = Object.assign("", this.perspectiveName);
+      const submittedCommunityName = `${this.perspectiveName}`;
       const fullExpressionLangs = Object.assign([], this.expressionLangs);
 
       //Publish perspective

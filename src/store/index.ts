@@ -184,7 +184,6 @@ export default createStore({
 
     // Get the view (i.e. feed,  channel) of the community a user is currently on
     getCurrentCommunityView(state: State) {
-      console.log(state.currentCommunityView);
       return state.currentCommunityView;
     },
     // Get current theme
@@ -214,7 +213,6 @@ export default createStore({
           );
         }
       );
-      console.log(cha);
       return cha;
     },
 
