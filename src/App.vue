@@ -23,18 +23,24 @@ export default defineComponent({
   name: "App",
   setup() {
     const store = useStore();
-    const { result } = useSubscription(AD4M_SIGNAL);
     const expressionUrl = ref("");
     const languageAddress = ref("");
     var language = "";
     var expression = {};
+
+    //Ad4m signal watcher
+    const { result } = useSubscription(AD4M_SIGNAL);
+    //Query expression handke 
     const getExpression = useLazyQuery(QUERY_EXPRESSION, () => ({
       url: expressionUrl.value,
     }));
+    //Get language UI handler
     const getLanguage = useLazyQuery(LANGUAGE, () => ({
       address: languageAddress.value,
     }));
 
+    //When we got an expression add it tot he currently defined language
+    //NOTE: this might break when there are lots of messages coming in at once from different languages
     getExpression.onResult((result) => {
       store.commit({
         type: "addExpressionAndLinkFromLanguageAddress",

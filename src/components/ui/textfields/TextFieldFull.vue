@@ -21,14 +21,12 @@ export default defineComponent({
     modelValue: { type:String, required: true },
   },
   data() {
-    console.log('hello', this.modelValue);
     return {
       content: this.modelValue,
     }
   },
   methods: {
     handleInput(e: any) {
-      console.log(`changed: ${e.target.value}`);
       this.$emit('update:modelValue', e.target.value);
     }
   }

@@ -62,12 +62,13 @@ import {
   CREATE_EXPRESSION,
   PUB_KEY_FOR_LANG,
   PERSPECTIVE,
+  LANGUAGE,
 } from "@/core/graphql_queries";
 import { useLazyQuery, useMutation } from "@vue/apollo-composable";
 import ad4m from "@perspect3vism/ad4m-executor";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
-import { FeedType, SyncLevel } from "@/store";
+import { FeedType, SyncLevel, ExpressionUIIcons } from "@/store";
 
 export default defineComponent({
   setup() {
@@ -88,6 +89,7 @@ export default defineComponent({
     });
     const currentQueryLang = ref("");
     const sharedPerspectiveType = ref("holochain");
+    const languageAddress = ref("");
 
     //TODO: setup error handlers for all error variants below
     const {
@@ -160,6 +162,10 @@ export default defineComponent({
       uuid: perspectiveUuid.value,
     }));
 
+    const getLanguage = useLazyQuery(LANGUAGE, () => ({
+      address: languageAddress.value,
+    }));
+
     return {
       createUniqueExprLang,
       createUniqueExprLangError,
@@ -185,6 +191,8 @@ export default defineComponent({
       groupExpressionLangHash,
       currentQueryLang,
       sharedPerspectiveType,
+      getLanguage,
+      languageAddress,
     };
   },
   methods: {
@@ -418,6 +426,35 @@ export default defineComponent({
         "Added link on channel social context with result",
         addChannelTypeLink
       );
+
+      let getLanguageResult = new Promise((resolve, reject) => {
+        this.getLanguage.onResult((result) => {
+          console.log(result);
+          let uiData: ExpressionUIIcons = {
+            languageAddress: this.languageAddress,
+            createIcon: result.data.language.constructorIcon.code,
+            viewIcon: result.data.language.iconFor.code,
+          };
+          this.$store.commit({
+            type: "addExpressionUI",
+            value: uiData,
+          });
+          resolve("");
+        });
+        this.getLanguage.onError((error) => {
+          reject(error);
+        });
+        this.getLanguage.load();
+      });
+
+      //Get and cache the expression UI for each expression language
+      for (const [, lang] of fullExpressionLangs.entries()) {
+        console.log("CreateCommunity.vue: Fetching UI lang:", lang);
+        this.languageAddress = lang;
+        this.getLanguage.load();
+        await this.sleep(40);
+        await getLanguageResult;
+      }
 
       this.showCreateCommunity!();
     },
