@@ -24,7 +24,6 @@ class ShortFormPutAdapter implements PublicSharing {
       data: JSON.stringify(expression.data),
       proof: expression.proof,
     };
-    console.log("Posting", expressionPostData);
     const res = await this.#shortFormDNA.call(
       DNA_NICK,
       "shortform",
@@ -54,7 +53,6 @@ export default class ShortFormAdapter implements ExpressionAdapter {
       hash
     );
     if (expression != null) {
-      console.log("Got expression====", expression);
       const acai_expression: Expression = Object.assign(
         expression.expression_data
       );
