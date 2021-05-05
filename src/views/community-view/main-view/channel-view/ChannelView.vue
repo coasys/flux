@@ -2,7 +2,7 @@
   <div class="channelView">
     <div class="channelView__messages" ref="messagesContainer">
       <direct-message
-        v-for="message in getCurrentChannel.currentExpressionMessages"
+        v-for="message in getCurrentChannel?.currentExpressionMessages"
         :key="message.url"
         :message="JSON.parse(message.data)"
       ></direct-message>
@@ -166,12 +166,13 @@ export default defineComponent({
   flex-direction: column;
   justify-content: space-between;
   position: relative;
-  max-height: 100vh;
+  min-height: 100vh;
 
   &__messages {
     overflow: scroll;
     // 9.5 = 7.5rem (height of MainVewTopBar) + 2rem
     padding: 9.5rem 2rem 7.5rem 2rem;
+    flex: 1;
   }
 }
 </style>
