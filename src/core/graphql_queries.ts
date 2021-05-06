@@ -316,9 +316,52 @@ export const ALL_LINKS_QUERY = gql`
   }
 `;
 
-export const CHILD_LINKS_QUERY = gql`
+export const SOURCE_LINK_QUERY = gql`
   query links($perspectiveUUID: String, $source: String) {
     links(perspectiveUUID: $perspectiveUUID, query: { source: $source }) {
+      author {
+        did
+      }
+      timestamp
+      data {
+        source
+        predicate
+        target
+      }
+    }
+  }
+`;
+
+export const SOURCE_PREDICATE_LINK_QUERY = gql`
+  query links($perspectiveUUID: String, $source: String, $predicate: String) {
+    links(
+      perspectiveUUID: $perspectiveUUID
+      query: { source: $source, predicate: $predicate }
+    ) {
+      author {
+        did
+      }
+      timestamp
+      data {
+        source
+        predicate
+        target
+      }
+    }
+  }
+`;
+
+export const SOURCE_LINK_QUERY_TIME_PAGINATED = gql`
+  query links(
+    $perspectiveUUID: String
+    $source: String
+    $from: Date
+    $to: Date
+  ) {
+    links(
+      perspectiveUUID: $perspectiveUUID
+      query: { source: $source, from: $from, to: $to }
+    ) {
       author {
         did
       }
