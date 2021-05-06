@@ -391,7 +391,7 @@ export default defineComponent({
       this.perspectiveUuid = createSourcePerspective.uuid!;
       //Link from source social context to new sharedperspective
       let addLinkToChannel = await this.createLink({
-        source: createExp,
+        source: `${publish.linkLanguages![0]!.address!}://self`,
         target: perspective.sharedURL!,
         predicate: "sioc://has_space",
       });
