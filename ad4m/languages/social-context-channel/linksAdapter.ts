@@ -1,5 +1,8 @@
 import type Expression from "@perspect3vism/ad4m/Expression";
-import type { LinksAdapter, NewLinksObserver } from "@perspect3vism/ad4m/Language";
+import type {
+  LinksAdapter,
+  NewLinksObserver,
+} from "@perspect3vism/ad4m/Language";
 import type Agent from "@perspect3vism/ad4m/Agent";
 import type Link from "@perspect3vism/ad4m/Links";
 import type LanguageContext from "@perspect3vism/ad4m-language-context/LanguageContext";
@@ -15,11 +18,11 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     this.#socialContextDna = context.Holochain as HolochainLanguageDelegate;
   }
 
-  writable() {
+  writable(): boolean {
     return true;
   }
 
-  public() {
+  public(): boolean {
     return false;
   }
 
@@ -32,7 +35,7 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     );
   }
 
-  async addLink(link: Expression) {
+  async addLink(link: Expression): Promise<void> {
     const data = prepareExpressionLink(link);
     //console.debug("Holochain Social Context: ADDING LINK!: ", data);
     //If target is an agent pub key, then we are just trying mark agent as active
@@ -81,7 +84,7 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
   async updateLink(
     oldLinkExpression: Expression,
     newLinkExpression: Expression
-  ) {
+  ): Promise<void> {
     const source_link = prepareExpressionLink(oldLinkExpression);
     const target_link = prepareExpressionLink(newLinkExpression);
     await this.#socialContextDna.call(
@@ -92,7 +95,7 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     );
   }
 
-  async removeLink(link: Expression) {
+  async removeLink(link: Expression): Promise<void> {
     const data = prepareExpressionLink(link);
     await this.#socialContextDna.call(
       DNA_NICK,
@@ -102,22 +105,17 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     );
   }
 
-  async getLinks(
-    query: LinkQuery,
-    from?: Date,
-    until?: Date
-  ): Promise<Expression[]> {
+  async getLinks(query: LinkQuery): Promise<Expression[]> {
     query = new LinkQuery(query);
     const link_query = Object.assign(query);
     if (!link_query.source) {
       link_query.source = "root";
     }
-    //console.debug("Holochain Social Context: Getting Links With: ", link_query);
-    if (from) {
-      link_query.from = from;
+    if (query.from) {
+      link_query.from = query.from.toISOString();
     }
-    if (until) {
-      link_query.until = until;
+    if (query.to) {
+      link_query.until = query.to.toISOString();
     }
     const links = await this.#socialContextDna.call(
       DNA_NICK,
@@ -130,11 +128,11 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     return links.filter((link) => query.isMatch(link.data as Link));
   }
 
-  addCallback(callback: NewLinksObserver) {
+  addCallback(callback: NewLinksObserver): number {
     return 0;
   }
 
-  handleHolochainSignal(signal: any) {
+  handleHolochainSignal(signal: any): void {
     //@ts-ignore
     this.ad4mSignal(signal);
   }
