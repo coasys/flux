@@ -138,7 +138,8 @@ export default defineComponent({
       let shortFormExpressionLanguage = this.community.value
         .expressionLanguages[0]!;
       console.log(
-        new Date().toISOString(), "Posting shortForm expression to language",
+        new Date().toISOString(),
+        "Posting shortForm expression to language",
         shortFormExpressionLanguage
       );
       let exprUrl = await this.createExpression(

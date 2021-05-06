@@ -10,25 +10,36 @@
   <create-community
     v-if="activateCreateCommunity"
     :showCreateCommunity="showCreateCommunity"
+    :showJoinCommunity="showJoinCommunity"
   ></create-community>
+  <join-community
+    v-if="activateJoinCommunity"
+    :showJoinCommunity="showJoinCommunity"
+  ></join-community>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import CreateCommunity from "./CreateCommunity.vue";
+import JoinCommunity from "./JoinCommunity.vue";
 export default defineComponent({
   data() {
     return {
       activateCreateCommunity: false,
+      activateJoinCommunity: false,
     };
   },
   components: {
     CreateCommunity,
+    JoinCommunity,
   },
   methods: {
     showCreateCommunity() {
       console.log("Closing create community view");
       this.activateCreateCommunity = !this.activateCreateCommunity;
+    },
+    showJoinCommunity() {
+      this.activateJoinCommunity = !this.activateJoinCommunity;
     },
   },
 });

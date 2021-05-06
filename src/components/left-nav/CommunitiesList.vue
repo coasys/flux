@@ -12,7 +12,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import CommunityAvatar from "./../ui/avatar/CommunityAvatar.vue";
-import CreateCommunityIcon from './create-community/CreateCommunityIcon.vue';
+import CreateCommunityIcon from './community-operation/CreateCommunityIcon.vue';
 
 export default defineComponent({
   computed: {

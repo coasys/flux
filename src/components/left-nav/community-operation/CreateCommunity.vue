@@ -44,6 +44,10 @@
         <div class="createCommunity__dialog--bottom">
           <create-button @click="createCommunity"></create-button>
         </div>
+        <spacer></spacer>
+        <div class="createCommunity__dialog--bottom">
+          <join-button @click="openJoinView"></join-button>
+        </div>
       </div>
     </div>
   </teleport>
@@ -53,6 +57,7 @@
 import { defineComponent, ref } from "vue";
 import TextFieldFull from "../../ui/textfields/TextFieldFull.vue";
 import CreateButton from "../../ui/buttons/CreateButton.vue";
+import JoinButton from "../../ui/buttons/JoinButton.vue";
 import Spacer from "../../ui/spacer/Spacer.vue";
 import {
   CREATE_UNIQUE_EXPRESSION_LANGUAGE,
@@ -458,14 +463,21 @@ export default defineComponent({
 
       this.showCreateCommunity!();
     },
+
+    openJoinView() {
+      this.showCreateCommunity!();
+      this.showJoinCommunity!();
+    },
   },
   components: {
     TextFieldFull,
     CreateButton,
     Spacer,
+    JoinButton,
   },
   props: {
     showCreateCommunity: Function,
+    showJoinCommunity: Function,
   },
 });
 </script>
