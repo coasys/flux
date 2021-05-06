@@ -30,7 +30,7 @@ export default defineComponent({
 
     //Ad4m signal watcher
     const { result } = useSubscription(AD4M_SIGNAL);
-    //Query expression handke 
+    //Query expression handke
     const getExpression = useLazyQuery(QUERY_EXPRESSION, () => ({
       url: expressionUrl.value,
     }));
@@ -42,6 +42,11 @@ export default defineComponent({
     //When we got an expression add it tot he currently defined language
     //NOTE: this might break when there are lots of messages coming in at once from different languages
     getExpression.onResult((result) => {
+      console.log(
+        new Date().toISOString(),
+        "Got expression result back",
+        result
+      );
       store.commit({
         type: "addExpressionAndLinkFromLanguageAddress",
         value: {
@@ -84,6 +89,10 @@ export default defineComponent({
       async (newValue) => {
         if (newValue.value == true) {
           //TODO: these are the kind of operations that are best done in a loading screen
+          store.commit({
+            type: "updateApplicationStartTime",
+            value: new Date(),
+          });
           let expressionLangs =
             store.getters.getAllExpressionLanguagesNotLoaded;
           for (const [, lang] of expressionLangs.entries()) {
@@ -101,7 +110,11 @@ export default defineComponent({
       let signal = JSON.parse(data.signal.signal);
       language = data.signal.language;
       expression = signal.data.payload;
-      console.log("SIGNAL RECEIVED IN UI: Coming from language", language);
+      console.log(
+        new Date().toISOString(),
+        "SIGNAL RECEIVED IN UI: Coming from language",
+        language
+      );
       if (
         //@ts-ignore
         Object.prototype.hasOwnProperty.call(expression.data, "source") &&

@@ -111,6 +111,7 @@ export default createStore({
 
     // navigate to a different view within a community (i.e. feeds, channels, etc)
     changeCommunityView(state: State, payload) {
+      console.log("Changing community view", payload);
       state.currentCommunityView = payload.value;
     },
 
@@ -152,7 +153,10 @@ export default createStore({
         //@ts-ignore
         community.value.channels.forEach((channel) => {
           if (channel.linkLanguageAddress == payload.value.linkLanguage) {
-            console.log("Adding to link and exp to channel!");
+            console.log(
+              new Date().toISOString(),
+              "Adding to link and exp to channel!"
+            );
             channel.currentExpressionLinks.push(payload.value.link);
             channel.currentExpressionMessages.push(payload.value.message);
           }
@@ -166,6 +170,10 @@ export default createStore({
 
     addExpressionUI(state: State, payload: ExpressionUIIcons) {
       state.expressionUI.push(payload);
+    },
+
+    updateApplicationStartTime(state: State, payload: Date) {
+      state.applicationStartTime = payload;
     },
   },
   getters: {
