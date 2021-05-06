@@ -1,7 +1,10 @@
 import type Address from "@perspect3vism/ad4m/Address";
 import Agent from "@perspect3vism/ad4m/Agent";
 import type Expression from "@perspect3vism/ad4m/Expression";
-import type { ExpressionAdapter, PublicSharing } from "@perspect3vism/ad4m/Language";
+import type {
+  ExpressionAdapter,
+  PublicSharing,
+} from "@perspect3vism/ad4m/Language";
 import type LanguageContext from "@perspect3vism/ad4m-language-context/LanguageContext";
 import type { default as HolochainLanguageDelegate } from "@perspect3vism/ad4m-language-context/Holochain/HolochainLanguageDelegate";
 import type AgentService from "@perspect3vism/ad4m/AgentService";
@@ -17,7 +20,13 @@ class ShortFormPutAdapter implements PublicSharing {
   }
 
   async createPublic(shortForm: object): Promise<Address> {
-    const expression = this.#agent.createSignedExpression(shortForm);
+    const orderedShortFormData = Object.keys(shortForm)
+      .sort()
+      .reduce((obj, key) => {
+        obj[key] = shortForm[key];
+        return obj;
+      }, {});
+    const expression = this.#agent.createSignedExpression(orderedShortFormData);
     const expressionPostData = {
       author: expression.author,
       timestamp: expression.timestamp,
