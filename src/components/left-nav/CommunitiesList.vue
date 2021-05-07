@@ -17,7 +17,9 @@ import CreateCommunityIcon from './community-operation/CreateCommunityIcon.vue';
 export default defineComponent({
   computed: {
     getCommunities() {
-      return this.$store.getters.getCommunities;
+      const communities = this.$store.getters.getCommunities;
+
+      return communities;
     },
   },
 
