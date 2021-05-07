@@ -3,7 +3,11 @@
 </template>
 
 <script lang="ts">
-import { useSubscription, useLazyQuery, useMutation } from "@vue/apollo-composable";
+import {
+  useSubscription,
+  useLazyQuery,
+  useMutation,
+} from "@vue/apollo-composable";
 import { defineComponent, watch, ref } from "vue";
 import {
   AD4M_SIGNAL,
@@ -12,6 +16,7 @@ import {
   ADD_LINK,
   PUB_KEY_FOR_LANG,
 } from "./core/graphql_queries";
+import { agentRefreshDurationMs } from "./core/juntoTypes";
 import { useStore } from "vuex";
 import { ExpressionUIIcons } from "./store";
 import ad4m from "@perspect3vism/ad4m-executor";
@@ -106,11 +111,12 @@ export default defineComponent({
       addLink: ad4m.LinkExpression;
     }>(ADD_LINK, () => {
       return {
-      variables: {
-        perspectiveUUID: perspectiveUuid.value,
-        link: JSON.stringify(linkData.value),
-      },
-    }});
+        variables: {
+          perspectiveUUID: perspectiveUuid.value,
+          link: JSON.stringify(linkData.value),
+        },
+      };
+    });
 
     function createLink(link: ad4m.Link): Promise<ad4m.LinkExpression> {
       linkData.value = link;
@@ -134,28 +140,38 @@ export default defineComponent({
       });
     }
 
-    async function setActiveAgents() {
-      const communities = store.getters.getCommunities;
+    async function setActiveAgents(skip: boolean) {
+      noDelaySetInterval(async () => {
+        console.log("Running active agent check with skip", skip);
+        if (skip == false || skip == undefined) {
+          const communities = store.getters.getCommunities;
 
-      for (const community of communities) {
-        const channels = community.value.channels;
-        
-        for (const channel of channels) {
-          perspectiveUuid.value = channel.perspective;
+          for (const community of communities) {
+            const channels = community.value.channels;
 
-          let channelScPubKey = await getPubKeyForLang(channel.linkLanguageAddress);
+            for (const channel of channels) {
+              perspectiveUuid.value = channel.perspective;
 
-          noDelaySetInterval(async () => {
-            let addActiveAgentLink = await createLink({
-              source: "active_agent",
-              target: channelScPubKey,
-              predicate: "*",
-            });
-
-            console.log("Created active agent link with result", addActiveAgentLink);
-          }, 600000);
+              let channelScPubKey = await getPubKeyForLang(
+                channel.linkLanguageAddress
+              );
+              let addActiveAgentLink = await createLink({
+                source: "active_agent",
+                target: channelScPubKey,
+                predicate: "*",
+              });
+              console.log(
+                "Created active agent link with result",
+                addActiveAgentLink
+              );
+            }
+          }
+        } else {
+          skip = false;
         }
-      }
+        //TODO; this number actually needs to be dynamic for first call; i.e difference between last start time and current time if < 10 secs
+        //once it has been run once at this delay then it needs to be increased to 10 seconds
+      }, agentRefreshDurationMs);
     }
 
     store.watch(
@@ -163,15 +179,23 @@ export default defineComponent({
       async (newValue) => {
         if (newValue.value == true) {
           //TODO: these are the kind of operations that are best done in a loading screen
+          let lastOpen = store.getters.getApplicationStartTime.value;
+          let now = new Date();
           store.commit({
             type: "updateApplicationStartTime",
-            value: new Date(),
+            value: now,
           });
-          
+
           let expressionLangs =
             store.getters.getAllExpressionLanguagesNotLoaded;
 
-          await setActiveAgents();
+          let difOld = new Date(lastOpen);
+          let dif = now.getTime() - difOld.getTime();
+          if (dif > agentRefreshDurationMs) {
+            await setActiveAgents(false);
+          } else {
+            await setActiveAgents(true);
+          }
 
           for (const [, lang] of expressionLangs.entries()) {
             console.log("App.vue: Fetching UI lang:", lang);
