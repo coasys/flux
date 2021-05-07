@@ -95,6 +95,7 @@ export default defineComponent({
     const currentQueryLang = ref("");
     const sharedPerspectiveType = ref("holochain");
     const languageAddress = ref("");
+    const activeAgentRef = ref();
 
     //TODO: setup error handlers for all error variants below
     const {
@@ -198,6 +199,7 @@ export default defineComponent({
       sharedPerspectiveType,
       getLanguage,
       languageAddress,
+      activeAgentRef,
     };
   },
   methods: {
@@ -281,6 +283,12 @@ export default defineComponent({
 
     sleep(ms: number) {
       return new Promise((resolve) => setTimeout(resolve, ms));
+    },
+
+    noDelaySetInterval(func: () => void, interval: number) {
+      func();
+
+      return setInterval(func, interval);
     },
 
     async createCommunity() {
@@ -414,12 +422,15 @@ export default defineComponent({
         shareChannelPerspective.linkLanguages![0]!.address!
       );
       console.log("Got pub key for social context channel", channelScPubKey);
-      let addActiveAgentLink = await this.createLink({
-        source: "active_agent",
-        target: channelScPubKey,
-        predicate: "*",
-      });
-      console.log("Created active agent link with result", addActiveAgentLink);
+      console.log(shareChannelPerspective.linkLanguages);
+      this.activeAgentRef = this.noDelaySetInterval(async () => {
+        let addActiveAgentLink = await this.createLink({
+          source: "active_agent",
+          target: channelScPubKey,
+          predicate: "*",
+        });
+        console.log("Created active agent link with result", addActiveAgentLink);
+      }, 600000);
 
       //Add link on channel social context declaring type
       let addChannelTypeLink = await this.createLink({
@@ -434,11 +445,11 @@ export default defineComponent({
 
       let getLanguageResult = new Promise((resolve, reject) => {
         this.getLanguage.onResult((result) => {
-          console.log(result);
+          console.log('hello', result);
           let uiData: ExpressionUIIcons = {
             languageAddress: this.languageAddress,
-            createIcon: result.data.language.constructorIcon.code,
-            viewIcon: result.data.language.iconFor.code,
+            createIcon: result.data.language?.constructorIcon.code,
+            viewIcon: result.data.language?.iconFor.code,
           };
           this.$store.commit({
             type: "addExpressionUI",
