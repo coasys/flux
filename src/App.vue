@@ -3,15 +3,18 @@
 </template>
 
 <script lang="ts">
-import { useSubscription, useLazyQuery } from "@vue/apollo-composable";
+import { useSubscription, useLazyQuery, useMutation } from "@vue/apollo-composable";
 import { defineComponent, watch, ref } from "vue";
 import {
   AD4M_SIGNAL,
   QUERY_EXPRESSION,
   LANGUAGE,
+  ADD_LINK,
+  PUB_KEY_FOR_LANG,
 } from "./core/graphql_queries";
 import { useStore } from "vuex";
 import { ExpressionUIIcons } from "./store";
+import ad4m from "@perspect3vism/ad4m-executor";
 
 declare global {
   interface Window {
@@ -25,6 +28,9 @@ export default defineComponent({
     const store = useStore();
     const expressionUrl = ref("");
     const languageAddress = ref("");
+    const currentQueryLang = ref("");
+    const perspectiveUuid = ref("");
+    const linkData = ref({});
     var language = "";
     var expression = {};
 
@@ -84,6 +90,74 @@ export default defineComponent({
       return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
+    function noDelaySetInterval(func: () => void, interval: number) {
+      func();
+
+      return setInterval(func, interval);
+    }
+
+    const pubKeyForLang = useLazyQuery<{
+      pubKeyForLanguage: string;
+    }>(PUB_KEY_FOR_LANG, () => {
+      return { lang: currentQueryLang.value };
+    });
+
+    const { mutate: addLink, error: addLinkError } = useMutation<{
+      addLink: ad4m.LinkExpression;
+    }>(ADD_LINK, () => {
+      return {
+      variables: {
+        perspectiveUUID: perspectiveUuid.value,
+        link: JSON.stringify(linkData.value),
+      },
+    }});
+
+    function createLink(link: ad4m.Link): Promise<ad4m.LinkExpression> {
+      linkData.value = link;
+      return new Promise((resolve, reject) => {
+        addLink().then((addLinkResp) => {
+          resolve(addLinkResp.data!.addLink);
+        });
+      });
+    }
+
+    function getPubKeyForLang(lang: string): Promise<string> {
+      currentQueryLang.value = lang;
+      return new Promise((resolve, reject) => {
+        pubKeyForLang.onResult((result) => {
+          resolve(result.data.pubKeyForLanguage);
+        });
+        pubKeyForLang.onError((error) => {
+          reject(error);
+        });
+        pubKeyForLang.load();
+      });
+    }
+
+    async function setActiveAgents() {
+      const communities = store.getters.getCommunities;
+
+      for (const community of communities) {
+        const channels = community.value.channels;
+        
+        for (const channel of channels) {
+          perspectiveUuid.value = channel.perspective;
+
+          let channelScPubKey = await getPubKeyForLang(channel.linkLanguageAddress);
+
+          noDelaySetInterval(async () => {
+            let addActiveAgentLink = await createLink({
+              source: "active_agent",
+              target: channelScPubKey,
+              predicate: "*",
+            });
+
+            console.log("Created active agent link with result", addActiveAgentLink);
+          }, 600000);
+        }
+      }
+    }
+
     store.watch(
       (state) => state.agentUnlocked,
       async (newValue) => {
@@ -93,8 +167,12 @@ export default defineComponent({
             type: "updateApplicationStartTime",
             value: new Date(),
           });
+          
           let expressionLangs =
             store.getters.getAllExpressionLanguagesNotLoaded;
+
+          await setActiveAgents();
+
           for (const [, lang] of expressionLangs.entries()) {
             console.log("App.vue: Fetching UI lang:", lang);
             languageAddress.value = lang;
