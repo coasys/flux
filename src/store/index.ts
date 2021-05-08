@@ -263,5 +263,9 @@ export default createStore({
     getAgentLockStatus(state: State): boolean {
       return state.agentUnlocked;
     },
+
+    getApplicationStartTime(state: State): Date {
+      return state.applicationStartTime;
+    },
   },
 });

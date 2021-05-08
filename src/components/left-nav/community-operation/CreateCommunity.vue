@@ -445,7 +445,6 @@ export default defineComponent({
 
       let getLanguageResult = new Promise((resolve, reject) => {
         this.getLanguage.onResult((result) => {
-          console.log('hello', result);
           let uiData: ExpressionUIIcons = {
             languageAddress: this.languageAddress,
             createIcon: result.data.language?.constructorIcon.code,

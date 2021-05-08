@@ -19,7 +19,7 @@
         </div>
 
         <text-field-full
-          maxLength="50"
+          maxLength="500"
           title="Link"
           description="Joining Link Here"
           v-model="joiningLink"
@@ -38,11 +38,185 @@ import { defineComponent, ref } from "vue";
 import TextFieldFull from "../../ui/textfields/TextFieldFull.vue";
 import JoinButton from "../../ui/buttons/JoinButton.vue";
 import Spacer from "../../ui/spacer/Spacer.vue";
+import { useLazyQuery, useMutation } from "@vue/apollo-composable";
+import {
+  QUERY_EXPRESSION,
+  INSTALL_SHARED_PERSPECTIVE,
+  SOURCE_PREDICATE_LINK_QUERY,
+} from "@/core/graphql_queries";
+import SharedPerspective from "@perspect3vism/ad4m/SharedPerspective";
+import { FeedType, SyncLevel, ChannelState } from "@/store";
 
 export default defineComponent({
   setup() {
     const joiningLink = ref("");
-    return { joiningLink };
+    const perspectiveUrl = ref("");
+    const sharedPerspective = ref({});
+    const sourceLinkLanguage = ref("");
+    const installedSourcePerspectiveUUID = ref("");
+
+    //Query expression handke
+    const getExpression = useLazyQuery(QUERY_EXPRESSION, () => ({
+      url: joiningLink.value,
+    }));
+
+    const getChatChannelLinks = useLazyQuery(
+      SOURCE_PREDICATE_LINK_QUERY,
+      () => ({
+        perspectiveUUID: installedSourcePerspectiveUUID.value,
+        //@ts-ignore
+        source: `${sourceLinkLanguage.value}://self`,
+        predicate: "sioc://has_space",
+      })
+    );
+
+    const installSharedPerspective = useMutation(
+      INSTALL_SHARED_PERSPECTIVE,
+      () => ({
+        variables: {
+          sharedPerspectiveUrl: perspectiveUrl.value,
+          sharedPerspective: sharedPerspective.value,
+        },
+      })
+    );
+
+    return {
+      getExpression,
+      joiningLink,
+      perspectiveUrl,
+      sharedPerspective,
+      installSharedPerspective,
+      getChatChannelLinks,
+      installedSourcePerspectiveUUID,
+      sourceLinkLanguage,
+    };
+  },
+  methods: {
+    getExpressionMethod() {
+      return new Promise((resolve, reject) => {
+        this.getExpression.onResult((result) => {
+          resolve(result.data);
+        });
+        this.getExpression.onError((error) => {
+          console.log("Got error", error);
+          reject(error);
+        });
+        this.getExpression.load();
+      });
+    },
+    getChannelLinks() {
+      return new Promise((resolve, reject) => {
+        this.getChatChannelLinks.onResult((result) => {
+          resolve(result.data.links);
+        });
+        this.getChatChannelLinks.onError((error) => {
+          console.log("Got error getting channel links", error);
+          reject(error);
+        });
+        this.getChatChannelLinks.load();
+      });
+    },
+    installSharedPerspectiveMethod(
+      url: string,
+      perspective: SharedPerspective
+    ) {
+      this.perspectiveUrl = url;
+      this.sharedPerspective = perspective;
+      return new Promise((resolve, reject) => {
+        this.installSharedPerspective.onError((error) => {
+          console.log("Install sharedPerspective got error", error);
+          reject(error);
+        });
+        this.installSharedPerspective.mutate().then((result) => {
+          resolve(result);
+        });
+      });
+    },
+
+    async joinCommunity() {
+      //TODO: fix all types here and remove ts-ignores
+      console.log(this.joiningLink);
+      let sharedPerspectiveExp = await this.getExpressionMethod();
+      let sharedPerspective: SharedPerspective = JSON.parse(
+        //@ts-ignore
+        sharedPerspectiveExp.expression.data
+      );
+      //TODO: check that the perspective is not already installed
+      let installedPerspective = await this.installSharedPerspectiveMethod(
+        this.joiningLink,
+        sharedPerspective
+      );
+      //@ts-ignore
+      installedPerspective = installedPerspective.data.installSharedPerspective;
+      console.log("Installed perspective raw data", installedPerspective);
+      //@ts-ignore
+      this.installedSourcePerspectiveUUID = installedPerspective.uuid;
+      //@ts-ignore
+      this.sourceLinkLanguage = installedPerspective.sharedPerspective.linkLanguages![0]!.address!;
+
+      let links = await this.getChannelLinks();
+      console.log("Got channel links", links);
+      let channels: ChannelState[] = [];
+      let now = new Date();
+
+      //@ts-ignore
+      links.forEach(async (element) => {
+        this.joiningLink = element.data.target;
+        console.log("Getting channel with address", this.joiningLink);
+
+        let channelSharedPerspExp = await this.getExpressionMethod();
+        console.log("Got channel shared exp", channelSharedPerspExp);
+        let channelSharedPerspective: SharedPerspective = JSON.parse(
+          //@ts-ignore
+          channelSharedPerspExp.expression.data
+        );
+        let installedChannelPerspective = await this.installSharedPerspectiveMethod(
+          this.joiningLink,
+          channelSharedPerspective
+        );
+        console.log("Installed with result", installedChannelPerspective);
+        installedChannelPerspective =
+          //@ts-ignore
+          installedChannelPerspective.data.installSharedPerspective;
+        console.log(
+          "Installed channel shared perspective with result",
+          installedChannelPerspective
+        );
+        channels.push({
+          //@ts-ignore
+          name: installedChannelPerspective.name,
+          //@ts-ignore
+          perspective: installedChannelPerspective.uuid,
+          type: FeedType.Dm,
+          lastSeenMessageTimestamp: now,
+          firstSeenMessageTimestamp: now,
+          createdAt: now,
+          //@ts-ignore
+          linkLanguageAddress: installedChannelPerspective.sharedPerspective
+            .linkLanguages![0]!.address!,
+          syncLevel: SyncLevel.Full,
+          maxSyncSize: -1,
+          currentExpressionLinks: [],
+          currentExpressionMessages: [],
+        });
+      });
+
+      this.$store.commit({
+        type: "addCommunity",
+        value: {
+          //@ts-ignore
+          name: installedPerspective.name,
+          linkLanguageAddress: this.sourceLinkLanguage,
+          channels: channels,
+          perspective: this.installedSourcePerspectiveUUID,
+          expressionLanguages:
+            //@ts-ignore
+            installedPerspective.sharedPerspective.requiredExpressionLanguages,
+        },
+      });
+
+      this.showJoinCommunity!();
+    },
   },
   props: {
     showJoinCommunity: Function,

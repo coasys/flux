@@ -455,3 +455,32 @@ export const LANGUAGE = gql`
     }
   }
 `;
+
+export const INSTALL_SHARED_PERSPECTIVE = gql`
+  mutation installSharedPerspective(
+    $sharedPerspectiveUrl: String
+    $sharedPerspective: SharedPerspectiveInput
+  ) {
+    installSharedPerspective(
+      input: {
+        sharedPerspectiveUrl: $sharedPerspectiveUrl
+        sharedPerspective: $sharedPerspective
+      }
+    ) {
+      name
+      uuid
+      sharedPerspective {
+        name
+        description
+        type
+        linkLanguages {
+          address
+          name
+        }
+        allowedExpressionLanguages
+        requiredExpressionLanguages
+      }
+      sharedURL
+    }
+  }
+`;
