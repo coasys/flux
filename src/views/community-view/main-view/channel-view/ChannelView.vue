@@ -1,13 +1,29 @@
 <template>
   <div class="channelView">
-    <div class="channelView__messages" ref="messagesContainer">
-      <direct-message
-        v-for="message in getCurrentChannel?.currentExpressionMessages"
-        :key="message.url"
-        :message="JSON.parse(message.data)"
-      ></direct-message>
-    </div>
-
+    <dynamic-scroller
+      :items="messageList"
+      :min-item-size="100"
+      class="channelView__messages"
+      ref="messagesContainer"
+    >
+      <template v-slot="{ item, index, active }">
+          <dynamic-scroller-item
+            :item="item"
+            :active="active"
+            :data-index="index"
+          >
+            <message-date
+              v-if="item.type === 'date'"
+              :date="item.date"
+            ></message-date>
+            <direct-message
+              v-if="item.type === 'message'"
+              :message="item.message"
+              :showAvatar="showAvatar(index)"
+            ></direct-message>
+          </dynamic-scroller-item>
+      </template>
+    </dynamic-scroller>
     <create-direct-message
       :createMessage="createDirectMessage"
     ></create-direct-message>
@@ -16,6 +32,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
+import { DynamicScroller, DynamicScrollerItem } from 'vue-virtual-scroller';
 import DirectMessage from "../../../../components/direct-message/display/DirectMessage.vue";
 import CreateDirectMessage from "../../../../components/direct-message/create/CreateDirectMessage.vue";
 import { JuntoShortForm } from "@/core/juntoTypes";
@@ -27,6 +44,16 @@ import {
 import ad4m from "@perspect3vism/ad4m-executor";
 import { useLazyQuery, useMutation } from "@vue/apollo-composable";
 import { ChannelState } from "@/store/index";
+import Expression from "@perspect3vism/ad4m/Expression";
+import { differenceInMinutes, format, parseISO } from "date-fns";
+import MessageDate from './MessageDateHeader.vue';
+
+interface ChatItem {
+  id: string;
+  type: 'date' | 'message';
+  date?: Date | string | number;
+  message?: Expression;
+}
 
 export default defineComponent({
   props: ["community"],
@@ -70,7 +97,7 @@ export default defineComponent({
   },
   mounted() {
     console.log("Current mounted channel", this.getCurrentChannel);
-    this.currentPerspective = this.getCurrentChannel.perspective;
+    this.currentPerspective = this.getCurrentChannel?.perspective;
     console.log("Perspective set in composition fn", this.currentPerspective);
     this.scrollToBottom();
   },
@@ -87,6 +114,40 @@ export default defineComponent({
   computed: {
     getCurrentChannel(): ChannelState {
       return this.$store.getters.getCurrentChannel;
+    },
+    messageList(): Array<ChatItem> {
+      const obj: { [x: string]: Array<Expression> } = {};
+      const list: Array<ChatItem> = [];
+      let i = 0;
+
+      this.getCurrentChannel?.currentExpressionMessages.forEach((e) => {
+        const formattedDate = format(parseISO(e.timestamp), 'MM/dd/yyyy');
+        if (obj[formattedDate] !== undefined) {
+          obj[formattedDate].push(e);
+        } else {
+          obj[formattedDate] = [e];
+        }
+      });
+
+      Object.entries(obj).forEach(([key, value]) => {
+        list.push({
+          id: i.toString(),
+          type: 'date',
+          date: key,
+        });
+        i += 1;
+
+        value.forEach((v) => {
+          list.push({
+            id: i.toString(),
+            type: 'message',
+            message: v,
+          });
+          i += 1;
+        });
+      });
+      console.log('list', list);
+      return list;
     },
   },
   methods: {
@@ -161,11 +222,39 @@ export default defineComponent({
       //@ts-ignore
       container.scrollTop = container.scrollHeight;
     },
+
+    showAvatar(index: number): boolean {
+      const previousMessage = this.messageList[index - 1];
+      const message = this.messageList[index];
+
+      if (index <= 0 || previousMessage === undefined || message === undefined) {
+        return true;
+      }
+
+      if (previousMessage.type === 'date') {
+        return true;
+      }
+
+      if (previousMessage.message?.author.name !== message.message?.author.name) {
+        return true;
+      }
+
+      return (
+        previousMessage.message?.author.name === message.message?.author.name
+        && differenceInMinutes(
+          parseISO(message.message!.timestamp!)?? Date.now(),
+          parseISO(previousMessage.message!.timestamp!) ?? Date.now(),
+        ) >= 2
+      );
+    },
   },
 
   components: {
     DirectMessage,
     CreateDirectMessage,
+    DynamicScroller,
+    DynamicScrollerItem,
+    MessageDate,
   },
 });
 </script>
@@ -180,10 +269,13 @@ export default defineComponent({
   min-height: 100vh;
 
   &__messages {
-    overflow: scroll;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    // overflow: scroll;
+    width: 100%;
     // 9.5 = 7.5rem (height of MainVewTopBar) + 2rem
     padding: 9.5rem 2rem 7.5rem 2rem;
-    flex: 1;
   }
 }
 </style>
