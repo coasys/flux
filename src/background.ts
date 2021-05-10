@@ -53,7 +53,6 @@ app.on("ready", async () => {
   ad4m
     .init(app.getPath("appData"), execPath, "./ad4m/languages", [
       "languages",
-      "encrypted-languages",
       "agent-profiles",
       "shared-perspectives",
     ])
