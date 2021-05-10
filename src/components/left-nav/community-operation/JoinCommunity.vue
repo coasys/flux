@@ -43,9 +43,12 @@ import {
   QUERY_EXPRESSION,
   INSTALL_SHARED_PERSPECTIVE,
   SOURCE_PREDICATE_LINK_QUERY,
+  ADD_LINK,
+  PUB_KEY_FOR_LANG,
 } from "@/core/graphql_queries";
 import SharedPerspective from "@perspect3vism/ad4m/SharedPerspective";
 import { FeedType, SyncLevel, ChannelState } from "@/store";
+import ad4m from "@perspect3vism/ad4m-executor";
 
 export default defineComponent({
   setup() {
@@ -54,11 +57,18 @@ export default defineComponent({
     const sharedPerspective = ref({});
     const sourceLinkLanguage = ref("");
     const installedSourcePerspectiveUUID = ref("");
+    const perspectiveUuid = ref("");
+    const linkData = ref({});
+    const currentQueryLang = ref("");
 
     //Query expression handke
-    const getExpression = useLazyQuery(QUERY_EXPRESSION, () => ({
-      url: joiningLink.value,
-    }));
+    const getExpression = useLazyQuery(
+      QUERY_EXPRESSION,
+      () => ({
+        url: joiningLink.value,
+      }),
+      { fetchPolicy: "network-only" }
+    );
 
     const getChatChannelLinks = useLazyQuery(
       SOURCE_PREDICATE_LINK_QUERY,
@@ -80,6 +90,19 @@ export default defineComponent({
       })
     );
 
+    const { mutate: addLink, error: addLinkError } = useMutation<{
+      addLink: ad4m.LinkExpression;
+    }>(ADD_LINK, () => ({
+      variables: {
+        perspectiveUUID: perspectiveUuid.value,
+        link: JSON.stringify(linkData.value),
+      },
+    }));
+
+        const pubKeyForLang = useLazyQuery<{
+      pubKeyForLanguage: string;
+    }>(PUB_KEY_FOR_LANG, () => ({ lang: currentQueryLang.value }));
+
     return {
       getExpression,
       joiningLink,
@@ -89,6 +112,12 @@ export default defineComponent({
       getChatChannelLinks,
       installedSourcePerspectiveUUID,
       sourceLinkLanguage,
+      addLink,
+      addLinkError,
+      perspectiveUuid,
+      linkData,
+      pubKeyForLang,
+      currentQueryLang,
     };
   },
   methods: {
@@ -133,6 +162,29 @@ export default defineComponent({
       });
     },
 
+    createLink(link: ad4m.Link): Promise<ad4m.LinkExpression> {
+      this.linkData = link;
+      return new Promise((resolve, reject) => {
+        this.addLink().then((addLinkResp) => {
+          resolve(addLinkResp.data!.addLink);
+        });
+      });
+    },
+
+        getPubKeyForLang(lang: string): Promise<string> {
+      this.currentQueryLang = lang;
+      return new Promise((resolve, reject) => {
+        this.pubKeyForLang.onResult((result) => {
+          resolve(result.data.pubKeyForLanguage);
+        });
+        this.pubKeyForLang.onError((error) => {
+          console.log("Got error in getPubKeyForLang", error);
+          reject(error);
+        });
+        this.pubKeyForLang.load();
+      });
+    },
+
     async joinCommunity() {
       //TODO: fix all types here and remove ts-ignores
       console.log(this.joiningLink);
@@ -148,24 +200,38 @@ export default defineComponent({
       );
       //@ts-ignore
       installedPerspective = installedPerspective.data.installSharedPerspective;
-      console.log("Installed perspective raw data", installedPerspective);
+      console.log(
+        new Date(),
+        "Installed perspective raw data",
+        installedPerspective
+      );
       //@ts-ignore
       this.installedSourcePerspectiveUUID = installedPerspective.uuid;
       //@ts-ignore
       this.sourceLinkLanguage = installedPerspective.sharedPerspective.linkLanguages![0]!.address!;
 
+      console.log(new Date(), "Getting channel links");
       let links = await this.getChannelLinks();
-      console.log("Got channel links", links);
+      console.log(new Date(), "Got channel links", links);
       let channels: ChannelState[] = [];
       let now = new Date();
 
       //@ts-ignore
-      links.forEach(async (element) => {
-        this.joiningLink = element.data.target;
-        console.log("Getting channel with address", this.joiningLink);
+      for (let i = 0; i < links.length; i++) {
+        //@ts-ignore
+        this.joiningLink = links[i].data.target;
+        console.log(
+          new Date(),
+          "Getting channel with address",
+          this.joiningLink
+        );
 
         let channelSharedPerspExp = await this.getExpressionMethod();
-        console.log("Got channel shared exp", channelSharedPerspExp);
+        console.log(
+          new Date(),
+          "Got channel shared exp",
+          channelSharedPerspExp
+        );
         let channelSharedPerspective: SharedPerspective = JSON.parse(
           //@ts-ignore
           channelSharedPerspExp.expression.data
@@ -174,7 +240,11 @@ export default defineComponent({
           this.joiningLink,
           channelSharedPerspective
         );
-        console.log("Installed with result", installedChannelPerspective);
+        console.log(
+          new Date(),
+          "Installed with result",
+          installedChannelPerspective
+        );
         installedChannelPerspective =
           //@ts-ignore
           installedChannelPerspective.data.installSharedPerspective;
@@ -182,6 +252,19 @@ export default defineComponent({
           "Installed channel shared perspective with result",
           installedChannelPerspective
         );
+
+        let channelScPubKey = await this.getPubKeyForLang(
+          //@ts-ignore
+          installedChannelPerspective.sharedPerspective.linkLanguages![0]!.address!
+        );
+        console.log("Got pub key for social context channel", channelScPubKey);
+        //@ts-ignore
+        this.perspectiveUuid = installedChannelPerspective.uuid;
+        let addActiveAgentLink = await this.createLink({
+          source: "active_agent",
+          target: channelScPubKey,
+          predicate: "*",
+        });
         channels.push({
           //@ts-ignore
           name: installedChannelPerspective.name,
@@ -199,7 +282,7 @@ export default defineComponent({
           currentExpressionLinks: [],
           currentExpressionMessages: [],
         });
-      });
+      }
 
       this.$store.commit({
         type: "addCommunity",
