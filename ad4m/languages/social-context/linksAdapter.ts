@@ -39,10 +39,47 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
   async addLink(link: Expression): Promise<void> {
     const data = prepareExpressionLink(link);
     //console.debug("Holochain Social Context: ADDING LINK!: ", data);
-    await this.#socialContextDna.call(DNA_NICK, "social_context", "add_link", {
-      link: data,
-      index_strategy: "Simple",
-    });
+    //If target is an agent pub key, then we are just trying mark agent as active
+    //@ts-ignore
+    if (data.data.source == "active_agent") {
+      await this.#socialContextDna.call(
+        DNA_NICK,
+        "social_context",
+        "add_link",
+        {
+          link: data,
+          index_strategy: "Simple",
+        }
+      );
+      await this.#socialContextDna.call(
+        DNA_NICK,
+        "social_context",
+        "index_link",
+        {
+          link: data,
+          index_strategy: "Simple",
+        }
+      );
+    } else {
+      await this.#socialContextDna.call(
+        DNA_NICK,
+        "social_context",
+        "add_link",
+        {
+          link: data,
+          index_strategy: "Simple",
+        }
+      );
+      await this.#socialContextDna.call(
+        DNA_NICK,
+        "social_context",
+        "index_link",
+        {
+          link: data,
+          index_strategy: "Simple",
+        }
+      );
+    }
   }
 
   async updateLink(
