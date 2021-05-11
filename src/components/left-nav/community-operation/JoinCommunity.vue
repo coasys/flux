@@ -215,6 +215,8 @@ export default defineComponent({
       this.sourceLinkLanguage = installedPerspective.sharedPerspective.linkLanguages![0]!.address!;
 
       console.log(new Date(), "Getting channel links");
+      //NOTE: these links are unlikely to return since there has not been enough time for gossip since joining the DHT
+      //for now this will remain but in the future these channel links need to be grabbed on an ongoing basis
       let links = await this.getChannelLinks();
       console.log(new Date(), "Got channel links", links);
       let channels: ChannelState[] = [];
@@ -265,7 +267,7 @@ export default defineComponent({
         console.log(new Date(), "Got pub key for social context channel", channelScPubKey);
         //@ts-ignore
         this.perspectiveUuid = installedChannelPerspective.uuid;
-        let addActiveAgentLink = await this.createLink({
+        await this.createLink({
           source: "active_agent",
           target: channelScPubKey,
           predicate: "*",
