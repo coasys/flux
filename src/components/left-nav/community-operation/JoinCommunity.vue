@@ -262,9 +262,14 @@ export default defineComponent({
         await this.sleep(1000);
         let channelScPubKey = await this.getPubKeyForLang(
           //@ts-ignore
-          installedChannelPerspective.sharedPerspective.linkLanguages![0]!.address!
+          installedChannelPerspective.sharedPerspective.linkLanguages![0]!
+            .address!
         );
-        console.log(new Date(), "Got pub key for social context channel", channelScPubKey);
+        console.log(
+          new Date(),
+          "Got pub key for social context channel",
+          channelScPubKey
+        );
         //@ts-ignore
         this.perspectiveUuid = installedChannelPerspective.uuid;
         await this.createLink({

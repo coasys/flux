@@ -208,7 +208,7 @@ export default defineComponent({
       }
     );
 
-    watch(result, (data) => {
+    watch(result, async (data) => {
       let signal = JSON.parse(data.signal.signal);
       language = data.signal.language;
       expression = signal.data.payload;
@@ -229,6 +229,8 @@ export default defineComponent({
         if (expression.data.predicate == "sioc://content_of") {
           //@ts-ignore
           expressionUrl.value = expression.data.target;
+          //Wait 500ms as temp solution to getting expressions after signal
+          await sleep(500);
           getExpression.load();
         }
       }
