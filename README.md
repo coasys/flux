@@ -9,6 +9,8 @@ Linux OS for running HC & Holochain binaries (see `./resources`). Only linux is 
 npm run build-languages && npm install
 ```
 
+If you have any troubles on npm install for any given language or for this project, its likely npm shitting the bed, delete `package-lock.json` & `node_modules` for the package in question and try again. 
+
 Also ensure that you have the following packages in the same directory that this repository is located in:<br>
 
 [AD4M](https://github.com/perspect3vism/ad4m)<br>
