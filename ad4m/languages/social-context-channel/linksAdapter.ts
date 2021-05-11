@@ -123,8 +123,8 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     if (query.from) {
       link_query.from = query.from.toISOString();
     }
-    if (query.to) {
-      link_query.until = query.to.toISOString();
+    if (query.until) {
+      link_query.until = query.until.toISOString();
     }
     const links = await this.#socialContextDna.call(
       DNA_NICK,

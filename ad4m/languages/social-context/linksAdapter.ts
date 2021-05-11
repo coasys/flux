@@ -124,7 +124,7 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     if (link_query.from == undefined) {
       link_query.from = new Date().toISOString();
     }
-    if (link_query.to == undefined) {
+    if (link_query.until == undefined) {
       link_query.until = new Date().toISOString();
     }
     console.debug("Holochain Social Context: Getting Links With: ", link_query);
