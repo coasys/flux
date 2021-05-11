@@ -99,7 +99,7 @@ export default defineComponent({
       },
     }));
 
-        const pubKeyForLang = useLazyQuery<{
+    const pubKeyForLang = useLazyQuery<{
       pubKeyForLanguage: string;
     }>(PUB_KEY_FOR_LANG, () => ({ lang: currentQueryLang.value }));
 
@@ -171,7 +171,7 @@ export default defineComponent({
       });
     },
 
-        getPubKeyForLang(lang: string): Promise<string> {
+    getPubKeyForLang(lang: string): Promise<string> {
       this.currentQueryLang = lang;
       return new Promise((resolve, reject) => {
         this.pubKeyForLang.onResult((result) => {

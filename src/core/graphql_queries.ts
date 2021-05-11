@@ -375,6 +375,31 @@ export const SOURCE_LINK_QUERY_TIME_PAGINATED = gql`
   }
 `;
 
+export const SOURCE_PREDICATE_LINK_QUERY_TIME_PAGINATED = gql`
+  query links(
+    $perspectiveUUID: String
+    $source: String
+    $predicate: String
+    $from: Date
+    $to: Date
+  ) {
+    links(
+      perspectiveUUID: $perspectiveUUID
+      query: { source: $source, predicate: $predicate, from: $from, to: $to }
+    ) {
+      author {
+        did
+      }
+      timestamp
+      data {
+        source
+        predicate
+        target
+      }
+    }
+  }
+`;
+
 export const ADD_LINK = gql`
   mutation addLink($perspectiveUUID: String, $link: String) {
     addLink(input: { perspectiveUUID: $perspectiveUUID, link: $link }) {
