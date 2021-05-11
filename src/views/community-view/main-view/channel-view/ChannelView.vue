@@ -67,8 +67,8 @@ export default defineComponent({
       () => ({
         perspectiveUUID: currentPerspective.value,
         source: "sioc://chatchannel",
-        from: myDate,
-        to: now,
+        from: myDate.toISOString(),
+        to: now.toISOString(),
       })
     );
 

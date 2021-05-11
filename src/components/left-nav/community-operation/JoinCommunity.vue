@@ -185,6 +185,10 @@ export default defineComponent({
       });
     },
 
+    sleep(ms: number) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    },
+
     async joinCommunity() {
       //TODO: fix all types here and remove ts-ignores
       console.log(this.joiningLink);
@@ -253,11 +257,12 @@ export default defineComponent({
           installedChannelPerspective
         );
 
+        await this.sleep(1000);
         let channelScPubKey = await this.getPubKeyForLang(
           //@ts-ignore
           installedChannelPerspective.sharedPerspective.linkLanguages![0]!.address!
         );
-        console.log("Got pub key for social context channel", channelScPubKey);
+        console.log(new Date(), "Got pub key for social context channel", channelScPubKey);
         //@ts-ignore
         this.perspectiveUuid = installedChannelPerspective.uuid;
         let addActiveAgentLink = await this.createLink({
