@@ -5,7 +5,6 @@ import router from "./router";
 import store from "./store/index";
 
 import { ApolloClient, InMemoryCache } from "@apollo/client/core";
-import VueApollo from "@vue/apollo-option";
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { ApolloClients } from "@vue/apollo-composable";
 
