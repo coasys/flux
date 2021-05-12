@@ -28,6 +28,9 @@ import {
 } from "./store";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { apolloClient } from "./main";
+import { onError } from '@apollo/client/link/error';
+import { logErrorMessages } from '@vue/apollo-util';
+
 
 declare global {
   interface Window {
@@ -41,6 +44,13 @@ export default defineComponent({
     const store = useStore();
     var language = "";
     var expression = {};
+
+    onError(error => {
+      if (process.env.NODE_ENV !== 'production') {
+        // can use error.operation.operationName to single out a query type.
+        logErrorMessages(error);
+      }
+    });
 
     //Ad4m signal watcher
     const { result } = useSubscription(AD4M_SIGNAL);
