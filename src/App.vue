@@ -207,33 +207,36 @@ export default defineComponent({
             //@ts-ignore
             community.value.linkLanguageAddress
           );
-          console.log("Got channel links", channelLinks);
-          for (let i = 0; i < channelLinks.length; i++) {
-            if (
-              //@ts-ignore
-              community.value.channels.find(
-                (element: ChannelState) =>
-                  element.sharedPerspectiveUrl === channelLinks[i].data!.target
-              ) == undefined
-            ) {
-              console.log(
-                "Found channel link",
-                channelLinks[i],
-                "Adding to channel"
-              );
-              let channel = await joinChannelFromSharedLink(
-                channelLinks[i].data!.target!
-              );
-              store.commit({
-                type: "addChannel",
-                value: { community: community.perspective, channel: channel },
-              });
-            } else {
-              console.log(
-                "Could not find match for channels",
+          if (channelLinks != null) {
+            console.log("Got channel links", channelLinks);
+            for (let i = 0; i < channelLinks.length; i++) {
+              if (
                 //@ts-ignore
-                community.value.channels
-              );
+                community.value.channels.find(
+                  (element: ChannelState) =>
+                    element.sharedPerspectiveUrl ===
+                    channelLinks[i].data!.target
+                ) == undefined
+              ) {
+                console.log(
+                  "Found channel link",
+                  channelLinks[i],
+                  "Adding to channel"
+                );
+                let channel = await joinChannelFromSharedLink(
+                  channelLinks[i].data!.target!
+                );
+                store.commit({
+                  type: "addChannel",
+                  value: { community: community.perspective, channel: channel },
+                });
+              } else {
+                console.log(
+                  "Could not find match for channels",
+                  //@ts-ignore
+                  community.value.channels
+                );
+              }
             }
           }
         }
