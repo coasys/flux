@@ -3,6 +3,8 @@ import App from "./App.vue";
 import "./registerServiceWorker";
 import router from "./router";
 import store from "./store/index";
+import VueVirtualScroller from 'vue-virtual-scroller';
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 
 import { ApolloClient, InMemoryCache } from "@apollo/client/core";
 import { WebSocketLink } from "@apollo/client/link/ws";
@@ -41,4 +43,5 @@ createApp({
 })
   .use(store)
   .use(router)
+  .use(VueVirtualScroller)
   .mount("#app");

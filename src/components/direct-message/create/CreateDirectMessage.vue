@@ -15,11 +15,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 import { JuntoShortForm } from "@/core/juntoTypes";
 
 export default defineComponent({
-  props: ["createMessage"],
+  props: {
+    createMessage: {
+      type: Function as PropType<(message: any) => void>,
+      required: true,
+    }
+  },
   data() {
     return {
       message: "",
