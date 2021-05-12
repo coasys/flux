@@ -3,23 +3,30 @@
 </template>
 
 <script lang="ts">
-import {
-  useSubscription,
-  useLazyQuery,
-  useMutation,
-} from "@vue/apollo-composable";
-import { defineComponent, watch, ref } from "vue";
+import { useSubscription } from "@vue/apollo-composable";
+import { defineComponent, watch } from "vue";
 import {
   AD4M_SIGNAL,
   QUERY_EXPRESSION,
   LANGUAGE,
   ADD_LINK,
   PUB_KEY_FOR_LANG,
+  SOURCE_PREDICATE_LINK_QUERY,
 } from "./core/graphql_queries";
-import { agentRefreshDurationMs } from "./core/juntoTypes";
+import {
+  agentRefreshDurationMs,
+  channelRefreshDurationMs,
+} from "./core/juntoTypes";
 import { useStore } from "vuex";
-import { ExpressionUIIcons } from "./store";
+import {
+  ExpressionUIIcons,
+  FeedType,
+  SyncLevel,
+  ChannelState,
+  CommunityState,
+} from "./store";
 import ad4m from "@perspect3vism/ad4m-executor";
+import { apolloClient } from "./main";
 
 declare global {
   interface Window {
@@ -31,113 +38,128 @@ export default defineComponent({
   name: "App",
   setup() {
     const store = useStore();
-    const expressionUrl = ref("");
-    const languageAddress = ref("");
-    const currentQueryLang = ref("");
-    const perspectiveUuid = ref("");
-    const linkData = ref({});
     var language = "";
     var expression = {};
 
     //Ad4m signal watcher
     const { result } = useSubscription(AD4M_SIGNAL);
-    //Query expression handke
-    const getExpression = useLazyQuery(QUERY_EXPRESSION, () => ({
-      url: expressionUrl.value,
-    }));
+    //Query expression handler
+    const getExpression = (url: string): Promise<ad4m.Expression> => {
+      return new Promise((resolve) => {
+        const getExpression = apolloClient.query<{
+          expression: ad4m.Expression;
+        }>({ query: QUERY_EXPRESSION, variables: { url: url } });
+        getExpression.then((result) => {
+          resolve(result.data.expression);
+        });
+      });
+    };
+
     //Get language UI handler
-    const getLanguage = useLazyQuery(LANGUAGE, () => ({
-      address: languageAddress.value,
-    }));
+    const getLanguage = (language: string): Promise<ad4m.Language> => {
+      return new Promise((resolve) => {
+        const getLanguage = apolloClient.query<{ language: ad4m.Language }>({
+          query: LANGUAGE,
+          variables: { address: language },
+        });
+        getLanguage.then((result) => {
+          console.log("Got result", result);
+          resolve(result.data.language);
+        });
+      });
+    };
 
-    //When we got an expression add it tot he currently defined language
-    //NOTE: this might break when there are lots of messages coming in at once from different languages
-    getExpression.onResult((result) => {
-      console.log(
-        new Date().toISOString(),
-        "Got expression result back",
-        result
+    const pubKeyForLang = (lang: string): Promise<string> => {
+      return new Promise((resolve) => {
+        const pubKey = apolloClient.query({
+          query: PUB_KEY_FOR_LANG,
+          variables: { lang: lang },
+        });
+        pubKey.then((result) => {
+          resolve(result.data);
+        });
+      });
+    };
+
+    const addLink = (perspectiveUUID: string, link: ad4m.Link) => {
+      return new Promise((resolve) => {
+        const addLinkQ = apolloClient.mutate({
+          mutation: ADD_LINK,
+          variables: {
+            perspectiveUUID: perspectiveUUID,
+            link: JSON.stringify(link),
+          },
+        });
+
+        addLinkQ.then((result) => {
+          resolve(result.data);
+        });
+      });
+    };
+
+    const getLinks = (
+      perspectiveUUID: string,
+      source: string,
+      predicate: string
+    ): Promise<ad4m.LinkExpression[]> => {
+      return new Promise((resolve) => {
+        const getLinksQ = apolloClient.query<{ links: ad4m.LinkExpression[] }>({
+          query: SOURCE_PREDICATE_LINK_QUERY,
+          variables: { perspectiveUUID, source, predicate },
+        });
+        getLinksQ.then((result) => {
+          resolve(result.data.links);
+        });
+      });
+    };
+
+    const getChatChannelLinks = (
+      perspectiveUUID: string,
+      linkLanguageAddress: string
+    ) => {
+      return getLinks(
+        perspectiveUUID,
+        `${linkLanguageAddress}://self`,
+        "sioc://has_space"
       );
-      store.commit({
-        type: "addExpressionAndLinkFromLanguageAddress",
-        value: {
-          linkLanguage: language,
-          link: expression,
-          message: result.data.expression,
-        },
-      });
-    });
-    getExpression.onError((error) => {
-      console.log("Got error in getExpression", error);
-      //Show error dialogue
-    });
+    };
 
-    let resultPromise = new Promise((resolve, reject) => {
-      getLanguage.onResult((result) => {
-        console.log(result);
-        let uiData: ExpressionUIIcons = {
-          languageAddress: languageAddress.value,
-          createIcon: result.data.language.constructorIcon.code,
-          viewIcon: result.data.language.iconFor.code,
-        };
-        store.commit({
-          type: "addExpressionUI",
-          value: uiData,
-        });
-        resolve("");
-      });
-      getLanguage.onError((error) => {
-        reject(error);
-      });
-    });
-
-    function sleep(ms: number) {
-      return new Promise((resolve) => setTimeout(resolve, ms));
-    }
-
-    function noDelaySetInterval(func: () => void, interval: number) {
-      func();
-
-      return setInterval(func, interval);
-    }
-
-    const pubKeyForLang = useLazyQuery<{
-      pubKeyForLanguage: string;
-    }>(PUB_KEY_FOR_LANG, () => {
-      return { lang: currentQueryLang.value };
-    });
-
-    const { mutate: addLink, error: addLinkError } = useMutation<{
-      addLink: ad4m.LinkExpression;
-    }>(ADD_LINK, () => {
-      return {
-        variables: {
-          perspectiveUUID: perspectiveUuid.value,
-          link: JSON.stringify(linkData.value),
-        },
-      };
-    });
-
-    function createLink(link: ad4m.Link): Promise<ad4m.LinkExpression> {
-      linkData.value = link;
-      return new Promise((resolve, reject) => {
-        addLink().then((addLinkResp) => {
-          resolve(addLinkResp.data!.addLink);
-        });
-      });
-    }
-
-    function getPubKeyForLang(lang: string): Promise<string> {
-      currentQueryLang.value = lang;
-      return new Promise((resolve, reject) => {
-        pubKeyForLang.onResult((result) => {
-          resolve(result.data.pubKeyForLanguage);
-        });
-        pubKeyForLang.onError((error) => {
-          reject(error);
-        });
-        pubKeyForLang.load();
-      });
+    async function getPerspectiveChannels() {
+      noDelaySetInterval(async () => {
+        //TODO: only do when application window is open
+        const communities: CommunityState[] = store.getters.getCommunities;
+        for (const community of communities) {
+          console.log("checking community", community);
+          let channelLinks = await getChatChannelLinks(
+            //@ts-ignore
+            community.value.perspective,
+            //@ts-ignore
+            community.value.linkLanguageAddress
+          );
+          console.log("Got channel links", channelLinks);
+          for (let i = 0; i < channelLinks.length; i++) {
+            if (
+              //@ts-ignore
+              community.value.channels.find(
+                (element: ChannelState) =>
+                  element.sharedPerspectiveUrl === channelLinks[i].data!.target
+              ) == undefined
+            ) {
+              console.log(
+                "Found channel link",
+                channelLinks[i],
+                "Adding to channel"
+              );
+            } else {
+              console.log(
+                "Could not find match for channels",
+                //@ts-ignore
+                community.value.channels
+              );
+            }
+          }
+        }
+      }, channelRefreshDurationMs);
     }
 
     async function setActiveAgents(skip: boolean) {
@@ -150,12 +172,11 @@ export default defineComponent({
             const channels = community.value.channels;
 
             for (const channel of channels) {
-              perspectiveUuid.value = channel.perspective;
-
-              let channelScPubKey = await getPubKeyForLang(
+              let channelScPubKey = await pubKeyForLang(
                 channel.linkLanguageAddress
               );
-              let addActiveAgentLink = await createLink({
+              console.log("Got pub key for language", channelScPubKey);
+              let addActiveAgentLink = await addLink(channel.perspective, {
                 source: "active_agent",
                 target: channelScPubKey,
                 predicate: "*",
@@ -174,6 +195,7 @@ export default defineComponent({
       }, agentRefreshDurationMs);
     }
 
+    //Watch for agent unlock to set off running queries
     store.watch(
       (state) => state.agentUnlocked,
       async (newValue) => {
@@ -196,18 +218,29 @@ export default defineComponent({
           } else {
             await setActiveAgents(true);
           }
+          await getPerspectiveChannels();
 
           for (const [, lang] of expressionLangs.entries()) {
-            console.log("App.vue: Fetching UI lang:", lang);
-            languageAddress.value = lang;
-            getLanguage.load();
-            await sleep(40);
-            await resultPromise;
+            let language = await getLanguage(lang);
+            console.log("Got language", language);
+            if (language != null) {
+              let uiData: ExpressionUIIcons = {
+                languageAddress: language!.address!,
+                createIcon: language!.constructorIcon!.code!,
+                viewIcon: language!.iconFor!.code!,
+              };
+              store.commit({
+                type: "addExpressionUI",
+                value: uiData,
+              });
+            }
+            await sleep(50);
           }
         }
       }
     );
 
+    //Watch for incoming signals to get expression data
     watch(result, async (data) => {
       let signal = JSON.parse(data.signal.signal);
       language = data.signal.language;
@@ -228,13 +261,48 @@ export default defineComponent({
         //@ts-ignore
         if (expression.data.predicate == "sioc://content_of") {
           //@ts-ignore
-          expressionUrl.value = expression.data.target;
-          //Wait 500ms as temp solution to getting expressions after signal
-          await sleep(500);
-          getExpression.load();
+          let getExprRes = await getExpression(expression.data.target);
+          if (getExprRes == null) {
+            for (let i = 0; i < 10; i++) {
+              console.log("Retrying get of expression signal");
+              //@ts-ignore
+              getExprRes = await getExpression(expression.data.target);
+              if (getExprRes != null) {
+                break;
+              }
+              await sleep(20);
+            }
+            if (getExprRes == null) {
+              throw Error("Could not get expression from link signal");
+            }
+          }
+          console.log(
+            new Date().toISOString(),
+            "Got expression result back",
+            getExprRes
+          );
+          store.commit({
+            type: "addExpressionAndLinkFromLanguageAddress",
+            value: {
+              linkLanguage: language,
+              //@ts-ignore
+              link: expression.data,
+              message: getExprRes,
+            },
+          });
         }
       }
     });
+
+    function sleep(ms: number) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    function noDelaySetInterval(func: () => void, interval: number) {
+      func();
+
+      return setInterval(func, interval);
+    }
 
     return {};
   },

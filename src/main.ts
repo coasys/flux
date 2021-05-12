@@ -5,6 +5,7 @@ import router from "./router";
 import store from "./store/index";
 
 import { ApolloClient, InMemoryCache } from "@apollo/client/core";
+import VueApollo from "@vue/apollo-option";
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { ApolloClients } from "@vue/apollo-composable";
 
@@ -15,18 +16,18 @@ const wsLink = new WebSocketLink({
   },
 });
 
-const apolloClient = new ApolloClient({
+export const apolloClient = new ApolloClient({
   //uri: 'http://localhost:4000',
   link: wsLink,
   cache: new InMemoryCache(),
   defaultOptions: {
     watchQuery: {
-      fetchPolicy: 'no-cache',
-      errorPolicy: 'ignore',
+      fetchPolicy: "no-cache",
+      errorPolicy: "ignore",
     },
     query: {
-      fetchPolicy: 'no-cache',
-      errorPolicy: 'all',
+      fetchPolicy: "no-cache",
+      errorPolicy: "all",
     },
   },
 });

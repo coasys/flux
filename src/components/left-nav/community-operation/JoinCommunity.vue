@@ -62,7 +62,7 @@ export default defineComponent({
     const currentQueryLang = ref("");
 
     //Query expression handke
-    const getExpression = useLazyQuery(
+    const getExpression = useLazyQuery<{ expression: ad4m.Expression }>(
       QUERY_EXPRESSION,
       () => ({
         url: joiningLink.value,
@@ -70,25 +70,23 @@ export default defineComponent({
       { fetchPolicy: "network-only" }
     );
 
-    const getChatChannelLinks = useLazyQuery(
+    const getChatChannelLinks = useLazyQuery<{ links: ad4m.LinkExpression[] }>(
       SOURCE_PREDICATE_LINK_QUERY,
       () => ({
         perspectiveUUID: installedSourcePerspectiveUUID.value,
-        //@ts-ignore
         source: `${sourceLinkLanguage.value}://self`,
         predicate: "sioc://has_space",
       })
     );
 
-    const installSharedPerspective = useMutation(
-      INSTALL_SHARED_PERSPECTIVE,
-      () => ({
-        variables: {
-          sharedPerspectiveUrl: perspectiveUrl.value,
-          sharedPerspective: sharedPerspective.value,
-        },
-      })
-    );
+    const installSharedPerspective = useMutation<{
+      installSharedPerspective: ad4m.Perspective;
+    }>(INSTALL_SHARED_PERSPECTIVE, () => ({
+      variables: {
+        sharedPerspectiveUrl: perspectiveUrl.value,
+        sharedPerspective: sharedPerspective.value,
+      },
+    }));
 
     const { mutate: addLink, error: addLinkError } = useMutation<{
       addLink: ad4m.LinkExpression;
@@ -121,10 +119,10 @@ export default defineComponent({
     };
   },
   methods: {
-    getExpressionMethod() {
+    getExpressionMethod(): Promise<ad4m.Expression> {
       return new Promise((resolve, reject) => {
         this.getExpression.onResult((result) => {
-          resolve(result.data);
+          resolve(result.data!.expression);
         });
         this.getExpression.onError((error) => {
           console.log("Got error", error);
@@ -133,7 +131,7 @@ export default defineComponent({
         this.getExpression.load();
       });
     },
-    getChannelLinks() {
+    getChannelLinks(): Promise<ad4m.LinkExpression[]> {
       return new Promise((resolve, reject) => {
         this.getChatChannelLinks.onResult((result) => {
           resolve(result.data.links);
@@ -148,7 +146,7 @@ export default defineComponent({
     installSharedPerspectiveMethod(
       url: string,
       perspective: SharedPerspective
-    ) {
+    ): Promise<ad4m.Perspective> {
       this.perspectiveUrl = url;
       this.sharedPerspective = perspective;
       return new Promise((resolve, reject) => {
@@ -157,7 +155,7 @@ export default defineComponent({
           reject(error);
         });
         this.installSharedPerspective.mutate().then((result) => {
-          resolve(result);
+          resolve(result.data!.installSharedPerspective);
         });
       });
     },
@@ -194,119 +192,30 @@ export default defineComponent({
       console.log(this.joiningLink);
       let sharedPerspectiveExp = await this.getExpressionMethod();
       let sharedPerspective: SharedPerspective = JSON.parse(
-        //@ts-ignore
-        sharedPerspectiveExp.expression.data
+        sharedPerspectiveExp.data!
       );
       //TODO: check that the perspective is not already installed
       let installedPerspective = await this.installSharedPerspectiveMethod(
         this.joiningLink,
         sharedPerspective
       );
-      //@ts-ignore
-      installedPerspective = installedPerspective.data.installSharedPerspective;
       console.log(
         new Date(),
         "Installed perspective raw data",
         installedPerspective
       );
-      //@ts-ignore
-      this.installedSourcePerspectiveUUID = installedPerspective.uuid;
-      //@ts-ignore
-      this.sourceLinkLanguage = installedPerspective.sharedPerspective.linkLanguages![0]!.address!;
-
-      console.log(new Date(), "Getting channel links");
-      //NOTE: these links are unlikely to return since there has not been enough time for gossip since joining the DHT
-      //for now this will remain but in the future these channel links need to be grabbed on an ongoing basis
-      let links = await this.getChannelLinks();
-      console.log(new Date(), "Got channel links", links);
-      let channels: ChannelState[] = [];
-      let now = new Date();
-
-      //@ts-ignore
-      for (let i = 0; i < links.length; i++) {
-        //@ts-ignore
-        this.joiningLink = links[i].data.target;
-        console.log(
-          new Date(),
-          "Getting channel with address",
-          this.joiningLink
-        );
-
-        let channelSharedPerspExp = await this.getExpressionMethod();
-        console.log(
-          new Date(),
-          "Got channel shared exp",
-          channelSharedPerspExp
-        );
-        let channelSharedPerspective: SharedPerspective = JSON.parse(
-          //@ts-ignore
-          channelSharedPerspExp.expression.data
-        );
-        let installedChannelPerspective = await this.installSharedPerspectiveMethod(
-          this.joiningLink,
-          channelSharedPerspective
-        );
-        console.log(
-          new Date(),
-          "Installed with result",
-          installedChannelPerspective
-        );
-        installedChannelPerspective =
-          //@ts-ignore
-          installedChannelPerspective.data.installSharedPerspective;
-        console.log(
-          "Installed channel shared perspective with result",
-          installedChannelPerspective
-        );
-
-        await this.sleep(1000);
-        let channelScPubKey = await this.getPubKeyForLang(
-          //@ts-ignore
-          installedChannelPerspective.sharedPerspective.linkLanguages![0]!
-            .address!
-        );
-        console.log(
-          new Date(),
-          "Got pub key for social context channel",
-          channelScPubKey
-        );
-        //@ts-ignore
-        this.perspectiveUuid = installedChannelPerspective.uuid;
-        await this.createLink({
-          source: "active_agent",
-          target: channelScPubKey,
-          predicate: "*",
-        });
-        channels.push({
-          //@ts-ignore
-          name: installedChannelPerspective.name,
-          //@ts-ignore
-          perspective: installedChannelPerspective.uuid,
-          type: FeedType.Dm,
-          lastSeenMessageTimestamp: now,
-          firstSeenMessageTimestamp: now,
-          createdAt: now,
-          //@ts-ignore
-          linkLanguageAddress: installedChannelPerspective.sharedPerspective
-            .linkLanguages![0]!.address!,
-          syncLevel: SyncLevel.Full,
-          maxSyncSize: -1,
-          currentExpressionLinks: [],
-          currentExpressionMessages: [],
-        });
-      }
+      this.installedSourcePerspectiveUUID = installedPerspective.uuid!;
+      this.sourceLinkLanguage = installedPerspective.sharedPerspective!.linkLanguages![0]!.address!;
 
       this.$store.commit({
         type: "addCommunity",
         value: {
-          //@ts-ignore
           name: installedPerspective.name,
           linkLanguageAddress: this.sourceLinkLanguage,
-          channels: channels,
+          channels: [],
           perspective: this.installedSourcePerspectiveUUID,
-          expressionLanguages:
-            //@ts-ignore
-            installedPerspective.sharedPerspective.requiredExpressionLanguages,
+          expressionLanguages: installedPerspective.sharedPerspective!
+            .requiredExpressionLanguages,
         },
       });
 

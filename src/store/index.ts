@@ -17,6 +17,7 @@ export interface ChannelState {
   name: string;
   perspective: string;
   linkLanguageAddress: string;
+  sharedPerspectiveUrl: string;
   type: FeedType;
   //This tells us how much time passed since last query at this channel
   lastSeenMessageTimestamp: Date | undefined;

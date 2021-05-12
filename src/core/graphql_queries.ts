@@ -207,7 +207,6 @@ export const PUBLISH_PERSPECTIVE = gql`
     $name: String
     $description: String
     $type: String
-    $encrypt: Boolean
     $passphrase: String
     $requiredExpressionLanguages: [String]
     $allowedExpressionLanguages: [String]
@@ -218,7 +217,6 @@ export const PUBLISH_PERSPECTIVE = gql`
         name: $name
         description: $description
         type: $type
-        encrypt: $encrypt
         passphrase: $passphrase
         requiredExpressionLanguages: $requiredExpressionLanguages
         allowedExpressionLanguages: $allowedExpressionLanguages
@@ -241,14 +239,12 @@ export const CREATE_UNIQUE_EXPRESSION_LANGUAGE = gql`
   mutation createUniqueHolochainExpressionLanguageFromTemplate(
     $languagePath: String
     $dnaNick: String
-    $encrypt: Boolean
     $passphrase: String
   ) {
     createUniqueHolochainExpressionLanguageFromTemplate(
       input: {
         languagePath: $languagePath
         dnaNick: $dnaNick
-        encrypt: $encrypt
         passphrase: $passphrase
       }
     ) {
