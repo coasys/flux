@@ -7,21 +7,21 @@
       ref="messagesContainer"
     >
       <template v-slot="{ item, index, active }">
-          <dynamic-scroller-item
-            :item="item"
-            :active="active"
-            :data-index="index"
-          >
-            <message-date
-              v-if="item.type === 'date'"
-              :date="item.date"
-            ></message-date>
-            <direct-message
-              v-if="item.type === 'message'"
-              :message="item.message"
-              :showAvatar="showAvatar(index)"
-            ></direct-message>
-          </dynamic-scroller-item>
+        <dynamic-scroller-item
+          :item="item"
+          :active="active"
+          :data-index="index"
+        >
+          <message-date
+            v-if="item.type === 'date'"
+            :date="item.date"
+          ></message-date>
+          <direct-message
+            v-if="item.type === 'message'"
+            :message="item.message"
+            :showAvatar="showAvatar(index)"
+          ></direct-message>
+        </dynamic-scroller-item>
       </template>
     </dynamic-scroller>
     <create-direct-message
@@ -32,7 +32,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import { DynamicScroller, DynamicScrollerItem } from 'vue-virtual-scroller';
+import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
 import DirectMessage from "../../../../components/direct-message/display/DirectMessage.vue";
 import CreateDirectMessage from "../../../../components/direct-message/create/CreateDirectMessage.vue";
 import { JuntoShortForm } from "@/core/juntoTypes";
@@ -47,11 +47,11 @@ import { useLazyQuery, useMutation } from "@vue/apollo-composable";
 import { ChannelState } from "@/store/index";
 import Expression from "@perspect3vism/ad4m/Expression";
 import { differenceInMinutes, format, parseISO } from "date-fns";
-import MessageDate from './MessageDateHeader.vue';
+import MessageDate from "./MessageDateHeader.vue";
 
 interface ChatItem {
   id: string;
-  type: 'date' | 'message';
+  type: "date" | "message";
   date?: Date | string | number;
   message?: Expression;
 }
@@ -146,7 +146,7 @@ export default defineComponent({
       let i = 0;
 
       this.getCurrentChannel?.currentExpressionMessages.forEach((e) => {
-        const formattedDate = format(parseISO(e.timestamp), 'MM/dd/yyyy');
+        const formattedDate = format(parseISO(e.timestamp), "MM/dd/yyyy");
         if (obj[formattedDate] !== undefined) {
           obj[formattedDate].push(e);
         } else {
@@ -157,7 +157,7 @@ export default defineComponent({
       Object.entries(obj).forEach(([key, value]) => {
         list.push({
           id: i.toString(),
-          type: 'date',
+          type: "date",
           date: key,
         });
         i += 1;
@@ -165,13 +165,13 @@ export default defineComponent({
         value.forEach((v) => {
           list.push({
             id: i.toString(),
-            type: 'message',
+            type: "message",
             message: v,
           });
           i += 1;
         });
       });
-      console.log('list', list);
+      console.log("list", list);
       return list;
     },
   },
@@ -252,23 +252,29 @@ export default defineComponent({
       const previousMessage = this.messageList[index - 1];
       const message = this.messageList[index];
 
-      if (index <= 0 || previousMessage === undefined || message === undefined) {
+      if (
+        index <= 0 ||
+        previousMessage === undefined ||
+        message === undefined
+      ) {
         return true;
       }
 
-      if (previousMessage.type === 'date') {
+      if (previousMessage.type === "date") {
         return true;
       }
 
-      if (previousMessage.message?.author.name !== message.message?.author.name) {
+      if (
+        previousMessage.message?.author.name !== message.message?.author.name
+      ) {
         return true;
       }
 
       return (
-        previousMessage.message?.author.name === message.message?.author.name
-        && differenceInMinutes(
-          parseISO(message.message!.timestamp!)?? Date.now(),
-          parseISO(previousMessage.message!.timestamp!) ?? Date.now(),
+        previousMessage.message?.author.name === message.message?.author.name &&
+        differenceInMinutes(
+          parseISO(message.message!.timestamp!) ?? Date.now(),
+          parseISO(previousMessage.message!.timestamp!) ?? Date.now()
         ) >= 2
       );
     },
