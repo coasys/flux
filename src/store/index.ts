@@ -17,6 +17,7 @@ export interface ChannelState {
   name: string;
   perspective: string;
   linkLanguageAddress: string;
+  sharedPerspectiveUrl: string;
   type: FeedType;
   //This tells us how much time passed since last query at this channel
   lastSeenMessageTimestamp: Date | undefined;
@@ -76,6 +77,11 @@ export enum ExpressionTypes {
 export interface ExpressionReference {
   languageAddress: LanguageRef;
   expressionType: ExpressionTypes;
+}
+
+export interface AddChannel {
+  community: string;
+  channel: ChannelState;
 }
 
 const vuexLocal = new VuexPersistence<State>({
@@ -175,6 +181,16 @@ export default createStore({
     updateApplicationStartTime(state: State, payload: Date) {
       state.applicationStartTime = payload;
     },
+
+    addChannel(state: State, payload: AddChannel) {
+      const community = state.communities.find(
+        (community) => community.perspective === payload.community
+      );
+      if (community != undefined) {
+        //@ts-ignore
+        community.value.channels.push(payload.value.channel);
+      }
+    },
   },
   getters: {
     //Dump the whole state
@@ -262,6 +278,10 @@ export default createStore({
 
     getAgentLockStatus(state: State): boolean {
       return state.agentUnlocked;
+    },
+
+    getApplicationStartTime(state: State): Date {
+      return state.applicationStartTime;
     },
   },
 });

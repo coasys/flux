@@ -368,6 +368,10 @@ export default defineComponent({
         shareChannelPerspective
       );
 
+      //Get the perspective again so that we have the SharedPerspective URL
+      let perspective = await this.getPerspectiveMethod();
+      console.log("Got the channel perspective back with result", perspective);
+
       //Add the perspective to community store
       let now = new Date();
       this.$store.commit({
@@ -389,16 +393,13 @@ export default defineComponent({
               maxSyncSize: -1,
               currentExpressionLinks: [],
               currentExpressionMessages: [],
+              sharedPerspectiveUrl: perspective.sharedURL!,
             },
           ],
           perspective: createSourcePerspective.uuid!,
           expressionLanguages: fullExpressionLangs,
         },
       });
-
-      //Get the perspective again so that we have the SharedPerspective URL
-      let perspective = await this.getPerspectiveMethod();
-      console.log("Got the channel perspective back with result", perspective);
 
       //Set the perspectiveUUID in question back to original
       this.perspectiveUuid = createSourcePerspective.uuid!;
@@ -429,7 +430,10 @@ export default defineComponent({
           target: channelScPubKey,
           predicate: "*",
         });
-        console.log("Created active agent link with result", addActiveAgentLink);
+        console.log(
+          "Created active agent link with result",
+          addActiveAgentLink
+        );
       }, 600000);
 
       //Add link on channel social context declaring type
@@ -445,7 +449,6 @@ export default defineComponent({
 
       let getLanguageResult = new Promise((resolve, reject) => {
         this.getLanguage.onResult((result) => {
-          console.log('hello', result);
           let uiData: ExpressionUIIcons = {
             languageAddress: this.languageAddress,
             createIcon: result.data.language?.constructorIcon.code,

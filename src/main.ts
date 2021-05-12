@@ -15,14 +15,18 @@ const wsLink = new WebSocketLink({
   },
 });
 
-const apolloClient = new ApolloClient({
+export const apolloClient = new ApolloClient({
   //uri: 'http://localhost:4000',
   link: wsLink,
   cache: new InMemoryCache(),
   defaultOptions: {
     watchQuery: {
-      fetchPolicy: "network-only",
-      nextFetchPolicy: "network-only",
+      fetchPolicy: "no-cache",
+      errorPolicy: "ignore",
+    },
+    query: {
+      fetchPolicy: "no-cache",
+      errorPolicy: "all",
     },
   },
 });

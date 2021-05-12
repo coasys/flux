@@ -51,12 +51,13 @@ app.on("ready", async () => {
 
   console.log("\x1b[36m%s\x1b[0m", "Init AD4M...");
   ad4m
-    .init(app.getPath("appData"), execPath, "./ad4m/languages", [
-      "languages",
-      "encrypted-languages",
-      "agent-profiles",
-      "shared-perspectives",
-    ])
+    .init(
+      app.getPath("appData"),
+      execPath,
+      "./ad4m/languages",
+      ["languages", "agent-profiles", "shared-perspectives"],
+      false
+    )
     .then((ad4mCore: ad4m.PerspectivismCore) => {
       Core = ad4mCore;
       console.log(

@@ -207,7 +207,6 @@ export const PUBLISH_PERSPECTIVE = gql`
     $name: String
     $description: String
     $type: String
-    $encrypt: Boolean
     $passphrase: String
     $requiredExpressionLanguages: [String]
     $allowedExpressionLanguages: [String]
@@ -218,7 +217,6 @@ export const PUBLISH_PERSPECTIVE = gql`
         name: $name
         description: $description
         type: $type
-        encrypt: $encrypt
         passphrase: $passphrase
         requiredExpressionLanguages: $requiredExpressionLanguages
         allowedExpressionLanguages: $allowedExpressionLanguages
@@ -241,14 +239,12 @@ export const CREATE_UNIQUE_EXPRESSION_LANGUAGE = gql`
   mutation createUniqueHolochainExpressionLanguageFromTemplate(
     $languagePath: String
     $dnaNick: String
-    $encrypt: Boolean
     $passphrase: String
   ) {
     createUniqueHolochainExpressionLanguageFromTemplate(
       input: {
         languagePath: $languagePath
         dnaNick: $dnaNick
-        encrypt: $encrypt
         passphrase: $passphrase
       }
     ) {
@@ -375,6 +371,31 @@ export const SOURCE_LINK_QUERY_TIME_PAGINATED = gql`
   }
 `;
 
+export const SOURCE_PREDICATE_LINK_QUERY_TIME_PAGINATED = gql`
+  query links(
+    $perspectiveUUID: String
+    $source: String
+    $predicate: String
+    $from: Date
+    $to: Date
+  ) {
+    links(
+      perspectiveUUID: $perspectiveUUID
+      query: { source: $source, predicate: $predicate, from: $from, to: $to }
+    ) {
+      author {
+        did
+      }
+      timestamp
+      data {
+        source
+        predicate
+        target
+      }
+    }
+  }
+`;
+
 export const ADD_LINK = gql`
   mutation addLink($perspectiveUUID: String, $link: String) {
     addLink(input: { perspectiveUUID: $perspectiveUUID, link: $link }) {
@@ -452,6 +473,35 @@ export const LANGUAGE = gql`
       settingsIcon {
         code
       }
+    }
+  }
+`;
+
+export const INSTALL_SHARED_PERSPECTIVE = gql`
+  mutation installSharedPerspective(
+    $sharedPerspectiveUrl: String
+    $sharedPerspective: SharedPerspectiveInput
+  ) {
+    installSharedPerspective(
+      input: {
+        sharedPerspectiveUrl: $sharedPerspectiveUrl
+        sharedPerspective: $sharedPerspective
+      }
+    ) {
+      name
+      uuid
+      sharedPerspective {
+        name
+        description
+        type
+        linkLanguages {
+          address
+          name
+        }
+        allowedExpressionLanguages
+        requiredExpressionLanguages
+      }
+      sharedURL
     }
   }
 `;

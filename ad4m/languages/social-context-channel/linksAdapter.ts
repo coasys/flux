@@ -111,11 +111,20 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     if (!link_query.source) {
       link_query.source = "root";
     }
+    if (link_query.source == undefined) {
+      link_query.source = null;
+    }
+    if (link_query.target == undefined) {
+      link_query.target = null;
+    }
+    if (link_query.predicate == undefined) {
+      link_query.predicate = null;
+    }
     if (query.from) {
       link_query.from = query.from.toISOString();
     }
-    if (query.to) {
-      link_query.until = query.to.toISOString();
+    if (query.until) {
+      link_query.until = query.until.toISOString();
     }
     const links = await this.#socialContextDna.call(
       DNA_NICK,
@@ -125,7 +134,7 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     );
     //console.debug("Holchain Social Context: Got Links", links);
 
-    return links.filter((link) => query.isMatch(link.data as Link));
+    return links;
   }
 
   addCallback(callback: NewLinksObserver): number {

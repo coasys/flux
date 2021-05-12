@@ -19,7 +19,7 @@
         </div>
 
         <text-field-full
-          maxLength="50"
+          maxLength="500"
           title="Link"
           description="Joining Link Here"
           v-model="joiningLink"
@@ -38,11 +38,189 @@ import { defineComponent, ref } from "vue";
 import TextFieldFull from "../../ui/textfields/TextFieldFull.vue";
 import JoinButton from "../../ui/buttons/JoinButton.vue";
 import Spacer from "../../ui/spacer/Spacer.vue";
+import { useLazyQuery, useMutation } from "@vue/apollo-composable";
+import {
+  QUERY_EXPRESSION,
+  INSTALL_SHARED_PERSPECTIVE,
+  SOURCE_PREDICATE_LINK_QUERY,
+  ADD_LINK,
+  PUB_KEY_FOR_LANG,
+} from "@/core/graphql_queries";
+import SharedPerspective from "@perspect3vism/ad4m/SharedPerspective";
+import { FeedType, SyncLevel, ChannelState } from "@/store";
+import ad4m from "@perspect3vism/ad4m-executor";
 
 export default defineComponent({
   setup() {
     const joiningLink = ref("");
-    return { joiningLink };
+    const perspectiveUrl = ref("");
+    const sharedPerspective = ref({});
+    const sourceLinkLanguage = ref("");
+    const installedSourcePerspectiveUUID = ref("");
+    const perspectiveUuid = ref("");
+    const linkData = ref({});
+    const currentQueryLang = ref("");
+
+    //Query expression handke
+    const getExpression = useLazyQuery<{ expression: ad4m.Expression }>(
+      QUERY_EXPRESSION,
+      () => ({
+        url: joiningLink.value,
+      }),
+      { fetchPolicy: "network-only" }
+    );
+
+    const getChatChannelLinks = useLazyQuery<{ links: ad4m.LinkExpression[] }>(
+      SOURCE_PREDICATE_LINK_QUERY,
+      () => ({
+        perspectiveUUID: installedSourcePerspectiveUUID.value,
+        source: `${sourceLinkLanguage.value}://self`,
+        predicate: "sioc://has_space",
+      })
+    );
+
+    const installSharedPerspective = useMutation<{
+      installSharedPerspective: ad4m.Perspective;
+    }>(INSTALL_SHARED_PERSPECTIVE, () => ({
+      variables: {
+        sharedPerspectiveUrl: perspectiveUrl.value,
+        sharedPerspective: sharedPerspective.value,
+      },
+    }));
+
+    const { mutate: addLink, error: addLinkError } = useMutation<{
+      addLink: ad4m.LinkExpression;
+    }>(ADD_LINK, () => ({
+      variables: {
+        perspectiveUUID: perspectiveUuid.value,
+        link: JSON.stringify(linkData.value),
+      },
+    }));
+
+    const pubKeyForLang = useLazyQuery<{
+      pubKeyForLanguage: string;
+    }>(PUB_KEY_FOR_LANG, () => ({ lang: currentQueryLang.value }));
+
+    return {
+      getExpression,
+      joiningLink,
+      perspectiveUrl,
+      sharedPerspective,
+      installSharedPerspective,
+      getChatChannelLinks,
+      installedSourcePerspectiveUUID,
+      sourceLinkLanguage,
+      addLink,
+      addLinkError,
+      perspectiveUuid,
+      linkData,
+      pubKeyForLang,
+      currentQueryLang,
+    };
+  },
+  methods: {
+    getExpressionMethod(): Promise<ad4m.Expression> {
+      return new Promise((resolve, reject) => {
+        this.getExpression.onResult((result) => {
+          resolve(result.data!.expression);
+        });
+        this.getExpression.onError((error) => {
+          console.log("Got error", error);
+          reject(error);
+        });
+        this.getExpression.load();
+      });
+    },
+    getChannelLinks(): Promise<ad4m.LinkExpression[]> {
+      return new Promise((resolve, reject) => {
+        this.getChatChannelLinks.onResult((result) => {
+          resolve(result.data.links);
+        });
+        this.getChatChannelLinks.onError((error) => {
+          console.log("Got error getting channel links", error);
+          reject(error);
+        });
+        this.getChatChannelLinks.load();
+      });
+    },
+    installSharedPerspectiveMethod(
+      url: string,
+      perspective: SharedPerspective
+    ): Promise<ad4m.Perspective> {
+      this.perspectiveUrl = url;
+      this.sharedPerspective = perspective;
+      return new Promise((resolve, reject) => {
+        this.installSharedPerspective.onError((error) => {
+          console.log("Install sharedPerspective got error", error);
+          reject(error);
+        });
+        this.installSharedPerspective.mutate().then((result) => {
+          resolve(result.data!.installSharedPerspective);
+        });
+      });
+    },
+
+    createLink(link: ad4m.Link): Promise<ad4m.LinkExpression> {
+      this.linkData = link;
+      return new Promise((resolve, reject) => {
+        this.addLink().then((addLinkResp) => {
+          resolve(addLinkResp.data!.addLink);
+        });
+      });
+    },
+
+    getPubKeyForLang(lang: string): Promise<string> {
+      this.currentQueryLang = lang;
+      return new Promise((resolve, reject) => {
+        this.pubKeyForLang.onResult((result) => {
+          resolve(result.data.pubKeyForLanguage);
+        });
+        this.pubKeyForLang.onError((error) => {
+          console.log("Got error in getPubKeyForLang", error);
+          reject(error);
+        });
+        this.pubKeyForLang.load();
+      });
+    },
+
+    sleep(ms: number) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    },
+
+    async joinCommunity() {
+      //TODO: fix all types here and remove ts-ignores
+      console.log(this.joiningLink);
+      let sharedPerspectiveExp = await this.getExpressionMethod();
+      let sharedPerspective: SharedPerspective = JSON.parse(
+        sharedPerspectiveExp.data!
+      );
+      //TODO: check that the perspective is not already installed
+      let installedPerspective = await this.installSharedPerspectiveMethod(
+        this.joiningLink,
+        sharedPerspective
+      );
+      console.log(
+        new Date(),
+        "Installed perspective raw data",
+        installedPerspective
+      );
+      this.installedSourcePerspectiveUUID = installedPerspective.uuid!;
+      this.sourceLinkLanguage = installedPerspective.sharedPerspective!.linkLanguages![0]!.address!;
+
+      this.$store.commit({
+        type: "addCommunity",
+        value: {
+          name: installedPerspective.name,
+          linkLanguageAddress: this.sourceLinkLanguage,
+          channels: [],
+          perspective: this.installedSourcePerspectiveUUID,
+          expressionLanguages: installedPerspective.sharedPerspective!
+            .requiredExpressionLanguages,
+        },
+      });
+
+      this.showJoinCommunity!();
+    },
   },
   props: {
     showJoinCommunity: Function,
