@@ -79,6 +79,11 @@ export interface ExpressionReference {
   expressionType: ExpressionTypes;
 }
 
+export interface AddChannel {
+  community: string;
+  channel: ChannelState;
+}
+
 const vuexLocal = new VuexPersistence<State>({
   storage: window.localStorage,
 });
@@ -175,6 +180,16 @@ export default createStore({
 
     updateApplicationStartTime(state: State, payload: Date) {
       state.applicationStartTime = payload;
+    },
+
+    addChannel(state: State, payload: AddChannel) {
+      const community = state.communities.find(
+        (community) => community.perspective === payload.community
+      );
+      if (community != undefined) {
+        //@ts-ignore
+        community.value.channels.push(payload.value.channel);
+      }
     },
   },
   getters: {

@@ -12,6 +12,7 @@ import {
   ADD_LINK,
   PUB_KEY_FOR_LANG,
   SOURCE_PREDICATE_LINK_QUERY,
+  INSTALL_SHARED_PERSPECTIVE,
 } from "./core/graphql_queries";
 import {
   agentRefreshDurationMs,
@@ -71,12 +72,12 @@ export default defineComponent({
 
     const pubKeyForLang = (lang: string): Promise<string> => {
       return new Promise((resolve) => {
-        const pubKey = apolloClient.query({
+        const pubKey = apolloClient.query<{ pubKeyForLanguage: string }>({
           query: PUB_KEY_FOR_LANG,
           variables: { lang: lang },
         });
         pubKey.then((result) => {
-          resolve(result.data);
+          resolve(result.data.pubKeyForLanguage);
         });
       });
     };
@@ -124,12 +125,82 @@ export default defineComponent({
       );
     };
 
+    const installSharedPerspective = (
+      url: string,
+      perspective: ad4m.SharedPerspective
+    ): Promise<ad4m.Perspective> => {
+      return new Promise((resolve) => {
+        const install = apolloClient.mutate<{
+          installSharedPerspective: ad4m.Perspective;
+        }>({
+          mutation: INSTALL_SHARED_PERSPECTIVE,
+          variables: {
+            sharedPerspectiveUrl: url,
+            sharedPerspective: perspective,
+          },
+        });
+        install.then((result) => {
+          resolve(result.data!.installSharedPerspective);
+        });
+      });
+    };
+
+    const joinChannelFromSharedLink = async (
+      sharedPerspectiveUrl: string
+    ): Promise<ChannelState> => {
+      let channelSharedPerspExp = await getExpression(sharedPerspectiveUrl);
+      console.log(new Date(), "Got channel shared exp", channelSharedPerspExp);
+      let channelSharedPerspective: ad4m.SharedPerspective = JSON.parse(
+        channelSharedPerspExp.data!
+      );
+      let installedChannelPerspective = await installSharedPerspective(
+        sharedPerspectiveUrl,
+        channelSharedPerspective
+      );
+      console.log(
+        new Date(),
+        "Installed with result",
+        installedChannelPerspective
+      );
+      await sleep(1000);
+      let channelScPubKey = await pubKeyForLang(
+        installedChannelPerspective.sharedPerspective!.linkLanguages![0]!
+          .address!
+      );
+      console.log(
+        new Date(),
+        "Got pub key for social context channel",
+        channelScPubKey
+      );
+      await addLink(installedChannelPerspective.uuid!, {
+        source: "active_agent",
+        target: channelScPubKey,
+        predicate: "*",
+      });
+      let now = new Date();
+      return {
+        name: installedChannelPerspective.name!,
+        perspective: installedChannelPerspective.uuid!,
+        type: FeedType.Dm,
+        lastSeenMessageTimestamp: now,
+        firstSeenMessageTimestamp: now,
+        createdAt: now,
+        linkLanguageAddress: installedChannelPerspective.sharedPerspective!
+          .linkLanguages![0]!.address!,
+        syncLevel: SyncLevel.Full,
+        maxSyncSize: -1,
+        currentExpressionLinks: [],
+        currentExpressionMessages: [],
+        sharedPerspectiveUrl: sharedPerspectiveUrl,
+      };
+    };
+
     async function getPerspectiveChannels() {
       noDelaySetInterval(async () => {
         //TODO: only do when application window is open
+        //Or perhaps this only gets run once a user clicks on a given community?
         const communities: CommunityState[] = store.getters.getCommunities;
         for (const community of communities) {
-          console.log("checking community", community);
           let channelLinks = await getChatChannelLinks(
             //@ts-ignore
             community.value.perspective,
@@ -150,6 +221,13 @@ export default defineComponent({
                 channelLinks[i],
                 "Adding to channel"
               );
+              let channel = await joinChannelFromSharedLink(
+                channelLinks[i].data!.target!
+              );
+              store.commit({
+                type: "addChannel",
+                value: { community: community.perspective, channel: channel },
+              });
             } else {
               console.log(
                 "Could not find match for channels",
