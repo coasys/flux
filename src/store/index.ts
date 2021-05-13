@@ -1,4 +1,3 @@
-import LanguageRef from "@perspect3vism/ad4m/LanguageRef";
 import { createStore } from "vuex";
 import VuexPersistence from "vuex-persist";
 import type Expression from "@perspect3vism/ad4m/Expression";
@@ -9,7 +8,8 @@ export interface CommunityState {
   channels: ChannelState[];
   perspective: string;
   linkLanguageAddress: string;
-  expressionLanguages: ExpressionReference[];
+  expressionLanguages: string[];
+  typedExpressionLanguages: ExpressionReference[];
 }
 
 // Vuex state of a given channel; note that links or expression data is not cached here since that will occur on the perspectives local data
@@ -72,10 +72,12 @@ export interface ExpressionUIIcons {
 
 export enum ExpressionTypes {
   ShortForm,
+  GroupExpression,
+  Other,
 }
 
 export interface ExpressionReference {
-  languageAddress: LanguageRef;
+  languageAddress: string;
   expressionType: ExpressionTypes;
 }
 

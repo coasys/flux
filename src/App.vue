@@ -296,9 +296,6 @@ export default defineComponent({
             value: now,
           });
 
-          let expressionLangs =
-            store.getters.getAllExpressionLanguagesNotLoaded;
-
           let difOld = new Date(lastOpen);
           let dif = now.getTime() - difOld.getTime();
           if (dif > agentRefreshDurationMs) {
@@ -308,6 +305,9 @@ export default defineComponent({
           }
           await getPerspectiveChannels();
 
+          //TODO: this is probably not needed here and should work fine on join/create of community
+          let expressionLangs =
+            store.getters.getAllExpressionLanguagesNotLoaded;
           for (const [, lang] of expressionLangs.entries()) {
             let language = await getLanguage(lang);
             console.log("Got language", language);

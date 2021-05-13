@@ -72,7 +72,14 @@ import {
 import ad4m from "@perspect3vism/ad4m-executor";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
-import { FeedType, SyncLevel, ExpressionUIIcons, ChannelState } from "@/store";
+import {
+  FeedType,
+  SyncLevel,
+  ExpressionUIIcons,
+  ChannelState,
+  ExpressionReference,
+  ExpressionTypes,
+} from "@/store";
 import { apolloClient } from "@/main";
 
 export default defineComponent({
@@ -380,6 +387,16 @@ export default defineComponent({
           channels: [channel],
           perspective: createSourcePerspective.uuid!,
           expressionLanguages: expressionLangs,
+          typedExpressionLanguages: [
+            {
+              languageAddress: shortFormExpressionLang.address!,
+              expressionType: ExpressionTypes.ShortForm,
+            } as ExpressionReference,
+            {
+              languageAddress: groupExpressionLang.address!,
+              expressionType: ExpressionTypes.GroupExpression,
+            } as ExpressionReference,
+          ],
         },
       });
 

@@ -45,9 +45,15 @@ import {
   SOURCE_PREDICATE_LINK_QUERY,
   ADD_LINK,
   PUB_KEY_FOR_LANG,
+  LANGUAGE,
 } from "@/core/graphql_queries";
 import SharedPerspective from "@perspect3vism/ad4m/SharedPerspective";
-import { FeedType, SyncLevel, ChannelState } from "@/store";
+import {
+  ExpressionReference,
+  ExpressionTypes,
+  ExpressionUIIcons,
+} from "@/store";
+import { apolloClient } from "@/main";
 import ad4m from "@perspect3vism/ad4m-executor";
 
 export default defineComponent({
@@ -183,6 +189,22 @@ export default defineComponent({
       });
     },
 
+    getLanguage(language: string): Promise<ad4m.Language> {
+      return new Promise((resolve, reject) => {
+        apolloClient
+          .query<{ language: ad4m.Language }>({
+            query: LANGUAGE,
+            variables: { address: language },
+          })
+          .then((result) => {
+            resolve(result.data!.language);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    },
+
     sleep(ms: number) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
@@ -205,7 +227,44 @@ export default defineComponent({
         installedPerspective
       );
       this.installedSourcePerspectiveUUID = installedPerspective.uuid!;
-      this.sourceLinkLanguage = installedPerspective.sharedPerspective!.linkLanguages![0]!.address!;
+      this.sourceLinkLanguage =
+        installedPerspective.sharedPerspective!.linkLanguages![0]!.address!;
+
+      let typedExpressionLanguages = [];
+      //Get and cache the expression UI for each expression language
+      //And used returned expression language names to populate typedExpressionLanguages field
+      for (const lang of installedPerspective.sharedPerspective!
+        .requiredExpressionLanguages!) {
+        console.log("JoinCommunity.vue: Fetching UI lang:", lang);
+        let languageRes = await this.getLanguage(lang!);
+        let uiData: ExpressionUIIcons = {
+          languageAddress: lang!,
+          createIcon: languageRes.constructorIcon!.code!,
+          viewIcon: languageRes.iconFor!.code!,
+        };
+        this.$store.commit({
+          type: "addExpressionUI",
+          value: uiData,
+        });
+        let expressionType;
+        switch (languageRes.name!) {
+          case "junto-shortform":
+            expressionType = ExpressionTypes.ShortForm;
+            break;
+
+          case "group-expression":
+            expressionType = ExpressionTypes.GroupExpression;
+            break;
+
+          default:
+            expressionType = ExpressionTypes.Other;
+        }
+        typedExpressionLanguages.push({
+          languageAddress: lang!,
+          expressionType: expressionType,
+        } as ExpressionReference);
+        await this.sleep(40);
+      }
 
       this.$store.commit({
         type: "addCommunity",
@@ -214,8 +273,9 @@ export default defineComponent({
           linkLanguageAddress: this.sourceLinkLanguage,
           channels: [],
           perspective: this.installedSourcePerspectiveUUID,
-          expressionLanguages: installedPerspective.sharedPerspective!
-            .requiredExpressionLanguages,
+          expressionLanguages:
+            installedPerspective.sharedPerspective!.requiredExpressionLanguages,
+          typedExpressionLanguages: typedExpressionLanguages,
         },
       });
 
