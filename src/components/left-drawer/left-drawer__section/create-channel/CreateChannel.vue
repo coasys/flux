@@ -15,8 +15,7 @@
             </div>
           </div>
           <p class="createChannel__dialog--description">
-            Channels are ways to organize your conversations by topics. You can
-            create up to 5 channels for your community.
+            Channels are ways to organize your conversations by topics.
           </p>
           <create-channel-text-field></create-channel-text-field>
         </div>

@@ -69,7 +69,6 @@ import {
   PERSPECTIVE,
   LANGUAGE,
 } from "@/core/graphql_queries";
-import { useLazyQuery, useMutation } from "@vue/apollo-composable";
 import ad4m from "@perspect3vism/ad4m-executor";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
@@ -81,14 +80,12 @@ export default defineComponent({
     //TODO: I hate this code block here, needs to be refactored
     const passphrase = ref("");
     const perspectiveName = ref("");
-    const channelPerspectiveName = ref("");
     const description = ref("");
 
     return {
       passphrase,
       perspectiveName,
       description,
-      channelPerspectiveName,
     };
   },
   methods: {
@@ -250,13 +247,8 @@ export default defineComponent({
     },
 
     async createChannel(expressionLangs: string[]): Promise<ChannelState> {
-      //Next steps: create another perspective + share with social-context-channel link language and add above expression DNA's onto it
-      //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel
-      //This logic and the above logic should be in their own functions, for now its monolithic
-      this.channelPerspectiveName =
-        this.perspectiveName + " Default Message Channel";
       let channelPerspective = await this.addPerspective(
-        this.channelPerspectiveName
+        "Default Message Channel"
       );
       console.log(
         "Created channel perspective with result",
@@ -266,7 +258,7 @@ export default defineComponent({
       //Publish the perspective and add a social-context backend
       let shareChannelPerspective = await this.publishSharedPerspective({
         uuid: channelPerspective.uuid!,
-        name: this.channelPerspectiveName,
+        name: "Default Message Channel",
         description: this.description,
         type: "holochainChannel",
         passphrase: this.passphrase,
@@ -373,6 +365,8 @@ export default defineComponent({
       );
       console.log("Created group expression link", addGroupExpLink);
 
+      //Next steps: create another perspective + share with social-context-channel link language and add above expression DNA's onto it
+      //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel
       let channel = await this.createChannel([
         shortFormExpressionLang.address!,
       ]);
