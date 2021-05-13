@@ -28,9 +28,8 @@ import {
 } from "./store";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { apolloClient } from "./main";
-import { onError } from '@apollo/client/link/error';
-import { logErrorMessages } from '@vue/apollo-util';
-
+import { onError } from "@apollo/client/link/error";
+import { logErrorMessages } from "@vue/apollo-util";
 
 declare global {
   interface Window {
@@ -45,8 +44,8 @@ export default defineComponent({
     var language = "";
     var expression = {};
 
-    onError(error => {
-      if (process.env.NODE_ENV !== 'production') {
+    onError((error) => {
+      if (process.env.NODE_ENV !== "production") {
         // can use error.operation.operationName to single out a query type.
         logErrorMessages(error);
       }
@@ -195,8 +194,9 @@ export default defineComponent({
         lastSeenMessageTimestamp: now,
         firstSeenMessageTimestamp: now,
         createdAt: now,
-        linkLanguageAddress: installedChannelPerspective.sharedPerspective!
-          .linkLanguages![0]!.address!,
+        linkLanguageAddress:
+          installedChannelPerspective.sharedPerspective!.linkLanguages![0]!
+            .address!,
         syncLevel: SyncLevel.Full,
         maxSyncSize: -1,
         currentExpressionLinks: [],
@@ -218,7 +218,6 @@ export default defineComponent({
             community.value.linkLanguageAddress
           );
           if (channelLinks != null) {
-            console.log("Got channel links", channelLinks);
             for (let i = 0; i < channelLinks.length; i++) {
               if (
                 //@ts-ignore
@@ -238,14 +237,12 @@ export default defineComponent({
                 );
                 store.commit({
                   type: "addChannel",
-                  value: { community: community.perspective, channel: channel },
+                  value: {
+                    //@ts-ignore
+                    community: community.value.perspective,
+                    channel: channel,
+                  },
                 });
-              } else {
-                console.log(
-                  "Could not find match for channels",
-                  //@ts-ignore
-                  community.value.channels
-                );
               }
             }
           }

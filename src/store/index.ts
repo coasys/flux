@@ -184,7 +184,8 @@ export default createStore({
 
     addChannel(state: State, payload: AddChannel) {
       const community = state.communities.find(
-        (community) => community.perspective === payload.community
+        //@ts-ignore
+        (community) => community.value.perspective === payload.value.community
       );
       if (community != undefined) {
         //@ts-ignore

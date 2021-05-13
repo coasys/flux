@@ -85,25 +85,6 @@ export default defineComponent({
       },
     }));
 
-    var dateOffset = 24 * 60 * 60 * 1000 * 3; //3 days
-    var myDate = new Date();
-    myDate.setTime(myDate.getTime() - dateOffset);
-    const now = new Date();
-    const getChatChannelLinks = useLazyQuery(
-      SOURCE_PREDICATE_LINK_QUERY_TIME_PAGINATED,
-      () => ({
-        perspectiveUUID: currentPerspective.value,
-        source: "sioc://chatchannel",
-        predicate: "sioc://content_of",
-        from: myDate,
-        to: now,
-      })
-    );
-
-    getChatChannelLinks.onResult((result) => {
-      console.log("Got links", result);
-    });
-
     return {
       currentExpressionPost,
       expressionLanguage,
@@ -113,7 +94,6 @@ export default defineComponent({
       addLink,
       getExpression,
       expressionUrl,
-      getChatChannelLinks,
     };
   },
   mounted() {
@@ -129,10 +109,6 @@ export default defineComponent({
         if (newVal != undefined) {
           this.currentPerspective = newVal.perspective;
         }
-        this.getChatChannelLinks.load();
-        this.getChatChannelLinks.onResult((result) => {
-          console.log("Got links", result);
-        });
       },
     },
   },
