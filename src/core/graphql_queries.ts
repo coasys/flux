@@ -351,12 +351,12 @@ export const SOURCE_LINK_QUERY_TIME_PAGINATED = gql`
   query links(
     $perspectiveUUID: String
     $source: String
-    $from: Date
-    $to: Date
+    $fromDate: Date
+    $untilDate: Date
   ) {
     links(
       perspectiveUUID: $perspectiveUUID
-      query: { source: $source, from: $from, to: $to }
+      query: { source: $source, fromDate: $fromDate, untilDate: $untilDate }
     ) {
       author {
         did
@@ -376,12 +376,17 @@ export const SOURCE_PREDICATE_LINK_QUERY_TIME_PAGINATED = gql`
     $perspectiveUUID: String
     $source: String
     $predicate: String
-    $from: Date
-    $to: Date
+    $fromDate: Date
+    $untilDate: Date
   ) {
     links(
       perspectiveUUID: $perspectiveUUID
-      query: { source: $source, predicate: $predicate, from: $from, to: $to }
+      query: {
+        source: $source
+        predicate: $predicate
+        fromDate: $fromDate
+        untilDate: $untilDate
+      }
     ) {
       author {
         did

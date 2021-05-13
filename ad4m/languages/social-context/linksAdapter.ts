@@ -4,11 +4,10 @@ import type {
   NewLinksObserver,
 } from "@perspect3vism/ad4m/Language";
 import type Agent from "@perspect3vism/ad4m/Agent";
-import type Link from "@perspect3vism/ad4m/Links";
 import type LanguageContext from "@perspect3vism/ad4m-language-context/LanguageContext";
 import type { default as HolochainLanguageDelegate } from "@perspect3vism/ad4m-language-context/Holochain/HolochainLanguageDelegate";
 import { DNA_NICK } from "./dna";
-import { LinkQuery } from "@perspect3vism/ad4m/Links";
+import type { LinkQuery } from "@perspect3vism/ad4m/Links";
 import { link } from "fs";
 
 export class JuntoSocialContextLinkAdapter implements LinksAdapter {
@@ -107,7 +106,6 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
   }
 
   async getLinks(query: LinkQuery): Promise<Expression[]> {
-    query = new LinkQuery(query);
     const link_query = Object.assign(query);
     if (!link_query.source) {
       link_query.source = "root";
@@ -121,11 +119,15 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     if (link_query.predicate == undefined) {
       link_query.predicate = null;
     }
-    if (link_query.from == undefined) {
+    if (link_query.fromDate == undefined) {
       link_query.from = new Date().toISOString();
+    } else {
+      link_query.from = link_query.fromDate;
     }
-    if (link_query.until == undefined) {
+    if (link_query.untilDate == undefined) {
       link_query.until = new Date().toISOString();
+    } else {
+      link_query.until = link_query.untilDate;
     }
     console.debug("Holochain Social Context: Getting Links With: ", link_query);
     const links = await this.#socialContextDna.call(
