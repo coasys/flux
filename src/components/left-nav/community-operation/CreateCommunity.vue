@@ -85,12 +85,12 @@ import { apolloClient } from "@/main";
 export default defineComponent({
   setup() {
     //TODO: I hate this code block here, needs to be refactored
-    const passphrase = ref("");
+    const uid = ref("");
     const perspectiveName = ref("");
     const description = ref("");
 
     return {
-      passphrase,
+      uid,
       perspectiveName,
       description,
     };
@@ -126,7 +126,7 @@ export default defineComponent({
     createUniqueHolochainExpressionLanguageFromTemplate(
       languagePath: string,
       dnaNick: string,
-      passphrase: string
+      uid: string
     ): Promise<ad4m.LanguageRef> {
       return new Promise((resolve, reject) => {
         apolloClient
@@ -137,7 +137,7 @@ export default defineComponent({
             variables: {
               languagePath: languagePath,
               dnaNick: dnaNick,
-              passphrase: passphrase,
+              uid: uid,
             },
           })
           .then((result) => {
@@ -268,7 +268,7 @@ export default defineComponent({
         name: "Default Message Channel",
         description: this.description,
         type: "holochainChannel",
-        passphrase: this.passphrase,
+        uid: this.uid,
         requiredExpressionLanguages: expressionLangs,
         allowedExpressionLanguages: expressionLangs,
       });
@@ -305,7 +305,7 @@ export default defineComponent({
         this.perspectiveName
       );
       console.log("Created perspective", createSourcePerspective);
-      this.passphrase = uuidv4().toString();
+      this.uid = uuidv4().toString();
 
       var builtInLangPath = this.$store.getters.getLanguagePath;
 
@@ -314,7 +314,7 @@ export default defineComponent({
         await this.createUniqueHolochainExpressionLanguageFromTemplate(
           path.join(builtInLangPath.value, "shortform/build"),
           "shortform",
-          this.passphrase
+          this.uid
         );
       console.log("Response from create exp lang", shortFormExpressionLang);
       //Create group expression language
@@ -322,7 +322,7 @@ export default defineComponent({
         await this.createUniqueHolochainExpressionLanguageFromTemplate(
           path.join(builtInLangPath.value, "group-expression/build"),
           "group-expression",
-          this.passphrase
+          this.uid
         );
       console.log("Response from create exp lang", groupExpressionLang);
       let expressionLangs = [
@@ -336,7 +336,7 @@ export default defineComponent({
         name: this.perspectiveName,
         description: this.description,
         type: "holochain",
-        passphrase: this.passphrase,
+        uid: this.uid,
         requiredExpressionLanguages: expressionLangs,
         allowedExpressionLanguages: expressionLangs,
       });
