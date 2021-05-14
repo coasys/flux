@@ -89,8 +89,7 @@ export default defineComponent({
       installSharedPerspective: ad4m.Perspective;
     }>(INSTALL_SHARED_PERSPECTIVE, () => ({
       variables: {
-        sharedPerspectiveUrl: perspectiveUrl.value,
-        sharedPerspective: sharedPerspective.value,
+        url: perspectiveUrl.value,
       },
     }));
 
@@ -149,12 +148,8 @@ export default defineComponent({
         this.getChatChannelLinks.load();
       });
     },
-    installSharedPerspectiveMethod(
-      url: string,
-      perspective: SharedPerspective
-    ): Promise<ad4m.Perspective> {
+    installSharedPerspectiveMethod(url: string): Promise<ad4m.Perspective> {
       this.perspectiveUrl = url;
-      this.sharedPerspective = perspective;
       return new Promise((resolve, reject) => {
         this.installSharedPerspective.onError((error) => {
           console.log("Install sharedPerspective got error", error);
@@ -210,16 +205,8 @@ export default defineComponent({
     },
 
     async joinCommunity() {
-      //TODO: fix all types here and remove ts-ignores
-      console.log(this.joiningLink);
-      let sharedPerspectiveExp = await this.getExpressionMethod();
-      let sharedPerspective: SharedPerspective = JSON.parse(
-        sharedPerspectiveExp.data!
-      );
-      //TODO: check that the perspective is not already installed
       let installedPerspective = await this.installSharedPerspectiveMethod(
-        this.joiningLink,
-        sharedPerspective
+        this.joiningLink
       );
       console.log(
         new Date(),

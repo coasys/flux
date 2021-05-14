@@ -28,8 +28,6 @@ export const AGENT = gql`
     agent {
       agent {
         did
-        name
-        email
       }
     }
   }
@@ -84,8 +82,6 @@ export const UPDATE_AGENT_PROFILE = gql`
     updateAgentProfile(input: { name: $name, email: $email }) {
       agent {
         did
-        name
-        email
       }
       isInitialized
       isUnlocked
@@ -207,7 +203,7 @@ export const PUBLISH_PERSPECTIVE = gql`
     $name: String
     $description: String
     $type: String
-    $passphrase: String
+    $uid: String
     $requiredExpressionLanguages: [String]
     $allowedExpressionLanguages: [String]
   ) {
@@ -217,7 +213,7 @@ export const PUBLISH_PERSPECTIVE = gql`
         name: $name
         description: $description
         type: $type
-        passphrase: $passphrase
+        uid: $uid
         requiredExpressionLanguages: $requiredExpressionLanguages
         allowedExpressionLanguages: $allowedExpressionLanguages
       }
@@ -239,14 +235,10 @@ export const CREATE_UNIQUE_EXPRESSION_LANGUAGE = gql`
   mutation createUniqueHolochainExpressionLanguageFromTemplate(
     $languagePath: String
     $dnaNick: String
-    $passphrase: String
+    $uid: String
   ) {
     createUniqueHolochainExpressionLanguageFromTemplate(
-      input: {
-        languagePath: $languagePath
-        dnaNick: $dnaNick
-        passphrase: $passphrase
-      }
+      input: { languagePath: $languagePath, dnaNick: $dnaNick, uid: $uid }
     ) {
       address
       name
@@ -406,8 +398,6 @@ export const ADD_LINK = gql`
     addLink(input: { perspectiveUUID: $perspectiveUUID, link: $link }) {
       author {
         did
-        email
-        name
       }
       timestamp
       data {
@@ -433,8 +423,6 @@ export const QUERY_EXPRESSION = gql`
       url
       author {
         did
-        email
-        name
       }
       timestamp
       data
@@ -483,16 +471,8 @@ export const LANGUAGE = gql`
 `;
 
 export const INSTALL_SHARED_PERSPECTIVE = gql`
-  mutation installSharedPerspective(
-    $sharedPerspectiveUrl: String
-    $sharedPerspective: SharedPerspectiveInput
-  ) {
-    installSharedPerspective(
-      input: {
-        sharedPerspectiveUrl: $sharedPerspectiveUrl
-        sharedPerspective: $sharedPerspective
-      }
-    ) {
+  mutation installSharedPerspective($url: String) {
+    installSharedPerspective(url: $url) {
       name
       uuid
       sharedPerspective {

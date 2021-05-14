@@ -135,8 +135,7 @@ export default defineComponent({
     };
 
     const installSharedPerspective = (
-      url: string,
-      perspective: ad4m.SharedPerspective
+      url: string
     ): Promise<ad4m.Perspective> => {
       return new Promise((resolve) => {
         const install = apolloClient.mutate<{
@@ -144,8 +143,7 @@ export default defineComponent({
         }>({
           mutation: INSTALL_SHARED_PERSPECTIVE,
           variables: {
-            sharedPerspectiveUrl: url,
-            sharedPerspective: perspective,
+            url: url,
           },
         });
         install.then((result) => {
@@ -157,14 +155,8 @@ export default defineComponent({
     const joinChannelFromSharedLink = async (
       sharedPerspectiveUrl: string
     ): Promise<ChannelState> => {
-      let channelSharedPerspExp = await getExpression(sharedPerspectiveUrl);
-      console.log(new Date(), "Got channel shared exp", channelSharedPerspExp);
-      let channelSharedPerspective: ad4m.SharedPerspective = JSON.parse(
-        channelSharedPerspExp.data!
-      );
       let installedChannelPerspective = await installSharedPerspective(
-        sharedPerspectiveUrl,
-        channelSharedPerspective
+        sharedPerspectiveUrl
       );
       console.log(
         new Date(),
