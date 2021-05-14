@@ -2,7 +2,7 @@
 
 ## Environment
 Node version: 14.16.0<br>
-Linux OS for running HC & Holochain binaries (see `./resources`). Only linux is supported currently.
+Linux/Mac OS for running HC & Holochain binaries (see `./resources`).
 
 ## Project setup
 ```
