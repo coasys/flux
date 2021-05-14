@@ -11,13 +11,10 @@ npm run build-languages && npm install
 
 If you have any troubles on npm install for any given language or for this project, its likely npm shitting the bed, delete `package-lock.json` & `node_modules` for the package in question and try again. 
 
-Also ensure that you have the following packages in the same directory that this repository is located in:<br>
-
-[AD4M](https://github.com/perspect3vism/ad4m)<br>
-[AD4M-core-executor](https://github.com/perspect3vism/ad4m-executor)<br>
-[language-context](https://github.com/perspect3vism/language-context)<br>
-
-(You will need to run `npm install && npm run build` in each of these also)
+### Compiles and hot-reloads for development
+```
+npm run electron:serve
+```
 
 ## Cleaning local state
 
@@ -39,11 +36,6 @@ This project makes use of the following holochain DNA's.
 [Language-Persistence](https://github.com/perspect3vism/language-persistence) DNA for the storing of language meta information under a given key<br>
 
 These DNA's come bundled with the builtin languages, links above are provided for reference to anyone interested.
-
-### Compiles and hot-reloads for development
-```
-npm run electron:serve
-```
 
 ### Compiles and minifies for production
 ```
