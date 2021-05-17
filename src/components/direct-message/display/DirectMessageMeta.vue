@@ -22,9 +22,7 @@ export default defineComponent({
   computed: {
     time(): string {
       const message = this.message as Expression;
-      const time = parseISO(message.timestamp
-        .split('+')[0]
-        .replace('Z', ''));
+      const time = parseISO(message.timestamp);
       return format(time, 'h:mm a');
     },
   },
