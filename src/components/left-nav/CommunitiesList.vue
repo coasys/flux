@@ -158,8 +158,6 @@ export default defineComponent({
       clearInterval(noDelayRef.value);
 
       const test = noDelaySetInterval(async () => {
-        //@ts-ignore
-        console.log('acc', community.value.name);
         //TODO: only do when application window is open
         //Or perhaps this only gets run once a user clicks on a given community?
         let channelLinks = await getChatChannelLinks(
