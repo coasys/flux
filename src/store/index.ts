@@ -12,7 +12,7 @@ export interface CommunityState {
   typedExpressionLanguages: ExpressionReference[];
 }
 
-// Vuex state of a given channel; note that links or expression data is not cached here since that will occur on the perspectives local data
+// Vuex state of a given channel
 export interface ChannelState {
   name: string;
   perspective: string;
@@ -39,8 +39,6 @@ export interface CommunityView {
   name: string;
   type: FeedType;
   perspective: string;
-  // currentExpressionLinks: [Expression];
-  // currentExpressionMessages: [Expression];
 }
 
 export enum FeedType {

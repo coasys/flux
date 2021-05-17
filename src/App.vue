@@ -242,39 +242,35 @@ export default defineComponent({
       }, channelRefreshDurationMs);
     }
 
-    async function runActiveAgents(skip: boolean) {
-      console.log("Running active agent check with skip", skip);
-      if (skip == false || skip == undefined) {
-        const communities = store.getters.getCommunities;
+    async function runActiveAgents() {
+      const communities = store.getters.getCommunities;
 
-        for (const community of communities) {
-          const channels = community.value.channels;
+      for (const community of communities) {
+        const channels = community.value.channels;
 
-          for (const channel of channels) {
-            let channelScPubKey = await pubKeyForLang(
-              channel.linkLanguageAddress
-            );
-            console.log("Got pub key for language", channelScPubKey);
-            let addActiveAgentLink = await addLink(channel.perspective, {
-              source: "active_agent",
-              target: channelScPubKey,
-              predicate: "*",
-            });
-            console.log(
-              "Created active agent link with result",
-              addActiveAgentLink
-            );
-          }
+        for (const channel of channels) {
+          let channelScPubKey = await pubKeyForLang(
+            channel.linkLanguageAddress
+          );
+          console.log("Got pub key for language", channelScPubKey);
+          let addActiveAgentLink = await addLink(channel.perspective, {
+            source: "active_agent",
+            target: channelScPubKey,
+            predicate: "*",
+          });
+          console.log(
+            "Created active agent link with result",
+            addActiveAgentLink
+          );
         }
-      } else {
-        skip = false;
       }
     }
 
-    async function setActiveAgents(skip: boolean, diffTime: number) {
+    async function setActiveAgents(diffTime: number) {
+      console.log("Delaying setting active agent by", diffTime / 1000);
       setTimeout(() => {
         noDelaySetInterval(async () => {
-          runActiveAgents(skip);
+          runActiveAgents();
         }, agentRefreshDurationMs);
       }, diffTime);
     }
@@ -295,9 +291,9 @@ export default defineComponent({
           let difOld = new Date(lastOpen);
           let dif = now.getTime() - difOld.getTime();
           if (dif > agentRefreshDurationMs) {
-            await setActiveAgents(false, dif);
+            await setActiveAgents(0);
           } else {
-            await setActiveAgents(true, dif);
+            await setActiveAgents(dif);
           }
           await getPerspectiveChannels();
 

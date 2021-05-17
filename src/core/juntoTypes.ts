@@ -2,7 +2,8 @@
 // of perspective/community data
 export const databasePerspectiveName = "a031bd57-fabb-4ee1-96af-b3f039183931";
 
-export const agentRefreshDurationMs = 600000;
+//TODO: this should probably be larger than 300000
+export const agentRefreshDurationMs = 300000;
 export const channelRefreshDurationMs = 10000;
 export interface JuntoShortForm {
   body: string;
