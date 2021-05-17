@@ -24,7 +24,7 @@ export default defineComponent({
       if (isYesterday(parse(this.date, 'MM/dd/yyyy', Date.now()))) {
         return 'Yesterday';
       }
-      return format(parse(this.date, 'MM/dd/yyyy', Date.now()), 'MMM DD, YYYY');
+      return format(parse(this.date, 'MM/dd/yyyy', Date.now()), 'MMM dd, yyyy');
     },
   },
 });
