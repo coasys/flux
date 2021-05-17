@@ -10,9 +10,11 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
-  props: ["community"],
+  props: ["community", "getPerspectiveChannels"],
+
   methods: {
-    navToCommunity() {
+    async navToCommunity() {
+      this.getPerspectiveChannels(this.community);
       this.$store.commit({ type: "changeCommunity", value: this.community });
     },
   },
