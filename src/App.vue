@@ -107,172 +107,41 @@ export default defineComponent({
       });
     };
 
-    const getLinks = (
-      perspectiveUUID: string,
-      source: string,
-      predicate: string
-    ): Promise<ad4m.LinkExpression[]> => {
-      return new Promise((resolve) => {
-        const getLinksQ = apolloClient.query<{ links: ad4m.LinkExpression[] }>({
-          query: SOURCE_PREDICATE_LINK_QUERY,
-          variables: { perspectiveUUID, source, predicate },
-        });
-        getLinksQ.then((result) => {
-          resolve(result.data.links);
-        });
-      });
-    };
+    async function runActiveAgents(skip: boolean) {
+      console.log("Running active agent check with skip", skip);
+      if (skip == false || skip == undefined) {
+        const communities = store.getters.getCommunities;
 
-    const getChatChannelLinks = (
-      perspectiveUUID: string,
-      linkLanguageAddress: string
-    ) => {
-      return getLinks(
-        perspectiveUUID,
-        `${linkLanguageAddress}://self`,
-        "sioc://has_space"
-      );
-    };
-
-    const installSharedPerspective = (
-      url: string
-    ): Promise<ad4m.Perspective> => {
-      return new Promise((resolve) => {
-        const install = apolloClient.mutate<{
-          installSharedPerspective: ad4m.Perspective;
-        }>({
-          mutation: INSTALL_SHARED_PERSPECTIVE,
-          variables: {
-            url: url,
-          },
-        });
-        install.then((result) => {
-          resolve(result.data!.installSharedPerspective);
-        });
-      });
-    };
-
-    const joinChannelFromSharedLink = async (
-      sharedPerspectiveUrl: string
-    ): Promise<ChannelState> => {
-      let installedChannelPerspective = await installSharedPerspective(
-        sharedPerspectiveUrl
-      );
-      console.log(
-        new Date(),
-        "Installed with result",
-        installedChannelPerspective
-      );
-      await sleep(1000);
-      let channelScPubKey = await pubKeyForLang(
-        installedChannelPerspective.sharedPerspective!.linkLanguages![0]!
-          .address!
-      );
-      console.log(
-        new Date(),
-        "Got pub key for social context channel",
-        channelScPubKey
-      );
-      await addLink(installedChannelPerspective.uuid!, {
-        source: "active_agent",
-        target: channelScPubKey,
-        predicate: "*",
-      });
-      let now = new Date();
-      return {
-        name: installedChannelPerspective.name!,
-        perspective: installedChannelPerspective.uuid!,
-        type: FeedType.Dm,
-        lastSeenMessageTimestamp: now,
-        firstSeenMessageTimestamp: now,
-        createdAt: now,
-        linkLanguageAddress:
-          installedChannelPerspective.sharedPerspective!.linkLanguages![0]!
-            .address!,
-        syncLevel: SyncLevel.Full,
-        maxSyncSize: -1,
-        currentExpressionLinks: [],
-        currentExpressionMessages: [],
-        sharedPerspectiveUrl: sharedPerspectiveUrl,
-      };
-    };
-
-    async function getPerspectiveChannels() {
-      noDelaySetInterval(async () => {
-        //TODO: only do when application window is open
-        //Or perhaps this only gets run once a user clicks on a given community?
-        const communities: CommunityState[] = store.getters.getCommunities;
         for (const community of communities) {
-          let channelLinks = await getChatChannelLinks(
-            //@ts-ignore
-            community.value.perspective,
-            //@ts-ignore
-            community.value.linkLanguageAddress
-          );
-          if (channelLinks != null) {
-            for (let i = 0; i < channelLinks.length; i++) {
-              if (
-                //@ts-ignore
-                community.value.channels.find(
-                  (element: ChannelState) =>
-                    element.sharedPerspectiveUrl ===
-                    channelLinks[i].data!.target
-                ) == undefined
-              ) {
-                console.log(
-                  "Found channel link",
-                  channelLinks[i],
-                  "Adding to channel"
-                );
-                let channel = await joinChannelFromSharedLink(
-                  channelLinks[i].data!.target!
-                );
-                store.commit({
-                  type: "addChannel",
-                  value: {
-                    //@ts-ignore
-                    community: community.value.perspective,
-                    channel: channel,
-                  },
-                });
-              }
-            }
+          const channels = community.value.channels;
+
+          for (const channel of channels) {
+            let channelScPubKey = await pubKeyForLang(
+              channel.linkLanguageAddress
+            );
+            console.log("Got pub key for language", channelScPubKey);
+            let addActiveAgentLink = await addLink(channel.perspective, {
+              source: "active_agent",
+              target: channelScPubKey,
+              predicate: "*",
+            });
+            console.log(
+              "Created active agent link with result",
+              addActiveAgentLink
+            );
           }
         }
-      }, channelRefreshDurationMs);
+      } else {
+        skip = false;
+      }
     }
 
-    async function setActiveAgents(skip: boolean) {
-      noDelaySetInterval(async () => {
-        console.log("Running active agent check with skip", skip);
-        if (skip == false || skip == undefined) {
-          const communities = store.getters.getCommunities;
-
-          for (const community of communities) {
-            const channels = community.value.channels;
-
-            for (const channel of channels) {
-              let channelScPubKey = await pubKeyForLang(
-                channel.linkLanguageAddress
-              );
-              console.log("Got pub key for language", channelScPubKey);
-              let addActiveAgentLink = await addLink(channel.perspective, {
-                source: "active_agent",
-                target: channelScPubKey,
-                predicate: "*",
-              });
-              console.log(
-                "Created active agent link with result",
-                addActiveAgentLink
-              );
-            }
-          }
-        } else {
-          skip = false;
-        }
-        //TODO; this number actually needs to be dynamic for first call; i.e difference between last start time and current time if < 10 secs
-        //once it has been run once at this delay then it needs to be increased to 10 seconds
-      }, agentRefreshDurationMs);
+    async function setActiveAgents(skip: boolean, diffTime: number) {
+      setTimeout(() => {
+        noDelaySetInterval(async () => {
+          runActiveAgents(skip);
+        }, agentRefreshDurationMs);
+      }, diffTime);
     }
 
     //Watch for agent unlock to set off running queries
@@ -291,11 +160,10 @@ export default defineComponent({
           let difOld = new Date(lastOpen);
           let dif = now.getTime() - difOld.getTime();
           if (dif > agentRefreshDurationMs) {
-            await setActiveAgents(false);
+            await setActiveAgents(false, dif);
           } else {
-            await setActiveAgents(true);
+            await setActiveAgents(true, dif);
           }
-          await getPerspectiveChannels();
 
           //TODO: this is probably not needed here and should work fine on join/create of community
           let expressionLangs =
