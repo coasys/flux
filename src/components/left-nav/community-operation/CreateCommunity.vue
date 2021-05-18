@@ -253,7 +253,11 @@ export default defineComponent({
       return setInterval(func, interval);
     },
 
-    async createChannel(expressionLangs: string[]): Promise<ChannelState> {
+    async createChannel(
+      sourcePerspective: string,
+      sourcePerspectiveLinkLanguage: string,
+      expressionLangs: string[]
+    ): Promise<ChannelState> {
       let channelPerspective = await this.addPerspective(
         "Default Message Channel"
       );
@@ -280,6 +284,42 @@ export default defineComponent({
       //Get the perspective again so that we have the SharedPerspective URL
       let perspective = await this.getPerspective(channelPerspective.uuid!);
       console.log("Got the channel perspective back with result", perspective);
+
+      //Link from source social context to new sharedperspective
+      let addLinkToChannel = await this.createLink(sourcePerspective, {
+        source: `${sourcePerspectiveLinkLanguage}://self`,
+        target: perspective.sharedURL!,
+        predicate: "sioc://has_space",
+      });
+      console.log(
+        "Added link from source social context to new SharedPerspective with result",
+        addLinkToChannel
+      );
+
+      //TODO: set a callback which will add another active_agent link in 10 minutes; callback should also call itself again 10 mins later
+      //Note this is temporary code to check the functioning of signals; but it should actually remain in the logic later on (post base creation)
+      let channelScPubKey = await this.pubKeyForLanguage(
+        shareChannelPerspective.linkLanguages![0]!.address!
+      );
+      console.log("Got pub key for social context channel", channelScPubKey);
+      //TODO: this shouldnt really happen here and should instead happen inside the main loop in App.vue
+      let addActiveAgentLink = await this.createLink(channelPerspective.uuid!, {
+        source: "active_agent",
+        target: channelScPubKey,
+        predicate: "*",
+      });
+      console.log("Created active agent link with result", addActiveAgentLink);
+
+      //Add link on channel social context declaring type
+      let addChannelTypeLink = await this.createLink(channelPerspective.uuid!, {
+        source: `${shareChannelPerspective.linkLanguages![0]!.address!}://self`,
+        target: "sioc://space",
+        predicate: "rdf://type",
+      });
+      console.log(
+        "Added link on channel social context with result",
+        addChannelTypeLink
+      );
 
       let now = new Date();
       return {
@@ -374,9 +414,11 @@ export default defineComponent({
 
       //Next steps: create another perspective + share with social-context-channel link language and add above expression DNA's onto it
       //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel
-      let channel = await this.createChannel([
-        shortFormExpressionLang.address!,
-      ]);
+      let channel = await this.createChannel(
+        createSourcePerspective.uuid!,
+        publish.linkLanguages![0]!.address!,
+        [shortFormExpressionLang.address!]
+      );
 
       //Add the perspective to community store
       this.$store.commit({
@@ -399,45 +441,6 @@ export default defineComponent({
           ],
         },
       });
-
-      //Link from source social context to new sharedperspective
-      let addLinkToChannel = await this.createLink(
-        createSourcePerspective.uuid!,
-        {
-          source: `${publish.linkLanguages![0]!.address!}://self`,
-          target: channel.sharedPerspectiveUrl,
-          predicate: "sioc://has_space",
-        }
-      );
-      console.log(
-        "Added link from source social context to new SharedPerspective with result",
-        addLinkToChannel
-      );
-
-      //TODO: set a callback which will add another active_agent link in 10 minutes; callback should also call itself again 10 mins later
-      //Note this is temporary code to check the functioning of signals; but it should actually remain in the logic later on (post base creation)
-      let channelScPubKey = await this.pubKeyForLanguage(
-        channel.linkLanguageAddress
-      );
-      console.log("Got pub key for social context channel", channelScPubKey);
-      //TODO: this shouldnt really happen here and should instead happen inside the main loop in App.vue
-      let addActiveAgentLink = await this.createLink(channel.perspective!, {
-        source: "active_agent",
-        target: channelScPubKey,
-        predicate: "*",
-      });
-      console.log("Created active agent link with result", addActiveAgentLink);
-
-      //Add link on channel social context declaring type
-      let addChannelTypeLink = await this.createLink(channel.perspective!, {
-        source: `${channel.linkLanguageAddress}://self`,
-        target: "sioc://space",
-        predicate: "rdf://type",
-      });
-      console.log(
-        "Added link on channel social context with result",
-        addChannelTypeLink
-      );
 
       //Get and cache the expression UI for each expression language
       for (const [, lang] of expressionLangs.entries()) {
