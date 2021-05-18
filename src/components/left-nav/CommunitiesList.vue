@@ -130,11 +130,6 @@ export default defineComponent({
         "Got pub key for social context channel",
         channelScPubKey
       );
-      await addLink(installedChannelPerspective.uuid!, {
-        source: "active_agent",
-        target: channelScPubKey,
-        predicate: "*",
-      });
       let now = new Date();
       return {
         name: installedChannelPerspective.name!,
@@ -202,8 +197,9 @@ export default defineComponent({
 
     onMounted(() => {
       const community = store.getters.getCurrentCommunity;
-
-      getPerspectiveChannels(community);
+      if (community != null) {
+        getPerspectiveChannels(community);
+      }
     });
 
     onUnmounted(() => {

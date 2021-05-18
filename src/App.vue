@@ -11,21 +11,9 @@ import {
   LANGUAGE,
   ADD_LINK,
   PUB_KEY_FOR_LANG,
-  SOURCE_PREDICATE_LINK_QUERY,
-  INSTALL_SHARED_PERSPECTIVE,
 } from "./core/graphql_queries";
-import {
-  agentRefreshDurationMs,
-  channelRefreshDurationMs,
-} from "./core/juntoTypes";
 import { useStore } from "vuex";
-import {
-  ExpressionUIIcons,
-  FeedType,
-  SyncLevel,
-  ChannelState,
-  CommunityState,
-} from "./store";
+import { ExpressionUIIcons } from "./store";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { apolloClient } from "./main";
 import { onError } from "@apollo/client/link/error";
@@ -107,64 +95,11 @@ export default defineComponent({
       });
     };
 
-    async function runActiveAgents(skip: boolean) {
-      console.log("Running active agent check with skip", skip);
-      if (skip == false || skip == undefined) {
-        const communities = store.getters.getCommunities;
-
-        for (const community of communities) {
-          const channels = community.value.channels;
-
-          for (const channel of channels) {
-            let channelScPubKey = await pubKeyForLang(
-              channel.linkLanguageAddress
-            );
-            console.log("Got pub key for language", channelScPubKey);
-            let addActiveAgentLink = await addLink(channel.perspective, {
-              source: "active_agent",
-              target: channelScPubKey,
-              predicate: "*",
-            });
-            console.log(
-              "Created active agent link with result",
-              addActiveAgentLink
-            );
-          }
-        }
-      } else {
-        skip = false;
-      }
-    }
-
-    async function setActiveAgents(skip: boolean, diffTime: number) {
-      setTimeout(() => {
-        noDelaySetInterval(async () => {
-          runActiveAgents(skip);
-        }, agentRefreshDurationMs);
-      }, diffTime);
-    }
-
     //Watch for agent unlock to set off running queries
     store.watch(
       (state) => state.agentUnlocked,
       async (newValue) => {
         if (newValue.value == true) {
-          //TODO: these are the kind of operations that are best done in a loading screen
-          let lastOpen = store.getters.getApplicationStartTime.value;
-          let now = new Date();
-          store.commit({
-            type: "updateApplicationStartTime",
-            value: now,
-          });
-
-          let difOld = new Date(lastOpen);
-          let dif = now.getTime() - difOld.getTime();
-          if (dif > agentRefreshDurationMs) {
-            await setActiveAgents(false, dif);
-          } else {
-            await setActiveAgents(true, dif);
-          }
-
           //TODO: this is probably not needed here and should work fine on join/create of community
           let expressionLangs =
             store.getters.getAllExpressionLanguagesNotLoaded;
@@ -244,12 +179,6 @@ export default defineComponent({
 
     function sleep(ms: number) {
       return new Promise((resolve) => setTimeout(resolve, ms));
-    }
-
-    function noDelaySetInterval(func: () => void, interval: number) {
-      func();
-
-      return setInterval(func, interval);
     }
 
     return {};

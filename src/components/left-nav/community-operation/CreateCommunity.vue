@@ -297,20 +297,6 @@ export default defineComponent({
         addLinkToChannel
       );
 
-      //TODO: set a callback which will add another active_agent link in 10 minutes; callback should also call itself again 10 mins later
-      //Note this is temporary code to check the functioning of signals; but it should actually remain in the logic later on (post base creation)
-      let channelScPubKey = await this.pubKeyForLanguage(
-        shareChannelPerspective.linkLanguages![0]!.address!
-      );
-      console.log("Got pub key for social context channel", channelScPubKey);
-      //TODO: this shouldnt really happen here and should instead happen inside the main loop in App.vue
-      let addActiveAgentLink = await this.createLink(channelPerspective.uuid!, {
-        source: "active_agent",
-        target: channelScPubKey,
-        predicate: "*",
-      });
-      console.log("Created active agent link with result", addActiveAgentLink);
-
       //Add link on channel social context declaring type
       let addChannelTypeLink = await this.createLink(channelPerspective.uuid!, {
         source: `${shareChannelPerspective.linkLanguages![0]!.address!}://self`,
