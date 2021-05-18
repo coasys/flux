@@ -253,6 +253,7 @@ export default defineComponent({
       return setInterval(func, interval);
     },
 
+    //Creates a channel but creating and publishing perspectives and then links to channel from source perspective as defined by input arguments
     async createChannel(
       sourcePerspective: string,
       sourcePerspectiveLinkLanguage: string,
