@@ -38,174 +38,31 @@ import { defineComponent, ref } from "vue";
 import TextFieldFull from "../../ui/textfields/TextFieldFull.vue";
 import JoinButton from "../../ui/buttons/JoinButton.vue";
 import Spacer from "../../ui/spacer/Spacer.vue";
-import { useLazyQuery, useMutation } from "@vue/apollo-composable";
-import {
-  QUERY_EXPRESSION,
-  INSTALL_SHARED_PERSPECTIVE,
-  SOURCE_PREDICATE_LINK_QUERY,
-  ADD_LINK,
-  PUB_KEY_FOR_LANG,
-  LANGUAGE,
-} from "@/core/graphql_queries";
-import SharedPerspective from "@perspect3vism/ad4m/SharedPerspective";
 import {
   ExpressionReference,
   ExpressionTypes,
   ExpressionUIIcons,
 } from "@/store";
-import { apolloClient } from "@/main";
-import ad4m from "@perspect3vism/ad4m-executor";
+import { getLanguage } from "@/core/queries/getLanguage";
+import { installSharedPerspective } from "@/core/mutations/installSharedPerspective";
+import { createProfile } from "@/core/methods/createProfile";
+import { createLink } from "@/core/mutations/createLink";
 
 export default defineComponent({
   setup() {
     const joiningLink = ref("");
-    const perspectiveUrl = ref("");
-    const sharedPerspective = ref({});
-    const sourceLinkLanguage = ref("");
-    const installedSourcePerspectiveUUID = ref("");
-    const perspectiveUuid = ref("");
-    const linkData = ref({});
-    const currentQueryLang = ref("");
-
-    //Query expression handke
-    const getExpression = useLazyQuery<{ expression: ad4m.Expression }>(
-      QUERY_EXPRESSION,
-      () => ({
-        url: joiningLink.value,
-      }),
-      { fetchPolicy: "network-only" }
-    );
-
-    const getChatChannelLinks = useLazyQuery<{ links: ad4m.LinkExpression[] }>(
-      SOURCE_PREDICATE_LINK_QUERY,
-      () => ({
-        perspectiveUUID: installedSourcePerspectiveUUID.value,
-        source: `${sourceLinkLanguage.value}://self`,
-        predicate: "sioc://has_space",
-      })
-    );
-
-    const installSharedPerspective = useMutation<{
-      installSharedPerspective: ad4m.Perspective;
-    }>(INSTALL_SHARED_PERSPECTIVE, () => ({
-      variables: {
-        url: perspectiveUrl.value,
-      },
-    }));
-
-    const { mutate: addLink, error: addLinkError } = useMutation<{
-      addLink: ad4m.LinkExpression;
-    }>(ADD_LINK, () => ({
-      variables: {
-        perspectiveUUID: perspectiveUuid.value,
-        link: JSON.stringify(linkData.value),
-      },
-    }));
-
-    const pubKeyForLang = useLazyQuery<{
-      pubKeyForLanguage: string;
-    }>(PUB_KEY_FOR_LANG, () => ({ lang: currentQueryLang.value }));
 
     return {
-      getExpression,
       joiningLink,
-      perspectiveUrl,
-      sharedPerspective,
-      installSharedPerspective,
-      getChatChannelLinks,
-      installedSourcePerspectiveUUID,
-      sourceLinkLanguage,
-      addLink,
-      addLinkError,
-      perspectiveUuid,
-      linkData,
-      pubKeyForLang,
-      currentQueryLang,
     };
   },
   methods: {
-    getExpressionMethod(): Promise<ad4m.Expression> {
-      return new Promise((resolve, reject) => {
-        this.getExpression.onResult((result) => {
-          resolve(result.data!.expression);
-        });
-        this.getExpression.onError((error) => {
-          console.log("Got error", error);
-          reject(error);
-        });
-        this.getExpression.load();
-      });
-    },
-    getChannelLinks(): Promise<ad4m.LinkExpression[]> {
-      return new Promise((resolve, reject) => {
-        this.getChatChannelLinks.onResult((result) => {
-          resolve(result.data.links);
-        });
-        this.getChatChannelLinks.onError((error) => {
-          console.log("Got error getting channel links", error);
-          reject(error);
-        });
-        this.getChatChannelLinks.load();
-      });
-    },
-    installSharedPerspectiveMethod(url: string): Promise<ad4m.Perspective> {
-      this.perspectiveUrl = url;
-      return new Promise((resolve, reject) => {
-        this.installSharedPerspective.onError((error) => {
-          console.log("Install sharedPerspective got error", error);
-          reject(error);
-        });
-        this.installSharedPerspective.mutate().then((result) => {
-          resolve(result.data!.installSharedPerspective);
-        });
-      });
-    },
-
-    createLink(link: ad4m.Link): Promise<ad4m.LinkExpression> {
-      this.linkData = link;
-      return new Promise((resolve, reject) => {
-        this.addLink().then((addLinkResp) => {
-          resolve(addLinkResp.data!.addLink);
-        });
-      });
-    },
-
-    getPubKeyForLang(lang: string): Promise<string> {
-      this.currentQueryLang = lang;
-      return new Promise((resolve, reject) => {
-        this.pubKeyForLang.onResult((result) => {
-          resolve(result.data.pubKeyForLanguage);
-        });
-        this.pubKeyForLang.onError((error) => {
-          console.log("Got error in getPubKeyForLang", error);
-          reject(error);
-        });
-        this.pubKeyForLang.load();
-      });
-    },
-
-    getLanguage(language: string): Promise<ad4m.Language> {
-      return new Promise((resolve, reject) => {
-        apolloClient
-          .query<{ language: ad4m.Language }>({
-            query: LANGUAGE,
-            variables: { address: language },
-          })
-          .then((result) => {
-            resolve(result.data!.language);
-          })
-          .catch((error) => {
-            reject(error);
-          });
-      });
-    },
-
     sleep(ms: number) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
 
     async joinCommunity() {
-      let installedPerspective = await this.installSharedPerspectiveMethod(
+      let installedPerspective = await installSharedPerspective(
         this.joiningLink
       );
       console.log(
@@ -213,9 +70,6 @@ export default defineComponent({
         "Installed perspective raw data",
         installedPerspective
       );
-      this.installedSourcePerspectiveUUID = installedPerspective.uuid!;
-      this.sourceLinkLanguage =
-        installedPerspective.sharedPerspective!.linkLanguages![0]!.address!;
 
       let typedExpressionLanguages = [];
       //Get and cache the expression UI for each expression language
@@ -223,7 +77,7 @@ export default defineComponent({
       for (const lang of installedPerspective.sharedPerspective!
         .requiredExpressionLanguages!) {
         console.log("JoinCommunity.vue: Fetching UI lang:", lang);
-        let languageRes = await this.getLanguage(lang!);
+        let languageRes = await getLanguage(lang!);
         let uiData: ExpressionUIIcons = {
           languageAddress: lang!,
           createIcon: languageRes.constructorIcon!.code!,
@@ -243,6 +97,10 @@ export default defineComponent({
             expressionType = ExpressionTypes.GroupExpression;
             break;
 
+          case "agent-profiles":
+            expressionType = ExpressionTypes.ProfileExpression;
+            break;
+
           default:
             expressionType = ExpressionTypes.Other;
         }
@@ -250,16 +108,40 @@ export default defineComponent({
           languageAddress: lang!,
           expressionType: expressionType,
         } as ExpressionReference);
-        await this.sleep(40);
+        //await this.sleep(40);
+      }
+
+      let profileExpLang = typedExpressionLanguages.find(
+        (val) => val.expressionType == ExpressionTypes.ProfileExpression
+      );
+      if (profileExpLang != undefined) {
+        //TODO: populate this data from the store
+        let createProfileExpression = await createProfile(
+          profileExpLang.languageAddress!,
+          "username",
+          "email",
+          "givenName",
+          "familyName"
+        );
+
+        //Create link between perspective and group expression
+        let addProfileLink = await createLink(installedPerspective.uuid!, {
+          source: `${installedPerspective.sharedPerspective!.linkLanguages![0]!
+            .address!}://self`,
+          target: createProfileExpression,
+          predicate: "sioc://has_member",
+        });
+        console.log("Created group expression link", addProfileLink);
       }
 
       this.$store.commit({
         type: "addCommunity",
         value: {
           name: installedPerspective.name,
-          linkLanguageAddress: this.sourceLinkLanguage,
+          linkLanguageAddress:
+            installedPerspective.sharedPerspective!.linkLanguages![0]!.address!,
           channels: [],
-          perspective: this.installedSourcePerspectiveUUID,
+          perspective: installedPerspective.uuid!,
           expressionLanguages:
             installedPerspective.sharedPerspective!.requiredExpressionLanguages,
           typedExpressionLanguages: typedExpressionLanguages,

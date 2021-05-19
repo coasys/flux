@@ -11,21 +11,10 @@ import {
   LANGUAGE,
   ADD_LINK,
   PUB_KEY_FOR_LANG,
-  SOURCE_PREDICATE_LINK_QUERY,
-  INSTALL_SHARED_PERSPECTIVE,
 } from "./core/graphql_queries";
-import {
-  agentRefreshDurationMs,
-  channelRefreshDurationMs,
-} from "./core/juntoTypes";
+import { agentRefreshDurationMs } from "./core/juntoTypes";
 import { useStore } from "vuex";
-import {
-  ExpressionUIIcons,
-  FeedType,
-  SyncLevel,
-  ChannelState,
-  CommunityState,
-} from "./store";
+import { ExpressionUIIcons } from "./store";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { apolloClient } from "./main";
 import { onError } from "@apollo/client/link/error";

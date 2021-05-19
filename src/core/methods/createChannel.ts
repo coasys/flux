@@ -2,8 +2,7 @@ import { addPerspective } from "@/core/mutations/addPerspective";
 import { createLink } from "@/core/mutations/createLink";
 import { publishSharedPerspective } from "@/core/mutations/publishSharedPerspective";
 import { getPerspective } from "@/core/queries/getPerspective";
-import { getPubKeyForLanguage } from "@/core/queries/getPubKeyForLanguage";
-import { ChannelState, FeedType, SyncLevel } from "..";
+import { ChannelState, FeedType } from "@/store";
 
 export async function createChannel(
   channelName: string,
@@ -46,20 +45,6 @@ export async function createChannel(
     addLinkToChannel
   );
 
-  //TODO: set a callback which will add another active_agent link in 10 minutes; callback should also call itself again 10 mins later
-  //Note this is temporary code to check the functioning of signals; but it should actually remain in the logic later on (post base creation)
-  const channelScPubKey = await getPubKeyForLanguage(
-    shareChannelPerspective.linkLanguages![0]!.address!
-  );
-  console.log("Got pub key for social context channel", channelScPubKey);
-  //TODO: this shouldnt really happen here and should instead happen inside the main loop in App.vue
-  const addActiveAgentLink = await createLink(channelPerspective.uuid!, {
-    source: "active_agent",
-    target: channelScPubKey,
-    predicate: "*",
-  });
-  console.log("Created active agent link with result", addActiveAgentLink);
-
   //Add link on channel social context declaring type
   const addChannelTypeLink = await createLink(channelPerspective.uuid!, {
     source: `${shareChannelPerspective.linkLanguages![0]!.address!}://self`,
@@ -76,13 +61,9 @@ export async function createChannel(
   return {
     name: channelPerspective.name!,
     perspective: channelPerspective.uuid!,
-    type: FeedType.Dm,
-    lastSeenMessageTimestamp: now,
-    firstSeenMessageTimestamp: now,
+    type: FeedType.Signaled,
     createdAt: now,
     linkLanguageAddress: shareChannelPerspective.linkLanguages![0]!.address!,
-    syncLevel: SyncLevel.Full,
-    maxSyncSize: -1,
     currentExpressionLinks: [],
     currentExpressionMessages: [],
     sharedPerspectiveUrl: perspective.sharedURL!,
