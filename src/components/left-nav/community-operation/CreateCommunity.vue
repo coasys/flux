@@ -34,6 +34,13 @@
             Handles can contain letters, numbers, hypens, and underscores."
           ></text-field-full>
           <spacer></spacer>
+          <text-field-full
+            maxLength="50"
+            title="Description"
+            description="Describe what your community is about."
+            v-model="description"
+          ></text-field-full>
+          <spacer></spacer>
           <h2 class="createCommunity__title">Privacy</h2>
           <select name="privacy" class="createCommunity__privacy">
             <option value="Private">Private</option>
@@ -426,6 +433,7 @@ export default defineComponent({
         type: "addCommunity",
         value: {
           name: this.perspectiveName,
+          description: this.description,
           linkLanguageAddress: publish.linkLanguages![0]!.address!,
           channels: [channel],
           perspective: createSourcePerspective.uuid!,

@@ -5,6 +5,7 @@ import Address from "@perspect3vism/ad4m/Address";
 
 export interface CommunityState {
   name: string;
+  description: string;
   channels: ChannelState[];
   perspective: string;
   linkLanguageAddress: string;
