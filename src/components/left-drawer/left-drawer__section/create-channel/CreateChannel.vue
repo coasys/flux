@@ -32,7 +32,7 @@
 <script lang="ts">
 import CreateChannelTextField from "./CreateChannelTextField.vue";
 import CreateChannelButton from "./CreateChannelButton.vue";
-import { createChannel } from "@/store/methods/createChannel";
+import { createChannel } from "@/core/methods/createChannel";
 import { v4 as uuidv4 } from "uuid";
 import { defineComponent } from "vue-demi";
 

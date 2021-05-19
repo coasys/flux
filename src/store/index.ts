@@ -20,20 +20,9 @@ export interface ChannelState {
   linkLanguageAddress: string;
   sharedPerspectiveUrl: string;
   type: FeedType;
-  //This tells us how much time passed since last query at this channel
-  lastSeenMessageTimestamp: Date | undefined;
-  firstSeenMessageTimestamp: Date | undefined;
   createdAt: Date;
-  syncLevel: SyncLevel;
-  maxSyncSize: number;
-  //Note: this is temporary measure until we can use a perspective to cache links and perspective syncing is implemented
   currentExpressionLinks: Expression[];
   currentExpressionMessages: Expression[];
-}
-
-export enum SyncLevel {
-  Full,
-  Rolling,
 }
 
 export interface CommunityView {
@@ -43,8 +32,8 @@ export interface CommunityView {
 }
 
 export enum FeedType {
-  Feed,
-  Dm,
+  Signaled,
+  Static,
 }
 
 export interface State {
@@ -72,6 +61,7 @@ export interface ExpressionUIIcons {
 export enum ExpressionTypes {
   ShortForm,
   GroupExpression,
+  ProfileExpression,
   Other,
 }
 
