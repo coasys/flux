@@ -55,7 +55,7 @@ app.on("ready", async () => {
       app.getPath("appData"),
       execPath,
       "./ad4m/languages",
-      ["languages", "agent-profiles", "shared-perspectives"],
+      ["languages", "shared-perspectives"],
       false
     )
     .then((ad4mCore: ad4m.PerspectivismCore) => {

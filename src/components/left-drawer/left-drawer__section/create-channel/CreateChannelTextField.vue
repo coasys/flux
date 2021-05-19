@@ -2,13 +2,33 @@
   <div class="createChannelTextField">
     <h2 class="createChannelTextField__title">Name</h2>
     <div class="createChannelTextField__input">
-      <input class="createChannelTextField__input--field" maxlength="22" />
+      <input class="createChannelTextField__input--field" maxlength="22" @input="handleInput" :value="modelValue" />
     </div>
     <p class="createChannelTextField__description">
       Channel names can contain letters, numbers, hypens, and underscores.
     </p>
   </div>
 </template>
+
+<script lang="ts">
+import { defineComponent } from 'vue';
+
+export default defineComponent({
+  props: {
+    modelValue: { type:String, required: true },
+  },
+  data() {
+    return {
+      content: this.modelValue,
+    }
+  },
+  methods: {
+    handleInput(e: any) {
+      this.$emit('update:modelValue', e.target.value);
+    }
+  }
+});
+</script>
 
 
 
