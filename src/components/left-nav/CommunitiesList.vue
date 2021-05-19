@@ -11,15 +11,16 @@
 </template>
 
 <script lang="ts">
-import CommunityAvatar from "./../ui/avatar/CommunityAvatar.vue";
-import CreateCommunityIcon from './community-operation/CreateCommunityIcon.vue';
-import { ADD_LINK, INSTALL_SHARED_PERSPECTIVE, PUB_KEY_FOR_LANG, SOURCE_PREDICATE_LINK_QUERY } from "@/core/graphql_queries";
-import { channelRefreshDurationMs } from "@/core/juntoTypes";
-import { apolloClient } from "@/main";
-import { ChannelState, CommunityState, FeedType, SyncLevel } from "@/store";
-import { defineComponent, onMounted, onUnmounted, ref, watch } from "vue";
-import ad4m from "@perspect3vism/ad4m-executor";
 import { useStore } from "vuex";
+import { apolloClient } from "@/main";
+import { defineComponent, onMounted, onUnmounted, ref } from "vue";
+import CommunityAvatar from "./../ui/avatar/CommunityAvatar.vue";
+import CreateCommunityIcon from "./community-operation/CreateCommunityIcon.vue";
+import { channelRefreshDurationMs } from "@/core/juntoTypes";
+import { ChannelState, CommunityState, FeedType } from "@/store";
+import { getLinks } from "@/core/queries/getLinks";
+import { installSharedPerspective } from "@/core/mutations/installSharedPerspective";
+import { PUB_KEY_FOR_LANG } from "@/core/graphql_queries";
 
 export default defineComponent({
   setup() {
@@ -35,38 +36,6 @@ export default defineComponent({
     function sleep(ms: number) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     }
-    
-    const getLinks = (
-      perspectiveUUID: string,
-      source: string,
-      predicate: string
-    ): Promise<ad4m.LinkExpression[]> => {
-      return new Promise((resolve) => {
-        const getLinksQ = apolloClient.query<{ links: ad4m.LinkExpression[] }>({
-          query: SOURCE_PREDICATE_LINK_QUERY,
-          variables: { perspectiveUUID, source, predicate },
-        });
-        getLinksQ.then((result) => {
-          resolve(result.data.links);
-        });
-      });
-    };
-
-    const addLink = (perspectiveUUID: string, link: ad4m.Link) => {
-      return new Promise((resolve) => {
-        const addLinkQ = apolloClient.mutate({
-          mutation: ADD_LINK,
-          variables: {
-            perspectiveUUID: perspectiveUUID,
-            link: JSON.stringify(link),
-          },
-        });
-
-        addLinkQ.then((result) => {
-          resolve(result.data);
-        });
-      });
-    };
 
     const getChatChannelLinks = (
       perspectiveUUID: string,
@@ -77,24 +46,6 @@ export default defineComponent({
         `${linkLanguageAddress}://self`,
         "sioc://has_space"
       );
-    };
-
-    const installSharedPerspective = (
-      url: string
-    ): Promise<ad4m.Perspective> => {
-      return new Promise((resolve) => {
-        const install = apolloClient.mutate<{
-          installSharedPerspective: ad4m.Perspective;
-        }>({
-          mutation: INSTALL_SHARED_PERSPECTIVE,
-          variables: {
-            url: url,
-          },
-        });
-        install.then((result) => {
-          resolve(result.data!.installSharedPerspective);
-        });
-      });
     };
 
     const pubKeyForLang = (lang: string): Promise<string> => {
@@ -134,15 +85,11 @@ export default defineComponent({
       return {
         name: installedChannelPerspective.name!,
         perspective: installedChannelPerspective.uuid!,
-        type: FeedType.Dm,
-        lastSeenMessageTimestamp: now,
-        firstSeenMessageTimestamp: now,
+        type: FeedType.Signaled,
         createdAt: now,
         linkLanguageAddress:
           installedChannelPerspective.sharedPerspective!.linkLanguages![0]!
             .address!,
-        syncLevel: SyncLevel.Full,
-        maxSyncSize: -1,
         currentExpressionLinks: [],
         currentExpressionMessages: [],
         sharedPerspectiveUrl: sharedPerspectiveUrl,
@@ -167,8 +114,7 @@ export default defineComponent({
               //@ts-ignore
               community.value.channels.find(
                 (element: ChannelState) =>
-                  element.sharedPerspectiveUrl ===
-                  channelLinks[i].data!.target
+                  element.sharedPerspectiveUrl === channelLinks[i].data!.target
               ) == undefined
             ) {
               console.log(
@@ -193,7 +139,7 @@ export default defineComponent({
       }, channelRefreshDurationMs);
 
       noDelayRef.value = test;
-    }
+    };
 
     onMounted(() => {
       const community = store.getters.getCurrentCommunity;
@@ -208,7 +154,7 @@ export default defineComponent({
 
     return {
       getPerspectiveChannels,
-    }
+    };
   },
   computed: {
     getCommunities() {

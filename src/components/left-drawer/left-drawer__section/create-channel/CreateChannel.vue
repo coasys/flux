@@ -17,27 +17,61 @@
           <p class="createChannel__dialog--description">
             Channels are ways to organize your conversations by topics.
           </p>
-          <create-channel-text-field></create-channel-text-field>
+          <create-channel-text-field
+            v-model="channelName"
+          ></create-channel-text-field>
         </div>
         <div class="createChannel__dialog--bottom">
-          <create-channel-button></create-channel-button>
+          <create-channel-button @click="create"></create-channel-button>
         </div>
       </div>
     </div>
   </teleport>
 </template>
 
-
-<script>
+<script lang="ts">
 import CreateChannelTextField from "./CreateChannelTextField.vue";
 import CreateChannelButton from "./CreateChannelButton.vue";
-export default {
+import { createChannel } from "@/core/methods/createChannel";
+import { v4 as uuidv4 } from "uuid";
+import { defineComponent } from "vue-demi";
+
+export default defineComponent({
   components: {
     CreateChannelTextField,
     CreateChannelButton,
   },
+  data() {
+    return {
+      channelName: "",
+    };
+  },
+  methods: {
+    async create() {
+      const community = this.$store.getters.getCurrentCommunity.value;
+      const uid = uuidv4().toString();
+      const channel = await createChannel(
+        this.channelName,
+        "",
+        uid,
+        community.perspective,
+        community.linkLanguageAddress,
+        community.expressionLanguages
+      );
+
+      this.$store.commit({
+        type: "addChannel",
+        value: {
+          community: community.perspective,
+          channel,
+        },
+      });
+
+      this.showCreateChannel();
+    },
+  },
   props: ["showCreateChannel"],
-};
+});
 </script>
 
 <style lang="scss">

@@ -67,34 +67,6 @@ export default defineComponent({
       });
     };
 
-    const pubKeyForLang = (lang: string): Promise<string> => {
-      return new Promise((resolve) => {
-        const pubKey = apolloClient.query<{ pubKeyForLanguage: string }>({
-          query: PUB_KEY_FOR_LANG,
-          variables: { lang: lang },
-        });
-        pubKey.then((result) => {
-          resolve(result.data.pubKeyForLanguage);
-        });
-      });
-    };
-
-    const addLink = (perspectiveUUID: string, link: ad4m.Link) => {
-      return new Promise((resolve) => {
-        const addLinkQ = apolloClient.mutate({
-          mutation: ADD_LINK,
-          variables: {
-            perspectiveUUID: perspectiveUUID,
-            link: JSON.stringify(link),
-          },
-        });
-
-        addLinkQ.then((result) => {
-          resolve(result.data);
-        });
-      });
-    };
-
     //Watch for agent unlock to set off running queries
     store.watch(
       (state) => state.agentUnlocked,

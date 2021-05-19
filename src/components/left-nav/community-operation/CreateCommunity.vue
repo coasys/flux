@@ -34,6 +34,13 @@
             Handles can contain letters, numbers, hypens, and underscores."
           ></text-field-full>
           <spacer></spacer>
+          <text-field-full
+            maxLength="50"
+            title="Description"
+            description="Describe what your community is about."
+            v-model="description"
+          ></text-field-full>
+          <spacer></spacer>
           <h2 class="createCommunity__title">Privacy</h2>
           <select name="privacy" class="createCommunity__privacy">
             <option value="Private">Private</option>
@@ -59,28 +66,21 @@ import TextFieldFull from "../../ui/textfields/TextFieldFull.vue";
 import CreateButton from "../../ui/buttons/CreateButton.vue";
 import JoinButton from "../../ui/buttons/JoinButton.vue";
 import Spacer from "../../ui/spacer/Spacer.vue";
-import {
-  CREATE_UNIQUE_EXPRESSION_LANGUAGE,
-  PUBLISH_PERSPECTIVE,
-  ADD_PERSPECTIVE,
-  ADD_LINK,
-  CREATE_EXPRESSION,
-  PUB_KEY_FOR_LANG,
-  PERSPECTIVE,
-  LANGUAGE,
-} from "@/core/graphql_queries";
-import ad4m from "@perspect3vism/ad4m-executor";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import {
-  FeedType,
-  SyncLevel,
   ExpressionUIIcons,
-  ChannelState,
   ExpressionReference,
   ExpressionTypes,
 } from "@/store";
-import { apolloClient } from "@/main";
+import { createChannel } from "@/core/methods/createChannel";
+import { createProfile } from "@/core/methods/createProfile";
+import { createExpression } from "@/core/mutations/createExpression";
+import { createUniqueExpressionLanguage } from "@/core/mutations/createUniqueExpressionLanguage";
+import { publishSharedPerspective } from "@/core/mutations/publishSharedPerspective";
+import { addPerspective } from "@/core/mutations/addPerspective";
+import { createLink } from "@/core/mutations/createLink";
+import { getLanguage } from "@/core/queries/getLanguage";
 
 export default defineComponent({
   setup() {
@@ -96,153 +96,6 @@ export default defineComponent({
     };
   },
   methods: {
-    pubKeyForLanguage(lang: string): Promise<string> {
-      return new Promise((resolve, reject) => {
-        apolloClient
-          .query<{ pubKeyForLanguage: string }>({
-            query: PUB_KEY_FOR_LANG,
-            variables: { lang: lang },
-          })
-          .then((result) => {
-            resolve(result.data!.pubKeyForLanguage);
-          })
-          .catch((error) => reject(error));
-      });
-    },
-
-    addPerspective(name: string): Promise<ad4m.Perspective> {
-      return new Promise((resolve, reject) => {
-        apolloClient
-          .mutate<{
-            addPerspective: ad4m.Perspective;
-          }>({ mutation: ADD_PERSPECTIVE, variables: { name: name } })
-          .then((result) => {
-            resolve(result.data!.addPerspective);
-          })
-          .catch((error) => reject(error));
-      });
-    },
-
-    createUniqueHolochainExpressionLanguageFromTemplate(
-      languagePath: string,
-      dnaNick: string,
-      uid: string
-    ): Promise<ad4m.LanguageRef> {
-      return new Promise((resolve, reject) => {
-        apolloClient
-          .mutate<{
-            createUniqueHolochainExpressionLanguageFromTemplate: ad4m.LanguageRef;
-          }>({
-            mutation: CREATE_UNIQUE_EXPRESSION_LANGUAGE,
-            variables: {
-              languagePath: languagePath,
-              dnaNick: dnaNick,
-              uid: uid,
-            },
-          })
-          .then((result) => {
-            resolve(
-              result.data!.createUniqueHolochainExpressionLanguageFromTemplate
-            );
-          })
-          .catch((error) => reject(error));
-      });
-    },
-
-    publishSharedPerspective(
-      sharedPerspective: ad4m.PublishPerspectiveInput
-    ): Promise<ad4m.SharedPerspective> {
-      return new Promise((resolve, reject) => {
-        apolloClient
-          .mutate<{ publishPerspective: ad4m.SharedPerspective }>({
-            mutation: PUBLISH_PERSPECTIVE,
-            variables: sharedPerspective,
-          })
-          .then((result) => {
-            resolve(result.data!.publishPerspective);
-          })
-          .catch((error) => {
-            reject(error);
-          });
-      });
-    },
-
-    createLink(
-      perspective: string,
-      link: ad4m.Link
-    ): Promise<ad4m.LinkExpression> {
-      return new Promise((resolve, reject) => {
-        apolloClient
-          .mutate<{ addLink: ad4m.LinkExpression }>({
-            mutation: ADD_LINK,
-            variables: {
-              perspectiveUUID: perspective,
-              link: JSON.stringify(link),
-            },
-          })
-          .then((result) => {
-            resolve(result.data!.addLink);
-          })
-          .catch((error) => {
-            reject(error);
-          });
-      });
-    },
-
-    createExpression(
-      languageAddress: string,
-      content: string
-    ): Promise<string> {
-      return new Promise((resolve, reject) => {
-        apolloClient
-          .mutate<{ createExpression: string }>({
-            mutation: CREATE_EXPRESSION,
-            variables: {
-              languageAddress: languageAddress,
-              content: content,
-            },
-          })
-          .then((result) => {
-            resolve(result.data!.createExpression);
-          })
-          .catch((error) => {
-            reject(error);
-          });
-      });
-    },
-
-    getPerspective(uuid: string): Promise<ad4m.Perspective> {
-      return new Promise((resolve, reject) => {
-        apolloClient
-          .query<{ perspective: ad4m.Perspective }>({
-            query: PERSPECTIVE,
-            variables: { uuid: uuid },
-          })
-          .then((result) => {
-            resolve(result.data!.perspective);
-          })
-          .catch((error) => {
-            reject(error);
-          });
-      });
-    },
-
-    getLanguage(language: string): Promise<ad4m.Language> {
-      return new Promise((resolve, reject) => {
-        apolloClient
-          .query<{ language: ad4m.Language }>({
-            query: LANGUAGE,
-            variables: { address: language },
-          })
-          .then((result) => {
-            resolve(result.data!.language);
-          })
-          .catch((error) => {
-            reject(error);
-          });
-      });
-    },
-
     sleep(ms: number) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
@@ -253,112 +106,41 @@ export default defineComponent({
       return setInterval(func, interval);
     },
 
-    //Creates a channel but creating and publishing perspectives and then links to channel from source perspective as defined by input arguments
-    async createChannel(
-      sourcePerspective: string,
-      sourcePerspectiveLinkLanguage: string,
-      expressionLangs: string[]
-    ): Promise<ChannelState> {
-      let channelPerspective = await this.addPerspective(
-        "Default Message Channel"
-      );
-      console.log(
-        "Created channel perspective with result",
-        channelPerspective
-      );
-
-      //Publish the perspective and add a social-context backend
-      let shareChannelPerspective = await this.publishSharedPerspective({
-        uuid: channelPerspective.uuid!,
-        name: "Default Message Channel",
-        description: this.description,
-        type: "holochainChannel",
-        uid: this.uid,
-        requiredExpressionLanguages: expressionLangs,
-        allowedExpressionLanguages: expressionLangs,
-      });
-      console.log(
-        "Shared channel perspective with result",
-        shareChannelPerspective
-      );
-
-      //Get the perspective again so that we have the SharedPerspective URL
-      let perspective = await this.getPerspective(channelPerspective.uuid!);
-      console.log("Got the channel perspective back with result", perspective);
-
-      //Link from source social context to new sharedperspective
-      let addLinkToChannel = await this.createLink(sourcePerspective, {
-        source: `${sourcePerspectiveLinkLanguage}://self`,
-        target: perspective.sharedURL!,
-        predicate: "sioc://has_space",
-      });
-      console.log(
-        "Added link from source social context to new SharedPerspective with result",
-        addLinkToChannel
-      );
-
-      //Add link on channel social context declaring type
-      let addChannelTypeLink = await this.createLink(channelPerspective.uuid!, {
-        source: `${shareChannelPerspective.linkLanguages![0]!.address!}://self`,
-        target: "sioc://space",
-        predicate: "rdf://type",
-      });
-      console.log(
-        "Added link on channel social context with result",
-        addChannelTypeLink
-      );
-
-      let now = new Date();
-      return {
-        name: channelPerspective.name!,
-        perspective: channelPerspective.uuid!,
-        type: FeedType.Dm,
-        lastSeenMessageTimestamp: now,
-        firstSeenMessageTimestamp: now,
-        createdAt: now,
-        linkLanguageAddress:
-          shareChannelPerspective.linkLanguages![0]!.address!,
-        syncLevel: SyncLevel.Full,
-        maxSyncSize: -1,
-        currentExpressionLinks: [],
-        currentExpressionMessages: [],
-        sharedPerspectiveUrl: perspective.sharedURL!,
-      };
-    },
-
     async createCommunity() {
       //TODO: @eric: show loading animation here
-      let createSourcePerspective = await this.addPerspective(
-        this.perspectiveName
-      );
+      let createSourcePerspective = await addPerspective(this.perspectiveName);
       console.log("Created perspective", createSourcePerspective);
       this.uid = uuidv4().toString();
 
       var builtInLangPath = this.$store.getters.getLanguagePath;
 
       //Create shortform expression language
-      let shortFormExpressionLang =
-        await this.createUniqueHolochainExpressionLanguageFromTemplate(
-          path.join(builtInLangPath.value, "shortform/build"),
-          "shortform",
-          this.uid
-        );
+      let shortFormExpressionLang = await createUniqueExpressionLanguage(
+        path.join(builtInLangPath.value, "shortform/build"),
+        "shortform",
+        this.uid
+      );
       console.log("Response from create exp lang", shortFormExpressionLang);
       //Create group expression language
-      let groupExpressionLang =
-        await this.createUniqueHolochainExpressionLanguageFromTemplate(
-          path.join(builtInLangPath.value, "group-expression/build"),
-          "group-expression",
-          this.uid
-        );
+      let groupExpressionLang = await createUniqueExpressionLanguage(
+        path.join(builtInLangPath.value, "group-expression/build"),
+        "group-expression",
+        this.uid
+      );
+      let profileExpressionLang = await createUniqueExpressionLanguage(
+        path.join(builtInLangPath.value, "profiles/build"),
+        "agent-profiles",
+        this.uid
+      );
       console.log("Response from create exp lang", groupExpressionLang);
       let expressionLangs = [
         shortFormExpressionLang.address!,
         groupExpressionLang.address!,
+        profileExpressionLang.address!,
       ];
 
       //Publish perspective
-      let publish = await this.publishSharedPerspective({
+      let publish = await publishSharedPerspective({
         uuid: createSourcePerspective.uuid!,
         name: this.perspectiveName,
         description: this.description,
@@ -370,16 +152,18 @@ export default defineComponent({
       console.log("Published perspective with response", publish);
 
       //Create link denoting type of community
-      let addLink = await this.createLink(createSourcePerspective.uuid!, {
+      let addLink = await createLink(createSourcePerspective.uuid!, {
         source: `${publish.linkLanguages![0]!.address!}://self`,
-        target: "foaf://group",
+        target: "sioc://community",
         predicate: "rdf://type",
       });
       console.log("Added typelink with response", addLink);
-      await this.sleep(200);
+      //TODO: we are sleeping here to ensure that all DNA's are installed before trying to do stuff
+      //ideally installing DNA's in holochain would be a sync operation to avoid this
+      await this.sleep(5000);
 
       //Create the group expression
-      let createExp = await this.createExpression(
+      let createExp = await createExpression(
         groupExpressionLang.address!,
         JSON.stringify({
           name: this.perspectiveName,
@@ -389,22 +173,39 @@ export default defineComponent({
       console.log("Created group expression with response", createExp);
 
       //Create link between perspective and group expression
-      let addGroupExpLink = await this.createLink(
-        createSourcePerspective.uuid!,
-        {
-          source: `${publish.linkLanguages![0]!.address!}://self`,
-          target: createExp,
-          predicate: "rdf://class",
-        }
-      );
+      let addGroupExpLink = await createLink(createSourcePerspective.uuid!, {
+        source: `${publish.linkLanguages![0]!.address!}://self`,
+        target: createExp,
+        predicate: "rdf://class",
+      });
       console.log("Created group expression link", addGroupExpLink);
+
+      //TODO: populate this data from the store
+      let createProfileExpression = await createProfile(
+        profileExpressionLang.address!,
+        "username",
+        "email",
+        "givenName",
+        "familyName"
+      );
+
+      //Create link between perspective and group expression
+      let addProfileLink = await createLink(createSourcePerspective.uuid!, {
+        source: `${publish.linkLanguages![0]!.address!}://self`,
+        target: createProfileExpression,
+        predicate: "sioc://has_member",
+      });
+      console.log("Created group expression link", addProfileLink);
 
       //Next steps: create another perspective + share with social-context-channel link language and add above expression DNA's onto it
       //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel
-      let channel = await this.createChannel(
+      let channel = await createChannel(
+        "Default Message Channel",
+        this.description,
+        this.uid,
         createSourcePerspective.uuid!,
         publish.linkLanguages![0]!.address!,
-        [shortFormExpressionLang.address!]
+        expressionLangs
       );
 
       //Add the perspective to community store
@@ -412,6 +213,7 @@ export default defineComponent({
         type: "addCommunity",
         value: {
           name: this.perspectiveName,
+          description: this.description,
           linkLanguageAddress: publish.linkLanguages![0]!.address!,
           channels: [channel],
           perspective: createSourcePerspective.uuid!,
@@ -425,6 +227,10 @@ export default defineComponent({
               languageAddress: groupExpressionLang.address!,
               expressionType: ExpressionTypes.GroupExpression,
             } as ExpressionReference,
+            {
+              languageAddress: profileExpressionLang.address!,
+              expressionType: ExpressionTypes.ProfileExpression,
+            } as ExpressionReference,
           ],
         },
       });
@@ -432,7 +238,7 @@ export default defineComponent({
       //Get and cache the expression UI for each expression language
       for (const [, lang] of expressionLangs.entries()) {
         console.log("CreateCommunity.vue: Fetching UI lang:", lang);
-        let languageRes = await this.getLanguage(lang);
+        let languageRes = await getLanguage(lang);
         let uiData: ExpressionUIIcons = {
           languageAddress: lang,
           createIcon: languageRes.constructorIcon!.code!,
