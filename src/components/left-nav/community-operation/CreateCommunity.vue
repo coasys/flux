@@ -73,13 +73,11 @@ import ad4m from "@perspect3vism/ad4m-executor";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import {
-  FeedType,
-  SyncLevel,
   ExpressionUIIcons,
-  ChannelState,
   ExpressionReference,
   ExpressionTypes,
 } from "@/store";
+import { createChannel } from '@/store/methods/createChannel'
 import { apolloClient } from "@/main";
 
 export default defineComponent({
@@ -253,93 +251,6 @@ export default defineComponent({
       return setInterval(func, interval);
     },
 
-    //Creates a channel but creating and publishing perspectives and then links to channel from source perspective as defined by input arguments
-    async createChannel(
-      sourcePerspective: string,
-      sourcePerspectiveLinkLanguage: string,
-      expressionLangs: string[]
-    ): Promise<ChannelState> {
-      let channelPerspective = await this.addPerspective(
-        "Default Message Channel"
-      );
-      console.log(
-        "Created channel perspective with result",
-        channelPerspective
-      );
-
-      //Publish the perspective and add a social-context backend
-      let shareChannelPerspective = await this.publishSharedPerspective({
-        uuid: channelPerspective.uuid!,
-        name: "Default Message Channel",
-        description: this.description,
-        type: "holochainChannel",
-        uid: this.uid,
-        requiredExpressionLanguages: expressionLangs,
-        allowedExpressionLanguages: expressionLangs,
-      });
-      console.log(
-        "Shared channel perspective with result",
-        shareChannelPerspective
-      );
-
-      //Get the perspective again so that we have the SharedPerspective URL
-      let perspective = await this.getPerspective(channelPerspective.uuid!);
-      console.log("Got the channel perspective back with result", perspective);
-
-      //Link from source social context to new sharedperspective
-      let addLinkToChannel = await this.createLink(sourcePerspective, {
-        source: `${sourcePerspectiveLinkLanguage}://self`,
-        target: perspective.sharedURL!,
-        predicate: "sioc://has_space",
-      });
-      console.log(
-        "Added link from source social context to new SharedPerspective with result",
-        addLinkToChannel
-      );
-
-      //TODO: set a callback which will add another active_agent link in 10 minutes; callback should also call itself again 10 mins later
-      //Note this is temporary code to check the functioning of signals; but it should actually remain in the logic later on (post base creation)
-      let channelScPubKey = await this.pubKeyForLanguage(
-        shareChannelPerspective.linkLanguages![0]!.address!
-      );
-      console.log("Got pub key for social context channel", channelScPubKey);
-      //TODO: this shouldnt really happen here and should instead happen inside the main loop in App.vue
-      let addActiveAgentLink = await this.createLink(channelPerspective.uuid!, {
-        source: "active_agent",
-        target: channelScPubKey,
-        predicate: "*",
-      });
-      console.log("Created active agent link with result", addActiveAgentLink);
-
-      //Add link on channel social context declaring type
-      let addChannelTypeLink = await this.createLink(channelPerspective.uuid!, {
-        source: `${shareChannelPerspective.linkLanguages![0]!.address!}://self`,
-        target: "sioc://space",
-        predicate: "rdf://type",
-      });
-      console.log(
-        "Added link on channel social context with result",
-        addChannelTypeLink
-      );
-
-      let now = new Date();
-      return {
-        name: channelPerspective.name!,
-        perspective: channelPerspective.uuid!,
-        type: FeedType.Dm,
-        lastSeenMessageTimestamp: now,
-        firstSeenMessageTimestamp: now,
-        createdAt: now,
-        linkLanguageAddress:
-          shareChannelPerspective.linkLanguages![0]!.address!,
-        syncLevel: SyncLevel.Full,
-        maxSyncSize: -1,
-        currentExpressionLinks: [],
-        currentExpressionMessages: [],
-        sharedPerspectiveUrl: perspective.sharedURL!,
-      };
-    },
-
     async createCommunity() {
       //TODO: @eric: show loading animation here
       let createSourcePerspective = await this.addPerspective(
@@ -370,6 +281,7 @@ export default defineComponent({
         shortFormExpressionLang.address!,
         groupExpressionLang.address!,
       ];
+
 
       //Publish perspective
       let publish = await this.publishSharedPerspective({
@@ -415,7 +327,10 @@ export default defineComponent({
 
       //Next steps: create another perspective + share with social-context-channel link language and add above expression DNA's onto it
       //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel
-      let channel = await this.createChannel(
+      let channel = await createChannel(
+        'Default Message Channel',
+        this.description,
+        this.uid,
         createSourcePerspective.uuid!,
         publish.linkLanguages![0]!.address!,
         [shortFormExpressionLang.address!]
