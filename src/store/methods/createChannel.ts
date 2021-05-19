@@ -13,13 +13,8 @@ export async function createChannel(
   sourcePerspectiveLinkLanguage: string,
   expressionLangs: string[]
 ): Promise<ChannelState> {
-  const channelPerspective = await addPerspective(
-    channelName
-  );
-  console.log(
-    "Created channel perspective with result",
-    channelPerspective
-  );
+  const channelPerspective = await addPerspective(channelName);
+  console.log("Created channel perspective with result", channelPerspective);
 
   //Publish the perspective and add a social-context backend
   const shareChannelPerspective = await publishSharedPerspective({
@@ -77,7 +72,7 @@ export async function createChannel(
   );
 
   const now = new Date();
-  
+
   return {
     name: channelPerspective.name!,
     perspective: channelPerspective.uuid!,
@@ -85,8 +80,7 @@ export async function createChannel(
     lastSeenMessageTimestamp: now,
     firstSeenMessageTimestamp: now,
     createdAt: now,
-    linkLanguageAddress:
-      shareChannelPerspective.linkLanguages![0]!.address!,
+    linkLanguageAddress: shareChannelPerspective.linkLanguages![0]!.address!,
     syncLevel: SyncLevel.Full,
     maxSyncSize: -1,
     currentExpressionLinks: [],
