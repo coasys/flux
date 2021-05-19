@@ -12,9 +12,11 @@ function interactions(a: Agent, expression: Address): Interaction[] {
   return [];
 }
 
+const activeAgentDurationSecs = 300;
+
 export const name = "social-context-channel";
 
-export default function create(context: LanguageContext): Language {
+export default async function create(context: LanguageContext): Promise<Language> {
   const Holochain = context.Holochain as HolochainLanguageDelegate;
 
   const linksAdapter = new JuntoSocialContextLinkAdapter(context);
@@ -23,6 +25,12 @@ export default function create(context: LanguageContext): Language {
   Holochain.registerDNAs(
     [{ file: DNA, nick: DNA_NICK }],
     linksAdapter.handleHolochainSignal.bind(context)
+  );
+
+  await linksAdapter.addActiveAgentLink(Holochain);
+  setInterval(
+    await linksAdapter.addActiveAgentLink.bind(Holochain),
+    activeAgentDurationSecs * 1000
   );
 
   return {

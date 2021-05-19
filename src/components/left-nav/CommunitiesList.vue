@@ -19,7 +19,6 @@ import CreateCommunityIcon from "./community-operation/CreateCommunityIcon.vue";
 import { channelRefreshDurationMs } from "@/core/juntoTypes";
 import { ChannelState, CommunityState, FeedType } from "@/store";
 import { getLinks } from "@/core/queries/getLinks";
-import { createLink } from "@/core/mutations/createLink";
 import { installSharedPerspective } from "@/core/mutations/installSharedPerspective";
 import { PUB_KEY_FOR_LANG } from "@/core/graphql_queries";
 
@@ -82,11 +81,6 @@ export default defineComponent({
         "Got pub key for social context channel",
         channelScPubKey
       );
-      await createLink(installedChannelPerspective.uuid!, {
-        source: "active_agent",
-        target: channelScPubKey,
-        predicate: "*",
-      });
       let now = new Date();
       return {
         name: installedChannelPerspective.name!,
@@ -149,8 +143,9 @@ export default defineComponent({
 
     onMounted(() => {
       const community = store.getters.getCurrentCommunity;
-
-      getPerspectiveChannels(community);
+      if (community != null) {
+        getPerspectiveChannels(community);
+      }
     });
 
     onUnmounted(() => {
