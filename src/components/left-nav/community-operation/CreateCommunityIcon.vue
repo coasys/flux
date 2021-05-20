@@ -1,11 +1,14 @@
 <template>
-  <div class="create-community-icon" @click="showCreateCommunity">
+  <div
+    class="create-community-icon"
+    @click="showCreateCommunity"
+    v-tooltip.right="{
+      content: 'New Community',
+    }"
+  >
     <svg class="create-community-icon__icon">
       <use href="@/assets/icons/icons.svg#plus"></use>
     </svg>
-    <div class="create-community-icon__name">
-      <p class="create-community-icon__name--text">New Community</p>
-    </div>
   </div>
   <create-community
     v-if="activateCreateCommunity"

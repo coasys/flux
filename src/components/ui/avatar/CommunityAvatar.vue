@@ -1,8 +1,12 @@
 <template>
-  <div class="community-avatar" @click="navToCommunity()">
-    <div class="community-avatar__name">
+  <div
+    class="community-avatar"
+    @click="navToCommunity()"
+    v-tooltip="community.value.name"
+  >
+    <!-- <div class="community-avatar__name">
       <p class="community-avatar__name--text">{{ community.value.name }}</p>
-    </div>
+    </div> -->
   </div>
 </template>
 
