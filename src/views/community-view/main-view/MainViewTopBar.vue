@@ -17,8 +17,10 @@
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from "vue";
+
+export default defineComponent({
   props: ["currentView"],
   computed: {
     setIcon() {
@@ -40,10 +42,9 @@ export default {
   methods: {
     getInviteCode() {
       // Get the invite code to join community and copy to clipboard
-
+      let currentCommunity = this.$store.getters.getCurrentCommunity;
       const el = document.createElement("textarea");
-      el.value =
-        "Hey! Here is an invite code to join my private community on Junto.";
+      el.value = `Hey! Here is an invite code to join my private community on Junto: ${currentCommunity.value.sharedPerspectiveUrl}`;
       document.body.appendChild(el);
       el.select();
       document.execCommand("copy");
@@ -52,7 +53,7 @@ export default {
       alert("Your custom invite code is copied to your clipboard!");
     },
   },
-};
+});
 </script>
 <style lang="scss">
 .mainView__topBar {

@@ -89,6 +89,7 @@ export default defineComponent({
           expressionLanguages:
             installedPerspective.sharedPerspective!.requiredExpressionLanguages,
           typedExpressionLanguages: typedExpressionLanguages,
+          sharedPerspectiveUrl: this.joiningLink, //TODO: this will have to be string split once we add proof onto the URL
         },
       });
 

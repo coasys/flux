@@ -48,6 +48,7 @@ import { getLanguage } from "@/core/queries/getLanguage";
 import TextFieldFull from "../../ui/textfields/TextFieldFull.vue";
 import CreateButton from "../../ui/buttons/CreateButton.vue";
 import Spacer from "../../ui/spacer/Spacer.vue";
+import { getPerspective } from "@/core/queries/getPerspective";
 
 export default defineComponent({
   props: ["showCreateCommunity"],
@@ -192,6 +193,11 @@ export default defineComponent({
         typedExpLangs
       );
 
+      //Get the created community perspective so we can get the SharedPerspectiveURL
+      let communityPerspective = await getPerspective(
+        createSourcePerspective.uuid!
+      );
+
       //Add the perspective to community store
       this.$store.commit({
         type: "addCommunity",
@@ -204,6 +210,7 @@ export default defineComponent({
           expressionLanguages: expressionLangs,
           typedExpressionLanguages: typedExpLangs,
           groupExpressionRef: createExp,
+          sharedPerspectiveUrl: communityPerspective.sharedURL!,
         },
       });
 

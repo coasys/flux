@@ -14,6 +14,7 @@ export interface CommunityState {
   expressionLanguages: string[];
   typedExpressionLanguages: JuntoExpressionReference[];
   groupExpressionRef: string;
+  sharedPerspectiveUrl: string;
 }
 
 // Vuex state of a given channel
