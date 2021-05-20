@@ -2,7 +2,12 @@
   <div class="createChannelTextField">
     <h2 class="createChannelTextField__title">Name</h2>
     <div class="createChannelTextField__input">
-      <input class="createChannelTextField__input--field" maxlength="22" @input="handleInput" :value="modelValue" />
+      <input
+        class="createChannelTextField__input--field"
+        maxlength="22"
+        @input="handleInput"
+        :value="modelValue"
+      />
     </div>
     <p class="createChannelTextField__description">
       Channel names can contain letters, numbers, hypens, and underscores.
@@ -11,26 +16,24 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from "vue";
 
 export default defineComponent({
   props: {
-    modelValue: { type:String, required: true },
+    modelValue: { type: String, required: true },
   },
   data() {
     return {
       content: this.modelValue,
-    }
+    };
   },
   methods: {
     handleInput(e: any) {
-      this.$emit('update:modelValue', e.target.value);
-    }
-  }
+      this.$emit("update:modelValue", e.target.value);
+    },
+  },
 });
 </script>
-
-
 
 <style lang="scss">
 @import "../../../../assets/sass/main.scss";

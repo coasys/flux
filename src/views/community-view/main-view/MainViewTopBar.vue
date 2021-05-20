@@ -41,14 +41,15 @@ export default {
     getInviteCode() {
       // Get the invite code to join community and copy to clipboard
 
-      const el = document.createElement('textarea');
-      el.value = 'Hey! Here is an invite code to join my private community on Junto.';
+      const el = document.createElement("textarea");
+      el.value =
+        "Hey! Here is an invite code to join my private community on Junto.";
       document.body.appendChild(el);
       el.select();
-      document.execCommand('copy');
+      document.execCommand("copy");
       document.body.removeChild(el);
 
-      alert('Your custom invite code is copied to your clipboard!');
+      alert("Your custom invite code is copied to your clipboard!");
     },
   },
 };

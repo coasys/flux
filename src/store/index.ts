@@ -125,7 +125,7 @@ export default createStore({
         root.style.setProperty("--junto-border-color", "#eee");
         root.style.setProperty("--junto-accent-color", "#B3808F");
         root.style.setProperty("--junto-background-color", "#fff");
-        root.style.setProperty('--junto-background-rgba', '255, 255, 255');
+        root.style.setProperty("--junto-background-rgba", "255, 255, 255");
       } else if (payload.value === "dark") {
         state.currentTheme = "dark";
         root.style.setProperty("--junto-primary-dark", "#fff");
@@ -135,7 +135,7 @@ export default createStore({
         root.style.setProperty("--junto-border-color", "#555");
         root.style.setProperty("--junto-accent-color", "#B3808F");
         root.style.setProperty("--junto-background-color", "#333");
-        root.style.setProperty('--junto-background-rgba', '0, 0, 0');
+        root.style.setProperty("--junto-background-rgba", "0, 0, 0");
       }
     },
 

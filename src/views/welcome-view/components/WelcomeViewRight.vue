@@ -133,9 +133,10 @@ export default defineComponent({
     };
   },
   beforeCreate() {
-    const { onResult, onError } = useQuery<{
-      agent: ad4m.AgentService;
-    }>(AGENT_SERVICE_STATUS);
+    const { onResult, onError } =
+      useQuery<{
+        agent: ad4m.AgentService;
+      }>(AGENT_SERVICE_STATUS);
     onResult((val) => {
       this.isInit = val.data.agent.isInitialized!;
       this.$store.commit({ type: "updateAgentLockState", value: false });

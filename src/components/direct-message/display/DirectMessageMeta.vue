@@ -10,10 +10,10 @@
 </template>
 
 <script lang="ts">
-import { format, parseISO } from 'date-fns';
+import { format, parseISO } from "date-fns";
 import ProfileAvatar from "../../ui/avatar/ProfileAvatar.vue";
-import { defineComponent, PropType } from 'vue';
-import Expression from '@perspect3vism/ad4m/Expression';
+import { defineComponent, PropType } from "vue";
+import Expression from "@perspect3vism/ad4m/Expression";
 
 export default defineComponent({
   props: {
@@ -23,7 +23,7 @@ export default defineComponent({
     time(): string {
       const message = this.message as Expression;
       const time = parseISO(message.timestamp);
-      return format(time, 'h:mm a');
+      return format(time, "h:mm a");
     },
   },
   components: {
@@ -44,7 +44,7 @@ export default defineComponent({
     &--username {
       font-size: 1.4rem;
       font-weight: 700;
-      margin-left: .5rem;
+      margin-left: 0.5rem;
       color: var(--junto-primary);
     }
   }

@@ -18,9 +18,13 @@ export default {
 .left-nav__bottom-section {
   width: 100%;
   border-top: 1px var(--junto-border-color) solid;
-  padding-top: 2rem;
+  background-color: var(--junto-background-color);
+  padding: 2rem 0;
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: absolute;
+  bottom: 0;
+  left: 0;
 }
 </style>

@@ -171,8 +171,16 @@ export default defineComponent({
 <style lang="scss" scoped>
 .left-nav__communities-list {
   width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow-y: scroll;
+  overflow-x: visible;
+  margin-bottom: 25vh;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 </style>

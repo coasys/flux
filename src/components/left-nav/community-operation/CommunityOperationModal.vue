@@ -37,9 +37,15 @@
           </div>
         </div>
         <div class="createCommunity__dialog--bottom">
-            <create-community v-if="!showJoin" :showCreateCommunity="showCreateCommunity" ></create-community>
-            <join-community v-if="showJoin" :showCreateCommunity="showCreateCommunity"></join-community>
-          </div>
+          <create-community
+            v-if="!showJoin"
+            :showCreateCommunity="showCreateCommunity"
+          ></create-community>
+          <join-community
+            v-if="showJoin"
+            :showCreateCommunity="showCreateCommunity"
+          ></join-community>
+        </div>
       </div>
     </div>
   </teleport>
@@ -47,8 +53,8 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import CreateCommunity from "./CreateCommunity.vue"
-import JoinCommunity from "./JoinCommunity.vue"
+import CreateCommunity from "./CreateCommunity.vue";
+import JoinCommunity from "./JoinCommunity.vue";
 
 export default defineComponent({
   setup() {
@@ -70,7 +76,7 @@ export default defineComponent({
   },
   methods: {
     toggleCommunityActionsView(value: string) {
-      if (value === 'Join') {
+      if (value === "Join") {
         this.showJoin = true;
       } else {
         this.showJoin = false;
@@ -85,15 +91,15 @@ export default defineComponent({
   computed: {
     createOptionClass() {
       if (this.showJoin) {
-        return 'background-color: var(--junto-background-color); ';
+        return "background-color: var(--junto-background-color); ";
       }
-      return 'background-color: var(--junto-primary-medium); color: white;';
+      return "background-color: var(--junto-primary-medium); color: white;";
     },
     joinOptionClass() {
       if (this.showJoin) {
-        return 'background-color: var(--junto-primary-medium); color: white;';
+        return "background-color: var(--junto-primary-medium); color: white;";
       }
-      return 'background-color: var(--junto-background-color); ';
+      return "background-color: var(--junto-background-color); ";
     },
   },
   components: {
@@ -126,7 +132,7 @@ export default defineComponent({
     font-weight: 700;
     margin-bottom: 1rem;
   }
-  
+
   &__privacy {
     outline: none;
     border: 1px solid var(--junto-border-color);

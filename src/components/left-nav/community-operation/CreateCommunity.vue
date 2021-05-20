@@ -1,14 +1,13 @@
 <template>
-<div>
-
-  <text-field-full
-    maxLength="50"
-    title="Name"
-    description="Name your community here"
-    v-model="perspectiveName"
-  ></text-field-full>
-  <spacer></spacer>
-</div>
+  <div>
+    <text-field-full
+      maxLength="50"
+      title="Name"
+      description="Name your community here"
+      v-model="perspectiveName"
+    ></text-field-full>
+    <spacer></spacer>
+  </div>
   <text-field-full
     maxLength="22"
     title="Handle"
@@ -230,10 +229,8 @@ export default defineComponent({
     TextFieldFull,
     Spacer,
     CreateButton,
-  }
-})
+  },
+});
 </script>
 
-<style>
-
-</style>
+<style></style>

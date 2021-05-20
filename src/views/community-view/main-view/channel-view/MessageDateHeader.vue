@@ -7,9 +7,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from "vue";
 // eslint-disable-next-line object-curly-newline
-import { format, isToday, isYesterday, parse } from 'date-fns';
+import { format, isToday, isYesterday, parse } from "date-fns";
 
 export default defineComponent({
   props: {
@@ -17,14 +17,14 @@ export default defineComponent({
   },
   computed: {
     value(): string {
-      console.log('test', parse(this.date, 'MM/dd/yyyy', Date.now()));
-      if (isToday(parse(this.date, 'MM/dd/yyyy', Date.now()))) {
-        return 'Today';
+      console.log("test", parse(this.date, "MM/dd/yyyy", Date.now()));
+      if (isToday(parse(this.date, "MM/dd/yyyy", Date.now()))) {
+        return "Today";
       }
-      if (isYesterday(parse(this.date, 'MM/dd/yyyy', Date.now()))) {
-        return 'Yesterday';
+      if (isYesterday(parse(this.date, "MM/dd/yyyy", Date.now()))) {
+        return "Yesterday";
       }
-      return format(parse(this.date, 'MM/dd/yyyy', Date.now()), 'MMM dd, yyyy');
+      return format(parse(this.date, "MM/dd/yyyy", Date.now()), "MMM dd, yyyy");
     },
   },
 });

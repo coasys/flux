@@ -2,7 +2,12 @@
   <div class="textFieldFull">
     <h2 class="textFieldFull__title">{{ title }}</h2>
     <div class="textFieldFull__input">
-      <input class="textFieldFull__input--field" :maxlength="maxLength" @input="handleInput" :value="modelValue" />
+      <input
+        class="textFieldFull__input--field"
+        :maxlength="maxLength"
+        @input="handleInput"
+        :value="modelValue"
+      />
     </div>
     <p class="textFieldFull__description">
       {{ description }}
@@ -11,30 +16,30 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from "vue";
 
 export default defineComponent({
   props: {
     title: { type: String, required: true },
     description: { type: String, required: true },
     maxLength: Number,
-    modelValue: { type:String, required: true },
+    modelValue: { type: String, required: true },
   },
   data() {
     return {
       content: this.modelValue,
-    }
+    };
   },
   methods: {
     handleInput(e: any) {
-      this.$emit('update:modelValue', e.target.value);
-    }
-  }
+      this.$emit("update:modelValue", e.target.value);
+    },
+  },
 });
 </script>
 
 <style lang="scss">
-@import '@/assets/sass/main.scss';
+@import "@/assets/sass/main.scss";
 .textFieldFull {
   &__title {
     font-size: 1.7rem;
