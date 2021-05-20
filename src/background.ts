@@ -91,6 +91,7 @@ async function createWindow() {
       preload: path.join(__dirname, "preload.js"), // use a preload script
     },
   });
+  win.removeMenu();
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
