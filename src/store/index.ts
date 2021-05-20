@@ -36,6 +36,14 @@ export enum FeedType {
   Static,
 }
 
+export interface Profile {
+  address: string;
+  username: string;
+  email: string;
+  givenName: string;
+  familyName: string;
+}
+
 export interface State {
   currentTheme: string;
   currentCommunity: CommunityState | null;
@@ -50,6 +58,7 @@ export interface State {
   //fow now this is fine
   expressionUI: ExpressionUIIcons[];
   agentUnlocked: boolean;
+  userProfile: Profile | null;
 }
 
 export interface ExpressionUIIcons {
@@ -90,6 +99,7 @@ export default createStore({
     applicationStartTime: new Date(),
     expressionUI: [],
     agentUnlocked: false,
+    userProfile: null,
   },
   plugins: [vuexLocal.plugin],
   mutations: {
@@ -185,11 +195,17 @@ export default createStore({
         community.value.channels.push(payload.value.channel);
       }
     },
+    createProfile(state: State, payload: Profile) {
+      state.userProfile = payload;
+    }
   },
   getters: {
     //Dump the whole state
     dumpState(state: State) {
       return state;
+    },
+    getProfile(state: State) {
+      return state.userProfile;
     },
     // Get the list of communities a user is a part of
     getCommunities(state: State) {

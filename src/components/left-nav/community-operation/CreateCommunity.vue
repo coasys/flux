@@ -40,6 +40,7 @@ import {
   ExpressionUIIcons,
   ExpressionReference,
   ExpressionTypes,
+  Profile,
 } from "@/store";
 import { createChannel } from "@/core/methods/createChannel";
 import { createProfile } from "@/core/methods/createProfile";
@@ -151,13 +152,14 @@ export default defineComponent({
       });
       console.log("Created group expression link", addGroupExpLink);
 
-      //TODO: populate this data from the store
+      const profile: Profile = this.$store.getters.getProfile;
+      
       let createProfileExpression = await createProfile(
         profileExpressionLang.address!,
-        "username",
-        "email",
-        "givenName",
-        "familyName"
+        profile.username,
+        profile.email,
+        profile.givenName,
+        profile.familyName,
       );
 
       //Create link between perspective and group expression
