@@ -5,18 +5,14 @@
 <script lang="ts">
 import { useSubscription } from "@vue/apollo-composable";
 import { defineComponent, watch } from "vue";
-import {
-  AD4M_SIGNAL,
-  QUERY_EXPRESSION,
-  LANGUAGE,
-} from "./core/graphql_queries";
+import { AD4M_SIGNAL } from "./core/graphql_queries";
 import { useStore } from "vuex";
 import { ExpressionUIIcons } from "./store";
-import ad4m from "@perspect3vism/ad4m-executor";
-import { apolloClient } from "./main";
 import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "./core/juntoTypes";
+import { getExpression } from "@/core/queries/getExpression";
+import { getLanguage } from "@/core/queries/getLanguage";
 
 declare global {
   interface Window {
@@ -40,31 +36,6 @@ export default defineComponent({
 
     //Ad4m signal watcher
     const { result } = useSubscription(AD4M_SIGNAL);
-    //Query expression handler
-    const getExpression = (url: string): Promise<ad4m.Expression> => {
-      return new Promise((resolve) => {
-        const getExpression = apolloClient.query<{
-          expression: ad4m.Expression;
-        }>({ query: QUERY_EXPRESSION, variables: { url: url } });
-        getExpression.then((result) => {
-          resolve(result.data.expression);
-        });
-      });
-    };
-
-    //Get language UI handler
-    const getLanguage = (language: string): Promise<ad4m.Language> => {
-      return new Promise((resolve) => {
-        const getLanguage = apolloClient.query<{ language: ad4m.Language }>({
-          query: LANGUAGE,
-          variables: { address: language },
-        });
-        getLanguage.then((result) => {
-          console.log("Got result", result);
-          resolve(result.data.language);
-        });
-      });
-    };
 
     //Watch for agent unlock to set off running queries
     store.watch(

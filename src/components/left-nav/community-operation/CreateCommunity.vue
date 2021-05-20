@@ -154,13 +154,13 @@ export default defineComponent({
       console.log("Created group expression link", addGroupExpLink);
 
       const profile: Profile = this.$store.getters.getProfile;
-      
+
       let createProfileExpression = await createProfile(
         profileExpressionLang.address!,
         profile.username,
         profile.email,
         profile.givenName,
-        profile.familyName,
+        profile.familyName
       );
 
       //Create link between perspective and group expression
