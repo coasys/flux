@@ -5,13 +5,14 @@ import Address from "@perspect3vism/ad4m/Address";
 import ExpressionRef, { parseExprURL } from "@perspect3vism/ad4m/ExpressionRef";
 
 export interface CommunityState {
-  name: string; //NOTE: here by having a static name + description we are assuming that these are top level metadata items that each group will have
+  //NOTE: here by having a static name + description we are assuming that these are top level metadata items that each group will have
+  name: string;
   description: string;
   channels: ChannelState[];
   perspective: string; //NOTE: this is essentially the UUID for the community
   linkLanguageAddress: string;
   expressionLanguages: string[];
-  typedExpressionLanguages: ExpressionReference[];
+  typedExpressionLanguages: JuntoExpressionReference[];
   groupExpressionRef: string;
 }
 
@@ -25,6 +26,7 @@ export interface ChannelState {
   createdAt: Date;
   currentExpressionLinks: ExpressionAndRef[];
   currentExpressionMessages: ExpressionAndRef[];
+  typedExpressionLanguages: JuntoExpressionReference[];
   membraneType: MembraneType;
   groupExpressionRef: string;
 }
@@ -88,7 +90,7 @@ export enum ExpressionTypes {
   Other,
 }
 
-export interface ExpressionReference {
+export interface JuntoExpressionReference {
   languageAddress: string;
   expressionType: ExpressionTypes;
 }

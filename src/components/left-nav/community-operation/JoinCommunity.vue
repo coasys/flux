@@ -16,15 +16,10 @@ import { defineComponent, ref } from "vue";
 import TextFieldFull from "../../ui/textfields/TextFieldFull.vue";
 import JoinButton from "../../ui/buttons/JoinButton.vue";
 import Spacer from "../../ui/spacer/Spacer.vue";
-import {
-  ExpressionReference,
-  ExpressionTypes,
-  ExpressionUIIcons,
-  Profile,
-} from "@/store";
-import { getLanguage } from "@/core/queries/getLanguage";
+import { ExpressionTypes, Profile } from "@/store";
 import { installSharedPerspective } from "@/core/mutations/installSharedPerspective";
 import { createProfile } from "@/core/methods/createProfile";
+import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
 import { createLink } from "@/core/mutations/createLink";
 
 export default defineComponent({
@@ -51,45 +46,13 @@ export default defineComponent({
         installedPerspective
       );
 
-      let typedExpressionLanguages = [];
       //Get and cache the expression UI for each expression language
       //And used returned expression language names to populate typedExpressionLanguages field
-      for (const lang of installedPerspective.sharedPerspective!
-        .requiredExpressionLanguages!) {
-        console.log("JoinCommunity.vue: Fetching UI lang:", lang);
-        let languageRes = await getLanguage(lang!);
-        let uiData: ExpressionUIIcons = {
-          languageAddress: lang!,
-          createIcon: languageRes.constructorIcon!.code!,
-          viewIcon: languageRes.iconFor!.code!,
-        };
-        this.$store.commit({
-          type: "addExpressionUI",
-          value: uiData,
-        });
-        let expressionType;
-        switch (languageRes.name!) {
-          case "junto-shortform":
-            expressionType = ExpressionTypes.ShortForm;
-            break;
-
-          case "group-expression":
-            expressionType = ExpressionTypes.GroupExpression;
-            break;
-
-          case "agent-profiles":
-            expressionType = ExpressionTypes.ProfileExpression;
-            break;
-
-          default:
-            expressionType = ExpressionTypes.Other;
-        }
-        typedExpressionLanguages.push({
-          languageAddress: lang!,
-          expressionType: expressionType,
-        } as ExpressionReference);
-        //await this.sleep(40);
-      }
+      let typedExpressionLanguages = await getTypedExpressionLanguages(
+        installedPerspective.sharedPerspective!,
+        true,
+        this.$store
+      );
 
       let profileExpLang = typedExpressionLanguages.find(
         (val) => val.expressionType == ExpressionTypes.ProfileExpression

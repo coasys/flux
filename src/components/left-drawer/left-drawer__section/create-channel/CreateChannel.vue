@@ -59,6 +59,7 @@ export default defineComponent({
         community.linkLanguageAddress,
         community.expressionLanguages,
         MembraneType.Inherited,
+        community.typedExpressionLanguages
       );
 
       this.$store.commit({

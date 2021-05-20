@@ -32,7 +32,7 @@ import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import {
   ExpressionUIIcons,
-  ExpressionReference,
+  JuntoExpressionReference,
   ExpressionTypes,
   Profile,
   MembraneType,
@@ -105,6 +105,20 @@ export default defineComponent({
         groupExpressionLang.address!,
         profileExpressionLang.address!,
       ];
+      let typedExpLangs = [
+        {
+          languageAddress: shortFormExpressionLang.address!,
+          expressionType: ExpressionTypes.ShortForm,
+        } as JuntoExpressionReference,
+        {
+          languageAddress: groupExpressionLang.address!,
+          expressionType: ExpressionTypes.GroupExpression,
+        } as JuntoExpressionReference,
+        {
+          languageAddress: profileExpressionLang.address!,
+          expressionType: ExpressionTypes.ProfileExpression,
+        } as JuntoExpressionReference,
+      ];
 
       //Publish perspective
       let publish = await publishSharedPerspective({
@@ -174,7 +188,8 @@ export default defineComponent({
         createSourcePerspective.uuid!,
         publish.linkLanguages![0]!.address!,
         expressionLangs,
-        MembraneType.Inherited
+        MembraneType.Inherited,
+        typedExpLangs
       );
 
       //Add the perspective to community store
@@ -187,20 +202,7 @@ export default defineComponent({
           channels: [channel],
           perspective: createSourcePerspective.uuid!,
           expressionLanguages: expressionLangs,
-          typedExpressionLanguages: [
-            {
-              languageAddress: shortFormExpressionLang.address!,
-              expressionType: ExpressionTypes.ShortForm,
-            } as ExpressionReference,
-            {
-              languageAddress: groupExpressionLang.address!,
-              expressionType: ExpressionTypes.GroupExpression,
-            } as ExpressionReference,
-            {
-              languageAddress: profileExpressionLang.address!,
-              expressionType: ExpressionTypes.ProfileExpression,
-            } as ExpressionReference,
-          ],
+          typedExpressionLanguages: typedExpLangs,
           groupExpressionRef: createExp,
         },
       });

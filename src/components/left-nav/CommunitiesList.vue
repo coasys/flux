@@ -23,6 +23,7 @@ import { installSharedPerspective } from "@/core/mutations/installSharedPerspect
 import { PUB_KEY_FOR_LANG } from "@/core/graphql_queries";
 import { getExpression } from "@/core/queries/getExpression";
 import { expressionGetRetries, expressionGetDelayMs } from "@/core/juntoTypes";
+import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
 
 export default defineComponent({
   setup() {
@@ -94,6 +95,10 @@ export default defineComponent({
         "Got pub key for social context channel",
         channelScPubKey
       );
+      let typedExpressionLanguages = await getTypedExpressionLanguages(
+        installedChannelPerspective.sharedPerspective!,
+        false
+      );
       //TODO: derive membraneType from link on sharedPerspective
       //For now its hard coded inherited since we dont support anything else
       let now = new Date();
@@ -111,6 +116,7 @@ export default defineComponent({
         sharedPerspectiveUrl: sharedPerspectiveUrl,
         membraneType: MembraneType.Inherited,
         groupExpressionRef: "",
+        typedExpressionLanguages: typedExpressionLanguages,
       };
     };
 
