@@ -1,36 +1,14 @@
 <template>
-  <teleport to="body">
-    <div class="joinCommunity">
-      <div class="joinCommunity__dialog">
-        <div class="joinCommunity__dialog--top">
-          <div class="joinCommunity__dialog--title">
-            <h2 class="joinCommunity__dialog--title--text">
-              Join A New Community
-            </h2>
-            <div
-              class="joinCommunity__dialog--title--container"
-              @click="showJoinCommunity"
-            >
-              <svg class="joinCommunity__dialog--title--icon">
-                <use href="@/assets/icons/icons.svg#cancel"></use>
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <text-field-full
-          maxLength="500"
-          title="Link"
-          description="Joining Link Here"
-          v-model="joiningLink"
-        ></text-field-full>
-        <spacer></spacer>
-        <div class="joinCommunity__dialog--bottom">
-          <join-button @click="joinCommunity"></join-button>
-        </div>
-      </div>
-    </div>
-  </teleport>
+  <text-field-full
+    maxLength="500"
+    title="Link"
+    description="Joining Link Here"
+    v-model="joiningLink"
+  ></text-field-full>
+  <spacer></spacer>
+  <div class="joinCommunity__dialog--bottom">
+    <join-button @click="joinCommunity"></join-button>
+  </div>
 </template>
 
 <script lang="ts">
@@ -49,6 +27,7 @@ import { createProfile } from "@/core/methods/createProfile";
 import { createLink } from "@/core/mutations/createLink";
 
 export default defineComponent({
+  props: ["showCreateCommunity"],
   setup() {
     const joiningLink = ref("");
 
@@ -148,11 +127,8 @@ export default defineComponent({
         },
       });
 
-      this.showJoinCommunity!();
+      this.showCreateCommunity!();
     },
-  },
-  props: {
-    showJoinCommunity: Function,
   },
   components: {
     TextFieldFull,

@@ -20,7 +20,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import CreateCommunity from "./CreateCommunity.vue";
+import CreateCommunity from "./CommunityOperationModal.vue";
 import JoinCommunity from "./JoinCommunity.vue";
 export default defineComponent({
   data() {
@@ -48,8 +48,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "@/assets/sass/main.scss";
 .create-community-icon {
-  height: 5rem;
-  width: 5rem;
+  min-height: 5rem;
+  min-width: 5rem;
   background-color: var(--junto-border-color);
   border-radius: 100px;
   margin-bottom: 2rem;
