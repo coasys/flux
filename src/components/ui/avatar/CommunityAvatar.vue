@@ -24,8 +24,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "../../../assets/sass/main.scss";
 .community-avatar {
-  height: 5rem;
-  width: 5rem;
+  min-height: 5rem;
+  min-width: 5rem;
   background-color: var(--junto-border-color);
   border-radius: 100px;
   margin-bottom: 2rem;
