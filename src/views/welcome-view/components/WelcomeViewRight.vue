@@ -18,7 +18,7 @@
 
   <div class="welcomeViewRight" v-if="!isInit">
     <div class="welcomeViewRight__spec">
-      <h3 class="welcomeViewRight__spec--title">Name</h3>
+      <h3 class="welcomeViewRight__spec--title">First Name</h3>
       <div class="welcomeViewRight__input">
         <input
           type="text"
@@ -30,7 +30,7 @@
 
     <div class="welcomeViewRight" v-if="!isInit">
       <div class="welcomeViewRight__spec">
-        <h3 class="welcomeViewRight__spec--title">Surname</h3>
+        <h3 class="welcomeViewRight__spec--title">Last Name</h3>
         <div class="welcomeViewRight__input">
           <input
             type="text"
