@@ -4,7 +4,7 @@
       v-for="community in getCommunities"
       :key="community.value.perspective"
       :community="community"
-      :getPerspectiveChannels="getPerspectiveChannels"
+      :getPerspectiveChannelsAndMetaData="getPerspectiveChannelsAndMetaData"
     ></community-avatar>
     <create-community-icon></create-community-icon>
   </div>
@@ -14,13 +14,15 @@
 import { useStore } from "vuex";
 import { apolloClient } from "@/main";
 import { defineComponent, onMounted, onUnmounted, ref } from "vue";
-import CommunityAvatar from "./../ui/avatar/CommunityAvatar.vue";
+import CommunityAvatar from "@/components/ui/avatar/CommunityAvatar.vue";
 import CreateCommunityIcon from "./community-operation/CreateCommunityIcon.vue";
 import { channelRefreshDurationMs } from "@/core/juntoTypes";
 import { ChannelState, CommunityState, FeedType, MembraneType } from "@/store";
 import { getLinks } from "@/core/queries/getLinks";
 import { installSharedPerspective } from "@/core/mutations/installSharedPerspective";
 import { PUB_KEY_FOR_LANG } from "@/core/graphql_queries";
+import { getExpression } from "@/core/queries/getExpression";
+import { expressionGetRetries, expressionGetDelayMs } from "@/core/juntoTypes";
 
 export default defineComponent({
   setup() {
@@ -45,6 +47,17 @@ export default defineComponent({
         perspectiveUUID,
         `${linkLanguageAddress}://self`,
         "sioc://has_space"
+      );
+    };
+
+    const getGroupExpressionLinks = (
+      perspectiveUUID: string,
+      linkLanguageAddress: string
+    ) => {
+      return getLinks(
+        perspectiveUUID,
+        `${linkLanguageAddress}://self`,
+        "rdf://class"
       );
     };
 
@@ -84,6 +97,7 @@ export default defineComponent({
       //TODO: derive membraneType from link on sharedPerspective
       //For now its hard coded inherited since we dont support anything else
       let now = new Date();
+      //TODO: lets use a constructor on the ChannelState type
       return {
         name: installedChannelPerspective.name!,
         perspective: installedChannelPerspective.uuid!,
@@ -96,10 +110,13 @@ export default defineComponent({
         currentExpressionMessages: [],
         sharedPerspectiveUrl: sharedPerspectiveUrl,
         membraneType: MembraneType.Inherited,
+        groupExpressionRef: "",
       };
     };
 
-    const getPerspectiveChannels = async (community: CommunityState) => {
+    const getPerspectiveChannelsAndMetaData = async (
+      community: CommunityState
+    ) => {
       clearInterval(noDelayRef.value);
 
       const test = noDelaySetInterval(async () => {
@@ -138,6 +155,59 @@ export default defineComponent({
               });
             }
           }
+          //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button
+          let groupExpressionLinks = await getGroupExpressionLinks(
+            //@ts-ignore
+            community.value.perspective,
+            //@ts-ignore
+            community.value.linkLanguageAddress
+          );
+          if (groupExpressionLinks != null && groupExpressionLinks.length > 0) {
+            if (
+              //@ts-ignore
+              community.value.groupExpressionRef !=
+              groupExpressionLinks[0].data!.target!
+            ) {
+              //@ts-ignore
+              let getExprRes = await getExpression(
+                groupExpressionLinks[0].data!.target!
+              );
+              if (getExprRes == null) {
+                for (let i = 0; i < expressionGetRetries; i++) {
+                  console.log("Retrying get of expression signal");
+                  //@ts-ignore
+                  getExprRes = await getExpression(
+                    groupExpressionLinks[0].data!.target!
+                  );
+                  if (getExprRes != null) {
+                    break;
+                  }
+                  await sleep(expressionGetDelayMs);
+                }
+                if (getExprRes == null) {
+                  console.warn(
+                    "Could not get expression from group expression link"
+                  );
+                  return;
+                }
+              }
+              let groupExpData = JSON.parse(getExprRes.data!);
+              console.log(
+                "Got new group expression data for community",
+                groupExpData
+              );
+              store.commit({
+                type: "updateCommunityMetadata",
+                value: {
+                  //@ts-ignore
+                  community: community.value.perspective,
+                  name: groupExpData["foaf:name"],
+                  description: groupExpData["foaf:description"],
+                  groupExpressionRef: groupExpressionLinks[0].data!.target,
+                },
+              });
+            }
+          }
         }
       }, channelRefreshDurationMs);
 
@@ -147,7 +217,7 @@ export default defineComponent({
     onMounted(() => {
       const community = store.getters.getCurrentCommunity;
       if (community != null) {
-        getPerspectiveChannels(community);
+        getPerspectiveChannelsAndMetaData(community);
       }
     });
 
@@ -156,7 +226,7 @@ export default defineComponent({
     });
 
     return {
-      getPerspectiveChannels,
+      getPerspectiveChannelsAndMetaData,
     };
   },
   computed: {

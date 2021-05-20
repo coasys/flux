@@ -5,12 +5,12 @@
 <script lang="ts">
 import { useSubscription } from "@vue/apollo-composable";
 import { defineComponent, watch } from "vue";
-import { AD4M_SIGNAL } from "./core/graphql_queries";
+import { AD4M_SIGNAL } from "@/core/graphql_queries";
 import { useStore } from "vuex";
-import { ExpressionUIIcons } from "./store";
+import { ExpressionUIIcons } from "@/store";
 import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
-import { expressionGetDelayMs, expressionGetRetries } from "./core/juntoTypes";
+import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { getExpression } from "@/core/queries/getExpression";
 import { getLanguage } from "@/core/queries/getLanguage";
 

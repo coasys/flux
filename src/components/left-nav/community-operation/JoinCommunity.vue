@@ -96,13 +96,13 @@ export default defineComponent({
       );
       if (profileExpLang != undefined) {
         const profile: Profile = this.$store.getters.getProfile;
-      
+
         let createProfileExpression = await createProfile(
           profileExpLang.languageAddress!,
           profile.username,
           profile.email,
           profile.givenName,
-          profile.familyName,
+          profile.familyName
         );
 
         //Create link between perspective and group expression

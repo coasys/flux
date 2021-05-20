@@ -14,11 +14,11 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
-  props: ["community", "getPerspectiveChannels"],
+  props: ["community", "getPerspectiveChannelsAndMetaData"],
 
   methods: {
     async navToCommunity() {
-      this.getPerspectiveChannels(this.community);
+      this.getPerspectiveChannelsAndMetaData(this.community);
       this.$store.commit({ type: "changeCommunity", value: this.community });
     },
   },

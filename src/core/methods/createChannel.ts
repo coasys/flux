@@ -69,5 +69,6 @@ export async function createChannel(
     currentExpressionMessages: [],
     sharedPerspectiveUrl: perspective.sharedURL!,
     membraneType: membraneType,
+    groupExpressionRef: "",
   };
 }

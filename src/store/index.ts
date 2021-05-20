@@ -5,19 +5,20 @@ import Address from "@perspect3vism/ad4m/Address";
 import ExpressionRef, { parseExprURL } from "@perspect3vism/ad4m/ExpressionRef";
 
 export interface CommunityState {
-  name: string;
+  name: string; //NOTE: here by having a static name + description we are assuming that these are top level metadata items that each group will have
   description: string;
   channels: ChannelState[];
-  perspective: string;
+  perspective: string; //NOTE: this is essentially the UUID for the community
   linkLanguageAddress: string;
   expressionLanguages: string[];
   typedExpressionLanguages: ExpressionReference[];
+  groupExpressionRef: string;
 }
 
 // Vuex state of a given channel
 export interface ChannelState {
   name: string;
-  perspective: string;
+  perspective: string; //NOTE: this is essentially the UUID for the community
   linkLanguageAddress: string;
   sharedPerspectiveUrl: string;
   type: FeedType;
@@ -25,6 +26,7 @@ export interface ChannelState {
   currentExpressionLinks: ExpressionAndRef[];
   currentExpressionMessages: ExpressionAndRef[];
   membraneType: MembraneType;
+  groupExpressionRef: string;
 }
 
 export interface ExpressionAndRef {
@@ -213,8 +215,24 @@ export default createStore({
         community.value.channels.push(payload.value.channel);
       }
     },
+
     createProfile(state: State, payload: Profile) {
       state.userProfile = payload;
+    },
+
+    updateCommunityMetadata(state: State, payload) {
+      const community = state.communities.find(
+        //@ts-ignore
+        (community) => community.value.perspective === payload.value.community
+      );
+      if (community != undefined) {
+        //@ts-ignore
+        community.value.name = payload.value.name;
+        //@ts-ignore
+        community.value.description = payload.value.description;
+        //@ts-ignore
+        community.value.groupExpressionRef = payload.value.groupExpressionRef;
+      }
     },
   },
   getters: {

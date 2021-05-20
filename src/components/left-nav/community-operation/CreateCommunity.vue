@@ -207,6 +207,7 @@ export default defineComponent({
               expressionType: ExpressionTypes.ProfileExpression,
             } as ExpressionReference,
           ],
+          groupExpressionRef: createExp,
         },
       });
 
