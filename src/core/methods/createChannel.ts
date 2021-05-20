@@ -2,7 +2,7 @@ import { addPerspective } from "@/core/mutations/addPerspective";
 import { createLink } from "@/core/mutations/createLink";
 import { publishSharedPerspective } from "@/core/mutations/publishSharedPerspective";
 import { getPerspective } from "@/core/queries/getPerspective";
-import { ChannelState, FeedType } from "@/store";
+import { ChannelState, FeedType, MembraneType } from "@/store";
 
 export async function createChannel(
   channelName: string,
@@ -10,7 +10,8 @@ export async function createChannel(
   communityUuid: string,
   sourcePerspective: string,
   sourcePerspectiveLinkLanguage: string,
-  expressionLangs: string[]
+  expressionLangs: string[],
+  membraneType: MembraneType,
 ): Promise<ChannelState> {
   const channelPerspective = await addPerspective(channelName);
   console.log("Created channel perspective with result", channelPerspective);
@@ -67,5 +68,6 @@ export async function createChannel(
     currentExpressionLinks: [],
     currentExpressionMessages: [],
     sharedPerspectiveUrl: perspective.sharedURL!,
+    membraneType: membraneType,
   };
 }

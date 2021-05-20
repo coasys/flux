@@ -57,18 +57,6 @@ import CreateCommunity from "./CreateCommunity.vue";
 import JoinCommunity from "./JoinCommunity.vue";
 
 export default defineComponent({
-  setup() {
-    //TODO: I hate this code block here, needs to be refactored
-    const uid = ref("");
-    const perspectiveName = ref("");
-    const description = ref("");
-
-    return {
-      uid,
-      perspectiveName,
-      description,
-    };
-  },
   data() {
     return {
       showJoin: false,
