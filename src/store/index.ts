@@ -23,6 +23,12 @@ export interface ChannelState {
   createdAt: Date;
   currentExpressionLinks: Expression[];
   currentExpressionMessages: Expression[];
+  membraneType: MembraneType;
+}
+
+export enum MembraneType {
+  Inherited,
+  Unique,
 }
 
 export interface CommunityView {
@@ -197,7 +203,7 @@ export default createStore({
     },
     createProfile(state: State, payload: Profile) {
       state.userProfile = payload;
-    }
+    },
   },
   getters: {
     //Dump the whole state

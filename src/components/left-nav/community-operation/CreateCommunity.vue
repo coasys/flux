@@ -41,6 +41,7 @@ import {
   ExpressionReference,
   ExpressionTypes,
   Profile,
+  MembraneType,
 } from "@/store";
 import { createChannel } from "@/core/methods/createChannel";
 import { createProfile } from "@/core/methods/createProfile";
@@ -178,7 +179,8 @@ export default defineComponent({
         this.uid,
         createSourcePerspective.uuid!,
         publish.linkLanguages![0]!.address!,
-        expressionLangs
+        expressionLangs,
+        MembraneType.Inherited
       );
 
       //Add the perspective to community store

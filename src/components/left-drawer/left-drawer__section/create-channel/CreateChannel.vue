@@ -35,6 +35,7 @@ import CreateChannelButton from "./CreateChannelButton.vue";
 import { createChannel } from "@/core/methods/createChannel";
 import { v4 as uuidv4 } from "uuid";
 import { defineComponent } from "vue-demi";
+import { MembraneType } from "@/store";
 
 export default defineComponent({
   components: {
@@ -56,7 +57,8 @@ export default defineComponent({
         uid,
         community.perspective,
         community.linkLanguageAddress,
-        community.expressionLanguages
+        community.expressionLanguages,
+        MembraneType.Inherited,
       );
 
       this.$store.commit({

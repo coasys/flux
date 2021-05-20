@@ -1,0 +1,3 @@
+[submodule "ad4m/languages/profiles"]
+	path = ad4m/languages/profiles
+	url = https://github.com/jdeepee/profiles

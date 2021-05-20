@@ -6,7 +6,7 @@ Linux/Mac OS for running HC & Holochain binaries (see `./resources`).
 
 ## Project setup
 ```
-npm run build-languages && npm install
+git submodule init && git submodule update && npm run build-languages && npm install
 ```
 
 If you have any troubles on npm install for any given language or for this project, its likely npm shitting the bed, delete `package-lock.json` & `node_modules` for the package in question and try again. 

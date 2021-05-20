@@ -28,16 +28,14 @@
       </div>
     </div>
 
-    <div class="welcomeViewRight" v-if="!isInit">
-      <div class="welcomeViewRight__spec">
-        <h3 class="welcomeViewRight__spec--title">Last Name</h3>
-        <div class="welcomeViewRight__input">
-          <input
-            type="text"
-            class="welcomeViewRight__input--field"
-            v-model="familyName"
-          />
-        </div>
+    <div class="welcomeViewRight__spec" v-if="!isInit">
+      <h3 class="welcomeViewRight__spec--title">Last Name</h3>
+      <div class="welcomeViewRight__input">
+        <input
+          type="text"
+          class="welcomeViewRight__input--field"
+          v-model="familyName"
+        />
       </div>
     </div>
 
@@ -198,7 +196,8 @@ export default defineComponent({
                   this.$store.commit({
                     type: "createProfile",
                     value: {
-                      address: addPerspectiveResult.data?.addPerspective.uuid || '',
+                      address:
+                        addPerspectiveResult.data?.addPerspective.uuid || "",
                       username: this.username,
                       email: this.email,
                       givenName: this.name,

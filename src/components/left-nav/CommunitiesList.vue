@@ -17,7 +17,7 @@ import { defineComponent, onMounted, onUnmounted, ref } from "vue";
 import CommunityAvatar from "./../ui/avatar/CommunityAvatar.vue";
 import CreateCommunityIcon from "./community-operation/CreateCommunityIcon.vue";
 import { channelRefreshDurationMs } from "@/core/juntoTypes";
-import { ChannelState, CommunityState, FeedType } from "@/store";
+import { ChannelState, CommunityState, FeedType, MembraneType } from "@/store";
 import { getLinks } from "@/core/queries/getLinks";
 import { installSharedPerspective } from "@/core/mutations/installSharedPerspective";
 import { PUB_KEY_FOR_LANG } from "@/core/graphql_queries";
@@ -81,6 +81,8 @@ export default defineComponent({
         "Got pub key for social context channel",
         channelScPubKey
       );
+      //TODO: derive membraneType from link on sharedPerspective
+      //For now its hard coded inherited since we dont support anything else
       let now = new Date();
       return {
         name: installedChannelPerspective.name!,
@@ -93,6 +95,7 @@ export default defineComponent({
         currentExpressionLinks: [],
         currentExpressionMessages: [],
         sharedPerspectiveUrl: sharedPerspectiveUrl,
+        membraneType: MembraneType.Inherited,
       };
     };
 
