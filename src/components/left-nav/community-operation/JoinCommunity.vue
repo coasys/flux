@@ -42,6 +42,7 @@ import {
   ExpressionReference,
   ExpressionTypes,
   ExpressionUIIcons,
+  Profile,
 } from "@/store";
 import { getLanguage } from "@/core/queries/getLanguage";
 import { installSharedPerspective } from "@/core/mutations/installSharedPerspective";
@@ -115,13 +116,14 @@ export default defineComponent({
         (val) => val.expressionType == ExpressionTypes.ProfileExpression
       );
       if (profileExpLang != undefined) {
-        //TODO: populate this data from the store
+        const profile: Profile = this.$store.getters.getProfile;
+      
         let createProfileExpression = await createProfile(
           profileExpLang.languageAddress!,
-          "username",
-          "email",
-          "givenName",
-          "familyName"
+          profile.username,
+          profile.email,
+          profile.givenName,
+          profile.familyName,
         );
 
         //Create link between perspective and group expression

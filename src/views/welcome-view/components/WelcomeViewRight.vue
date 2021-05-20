@@ -178,6 +178,18 @@ export default defineComponent({
                     type: "addDatabasePerspective",
                     value: addPerspectiveResult.data?.addPerspective.uuid,
                   });
+
+                  this.$store.commit({
+                    type: "createProfile",
+                    value: {
+                      address: addPerspectiveResult.data?.addPerspective.uuid || '',
+                      username: this.username,
+                      email: this.email,
+                      givenName: this.name,
+                      familyName: 'familyName',
+                    },
+                  });
+
                   this.$router.push("/home");
                 } else {
                   console.log("Got error", this.addPerspectiveError);
