@@ -6,3 +6,5 @@ declare module '*.vue' {
 }
 
 declare module 'vue-virtual-scroller';
+
+declare module 'v-tooltip';
