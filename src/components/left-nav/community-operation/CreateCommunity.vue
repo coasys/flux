@@ -8,12 +8,6 @@
     ></text-field-full>
     <spacer></spacer>
   </div>
-  <text-field-full
-    maxLength="22"
-    title="Handle"
-    description="Choose a handle for your community.
-    Handles can contain letters, numbers, hypens, and underscores."
-  ></text-field-full>
   <spacer></spacer>
   <text-field-full
     maxLength="50"
