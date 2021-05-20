@@ -1,11 +1,14 @@
 <template>
-  <div class="create-community-icon" @click="showCreateCommunity">
+  <div
+    class="create-community-icon"
+    @click="showCreateCommunity"
+    v-tooltip.right="{
+      content: 'New Community',
+    }"
+  >
     <svg class="create-community-icon__icon">
       <use href="@/assets/icons/icons.svg#plus"></use>
     </svg>
-    <div class="create-community-icon__name">
-      <p class="create-community-icon__name--text">New Community</p>
-    </div>
   </div>
   <create-community
     v-if="activateCreateCommunity"
@@ -20,7 +23,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import CreateCommunity from "./CreateCommunity.vue";
+import CreateCommunity from "./CommunityOperationModal.vue";
 import JoinCommunity from "./JoinCommunity.vue";
 export default defineComponent({
   data() {
@@ -48,8 +51,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "@/assets/sass/main.scss";
 .create-community-icon {
-  height: 5rem;
-  width: 5rem;
+  min-height: 5rem;
+  min-width: 5rem;
   background-color: var(--junto-border-color);
   border-radius: 100px;
   margin-bottom: 2rem;

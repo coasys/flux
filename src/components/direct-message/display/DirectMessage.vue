@@ -1,6 +1,9 @@
 <template>
   <div class="directMessage">
-    <direct-message-meta  v-if="showAvatar" :message="message"></direct-message-meta>
+    <direct-message-meta
+      v-if="showAvatar"
+      :message="message"
+    ></direct-message-meta>
     <text-message :text="JSON.parse(message.data).body"></text-message>
   </div>
 </template>

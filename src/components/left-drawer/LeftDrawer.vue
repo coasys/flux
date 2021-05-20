@@ -1,7 +1,10 @@
 <template>
   <div class="left-drawer" v-if="community != null">
     <div class="left-drawer__top">
-      <community-name :title="community.value.name" :description="community.value.description"></community-name>
+      <community-name
+        :title="community.value.name"
+        :description="community.value.description"
+      ></community-name>
       <left-drawer-section
         type="Feed"
         :community="community"
@@ -11,16 +14,12 @@
         :community="community"
       ></left-drawer-section>
     </div>
-    <!-- <div class="left-drawer__bottom">
-      <community-actions-button></community-actions-button>
-    </div> -->
   </div>
 </template>
 
 <script>
 import CommunityName from "./CommunityName.vue";
 import LeftDrawerSection from "./left-drawer__section/LeftDrawerSection.vue";
-//import CommunityActionsButton from "./left-drawer__section/CommunityActionsButton.vue";
 
 export default {
   props: ["community"],

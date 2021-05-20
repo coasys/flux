@@ -5,16 +5,15 @@
   </div>
 </template>
 
-
 <script>
 export default {
   props: {
     title: String,
-    description: String
+    description: String,
   },
 };
 </script>
- <style lang="scss" scoped>
+<style lang="scss" scoped>
 .community-name {
   width: 100%;
   margin-bottom: 3rem;

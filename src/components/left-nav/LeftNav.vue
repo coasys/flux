@@ -22,13 +22,13 @@ export default {
   height: 100vh;
   width: 5vw;
   min-width: 10rem;
-  padding: 2rem;
+  padding: 2rem 0 2rem 0;
   background-color: var(--junto-background-color);
   border-right: 1px var(--junto-border-color) solid;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   z-index: 9999;
+  position: relative;
 }
 </style>
-

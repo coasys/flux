@@ -6,6 +6,14 @@
       </svg>
       <p class="mainView__topBar--title--name">{{ currentView.name }}</p>
     </div>
+    <div class="mainView__topBar--action-items">
+      <svg
+        class="mainView__topBar--action-items--invite"
+        @click="getInviteCode"
+      >
+        <use href="@/assets/icons/icons.svg#add-user"></use>
+      </svg>
+    </div>
   </div>
 </template>
 
@@ -29,6 +37,21 @@ export default {
       return icon;
     },
   },
+  methods: {
+    getInviteCode() {
+      // Get the invite code to join community and copy to clipboard
+
+      const el = document.createElement("textarea");
+      el.value =
+        "Hey! Here is an invite code to join my private community on Junto.";
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+
+      alert("Your custom invite code is copied to your clipboard!");
+    },
+  },
 };
 </script>
 <style lang="scss">
@@ -41,6 +64,7 @@ export default {
   padding: 2rem;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   position: absolute;
   top: 0;
   left: 0;
@@ -60,6 +84,17 @@ export default {
       font-size: 1.7rem;
       font-weight: 700;
       color: var(--junto-primary);
+    }
+  }
+
+  &--action-items {
+    &--invite {
+      height: 1.7rem;
+      width: 1.7rem;
+      fill: var(--junto-primary);
+      &:hover {
+        cursor: pointer;
+      }
     }
   }
 }

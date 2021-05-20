@@ -6,7 +6,7 @@
 </template>
 
 <style lang="scss" scoped>
-@import '@/assets/sass/main.scss';
+@import "@/assets/sass/main.scss";
 .joinButton {
   display: flex;
   justify-content: space-between;

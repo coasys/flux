@@ -23,7 +23,6 @@ export default defineComponent({
     // window.api.receive("pong", (data: any) => {
     //   console.log(`Received pong: ${data}`);
     // });
-
     // const { onResult, onError } = useQuery<{ agent: ad4m.AgentService }>(
     //   AGENT_SERVICE_STATUS
     // );
@@ -45,6 +44,7 @@ export default defineComponent({
   width: 100vw;
   display: flex;
   flex-direction: column;
+  background-color: var(--junto-background-color);
 
   &__container {
     display: flex;

@@ -23,7 +23,7 @@ export default defineComponent({
     createMessage: {
       type: Function as PropType<(message: any) => void>,
       required: true,
-    }
+    },
   },
   data() {
     return {

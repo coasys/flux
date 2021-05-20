@@ -1,8 +1,12 @@
 <template>
-  <div class="community-avatar" @click="navToCommunity()">
-    <div class="community-avatar__name">
+  <div
+    class="community-avatar"
+    @click="navToCommunity()"
+    v-tooltip="community.value.name"
+  >
+    <!-- <div class="community-avatar__name">
       <p class="community-avatar__name--text">{{ community.value.name }}</p>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -24,8 +28,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "../../../assets/sass/main.scss";
 .community-avatar {
-  height: 5rem;
-  width: 5rem;
+  min-height: 5rem;
+  min-width: 5rem;
   background-color: var(--junto-border-color);
   border-radius: 100px;
   margin-bottom: 2rem;
