@@ -2,6 +2,7 @@ import { createStore } from "vuex";
 import VuexPersistence from "vuex-persist";
 import type Expression from "@perspect3vism/ad4m/Expression";
 import Address from "@perspect3vism/ad4m/Address";
+import ExpressionRef, { parseExprURL } from "@perspect3vism/ad4m/ExpressionRef";
 
 export interface CommunityState {
   name: string;
@@ -21,9 +22,14 @@ export interface ChannelState {
   sharedPerspectiveUrl: string;
   type: FeedType;
   createdAt: Date;
-  currentExpressionLinks: Expression[];
-  currentExpressionMessages: Expression[];
+  currentExpressionLinks: ExpressionAndRef[];
+  currentExpressionMessages: ExpressionAndRef[];
   membraneType: MembraneType;
+}
+
+export interface ExpressionAndRef {
+  expression: Expression;
+  url: ExpressionRef;
 }
 
 export enum MembraneType {
@@ -172,8 +178,14 @@ export default createStore({
               new Date().toISOString(),
               "Adding to link and exp to channel!"
             );
-            channel.currentExpressionLinks.push(payload.value.link);
-            channel.currentExpressionMessages.push(payload.value.message);
+            channel.currentExpressionLinks.push({
+              expression: payload.value.link,
+              url: parseExprURL(payload.value.linkLanguage),
+            } as ExpressionAndRef);
+            channel.currentExpressionMessages.push({
+              expression: payload.value.message,
+              url: parseExprURL(payload.value.link.target),
+            });
           }
         });
       });

@@ -121,11 +121,14 @@ export default defineComponent({
       let i = 0;
 
       this.getCurrentChannel?.currentExpressionMessages.forEach((e) => {
-        const formattedDate = format(parseISO(e.timestamp), "MM/dd/yyyy");
+        const formattedDate = format(
+          parseISO(e.expression.timestamp),
+          "MM/dd/yyyy"
+        );
         if (obj[formattedDate] !== undefined) {
-          obj[formattedDate].push(e);
+          obj[formattedDate].push(e.expression);
         } else {
-          obj[formattedDate] = [e];
+          obj[formattedDate] = [e.expression];
         }
       });
 

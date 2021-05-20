@@ -9,8 +9,6 @@ import {
   AD4M_SIGNAL,
   QUERY_EXPRESSION,
   LANGUAGE,
-  ADD_LINK,
-  PUB_KEY_FOR_LANG,
 } from "./core/graphql_queries";
 import { useStore } from "vuex";
 import { ExpressionUIIcons } from "./store";
@@ -18,6 +16,7 @@ import ad4m from "@perspect3vism/ad4m-executor";
 import { apolloClient } from "./main";
 import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
+import { expressionGetDelayMs, expressionGetRetries } from "./core/juntoTypes";
 
 declare global {
   interface Window {
@@ -118,14 +117,14 @@ export default defineComponent({
           //@ts-ignore
           let getExprRes = await getExpression(expression.data.target);
           if (getExprRes == null) {
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < expressionGetRetries; i++) {
               console.log("Retrying get of expression signal");
               //@ts-ignore
               getExprRes = await getExpression(expression.data.target);
               if (getExprRes != null) {
                 break;
               }
-              await sleep(20);
+              await sleep(expressionGetDelayMs);
             }
             if (getExprRes == null) {
               throw Error("Could not get expression from link signal");
