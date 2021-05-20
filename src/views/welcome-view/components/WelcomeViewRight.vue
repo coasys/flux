@@ -28,6 +28,19 @@
       </div>
     </div>
 
+    <div class="welcomeViewRight" v-if="!isInit">
+      <div class="welcomeViewRight__spec">
+        <h3 class="welcomeViewRight__spec--title">Surname</h3>
+        <div class="welcomeViewRight__input">
+          <input
+            type="text"
+            class="welcomeViewRight__input--field"
+            v-model="familyName"
+          />
+        </div>
+      </div>
+    </div>
+
     <div class="welcomeViewRight__spec" v-if="!isInit">
       <h3 class="welcomeViewRight__spec--title">Username</h3>
       <div class="welcomeViewRight__input">
@@ -86,6 +99,7 @@ export default defineComponent({
   name: "WelcomeViewRight",
   setup() {
     const name = ref("");
+    const familyName = ref("");
     const username = ref("");
     const email = ref("");
     const password = ref("");
@@ -121,6 +135,7 @@ export default defineComponent({
       username,
       email,
       password,
+      familyName,
       isInit,
       initAgent,
       initAgentError,
@@ -186,7 +201,7 @@ export default defineComponent({
                       username: this.username,
                       email: this.email,
                       givenName: this.name,
-                      familyName: 'familyName',
+                      familyName: this.familyName,
                     },
                   });
 
