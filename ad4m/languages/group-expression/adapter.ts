@@ -1,7 +1,13 @@
 import type Address from "@perspect3vism/ad4m/Address";
 import type Agent from "@perspect3vism/ad4m/Agent";
-import type Expression from "@perspect3vism/ad4m/Expression";
-import type { ExpressionAdapter, PublicSharing } from "@perspect3vism/ad4m/Language";
+import type {
+  ExpressionProof,
+  default as Expression,
+} from "@perspect3vism/ad4m/Expression";
+import type {
+  ExpressionAdapter,
+  PublicSharing,
+} from "@perspect3vism/ad4m/Language";
 import type LanguageContext from "@perspect3vism/ad4m-language-context/lib/LanguageContext";
 import type { default as HolochainLanguageDelegate } from "@perspect3vism/ad4m-language-context/lib/Holochain/HolochainLanguageDelegate";
 import type AgentService from "@perspect3vism/ad4m/AgentService";
@@ -53,22 +59,25 @@ export default class ShortFormAdapter implements ExpressionAdapter {
       hash
     );
     if (expression != null) {
-      const acai_expression: Expression = Object.assign(
-        expression.expression_data
-      );
-      return acai_expression;
+      const expressionSer = {
+        author: {
+          did: expression.expression_data["schema:agent"]["did:id"],
+          name: expression.expression_data["schema:agent"]["schema:givenName"],
+          email: expression.expression_data["schema:agent"]["schema:email"],
+        } as Agent,
+        data: expression.expression_data,
+        timestamp: expression.expression_data["schema:dateCreated"]["@value"],
+        proof: {
+          signature:
+            expression.expression_data["sec:proof"]["sec:verificationMethod"],
+          key: expression.expression_data["sec:proof"][
+            "sec:verificationMethod"
+          ],
+        } as ExpressionProof,
+      } as Expression;
+      return expressionSer;
     } else {
       return null;
     }
-  }
-
-  /// Send an expression to someone privately p2p
-  send_private(to: Agent, content: object) {
-    console.error("Send private not supported in this DNA")
-  }
-
-  /// Get private expressions sent to you
-  async inbox(filterFrom: void | Agent[]): Promise<Expression[]> {
-    return [];
   }
 }
