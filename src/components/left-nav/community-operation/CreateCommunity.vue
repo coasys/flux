@@ -169,7 +169,8 @@ export default defineComponent({
         profile.username,
         profile.email,
         profile.givenName,
-        profile.familyName
+        profile.familyName,
+        profile.profilePicture,
       );
 
       //Create link between perspective and group expression

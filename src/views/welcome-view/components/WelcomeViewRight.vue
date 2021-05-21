@@ -17,6 +17,14 @@
   </div>
 
   <div class="welcomeViewRight" v-if="!isInit">
+    <div class="welcomeViewRight__spec welcomeViewRight__spec--center">
+      <profile-avatar 
+        :diameter="10" 
+        :enableFileSelection="true" 
+        :onClick="selectFile" 
+        :profileImage="profileImage">
+      </profile-avatar>
+    </div>
     <div class="welcomeViewRight__spec">
       <h3 class="welcomeViewRight__spec--title">First Name</h3>
       <div class="welcomeViewRight__input">
@@ -92,6 +100,7 @@ import {
 import { useQuery, useMutation } from "@vue/apollo-composable";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { databasePerspectiveName } from "../../../core/juntoTypes";
+import ProfileAvatar from "@/components/ui/avatar/ProfileAvatar.vue";
 
 export default defineComponent({
   name: "WelcomeViewRight",
@@ -144,6 +153,15 @@ export default defineComponent({
       addPerspective,
       addPerspectiveError,
     };
+  },
+  data() : {
+    profileImage: string | ArrayBuffer | null | undefined,
+    thumbnail: string | null,
+  } {
+    return {
+      profileImage: null,
+      thumbnail: null,
+    }
   },
   beforeCreate() {
     const { onResult, onError } =
@@ -202,6 +220,7 @@ export default defineComponent({
                       email: this.email,
                       givenName: this.name,
                       familyName: this.familyName,
+                      profilePicture: this.profileImage,
                     },
                   });
 
@@ -248,7 +267,25 @@ export default defineComponent({
         }
       });
     },
+    selectFile(e: any) {
+      const files = e.target.files || e.dataTransfer.files;
+      if (!files.length)
+        return;
+
+      var image = new Image();
+      var reader = new FileReader();
+
+      reader.onload = (e) => {
+        this.profileImage = e.target?.result;
+        console.log(this.profileImage);
+      };
+
+      reader.readAsDataURL(files[0]);
+    },
   },
+  components: {
+    ProfileAvatar,
+  }
 });
 </script>
 
@@ -263,6 +300,11 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     margin-bottom: 4rem;
+
+    &--center {
+      align-items: center;
+    }
+
     &--title {
       font-size: 1.4rem;
       font-weight: 500;

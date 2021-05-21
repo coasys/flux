@@ -59,6 +59,7 @@ export interface Profile {
   email: string;
   givenName: string;
   familyName: string;
+  profilePicture: string;
 }
 
 export interface State {
