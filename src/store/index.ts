@@ -60,6 +60,7 @@ export interface Profile {
   givenName: string;
   familyName: string;
   profilePicture: string;
+  thumbnailPicture: string;
 }
 
 export interface State {
