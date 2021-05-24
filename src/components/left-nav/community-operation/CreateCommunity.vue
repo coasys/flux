@@ -24,6 +24,7 @@
   <div class="createCommunity__dialog--bottom">
     <create-button @click="createCommunity"></create-button>
   </div>
+  <junto-loader v-if="showLoader"></junto-loader>
 </template>
 
 <script lang="ts">
@@ -49,6 +50,7 @@ import TextFieldFull from "../../ui/textfields/TextFieldFull.vue";
 import CreateButton from "../../ui/buttons/CreateButton.vue";
 import Spacer from "../../ui/spacer/Spacer.vue";
 import { getPerspective } from "@/core/queries/getPerspective";
+import JuntoLoader from '@/components/ui/animations/JuntoLoader.vue';
 
 export default defineComponent({
   props: ["showCreateCommunity"],
@@ -63,6 +65,11 @@ export default defineComponent({
       description,
     };
   },
+  data(): {showLoader: boolean} {
+    return {
+      showLoader: false,
+    }
+  },
   methods: {
     sleep(ms: number) {
       return new Promise((resolve) => setTimeout(resolve, ms));
@@ -75,7 +82,8 @@ export default defineComponent({
     },
 
     async createCommunity() {
-      //TODO: @eric: show loading animation here
+      this.showLoader = true;
+
       let createSourcePerspective = await addPerspective(this.perspectiveName);
       console.log("Created perspective", createSourcePerspective);
       this.uid = uuidv4().toString();
@@ -231,12 +239,15 @@ export default defineComponent({
       }
 
       this.showCreateCommunity!();
+
+      this.showLoader = false;
     },
   },
   components: {
     TextFieldFull,
     Spacer,
     CreateButton,
+    JuntoLoader,
   },
 });
 </script>
