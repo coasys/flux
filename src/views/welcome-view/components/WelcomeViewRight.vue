@@ -86,6 +86,21 @@
       Create
     </button>
   </div>
+  <div class="cropper_parent" v-if="tempProfileImage !== null">
+     <cropper
+     ref="cropper"
+      class="cropper"
+      backgroundClass="cropper__background"
+      :src="tempProfileImage"
+      :stencil-props="{
+        aspectRatio: 12/12
+      }"
+    ></cropper>
+    <div class="cropper_parent__btns">
+      <button class="cropper_parent__btn" @click="clearImage">cancel</button>
+      <button class="cropper_parent__btn" @click="selectImage">submit</button>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -101,6 +116,9 @@ import { useQuery, useMutation } from "@vue/apollo-composable";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { databasePerspectiveName } from "../../../core/juntoTypes";
 import ProfileAvatar from "@/components/ui/avatar/ProfileAvatar.vue";
+import { blobToDataURL, dataURItoBlob, resizeImage } from "@/core/methods/createProfile";
+import { Cropper } from 'vue-advanced-cropper';
+import 'vue-advanced-cropper/dist/style.css';
 
 export default defineComponent({
   name: "WelcomeViewRight",
@@ -157,10 +175,12 @@ export default defineComponent({
   data() : {
     profileImage: string | ArrayBuffer | null | undefined,
     thumbnail: string | null,
+    tempProfileImage: any
   } {
     return {
       profileImage: null,
       thumbnail: null,
+      tempProfileImage: null
     }
   },
   beforeCreate() {
@@ -200,7 +220,7 @@ export default defineComponent({
             console.log("Post lock result", lockAgentRes);
             if (this.lockAgentError == null) {
               //NOTE: this code is potentially not needed
-              this.addPerspective().then((addPerspectiveResult) => {
+              this.addPerspective().then(async (addPerspectiveResult) => {
                 console.log(
                   "Created perspective for local database with result",
                   addPerspectiveResult
@@ -211,6 +231,9 @@ export default defineComponent({
                     value: addPerspectiveResult.data?.addPerspective.uuid,
                   });
 
+                  const resizedImage = await resizeImage(dataURItoBlob(this.profileImage as string), 400);
+                  const thumbnail = await blobToDataURL(resizedImage);
+
                   this.$store.commit({
                     type: "createProfile",
                     value: {
@@ -220,7 +243,8 @@ export default defineComponent({
                       email: this.email,
                       givenName: this.name,
                       familyName: this.familyName,
-                      profilePicture: this.profileImage,
+                      profilePicture: this.profileImage as string,
+                      thumbnailPicture: thumbnail,
                     },
                   });
 
@@ -272,19 +296,27 @@ export default defineComponent({
       if (!files.length)
         return;
 
-      var image = new Image();
       var reader = new FileReader();
 
       reader.onload = (e) => {
-        this.profileImage = e.target?.result;
-        console.log(this.profileImage);
+        this.tempProfileImage = e.target?.result;
       };
 
       reader.readAsDataURL(files[0]);
     },
+    clearImage() {
+      this.tempProfileImage = null;
+    },
+    selectImage() {
+      const result = (this.$refs.cropper as any).getResult();
+      this.profileImage = result.canvas.toDataURL();
+      console.log(this.profileImage);
+      this.tempProfileImage = null;
+    }
   },
   components: {
     ProfileAvatar,
+    Cropper
   }
 });
 </script>
@@ -346,4 +378,45 @@ export default defineComponent({
     }
   }
 }
+
+.cropper_parent {
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  width: 800px;
+  height: 600px;
+  background: black;
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+
+  &__btns {
+    display: flex;
+    width: 100%;
+  }
+
+  &__btn {
+    height: 40px;
+    width: 50%;
+    font-size: 18px;
+    background: white;
+
+    &:hover {
+      background: rgb(235, 235, 235);
+      transition: all 0.2s;
+    }
+  }
+}
+
+.cropper {
+  flex-grow: 1;
+  &__background {
+    background: transparent !important;
+  }
+}
 </style>
+
+function blobToDataURL(resizedImage: Blob) {
+  throw new Error("Function not implemented.");
+}
