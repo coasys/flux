@@ -1,12 +1,70 @@
 <template>
   <div class="left-nav__communities-list">
-    <community-avatar
+    <j-community-item
       v-for="community in getCommunities"
       :key="community.value.perspective"
-      :community="community"
-      :getPerspectiveChannelsAndMetaData="getPerspectiveChannelsAndMetaData"
-    ></community-avatar>
-    <create-community-icon></create-community-icon>
+      src="https://i.pravatar.cc/300"
+      initials="false"
+      @click="() => handleCommunityClick(community)"
+    ></j-community-item>
+    <j-tooltip title="Create comminuty">
+      <j-button
+        @click="showModal = true"
+        variant="primary"
+        square
+        circle
+        size="lg"
+      >
+        <j-icon size="lg" name="plus"></j-icon>
+      </j-button>
+    </j-tooltip>
+
+    <j-modal :open="showModal" @toggle="(e) => (showModal = e.target.open)">
+      <j-flex direction="column" gap="700">
+        <div>
+          <j-text variant="heading">Create or join a Community</j-text>
+          <j-text nomargin variant="ingress">
+            Communities are the building blocks of Junto.
+          </j-text>
+        </div>
+        <j-tabs
+          size="lg"
+          :value="tabView"
+          @change="(e) => (tabView = e.target.value)"
+        >
+          <j-tab-item>Create</j-tab-item>
+          <j-tab-item>Join</j-tab-item>
+        </j-tabs>
+        <j-flex direction="column" gap="200" v-if="tabView === 'Create'">
+          <j-input
+            size="lg"
+            label="Name"
+            @input="(e) => (newCommunityName = e.target.value)"
+            :value="newCommunityName"
+          ></j-input>
+          <j-input
+            size="lg"
+            label="Description"
+            :value="newCommunityDesc"
+            @input="(e) => (newCommunityDesc = e.target.value)"
+          ></j-input>
+          <j-button size="lg" full variant="primary" @click="createCommunity">
+            Create
+          </j-button>
+        </j-flex>
+        <j-flex direction="column" gap="200" v-if="tabView === 'Join'">
+          <j-input
+            :value="joiningLink"
+            @input="(e) => (joiningLink = e.target.value)"
+            size="lg"
+            label="Invite link"
+          ></j-input>
+          <j-button @click="joinCommunity" size="lg" full variant="primary">
+            Join
+          </j-button>
+        </j-flex>
+      </j-flex>
+    </j-modal>
   </div>
 </template>
 
@@ -14,8 +72,6 @@
 import { useStore } from "vuex";
 import { apolloClient } from "@/main";
 import { defineComponent, onMounted, onUnmounted, ref } from "vue";
-import CommunityAvatar from "@/components/ui/avatar/CommunityAvatar.vue";
-import CreateCommunityIcon from "./community-operation/CreateCommunityIcon.vue";
 import { channelRefreshDurationMs } from "@/core/juntoTypes";
 import { ChannelState, CommunityState, FeedType, MembraneType } from "@/store";
 import { getLinks } from "@/core/queries/getLinks";
@@ -29,6 +85,14 @@ export default defineComponent({
   setup() {
     const store = useStore();
     let noDelayRef: any = ref();
+
+    const joiningLink = ref("");
+
+    const newCommunityName = ref("");
+    const newCommunityDesc = ref("");
+
+    const showModal = ref(false);
+    const tabView = ref("Create");
 
     function noDelaySetInterval(func: () => void, interval: number) {
       func();
@@ -49,6 +113,10 @@ export default defineComponent({
         `${linkLanguageAddress}://self`,
         "sioc://has_space"
       );
+    };
+
+    const changeCommunity = (community: CommunityState) => {
+      store.commit({ type: "changeCommunity", value: community });
     };
 
     const getGroupExpressionLinks = (
@@ -231,10 +299,37 @@ export default defineComponent({
       clearInterval(noDelayRef.value);
     });
 
+    const handleCommunityClick = (community: CommunityState) => {
+      changeCommunity(community);
+      getPerspectiveChannelsAndMetaData(community);
+    };
+
+    const createCommunity = () => {
+      store.dispatch("createCommunity", {
+        name: newCommunityName.value,
+        description: newCommunityDesc.value,
+      });
+    };
+
+    const joinCommunity = () => {
+      store.dispatch("joinCommunity", {
+        joiningLink: joiningLink.value,
+      });
+    };
+
     return {
+      joiningLink,
+      joinCommunity,
+      newCommunityName,
+      newCommunityDesc,
+      createCommunity,
+      tabView,
+      showModal,
+      handleCommunityClick,
       getPerspectiveChannelsAndMetaData,
     };
   },
+
   computed: {
     getCommunities() {
       const communities = this.$store.getters.getCommunities;
@@ -242,8 +337,6 @@ export default defineComponent({
       return communities;
     },
   },
-
-  components: { CommunityAvatar, CreateCommunityIcon },
 });
 </script>
 
