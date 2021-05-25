@@ -12,6 +12,9 @@ import { ApolloClient, InMemoryCache } from "@apollo/client/core";
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { ApolloClients } from "@vue/apollo-composable";
 
+import "junto-elements/dist/main.js";
+import "junto-elements/dist/main.css";
+
 const wsLink = new WebSocketLink({
   uri: `ws://localhost:4000/graphql`,
   options: {
