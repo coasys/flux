@@ -44,8 +44,9 @@ async function main() {
   
   await askQuestion(`Deleting ${configPath} config path.. Press Y to accept... `);
   fs.rmdirSync(configPath, { recursive: true });
-  if (fs.existsSync("./hc")) {
-    fs.rmSync("./hc");
+  if (fs.existsSync(".hc")) {
+    console.log("Removing .hc");
+    fs.rmSync(".hc");
   }
   console.log("Done. Please run localStorage.clear() in the browser to clear Vuex store.")
 }
