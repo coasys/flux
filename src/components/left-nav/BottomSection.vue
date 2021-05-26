@@ -10,19 +10,69 @@
       <j-icon :name="themeIcon"></j-icon>
     </j-button>
 
-    <j-tooltip title="My profile">
-      <j-avatar
-        id="avatar"
-        size="xl"
-        :src="require('../../../src/assets/images/junto_app_icon.png')"
-        initials="P"
-      ></j-avatar>
-    </j-tooltip>
+    <j-avatar
+      id="myProfile"
+      size="xl"
+      :src="require('../../../src/assets/images/junto_app_icon.png')"
+      initials="P"
+    ></j-avatar>
+
+    <j-popover event="click" selector="#myProfile">
+      <j-menu>
+        <j-flex
+          a="center"
+          gap="400"
+          style="
+            display: block;
+            padding-left: var(--j-space-500);
+            padding-right: var(--j-space-500);
+            padding-bottom: var(--j-space-300);
+            border-bottom: 1px solid var(--j-color-ui-100);
+          "
+        >
+          <j-avatar initials="S"></j-avatar>
+          <j-text nomargin>Username </j-text>
+        </j-flex>
+        <j-menu-item @click="isEditProfileOpen = true">
+          Edit profile
+        </j-menu-item>
+        <j-menu-item>View profile</j-menu-item>
+        <j-menu-item @click="isSettingsOpen = true">Settings</j-menu-item>
+        <j-menu-item>Log out</j-menu-item>
+      </j-menu>
+    </j-popover>
+
+    <j-modal
+      :open="isEditProfileOpen"
+      @toggle="(e) => (isEditProfileOpen = e.target.open)"
+    >
+      <j-text variant="heading">Edit profile</j-text>
+      <j-input label="Username"></j-input>
+      <j-button variant="primary" full>Save</j-button>
+    </j-modal>
+
+    <j-modal
+      :open="isSettingsOpen"
+      @toggle="(e) => (isSettingsOpen = e.target.open)"
+    >
+      <j-text variant="heading">Settings</j-text>
+      <j-select value="Dark" label="Theme">
+        <j-menu-item>Light</j-menu-item>
+        <j-menu-item>Dark</j-menu-item>
+      </j-select>
+      <j-button variant="primary" full>Save</j-button>
+    </j-modal>
   </div>
 </template>
 
 <script>
 export default {
+  data() {
+    return {
+      isSettingsOpen: false,
+      isEditProfileOpen: false,
+    };
+  },
   methods: {
     toggleTheme() {
       if (this.$store.state.currentTheme === "light") {
