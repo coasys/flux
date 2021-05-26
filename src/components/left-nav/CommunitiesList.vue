@@ -40,7 +40,6 @@
           <j-input
             size="lg"
             label="Name"
-            type="email"
             @input="(e) => (newCommunityName = e.target.value)"
             :value="newCommunityName"
           ></j-input>
