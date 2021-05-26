@@ -57,7 +57,7 @@ app.on("ready", async () => {
     .init(
       app.getPath("appData"),
       execPath,
-      "./ad4m/languages",
+      builtInLangPath,
       ["languages", "shared-perspectives"],
       false
     )
