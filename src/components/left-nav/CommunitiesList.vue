@@ -307,7 +307,7 @@ export default defineComponent({
 
     const createCommunity = () => {
       store.dispatch("createCommunity", {
-        name: newCommunityName.value,
+        perspectiveName: newCommunityName.value,
         description: newCommunityDesc.value,
       });
     };
