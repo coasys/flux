@@ -248,6 +248,30 @@ export default createStore({
     },
   },
   actions: {
+    async createChannel({ commit, getters }, { name }) {
+      const community = getters.getCurrentCommunity.value;
+      const uid = uuidv4().toString();
+      const channel = await createChannel(
+        name,
+        "",
+        uid,
+        community.perspective,
+        community.linkLanguageAddress,
+        community.expressionLanguages,
+        MembraneType.Inherited,
+        community.typedExpressionLanguages
+      );
+
+      console.log({ name });
+
+      commit({
+        type: "addChannel",
+        value: {
+          community: community.perspective,
+          channel,
+        },
+      });
+    },
     async createCommunity(
       { commit, getters },
       { perspectiveName, description }
@@ -310,6 +334,8 @@ export default createStore({
       });
       console.log("Published perspective with response", publish);
 
+      await sleep(10000);
+
       //Create link denoting type of community
       const addLink = await createLink(createSourcePerspective.uuid!, {
         source: `${publish.linkLanguages![0]!.address!}://self`,
@@ -319,7 +345,6 @@ export default createStore({
       console.log("Added typelink with response", addLink);
       //TODO: we are sleeping here to ensure that all DNA's are installed before trying to do stuff
       //ideally installing DNA's in holochain would be a sync operation to avoid this
-      await sleep(5000);
 
       //Create the group expression
       const createExp = await createExpression(
@@ -346,7 +371,9 @@ export default createStore({
         profile.username,
         profile.email,
         profile.givenName,
-        profile.familyName
+        profile.familyName,
+        profile.profilePicture,
+        profile.thumbnailPicture
       );
 
       //Create link between perspective and group expression
@@ -435,7 +462,9 @@ export default createStore({
           profile.username,
           profile.email,
           profile.givenName,
-          profile.familyName
+          profile.familyName,
+          profile.profilePicture,
+          profile.thumbnailPicture
         );
 
         //Create link between perspective and group expression
