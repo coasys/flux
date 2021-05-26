@@ -18,9 +18,9 @@
       </j-text>
     </div>
     <div class="welcome-view__right">
-      <div v-if="!isInit">
+      <div v-if="isInit">
         <j-text variant="heading">Welcome back</j-text>
-        <div class="welcome-view__inputs">
+        <j-flex direction="column" gap="400">
           <j-input
             size="lg"
             label="Password"
@@ -33,11 +33,11 @@
             size="lg"
             variant="primary"
             @click="unlockDidStoreMethod"
-            >Login</j-button
-          >
-        </div>
+            >Login
+          </j-button>
+        </j-flex>
       </div>
-      <div class="welcome-view__inputs" v-if="isInit">
+      <j-flex direction="column" gap="400" v-if="!isInit">
         <j-text variant="heading">Sign up</j-text>
         <j-input
           label="First Name"
@@ -71,9 +71,10 @@
           full="true"
           variant="primary"
           @click="submitUserInfo"
-          >Create</j-button
         >
-      </div>
+          Create
+        </j-button>
+      </j-flex>
     </div>
   </div>
 </template>
@@ -259,7 +260,7 @@ export default defineComponent({
   max-width: 1200px;
   margin: 0 auto;
   height: 100vh;
-  gap: 130px;
+  gap: var(--j-space-500);
   display: grid;
   place-content: center;
   grid-template-columns: 1fr;
@@ -267,8 +268,9 @@ export default defineComponent({
 
 @media (min-width: 800px) {
   .welcome-view {
-    place-content: center;
+    gap: var(--j-space-1000);
     grid-template-columns: 1fr 1fr;
+    align-items: center;
   }
 }
 

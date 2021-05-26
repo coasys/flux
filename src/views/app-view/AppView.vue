@@ -70,6 +70,5 @@ export default defineComponent({
   max-height: 100vh;
   width: 100%;
   display: flex;
-  background-color: var(--junto-background-color);
 }
 </style>
