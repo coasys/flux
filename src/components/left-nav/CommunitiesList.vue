@@ -1,13 +1,22 @@
 <template>
   <div class="left-nav__communities-list">
-    <j-avatar
+    <router-link
       v-for="community in getCommunities"
       :key="community.value.perspective"
-      size="xl"
-      src="https://i.pravatar.cc/300"
-      initials="false"
-      @click="() => handleCommunityClick(community)"
-    ></j-avatar>
+      :to="{
+        name: 'community',
+        params: { communityId: community.value.perspective },
+      }"
+      v-slot="{ navigate, isActive }"
+    >
+      <j-avatar
+        :selected="isActive"
+        size="xl"
+        src="https://i.pravatar.cc/300"
+        initials="false"
+        @click="() => handleCommunityClick(community) && navigate()"
+      ></j-avatar>
+    </router-link>
     <j-tooltip title="Create comminuty">
       <j-button
         @click="showModal = true"

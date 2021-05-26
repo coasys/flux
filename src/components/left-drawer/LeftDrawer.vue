@@ -17,14 +17,17 @@
       <router-link
         :to="{
           name: 'channel',
-          params: { communityId: 'hello', channelId: channel.perspective },
+          params: {
+            communityId: community.value.perspective,
+            channelId: channel.perspective,
+          },
         }"
         custom
-        v-slot="{ navigate }"
+        v-slot="{ navigate, isExactActive }"
         v-for="channel in community.value.channels"
         :key="channel.perspective"
       >
-        <j-menu-item @click="navigate" size="md">
+        <j-menu-item :selected="isExactActive" @click="navigate" size="md">
           <j-icon slot="start" size="sm" name="hash"></j-icon>
           {{ channel.name }}
         </j-menu-item>
