@@ -83,6 +83,11 @@ export default {
     },
   },
   computed: {
+    profilePic() {
+      const profile = this.$store.getters.getProfile;
+
+      return profile.value.profilePicture;
+    },
     currentTheme() {
       return this.$store.getters.getCurrentTheme;
     },

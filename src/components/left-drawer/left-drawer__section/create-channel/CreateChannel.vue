@@ -27,6 +27,7 @@
       </div>
     </div>
   </teleport>
+  <junto-loader v-if="showLoader"></junto-loader>
 </template>
 
 <script lang="ts">
@@ -36,19 +37,23 @@ import { createChannel } from "@/core/methods/createChannel";
 import { v4 as uuidv4 } from "uuid";
 import { defineComponent } from "vue-demi";
 import { MembraneType } from "@/store";
+import JuntoLoader from '@/components/ui/animations/JuntoLoader.vue';
 
 export default defineComponent({
   components: {
     CreateChannelTextField,
     CreateChannelButton,
+    JuntoLoader,
   },
   data() {
     return {
       channelName: "",
+      showLoader: false,
     };
   },
   methods: {
     async create() {
+      this.showLoader = true;
       const community = this.$store.getters.getCurrentCommunity.value;
       const uid = uuidv4().toString();
       const channel = await createChannel(
@@ -71,6 +76,7 @@ export default defineComponent({
       });
 
       this.showCreateChannel();
+      this.showLoader = false;
     },
   },
   props: ["showCreateChannel"],

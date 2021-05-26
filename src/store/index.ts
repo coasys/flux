@@ -40,11 +40,16 @@ export interface ChannelState {
   sharedPerspectiveUrl: string;
   type: FeedType;
   createdAt: Date;
-  currentExpressionLinks: ExpressionAndRef[];
+  currentExpressionLinks: ExpressionAndLang[];
   currentExpressionMessages: ExpressionAndRef[];
   typedExpressionLanguages: JuntoExpressionReference[];
   membraneType: MembraneType;
   groupExpressionRef: string;
+}
+
+export interface ExpressionAndLang {
+  expression: Expression;
+  language: string;
 }
 
 export interface ExpressionAndRef {
@@ -74,6 +79,8 @@ export interface Profile {
   email: string;
   givenName: string;
   familyName: string;
+  profilePicture: string;
+  thumbnailPicture: string;
 }
 
 export interface State {
@@ -182,16 +189,17 @@ export default createStore({
           if (channel.linkLanguageAddress == payload.value.linkLanguage) {
             console.log(
               new Date().toISOString(),
-              "Adding to link and exp to channel!"
+              "Adding to link and exp to channel!",
+              payload.value
             );
             channel.currentExpressionLinks.push({
               expression: payload.value.link,
-              url: parseExprURL(payload.value.linkLanguage),
-            } as ExpressionAndRef);
+              language: payload.value.linkLanguage,
+            } as ExpressionAndLang);
             channel.currentExpressionMessages.push({
               expression: payload.value.message,
-              url: parseExprURL(payload.value.link.target),
-            });
+              url: parseExprURL(payload.value.link.data.target),
+            } as ExpressionAndRef);
           }
         });
       });

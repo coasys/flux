@@ -73,7 +73,8 @@ export default defineComponent({
       console.log(
         new Date().toISOString(),
         "SIGNAL RECEIVED IN UI: Coming from language",
-        language
+        language,
+        signal
       );
       if (
         //@ts-ignore
@@ -111,7 +112,7 @@ export default defineComponent({
             value: {
               linkLanguage: language,
               //@ts-ignore
-              link: expression.data,
+              link: expression,
               message: getExprRes,
             },
           });
