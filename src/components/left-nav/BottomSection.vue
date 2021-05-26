@@ -1,17 +1,25 @@
 <template>
   <div class="left-nav__bottom-section">
     <toggle-theme-button></toggle-theme-button>
-    <profile-avatar diameter="5"></profile-avatar>
+    <profile-avatar diameter="5" :profileImage="profilePic"></profile-avatar>
   </div>
 </template>
 
 <script lang="ts">
+import { defineComponent } from "vue-demi";
 import ProfileAvatar from "./../ui/avatar/ProfileAvatar.vue";
 import ToggleThemeButton from "./../ui/theme/ToggleThemeButton.vue";
 
-export default {
+export default defineComponent({
   components: { ProfileAvatar, ToggleThemeButton },
-};
+  computed: {
+    profilePic(): string {
+      const profile = this.$store.getters.getProfile;
+
+      return profile.value.profilePicture;
+    }
+  }
+});
 </script>
 
 <style lang="scss" scoped>

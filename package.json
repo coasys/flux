@@ -36,6 +36,7 @@
     "uuid": "^8.3.2",
     "v-tooltip": "^4.0.0-alpha.1",
     "vue": "^3.0.0",
+    "vue-advanced-cropper": "^2.3.1",
     "vue-router": "^4.0.0-0",
     "vue-virtual-scroller": "^2.0.0-alpha.1",
     "vuex": "^4.0.0",
