@@ -134,19 +134,22 @@ if (isDevelopment) {
 
 // Quit when all windows are closed.
 app.on("window-all-closed", () => {
+  console.log("Got window-all-closed signal");
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== "darwin") {
+  //if (process.platform !== "darwin") {
     //Quit PerspectivismCore
-    Core.exit();
-    app.quit();
-  }
+  Core.exit();
+  app.quit();
+  //}
 });
 
 // Quit when all windows are closed.
 app.on("will-quit", () => {
+  console.log("Got quit quit signal");
   //Quit PerspectivismCore
-  //Core.exit();
+  Core.exit();
+  app.quit();
 });
 
 app.on("activate", () => {

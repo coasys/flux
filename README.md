@@ -9,6 +9,12 @@ Linux/Mac OS for running HC & Holochain binaries (see `./resources`).
 git submodule init && git submodule update && npm run build-languages && npm install
 ```
 
+## Extra Setup For Mac Development
+This step may not be needed and should only need to be ran if ad4m-executor is unable to find/run holochain binaries.
+```
+chmod +x resources/darwin/*
+```
+
 If you have any troubles on npm install for any given language or for this project, its likely npm shitting the bed, delete `package-lock.json` & `node_modules` for the package in question and try again. 
 
 ### Compiles and hot-reloads for development
