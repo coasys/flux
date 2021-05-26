@@ -19,7 +19,7 @@
   "dependencies": {
     "@apollo/client": "^3.3.14",
     "@perspect3vism/ad4m": "0.0.5",
-    "@perspect3vism/ad4m-executor": "0.0.8",
+    "@perspect3vism/ad4m-executor": "0.0.9",
     "@types/jest": "^26.0.20",
     "@types/mocha": "^8.2.1",
     "@vue/apollo-composable": "^4.0.0-alpha.12",
