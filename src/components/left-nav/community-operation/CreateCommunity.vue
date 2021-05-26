@@ -50,7 +50,7 @@ import TextFieldFull from "../../ui/textfields/TextFieldFull.vue";
 import CreateButton from "../../ui/buttons/CreateButton.vue";
 import Spacer from "../../ui/spacer/Spacer.vue";
 import { getPerspective } from "@/core/queries/getPerspective";
-import JuntoLoader from '@/components/ui/animations/JuntoLoader.vue';
+import JuntoLoader from "@/components/ui/animations/JuntoLoader.vue";
 
 export default defineComponent({
   props: ["showCreateCommunity"],
@@ -65,10 +65,10 @@ export default defineComponent({
       description,
     };
   },
-  data(): {showLoader: boolean} {
+  data(): { showLoader: boolean } {
     return {
       showLoader: false,
-    }
+    };
   },
   methods: {
     sleep(ms: number) {
@@ -179,7 +179,7 @@ export default defineComponent({
         profile.givenName,
         profile.familyName,
         profile.profilePicture,
-        profile.thumbnailPicture,
+        profile.thumbnailPicture
       );
 
       //Create link between perspective and group expression

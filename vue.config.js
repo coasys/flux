@@ -10,7 +10,7 @@ module.exports = {
           target: "tar.gz",
         },
         linux: {
-          target: ["AppImage"],
+          target: ["AppImage", "deb"],
           category: "Network",
           maintainer: "dev@junto.foundation",
         },

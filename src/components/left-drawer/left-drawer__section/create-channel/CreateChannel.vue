@@ -37,7 +37,7 @@ import { createChannel } from "@/core/methods/createChannel";
 import { v4 as uuidv4 } from "uuid";
 import { defineComponent } from "vue-demi";
 import { MembraneType } from "@/store";
-import JuntoLoader from '@/components/ui/animations/JuntoLoader.vue';
+import JuntoLoader from "@/components/ui/animations/JuntoLoader.vue";
 
 export default defineComponent({
   components: {

@@ -17,8 +17,8 @@ export default defineComponent({
       const profile = this.$store.getters.getProfile;
 
       return profile.value.profilePicture;
-    }
-  }
+    },
+  },
 });
 </script>
 

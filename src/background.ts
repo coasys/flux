@@ -13,6 +13,8 @@ let builtInLangPath: string;
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
+console.log("Trying to run!");
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -31,10 +33,10 @@ app.on("ready", async () => {
     console.log("App is running in production mode");
     //TODO: this code is probably somewhat broken
     builtInLangPath = path.resolve(
-      `${process.resourcesPath}/../packaged-resources/languages`
+      `${process.resourcesPath}/../resources/packaged-resources/languages`
     );
     execPath = path.resolve(
-      `${process.resourcesPath}/../packaged-resources/bin`
+      `${process.resourcesPath}/../resources/packaged-resources/bin`
     );
   } else {
     console.log("App is running in dev mode");
@@ -49,6 +51,7 @@ app.on("ready", async () => {
     builtInLangPath
   );
 
+  //createWindow();
   console.log("\x1b[36m%s\x1b[0m", "Init AD4M...");
   ad4m
     .init(
@@ -100,7 +103,7 @@ async function createWindow() {
   } else {
     createProtocol("app");
     // Load the index.html when not in development
-    win.loadURL("app://./index.html");
+    win.loadURL(`file://${__dirname}/index.html`);
   }
 }
 
@@ -138,7 +141,7 @@ app.on("window-all-closed", () => {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   //if (process.platform !== "darwin") {
-    //Quit PerspectivismCore
+  //Quit PerspectivismCore
   Core.exit();
   app.quit();
   //}

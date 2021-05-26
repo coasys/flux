@@ -1,22 +1,24 @@
 const path = require("path");
 const fs = require("fs");
-const readline = require('readline');
+const readline = require("readline");
 
 function askQuestion(query) {
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-    });
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
 
-    return new Promise((resolve, reject) => rl.question(query, ans => {
-        if (ans == "y" || ans == "Y") {
-          rl.close();
-          resolve(ans);
-        } else {
-          console.log("\n Aborting...");
-          process.exit(1);
-        }
-    }))
+  return new Promise((resolve, reject) =>
+    rl.question(query, (ans) => {
+      if (ans == "y" || ans == "Y") {
+        rl.close();
+        resolve(ans);
+      } else {
+        console.log("\n Aborting...");
+        process.exit(1);
+      }
+    })
+  );
 }
 
 async function main() {
@@ -41,14 +43,18 @@ async function main() {
       break;
     }
   }
-  
-  await askQuestion(`Deleting ${configPath} config path.. Press Y to accept... `);
+
+  await askQuestion(
+    `Deleting ${configPath} config path.. Press Y to accept... `
+  );
   fs.rmdirSync(configPath, { recursive: true });
   if (fs.existsSync(".hc")) {
     console.log("Removing .hc");
     fs.rmSync(".hc");
   }
-  console.log("Done. Please run localStorage.clear() in the browser to clear Vuex store.")
+  console.log(
+    "Done. Please run localStorage.clear() in the browser to clear Vuex store."
+  );
 }
 
-main()
+main();
