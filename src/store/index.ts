@@ -17,6 +17,7 @@ import { getLanguage } from "@/core/queries/getLanguage";
 import { getPerspective } from "@/core/queries/getPerspective";
 import { installSharedPerspective } from "@/core/mutations/installSharedPerspective";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
+import sleep from "@/utils/sleep";
 
 export interface CommunityState {
   //NOTE: here by having a static name + description we are assuming that these are top level metadata items that each group will have
@@ -159,24 +160,10 @@ export default createStore({
 
       if (payload.value === "light") {
         state.currentTheme = "light";
-        root.style.setProperty("--junto-primary-dark", "#000");
-        root.style.setProperty("--junto-primary", "#333");
-        root.style.setProperty("--junto-primary-medium", "#555");
-        root.style.setProperty("--junto-primary-light", "#999");
-        root.style.setProperty("--junto-border-color", "#eee");
-        root.style.setProperty("--junto-accent-color", "#B3808F");
-        root.style.setProperty("--junto-background-color", "#fff");
-        root.style.setProperty("--junto-background-rgba", "255, 255, 255");
+        document.body.setAttribute("theme", "");
       } else if (payload.value === "dark") {
+        document.body.setAttribute("theme", "dark");
         state.currentTheme = "dark";
-        root.style.setProperty("--junto-primary-dark", "#fff");
-        root.style.setProperty("--junto-primary", "#f0f0f0");
-        root.style.setProperty("--junto-primary-medium", "#f0f0f0");
-        root.style.setProperty("--junto-primary-light", "#999999");
-        root.style.setProperty("--junto-border-color", "#555");
-        root.style.setProperty("--junto-accent-color", "#B3808F");
-        root.style.setProperty("--junto-background-color", "#333");
-        root.style.setProperty("--junto-background-rgba", "0, 0, 0");
       }
     },
 
@@ -324,7 +311,7 @@ export default createStore({
       console.log("Added typelink with response", addLink);
       //TODO: we are sleeping here to ensure that all DNA's are installed before trying to do stuff
       //ideally installing DNA's in holochain would be a sync operation to avoid this
-      //await this.sleep(5000);
+      await sleep(5000);
 
       //Create the group expression
       const createExp = await createExpression(
@@ -409,7 +396,7 @@ export default createStore({
           type: "addExpressionUI",
           value: uiData,
         });
-        // await this.sleep(40);
+        await sleep(40);
       }
     },
     // TODO: Use something else than any
