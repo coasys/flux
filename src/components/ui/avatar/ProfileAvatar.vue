@@ -1,13 +1,18 @@
 <template>
-  <div 
-    class="profile-avatar" 
+  <div
+    class="profile-avatar"
     :style="`${avatarDiameter} ${profilePic}`"
-    id="fileInputButton" 
+    id="fileInputButton"
     @click="onFileClick()"
   >
     &nbsp;
   </div>
-  <input id="fileInput" type="file" style="display:none" v-on:change="onClick"/>
+  <input
+    id="fileInput"
+    type="file"
+    style="display: none"
+    v-on:change="onClick"
+  />
 </template>
 
 <script>
@@ -20,16 +25,18 @@ export default {
       );
     },
     profilePic() {
-      return  this.profileImage ? `background-image: url(${this.profileImage});` : "";
-    }
+      return this.profileImage
+        ? `background-image: url(${this.profileImage});`
+        : "";
+    },
   },
   methods: {
     onFileClick() {
       if (this.enableFileSelection) {
-        document.getElementById('fileInput').click()
+        document.getElementById("fileInput").click();
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

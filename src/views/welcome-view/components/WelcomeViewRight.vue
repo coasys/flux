@@ -18,11 +18,12 @@
 
   <div class="welcomeViewRight" v-if="!isInit">
     <div class="welcomeViewRight__spec welcomeViewRight__spec--center">
-      <profile-avatar 
-        :diameter="10" 
-        :enableFileSelection="true" 
-        :onClick="selectFile" 
-        :profileImage="profileImage">
+      <profile-avatar
+        :diameter="10"
+        :enableFileSelection="true"
+        :onClick="selectFile"
+        :profileImage="profileImage"
+      >
       </profile-avatar>
     </div>
     <div class="welcomeViewRight__spec">
@@ -87,13 +88,13 @@
     </button>
   </div>
   <div class="cropper_parent" v-if="tempProfileImage !== null">
-     <cropper
-     ref="cropper"
+    <cropper
+      ref="cropper"
       class="cropper"
       backgroundClass="cropper__background"
       :src="tempProfileImage"
       :stencil-props="{
-        aspectRatio: 12/12
+        aspectRatio: 12 / 12,
       }"
     ></cropper>
     <div class="cropper_parent__btns">
@@ -116,9 +117,13 @@ import { useQuery, useMutation } from "@vue/apollo-composable";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { databasePerspectiveName } from "../../../core/juntoTypes";
 import ProfileAvatar from "@/components/ui/avatar/ProfileAvatar.vue";
-import { blobToDataURL, dataURItoBlob, resizeImage } from "@/core/methods/createProfile";
-import { Cropper } from 'vue-advanced-cropper';
-import 'vue-advanced-cropper/dist/style.css';
+import {
+  blobToDataURL,
+  dataURItoBlob,
+  resizeImage,
+} from "@/core/methods/createProfile";
+import { Cropper } from "vue-advanced-cropper";
+import "vue-advanced-cropper/dist/style.css";
 
 export default defineComponent({
   name: "WelcomeViewRight",
@@ -172,16 +177,16 @@ export default defineComponent({
       addPerspectiveError,
     };
   },
-  data() : {
-    profileImage: string | ArrayBuffer | null | undefined,
-    thumbnail: string | null,
-    tempProfileImage: any
+  data(): {
+    profileImage: string | ArrayBuffer | null | undefined;
+    thumbnail: string | null;
+    tempProfileImage: any;
   } {
     return {
       profileImage: null,
       thumbnail: null,
-      tempProfileImage: null
-    }
+      tempProfileImage: null,
+    };
   },
   beforeCreate() {
     const { onResult, onError } =
@@ -231,7 +236,10 @@ export default defineComponent({
                     value: addPerspectiveResult.data?.addPerspective.uuid,
                   });
 
-                  const resizedImage = await resizeImage(dataURItoBlob(this.profileImage as string), 400);
+                  const resizedImage = await resizeImage(
+                    dataURItoBlob(this.profileImage as string),
+                    400
+                  );
                   const thumbnail = await blobToDataURL(resizedImage);
 
                   this.$store.commit({
@@ -293,8 +301,7 @@ export default defineComponent({
     },
     selectFile(e: any) {
       const files = e.target.files || e.dataTransfer.files;
-      if (!files.length)
-        return;
+      if (!files.length) return;
 
       var reader = new FileReader();
 
@@ -312,12 +319,12 @@ export default defineComponent({
       this.profileImage = result.canvas.toDataURL();
       console.log(this.profileImage);
       this.tempProfileImage = null;
-    }
+    },
   },
   components: {
     ProfileAvatar,
-    Cropper
-  }
+    Cropper,
+  },
 });
 </script>
 
@@ -380,10 +387,10 @@ export default defineComponent({
 }
 
 .cropper_parent {
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%, -50%);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 800px;
   height: 600px;
   background: black;
@@ -417,6 +424,5 @@ export default defineComponent({
 }
 </style>
 
-function blobToDataURL(resizedImage: Blob) {
-  throw new Error("Function not implemented.");
-}
+function blobToDataURL(resizedImage: Blob) { throw new Error("Function not
+implemented."); }

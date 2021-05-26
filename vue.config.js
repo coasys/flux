@@ -17,13 +17,13 @@ module.exports = {
       preload: "src/preload.js",
       externals: ["@perspect3vism/ad4m-executor", "fs"],
       builderOptions: {
-        productName: "Junto🐺",
+        productName: "Junto",
         appId: "junto.foundation.communities",
         mac: {
           target: "tar.gz",
         },
         linux: {
-          target: ["AppImage"],
+          target: ["AppImage", "deb"],
           category: "Network",
           maintainer: "dev@junto.foundation",
         },
