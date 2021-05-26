@@ -1,11 +1,10 @@
-
 :root {
   --junto-primary-dark: #000;
   --junto-primary: #333;
   --junto-primary-medium: #555;
   --junto-primary-light: #999;
   --junto-border-color: #eee;
-  --junto-accent-color: #B3808F;
+  --junto-accent-color: #b3808f;
   --junto-background-color: #fff;
   --junto-background-rgba: 255, 255, 255;
   --junto-icon-color: invert(30%);
@@ -29,5 +28,6 @@ body {
   font-weight: 400;
   overflow-x: hidden;
   outline: none;
+  background-color: var(--j-color-white);
   color: var(--junto-primary);
 }
