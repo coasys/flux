@@ -206,7 +206,7 @@ export default defineComponent({
                     },
                   });
 
-                  this.$router.push("/home");
+                  this.$router.push("/");
                 } else {
                   console.log("Got error", this.addPerspectiveError);
                 }
