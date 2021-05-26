@@ -1,41 +1,79 @@
 <template>
   <div class="left-drawer" v-if="community != null">
-    <div class="left-drawer__top">
-      <community-name
-        :title="community.value.name"
-        :description="community.value.description"
-      ></community-name>
-      <left-drawer-section
-        type="Feed"
-        :community="community"
-      ></left-drawer-section>
-      <left-drawer-section
-        type="Channel"
-        :community="community"
-      ></left-drawer-section>
-    </div>
+    <j-box px="500" pt="500">
+      <j-text variant="heading-sm">{{ community.value.name }}</j-text>
+      <j-text variant="ingress">{{ community.value.description }}</j-text>
+    </j-box>
+
+    <j-menu-group-item open title="Channels">
+      <j-button
+        @click.prevent="showCreateChannel = true"
+        size="sm"
+        slot="end"
+        variant="transparent"
+      >
+        <j-icon size="sm" square name="plus"></j-icon>
+      </j-button>
+      <router-link
+        :to="{
+          name: 'channel',
+          params: { communityId: 'hello', channelId: channel.perspective },
+        }"
+        custom
+        v-slot="{ navigate }"
+        v-for="channel in community.value.channels"
+        :key="channel.perspective"
+      >
+        <j-menu-item @click="navigate" size="md">
+          <j-icon slot="start" size="sm" name="hash"></j-icon>
+          {{ channel.name }}
+        </j-menu-item>
+      </router-link>
+    </j-menu-group-item>
+    <j-modal
+      :open="showCreateChannel"
+      @toggle="(e) => (showCreateChannel = e.target.open)"
+    >
+      <j-text variant="heading">Create Channel</j-text>
+      <j-text variant="body">
+        Channels are ways to organize your conversations by topics.
+      </j-text>
+      <j-input
+        label="Name"
+        :value="channelName"
+        @input="(e) => (channelName = e.target.value)"
+      ></j-input>
+      <j-button @click="createChannel" variant="primary">
+        Create Channel
+      </j-button>
+    </j-modal>
   </div>
 </template>
 
-<script>
-import CommunityName from "./CommunityName.vue";
-import LeftDrawerSection from "./left-drawer__section/LeftDrawerSection.vue";
+<script lang="ts">
+import { defineComponent } from "vue";
 
-export default {
+export default defineComponent({
   props: ["community"],
-  components: { CommunityName, LeftDrawerSection },
-};
+  data() {
+    return {
+      channelName: "",
+      showCreateChannel: false,
+    };
+  },
+  methods: {
+    async createChannel() {
+      this.$store.dispatch("createChannel", { name: this.channelName });
+    },
+  },
+});
 </script>
 
 <style lang="scss" scoped>
 .left-drawer {
-  padding: 2rem;
   width: 15vw;
   min-width: 20rem;
   background-color: var(--junto-background-color);
-  display: flex;
-  flex-direction: column;
   border-right: 1px solid var(--junto-border-color);
-  justify-content: space-between;
 }
 </style>
