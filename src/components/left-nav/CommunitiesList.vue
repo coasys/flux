@@ -1,19 +1,20 @@
 <template>
   <div class="left-nav__communities-list">
-    <j-community-item
+    <j-avatar
       v-for="community in getCommunities"
       :key="community.value.perspective"
+      size="xl"
       src="https://i.pravatar.cc/300"
       initials="false"
       @click="() => handleCommunityClick(community)"
-    ></j-community-item>
+    ></j-avatar>
     <j-tooltip title="Create comminuty">
       <j-button
         @click="showModal = true"
         variant="primary"
         square
         circle
-        size="lg"
+        size="xl"
       >
         <j-icon size="lg" name="plus"></j-icon>
       </j-button>
@@ -35,10 +36,11 @@
           <j-tab-item>Create</j-tab-item>
           <j-tab-item>Join</j-tab-item>
         </j-tabs>
-        <j-flex direction="column" gap="200" v-if="tabView === 'Create'">
+        <j-flex direction="column" gap="300" v-if="tabView === 'Create'">
           <j-input
             size="lg"
             label="Name"
+            type="email"
             @input="(e) => (newCommunityName = e.target.value)"
             :value="newCommunityName"
           ></j-input>
