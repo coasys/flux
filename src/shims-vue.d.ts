@@ -8,3 +8,5 @@ declare module '*.vue' {
 declare module 'vue-virtual-scroller';
 
 declare module 'v-tooltip';
+
+declare module 'vue-advanced-cropper';
