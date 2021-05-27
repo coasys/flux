@@ -58,16 +58,16 @@ export default defineComponent({
         (val) => val.expressionType == ExpressionTypes.ProfileExpression
       );
       if (profileExpLang != undefined) {
-        const profile: Profile = this.$store.getters.getProfile;
+        const profile = this.$store.getters.getProfile;
 
         let createProfileExpression = await createProfile(
           profileExpLang.languageAddress!,
-          profile.username,
-          profile.email,
-          profile.givenName,
-          profile.familyName,
-          profile.profilePicture,
-          profile.thumbnailPicture
+          profile.value.username,
+          profile.value.email,
+          profile.value.givenName,
+          profile.value.familyName,
+          profile.value.profilePicture,
+          profile.value.thumbnailPicture
         );
 
         //Create link between perspective and group expression
