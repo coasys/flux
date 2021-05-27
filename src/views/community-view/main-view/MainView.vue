@@ -30,10 +30,8 @@ export default {
   },
   computed: {
     getCurrentView() {
-      return (
-        this.$store.getters.getCurrentCommunityView ??
-        this.$store.getters.getCommunities[0]
-      );
+      const { channelId, communityId } = this.$route.params;
+      return this.$store.getters.getChannel({ channelId, communityId });
     },
   },
 };

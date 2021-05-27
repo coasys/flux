@@ -471,17 +471,16 @@ export default createStore({
       return community;
     },
 
-    getChannel:
-      (state) => (payload: { channelId: string; communityId: string }) => {
-        const { channelId, communityId } = payload;
-        const community = state.communities.find(
-          (community: CommunityState) => community.perspective === channelId
-        );
+    getChannel: (state) => (payload: any) => {
+      const { channelId, communityId } = payload;
+      const community = state.communities.find(
+        (community: CommunityState) => community.perspective === communityId
+      );
 
-        return community?.channels.find(
-          (channel) => channel.perspective === communityId
-        );
-      },
+      return community?.channels.find(
+        (channel) => channel.perspective === channelId
+      );
+    },
 
     getDatabasePerspective(state: State) {
       return state.databasePerspective;
