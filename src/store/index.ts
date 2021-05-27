@@ -152,7 +152,7 @@ export default createStore({
     addExpressionAndLinkFromLanguageAddress: (state: State, payload) => {
       state.communities.forEach((community) => {
         community.channels.forEach((channel) => {
-          if (channel.linkLanguageAddress == payload.linkLanguage) {
+          if (channel.linkLanguageAddress === payload.linkLanguage) {
             console.log(
               new Date().toISOString(),
               "Adding to link and exp to channel!",
