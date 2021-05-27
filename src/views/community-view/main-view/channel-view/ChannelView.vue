@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
 import DirectMessage from "../../../../components/direct-message/display/DirectMessage.vue";
@@ -58,7 +58,16 @@ interface ChatItem {
 export default defineComponent({
   props: ["community", "channel"],
   setup() {
-    const { params } = useRoute();
+    const route = useRoute();
+
+    const channelId = ref("");
+
+    watch(
+      () => route.params,
+      (params: any) => {
+        channelId.value = params.channelId;
+      }
+    );
 
     const currentExpressionPost = ref({});
     const expressionLanguage = ref("");
@@ -80,7 +89,7 @@ export default defineComponent({
       addLink: ad4m.LinkExpression;
     }>(ADD_LINK, () => ({
       variables: {
-        perspectiveUUID: params.channelId,
+        perspectiveUUID: route.params.channelId,
         link: JSON.stringify(linkData.value),
       },
     }));
