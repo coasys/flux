@@ -59,9 +59,9 @@ export default defineComponent({
 .mainView__topBar {
   z-index: 2000;
   height: 7.5rem;
-  background-color: var(--junto-background-color);
+  background-color: var(--j-color-white);
   width: 100%;
-  border-bottom: 1px solid var(--junto-border-color);
+  border-bottom: 1px solid var(--j-color-ui-50);
   padding: 2rem;
   display: flex;
   align-items: center;

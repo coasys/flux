@@ -355,6 +355,7 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   display: flex;
+  gap: var(--j-space-400);
   flex-direction: column;
   align-items: center;
   overflow-y: scroll;

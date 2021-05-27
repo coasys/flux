@@ -38,7 +38,9 @@
         </j-menu-item>
         <j-menu-item>View profile</j-menu-item>
         <j-menu-item @click="isSettingsOpen = true">Settings</j-menu-item>
-        <j-menu-item>Log out</j-menu-item>
+        <router-link :to="{ name: 'signup' }" v-slot="{ navigate }">
+          <j-menu-item @click="navigate">Log out</j-menu-item>
+        </router-link>
       </j-menu>
     </j-popover>
 

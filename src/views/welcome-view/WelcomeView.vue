@@ -242,7 +242,7 @@ export default defineComponent({
             type: "updateAgentLockState",
             value: true,
           });
-          this.$router.push("/home");
+          this.$router.push("/");
         } else {
           //TODO: this needs to go to an error handler function
           console.log("Got error", this.unlockDidStoreError);

@@ -27,7 +27,7 @@
         v-for="channel in community.value.channels"
         :key="channel.perspective"
       >
-        <j-menu-item :selected="isExactActive" @click="navigate" size="md">
+        <j-menu-item :selected="isExactActive" @click="navigate">
           <j-icon slot="start" size="sm" name="hash"></j-icon>
           {{ channel.name }}
         </j-menu-item>
@@ -67,6 +67,7 @@ export default defineComponent({
   methods: {
     async createChannel() {
       this.$store.dispatch("createChannel", { name: this.channelName });
+      this.showCreateChannel = false;
     },
   },
 });
@@ -76,7 +77,7 @@ export default defineComponent({
 .left-drawer {
   width: 15vw;
   min-width: 20rem;
-  background-color: var(--junto-background-color);
-  border-right: 1px solid var(--junto-border-color);
+  background-color: var(--j-color-white);
+  border-right: 1px solid var(--j-color-ui-50);
 }
 </style>
