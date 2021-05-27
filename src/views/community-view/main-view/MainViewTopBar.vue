@@ -25,7 +25,7 @@ export default defineComponent({
   computed: {
     setIcon() {
       let icon;
-      switch (this.channel.type) {
+      switch (this.channel?.type) {
         case "feed":
           icon = "#feed";
           break;
