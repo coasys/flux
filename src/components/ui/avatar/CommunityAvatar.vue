@@ -19,7 +19,7 @@ export default defineComponent({
   methods: {
     async navToCommunity() {
       this.getPerspectiveChannelsAndMetaData(this.community);
-      this.$store.commit({ type: "changeCommunity", value: this.community });
+      this.$store.commit("changeCommunity", this.community);
     },
   },
 });

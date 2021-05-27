@@ -1,7 +1,7 @@
 <template>
   <div class="community-view">
-    <left-drawer :community="getCurrentCommunity"></left-drawer>
-    <main-view :community="getCurrentCommunity"></main-view>
+    <left-drawer :community="currentCommunity"></left-drawer>
+    <main-view :community="currentCommunity"></main-view>
   </div>
 </template>
 
@@ -14,8 +14,9 @@ export default {
     MainView,
   },
   computed: {
-    getCurrentCommunity() {
-      return this.$store.getters.getCurrentCommunity;
+    currentCommunity() {
+      const { communityId } = this.$route.params;
+      return this.$store.getters.getCommunity(communityId);
     },
   },
 };

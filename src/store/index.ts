@@ -84,9 +84,6 @@ export interface Profile {
 }
 
 export interface State {
-  currentTheme: string;
-  currentCommunity: CommunityState | null;
-  currentCommunityView: CommunityView | null;
   communities: CommunityState[];
   localLanguagesPath: string;
   databasePerspective: string;
@@ -129,9 +126,6 @@ const vuexLocal = new VuexPersistence<State>({
 
 export default createStore({
   state: {
-    currentTheme: "light",
-    currentCommunity: null,
-    currentCommunityView: null,
     communities: [],
     localLanguagesPath: "",
     databasePerspective: "",
@@ -143,35 +137,12 @@ export default createStore({
   plugins: [vuexLocal.plugin],
   mutations: {
     addCommunity(state: State, payload: CommunityState) {
+      console.log("adding Community", payload);
       state.communities.push(payload);
     },
 
     setLanguagesPath(state: State, payload: string) {
       state.localLanguagesPath = payload;
-    },
-
-    // navigate to a new community
-    changeCommunity(state: State, payload) {
-      state.currentCommunity = payload.value;
-    },
-
-    // navigate to a different view within a community (i.e. feeds, channels, etc)
-    changeCommunityView(state: State, payload) {
-      console.log("Changing community view", payload);
-      state.currentCommunityView = payload.value;
-    },
-
-    // Toggle theme
-    toggleTheme(state: State, payload) {
-      const root = document.documentElement;
-
-      if (payload.value === "light") {
-        state.currentTheme = "light";
-        document.body.setAttribute("theme", "");
-      } else if (payload.value === "dark") {
-        document.body.setAttribute("theme", "dark");
-        state.currentTheme = "dark";
-      }
     },
 
     addDatabasePerspective(state: State, payload) {
@@ -180,25 +151,20 @@ export default createStore({
 
     addExpressionAndLinkFromLanguageAddress: (state: State, payload) => {
       state.communities.forEach((community) => {
-        //@ts-ignore
-        // if (community.value.linkLanguageAddress == payload.linkLanguage) {
-        //   return;
-        // }
-        //@ts-ignore
-        community.value.channels.forEach((channel) => {
-          if (channel.linkLanguageAddress == payload.value.linkLanguage) {
+        community.channels.forEach((channel) => {
+          if (channel.linkLanguageAddress == payload.linkLanguage) {
             console.log(
               new Date().toISOString(),
               "Adding to link and exp to channel!",
-              payload.value
+              payload
             );
             channel.currentExpressionLinks.push({
-              expression: payload.value.link,
-              language: payload.value.linkLanguage,
+              expression: payload.link,
+              language: payload.linkLanguage,
             } as ExpressionAndLang);
             channel.currentExpressionMessages.push({
-              expression: payload.value.message,
-              url: parseExprURL(payload.value.link.data.target),
+              expression: payload.message,
+              url: parseExprURL(payload.link.data.target),
             } as ExpressionAndRef);
           }
         });
@@ -218,13 +184,14 @@ export default createStore({
     },
 
     addChannel(state: State, payload: AddChannel) {
+      console.log(payload);
       const community = state.communities.find(
         //@ts-ignore
-        (community) => community.value.perspective === payload.value.community
+        (community) => community.perspective === payload.communityId
       );
-      if (community != undefined) {
+      if (community !== undefined) {
         //@ts-ignore
-        community.value.channels.push(payload.value.channel);
+        community.channels.push(payload.channel);
       }
     },
 
@@ -235,21 +202,21 @@ export default createStore({
     updateCommunityMetadata(state: State, payload) {
       const community = state.communities.find(
         //@ts-ignore
-        (community) => community.value.perspective === payload.value.community
+        (community) => community.perspective === payload.community
       );
       if (community != undefined) {
         //@ts-ignore
-        community.value.name = payload.value.name;
+        community.name = payload.name;
         //@ts-ignore
-        community.value.description = payload.value.description;
+        community.description = payload.description;
         //@ts-ignore
-        community.value.groupExpressionRef = payload.value.groupExpressionRef;
+        community.groupExpressionRef = payload.groupExpressionRef;
       }
     },
   },
   actions: {
-    async createChannel({ commit, getters }, { name }) {
-      const community = getters.getCurrentCommunity.value;
+    async createChannel({ commit, getters }, { communityId, name }) {
+      const community = getters.getCommunity(communityId);
       const uid = uuidv4().toString();
       const channel = await createChannel(
         name,
@@ -262,14 +229,9 @@ export default createStore({
         community.typedExpressionLanguages
       );
 
-      console.log({ name });
-
-      commit({
-        type: "addChannel",
-        value: {
-          community: community.perspective,
-          channel,
-        },
+      commit("addChannel", {
+        communityId: community.perspective,
+        channel,
       });
     },
     async createCommunity(
@@ -285,19 +247,19 @@ export default createStore({
 
       //Create shortform expression language
       const shortFormExpressionLang = await createUniqueExpressionLanguage(
-        path.join(builtInLangPath.value, "shortform/build"),
+        path.join(builtInLangPath, "shortform/build"),
         "shortform",
         uid
       );
       console.log("Response from create exp lang", shortFormExpressionLang);
       //Create group expression language
       const groupExpressionLang = await createUniqueExpressionLanguage(
-        path.join(builtInLangPath.value, "group-expression/build"),
+        path.join(builtInLangPath, "group-expression/build"),
         "group-expression",
         uid
       );
       const profileExpressionLang = await createUniqueExpressionLanguage(
-        path.join(builtInLangPath.value, "profiles/build"),
+        path.join(builtInLangPath, "profiles/build"),
         "agent-profiles",
         uid
       );
@@ -403,19 +365,16 @@ export default createStore({
       );
 
       //Add the perspective to community store
-      commit({
-        type: "addCommunity",
-        value: {
-          name: perspectiveName,
-          description: description,
-          linkLanguageAddress: publish.linkLanguages![0]!.address!,
-          channels: [channel],
-          perspective: createSourcePerspective.uuid!,
-          expressionLanguages: expressionLangs,
-          typedExpressionLanguages: typedExpLangs,
-          groupExpressionRef: createExp,
-          sharedPerspectiveUrl: communityPerspective.sharedURL!,
-        },
+      commit("addCommunity", {
+        name: perspectiveName,
+        description: description,
+        linkLanguageAddress: publish.linkLanguages![0]!.address!,
+        channels: [channel],
+        perspective: createSourcePerspective.uuid!,
+        expressionLanguages: expressionLangs,
+        typedExpressionLanguages: typedExpLangs,
+        groupExpressionRef: createExp,
+        sharedPerspectiveUrl: communityPerspective.sharedURL!,
       });
 
       //Get and cache the expression UI for each expression language
@@ -427,10 +386,7 @@ export default createStore({
           createIcon: languageRes.constructorIcon!.code!,
           viewIcon: languageRes.iconFor!.code!,
         };
-        commit({
-          type: "addExpressionUI",
-          value: uiData,
-        });
+        commit("addExpressionUI", uiData);
         await sleep(40);
       }
     },
@@ -477,19 +433,16 @@ export default createStore({
         console.log("Created group expression link", addProfileLink);
       }
 
-      store.commit({
-        type: "addCommunity",
-        value: {
-          name: installedPerspective.name,
-          linkLanguageAddress:
-            installedPerspective.sharedPerspective!.linkLanguages![0]!.address!,
-          channels: [],
-          perspective: installedPerspective.uuid!,
-          expressionLanguages:
-            installedPerspective.sharedPerspective!.requiredExpressionLanguages,
-          typedExpressionLanguages: typedExpressionLanguages,
-          sharedPerspectiveUrl: joiningLink, //TODO: this will have to be string split once we add proof onto the URL
-        },
+      store.commit("addCommunity", {
+        name: installedPerspective.name,
+        linkLanguageAddress:
+          installedPerspective.sharedPerspective!.linkLanguages![0]!.address!,
+        channels: [],
+        perspective: installedPerspective.uuid!,
+        expressionLanguages:
+          installedPerspective.sharedPerspective!.requiredExpressionLanguages,
+        typedExpressionLanguages: typedExpressionLanguages,
+        sharedPerspectiveUrl: joiningLink, //TODO: this will have to be string split once we add proof onto the URL
       });
     },
   },
@@ -505,54 +458,44 @@ export default createStore({
     getCommunities(state: State) {
       return state.communities;
     },
-    // Get the current community the user is viewing
-    getCurrentCommunity(state: State) {
-      return state.currentCommunity;
-    },
-
-    // Get the view (i.e. feed,  channel) of the community a user is currently on
-    getCurrentCommunityView(state: State) {
-      return state.currentCommunityView;
-    },
-    // Get current theme
-    getCurrentTheme(state: State) {
-      return state.currentTheme;
-    },
 
     getLanguagePath(state: State) {
       return state.localLanguagesPath;
     },
 
-    getCommunityById: (state) => (id: string) => {
-      return state.communities.find((todo) => todo.perspective === id);
+    getCommunity: (state) => (id: string) => {
+      const community = state.communities.find(
+        (community) => community.perspective === id
+      );
+
+      return community;
     },
+
+    getChannel:
+      (state) => (payload: { channelId: string; communityId: string }) => {
+        const { channelId, communityId } = payload;
+        const community = state.communities.find(
+          (community: CommunityState) => community.perspective === channelId
+        );
+
+        return community?.channels.find(
+          (channel) => channel.perspective === communityId
+        );
+      },
 
     getDatabasePerspective(state: State) {
       return state.databasePerspective;
-    },
-
-    getCurrentChannel(state) {
-      //@ts-ignore
-      const cha = state.currentCommunity.value.channels.find(
-        (channel: ChannelState) => {
-          //@ts-ignore
-          return (
-            channel.perspective === state.currentCommunityView!.perspective
-          );
-        }
-      );
-      return cha;
     },
 
     getPerspectiveFromLinkLanguage: (state) => (linkLanguage: string) => {
       let perspective;
       state.communities.forEach((community) => {
         //@ts-ignore
-        if (community.value.linkLanguageAddress == linkLanguage) {
+        if (community.linkLanguageAddress == linkLanguage) {
           return community;
         }
         //@ts-ignore
-        community.value.channels.forEach((channel) => {
+        community.channels.forEach((channel) => {
           if (channel.linkLanguageAddress == linkLanguage) {
             perspective = channel;
           }
@@ -565,12 +508,12 @@ export default createStore({
       const expressionLangs: Address[] = [];
       state.communities.forEach((community) => {
         //@ts-ignore
-        community.value.expressionLanguages.forEach((expLang) => {
+        community.expressionLanguages.forEach((expLang) => {
           if (
             expressionLangs.indexOf(expLang) === -1 &&
             //@ts-ignore
             state.expressionUI.find(
-              (val: ExpressionUIIcons) => val.languageAddress === expLang.value
+              (val: ExpressionUIIcons) => val.languageAddress === expLang
             ) === undefined
           ) {
             expressionLangs.push(expLang);

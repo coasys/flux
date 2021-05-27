@@ -153,7 +153,7 @@ export default defineComponent({
       }>(AGENT_SERVICE_STATUS);
     onResult((val) => {
       this.isInit = val.data.agent.isInitialized!;
-      this.$store.commit({ type: "updateAgentLockState", value: false });
+      this.$store.commit("updateAgentLockState", false);
       if (this.isInit == true) {
         //Get database perspective from store
         let databasePerspective = this.$store.getters.getDatabasePerspective;
@@ -189,21 +189,18 @@ export default defineComponent({
                   addPerspectiveResult
                 );
                 if (this.addPerspectiveError == null) {
-                  this.$store.commit({
-                    type: "addDatabasePerspective",
-                    value: addPerspectiveResult.data?.addPerspective.uuid,
-                  });
+                  this.$store.commit(
+                    "addDatabasePerspective",
+                    addPerspectiveResult.data?.addPerspective.uuid
+                  );
 
-                  this.$store.commit({
-                    type: "createProfile",
-                    value: {
-                      address:
-                        addPerspectiveResult.data?.addPerspective.uuid || "",
-                      username: this.username,
-                      email: this.email,
-                      givenName: this.name,
-                      familyName: this.familyName,
-                    },
+                  this.$store.commit("createProfile", {
+                    address:
+                      addPerspectiveResult.data?.addPerspective.uuid || "",
+                    username: this.username,
+                    email: this.email,
+                    givenName: this.name,
+                    familyName: this.familyName,
                   });
 
                   this.$router.push("/");
@@ -213,10 +210,7 @@ export default defineComponent({
               });
               //TODO: then send the profile information to a public Junto DNA
               this.isInit = true;
-              this.$store.commit({
-                type: "updateAgentLockState",
-                value: true,
-              });
+              this.$store.commit("updateAgentLockState", true);
             } else {
               console.log("Got error", this.lockAgentError);
             }
@@ -238,10 +232,7 @@ export default defineComponent({
           val.data.unlockAgent.isUnlocked
         ) {
           this.isInit = true;
-          this.$store.commit({
-            type: "updateAgentLockState",
-            value: true,
-          });
+          this.$store.commit("updateAgentLockState", true);
           this.$router.push("/");
         } else {
           //TODO: this needs to go to an error handler function

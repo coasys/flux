@@ -44,7 +44,7 @@ export default defineComponent({
       // Get the invite code to join community and copy to clipboard
       let currentCommunity = this.$store.getters.getCurrentCommunity;
       const el = document.createElement("textarea");
-      el.value = `Hey! Here is an invite code to join my private community on Junto: ${currentCommunity.value.sharedPerspectiveUrl}`;
+      el.value = `Hey! Here is an invite code to join my private community on Junto: ${currentCommunity.sharedPerspectiveUrl}`;
       document.body.appendChild(el);
       el.select();
       document.execCommand("copy");

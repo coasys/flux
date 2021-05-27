@@ -54,10 +54,7 @@ export default defineComponent({
                 createIcon: language!.constructorIcon!.code!,
                 viewIcon: language!.iconFor!.code!,
               };
-              store.commit({
-                type: "addExpressionUI",
-                value: uiData,
-              });
+              store.commit("addExpressionUI", uiData);
             }
             await sleep(50);
           }
@@ -107,14 +104,11 @@ export default defineComponent({
             "Got expression result back",
             getExprRes
           );
-          store.commit({
-            type: "addExpressionAndLinkFromLanguageAddress",
-            value: {
-              linkLanguage: language,
-              //@ts-ignore
-              link: expression,
-              message: getExprRes,
-            },
+          store.commit("addExpressionAndLinkFromLanguageAddress", {
+            linkLanguage: language,
+            //@ts-ignore
+            link: expression,
+            message: getExprRes,
           });
         }
       }
@@ -130,10 +124,7 @@ export default defineComponent({
     window.api.send("getLangPath");
     window.api.receive("getLangPathResponse", (data: string) => {
       console.log(`Received language path from main thread: ${data}`);
-      this.$store.commit({
-        type: "setLanguagesPath",
-        value: data,
-      });
+      this.$store.commit("setLanguagesPath", data);
     });
   },
 });

@@ -1,8 +1,8 @@
 <template>
   <div class="left-drawer" v-if="community != null">
     <j-box px="500" pt="500">
-      <j-text variant="heading-sm">{{ community.value.name }}</j-text>
-      <j-text variant="ingress">{{ community.value.description }}</j-text>
+      <j-text variant="heading-sm">{{ community.name }}</j-text>
+      <j-text variant="ingress">{{ community.description }}</j-text>
     </j-box>
 
     <j-menu-group-item open title="Channels">
@@ -18,13 +18,13 @@
         :to="{
           name: 'channel',
           params: {
-            communityId: community.value.perspective,
+            communityId: community.perspective,
             channelId: channel.perspective,
           },
         }"
         custom
         v-slot="{ navigate, isExactActive }"
-        v-for="channel in community.value.channels"
+        v-for="channel in community.channels"
         :key="channel.perspective"
       >
         <j-menu-item :selected="isExactActive" @click="navigate">
@@ -66,7 +66,12 @@ export default defineComponent({
   },
   methods: {
     async createChannel() {
-      this.$store.dispatch("createChannel", { name: this.channelName });
+      const { communityId } = this.$route.params;
+      const name = this.channelName;
+      this.$store.dispatch("createChannel", {
+        communityId,
+        name,
+      });
       this.showCreateChannel = false;
     },
   },

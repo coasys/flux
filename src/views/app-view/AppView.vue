@@ -30,7 +30,7 @@ export default defineComponent({
       }>(AGENT_SERVICE_STATUS);
     onResult((val) => {
       this.isInit = val.data.agent.isInitialized!;
-      this.$store.commit({ type: "updateAgentLockState", value: false });
+      this.$store.commit("updateAgentLockState", false);
       if (this.isInit) {
         //Get database perspective from store
         let databasePerspective = this.$store.getters.getDatabasePerspective;

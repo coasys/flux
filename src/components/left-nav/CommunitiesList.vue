@@ -2,10 +2,10 @@
   <div class="left-nav__communities-list">
     <router-link
       v-for="community in getCommunities"
-      :key="community.value.perspective"
+      :key="community.perspective"
       :to="{
         name: 'community',
-        params: { communityId: community.value.perspective },
+        params: { communityId: community.perspective },
       }"
       v-slot="{ navigate, isActive }"
     >
@@ -14,7 +14,7 @@
         size="xl"
         src="https://i.pravatar.cc/300"
         initials="false"
-        @click="() => handleCommunityClick(community) && navigate()"
+        @click="() => navigate()"
       ></j-avatar>
     </router-link>
     <j-tooltip title="Create comminuty">
@@ -126,7 +126,7 @@ export default defineComponent({
     };
 
     const changeCommunity = (community: CommunityState) => {
-      store.commit({ type: "changeCommunity", value: community });
+      store.commit("changeCommunity", community);
     };
 
     const getGroupExpressionLinks = (
@@ -208,15 +208,15 @@ export default defineComponent({
         //Or perhaps this only gets run once a user clicks on a given community?
         let channelLinks = await getChatChannelLinks(
           //@ts-ignore
-          community.value.perspective,
+          community.perspective,
           //@ts-ignore
-          community.value.linkLanguageAddress
+          community.linkLanguageAddress
         );
         if (channelLinks != null) {
           for (let i = 0; i < channelLinks.length; i++) {
             if (
               //@ts-ignore
-              community.value.channels.find(
+              community.channels.find(
                 (element: ChannelState) =>
                   element.sharedPerspectiveUrl === channelLinks[i].data!.target
               ) == undefined
@@ -229,27 +229,24 @@ export default defineComponent({
               let channel = await joinChannelFromSharedLink(
                 channelLinks[i].data!.target!
               );
-              store.commit({
-                type: "addChannel",
-                value: {
-                  //@ts-ignore
-                  community: community.value.perspective,
-                  channel: channel,
-                },
+              store.commit("addChannel", {
+                //@ts-ignore
+                community: community.perspective,
+                channel: channel,
               });
             }
           }
           //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button
           let groupExpressionLinks = await getGroupExpressionLinks(
             //@ts-ignore
-            community.value.perspective,
+            community.perspective,
             //@ts-ignore
-            community.value.linkLanguageAddress
+            community.linkLanguageAddress
           );
           if (groupExpressionLinks != null && groupExpressionLinks.length > 0) {
             if (
               //@ts-ignore
-              community.value.groupExpressionRef !=
+              community.groupExpressionRef !=
               groupExpressionLinks[0].data!.target!
             ) {
               //@ts-ignore
@@ -280,15 +277,12 @@ export default defineComponent({
                 "Got new group expression data for community",
                 groupExpData
               );
-              store.commit({
-                type: "updateCommunityMetadata",
-                value: {
-                  //@ts-ignore
-                  community: community.value.perspective,
-                  name: groupExpData["foaf:name"],
-                  description: groupExpData["foaf:description"],
-                  groupExpressionRef: groupExpressionLinks[0].data!.target,
-                },
+              store.commit("updateCommunityMetadata", {
+                //@ts-ignore
+                community: community.perspective,
+                name: groupExpData["foaf:name"],
+                description: groupExpData["foaf:description"],
+                groupExpressionRef: groupExpressionLinks[0].data!.target,
               });
             }
           }

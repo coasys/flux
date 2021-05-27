@@ -1,12 +1,6 @@
 <template>
   <div class="left-nav__bottom-section">
-    <j-button
-      size="xl"
-      @click="toggleTheme"
-      square
-      circle
-      variant="transparent"
-    >
+    <j-button size="xl" square circle variant="transparent">
       <j-icon :name="themeIcon"></j-icon>
     </j-button>
 
@@ -75,20 +69,11 @@ export default {
       isEditProfileOpen: false,
     };
   },
-  methods: {
-    toggleTheme() {
-      if (this.$store.state.currentTheme === "light") {
-        this.$store.commit({ type: "toggleTheme", value: "dark" });
-      } else {
-        this.$store.commit({ type: "toggleTheme", value: "light" });
-      }
-    },
-  },
   computed: {
     profilePic() {
       const profile = this.$store.getters.getProfile;
 
-      return profile.value.profilePicture;
+      return profile.profilePicture;
     },
     currentTheme() {
       return this.$store.getters.getCurrentTheme;
