@@ -12,15 +12,18 @@
           :active="active"
           :data-index="index"
         >
-          <message-date
-            v-if="item.type === 'date'"
-            :date="item.date"
-          ></message-date>
-          <direct-message
-            v-if="item.type === 'message'"
-            :message="item.message"
-            :showAvatar="showAvatar(index)"
-          ></direct-message>
+          <j-message-item :timestamp="item.showAvatar && item.timestamp">
+            <j-avatar
+              v-if="item.showAvatar"
+              :src="
+                require('../../../../../src/assets/images/junto_app_icon.png')
+              "
+              slot="avatar"
+              initials="P"
+            />
+            <span v-if="item.showAvatar" slot="username">Username</span>
+            {{ item.message }}
+          </j-message-item>
         </dynamic-scroller-item>
       </template>
     </dynamic-scroller>
@@ -34,7 +37,6 @@
 import { defineComponent, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
-import DirectMessage from "../../../../components/direct-message/display/DirectMessage.vue";
 import CreateDirectMessage from "../../../../components/direct-message/create/CreateDirectMessage.vue";
 import { JuntoShortForm } from "@/core/juntoTypes";
 import {
@@ -45,14 +47,13 @@ import {
 import ad4m from "@perspect3vism/ad4m-executor";
 import { useLazyQuery, useMutation } from "@vue/apollo-composable";
 import Expression from "@perspect3vism/ad4m/Expression";
-import { differenceInMinutes, format, parseISO } from "date-fns";
-import MessageDate from "./MessageDateHeader.vue";
+import { differenceInMinutes, parseISO } from "date-fns";
 
 interface ChatItem {
   id: string;
-  type: "date" | "message";
   date?: Date | string | number;
   message?: Expression;
+  showAvatar?: boolean;
 }
 
 export default defineComponent({
@@ -110,41 +111,23 @@ export default defineComponent({
   },
   computed: {
     messageList(): Array<ChatItem> {
-      const obj: { [x: string]: Array<Expression> } = {};
-      const list: Array<ChatItem> = [];
-      let i = 0;
-
-      this.channel?.currentExpressionMessages.forEach((e: any) => {
-        const formattedDate = format(
-          parseISO(e.expression.timestamp),
-          "MM/dd/yyyy"
-        );
-        if (obj[formattedDate] !== undefined) {
-          obj[formattedDate].push(e.expression);
-        } else {
-          obj[formattedDate] = [e.expression];
-        }
-      });
-
-      Object.entries(obj).forEach(([key, value]) => {
-        list.push({
-          id: i.toString(),
-          type: "date",
-          date: key,
-        });
-        i += 1;
-
-        value.forEach((v) => {
-          list.push({
-            id: i.toString(),
-            type: "message",
-            message: v,
-          });
-          i += 1;
-        });
-      });
-      console.log("list", list);
-      return list;
+      console.log(this.channel.currentExpressionMessages);
+      return this.channel.currentExpressionMessages.reduce(
+        (acc: any, item: any, index: number) => {
+          const previousItem = acc[index - 1];
+          return [
+            ...acc,
+            {
+              id: item.expression.timestamp,
+              authorId: item.expression.author.did,
+              timestamp: item.expression.timestamp,
+              message: JSON.parse(item.expression.data).body,
+              showAvatar: item.expression.author.did !== previousItem?.authorId,
+            },
+          ];
+        },
+        []
+      );
     },
   },
   methods: {
@@ -218,45 +201,12 @@ export default defineComponent({
       //@ts-ignore
       container.scrollTop = container.scrollHeight;
     },
-
-    showAvatar(index: number): boolean {
-      const previousMessage = this.messageList[index - 1];
-      const message = this.messageList[index];
-
-      if (
-        index <= 0 ||
-        previousMessage === undefined ||
-        message === undefined
-      ) {
-        return true;
-      }
-
-      if (previousMessage.type === "date") {
-        return true;
-      }
-
-      if (
-        previousMessage.message?.author.name !== message.message?.author.name
-      ) {
-        return true;
-      }
-
-      return (
-        previousMessage.message?.author.name === message.message?.author.name &&
-        differenceInMinutes(
-          parseISO(message.message!.timestamp!) ?? Date.now(),
-          parseISO(previousMessage.message!.timestamp!) ?? Date.now()
-        ) >= 2
-      );
-    },
   },
 
   components: {
-    DirectMessage,
     CreateDirectMessage,
     DynamicScroller,
     DynamicScrollerItem,
-    MessageDate,
   },
 });
 </script>
@@ -264,6 +214,7 @@ export default defineComponent({
 <style lang="scss">
 .channelView {
   width: 100%;
+  margin-top: var(--j-space-500);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -274,10 +225,15 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     align-items: center;
-    // overflow: scroll;
     width: 100%;
-    // 9.5 = 7.5rem (height of MainVewTopBar) + 2rem
-    padding: 9.5rem 2rem 7.5rem 2rem;
+  }
+
+  & j-message-item::part(content) {
+    font-size: var(--j-font-size-400);
+    border-radius: 0;
+    box-shadow: none;
+    padding-top: var(--j-space-100);
+    padding-bottom: var(--j-space-100);
   }
 }
 </style>
