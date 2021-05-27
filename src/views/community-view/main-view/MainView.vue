@@ -1,5 +1,5 @@
 <template>
-  <div class="mainView" v-if="community != null">
+  <div class="mainView" v-if="community && channel">
     <main-view-top-bar
       :community="community"
       :channel="channel"
