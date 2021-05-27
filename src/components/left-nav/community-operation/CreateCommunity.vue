@@ -170,16 +170,16 @@ export default defineComponent({
       });
       console.log("Created group expression link", addGroupExpLink);
 
-      const profile: Profile = this.$store.getters.getProfile;
+      const profile = this.$store.getters.getProfile;
 
       let createProfileExpression = await createProfile(
         profileExpressionLang.address!,
-        profile.username,
-        profile.email,
-        profile.givenName,
-        profile.familyName,
-        profile.profilePicture,
-        profile.thumbnailPicture
+        profile.value.username,
+        profile.value.email,
+        profile.value.givenName,
+        profile.value.familyName,
+        profile.value.profilePicture,
+        profile.value.thumbnailPicture
       );
 
       //Create link between perspective and group expression
