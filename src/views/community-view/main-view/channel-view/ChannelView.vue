@@ -217,9 +217,10 @@ export default defineComponent({
   margin-top: var(--j-space-500);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-end;
   position: relative;
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
 
   &__messages {
     display: flex;
@@ -229,11 +230,14 @@ export default defineComponent({
   }
 
   & j-message-item::part(content) {
-    font-size: var(--j-font-size-400);
+    font-size: var(--j-font-size-500);
     border-radius: 0;
     box-shadow: none;
-    padding-top: var(--j-space-100);
-    padding-bottom: var(--j-space-100);
+    padding-top: var(--j-space-400);
+    padding-bottom: var(--j-space-400);
+  }
+  & j-message-item::part(metadata) {
+    margin-bottom: 0;
   }
 }
 </style>

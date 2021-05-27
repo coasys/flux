@@ -59,7 +59,7 @@ export default defineComponent({
   padding: 2rem;
   background-color: var(--j-color-white);
   border-top: 1px solid var(--j-color-ui-100);
-  position: absolute;
+  position: sticky;
   bottom: 0;
   left: 0;
 
