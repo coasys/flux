@@ -236,11 +236,12 @@ export default defineComponent({
                     value: addPerspectiveResult.data?.addPerspective.uuid,
                   });
 
-                  const resizedImage = await resizeImage(
+                  const resizedImage = this.profileImage ? await resizeImage(
                     dataURItoBlob(this.profileImage as string),
                     400
-                  );
-                  const thumbnail = await blobToDataURL(resizedImage);
+                  ) : null;
+                  
+                  const thumbnail = this.profileImage ? await blobToDataURL(resizedImage!) : null;
 
                   this.$store.commit({
                     type: "createProfile",
