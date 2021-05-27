@@ -66,7 +66,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: absolute;
+  position: sticky;
   top: 0;
   left: 0;
 
