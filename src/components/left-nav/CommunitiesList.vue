@@ -80,21 +80,12 @@
 
 <script lang="ts">
 import { useStore } from "vuex";
-import { apolloClient } from "@/main";
-import { defineComponent, onMounted, onUnmounted, ref } from "vue";
-import { channelRefreshDurationMs } from "@/core/juntoTypes";
-import { ChannelState, CommunityState, FeedType, MembraneType } from "@/store";
-import { getLinks } from "@/core/queries/getLinks";
-import { installSharedPerspective } from "@/core/mutations/installSharedPerspective";
-import { PUB_KEY_FOR_LANG } from "@/core/graphql_queries";
-import { getExpression } from "@/core/queries/getExpression";
-import { expressionGetRetries, expressionGetDelayMs } from "@/core/juntoTypes";
-import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
+import { defineComponent, ref } from "vue";
+import { CommunityState } from "@/store";
 
 export default defineComponent({
   setup() {
     const store = useStore();
-    let noDelayRef: any = ref();
 
     const joiningLink = ref("");
 
@@ -104,208 +95,12 @@ export default defineComponent({
     const showModal = ref(false);
     const tabView = ref("Create");
 
-    function noDelaySetInterval(func: () => void, interval: number) {
-      func();
-
-      return setInterval(func, interval);
-    }
-
-    function sleep(ms: number) {
-      return new Promise((resolve) => setTimeout(resolve, ms));
-    }
-
-    const getChatChannelLinks = (
-      perspectiveUUID: string,
-      linkLanguageAddress: string
-    ) => {
-      return getLinks(
-        perspectiveUUID,
-        `${linkLanguageAddress}://self`,
-        "sioc://has_space"
-      );
-    };
-
     const changeCommunity = (community: CommunityState) => {
       store.commit("changeCommunity", community);
     };
 
-    const getGroupExpressionLinks = (
-      perspectiveUUID: string,
-      linkLanguageAddress: string
-    ) => {
-      return getLinks(
-        perspectiveUUID,
-        `${linkLanguageAddress}://self`,
-        "rdf://class"
-      );
-    };
-
-    const pubKeyForLang = (lang: string): Promise<string> => {
-      return new Promise((resolve) => {
-        const pubKey = apolloClient.query<{ pubKeyForLanguage: string }>({
-          query: PUB_KEY_FOR_LANG,
-          variables: { lang: lang },
-        });
-        pubKey.then((result) => {
-          resolve(result.data.pubKeyForLanguage);
-        });
-      });
-    };
-
-    const joinChannelFromSharedLink = async (
-      sharedPerspectiveUrl: string
-    ): Promise<ChannelState> => {
-      let installedChannelPerspective = await installSharedPerspective(
-        sharedPerspectiveUrl
-      );
-      console.log(
-        new Date(),
-        "Installed with result",
-        installedChannelPerspective
-      );
-      await sleep(1000);
-      let channelScPubKey = await pubKeyForLang(
-        installedChannelPerspective.sharedPerspective!.linkLanguages![0]!
-          .address!
-      );
-      console.log(
-        new Date(),
-        "Got pub key for social context channel",
-        channelScPubKey
-      );
-      let typedExpressionLanguages = await getTypedExpressionLanguages(
-        installedChannelPerspective.sharedPerspective!,
-        false
-      );
-      //TODO: derive membraneType from link on sharedPerspective
-      //For now its hard coded inherited since we dont support anything else
-      let now = new Date();
-      //TODO: lets use a constructor on the ChannelState type
-      return {
-        name: installedChannelPerspective.name!,
-        perspective: installedChannelPerspective.uuid!,
-        type: FeedType.Signaled,
-        createdAt: now,
-        linkLanguageAddress:
-          installedChannelPerspective.sharedPerspective!.linkLanguages![0]!
-            .address!,
-        currentExpressionLinks: [],
-        currentExpressionMessages: [],
-        sharedPerspectiveUrl: sharedPerspectiveUrl,
-        membraneType: MembraneType.Inherited,
-        groupExpressionRef: "",
-        typedExpressionLanguages: typedExpressionLanguages,
-      };
-    };
-
-    const getPerspectiveChannelsAndMetaData = async (
-      community: CommunityState
-    ) => {
-      clearInterval(noDelayRef.value);
-
-      const test = noDelaySetInterval(async () => {
-        //TODO: only do when application window is open
-        //Or perhaps this only gets run once a user clicks on a given community?
-        let channelLinks = await getChatChannelLinks(
-          //@ts-ignore
-          community.perspective,
-          //@ts-ignore
-          community.linkLanguageAddress
-        );
-        if (channelLinks != null) {
-          for (let i = 0; i < channelLinks.length; i++) {
-            if (
-              //@ts-ignore
-              community.channels.find(
-                (element: ChannelState) =>
-                  element.sharedPerspectiveUrl === channelLinks[i].data!.target
-              ) == undefined
-            ) {
-              console.log(
-                "Found channel link",
-                channelLinks[i],
-                "Adding to channel"
-              );
-              let channel = await joinChannelFromSharedLink(
-                channelLinks[i].data!.target!
-              );
-              store.commit("addChannel", {
-                //@ts-ignore
-                community: community.perspective,
-                channel: channel,
-              });
-            }
-          }
-          //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button
-          let groupExpressionLinks = await getGroupExpressionLinks(
-            //@ts-ignore
-            community.perspective,
-            //@ts-ignore
-            community.linkLanguageAddress
-          );
-          if (groupExpressionLinks != null && groupExpressionLinks.length > 0) {
-            if (
-              //@ts-ignore
-              community.groupExpressionRef !=
-              groupExpressionLinks[0].data!.target!
-            ) {
-              //@ts-ignore
-              let getExprRes = await getExpression(
-                groupExpressionLinks[0].data!.target!
-              );
-              if (getExprRes == null) {
-                for (let i = 0; i < expressionGetRetries; i++) {
-                  console.log("Retrying get of expression signal");
-                  //@ts-ignore
-                  getExprRes = await getExpression(
-                    groupExpressionLinks[0].data!.target!
-                  );
-                  if (getExprRes != null) {
-                    break;
-                  }
-                  await sleep(expressionGetDelayMs);
-                }
-                if (getExprRes == null) {
-                  console.warn(
-                    "Could not get expression from group expression link"
-                  );
-                  return;
-                }
-              }
-              let groupExpData = JSON.parse(getExprRes.data!);
-              console.log(
-                "Got new group expression data for community",
-                groupExpData
-              );
-              store.commit("updateCommunityMetadata", {
-                //@ts-ignore
-                community: community.perspective,
-                name: groupExpData["foaf:name"],
-                description: groupExpData["foaf:description"],
-                groupExpressionRef: groupExpressionLinks[0].data!.target,
-              });
-            }
-          }
-        }
-      }, channelRefreshDurationMs);
-
-      noDelayRef.value = test;
-    };
-
-    onMounted(() => {
-      const community = store.getters.getCurrentCommunity;
-      if (community != null) {
-        getPerspectiveChannelsAndMetaData(community);
-      }
-    });
-
-    onUnmounted(() => {
-      clearInterval(noDelayRef.value);
-    });
-
     const handleCommunityClick = (community: CommunityState) => {
       changeCommunity(community);
-      getPerspectiveChannelsAndMetaData(community);
     };
 
     const createCommunity = () => {
@@ -330,7 +125,6 @@ export default defineComponent({
       tabView,
       showModal,
       handleCommunityClick,
-      getPerspectiveChannelsAndMetaData,
     };
   },
 
