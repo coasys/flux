@@ -32,6 +32,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
+import { useRoute } from "vue-router";
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
 import DirectMessage from "../../../../components/direct-message/display/DirectMessage.vue";
 import CreateDirectMessage from "../../../../components/direct-message/create/CreateDirectMessage.vue";
@@ -43,7 +44,6 @@ import {
 } from "@/core/graphql_queries";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { useLazyQuery, useMutation } from "@vue/apollo-composable";
-import { ChannelState } from "@/store/index";
 import Expression from "@perspect3vism/ad4m/Expression";
 import { differenceInMinutes, format, parseISO } from "date-fns";
 import MessageDate from "./MessageDateHeader.vue";
@@ -56,12 +56,13 @@ interface ChatItem {
 }
 
 export default defineComponent({
-  props: ["community"],
+  props: ["community", "channel"],
   setup() {
+    const { params } = useRoute();
+
     const currentExpressionPost = ref({});
     const expressionLanguage = ref("");
     const linkData = ref({});
-    const currentPerspective = ref("");
     const expressionUrl = ref("");
 
     const postExpression = useMutation(CREATE_EXPRESSION, () => ({
@@ -79,7 +80,7 @@ export default defineComponent({
       addLink: ad4m.LinkExpression;
     }>(ADD_LINK, () => ({
       variables: {
-        perspectiveUUID: currentPerspective.value,
+        perspectiveUUID: params.channelId,
         link: JSON.stringify(linkData.value),
       },
     }));
@@ -88,7 +89,6 @@ export default defineComponent({
       currentExpressionPost,
       expressionLanguage,
       linkData,
-      currentPerspective,
       postExpression,
       addLink,
       getExpression,
@@ -96,31 +96,16 @@ export default defineComponent({
     };
   },
   mounted() {
-    console.log("Current mounted channel", this.getCurrentChannel);
-    this.currentPerspective = this.getCurrentChannel?.perspective;
-    console.log("Perspective set in composition fn", this.currentPerspective);
+    console.log("Current mounted channel", this.channel);
     this.scrollToBottom();
   },
-  watch: {
-    getCurrentChannel: {
-      handler: function (newVal) {
-        console.log("Updating current perspective", newVal);
-        if (newVal != undefined) {
-          this.currentPerspective = newVal.perspective;
-        }
-      },
-    },
-  },
   computed: {
-    getCurrentChannel(): ChannelState {
-      return this.$store.getters.getCurrentChannel;
-    },
     messageList(): Array<ChatItem> {
       const obj: { [x: string]: Array<Expression> } = {};
       const list: Array<ChatItem> = [];
       let i = 0;
 
-      this.getCurrentChannel?.currentExpressionMessages.forEach((e) => {
+      this.channel?.currentExpressionMessages.forEach((e: any) => {
         const formattedDate = format(
           parseISO(e.expression.timestamp),
           "MM/dd/yyyy"

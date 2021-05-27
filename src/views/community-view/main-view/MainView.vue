@@ -1,35 +1,25 @@
 <template>
   <div class="mainView" v-if="community != null">
-    <main-view-top-bar :currentView="getCurrentView"></main-view-top-bar>
-    <feed-view v-if="getCurrentView.type === 'feed'"> </feed-view>
-    <channel-view
-      v-if="getCurrentView.type === 'channel'"
+    <main-view-top-bar
       :community="community"
-    >
-    </channel-view>
+      :channel="channel"
+    ></main-view-top-bar>
+    <channel-view :channel="channel" :community="community"> </channel-view>
   </div>
 </template>
 
 <script>
 import MainViewTopBar from "./MainViewTopBar.vue";
-import FeedView from "./feed-view/FeedView.vue";
 import ChannelView from "./channel-view/ChannelView.vue";
+
 export default {
   props: ["community"],
-  data() {
-    return {
-      currentView: "main",
-      currentViewType: "feed",
-      selectedComponent: "feed-view",
-    };
-  },
   components: {
     MainViewTopBar,
-    FeedView,
     ChannelView,
   },
   computed: {
-    getCurrentView() {
+    channel() {
       const { channelId, communityId } = this.$route.params;
       return this.$store.getters.getChannel({ channelId, communityId });
     },

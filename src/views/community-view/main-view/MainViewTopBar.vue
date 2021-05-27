@@ -4,7 +4,7 @@
       <svg class="mainView__topBar--title--icon">
         <use :href="require('../../../assets/icons/icons.svg') + setIcon"></use>
       </svg>
-      <p class="mainView__topBar--title--name">{{ currentView.name }}</p>
+      <p class="mainView__topBar--title--name">{{ channel.name }}</p>
     </div>
     <div class="mainView__topBar--action-items">
       <svg
@@ -21,11 +21,11 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
-  props: ["currentView"],
+  props: ["channel", "community"],
   computed: {
     setIcon() {
       let icon;
-      switch (this.currentView.type) {
+      switch (this.channel.type) {
         case "feed":
           icon = "#feed";
           break;
@@ -42,7 +42,7 @@ export default defineComponent({
   methods: {
     getInviteCode() {
       // Get the invite code to join community and copy to clipboard
-      let currentCommunity = this.$store.getters.getCurrentCommunity;
+      let currentCommunity = this.community;
       const el = document.createElement("textarea");
       el.value = `Hey! Here is an invite code to join my private community on Junto: ${currentCommunity.sharedPerspectiveUrl}`;
       document.body.appendChild(el);
