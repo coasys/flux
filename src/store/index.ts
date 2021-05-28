@@ -303,7 +303,7 @@ export default createStore({
       });
       console.log("Published perspective with response", publish);
 
-      await sleep(10000);
+      //await sleep(10000);
 
       //Create link denoting type of community
       const addLink = await createLink(createSourcePerspective.uuid!, {

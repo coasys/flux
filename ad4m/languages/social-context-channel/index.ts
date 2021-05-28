@@ -22,7 +22,7 @@ export default async function create(context: LanguageContext): Promise<Language
   const linksAdapter = new JuntoSocialContextLinkAdapter(context);
   const settingsUI = new JuntoSettingsUI();
 
-  Holochain.registerDNAs(
+  await Holochain.registerDNAs(
     [{ file: DNA, nick: DNA_NICK }],
     linksAdapter.handleHolochainSignal.bind(context)
   );

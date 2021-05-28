@@ -124,6 +124,7 @@ import {
 } from "@/core/methods/createProfile";
 import { Cropper } from "vue-advanced-cropper";
 import "vue-advanced-cropper/dist/style.css";
+import sleep from "@/utils/sleep";
 
 export default defineComponent({
   name: "WelcomeViewRight",
@@ -225,6 +226,7 @@ export default defineComponent({
             console.log("Post lock result", lockAgentRes);
             if (this.lockAgentError == null) {
               //NOTE: this code is potentially not needed
+              await sleep(100);
               this.addPerspective().then(async (addPerspectiveResult) => {
                 console.log(
                   "Created perspective for local database with result",

@@ -10,7 +10,7 @@ export async function joinChannelFromSharedLink(
     sharedPerspectiveUrl
   );
   console.log(new Date(), "Installed with result", installedChannelPerspective);
-  await sleep(1000);
+  //await sleep(1000);
 
   const typedExpressionLanguages = await getTypedExpressionLanguages(
     installedChannelPerspective.sharedPerspective!,
