@@ -58,8 +58,14 @@
             :value="newCommunityDesc"
             @input="(e) => (newCommunityDesc = e.target.value)"
           ></j-input>
-          <j-button size="lg" full variant="primary" @click="createCommunity">
-            Create
+          <j-button
+            :disabled="isCreatingCommunity"
+            size="lg"
+            full
+            variant="primary"
+            @click="createCommunity"
+          >
+            {{ isCreatingCommunity ? "Creating..." : "Create" }}
           </j-button>
         </j-flex>
         <j-flex direction="column" gap="200" v-if="tabView === 'Join'">
@@ -93,6 +99,7 @@ export default defineComponent({
     const newCommunityDesc = ref("");
 
     const showModal = ref(false);
+    const isCreatingCommunity = ref(false);
     const tabView = ref("Create");
 
     const changeCommunity = (community: CommunityState) => {
@@ -104,10 +111,18 @@ export default defineComponent({
     };
 
     const createCommunity = () => {
-      store.dispatch("createCommunity", {
-        perspectiveName: newCommunityName.value,
-        description: newCommunityDesc.value,
-      });
+      isCreatingCommunity.value = true;
+      store
+        .dispatch("createCommunity", {
+          perspectiveName: newCommunityName.value,
+          description: newCommunityDesc.value,
+        })
+        .then(() => {
+          showModal.value = false;
+          isCreatingCommunity.value = false;
+          newCommunityName.value = "";
+          newCommunityDesc.value = "";
+        });
     };
 
     const joinCommunity = () => {
@@ -124,6 +139,7 @@ export default defineComponent({
       createCommunity,
       tabView,
       showModal,
+      isCreatingCommunity,
       handleCommunityClick,
     };
   },

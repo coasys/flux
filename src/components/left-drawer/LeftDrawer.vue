@@ -46,8 +46,12 @@
         :value="channelName"
         @input="(e) => (channelName = e.target.value)"
       ></j-input>
-      <j-button @click="createChannel" variant="primary">
-        Create Channel
+      <j-button
+        :disabled="isCreatingChannel"
+        @click="createChannel"
+        variant="primary"
+      >
+        {{ isCreatingChannel ? "Creating channel..." : "Create Channel" }}
       </j-button>
     </j-modal>
   </div>
@@ -60,6 +64,7 @@ export default defineComponent({
   props: ["community"],
   data() {
     return {
+      isCreatingChannel: false,
       channelName: "",
       showCreateChannel: false,
     };
@@ -68,11 +73,17 @@ export default defineComponent({
     async createChannel() {
       const { communityId } = this.$route.params;
       const name = this.channelName;
-      this.$store.dispatch("createChannel", {
-        communityId,
-        name,
-      });
-      this.showCreateChannel = false;
+      this.isCreatingChannel = true;
+      this.$store
+        .dispatch("createChannel", {
+          communityId,
+          name,
+        })
+        .then(() => {
+          this.showCreateChannel = false;
+          this.channelName = "";
+          this.isCreatingChannel = false;
+        });
     },
   },
 });
