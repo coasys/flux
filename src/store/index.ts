@@ -1,4 +1,4 @@
-import { createStore, Store } from "vuex";
+import { createStore } from "vuex";
 import VuexPersistence from "vuex-persist";
 import type Expression from "@perspect3vism/ad4m/Expression";
 import Address from "@perspect3vism/ad4m/Address";
@@ -24,7 +24,7 @@ import { getPerspective } from "@/core/queries/getPerspective";
 import { installSharedPerspective } from "@/core/mutations/installSharedPerspective";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
 import sleep from "@/utils/sleep";
-import { expressionGetRetries, expressionGetDelayMs } from "@/core/juntoTypes"
+import { expressionGetRetries, expressionGetDelayMs } from "@/core/juntoTypes";
 
 export interface CommunityState {
   //NOTE: here by having a static name + description we are assuming that these are top level metadata items that each group will have
@@ -396,6 +396,11 @@ export default createStore({
         commit("addExpressionUI", uiData);
         await sleep(40);
       }
+
+      // Need error handling (try catch in the awaits over)
+      return new Promise((resolve, reject) => {
+        resolve(null);
+      });
     },
     // TODO: Use something else than any
     async joinCommunity(store: any, { joiningLink }) {
