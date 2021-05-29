@@ -12,24 +12,33 @@
           :active="active"
           :data-index="index"
         >
-          <j-message-item :timestamp="item.showAvatar && item.timestamp">
+          <j-message-item :hideuser="item.hideUser" :timestamp="item.timestamp">
             <j-avatar
-              v-if="item.showAvatar"
               :src="
                 require('../../../../../src/assets/images/junto_app_icon.png')
               "
               slot="avatar"
               initials="P"
             />
-            <span v-if="item.showAvatar" slot="username">Username</span>
-            {{ item.message }}
+            <span slot="username">Username</span>
+            <div slot="message">
+              <span v-html="item.message"></span>
+            </div>
           </j-message-item>
         </dynamic-scroller-item>
       </template>
     </dynamic-scroller>
-    <create-direct-message
-      :createMessage="createDirectMessage"
-    ></create-direct-message>
+    <j-box p="400">
+      <j-editor
+        @keydown.enter="
+          (e) =>
+            !e.shiftKey &&
+            createDirectMessage({ body: e.target.value, background: [''] })
+        "
+        :value="currentExpressionPost"
+        @change="(e) => (currentExpressionPost = e.target.value)"
+      ></j-editor>
+    </j-box>
   </div>
 </template>
 
@@ -37,7 +46,6 @@
 import { defineComponent, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
-import CreateDirectMessage from "../../../../components/direct-message/create/CreateDirectMessage.vue";
 import { JuntoShortForm } from "@/core/juntoTypes";
 import {
   CREATE_EXPRESSION,
@@ -47,13 +55,12 @@ import {
 import ad4m from "@perspect3vism/ad4m-executor";
 import { useLazyQuery, useMutation } from "@vue/apollo-composable";
 import Expression from "@perspect3vism/ad4m/Expression";
-import { differenceInMinutes, parseISO } from "date-fns";
 
 interface ChatItem {
   id: string;
   date?: Date | string | number;
   message?: Expression;
-  showAvatar?: boolean;
+  hideUser?: boolean;
 }
 
 export default defineComponent({
@@ -111,7 +118,6 @@ export default defineComponent({
   },
   computed: {
     messageList(): Array<ChatItem> {
-      console.log(this.channel.currentExpressionMessages);
       return this.channel.currentExpressionMessages.reduce(
         (acc: any, item: any, index: number) => {
           const previousItem = acc[index - 1];
@@ -122,7 +128,7 @@ export default defineComponent({
               authorId: item.expression.author.did,
               timestamp: item.expression.timestamp,
               message: JSON.parse(item.expression.data).body,
-              showAvatar: item.expression.author.did !== previousItem?.authorId,
+              hideUser: item.expression.author.did === previousItem?.authorId,
             },
           ];
         },
@@ -176,12 +182,14 @@ export default defineComponent({
     },
 
     async createDirectMessage(message: JuntoShortForm) {
+      console.log({ message });
       let shortFormExpressionLanguage = this.community.expressionLanguages[0]!;
       console.log(
         new Date().toISOString(),
         "Posting shortForm expression to language",
         shortFormExpressionLanguage
       );
+
       let exprUrl = await this.createExpression(
         message,
         shortFormExpressionLanguage
@@ -204,7 +212,6 @@ export default defineComponent({
   },
 
   components: {
-    CreateDirectMessage,
     DynamicScroller,
     DynamicScrollerItem,
   },
@@ -229,15 +236,8 @@ export default defineComponent({
     width: 100%;
   }
 
-  & j-message-item::part(content) {
+  & j-message-item {
     font-size: var(--j-font-size-500);
-    border-radius: 0;
-    box-shadow: none;
-    padding-top: var(--j-space-400);
-    padding-bottom: var(--j-space-400);
-  }
-  & j-message-item::part(metadata) {
-    margin-bottom: 0;
   }
 }
 </style>
