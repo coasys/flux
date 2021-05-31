@@ -133,7 +133,6 @@ export default defineComponent({
     const username = ref("");
     const email = ref("");
     const password = ref("");
-    const isInit = ref(false);
     const perspectiveName = ref(databasePerspectiveName);
     const { mutate: initAgent, error: initAgentError } = useMutation<{
       initializeAgent: ad4m.AgentService;
@@ -166,7 +165,6 @@ export default defineComponent({
       email,
       password,
       familyName,
-      isInit,
       initAgent,
       initAgentError,
       unlockDidStore,
@@ -176,6 +174,12 @@ export default defineComponent({
       addPerspective,
       addPerspectiveError,
     };
+  },
+  computed: {
+    isInit(): boolean {
+      const isInit = this.$store.getters.getAgentInitStatus;
+      return isInit.value;
+    }
   },
   data(): {
     profileImage: string | ArrayBuffer | null | undefined;
@@ -194,9 +198,11 @@ export default defineComponent({
         agent: ad4m.AgentService;
       }>(AGENT_SERVICE_STATUS);
     onResult((val) => {
-      this.isInit = val.data.agent.isInitialized!;
+      const isInit = val.data.agent.isInitialized!;
+      this.$store.commit({type: "updateAgentInitState", value: isInit});
       this.$store.commit({ type: "updateAgentLockState", value: false });
-      if (this.isInit == true) {
+      
+      if (isInit == true) {
         //Get database perspective from store
         let databasePerspective = this.$store.getters.getDatabasePerspective;
         if (databasePerspective == "") {
@@ -263,7 +269,7 @@ export default defineComponent({
                 }
               });
               //TODO: then send the profile information to a public Junto DNA
-              this.isInit = true;
+              this.$store.commit({type: "updateAgentInitState", value: true});
               this.$store.commit({
                 type: "updateAgentLockState",
                 value: true,
@@ -288,7 +294,7 @@ export default defineComponent({
           val.data?.unlockAgent.isInitialized &&
           val.data.unlockAgent.isUnlocked
         ) {
-          this.isInit = true;
+          this.$store.commit({type: "updateAgentInitState", value: true});
           this.$store.commit({
             type: "updateAgentLockState",
             value: true,
