@@ -1,5 +1,6 @@
 <template>
   <router-view />
+  <single-action-dialog v-if="state.visible" />
 </template>
 
 <script lang="ts">
@@ -13,6 +14,8 @@ import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { getExpression } from "@/core/queries/getExpression";
 import { getLanguage } from "@/core/queries/getLanguage";
+import useSingleDialog from '@/components/dialogs/useSingleDialog';
+import SingleActionDialog from '@/components/dialogs/SingleActionDialog.vue';
 
 declare global {
   interface Window {
@@ -22,8 +25,10 @@ declare global {
 
 export default defineComponent({
   name: "App",
-  setup() {
+  setup(props, {emit}) {
     const store = useStore();
+    const {state, show} = useSingleDialog();
+    
     var language = "";
     var expression = {};
 
@@ -31,6 +36,8 @@ export default defineComponent({
       if (process.env.NODE_ENV !== "production") {
         // can use error.operation.operationName to single out a query type.
         logErrorMessages(error);
+
+        show(JSON.stringify(error));
       }
     });
 
@@ -124,7 +131,10 @@ export default defineComponent({
       return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
-    return {};
+    return {
+      state,
+      show
+    };
   },
   beforeCreate() {
     window.api.send("getLangPath");
@@ -136,6 +146,9 @@ export default defineComponent({
       });
     });
   },
+  components: {
+    SingleActionDialog,
+  }
 });
 </script>
 
