@@ -9,13 +9,15 @@
       }"
       v-slot="{ navigate, isActive }"
     >
-      <j-avatar
-        :selected="isActive"
-        size="xl"
-        src="https://i.pravatar.cc/300"
-        initials="false"
-        @click="() => navigate()"
-      ></j-avatar>
+      <j-tooltip :title="community.name">
+        <j-avatar
+          :selected="isActive"
+          size="xl"
+          src="https://i.pravatar.cc/300"
+          initials="false"
+          @click="() => navigate()"
+        ></j-avatar>
+      </j-tooltip>
     </router-link>
     <j-tooltip title="Create comminuty">
       <j-button
@@ -32,7 +34,12 @@
     <j-modal :open="showModal" @toggle="(e) => (showModal = e.target.open)">
       <j-flex direction="column" gap="700">
         <div>
-          <j-text variant="heading">Create or join a Community</j-text>
+          <j-text variant="heading" v-if="tabView === 'Create'"
+            >Create a community
+          </j-text>
+          <j-text variant="heading" v-if="tabView === 'Join'"
+            >Join a community
+          </j-text>
           <j-text nomargin variant="ingress">
             Communities are the building blocks of Junto.
           </j-text>
@@ -45,7 +52,7 @@
           <j-tab-item>Create</j-tab-item>
           <j-tab-item>Join</j-tab-item>
         </j-tabs>
-        <j-flex direction="column" gap="300" v-if="tabView === 'Create'">
+        <j-flex direction="column" gap="500" v-if="tabView === 'Create'">
           <j-input
             size="lg"
             label="Name"
@@ -56,16 +63,22 @@
             size="lg"
             label="Description"
             :value="newCommunityDesc"
+            @keydown.enter="createCommunity"
             @input="(e) => (newCommunityDesc = e.target.value)"
           ></j-input>
+          <j-tabs value="Public">
+            <j-tab-item>Public</j-tab-item>
+            <j-tab-item>Private</j-tab-item>
+          </j-tabs>
           <j-button
+            :loading="isCreatingCommunity"
             :disabled="isCreatingCommunity"
             size="lg"
             full
             variant="primary"
             @click="createCommunity"
           >
-            {{ isCreatingCommunity ? "Creating..." : "Create" }}
+            Create
           </j-button>
         </j-flex>
         <j-flex direction="column" gap="200" v-if="tabView === 'Join'">
