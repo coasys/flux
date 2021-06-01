@@ -1,4 +1,17 @@
 module.exports = {
+  chainWebpack: (config) => {
+    config.module
+      .rule("vue")
+      .use("vue-loader")
+      .tap((options) => {
+        return {
+          ...options,
+          compilerOptions: {
+            isCustomElement: (tag) => /^j-/.test(tag),
+          },
+        };
+      });
+  },
   pluginOptions: {
     electronBuilder: {
       preload: "src/preload.js",

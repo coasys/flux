@@ -124,6 +124,7 @@ import {
 } from "@/core/methods/createProfile";
 import { Cropper } from "vue-advanced-cropper";
 import "vue-advanced-cropper/dist/style.css";
+import sleep from "@/utils/sleep";
 
 export default defineComponent({
   name: "WelcomeViewRight",
@@ -195,7 +196,7 @@ export default defineComponent({
       }>(AGENT_SERVICE_STATUS);
     onResult((val) => {
       this.isInit = val.data.agent.isInitialized!;
-      this.$store.commit({ type: "updateAgentLockState", value: false });
+      this.$store.commit("updateAgentLockState", false);
       if (this.isInit == true) {
         //Get database perspective from store
         let databasePerspective = this.$store.getters.getDatabasePerspective;
@@ -225,36 +226,38 @@ export default defineComponent({
             console.log("Post lock result", lockAgentRes);
             if (this.lockAgentError == null) {
               //NOTE: this code is potentially not needed
+              await sleep(100);
               this.addPerspective().then(async (addPerspectiveResult) => {
                 console.log(
                   "Created perspective for local database with result",
                   addPerspectiveResult
                 );
                 if (this.addPerspectiveError == null) {
-                  this.$store.commit({
-                    type: "addDatabasePerspective",
-                    value: addPerspectiveResult.data?.addPerspective.uuid,
-                  });
+                  this.$store.commit(
+                    "addDatabasePerspective",
+                    addPerspectiveResult.data?.addPerspective.uuid
+                  );
 
-                  const resizedImage = this.profileImage ? await resizeImage(
-                    dataURItoBlob(this.profileImage as string),
-                    400
-                  ) : null;
-                  
-                  const thumbnail = this.profileImage ? await blobToDataURL(resizedImage!) : null;
+                  const resizedImage = this.profileImage
+                    ? await resizeImage(
+                        dataURItoBlob(this.profileImage as string),
+                        400
+                      )
+                    : null;
 
-                  this.$store.commit({
-                    type: "createProfile",
-                    value: {
-                      address:
-                        addPerspectiveResult.data?.addPerspective.uuid || "",
-                      username: this.username,
-                      email: this.email,
-                      givenName: this.name,
-                      familyName: this.familyName,
-                      profilePicture: this.profileImage as string,
-                      thumbnailPicture: thumbnail,
-                    },
+                  const thumbnail = this.profileImage
+                    ? await blobToDataURL(resizedImage!)
+                    : null;
+
+                  this.$store.commit("createProfile", {
+                    address:
+                      addPerspectiveResult.data?.addPerspective.uuid || "",
+                    username: this.username,
+                    email: this.email,
+                    givenName: this.name,
+                    familyName: this.familyName,
+                    profilePicture: this.profileImage as string,
+                    thumbnailPicture: thumbnail,
                   });
 
                   this.$router.push("/home");
@@ -264,10 +267,7 @@ export default defineComponent({
               });
               //TODO: then send the profile information to a public Junto DNA
               this.isInit = true;
-              this.$store.commit({
-                type: "updateAgentLockState",
-                value: true,
-              });
+              this.$store.commit("updateAgentLockState", true);
             } else {
               console.log("Got error", this.lockAgentError);
             }
@@ -289,10 +289,7 @@ export default defineComponent({
           val.data.unlockAgent.isUnlocked
         ) {
           this.isInit = true;
-          this.$store.commit({
-            type: "updateAgentLockState",
-            value: true,
-          });
+          this.$store.commit("updateAgentLockState", true);
           this.$router.push("/home");
         } else {
           //TODO: this needs to go to an error handler function

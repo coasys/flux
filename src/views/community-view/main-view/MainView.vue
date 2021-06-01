@@ -1,39 +1,27 @@
 <template>
-  <div class="mainView" v-if="community != null">
-    <main-view-top-bar :currentView="getCurrentView"></main-view-top-bar>
-    <feed-view v-if="getCurrentView.type === 'feed'"> </feed-view>
-    <channel-view
-      v-if="getCurrentView.type === 'channel'"
+  <div class="mainView" v-if="community && channel">
+    <main-view-top-bar
       :community="community"
-    >
-    </channel-view>
+      :channel="channel"
+    ></main-view-top-bar>
+    <channel-view :channel="channel" :community="community"> </channel-view>
   </div>
 </template>
 
 <script>
 import MainViewTopBar from "./MainViewTopBar.vue";
-import FeedView from "./feed-view/FeedView.vue";
 import ChannelView from "./channel-view/ChannelView.vue";
+
 export default {
   props: ["community"],
-  data() {
-    return {
-      currentView: "main",
-      currentViewType: "feed",
-      selectedComponent: "feed-view",
-    };
-  },
   components: {
     MainViewTopBar,
-    FeedView,
     ChannelView,
   },
   computed: {
-    getCurrentView() {
-      return (
-        this.$store.getters.getCurrentCommunityView ??
-        this.$store.getters.getCommunities[0]
-      );
+    channel() {
+      const { channelId, communityId } = this.$route.params;
+      return this.$store.getters.getChannel({ channelId, communityId });
     },
   },
 };
@@ -43,7 +31,7 @@ export default {
 .mainView {
   width: 100%;
   height: 100%;
-  background-color: var(--junto-background-color);
+  background-color: var(--j-color-white);
   display: flex;
   flex-direction: column;
   flex-grow: 1;

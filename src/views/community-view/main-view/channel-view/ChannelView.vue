@@ -12,29 +12,40 @@
           :active="active"
           :data-index="index"
         >
-          <message-date
-            v-if="item.type === 'date'"
-            :date="item.date"
-          ></message-date>
-          <direct-message
-            v-if="item.type === 'message'"
-            :message="item.message"
-            :showAvatar="showAvatar(index)"
-          ></direct-message>
+          <j-message-item :hideuser="item.hideUser" :timestamp="item.timestamp">
+            <j-avatar
+              :src="
+                require('../../../../../src/assets/images/junto_app_icon.png')
+              "
+              slot="avatar"
+              initials="P"
+            />
+            <span slot="username">Username</span>
+            <div slot="message">
+              <span v-html="item.message"></span>
+            </div>
+          </j-message-item>
         </dynamic-scroller-item>
       </template>
     </dynamic-scroller>
-    <create-direct-message
-      :createMessage="createDirectMessage"
-    ></create-direct-message>
+    <j-box p="400">
+      <j-editor
+        @keydown.enter="
+          (e) =>
+            !e.shiftKey &&
+            createDirectMessage({ body: e.target.value, background: [''] })
+        "
+        :value="currentExpressionPost"
+        @change="(e) => (currentExpressionPost = e.target.value)"
+      ></j-editor>
+    </j-box>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
-import DirectMessage from "../../../../components/direct-message/display/DirectMessage.vue";
-import CreateDirectMessage from "../../../../components/direct-message/create/CreateDirectMessage.vue";
 import { JuntoShortForm } from "@/core/juntoTypes";
 import {
   CREATE_EXPRESSION,
@@ -43,25 +54,32 @@ import {
 } from "@/core/graphql_queries";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { useLazyQuery, useMutation } from "@vue/apollo-composable";
-import { ChannelState } from "@/store/index";
 import Expression from "@perspect3vism/ad4m/Expression";
-import { differenceInMinutes, format, parseISO } from "date-fns";
-import MessageDate from "./MessageDateHeader.vue";
 
 interface ChatItem {
   id: string;
-  type: "date" | "message";
   date?: Date | string | number;
   message?: Expression;
+  hideUser?: boolean;
 }
 
 export default defineComponent({
-  props: ["community"],
+  props: ["community", "channel"],
   setup() {
+    const route = useRoute();
+
+    const channelId = ref("");
+
+    watch(
+      () => route.params,
+      (params: any) => {
+        channelId.value = params.channelId;
+      }
+    );
+
     const currentExpressionPost = ref({});
     const expressionLanguage = ref("");
     const linkData = ref({});
-    const currentPerspective = ref("");
     const expressionUrl = ref("");
 
     const postExpression = useMutation(CREATE_EXPRESSION, () => ({
@@ -79,7 +97,7 @@ export default defineComponent({
       addLink: ad4m.LinkExpression;
     }>(ADD_LINK, () => ({
       variables: {
-        perspectiveUUID: currentPerspective.value,
+        perspectiveUUID: route.params.channelId,
         link: JSON.stringify(linkData.value),
       },
     }));
@@ -88,7 +106,6 @@ export default defineComponent({
       currentExpressionPost,
       expressionLanguage,
       linkData,
-      currentPerspective,
       postExpression,
       addLink,
       getExpression,
@@ -96,61 +113,27 @@ export default defineComponent({
     };
   },
   mounted() {
-    console.log("Current mounted channel", this.getCurrentChannel);
-    this.currentPerspective = this.getCurrentChannel?.perspective;
-    console.log("Perspective set in composition fn", this.currentPerspective);
+    console.log("Current mounted channel", this.channel);
     this.scrollToBottom();
   },
-  watch: {
-    getCurrentChannel: {
-      handler: function (newVal) {
-        console.log("Updating current perspective", newVal);
-        if (newVal != undefined) {
-          this.currentPerspective = newVal.perspective;
-        }
-      },
-    },
-  },
   computed: {
-    getCurrentChannel(): ChannelState {
-      return this.$store.getters.getCurrentChannel;
-    },
     messageList(): Array<ChatItem> {
-      const obj: { [x: string]: Array<Expression> } = {};
-      const list: Array<ChatItem> = [];
-      let i = 0;
-
-      this.getCurrentChannel?.currentExpressionMessages.forEach((e) => {
-        const formattedDate = format(
-          parseISO(e.expression.timestamp),
-          "MM/dd/yyyy"
-        );
-        if (obj[formattedDate] !== undefined) {
-          obj[formattedDate].push(e.expression);
-        } else {
-          obj[formattedDate] = [e.expression];
-        }
-      });
-
-      Object.entries(obj).forEach(([key, value]) => {
-        list.push({
-          id: i.toString(),
-          type: "date",
-          date: key,
-        });
-        i += 1;
-
-        value.forEach((v) => {
-          list.push({
-            id: i.toString(),
-            type: "message",
-            message: v,
-          });
-          i += 1;
-        });
-      });
-      console.log("list", list);
-      return list;
+      return this.channel.currentExpressionMessages.reduce(
+        (acc: any, item: any, index: number) => {
+          const previousItem = acc[index - 1];
+          return [
+            ...acc,
+            {
+              id: item.expression.timestamp,
+              authorId: item.expression.author.did,
+              timestamp: item.expression.timestamp,
+              message: JSON.parse(item.expression.data).body,
+              hideUser: item.expression.author.did === previousItem?.authorId,
+            },
+          ];
+        },
+        []
+      );
     },
   },
   methods: {
@@ -199,13 +182,14 @@ export default defineComponent({
     },
 
     async createDirectMessage(message: JuntoShortForm) {
-      let shortFormExpressionLanguage =
-        this.community.value.expressionLanguages[0]!;
+      console.log({ message });
+      let shortFormExpressionLanguage = this.community.expressionLanguages[0]!;
       console.log(
         new Date().toISOString(),
         "Posting shortForm expression to language",
         shortFormExpressionLanguage
       );
+
       let exprUrl = await this.createExpression(
         message,
         shortFormExpressionLanguage
@@ -225,45 +209,11 @@ export default defineComponent({
       //@ts-ignore
       container.scrollTop = container.scrollHeight;
     },
-
-    showAvatar(index: number): boolean {
-      const previousMessage = this.messageList[index - 1];
-      const message = this.messageList[index];
-
-      if (
-        index <= 0 ||
-        previousMessage === undefined ||
-        message === undefined
-      ) {
-        return true;
-      }
-
-      if (previousMessage.type === "date") {
-        return true;
-      }
-
-      if (
-        previousMessage.message?.author.name !== message.message?.author.name
-      ) {
-        return true;
-      }
-
-      return (
-        previousMessage.message?.author.name === message.message?.author.name &&
-        differenceInMinutes(
-          parseISO(message.message!.timestamp!) ?? Date.now(),
-          parseISO(previousMessage.message!.timestamp!) ?? Date.now()
-        ) >= 2
-      );
-    },
   },
 
   components: {
-    DirectMessage,
-    CreateDirectMessage,
     DynamicScroller,
     DynamicScrollerItem,
-    MessageDate,
   },
 });
 </script>
@@ -271,20 +221,23 @@ export default defineComponent({
 <style lang="scss">
 .channelView {
   width: 100%;
+  margin-top: var(--j-space-500);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-end;
   position: relative;
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
 
   &__messages {
     display: flex;
     flex-direction: column;
     align-items: center;
-    // overflow: scroll;
     width: 100%;
-    // 9.5 = 7.5rem (height of MainVewTopBar) + 2rem
-    padding: 9.5rem 2rem 7.5rem 2rem;
+  }
+
+  & j-message-item {
+    font-size: var(--j-font-size-500);
   }
 }
 </style>

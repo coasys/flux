@@ -17,3 +17,25 @@ export async function getLinks(
     });
   });
 }
+
+export async function getChatChannelLinks(
+  perspectiveUUID: string,
+  linkLanguageAddress: string
+): Promise<ad4m.LinkExpression[]> {
+  return getLinks(
+    perspectiveUUID,
+    `${linkLanguageAddress}://self`,
+    "sioc://has_space"
+  );
+}
+
+export async function getGroupExpressionLinks(
+  perspectiveUUID: string,
+  linkLanguageAddress: string
+): Promise<ad4m.LinkExpression[]> {
+  return getLinks(
+    perspectiveUUID,
+    `${linkLanguageAddress}://self`,
+    "rdf://class"
+  );
+}

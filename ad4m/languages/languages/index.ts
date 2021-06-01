@@ -25,9 +25,9 @@ function interactions(a: Agent, expression: Address): Interaction[] {
   return [];
 }
 
-export default function create(context: LanguageContext): Language {
+export default async function create(context: LanguageContext): Promise<Language> {
   const Holochain = context.Holochain as HolochainLanguageDelegate;
-  Holochain.registerDNAs([{ file: DNA, nick: DNA_NICK }]);
+  await Holochain.registerDNAs([{ file: DNA, nick: DNA_NICK }]);
 
   const expressionAdapter = new Adapter(context);
   const expressionUI = new ExpressionUI();

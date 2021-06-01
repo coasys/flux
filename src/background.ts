@@ -69,12 +69,13 @@ app.on("ready", async () => {
       );
 
       createWindow();
-      ad4mCore.waitForAgent().then(() => {
+      Core.waitForAgent().then(async () => {
         console.log(
           "\x1b[36m%s\x1b[0m",
           "Agent has been init'd. Controllers now starting init..."
         );
-        ad4mCore.initControllers();
+        Core.initControllers();
+        await Core.initLanguages();
         console.log("\x1b[32m", "Controllers init complete!");
       });
     });

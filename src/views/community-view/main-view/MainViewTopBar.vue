@@ -4,7 +4,7 @@
       <svg class="mainView__topBar--title--icon">
         <use :href="require('../../../assets/icons/icons.svg') + setIcon"></use>
       </svg>
-      <p class="mainView__topBar--title--name">{{ currentView.name }}</p>
+      <p class="mainView__topBar--title--name">{{ channel.name }}</p>
     </div>
     <div class="mainView__topBar--action-items">
       <svg
@@ -21,11 +21,11 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
-  props: ["currentView"],
+  props: ["channel", "community"],
   computed: {
     setIcon() {
       let icon;
-      switch (this.currentView.type) {
+      switch (this.channel?.type) {
         case "feed":
           icon = "#feed";
           break;
@@ -42,9 +42,9 @@ export default defineComponent({
   methods: {
     getInviteCode() {
       // Get the invite code to join community and copy to clipboard
-      let currentCommunity = this.$store.getters.getCurrentCommunity;
+      let currentCommunity = this.community;
       const el = document.createElement("textarea");
-      el.value = `Hey! Here is an invite code to join my private community on Junto: ${currentCommunity.value.sharedPerspectiveUrl}`;
+      el.value = `Hey! Here is an invite code to join my private community on Junto: ${currentCommunity.sharedPerspectiveUrl}`;
       document.body.appendChild(el);
       el.select();
       document.execCommand("copy");
@@ -59,14 +59,14 @@ export default defineComponent({
 .mainView__topBar {
   z-index: 2000;
   height: 7.5rem;
-  background-color: var(--junto-background-color);
+  background-color: var(--j-color-white);
   width: 100%;
-  border-bottom: 1px solid var(--junto-border-color);
+  border-bottom: 1px solid var(--j-color-ui-50);
   padding: 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: absolute;
+  position: sticky;
   top: 0;
   left: 0;
 

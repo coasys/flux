@@ -4,6 +4,28 @@ import type Expression from "@perspect3vism/ad4m/Expression";
 import Address from "@perspect3vism/ad4m/Address";
 import ExpressionRef, { parseExprURL } from "@perspect3vism/ad4m/ExpressionRef";
 
+import path from "path";
+import { v4 as uuidv4 } from "uuid";
+import { createChannel } from "@/core/methods/createChannel";
+import { createProfile } from "@/core/methods/createProfile";
+import { joinChannelFromSharedLink } from "@/core/methods/joinChannelFromSharedLink";
+import { createExpression } from "@/core/mutations/createExpression";
+import { createUniqueExpressionLanguage } from "@/core/mutations/createUniqueExpressionLanguage";
+import { publishSharedPerspective } from "@/core/mutations/publishSharedPerspective";
+import { addPerspective } from "@/core/mutations/addPerspective";
+import { createLink } from "@/core/mutations/createLink";
+import { getLanguage } from "@/core/queries/getLanguage";
+import { getExpression } from "@/core/queries/getExpression";
+import {
+  getChatChannelLinks,
+  getGroupExpressionLinks,
+} from "@/core/queries/getLinks";
+import { getPerspective } from "@/core/queries/getPerspective";
+import { installSharedPerspective } from "@/core/mutations/installSharedPerspective";
+import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
+import sleep from "@/utils/sleep";
+import { expressionGetRetries, expressionGetDelayMs } from "@/core/juntoTypes";
+
 export interface CommunityState {
   //NOTE: here by having a static name + description we are assuming that these are top level metadata items that each group will have
   name: string;
@@ -69,9 +91,6 @@ export interface Profile {
 }
 
 export interface State {
-  currentTheme: string;
-  currentCommunity: CommunityState | null;
-  currentCommunityView: CommunityView | null;
   communities: CommunityState[];
   localLanguagesPath: string;
   databasePerspective: string;
@@ -114,9 +133,6 @@ const vuexLocal = new VuexPersistence<State>({
 
 export default createStore({
   state: {
-    currentTheme: "light",
-    currentCommunity: null,
-    currentCommunityView: null,
     communities: [],
     localLanguagesPath: "",
     databasePerspective: "",
@@ -128,49 +144,12 @@ export default createStore({
   plugins: [vuexLocal.plugin],
   mutations: {
     addCommunity(state: State, payload: CommunityState) {
+      console.log("adding Community", payload);
       state.communities.push(payload);
     },
 
     setLanguagesPath(state: State, payload: string) {
       state.localLanguagesPath = payload;
-    },
-
-    // navigate to a new community
-    changeCommunity(state: State, payload) {
-      state.currentCommunity = payload.value;
-    },
-
-    // navigate to a different view within a community (i.e. feeds, channels, etc)
-    changeCommunityView(state: State, payload) {
-      console.log("Changing community view", payload);
-      state.currentCommunityView = payload.value;
-    },
-
-    // Toggle theme
-    toggleTheme(state: State, payload) {
-      const root = document.documentElement;
-
-      if (payload.value === "light") {
-        state.currentTheme = "light";
-        root.style.setProperty("--junto-primary-dark", "#000");
-        root.style.setProperty("--junto-primary", "#333");
-        root.style.setProperty("--junto-primary-medium", "#555");
-        root.style.setProperty("--junto-primary-light", "#999");
-        root.style.setProperty("--junto-border-color", "#eee");
-        root.style.setProperty("--junto-accent-color", "#B3808F");
-        root.style.setProperty("--junto-background-color", "#fff");
-        root.style.setProperty("--junto-background-rgba", "255, 255, 255");
-      } else if (payload.value === "dark") {
-        state.currentTheme = "dark";
-        root.style.setProperty("--junto-primary-dark", "#fff");
-        root.style.setProperty("--junto-primary", "#f0f0f0");
-        root.style.setProperty("--junto-primary-medium", "#f0f0f0");
-        root.style.setProperty("--junto-primary-light", "#999999");
-        root.style.setProperty("--junto-border-color", "#555");
-        root.style.setProperty("--junto-accent-color", "#B3808F");
-        root.style.setProperty("--junto-background-color", "#333");
-        root.style.setProperty("--junto-background-rgba", "0, 0, 0");
-      }
     },
 
     addDatabasePerspective(state: State, payload) {
@@ -179,25 +158,20 @@ export default createStore({
 
     addExpressionAndLinkFromLanguageAddress: (state: State, payload) => {
       state.communities.forEach((community) => {
-        //@ts-ignore
-        // if (community.value.linkLanguageAddress == payload.linkLanguage) {
-        //   return;
-        // }
-        //@ts-ignore
-        community.value.channels.forEach((channel) => {
-          if (channel.linkLanguageAddress == payload.value.linkLanguage) {
+        community.channels.forEach((channel) => {
+          if (channel.linkLanguageAddress === payload.linkLanguage) {
             console.log(
               new Date().toISOString(),
               "Adding to link and exp to channel!",
-              payload.value
+              payload
             );
             channel.currentExpressionLinks.push({
-              expression: payload.value.link,
-              language: payload.value.linkLanguage,
+              expression: payload.link,
+              language: payload.linkLanguage,
             } as ExpressionAndLang);
             channel.currentExpressionMessages.push({
-              expression: payload.value.message,
-              url: parseExprURL(payload.value.link.data.target),
+              expression: payload.message,
+              url: parseExprURL(payload.link.data.target),
             } as ExpressionAndRef);
           }
         });
@@ -217,13 +191,14 @@ export default createStore({
     },
 
     addChannel(state: State, payload: AddChannel) {
+      console.log(payload);
       const community = state.communities.find(
         //@ts-ignore
-        (community) => community.value.perspective === payload.value.community
+        (community) => community.perspective === payload.communityId
       );
-      if (community != undefined) {
+      if (community !== undefined) {
         //@ts-ignore
-        community.value.channels.push(payload.value.channel);
+        community.channels.push(payload.channel);
       }
     },
 
@@ -234,15 +209,330 @@ export default createStore({
     updateCommunityMetadata(state: State, payload) {
       const community = state.communities.find(
         //@ts-ignore
-        (community) => community.value.perspective === payload.value.community
+        (community) => community.perspective === payload.community
       );
       if (community != undefined) {
         //@ts-ignore
-        community.value.name = payload.value.name;
+        community.name = payload.name;
         //@ts-ignore
-        community.value.description = payload.value.description;
+        community.description = payload.description;
         //@ts-ignore
-        community.value.groupExpressionRef = payload.value.groupExpressionRef;
+        community.groupExpressionRef = payload.groupExpressionRef;
+      }
+    },
+  },
+  actions: {
+    async createChannel({ commit, getters }, { communityId, name }) {
+      const community = getters.getCommunity(communityId);
+      const uid = uuidv4().toString();
+      const channel = await createChannel(
+        name,
+        "",
+        uid,
+        community.perspective,
+        community.linkLanguageAddress,
+        community.expressionLanguages,
+        MembraneType.Inherited,
+        community.typedExpressionLanguages
+      );
+
+      commit("addChannel", {
+        communityId: community.perspective,
+        channel,
+      });
+    },
+    async createCommunity(
+      { commit, getters },
+      { perspectiveName, description }
+    ) {
+      //TODO: @eric: show loading animation here
+      const createSourcePerspective = await addPerspective(perspectiveName);
+      console.log("Created perspective", createSourcePerspective);
+      const uid = uuidv4().toString();
+
+      const builtInLangPath = getters.getLanguagePath;
+
+      //Create shortform expression language
+      const shortFormExpressionLang = await createUniqueExpressionLanguage(
+        path.join(builtInLangPath, "shortform/build"),
+        "shortform",
+        uid
+      );
+      console.log("Response from create exp lang", shortFormExpressionLang);
+      //Create group expression language
+      const groupExpressionLang = await createUniqueExpressionLanguage(
+        path.join(builtInLangPath, "group-expression/build"),
+        "group-expression",
+        uid
+      );
+      const profileExpressionLang = await createUniqueExpressionLanguage(
+        path.join(builtInLangPath, "profiles/build"),
+        "agent-profiles",
+        uid
+      );
+      console.log("Response from create exp lang", groupExpressionLang);
+      const expressionLangs = [
+        shortFormExpressionLang.address!,
+        groupExpressionLang.address!,
+        profileExpressionLang.address!,
+      ];
+      const typedExpLangs = [
+        {
+          languageAddress: shortFormExpressionLang.address!,
+          expressionType: ExpressionTypes.ShortForm,
+        } as JuntoExpressionReference,
+        {
+          languageAddress: groupExpressionLang.address!,
+          expressionType: ExpressionTypes.GroupExpression,
+        } as JuntoExpressionReference,
+        {
+          languageAddress: profileExpressionLang.address!,
+          expressionType: ExpressionTypes.ProfileExpression,
+        } as JuntoExpressionReference,
+      ];
+
+      //Publish perspective
+      const publish = await publishSharedPerspective({
+        uuid: createSourcePerspective.uuid!,
+        name: perspectiveName,
+        description: description,
+        type: "holochain",
+        uid: uid,
+        requiredExpressionLanguages: expressionLangs,
+        allowedExpressionLanguages: expressionLangs,
+      });
+      console.log("Published perspective with response", publish);
+
+      //await sleep(10000);
+
+      //Create link denoting type of community
+      const addLink = await createLink(createSourcePerspective.uuid!, {
+        source: `${publish.linkLanguages![0]!.address!}://self`,
+        target: "sioc://community",
+        predicate: "rdf://type",
+      });
+      console.log("Added typelink with response", addLink);
+      //TODO: we are sleeping here to ensure that all DNA's are installed before trying to do stuff
+      //ideally installing DNA's in holochain would be a sync operation to avoid this
+
+      //Create the group expression
+      const createExp = await createExpression(
+        groupExpressionLang.address!,
+        JSON.stringify({
+          name: perspectiveName,
+          description: description,
+        })
+      );
+      console.log("Created group expression with response", createExp);
+
+      //Create link between perspective and group expression
+      const addGroupExpLink = await createLink(createSourcePerspective.uuid!, {
+        source: `${publish.linkLanguages![0]!.address!}://self`,
+        target: createExp,
+        predicate: "rdf://class",
+      });
+      console.log("Created group expression link", addGroupExpLink);
+
+      const profile: Profile = getters.getProfile;
+
+      const createProfileExpression = await createProfile(
+        profileExpressionLang.address!,
+        profile.username,
+        profile.email,
+        profile.givenName,
+        profile.familyName,
+        profile.profilePicture,
+        profile.thumbnailPicture
+      );
+
+      //Create link between perspective and group expression
+      const addProfileLink = await createLink(createSourcePerspective.uuid!, {
+        source: `${publish.linkLanguages![0]!.address!}://self`,
+        target: createProfileExpression,
+        predicate: "sioc://has_member",
+      });
+      console.log("Created group expression link", addProfileLink);
+
+      //Next steps: create another perspective + share with social-context-channel link language and add above expression DNA's onto it
+      //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel
+      const channel = await createChannel(
+        "Default Message Channel",
+        description,
+        uid,
+        createSourcePerspective.uuid!,
+        publish.linkLanguages![0]!.address!,
+        expressionLangs,
+        MembraneType.Inherited,
+        typedExpLangs
+      );
+
+      //Get the created community perspective so we can get the SharedPerspectiveURL
+      const communityPerspective = await getPerspective(
+        createSourcePerspective.uuid!
+      );
+
+      //Add the perspective to community store
+      commit("addCommunity", {
+        name: perspectiveName,
+        description: description,
+        linkLanguageAddress: publish.linkLanguages![0]!.address!,
+        channels: [channel],
+        perspective: createSourcePerspective.uuid!,
+        expressionLanguages: expressionLangs,
+        typedExpressionLanguages: typedExpLangs,
+        groupExpressionRef: createExp,
+        sharedPerspectiveUrl: communityPerspective.sharedURL!,
+      });
+
+      //Get and cache the expression UI for each expression language
+      for (const [, lang] of expressionLangs.entries()) {
+        console.log("CreateCommunity.vue: Fetching UI lang:", lang);
+        const languageRes = await getLanguage(lang);
+        const uiData: ExpressionUIIcons = {
+          languageAddress: lang,
+          createIcon: languageRes.constructorIcon!.code!,
+          viewIcon: languageRes.iconFor!.code!,
+        };
+        commit("addExpressionUI", uiData);
+        await sleep(40);
+      }
+
+      // Need error handling (try catch in the awaits over)
+      return new Promise((resolve, reject) => {
+        resolve(null);
+      });
+    },
+    // TODO: Use something else than any
+    async joinCommunity(store: any, { joiningLink }) {
+      const installedPerspective = await installSharedPerspective(joiningLink);
+      console.log(
+        new Date(),
+        "Installed perspective raw data",
+        installedPerspective
+      );
+
+      //Get and cache the expression UI for each expression language
+      //And used returned expression language names to populate typedExpressionLanguages field
+      const typedExpressionLanguages = await getTypedExpressionLanguages(
+        installedPerspective.sharedPerspective!,
+        true,
+        store
+      );
+
+      const profileExpLang = typedExpressionLanguages.find(
+        (val) => val.expressionType == ExpressionTypes.ProfileExpression
+      );
+      if (profileExpLang != undefined) {
+        const profile: Profile = store.getters.getProfile;
+
+        const createProfileExpression = await createProfile(
+          profileExpLang.languageAddress!,
+          profile.username,
+          profile.email,
+          profile.givenName,
+          profile.familyName,
+          profile.profilePicture,
+          profile.thumbnailPicture
+        );
+
+        //Create link between perspective and group expression
+        const addProfileLink = await createLink(installedPerspective.uuid!, {
+          source: `${installedPerspective.sharedPerspective!.linkLanguages![0]!
+            .address!}://self`,
+          target: createProfileExpression,
+          predicate: "sioc://has_member",
+        });
+        console.log("Created group expression link", addProfileLink);
+      }
+
+      store.commit("addCommunity", {
+        name: installedPerspective.name,
+        linkLanguageAddress:
+          installedPerspective.sharedPerspective!.linkLanguages![0]!.address!,
+        channels: [],
+        perspective: installedPerspective.uuid!,
+        expressionLanguages:
+          installedPerspective.sharedPerspective!.requiredExpressionLanguages,
+        typedExpressionLanguages: typedExpressionLanguages,
+        sharedPerspectiveUrl: joiningLink, //TODO: this will have to be string split once we add proof onto the URL
+      });
+    },
+    async getPerspectiveChannelsAndMetadata({ commit }, { community }) {
+      console.log("Getting channel links");
+      const channelLinks = await getChatChannelLinks(
+        community.perspective,
+        community.linkLanguageAddress
+      );
+      console.log("Got links", channelLinks);
+      if (channelLinks != null) {
+        for (let i = 0; i < channelLinks.length; i++) {
+          if (
+            community.channels.find(
+              (element: ChannelState) =>
+                element.sharedPerspectiveUrl === channelLinks[i].data!.target
+            ) == undefined
+          ) {
+            console.log(
+              "Found channel link",
+              channelLinks[i],
+              "Adding to channel"
+            );
+            const channel = await joinChannelFromSharedLink(
+              channelLinks[i].data!.target!
+            );
+            commit("addChannel", {
+              community: community.perspective,
+              channel: channel,
+            });
+          }
+        }
+        //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button
+        const groupExpressionLinks = await getGroupExpressionLinks(
+          //@ts-ignore
+          community.perspective,
+          //@ts-ignore
+          community.linkLanguageAddress
+        );
+        if (groupExpressionLinks != null && groupExpressionLinks.length > 0) {
+          if (
+            community.groupExpressionRef !=
+            groupExpressionLinks[0].data!.target!
+          ) {
+            let getExprRes = await getExpression(
+              groupExpressionLinks[0].data!.target!
+            );
+            if (getExprRes == null) {
+              for (let i = 0; i < expressionGetRetries; i++) {
+                console.log("Retrying get of expression signal");
+
+                getExprRes = await getExpression(
+                  groupExpressionLinks[0].data!.target!
+                );
+                if (getExprRes != null) {
+                  break;
+                }
+                await sleep(expressionGetDelayMs);
+              }
+              if (getExprRes == null) {
+                console.warn(
+                  "Could not get expression from group expression link"
+                );
+                return;
+              }
+            }
+            const groupExpData = JSON.parse(getExprRes.data!);
+            console.log(
+              "Got new group expression data for community",
+              groupExpData
+            );
+            commit("updateCommunityMetadata", {
+              community: community.perspective,
+              name: groupExpData["foaf:name"],
+              description: groupExpData["foaf:description"],
+              groupExpressionRef: groupExpressionLinks[0].data!.target,
+            });
+          }
+        }
       }
     },
   },
@@ -258,54 +548,43 @@ export default createStore({
     getCommunities(state: State) {
       return state.communities;
     },
-    // Get the current community the user is viewing
-    getCurrentCommunity(state: State) {
-      return state.currentCommunity;
-    },
-
-    // Get the view (i.e. feed,  channel) of the community a user is currently on
-    getCurrentCommunityView(state: State) {
-      return state.currentCommunityView;
-    },
-    // Get current theme
-    getCurrentTheme(state: State) {
-      return state.currentTheme;
-    },
 
     getLanguagePath(state: State) {
       return state.localLanguagesPath;
     },
 
-    getCommunityById: (state) => (id: string) => {
-      return state.communities.find((todo) => todo.perspective === id);
+    getCommunity: (state) => (id: string) => {
+      const community = state.communities.find(
+        (community) => community.perspective === id
+      );
+
+      return community;
+    },
+
+    getChannel: (state) => (payload: any) => {
+      const { channelId, communityId } = payload;
+      const community = state.communities.find(
+        (community: CommunityState) => community.perspective === communityId
+      );
+
+      return community?.channels.find(
+        (channel) => channel.perspective === channelId
+      );
     },
 
     getDatabasePerspective(state: State) {
       return state.databasePerspective;
     },
 
-    getCurrentChannel(state) {
-      //@ts-ignore
-      const cha = state.currentCommunity.value.channels.find(
-        (channel: ChannelState) => {
-          //@ts-ignore
-          return (
-            channel.perspective === state.currentCommunityView!.perspective
-          );
-        }
-      );
-      return cha;
-    },
-
     getPerspectiveFromLinkLanguage: (state) => (linkLanguage: string) => {
       let perspective;
       state.communities.forEach((community) => {
         //@ts-ignore
-        if (community.value.linkLanguageAddress == linkLanguage) {
+        if (community.linkLanguageAddress == linkLanguage) {
           return community;
         }
         //@ts-ignore
-        community.value.channels.forEach((channel) => {
+        community.channels.forEach((channel) => {
           if (channel.linkLanguageAddress == linkLanguage) {
             perspective = channel;
           }
@@ -318,12 +597,12 @@ export default createStore({
       const expressionLangs: Address[] = [];
       state.communities.forEach((community) => {
         //@ts-ignore
-        community.value.expressionLanguages.forEach((expLang) => {
+        community.expressionLanguages.forEach((expLang) => {
           if (
             expressionLangs.indexOf(expLang) === -1 &&
             //@ts-ignore
             state.expressionUI.find(
-              (val: ExpressionUIIcons) => val.languageAddress === expLang.value
+              (val: ExpressionUIIcons) => val.languageAddress === expLang
             ) === undefined
           ) {
             expressionLangs.push(expLang);
