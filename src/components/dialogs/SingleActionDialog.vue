@@ -4,12 +4,12 @@
       <div class="singleActionDialog__dialog">
         <div class="singleActionDialog__dialog--top">
           <p class="singleActionDialog__dialog--description">
-            {{ dialogText }}
+            {{ state.message }}
           </p>
         </div>
         <div
           class="singleActionDialog__dialog--bottom"
-          @click="showSingleActionDialog"
+          @click="hide"
         >
           CLOSE
         </div>
@@ -20,8 +20,18 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import useSingleDialog from './useSingleDialog';
+
 
 export default defineComponent({
+  setup(props, {emit}) {
+    const {state, hide} = useSingleDialog();
+
+    return {
+      hide,
+      state
+    }
+  },
   props: {
     dialogText: String,
     showSingleActionDialog: Function,
