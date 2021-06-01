@@ -101,6 +101,7 @@ export interface State {
   //fow now this is fine
   expressionUI: ExpressionUIIcons[];
   agentUnlocked: boolean;
+  agentInit: boolean;
   userProfile: Profile | null;
 }
 
@@ -139,6 +140,7 @@ export default createStore({
     applicationStartTime: new Date(),
     expressionUI: [],
     agentUnlocked: false,
+    agentInit: false,
     userProfile: null,
   },
   plugins: [vuexLocal.plugin],
@@ -180,6 +182,10 @@ export default createStore({
 
     updateAgentLockState(state: State, payload: boolean) {
       state.agentUnlocked = payload;
+    },
+
+    updateAgentInitState(state: State, payload: boolean) {
+      state.agentInit = payload;
     },
 
     addExpressionUI(state: State, payload: ExpressionUIIcons) {
@@ -614,6 +620,10 @@ export default createStore({
 
     getAgentLockStatus(state: State): boolean {
       return state.agentUnlocked;
+    },
+
+    getAgentInitStatus(state: State): boolean {
+      return state.agentInit;
     },
 
     getApplicationStartTime(state: State): Date {
