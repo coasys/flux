@@ -85,11 +85,19 @@
           @keydown.enter="saveCommunity"
           @input="(e) => (communityName = e.target.value)"
         ></j-input>
+        <j-space>
+        <j-input
+          size="lg"
+          label="Description"
+          :value="communityDescription"
+          @keydown.enter="saveCommunity"
+          @input="(e) => (communityDescription = e.target.value)"
+        ></j-input>
         <j-button
           size="lg"
           :loading="isSavingChannel"
           :disabled="isSavingChannel"
-          @click="updateChannel"
+          @click="updateCommunity"
           variant="primary"
         >
           Save
@@ -133,11 +141,13 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import Expression from "@perspect3vism/ad4m/Expression";
 
 export default defineComponent({
   props: ["community"],
   created() {
     this.communityName = this.community?.name;
+    this.communityDescription = this.community?.description;
   },
   data() {
     return {
@@ -146,22 +156,26 @@ export default defineComponent({
       showCreateChannel: false,
       isUpdatingCommunity: false,
       communityName: "",
+      communityDescription: "",
       showUpdateCommunity: false,
     };
   },
   methods: {
-    async updateChannel() {
+    async updateCommunity() {
       const { communityId } = this.$route.params;
       const name = this.communityName;
       this.isUpdatingCommunity = true;
       this.$store
-        .dispatch("updateChannel", {
-          communityId,
-          name,
+        .dispatch("updateCommunity", {
+          community: this.community!,
+          groupExpressionData: {
+            name: this.communityName,
+            description: this.community!.description,
+          },
         })
         .then(() => {
           this.showUpdateCommunity = false;
-          this.communityName = "";
+          this.communityName = name;
           this.isUpdatingCommunity = false;
         });
     },
