@@ -27,6 +27,7 @@ export default async (
   { commit, getters }: Context,
   { givenName, familyName, email, username, password }: Payload
 ): Promise<void> => {
+  let error = false;
   const perspectiveName = databasePerspectiveName;
 
   try {
@@ -66,6 +67,12 @@ export default async (
       familyName: familyName,
     });
   } catch (e) {
+    error = true;
     console.warn(e);
   }
+
+  return new Promise((resolve, reject) => {
+    if (error) reject();
+    else resolve();
+  });
 };

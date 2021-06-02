@@ -15,17 +15,27 @@ export default async (
   { commit }: Context,
   { password }: Payload
 ): Promise<void> => {
+  let error = false;
+  let lockRes: any = null;
+
   try {
-    await apolloClient.mutate<{
+    lockRes = await apolloClient.mutate<{
       unlockAgent: ad4m.AgentService;
       passphrase: string;
     }>({
       mutation: UNLOCK_AGENT,
       variables: { passphrase: password },
     });
+    console.log(lockRes);
     commit("updateAgentInitState", true);
     commit("updateAgentLockState", true);
   } catch (e) {
+    error = true;
     console.log(e);
   }
+
+  return new Promise((resolve, reject) => {
+    if (error || lockRes.data.unlockAgent.error) reject();
+    else resolve();
+  });
 };
