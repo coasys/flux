@@ -66,12 +66,7 @@
           :value="password"
           @input="(e) => (password = e.target.value)"
         ></j-input>
-        <j-button
-          size="lg"
-          full="true"
-          variant="primary"
-          @click="submitUserInfo"
-        >
+        <j-button size="lg" full="true" variant="primary" @click="createUser">
           Create
         </j-button>
       </j-flex>
@@ -81,16 +76,6 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import {
-  INITIALIZE_AGENT,
-  AGENT_SERVICE_STATUS,
-  UNLOCK_AGENT,
-  LOCK_AGENT,
-  ADD_PERSPECTIVE,
-} from "../../core/graphql_queries";
-import { useQuery, useMutation } from "@vue/apollo-composable";
-import ad4m from "@perspect3vism/ad4m-executor";
-import { databasePerspectiveName } from "../../core/juntoTypes";
 
 export default defineComponent({
   name: "Welcome",
@@ -101,32 +86,6 @@ export default defineComponent({
     const username = ref("");
     const email = ref("");
     const password = ref("");
-    const isInit = ref(false);
-    const perspectiveName = ref(databasePerspectiveName);
-    const { mutate: initAgent, error: initAgentError } = useMutation<{
-      initializeAgent: ad4m.AgentService;
-    }>(INITIALIZE_AGENT, () => ({
-      variables: {},
-    }));
-    const { mutate: unlockDidStore, error: unlockDidStoreError } = useMutation<{
-      unlockAgent: ad4m.AgentService;
-      passphrase: string;
-    }>(UNLOCK_AGENT, () => ({
-      variables: { passphrase: password.value },
-    }));
-    const { mutate: lockAgent, error: lockAgentError } = useMutation<{
-      lockAgent: ad4m.AgentService;
-      passphrase: string;
-    }>(LOCK_AGENT, () => ({
-      variables: { passphrase: password.value },
-    }));
-    const { mutate: addPerspective, error: addPerspectiveError } = useMutation<{
-      addPerspective: ad4m.Perspective;
-    }>(ADD_PERSPECTIVE, () => ({
-      variables: {
-        name: perspectiveName.value,
-      },
-    }));
 
     return {
       modalOpen,
@@ -135,110 +94,26 @@ export default defineComponent({
       email,
       password,
       familyName,
-      isInit,
-      initAgent,
-      initAgentError,
-      unlockDidStore,
-      unlockDidStoreError,
-      lockAgent,
-      lockAgentError,
-      addPerspective,
-      addPerspectiveError,
     };
   },
-  beforeCreate() {
-    const { onResult, onError } =
-      useQuery<{
-        agent: ad4m.AgentService;
-      }>(AGENT_SERVICE_STATUS);
-    onResult((val) => {
-      this.isInit = val.data.agent.isInitialized!;
-      this.$store.commit("updateAgentLockState", false);
-      if (this.isInit == true) {
-        //Get database perspective from store
-        let databasePerspective = this.$store.getters.getDatabasePerspective;
-        if (databasePerspective == "") {
-          console.warn(
-            "Does not have databasePerspective in store but has already been init'd! Add logic for getting databasePerspective as found with name",
-            databasePerspectiveName
-          );
-          //TODO: add the retrieval/state saving logic here
-        }
-      }
-    });
-    onError((error) => {
-      console.log("WelcomeViewRight: AGENT_SERVICE_STATUS, error:", error);
-    });
-  },
   methods: {
-    submitUserInfo() {
-      console.log("WelcomeViewRight: submitUserInfo() called");
-      console.log("Got name", this.name);
-      let res = this.initAgent();
-      res.then((val) => {
-        console.log(val);
-        console.log(val.data?.initializeAgent.isInitialized);
-        if (this.initAgentError == null) {
-          this.lockAgent().then((lockAgentRes) => {
-            console.log("Post lock result", lockAgentRes);
-            if (this.lockAgentError == null) {
-              //NOTE: this code is potentially not needed
-              this.addPerspective().then((addPerspectiveResult) => {
-                console.log(
-                  "Created perspective for local database with result",
-                  addPerspectiveResult
-                );
-                if (this.addPerspectiveError == null) {
-                  this.$store.commit(
-                    "addDatabasePerspective",
-                    addPerspectiveResult.data?.addPerspective.uuid
-                  );
-
-                  this.$store.commit("createProfile", {
-                    address:
-                      addPerspectiveResult.data?.addPerspective.uuid || "",
-                    username: this.username,
-                    email: this.email,
-                    givenName: this.name,
-                    familyName: this.familyName,
-                  });
-
-                  this.$router.push("/");
-                } else {
-                  console.log("Got error", this.addPerspectiveError);
-                }
-              });
-              //TODO: then send the profile information to a public Junto DNA
-              this.isInit = true;
-              this.$store.commit("updateAgentLockState", true);
-            } else {
-              console.log("Got error", this.lockAgentError);
-            }
-          });
-        } else {
-          //TODO: this needs to go to an error handler function
-          console.log("Got error", this.initAgentError);
-        }
-      });
+    createUser() {
+      this.$store
+        .dispatch("createUser", {
+          givenName: this.name,
+          familyName: this.familyName,
+          email: this.email,
+          username: this.username,
+          password: this.password,
+        })
+        .then(() => this.$router.push("/"));
     },
-    unlockDidStoreMethod() {
-      console.log("WelcomeViewRight: unlockDidStore() called");
-      let res = this.unlockDidStore();
-      res.then((val) => {
-        console.log("Unlock result", val);
-        if (
-          this.unlockDidStoreError == null &&
-          val.data?.unlockAgent.isInitialized &&
-          val.data.unlockAgent.isUnlocked
-        ) {
-          this.isInit = true;
-          this.$store.commit("updateAgentLockState", true);
-          this.$router.push("/");
-        } else {
-          //TODO: this needs to go to an error handler function
-          console.log("Got error", this.unlockDidStoreError);
-        }
-      });
+    logIn() {
+      this.$store
+        .dispatch("logIn", {
+          password: this.password,
+        })
+        .then(() => this.$router.push("/"));
     },
   },
 });

@@ -4,6 +4,8 @@
 </template>
 
 <script lang="ts">
+import { useQuery } from "@vue/apollo-composable";
+import { useRouter } from "vue-router";
 import { useSubscription } from "@vue/apollo-composable";
 import { defineComponent, watch } from "vue";
 import { AD4M_SIGNAL } from "@/core/graphql_queries";
@@ -14,8 +16,16 @@ import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { getExpression } from "@/core/queries/getExpression";
 import { getLanguage } from "@/core/queries/getLanguage";
-import useSingleDialog from '@/components/dialogs/useSingleDialog';
-import SingleActionDialog from '@/components/dialogs/SingleActionDialog.vue';
+import useSingleDialog from "@/components/dialogs/useSingleDialog";
+import SingleActionDialog from "@/components/dialogs/SingleActionDialog.vue";
+import ad4m from "@perspect3vism/ad4m-executor";
+import {
+  INITIALIZE_AGENT,
+  AGENT_SERVICE_STATUS,
+  UNLOCK_AGENT,
+  LOCK_AGENT,
+  ADD_PERSPECTIVE,
+} from "@/core/graphql_queries";
 
 declare global {
   interface Window {
@@ -25,10 +35,11 @@ declare global {
 
 export default defineComponent({
   name: "App",
-  setup(props, {emit}) {
+  setup(props, { emit }) {
+    const router = useRouter();
     const store = useStore();
-    const {state, show} = useSingleDialog();
-    
+    const { state, show } = useSingleDialog();
+
     var language = "";
     var expression = {};
 
@@ -65,6 +76,9 @@ export default defineComponent({
             }
             await sleep(50);
           }
+          router.push({ name: "home" });
+        } else {
+          router.push({ name: "signup" });
         }
       }
     );
@@ -127,7 +141,7 @@ export default defineComponent({
 
     return {
       state,
-      show
+      show,
     };
   },
   beforeCreate() {
@@ -136,10 +150,32 @@ export default defineComponent({
       console.log(`Received language path from main thread: ${data}`);
       this.$store.commit("setLanguagesPath", data);
     });
+    const { onResult, onError } =
+      useQuery<{
+        agent: ad4m.AgentService;
+      }>(AGENT_SERVICE_STATUS);
+    onResult((val) => {
+      const isInit = val.data.agent.isInitialized!;
+      this.$store.commit("updateAgentInitState", isInit);
+      this.$store.commit("updateAgentLockState", false);
+      if (isInit == true) {
+        //Get database perspective from store
+        let databasePerspective = this.$store.getters.getDatabasePerspective;
+        if (databasePerspective == "") {
+          console.warn(
+            "Does not have databasePerspective in store but has already been init'd! Add logic for getting databasePerspective as found with name"
+          );
+          //TODO: add the retrieval/state saving logic here
+        }
+      }
+    });
+    onError((error) => {
+      console.log("WelcomeViewRight: AGENT_SERVICE_STATUS, error:", error);
+    });
   },
   components: {
     SingleActionDialog,
-  }
+  },
 });
 </script>
 
