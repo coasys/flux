@@ -1,11 +1,9 @@
 import { Commit } from "vuex";
-import { useMutation } from "@vue/apollo-composable";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { apolloClient } from "@/main";
 
 import {
   INITIALIZE_AGENT,
-  UNLOCK_AGENT,
   LOCK_AGENT,
   ADD_PERSPECTIVE,
 } from "../../core/graphql_queries";
