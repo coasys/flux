@@ -18,7 +18,7 @@
       </j-text>
     </div>
     <div class="welcome-view__right">
-      <div v-if="isInit">
+      <div v-if="hasUser">
         <j-text variant="heading">Welcome back</j-text>
         <j-flex direction="column" gap="400">
           <j-input
@@ -26,18 +26,16 @@
             label="Password"
             type="password"
             :value="password"
+            @keydown.enter="logIn"
             @input="(e) => e.target.value"
           ></j-input>
-          <j-button
-            full="false"
-            size="lg"
-            variant="primary"
-            @click="unlockDidStoreMethod"
+          <j-button full="false" size="lg" variant="primary" @click="logIn"
             >Login
           </j-button>
+          <j-text v-if="logInError">Something wrong happended</j-text>
         </j-flex>
       </div>
-      <j-flex direction="column" gap="400" v-if="!isInit">
+      <j-flex direction="column" gap="400" v-else>
         <j-text variant="heading">Sign up</j-text>
         <j-input
           label="First Name"
@@ -64,6 +62,7 @@
           type="password"
           label="Password"
           :value="password"
+          @keydown.enter="logIn"
           @input="(e) => (password = e.target.value)"
         ></j-input>
         <j-button size="lg" full="true" variant="primary" @click="createUser">
@@ -76,26 +75,32 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
+import { useStore } from "vuex";
 
 export default defineComponent({
   name: "Welcome",
   setup() {
+    const store = useStore();
     const modalOpen = ref(false);
     const name = ref("");
     const familyName = ref("");
     const username = ref("");
     const email = ref("");
     const password = ref("");
+    const logInError = ref(false);
 
     return {
+      hasUser: store.state.agentInit,
       modalOpen,
       name,
       username,
       email,
       password,
       familyName,
+      logInError,
     };
   },
+
   methods: {
     createUser() {
       this.$store
@@ -113,7 +118,10 @@ export default defineComponent({
         .dispatch("logIn", {
           password: this.password,
         })
-        .then(() => this.$router.push("/"));
+        .then(() => this.$router.push("/"))
+        .catch(() => {
+          this.logInError = true;
+        });
     },
   },
 });
