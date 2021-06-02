@@ -247,11 +247,35 @@ export default createStore({
         channel,
       });
     },
+    async updateCommunity({commit, getters}, {community, groupExpressionData}) {
+      const groupExpressionLang = community.typedExpressionLanguages.find((val: JuntoExpressionReference) => val.expressionType == ExpressionTypes.GroupExpression);
+      if (groupExpressionLang != undefined) {
+        console.log("Found group exp lang", groupExpressionLang);
+        const groupExpression = await createExpression(groupExpressionLang.languageAddress, JSON.stringify(groupExpressionData));
+        console.log("Created new group expression for updateCommunity", groupExpression);
+
+        const addGroupExpLink = await createLink(community.perspective, {
+          source: `${community.sharedPerspectiveUrl}://self`,
+          target: groupExpression,
+          predicate: "rdf://class",
+        });
+        console.log("Created group expression link", addGroupExpLink);
+
+        commit("updateCommunityMetadata", 
+          {
+            community: community.perspective, 
+            name: groupExpressionData.name, 
+            description: groupExpressionData.description, 
+            groupExpressionRef: groupExpression
+        })
+      } else {
+        throw Error("Expected to find group expression language for group")
+      }
+    },
     async createCommunity(
       { commit, getters },
       { perspectiveName, description }
     ) {
-      //TODO: @eric: show loading animation here
       const createSourcePerspective = await addPerspective(perspectiveName);
       console.log("Created perspective", createSourcePerspective);
       const uid = uuidv4().toString();
@@ -500,6 +524,7 @@ export default createStore({
           community.linkLanguageAddress
         );
         if (groupExpressionLinks != null && groupExpressionLinks.length > 0) {
+          //Note assumption here is that [0] link of array will always be the latest
           if (
             community.groupExpressionRef !=
             groupExpressionLinks[0].data!.target!
