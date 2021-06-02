@@ -59,7 +59,8 @@ export default defineComponent({
     store.watch(
       (state) => state.agentUnlocked,
       async (newValue) => {
-        if (newValue.value == true) {
+        console.log("agent unlocked changed to", newValue);
+        if (newValue.value) {
           //TODO: this is probably not needed here and should work fine on join/create of community
           let expressionLangs =
             store.getters.getAllExpressionLanguagesNotLoaded;
@@ -80,7 +81,8 @@ export default defineComponent({
         } else {
           router.push({ name: "signup" });
         }
-      }
+      },
+      { immediate: true }
     );
 
     //Watch for incoming signals to get expression data
@@ -156,8 +158,10 @@ export default defineComponent({
       }>(AGENT_SERVICE_STATUS);
     onResult((val) => {
       const isInit = val.data.agent.isInitialized!;
+      const isUnlocked = val.data.agent.isUnlocked!;
+      console.log({ isInit, val, comment: "Hello" });
       this.$store.commit("updateAgentInitState", isInit);
-      this.$store.commit("updateAgentLockState", false);
+      this.$store.commit("updateAgentLockState", isUnlocked);
       if (isInit == true) {
         //Get database perspective from store
         let databasePerspective = this.$store.getters.getDatabasePerspective;
