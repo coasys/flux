@@ -65,13 +65,16 @@ export default class ShortFormAdapter implements ExpressionAdapter {
           name: expression.expression_data["schema:agent"]["schema:givenName"],
           email: expression.expression_data["schema:agent"]["schema:email"],
         } as Agent,
-        data: expression.expression_data,
+        data: {
+          name: expression.expression_data["foaf:name"],
+          description: expression.expression_data["schema:description"]
+        },
         timestamp: expression.expression_data["schema:dateCreated"]["@value"],
         proof: {
           signature:
             expression.expression_data["sec:proof"]["sec:verificationMethod"],
           key: expression.expression_data["sec:proof"][
-            "sec:verificationMethod"
+            "sec:jws"
           ],
         } as ExpressionProof,
       } as Expression;

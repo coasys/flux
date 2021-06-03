@@ -78,7 +78,6 @@ export default defineComponent({
             }
             await sleep(50);
           }
-          router.push({ name: "home" });
         } else {
           router.push({ name: "signup" });
         }
