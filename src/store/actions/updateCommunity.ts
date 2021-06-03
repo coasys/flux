@@ -18,7 +18,7 @@ export interface Payload {
     groupExpressionData: GroupExpressionData
 }
 
-async function updateCommunity({commit, getters}: Context, {community, groupExpressionData}: Payload) {
+export default async function updateCommunity({commit, getters}: Context, {community, groupExpressionData}: Payload) {
     const groupExpressionLang = community.typedExpressionLanguages.find((val: JuntoExpressionReference) => val.expressionType == ExpressionTypes.GroupExpression);
     if (groupExpressionLang != undefined) {
       console.log("Found group exp lang", groupExpressionLang);
