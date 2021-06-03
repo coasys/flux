@@ -20,8 +20,7 @@ export default {
 <style lang="scss">
 .left-nav {
   height: 100vh;
-  width: 5vw;
-  min-width: 10rem;
+  width: 100px;
   padding: 2rem 0 2rem 0;
   border-right: 1px var(--j-color-ui-50) solid;
   display: flex;
