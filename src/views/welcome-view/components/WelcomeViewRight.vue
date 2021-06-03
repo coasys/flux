@@ -15,7 +15,7 @@
       Unlock
     </button>
   </div>
-
+  
   <div class="welcomeViewRight" v-if="!isInit">
     <div class="welcomeViewRight__spec welcomeViewRight__spec--center">
       <profile-avatar
@@ -228,7 +228,7 @@ export default defineComponent({
         console.log(val);
         console.log(val.data?.initializeAgent.isInitialized);
         if (this.initAgentError == null) {
-          this.lockAgent().then((lockAgentRes) => {
+          this.lockAgent().then(async (lockAgentRes) => {
             console.log("Post lock result", lockAgentRes);
             if (this.lockAgentError == null) {
               //NOTE: this code is potentially not needed
@@ -433,6 +433,3 @@ export default defineComponent({
   }
 }
 </style>
-
-function blobToDataURL(resizedImage: Blob) { throw new Error("Function not
-implemented."); }

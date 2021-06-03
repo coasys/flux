@@ -1,11 +1,15 @@
 <template>
   <div
     class="profile-avatar"
-    :style="`${avatarDiameter} ${profilePic}`"
     id="fileInputButton"
     @click="onFileClick()"
   >
-    &nbsp;
+    <j-avatar
+      id="myProfile"
+      size="xl"
+      :src="profileImage ?? require('@/assets/images/junto_app_icon.png')"
+      initials="P"
+    ></j-avatar>
   </div>
   <input
     id="fileInput"
@@ -44,7 +48,6 @@ export default {
 .profile-avatar {
   background-color: var(--junto-border-color);
   border-radius: 100px;
-  background-image: url("../../../../src/assets/images/junto_app_icon.png");
   background-size: cover;
 }
 </style>
