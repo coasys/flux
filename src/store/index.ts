@@ -70,7 +70,18 @@ export interface Profile {
   thumbnailPicture: string;
 }
 
+export interface ToastState {
+  variant: "succes" | "" | "danger" | "error";
+  message: string;
+  open: boolean;
+}
+
+export interface UIState {
+  toast: ToastState;
+}
+
 export interface State {
+  ui: UIState;
   communities: CommunityState[];
   localLanguagesPath: string;
   databasePerspective: string;
@@ -114,6 +125,13 @@ const vuexLocal = new VuexPersistence<State>({
 
 export default createStore({
   state: {
+    ui: {
+      toast: {
+        variant: "",
+        message: "",
+        open: false,
+      },
+    },
     communities: [],
     localLanguagesPath: "",
     databasePerspective: "",
