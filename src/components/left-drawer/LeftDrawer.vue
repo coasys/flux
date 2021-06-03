@@ -94,8 +94,8 @@
         ></j-input>
         <j-button
           size="lg"
-          :loading="isSavingChannel"
-          :disabled="isSavingChannel"
+          :loading="isUpdatingCommunity"
+          :disabled="isUpdatingCommunity"
           @click="updateCommunity"
           variant="primary"
         >
@@ -140,13 +140,18 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import Expression from "@perspect3vism/ad4m/Expression";
 
 export default defineComponent({
   props: ["community"],
-  created() {
-    this.communityName = this.community?.name;
-    this.communityDescription = this.community?.description;
+  watch: {
+    community: {
+      handler: function ({ name, description }) {
+        this.communityName = name;
+        this.communityDescription = description;
+      },
+      deep: true,
+      immediate: true,
+    },
   },
   data() {
     return {
@@ -162,19 +167,15 @@ export default defineComponent({
   methods: {
     async updateCommunity() {
       const { communityId } = this.$route.params;
-      const name = this.communityName;
       this.isUpdatingCommunity = true;
       this.$store
         .dispatch("updateCommunity", {
-          community: this.community!,
-          groupExpressionData: {
-            name: this.communityName,
-            description: this.community!.description,
-          },
+          communityId: communityId,
+          name: this.communityName,
+          description: this.communityDescription,
         })
         .then(() => {
           this.showUpdateCommunity = false;
-          this.communityName = name;
           this.isUpdatingCommunity = false;
         });
     },
