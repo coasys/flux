@@ -15,12 +15,10 @@ import { useSubscription } from "@vue/apollo-composable";
 import { defineComponent, watch, ref } from "vue";
 import { AD4M_SIGNAL } from "@/core/graphql_queries";
 import { useStore } from "vuex";
-import { ExpressionUIIcons } from "@/store";
 import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { getExpression } from "@/core/queries/getExpression";
-import { getLanguage } from "@/core/queries/getLanguage";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { AGENT_SERVICE_STATUS } from "@/core/graphql_queries";
 
@@ -164,7 +162,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss">
-@import "src/assets/sass/main.scss";
-</style>
