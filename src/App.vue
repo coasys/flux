@@ -60,10 +60,11 @@ export default defineComponent({
       (state) => state.agentUnlocked,
       async (newValue) => {
         console.log("agent unlocked changed to", newValue);
-        if (newValue.value) {
+        if (newValue) {
           //TODO: this is probably not needed here and should work fine on join/create of community
           let expressionLangs =
             store.getters.getAllExpressionLanguagesNotLoaded;
+          console.log({ expressionLangs });
           for (const [, lang] of expressionLangs.entries()) {
             let language = await getLanguage(lang);
             console.log("Got language", language);
