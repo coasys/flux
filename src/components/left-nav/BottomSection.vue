@@ -21,7 +21,7 @@
           "
         >
           <j-avatar initials="S"></j-avatar>
-          <j-text nomargin>Username </j-text>
+          <j-text nomargin>{{ userProfile?.username }} </j-text>
         </j-flex>
         <j-menu-item @click="isEditProfileOpen = true">
           Edit profile
@@ -38,9 +38,16 @@
       :open="isEditProfileOpen"
       @toggle="(e) => (isEditProfileOpen = e.target.open)"
     >
-      <j-text variant="heading">Edit profile</j-text>
-      <j-input label="Username"></j-input>
-      <j-button variant="primary" full>Save</j-button>
+      <j-flex direction="column" gap="700">
+        <j-text variant="heading">Edit profile</j-text>
+        <j-input
+          size="lg"
+          label="Username"
+          :value="userProfile?.username"
+          @input="(e) => setUserProfile({ username: e.target.value })"
+        ></j-input>
+        <j-button size="lg" variant="primary" full>Save</j-button>
+      </j-flex>
     </j-modal>
 
     <j-modal
@@ -68,7 +75,7 @@
             @input="(e) => (hue = e.target.value)"
           />
         </div>
-        <j-button variant="primary" full>Save</j-button>
+        <j-button full size="lg" variant="primary">Save</j-button>
       </j-flex>
     </j-modal>
   </div>
@@ -94,11 +101,19 @@ export default {
       document.documentElement.setAttribute("theme", val);
     },
   },
+  methods: {
+    setUserProfile(profile) {
+      this.$store.commit("setUserProfile", profile);
+    },
+  },
   computed: {
     profilePic() {
       const profile = this.$store.getters.getProfile;
 
       return profile.profilePicture;
+    },
+    userProfile() {
+      return this.$store.state.userProfile;
     },
   },
 };
