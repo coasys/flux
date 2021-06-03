@@ -85,7 +85,6 @@
           @keydown.enter="saveCommunity"
           @input="(e) => (communityName = e.target.value)"
         ></j-input>
-        <j-space>
         <j-input
           size="lg"
           label="Description"

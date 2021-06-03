@@ -52,6 +52,7 @@ export default async ({ commit }: Context, { community }: Payload) => {
       //@ts-ignore
       community.linkLanguageAddress
     );
+    console.log("Got group expression links", groupExpressionLinks);
     if (groupExpressionLinks != null && groupExpressionLinks.length > 0) {
       if (
         community.groupExpressionRef != groupExpressionLinks[0].data!.target!

@@ -26,7 +26,7 @@ export default async function updateCommunity({commit, getters}: Context, {commu
       console.log("Created new group expression for updateCommunity", groupExpression);
 
       const addGroupExpLink = await createLink(community.perspective, {
-        source: `${community.sharedPerspectiveUrl}://self`,
+        source: `${community.linkLanguageAddress}://self`,
         target: groupExpression,
         predicate: "rdf://class",
       });
@@ -34,7 +34,7 @@ export default async function updateCommunity({commit, getters}: Context, {commu
 
       commit("updateCommunityMetadata", 
         {
-          community: community.perspective, 
+          communityId: community.perspective, 
           name: groupExpressionData.name, 
           description: groupExpressionData.description, 
           groupExpressionRef: groupExpression
