@@ -55,17 +55,17 @@ export default async ({ commit }: Context, { community }: Payload) => {
     console.log("Got group expression links", groupExpressionLinks);
     if (groupExpressionLinks != null && groupExpressionLinks.length > 0) {
       if (
-        community.groupExpressionRef != groupExpressionLinks[0].data!.target!
+        community.groupExpressionRef != groupExpressionLinks[groupExpressionLinks.length-1].data!.target!
       ) {
         let getExprRes = await getExpression(
-          groupExpressionLinks[0].data!.target!
+          groupExpressionLinks[groupExpressionLinks.length-1].data!.target!
         );
         if (getExprRes == null) {
           for (let i = 0; i < expressionGetRetries; i++) {
             console.log("Retrying get of expression signal");
 
             getExprRes = await getExpression(
-              groupExpressionLinks[0].data!.target!
+              groupExpressionLinks[groupExpressionLinks.length-1].data!.target!
             );
             if (getExprRes != null) {
               break;
@@ -83,10 +83,10 @@ export default async ({ commit }: Context, { community }: Payload) => {
           groupExpData
         );
         commit("updateCommunityMetadata", {
-          community: community.perspective,
+          communityId: community.perspective,
           name: groupExpData["name"],
           description: groupExpData["description"],
-          groupExpressionRef: groupExpressionLinks[0].data!.target,
+          groupExpressionRef: groupExpressionLinks[groupExpressionLinks.length-1].data!.target,
         });
       }
     }
