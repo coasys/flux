@@ -23,29 +23,6 @@ export default defineComponent({
       isInit: false,
     };
   },
-  beforeCreate() {
-    const { onResult, onError } =
-      useQuery<{
-        agent: ad4m.AgentService;
-      }>(AGENT_SERVICE_STATUS);
-    onResult((val) => {
-      this.isInit = val.data.agent.isInitialized!;
-      this.$store.commit("updateAgentLockState", false);
-      if (this.isInit) {
-        //Get database perspective from store
-        let databasePerspective = this.$store.getters.getDatabasePerspective;
-        if (databasePerspective == "") {
-          console.warn(
-            "Does not have databasePerspective in store but has already been init'd! Add logic for getting databasePerspective as found with name",
-            databasePerspectiveName
-          );
-          //TODO: add the retrieval/state saving logic here
-        }
-      } else {
-        this.$router.push("/signup");
-      }
-    });
-  },
   components: {
     LeftNav,
     CommunityView,
