@@ -104,7 +104,7 @@ export interface JuntoExpressionReference {
 }
 
 export interface AddChannel {
-  community: string;
+  communityId: string;
   channel: ChannelState;
 }
 

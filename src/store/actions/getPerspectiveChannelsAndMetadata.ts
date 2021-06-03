@@ -21,12 +21,12 @@ export interface Payload {
 }
 
 export default async ({ commit }: Context, { community }: Payload) => {
-  console.log("Getting channel links");
+  //console.log("Getting channel links", community);
   const channelLinks = await getChatChannelLinks(
     community.perspective,
     community.linkLanguageAddress
   );
-  console.log("Got links", channelLinks);
+  console.log("Got links channel links", channelLinks);
   if (channelLinks != null) {
     for (let i = 0; i < channelLinks.length; i++) {
       if (
@@ -35,12 +35,13 @@ export default async ({ commit }: Context, { community }: Payload) => {
             element.sharedPerspectiveUrl === channelLinks[i].data!.target
         ) == undefined
       ) {
-        console.log("Found channel link", channelLinks[i], "Adding to channel");
+        //console.log("Found channel link", channelLinks[i], "Adding to channel");
         const channel = await joinChannelFromSharedLink(
           channelLinks[i].data!.target!
         );
+        //console.log("trying to join channel", channel, community.perspective);
         commit("addChannel", {
-          community: community.perspective,
+          communityId: community.perspective,
           channel: channel,
         });
       }
