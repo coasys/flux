@@ -7,7 +7,7 @@
     <j-avatar
       id="myProfile"
       size="xl"
-      :src="profilePic ?? require('@/assets/images/junto_app_icon.png')"
+      :src="profile.profilePicture ?? require('@/assets/images/junto_app_icon.png')"
       initials="P"
     ></j-avatar>
 
@@ -25,7 +25,7 @@
           "
         >
           <j-avatar initials="S"></j-avatar>
-          <j-text nomargin>Username </j-text>
+          <j-text nomargin>{{ profile.username }}</j-text>
         </j-flex>
         <j-menu-item @click="isEditProfileOpen = true">
           Edit profile
@@ -70,10 +70,10 @@ export default {
     };
   },
   computed: {
-    profilePic() {
+    profile() {
       const profile = this.$store.getters.getProfile;
 
-      return profile.profilePicture;
+      return profile;
     },
     currentTheme() {
       return this.$store.getters.getCurrentTheme;
