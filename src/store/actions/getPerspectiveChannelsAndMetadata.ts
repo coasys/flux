@@ -84,8 +84,8 @@ export default async ({ commit }: Context, { community }: Payload) => {
         );
         commit("updateCommunityMetadata", {
           community: community.perspective,
-          name: groupExpData["foaf:name"],
-          description: groupExpData["foaf:description"],
+          name: groupExpData["name"],
+          description: groupExpData["description"],
           groupExpressionRef: groupExpressionLinks[0].data!.target,
         });
       }
