@@ -12,7 +12,6 @@ import { databasePerspectiveName } from "@/core/juntoTypes";
 
 export interface Context {
   commit: Commit;
-  getters: any;
 }
 
 export interface Payload {
@@ -24,7 +23,7 @@ export interface Payload {
 }
 
 export default async (
-  { commit, getters }: Context,
+  { commit }: Context,
   { givenName, familyName, email, username, password }: Payload
 ): Promise<void> => {
   let error = false;
@@ -66,6 +65,9 @@ export default async (
       givenName: givenName,
       familyName: familyName,
     });
+
+    commit("updateAgentInitState", true);
+    commit("updateAgentLockState", true);
   } catch (e) {
     error = true;
     console.warn(e);
