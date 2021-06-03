@@ -1,13 +1,18 @@
 <template>
   <router-view />
-  <single-action-dialog v-if="state.visible" />
+  <j-modal
+    :open="showErrorModal"
+    @toggle="(e) => (showErrorModal = e.target.open)"
+  >
+    {{ errorMessage }}
+  </j-modal>
 </template>
 
 <script lang="ts">
 import { useQuery } from "@vue/apollo-composable";
 import { useRouter } from "vue-router";
 import { useSubscription } from "@vue/apollo-composable";
-import { defineComponent, watch } from "vue";
+import { defineComponent, watch, ref } from "vue";
 import { AD4M_SIGNAL } from "@/core/graphql_queries";
 import { useStore } from "vuex";
 import { ExpressionUIIcons } from "@/store";
@@ -16,16 +21,8 @@ import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { getExpression } from "@/core/queries/getExpression";
 import { getLanguage } from "@/core/queries/getLanguage";
-import useSingleDialog from "@/components/dialogs/useSingleDialog";
-import SingleActionDialog from "@/components/dialogs/SingleActionDialog.vue";
 import ad4m from "@perspect3vism/ad4m-executor";
-import {
-  INITIALIZE_AGENT,
-  AGENT_SERVICE_STATUS,
-  UNLOCK_AGENT,
-  LOCK_AGENT,
-  ADD_PERSPECTIVE,
-} from "@/core/graphql_queries";
+import { AGENT_SERVICE_STATUS } from "@/core/graphql_queries";
 
 declare global {
   interface Window {
@@ -35,10 +32,11 @@ declare global {
 
 export default defineComponent({
   name: "App",
-  setup(props, { emit }) {
+  setup() {
     const router = useRouter();
     const store = useStore();
-    const { state, show } = useSingleDialog();
+    const errorMessage = ref("");
+    const showErrorModal = ref(false);
 
     var language = "";
     var expression = {};
@@ -48,7 +46,8 @@ export default defineComponent({
         // can use error.operation.operationName to single out a query type.
         logErrorMessages(error);
 
-        show(JSON.stringify(error));
+        errorMessage.value = JSON.stringify(error);
+        showErrorModal.value = true;
       }
     });
 
@@ -61,24 +60,9 @@ export default defineComponent({
       async (newValue) => {
         console.log("agent unlocked changed to", newValue);
         if (newValue) {
-          //TODO: this is probably not needed here and should work fine on join/create of community
-          let expressionLangs =
-            store.getters.getAllExpressionLanguagesNotLoaded;
-          console.log({ expressionLangs });
-          for (const [, lang] of expressionLangs.entries()) {
-            let language = await getLanguage(lang);
-            console.log("Got language", language);
-            if (language != null) {
-              let uiData: ExpressionUIIcons = {
-                languageAddress: language!.address!,
-                createIcon: language!.constructorIcon!.code!,
-                viewIcon: language!.iconFor!.code!,
-              };
-              store.commit("addExpressionUI", uiData);
-            }
-            await sleep(50);
-          }
-          router.push({ name: "home" });
+          store.dispatch("loadExpressionLanguages").then(() => {
+            router.push({ name: "home" });
+          });
         } else {
           router.push({ name: "signup" });
         }
@@ -143,8 +127,8 @@ export default defineComponent({
     }
 
     return {
-      state,
-      show,
+      showErrorModal,
+      errorMessage,
     };
   },
   beforeCreate() {
@@ -177,9 +161,6 @@ export default defineComponent({
     onError((error) => {
       console.log("WelcomeViewRight: AGENT_SERVICE_STATUS, error:", error);
     });
-  },
-  components: {
-    SingleActionDialog,
   },
 });
 </script>
