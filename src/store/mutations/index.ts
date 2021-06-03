@@ -80,6 +80,10 @@ export default {
     state.userProfile = payload;
   },
 
+  setUserProfile(state: State, payload: Profile): void {
+    state.userProfile = { ...state.userProfile, ...payload };
+  },
+
   updateCommunityMetadata(
     state: State,
     { communityId, name, description, groupExpressionRef }: UpdatePayload

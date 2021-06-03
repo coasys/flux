@@ -16,7 +16,7 @@ export interface Payload {
   joiningLink: string;
 }
 
-export default async (store: any, { joiningLink }: Payload) => {
+export default async (store: any, { joiningLink }: Payload): Promise<void> => {
   const installedPerspective = await installSharedPerspective(joiningLink);
   console.log(
     new Date(),
