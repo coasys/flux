@@ -69,11 +69,9 @@ export default {
   addChannel(state: State, payload: AddChannel) {
     console.log(payload);
     const community = state.communities.find(
-      //@ts-ignore
       (community) => community.perspective === payload.communityId
     );
     if (community !== undefined) {
-      //@ts-ignore
       community.channels.push(payload.channel);
     }
   },
@@ -94,11 +92,8 @@ export default {
       (community) => community.perspective === communityId
     );
     if (community != undefined) {
-      //@ts-ignore
       community.name = name;
-      //@ts-ignore
       community.description = description;
-      //@ts-ignore
       community.groupExpressionRef = groupExpressionRef;
     }
   },

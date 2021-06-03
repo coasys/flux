@@ -21,12 +21,12 @@ export interface Payload {
 }
 
 export default async ({ commit }: Context, { community }: Payload) => {
-  console.log("Getting channel links");
+  //console.log("Getting channel links", community);
   const channelLinks = await getChatChannelLinks(
     community.perspective,
     community.linkLanguageAddress
   );
-  console.log("Got links", channelLinks);
+  console.log("Got links channel links", channelLinks);
   if (channelLinks != null) {
     for (let i = 0; i < channelLinks.length; i++) {
       if (
@@ -35,36 +35,36 @@ export default async ({ commit }: Context, { community }: Payload) => {
             element.sharedPerspectiveUrl === channelLinks[i].data!.target
         ) == undefined
       ) {
-        console.log("Found channel link", channelLinks[i], "Adding to channel");
+        //console.log("Found channel link", channelLinks[i], "Adding to channel");
         const channel = await joinChannelFromSharedLink(
           channelLinks[i].data!.target!
         );
+        //console.log("trying to join channel", channel, community.perspective);
         commit("addChannel", {
-          community: community.perspective,
+          communityId: community.perspective,
           channel: channel,
         });
       }
     }
     //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button
     const groupExpressionLinks = await getGroupExpressionLinks(
-      //@ts-ignore
       community.perspective,
-      //@ts-ignore
       community.linkLanguageAddress
     );
+    console.log("Got group expression links", groupExpressionLinks);
     if (groupExpressionLinks != null && groupExpressionLinks.length > 0) {
       if (
-        community.groupExpressionRef != groupExpressionLinks[0].data!.target!
+        community.groupExpressionRef != groupExpressionLinks[groupExpressionLinks.length-1].data!.target!
       ) {
         let getExprRes = await getExpression(
-          groupExpressionLinks[0].data!.target!
+          groupExpressionLinks[groupExpressionLinks.length-1].data!.target!
         );
         if (getExprRes == null) {
           for (let i = 0; i < expressionGetRetries; i++) {
             console.log("Retrying get of expression signal");
 
             getExprRes = await getExpression(
-              groupExpressionLinks[0].data!.target!
+              groupExpressionLinks[groupExpressionLinks.length-1].data!.target!
             );
             if (getExprRes != null) {
               break;
@@ -82,10 +82,10 @@ export default async ({ commit }: Context, { community }: Payload) => {
           groupExpData
         );
         commit("updateCommunityMetadata", {
-          community: community.perspective,
-          name: groupExpData["foaf:name"],
-          description: groupExpData["foaf:description"],
-          groupExpressionRef: groupExpressionLinks[0].data!.target,
+          communityId: community.perspective,
+          name: groupExpData["name"],
+          description: groupExpData["description"],
+          groupExpressionRef: groupExpressionLinks[groupExpressionLinks.length-1].data!.target,
         });
       }
     }

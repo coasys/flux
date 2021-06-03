@@ -58,9 +58,7 @@ export default defineComponent({
       async (newValue) => {
         console.log("agent unlocked changed to", newValue);
         if (newValue) {
-          store.dispatch("loadExpressionLanguages").then(() => {
-            router.push({ name: "home" });
-          });
+          store.dispatch("loadExpressionLanguages");
         } else {
           router.push({ name: "signup" });
         }

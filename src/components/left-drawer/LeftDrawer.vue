@@ -85,11 +85,18 @@
           @keydown.enter="saveCommunity"
           @input="(e) => (communityName = e.target.value)"
         ></j-input>
+        <j-input
+          size="lg"
+          label="Description"
+          :value="communityDescription"
+          @keydown.enter="saveCommunity"
+          @input="(e) => (communityDescription = e.target.value)"
+        ></j-input>
         <j-button
           size="lg"
-          :loading="isSavingChannel"
-          :disabled="isSavingChannel"
-          @click="updateChannel"
+          :loading="isUpdatingCommunity"
+          :disabled="isUpdatingCommunity"
+          @click="updateCommunity"
           variant="primary"
         >
           Save
@@ -136,8 +143,15 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   props: ["community"],
-  created() {
-    this.communityName = this.community?.name;
+  watch: {
+    community: {
+      handler: function ({ name, description }) {
+        this.communityName = name;
+        this.communityDescription = description;
+      },
+      deep: true,
+      immediate: true,
+    },
   },
   data() {
     return {
@@ -146,22 +160,22 @@ export default defineComponent({
       showCreateChannel: false,
       isUpdatingCommunity: false,
       communityName: "",
+      communityDescription: "",
       showUpdateCommunity: false,
     };
   },
   methods: {
-    async updateChannel() {
+    async updateCommunity() {
       const { communityId } = this.$route.params;
-      const name = this.communityName;
       this.isUpdatingCommunity = true;
       this.$store
-        .dispatch("updateChannel", {
-          communityId,
-          name,
+        .dispatch("updateCommunity", {
+          communityId: communityId,
+          name: this.communityName,
+          description: this.communityDescription,
         })
         .then(() => {
           this.showUpdateCommunity = false;
-          this.communityName = "";
           this.isUpdatingCommunity = false;
         });
     },
