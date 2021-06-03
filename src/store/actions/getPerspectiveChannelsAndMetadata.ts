@@ -47,9 +47,7 @@ export default async ({ commit }: Context, { community }: Payload) => {
     }
     //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button
     const groupExpressionLinks = await getGroupExpressionLinks(
-      //@ts-ignore
       community.perspective,
-      //@ts-ignore
       community.linkLanguageAddress
     );
     console.log("Got group expression links", groupExpressionLinks);
