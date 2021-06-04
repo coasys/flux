@@ -37,15 +37,15 @@
       </div>
       <j-flex direction="column" gap="400" v-else>
         <j-text variant="heading">Sign up</j-text>
-            <div class="welcome-view--center">
-      <profile-avatar
-        :diameter="10"
-        :enableFileSelection="true"
-        :onClick="selectFile"
-        :profileImage="profileImage"
-      >
-      </profile-avatar>
-    </div>
+        <div class="welcome-view--center">
+          <profile-avatar
+            :diameter="10"
+            :enableFileSelection="true"
+            :onClick="selectFile"
+            :profileImage="profileImage"
+          >
+          </profile-avatar>
+        </div>
         <j-input
           label="First Name"
           :value="name"
@@ -81,7 +81,7 @@
     </div>
   </div>
 
-    <div class="cropper_parent" v-if="tempProfileImage !== null">
+  <div class="cropper_parent" v-if="tempProfileImage !== null">
     <cropper
       ref="cropper"
       class="cropper"
@@ -113,7 +113,11 @@ import { databasePerspectiveName } from "../../core/juntoTypes";
 import ProfileAvatar from "@/components/ui/avatar/ProfileAvatar.vue";
 import { Cropper } from "vue-advanced-cropper";
 import "vue-advanced-cropper/dist/style.css";
-import { blobToDataURL, dataURItoBlob, resizeImage } from "@/core/methods/createProfile";
+import {
+  blobToDataURL,
+  dataURItoBlob,
+  resizeImage,
+} from "@/core/methods/createProfile";
 import { useStore } from "vuex";
 
 export default defineComponent({
@@ -143,7 +147,7 @@ export default defineComponent({
     isInit(): boolean {
       const isInit = this.$store.getters.getAgentInitStatus;
       return isInit.value;
-    }
+    },
   },
   data(): {
     profileImage: string | ArrayBuffer | null | undefined;
@@ -156,9 +160,12 @@ export default defineComponent({
   },
   methods: {
     async createUser() {
-
-      const resizedImage = this.profileImage ? await resizeImage(dataURItoBlob(this.profileImage as string), 400) : null;
-      const thumbnail = this.profileImage ? await blobToDataURL(resizedImage!) : null;
+      const resizedImage = this.profileImage
+        ? await resizeImage(dataURItoBlob(this.profileImage as string), 400)
+        : null;
+      const thumbnail = this.profileImage
+        ? await blobToDataURL(resizedImage!)
+        : null;
 
       this.$store
         .dispatch("createUser", {
@@ -168,7 +175,7 @@ export default defineComponent({
           username: this.username,
           password: this.password,
           profilePicture: this.profileImage,
-          thumbnailPicture: thumbnail
+          thumbnailPicture: thumbnail,
         })
         .then(() => this.$router.push("/"));
     },
@@ -206,7 +213,7 @@ export default defineComponent({
   components: {
     ProfileAvatar,
     Cropper,
-  }
+  },
 });
 </script>
 

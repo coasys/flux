@@ -80,12 +80,12 @@ export async function createProfile(
   profileImage: string,
   thumbnail: string
 ): Promise<string> {
-  const profile: {[x: string]: any} = {
+  const profile: { [x: string]: any } = {
     "foaf:AccountName": username,
     "schema:email": email,
     "schema:givenName": givenName,
     "schema:familyName": familyName,
-    "@type": "foaf:OnlineAccount"
+    "@type": "foaf:OnlineAccount",
   };
 
   if (profileImage) {

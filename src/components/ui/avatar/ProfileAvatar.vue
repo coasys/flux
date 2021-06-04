@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="profile-avatar"
-    id="fileInputButton"
-    @click="onFileClick()"
-  >
+  <div class="profile-avatar" id="fileInputButton" @click="onFileClick()">
     <j-avatar
       id="myProfile"
       size="xl"

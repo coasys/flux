@@ -20,11 +20,21 @@ export interface Payload {
   username: string;
   password: string;
   email: string;
+  profilePicture: string;
+  thumbnailPicture: string;
 }
 
 export default async (
   { commit }: Context,
-  { givenName, familyName, email, username, password }: Payload
+  {
+    givenName,
+    familyName,
+    email,
+    username,
+    password,
+    profilePicture,
+    thumbnailPicture,
+  }: Payload
 ): Promise<void> => {
   let error = false;
   const perspectiveName = databasePerspectiveName;
@@ -64,6 +74,8 @@ export default async (
       email: email,
       givenName: givenName,
       familyName: familyName,
+      profilePicture,
+      thumbnailPicture,
     });
 
     commit("updateAgentInitState", true);

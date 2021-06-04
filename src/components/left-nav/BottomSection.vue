@@ -3,7 +3,9 @@
     <j-avatar
       id="myProfile"
       size="xl"
-      :src="profile.profilePicture ?? require('@/assets/images/junto_app_icon.png')"
+      :src="
+        profile.profilePicture ?? require('@/assets/images/junto_app_icon.png')
+      "
       initials="P"
     ></j-avatar>
 
