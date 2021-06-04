@@ -1,12 +1,16 @@
 import { Store } from "vuex";
-import { CommunityState, Profile, ExpressionUIIcons } from ".store/index";
+import {
+  CommunityState,
+  Profile,
+  UIState,
+  ExpressionUIIcons,
+} from ".store/index";
 import VueApollo from "@vue/apollo-option";
-import { ThemeState } from "./store";
 
 declare module "@vue/runtime-core" {
   // declare your own store states
   interface State {
-    theme: ThemeState;
+    ui: UIState;
     communities: CommunityState[];
     localLanguagesPath: string;
     databasePerspective: string;
