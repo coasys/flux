@@ -4,7 +4,8 @@
       id="myProfile"
       size="xl"
       :src="
-        profile.profilePicture ?? require('@/assets/images/junto_app_icon.png')
+        profile.profilePicture ||
+        require('@/assets/images/avatar-placeholder.png')
       "
       initials="P"
     ></j-avatar>
@@ -22,7 +23,12 @@
             border-bottom: 1px solid var(--j-color-ui-100);
           "
         >
-          <j-avatar initials="S"></j-avatar>
+          <j-avatar
+            :src="
+              profile.profilePicture ||
+              require('@/assets/images/avatar-placeholder.png')
+            "
+          ></j-avatar>
           <j-text nomargin>{{ profile.username }}</j-text>
         </j-flex>
         <j-menu-item @click="isEditProfileOpen = true">
