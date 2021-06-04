@@ -18,7 +18,7 @@
       </j-text>
     </div>
     <div class="welcome-view__right">
-      <div v-if="isInit">
+      <div v-if="hasUser">
         <j-text variant="heading">Welcome back</j-text>
         <j-flex direction="column" gap="400">
           <j-input
@@ -26,18 +26,16 @@
             label="Password"
             type="password"
             :value="password"
-            @input="(e) => e.target.value"
+            @keydown.enter="logIn"
+            @input="(e) => (password = e.target.value)"
           ></j-input>
-          <j-button
-            full="false"
-            size="lg"
-            variant="primary"
-            @click="unlockDidStoreMethod"
+          <j-button full="false" size="lg" variant="primary" @click="logIn"
             >Login
           </j-button>
+          <j-text v-if="logInError">Something wrong happended</j-text>
         </j-flex>
       </div>
-      <j-flex direction="column" gap="400" v-if="!isInit">
+      <j-flex direction="column" gap="400" v-else>
         <j-text variant="heading">Sign up</j-text>
             <div class="welcome-view--center">
       <profile-avatar
@@ -73,14 +71,10 @@
           type="password"
           label="Password"
           :value="password"
+          @keydown.enter="logIn"
           @input="(e) => (password = e.target.value)"
         ></j-input>
-        <j-button
-          size="lg"
-          full="true"
-          variant="primary"
-          @click="submitUserInfo"
-        >
+        <j-button size="lg" full="true" variant="primary" @click="createUser">
           Create
         </j-button>
       </j-flex>
@@ -120,57 +114,29 @@ import ProfileAvatar from "@/components/ui/avatar/ProfileAvatar.vue";
 import { Cropper } from "vue-advanced-cropper";
 import "vue-advanced-cropper/dist/style.css";
 import { blobToDataURL, dataURItoBlob, resizeImage } from "@/core/methods/createProfile";
+import { useStore } from "vuex";
 
 export default defineComponent({
   name: "Welcome",
   setup() {
+    const store = useStore();
     const modalOpen = ref(false);
     const name = ref("");
     const familyName = ref("");
     const username = ref("");
     const email = ref("");
     const password = ref("");
-    const perspectiveName = ref(databasePerspectiveName);
-    const { mutate: initAgent, error: initAgentError } = useMutation<{
-      initializeAgent: ad4m.AgentService;
-    }>(INITIALIZE_AGENT, () => ({
-      variables: {},
-    }));
-    const { mutate: unlockDidStore, error: unlockDidStoreError } = useMutation<{
-      unlockAgent: ad4m.AgentService;
-      passphrase: string;
-    }>(UNLOCK_AGENT, () => ({
-      variables: { passphrase: password.value },
-    }));
-    const { mutate: lockAgent, error: lockAgentError } = useMutation<{
-      lockAgent: ad4m.AgentService;
-      passphrase: string;
-    }>(LOCK_AGENT, () => ({
-      variables: { passphrase: password.value },
-    }));
-    const { mutate: addPerspective, error: addPerspectiveError } = useMutation<{
-      addPerspective: ad4m.Perspective;
-    }>(ADD_PERSPECTIVE, () => ({
-      variables: {
-        name: perspectiveName.value,
-      },
-    }));
+    const logInError = ref(false);
 
     return {
+      hasUser: store.state.agentInit,
       modalOpen,
       name,
       username,
       email,
       password,
       familyName,
-      initAgent,
-      initAgentError,
-      unlockDidStore,
-      unlockDidStoreError,
-      lockAgent,
-      lockAgentError,
-      addPerspective,
-      addPerspectiveError,
+      logInError,
     };
   },
   computed: {
@@ -181,122 +147,40 @@ export default defineComponent({
   },
   data(): {
     profileImage: string | ArrayBuffer | null | undefined;
-    thumbnail: string | null;
     tempProfileImage: any;
   } {
     return {
       profileImage: null,
-      thumbnail: null,
       tempProfileImage: null,
     };
   },
-  beforeCreate() {
-    const { onResult, onError } =
-      useQuery<{
-        agent: ad4m.AgentService;
-      }>(AGENT_SERVICE_STATUS);
-    onResult((val) => {
-      const isInit = val.data.agent.isInitialized!;
-      this.$store.commit({type: "updateAgentInitState", value: isInit});
-      this.$store.commit({ type: "updateAgentLockState", value: false });
-      if (isInit == true) {
-        //Get database perspective from store
-        let databasePerspective = this.$store.getters.getDatabasePerspective;
-        if (databasePerspective == "") {
-          console.warn(
-            "Does not have databasePerspective in store but has already been init'd! Add logic for getting databasePerspective as found with name",
-            databasePerspectiveName
-          );
-          //TODO: add the retrieval/state saving logic here
-        }
-      }
-    });
-    onError((error) => {
-      console.log("WelcomeViewRight: AGENT_SERVICE_STATUS, error:", error);
-    });
-  },
   methods: {
-    submitUserInfo() {
-      console.log("WelcomeViewRight: submitUserInfo() called");
-      console.log("Got name", this.name);
-      let res = this.initAgent();
-      res.then((val) => {
-        console.log(val);
-        console.log(val.data?.initializeAgent.isInitialized);
-        if (this.initAgentError == null) {
-          this.lockAgent().then((lockAgentRes) => {
-            console.log("Post lock result", lockAgentRes);
-            if (this.lockAgentError == null) {
-              //NOTE: this code is potentially not needed
-              this.addPerspective().then(async (addPerspectiveResult) => {
-                console.log(
-                  "Created perspective for local database with result",
-                  addPerspectiveResult
-                );
-                if (this.addPerspectiveError == null) {
-                  this.$store.commit(
-                    "addDatabasePerspective",
-                    addPerspectiveResult.data?.addPerspective.uuid
-                  );
+    async createUser() {
 
-                  const resizedImage = this.profileImage
-                    ? await resizeImage(
-                        dataURItoBlob(this.profileImage as string),
-                        400
-                      )
-                    : null;
+      const resizedImage = this.profileImage ? await resizeImage(dataURItoBlob(this.profileImage as string), 400) : null;
+      const thumbnail = this.profileImage ? await blobToDataURL(resizedImage!) : null;
 
-                  const thumbnail = this.profileImage
-                    ? await blobToDataURL(resizedImage!)
-                    : null;
-
-                  this.$store.commit("createProfile", {
-                    address:
-                      addPerspectiveResult.data?.addPerspective.uuid || "",
-                    username: this.username,
-                    email: this.email,
-                    givenName: this.name,
-                    familyName: this.familyName,
-                    profilePicture: this.profileImage as string,
-                    thumbnailPicture: thumbnail,
-                  });
-
-                  this.$router.push("/");
-                } else {
-                  console.log("Got error", this.addPerspectiveError);
-                }
-              });
-              //TODO: then send the profile information to a public Junto DNA
-              this.$store.commit({type: "updateAgentInitState", value: true});
-              this.$store.commit("updateAgentLockState", true);
-            } else {
-              console.log("Got error", this.lockAgentError);
-            }
-          });
-        } else {
-          //TODO: this needs to go to an error handler function
-          console.log("Got error", this.initAgentError);
-        }
-      });
+      this.$store
+        .dispatch("createUser", {
+          givenName: this.name,
+          familyName: this.familyName,
+          email: this.email,
+          username: this.username,
+          password: this.password,
+          profilePicture: this.profileImage,
+          thumbnailPicture: thumbnail
+        })
+        .then(() => this.$router.push("/"));
     },
-    unlockDidStoreMethod() {
-      console.log("WelcomeViewRight: unlockDidStore() called");
-      let res = this.unlockDidStore();
-      res.then((val) => {
-        console.log("Unlock result", val);
-        if (
-          this.unlockDidStoreError == null &&
-          val.data?.unlockAgent.isInitialized &&
-          val.data.unlockAgent.isUnlocked
-        ) {
-          this.$store.commit({type: "updateAgentInitState", value: true});
-          this.$store.commit("updateAgentLockState", true);
-          this.$router.push("/");
-        } else {
-          //TODO: this needs to go to an error handler function
-          console.log("Got error", this.unlockDidStoreError);
-        }
-      });
+    logIn() {
+      this.$store
+        .dispatch("logIn", {
+          password: this.password,
+        })
+        .then(() => this.$router.push("/"))
+        .catch(() => {
+          this.logInError = true;
+        });
     },
     selectFile(e: any) {
       const files = e.target.files || e.dataTransfer.files;
@@ -316,7 +200,6 @@ export default defineComponent({
     selectImage() {
       const result = (this.$refs.cropper as any).getResult();
       this.profileImage = result.canvas.toDataURL();
-      console.log(this.profileImage);
       this.tempProfileImage = null;
     },
   },

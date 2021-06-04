@@ -1,9 +1,5 @@
 <template>
   <div class="left-nav__bottom-section">
-    <j-button size="xl" square circle variant="transparent">
-      <j-icon :name="themeIcon"></j-icon>
-    </j-button>
-
     <j-avatar
       id="myProfile"
       size="xl"
@@ -42,21 +38,45 @@
       :open="isEditProfileOpen"
       @toggle="(e) => (isEditProfileOpen = e.target.open)"
     >
-      <j-text variant="heading">Edit profile</j-text>
-      <j-input label="Username"></j-input>
-      <j-button variant="primary" full>Save</j-button>
+      <j-flex direction="column" gap="700">
+        <j-text variant="heading">Edit profile</j-text>
+        <j-input
+          size="lg"
+          label="Username"
+          :value="userProfile?.username"
+          @input="(e) => setUserProfile({ username: e.target.value })"
+        ></j-input>
+        <j-button size="lg" variant="primary" full>Save</j-button>
+      </j-flex>
     </j-modal>
 
     <j-modal
       :open="isSettingsOpen"
       @toggle="(e) => (isSettingsOpen = e.target.open)"
     >
-      <j-text variant="heading">Settings</j-text>
-      <j-select value="Dark" label="Theme">
-        <j-menu-item>Light</j-menu-item>
-        <j-menu-item>Dark</j-menu-item>
-      </j-select>
-      <j-button variant="primary" full>Save</j-button>
+      <j-flex direction="column" gap="700">
+        <j-text variant="heading">Settings</j-text>
+        <j-select
+          :value="theme"
+          @change="(e) => (theme = e.target.value)"
+          label="Theme"
+        >
+          <j-menu-item value="light">Light</j-menu-item>
+          <j-menu-item value="dark">Dark</j-menu-item>
+        </j-select>
+        <div>
+          <j-text variant="label">Primary color</j-text>
+          <input
+            style="display: block; width: 100%"
+            type="range"
+            :value="hue"
+            min="0"
+            max="359"
+            @input="(e) => (hue = e.target.value)"
+          />
+        </div>
+        <j-button full size="lg" variant="primary">Save</j-button>
+      </j-flex>
     </j-modal>
   </div>
 </template>
@@ -65,9 +85,26 @@
 export default {
   data() {
     return {
+      hue: getComputedStyle(document.documentElement).getPropertyValue(
+        "--j-color-primary-hue"
+      ),
+      theme: "light",
       isSettingsOpen: false,
       isEditProfileOpen: false,
     };
+  },
+  watch: {
+    hue: function (val) {
+      document.documentElement.style.setProperty("--j-color-primary-hue", val);
+    },
+    theme: function (val) {
+      document.documentElement.setAttribute("theme", val);
+    },
+  },
+  methods: {
+    setUserProfile(profile) {
+      this.$store.commit("setUserProfile", profile);
+    },
   },
   computed: {
     profile() {
@@ -75,15 +112,8 @@ export default {
 
       return profile;
     },
-    currentTheme() {
-      return this.$store.getters.getCurrentTheme;
-    },
-    themeIcon() {
-      if (this.$store.state.currentTheme === "light") {
-        return "sun";
-      } else {
-        return "moon";
-      }
+    userProfile() {
+      return this.$store.state.userProfile;
     },
   },
 };

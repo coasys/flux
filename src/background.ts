@@ -2,7 +2,7 @@
 
 import { app, protocol, BrowserWindow, ipcMain } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
-//import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
+import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 import ad4m from "@perspect3vism/ad4m-executor";
 import path from "path";
 import os from "os";
@@ -19,14 +19,17 @@ console.log("Trying to run!");
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", async () => {
-  // if (isDevelopment && !process.env.IS_TEST) {
-  //   // Install Vue Devtools
-  //   try {
-  //     await installExtension(VUEJS_DEVTOOLS);
-  //   } catch (e) {
-  //     console.error("Vue Devtools failed to install:", e.toString());
-  //   }
-  // }
+  if (isDevelopment && !process.env.IS_TEST) {
+    // Install Vue Devtools
+    try {
+      await installExtension({
+        id: 'ljjemllljcmogpfapbkkighbhhppjdbg',
+        electron: '>=1.2.1'
+      })
+    } catch (e) {
+      console.error("Vue Devtools failed to install:", e.toString());
+    }
+  }
 
   let execPath;
   if (app.isPackaged) {

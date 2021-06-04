@@ -1,21 +1,26 @@
 <template>
   <router-view />
-  <single-action-dialog v-if="state.visible" />
+  <j-modal
+    :open="showErrorModal"
+    @toggle="(e) => (showErrorModal = e.target.open)"
+  >
+    {{ errorMessage }}
+  </j-modal>
 </template>
 
 <script lang="ts">
+import { useQuery } from "@vue/apollo-composable";
+import { useRouter } from "vue-router";
 import { useSubscription } from "@vue/apollo-composable";
-import { defineComponent, watch } from "vue";
+import { defineComponent, watch, ref } from "vue";
 import { AD4M_SIGNAL } from "@/core/graphql_queries";
 import { useStore } from "vuex";
-import { ExpressionUIIcons } from "@/store";
 import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { getExpression } from "@/core/queries/getExpression";
-import { getLanguage } from "@/core/queries/getLanguage";
-import useSingleDialog from '@/components/dialogs/useSingleDialog';
-import SingleActionDialog from '@/components/dialogs/SingleActionDialog.vue';
+import ad4m from "@perspect3vism/ad4m-executor";
+import { AGENT_SERVICE_STATUS } from "@/core/graphql_queries";
 
 declare global {
   interface Window {
@@ -25,10 +30,12 @@ declare global {
 
 export default defineComponent({
   name: "App",
-  setup(props, {emit}) {
+  setup() {
+    const router = useRouter();
     const store = useStore();
-    const {state, show} = useSingleDialog();
-    
+    const errorMessage = ref("");
+    const showErrorModal = ref(false);
+
     var language = "";
     var expression = {};
 
@@ -37,7 +44,8 @@ export default defineComponent({
         // can use error.operation.operationName to single out a query type.
         logErrorMessages(error);
 
-        show(JSON.stringify(error));
+        errorMessage.value = JSON.stringify(error);
+        showErrorModal.value = true;
       }
     });
 
@@ -48,25 +56,14 @@ export default defineComponent({
     store.watch(
       (state) => state.agentUnlocked,
       async (newValue) => {
-        if (newValue.value == true) {
-          //TODO: this is probably not needed here and should work fine on join/create of community
-          let expressionLangs =
-            store.getters.getAllExpressionLanguagesNotLoaded;
-          for (const [, lang] of expressionLangs.entries()) {
-            let language = await getLanguage(lang);
-            console.log("Got language", language);
-            if (language != null) {
-              let uiData: ExpressionUIIcons = {
-                languageAddress: language!.address!,
-                createIcon: language!.constructorIcon!.code!,
-                viewIcon: language!.iconFor!.code!,
-              };
-              store.commit("addExpressionUI", uiData);
-            }
-            await sleep(50);
-          }
+        console.log("agent unlocked changed to", newValue);
+        if (newValue) {
+          store.dispatch("loadExpressionLanguages");
+        } else {
+          router.push({ name: "signup" });
         }
-      }
+      },
+      { immediate: true }
     );
 
     //Watch for incoming signals to get expression data
@@ -126,8 +123,8 @@ export default defineComponent({
     }
 
     return {
-      state,
-      show
+      showErrorModal,
+      errorMessage,
     };
   },
   beforeCreate() {
@@ -136,13 +133,47 @@ export default defineComponent({
       console.log(`Received language path from main thread: ${data}`);
       this.$store.commit("setLanguagesPath", data);
     });
+    const { onResult, onError } =
+      useQuery<{
+        agent: ad4m.AgentService;
+      }>(AGENT_SERVICE_STATUS);
+    onResult((val) => {
+      const isInit = val.data.agent.isInitialized!;
+      const isUnlocked = val.data.agent.isUnlocked!;
+      console.log({ isInit, val, comment: "Hello" });
+      this.$store.commit("updateAgentInitState", isInit);
+      this.$store.commit("updateAgentLockState", isUnlocked);
+      if (isInit == true) {
+        //Get database perspective from store
+        let databasePerspective = this.$store.getters.getDatabasePerspective;
+        if (databasePerspective == "") {
+          console.warn(
+            "Does not have databasePerspective in store but has already been init'd! Add logic for getting databasePerspective as found with name"
+          );
+          //TODO: add the retrieval/state saving logic here
+        }
+      }
+    });
+    onError((error) => {
+      console.log("WelcomeViewRight: AGENT_SERVICE_STATUS, error:", error);
+    });
   },
-  components: {
-    SingleActionDialog,
-  }
 });
 </script>
 
-<style lang="scss">
-@import "src/assets/sass/main.scss";
+<style>
+body {
+  padding: 0;
+  margin: 0;
+}
+
+/* apply a natural box layout model to all elements, but allowing components to change */
+html {
+  box-sizing: border-box;
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
 </style>

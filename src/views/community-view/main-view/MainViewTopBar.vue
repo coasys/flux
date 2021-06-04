@@ -1,19 +1,16 @@
 <template>
   <div class="mainView__topBar">
-    <div class="mainView__topBar--title">
-      <svg class="mainView__topBar--title--icon">
-        <use :href="require('../../../assets/icons/icons.svg') + setIcon"></use>
-      </svg>
-      <p class="mainView__topBar--title--name">{{ channel.name }}</p>
-    </div>
-    <div class="mainView__topBar--action-items">
-      <svg
-        class="mainView__topBar--action-items--invite"
-        @click="getInviteCode"
-      >
-        <use href="@/assets/icons/icons.svg#add-user"></use>
-      </svg>
-    </div>
+    <j-flex style="width: 100%" a="center" j="between">
+      <j-flex gap="300" a="center">
+        <j-icon size="sm" name="hash" />
+        <j-text nomargin weight="500" size="500">{{ channel.name }}</j-text>
+      </j-flex>
+      <j-tooltip title="Copy invite link">
+        <j-button size="sm">
+          <j-icon size="sm" name="person-plus" @click="getInviteCode"> </j-icon>
+        </j-button>
+      </j-tooltip>
+    </j-flex>
   </div>
 </template>
 
@@ -69,34 +66,5 @@ export default defineComponent({
   position: sticky;
   top: 0;
   left: 0;
-
-  &--title {
-    display: flex;
-    align-items: center;
-
-    &--icon {
-      fill: var(--junto-primary);
-      height: 1.7rem;
-      width: 1.7rem;
-      margin-right: 0.5rem;
-    }
-
-    &--name {
-      font-size: 1.7rem;
-      font-weight: 700;
-      color: var(--junto-primary);
-    }
-  }
-
-  &--action-items {
-    &--invite {
-      height: 1.7rem;
-      width: 1.7rem;
-      fill: var(--junto-primary);
-      &:hover {
-        cursor: pointer;
-      }
-    }
-  }
 }
 </style>
