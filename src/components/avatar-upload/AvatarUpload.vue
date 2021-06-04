@@ -38,6 +38,7 @@
 </template>
 
 <script lang="ts">
+import "vue-advanced-cropper/dist/style.css";
 import { defineComponent } from "vue";
 import { Cropper } from "vue-advanced-cropper";
 
