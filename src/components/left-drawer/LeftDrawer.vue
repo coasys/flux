@@ -80,14 +80,13 @@
           size="lg"
           label="Name"
           :value="communityName"
-          @keydown.enter="saveCommunity"
           @input="(e) => (communityName = e.target.value)"
         ></j-input>
         <j-input
           size="lg"
           label="Description"
           :value="communityDescription"
-          @keydown.enter="saveCommunity"
+          @keydown.enter="updateCommunity"
           @input="(e) => (communityDescription = e.target.value)"
         ></j-input>
         <j-button
@@ -118,10 +117,6 @@
           @keydown.enter="createChannel"
           @input="(e) => (channelName = e.target.value)"
         ></j-input>
-        <j-tabs value="Public">
-          <j-tab-item>Public</j-tab-item>
-          <j-tab-item>Private</j-tab-item>
-        </j-tabs>
         <j-button
           size="lg"
           :loading="isCreatingChannel"
@@ -173,9 +168,7 @@ export default defineComponent({
       document.execCommand("copy");
       document.body.removeChild(el);
 
-      this.$store.commit("setToast", {
-        open: true,
-        variant: "success",
+      this.$store.commit("showSuccessToast", {
         message: "Your custom invite code is copied to your clipboard!",
       });
     },
@@ -190,6 +183,8 @@ export default defineComponent({
         })
         .then(() => {
           this.showUpdateCommunity = false;
+        })
+        .finally(() => {
           this.isUpdatingCommunity = false;
         });
     },
@@ -205,6 +200,8 @@ export default defineComponent({
         .then(() => {
           this.showCreateChannel = false;
           this.channelName = "";
+        })
+        .finally(() => {
           this.isCreatingChannel = false;
         });
     },

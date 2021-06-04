@@ -18,26 +18,28 @@ export default async (
   { commit, getters }: Context,
   { communityId, name }: Payload
 ): Promise<void> => {
-  const community = getters.getCommunity(communityId);
-  const uid = uuidv4().toString();
-  const channel = await createChannel(
-    name,
-    "",
-    uid,
-    community.perspective,
-    community.linkLanguageAddress,
-    community.expressionLanguages,
-    MembraneType.Inherited,
-    community.typedExpressionLanguages
-  );
+  try {
+    const community = getters.getCommunity(communityId);
+    const uid = uuidv4().toString();
+    const channel = await createChannel(
+      name,
+      "",
+      uid,
+      community.perspective,
+      community.linkLanguageAddress,
+      community.expressionLanguages,
+      MembraneType.Inherited,
+      community.typedExpressionLanguages
+    );
 
-  commit("addChannel", {
-    communityId: community.perspective,
-    channel,
-  });
-
-  // Need error handling (try catch in the awaits over)
-  return new Promise((resolve, reject) => {
-    resolve();
-  });
+    commit("addChannel", {
+      communityId: community.perspective,
+      channel,
+    });
+  } catch (e) {
+    commit("showDangerToast", {
+      message: e.message,
+    });
+    throw new Error(e);
+  }
 };

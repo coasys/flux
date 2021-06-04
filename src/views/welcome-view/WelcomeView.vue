@@ -39,8 +39,8 @@
         <j-text variant="heading">Sign up</j-text>
         <div class="welcome-view--center">
           <avatar-upload
-            :value="profileImage"
-            @change="(url) => (profileImage = url)"
+            :value="profilePicture"
+            @change="(url) => (profilePicture = url)"
           >
           </avatar-upload>
         </div>
@@ -69,10 +69,17 @@
           type="password"
           label="Password"
           :value="password"
-          @keydown.enter="logIn"
+          @keydown.enter="createUser"
           @input="(e) => (password = e.target.value)"
         ></j-input>
-        <j-button size="lg" full="true" variant="primary" @click="createUser">
+        <j-button
+          :disabled="isCreatingUser"
+          :loading="isCreatingUser"
+          size="lg"
+          full="true"
+          variant="primary"
+          @click="createUser"
+        >
           Create
         </j-button>
       </j-flex>
@@ -82,18 +89,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import {
-  INITIALIZE_AGENT,
-  AGENT_SERVICE_STATUS,
-  UNLOCK_AGENT,
-  LOCK_AGENT,
-  ADD_PERSPECTIVE,
-} from "../../core/graphql_queries";
-import { useQuery, useMutation } from "@vue/apollo-composable";
-import ad4m from "@perspect3vism/ad4m-executor";
-import { databasePerspectiveName } from "../../core/juntoTypes";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
-import "vue-advanced-cropper/dist/style.css";
 import {
   blobToDataURL,
   dataURItoBlob,
@@ -106,6 +102,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const modalOpen = ref(false);
+    const isCreatingUser = ref(false);
     const name = ref("");
     const familyName = ref("");
     const username = ref("");
@@ -116,6 +113,7 @@ export default defineComponent({
     return {
       hasUser: store.state.agentInit,
       modalOpen,
+      isCreatingUser,
       name,
       username,
       email,
@@ -131,20 +129,22 @@ export default defineComponent({
     },
   },
   data(): {
-    profileImage: string | ArrayBuffer | null | undefined;
+    profilePicture: string | ArrayBuffer | null | undefined;
   } {
     return {
-      profileImage: null,
+      profilePicture: null,
     };
   },
   methods: {
     async createUser() {
-      const resizedImage = this.profileImage
-        ? await resizeImage(dataURItoBlob(this.profileImage as string), 400)
+      const resizedImage = this.profilePicture
+        ? await resizeImage(dataURItoBlob(this.profilePicture as string), 400)
         : null;
-      const thumbnail = this.profileImage
+      const thumbnail = this.profilePicture
         ? await blobToDataURL(resizedImage!)
         : null;
+
+      this.isCreatingUser = true;
 
       this.$store
         .dispatch("createUser", {
@@ -153,10 +153,13 @@ export default defineComponent({
           email: this.email,
           username: this.username,
           password: this.password,
-          profilePicture: this.profileImage,
+          profilePicture: this.profilePicture,
           thumbnailPicture: thumbnail,
         })
-        .then(() => this.$router.push("/"));
+        .then(() => this.$router.push("/"))
+        .finally(() => {
+          this.isCreatingUser = false;
+        });
     },
     logIn() {
       this.$store

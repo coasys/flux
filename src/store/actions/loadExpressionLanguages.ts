@@ -13,18 +13,25 @@ export interface Payload {
 }
 
 export default async ({ commit, getters }: Context): Promise<void> => {
-  const expressionLangs = getters.getAllExpressionLanguagesNotLoaded;
-  console.log({ expressionLangs });
-  for (const [, lang] of expressionLangs.entries()) {
-    const language = await getLanguage(lang);
-    console.log("Got language", language);
-    if (language !== null) {
-      const uiData: ExpressionUIIcons = {
-        languageAddress: language!.address!,
-        createIcon: language!.constructorIcon!.code!,
-        viewIcon: language!.iconFor!.code!,
-      };
-      commit("addExpressionUI", uiData);
+  try {
+    const expressionLangs = getters.getAllExpressionLanguagesNotLoaded;
+    console.log({ expressionLangs });
+    for (const [, lang] of expressionLangs.entries()) {
+      const language = await getLanguage(lang);
+      console.log("Got language", language);
+      if (language !== null) {
+        const uiData: ExpressionUIIcons = {
+          languageAddress: language!.address!,
+          createIcon: language!.constructorIcon!.code!,
+          viewIcon: language!.iconFor!.code!,
+        };
+        commit("addExpressionUI", uiData);
+      }
     }
+  } catch (e) {
+    commit("showDangerToast", {
+      message: e.message,
+    });
+    throw new Error(e);
   }
 };

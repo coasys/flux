@@ -36,7 +36,6 @@ export default async (
     thumbnailPicture,
   }: Payload
 ): Promise<void> => {
-  let error = false;
   const perspectiveName = databasePerspectiveName;
 
   try {
@@ -81,12 +80,9 @@ export default async (
     commit("updateAgentInitState", true);
     commit("updateAgentLockState", true);
   } catch (e) {
-    error = true;
-    console.warn(e);
+    commit("showDangerToast", {
+      message: e.message,
+    });
+    throw new Error(e);
   }
-
-  return new Promise((resolve, reject) => {
-    if (error) reject();
-    else resolve();
-  });
 };
