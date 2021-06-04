@@ -17,56 +17,65 @@ export interface Payload {
 }
 
 export default async (store: any, { joiningLink }: Payload): Promise<void> => {
-  const installedPerspective = await installSharedPerspective(joiningLink);
-  console.log(
-    new Date(),
-    "Installed perspective raw data",
-    installedPerspective
-  );
-
-  //Get and cache the expression UI for each expression language
-  //And used returned expression language names to populate typedExpressionLanguages field
-  const typedExpressionLanguages = await getTypedExpressionLanguages(
-    installedPerspective.sharedPerspective!,
-    true,
-    store
-  );
-
-  const profileExpLang = typedExpressionLanguages.find(
-    (val) => val.expressionType == ExpressionTypes.ProfileExpression
-  );
-  if (profileExpLang != undefined) {
-    const profile: Profile = store.getters.getProfile;
-
-    const createProfileExpression = await createProfile(
-      profileExpLang.languageAddress!,
-      profile.username,
-      profile.email,
-      profile.givenName,
-      profile.familyName,
-      profile.profilePicture,
-      profile.thumbnailPicture
+  try {
+    const installedPerspective = await installSharedPerspective(joiningLink);
+    console.log(
+      new Date(),
+      "Installed perspective raw data",
+      installedPerspective
     );
 
-    //Create link between perspective and group expression
-    const addProfileLink = await createLink(installedPerspective.uuid!, {
-      source: `${installedPerspective.sharedPerspective!.linkLanguages![0]!
-        .address!}://self`,
-      target: createProfileExpression,
-      predicate: "sioc://has_member",
-    });
-    console.log("Created group expression link", addProfileLink);
-  }
+    //Get and cache the expression UI for each expression language
+    //And used returned expression language names to populate typedExpressionLanguages field
+    const typedExpressionLanguages = await getTypedExpressionLanguages(
+      installedPerspective.sharedPerspective!,
+      true,
+      store
+    );
 
-  store.commit("addCommunity", {
-    name: installedPerspective.name,
-    linkLanguageAddress:
-      installedPerspective.sharedPerspective!.linkLanguages![0]!.address!,
-    channels: [],
-    perspective: installedPerspective.uuid!,
-    expressionLanguages:
-      installedPerspective.sharedPerspective!.requiredExpressionLanguages,
-    typedExpressionLanguages: typedExpressionLanguages,
-    sharedPerspectiveUrl: joiningLink, //TODO: this will have to be string split once we add proof onto the URL
-  });
+    const profileExpLang = typedExpressionLanguages.find(
+      (val) => val.expressionType == ExpressionTypes.ProfileExpression
+    );
+    if (profileExpLang != undefined) {
+      const profile: Profile = store.getters.getProfile;
+
+      const createProfileExpression = await createProfile(
+        profileExpLang.languageAddress!,
+        profile.username,
+        profile.email,
+        profile.givenName,
+        profile.familyName,
+        profile.profilePicture,
+        profile.thumbnailPicture
+      );
+
+      //Create link between perspective and group expression
+      const addProfileLink = await createLink(installedPerspective.uuid!, {
+        source: `${installedPerspective.sharedPerspective!.linkLanguages![0]!
+          .address!}://self`,
+        target: createProfileExpression,
+        predicate: "sioc://has_member",
+      });
+      console.log("Created group expression link", addProfileLink);
+    }
+
+    store.commit("addCommunity", {
+      name: installedPerspective.name,
+      linkLanguageAddress:
+        installedPerspective.sharedPerspective!.linkLanguages![0]!.address!,
+      channels: [],
+      perspective: installedPerspective.uuid!,
+      expressionLanguages:
+        installedPerspective.sharedPerspective!.requiredExpressionLanguages,
+      typedExpressionLanguages: typedExpressionLanguages,
+      sharedPerspectiveUrl: joiningLink, //TODO: this will have to be string split once we add proof onto the URL
+    });
+  } catch (e) {
+    store.commit("setToast", {
+      variant: "danger",
+      open: true,
+      message: e.message,
+    });
+    throw new Error(e);
+  }
 };

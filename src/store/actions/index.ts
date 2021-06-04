@@ -6,6 +6,7 @@ import logIn from "./logIn";
 import getPerspectiveChannelsAndMetadata from "./getPerspectiveChannelsAndMetadata";
 import loadExpressionLanguages from "./loadExpressionLanguages";
 import updateCommunity from "./updateCommunity";
+import updateUser from "./updateUser";
 
 export default {
   createChannel,
@@ -16,4 +17,5 @@ export default {
   getPerspectiveChannelsAndMetadata,
   loadExpressionLanguages,
   updateCommunity,
+  updateUser,
 };

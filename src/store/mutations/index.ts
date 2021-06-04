@@ -9,8 +9,8 @@ import {
   Profile,
   ToastState,
   ExpressionUIIcons,
+  ThemeState,
 } from "@/store";
-import { stat } from "original-fs";
 
 interface UpdatePayload {
   communityId: string;
@@ -88,6 +88,19 @@ export default {
 
   setToast(state: State, payload: ToastState): void {
     state.ui.toast = { ...state.ui.toast, ...payload };
+  },
+
+  setTheme(state: State, payload: ThemeState): void {
+    if (payload.hue) {
+      document.documentElement.style.setProperty(
+        "--j-color-primary-hue",
+        payload.hue.toString()
+      );
+    }
+    if (payload.name) {
+      document.documentElement.setAttribute("theme", payload.name);
+    }
+    state.ui.theme = { ...state.ui.theme, ...payload };
   },
 
   updateCommunityMetadata(

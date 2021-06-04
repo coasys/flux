@@ -34,160 +34,165 @@ export default async (
   { commit, getters }: Context,
   { perspectiveName, description }: Payload
 ): Promise<void> => {
-  //TODO: @eric: show loading animation here
-  const createSourcePerspective = await addPerspective(perspectiveName);
-  console.log("Created perspective", createSourcePerspective);
-  const uid = uuidv4().toString();
+  try {
+    //TODO: @eric: show loading animation here
+    const createSourcePerspective = await addPerspective(perspectiveName);
+    console.log("Created perspective", createSourcePerspective);
+    const uid = uuidv4().toString();
 
-  const builtInLangPath = getters.getLanguagePath;
+    const builtInLangPath = getters.getLanguagePath;
 
-  //Create shortform expression language
-  const shortFormExpressionLang = await createUniqueExpressionLanguage(
-    path.join(builtInLangPath, "shortform/build"),
-    "shortform",
-    uid
-  );
-  console.log("Response from create exp lang", shortFormExpressionLang);
-  //Create group expression language
-  const groupExpressionLang = await createUniqueExpressionLanguage(
-    path.join(builtInLangPath, "group-expression/build"),
-    "group-expression",
-    uid
-  );
-  const profileExpressionLang = await createUniqueExpressionLanguage(
-    path.join(builtInLangPath, "profiles/build"),
-    "agent-profiles",
-    uid
-  );
-  console.log("Response from create exp lang", groupExpressionLang);
-  const expressionLangs = [
-    shortFormExpressionLang.address!,
-    groupExpressionLang.address!,
-    profileExpressionLang.address!,
-  ];
-  const typedExpLangs = [
-    {
-      languageAddress: shortFormExpressionLang.address!,
-      expressionType: ExpressionTypes.ShortForm,
-    } as JuntoExpressionReference,
-    {
-      languageAddress: groupExpressionLang.address!,
-      expressionType: ExpressionTypes.GroupExpression,
-    } as JuntoExpressionReference,
-    {
-      languageAddress: profileExpressionLang.address!,
-      expressionType: ExpressionTypes.ProfileExpression,
-    } as JuntoExpressionReference,
-  ];
+    //Create shortform expression language
+    const shortFormExpressionLang = await createUniqueExpressionLanguage(
+      path.join(builtInLangPath, "shortform/build"),
+      "shortform",
+      uid
+    );
+    console.log("Response from create exp lang", shortFormExpressionLang);
+    //Create group expression language
+    const groupExpressionLang = await createUniqueExpressionLanguage(
+      path.join(builtInLangPath, "group-expression/build"),
+      "group-expression",
+      uid
+    );
+    const profileExpressionLang = await createUniqueExpressionLanguage(
+      path.join(builtInLangPath, "profiles/build"),
+      "agent-profiles",
+      uid
+    );
+    console.log("Response from create exp lang", groupExpressionLang);
+    const expressionLangs = [
+      shortFormExpressionLang.address!,
+      groupExpressionLang.address!,
+      profileExpressionLang.address!,
+    ];
+    const typedExpLangs = [
+      {
+        languageAddress: shortFormExpressionLang.address!,
+        expressionType: ExpressionTypes.ShortForm,
+      } as JuntoExpressionReference,
+      {
+        languageAddress: groupExpressionLang.address!,
+        expressionType: ExpressionTypes.GroupExpression,
+      } as JuntoExpressionReference,
+      {
+        languageAddress: profileExpressionLang.address!,
+        expressionType: ExpressionTypes.ProfileExpression,
+      } as JuntoExpressionReference,
+    ];
 
-  //Publish perspective
-  const publish = await publishSharedPerspective({
-    uuid: createSourcePerspective.uuid!,
-    name: perspectiveName,
-    description: description,
-    type: "holochain",
-    uid: uid,
-    requiredExpressionLanguages: expressionLangs,
-    allowedExpressionLanguages: expressionLangs,
-  });
-  console.log("Published perspective with response", publish);
-
-  //await sleep(10000);
-
-  //Create link denoting type of community
-  const addLink = await createLink(createSourcePerspective.uuid!, {
-    source: `${publish.linkLanguages![0]!.address!}://self`,
-    target: "sioc://community",
-    predicate: "rdf://type",
-  });
-  console.log("Added typelink with response", addLink);
-  //TODO: we are sleeping here to ensure that all DNA's are installed before trying to do stuff
-  //ideally installing DNA's in holochain would be a sync operation to avoid this
-
-  //Create the group expression
-  const createExp = await createExpression(
-    groupExpressionLang.address!,
-    JSON.stringify({
+    //Publish perspective
+    const publish = await publishSharedPerspective({
+      uuid: createSourcePerspective.uuid!,
       name: perspectiveName,
       description: description,
-    })
-  );
-  console.log("Created group expression with response", createExp);
+      type: "holochain",
+      uid: uid,
+      requiredExpressionLanguages: expressionLangs,
+      allowedExpressionLanguages: expressionLangs,
+    });
+    console.log("Published perspective with response", publish);
 
-  //Create link between perspective and group expression
-  const addGroupExpLink = await createLink(createSourcePerspective.uuid!, {
-    source: `${publish.linkLanguages![0]!.address!}://self`,
-    target: createExp,
-    predicate: "rdf://class",
-  });
-  console.log("Created group expression link", addGroupExpLink);
+    //await sleep(10000);
 
-  const profile: Profile = getters.getProfile;
+    //Create link denoting type of community
+    const addLink = await createLink(createSourcePerspective.uuid!, {
+      source: `${publish.linkLanguages![0]!.address!}://self`,
+      target: "sioc://community",
+      predicate: "rdf://type",
+    });
+    console.log("Added typelink with response", addLink);
+    //TODO: we are sleeping here to ensure that all DNA's are installed before trying to do stuff
+    //ideally installing DNA's in holochain would be a sync operation to avoid this
 
-  const createProfileExpression = await createProfile(
-    profileExpressionLang.address!,
-    profile.username,
-    profile.email,
-    profile.givenName,
-    profile.familyName,
-    profile.profilePicture,
-    profile.thumbnailPicture
-  );
+    //Create the group expression
+    const createExp = await createExpression(
+      groupExpressionLang.address!,
+      JSON.stringify({
+        name: perspectiveName,
+        description: description,
+      })
+    );
+    console.log("Created group expression with response", createExp);
 
-  //Create link between perspective and group expression
-  const addProfileLink = await createLink(createSourcePerspective.uuid!, {
-    source: `${publish.linkLanguages![0]!.address!}://self`,
-    target: createProfileExpression,
-    predicate: "sioc://has_member",
-  });
-  console.log("Created group expression link", addProfileLink);
+    //Create link between perspective and group expression
+    const addGroupExpLink = await createLink(createSourcePerspective.uuid!, {
+      source: `${publish.linkLanguages![0]!.address!}://self`,
+      target: createExp,
+      predicate: "rdf://class",
+    });
+    console.log("Created group expression link", addGroupExpLink);
 
-  //Next steps: create another perspective + share with social-context-channel link language and add above expression DNA's onto it
-  //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel
-  const channel = await createChannel(
-    "Default Message Channel",
-    description,
-    uid,
-    createSourcePerspective.uuid!,
-    publish.linkLanguages![0]!.address!,
-    expressionLangs,
-    MembraneType.Inherited,
-    typedExpLangs
-  );
+    const profile: Profile = getters.getProfile;
 
-  //Get the created community perspective so we can get the SharedPerspectiveURL
-  const communityPerspective = await getPerspective(
-    createSourcePerspective.uuid!
-  );
+    const createProfileExpression = await createProfile(
+      profileExpressionLang.address!,
+      profile.username,
+      profile.email,
+      profile.givenName,
+      profile.familyName,
+      profile.profilePicture,
+      profile.thumbnailPicture
+    );
 
-  //Add the perspective to community store
-  commit("addCommunity", {
-    name: perspectiveName,
-    description: description,
-    linkLanguageAddress: publish.linkLanguages![0]!.address!,
-    channels: [channel],
-    perspective: createSourcePerspective.uuid!,
-    expressionLanguages: expressionLangs,
-    typedExpressionLanguages: typedExpLangs,
-    groupExpressionRef: createExp,
-    sharedPerspectiveUrl: communityPerspective.sharedURL!,
-  });
+    //Create link between perspective and group expression
+    const addProfileLink = await createLink(createSourcePerspective.uuid!, {
+      source: `${publish.linkLanguages![0]!.address!}://self`,
+      target: createProfileExpression,
+      predicate: "sioc://has_member",
+    });
+    console.log("Created group expression link", addProfileLink);
 
-  //Get and cache the expression UI for each expression language
-  for (const [, lang] of expressionLangs.entries()) {
-    console.log("CreateCommunity.vue: Fetching UI lang:", lang);
-    const languageRes = await getLanguage(lang);
-    const uiData: ExpressionUIIcons = {
-      languageAddress: lang,
-      createIcon: languageRes.constructorIcon!.code!,
-      viewIcon: languageRes.iconFor!.code!,
-    };
-    commit("addExpressionUI", uiData);
-    await sleep(40);
+    //Next steps: create another perspective + share with social-context-channel link language and add above expression DNA's onto it
+    //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel
+    const channel = await createChannel(
+      "Default Message Channel",
+      description,
+      uid,
+      createSourcePerspective.uuid!,
+      publish.linkLanguages![0]!.address!,
+      expressionLangs,
+      MembraneType.Inherited,
+      typedExpLangs
+    );
+
+    //Get the created community perspective so we can get the SharedPerspectiveURL
+    const communityPerspective = await getPerspective(
+      createSourcePerspective.uuid!
+    );
+
+    //Add the perspective to community store
+    commit("addCommunity", {
+      name: perspectiveName,
+      description: description,
+      linkLanguageAddress: publish.linkLanguages![0]!.address!,
+      channels: [channel],
+      perspective: createSourcePerspective.uuid!,
+      expressionLanguages: expressionLangs,
+      typedExpressionLanguages: typedExpLangs,
+      groupExpressionRef: createExp,
+      sharedPerspectiveUrl: communityPerspective.sharedURL!,
+    });
+
+    //Get and cache the expression UI for each expression language
+    for (const [, lang] of expressionLangs.entries()) {
+      console.log("CreateCommunity.vue: Fetching UI lang:", lang);
+      const languageRes = await getLanguage(lang);
+      const uiData: ExpressionUIIcons = {
+        languageAddress: lang,
+        createIcon: languageRes.constructorIcon!.code!,
+        viewIcon: languageRes.iconFor!.code!,
+      };
+      commit("addExpressionUI", uiData);
+      await sleep(40);
+    }
+  } catch (e) {
+    commit("setToast", {
+      variant: "danger",
+      open: true,
+      message:
+        "Ops! Could not create community. Try again, and let us know if it happends again.",
+    });
+    throw new Error(e);
   }
-
-  // Need error handling (try catch in the awaits over)
-  return new Promise((resolve, reject) => {
-    resolve();
-  });
 };

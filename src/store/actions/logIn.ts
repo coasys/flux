@@ -14,28 +14,25 @@ export interface Payload {
 export default async (
   { commit }: Context,
   { password }: Payload
-): Promise<void> => {
-  let error = false;
-  let lockRes: any = null;
-
+): Promise<any> => {
   try {
-    lockRes = await apolloClient.mutate<{
+    const lockRes = await apolloClient.mutate<{
       unlockAgent: ad4m.AgentService;
       passphrase: string;
     }>({
       mutation: UNLOCK_AGENT,
       variables: { passphrase: password },
     });
-    console.log(lockRes);
+
     commit("updateAgentInitState", true);
     commit("updateAgentLockState", true);
+    return lockRes;
   } catch (e) {
-    error = true;
-    console.log(e);
+    commit("setToast", {
+      variant: "danger",
+      open: true,
+      message: e.message,
+    });
+    throw new Error(e);
   }
-
-  return new Promise((resolve, reject) => {
-    if (error || lockRes.data.unlockAgent.error) reject();
-    else resolve();
-  });
 };

@@ -76,8 +76,14 @@ export interface ToastState {
   open: boolean;
 }
 
+export interface ThemeState {
+  name: "light" | "dark";
+  hue: number;
+}
+
 export interface UIState {
   toast: ToastState;
+  theme: ThemeState;
 }
 
 export interface State {
@@ -126,6 +132,10 @@ const vuexLocal = new VuexPersistence<State>({
 export default createStore({
   state: {
     ui: {
+      theme: {
+        name: "light",
+        hue: 0,
+      },
       toast: {
         variant: "",
         message: "",
