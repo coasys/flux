@@ -90,6 +90,14 @@ export default {
     state.ui.toast = { ...state.ui.toast, ...payload };
   },
 
+  showSuccessToast(state: State, payload: { message: string }): void {
+    state.ui.toast = { variant: "success", open: true, ...payload };
+  },
+
+  showDangerToast(state: State, payload: { message: string }): void {
+    state.ui.toast = { variant: "danger", open: true, ...payload };
+  },
+
   setTheme(state: State, payload: ThemeState): void {
     if (payload.hue) {
       document.documentElement.style.setProperty(
