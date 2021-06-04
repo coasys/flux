@@ -7,8 +7,10 @@ import {
   ExpressionAndRef,
   AddChannel,
   Profile,
+  ToastState,
   ExpressionUIIcons,
 } from "@/store";
+import { stat } from "original-fs";
 
 interface UpdatePayload {
   communityId: string;
@@ -82,6 +84,10 @@ export default {
 
   setUserProfile(state: State, payload: Profile): void {
     state.userProfile = { ...state.userProfile, ...payload };
+  },
+
+  setToast(state: State, payload: ToastState): void {
+    state.ui.toast = { ...state.ui.toast, ...payload };
   },
 
   updateCommunityMetadata(

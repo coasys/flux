@@ -1,5 +1,13 @@
 <template>
   <router-view />
+  <j-toast
+    :open="toast.open"
+    autohide="10"
+    @toggle="(e) => setToast({ open: e.target.open })"
+    :variant="toast.variant"
+  >
+    {{ toast.message }}
+  </j-toast>
   <j-modal
     :open="showErrorModal"
     @toggle="(e) => (showErrorModal = e.target.open)"
@@ -12,7 +20,7 @@
 import { useQuery } from "@vue/apollo-composable";
 import { useRouter } from "vue-router";
 import { useSubscription } from "@vue/apollo-composable";
-import { defineComponent, watch, ref } from "vue";
+import { defineComponent, watch, ref, computed } from "vue";
 import { AD4M_SIGNAL } from "@/core/graphql_queries";
 import { useStore } from "vuex";
 import { onError } from "@apollo/client/link/error";
@@ -21,6 +29,7 @@ import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { getExpression } from "@/core/queries/getExpression";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { AGENT_SERVICE_STATUS } from "@/core/graphql_queries";
+import { ToastState } from "@/store";
 
 declare global {
   interface Window {
@@ -123,6 +132,8 @@ export default defineComponent({
     }
 
     return {
+      toast: computed(() => store.state.ui.toast),
+      setToast: (payload: ToastState) => store.commit("setToast", payload),
       showErrorModal,
       errorMessage,
     };
@@ -165,6 +176,7 @@ export default defineComponent({
 body {
   padding: 0;
   margin: 0;
+  color: var(--j-color-ui-500);
 }
 
 /* apply a natural box layout model to all elements, but allowing components to change */

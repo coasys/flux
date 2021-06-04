@@ -2,9 +2,12 @@
   <div class="left-drawer" v-if="community != null">
     <button class="left-drawer__header">
       <j-flex j="between" gap="300">
-        <j-text nomargin size="600">
-          {{ community.name }}
-        </j-text>
+        <j-flex gap="400" a="center">
+          <j-avatar src="https://i.pravatar.cc/300" />
+          <j-text weight="500" color="ui-800" nomargin size="500">
+            {{ community.name }}
+          </j-text>
+        </j-flex>
         <j-icon size="xs" name="chevron-down"></j-icon>
       </j-flex>
     </button>
@@ -15,33 +18,28 @@
       placement="bottom-start"
       selector=".left-drawer__header"
     >
-      <j-box pb="400" px="400">
-        <j-flex a="center" gap="400">
-          <j-avatar src="https://i.pravatar.cc/300" />
-          <div>
-            <j-text nomargin size="500">{{ community.name }}</j-text>
-            <j-text nomargin color="ui-400" size="400">
-              {{ community.description }}
-            </j-text>
-          </div>
-        </j-flex>
-      </j-box>
-      <j-divider />
-      <j-menu-item
-        :value="communityName"
-        @change="(e) => (communityName = e.target.value)"
-        @click="showUpdateCommunity = true"
-      >
-        Edit information
-      </j-menu-item>
-      <j-menu-item>Invite people</j-menu-item>
-      <j-divider />
-      <j-menu-item @click="showCreateChannel = true"
-        >Create a new channel</j-menu-item
-      >
+      <j-menu>
+        <j-menu-item
+          :value="communityName"
+          @change="(e) => (communityName = e.target.value)"
+          @click="showUpdateCommunity = true"
+        >
+          <j-icon size="xs" slot="start" name="pencil" />
+          Edit community
+        </j-menu-item>
+        <j-menu-item @click="getInviteCode">
+          <j-icon size="xs" slot="start" name="person-plus" />
+          Invite people
+        </j-menu-item>
+        <j-divider />
+        <j-menu-item @click="showCreateChannel = true">
+          <j-icon size="xs" slot="start" name="plus" />
+          Create a new channel
+        </j-menu-item>
+      </j-menu>
     </j-popover>
 
-    <div class="left-drawer__channels">
+    <j-box pt="500">
       <j-menu-group-item open title="Channels">
         <j-button
           @click.prevent="showCreateChannel = true"
@@ -70,7 +68,7 @@
           </j-menu-item>
         </router-link>
       </j-menu-group-item>
-    </div>
+    </j-box>
 
     <j-modal
       :open="showUpdateCommunity"
@@ -165,6 +163,22 @@ export default defineComponent({
     };
   },
   methods: {
+    getInviteCode() {
+      // Get the invite code to join community and copy to clipboard
+      let currentCommunity = this.community;
+      const el = document.createElement("textarea");
+      el.value = `Hey! Here is an invite code to join my private community on Junto: ${currentCommunity.sharedPerspectiveUrl}`;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+
+      this.$store.commit("setToast", {
+        open: true,
+        variant: "success",
+        message: "Your custom invite code is copied to your clipboard!",
+      });
+    },
     async updateCommunity() {
       const { communityId } = this.$route.params;
       this.isUpdatingCommunity = true;
@@ -200,12 +214,13 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .left-drawer {
-  width: 17vw;
-  min-width: 250px;
+  width: clamp(300px, 18vw, 400px);
   background-color: var(--j-color-white);
   border-right: 1px solid var(--j-color-ui-50);
 }
+
 .left-drawer__header {
+  color: inherit;
   width: 100%;
   display: block;
   border: 0;
@@ -217,21 +232,9 @@ export default defineComponent({
   padding: var(--j-space-400) var(--j-space-500);
   border-bottom: 1px solid var(--j-color-ui-50);
 }
+
 .left-drawer__header:hover {
   background: var(--j-color-ui-50);
-}
-.left-drawer__header-menu {
-  padding-top: var(--j-space-500);
-  padding-bottom: var(--j-space-300);
-  border: 1px solid var(--j-color-ui-50);
-  background: var(--j-color-white);
-  border-radius: var(--j-border-radius);
-  width: 19vw;
-  min-width: 280px;
-  z-index: 500;
-}
-.left-drawer__channels {
-  padding-top: var(--j-space-500);
 }
 
 j-divider {
