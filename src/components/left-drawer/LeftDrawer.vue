@@ -168,9 +168,7 @@ export default defineComponent({
       document.execCommand("copy");
       document.body.removeChild(el);
 
-      this.$store.commit("setToast", {
-        open: true,
-        variant: "success",
+      this.$store.commit("showSuccessToast", {
         message: "Your custom invite code is copied to your clipboard!",
       });
     },
