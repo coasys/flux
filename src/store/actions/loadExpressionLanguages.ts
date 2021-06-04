@@ -29,9 +29,7 @@ export default async ({ commit, getters }: Context): Promise<void> => {
       }
     }
   } catch (e) {
-    commit("setToast", {
-      variant: "danger",
-      open: true,
+    commit("showDangerToast", {
       message: e.message,
     });
     throw new Error(e);

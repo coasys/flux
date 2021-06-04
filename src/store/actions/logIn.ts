@@ -28,9 +28,7 @@ export default async (
     commit("updateAgentLockState", true);
     return lockRes;
   } catch (e) {
-    commit("setToast", {
-      variant: "danger",
-      open: true,
+    commit("showDangerToast", {
       message: e.message,
     });
     throw new Error(e);

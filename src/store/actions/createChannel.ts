@@ -37,11 +37,8 @@ export default async (
       channel,
     });
   } catch (e) {
-    commit("setToast", {
-      variant: "danger",
-      open: true,
-      message:
-        "Ops! Could not create channel. Try again, and let us know if it happends again.",
+    commit("showDangerToast", {
+      message: e.message,
     });
     throw new Error(e);
   }

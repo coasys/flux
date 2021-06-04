@@ -55,6 +55,9 @@ export default async function updateCommunity(
       throw Error("Expected to find group expression language for group");
     }
   } catch (e) {
+    commit("showDangerToast", {
+      message: e.message,
+    });
     throw new Error(e);
   }
 }

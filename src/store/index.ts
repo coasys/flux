@@ -71,7 +71,7 @@ export interface Profile {
 }
 
 export interface ToastState {
-  variant: "succes" | "" | "danger" | "error";
+  variant: "success" | "" | "danger" | "error";
   message: string;
   open: boolean;
 }

@@ -80,9 +80,7 @@ export default async (
     commit("updateAgentInitState", true);
     commit("updateAgentLockState", true);
   } catch (e) {
-    commit("setToast", {
-      variant: "danger",
-      open: true,
+    commit("showDangerToast", {
       message: e.message,
     });
     throw new Error(e);

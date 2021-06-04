@@ -71,9 +71,7 @@ export default async (store: any, { joiningLink }: Payload): Promise<void> => {
       sharedPerspectiveUrl: joiningLink, //TODO: this will have to be string split once we add proof onto the URL
     });
   } catch (e) {
-    store.commit("setToast", {
-      variant: "danger",
-      open: true,
+    store.commit("showDangerToast", {
       message: e.message,
     });
     throw new Error(e);

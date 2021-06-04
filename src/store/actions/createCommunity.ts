@@ -187,11 +187,8 @@ export default async (
       await sleep(40);
     }
   } catch (e) {
-    commit("setToast", {
-      variant: "danger",
-      open: true,
-      message:
-        "Ops! Could not create community. Try again, and let us know if it happends again.",
+    commit("showDangerToast", {
+      message: e.message,
     });
     throw new Error(e);
   }

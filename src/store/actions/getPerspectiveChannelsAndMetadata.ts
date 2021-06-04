@@ -101,11 +101,6 @@ export default async (
       }
     }
   } catch (e) {
-    commit("setToast", {
-      variant: "danger",
-      open: true,
-      message: e.message,
-    });
     throw new Error(e);
   }
 };
