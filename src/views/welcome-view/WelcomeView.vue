@@ -37,6 +37,13 @@
       </div>
       <j-flex direction="column" gap="400" v-else>
         <j-text variant="heading">Sign up</j-text>
+        <div class="welcome-view--center">
+          <avatar-upload
+            :value="profileImage"
+            @change="(url) => (profileImage = url)"
+          >
+          </avatar-upload>
+        </div>
         <j-input
           label="First Name"
           :value="name"
@@ -75,6 +82,23 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
+import {
+  INITIALIZE_AGENT,
+  AGENT_SERVICE_STATUS,
+  UNLOCK_AGENT,
+  LOCK_AGENT,
+  ADD_PERSPECTIVE,
+} from "../../core/graphql_queries";
+import { useQuery, useMutation } from "@vue/apollo-composable";
+import ad4m from "@perspect3vism/ad4m-executor";
+import { databasePerspectiveName } from "../../core/juntoTypes";
+import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
+import "vue-advanced-cropper/dist/style.css";
+import {
+  blobToDataURL,
+  dataURItoBlob,
+  resizeImage,
+} from "@/core/methods/createProfile";
 import { useStore } from "vuex";
 
 export default defineComponent({
@@ -100,9 +124,28 @@ export default defineComponent({
       logInError,
     };
   },
-
+  computed: {
+    isInit(): boolean {
+      const isInit = this.$store.getters.getAgentInitStatus;
+      return isInit.value;
+    },
+  },
+  data(): {
+    profileImage: string | ArrayBuffer | null | undefined;
+  } {
+    return {
+      profileImage: null,
+    };
+  },
   methods: {
-    createUser() {
+    async createUser() {
+      const resizedImage = this.profileImage
+        ? await resizeImage(dataURItoBlob(this.profileImage as string), 400)
+        : null;
+      const thumbnail = this.profileImage
+        ? await blobToDataURL(resizedImage!)
+        : null;
+
       this.$store
         .dispatch("createUser", {
           givenName: this.name,
@@ -110,6 +153,8 @@ export default defineComponent({
           email: this.email,
           username: this.username,
           password: this.password,
+          profilePicture: this.profileImage,
+          thumbnailPicture: thumbnail,
         })
         .then(() => this.$router.push("/"));
     },
@@ -124,10 +169,13 @@ export default defineComponent({
         });
     },
   },
+  components: {
+    AvatarUpload,
+  },
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .welcome-view {
   padding-left: var(--j-space-900);
   padding-right: var(--j-space-900);
@@ -138,6 +186,10 @@ export default defineComponent({
   display: grid;
   place-content: center;
   grid-template-columns: 1fr;
+
+  &--center {
+    align-self: center;
+  }
 }
 
 @media (min-width: 800px) {

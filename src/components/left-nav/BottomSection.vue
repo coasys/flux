@@ -3,7 +3,10 @@
     <j-avatar
       id="myProfile"
       size="xl"
-      :src="require('../../../src/assets/images/junto_app_icon.png')"
+      :src="
+        profile.profilePicture ||
+        require('@/assets/images/avatar-placeholder.png')
+      "
       initials="P"
     ></j-avatar>
 
@@ -20,8 +23,13 @@
             border-bottom: 1px solid var(--j-color-ui-100);
           "
         >
-          <j-avatar initials="S"></j-avatar>
-          <j-text nomargin>{{ userProfile?.username }} </j-text>
+          <j-avatar
+            :src="
+              profile.profilePicture ||
+              require('@/assets/images/avatar-placeholder.png')
+            "
+          ></j-avatar>
+          <j-text nomargin>{{ profile.username }}</j-text>
         </j-flex>
         <j-menu-item @click="isEditProfileOpen = true">
           Edit profile
@@ -107,10 +115,10 @@ export default {
     },
   },
   computed: {
-    profilePic() {
+    profile() {
       const profile = this.$store.getters.getProfile;
 
-      return profile.profilePicture;
+      return profile;
     },
     userProfile() {
       return this.$store.state.userProfile;

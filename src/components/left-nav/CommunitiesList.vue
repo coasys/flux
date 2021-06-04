@@ -13,7 +13,7 @@
         <j-avatar
           :selected="isActive"
           size="xl"
-          src="https://i.pravatar.cc/300"
+          :src="require('@/assets/images/junto_app_icon.png')"
           initials="false"
           @click="() => navigate()"
         ></j-avatar>
