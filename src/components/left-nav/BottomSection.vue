@@ -4,7 +4,7 @@
       id="myProfile"
       size="xl"
       :src="
-        profile.profilePicture ||
+        userProfile.profilePicture ||
         require('@/assets/images/avatar-placeholder.png')
       "
       initials="P"
@@ -25,11 +25,11 @@
         >
           <j-avatar
             :src="
-              profile.profilePicture ||
+              userProfile.profilePicture ||
               require('@/assets/images/avatar-placeholder.png')
             "
           ></j-avatar>
-          <j-text nomargin>{{ profile.username }}</j-text>
+          <j-text nomargin>{{ userProfile.username }}</j-text>
         </j-flex>
         <j-menu-item @click="isEditProfileOpen = true">
           Edit profile
@@ -51,10 +51,13 @@
         <j-input
           size="lg"
           label="Username"
+          @keydown.enter="updateUser"
           :value="userProfile?.username"
-          @input="(e) => setUserProfile({ username: e.target.value })"
+          @input="(e) => (username = e.target.value)"
         ></j-input>
-        <j-button size="lg" variant="primary" full>Save</j-button>
+        <j-button size="lg" variant="primary" @click="updateUser" full>
+          Save
+        </j-button>
       </j-flex>
     </j-modal>
 
@@ -65,8 +68,8 @@
       <j-flex direction="column" gap="700">
         <j-text variant="heading">Settings</j-text>
         <j-select
-          :value="theme"
-          @change="(e) => (theme = e.target.value)"
+          :value="themeName"
+          @change="(e) => (themeName = e.target.value)"
           label="Theme"
         >
           <j-menu-item value="light">Light</j-menu-item>
@@ -77,54 +80,107 @@
           <input
             style="display: block; width: 100%"
             type="range"
-            :value="hue"
+            :value="themeHue"
             min="0"
             max="359"
-            @input="(e) => (hue = e.target.value)"
+            @input="(e) => (themeHue = e.target.value)"
           />
         </div>
-        <j-button full size="lg" variant="primary">Save</j-button>
+        <div>
+          <j-button size="lg" @click="isSettingsOpen = false">Cancel</j-button>
+          <j-button size="lg" variant="primary" @click="updateTheme">
+            Save
+          </j-button>
+        </div>
       </j-flex>
     </j-modal>
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from "vue";
+import { Profile, ThemeState } from "@/store";
+
+export default defineComponent({
   data() {
     return {
       hue: getComputedStyle(document.documentElement).getPropertyValue(
         "--j-color-primary-hue"
       ),
-      theme: "light",
       isSettingsOpen: false,
       isEditProfileOpen: false,
+      isUpdatingProfile: false,
+      username: "",
+      themeName: "",
+      themeHue: "",
     };
   },
   watch: {
-    hue: function (val) {
+    isSettingsOpen: function (val) {
+      if (!val) {
+        this.resetTheme();
+      }
+    },
+    themeHue: function (val) {
       document.documentElement.style.setProperty("--j-color-primary-hue", val);
     },
-    theme: function (val) {
+    themeName: function (val) {
       document.documentElement.setAttribute("theme", val);
+    },
+    "userProfile.username": {
+      handler: function (val: string): void {
+        this.username = val;
+      },
+      immediate: true,
+    },
+    "theme.name": {
+      handler: function (val: string): void {
+        this.themeName = val;
+      },
+      immediate: true,
+    },
+    "theme.hue": {
+      handler: function (val: string): void {
+        this.themeHue = val;
+      },
+      immediate: true,
     },
   },
   methods: {
-    setUserProfile(profile) {
-      this.$store.commit("setUserProfile", profile);
+    resetTheme() {
+      this.$store.commit("setTheme", {
+        name: this.theme.name,
+        hue: this.theme.hue,
+      });
+    },
+    updateTheme() {
+      this.$store.commit("setTheme", {
+        name: this.themeName,
+        hue: this.themeHue,
+      });
+      this.isSettingsOpen = false;
+    },
+    updateUser() {
+      this.isUpdatingProfile = true;
+      this.$store
+        .dispatch("updateUser", { username: this.username })
+        .then(() => {
+          this.isEditProfileOpen = false;
+        })
+        .finally(() => {
+          this.isUpdatingProfile = false;
+        });
     },
   },
   computed: {
-    profile() {
-      const profile = this.$store.getters.getProfile;
-
-      return profile;
+    theme(): ThemeState {
+      return this.$store.state.ui.theme;
     },
-    userProfile() {
+    userProfile(): Profile {
       return this.$store.state.userProfile;
     },
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

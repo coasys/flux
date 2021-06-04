@@ -66,10 +66,6 @@
             @keydown.enter="createCommunity"
             @input="(e) => (newCommunityDesc = e.target.value)"
           ></j-input>
-          <j-tabs value="Public">
-            <j-tab-item>Public</j-tab-item>
-            <j-tab-item>Private</j-tab-item>
-          </j-tabs>
           <j-button
             :loading="isCreatingCommunity"
             :disabled="isCreatingCommunity"
@@ -78,7 +74,7 @@
             variant="primary"
             @click="createCommunity"
           >
-            Create
+            Create Community
           </j-button>
         </j-flex>
         <j-flex direction="column" gap="200" v-if="tabView === 'Join'">
@@ -89,7 +85,7 @@
             label="Invite link"
           ></j-input>
           <j-button @click="joinCommunity" size="lg" full variant="primary">
-            Join
+            Join Community
           </j-button>
         </j-flex>
       </j-flex>
@@ -132,9 +128,11 @@ export default defineComponent({
         })
         .then(() => {
           showModal.value = false;
-          isCreatingCommunity.value = false;
           newCommunityName.value = "";
           newCommunityDesc.value = "";
+        })
+        .finally(() => {
+          isCreatingCommunity.value = false;
         });
     };
 
