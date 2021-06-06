@@ -227,15 +227,21 @@ export default defineComponent({
 <style scoped>
 .channel-view {
   height: 100vh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 .channel-view__header {
+  position: sticky;
+  top: 0;
   height: 40px;
   padding: var(--j-space-500);
   display: flex;
   align-items: center;
   border-bottom: 1px solid var(--j-color-ui-100);
+  background: var(--j-color-white);
+  z-index: 1;
 }
 .channel-view__main {
   flex: 1;
@@ -244,6 +250,9 @@ export default defineComponent({
   justify-content: flex-end;
 }
 .channel-view__footer {
+  background: var(--j-color-white);
+  position: sticky;
+  bottom: 0;
   padding: var(--j-space-300);
 }
 </style>
