@@ -3,7 +3,7 @@
     <button class="left-drawer__header">
       <j-flex j="between" gap="300">
         <j-flex gap="400" a="center">
-          <j-avatar src="https://i.pravatar.cc/300" />
+          <j-avatar :src="require('@/assets/images/junto_app_icon.png')" />
           <j-text weight="500" color="ui-800" nomargin size="500">
             {{ community.name }}
           </j-text>
