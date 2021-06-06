@@ -1,34 +1,41 @@
 <template>
-  <div class="channelView">
-    <dynamic-scroller
-      :items="messageList"
-      :min-item-size="100"
-      class="channelView__messages"
-      ref="messagesContainer"
-    >
-      <template v-slot="{ item, index, active }">
-        <dynamic-scroller-item
-          :item="item"
-          :active="active"
-          :data-index="index"
-        >
-          <j-message-item :hideuser="item.hideUser" :timestamp="item.timestamp">
-            <j-avatar
-              :src="
-                require('../../../../../src/assets/images/junto_app_icon.png')
-              "
-              slot="avatar"
-              initials="P"
-            />
-            <span slot="username">Username</span>
-            <div slot="message">
-              <span v-html="item.message"></span>
-            </div>
-          </j-message-item>
-        </dynamic-scroller-item>
-      </template>
-    </dynamic-scroller>
-    <j-box p="400">
+  <div class="channel-view">
+    <header class="channel-view__header">
+      <j-icon size="sm" name="hash" />
+      <j-text nomargin weight="500" size="500">{{ channel.name }}</j-text>
+    </header>
+    <div class="channel-view__main">
+      <dynamic-scroller
+        :items="messageList"
+        :min-item-size="100"
+        class="channelView__messages"
+        ref="messagesContainer"
+      >
+        <template v-slot="{ item, index, active }">
+          <dynamic-scroller-item
+            :item="item"
+            :active="active"
+            :data-index="index"
+          >
+            <j-message-item
+              :hideuser="item.hideUser"
+              :timestamp="item.timestamp"
+            >
+              <j-avatar
+                :src="require('../../../src/assets/images/junto_app_icon.png')"
+                slot="avatar"
+                initials="P"
+              />
+              <span slot="username">Username</span>
+              <div slot="message">
+                <span v-html="item.message"></span>
+              </div>
+            </j-message-item>
+          </dynamic-scroller-item>
+        </template>
+      </dynamic-scroller>
+    </div>
+    <footer class="channel-view__footer">
       <j-editor
         @keydown.enter="
           (e) =>
@@ -38,12 +45,12 @@
         :value="currentExpressionPost"
         @change="(e) => (currentExpressionPost = e.target.value)"
       ></j-editor>
-    </j-box>
+    </footer>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent, ref } from "vue";
 import { useRoute } from "vue-router";
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
 import { JuntoShortForm } from "@/core/juntoTypes";
@@ -55,6 +62,7 @@ import {
 import ad4m from "@perspect3vism/ad4m-executor";
 import { useLazyQuery, useMutation } from "@vue/apollo-composable";
 import Expression from "@perspect3vism/ad4m/Expression";
+import { ChannelState, CommunityState } from "@/store";
 
 interface ChatItem {
   id: string;
@@ -64,18 +72,8 @@ interface ChatItem {
 }
 
 export default defineComponent({
-  props: ["community", "channel"],
   setup() {
     const route = useRoute();
-
-    const channelId = ref("");
-
-    watch(
-      () => route.params,
-      (params: any) => {
-        channelId.value = params.channelId;
-      }
-    );
 
     const currentExpressionPost = ref({});
     const expressionLanguage = ref("");
@@ -117,6 +115,14 @@ export default defineComponent({
     this.scrollToBottom();
   },
   computed: {
+    community(): CommunityState {
+      const { communityId } = this.$route.params;
+      return this.$store.getters.getCommunity(communityId);
+    },
+    channel(): ChannelState {
+      const { channelId, communityId } = this.$route.params;
+      return this.$store.getters.getChannel({ channelId, communityId });
+    },
     messageList(): Array<ChatItem> {
       return this.channel.currentExpressionMessages.reduce(
         (acc: any, item: any, index: number) => {
@@ -218,26 +224,26 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
-.channelView {
-  width: 100%;
-  margin-top: var(--j-space-500);
+<style scoped>
+.channel-view {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.channel-view__header {
+  height: 40px;
+  padding: var(--j-space-500);
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--j-color-ui-100);
+}
+.channel-view__main {
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  position: relative;
-  height: 100vh;
-  overflow-y: auto;
-
-  &__messages {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-  }
-
-  & j-message-item {
-    font-size: var(--j-font-size-500);
-  }
+}
+.channel-view__footer {
+  padding: var(--j-space-300);
 }
 </style>

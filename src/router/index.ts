@@ -4,10 +4,10 @@ import {
   RouteRecordRaw,
   createWebHashHistory,
 } from "vue-router";
-import AppView from "./../views/app-view/AppView.vue";
-import WelcomeView from "./../views/welcome-view/WelcomeView.vue";
-import CommunityView from "./../views/community-view/CommunityView.vue";
-import MainView from "./../views/community-view/main-view/MainView.vue";
+import MainView from "@/views/main-view/MainView.vue";
+import WelcomeView from "@/views/welcome-view/WelcomeView.vue";
+import CommunityView from "@/views/community-view/CommunityView.vue";
+import ChannelView from "@/views/channel-view/ChannelView.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -18,7 +18,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
     name: "home",
-    component: AppView,
+    component: MainView,
     children: [
       {
         path: "communities/:communityId",
@@ -28,7 +28,7 @@ const routes: Array<RouteRecordRaw> = [
           {
             path: ":channelId",
             name: "channel",
-            component: MainView,
+            component: ChannelView,
           },
         ],
       },

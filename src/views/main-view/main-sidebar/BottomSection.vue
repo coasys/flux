@@ -192,8 +192,5 @@ export default defineComponent({
   gap: var(--j-space-400);
   flex-direction: column;
   align-items: center;
-  position: absolute;
-  bottom: 0;
-  left: 0;
 }
 </style>
