@@ -17,8 +17,6 @@
   height: 100%;
   border-right: 1px var(--j-color-ui-50) solid;
   display: flex;
-  position: relative;
-  z-index: 999;
   flex-direction: column;
   justify-content: space-between;
 }
