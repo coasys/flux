@@ -22,7 +22,7 @@
               :timestamp="item.timestamp"
             >
               <j-avatar
-                :src="require('../../../src/assets/images/junto_app_icon.png')"
+                :src="require('@/assets/images/junto_app_icon.png')"
                 slot="avatar"
                 initials="P"
               />

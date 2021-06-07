@@ -6,7 +6,7 @@ import {
   INITIALIZE_AGENT,
   LOCK_AGENT,
   ADD_PERSPECTIVE,
-} from "../../core/graphql_queries";
+} from "@/core/graphql_queries";
 
 import { databasePerspectiveName } from "@/core/juntoTypes";
 
