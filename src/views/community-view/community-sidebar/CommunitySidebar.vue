@@ -90,9 +90,9 @@
       <j-flex gap="500" direction="column">
         <j-text variant="heading">All group members (5)</j-text>
         <j-input placeholder="Search for member" type="search"></j-input>
-        <j-flex gap="800">
+        <j-flex wrap gap="600">
           <j-flex
-            wrap
+            gap="300"
             v-for="index in 5"
             :key="index"
             inline
