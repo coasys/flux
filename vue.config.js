@@ -21,6 +21,11 @@ module.exports = {
         appId: "junto.foundation.communities",
         mac: {
           target: "default",
+          binaries: [
+            "./resources/darwin/hc",
+            "./resources/darwin/holochain",
+            "./resources/darwin/lair-keystore",
+          ],
         },
         linux: {
           target: ["AppImage", "deb"],
@@ -36,7 +41,7 @@ module.exports = {
           {
             from: "./ad4m/languages",
             to: "packaged-resources/languages",
-            filter: ["**/*"],
+            filter: ["**/build/bundle.js"],
           },
         ],
       },
