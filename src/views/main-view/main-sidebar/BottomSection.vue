@@ -48,6 +48,10 @@
     >
       <j-flex direction="column" gap="700">
         <j-text variant="heading">Edit profile</j-text>
+        <avatar-upload
+          :value="profilePicture"
+          @change="(url) => (profilePicture = url)"
+        ></avatar-upload>
         <j-input
           size="lg"
           label="Username"
@@ -100,8 +104,12 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { Profile, ThemeState } from "@/store";
+import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
+
+import { dataURItoBlob } from "@/core/methods/createProfile";
 
 export default defineComponent({
+  components: { AvatarUpload },
   data() {
     return {
       hue: getComputedStyle(document.documentElement).getPropertyValue(
@@ -111,6 +119,7 @@ export default defineComponent({
       isEditProfileOpen: false,
       isUpdatingProfile: false,
       username: "",
+      profilePicture: "",
       themeName: "",
       themeHue: "",
     };
@@ -126,6 +135,12 @@ export default defineComponent({
     },
     themeName: function (val) {
       document.documentElement.setAttribute("theme", val);
+    },
+    "userProfile.profilePicture": {
+      handler: function (val: string): void {
+        this.profilePicture = val;
+      },
+      immediate: true,
     },
     "userProfile.username": {
       handler: function (val: string): void {
@@ -163,7 +178,10 @@ export default defineComponent({
     updateUser() {
       this.isUpdatingProfile = true;
       this.$store
-        .dispatch("updateUser", { username: this.username })
+        .dispatch("updateUser", {
+          username: this.username,
+          profilePicture: this.profilePicture,
+        })
         .then(() => {
           this.isEditProfileOpen = false;
         })
@@ -192,8 +210,5 @@ export default defineComponent({
   gap: var(--j-space-400);
   flex-direction: column;
   align-items: center;
-  position: absolute;
-  bottom: 0;
-  left: 0;
 }
 </style>

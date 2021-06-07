@@ -4,7 +4,7 @@
       <div class="welcome-view__logo">
         <img
           width="100"
-          src="../../assets/images/junto_web_logo--rainbow.png"
+          src="@/assets/images/junto_web_logo--rainbow.png"
           alt=""
         />
       </div>

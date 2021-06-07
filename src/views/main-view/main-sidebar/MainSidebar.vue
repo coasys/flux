@@ -1,32 +1,27 @@
 <template>
-  <div class="left-nav">
+  <div class="sidebar-container">
     <communities-list></communities-list>
     <bottom-section></bottom-section>
   </div>
 </template>
 
 <script lang="ts">
+import { defineComponent } from "vue";
 import CommunitiesList from "./CommunitiesList.vue";
 import BottomSection from "./BottomSection.vue";
 
-export default {
-  components: {
-    CommunitiesList,
-    BottomSection,
-  },
-};
+export default defineComponent({
+  components: { CommunitiesList, BottomSection },
+});
 </script>
 
-<style lang="scss">
-.left-nav {
+<style scoped>
+.sidebar-container {
+  padding-top: var(--j-space-400);
   height: 100vh;
-  width: 100px;
-  padding: 2rem 0 2rem 0;
-  border-right: 1px var(--j-color-ui-50) solid;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  z-index: 9999;
-  position: relative;
 }
 </style>

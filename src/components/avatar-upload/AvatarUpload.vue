@@ -45,7 +45,7 @@ import { Cropper } from "vue-advanced-cropper";
 export default defineComponent({
   components: { Cropper },
   emits: ["change"],
-  props: ["change", "value", "disabled"],
+  props: ["value", "disabled"],
   data() {
     return {
       tempProfileImage: null,
