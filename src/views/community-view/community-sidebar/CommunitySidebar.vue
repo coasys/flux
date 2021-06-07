@@ -39,6 +39,19 @@
       </j-menu>
     </j-popover>
 
+    <j-box pt="500" px="500" pb="500">
+      <avatar-group
+        @click="showGroupMembers = true"
+        :users="[
+          { username: 'test' },
+          { username: 'test' },
+          { username: 'test' },
+          { username: 'test' },
+          { username: 'test' },
+        ]"
+      />
+    </j-box>
+
     <j-box pt="500">
       <j-menu-group-item open title="Channels">
         <j-button
@@ -69,6 +82,29 @@
         </router-link>
       </j-menu-group-item>
     </j-box>
+
+    <j-modal
+      :open="showGroupMembers"
+      @toggle="(e) => (showGroupMembers = e.target.open)"
+    >
+      <j-flex gap="500" direction="column">
+        <j-text variant="heading">All group members (5)</j-text>
+        <j-input placeholder="Search for member" type="search"></j-input>
+        <j-flex gap="800">
+          <j-flex
+            wrap
+            v-for="index in 5"
+            :key="index"
+            inline
+            direction="column"
+            a="center"
+          >
+            <j-avatar size="lg" />
+            <j-text variant="body">Username</j-text>
+          </j-flex>
+        </j-flex>
+      </j-flex>
+    </j-modal>
 
     <j-modal
       :open="showUpdateCommunity"
@@ -133,8 +169,10 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 
 export default defineComponent({
+  components: { AvatarGroup },
   props: ["community"],
   watch: {
     community: {
@@ -155,6 +193,7 @@ export default defineComponent({
       communityName: "",
       communityDescription: "",
       showUpdateCommunity: false,
+      showGroupMembers: false,
     };
   },
   methods: {
