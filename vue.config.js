@@ -20,7 +20,7 @@ module.exports = {
         productName: "Junto",
         appId: "junto.foundation.communities",
         mac: {
-          target: "tar.gz",
+          target: "default",
         },
         linux: {
           target: ["AppImage", "deb"],
@@ -29,7 +29,7 @@ module.exports = {
         },
         extraResources: [
           {
-            from: "./resources/${os}",
+            from: "./resources/${platform}",
             to: "packaged-resources/bin",
             filter: ["**/*"],
           },
