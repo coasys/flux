@@ -1,12 +1,15 @@
 <template>
-  <div class="app-view">
-    <left-nav></left-nav>
+  <app-layout>
+    <template v-slot:sidebar>
+      <main-sidebar></main-sidebar>
+    </template>
     <router-view></router-view>
-  </div>
+  </app-layout>
 </template>
 
 <script lang="ts">
-import LeftNav from "./../../components/left-nav/LeftNav.vue";
+import AppLayout from "@/layout/AppLayout.vue";
+import MainSidebar from "./main-sidebar/MainSidebar.vue";
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -17,16 +20,8 @@ export default defineComponent({
     };
   },
   components: {
-    LeftNav,
+    MainSidebar,
+    AppLayout,
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.app-view {
-  height: 100vh;
-  max-height: 100vh;
-  width: 100%;
-  display: flex;
-}
-</style>

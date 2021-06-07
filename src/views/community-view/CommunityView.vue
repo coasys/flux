@@ -1,15 +1,17 @@
 <template>
-  <div class="community-view">
-    <left-drawer :community="currentCommunity"></left-drawer>
-    <main-view :community="currentCommunity"></main-view>
-  </div>
+  <sidebar-layout>
+    <template v-slot:sidebar>
+      <community-sidebar :community="currentCommunity"></community-sidebar>
+    </template>
+    <router-view></router-view>
+  </sidebar-layout>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, ref, watch } from "vue";
+import { defineComponent, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import LeftDrawer from "../../components/left-drawer/LeftDrawer.vue";
-import MainView from "./main-view/MainView.vue";
+import SidebarLayout from "@/layout/SidebarLayout.vue";
+import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
 import { channelRefreshDurationMs } from "@/core/juntoTypes";
 import { useStore } from "vuex";
 
@@ -62,8 +64,8 @@ export default defineComponent({
     }
   },
   components: {
-    LeftDrawer,
-    MainView,
+    CommunitySidebar,
+    SidebarLayout,
   },
   computed: {
     currentCommunity() {
@@ -73,13 +75,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.community-view {
-  height: 100vh;
-  max-height: 100vh;
-  width: 100%;
-  display: flex;
-  position: relative;
-}
-</style>
