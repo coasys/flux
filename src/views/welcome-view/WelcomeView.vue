@@ -25,9 +25,9 @@
             size="lg"
             label="Password"
             type="password"
-            :value="password.value"
+            :value="password"
             @keydown.enter="logIn"
-            @input="(e) => (password.value = e.target.value)"
+            @input="(e) => (password = e.target.value)"
           ></j-input>
           <j-button
             :loading="isLoggingIn"
