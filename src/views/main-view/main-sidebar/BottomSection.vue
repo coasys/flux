@@ -195,7 +195,7 @@ export default defineComponent({
       return this.$store.state.ui.theme;
     },
     userProfile(): Profile {
-      return this.$store.state.userProfile;
+      return this.$store.state.userProfile || {};
     },
   },
 });
