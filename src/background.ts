@@ -2,10 +2,12 @@
 
 import { app, protocol, BrowserWindow, ipcMain } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
-import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
+import installExtension from "electron-devtools-installer";
 import ad4m from "@perspect3vism/ad4m-executor";
 import path from "path";
 import os from "os";
+import util from "util";
+import fs from "fs";
 
 let win: BrowserWindow;
 let splash: BrowserWindow;
@@ -22,7 +24,7 @@ console.log("Trying to run!");
 app.on("ready", async () => {
   splash = createSplashScreen();
 
-  splash.on('ready-to-show', async () => {
+  splash.on("ready-to-show", async () => {
     splash.show();
 
     if (isDevelopment && !process.env.IS_TEST) {
@@ -36,7 +38,7 @@ app.on("ready", async () => {
         console.error("Vue Devtools failed to install:", e.toString());
       }
     }
-  
+
     let execPath;
     if (app.isPackaged) {
       console.log("App is running in production mode");
@@ -47,6 +49,20 @@ app.on("ready", async () => {
       execPath = path.resolve(
         `${process.resourcesPath}/../resources/packaged-resources/bin`
       );
+      const log_file = fs.createWriteStream(
+        path.join(app.getPath("logs"), "debug.log"),
+        {
+          flags: "w",
+        }
+      );
+      const log_stdout = process.stdout;
+
+      console.log = function (...args: any) {
+        args.forEach((arg: any) => {
+          log_file.write(util.format(arg) + "\n");
+          log_stdout.write(util.format(arg) + "\n");
+        });
+      };
     } else {
       console.log("App is running in dev mode");
       builtInLangPath = path.resolve(`${__dirname}/../ad4m/languages`);
@@ -59,26 +75,36 @@ app.on("ready", async () => {
       "built in language path",
       builtInLangPath
     );
-  
+
     //createWindow();
     console.log("\x1b[36m%s\x1b[0m", "Init AD4M...");
     ad4m
-      .init(
-        app.getPath("appData"),
-        execPath,
-        builtInLangPath,
-        ["languages", "shared-perspectives"],
-        false
-      )
+      .init({
+        appDataPath: app.getPath("userData"),
+        resourcePath: execPath,
+        appDefaultLangPath: builtInLangPath,
+        ad4mBootstrapLanguages: {
+          agents: "profiles",
+          languages: "languages",
+          perspectives: "shared-perspectives",
+        },
+        ad4mBootstrapFixtures: {
+          languages: [],
+          perspectives: [],
+        },
+        appBuiltInLangs: ["social-context"],
+        appLangAliases: null,
+        mocks: false,
+      })
       .then((ad4mCore: ad4m.PerspectivismCore) => {
         Core = ad4mCore;
         console.log(
           "\x1b[36m%s\x1b[0m",
           "Starting account creation splash screen"
         );
-  
+
         createWindow();
-  
+
         Core.waitForAgent().then(async () => {
           console.log(
             "\x1b[36m%s\x1b[0m",
@@ -88,14 +114,14 @@ app.on("ready", async () => {
           await Core.initLanguages();
           console.log("\x1b[32m", "Controllers init complete!");
         });
-      }).catch((err) => {
-        console.log('error:', err);
+      })
+      .catch((err) => {
+        console.log("error:", err);
       });
   });
 });
 
-
-function createSplashScreen() {  
+function createSplashScreen() {
   const win = new BrowserWindow({
     height: 600,
     width: 1000,
@@ -107,7 +133,7 @@ function createSplashScreen() {
     alwaysOnTop: true,
     frame: false,
     transparent: true,
-    show: false
+    show: false,
   });
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -147,7 +173,7 @@ async function createWindow() {
     win.loadURL(`file://${__dirname}/index.html`);
   }
 
-  win.on('ready-to-show', () => {
+  win.on("ready-to-show", () => {
     win.show();
     splash.close();
   });
@@ -182,22 +208,22 @@ if (isDevelopment) {
 }
 
 // Quit when all windows are closed.
-app.on("window-all-closed", () => {
+app.on("window-all-closed", async () => {
   console.log("Got window-all-closed signal");
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   //if (process.platform !== "darwin") {
   //Quit PerspectivismCore
-  Core.exit();
+  await Core.exit();
   app.quit();
   //}
 });
 
 // Quit when all windows are closed.
-app.on("will-quit", () => {
+app.on("will-quit", async () => {
   console.log("Got quit quit signal");
   //Quit PerspectivismCore
-  Core.exit();
+  await Core.exit();
   app.quit();
 });
 
