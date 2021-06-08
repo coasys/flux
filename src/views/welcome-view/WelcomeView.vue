@@ -48,22 +48,28 @@
           label="First Name"
           :value="name"
           @input="(e) => (name = e.target.value)"
+          help-text="(optional)"
         ></j-input>
         <j-input
           label="Last Name"
           :value="familyName"
           @input="(e) => (familyName = e.target.value)"
+          help-text="(optional)"
         ></j-input>
         <j-input
           label="Username"
           :value="username"
           @input="(e) => (username = e.target.value)"
+          required=""
+          :error-text="usernameError"
+          :error="usernameError !== null && usernameError?.length !== 0"
         ></j-input>
         <j-input
           type="email"
           label="Email"
           :value="email"
           @input="(e) => (email = e.target.value)"
+          help-text="(optional)"
         ></j-input>
         <j-input
           type="password"
@@ -71,9 +77,12 @@
           :value="password"
           @keydown.enter="createUser"
           @input="(e) => (password = e.target.value)"
+          required=""
+          :error-text="passwordError"
+          :error="passwordError !== null && passwordError?.length !== 0 "
         ></j-input>
         <j-button
-          :disabled="isCreatingUser"
+          :disabled="isCreatingUser || !canSignUp"
           :loading="isCreatingUser"
           size="lg"
           full="true"
@@ -127,13 +136,38 @@ export default defineComponent({
       const isInit = this.$store.getters.getAgentInitStatus;
       return isInit.value;
     },
+    canSignUp(): boolean {
+      return this.usernameError === null && this.passwordError === null;
+    }
   },
   data(): {
     profilePicture: string | ArrayBuffer | null | undefined;
+    usernameError: string | null;
+    passwordError: string | null;
   } {
     return {
       profilePicture: null,
+      usernameError: "",
+      passwordError: "",
     };
+  },
+  watch: {
+    username() {
+      if (this.username.length < 3) {
+        this.usernameError = "Username must be three characters long";
+      } else {
+        this.usernameError = null;
+      }
+    },
+    password() {
+      if (this.password.length < 8) {
+        this.passwordError = "Password must be eight characters long";
+      } else if(!(/[a-zA-Z]/.test(this.password) && /[0-9]/.test(this.password))) {
+        this.passwordError = "Password must contain atleast one number and be 8 charactes long";
+      } else {
+        this.passwordError = null;
+      }
+    }
   },
   methods: {
     async createUser() {
