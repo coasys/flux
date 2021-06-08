@@ -19,6 +19,8 @@ console.log("Trying to run!");
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", async () => {
+  createWindow();
+
   if (isDevelopment && !process.env.IS_TEST) {
     // Install Vue Devtools
     try {
@@ -71,7 +73,8 @@ app.on("ready", async () => {
         "Starting account creation splash screen"
       );
 
-      createWindow();
+      showApp();
+
       Core.waitForAgent().then(async () => {
         console.log(
           "\x1b[36m%s\x1b[0m",
@@ -81,8 +84,22 @@ app.on("ready", async () => {
         await Core.initLanguages();
         console.log("\x1b[32m", "Controllers init complete!");
       });
+    }).catch((err) => {
+      console.log('error:', err);
     });
 });
+
+async function showApp() {
+  if (process.env.WEBPACK_DEV_SERVER_URL) {
+    // Load the url of the dev server if in development mode
+    await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL as string);
+    if (!process.env.IS_TEST) win.webContents.openDevTools();
+  } else {
+    createProtocol("app");
+    // Load the index.html when not in development
+    win.loadURL(`file://${__dirname}/index.html`);
+  }
+}
 
 async function createWindow() {
   // Create the browser window.
@@ -101,13 +118,9 @@ async function createWindow() {
   win.removeMenu();
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
-    // Load the url of the dev server if in development mode
-    await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL as string);
-    if (!process.env.IS_TEST) win.webContents.openDevTools();
+    win.loadURL(`file://${process.env.PWD}/public/loading.html`);
   } else {
-    createProtocol("app");
-    // Load the index.html when not in development
-    win.loadURL(`file://${__dirname}/index.html`);
+    win.loadURL(`file://${__dirname}/loading.html`);
   }
 }
 
