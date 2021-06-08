@@ -25,14 +25,19 @@
             size="lg"
             label="Password"
             type="password"
-            :value="password"
+            :value="password.value"
             @keydown.enter="logIn"
-            @input="(e) => (password = e.target.value)"
+            @input="(e) => (password.value = e.target.value)"
           ></j-input>
-          <j-button full="false" size="lg" variant="primary" @click="logIn"
-            >Login
+          <j-button
+            :loading="isLoggingIn"
+            full="false"
+            size="lg"
+            variant="primary"
+            @click="logIn"
+          >
+            Login
           </j-button>
-          <j-text v-if="logInError">Something wrong happended</j-text>
         </j-flex>
       </div>
       <j-flex direction="column" gap="400" v-else>
@@ -44,36 +49,47 @@
           >
           </avatar-upload>
         </div>
-        <j-input
-          label="First Name"
-          :value="name"
-          @input="(e) => (name = e.target.value)"
-        ></j-input>
-        <j-input
-          label="Last Name"
-          :value="familyName"
-          @input="(e) => (familyName = e.target.value)"
-        ></j-input>
+
         <j-input
           label="Username"
           :value="username"
           @input="(e) => (username = e.target.value)"
+          :error="usernameError"
+          :errortext="usernameErrorMessage"
+          @blur="(e) => validateUsername()"
         ></j-input>
-        <j-input
-          type="email"
-          label="Email"
-          :value="email"
-          @input="(e) => (email = e.target.value)"
-        ></j-input>
+
         <j-input
           type="password"
           label="Password"
           :value="password"
           @keydown.enter="createUser"
           @input="(e) => (password = e.target.value)"
+          :error="passwordError"
+          :errortext="passwordErrorMessage"
+          @blur="(e) => validatePassword()"
+        ></j-input>
+        <j-input
+          label="First Name"
+          :value="name"
+          @input="(e) => (name = e.target.value)"
+          helptext="(optional)"
+        ></j-input>
+        <j-input
+          label="Last Name"
+          :value="familyName"
+          @input="(e) => (familyName = e.target.value)"
+          helptext="(optional)"
+        ></j-input>
+        <j-input
+          type="email"
+          label="Email"
+          :value="email"
+          @input="(e) => (email = e.target.value)"
+          helptext="(optional)"
         ></j-input>
         <j-button
-          :disabled="isCreatingUser"
+          :disabled="isCreatingUser || !canSignUp"
           :loading="isCreatingUser"
           size="lg"
           full="true"
@@ -96,28 +112,85 @@ import {
   resizeImage,
 } from "@/core/methods/createProfile";
 import { useStore } from "vuex";
+import { useValidation } from "@/utils/validation";
 
 export default defineComponent({
   name: "Welcome",
   setup() {
     const store = useStore();
+    const profilePicture = ref();
     const modalOpen = ref(false);
     const isCreatingUser = ref(false);
+    const isLoggingIn = ref(false);
+
+    const {
+      value: username,
+      error: usernameError,
+      errorMessage: usernameErrorMessage,
+      isValid: usernameIsValid,
+      validate: validateUsername,
+    } = useValidation({
+      initialValue: "",
+      rules: [
+        {
+          check: (value: string) => (value ? false : true),
+          message: "Username is required",
+        },
+        {
+          check: (value: string) => value.length < 3,
+          message: "Should be 3 or more characters",
+        },
+      ],
+    });
+
+    const {
+      value: password,
+      error: passwordError,
+      errorMessage: passwordErrorMessage,
+      isValid: passwordIsValid,
+      validate: validatePassword,
+    } = useValidation({
+      initialValue: "",
+      rules: [
+        {
+          check: (value: string) => value.length < 8,
+          message: "Password should be 8 or more characters",
+        },
+        {
+          check: (value: string) =>
+            !(/[a-zA-Z]/.test(value) && /[0-9]/.test(value)),
+          message:
+            "Password should be 8 or more characters and contain at least one number",
+        },
+      ],
+    });
+
     const name = ref("");
+
     const familyName = ref("");
-    const username = ref("");
+
     const email = ref("");
-    const password = ref("");
+
     const logInError = ref(false);
 
     return {
+      isLoggingIn,
+      profilePicture,
       hasUser: store.state.agentInit,
       modalOpen,
       isCreatingUser,
       name,
       username,
-      email,
+      usernameError,
+      usernameErrorMessage,
+      usernameIsValid,
+      validateUsername,
       password,
+      passwordError,
+      passwordErrorMessage,
+      passwordIsValid,
+      validatePassword,
+      email,
       familyName,
       logInError,
     };
@@ -127,13 +200,9 @@ export default defineComponent({
       const isInit = this.$store.getters.getAgentInitStatus;
       return isInit.value;
     },
-  },
-  data(): {
-    profilePicture: string | ArrayBuffer | null | undefined;
-  } {
-    return {
-      profilePicture: null,
-    };
+    canSignUp(): boolean {
+      return this.usernameIsValid && this.passwordIsValid;
+    },
   },
   methods: {
     async createUser() {
@@ -162,13 +231,14 @@ export default defineComponent({
         });
     },
     logIn() {
+      this.isLoggingIn = true;
       this.$store
         .dispatch("logIn", {
           password: this.password,
         })
         .then(() => this.$router.push("/"))
-        .catch(() => {
-          this.logInError = true;
+        .finally(() => {
+          this.isLoggingIn = false;
         });
     },
   },
