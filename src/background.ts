@@ -173,10 +173,8 @@ async function createWindow() {
     win.loadURL(`file://${__dirname}/index.html`);
   }
 
-  win.on("ready-to-show", () => {
-    win.show();
-    splash.close();
-  });
+  win.show();
+  splash.destroy();
 }
 
 ipcMain.on("ping", () => {
