@@ -41,7 +41,7 @@ module.exports = {
           {
             from: "./ad4m/languages",
             to: "packaged-resources/languages",
-            filter: ["**/build/bundle.js"],
+            filter: ["**/build/bundle.js", "**/*.dna"],
           },
         ],
       },
