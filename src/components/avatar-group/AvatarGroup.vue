@@ -5,7 +5,7 @@
         <j-avatar
           v-for="(user, index) in firstUsers"
           :key="index"
-          :src="require('@/assets/images/junto_app_icon.png')"
+          :src="require('@/assets/images/avatar-placeholder.png')"
           size="sm"
         ></j-avatar>
         <span v-if="users.length >= 4" class="avatar-group__see-all">
