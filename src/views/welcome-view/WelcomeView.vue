@@ -29,10 +29,15 @@
             @keydown.enter="logIn"
             @input="(e) => (password.value = e.target.value)"
           ></j-input>
-          <j-button full="false" size="lg" variant="primary" @click="logIn"
-            >Login
+          <j-button
+            :loading="isLoggingIn"
+            full="false"
+            size="lg"
+            variant="primary"
+            @click="logIn"
+          >
+            Login
           </j-button>
-          <j-text v-if="logInError">Something wrong happended</j-text>
         </j-flex>
       </div>
       <j-flex direction="column" gap="400" v-else>
@@ -116,6 +121,7 @@ export default defineComponent({
     const profilePicture = ref();
     const modalOpen = ref(false);
     const isCreatingUser = ref(false);
+    const isLoggingIn = ref(false);
 
     const {
       value: username,
@@ -127,11 +133,11 @@ export default defineComponent({
       initialValue: "",
       rules: [
         {
-          check: (v: string) => (v ? false : true),
+          check: (value: string) => (value ? false : true),
           message: "Username is required",
         },
         {
-          check: (v: string) => v.length < 3,
+          check: (value: string) => value.length < 3,
           message: "Should be 3 or more characters",
         },
       ],
@@ -147,11 +153,12 @@ export default defineComponent({
       initialValue: "",
       rules: [
         {
-          check: (v: string) => v.length < 8,
+          check: (value: string) => value.length < 8,
           message: "Password should be 8 or more characters",
         },
         {
-          check: (v: string) => !(/[a-zA-Z]/.test(v) && /[0-9]/.test(v)),
+          check: (value: string) =>
+            !(/[a-zA-Z]/.test(value) && /[0-9]/.test(value)),
           message:
             "Password should be 8 or more characters and contain at least one number",
         },
@@ -167,6 +174,7 @@ export default defineComponent({
     const logInError = ref(false);
 
     return {
+      isLoggingIn,
       profilePicture,
       hasUser: store.state.agentInit,
       modalOpen,
@@ -223,13 +231,14 @@ export default defineComponent({
         });
     },
     logIn() {
+      this.isLoggingIn = true;
       this.$store
         .dispatch("logIn", {
           password: this.password,
         })
         .then(() => this.$router.push("/"))
-        .catch(() => {
-          this.logInError = true;
+        .finally(() => {
+          this.isLoggingIn = false;
         });
     },
   },
