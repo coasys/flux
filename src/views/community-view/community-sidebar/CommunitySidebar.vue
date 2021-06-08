@@ -2,11 +2,19 @@
   <div class="left-drawer" v-if="community != null">
     <button class="left-drawer__header">
       <j-flex j="between" gap="300">
-        <j-flex gap="400" a="center">
-          <j-avatar :src="require('@/assets/images/junto_app_icon.png')" />
-          <j-text weight="500" color="ui-800" nomargin size="500">
-            {{ community.name }}
-          </j-text>
+        <j-flex gap="400">
+          <j-avatar
+            style="--j-avatar-size: 35px"
+            :src="require('@/assets/images/junto_app_icon.png')"
+          />
+          <div>
+            <j-text weight="500" color="ui-800" nomargin size="500">
+              {{ community.name }}
+            </j-text>
+            <j-text weight="300" color="ui-800" nomargin size="400">
+              {{ community.description }}
+            </j-text>
+          </div>
         </j-flex>
         <j-icon size="xs" name="chevron-down"></j-icon>
       </j-flex>
