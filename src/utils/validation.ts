@@ -1,3 +1,5 @@
+import { ref, computed } from "vue";
+
 export interface ValidationRule {
   check: (val: string) => boolean;
   message: string;
@@ -24,4 +26,34 @@ export function checkValidation(
   return ruleResult
     ? { message: ruleResult.message, error: true }
     : { message: "No errors", error: false };
+}
+
+interface ValidationProps {
+  initialValue: any;
+  rules: ValidationRule[];
+}
+
+export function useValidation({
+  initialValue = "",
+  rules = [],
+}: ValidationProps): any {
+  const value = ref(initialValue);
+  const error = ref(false);
+  const errorMessage = ref("");
+  const valRules = ref(rules);
+
+  const validate = () => {
+    const rule = checkValidation(valRules.value, value.value);
+    error.value = rule.error;
+    errorMessage.value = rule.message;
+    console.log({ rule, valRules: valRules.value, value: value.value });
+  };
+
+  return {
+    value,
+    error,
+    errorMessage,
+    validate,
+    isValid: computed(() => isValid(valRules.value, value.value)),
+  };
 }
