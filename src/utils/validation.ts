@@ -46,7 +46,6 @@ export function useValidation({
     const rule = checkValidation(valRules.value, value.value);
     error.value = rule.error;
     errorMessage.value = rule.message;
-    console.log({ rule, valRules: valRules.value, value: value.value });
   };
 
   return {
