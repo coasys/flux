@@ -5,8 +5,8 @@ import type {
   ExpressionAdapter,
   PublicSharing,
 } from "@perspect3vism/ad4m/Language";
-import type LanguageContext from "@perspect3vism/ad4m-language-context/LanguageContext";
-import type { default as HolochainLanguageDelegate } from "@perspect3vism/ad4m-language-context/Holochain/HolochainLanguageDelegate";
+import type { HolochainLanguageDelegate } from "@perspect3vism/ad4m/LanguageContext";
+import type LanguageContext from "@perspect3vism/ad4m/LanguageContext";
 import type AgentService from "@perspect3vism/ad4m/AgentService";
 import { DNA_NICK } from "./dna";
 

@@ -4,8 +4,8 @@ import type {
   NewLinksObserver,
 } from "@perspect3vism/ad4m/Language";
 import type Agent from "@perspect3vism/ad4m/Agent";
-import type LanguageContext from "@perspect3vism/ad4m-language-context/LanguageContext";
-import type { default as HolochainLanguageDelegate } from "@perspect3vism/ad4m-language-context/lib/Holochain/HolochainLanguageDelegate";
+import type { HolochainLanguageDelegate } from "@perspect3vism/ad4m/LanguageContext";
+import type LanguageContext from "@perspect3vism/ad4m/LanguageContext";
 import { DNA_NICK } from "./dna";
 import type { LinkQuery } from "@perspect3vism/ad4m/Links";
 
