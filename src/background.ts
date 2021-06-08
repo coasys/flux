@@ -8,6 +8,7 @@ import path from "path";
 import os from "os";
 
 let win: BrowserWindow;
+let splash: BrowserWindow;
 let Core: ad4m.PerspectivismCore;
 let builtInLangPath: string;
 
@@ -19,70 +20,104 @@ console.log("Trying to run!");
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", async () => {
-  if (isDevelopment && !process.env.IS_TEST) {
-    // Install Vue Devtools
-    try {
-      await installExtension({
-        id: "ljjemllljcmogpfapbkkighbhhppjdbg",
-        electron: ">=1.2.1",
-      });
-    } catch (e) {
-      console.error("Vue Devtools failed to install:", e.toString());
+  splash = createSplashScreen();
+
+  splash.on('ready-to-show', async () => {
+    splash.show();
+
+    if (isDevelopment && !process.env.IS_TEST) {
+      // Install Vue Devtools
+      try {
+        await installExtension({
+          id: "ljjemllljcmogpfapbkkighbhhppjdbg",
+          electron: ">=1.2.1",
+        });
+      } catch (e) {
+        console.error("Vue Devtools failed to install:", e.toString());
+      }
     }
-  }
-
-  let execPath;
-  if (app.isPackaged) {
-    console.log("App is running in production mode");
-    //TODO: this code is probably somewhat broken
-    builtInLangPath = path.resolve(
-      `${process.resourcesPath}/../resources/packaged-resources/languages`
-    );
-    execPath = path.resolve(
-      `${process.resourcesPath}/../resources/packaged-resources/bin`
-    );
-  } else {
-    console.log("App is running in dev mode");
-    builtInLangPath = path.resolve(`${__dirname}/../ad4m/languages`);
-    execPath = path.resolve(`${__dirname}/../resources/${os.platform}/`);
-  }
-  console.log(
-    "\x1b[1m",
-    "Using Resource path",
-    execPath,
-    "built in language path",
-    builtInLangPath
-  );
-
-  //createWindow();
-  console.log("\x1b[36m%s\x1b[0m", "Init AD4M...");
-  ad4m
-    .init(
-      app.getPath("appData"),
-      execPath,
-      builtInLangPath,
-      ["languages", "shared-perspectives"],
-      false
-    )
-    .then((ad4mCore: ad4m.PerspectivismCore) => {
-      Core = ad4mCore;
-      console.log(
-        "\x1b[36m%s\x1b[0m",
-        "Starting account creation splash screen"
+  
+    let execPath;
+    if (app.isPackaged) {
+      console.log("App is running in production mode");
+      //TODO: this code is probably somewhat broken
+      builtInLangPath = path.resolve(
+        `${process.resourcesPath}/../resources/packaged-resources/languages`
       );
-
-      createWindow();
-      Core.waitForAgent().then(async () => {
+      execPath = path.resolve(
+        `${process.resourcesPath}/../resources/packaged-resources/bin`
+      );
+    } else {
+      console.log("App is running in dev mode");
+      builtInLangPath = path.resolve(`${__dirname}/../ad4m/languages`);
+      execPath = path.resolve(`${__dirname}/../resources/${os.platform}/`);
+    }
+    console.log(
+      "\x1b[1m",
+      "Using Resource path",
+      execPath,
+      "built in language path",
+      builtInLangPath
+    );
+  
+    //createWindow();
+    console.log("\x1b[36m%s\x1b[0m", "Init AD4M...");
+    ad4m
+      .init(
+        app.getPath("appData"),
+        execPath,
+        builtInLangPath,
+        ["languages", "shared-perspectives"],
+        false
+      )
+      .then((ad4mCore: ad4m.PerspectivismCore) => {
+        Core = ad4mCore;
         console.log(
           "\x1b[36m%s\x1b[0m",
-          "Agent has been init'd. Controllers now starting init..."
+          "Starting account creation splash screen"
         );
-        Core.initControllers();
-        await Core.initLanguages();
-        console.log("\x1b[32m", "Controllers init complete!");
+  
+        createWindow();
+  
+        Core.waitForAgent().then(async () => {
+          console.log(
+            "\x1b[36m%s\x1b[0m",
+            "Agent has been init'd. Controllers now starting init..."
+          );
+          Core.initControllers();
+          await Core.initLanguages();
+          console.log("\x1b[32m", "Controllers init complete!");
+        });
+      }).catch((err) => {
+        console.log('error:', err);
       });
-    });
+  });
 });
+
+
+function createSplashScreen() {  
+  const win = new BrowserWindow({
+    height: 600,
+    width: 1000,
+    webPreferences: {
+      nodeIntegration: false,
+      enableRemoteModule: false,
+    },
+    minimizable: false,
+    alwaysOnTop: true,
+    frame: false,
+    transparent: true,
+    show: false
+  });
+
+  if (process.env.WEBPACK_DEV_SERVER_URL) {
+    win.loadURL(`file://${process.env.PWD}/public/loading.html`);
+  } else {
+    win.loadURL(`file://${__dirname}/loading.html`);
+  }
+
+  return win;
+}
 
 async function createWindow() {
   // Create the browser window.
@@ -97,7 +132,9 @@ async function createWindow() {
       enableRemoteModule: false, // turn off remote
       preload: path.join(__dirname, "preload.js"), // use a preload script
     },
+    show: false,
   });
+
   win.removeMenu();
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -109,6 +146,11 @@ async function createWindow() {
     // Load the index.html when not in development
     win.loadURL(`file://${__dirname}/index.html`);
   }
+
+  win.on('ready-to-show', () => {
+    win.show();
+    splash.close();
+  });
 }
 
 ipcMain.on("ping", () => {
