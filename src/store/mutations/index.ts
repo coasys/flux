@@ -1,4 +1,6 @@
 import { parseExprURL } from "@perspect3vism/ad4m/ExpressionRef";
+import type Expression from "@perspect3vism/ad4m/Expression";
+import { getExpressionAndRetry } from "@/core/queries/getExpression";
 
 import {
   State,
@@ -19,7 +21,56 @@ interface UpdatePayload {
   groupExpressionRef: any;
 }
 
+interface AddChannelMessages {
+  channelId: string;
+  links: Expression[];
+}
+
 export default {
+  addMessagesIfNotPresent(state: State, payload: AddChannelMessages) {
+    state.communities.forEach((community) => {
+      community.channels.forEach(async (channel) => {
+        if (channel.perspective === payload.channelId) {
+          for (const link of payload.links) {
+            console.log(
+              "Checking",
+              link,
+              "with links",
+              channel.currentExpressionLinks
+            );
+            if (
+              channel.currentExpressionLinks.find(
+                (channelLink) =>
+                  //@ts-ignore
+                  channelLink.expression.data.target === link.data.target
+              ) == undefined
+            ) {
+              console.log("Did not find link", link, "in channel, adding!");
+              channel.currentExpressionLinks.push({
+                expression: link,
+                language: channel.linkLanguageAddress,
+              } as ExpressionAndLang);
+              const expression = await getExpressionAndRetry(
+                //@ts-ignore
+                link.data.target,
+                5,
+                20
+              );
+              if (expression != null) {
+                //@ts-ignore
+                channel.currentExpressionMessages.push({
+                  //@ts-ignore
+                  expression: expression,
+                  //@ts-ignore
+                  url: parseExprURL(link.data.target),
+                } as ExpressionAndRef);
+              }
+            }
+          }
+        }
+      });
+    });
+  },
   addCommunity(state: State, payload: CommunityState) {
     console.log("adding Community", payload);
     state.communities.push(payload);

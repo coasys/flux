@@ -51,18 +51,13 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import { useRoute } from "vue-router";
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
 import { JuntoShortForm } from "@/core/juntoTypes";
-import {
-  CREATE_EXPRESSION,
-  ADD_LINK,
-  QUERY_EXPRESSION,
-} from "@/core/graphql_queries";
-import ad4m from "@perspect3vism/ad4m-executor";
-import { useLazyQuery, useMutation } from "@vue/apollo-composable";
 import Expression from "@perspect3vism/ad4m/Expression";
 import { ChannelState, CommunityState } from "@/store";
+import { getLinksPaginated } from "@/core/queries/getLinks";
+import { createExpression } from "@/core/mutations/createExpression";
+import { createLink } from "@/core/mutations/createLink";
 
 interface ChatItem {
   id: string;
@@ -73,46 +68,16 @@ interface ChatItem {
 
 export default defineComponent({
   setup() {
-    const route = useRoute();
-
     const currentExpressionPost = ref({});
-    const expressionLanguage = ref("");
-    const linkData = ref({});
-    const expressionUrl = ref("");
-
-    const postExpression = useMutation(CREATE_EXPRESSION, () => ({
-      variables: {
-        languageAddress: expressionLanguage.value,
-        content: JSON.stringify(currentExpressionPost.value),
-      },
-    }));
-
-    const getExpression = useLazyQuery(QUERY_EXPRESSION, () => ({
-      url: expressionUrl.value,
-    }));
-
-    const addLink = useMutation<{
-      addLink: ad4m.LinkExpression;
-    }>(ADD_LINK, () => ({
-      variables: {
-        perspectiveUUID: route.params.channelId,
-        link: JSON.stringify(linkData.value),
-      },
-    }));
 
     return {
       currentExpressionPost,
-      expressionLanguage,
-      linkData,
-      postExpression,
-      addLink,
-      getExpression,
-      expressionUrl,
     };
   },
   mounted() {
     console.log("Current mounted channel", this.channel);
     this.scrollToBottom();
+    this.getNextSetExpressions();
   },
   computed: {
     community(): CommunityState {
@@ -143,50 +108,34 @@ export default defineComponent({
     },
   },
   methods: {
-    createExpression(
-      message: JuntoShortForm,
-      expressionLanguage: string
-    ): Promise<string> {
-      this.currentExpressionPost = message;
-      this.expressionLanguage = expressionLanguage;
-      return new Promise((resolve, reject) => {
-        this.postExpression.onError((error) => {
-          console.log("Got error posting expression", error);
-          reject(error);
-        });
-        this.postExpression.mutate().then((result) => {
-          resolve(result.data.createExpression);
-        });
+    async getNextSetExpressions(lastSeen?: Date) {
+      //NOTE: here we could add logic which updates a channels state detailing how far back we have gone with manual queries
+      //This could be useful for limiting redundant zome calls that have already been made
+      //But we might actually want to remake these zome calls since holochain is eventually consistent and previous zome calls may not have
+      //returned all expressions
+      let fromDate;
+      if (lastSeen == undefined) {
+        //Get from application start time -> channel creation time in chunks
+        //Dedup results from whats already in the store and add deduped values to the store
+        fromDate = this.$store.getters.getApplicationStartTime;
+      } else {
+        //Get from lastSeen -> channel creationg time in chunks
+        fromDate = lastSeen;
+      }
+      console.log("Query from", fromDate, "until", this.channel?.createdAt);
+      let links = await getLinksPaginated(
+        this.$route.params.channelId.toString(),
+        "sioc://chatchannel",
+        "sioc://content_of",
+        fromDate,
+        this.channel?.createdAt
+      );
+      console.log("Got paginated links", links);
+      this.$store.commit("addMessagesIfNotPresent", {
+        channelId: this.channel!.perspective,
+        links: links,
       });
     },
-
-    createLink(link: ad4m.Link): Promise<ad4m.LinkExpression> {
-      this.linkData = link;
-      return new Promise((resolve, reject) => {
-        this.addLink.onError((error) => {
-          console.log("Got error posting link", error);
-          reject(error);
-        });
-        this.addLink.mutate().then((addLinkResp) => {
-          resolve(addLinkResp.data!.addLink);
-        });
-      });
-    },
-
-    getExpressionMethod(url: string) {
-      this.expressionUrl = url;
-      return new Promise((resolve, reject) => {
-        this.getExpression.onResult((result) => {
-          resolve(result.data);
-        });
-        this.getExpression.onError((error) => {
-          console.log("Got error in getExpression", error);
-          reject(error);
-        });
-        this.getExpression.load();
-      });
-    },
-
     async createDirectMessage(message: JuntoShortForm) {
       console.log({ message });
       let shortFormExpressionLanguage = this.community.expressionLanguages[0]!;
@@ -196,12 +145,12 @@ export default defineComponent({
         shortFormExpressionLanguage
       );
 
-      let exprUrl = await this.createExpression(
-        message,
-        shortFormExpressionLanguage
+      let exprUrl = await createExpression(
+        shortFormExpressionLanguage,
+        JSON.stringify(message)
       );
       console.log("Created expression with hash", exprUrl);
-      let addLink = await this.createLink({
+      let addLink = await createLink(this.$route.params.channelId.toString(), {
         source: "sioc://chatchannel",
         target: exprUrl,
         predicate: "sioc://content_of",
