@@ -154,6 +154,9 @@ export default defineComponent({
       console.log({ isInit, val, comment: "Hello" });
       this.$store.commit("updateAgentInitState", isInit);
       this.$store.commit("updateAgentLockState", isUnlocked);
+      if (isUnlocked == true) {
+        this.$store.commit("updateApplicationStartTime", new Date());
+      }
       if (isInit == true) {
         //Get database perspective from store
         let databasePerspective = this.$store.getters.getDatabasePerspective;
