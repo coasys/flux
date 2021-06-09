@@ -144,10 +144,9 @@ export default defineComponent({
       console.log(`Received language path from main thread: ${data}`);
       this.$store.commit("setLanguagesPath", data);
     });
-    const { onResult, onError } =
-      useQuery<{
-        agent: ad4m.AgentService;
-      }>(AGENT_SERVICE_STATUS);
+    const { onResult, onError } = useQuery<{
+      agent: ad4m.AgentService;
+    }>(AGENT_SERVICE_STATUS);
     onResult((val) => {
       const isInit = val.data.agent.isInitialized!;
       const isUnlocked = val.data.agent.isUnlocked!;

@@ -106,7 +106,11 @@ import { defineComponent } from "vue";
 import { Profile, ThemeState } from "@/store";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 
-import { dataURItoBlob } from "@/core/methods/createProfile";
+import {
+  blobToDataURL,
+  dataURItoBlob,
+  resizeImage,
+} from "@/core/methods/createProfile";
 
 export default defineComponent({
   components: { AvatarUpload },
@@ -175,12 +179,20 @@ export default defineComponent({
       });
       this.isSettingsOpen = false;
     },
-    updateUser() {
+    async updateUser() {
+      const resizedImage = this.profilePicture
+        ? await resizeImage(dataURItoBlob(this.profilePicture as string), 400)
+        : null;
+      const thumbnail = this.profilePicture
+        ? await blobToDataURL(resizedImage!)
+        : null;
+
       this.isUpdatingProfile = true;
       this.$store
         .dispatch("updateUser", {
           username: this.username,
           profilePicture: this.profilePicture,
+          thumbnail,
         })
         .then(() => {
           this.isEditProfileOpen = false;
