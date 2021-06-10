@@ -1,5 +1,6 @@
 import { getExpression } from "@/core/queries/getExpression";
 import { getLinks } from "@/core/queries/getLinks";
+import { TimeoutCache } from "@/utils/timeoutCache";
 import { Commit } from "vuex";
 import { ExpressionTypes, Profile, State } from "..";
 
@@ -55,6 +56,8 @@ export default async function(
 
   const profiles : {[x: string]: Profile} = {}
 
+  const cache = new TimeoutCache<Profile>(1000 * 60 * 60);
+
   try {
     const communities = state.communities;
 
@@ -70,8 +73,17 @@ export default async function(
   
     if (profileLang) {
       for (const profileLink of profileLinks) {
-        if (profiles[profileLink.author!.did!] === undefined) {
-          profiles[profileLink.author!.did!] =  await getMember(profileLang!.languageAddress, profileLink.author!.did!);
+        const did = `${profileLang.languageAddress}://${profileLink.author!.did!}`;
+        const profile = cache.get(did);
+
+        if (profile) {
+          if (profiles[did] === undefined) {
+            profiles[did] = profile;
+          }
+        } else {
+          const member = await getMember(profileLang.languageAddress, profileLink.author!.did!);;
+          profiles[did] = member;
+          cache.set(did, member);
         }
       }
 
