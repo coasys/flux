@@ -192,7 +192,7 @@ export default defineComponent({
         .dispatch("updateUser", {
           username: this.username,
           profilePicture: this.profilePicture,
-          thumbnail,
+          thumbnailPicture: thumbnail,
         })
         .then(() => {
           this.isEditProfileOpen = false;
