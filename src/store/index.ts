@@ -66,8 +66,8 @@ export interface Profile {
   email: string;
   givenName: string;
   familyName: string;
-  profilePicture: string;
-  thumbnailPicture: string;
+  profilePicture?: string;
+  thumbnailPicture?: string;
 }
 
 export interface ToastState {
@@ -100,6 +100,7 @@ export interface State {
   agentUnlocked: boolean;
   agentInit: boolean;
   userProfile: Profile | null;
+  activeCommunityMembers: Profile[]
 }
 
 export interface ExpressionUIIcons {
@@ -150,6 +151,7 @@ export default createStore({
     agentUnlocked: false,
     agentInit: false,
     userProfile: null,
+    activeCommunityMembers: []
   },
   plugins: [vuexLocal.plugin],
   mutations: mutations,

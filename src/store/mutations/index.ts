@@ -124,4 +124,8 @@ export default {
       community.groupExpressionRef = groupExpressionRef;
     }
   },
+
+  setActiveCommunityMembers(state: State, { members }: {members: Profile[]}) {
+    state.activeCommunityMembers = members;
+  },
 };
