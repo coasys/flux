@@ -239,10 +239,9 @@ export default defineComponent({
         .dispatch("logIn", {
           password: this.password,
         })
-        .then(async () => {
-          if (this.$store.getters.getAgentLockStatus) {
-            this.passwordError = false;
-            this.passwordErrorMessage = "";
+        .then(({ data }) => {
+          const isUnlocked = data!.unlockAgent!.isUnlocked;
+          if (isUnlocked) {
             this.$router.push("/");
           } else {
             this.password = "";
