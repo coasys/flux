@@ -27,6 +27,8 @@
             type="password"
             :value="password"
             @keydown.enter="logIn"
+            :error="passwordError"
+            :errortext="passwordErrorMessage"
             @input="(e) => (password = e.target.value)"
           ></j-input>
           <j-button
@@ -113,6 +115,7 @@ import {
 } from "@/core/methods/createProfile";
 import { useStore } from "vuex";
 import { useValidation } from "@/utils/validation";
+import sleep from "@/utils/sleep";
 
 export default defineComponent({
   name: "Welcome",
@@ -236,7 +239,17 @@ export default defineComponent({
         .dispatch("logIn", {
           password: this.password,
         })
-        .then(() => this.$router.push("/"))
+        .then(async () => {
+          if (this.$store.getters.getAgentLockStatus) {
+            this.passwordError = false;
+            this.passwordErrorMessage = "";
+            this.$router.push("/");
+          } else {
+            this.password = "";
+            this.passwordError = true;
+            this.passwordErrorMessage = "Incorrect password";
+          }
+        })
         .finally(() => {
           this.isLoggingIn = false;
         });
