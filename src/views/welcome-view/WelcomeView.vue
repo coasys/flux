@@ -12,9 +12,9 @@
       <j-text variant="ingress">
         Welcome to the next generation of social media.
       </j-text>
-      <j-text variant="body">
-        Submitting user information will register you in the public junto DNA
-        but this is not required to use private groups.
+      <j-text variant="body" v-if="!hasUser">
+        Submitting user information will register you in the public Junto
+        network but this is not required to use private groups.
       </j-text>
     </div>
     <div class="welcome-view__right">
