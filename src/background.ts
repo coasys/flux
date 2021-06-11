@@ -193,8 +193,9 @@ ipcMain.on("cleanState", () => {
   win.webContents.send("getCleanState");
 });
 
-ipcMain.on("quitApp", () => {
-  app.exit()
+ipcMain.on("quitApp", async () => {
+  await Core.exit();
+  app.quit();
 });
 
 // Scheme must be registered before the app is ready
