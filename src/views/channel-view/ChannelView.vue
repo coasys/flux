@@ -5,6 +5,9 @@
       <j-text nomargin weight="500" size="500">{{ channel.name }}</j-text>
     </header>
     <div class="channel-view__main">
+      <div class="channel-view__load-more">
+        <j-button @click="loadMoreMessages">Load more messages</j-button>
+      </div>
       <dynamic-scroller
         :items="messageList"
         :min-item-size="100"
@@ -55,13 +58,11 @@ import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
 import { JuntoShortForm } from "@/core/juntoTypes";
 import Expression from "@perspect3vism/ad4m/Expression";
 import { ChannelState, CommunityState } from "@/store";
-import { getLinksPaginated } from "@/core/queries/getLinks";
-import { createExpression } from "@/core/mutations/createExpression";
-import { createLink } from "@/core/mutations/createLink";
 
 interface ChatItem {
   id: string;
-  date?: Date | string | number;
+  authorId?: string;
+  timestamp?: string;
   message?: Expression;
   hideUser?: boolean;
 }
@@ -77,7 +78,17 @@ export default defineComponent({
   mounted() {
     console.log("Current mounted channel", this.channel);
     this.scrollToBottom();
-    this.getNextSetExpressions();
+    this.loadMessages();
+    /* TODO: Show button only when we scrolled to top
+    document.addEventListener("scroll", (e) => {
+      this.isScrolledToTop = window.scrollY > 10;
+    });
+    */
+  },
+  watch: {
+    messageList: function (val) {
+      this.scrollToBottom();
+    },
   },
   computed: {
     community(): CommunityState {
@@ -89,74 +100,56 @@ export default defineComponent({
       return this.$store.getters.getChannel({ channelId, communityId });
     },
     messageList(): Array<ChatItem> {
-      return this.channel.currentExpressionMessages.reduce(
-        (acc: any, item: any, index: number) => {
-          const previousItem = acc[index - 1];
-          return [
-            ...acc,
-            {
-              id: item.expression.timestamp,
-              authorId: item.expression.author.did,
-              timestamp: item.expression.timestamp,
-              message: JSON.parse(item.expression.data).body,
-              hideUser: item.expression.author.did === previousItem?.authorId,
-            },
-          ];
-        },
-        []
+      const sortedMessages = [...this.channel.currentExpressionMessages].sort(
+        (a, b) =>
+          new Date(a.expression.timestamp).getTime() -
+          new Date(b.expression.timestamp).getTime()
       );
+
+      return sortedMessages.reduce((acc: any, item: any, index: number) => {
+        const previousItem = acc[index - 1];
+        return [
+          ...acc,
+          {
+            id: item.expression.timestamp,
+            authorId: item.expression.author.did,
+            timestamp: item.expression.timestamp,
+            message: JSON.parse(item.expression.data).body,
+            hideUser: item.expression.author.did === previousItem?.authorId,
+          },
+        ];
+      }, []);
     },
   },
   methods: {
-    async getNextSetExpressions(lastSeen?: Date) {
-      //NOTE: here we could add logic which updates a channels state detailing how far back we have gone with manual queries
-      //This could be useful for limiting redundant zome calls that have already been made
-      //But we might actually want to remake these zome calls since holochain is eventually consistent and previous zome calls may not have
-      //returned all expressions
-      let fromDate;
-      if (lastSeen == undefined) {
-        //Get from application start time -> channel creation time in chunks
-        //Dedup results from whats already in the store and add deduped values to the store
-        fromDate = this.$store.getters.getApplicationStartTime;
+    loadMoreMessages() {
+      const messageAmount = this.messageList.length;
+      if (messageAmount) {
+        const lastMessage = this.messageList[messageAmount - 1];
+        this.loadMessages(lastMessage.timestamp);
       } else {
-        //Get from lastSeen -> channel creationg time in chunks
-        fromDate = lastSeen;
+        this.loadMessages();
       }
-      console.log("Query from", fromDate, "until", this.channel?.createdAt);
-      let links = await getLinksPaginated(
-        this.$route.params.channelId.toString(),
-        "sioc://chatchannel",
-        "sioc://content_of",
-        fromDate,
-        this.channel?.createdAt
-      );
-      console.log("Got paginated links", links);
-      this.$store.commit("addMessagesIfNotPresent", {
-        channelId: this.channel!.perspective,
-        links: links,
+    },
+    loadMessages(from?: string, to?: string): void {
+      this.$store.dispatch("loadExpressions", {
+        from,
+        to,
+        communityId: this.$route.params.communityId,
+        channelId: this.$route.params.channelId,
       });
     },
     async createDirectMessage(message: JuntoShortForm) {
-      console.log({ message });
-      let shortFormExpressionLanguage = this.community.expressionLanguages[0]!;
-      console.log(
-        new Date().toISOString(),
-        "Posting shortForm expression to language",
-        shortFormExpressionLanguage
-      );
-
-      let exprUrl = await createExpression(
-        shortFormExpressionLanguage,
-        JSON.stringify(message)
-      );
-      console.log("Created expression with hash", exprUrl);
-      let addLink = await createLink(this.$route.params.channelId.toString(), {
-        source: "sioc://chatchannel",
-        target: exprUrl,
-        predicate: "sioc://content_of",
-      });
-      console.log("Adding link with response", addLink);
-      setTimeout(this.scrollToBottom, 300);
+      this.currentExpressionPost = "";
+      this.$store
+        .dispatch("createExpression", {
+          languageAddress: this.community.expressionLanguages[0]!,
+          content: message,
+          perspective: this.$route.params.channelId.toString(),
+        })
+        .then(() => {
+          setTimeout(this.scrollToBottom, 300);
+        });
     },
 
     scrollToBottom() {
@@ -198,6 +191,15 @@ export default defineComponent({
   flex-direction: column;
   justify-content: flex-end;
 }
+
+.channel-view__load-more {
+  position: absolute;
+  top: var(--j-space-1000);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
 .channel-view__footer {
   background: var(--j-color-white);
   position: sticky;

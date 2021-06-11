@@ -27,7 +27,7 @@ interface AddChannelMessages {
 }
 
 export default {
-  addMessagesIfNotPresent(state: State, payload: AddChannelMessages) {
+  addMessagesIfNotPresent(state: State, payload: AddChannelMessages): void {
     state.communities.forEach((community) => {
       community.channels.forEach(async (channel) => {
         if (channel.perspective === payload.channelId) {
