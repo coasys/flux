@@ -106,7 +106,7 @@ export default defineComponent({
               if (getExprRes != null) {
                 break;
               }
-              await sleep(expressionGetDelayMs);
+              await sleep(expressionGetDelayMs * i);
             }
             if (getExprRes == null) {
               throw Error("Could not get expression from link signal");
