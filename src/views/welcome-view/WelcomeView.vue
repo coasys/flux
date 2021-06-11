@@ -12,9 +12,9 @@
       <j-text variant="ingress">
         Welcome to the next generation of social media.
       </j-text>
-      <j-text variant="body">
-        Submitting user information will register you in the public junto DNA
-        but this is not required to use private groups.
+      <j-text variant="body" v-if="!hasUser">
+        Submitting user information will register you in the public Junto
+        network but this is not required to use private groups.
       </j-text>
     </div>
     <div class="welcome-view__right">
@@ -27,6 +27,8 @@
             type="password"
             :value="password"
             @keydown.enter="logIn"
+            :error="passwordError"
+            :errortext="passwordErrorMessage"
             @input="(e) => (password = e.target.value)"
           ></j-input>
           <j-button
@@ -113,6 +115,7 @@ import {
 } from "@/core/methods/createProfile";
 import { useStore } from "vuex";
 import { useValidation } from "@/utils/validation";
+import sleep from "@/utils/sleep";
 
 export default defineComponent({
   name: "Welcome",
@@ -236,7 +239,16 @@ export default defineComponent({
         .dispatch("logIn", {
           password: this.password,
         })
-        .then(() => this.$router.push("/"))
+        .then(({ data }) => {
+          const isUnlocked = data!.unlockAgent!.isUnlocked;
+          if (isUnlocked) {
+            this.$router.push("/");
+          } else {
+            this.password = "";
+            this.passwordError = true;
+            this.passwordErrorMessage = "Incorrect password";
+          }
+        })
         .finally(() => {
           this.isLoggingIn = false;
         });

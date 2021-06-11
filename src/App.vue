@@ -151,7 +151,6 @@ export default defineComponent({
     onResult((val) => {
       const isInit = val.data.agent.isInitialized!;
       const isUnlocked = val.data.agent.isUnlocked!;
-      console.log({ isInit, val, comment: "Hello" });
       this.$store.commit("updateAgentInitState", isInit);
       this.$store.commit("updateAgentLockState", isUnlocked);
       if (isUnlocked == true) {

@@ -90,6 +90,12 @@
             @input="(e) => (themeHue = e.target.value)"
           />
         </div>
+        <j-flex a="center" j="between">
+        <j-text variant="label">Clear State</j-text>
+          <j-button size="md" variant="primary" @click="cleanState">
+            clear
+          </j-button>
+        </j-flex>
         <div>
           <j-button size="lg" @click="isSettingsOpen = false">Cancel</j-button>
           <j-button size="lg" variant="primary" @click="updateTheme">
@@ -102,7 +108,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, onBeforeMount } from "vue";
 import { Profile, ThemeState } from "@/store";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 
@@ -110,6 +116,15 @@ import { dataURItoBlob } from "@/core/methods/createProfile";
 
 export default defineComponent({
   components: { AvatarUpload },
+  setup() {
+    onBeforeMount(() => {
+      window.api.receive("getCleanState", (data: string) => {
+        localStorage.clear();
+
+        window.api.send("quitApp");
+      });
+    });
+  },
   data() {
     return {
       hue: getComputedStyle(document.documentElement).getPropertyValue(
@@ -189,6 +204,9 @@ export default defineComponent({
           this.isUpdatingProfile = false;
         });
     },
+    cleanState() {
+      window.api.send("cleanState");
+    }
   },
   computed: {
     theme(): ThemeState {

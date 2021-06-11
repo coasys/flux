@@ -84,7 +84,14 @@
             size="lg"
             label="Invite link"
           ></j-input>
-          <j-button @click="joinCommunity" size="lg" full variant="primary">
+          <j-button
+            :disabled="isJoiningCommunity"
+            :loading="isJoiningCommunity"
+            @click="joinCommunity"
+            size="lg"
+            full
+            variant="primary"
+          >
             Join Community
           </j-button>
         </j-flex>
@@ -108,6 +115,7 @@ export default defineComponent({
 
     const showModal = ref(false);
     const isCreatingCommunity = ref(false);
+    const isJoiningCommunity = ref(false);
     const tabView = ref("Create");
 
     const createCommunity = () => {
@@ -128,9 +136,17 @@ export default defineComponent({
     };
 
     const joinCommunity = () => {
-      store.dispatch("joinCommunity", {
-        joiningLink: joiningLink.value,
-      });
+      isJoiningCommunity.value = true;
+      store
+        .dispatch("joinCommunity", {
+          joiningLink: joiningLink.value,
+        })
+        .then(() => {
+          showModal.value = false;
+        })
+        .finally(() => {
+          isJoiningCommunity.value = false;
+        });
     };
 
     return {
@@ -141,6 +157,7 @@ export default defineComponent({
       createCommunity,
       tabView,
       showModal,
+      isJoiningCommunity,
       isCreatingCommunity,
     };
   },

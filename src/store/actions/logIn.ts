@@ -23,9 +23,8 @@ export default async (
       mutation: UNLOCK_AGENT,
       variables: { passphrase: password },
     });
-
-    commit("updateAgentInitState", true);
-    commit("updateAgentLockState", true);
+    commit("updateAgentInitState", lockRes.data!.unlockAgent.isInitialized!);
+    commit("updateAgentLockState", lockRes.data!.unlockAgent.isUnlocked!);
     return lockRes;
   } catch (e) {
     commit("showDangerToast", {

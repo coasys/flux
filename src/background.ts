@@ -185,6 +185,18 @@ ipcMain.on("getLangPath", () => {
   win.webContents.send("getLangPathResponse", builtInLangPath);
 });
 
+ipcMain.on("cleanState", () => {
+  const path = app.getPath("userData");
+
+  fs.rmdirSync(path, { recursive: true });
+
+  win.webContents.send("getCleanState");
+});
+
+ipcMain.on("quitApp", () => {
+  app.exit()
+});
+
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
   { scheme: "app", privileges: { secure: true, standard: true } },
