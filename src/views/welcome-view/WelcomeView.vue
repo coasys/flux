@@ -32,7 +32,8 @@
             @input="(e) => (password = e.target.value)"
           >
             <j-button
-              @click="showPassword = !showPassword"
+              @keydown.stop
+              @click.stop="showPassword = !showPassword"
               variant="transparent"
               square
               slot="end"
@@ -81,7 +82,8 @@
           @blur="(e) => validatePassword()"
         >
           <j-button
-            @click="showPassword = !showPassword"
+            @keydown.stop
+            @click.stop="showPassword = !showPassword"
             variant="transparent"
             square
             slot="end"
