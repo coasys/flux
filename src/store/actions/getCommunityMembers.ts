@@ -1,4 +1,4 @@
-import { getExpression } from "@/core/queries/getExpression";
+import { getProfile, toProfile } from "@/utils/profileHelpers";
 import { getLinks } from "@/core/queries/getLinks";
 import { TimeoutCache } from "@/utils/timeoutCache";
 import { Commit } from "vuex";
@@ -11,43 +11,6 @@ export interface Context {
 
 export interface Payload {
   communityId: string;
-}
-
-export function toProfile(did: string, obj: { [x: string]: any }): Profile {
-  const profile: Profile = {
-    username: obj["foaf:AccountName"],
-    email: obj["schema:email"],
-    familyName: obj["schema:familyName"],
-    givenName: obj["schema:givenName"],
-    thumbnailPicture: undefined,
-    profilePicture: undefined,
-    address: did,
-  };
-
-  if (obj["schema:image"]) {
-    profile.profilePicture = obj["schema:image"]["schema:contentUrl"];
-    profile.thumbnailPicture =
-      obj["schema:image"]["schema:thumbnail"]["schema:contentUrl"];
-  }
-
-  return profile;
-}
-
-export async function getMember(
-  profileLangAddress: string,
-  did: string
-): Promise<Profile> {
-  const profileLink = `${profileLangAddress}://${did}`;
-
-  const profileExp = await getExpression(profileLink);
-
-  const profile = JSON.parse(profileExp["data"]!).profile;
-
-  if (profile["schema:image"]) {
-    profile["schema:image"] = JSON.parse(profile["schema:image"]);
-  }
-
-  return toProfile(did, profile);
 }
 
 export default async function (
@@ -88,12 +51,12 @@ export default async function (
             profiles[did] = profile;
           }
         } else {
-          const member = await getMember(
+          const profile = await getProfile(
             profileLang.languageAddress,
             profileLink.author!.did!
           );
-          profiles[did] = member;
-          cache.set(did, member);
+          profiles[did] = profile;
+          cache.set(did, profile);
         }
       }
 

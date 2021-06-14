@@ -4,31 +4,30 @@
       <j-icon size="sm" name="hash" />
       <j-text nomargin weight="500" size="500">{{ channel.name }}</j-text>
     </header>
-    <div class="channel-view__main">
+    <div class="channel-view__main" ref="messagesContainer">
       <dynamic-scroller
-        :items="messageList"
+        :items="messages"
         :min-item-size="100"
         class="channelView__messages"
-        ref="messagesContainer"
       >
-        <template v-slot="{ item, index, active }">
+        <template v-slot="{ item: message, index, active }">
           <dynamic-scroller-item
-            :item="item"
+            :item="message"
             :active="active"
             :data-index="index"
           >
             <j-message-item
-              :hideuser="item.hideUser"
-              :timestamp="item.timestamp"
+              :hideuser="message.hideUser"
+              :timestamp="message.timestamp"
             >
               <j-avatar
                 :src="require('@/assets/images/junto_app_icon.png')"
                 slot="avatar"
                 initials="P"
               />
-              <span slot="username">Username</span>
+              <span slot="username">{{ message.user.username }}</span>
               <div slot="message">
-                <span v-html="item.message"></span>
+                <span v-html="message.message"></span>
               </div>
             </j-message-item>
           </dynamic-scroller-item>
@@ -62,13 +61,22 @@ import {
 import ad4m from "@perspect3vism/ad4m-executor";
 import { useLazyQuery, useMutation } from "@vue/apollo-composable";
 import Expression from "@perspect3vism/ad4m/Expression";
-import { ChannelState, CommunityState } from "@/store";
+import {
+  ChannelState,
+  Profile,
+  CommunityState,
+  ExpressionTypes,
+} from "@/store";
+import { getProfile } from "@/utils/profileHelpers";
 
-interface ChatItem {
+interface Message {
   id: string;
+  authorId: string;
+  user: Profile;
   date?: Date | string | number;
   message?: Expression;
   hideUser?: boolean;
+  timestamp: string;
 }
 
 export default defineComponent({
@@ -79,6 +87,7 @@ export default defineComponent({
     const expressionLanguage = ref("");
     const linkData = ref({});
     const expressionUrl = ref("");
+    const unsortedMessages = ref([]);
 
     const postExpression = useMutation(CREATE_EXPRESSION, () => ({
       variables: {
@@ -108,13 +117,67 @@ export default defineComponent({
       addLink,
       getExpression,
       expressionUrl,
+      unsortedMessages,
     };
+  },
+  watch: {
+    "channel.currentExpressionMessages": {
+      handler: async function (expressions) {
+        const profileLang = this.community?.typedExpressionLanguages.find(
+          (t) => t.expressionType === ExpressionTypes.ProfileExpression
+        );
+
+        if (profileLang) {
+          this.unsortedMessages = await Promise.all(
+            expressions.map(async (item: any) => {
+              return {
+                user: await getProfile(
+                  profileLang.languageAddress.toString(),
+                  item.expression.author.did
+                ),
+                id: item.expression.timestamp,
+                authorId: item.expression.author.did,
+                timestamp: item.expression.timestamp,
+                message: JSON.parse(item.expression.data).body,
+              };
+            }, [])
+          );
+        }
+      },
+      immediate: true,
+      deep: true,
+    },
   },
   mounted() {
     console.log("Current mounted channel", this.channel);
     this.scrollToBottom();
   },
   computed: {
+    messages(): Message[] {
+      const sortedMessages = [...this.unsortedMessages].sort(
+        (a: Message, b: Message) => {
+          return (
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+          );
+        }
+      );
+
+      return sortedMessages.reduce(
+        (acc: Message[], message: Message, index: number) => {
+          const prevMessage = acc[index - 1];
+          return [
+            ...acc,
+            {
+              ...message,
+              hideUser: prevMessage
+                ? prevMessage.authorId === message.authorId
+                : false,
+            },
+          ];
+        },
+        []
+      );
+    },
     community(): CommunityState {
       const { communityId } = this.$route.params;
       return this.$store.getters.getCommunity(communityId);
@@ -122,24 +185,6 @@ export default defineComponent({
     channel(): ChannelState {
       const { channelId, communityId } = this.$route.params;
       return this.$store.getters.getChannel({ channelId, communityId });
-    },
-    messageList(): Array<ChatItem> {
-      return this.channel.currentExpressionMessages.reduce(
-        (acc: any, item: any, index: number) => {
-          const previousItem = acc[index - 1];
-          return [
-            ...acc,
-            {
-              id: item.expression.timestamp,
-              authorId: item.expression.author.did,
-              timestamp: item.expression.timestamp,
-              message: JSON.parse(item.expression.data).body,
-              hideUser: item.expression.author.did === previousItem?.authorId,
-            },
-          ];
-        },
-        []
-      );
     },
   },
   methods: {
@@ -212,6 +257,14 @@ export default defineComponent({
 
     scrollToBottom() {
       const container = this.$refs.messagesContainer;
+      //@ts-ignore
+      console.log(
+        "scroll to bottom",
+        //@ts-ignore
+        container.scrollTop,
+        //@ts-ignore
+        container.scrollHeight
+      );
       //@ts-ignore
       container.scrollTop = container.scrollHeight;
     },
