@@ -26,10 +26,13 @@ import { useStore } from "vuex";
 import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
-import { getExpression } from "@/core/queries/getExpression";
-import ad4m from "@perspect3vism/ad4m-executor";
+import {
+  getExpressionAndRetry,
+} from "@/core/queries/getExpression";
+import ad4m, { LinkExpression } from "@perspect3vism/ad4m-executor";
 import { AGENT_SERVICE_STATUS } from "@/core/graphql_queries";
 import { ToastState } from "@/store";
+import parseSignalAsLink from "@/core/utils/parseSignalAsLink";
 
 declare global {
   interface Window {
@@ -45,9 +48,6 @@ export default defineComponent({
     const errorMessage = ref("");
     const showErrorModal = ref(false);
 
-    var language = "";
-    var expression = {};
-
     onError((error) => {
       if (process.env.NODE_ENV !== "production") {
         // can use error.operation.operationName to single out a query type.
@@ -59,7 +59,7 @@ export default defineComponent({
     });
 
     //Ad4m signal watcher
-    const { result } = useSubscription(AD4M_SIGNAL);
+    const { result } = useSubscription<{ signal: ad4m.Signal }>(AD4M_SIGNAL);
 
     //Watch for agent unlock to set off running queries
     store.watch(
@@ -77,59 +77,25 @@ export default defineComponent({
 
     //Watch for incoming signals to get expression data
     watch(result, async (data) => {
-      let signal = JSON.parse(data.signal.signal);
-      language = data.signal.language;
-      expression = signal.data.payload;
-      console.log(
-        new Date().toISOString(),
-        "SIGNAL RECEIVED IN UI: Coming from language",
-        language,
-        signal
-      );
-      if (
-        //@ts-ignore
-        Object.prototype.hasOwnProperty.call(expression.data, "source") &&
-        //@ts-ignore
-        Object.prototype.hasOwnProperty.call(expression.data, "target") &&
-        //@ts-ignore
-        Object.prototype.hasOwnProperty.call(expression.data, "predicate")
-      ) {
-        //@ts-ignore
-        if (expression.data.predicate == "sioc://content_of") {
-          //@ts-ignore
-          let getExprRes = await getExpression(expression.data.target);
-          if (getExprRes == null) {
-            for (let i = 0; i < expressionGetRetries; i++) {
-              console.log("Retrying get of expression signal");
-              //@ts-ignore
-              getExprRes = await getExpression(expression.data.target);
-              if (getExprRes != null) {
-                break;
-              }
-              await sleep(expressionGetDelayMs);
-            }
-            if (getExprRes == null) {
-              throw Error("Could not get expression from link signal");
-            }
-          }
-          console.log(
-            new Date().toISOString(),
-            "Got expression result back",
-            getExprRes
+      const linkData = parseSignalAsLink(data.signal);
+      if (linkData) {
+        const link = linkData.link;
+        const language = linkData.language;
+        if (link.data!.predicate! == "sioc://content_of") {
+          let getExprRes = await getExpressionAndRetry(
+            link.data!.target!,
+            expressionGetRetries,
+            expressionGetDelayMs
           );
           store.commit("addExpressionAndLinkFromLanguageAddress", {
             linkLanguage: language,
             //@ts-ignore
-            link: expression,
+            link: link,
             message: getExprRes,
           });
         }
       }
     });
-
-    function sleep(ms: number) {
-      return new Promise((resolve) => setTimeout(resolve, ms));
-    }
 
     return {
       toast: computed(() => store.state.ui.toast),

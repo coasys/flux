@@ -5,7 +5,7 @@ import { getExpressionAndRetry } from "@/core/queries/getExpression";
 import {
   State,
   CommunityState,
-  ExpressionAndLang,
+  LinkExpressionAndLang,
   ExpressionAndRef,
   AddChannel,
   Profile,
@@ -29,7 +29,7 @@ interface AddChannelMessages {
 
 export default {
   addMessagesIfNotPresent(state: State, payload: AddChannelMessages): void {
-    const links: ExpressionAndLang[] = [];
+    const links: LinkExpressionAndLang[] = [];
     const expressionMessages: ExpressionAndRef[] = [];
     let targetChannel: ChannelState | undefined = undefined;
     state.communities.forEach((community) => {
@@ -48,7 +48,7 @@ export default {
               links.push({
                 expression: link,
                 language: channel.linkLanguageAddress,
-              } as ExpressionAndLang);
+              } as LinkExpressionAndLang);
               const expression = await getExpressionAndRetry(
                 //@ts-ignore
                 link.data.target,
@@ -96,7 +96,7 @@ export default {
           channel.currentExpressionLinks.push({
             expression: payload.link,
             language: payload.linkLanguage,
-          } as ExpressionAndLang);
+          } as LinkExpressionAndLang);
           channel.currentExpressionMessages.push({
             expression: payload.message,
             url: parseExprURL(payload.link.data.target),

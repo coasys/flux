@@ -28,10 +28,10 @@ export async function getExpressionAndRetry(
       if (getExprRes != null) {
         break;
       }
-      await sleep(retryDelay);
+      await sleep(retryDelay * i);
     }
     if (getExprRes == null) {
-      throw Error("Could not get expression from link signal");
+      throw Error(`Could not get expression in ${retries} retries`);
     }
   }
   return getExprRes;
