@@ -50,13 +50,7 @@
     <j-box pt="500" px="500" pb="500">
       <avatar-group
         @click="showGroupMembers = true"
-        :users="[
-          { username: 'test' },
-          { username: 'test' },
-          { username: 'test' },
-          { username: 'test' },
-          { username: 'test' },
-        ]"
+        :users="communityMembers"
       />
     </j-box>
 
@@ -96,19 +90,22 @@
       @toggle="(e) => (showGroupMembers = e.target.open)"
     >
       <j-flex gap="500" direction="column">
-        <j-text variant="heading">All group members (5)</j-text>
+        <j-text variant="heading">All group members ({{ communityMembers.length }})</j-text>
         <j-input placeholder="Search for member" type="search"></j-input>
         <j-flex wrap gap="600">
           <j-flex
             gap="300"
-            v-for="index in 5"
-            :key="index"
+            v-for="communityMember in communityMembers"
+            :key="communityMember.username"
             inline
             direction="column"
             a="center"
           >
-            <j-avatar size="lg" />
-            <j-text variant="body">Username</j-text>
+            <j-avatar
+              size="lg"
+              :src="value ?? require('@/assets/images/avatar-placeholder.png')"
+            />
+            <j-text variant="body">{{ communityMember.username }}</j-text>
           </j-flex>
         </j-flex>
       </j-flex>
@@ -178,6 +175,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
+import { Profile } from "@/store";
 
 export default defineComponent({
   components: { AvatarGroup },
@@ -251,6 +249,11 @@ export default defineComponent({
         .finally(() => {
           this.isCreatingChannel = false;
         });
+    },
+  },
+  computed: {
+    communityMembers(): Profile[] {
+      return this.$store.getters.getActiveCommunityMembers;
     },
   },
 });

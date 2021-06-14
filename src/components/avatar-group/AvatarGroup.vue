@@ -5,7 +5,7 @@
         <j-avatar
           v-for="(user, index) in firstUsers"
           :key="index"
-          :src="require('@/assets/images/avatar-placeholder.png')"
+          :src="value ?? require('@/assets/images/avatar-placeholder.png')"
           size="sm"
         ></j-avatar>
         <span v-if="users.length >= 4" class="avatar-group__see-all">
@@ -24,7 +24,7 @@ export default defineComponent({
   props: ["users"],
   computed: {
     firstUsers(): any {
-      return [{ ...this.users[0] }, { ...this.users[1] }, { ...this.users[2] }];
+      return (this.users as any[]).slice(0, 3);
     },
   },
 });
