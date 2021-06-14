@@ -135,7 +135,6 @@ export default defineComponent({
       this.$store.dispatch("loadExpressions", {
         from,
         to,
-        communityId: this.$route.params.communityId,
         channelId: this.$route.params.channelId,
       });
     },

@@ -12,6 +12,7 @@ import {
   ToastState,
   ExpressionUIIcons,
   ThemeState,
+  ChannelState,
 } from "@/store";
 
 interface UpdatePayload {
@@ -28,16 +29,14 @@ interface AddChannelMessages {
 
 export default {
   addMessagesIfNotPresent(state: State, payload: AddChannelMessages): void {
+    const links: ExpressionAndLang[] = [];
+    const expressionMessages: ExpressionAndRef[] = [];
+    let targetChannel: ChannelState | undefined = undefined;
     state.communities.forEach((community) => {
       community.channels.forEach(async (channel) => {
         if (channel.perspective === payload.channelId) {
+          targetChannel = channel;
           for (const link of payload.links) {
-            console.log(
-              "Checking",
-              link,
-              "with links",
-              channel.currentExpressionLinks
-            );
             if (
               channel.currentExpressionLinks.find(
                 (channelLink) =>
@@ -46,7 +45,7 @@ export default {
               ) == undefined
             ) {
               console.log("Did not find link", link, "in channel, adding!");
-              channel.currentExpressionLinks.push({
+              links.push({
                 expression: link,
                 language: channel.linkLanguageAddress,
               } as ExpressionAndLang);
@@ -58,7 +57,7 @@ export default {
               );
               if (expression != null) {
                 //@ts-ignore
-                channel.currentExpressionMessages.push({
+                expressionMessages.push({
                   //@ts-ignore
                   expression: expression,
                   //@ts-ignore
@@ -70,6 +69,10 @@ export default {
         }
       });
     });
+    if (targetChannel != undefined) {
+      targetChannel!.currentExpressionLinks.concat(links);
+      targetChannel!.currentExpressionMessages.concat(expressionMessages);
+    }
   },
   addCommunity(state: State, payload: CommunityState) {
     console.log("adding Community", payload);
