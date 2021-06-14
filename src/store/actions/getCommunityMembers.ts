@@ -13,44 +13,48 @@ export interface Payload {
   communityId: string;
 }
 
-export function toProfile(did: string, obj: {[x:string]: any}): Profile {
+export function toProfile(did: string, obj: { [x: string]: any }): Profile {
   const profile: Profile = {
-    username: obj['foaf:AccountName'],
-    email: obj['schema:email'],
-    familyName: obj['schema:familyName'],
-    givenName: obj['schema:givenName'],
+    username: obj["foaf:AccountName"],
+    email: obj["schema:email"],
+    familyName: obj["schema:familyName"],
+    givenName: obj["schema:givenName"],
     thumbnailPicture: undefined,
     profilePicture: undefined,
-    address: did
+    address: did,
   };
 
-  if(obj['schema:image']) {
-    profile.profilePicture = obj['schema:image']['schema:contentUrl'];
-    profile.thumbnailPicture = obj['schema:image']['schema:thumbnail']['schema:contentUrl'];
+  if (obj["schema:image"]) {
+    profile.profilePicture = obj["schema:image"]["schema:contentUrl"];
+    profile.thumbnailPicture =
+      obj["schema:image"]["schema:thumbnail"]["schema:contentUrl"];
   }
 
   return profile;
 }
 
-export async function getMember(profileLangAddress: string, did: string): Promise<Profile> {
+export async function getMember(
+  profileLangAddress: string,
+  did: string
+): Promise<Profile> {
   const profileLink = `${profileLangAddress}://${did}`;
 
   const profileExp = await getExpression(profileLink);
 
-  const profile = JSON.parse(profileExp['data']!).profile;
+  const profile = JSON.parse(profileExp["data"]!).profile;
 
-  if (profile['schema:image']) {
-    profile['schema:image'] = JSON.parse(profile['schema:image']);
+  if (profile["schema:image"]) {
+    profile["schema:image"] = JSON.parse(profile["schema:image"]);
   }
 
   return toProfile(did, profile);
 }
 
-export default async function(
-  { commit , state} : Context,
-  { communityId } : Payload,
-) : Promise<void> {
-  const profiles : {[x: string]: Profile} = {}
+export default async function (
+  { commit, state }: Context,
+  { communityId }: Payload
+): Promise<void> {
+  const profiles: { [x: string]: Profile } = {};
 
   const cache = new TimeoutCache<Profile>(1000 * 60 * 60);
 
@@ -59,17 +63,24 @@ export default async function(
 
     console.log(communityId, communities);
 
-    const community = communities.find(c => c.perspective === communityId);
+    const community = communities.find((c) => c.perspective === communityId);
 
-    const profileLinks = await getLinks(communityId, `${community?.linkLanguageAddress}://self`, 'sioc://has_member');
+    const profileLinks = await getLinks(
+      communityId,
+      `${community?.linkLanguageAddress}://self`,
+      "sioc://has_member"
+    );
 
-    console.log('profileLinks:', profileLinks)
+    console.log("profileLinks:", profileLinks);
 
-    const profileLang = community?.typedExpressionLanguages.find(t => t.expressionType === ExpressionTypes.ProfileExpression);
+    const profileLang = community?.typedExpressionLanguages.find(
+      (t) => t.expressionType === ExpressionTypes.ProfileExpression
+    );
 
     if (profileLang) {
       for (const profileLink of profileLinks) {
-        const did = `${profileLang.languageAddress}://${profileLink.author!.did!}`;
+        const did = `${profileLang.languageAddress}://${profileLink.author!
+          .did!}`;
         const profile = cache.get(did);
 
         if (profile) {
@@ -77,7 +88,10 @@ export default async function(
             profiles[did] = profile;
           }
         } else {
-          const member = await getMember(profileLang.languageAddress, profileLink.author!.did!);;
+          const member = await getMember(
+            profileLang.languageAddress,
+            profileLink.author!.did!
+          );
           profiles[did] = member;
           cache.set(did, member);
         }
@@ -85,14 +99,15 @@ export default async function(
 
       const profileList = Object.values(profiles);
 
-      console.log('profiles', profileList);
+      console.log("profiles", profileList);
 
-      commit('setActiveCommunityMembers', {
+      commit("setCommunityMembers", {
         communityId,
         members: profileList,
       });
     } else {
-      const errorMessage = "Expected to find profile expression language for this community";
+      const errorMessage =
+        "Expected to find profile expression language for this community";
       commit("showDangerToast", {
         message: errorMessage,
       });
@@ -104,4 +119,4 @@ export default async function(
     });
     throw new Error(e);
   }
-} 
+}
