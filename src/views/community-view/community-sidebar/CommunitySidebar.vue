@@ -91,11 +91,16 @@
     >
       <j-flex gap="500" direction="column">
         <j-text variant="heading">All group members ({{ communityMembers.length }})</j-text>
-        <j-input placeholder="Search for member" type="search"></j-input>
+        <j-input
+          placeholder="Search for member"
+          type="search"
+          :value="searchValue"
+          @input="(e) => (searchValue = e.target.value)"
+        ></j-input>
         <j-flex wrap gap="600">
           <j-flex
             gap="300"
-            v-for="communityMember in communityMembers"
+            v-for="communityMember in filteredCommunityMemberList"
             :key="communityMember.username"
             inline
             direction="column"
@@ -185,6 +190,8 @@ export default defineComponent({
       handler: function ({ name, description }) {
         this.communityName = name;
         this.communityDescription = description;
+
+        this.searchValue = "";
       },
       deep: true,
       immediate: true,
@@ -200,6 +207,7 @@ export default defineComponent({
       communityDescription: "",
       showUpdateCommunity: false,
       showGroupMembers: false,
+      searchValue: ""
     };
   },
   methods: {
@@ -255,6 +263,11 @@ export default defineComponent({
     communityMembers(): Profile[] {
       return this.$store.getters.getActiveCommunityMembers;
     },
+    filteredCommunityMemberList(): Profile[] {
+      const members: Profile[] = this.$store.getters.getActiveCommunityMembers;
+
+      return members.filter(m => m.username.includes(this.searchValue));
+    }
   },
 });
 </script>
