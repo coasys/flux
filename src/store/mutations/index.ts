@@ -73,10 +73,16 @@ export default {
           }
         }
       }
-    }
 
-    channel?.currentExpressionLinks.concat(links);
-    channel?.currentExpressionMessages.concat(expressions);
+      channel.currentExpressionLinks = [
+        ...channel.currentExpressionLinks,
+        ...links,
+      ];
+      channel.currentExpressionMessages = [
+        ...channel.currentExpressionMessages,
+        ...expressions,
+      ];
+    }
   },
   addCommunity(state: State, payload: CommunityState) {
     console.log("adding Community", payload);
