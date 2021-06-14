@@ -126,7 +126,13 @@ export default {
   },
 
   
-  setActiveCommunityMembers(state: State, { members }: {members: Profile[]}) {
-    state.activeCommunityMembers = members;
+  setActiveCommunityMembers(state: State, { members, communityId }: { members: Profile[], communityId: string }) {
+    const community = state.communities.find(
+      (community) => community.perspective === communityId
+    );
+
+    if (community) {
+      community.members = members;
+    }
   },
 };

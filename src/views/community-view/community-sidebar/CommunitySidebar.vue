@@ -50,7 +50,7 @@
     <j-box pt="500" px="500" pb="500">
       <avatar-group
         @click="showGroupMembers = true"
-        :users="communityMembers"
+        :users="community.members"
       />
     </j-box>
 
@@ -90,7 +90,7 @@
       @toggle="(e) => (showGroupMembers = e.target.open)"
     >
       <j-flex gap="500" direction="column">
-        <j-text variant="heading">All group members ({{ communityMembers.length }})</j-text>
+        <j-text variant="heading">All group members ({{ community.members.length ?? 0 }})</j-text>
         <j-input
           placeholder="Search for member"
           type="search"
@@ -260,11 +260,8 @@ export default defineComponent({
     },
   },
   computed: {
-    communityMembers(): Profile[] {
-      return this.$store.getters.getActiveCommunityMembers;
-    },
     filteredCommunityMemberList(): Profile[] {
-      const members: Profile[] = this.$store.getters.getActiveCommunityMembers;
+      const members: Profile[] = this.community.members;
 
       return members.filter(m => m.username.includes(this.searchValue));
     }

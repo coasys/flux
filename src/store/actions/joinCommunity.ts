@@ -69,6 +69,7 @@ export default async (store: any, { joiningLink }: Payload): Promise<void> => {
         installedPerspective.sharedPerspective!.requiredExpressionLanguages,
       typedExpressionLanguages: typedExpressionLanguages,
       sharedPerspectiveUrl: joiningLink, //TODO: this will have to be string split once we add proof onto the URL
+      members: []
     });
   } catch (e) {
     store.commit("showDangerToast", {

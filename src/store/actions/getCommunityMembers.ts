@@ -50,10 +50,6 @@ export default async function(
   { commit , state} : Context,
   { communityId } : Payload,
 ) : Promise<void> {
-  commit('setActiveCommunityMembers', {
-    members: [],
-  });
-
   const profiles : {[x: string]: Profile} = {}
 
   const cache = new TimeoutCache<Profile>(1000 * 60 * 60);
@@ -92,6 +88,7 @@ export default async function(
       console.log('profiles', profileList);
 
       commit('setActiveCommunityMembers', {
+        communityId,
         members: profileList,
       });
     } else {

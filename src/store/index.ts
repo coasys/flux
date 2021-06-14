@@ -6,6 +6,7 @@ import ExpressionRef from "@perspect3vism/ad4m/ExpressionRef";
 import actions from "./actions";
 import mutations from "./mutations";
 import getters from "./getters";
+
 export interface CommunityState {
   //NOTE: here by having a static name + description we are assuming that these are top level metadata items that each group will have
   name: string;
@@ -17,6 +18,7 @@ export interface CommunityState {
   typedExpressionLanguages: JuntoExpressionReference[];
   groupExpressionRef: string;
   sharedPerspectiveUrl: string;
+  members: Profile[]
 }
 
 // Vuex state of a given channel
@@ -100,7 +102,6 @@ export interface State {
   agentUnlocked: boolean;
   agentInit: boolean;
   userProfile: Profile | null;
-  activeCommunityMembers: Profile[];
 }
 
 export interface ExpressionUIIcons {
@@ -151,7 +152,6 @@ export default createStore({
     agentUnlocked: false,
     agentInit: false,
     userProfile: null,
-    activeCommunityMembers: [],
   },
   plugins: [vuexLocal.plugin],
   mutations: mutations,

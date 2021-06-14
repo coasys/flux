@@ -94,8 +94,4 @@ export default {
   getApplicationStartTime(state: State): Date {
     return state.applicationStartTime;
   },
-
-  getActiveCommunityMembers(state: State): Profile[] {
-    return state.activeCommunityMembers;
-  }
 };
