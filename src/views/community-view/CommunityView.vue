@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onUnmounted, ref, watch } from "vue";
+import { defineComponent, onUnmounted, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
@@ -27,16 +27,19 @@ export default defineComponent({
       (params: any) => {
         console.log("Got update", params);
         startLoop(params);
+
+        store.dispatch('getCommunityMembers', {
+          communityId: params
+        });
       }
     );
 
-    //Dont think we need this
-    // onMounted(() => {
-    //   let communityId = route.params.communityId;
-    //   if (communityId != undefined) {
-    //     startLoop(communityId);
-    //   }
-    // });
+    onMounted(() => {
+      let communityId = route.params.communityId;
+        store.dispatch('getCommunityMembers', {
+          communityId: communityId
+        });
+    });
 
     onUnmounted(() => {
       clearInterval(noDelayRef.value);

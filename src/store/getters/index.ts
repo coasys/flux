@@ -3,6 +3,7 @@ import {
   CommunityState,
   ExpressionUIIcons,
   ChannelState,
+  Profile,
 } from "@/store";
 import Address from "@perspect3vism/ad4m/Address";
 
@@ -93,4 +94,8 @@ export default {
   getApplicationStartTime(state: State): Date {
     return state.applicationStartTime;
   },
+
+  getActiveCommunityMembers(state: State): Profile[] {
+    return state.activeCommunityMembers;
+  }
 };
