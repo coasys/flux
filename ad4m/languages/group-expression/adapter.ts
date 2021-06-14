@@ -8,8 +8,8 @@ import type {
   ExpressionAdapter,
   PublicSharing,
 } from "@perspect3vism/ad4m/Language";
-import type LanguageContext from "@perspect3vism/ad4m-language-context/lib/LanguageContext";
-import type { default as HolochainLanguageDelegate } from "@perspect3vism/ad4m-language-context/lib/Holochain/HolochainLanguageDelegate";
+import type { HolochainLanguageDelegate } from "@perspect3vism/ad4m/LanguageContext";
+import type LanguageContext from "@perspect3vism/ad4m/LanguageContext";
 import type AgentService from "@perspect3vism/ad4m/AgentService";
 import { DNA_NICK } from "./dna";
 
@@ -67,15 +67,13 @@ export default class ShortFormAdapter implements ExpressionAdapter {
         } as Agent,
         data: {
           name: expression.expression_data["foaf:name"],
-          description: expression.expression_data["schema:description"]
+          description: expression.expression_data["schema:description"],
         },
         timestamp: expression.expression_data["schema:dateCreated"]["@value"],
         proof: {
           signature:
             expression.expression_data["sec:proof"]["sec:verificationMethod"],
-          key: expression.expression_data["sec:proof"][
-            "sec:jws"
-          ],
+          key: expression.expression_data["sec:proof"]["sec:jws"],
         } as ExpressionProof,
       } as Expression;
       return expressionSer;

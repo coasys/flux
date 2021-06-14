@@ -84,7 +84,14 @@
             size="lg"
             label="Invite link"
           ></j-input>
-          <j-button @click="joinCommunity" size="lg" full variant="primary">
+          <j-button
+            :disabled="isJoiningCommunity"
+            :loading="isJoiningCommunity"
+            @click="joinCommunity"
+            size="lg"
+            full
+            variant="primary"
+          >
             Join Community
           </j-button>
         </j-flex>
@@ -96,7 +103,6 @@
 <script lang="ts">
 import { useStore } from "vuex";
 import { defineComponent, ref } from "vue";
-import { CommunityState } from "@/store";
 
 export default defineComponent({
   setup() {
@@ -109,15 +115,8 @@ export default defineComponent({
 
     const showModal = ref(false);
     const isCreatingCommunity = ref(false);
+    const isJoiningCommunity = ref(false);
     const tabView = ref("Create");
-
-    const changeCommunity = (community: CommunityState) => {
-      store.commit("changeCommunity", community);
-    };
-
-    const handleCommunityClick = (community: CommunityState) => {
-      changeCommunity(community);
-    };
 
     const createCommunity = () => {
       isCreatingCommunity.value = true;
@@ -137,9 +136,17 @@ export default defineComponent({
     };
 
     const joinCommunity = () => {
-      store.dispatch("joinCommunity", {
-        joiningLink: joiningLink.value,
-      });
+      isJoiningCommunity.value = true;
+      store
+        .dispatch("joinCommunity", {
+          joiningLink: joiningLink.value,
+        })
+        .then(() => {
+          showModal.value = false;
+        })
+        .finally(() => {
+          isJoiningCommunity.value = false;
+        });
     };
 
     return {
@@ -150,15 +157,14 @@ export default defineComponent({
       createCommunity,
       tabView,
       showModal,
+      isJoiningCommunity,
       isCreatingCommunity,
-      handleCommunityClick,
     };
   },
 
   computed: {
     getCommunities() {
       const communities = this.$store.getters.getCommunities;
-
       return communities;
     },
   },

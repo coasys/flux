@@ -1,7 +1,8 @@
 import type Address from "@perspect3vism/ad4m/Address";
 import type Agent from "@perspect3vism/ad4m/Agent";
 import type Language from "@perspect3vism/ad4m/Language";
-import type LanguageContext from "@perspect3vism/ad4m-language-context/lib/LanguageContext";
+import type { HolochainLanguageDelegate } from "@perspect3vism/ad4m/LanguageContext";
+import type LanguageContext from "@perspect3vism/ad4m/LanguageContext";
 import type { Interaction } from "@perspect3vism/ad4m/Language";
 import ShortFormAdapter from "./adapter";
 import ShortFormAuthorAdapter from "./authorAdapter";
@@ -10,7 +11,6 @@ import ConstructorIcon from "./build/ConstructorIcon.js";
 import { JuntoSettingsUI } from "./SettingsUI";
 import { GroupExpressionUI } from "./groupExpressionUI";
 import { DNA, DNA_NICK } from "./dna";
-import type HolochainLanguageDelegate from "@perspect3vism/ad4m-language-context/lib/Holochain/HolochainLanguageDelegate";
 
 function iconFor(expression: Address): string {
   return Icon;

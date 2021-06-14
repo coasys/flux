@@ -1,8 +1,8 @@
 import type Address from "@perspect3vism/ad4m/Address";
 import type Expression from "@perspect3vism/ad4m/Expression";
 import type { ExpressionAdapter, PublicSharing } from "@perspect3vism/ad4m/Language";
-import type LanguageContext from "@perspect3vism/ad4m-language-context/LanguageContext";
-import type HolochainLanguageDelegate from "@perspect3vism/ad4m-language-context/Holochain/HolochainLanguageDelegate";
+import type { HolochainLanguageDelegate } from "@perspect3vism/ad4m/LanguageContext";
+import type LanguageContext from "@perspect3vism/ad4m/LanguageContext";
 import { IpfsPutAdapter } from "./putAdapter";
 import { DNA_NICK } from "./dna";
 

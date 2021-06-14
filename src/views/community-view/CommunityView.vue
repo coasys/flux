@@ -25,7 +25,7 @@ export default defineComponent({
     watch(
       () => route.params.communityId,
       (params: any) => {
-        console.log("Got update", params);
+        clearInterval(noDelayRef.value);
         startLoop(params);
 
         store.dispatch('getCommunityMembers', {

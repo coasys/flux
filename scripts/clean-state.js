@@ -30,16 +30,16 @@ async function main() {
         process.env.HOME,
         "Library",
         "Application Support",
-        "ad4m"
+        "junto"
       );
       break;
     }
     case "win32": {
-      configPath = path.join(process.env.APPDATA, "ad4m");
+      configPath = path.join(process.env.APPDATA, "junto");
       break;
     }
     case "linux": {
-      configPath = path.join(process.env.HOME, ".config", "ad4m");
+      configPath = path.join(process.env.HOME, ".config", "junto");
       break;
     }
   }
@@ -48,10 +48,6 @@ async function main() {
     `Deleting ${configPath} config path.. Press Y to accept... `
   );
   fs.rmdirSync(configPath, { recursive: true });
-  if (fs.existsSync(".hc")) {
-    console.log("Removing .hc");
-    fs.rmSync(".hc");
-  }
   console.log(
     "Done. Please run localStorage.clear() in the browser to clear Vuex store."
   );
