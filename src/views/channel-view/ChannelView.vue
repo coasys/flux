@@ -53,11 +53,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onUnmounted } from "vue";
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
-import { JuntoShortForm } from "@/core/juntoTypes";
-import Expression from "@perspect3vism/ad4m/Expression";
+import { chatMessageRefreshDuration } from "@/core/juntoTypes";
 import { ChannelState, CommunityState } from "@/store";
+import Expression from "@perspect3vism/ad4m/Expression";
+import { JuntoShortForm } from "@/core/juntoTypes";
 
 interface ChatItem {
   id: string;
@@ -68,22 +69,36 @@ interface ChatItem {
 }
 
 export default defineComponent({
-  setup() {
-    const currentExpressionPost = ref({});
-
+  data() {
     return {
-      currentExpressionPost,
+      noDelayRef: 0,
+      currentExpressionPost: {},
     };
   },
   mounted() {
     console.log("Current mounted channel", this.channel);
     this.scrollToBottom();
-    this.loadMessages();
     /* TODO: Show button only when we scrolled to top
     document.addEventListener("scroll", (e) => {
       this.isScrolledToTop = window.scrollY > 10;
     });
     */
+  },
+  onUnmounted() {
+    if (this.noDelayRef) {
+      clearInterval(this.noDelayRef);
+    }
+  },
+  watch: {
+    "$route.params.channelId": {
+      handler: function (params: string) {
+        if (this.noDelayRef) {
+          clearInterval(this.noDelayRef);
+        }
+        this.startLoop(params);
+      },
+      immediate: true,
+    },
   },
   computed: {
     community(): CommunityState {
@@ -117,6 +132,23 @@ export default defineComponent({
     },
   },
   methods: {
+    startLoop(communityId: string) {
+      clearInterval(this.noDelayRef);
+      if (communityId) {
+        console.log("Running get channels loop");
+        const test = this.noDelaySetInterval(async () => {
+          this.loadMessages();
+        }, chatMessageRefreshDuration);
+
+        //@ts-ignore
+        this.noDelayRef = test;
+      }
+    },
+    noDelaySetInterval(func: () => void, interval: number) {
+      func();
+
+      return setInterval(func, interval);
+    },
     loadMoreMessages() {
       const messageAmount = this.messageList.length;
       if (messageAmount) {

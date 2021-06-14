@@ -2,9 +2,11 @@
 // of perspective/community data
 export const databasePerspectiveName = "a031bd57-fabb-4ee1-96af-b3f039183931";
 
-export const channelRefreshDurationMs = 10000;
+export const channelRefreshDurationMs = 5000;
 export const expressionGetRetries = 30;
 export const expressionGetDelayMs = 20;
+export const chatMessageRefreshDuration = 1000;
+
 export interface JuntoShortForm {
   body: string;
   background: [string];
