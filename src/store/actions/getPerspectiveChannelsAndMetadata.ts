@@ -16,7 +16,7 @@ export interface Context {
 }
 
 export interface Payload {
-  communityId: CommunityState;
+  communityId: string;
   description: string;
 }
 
