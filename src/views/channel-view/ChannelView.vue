@@ -85,11 +85,6 @@ export default defineComponent({
     });
     */
   },
-  watch: {
-    messageList: function (val) {
-      this.scrollToBottom();
-    },
-  },
   computed: {
     community(): CommunityState {
       const { communityId } = this.$route.params;
