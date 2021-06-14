@@ -26,9 +26,7 @@ import { useStore } from "vuex";
 import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
-import {
-  getExpressionAndRetry,
-} from "@/core/queries/getExpression";
+import { getExpressionAndRetry } from "@/core/queries/getExpression";
 import ad4m, { LinkExpression } from "@perspect3vism/ad4m-executor";
 import { AGENT_SERVICE_STATUS } from "@/core/graphql_queries";
 import { ToastState } from "@/store";
