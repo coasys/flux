@@ -24,54 +24,53 @@ interface UpdatePayload {
 
 interface AddChannelMessages {
   channelId: string;
+  communityId: string;
   links: Expression[];
 }
 
 export default {
-  addMessagesIfNotPresent(state: State, payload: AddChannelMessages): void {
-    const links: LinkExpressionAndLang[] = [];
-    const expressionMessages: ExpressionAndRef[] = [];
-    let targetChannel: ChannelState | undefined = undefined;
-    state.communities.forEach((community) => {
-      community.channels.forEach(async (channel) => {
-        if (channel.perspective === payload.channelId) {
-          targetChannel = channel;
-          for (const link of payload.links) {
-            if (
-              channel.currentExpressionLinks.find(
-                (channelLink) =>
-                  //@ts-ignore
-                  channelLink.expression.data.target === link.data.target
-              ) == undefined
-            ) {
-              console.log("Did not find link", link, "in channel, adding!");
-              links.push({
-                expression: link,
-                language: channel.linkLanguageAddress,
-              } as LinkExpressionAndLang);
-              const expression = await getExpressionAndRetry(
-                //@ts-ignore
-                link.data.target,
-                5,
-                20
-              );
-              if (expression != null) {
-                //@ts-ignore
-                expressionMessages.push({
-                  //@ts-ignore
-                  expression: expression,
-                  //@ts-ignore
-                  url: parseExprURL(link.data.target),
-                } as ExpressionAndRef);
-              }
-            }
+  async addMessagesIfNotPresent(
+    state: State,
+    payload: AddChannelMessages
+  ): Promise<void> {
+    const community = state.communities.find(
+      (c) => c.perspective === payload.communityId
+    );
+    const channel = community?.channels.find(
+      (c) => c.perspective === payload.channelId
+    );
+
+    if (channel) {
+      for (const link of payload.links) {
+        const currentExpressionLink = channel.currentExpressionLinks.find(
+          (channelLink) =>
+            //@ts-ignore
+            channelLink.expression.data.target === link.data.target
+        );
+
+        if (currentExpressionLink) {
+          console.log("Did not find link", link, "in channel, adding!");
+          channel.currentExpressionLinks.push({
+            expression: link,
+            language: channel.linkLanguageAddress,
+          } as LinkExpressionAndLang);
+          const expression = await getExpressionAndRetry(
+            //@ts-ignore
+            link.data.target,
+            5,
+            20
+          );
+          if (expression) {
+            //@ts-ignore
+            channel.currentExpressionMessages.push({
+              //@ts-ignore
+              expression: expression,
+              //@ts-ignore
+              url: parseExprURL(link.data.target),
+            } as ExpressionAndRef);
           }
         }
-      });
-    });
-    if (targetChannel != undefined) {
-      targetChannel!.currentExpressionLinks.concat(links);
-      targetChannel!.currentExpressionMessages.concat(expressionMessages);
+      }
     }
   },
   addCommunity(state: State, payload: CommunityState) {

@@ -8,6 +8,7 @@ export interface Context {
 }
 
 export interface Payload {
+  communityId: string;
   channelId: string;
   from: Date;
   to: Date;
@@ -15,13 +16,11 @@ export interface Payload {
 
 export default async (
   { getters, commit }: Context,
-  { channelId, from, to }: Payload
+  { channelId, communityId, from, to }: Payload
 ): Promise<void> => {
   try {
     const fromDate = from || getters.getApplicationStartTime;
     const untilDate = to || new Date("August 19, 1975 23:15:30").toISOString();
-
-    console.log({ fromDate, untilDate });
 
     const links = await getLinksPaginated(
       channelId.toString(),
@@ -32,6 +31,7 @@ export default async (
     );
     console.log("Got paginated links", links);
     commit("addMessagesIfNotPresent", {
+      communityId: communityId,
       channelId: channelId,
       links: links,
     });

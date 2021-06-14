@@ -16,14 +16,16 @@ export interface Context {
 }
 
 export interface Payload {
-  community: CommunityState;
+  communityId: CommunityState;
   description: string;
 }
 
 export default async (
-  { commit }: Context,
-  { community }: Payload
+  { commit, getters }: Context,
+  { communityId }: Payload
 ): Promise<any> => {
+  const community = getters.getCommunity(communityId);
+
   try {
     //console.log("Getting channel links", community);
     const channelLinks = await getChatChannelLinks(

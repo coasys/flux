@@ -39,11 +39,11 @@ export default defineComponent({
 
     function startLoop(communityId: string) {
       clearInterval(noDelayRef.value);
-      if (communityId != null) {
+      if (communityId) {
         console.log("Running get channels loop");
         const test = noDelaySetInterval(async () => {
           store.dispatch("getPerspectiveChannelsAndMetadata", {
-            community: store.getters.getCommunity(communityId),
+            communityId,
           });
         }, channelRefreshDurationMs);
 
