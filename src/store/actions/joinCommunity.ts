@@ -14,7 +14,9 @@ export interface Payload {
 export default async (store: any, { joiningLink }: Payload): Promise<void> => {
   try {
     const communities = store.state.communities;
-    const isAlreadyPartOf = communities.find((c: any) => c.sharedPerspectiveUrl === joiningLink);
+    const isAlreadyPartOf = communities.find(
+      (c: any) => c.sharedPerspectiveUrl === joiningLink
+    );
     if (!isAlreadyPartOf) {
       const installedPerspective = await installSharedPerspective(joiningLink);
       console.log(
@@ -22,7 +24,7 @@ export default async (store: any, { joiningLink }: Payload): Promise<void> => {
         "Installed perspective raw data",
         installedPerspective
       );
-  
+
       //Get and cache the expression UI for each expression language
       //And used returned expression language names to populate typedExpressionLanguages field
       const typedExpressionLanguages = await getTypedExpressionLanguages(
@@ -30,13 +32,13 @@ export default async (store: any, { joiningLink }: Payload): Promise<void> => {
         true,
         store
       );
-  
+
       const profileExpLang = typedExpressionLanguages.find(
         (val) => val.expressionType == ExpressionTypes.ProfileExpression
       );
       if (profileExpLang != undefined) {
         const profile: Profile = store.getters.getProfile;
-  
+
         const createProfileExpression = await createProfile(
           profileExpLang.languageAddress!,
           profile.username,
@@ -46,7 +48,7 @@ export default async (store: any, { joiningLink }: Payload): Promise<void> => {
           profile.profilePicture,
           profile.thumbnailPicture
         );
-  
+
         //Create link between perspective and group expression
         const addProfileLink = await createLink(installedPerspective.uuid!, {
           source: `${installedPerspective.sharedPerspective!.linkLanguages![0]!
@@ -56,7 +58,7 @@ export default async (store: any, { joiningLink }: Payload): Promise<void> => {
         });
         console.log("Created group expression link", addProfileLink);
       }
-  
+
       store.commit("addCommunity", {
         name: installedPerspective.name,
         linkLanguageAddress:
@@ -67,7 +69,7 @@ export default async (store: any, { joiningLink }: Payload): Promise<void> => {
           installedPerspective.sharedPerspective!.requiredExpressionLanguages,
         typedExpressionLanguages: typedExpressionLanguages,
         sharedPerspectiveUrl: joiningLink, //TODO: this will have to be string split once we add proof onto the URL
-        members: []
+        members: [],
       });
     } else {
       const message = "You are already part of this group";

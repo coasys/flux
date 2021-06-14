@@ -28,17 +28,17 @@ export default defineComponent({
         clearInterval(noDelayRef.value);
         startLoop(params);
 
-        store.dispatch('getCommunityMembers', {
-          communityId: params
+        store.dispatch("getCommunityMembers", {
+          communityId: params,
         });
       }
     );
 
     onMounted(() => {
       let communityId = route.params.communityId;
-        store.dispatch('getCommunityMembers', {
-          communityId: communityId
-        });
+      store.dispatch("getCommunityMembers", {
+        communityId: communityId,
+      });
     });
 
     onUnmounted(() => {

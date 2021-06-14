@@ -90,7 +90,9 @@
       @toggle="(e) => (showGroupMembers = e.target.open)"
     >
       <j-flex gap="500" direction="column">
-        <j-text variant="heading">All group members ({{ community.members.length ?? 0 }})</j-text>
+        <j-text variant="heading"
+          >All group members ({{ community.members.length ?? 0 }})</j-text
+        >
         <j-input
           placeholder="Search for member"
           type="search"
@@ -207,7 +209,7 @@ export default defineComponent({
       communityDescription: "",
       showUpdateCommunity: false,
       showGroupMembers: false,
-      searchValue: ""
+      searchValue: "",
     };
   },
   methods: {
@@ -263,8 +265,8 @@ export default defineComponent({
     filteredCommunityMemberList(): Profile[] {
       const members: Profile[] = this.community.members;
 
-      return members.filter(m => m.username.includes(this.searchValue));
-    }
+      return members.filter((m) => m.username.includes(this.searchValue));
+    },
   },
 });
 </script>

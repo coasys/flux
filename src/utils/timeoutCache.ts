@@ -7,7 +7,7 @@ export class TimeoutCache<T> {
   ttl: number;
 
   constructor(ttl: number) {
-    this.ttl = ttl; 
+    this.ttl = ttl;
   }
 
   set(key: string, value: T) {
@@ -16,7 +16,7 @@ export class TimeoutCache<T> {
     const item: TimeoutCacheItem = {
       value,
       expiry: now.getTime() + this.ttl,
-    }
+    };
 
     localStorage.setItem(key, JSON.stringify(item));
   }
@@ -39,4 +39,4 @@ export class TimeoutCache<T> {
 
     return parseditem.value;
   }
-} 
+}

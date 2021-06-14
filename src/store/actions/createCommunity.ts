@@ -172,7 +172,7 @@ export default async (
       typedExpressionLanguages: typedExpLangs,
       groupExpressionRef: createExp,
       sharedPerspectiveUrl: communityPerspective.sharedURL!,
-      members: []
+      members: [],
     });
 
     //Get and cache the expression UI for each expression language
