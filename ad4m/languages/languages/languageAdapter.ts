@@ -3,8 +3,8 @@ import type {
   LanguageAdapter as Interface,
   PublicSharing,
 } from "@perspect3vism/ad4m/Language";
-import type LanguageContext from "@perspect3vism/ad4m-language-context/LanguageContext";
-import type { IPFSNode } from "@perspect3vism/ad4m-language-context/LanguageContext";
+import type { IPFSNode } from "@perspect3vism/ad4m/LanguageContext";
+import type LanguageContext from "@perspect3vism/ad4m/LanguageContext";
 
 const _appendBuffer = (buffer1, buffer2) => {
   const tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);

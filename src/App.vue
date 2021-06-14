@@ -106,7 +106,7 @@ export default defineComponent({
               if (getExprRes != null) {
                 break;
               }
-              await sleep(expressionGetDelayMs);
+              await sleep(expressionGetDelayMs * i);
             }
             if (getExprRes == null) {
               throw Error("Could not get expression from link signal");
@@ -151,7 +151,6 @@ export default defineComponent({
     onResult((val) => {
       const isInit = val.data.agent.isInitialized!;
       const isUnlocked = val.data.agent.isUnlocked!;
-      console.log({ isInit, val, comment: "Hello" });
       this.$store.commit("updateAgentInitState", isInit);
       this.$store.commit("updateAgentLockState", isUnlocked);
       if (isInit == true) {
