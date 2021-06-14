@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onUnmounted, onMounted, ref, watch } from "vue";
+import { defineComponent, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";

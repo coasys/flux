@@ -39,18 +39,20 @@ export default {
     const channel = community?.channels.find(
       (c) => c.perspective === payload.channelId
     );
+    const links = [];
+    const expressions = [];
 
     if (channel) {
       for (const link of payload.links) {
         const currentExpressionLink = channel.currentExpressionLinks.find(
           (channelLink) =>
             //@ts-ignore
-            channelLink.expression.data.target === link.data.target
+            channelLink.expression.data!.target === link.data.target
         );
 
-        if (currentExpressionLink) {
-          console.log("Did not find link", link, "in channel, adding!");
-          channel.currentExpressionLinks.push({
+        if (!currentExpressionLink) {
+          console.log("Adding link to channel", link);
+          links.push({
             expression: link,
             language: channel.linkLanguageAddress,
           } as LinkExpressionAndLang);
@@ -62,7 +64,7 @@ export default {
           );
           if (expression) {
             //@ts-ignore
-            channel.currentExpressionMessages.push({
+            expressions.push({
               //@ts-ignore
               expression: expression,
               //@ts-ignore
@@ -72,6 +74,9 @@ export default {
         }
       }
     }
+
+    channel?.currentExpressionLinks.concat(links);
+    channel?.currentExpressionMessages.concat(expressions);
   },
   addCommunity(state: State, payload: CommunityState) {
     console.log("adding Community", payload);

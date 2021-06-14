@@ -17,7 +17,6 @@ export interface Context {
 
 export interface Payload {
   communityId: string;
-  description: string;
 }
 
 export default async (

@@ -30,11 +30,13 @@ export default async (
       untilDate
     );
     console.log("Got paginated links", links);
-    commit("addMessagesIfNotPresent", {
-      communityId: communityId,
-      channelId: channelId,
-      links: links,
-    });
+    if (links) {
+      commit("addMessagesIfNotPresent", {
+        communityId: communityId,
+        channelId: channelId,
+        links: links,
+      });
+    }
   } catch (e) {
     commit("showDangerToast", {
       message: e.message,
