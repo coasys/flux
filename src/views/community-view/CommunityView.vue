@@ -27,16 +27,11 @@ export default defineComponent({
       (params: any) => {
         clearInterval(noDelayRef.value);
         startLoop(params);
+      },
+      {
+        immediate: true,
       }
     );
-
-    //Dont think we need this
-    // onMounted(() => {
-    //   let communityId = route.params.communityId;
-    //   if (communityId != undefined) {
-    //     startLoop(communityId);
-    //   }
-    // });
 
     onUnmounted(() => {
       clearInterval(noDelayRef.value);
@@ -44,11 +39,11 @@ export default defineComponent({
 
     function startLoop(communityId: string) {
       clearInterval(noDelayRef.value);
-      if (communityId != null) {
+      if (communityId) {
         console.log("Running get channels loop");
         const test = noDelaySetInterval(async () => {
           store.dispatch("getPerspectiveChannelsAndMetadata", {
-            community: store.getters.getCommunity(communityId),
+            communityId,
           });
         }, channelRefreshDurationMs);
 
