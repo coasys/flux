@@ -18,7 +18,7 @@
   "main": "background.js",
   "dependencies": {
     "@apollo/client": "^3.3.14",
-    "@junto-foundation/junto-elements": "0.0.12",
+    "@junto-foundation/junto-elements": "0.0.13",
     "@perspect3vism/ad4m": "0.0.6",
     "@perspect3vism/ad4m-executor": "0.0.14",
     "@types/jest": "^26.0.20",
