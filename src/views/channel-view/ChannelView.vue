@@ -16,7 +16,6 @@
         :timestamp="message.timestamp"
       >
         <j-avatar
-          v-if="message.user"
           :src="
             users[message.authorId]?.profile['schema:image']
               ? JSON.parse(users[message.authorId].profile['schema:image'])[
@@ -27,7 +26,7 @@
           slot="avatar"
           initials="P"
         />
-        <span v-if="message.user" slot="username">{{
+        <span slot="username">{{
           users[message.authorId]?.profile["foaf:AccountName"]
         }}</span>
         <div slot="message">
@@ -80,23 +79,7 @@ export default defineComponent({
       users: {} as UserMap,
     };
   },
-  watch: {
-    "channel.currentExpressionMessages": {
-      handler: function (expressions) {
-        this.unsortedMessages = expressions.map((item: any) => {
-          this.loadUser(item.expression.author.did);
-          return {
-            id: item.expression.timestamp,
-            authorId: item.expression.author.did,
-            timestamp: item.expression.timestamp,
-            message: JSON.parse(item.expression.data).body,
-          };
-        }, []);
-      },
-      immediate: true,
-      deep: true,
-    },
-  },
+
   mounted() {
     console.log("Current mounted channel", this.channel);
     this.scrollToBottom();
@@ -108,27 +91,29 @@ export default defineComponent({
     */
   },
   computed: {
-    messages(): Message[] {
-      const sortedMessages = [...this.unsortedMessages].sort(
-        (a: Message, b: Message) => {
+    messages(): any[] {
+      const sortedMessages = [...this.channel.currentExpressionMessages].sort(
+        (a: any, b: any) => {
           return (
-            new Date(a.expression.timestamp).getTime() - new Date(b.expression.timestamp).getTime()
+            new Date(a.expression.timestamp).getTime() -
+            new Date(b.expression.timestamp).getTime()
           );
         }
       );
 
       return sortedMessages.reduce(
-        (acc: Message[], message: Message, index: number) => {
-          const prevMessage = acc[index - 1];
+        (acc: Message[], item: any, index: number) => {
+          this.loadUser(item.expression.author.did);
+          const prevItem = acc[index - 1];
           return [
             ...acc,
             {
-              id: message.expression.timestamp,
-              authorId: message.expression.author.did,
-              timestamp: message.expression.timestamp,
-              message: JSON.parse(message.expression.data).body,
-              hideUser: prevMessage
-                ? prevMessage.authorId === message.authorId
+              id: item.expression.timestamp,
+              authorId: item.expression.author.did,
+              timestamp: item.expression.timestamp,
+              message: JSON.parse(item.expression.data).body,
+              hideUser: prevItem
+                ? prevItem.authorId === item.expression.author.did
                 : false,
             },
           ];
