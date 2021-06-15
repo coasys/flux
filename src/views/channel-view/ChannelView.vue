@@ -8,42 +8,32 @@
       <div class="channel-view__load-more">
         <j-button @click="loadMoreMessages">Load more messages</j-button>
       </div>
-      <dynamic-scroller
-        :items="messages"
-        :min-item-size="100"
-        class="channelView__messages"
+
+      <j-message-item
+        v-for="message in messages"
+        :key="message.id"
+        :hideuser="message.hideUser"
+        :timestamp="message.timestamp"
       >
-        <template v-slot="{ item: message, index, active }">
-          <dynamic-scroller-item
-            :item="message"
-            :active="active"
-            :data-index="index"
-          >
-            <j-message-item
-              :hideuser="message.hideUser"
-              :timestamp="message.timestamp"
-            >
-              <j-avatar
-                :src="
-                  message.user.data.profile['schema:image']
-                    ? JSON.parse(message.user.data.profile['schema:image'])[
-                        'schema:contentUrl'
-                      ]
-                    : require('@/assets/images/avatar-placeholder.png')
-                "
-                slot="avatar"
-                initials="P"
-              />
-              <span slot="username">{{
-                message.user.data.profile["foaf:AccountName"]
-              }}</span>
-              <div slot="message">
-                <span v-html="message.message"></span>
-              </div>
-            </j-message-item>
-          </dynamic-scroller-item>
-        </template>
-      </dynamic-scroller>
+        <j-avatar
+          v-if="message.user"
+          :src="
+            message.user.data.profile['schema:image']
+              ? JSON.parse(message.user.data.profile['schema:image'])[
+                  'schema:contentUrl'
+                ]
+              : require('@/assets/images/avatar-placeholder.png')
+          "
+          slot="avatar"
+          initials="P"
+        />
+        <span v-if="message.user" slot="username">{{
+          message.user.data.profile["foaf:AccountName"]
+        }}</span>
+        <div slot="message">
+          <span v-html="message.message"></span>
+        </div>
+      </j-message-item>
     </div>
     <footer class="channel-view__footer">
       <j-editor
@@ -111,10 +101,7 @@ export default defineComponent({
           this.unsortedMessages = await Promise.all(
             expressions.map(async (item: any) => {
               return {
-                user: await getProfile(
-                  profileLang.languageAddress.toString(),
-                  item.expression.author.did
-                ),
+                user: null,
                 id: item.expression.timestamp,
                 authorId: item.expression.author.did,
                 timestamp: item.expression.timestamp,
@@ -240,10 +227,7 @@ export default defineComponent({
     },
   },
 
-  components: {
-    DynamicScroller,
-    DynamicScrollerItem,
-  },
+  components: {},
 });
 </script>
 
