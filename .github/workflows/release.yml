@@ -36,7 +36,7 @@ jobs:
 
   build_linux:
     name: Linux build
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
@@ -44,6 +44,11 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12
+      - name: Retrieve tag version
+        id: ref
+        run: |
+          pkgver=$(node ./scripts/get-pkg-version.js)
+          echo ::set-output name=version::$pkgver
       - name: Git submodule
         run: git submodule init && git submodule update
       - name: Build languages
@@ -54,4 +59,84 @@ jobs:
         run: npm run release
         env:
           GH_TOKEN: ${{ secrets.github_token }}
+      - name: Cache AppImage
+        uses: actions/upload-artifact@v1
+        with:
+          name: Junto-${{steps.ref.outputs.version}}.AppImage
+          path: ./dist_electron/Junto-${{steps.ref.outputs.version}}.AppImage
+      - name: Cache .deb release (x64)
+        uses: actions/upload-artifact@v1
+        with:
+          name: junto_${{steps.ref.outputs.version}}_amd64.deb
+          path: ./dist_electron/junto_${{steps.ref.outputs.version}}_amd64.deb
+
+  prepare_release:
+    name: Prepare release draft
+    needs: [build_linux]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      - name: Install Node.js, NPM & Yarn
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Retrieve tag version
+        id: ref
+        run: |
+          pkgver=$(node ./scripts/get-pkg-version.js)
+          echo ::set-output name=version::$pkgver
+      - name: Download AppImage
+        uses: actions/download-artifact@v1
+        with:
+          name: Junto-${{steps.ref.outputs.version}}.AppImage
+          path: .
+      - name: Download AppImage
+        uses: actions/download-artifact@v1
+        with:
+          name: junto_${{steps.ref.outputs.version}}_amd64.deb
+          path: .
+      - name: Generate SHA256 checksums
+        run: |
+          sha256sum "junto_${{steps.ref.outputs.version}}_amd64.deb" >> "SHA256SUMS.txt"
+          sha256sum "Junto-${{steps.ref.outputs.version}}.AppImage" >> "SHA256SUMS.txt"
+      - name: Verify checksums
+        run: sha256sum -c SHA256SUMS.txt
+      - name: Create a new release draft
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+        with:
+          tag_name: v${{steps.ref.outputs.version}}
+          release_name: Release v${{steps.ref.outputs.version}} 
+          body: If you can read this, we have forgotten to fill in the changelog. Sorry!
+          draft: true 
+      - name: Upload .deb installer (x64)
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./junto_${{steps.ref.outputs.version}}_amd64.deb
+          asset_name: junto_${{steps.ref.outputs.version}}_amd64.deb
+          asset_content_type: application/octet-stream
+      - name: Upload AppImage binary (arm64)
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./Junto-${{steps.ref.outputs.version}}.AppImage
+          asset_name: Junto-${{steps.ref.outputs.version}}.AppImage
+          asset_content_type: application/octet-stream
+      - name: Upload the checksums
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./SHA256SUMS.txt
+          asset_name: SHA256SUMS.txt
+          asset_content_type: text/plain
 
