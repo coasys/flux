@@ -62,6 +62,7 @@ import {
 } from "@/store";
 import { getProfile } from "@/utils/profileHelpers";
 import { chatMessageRefreshDuration } from "@/core/juntoTypes";
+import sleep from "@/utils/sleep";
 
 interface Message {
   id: string;
@@ -82,15 +83,6 @@ export default defineComponent({
     };
   },
   watch: {
-    "$route.params.channelId": {
-      handler: function (params: string) {
-        if (this.noDelayRef) {
-          clearInterval(this.noDelayRef);
-        }
-        this.startLoop(params);
-      },
-      immediate: true,
-    },
     "channel.currentExpressionMessages": {
       handler: async function (expressions) {
         const profileLang = this.community?.typedExpressionLanguages.find(
@@ -118,16 +110,12 @@ export default defineComponent({
   mounted() {
     console.log("Current mounted channel", this.channel);
     this.scrollToBottom();
+    this.startLoop(this.community.perspective);
     /* TODO: Show button only when we scrolled to top
     document.addEventListener("scroll", (e) => {
       this.isScrolledToTop = window.scrollY > 10;
     });
     */
-  },
-  onUnmounted() {
-    if (this.noDelayRef) {
-      clearInterval(this.noDelayRef);
-    }
   },
   computed: {
     messages(): Message[] {
@@ -165,22 +153,16 @@ export default defineComponent({
     },
   },
   methods: {
-    startLoop(communityId: string) {
-      clearInterval(this.noDelayRef);
+    async startLoop(communityId: string) {
       if (communityId) {
         console.log("Running get channels loop");
-        const test = this.noDelaySetInterval(async () => {
-          this.loadMessages();
-        }, chatMessageRefreshDuration);
-
-        //@ts-ignore
-        this.noDelayRef = test;
+        await this.$store.dispatch("loadExpressions", {
+          communityId: this.$route.params.communityId,
+          channelId: this.$route.params.channelId,
+        });
+        await sleep(chatMessageRefreshDuration);
+        this.startLoop(communityId);
       }
-    },
-    noDelaySetInterval(func: () => void, interval: number) {
-      func();
-
-      return setInterval(func, interval);
     },
     loadMoreMessages() {
       const messageAmount = this.messages.length;
