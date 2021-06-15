@@ -8,24 +8,21 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onUnmounted, onMounted, ref, watch } from "vue";
+import { defineComponent, watch } from "vue";
 import { useRoute } from "vue-router";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
 import { channelRefreshDurationMs } from "@/core/juntoTypes";
 import { useStore } from "vuex";
+import sleep from "@/utils/sleep";
 
 export default defineComponent({
   setup() {
     const route = useRoute();
     const store = useStore();
-
-    let noDelayRef: any = ref();
-
     watch(
       () => route.params.communityId,
       (params: any) => {
-        clearInterval(noDelayRef.value);
         startLoop(params);
 
         store.dispatch("getCommunityMembers", {
@@ -35,29 +32,14 @@ export default defineComponent({
       { immediate: true }
     );
 
-    onUnmounted(() => {
-      clearInterval(noDelayRef.value);
-    });
-
-    function startLoop(communityId: string) {
-      clearInterval(noDelayRef.value);
+    async function startLoop(communityId: string) {
       if (communityId) {
-        console.log("Running get channels loop");
-        const test = noDelaySetInterval(async () => {
-          store.dispatch("getPerspectiveChannelsAndMetadata", {
-            communityId,
-          });
-        }, channelRefreshDurationMs);
-
-        noDelayRef.value = test;
+        await store.dispatch("getPerspectiveChannelsAndMetadata", {
+          communityId,
+        });
+        await sleep(channelRefreshDurationMs);
+        startLoop(communityId);
       }
-    }
-
-    //TODO: @leif idk the best place to put this
-    function noDelaySetInterval(func: () => void, interval: number) {
-      func();
-
-      return setInterval(func, interval);
     }
   },
   components: {
