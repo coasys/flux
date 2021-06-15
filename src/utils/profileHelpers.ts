@@ -1,5 +1,6 @@
 import { getExpression } from "@/core/queries/getExpression";
 import { Profile } from "@/store";
+import type Expression from "@perspect3vism/ad4m/Expression";
 
 export function toProfile(did: string, obj: { [x: string]: any }): Profile {
   const profile: Profile = {
@@ -24,21 +25,17 @@ export function toProfile(did: string, obj: { [x: string]: any }): Profile {
 export async function getProfile(
   profileLangAddress: string,
   did: string
-): Promise<any> {
+): Promise<Expression> {
   const profileLink = `${profileLangAddress}://${did}`;
 
-  const profileExp = await getExpression(profileLink);
+  const profileGqlExp = await getExpression(profileLink);
+  const profileExp = {
+    author: profileGqlExp.author!,
+    data: JSON.parse(profileGqlExp.data!),
+    timestamp: profileGqlExp.timestamp!,
+    proof: profileGqlExp.proof!,
+  } as Expression;
+  //console.log("Returning", profileExp);
 
-  console.log({ profileExp, profileLink });
-
-  const profile = profileExp;
-
-  profile['data'] = JSON.parse(profileExp["data"]!).profile;
-
-  if ((profile.data as any)!["schema:image"]) {
-    (profile.data as any)!["schema:image"] = JSON.parse((profile.data as any)!["schema:image"]);
-  }
-  
-
-  return profile;
+  return profileExp;
 }

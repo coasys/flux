@@ -21,11 +21,17 @@
               :timestamp="message.timestamp"
             >
               <j-avatar
-                :src="require('@/assets/images/junto_app_icon.png')"
+                :src="
+                  message.user.data.profile['schema:image']
+                    ? JSON.parse(message.user.data.profile['schema:image'])['schema:contentUrl']
+                    : require('@/assets/images/avatar-placeholder.png')
+                "
                 slot="avatar"
                 initials="P"
               />
-              <span slot="username">{{ message.user.username }}</span>
+              <span slot="username">{{
+                message.user.data.profile["foaf:AccountName"]
+              }}</span>
               <div slot="message">
                 <span v-html="message.message"></span>
               </div>
