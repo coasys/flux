@@ -20,5 +20,6 @@
 }
 .sidebar-layout__main {
   max-height: 100vh;
+  position: relative;
 }
 </style>

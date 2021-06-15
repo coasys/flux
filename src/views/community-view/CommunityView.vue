@@ -31,15 +31,9 @@ export default defineComponent({
         store.dispatch("getCommunityMembers", {
           communityId: params,
         });
-      }
+      },
+      { immediate: true }
     );
-
-    onMounted(() => {
-      let communityId = route.params.communityId;
-      store.dispatch("getCommunityMembers", {
-        communityId: communityId,
-      });
-    });
 
     onUnmounted(() => {
       clearInterval(noDelayRef.value);
@@ -47,11 +41,11 @@ export default defineComponent({
 
     function startLoop(communityId: string) {
       clearInterval(noDelayRef.value);
-      if (communityId != null) {
+      if (communityId) {
         console.log("Running get channels loop");
         const test = noDelaySetInterval(async () => {
           store.dispatch("getPerspectiveChannelsAndMetadata", {
-            community: store.getters.getCommunity(communityId),
+            communityId,
           });
         }, channelRefreshDurationMs);
 

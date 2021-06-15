@@ -106,12 +106,14 @@ app.on("ready", async () => {
         createWindow();
 
         Core.waitForAgent().then(async () => {
+          win.webContents.send("setGlobalLoading", true);
           console.log(
             "\x1b[36m%s\x1b[0m",
             "Agent has been init'd. Controllers now starting init..."
           );
           Core.initControllers();
           await Core.initLanguages();
+          win.webContents.send("setGlobalLoading", false);
           console.log("\x1b[32m", "Controllers init complete!");
         });
       })

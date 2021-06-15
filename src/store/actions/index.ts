@@ -8,6 +8,8 @@ import loadExpressionLanguages from "./loadExpressionLanguages";
 import updateCommunity from "./updateCommunity";
 import updateUser from "./updateUser";
 import getCommunityMembers from "./getCommunityMembers";
+import loadExpressions from "./loadExpressions";
+import createExpression from "./createExpression";
 
 export default {
   createChannel,
@@ -20,4 +22,6 @@ export default {
   updateCommunity,
   updateUser,
   getCommunityMembers,
+  loadExpressions,
+  createExpression,
 };

@@ -4,7 +4,10 @@
       <j-icon size="sm" name="hash" />
       <j-text nomargin weight="500" size="500">{{ channel.name }}</j-text>
     </header>
-    <div class="channel-view__main" ref="messagesContainer">
+    <div class="channel-view__main">
+      <div class="channel-view__load-more">
+        <j-button @click="loadMoreMessages">Load more messages</j-button>
+      </div>
       <dynamic-scroller
         :items="messages"
         :min-item-size="100"
@@ -23,7 +26,9 @@
               <j-avatar
                 :src="
                   message.user.data.profile['schema:image']
-                    ? JSON.parse(message.user.data.profile['schema:image'])['schema:contentUrl']
+                    ? JSON.parse(message.user.data.profile['schema:image'])[
+                        'schema:contentUrl'
+                      ]
                     : require('@/assets/images/avatar-placeholder.png')
                 "
                 slot="avatar"
@@ -55,17 +60,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
-import { useRoute } from "vue-router";
+import { defineComponent } from "vue";
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
 import { JuntoShortForm } from "@/core/juntoTypes";
-import {
-  CREATE_EXPRESSION,
-  ADD_LINK,
-  QUERY_EXPRESSION,
-} from "@/core/graphql_queries";
-import ad4m from "@perspect3vism/ad4m-executor";
-import { useLazyQuery, useMutation } from "@vue/apollo-composable";
 import Expression from "@perspect3vism/ad4m/Expression";
 import {
   ChannelState,
@@ -74,6 +71,7 @@ import {
   ExpressionTypes,
 } from "@/store";
 import { getProfile } from "@/utils/profileHelpers";
+import { chatMessageRefreshDuration } from "@/core/juntoTypes";
 
 interface Message {
   id: string;
@@ -86,47 +84,23 @@ interface Message {
 }
 
 export default defineComponent({
-  setup() {
-    const route = useRoute();
-
-    const currentExpressionPost = ref({});
-    const expressionLanguage = ref("");
-    const linkData = ref({});
-    const expressionUrl = ref("");
-    const unsortedMessages = ref([]);
-
-    const postExpression = useMutation(CREATE_EXPRESSION, () => ({
-      variables: {
-        languageAddress: expressionLanguage.value,
-        content: JSON.stringify(currentExpressionPost.value),
-      },
-    }));
-
-    const getExpression = useLazyQuery(QUERY_EXPRESSION, () => ({
-      url: expressionUrl.value,
-    }));
-
-    const addLink = useMutation<{
-      addLink: ad4m.LinkExpression;
-    }>(ADD_LINK, () => ({
-      variables: {
-        perspectiveUUID: route.params.channelId,
-        link: JSON.stringify(linkData.value),
-      },
-    }));
-
+  data() {
     return {
-      currentExpressionPost,
-      expressionLanguage,
-      linkData,
-      postExpression,
-      addLink,
-      getExpression,
-      expressionUrl,
-      unsortedMessages,
+      noDelayRef: 0,
+      currentExpressionPost: {},
+      unsortedMessages: [],
     };
   },
   watch: {
+    "$route.params.channelId": {
+      handler: function (params: string) {
+        if (this.noDelayRef) {
+          clearInterval(this.noDelayRef);
+        }
+        this.startLoop(params);
+      },
+      immediate: true,
+    },
     "channel.currentExpressionMessages": {
       handler: async function (expressions) {
         const profileLang = this.community?.typedExpressionLanguages.find(
@@ -157,6 +131,16 @@ export default defineComponent({
   mounted() {
     console.log("Current mounted channel", this.channel);
     this.scrollToBottom();
+    /* TODO: Show button only when we scrolled to top
+    document.addEventListener("scroll", (e) => {
+      this.isScrolledToTop = window.scrollY > 10;
+    });
+    */
+  },
+  onUnmounted() {
+    if (this.noDelayRef) {
+      clearInterval(this.noDelayRef);
+    }
   },
   computed: {
     messages(): Message[] {
@@ -194,71 +178,51 @@ export default defineComponent({
     },
   },
   methods: {
-    createExpression(
-      message: JuntoShortForm,
-      expressionLanguage: string
-    ): Promise<string> {
-      this.currentExpressionPost = message;
-      this.expressionLanguage = expressionLanguage;
-      return new Promise((resolve, reject) => {
-        this.postExpression.onError((error) => {
-          console.log("Got error posting expression", error);
-          reject(error);
-        });
-        this.postExpression.mutate().then((result) => {
-          resolve(result.data.createExpression);
-        });
+    startLoop(communityId: string) {
+      clearInterval(this.noDelayRef);
+      if (communityId) {
+        console.log("Running get channels loop");
+        const test = this.noDelaySetInterval(async () => {
+          this.loadMessages();
+        }, chatMessageRefreshDuration);
+
+        //@ts-ignore
+        this.noDelayRef = test;
+      }
+    },
+    noDelaySetInterval(func: () => void, interval: number) {
+      func();
+
+      return setInterval(func, interval);
+    },
+    loadMoreMessages() {
+      const messageAmount = this.messages.length;
+      if (messageAmount) {
+        const lastMessage = this.messages[messageAmount - 1];
+        this.loadMessages(lastMessage.timestamp);
+      } else {
+        this.loadMessages();
+      }
+    },
+    loadMessages(from?: string, to?: string): void {
+      this.$store.dispatch("loadExpressions", {
+        from,
+        to,
+        communityId: this.$route.params.communityId,
+        channelId: this.$route.params.channelId,
       });
     },
-
-    createLink(link: ad4m.Link): Promise<ad4m.LinkExpression> {
-      this.linkData = link;
-      return new Promise((resolve, reject) => {
-        this.addLink.onError((error) => {
-          console.log("Got error posting link", error);
-          reject(error);
-        });
-        this.addLink.mutate().then((addLinkResp) => {
-          resolve(addLinkResp.data!.addLink);
-        });
-      });
-    },
-
-    getExpressionMethod(url: string) {
-      this.expressionUrl = url;
-      return new Promise((resolve, reject) => {
-        this.getExpression.onResult((result) => {
-          resolve(result.data);
-        });
-        this.getExpression.onError((error) => {
-          console.log("Got error in getExpression", error);
-          reject(error);
-        });
-        this.getExpression.load();
-      });
-    },
-
     async createDirectMessage(message: JuntoShortForm) {
-      console.log({ message });
-      let shortFormExpressionLanguage = this.community.expressionLanguages[0]!;
-      console.log(
-        new Date().toISOString(),
-        "Posting shortForm expression to language",
-        shortFormExpressionLanguage
-      );
-
-      let exprUrl = await this.createExpression(
-        message,
-        shortFormExpressionLanguage
-      );
-      console.log("Created expression with hash", exprUrl);
-      let addLink = await this.createLink({
-        source: "sioc://chatchannel",
-        target: exprUrl,
-        predicate: "sioc://content_of",
-      });
-      console.log("Adding link with response", addLink);
-      setTimeout(this.scrollToBottom, 300);
+      this.currentExpressionPost = "";
+      this.$store
+        .dispatch("createExpression", {
+          languageAddress: this.community.expressionLanguages[0]!,
+          content: message,
+          perspective: this.$route.params.channelId.toString(),
+        })
+        .then(() => {
+          setTimeout(this.scrollToBottom, 300);
+        });
     },
 
     scrollToBottom() {
@@ -308,6 +272,15 @@ export default defineComponent({
   flex-direction: column;
   justify-content: flex-end;
 }
+
+.channel-view__load-more {
+  position: absolute;
+  top: var(--j-space-1000);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
 .channel-view__footer {
   background: var(--j-color-white);
   position: sticky;

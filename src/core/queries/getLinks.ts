@@ -1,6 +1,9 @@
 import { apolloClient } from "@/main";
 import ad4m from "@perspect3vism/ad4m-executor";
-import { SOURCE_PREDICATE_LINK_QUERY } from "../graphql_queries";
+import {
+  SOURCE_PREDICATE_LINK_QUERY,
+  SOURCE_PREDICATE_LINK_QUERY_TIME_PAGINATED,
+} from "../graphql_queries";
 
 export async function getLinks(
   perspectiveUUID: string,
@@ -38,4 +41,24 @@ export async function getGroupExpressionLinks(
     `${linkLanguageAddress}://self`,
     "rdf://class"
   );
+}
+
+export async function getLinksPaginated(
+  perspectiveUUID: string,
+  source: string,
+  predicate: string,
+  fromDate: Date,
+  untilDate: Date
+): Promise<ad4m.LinkExpression[]> {
+  console.log("Getting links", fromDate, untilDate);
+  return new Promise((resolve) => {
+    const getLinksQ = apolloClient.query<{ links: ad4m.LinkExpression[] }>({
+      query: SOURCE_PREDICATE_LINK_QUERY_TIME_PAGINATED,
+      variables: { perspectiveUUID, source, predicate, fromDate, untilDate },
+    });
+    getLinksQ.then((result) => {
+      console.log("Got raw result", result);
+      resolve(result.data.links);
+    });
+  });
 }

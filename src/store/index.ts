@@ -6,7 +6,7 @@ import ExpressionRef from "@perspect3vism/ad4m/ExpressionRef";
 import actions from "./actions";
 import mutations from "./mutations";
 import getters from "./getters";
-
+import { LinkExpression } from "@perspect3vism/ad4m-executor";
 export interface CommunityState {
   //NOTE: here by having a static name + description we are assuming that these are top level metadata items that each group will have
   name: string;
@@ -29,15 +29,15 @@ export interface ChannelState {
   sharedPerspectiveUrl: string;
   type: FeedType;
   createdAt: Date;
-  currentExpressionLinks: ExpressionAndLang[];
+  currentExpressionLinks: LinkExpressionAndLang[];
   currentExpressionMessages: ExpressionAndRef[];
   typedExpressionLanguages: JuntoExpressionReference[];
   membraneType: MembraneType;
   groupExpressionRef: string;
 }
 
-export interface ExpressionAndLang {
-  expression: Expression;
+export interface LinkExpressionAndLang {
+  expression: LinkExpression;
   language: string;
 }
 
@@ -86,6 +86,7 @@ export interface ThemeState {
 export interface UIState {
   toast: ToastState;
   theme: ThemeState;
+  isGlobalLoading: boolean;
 }
 
 export interface State {
@@ -134,6 +135,7 @@ const vuexLocal = new VuexPersistence<State>({
 export default createStore({
   state: {
     ui: {
+      isGlobalLoading: false,
       theme: {
         name: "light",
         hue: 0,
