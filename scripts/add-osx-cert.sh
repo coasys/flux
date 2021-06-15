@@ -24,9 +24,14 @@ security default-keychain -s $KEY_CHAIN
 # Unlock the keychain using the previously chosen, very secure password
 security unlock-keychain -p actions $KEY_CHAIN
 
+# Set keychain locking timeout to 3600 seconds
+security set-keychain-settings -t 3600 -u $KEY_CHAIN
+
 # Import our certificate into the (now default) created keychain and also allow
 # the codesign binary to access said certificate.
 security import $CERT_FILE -k $KEY_CHAIN -P "$COMMUNITIES_APPLE_CERT_PASSWORD" -T /usr/bin/codesign;
+
+security list-keychains -s build.keychain
 
 # Since macOS Sierra, the following command is necessary.
 # Further information: https://stackoverflow.com/a/40039594
