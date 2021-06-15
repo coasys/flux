@@ -14,7 +14,7 @@
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps",
     "rebuild": "./node_modules/.bin/electron-rebuild -f -w ad4m-core-executor",
-    "release": "npm run electron:build --mac --linux --publish always"
+    "release": "npm run electron:build --publish always"
   },
   "main": "background.js",
   "dependencies": {
