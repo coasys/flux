@@ -8,6 +8,7 @@ import path from "path";
 import os from "os";
 import util from "util";
 import fs from "fs";
+import autoUpdater from 'electron-updater';
 
 let win: BrowserWindow;
 let splash: BrowserWindow;
@@ -23,6 +24,9 @@ console.log("Trying to run!");
 // Some APIs can only be used after this event occurs.
 app.on("ready", async () => {
   splash = createSplashScreen();
+
+  // @ts-ignore
+  autoUpdater.checkForUpdatesAndNotify();
 
   splash.on("ready-to-show", async () => {
     splash.show();

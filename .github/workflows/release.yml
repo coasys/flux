@@ -1,0 +1,28 @@
+name: Build/release
+
+on: push
+
+jobs:
+  release: ${{ matrix.os }}
+
+  strategy:
+    matrix:
+      os: [macos-latest, ubuntu-latest]
+  
+  steps:
+    - name: Check out Git repository
+      uses: actions/checkout@v2
+    
+    - name: Install Node.js, NPM & Yarn
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12
+    
+    - name: Build Electron app
+      uses: samuelmeuli/action-electron-builder@v1.6.0
+      with:
+        use_vue_cli: true
+        github_token: ${{ secrets.github_token }}
+        mac_certs: ${{ secrets.COMMUNITIES_APPLE_CERT }}
+        mac_certs_password: ${{ secrets.COMMUNITIES_APPLE_CERT_PASSWORD }}
+        release: ${{ startsWith(github.ref, 'refs/tags/v') }}

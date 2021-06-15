@@ -13,7 +13,9 @@
     "electron:serve": "vue-cli-service electron:serve",
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps",
-    "rebuild": "./node_modules/.bin/electron-rebuild -f -w ad4m-core-executor"
+    "rebuild": "./node_modules/.bin/electron-rebuild -f -w ad4m-core-executor",
+    "build": "npm run build-languages && electron:build --mac --linux",
+    "release": "npm run build-languages && electron:build --mac --linux --publish always"
   },
   "main": "background.js",
   "dependencies": {
@@ -27,6 +29,7 @@
     "@vue/apollo-util": "^4.0.0-alpha.11",
     "core-js": "^3.6.5",
     "date-fns": "^2.21.3",
+    "electron-updater": "^4.3.9",
     "esm": "^3.2.25",
     "graphql": "^15.5.0",
     "register-service-worker": "^1.7.1",
