@@ -3,7 +3,8 @@ name: Build/release
 on: push
 
 jobs:
-  release: ${{ matrix.os }}
+  release:
+    runs-on: ${{ matrix.os }}
 
   strategy:
     matrix:
