@@ -40,6 +40,8 @@ jobs:
         run: npm i
       - name: Build app
         run: npm run release
+        env:
+          GH_TOKEN: ${{ secrets.github_token }}
       - name: Cache macOS release (x64)
         uses: actions/upload-artifact@v1
         with:
