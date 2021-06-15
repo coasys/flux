@@ -12,9 +12,7 @@ import {
   ToastState,
   ExpressionUIIcons,
   ThemeState,
-  ChannelState,
 } from "@/store";
-import Expression from "@perspect3vism/ad4m/Expression";
 
 interface UpdatePayload {
   communityId: string;
@@ -85,17 +83,20 @@ export default {
       ];
     }
   },
-  addCommunity(state: State, payload: CommunityState) {
+  addCommunity(state: State, payload: CommunityState): void {
     console.log("adding Community", payload);
     state.communities.push(payload);
   },
-  setLanguagesPath(state: State, payload: string) {
+  setLanguagesPath(state: State, payload: string): void {
     state.localLanguagesPath = payload;
   },
-  addDatabasePerspective(state: State, payload: any) {
+  addDatabasePerspective(state: State, payload: any): void {
     state.databasePerspective = payload;
   },
-  addExpressionAndLinkFromLanguageAddress: (state: State, payload: any) => {
+  addExpressionAndLinkFromLanguageAddress: (
+    state: State,
+    payload: any
+  ): void => {
     state.communities.forEach((community) => {
       community.channels.forEach((channel) => {
         if (channel.linkLanguageAddress === payload.linkLanguage) {
@@ -117,23 +118,23 @@ export default {
     });
   },
 
-  updateAgentLockState(state: State, payload: boolean) {
+  updateAgentLockState(state: State, payload: boolean): void {
     state.agentUnlocked = payload;
   },
 
-  updateAgentInitState(state: State, payload: boolean) {
+  updateAgentInitState(state: State, payload: boolean): void {
     state.agentInit = payload;
   },
 
-  addExpressionUI(state: State, payload: ExpressionUIIcons) {
+  addExpressionUI(state: State, payload: ExpressionUIIcons): void {
     state.expressionUI.push(payload);
   },
 
-  updateApplicationStartTime(state: State, payload: Date) {
+  updateApplicationStartTime(state: State, payload: Date): void {
     state.applicationStartTime = payload;
   },
 
-  addChannel(state: State, payload: AddChannel) {
+  addChannel(state: State, payload: AddChannel): void {
     console.log(payload);
     const community = state.communities.find(
       (community) => community.perspective === payload.communityId
