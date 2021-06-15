@@ -77,8 +77,8 @@ export async function createProfile(
   email: string,
   givenName: string,
   familyName: string,
-  profileImage: string,
-  thumbnail: string
+  profileImage?: string,
+  thumbnail?: string
 ): Promise<string> {
   const profile: { [x: string]: any } = {
     "foaf:AccountName": username,
@@ -95,7 +95,7 @@ export async function createProfile(
       "schema:contentUrl": profileImage,
       "schema:thumbnail": {
         "@type": "schema:ImageObject",
-        "schema:contentSize": byteSize(thumbnail),
+        "schema:contentSize": byteSize(thumbnail!),
         "schema:contentUrl": thumbnail,
       },
     });

@@ -2,11 +2,19 @@
   <div class="left-drawer" v-if="community != null">
     <button class="left-drawer__header">
       <j-flex j="between" gap="300">
-        <j-flex gap="400" a="center">
-          <j-avatar :src="require('@/assets/images/junto_app_icon.png')" />
-          <j-text weight="500" color="ui-800" nomargin size="500">
-            {{ community.name }}
-          </j-text>
+        <j-flex gap="400">
+          <j-avatar
+            style="--j-avatar-size: 35px"
+            :src="require('@/assets/images/junto_app_icon.png')"
+          />
+          <div>
+            <j-text weight="500" color="ui-800" nomargin size="500">
+              {{ community.name }}
+            </j-text>
+            <j-text weight="300" color="ui-800" nomargin size="400">
+              {{ community.description }}
+            </j-text>
+          </div>
         </j-flex>
         <j-icon size="xs" name="chevron-down"></j-icon>
       </j-flex>
@@ -39,6 +47,13 @@
       </j-menu>
     </j-popover>
 
+    <j-box pt="500" px="500" pb="500">
+      <avatar-group
+        @click="showGroupMembers = true"
+        :users="community.members"
+      />
+    </j-box>
+
     <j-box pt="500">
       <j-menu-group-item open title="Channels">
         <j-button
@@ -69,6 +84,45 @@
         </router-link>
       </j-menu-group-item>
     </j-box>
+
+    <j-modal
+      :open="showGroupMembers"
+      @toggle="(e) => (showGroupMembers = e.target.open)"
+    >
+      <j-flex gap="500" direction="column">
+        <j-text variant="heading"
+          >All group members ({{ community.members.length ?? 0 }})</j-text
+        >
+        <j-input
+          placeholder="Search for member"
+          type="search"
+          :value="searchValue"
+          @input="(e) => (searchValue = e.target.value)"
+        ></j-input>
+        <j-flex wrap gap="600">
+          <j-flex
+            gap="300"
+            v-for="communityMember in filteredCommunityMemberList"
+            :key="communityMember.data.profile['foaf:AccountName']"
+            inline
+            direction="column"
+            a="center"
+          >
+            <j-avatar
+              size="lg"
+              :src="
+                communityMember.data.profile['schema:image']
+                  ? JSON.parse(communityMember.data.profile['schema:image'])['schema:contentUrl']
+                  : require('@/assets/images/avatar-placeholder.png')
+              "
+            />
+            <j-text variant="body">{{
+              communityMember.data.profile["foaf:AccountName"]
+            }}</j-text>
+          </j-flex>
+        </j-flex>
+      </j-flex>
+    </j-modal>
 
     <j-modal
       :open="showUpdateCommunity"
@@ -133,14 +187,20 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
+import { Profile } from "@/store";
+import Expression from "@perspect3vism/ad4m/Expression";
 
 export default defineComponent({
+  components: { AvatarGroup },
   props: ["community"],
   watch: {
     community: {
       handler: function ({ name, description }) {
         this.communityName = name;
         this.communityDescription = description;
+
+        this.searchValue = "";
       },
       deep: true,
       immediate: true,
@@ -155,6 +215,8 @@ export default defineComponent({
       communityName: "",
       communityDescription: "",
       showUpdateCommunity: false,
+      showGroupMembers: false,
+      searchValue: "",
     };
   },
   methods: {
@@ -204,6 +266,14 @@ export default defineComponent({
         .finally(() => {
           this.isCreatingChannel = false;
         });
+    },
+  },
+  computed: {
+    filteredCommunityMemberList(): Expression[] {
+      const members: Expression[] = this.community.members;
+      return members.filter((m: Expression) =>
+        Object(m.data).profile["foaf:AccountName"].includes(this.searchValue)
+      );
     },
   },
 });

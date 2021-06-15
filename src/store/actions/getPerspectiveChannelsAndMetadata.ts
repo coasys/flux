@@ -40,7 +40,11 @@ export default async (
               element.sharedPerspectiveUrl === channelLinks[i].data!.target
           ) == undefined
         ) {
-          //console.log("Found channel link", channelLinks[i], "Adding to channel");
+          console.log(
+            "Found channel link",
+            channelLinks[i],
+            "Adding to channel"
+          );
           const channel = await joinChannelFromSharedLink(
             channelLinks[i].data!.target!
           );
@@ -76,7 +80,7 @@ export default async (
               if (getExprRes != null) {
                 break;
               }
-              await sleep(expressionGetDelayMs);
+              await sleep(expressionGetDelayMs * i);
             }
             if (getExprRes == null) {
               console.warn(

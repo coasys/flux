@@ -4,39 +4,35 @@
       <j-icon size="sm" name="hash" />
       <j-text nomargin weight="500" size="500">{{ channel.name }}</j-text>
     </header>
-    <div class="channel-view__main">
+    <div class="channel-view__main" ref="messagesContainer">
       <div class="channel-view__load-more">
         <j-button @click="loadMoreMessages">Load more messages</j-button>
       </div>
-      <dynamic-scroller
-        :items="messageList"
-        :min-item-size="100"
-        class="channelView__messages"
-        ref="messagesContainer"
+
+      <j-message-item
+        v-for="message in messages"
+        :key="message.id"
+        :hideuser="message.hideUser"
+        :timestamp="message.timestamp"
       >
-        <template v-slot="{ item, index, active }">
-          <dynamic-scroller-item
-            :item="item"
-            :active="active"
-            :data-index="index"
-          >
-            <j-message-item
-              :hideuser="item.hideUser"
-              :timestamp="item.timestamp"
-            >
-              <j-avatar
-                :src="require('@/assets/images/junto_app_icon.png')"
-                slot="avatar"
-                initials="P"
-              />
-              <span slot="username">Username</span>
-              <div slot="message">
-                <span v-html="item.message"></span>
-              </div>
-            </j-message-item>
-          </dynamic-scroller-item>
-        </template>
-      </dynamic-scroller>
+        <j-avatar
+          :src="
+            users[message.authorId]?.profile['schema:image']
+              ? JSON.parse(users[message.authorId].profile['schema:image'])[
+                  'schema:contentUrl'
+                ]
+              : require('@/assets/images/avatar-placeholder.png')
+          "
+          slot="avatar"
+          initials="P"
+        />
+        <span slot="username">{{
+          users[message.authorId]?.profile["foaf:AccountName"]
+        }}</span>
+        <div slot="message">
+          <span v-html="message.message"></span>
+        </div>
+      </j-message-item>
     </div>
     <footer class="channel-view__footer">
       <j-editor
@@ -53,19 +49,25 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onUnmounted } from "vue";
-import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
-import { chatMessageRefreshDuration } from "@/core/juntoTypes";
-import { ChannelState, CommunityState } from "@/store";
-import Expression from "@perspect3vism/ad4m/Expression";
+import { defineComponent } from "vue";
 import { JuntoShortForm } from "@/core/juntoTypes";
+import Expression from "@perspect3vism/ad4m/Expression";
+import { ChannelState, CommunityState, ExpressionTypes } from "@/store";
+import { getProfile } from "@/utils/profileHelpers";
+import { chatMessageRefreshDuration } from "@/core/juntoTypes";
+import sleep from "@/utils/sleep";
 
-interface ChatItem {
+interface Message {
   id: string;
-  authorId?: string;
-  timestamp?: string;
+  authorId: string;
+  date?: Date | string | number;
   message?: Expression;
   hideUser?: boolean;
+  timestamp: string;
+}
+
+interface UserMap {
+  [key: string]: any;
 }
 
 export default defineComponent({
@@ -73,34 +75,52 @@ export default defineComponent({
     return {
       noDelayRef: 0,
       currentExpressionPost: {},
+      unsortedMessages: [],
+      users: {} as UserMap,
     };
   },
+
   mounted() {
     console.log("Current mounted channel", this.channel);
     this.scrollToBottom();
+    this.startLoop(this.community.perspective);
     /* TODO: Show button only when we scrolled to top
     document.addEventListener("scroll", (e) => {
       this.isScrolledToTop = window.scrollY > 10;
     });
     */
   },
-  onUnmounted() {
-    if (this.noDelayRef) {
-      clearInterval(this.noDelayRef);
-    }
-  },
-  watch: {
-    "$route.params.channelId": {
-      handler: function (params: string) {
-        if (this.noDelayRef) {
-          clearInterval(this.noDelayRef);
-        }
-        this.startLoop(params);
-      },
-      immediate: true,
-    },
-  },
   computed: {
+    messages(): any[] {
+      const sortedMessages = [...this.channel.currentExpressionMessages].sort(
+        (a: any, b: any) => {
+          return (
+            new Date(a.expression.timestamp).getTime() -
+            new Date(b.expression.timestamp).getTime()
+          );
+        }
+      );
+
+      return sortedMessages.reduce(
+        (acc: Message[], item: any, index: number) => {
+          this.loadUser(item.expression.author.did);
+          const prevItem = acc[index - 1];
+          return [
+            ...acc,
+            {
+              id: item.expression.timestamp,
+              authorId: item.expression.author.did,
+              timestamp: item.expression.timestamp,
+              message: JSON.parse(item.expression.data).body,
+              hideUser: prevItem
+                ? prevItem.authorId === item.expression.author.did
+                : false,
+            },
+          ];
+        },
+        []
+      );
+    },
     community(): CommunityState {
       const { communityId } = this.$route.params;
       return this.$store.getters.getCommunity(communityId);
@@ -109,50 +129,34 @@ export default defineComponent({
       const { channelId, communityId } = this.$route.params;
       return this.$store.getters.getChannel({ channelId, communityId });
     },
-    messageList(): Array<ChatItem> {
-      const sortedMessages = [...this.channel.currentExpressionMessages].sort(
-        (a, b) =>
-          new Date(a.expression.timestamp).getTime() -
-          new Date(b.expression.timestamp).getTime()
+    profileLanguage(): string {
+      const profileLang = this.community?.typedExpressionLanguages.find(
+        (t) => t.expressionType === ExpressionTypes.ProfileExpression
       );
-
-      return sortedMessages.reduce((acc: any, item: any, index: number) => {
-        const previousItem = acc[index - 1];
-        return [
-          ...acc,
-          {
-            id: item.expression.timestamp,
-            authorId: item.expression.author.did,
-            timestamp: item.expression.timestamp,
-            message: JSON.parse(item.expression.data).body,
-            hideUser: item.expression.author.did === previousItem?.authorId,
-          },
-        ];
-      }, []);
+      return profileLang!.languageAddress;
     },
   },
   methods: {
-    startLoop(communityId: string) {
-      clearInterval(this.noDelayRef);
+    async loadUser(did: string) {
+      let profileLang = this.profileLanguage;
+      const { data } = await getProfile(profileLang, did);
+      this.users[did] = data;
+    },
+    async startLoop(communityId: string) {
       if (communityId) {
         console.log("Running get channels loop");
-        const test = this.noDelaySetInterval(async () => {
-          this.loadMessages();
-        }, chatMessageRefreshDuration);
-
-        //@ts-ignore
-        this.noDelayRef = test;
+        await this.$store.dispatch("loadExpressions", {
+          communityId: this.$route.params.communityId,
+          channelId: this.$route.params.channelId,
+        });
+        await sleep(chatMessageRefreshDuration);
+        this.startLoop(communityId);
       }
     },
-    noDelaySetInterval(func: () => void, interval: number) {
-      func();
-
-      return setInterval(func, interval);
-    },
     loadMoreMessages() {
-      const messageAmount = this.messageList.length;
+      const messageAmount = this.messages.length;
       if (messageAmount) {
-        const lastMessage = this.messageList[messageAmount - 1];
+        const lastMessage = this.messages[messageAmount - 1];
         this.loadMessages(lastMessage.timestamp);
       } else {
         this.loadMessages();
@@ -182,14 +186,19 @@ export default defineComponent({
     scrollToBottom() {
       const container = this.$refs.messagesContainer;
       //@ts-ignore
+      console.log(
+        "scroll to bottom",
+        //@ts-ignore
+        container.scrollTop,
+        //@ts-ignore
+        container.scrollHeight
+      );
+      //@ts-ignore
       container.scrollTop = container.scrollHeight;
     },
   },
 
-  components: {
-    DynamicScroller,
-    DynamicScrollerItem,
-  },
+  components: {},
 });
 </script>
 

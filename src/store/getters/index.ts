@@ -3,6 +3,7 @@ import {
   CommunityState,
   ExpressionUIIcons,
   ChannelState,
+  Profile,
 } from "@/store";
 import Address from "@perspect3vism/ad4m/Address";
 

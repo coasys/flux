@@ -14,10 +14,10 @@ export interface Payload {
   to: Date;
 }
 
-export default async (
+export default async function (
   { getters, commit }: Context,
   { channelId, communityId, from, to }: Payload
-): Promise<void> => {
+): Promise<void> {
   try {
     const fromDate = from || getters.getApplicationStartTime;
     const untilDate = to || new Date("August 19, 1975 23:15:30").toISOString();
@@ -31,7 +31,7 @@ export default async (
     );
     console.log("Got paginated links", links);
     if (links) {
-      commit("addMessagesIfNotPresent", {
+      await commit("addMessagesIfNotPresent", {
         communityId: communityId,
         channelId: channelId,
         links: links,
@@ -43,4 +43,4 @@ export default async (
     });
     throw new Error(e);
   }
-};
+}

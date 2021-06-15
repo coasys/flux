@@ -18,6 +18,7 @@ export interface CommunityState {
   typedExpressionLanguages: JuntoExpressionReference[];
   groupExpressionRef: string;
   sharedPerspectiveUrl: string;
+  members: Expression[];
 }
 
 // Vuex state of a given channel
@@ -67,8 +68,8 @@ export interface Profile {
   email: string;
   givenName: string;
   familyName: string;
-  profilePicture: string;
-  thumbnailPicture: string;
+  profilePicture?: string;
+  thumbnailPicture?: string;
 }
 
 export interface ToastState {
