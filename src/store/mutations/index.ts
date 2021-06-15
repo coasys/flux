@@ -11,6 +11,7 @@ import {
   ExpressionUIIcons,
   ThemeState,
 } from "@/store";
+import Expression from "@perspect3vism/ad4m/Expression";
 
 interface UpdatePayload {
   communityId: string;
@@ -127,7 +128,7 @@ export default {
 
   setCommunityMembers(
     state: State,
-    { members, communityId }: { members: Profile[]; communityId: string }
+    { members, communityId }: { members: Expression[]; communityId: string }
   ) {
     const community = state.communities.find(
       (community) => community.perspective === communityId

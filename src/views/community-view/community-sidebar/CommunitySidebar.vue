@@ -103,16 +103,16 @@
           <j-flex
             gap="300"
             v-for="communityMember in filteredCommunityMemberList"
-            :key="communityMember.username"
+            :key="communityMember.data['foaf:AccountName']"
             inline
             direction="column"
             a="center"
           >
             <j-avatar
               size="lg"
-              :src="value ?? require('@/assets/images/avatar-placeholder.png')"
+              :src="communityMember.data['schema:image'] ? communityMember.data['schema:image']['schema:contentUrl']  : require('@/assets/images/avatar-placeholder.png')"
             />
-            <j-text variant="body">{{ communityMember.username }}</j-text>
+            <j-text variant="body">{{ communityMember.data["foaf:AccountName"] }}</j-text>
           </j-flex>
         </j-flex>
       </j-flex>
@@ -183,6 +183,7 @@
 import { defineComponent } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { Profile } from "@/store";
+import Expression from "@perspect3vism/ad4m/Expression";
 
 export default defineComponent({
   components: { AvatarGroup },
@@ -262,10 +263,11 @@ export default defineComponent({
     },
   },
   computed: {
-    filteredCommunityMemberList(): Profile[] {
-      const members: Profile[] = this.community.members;
+    filteredCommunityMemberList(): Expression[] {
+      const members: Expression[] = this.community.members;
+      console.log('hello', members)
 
-      return members.filter((m) => m.username.includes(this.searchValue));
+      return members.filter((m) => (m.data as any)!["foaf:AccountName"].includes(this.searchValue));
     },
   },
 });

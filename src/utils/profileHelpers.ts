@@ -24,18 +24,21 @@ export function toProfile(did: string, obj: { [x: string]: any }): Profile {
 export async function getProfile(
   profileLangAddress: string,
   did: string
-): Promise<Profile> {
+): Promise<any> {
   const profileLink = `${profileLangAddress}://${did}`;
 
   const profileExp = await getExpression(profileLink);
 
   console.log({ profileExp, profileLink });
 
-  const profile = JSON.parse(profileExp["data"]!).profile;
+  const profile = profileExp;
 
-  if (profile["schema:image"]) {
-    profile["schema:image"] = JSON.parse(profile["schema:image"]);
+  profile['data'] = JSON.parse(profileExp["data"]!).profile;
+
+  if ((profile.data as any)!["schema:image"]) {
+    (profile.data as any)!["schema:image"] = JSON.parse((profile.data as any)!["schema:image"]);
   }
+  
 
-  return toProfile(did, profile);
+  return profile;
 }

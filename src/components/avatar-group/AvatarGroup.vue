@@ -5,7 +5,7 @@
         <j-avatar
           v-for="(user, index) in firstUsers"
           :key="index"
-          :src="value ?? require('@/assets/images/avatar-placeholder.png')"
+          :src="user.data['schema:image'] ? user.data['schema:image']['schema:contentUrl'] : require('@/assets/images/avatar-placeholder.png')"
           size="sm"
         ></j-avatar>
         <span v-if="users.length >= 4" class="avatar-group__see-all">
