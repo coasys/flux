@@ -85,6 +85,7 @@ export interface ThemeState {
 export interface UIState {
   toast: ToastState;
   theme: ThemeState;
+  isGlobalLoading: boolean;
 }
 
 export interface State {
@@ -133,6 +134,7 @@ const vuexLocal = new VuexPersistence<State>({
 export default createStore({
   state: {
     ui: {
+      isGlobalLoading: false,
       theme: {
         name: "light",
         hue: 0,

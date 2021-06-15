@@ -188,4 +188,8 @@ export default {
       community.groupExpressionRef = groupExpressionRef;
     }
   },
+
+  setGlobalLoading(state: State, payload: boolean): void {
+    state.ui.isGlobalLoading = payload;
+  },
 };

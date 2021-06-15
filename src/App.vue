@@ -8,6 +8,12 @@
   >
     {{ toast.message }}
   </j-toast>
+  <div class="global-loading" v-if="isGlobalLoading">
+    <j-flex a="center" direction="column" gap="1000">
+      <j-spinner size="lg"> </j-spinner>
+      <j-text size="700">Please wait...</j-text>
+    </j-flex>
+  </div>
   <j-modal
     :open="showErrorModal"
     @toggle="(e) => (showErrorModal = e.target.open)"
@@ -102,11 +108,19 @@ export default defineComponent({
       errorMessage,
     };
   },
+  computed: {
+    isGlobalLoading() {
+      return this.$store.state.ui.isGlobalLoading;
+    },
+  },
   beforeCreate() {
     window.api.send("getLangPath");
     window.api.receive("getLangPathResponse", (data: string) => {
       console.log(`Received language path from main thread: ${data}`);
       this.$store.commit("setLanguagesPath", data);
+    });
+    window.api.receive("setGlobalLoading", (val: boolean) => {
+      this.$store.commit("setGlobalLoading", val);
     });
     const { onResult, onError } =
       useQuery<{
@@ -143,6 +157,22 @@ body {
   padding: 0;
   margin: 0;
   color: var(--j-color-ui-500);
+}
+
+.global-loading {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(15px);
+  display: grid;
+  place-items: center;
+}
+
+.global-loading j-spinner {
+  --j-spinner-size: 80px;
 }
 
 /* apply a natural box layout model to all elements, but allowing components to change */
