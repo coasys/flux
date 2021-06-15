@@ -24,13 +24,23 @@
           <j-input
             size="lg"
             label="Password"
-            type="password"
+            :type="showPassword ? 'text' : 'password'"
             :value="password"
             @keydown.enter="logIn"
             :error="passwordError"
             :errortext="passwordErrorMessage"
             @input="(e) => (password = e.target.value)"
-          ></j-input>
+          >
+            <j-button
+              @keydown.stop
+              @click.stop="showPassword = !showPassword"
+              variant="transparent"
+              square
+              slot="end"
+            >
+              <j-icon :name="showPassword ? 'eye-slash' : 'eye'" />
+            </j-button>
+          </j-input>
           <j-button
             :loading="isLoggingIn"
             full="false"
@@ -62,7 +72,7 @@
         ></j-input>
 
         <j-input
-          type="password"
+          :type="showPassword ? 'text' : 'password'"
           label="Password"
           :value="password"
           @keydown.enter="createUser"
@@ -70,7 +80,17 @@
           :error="passwordError"
           :errortext="passwordErrorMessage"
           @blur="(e) => validatePassword()"
-        ></j-input>
+        >
+          <j-button
+            @keydown.stop
+            @click.stop="showPassword = !showPassword"
+            variant="transparent"
+            square
+            slot="end"
+          >
+            <j-icon :name="showPassword ? 'eye-slash' : 'eye'" />
+          </j-button>
+        </j-input>
         <j-input
           label="First Name"
           :value="name"
@@ -115,7 +135,6 @@ import {
 } from "@/core/methods/createProfile";
 import { useStore } from "vuex";
 import { useValidation } from "@/utils/validation";
-import sleep from "@/utils/sleep";
 
 export default defineComponent({
   name: "Welcome",
@@ -125,6 +144,7 @@ export default defineComponent({
     const modalOpen = ref(false);
     const isCreatingUser = ref(false);
     const isLoggingIn = ref(false);
+    const showPassword = ref(false);
 
     const {
       value: username,
@@ -193,6 +213,7 @@ export default defineComponent({
       passwordErrorMessage,
       passwordIsValid,
       validatePassword,
+      showPassword,
       email,
       familyName,
       logInError,
