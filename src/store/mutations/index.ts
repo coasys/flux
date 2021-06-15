@@ -58,7 +58,7 @@ export default {
           const expression = await getExpressionAndRetry(
             //@ts-ignore
             link.data.target,
-            5,
+            50,
             20
           );
           if (expression) {
