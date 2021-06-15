@@ -49,7 +49,6 @@ jobs:
           path: ./dist_electron/Junto-${{steps.ref.outputs.version}}.dmg
 
   build_linux:
-    if: ${{ false }}
     name: Linux build
     runs-on: ubuntu-latest
     steps:
@@ -87,7 +86,7 @@ jobs:
 
   prepare_release:
     name: Prepare release draft
-    needs: [build_macos]
+    needs: [build_macos, build_linux]
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
@@ -101,16 +100,16 @@ jobs:
         run: |
           pkgver=$(node ./scripts/get-pkg-version.js)
           echo ::set-output name=version::$pkgver
-      # - name: Download AppImage
-      #   uses: actions/download-artifact@v1
-      #   with:
-      #     name: Junto-${{steps.ref.outputs.version}}.AppImage
-      #     path: .
-      # - name: Download deb
-      #   uses: actions/download-artifact@v1
-      #   with:
-      #     name: junto_${{steps.ref.outputs.version}}_amd64.deb
-      #     path: .
+      - name: Download AppImage
+        uses: actions/download-artifact@v1
+        with:
+          name: Junto-${{steps.ref.outputs.version}}.AppImage
+          path: .
+      - name: Download deb
+        uses: actions/download-artifact@v1
+        with:
+          name: junto_${{steps.ref.outputs.version}}_amd64.deb
+          path: .
       - name: Download macOS image
         uses: actions/download-artifact@v1
         with:
@@ -133,24 +132,24 @@ jobs:
           release_name: Release v${{steps.ref.outputs.version}} 
           body: If you can read this, we have forgotten to fill in the changelog. Sorry!
           draft: true 
-      # - name: Upload .deb installer (x64)
-      #   uses: actions/upload-release-asset@v1.0.1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.github_token }}
-        # with:
-        #   upload_url: ${{ steps.create_release.outputs.upload_url }}
-        #   asset_path: ./junto_${{steps.ref.outputs.version}}_amd64.deb
-        #   asset_name: junto_${{steps.ref.outputs.version}}_amd64.deb
-        #   asset_content_type: application/octet-stream
-      # - name: Upload AppImage binary (arm64)
-      #   uses: actions/upload-release-asset@v1.0.1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.github_token }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: ./Junto-${{steps.ref.outputs.version}}.AppImage
-      #     asset_name: Junto-${{steps.ref.outputs.version}}.AppImage
-      #     asset_content_type: application/octet-stream
+      - name: Upload .deb installer (x64)
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./junto_${{steps.ref.outputs.version}}_amd64.deb
+          asset_name: junto_${{steps.ref.outputs.version}}_amd64.deb
+          asset_content_type: application/octet-stream
+      - name: Upload AppImage binary (arm64)
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./Junto-${{steps.ref.outputs.version}}.AppImage
+          asset_name: Junto-${{steps.ref.outputs.version}}.AppImage
+          asset_content_type: application/octet-stream
       - name: Upload macOS image
         uses: actions/upload-release-asset@v1.0.1
         env:
