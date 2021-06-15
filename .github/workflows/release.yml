@@ -52,6 +52,6 @@ jobs:
         run: npm i
       - name: Build app
         run: npm run release
-        with:
+        env:
           GH_TOKEN: ${{ secrets.github_token }}
 
