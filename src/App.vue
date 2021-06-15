@@ -9,8 +9,10 @@
     {{ toast.message }}
   </j-toast>
   <div class="global-loading" v-if="isGlobalLoading">
-    <j-spinner> </j-spinner>
-    <j-text>Holochain DNA's are loading... please wait.</j-text>
+    <j-flex a="center" direction="column" gap="1000">
+      <j-spinner size="lg"> </j-spinner>
+      <j-text size="700">Please wait...</j-text>
+    </j-flex>
   </div>
   <j-modal
     :open="showErrorModal"
@@ -196,7 +198,14 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  background: white;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(15px);
+  display: grid;
+  place-items: center;
+}
+
+.global-loading j-spinner {
+  --j-spinner-size: 80px;
 }
 
 /* apply a natural box layout model to all elements, but allowing components to change */
