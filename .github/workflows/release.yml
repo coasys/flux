@@ -119,7 +119,7 @@ jobs:
         run: |
           sha256sum "junto_${{steps.ref.outputs.version}}_amd64.deb" >> "SHA256SUMS.txt"
           sha256sum "Junto-${{steps.ref.outputs.version}}.AppImage" >> "SHA256SUMS.txt"
-          sha256sum "Junto-${{steps.ref.outputs.version}}" >> "SHA256SUMS.txt"
+          sha256sum "Junto-${{steps.ref.outputs.version}}.dmg" >> "SHA256SUMS.txt"
       - name: Verify checksums
         run: sha256sum -c SHA256SUMS.txt
       - name: Create a new release draft
