@@ -12,29 +12,42 @@ on: push
 #       - 'v*'
 
 jobs:
-  # build_macos:
-  #   name: MacOS build
-  #   runs-on: macos-latest
-  #   steps:
-  #     - name: Check out Git repository
-  #       uses: actions/checkout@v2
-  #     - name: Install Node.js, NPM & Yarn
-  #       uses: actions/setup-node@v1
-  #       with:
-  #         node-version: 12
-  #     - name: Setup codesiging certs
-  #       run: ./scripts/add-osx-cert.sh
-  #       env:
-  #         COMMUNITIES_APPLE_CERT: ${{ secrets.COMMUNITIES_APPLE_CERT }}
-  #         # COMMUNITIES_APPLE_CERT_PASSWORD: ${{ secrets.COMMUNITIES_APPLE_CERT_PASSWORD }}
-  #     - name: Build languages
-  #       run: npm run build-languages
-  #     - name: Install deps
-  #       run: npm i
-  #     - name: Build app
-  #       run: npm run release
+  build_macos:
+    name: MacOS build
+    runs-on: macos-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      - name: Install Node.js, NPM & Yarn
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Retrieve tag version
+        id: ref
+        run: |
+          pkgver=$(node ./scripts/get-pkg-version.js)
+          echo ::set-output name=version::$pkgver
+      - name: Git submodule
+        run: git submodule init && git submodule update
+      - name: Setup codesiging certs
+        run: ./scripts/add-osx-cert.sh
+        env:
+          COMMUNITIES_APPLE_CERT: ${{ secrets.COMMUNITIES_APPLE_CERT }}
+          # COMMUNITIES_APPLE_CERT_PASSWORD: ${{ secrets.COMMUNITIES_APPLE_CERT_PASSWORD }}
+      - name: Build languages
+        run: npm run build-languages
+      - name: Install deps
+        run: npm i
+      - name: Build app
+        run: npm run release
+      - name: Cache macOS release (x64)
+        uses: actions/upload-artifact@v1
+        with:
+          name: Junto-${{steps.ref.outputs.version}}.dmg
+          path: ./dist_electron/Junto-${{steps.ref.outputs.version}}.dmg
 
   build_linux:
+    if: ${{ false }}
     name: Linux build
     runs-on: ubuntu-latest
     steps:
@@ -72,7 +85,7 @@ jobs:
 
   prepare_release:
     name: Prepare release draft
-    needs: [build_linux]
+    needs: [build_macos]
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
@@ -91,15 +104,21 @@ jobs:
         with:
           name: Junto-${{steps.ref.outputs.version}}.AppImage
           path: .
-      - name: Download AppImage
+      - name: Download deb
         uses: actions/download-artifact@v1
         with:
           name: junto_${{steps.ref.outputs.version}}_amd64.deb
+          path: .
+      - name: Download macOS image
+        uses: actions/download-artifact@v1
+        with:
+          name: Junto-${{steps.ref.outputs.version}}.dmg
           path: .
       - name: Generate SHA256 checksums
         run: |
           sha256sum "junto_${{steps.ref.outputs.version}}_amd64.deb" >> "SHA256SUMS.txt"
           sha256sum "Junto-${{steps.ref.outputs.version}}.AppImage" >> "SHA256SUMS.txt"
+          sha256sum "Junto-${{steps.ref.outputs.version}}" >> "SHA256SUMS.txt"
       - name: Verify checksums
         run: sha256sum -c SHA256SUMS.txt
       - name: Create a new release draft
@@ -115,7 +134,7 @@ jobs:
       - name: Upload .deb installer (x64)
         uses: actions/upload-release-asset@v1.0.1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.github_token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./junto_${{steps.ref.outputs.version}}_amd64.deb
@@ -124,16 +143,25 @@ jobs:
       - name: Upload AppImage binary (arm64)
         uses: actions/upload-release-asset@v1.0.1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.github_token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./Junto-${{steps.ref.outputs.version}}.AppImage
           asset_name: Junto-${{steps.ref.outputs.version}}.AppImage
           asset_content_type: application/octet-stream
-      - name: Upload the checksums
+      - name: Upload macOS image
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./Junto-${{steps.ref.outputs.version}}.dmg
+          asset_name: Junto-${{steps.ref.outputs.version}}.dmg
+          asset_content_type: application/octet-stream
+      - name: Upload the checksums
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./SHA256SUMS.txt
