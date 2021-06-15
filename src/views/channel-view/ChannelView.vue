@@ -18,8 +18,8 @@
         <j-avatar
           v-if="message.user"
           :src="
-            message.user.data.profile['schema:image']
-              ? JSON.parse(message.user.data.profile['schema:image'])[
+            users[message.authorId]?.profile['schema:image']
+              ? JSON.parse(users[message.authorId].profile['schema:image'])[
                   'schema:contentUrl'
                 ]
               : require('@/assets/images/avatar-placeholder.png')
@@ -28,7 +28,7 @@
           initials="P"
         />
         <span v-if="message.user" slot="username">{{
-          message.user.data.profile["foaf:AccountName"]
+          users[message.authorId]?.profile["foaf:AccountName"]
         }}</span>
         <div slot="message">
           <span v-html="message.message"></span>
@@ -51,15 +51,9 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
 import { JuntoShortForm } from "@/core/juntoTypes";
 import Expression from "@perspect3vism/ad4m/Expression";
-import {
-  ChannelState,
-  Profile,
-  CommunityState,
-  ExpressionTypes,
-} from "@/store";
+import { ChannelState, CommunityState, ExpressionTypes } from "@/store";
 import { getProfile } from "@/utils/profileHelpers";
 import { chatMessageRefreshDuration } from "@/core/juntoTypes";
 import sleep from "@/utils/sleep";
@@ -67,11 +61,14 @@ import sleep from "@/utils/sleep";
 interface Message {
   id: string;
   authorId: string;
-  user: Profile;
   date?: Date | string | number;
   message?: Expression;
   hideUser?: boolean;
   timestamp: string;
+}
+
+interface UserMap {
+  [key: string]: any;
 }
 
 export default defineComponent({
@@ -80,28 +77,21 @@ export default defineComponent({
       noDelayRef: 0,
       currentExpressionPost: {},
       unsortedMessages: [],
+      users: {} as UserMap,
     };
   },
   watch: {
     "channel.currentExpressionMessages": {
-      handler: async function (expressions) {
-        const profileLang = this.community?.typedExpressionLanguages.find(
-          (t) => t.expressionType === ExpressionTypes.ProfileExpression
-        );
-
-        if (profileLang) {
-          this.unsortedMessages = await Promise.all(
-            expressions.map(async (item: any) => {
-              return {
-                user: null,
-                id: item.expression.timestamp,
-                authorId: item.expression.author.did,
-                timestamp: item.expression.timestamp,
-                message: JSON.parse(item.expression.data).body,
-              };
-            }, [])
-          );
-        }
+      handler: function (expressions) {
+        this.unsortedMessages = expressions.map((item: any) => {
+          this.loadUser(item.expression.author.did);
+          return {
+            id: item.expression.timestamp,
+            authorId: item.expression.author.did,
+            timestamp: item.expression.timestamp,
+            message: JSON.parse(item.expression.data).body,
+          };
+        }, []);
       },
       immediate: true,
       deep: true,
@@ -122,7 +112,7 @@ export default defineComponent({
       const sortedMessages = [...this.unsortedMessages].sort(
         (a: Message, b: Message) => {
           return (
-            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+            new Date(a.expression.timestamp).getTime() - new Date(b.expression.timestamp).getTime()
           );
         }
       );
@@ -133,7 +123,10 @@ export default defineComponent({
           return [
             ...acc,
             {
-              ...message,
+              id: message.expression.timestamp,
+              authorId: message.expression.author.did,
+              timestamp: message.expression.timestamp,
+              message: JSON.parse(message.expression.data).body,
               hideUser: prevMessage
                 ? prevMessage.authorId === message.authorId
                 : false,
@@ -151,8 +144,19 @@ export default defineComponent({
       const { channelId, communityId } = this.$route.params;
       return this.$store.getters.getChannel({ channelId, communityId });
     },
+    profileLanguage(): string {
+      const profileLang = this.community?.typedExpressionLanguages.find(
+        (t) => t.expressionType === ExpressionTypes.ProfileExpression
+      );
+      return profileLang!.languageAddress;
+    },
   },
   methods: {
+    async loadUser(did: string) {
+      let profileLang = this.profileLanguage;
+      const { data } = await getProfile(profileLang, did);
+      this.users[did] = data;
+    },
     async startLoop(communityId: string) {
       if (communityId) {
         console.log("Running get channels loop");
