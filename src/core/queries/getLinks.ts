@@ -14,6 +14,7 @@ export async function getLinks(
     const getLinksQ = apolloClient.query<{ links: ad4m.LinkExpression[] }>({
       query: SOURCE_PREDICATE_LINK_QUERY,
       variables: { perspectiveUUID, source, predicate },
+      fetchPolicy: "no-cache",
     });
     getLinksQ.then((result) => {
       resolve(result.data.links);
@@ -55,6 +56,7 @@ export async function getLinksPaginated(
     const getLinksQ = apolloClient.query<{ links: ad4m.LinkExpression[] }>({
       query: SOURCE_PREDICATE_LINK_QUERY_TIME_PAGINATED,
       variables: { perspectiveUUID, source, predicate, fromDate, untilDate },
+      fetchPolicy: "no-cache",
     });
     getLinksQ.then((result) => {
       console.log("Got raw result", result);
