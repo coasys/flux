@@ -2,28 +2,52 @@ name: Build/release
 
 on: push
 
-jobs:
-  release:
-    runs-on: ${{ matrix.os }}
+# TODO: switch to only work with master
+# on:
+#   push:
+#     branches:
+#       - master
+#     tags:
+#       # Build on every tag in the form v1.2.3-something.4
+#       - 'v*'
 
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest]
-  
+jobs:
+  build_macos:
+    name: MacOS build
+    runs-on: macos-latest
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
-      
       - name: Install Node.js, NPM & Yarn
         uses: actions/setup-node@v1
         with:
           node-version: 12
-      
-      - name: Build Electron app
-        uses: samuelmeuli/action-electron-builder@v1.6.0
+      - name: Setup codesiging certs
+        run: ./scripts/add-osx-cert.sh
+        env:
+          COMMUNITIES_APPLE_CERT: ${{ secrets.COMMUNITIES_APPLE_CERT }}
+          # COMMUNITIES_APPLE_CERT_PASSWORD: ${{ secrets.COMMUNITIES_APPLE_CERT_PASSWORD }}
+      - name: Build languages
+        run: npm run build-languages
+      - name: Install deps
+        run: npm i
+      - name: Build app
+        run: npm run release
+
+  build_linux:
+    name: MacOS build
+    runs-on: macos-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      - name: Install Node.js, NPM & Yarn
+        uses: actions/setup-node@v1
         with:
-          use_vue_cli: true
-          github_token: ${{ secrets.github_token }}
-          mac_certs: ${{ secrets.COMMUNITIES_APPLE_CERT }}
-          mac_certs_password: ${{ secrets.COMMUNITIES_APPLE_CERT_PASSWORD }}
-          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          node-version: 12
+      - name: Build languages
+        run: npm run build-languages
+      - name: Install deps
+        run: npm i
+      - name: Build app
+        run: npm run release
+
