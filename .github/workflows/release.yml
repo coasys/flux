@@ -12,30 +12,30 @@ on: push
 #       - 'v*'
 
 jobs:
-  build_macos:
-    name: MacOS build
-    runs-on: macos-latest
-    steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v2
-      - name: Install Node.js, NPM & Yarn
-        uses: actions/setup-node@v1
-        with:
-          node-version: 12
-      - name: Setup codesiging certs
-        run: ./scripts/add-osx-cert.sh
-        env:
-          COMMUNITIES_APPLE_CERT: ${{ secrets.COMMUNITIES_APPLE_CERT }}
-          # COMMUNITIES_APPLE_CERT_PASSWORD: ${{ secrets.COMMUNITIES_APPLE_CERT_PASSWORD }}
-      - name: Build languages
-        run: npm run build-languages
-      - name: Install deps
-        run: npm i
-      - name: Build app
-        run: npm run release
+  # build_macos:
+  #   name: MacOS build
+  #   runs-on: macos-latest
+  #   steps:
+  #     - name: Check out Git repository
+  #       uses: actions/checkout@v2
+  #     - name: Install Node.js, NPM & Yarn
+  #       uses: actions/setup-node@v1
+  #       with:
+  #         node-version: 12
+  #     - name: Setup codesiging certs
+  #       run: ./scripts/add-osx-cert.sh
+  #       env:
+  #         COMMUNITIES_APPLE_CERT: ${{ secrets.COMMUNITIES_APPLE_CERT }}
+  #         # COMMUNITIES_APPLE_CERT_PASSWORD: ${{ secrets.COMMUNITIES_APPLE_CERT_PASSWORD }}
+  #     - name: Build languages
+  #       run: npm run build-languages
+  #     - name: Install deps
+  #       run: npm i
+  #     - name: Build app
+  #       run: npm run release
 
   build_linux:
-    name: MacOS build
+    name: Linux build
     runs-on: macos-latest
     steps:
       - name: Check out Git repository
@@ -44,6 +44,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12
+      - name: Git submodule
+        run: git submodule init && git submodule update
       - name: Build languages
         run: npm run build-languages
       - name: Install deps
