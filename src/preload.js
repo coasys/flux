@@ -5,13 +5,13 @@ import { contextBridge, ipcRenderer } from "electron";
 contextBridge.exposeInMainWorld("api", {
   send: (channel, data) => {
     // whitelist channels
-    let validChannels = ["ping", "getLangPath", "cleanState", "quitApp"];
+    let validChannels = ["ping", "getLangPath", "cleanState", "quitApp", "download-update", "quit-and-install"];
     if (validChannels.includes(channel)) {
       ipcRenderer.send(channel, data);
     }
   },
   receive: (channel, func) => {
-    let validChannels = ["pong", "getLangPathResponse", "getCleanState"];
+    let validChannels = ["pong", "getLangPathResponse", "getCleanState", "update_available", "update_not_available", "update_downloaded", "download_progress"];
     if (validChannels.includes(channel)) {
       // Deliberately strip event as it includes `sender`
       ipcRenderer.on(channel, (event, ...args) => func(...args));
