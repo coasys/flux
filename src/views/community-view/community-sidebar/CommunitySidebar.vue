@@ -103,16 +103,22 @@
           <j-flex
             gap="300"
             v-for="communityMember in filteredCommunityMemberList"
-            :key="communityMember.data['foaf:AccountName']"
+            :key="communityMember.data.profile['foaf:AccountName']"
             inline
             direction="column"
             a="center"
           >
             <j-avatar
               size="lg"
-              :src="communityMember.data['schema:image'] ? communityMember.data['schema:image']['schema:contentUrl']  : require('@/assets/images/avatar-placeholder.png')"
+              :src="
+                communityMember.data.profile['schema:image']
+                  ? JSON.parse(communityMember.data.profile['schema:image'])['schema:contentUrl']
+                  : require('@/assets/images/avatar-placeholder.png')
+              "
             />
-            <j-text variant="body">{{ communityMember.data["foaf:AccountName"] }}</j-text>
+            <j-text variant="body">{{
+              communityMember.data.profile["foaf:AccountName"]
+            }}</j-text>
           </j-flex>
         </j-flex>
       </j-flex>
@@ -265,9 +271,9 @@ export default defineComponent({
   computed: {
     filteredCommunityMemberList(): Expression[] {
       const members: Expression[] = this.community.members;
-      console.log('hello', members)
-
-      return members.filter((m) => (m.data as any)!["foaf:AccountName"].includes(this.searchValue));
+      return members.filter((m: Expression) =>
+        Object(m.data).profile["foaf:AccountName"].includes(this.searchValue)
+      );
     },
   },
 });
