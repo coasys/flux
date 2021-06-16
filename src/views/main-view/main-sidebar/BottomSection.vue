@@ -92,7 +92,7 @@
           />
         </div>
         <j-flex a="center" j="between">
-        <j-text variant="label">Clear State</j-text>
+          <j-text variant="label">Clear State</j-text>
           <j-button size="md" variant="primary" @click="cleanState">
             clear
           </j-button>

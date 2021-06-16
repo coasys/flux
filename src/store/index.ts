@@ -18,6 +18,7 @@ export interface CommunityState {
   typedExpressionLanguages: JuntoExpressionReference[];
   groupExpressionRef: string;
   sharedPerspectiveUrl: string;
+  members: Expression[];
 }
 
 // Vuex state of a given channel
@@ -67,8 +68,8 @@ export interface Profile {
   email: string;
   givenName: string;
   familyName: string;
-  profilePicture: string;
-  thumbnailPicture: string;
+  profilePicture?: string;
+  thumbnailPicture?: string;
 }
 
 export interface ToastState {
@@ -85,6 +86,7 @@ export interface ThemeState {
 export interface UIState {
   toast: ToastState;
   theme: ThemeState;
+  isGlobalLoading: boolean;
 }
 
 export type UpdateState = "available" | "not-available" | "downloading" | "downloaded" | "checking";
@@ -136,6 +138,7 @@ const vuexLocal = new VuexPersistence<State>({
 export default createStore({
   state: {
     ui: {
+      isGlobalLoading: false,
       theme: {
         name: "light",
         hue: 0,

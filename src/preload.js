@@ -11,7 +11,16 @@ contextBridge.exposeInMainWorld("api", {
     }
   },
   receive: (channel, func) => {
-    let validChannels = ["pong", "getLangPathResponse", "getCleanState", "update_available", "update_not_available", "update_downloaded", "download_progress"];
+    let validChannels = [
+      "pong",
+      "getLangPathResponse",
+      "getCleanState",
+      "setGlobalLoading",
+      "update_available",
+      "update_not_available",
+      "update_downloaded",
+      "download_progress"
+    ];
     if (validChannels.includes(channel)) {
       // Deliberately strip event as it includes `sender`
       ipcRenderer.on(channel, (event, ...args) => func(...args));

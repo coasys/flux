@@ -12,7 +12,6 @@ import {
   ToastState,
   ExpressionUIIcons,
   ThemeState,
-  ChannelState,
   UpdateState,
 } from "@/store";
 
@@ -60,7 +59,7 @@ export default {
           const expression = await getExpressionAndRetry(
             //@ts-ignore
             link.data.target,
-            5,
+            50,
             20
           );
           if (expression) {
@@ -85,17 +84,20 @@ export default {
       ];
     }
   },
-  addCommunity(state: State, payload: CommunityState) {
+  addCommunity(state: State, payload: CommunityState): void {
     console.log("adding Community", payload);
     state.communities.push(payload);
   },
-  setLanguagesPath(state: State, payload: string) {
+  setLanguagesPath(state: State, payload: string): void {
     state.localLanguagesPath = payload;
   },
-  addDatabasePerspective(state: State, payload: any) {
+  addDatabasePerspective(state: State, payload: any): void {
     state.databasePerspective = payload;
   },
-  addExpressionAndLinkFromLanguageAddress: (state: State, payload: any) => {
+  addExpressionAndLinkFromLanguageAddress: (
+    state: State,
+    payload: any
+  ): void => {
     state.communities.forEach((community) => {
       community.channels.forEach((channel) => {
         if (channel.linkLanguageAddress === payload.linkLanguage) {
@@ -117,23 +119,23 @@ export default {
     });
   },
 
-  updateAgentLockState(state: State, payload: boolean) {
+  updateAgentLockState(state: State, payload: boolean): void {
     state.agentUnlocked = payload;
   },
 
-  updateAgentInitState(state: State, payload: boolean) {
+  updateAgentInitState(state: State, payload: boolean): void {
     state.agentInit = payload;
   },
 
-  addExpressionUI(state: State, payload: ExpressionUIIcons) {
+  addExpressionUI(state: State, payload: ExpressionUIIcons): void {
     state.expressionUI.push(payload);
   },
 
-  updateApplicationStartTime(state: State, payload: Date) {
+  updateApplicationStartTime(state: State, payload: Date): void {
     state.applicationStartTime = payload;
   },
 
-  addChannel(state: State, payload: AddChannel) {
+  addChannel(state: State, payload: AddChannel): void {
     console.log(payload);
     const community = state.communities.find(
       (community) => community.perspective === payload.communityId
@@ -192,5 +194,20 @@ export default {
 
   updateUpdateState(state: State, { updateState }: {updateState: UpdateState}): void {
     state.updateState = updateState;
-  }
+  },
+  setCommunityMembers(
+    state: State,
+    { members, communityId }: { members: Expression[]; communityId: string }
+  ): void {
+    const community = state.communities.find(
+      (community) => community.perspective === communityId
+    );
+
+    if (community) {
+      community.members = members;
+    }
+  },
+  setGlobalLoading(state: State, payload: boolean): void {
+    state.ui.isGlobalLoading = payload;
+  },
 };
