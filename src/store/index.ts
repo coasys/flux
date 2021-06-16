@@ -143,7 +143,7 @@ export default createStore({
       isGlobalLoading: false,
       theme: {
         name: "light",
-        hue: 0,
+        hue: 270,
       },
       toast: {
         variant: "",
