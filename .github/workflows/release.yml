@@ -13,6 +13,7 @@ on: push
 
 jobs:
   build_macos:
+    if: ${{ false }}
     name: MacOS build
     runs-on: macos-latest
     steps:
@@ -83,10 +84,15 @@ jobs:
         with:
           name: junto_${{steps.ref.outputs.version}}_amd64.deb
           path: ./dist_electron/junto_${{steps.ref.outputs.version}}_amd64.deb
+      - name: Cache latest-linux.yml
+        uses: actions/upload-artifact@v1
+        with:
+          name: latest-linux.yml
+          path: ./dist_electron/latest-linux.yml
 
   prepare_release:
     name: Prepare release draft
-    needs: [build_macos, build_linux]
+    needs: [build_linux]
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
@@ -110,16 +116,22 @@ jobs:
         with:
           name: junto_${{steps.ref.outputs.version}}_amd64.deb
           path: .
-      - name: Download macOS image
+      # - name: Download macOS image
+      #   uses: actions/download-artifact@v1
+      #   with:
+      #     name: Junto-${{steps.ref.outputs.version}}.dmg
+      #     path: .
+      - name: Download latest-linux.yml
         uses: actions/download-artifact@v1
         with:
-          name: Junto-${{steps.ref.outputs.version}}.dmg
+          name: latest-linux.yml
           path: .
       - name: Generate SHA256 checksums
         run: |
           sha256sum "junto_${{steps.ref.outputs.version}}_amd64.deb" >> "SHA256SUMS.txt"
           sha256sum "Junto-${{steps.ref.outputs.version}}.AppImage" >> "SHA256SUMS.txt"
-          sha256sum "Junto-${{steps.ref.outputs.version}}.dmg" >> "SHA256SUMS.txt"
+          sha256sum "latest-linux.yml" >> "SHA256SUMS.txt"
+        # sha256sum "Junto-${{steps.ref.outputs.version}}.dmg" >> "SHA256SUMS.txt"
       - name: Verify checksums
         run: sha256sum -c SHA256SUMS.txt
       - name: Create a new release draft
@@ -150,14 +162,23 @@ jobs:
           asset_path: ./Junto-${{steps.ref.outputs.version}}.AppImage
           asset_name: Junto-${{steps.ref.outputs.version}}.AppImage
           asset_content_type: application/octet-stream
-      - name: Upload macOS image
+      # - name: Upload macOS image
+      #   uses: actions/upload-release-asset@v1.0.1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: ./Junto-${{steps.ref.outputs.version}}.dmg
+      #     asset_name: Junto-${{steps.ref.outputs.version}}.dmg
+      #     asset_content_type: application/octet-stream
+      - name: Upload latest-linux.yml
         uses: actions/upload-release-asset@v1.0.1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.github_token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Junto-${{steps.ref.outputs.version}}.dmg
-          asset_name: Junto-${{steps.ref.outputs.version}}.dmg
+          asset_path: ./latest-linux.yml
+          asset_name: latest-linux.yml
           asset_content_type: application/octet-stream
       - name: Upload the checksums
         uses: actions/upload-release-asset@v1.0.1
