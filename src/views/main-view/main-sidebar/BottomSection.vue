@@ -214,6 +214,7 @@ export default defineComponent({
     },
     downloadUpdates() {
       window.api.send("download-update");
+      this.$store.commit("updateUpdateState", { updateState: "downloading" });
     },
     installNow() {
       window.api.send("quit-and-install");
@@ -233,7 +234,7 @@ export default defineComponent({
       let func: undefined | (() => void) = this.checkForUpdates;
 
       if (state === 'available') {
-        text = 'Update available';
+        text = 'Download now';
         func = this.downloadUpdates;
       } else if (state === 'not-available') {
         text = 'Check for updates';
