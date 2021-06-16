@@ -190,7 +190,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import { Profile } from "@/store";
 import Expression from "@perspect3vism/ad4m/Expression";
 
 export default defineComponent({
