@@ -1,9 +1,13 @@
 {
   "name": "junto",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Junto ad4m chat application leveraging distributed & decentralized technologies",
   "author": "josh@junto.foundation",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/juntofoundation/communities.git"
+  },
   "scripts": {
     "lint": "vue-cli-service lint",
     "build-languages": "for OUTPUT in $(ls ad4m/languages); do echo \"Building: $OUTPUT\" && cd ad4m/languages/$OUTPUT && npm i && npm run build && cd -; done",
@@ -13,7 +17,8 @@
     "electron:serve": "vue-cli-service electron:serve",
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps",
-    "rebuild": "./node_modules/.bin/electron-rebuild -f -w ad4m-core-executor"
+    "rebuild": "./node_modules/.bin/electron-rebuild -f -w ad4m-core-executor",
+    "release": "npm run electron:build"
   },
   "main": "background.js",
   "dependencies": {
@@ -27,6 +32,7 @@
     "@vue/apollo-util": "^4.0.0-alpha.11",
     "core-js": "^3.6.5",
     "date-fns": "^2.21.3",
+    "electron-updater": "^4.3.9",
     "esm": "^3.2.25",
     "graphql": "^15.5.0",
     "register-service-worker": "^1.7.1",

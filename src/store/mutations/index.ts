@@ -12,6 +12,7 @@ import {
   ToastState,
   ExpressionUIIcons,
   ThemeState,
+  UpdateState,
 } from "@/store";
 
 interface UpdatePayload {
@@ -191,6 +192,9 @@ export default {
     }
   },
 
+  updateUpdateState(state: State, { updateState }: {updateState: UpdateState}): void {
+    state.updateState = updateState;
+  },
   setCommunityMembers(
     state: State,
     { members, communityId }: { members: Expression[]; communityId: string }
@@ -203,7 +207,6 @@ export default {
       community.members = members;
     }
   },
-
   setGlobalLoading(state: State, payload: boolean): void {
     state.ui.isGlobalLoading = payload;
   },

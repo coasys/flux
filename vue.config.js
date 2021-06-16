@@ -44,6 +44,7 @@ module.exports = {
             filter: ["**/build/bundle.js", "**/*.dna"],
           },
         ],
+        publish: ['github']
       },
       nodeIntegration: false,
     },

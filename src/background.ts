@@ -8,6 +8,7 @@ import path from "path";
 import os from "os";
 import util from "util";
 import fs from "fs";
+import { autoUpdater } from 'electron-updater';
 
 let win: BrowserWindow;
 let splash: BrowserWindow;
@@ -23,6 +24,11 @@ console.log("Trying to run!");
 // Some APIs can only be used after this event occurs.
 app.on("ready", async () => {
   splash = createSplashScreen();
+
+  autoUpdater.autoDownload = false;
+
+  autoUpdater.checkForUpdates();
+
 
   splash.on("ready-to-show", async () => {
     splash.show();
@@ -249,4 +255,36 @@ app.on("activate", () => {
 process.on("unhandledRejection", (reason, p) => {
   console.log("Unhandled Rejection at: Promise", p, "reason:", reason);
   // application specific logging, throwing an error, or other logic here
+});
+
+ipcMain.on('check-update', () => {
+  autoUpdater.checkForUpdatesAndNotify();
+});
+
+autoUpdater.on('update-available', () => {
+  win.webContents.send("update_available");
+});
+
+autoUpdater.on('update-not-available', () => {
+  win.webContents.send("update_not_available");
+});
+
+ipcMain.on('download-update', () => {
+  autoUpdater.downloadUpdate();
+});
+
+autoUpdater.on('update-downloaded', () => {
+  win.webContents.send("update_downloaded");
+});
+
+ipcMain.on('quit-and-install', () => {
+  autoUpdater.quitAndInstall();
+});
+
+autoUpdater.on('download-progress', (info) => {
+  win.webContents.send('download_progress', info);
+});
+
+autoUpdater.on('error', () => {
+  win.webContents.send("update_not_available");
 });
