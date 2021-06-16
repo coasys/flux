@@ -255,6 +255,10 @@ process.on("unhandledRejection", (reason, p) => {
   // application specific logging, throwing an error, or other logic here
 });
 
+ipcMain.on('check-update', () => {
+  autoUpdater.checkForUpdatesAndNotify();
+});
+
 autoUpdater.on('update-available', () => {
   win.webContents.send("update_available");
 });
@@ -277,4 +281,8 @@ ipcMain.on('quit-and-install', () => {
 
 autoUpdater.on('download-progress', (info) => {
   win.webContents.send('download_progress', info);
+});
+
+autoUpdater.on('error', () => {
+  win.webContents.send("update_not_available");
 });

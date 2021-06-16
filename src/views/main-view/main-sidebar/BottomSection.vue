@@ -35,6 +35,7 @@
           Edit profile
         </j-menu-item>
         <j-menu-item>View profile</j-menu-item>
+        <j-menu-item @click="updateApp.func">{{ updateApp.text }}</j-menu-item>
         <j-menu-item @click="isSettingsOpen = true">Settings</j-menu-item>
         <router-link :to="{ name: 'signup' }" v-slot="{ navigate }">
           <j-menu-item @click="navigate">Log out</j-menu-item>
@@ -206,6 +207,16 @@ export default defineComponent({
     },
     cleanState() {
       window.api.send("cleanState");
+    },
+    checkForUpdates() {
+      window.api.send("check-update");
+      this.$store.commit("updateUpdateState", { updateState: "checking" });
+    },
+    downloadUpdates() {
+      window.api.send("download-update");
+    },
+    installNow() {
+      window.api.send("quit-and-install");
     }
   },
   computed: {
@@ -215,6 +226,33 @@ export default defineComponent({
     userProfile(): Profile {
       return this.$store.state.userProfile || {};
     },
+    updateApp(): {text: string, func?: () => void} {
+      const state = this.$store.state.updateState;
+
+      let text = 'Check for updates';
+      let func: undefined | (() => void) = this.checkForUpdates;
+
+      if (state === 'available') {
+        text = 'Update available';
+        func = this.downloadUpdates;
+      } else if (state === 'not-available') {
+        text = 'Check for updates';
+      } else if (state === 'checking') {
+        text = 'Checking for updates';
+        func = undefined;
+      } else if (state === 'downloading') {
+        text = 'Downloading update';
+        func = undefined;
+      } else if (state === 'downloaded') {
+        text = 'Update downloaded, install now';
+        func = this.installNow;
+      } 
+
+      return {
+        text,
+        func
+      };
+    }
   },
 });
 </script>

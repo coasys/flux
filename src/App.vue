@@ -104,10 +104,28 @@ export default defineComponent({
   },
   beforeCreate() {
     window.api.send("getLangPath");
+    
     window.api.receive("getLangPathResponse", (data: string) => {
       console.log(`Received language path from main thread: ${data}`);
       this.$store.commit("setLanguagesPath", data);
     });
+
+    window.api.receive("update_available", () => {
+      this.$store.commit("updateUpdateState", { updateState: "available" });
+    });
+
+    window.api.receive("update_not_available", () => {
+      this.$store.commit("updateUpdateState", { updateState: "not-available" });
+    });
+
+    window.api.receive("update_downloaded", () => {
+      this.$store.commit("updateUpdateState", { updateState: "downloaded" });
+    });
+
+    window.api.receive("download_progress", (data: any) => {
+      this.$store.commit("updateUpdateState", { updateState: "downloading" });
+    });
+
     const { onResult, onError } =
       useQuery<{
         agent: ad4m.AgentService;

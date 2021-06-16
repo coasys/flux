@@ -87,6 +87,8 @@ export interface UIState {
   theme: ThemeState;
 }
 
+export type UpdateState = "available" | "not-available" | "downloading" | "downloaded" | "checking";
+
 export interface State {
   ui: UIState;
   communities: CommunityState[];
@@ -101,6 +103,7 @@ export interface State {
   agentUnlocked: boolean;
   agentInit: boolean;
   userProfile: Profile | null;
+  updateState: UpdateState;
 }
 
 export interface ExpressionUIIcons {
@@ -151,6 +154,7 @@ export default createStore({
     agentUnlocked: false,
     agentInit: false,
     userProfile: null,
+    updateState: "not-available",
   },
   plugins: [vuexLocal.plugin],
   mutations: mutations,

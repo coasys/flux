@@ -13,6 +13,7 @@ import {
   ExpressionUIIcons,
   ThemeState,
   ChannelState,
+  UpdateState,
 } from "@/store";
 
 interface UpdatePayload {
@@ -188,4 +189,8 @@ export default {
       community.groupExpressionRef = groupExpressionRef;
     }
   },
+
+  updateUpdateState(state: State, { updateState }: {updateState: UpdateState}): void {
+    state.updateState = updateState;
+  }
 };
