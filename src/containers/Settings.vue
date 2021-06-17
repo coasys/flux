@@ -127,7 +127,7 @@ export default defineComponent({
   --hue: 0;
   width: var(--j-element-md);
   height: var(--j-element-md);
-  background-color: hsl(var(--hue), 100%, 50%);
+  background-color: hsl(var(--hue), 80%, 60%);
   border: 2px solid transparent;
   outline: 0;
   border-radius: var(--j-border-radius);
