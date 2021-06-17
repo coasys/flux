@@ -9,6 +9,7 @@
     {{ toast.message }}
   </j-toast>
   <div class="global-loading" v-if="isGlobalLoading">
+    <div class="global-loading__backdrop"></div>
     <j-flex a="center" direction="column" gap="1000">
       <j-spinner size="lg"> </j-spinner>
       <j-text size="700">Please wait...</j-text>
@@ -115,7 +116,7 @@ export default defineComponent({
   },
   beforeCreate() {
     window.api.send("getLangPath");
-    
+
     window.api.receive("getLangPathResponse", (data: string) => {
       console.log(`Received language path from main thread: ${data}`);
       this.$store.commit("setLanguagesPath", data);
@@ -140,7 +141,7 @@ export default defineComponent({
     window.api.receive("setGlobalLoading", (val: boolean) => {
       this.$store.commit("setGlobalLoading", val);
     });
-    
+
     const { onResult, onError } =
       useQuery<{
         agent: ad4m.AgentService;
@@ -184,10 +185,19 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(15px);
   display: grid;
   place-items: center;
+}
+
+.global-loading__backdrop {
+  position: absolute;
+  left: 0;
+  height: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--j-color-white);
+  opacity: 0.5;
+  backdrop-filter: blur(15px);
 }
 
 .global-loading j-spinner {
