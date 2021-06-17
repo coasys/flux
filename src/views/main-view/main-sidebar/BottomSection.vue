@@ -67,34 +67,51 @@
     </j-modal>
 
     <j-modal
+      class="settings-modal"
       :open="isSettingsOpen"
       @toggle="(e) => (isSettingsOpen = e.target.open)"
     >
       <j-flex direction="column" gap="700">
         <j-text variant="heading">Settings</j-text>
-        <j-select
-          :value="themeName"
-          @change="(e) => (themeName = e.target.value)"
-          label="Theme"
-        >
-          <j-menu-item value="light">Light</j-menu-item>
-          <j-menu-item value="dark">Dark</j-menu-item>
-        </j-select>
-        <div>
+        <j-flex a="center" j="between">
+          <j-text variant="label">Font family</j-text>
+          <j-tabs
+            :value="fontFamily"
+            @change="(e) => (fontFamily = e.target.value)"
+          >
+            <j-tab-item value="default">Default</j-tab-item>
+            <j-tab-item value="system">System</j-tab-item>
+            <j-tab-item value="monospace">Monospace</j-tab-item>
+          </j-tabs>
+        </j-flex>
+        <j-flex a="center" j="between">
+          <j-text variant="label">Mode</j-text>
+          <j-tabs
+            :value="themeName"
+            @change="(e) => (themeName = e.target.value)"
+          >
+            <j-tab-item value="light">Light</j-tab-item>
+            <j-tab-item value="dark">Dark</j-tab-item>
+          </j-tabs>
+        </j-flex>
+        <j-flex a="center" j="between">
           <j-text variant="label">Primary color</j-text>
-          <input
-            style="display: block; width: 100%"
-            type="range"
-            :value="themeHue"
-            min="0"
-            max="359"
-            @input="(e) => (themeHue = e.target.value)"
-          />
-        </div>
+          <div class="colors">
+            <button
+              v-for="n in [0, 50, 100, 150, 200, 250, 270, 300]"
+              :key="n"
+              class="color-button"
+              :class="{ 'color-button--active': themeHue === n }"
+              @click="() => (themeHue = n)"
+              :style="`--hue: ${n}`"
+            ></button>
+          </div>
+        </j-flex>
         <j-flex a="center" j="between">
           <j-text variant="label">Clear State</j-text>
           <j-button size="md" variant="primary" @click="cleanState">
-            clear
+            <j-icon size="sm" name="trash"></j-icon>
+            Clear state
           </j-button>
         </j-flex>
         <div>
@@ -113,8 +130,6 @@ import { defineComponent, onBeforeMount } from "vue";
 import { Profile, ThemeState } from "@/store";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 
-import { dataURItoBlob } from "@/core/methods/createProfile";
-
 export default defineComponent({
   components: { AvatarUpload },
   setup() {
@@ -130,6 +145,9 @@ export default defineComponent({
     return {
       hue: getComputedStyle(document.documentElement).getPropertyValue(
         "--j-color-primary-hue"
+      ),
+      fontFamily: getComputedStyle(document.documentElement).getPropertyValue(
+        "--j-font-family"
       ),
       isSettingsOpen: false,
       isEditProfileOpen: false,
@@ -152,6 +170,14 @@ export default defineComponent({
     themeName: function (val) {
       document.documentElement.setAttribute("theme", val);
     },
+    fontFamily: function (val: "system" | "default") {
+      const font = {
+        default: `"Avenir", sans-serif`,
+        monospace: `monospace`,
+        system: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
+      };
+      document.documentElement.style.setProperty("--j-font-family", font[val]);
+    },
     "userProfile.profilePicture": {
       handler: function (val: string): void {
         this.profilePicture = val;
@@ -173,6 +199,12 @@ export default defineComponent({
     "theme.hue": {
       handler: function (val: string): void {
         this.themeHue = val;
+      },
+      immediate: true,
+    },
+    "theme.fontFamily": {
+      handler: function (val: string): void {
+        this.fontFamily = val;
       },
       immediate: true,
     },
@@ -218,7 +250,7 @@ export default defineComponent({
     },
     installNow() {
       window.api.send("quit-and-install");
-    }
+    },
   },
   computed: {
     theme(): ThemeState {
@@ -227,33 +259,33 @@ export default defineComponent({
     userProfile(): Profile {
       return this.$store.state.userProfile || {};
     },
-    updateApp(): {text: string, func?: () => void} {
+    updateApp(): { text: string; func?: () => void } {
       const state = this.$store.state.updateState;
 
-      let text = 'Check for updates';
+      let text = "Check for updates";
       let func: undefined | (() => void) = this.checkForUpdates;
 
-      if (state === 'available') {
-        text = 'Download now';
+      if (state === "available") {
+        text = "Download now";
         func = this.downloadUpdates;
-      } else if (state === 'not-available') {
-        text = 'Check for updates';
-      } else if (state === 'checking') {
-        text = 'Checking for updates';
+      } else if (state === "not-available") {
+        text = "Check for updates";
+      } else if (state === "checking") {
+        text = "Checking for updates";
         func = undefined;
-      } else if (state === 'downloading') {
-        text = 'Downloading update';
+      } else if (state === "downloading") {
+        text = "Downloading update";
         func = undefined;
-      } else if (state === 'downloaded') {
-        text = 'Update downloaded, install now';
+      } else if (state === "downloaded") {
+        text = "Update downloaded, install now";
         func = this.installNow;
-      } 
+      }
 
       return {
         text,
-        func
+        func,
       };
-    }
+    },
   },
 });
 </script>
@@ -267,5 +299,21 @@ export default defineComponent({
   gap: var(--j-space-400);
   flex-direction: column;
   align-items: center;
+}
+.color-button {
+  --hue: 0;
+  width: var(--j-element-md);
+  height: var(--j-element-md);
+  background-color: hsl(var(--hue), 100%, 50%);
+  border: 2px solid transparent;
+  outline: 0;
+  border-radius: var(--j-border-radius);
+  margin-right: var(--j-space-200);
+}
+.color-button--active {
+  border-color: var(--j-color-primary-600);
+}
+.colors {
+  max-width: 400px;
 }
 </style>

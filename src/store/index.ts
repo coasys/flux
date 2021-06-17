@@ -80,6 +80,7 @@ export interface ToastState {
 
 export interface ThemeState {
   name: "light" | "dark";
+  fontFamily: "default" | "system" | "monospace";
   hue: number;
 }
 
@@ -90,7 +91,12 @@ export interface UIState {
   isGlobalLoading: boolean;
 }
 
-export type UpdateState = "available" | "not-available" | "downloading" | "downloaded" | "checking";
+export type UpdateState =
+  | "available"
+  | "not-available"
+  | "downloading"
+  | "downloaded"
+  | "checking";
 
 export interface State {
   ui: UIState;
@@ -142,6 +148,7 @@ export default createStore({
       showSidebar: true,
       isGlobalLoading: false,
       theme: {
+        fontFamily: "default",
         name: "light",
         hue: 270,
       },
