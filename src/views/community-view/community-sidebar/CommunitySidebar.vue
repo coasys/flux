@@ -2,7 +2,7 @@
   <div class="community-sidebar" v-if="community != null">
     <button class="community-sidebar__header">
       <j-flex j="between" gap="300">
-        <j-flex gap="400">
+        <j-flex a="center" gap="400">
           <j-avatar
             style="--j-avatar-size: 35px"
             :src="require('@/assets/images/junto_app_icon.png')"
