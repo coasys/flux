@@ -1,24 +1,19 @@
 <template>
   <div class="left-nav__communities-list">
-    <router-link
+    <j-tooltip
       v-for="community in getCommunities"
       :key="community.perspective"
-      :to="{
-        name: 'community',
-        params: { communityId: community.perspective },
-      }"
-      v-slot="{ navigate, isActive }"
+      :title="community.name"
     >
-      <j-tooltip :title="community.name">
-        <j-avatar
-          :selected="isActive"
-          size="xl"
-          :src="require('@/assets/images/junto_app_icon.png')"
-          initials="false"
-          @click="() => navigate()"
-        ></j-avatar>
-      </j-tooltip>
-    </router-link>
+      <j-avatar
+        :selected="communityIsActive(community.perspective)"
+        size="xl"
+        :src="require('@/assets/images/junto_app_icon.png')"
+        initials="false"
+        @click="() => handleCommunityClick(community.perspective)"
+      ></j-avatar>
+    </j-tooltip>
+
     <j-tooltip title="Create comminuty">
       <j-button
         @click="showModal = true"
@@ -101,71 +96,62 @@
 </template>
 
 <script lang="ts">
-import { useStore } from "vuex";
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 
 export default defineComponent({
-  setup() {
-    const store = useStore();
-
-    const joiningLink = ref("");
-
-    const newCommunityName = ref("");
-    const newCommunityDesc = ref("");
-
-    const showModal = ref(false);
-    const isCreatingCommunity = ref(false);
-    const isJoiningCommunity = ref(false);
-    const tabView = ref("Create");
-
-    const createCommunity = () => {
-      isCreatingCommunity.value = true;
-      store
-        .dispatch("createCommunity", {
-          perspectiveName: newCommunityName.value,
-          description: newCommunityDesc.value,
-        })
-        .then(() => {
-          showModal.value = false;
-          newCommunityName.value = "";
-          newCommunityDesc.value = "";
-        })
-        .finally(() => {
-          isCreatingCommunity.value = false;
-        });
-    };
-
-    const joinCommunity = () => {
-      isJoiningCommunity.value = true;
-      store
-        .dispatch("joinCommunity", {
-          joiningLink: joiningLink.value,
-        })
-        .then(() => {
-          showModal.value = false;
-        })
-        .finally(() => {
-          isJoiningCommunity.value = false;
-        });
-    };
-
+  data() {
     return {
-      joiningLink,
-      joinCommunity,
-      newCommunityName,
-      newCommunityDesc,
-      createCommunity,
-      tabView,
-      showModal,
-      isJoiningCommunity,
-      isCreatingCommunity,
+      tabView: "Create",
+      joiningLink: "",
+      newCommunityName: "",
+      newCommunityDesc: "",
+      showModal: false,
+      isJoiningCommunity: false,
+      isCreatingCommunity: false,
     };
   },
-
+  methods: {
+    joinCommunity() {
+      this.isJoiningCommunity = true;
+      this.$store
+        .dispatch("joinCommunity", { joiningLink: this.joiningLink })
+        .then(() => {
+          this.showModal = false;
+        })
+        .finally(() => {
+          this.isJoiningCommunity = false;
+        });
+    },
+    createCommunity() {
+      this.isCreatingCommunity = true;
+      this.$store
+        .dispatch("createCommunity", {
+          perspectiveName: this.newCommunityName,
+          description: this.newCommunityDesc,
+        })
+        .then(() => {
+          this.showModal = false;
+          this.newCommunityName = "";
+          this.newCommunityDesc = "";
+        })
+        .finally(() => {
+          this.isCreatingCommunity = false;
+        });
+    },
+    handleCommunityClick(communityId: string) {
+      this.$router.push({ name: "community", params: { communityId } });
+      if (this.communityIsActive(communityId)) {
+        this.$store.commit("toggleSidebar");
+      }
+    },
+  },
   computed: {
     getCommunities() {
       const communities = this.$store.getters.getCommunities;
       return communities;
+    },
+    communityIsActive() {
+      return (id: string) => this.$route.params.communityId === id;
     },
   },
 });

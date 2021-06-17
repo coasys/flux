@@ -4,6 +4,7 @@
       <j-icon size="sm" name="hash" />
       <j-text nomargin weight="500" size="500">{{ channel.name }}</j-text>
     </header>
+
     <div class="channel-view__main" ref="messagesContainer">
       <div class="channel-view__load-more">
         <j-button @click="loadMoreMessages">Load more messages</j-button>

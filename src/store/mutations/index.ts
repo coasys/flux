@@ -178,6 +178,14 @@ export default {
     state.ui.theme = { ...state.ui.theme, ...payload };
   },
 
+  toggleSidebar(state: State): void {
+    state.ui.showSidebar = !state.ui.showSidebar;
+  },
+
+  setSidebar(state: State, open: boolean): void {
+    state.ui.showSidebar = open;
+  },
+
   updateCommunityMetadata(
     state: State,
     { communityId, name, description, groupExpressionRef }: UpdatePayload
