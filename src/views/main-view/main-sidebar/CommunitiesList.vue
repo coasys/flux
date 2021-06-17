@@ -111,10 +111,10 @@ export default defineComponent({
     };
   },
   methods: {
-    joinCommunity(joiningLink: string) {
+    joinCommunity() {
       this.isJoiningCommunity = true;
       this.$store
-        .dispatch("joinCommunity", { joiningLink })
+        .dispatch("joinCommunity", { joiningLink: this.joiningLink })
         .then(() => {
           this.showModal = false;
         })
