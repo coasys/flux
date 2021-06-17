@@ -28,17 +28,19 @@
 
     <j-modal :open="showModal" @toggle="(e) => (showModal = e.target.open)">
       <j-flex direction="column" gap="700">
-        <div>
-          <j-text variant="heading" v-if="tabView === 'Create'"
-            >Create a community
-          </j-text>
-          <j-text variant="heading" v-if="tabView === 'Join'"
-            >Join a community
-          </j-text>
-          <j-text nomargin variant="ingress">
-            Communities are the building blocks of Junto.
+        <div v-if="tabView === 'Create'">
+          <j-text variant="heading">Create a community </j-text>
+        </div>
+        <div v-if="tabView === 'Join'">
+          <j-text variant="heading">Join a community </j-text>
+          <j-text color="danger-500">
+            This is an early version of Junto with a remote code execution
+            vulnerability. DO NOT join any community from somebody you do not
+            know as its possible for people to use fake joining links to hack
+            you!
           </j-text>
         </div>
+
         <j-tabs
           size="lg"
           :value="tabView"
@@ -142,6 +144,8 @@ export default defineComponent({
       this.$router.push({ name: "community", params: { communityId } });
       if (this.communityIsActive(communityId)) {
         this.$store.commit("toggleSidebar");
+      } else {
+        this.$store.commit("setSidebar", true);
       }
     },
   },
