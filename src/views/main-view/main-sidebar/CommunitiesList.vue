@@ -48,11 +48,11 @@ export default defineComponent({
   },
   methods: {
     handleCommunityClick(communityId: string) {
-      this.$router.push({ name: "community", params: { communityId } });
       if (this.communityIsActive(communityId)) {
         this.$store.commit("toggleSidebar");
       } else {
         this.$store.commit("setSidebar", true);
+        this.$router.push({ name: "community", params: { communityId } });
       }
     },
   },
