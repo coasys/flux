@@ -86,6 +86,7 @@ export interface ThemeState {
 export interface UIState {
   toast: ToastState;
   theme: ThemeState;
+  showSidebar: boolean;
   isGlobalLoading: boolean;
 }
 
@@ -138,10 +139,11 @@ const vuexLocal = new VuexPersistence<State>({
 export default createStore({
   state: {
     ui: {
+      showSidebar: true,
       isGlobalLoading: false,
       theme: {
         name: "light",
-        hue: 0,
+        hue: 270,
       },
       toast: {
         variant: "",

@@ -1,6 +1,6 @@
 <template>
-  <div class="left-drawer" v-if="community != null">
-    <button class="left-drawer__header">
+  <div class="community-sidebar" v-if="community != null">
+    <button class="community-sidebar__header">
       <j-flex j="between" gap="300">
         <j-flex gap="400">
           <j-avatar
@@ -21,10 +21,10 @@
     </button>
 
     <j-popover
-      class="left-drawer__header-menu"
+      class="community-sidebar__header-menu"
       event="click"
       placement="bottom-start"
-      selector=".left-drawer__header"
+      selector=".community-sidebar__header"
     >
       <j-menu>
         <j-menu-item
@@ -112,7 +112,9 @@
               size="lg"
               :src="
                 communityMember.data.profile['schema:image']
-                  ? JSON.parse(communityMember.data.profile['schema:image'])['schema:contentUrl']
+                  ? JSON.parse(communityMember.data.profile['schema:image'])[
+                      'schema:contentUrl'
+                    ]
                   : require('@/assets/images/avatar-placeholder.png')
               "
             />
@@ -188,7 +190,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import { Profile } from "@/store";
 import Expression from "@perspect3vism/ad4m/Expression";
 
 export default defineComponent({
@@ -280,13 +281,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.left-drawer {
-  width: clamp(300px, 18vw, 400px);
-  background-color: var(--j-color-white);
-  border-right: 1px solid var(--j-color-ui-50);
-}
-
-.left-drawer__header {
+.community-sidebar__header {
   color: inherit;
   width: 100%;
   display: block;
@@ -300,7 +295,7 @@ export default defineComponent({
   border-bottom: 1px solid var(--j-color-ui-50);
 }
 
-.left-drawer__header:hover {
+.community-sidebar__header:hover {
   background: var(--j-color-ui-50);
 }
 
