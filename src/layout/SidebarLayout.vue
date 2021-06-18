@@ -6,7 +6,7 @@
       'sidebar-layout--is-dragging': isDragging,
     }"
   >
-    <aside class="sidebar-layout__sidebar" ref="sidebar">
+    <aside class="sidebar-layout__drawer" ref="sidebar">
       <span
         role="presentation"
         class="sidebar-layout__resize-handle"
@@ -75,14 +75,15 @@ export default defineComponent({
 .sidebar-layout--is-dragging {
   user-select: none;
 }
-.sidebar-layout__sidebar {
+.sidebar-layout__drawer {
   height: 100%;
   width: 300px;
+  background: var(--app-drawer-bg-color);
   overflow-y: auto;
   position: relative;
   transition: all 0.2s ease;
 }
-.sidebar-layout--closed .sidebar-layout__sidebar {
+.sidebar-layout--closed .sidebar-layout__drawer {
   width: 0px !important;
 }
 .sidebar-layout__main {
@@ -94,15 +95,16 @@ export default defineComponent({
   position: absolute;
   right: 0;
   top: 0;
-  width: 1px;
-  background: var(--j-color-ui-100);
+  width: 3px;
+  border-right: 1px solid var(--app-drawer-border-color);
+  background: transparent;
   cursor: col-resize;
   height: 100%;
   transition: all 0.2s ease;
 }
 .sidebar-layout__resize-handle:hover,
 .sidebar-layout--is-dragging .sidebar-layout__resize-handle {
-  width: 3px;
-  background: var(--j-color-primary-400);
+  border-right: 1px solid var(--j-focus-color);
+  background: var(--j-focus-color);
 }
 </style>

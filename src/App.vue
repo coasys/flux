@@ -179,6 +179,14 @@ body {
   color: var(--j-color-ui-500);
 }
 
+:root {
+  --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+  --app-main-sidebar-border-color: var(--j-border-color);
+  --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+  --app-drawer-border-color: var(--j-border-color);
+  --app-channel-bg-color: var(--j-color-white);
+}
+
 .global-loading {
   width: 100vw;
   height: 100vh;

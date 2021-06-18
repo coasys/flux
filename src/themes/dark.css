@@ -57,6 +57,15 @@
   --j-color-ui-700: hsl(var(--j-color-ui-hue), 15%, 95%);
   --j-color-ui-800: hsl(var(--j-color-ui-hue), 15%, 97%);
   --j-color-ui-900: hsl(var(--j-color-ui-hue), 15%, 100%);
+
+  --j-border-color: hsl(var(--j-color-ui-hue), 18%, 25%);
+
+  /*  App specific styles */
+  --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 18%, 14%);
+  --app-main-sidebar-border-color: hsl(var(--j-color-ui-hue), 18%, 12%);
+  --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 18%, 15%);
+  --app-drawer-border-color: hsl(var(--j-color-ui-hue), 18%, 12%);
+  --app-channel-bg-color: hsl(var(--j-color-ui-hue), 18%, 13%);
 }
 
 :root[theme="dark"] j-tabs {

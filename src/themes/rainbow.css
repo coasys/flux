@@ -3,6 +3,43 @@
 }
 
 :root[theme="rainbow"] j-button[variant="primary"]::part(base) {
+  transition: background-position 1s ease;
+  background-position: 10vw;
+  background-image: linear-gradient(
+    45deg,
+    #00c0ff 0%,
+    #ffcf00 49%,
+    #fc4f4f 80%,
+    #00c0ff 100%
+  );
+}
+
+:root[theme="rainbow"] j-button[variant="primary"]:hover::part(base) {
+  background-position: 20vw;
+  background-image: linear-gradient(
+    90deg,
+    #00c0ff 0%,
+    #ffcf00 49%,
+    #fc4f4f 80%,
+    #00c0ff 100%
+  );
+}
+
+:root[theme="rainbow"] j-modal::part(modal) {
+  border: 2px solid transparent;
+  border-radius: var(--j-border-radius);
+  border-image: linear-gradient(
+    to bottom right,
+    #b827fc 0%,
+    #2c90fc 25%,
+    #b8fd33 50%,
+    #fec837 75%,
+    #fd1892 100%
+  );
+  border-image-slice: 1;
+}
+
+:root[theme="rainbow"] j-menu-item[selected]::part(base) {
   background-image: linear-gradient(
     45deg,
     #00c0ff 0%,

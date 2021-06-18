@@ -3,7 +3,9 @@
     <template v-slot:sidebar>
       <community-sidebar :community="currentCommunity"></community-sidebar>
     </template>
-    <router-view></router-view>
+    <keep-alive>
+      <router-view></router-view>
+    </keep-alive>
   </sidebar-layout>
 </template>
 
