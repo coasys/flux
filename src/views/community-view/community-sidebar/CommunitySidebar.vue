@@ -61,7 +61,7 @@
 
     <j-box pt="500" px="500" pb="500">
       <avatar-group
-        @click="showCommunityMembers = true"
+        @click="() => setShowCommunityMembers(true)"
         :users="community.members"
       />
     </j-box>
@@ -108,7 +108,11 @@ export default defineComponent({
   components: { AvatarGroup },
   props: ["community"],
   methods: {
-    ...mapMutations(["setShowCreateChannel", "setShowEditCommunity"]),
+    ...mapMutations([
+      "setShowCreateChannel",
+      "setShowEditCommunity",
+      "setShowCommunityMembers",
+    ]),
     getInviteCode() {
       // Get the invite code to join community and copy to clipboard
       let currentCommunity = this.community;
