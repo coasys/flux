@@ -10,7 +10,7 @@
       :value="searchValue"
       @input="(e) => (searchValue = e.target.value)"
     >
-      <j-icon name="search" size="sm" slot="start"></j-icon>
+      <j-icon name="search" size="sm" slot="end"></j-icon>
     </j-input>
     <j-flex wrap gap="600">
       <j-flex

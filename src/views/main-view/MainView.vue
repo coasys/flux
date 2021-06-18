@@ -3,7 +3,9 @@
     <template v-slot:sidebar>
       <main-sidebar></main-sidebar>
     </template>
-    <router-view></router-view>
+    <keep-alive>
+      <router-view></router-view>
+    </keep-alive>
   </app-layout>
   <j-modal
     :open="modals.showEditProfile"

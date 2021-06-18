@@ -124,7 +124,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .left-nav__bottom-section {
   width: 100%;
-  border-top: 1px var(--j-color-ui-50) solid;
+  border-top: 1px var(--app-drawer-border-color) solid;
   padding: 2rem 0;
   display: flex;
   gap: var(--j-space-400);

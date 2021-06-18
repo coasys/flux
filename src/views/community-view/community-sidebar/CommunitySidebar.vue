@@ -143,7 +143,7 @@ export default defineComponent({
   background: none;
   cursor: pointer;
   padding: var(--j-space-400) var(--j-space-500);
-  border-bottom: 1px solid var(--j-color-ui-50);
+  border-bottom: 1px solid var(--app-drawer-border-color);
 }
 
 .community-sidebar__header:hover {
