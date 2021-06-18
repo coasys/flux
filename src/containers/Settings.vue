@@ -4,8 +4,8 @@
     <j-flex a="center" j="between">
       <j-text variant="label">Font family</j-text>
       <j-tabs
-        :value="fontFamily"
-        @change="(e) => (fontFamily = e.target.value)"
+        :value="theme.fontFamily"
+        @change="(e) => setTheme({ fontFamily: e.target.value })"
       >
         <j-tab-item value="default">Default</j-tab-item>
         <j-tab-item value="system">System</j-tab-item>
@@ -14,11 +14,15 @@
     </j-flex>
     <j-flex a="center" j="between">
       <j-text variant="label">Mode</j-text>
-      <j-tabs :value="themeName" @change="(e) => (themeName = e.target.value)">
+      <j-tabs
+        :value="theme.name"
+        @change="(e) => setTheme({ name: e.target.value })"
+      >
         <j-tab-item value="light">Light</j-tab-item>
         <j-tab-item value="dark">Dark</j-tab-item>
         <j-tab-item value="rainbow">Rainbow</j-tab-item>
         <j-tab-item value="cyberpunk">Cyberpunk</j-tab-item>
+        <j-tab-item value="90s">90s</j-tab-item>
       </j-tabs>
     </j-flex>
     <j-flex a="center" j="between">
@@ -28,8 +32,8 @@
           v-for="n in [0, 50, 100, 150, 200, 250, 270, 300]"
           :key="n"
           class="color-button"
-          :class="{ 'color-button--active': themeHue === n }"
-          @click="() => (themeHue = n)"
+          :class="{ 'color-button--active': theme.hue === n }"
+          @click="() => setTheme({ hue: n })"
           :style="`--hue: ${n}`"
         ></button>
       </div>
@@ -42,9 +46,8 @@
       </j-button>
     </j-flex>
     <div>
-      <j-button size="lg" @click="$emit('cancel')">Cancel</j-button>
       <j-button size="lg" variant="primary" @click="updateTheme">
-        Save
+        Done
       </j-button>
     </div>
   </j-flex>
@@ -53,67 +56,20 @@
 <script lang="ts">
 import { ThemeState } from "@/store";
 import { defineComponent } from "vue";
+import { mapMutations } from "vuex";
 
 export default defineComponent({
   data() {
     return {
-      hue: getComputedStyle(document.documentElement).getPropertyValue(
-        "--j-color-primary-hue"
-      ),
-      fontFamily: getComputedStyle(document.documentElement).getPropertyValue(
-        "--j-font-family"
-      ),
+      hue: 270,
+      fontFamily: "",
       themeName: "",
       themeHue: "",
     };
   },
-  watch: {
-    themeHue: function (val) {
-      document.documentElement.style.setProperty("--j-color-primary-hue", val);
-    },
-    themeName: function (val) {
-      import(`../themes/${val}.css`);
-      document.documentElement.setAttribute("theme", val);
-    },
-    fontFamily: function (val: "system" | "default") {
-      const font = {
-        default: `"Avenir", sans-serif`,
-        monospace: `monospace`,
-        system: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
-      };
-      document.documentElement.style.setProperty("--j-font-family", font[val]);
-    },
-    "theme.name": {
-      handler: function (val: string): void {
-        this.themeName = val;
-      },
-      immediate: true,
-    },
-    "theme.hue": {
-      handler: function (val: string): void {
-        this.themeHue = val;
-      },
-      immediate: true,
-    },
-    "theme.fontFamily": {
-      handler: function (val: string): void {
-        this.fontFamily = val;
-      },
-      immediate: true,
-    },
-  },
   methods: {
-    resetTheme() {
-      this.$store.commit("setTheme", {
-        name: this.theme.name,
-        hue: this.theme.hue,
-      });
-    },
+    ...mapMutations(["setTheme"]),
     updateTheme() {
-      this.$store.commit("setTheme", {
-        name: this.themeName,
-        hue: this.themeHue,
-      });
       this.$emit("submit");
     },
   },

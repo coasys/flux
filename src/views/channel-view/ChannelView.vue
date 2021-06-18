@@ -1,11 +1,11 @@
 <template>
-  <div class="channel-view">
+  <div class="channel-view" ref="scrollContainer">
     <header class="channel-view__header">
       <j-icon size="sm" name="hash" />
       <j-text nomargin weight="500" size="500">{{ channel.name }}</j-text>
     </header>
 
-    <div class="channel-view__main" ref="messagesContainer">
+    <div class="channel-view__main">
       <div class="channel-view__load-more">
         <j-button @click="loadMoreMessages">Load more messages</j-button>
       </div>
@@ -82,7 +82,7 @@ export default defineComponent({
   },
 
   mounted() {
-    console.log("Current mounted channel", this.channel);
+    //console.log("Current mounted channel", this.channel);
     this.scrollToBottom();
     this.startLoop(this.community.perspective);
     /* TODO: Show button only when we scrolled to top
@@ -92,6 +92,9 @@ export default defineComponent({
     */
   },
   computed: {
+    messagesLength(): number {
+      return this.messages.length;
+    },
     messages(): any[] {
       const sortedMessages = [...this.channel.currentExpressionMessages].sort(
         (a: any, b: any) => {
@@ -183,19 +186,14 @@ export default defineComponent({
           setTimeout(this.scrollToBottom, 300);
         });
     },
-
     scrollToBottom() {
-      const container = this.$refs.messagesContainer;
-      //@ts-ignore
-      console.log(
-        "scroll to bottom",
-        //@ts-ignore
-        container.scrollTop,
-        //@ts-ignore
-        container.scrollHeight
-      );
-      //@ts-ignore
-      container.scrollTop = container.scrollHeight;
+      const container = this.$refs.scrollContainer as any;
+      if (container) {
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: "smooth",
+        });
+      }
     },
   },
 
@@ -218,11 +216,12 @@ export default defineComponent({
   padding: var(--j-space-500);
   display: flex;
   align-items: center;
-  border-bottom: 1px solid var(--j-color-ui-100);
-  background: var(--j-color-white);
+  border-bottom: 1px solid var(--j-border-color);
+  background: var(--app-channel-bg-color);
   z-index: 1;
 }
 .channel-view__main {
+  background: var(--app-channel-bg-color);
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -238,7 +237,7 @@ export default defineComponent({
 }
 
 .channel-view__footer {
-  background: var(--j-color-white);
+  background: var(--app-channel-bg-color);
   position: sticky;
   bottom: 0;
   padding: var(--j-space-300);

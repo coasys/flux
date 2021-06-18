@@ -57,10 +57,23 @@
   --j-color-ui-700: hsl(var(--j-color-ui-hue), 15%, 95%);
   --j-color-ui-800: hsl(var(--j-color-ui-hue), 15%, 97%);
   --j-color-ui-900: hsl(var(--j-color-ui-hue), 15%, 100%);
+
+  --j-border-color: hsl(var(--j-color-ui-hue), 18%, 25%);
+
+  /*  App specific styles */
+  --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 18%, 14%);
+  --app-main-sidebar-border-color: hsl(var(--j-color-ui-hue), 18%, 12%);
+  --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 18%, 15%);
+  --app-drawer-border-color: hsl(var(--j-color-ui-hue), 18%, 12%);
+  --app-channel-bg-color: hsl(var(--j-color-ui-hue), 18%, 13%);
 }
 
 :root[theme="dark"] j-tabs {
   --j-tabs-indicator-bg: var(--j-color-primary-600);
+}
+
+:root[theme="dark"] j-modal::part(modal) {
+  box-shadow: 0px 0px 40px 20px hsla(var(--j-color-primary-hue), 60%, 50%, 0.05);
 }
 
 :root[theme="dark"] j-tab-item::part(base) {
@@ -71,6 +84,18 @@
   color: var(--j-color-black);
 }
 
+:root[theme="dark"] j-input::part(input-wrapper) {
+  background-color: hsl(var(--j-color-ui-hue), 18%, 23%);
+}
+
 :root[theme="dark"] j-tab-item[checked]::part(base) {
   color: var(--j-color-white);
+}
+
+:root[theme="dark"] j-message-item:hover::part(base) {
+  background-color: hsl(var(--j-color-ui-hue), 18%, 17%);
+}
+
+:root[theme="dark"] body {
+  background: hsl(var(--j-color-ui-hue), 18%, 13%);
 }

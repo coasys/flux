@@ -8,16 +8,59 @@ import path from "path";
 import os from "os";
 import util from "util";
 import fs from "fs";
-import { autoUpdater } from 'electron-updater';
+import { autoUpdater } from "electron-updater";
 
 let win: BrowserWindow;
 let splash: BrowserWindow;
 let Core: ad4m.PerspectivismCore;
 let builtInLangPath: string;
+let execPath: string;
+let env;
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
-console.log("Trying to run!");
+if (app.isPackaged) {
+  console.log("App is running in production mode");
+  //TODO: this code is probably somewhat broken
+  builtInLangPath = path.resolve(
+    `${process.resourcesPath}/../resources/packaged-resources/languages`
+  );
+  execPath = path.resolve(
+    `${process.resourcesPath}/../resources/packaged-resources/bin`
+  );
+  env = "";
+  const log_file = fs.createWriteStream(
+    path.join(app.getPath("logs"), "debug.log"),
+    {
+      flags: "w",
+    }
+  );
+  const log_stdout = process.stdout;
+
+  console.log = function (...args: any) {
+    args.forEach((arg: any) => {
+      log_file.write(util.format(arg) + "\n");
+      log_stdout.write(util.format(arg) + "\n");
+    });
+  };
+} else {
+  console.log("App is running in dev mode");
+  builtInLangPath = path.resolve(`${__dirname}/../ad4m/languages`);
+  execPath = path.resolve(`${__dirname}/../resources/${os.platform}/`);
+  env = "dev";
+
+  if (!fs.existsSync(path.join(app.getPath("userData"), env))) {
+    fs.mkdirSync(path.join(app.getPath("userData"), env));
+  }
+
+  if (!fs.existsSync(path.join(app.getPath("appData"), env))) {
+    fs.mkdirSync(path.join(app.getPath("appData"), env));
+  }
+
+  app.setPath("userData", path.join(app.getPath("userData"), env));
+  app.setPath("appData", path.join(app.getPath("appData"), env));
+  //app.setName("junto-dev");
+}
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -46,37 +89,12 @@ app.on("ready", async () => {
       }
     }
 
-    let execPath;
-    if (app.isPackaged) {
-      console.log("App is running in production mode");
-      //TODO: this code is probably somewhat broken
-      builtInLangPath = path.resolve(
-        `${process.resourcesPath}/../resources/packaged-resources/languages`
-      );
-      execPath = path.resolve(
-        `${process.resourcesPath}/../resources/packaged-resources/bin`
-      );
-      const log_file = fs.createWriteStream(
-        path.join(app.getPath("logs"), "debug.log"),
-        {
-          flags: "w",
-        }
-      );
-      const log_stdout = process.stdout;
-
-      console.log = function (...args: any) {
-        args.forEach((arg: any) => {
-          log_file.write(util.format(arg) + "\n");
-          log_stdout.write(util.format(arg) + "\n");
-        });
-      };
-    } else {
-      console.log("App is running in dev mode");
-      builtInLangPath = path.resolve(`${__dirname}/../ad4m/languages`);
-      execPath = path.resolve(`${__dirname}/../resources/${os.platform}/`);
-    }
     console.log(
       "\x1b[1m",
+      "UserData path",
+      app.getPath("userData"),
+      "AppData path",
+      app.getPath("appData"),
       "Using Resource path",
       execPath,
       "built in language path",
@@ -125,7 +143,7 @@ app.on("ready", async () => {
         });
       })
       .catch((err) => {
-        console.log("error:", err);
+        console.error("Ad4m init error:", err);
       });
   });
 });
@@ -136,6 +154,7 @@ function createSplashScreen() {
     width: 1000,
     webPreferences: {
       nodeIntegration: false,
+      contextIsolation: true, // protect against prototype pollution
       enableRemoteModule: false,
     },
     minimizable: false,
@@ -160,8 +179,6 @@ async function createWindow() {
     width: 1920,
     height: 1080,
     webPreferences: {
-      // Use pluginOptions.nodeIntegration, leave this alone
-      // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: false,
       contextIsolation: true, // protect against prototype pollution
       enableRemoteModule: false, // turn off remote
@@ -258,7 +275,7 @@ process.on("unhandledRejection", (reason, p) => {
   // application specific logging, throwing an error, or other logic here
 });
 
-ipcMain.on('check-update', () => {
+ipcMain.on("check-update", () => {
   if (!isDevelopment) {
     autoUpdater.checkForUpdates();
   } else {
@@ -266,30 +283,30 @@ ipcMain.on('check-update', () => {
   }
 });
 
-autoUpdater.on('update-available', () => {
+autoUpdater.on("update-available", () => {
   win.webContents.send("update_available");
 });
 
-autoUpdater.on('update-not-available', () => {
+autoUpdater.on("update-not-available", () => {
   win.webContents.send("update_not_available");
 });
 
-ipcMain.on('download-update', () => {
+ipcMain.on("download-update", () => {
   autoUpdater.downloadUpdate();
 });
 
-autoUpdater.on('update-downloaded', () => {
+autoUpdater.on("update-downloaded", () => {
   win.webContents.send("update_downloaded");
 });
 
-ipcMain.on('quit-and-install', () => {
+ipcMain.on("quit-and-install", () => {
   autoUpdater.quitAndInstall();
 });
 
-autoUpdater.on('download-progress', (info) => {
-  win.webContents.send('download_progress', info);
+autoUpdater.on("download-progress", (info) => {
+  win.webContents.send("download_progress", info);
 });
 
-autoUpdater.on('error', () => {
+autoUpdater.on("error", () => {
   win.webContents.send("update_not_available");
 });

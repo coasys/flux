@@ -25,7 +25,7 @@ export default async function (
   try {
     const communities = state.communities;
 
-    console.log(communityId, communities);
+    // console.log(communityId, communities);
 
     const community = communities.find((c) => c.perspective === communityId);
 
@@ -35,7 +35,7 @@ export default async function (
       "sioc://has_member"
     );
 
-    console.log("profileLinks:", profileLinks);
+    //console.log("profileLinks:", profileLinks);
 
     const profileLang = community?.typedExpressionLanguages.find(
       (t) => t.expressionType === ExpressionTypes.ProfileExpression
@@ -63,7 +63,7 @@ export default async function (
 
       const profileList = Object.values(profiles);
 
-      console.log("profiles", profileList);
+      // console.log("profiles", profileList);
 
       commit("setCommunityMembers", {
         communityId,

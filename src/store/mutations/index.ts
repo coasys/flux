@@ -51,7 +51,7 @@ export default {
         );
 
         if (!currentExpressionLink) {
-          console.log("Adding link to channel", link);
+          console.log("Adding link to channel");
           links.push({
             expression: link,
             language: channel.linkLanguageAddress,
@@ -63,6 +63,7 @@ export default {
             20
           );
           if (expression) {
+            console.log("Adding expression to channel");
             //@ts-ignore
             expressions.push({
               //@ts-ignore
@@ -101,11 +102,7 @@ export default {
     state.communities.forEach((community) => {
       community.channels.forEach((channel) => {
         if (channel.linkLanguageAddress === payload.linkLanguage) {
-          console.log(
-            new Date().toISOString(),
-            "Adding to link and exp to channel!",
-            payload
-          );
+          console.log("Adding to link and exp to channel!");
           channel.currentExpressionLinks.push({
             expression: payload.link,
             language: payload.linkLanguage,
@@ -136,7 +133,6 @@ export default {
   },
 
   addChannel(state: State, payload: AddChannel): void {
-    console.log(payload);
     const community = state.communities.find(
       (community) => community.perspective === payload.communityId
     );
@@ -200,7 +196,10 @@ export default {
     }
   },
 
-  updateUpdateState(state: State, { updateState }: {updateState: UpdateState}): void {
+  updateUpdateState(
+    state: State,
+    { updateState }: { updateState: UpdateState }
+  ): void {
     state.updateState = updateState;
   },
   setCommunityMembers(
@@ -216,6 +215,30 @@ export default {
     }
   },
   setGlobalLoading(state: State, payload: boolean): void {
-    state.ui.isGlobalLoading = payload;
+    state.ui.showGlobalLoading = payload;
+  },
+
+  setShowCreateCommunity(state: State, payload: boolean): void {
+    state.ui.modals.showCreateCommunity = payload;
+  },
+
+  setShowEditCommunity(state: State, payload: boolean): void {
+    state.ui.modals.showEditCommunity = payload;
+  },
+
+  setShowCommunityMembers(state: State, payload: boolean): void {
+    state.ui.modals.showCommunityMembers = payload;
+  },
+
+  setShowCreateChannel(state: State, payload: boolean): void {
+    state.ui.modals.showCreateChannel = payload;
+  },
+
+  setShowEditProfile(state: State, payload: boolean): void {
+    state.ui.modals.showEditProfile = payload;
+  },
+
+  setShowSettings(state: State, payload: boolean): void {
+    state.ui.modals.showSettings = payload;
   },
 };
