@@ -90,6 +90,7 @@ export default defineComponent({
   width: 100%;
   max-height: 100vh;
   position: relative;
+  background: var(--app-main-content-bg-color);
 }
 .sidebar-layout__resize-handle {
   position: absolute;

@@ -21,6 +21,7 @@
         <j-tab-item value="light">Light</j-tab-item>
         <j-tab-item value="dark">Dark</j-tab-item>
         <j-tab-item value="rainbow">Rainbow</j-tab-item>
+        <j-tab-item value="90s">90s</j-tab-item>
       </j-tabs>
     </j-flex>
     <j-flex a="center" j="between">
