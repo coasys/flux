@@ -21,8 +21,8 @@
     @toggle="(e) => setShowSettings(e.target.open)"
   >
     <settings
-      @submit="setShowEditProfile(false)"
-      @cancel="setShowEditProfile(false)"
+      @submit="setShowEditSettings(false)"
+      @cancel="setShowEditSettings(false)"
     />
   </j-modal>
 </template>
