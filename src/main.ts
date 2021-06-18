@@ -3,8 +3,6 @@ import App from "./App.vue";
 import "./registerServiceWorker";
 import router from "./router";
 import store from "./store/index";
-import VueVirtualScroller from "vue-virtual-scroller";
-import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 import VTooltip from "v-tooltip";
 import "v-tooltip/dist/v-tooltip.css";
 
@@ -43,6 +41,5 @@ createApp({
 })
   .use(store)
   .use(router)
-  .use(VueVirtualScroller)
   .use(VTooltip)
   .mount("#app");

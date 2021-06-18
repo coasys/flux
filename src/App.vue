@@ -15,6 +15,22 @@
       <j-text size="700">Please wait...</j-text>
     </j-flex>
   </div>
+  <div class="global-error" v-if="globalError.show">
+    <div class="global-error__backdrop"></div>
+    <j-flex a="center" direction="column" gap="1000">
+      <j-icon name="bug-fill"></j-icon>
+      <j-text size="700">
+        Sorry Junto has a bug... Please report this message to us:
+        {{ globalError.message }}</j-text
+      >
+    </j-flex>
+  </div>
+  <j-modal
+    :open="showErrorModal"
+    @toggle="(e) => (showErrorModal = e.target.open)"
+  >
+    {{ errorMessage }}
+  </j-modal>
 </template>
 
 <script lang="ts">
@@ -106,12 +122,18 @@ export default defineComponent({
     showGlobalLoading(): boolean {
       return this.$store.state.ui.showGlobalLoading;
     },
+    globalError(): { show: boolean; message: string } {
+      return this.$store.state.ui.globalError;
+    },
     modals(): ModalsState {
       return this.$store.state.ui.modals;
     },
   },
-
   beforeCreate() {
+    //Reset globalError & loading states in case application was exited with these states set to true before
+    this.$store.commit("setGlobalError", { show: false, message: "" });
+    this.$store.commit("setGlobalLoading", false);
+
     window.api.send("getLangPath");
 
     window.api.receive("getLangPathResponse", (data: string) => {
@@ -138,6 +160,13 @@ export default defineComponent({
     window.api.receive("setGlobalLoading", (val: boolean) => {
       this.$store.commit("setGlobalLoading", val);
     });
+
+    window.api.receive(
+      "globalError",
+      (payload: { show: boolean; message: string }) => {
+        this.$store.commit("setGlobalError", payload);
+      }
+    );
 
     const { onResult, onError } =
       useQuery<{
@@ -186,7 +215,28 @@ body {
   place-items: center;
 }
 
+.global-error {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+}
+
 .global-loading__backdrop {
+  position: absolute;
+  left: 0;
+  height: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--j-color-white);
+  opacity: 0.5;
+  backdrop-filter: blur(15px);
+}
+
+.global-error__backdrop {
   position: absolute;
   left: 0;
   height: 0;
