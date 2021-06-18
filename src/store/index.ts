@@ -84,11 +84,21 @@ export interface ThemeState {
   hue: number;
 }
 
+export interface ModalsState {
+  showCreateCommunity: boolean;
+  showEditCommunity: boolean;
+  showCommunityMembers: boolean;
+  showCreateChannel: boolean;
+  showEditProfile: boolean;
+  showSettings: boolean;
+}
+
 export interface UIState {
   toast: ToastState;
   theme: ThemeState;
+  modals: ModalsState;
   showSidebar: boolean;
-  isGlobalLoading: boolean;
+  showGlobalLoading: boolean;
 }
 
 export type UpdateState =
@@ -145,8 +155,16 @@ const vuexLocal = new VuexPersistence<State>({
 export default createStore({
   state: {
     ui: {
+      modals: {
+        showCreateCommunity: false,
+        showEditCommunity: false,
+        showCommunityMembers: false,
+        showCreateChannel: false,
+        showEditProfile: false,
+        showSettings: false,
+      },
       showSidebar: true,
-      isGlobalLoading: false,
+      showGlobalLoading: false,
       theme: {
         fontFamily: "default",
         name: "light",

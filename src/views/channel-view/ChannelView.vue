@@ -82,7 +82,7 @@ export default defineComponent({
   },
 
   mounted() {
-    console.log("Current mounted channel", this.channel);
+    //console.log("Current mounted channel", this.channel);
     this.scrollToBottom();
     this.startLoop(this.community.perspective);
     /* TODO: Show button only when we scrolled to top

@@ -42,7 +42,7 @@
         <j-menu-item
           :value="communityName"
           @change="(e) => (communityName = e.target.value)"
-          @click="showUpdateCommunity = true"
+          @click="() => setShowEditCommunity(true)"
         >
           <j-icon size="xs" slot="start" name="pencil" />
           Edit community
@@ -52,7 +52,7 @@
           Invite people
         </j-menu-item>
         <j-divider />
-        <j-menu-item @click="showCreateChannel = true">
+        <j-menu-item @click="() => setShowCreateChannel(true)">
           <j-icon size="xs" slot="start" name="plus" />
           Create a new channel
         </j-menu-item>
@@ -61,7 +61,7 @@
 
     <j-box pt="500" px="500" pb="500">
       <avatar-group
-        @click="showGroupMembers = true"
+        @click="() => setShowCommunityMembers(true)"
         :users="community.members"
       />
     </j-box>
@@ -69,7 +69,7 @@
     <j-box pt="500">
       <j-menu-group-item open title="Channels">
         <j-button
-          @click.prevent="showCreateChannel = true"
+          @click.prevent="() => setShowCreateChannel(true)"
           size="sm"
           slot="end"
           variant="transparent"
@@ -96,54 +96,23 @@
         </router-link>
       </j-menu-group-item>
     </j-box>
-
-    <j-modal
-      :open="showGroupMembers"
-      @toggle="(e) => (showGroupMembers = e.target.open)"
-    >
-      <community-members />
-    </j-modal>
-
-    <j-modal
-      :open="showUpdateCommunity"
-      @toggle="(e) => (showUpdateCommunity = e.target.open)"
-    >
-      <edit-community
-        @submit="showUpdateCommunity = false"
-        @cancel="showUpdateCommunity = false"
-      />
-    </j-modal>
-
-    <j-modal
-      :open="showCreateChannel"
-      @toggle="(e) => (showCreateChannel = e.target.open)"
-    >
-      <create-channel
-        @submit="showCreateChannel = false"
-        @cancel="showCreateChannel = false"
-      />
-    </j-modal>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import EditCommunity from "@/containers/EditCommunity.vue";
-import CreateChannel from "@/containers/CreateChannel.vue";
-import CommunityMembers from "@/containers/CommunityMembers.vue";
+import { mapMutations } from "vuex";
 
 export default defineComponent({
-  components: { AvatarGroup, EditCommunity, CreateChannel, CommunityMembers },
+  components: { AvatarGroup },
   props: ["community"],
-  data() {
-    return {
-      showCreateChannel: false,
-      showUpdateCommunity: false,
-      showGroupMembers: false,
-    };
-  },
   methods: {
+    ...mapMutations([
+      "setShowCreateChannel",
+      "setShowEditCommunity",
+      "setShowCommunityMembers",
+    ]),
     getInviteCode() {
       // Get the invite code to join community and copy to clipboard
       let currentCommunity = this.community;
