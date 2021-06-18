@@ -8,7 +8,7 @@
   >
     {{ toast.message }}
   </j-toast>
-  <div class="global-loading" v-if="isGlobalLoading">
+  <div class="global-loading" v-if="ui.isGlobalLoading">
     <div class="global-loading__backdrop"></div>
     <j-flex a="center" direction="column" gap="1000">
       <j-spinner size="lg"> </j-spinner>
@@ -109,9 +109,34 @@ export default defineComponent({
       errorMessage,
     };
   },
+  watch: {
+    "ui.theme.hue": function (val) {
+      console.log({ val });
+      document.documentElement.style.setProperty("--j-color-primary-hue", val);
+    },
+    "ui.theme.name": {
+      handler: function (themeName) {
+        if (!themeName) {
+          document.documentElement.setAttribute("theme", "");
+        } else {
+          import(`./themes/${themeName}.css`);
+          document.documentElement.setAttribute("theme", themeName);
+        }
+      },
+      immediate: true,
+    },
+    "ui.theme.fontFamily": function (val: "system" | "default") {
+      const font = {
+        default: `"Avenir", sans-serif`,
+        monospace: `monospace`,
+        system: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
+      };
+      document.documentElement.style.setProperty("--j-font-family", font[val]);
+    },
+  },
   computed: {
-    isGlobalLoading() {
-      return this.$store.state.ui.isGlobalLoading;
+    ui() {
+      return this.$store.state.ui;
     },
   },
   beforeCreate() {
