@@ -48,9 +48,7 @@ async function main() {
     `Deleting ${configPath} config path.. Press Y to accept... `
   );
   fs.rmdirSync(configPath, { recursive: true });
-  console.log(
-    "Done. Please run localStorage.clear() in the browser to clear Vuex store."
-  );
+  console.log("Done.");
 }
 
 main();

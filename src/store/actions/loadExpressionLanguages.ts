@@ -15,7 +15,7 @@ export interface Payload {
 export default async ({ commit, getters }: Context): Promise<void> => {
   try {
     const expressionLangs = getters.getAllExpressionLanguagesNotLoaded;
-    console.log({ expressionLangs });
+    // console.log({ expressionLangs });
     for (const [, lang] of expressionLangs.entries()) {
       const language = await getLanguage(lang);
       console.log("Got language", language);

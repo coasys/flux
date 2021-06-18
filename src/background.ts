@@ -17,8 +17,6 @@ let builtInLangPath: string;
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
-console.log("Trying to run!");
-
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -125,7 +123,7 @@ app.on("ready", async () => {
         });
       })
       .catch((err) => {
-        console.log("error:", err);
+        console.error("Ad4m init error:", err);
       });
   });
 });

@@ -82,6 +82,7 @@ export default defineComponent({
 
     //Watch for incoming signals to get expression data
     watch(result, async (data) => {
+      console.log("GOT INCOMING MESSAGE SIGNAL");
       const linkData = parseSignalAsLink(data.signal);
       if (linkData) {
         const link = linkData.link;
@@ -92,6 +93,7 @@ export default defineComponent({
             expressionGetRetries,
             expressionGetDelayMs
           );
+          console.log("FOUND EXPRESSION FOR SIGNAL");
           store.commit("addExpressionAndLinkFromLanguageAddress", {
             linkLanguage: language,
             //@ts-ignore
@@ -118,7 +120,7 @@ export default defineComponent({
     window.api.send("getLangPath");
 
     window.api.receive("getLangPathResponse", (data: string) => {
-      console.log(`Received language path from main thread: ${data}`);
+      // console.log(`Received language path from main thread: ${data}`);
       this.$store.commit("setLanguagesPath", data);
     });
 
