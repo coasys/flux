@@ -200,7 +200,10 @@ export default {
     }
   },
 
-  updateUpdateState(state: State, { updateState }: {updateState: UpdateState}): void {
+  updateUpdateState(
+    state: State,
+    { updateState }: { updateState: UpdateState }
+  ): void {
     state.updateState = updateState;
   },
   setCommunityMembers(
@@ -216,6 +219,30 @@ export default {
     }
   },
   setGlobalLoading(state: State, payload: boolean): void {
-    state.ui.isGlobalLoading = payload;
+    state.ui.showGlobalLoading = payload;
+  },
+
+  setShowCreateCommunity(state: State, payload: boolean): void {
+    state.ui.modals.showCreateCommunity = payload;
+  },
+
+  setShowEditCommunity(state: State, payload: boolean): void {
+    state.ui.modals.showEditCommunity = payload;
+  },
+
+  setShowCommunityMembers(state: State, payload: boolean): void {
+    state.ui.modals.showCommunityMembers = payload;
+  },
+
+  setShowCreateChannel(state: State, payload: boolean): void {
+    state.ui.modals.showCreateChannel = payload;
+  },
+
+  setShowEditProfile(state: State, payload: boolean): void {
+    state.ui.modals.showEditProfile = payload;
+  },
+
+  setShowSettings(state: State, payload: boolean): void {
+    state.ui.modals.showSettings = payload;
   },
 };

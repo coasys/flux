@@ -31,7 +31,7 @@
           ></j-avatar>
           <j-text nomargin>{{ userProfile.username }}</j-text>
         </j-flex>
-        <j-menu-item @click="isEditProfileOpen = true">
+        <j-menu-item @click="() => setShowEditProfile(true)">
           <j-icon size="sm" slot="start" name="pencil"></j-icon>
           Edit profile
         </j-menu-item>
@@ -39,7 +39,7 @@
           <j-icon size="sm" slot="start" name="cloud-download"></j-icon>
           {{ updateApp.text }}
         </j-menu-item>
-        <j-menu-item @click="isSettingsOpen = true">
+        <j-menu-item @click="() => setShowSettings(true)">
           <j-icon size="sm" slot="start" name="gear"></j-icon>
           Settings
         </j-menu-item>
@@ -51,38 +51,15 @@
         </router-link>
       </j-menu>
     </j-popover>
-
-    <j-modal
-      :open="isEditProfileOpen"
-      @toggle="(e) => (isEditProfileOpen = e.target.open)"
-    >
-      <edit-profile
-        @submit="isEditProfileOpen = false"
-        @cancel="isEditProfileOpen = false"
-      />
-    </j-modal>
-
-    <j-modal
-      class="settings-modal"
-      :open="isSettingsOpen"
-      @toggle="(e) => (isSettingsOpen = e.target.open)"
-    >
-      <settings
-        @submit="isSettingsOpen = false"
-        @cancel="isSettingsOpen = false"
-      />
-    </j-modal>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onBeforeMount } from "vue";
-import Settings from "@/containers/Settings.vue";
-import EditProfile from "@/containers/EditProfile.vue";
+import { mapMutations } from "vuex";
 import { Profile } from "@/store";
 
 export default defineComponent({
-  components: { Settings, EditProfile },
   setup() {
     onBeforeMount(() => {
       window.api.receive("getCleanState", (data: string) => {
@@ -92,14 +69,8 @@ export default defineComponent({
       });
     });
   },
-  data() {
-    return {
-      isSettingsOpen: false,
-      isEditProfileOpen: false,
-    };
-  },
-
   methods: {
+    ...mapMutations(["setShowSettings", "setShowEditProfile"]),
     cleanState() {
       window.api.send("cleanState");
     },
