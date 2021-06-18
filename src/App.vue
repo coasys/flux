@@ -8,26 +8,20 @@
   >
     {{ toast.message }}
   </j-toast>
-  <div class="global-loading" v-if="isGlobalLoading">
+  <div class="global-loading" v-if="showGlobalLoading">
     <div class="global-loading__backdrop"></div>
     <j-flex a="center" direction="column" gap="1000">
       <j-spinner size="lg"> </j-spinner>
       <j-text size="700">Please wait...</j-text>
     </j-flex>
   </div>
-  <j-modal
-    :open="showErrorModal"
-    @toggle="(e) => (showErrorModal = e.target.open)"
-  >
-    {{ errorMessage }}
-  </j-modal>
 </template>
 
 <script lang="ts">
 import { useQuery } from "@vue/apollo-composable";
 import { useRouter } from "vue-router";
 import { useSubscription } from "@vue/apollo-composable";
-import { defineComponent, watch, ref, computed } from "vue";
+import { defineComponent, watch, computed } from "vue";
 import { AD4M_SIGNAL } from "@/core/graphql_queries";
 import { useStore } from "vuex";
 import { onError } from "@apollo/client/link/error";
@@ -36,7 +30,7 @@ import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { getExpressionAndRetry } from "@/core/queries/getExpression";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { AGENT_SERVICE_STATUS } from "@/core/graphql_queries";
-import { ToastState } from "@/store";
+import { ModalsState, ToastState } from "@/store";
 import parseSignalAsLink from "@/core/utils/parseSignalAsLink";
 
 declare global {
@@ -50,16 +44,15 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const store = useStore();
-    const errorMessage = ref("");
-    const showErrorModal = ref(false);
 
     onError((error) => {
       if (process.env.NODE_ENV !== "production") {
         // can use error.operation.operationName to single out a query type.
         logErrorMessages(error);
 
-        errorMessage.value = JSON.stringify(error);
-        showErrorModal.value = true;
+        store.commit("showDangerToast", {
+          message: JSON.stringify(error),
+        });
       }
     });
 
@@ -107,15 +100,17 @@ export default defineComponent({
     return {
       toast: computed(() => store.state.ui.toast),
       setToast: (payload: ToastState) => store.commit("setToast", payload),
-      showErrorModal,
-      errorMessage,
     };
   },
   computed: {
-    isGlobalLoading() {
-      return this.$store.state.ui.isGlobalLoading;
+    showGlobalLoading(): boolean {
+      return this.$store.state.ui.showGlobalLoading;
+    },
+    modals(): ModalsState {
+      return this.$store.state.ui.modals;
     },
   },
+
   beforeCreate() {
     window.api.send("getLangPath");
 
