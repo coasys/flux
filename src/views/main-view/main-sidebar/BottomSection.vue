@@ -35,10 +35,6 @@
           <j-icon size="sm" slot="start" name="pencil"></j-icon>
           Edit profile
         </j-menu-item>
-        <j-menu-item>
-          <j-icon size="sm" slot="start" name="person"></j-icon>
-          View profile
-        </j-menu-item>
         <j-menu-item @click="updateApp.func">
           <j-icon size="sm" slot="start" name="cloud-download"></j-icon>
           {{ updateApp.text }}
