@@ -18,6 +18,7 @@
         <j-tab-item value="light">Light</j-tab-item>
         <j-tab-item value="dark">Dark</j-tab-item>
         <j-tab-item value="rainbow">Rainbow</j-tab-item>
+        <j-tab-item value="cyberpunk">Cyberpunk</j-tab-item>
       </j-tabs>
     </j-flex>
     <j-flex a="center" j="between">
