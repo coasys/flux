@@ -14,16 +14,16 @@
     </j-flex>
     <j-flex a="center" j="between">
       <j-text variant="label">Mode</j-text>
-      <j-tabs
+      <j-select
         :value="theme.name"
         @change="(e) => setTheme({ name: e.target.value })"
       >
-        <j-tab-item value="light">Light</j-tab-item>
-        <j-tab-item value="dark">Dark</j-tab-item>
-        <j-tab-item value="rainbow">Rainbow</j-tab-item>
-        <j-tab-item value="cyberpunk">Cyberpunk</j-tab-item>
-        <j-tab-item value="90s">90s</j-tab-item>
-      </j-tabs>
+        <j-menu-item value="light">Light</j-menu-item>
+        <j-menu-item value="dark">Dark</j-menu-item>
+        <j-menu-item value="rainbow">Rainbow</j-menu-item>
+        <j-menu-item value="cyberpunk">Cyberpunk</j-menu-item>
+        <j-menu-item value="90s">90s</j-menu-item>
+      </j-select>
     </j-flex>
     <j-flex a="center" j="between">
       <j-text variant="label">Primary color</j-text>

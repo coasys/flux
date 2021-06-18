@@ -4,7 +4,6 @@
 
 :root[theme="rainbow"] j-button[variant="primary"]::part(base) {
   transition: background-position 1s ease;
-  background-position: 10vw;
   background-image: linear-gradient(
     45deg,
     #00c0ff 0%,
@@ -15,7 +14,7 @@
 }
 
 :root[theme="rainbow"] j-button[variant="primary"]:hover::part(base) {
-  background-position: 20vw;
+  background-position: 10vw;
   background-image: linear-gradient(
     90deg,
     #00c0ff 0%,
