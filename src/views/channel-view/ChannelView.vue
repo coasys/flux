@@ -91,14 +91,6 @@ export default defineComponent({
     });
     */
   },
-  watch: {
-    messages: {
-      handler: function (val) {
-        this.scrollToBottom();
-      },
-      deep: true,
-    },
-  },
   computed: {
     messages(): any[] {
       const sortedMessages = [...this.channel.currentExpressionMessages].sort(
@@ -194,8 +186,10 @@ export default defineComponent({
 
     scrollToBottom() {
       const container = this.$refs.scrollContainer;
-      //@ts-ignore
-      container.scrollTop = container.scrollHeight;
+      if (container) {
+        //@ts-ignore
+        container.scrollTop = container.scrollHeight;
+      }
     },
   },
 
