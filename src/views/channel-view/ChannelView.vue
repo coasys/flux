@@ -1,11 +1,11 @@
 <template>
-  <div class="channel-view">
+  <div class="channel-view" ref="scrollContainer">
     <header class="channel-view__header">
       <j-icon size="sm" name="hash" />
       <j-text nomargin weight="500" size="500">{{ channel.name }}</j-text>
     </header>
 
-    <div class="channel-view__main" ref="messagesContainer">
+    <div class="channel-view__main">
       <div class="channel-view__load-more">
         <j-button @click="loadMoreMessages">Load more messages</j-button>
       </div>
@@ -90,6 +90,14 @@ export default defineComponent({
       this.isScrolledToTop = window.scrollY > 10;
     });
     */
+  },
+  watch: {
+    messages: {
+      handler: function (val) {
+        this.scrollToBottom();
+      },
+      deep: true,
+    },
   },
   computed: {
     messages(): any[] {
@@ -185,15 +193,7 @@ export default defineComponent({
     },
 
     scrollToBottom() {
-      const container = this.$refs.messagesContainer;
-      //@ts-ignore
-      console.log(
-        "scroll to bottom",
-        //@ts-ignore
-        container.scrollTop,
-        //@ts-ignore
-        container.scrollHeight
-      );
+      const container = this.$refs.scrollContainer;
       //@ts-ignore
       container.scrollTop = container.scrollHeight;
     },
