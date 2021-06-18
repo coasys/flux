@@ -17,6 +17,7 @@
       <j-tabs :value="themeName" @change="(e) => (themeName = e.target.value)">
         <j-tab-item value="light">Light</j-tab-item>
         <j-tab-item value="dark">Dark</j-tab-item>
+        <j-tab-item value="rainbow">Rainbow</j-tab-item>
       </j-tabs>
     </j-flex>
     <j-flex a="center" j="between">
@@ -70,6 +71,7 @@ export default defineComponent({
       document.documentElement.style.setProperty("--j-color-primary-hue", val);
     },
     themeName: function (val) {
+      import(`../themes/${val}.css`);
       document.documentElement.setAttribute("theme", val);
     },
     fontFamily: function (val: "system" | "default") {

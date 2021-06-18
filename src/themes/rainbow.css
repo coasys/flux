@@ -1,0 +1,41 @@
+:root[theme="rainbow"] {
+  --j-border-radius: 10px;
+}
+
+:root[theme="rainbow"] j-button[variant="primary"]::part(base) {
+  background-image: linear-gradient(
+    45deg,
+    #00c0ff 0%,
+    #ffcf00 49%,
+    #fc4f4f 80%,
+    #00c0ff 100%
+  );
+}
+
+:root[theme="rainbow"] j-tabs::part(base):before {
+  background-image: linear-gradient(
+    45deg,
+    #00c0ff 0%,
+    #ffcf00 49%,
+    #fc4f4f 80%,
+    #00c0ff 100%
+  );
+}
+
+:root[theme="rainbow"] j-tab-item[checked]::part(base) {
+  color: var(--j-color-white);
+}
+
+:root[theme="rainbow"] j-input::part(input-wrapper) {
+  border: 2px solid transparent;
+  border-radius: var(--j-border-radius);
+  border-image: linear-gradient(
+    to bottom right,
+    #b827fc 0%,
+    #2c90fc 25%,
+    #b8fd33 50%,
+    #fec837 75%,
+    #fd1892 100%
+  );
+  border-image-slice: 1;
+}

@@ -79,8 +79,8 @@ export interface ToastState {
 }
 
 export interface ThemeState {
-  name: "light" | "dark";
-  fontFamily: "default" | "system" | "monospace";
+  name: string;
+  fontFamily: string;
   hue: number;
 }
 
