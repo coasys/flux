@@ -27,8 +27,9 @@ app.on("ready", async () => {
 
   autoUpdater.autoDownload = false;
 
-  autoUpdater.checkForUpdates();
-
+  if (!isDevelopment) {
+    autoUpdater.checkForUpdates();
+  }
 
   splash.on("ready-to-show", async () => {
     splash.show();
@@ -258,7 +259,11 @@ process.on("unhandledRejection", (reason, p) => {
 });
 
 ipcMain.on('check-update', () => {
-  autoUpdater.checkForUpdatesAndNotify();
+  if (!isDevelopment) {
+    autoUpdater.checkForUpdates();
+  } else {
+    win.webContents.send("update_not_available");
+  }
 });
 
 autoUpdater.on('update-available', () => {
