@@ -24,6 +24,7 @@
       <j-input
         size="lg"
         label="Name"
+        @keydown.enter="createCommunity"
         @input="(e) => (newCommunityName = e.target.value)"
         :value="newCommunityName"
       ></j-input>

@@ -5,6 +5,7 @@
       size="lg"
       label="Name"
       :value="communityName"
+      @keydown.enter="updateCommunity"
       @input="(e) => (communityName = e.target.value)"
     ></j-input>
     <j-input
