@@ -79,18 +79,34 @@ export interface ToastState {
 }
 
 export interface ThemeState {
-  name: "light" | "dark";
+  name: string;
+  fontFamily: string;
   hue: number;
+}
+
+export interface ModalsState {
+  showCreateCommunity: boolean;
+  showEditCommunity: boolean;
+  showCommunityMembers: boolean;
+  showCreateChannel: boolean;
+  showEditProfile: boolean;
+  showSettings: boolean;
 }
 
 export interface UIState {
   toast: ToastState;
   theme: ThemeState;
+  modals: ModalsState;
   showSidebar: boolean;
-  isGlobalLoading: boolean;
+  showGlobalLoading: boolean;
 }
 
-export type UpdateState = "available" | "not-available" | "downloading" | "downloaded" | "checking";
+export type UpdateState =
+  | "available"
+  | "not-available"
+  | "downloading"
+  | "downloaded"
+  | "checking";
 
 export interface State {
   ui: UIState;
@@ -139,9 +155,18 @@ const vuexLocal = new VuexPersistence<State>({
 export default createStore({
   state: {
     ui: {
+      modals: {
+        showCreateCommunity: false,
+        showEditCommunity: false,
+        showCommunityMembers: false,
+        showCreateChannel: false,
+        showEditProfile: false,
+        showSettings: false,
+      },
       showSidebar: true,
-      isGlobalLoading: false,
+      showGlobalLoading: false,
       theme: {
+        fontFamily: "default",
         name: "light",
         hue: 270,
       },

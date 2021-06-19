@@ -8,25 +8,20 @@
   >
     {{ toast.message }}
   </j-toast>
-  <div class="global-loading" v-if="isGlobalLoading">
+  <div class="global-loading" v-if="ui.isGlobalLoading">
+    <div class="global-loading__backdrop"></div>
     <j-flex a="center" direction="column" gap="1000">
       <j-spinner size="lg"> </j-spinner>
       <j-text size="700">Please wait...</j-text>
     </j-flex>
   </div>
-  <j-modal
-    :open="showErrorModal"
-    @toggle="(e) => (showErrorModal = e.target.open)"
-  >
-    {{ errorMessage }}
-  </j-modal>
 </template>
 
 <script lang="ts">
 import { useQuery } from "@vue/apollo-composable";
 import { useRouter } from "vue-router";
 import { useSubscription } from "@vue/apollo-composable";
-import { defineComponent, watch, ref, computed } from "vue";
+import { defineComponent, watch, computed } from "vue";
 import { AD4M_SIGNAL } from "@/core/graphql_queries";
 import { useStore } from "vuex";
 import { onError } from "@apollo/client/link/error";
@@ -35,7 +30,7 @@ import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { getExpressionAndRetry } from "@/core/queries/getExpression";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { AGENT_SERVICE_STATUS } from "@/core/graphql_queries";
-import { ToastState } from "@/store";
+import { ModalsState, ToastState } from "@/store";
 import parseSignalAsLink from "@/core/utils/parseSignalAsLink";
 
 declare global {
@@ -49,16 +44,15 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const store = useStore();
-    const errorMessage = ref("");
-    const showErrorModal = ref(false);
 
     onError((error) => {
       if (process.env.NODE_ENV !== "production") {
         // can use error.operation.operationName to single out a query type.
         logErrorMessages(error);
 
-        errorMessage.value = JSON.stringify(error);
-        showErrorModal.value = true;
+        store.commit("showDangerToast", {
+          message: JSON.stringify(error),
+        });
       }
     });
 
@@ -81,6 +75,7 @@ export default defineComponent({
 
     //Watch for incoming signals to get expression data
     watch(result, async (data) => {
+      console.log("GOT INCOMING MESSAGE SIGNAL");
       const linkData = parseSignalAsLink(data.signal);
       if (linkData) {
         const link = linkData.link;
@@ -91,6 +86,7 @@ export default defineComponent({
             expressionGetRetries,
             expressionGetDelayMs
           );
+          console.log("FOUND EXPRESSION FOR SIGNAL");
           store.commit("addExpressionAndLinkFromLanguageAddress", {
             linkLanguage: language,
             //@ts-ignore
@@ -104,20 +100,47 @@ export default defineComponent({
     return {
       toast: computed(() => store.state.ui.toast),
       setToast: (payload: ToastState) => store.commit("setToast", payload),
-      showErrorModal,
-      errorMessage,
     };
   },
-  computed: {
-    isGlobalLoading() {
-      return this.$store.state.ui.isGlobalLoading;
+  watch: {
+    "ui.theme.hue": function (val) {
+      console.log({ val });
+      document.documentElement.style.setProperty("--j-color-primary-hue", val);
+    },
+    "ui.theme.name": {
+      handler: function (themeName) {
+        if (!themeName) {
+          document.documentElement.setAttribute("theme", "");
+        } else {
+          import(`./themes/${themeName}.css`);
+          document.documentElement.setAttribute("theme", themeName);
+        }
+      },
+      immediate: true,
+    },
+    "ui.theme.fontFamily": function (val: "system" | "default") {
+      const font = {
+        default: `"Avenir", sans-serif`,
+        monospace: `monospace`,
+        system: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
+      };
+      document.documentElement.style.setProperty("--j-font-family", font[val]);
     },
   },
+  computed: {
+    ui() {
+      return this.$store.state.ui;
+    },
+    modals(): ModalsState {
+      return this.$store.state.ui.modals;
+    },
+  },
+
   beforeCreate() {
     window.api.send("getLangPath");
-    
+
     window.api.receive("getLangPathResponse", (data: string) => {
-      console.log(`Received language path from main thread: ${data}`);
+      // console.log(`Received language path from main thread: ${data}`);
       this.$store.commit("setLanguagesPath", data);
     });
 
@@ -140,7 +163,7 @@ export default defineComponent({
     window.api.receive("setGlobalLoading", (val: boolean) => {
       this.$store.commit("setGlobalLoading", val);
     });
-    
+
     const { onResult, onError } =
       useQuery<{
         agent: ad4m.AgentService;
@@ -178,16 +201,33 @@ body {
   color: var(--j-color-ui-500);
 }
 
+:root {
+  --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+  --app-main-sidebar-border-color: var(--j-border-color);
+  --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+  --app-drawer-border-color: var(--j-border-color);
+  --app-channel-bg-color: var(--j-color-white);
+}
+
 .global-loading {
   width: 100vw;
   height: 100vh;
   position: absolute;
   top: 0;
   left: 0;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(15px);
   display: grid;
   place-items: center;
+}
+
+.global-loading__backdrop {
+  position: absolute;
+  left: 0;
+  height: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--j-color-white);
+  opacity: 0.5;
+  backdrop-filter: blur(15px);
 }
 
 .global-loading j-spinner {

@@ -29,7 +29,7 @@ export default async function (
       fromDate,
       untilDate
     );
-    console.log("Got paginated links", links);
+    // console.log("Got paginated links", links);
     if (links) {
       await commit("addMessagesIfNotPresent", {
         communityId: communityId,

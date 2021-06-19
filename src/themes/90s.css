@@ -1,0 +1,126 @@
+:root[theme="90s"] {
+  --app-main-sidebar-bg-color: white;
+  --app-drawer-bg-color: #f1f1f1;
+  --app-main-content-bg-color: white;
+  --app-channel-bg-color: white;
+
+  --j-font-family: System, monospace;
+
+  --j-border-radius: 0px;
+
+  --j-border-color: silver;
+
+  --j-element-sm: 30px;
+  --j-element-md: 40px;
+  --j-element-lg: 50px;
+}
+
+[theme="90s"] ::-webkit-scrollbar {
+  width: 16px;
+}
+
+[theme="90s"] ::-webkit-scrollbar-corner {
+  background: #dfdfdf;
+}
+
+[theme="90s"] ::-webkit-scrollbar-thumb {
+  background-color: #dfdfdf;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+}
+
+[theme="90s"] ::-webkit-scrollbar-track {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='2' height='2' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M1 0H0v1h1v1h1V1H1V0z' fill='silver'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M2 0H1v1H0v1h1V1h1V0z' fill='%23fff'/%3E%3C/svg%3E");
+}
+
+[theme="90s"] j-modal::part(modal) {
+  background: silver;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+}
+
+[theme="90s"] j-avatar::part(base) {
+  border-radius: 0;
+  border: 0;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+}
+
+[theme="90s"] j-avatar::part(img) {
+  border-radius: 0;
+}
+
+[theme="90s"] j-button::part(base) {
+  transform: scale(1);
+  transition: all 0.2s ease;
+  background: silver;
+  border: 0 !important;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+}
+
+[theme="90s"] j-button::part(base):active {
+  transform: scale(0.95);
+}
+
+[theme="90s"] j-button[variant="primary"]::part(base) {
+  background: blue;
+  border: 0;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+}
+
+[theme="90s"] j-button[circle]::part(base) {
+  border-radius: 0;
+}
+
+[theme="90s"] j-tabs::part(base) {
+  background: none;
+  border: 0;
+}
+
+[theme="90s"] j-tabs::part(base)::before {
+  content: none;
+}
+
+[theme="90s"] j-tab-item[checked]::part(base) {
+  color: white;
+  background: blue;
+  height: 35px;
+}
+
+[theme="90s"] j-tab-item::part(base):hover {
+  background: slategray;
+  height: 35px;
+}
+
+[theme="90s"] j-tab-item::part(base) {
+  color: black;
+}
+
+[theme="90s"] j-menu-item[selected]::part(base) {
+  color: white;
+  background: blue;
+  height: 35px;
+}
+
+[theme="90s"] j-menu-item:hover:not([selected])::part(base) {
+  background: silver;
+}
+
+[theme="90s"] j-input::part(input-wrapper) {
+  background: white;
+  border: 0;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+}
+
+[theme="90s"] j-input::part(input-wrapper):focus-within {
+  border: 0;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+}
+
+[theme="90s"] body {
+  background: silver;
+}

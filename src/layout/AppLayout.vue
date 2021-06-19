@@ -14,8 +14,9 @@
   grid-template-columns: 100px 1fr;
 }
 .app-layout__sidebar {
+  background: var(--app-main-sidebar-bg-color);
   height: 100%;
-  border-right: 1px var(--j-color-ui-50) solid;
+  border-right: 1px var(--app-drawer-border-color) solid;
   display: flex;
   flex-direction: column;
   justify-content: space-between;

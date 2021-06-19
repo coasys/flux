@@ -52,75 +52,93 @@
           </j-button>
         </j-flex>
       </div>
-      <j-flex direction="column" gap="400" v-else>
-        <j-text variant="heading">Sign up</j-text>
-        <div class="welcome-view--center">
+      <div v-else>
+        <j-flex direction="column" gap="400" v-if="step === 1">
+          <j-text variant="heading">Sign up</j-text>
+          <j-input
+            label="Username"
+            size="lg"
+            :value="username"
+            @input="(e) => (username = e.target.value)"
+            :error="usernameError"
+            :errortext="usernameErrorMessage"
+            @blur="(e) => validateUsername()"
+          ></j-input>
+
+          <j-input
+            :type="showPassword ? 'text' : 'password'"
+            label="Password"
+            size="lg"
+            :value="password"
+            @keydown.enter="step = 2"
+            @input="(e) => (password = e.target.value)"
+            :error="passwordError"
+            :errortext="passwordErrorMessage"
+            @blur="(e) => validatePassword()"
+          >
+            <j-button
+              @keydown.stop
+              @click.stop="showPassword = !showPassword"
+              variant="transparent"
+              square
+              slot="end"
+            >
+              <j-icon :name="showPassword ? 'eye-slash' : 'eye'" />
+            </j-button>
+          </j-input>
+          <j-button
+            full
+            size="lg"
+            :disabled="!canSignUp"
+            variant="primary"
+            @click="step = 2"
+          >
+            Next
+            <j-icon slot="end" name="arrow-right-short" />
+          </j-button>
+        </j-flex>
+        <j-flex direction="column" gap="400" v-if="step === 2">
           <avatar-upload
             :value="profilePicture"
             @change="(url) => (profilePicture = url)"
           >
           </avatar-upload>
-        </div>
-
-        <j-input
-          label="Username"
-          :value="username"
-          @input="(e) => (username = e.target.value)"
-          :error="usernameError"
-          :errortext="usernameErrorMessage"
-          @blur="(e) => validateUsername()"
-        ></j-input>
-
-        <j-input
-          :type="showPassword ? 'text' : 'password'"
-          label="Password"
-          :value="password"
-          @keydown.enter="createUser"
-          @input="(e) => (password = e.target.value)"
-          :error="passwordError"
-          :errortext="passwordErrorMessage"
-          @blur="(e) => validatePassword()"
-        >
-          <j-button
-            @keydown.stop
-            @click.stop="showPassword = !showPassword"
-            variant="transparent"
-            square
-            slot="end"
-          >
-            <j-icon :name="showPassword ? 'eye-slash' : 'eye'" />
-          </j-button>
-        </j-input>
-        <j-input
-          label="First Name"
-          :value="name"
-          @input="(e) => (name = e.target.value)"
-          helptext="(optional)"
-        ></j-input>
-        <j-input
-          label="Last Name"
-          :value="familyName"
-          @input="(e) => (familyName = e.target.value)"
-          helptext="(optional)"
-        ></j-input>
-        <j-input
-          type="email"
-          label="Email"
-          :value="email"
-          @input="(e) => (email = e.target.value)"
-          helptext="(optional)"
-        ></j-input>
-        <j-button
-          :disabled="isCreatingUser || !canSignUp"
-          :loading="isCreatingUser"
-          size="lg"
-          full="true"
-          variant="primary"
-          @click="createUser"
-        >
-          Create
-        </j-button>
-      </j-flex>
+          <j-input
+            label="First Name (optional)"
+            :value="name"
+            @input="(e) => (name = e.target.value)"
+          ></j-input>
+          <j-input
+            label="Last Name (optional)"
+            :value="familyName"
+            @input="(e) => (familyName = e.target.value)"
+          ></j-input>
+          <j-input
+            type="email"
+            label="Email (optional)"
+            :value="email"
+            @input="(e) => (email = e.target.value)"
+          ></j-input>
+          <j-flex>
+            <j-button full style="width: 100%" size="lg" @click="step = 1">
+              <j-icon slot="start" name="arrow-left-short" />
+              Back
+            </j-button>
+            <j-button
+              style="width: 100%"
+              full
+              :disabled="isCreatingUser || !canSignUp"
+              :loading="isCreatingUser"
+              size="lg"
+              variant="primary"
+              @click="createUser"
+            >
+              <j-icon slot="end" name="check" />
+              Create user
+            </j-button>
+          </j-flex>
+        </j-flex>
+      </div>
     </div>
   </div>
 </template>
@@ -139,6 +157,7 @@ import { useValidation } from "@/utils/validation";
 export default defineComponent({
   name: "Welcome",
   setup() {
+    const step = ref(1);
     const store = useStore();
     const profilePicture = ref();
     const modalOpen = ref(false);
@@ -197,6 +216,7 @@ export default defineComponent({
     const logInError = ref(false);
 
     return {
+      step,
       isLoggingIn,
       profilePicture,
       hasUser: store.state.agentInit,
@@ -292,10 +312,6 @@ export default defineComponent({
   display: grid;
   place-content: center;
   grid-template-columns: 1fr;
-
-  &--center {
-    align-self: center;
-  }
 }
 
 @media (min-width: 800px) {

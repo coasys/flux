@@ -59,7 +59,7 @@ export async function getLinksPaginated(
       fetchPolicy: "no-cache",
     });
     getLinksQ.then((result) => {
-      console.log("Got raw result", result);
+      //console.log("Got raw result", result);
       resolve(result.data.links);
     });
   });
