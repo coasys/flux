@@ -97,7 +97,7 @@ export default defineComponent({
   },
   mounted() {
     setTimeout(() => {
-      this.scrollToBottom();
+      this.scrollToBottom("auto");
     }, 300);
     this.startLoop(this.community.perspective);
   },
@@ -160,8 +160,11 @@ export default defineComponent({
     },
     async loadUser(did: string) {
       let profileLang = this.profileLanguage;
-      const { data } = await getProfile(profileLang, did);
-      this.users[did] = data;
+      const dataExp = await getProfile(profileLang, did);
+      if (dataExp) {
+        const { data } = dataExp;
+        this.users[did] = data;
+      }
     },
     async startLoop(communityId: string) {
       if (communityId) {
@@ -192,18 +195,30 @@ export default defineComponent({
       });
     },
     async createDirectMessage(message: JuntoShortForm) {
+      const escapedMessage = message.body.replace(/( |<([^>]+)>)/gi, "");
+
       this.currentExpressionPost = "";
-      this.$store.dispatch("createExpression", {
-        languageAddress: this.community.expressionLanguages[0]!,
-        content: message,
-        perspective: this.$route.params.channelId.toString(),
-      });
+
+      if (escapedMessage) {
+        this.$store
+          .dispatch("createExpression", {
+            languageAddress: this.community.expressionLanguages[0]!,
+            content: message,
+            perspective: this.$route.params.channelId.toString(),
+          })
+          .then(() => {
+            setTimeout(() => this.scrollToBottom("smooth"), 300);
+          });
+      }
     },
-    scrollToBottom() {
-      const container = this.$refs.scrollContainer as any;
+    scrollToBottom(behavior: "smooth" | "auto") {
+      const container = this.$refs.scrollContainer as HTMLDivElement;
       if (container) {
         this.$nextTick(() => {
-          container.scrollTop = container.scrollHeight + 5000;
+          container.scrollTo({
+            top: container.scrollHeight,
+            behavior,
+          });
         });
       }
     },
