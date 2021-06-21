@@ -99,6 +99,10 @@ export interface UIState {
   modals: ModalsState;
   showSidebar: boolean;
   showGlobalLoading: boolean;
+  globalError: {
+    show: boolean;
+    message: string;
+  };
 }
 
 export type UpdateState =
@@ -174,6 +178,10 @@ export default createStore({
         variant: "",
         message: "",
         open: false,
+      },
+      globalError: {
+        show: false,
+        message: "",
       },
     },
     communities: [],
