@@ -11,7 +11,7 @@ export interface CommunityState {
   //NOTE: here by having a static name + description we are assuming that these are top level metadata items that each group will have
   name: string;
   description: string;
-  channels: {[x: string]: ChannelState};
+  channels: { [x: string]: ChannelState };
   perspective: string; //NOTE: this is essentially the UUID for the community
   linkLanguageAddress: string;
   expressionLanguages: string[];
@@ -114,7 +114,7 @@ export type UpdateState =
 
 export interface State {
   ui: UIState;
-  communities: {[x:string]: CommunityState};
+  communities: { [x: string]: CommunityState };
   localLanguagesPath: string;
   databasePerspective: string;
   //This tells us when the application was started; this tells us that between startTime -> now all messages should have been received

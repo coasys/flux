@@ -42,9 +42,9 @@ export async function getProfile(
         timestamp: profileGqlExp.timestamp!,
         proof: profileGqlExp.proof!,
       } as Expression;
-  
+
       cache.set(profileLink, profileExp);
-  
+
       return profileExp;
     } else {
       return null;

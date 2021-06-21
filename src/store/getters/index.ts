@@ -43,7 +43,7 @@ export default {
 
   getPerspectiveFromLinkLanguage: (state: State) => (linkLanguage: string) => {
     let perspective;
-    
+
     for (const community of Object.values(state.communities)) {
       if (community.linkLanguageAddress == linkLanguage) {
         return community;
@@ -61,7 +61,7 @@ export default {
 
   getAllExpressionLanguagesNotLoaded(state: State): Address[] {
     const expressionLangs: Address[] = [];
-    
+
     for (const community of Object.values(state.communities)) {
       for (const expLang of community.expressionLanguages) {
         if (
