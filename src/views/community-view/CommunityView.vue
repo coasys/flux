@@ -3,9 +3,11 @@
     <template v-slot:sidebar>
       <community-sidebar :community="currentCommunity"></community-sidebar>
     </template>
-    <keep-alive>
-      <router-view></router-view>
-    </keep-alive>
+    <router-view v-slot="{ Component }">
+      <keep-alive max="5" include="ChannelView">
+        <component :key="$route.fullPath" :is="Component" />
+      </keep-alive>
+    </router-view>
   </sidebar-layout>
 
   <j-modal
@@ -52,6 +54,7 @@ import CommunityMembers from "@/containers/CommunityMembers.vue";
 import { CommunityState, ModalsState } from "@/store";
 
 export default defineComponent({
+  name: "CommunityView",
   components: {
     EditCommunity,
     CreateChannel,
