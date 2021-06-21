@@ -29,7 +29,7 @@ export default async (
   const community: CommunityState = getters.getCommunity(communityId);
 
   try {
-    console.log("Getting channel links");
+    console.log("Getting community channel links");
     const channelLinks = await getChatChannelLinks(
       community.perspective,
       community.linkLanguageAddress

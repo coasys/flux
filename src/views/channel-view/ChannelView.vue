@@ -222,7 +222,6 @@ export default defineComponent({
     async startLoop(communityId: string) {
       if (communityId) {
         console.log("Running get channels messages loop");
-        console.log(this.channel);
         let hasNewer = await this.$store.dispatch("loadExpressions", {
           communityId: this.$route.params.communityId,
           channelId: this.$route.params.channelId,
