@@ -9,3 +9,5 @@ declare module '*.vue' {
 declare module 'v-tooltip';
 
 declare module 'vue-advanced-cropper';
+
+declare module "object-hash";

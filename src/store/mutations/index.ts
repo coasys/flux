@@ -1,6 +1,8 @@
 import { parseExprURL } from "@perspect3vism/ad4m/ExpressionRef";
 import type Expression from "@perspect3vism/ad4m/Expression";
 import { getExpressionAndRetry } from "@/core/queries/getExpression";
+import ad4m from "@perspect3vism/ad4m-executor";
+import hash from "object-hash";
 
 import {
   State,
@@ -35,23 +37,20 @@ export default {
   ): Promise<void> {
     const community = state.communities[payload.communityId];
     const channel = community?.channels[payload.channelId];
-    const links = [];
-    const expressions = [];
+    const links: { [x: string]: LinkExpressionAndLang } = {};
+    const expressions: { [x: string]: ExpressionAndRef } = {};
 
     if (channel) {
       for (const link of payload.links) {
-        const currentExpressionLink = channel.currentExpressionLinks.find(
-          (channelLink) =>
-            //@ts-ignore
-            channelLink.expression.data!.target === link.data.target
-        );
+        const currentExpressionLink =
+          channel.currentExpressionLinks[hash(link.data)];
 
         if (!currentExpressionLink) {
           console.log("Adding link to channel");
-          links.push({
+          links[hash(link.data!)] = {
             expression: link,
             language: channel.linkLanguageAddress,
-          } as LinkExpressionAndLang);
+          } as LinkExpressionAndLang;
           const expression = await getExpressionAndRetry(
             //@ts-ignore
             link.data.target,
@@ -60,25 +59,28 @@ export default {
           );
           if (expression) {
             console.log("Adding expression to channel");
-            //@ts-ignore
-            expressions.push({
-              //@ts-ignore
-              expression: expression,
+            expressions[expression.url!] = {
+              expression: {
+                author: expression.author!,
+                data: JSON.parse(expression.data!),
+                timestamp: expression.timestamp!,
+                proof: expression.proof!,
+              } as Expression,
               //@ts-ignore
               url: parseExprURL(link.data.target),
-            } as ExpressionAndRef);
+            } as ExpressionAndRef;
           }
         }
       }
 
-      channel.currentExpressionLinks = [
+      channel.currentExpressionLinks = {
         ...channel.currentExpressionLinks,
         ...links,
-      ];
-      channel.currentExpressionMessages = [
+      };
+      channel.currentExpressionMessages = {
         ...channel.currentExpressionMessages,
         ...expressions,
-      ];
+      };
     }
   },
   addCommunity(state: State, payload: CommunityState): void {
@@ -88,25 +90,35 @@ export default {
   setLanguagesPath(state: State, payload: string): void {
     state.localLanguagesPath = payload;
   },
-  addDatabasePerspective(state: State, payload: any): void {
+  addDatabasePerspective(state: State, payload: string): void {
     state.databasePerspective = payload;
   },
   addExpressionAndLinkFromLanguageAddress: (
     state: State,
-    payload: any
+    payload: {
+      linkLanguage: string;
+      link: ad4m.LinkExpression;
+      message: ad4m.Expression;
+    }
   ): void => {
     for (const community of Object.values(state.communities)) {
       for (const channel of Object.values(community.channels)) {
         if (channel.linkLanguageAddress === payload.linkLanguage) {
           console.log("Adding to link and exp to channel!");
-          channel.currentExpressionLinks.push({
+          channel.currentExpressionLinks[hash(payload.link.data!)] = {
             expression: payload.link,
             language: payload.linkLanguage,
-          } as LinkExpressionAndLang);
-          channel.currentExpressionMessages.push({
-            expression: payload.message,
-            url: parseExprURL(payload.link.data.target),
-          } as ExpressionAndRef);
+          } as LinkExpressionAndLang;
+          //TODO: make gql expression to ad4m expression conversion function
+          channel.currentExpressionMessages[payload.message.url!] = {
+            expression: {
+              author: payload.message.author!,
+              data: JSON.parse(payload.message.data!),
+              timestamp: payload.message.timestamp!,
+              proof: payload.message.proof!,
+            } as Expression,
+            url: parseExprURL(payload.link.data!.target!),
+          } as ExpressionAndRef;
         }
       }
     }
