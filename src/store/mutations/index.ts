@@ -75,6 +75,7 @@ export default {
         ...channel.currentExpressionLinks,
         ...links,
       ];
+
       channel.currentExpressionMessages = [
         ...channel.currentExpressionMessages,
         ...expressions,
@@ -134,8 +135,24 @@ export default {
     if (community !== undefined) {
       community.channels[payload.channel.perspective] = {
         ...payload.channel,
-        hasUnseenInstantMessage: false,
+        hasUnseenMessages: false,
       };
+    }
+  },
+
+  setUnseenMessages(
+    state: State,
+    payload: { channelId: string; value: boolean }
+  ): void {
+    console.log(payload);
+    for (const community of Object.values(state.communities)) {
+      for (const channel of Object.values(community.channels)) {
+        console.log(channel);
+        if (channel.perspective === payload.channelId) {
+          console.log({ channel });
+          channel.hasUnseenMessages = payload.value;
+        }
+      }
     }
   },
 

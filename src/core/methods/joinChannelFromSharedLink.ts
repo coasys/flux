@@ -22,6 +22,7 @@ export async function joinChannelFromSharedLink(
   //TODO: lets use a constructor on the ChannelState type
   return {
     name: installedChannelPerspective.name!,
+    hasUnseenMessages: false,
     perspective: installedChannelPerspective.uuid!,
     type: FeedType.Signaled,
     createdAt: now,

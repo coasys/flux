@@ -10,7 +10,12 @@
         <j-button @click="loadMoreMessages">Load more messages</j-button>
       </div>
 
-      <DynamicScroller red="scroller" :items="messages" :min-item-size="3">
+      <DynamicScroller
+        v-if="messages.length"
+        ref="scroller"
+        :items="messages"
+        :min-item-size="2"
+      >
         <template v-slot="{ item, index, active }">
           <DynamicScrollerItem
             :item="item"
@@ -68,7 +73,8 @@ import { ChannelState, CommunityState, ExpressionTypes } from "@/store";
 import { getProfile } from "@/utils/profileHelpers";
 import { chatMessageRefreshDuration } from "@/core/juntoTypes";
 import sleep from "@/utils/sleep";
-import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
+import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
+import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css";
 import { differenceInMinutes, parseISO } from "date-fns";
 
 interface Message {
@@ -100,6 +106,15 @@ export default defineComponent({
       this.scrollToBottom("auto");
     }, 300);
     this.startLoop(this.community.perspective);
+  },
+  watch: {
+    "channel.hasUnseenMessages": function (val) {
+      if (val) {
+        setTimeout(() => {
+          this.scrollToBottom("smooth");
+        }, 0);
+      }
+    },
   },
   computed: {
     messages(): any[] {
@@ -200,15 +215,11 @@ export default defineComponent({
       this.currentExpressionPost = "";
 
       if (escapedMessage) {
-        this.$store
-          .dispatch("createExpression", {
-            languageAddress: this.community.expressionLanguages[0]!,
-            content: message,
-            perspective: this.$route.params.channelId.toString(),
-          })
-          .then(() => {
-            setTimeout(() => this.scrollToBottom("smooth"), 300);
-          });
+        this.$store.dispatch("createExpression", {
+          languageAddress: this.community.expressionLanguages[0]!,
+          content: message,
+          perspective: this.$route.params.channelId.toString(),
+        });
       }
     },
     scrollToBottom(behavior: "smooth" | "auto") {
@@ -218,6 +229,11 @@ export default defineComponent({
           container.scrollTo({
             top: container.scrollHeight,
             behavior,
+          });
+          // If we scroll to the bottom we have seen all messages
+          this.$store.commit("setUnseenMessages", {
+            channelId: this.channel.perspective,
+            value: false,
           });
         });
       }

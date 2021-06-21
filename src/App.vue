@@ -111,6 +111,11 @@ export default defineComponent({
             expressionGetDelayMs
           );
           console.log("FOUND EXPRESSION FOR SIGNAL");
+          store.commit("setUnseenMessages", {
+            channelId:
+              store.getters.getChannelFromLinkLanguage(language).perspective,
+            value: true,
+          });
           store.commit("addExpressionAndLinkFromLanguageAddress", {
             linkLanguage: language,
             //@ts-ignore

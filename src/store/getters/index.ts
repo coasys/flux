@@ -41,9 +41,19 @@ export default {
     return state.databasePerspective;
   },
 
+  getChannelFromLinkLanguage: (state: State) => (linkLanguage: string) => {
+    for (const community of Object.values(state.communities)) {
+      for (const channel of Object.values(community.channels)) {
+        if (channel.linkLanguageAddress == linkLanguage) {
+          return channel;
+        }
+      }
+    }
+  },
+
   getPerspectiveFromLinkLanguage: (state: State) => (linkLanguage: string) => {
     let perspective;
-    
+
     for (const community of Object.values(state.communities)) {
       if (community.linkLanguageAddress == linkLanguage) {
         return community;
@@ -61,7 +71,7 @@ export default {
 
   getAllExpressionLanguagesNotLoaded(state: State): Address[] {
     const expressionLangs: Address[] = [];
-    
+
     for (const community of Object.values(state.communities)) {
       for (const expLang of community.expressionLanguages) {
         if (
