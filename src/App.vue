@@ -21,8 +21,9 @@
     <div class="global-error__backdrop"></div>
     <div class="global-error__content">
       <j-flex a="center" direction="column" gap="900">
-        <j-icon class="bug-icon" size="xl" name="bug-fill"></j-icon>
-        <j-text nomargin variant="heading-lg"> Sorry Junto has a bug </j-text>
+        <j-text nomargin variant="heading-lg"
+          >Whoops, something broke! 😅</j-text
+        >
         <j-text nomargin v-if="globalError.message" variant="subheading">
           Please report this message to us:
         </j-text>
@@ -262,16 +263,22 @@ body {
 }
 
 .global-error__content {
+  text-align: center;
   position: relative;
   max-width: 600px;
   margin: 0 auto;
+  padding-top: var(--j-space-600);
+  padding-bottom: var(--j-space-600);
   color: var(--j-color-ui-300);
 }
 
 .global-error__message {
+  text-align: left;
   background: var(--j-color-ui-800);
   padding: var(--j-space-500);
   line-height: 1.5;
+  max-height: 400px;
+  overflow-y: auto;
   border-radius: 20px;
 }
 
