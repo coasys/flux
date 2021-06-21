@@ -82,8 +82,10 @@ export default defineComponent({
   },
 
   mounted() {
-    //console.log("Current mounted channel", this.channel);
-    this.scrollToBottom();
+    console.log("Current mounted channel", this.messages);
+    setTimeout(() => {
+      this.scrollToBottom();
+    }, 0)
     this.startLoop(this.community.perspective);
     /* TODO: Show button only when we scrolled to top
     document.addEventListener("scroll", (e) => {
@@ -177,8 +179,9 @@ export default defineComponent({
     async createDirectMessage(message: JuntoShortForm) {
       const escapedMessage = message.body.replace(/( |<([^>]+)>)/ig, "");
 
+      this.currentExpressionPost = "";
+      
       if (escapedMessage) {
-        this.currentExpressionPost = "";
         this.$store
           .dispatch("createExpression", {
             languageAddress: this.community.expressionLanguages[0]!,
@@ -193,6 +196,7 @@ export default defineComponent({
     scrollToBottom() {
       const container = this.$refs.scrollContainer as any;
       if (container) {
+        console.log('scrolling', container.scrollHeight);
         container.scrollTo({
           top: container.scrollHeight,
           behavior: "smooth",
