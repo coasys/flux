@@ -71,9 +71,6 @@ export default defineComponent({
   },
   methods: {
     ...mapMutations(["setShowSettings", "setShowEditProfile"]),
-    cleanState() {
-      window.api.send("cleanState");
-    },
     checkForUpdates() {
       window.api.send("check-update");
       this.$store.commit("updateUpdateState", { updateState: "checking" });
