@@ -82,8 +82,14 @@ export default defineComponent({
   },
 
   mounted() {
-    //console.log("Current mounted channel", this.channel);
-    this.scrollToBottom();
+    const container = this.$refs.scrollContainer as HTMLDivElement;
+    container.style.visibility = "hidden";
+
+    setTimeout(() => {
+      this.scrollToBottom("auto");
+      container.style.visibility = "visible";
+    }, 0);
+
     this.startLoop(this.community.perspective);
     /* TODO: Show button only when we scrolled to top
     document.addEventListener("scroll", (e) => {
@@ -143,8 +149,11 @@ export default defineComponent({
   methods: {
     async loadUser(did: string) {
       let profileLang = this.profileLanguage;
-      const { data } = await getProfile(profileLang, did);
-      this.users[did] = data;
+      const dataExp = await getProfile(profileLang, did);
+      if (dataExp) {
+        const { data } = dataExp;
+        this.users[did] = data;
+      }
     },
     async startLoop(communityId: string) {
       if (communityId) {
@@ -175,23 +184,29 @@ export default defineComponent({
       });
     },
     async createDirectMessage(message: JuntoShortForm) {
+      const escapedMessage = message.body.replace(/( |<([^>]+)>)/gi, "");
+
       this.currentExpressionPost = "";
-      this.$store
-        .dispatch("createExpression", {
-          languageAddress: this.community.expressionLanguages[0]!,
-          content: message,
-          perspective: this.$route.params.channelId.toString(),
-        })
-        .then(() => {
-          setTimeout(this.scrollToBottom, 300);
-        });
+
+      if (escapedMessage) {
+        this.$store
+          .dispatch("createExpression", {
+            languageAddress: this.community.expressionLanguages[0]!,
+            content: message,
+            perspective: this.$route.params.channelId.toString(),
+          })
+          .then(() => {
+            setTimeout(() => this.scrollToBottom("smooth"), 300);
+          });
+      }
     },
-    scrollToBottom() {
-      const container = this.$refs.scrollContainer as any;
+    scrollToBottom(behavior: "smooth" | "auto") {
+      const container = this.$refs.scrollContainer as HTMLDivElement;
       if (container) {
+        console.log("scrolling", container.scrollHeight);
         container.scrollTo({
           top: container.scrollHeight,
-          behavior: "smooth",
+          behavior,
         });
       }
     },
