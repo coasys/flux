@@ -149,8 +149,11 @@ export default defineComponent({
   methods: {
     async loadUser(did: string) {
       let profileLang = this.profileLanguage;
-      const { data } = await getProfile(profileLang, did);
-      this.users[did] = data;
+      const dataExp = await getProfile(profileLang, did);
+      if (dataExp) {
+        const { data } = dataExp;
+        this.users[did] = data;
+      }
     },
     async startLoop(communityId: string) {
       if (communityId) {
@@ -181,10 +184,10 @@ export default defineComponent({
       });
     },
     async createDirectMessage(message: JuntoShortForm) {
-      const escapedMessage = message.body.replace(/( |<([^>]+)>)/ig, "");
+      const escapedMessage = message.body.replace(/( |<([^>]+)>)/gi, "");
 
       this.currentExpressionPost = "";
-      
+
       if (escapedMessage) {
         this.$store
           .dispatch("createExpression", {
@@ -200,7 +203,7 @@ export default defineComponent({
     scrollToBottom(behavior: "smooth" | "auto") {
       const container = this.$refs.scrollContainer as HTMLDivElement;
       if (container) {
-        console.log('scrolling', container.scrollHeight);
+        console.log("scrolling", container.scrollHeight);
         container.scrollTo({
           top: container.scrollHeight,
           behavior,

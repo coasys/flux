@@ -44,7 +44,9 @@ export default async function (
           profileLink.author!.did!
         );
 
-        profiles[did] = Object.assign({}, profile);
+        if (profile) {
+          profiles[did] = Object.assign({}, profile);
+        }
       }
 
       const profileList = Object.values(profiles);
