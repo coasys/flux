@@ -1,6 +1,5 @@
 import { parseExprURL } from "@perspect3vism/ad4m/ExpressionRef";
 import type Expression from "@perspect3vism/ad4m/Expression";
-import { getExpressionAndRetry } from "@/core/queries/getExpression";
 import ad4m from "@perspect3vism/ad4m-executor";
 import hash from "object-hash";
 
@@ -27,61 +26,29 @@ interface UpdatePayload {
 interface AddChannelMessages {
   channelId: string;
   communityId: string;
-  links: Expression[];
+  links: { [x: string]: LinkExpressionAndLang };
+  expressions: { [x: string]: ExpressionAndRef };
 }
 
 export default {
-  async addMessagesIfNotPresent(
-    state: State,
-    payload: AddChannelMessages
-  ): Promise<void> {
+  async addMessages(state: State, payload: AddChannelMessages): Promise<void> {
     const community = state.communities[payload.communityId];
     const channel = community?.channels[payload.channelId];
-    const links: { [x: string]: LinkExpressionAndLang } = {};
-    const expressions: { [x: string]: ExpressionAndRef } = {};
-
-    if (channel) {
-      for (const link of payload.links) {
-        const currentExpressionLink =
-          channel.currentExpressionLinks[hash(link.data)];
-
-        if (!currentExpressionLink) {
-          console.log("Adding link to channel");
-          links[hash(link.data!)] = {
-            expression: link,
-            language: channel.linkLanguageAddress,
-          } as LinkExpressionAndLang;
-          const expression = await getExpressionAndRetry(
-            //@ts-ignore
-            link.data.target,
-            50,
-            20
-          );
-          if (expression) {
-            console.log("Adding expression to channel");
-            expressions[expression.url!] = {
-              expression: {
-                author: expression.author!,
-                data: JSON.parse(expression.data!),
-                timestamp: expression.timestamp!,
-                proof: expression.proof!,
-              } as Expression,
-              //@ts-ignore
-              url: parseExprURL(link.data.target),
-            } as ExpressionAndRef;
-          }
-        }
-      }
-
-      channel.currentExpressionLinks = {
-        ...channel.currentExpressionLinks,
-        ...links,
-      };
-      channel.currentExpressionMessages = {
-        ...channel.currentExpressionMessages,
-        ...expressions,
-      };
-    }
+    console.log(
+      "Adding ",
+      Object.values(payload.links).length,
+      " to channel and ",
+      Object.values(payload.expressions).length,
+      " to channel"
+    );
+    channel.currentExpressionLinks = {
+      ...channel.currentExpressionLinks,
+      ...payload.links,
+    };
+    channel.currentExpressionMessages = {
+      ...channel.currentExpressionMessages,
+      ...payload.expressions,
+    };
   },
   addCommunity(state: State, payload: CommunityState): void {
     console.log("adding Community", payload);
@@ -155,12 +122,12 @@ export default {
     state: State,
     payload: { channelId: string; value: boolean }
   ): void {
-    console.log(payload);
+    //console.log(payload);
     for (const community of Object.values(state.communities)) {
       for (const channel of Object.values(community.channels)) {
-        console.log(channel);
+        //console.log(channel);
         if (channel.perspective === payload.channelId) {
-          console.log({ channel });
+          //console.log({ channel });
           channel.hasNewMessages = payload.value;
         }
       }

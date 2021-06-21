@@ -51,7 +51,7 @@ export async function getLinksPaginated(
   fromDate: Date,
   untilDate: Date
 ): Promise<ad4m.LinkExpression[]> {
-  console.log("Getting links", fromDate, untilDate);
+  // console.log("Getting links", fromDate, untilDate);
   return new Promise((resolve) => {
     const getLinksQ = apolloClient.query<{ links: ad4m.LinkExpression[] }>({
       query: SOURCE_PREDICATE_LINK_QUERY_TIME_PAGINATED,
