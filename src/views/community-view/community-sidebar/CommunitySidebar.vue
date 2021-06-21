@@ -88,7 +88,7 @@
           <j-menu-item :selected="isExactActive" @click="navigate">
             <j-icon slot="start" size="sm" name="hash"></j-icon>
             {{ channel.name }}
-            <j-badge v-if="channel.hasUnseenMessages">New</j-badge>
+            <j-badge v-if="channel.hasNewMessages">New</j-badge>
           </j-menu-item>
         </router-link>
       </j-menu-group-item>

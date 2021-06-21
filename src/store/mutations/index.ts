@@ -135,12 +135,12 @@ export default {
     if (community !== undefined) {
       community.channels[payload.channel.perspective] = {
         ...payload.channel,
-        hasUnseenMessages: false,
+        hasNewMessages: false,
       };
     }
   },
 
-  setUnseenMessages(
+  setNewMessages(
     state: State,
     payload: { channelId: string; value: boolean }
   ): void {
@@ -150,7 +150,7 @@ export default {
         console.log(channel);
         if (channel.perspective === payload.channelId) {
           console.log({ channel });
-          channel.hasUnseenMessages = payload.value;
+          channel.hasNewMessages = payload.value;
         }
       }
     }

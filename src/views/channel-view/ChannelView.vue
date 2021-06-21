@@ -108,7 +108,7 @@ export default defineComponent({
     this.startLoop(this.community.perspective);
   },
   watch: {
-    "channel.hasUnseenMessages": function (val) {
+    "channel.hasNewMessages": function (val) {
       if (val) {
         setTimeout(() => {
           this.scrollToBottom("smooth");
@@ -231,7 +231,7 @@ export default defineComponent({
             behavior,
           });
           // If we scroll to the bottom we have seen all messages
-          this.$store.commit("setUnseenMessages", {
+          this.$store.commit("setNewMessages", {
             channelId: this.channel.perspective,
             value: false,
           });
