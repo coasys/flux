@@ -20,6 +20,7 @@ const wsLink = new WebSocketLink({
 export const apolloClient = new ApolloClient({
   link: wsLink,
   cache: new InMemoryCache({
+    //Note in some cases this may hurt cache performance: https://github.com/apollographql/apollo-client/issues/1913
     addTypename: false,
   }),
   defaultOptions: {
