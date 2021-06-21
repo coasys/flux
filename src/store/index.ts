@@ -24,6 +24,7 @@ export interface CommunityState {
 // Vuex state of a given channel
 export interface ChannelState {
   name: string;
+  hasUnseenInstantMessage: boolean;
   perspective: string; //NOTE: this is essentially the UUID for the community
   linkLanguageAddress: string;
   sharedPerspectiveUrl: string;

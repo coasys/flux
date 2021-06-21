@@ -137,7 +137,10 @@ export default {
       (community) => community.perspective === payload.communityId
     );
     if (community !== undefined) {
-      community.channels.push(payload.channel);
+      community.channels.push({
+        ...payload.channel,
+        hasUnseenInstantMessage: false,
+      });
     }
   },
 
