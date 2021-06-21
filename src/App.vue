@@ -8,7 +8,7 @@
   >
     {{ toast.message }}
   </j-toast>
-  <div class="global-loading" v-if="ui.isGlobalLoading">
+  <div class="global-loading" v-if="ui.showGlobalLoading">
     <div class="global-loading__backdrop"></div>
     <div class="global-loading__content">
       <j-flex a="center" direction="column" gap="1000">
