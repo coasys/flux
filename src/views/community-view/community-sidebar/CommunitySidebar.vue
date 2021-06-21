@@ -39,11 +39,7 @@
       selector=".community-sidebar__header"
     >
       <j-menu>
-        <j-menu-item
-          :value="communityName"
-          @change="(e) => (communityName = e.target.value)"
-          @click="() => setShowEditCommunity(true)"
-        >
+        <j-menu-item @click="() => setShowEditCommunity(true)">
           <j-icon size="xs" slot="start" name="pencil" />
           Edit community
         </j-menu-item>
