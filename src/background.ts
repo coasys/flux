@@ -19,6 +19,31 @@ let env;
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
+// Scheme must be registered before the app is ready
+protocol.registerSchemesAsPrivileged([
+  { scheme: "app", privileges: { secure: true, standard: true } },
+]);
+
+process.on("unhandledRejection", (reason, p) => {
+  console.log("Unhandled Rejection at: Promise", p, "reason:", reason);
+  // application specific logging, throwing an error, or other logic here
+});
+
+// Exit cleanly on request from parent process in development mode.
+if (isDevelopment) {
+  if (process.platform === "win32") {
+    process.on("message", (data) => {
+      if (data === "graceful-exit") {
+        app.quit();
+      }
+    });
+  } else {
+    process.on("SIGTERM", () => {
+      app.quit();
+    });
+  }
+}
+
 if (app.isPackaged) {
   console.log("App is running in production mode");
   //TODO: this code is probably somewhat broken
@@ -59,7 +84,6 @@ if (app.isPackaged) {
 
   app.setPath("userData", path.join(app.getPath("userData"), env));
   app.setPath("appData", path.join(app.getPath("appData"), env));
-  //app.setName("junto-dev");
 }
 
 // This method will be called when Electron has finished
@@ -101,7 +125,6 @@ app.on("ready", async () => {
       builtInLangPath
     );
 
-    //createWindow();
     console.log("\x1b[36m%s\x1b[0m", "Init AD4M...");
     ad4m
       .init({
@@ -142,8 +165,18 @@ app.on("ready", async () => {
           console.log("\x1b[32m", "Controllers init complete!");
         });
       })
-      .catch((err) => {
+      .catch(async (err) => {
         console.error("Ad4m init error:", err);
+        if (win) {
+          win.webContents.send("setGlobalLoading", false);
+          win.webContents.send("globalError", { show: true, message: err });
+        } else {
+          await createWindow();
+          //@ts-ignore
+          win.webContents.send("setGlobalLoading", false);
+          //@ts-ignore
+          win.webContents.send("globalError", { show: true, message: err });
+        }
       });
   });
 });
@@ -203,6 +236,8 @@ async function createWindow() {
   splash.destroy();
 }
 
+// IPC communication
+
 ipcMain.on("ping", () => {
   win.webContents.send("pong", "Hello from main thread!");
 });
@@ -224,42 +259,22 @@ ipcMain.on("quitApp", async () => {
   app.quit();
 });
 
-// Scheme must be registered before the app is ready
-protocol.registerSchemesAsPrivileged([
-  { scheme: "app", privileges: { secure: true, standard: true } },
-]);
-
-// Exit cleanly on request from parent process in development mode.
-if (isDevelopment) {
-  if (process.platform === "win32") {
-    process.on("message", (data) => {
-      if (data === "graceful-exit") {
-        app.quit();
-      }
-    });
-  } else {
-    process.on("SIGTERM", () => {
-      app.quit();
-    });
-  }
-}
+// App hooks
 
 // Quit when all windows are closed.
 app.on("window-all-closed", async () => {
   console.log("Got window-all-closed signal");
+  await Core.exit();
+  app.quit();
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   //if (process.platform !== "darwin") {
-  //Quit PerspectivismCore
-  await Core.exit();
-  app.quit();
   //}
 });
 
 // Quit when all windows are closed.
 app.on("will-quit", async () => {
   console.log("Got quit quit signal");
-  //Quit PerspectivismCore
   await Core.exit();
   app.quit();
 });
@@ -270,10 +285,7 @@ app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
 
-process.on("unhandledRejection", (reason, p) => {
-  console.log("Unhandled Rejection at: Promise", p, "reason:", reason);
-  // application specific logging, throwing an error, or other logic here
-});
+// Update code
 
 ipcMain.on("check-update", () => {
   if (!isDevelopment) {

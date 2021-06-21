@@ -212,6 +212,13 @@ export default {
     state.ui.showGlobalLoading = payload;
   },
 
+  setGlobalError(
+    state: State,
+    payload: { show: boolean; message: string }
+  ): void {
+    state.ui.globalError = payload;
+  },
+
   setShowCreateCommunity(state: State, payload: boolean): void {
     state.ui.modals.showCreateCommunity = payload;
   },

@@ -10,11 +10,35 @@
   </j-toast>
   <div class="global-loading" v-if="ui.isGlobalLoading">
     <div class="global-loading__backdrop"></div>
-    <j-flex a="center" direction="column" gap="1000">
-      <j-spinner size="lg"> </j-spinner>
-      <j-text size="700">Please wait...</j-text>
-    </j-flex>
+    <div class="global-loading__content">
+      <j-flex a="center" direction="column" gap="1000">
+        <j-spinner size="lg"> </j-spinner>
+        <j-text size="700">Please wait...</j-text>
+      </j-flex>
+    </div>
   </div>
+  <div class="global-error" v-if="globalError.show">
+    <div class="global-error__backdrop"></div>
+    <div class="global-error__content">
+      <j-flex a="center" direction="column" gap="900">
+        <j-text nomargin variant="heading-lg"
+          >Whoops, something broke! 😅</j-text
+        >
+        <j-text nomargin v-if="globalError.message" variant="subheading">
+          Please report this message to us:
+        </j-text>
+        <div class="global-error__message">
+          {{ globalError.message }}
+        </div>
+      </j-flex>
+    </div>
+  </div>
+  <j-modal
+    :open="showErrorModal"
+    @toggle="(e) => (showErrorModal = e.target.open)"
+  >
+    {{ errorMessage }}
+  </j-modal>
 </template>
 
 <script lang="ts">
@@ -131,12 +155,21 @@ export default defineComponent({
     ui() {
       return this.$store.state.ui;
     },
+    globalError(): { show: boolean; message: string } {
+      return this.$store.state.ui.globalError;
+    },
     modals(): ModalsState {
       return this.$store.state.ui.modals;
     },
   },
-
   beforeCreate() {
+    //Reset globalError & loading states in case application was exited with these states set to true before
+    this.$store.commit("setGlobalError", {
+      show: false,
+      message: "",
+    });
+    this.$store.commit("setGlobalLoading", false);
+
     window.api.send("getLangPath");
 
     window.api.receive("getLangPathResponse", (data: string) => {
@@ -163,6 +196,13 @@ export default defineComponent({
     window.api.receive("setGlobalLoading", (val: boolean) => {
       this.$store.commit("setGlobalLoading", val);
     });
+
+    window.api.receive(
+      "globalError",
+      (payload: { show: boolean; message: string }) => {
+        this.$store.commit("setGlobalError", payload);
+      }
+    );
 
     const { onResult, onError } =
       useQuery<{
@@ -219,6 +259,16 @@ body {
   place-items: center;
 }
 
+.global-error {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+}
+
 .global-loading__backdrop {
   position: absolute;
   left: 0;
@@ -226,12 +276,52 @@ body {
   width: 100%;
   height: 100%;
   background: var(--j-color-white);
-  opacity: 0.5;
+  opacity: 0.8;
   backdrop-filter: blur(15px);
+}
+
+.global-loading__content {
+  position: relative;
+}
+
+.global-error__backdrop {
+  position: absolute;
+  left: 0;
+  height: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--j-color-white);
+  opacity: 0.8;
+  backdrop-filter: blur(15px);
+}
+
+.global-error__content {
+  text-align: center;
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto;
+  padding-top: var(--j-space-600);
+  padding-bottom: var(--j-space-600);
+  color: var(--j-color-ui-300);
+}
+
+.global-error__message {
+  text-align: left;
+  background: var(--j-color-ui-800);
+  padding: var(--j-space-500);
+  line-height: 1.5;
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: 20px;
 }
 
 .global-loading j-spinner {
   --j-spinner-size: 80px;
+}
+
+.bug-icon::part(base) {
+  width: 100px;
+  height: 100px;
 }
 
 /* apply a natural box layout model to all elements, but allowing components to change */

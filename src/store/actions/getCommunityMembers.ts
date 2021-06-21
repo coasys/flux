@@ -1,6 +1,5 @@
 import { getProfile, toProfile } from "@/utils/profileHelpers";
 import { getLinks } from "@/core/queries/getLinks";
-import { TimeoutCache } from "@/utils/timeoutCache";
 import { Commit } from "vuex";
 import { ExpressionTypes, Profile, State } from "..";
 import type Expression from "@perspect3vism/ad4m/Expression";
@@ -20,8 +19,6 @@ export default async function (
 ): Promise<void> {
   const profiles: { [x: string]: Expression } = {};
 
-  const cache = new TimeoutCache<Expression>(1000 * 60 * 60);
-
   try {
     const communities = state.communities;
 
@@ -33,8 +30,6 @@ export default async function (
       "sioc://has_member"
     );
 
-    //console.log("profileLinks:", profileLinks);
-
     const profileLang = community?.typedExpressionLanguages.find(
       (t) => t.expressionType === ExpressionTypes.ProfileExpression
     );
@@ -43,25 +38,18 @@ export default async function (
       for (const profileLink of profileLinks) {
         const did = `${profileLang.languageAddress}://${profileLink.author!
           .did!}`;
-        const profile = cache.get(did);
+
+        const profile = await getProfile(
+          profileLang.languageAddress,
+          profileLink.author!.did!
+        );
 
         if (profile) {
-          if (profiles[did] === undefined) {
-            profiles[did] = profile;
-          }
-        } else {
-          const profile = await getProfile(
-            profileLang.languageAddress,
-            profileLink.author!.did!
-          );
           profiles[did] = Object.assign({}, profile);
-          cache.set(did, profile);
         }
       }
 
       const profileList = Object.values(profiles);
-
-      // console.log("profiles", profileList);
 
       commit("setCommunityMembers", {
         communityId,
