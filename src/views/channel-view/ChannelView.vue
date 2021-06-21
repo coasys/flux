@@ -123,9 +123,6 @@ export default defineComponent({
   watch: {
     "channel.hasNewMessages": function (hasMessages) {
       if (hasMessages) {
-        const container = this.$refs.scrollContainer as HTMLDivElement;
-        if (!container) return;
-
         // If this channel is not in view, and only kept alive
         // Show new messages button, so when you open the channel
         // Again the button will be there
@@ -133,6 +130,9 @@ export default defineComponent({
           this.showNewMessagesButton = true;
           return;
         }
+
+        const container = this.$refs.scrollContainer as HTMLDivElement;
+        if (!container) return;
 
         const isAtBottom =
           container.scrollHeight - window.innerHeight === container.scrollTop;
