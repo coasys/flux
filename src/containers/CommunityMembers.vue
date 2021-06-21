@@ -42,15 +42,17 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import Expression from "@perspect3vism/ad4m/Expression";
+import { CommunityState } from "@/store";
 
 export default defineComponent({
+  emits: ["cancel", "submit"],
   data() {
     return {
       searchValue: "",
     };
   },
   computed: {
-    community() {
+    community(): CommunityState {
       return this.$store.getters.getCommunity(this.$route.params.communityId);
     },
     filteredCommunityMemberList(): Expression[] {

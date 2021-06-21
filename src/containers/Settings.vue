@@ -58,6 +58,7 @@ import { defineComponent } from "vue";
 import { mapMutations } from "vuex";
 
 export default defineComponent({
+  emits: ["cancel", "submit"],
   data() {
     return {
       hue: 270,
