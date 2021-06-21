@@ -72,6 +72,10 @@ export default defineComponent({
     updateTheme() {
       this.$emit("submit");
     },
+    cleanState() {
+      console.log("Sending clean-state command");
+      window.api.send("cleanState");
+    },
   },
   computed: {
     theme(): ThemeState {

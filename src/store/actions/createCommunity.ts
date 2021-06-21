@@ -165,7 +165,7 @@ export default async (
       name: perspectiveName,
       description: description,
       linkLanguageAddress: publish.linkLanguages![0]!.address!,
-      channels: {[channel.perspective]: channel},
+      channels: { [channel.perspective]: channel },
       perspective: createSourcePerspective.uuid!,
       expressionLanguages: expressionLangs,
       typedExpressionLanguages: typedExpLangs,
