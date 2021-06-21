@@ -22,7 +22,7 @@ export default async function (
   try {
     const communities = state.communities;
 
-    const community = communities.find((c) => c.perspective === communityId);
+    const community = communities[communityId];
 
     const profileLinks = await getLinks(
       communityId,
