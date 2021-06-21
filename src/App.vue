@@ -10,20 +10,27 @@
   </j-toast>
   <div class="global-loading" v-if="showGlobalLoading">
     <div class="global-loading__backdrop"></div>
-    <j-flex a="center" direction="column" gap="1000">
-      <j-spinner size="lg"> </j-spinner>
-      <j-text size="700">Please wait...</j-text>
-    </j-flex>
+    <div class="global-loading__content">
+      <j-flex a="center" direction="column" gap="1000">
+        <j-spinner size="lg"> </j-spinner>
+        <j-text size="700">Please wait...</j-text>
+      </j-flex>
+    </div>
   </div>
   <div class="global-error" v-if="globalError.show">
     <div class="global-error__backdrop"></div>
-    <j-flex a="center" direction="column" gap="1000">
-      <j-icon name="bug-fill"></j-icon>
-      <j-text size="700">
-        Sorry Junto has a bug... Please report this message to us:
-        {{ globalError.message }}</j-text
-      >
-    </j-flex>
+    <div class="global-error__content">
+      <j-flex a="center" direction="column" gap="900">
+        <j-icon class="bug-icon" size="xl" name="bug-fill"></j-icon>
+        <j-text nomargin variant="heading-lg"> Sorry Junto has a bug </j-text>
+        <j-text nomargin v-if="globalError.message" variant="subheading">
+          Please report this message to us:
+        </j-text>
+        <div class="global-error__message">
+          {{ globalError.message }}
+        </div>
+      </j-flex>
+    </div>
   </div>
   <j-modal
     :open="showErrorModal"
@@ -131,7 +138,10 @@ export default defineComponent({
   },
   beforeCreate() {
     //Reset globalError & loading states in case application was exited with these states set to true before
-    this.$store.commit("setGlobalError", { show: false, message: "" });
+    this.$store.commit("setGlobalError", {
+      show: false,
+      message: "",
+    });
     this.$store.commit("setGlobalLoading", false);
 
     window.api.send("getLangPath");
@@ -232,8 +242,12 @@ body {
   width: 100%;
   height: 100%;
   background: var(--j-color-white);
-  opacity: 0.5;
+  opacity: 0.8;
   backdrop-filter: blur(15px);
+}
+
+.global-loading__content {
+  position: relative;
 }
 
 .global-error__backdrop {
@@ -243,12 +257,31 @@ body {
   width: 100%;
   height: 100%;
   background: var(--j-color-white);
-  opacity: 0.5;
+  opacity: 0.8;
   backdrop-filter: blur(15px);
+}
+
+.global-error__content {
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto;
+  color: var(--j-color-ui-300);
+}
+
+.global-error__message {
+  background: var(--j-color-ui-800);
+  padding: var(--j-space-500);
+  line-height: 1.5;
+  border-radius: 20px;
 }
 
 .global-loading j-spinner {
   --j-spinner-size: 80px;
+}
+
+.bug-icon::part(base) {
+  width: 100px;
+  height: 100px;
 }
 
 /* apply a natural box layout model to all elements, but allowing components to change */
