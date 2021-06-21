@@ -33,12 +33,8 @@ export default {
     state: State,
     payload: AddChannelMessages
   ): Promise<void> {
-    const community = state.communities.find(
-      (c) => c.perspective === payload.communityId
-    );
-    const channel = community?.channels.find(
-      (c) => c.perspective === payload.channelId
-    );
+    const community = state.communities[payload.communityId];
+    const channel = community?.channels[payload.channelId];
     const links = [];
     const expressions = [];
 
@@ -87,7 +83,7 @@ export default {
   },
   addCommunity(state: State, payload: CommunityState): void {
     console.log("adding Community", payload);
-    state.communities.push(payload);
+    state.communities[payload.perspective] = payload;
   },
   setLanguagesPath(state: State, payload: string): void {
     state.localLanguagesPath = payload;
@@ -99,8 +95,8 @@ export default {
     state: State,
     payload: any
   ): void => {
-    state.communities.forEach((community) => {
-      community.channels.forEach((channel) => {
+    for (const community of Object.values(state.communities)) {
+      for (const channel of Object.values(community.channels)) {
         if (channel.linkLanguageAddress === payload.linkLanguage) {
           console.log("Adding to link and exp to channel!");
           channel.currentExpressionLinks.push({
@@ -112,8 +108,8 @@ export default {
             url: parseExprURL(payload.link.data.target),
           } as ExpressionAndRef);
         }
-      });
-    });
+      }
+    }
   },
 
   updateAgentLockState(state: State, payload: boolean): void {
@@ -133,11 +129,10 @@ export default {
   },
 
   addChannel(state: State, payload: AddChannel): void {
-    const community = state.communities.find(
-      (community) => community.perspective === payload.communityId
-    );
+    const community = state.communities[payload.communityId];
+
     if (community !== undefined) {
-      community.channels.push(payload.channel);
+      community.channels[payload.channel.perspective] = payload.channel;
     }
   },
 
@@ -186,14 +181,15 @@ export default {
     state: State,
     { communityId, name, description, groupExpressionRef }: UpdatePayload
   ): void {
-    const community = state.communities.find(
-      (community) => community.perspective === communityId
-    );
-    if (community != undefined) {
+    const community = state.communities[communityId];
+
+    if (community) {
       community.name = name;
       community.description = description;
       community.groupExpressionRef = groupExpressionRef;
     }
+
+    state.communities[communityId] = community;
   },
 
   updateUpdateState(
@@ -206,9 +202,7 @@ export default {
     state: State,
     { members, communityId }: { members: Expression[]; communityId: string }
   ): void {
-    const community = state.communities.find(
-      (community) => community.perspective === communityId
-    );
+    const community = state.communities[communityId];
 
     if (community) {
       community.members = members;
