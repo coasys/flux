@@ -29,8 +29,8 @@ export async function joinChannelFromSharedLink(
     linkLanguageAddress:
       installedChannelPerspective.sharedPerspective!.linkLanguages![0]!
         .address!,
-    currentExpressionLinks: [],
-    currentExpressionMessages: [],
+    currentExpressionLinks: {},
+    currentExpressionMessages: {},
     sharedPerspectiveUrl: sharedPerspectiveUrl,
     membraneType: MembraneType.Inherited,
     groupExpressionRef: "",

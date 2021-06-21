@@ -9,4 +9,6 @@ declare module "v-tooltip";
 
 declare module "vue3-virtual-scroller";
 
-declare module "vue-advanced-cropper";
+declare module 'vue-advanced-cropper';
+
+declare module "object-hash";

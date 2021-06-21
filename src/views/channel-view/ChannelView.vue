@@ -69,7 +69,12 @@
 import { defineComponent } from "vue";
 import { JuntoShortForm } from "@/core/juntoTypes";
 import Expression from "@perspect3vism/ad4m/Expression";
-import { ChannelState, CommunityState, ExpressionTypes } from "@/store";
+import {
+  ChannelState,
+  CommunityState,
+  ExpressionAndRef,
+  ExpressionTypes,
+} from "@/store";
 import { getProfile } from "@/utils/profileHelpers";
 import { chatMessageRefreshDuration } from "@/core/juntoTypes";
 import sleep from "@/utils/sleep";
@@ -118,24 +123,26 @@ export default defineComponent({
   },
   computed: {
     messages(): any[] {
-      const sortedMessages = [...this.channel.currentExpressionMessages].sort(
-        (a: any, b: any) => {
-          return (
-            new Date(a.expression.timestamp).getTime() -
-            new Date(b.expression.timestamp).getTime()
-          );
-        }
-      );
+      const sortedMessages = Object.values(
+        this.channel.currentExpressionMessages
+      ).sort((a: ExpressionAndRef, b: ExpressionAndRef) => {
+        return (
+          new Date(a.expression.timestamp).getTime() -
+          new Date(b.expression.timestamp).getTime()
+        );
+      });
 
-      return sortedMessages.reduce((acc: Message[], item: any) => {
+      //Note; code below will break once we add other expression types since we try to extract body from exp data
+      return sortedMessages.reduce((acc: Message[], item: ExpressionAndRef) => {
         this.loadUser(item.expression.author.did);
         return [
           ...acc,
           {
-            id: item.expression.timestamp,
+            id: item.expression.proof.signature,
             did: item.expression.author.did,
             timestamp: item.expression.timestamp,
-            message: JSON.parse(item.expression.data).body,
+            //@ts-ignore
+            message: item.expression.data.body,
           },
         ];
       }, []);

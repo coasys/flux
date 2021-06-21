@@ -30,8 +30,8 @@ export interface ChannelState {
   sharedPerspectiveUrl: string;
   type: FeedType;
   createdAt: Date;
-  currentExpressionLinks: LinkExpressionAndLang[];
-  currentExpressionMessages: ExpressionAndRef[];
+  currentExpressionLinks: { [x: string]: LinkExpressionAndLang };
+  currentExpressionMessages: { [x: string]: ExpressionAndRef };
   typedExpressionLanguages: JuntoExpressionReference[];
   membraneType: MembraneType;
   groupExpressionRef: string;
