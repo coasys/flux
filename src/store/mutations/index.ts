@@ -72,7 +72,9 @@ export default {
       for (const channel of Object.values(community.channels)) {
         if (channel.linkLanguageAddress === payload.linkLanguage) {
           console.log("Adding to link and exp to channel!");
-          channel.currentExpressionLinks[hash(payload.link.data!)] = {
+          channel.currentExpressionLinks[
+            hash(payload.link.data!, { excludeValues: "__typename" })
+          ] = {
             expression: payload.link,
             language: payload.linkLanguage,
           } as LinkExpressionAndLang;

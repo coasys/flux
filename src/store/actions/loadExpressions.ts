@@ -45,7 +45,9 @@ export default async function (
       if (channel) {
         for (const link of linkQuery) {
           const currentExpressionLink =
-            channel.currentExpressionLinks[hash(link.data!)];
+            channel.currentExpressionLinks[
+              hash(link.data!, { excludeValues: "__typename" })
+            ];
 
           if (!currentExpressionLink) {
             const expression = await getExpressionAndRetry(
@@ -56,7 +58,7 @@ export default async function (
             );
             if (expression) {
               //Set link data
-              links[hash(link.data!)] = {
+              links[hash(link.data!, { excludeValues: "__typename" })] = {
                 expression: link,
                 language: channel.linkLanguageAddress,
               } as LinkExpressionAndLang;
