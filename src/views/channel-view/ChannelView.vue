@@ -10,30 +10,41 @@
         <j-button @click="loadMoreMessages">Load more messages</j-button>
       </div>
 
-      <j-message-item
-        v-for="message in messages"
-        :key="message.id"
-        :hideuser="message.hideUser"
-        :timestamp="message.timestamp"
-      >
-        <j-avatar
-          :src="
-            users[message.authorId]?.profile['schema:image']
-              ? JSON.parse(users[message.authorId].profile['schema:image'])[
-                  'schema:contentUrl'
-                ]
-              : require('@/assets/images/avatar-placeholder.png')
-          "
-          slot="avatar"
-          initials="P"
-        />
-        <span slot="username">{{
-          users[message.authorId]?.profile["foaf:AccountName"]
-        }}</span>
-        <div slot="message">
-          <span v-html="message.message"></span>
-        </div>
-      </j-message-item>
+      <DynamicScroller red="scroller" :items="messages" :min-item-size="3">
+        <template v-slot="{ item, index, active }">
+          <DynamicScrollerItem
+            :item="item"
+            :active="active"
+            :size-dependencies="[item.message, item.timestamp]"
+            :data-index="index"
+            :data-active="active"
+            class="message"
+          >
+            <j-message-item
+              :hideuser="!showAvatar(index)"
+              :timestamp="item.timestamp"
+            >
+              <j-avatar
+                :src="
+                  users[item.did]?.profile['schema:image']
+                    ? JSON.parse(users[item.did].profile['schema:image'])[
+                        'schema:contentUrl'
+                      ]
+                    : require('@/assets/images/avatar-placeholder.png')
+                "
+                slot="avatar"
+                initials="P"
+              />
+              <span slot="username">{{
+                users[item.did]?.profile["foaf:AccountName"]
+              }}</span>
+              <div slot="message">
+                <span v-html="item.message"></span>
+              </div>
+            </j-message-item>
+          </DynamicScrollerItem>
+        </template>
+      </DynamicScroller>
     </div>
     <footer class="channel-view__footer">
       <j-editor
@@ -57,10 +68,12 @@ import { ChannelState, CommunityState, ExpressionTypes } from "@/store";
 import { getProfile } from "@/utils/profileHelpers";
 import { chatMessageRefreshDuration } from "@/core/juntoTypes";
 import sleep from "@/utils/sleep";
+import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
+import { differenceInMinutes, parseISO } from "date-fns";
 
 interface Message {
   id: string;
-  authorId: string;
+  did: string;
   date?: Date | string | number;
   message?: Expression;
   hideUser?: boolean;
@@ -72,6 +85,8 @@ interface UserMap {
 }
 
 export default defineComponent({
+  name: "ChannelView",
+  components: { DynamicScroller, DynamicScrollerItem },
   data() {
     return {
       noDelayRef: 0,
@@ -80,21 +95,13 @@ export default defineComponent({
       users: {} as UserMap,
     };
   },
-
   mounted() {
-    //console.log("Current mounted channel", this.channel);
-    this.scrollToBottom();
+    setTimeout(() => {
+      this.scrollToBottom();
+    }, 300);
     this.startLoop(this.community.perspective);
-    /* TODO: Show button only when we scrolled to top
-    document.addEventListener("scroll", (e) => {
-      this.isScrolledToTop = window.scrollY > 10;
-    });
-    */
   },
   computed: {
-    messagesLength(): number {
-      return this.messages.length;
-    },
     messages(): any[] {
       const sortedMessages = [...this.channel.currentExpressionMessages].sort(
         (a: any, b: any) => {
@@ -105,25 +112,18 @@ export default defineComponent({
         }
       );
 
-      return sortedMessages.reduce(
-        (acc: Message[], item: any, index: number) => {
-          this.loadUser(item.expression.author.did);
-          const prevItem = acc[index - 1];
-          return [
-            ...acc,
-            {
-              id: item.expression.timestamp,
-              authorId: item.expression.author.did,
-              timestamp: item.expression.timestamp,
-              message: JSON.parse(item.expression.data).body,
-              hideUser: prevItem
-                ? prevItem.authorId === item.expression.author.did
-                : false,
-            },
-          ];
-        },
-        []
-      );
+      return sortedMessages.reduce((acc: Message[], item: any) => {
+        this.loadUser(item.expression.author.did);
+        return [
+          ...acc,
+          {
+            id: item.expression.timestamp,
+            did: item.expression.author.did,
+            timestamp: item.expression.timestamp,
+            message: JSON.parse(item.expression.data).body,
+          },
+        ];
+      }, []);
     },
     community(): CommunityState {
       const { communityId } = this.$route.params;
@@ -141,6 +141,23 @@ export default defineComponent({
     },
   },
   methods: {
+    showAvatar(index: number): boolean {
+      const previousMessage = this.messages[index - 1];
+      const message = this.messages[index];
+      if (!previousMessage || !message) {
+        return true;
+      }
+      if (previousMessage.did !== message.did) {
+        return true;
+      }
+      return (
+        previousMessage.did === message.did &&
+        differenceInMinutes(
+          parseISO(message.timestamp),
+          parseISO(previousMessage.timestamp)
+        ) >= 2
+      );
+    },
     async loadUser(did: string) {
       let profileLang = this.profileLanguage;
       const { data } = await getProfile(profileLang, did);
@@ -176,32 +193,29 @@ export default defineComponent({
     },
     async createDirectMessage(message: JuntoShortForm) {
       this.currentExpressionPost = "";
-      this.$store
-        .dispatch("createExpression", {
-          languageAddress: this.community.expressionLanguages[0]!,
-          content: message,
-          perspective: this.$route.params.channelId.toString(),
-        })
-        .then(() => {
-          setTimeout(this.scrollToBottom, 300);
-        });
+      this.$store.dispatch("createExpression", {
+        languageAddress: this.community.expressionLanguages[0]!,
+        content: message,
+        perspective: this.$route.params.channelId.toString(),
+      });
     },
     scrollToBottom() {
       const container = this.$refs.scrollContainer as any;
       if (container) {
-        container.scrollTo({
-          top: container.scrollHeight,
-          behavior: "smooth",
+        this.$nextTick(() => {
+          container.scrollTop = container.scrollHeight + 5000;
         });
       }
     },
   },
-
-  components: {},
 });
 </script>
 
 <style scoped>
+.message {
+  min-height: 32px;
+}
+
 .channel-view {
   height: 100vh;
   overflow: hidden;
