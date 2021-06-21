@@ -18,9 +18,10 @@ const wsLink = new WebSocketLink({
 });
 
 export const apolloClient = new ApolloClient({
-  //uri: 'http://localhost:4000',
   link: wsLink,
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    addTypename: false,
+  }),
   defaultOptions: {
     watchQuery: {
       errorPolicy: "ignore",

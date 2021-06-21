@@ -2,11 +2,12 @@ import { createStore } from "vuex";
 import VuexPersistence from "vuex-persist";
 import type Expression from "@perspect3vism/ad4m/Expression";
 import ExpressionRef from "@perspect3vism/ad4m/ExpressionRef";
+import { LinkExpression } from "@perspect3vism/ad4m-executor";
 
 import actions from "./actions";
 import mutations from "./mutations";
 import getters from "./getters";
-import { LinkExpression } from "@perspect3vism/ad4m-executor";
+
 export interface CommunityState {
   //NOTE: here by having a static name + description we are assuming that these are top level metadata items that each group will have
   name: string;

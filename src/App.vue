@@ -113,7 +113,6 @@ export default defineComponent({
           console.log("FOUND EXPRESSION FOR SIGNAL");
           store.commit("addExpressionAndLinkFromLanguageAddress", {
             linkLanguage: language,
-            //@ts-ignore
             link: link,
             message: getExprRes,
           });

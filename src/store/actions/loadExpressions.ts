@@ -26,12 +26,14 @@ export default async function (
   try {
     const fromDate = from || getters.getApplicationStartTime;
     const untilDate = to || new Date("August 19, 1975 23:15:30").toISOString();
+
     const community = state.communities[communityId];
     const channel = community?.channels[channelId];
     const links: { [x: string]: LinkExpressionAndLang } = {};
     const expressions: { [x: string]: ExpressionAndRef } = {};
     let latestLinkTimestamp: Date | null = null;
 
+    //Make query for expression links
     const linkQuery = await getLinksPaginated(
       channelId.toString(),
       "sioc://chatchannel",
@@ -53,10 +55,12 @@ export default async function (
               20
             );
             if (expression) {
+              //Set link data
               links[hash(link.data!)] = {
                 expression: link,
                 language: channel.linkLanguageAddress,
               } as LinkExpressionAndLang;
+              //Set expression data
               expressions[expression.url!] = {
                 expression: {
                   author: expression.author!,
@@ -64,14 +68,23 @@ export default async function (
                   timestamp: expression.timestamp!,
                   proof: expression.proof!,
                 } as Expression,
-                //@ts-ignore
-                url: parseExprURL(link.data.target),
+                url: parseExprURL(link.data!.target!),
               } as ExpressionAndRef;
-              latestLinkTimestamp = new Date(link.timestamp!);
+
+              //Compare the timestamp of this link with the current highest
+              const linkTimestamp = new Date(link.timestamp!);
+              if (latestLinkTimestamp) {
+                if (linkTimestamp > latestLinkTimestamp!) {
+                  latestLinkTimestamp = linkTimestamp;
+                }
+              } else {
+                latestLinkTimestamp = linkTimestamp;
+              }
             }
           }
         }
 
+        //Add any gathered message to the channel
         commit("addMessages", {
           channelId: channelId,
           communityId: communityId,
@@ -79,6 +92,7 @@ export default async function (
           links: links,
         });
 
+        //If we have a linktimestamp check if timestamp is > than current latest link to allow for dynamic scroll rendering
         if (latestLinkTimestamp) {
           if (
             Object.values(channel.currentExpressionLinks).filter(
