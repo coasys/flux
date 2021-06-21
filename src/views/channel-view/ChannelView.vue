@@ -82,10 +82,14 @@ export default defineComponent({
   },
 
   mounted() {
-    console.log("Current mounted channel", this.messages);
+    const container = this.$refs.scrollContainer as HTMLDivElement;
+    container.style.visibility = "hidden";
+
     setTimeout(() => {
-      this.scrollToBottom();
-    }, 0)
+      this.scrollToBottom("auto");
+      container.style.visibility = "visible";
+    }, 0);
+
     this.startLoop(this.community.perspective);
     /* TODO: Show button only when we scrolled to top
     document.addEventListener("scroll", (e) => {
@@ -189,17 +193,17 @@ export default defineComponent({
             perspective: this.$route.params.channelId.toString(),
           })
           .then(() => {
-            setTimeout(this.scrollToBottom, 300);
+            setTimeout(() => this.scrollToBottom("smooth"), 300);
           });
       }
     },
-    scrollToBottom() {
-      const container = this.$refs.scrollContainer as any;
+    scrollToBottom(behavior: "smooth" | "auto") {
+      const container = this.$refs.scrollContainer as HTMLDivElement;
       if (container) {
         console.log('scrolling', container.scrollHeight);
         container.scrollTo({
           top: container.scrollHeight,
-          behavior: "smooth",
+          behavior,
         });
       }
     },
