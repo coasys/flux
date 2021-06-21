@@ -1,5 +1,5 @@
 <template>
-  <div class="channel-view" ref="scrollContainer">
+  <div class="channel-view" @scroll="handleScroll" ref="scrollContainer">
     <header class="channel-view__header">
       <j-icon size="sm" name="hash" />
       <j-text nomargin weight="500" size="500">{{ channel.name }}</j-text>
@@ -7,7 +7,13 @@
 
     <div class="channel-view__main">
       <div class="channel-view__load-more">
-        <j-button @click="loadMoreMessages">Load more messages</j-button>
+        <j-button
+          variant="primary"
+          v-if="showNewMessagesButton && channel.hasNewMessages"
+          @click="scrollToBottom('auto')"
+        >
+          Show new messages
+        </j-button>
       </div>
 
       <DynamicScroller
@@ -100,6 +106,7 @@ export default defineComponent({
   components: { DynamicScroller, DynamicScrollerItem },
   data() {
     return {
+      showNewMessagesButton: false,
       noDelayRef: 0,
       currentExpressionPost: {},
       unsortedMessages: [],
@@ -113,11 +120,19 @@ export default defineComponent({
     this.startLoop(this.community.perspective);
   },
   watch: {
-    "channel.hasNewMessages": function (val) {
-      if (val) {
-        setTimeout(() => {
+    "channel.hasNewMessages": function (hasMessages) {
+      if (hasMessages) {
+        const container = this.$refs.scrollContainer as HTMLDivElement;
+        if (!container) return;
+
+        const isAtBottom =
+          container.scrollHeight - window.innerHeight === container.scrollTop;
+
+        if (isAtBottom) {
           this.scrollToBottom("smooth");
-        }, 0);
+        } else {
+          this.showNewMessagesButton = true;
+        }
       }
     },
   },
@@ -163,6 +178,13 @@ export default defineComponent({
     },
   },
   methods: {
+    handleScroll(e: any) {
+      const isAtBottom =
+        e.target.scrollHeight - window.innerHeight === e.target.scrollTop;
+      if (isAtBottom) {
+        this.showNewMessagesButton = false;
+      }
+    },
     showAvatar(index: number): boolean {
       const previousMessage = this.messages[index - 1];
       const message = this.messages[index];
@@ -233,15 +255,20 @@ export default defineComponent({
       const container = this.$refs.scrollContainer as HTMLDivElement;
       if (container) {
         this.$nextTick(() => {
-          container.scrollTo({
-            top: container.scrollHeight,
-            behavior,
-          });
           // If we scroll to the bottom we have seen all messages
           this.$store.commit("setNewMessages", {
             channelId: this.channel.perspective,
             value: false,
           });
+
+          this.showNewMessagesButton = false;
+
+          setTimeout(() => {
+            container.scrollTo({
+              top: container.scrollHeight,
+              behavior,
+            });
+          }, 10);
         });
       }
     },
