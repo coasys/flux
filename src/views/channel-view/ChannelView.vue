@@ -175,16 +175,20 @@ export default defineComponent({
       });
     },
     async createDirectMessage(message: JuntoShortForm) {
-      this.currentExpressionPost = "";
-      this.$store
-        .dispatch("createExpression", {
-          languageAddress: this.community.expressionLanguages[0]!,
-          content: message,
-          perspective: this.$route.params.channelId.toString(),
-        })
-        .then(() => {
-          setTimeout(this.scrollToBottom, 300);
-        });
+      const escapedMessage = message.body.replace(/( |<([^>]+)>)/ig, "");
+
+      if (escapedMessage) {
+        this.currentExpressionPost = "";
+        this.$store
+          .dispatch("createExpression", {
+            languageAddress: this.community.expressionLanguages[0]!,
+            content: message,
+            perspective: this.$route.params.channelId.toString(),
+          })
+          .then(() => {
+            setTimeout(this.scrollToBottom, 300);
+          });
+      }
     },
     scrollToBottom() {
       const container = this.$refs.scrollContainer as any;
