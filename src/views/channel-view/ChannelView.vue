@@ -10,9 +10,10 @@
         <j-button
           variant="primary"
           v-if="showNewMessagesButton && channel.hasNewMessages"
-          @click="scrollToBottom('auto')"
+          @click="scrollToBottom('smooth')"
         >
           Show new messages
+          <j-icon name="arrow-down-short" size="xs" />
         </j-button>
       </div>
 
@@ -124,6 +125,14 @@ export default defineComponent({
       if (hasMessages) {
         const container = this.$refs.scrollContainer as HTMLDivElement;
         if (!container) return;
+
+        // If this channel is not in view, and only kept alive
+        // Show new messages button, so when you open the channel
+        // Again the button will be there
+        if (this.$route.params.channelId !== this.channel.perspective) {
+          this.showNewMessagesButton = true;
+          return;
+        }
 
         const isAtBottom =
           container.scrollHeight - window.innerHeight === container.scrollTop;
