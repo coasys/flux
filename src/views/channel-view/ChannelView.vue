@@ -105,10 +105,14 @@ export default defineComponent({
       currentExpressionPost: {},
       unsortedMessages: [],
       users: {} as UserMap,
-      activated: false,
     };
   },
-  mounted() {
+  async mounted() {
+    await this.$store.dispatch("loadExpressions", {
+      communityId: this.$route.params.communityId,
+      channelId: this.$route.params.channelId,
+    });
+
     this.cachedChannelId = this.$route.params.channelId as string;
     setTimeout(() => {
       this.scrollToBottom("auto");
@@ -118,11 +122,6 @@ export default defineComponent({
     // Go back to saved scroll position
     const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
     scrollContainer.scrollTop = this.lastScrollTop as number;
-    this.activated = true;
-    this.startLoop(this.community.perspective);
-  },
-  deactivated() {
-    this.activated = false;
   },
   watch: {
     "channel.hasNewMessages": function (hasMessages) {
@@ -237,25 +236,7 @@ export default defineComponent({
         this.users[did] = data;
       }
     },
-    async startLoop(communityId: string) {
-      if (communityId) {
-        console.log("Running get channels messages loop", this.channel.name);
-        await this.$store.dispatch("loadExpressions", {
-          communityId: this.$route.params.communityId,
-          channelId: this.$route.params.channelId,
-        });
-        // if (hasNewer) {
-        //   this.$store.commit("setHasNewMessages", {
-        //     channelId: this.channel.perspective,
-        //     value: true,
-        //   });
-        // }
-        await sleep(chatMessageRefreshDuration);
-        if (this.activated) {
-          this.startLoop(communityId);
-        }
-      }
-    },
+
     loadMoreMessages() {
       const messageAmount = this.messages.length;
       if (messageAmount) {
