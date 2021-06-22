@@ -18,6 +18,7 @@
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps",
     "rebuild": "./node_modules/.bin/electron-rebuild -f -w ad4m-core-executor",
+    "build-holochain": "echo \"\n\n\n\nThis next stage will fail if Nix is not installed!! You can install here: https://nixos.wiki/wiki/Nix_Installation_Guide\" && sleep 5 && nix-shell --run ./scripts/copy-hc.sh",
     "release": "npm run electron:build"
   },
   "main": "background.js",
