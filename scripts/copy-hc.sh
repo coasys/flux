@@ -7,6 +7,8 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     cp `which holochain` ./resources/linux/
     [ -f "./resources/linux/lair-keystore" ] && rm ./resources/linux/lair-keystore
     cp `which lair-keystore` ./resources/linux/
+    [ -f "./resources/linux/hc" ] && rm ./resources/linux/hc
+    cp `which hc` ./resources/linux/
 
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     [ ! -d "./resources/darwin" ] && mkdir "./resources/darwin"
@@ -14,6 +16,8 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
     cp `which holochain` ./resources/darwin
     [ -f "./resources/darwin/holochain" ] && rm ./resources/darwin/lair-keystore
     cp `which lair-keystore` ./resources/darwin
+    [ -f "./resources/darwin/hc" ] && rm ./resources/darwin/hc
+    cp `which hc` ./resources/darwin/
     
 else
     echo "Sorry your OS type is not supported"

@@ -7,7 +7,7 @@ Node version: 14.16.0<br>
 This project requires nix for building holochain! You can download nix here: https://nixos.wiki/wiki/Nix_Installation_Guide
 
 ```
-git submodule init && git submodule update && npm run build-languages && npm install && npm run build-holochain
+npm install && npm run build-languages && npm run build-holochain
 ```
 
 ### Compiles and hot-reloads for development

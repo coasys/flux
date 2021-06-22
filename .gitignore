@@ -7,9 +7,12 @@
 !/ad4m/languages/**/rollup.config.icons.js
 /ad4m/languages/**/*.js.map
 /ad4m/languages/**/node_modules
+/ad4m/languages/**/build
+/ad4m/languages/profiles/**
 .hc
 .hc_live_0
 out.log
+
 resources/darwin/*
 resources/linux/*
 
