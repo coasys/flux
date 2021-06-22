@@ -52,7 +52,6 @@ export default async function (
 
     linksWorker.addEventListener("message", async (e) => {
       const linkQuery = e.data.links;
-      console.log("Recived links", linkQuery);
       if (linkQuery) {
         if (channel) {
           for (const link of linkQuery) {
@@ -61,20 +60,18 @@ export default async function (
                 hash(link.data!, { excludeValues: "__typename" })
               ];
 
-            console.log(currentExpressionLink);
-
             if (!currentExpressionLink) {
               const expressionWorker = new Worker("pollingWorker.js");
 
               expressionWorker.postMessage({
                 retry: 50,
+                quitOnResponse: true,
                 interval: 5000,
                 query: print(QUERY_EXPRESSION),
                 variables: { url: link.data.target },
               });
 
               expressionWorker.addEventListener("message", (e) => {
-                console.log("Recieved expression");
                 const expression = e.data.expression;
 
                 if (expression) {

@@ -35,7 +35,13 @@ function sleep(ms) {
 let retries = 0;
 
 function pollData(e) {
-  const { retry = null, interval = 1000, query, variables } = e.data;
+  const {
+    retry = null,
+    quitOnResponse = false,
+    interval = 1000,
+    query,
+    variables,
+  } = e.data;
 
   console.log("Started polling", {
     retries,
@@ -51,7 +57,12 @@ function pollData(e) {
 
   getData({ query, variables })
     .then((res) => {
-      self.postMessage(res);
+      if (res) {
+        self.postMessage(res);
+        if (quitOnResponse) {
+          self.close();
+        }
+      }
     })
     .catch((e) => {
       console.log(e);
