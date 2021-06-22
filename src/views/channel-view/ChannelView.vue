@@ -107,6 +107,8 @@ export default defineComponent({
   components: { DynamicScroller, DynamicScrollerItem },
   data() {
     return {
+      lastScrollTop: 0,
+      cachedChannelId: "",
       showNewMessagesButton: false,
       noDelayRef: 0,
       currentExpressionPost: {},
@@ -114,13 +116,23 @@ export default defineComponent({
       users: {} as UserMap,
     };
   },
+
   mounted() {
+    this.cachedChannelId = this.$route.params.channelId as string;
     setTimeout(() => {
       this.scrollToBottom("auto");
     }, 300);
     this.startLoop(this.community.perspective);
   },
   watch: {
+    "$route.params.channelId": function (id) {
+      console.log("route changed");
+      if (id === this.cachedChannelId) {
+        console.log("trying to go back to scroll pos");
+        const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
+        scrollContainer.scrollTop = this.lastScrollTop as number;
+      }
+    },
     "channel.hasNewMessages": function (hasMessages) {
       if (hasMessages) {
         // If this channel is not in view, and only kept alive
@@ -173,11 +185,20 @@ export default defineComponent({
     },
     community(): CommunityState {
       const { communityId } = this.$route.params;
+
       return this.$store.getters.getCommunity(communityId);
     },
     channel(): ChannelState {
-      const { channelId, communityId } = this.$route.params;
-      return this.$store.getters.getChannel({ channelId, communityId });
+      const cachedChannelId = this.cachedChannelId;
+      const { communityId, channelId } = this.$route.params;
+      if (!cachedChannelId) {
+        return this.$store.getters.getChannel({ channelId, communityId });
+      } else {
+        return this.$store.getters.getChannel({
+          channelId: cachedChannelId,
+          communityId,
+        });
+      }
     },
     profileLanguage(): string {
       const profileLang = this.community?.typedExpressionLanguages.find(
@@ -188,6 +209,7 @@ export default defineComponent({
   },
   methods: {
     handleScroll(e: any) {
+      this.lastScrollTop = e.target.scrollTop;
       const isAtBottom =
         e.target.scrollHeight - window.innerHeight === e.target.scrollTop;
       if (isAtBottom) {
