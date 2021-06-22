@@ -27,7 +27,7 @@ export async function getProfile(
   profileLangAddress: string,
   did: string
 ): Promise<Expression | null> {
-  const cache = new TimeoutCache<Expression>(1000 * 60 * 60);
+  const cache = new TimeoutCache<Expression>(1000 * 60 * 5);
 
   const profileLink = `${profileLangAddress}://${did}`;
 

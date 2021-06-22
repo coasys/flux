@@ -39,6 +39,7 @@ export default async function (
         const did = `${profileLang.languageAddress}://${profileLink.author!
           .did!}`;
 
+        //TODO: we should store the whole profile in the store but just the did and then resolve the profile via cache/network
         const profile = await getProfile(
           profileLang.languageAddress,
           profileLink.author!.did!
