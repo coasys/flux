@@ -32,26 +32,18 @@
             :data-active="active"
             class="message"
           >
-            <j-message-item
-              :hideuser="!showAvatar(index)"
+            <message-item
+              :showAvatar="showAvatar(index)"
+              :message="item.message"
               :timestamp="item.timestamp"
-            >
-              <j-avatar
-                :src="
-                  users[item.did]?.profile['schema:image']
-                    ? JSON.parse(users[item.did].profile['schema:image'])[
-                        'schema:contentUrl'
-                      ]
-                    : require('@/assets/images/avatar-placeholder.png')
-                "
-                slot="avatar"
-                initials="P"
-              />
-              <span slot="username">{{
-                users[item.did]?.profile["foaf:AccountName"]
-              }}</span>
-              <div slot="message" v-html="item.message"></div>
-            </j-message-item>
+              :username="users[item.did]?.profile['foaf:AccountName']"
+              :profileImg="
+                users[item.did]?.profile['schema:image'] &&
+                JSON.parse(users[item.did].profile['schema:image'])[
+                  'schema:contentUrl'
+                ]
+              "
+            />
           </DynamicScrollerItem>
         </template>
       </DynamicScroller>
@@ -86,6 +78,7 @@ import sleep from "@/utils/sleep";
 import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
 import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css";
 import { differenceInMinutes, parseISO } from "date-fns";
+import MessageItem from "@/components/message-item/MessageItem.vue";
 
 interface Message {
   id: string;
@@ -102,7 +95,7 @@ interface UserMap {
 
 export default defineComponent({
   name: "ChannelView",
-  components: { DynamicScroller, DynamicScrollerItem },
+  components: { DynamicScroller, DynamicScrollerItem, MessageItem },
   data() {
     return {
       lastScrollTop: 0,
@@ -341,14 +334,6 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-}
-
-j-message-item [slot="message"] > :first-of-type {
-  margin-top: 0;
-}
-
-j-message-item [slot="message"] > :last-of-type {
-  margin-bottom: 0;
 }
 
 .channel-view__load-more {
