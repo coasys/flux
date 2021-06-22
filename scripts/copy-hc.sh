@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+[ ! -d "./resources" ] && mkdir "./resources"
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     [ ! -d "./resources/linux" ] && mkdir "./resources/linux"
