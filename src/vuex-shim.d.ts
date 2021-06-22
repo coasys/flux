@@ -6,6 +6,7 @@ import {
   ExpressionUIIcons,
 } from ".store/index";
 import VueApollo from "@vue/apollo-option";
+import { UpdateState } from "./store";
 
 declare module "@vue/runtime-core" {
   // declare your own store states
@@ -23,6 +24,7 @@ declare module "@vue/runtime-core" {
     agentUnlocked: boolean;
     agentInit: boolean;
     userProfile: Profile | null;
+    updateState: UpdateState;
   }
 
   // provide typings for `this.$store`

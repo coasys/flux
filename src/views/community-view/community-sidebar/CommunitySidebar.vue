@@ -1,17 +1,29 @@
 <template>
-  <div class="left-drawer" v-if="community != null">
-    <button class="left-drawer__header">
+  <div class="community-sidebar" v-if="community">
+    <button class="community-sidebar__header">
       <j-flex j="between" gap="300">
-        <j-flex gap="400">
+        <j-flex a="center" gap="400">
           <j-avatar
             style="--j-avatar-size: 35px"
             :src="require('@/assets/images/junto_app_icon.png')"
           />
           <div>
-            <j-text weight="500" color="ui-800" nomargin size="500">
+            <j-text
+              v-if="community.name"
+              weight="500"
+              color="ui-800"
+              nomargin
+              size="500"
+            >
               {{ community.name }}
             </j-text>
-            <j-text weight="300" color="ui-800" nomargin size="400">
+            <j-text
+              v-if="community.description"
+              weight="300"
+              color="ui-800"
+              nomargin
+              size="400"
+            >
               {{ community.description }}
             </j-text>
           </div>
@@ -21,17 +33,13 @@
     </button>
 
     <j-popover
-      class="left-drawer__header-menu"
+      class="community-sidebar__header-menu"
       event="click"
       placement="bottom-start"
-      selector=".left-drawer__header"
+      selector=".community-sidebar__header"
     >
       <j-menu>
-        <j-menu-item
-          :value="communityName"
-          @change="(e) => (communityName = e.target.value)"
-          @click="showUpdateCommunity = true"
-        >
+        <j-menu-item @click="() => setShowEditCommunity(true)">
           <j-icon size="xs" slot="start" name="pencil" />
           Edit community
         </j-menu-item>
@@ -40,7 +48,7 @@
           Invite people
         </j-menu-item>
         <j-divider />
-        <j-menu-item @click="showCreateChannel = true">
+        <j-menu-item @click="() => setShowCreateChannel(true)">
           <j-icon size="xs" slot="start" name="plus" />
           Create a new channel
         </j-menu-item>
@@ -49,7 +57,7 @@
 
     <j-box pt="500" px="500" pb="500">
       <avatar-group
-        @click="showGroupMembers = true"
+        @click="() => setShowCommunityMembers(true)"
         :users="community.members"
       />
     </j-box>
@@ -57,7 +65,7 @@
     <j-box pt="500">
       <j-menu-group-item open title="Channels">
         <j-button
-          @click.prevent="showCreateChannel = true"
+          @click.prevent="() => setShowCreateChannel(true)"
           size="sm"
           slot="end"
           variant="transparent"
@@ -77,149 +85,38 @@
           v-for="channel in community.channels"
           :key="channel.perspective"
         >
-          <j-menu-item :selected="isExactActive" @click="navigate">
+          <j-menu-item
+            class="channel"
+            :selected="isExactActive"
+            @click="navigate"
+          >
             <j-icon slot="start" size="sm" name="hash"></j-icon>
             {{ channel.name }}
+            <div
+              class="channel__notification"
+              v-if="channel.hasNewMessages"
+            ></div>
           </j-menu-item>
         </router-link>
       </j-menu-group-item>
     </j-box>
-
-    <j-modal
-      :open="showGroupMembers"
-      @toggle="(e) => (showGroupMembers = e.target.open)"
-    >
-      <j-flex gap="500" direction="column">
-        <j-text variant="heading"
-          >All group members ({{ community.members.length ?? 0 }})</j-text
-        >
-        <j-input
-          placeholder="Search for member"
-          type="search"
-          :value="searchValue"
-          @input="(e) => (searchValue = e.target.value)"
-        ></j-input>
-        <j-flex wrap gap="600">
-          <j-flex
-            gap="300"
-            v-for="communityMember in filteredCommunityMemberList"
-            :key="communityMember.data.profile['foaf:AccountName']"
-            inline
-            direction="column"
-            a="center"
-          >
-            <j-avatar
-              size="lg"
-              :src="
-                communityMember.data.profile['schema:image']
-                  ? JSON.parse(communityMember.data.profile['schema:image'])['schema:contentUrl']
-                  : require('@/assets/images/avatar-placeholder.png')
-              "
-            />
-            <j-text variant="body">{{
-              communityMember.data.profile["foaf:AccountName"]
-            }}</j-text>
-          </j-flex>
-        </j-flex>
-      </j-flex>
-    </j-modal>
-
-    <j-modal
-      :open="showUpdateCommunity"
-      @toggle="(e) => (showUpdateCommunity = e.target.open)"
-    >
-      <j-text variant="heading">Edit Community</j-text>
-      <j-flex direction="column" gap="400">
-        <j-input
-          size="lg"
-          label="Name"
-          :value="communityName"
-          @input="(e) => (communityName = e.target.value)"
-        ></j-input>
-        <j-input
-          size="lg"
-          label="Description"
-          :value="communityDescription"
-          @keydown.enter="updateCommunity"
-          @input="(e) => (communityDescription = e.target.value)"
-        ></j-input>
-        <j-button
-          size="lg"
-          :loading="isUpdatingCommunity"
-          :disabled="isUpdatingCommunity"
-          @click="updateCommunity"
-          variant="primary"
-        >
-          Save
-        </j-button>
-      </j-flex>
-    </j-modal>
-
-    <j-modal
-      :open="showCreateChannel"
-      @toggle="(e) => (showCreateChannel = e.target.open)"
-    >
-      <j-text variant="heading">Create Channel</j-text>
-      <j-text variant="body">
-        Channels are ways to organize your conversations by topics.
-      </j-text>
-      <j-flex direction="column" gap="400">
-        <j-input
-          size="lg"
-          label="Name"
-          :value="channelName"
-          @keydown.enter="createChannel"
-          @input="(e) => (channelName = e.target.value)"
-        ></j-input>
-        <j-button
-          size="lg"
-          :loading="isCreatingChannel"
-          :disabled="isCreatingChannel"
-          @click="createChannel"
-          variant="primary"
-        >
-          Create Channel
-        </j-button>
-      </j-flex>
-    </j-modal>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import { Profile } from "@/store";
-import Expression from "@perspect3vism/ad4m/Expression";
+import { mapMutations } from "vuex";
 
 export default defineComponent({
   components: { AvatarGroup },
   props: ["community"],
-  watch: {
-    community: {
-      handler: function ({ name, description }) {
-        this.communityName = name;
-        this.communityDescription = description;
-
-        this.searchValue = "";
-      },
-      deep: true,
-      immediate: true,
-    },
-  },
-  data() {
-    return {
-      isCreatingChannel: false,
-      channelName: "",
-      showCreateChannel: false,
-      isUpdatingCommunity: false,
-      communityName: "",
-      communityDescription: "",
-      showUpdateCommunity: false,
-      showGroupMembers: false,
-      searchValue: "",
-    };
-  },
   methods: {
+    ...mapMutations([
+      "setShowCreateChannel",
+      "setShowEditCommunity",
+      "setShowCommunityMembers",
+    ]),
     getInviteCode() {
       // Get the invite code to join community and copy to clipboard
       let currentCommunity = this.community;
@@ -234,59 +131,12 @@ export default defineComponent({
         message: "Your custom invite code is copied to your clipboard!",
       });
     },
-    async updateCommunity() {
-      const { communityId } = this.$route.params;
-      this.isUpdatingCommunity = true;
-      this.$store
-        .dispatch("updateCommunity", {
-          communityId: communityId,
-          name: this.communityName,
-          description: this.communityDescription,
-        })
-        .then(() => {
-          this.showUpdateCommunity = false;
-        })
-        .finally(() => {
-          this.isUpdatingCommunity = false;
-        });
-    },
-    async createChannel() {
-      const { communityId } = this.$route.params;
-      const name = this.channelName;
-      this.isCreatingChannel = true;
-      this.$store
-        .dispatch("createChannel", {
-          communityId,
-          name,
-        })
-        .then(() => {
-          this.showCreateChannel = false;
-          this.channelName = "";
-        })
-        .finally(() => {
-          this.isCreatingChannel = false;
-        });
-    },
-  },
-  computed: {
-    filteredCommunityMemberList(): Expression[] {
-      const members: Expression[] = this.community.members;
-      return members.filter((m: Expression) =>
-        Object(m.data).profile["foaf:AccountName"].includes(this.searchValue)
-      );
-    },
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.left-drawer {
-  width: clamp(300px, 18vw, 400px);
-  background-color: var(--j-color-white);
-  border-right: 1px solid var(--j-color-ui-50);
-}
-
-.left-drawer__header {
+.community-sidebar__header {
   color: inherit;
   width: 100%;
   display: block;
@@ -297,10 +147,10 @@ export default defineComponent({
   background: none;
   cursor: pointer;
   padding: var(--j-space-400) var(--j-space-500);
-  border-bottom: 1px solid var(--j-color-ui-50);
+  border-bottom: 1px solid var(--app-drawer-border-color);
 }
 
-.left-drawer__header:hover {
+.community-sidebar__header:hover {
   background: var(--j-color-ui-50);
 }
 
@@ -310,5 +160,21 @@ j-divider {
   border-bottom: 1px solid var(--j-color-ui-100);
   margin-top: var(--j-space-300);
   margin-bottom: var(--j-space-300);
+}
+
+.channel {
+  position: relative;
+  display: block;
+}
+
+.channel__notification {
+  position: absolute;
+  right: var(--j-space-300);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--j-color-primary-500);
 }
 </style>

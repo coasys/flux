@@ -11,7 +11,9 @@
 .hc
 .hc_live_0
 out.log
-resources/linux/old
+
+resources/darwin/*
+resources/linux/*
 
 .DS_Store
 node_modules

@@ -2,16 +2,17 @@ import { createStore } from "vuex";
 import VuexPersistence from "vuex-persist";
 import type Expression from "@perspect3vism/ad4m/Expression";
 import ExpressionRef from "@perspect3vism/ad4m/ExpressionRef";
+import { LinkExpression } from "@perspect3vism/ad4m-executor";
 
 import actions from "./actions";
 import mutations from "./mutations";
 import getters from "./getters";
-import { LinkExpression } from "@perspect3vism/ad4m-executor";
+
 export interface CommunityState {
   //NOTE: here by having a static name + description we are assuming that these are top level metadata items that each group will have
   name: string;
   description: string;
-  channels: ChannelState[];
+  channels: { [x: string]: ChannelState };
   perspective: string; //NOTE: this is essentially the UUID for the community
   linkLanguageAddress: string;
   expressionLanguages: string[];
@@ -24,13 +25,14 @@ export interface CommunityState {
 // Vuex state of a given channel
 export interface ChannelState {
   name: string;
+  hasNewMessages: boolean;
   perspective: string; //NOTE: this is essentially the UUID for the community
   linkLanguageAddress: string;
   sharedPerspectiveUrl: string;
   type: FeedType;
   createdAt: Date;
-  currentExpressionLinks: LinkExpressionAndLang[];
-  currentExpressionMessages: ExpressionAndRef[];
+  currentExpressionLinks: { [x: string]: LinkExpressionAndLang };
+  currentExpressionMessages: { [x: string]: ExpressionAndRef };
   typedExpressionLanguages: JuntoExpressionReference[];
   membraneType: MembraneType;
   groupExpressionRef: string;
@@ -79,19 +81,42 @@ export interface ToastState {
 }
 
 export interface ThemeState {
-  name: "light" | "dark";
+  name: string;
+  fontFamily: string;
   hue: number;
+}
+
+export interface ModalsState {
+  showCreateCommunity: boolean;
+  showEditCommunity: boolean;
+  showCommunityMembers: boolean;
+  showCreateChannel: boolean;
+  showEditProfile: boolean;
+  showSettings: boolean;
 }
 
 export interface UIState {
   toast: ToastState;
   theme: ThemeState;
-  isGlobalLoading: boolean;
+  modals: ModalsState;
+  showSidebar: boolean;
+  showGlobalLoading: boolean;
+  globalError: {
+    show: boolean;
+    message: string;
+  };
 }
+
+export type UpdateState =
+  | "available"
+  | "not-available"
+  | "downloading"
+  | "downloaded"
+  | "checking";
 
 export interface State {
   ui: UIState;
-  communities: CommunityState[];
+  communities: { [x: string]: CommunityState };
   localLanguagesPath: string;
   databasePerspective: string;
   //This tells us when the application was started; this tells us that between startTime -> now all messages should have been received
@@ -103,6 +128,7 @@ export interface State {
   agentUnlocked: boolean;
   agentInit: boolean;
   userProfile: Profile | null;
+  updateState: UpdateState;
 }
 
 export interface ExpressionUIIcons {
@@ -135,18 +161,32 @@ const vuexLocal = new VuexPersistence<State>({
 export default createStore({
   state: {
     ui: {
-      isGlobalLoading: false,
+      modals: {
+        showCreateCommunity: false,
+        showEditCommunity: false,
+        showCommunityMembers: false,
+        showCreateChannel: false,
+        showEditProfile: false,
+        showSettings: false,
+      },
+      showSidebar: true,
+      showGlobalLoading: false,
       theme: {
+        fontFamily: "default",
         name: "light",
-        hue: 0,
+        hue: 270,
       },
       toast: {
         variant: "",
         message: "",
         open: false,
       },
+      globalError: {
+        show: false,
+        message: "",
+      },
     },
-    communities: [],
+    communities: {},
     localLanguagesPath: "",
     databasePerspective: "",
     applicationStartTime: new Date(),
@@ -154,6 +194,7 @@ export default createStore({
     agentUnlocked: false,
     agentInit: false,
     userProfile: null,
+    updateState: "not-available",
   },
   plugins: [vuexLocal.plugin],
   mutations: mutations,

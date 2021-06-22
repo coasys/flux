@@ -14,7 +14,7 @@ export interface Payload {
 export default async (store: any, { joiningLink }: Payload): Promise<void> => {
   try {
     const communities = store.state.communities;
-    const isAlreadyPartOf = communities.find(
+    const isAlreadyPartOf = Object.values(communities).find(
       (c: any) => c.sharedPerspectiveUrl === joiningLink
     );
     if (!isAlreadyPartOf) {
@@ -63,7 +63,7 @@ export default async (store: any, { joiningLink }: Payload): Promise<void> => {
         name: installedPerspective.name,
         linkLanguageAddress:
           installedPerspective.sharedPerspective!.linkLanguages![0]!.address!,
-        channels: [],
+        channels: {},
         perspective: installedPerspective.uuid!,
         expressionLanguages:
           installedPerspective.sharedPerspective!.requiredExpressionLanguages,

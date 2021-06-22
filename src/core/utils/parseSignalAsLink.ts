@@ -1,4 +1,4 @@
-import { LinkExpression, Signal } from "@perspect3vism/ad4m-executor";
+import type { LinkExpression, Signal } from "@perspect3vism/ad4m-executor";
 
 export default function (
   signal: Signal

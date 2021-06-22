@@ -15,16 +15,31 @@ export function getExpression(url: string): Promise<ad4m.Expression> {
   });
 }
 
+export function getExpressionNoCache(url: string): Promise<ad4m.Expression> {
+  return new Promise((resolve) => {
+    const getExpression = apolloClient.query<{
+      expression: ad4m.Expression;
+    }>({
+      query: QUERY_EXPRESSION,
+      variables: { url: url },
+      fetchPolicy: "no-cache",
+    });
+    getExpression.then((result) => {
+      resolve(result.data.expression);
+    });
+  });
+}
+
 export async function getExpressionAndRetry(
   url: string,
   retries: number,
   retryDelay: number
 ): Promise<ad4m.Expression | null> {
-  let getExprRes = await getExpression(url);
+  let getExprRes = await getExpressionNoCache(url);
   if (getExprRes == null) {
     for (let i = 0; i < retries; i++) {
-      console.log("Retrying get of expression in getExpressionAndRetry");
-      getExprRes = await getExpression(url);
+      //console.log("Retrying get of expression in getExpressionAndRetry");
+      getExprRes = await getExpressionNoCache(url);
       if (getExprRes != null) {
         break;
       }

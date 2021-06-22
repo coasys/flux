@@ -22,14 +22,15 @@ export async function joinChannelFromSharedLink(
   //TODO: lets use a constructor on the ChannelState type
   return {
     name: installedChannelPerspective.name!,
+    hasNewMessages: false,
     perspective: installedChannelPerspective.uuid!,
     type: FeedType.Signaled,
     createdAt: now,
     linkLanguageAddress:
       installedChannelPerspective.sharedPerspective!.linkLanguages![0]!
         .address!,
-    currentExpressionLinks: [],
-    currentExpressionMessages: [],
+    currentExpressionLinks: {},
+    currentExpressionMessages: {},
     sharedPerspectiveUrl: sharedPerspectiveUrl,
     membraneType: MembraneType.Inherited,
     groupExpressionRef: "",

@@ -35,7 +35,6 @@ export default async (
   { perspectiveName, description }: Payload
 ): Promise<void> => {
   try {
-    //TODO: @eric: show loading animation here
     const createSourcePerspective = await addPerspective(perspectiveName);
     console.log("Created perspective", createSourcePerspective);
     const uid = uuidv4().toString();
@@ -166,7 +165,7 @@ export default async (
       name: perspectiveName,
       description: description,
       linkLanguageAddress: publish.linkLanguages![0]!.address!,
-      channels: [channel],
+      channels: { [channel.perspective]: channel },
       perspective: createSourcePerspective.uuid!,
       expressionLanguages: expressionLangs,
       typedExpressionLanguages: typedExpLangs,

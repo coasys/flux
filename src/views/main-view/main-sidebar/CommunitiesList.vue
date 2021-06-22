@@ -1,25 +1,20 @@
 <template>
   <div class="left-nav__communities-list">
-    <router-link
-      v-for="community in getCommunities"
+    <j-tooltip
+      v-for="community in communities"
       :key="community.perspective"
-      :to="{
-        name: 'community',
-        params: { communityId: community.perspective },
-      }"
-      v-slot="{ navigate, isActive }"
+      :title="community.name"
     >
-      <j-tooltip :title="community.name">
-        <j-avatar
-          :selected="isActive"
-          size="xl"
-          :src="require('@/assets/images/junto_app_icon.png')"
-          initials="false"
-          @click="() => navigate()"
-        ></j-avatar>
-      </j-tooltip>
-    </router-link>
-    <j-tooltip title="Create comminuty">
+      <j-avatar
+        :selected="communityIsActive(community.perspective)"
+        size="xl"
+        :src="require('@/assets/images/junto_app_icon.png')"
+        initials="false"
+        @click="() => handleCommunityClick(community.perspective)"
+      ></j-avatar>
+    </j-tooltip>
+
+    <j-tooltip title="Create community">
       <j-button
         @click="showModal = true"
         variant="primary"
@@ -32,140 +27,41 @@
     </j-tooltip>
 
     <j-modal :open="showModal" @toggle="(e) => (showModal = e.target.open)">
-      <j-flex direction="column" gap="700">
-        <div>
-          <j-text variant="heading" v-if="tabView === 'Create'"
-            >Create a community
-          </j-text>
-          <j-text variant="heading" v-if="tabView === 'Join'"
-            >Join a community
-          </j-text>
-          <j-text nomargin variant="ingress">
-            Communities are the building blocks of Junto.
-          </j-text>
-        </div>
-        <j-tabs
-          size="lg"
-          :value="tabView"
-          @change="(e) => (tabView = e.target.value)"
-        >
-          <j-tab-item>Create</j-tab-item>
-          <j-tab-item>Join</j-tab-item>
-        </j-tabs>
-        <j-flex direction="column" gap="500" v-if="tabView === 'Create'">
-          <j-input
-            size="lg"
-            label="Name"
-            @input="(e) => (newCommunityName = e.target.value)"
-            :value="newCommunityName"
-          ></j-input>
-          <j-input
-            size="lg"
-            label="Description"
-            :value="newCommunityDesc"
-            @keydown.enter="createCommunity"
-            @input="(e) => (newCommunityDesc = e.target.value)"
-          ></j-input>
-          <j-button
-            :loading="isCreatingCommunity"
-            :disabled="isCreatingCommunity"
-            size="lg"
-            full
-            variant="primary"
-            @click="createCommunity"
-          >
-            Create Community
-          </j-button>
-        </j-flex>
-        <j-flex direction="column" gap="200" v-if="tabView === 'Join'">
-          <j-input
-            :value="joiningLink"
-            @input="(e) => (joiningLink = e.target.value)"
-            size="lg"
-            label="Invite link"
-          ></j-input>
-          <j-button
-            :disabled="isJoiningCommunity"
-            :loading="isJoiningCommunity"
-            @click="joinCommunity"
-            size="lg"
-            full
-            variant="primary"
-          >
-            Join Community
-          </j-button>
-        </j-flex>
-      </j-flex>
+      <create-community
+        @submit="showModal = false"
+        @cancel="showModal = false"
+      />
     </j-modal>
   </div>
 </template>
 
 <script lang="ts">
-import { useStore } from "vuex";
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
+import CreateCommunity from "@/containers/CreateCommunity.vue";
 
 export default defineComponent({
-  setup() {
-    const store = useStore();
-
-    const joiningLink = ref("");
-
-    const newCommunityName = ref("");
-    const newCommunityDesc = ref("");
-
-    const showModal = ref(false);
-    const isCreatingCommunity = ref(false);
-    const isJoiningCommunity = ref(false);
-    const tabView = ref("Create");
-
-    const createCommunity = () => {
-      isCreatingCommunity.value = true;
-      store
-        .dispatch("createCommunity", {
-          perspectiveName: newCommunityName.value,
-          description: newCommunityDesc.value,
-        })
-        .then(() => {
-          showModal.value = false;
-          newCommunityName.value = "";
-          newCommunityDesc.value = "";
-        })
-        .finally(() => {
-          isCreatingCommunity.value = false;
-        });
-    };
-
-    const joinCommunity = () => {
-      isJoiningCommunity.value = true;
-      store
-        .dispatch("joinCommunity", {
-          joiningLink: joiningLink.value,
-        })
-        .then(() => {
-          showModal.value = false;
-        })
-        .finally(() => {
-          isJoiningCommunity.value = false;
-        });
-    };
-
+  components: { CreateCommunity },
+  data() {
     return {
-      joiningLink,
-      joinCommunity,
-      newCommunityName,
-      newCommunityDesc,
-      createCommunity,
-      tabView,
-      showModal,
-      isJoiningCommunity,
-      isCreatingCommunity,
+      showModal: false,
     };
   },
-
+  methods: {
+    handleCommunityClick(communityId: string) {
+      if (this.communityIsActive(communityId)) {
+        this.$store.commit("toggleSidebar");
+      } else {
+        this.$store.commit("setSidebar", true);
+        this.$router.push({ name: "community", params: { communityId } });
+      }
+    },
+  },
   computed: {
-    getCommunities() {
-      const communities = this.$store.getters.getCommunities;
-      return communities;
+    communities() {
+      return this.$store.state.communities;
+    },
+    communityIsActive() {
+      return (id: string) => this.$route.params.communityId === id;
     },
   },
 });
