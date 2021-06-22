@@ -54,7 +54,7 @@ import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { getExpressionAndRetry } from "@/core/queries/getExpression";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { AGENT_SERVICE_STATUS } from "@/core/graphql_queries";
-import { ModalsState, ToastState } from "@/store";
+import { ChannelState, CommunityState, ModalsState, ToastState } from "@/store";
 import parseSignalAsLink from "@/core/utils/parseSignalAsLink";
 
 declare global {
@@ -97,6 +97,27 @@ export default defineComponent({
       { immediate: true }
     );
 
+    const notification = new Notification('Message Received', {
+      body: 'test',
+    });
+  
+    notification.onclick = () => {
+      router.push({
+        name: 'channel',
+
+      });
+    }
+
+    notification.onshow = () => {
+      console.log('showed');
+    }
+
+    notification.onerror = () => {
+      console.log('error');
+    }
+
+    console.log('hello world', notification);
+
     //Watch for incoming signals to get expression data
     watch(result, async (data) => {
       console.log("GOT INCOMING MESSAGE SIGNAL");
@@ -111,12 +132,46 @@ export default defineComponent({
             expressionGetDelayMs
           );
           console.log("FOUND EXPRESSION FOR SIGNAL");
+          const message = JSON.parse(getExprRes!.data!);
+
+          let community: CommunityState | undefined;
+          let channel: ChannelState | undefined;
+
+          for (const comm of Object.values(store.state.communities)) {
+            const temp = comm as CommunityState;
+            channel = Object.values(temp.channels).find((c: any) => c.linkLanguageAddress === language) as ChannelState;
+
+            if (channel) {
+              community = temp;
+
+              break;
+            }
+          }
+
           store.commit("addExpressionAndLinkFromLanguageAddress", {
             linkLanguage: language,
             //@ts-ignore
             link: link,
             message: getExprRes,
           });
+
+          new Notification('Message Received', {
+            body: message.message,
+            icon: '@/assets/images/junto_app_icon.png',
+            data: {
+              message,
+              community,
+              channel
+            }
+          }).onclick = () => {
+            router.push({
+              name: 'channel',
+              params: {
+                communityId: community!.perspective!,
+                channelId: channel!.perspective!,
+              }
+            });
+          }
         }
       }
     });
