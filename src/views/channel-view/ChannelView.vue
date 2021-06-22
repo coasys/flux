@@ -50,9 +50,7 @@
               <span slot="username">{{
                 users[item.did]?.profile["foaf:AccountName"]
               }}</span>
-              <div slot="message">
-                <span v-html="item.message"></span>
-              </div>
+              <div slot="message" v-html="item.message"></div>
             </j-message-item>
           </DynamicScrollerItem>
         </template>
@@ -124,20 +122,22 @@ export default defineComponent({
     }, 300);
     this.startLoop(this.community.perspective);
   },
+  activated() {
+    // Go back to saved scroll position
+    const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
+    scrollContainer.scrollTop = this.lastScrollTop as number;
+  },
+  deactivated() {
+    // Save last scroll position
+    const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
+    this.lastScrollTop = scrollContainer.scrollTop;
+  },
   watch: {
-    "$route.params.channelId": function (id) {
-      console.log("route changed");
-      if (id === this.cachedChannelId) {
-        console.log("trying to go back to scroll pos");
-        const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-        scrollContainer.scrollTop = this.lastScrollTop as number;
-      }
-    },
     "channel.hasNewMessages": function (hasMessages) {
       if (hasMessages) {
         // If this channel is not in view, and only kept alive
-        // Show new messages button, so when you open the channel
-        // Again the button will be there
+        // show new messages button, so when you open the channel
+        // again the button will be there
         if (this.$route.params.channelId !== this.channel.perspective) {
           this.showNewMessagesButton = true;
           return;
@@ -209,7 +209,6 @@ export default defineComponent({
   },
   methods: {
     handleScroll(e: any) {
-      this.lastScrollTop = e.target.scrollTop;
       const isAtBottom =
         e.target.scrollHeight - window.innerHeight === e.target.scrollTop;
       if (isAtBottom) {
@@ -342,6 +341,14 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+}
+
+j-message-item [slot="message"] > :first-of-type {
+  margin-top: 0;
+}
+
+j-message-item [slot="message"] > :last-of-type {
+  margin-bottom: 0;
 }
 
 .channel-view__load-more {
