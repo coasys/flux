@@ -54,7 +54,13 @@ import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { getExpressionAndRetry } from "@/core/queries/getExpression";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { AGENT_SERVICE_STATUS } from "@/core/graphql_queries";
-import { ChannelState, CommunityState, ExpressionTypes, ModalsState, ToastState } from "@/store";
+import {
+  ChannelState,
+  CommunityState,
+  ExpressionTypes,
+  ModalsState,
+  ToastState,
+} from "@/store";
 import parseSignalAsLink from "@/core/utils/parseSignalAsLink";
 import { getProfile } from "./utils/profileHelpers";
 
@@ -71,14 +77,20 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
 
-    const showMessageNotification = async (languageAddress: string, authorDid: string, message: string) => {
+    const showMessageNotification = async (
+      languageAddress: string,
+      authorDid: string,
+      message: string
+    ) => {
       let community: CommunityState | undefined;
       let channel: ChannelState | undefined;
 
       // Getting the community & channel this message belongs too
       for (const comm of Object.values(store.state.communities)) {
         const temp = comm as CommunityState;
-        channel = Object.values(temp.channels).find((c: any) => c.linkLanguageAddress === languageAddress) as ChannelState;
+        channel = Object.values(temp.channels).find(
+          (c: any) => c.linkLanguageAddress === languageAddress
+        ) as ChannelState;
 
         if (channel) {
           community = temp;
@@ -89,31 +101,40 @@ export default defineComponent({
 
       // Fetch the user profile to check if this is the current user
       const profile = await getProfile(
-        community!.typedExpressionLanguages.find(t => t.expressionType === ExpressionTypes.ProfileExpression)!.languageAddress!,
+        community!.typedExpressionLanguages.find(
+          (t) => t.expressionType === ExpressionTypes.ProfileExpression
+        )!.languageAddress!,
         authorDid
       );
 
       const { channelId, communityId } = route.params;
 
       // Only show the notification when the the message is not from self & the active community & channel is different
-      if (profile?.author.did !== authorDid && community?.perspective !== communityId && channel?.perspective !== channelId) {
-        const notification = new Notification(`New message in ${community?.name}`, {
-          body: `#${channel?.name}: ${message}`,
-          icon: '/assets/images/junto_app_icon.png',
-        });
+      if (
+        profile?.author.did !== authorDid &&
+        community?.perspective !== communityId &&
+        channel?.perspective !== channelId
+      ) {
+        const notification = new Notification(
+          `New message in ${community?.name}`,
+          {
+            body: `#${channel?.name}: ${message}`,
+            icon: "/assets/images/junto_app_icon.png",
+          }
+        );
 
         // Clicking on notification will take the user to that community & channel
         notification.onclick = () => {
           router.push({
-            name: 'channel',
+            name: "channel",
             params: {
               communityId: community!.perspective!,
               channelId: channel!.perspective!,
-            }
+            },
           });
-        }
+        };
       }
-    }
+    };
 
     onError((error) => {
       if (process.env.NODE_ENV !== "production") {
@@ -166,7 +187,11 @@ export default defineComponent({
             message: getExprRes,
           });
 
-          showMessageNotification(language, getExprRes!.author!.did!, message.message);
+          showMessageNotification(
+            language,
+            getExprRes!.author!.did!,
+            message.message
+          );
         }
       }
     });
@@ -254,10 +279,9 @@ export default defineComponent({
       }
     );
 
-    const { onResult, onError } =
-      useQuery<{
-        agent: ad4m.AgentService;
-      }>(AGENT_SERVICE_STATUS);
+    const { onResult, onError } = useQuery<{
+      agent: ad4m.AgentService;
+    }>(AGENT_SERVICE_STATUS);
     onResult((val) => {
       const isInit = val.data.agent.isInitialized!;
       const isUnlocked = val.data.agent.isUnlocked!;
