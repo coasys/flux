@@ -105,20 +105,24 @@ export default defineComponent({
       currentExpressionPost: {},
       unsortedMessages: [],
       users: {} as UserMap,
+      activated: false,
     };
   },
-
   mounted() {
     this.cachedChannelId = this.$route.params.channelId as string;
     setTimeout(() => {
       this.scrollToBottom("auto");
     }, 300);
-    this.startLoop(this.community.perspective);
   },
   activated() {
     // Go back to saved scroll position
     const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
     scrollContainer.scrollTop = this.lastScrollTop as number;
+    this.activated = true;
+    this.startLoop(this.community.perspective);
+  },
+  deactivated() {
+    this.activated = false;
   },
   watch: {
     "channel.hasNewMessages": function (hasMessages) {
@@ -235,7 +239,7 @@ export default defineComponent({
     },
     async startLoop(communityId: string) {
       if (communityId) {
-        console.log("Running get channels messages loop");
+        console.log("Running get channels messages loop", this.channel.name);
         let hasNewer = await this.$store.dispatch("loadExpressions", {
           communityId: this.$route.params.communityId,
           channelId: this.$route.params.channelId,
@@ -247,7 +251,9 @@ export default defineComponent({
           });
         }
         await sleep(chatMessageRefreshDuration);
-        this.startLoop(communityId);
+        if (this.activated) {
+          this.startLoop(communityId);
+        }
       }
     },
     loadMoreMessages() {
