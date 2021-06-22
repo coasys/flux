@@ -26,10 +26,10 @@ export default async (
   { commit, getters }: Context,
   { communityId }: Payload
 ): Promise<any> => {
-  const community = getters.getCommunity(communityId);
+  const community: CommunityState = getters.getCommunity(communityId);
 
   try {
-    console.log("Getting channel links");
+    console.log("Getting community channel links");
     const channelLinks = await getChatChannelLinks(
       community.perspective,
       community.linkLanguageAddress
@@ -38,7 +38,7 @@ export default async (
     if (channelLinks != null) {
       for (let i = 0; i < channelLinks.length; i++) {
         if (
-          community.channels.find(
+          Object.values(community.channels).find(
             (element: ChannelState) =>
               element.sharedPerspectiveUrl === channelLinks[i].data!.target
           ) == undefined

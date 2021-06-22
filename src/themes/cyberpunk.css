@@ -1,0 +1,125 @@
+:root[theme="cyberpunk"] {
+  --j-color-white: #08090c;
+  --j-color-primary-hue: 290 !important;
+  --j-color-ui-hue: 290 !important;
+  --j-color-black: hsl(var(--j-color-ui-hue), 15%, 100%);
+
+  --app-main-sidebar-bg-color: #08090c;
+  --app-drawer-bg-color: #08090c;
+  --app-main-content-bg-color: #08090c;
+  --app-channel-bg-color: #08090c;
+
+  --j-color-ui-50: hsl(var(--j-color-ui-hue), 50%, 26%);
+  --j-color-ui-100: hsl(var(--j-color-ui-hue), 50%, 34%);
+  --j-color-ui-200: hsl(var(--j-color-ui-hue), 50%, 41%);
+  --j-color-ui-300: hsl(var(--j-color-ui-hue), 50%, 58%);
+  --j-color-ui-400: hsl(var(--j-color-ui-hue), 50%, 66%);
+  --j-color-ui-500: hsl(var(--j-color-ui-hue), 50%, 76%);
+  --j-color-ui-600: hsl(var(--j-color-ui-hue), 50%, 86%);
+  --j-color-ui-700: hsl(var(--j-color-ui-hue), 50%, 95%);
+  --j-color-ui-800: hsl(var(--j-color-ui-hue), 50%, 97%);
+  --j-color-ui-900: hsl(var(--j-color-ui-hue), 50%, 100%);
+
+  --j-font-family: monospace;
+
+  --j-border-radius: 0px;
+
+  --j-border-color: #d600ff;
+
+  --j-element-sm: 30px;
+  --j-element-md: 40px;
+  --j-element-lg: 50px;
+}
+
+/* Modal background colour */
+[theme="cyberpunk"] j-modal::part(modal) {
+  background-color: #08090c;
+}
+
+/* Hover text colour */
+:root[theme="cyberpunk"] j-tab-item:hover::part(base) {
+  color: #1261d1;
+}
+
+/* Input field */
+:root[theme="cyberpunk"] j-input::part(input-wrapper) {
+  background-color: #1261d1;
+}
+
+/* Input text placeholder */
+:root[theme="cyberpunk"] j-input::part(input-field)::placeholder {
+  color: black;
+}
+
+/* Input text */
+:root[theme="cyberpunk"] j-input::part(input-field) {
+  color: black;
+}
+
+:root[theme="cyperpunk"] j-icon:host {
+  background-color: black;
+}
+
+/* Message hover bg color */
+/* :root[theme="cyberpunk"] j-message-item:hover::part(base) {
+    background-color: 00ff9f;
+} */
+
+/* Primary button */
+:root[theme="cyberpunk"] j-button[variant="primary"]::part(base) {
+  background-color: #03ac13;
+}
+
+/* slider button color */
+:root[theme="cyberpunk"] j-tabs::part(base):before {
+  background-color: #fafd0f;
+}
+
+/* slider item selected text color */
+:root[theme="cyberpunk"] j-tab-item[checked]::part(base) {
+  color: black;
+}
+
+/* modal border */
+:root[theme="cyberpunk"] j-modal::part(modal) {
+  border: 2px solid transparent;
+  border-radius: var(--j-border-radius);
+  border-color: #d600ff;
+  border-image-slice: 1;
+}
+
+:root[theme="cyberpunk"] j-avatar[selected]::part(base) {
+  background-color: pink;
+  position: relative;
+}
+
+:root[theme="cyberpunk"] j-menu::part(base) {
+  border: 0px;
+}
+
+:root[theme="cyberpunk"] j-menu-item[selected]::part(base) {
+  background-color: #f8ef02;
+  color: black;
+}
+
+/* Channel item selected */
+/* :root[theme="cyberpunk"] j-menu-item[selected]::part(base) {
+    border: 1px solid transparent;
+    border-color: #d600ff;
+    background: #defe47;
+} */
+
+/* Standard channel item */
+/* :root[theme="cyberpunk"] j-menu-item::part(base) {
+    border: 0.5px solid transparent;
+    border-color: #d600ff;
+} */
+
+/* Hover on channel item */
+/* :root[theme="cyberpunk"] j-menu-item::part(base):hover {
+    background: #1261d1;
+} */
+
+:root[theme="cyberpunk"] j-divider {
+  border-bottom: 0px;
+}

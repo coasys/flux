@@ -67,12 +67,13 @@ export async function createChannel(
 
   return {
     name: channelPerspective.name!,
+    hasNewMessages: false,
     perspective: channelPerspective.uuid!,
     type: FeedType.Signaled,
     createdAt: now,
     linkLanguageAddress: shareChannelPerspective.linkLanguages![0]!.address!,
-    currentExpressionLinks: [],
-    currentExpressionMessages: [],
+    currentExpressionLinks: {},
+    currentExpressionMessages: {},
     sharedPerspectiveUrl: perspective.sharedURL!,
     membraneType: membraneType,
     groupExpressionRef: "",

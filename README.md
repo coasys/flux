@@ -2,20 +2,13 @@
 
 ## Environment
 Node version: 14.16.0<br>
-Linux/Mac OS for running HC & Holochain binaries (see `./resources`).
 
 ## Project setup
-```
-git submodule init && git submodule update && npm run build-languages && npm install
-```
+This project requires nix for building holochain! You can download nix here: https://nixos.wiki/wiki/Nix_Installation_Guide
 
-## Extra Setup For Mac Development
-This step may not be needed and should only need to be ran if ad4m-executor is unable to find/run holochain binaries.
 ```
-chmod +x resources/darwin/*
+npm install && npm run build-languages && npm run build-holochain
 ```
-
-If you have any troubles on npm install for any given language or for this project, its likely npm shitting the bed, delete `package-lock.json` & `node_modules` for the package in question and try again. 
 
 ### Compiles and hot-reloads for development
 ```
@@ -45,7 +38,7 @@ These DNA's come bundled with the builtin languages, links above are provided fo
 
 ### Compiles and minifies for production
 ```
-npm run electron:build
+npm run build-holochain && npm run build-languages && npm run electron:build
 ```
 
 ### Lints and fixes files

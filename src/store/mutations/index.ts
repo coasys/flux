@@ -1,6 +1,7 @@
 import { parseExprURL } from "@perspect3vism/ad4m/ExpressionRef";
 import type Expression from "@perspect3vism/ad4m/Expression";
-import { getExpressionAndRetry } from "@/core/queries/getExpression";
+import ad4m from "@perspect3vism/ad4m-executor";
+import hash from "object-hash";
 
 import {
   State,
@@ -25,95 +26,71 @@ interface UpdatePayload {
 interface AddChannelMessages {
   channelId: string;
   communityId: string;
-  links: Expression[];
+  links: { [x: string]: LinkExpressionAndLang };
+  expressions: { [x: string]: ExpressionAndRef };
 }
 
 export default {
-  async addMessagesIfNotPresent(
-    state: State,
-    payload: AddChannelMessages
-  ): Promise<void> {
-    const community = state.communities.find(
-      (c) => c.perspective === payload.communityId
+  async addMessages(state: State, payload: AddChannelMessages): Promise<void> {
+    const community = state.communities[payload.communityId];
+    const channel = community?.channels[payload.channelId];
+    console.log(
+      "Adding ",
+      Object.values(payload.links).length,
+      " to channel and ",
+      Object.values(payload.expressions).length,
+      " to channel"
     );
-    const channel = community?.channels.find(
-      (c) => c.perspective === payload.channelId
-    );
-    const links = [];
-    const expressions = [];
-
-    if (channel) {
-      for (const link of payload.links) {
-        const currentExpressionLink = channel.currentExpressionLinks.find(
-          (channelLink) =>
-            //@ts-ignore
-            channelLink.expression.data!.target === link.data.target
-        );
-
-        if (!currentExpressionLink) {
-          console.log("Adding link to channel");
-          links.push({
-            expression: link,
-            language: channel.linkLanguageAddress,
-          } as LinkExpressionAndLang);
-          const expression = await getExpressionAndRetry(
-            //@ts-ignore
-            link.data.target,
-            50,
-            20
-          );
-          if (expression) {
-            console.log("Adding expression to channel");
-            //@ts-ignore
-            expressions.push({
-              //@ts-ignore
-              expression: expression,
-              //@ts-ignore
-              url: parseExprURL(link.data.target),
-            } as ExpressionAndRef);
-          }
-        }
-      }
-
-      channel.currentExpressionLinks = [
-        ...channel.currentExpressionLinks,
-        ...links,
-      ];
-      channel.currentExpressionMessages = [
-        ...channel.currentExpressionMessages,
-        ...expressions,
-      ];
-    }
+    channel.currentExpressionLinks = {
+      ...channel.currentExpressionLinks,
+      ...payload.links,
+    };
+    channel.currentExpressionMessages = {
+      ...channel.currentExpressionMessages,
+      ...payload.expressions,
+    };
   },
   addCommunity(state: State, payload: CommunityState): void {
     console.log("adding Community", payload);
-    state.communities.push(payload);
+    state.communities[payload.perspective] = payload;
   },
   setLanguagesPath(state: State, payload: string): void {
     state.localLanguagesPath = payload;
   },
-  addDatabasePerspective(state: State, payload: any): void {
+  addDatabasePerspective(state: State, payload: string): void {
     state.databasePerspective = payload;
   },
   addExpressionAndLinkFromLanguageAddress: (
     state: State,
-    payload: any
+    payload: {
+      linkLanguage: string;
+      link: ad4m.LinkExpression;
+      message: ad4m.Expression;
+    }
   ): void => {
-    state.communities.forEach((community) => {
-      community.channels.forEach((channel) => {
+    for (const community of Object.values(state.communities)) {
+      for (const channel of Object.values(community.channels)) {
         if (channel.linkLanguageAddress === payload.linkLanguage) {
           console.log("Adding to link and exp to channel!");
-          channel.currentExpressionLinks.push({
+          channel.currentExpressionLinks[
+            hash(payload.link.data!, { excludeValues: "__typename" })
+          ] = {
             expression: payload.link,
             language: payload.linkLanguage,
-          } as LinkExpressionAndLang);
-          channel.currentExpressionMessages.push({
-            expression: payload.message,
-            url: parseExprURL(payload.link.data.target),
-          } as ExpressionAndRef);
+          } as LinkExpressionAndLang;
+          //TODO: make gql expression to ad4m expression conversion function
+          channel.currentExpressionMessages[payload.message.url!] = {
+            expression: {
+              author: payload.message.author!,
+              data: JSON.parse(payload.message.data!),
+              timestamp: payload.message.timestamp!,
+              proof: payload.message.proof!,
+            } as Expression,
+            url: parseExprURL(payload.link.data!.target!),
+          } as ExpressionAndRef;
         }
-      });
-    });
+      }
+    }
   },
 
   updateAgentLockState(state: State, payload: boolean): void {
@@ -133,11 +110,29 @@ export default {
   },
 
   addChannel(state: State, payload: AddChannel): void {
-    const community = state.communities.find(
-      (community) => community.perspective === payload.communityId
-    );
+    const community = state.communities[payload.communityId];
+
     if (community !== undefined) {
-      community.channels.push(payload.channel);
+      community.channels[payload.channel.perspective] = {
+        ...payload.channel,
+        hasNewMessages: false,
+      };
+    }
+  },
+
+  setHasNewMessages(
+    state: State,
+    payload: { channelId: string; value: boolean }
+  ): void {
+    //console.log(payload);
+    for (const community of Object.values(state.communities)) {
+      for (const channel of Object.values(community.channels)) {
+        //console.log(channel);
+        if (channel.perspective === payload.channelId) {
+          //console.log({ channel });
+          channel.hasNewMessages = payload.value;
+        }
+      }
     }
   },
 
@@ -186,14 +181,15 @@ export default {
     state: State,
     { communityId, name, description, groupExpressionRef }: UpdatePayload
   ): void {
-    const community = state.communities.find(
-      (community) => community.perspective === communityId
-    );
-    if (community != undefined) {
+    const community = state.communities[communityId];
+
+    if (community) {
       community.name = name;
       community.description = description;
       community.groupExpressionRef = groupExpressionRef;
     }
+
+    state.communities[communityId] = community;
   },
 
   updateUpdateState(
@@ -206,9 +202,7 @@ export default {
     state: State,
     { members, communityId }: { members: Expression[]; communityId: string }
   ): void {
-    const community = state.communities.find(
-      (community) => community.perspective === communityId
-    );
+    const community = state.communities[communityId];
 
     if (community) {
       community.members = members;
@@ -216,6 +210,13 @@ export default {
   },
   setGlobalLoading(state: State, payload: boolean): void {
     state.ui.showGlobalLoading = payload;
+  },
+
+  setGlobalError(
+    state: State,
+    payload: { show: boolean; message: string }
+  ): void {
+    state.ui.globalError = payload;
   },
 
   setShowCreateCommunity(state: State, payload: boolean): void {

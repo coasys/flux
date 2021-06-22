@@ -25,50 +25,55 @@ export default {
   },
 
   getCommunity: (state: State) => (id: string) => {
-    const community = state.communities.find(
-      (community: CommunityState) => community.perspective === id
-    );
+    const community = state.communities[id];
 
     return community;
   },
 
   getChannel: (state: State) => (payload: any) => {
     const { channelId, communityId } = payload;
-    const community = state.communities.find(
-      (community: CommunityState) => community.perspective === communityId
-    );
+    const community = state.communities[communityId];
 
-    return community?.channels.find(
-      (channel: ChannelState) => channel.perspective === channelId
-    );
+    return community?.channels[channelId];
   },
 
   getDatabasePerspective(state: State) {
     return state.databasePerspective;
   },
 
+  getChannelFromLinkLanguage: (state: State) => (linkLanguage: string) => {
+    for (const community of Object.values(state.communities)) {
+      for (const channel of Object.values(community.channels)) {
+        if (channel.linkLanguageAddress == linkLanguage) {
+          return channel;
+        }
+      }
+    }
+  },
+
   getPerspectiveFromLinkLanguage: (state: State) => (linkLanguage: string) => {
     let perspective;
-    state.communities.forEach((community: CommunityState) => {
-      //@ts-ignore
+
+    for (const community of Object.values(state.communities)) {
       if (community.linkLanguageAddress == linkLanguage) {
         return community;
       }
-      //@ts-ignore
-      community.channels.forEach((channel: ChannelState) => {
+
+      for (const channel of Object.values(community.channels)) {
         if (channel.linkLanguageAddress == linkLanguage) {
           perspective = channel;
         }
-      });
-    });
+      }
+    }
+
     return perspective;
   },
 
   getAllExpressionLanguagesNotLoaded(state: State): Address[] {
     const expressionLangs: Address[] = [];
-    state.communities.forEach((community: CommunityState) => {
-      //@ts-ignore
-      community.expressionLanguages.forEach((expLang) => {
+
+    for (const community of Object.values(state.communities)) {
+      for (const expLang of community.expressionLanguages) {
         if (
           expressionLangs.indexOf(expLang) === -1 &&
           //@ts-ignore
@@ -78,8 +83,9 @@ export default {
         ) {
           expressionLangs.push(expLang);
         }
-      });
-    });
+      }
+    }
+
     return expressionLangs;
   },
 

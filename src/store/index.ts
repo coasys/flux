@@ -2,16 +2,17 @@ import { createStore } from "vuex";
 import VuexPersistence from "vuex-persist";
 import type Expression from "@perspect3vism/ad4m/Expression";
 import ExpressionRef from "@perspect3vism/ad4m/ExpressionRef";
+import { LinkExpression } from "@perspect3vism/ad4m-executor";
 
 import actions from "./actions";
 import mutations from "./mutations";
 import getters from "./getters";
-import { LinkExpression } from "@perspect3vism/ad4m-executor";
+
 export interface CommunityState {
   //NOTE: here by having a static name + description we are assuming that these are top level metadata items that each group will have
   name: string;
   description: string;
-  channels: ChannelState[];
+  channels: { [x: string]: ChannelState };
   perspective: string; //NOTE: this is essentially the UUID for the community
   linkLanguageAddress: string;
   expressionLanguages: string[];
@@ -24,13 +25,14 @@ export interface CommunityState {
 // Vuex state of a given channel
 export interface ChannelState {
   name: string;
+  hasNewMessages: boolean;
   perspective: string; //NOTE: this is essentially the UUID for the community
   linkLanguageAddress: string;
   sharedPerspectiveUrl: string;
   type: FeedType;
   createdAt: Date;
-  currentExpressionLinks: LinkExpressionAndLang[];
-  currentExpressionMessages: ExpressionAndRef[];
+  currentExpressionLinks: { [x: string]: LinkExpressionAndLang };
+  currentExpressionMessages: { [x: string]: ExpressionAndRef };
   typedExpressionLanguages: JuntoExpressionReference[];
   membraneType: MembraneType;
   groupExpressionRef: string;
@@ -99,6 +101,10 @@ export interface UIState {
   modals: ModalsState;
   showSidebar: boolean;
   showGlobalLoading: boolean;
+  globalError: {
+    show: boolean;
+    message: string;
+  };
 }
 
 export type UpdateState =
@@ -110,7 +116,7 @@ export type UpdateState =
 
 export interface State {
   ui: UIState;
-  communities: CommunityState[];
+  communities: { [x: string]: CommunityState };
   localLanguagesPath: string;
   databasePerspective: string;
   //This tells us when the application was started; this tells us that between startTime -> now all messages should have been received
@@ -175,8 +181,12 @@ export default createStore({
         message: "",
         open: false,
       },
+      globalError: {
+        show: false,
+        message: "",
+      },
     },
-    communities: [],
+    communities: {},
     localLanguagesPath: "",
     databasePerspective: "",
     applicationStartTime: new Date(),
