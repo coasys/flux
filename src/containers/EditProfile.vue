@@ -27,6 +27,7 @@ import { defineComponent } from "vue";
 import { Profile } from "@/store";
 
 export default defineComponent({
+  emits: ["cancel", "submit"],
   components: { AvatarUpload },
   data() {
     return {

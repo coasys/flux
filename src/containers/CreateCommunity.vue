@@ -73,6 +73,7 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
+  emits: ["cancel", "submit"],
   data() {
     return {
       tabView: "Create",

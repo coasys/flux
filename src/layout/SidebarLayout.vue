@@ -39,8 +39,7 @@ export default defineComponent({
   methods: {
     startResize(e: any) {
       const sidebar = this.$refs.sidebar as HTMLSpanElement;
-      const sidebarWidth = parseInt(window.getComputedStyle(sidebar).width, 10);
-      this.startWidth = sidebarWidth;
+      this.startWidth = sidebar.getBoundingClientRect().width;
       this.isDragging = true;
       this.startX = e.clientX;
       document.addEventListener("mousemove", this.doResize, false);
@@ -48,11 +47,12 @@ export default defineComponent({
     },
     doResize(e: any) {
       const sidebar = this.$refs.sidebar as HTMLSpanElement;
-      sidebar.style.width = `${this.startWidth + e.clientX - this.startX}px`;
+      sidebar.style.width = `${this.startWidth + (e.clientX - this.startX)}px`;
     },
     stopResize() {
       this.isDragging = false;
       document.removeEventListener("mousemove", this.doResize);
+      document.addEventListener("mouseup", this.stopResize, false);
     },
   },
 });
@@ -89,6 +89,7 @@ export default defineComponent({
 .sidebar-layout__main {
   width: 100%;
   max-height: 100vh;
+  flex: 1;
   position: relative;
   background: var(--app-main-content-bg-color);
 }
@@ -101,6 +102,7 @@ export default defineComponent({
   background: transparent;
   cursor: col-resize;
   height: 100%;
+  z-index: 100;
   transition: all 0.2s ease;
 }
 .sidebar-layout__resize-handle:hover,
