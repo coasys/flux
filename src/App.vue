@@ -33,12 +33,6 @@
       </j-flex>
     </div>
   </div>
-  <j-modal
-    :open="showErrorModal"
-    @toggle="(e) => (showErrorModal = e.target.open)"
-  >
-    {{ errorMessage }}
-  </j-modal>
 </template>
 
 <script lang="ts">
