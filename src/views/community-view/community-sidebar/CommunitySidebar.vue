@@ -85,10 +85,17 @@
           v-for="channel in community.channels"
           :key="channel.perspective"
         >
-          <j-menu-item :selected="isExactActive" @click="navigate">
+          <j-menu-item
+            class="channel"
+            :selected="isExactActive"
+            @click="navigate"
+          >
             <j-icon slot="start" size="sm" name="hash"></j-icon>
             {{ channel.name }}
-            <j-badge v-if="channel.hasNewMessages">New</j-badge>
+            <div
+              class="channel__notification"
+              v-if="channel.hasNewMessages"
+            ></div>
           </j-menu-item>
         </router-link>
       </j-menu-group-item>
@@ -153,5 +160,21 @@ j-divider {
   border-bottom: 1px solid var(--j-color-ui-100);
   margin-top: var(--j-space-300);
   margin-bottom: var(--j-space-300);
+}
+
+.channel {
+  position: relative;
+  display: block;
+}
+
+.channel__notification {
+  position: absolute;
+  right: var(--j-space-300);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--j-color-primary-500);
 }
 </style>
