@@ -4,9 +4,9 @@ const wget = require("node-wget-js");
 const languages = {
   profiles: {
     targetDnaName: "agent-profiles",
-    dna: "https://github.com/jdeepee/profiles/releases/download/0.0.1/agent-profiles.dna",
+    dna: "https://github.com/jdeepee/profiles/releases/download/0.0.2/agent-profiles.dna",
     bundle:
-      "https://github.com/jdeepee/profiles/releases/download/0.0.1/bundle.js",
+      "https://github.com/jdeepee/profiles/releases/download/0.0.2/bundle.js",
   },
 };
 
