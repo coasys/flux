@@ -212,6 +212,10 @@ export default defineComponent({
       const isAtBottom =
         e.target.scrollHeight - window.innerHeight === e.target.scrollTop;
       if (isAtBottom) {
+        this.$store.commit("setHasNewMessages", {
+          channelId: this.$route.params.channelId,
+          value: false,
+        });
         this.showNewMessagesButton = false;
       }
     },
@@ -248,7 +252,7 @@ export default defineComponent({
           channelId: this.$route.params.channelId,
         });
         if (hasNewer) {
-          this.$store.commit("setNewMessages", {
+          this.$store.commit("setHasNewMessages", {
             channelId: this.channel.perspective,
             value: true,
           });
@@ -292,7 +296,7 @@ export default defineComponent({
       if (container) {
         this.$nextTick(() => {
           // If we scroll to the bottom we have seen all messages
-          this.$store.commit("setNewMessages", {
+          this.$store.commit("setHasNewMessages", {
             channelId: this.channel.perspective,
             value: false,
           });

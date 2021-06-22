@@ -110,7 +110,7 @@ export default defineComponent({
             link: link,
             message: getExprRes,
           });
-          store.commit("setNewMessages", {
+          store.commit("setHasNewMessages", {
             channelId:
               store.getters.getChannelFromLinkLanguage(language).perspective,
             value: true,

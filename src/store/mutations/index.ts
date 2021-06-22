@@ -120,7 +120,7 @@ export default {
     }
   },
 
-  setNewMessages(
+  setHasNewMessages(
     state: State,
     payload: { channelId: string; value: boolean }
   ): void {
