@@ -240,16 +240,16 @@ export default defineComponent({
     async startLoop(communityId: string) {
       if (communityId) {
         console.log("Running get channels messages loop", this.channel.name);
-        let hasNewer = await this.$store.dispatch("loadExpressions", {
+        await this.$store.dispatch("loadExpressions", {
           communityId: this.$route.params.communityId,
           channelId: this.$route.params.channelId,
         });
-        if (hasNewer) {
-          this.$store.commit("setHasNewMessages", {
-            channelId: this.channel.perspective,
-            value: true,
-          });
-        }
+        // if (hasNewer) {
+        //   this.$store.commit("setHasNewMessages", {
+        //     channelId: this.channel.perspective,
+        //     value: true,
+        //   });
+        // }
         await sleep(chatMessageRefreshDuration);
         if (this.activated) {
           this.startLoop(communityId);
