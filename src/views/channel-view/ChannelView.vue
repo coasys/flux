@@ -127,11 +127,6 @@ export default defineComponent({
     const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
     scrollContainer.scrollTop = this.lastScrollTop as number;
   },
-  deactivated() {
-    // Save last scroll position
-    const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-    this.lastScrollTop = scrollContainer.scrollTop;
-  },
   watch: {
     "channel.hasNewMessages": function (hasMessages) {
       if (hasMessages) {
@@ -209,6 +204,7 @@ export default defineComponent({
   },
   methods: {
     handleScroll(e: any) {
+      this.lastScrollTop = e.target.scrollTop;
       const isAtBottom =
         e.target.scrollHeight - window.innerHeight === e.target.scrollTop;
       if (isAtBottom) {
