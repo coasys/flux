@@ -71,8 +71,8 @@ export default {
         data: JSON.parse(payload.expression.data!),
         timestamp: payload.expression.timestamp!,
         proof: payload.expression.proof!,
-      },
-      url: parseExprURL(payload.link.data!.target!),
+      } as Expression,
+      url: parseExprURL(payload.link.expression.data!.target!),
     };
   },
   addCommunity(state: State, payload: CommunityState): void {
