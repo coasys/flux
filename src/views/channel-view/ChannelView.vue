@@ -331,7 +331,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   border-bottom: 1px solid var(--app-channel-border-color);
-  background: var(--app-channel-bg-color);
+  background: var(--app-channel-header-bg-color);
   z-index: 1;
 }
 .channel-view__main {
@@ -351,9 +351,11 @@ export default defineComponent({
 }
 
 .channel-view__footer {
-  background: var(--app-channel-bg-color);
+  background: var(--app-channel-footer-bg-color);
   position: sticky;
   bottom: 0;
-  padding: var(--j-space-300);
+  padding-left: var(--j-space-500);
+  padding-right: var(--j-space-500);
+  padding-bottom: var(--j-space-300);
 }
 </style>

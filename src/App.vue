@@ -267,6 +267,8 @@ body {
   --app-drawer-border-color: var(--j-border-color);
   --app-channel-bg-color: var(--j-color-white);
   --app-channel-border-color: var(--j-border-color);
+  --app-channel-header-bg-color: var(--j-color-white);
+  --app-channel-footer-bg-color: var(--j-color-white);
 }
 
 .global-loading {

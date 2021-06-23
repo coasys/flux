@@ -194,25 +194,27 @@
   );
 
   --j-color-ui-hue: var(--j-color-primary-hue);
-  --j-color-ui-50: hsl(var(--j-color-ui-hue), 15%, 26%);
-  --j-color-ui-100: hsl(var(--j-color-ui-hue), 15%, 34%);
-  --j-color-ui-200: hsl(var(--j-color-ui-hue), 15%, 41%);
-  --j-color-ui-300: hsl(var(--j-color-ui-hue), 15%, 58%);
-  --j-color-ui-400: hsl(var(--j-color-ui-hue), 15%, 66%);
-  --j-color-ui-500: hsl(var(--j-color-ui-hue), 15%, 76%);
-  --j-color-ui-600: hsl(var(--j-color-ui-hue), 15%, 86%);
-  --j-color-ui-700: hsl(var(--j-color-ui-hue), 15%, 95%);
-  --j-color-ui-800: hsl(var(--j-color-ui-hue), 15%, 97%);
-  --j-color-ui-900: hsl(var(--j-color-ui-hue), 15%, 100%);
+  --j-color-ui-50: hsl(var(--j-color-ui-hue), 10%, 26%);
+  --j-color-ui-100: hsl(var(--j-color-ui-hue), 10%, 34%);
+  --j-color-ui-200: hsl(var(--j-color-ui-hue), 10%, 41%);
+  --j-color-ui-300: hsl(var(--j-color-ui-hue), 10%, 58%);
+  --j-color-ui-400: hsl(var(--j-color-ui-hue), 10%, 66%);
+  --j-color-ui-500: hsl(var(--j-color-ui-hue), 10%, 76%);
+  --j-color-ui-600: hsl(var(--j-color-ui-hue), 10%, 86%);
+  --j-color-ui-700: hsl(var(--j-color-ui-hue), 10%, 95%);
+  --j-color-ui-800: hsl(var(--j-color-ui-hue), 10%, 97%);
+  --j-color-ui-900: hsl(var(--j-color-ui-hue), 10%, 100%);
 
-  --j-border-color: hsl(var(--j-color-ui-hue), 15%, 25%);
+  --j-border-color: hsl(var(--j-color-ui-hue), 10%, 25%);
 
   /*  App specific styles */
-  --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 15%, 14%);
-  --app-main-sidebar-border-color: hsl(var(--j-color-ui-hue), 15%, 12%);
-  --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 15%, 15%);
-  --app-drawer-border-color: hsl(var(--j-color-ui-hue), 15%, 12%);
-  --app-channel-bg-color: hsl(var(--j-color-ui-hue), 15%, 13%);
+  --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 10%, 14%);
+  --app-main-sidebar-border-color: hsl(var(--j-color-ui-hue), 10%, 12%);
+  --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 10%, 15%);
+  --app-drawer-border-color: hsl(var(--j-color-ui-hue), 10%, 12%);
+  --app-channel-bg-color: hsl(var(--j-color-ui-hue), 10%, 13%);
+  --app-channel-header-bg-color: hsl(var(--j-color-ui-hue), 10%, 13%);
+  --app-channel-footer-bg-color: hsl(var(--j-color-ui-hue), 10%, 13%);
 }
 
 :root[theme="dark"] j-menu-item::part(base) {
@@ -222,13 +224,13 @@
 }
 
 :root[theme="dark"] j-menu-item:hover::part(base) {
-  background: transparent;
+  background: var(--j-color-ui-50);
   color: var(--j-color-ui-600);
 }
 
 :root[theme="dark"] j-menu-item[selected]::part(base) {
-  background: var(--j-color-ui-100);
-  color: var(--j-color-primary-600);
+  background: var(--j-color-primary-100);
+  color: var(--j-color-primary-700);
 }
 
 :root[theme="dark"] j-tabs {
