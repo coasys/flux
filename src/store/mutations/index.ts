@@ -136,8 +136,9 @@ export default {
     }
   },
 
-  createProfile(state: State, payload: Profile): void {
-    state.userProfile = payload;
+  createProfile(state: State, {profile, did}: {profile: Profile, did: string}): void {
+    state.userProfile = profile;
+    state.userDid = did;
   },
 
   setUserProfile(state: State, payload: Profile): void {

@@ -25,6 +25,7 @@ declare module "@vue/runtime-core" {
     agentInit: boolean;
     userProfile: Profile | null;
     updateState: UpdateState;
+    userDid: string;
   }
 
   // provide typings for `this.$store`

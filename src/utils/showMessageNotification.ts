@@ -1,12 +1,9 @@
-import { ChannelState, CommunityState, ExpressionTypes, State } from "@/store";
+import { ChannelState, CommunityState, State } from "@/store";
 import {
   RouteLocationNormalizedLoaded,
   Router,
-  useRoute,
-  useRouter,
 } from "vue-router";
-import { Store, useStore } from "vuex";
-import { getProfile } from "./profileHelpers";
+import { Store } from "vuex";
 
 export default async (
   router: Router,
@@ -37,7 +34,7 @@ export default async (
 
   // Only show the notification when the the message is not from self & the active community & channel is different
   if (
-    store.state.userProfile?.address !== authorDid &&
+    store.state.userDid !== authorDid &&
     (community?.perspective === communityId ?
     channel?.perspective !== channelId : true) &&
     !channel?.notifications.mute

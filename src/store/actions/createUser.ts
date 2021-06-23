@@ -68,13 +68,16 @@ export default async (
     );
 
     commit("createProfile", {
-      address: status.data!.initializeAgent.did!,
-      username: username,
-      email: email,
-      givenName: givenName,
-      familyName: familyName,
-      profilePicture,
-      thumbnailPicture,
+      profile: {
+        address: status.data!.initializeAgent.did!,
+        username: username,
+        email: email,
+        givenName: givenName,
+        familyName: familyName,
+        profilePicture,
+        thumbnailPicture,
+      },
+      did: status.data!.initializeAgent.did!
     });
 
     commit("updateAgentInitState", true);
