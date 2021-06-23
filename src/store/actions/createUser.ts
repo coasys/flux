@@ -43,7 +43,6 @@ export default async (
 
     commit("createProfile", {
       profile: {
-        address: status.data!.initializeAgent.did!,
         username: username,
         email: email,
         givenName: givenName,
@@ -51,7 +50,7 @@ export default async (
         profilePicture,
         thumbnailPicture,
       },
-      did: status.data!.initializeAgent.did!,
+      did: status.did!,
     });
 
     commit("updateAgentInitState", true);

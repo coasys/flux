@@ -68,7 +68,6 @@ export enum FeedType {
 }
 
 export interface Profile {
-  address: string;
   username: string;
   email: string;
   givenName: string;
@@ -203,7 +202,7 @@ export default createStore({
     userProfile: null,
     updateState: "not-available",
     userDid: "",
-    windowState: "visible"
+    windowState: "visible",
   },
   plugins: [vuexLocal.plugin],
   mutations: mutations,

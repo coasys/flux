@@ -136,7 +136,10 @@ export default {
     }
   },
 
-  createProfile(state: State, {profile, did}: {profile: Profile, did: string}): void {
+  createProfile(
+    state: State,
+    { profile, did }: { profile: Profile; did: string }
+  ): void {
     state.userProfile = profile;
     state.userDid = did;
   },
@@ -245,8 +248,8 @@ export default {
 
     channel.notifications.mute = !channel.notifications.mute;
   },
-  
-  setWindowState(state: State, payload: "minimize" | "visible" | "foreground") {
+
+  setWindowState(state: State, payload: "minimize" | "visible" | "foreground"): void {
     state.windowState = payload;
-  }
+  },
 };
