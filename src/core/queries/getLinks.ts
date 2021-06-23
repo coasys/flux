@@ -10,15 +10,19 @@ export async function getLinks(
   source: string,
   predicate: string
 ): Promise<ad4m.LinkExpression[]> {
-  return new Promise((resolve) => {
-    const getLinksQ = apolloClient.query<{ links: ad4m.LinkExpression[] }>({
-      query: SOURCE_PREDICATE_LINK_QUERY,
-      variables: { perspectiveUUID, source, predicate },
-      fetchPolicy: "no-cache",
-    });
-    getLinksQ.then((result) => {
-      resolve(result.data.links);
-    });
+  return new Promise((resolve, reject) => {
+    apolloClient
+      .query<{ links: ad4m.LinkExpression[] }>({
+        query: SOURCE_PREDICATE_LINK_QUERY,
+        variables: { perspectiveUUID, source, predicate },
+        fetchPolicy: "no-cache",
+      })
+      .then((result) => {
+        resolve(result.data.links);
+      })
+      .catch((error) => {
+        reject(error);
+      });
   });
 }
 
@@ -52,15 +56,17 @@ export async function getLinksPaginated(
   untilDate: Date
 ): Promise<ad4m.LinkExpression[]> {
   // console.log("Getting links", fromDate, untilDate);
-  return new Promise((resolve) => {
-    const getLinksQ = apolloClient.query<{ links: ad4m.LinkExpression[] }>({
-      query: SOURCE_PREDICATE_LINK_QUERY_TIME_PAGINATED,
-      variables: { perspectiveUUID, source, predicate, fromDate, untilDate },
-      fetchPolicy: "no-cache",
-    });
-    getLinksQ.then((result) => {
-      //console.log("Got raw result", result);
-      resolve(result.data.links);
-    });
+  return new Promise((resolve, reject) => {
+    apolloClient
+      .query<{ links: ad4m.LinkExpression[] }>({
+        query: SOURCE_PREDICATE_LINK_QUERY_TIME_PAGINATED,
+        variables: { perspectiveUUID, source, predicate, fromDate, untilDate },
+        fetchPolicy: "no-cache",
+      })
+      .then((result) => {
+        //console.log("Got raw result", result);
+        resolve(result.data.links);
+      })
+      .catch((error) => reject(error));
   });
 }
