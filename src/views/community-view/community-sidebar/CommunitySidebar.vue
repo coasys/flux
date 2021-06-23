@@ -86,7 +86,7 @@
           :key="channel.perspective"
         >
           <j-menu-item
-            :id="channel.name.replaceAll(' ', '')"
+            :id="`channel${channel.name.replaceAll(' ', '')}`"
             class="channel"
             :selected="isExactActive"
             @click="navigate"
@@ -102,7 +102,7 @@
             class="community-sidebar__header-menu"
             event="contextmenu"
             placement="bottom-start"
-            :selector="`#${channel.name.replaceAll(' ', '')}`"
+            :selector="`#channel${channel.name.replaceAll(' ', '')}`"
           >
             <j-menu>
               <j-menu-item
