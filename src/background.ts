@@ -221,13 +221,19 @@ async function createWindow() {
   });
 
   win.on('minimize', () => {
-    console.log('minimize');
     win.webContents.send("windowState", 'minimize');
   });
 
   win.on('restore', () => {
-    console.log('minimize');
     win.webContents.send("windowState", 'visible');
+  });
+
+  win.on('focus', () => {
+    win.webContents.send("windowState", 'visible');
+  });
+
+  win.on('blur', () => {
+    win.webContents.send("windowState", 'foreground');
   });
 
   win.removeMenu();
@@ -250,6 +256,16 @@ async function createWindow() {
 
 ipcMain.on("ping", () => {
   win.webContents.send("pong", "Hello from main thread!");
+});
+
+ipcMain.on("restoreWindow", () => {
+  if(win.isMinimized()) {
+    win.restore();
+  }
+
+  if (!win.isFocused()) {
+    win.focus();
+  }
 });
 
 ipcMain.on("getLangPath", () => {

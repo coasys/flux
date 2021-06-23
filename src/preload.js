@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld("api", {
       "download-update",
       "quit-and-install",
       "check-update",
+      "restoreWindow"
     ];
     if (validChannels.includes(channel)) {
       ipcRenderer.send(channel, data);

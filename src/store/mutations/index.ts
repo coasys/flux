@@ -255,7 +255,7 @@ export default {
     channel.notifications.mute = !channel.notifications.mute;
   },
   
-  setWindowState(state: State, payload: "minimize" | "visible") {
+  setWindowState(state: State, payload: "minimize" | "visible" | "foreground") {
     state.windowState = payload;
   }
 };

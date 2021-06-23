@@ -30,10 +30,9 @@ export default async (
     }
   }
 
-  console.log(store.state.windowState);
-
-  const isMinimized = store.state.windowState === 'visible';
-
+  
+  const isMinimized = ['minimize', 'foreground'].includes(store.state.windowState);
+  
   const { channelId, communityId } = route.params;
 
   // Only show the notification when the the message is not from self & the active community & channel is different
@@ -51,6 +50,8 @@ export default async (
 
     // Clicking on notification will take the user to that community & channel
     notification.onclick = () => {
+      window.api.send("restoreWindow");
+
       router.push({
         name: "channel",
         params: {
