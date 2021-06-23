@@ -64,7 +64,7 @@ function pollData(e) {
     })
     .finally(() => {
       retries = retries + 1;
-      sleep(interval).then(() => pollData(e));
+      sleep(interval * retries).then(() => pollData(e));
     });
 }
 
