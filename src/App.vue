@@ -49,14 +49,11 @@ import { getExpressionAndRetry } from "@/core/queries/getExpression";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { AGENT_SERVICE_STATUS } from "@/core/graphql_queries";
 import {
-  ChannelState,
-  CommunityState,
-  ExpressionTypes,
   ModalsState,
   ToastState,
 } from "@/store";
 import parseSignalAsLink from "@/core/utils/parseSignalAsLink";
-import { getProfile } from "./utils/profileHelpers";
+import showMessageNotification from '@/utils/showMessageNotification';
 
 declare global {
   interface Window {
@@ -70,66 +67,6 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
-
-    const showMessageNotification = async (
-      languageAddress: string,
-      authorDid: string,
-      message: string
-    ) => {
-      let community: CommunityState | undefined;
-      let channel: ChannelState | undefined;
-
-      // Getting the community & channel this message belongs too
-      for (const comm of Object.values(store.state.communities)) {
-        const temp = comm as CommunityState;
-        channel = Object.values(temp.channels).find(
-          (c: any) => c.linkLanguageAddress === languageAddress
-        ) as ChannelState;
-
-        if (channel) {
-          community = temp;
-
-          break;
-        }
-      }
-
-      // Fetch the user profile to check if this is the current user
-      const profile = await getProfile(
-        community!.typedExpressionLanguages.find(
-          (t) => t.expressionType === ExpressionTypes.ProfileExpression
-        )!.languageAddress!,
-        authorDid
-      );
-
-      const { channelId, communityId } = route.params;
-
-      // Only show the notification when the the message is not from self & the active community & channel is different
-      if (
-        profile?.author.did !== authorDid &&
-        community?.perspective !== communityId &&
-        channel?.perspective !== channelId &&
-        !channel?.notifications.mute
-      ) {
-        const notification = new Notification(
-          `New message in ${community?.name}`,
-          {
-            body: `#${channel?.name}: ${message}`,
-            icon: "/assets/images/junto_app_icon.png",
-          }
-        );
-
-        // Clicking on notification will take the user to that community & channel
-        notification.onclick = () => {
-          router.push({
-            name: "channel",
-            params: {
-              communityId: community!.perspective!,
-              channelId: channel!.perspective!,
-            },
-          });
-        };
-      }
-    };
 
     onError((error) => {
       if (process.env.NODE_ENV !== "production") {
@@ -182,6 +119,9 @@ export default defineComponent({
           });
 
           showMessageNotification(
+            router,
+            route,
+            store,
             language,
             getExprRes!.author!.did!,
             message.message
@@ -408,3 +348,7 @@ html {
   box-sizing: inherit;
 }
 </style>
+
+function showMessageNotification(language: string, arg1: string, message: any) {
+  throw new Error("Function not implemented.");
+}
