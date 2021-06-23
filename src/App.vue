@@ -103,7 +103,7 @@ export default defineComponent({
           console.log("FOUND EXPRESSION FOR SIGNAL");
           const message = JSON.parse(getExprRes!.data!);
 
-          const escapedMessage = message.body.replace(/( |<([^>]+)>)/gi, "");
+          const escapedMessage = message.body.replace(/(\s*<.*?>\s*)+/g, " ");
 
           store.commit("addExpressionAndLinkFromLanguageAddress", {
             linkLanguage: language,
