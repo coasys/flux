@@ -124,6 +124,11 @@ export default defineComponent({
     });
     this.linkWorker = linkWorker as Worker;
   },
+  unmounted() {
+    if (this.linkWorker) {
+      this.linkWorker!.terminate();
+    }
+  },
   deactivated() {
     if (this.linkWorker) {
       this.linkWorker!.terminate();
