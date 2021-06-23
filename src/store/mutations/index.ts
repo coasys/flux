@@ -33,8 +33,9 @@ interface AddChannelMessages {
 interface AddChannelMessage {
   channelId: string;
   communityId: string;
-  link: LinkExpressionAndLang;
+  link: ad4m.LinkExpression;
   expression: ad4m.Expression;
+  linkLanguage: string;
 }
 
 export default {
@@ -62,9 +63,11 @@ export default {
     const channel = community?.channels[payload.channelId];
 
     channel.currentExpressionLinks[
-      hash(payload.link.expression.data!, { excludeValues: "__typename" })
-    ] = payload.link;
-
+      hash(payload.link.data!, { excludeValues: "__typename" })
+    ] = {
+      expression: payload.link,
+      language: payload.linkLanguage,
+    } as LinkExpressionAndLang;
     channel.currentExpressionMessages[payload.expression.url!] = {
       expression: {
         author: payload.expression.author!,
@@ -72,7 +75,7 @@ export default {
         timestamp: payload.expression.timestamp!,
         proof: payload.expression.proof!,
       } as Expression,
-      url: parseExprURL(payload.link.expression.data!.target!),
+      url: parseExprURL(payload.link.data!.target!),
     };
   },
   addCommunity(state: State, payload: CommunityState): void {

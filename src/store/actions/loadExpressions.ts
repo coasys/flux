@@ -1,16 +1,11 @@
 import { Commit } from "vuex";
 import hash from "object-hash";
 import { print } from "graphql/language/printer";
-import type Expression from "@perspect3vism/ad4m/Expression";
 import {
   SOURCE_PREDICATE_LINK_QUERY_TIME_PAGINATED,
   QUERY_EXPRESSION,
 } from "@/core/graphql_queries";
-import { getLinksPaginated } from "@/core/queries/getLinks";
-import { State, LinkExpressionAndLang, ExpressionAndRef } from "..";
-import { getExpressionAndRetry } from "@/core/queries/getExpression";
-import { parseExprURL } from "@perspect3vism/ad4m/ExpressionRef";
-
+import { State } from "..";
 export interface Context {
   commit: Commit;
   getters: any;
@@ -59,6 +54,7 @@ export default async function (
               channel.currentExpressionLinks[
                 hash(link.data!, { excludeValues: "__typename" })
               ];
+            console.log(currentExpressionLink);
 
             if (!currentExpressionLink) {
               const expressionWorker = new Worker("pollingWorker.js");
@@ -73,13 +69,14 @@ export default async function (
 
               expressionWorker.addEventListener("message", (e) => {
                 const expression = e.data.expression;
-
+                console.log("got exp msg", expression);
                 if (expression) {
                   commit("addMessage", {
                     channelId,
                     communityId,
                     link: link,
                     expression: expression,
+                    linkLanguage: channel.linkLanguageAddress,
                   });
 
                   //Compare the timestamp of this link with the current highest
