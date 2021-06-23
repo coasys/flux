@@ -27,7 +27,7 @@ export interface Payload {
 export default async function (
   { getters, commit, state }: Context,
   { channelId, communityId, from, to }: Payload
-): Promise<boolean> {
+): Promise<[boolean, Worker]> {
   try {
     const fromDate = from || getters.getApplicationStartTime;
     const untilDate = to || new Date("August 19, 1975 23:15:30").toISOString();
@@ -104,16 +104,16 @@ export default async function (
                   new Date(link.expression.timestamp!) > latestLinkTimestamp!
               ).length > 0
             ) {
-              return false;
+              return [false, linksWorker];
             } else {
-              return true;
+              return [true, linksWorker];
             }
           }
         }
       }
     });
 
-    return false;
+    return [false, linksWorker];
   } catch (e) {
     commit("showDangerToast", {
       message: e.message,

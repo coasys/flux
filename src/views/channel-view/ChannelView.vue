@@ -105,23 +105,29 @@ export default defineComponent({
       currentExpressionPost: {},
       unsortedMessages: [],
       users: {} as UserMap,
+      linkWorker: null as null | Worker,
     };
   },
-  async mounted() {
-    await this.$store.dispatch("loadExpressions", {
-      communityId: this.$route.params.communityId,
-      channelId: this.$route.params.channelId,
-    });
-
+  mounted() {
     this.cachedChannelId = this.$route.params.channelId as string;
     setTimeout(() => {
       this.scrollToBottom("auto");
     }, 300);
   },
-  activated() {
+  async activated() {
     // Go back to saved scroll position
     const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
     scrollContainer.scrollTop = this.lastScrollTop as number;
+    let [status, linkWorker] = await this.$store.dispatch("loadExpressions", {
+      communityId: this.$route.params.communityId,
+      channelId: this.$route.params.channelId,
+    });
+    this.linkWorker = linkWorker as Worker;
+  },
+  deactivated() {
+    if (this.linkWorker) {
+      this.linkWorker!.terminate();
+    }
   },
   watch: {
     "channel.hasNewMessages": function (hasMessages) {
