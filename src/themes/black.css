@@ -2,9 +2,6 @@
   --j-color-white: hsl(var(--j-color-ui-hue), 0%, 0%);
   --j-color-black: hsl(var(--j-color-ui-hue), 0%, 100%);
 
-  --j-color-focus: #83b6fb;
-  --j-focus-outline: 0px 0px 0px 4px var(--j-color-focus);
-
   --j-color-saturation: 50%;
 
   --j-color-primary-50: hsl(

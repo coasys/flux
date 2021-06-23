@@ -7,7 +7,7 @@
         :value="theme.name"
         @change="(e) => setTheme({ name: e.target.value })"
       >
-        <j-menu-item value="light">Light</j-menu-item>
+        <j-menu-item value="">Light</j-menu-item>
         <j-menu-item value="dark">Dark</j-menu-item>
         <j-menu-item value="black">Black</j-menu-item>
         <j-menu-item value="rainbow">Rainbow</j-menu-item>

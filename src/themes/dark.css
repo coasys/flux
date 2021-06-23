@@ -2,9 +2,6 @@
   --j-color-white: hsl(var(--j-color-ui-hue), 19%, 19%);
   --j-color-black: hsl(var(--j-color-ui-hue), 15%, 100%);
 
-  --j-color-focus: #83b6fb;
-  --j-focus-outline: 0px 0px 0px 4px var(--j-color-focus);
-
   --j-color-saturation: 50%;
 
   --j-color-primary-50: hsl(
@@ -218,9 +215,20 @@
   --app-channel-bg-color: hsl(var(--j-color-ui-hue), 15%, 13%);
 }
 
+:root[theme="dark"] j-menu-item::part(base) {
+  font-weight: 500;
+  transition: background 0.2s ease;
+  color: var(--j-color-ui-400);
+}
+
+:root[theme="dark"] j-menu-item:hover::part(base) {
+  background: transparent;
+  color: var(--j-color-ui-600);
+}
+
 :root[theme="dark"] j-menu-item[selected]::part(base) {
-  background: var(--j-color-ui-200);
-  color: var(--j-color-black);
+  background: var(--j-color-ui-100);
+  color: var(--j-color-primary-600);
 }
 
 :root[theme="dark"] j-tabs {

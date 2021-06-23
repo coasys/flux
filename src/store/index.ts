@@ -174,7 +174,7 @@ export default createStore({
       showGlobalLoading: false,
       theme: {
         fontFamily: "default",
-        name: "light",
+        name: "",
         hue: 270,
         saturation: 50,
       },

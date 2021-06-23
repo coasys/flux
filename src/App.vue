@@ -125,9 +125,23 @@ export default defineComponent({
     };
   },
   watch: {
-    "ui.theme.hue": function (val) {
-      console.log({ val });
-      document.documentElement.style.setProperty("--j-color-primary-hue", val);
+    "ui.theme.hue": {
+      handler: function (hue) {
+        document.documentElement.style.setProperty(
+          "--j-color-primary-hue",
+          hue
+        );
+      },
+      immediate: true,
+    },
+    "ui.theme.saturation": {
+      handler: function (saturation) {
+        document.documentElement.style.setProperty(
+          "--j-color-saturation",
+          saturation + "%"
+        );
+      },
+      immediate: true,
     },
     "ui.theme.name": {
       handler: function (themeName) {
@@ -140,13 +154,20 @@ export default defineComponent({
       },
       immediate: true,
     },
-    "ui.theme.fontFamily": function (val: "system" | "default") {
-      const font = {
-        default: `"Avenir", sans-serif`,
-        monospace: `monospace`,
-        system: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
-      };
-      document.documentElement.style.setProperty("--j-font-family", font[val]);
+    "ui.theme.fontFamily": {
+      handler: function (fontFamily: string) {
+        const font = {
+          default: `"Avenir", sans-serif`,
+          monospace: `monospace`,
+          system: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
+        };
+        document.documentElement.style.setProperty(
+          "--j-font-family",
+          // @ts-ignore
+          font[fontFamily]
+        );
+      },
+      immediate: true,
     },
   },
   computed: {
@@ -202,10 +223,9 @@ export default defineComponent({
       }
     );
 
-    const { onResult, onError } =
-      useQuery<{
-        agent: ad4m.AgentService;
-      }>(AGENT_SERVICE_STATUS);
+    const { onResult, onError } = useQuery<{
+      agent: ad4m.AgentService;
+    }>(AGENT_SERVICE_STATUS);
     onResult((val) => {
       const isInit = val.data.agent.isInitialized!;
       const isUnlocked = val.data.agent.isUnlocked!;

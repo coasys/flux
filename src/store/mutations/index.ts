@@ -157,21 +157,6 @@ export default {
   },
 
   setTheme(state: State, payload: ThemeState): void {
-    if (payload.hue) {
-      document.documentElement.style.setProperty(
-        "--j-color-primary-hue",
-        payload.hue.toString()
-      );
-    }
-    if (payload.saturation) {
-      document.documentElement.style.setProperty(
-        "--j-color-saturation",
-        payload.saturation.toString() + "%"
-      );
-    }
-    if (payload.name) {
-      document.documentElement.setAttribute("theme", payload.name);
-    }
     state.ui.theme = { ...state.ui.theme, ...payload };
   },
 
