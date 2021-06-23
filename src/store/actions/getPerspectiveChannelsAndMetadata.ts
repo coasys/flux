@@ -35,6 +35,7 @@ export default async (
         source: `${community.linkLanguageAddress}://self`,
         predicate: "sioc://has_space",
       },
+      name: "Community channel links"
     });
 
     channelLinksWorker.onerror = function (e) {
@@ -53,15 +54,15 @@ export default async (
                   element.sharedPerspectiveUrl === channelLinks[i].data!.target
               ) == undefined
             ) {
-              // console.log(
-              //   "Found channel link",
-              //   channelLinks[i],
-              //   "Adding to channel"
-              // );
+              console.log(
+                "Found channel link",
+                channelLinks[i],
+                "Adding to channel"
+              );
               const channel = await joinChannelFromSharedLink(
                 channelLinks[i].data!.target!
               );
-              //console.log("trying to join channel", channel, community.perspective);
+              console.log("trying to join channel", channel, community.perspective);
               commit("addChannel", {
                 communityId: community.perspective,
                 channel: channel,
@@ -84,6 +85,7 @@ export default async (
         source: `${community.linkLanguageAddress}://self`,
         predicate: "rdf://class",
       },
+      name: `Get expression links ${community.name}`,
     });
 
     groupExpressionWorker.onerror = function (e) {
@@ -103,13 +105,13 @@ export default async (
 
             expressionWorker.postMessage({
               retry: expressionGetRetries,
-              quitOnResponse: true,
               interval: expressionGetDelayMs,
               query: print(QUERY_EXPRESSION),
               variables: {
                 url: groupExpressionLinks[groupExpressionLinks.length - 1].data!
                   .target!,
               },
+              name: "Get group expression data",
             });
 
             expressionWorker.onerror = function (e) {
@@ -119,6 +121,7 @@ export default async (
             expressionWorker.addEventListener("message", (e) => {
               const getExpRes = e.data.expression;
               if (getExpRes) {
+                expressionWorker.terminate();
                 const groupExpData = JSON.parse(getExpRes.data!);
                 console.log(
                   "Got new group expression data for community",

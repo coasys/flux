@@ -41,15 +41,10 @@ function pollData(e) {
     interval = 1000,
     query,
     variables,
+    name = "Undefined",
   } = e.data;
 
-  console.log("Started polling", {
-    retries,
-    retry,
-    interval,
-    query,
-    variables,
-  });
+  console.log("Running worker loop: ", name);
 
   if (retry !== null && retries > retry) {
     self.close();

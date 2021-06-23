@@ -107,10 +107,10 @@ export default defineComponent({
 
           expressionWorker.postMessage({
             retry: expressionGetRetries,
-            quitOnResponse: true,
             interval: expressionGetDelayMs,
             query: print(QUERY_EXPRESSION),
             variables: { url: link.data!.target! },
+            name: "Expression signal get",
           });
 
           expressionWorker.onerror = function (e) {
@@ -120,6 +120,7 @@ export default defineComponent({
           expressionWorker.addEventListener("message", (e) => {
             const expression = e.data.expression;
             if (expression) {
+              expressionWorker.terminate();
               console.log("FOUND EXPRESSION FOR SIGNAL");
               store.commit("addExpressionAndLinkFromLanguageAddress", {
                 linkLanguage: language,

@@ -47,6 +47,7 @@ export default async function (
         fromDate,
         untilDate,
       },
+      name: `Get channel messages ${channel.name}`,
     });
 
     linksWorker.onerror = function (e) {
@@ -68,10 +69,10 @@ export default async function (
 
               expressionWorker.postMessage({
                 retry: 50,
-                quitOnResponse: true,
                 interval: 5000,
                 query: print(QUERY_EXPRESSION),
                 variables: { url: link.data.target },
+                name: "Get expression data from channel links",
               });
 
               expressionWorker.onerror = function (e) {
@@ -81,6 +82,7 @@ export default async function (
               expressionWorker.addEventListener("message", (e) => {
                 const expression = e.data.expression;
                 if (expression) {
+                  expressionWorker.terminate();
                   commit("addMessage", {
                     channelId,
                     communityId,
