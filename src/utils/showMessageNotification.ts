@@ -30,14 +30,19 @@ export default async (
     }
   }
 
+  console.log(store.state.windowState);
+
+  const isMinimized = store.state.windowState === 'visible';
+
   const { channelId, communityId } = route.params;
 
   // Only show the notification when the the message is not from self & the active community & channel is different
   if (
-    store.state.userDid !== authorDid &&
+    isMinimized || 
+    (store.state.userDid !== authorDid &&
     (community?.perspective === communityId ?
     channel?.perspective !== channelId : true) &&
-    !channel?.notifications.mute
+    !channel?.notifications.mute)
   ) {
     const notification = new Notification(`New message in ${community?.name}`, {
       body: `#${channel?.name}: ${message}`,
