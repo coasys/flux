@@ -107,7 +107,8 @@ export default defineComponent({
       if (
         profile?.author.did !== authorDid &&
         community?.perspective !== communityId &&
-        channel?.perspective !== channelId
+        channel?.perspective !== channelId &&
+        !channel?.notifications.mute
       ) {
         const notification = new Notification(
           `New message in ${community?.name}`,

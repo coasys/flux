@@ -36,6 +36,9 @@ export interface ChannelState {
   typedExpressionLanguages: JuntoExpressionReference[];
   membraneType: MembraneType;
   groupExpressionRef: string;
+  notifications: {
+    mute: boolean;
+  }
 }
 
 export interface LinkExpressionAndLang {

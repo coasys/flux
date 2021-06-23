@@ -242,4 +242,12 @@ export default {
   setShowSettings(state: State, payload: boolean): void {
     state.ui.modals.showSettings = payload;
   },
+
+  setChannelNotificationState(state: State, { communityId, channelId }: { communityId: string, channelId: string }): void {
+    console.log(state.communities[communityId], communityId);
+
+    const channel = state.communities[communityId].channels[channelId];
+
+    channel.notifications.mute = !channel.notifications.mute;
+  },
 };
