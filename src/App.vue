@@ -64,6 +64,7 @@ export default defineComponent({
     const store = useStore();
 
     onError((error) => {
+      console.log("Got global graphql error, logging with error", error);
       if (process.env.NODE_ENV !== "production") {
         // can use error.operation.operationName to single out a query type.
         logErrorMessages(error);
