@@ -31,9 +31,11 @@
 </template>
 
 <script lang="ts">
+import { CommunityState } from "@/store";
 import { defineComponent } from "vue";
 
 export default defineComponent({
+  emits: ["cancel", "submit"],
   data() {
     return {
       isUpdatingCommunity: false,
@@ -52,7 +54,7 @@ export default defineComponent({
     },
   },
   computed: {
-    community() {
+    community(): CommunityState {
       return this.$store.getters.getCommunity(this.$route.params.communityId);
     },
   },

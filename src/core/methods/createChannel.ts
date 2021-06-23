@@ -67,6 +67,7 @@ export async function createChannel(
 
   return {
     name: channelPerspective.name!,
+    hasNewMessages: false,
     perspective: channelPerspective.uuid!,
     type: FeedType.Signaled,
     createdAt: now,

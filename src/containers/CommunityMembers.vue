@@ -16,7 +16,7 @@
       <j-flex
         gap="300"
         v-for="communityMember in filteredCommunityMemberList"
-        :key="communityMember.data.profile['foaf:AccountName']"
+        :key="communityMember.author.did"
         inline
         direction="column"
         a="center"
@@ -31,9 +31,9 @@
               : require('@/assets/images/avatar-placeholder.png')
           "
         />
-        <j-text variant="body">{{
-          communityMember.data.profile["foaf:AccountName"]
-        }}</j-text>
+        <j-text variant="body">
+          {{ communityMember.data.profile["foaf:AccountName"] }}
+        </j-text>
       </j-flex>
     </j-flex>
   </j-flex>
@@ -42,15 +42,17 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import Expression from "@perspect3vism/ad4m/Expression";
+import { CommunityState } from "@/store";
 
 export default defineComponent({
+  emits: ["cancel", "submit"],
   data() {
     return {
       searchValue: "",
     };
   },
   computed: {
-    community() {
+    community(): CommunityState {
       return this.$store.getters.getCommunity(this.$route.params.communityId);
     },
     filteredCommunityMemberList(): Expression[] {

@@ -8,7 +8,7 @@
   >
     {{ toast.message }}
   </j-toast>
-  <div class="global-loading" v-if="ui.isGlobalLoading">
+  <div class="global-loading" v-if="ui.showGlobalLoading">
     <div class="global-loading__backdrop"></div>
     <div class="global-loading__content">
       <j-flex a="center" direction="column" gap="1000">
@@ -33,12 +33,6 @@
       </j-flex>
     </div>
   </div>
-  <j-modal
-    :open="showErrorModal"
-    @toggle="(e) => (showErrorModal = e.target.open)"
-  >
-    {{ errorMessage }}
-  </j-modal>
 </template>
 
 <script lang="ts">
@@ -182,7 +176,6 @@ export default defineComponent({
 
           store.commit("addExpressionAndLinkFromLanguageAddress", {
             linkLanguage: language,
-            //@ts-ignore
             link: link,
             message: getExprRes,
           });
@@ -192,6 +185,12 @@ export default defineComponent({
             getExprRes!.author!.did!,
             message.message
           );
+          
+          store.commit("setHasNewMessages", {
+            channelId:
+              store.getters.getChannelFromLinkLanguage(language).perspective,
+            value: true,
+          });
         }
       }
     });
