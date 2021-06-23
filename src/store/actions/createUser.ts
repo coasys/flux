@@ -39,7 +39,7 @@ export default async (
   const perspectiveName = databasePerspectiveName;
 
   try {
-    await apolloClient.mutate<{
+    const status = await apolloClient.mutate<{
       initializeAgent: ad4m.AgentService;
     }>({ mutation: INITIALIZE_AGENT, variables: {} });
 
@@ -68,7 +68,7 @@ export default async (
     );
 
     commit("createProfile", {
-      address: addPerspectiveResult.data?.addPerspective.uuid || "",
+      address: status.data!.initializeAgent.did!,
       username: username,
       email: email,
       givenName: givenName,
