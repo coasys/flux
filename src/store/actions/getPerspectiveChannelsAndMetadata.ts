@@ -26,6 +26,7 @@ export default async (
     const community: CommunityState = getters.getCommunity(communityId);
     console.log("Getting community channel links for community: ", communityId);
     const channelLinksWorker = new Worker("pollingWorker.js");
+    let isExecuting = false;
 
     channelLinksWorker.postMessage({
       interval: 5000,
@@ -35,7 +36,7 @@ export default async (
         source: `${community.linkLanguageAddress}://self`,
         predicate: "sioc://has_space",
       },
-      name: "Community channel links"
+      name: "Community channel links",
     });
 
     channelLinksWorker.onerror = function (e) {
@@ -43,35 +44,44 @@ export default async (
     };
 
     channelLinksWorker.addEventListener("message", async (e) => {
-      try {
-        const channelLinks = e.data.links;
+      if (!isExecuting) {
+        isExecuting = true;
+        try {
+          const channelLinks = e.data.links;
 
-        if (channelLinks) {
-          for (let i = 0; i < channelLinks.length; i++) {
-            if (
-              Object.values(community.channels).find(
-                (element: ChannelState) =>
-                  element.sharedPerspectiveUrl === channelLinks[i].data!.target
-              ) == undefined
-            ) {
-              console.log(
-                "Found channel link",
-                channelLinks[i],
-                "Adding to channel"
-              );
-              const channel = await joinChannelFromSharedLink(
-                channelLinks[i].data!.target!
-              );
-              console.log("trying to join channel", channel, community.perspective);
-              commit("addChannel", {
-                communityId: community.perspective,
-                channel: channel,
-              });
+          if (channelLinks) {
+            for (let i = 0; i < channelLinks.length; i++) {
+              if (
+                Object.values(community.channels).find(
+                  (element: ChannelState) =>
+                    element.sharedPerspectiveUrl ===
+                    channelLinks[i].data!.target
+                ) == undefined
+              ) {
+                console.log(
+                  "Found channel link",
+                  channelLinks[i],
+                  "Adding to channel"
+                );
+                const channel = await joinChannelFromSharedLink(
+                  channelLinks[i].data!.target!
+                );
+                console.log(
+                  "trying to join channel",
+                  channel,
+                  community.perspective
+                );
+                commit("addChannel", {
+                  communityId: community.perspective,
+                  channel: channel,
+                });
+              }
             }
           }
+          isExecuting = false;
+        } catch (error) {
+          throw new Error(error);
         }
-      } catch (error) {
-        throw new Error(error);
       }
     });
 
@@ -85,7 +95,7 @@ export default async (
         source: `${community.linkLanguageAddress}://self`,
         predicate: "rdf://class",
       },
-      name: `Get expression links ${community.name}`,
+      name: `Get group expression links ${community.name}`,
     });
 
     groupExpressionWorker.onerror = function (e) {
@@ -143,7 +153,7 @@ export default async (
         throw new Error(error);
       }
     });
-    return [channelLinksWorker, groupExpressionWorker]
+    return [channelLinksWorker, groupExpressionWorker];
   } catch (e) {
     throw new Error(e);
   }
