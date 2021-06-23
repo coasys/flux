@@ -10,7 +10,7 @@
     :open="modals.showCommunityMembers"
     @toggle="(e) => setShowCommunityMembers(e.target.open)"
   >
-    <community-members />
+    <community-members v-if="modals.showCommunityMembers" />
   </j-modal>
 
   <j-modal
@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onUnmounted, watch } from "vue";
+import { defineComponent, watch } from "vue";
 import { useRoute } from "vue-router";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
