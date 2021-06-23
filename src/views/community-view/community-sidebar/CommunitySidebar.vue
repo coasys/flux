@@ -105,9 +105,25 @@
             :selector="`#${channel.name.replaceAll(' ', '')}`"
           >
             <j-menu>
-              <j-menu-item @click="() => setChannelNotificationState({communityId: community.perspective, channelId: channel.perspective})">
-                <j-icon size="xs" slot="start" :name="channel?.notifications?.mute ? 'volume-mute' : 'volume-up'" />
-                {{ `${channel?.notifications?.mute ? "Unmute" : "Mute"} Channel` }}
+              <j-menu-item
+                @click="
+                  () =>
+                    setChannelNotificationState({
+                      communityId: community.perspective,
+                      channelId: channel.perspective,
+                    })
+                "
+              >
+                <j-icon
+                  size="xs"
+                  slot="start"
+                  :name="
+                    channel?.notifications?.mute ? 'volume-mute' : 'volume-up'
+                  "
+                />
+                {{
+                  `${channel?.notifications?.mute ? "Unmute" : "Mute"} Channel`
+                }}
               </j-menu-item>
             </j-menu>
           </j-popover>
@@ -130,7 +146,7 @@ export default defineComponent({
       "setShowCreateChannel",
       "setShowEditCommunity",
       "setShowCommunityMembers",
-      "setChannelNotificationState"
+      "setChannelNotificationState",
     ]),
     getInviteCode() {
       // Get the invite code to join community and copy to clipboard

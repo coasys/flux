@@ -1,5 +1,10 @@
 import { ChannelState, CommunityState, ExpressionTypes, State } from "@/store";
-import { RouteLocationNormalizedLoaded, Router, useRoute, useRouter } from "vue-router";
+import {
+  RouteLocationNormalizedLoaded,
+  Router,
+  useRoute,
+  useRouter,
+} from "vue-router";
 import { Store, useStore } from "vuex";
 import { getProfile } from "./profileHelpers";
 
@@ -45,13 +50,10 @@ export default async (
     channel?.perspective !== channelId &&
     !channel?.notifications.mute
   ) {
-    const notification = new Notification(
-      `New message in ${community?.name}`,
-      {
-        body: `#${channel?.name}: ${message}`,
-        icon: "/assets/images/junto_app_icon.png",
-      }
-    );
+    const notification = new Notification(`New message in ${community?.name}`, {
+      body: `#${channel?.name}: ${message}`,
+      icon: "/assets/images/junto_app_icon.png",
+    });
 
     // Clicking on notification will take the user to that community & channel
     notification.onclick = () => {

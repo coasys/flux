@@ -79,7 +79,7 @@ export async function createChannel(
     groupExpressionRef: "",
     typedExpressionLanguages: typedExpressionLanguages,
     notifications: {
-      mute: false
-    }
+      mute: false,
+    },
   };
 }

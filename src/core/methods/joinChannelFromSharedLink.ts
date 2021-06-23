@@ -37,6 +37,6 @@ export async function joinChannelFromSharedLink(
     typedExpressionLanguages: typedExpressionLanguages,
     notifications: {
       mute: false,
-    }
+    },
   };
 }

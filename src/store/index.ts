@@ -38,7 +38,7 @@ export interface ChannelState {
   groupExpressionRef: string;
   notifications: {
     mute: boolean;
-  }
+  };
 }
 
 export interface LinkExpressionAndLang {

@@ -243,7 +243,10 @@ export default {
     state.ui.modals.showSettings = payload;
   },
 
-  setChannelNotificationState(state: State, { communityId, channelId }: { communityId: string, channelId: string }): void {
+  setChannelNotificationState(
+    state: State,
+    { communityId, channelId }: { communityId: string; channelId: string }
+  ): void {
     console.log(state.communities[communityId], communityId);
 
     const channel = state.communities[communityId].channels[channelId];

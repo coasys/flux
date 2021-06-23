@@ -48,12 +48,9 @@ import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { getExpressionAndRetry } from "@/core/queries/getExpression";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { AGENT_SERVICE_STATUS } from "@/core/graphql_queries";
-import {
-  ModalsState,
-  ToastState,
-} from "@/store";
+import { ModalsState, ToastState } from "@/store";
 import parseSignalAsLink from "@/core/utils/parseSignalAsLink";
-import showMessageNotification from '@/utils/showMessageNotification';
+import showMessageNotification from "@/utils/showMessageNotification";
 
 declare global {
   interface Window {
@@ -126,7 +123,7 @@ export default defineComponent({
             getExprRes!.author!.did!,
             message.message
           );
-          
+
           store.commit("setHasNewMessages", {
             channelId:
               store.getters.getChannelFromLinkLanguage(language).perspective,
@@ -348,7 +345,3 @@ html {
   box-sizing: inherit;
 }
 </style>
-
-function showMessageNotification(language: string, arg1: string, message: any) {
-  throw new Error("Function not implemented.");
-}
