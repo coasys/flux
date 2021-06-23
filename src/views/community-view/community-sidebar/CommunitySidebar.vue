@@ -28,7 +28,7 @@
             </j-text>
           </div>
         </j-flex>
-        <j-icon size="xs" name="chevron-down"></j-icon>
+        <j-icon size="xs" name="chevron-expand"></j-icon>
       </j-flex>
     </button>
 
