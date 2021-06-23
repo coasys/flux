@@ -5,28 +5,32 @@ import sleep from "@/utils/sleep";
 
 //Query expression handler
 export function getExpression(url: string): Promise<ad4m.Expression> {
-  return new Promise((resolve) => {
-    const getExpression = apolloClient.query<{
-      expression: ad4m.Expression;
-    }>({ query: QUERY_EXPRESSION, variables: { url: url } });
-    getExpression.then((result) => {
-      resolve(result.data.expression);
-    });
+  return new Promise((resolve, reject) => {
+    apolloClient
+      .query<{
+        expression: ad4m.Expression;
+      }>({ query: QUERY_EXPRESSION, variables: { url: url } })
+      .then((result) => {
+        resolve(result.data.expression);
+      })
+      .catch((error) => reject(error));
   });
 }
 
 export function getExpressionNoCache(url: string): Promise<ad4m.Expression> {
-  return new Promise((resolve) => {
-    const getExpression = apolloClient.query<{
-      expression: ad4m.Expression;
-    }>({
-      query: QUERY_EXPRESSION,
-      variables: { url: url },
-      fetchPolicy: "no-cache",
-    });
-    getExpression.then((result) => {
-      resolve(result.data.expression);
-    });
+  return new Promise((resolve, reject) => {
+    apolloClient
+      .query<{
+        expression: ad4m.Expression;
+      }>({
+        query: QUERY_EXPRESSION,
+        variables: { url: url },
+        fetchPolicy: "no-cache",
+      })
+      .then((result) => {
+        resolve(result.data.expression);
+      })
+      .catch((error) => reject(error));
   });
 }
 
