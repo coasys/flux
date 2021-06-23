@@ -29,6 +29,7 @@ contextBridge.exposeInMainWorld("api", {
       "update_downloaded",
       "download_progress",
       "globalError",
+      "windowState"
     ];
     if (validChannels.includes(channel)) {
       // Deliberately strip event as it includes `sender`

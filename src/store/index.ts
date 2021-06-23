@@ -133,6 +133,7 @@ export interface State {
   userProfile: Profile | null;
   updateState: UpdateState;
   userDid: string;
+  windowState: "minimize" | "visible"
 }
 
 export interface ExpressionUIIcons {
@@ -199,7 +200,8 @@ export default createStore({
     agentInit: false,
     userProfile: null,
     updateState: "not-available",
-    userDid: ""
+    userDid: "",
+    windowState: "visible"
   },
   plugins: [vuexLocal.plugin],
   mutations: mutations,

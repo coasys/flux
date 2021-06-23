@@ -109,6 +109,8 @@ export default defineComponent({
           console.log("FOUND EXPRESSION FOR SIGNAL");
           const message = JSON.parse(getExprRes!.data!);
 
+          const escapedMessage = message.body.replace(/( |<([^>]+)>)/gi, "");
+
           store.commit("addExpressionAndLinkFromLanguageAddress", {
             linkLanguage: language,
             link: link,
@@ -121,7 +123,7 @@ export default defineComponent({
             store,
             language,
             getExprRes!.author!.did!,
-            message.message
+            escapedMessage
           );
 
           store.commit("setHasNewMessages", {
@@ -187,6 +189,11 @@ export default defineComponent({
     window.api.receive("getLangPathResponse", (data: string) => {
       // console.log(`Received language path from main thread: ${data}`);
       this.$store.commit("setLanguagesPath", data);
+    });
+
+    window.api.receive("windowState", (data: string) => {
+      console.log(`setWindowState: ${data}`);
+      this.$store.commit("setWindowState", data);
     });
 
     window.api.receive("update_available", () => {

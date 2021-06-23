@@ -220,6 +220,16 @@ async function createWindow() {
     show: false,
   });
 
+  win.on('minimize', () => {
+    console.log('minimize');
+    win.webContents.send("windowState", 'minimize');
+  });
+
+  win.on('restore', () => {
+    console.log('minimize');
+    win.webContents.send("windowState", 'visible');
+  });
+
   win.removeMenu();
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
