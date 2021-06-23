@@ -84,6 +84,7 @@ export interface ThemeState {
   name: string;
   fontFamily: string;
   hue: number;
+  saturation: number;
 }
 
 export interface ModalsState {
@@ -173,8 +174,9 @@ export default createStore({
       showGlobalLoading: false,
       theme: {
         fontFamily: "default",
-        name: "light",
+        name: "",
         hue: 270,
+        saturation: 50,
       },
       toast: {
         variant: "",

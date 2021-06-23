@@ -2,6 +2,20 @@
   <j-flex direction="column" gap="700">
     <j-text variant="heading">Settings</j-text>
     <j-flex a="center" j="between">
+      <j-text variant="label">Theme</j-text>
+      <j-select
+        :value="theme.name"
+        @change="(e) => setTheme({ name: e.target.value })"
+      >
+        <j-menu-item value="">Light</j-menu-item>
+        <j-menu-item value="dark">Dark</j-menu-item>
+        <j-menu-item value="black">Black</j-menu-item>
+        <j-menu-item value="rainbow">Rainbow</j-menu-item>
+        <j-menu-item value="cyberpunk">Cyberpunk</j-menu-item>
+        <j-menu-item value="90s">90s</j-menu-item>
+      </j-select>
+    </j-flex>
+    <j-flex a="center" j="between">
       <j-text variant="label">Font family</j-text>
       <j-tabs
         :value="theme.fontFamily"
@@ -11,19 +25,6 @@
         <j-tab-item value="system">System</j-tab-item>
         <j-tab-item value="monospace">Monospace</j-tab-item>
       </j-tabs>
-    </j-flex>
-    <j-flex a="center" j="between">
-      <j-text variant="label">Mode</j-text>
-      <j-select
-        :value="theme.name"
-        @change="(e) => setTheme({ name: e.target.value })"
-      >
-        <j-menu-item value="light">Light</j-menu-item>
-        <j-menu-item value="dark">Dark</j-menu-item>
-        <j-menu-item value="rainbow">Rainbow</j-menu-item>
-        <j-menu-item value="cyberpunk">Cyberpunk</j-menu-item>
-        <j-menu-item value="90s">90s</j-menu-item>
-      </j-select>
     </j-flex>
     <j-flex a="center" j="between">
       <j-text variant="label">Primary color</j-text>
@@ -37,6 +38,17 @@
           :style="`--hue: ${n}`"
         ></button>
       </div>
+    </j-flex>
+    <j-flex a="center" j="between">
+      <j-text variant="label">Saturation</j-text>
+      <j-tabs
+        :value="theme.saturation"
+        @change="(e) => setTheme({ saturation: e.target.value })"
+      >
+        <j-tab-item value="30">Weak</j-tab-item>
+        <j-tab-item value="60">Normal</j-tab-item>
+        <j-tab-item value="100">Vibrant</j-tab-item>
+      </j-tabs>
     </j-flex>
     <j-flex a="center" j="between">
       <j-text variant="label">Clear State</j-text>
@@ -63,6 +75,7 @@ export default defineComponent({
   data() {
     return {
       hue: 270,
+      saturation: 50,
       fontFamily: "",
       themeName: "",
       themeHue: "",
@@ -89,9 +102,10 @@ export default defineComponent({
 <style scoped>
 .color-button {
   --hue: 0;
+  --saturation: 80%;
   width: var(--j-element-md);
   height: var(--j-element-md);
-  background-color: hsl(var(--hue), 80%, 60%);
+  background-color: hsl(var(--hue), var(--saturation), 60%);
   border: 2px solid transparent;
   outline: 0;
   border-radius: var(--j-border-radius);
