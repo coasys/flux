@@ -330,7 +330,7 @@ export default defineComponent({
   padding: var(--j-space-500);
   display: flex;
   align-items: center;
-  border-bottom: 1px solid var(--j-border-color);
+  border-bottom: 1px solid var(--app-channel-border-color);
   background: var(--app-channel-bg-color);
   z-index: 1;
 }

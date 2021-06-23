@@ -266,6 +266,7 @@ body {
   --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
   --app-drawer-border-color: var(--j-border-color);
   --app-channel-bg-color: var(--j-color-white);
+  --app-channel-border-color: var(--j-border-color);
 }
 
 .global-loading {
