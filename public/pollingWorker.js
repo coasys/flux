@@ -65,7 +65,7 @@ function pollData(e) {
       }
     })
     .catch((e) => {
-      console.log(e);
+      throw new Error(e);
     })
     .finally(() => {
       retries = retries + 1;

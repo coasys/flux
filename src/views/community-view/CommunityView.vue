@@ -39,13 +39,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, watch } from "vue";
+import { defineComponent, onUnmounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
-import { channelRefreshDurationMs } from "@/core/juntoTypes";
 import { useStore, mapMutations } from "vuex";
-import sleep from "@/utils/sleep";
 
 import EditCommunity from "@/containers/EditCommunity.vue";
 import CreateChannel from "@/containers/CreateChannel.vue";
@@ -65,27 +63,30 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const store = useStore();
+    let channelWorkerLoop = null as null | Worker;
+    let groupExpWorkerLoop = null as null | Worker;
+
     watch(
       () => route.params.communityId,
-      (params: any) => {
-        startLoop(params);
-
+      async (params: any) => {
+        if (channelWorkerLoop) {
+          channelWorkerLoop.terminate();
+        }
+        if (groupExpWorkerLoop) {
+          groupExpWorkerLoop.terminate();
+        }
+        [channelWorkerLoop, groupExpWorkerLoop] = await store.dispatch(
+          "getPerspectiveChannelsAndMetadata",
+          {
+            communityId: params,
+          }
+        );
         store.dispatch("getCommunityMembers", {
           communityId: params,
         });
       },
       { immediate: true }
     );
-
-    async function startLoop(communityId: string) {
-      if (communityId) {
-        await store.dispatch("getPerspectiveChannelsAndMetadata", {
-          communityId,
-        });
-        await sleep(channelRefreshDurationMs);
-        startLoop(communityId);
-      }
-    }
   },
   methods: {
     ...mapMutations([

@@ -45,6 +45,10 @@ export default async function (
       },
     });
 
+    linksWorker.onerror = function (e) {
+      throw new Error(e.toString());
+    };
+
     linksWorker.addEventListener("message", async (e) => {
       const linkQuery = e.data.links;
       if (linkQuery) {
@@ -54,7 +58,6 @@ export default async function (
               channel.currentExpressionLinks[
                 hash(link.data!, { excludeValues: "__typename" })
               ];
-            console.log(currentExpressionLink);
 
             if (!currentExpressionLink) {
               const expressionWorker = new Worker("pollingWorker.js");
@@ -67,9 +70,12 @@ export default async function (
                 variables: { url: link.data.target },
               });
 
+              expressionWorker.onerror = function (e) {
+                throw new Error(e.toString());
+              };
+
               expressionWorker.addEventListener("message", (e) => {
                 const expression = e.data.expression;
-                console.log("got exp msg", expression);
                 if (expression) {
                   commit("addMessage", {
                     channelId,
