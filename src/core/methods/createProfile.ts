@@ -80,38 +80,42 @@ export async function createProfile(
   profileImage?: string,
   thumbnail?: string
 ): Promise<string> {
-  const profile: { [x: string]: any } = {
-    "foaf:AccountName": username,
-    "schema:email": email,
-    "schema:givenName": givenName,
-    "schema:familyName": familyName,
-    "@type": "foaf:OnlineAccount",
-  };
-
-  if (profileImage) {
-    profile["schema:image"] = JSON.stringify({
-      "@type": "schema:ImageObject",
-      "schema:contentSize": byteSize(profileImage),
-      "schema:contentUrl": profileImage,
-      "schema:thumbnail": {
+  try {
+    const profile: { [x: string]: any } = {
+      "foaf:AccountName": username,
+      "schema:email": email,
+      "schema:givenName": givenName,
+      "schema:familyName": familyName,
+      "@type": "foaf:OnlineAccount",
+    };
+  
+    if (profileImage) {
+      profile["schema:image"] = JSON.stringify({
         "@type": "schema:ImageObject",
-        "schema:contentSize": byteSize(thumbnail!),
-        "schema:contentUrl": thumbnail,
-      },
-    });
+        "schema:contentSize": byteSize(profileImage),
+        "schema:contentUrl": profileImage,
+        "schema:thumbnail": {
+          "@type": "schema:ImageObject",
+          "schema:contentSize": byteSize(thumbnail!),
+          "schema:contentUrl": thumbnail,
+        },
+      });
+    }
+  
+    const createProfileExpression = await createExpression(
+      expressionLanguage,
+      JSON.stringify({
+        "@context": {
+          foaf: "http://xmlns.com/foaf/0.1/",
+          schema: "https://schema.org/",
+        },
+        profile,
+        signed_agent: "NA",
+      })
+    );
+  
+    return createProfileExpression;
+  } catch (error) {
+    throw new Error(error);
   }
-
-  const createProfileExpression = await createExpression(
-    expressionLanguage,
-    JSON.stringify({
-      "@context": {
-        foaf: "http://xmlns.com/foaf/0.1/",
-        schema: "https://schema.org/",
-      },
-      profile,
-      signed_agent: "NA",
-    })
-  );
-
-  return createProfileExpression;
 }

@@ -20,6 +20,7 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
       - uses: cachix/cachix-action@v10
         with:
+          name: junto-communities
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - name: Build Holochain
         run: npm run build-holochain
@@ -32,8 +33,6 @@ jobs:
         run: |
           pkgver=$(node ./scripts/get-pkg-version.js)
           echo ::set-output name=version::$pkgver
-      - name: Git submodule
-        run: git submodule init && git submodule update
       - name: Setup codesiging certs
         run: ./scripts/add-osx-cert.sh
         env:
@@ -70,6 +69,7 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
       - uses: cachix/cachix-action@v10
         with:
+          name: junto-communities
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - name: Build Holochain
         run: npm run build-holochain
@@ -82,8 +82,6 @@ jobs:
         run: |
           pkgver=$(node ./scripts/get-pkg-version.js)
           echo ::set-output name=version::$pkgver
-      - name: Git submodule
-        run: git submodule init && git submodule update
       - name: Build languages
         run: npm run build-languages
       - name: Install deps

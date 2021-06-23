@@ -12,45 +12,49 @@ export async function getTypedExpressionLanguages<S>(
   storeLanguageUI: boolean,
   store?: Store<S>
 ): Promise<JuntoExpressionReference[]> {
-  const typedExpressionLanguages = [];
-  //Get and cache the expression UI for each expression language
-  //And used returned expression language names to populate typedExpressionLanguages field
-  for (const lang of installedPerspective.requiredExpressionLanguages!) {
-    console.log("JoinCommunity.vue: Fetching UI lang:", lang);
-    const languageRes = await getLanguage(lang!);
-    if (storeLanguageUI && store) {
-      const uiData: ExpressionUIIcons = {
+  try {
+    const typedExpressionLanguages = [];
+    //Get and cache the expression UI for each expression language
+    //And used returned expression language names to populate typedExpressionLanguages field
+    for (const lang of installedPerspective.requiredExpressionLanguages!) {
+      console.log("JoinCommunity.vue: Fetching UI lang:", lang);
+      const languageRes = await getLanguage(lang!);
+      if (storeLanguageUI && store) {
+        const uiData: ExpressionUIIcons = {
+          languageAddress: lang!,
+          createIcon: languageRes.constructorIcon!.code!,
+          viewIcon: languageRes.iconFor!.code!,
+        };
+        store!.commit({
+          type: "addExpressionUI",
+          value: uiData,
+        });
+      }
+      let expressionType;
+      switch (languageRes.name!) {
+        case "junto-shortform":
+          expressionType = ExpressionTypes.ShortForm;
+          break;
+
+        case "group-expression":
+          expressionType = ExpressionTypes.GroupExpression;
+          break;
+
+        case "agent-profiles":
+          expressionType = ExpressionTypes.ProfileExpression;
+          break;
+
+        default:
+          expressionType = ExpressionTypes.Other;
+      }
+      typedExpressionLanguages.push({
         languageAddress: lang!,
-        createIcon: languageRes.constructorIcon!.code!,
-        viewIcon: languageRes.iconFor!.code!,
-      };
-      store!.commit({
-        type: "addExpressionUI",
-        value: uiData,
-      });
+        expressionType: expressionType,
+      } as JuntoExpressionReference);
+      //await this.sleep(40);
     }
-    let expressionType;
-    switch (languageRes.name!) {
-      case "junto-shortform":
-        expressionType = ExpressionTypes.ShortForm;
-        break;
-
-      case "group-expression":
-        expressionType = ExpressionTypes.GroupExpression;
-        break;
-
-      case "agent-profiles":
-        expressionType = ExpressionTypes.ProfileExpression;
-        break;
-
-      default:
-        expressionType = ExpressionTypes.Other;
-    }
-    typedExpressionLanguages.push({
-      languageAddress: lang!,
-      expressionType: expressionType,
-    } as JuntoExpressionReference);
-    //await this.sleep(40);
+    return typedExpressionLanguages;
+  } catch (error) {
+    throw new Error(error);
   }
-  return typedExpressionLanguages;
 }
