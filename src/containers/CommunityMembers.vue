@@ -46,6 +46,11 @@ import { CommunityState } from "@/store";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
+  onMounted() {
+    this.$store.dispatch("getCommunityMembers", {
+      communityId: this.community.perspective,
+    });
+  },
   data() {
     return {
       searchValue: "",
