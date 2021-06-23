@@ -7,7 +7,7 @@
             style="--j-avatar-size: 35px"
             :src="require('@/assets/images/junto_app_icon.png')"
           />
-          <div>
+          <div class="community-info">
             <j-text
               v-if="community.name"
               weight="500"
@@ -152,6 +152,13 @@ export default defineComponent({
 
 .community-sidebar__header:hover {
   background: var(--j-color-ui-50);
+}
+
+.community-info {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
 }
 
 j-divider {
