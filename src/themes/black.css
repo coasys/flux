@@ -77,7 +77,7 @@
   --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
   --app-drawer-border-color: hsl(var(--j-color-ui-hue), 0%, 15%);
 
-  --app-channel-bg-color: hsl(var(--j-color-ui-hue), 0%, 5%);
+  --app-channel-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
   --app-channel-border-color: hsl(var(--j-color-ui-hue), 0%, 15%);
   --app-channel-header-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
   --app-channel-footer-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);

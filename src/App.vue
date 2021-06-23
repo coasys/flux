@@ -255,9 +255,23 @@ export default defineComponent({
 
 <style>
 body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
   padding: 0;
   margin: 0;
   color: var(--j-color-ui-500);
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 :root {
