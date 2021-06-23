@@ -84,6 +84,9 @@ export default defineComponent({
       async (newValue) => {
         console.log("agent unlocked changed to", newValue);
         if (newValue) {
+          store.commit("updateApplicationStartTime", new Date());
+        }
+        if (newValue) {
           store.dispatch("loadExpressionLanguages");
         } else {
           router.push({ name: "signup" });
@@ -203,18 +206,14 @@ export default defineComponent({
       }
     );
 
-    const { onResult, onError } =
-      useQuery<{
-        agent: ad4m.AgentService;
-      }>(AGENT_SERVICE_STATUS);
+    const { onResult, onError } = useQuery<{
+      agent: ad4m.AgentService;
+    }>(AGENT_SERVICE_STATUS);
     onResult((val) => {
       const isInit = val.data.agent.isInitialized!;
       const isUnlocked = val.data.agent.isUnlocked!;
       this.$store.commit("updateAgentInitState", isInit);
       this.$store.commit("updateAgentLockState", isUnlocked);
-      if (isUnlocked == true) {
-        this.$store.commit("updateApplicationStartTime", new Date());
-      }
       if (isInit == true) {
         //Get database perspective from store
         let databasePerspective = this.$store.getters.getDatabasePerspective;
