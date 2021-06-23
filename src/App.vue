@@ -52,12 +52,6 @@ import { ModalsState, ToastState } from "@/store";
 import parseSignalAsLink from "@/core/utils/parseSignalAsLink";
 import showMessageNotification from "@/utils/showMessageNotification";
 
-declare global {
-  interface Window {
-    api: any;
-  }
-}
-
 export default defineComponent({
   name: "App",
   setup() {
