@@ -222,13 +222,13 @@
 }
 
 :root[theme="dark"] j-menu-item:hover::part(base) {
-  background: transparent;
+  background: var(--j-color-ui-50);
   color: var(--j-color-ui-600);
 }
 
 :root[theme="dark"] j-menu-item[selected]::part(base) {
-  background: var(--j-color-ui-100);
-  color: var(--j-color-primary-600);
+  background: var(--j-color-primary-200);
+  color: var(--j-color-primary-900);
 }
 
 :root[theme="dark"] j-tabs {
