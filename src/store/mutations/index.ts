@@ -205,6 +205,15 @@ export default {
     state.ui.showSidebar = open;
   },
 
+  setChannelScrollTop(
+    state: State,
+    payload: { channelId: string; communityId: string; value: number }
+  ): void {
+    state.communities[payload.communityId].channels[
+      payload.channelId
+    ].scrollTop = payload.value;
+  },
+
   updateCommunityMetadata(
     state: State,
     { communityId, name, description, groupExpressionRef }: UpdatePayload

@@ -3,11 +3,7 @@
     <template v-slot:sidebar>
       <community-sidebar :community="currentCommunity"></community-sidebar>
     </template>
-    <router-view v-slot="{ Component }">
-      <keep-alive max="5" include="ChannelView">
-        <component :key="$route.fullPath" :is="Component" />
-      </keep-alive>
-    </router-view>
+    <router-view :key="$route.fullPath"></router-view>
   </sidebar-layout>
 
   <j-modal

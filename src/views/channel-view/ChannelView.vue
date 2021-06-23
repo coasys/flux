@@ -73,8 +73,6 @@ import {
   ExpressionTypes,
 } from "@/store";
 import { getProfile } from "@/utils/profileHelpers";
-import { chatMessageRefreshDuration } from "@/core/juntoTypes";
-import sleep from "@/utils/sleep";
 import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
 import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css";
 import { differenceInMinutes, parseISO } from "date-fns";
@@ -98,41 +96,51 @@ export default defineComponent({
   components: { DynamicScroller, DynamicScrollerItem, MessageItem },
   data() {
     return {
-      lastScrollTop: 0,
       cachedChannelId: "",
+      chachedCommunityId: "",
+      lastScrollTop: 0,
       showNewMessagesButton: false,
       noDelayRef: 0,
       currentExpressionPost: {},
       unsortedMessages: [],
       users: {} as UserMap,
-      linkWorker: null as null | Worker,
+      linksWorker: null as null | Worker,
     };
   },
-  mounted() {
-    this.cachedChannelId = this.$route.params.channelId as string;
-    setTimeout(() => {
-      this.scrollToBottom("auto");
-    }, 300);
-  },
-  async activated() {
-    // Go back to saved scroll position
-    const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-    scrollContainer.scrollTop = this.lastScrollTop as number;
-    let [status, linkWorker] = await this.$store.dispatch("loadExpressions", {
+  async beforeCreate() {
+    const { linksWorker } = await this.$store.dispatch("loadExpressions", {
       communityId: this.$route.params.communityId,
       channelId: this.$route.params.channelId,
     });
-    this.linkWorker = linkWorker as Worker;
+    this.linksWorker = linksWorker as Worker;
   },
-  unmounted() {
-    if (this.linkWorker) {
-      this.linkWorker!.terminate();
-    }
+  mounted() {
+    // Set cached id's as Vue has a bug where route params
+    // update before the component is unmounted/beforeUnmount
+    this.chachedCommunityId = this.$route.params.communityId as string;
+    this.cachedChannelId = this.$route.params.channelId as string;
+
+    const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
+
+    // Next tick waits for everything to be rendered
+    this.$nextTick(() => {
+      if (this.channel.scrollTop === undefined) {
+        this.scrollToBottom("auto");
+      } else {
+        scrollContainer.scrollTop = this.channel.scrollTop as number;
+      }
+    });
   },
-  deactivated() {
-    if (this.linkWorker) {
-      this.linkWorker!.terminate();
+  beforeUnmount() {
+    if (this.linksWorker) {
+      this.linksWorker!.terminate();
     }
+    const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
+    this.$store.commit("setChannelScrollTop", {
+      communityId: this.community.perspective,
+      channelId: this.channel.perspective,
+      value: scrollContainer.scrollTop as any,
+    });
   },
   watch: {
     "channel.hasNewMessages": function (hasMessages) {
@@ -187,20 +195,16 @@ export default defineComponent({
     },
     community(): CommunityState {
       const { communityId } = this.$route.params;
-
-      return this.$store.getters.getCommunity(communityId);
+      return this.$store.getters.getCommunity(
+        this.chachedCommunityId || communityId
+      );
     },
     channel(): ChannelState {
-      const cachedChannelId = this.cachedChannelId;
       const { communityId, channelId } = this.$route.params;
-      if (!cachedChannelId) {
-        return this.$store.getters.getChannel({ channelId, communityId });
-      } else {
-        return this.$store.getters.getChannel({
-          channelId: cachedChannelId,
-          communityId,
-        });
-      }
+      return this.$store.getters.getChannel({
+        channelId: this.cachedChannelId || channelId,
+        communityId: this.chachedCommunityId || communityId,
+      });
     },
     profileLanguage(): string {
       const profileLang = this.community?.typedExpressionLanguages.find(
@@ -211,12 +215,11 @@ export default defineComponent({
   },
   methods: {
     handleScroll(e: any) {
-      this.lastScrollTop = e.target.scrollTop;
       const isAtBottom =
         e.target.scrollHeight - window.innerHeight === e.target.scrollTop;
       if (isAtBottom) {
         this.$store.commit("setHasNewMessages", {
-          channelId: this.$route.params.channelId,
+          channelId: this.channel.perspective,
           value: false,
         });
         this.showNewMessagesButton = false;
@@ -261,8 +264,8 @@ export default defineComponent({
       this.$store.dispatch("loadExpressions", {
         from,
         to,
-        communityId: this.$route.params.communityId,
-        channelId: this.$route.params.channelId,
+        communityId: this.community.perspective,
+        channelId: this.channel.perspective,
       });
     },
     async createDirectMessage(message: JuntoShortForm) {
@@ -274,7 +277,7 @@ export default defineComponent({
         this.$store.dispatch("createExpression", {
           languageAddress: this.community.expressionLanguages[0]!,
           content: message,
-          perspective: this.$route.params.channelId.toString(),
+          perspective: this.channel.perspective.toString(),
         });
       }
     },

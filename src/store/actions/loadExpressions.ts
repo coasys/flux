@@ -19,10 +19,14 @@ export interface Payload {
   to: Date;
 }
 
+export interface LoadExpressionResult {
+  linksWorker: any;
+}
+
 export default async function (
   { getters, commit, state }: Context,
   { channelId, communityId, from, to }: Payload
-): Promise<[boolean, Worker]> {
+): Promise<LoadExpressionResult> {
   try {
     const fromDate = from || getters.getApplicationStartTime;
     const untilDate = to || new Date("August 19, 1975 23:15:30").toISOString();
@@ -34,7 +38,7 @@ export default async function (
     const linksWorker = new Worker("pollingWorker.js");
 
     linksWorker.postMessage({
-      interval: 5000,
+      interval: 10000,
       query: print(SOURCE_PREDICATE_LINK_QUERY_TIME_PAGINATED),
       variables: {
         perspectiveUUID: channelId.toString(),
@@ -116,7 +120,7 @@ export default async function (
       }
     });
 
-    return [false, linksWorker];
+    return { linksWorker };
   } catch (e) {
     commit("showDangerToast", {
       message: e.message,
