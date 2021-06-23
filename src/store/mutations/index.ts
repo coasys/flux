@@ -163,6 +163,12 @@ export default {
         payload.hue.toString()
       );
     }
+    if (payload.saturation) {
+      document.documentElement.style.setProperty(
+        "--j-color-saturation",
+        payload.saturation.toString() + "%"
+      );
+    }
     if (payload.name) {
       document.documentElement.setAttribute("theme", payload.name);
     }
