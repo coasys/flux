@@ -45,11 +45,11 @@ import { useStore } from "vuex";
 import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
-import { getExpressionAndRetry } from "@/core/queries/getExpression";
 import ad4m from "@perspect3vism/ad4m-executor";
-import { AGENT_SERVICE_STATUS } from "@/core/graphql_queries";
+import { AGENT_SERVICE_STATUS, QUERY_EXPRESSION } from "@/core/graphql_queries";
 import { ModalsState, ToastState } from "@/store";
 import parseSignalAsLink from "@/core/utils/parseSignalAsLink";
+import { print } from "graphql/language/printer";
 
 declare global {
   interface Window {
@@ -103,21 +103,36 @@ export default defineComponent({
         const link = linkData.link;
         const language = linkData.language;
         if (link.data!.predicate! == "sioc://content_of") {
-          let getExprRes = await getExpressionAndRetry(
-            link.data!.target!,
-            expressionGetRetries,
-            expressionGetDelayMs
-          );
-          console.log("FOUND EXPRESSION FOR SIGNAL");
-          store.commit("addExpressionAndLinkFromLanguageAddress", {
-            linkLanguage: language,
-            link: link,
-            message: getExprRes,
+          const expressionWorker = new Worker("pollingWorker.js");
+
+          expressionWorker.postMessage({
+            retry: expressionGetRetries,
+            quitOnResponse: true,
+            interval: expressionGetDelayMs,
+            query: print(QUERY_EXPRESSION),
+            variables: { url: link.data!.target! },
           });
-          store.commit("setHasNewMessages", {
-            channelId:
-              store.getters.getChannelFromLinkLanguage(language).perspective,
-            value: true,
+
+          expressionWorker.onerror = function (e) {
+            throw new Error(e.toString());
+          };
+
+          expressionWorker.addEventListener("message", (e) => {
+            const expression = e.data.expression;
+            if (expression) {
+              console.log("FOUND EXPRESSION FOR SIGNAL");
+              store.commit("addExpressionAndLinkFromLanguageAddress", {
+                linkLanguage: language,
+                link: link,
+                message: expression,
+              });
+              store.commit("setHasNewMessages", {
+                channelId:
+                  store.getters.getChannelFromLinkLanguage(language)
+                    .perspective,
+                value: true,
+              });
+            }
           });
         }
       }
