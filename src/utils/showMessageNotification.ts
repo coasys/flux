@@ -33,21 +33,13 @@ export default async (
     }
   }
 
-  // Fetch the user profile to check if this is the current user
-  const profile = await getProfile(
-    community!.typedExpressionLanguages.find(
-      (t) => t.expressionType === ExpressionTypes.ProfileExpression
-    )!.languageAddress!,
-    authorDid
-  );
-
   const { channelId, communityId } = route.params;
 
   // Only show the notification when the the message is not from self & the active community & channel is different
   if (
-    profile?.author.did !== authorDid &&
-    community?.perspective !== communityId &&
-    channel?.perspective !== channelId &&
+    store.state.userProfile?.address !== authorDid &&
+    (community?.perspective === communityId ?
+    channel?.perspective !== channelId : true) &&
     !channel?.notifications.mute
   ) {
     const notification = new Notification(`New message in ${community?.name}`, {
