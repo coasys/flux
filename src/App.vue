@@ -45,12 +45,18 @@ import { useStore } from "vuex";
 import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
-import { getExpressionAndRetry } from "@/core/queries/getExpression";
 import ad4m from "@perspect3vism/ad4m-executor";
-import { AGENT_SERVICE_STATUS } from "@/core/graphql_queries";
+import { AGENT_SERVICE_STATUS, QUERY_EXPRESSION } from "@/core/graphql_queries";
 import { ModalsState, ToastState } from "@/store";
 import parseSignalAsLink from "@/core/utils/parseSignalAsLink";
 import showMessageNotification from "@/utils/showMessageNotification";
+import { print } from "graphql/language/printer";
+
+declare global {
+  interface Window {
+    api: any;
+  }
+}
 
 export default defineComponent({
   name: "App",
@@ -80,6 +86,9 @@ export default defineComponent({
       async (newValue) => {
         console.log("agent unlocked changed to", newValue);
         if (newValue) {
+          store.commit("updateApplicationStartTime", new Date());
+        }
+        if (newValue) {
           store.dispatch("loadExpressionLanguages");
         } else {
           router.push({ name: "signup" });
@@ -88,43 +97,65 @@ export default defineComponent({
       { immediate: true }
     );
 
-    //Watch for incoming signals to get expression data
+    //Watch for incoming signals from holochain - an incoming signal should mean a DM is inbound
     watch(result, async (data) => {
       console.log("GOT INCOMING MESSAGE SIGNAL");
+      //Parse out the signal data to its link form and validate the link structure
       const linkData = parseSignalAsLink(data.signal);
       if (linkData) {
         const link = linkData.link;
         const language = linkData.language;
         if (link.data!.predicate! == "sioc://content_of") {
-          let getExprRes = await getExpressionAndRetry(
-            link.data!.target!,
-            expressionGetRetries,
-            expressionGetDelayMs
-          );
-          console.log("FOUND EXPRESSION FOR SIGNAL");
-          const message = JSON.parse(getExprRes!.data!);
+          //Start expression web worker to try and get the expression data pointed to in link target
+          const expressionWorker = new Worker("pollingWorker.js");
 
-          const escapedMessage = message.body.replace(/(\s*<.*?>\s*)+/g, " ");
-
-          store.commit("addExpressionAndLinkFromLanguageAddress", {
-            linkLanguage: language,
-            link: link,
-            message: getExprRes,
+          expressionWorker.postMessage({
+            retry: expressionGetRetries,
+            interval: expressionGetDelayMs,
+            query: print(QUERY_EXPRESSION),
+            variables: { url: link.data!.target! },
+            name: "Expression signal get",
           });
 
-          showMessageNotification(
-            router,
-            route,
-            store,
-            language,
-            getExprRes!.author!.did!,
-            escapedMessage
-          );
+          expressionWorker.onerror = function (e) {
+            throw new Error(e.toString());
+          };
 
-          store.commit("setHasNewMessages", {
-            channelId:
-              store.getters.getChannelFromLinkLanguage(language).perspective,
-            value: true,
+          expressionWorker.addEventListener("message", (e) => {
+            const expression = e.data.expression;
+            if (expression) {
+              //Expression is not null, which means we got the data and we can terminate the loop
+              expressionWorker.terminate();
+              const message = JSON.parse(expression!.data!);
+              const escapedMessage = message.body.replace(
+                /(\s*<.*?>\s*)+/g,
+                " "
+              );
+              console.log("FOUND EXPRESSION FOR SIGNAL");
+              //Add the expression to the store
+              store.commit("addExpressionAndLinkFromLanguageAddress", {
+                linkLanguage: language,
+                link: link,
+                message: expression,
+              });
+
+              showMessageNotification(
+                router,
+                route,
+                store,
+                language,
+                expression!.author!.did!,
+                escapedMessage
+              );
+
+              //Add UI notification on the channel to notify that there is a new message there
+              store.commit("setHasNewMessages", {
+                channelId:
+                  store.getters.getChannelFromLinkLanguage(language)
+                    .perspective,
+                value: true,
+              });
+            }
           });
         }
       }
@@ -247,9 +278,6 @@ export default defineComponent({
       const isUnlocked = val.data.agent.isUnlocked!;
       this.$store.commit("updateAgentInitState", isInit);
       this.$store.commit("updateAgentLockState", isUnlocked);
-      if (isUnlocked == true) {
-        this.$store.commit("updateApplicationStartTime", new Date());
-      }
       if (isInit == true) {
         //Get database perspective from store
         let databasePerspective = this.$store.getters.getDatabasePerspective;
@@ -270,9 +298,28 @@ export default defineComponent({
 
 <style>
 body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
   padding: 0;
   margin: 0;
   color: var(--j-color-ui-500);
+}
+
+/* TODO: Put this in junto-elements? */
+j-popover {
+  position: fixed !important;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 :root {
@@ -281,6 +328,9 @@ body {
   --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
   --app-drawer-border-color: var(--j-border-color);
   --app-channel-bg-color: var(--j-color-white);
+  --app-channel-border-color: var(--j-border-color);
+  --app-channel-header-bg-color: var(--j-color-white);
+  --app-channel-footer-bg-color: var(--j-color-white);
 }
 
 .global-loading {

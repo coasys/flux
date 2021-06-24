@@ -30,8 +30,16 @@ interface AddChannelMessages {
   expressions: { [x: string]: ExpressionAndRef };
 }
 
+interface AddChannelMessage {
+  channelId: string;
+  communityId: string;
+  link: ad4m.LinkExpression;
+  expression: ad4m.Expression;
+  linkLanguage: string;
+}
+
 export default {
-  async addMessages(state: State, payload: AddChannelMessages): Promise<void> {
+  addMessages(state: State, payload: AddChannelMessages): void {
     const community = state.communities[payload.communityId];
     const channel = community?.channels[payload.channelId];
     console.log(
@@ -48,6 +56,26 @@ export default {
     channel.currentExpressionMessages = {
       ...channel.currentExpressionMessages,
       ...payload.expressions,
+    };
+  },
+  addMessage(state: State, payload: AddChannelMessage): void {
+    const community = state.communities[payload.communityId];
+    const channel = community?.channels[payload.channelId];
+
+    channel.currentExpressionLinks[
+      hash(payload.link.data!, { excludeValues: "__typename" })
+    ] = {
+      expression: payload.link,
+      language: payload.linkLanguage,
+    } as LinkExpressionAndLang;
+    channel.currentExpressionMessages[payload.expression.url!] = {
+      expression: {
+        author: payload.expression.author!,
+        data: JSON.parse(payload.expression.data!),
+        timestamp: payload.expression.timestamp!,
+        proof: payload.expression.proof!,
+      } as Expression,
+      url: parseExprURL(payload.link.data!.target!),
     };
   },
   addCommunity(state: State, payload: CommunityState): void {
@@ -170,6 +198,15 @@ export default {
 
   setSidebar(state: State, open: boolean): void {
     state.ui.showSidebar = open;
+  },
+
+  setChannelScrollTop(
+    state: State,
+    payload: { channelId: string; communityId: string; value: number }
+  ): void {
+    state.communities[payload.communityId].channels[
+      payload.channelId
+    ].scrollTop = payload.value;
   },
 
   updateCommunityMetadata(

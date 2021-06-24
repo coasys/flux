@@ -217,6 +217,7 @@ async function createWindow() {
       enableRemoteModule: false, // turn off remote
       preload: path.join(__dirname, "preload.js"), // use a preload script
     },
+    titleBarStyle: "hidden",
     show: false,
   });
 

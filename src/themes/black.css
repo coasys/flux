@@ -67,15 +67,20 @@
   --j-color-ui-800: hsl(var(--j-color-ui-hue), 0%, 80%);
   --j-color-ui-900: hsl(var(--j-color-ui-hue), 0%, 90%);
 
-  --j-border-color: hsl(var(--j-color-ui-hue), 0%, 25%);
-  --j-border-color-strong: hsl(var(--j-color-ui-hue), 0%, 35%);
+  --j-border-color: hsl(var(--j-color-ui-hue), 0%, 15%);
+  --j-border-color-strong: hsl(var(--j-color-ui-hue), 0%, 30%);
 
   /*  App specific styles */
   --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
-  --app-main-sidebar-border-color: hsl(var(--j-color-ui-hue), 0%, 12%);
+  --app-main-sidebar-border-color: hsl(var(--j-color-ui-hue), 0%, 15%);
+
   --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
-  --app-drawer-border-color: hsl(var(--j-color-ui-hue), 0%, 0%);
+  --app-drawer-border-color: hsl(var(--j-color-ui-hue), 0%, 15%);
+
   --app-channel-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
+  --app-channel-border-color: hsl(var(--j-color-ui-hue), 0%, 15%);
+  --app-channel-header-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
+  --app-channel-footer-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
 }
 
 :root[theme="black"] body {
@@ -91,6 +96,6 @@
 }
 
 :root[theme="black"] j-menu-item[selected] {
-  --j-menu-item-bg: var(--j-color-ui-100);
-  --j-menu-item-color: var(--j-color-black);
+  --j-menu-item-bg: var(--j-color-primary-50);
+  --j-menu-item-color: var(--j-color-primary-500);
 }
