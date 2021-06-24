@@ -129,6 +129,17 @@ export default defineComponent({
       } else {
         scrollContainer.scrollTop = this.channel.scrollTop as number;
       }
+
+      const isAtBottom =
+        scrollContainer.scrollHeight - window.innerHeight ===
+        scrollContainer.scrollTop;
+
+      if (isAtBottom && this.channel.hasNewMessages) {
+        this.markAsRead();
+      }
+      if (!isAtBottom && this.channel.hasNewMessages) {
+        this.showNewMessagesButton = true;
+      }
     });
   },
   beforeUnmount() {
@@ -214,15 +225,18 @@ export default defineComponent({
     },
   },
   methods: {
+    markAsRead() {
+      this.$store.commit("setHasNewMessages", {
+        channelId: this.channel.perspective,
+        value: false,
+      });
+      this.showNewMessagesButton = false;
+    },
     handleScroll(e: any) {
       const isAtBottom =
         e.target.scrollHeight - window.innerHeight === e.target.scrollTop;
       if (isAtBottom) {
-        this.$store.commit("setHasNewMessages", {
-          channelId: this.channel.perspective,
-          value: false,
-        });
-        this.showNewMessagesButton = false;
+        this.markAsRead();
       }
     },
     showAvatar(index: number): boolean {
@@ -285,13 +299,7 @@ export default defineComponent({
       const container = this.$refs.scrollContainer as HTMLDivElement;
       if (container) {
         this.$nextTick(() => {
-          // If we scroll to the bottom we have seen all messages
-          this.$store.commit("setHasNewMessages", {
-            channelId: this.channel.perspective,
-            value: false,
-          });
-
-          this.showNewMessagesButton = false;
+          this.markAsRead();
 
           setTimeout(() => {
             container.scrollTo({
