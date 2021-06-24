@@ -34,9 +34,31 @@
 }
 
 [theme="90s"] j-modal::part(modal) {
+  position: relative;
   background: silver;
   box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
     inset 2px 2px #dfdfdf;
+  padding: 0;
+}
+
+[theme="90s"] j-modal::part(content) {
+  padding: var(--j-space-800);
+  background: silver;
+  z-index: 1;
+  position: relative;
+}
+
+[theme="90s"] j-modal::part(modal):before {
+  position: absolute;
+  content: "";
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: 2px solid white;
+  left: 19px;
+  top: 20px;
 }
 
 [theme="90s"] j-avatar::part(base) {

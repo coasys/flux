@@ -255,9 +255,28 @@ export default defineComponent({
 
 <style>
 body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
   padding: 0;
   margin: 0;
   color: var(--j-color-ui-500);
+}
+
+/* TODO: Put this in junto-elements? */
+j-popover {
+  position: fixed !important;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 :root {
@@ -266,6 +285,9 @@ body {
   --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
   --app-drawer-border-color: var(--j-border-color);
   --app-channel-bg-color: var(--j-color-white);
+  --app-channel-border-color: var(--j-border-color);
+  --app-channel-header-bg-color: var(--j-color-white);
+  --app-channel-footer-bg-color: var(--j-color-white);
 }
 
 .global-loading {
