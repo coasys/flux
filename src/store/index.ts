@@ -134,7 +134,7 @@ export interface State {
   userProfile: Profile | null;
   updateState: UpdateState;
   userDid: string;
-  windowState: "minimize" | "visible" | "foreground"
+  windowState: "minimize" | "visible" | "foreground";
 }
 
 export interface ExpressionUIIcons {

@@ -88,7 +88,7 @@ export async function createProfile(
       "schema:familyName": familyName,
       "@type": "foaf:OnlineAccount",
     };
-  
+
     if (profileImage) {
       profile["schema:image"] = JSON.stringify({
         "@type": "schema:ImageObject",
@@ -101,7 +101,7 @@ export async function createProfile(
         },
       });
     }
-  
+
     const createProfileExpression = await createExpression(
       expressionLanguage,
       JSON.stringify({
@@ -113,7 +113,7 @@ export async function createProfile(
         signed_agent: "NA",
       })
     );
-  
+
     return createProfileExpression;
   } catch (error) {
     throw new Error(error);
