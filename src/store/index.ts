@@ -26,6 +26,7 @@ export interface CommunityState {
 export interface ChannelState {
   name: string;
   hasNewMessages: boolean;
+  scrollTop?: number;
   perspective: string; //NOTE: this is essentially the UUID for the community
   linkLanguageAddress: string;
   sharedPerspectiveUrl: string;

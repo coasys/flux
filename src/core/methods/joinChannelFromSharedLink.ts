@@ -6,6 +6,7 @@ export async function joinChannelFromSharedLink(
   sharedPerspectiveUrl: string
 ): Promise<ChannelState> {
   try {
+    console.log("Starting sharedperspective join");
     const installedChannelPerspective = await installSharedPerspective(
       sharedPerspectiveUrl
     );

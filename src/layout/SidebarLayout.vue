@@ -90,6 +90,7 @@ export default defineComponent({
   width: 100%;
   max-height: 100vh;
   flex: 1;
+  position: relative;
   background: var(--app-main-content-bg-color);
 }
 .sidebar-layout__resize-handle {
