@@ -16,7 +16,7 @@
 .app-layout__sidebar {
   background: var(--app-main-sidebar-bg-color);
   height: 100%;
-  border-right: 1px var(--app-drawer-border-color) solid;
+  border-right: 1px var(--app-main-sidebar-border-color) solid;
   display: flex;
   flex-direction: column;
   justify-content: space-between;

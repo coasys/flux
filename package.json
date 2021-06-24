@@ -1,6 +1,6 @@
 {
   "name": "junto",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "description": "Junto ad4m chat application leveraging distributed & decentralized technologies",
   "author": "josh@junto.foundation",
@@ -27,7 +27,7 @@
     "@apollo/client": "^3.3.14",
     "@junto-foundation/junto-elements": "0.0.13",
     "@perspect3vism/ad4m": "0.0.6",
-    "@perspect3vism/ad4m-executor": "0.0.14",
+    "@perspect3vism/ad4m-executor": "0.0.15",
     "@types/jest": "^26.0.20",
     "@types/mocha": "^8.2.1",
     "@vue/apollo-composable": "^4.0.0-alpha.12",

@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld("api", {
       "download-update",
       "quit-and-install",
       "check-update",
+      "restoreWindow",
     ];
     if (validChannels.includes(channel)) {
       ipcRenderer.send(channel, data);
@@ -29,6 +30,7 @@ contextBridge.exposeInMainWorld("api", {
       "update_downloaded",
       "download_progress",
       "globalError",
+      "windowState",
     ];
     if (validChannels.includes(channel)) {
       // Deliberately strip event as it includes `sender`

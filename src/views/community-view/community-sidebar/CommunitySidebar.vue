@@ -7,7 +7,7 @@
             style="--j-avatar-size: 35px"
             :src="require('@/assets/images/junto_app_icon.png')"
           />
-          <div>
+          <div class="community-info">
             <j-text
               v-if="community.name"
               weight="500"
@@ -28,7 +28,7 @@
             </j-text>
           </div>
         </j-flex>
-        <j-icon size="xs" name="chevron-down"></j-icon>
+        <j-icon size="xs" name="chevron-expand"></j-icon>
       </j-flex>
     </button>
 
@@ -86,6 +86,7 @@
           :key="channel.perspective"
         >
           <j-menu-item
+            :id="getValidId(channel.perspective)"
             class="channel"
             :selected="isExactActive"
             @click="navigate"
@@ -97,6 +98,35 @@
               v-if="channel.hasNewMessages"
             ></div>
           </j-menu-item>
+          <j-popover
+            class="community-sidebar__header-menu"
+            event="contextmenu"
+            placement="bottom-start"
+            :selector="'#' + getValidId(channel.perspective)"
+          >
+            <j-menu>
+              <j-menu-item
+                @click="
+                  () =>
+                    setChannelNotificationState({
+                      communityId: community.perspective,
+                      channelId: channel.perspective,
+                    })
+                "
+              >
+                <j-icon
+                  size="xs"
+                  slot="start"
+                  :name="
+                    channel?.notifications?.mute ? 'volume-mute' : 'volume-up'
+                  "
+                />
+                {{
+                  `${channel?.notifications?.mute ? "Unmute" : "Mute"} Channel`
+                }}
+              </j-menu-item>
+            </j-menu>
+          </j-popover>
         </router-link>
       </j-menu-group-item>
     </j-box>
@@ -116,7 +146,11 @@ export default defineComponent({
       "setShowCreateChannel",
       "setShowEditCommunity",
       "setShowCommunityMembers",
+      "setChannelNotificationState",
     ]),
+    getValidId(val: string) {
+      return "channel-" + val;
+    },
     getInviteCode() {
       // Get the invite code to join community and copy to clipboard
       let currentCommunity = this.community;
@@ -139,6 +173,7 @@ export default defineComponent({
 .community-sidebar__header {
   color: inherit;
   width: 100%;
+  height: 74px;
   display: block;
   border: 0;
   outline: 0;
@@ -146,12 +181,19 @@ export default defineComponent({
   text-align: left;
   background: none;
   cursor: pointer;
-  padding: var(--j-space-400) var(--j-space-500);
+  padding: 0 var(--j-space-500);
   border-bottom: 1px solid var(--app-drawer-border-color);
 }
 
 .community-sidebar__header:hover {
   background: var(--j-color-ui-50);
+}
+
+.community-info {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
 }
 
 j-divider {
