@@ -7,7 +7,7 @@
             style="--j-avatar-size: 35px"
             :src="require('@/assets/images/junto_app_icon.png')"
           />
-          <div>
+          <div class="community-info">
             <j-text
               v-if="community.name"
               weight="500"
@@ -28,7 +28,7 @@
             </j-text>
           </div>
         </j-flex>
-        <j-icon size="xs" name="chevron-down"></j-icon>
+        <j-icon size="xs" name="chevron-expand"></j-icon>
       </j-flex>
     </button>
 
@@ -139,6 +139,7 @@ export default defineComponent({
 .community-sidebar__header {
   color: inherit;
   width: 100%;
+  height: 74px;
   display: block;
   border: 0;
   outline: 0;
@@ -146,12 +147,19 @@ export default defineComponent({
   text-align: left;
   background: none;
   cursor: pointer;
-  padding: var(--j-space-400) var(--j-space-500);
+  padding: 0 var(--j-space-500);
   border-bottom: 1px solid var(--app-drawer-border-color);
 }
 
 .community-sidebar__header:hover {
   background: var(--j-color-ui-50);
+}
+
+.community-info {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
 }
 
 j-divider {
