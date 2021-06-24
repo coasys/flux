@@ -1,7 +1,7 @@
-import { getProfile, toProfile } from "@/utils/profileHelpers";
+import { getProfile } from "@/utils/profileHelpers";
 import { getLinks } from "@/core/queries/getLinks";
 import { Commit } from "vuex";
-import { ExpressionTypes, Profile, State } from "..";
+import { ExpressionTypes, State } from "..";
 import type Expression from "@perspect3vism/ad4m/Expression";
 
 export interface Context {

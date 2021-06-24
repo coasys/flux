@@ -9,47 +9,53 @@ import Address from "@perspect3vism/ad4m/Address";
 
 export default {
   //Dump the whole state
-  dumpState(state: State) {
+  dumpState(state: State): State {
     return state;
   },
-  getProfile(state: State) {
+  getProfile(state: State): Profile | null {
     return state.userProfile;
   },
   // Get the list of communities a user is a part of
-  getCommunities(state: State) {
+  getCommunities(state: State): { [x: string]: CommunityState } {
     return state.communities;
   },
 
-  getLanguagePath(state: State) {
+  getLanguagePath(state: State): string {
     return state.localLanguagesPath;
   },
 
-  getCommunity: (state: State) => (id: string) => {
-    const community = state.communities[id];
+  getCommunity:
+    (state: State) =>
+    (id: string): CommunityState => {
+      const community = state.communities[id];
 
-    return community;
-  },
+      return community;
+    },
 
-  getChannel: (state: State) => (payload: any) => {
-    const { channelId, communityId } = payload;
-    const community = state.communities[communityId];
+  getChannel:
+    (state: State) =>
+    (payload: any): ChannelState => {
+      const { channelId, communityId } = payload;
+      const community = state.communities[communityId];
 
-    return community?.channels[channelId];
-  },
+      return community?.channels[channelId];
+    },
 
-  getDatabasePerspective(state: State) {
+  getDatabasePerspective(state: State): string {
     return state.databasePerspective;
   },
 
-  getChannelFromLinkLanguage: (state: State) => (linkLanguage: string) => {
-    for (const community of Object.values(state.communities)) {
-      for (const channel of Object.values(community.channels)) {
-        if (channel.linkLanguageAddress == linkLanguage) {
-          return channel;
+  getChannelFromLinkLanguage:
+    (state: State) =>
+    (linkLanguage: string): ChannelState | undefined => {
+      for (const community of Object.values(state.communities)) {
+        for (const channel of Object.values(community.channels)) {
+          if (channel.linkLanguageAddress == linkLanguage) {
+            return channel;
+          }
         }
       }
-    }
-  },
+    },
 
   getPerspectiveFromLinkLanguage: (state: State) => (linkLanguage: string) => {
     let perspective;

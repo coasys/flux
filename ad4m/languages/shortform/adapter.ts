@@ -61,6 +61,7 @@ export default class ShortFormAdapter implements ExpressionAdapter {
       "get_expression_by_address",
       hash
     );
+    console.log("Language got shortform expression result", expression);
     if (expression != null) {
       const acai_expression: Expression = Object.assign(
         expression.expression_data

@@ -8,6 +8,12 @@ import {
 import VueApollo from "@vue/apollo-option";
 import { UpdateState } from "./store";
 
+declare global {
+  interface Window {
+    api: any;
+  }
+}
+
 declare module "@vue/runtime-core" {
   // declare your own store states
   interface State {
@@ -25,6 +31,7 @@ declare module "@vue/runtime-core" {
     agentInit: boolean;
     userProfile: Profile | null;
     updateState: UpdateState;
+    userDid: string;
   }
 
   // provide typings for `this.$store`

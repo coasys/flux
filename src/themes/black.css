@@ -1,0 +1,101 @@
+:root[theme="black"] {
+  --j-color-white: hsl(var(--j-color-ui-hue), 0%, 0%);
+  --j-color-black: hsl(var(--j-color-ui-hue), 0%, 100%);
+
+  --j-color-saturation: 50%;
+
+  --j-color-primary-50: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    5%
+  );
+  --j-color-primary-100: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    10%
+  );
+  --j-color-primary-200: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    20%
+  );
+  --j-color-primary-300: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    30%
+  );
+  --j-color-primary-400: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    40%
+  );
+  --j-color-primary-500: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    50%
+  );
+  --j-color-primary-600: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    60%
+  );
+  --j-color-primary-700: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    70%
+  );
+  --j-color-primary-800: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    80%
+  );
+  --j-color-primary-900: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    90%
+  );
+
+  --j-color-ui-hue: var(--j-color-primary-hue);
+  --j-color-ui-50: hsl(var(--j-color-ui-hue), 0%, 5%);
+  --j-color-ui-100: hsl(var(--j-color-ui-hue), 0%, 10%);
+  --j-color-ui-200: hsl(var(--j-color-ui-hue), 0%, 20%);
+  --j-color-ui-300: hsl(var(--j-color-ui-hue), 0%, 30%);
+  --j-color-ui-400: hsl(var(--j-color-ui-hue), 0%, 40%);
+  --j-color-ui-500: hsl(var(--j-color-ui-hue), 0%, 50%);
+  --j-color-ui-600: hsl(var(--j-color-ui-hue), 0%, 60%);
+  --j-color-ui-700: hsl(var(--j-color-ui-hue), 0%, 70%);
+  --j-color-ui-800: hsl(var(--j-color-ui-hue), 0%, 80%);
+  --j-color-ui-900: hsl(var(--j-color-ui-hue), 0%, 90%);
+
+  --j-border-color: hsl(var(--j-color-ui-hue), 0%, 15%);
+  --j-border-color-strong: hsl(var(--j-color-ui-hue), 0%, 30%);
+
+  /*  App specific styles */
+  --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
+  --app-main-sidebar-border-color: hsl(var(--j-color-ui-hue), 0%, 15%);
+
+  --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
+  --app-drawer-border-color: hsl(var(--j-color-ui-hue), 0%, 15%);
+
+  --app-channel-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
+  --app-channel-border-color: hsl(var(--j-color-ui-hue), 0%, 15%);
+  --app-channel-header-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
+  --app-channel-footer-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
+}
+
+:root[theme="black"] body {
+  color: var(--j-color-ui-800);
+}
+
+:root[theme="black"] j-text[variant="heading"]::part(base) {
+  --j-text-color: var(--j-color-black);
+}
+
+:root[theme="black"] j-menu-item {
+  --j-menu-item-font-weight: 500;
+}
+
+:root[theme="black"] j-menu-item[selected] {
+  --j-menu-item-bg: var(--j-color-primary-50);
+  --j-menu-item-color: var(--j-color-primary-500);
+}
