@@ -37,6 +37,9 @@ export interface ChannelState {
   typedExpressionLanguages: JuntoExpressionReference[];
   membraneType: MembraneType;
   groupExpressionRef: string;
+  notifications: {
+    mute: boolean;
+  };
 }
 
 export interface LinkExpressionAndLang {
@@ -66,7 +69,6 @@ export enum FeedType {
 }
 
 export interface Profile {
-  address: string;
   username: string;
   email: string;
   givenName: string;
@@ -131,6 +133,8 @@ export interface State {
   agentInit: boolean;
   userProfile: Profile | null;
   updateState: UpdateState;
+  userDid: string;
+  windowState: "minimize" | "visible" | "foreground"
 }
 
 export interface ExpressionUIIcons {
@@ -198,6 +202,8 @@ export default createStore({
     agentInit: false,
     userProfile: null,
     updateState: "not-available",
+    userDid: "",
+    windowState: "visible",
   },
   plugins: [vuexLocal.plugin],
   mutations: mutations,

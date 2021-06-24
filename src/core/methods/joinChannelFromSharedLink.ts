@@ -39,6 +39,9 @@ export async function joinChannelFromSharedLink(
       membraneType: MembraneType.Inherited,
       groupExpressionRef: "",
       typedExpressionLanguages: typedExpressionLanguages,
+      notifications: {
+        mute: false,
+      },
     };
   } catch (error) {
     throw new Error(error);

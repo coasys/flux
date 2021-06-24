@@ -164,8 +164,12 @@ export default {
     }
   },
 
-  createProfile(state: State, payload: Profile): void {
-    state.userProfile = payload;
+  createProfile(
+    state: State,
+    { profile, did }: { profile: Profile; did: string }
+  ): void {
+    state.userProfile = profile;
+    state.userDid = did;
   },
 
   setUserProfile(state: State, payload: Profile): void {
@@ -269,5 +273,20 @@ export default {
 
   setShowSettings(state: State, payload: boolean): void {
     state.ui.modals.showSettings = payload;
+  },
+
+  setChannelNotificationState(
+    state: State,
+    { communityId, channelId }: { communityId: string; channelId: string }
+  ): void {
+    console.log(state.communities[communityId], communityId);
+
+    const channel = state.communities[communityId].channels[channelId];
+
+    channel.notifications.mute = !channel.notifications.mute;
+  },
+
+  setWindowState(state: State, payload: "minimize" | "visible" | "foreground"): void {
+    state.windowState = payload;
   },
 };

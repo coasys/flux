@@ -37,7 +37,7 @@
 
 <script lang="ts">
 import { useQuery } from "@vue/apollo-composable";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useSubscription } from "@vue/apollo-composable";
 import { defineComponent, watch, computed } from "vue";
 import { AD4M_SIGNAL } from "@/core/graphql_queries";
@@ -49,6 +49,7 @@ import ad4m from "@perspect3vism/ad4m-executor";
 import { AGENT_SERVICE_STATUS, QUERY_EXPRESSION } from "@/core/graphql_queries";
 import { ModalsState, ToastState } from "@/store";
 import parseSignalAsLink from "@/core/utils/parseSignalAsLink";
+import showMessageNotification from "@/utils/showMessageNotification";
 import { print } from "graphql/language/printer";
 
 declare global {
@@ -61,6 +62,7 @@ export default defineComponent({
   name: "App",
   setup() {
     const router = useRouter();
+    const route = useRoute();
     const store = useStore();
 
     onError((error) => {
@@ -124,6 +126,11 @@ export default defineComponent({
             if (expression) {
               //Expression is not null, which means we got the data and we can terminate the loop
               expressionWorker.terminate();
+              const message = JSON.parse(expression!.data!);
+              const escapedMessage = message.body.replace(
+                /(\s*<.*?>\s*)+/g,
+                " "
+              );
               console.log("FOUND EXPRESSION FOR SIGNAL");
               //Add the expression to the store
               store.commit("addExpressionAndLinkFromLanguageAddress", {
@@ -131,6 +138,16 @@ export default defineComponent({
                 link: link,
                 message: expression,
               });
+
+              showMessageNotification(
+                router,
+                route,
+                store,
+                language,
+                expression!.author!.did!,
+                escapedMessage
+              );
+
               //Add UI notification on the channel to notify that there is a new message there
               store.commit("setHasNewMessages", {
                 channelId:
@@ -219,6 +236,11 @@ export default defineComponent({
     window.api.receive("getLangPathResponse", (data: string) => {
       // console.log(`Received language path from main thread: ${data}`);
       this.$store.commit("setLanguagesPath", data);
+    });
+
+    window.api.receive("windowState", (data: string) => {
+      console.log(`setWindowState: ${data}`);
+      this.$store.commit("setWindowState", data);
     });
 
     window.api.receive("update_available", () => {
