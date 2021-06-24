@@ -23,6 +23,7 @@ export interface LoadExpressionResult {
   linksWorker: any;
 }
 
+/// Function that polls for new messages on a channel using a web worker, if a message link is found then another web worker is spawned to retry getting the expression until its found
 export default async function (
   { getters, commit, state }: Context,
   { channelId, communityId, from, to }: Payload
@@ -50,15 +51,18 @@ export default async function (
       name: `Get channel messages ${channel.name}`,
     });
 
+    //If links worker gets an error then throw it
     linksWorker.onerror = function (e) {
       throw new Error(e.toString());
     };
 
+    //Listen for message callback saying we got some links
     linksWorker.addEventListener("message", async (e) => {
       const linkQuery = e.data.links;
       if (linkQuery) {
         if (channel) {
           for (const link of linkQuery) {
+            //Hash the link data as the key for map and check if it exists in the store
             const currentExpressionLink =
               channel.currentExpressionLinks[
                 hash(link.data!, { excludeValues: "__typename" })
@@ -67,6 +71,7 @@ export default async function (
             if (!currentExpressionLink) {
               const expressionWorker = new Worker("pollingWorker.js");
 
+              //Run expression worker to try and get expression on link target
               expressionWorker.postMessage({
                 retry: 50,
                 interval: 5000,
@@ -81,8 +86,11 @@ export default async function (
 
               expressionWorker.addEventListener("message", (e) => {
                 const expression = e.data.expression;
+                //Check an expression was actually found as not null
                 if (expression) {
+                  //Expression not null so kill the worker to stop future polling
                   expressionWorker.terminate();
+                  //Add the link and message to the store
                   commit("addMessage", {
                     channelId,
                     communityId,

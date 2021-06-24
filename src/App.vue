@@ -95,14 +95,16 @@ export default defineComponent({
       { immediate: true }
     );
 
-    //Watch for incoming signals to get expression data
+    //Watch for incoming signals from holochain - an incoming signal should mean a DM is inbound
     watch(result, async (data) => {
       console.log("GOT INCOMING MESSAGE SIGNAL");
+      //Parse out the signal data to its link form and validate the link structure
       const linkData = parseSignalAsLink(data.signal);
       if (linkData) {
         const link = linkData.link;
         const language = linkData.language;
         if (link.data!.predicate! == "sioc://content_of") {
+          //Start expression web worker to try and get the expression data pointed to in link target
           const expressionWorker = new Worker("pollingWorker.js");
 
           expressionWorker.postMessage({
@@ -120,13 +122,16 @@ export default defineComponent({
           expressionWorker.addEventListener("message", (e) => {
             const expression = e.data.expression;
             if (expression) {
+              //Expression is not null, which means we got the data and we can terminate the loop
               expressionWorker.terminate();
               console.log("FOUND EXPRESSION FOR SIGNAL");
+              //Add the expression to the store
               store.commit("addExpressionAndLinkFromLanguageAddress", {
                 linkLanguage: language,
                 link: link,
                 message: expression,
               });
+              //Add UI notification on the channel to notify that there is a new message there
               store.commit("setHasNewMessages", {
                 channelId:
                   store.getters.getChannelFromLinkLanguage(language)
