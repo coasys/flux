@@ -221,20 +221,20 @@ async function createWindow() {
     show: false,
   });
 
-  win.on('minimize', () => {
-    win.webContents.send("windowState", 'minimize');
+  win.on("minimize", () => {
+    win.webContents.send("windowState", "minimize");
   });
 
-  win.on('restore', () => {
-    win.webContents.send("windowState", 'visible');
+  win.on("restore", () => {
+    win.webContents.send("windowState", "visible");
   });
 
-  win.on('focus', () => {
-    win.webContents.send("windowState", 'visible');
+  win.on("focus", () => {
+    win.webContents.send("windowState", "visible");
   });
 
-  win.on('blur', () => {
-    win.webContents.send("windowState", 'foreground');
+  win.on("blur", () => {
+    win.webContents.send("windowState", "foreground");
   });
 
   win.removeMenu();
@@ -260,7 +260,7 @@ ipcMain.on("ping", () => {
 });
 
 ipcMain.on("restoreWindow", () => {
-  if(win.isMinimized()) {
+  if (win.isMinimized()) {
     win.restore();
   }
 

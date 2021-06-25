@@ -1,8 +1,5 @@
 import { ChannelState, CommunityState, State } from "@/store";
-import {
-  RouteLocationNormalizedLoaded,
-  Router,
-} from "vue-router";
+import { RouteLocationNormalizedLoaded, Router } from "vue-router";
 import { Store } from "vuex";
 
 export default async (
@@ -30,18 +27,20 @@ export default async (
     }
   }
 
-  
-  const isMinimized = ['minimize', 'foreground'].includes(store.state.windowState);
-  
+  const isMinimized = ["minimize", "foreground"].includes(
+    store.state.windowState
+  );
+
   const { channelId, communityId } = route.params;
 
   // Only show the notification when the the message is not from self & the active community & channel is different
   if (
-    isMinimized || 
+    isMinimized ||
     (store.state.userDid !== authorDid &&
-    (community?.perspective === communityId ?
-    channel?.perspective !== channelId : true) &&
-    !channel?.notifications.mute)
+      (community?.perspective === communityId
+        ? channel?.perspective !== channelId
+        : true) &&
+      !channel?.notifications.mute)
   ) {
     const notification = new Notification(`New message in ${community?.name}`, {
       body: `#${channel?.name}: ${message}`,
