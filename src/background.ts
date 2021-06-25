@@ -210,9 +210,9 @@ function createSplashScreen() {
 
 async function createWindow() {
   if (process.env.WEBPACK_DEV_SERVER_URL) {
-    tray = new Tray(`${process.env.PWD}/public/img/icons/junto_web_logo--rainbow.png`);
+    tray = new Tray(`${process.env.PWD}/public/img/icons/favicon-32x32.png`);
   } else {
-    tray = new Tray(`${__dirname}/public/img/icons/junto_web_logo--rainbow.png`);
+    tray = new Tray(`${__dirname}/public/img/icons/favicon-32x32.png`);
   }
 
   tray.setContextMenu(Menu.buildFromTemplate([{
