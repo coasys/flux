@@ -79,6 +79,9 @@ export async function createChannel(
       membraneType: membraneType,
       groupExpressionRef: "",
       typedExpressionLanguages: typedExpressionLanguages,
+      notifications: {
+        mute: false,
+      },
     };
   } catch (error) {
     throw new Error(error);

@@ -42,13 +42,15 @@ export default async (
     commit("addDatabasePerspective", addPerspectiveResult.uuid);
 
     commit("createProfile", {
-      address: status.did!,
-      username: username,
-      email: email,
-      givenName: givenName,
-      familyName: familyName,
-      profilePicture,
-      thumbnailPicture,
+      profile: {
+        username: username,
+        email: email,
+        givenName: givenName,
+        familyName: familyName,
+        profilePicture,
+        thumbnailPicture,
+      },
+      did: status.did!,
     });
 
     commit("updateAgentInitState", true);

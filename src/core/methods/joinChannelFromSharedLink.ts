@@ -6,6 +6,7 @@ export async function joinChannelFromSharedLink(
   sharedPerspectiveUrl: string
 ): Promise<ChannelState> {
   try {
+    console.log("Starting sharedperspective join");
     const installedChannelPerspective = await installSharedPerspective(
       sharedPerspectiveUrl
     );
@@ -38,6 +39,9 @@ export async function joinChannelFromSharedLink(
       membraneType: MembraneType.Inherited,
       groupExpressionRef: "",
       typedExpressionLanguages: typedExpressionLanguages,
+      notifications: {
+        mute: false,
+      },
     };
   } catch (error) {
     throw new Error(error);

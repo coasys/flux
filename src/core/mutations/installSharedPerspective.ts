@@ -14,10 +14,13 @@ export async function installSharedPerspective(
         variables: {
           url: url,
         },
+        fetchPolicy: "no-cache",
       })
       .then((result) => {
         resolve(result.data!.installSharedPerspective);
       })
-      .catch((error) => reject(error));
+      .catch((error) => {
+        reject(error);
+      });
   });
 }
