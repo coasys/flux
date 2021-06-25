@@ -217,8 +217,9 @@ async function createWindow() {
 
   tray.setContextMenu(Menu.buildFromTemplate([{
     label: 'Quit',
-    click: () => {
+    click: async () => {
       isQuiting = true;
+      await Core.exit();
       app.quit();
     }
   }]));
@@ -247,7 +248,7 @@ async function createWindow() {
       win.hide();
     }
   });
-  
+
   win.on("minimize", () => {
     win.webContents.send("windowState", "minimize");
   });
