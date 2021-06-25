@@ -3,6 +3,7 @@ import { getLinks } from "@/core/queries/getLinks";
 import { Commit } from "vuex";
 import { ExpressionTypes, State } from "..";
 import type Expression from "@perspect3vism/ad4m/Expression";
+import { TimeoutCache } from "../../utils/timeoutCache";
 
 export interface Context {
   commit: Commit;
@@ -18,6 +19,7 @@ export default async function (
   { communityId }: Payload
 ): Promise<void> {
   const profiles: { [x: string]: Expression } = {};
+  const cache = new TimeoutCache<Expression>(1000 * 60 * 5);
 
   try {
     const communities = state.communities;
@@ -47,6 +49,7 @@ export default async function (
 
         if (profile) {
           profiles[did] = Object.assign({}, profile);
+          cache.set(did, profile);
         }
       }
 

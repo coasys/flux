@@ -26,11 +26,13 @@ export default async (
     const user: Profile | null = state.userProfile;
 
     const communities = Object.values(state.communities);
+    const cache = new TimeoutCache<Expression>(1000 * 60 * 5);
 
     for (const community of communities) {
       const profileExpression = community.typedExpressionLanguages.find(
         (t) => t.expressionType == ExpressionTypes.ProfileExpression
       );
+      const didExpression = `${profileExpression!.languageAddress}://${state.userDid!}`;
 
       console.log("profileExpression: ", profileExpression);
 
@@ -47,8 +49,6 @@ export default async (
 
         console.log("Created new profileExpression: ", exp);
 
-        const cache = new TimeoutCache<Expression>(1000 * 60 * 5);
-
         const expressionGql = await getExpression(exp);
         const profileExp = {
           author: expressionGql.author!,
@@ -56,8 +56,7 @@ export default async (
           timestamp: expressionGql.timestamp!,
           proof: expressionGql.proof!,
         } as Expression;
-        console.log("Settinv cache as exp", profileExp);
-        cache.set(exp, profileExp);
+        cache.set(didExpression, profileExp);
       } else {
         const errorMessage =
           "Expected to find profile expression language for this community";
