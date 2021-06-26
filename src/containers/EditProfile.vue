@@ -8,13 +8,13 @@
     <j-input
       size="lg"
       label="Username"
-      @keydown.enter="updateUser"
+      @keydown.enter="updateProfile"
       :value="userProfile?.username"
       @input="(e) => (username = e.target.value)"
     ></j-input>
     <div>
       <j-button size="lg" @click="$emit('cancel')"> Cancel </j-button>
-      <j-button size="lg" variant="primary" @click="updateUser">
+      <j-button size="lg" variant="primary" @click="updateProfile">
         Save
       </j-button>
     </div>
@@ -56,10 +56,10 @@ export default defineComponent({
     },
   },
   methods: {
-    updateUser() {
+    updateProfile() {
       this.isUpdatingProfile = true;
       this.$store
-        .dispatch("updateUser", {
+        .dispatch("updateProfile", {
           username: this.username,
           profilePicture: this.profilePicture,
         })
