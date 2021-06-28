@@ -130,7 +130,7 @@ export default {
   },
 
   addExpressionUI(state: State, payload: ExpressionUIIcons): void {
-    state.expressionUI.push(payload);
+    state.expressionUI[payload.languageAddress] = payload;
   },
 
   updateApplicationStartTime(state: State, payload: Date): void {

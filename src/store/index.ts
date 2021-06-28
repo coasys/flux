@@ -128,7 +128,7 @@ export interface State {
   applicationStartTime: Date;
   //TODO: this is a horrible type for this use; would be better to have a real map with values pointing to same strings where appropriate
   //fow now this is fine
-  expressionUI: ExpressionUIIcons[];
+  expressionUI: { [x: string]: ExpressionUIIcons };
   agentUnlocked: boolean;
   agentInit: boolean;
   userProfile: Profile | null;
@@ -197,7 +197,7 @@ export default createStore({
     localLanguagesPath: "",
     databasePerspective: "",
     applicationStartTime: new Date(),
-    expressionUI: [],
+    expressionUI: {},
     agentUnlocked: false,
     agentInit: false,
     userProfile: null,
