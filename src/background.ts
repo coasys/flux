@@ -246,7 +246,7 @@ async function createWindow() {
   } else {
     createProtocol("app");
     // Load the index.html when not in development
-    win.loadURL(`file://${__dirname}/index.html`);
+    await win.loadURL(`file://${__dirname}/index.html`);
   }
 
   win.show();
