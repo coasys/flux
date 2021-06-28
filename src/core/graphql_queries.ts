@@ -96,6 +96,16 @@ export const LANGUAGES = gql`
     languages(filter: $filter) {
       name
       address
+      constructorIcon {
+        code
+      }
+      iconFor {
+        code
+      }
+      settings
+      settingsIcon {
+        code
+      }
     }
   }
 `;
