@@ -1,13 +1,7 @@
 <template>
   <div class="avatar-upload" id="fileInputButton" @click="onFileClick">
     <j-flex direction="column" gap="400" a="center">
-      <j-avatar
-        id="myProfile"
-        :hash="hash"
-        size="xl"
-        :src="value"
-        initials="P"
-      ></j-avatar>
+      <j-avatar id="myProfile" :hash="hash" size="xl" :src="value"></j-avatar>
       <j-button v-if="!value" size="sm">Upload image</j-button>
       <j-button v-if="value" @click.prevent="$emit('change', null)" size="sm">
         Remove image
