@@ -140,7 +140,7 @@ app.on("ready", async () => {
           languages: [],
           perspectives: [],
         },
-        appBuiltInLangs: ["social-context"],
+        appBuiltInLangs: ["social-context", "youtube"],
         appLangAliases: null,
         mocks: false,
       })
