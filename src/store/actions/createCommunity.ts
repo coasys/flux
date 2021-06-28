@@ -182,6 +182,7 @@ export default async (
         languageAddress: lang,
         createIcon: languageRes.constructorIcon!.code!,
         viewIcon: languageRes.iconFor!.code!,
+        name: languageRes.name!,
       };
       commit("addExpressionUI", uiData);
       await sleep(40);

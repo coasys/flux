@@ -24,6 +24,7 @@ export async function getTypedExpressionLanguages<S>(
           languageAddress: lang!,
           createIcon: languageRes.constructorIcon!.code!,
           viewIcon: languageRes.iconFor!.code!,
+          name: languageRes.name!,
         };
         store!.commit({
           type: "addExpressionUI",

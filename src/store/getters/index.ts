@@ -87,7 +87,7 @@ export default {
     return state.applicationStartTime;
   },
 
-  getLangugeUI(state: State, language: string): ExpressionUIIcons {
+  getLanguageUI: (state: State) => (language: string) => {
     return state.expressionUI[language];
   },
 };
