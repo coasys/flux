@@ -68,7 +68,7 @@
           @click.prevent="() => setShowCreateChannel(true)"
           size="sm"
           slot="end"
-          variant="transparent"
+          variant="subtle"
         >
           <j-icon size="sm" square name="plus"></j-icon>
         </j-button>
@@ -88,16 +88,25 @@
           <j-menu-item
             :id="getValidId(channel.perspective)"
             class="channel"
+            :class="{ 'channel--mute': channel?.notifications?.mute }"
             :selected="isExactActive"
             @click="navigate"
           >
             <j-icon slot="start" size="sm" name="hash"></j-icon>
             {{ channel.name }}
+            <j-icon
+              size="xs"
+              slot="end"
+              v-if="channel?.notifications?.mute"
+              name="volume-mute"
+            />
             <div
+              slot="end"
               class="channel__notification"
               v-if="channel.hasNewMessages"
             ></div>
           </j-menu-item>
+
           <j-popover
             class="community-sidebar__header-menu"
             event="contextmenu"
@@ -128,6 +137,10 @@
             </j-menu>
           </j-popover>
         </router-link>
+        <j-menu-item @click="() => setShowCreateChannel(true)">
+          <j-icon size="xs" slot="start" name="plus" />
+          Add channel
+        </j-menu-item>
       </j-menu-group-item>
     </j-box>
   </div>
@@ -207,6 +220,10 @@ j-divider {
 .channel {
   position: relative;
   display: block;
+}
+
+.channel--mute {
+  opacity: 0.5;
 }
 
 .channel__notification {
