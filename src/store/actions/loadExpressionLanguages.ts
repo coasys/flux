@@ -1,7 +1,7 @@
 import { Commit } from "vuex";
 
 import { ExpressionUIIcons } from "@/store";
-import { getLanguage } from "@/core/queries/getLanguage";
+import { getLanguages } from "@/core/queries/getLanguages";
 
 export interface Context {
   commit: Commit;
@@ -14,18 +14,18 @@ export interface Payload {
 
 export default async ({ commit, getters }: Context): Promise<void> => {
   try {
-    const expressionLangs = getters.getAllExpressionLanguagesNotLoaded;
-    // console.log({ expressionLangs });
-    for (const [, lang] of expressionLangs.entries()) {
-      const language = await getLanguage(lang);
-      console.log("Got language", language);
-      if (language !== null) {
-        const uiData: ExpressionUIIcons = {
-          languageAddress: language!.address!,
-          createIcon: language!.constructorIcon!.code!,
-          viewIcon: language!.iconFor!.code!,
-        };
-        commit("addExpressionUI", uiData);
+    const languages = await getLanguages();
+    for (const language of languages) {
+      if (language.iconFor) {
+        if (!getters.getLanguageUI(language.address!)) {
+          const uiData: ExpressionUIIcons = {
+            languageAddress: language!.address!,
+            createIcon: language!.constructorIcon!.code!,
+            viewIcon: language!.iconFor!.code!,
+            name: language!.name!,
+          };
+          commit("addExpressionUI", uiData);
+        }
       }
     }
   } catch (e) {

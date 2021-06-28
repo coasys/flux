@@ -75,26 +75,6 @@ export default {
     return perspective;
   },
 
-  getAllExpressionLanguagesNotLoaded(state: State): Address[] {
-    const expressionLangs: Address[] = [];
-
-    for (const community of Object.values(state.communities)) {
-      for (const expLang of community.expressionLanguages) {
-        if (
-          expressionLangs.indexOf(expLang) === -1 &&
-          //@ts-ignore
-          state.expressionUI.find(
-            (val: ExpressionUIIcons) => val.languageAddress === expLang
-          ) === undefined
-        ) {
-          expressionLangs.push(expLang);
-        }
-      }
-    }
-
-    return expressionLangs;
-  },
-
   getAgentLockStatus(state: State): boolean {
     return state.agentUnlocked;
   },
@@ -105,5 +85,9 @@ export default {
 
   getApplicationStartTime(state: State): Date {
     return state.applicationStartTime;
+  },
+
+  getLanguageUI: (state: State) => (language: string) => {
+    return state.expressionUI[language];
   },
 };

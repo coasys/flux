@@ -144,14 +144,14 @@ app.on("ready", async () => {
         appLangAliases: null,
         mocks: false,
       })
-      .then((ad4mCore: ad4m.PerspectivismCore) => {
+      .then(async (ad4mCore: ad4m.PerspectivismCore) => {
         Core = ad4mCore;
         console.log(
           "\x1b[36m%s\x1b[0m",
           "Starting account creation splash screen"
         );
 
-        createWindow();
+        await createWindow();
 
         Core.waitForAgent().then(async () => {
           win.webContents.send("setGlobalLoading", true);
@@ -246,7 +246,7 @@ async function createWindow() {
   } else {
     createProtocol("app");
     // Load the index.html when not in development
-    win.loadURL(`file://${__dirname}/index.html`);
+    await win.loadURL(`file://${__dirname}/index.html`);
   }
 
   win.show();
