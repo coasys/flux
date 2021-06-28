@@ -35,7 +35,7 @@ export default async (
 
   // Only show the notification when the the message is not from self & the active community & channel is different
   if (
-    isMinimized ||
+    (isMinimized && !channel?.notifications.mute) ||
     (store.state.userDid !== authorDid &&
       (community?.perspective === communityId
         ? channel?.perspective !== channelId

@@ -38,10 +38,10 @@ jobs:
         env:
           COMMUNITIES_APPLE_CERT: ${{ secrets.COMMUNITIES_APPLE_CERT }}
           COMMUNITIES_APPLE_CERT_PASSWORD: ${{ secrets.COMMUNITIES_APPLE_CERT_PASSWORD }}
-      - name: Build languages
-        run: npm run build-languages
       - name: Install deps
         run: npm i
+      - name: Build languages
+        run: npm run build-languages
       - name: Build app
         run: npm run release
         env:
@@ -82,10 +82,10 @@ jobs:
         run: |
           pkgver=$(node ./scripts/get-pkg-version.js)
           echo ::set-output name=version::$pkgver
-      - name: Build languages
-        run: npm run build-languages
       - name: Install deps
         run: npm i
+      - name: Build languages
+        run: npm run build-languages
       - name: Build app
         run: npm run release
         env:
