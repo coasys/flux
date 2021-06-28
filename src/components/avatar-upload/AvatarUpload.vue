@@ -3,8 +3,9 @@
     <j-flex direction="column" gap="400" a="center">
       <j-avatar
         id="myProfile"
+        :hash="hash"
         size="xl"
-        :src="value ?? require('@/assets/images/avatar-placeholder.png')"
+        :src="value"
         initials="P"
       ></j-avatar>
       <j-button v-if="!value" size="sm">Upload image</j-button>
@@ -45,7 +46,7 @@ import { Cropper } from "vue-advanced-cropper";
 export default defineComponent({
   components: { Cropper },
   emits: ["change"],
-  props: ["value", "disabled"],
+  props: ["value", "disabled", "hash"],
   data() {
     return {
       tempProfileImage: null,

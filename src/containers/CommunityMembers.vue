@@ -23,12 +23,13 @@
       >
         <j-avatar
           size="lg"
+          :hash="communityMember.author.did"
           :src="
             communityMember.data.profile['schema:image']
               ? JSON.parse(communityMember.data.profile['schema:image'])[
                   'schema:contentUrl'
                 ]
-              : require('@/assets/images/avatar-placeholder.png')
+              : null
           "
         />
         <j-text variant="body">

@@ -2,6 +2,7 @@
   <j-flex direction="column" gap="700">
     <j-text variant="heading">Edit profile</j-text>
     <avatar-upload
+      :hash="userDid"
       :value="profilePicture"
       @change="(url) => (profilePicture = url)"
     ></avatar-upload>
@@ -39,6 +40,9 @@ export default defineComponent({
   computed: {
     userProfile(): Profile {
       return this.$store.state.userProfile || {};
+    },
+    userDid(): string {
+      return this.$store.state.userDid;
     },
   },
   watch: {
