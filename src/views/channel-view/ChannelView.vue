@@ -49,6 +49,16 @@
       </DynamicScroller>
     </div>
     <footer class="channel-view__footer">
+      <j-box pb="300" pt="300">
+        <j-tabs
+          size="sm"
+          :value="expressionType"
+          @change="(e) => (expressionType = e.target.value)"
+        >
+          <j-tab-item value="shortform">Text</j-tab-item>
+          <j-tab-item value="youtube">Youtube link</j-tab-item>
+        </j-tabs>
+      </j-box>
       <j-editor
         @keydown.enter="
           (e) =>
@@ -96,6 +106,7 @@ export default defineComponent({
   components: { DynamicScroller, DynamicScrollerItem, MessageItem },
   data() {
     return {
+      expressionType: "shortform",
       cachedChannelId: "",
       chachedCommunityId: "",
       lastScrollTop: 0,
