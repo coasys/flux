@@ -94,10 +94,6 @@ app.on("ready", async () => {
 
   autoUpdater.autoDownload = false;
 
-  if (!isDevelopment) {
-    autoUpdater.checkForUpdates();
-  }
-
   splash.on("ready-to-show", async () => {
     splash.show();
 
@@ -163,6 +159,11 @@ app.on("ready", async () => {
           await Core.initLanguages();
           win.webContents.send("setGlobalLoading", false);
           console.log("\x1b[32m", "Controllers init complete!");
+
+          //Check for updates
+          if (!isDevelopment) {
+            autoUpdater.checkForUpdates();
+          }
         });
       })
       .catch(async (err) => {
@@ -246,7 +247,7 @@ async function createWindow() {
   } else {
     createProtocol("app");
     // Load the index.html when not in development
-    win.loadURL(`file://${__dirname}/index.html`);
+    await win.loadURL(`file://${__dirname}/index.html`);
   }
 
   win.show();
