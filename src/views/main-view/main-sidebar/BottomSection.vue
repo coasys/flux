@@ -3,11 +3,8 @@
     <j-avatar
       id="myProfile"
       size="xl"
-      :src="
-        userProfile.profilePicture ||
-        require('@/assets/images/avatar-placeholder.png')
-      "
-      initials="P"
+      :hash="userDid"
+      :src="userProfile.profilePicture"
     ></j-avatar>
 
     <j-popover event="click" selector="#myProfile">
@@ -24,10 +21,8 @@
           "
         >
           <j-avatar
-            :src="
-              userProfile.profilePicture ||
-              require('@/assets/images/avatar-placeholder.png')
-            "
+            :hash="userDid"
+            :src="userProfile.profilePicture"
           ></j-avatar>
           <j-text nomargin>{{ userProfile.username }}</j-text>
         </j-flex>
@@ -86,6 +81,9 @@ export default defineComponent({
   computed: {
     userProfile(): Profile {
       return this.$store.state.userProfile || {};
+    },
+    userDid(): string {
+      return this.$store.state.userDid;
     },
     updateApp(): { text: string; func?: () => void } {
       const state = this.$store.state.updateState;

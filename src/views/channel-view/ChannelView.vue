@@ -33,6 +33,7 @@
             class="message"
           >
             <message-item
+              :did="item.did"
               :showAvatar="showAvatar(index)"
               :message="item.message"
               :timestamp="item.timestamp"
