@@ -1,11 +1,12 @@
 <template>
   <div class="left-nav__bottom-section">
-    <j-avatar
-      id="myProfile"
-      size="xl"
-      :hash="userDid"
-      :src="userProfile.profilePicture"
-    ></j-avatar>
+    <j-tooltip id="myProfile" title="My profile">
+      <j-avatar
+        size="xl"
+        :hash="userDid"
+        :src="userProfile.profilePicture"
+      ></j-avatar>
+    </j-tooltip>
 
     <j-popover event="click" selector="#myProfile">
       <j-menu>
@@ -119,7 +120,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .left-nav__bottom-section {
   width: 100%;
-  border-top: 1px var(--app-drawer-border-color) solid;
+  border-top: 1px var(--app-main-sidebar-border-color) solid;
   padding: 2rem 0;
   display: flex;
   gap: var(--j-space-400);
