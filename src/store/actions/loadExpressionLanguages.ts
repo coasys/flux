@@ -21,6 +21,7 @@ export default async ({ commit, getters }: Context): Promise<void> => {
           languageAddress: language!.address!,
           createIcon: language!.constructorIcon!.code!,
           viewIcon: language!.iconFor!.code!,
+          name: language!.name!,
         };
         commit("addExpressionUI", uiData);
       }

@@ -141,6 +141,7 @@ export interface ExpressionUIIcons {
   languageAddress: string;
   createIcon: string;
   viewIcon: string;
+  name: string;
 }
 
 export enum ExpressionTypes {
