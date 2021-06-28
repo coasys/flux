@@ -55,11 +55,23 @@
       </j-menu>
     </j-popover>
 
-    <j-box pt="500" px="500" pb="500">
-      <avatar-group
-        @click="() => setShowCommunityMembers(true)"
-        :users="community.members"
-      />
+    <j-box pt="500" pb="300">
+      <j-menu-group-item open title="Members">
+        <j-button
+          @click.prevent="getInviteCode"
+          size="sm"
+          slot="end"
+          variant="subtle"
+        >
+          <j-icon size="sm" square name="plus"></j-icon>
+        </j-button>
+        <j-box pt="300" px="500">
+          <avatar-group
+            @click="() => setShowCommunityMembers(true)"
+            :users="community.members"
+          />
+        </j-box>
+      </j-menu-group-item>
     </j-box>
 
     <j-box pt="500">
