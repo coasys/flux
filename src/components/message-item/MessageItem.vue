@@ -4,11 +4,7 @@
     :hideuser="!showAvatar"
     :timestamp="timestamp"
   >
-    <j-avatar
-      :src="profileImg || require('@/assets/images/avatar-placeholder.png')"
-      slot="avatar"
-      initials="P"
-    />
+    <j-avatar :hash="did" :src="profileImg" slot="avatar" />
     <span slot="username">{{ username }}</span>
     <div class="message-item__message" slot="message" v-html="message"></div>
   </j-message-item>
@@ -19,6 +15,7 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   props: {
+    did: String,
     timestamp: String,
     username: String,
     message: String,
