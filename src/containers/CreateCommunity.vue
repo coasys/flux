@@ -50,6 +50,7 @@
     <j-flex direction="column" gap="200" v-if="tabView === 'Join'">
       <j-input
         :value="joiningLink"
+        @keydown.enter="joinCommunity"
         @input="(e) => (joiningLink = e.target.value)"
         size="lg"
         label="Invite link"

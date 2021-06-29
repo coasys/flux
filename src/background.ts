@@ -1,6 +1,6 @@
 "use strict";
 
-import { app, protocol, BrowserWindow, ipcMain } from "electron";
+import { app, protocol, BrowserWindow, ipcMain, Tray, Menu } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension from "electron-devtools-installer";
 import ad4m from "@perspect3vism/ad4m-executor";
@@ -16,6 +16,8 @@ let Core: ad4m.PerspectivismCore;
 let builtInLangPath: string;
 let execPath: string;
 let env;
+let tray: Tray;
+let isQuiting: boolean;
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
@@ -208,6 +210,38 @@ function createSplashScreen() {
 }
 
 async function createWindow() {
+  if (process.env.WEBPACK_DEV_SERVER_URL) {
+    tray = new Tray(`${process.env.PWD}/public/img/icons/favicon-32x32.png`);
+  } else {
+    tray = new Tray(`${__dirname}/public/img/icons/favicon-32x32.png`);
+  }
+
+  tray.setContextMenu(
+    Menu.buildFromTemplate([
+      {
+        label: "Open",
+        click: async () => {
+          win.show();
+          if (process.platform === "darwin") {
+            app.dock.show();
+          }
+        },
+      },
+      {
+        label: "Quit",
+        click: async () => {
+          isQuiting = true;
+          await Core.exit();
+          app.quit();
+        },
+      },
+    ])
+  );
+
+  tray.on("click", () => {
+    win.show();
+  });
+
   // Create the browser window.
   win = new BrowserWindow({
     width: 1920,
@@ -220,6 +254,16 @@ async function createWindow() {
     },
     titleBarStyle: "hidden",
     show: false,
+  });
+
+  win.on("close", (event) => {
+    if (!isQuiting) {
+      event.preventDefault();
+      win.hide();
+      if (process.platform === "darwin") {
+        app.dock.hide();
+      }
+    }
   });
 
   win.on("minimize", () => {
@@ -305,6 +349,10 @@ app.on("will-quit", async () => {
   console.log("Got quit quit signal");
   await Core.exit();
   app.quit();
+});
+
+app.on("before-quit", async () => {
+  isQuiting = true;
 });
 
 app.on("activate", () => {

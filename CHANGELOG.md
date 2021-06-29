@@ -2,6 +2,26 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.1.7] - 28/06/2021
+
+### Added
+
+### Changed
+ - We now await loadUrl in prod once window is ready to serve UI
+ - Code to start update search in background.ts not starts after user has logged in to ensure win is defined when update callbacks are called
+
+### Deprecated
+
+### Removed
+
+### Fixed
+ - Ad4m now waits for holochain & lair to emit ready signals before returning from runHolochain function
+ - Update profile will now correctly update the cache after updating
+ - Notfication would sometimes be sent if channel was muted
+
+### Security
+
+---
 ## [0.1.6] - 24/06/2021
 
 ### Added

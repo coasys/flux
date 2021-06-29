@@ -5,12 +5,13 @@
         <j-avatar
           v-for="(user, index) in firstUsers"
           :key="index"
+          :hash="user.author.did"
           :src="
             user.data.profile['schema:image']
               ? JSON.parse(user.data.profile['schema:image'])[
                   'schema:contentUrl'
                 ]
-              : require('@/assets/images/avatar-placeholder.png')
+              : null
           "
           size="sm"
         ></j-avatar>
@@ -63,8 +64,8 @@ export default defineComponent({
   background: var(--j-color-white);
   border: 1px solid var(--j-color-primary-500);
   border-radius: 50%;
-  height: var(--j-element-sm);
-  width: var(--j-element-sm);
+  height: var(--j-size-sm);
+  width: var(--j-size-sm);
   font-size: var(--j-font-size-100);
   color: var(--j-color-primary-500);
   white-space: nowrap;
