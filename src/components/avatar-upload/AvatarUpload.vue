@@ -1,12 +1,7 @@
 <template>
   <div class="avatar-upload" id="fileInputButton" @click="onFileClick">
     <j-flex direction="column" gap="400" a="center">
-      <j-avatar
-        id="myProfile"
-        size="xl"
-        :src="value ?? require('@/assets/images/avatar-placeholder.png')"
-        initials="P"
-      ></j-avatar>
+      <j-avatar id="myProfile" :hash="hash" size="xl" :src="value"></j-avatar>
       <j-button v-if="!value" size="sm">Upload image</j-button>
       <j-button v-if="value" @click.prevent="$emit('change', null)" size="sm">
         Remove image
@@ -45,7 +40,7 @@ import { Cropper } from "vue-advanced-cropper";
 export default defineComponent({
   components: { Cropper },
   emits: ["change"],
-  props: ["value", "disabled"],
+  props: ["value", "disabled", "hash"],
   data() {
     return {
       tempProfileImage: null,
