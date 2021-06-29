@@ -216,6 +216,11 @@ async function createWindow() {
   }
 
   tray.setContextMenu(Menu.buildFromTemplate([{
+    label: 'Open',
+    click: async () => {
+      win.show();
+    }
+  }, {
     label: 'Quit',
     click: async () => {
       isQuiting = true;
