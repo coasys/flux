@@ -87,9 +87,9 @@ export default defineComponent({
         console.log("agent unlocked changed to", newValue);
         if (newValue) {
           store.commit("updateApplicationStartTime", new Date());
-        }
-        if (newValue) {
-          store.dispatch("loadExpressionLanguages");
+          store
+            .dispatch("loadExpressionLanguages")
+            .catch((e) => console.log(e));
         } else {
           router.push({ name: "signup" });
         }
