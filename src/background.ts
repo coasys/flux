@@ -96,10 +96,6 @@ app.on("ready", async () => {
 
   autoUpdater.autoDownload = false;
 
-  if (!isDevelopment) {
-    autoUpdater.checkForUpdates();
-  }
-
   splash.on("ready-to-show", async () => {
     splash.show();
 
@@ -165,6 +161,11 @@ app.on("ready", async () => {
           await Core.initLanguages();
           win.webContents.send("setGlobalLoading", false);
           console.log("\x1b[32m", "Controllers init complete!");
+
+          //Check for updates
+          if (!isDevelopment) {
+            autoUpdater.checkForUpdates();
+          }
         });
       })
       .catch(async (err) => {
@@ -212,7 +213,7 @@ async function createWindow() {
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     tray = new Tray(`${process.env.PWD}/public/img/icons/favicon-32x32.png`);
   } else {
-    tray = new Tray(`${__dirname}/public/img/icons/favicon-32x32.png`);
+    tray = new Tray(`${__dirname}/img/icons/favicon-32x32.png`);
   }
 
   tray.setContextMenu(
