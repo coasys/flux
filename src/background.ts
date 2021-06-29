@@ -215,23 +215,31 @@ async function createWindow() {
     tray = new Tray(`${__dirname}/public/img/icons/favicon-32x32.png`);
   }
 
-  tray.setContextMenu(Menu.buildFromTemplate([{
-    label: 'Open',
-    click: async () => {
-      win.show();
-    }
-  }, {
-    label: 'Quit',
-    click: async () => {
-      isQuiting = true;
-      await Core.exit();
-      app.quit();
-    }
-  }]));
+  tray.setContextMenu(
+    Menu.buildFromTemplate([
+      {
+        label: "Open",
+        click: async () => {
+          win.show();
+          if (process.platform === "darwin") {
+            app.dock.show();
+          }
+        },
+      },
+      {
+        label: "Quit",
+        click: async () => {
+          isQuiting = true;
+          await Core.exit();
+          app.quit();
+        },
+      },
+    ])
+  );
 
-  tray.on('click', () => {
+  tray.on("click", () => {
     win.show();
-  })
+  });
 
   // Create the browser window.
   win = new BrowserWindow({
@@ -247,10 +255,13 @@ async function createWindow() {
     show: false,
   });
 
-  win.on('close', (event) => {
+  win.on("close", (event) => {
     if (!isQuiting) {
       event.preventDefault();
       win.hide();
+      if (process.platform === "darwin") {
+        app.dock.hide();
+      }
     }
   });
 
@@ -339,7 +350,7 @@ app.on("will-quit", async () => {
   app.quit();
 });
 
-app.on('before-quit', async () => {
+app.on("before-quit", async () => {
   isQuiting = true;
 });
 
