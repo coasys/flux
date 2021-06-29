@@ -26,9 +26,9 @@
 
   --j-border-color: #d600ff;
 
-  --j-element-sm: 30px;
-  --j-element-md: 40px;
-  --j-element-lg: 50px;
+  --j-size-sm: 30px;
+  --j-size-md: 40px;
+  --j-size-lg: 50px;
 }
 
 /* Modal background colour */

@@ -103,8 +103,8 @@ export default defineComponent({
 .color-button {
   --hue: 0;
   --saturation: 80%;
-  width: var(--j-element-md);
-  height: var(--j-element-md);
+  width: var(--j-size-md);
+  height: var(--j-size-md);
   background-color: hsl(var(--hue), var(--saturation), 60%);
   border: 2px solid transparent;
   outline: 0;
