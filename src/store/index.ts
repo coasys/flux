@@ -139,8 +139,8 @@ export interface State {
 
 export interface ExpressionUIIcons {
   languageAddress: string;
-  createIcon: string;
-  viewIcon: string;
+  createIcon?: string | undefined;
+  viewIcon?: string | undefined;
   name: string;
 }
 
