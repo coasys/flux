@@ -30,10 +30,11 @@ export default async function create(
     expressionAdapter: new ExpressionAdapter(),
     expressionUI: {
       constructorIcon() {
-        return ConstructorIcon as string;
+        const ConstructorIcon = await import("./constructor-icon.js");
+        return ConstructorIcon.default;
       },
       icon() {
-        return ConstructorIcon as string;
+        return ConstructorIcon;
       },
     },
     interactions,
