@@ -1,13 +1,25 @@
-import type LanguageContext from "@perspect3vism/ad4m/LanguageContext";
-import type Language from "@perspect3vism/ad4m/Language";
-import type { Interaction } from "@perspect3vism/ad4m/Language";
-import ConstructorIcon from "./constructor-icon.js";
-
 export const name = "junto-youtube";
 
-export interface Content {
-  url: string;
+const icon = `
+
+export default class ConstructorIcon extends HTMLElement {
+  constructor() {
+    super();
+
+    const tmpl = document.createElement("template");
+    tmpl.innerHTML = \`
+      <style>:host { ... }</style> <!-- look ma, scoped styles -->
+      <b>I'm in shadow dom!</b>
+      <slot></slot>
+    \`;
+
+    const shadowRoot = this.attachShadow({ mode: "open" });
+    shadowRoot.appendChild(tmpl.content.cloneNode(true));
+  }
 }
+
+
+`;
 
 function PutAdapter() {
   this.addressOf = async (content) => content.url;
@@ -15,28 +27,30 @@ function PutAdapter() {
 
 function ExpressionAdapter() {
   this.putAdapter = new PutAdapter();
-  this.get = () => {};
+  this.get = () => null;
 }
 
-function interactions(): Interaction[] {
+function interactions() {
   return [];
 }
 
-export default async function create(
-  context: LanguageContext
-): Promise<Language> {
+export default async function create(context) {
   return {
     name,
     expressionAdapter: new ExpressionAdapter(),
     expressionUI: {
       constructorIcon() {
-        const ConstructorIcon = await import("./constructor-icon.js");
-        return ConstructorIcon.default;
+        return icon;
       },
       icon() {
-        return ConstructorIcon;
+        return icon;
+      },
+    },
+    settingsUI: {
+      settingsIcon() {
+        return icon;
       },
     },
     interactions,
-  } as Language;
+  };
 }

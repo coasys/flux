@@ -129,6 +129,13 @@ export default defineComponent({
     this.linksWorker = linksWorker as Worker;
   },
   mounted() {
+    const expressionLangs = Object.keys(this.$store.state.expressionUI);
+    console.log(this.$store.state);
+    for (const lang of expressionLangs) {
+      console.log("lang", lang);
+      const ui = this.$store.getters.getLanguageUI(lang);
+      console.log(ui);
+    }
     // Set cached id's as Vue has a bug where route params
     // update before the component is unmounted/beforeUnmount
     this.chachedCommunityId = this.$route.params.communityId as string;
