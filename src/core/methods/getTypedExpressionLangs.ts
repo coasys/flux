@@ -45,6 +45,10 @@ export async function getTypedExpressionLanguages<S>(
           expressionType = ExpressionTypes.ProfileExpression;
           break;
 
+        case "junto-youtube":
+          expressionType = ExpressionTypes.YouTube;
+          break;
+
         default:
           expressionType = ExpressionTypes.Other;
       }

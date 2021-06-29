@@ -148,6 +148,7 @@ export enum ExpressionTypes {
   ShortForm,
   GroupExpression,
   ProfileExpression,
+  YouTube,
   Other,
 }
 

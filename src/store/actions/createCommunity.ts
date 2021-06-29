@@ -60,10 +60,14 @@ export default async (
       uid
     );
     console.log("Response from create exp lang", groupExpressionLang);
+
+    const youTubeLanguage = getters.getLanguageByName("junto-youtube")!;
+
     const expressionLangs = [
       shortFormExpressionLang.address!,
       groupExpressionLang.address!,
       profileExpressionLang.address!,
+      youTubeLanguage.address!,
     ];
     const typedExpLangs = [
       {
@@ -77,6 +81,10 @@ export default async (
       {
         languageAddress: profileExpressionLang.address!,
         expressionType: ExpressionTypes.ProfileExpression,
+      } as JuntoExpressionReference,
+      {
+        languageAddress: youTubeLanguage.address!,
+        expressionType: ExpressionTypes.YouTube,
       } as JuntoExpressionReference,
     ];
 

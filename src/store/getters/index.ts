@@ -87,7 +87,17 @@ export default {
     return state.applicationStartTime;
   },
 
-  getLanguageUI: (state: State) => (language: string) => {
-    return state.expressionUI[language];
-  },
+  getLanguageUI:
+    (state: State) =>
+    (language: string): ExpressionUIIcons | undefined => {
+      return state.expressionUI[language];
+    },
+
+  getLanguageByName:
+    (state: State) =>
+    (name: string): ExpressionUIIcons | undefined => {
+      return Object.values(state.expressionUI).find(
+        (object) => object.name === name
+      );
+    },
 };
