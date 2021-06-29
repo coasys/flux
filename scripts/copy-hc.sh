@@ -14,7 +14,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
     [ ! -d "./resources/darwin" ] && mkdir "./resources/darwin"
     [ -f "./resources/darwin/holochain" ] && rm ./resources/darwin/holochain
     cp `which holochain` ./resources/darwin
-    [ -f "./resources/darwin/holochain" ] && rm ./resources/darwin/lair-keystore
+    [ -f "./resources/darwin/lair-keystore" ] && rm ./resources/darwin/lair-keystore
     cp `which lair-keystore` ./resources/darwin
     [ -f "./resources/darwin/hc" ] && rm ./resources/darwin/hc
     cp `which hc` ./resources/darwin/
