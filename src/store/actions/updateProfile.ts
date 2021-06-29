@@ -32,7 +32,9 @@ export default async (
       const profileExpression = community.typedExpressionLanguages.find(
         (t) => t.expressionType == ExpressionTypes.ProfileExpression
       );
-      const didExpression = `${profileExpression!.languageAddress}://${state.userDid!}`;
+      const didExpression = `${
+        profileExpression!.languageAddress
+      }://${state.userDid!}`;
 
       console.log("profileExpression: ", profileExpression);
 
