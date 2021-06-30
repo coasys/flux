@@ -50,13 +50,12 @@
     </div>
     <footer class="channel-view__footer">
       <j-editor
-        @keydown.enter="
-          (e) =>
-            !e.shiftKey &&
-            createDirectMessage({ body: e.target.value, background: [''] })
-        "
+        @keydown.enter="onEnter"
         :value="currentExpressionPost"
         @change="(e) => (currentExpressionPost = e.target.value)"
+        @onsuggestionlist="changeShowList"
+        @editorinit="editorinit"
+        :mentions="items"
       ></j-editor>
     </footer>
   </div>
@@ -77,6 +76,7 @@ import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
 import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css";
 import { differenceInMinutes, parseISO } from "date-fns";
 import MessageItem from "@/components/message-item/MessageItem.vue";
+import { Editor } from "@tiptap/vue-3";
 
 interface Message {
   id: string;
@@ -101,10 +101,12 @@ export default defineComponent({
       lastScrollTop: 0,
       showNewMessagesButton: false,
       noDelayRef: 0,
-      currentExpressionPost: {},
+      currentExpressionPost: "",
       unsortedMessages: [],
       users: {} as UserMap,
       linksWorker: null as null | Worker,
+      editor: null as Editor | null,
+      showList: false
     };
   },
   async beforeCreate() {
@@ -225,6 +227,19 @@ export default defineComponent({
     },
   },
   methods: {
+    onEnter(e: any) {
+      if (!e.shiftKey && !this.showList) {
+        console.log(e.detail, e.target.value);
+        this.createDirectMessage({ body: e.target.value, background: [''] })
+        e.preventDefault();
+      }
+    },
+    editorinit(e: any) {
+      this.editor = e.detail.editorInstance;
+    },
+    changeShowList(e: any) {
+      this.showList = e.detail.showSuggestions;
+    },
     markAsRead() {
       this.$store.commit("setHasNewMessages", {
         channelId: this.channel.perspective,
@@ -264,7 +279,31 @@ export default defineComponent({
         this.users[did] = data;
       }
     },
+    items(trigger: string, query: string) {
+      let list = [];
 
+      if (trigger === "@") {
+        list = [
+          { name: "Fayeed", id: "0", trigger: "@" },
+          { name: "Leif", id: "1", trigger: "@" },
+          { name: "Eric", id: "2", trigger: "@" },
+          { name: "Josh", id: "3", trigger: "@" },
+        ];
+      } else {
+        list = [
+          { name: "dev", id: "10", trigger: "#" },
+          { name: "design", id: "11", trigger: "#" },
+          { name: "meetings", id: "12", trigger: "#" },
+          { name: "speed", id: "13", trigger: "#" },
+        ];
+      }
+
+      return  list
+        .filter((item) =>
+          item.name.toLowerCase().startsWith(query.toLowerCase())
+        )
+        .slice(0, 5);
+    },
     loadMoreMessages() {
       const messageAmount = this.messages.length;
       if (messageAmount) {
