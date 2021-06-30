@@ -127,10 +127,7 @@ export default defineComponent({
               //Expression is not null, which means we got the data and we can terminate the loop
               expressionWorker.terminate();
               const message = JSON.parse(expression!.data!);
-              const escapedMessage = message.body.replace(
-                /(\s*<.*?>\s*)+/g,
-                " "
-              );
+
               console.log("FOUND EXPRESSION FOR SIGNAL");
               //Add the expression to the store
               store.commit("addExpressionAndLinkFromLanguageAddress", {
@@ -145,7 +142,7 @@ export default defineComponent({
                 store,
                 language,
                 expression!.author!.did!,
-                escapedMessage
+                message.body
               );
 
               //Add UI notification on the channel to notify that there is a new message there
@@ -303,11 +300,6 @@ body {
   padding: 0;
   margin: 0;
   color: var(--j-color-ui-500);
-}
-
-/* TODO: Put this in junto-elements? */
-j-popover {
-  position: fixed !important;
 }
 
 *,
