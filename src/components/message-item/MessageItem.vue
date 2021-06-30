@@ -76,7 +76,6 @@ export default defineComponent({
 <style>
 .message-item {
   padding: var(--j-space-300) 0;
-  font-size: var(--j-font-size-400);
   display: grid;
   gap: var(--j-space-500);
   grid-template-columns: 70px 1fr;
@@ -129,6 +128,11 @@ export default defineComponent({
   border-radius: var(--j-border-radius);
   background: var(--j-color-primary-100);
   color: var(--j-color-primary-700);
+}
+
+.message-item__message a {
+  color: var(--j-color-primary-600);
+  text-decoration: underline;
 }
 
 .message-item__message .mention:hover {
