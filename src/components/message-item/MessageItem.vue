@@ -22,6 +22,30 @@ export default defineComponent({
     profileImg: String,
     showAvatar: Boolean,
   },
+  mounted() {
+    const { communityId, channelId } = this.$route.params;
+    
+    const mentionElements = document.querySelectorAll('.mention');
+
+    for (const ele of mentionElements) {
+      const mention = ele as HTMLElement;
+      mention.onclick = () => {
+        if (mention.dataset.label?.startsWith('#')) {
+          console.log(mention.dataset);
+          this.$router.push({
+            name: "channel",
+            params: {
+              communityId,
+              channelId: mention.dataset.id!,
+            },
+          });
+        } else {
+          // TODO: show user card here...
+        }
+      }
+    }
+
+  }
 });
 </script>
 
