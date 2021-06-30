@@ -272,7 +272,6 @@ export default defineComponent({
   },
   methods: {
     handleEditorChange(e: any) {
-      console.log(e.target.json);
       this.currentExpressionPost = e.target.value;
     },
     handleProfileClick(did: string) {
