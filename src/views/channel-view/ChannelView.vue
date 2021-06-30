@@ -57,7 +57,7 @@
         autofocus
         :placeholder="`Write something in ${channel.name}`"
         :value="currentExpressionPost"
-        @change="(e) => (currentExpressionPost = e.target.value)"
+        @change="handleEditorChange"
         @onsuggestionlist="changeShowList"
         @editorinit="editorinit"
         :mentions="items"
@@ -271,6 +271,10 @@ export default defineComponent({
     },
   },
   methods: {
+    handleEditorChange(e: any) {
+      console.log(e.target.json);
+      this.currentExpressionPost = e.target.value;
+    },
     handleProfileClick(did: string) {
       this.showProfile = true;
       this.activeProfile = this.community.members.find(
@@ -297,7 +301,8 @@ export default defineComponent({
     },
     onEnter(e: any) {
       if (!e.shiftKey && !this.showList) {
-        console.log(e.detail, e.target.value);
+        console.log({ detail: e });
+        this.currentExpressionPost = "";
         this.createDirectMessage({ body: e.target.value, background: [""] });
         e.preventDefault();
       }
