@@ -44,8 +44,8 @@
                   'schema:contentUrl'
                 ]
               "
-              :openMember="openMember"
-              :openedProfile="openedProfile"
+              @profileClick="handleProfileClick"
+              @mentionClick="handleMentionClick"
             />
           </DynamicScrollerItem>
         </template>
@@ -63,29 +63,28 @@
         :mentions="items"
       ></j-editor>
     </footer>
-    <j-box id="profileCard">
-      <j-box
-        v-if="openedProfile !== null"
-        class="background"
-        @click="() => openMember()"
-      />
-      <div class="profileCard__container">
-        <img
-          height="200"
-          width="200"
+    <j-modal
+      size="xs"
+      :open="showProfile"
+      @toggle="(e) => (showProfile = e.target.open)"
+    >
+      <j-flex a="center" direction="column" gap="500">
+        <j-avatar
+          style="--j-avatar-size: 100px"
+          :hash="activeProfile?.author?.did"
           :src="
-            openedProfile?.data?.profile['schema:image']
-              ? JSON.parse(openedProfile?.data?.profile['schema:image'])[
+            activeProfile?.data?.profile['schema:image']
+              ? JSON.parse(activeProfile?.data?.profile['schema:image'])[
                   'schema:contentUrl'
                 ]
-              : require('@/assets/images/junto_app_icon.png')
+              : null
           "
         />
-        <j-text variant="label">{{
-          openedProfile?.data?.profile["foaf:AccountName"]
+        <j-text variant="heading-sm">{{
+          activeProfile?.data?.profile["foaf:AccountName"]
         }}</j-text>
-      </div>
-    </j-box>
+      </j-flex>
+    </j-modal>
   </div>
 </template>
 
@@ -135,7 +134,8 @@ export default defineComponent({
       linksWorker: null as null | Worker,
       editor: null as Editor | null,
       showList: false,
-      openedProfile: null as any,
+      showProfile: false,
+      activeProfile: {} as any,
     };
   },
   async beforeCreate() {
@@ -271,20 +271,28 @@ export default defineComponent({
     },
   },
   methods: {
-    openMember(did: any) {
-      const scroller = this.$refs.scrollContainer as any;
-
-      if (did) {
-        this.openedProfile = this.community.members.find(
-          (m) => m.author.did === did
+    handleProfileClick(did: string) {
+      this.showProfile = true;
+      this.activeProfile = this.community.members.find(
+        (m) => m.author.did === did
+      );
+    },
+    handleMentionClick(dataset: { label: string; id: string }) {
+      const { label, id } = dataset;
+      if (label?.startsWith("#")) {
+        this.$router.push({
+          name: "channel",
+          params: {
+            channelId: id,
+            communityId: this.community.perspective,
+          },
+        });
+      }
+      if (label?.startsWith("@")) {
+        this.showProfile = true;
+        this.activeProfile = this.community.members.find(
+          (m) => m.author.did === id
         );
-        scroller.style.overflowY = "hidden";
-      } else {
-        this.openedProfile = null;
-        scroller.style.overflowY = "scroll";
-        const popup = document.getElementById("profileCard") as HTMLElement;
-        popup.style.opacity = "0";
-        popup.style.zIndex = "-100";
       }
     },
     onEnter(e: any) {

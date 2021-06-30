@@ -1,7 +1,12 @@
 <template>
   <div class="message-item">
     <div class="message-item__left-column">
-      <j-avatar v-if="showAvatar" :hash="did" :src="profileImg" />
+      <j-avatar
+        @click="handleProfileClick"
+        v-if="showAvatar"
+        :hash="did"
+        :src="profileImg"
+      />
 
       <j-timestamp
         class="message-item__timestamp"
@@ -13,20 +18,16 @@
     </div>
     <div class="message-item__right-column">
       <div class="message-item__message-info" v-if="showAvatar">
-        <j-popover placement="bottom-start">
-          <j-text
-            slot="trigger"
-            :id="username"
-            color="black"
-            nomargin
-            weight="500"
-            class="message-item__username"
-            >{{ username }}
-          </j-text>
-          <j-menu slot="content">
-            <j-menu-item>Halla</j-menu-item>
-          </j-menu>
-        </j-popover>
+        <j-text
+          @click="handleProfileClick"
+          slot="trigger"
+          :id="username"
+          color="black"
+          nomargin
+          weight="500"
+          class="message-item__username"
+          >{{ username }}
+        </j-text>
         <j-timestamp
           hour="numeric"
           minute="numeric"
@@ -43,6 +44,7 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
+  emits: ["mentionClick", "profileClick"],
   props: {
     did: String,
     timestamp: String,
@@ -51,43 +53,22 @@ export default defineComponent({
     profileImg: String,
     showAvatar: Boolean,
     openMember: Function,
-    openedProfile: Object
+    openedProfile: Object,
   },
   mounted() {
-    const { communityId, channelId } = this.$route.params;
-
     const mentionElements = document.querySelectorAll(".mention");
 
     for (const ele of mentionElements) {
       const mention = ele as HTMLElement;
       mention.onclick = () => {
-        if (mention.dataset.label?.startsWith("#")) {
-          console.log(mention.dataset);
-          this.$router.push({
-            name: "channel",
-            params: {
-              communityId,
-              channelId: mention.dataset.id!,
-            },
-          });
-        } else {
-          // TODO: show user card here...
-          const popup = document.getElementById('profileCard') as HTMLElement;
-
-          const mentionRect = mention.getBoundingClientRect();
-
-          const popupRect = popup.getBoundingClientRect();
-
-          popup.style.top = `${mentionRect.top - popupRect.height}px`;
-          popup.style.left = `${mentionRect.left}px`;
-          popup.style.opacity = '1';
-          popup.style.zIndex = '100';
-
-
-          this.openMember!(mention.dataset.id!);
-        }
+        this.$emit("mentionClick", mention.dataset);
       };
     }
+  },
+  methods: {
+    handleProfileClick() {
+      this.$emit("profileClick", this.did);
+    },
   },
 });
 </script>
@@ -152,5 +133,14 @@ export default defineComponent({
 
 .message-item__message .mention:hover {
   color: var(--j-color-primary-500);
+}
+
+.message-item__username {
+  cursor: pointer;
+}
+
+.message-item__username:hover {
+  cursor: pointer;
+  text-decoration: underline;
 }
 </style>
