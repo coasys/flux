@@ -43,6 +43,7 @@ export default defineComponent({
   border: 0;
   background: none;
   width: 100%;
+  cursor: pointer;
   display: flex;
 }
 
