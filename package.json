@@ -25,7 +25,7 @@
   "main": "background.js",
   "dependencies": {
     "@apollo/client": "^3.3.14",
-    "@junto-foundation/junto-elements": "^0.2.0",
+    "@junto-foundation/junto-elements": "^0.2.1",
     "@perspect3vism/ad4m": "0.0.6",
     "@perspect3vism/ad4m-executor": "0.0.17",
     "@tiptap/core": "^2.0.0-beta.85",
