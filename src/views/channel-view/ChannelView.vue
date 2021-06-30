@@ -64,15 +64,27 @@
       ></j-editor>
     </footer>
     <j-box id="profileCard">
-      <j-box v-if="openedProfile !== null" class="background" @click="() => openMember()" />
-        <div class="profileCard__container">
-          <img height="200" width="200" :src="openedProfile?.data?.profile['schema:image']
-                  ? JSON.parse(openedProfile?.data?.profile['schema:image'])[
-                      'schema:contentUrl'
-                    ]
-                  : require('@/assets/images/junto_app_icon.png')" />
-          <j-text variant="label">{{ openedProfile?.data?.profile["foaf:AccountName"] }}</j-text>
-        </div>
+      <j-box
+        v-if="openedProfile !== null"
+        class="background"
+        @click="() => openMember()"
+      />
+      <div class="profileCard__container">
+        <img
+          height="200"
+          width="200"
+          :src="
+            openedProfile?.data?.profile['schema:image']
+              ? JSON.parse(openedProfile?.data?.profile['schema:image'])[
+                  'schema:contentUrl'
+                ]
+              : require('@/assets/images/junto_app_icon.png')
+          "
+        />
+        <j-text variant="label">{{
+          openedProfile?.data?.profile["foaf:AccountName"]
+        }}</j-text>
+      </div>
     </j-box>
   </div>
 </template>
@@ -123,7 +135,7 @@ export default defineComponent({
       linksWorker: null as null | Worker,
       editor: null as Editor | null,
       showList: false,
-      openedProfile: null as any
+      openedProfile: null as any,
     };
   },
   async beforeCreate() {
@@ -199,18 +211,17 @@ export default defineComponent({
   },
   computed: {
     memberMentions(): any[] {
-      return this.community.members.map(m => ({
+      return this.community.members.map((m) => ({
         name: (m.data as any).profile["foaf:AccountName"],
         id: m.author.did,
-        trigger: '@'
+        trigger: "@",
       }));
-
     },
     channelMentions(): any[] {
-      return Object.values(this.community.channels).map(c => ({
+      return Object.values(this.community.channels).map((c) => ({
         name: c.name,
         id: c.perspective,
-        trigger: '#'
+        trigger: "#",
       }));
     },
     messages(): any[] {
@@ -240,7 +251,7 @@ export default defineComponent({
     },
     community(): CommunityState {
       const { communityId } = this.$route.params;
-      
+
       return this.$store.getters.getCommunity(
         this.chachedCommunityId || communityId
       );
@@ -262,22 +273,24 @@ export default defineComponent({
   methods: {
     openMember(did: any) {
       const scroller = this.$refs.scrollContainer as any;
-      
-      if(did) {
-        this.openedProfile = this.community.members.find(m => m.author.did === did);
-        scroller.style.overflowY = 'hidden';
+
+      if (did) {
+        this.openedProfile = this.community.members.find(
+          (m) => m.author.did === did
+        );
+        scroller.style.overflowY = "hidden";
       } else {
         this.openedProfile = null;
-        scroller.style.overflowY = 'scroll';
-        const popup = document.getElementById('profileCard') as HTMLElement;
-        popup.style.opacity = '0';
-        popup.style.zIndex = '-100';
+        scroller.style.overflowY = "scroll";
+        const popup = document.getElementById("profileCard") as HTMLElement;
+        popup.style.opacity = "0";
+        popup.style.zIndex = "-100";
       }
-    }, 
+    },
     onEnter(e: any) {
       if (!e.shiftKey && !this.showList) {
         console.log(e.detail, e.target.value);
-        this.createDirectMessage({ body: e.target.value, background: [''] })
+        this.createDirectMessage({ body: e.target.value, background: [""] });
         e.preventDefault();
       }
     },
@@ -335,7 +348,7 @@ export default defineComponent({
         list = this.channelMentions;
       }
 
-      return  list
+      return list
         .filter((item) =>
           item.name.toLowerCase().startsWith(query.toLowerCase())
         )

@@ -302,11 +302,6 @@ body {
   color: var(--j-color-ui-500);
 }
 
-/* TODO: Put this in junto-elements? */
-j-popover {
-  position: fixed !important;
-}
-
 *,
 *:before,
 *:after {
