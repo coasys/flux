@@ -184,6 +184,22 @@ export default defineComponent({
     },
   },
   computed: {
+    memberMentions(): any[] {
+      return this.community.members.map(m => ({
+        name: (m.data as any).profile["foaf:AccountName"],
+        id: m.author.did,
+        trigger: '@'
+      }));
+
+    },
+    channelMentions(): any[] {
+      return Object.values(this.community.channels).map(c => ({
+        name: c.name,
+        id: c.perspective,
+        trigger: '#'
+      }));
+
+    },
     messages(): any[] {
       const sortedMessages = Object.values(
         this.channel.currentExpressionMessages
@@ -211,6 +227,7 @@ export default defineComponent({
     },
     community(): CommunityState {
       const { communityId } = this.$route.params;
+      
       return this.$store.getters.getCommunity(
         this.chachedCommunityId || communityId
       );
@@ -286,19 +303,9 @@ export default defineComponent({
       let list = [];
 
       if (trigger === "@") {
-        list = [
-          { name: "Fayeed", id: "0", trigger: "@" },
-          { name: "Leif", id: "1", trigger: "@" },
-          { name: "Eric", id: "2", trigger: "@" },
-          { name: "Josh", id: "3", trigger: "@" },
-        ];
+        list = this.memberMentions;
       } else {
-        list = [
-          { name: "dev", id: "10", trigger: "#" },
-          { name: "design", id: "11", trigger: "#" },
-          { name: "meetings", id: "12", trigger: "#" },
-          { name: "speed", id: "13", trigger: "#" },
-        ];
+        list = this.channelMentions;
       }
 
       return  list
