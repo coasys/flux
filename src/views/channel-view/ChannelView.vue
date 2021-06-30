@@ -33,6 +33,7 @@
             class="message"
           >
             <message-item
+              :did="item.did"
               :showAvatar="showAvatar(index)"
               :message="item.message"
               :timestamp="item.timestamp"
@@ -51,6 +52,8 @@
     <footer class="channel-view__footer">
       <j-editor
         @keydown.enter="onEnter"
+        autofocus
+        :placeholder="`Write something in ${channel.name}`"
         :value="currentExpressionPost"
         @change="(e) => (currentExpressionPost = e.target.value)"
         @onsuggestionlist="changeShowList"
@@ -393,11 +396,26 @@ export default defineComponent({
 }
 
 .channel-view__footer {
+  border-top: 1px solid var(--app-channel-border-color);
   background: var(--app-channel-footer-bg-color);
   position: sticky;
   bottom: 0;
   padding-left: var(--j-space-500);
   padding-right: var(--j-space-500);
   padding-bottom: var(--j-space-300);
+}
+
+j-editor::part(base) {
+  border: 0;
+  padding: 0;
+}
+
+j-editor::part(editor) {
+  padding-top: var(--j-space-500);
+  padding-left: var(--j-space-300);
+}
+
+j-editor::part(toolbar) {
+  border: 0;
 }
 </style>
