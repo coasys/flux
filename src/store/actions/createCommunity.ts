@@ -145,7 +145,7 @@ export default async (
     //Next steps: create another perspective + share with social-context-channel link language and add above expression DNA's onto it
     //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel
     const channel = await createChannel(
-      "Default Message Channel",
+      "General",
       description,
       uid,
       createSourcePerspective.uuid!,
