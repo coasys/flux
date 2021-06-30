@@ -2,6 +2,28 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.1.9] - 30/06/2021
+
+### Added
+ - Mentions feature in channel view!
+ - Profile card on mention click
+
+### Changed
+ - Holochain now built from source in CI to ensure that binaries will work on systems without nix installed!
+ - Default channel renamed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+ - Junto elements now being imported from npm vs in index.html
+ - Editor cleaned on enter press
+
+### Security
+
+---
+
 ## [0.1.8] - 29/06/2021
 
 ### Added
