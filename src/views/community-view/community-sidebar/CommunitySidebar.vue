@@ -22,15 +22,6 @@
               >
                 {{ community.name }}
               </j-text>
-              <j-text
-                v-if="community.description"
-                weight="300"
-                color="ui-800"
-                nomargin
-                size="400"
-              >
-                {{ community.description }}
-              </j-text>
             </div>
           </j-flex>
           <j-icon size="xs" name="chevron-expand"></j-icon>
@@ -54,7 +45,7 @@
     </j-popover>
 
     <j-box pt="500" pb="300">
-      <j-menu-group-item open title="Members">
+      <j-menu-group-item open :title="`Members (${community.members.length})`">
         <j-button
           @click.prevent="getInviteCode"
           size="sm"
