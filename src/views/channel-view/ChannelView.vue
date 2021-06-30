@@ -44,6 +44,8 @@
                   'schema:contentUrl'
                 ]
               "
+              @profileClick="handleProfileClick"
+              @mentionClick="handleMentionClick"
             />
           </DynamicScrollerItem>
         </template>
@@ -51,17 +53,38 @@
     </div>
     <footer class="channel-view__footer">
       <j-editor
+        @keydown.enter="onEnter"
         autofocus
         :placeholder="`Write something in ${channel.name}`"
-        @keydown.enter="
-          (e) =>
-            !e.shiftKey &&
-            createDirectMessage({ body: e.target.value, background: [''] })
-        "
         :value="currentExpressionPost"
-        @change="(e) => (currentExpressionPost = e.target.value)"
+        @change="handleEditorChange"
+        @onsuggestionlist="changeShowList"
+        @editorinit="editorinit"
+        :mentions="items"
       ></j-editor>
     </footer>
+    <j-modal
+      size="xs"
+      :open="showProfile"
+      @toggle="(e) => (showProfile = e.target.open)"
+    >
+      <j-flex a="center" direction="column" gap="500">
+        <j-avatar
+          style="--j-avatar-size: 100px"
+          :hash="activeProfile?.author?.did"
+          :src="
+            activeProfile?.data?.profile['schema:image']
+              ? JSON.parse(activeProfile?.data?.profile['schema:image'])[
+                  'schema:contentUrl'
+                ]
+              : null
+          "
+        />
+        <j-text variant="heading-sm">{{
+          activeProfile?.data?.profile["foaf:AccountName"]
+        }}</j-text>
+      </j-flex>
+    </j-modal>
   </div>
 </template>
 
@@ -80,6 +103,7 @@ import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
 import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css";
 import { differenceInMinutes, parseISO } from "date-fns";
 import MessageItem from "@/components/message-item/MessageItem.vue";
+import { Editor } from "@tiptap/vue-3";
 
 interface Message {
   id: string;
@@ -104,10 +128,14 @@ export default defineComponent({
       lastScrollTop: 0,
       showNewMessagesButton: false,
       noDelayRef: 0,
-      currentExpressionPost: {},
+      currentExpressionPost: "",
       unsortedMessages: [],
       users: {} as UserMap,
       linksWorker: null as null | Worker,
+      editor: null as Editor | null,
+      showList: false,
+      showProfile: false,
+      activeProfile: {} as any,
     };
   },
   async beforeCreate() {
@@ -182,6 +210,20 @@ export default defineComponent({
     },
   },
   computed: {
+    memberMentions(): any[] {
+      return this.community.members.map((m) => ({
+        name: (m.data as any).profile["foaf:AccountName"],
+        id: m.author.did,
+        trigger: "@",
+      }));
+    },
+    channelMentions(): any[] {
+      return Object.values(this.community.channels).map((c) => ({
+        name: c.name,
+        id: c.perspective,
+        trigger: "#",
+      }));
+    },
     messages(): any[] {
       const sortedMessages = Object.values(
         this.channel.currentExpressionMessages
@@ -209,6 +251,7 @@ export default defineComponent({
     },
     community(): CommunityState {
       const { communityId } = this.$route.params;
+
       return this.$store.getters.getCommunity(
         this.chachedCommunityId || communityId
       );
@@ -228,6 +271,48 @@ export default defineComponent({
     },
   },
   methods: {
+    handleEditorChange(e: any) {
+      //console.log(e.target.json);
+      this.currentExpressionPost = e.target.value;
+    },
+    handleProfileClick(did: string) {
+      this.showProfile = true;
+      this.activeProfile = this.community.members.find(
+        (m) => m.author.did === did
+      );
+    },
+    handleMentionClick(dataset: { label: string; id: string }) {
+      const { label, id } = dataset;
+      if (label?.startsWith("#")) {
+        this.$router.push({
+          name: "channel",
+          params: {
+            channelId: id,
+            communityId: this.community.perspective,
+          },
+        });
+      }
+      if (label?.startsWith("@")) {
+        this.showProfile = true;
+        this.activeProfile = this.community.members.find(
+          (m) => m.author.did === id
+        );
+      }
+    },
+    onEnter(e: any) {
+      if (!e.shiftKey && !this.showList) {
+        console.log({ detail: e });
+        this.currentExpressionPost = "";
+        this.createDirectMessage({ body: e.target.value, background: [""] });
+        e.preventDefault();
+      }
+    },
+    editorinit(e: any) {
+      this.editor = e.detail.editorInstance;
+    },
+    changeShowList(e: any) {
+      this.showList = e.detail.showSuggestions;
+    },
     markAsRead() {
       this.$store.commit("setHasNewMessages", {
         channelId: this.channel.perspective,
@@ -267,7 +352,21 @@ export default defineComponent({
         this.users[did] = data;
       }
     },
+    items(trigger: string, query: string) {
+      let list = [];
 
+      if (trigger === "@") {
+        list = this.memberMentions;
+      } else {
+        list = this.channelMentions;
+      }
+
+      return list
+        .filter((item) =>
+          item.name.toLowerCase().startsWith(query.toLowerCase())
+        )
+        .slice(0, 5);
+    },
     loadMoreMessages() {
       const messageAmount = this.messages.length;
       if (messageAmount) {
@@ -378,5 +477,24 @@ j-editor::part(editor) {
 
 j-editor::part(toolbar) {
   border: 0;
+}
+#profileCard {
+  position: fixed;
+  opacity: 0;
+  z-index: -100;
+}
+.background {
+  height: 100vh;
+  width: 100vw;
+  background: transparent;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -10;
+}
+.profileCard__container {
+  background-color: var(--j-color-white);
+  padding: var(--j-space-400);
+  border-radius: 10px;
 }
 </style>

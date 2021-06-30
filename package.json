@@ -1,6 +1,6 @@
 {
   "name": "junto",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "private": true,
   "description": "Junto ad4m chat application leveraging distributed & decentralized technologies",
   "author": "josh@junto.foundation",
@@ -25,9 +25,11 @@
   "main": "background.js",
   "dependencies": {
     "@apollo/client": "^3.3.14",
-    "@junto-foundation/junto-elements": "0.0.13",
+    "@junto-foundation/junto-elements": "^0.2.0",
     "@perspect3vism/ad4m": "0.0.6",
     "@perspect3vism/ad4m-executor": "0.0.17",
+    "@tiptap/core": "^2.0.0-beta.85",
+    "@tiptap/vue-3": "^2.0.0-beta.45",
     "@types/jest": "^26.0.20",
     "@types/mocha": "^8.2.1",
     "@vue/apollo-composable": "^4.0.0-alpha.12",
@@ -40,6 +42,7 @@
     "object-hash": "^2.2.0",
     "register-service-worker": "^1.7.1",
     "subscriptions-transport-ws": "^0.9.18",
+    "tippy.js": "^6.3.1",
     "uuid": "^8.3.2",
     "v-tooltip": "^4.0.0-alpha.1",
     "vue": "^3.0.0",
@@ -53,8 +56,8 @@
   "devDependencies": {
     "@types/electron-devtools-installer": "^2.2.0",
     "@types/uuid": "^8.3.0",
-    "@typescript-eslint/eslint-plugin": "^4.18.0",
-    "@typescript-eslint/parser": "^4.18.0",
+    "@typescript-eslint/eslint-plugin": "^4.28.1",
+    "@typescript-eslint/parser": "^4.28.1",
     "@vue/cli-plugin-babel": "~4.5.0",
     "@vue/cli-plugin-eslint": "~4.5.0",
     "@vue/cli-plugin-pwa": "~4.5.0",
@@ -70,15 +73,15 @@
     "electron-rebuild": "^2.3.5",
     "eslint": "^6.7.2",
     "eslint-plugin-prettier": "^3.3.1",
-    "eslint-plugin-vue": "^7.0.0",
+    "eslint-plugin-vue": "^7.12.1",
+    "fs-extra": "^10.0.0",
     "node-sass": "^4.12.0",
-    "prettier": "^2.2.1",
+    "node-wget-js": "^1.0.1",
+    "prettier": "^2.3.2",
     "sass-loader": "^8.0.2",
     "typescript": "^4.2.4",
     "vue-cli-plugin-electron-builder": "~2.0.0-rc.6",
-    "vue-devtools": "^5.1.4",
-    "node-wget-js": "^1.0.1",
-    "fs-extra": "^10.0.0"
+    "vue-devtools": "^5.1.4"
   },
   "contributors": [
     "eric@junto.foundation"

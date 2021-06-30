@@ -1,52 +1,52 @@
 <template>
   <div class="left-nav__bottom-section">
     <j-tooltip id="myProfile" title="My profile">
-      <j-avatar
-        size="xl"
-        :hash="userDid"
-        :src="userProfile.profilePicture"
-      ></j-avatar>
-    </j-tooltip>
-
-    <j-popover event="click" selector="#myProfile">
-      <j-menu>
-        <j-flex
-          a="center"
-          gap="400"
-          style="
-            display: block;
-            padding-left: var(--j-space-500);
-            padding-right: var(--j-space-500);
-            padding-bottom: var(--j-space-300);
-            border-bottom: 1px solid var(--j-color-ui-100);
-          "
-        >
-          <j-avatar
-            :hash="userDid"
-            :src="userProfile.profilePicture"
-          ></j-avatar>
-          <j-text nomargin>{{ userProfile.username }}</j-text>
-        </j-flex>
-        <j-menu-item @click="() => setShowEditProfile(true)">
-          <j-icon size="sm" slot="start" name="pencil"></j-icon>
-          Edit profile
-        </j-menu-item>
-        <j-menu-item @click="updateApp.func">
-          <j-icon size="sm" slot="start" name="cloud-download"></j-icon>
-          {{ updateApp.text }}
-        </j-menu-item>
-        <j-menu-item @click="() => setShowSettings(true)">
-          <j-icon size="sm" slot="start" name="gear"></j-icon>
-          Settings
-        </j-menu-item>
-        <router-link :to="{ name: 'signup' }" v-slot="{ navigate }">
-          <j-menu-item @click="navigate">
-            <j-icon size="sm" slot="start" name="door-closed"></j-icon>
-            Log out
+      <j-popover event="click">
+        <j-avatar
+          slot="trigger"
+          size="xl"
+          :hash="userDid"
+          :src="userProfile.profilePicture"
+        ></j-avatar>
+        <j-menu slot="content">
+          <j-flex
+            a="center"
+            gap="400"
+            style="
+              display: block;
+              padding-left: var(--j-space-500);
+              padding-right: var(--j-space-500);
+              padding-bottom: var(--j-space-300);
+              border-bottom: 1px solid var(--j-color-ui-100);
+            "
+          >
+            <j-avatar
+              :hash="userDid"
+              :src="userProfile.profilePicture"
+            ></j-avatar>
+            <j-text nomargin>{{ userProfile.username }}</j-text>
+          </j-flex>
+          <j-menu-item @click="() => setShowEditProfile(true)">
+            <j-icon size="sm" slot="start" name="pencil"></j-icon>
+            Edit profile
           </j-menu-item>
-        </router-link>
-      </j-menu>
-    </j-popover>
+          <j-menu-item @click="updateApp.func">
+            <j-icon size="sm" slot="start" name="cloud-download"></j-icon>
+            {{ updateApp.text }}
+          </j-menu-item>
+          <j-menu-item @click="() => setShowSettings(true)">
+            <j-icon size="sm" slot="start" name="gear"></j-icon>
+            Settings
+          </j-menu-item>
+          <router-link :to="{ name: 'signup' }" v-slot="{ navigate }">
+            <j-menu-item @click="navigate">
+              <j-icon size="sm" slot="start" name="door-closed"></j-icon>
+              Log out
+            </j-menu-item>
+          </router-link>
+        </j-menu>
+      </j-popover>
+    </j-tooltip>
   </div>
 </template>
 
