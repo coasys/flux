@@ -9,11 +9,12 @@
         :src="profileImg"
       />
 
-      <j-tooltip v-else>
+      <j-tooltip placement="top" v-else>
         <j-timestamp
           slot="title"
           :value="timestamp"
-          dateStyle="full"
+          dateStyle="medium"
+          timeStyle="short"
         ></j-timestamp>
         <j-timestamp
           class="message-item__timestamp"
@@ -39,7 +40,8 @@
           <j-timestamp
             slot="title"
             :value="timestamp"
-            dateStyle="full"
+            dateStyle="medium"
+            timeStyle="short"
           ></j-timestamp>
           <j-timestamp
             class="message-item__timestamp"
