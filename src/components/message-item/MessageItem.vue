@@ -21,6 +21,8 @@ export default defineComponent({
     message: String,
     profileImg: String,
     showAvatar: Boolean,
+    openMember: Function,
+    openedProfile: Object
   },
   mounted() {
     const { communityId, channelId } = this.$route.params;
@@ -41,6 +43,19 @@ export default defineComponent({
           });
         } else {
           // TODO: show user card here...
+          const popup = document.getElementById('profileCard') as HTMLElement;
+
+          const mentionRect = mention.getBoundingClientRect();
+
+          const popupRect = popup.getBoundingClientRect();
+
+          popup.style.top = `${mentionRect.top - popupRect.height}px`;
+          popup.style.left = `${mentionRect.left}px`;
+          popup.style.opacity = '1';
+          popup.style.zIndex = '100';
+
+
+          this.openMember!(mention.dataset.id!);
         }
       }
     }

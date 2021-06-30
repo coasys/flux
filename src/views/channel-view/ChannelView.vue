@@ -44,6 +44,8 @@
                   'schema:contentUrl'
                 ]
               "
+              :openMember="openMember"
+              :openedProfile="openedProfile"
             />
           </DynamicScrollerItem>
         </template>
@@ -61,6 +63,17 @@
         :mentions="items"
       ></j-editor>
     </footer>
+    <j-box id="profileCard">
+      <j-box v-if="openedProfile !== null" class="background" @click="() => openMember()" />
+        <div class="profileCard__container">
+          <img height="200" width="200" :src="openedProfile?.data?.profile['schema:image']
+                  ? JSON.parse(openedProfile?.data?.profile['schema:image'])[
+                      'schema:contentUrl'
+                    ]
+                  : require('@/assets/images/junto_app_icon.png')" />
+          <j-text variant="label">{{ openedProfile?.data?.profile["foaf:AccountName"] }}</j-text>
+        </div>
+    </j-box>
   </div>
 </template>
 
@@ -109,7 +122,8 @@ export default defineComponent({
       users: {} as UserMap,
       linksWorker: null as null | Worker,
       editor: null as Editor | null,
-      showList: false
+      showList: false,
+      openedProfile: null as any
     };
   },
   async beforeCreate() {
@@ -198,7 +212,6 @@ export default defineComponent({
         id: c.perspective,
         trigger: '#'
       }));
-
     },
     messages(): any[] {
       const sortedMessages = Object.values(
@@ -247,6 +260,20 @@ export default defineComponent({
     },
   },
   methods: {
+    openMember(did: any) {
+      const scroller = this.$refs.scrollContainer as any;
+      
+      if(did) {
+        this.openedProfile = this.community.members.find(m => m.author.did === did);
+        scroller.style.overflowY = 'hidden';
+      } else {
+        this.openedProfile = null;
+        scroller.style.overflowY = 'scroll';
+        const popup = document.getElementById('profileCard') as HTMLElement;
+        popup.style.opacity = '0';
+        popup.style.zIndex = '-100';
+      }
+    }, 
     onEnter(e: any) {
       if (!e.shiftKey && !this.showList) {
         console.log(e.detail, e.target.value);
@@ -424,5 +451,24 @@ j-editor::part(editor) {
 
 j-editor::part(toolbar) {
   border: 0;
+}
+#profileCard {
+  position: fixed;
+  opacity: 0;
+  z-index: -100;
+}
+.background {
+  height: 100vh;
+  width: 100vw;
+  background: transparent;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -10;
+}
+.profileCard__container {
+  background-color: var(--j-color-white);
+  padding: var(--j-space-400);
+  border-radius: 10px;
 }
 </style>
