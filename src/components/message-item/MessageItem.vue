@@ -108,7 +108,7 @@ export default defineComponent({
 
 .message-item__timestamp {
   opacity: 0.5;
-  cursor: default;
+  cursor: pointer;
   font-size: var(--j-font-size-300);
 }
 
