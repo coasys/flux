@@ -6,6 +6,7 @@
       :title="community.name"
     >
       <j-avatar
+        class="left-nav__community-item"
         :selected="communityIsActive(community.perspective)"
         size="xl"
         :src="require('@/assets/images/junto_app_icon.png')"
@@ -72,6 +73,7 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   display: flex;
+  padding-top: var(--j-space-200);
   gap: var(--j-space-400);
   flex-direction: column;
   align-items: center;
@@ -82,5 +84,9 @@ export default defineComponent({
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+.left-nav__community-item {
+  cursor: pointer;
 }
 </style>
