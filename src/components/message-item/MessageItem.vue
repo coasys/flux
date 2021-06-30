@@ -2,19 +2,26 @@
   <div class="message-item">
     <div class="message-item__left-column">
       <j-avatar
+        class="message-item__avatar"
         @click="handleProfileClick"
         v-if="showAvatar"
         :hash="did"
         :src="profileImg"
       />
 
-      <j-timestamp
-        class="message-item__timestamp"
-        v-else
-        hour="numeric"
-        minute="numeric"
-        :value="timestamp"
-      ></j-timestamp>
+      <j-tooltip v-else>
+        <j-timestamp
+          slot="title"
+          :value="timestamp"
+          dateStyle="full"
+        ></j-timestamp>
+        <j-timestamp
+          class="message-item__timestamp"
+          hour="numeric"
+          minute="numeric"
+          :value="timestamp"
+        ></j-timestamp>
+      </j-tooltip>
     </div>
     <div class="message-item__right-column">
       <div class="message-item__message-info" v-if="showAvatar">
@@ -28,12 +35,18 @@
           class="message-item__username"
           >{{ username }}
         </j-text>
-        <j-timestamp
-          hour="numeric"
-          minute="numeric"
-          class="message-item__timestamp"
-          :value="timestamp"
-        ></j-timestamp>
+        <j-tooltip placement="top">
+          <j-timestamp
+            slot="title"
+            :value="timestamp"
+            dateStyle="full"
+          ></j-timestamp>
+          <j-timestamp
+            class="message-item__timestamp"
+            relative
+            :value="timestamp"
+          ></j-timestamp>
+        </j-tooltip>
       </div>
       <div class="message-item__message" v-html="message"></div>
     </div>
@@ -81,6 +94,10 @@ export default defineComponent({
   grid-template-columns: 70px 1fr;
 }
 
+.message-item__avatar {
+  cursor: pointer;
+}
+
 .message-item:hover {
   background: hsla(var(--j-color-primary-hue), 50%, 50%, 0.03);
 }
@@ -91,7 +108,13 @@ export default defineComponent({
 
 .message-item__timestamp {
   opacity: 0.5;
+  cursor: default;
   font-size: var(--j-font-size-300);
+}
+
+.message-item__timestamp:hover {
+  opacity: 0.8;
+  text-decoration: underline;
 }
 
 .message-item__right-column {
