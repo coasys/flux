@@ -1,6 +1,8 @@
 <template>
   <div class="community-sidebar" v-if="community">
     <j-popover
+      :open="showCommunityMenu"
+      @toggle="(e) => (showCommunityMenu = e.target.open)"
       class="community-sidebar__header-menu"
       event="click"
       placement="bottom-start"
@@ -24,7 +26,7 @@
               </j-text>
             </div>
           </j-flex>
-          <j-icon size="xs" name="chevron-expand"></j-icon>
+          <j-icon size="xs" name="chevron-down"></j-icon>
         </j-flex>
       </button>
       <j-menu slot="content">
@@ -154,6 +156,11 @@ import { mapMutations } from "vuex";
 export default defineComponent({
   components: { AvatarGroup },
   props: ["community"],
+  data: function () {
+    return {
+      showCommunityMenu: false,
+    };
+  },
   methods: {
     ...mapMutations([
       "setShowCreateChannel",
