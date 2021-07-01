@@ -1,6 +1,6 @@
 import { Commit } from "vuex";
 import ad4m from "@perspect3vism/ad4m-executor";
-import { apolloClient } from "@/main";
+import { apolloClient } from "@/app";
 import { UNLOCK_AGENT } from "@/core/graphql_queries";
 
 export interface Context {

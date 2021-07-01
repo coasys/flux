@@ -1,4 +1,4 @@
-import { apolloClient } from "@/main";
+import { apolloClient } from "@/app";
 import { CREATE_EXPRESSION } from "../graphql_queries";
 
 export function createExpression(
