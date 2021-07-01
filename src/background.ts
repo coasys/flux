@@ -95,6 +95,7 @@ if (!gotTheLock) {
   app.quit();
 }
 
+// This method is called if a second instance of the application is started
 app.on("second-instance", (event, commandLine, workingDirectory) => {
   // Someone tried to run a second instance, we should focus our window.
   if (win) {
