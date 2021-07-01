@@ -46,6 +46,13 @@ if (isDevelopment) {
   }
 }
 
+let iconPath = "";
+if (process.env.WEBPACK_DEV_SERVER_URL) {
+  iconPath = `${process.env.PWD}/public/img/icons/favicon-32x32.png`;
+} else {
+  iconPath = `${__dirname}/img/icons/favicon-32x32.png`;
+}
+
 if (app.isPackaged) {
   console.log("App is running in production mode");
   //TODO: this code is probably somewhat broken
@@ -221,6 +228,7 @@ function createSplashScreen() {
     frame: false,
     transparent: true,
     show: false,
+    icon: iconPath,
   });
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -279,6 +287,7 @@ async function createWindow() {
     },
     titleBarStyle: "hidden",
     show: false,
+    icon: iconPath,
   });
 
   win.on("close", (event) => {
