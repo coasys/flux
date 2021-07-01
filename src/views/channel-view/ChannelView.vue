@@ -55,7 +55,7 @@
       <j-editor
         @keydown.enter="onEnter"
         autofocus
-        :placeholder="`Write something in ${channel.name}`"
+        :placeholder="`Write to #${channel.name}`"
         :value="currentExpressionPost"
         @change="handleEditorChange"
         @onsuggestionlist="changeShowList"

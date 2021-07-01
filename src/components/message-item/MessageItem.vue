@@ -135,7 +135,7 @@ export default defineComponent({
 .message-item__message-info {
   display: flex;
   align-items: center;
-  margin-bottom: var(--j-space-300);
+  margin-bottom: var(--j-space-100);
   gap: var(--j-space-400);
 }
 
