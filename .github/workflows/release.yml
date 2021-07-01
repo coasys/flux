@@ -18,7 +18,7 @@ jobs:
           toolchain: stable
       - name: Get Holochain
         run: |
-          ./scripts/get-holochain.sh && cd ../../
+          ./scripts/get-holochain.sh
       - uses: Swatinem/rust-cache@v1
         with:
           working-directory: ./resources/temp/holochain
@@ -77,7 +77,7 @@ jobs:
           toolchain: stable
       - name: Get Holochain
         run: |
-          ./scripts/get-holochain.sh && cd ../../
+          ./scripts/get-holochain.sh
       - uses: Swatinem/rust-cache@v1
         with:
           working-directory: ./resources/temp/holochain
