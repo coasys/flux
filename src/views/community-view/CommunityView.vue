@@ -41,7 +41,12 @@
     <j-text variant="ingress">
       Copy and send this code to the people you want to join your community
     </j-text>
-    <j-input size="lg" readonly :value="currentCommunity.sharedPerspectiveUrl">
+    <j-input
+      @click="(e) => e.target.select()"
+      size="lg"
+      readonly
+      :value="currentCommunity.sharedPerspectiveUrl"
+    >
       <j-button @click="getInviteCode" variant="subtle" slot="end"
         ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
       /></j-button>
