@@ -3,6 +3,7 @@
     <j-tooltip title="See all members">
       <div class="avatar-group__avatars">
         <j-avatar
+          class="avatar-group__avatar"
           v-for="(user, index) in firstUsers"
           :key="index"
           :hash="user.author.did"
@@ -52,11 +53,17 @@ export default defineComponent({
   display: inline-flex;
 }
 
+.avatar-group__avatar {
+  border-radius: 50%;
+  background: var(--j-color-white);
+}
+
 .avatar-group__avatars > *:not(:first-child) {
   margin-left: -15px;
 }
 
 .avatar-group__see-all {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
