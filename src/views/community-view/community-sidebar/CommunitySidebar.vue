@@ -32,7 +32,7 @@
           <j-icon size="xs" slot="start" name="pencil" />
           Edit community
         </j-menu-item>
-        <j-menu-item @click="getInviteCode">
+        <j-menu-item @click="() => setShowInviteCode(true)">
           <j-icon size="xs" slot="start" name="person-plus" />
           Invite people
         </j-menu-item>
@@ -47,7 +47,7 @@
     <j-box pt="500" pb="300">
       <j-menu-group-item open :title="`Members (${community.members.length})`">
         <j-button
-          @click.prevent="getInviteCode"
+          @click.prevent="() => setShowInviteCode(true)"
           size="sm"
           slot="end"
           variant="subtle"
@@ -160,23 +160,10 @@ export default defineComponent({
       "setShowEditCommunity",
       "setShowCommunityMembers",
       "setChannelNotificationState",
+      "setShowInviteCode",
     ]),
     getValidId(val: string) {
       return "channel-" + val;
-    },
-    getInviteCode() {
-      // Get the invite code to join community and copy to clipboard
-      let currentCommunity = this.community;
-      const el = document.createElement("textarea");
-      el.value = `Hey! Here is an invite code to join my private community on Junto: ${currentCommunity.sharedPerspectiveUrl}`;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand("copy");
-      document.body.removeChild(el);
-
-      this.$store.commit("showSuccessToast", {
-        message: "Your custom invite code is copied to your clipboard!",
-      });
     },
   },
 });

@@ -97,6 +97,7 @@ export interface ModalsState {
   showCreateChannel: boolean;
   showEditProfile: boolean;
   showSettings: boolean;
+  showInviteCode: boolean;
 }
 
 export interface UIState {
@@ -175,6 +176,7 @@ export default createStore({
         showCreateChannel: false,
         showEditProfile: false,
         showSettings: false,
+        showInviteCode: false,
       },
       showSidebar: true,
       showGlobalLoading: false,

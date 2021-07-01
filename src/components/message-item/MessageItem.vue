@@ -101,7 +101,7 @@ export default defineComponent({
 }
 
 .message-item:hover {
-  background: hsla(var(--j-color-primary-hue), 50%, 50%, 0.03);
+  background: hsla(var(--j-color-primary-hue), 50%, 50%, 0.06);
 }
 
 .message-item__left-column {
