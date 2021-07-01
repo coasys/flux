@@ -88,6 +88,28 @@ if (app.isPackaged) {
   app.setPath("appData", path.join(app.getPath("appData"), env));
 }
 
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  console.log("App is already running, quitting and focusing other window...");
+  app.quit();
+}
+
+app.on("second-instance", (event, commandLine, workingDirectory) => {
+  // Someone tried to run a second instance, we should focus our window.
+  if (win) {
+    if (win.isMinimized()) win.restore();
+    win.show();
+    win.focus();
+    if (process.platform === "darwin") {
+      app.dock.show();
+    }
+  } else if (splash) {
+    if (splash.isMinimized()) splash.restore();
+    splash.focus();
+  }
+});
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -231,7 +253,9 @@ async function createWindow() {
         label: "Quit",
         click: async () => {
           isQuiting = true;
-          await Core.exit();
+          if (Core) {
+            await Core.exit();
+          }
           app.quit();
         },
       },
@@ -327,7 +351,10 @@ ipcMain.on("cleanState", () => {
 });
 
 ipcMain.on("quitApp", async () => {
-  await Core.exit();
+  console.log("Got quitApp signal");
+  if (Core) {
+    await Core.exit();
+  }
   app.quit();
 });
 
@@ -336,7 +363,9 @@ ipcMain.on("quitApp", async () => {
 // Quit when all windows are closed.
 app.on("window-all-closed", async () => {
   console.log("Got window-all-closed signal");
-  await Core.exit();
+  if (Core) {
+    await Core.exit();
+  }
   app.quit();
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
@@ -346,8 +375,10 @@ app.on("window-all-closed", async () => {
 
 // Quit when all windows are closed.
 app.on("will-quit", async () => {
-  console.log("Got quit quit signal");
-  await Core.exit();
+  console.log("Got will-quit signal");
+  if (Core) {
+    await Core.exit();
+  }
   app.quit();
 });
 
