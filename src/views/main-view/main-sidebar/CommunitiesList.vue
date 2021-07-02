@@ -29,6 +29,7 @@
 
     <j-modal :open="showModal" @toggle="(e) => (showModal = e.target.open)">
       <create-community
+        v-if="showModal"
         @submit="showModal = false"
         @cancel="showModal = false"
       />

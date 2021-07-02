@@ -19,6 +19,7 @@
     @toggle="(e) => setShowEditCommunity(e.target.open)"
   >
     <edit-community
+      v-if="modals.showEditCommunity"
       @submit="() => setShowEditCommunity(false)"
       @cancel="() => setShowEditCommunity(false)"
     />
@@ -29,6 +30,7 @@
     @toggle="(e) => setShowCreateChannel(e.target.open)"
   >
     <create-channel
+      v-if="modals.showCreateChannel"
       @submit="() => setShowCreateChannel(false)"
       @cancel="() => setShowCreateChannel(false)"
     />
