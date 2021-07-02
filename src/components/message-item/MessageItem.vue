@@ -112,6 +112,7 @@ export default defineComponent({
   opacity: 0.5;
   cursor: pointer;
   font-size: var(--j-font-size-300);
+  font-weight: 500;
 }
 
 .message-item__timestamp:hover {
@@ -136,7 +137,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   margin-bottom: var(--j-space-100);
-  gap: var(--j-space-400);
+  gap: var(--j-space-300);
 }
 
 .message-item__message > :first-of-type {

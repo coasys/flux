@@ -78,5 +78,6 @@ export default defineComponent({
   font-weight: 500;
   color: var(--j-color-ui-400);
   white-space: nowrap;
+  padding: 14px;
 }
 </style>
