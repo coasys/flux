@@ -14,6 +14,7 @@
   </j-modal>
 
   <j-modal
+    size="sm"
     :open="modals.showEditCommunity"
     @toggle="(e) => setShowEditCommunity(e.target.open)"
   >
@@ -34,6 +35,7 @@
   </j-modal>
 
   <j-modal
+    size="sm"
     :open="modals.showInviteCode"
     @toggle="(e) => setShowInviteCode(e.target.open)"
   >
