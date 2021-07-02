@@ -290,6 +290,8 @@ async function createWindow() {
     titleBarStyle: "hidden",
     show: false,
     icon: iconPath,
+    minWidth: 600,
+    minHeight: 400,
   });
 
   win.on("close", (event) => {

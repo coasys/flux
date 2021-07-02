@@ -80,7 +80,6 @@ export default defineComponent({
   align-items: center;
   overflow-y: scroll;
   overflow-x: visible;
-  margin-bottom: 25vh;
 
   &::-webkit-scrollbar {
     display: none;
