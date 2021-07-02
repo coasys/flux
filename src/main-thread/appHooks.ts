@@ -154,6 +154,8 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
 
   app.on("before-quit", async () => {
     mainThreadState.isQuiting = true;
+
+    mainThreadState.mainWindow!.webContents.send("unlockedStateOff");
   });
 
   app.on("activate", async () => {

@@ -230,6 +230,10 @@ export default defineComponent({
 
     window.api.send("getLangPath");
 
+    window.api.receive("unlockedStateOff", () => {
+      this.$store.commit("updateAgentLockState", false);
+    });
+
     window.api.receive("getLangPathResponse", (data: string) => {
       // console.log(`Received language path from main thread: ${data}`);
       this.$store.commit("setLanguagesPath", data);
