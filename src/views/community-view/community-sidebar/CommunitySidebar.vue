@@ -50,7 +50,7 @@
       <j-menu-group-item open :title="`Members (${community.members.length})`">
         <j-button
           @click.prevent="() => setShowInviteCode(true)"
-          size="sm"
+          size="xs"
           slot="end"
           variant="subtle"
         >
@@ -69,7 +69,7 @@
       <j-menu-group-item open title="Channels">
         <j-button
           @click.prevent="() => setShowCreateChannel(true)"
-          size="sm"
+          size="xs"
           slot="end"
           variant="subtle"
         >
