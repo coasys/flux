@@ -50,7 +50,7 @@
       <j-menu-group-item open :title="`Members (${community.members.length})`">
         <j-button
           @click.prevent="() => setShowInviteCode(true)"
-          size="xs"
+          size="sm"
           slot="end"
           variant="subtle"
         >
@@ -65,11 +65,11 @@
       </j-menu-group-item>
     </j-box>
 
-    <j-box pt="400">
+    <j-box pt="500">
       <j-menu-group-item open title="Channels">
         <j-button
           @click.prevent="() => setShowCreateChannel(true)"
-          size="xs"
+          size="sm"
           slot="end"
           variant="subtle"
         >
@@ -94,7 +94,6 @@
             placement="bottom-start"
           >
             <j-menu-item
-              size="sm"
               slot="trigger"
               :id="getValidId(channel.perspective)"
               class="channel"
@@ -140,7 +139,7 @@
             </j-menu>
           </j-popover>
         </router-link>
-        <j-menu-item size="sm" @click="() => setShowCreateChannel(true)">
+        <j-menu-item @click="() => setShowCreateChannel(true)">
           <j-icon size="xs" slot="start" name="plus" />
           Add channel
         </j-menu-item>
