@@ -14,6 +14,16 @@ module.exports = {
   },
   pluginOptions: {
     electronBuilder: {
+      mainProcessFile: "src/main-thread/mainThread.ts",
+      mainProcessWatch: [
+        "src/main-thread/appHooks.ts",
+        "src/main-thread/createUI.ts",
+        "src/main-thread/globals.ts",
+        "src/main-thread/ipcHooks.ts",
+        "src/main-thread/setup.ts",
+        "src/main-thread/updateHooks.ts",
+      ],
+      rendererProcessFile: "src/app.ts",
       preload: "src/preload.js",
       externals: ["@perspect3vism/ad4m-executor", "fs"],
       builderOptions: {
@@ -47,6 +57,16 @@ module.exports = {
         publish: ["github"],
       },
       nodeIntegration: false,
+      chainWebpackMainProcess: (config) => {
+        config.module
+          .rule("babel")
+          .use("babel")
+          .loader("babel-loader")
+          .options({
+            presets: [["@babel/preset-env", { modules: false }]],
+            plugins: ["@babel/plugin-transform-typescript"],
+          });
+      },
     },
   },
 };
