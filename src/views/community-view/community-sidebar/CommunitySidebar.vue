@@ -41,7 +41,7 @@
         <j-divider />
         <j-menu-item @click="() => setShowCreateChannel(true)">
           <j-icon size="xs" slot="start" name="plus" />
-          Create a new channel
+          Create channel
         </j-menu-item>
       </j-menu>
     </j-popover>
