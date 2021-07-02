@@ -46,6 +46,13 @@ if (isDevelopment) {
   }
 }
 
+let iconPath = "";
+if (process.env.WEBPACK_DEV_SERVER_URL) {
+  iconPath = `${process.env.PWD}/public/img/icons/favicon-32x32.png`;
+} else {
+  iconPath = `${__dirname}/img/icons/favicon-32x32.png`;
+}
+
 if (app.isPackaged) {
   console.log("App is running in production mode");
   //TODO: this code is probably somewhat broken
@@ -87,6 +94,29 @@ if (app.isPackaged) {
   app.setPath("userData", path.join(app.getPath("userData"), env));
   app.setPath("appData", path.join(app.getPath("appData"), env));
 }
+
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  console.log("App is already running, quitting and focusing other window...");
+  app.quit();
+}
+
+// This method is called if a second instance of the application is started
+app.on("second-instance", (event, commandLine, workingDirectory) => {
+  // Someone tried to run a second instance, we should focus our window.
+  if (win) {
+    if (win.isMinimized()) win.restore();
+    win.show();
+    win.focus();
+    if (process.platform === "darwin") {
+      app.dock.show();
+    }
+  } else if (splash) {
+    if (splash.isMinimized()) splash.restore();
+    splash.focus();
+  }
+});
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -198,6 +228,7 @@ function createSplashScreen() {
     frame: false,
     transparent: true,
     show: false,
+    icon: iconPath,
   });
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -233,7 +264,9 @@ async function createWindow() {
         label: "Quit",
         click: async () => {
           isQuiting = true;
-          await Core.exit();
+          if (Core) {
+            await Core.exit();
+          }
           app.quit();
         },
       },
@@ -256,6 +289,7 @@ async function createWindow() {
     },
     titleBarStyle: "hidden",
     show: false,
+    icon: iconPath,
   });
 
   win.on("close", (event) => {
@@ -329,7 +363,10 @@ ipcMain.on("cleanState", () => {
 });
 
 ipcMain.on("quitApp", async () => {
-  await Core.exit();
+  console.log("Got quitApp signal");
+  if (Core) {
+    await Core.exit();
+  }
   app.quit();
 });
 
@@ -338,7 +375,9 @@ ipcMain.on("quitApp", async () => {
 // Quit when all windows are closed.
 app.on("window-all-closed", async () => {
   console.log("Got window-all-closed signal");
-  await Core.exit();
+  if (Core) {
+    await Core.exit();
+  }
   app.quit();
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
@@ -348,8 +387,10 @@ app.on("window-all-closed", async () => {
 
 // Quit when all windows are closed.
 app.on("will-quit", async () => {
-  console.log("Got quit quit signal");
-  await Core.exit();
+  console.log("Got will-quit signal");
+  if (Core) {
+    await Core.exit();
+  }
   app.quit();
 });
 
