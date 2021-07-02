@@ -17,7 +17,7 @@
           size="sm"
         ></j-avatar>
         <span v-if="users.length >= 4" class="avatar-group__see-all">
-          + {{ users.length - 3 }}
+          +{{ users.length - 3 }}
         </span>
       </div>
     </j-tooltip>
@@ -70,11 +70,12 @@ export default defineComponent({
   outline: 0;
   cursor: pointer;
   background: var(--j-color-white);
-  border: 1px solid var(--j-color-primary-500);
+  border: .25px solid var(--j-border-color);
   border-radius: 50%;
   height: var(--j-size-sm);
   width: var(--j-size-sm);
-  font-size: var(--j-font-size-100);
+  font-size: var(--j-font-size-300);
+  font-weight: 500;
   color: var(--j-color-primary-500);
   white-space: nowrap;
 }
