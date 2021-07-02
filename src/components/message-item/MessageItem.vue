@@ -92,7 +92,7 @@ export default defineComponent({
 .message-item {
   padding: var(--j-space-300) 0;
   display: grid;
-  gap: var(--j-space-500);
+  gap: var(--j-space-300);
   grid-template-columns: 70px 1fr;
 }
 
