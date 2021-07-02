@@ -79,7 +79,7 @@ export default defineComponent({
   height: 100%;
   width: 300px;
   min-width: 200px;
-  max-width: 60vw;
+  max-width: 33vw;
   background: var(--app-drawer-bg-color);
   overflow-y: auto;
   position: relative;
