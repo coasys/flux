@@ -394,6 +394,8 @@ app.on("will-quit", async () => {
 
 app.on("before-quit", async () => {
   isQuiting = true;
+
+  win.webContents.send("unlockedStateOff");
 });
 
 app.on("activate", () => {
