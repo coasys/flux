@@ -431,7 +431,7 @@ export default defineComponent({
   position: sticky;
   top: 0;
   height: 74px;
-  padding: var(--j-space-500);
+  padding: var(--j-space-400) var(--j-space-500);
   display: flex;
   align-items: center;
   border-bottom: 1px solid var(--app-channel-border-color);

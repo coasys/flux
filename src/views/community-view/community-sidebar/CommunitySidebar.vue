@@ -9,9 +9,9 @@
     >
       <button slot="trigger" class="community-sidebar__header">
         <j-flex j="between" gap="300">
-          <j-flex a="center" gap="400">
+          <j-flex a="center" gap="300">
             <j-avatar
-              style="--j-avatar-size: 35px"
+              style="--j-avatar-size: 30px"
               :src="require('@/assets/images/junto_app_icon.png')"
             />
             <div class="community-info">
@@ -46,7 +46,7 @@
       </j-menu>
     </j-popover>
 
-    <j-box pt="500" pb="300">
+    <j-box pt="500">
       <j-menu-group-item open :title="`Members (${community.members.length})`">
         <j-button
           @click.prevent="() => setShowInviteCode(true)"
@@ -56,7 +56,7 @@
         >
           <j-icon size="sm" square name="plus"></j-icon>
         </j-button>
-        <j-box pt="300" px="500">
+        <j-box px="500">
           <avatar-group
             @click="() => setShowCommunityMembers(true)"
             :users="community.members"
@@ -65,7 +65,7 @@
       </j-menu-group-item>
     </j-box>
 
-    <j-box pt="500">
+    <j-box pt="400">
       <j-menu-group-item open title="Channels">
         <j-button
           @click.prevent="() => setShowCreateChannel(true)"
