@@ -76,7 +76,7 @@ export default defineComponent({
   width: var(--j-size-sm);
   font-size: var(--j-font-size-300);
   font-weight: 500;
-  color: var(--j-color-primary-500);
+  color: var(--j-color-ui-400);
   white-space: nowrap;
 }
 </style>

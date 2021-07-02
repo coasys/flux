@@ -15,7 +15,7 @@
       ></j-avatar>
     </j-tooltip>
 
-    <j-tooltip title="Create community">
+    <j-tooltip title="Add community">
       <j-button
         @click="showModal = true"
         variant="primary"
