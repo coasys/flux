@@ -67,7 +67,7 @@ export default async (
       shortFormExpressionLang.address!,
       groupExpressionLang.address!,
       profileExpressionLang.address!,
-      youTubeLanguage.address!,
+      youTubeLanguage.languageAddress!,
     ];
     const typedExpLangs = [
       {
