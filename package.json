@@ -27,7 +27,7 @@
     "@apollo/client": "^3.3.14",
     "@junto-foundation/junto-elements": "^0.2.0",
     "@perspect3vism/ad4m": "0.0.6",
-    "@perspect3vism/ad4m-executor": "0.0.17",
+    "@perspect3vism/ad4m-executor": "0.0.18",
     "@tiptap/core": "^2.0.0-beta.85",
     "@tiptap/vue-3": "^2.0.0-beta.45",
     "@types/jest": "^26.0.20",

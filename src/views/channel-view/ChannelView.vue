@@ -114,6 +114,7 @@ import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css";
 import { differenceInMinutes, parseISO } from "date-fns";
 import MessageItem from "@/components/message-item/MessageItem.vue";
 import { Editor } from "@tiptap/vue-3";
+import loadModule from "@/utils/loadModule.js";
 
 interface Message {
   id: string;
@@ -156,13 +157,16 @@ export default defineComponent({
     });
     this.linksWorker = linksWorker as Worker;
   },
-  mounted() {
+  async mounted() {
     const expressionLangs = Object.keys(this.$store.state.expressionUI);
-    console.log(this.$store.state);
+
     for (const lang of expressionLangs) {
-      console.log("lang", lang);
       const ui = this.$store.getters.getLanguageUI(lang);
-      console.log(ui);
+      if (ui.name === "junto-youtube") {
+        console.log("create", ui.createIcon);
+        const compo = await loadModule(ui.createIcon);
+        console.log(compo);
+      }
     }
     // Set cached id's as Vue has a bug where route params
     // update before the component is unmounted/beforeUnmount

@@ -9,23 +9,15 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "allowJs": true,
     "sourceMap": true,
     "strictPropertyInitialization": false,
     "baseUrl": ".",
-    "types": [
-      "webpack-env", "jest", "mocha"
-    ],
+    "types": ["webpack-env", "jest", "mocha"],
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": ["src/*"]
     },
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost"
-    ],
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
   "include": [
     "src/**/*.ts",
@@ -34,7 +26,6 @@
     "tests/**/*.ts",
     "tests/**/*.tsx"
   ],
-  "exclude": [
-    "node_modules", "__sapper__/*", "public/*", "ad4m/languages"
-  ]
+  "exclude": ["node_modules", "__sapper__/*", "public/*", "ad4m/languages"]
 }
+, "src/utils/loadModule.js"
