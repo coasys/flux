@@ -18,11 +18,9 @@ export default async ({ commit, getters }: Context): Promise<void> => {
     if (!languages) {
       throw new Error("No languages found");
     }
-    console.log(languages);
     for (const language of languages) {
       if (language.constructorIcon) {
         if (!getters.getLanguageUI(language.address!)) {
-          console.log(language);
           const uiData: ExpressionUIIcons = {
             languageAddress: language!.address!,
             createIcon: language!.constructorIcon?.code || undefined,

@@ -1,44 +1,42 @@
 <template>
   <div class="community-sidebar" v-if="community">
-    <button class="community-sidebar__header">
-      <j-flex j="between" gap="300">
-        <j-flex a="center" gap="400">
-          <j-avatar
-            style="--j-avatar-size: 35px"
-            :src="require('@/assets/images/junto_app_icon.png')"
-          />
-          <div class="community-info">
-            <j-text
-              v-if="community.name"
-              weight="500"
-              color="ui-800"
-              nomargin
-              size="500"
-            >
-              {{ community.name }}
-            </j-text>
-            <j-text
-              v-if="community.description"
-              weight="300"
-              color="ui-800"
-              nomargin
-              size="400"
-            >
-              {{ community.description }}
-            </j-text>
-          </div>
-        </j-flex>
-        <j-icon size="xs" name="chevron-expand"></j-icon>
-      </j-flex>
-    </button>
-
     <j-popover
       class="community-sidebar__header-menu"
       event="click"
       placement="bottom-start"
-      selector=".community-sidebar__header"
     >
-      <j-menu>
+      <button slot="trigger" class="community-sidebar__header">
+        <j-flex j="between" gap="300">
+          <j-flex a="center" gap="400">
+            <j-avatar
+              style="--j-avatar-size: 35px"
+              :src="require('@/assets/images/junto_app_icon.png')"
+            />
+            <div class="community-info">
+              <j-text
+                v-if="community.name"
+                weight="500"
+                color="ui-800"
+                nomargin
+                size="500"
+              >
+                {{ community.name }}
+              </j-text>
+              <j-text
+                v-if="community.description"
+                weight="300"
+                color="ui-800"
+                nomargin
+                size="400"
+              >
+                {{ community.description }}
+              </j-text>
+            </div>
+          </j-flex>
+          <j-icon size="xs" name="chevron-expand"></j-icon>
+        </j-flex>
+      </button>
+      <j-menu slot="content">
         <j-menu-item @click="() => setShowEditCommunity(true)">
           <j-icon size="xs" slot="start" name="pencil" />
           Edit community
@@ -97,35 +95,34 @@
           v-for="channel in community.channels"
           :key="channel.perspective"
         >
-          <j-menu-item
-            :id="getValidId(channel.perspective)"
-            class="channel"
-            :class="{ 'channel--mute': channel?.notifications?.mute }"
-            :selected="isExactActive"
-            @click="navigate"
-          >
-            <j-icon slot="start" size="sm" name="hash"></j-icon>
-            {{ channel.name }}
-            <j-icon
-              size="xs"
-              slot="end"
-              v-if="channel?.notifications?.mute"
-              name="volume-mute"
-            />
-            <div
-              slot="end"
-              class="channel__notification"
-              v-if="channel.hasNewMessages"
-            ></div>
-          </j-menu-item>
-
           <j-popover
             class="community-sidebar__header-menu"
             event="contextmenu"
             placement="bottom-start"
-            :selector="'#' + getValidId(channel.perspective)"
           >
-            <j-menu>
+            <j-menu-item
+              slot="trigger"
+              :id="getValidId(channel.perspective)"
+              class="channel"
+              :class="{ 'channel--mute': channel?.notifications?.mute }"
+              :selected="isExactActive"
+              @click="navigate"
+            >
+              <j-icon slot="start" size="sm" name="hash"></j-icon>
+              {{ channel.name }}
+              <j-icon
+                size="xs"
+                slot="end"
+                v-if="channel?.notifications?.mute"
+                name="volume-mute"
+              />
+              <div
+                slot="end"
+                class="channel__notification"
+                v-if="channel.hasNewMessages"
+              ></div>
+            </j-menu-item>
+            <j-menu slot="content">
               <j-menu-item
                 @click="
                   () =>

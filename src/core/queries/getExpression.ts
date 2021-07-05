@@ -1,4 +1,4 @@
-import { apolloClient } from "@/main";
+import { apolloClient } from "@/app";
 import { QUERY_EXPRESSION } from "../graphql_queries";
 import ad4m from "@perspect3vism/ad4m-executor";
 import sleep from "@/utils/sleep";
