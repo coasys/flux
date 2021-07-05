@@ -74,7 +74,7 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
             languages: [],
             perspectives: [],
           },
-          appBuiltInLangs: ["social-context"],
+          appBuiltInLangs: ["social-context", "junto-youtube"],
           appLangAliases: null,
           mocks: false,
         })
