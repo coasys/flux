@@ -83,9 +83,9 @@ export default defineComponent({
     //Watch for agent unlock to set off running queries
     store.watch(
       (state) => state.agentUnlocked,
-      async (newValue) => {
-        console.log("agent unlocked changed to", newValue);
-        if (newValue) {
+      async (unlocked) => {
+        console.log("agent unlocked changed to", unlocked);
+        if (unlocked) {
           store.commit("updateApplicationStartTime", new Date());
           store
             .dispatch("loadExpressionLanguages")
