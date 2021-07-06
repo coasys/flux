@@ -32,20 +32,14 @@
             :data-active="active"
             class="message"
           >
-            <message-item
-              :did="item.did"
-              :showAvatar="showAvatar(index)"
-              :message="item.message"
-              :timestamp="item.timestamp"
-              :username="users[item.did]?.profile['foaf:AccountName']"
-              :profileImg="
-                users[item.did]?.profile['schema:image'] &&
-                JSON.parse(users[item.did].profile['schema:image'])[
-                  'schema:contentUrl'
-                ]
-              "
-              @profileClick="handleProfileClick"
-              @mentionClick="handleMentionClick"
+            <div
+              v-if="expressionType === 'shortform'"
+              v-html="item.data.body"
+            ></div>
+            <expression-view
+              v-if="expressionType !== 'shortform'"
+              :element="expressionType"
+              :expression="item"
             />
           </DynamicScrollerItem>
         </template>
@@ -59,10 +53,11 @@
           @change="(e) => (expressionType = e.target.value)"
         >
           <j-tab-item value="shortform">Text</j-tab-item>
-          <j-tab-item value="youtube">Youtube link</j-tab-item>
+          <j-tab-item value="junto-youtube"> Youtube </j-tab-item>
         </j-tabs>
       </j-box>
       <j-editor
+        v-if="expressionType === 'shortform'"
         @keydown.enter="onEnter"
         autofocus
         :placeholder="`Write something in ${channel.name}`"
@@ -72,6 +67,10 @@
         @editorinit="editorinit"
         :mentions="items"
       ></j-editor>
+      <div
+        v-if="expressionType !== 'shortform'"
+        v-html="`<${expressionType}-create></${expressionType}-create`"
+      />
     </footer>
     <j-modal
       size="xs"
@@ -112,9 +111,9 @@ import { getProfile } from "@/utils/profileHelpers";
 import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
 import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css";
 import { differenceInMinutes, parseISO } from "date-fns";
-import MessageItem from "@/components/message-item/MessageItem.vue";
+import ExpressionView from "@/components/expression/Expression.vue";
 import { Editor } from "@tiptap/vue-3";
-import loadModule from "@/utils/loadModule.js";
+import loadModule from "@/utils/loadModule";
 
 interface Message {
   id: string;
@@ -131,7 +130,7 @@ interface UserMap {
 
 export default defineComponent({
   name: "ChannelView",
-  components: { DynamicScroller, DynamicScrollerItem, MessageItem },
+  components: { DynamicScroller, DynamicScrollerItem, ExpressionView },
   data() {
     return {
       expressionType: "shortform",
@@ -158,14 +157,25 @@ export default defineComponent({
     this.linksWorker = linksWorker as Worker;
   },
   async mounted() {
-    const expressionLangs = Object.keys(this.$store.state.expressionUI);
+    const expressionLangs = Object.values(this.$store.state.expressionUI);
 
     for (const lang of expressionLangs) {
-      const ui = this.$store.getters.getLanguageUI(lang);
-      if (ui.name === "junto-youtube") {
-        console.log("create", ui.createIcon);
-        const compo = await loadModule(ui.createIcon);
-        console.log(compo);
+      if (lang.name === "junto-youtube") {
+        console.log({ lang });
+        const createModule = await loadModule(lang.createIcon);
+        const viewModule = await loadModule(lang.viewIcon);
+        if (createModule.default) {
+          const name = lang.name + "-create";
+          if (!customElements.get(name)) {
+            customElements.define(name, createModule.default);
+          }
+        }
+        if (viewModule.default) {
+          const name = lang.name + "-view";
+          if (!customElements.get(name)) {
+            customElements.define(name, createModule.default);
+          }
+        }
       }
     }
     // Set cached id's as Vue has a bug where route params
@@ -207,6 +217,17 @@ export default defineComponent({
     });
   },
   watch: {
+    expressionType: function (val) {
+      console.log(val);
+      this.$nextTick(() => {
+        const element = document.querySelector(val + "-create") as any;
+        if (element) {
+          element.commitExpression = (content: any) => {
+            this.createExpression(content);
+          };
+        }
+      });
+    },
     "channel.hasNewMessages": function (hasMessages) {
       if (hasMessages) {
         // If this channel is not in view, and only kept alive
@@ -266,7 +287,10 @@ export default defineComponent({
             did: item.expression.author.did,
             timestamp: item.expression.timestamp,
             //@ts-ignore
-            message: item.expression.data.body,
+            data: item.expression.data,
+            language: this.$store.getters.getLanguageUI(
+              item.url.language.address
+            ),
           },
         ];
       }, []);
@@ -325,7 +349,7 @@ export default defineComponent({
       if (!e.shiftKey && !this.showList) {
         console.log({ detail: e });
         this.currentExpressionPost = "";
-        this.createDirectMessage({ body: e.target.value, background: [""] });
+        this.createExpression({ body: e.target.value, background: [""] });
         e.preventDefault();
       }
     },
@@ -406,18 +430,14 @@ export default defineComponent({
         channelId: this.channel.perspective,
       });
     },
-    async createDirectMessage(message: JuntoShortForm) {
-      const escapedMessage = message.body.replace(/( |<([^>]+)>)/gi, "");
 
+    async createExpression(message: JuntoShortForm) {
       this.currentExpressionPost = "";
-
-      if (escapedMessage) {
-        this.$store.dispatch("createExpression", {
-          languageAddress: this.community.expressionLanguages[0]!,
-          content: message,
-          perspective: this.channel.perspective.toString(),
-        });
-      }
+      this.$store.dispatch("createExpression", {
+        languageAddress: this.community.expressionLanguages[0]!,
+        content: message,
+        perspective: this.channel.perspective.toString(),
+      });
     },
     scrollToBottom(behavior: "smooth" | "auto") {
       const container = this.$refs.scrollContainer as HTMLDivElement;
