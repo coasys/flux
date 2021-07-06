@@ -1,25 +1,21 @@
-import ConstructorIcon from "inline:./constructor-icon.js";
-import ExpressionIcon from "inline:./expression-icon.js";
+import type Language from "@perspect3vism/ad4m/Language";
 
-export const name = "junto-youtube";
-
-function PutAdapter() {
-  this.addressOf = async (content) => content.url;
-}
-
-function ExpressionAdapter() {
-  this.putAdapter = new PutAdapter();
-  this.get = () => null;
-}
-
-function interactions() {
-  return [];
-}
+// @ts-ignore
+import ConstructorIcon from "inline:./icons/constructor-icon.js";
+// @ts-ignore
+import ExpressionIcon from "inline:./icons/expression-icon.js";
 
 export default async function create(context) {
   return {
-    name,
-    expressionAdapter: new ExpressionAdapter(),
+    name: "junto-youtube",
+    expressionAdapter: {
+      putAdapter: {
+        addressOf: (content: any) => content.url,
+      },
+      get() {
+        return null;
+      },
+    },
     expressionUI: {
       constructorIcon() {
         return ConstructorIcon;
@@ -33,6 +29,6 @@ export default async function create(context) {
         return null;
       },
     },
-    interactions,
-  };
+    interactions: () => [],
+  } as Language;
 }
