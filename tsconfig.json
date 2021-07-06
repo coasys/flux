@@ -28,4 +28,3 @@
   ],
   "exclude": ["node_modules", "__sapper__/*", "public/*", "ad4m/languages"]
 }
-, "src/utils/loadModule.js"
