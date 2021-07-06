@@ -1,4 +1,4 @@
-import { apolloClient } from "@/main";
+import { apolloClient } from "@/app";
 import ad4m from "@perspect3vism/ad4m-executor";
 import {
   SOURCE_PREDICATE_LINK_QUERY,

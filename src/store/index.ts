@@ -164,6 +164,20 @@ export interface AddChannel {
 
 const vuexLocal = new VuexPersistence<State>({
   storage: window.localStorage,
+  reducer: state => ({
+    communities: state.communities,
+    localLanguagesPath: state.localLanguagesPath,
+    databasePerspective: state.databasePerspective,
+    expressionUI: state.expressionUI,
+    userProfile: state.userProfile,
+    userDid: state.userDid,
+    agentInit: state.agentInit,
+    agentUnlocked: state.agentUnlocked,
+    ui: {
+      showSidebar: state.ui.showSidebar,
+      theme: state.ui.theme,
+    }
+  })
 });
 
 export default createStore({

@@ -1,4 +1,4 @@
-import { apolloClient } from "@/main";
+import { apolloClient } from "@/app";
 import { PUB_KEY_FOR_LANG } from "../graphql_queries";
 
 export function getPubKeyForLanguage(lang: string): Promise<string> {

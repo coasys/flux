@@ -1,4 +1,4 @@
-import { apolloClient } from "@/main";
+import { apolloClient } from "@/app";
 import { INSTALL_SHARED_PERSPECTIVE } from "../graphql_queries";
 import ad4m from "@perspect3vism/ad4m-executor";
 
