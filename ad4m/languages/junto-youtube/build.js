@@ -3,6 +3,7 @@ const inlineImportPlugin = require("esbuild-plugin-inline-import");
 
 esbuild
   .build({
+    format: "cjs",
     entryPoints: ["index.ts"],
     bundle: true,
     outfile: "build/bundle.js",
