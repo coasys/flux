@@ -53,9 +53,10 @@
     </div>
     <footer class="channel-view__footer">
       <j-editor
+        @send="(e) => createDirectMessage(e.target.value)"
         @keydown.enter="onEnter"
         autofocus
-        :placeholder="`Write something in ${channel.name}`"
+        :placeholder="`Write to #${channel.name}`"
         :value="currentExpressionPost"
         @change="handleEditorChange"
         @onsuggestionlist="changeShowList"
@@ -301,10 +302,8 @@ export default defineComponent({
     },
     onEnter(e: any) {
       if (!e.shiftKey && !this.showList) {
-        console.log({ detail: e });
-        this.currentExpressionPost = "";
-        this.createDirectMessage({ body: e.target.value, background: [""] });
         e.preventDefault();
+        this.createDirectMessage(e.target.value);
       }
     },
     editorinit(e: any) {
@@ -384,15 +383,15 @@ export default defineComponent({
         channelId: this.channel.perspective,
       });
     },
-    async createDirectMessage(message: JuntoShortForm) {
-      const escapedMessage = message.body.replace(/( |<([^>]+)>)/gi, "");
+    async createDirectMessage(message: string) {
+      const escapedMessage = message.replace(/( |<([^>]+)>)/gi, "");
 
       this.currentExpressionPost = "";
 
       if (escapedMessage) {
         this.$store.dispatch("createExpression", {
           languageAddress: this.community.expressionLanguages[0]!,
-          content: message,
+          content: { body: message, background: [""] },
           perspective: this.channel.perspective.toString(),
         });
       }
@@ -432,7 +431,7 @@ export default defineComponent({
   position: sticky;
   top: 0;
   height: 74px;
-  padding: var(--j-space-500);
+  padding: var(--j-space-400) var(--j-space-500);
   display: flex;
   align-items: center;
   border-bottom: 1px solid var(--app-channel-border-color);
@@ -460,19 +459,10 @@ export default defineComponent({
   background: var(--app-channel-footer-bg-color);
   position: sticky;
   bottom: 0;
-  padding-left: var(--j-space-500);
-  padding-right: var(--j-space-500);
-  padding-bottom: var(--j-space-300);
 }
 
 j-editor::part(base) {
   border: 0;
-  padding: 0;
-}
-
-j-editor::part(editor) {
-  padding-top: var(--j-space-500);
-  padding-left: var(--j-space-300);
 }
 
 j-editor::part(toolbar) {

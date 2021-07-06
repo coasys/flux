@@ -10,16 +10,21 @@
       <j-input
         size="lg"
         label="Name"
+        :minlength="10"
+        :maxlength="30"
+        autovalidate
+        required
+        type="text"
         :value="channelName"
         @keydown.enter="createChannel"
         @input="(e) => (channelName = e.target.value)"
       ></j-input>
       <div>
-        <j-button size="lg" @click="$emit('cancel')">Cancel</j-button>
+        <j-button size="lg" @click="$emit('cancel')"> Cancel </j-button>
         <j-button
           size="lg"
           :loading="isCreatingChannel"
-          :disabled="isCreatingChannel"
+          :disabled="isCreatingChannel || !canSubmit"
           @click="createChannel"
           variant="primary"
         >
@@ -31,6 +36,7 @@
 </template>
 
 <script lang="ts">
+import { isValid } from "@/utils/validation";
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -40,6 +46,19 @@ export default defineComponent({
       channelName: "",
       isCreatingChannel: false,
     };
+  },
+  computed: {
+    canSubmit(): boolean {
+      return isValid(
+        [
+          {
+            check: (val: string) => (val ? false : true),
+            message: "This field is required",
+          },
+        ],
+        this.channelName
+      );
+    },
   },
   methods: {
     async createChannel() {

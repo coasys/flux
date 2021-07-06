@@ -275,6 +275,10 @@ export default {
     state.ui.modals.showSettings = payload;
   },
 
+  setShowInviteCode(state: State, payload: boolean): void {
+    state.ui.modals.showInviteCode = payload;
+  },
+
   setChannelNotificationState(
     state: State,
     { communityId, channelId }: { communityId: string; channelId: string }

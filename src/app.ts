@@ -3,15 +3,13 @@ import App from "./App.vue";
 import "./registerServiceWorker";
 import router from "./router";
 import store from "./store/index";
-import VTooltip from "v-tooltip";
-import "v-tooltip/dist/v-tooltip.css";
 
 import { ApolloClient, InMemoryCache } from "@apollo/client/core";
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { ApolloClients } from "@vue/apollo-composable";
 
-import "@junto-foundation/junto-elements"
-import "@junto-foundation/junto-elements/dist/main.css"
+import "@junto-foundation/junto-elements";
+import "@junto-foundation/junto-elements/dist/main.css";
 
 const wsLink = new WebSocketLink({
   uri: `ws://localhost:4000/graphql`,
@@ -43,5 +41,4 @@ createApp({
 })
   .use(store)
   .use(router)
-  .use(VTooltip)
   .mount("#app");

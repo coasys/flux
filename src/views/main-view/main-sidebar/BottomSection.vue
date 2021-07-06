@@ -3,6 +3,7 @@
     <j-tooltip id="myProfile" title="My profile">
       <j-popover event="click">
         <j-avatar
+          class="left-nav__profile-icon"
           slot="trigger"
           size="xl"
           :hash="userDid"
@@ -126,5 +127,9 @@ export default defineComponent({
   gap: var(--j-space-400);
   flex-direction: column;
   align-items: center;
+}
+
+.left-nav__profile-icon {
+  cursor: pointer;
 }
 </style>
