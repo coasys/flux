@@ -3,6 +3,8 @@
 /ad4m/holochain
 /ad4m/languages/**/*.js
 !/ad4m/languages/**/dna.js
+!/ad4m/languages/**/build.js
+!/ad4m/languages/**/icons/**
 !/ad4m/languages/**/rollup.config.js
 !/ad4m/languages/**/rollup.config.icons.js
 /ad4m/languages/**/*.js.map

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@junto-foundation/junto-elements@latest/dist/main.css"
+    />
+    <script src="https://unpkg.com/@junto-foundation/junto-elements@latest"></script>
+  </head>
+  <body>
+    <div style="max-width: 800px">
+      <expression-icon></expression-icon>
+      <constructor-icon></constructor-icon>
+    </div>
+
+    <script type="module">
+      import ConstructorIcon from "./icons/constructor-icon.js";
+      import ExpressionIcon from "./icons/expression-icon.js";
+      customElements.define("constructor-icon", ConstructorIcon);
+      customElements.define("expression-icon", ExpressionIcon);
+
+      const eIcon = document.querySelector("expression-icon");
+      const cIcon = document.querySelector("constructor-icon");
+
+      cIcon.commitExpression = (expressionData) => {
+        eIcon.expression = expressionData;
+      };
+    </script>
+  </body>
+</html>
