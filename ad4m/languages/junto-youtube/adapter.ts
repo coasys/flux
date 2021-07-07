@@ -7,8 +7,8 @@ import type {
 import type LanguageContext from "@perspect3vism/ad4m/LanguageContext";
 
 class YouTubePutAdapter implements ReadOnlyLanguage {
-  async addressOf(content: any): Promise<Address> {
-    return content.url;
+  async addressOf(data: any): Promise<Address> {
+    return data.url;
   }
 }
 
@@ -20,6 +20,11 @@ export default class YouTubeAdapter implements ExpressionAdapter {
   }
 
   async get(address: Address): Promise<void | Expression> {
-    return null;
+    return {
+      author: { did: "123", name: null, email: null },
+      timestamp: "never",
+      proof: null,
+      data: { url: address },
+    };
   }
 }
