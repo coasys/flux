@@ -21,6 +21,7 @@
       <j-tab-item>Join</j-tab-item>
     </j-tabs>
     <j-flex direction="column" gap="500" v-if="tabView === 'Create'">
+      <avatar-upload />
       <j-input
         size="lg"
         label="Name"
@@ -75,8 +76,10 @@
 <script lang="ts">
 import { isValid } from "@/utils/validation";
 import { defineComponent } from "vue";
+import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 
 export default defineComponent({
+  components: { AvatarUpload },
   emits: ["cancel", "submit"],
   data() {
     return {
