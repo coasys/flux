@@ -48,7 +48,7 @@ export default async (
         : true) &&
       !channel?.notifications.mute)
   ) {
-    const isMentioned = message.includes(store.state.userDid);
+    const isMentioned = message.includes(store.state.userDid.replace('did:key:', ''));
 
     let title = "";
     let body = "";

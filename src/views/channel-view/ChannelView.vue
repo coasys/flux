@@ -214,7 +214,7 @@ export default defineComponent({
     memberMentions(): any[] {
       return this.community.members.map((m) => ({
         name: (m.data as any).profile["foaf:AccountName"],
-        id: m.author.did,
+        id: m.author.did.replace('did:key:', ''),
         trigger: "@",
       }));
     },
@@ -296,7 +296,7 @@ export default defineComponent({
       if (label?.startsWith("@")) {
         this.showProfile = true;
         this.activeProfile = this.community.members.find(
-          (m) => m.author.did === id
+          (m) => m.author.did === `did:key:${id}`
         );
       }
     },
