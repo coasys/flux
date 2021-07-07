@@ -15,9 +15,11 @@ export default defineComponent({
   },
   mounted() {
     const element = document.createElement(this.element) as any;
-    element.expression = this.expression;
     // @ts-ignore
     this.$refs.container.appendChild(element);
+    // @ts-ignore
+    const el = this.$refs.container.querySelector(this.element);
+    el.expression = this.expression?.data;
   },
 });
 </script>

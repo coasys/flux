@@ -28,7 +28,7 @@ export default class ConstructorIcon extends HTMLElement {
     const button = shadowRoot.querySelector("j-button");
     button.addEventListener("click", () => {
       const input = shadowRoot.querySelector("j-input");
-      this.commitExpression({ data: { url: input.value } });
+      this.commitExpression({ url: input.value });
     });
   }
 }

@@ -27,7 +27,7 @@ export default class ExpressionIcon extends HTMLElement {
   constructor() {
     super();
     // Set initial epxression data
-    this._expression = { data: { url: "" } };
+    this._expression = { url: "" };
     // Create  template
     const tmpl = document.createElement("template");
     tmpl.innerHTML = template;
@@ -42,8 +42,6 @@ export default class ExpressionIcon extends HTMLElement {
 
   set expression(expression) {
     this._expression = expression;
-    this.shadowRoot
-      .querySelector("iframe")
-      .setAttribute("src", expression.data.url);
+    this.shadowRoot.querySelector("iframe").setAttribute("src", expression.url);
   }
 }

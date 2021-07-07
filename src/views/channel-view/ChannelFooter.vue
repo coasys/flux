@@ -1,95 +1,31 @@
 <template>
-  <div class="channel-view" @scroll="handleScroll" ref="scrollContainer">
-    <header class="channel-view__header">
-      <j-icon size="sm" name="hash" />
-      <j-text nomargin weight="500" size="500">{{ channel.name }}</j-text>
-    </header>
-
-    <div class="channel-view__main">
-      <div class="channel-view__load-more">
-        <j-button
-          variant="primary"
-          v-if="showNewMessagesButton && channel.hasNewMessages"
-          @click="scrollToBottom('smooth')"
-        >
-          Show new messages
-          <j-icon name="arrow-down-short" size="xs" />
-        </j-button>
-      </div>
-
-      <DynamicScroller
-        v-if="messages.length"
-        ref="scroller"
-        :items="messages"
-        :min-item-size="2"
+  <footer class="channel-view__footer">
+    <j-box pb="300" pt="300">
+      <j-tabs
+        size="sm"
+        :value="expressionType"
+        @change="(e) => (expressionType = e.target.value)"
       >
-        <template v-slot="{ item, index, active }">
-          <DynamicScrollerItem
-            :item="item"
-            :active="active"
-            :size-dependencies="[item.message, item.timestamp]"
-            :data-index="index"
-            :data-active="active"
-            class="message"
-          >
-            <expression-view
-              :element="item.language.name + '-view'"
-              :expression="item"
-            />
-          </DynamicScrollerItem>
-        </template>
-      </DynamicScroller>
-    </div>
-    <footer class="channel-view__footer">
-      <j-box pb="300" pt="300">
-        <j-tabs
-          size="sm"
-          :value="expressionType"
-          @change="(e) => (expressionType = e.target.value)"
-        >
-          <j-tab-item value="shortform">Text</j-tab-item>
-          <j-tab-item value="junto-youtube"> Youtube </j-tab-item>
-        </j-tabs>
-      </j-box>
-      <j-editor
-        v-if="expressionType === 'shortform'"
-        @keydown.enter="onEnter"
-        autofocus
-        :placeholder="`Write something in ${channel.name}`"
-        :value="currentExpressionPost"
-        @change="handleEditorChange"
-        @onsuggestionlist="changeShowList"
-        @editorinit="editorinit"
-        :mentions="items"
-      ></j-editor>
-      <div
-        v-if="expressionType !== 'shortform'"
-        v-html="`<${expressionType}-create></${expressionType}-create`"
-      />
-    </footer>
-    <j-modal
-      size="xs"
-      :open="showProfile"
-      @toggle="(e) => (showProfile = e.target.open)"
-    >
-      <j-flex a="center" direction="column" gap="500">
-        <j-avatar
-          style="--j-avatar-size: 100px"
-          :hash="activeProfile?.author?.did"
-          :src="
-            activeProfile?.data?.profile['schema:image']
-              ? JSON.parse(activeProfile?.data?.profile['schema:image'])[
-                  'schema:contentUrl'
-                ]
-              : null
-          "
-        />
-        <j-text variant="heading-sm">{{
-          activeProfile?.data?.profile["foaf:AccountName"]
-        }}</j-text>
-      </j-flex>
-    </j-modal>
-  </div>
+        <j-tab-item value="shortform">Text</j-tab-item>
+        <j-tab-item value="junto-youtube"> Youtube </j-tab-item>
+      </j-tabs>
+    </j-box>
+    <j-editor
+      v-if="expressionType === 'shortform'"
+      @keydown.enter="onEnter"
+      autofocus
+      :placeholder="`Write something in ${channel.name}`"
+      :value="currentExpressionPost"
+      @change="handleEditorChange"
+      @onsuggestionlist="changeShowList"
+      @editorinit="editorinit"
+      :mentions="items"
+    ></j-editor>
+    <div
+      v-if="expressionType !== 'shortform'"
+      v-html="`<${expressionType}-create></${expressionType}-create`"
+    />
+  </footer>
 </template>
 
 <script lang="ts">
@@ -126,7 +62,6 @@ interface UserMap {
 
 export default defineComponent({
   name: "ChannelView",
-  components: { DynamicScroller, DynamicScrollerItem, ExpressionView },
   data() {
     return {
       expressionType: "shortform",
@@ -144,74 +79,6 @@ export default defineComponent({
       showProfile: false,
       activeProfile: {} as any,
     };
-  },
-  async beforeCreate() {
-    const expressionLangs = Object.values(this.$store.state.expressionUI);
-
-    for (const lang of expressionLangs) {
-      if (lang.name === "junto-youtube") {
-        console.log({ lang });
-        const createModule = await loadModule(lang.createIcon);
-        const viewModule = await loadModule(lang.viewIcon);
-        if (createModule.default) {
-          const name = lang.name + "-create";
-          if (!customElements.get(name)) {
-            customElements.define(name, createModule.default);
-          }
-        }
-        if (viewModule.default) {
-          const name = lang.name + "-view";
-          if (!customElements.get(name)) {
-            customElements.define(name, viewModule.default);
-          }
-        }
-      }
-    }
-
-    const { linksWorker } = await this.$store.dispatch("loadExpressions", {
-      communityId: this.$route.params.communityId,
-      channelId: this.$route.params.channelId,
-    });
-    this.linksWorker = linksWorker as Worker;
-  },
-  async mounted() {
-    // Set cached id's as Vue has a bug where route params
-    // update before the component is unmounted/beforeUnmount
-    this.chachedCommunityId = this.$route.params.communityId as string;
-    this.cachedChannelId = this.$route.params.channelId as string;
-
-    const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-
-    // Next tick waits for everything to be rendered
-    this.$nextTick(() => {
-      if (this.channel.scrollTop === undefined) {
-        this.scrollToBottom("auto");
-      } else {
-        scrollContainer.scrollTop = this.channel.scrollTop as number;
-      }
-
-      const isAtBottom =
-        scrollContainer.scrollHeight - window.innerHeight ===
-        scrollContainer.scrollTop;
-
-      if (isAtBottom && this.channel.hasNewMessages) {
-        this.markAsRead();
-      }
-      if (!isAtBottom && this.channel.hasNewMessages) {
-        this.showNewMessagesButton = true;
-      }
-    });
-  },
-  beforeUnmount() {
-    if (this.linksWorker) {
-      this.linksWorker!.terminate();
-    }
-    const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-    this.$store.commit("setChannelScrollTop", {
-      communityId: this.community.perspective,
-      channelId: this.channel.perspective,
-      value: scrollContainer.scrollTop as any,
-    });
   },
   watch: {
     expressionType: function (val) {

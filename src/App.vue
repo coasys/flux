@@ -102,15 +102,17 @@ export default defineComponent({
       console.log("GOT INCOMING MESSAGE SIGNAL");
       //Parse out the signal data to its link form and validate the link structure
       const linkData = parseSignalAsLink(data.signal);
+
       if (linkData) {
         const link = linkData.link;
         const language = linkData.language;
-        if (link.data!.predicate! == "sioc://content_of") {
+        if (link.data!.predicate! === "sioc://content_of") {
           //Start expression web worker to try and get the expression data pointed to in link target
           const expressionWorker = new Worker("pollingWorker.js");
 
           expressionWorker.postMessage({
             retry: expressionGetRetries,
+            quitOnResponse: true,
             interval: expressionGetDelayMs,
             query: print(QUERY_EXPRESSION),
             variables: { url: link.data!.target! },
@@ -136,14 +138,16 @@ export default defineComponent({
                 message: expression,
               });
 
-              showMessageNotification(
-                router,
-                route,
-                store,
-                language,
-                expression!.author!.did!,
-                message.body
-              );
+              if (message.body) {
+                showMessageNotification(
+                  router,
+                  route,
+                  store,
+                  language,
+                  expression!.author!.did!,
+                  message.body
+                );
+              }
 
               //Add UI notification on the channel to notify that there is a new message there
               store.commit("setHasNewMessages", {

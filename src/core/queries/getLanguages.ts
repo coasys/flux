@@ -7,6 +7,7 @@ export async function getLanguages(): Promise<ad4m.Language[]> {
     apolloClient
       .query<{ languages: ad4m.Language[] }>({
         query: LANGUAGES,
+        fetchPolicy: "no-cache",
       })
       .then((result) => {
         resolve(result.data!.languages);
