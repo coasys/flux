@@ -329,6 +329,10 @@ body {
   --app-channel-footer-bg-color: var(--j-color-white);
 }
 
+j-avatar::part(base) {
+  transition: box-shadow 0.2s ease;
+}
+
 .global-loading {
   width: 100vw;
   height: 100vh;
