@@ -1,15 +1,17 @@
 <template>
   <div class="community-sidebar" v-if="community">
     <j-popover
+      :open="showCommunityMenu"
+      @toggle="(e) => (showCommunityMenu = e.target.open)"
       class="community-sidebar__header-menu"
       event="click"
       placement="bottom-start"
     >
       <button slot="trigger" class="community-sidebar__header">
         <j-flex j="between" gap="300">
-          <j-flex a="center" gap="400">
+          <j-flex a="center" gap="300">
             <j-avatar
-              style="--j-avatar-size: 35px"
+              style="--j-avatar-size: 30px"
               :src="require('@/assets/images/junto_app_icon.png')"
             />
             <div class="community-info">
@@ -19,21 +21,13 @@
                 color="ui-800"
                 nomargin
                 size="500"
+                style="text-overflow: ellipsis;"
               >
                 {{ community.name }}
               </j-text>
-              <j-text
-                v-if="community.description"
-                weight="300"
-                color="ui-800"
-                nomargin
-                size="400"
-              >
-                {{ community.description }}
-              </j-text>
             </div>
           </j-flex>
-          <j-icon size="xs" name="chevron-expand"></j-icon>
+          <j-icon size="xs" name="chevron-down"></j-icon>
         </j-flex>
       </button>
       <j-menu slot="content">
@@ -41,29 +35,29 @@
           <j-icon size="xs" slot="start" name="pencil" />
           Edit community
         </j-menu-item>
-        <j-menu-item @click="getInviteCode">
+        <j-menu-item @click="() => setShowInviteCode(true)">
           <j-icon size="xs" slot="start" name="person-plus" />
           Invite people
         </j-menu-item>
         <j-divider />
         <j-menu-item @click="() => setShowCreateChannel(true)">
           <j-icon size="xs" slot="start" name="plus" />
-          Create a new channel
+          Create channel
         </j-menu-item>
       </j-menu>
     </j-popover>
 
-    <j-box pt="500" pb="300">
-      <j-menu-group-item open title="Members">
+    <j-box pt="500">
+      <j-menu-group-item open :title="`Members (${community.members.length})`">
         <j-button
-          @click.prevent="getInviteCode"
+          @click.prevent="() => setShowInviteCode(true)"
           size="sm"
           slot="end"
           variant="subtle"
         >
           <j-icon size="sm" square name="plus"></j-icon>
         </j-button>
-        <j-box pt="300" px="500">
+        <j-box px="500">
           <avatar-group
             @click="() => setShowCommunityMembers(true)"
             :users="community.members"
@@ -163,29 +157,21 @@ import { mapMutations } from "vuex";
 export default defineComponent({
   components: { AvatarGroup },
   props: ["community"],
+  data: function () {
+    return {
+      showCommunityMenu: false,
+    };
+  },
   methods: {
     ...mapMutations([
       "setShowCreateChannel",
       "setShowEditCommunity",
       "setShowCommunityMembers",
       "setChannelNotificationState",
+      "setShowInviteCode",
     ]),
     getValidId(val: string) {
       return "channel-" + val;
-    },
-    getInviteCode() {
-      // Get the invite code to join community and copy to clipboard
-      let currentCommunity = this.community;
-      const el = document.createElement("textarea");
-      el.value = `Hey! Here is an invite code to join my private community on Junto: ${currentCommunity.sharedPerspectiveUrl}`;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand("copy");
-      document.body.removeChild(el);
-
-      this.$store.commit("showSuccessToast", {
-        message: "Your custom invite code is copied to your clipboard!",
-      });
     },
   },
 });

@@ -78,12 +78,14 @@ export default defineComponent({
 .sidebar-layout__drawer {
   height: 100%;
   width: 300px;
+  min-width: 200px;
+  max-width: 33vw;
   background: var(--app-drawer-bg-color);
   overflow-y: auto;
   position: relative;
-  transition: all 0.2s ease;
 }
 .sidebar-layout--closed .sidebar-layout__drawer {
+  min-width: 0px;
   width: 0px !important;
 }
 .sidebar-layout__main {

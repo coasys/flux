@@ -8,7 +8,7 @@
       <j-text color="danger-500">
         This is an early version of Junto with a remote code execution
         vulnerability. DO NOT join any community from somebody you do not know
-        as its possible for people to use fake joining links to hack you!
+        as its possible for people to use fake links to hack you!
       </j-text>
     </div>
 
@@ -24,6 +24,8 @@
       <j-input
         size="lg"
         label="Name"
+        required
+        autovalidate
         @keydown.enter="createCommunity"
         @input="(e) => (newCommunityName = e.target.value)"
         :value="newCommunityName"
@@ -39,7 +41,7 @@
       <j-button
         full
         :loading="isCreatingCommunity"
-        :disabled="isCreatingCommunity"
+        :disabled="isCreatingCommunity || !canSubmit"
         size="lg"
         variant="primary"
         @click="createCommunity"
@@ -47,7 +49,7 @@
         Create Community
       </j-button>
     </j-flex>
-    <j-flex direction="column" gap="200" v-if="tabView === 'Join'">
+    <j-flex direction="column" gap="500" v-if="tabView === 'Join'">
       <j-input
         :value="joiningLink"
         @keydown.enter="joinCommunity"
@@ -57,7 +59,7 @@
       ></j-input>
 
       <j-button
-        :disabled="isJoiningCommunity"
+        :disabled="isJoiningCommunity || !joiningLink"
         :loading="isJoiningCommunity"
         @click="joinCommunity"
         size="lg"
@@ -71,6 +73,7 @@
 </template>
 
 <script lang="ts">
+import { isValid } from "@/utils/validation";
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -84,6 +87,19 @@ export default defineComponent({
       isJoiningCommunity: false,
       isCreatingCommunity: false,
     };
+  },
+  computed: {
+    canSubmit(): boolean {
+      return isValid(
+        [
+          {
+            check: (val: string) => (val ? false : true),
+            message: "This field is required",
+          },
+        ],
+        this.newCommunityName
+      );
+    },
   },
   methods: {
     joinCommunity() {

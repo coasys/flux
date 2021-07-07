@@ -5,7 +5,7 @@
     >
     <j-input
       size="lg"
-      placeholder="Search for member"
+      placeholder="Search members"
       type="search"
       :value="searchValue"
       @input="(e) => (searchValue = e.target.value)"

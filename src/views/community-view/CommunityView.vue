@@ -14,10 +14,12 @@
   </j-modal>
 
   <j-modal
+    size="sm"
     :open="modals.showEditCommunity"
     @toggle="(e) => setShowEditCommunity(e.target.open)"
   >
     <edit-community
+      v-if="modals.showEditCommunity"
       @submit="() => setShowEditCommunity(false)"
       @cancel="() => setShowEditCommunity(false)"
     />
@@ -28,14 +30,36 @@
     @toggle="(e) => setShowCreateChannel(e.target.open)"
   >
     <create-channel
+      v-if="modals.showCreateChannel"
       @submit="() => setShowCreateChannel(false)"
       @cancel="() => setShowCreateChannel(false)"
     />
   </j-modal>
+
+  <j-modal
+    size="sm"
+    :open="modals.showInviteCode"
+    @toggle="(e) => setShowInviteCode(e.target.open)"
+  >
+    <j-text variant="heading">Invite people</j-text>
+    <j-text variant="ingress">
+      Copy and send this code to the people you want to join your community
+    </j-text>
+    <j-input
+      @click="(e) => e.target.select()"
+      size="lg"
+      readonly
+      :value="currentCommunity.sharedPerspectiveUrl"
+    >
+      <j-button @click="getInviteCode" variant="subtle" slot="end"
+        ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
+      /></j-button>
+    </j-input>
+  </j-modal>
 </template>
 
 <script lang="ts">
-import { defineComponent, watch } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
@@ -59,6 +83,7 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const store = useStore();
+    const hasCopied = ref(false);
     let channelWorkerLoop = null as null | Worker;
     let groupExpWorkerLoop = null as null | Worker;
 
@@ -83,13 +108,33 @@ export default defineComponent({
       },
       { immediate: true }
     );
+
+    return {
+      hasCopied,
+    };
   },
   methods: {
     ...mapMutations([
       "setShowCreateChannel",
       "setShowEditCommunity",
       "setShowCommunityMembers",
+      "setShowInviteCode",
     ]),
+    getInviteCode() {
+      // Get the invite code to join community and copy to clipboard
+      let currentCommunity = this.currentCommunity;
+      const el = document.createElement("textarea");
+      el.value = `Hey! Here is an invite code to join my private community on Junto: ${currentCommunity.sharedPerspectiveUrl}`;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+      this.hasCopied = true;
+
+      this.$store.commit("showSuccessToast", {
+        message: "Your custom invite code is copied to your clipboard!",
+      });
+    },
   },
   computed: {
     modals(): ModalsState {

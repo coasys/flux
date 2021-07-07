@@ -6,6 +6,7 @@
       :title="community.name"
     >
       <j-avatar
+        class="left-nav__community-item"
         :selected="communityIsActive(community.perspective)"
         size="xl"
         :src="require('@/assets/images/junto_app_icon.png')"
@@ -14,7 +15,7 @@
       ></j-avatar>
     </j-tooltip>
 
-    <j-tooltip title="Create community">
+    <j-tooltip title="Add community">
       <j-button
         @click="showModal = true"
         variant="primary"
@@ -28,6 +29,7 @@
 
     <j-modal :open="showModal" @toggle="(e) => (showModal = e.target.open)">
       <create-community
+        v-if="showModal"
         @submit="showModal = false"
         @cancel="showModal = false"
       />
@@ -72,15 +74,19 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   display: flex;
+  padding-top: var(--j-space-200);
   gap: var(--j-space-400);
   flex-direction: column;
   align-items: center;
   overflow-y: scroll;
   overflow-x: visible;
-  margin-bottom: 25vh;
 
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+.left-nav__community-item {
+  cursor: pointer;
 }
 </style>
