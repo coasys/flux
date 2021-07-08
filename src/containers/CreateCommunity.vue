@@ -21,7 +21,7 @@
       <j-tab-item>Join</j-tab-item>
     </j-tabs>
     <j-flex direction="column" gap="500" v-if="tabView === 'Create'">
-      <avatar-upload />
+      <avatar-upload icon="people-fill" />
       <j-input
         size="lg"
         label="Name"
