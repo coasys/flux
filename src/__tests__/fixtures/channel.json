@@ -1,0 +1,45 @@
+{
+  "createdAt": "2021-07-06T13:25:03.935Z",
+  "groupExpressionRef": "",
+  "hasNewMessages": false,
+  "linkLanguageAddress": "Qme6ayam9XfPHEGxruwehwmFMCHPgfamPo3hLANHiiaJYU",
+  "membraneType": 0,
+  "name": "Test",
+  "notifications": {"mute": false},
+  "perspective": "f675daef-7dd9-4840-a634-ef32b11c6de4",
+  "scrollTop": 0,
+  "sharedPerspectiveUrl": "perspective://QmY2CdDc37hxDr6fL1Kx5sxdF9idPZvbbQ7wvoyv61w9Q5",
+  "type": 0,
+  "typedExpressionLanguages": [{
+    "expressionType": 0,
+    "languageAddress": "QmWXrqpCo9id7KXBVYJjCFm5GucpAJ5tfkCqRaGqNtF4qA"
+  }, {
+    "expressionType": 1,
+    "languageAddress": "QmUMNHAW8w5M1A5UkBw12hjhupTTjzYG6iKt1N94wcoHHv"
+  }, {
+    "expressionType": 2,
+    "languageAddress": "QmfQnfMHheDDTQtqSXuRFzRUiBFjMTzCWQgK25RcgLKWps"
+  }],
+  "currentExpressionMessages": {},
+  "currentExpressionLinks": {
+    "0663ddf798220a905a7d0ad022d8c8be2a7317c1": {
+      "language": "Qme6ayam9XfPHEGxruwehwmFMCHPgfamPo3hLANHiiaJYU",
+      "expression": {
+        "author": {
+          "did": "did:key:zQ3shnCoKuYhvzXkHykAqkgSbNS5ShxbS7yPuS564qhwW7qNw",
+          "email": null,
+          "name": null
+        },
+        "data": {
+          "predicate": "sioc://content_of",
+          "source": "sioc://chatchannel",
+          "target": "QmWXrqpCo9id7KXBVYJjCFm5GucpAJ5tfkCqRaGqNtF4qA://8429244c81974facaf714c73fdcff6a7c2b9121521b5158ace54b4bc729f3d7069ca5d03f689ce"
+        },
+        "proof": {
+          "key": "#zQ3shnCoKuYhvzXkHykAqkgSbNS5ShxbS7yPuS564qhwW7qNw",
+          "signature": "905d6cfd4b40677f2e2876b300910411e8c39ec5a8889b8abebb899461f3e83b3408a68ea04dba6b4a031e113ccb8b4af12beea875a7fd74db76b7df3c3c9b2b"
+        }
+      }
+    }
+  }
+}
