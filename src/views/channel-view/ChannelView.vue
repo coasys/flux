@@ -54,7 +54,6 @@
     <footer class="channel-view__footer">
       <j-editor
         @send="(e) => createDirectMessage(e.target.value)"
-        @keydown.enter="onEnter"
         autofocus
         :placeholder="`Write to #${channel.name}`"
         :value="currentExpressionPost"
@@ -214,7 +213,7 @@ export default defineComponent({
     memberMentions(): any[] {
       return this.community.members.map((m) => ({
         name: (m.data as any).profile["foaf:AccountName"],
-        id: m.author.did,
+        id: m.author.did.replace("did:key:", ""),
         trigger: "@",
       }));
     },
@@ -296,16 +295,11 @@ export default defineComponent({
       if (label?.startsWith("@")) {
         this.showProfile = true;
         this.activeProfile = this.community.members.find(
-          (m) => m.author.did === id
+          (m) => m.author.did === `did:key:${id}`
         );
       }
     },
-    onEnter(e: any) {
-      if (!e.shiftKey && !this.showList) {
-        e.preventDefault();
-        this.createDirectMessage(e.target.value);
-      }
-    },
+
     editorinit(e: any) {
       this.editor = e.detail.editorInstance;
     },
@@ -458,6 +452,7 @@ export default defineComponent({
   border-top: 1px solid var(--app-channel-border-color);
   background: var(--app-channel-footer-bg-color);
   position: sticky;
+  padding: var(--j-space-400);
   bottom: 0;
 }
 

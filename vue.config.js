@@ -1,4 +1,5 @@
 module.exports = {
+  transpileDependencies: ['@vue/apollo-composable'],
   chainWebpack: (config) => {
     config.module
       .rule("vue")

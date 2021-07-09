@@ -193,6 +193,12 @@ export default defineComponent({
       },
       immediate: true,
     },
+    "ui.theme.fontSize": {
+      handler: function (fontSize: "sm" | "md" | "lg") {
+        document.documentElement.setAttribute("font-size", fontSize);
+      },
+      immediate: true,
+    },
     "ui.theme.fontFamily": {
       handler: function (fontFamily: string) {
         const font = {
@@ -327,6 +333,22 @@ body {
   --app-channel-border-color: var(--j-border-color);
   --app-channel-header-bg-color: var(--j-color-white);
   --app-channel-footer-bg-color: var(--j-color-white);
+}
+
+html[font-size="sm"] {
+  font-size: 14px;
+}
+
+html[font-size="md"] {
+  font-size: 16px;
+}
+
+html[font-size="lg"] {
+  font-size: 19px;
+}
+
+j-avatar::part(base) {
+  transition: box-shadow 0.2s ease;
 }
 
 .global-loading {

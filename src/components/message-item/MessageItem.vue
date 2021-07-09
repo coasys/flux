@@ -72,6 +72,24 @@ export default defineComponent({
   },
   mounted() {
     const mentionElements = document.querySelectorAll(".mention");
+    const emojiElements = document.querySelectorAll(".emoji");
+
+    for (const ele of emojiElements) {
+      const emoji = ele as HTMLElement;
+      
+      if (emoji.parentNode?.nodeName !== 'J-TOOLTIP') {
+        var wrapper = document.createElement('j-tooltip');
+        wrapper.title = `:${emoji.dataset.id}:`;
+        wrapper.classList.add('emojitoolip');
+        (wrapper as any).placement = 'top';
+        emoji.parentNode?.insertBefore(wrapper, emoji);
+        wrapper.appendChild(emoji);
+
+        if (emoji.parentNode?.nextSibling?.textContent?.trim().length === 0) {
+          emoji.parentNode?.nextSibling.remove();
+        }
+      }
+    }
 
     for (const ele of mentionElements) {
       const mention = ele as HTMLElement;
@@ -89,11 +107,19 @@ export default defineComponent({
 </script>
 
 <style>
+.emojitoolip::part(base) {
+  display: inline;
+}
+.emojitoolip::part(content) {
+  display: inline;
+}
+
 .message-item {
   padding: var(--j-space-300) 0;
   display: grid;
   gap: var(--j-space-300);
   grid-template-columns: 70px 1fr;
+  overflow: visible;
 }
 
 .message-item__avatar {

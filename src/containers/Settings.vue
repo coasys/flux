@@ -51,6 +51,17 @@
       </j-tabs>
     </j-flex>
     <j-flex a="center" j="between">
+      <j-text variant="label">Font size</j-text>
+      <j-tabs
+        :value="theme.fontSize"
+        @change="(e) => setTheme({ fontSize: e.target.value })"
+      >
+        <j-tab-item value="sm">Small</j-tab-item>
+        <j-tab-item value="md">Medium</j-tab-item>
+        <j-tab-item value="lg">Large</j-tab-item>
+      </j-tabs>
+    </j-flex>
+    <j-flex a="center" j="between">
       <j-text variant="label">Clear State</j-text>
       <j-button size="md" variant="primary" @click="cleanState">
         <j-icon size="sm" name="trash"></j-icon>

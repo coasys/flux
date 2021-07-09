@@ -109,7 +109,7 @@ export default defineComponent({
 }
 .sidebar-layout__resize-handle:hover,
 .sidebar-layout--is-dragging .sidebar-layout__resize-handle {
-  border-right: 1px solid var(--j-focus-color);
-  background: var(--j-focus-color);
+  border-right: 1px solid var(--j-color-focus);
+  background: var(--j-color-focus);
 }
 </style>
