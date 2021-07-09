@@ -1,5 +1,6 @@
 <template>
   <div class="sidebar-container">
+    <top-section></top-section>
     <communities-list></communities-list>
     <bottom-section></bottom-section>
   </div>
@@ -9,9 +10,10 @@
 import { defineComponent } from "vue";
 import CommunitiesList from "./CommunitiesList.vue";
 import BottomSection from "./BottomSection.vue";
+import TopSection from "./TopSection.vue";
 
 export default defineComponent({
-  components: { CommunitiesList, BottomSection },
+  components: { CommunitiesList, BottomSection, TopSection },
 });
 </script>
 

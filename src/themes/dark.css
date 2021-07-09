@@ -209,9 +209,9 @@
 
   /*  App specific styles */
   --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 10%, 14%);
-  --app-main-sidebar-border-color: hsl(var(--j-color-ui-hue), 10%, 10%);
+  --app-main-sidebar-border-color: hsl(var(--j-color-ui-hue), 10%, 25%);
   --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 10%, 15%);
-  --app-drawer-border-color: hsl(var(--j-color-ui-hue), 10%, 12%);
+  --app-drawer-border-color: hsl(var(--j-color-ui-hue), 10%, 25%);
   --app-channel-bg-color: hsl(var(--j-color-ui-hue), 10%, 13%);
   --app-channel-border-color: hsl(var(--j-color-ui-hue), 10%, 10%);
   --app-channel-header-bg-color: hsl(var(--j-color-ui-hue), 10%, 13%);

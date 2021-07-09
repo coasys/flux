@@ -9,6 +9,7 @@ import WelcomeView from "@/views/welcome-view/WelcomeView.vue";
 import CommunityView from "@/views/community-view/CommunityView.vue";
 import CommunityWelcomeView from "@/views/community-view/CommunityWelcomeView.vue";
 import ChannelView from "@/views/channel-view/ChannelView.vue";
+import HomeView from "@/views/home-view/HomeView.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -18,9 +19,14 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: "/",
-    name: "home",
+    name: "main",
     component: MainView,
     children: [
+      {
+        path: "home",
+        name: "home",
+        component: HomeView,
+      },
       {
         path: "communities/:communityId",
         name: "community",

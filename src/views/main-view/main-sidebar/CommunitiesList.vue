@@ -14,11 +14,10 @@
         @click="() => handleCommunityClick(community.perspective)"
       ></j-avatar>
     </j-tooltip>
-
     <j-tooltip title="Add community">
       <j-button
-        @click="showModal = true"
-        variant="primary"
+        @click="() => $store.commit('setShowCreateCommunity', true)"
+        variant="subtle"
         square
         circle
         size="xl"
@@ -26,28 +25,13 @@
         <j-icon size="lg" name="plus"></j-icon>
       </j-button>
     </j-tooltip>
-
-    <j-modal :open="showModal" @toggle="(e) => (showModal = e.target.open)">
-      <create-community
-        v-if="showModal"
-        @submit="showModal = false"
-        @cancel="showModal = false"
-      />
-    </j-modal>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import CreateCommunity from "@/containers/CreateCommunity.vue";
 
 export default defineComponent({
-  components: { CreateCommunity },
-  data() {
-    return {
-      showModal: false,
-    };
-  },
   methods: {
     handleCommunityClick(communityId: string) {
       if (this.communityIsActive(communityId)) {
@@ -74,7 +58,7 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   display: flex;
-  padding-top: var(--j-space-200);
+  padding-top: var(--j-space-300);
   gap: var(--j-space-400);
   flex-direction: column;
   align-items: center;
