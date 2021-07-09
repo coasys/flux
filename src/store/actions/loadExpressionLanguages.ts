@@ -15,7 +15,7 @@ export interface Payload {
 export default async ({ commit, getters }: Context): Promise<void> => {
   try {
     const languages = await getLanguages();
-    
+
     if (languages) {
       for (const language of languages) {
         if (language.iconFor) {

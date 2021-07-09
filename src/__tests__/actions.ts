@@ -1,38 +1,41 @@
-import '@testing-library/vue';
-import initAgentFixture from './fixtures/initAgent.json';
-import lockAgentFixture from './fixtures/lockAgent.json';
-import addPerspectiveFixture from './fixtures/addPerspective.json';
-import { createStore, Store } from 'vuex';
-import mutations from '@/store/mutations';
-import actions from '@/store/actions';
-import getters from '@/store/getters';
-import { State } from '@/store';
-import * as initAgent from '../core/mutations/initAgent';
-import * as lockAgent from '../core/mutations/lockAgent';
-import * as addPerspective from '../core/mutations/addPerspective';
-import { AgentService, Perspective } from '@perspect3vism/ad4m-executor';
-import createUser from '@/store/actions/createUser';
+import "@testing-library/vue";
+import initAgentFixture from "./fixtures/initAgent.json";
+import lockAgentFixture from "./fixtures/lockAgent.json";
+import addPerspectiveFixture from "./fixtures/addPerspective.json";
+import { createStore, Store } from "vuex";
+import mutations from "@/store/mutations";
+import actions from "@/store/actions";
+import getters from "@/store/getters";
+import { State } from "@/store";
+import * as initAgent from "../core/mutations/initAgent";
+import * as lockAgent from "../core/mutations/lockAgent";
+import * as addPerspective from "../core/mutations/addPerspective";
+import { AgentService, Perspective } from "@perspect3vism/ad4m-executor";
+import createUser from "@/store/actions/createUser";
 
-describe('Store Actions', () => {
+describe("Store Actions", () => {
   let store: Store<State>;
 
   beforeEach(() => {
     // @ts-ignore
-    jest.spyOn(initAgent, 'initAgent').mockReturnValue(initAgentFixture as AgentService);
+    jest
+      .spyOn(initAgent, "initAgent")
+      .mockReturnValue(initAgentFixture as AgentService);
 
     // @ts-ignore
-    jest.spyOn(lockAgent, 'lockAgent').mockImplementation(async (password) => {
+    jest.spyOn(lockAgent, "lockAgent").mockImplementation(async (password) => {
       if (password) {
         return lockAgentFixture as AgentService;
       } else {
-        throw Error('No Password passed');
+        throw Error("No Password passed");
       }
-    })
+    });
 
     // @ts-ignore
-    jest.spyOn(addPerspective, 'addPerspective').mockReturnValue(addPerspectiveFixture as Perspective);
+    jest
+      .spyOn(addPerspective, "addPerspective")
+      .mockReturnValue(addPerspectiveFixture as Perspective);
 
-        
     store = createStore({
       state: {
         ui: {
@@ -63,8 +66,7 @@ describe('Store Actions', () => {
             message: "",
           },
         },
-        communities: {
-        },
+        communities: {},
         localLanguagesPath: "",
         databasePerspective: "",
         applicationStartTime: new Date(),
@@ -79,18 +81,18 @@ describe('Store Actions', () => {
       mutations: mutations,
       actions: actions,
       getters: getters,
-    })
-  })
-  
-  test('Create User with all the property', async () => {
+    });
+  });
+
+  test("Create User with all the property", async () => {
     expect(store.state.agentInit).toBeFalsy();
     expect(store.state.agentInit).toBeFalsy();
     expect(store.state.userDid).toBe("");
     expect(store.state.userProfile).toBeNull();
 
     const profile = {
-      givenName: 'jhon',
-      familyName: 'doe',
+      givenName: "jhon",
+      familyName: "doe",
       email: "jhon@test.com",
       username: "jhon",
       profilePicture: "test",
@@ -98,7 +100,7 @@ describe('Store Actions', () => {
     };
 
     await store.dispatch("createUser", {
-      ...profile, 
+      ...profile,
       password: "test123456",
     });
 
@@ -109,15 +111,15 @@ describe('Store Actions', () => {
     expect(store.state.userProfile).toStrictEqual(profile);
   });
 
-  test('Create User without password', async () => {
+  test("Create User without password", async () => {
     expect(store.state.agentInit).toBeFalsy();
     expect(store.state.agentInit).toBeFalsy();
     expect(store.state.userDid).toBe("");
     expect(store.state.userProfile).toBeNull();
 
     const profile = {
-      givenName: 'jhon',
-      familyName: 'doe',
+      givenName: "jhon",
+      familyName: "doe",
       email: "jhon@test.com",
       username: "",
       profilePicture: "test",
@@ -125,13 +127,16 @@ describe('Store Actions', () => {
     };
 
     try {
-      await createUser({commit: store.commit}, {
-        ...profile, 
-        password: "",
-      });
-    } catch(error) {
+      await createUser(
+        { commit: store.commit },
+        {
+          ...profile,
+          password: "",
+        }
+      );
+    } catch (error) {
       expect(error).toBeInstanceOf(Error);
-      expect(error).toHaveProperty('message', 'Error: No Password passed')
+      expect(error).toHaveProperty("message", "Error: No Password passed");
     }
 
     expect(store.state.agentInit).toBeFalsy();

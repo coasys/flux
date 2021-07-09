@@ -214,7 +214,7 @@ export default defineComponent({
     memberMentions(): any[] {
       return this.community.members.map((m) => ({
         name: (m.data as any).profile["foaf:AccountName"],
-        id: m.author.did.replace('did:key:', ''),
+        id: m.author.did.replace("did:key:", ""),
         trigger: "@",
       }));
     },

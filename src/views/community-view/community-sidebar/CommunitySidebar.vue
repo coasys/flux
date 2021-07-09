@@ -21,7 +21,7 @@
                 color="ui-800"
                 nomargin
                 size="500"
-                style="text-overflow: ellipsis;"
+                style="text-overflow: ellipsis"
               >
                 {{ community.name }}
               </j-text>

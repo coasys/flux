@@ -164,7 +164,7 @@ export interface AddChannel {
 
 const vuexLocal = new VuexPersistence<State>({
   storage: window.localStorage,
-  reducer: state => ({
+  reducer: (state) => ({
     communities: state.communities,
     localLanguagesPath: state.localLanguagesPath,
     databasePerspective: state.databasePerspective,
@@ -176,8 +176,8 @@ const vuexLocal = new VuexPersistence<State>({
     ui: {
       showSidebar: state.ui.showSidebar,
       theme: state.ui.theme,
-    }
-  })
+    },
+  }),
 });
 
 export default createStore({
