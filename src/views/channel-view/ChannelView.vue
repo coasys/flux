@@ -151,6 +151,11 @@ export default defineComponent({
     this.chachedCommunityId = this.$route.params.communityId as string;
     this.cachedChannelId = this.$route.params.channelId as string;
 
+    this.$store.commit("setCurrentChannelId", {
+      communityId: this.community.perspective,
+      channelId: this.channel.perspective,
+    });
+
     const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
 
     // Next tick waits for everything to be rendered

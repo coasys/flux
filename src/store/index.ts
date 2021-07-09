@@ -13,6 +13,7 @@ export interface CommunityState {
   name: string;
   description: string;
   channels: { [x: string]: ChannelState };
+  currentChannelId: string | undefined | null;
   perspective: string; //NOTE: this is essentially the UUID for the community
   linkLanguageAddress: string;
   expressionLanguages: string[];
