@@ -3,7 +3,7 @@
     <template v-slot:sidebar>
       <community-sidebar :community="currentCommunity"></community-sidebar>
     </template>
-    <router-view></router-view>
+    <router-view :key="$route.fullPath"></router-view>
   </sidebar-layout>
 
   <j-modal
