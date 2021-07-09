@@ -123,10 +123,14 @@ export default defineComponent({
           perspectiveName: this.newCommunityName,
           description: this.newCommunityDesc,
         })
-        .then(() => {
+        .then((community) => {
           this.$emit("submit");
           this.newCommunityName = "";
           this.newCommunityDesc = "";
+          this.$router.push({
+            name: "community",
+            params: { communityId: community.perspective },
+          });
         })
         .finally(() => {
           this.isCreatingCommunity = false;
