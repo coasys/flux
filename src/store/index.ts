@@ -88,6 +88,7 @@ export interface ThemeState {
   fontFamily: string;
   hue: number;
   saturation: number;
+  fontSize: "sm" | "md" | "lg";
 }
 
 export interface ModalsState {
@@ -164,7 +165,7 @@ export interface AddChannel {
 
 const vuexLocal = new VuexPersistence<State>({
   storage: window.localStorage,
-  reducer: state => ({
+  reducer: (state) => ({
     communities: state.communities,
     localLanguagesPath: state.localLanguagesPath,
     databasePerspective: state.databasePerspective,
@@ -176,8 +177,8 @@ const vuexLocal = new VuexPersistence<State>({
     ui: {
       showSidebar: state.ui.showSidebar,
       theme: state.ui.theme,
-    }
-  })
+    },
+  }),
 });
 
 export default createStore({
@@ -195,6 +196,7 @@ export default createStore({
       showSidebar: true,
       showGlobalLoading: false,
       theme: {
+        fontSize: "md",
         fontFamily: "default",
         name: "",
         hue: 270,
