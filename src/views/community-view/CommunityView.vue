@@ -114,18 +114,21 @@ export default defineComponent({
     };
   },
   watch: {
-    "currentCommunity.perspective": function (val) {
-      const firstChannel = Object.values(this.currentCommunity.channels)[0];
-      const currentChannelId =
-        this.currentCommunity.currentChannelId || firstChannel.perspective;
+    "currentCommunity.perspective": {
+      handler: function (val) {
+        const firstChannel = Object.values(this.currentCommunity.channels)[0];
+        const currentChannelId =
+          this.currentCommunity.currentChannelId || firstChannel.perspective;
 
-      this.$router.push({
-        name: "channel",
-        params: {
-          communityId: val,
-          channelId: currentChannelId,
-        },
-      });
+        this.$router.push({
+          name: "channel",
+          params: {
+            communityId: val,
+            channelId: currentChannelId,
+          },
+        });
+      },
+      immediate: true,
     },
   },
   methods: {
