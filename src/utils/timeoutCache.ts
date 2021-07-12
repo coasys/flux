@@ -39,4 +39,8 @@ export class TimeoutCache<T> {
 
     return parseditem.value;
   }
+
+  remove(key: string) {
+    localStorage.removeItem(key);
+  }
 }
