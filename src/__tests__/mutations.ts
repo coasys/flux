@@ -73,6 +73,22 @@ describe("Store Mutations", async () => {
     );
   });
 
+  test("Check duplicate community if one exists already", async () => {
+    expect(Object.values(store.state.communities).length).toBe(0);
+
+    store.commit("addCommunity", community);
+
+    expect(Object.keys(store.state.communities)).toStrictEqual(
+      [community.perspective]
+    );
+
+    store.commit("addCommunity", community);
+
+    expect(Object.keys(store.state.communities)).toStrictEqual(
+      [community.perspective]
+    );
+  });
+
   test("Add Channel", async () => {
     expect(Object.values(store.state.communities).length).toBe(0);
 
@@ -98,5 +114,57 @@ describe("Store Mutations", async () => {
       Object.values(store.state.communities[community.perspective].channels)
         .length
     ).toBe(2);
+  });
+
+  test("Check duplicate channel if one exists already", async () => {
+    expect(Object.values(store.state.communities).length).toBe(0);
+
+    store.commit("addCommunity", community);
+
+    expect(Object.values(store.state.communities)[0].perspective).toBe(
+      community.perspective
+    );
+
+    store.commit("addChannel", {
+      communityId: community.perspective,
+      channel,
+    });
+
+    expect(Object.keys(store.state.communities[community.perspective].channels)).toStrictEqual(
+      ["30e4a29e-1373-4c8a-a5af-a2353c919e7a", channel.perspective]
+    );
+
+    store.commit("addChannel", {
+      communityId: community.perspective,
+      channel,
+    });
+
+    expect(Object.keys(store.state.communities[community.perspective].channels)).toStrictEqual(
+      ["30e4a29e-1373-4c8a-a5af-a2353c919e7a", channel.perspective]
+    );
+  });
+
+  test("Create Profile", async () => {
+    const did = "did:key:zQ3shZj7gEX6tbrQGvMJeHsL2hWRcQPUmJHoTFZzEZdEsHBwa";
+    expect(store.state.userDid).not.toBe(did);
+    expect(store.state.userProfile).toBeNull();
+
+    const profile = {
+      givenName: "jhon",
+      familyName: "doe",
+      email: "jhon@test.com",
+      username: "jhon",
+      profilePicture: "test",
+      thumbnailPicture: "test",
+    };
+
+    await store.commit('createProfile', {
+      profile,
+      did,
+    });
+
+    expect(store.state.userDid).toBe(did);
+    expect(store.state.userProfile).not.toBeNull();
+    expect(store.state.userProfile).toStrictEqual(profile);
   });
 });
