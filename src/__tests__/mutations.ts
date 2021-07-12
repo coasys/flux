@@ -78,15 +78,15 @@ describe("Store Mutations", async () => {
 
     store.commit("addCommunity", community);
 
-    expect(Object.keys(store.state.communities)).toStrictEqual(
-      [community.perspective]
-    );
+    expect(Object.keys(store.state.communities)).toStrictEqual([
+      community.perspective,
+    ]);
 
     store.commit("addCommunity", community);
 
-    expect(Object.keys(store.state.communities)).toStrictEqual(
-      [community.perspective]
-    );
+    expect(Object.keys(store.state.communities)).toStrictEqual([
+      community.perspective,
+    ]);
   });
 
   test("Add Channel", async () => {
@@ -130,18 +130,24 @@ describe("Store Mutations", async () => {
       channel,
     });
 
-    expect(Object.keys(store.state.communities[community.perspective].channels)).toStrictEqual(
-      ["30e4a29e-1373-4c8a-a5af-a2353c919e7a", channel.perspective]
-    );
+    expect(
+      Object.keys(store.state.communities[community.perspective].channels)
+    ).toStrictEqual([
+      "30e4a29e-1373-4c8a-a5af-a2353c919e7a",
+      channel.perspective,
+    ]);
 
     store.commit("addChannel", {
       communityId: community.perspective,
       channel,
     });
 
-    expect(Object.keys(store.state.communities[community.perspective].channels)).toStrictEqual(
-      ["30e4a29e-1373-4c8a-a5af-a2353c919e7a", channel.perspective]
-    );
+    expect(
+      Object.keys(store.state.communities[community.perspective].channels)
+    ).toStrictEqual([
+      "30e4a29e-1373-4c8a-a5af-a2353c919e7a",
+      channel.perspective,
+    ]);
   });
 
   test("Create Profile", async () => {
@@ -158,7 +164,7 @@ describe("Store Mutations", async () => {
       thumbnailPicture: "test",
     };
 
-    await store.commit('createProfile', {
+    await store.commit("createProfile", {
       profile,
       did,
     });

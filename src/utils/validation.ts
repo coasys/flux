@@ -38,7 +38,7 @@ export interface ValidationReturnValue {
   error: Ref<boolean>;
   errorMessage: Ref<string>;
   validate: () => void;
-  isValid: ComputedRef<boolean>
+  isValid: ComputedRef<boolean>;
 }
 
 export function useValidation({

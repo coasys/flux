@@ -7,20 +7,20 @@ import { Store, createStore } from "vuex";
 import * as unlockAgent from "../../../core/mutations/unlockAgent";
 import lockAgentFixture from "../../fixtures/lockAgent.json";
 
-describe('Login', () => {
+describe("Login", () => {
   let store: Store<State>;
 
   beforeEach(() => {
     // @ts-ignore
     jest
-    .spyOn(unlockAgent, "unlockAgent")
-    .mockImplementation(async (password) => {
-      if (password === 'test123') {
-        return lockAgentFixture as AgentService;
-      }
+      .spyOn(unlockAgent, "unlockAgent")
+      .mockImplementation(async (password) => {
+        if (password === "test123") {
+          return lockAgentFixture as AgentService;
+        }
 
-      throw new Error("Password doesn't match");
-    });
+        throw new Error("Password doesn't match");
+      });
 
     store = createStore({
       state: {
@@ -70,14 +70,14 @@ describe('Login', () => {
     });
   });
 
-  test('Login with wrong password', async () => {
+  test("Login with wrong password", async () => {
     expect(store.state.agentInit).toBeFalsy();
     expect(store.state.agentInit).toBeFalsy();
     expect(store.state.userDid).toBe("");
 
     try {
       await store.dispatch("logIn", {
-        password: 'test1'
+        password: "test1",
       });
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
@@ -89,12 +89,12 @@ describe('Login', () => {
     expect(store.state.userDid).toBe("");
   });
 
-  test('Login with correct password', async () => {
+  test("Login with correct password", async () => {
     expect(store.state.agentInit).toBeFalsy();
     expect(store.state.agentInit).toBeFalsy();
 
     await store.dispatch("logIn", {
-      password: 'test123'
+      password: "test123",
     });
 
     expect(store.state.agentInit).toBeTruthy();
