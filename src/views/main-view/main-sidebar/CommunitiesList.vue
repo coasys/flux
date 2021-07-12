@@ -14,17 +14,6 @@
         @click="() => handleCommunityClick(community.perspective)"
       ></j-avatar>
     </j-tooltip>
-    <j-tooltip title="Add community">
-      <j-button
-        @click="() => $store.commit('setShowCreateCommunity', true)"
-        variant="subtle"
-        square
-        circle
-        size="xl"
-      >
-        <j-icon size="lg" name="plus"></j-icon>
-      </j-button>
-    </j-tooltip>
   </div>
 </template>
 
@@ -58,7 +47,8 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   display: flex;
-  padding-top: var(--j-space-300);
+  border-top: 1px solid var(--app-main-sidebar-border-color);
+  padding-top: var(--j-space-500);
   gap: var(--j-space-400);
   flex-direction: column;
   align-items: center;

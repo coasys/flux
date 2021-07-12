@@ -19,6 +19,17 @@
         </j-button>
       </j-tooltip>
     </router-link>
+    <j-tooltip title="Add community">
+      <j-button
+        @click="() => $store.commit('setShowCreateCommunity', true)"
+        variant="subtle"
+        square
+        circle
+        size="xl"
+      >
+        <j-icon size="lg" name="plus"></j-icon>
+      </j-button>
+    </j-tooltip>
   </div>
 </template>
 
@@ -33,7 +44,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .left-nav__top-section {
   width: 100%;
-  padding: var(--j-space-400) 0;
+  padding: var(--j-space-500) 0;
   display: flex;
   gap: var(--j-space-400);
   flex-direction: column;

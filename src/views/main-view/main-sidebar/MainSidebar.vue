@@ -19,7 +19,7 @@ export default defineComponent({
 
 <style scoped>
 .sidebar-container {
-  padding-top: var(--j-space-900);
+  padding-top: var(--j-space-700);
   height: 100vh;
   width: 100%;
   display: flex;
