@@ -260,6 +260,7 @@ export default defineComponent({
       // Next tick waits for everything to be rendered
       this.$nextTick(() => {
         const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
+        if (!scrollContainer) return;
         if (this.channel.scrollTop === undefined) {
           this.scrollToBottom("auto");
         } else {
