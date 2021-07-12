@@ -1,15 +1,15 @@
 import "@testing-library/vue";
-import initAgentFixture from "./fixtures/initAgent.json";
-import lockAgentFixture from "./fixtures/lockAgent.json";
-import addPerspectiveFixture from "./fixtures/addPerspective.json";
+import initAgentFixture from "../../fixtures/initAgent.json";
+import lockAgentFixture from "../../fixtures/lockAgent.json";
+import addPerspectiveFixture from "../../fixtures/addPerspective.json";
 import { createStore, Store } from "vuex";
 import mutations from "@/store/mutations";
 import actions from "@/store/actions";
 import getters from "@/store/getters";
 import { State } from "@/store";
-import * as initAgent from "../core/mutations/initAgent";
-import * as lockAgent from "../core/mutations/lockAgent";
-import * as addPerspective from "../core/mutations/addPerspective";
+import * as initAgent from "../../../core/mutations/initAgent";
+import * as lockAgent from "../../../core/mutations/lockAgent";
+import * as addPerspective from "../../../core/mutations/addPerspective";
 import { AgentService, Perspective } from "@perspect3vism/ad4m-executor";
 import createUser from "@/store/actions/createUser";
 
@@ -20,7 +20,7 @@ describe("Store Actions", () => {
     // @ts-ignore
     jest
       .spyOn(initAgent, "initAgent")
-      .mockReturnValue(initAgentFixture as AgentService);
+      .mockResolvedValue(initAgentFixture as AgentService);
 
     // @ts-ignore
     jest.spyOn(lockAgent, "lockAgent").mockImplementation(async (password) => {
@@ -34,7 +34,7 @@ describe("Store Actions", () => {
     // @ts-ignore
     jest
       .spyOn(addPerspective, "addPerspective")
-      .mockReturnValue(addPerspectiveFixture as Perspective);
+      .mockResolvedValue(addPerspectiveFixture as Perspective);
 
     store = createStore({
       state: {
