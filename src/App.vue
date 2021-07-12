@@ -91,7 +91,7 @@ export default defineComponent({
         if (newValue) {
           store.dispatch("loadExpressionLanguages");
         } else {
-          router.push({ name: "signup" });
+          router.push({ name: store.state.agentInit ? "login" : "signup" });
         }
       },
       { immediate: true }
@@ -336,15 +336,27 @@ body {
 }
 
 html[font-size="sm"] {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 html[font-size="md"] {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 html[font-size="lg"] {
-  font-size: 19px;
+  font-size: 16px;
+}
+
+@media (min-width: 800px) {
+  html[font-size="sm"] {
+    font-size: 14px;
+  }
+  html[font-size="md"] {
+    font-size: 16px;
+  }
+  html[font-size="lg"] {
+    font-size: 19px;
+  }
 }
 
 j-avatar::part(base) {
