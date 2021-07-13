@@ -11,10 +11,7 @@ export default async (
   authorDid: string,
   message: string
 ) => {
-  const escapedMessage = message.replace(
-    /(\s*<.*?>\s*)+/g,
-    " "
-  );
+  const escapedMessage = message.replace(/(\s*<.*?>\s*)+/g, " ");
 
   let community: CommunityState | undefined;
   let channel: ChannelState | undefined;
@@ -48,14 +45,21 @@ export default async (
         : true) &&
       !channel?.notifications.mute)
   ) {
-    const isMentioned = message.includes(store.state.userDid.replace('did:key:', ''));
+    const isMentioned = message.includes(
+      store.state.userDid.replace("did:key:", "")
+    );
 
     let title = "";
     let body = "";
 
     if (isMentioned) {
-      const profileLanguage = community?.typedExpressionLanguages.find(t => t.expressionType === ExpressionTypes.ProfileExpression);
-      const profile = await getProfile(profileLanguage!.languageAddress, authorDid);
+      const profileLanguage = community?.typedExpressionLanguages.find(
+        (t) => t.expressionType === ExpressionTypes.ProfileExpression
+      );
+      const profile = await getProfile(
+        profileLanguage!.languageAddress,
+        authorDid
+      );
       const name = (profile?.data as any).profile["foaf:AccountName"];
 
       title = `${name} mentioned you in #${channel?.name}}`;

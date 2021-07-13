@@ -101,7 +101,7 @@ export default defineComponent({
     watch(result, async (data) => {
       console.log("GOT INCOMING MESSAGE SIGNAL");
       //Parse out the signal data to its link form and validate the link structure
-      const linkData = parseSignalAsLink(data.signal);
+      const linkData = parseSignalAsLink(data!.signal);
       if (linkData) {
         const link = linkData.link;
         const language = linkData.language;

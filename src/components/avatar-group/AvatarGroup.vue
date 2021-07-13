@@ -70,7 +70,7 @@ export default defineComponent({
   outline: 0;
   cursor: pointer;
   background: var(--j-color-white);
-  border: .25px solid var(--j-border-color);
+  border: 0.25px solid var(--j-border-color);
   border-radius: 50%;
   height: var(--j-size-sm);
   width: var(--j-size-sm);

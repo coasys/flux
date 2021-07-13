@@ -280,8 +280,8 @@ export default defineComponent({
         .dispatch("logIn", {
           password: this.password,
         })
-        .then(({ data }) => {
-          const isUnlocked = data!.unlockAgent!.isUnlocked;
+        .then((data) => {
+          const isUnlocked = data!.isUnlocked;
           if (isUnlocked) {
             this.$router.push("/");
           } else {
