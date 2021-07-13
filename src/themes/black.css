@@ -87,7 +87,9 @@
   color: var(--j-color-ui-800);
 }
 
-:root[theme="black"] j-text[variant="heading"]::part(base) {
+:root[theme="black"] j-text[variant="heading"]::part(base),
+:root[theme="black"] j-text[variant="heading-sm"]::part(base),
+:root[theme="black"] j-text[variant="heading-lg"]::part(base) {
   --j-text-color: var(--j-color-black);
 }
 

@@ -10,6 +10,8 @@ import CommunityView from "@/views/community-view/CommunityView.vue";
 import CommunityWelcomeView from "@/views/community-view/CommunityWelcomeView.vue";
 import ChannelView from "@/views/channel-view/ChannelView.vue";
 import HomeView from "@/views/home-view/HomeView.vue";
+import Settings from "@/containers/Settings.vue";
+import MyCommunities from "@/containers/MyCommunities.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -26,6 +28,18 @@ const routes: Array<RouteRecordRaw> = [
         path: "home",
         name: "home",
         component: HomeView,
+        children: [
+          {
+            path: "settings",
+            name: "settings",
+            component: Settings,
+          },
+          {
+            path: "communities",
+            name: "my-communities",
+            component: MyCommunities,
+          },
+        ],
       },
       {
         path: "communities/:communityId",
@@ -56,11 +70,6 @@ const router = createRouter({
     ? createWebHashHistory()
     : createWebHistory(),
   routes,
-});
-
-router.beforeEach((to, from) => {
-  console.log(to);
-  return true;
 });
 
 export default router;

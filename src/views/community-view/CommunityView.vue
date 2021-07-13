@@ -89,22 +89,24 @@ export default defineComponent({
 
     watch(
       () => route.params.communityId,
-      async (params: any) => {
+      async (id: any) => {
         if (channelWorkerLoop) {
           channelWorkerLoop.terminate();
         }
         if (groupExpWorkerLoop) {
           groupExpWorkerLoop.terminate();
         }
-        [channelWorkerLoop, groupExpWorkerLoop] = await store.dispatch(
-          "getPerspectiveChannelsAndMetadata",
-          {
-            communityId: params,
-          }
-        );
-        store.dispatch("getCommunityMembers", {
-          communityId: params,
-        });
+        if (id) {
+          [channelWorkerLoop, groupExpWorkerLoop] = await store.dispatch(
+            "getPerspectiveChannelsAndMetadata",
+            {
+              communityId: id,
+            }
+          );
+          store.dispatch("getCommunityMembers", {
+            communityId: id,
+          });
+        }
       },
       { immediate: true }
     );

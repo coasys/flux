@@ -7,6 +7,7 @@
           v-for="(user, index) in firstUsers"
           :key="index"
           :hash="user.author.did"
+          :size="size"
           :src="
             user.data.profile['schema:image']
               ? JSON.parse(user.data.profile['schema:image'])[
@@ -14,7 +15,6 @@
                 ]
               : null
           "
-          size="sm"
         ></j-avatar>
         <span v-if="users.length >= 4" class="avatar-group__see-all">
           +{{ users.length - 3 }}
@@ -29,7 +29,7 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   emits: ["click"],
-  props: ["users"],
+  props: ["users", "size"],
   computed: {
     firstUsers(): any {
       return (this.users as any[]).slice(0, 3);
@@ -43,7 +43,6 @@ export default defineComponent({
   outline: 0;
   border: 0;
   background: none;
-  width: 100%;
   cursor: pointer;
   display: flex;
 }
@@ -70,7 +69,7 @@ export default defineComponent({
   outline: 0;
   cursor: pointer;
   background: var(--j-color-white);
-  border: .25px solid var(--j-border-color);
+  border: 0.25px solid var(--j-border-color);
   border-radius: 50%;
   height: var(--j-size-sm);
   width: var(--j-size-sm);

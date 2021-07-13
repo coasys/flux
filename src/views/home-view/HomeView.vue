@@ -2,32 +2,46 @@
   <sidebar-layout>
     <template v-slot:sidebar>
       <div class="home-sidebar">
-        <j-box px="500" pb="1000">
-          <j-flex a="center" gap="400">
-            <img
-              class="logo__img"
-              width="25"
-              src="https://junto.foundation/dist/junto-home-2.0__logo--rainbow.png?d9ff94e4e39bfd0536e60f760a9e6bd7"
-            />
-            <j-text nomargin class="logo_text" size="600" variant="body">
-              Home
-            </j-text>
-          </j-flex>
-        </j-box>
         <j-box pb="500">
-          <j-menu-group-item title="About">
-            <j-menu-item>Intro</j-menu-item>
-            <j-menu-item>Foundation</j-menu-item>
-            <j-menu-item>Team</j-menu-item>
-            <j-menu-item>Values</j-menu-item>
-            <j-menu-item>Contributing</j-menu-item>
-            <j-menu-item>Measuring impact</j-menu-item>
-            <j-menu-item>FAQ</j-menu-item>
-          </j-menu-group-item>
+          <j-menu-item size="lg">
+            <j-avatar
+              size="xs"
+              :hash="$store.state.userDid"
+              :src="userProfile.profilePicture"
+              slot="start"
+            />
+            {{ userProfile.name || userProfile.username }}
+          </j-menu-item>
+          <router-link
+            :to="{
+              name: 'my-communities',
+            }"
+            custom
+            v-slot="{ navigate, isExactActive }"
+          >
+            <j-menu-item :selected="isExactActive" size="lg" @click="navigate">
+              <j-icon name="globe2" slot="start" />
+              Communities
+            </j-menu-item>
+          </router-link>
+          <router-link
+            :to="{
+              name: 'settings',
+            }"
+            custom
+            v-slot="{ navigate, isExactActive }"
+          >
+            <j-menu-item :selected="isExactActive" size="lg" @click="navigate">
+              <j-icon name="gear" slot="start" />
+              Settings
+            </j-menu-item>
+          </router-link>
         </j-box>
       </div>
     </template>
-    <div>Halla</div>
+    <j-box p="1000">
+      <router-view />
+    </j-box>
   </sidebar-layout>
 </template>
 
@@ -35,9 +49,35 @@
 import { defineComponent } from "vue";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 
+import { CommunityState } from "@/store";
+
 export default defineComponent({
   name: "HomeView",
   components: { SidebarLayout },
+  methods: {
+    handleMembersClick(community: CommunityState) {
+      this.$store.commit("setShowCommunityMembers", true);
+      this.$router.push({
+        name: "community",
+        params: { communityId: community.perspective },
+      });
+    },
+    handleEditClick(community: CommunityState) {
+      this.$store.commit("setShowEditCommunity", true);
+      this.$router.push({
+        name: "community",
+        params: { communityId: community.perspective },
+      });
+    },
+  },
+  computed: {
+    communities() {
+      return this.$store.state.communities;
+    },
+    userProfile() {
+      return this.$store.state.userProfile;
+    },
+  },
 });
 </script>
 
