@@ -60,7 +60,8 @@ export default async (
         profileLanguage!.languageAddress,
         authorDid
       );
-      const name = (profile?.data as any).profile["foaf:AccountName"];
+      //@ts-ignore
+      const name = (profile!.data as any).profile["foaf:AccountName"];
 
       title = `${name} mentioned you in #${channel?.name}}`;
       body = escapedMessage;

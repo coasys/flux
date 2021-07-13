@@ -27,8 +27,8 @@
   "dependencies": {
     "@apollo/client": "^3.3.14",
     "@junto-foundation/junto-elements": "^0.2.12",
-    "@perspect3vism/ad4m": "0.0.6",
-    "@perspect3vism/ad4m-executor": "0.0.17",
+    "@perspect3vism/ad4m": "0.1.4",
+    "@perspect3vism/ad4m-executor": "file:../ad4m-executor",
     "@tiptap/core": "^2.0.0-beta.85",
     "@tiptap/vue-3": "^2.0.0-beta.45",
     "@types/jest": "^26.0.20",
@@ -84,6 +84,7 @@
     "node-sass": "^4.12.0",
     "node-wget-js": "^1.0.1",
     "prettier": "^2.3.2",
+    "react": "^17.0.2",
     "sass-loader": "^8.0.2",
     "ts-jest": "^26.0.0",
     "typescript": "^4.2.4",

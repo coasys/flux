@@ -1,5 +1,5 @@
-import { parseExprURL } from "@perspect3vism/ad4m/ExpressionRef";
-import type Expression from "@perspect3vism/ad4m/Expression";
+import { parseExprUrl } from "@perspect3vism/ad4m";
+import type { Expression } from "@perspect3vism/ad4m";
 import ad4m from "@perspect3vism/ad4m-executor";
 import hash from "object-hash";
 
@@ -75,7 +75,7 @@ export default {
         timestamp: payload.expression.timestamp!,
         proof: payload.expression.proof!,
       } as Expression,
-      url: parseExprURL(payload.link.data!.target!),
+      url: parseExprUrl(payload.link.data!.target!),
     };
   },
   addCommunity(state: State, payload: CommunityState): void {
@@ -114,7 +114,7 @@ export default {
               timestamp: payload.message.timestamp!,
               proof: payload.message.proof!,
             } as Expression,
-            url: parseExprURL(payload.link.data!.target!),
+            url: parseExprUrl(payload.link.data!.target!),
           } as ExpressionAndRef;
         }
       }

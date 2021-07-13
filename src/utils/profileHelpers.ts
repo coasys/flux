@@ -1,6 +1,6 @@
 import { getExpressionNoCache } from "@/core/queries/getExpression";
 import { Profile } from "@/store";
-import type Expression from "@perspect3vism/ad4m/Expression";
+import type { Expression } from "@perspect3vism/ad4m";
 import { TimeoutCache } from "./timeoutCache";
 
 export async function getProfile(
