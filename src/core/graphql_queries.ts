@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client/core";
 
 export const OPEN_LINK = gql`
-  mutation openLinkExtern($url: String) {
-    openLinkExtern(url: $url)
+  mutation runtimeOpenLink($url: String!) {
+    runtimeOpenLink(url: $url)
   }
 `;
 

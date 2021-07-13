@@ -72,6 +72,7 @@
     "@vue/eslint-config-prettier": "^6.0.0",
     "@vue/eslint-config-typescript": "^7.0.0",
     "babel-jest": "^26.0.0",
+    "easygraphql-tester": "^6.0.1",
     "electron": "^11.4.7",
     "electron-devtools-installer": "^3.1.0",
     "electron-rebuild": "^2.3.5",
