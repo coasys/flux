@@ -28,7 +28,7 @@
   </j-modal>
 
   <j-modal
-    class="settings-modal"
+    size="lg"
     :open="modals.showSettings"
     @toggle="(e) => setShowSettings(e.target.open)"
   >
