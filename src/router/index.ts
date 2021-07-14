@@ -12,6 +12,7 @@ import ChannelView from "@/views/channel-view/ChannelView.vue";
 import HomeView from "@/views/home-view/HomeView.vue";
 import Settings from "@/containers/Settings.vue";
 import MyCommunities from "@/containers/MyCommunities.vue";
+import MyProfile from "@/containers/MyProfile.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -28,6 +29,7 @@ const routes: Array<RouteRecordRaw> = [
         path: "home",
         name: "home",
         component: HomeView,
+        redirect: { name: "my-profile" },
         children: [
           {
             path: "settings",
@@ -38,6 +40,11 @@ const routes: Array<RouteRecordRaw> = [
             path: "communities",
             name: "my-communities",
             component: MyCommunities,
+          },
+          {
+            path: "communities",
+            name: "my-profile",
+            component: MyProfile,
           },
         ],
       },

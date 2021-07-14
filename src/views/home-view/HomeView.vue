@@ -3,15 +3,23 @@
     <template v-slot:sidebar>
       <div class="home-sidebar">
         <j-box pb="500">
-          <j-menu-item size="lg">
-            <j-avatar
-              size="xs"
-              :hash="$store.state.userDid"
-              :src="userProfile.profilePicture"
-              slot="start"
-            />
-            {{ userProfile.name || userProfile.username }}
-          </j-menu-item>
+          <router-link
+            :to="{
+              name: 'my-profile',
+            }"
+            custom
+            v-slot="{ navigate, isExactActive }"
+          >
+            <j-menu-item :selected="isExactActive" size="lg" @click="navigate">
+              <j-avatar
+                size="xs"
+                :hash="$store.state.userDid"
+                :src="userProfile.profilePicture"
+                slot="start"
+              />
+              {{ userProfile.name || userProfile.username }}
+            </j-menu-item>
+          </router-link>
           <router-link
             :to="{
               name: 'my-communities',
