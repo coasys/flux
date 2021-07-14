@@ -101,11 +101,3 @@
   --j-menu-item-bg: var(--j-color-primary-50);
   --j-menu-item-color: var(--j-color-primary-700);
 }
-
-:root[theme="black"] j-tabs {
-  --j-tabs-indicator-bg: var(--j-color-primary-600);
-}
-
-:root[theme="black"] j-tab-item[checked]::part(base) {
-  color: var(--j-color-white);
-}
