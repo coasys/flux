@@ -1,29 +1,31 @@
 import { getLanguage } from "@/core/queries/getLanguage";
-import { SharedPerspective } from "@perspect3vism/ad4m-executor";
 import {
   JuntoExpressionReference,
   ExpressionTypes,
   ExpressionUIIcons,
 } from "@/store";
+import { Perspective } from "@perspect3vism/ad4m";
 import { Store } from "vuex";
 
+///NOTE: this function wont work in current setup and its still undecided if we want expression language hints on the perspective meta
+///This behaviour should likely be deleted and achieved some other way
 export async function getTypedExpressionLanguages<S>(
-  installedPerspective: SharedPerspective,
+  perspective: Perspective,
   storeLanguageUI: boolean,
   store?: Store<S>
 ): Promise<JuntoExpressionReference[]> {
-  try {
-    const typedExpressionLanguages = [];
-    //Get and cache the expression UI for each expression language
-    //And used returned expression language names to populate typedExpressionLanguages field
-    for (const lang of installedPerspective.requiredExpressionLanguages!) {
-      console.log("JoinCommunity.vue: Fetching UI lang:", lang);
-      const languageRes = await getLanguage(lang!);
+  const typedExpressionLanguages = [];
+  //Get and cache the expression UI for each expression language
+  //And used returned expression language names to populate typedExpressionLanguages field
+  for (const link of perspective.links!) {
+    if (link.data.predicate == "expressionLanguage") {
+      console.log("JoinCommunity.vue: Fetching UI lang:", link.data.target);
+      const languageRes = await getLanguage(link.data.target!);
       if (storeLanguageUI && store) {
         const uiData: ExpressionUIIcons = {
-          languageAddress: lang!,
+          languageAddress: link.data.target!,
           createIcon: languageRes.constructorIcon!.code!,
-          viewIcon: languageRes.iconFor!.code!,
+          viewIcon: languageRes.icon!.code!,
           name: languageRes.name!,
         };
         store!.commit({
@@ -49,13 +51,10 @@ export async function getTypedExpressionLanguages<S>(
           expressionType = ExpressionTypes.Other;
       }
       typedExpressionLanguages.push({
-        languageAddress: lang!,
+        languageAddress: link.data.target!,
         expressionType: expressionType,
       } as JuntoExpressionReference);
-      //await this.sleep(40);
     }
-    return typedExpressionLanguages;
-  } catch (error) {
-    throw new Error(error);
   }
+  return typedExpressionLanguages;
 }
