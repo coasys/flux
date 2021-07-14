@@ -223,6 +223,15 @@
   color: var(--j-color-ui-400);
 }
 
+:root[theme="dark"] j-menu-item::part(base) {
+  font-weight: 500;
+  margin-top: var(--j-space-100);
+  margin-left: var(--j-space-300);
+  margin-right: var(--j-space-300);
+  border-radius: 6px;
+  color: var(--j-color-ui-400);
+}
+
 :root[theme="dark"] j-menu-item:hover::part(base) {
   background: var(--j-color-ui-50);
   color: var(--j-color-ui-600);
