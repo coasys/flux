@@ -19,7 +19,7 @@
         </j-button>
       </j-tooltip>
     </router-link>
-    <j-tooltip title="Add community">
+    <j-tooltip title="Create a community">
       <j-button
         @click="() => $store.commit('setShowCreateCommunity', true)"
         variant="subtle"
