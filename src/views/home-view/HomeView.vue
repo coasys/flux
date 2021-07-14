@@ -2,7 +2,7 @@
   <sidebar-layout>
     <template v-slot:sidebar>
       <div class="home-sidebar">
-        <j-box pb="500">
+        <j-box pb="800">
           <router-link
             :to="{
               name: 'my-profile',
@@ -44,6 +44,13 @@
               Settings
             </j-menu-item>
           </router-link>
+        </j-box>
+        <j-box>
+          <j-menu-group-item title="About">
+            <j-menu-item>Junto Foundation</j-menu-item>
+            <j-menu-item>Privacy</j-menu-item>
+            <j-menu-item>Roadmap</j-menu-item>
+          </j-menu-group-item>
         </j-box>
       </div>
     </template>
