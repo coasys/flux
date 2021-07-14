@@ -1,7 +1,7 @@
 <template>
   <j-flex direction="column" gap="700">
-    <j-text variant="heading">Settings</j-text>
-    <j-flex a="center" j="between">
+    <j-text variant="heading-lg">Settings</j-text>
+    <j-flex wrap a="center" j="between">
       <j-text variant="label">Theme</j-text>
       <j-select
         :value="theme.name"
@@ -15,7 +15,7 @@
         <j-menu-item value="90s">90s</j-menu-item>
       </j-select>
     </j-flex>
-    <j-flex a="center" j="between">
+    <j-flex wrap a="center" j="between">
       <j-text variant="label">Font family</j-text>
       <j-tabs
         :value="theme.fontFamily"
@@ -26,7 +26,7 @@
         <j-tab-item value="monospace">Monospace</j-tab-item>
       </j-tabs>
     </j-flex>
-    <j-flex a="center" j="between">
+    <j-flex wrap a="center" j="between">
       <j-text variant="label">Primary color</j-text>
       <div class="colors">
         <button
@@ -39,7 +39,7 @@
         ></button>
       </div>
     </j-flex>
-    <j-flex a="center" j="between">
+    <j-flex wrap a="center" j="between">
       <j-text variant="label">Saturation</j-text>
       <j-tabs
         :value="theme.saturation"
@@ -50,7 +50,7 @@
         <j-tab-item value="100">Vibrant</j-tab-item>
       </j-tabs>
     </j-flex>
-    <j-flex a="center" j="between">
+    <j-flex wrap a="center" j="between">
       <j-text variant="label">Font size</j-text>
       <j-tabs
         :value="theme.fontSize"
@@ -61,18 +61,13 @@
         <j-tab-item value="lg">Large</j-tab-item>
       </j-tabs>
     </j-flex>
-    <j-flex a="center" j="between">
+    <j-flex wrap a="center" j="between">
       <j-text variant="label">Clear State</j-text>
       <j-button size="md" variant="primary" @click="cleanState">
         <j-icon size="sm" name="trash"></j-icon>
         Clear state
       </j-button>
     </j-flex>
-    <div>
-      <j-button size="lg" variant="primary" @click="updateTheme">
-        Done
-      </j-button>
-    </div>
   </j-flex>
 </template>
 
