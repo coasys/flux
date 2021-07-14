@@ -1,5 +1,5 @@
 import { Commit } from "vuex";
-import { JuntoExpressionReference, ExpressionTypes } from "..";
+import { JuntoExpressionReference, ExpressionTypes, CommunityState } from "..";
 import { createExpression } from "@/core/mutations/createExpression";
 import { createLink } from "@/core/mutations/createLink";
 
@@ -18,7 +18,7 @@ export default async function updateCommunity(
   { commit, getters }: Context,
   { communityId, name, description }: Payload
 ): Promise<void> {
-  const community = getters.getCommunity(communityId);
+  const community: CommunityState = getters.getCommunity(communityId);
 
   try {
     const groupExpressionLang = community.typedExpressionLanguages.find(
@@ -38,15 +38,15 @@ export default async function updateCommunity(
         groupExpression
       );
 
-      const addGroupExpLink = await createLink(community.perspective, {
-        source: `${community.linkLanguageAddress}://self`,
+      const addGroupExpLink = await createLink(community.perspective.uuid, {
+        source: `${community.neighbourhoodUrl}://self`,
         target: groupExpression,
         predicate: "rdf://class",
       });
       console.log("Created group expression link", addGroupExpLink);
 
       commit("updateCommunityMetadata", {
-        communityId: community.perspective,
+        communityId: community.perspective.uuid,
         name: name,
         description: description,
         groupExpressionRef: groupExpression,

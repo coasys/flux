@@ -18,12 +18,12 @@ export default async ({ commit, getters }: Context): Promise<void> => {
 
     if (languages) {
       for (const language of languages) {
-        if (language.iconFor) {
+        if (language.icon) {
           if (!getters.getLanguageUI(language.address!)) {
             const uiData: ExpressionUIIcons = {
               languageAddress: language!.address!,
               createIcon: language!.constructorIcon!.code!,
-              viewIcon: language!.iconFor!.code!,
+              viewIcon: language!.icon!.code!,
               name: language!.name!,
             };
             commit("addExpressionUI", uiData);

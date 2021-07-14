@@ -1,7 +1,7 @@
 import { Commit } from "vuex";
-import { getLinksPaginated } from "@/core/queries/getLinks";
 import { createExpression } from "@/core/mutations/createExpression";
 import { createLink } from "@/core/mutations/createLink";
+import { Link } from "@perspect3vism/ad4m";
 
 export interface Context {
   commit: Commit;
@@ -34,7 +34,7 @@ export default async (
       source: "sioc://chatchannel",
       target: exprUrl,
       predicate: "sioc://content_of",
-    });
+    } as Link);
     console.log("Adding link with response", addLink);
 
     // TODO: Add optimistic UI pattern so it feels fast

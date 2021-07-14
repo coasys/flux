@@ -3,6 +3,7 @@ import { getLinks } from "@/core/queries/getLinks";
 import { Commit } from "vuex";
 import { ExpressionTypes, State } from "..";
 import type { Expression } from "@perspect3vism/ad4m";
+import { LinkQuery } from "@perspect3vism/ad4m";
 import { TimeoutCache } from "../../utils/timeoutCache";
 
 export interface Context {
@@ -28,8 +29,10 @@ export default async function (
 
     const profileLinks = await getLinks(
       communityId,
-      `${community?.linkLanguageAddress}://self`,
-      "sioc://has_member"
+      new LinkQuery({
+        source: `${community.perspective.sharedUrl!}://self`,
+        target: "sioc://has_member"
+      })
     );
 
     const profileLang = community?.typedExpressionLanguages.find(

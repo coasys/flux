@@ -1,6 +1,7 @@
 import { ChannelState, FeedType, MembraneType } from "@/store";
 import { ad4mClient } from "@/app";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
+import { findNameFromMeta } from "./findNameFromMeta";
 
 export async function joinChannelFromSharedLink(
   url: string
@@ -21,12 +22,7 @@ export async function joinChannelFromSharedLink(
   );
 
   //Read out metadata about the perspective from the meta
-  let name;
-  for (const link of perspectiveSnapshot!.links) {
-    if (link.data.predicate == "rdf://name") {
-      name = link.data.target
-    };
-  };
+  let name = findNameFromMeta(perspectiveSnapshot!);
 
   //TODO: derive membraneType from link on sharedPerspective
   //For now its hard coded inherited since we dont support anything else
@@ -35,13 +31,13 @@ export async function joinChannelFromSharedLink(
   return {
     name: name,
     hasNewMessages: false,
-    perspective: joinNeighbourhood.uuid,
+    perspective: joinNeighbourhood,
     type: FeedType.Signaled,
     createdAt: now,
     linkLanguageAddress: "na",
     currentExpressionLinks: {},
     currentExpressionMessages: {},
-    sharedPerspectiveUrl: url,
+    neighbourhoodUrl: url,
     membraneType: MembraneType.Inherited,
     groupExpressionRef: "",
     typedExpressionLanguages: typedExpressionLanguages,

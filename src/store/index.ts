@@ -1,7 +1,7 @@
 import { createStore } from "vuex";
 import VuexPersistence from "vuex-persist";
 import type { Expression } from "@perspect3vism/ad4m";
-import { ExpressionRef } from "@perspect3vism/ad4m";
+import { ExpressionRef, PerspectiveHandle } from "@perspect3vism/ad4m";
 import { LinkExpression } from "@perspect3vism/ad4m-executor";
 
 import actions from "./actions";
@@ -9,16 +9,15 @@ import mutations from "./mutations";
 import getters from "./getters";
 
 export interface CommunityState {
-  //NOTE: here by having a static name + description we are assuming that these are top level metadata items that each group will have
   name: string;
   description: string;
   channels: { [x: string]: ChannelState };
-  perspective: string; //NOTE: this is essentially the UUID for the community
+  perspective: PerspectiveHandle;
   linkLanguageAddress: string;
   expressionLanguages: string[];
   typedExpressionLanguages: JuntoExpressionReference[];
   groupExpressionRef: string;
-  sharedPerspectiveUrl: string;
+  neighbourhoodUrl: string;
   members: Expression[];
 }
 
@@ -27,9 +26,9 @@ export interface ChannelState {
   name: string;
   hasNewMessages: boolean;
   scrollTop?: number;
-  perspective: string; //NOTE: this is essentially the UUID for the community
+  perspective: PerspectiveHandle;
   linkLanguageAddress: string;
-  sharedPerspectiveUrl: string;
+  neighbourhoodUrl: string;
   type: FeedType;
   createdAt: Date;
   currentExpressionLinks: { [x: string]: LinkExpressionAndLang };

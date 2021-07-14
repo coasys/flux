@@ -1,6 +1,5 @@
 import { Commit } from "vuex";
-import { initAgent } from "@/core/mutations/agentGenerate";
-import { lockAgent } from "@/core/mutations/lockAgent";
+import { agentGenerate } from "@/core/mutations/agentGenerate";
 import { addPerspective } from "@/core/mutations/addPerspective";
 
 import { databasePerspectiveName } from "@/core/juntoTypes";
@@ -34,8 +33,7 @@ export default async (
   const perspectiveName = databasePerspectiveName;
 
   try {
-    const status = await initAgent();
-    await lockAgent(password);
+    const status = await agentGenerate(password);
 
     const addPerspectiveResult = await addPerspective(perspectiveName);
 

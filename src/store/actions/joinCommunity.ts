@@ -1,11 +1,12 @@
-import { Commit, Store } from "vuex";
-
 import { createProfile } from "@/core/methods/createProfile";
 import { createLink } from "@/core/mutations/createLink";
-import { installSharedPerspective } from "@/core/mutations/installSharedPerspective";
+import { joinNeighbourhood } from "@/core/mutations/joinNeighbourhood";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
 
 import { Profile, ExpressionTypes, State } from "@/store";
+import { ad4mClient } from "@/app";
+import { Link } from "@perspect3vism/ad4m";
+import { findNameFromMeta } from "@/core/methods/findNameFromMeta";
 
 export interface Payload {
   joiningLink: string;
@@ -15,20 +16,22 @@ export default async (store: any, { joiningLink }: Payload): Promise<void> => {
   try {
     const communities = store.state.communities;
     const isAlreadyPartOf = Object.values(communities).find(
-      (c: any) => c.sharedPerspectiveUrl === joiningLink
+      (c: any) => c.neighbourhoodUrl === joiningLink
     );
     if (!isAlreadyPartOf) {
-      const installedPerspective = await installSharedPerspective(joiningLink);
+      const neighourhood = await joinNeighbourhood(joiningLink);
       console.log(
         new Date(),
-        "Installed perspective raw data",
-        installedPerspective
+        "Installed neighourhood with result",
+        neighourhood
       );
+
+      const perspective = await ad4mClient.perspective.snapshotByUUID(neighourhood.uuid);
 
       //Get and cache the expression UI for each expression language
       //And used returned expression language names to populate typedExpressionLanguages field
       const typedExpressionLanguages = await getTypedExpressionLanguages(
-        installedPerspective.sharedPerspective!,
+        perspective!,
         true,
         store
       );
@@ -50,23 +53,23 @@ export default async (store: any, { joiningLink }: Payload): Promise<void> => {
         );
 
         //Create link between perspective and group expression
-        const addProfileLink = await createLink(installedPerspective.uuid!, {
-          source: `${installedPerspective.sharedPerspective!.linkLanguages![0]!
-            .address!}://self`,
+        const addProfileLink = await createLink(neighourhood.uuid, {
+          source: `${neighourhood.uuid}://self`,
           target: createProfileExpression,
           predicate: "sioc://has_member",
-        });
+        } as Link);
         console.log("Created group expression link", addProfileLink);
       }
 
+      //Read out metadata about the perspective from the meta
+      let name = findNameFromMeta(perspective!);
+
       store.commit("addCommunity", {
-        name: installedPerspective.name,
-        linkLanguageAddress:
-          installedPerspective.sharedPerspective!.linkLanguages![0]!.address!,
+        name: name,
+        linkLanguageAddress: "na",
         channels: {},
-        perspective: installedPerspective.uuid!,
-        expressionLanguages:
-          installedPerspective.sharedPerspective!.requiredExpressionLanguages,
+        perspective: neighourhood,
+        expressionLanguages: typedExpressionLanguages.forEach((lang) => lang.languageAddress),
         typedExpressionLanguages: typedExpressionLanguages,
         sharedPerspectiveUrl: joiningLink, //TODO: this will have to be string split once we add proof onto the URL
         members: [],

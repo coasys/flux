@@ -1,11 +1,10 @@
 import { Commit } from "vuex";
 import hash from "object-hash";
 import { print } from "graphql/language/printer";
-import {
-  SOURCE_PREDICATE_LINK_QUERY_TIME_PAGINATED,
-  QUERY_EXPRESSION,
-} from "@/core/graphql_queries";
+import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 import { State } from "..";
+import { LinkQuery } from "@perspect3vism/ad4m";
+
 export interface Context {
   commit: Commit;
   getters: any;
@@ -40,13 +39,15 @@ export default async function (
 
     linksWorker.postMessage({
       interval: 10000,
-      query: print(SOURCE_PREDICATE_LINK_QUERY_TIME_PAGINATED),
+      query: print(PERSPECTIVE_LINK_QUERY),
       variables: {
-        perspectiveUUID: channelId.toString(),
-        source: "sioc://chatchannel",
-        predicate: "sioc://content_of",
-        fromDate,
-        untilDate,
+        uuid: channelId.toString(),
+        query: {
+          source: "sioc://chatchannel",
+          predicate: "sioc://content_of",
+          fromDate,
+          untilDate,
+        } as LinkQuery
       },
       name: `Get channel messages ${channel.name}`,
     });
@@ -75,7 +76,7 @@ export default async function (
               expressionWorker.postMessage({
                 retry: 50,
                 interval: 5000,
-                query: print(QUERY_EXPRESSION),
+                query: print(GET_EXPRESSION),
                 variables: { url: link.data.target },
                 name: "Get expression data from channel links",
               });

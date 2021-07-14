@@ -80,7 +80,7 @@ export default {
   },
   addCommunity(state: State, payload: CommunityState): void {
     console.log("adding Community", payload);
-    state.communities[payload.perspective] = payload;
+    state.communities[payload.perspective.uuid] = payload;
   },
   setLanguagesPath(state: State, payload: string): void {
     state.localLanguagesPath = payload;
@@ -141,7 +141,7 @@ export default {
     const community = state.communities[payload.communityId];
 
     if (community !== undefined) {
-      community.channels[payload.channel.perspective] = {
+      community.channels[payload.channel.perspective.uuid] = {
         ...payload.channel,
         hasNewMessages: false,
       };
@@ -156,7 +156,7 @@ export default {
     for (const community of Object.values(state.communities)) {
       for (const channel of Object.values(community.channels)) {
         //console.log(channel);
-        if (channel.perspective === payload.channelId) {
+        if (channel.perspective.uuid === payload.channelId) {
           //console.log({ channel });
           channel.hasNewMessages = payload.value;
         }

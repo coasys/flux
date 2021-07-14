@@ -3,10 +3,8 @@ import { CommunityState, ChannelState } from "@/store";
 import { print } from "graphql/language/printer";
 import { joinChannelFromSharedLink } from "@/core/methods/joinChannelFromSharedLink";
 import { expressionGetRetries, expressionGetDelayMs } from "@/core/juntoTypes";
-import {
-  SOURCE_PREDICATE_LINK_QUERY,
-  QUERY_EXPRESSION,
-} from "@/core/graphql_queries";
+import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY} from "@/core/graphql_queries";
+import { LinkQuery } from "@perspect3vism/ad4m";
 
 export interface Context {
   commit: Commit;
@@ -33,11 +31,13 @@ export default async (
     //Start the worker looking for channels
     channelLinksWorker.postMessage({
       interval: 5000,
-      query: print(SOURCE_PREDICATE_LINK_QUERY),
+      query: print(PERSPECTIVE_LINK_QUERY),
       variables: {
-        perspectiveUUID: community.perspective,
-        source: `${community.linkLanguageAddress}://self`,
-        predicate: "sioc://has_space",
+        uuid: community.perspective.uuid,
+        query: new LinkQuery({
+          source: `${community.linkLanguageAddress}://self`,
+          predicate: "sioc://has_space",
+        })
       },
       name: "Community channel links",
     });
@@ -79,7 +79,7 @@ export default async (
                 );
                 //Add the channel to the store
                 commit("addChannel", {
-                  communityId: community.perspective,
+                  communityId: community.perspective.uuid,
                   channel: channel,
                 });
               }
@@ -97,11 +97,13 @@ export default async (
     // Start worker looking for group expression links
     groupExpressionWorker.postMessage({
       interval: 5000,
-      query: print(SOURCE_PREDICATE_LINK_QUERY),
+      query: print(PERSPECTIVE_LINK_QUERY),
       variables: {
-        perspectiveUUID: community.perspective,
-        source: `${community.linkLanguageAddress}://self`,
-        predicate: "rdf://class",
+        uuid: community.perspective.uuid,
+        query: new LinkQuery({
+          source: `${community.linkLanguageAddress}://self`,
+          predicate: "rdf://class",
+        })
       },
       name: `Get group expression links ${community.name}`,
     });
@@ -127,7 +129,7 @@ export default async (
             expressionWorker.postMessage({
               retry: expressionGetRetries,
               interval: expressionGetDelayMs,
-              query: print(QUERY_EXPRESSION),
+              query: print(GET_EXPRESSION),
               variables: {
                 url: groupExpressionLinks[groupExpressionLinks.length - 1].data!
                   .target!,
@@ -152,7 +154,7 @@ export default async (
                 );
                 //Update the community with the new group data
                 commit("updateCommunityMetadata", {
-                  communityId: community.perspective,
+                  communityId: community.perspective.uuid,
                   name: groupExpData["name"],
                   description: groupExpData["description"],
                   groupExpressionRef:

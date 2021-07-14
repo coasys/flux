@@ -1,6 +1,6 @@
 import { createProfile } from "@/core/methods/createProfile";
 import { Commit } from "vuex";
-import { ExpressionTypes, State, Profile } from "..";
+import { ExpressionTypes, State, Profile, CommunityState } from "..";
 import { TimeoutCache } from "../../utils/timeoutCache";
 import type { Expression } from "@perspect3vism/ad4m";
 import { getExpression } from "@/core/queries/getExpression";
@@ -25,7 +25,7 @@ export default async (
   try {
     const user: Profile | null = state.userProfile;
 
-    const communities = Object.values(state.communities);
+    const communities: CommunityState[] = Object.values(state.communities);
     const cache = new TimeoutCache<Expression>(1000 * 60 * 5);
 
     for (const community of communities) {

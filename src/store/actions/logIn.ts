@@ -1,8 +1,5 @@
 import { Commit } from "vuex";
-import ad4m from "@perspect3vism/ad4m-executor";
-import { apolloClient } from "@/app";
-import { UNLOCK_AGENT } from "@/core/graphql_queries";
-import { unlockAgent } from "@/core/mutations/unlockAgent";
+import { agentUnlock } from "@/core/mutations/agentUnlock";
 
 export interface Context {
   commit: Commit;
@@ -17,7 +14,7 @@ export default async (
   { password }: Payload
 ): Promise<any> => {
   try {
-    const lockRes = await unlockAgent(password);
+    const lockRes = await agentUnlock(password);
 
     commit("updateAgentInitState", lockRes.isInitialized!);
     commit("updateAgentLockState", lockRes.isUnlocked!);

@@ -4,8 +4,8 @@ import { Commit } from "vuex";
 import { createChannel } from "@/core/methods/createChannel";
 import { createProfile } from "@/core/methods/createProfile";
 import { createExpression } from "@/core/mutations/createExpression";
-import { createUniqueExpressionLanguage } from "@/core/mutations/createUniqueExpressionLanguage";
-import { publishSharedPerspective } from "@/core/mutations/publishSharedPerspective";
+import { createUniqueHolochainLanguage } from "@/core/mutations/createUniqueHolochainLanguage";
+import { createNeighbourhood } from "@/core/mutations/createNeighbourhood";
 import { addPerspective } from "@/core/mutations/addPerspective";
 import { createLink } from "@/core/mutations/createLink";
 import { getLanguage } from "@/core/queries/getLanguage";
@@ -19,6 +19,7 @@ import {
   JuntoExpressionReference,
   ExpressionTypes,
 } from "@/store";
+import { Perspective } from "@perspect3vism/ad4m";
 
 export interface Context {
   commit: Commit;
@@ -36,30 +37,40 @@ export default async (
 ): Promise<void> => {
   try {
     const createSourcePerspective = await addPerspective(perspectiveName);
-    console.log("Created perspective", createSourcePerspective);
+    console.log("Created source perspective", createSourcePerspective);
+    
+    //Get the variables that we need to create new unique languages
     const uid = uuidv4().toString();
-
     const builtInLangPath = getters.getLanguagePath;
 
+    //Create unique social-context
+    const socialContextLang = await createUniqueHolochainLanguage(
+      path.join(builtInLangPath, "social-context"),
+      "social-context",
+      uid
+    );
+    console.log("Response from create social-context", socialContextLang);
     //Create shortform expression language
-    const shortFormExpressionLang = await createUniqueExpressionLanguage(
-      path.join(builtInLangPath, "shortform/build"),
+    const shortFormExpressionLang = await createUniqueHolochainLanguage(
+      path.join(builtInLangPath, "shortform"),
       "shortform",
       uid
     );
-    console.log("Response from create exp lang", shortFormExpressionLang);
+    console.log("Response from create shortform exp lang", shortFormExpressionLang);
     //Create group expression language
-    const groupExpressionLang = await createUniqueExpressionLanguage(
-      path.join(builtInLangPath, "group-expression/build"),
+    const groupExpressionLang = await createUniqueHolochainLanguage(
+      path.join(builtInLangPath, "group-expression"),
       "group-expression",
       uid
     );
-    const profileExpressionLang = await createUniqueExpressionLanguage(
-      path.join(builtInLangPath, "profiles/build"),
+    console.log("Response from create group exp lang", groupExpressionLang);
+    //Create profile expression language
+    const profileExpressionLang = await createUniqueHolochainLanguage(
+      path.join(builtInLangPath, "profiles"),
       "agent-profiles",
       uid
     );
-    console.log("Response from create exp lang", groupExpressionLang);
+    console.log("Response from create profile exp lang", profileExpressionLang);
     const expressionLangs = [
       shortFormExpressionLang.address!,
       groupExpressionLang.address!,
@@ -81,28 +92,19 @@ export default async (
     ];
 
     //Publish perspective
-    const publish = await publishSharedPerspective({
-      uuid: createSourcePerspective.uuid!,
-      name: perspectiveName,
-      description: description,
-      type: "holochain",
-      uid: uid,
-      requiredExpressionLanguages: expressionLangs,
-      allowedExpressionLanguages: expressionLangs,
-    });
-    console.log("Published perspective with response", publish);
+    const meta = new Perspective();
+    const neighbourhood = await createNeighbourhood(createSourcePerspective.uuid, socialContextLang.address, meta)
+    console.log("Created neighbourhood with result", neighbourhood);
 
     //await sleep(10000);
 
     //Create link denoting type of community
     const addLink = await createLink(createSourcePerspective.uuid!, {
-      source: `${publish.linkLanguages![0]!.address!}://self`,
+      source: `${neighbourhood}://self`,
       target: "sioc://community",
       predicate: "rdf://type",
     });
     console.log("Added typelink with response", addLink);
-    //TODO: we are sleeping here to ensure that all DNA's are installed before trying to do stuff
-    //ideally installing DNA's in holochain would be a sync operation to avoid this
 
     //Create the group expression
     const createExp = await createExpression(
@@ -116,7 +118,7 @@ export default async (
 
     //Create link between perspective and group expression
     const addGroupExpLink = await createLink(createSourcePerspective.uuid!, {
-      source: `${publish.linkLanguages![0]!.address!}://self`,
+      source: `${neighbourhood}://self`,
       target: createExp,
       predicate: "rdf://class",
     });
@@ -136,7 +138,7 @@ export default async (
 
     //Create link between perspective and group expression
     const addProfileLink = await createLink(createSourcePerspective.uuid!, {
-      source: `${publish.linkLanguages![0]!.address!}://self`,
+      source: `${neighbourhood}://self`,
       target: createProfileExpression,
       predicate: "sioc://has_member",
     });
@@ -146,11 +148,8 @@ export default async (
     //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel
     const channel = await createChannel(
       "Home",
-      description,
-      uid,
-      createSourcePerspective.uuid!,
-      publish.linkLanguages![0]!.address!,
-      expressionLangs,
+      builtInLangPath,
+      createSourcePerspective,
       MembraneType.Inherited,
       typedExpLangs
     );
@@ -164,13 +163,13 @@ export default async (
     commit("addCommunity", {
       name: perspectiveName,
       description: description,
-      linkLanguageAddress: publish.linkLanguages![0]!.address!,
-      channels: { [channel.perspective]: channel },
-      perspective: createSourcePerspective.uuid!,
+      linkLanguageAddress: "",
+      channels: { [channel.perspective.uuid]: channel },
+      perspective: createSourcePerspective,
       expressionLanguages: expressionLangs,
       typedExpressionLanguages: typedExpLangs,
       groupExpressionRef: createExp,
-      sharedPerspectiveUrl: communityPerspective.sharedURL!,
+      sharedPerspectiveUrl: neighbourhood,
       members: [],
     });
 
@@ -181,7 +180,7 @@ export default async (
       const uiData: ExpressionUIIcons = {
         languageAddress: lang,
         createIcon: languageRes.constructorIcon!.code!,
-        viewIcon: languageRes.iconFor!.code!,
+        viewIcon: languageRes.icon!.code!,
         name: languageRes.name!,
       };
       commit("addExpressionUI", uiData);

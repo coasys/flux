@@ -1,8 +1,7 @@
-import { v4 as uuidv4 } from "uuid";
 import { Commit } from "vuex";
 import { createChannel } from "@/core/methods/createChannel";
 
-import { MembraneType } from "@/store";
+import { CommunityState, MembraneType } from "@/store";
 
 export interface Context {
   commit: Commit;
@@ -19,15 +18,11 @@ export default async (
   { communityId, name }: Payload
 ): Promise<void> => {
   try {
-    const community = getters.getCommunity(communityId);
-    const uid = uuidv4().toString();
+    const community: CommunityState = getters.getCommunity(communityId);
     const channel = await createChannel(
       name,
-      "",
-      uid,
+      getters.getLanguagePath,
       community.perspective,
-      community.linkLanguageAddress,
-      community.expressionLanguages,
       MembraneType.Inherited,
       community.typedExpressionLanguages
     );
