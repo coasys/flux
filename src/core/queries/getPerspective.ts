@@ -1,19 +1,10 @@
-import { apolloClient } from "@/app";
-import ad4m from "@perspect3vism/ad4m-executor";
-import { PERSPECTIVE } from "../graphql_queries";
+import { ad4mClient } from "@/app";
+import { Perspective, PerspectiveHandle } from "@perspect3vism/ad4m";
 
-export function getPerspective(uuid: string): Promise<ad4m.Perspective> {
-  return new Promise((resolve, reject) => {
-    apolloClient
-      .query<{ perspective: ad4m.Perspective }>({
-        query: PERSPECTIVE,
-        variables: { uuid: uuid },
-      })
-      .then((result) => {
-        resolve(result.data!.perspective);
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
+export function getPerspective(uuid: string): Promise<PerspectiveHandle | null> {
+  return ad4mClient.perspective.byUUID(uuid)
+}
+
+export function getPerspectiveSnapshot(uuid: string): Promise<Perspective | null> {
+  return ad4mClient.perspective.snapshotByUUID(uuid)
 }

@@ -7,7 +7,7 @@ import mutations from "@/store/mutations";
 import actions from "@/store/actions";
 import getters from "@/store/getters";
 import { State } from "@/store";
-import * as initAgent from "../../../core/mutations/initAgent";
+import * as initAgent from "../../../core/mutations/agentGenerate";
 import * as lockAgent from "../../../core/mutations/lockAgent";
 import * as addPerspective from "../../../core/mutations/addPerspective";
 import { AgentService, Perspective } from "@perspect3vism/ad4m-executor";

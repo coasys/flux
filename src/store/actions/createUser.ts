@@ -1,5 +1,5 @@
 import { Commit } from "vuex";
-import { initAgent } from "@/core/mutations/initAgent";
+import { initAgent } from "@/core/mutations/agentGenerate";
 import { lockAgent } from "@/core/mutations/lockAgent";
 import { addPerspective } from "@/core/mutations/addPerspective";
 
