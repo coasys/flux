@@ -70,9 +70,16 @@ export default defineComponent({
           communityId,
           name,
         })
-        .then(() => {
+        .then((channel) => {
           this.$emit("submit");
           this.channelName = "";
+          this.$router.push({
+            name: "channel",
+            params: {
+              communityId: communityId,
+              channelId: channel.perspective,
+            },
+          });
         })
         .finally(() => {
           this.isCreatingChannel = false;
