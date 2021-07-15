@@ -5,10 +5,10 @@
         <j-box pt="500" pb="800">
           <img width="500" src="@/assets/images/app-secure.png" />
         </j-box>
-        <j-text variant="heading-lg">Communicate privately and freely</j-text>
+        <j-text variant="heading-lg">Communicate Privately and Freely</j-text>
         <j-text variant="ingress">
-          Without central servers we make sure there is no third-party involved
-          that can eavesdrop on your converstions and try to sell your data.
+          Without central servers, there's no way for third-parties to eavesdrop
+          on your conversations or sell your data to advertisers
         </j-text>
       </div>
     </div>
@@ -17,10 +17,12 @@
         <j-box pt="500" pb="800">
           <img width="500" src="@/assets/images/app-secure.png" />
         </j-box>
-        <j-text variant="heading-lg">Own your own information</j-text>
+        <j-text variant="heading-lg">
+          Create Groups, Communities and Networks
+        </j-text>
         <j-text variant="ingress">
-          Without central servers we make sure there is no third-party involved
-          that can eavesdrop on your converstions and try to sell your data.
+          Organize and aggregate social organisms of any size or scale with a
+          level of fluidity and interoperability only possible with p2p design
         </j-text>
       </div>
     </div>
@@ -29,10 +31,11 @@
         <j-box pt="500" pb="800">
           <img width="500" src="@/assets/images/app-secure.png" />
         </j-box>
-        <j-text variant="heading-lg">Organize your communitcation</j-text>
+        <j-text variant="heading-lg">Take Back the Internet</j-text>
         <j-text variant="ingress">
-          Without central servers we make sure there is no third-party involved
-          that can eavesdrop on your converstions and try to sell your data.
+          With Holochain's agent-centric application framework, you own your
+          data, manage your identity, and host the apps that you use with those
+          you trust
         </j-text>
       </div>
     </div>
@@ -45,7 +48,7 @@
 }
 
 .slider__slide-content {
-  max-width: 750px;
+  max-width: 700px;
   margin: 0 auto;
 }
 </style>
