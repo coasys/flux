@@ -118,6 +118,7 @@ export default defineComponent({
   watch: {
     "currentCommunity.perspective": {
       handler: function (val) {
+        if (!this.currentCommunity) return;
         const firstChannel = Object.values(this.currentCommunity.channels)[0];
         const currentChannelId =
           this.currentCommunity.currentChannelId || firstChannel.perspective;
