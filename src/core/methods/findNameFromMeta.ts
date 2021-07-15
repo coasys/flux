@@ -5,12 +5,12 @@ export function findNameFromMeta(perspective: Perspective): string | null {
   let name;
   for (const link of perspective!.links) {
     if (link.data.predicate == "rdf://name") {
-      name = link.data.target
-    };
-  };
+      name = link.data.target;
+    }
+  }
   if (name) {
-      return name
+    return name;
   } else {
-      return null
+    return null;
   }
 }

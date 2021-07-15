@@ -1,10 +1,19 @@
-import { apolloClient, ad4mClient } from "@/app";
-import { LanguageRef } from "@perspect3vism/ad4m";
+import { apolloClient } from "@/app";
+import unwrapApolloResult from "@/utils/unwrapApolloResult";
+import type { LanguageRef } from "@perspect3vism/ad4m";
+import { LANGUAGE_CLONE_HOLOCHAIN_TEMPLATE } from "../graphql_queries";
 
 export async function createUniqueHolochainLanguage(
   languagePath: string,
   dnaNick: string,
   uid: string
 ): Promise<LanguageRef> {
-  return ad4mClient.languages.cloneHolochainTemplate(languagePath, dnaNick, uid)
+  const { languageCloneHolochainTemplate } = unwrapApolloResult(
+    await apolloClient.mutate({
+      mutation: LANGUAGE_CLONE_HOLOCHAIN_TEMPLATE,
+      variables: { languagePath, dnaNick, uid },
+    })
+  );
+
+  return languageCloneHolochainTemplate;
 }

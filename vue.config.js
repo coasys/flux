@@ -64,8 +64,29 @@ module.exports = {
           .use("babel")
           .loader("babel-loader")
           .options({
-            presets: [["@babel/preset-env", { modules: false }]],
-            plugins: ["@babel/plugin-transform-typescript"],
+            presets: [['@babel/preset-typescript', {}]],
+        
+            ////////////////////////////////////////////////////////////////////////////
+        
+            plugins: [
+              // Decorators must be before `class-properties`.
+              ['@babel/plugin-proposal-decorators', {legacy: true}],
+        
+              ////////////////////
+        
+              // Patched to fix: https://github.com/WarnerHooh/babel-plugin-parameter-decorator/issues/25
+              ['@vjpr/babel-plugin-parameter-decorator'],
+        
+              ////////////////////
+        
+              // NOTE: Breaks automatic field getters with Sequelize if not in the correct spot.
+              //   See: https://github.com/sequelize/sequelize/issues/11326
+              //   See also: https://github.com/Polymer/lit-element/issues/234#issuecomment-687673767
+              ['@babel/plugin-proposal-class-properties', {loose: true}],
+        
+              ['babel-plugin-transform-typescript-metadata'],
+        
+           ]
           });
       },
     },

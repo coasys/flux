@@ -34,7 +34,7 @@ describe("ProfileHelpers", () => {
         const split = url.split("://");
         if (split[1] === did && split[0] === profileLangAddress) {
           return getProfileFixture as unknown as Expression;
-        } 
+        }
 
         return null;
       });

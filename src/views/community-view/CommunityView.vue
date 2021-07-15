@@ -49,7 +49,7 @@
       @click="(e) => e.target.select()"
       size="lg"
       readonly
-      :value="currentCommunity.sharedPerspectiveUrl"
+      :value="currentCommunity.neighbourhoodUrl"
     >
       <j-button @click="getInviteCode" variant="subtle" slot="end"
         ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
@@ -124,7 +124,7 @@ export default defineComponent({
       // Get the invite code to join community and copy to clipboard
       let currentCommunity = this.currentCommunity;
       const el = document.createElement("textarea");
-      el.value = `Hey! Here is an invite code to join my private community on Junto: ${currentCommunity.sharedPerspectiveUrl}`;
+      el.value = `Hey! Here is an invite code to join my private community on Junto: ${currentCommunity.neighbourhoodUrl}`;
       document.body.appendChild(el);
       el.select();
       document.execCommand("copy");

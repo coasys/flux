@@ -1,10 +1,18 @@
-import { ad4mClient } from "@/app";
-import { Perspective } from "@perspect3vism/ad4m";
+import { apolloClient } from "@/app";
+import unwrapApolloResult from "@/utils/unwrapApolloResult";
+import type { Perspective } from "@perspect3vism/ad4m";
+import { PUBLISH_NEIGHBOURHOOD_FROM_PERSPECTIVE } from "../graphql_queries";
 
-export function createNeighbourhood(
+export async function createNeighbourhood(
   perspective: string,
   linkLanguage: string,
   meta: Perspective
 ): Promise<string> {
-  return ad4mClient.neighbourhood.publishFromPerspective(perspective, linkLanguage, meta)
+  const { neighbourhoodPublishFromPerspective } = unwrapApolloResult(
+    await apolloClient.mutate({
+      mutation: PUBLISH_NEIGHBOURHOOD_FROM_PERSPECTIVE,
+      variables: { perspectiveUUID: perspective, linkLanguage, meta: meta },
+    })
+  );
+  return neighbourhoodPublishFromPerspective;
 }

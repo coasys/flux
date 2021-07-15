@@ -38,7 +38,7 @@ export default async (
   try {
     const createSourcePerspective = await addPerspective(perspectiveName);
     console.log("Created source perspective", createSourcePerspective);
-    
+
     //Get the variables that we need to create new unique languages
     const uid = uuidv4().toString();
     const builtInLangPath = getters.getLanguagePath;
@@ -56,7 +56,10 @@ export default async (
       "shortform",
       uid
     );
-    console.log("Response from create shortform exp lang", shortFormExpressionLang);
+    console.log(
+      "Response from create shortform exp lang",
+      shortFormExpressionLang
+    );
     //Create group expression language
     const groupExpressionLang = await createUniqueHolochainLanguage(
       path.join(builtInLangPath, "group-expression"),
@@ -93,7 +96,11 @@ export default async (
 
     //Publish perspective
     const meta = new Perspective();
-    const neighbourhood = await createNeighbourhood(createSourcePerspective.uuid, socialContextLang.address, meta)
+    const neighbourhood = await createNeighbourhood(
+      createSourcePerspective.uuid,
+      socialContextLang.address,
+      meta
+    );
     console.log("Created neighbourhood with result", neighbourhood);
 
     //await sleep(10000);

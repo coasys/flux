@@ -190,7 +190,7 @@ export default defineComponent({
         // If this channel is not in view, and only kept alive
         // show new messages button, so when you open the channel
         // again the button will be there
-        if (this.$route.params.channelId !== this.channel.perspective) {
+        if (this.$route.params.channelId !== this.channel.perspective.uuid) {
           this.showNewMessagesButton = true;
           return;
         }
@@ -288,7 +288,7 @@ export default defineComponent({
           name: "channel",
           params: {
             channelId: id,
-            communityId: this.community.perspective,
+            communityId: this.community.perspective.uuid,
           },
         });
       }

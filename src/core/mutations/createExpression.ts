@@ -1,8 +1,16 @@
-import { ad4mClient } from "@/app";
+import { apolloClient } from "@/app";
+import unwrapApolloResult from "@/utils/unwrapApolloResult";
+import { CREATE_EXPRESSION } from "../graphql_queries";
 
-export function createExpression(
+export async function createExpression(
   languageAddress: string,
   content: string
 ): Promise<string> {
-  return ad4mClient.expression.create(content, languageAddress)
+  const { expressionCreate } = unwrapApolloResult(
+    await apolloClient.mutate({
+      mutation: CREATE_EXPRESSION,
+      variables: { content, languageAddress },
+    })
+  );
+  return expressionCreate;
 }

@@ -31,7 +31,7 @@ export default async function (
       communityId,
       new LinkQuery({
         source: `${community.perspective.sharedUrl!}://self`,
-        target: "sioc://has_member"
+        target: "sioc://has_member",
       })
     );
 

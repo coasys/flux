@@ -1,11 +1,17 @@
-import { ad4mClient } from "@/app";
+import { apolloClient } from "@/app";
+import unwrapApolloResult from "@/utils/unwrapApolloResult";
 import { LinkQuery, LinkExpression } from "@perspect3vism/ad4m";
+import { PERSPECTIVE_LINK_QUERY } from "../graphql_queries";
 
-export function getLinks(
+export async function getLinks(
   perspective: string,
   linkQuery: LinkQuery
 ): Promise<LinkExpression[]> {
-  return ad4mClient.perspective.queryLinks(perspective, linkQuery)
+  const { perspectiveQueryLinks } = unwrapApolloResult(await apolloClient.query({
+    query: PERSPECTIVE_LINK_QUERY,
+    variables: { uuid: perspective, query: linkQuery }
+}))
+return perspectiveQueryLinks
 }
 
 export function getChatChannelLinks(
@@ -14,7 +20,10 @@ export function getChatChannelLinks(
 ): Promise<LinkExpression[]> {
   return getLinks(
     perspectiveUUID,
-    new LinkQuery({source: `${linkLanguageAddress}://self`, predicate: "sioc://has_space"})
+    new LinkQuery({
+      source: `${linkLanguageAddress}://self`,
+      predicate: "sioc://has_space",
+    })
   );
 }
 
@@ -24,6 +33,9 @@ export function getGroupExpressionLinks(
 ): Promise<LinkExpression[]> {
   return getLinks(
     perspectiveUUID,
-    new LinkQuery({source: `${linkLanguageAddress}://self`, predicate: "rdf://class"})
+    new LinkQuery({
+      source: `${linkLanguageAddress}://self`,
+      predicate: "rdf://class",
+    })
   );
 }

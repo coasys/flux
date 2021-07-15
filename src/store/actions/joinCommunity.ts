@@ -4,9 +4,9 @@ import { joinNeighbourhood } from "@/core/mutations/joinNeighbourhood";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
 
 import { Profile, ExpressionTypes, State } from "@/store";
-import { ad4mClient } from "@/app";
 import { Link } from "@perspect3vism/ad4m";
 import { findNameFromMeta } from "@/core/methods/findNameFromMeta";
+import { getPerspectiveSnapshot } from "@/core/queries/getPerspective";
 
 export interface Payload {
   joiningLink: string;
@@ -26,7 +26,9 @@ export default async (store: any, { joiningLink }: Payload): Promise<void> => {
         neighourhood
       );
 
-      const perspective = await ad4mClient.perspective.snapshotByUUID(neighourhood.uuid);
+      const perspective = await getPerspectiveSnapshot(
+        neighourhood.uuid
+      );
 
       //Get and cache the expression UI for each expression language
       //And used returned expression language names to populate typedExpressionLanguages field
@@ -62,14 +64,16 @@ export default async (store: any, { joiningLink }: Payload): Promise<void> => {
       }
 
       //Read out metadata about the perspective from the meta
-      let name = findNameFromMeta(perspective!);
+      const name = findNameFromMeta(perspective!);
 
       store.commit("addCommunity", {
         name: name,
         linkLanguageAddress: "na",
         channels: {},
         perspective: neighourhood,
-        expressionLanguages: typedExpressionLanguages.forEach((lang) => lang.languageAddress),
+        expressionLanguages: typedExpressionLanguages.forEach(
+          (lang) => lang.languageAddress
+        ),
         typedExpressionLanguages: typedExpressionLanguages,
         sharedPerspectiveUrl: joiningLink, //TODO: this will have to be string split once we add proof onto the URL
         members: [],

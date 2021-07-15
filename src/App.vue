@@ -38,19 +38,19 @@
 <script lang="ts">
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
-import { useSubscription } from "@vue/apollo-composable";
+import { gql } from "@apollo/client/core";
 import { defineComponent, watch, computed } from "vue";
-import { AD4M_SIGNAL } from "@/core/graphql_queries";
 import { useStore } from "vuex";
 import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
-import ad4m from "@perspect3vism/ad4m-executor";
-import { AGENT_SERVICE_STATUS, QUERY_EXPRESSION } from "@/core/graphql_queries";
-import { ModalsState, ToastState } from "@/store";
-import parseSignalAsLink from "@/core/utils/parseSignalAsLink";
+import { LinkExpression } from "@perspect3vism/ad4m-executor";
+import { AGENT_STATUS, GET_EXPRESSION } from "@/core/graphql_queries";
+import { CommunityState, ModalsState, ToastState } from "@/store";
 import showMessageNotification from "@/utils/showMessageNotification";
 import { print } from "graphql/language/printer";
+import { AgentStatusType } from "@perspect3vism/ad4m";
+import { apolloClient } from "./app";
 
 declare global {
   interface Window {
@@ -77,9 +77,6 @@ export default defineComponent({
       }
     });
 
-    //Ad4m signal watcher
-    const { result } = useSubscription<{ signal: ad4m.Signal }>(AD4M_SIGNAL);
-
     //Watch for agent unlock to set off running queries
     store.watch(
       (state) => state.agentUnlocked,
@@ -98,65 +95,99 @@ export default defineComponent({
     );
 
     //Watch for incoming signals from holochain - an incoming signal should mean a DM is inbound
-    watch(result, async (data) => {
+    const newLinkHandler = async (
+      link: LinkExpression,
+      perspective: string
+    ) => {
       console.log("GOT INCOMING MESSAGE SIGNAL");
-      //Parse out the signal data to its link form and validate the link structure
-      const linkData = parseSignalAsLink(data!.signal);
-      if (linkData) {
-        const link = linkData.link;
-        const language = linkData.language;
-        if (link.data!.predicate! == "sioc://content_of") {
-          //Start expression web worker to try and get the expression data pointed to in link target
-          const expressionWorker = new Worker("pollingWorker.js");
+      if (link.data!.predicate! == "sioc://content_of") {
+        //Start expression web worker to try and get the expression data pointed to in link target
+        const expressionWorker = new Worker("pollingWorker.js");
 
-          expressionWorker.postMessage({
-            retry: expressionGetRetries,
-            interval: expressionGetDelayMs,
-            query: print(QUERY_EXPRESSION),
-            variables: { url: link.data!.target! },
-            name: "Expression signal get",
-          });
+        expressionWorker.postMessage({
+          retry: expressionGetRetries,
+          interval: expressionGetDelayMs,
+          query: print(GET_EXPRESSION),
+          variables: { url: link.data!.target! },
+          name: "Expression signal get",
+        });
 
-          expressionWorker.onerror = function (e) {
-            throw new Error(e.toString());
-          };
+        expressionWorker.onerror = function (e) {
+          throw new Error(e.toString());
+        };
 
-          expressionWorker.addEventListener("message", (e) => {
-            const expression = e.data.expression;
-            if (expression) {
-              //Expression is not null, which means we got the data and we can terminate the loop
-              expressionWorker.terminate();
-              const message = JSON.parse(expression!.data!);
+        expressionWorker.addEventListener("message", (e) => {
+          const expression = e.data.expression;
+          if (expression) {
+            //Expression is not null, which means we got the data and we can terminate the loop
+            expressionWorker.terminate();
+            const message = JSON.parse(expression!.data!);
 
-              console.log("FOUND EXPRESSION FOR SIGNAL");
-              //Add the expression to the store
-              store.commit("addExpressionAndLinkFromLanguageAddress", {
-                linkLanguage: language,
-                link: link,
-                message: expression,
-              });
+            console.log("FOUND EXPRESSION FOR SIGNAL");
+            //Add the expression to the store
+            store.commit("addExpressionAndLinkFromLanguageAddress", {
+              linkLanguage: perspective,
+              link: link,
+              message: expression,
+            });
 
-              showMessageNotification(
-                router,
-                route,
-                store,
-                language,
-                expression!.author!.did!,
-                message.body
-              );
+            showMessageNotification(
+              router,
+              route,
+              store,
+              perspective,
+              expression!.author!.did!,
+              message.body
+            );
 
-              //Add UI notification on the channel to notify that there is a new message there
-              store.commit("setHasNewMessages", {
-                channelId:
-                  store.getters.getChannelFromLinkLanguage(language)
-                    .perspective,
-                value: true,
-              });
-            }
-          });
-        }
+            //Add UI notification on the channel to notify that there is a new message there
+            store.commit("setHasNewMessages", {
+              channelId:
+                store.getters.getChannelFromLinkLanguage(perspective)
+                  .perspective,
+              value: true,
+            });
+          }
+        });
       }
-    });
+    };
+
+    let communities: CommunityState[] = Object.values(
+      store.getters.getCommunities
+    );
+    for (const community of communities) {
+      for (const channel of Object.values(community.channels)) {
+        apolloClient
+          .subscribe({
+            query: gql` subscription {
+                perspectiveLinkAdded(uuid: "${channel.perspective.uuid}") {
+                  author
+                  timestamp
+                  data { source, predicate, target }
+                  proof { valid, invalid, signature, key }
+                }
+            }   
+        `,
+          })
+          .subscribe({
+            next: (result) => {
+              console.debug(
+                "Got new link with data",
+                result.data,
+                "and channel",
+                channel
+              );
+              newLinkHandler(
+                result.data.perspectiveLinkAdded,
+                channel.perspective.uuid
+              );
+            },
+            error: (e) => {
+              throw Error(e);
+            },
+          });
+      }
+    }
 
     return {
       toast: computed(() => store.state.ui.toast),
@@ -278,8 +309,8 @@ export default defineComponent({
     );
 
     const { onResult, onError } = useQuery<{
-      agent: ad4m.AgentService;
-    }>(AGENT_SERVICE_STATUS);
+      agent: AgentStatusType;
+    }>(AGENT_STATUS);
     onResult((val) => {
       const isInit = val.data.agent.isInitialized!;
       const isUnlocked = val.data.agent.isUnlocked!;

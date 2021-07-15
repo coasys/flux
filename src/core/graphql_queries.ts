@@ -32,9 +32,7 @@ export const AGENT = gql`
 `;
 
 export const AGENT_GENERATE = gql`
-  mutation agentGenerate(
-    $passphrase: String!
-  ) {
+  mutation agentGenerate($passphrase: String!) {
     agentGenerate(passphrase: $passphrase) {
       isInitialized
       isUnlocked
@@ -70,16 +68,22 @@ export const AGENT_UPDATE_PUBLIC_PERSPECTIVE = gql`
     agentUpdatePublicPerspective(perspective: $perspective) {
       did
       directMessageLanguage
-      perspective { 
-          links {
-              author, timestamp, 
-              proof {
-                  signature, key, valid, invalid
-              }
-              data {
-                  source, predicate, target
-              }
+      perspective {
+        links {
+          author
+          timestamp
+          proof {
+            signature
+            key
+            valid
+            invalid
           }
+          data {
+            source
+            predicate
+            target
+          }
+        }
       }
     }
   }
@@ -87,19 +91,27 @@ export const AGENT_UPDATE_PUBLIC_PERSPECTIVE = gql`
 
 export const AGENT_UPDATE_DIRECT_MESSAGE_ADAPTER = gql`
   mutation agentUpdateDirectMessageLanguage($directMessageLanguage: String!) {
-    agentUpdateDirectMessageLanguage(directMessageLanguage: $directMessageLanguage) {
+    agentUpdateDirectMessageLanguage(
+      directMessageLanguage: $directMessageLanguage
+    ) {
       did
       directMessageLanguage
-      perspective { 
-          links {
-              author, timestamp, 
-              proof {
-                  signature, key, valid, invalid
-              }
-              data {
-                  source, predicate, target
-              }
+      perspective {
+        links {
+          author
+          timestamp
+          proof {
+            signature
+            key
+            valid
+            invalid
           }
+          data {
+            source
+            predicate
+            target
+          }
+        }
       }
     }
   }
@@ -111,16 +123,28 @@ export const LANGUAGES = gql`
       name
       address
       settings
-      icon { code }
-      constructorIcon { code }
-      settingsIcon { code }
+      icon {
+        code
+      }
+      constructorIcon {
+        code
+      }
+      settingsIcon {
+        code
+      }
     }
   }
 `;
 
 export const LANGUAGES_WRITE_SETTINGS = gql`
-  mutation languageWriteSettings($languageAddress: String!, $settings: String!) {
-    languageWriteSettings(languageAddress: $languageAddress, settings: $settings)
+  mutation languageWriteSettings(
+    $languageAddress: String!
+    $settings: String!
+  ) {
+    languageWriteSettings(
+      languageAddress: $languageAddress
+      settings: $settings
+    )
   }
 `;
 
@@ -150,14 +174,23 @@ export const PERSPECTIVE_SNAPSHOT = gql`
       links {
         author
         timestamp
-        data { source, predicate, target }
-        proof { valid, invalid, signature, key }
+        data {
+          source
+          predicate
+          target
+        }
+        proof {
+          valid
+          invalid
+          signature
+          key
+        }
       }
     }
   }
 `;
 
-export const ADD_PERSPECTIVE = gql`
+export const PERSPECTIVE_ADD = gql`
   mutation perspectiveAdd($name: String!) {
     perspectiveAdd(name: $name) {
       uuid
@@ -167,7 +200,7 @@ export const ADD_PERSPECTIVE = gql`
   }
 `;
 
-export const UPDATE_PERSPECTIVE = gql`
+export const PERSPECTIVE_UPDATE = gql`
   mutation perspectiveUpdate($uuid: String!, $name: String!) {
     perspectiveUpdate(uuid: $uuid, name: $name) {
       uuid
@@ -179,13 +212,13 @@ export const UPDATE_PERSPECTIVE = gql`
 
 export const PUBLISH_NEIGHBOURHOOD_FROM_PERSPECTIVE = gql`
   mutation neighbourhoodPublishFromPerspective(
-    $linkLanguage: String!,
-    $meta: PerspectiveInput!,
+    $linkLanguage: String!
+    $meta: PerspectiveInput!
     $perspectiveUUID: String!
   ) {
     neighbourhoodPublishFromPerspective(
-      linkLanguage: $linkLanguage,
-      meta: $meta,
+      linkLanguage: $linkLanguage
+      meta: $meta
       perspectiveUUID: $perspectiveUUID
     )
   }
@@ -193,11 +226,15 @@ export const PUBLISH_NEIGHBOURHOOD_FROM_PERSPECTIVE = gql`
 
 export const LANGUAGE_CLONE_HOLOCHAIN_TEMPLATE = gql`
   mutation languageCloneHolochainTemplate(
-    $languagePath: String!,
-    $dnaNick: String!,
+    $languagePath: String!
+    $dnaNick: String!
     $uid: String!
   ) {
-    languageCloneHolochainTemplate(languagePath: $languagePath, dnaNick: $dnaNick, uid: $uid) {
+    languageCloneHolochainTemplate(
+      languagePath: $languagePath
+      dnaNick: $dnaNick
+      uid: $uid
+    ) {
       address
       name
     }
@@ -241,8 +278,17 @@ export const PERSPECTIVE_LINK_QUERY = gql`
     perspectiveQueryLinks(query: $query, uuid: $uuid) {
       author
       timestamp
-      data { source, predicate, target }
-      proof { valid, invalid, signature, key }
+      data {
+        source
+        predicate
+        target
+      }
+      proof {
+        valid
+        invalid
+        signature
+        key
+      }
     }
   }
 `;
@@ -252,8 +298,17 @@ export const ADD_LINK = gql`
     perspectiveAddLink(uuid: $uuid, link: $link) {
       author
       timestamp
-      data { source, predicate, target }
-      proof { valid, invalid, signature, key }
+      data {
+        source
+        predicate
+        target
+      }
+      proof {
+        valid
+        invalid
+        signature
+        key
+      }
     }
   }
 `;
@@ -271,11 +326,11 @@ export const GET_EXPRESSION = gql`
       timestamp
       data
       language {
-          address
+        address
       }
       proof {
-          valid
-          invalid
+        valid
+        invalid
       }
     }
   }
@@ -287,9 +342,15 @@ export const LANGUAGE = gql`
       name
       address
       settings
-      icon { code }
-      constructorIcon { code }
-      settingsIcon { code }
+      icon {
+        code
+      }
+      constructorIcon {
+        code
+      }
+      settingsIcon {
+        code
+      }
     }
   }
 `;

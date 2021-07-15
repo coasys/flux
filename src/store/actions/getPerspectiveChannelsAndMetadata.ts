@@ -3,7 +3,7 @@ import { CommunityState, ChannelState } from "@/store";
 import { print } from "graphql/language/printer";
 import { joinChannelFromSharedLink } from "@/core/methods/joinChannelFromSharedLink";
 import { expressionGetRetries, expressionGetDelayMs } from "@/core/juntoTypes";
-import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY} from "@/core/graphql_queries";
+import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 import { LinkQuery } from "@perspect3vism/ad4m";
 
 export interface Context {
@@ -37,7 +37,7 @@ export default async (
         query: new LinkQuery({
           source: `${community.linkLanguageAddress}://self`,
           predicate: "sioc://has_space",
-        })
+        }),
       },
       name: "Community channel links",
     });
@@ -59,8 +59,7 @@ export default async (
               if (
                 Object.values(community.channels).find(
                   (element: ChannelState) =>
-                    element.sharedPerspectiveUrl ===
-                    channelLinks[i].data!.target
+                    element.neighbourhoodUrl === channelLinks[i].data!.target
                 ) == undefined
               ) {
                 console.log(
@@ -103,7 +102,7 @@ export default async (
         query: new LinkQuery({
           source: `${community.linkLanguageAddress}://self`,
           predicate: "rdf://class",
-        })
+        }),
       },
       name: `Get group expression links ${community.name}`,
     });

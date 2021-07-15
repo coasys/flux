@@ -1,6 +1,14 @@
-import { ad4mClient } from "@/app";
-import { PerspectiveHandle } from "@perspect3vism/ad4m";
+import { apolloClient } from "@/app";
+import type { PerspectiveHandle } from "@perspect3vism/ad4m";
+import unwrapApolloResult from "@/utils/unwrapApolloResult";
+import { PERSPECTIVE_ADD } from "../graphql_queries";
 
-export function addPerspective(name: string): Promise<PerspectiveHandle> {
-  return ad4mClient.perspective.add(name)
+export async function addPerspective(name: string): Promise<PerspectiveHandle> {
+  const { perspectiveAdd } = unwrapApolloResult(
+    await apolloClient.mutate({
+      mutation: PERSPECTIVE_ADD,
+      variables: { name },
+    })
+  );
+  return perspectiveAdd;
 }

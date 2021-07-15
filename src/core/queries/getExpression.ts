@@ -17,7 +17,9 @@ export function getExpression(url: string): Promise<ExpressionRendered> {
   });
 }
 
-export function getExpressionNoCache(url: string): Promise<ExpressionRendered | null> {
+export function getExpressionNoCache(
+  url: string
+): Promise<ExpressionRendered | null> {
   return new Promise((resolve, reject) => {
     apolloClient
       .query<{

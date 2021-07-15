@@ -40,8 +40,8 @@ export default async (
   if (
     (isMinimized && !channel?.notifications.mute) ||
     (store.state.userDid !== authorDid &&
-      (community?.perspective === communityId
-        ? channel?.perspective !== channelId
+      (community?.perspective.uuid === communityId
+        ? channel?.perspective.uuid !== channelId
         : true) &&
       !channel?.notifications.mute)
   ) {
@@ -82,8 +82,8 @@ export default async (
       router.push({
         name: "channel",
         params: {
-          communityId: community!.perspective!,
-          channelId: channel!.perspective!,
+          communityId: community!.perspective!.uuid,
+          channelId: channel!.perspective!.uuid,
         },
       });
     };

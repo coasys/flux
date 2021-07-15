@@ -10,17 +10,14 @@ import { ApolloClients } from "@vue/apollo-composable";
 
 import "@junto-foundation/junto-elements";
 import "@junto-foundation/junto-elements/dist/main.css";
-import { Ad4mClient } from "@perspect3vism/ad4m";
-
-const wsLink = new WebSocketLink({
-  uri: `ws://localhost:4000/graphql`,
-  options: {
-    reconnect: true,
-  },
-});
 
 export const apolloClient = new ApolloClient({
-  link: wsLink,
+  link: new WebSocketLink({
+    uri: `ws://localhost:4000/graphql`,
+    options: {
+      reconnect: true,
+    },
+  }),
   cache: new InMemoryCache({}),
   defaultOptions: {
     watchQuery: {
@@ -31,8 +28,6 @@ export const apolloClient = new ApolloClient({
     },
   },
 });
-
-export const ad4mClient = new Ad4mClient(apolloClient);
 
 createApp({
   setup() {

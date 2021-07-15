@@ -1,9 +1,4 @@
-import {
-  State,
-  CommunityState,
-  ChannelState,
-  Profile,
-} from "@/store";
+import { State, CommunityState, ChannelState, Profile } from "@/store";
 
 export default {
   //Dump the whole state

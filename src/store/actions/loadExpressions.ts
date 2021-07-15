@@ -47,7 +47,7 @@ export default async function (
           predicate: "sioc://content_of",
           fromDate,
           untilDate,
-        } as LinkQuery
+        } as LinkQuery,
       },
       name: `Get channel messages ${channel.name}`,
     });

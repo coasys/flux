@@ -1,8 +1,16 @@
-import { ad4mClient } from "@/app";
-import { PerspectiveHandle } from "@perspect3vism/ad4m";
+import { apolloClient } from "@/app";
+import unwrapApolloResult from "@/utils/unwrapApolloResult";
+import type { PerspectiveHandle } from "@perspect3vism/ad4m";
+import { NEIGHBOURHOOD_JOIN } from "../graphql_queries";
 
 export async function joinNeighbourhood(
   url: string
 ): Promise<PerspectiveHandle> {
-  return ad4mClient.neighbourhood.joinFromUrl(url)
+  const { neighbourhoodJoinFromUrl } = unwrapApolloResult(
+    await apolloClient.mutate({
+      mutation: NEIGHBOURHOOD_JOIN,
+      variables: { url },
+    })
+  );
+  return neighbourhoodJoinFromUrl;
 }

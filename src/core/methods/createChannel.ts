@@ -5,30 +5,53 @@ import {
   MembraneType,
   JuntoExpressionReference,
 } from "@/store";
-import { ad4mClient } from "@/app";
 import { v4 } from "uuid";
 import path from "path";
-import { Perspective, Link, PerspectiveHandle } from "@perspect3vism/ad4m";
+import { PerspectiveType, LinkType } from "@perspect3vism/ad4m";
+import type { PerspectiveHandle } from "@perspect3vism/ad4m";
+import { addPerspective } from "../mutations/addPerspective";
+import { createUniqueHolochainLanguage } from "../mutations/createUniqueHolochainLanguage";
+import { createNeighbourhood } from "../mutations/createNeighbourhood";
 
-export async function createChannel(channelName: string, languagePath: string, sourcePerspective: PerspectiveHandle, 
-  membraneType: MembraneType, typedExpressionLanguages: JuntoExpressionReference[]): Promise<ChannelState> {
+export async function createChannel(
+  channelName: string,
+  languagePath: string,
+  sourcePerspective: PerspectiveHandle,
+  membraneType: MembraneType,
+  typedExpressionLanguages: JuntoExpressionReference[]
+): Promise<ChannelState> {
   console.debug("Create channel called");
-  const socialContextPath = path.join(languagePath, "social-context-channel")
+  const socialContextPath = path.join(languagePath, "social-context-channel");
 
-  const perspective = await ad4mClient.perspective.add(channelName);
+  const perspective = await addPerspective(channelName);
   console.debug("Created new perspective with result", perspective);
-  const socialContextLanguage = await ad4mClient.languages.cloneHolochainTemplate(socialContextPath, "social-context", v4().toString());
-  console.debug("Created new social context language wuth result", socialContextLanguage);
-  const meta = new Perspective();
-  const neighbourhood = await ad4mClient.neighbourhood.publishFromPerspective(perspective.uuid, socialContextLanguage.address, meta);
+  const socialContextLanguage =
+    await createUniqueHolochainLanguage(
+      socialContextPath,
+      "social-context",
+      v4().toString()
+    );
+  console.debug(
+    "Created new social context language wuth result",
+    socialContextLanguage
+  );
+  const meta = new PerspectiveType();
+  const neighbourhood = await createNeighbourhood(
+    perspective.uuid,
+    socialContextLanguage.address,
+    meta
+  );
   console.debug("Create a neighbourhood with result", neighbourhood);
 
-  const channelLink = new Link({
+  const channelLink = new LinkType({
     source: `${sourcePerspective.sharedUrl}://self`,
     target: neighbourhood,
     predicate: "sioc://has_space",
-  })
-  const addLinkToChannel = await ad4mClient.perspective.addLink(perspective.uuid, channelLink);
+  });
+  const addLinkToChannel = await createLink(
+    perspective.uuid,
+    channelLink
+  );
   console.debug("Created new link on channel with result", addLinkToChannel);
 
   //Add link on channel social context declaring type
@@ -53,7 +76,7 @@ export async function createChannel(channelName: string, languagePath: string, s
     linkLanguageAddress: socialContextLanguage.address,
     currentExpressionLinks: {},
     currentExpressionMessages: {},
-    sharedPerspectiveUrl: neighbourhood,
+    neighbourhoodUrl: neighbourhood,
     membraneType: membraneType,
     groupExpressionRef: "",
     typedExpressionLanguages: typedExpressionLanguages,
