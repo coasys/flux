@@ -99,6 +99,7 @@ export interface ModalsState {
   showEditProfile: boolean;
   showSettings: boolean;
   showInviteCode: boolean;
+  showDisclaimer: boolean;
 }
 
 export interface UIState {
@@ -177,6 +178,7 @@ const vuexLocal = new VuexPersistence<State>({
     ui: {
       showSidebar: state.ui.showSidebar,
       theme: state.ui.theme,
+      modals: { showDisclaimer: state.ui.modals.showDisclaimer },
     },
   }),
 });
@@ -192,6 +194,7 @@ export default createStore({
         showEditProfile: false,
         showSettings: false,
         showInviteCode: false,
+        showDisclaimer: true,
       },
       showSidebar: true,
       showGlobalLoading: false,
