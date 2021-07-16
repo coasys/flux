@@ -1,4 +1,4 @@
-import {render, screen} from '@testing-library/vue'
+import { render } from '@testing-library/vue'
 import AvatarGroup from '@/components/avatar-group/AvatarGroup.vue';
 import getProfileFixture from '../fixtures/getProfile.json'
 import { fireEvent } from '@testing-library/dom';
