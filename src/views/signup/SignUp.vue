@@ -1,7 +1,12 @@
 <template>
-  <div class="signup-view">
+  <div class="signup-view" :class="{ 'signup-view--show-signup': showSignup }">
     <div class="signup-view__flow">
       <j-flex direction="column" gap="400" v-if="step === 1">
+        <j-box class="signup-view__flow-back" pb="500">
+          <j-button @click="showSignup = false" variant="link"
+            ><j-icon name="arrow-left-short" />Back</j-button
+          >
+        </j-box>
         <j-box pb="500">
           <j-flex gap="400" a="center">
             <img src="@/assets/images/junto_web_logo--rainbow.png" width="25" />
@@ -98,13 +103,20 @@
     <div class="signup-view__intro">
       <div class="signup-view__intro-content">
         <Carousel />
+        <j-box
+          class="signup-view__intro-button"
+          @click="showSignup = true"
+          pt="900"
+        >
+          <j-button variant="primary" size="xl"> Sign up </j-button>
+        </j-box>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onMounted, onUnmounted } from "vue";
 import Carousel from "./SignUpCarousel.vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import {
@@ -122,6 +134,7 @@ export default defineComponent({
     Carousel,
   },
   setup() {
+    const showSignup = ref(false);
     const step = ref(1);
     const store = useStore();
     const profilePicture = ref();
@@ -182,6 +195,7 @@ export default defineComponent({
 
     return {
       step,
+      showSignup,
       isLoggingIn,
       profilePicture,
       hasUser: store.state.agentInit,
@@ -247,20 +261,60 @@ export default defineComponent({
 }
 
 .signup-view__flow {
-  width: 40%;
+  display: none;
+  width: 100%;
   height: 100%;
-  display: grid;
   align-content: center;
   padding: var(--j-space-1000);
 }
 
+.signup-view--show-signup .signup-view__flow {
+  display: grid;
+}
+
+.signup-view--show-signup .signup-view__intro {
+  display: none;
+}
+
 .signup-view__intro {
-  width: 60%;
+  width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   background: var(--j-color-primary-50);
   overflow: hidden;
+  text-align: center;
+}
+
+@media (min-width: 1100px) {
+  .signup-view__flow {
+    display: grid;
+  }
+  .signup-view--show-signup .signup-view__flow {
+    display: grid;
+  }
+  .signup-view__intro {
+    display: flex;
+  }
+  .signup-view--show-signup .signup-view__intro {
+    display: flex;
+  }
+  .signup-view__intro-button {
+    display: none;
+  }
+  .signup-view__flow-back {
+    display: none;
+  }
+}
+
+@media (min-width: 1100px) {
+  .signup-view__flow {
+    width: 40%;
+  }
+
+  .signup-view__intro {
+    width: 60%;
+  }
 }
 
 .signup-view__intro-content {

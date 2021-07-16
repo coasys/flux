@@ -54,6 +54,8 @@ export default defineComponent({
   mounted() {
     setInterval(() => {
       this.currentIndex = this.currentIndex >= 3 ? 0 : this.currentIndex + 1;
+      // @ts-ignore
+      // TODO: Make j-carousel take a attribute instead of prop
       this.$refs.carousel.value = this.currentIndex;
     }, 3000);
   },
@@ -66,7 +68,8 @@ export default defineComponent({
 }
 
 .slider__slide-content {
-  max-width: 700px;
+  max-width: 750px;
   margin: 0 auto;
+  padding: var(--j-space-900);
 }
 </style>
