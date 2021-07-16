@@ -5,24 +5,24 @@
         name: 'home',
       }"
       custom
-      v-slot="{ navigate }"
+      v-slot="{ navigate, isActive }"
     >
       <j-tooltip title="Home">
-        <j-button
+        <j-avatar
+          :selected="isActive"
           @click="() => navigate()"
           square
+          :src="require('@/assets/images/junto_app_icon.png')"
           circle
           size="xl"
           variant="primary"
         >
-          <j-icon name="house"></j-icon>
-        </j-button>
+        </j-avatar>
       </j-tooltip>
     </router-link>
     <j-tooltip title="Create a community">
       <j-button
         @click="() => $store.commit('setShowCreateCommunity', true)"
-        variant="subtle"
         square
         circle
         size="xl"
@@ -52,6 +52,10 @@ export default defineComponent({
 }
 
 .left-nav__profile-icon {
+  cursor: pointer;
+}
+
+j-avatar {
   cursor: pointer;
 }
 </style>

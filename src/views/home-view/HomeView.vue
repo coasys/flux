@@ -2,24 +2,10 @@
   <sidebar-layout>
     <template v-slot:sidebar>
       <div class="home-sidebar">
+        <j-box px="500" pb="400">
+          <j-text nomargin size="700" weight="500" color="ui-900">Home</j-text>
+        </j-box>
         <j-box pb="800">
-          <router-link
-            :to="{
-              name: 'my-profile',
-            }"
-            custom
-            v-slot="{ navigate, isExactActive }"
-          >
-            <j-menu-item :selected="isExactActive" size="lg" @click="navigate">
-              <j-avatar
-                size="xs"
-                :hash="$store.state.userDid"
-                :src="userProfile.profilePicture"
-                slot="start"
-              />
-              {{ userProfile.name || userProfile.username }}
-            </j-menu-item>
-          </router-link>
           <router-link
             :to="{
               name: 'my-communities',
@@ -47,9 +33,18 @@
         </j-box>
         <j-box>
           <j-menu-group-item title="About">
-            <j-menu-item>Junto Foundation</j-menu-item>
-            <j-menu-item>Privacy</j-menu-item>
-            <j-menu-item>Roadmap</j-menu-item>
+            <j-menu-item>
+              <j-icon size="sm" name="file-earmark-text" slot="start" />
+              Junto Foundation
+            </j-menu-item>
+            <j-menu-item>
+              <j-icon size="sm" name="lock" slot="start" />
+              Privacy
+            </j-menu-item>
+            <j-menu-item>
+              <j-icon size="sm" name="map" slot="start" />
+              Roadmap
+            </j-menu-item>
           </j-menu-group-item>
         </j-box>
       </div>

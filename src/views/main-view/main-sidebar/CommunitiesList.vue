@@ -9,7 +9,7 @@
         class="left-nav__community-item"
         :selected="communityIsActive(community.perspective)"
         size="xl"
-        :src="require('@/assets/images/junto_app_icon.png')"
+        :src="require('@/assets/images/junto_web_rainbow.png')"
         initials="false"
         @click="() => handleCommunityClick(community.perspective)"
       ></j-avatar>
