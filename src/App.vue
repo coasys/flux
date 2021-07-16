@@ -184,8 +184,8 @@ export default defineComponent({
     },
     "ui.theme.name": {
       handler: function (themeName) {
-        if (!themeName) {
-          document.documentElement.setAttribute("theme", "");
+        if (themeName === "light") {
+          document.documentElement.removeAttribute("theme");
         } else {
           import(`./themes/${themeName}.css`);
           document.documentElement.setAttribute("theme", themeName);

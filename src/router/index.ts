@@ -9,6 +9,10 @@ import SignUp from "@/views/signup/SignUp.vue";
 import LogIn from "@/views/login/LogIn.vue";
 import CommunityView from "@/views/community-view/CommunityView.vue";
 import ChannelView from "@/views/channel-view/ChannelView.vue";
+import HomeView from "@/views/home-view/HomeView.vue";
+import Settings from "@/containers/Settings.vue";
+import MyCommunities from "@/containers/MyCommunities.vue";
+import MyProfile from "@/containers/MyProfile.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -23,9 +27,32 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: "/",
-    name: "home",
+    name: "main",
     component: MainView,
     children: [
+      {
+        path: "home",
+        name: "home",
+        component: HomeView,
+        redirect: { name: "my-communities" },
+        children: [
+          {
+            path: "settings",
+            name: "settings",
+            component: Settings,
+          },
+          {
+            path: "communities",
+            name: "my-communities",
+            component: MyCommunities,
+          },
+          {
+            path: "communities",
+            name: "my-profile",
+            component: MyProfile,
+          },
+        ],
+      },
       {
         path: "communities/:communityId",
         name: "community",

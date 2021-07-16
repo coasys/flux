@@ -12,13 +12,9 @@
       </j-text>
     </div>
 
-    <j-tabs
-      size="lg"
-      :value="tabView"
-      @change="(e) => (tabView = e.target.value)"
-    >
-      <j-tab-item>Create</j-tab-item>
-      <j-tab-item>Join</j-tab-item>
+    <j-tabs :value="tabView" @change="(e) => (tabView = e.target.value)">
+      <j-tab-item size="lg" variant="button">Create</j-tab-item>
+      <j-tab-item size="lg" variant="button">Join</j-tab-item>
     </j-tabs>
     <j-flex direction="column" gap="500" v-if="tabView === 'Create'">
       <avatar-upload icon="people-fill" />

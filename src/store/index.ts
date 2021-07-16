@@ -202,9 +202,9 @@ export default createStore({
       theme: {
         fontSize: "md",
         fontFamily: "default",
-        name: "",
+        name: "light",
         hue: 270,
-        saturation: 50,
+        saturation: 60,
       },
       toast: {
         variant: "",

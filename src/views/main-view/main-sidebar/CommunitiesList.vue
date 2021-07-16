@@ -9,45 +9,18 @@
         class="left-nav__community-item"
         :selected="communityIsActive(community.perspective)"
         size="xl"
-        :src="require('@/assets/images/junto_app_icon.png')"
+        :src="require('@/assets/images/junto_web_rainbow.png')"
         initials="false"
         @click="() => handleCommunityClick(community.perspective)"
       ></j-avatar>
     </j-tooltip>
-
-    <j-tooltip title="Add community">
-      <j-button
-        @click="showModal = true"
-        variant="primary"
-        square
-        circle
-        size="xl"
-      >
-        <j-icon size="lg" name="plus"></j-icon>
-      </j-button>
-    </j-tooltip>
-
-    <j-modal :open="showModal" @toggle="(e) => (showModal = e.target.open)">
-      <create-community
-        v-if="showModal"
-        @submit="showModal = false"
-        @cancel="showModal = false"
-      />
-    </j-modal>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import CreateCommunity from "@/containers/CreateCommunity.vue";
 
 export default defineComponent({
-  components: { CreateCommunity },
-  data() {
-    return {
-      showModal: false,
-    };
-  },
   methods: {
     handleCommunityClick(communityId: string) {
       if (this.communityIsActive(communityId)) {
@@ -74,7 +47,8 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   display: flex;
-  padding-top: var(--j-space-200);
+  border-top: 1px solid var(--app-main-sidebar-border-color);
+  padding-top: var(--j-space-500);
   gap: var(--j-space-400);
   flex-direction: column;
   align-items: center;

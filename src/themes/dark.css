@@ -209,17 +209,26 @@
 
   /*  App specific styles */
   --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 10%, 14%);
-  --app-main-sidebar-border-color: hsl(var(--j-color-ui-hue), 10%, 10%);
+  --app-main-sidebar-border-color: hsl(var(--j-color-ui-hue), 10%, 21%);
   --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 10%, 15%);
-  --app-drawer-border-color: hsl(var(--j-color-ui-hue), 10%, 12%);
+  --app-drawer-border-color: hsl(var(--j-color-ui-hue), 10%, 21%);
   --app-channel-bg-color: hsl(var(--j-color-ui-hue), 10%, 13%);
-  --app-channel-border-color: hsl(var(--j-color-ui-hue), 10%, 10%);
+  --app-channel-border-color: hsl(var(--j-color-ui-hue), 10%, 21%);
   --app-channel-header-bg-color: hsl(var(--j-color-ui-hue), 10%, 13%);
   --app-channel-footer-bg-color: hsl(var(--j-color-ui-hue), 10%, 13%);
 }
 
 :root[theme="dark"] j-menu-item::part(base) {
   font-weight: 500;
+  color: var(--j-color-ui-400);
+}
+
+:root[theme="dark"] j-menu-item::part(base) {
+  font-weight: 500;
+  margin-top: var(--j-space-100);
+  margin-left: var(--j-space-300);
+  margin-right: var(--j-space-300);
+  border-radius: 6px;
   color: var(--j-color-ui-400);
 }
 
@@ -233,29 +242,13 @@
   color: hsl(var(--j-color-ui-hue), var(--j-color-saturation), 75%);
 }
 
-:root[theme="dark"] j-tabs {
-  --j-tabs-indicator-bg: var(--j-color-primary-600);
-}
-
 :root[theme="dark"] j-modal::part(modal) {
   box-shadow: 0px 0px 40px 20px
     hsla(var(--j-color-primary-hue), var(--j-color-saturation), 20%, 0.05);
 }
 
-:root[theme="dark"] j-tab-item::part(base) {
-  color: var(--j-color-ui-600);
-}
-
-:root[theme="dark"] j-tab-item:hover::part(base) {
-  color: var(--j-color-black);
-}
-
 :root[theme="dark"] j-input::part(input-wrapper) {
   background-color: hsl(var(--j-color-ui-hue), 18%, 23%);
-}
-
-:root[theme="dark"] j-tab-item[checked]::part(base) {
-  color: var(--j-color-white);
 }
 
 :root[theme="dark"] j-message-item:hover::part(base) {

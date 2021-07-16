@@ -5,6 +5,18 @@
     </template>
     <router-view></router-view>
   </app-layout>
+
+  <j-modal
+    :open="modals.showCreateCommunity"
+    @toggle="(e) => setShowCreateCommunity(e.target.open)"
+  >
+    <create-community
+      v-if="modals.showCreateCommunity"
+      @submit="() => setShowCreateCommunity(false)"
+      @cancel="() => setShowCreateCommunity(false)"
+    />
+  </j-modal>
+
   <j-modal
     :open="modals.showEditProfile"
     @toggle="(e) => setShowEditProfile(e.target.open)"
@@ -16,7 +28,7 @@
   </j-modal>
 
   <j-modal
-    class="settings-modal"
+    size="lg"
     :open="modals.showSettings"
     @toggle="(e) => setShowSettings(e.target.open)"
   >
@@ -52,6 +64,7 @@ import AppLayout from "@/layout/AppLayout.vue";
 import MainSidebar from "./main-sidebar/MainSidebar.vue";
 import { defineComponent } from "vue";
 
+import CreateCommunity from "@/containers/CreateCommunity.vue";
 import EditProfile from "@/containers/EditProfile.vue";
 import Settings from "@/containers/Settings.vue";
 import { mapMutations } from "vuex";
@@ -64,6 +77,7 @@ export default defineComponent({
     AppLayout,
     EditProfile,
     Settings,
+    CreateCommunity,
   },
   data() {
     return {
@@ -79,6 +93,7 @@ export default defineComponent({
     ...mapMutations([
       "setShowEditProfile",
       "setShowSettings",
+      "setShowCreateCommunity",
       "setShowDisclaimer",
     ]),
   },

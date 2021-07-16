@@ -462,7 +462,7 @@ export default defineComponent({
   border-top: 1px solid var(--app-channel-border-color);
   background: var(--app-channel-footer-bg-color);
   position: sticky;
-  padding: var(--j-space-400);
+  padding: var(--j-space-500);
   bottom: 0;
 }
 

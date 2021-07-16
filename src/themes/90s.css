@@ -105,15 +105,13 @@
   content: none;
 }
 
+[theme="90s"] j-tab-item::part(base):hover {
+  background: slategray;
+}
+
 [theme="90s"] j-tab-item[checked]::part(base) {
   color: white;
   background: blue;
-  height: 35px;
-}
-
-[theme="90s"] j-tab-item::part(base):hover {
-  background: slategray;
-  height: 35px;
 }
 
 [theme="90s"] j-tab-item::part(base) {
@@ -123,7 +121,6 @@
 [theme="90s"] j-menu-item[selected]::part(base) {
   color: white;
   background: blue;
-  height: 35px;
 }
 
 [theme="90s"] j-menu-item:hover:not([selected])::part(base) {
