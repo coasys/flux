@@ -39,7 +39,7 @@
             <j-icon size="sm" slot="start" name="gear"></j-icon>
             Settings
           </j-menu-item>
-          <router-link :to="{ name: 'signup' }" v-slot="{ navigate }">
+          <router-link :to="{ name: 'login' }" v-slot="{ navigate }">
             <j-menu-item @click="navigate">
               <j-icon size="sm" slot="start" name="door-closed"></j-icon>
               Log out
