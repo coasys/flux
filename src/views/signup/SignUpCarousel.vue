@@ -1,11 +1,11 @@
 <template>
-  <j-carousel class="slider">
+  <j-carousel ref="carousel" class="slider">
     <div class="slider__slide">
       <div class="slider__slide-content">
         <j-box pt="500" pb="800">
           <img width="500" src="@/assets/images/app-secure.png" />
         </j-box>
-        <j-text variant="heading-lg">Communicate Privately and Freely</j-text>
+        <j-text variant="heading">Communicate Privately and Freely</j-text>
         <j-text variant="ingress">
           Without central servers, there's no way for third-parties to eavesdrop
           on your conversations or sell your data to advertisers
@@ -17,7 +17,7 @@
         <j-box pt="500" pb="800">
           <img width="500" src="@/assets/images/app-secure.png" />
         </j-box>
-        <j-text variant="heading-lg">
+        <j-text variant="heading">
           Create Groups, Communities and Networks
         </j-text>
         <j-text variant="ingress">
@@ -31,7 +31,7 @@
         <j-box pt="500" pb="800">
           <img width="500" src="@/assets/images/app-secure.png" />
         </j-box>
-        <j-text variant="heading-lg">Take Back the Internet</j-text>
+        <j-text variant="heading">Take Back the Internet</j-text>
         <j-text variant="ingress">
           With Holochain's agent-centric application framework, you own your
           data, manage your identity, and host the apps that you use with those
@@ -41,6 +41,24 @@
     </div>
   </j-carousel>
 </template>
+
+<script lang="ts">
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  data() {
+    return {
+      currentIndex: 0,
+    };
+  },
+  mounted() {
+    setInterval(() => {
+      this.currentIndex = this.currentIndex >= 3 ? 0 : this.currentIndex + 1;
+      this.$refs.carousel.value = this.currentIndex;
+    }, 3000);
+  },
+});
+</script>
 
 <style scoped>
 .slider__slide {

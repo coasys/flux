@@ -1,18 +1,16 @@
 <template>
   <div class="signup-view">
-    <div class="signup-view__intro" v-if="showIntro">
-      <j-flex gap="800" direction="column">
-        <Carousel />
-        <j-button @click="showIntro = false" variant="primary" size="xl">
-          Create an agent
-        </j-button>
-      </j-flex>
-    </div>
-    <div class="signup-view__flow" v-else>
+    <div class="signup-view__flow">
       <j-flex direction="column" gap="400" v-if="step === 1">
-        <j-text style="text-align: center" variant="heading-lg"
-          >Create an agent</j-text
-        >
+        <j-box pb="500">
+          <j-flex gap="400" a="center">
+            <img src="@/assets/images/junto_web_logo--rainbow.png" width="25" />
+            <j-text size="800" color="ui-800" uppercase nomargin>
+              Junto
+            </j-text>
+          </j-flex>
+        </j-box>
+        <j-text variant="heading"> Create a user </j-text>
         <j-input
           label="Username"
           size="xl"
@@ -97,6 +95,11 @@
         </j-flex>
       </j-flex>
     </div>
+    <div class="signup-view__intro">
+      <div class="signup-view__intro-content">
+        <Carousel />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -119,7 +122,6 @@ export default defineComponent({
     Carousel,
   },
   setup() {
-    const showIntro = ref(true);
     const step = ref(1);
     const store = useStore();
     const profilePicture = ref();
@@ -180,7 +182,6 @@ export default defineComponent({
 
     return {
       step,
-      showIntro,
       isLoggingIn,
       profilePicture,
       hasUser: store.state.agentInit,
@@ -243,20 +244,27 @@ export default defineComponent({
   margin: 0 auto;
   height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.signup-view__intro {
-  width: 100%;
-  max-width: 100%;
-  text-align: center;
 }
 
 .signup-view__flow {
+  width: 40%;
+  height: 100%;
+  display: grid;
+  align-content: center;
+  padding: var(--j-space-1000);
+}
+
+.signup-view__intro {
+  width: 60%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  background: var(--j-color-primary-50);
+  overflow: hidden;
+}
+
+.signup-view__intro-content {
   width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
 }
 
 .signup-view__inputs {
