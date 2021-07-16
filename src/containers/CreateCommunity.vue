@@ -76,6 +76,7 @@
 <script lang="ts">
 import { isValid } from "@/utils/validation";
 import { defineComponent } from "vue";
+import { ChannelState, CommunityState } from "@/store";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 
 export default defineComponent({
@@ -123,10 +124,22 @@ export default defineComponent({
           perspectiveName: this.newCommunityName,
           description: this.newCommunityDesc,
         })
-        .then(() => {
+        .then((community: CommunityState) => {
           this.$emit("submit");
           this.newCommunityName = "";
           this.newCommunityDesc = "";
+
+          const firstChannel = Object.values(
+            community.channels
+          )[0] as ChannelState;
+
+          this.$router.push({
+            name: "channel",
+            params: {
+              communityId: community.perspective,
+              channelId: firstChannel.perspective,
+            },
+          });
         })
         .finally(() => {
           this.isCreatingCommunity = false;

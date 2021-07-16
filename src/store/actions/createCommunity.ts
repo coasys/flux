@@ -18,6 +18,7 @@ import {
   Profile,
   JuntoExpressionReference,
   ExpressionTypes,
+  CommunityState,
 } from "@/store";
 
 export interface Context {
@@ -33,7 +34,7 @@ export interface Payload {
 export default async (
   { commit, getters }: Context,
   { perspectiveName, description }: Payload
-): Promise<void> => {
+): Promise<CommunityState> => {
   try {
     const createSourcePerspective = await addPerspective(perspectiveName);
     console.log("Created perspective", createSourcePerspective);
@@ -160,10 +161,10 @@ export default async (
       createSourcePerspective.uuid!
     );
 
-    //Add the perspective to community store
-    commit("addCommunity", {
+    const newCommunity = {
       name: perspectiveName,
       description: description,
+      currentChannelId: null,
       linkLanguageAddress: publish.linkLanguages![0]!.address!,
       channels: { [channel.perspective]: channel },
       perspective: createSourcePerspective.uuid!,
@@ -172,7 +173,10 @@ export default async (
       groupExpressionRef: createExp,
       sharedPerspectiveUrl: communityPerspective.sharedURL!,
       members: [],
-    });
+    };
+
+    //Add the perspective to community store
+    commit("addCommunity", newCommunity);
 
     //Get and cache the expression UI for each expression language
     for (const [, lang] of expressionLangs.entries()) {
@@ -187,6 +191,8 @@ export default async (
       commit("addExpressionUI", uiData);
       await sleep(40);
     }
+
+    return newCommunity;
   } catch (e) {
     commit("showDangerToast", {
       message: e.message,

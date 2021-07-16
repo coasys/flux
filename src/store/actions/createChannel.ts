@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Commit } from "vuex";
 import { createChannel } from "@/core/methods/createChannel";
 
-import { MembraneType } from "@/store";
+import { ChannelState, MembraneType } from "@/store";
 
 export interface Context {
   commit: Commit;
@@ -17,7 +17,7 @@ export interface Payload {
 export default async (
   { commit, getters }: Context,
   { communityId, name }: Payload
-): Promise<void> => {
+): Promise<ChannelState> => {
   try {
     const community = getters.getCommunity(communityId);
     const uid = uuidv4().toString();
@@ -36,6 +36,8 @@ export default async (
       communityId: community.perspective,
       channel,
     });
+
+    return channel;
   } catch (e) {
     commit("showDangerToast", {
       message: e.message,
