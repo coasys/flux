@@ -1,7 +1,7 @@
 <template>
   <j-box pb="1000">
     <j-flex wrap gap="500" a="center" j="between">
-      <j-text nomargin variant="heading-lg">
+      <j-text nomargin variant="heading">
         My communities ({{ Object.keys(communities).length }})
       </j-text>
       <j-button
@@ -28,7 +28,12 @@
         size="xl"
       ></j-avatar>
       <div class="community-item__content">
-        <j-text size="600" color="ui-800" weight="600">
+        <j-text
+          class="community-item__name"
+          size="600"
+          color="ui-800"
+          weight="600"
+        >
           {{ community.name }}
         </j-text>
         <j-text variant="body">{{ community.description }}</j-text>
@@ -88,7 +93,6 @@ export default defineComponent({
 .community-items {
   display: grid;
   border-radius: var(--j-border-radius);
-  border: 1px solid var(--j-border-color);
   grid-template-columns: 1fr;
 }
 
@@ -111,7 +115,11 @@ export default defineComponent({
   flex: 1;
 }
 
+.community-item:first-of-type {
+  border-top: 1px solid var(--j-border-color);
+}
+
 .community-item:hover {
-  background: var(--j-color-ui-50);
+  background: rgba(128, 128, 128, 0.05);
 }
 </style>

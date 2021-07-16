@@ -1,10 +1,10 @@
 <template>
   <j-flex direction="column" gap="700">
     <div v-if="tabView === 'Create'">
-      <j-text variant="heading-lg">Create a community </j-text>
+      <j-text variant="heading">Create a community </j-text>
     </div>
     <div v-if="tabView === 'Join'">
-      <j-text variant="heading-lg">Join a community </j-text>
+      <j-text variant="heading">Join a community </j-text>
       <j-text color="danger-500">
         This is an early version of Junto with a remote code execution
         vulnerability. DO NOT join any community from somebody you do not know
