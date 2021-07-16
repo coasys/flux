@@ -279,6 +279,10 @@ export default {
     state.ui.modals.showEditProfile = payload;
   },
 
+  setShowDisclaimer(state: State, payload: boolean): void {
+    state.ui.modals.showDisclaimer = payload;
+  },
+
   setShowSettings(state: State, payload: boolean): void {
     state.ui.modals.showSettings = payload;
   },
