@@ -23,7 +23,7 @@
         :value="theme.name"
         @change="(e) => setTheme({ name: e.target.value })"
       >
-        <j-tab-item variant="button" value="">Light</j-tab-item>
+        <j-tab-item variant="button" value="light">Light</j-tab-item>
         <j-tab-item variant="button" value="dark">Dark</j-tab-item>
         <j-tab-item variant="button" value="black">Black</j-tab-item>
         <j-tab-item variant="button" value="rainbow">Rainbow</j-tab-item>
