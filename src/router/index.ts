@@ -34,7 +34,7 @@ const routes: Array<RouteRecordRaw> = [
         path: "home",
         name: "home",
         component: HomeView,
-        redirect: { name: "my-profile" },
+        redirect: { name: "my-communities" },
         children: [
           {
             path: "settings",
