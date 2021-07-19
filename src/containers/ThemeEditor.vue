@@ -7,7 +7,7 @@
         </j-box>
         <div class="colors">
           <button
-            v-for="n in [0, 50, 100, 150, 200, 250, 270, 300]"
+            v-for="n in [0, 20, 50, 100, 150, 200, 220, 250, 270, 300, 340]"
             :key="n"
             class="color-button"
             :class="{ 'color-button--active': theme.hue === n }"
@@ -113,12 +113,14 @@ export default defineComponent({
   border: 2px solid transparent;
   outline: 0;
   border-radius: var(--j-border-radius);
-  margin-right: var(--j-space-200);
 }
 .color-button--active {
   border-color: var(--j-color-primary-600);
 }
 .colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--j-space-200);
   max-width: 400px;
 }
 </style>
