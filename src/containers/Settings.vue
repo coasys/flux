@@ -31,9 +31,10 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import ThemeEditor from "./ThemeEditor.vue";
+import Privacy from "./Privacy.vue";
 
 export default defineComponent({
-  components: { ThemeEditor },
+  components: { ThemeEditor, Privacy },
   data() {
     return {
       currentView: "theme-editor",

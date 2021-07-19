@@ -70,15 +70,6 @@
         <j-tab-item variant="button" value="lg">Large</j-tab-item>
       </j-tabs>
     </j-box>
-    <j-box pb="800">
-      <j-box pb="300">
-        <j-text size="500" weight="400" color="ui-700">Clear State</j-text>
-      </j-box>
-      <j-button size="md" variant="primary" @click="cleanState">
-        <j-icon size="sm" name="trash"></j-icon>
-        Clear state
-      </j-button>
-    </j-box>
   </div>
 </template>
 
