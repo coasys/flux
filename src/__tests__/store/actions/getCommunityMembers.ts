@@ -7,26 +7,26 @@ import { createStore, Store } from "vuex";
 import community from "../../fixtures/community.json";
 import * as getLinks from "../../../core/queries/getLinks";
 import { Expression } from "@perspect3vism/ad4m-executor";
-import getCommunityMembersLinkFixture from '../../fixtures/getCommunityMembersLink.json';
+import getCommunityMembersLinkFixture from "../../fixtures/getCommunityMembersLink.json";
 import getProfileFixture from "../../fixtures/getProfile.json";
 import * as getExpressionNoCache from "@/core/queries/getExpression";
 
-describe('Get Community Members', () => {
+describe("Get Community Members", () => {
   let store: Store<State>;
-  
+
   beforeEach(() => {
     // @ts-ignore
     jest
-    .spyOn(getLinks, "getLinks")
-    // @ts-ignore
-    .mockResolvedValue(getCommunityMembersLinkFixture);
+      .spyOn(getLinks, "getLinks")
+      // @ts-ignore
+      .mockResolvedValue(getCommunityMembersLinkFixture);
 
     // @ts-ignore
     jest
-    .spyOn(getExpressionNoCache, "getExpressionNoCache")
-    .mockImplementation(async (url) => {
-      return getProfileFixture as unknown as Expression;
-    });
+      .spyOn(getExpressionNoCache, "getExpressionNoCache")
+      .mockImplementation(async (url) => {
+        return getProfileFixture as unknown as Expression;
+      });
 
     store = createStore({
       state: {
@@ -60,7 +60,7 @@ describe('Get Community Members', () => {
         },
         // @ts-ignore
         communities: {
-          [community.perspective]: community
+          [community.perspective]: community,
         },
         localLanguagesPath: "",
         databasePerspective: "",
@@ -79,27 +79,30 @@ describe('Get Community Members', () => {
     });
   });
 
-  test('Check if the getCommunityMembers work', async () => {
+  test("Check if the getCommunityMembers work", async () => {
     const communityId = community.perspective;
     expect(store.state.communities[communityId].members).toStrictEqual([]);
 
-    await store.dispatch('getCommunityMembers', {
-      communityId
+    await store.dispatch("getCommunityMembers", {
+      communityId,
     });
 
     expect(store.state.communities[communityId].members.length).toBe(1);
   });
 
-  test('Check if the getCommunityMembers with wrong community id or community that don\'t exists', async () => {
+  test("Check if the getCommunityMembers with wrong community id or community that don't exists", async () => {
     const communityId = community.perspective;
-    
+
     try {
-      await store.dispatch('getCommunityMembers', {
-        communityId: `${communityId}1`
+      await store.dispatch("getCommunityMembers", {
+        communityId: `${communityId}1`,
       });
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
-      expect(error).toHaveProperty("message", "Error: Expected to find profile expression language for this community");
+      expect(error).toHaveProperty(
+        "message",
+        "Error: Expected to find profile expression language for this community"
+      );
     }
   });
 });

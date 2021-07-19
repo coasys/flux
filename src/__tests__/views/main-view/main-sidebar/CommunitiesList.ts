@@ -1,12 +1,12 @@
-import 'regenerator-runtime/runtime'
-import { fireEvent, render } from '@testing-library/vue';
-import CommunitiesList from '@/views/main-view/main-sidebar/CommunitiesList.vue';
-import actions from '@/store/actions';
-import getters from '@/store/getters';
-import mutations from '@/store/mutations';
+import "regenerator-runtime/runtime";
+import { fireEvent, render } from "@testing-library/vue";
+import CommunitiesList from "@/views/main-view/main-sidebar/CommunitiesList.vue";
+import actions from "@/store/actions";
+import getters from "@/store/getters";
+import mutations from "@/store/mutations";
 import community from "../../../fixtures/community.json";
-import { State } from 'vue-demi';
-import { Store, createStore } from 'vuex';
+import { State } from "vue-demi";
+import { Store, createStore } from "vuex";
 
 const tempStore = {
   state: {
@@ -53,121 +53,148 @@ const tempStore = {
   mutations: mutations,
   actions: actions,
   getters: getters,
-}
+};
 
-describe('Communities List', () => {
-  let store: Store<State>;  
+describe("Communities List", () => {
+  let store: Store<State>;
   let mockRouter: any;
   let mockRoute: any;
-  
+
   beforeEach(() => {
     // @ts-ignore
     store = createStore(tempStore);
 
     mockRoute = {
-      params: {}
-    }
+      params: {},
+    };
 
     mockRouter = {
       push: jest.fn(),
-    }
+    };
   });
 
-  test('Check there is no community avatar', () => {
-    const { container, findByTitle } = render(CommunitiesList, { 
+  test("Check there is no community avatar", () => {
+    const { container, findByTitle } = render(CommunitiesList, {
       global: {
         plugins: [store],
         mocks: {
           $router: mockRouter,
-          $route: mockRoute
-        }
-      }
-     });
+          $route: mockRoute,
+        },
+      },
+    });
 
-     const communities = container.querySelectorAll('.left-nav__community-item');
+    const communities = container.querySelectorAll(".left-nav__community-item");
 
-     expect(communities.length).toBe(0);
+    expect(communities.length).toBe(0);
 
-     const addBtn = findByTitle('Add community');
+    const addBtn = findByTitle("Add community");
 
-     expect(addBtn).not.toBeNull();
+    expect(addBtn).not.toBeNull();
   });
 
-  test('Check there is only one community avatar', async () => {
+  test("Check there is only one community avatar", async () => {
     // @ts-ignore
-    store = createStore({...tempStore, state: {...tempStore.state, communities: {[community.perspective]: community}}});
+    store = createStore({
+      ...tempStore,
+      state: {
+        ...tempStore.state,
+        // @ts-ignore
+        communities: { [community.perspective]: community },
+      },
+    });
 
-    const { container, findByTitle } = render(CommunitiesList, { 
+    const { container, findByTitle } = render(CommunitiesList, {
       global: {
         plugins: [store],
         mocks: {
           $router: mockRouter,
-          $route: mockRoute
-        }
-      }
-     });
+          $route: mockRoute,
+        },
+      },
+    });
 
-     const communities = container.querySelectorAll('.left-nav__community-item');
+    const communities = container.querySelectorAll(".left-nav__community-item");
 
-     expect(communities.length).toBe(1);
+    expect(communities.length).toBe(1);
 
-     const addBtn = findByTitle('Add community');
+    const addBtn = findByTitle("Add community");
 
-     expect(addBtn).not.toBeNull();
+    expect(addBtn).not.toBeNull();
   });
 
-  test('Check there if onclick community chnages the route changes', async () => {
+  test("Check there if onclick community chnages the route changes", async () => {
     // @ts-ignore
-    store = createStore({...tempStore, state: {...tempStore.state, communities: {[community.perspective]: community}}});
+    store = createStore({
+      ...tempStore,
+      state: {
+        ...tempStore.state,
+        // @ts-ignore
+        communities: { [community.perspective]: community },
+      },
+    });
 
-    const { container } = render(CommunitiesList, { 
+    const { container } = render(CommunitiesList, {
       global: {
         plugins: [store],
         mocks: {
           $router: mockRouter,
-          $route: mockRoute
-        }
-      }
-     });
+          $route: mockRoute,
+        },
+      },
+    });
 
-     const communities = container.querySelectorAll('.left-nav__community-item');
+    const communities = container.querySelectorAll(".left-nav__community-item");
 
-     expect(communities.length).toBe(1);
+    expect(communities.length).toBe(1);
 
-     await fireEvent.click(communities[0]);
+    await fireEvent.click(communities[0]);
 
-     expect(mockRouter.push).toHaveBeenCalledTimes(1);
-     expect(mockRouter.push).toHaveBeenCalledWith({name: "community", params: {communityId: community.perspective}})
+    expect(mockRouter.push).toHaveBeenCalledTimes(1);
+    expect(mockRouter.push).toHaveBeenCalledWith({
+      name: "community",
+      params: { communityId: community.perspective },
+    });
   });
 
-  test('Check there if onclick community works for community that is selected', async () => {
+  test("Check there if onclick community works for community that is selected", async () => {
     // @ts-ignore
-    store = createStore({...tempStore, state: {...tempStore.state, communities: {[community.perspective]: community}}});
+    store = createStore({
+      ...tempStore,
+      state: {
+        ...tempStore.state,
+        // @ts-ignore
+        communities: { [community.perspective]: community },
+      },
+    });
 
-    const { container } = render(CommunitiesList, { 
+    const { container } = render(CommunitiesList, {
       global: {
         plugins: [store],
         mocks: {
           $router: mockRouter,
           $route: {
             params: {
-              communityId: community.perspective
-            }
-          }
-        }
-      }
-     });
+              communityId: community.perspective,
+            },
+          },
+        },
+      },
+    });
 
-     expect(store.state.ui.showSidebar).toBeTruthy();
+    expect(store.state.ui.showSidebar).toBeTruthy();
 
-     const communities = container.querySelectorAll('.left-nav__community-item');
+    const communities = container.querySelectorAll(".left-nav__community-item");
 
-     expect(communities.length).toBe(1);
+    expect(communities.length).toBe(1);
 
-     await fireEvent.click(communities[0]);
+    await fireEvent.click(communities[0]);
 
-     expect(mockRouter.push).toHaveBeenCalledTimes(0);
-     expect(mockRouter.push).not.toHaveBeenCalledWith({name: "community", params: {communityId: community.perspective}});
-     expect(store.state.ui.showSidebar).toBeFalsy();
+    expect(mockRouter.push).toHaveBeenCalledTimes(0);
+    expect(mockRouter.push).not.toHaveBeenCalledWith({
+      name: "community",
+      params: { communityId: community.perspective },
+    });
+    expect(store.state.ui.showSidebar).toBeFalsy();
   });
-})
+});

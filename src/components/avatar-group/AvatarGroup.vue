@@ -33,8 +33,8 @@ export default defineComponent({
   props: {
     users: {
       type: [],
-      default: []
-    }
+      default: [],
+    },
   },
   computed: {
     firstUsers(): any {
