@@ -1,5 +1,5 @@
 <template>
-  <j-box pb="1000">
+  <j-box p="800">
     <j-box pb="500">
       <j-flex gap="500" a="center" j="between" wrap>
         <j-avatar

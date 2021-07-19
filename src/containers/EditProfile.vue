@@ -1,25 +1,27 @@
 <template>
-  <j-flex direction="column" gap="700">
-    <j-text variant="heading">Edit profile</j-text>
-    <avatar-upload
-      :hash="userDid"
-      :value="profilePicture"
-      @change="(url) => (profilePicture = url)"
-    ></avatar-upload>
-    <j-input
-      size="lg"
-      label="Username"
-      @keydown.enter="updateProfile"
-      :value="userProfile?.username"
-      @input="(e) => (username = e.target.value)"
-    ></j-input>
-    <div>
-      <j-button size="lg" @click="$emit('cancel')"> Cancel </j-button>
-      <j-button size="lg" variant="primary" @click="updateProfile">
-        Save
-      </j-button>
-    </div>
-  </j-flex>
+  <j-box p="800">
+    <j-flex direction="column" gap="700">
+      <j-text variant="heading">Edit profile</j-text>
+      <avatar-upload
+        :hash="userDid"
+        :value="profilePicture"
+        @change="(url) => (profilePicture = url)"
+      ></avatar-upload>
+      <j-input
+        size="lg"
+        label="Username"
+        @keydown.enter="updateProfile"
+        :value="userProfile?.username"
+        @input="(e) => (username = e.target.value)"
+      ></j-input>
+      <div>
+        <j-button size="lg" @click="$emit('cancel')"> Cancel </j-button>
+        <j-button size="lg" variant="primary" @click="updateProfile">
+          Save
+        </j-button>
+      </div>
+    </j-flex>
+  </j-box>
 </template>
 
 <script lang="ts">
