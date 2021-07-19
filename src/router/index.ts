@@ -14,6 +14,8 @@ import Settings from "@/containers/Settings.vue";
 import MyCommunities from "@/containers/MyCommunities.vue";
 import MyProfile from "@/containers/MyProfile.vue";
 
+import JuntoFoundation from "@/views/home-view/JuntoFoundation.vue";
+
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/signup",
@@ -47,9 +49,14 @@ const routes: Array<RouteRecordRaw> = [
             component: MyCommunities,
           },
           {
-            path: "communities",
+            path: "profile",
             name: "my-profile",
             component: MyProfile,
+          },
+          {
+            path: "junto-foundation",
+            name: "junto-foundation",
+            component: JuntoFoundation,
           },
         ],
       },
