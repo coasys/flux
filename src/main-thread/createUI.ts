@@ -12,6 +12,8 @@ export async function createMainWindow(
   mainThreadState.mainWindow = new BrowserWindow({
     width: 1920,
     height: 1080,
+    minWidth: 850,
+    minHeight: 600,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true, // protect against prototype pollution
@@ -78,7 +80,7 @@ export function createSplashScreen(mainThreadState: MainThreadGlobal): void {
       enableRemoteModule: false,
     },
     minimizable: false,
-    alwaysOnTop: true,
+    alwaysOnTop: false,
     frame: false,
     transparent: true,
     show: false,
