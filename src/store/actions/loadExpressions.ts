@@ -3,7 +3,7 @@ import hash from "object-hash";
 import { print } from "graphql/language/printer";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 import { State } from "..";
-import { LinkQuery } from "@perspect3vism/ad4m";
+import { LinkQuery } from "@perspect3vism/ad4m-types";
 
 export interface Context {
   commit: Commit;

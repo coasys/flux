@@ -2,7 +2,7 @@ import { createProfile } from "@/core/methods/createProfile";
 import { Commit } from "vuex";
 import { ExpressionTypes, State, Profile, CommunityState } from "..";
 import { TimeoutCache } from "../../utils/timeoutCache";
-import type { Expression } from "@perspect3vism/ad4m";
+import type { Expression } from "@perspect3vism/ad4m-types";
 import { getExpression } from "@/core/queries/getExpression";
 
 export interface Context {

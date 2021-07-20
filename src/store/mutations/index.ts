@@ -1,5 +1,5 @@
-import { parseExprUrl } from "@perspect3vism/ad4m";
-import type { Expression } from "@perspect3vism/ad4m";
+import { parseExprUrl } from "@perspect3vism/ad4m-types";
+import type { Expression } from "@perspect3vism/ad4m-types";
 import ad4m from "@perspect3vism/ad4m-executor";
 import hash from "object-hash";
 

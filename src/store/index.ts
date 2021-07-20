@@ -1,7 +1,7 @@
 import { createStore } from "vuex";
 import VuexPersistence from "vuex-persist";
-import type { Expression } from "@perspect3vism/ad4m";
-import { ExpressionRef, PerspectiveHandle } from "@perspect3vism/ad4m";
+import type { Expression } from "@perspect3vism/ad4m-types";
+import { ExpressionRef, PerspectiveHandle } from "@perspect3vism/ad4m-types";
 import { LinkExpression } from "@perspect3vism/ad4m-executor";
 
 import actions from "./actions";

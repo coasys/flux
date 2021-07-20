@@ -4,7 +4,7 @@ import {
   ExpressionTypes,
   ExpressionUIIcons,
 } from "@/store";
-import { Perspective } from "@perspect3vism/ad4m";
+import { Perspective } from "@perspect3vism/ad4m-types";
 import { Store } from "vuex";
 
 ///NOTE: this function wont work in current setup and its still undecided if we want expression language hints on the perspective meta

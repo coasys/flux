@@ -91,7 +91,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { JuntoShortForm } from "@/core/juntoTypes";
-import { Expression } from "@perspect3vism/ad4m";
+import { Expression } from "@perspect3vism/ad4m-types";
 import {
   ChannelState,
   CommunityState,

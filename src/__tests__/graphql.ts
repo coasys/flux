@@ -4,7 +4,7 @@ import {
   typeDefsString,
   Link,
   LinkInput,
-} from "@perspect3vism/ad4m";
+} from "@perspect3vism/ad4m-types";
 import {
   OPEN_LINK,
   QUIT,

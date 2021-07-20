@@ -49,7 +49,7 @@ import { AGENT_STATUS, GET_EXPRESSION } from "@/core/graphql_queries";
 import { CommunityState, ModalsState, ToastState } from "@/store";
 import showMessageNotification from "@/utils/showMessageNotification";
 import { print } from "graphql/language/printer";
-import { AgentStatusType } from "@perspect3vism/ad4m";
+import { AgentStatus } from "@perspect3vism/ad4m-types";
 import { apolloClient } from "./app";
 
 declare global {
@@ -309,11 +309,11 @@ export default defineComponent({
     );
 
     const { onResult, onError } = useQuery<{
-      agent: AgentStatusType;
+      agentStatus: AgentStatus;
     }>(AGENT_STATUS);
     onResult((val) => {
-      const isInit = val.data.agent.isInitialized!;
-      const isUnlocked = val.data.agent.isUnlocked!;
+      const isInit = val.data.agentStatus.isInitialized!;
+      const isUnlocked = val.data.agentStatus.isUnlocked!;
       this.$store.commit("updateAgentInitState", isInit);
       this.$store.commit("updateAgentLockState", isUnlocked);
       if (isInit == true) {

@@ -4,7 +4,7 @@ import { joinNeighbourhood } from "@/core/mutations/joinNeighbourhood";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
 
 import { Profile, ExpressionTypes, State } from "@/store";
-import { Link } from "@perspect3vism/ad4m";
+import { Link } from "@perspect3vism/ad4m-types";
 import { findNameFromMeta } from "@/core/methods/findNameFromMeta";
 import { getPerspectiveSnapshot } from "@/core/queries/getPerspective";
 

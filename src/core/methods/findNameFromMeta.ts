@@ -1,4 +1,4 @@
-import { Perspective } from "@perspect3vism/ad4m";
+import { Perspective } from "@perspect3vism/ad4m-types";
 
 export function findNameFromMeta(perspective: Perspective): string | null {
   //Read out metadata about the perspective from the meta

@@ -1,7 +1,7 @@
 import { Commit } from "vuex";
 import { createExpression } from "@/core/mutations/createExpression";
 import { createLink } from "@/core/mutations/createLink";
-import { Link } from "@perspect3vism/ad4m";
+import { Link } from "@perspect3vism/ad4m-types";
 
 export interface Context {
   commit: Commit;

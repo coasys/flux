@@ -7,8 +7,8 @@ import {
 } from "@/store";
 import { v4 } from "uuid";
 import path from "path";
-import { PerspectiveType, LinkType } from "@perspect3vism/ad4m";
-import type { PerspectiveHandle } from "@perspect3vism/ad4m";
+import { Perspective, Link } from "@perspect3vism/ad4m-types";
+import type { PerspectiveHandle } from "@perspect3vism/ad4m-types";
 import { addPerspective } from "../mutations/addPerspective";
 import { createUniqueHolochainLanguage } from "../mutations/createUniqueHolochainLanguage";
 import { createNeighbourhood } from "../mutations/createNeighbourhood";
@@ -35,7 +35,7 @@ export async function createChannel(
     "Created new social context language wuth result",
     socialContextLanguage
   );
-  const meta = new PerspectiveType();
+  const meta = new Perspective;
   const neighbourhood = await createNeighbourhood(
     perspective.uuid,
     socialContextLanguage.address,
@@ -43,7 +43,7 @@ export async function createChannel(
   );
   console.debug("Create a neighbourhood with result", neighbourhood);
 
-  const channelLink = new LinkType({
+  const channelLink = new Link({
     source: `${sourcePerspective.sharedUrl}://self`,
     target: neighbourhood,
     predicate: "sioc://has_space",

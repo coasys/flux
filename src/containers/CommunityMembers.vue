@@ -42,7 +42,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import type { Expression } from "@perspect3vism/ad4m";
+import type { Expression } from "@perspect3vism/ad4m-types";
 import { CommunityState } from "@/store";
 
 export default defineComponent({

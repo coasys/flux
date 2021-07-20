@@ -1,6 +1,6 @@
 import { apolloClient } from "@/app";
 import unwrapApolloResult from "@/utils/unwrapApolloResult";
-import { LanguageHandle } from "@perspect3vism/ad4m/lib/language/LanguageHandle";
+import { LanguageHandle } from "@perspect3vism/ad4m-types";
 import { LANGUAGE } from "../graphql_queries";
 
 export async function getLanguages(): Promise<LanguageHandle[]> {

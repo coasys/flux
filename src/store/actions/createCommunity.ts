@@ -19,7 +19,7 @@ import {
   JuntoExpressionReference,
   ExpressionTypes,
 } from "@/store";
-import { Perspective } from "@perspect3vism/ad4m";
+import { Perspective } from "@perspect3vism/ad4m-types";
 
 export interface Context {
   commit: Commit;

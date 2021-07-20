@@ -4,7 +4,7 @@ import { print } from "graphql/language/printer";
 import { joinChannelFromSharedLink } from "@/core/methods/joinChannelFromSharedLink";
 import { expressionGetRetries, expressionGetDelayMs } from "@/core/juntoTypes";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
-import { LinkQuery } from "@perspect3vism/ad4m";
+import { LinkQuery } from "@perspect3vism/ad4m-types";
 
 export interface Context {
   commit: Commit;
