@@ -1,8 +1,4 @@
-import type Expression from "@perspect3vism/ad4m/Expression";
-import type Agent from "@perspect3vism/ad4m/Agent";
-import type { GetByAuthorAdapter } from "@perspect3vism/ad4m/Language";
-import type { HolochainLanguageDelegate } from "@perspect3vism/ad4m/LanguageContext";
-import type LanguageContext from "@perspect3vism/ad4m/LanguageContext";
+import type { Expression, Agent, GetByAuthorAdapter, HolochainLanguageDelegate, LanguageContext } from "@perspect3vism/ad4m";
 import { DNA_NICK } from "./dna";
 export default class ShortFormAuthorAdapter implements GetByAuthorAdapter {
   #shortFormDNA: HolochainLanguageDelegate;
@@ -15,16 +11,16 @@ export default class ShortFormAuthorAdapter implements GetByAuthorAdapter {
   //might not be a clear 1:1 mapping for did to agents
   ///Get expressions authored by a given Agent/Identity
   async getByAuthor(
-    author: Agent,
+    author: string,
     count: number,
     page: number
-  ): Promise<void | Expression[]> {
+  ): Promise<Expression[]> {
     //TODO: resolve did
     const res = await this.#shortFormDNA.call(
       DNA_NICK,
       "shortform",
       "get_by_author",
-      { author: author.did, page_size: count, page_number: page }
+      { author: author, page_size: count, page_number: page }
     );
     const out = [];
     res.forEach((expression) => {

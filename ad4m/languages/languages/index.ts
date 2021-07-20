@@ -1,10 +1,11 @@
-import type Address from "@perspect3vism/ad4m/Address";
-import type Agent from "@perspect3vism/ad4m/Agent";
-import type Language from "@perspect3vism/ad4m/Language";
-import type { HolochainLanguageDelegate } from "@perspect3vism/ad4m/LanguageContext";
-import type LanguageContext from "@perspect3vism/ad4m/LanguageContext";
-import type { Interaction } from "@perspect3vism/ad4m/Language";
-import type { ExpressionUI as ExpressionUIInterface } from "@perspect3vism/ad4m/Language";
+import type {
+  Address,
+  Language,
+  HolochainLanguageDelegate,
+  LanguageContext,
+  Interaction,
+  ExpressionUI as ExpressionUIInterface,
+} from "@perspect3vism/ad4m";
 import LanguageAdapter from "./languageAdapter";
 import { DNA, DNA_NICK } from "./dna";
 import Adapter from "./adapter";
@@ -21,11 +22,13 @@ export class ExpressionUI implements ExpressionUIInterface {
   }
 }
 
-function interactions(a: Agent, expression: Address): Interaction[] {
+function interactions(expression: Address): Interaction[] {
   return [];
 }
 
-export default async function create(context: LanguageContext): Promise<Language> {
+export default async function create(
+  context: LanguageContext
+): Promise<Language> {
   const Holochain = context.Holochain as HolochainLanguageDelegate;
   await Holochain.registerDNAs([{ file: DNA, nick: DNA_NICK }]);
 

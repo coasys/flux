@@ -1,16 +1,14 @@
-import type Address from "@perspect3vism/ad4m/Address";
-import type Agent from "@perspect3vism/ad4m/Agent";
 import type {
+  Address,
+  Agent,
   ExpressionProof,
-  default as Expression,
-} from "@perspect3vism/ad4m/Expression";
-import type {
+  Expression,
   ExpressionAdapter,
   PublicSharing,
-} from "@perspect3vism/ad4m/Language";
-import type { HolochainLanguageDelegate } from "@perspect3vism/ad4m/LanguageContext";
-import type LanguageContext from "@perspect3vism/ad4m/LanguageContext";
-import type AgentService from "@perspect3vism/ad4m/AgentService";
+  HolochainLanguageDelegate,
+  LanguageContext,
+  AgentService,
+} from "@perspect3vism/ad4m";
 import { DNA_NICK } from "./dna";
 
 class GroupExpPutAdapter implements PublicSharing {
@@ -50,7 +48,7 @@ export default class ShortFormAdapter implements ExpressionAdapter {
     this.putAdapter = new GroupExpPutAdapter(context);
   }
 
-  async get(address: Address): Promise<void | Expression> {
+  async get(address: Address): Promise<Expression> {
     const hash = Buffer.from(address, "hex");
     const expression = await this.#hcDna.call(
       DNA_NICK,

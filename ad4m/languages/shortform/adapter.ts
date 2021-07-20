@@ -1,13 +1,13 @@
-import type Address from "@perspect3vism/ad4m/Address";
-import Agent from "@perspect3vism/ad4m/Agent";
-import type Expression from "@perspect3vism/ad4m/Expression";
 import type {
+  Address,
+  Agent,
+  Expression,
   ExpressionAdapter,
   PublicSharing,
-} from "@perspect3vism/ad4m/Language";
-import type { HolochainLanguageDelegate } from "@perspect3vism/ad4m/LanguageContext";
-import type LanguageContext from "@perspect3vism/ad4m/LanguageContext";
-import type AgentService from "@perspect3vism/ad4m/AgentService";
+  HolochainLanguageDelegate,
+  LanguageContext,
+  AgentService,
+} from "@perspect3vism/ad4m";
 import { DNA_NICK } from "./dna";
 
 class ShortFormPutAdapter implements PublicSharing {
@@ -53,7 +53,7 @@ export default class ShortFormAdapter implements ExpressionAdapter {
     this.putAdapter = new ShortFormPutAdapter(context);
   }
 
-  async get(address: Address): Promise<void | Expression> {
+  async get(address: Address): Promise<Expression> {
     const hash = Buffer.from(address, "hex");
     const expression = await this.#shortFormDNA.call(
       DNA_NICK,
@@ -98,11 +98,11 @@ export default class ShortFormAdapter implements ExpressionAdapter {
     const out = [];
     res.forEach((expression) => {
       out.push({
-        author: new Agent(expression.creator),
+        author: expression.creator,
         timestamp: expression.created_at,
         data: JSON.parse(expression),
         proof: undefined,
-      });
+      } as Expression);
     });
     return out;
   }

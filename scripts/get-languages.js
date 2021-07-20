@@ -4,9 +4,20 @@ const wget = require("node-wget-js");
 const languages = {
   profiles: {
     targetDnaName: "agent-profiles",
-    dna: "https://github.com/jdeepee/profiles/releases/download/0.0.2/agent-profiles.dna",
+    dna: "https://github.com/jdeepee/profiles/releases/download/0.0.3/agent-profiles.dna",
     bundle:
-      "https://github.com/jdeepee/profiles/releases/download/0.0.2/bundle.js",
+      "https://github.com/jdeepee/profiles/releases/download/0.0.3/bundle.js",
+  },
+  "agent-expression-store": {
+    targetDnaName: "agent-store",
+    dna: "https://github.com/perspect3vism/agent-language/releases/download/0.0.3/agent-store.dna",
+    bundle:
+      "https://github.com/perspect3vism/agent-language/releases/download/0.0.3/bundle.js",
+  },
+  "neighbourhood-store": {
+    targetDnaName: "neighbourhood-store",
+    dna: "https://github.com/perspect3vism/neighbourhood-language/releases/download/0.0.1/neighbourhood-store.dna",
+    bundle: "https://github.com/perspect3vism/neighbourhood-language/releases/download/0.0.1/bundle.js",
   },
 };
 

@@ -1,8 +1,11 @@
-import type Address from "@perspect3vism/ad4m/Address";
-import type AgentService from "@perspect3vism/ad4m/AgentService";
-import type { PublicSharing } from "@perspect3vism/ad4m/Language";
-import type { HolochainLanguageDelegate, IPFSNode } from "@perspect3vism/ad4m/LanguageContext";
-import type LanguageContext from "@perspect3vism/ad4m/LanguageContext";
+import type {
+  Address,
+  AgentService,
+  PublicSharing,
+  HolochainLanguageDelegate,
+  IPFSNode,
+  LanguageContext,
+} from "@perspect3vism/ad4m";
 import { DNA_NICK } from "./dna";
 
 export class IpfsPutAdapter implements PublicSharing {

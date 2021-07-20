@@ -1,8 +1,11 @@
-import type Address from "@perspect3vism/ad4m/Address";
-import type Expression from "@perspect3vism/ad4m/Expression";
-import type { ExpressionAdapter, PublicSharing } from "@perspect3vism/ad4m/Language";
-import type { HolochainLanguageDelegate } from "@perspect3vism/ad4m/LanguageContext";
-import type LanguageContext from "@perspect3vism/ad4m/LanguageContext";
+import type {
+  Address,
+  Expression,
+  ExpressionAdapter,
+  PublicSharing,
+  LanguageContext,
+  HolochainLanguageDelegate,
+} from "@perspect3vism/ad4m";
 import { IpfsPutAdapter } from "./putAdapter";
 import { DNA_NICK } from "./dna";
 
@@ -27,7 +30,7 @@ export default class Adapter implements ExpressionAdapter {
     this.putAdapter = new IpfsPutAdapter(context);
   }
 
-  async get(address: Address): Promise<void | Expression> {
+  async get(address: Address): Promise<Expression> {
     const { expressions } = await this.#holochain.call(
       DNA_NICK,
       "anchored-expression",
