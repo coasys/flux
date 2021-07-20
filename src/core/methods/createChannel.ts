@@ -21,21 +21,18 @@ export async function createChannel(
   typedExpressionLanguages: JuntoExpressionReference[]
 ): Promise<ChannelState> {
   console.debug("Create channel called");
-  const socialContextPath = path.join(languagePath, "social-context-channel");
-
   const perspective = await addPerspective(channelName);
   console.debug("Created new perspective with result", perspective);
-  const socialContextLanguage =
-    await createUniqueHolochainLanguage(
-      socialContextPath,
-      "social-context",
-      v4().toString()
-    );
+  const socialContextLanguage = await createUniqueHolochainLanguage(
+    path.join(languagePath, "social-context-channel"),
+    "social-context-channel",
+    v4().toString()
+  );
   console.debug(
     "Created new social context language wuth result",
     socialContextLanguage
   );
-  const meta = new Perspective;
+  const meta = new Perspective();
   const neighbourhood = await createNeighbourhood(
     perspective.uuid,
     socialContextLanguage.address,
@@ -48,10 +45,7 @@ export async function createChannel(
     target: neighbourhood,
     predicate: "sioc://has_space",
   });
-  const addLinkToChannel = await createLink(
-    perspective.uuid,
-    channelLink
-  );
+  const addLinkToChannel = await createLink(perspective.uuid, channelLink);
   console.debug("Created new link on channel with result", addLinkToChannel);
 
   //Add link on channel social context declaring type

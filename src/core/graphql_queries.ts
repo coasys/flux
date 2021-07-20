@@ -117,25 +117,6 @@ export const AGENT_UPDATE_DIRECT_MESSAGE_ADAPTER = gql`
   }
 `;
 
-export const LANGUAGES = gql`
-  query languages($filter: String!) {
-    languages(filter: $filter) {
-      name
-      address
-      settings
-      icon {
-        code
-      }
-      constructorIcon {
-        code
-      }
-      settingsIcon {
-        code
-      }
-    }
-  }
-`;
-
 export const LANGUAGES_WRITE_SETTINGS = gql`
   mutation languageWriteSettings(
     $languageAddress: String!
@@ -339,6 +320,25 @@ export const GET_EXPRESSION = gql`
 export const LANGUAGE = gql`
   query langauge($address: String!) {
     language(address: $address) {
+      name
+      address
+      settings
+      icon {
+        code
+      }
+      constructorIcon {
+        code
+      }
+      settingsIcon {
+        code
+      }
+    }
+  }
+`;
+
+export const LANGUAGES = gql`
+  query languages($filter: String!) {
+    languages(filter: $filter) {
       name
       address
       settings

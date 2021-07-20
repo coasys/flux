@@ -18,6 +18,7 @@ import {
   Profile,
   JuntoExpressionReference,
   ExpressionTypes,
+  CommunityState,
 } from "@/store";
 import { Perspective } from "@perspect3vism/ad4m-types";
 
@@ -53,7 +54,7 @@ export default async (
     //Create shortform expression language
     const shortFormExpressionLang = await createUniqueHolochainLanguage(
       path.join(builtInLangPath, "shortform"),
-      "shortform",
+      "shortform-expression",
       uid
     );
     console.log(
@@ -160,14 +161,9 @@ export default async (
       MembraneType.Inherited,
       typedExpLangs
     );
+    console.log("created channel with result", channel);
 
-    //Get the created community perspective so we can get the SharedPerspectiveURL
-    const communityPerspective = await getPerspective(
-      createSourcePerspective.uuid!
-    );
-
-    //Add the perspective to community store
-    commit("addCommunity", {
+    const community = {
       name: perspectiveName,
       description: description,
       linkLanguageAddress: "",
@@ -176,9 +172,13 @@ export default async (
       expressionLanguages: expressionLangs,
       typedExpressionLanguages: typedExpLangs,
       groupExpressionRef: createExp,
-      sharedPerspectiveUrl: neighbourhood,
+      neighbourhoodUrl: neighbourhood,
       members: [],
-    });
+    } as CommunityState;
+    console.log("Final created community state", community);
+
+    //Add the perspective to community store
+    commit("addCommunity", community);
 
     //Get and cache the expression UI for each expression language
     for (const [, lang] of expressionLangs.entries()) {
@@ -186,8 +186,8 @@ export default async (
       const languageRes = await getLanguage(lang);
       const uiData: ExpressionUIIcons = {
         languageAddress: lang,
-        createIcon: languageRes.constructorIcon!.code!,
-        viewIcon: languageRes.icon!.code!,
+        createIcon: languageRes.constructorIcon?.code || "",
+        viewIcon: languageRes.icon?.code || "",
         name: languageRes.name!,
       };
       commit("addExpressionUI", uiData);
