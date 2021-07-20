@@ -49,7 +49,7 @@ export default defineComponent({
   emits: ["cancel", "submit"],
   mounted() {
     this.$store.dispatch("getCommunityMembers", {
-      communityId: this.community.perspective,
+      communityId: this.community.perspective.uuid,
     });
   },
   data() {

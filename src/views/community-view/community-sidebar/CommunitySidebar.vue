@@ -80,14 +80,14 @@
           :to="{
             name: 'channel',
             params: {
-              communityId: community.perspective,
-              channelId: channel.perspective,
+              communityId: community.perspective.uuid,
+              channelId: channel.perspective.uuid,
             },
           }"
           custom
           v-slot="{ navigate, isExactActive }"
           v-for="channel in community.channels"
-          :key="channel.perspective"
+          :key="channel.perspective.uuid"
         >
           <j-popover
             class="community-sidebar__header-menu"
@@ -96,7 +96,7 @@
           >
             <j-menu-item
               slot="trigger"
-              :id="getValidId(channel.perspective)"
+              :id="getValidId(channel.perspective.uuid)"
               class="channel"
               :class="{ 'channel--mute': channel?.notifications?.mute }"
               :selected="isExactActive"
@@ -121,8 +121,8 @@
                 @click="
                   () =>
                     setChannelNotificationState({
-                      communityId: community.perspective,
-                      channelId: channel.perspective,
+                      communityId: community.perspective.uuid,
+                      channelId: channel.perspective.uuid,
                     })
                 "
               >

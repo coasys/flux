@@ -2,6 +2,7 @@
 /ad4m/data
 /ad4m/holochain
 /ad4m/languages/**/
+/ad4m/language/*
 .hc
 .hc_live_0
 out.log

@@ -28,7 +28,7 @@ export default async (
     );
 
     commit("addChannel", {
-      communityId: community.perspective,
+      communityId: community.perspective.uuid,
       channel,
     });
   } catch (e) {

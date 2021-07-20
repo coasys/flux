@@ -74,7 +74,7 @@ export default async (
                 console.log(
                   "trying to join channel",
                   channel,
-                  community.perspective
+                  community.perspective.uuid
                 );
                 //Add the channel to the store
                 commit("addChannel", {

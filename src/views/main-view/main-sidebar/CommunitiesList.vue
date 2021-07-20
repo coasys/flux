@@ -2,16 +2,16 @@
   <div class="left-nav__communities-list">
     <j-tooltip
       v-for="community in communities"
-      :key="community.perspective"
+      :key="community.perspective.uuid"
       :title="community.name"
     >
       <j-avatar
         class="left-nav__community-item"
-        :selected="communityIsActive(community.perspective)"
+        :selected="communityIsActive(community.perspective.uuid)"
         size="xl"
         :src="require('@/assets/images/junto_app_icon.png')"
         initials="false"
-        @click="() => handleCommunityClick(community.perspective)"
+        @click="() => handleCommunityClick(community.perspective.uuid)"
       ></j-avatar>
     </j-tooltip>
 

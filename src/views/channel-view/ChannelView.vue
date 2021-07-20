@@ -179,8 +179,8 @@ export default defineComponent({
     }
     const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
     this.$store.commit("setChannelScrollTop", {
-      communityId: this.community.perspective,
-      channelId: this.channel.perspective,
+      communityId: this.community.perspective.uuid,
+      channelId: this.channel.perspective.uuid,
       value: scrollContainer.scrollTop as any,
     });
   },
@@ -220,7 +220,7 @@ export default defineComponent({
     channelMentions(): any[] {
       return Object.values(this.community.channels).map((c) => ({
         name: c.name,
-        id: c.perspective,
+        id: c.perspective.uuid,
         trigger: "#",
       }));
     },
@@ -308,7 +308,7 @@ export default defineComponent({
     },
     markAsRead() {
       this.$store.commit("setHasNewMessages", {
-        channelId: this.channel.perspective,
+        channelId: this.channel.perspective.uuid,
         value: false,
       });
       this.showNewMessagesButton = false;
@@ -373,8 +373,8 @@ export default defineComponent({
       this.$store.dispatch("loadExpressions", {
         from,
         to,
-        communityId: this.community.perspective,
-        channelId: this.channel.perspective,
+        communityId: this.community.perspective.uuid,
+        channelId: this.channel.perspective.uuid,
       });
     },
     async createDirectMessage(message: string) {
@@ -386,7 +386,7 @@ export default defineComponent({
         this.$store.dispatch("createExpression", {
           languageAddress: this.community.expressionLanguages[0]!,
           content: { body: message, background: [""] },
-          perspective: this.channel.perspective.toString(),
+          perspective: this.channel.perspective.uuid.toString(),
         });
       }
     },

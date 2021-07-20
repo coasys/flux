@@ -3,7 +3,7 @@ import { createLink } from "@/core/mutations/createLink";
 import { joinNeighbourhood } from "@/core/mutations/joinNeighbourhood";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
 
-import { Profile, ExpressionTypes, State } from "@/store";
+import { Profile, ExpressionTypes, State, CommunityState } from "@/store";
 import { Link } from "@perspect3vism/ad4m-types";
 import { findNameFromMeta } from "@/core/methods/findNameFromMeta";
 import { getPerspectiveSnapshot } from "@/core/queries/getPerspective";
@@ -26,9 +26,7 @@ export default async (store: any, { joiningLink }: Payload): Promise<void> => {
         neighourhood
       );
 
-      const perspective = await getPerspectiveSnapshot(
-        neighourhood.uuid
-      );
+      const perspective = await getPerspectiveSnapshot(neighourhood.uuid);
 
       //Get and cache the expression UI for each expression language
       //And used returned expression language names to populate typedExpressionLanguages field
@@ -66,18 +64,22 @@ export default async (store: any, { joiningLink }: Payload): Promise<void> => {
       //Read out metadata about the perspective from the meta
       const name = findNameFromMeta(perspective!);
 
+      const expressionLangs = [];
+      for (const lang of typedExpressionLanguages) {
+        expressionLangs.push(lang.languageAddress);
+      }
       store.commit("addCommunity", {
         name: name,
+        description: "",
         linkLanguageAddress: "na",
         channels: {},
         perspective: neighourhood,
-        expressionLanguages: typedExpressionLanguages.forEach(
-          (lang) => lang.languageAddress
-        ),
+        expressionLanguages: expressionLangs,
         typedExpressionLanguages: typedExpressionLanguages,
-        sharedPerspectiveUrl: joiningLink, //TODO: this will have to be string split once we add proof onto the URL
+        groupExpressionRef: "na",
+        neighbourhoodUrl: joiningLink, //TODO: this will have to be string split once we add proof onto the URL
         members: [],
-      });
+      } as CommunityState);
     } else {
       const message = "You are already part of this group";
 
