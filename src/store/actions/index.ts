@@ -12,6 +12,7 @@ import loadExpressions from "./loadExpressions";
 import createExpression from "./createExpression";
 import updateCommunityTheme from "./updateCommunityTheme";
 import updateGlobalTheme from "./updateGlobalTheme";
+import changeCurrentTheme from "./changeCurrentTheme";
 
 export default {
   createChannel,
@@ -28,4 +29,5 @@ export default {
   createExpression,
   updateCommunityTheme,
   updateGlobalTheme,
+  changeCurrentTheme,
 };

@@ -127,19 +127,13 @@ export default defineComponent({
   watch: {
     "currentCommunity.perspective": {
       handler: function (val) {
-        if (!val) {
-          this.$store.commit("setCurrentTheme", "global");
-          return;
-        }
+        this.$store.dispatch("changeCurrentTheme", val ? val : "global");
+
+        if (!val) return;
+
         const firstChannel = Object.values(this.currentCommunity.channels)[0];
         const currentChannelId =
           this.currentCommunity.currentChannelId || firstChannel.perspective;
-
-        this.$store.commit("setCurrentTheme", val);
-        this.$store.dispatch("updateCommunityTheme", {
-          communityId: val,
-          theme: this.currentCommunity.theme,
-        });
 
         this.$router.push({
           name: "channel",
