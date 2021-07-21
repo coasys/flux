@@ -70,6 +70,7 @@ import CreateChannel from "@/containers/CreateChannel.vue";
 import CommunityMembers from "@/containers/CommunityMembers.vue";
 
 import { CommunityState, ModalsState } from "@/store";
+import { PerspectiveHandle } from "@perspect3vism/ad4m-types";
 
 export default defineComponent({
   name: "CommunityView",
@@ -117,7 +118,7 @@ export default defineComponent({
   },
   watch: {
     "currentCommunity.perspective": {
-      handler: function (val) {
+      handler: function (val: PerspectiveHandle) {
         if (!this.currentCommunity) return;
         const firstChannel = Object.values(this.currentCommunity.channels)[0];
         const currentChannelId =
@@ -127,7 +128,7 @@ export default defineComponent({
         this.$router.push({
           name: "channel",
           params: {
-            communityId: val,
+            communityId: val.uuid,
             channelId: currentChannelId,
           },
         });
