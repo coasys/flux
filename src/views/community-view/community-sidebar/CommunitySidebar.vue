@@ -22,6 +22,10 @@
           <j-icon size="xs" slot="start" name="pencil" />
           Edit community
         </j-menu-item>
+        <j-menu-item @click="() => setShowCommunitySettings(true)">
+          <j-icon size="xs" slot="start" name="gear" />
+          Settings
+        </j-menu-item>
         <j-menu-item @click="() => setShowInviteCode(true)">
           <j-icon size="xs" slot="start" name="person-plus" />
           Invite people
@@ -156,6 +160,7 @@ export default defineComponent({
       "setShowCommunityMembers",
       "setChannelNotificationState",
       "setShowInviteCode",
+      "setShowCommunitySettings",
     ]),
     getValidId(val: string) {
       return "channel-" + val;

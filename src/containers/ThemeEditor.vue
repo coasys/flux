@@ -11,7 +11,7 @@
             :key="n"
             class="color-button"
             :class="{ 'color-button--active': theme.hue === n }"
-            @click="() => setTheme({ hue: n })"
+            @click="() => updateTheme({ hue: n })"
             :style="`--hue: ${n}`"
           ></button>
         </div>
@@ -21,7 +21,7 @@
       </j-box>
       <j-tabs
         :value="theme.name"
-        @change="(e) => setTheme({ name: e.target.value })"
+        @change="(e) => updateTheme({ name: e.target.value })"
       >
         <j-tab-item variant="button" value="light">Light</j-tab-item>
         <j-tab-item variant="button" value="dark">Dark</j-tab-item>
@@ -37,7 +37,7 @@
       </j-box>
       <j-tabs
         :value="theme.fontFamily"
-        @change="(e) => setTheme({ fontFamily: e.target.value })"
+        @change="(e) => updateTheme({ fontFamily: e.target.value })"
       >
         <j-tab-item variant="button" value="default">Default</j-tab-item>
         <j-tab-item variant="button" value="system">System</j-tab-item>
@@ -50,7 +50,7 @@
       </j-box>
       <j-tabs
         :value="theme.saturation"
-        @change="(e) => setTheme({ saturation: e.target.value })"
+        @change="(e) => updateTheme({ saturation: e.target.value })"
       >
         <j-tab-item variant="button" value="30">Weak</j-tab-item>
         <j-tab-item variant="button" value="60">Normal</j-tab-item>
@@ -63,7 +63,7 @@
       </j-box>
       <j-tabs
         :value="theme.fontSize"
-        @change="(e) => setTheme({ fontSize: e.target.value })"
+        @change="(e) => updateTheme({ fontSize: e.target.value })"
       >
         <j-tab-item variant="button" value="sm">Small</j-tab-item>
         <j-tab-item variant="button" value="md">Medium</j-tab-item>
@@ -74,30 +74,16 @@
 </template>
 
 <script lang="ts">
-import { ThemeState } from "@/store";
 import { defineComponent } from "vue";
-import { mapMutations } from "vuex";
 
 export default defineComponent({
-  data() {
-    return {
-      hue: 270,
-      saturation: 50,
-      fontFamily: "",
-      themeName: "",
-      themeHue: "",
-    };
-  },
+  emits: ["update"],
+  props: ["theme"],
   methods: {
-    ...mapMutations(["setTheme"]),
-    cleanState() {
-      console.log("Sending clean-state command");
-      window.api.send("cleanState");
-    },
-  },
-  computed: {
-    theme(): ThemeState {
-      return this.$store.state.ui.theme;
+    updateTheme(val: any) {
+      if (this.theme) {
+        this.$emit("update", val);
+      }
     },
   },
 });

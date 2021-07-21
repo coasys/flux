@@ -22,34 +22,40 @@
     </aside>
     <div class="settings__content">
       <theme-editor
-        v-if="currentView === 'theme-editor'"
-        @update="(theme) => updateGlobalTheme(theme)"
+        v-if="currentView === 'theme-editor' && theme"
+        @update="
+          (theme) =>
+            updateCommunityTheme({
+              communityId: $route.params.communityId,
+              theme: { ...theme },
+            })
+        "
         :theme="theme"
       />
     </div>
-  </j-box>
+  </div>
 </template>
 
 <script lang="ts">
+import { ThemeState } from "@/store";
 import { defineComponent } from "vue";
 import { mapActions } from "vuex";
-import { ThemeState } from "@/store";
 import ThemeEditor from "./ThemeEditor.vue";
-import Privacy from "./Privacy.vue";
 
 export default defineComponent({
-  components: { ThemeEditor, Privacy },
+  components: { ThemeEditor },
   data() {
     return {
       currentView: "theme-editor",
     };
   },
   methods: {
-    ...mapActions(["updateGlobalTheme"]),
+    ...mapActions(["updateCommunityTheme"]),
   },
   computed: {
     theme(): ThemeState {
-      return this.$store.state.ui.globalTheme;
+      const communityId: any = this.$route.params.communityId;
+      return this.$store.state.communities[communityId].theme;
     },
   },
 });
