@@ -5,6 +5,7 @@
         <j-avatar
           class="avatar-group__avatar"
           v-for="(user, index) in firstUsers"
+          :data-testid="`avatar-group__avatar__${user.author.did}`"
           :key="index"
           :hash="user.author"
           :src="
@@ -29,7 +30,12 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   emits: ["click"],
-  props: ["users"],
+  props: {
+    users: {
+      type: [],
+      default: [],
+    },
+  },
   computed: {
     firstUsers(): any {
       return (this.users as any[]).slice(0, 3);
