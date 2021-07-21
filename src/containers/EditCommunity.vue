@@ -1,33 +1,35 @@
 <template>
-  <j-text variant="heading">Edit Community</j-text>
-  <j-flex direction="column" gap="400">
-    <j-input
-      size="lg"
-      label="Name"
-      :value="communityName"
-      @keydown.enter="updateCommunity"
-      @input="(e) => (communityName = e.target.value)"
-    ></j-input>
-    <j-input
-      size="lg"
-      label="Description"
-      :value="communityDescription"
-      @keydown.enter="updateCommunity"
-      @input="(e) => (communityDescription = e.target.value)"
-    ></j-input>
-    <div>
-      <j-button size="lg" @click="$emit('cancel')">Cancel</j-button>
-      <j-button
+  <j-box p="800">
+    <j-text variant="heading">Edit Community</j-text>
+    <j-flex direction="column" gap="400">
+      <j-input
         size="lg"
-        :loading="isUpdatingCommunity"
-        :disabled="isUpdatingCommunity"
-        @click="updateCommunity"
-        variant="primary"
-      >
-        Save
-      </j-button>
-    </div>
-  </j-flex>
+        label="Name"
+        :value="communityName"
+        @keydown.enter="updateCommunity"
+        @input="(e) => (communityName = e.target.value)"
+      ></j-input>
+      <j-input
+        size="lg"
+        label="Description"
+        :value="communityDescription"
+        @keydown.enter="updateCommunity"
+        @input="(e) => (communityDescription = e.target.value)"
+      ></j-input>
+      <div>
+        <j-button size="lg" @click="$emit('cancel')">Cancel</j-button>
+        <j-button
+          size="lg"
+          :loading="isUpdatingCommunity"
+          :disabled="isUpdatingCommunity"
+          @click="updateCommunity"
+          variant="primary"
+        >
+          Save
+        </j-button>
+      </div>
+    </j-flex>
+  </j-box>
 </template>
 
 <script lang="ts">

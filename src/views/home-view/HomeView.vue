@@ -6,34 +6,29 @@
           <j-text nomargin size="700" weight="500" color="ui-900">Home</j-text>
         </j-box>
         <j-box pb="800">
-          <router-link
-            :to="{
-              name: 'my-communities',
-            }"
-            custom
-            v-slot="{ navigate, isExactActive }"
+          <j-menu-item
+            :selected="$route.name === 'my-communities'"
+            @click="() => $router.push({ name: 'my-communities' })"
+            size="lg"
           >
-            <j-menu-item :selected="isExactActive" size="lg" @click="navigate">
-              <j-icon name="globe2" slot="start" />
-              Communities
-            </j-menu-item>
-          </router-link>
-          <router-link
-            :to="{
-              name: 'settings',
-            }"
-            custom
-            v-slot="{ navigate, isExactActive }"
+            <j-icon name="globe2" slot="start" />
+            Communities
+          </j-menu-item>
+          <j-menu-item
+            :selected="$route.name === 'settings'"
+            @click="() => $router.push({ name: 'settings' })"
+            size="lg"
           >
-            <j-menu-item :selected="isExactActive" size="lg" @click="navigate">
-              <j-icon name="gear" slot="start" />
-              Settings
-            </j-menu-item>
-          </router-link>
+            <j-icon name="gear" slot="start" />
+            Settings
+          </j-menu-item>
         </j-box>
         <j-box>
           <j-menu-group-item title="About">
-            <j-menu-item>
+            <j-menu-item
+              :selected="$route.name === 'junto-foundation'"
+              @click="() => $router.push({ name: 'junto-foundation' })"
+            >
               <j-icon size="sm" name="file-earmark-text" slot="start" />
               Junto Foundation
             </j-menu-item>
@@ -49,9 +44,7 @@
         </j-box>
       </div>
     </template>
-    <j-box p="1000">
-      <router-view />
-    </j-box>
+    <router-view />
   </sidebar-layout>
 </template>
 

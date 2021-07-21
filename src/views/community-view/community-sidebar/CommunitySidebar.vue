@@ -8,27 +8,14 @@
       placement="bottom-start"
     >
       <button slot="trigger" class="community-sidebar__header">
-        <j-flex j="between" gap="300">
-          <j-flex a="center" gap="300">
-            <j-avatar
-              style="--j-avatar-size: 30px"
-              :src="require('@/assets/images/junto_app_icon.png')"
-            />
-            <div class="community-info">
-              <j-text
-                v-if="community.name"
-                weight="500"
-                color="ui-800"
-                nomargin
-                size="500"
-                style="text-overflow: ellipsis"
-              >
-                {{ community.name }}
-              </j-text>
-            </div>
-          </j-flex>
-          <j-icon size="xs" name="chevron-down"></j-icon>
-        </j-flex>
+        <j-avatar
+          style="--j-avatar-size: 30px"
+          :src="require('@/assets/images/junto_app_icon.png')"
+        />
+        <div class="community-info">
+          {{ community.name }}
+        </div>
+        <j-icon size="xs" name="chevron-down"></j-icon>
       </button>
       <j-menu slot="content">
         <j-menu-item @click="() => setShowEditCommunity(true)">
@@ -187,7 +174,9 @@ export default defineComponent({
   color: inherit;
   width: 100%;
   height: 74px;
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-400);
   border: 0;
   outline: 0;
   font-family: inherit;
@@ -207,6 +196,10 @@ export default defineComponent({
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1;
+  font-weight: 500;
+  color: var(--j-color-ui-800);
+  font-size: var(--j-font-size-500);
+  text-overflow: ellipsis;
 }
 
 j-divider {

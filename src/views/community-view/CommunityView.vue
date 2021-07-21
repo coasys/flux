@@ -41,20 +41,22 @@
     :open="modals.showInviteCode"
     @toggle="(e) => setShowInviteCode(e.target.open)"
   >
-    <j-text variant="heading">Invite people</j-text>
-    <j-text variant="ingress">
-      Copy and send this code to the people you want to join your community
-    </j-text>
-    <j-input
-      @click="(e) => e.target.select()"
-      size="lg"
-      readonly
-      :value="currentCommunity.sharedPerspectiveUrl"
-    >
-      <j-button @click="getInviteCode" variant="subtle" slot="end"
-        ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
-      /></j-button>
-    </j-input>
+    <j-box p="800">
+      <j-text variant="heading">Invite people</j-text>
+      <j-text variant="ingress">
+        Copy and send this code to the people you want to join your community
+      </j-text>
+      <j-input
+        @click="(e) => e.target.select()"
+        size="lg"
+        readonly
+        :value="currentCommunity.sharedPerspectiveUrl"
+      >
+        <j-button @click="getInviteCode" variant="subtle" slot="end"
+          ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
+        /></j-button>
+      </j-input>
+    </j-box>
   </j-modal>
 
   <j-modal

@@ -310,6 +310,10 @@ export default {
     state.ui.modals.showInviteCode = payload;
   },
 
+  removeCommunity(state: State, id: string): void {
+    delete state.communities[id];
+  },
+
   setChannelNotificationState(
     state: State,
     { communityId, channelId }: { communityId: string; channelId: string }

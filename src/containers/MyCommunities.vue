@@ -1,5 +1,5 @@
 <template>
-  <j-box pb="1000">
+  <j-box px="800" pt="800" pb="1000">
     <j-flex wrap gap="500" a="center" j="between">
       <j-text nomargin variant="heading">
         My communities ({{ Object.keys(communities).length }})
@@ -106,7 +106,7 @@ export default defineComponent({
   cursor: pointer;
   width: 100%;
   justify-content: space-between;
-  padding: var(--j-space-500);
+  padding: var(--j-space-500) var(--j-space-800);
   border-bottom: 1px solid var(--j-border-color);
   transition: all 0.2s ease;
 }
