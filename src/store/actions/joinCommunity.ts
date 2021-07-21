@@ -79,6 +79,7 @@ export default async (store: any, { joiningLink }: Payload): Promise<void> => {
         groupExpressionRef: "na",
         neighbourhoodUrl: joiningLink, //TODO: this will have to be string split once we add proof onto the URL
         members: [],
+        currentChannelId: null,
       } as CommunityState);
     } else {
       const message = "You are already part of this group";

@@ -100,7 +100,7 @@ describe("Communities List", () => {
       state: {
         ...tempStore.state,
         // @ts-ignore
-        communities: { [community.perspective]: community },
+        communities: { [community.perspective.uuid]: community },
       },
     });
 
@@ -130,7 +130,7 @@ describe("Communities List", () => {
       state: {
         ...tempStore.state,
         // @ts-ignore
-        communities: { [community.perspective]: community },
+        communities: { [community.perspective.uuid]: community },
       },
     });
 
@@ -153,7 +153,7 @@ describe("Communities List", () => {
     expect(mockRouter.push).toHaveBeenCalledTimes(1);
     expect(mockRouter.push).toHaveBeenCalledWith({
       name: "community",
-      params: { communityId: community.perspective },
+      params: { communityId: community.perspective.uuid },
     });
   });
 
@@ -164,7 +164,7 @@ describe("Communities List", () => {
       state: {
         ...tempStore.state,
         // @ts-ignore
-        communities: { [community.perspective]: community },
+        communities: { [community.perspective.uuid]: community },
       },
     });
 
@@ -175,7 +175,7 @@ describe("Communities List", () => {
           $router: mockRouter,
           $route: {
             params: {
-              communityId: community.perspective,
+              communityId: community.perspective.uuid,
             },
           },
         },
@@ -193,7 +193,7 @@ describe("Communities List", () => {
     expect(mockRouter.push).toHaveBeenCalledTimes(0);
     expect(mockRouter.push).not.toHaveBeenCalledWith({
       name: "community",
-      params: { communityId: community.perspective },
+      params: { communityId: community.perspective.uuid },
     });
     expect(store.state.ui.showSidebar).toBeFalsy();
   });

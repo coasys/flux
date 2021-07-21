@@ -60,7 +60,7 @@ describe("Get Community Members", () => {
         },
         // @ts-ignore
         communities: {
-          [community.perspective]: community,
+          [community.perspective.uuid]: community,
         },
         localLanguagesPath: "",
         databasePerspective: "",
@@ -80,7 +80,7 @@ describe("Get Community Members", () => {
   });
 
   test("Check if the getCommunityMembers work", async () => {
-    const communityId = community.perspective;
+    const communityId = community.perspective.uuid;
     expect(store.state.communities[communityId].members).toStrictEqual([]);
 
     await store.dispatch("getCommunityMembers", {
@@ -91,7 +91,7 @@ describe("Get Community Members", () => {
   });
 
   test("Check if the getCommunityMembers with wrong community id or community that don't exists", async () => {
-    const communityId = community.perspective;
+    const communityId = community.perspective.uuid;
 
     try {
       await store.dispatch("getCommunityMembers", {

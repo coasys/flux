@@ -68,8 +68,8 @@ describe("Store Mutations", async () => {
 
     expect(Object.values(store.state.communities).length).toBe(1);
 
-    expect(Object.values(store.state.communities)[0].perspective).toBe(
-      community.perspective
+    expect(Object.values(store.state.communities)[0].perspective.uuid).toBe(
+      community.perspective.uuid
     );
   });
 
@@ -79,13 +79,13 @@ describe("Store Mutations", async () => {
     store.commit("addCommunity", community);
 
     expect(Object.keys(store.state.communities)).toStrictEqual([
-      community.perspective,
+      community.perspective.uuid,
     ]);
 
     store.commit("addCommunity", community);
 
     expect(Object.keys(store.state.communities)).toStrictEqual([
-      community.perspective,
+      community.perspective.uuid,
     ]);
   });
 
@@ -96,22 +96,22 @@ describe("Store Mutations", async () => {
 
     expect(Object.values(store.state.communities).length).toBe(1);
 
-    expect(Object.values(store.state.communities)[0].perspective).toBe(
-      community.perspective
+    expect(Object.values(store.state.communities)[0].perspective.uuid).toBe(
+      community.perspective.uuid
     );
 
     expect(
-      Object.values(store.state.communities[community.perspective].channels)
+      Object.values(store.state.communities[community.perspective.uuid].channels)
         .length
     ).toBe(1);
 
     store.commit("addChannel", {
-      communityId: community.perspective,
+      communityId: community.perspective.uuid,
       channel,
     });
 
     expect(
-      Object.values(store.state.communities[community.perspective].channels)
+      Object.values(store.state.communities[community.perspective.uuid].channels)
         .length
     ).toBe(2);
   });
@@ -121,32 +121,32 @@ describe("Store Mutations", async () => {
 
     store.commit("addCommunity", community);
 
-    expect(Object.values(store.state.communities)[0].perspective).toBe(
-      community.perspective
+    expect(Object.values(store.state.communities)[0].perspective.uuid).toBe(
+      community.perspective.uuid
     );
 
     store.commit("addChannel", {
-      communityId: community.perspective,
+      communityId: community.perspective.uuid,
       channel,
     });
 
     expect(
-      Object.keys(store.state.communities[community.perspective].channels)
+      Object.keys(store.state.communities[community.perspective.uuid].channels)
     ).toStrictEqual([
       "30e4a29e-1373-4c8a-a5af-a2353c919e7a",
-      channel.perspective,
+      channel.perspective.uuid,
     ]);
 
     store.commit("addChannel", {
-      communityId: community.perspective,
+      communityId: community.perspective.uuid,
       channel,
     });
 
     expect(
-      Object.keys(store.state.communities[community.perspective].channels)
+      Object.keys(store.state.communities[community.perspective.uuid].channels)
     ).toStrictEqual([
       "30e4a29e-1373-4c8a-a5af-a2353c919e7a",
-      channel.perspective,
+      channel.perspective.uuid,
     ]);
   });
 

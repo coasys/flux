@@ -48,7 +48,11 @@
         }
       }
   }},
-  "perspective": "5a251e1b-5415-4886-911c-e2e829f71fec",
+  "perspective": {
+    "uuid": "5a251e1b-5415-4886-911c-e2e829f71fec",
+    "name": "test perspective",
+    "sharedUrl": "neighbourhood://qmahash"
+  },
   "expressionLanguages": [
     "QmWXrqpCo9id7KXBVYJjCFm5GucpAJ5tfkCqRaGqNtF4qA",
     "QmUMNHAW8w5M1A5UkBw12hjhupTTjzYG6iKt1N94wcoHHv",

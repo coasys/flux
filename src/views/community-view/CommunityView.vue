@@ -121,7 +121,7 @@ export default defineComponent({
         if (!this.currentCommunity) return;
         const firstChannel = Object.values(this.currentCommunity.channels)[0];
         const currentChannelId =
-          this.currentCommunity.currentChannelId || firstChannel.perspective;
+          this.currentCommunity.currentChannelId || firstChannel.perspective.uuid;
 
         this.$router.push({
           name: "channel",

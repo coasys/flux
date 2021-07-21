@@ -69,14 +69,14 @@ export default defineComponent({
       this.$store.commit("setShowCommunityMembers", true);
       this.$router.push({
         name: "community",
-        params: { communityId: community.perspective },
+        params: { communityId: community.perspective.uuid },
       });
     },
     handleEditClick(community: CommunityState) {
       this.$store.commit("setShowEditCommunity", true);
       this.$router.push({
         name: "community",
-        params: { communityId: community.perspective },
+        params: { communityId: community.perspective.uuid },
       });
     },
   },

@@ -16,11 +16,11 @@
     <router-link
       :to="{
         name: 'community',
-        params: { communityId: community.perspective },
+        params: { communityId: community.perspective.uuid },
       }"
       class="community-item"
       v-for="community in communities"
-      :key="community.perspective"
+      :key="community.perspective.uuid"
     >
       <j-avatar
         :src="require('@/assets/images/junto_web_rainbow.png')"
@@ -75,14 +75,14 @@ export default defineComponent({
       this.$store.commit("setShowCommunityMembers", true);
       this.$router.push({
         name: "community",
-        params: { communityId: community.perspective },
+        params: { communityId: community.perspective.uuid },
       });
     },
     handleEditClick(community: CommunityState) {
       this.$store.commit("setShowEditCommunity", true);
       this.$router.push({
         name: "community",
-        params: { communityId: community.perspective },
+        params: { communityId: community.perspective.uuid },
       });
     },
   },

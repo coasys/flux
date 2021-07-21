@@ -132,8 +132,8 @@ export default defineComponent({
           this.$router.push({
             name: "channel",
             params: {
-              communityId: community.perspective,
-              channelId: firstChannel.perspective,
+              communityId: community.perspective.uuid,
+              channelId: firstChannel.perspective.uuid,
             },
           });
         })

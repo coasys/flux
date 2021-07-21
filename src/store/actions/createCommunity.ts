@@ -53,7 +53,7 @@ export default async (
     console.log("Response from create social-context", socialContextLang);
     //Create shortform expression language
     const shortFormExpressionLang = await createUniqueHolochainLanguage(
-      path.join(builtInLangPath, "shortform"),
+      path.join(builtInLangPath, "shortform-expression"),
       "shortform-expression",
       uid
     );
