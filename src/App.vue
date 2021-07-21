@@ -44,12 +44,11 @@ import { useStore } from "vuex";
 import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
-import { LinkExpression } from "@perspect3vism/ad4m-executor";
 import { AGENT_STATUS, GET_EXPRESSION } from "@/core/graphql_queries";
 import { CommunityState, ModalsState, ToastState } from "@/store";
 import showMessageNotification from "@/utils/showMessageNotification";
 import { print } from "graphql/language/printer";
-import { AgentStatus } from "@perspect3vism/ad4m-types";
+import { AgentStatus, LinkExpression } from "@perspect3vism/ad4m-types";
 import { apolloClient } from "./app";
 
 declare global {

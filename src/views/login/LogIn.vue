@@ -41,6 +41,7 @@
 import { defineComponent, ref } from "vue";
 import { useStore } from "vuex";
 import { useValidation } from "@/utils/validation";
+import { AgentStatus } from "@perspect3vism/ad4m-types";
 
 export default defineComponent({
   name: "LogIn",
@@ -97,8 +98,8 @@ export default defineComponent({
         .dispatch("logIn", {
           password: this.password,
         })
-        .then(({ data }) => {
-          const isUnlocked = data!.unlockAgent!.isUnlocked;
+        .then((data: AgentStatus) => {
+          const isUnlocked = data.isUnlocked;
           if (isUnlocked) {
             this.$router.push("/");
           } else {
