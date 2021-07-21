@@ -5,7 +5,7 @@ import community from "../fixtures/community.json";
 import initAgentFixture from "../fixtures/initAgent.json";
 import getProfileFixture from "../fixtures/getProfile.json";
 import * as getExpressionNoCache from "@/core/queries/getExpression";
-import { Expression } from "@perspect3vism/ad4m-executor";
+import { Expression } from "@perspect3vism/ad4m-types";
 
 describe("ProfileHelpers", () => {
   let profileLangAddress: string;

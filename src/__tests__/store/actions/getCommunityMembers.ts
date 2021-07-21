@@ -6,7 +6,7 @@ import mutations from "@/store/mutations";
 import { createStore, Store } from "vuex";
 import community from "../../fixtures/community.json";
 import * as getLinks from "../../../core/queries/getLinks";
-import { Expression } from "@perspect3vism/ad4m-executor";
+import { Expression } from "@perspect3vism/ad4m-types";
 import getCommunityMembersLinkFixture from "../../fixtures/getCommunityMembersLink.json";
 import getProfileFixture from "../../fixtures/getProfile.json";
 import * as getExpressionNoCache from "@/core/queries/getExpression";
@@ -39,6 +39,7 @@ describe("Get Community Members", () => {
             showEditProfile: false,
             showSettings: false,
             showInviteCode: false,
+            showDisclaimer: false,
           },
           showSidebar: true,
           showGlobalLoading: false,
@@ -47,6 +48,7 @@ describe("Get Community Members", () => {
             name: "",
             hue: 270,
             saturation: 50,
+            fontSize: "md"
           },
           toast: {
             variant: "",

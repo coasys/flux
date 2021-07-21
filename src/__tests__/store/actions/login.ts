@@ -2,9 +2,9 @@ import { State } from "@/store";
 import actions from "@/store/actions";
 import getters from "@/store/getters";
 import mutations from "@/store/mutations";
-import { AgentService } from "@perspect3vism/ad4m-executor";
+import { AgentStatus } from "@perspect3vism/ad4m-types";
 import { Store, createStore } from "vuex";
-import * as unlockAgent from "../../../core/mutations/unlockAgent";
+import * as agentUnlock from "../../../core/mutations/agentUnlock";
 import lockAgentFixture from "../../fixtures/lockAgent.json";
 
 describe("Login", () => {
@@ -13,10 +13,10 @@ describe("Login", () => {
   beforeEach(() => {
     // @ts-ignore
     jest
-      .spyOn(unlockAgent, "unlockAgent")
+      .spyOn(agentUnlock, "agentUnlock")
       .mockImplementation(async (password) => {
         if (password === "test123") {
-          return lockAgentFixture as AgentService;
+          return lockAgentFixture as AgentStatus;
         }
 
         throw new Error("Password doesn't match");
@@ -33,6 +33,7 @@ describe("Login", () => {
             showEditProfile: false,
             showSettings: false,
             showInviteCode: false,
+            showDisclaimer: false,
           },
           showSidebar: true,
           showGlobalLoading: false,
@@ -41,6 +42,7 @@ describe("Login", () => {
             name: "",
             hue: 270,
             saturation: 50,
+            fontSize: "md",
           },
           toast: {
             variant: "",

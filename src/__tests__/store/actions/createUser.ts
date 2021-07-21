@@ -1,16 +1,14 @@
 import "@testing-library/vue";
 import initAgentFixture from "../../fixtures/initAgent.json";
-import lockAgentFixture from "../../fixtures/lockAgent.json";
 import addPerspectiveFixture from "../../fixtures/addPerspective.json";
 import { createStore, Store } from "vuex";
 import mutations from "@/store/mutations";
 import actions from "@/store/actions";
 import getters from "@/store/getters";
 import { State } from "@/store";
-import * as initAgent from "../../../core/mutations/agentGenerate";
-import * as lockAgent from "../../../core/mutations/lockAgent";
-import * as addPerspective from "../../../core/mutations/addPerspective";
-import { AgentService, Perspective } from "@perspect3vism/ad4m-executor";
+import { agentGenerate } from "../../../core/mutations/agentGenerate";
+import { addPerspective } from "../../../core/mutations/addPerspective";
+import { AgentStatus, PerspectiveHandle } from "@perspect3vism/ad4m-types";
 import createUser from "@/store/actions/createUser";
 
 describe("Store Actions", () => {
@@ -19,22 +17,22 @@ describe("Store Actions", () => {
   beforeEach(() => {
     // @ts-ignore
     jest
-      .spyOn(initAgent, "initAgent")
-      .mockResolvedValue(initAgentFixture as AgentService);
+      .spyOn(agentGenerate, "agentGenerate")
+      .mockResolvedValue(initAgentFixture as AgentStatus);
 
     // @ts-ignore
-    jest.spyOn(lockAgent, "lockAgent").mockImplementation(async (password) => {
-      if (password) {
-        return lockAgentFixture as AgentService;
-      } else {
-        throw Error("No Password passed");
-      }
-    });
+    // jest.spyOn(lockAgent, "lockAgent").mockImplementation(async (password) => {
+    //   if (password) {
+    //     return lockAgentFixture as AgentStatus;
+    //   } else {
+    //     throw Error("No Password passed");
+    //   }
+    // });
 
     // @ts-ignore
     jest
       .spyOn(addPerspective, "addPerspective")
-      .mockResolvedValue(addPerspectiveFixture as Perspective);
+      .mockResolvedValue(addPerspectiveFixture as PerspectiveHandle);
 
     store = createStore({
       state: {
@@ -47,6 +45,7 @@ describe("Store Actions", () => {
             showEditProfile: false,
             showSettings: false,
             showInviteCode: false,
+            showDisclaimer: false,
           },
           showSidebar: true,
           showGlobalLoading: false,
@@ -55,6 +54,7 @@ describe("Store Actions", () => {
             name: "",
             hue: 270,
             saturation: 50,
+            fontSize: "md",
           },
           toast: {
             variant: "",
