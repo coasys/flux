@@ -99,7 +99,7 @@ export default defineComponent({
       link: LinkExpression,
       perspective: string
     ) => {
-      console.log("GOT INCOMING MESSAGE SIGNAL");
+      console.log("GOT INCOMING MESSAGE SIGNAL", link, perspective);
       if (link.data!.predicate! == "sioc://content_of") {
         //Start expression web worker to try and get the expression data pointed to in link target
         const expressionWorker = new Worker("pollingWorker.js");
@@ -125,8 +125,8 @@ export default defineComponent({
 
             console.log("FOUND EXPRESSION FOR SIGNAL");
             //Add the expression to the store
-            store.commit("addExpressionAndLinkFromLanguageAddress", {
-              linkLanguage: perspective,
+            store.commit("addExpressionAndLink", {
+              channelId: perspective,
               link: link,
               message: expression,
             });
@@ -142,9 +142,7 @@ export default defineComponent({
 
             //Add UI notification on the channel to notify that there is a new message there
             store.commit("setHasNewMessages", {
-              channelId:
-                store.getters.getChannelFromLinkLanguage(perspective)
-                  .perspective,
+              channelId: perspective,
               value: true,
             });
           }

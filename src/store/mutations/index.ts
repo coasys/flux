@@ -1,6 +1,5 @@
 import { parseExprUrl } from "@perspect3vism/ad4m-types";
-import type { Expression } from "@perspect3vism/ad4m-types";
-import ad4m from "@perspect3vism/ad4m-executor";
+import type { Expression, LinkExpression } from "@perspect3vism/ad4m-types";
 import hash from "object-hash";
 
 import {
@@ -33,8 +32,8 @@ interface AddChannelMessages {
 interface AddChannelMessage {
   channelId: string;
   communityId: string;
-  link: ad4m.LinkExpression;
-  expression: ad4m.Expression;
+  link: LinkExpression;
+  expression: Expression;
   linkLanguage: string;
 }
 
@@ -88,23 +87,23 @@ export default {
   addDatabasePerspective(state: State, payload: string): void {
     state.databasePerspective = payload;
   },
-  addExpressionAndLinkFromLanguageAddress: (
+  addExpressionAndLink: (
     state: State,
     payload: {
-      linkLanguage: string;
-      link: ad4m.LinkExpression;
-      message: ad4m.Expression;
+      channelId: string;
+      link: LinkExpression;
+      message: Expression;
     }
   ): void => {
     for (const community of Object.values(state.communities)) {
       for (const channel of Object.values(community.channels)) {
-        if (channel.linkLanguageAddress === payload.linkLanguage) {
-          console.log("Adding to link and exp to channel!");
+        if (channel.perspective.uuid === payload.channelId) {
+          console.log("Adding to link and exp to channel!", payload.message);
           channel.currentExpressionLinks[
             hash(payload.link.data!, { excludeValues: "__typename" })
           ] = {
             expression: payload.link,
-            language: payload.linkLanguage,
+            language: "na",
           } as LinkExpressionAndLang;
           //TODO: make gql expression to ad4m expression conversion function
           channel.currentExpressionMessages[payload.message.url!] = {
