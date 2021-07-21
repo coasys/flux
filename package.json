@@ -11,7 +11,6 @@
   "scripts": {
     "lint": "vue-cli-service lint",
     "get-languages": "node scripts/get-languages.js",
-    "build-languages": "npm run get-languages && for OUTPUT in $(ls ad4m/languages); do if [ $OUTPUT != \"profiles\" ]; then echo \"Building: $OUTPUT\" && cd ad4m/languages/$OUTPUT && npm i && npm run build && cd -; fi; done",
     "build-start": "cd ../ad4m-core-executor && npm run build && cd ../communities && npm run electron:serve",
     "clean-state": "node scripts/clean-state.js",
     "electron:build": "vue-cli-service electron:build",
@@ -20,7 +19,7 @@
     "postuninstall": "electron-builder install-app-deps",
     "rebuild": "./node_modules/.bin/electron-rebuild -f -w ad4m-core-executor",
     "build-holochain": "echo \"\n\n\n\nThis next stage will fail if Nix is not installed!! You can install here: https://nixos.wiki/wiki/Nix_Installation_Guide\" && sleep 5 && nix-shell --run ./scripts/copy-hc.sh",
-    "release": "npm run electron:build",
+    "release": "npm run get-languages && npm run electron:build",
     "test": "jest --env=jsdom",
     "test-gql": "jest --env=jsdom src/__tests__/graphql.ts"
   },
@@ -30,6 +29,7 @@
     "@junto-foundation/junto-elements": "^0.2.12",
     "@perspect3vism/ad4m-types": "file:../ad4m-types",
     "@perspect3vism/ad4m-executor": "file:../ad4m-executor",
+    "@perspect3vism/ad4m": "0.1.4",
     "@tiptap/core": "^2.0.0-beta.85",
     "@tiptap/vue-3": "^2.0.0-beta.45",
     "@types/jest": "^26.0.20",
@@ -94,6 +94,7 @@
     "sass-loader": "^8.0.2",
     "ts-jest": "^26.0.0",
     "typescript": "^4.2.4",
+    "unzipper": "^0.10.11",
     "vue-cli-plugin-electron-builder": "~2.0.0-rc.6",
     "vue-devtools": "^5.1.4",
     "vue-jest": "^5.0.0-alpha.10"

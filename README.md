@@ -7,7 +7,7 @@ Node version: 14.16.0<br>
 This project requires nix for building holochain! You can download nix here: https://nixos.wiki/wiki/Nix_Installation_Guide
 
 ```
-npm install && npm run build-languages && npm run build-holochain
+npm install && npm run get-languages && npm run build-holochain
 ```
 
 ### Compiles and hot-reloads for development
@@ -22,8 +22,6 @@ The following commands will remove all installed ad4m languages (except defaults
 ```
 npm run clean-state
 ```
-
-Once complete inside the browser windows console run localStorage.clear(). Restart application and you will have a fresh state.
 
 ## Holochain DNA's
 

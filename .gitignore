@@ -7,8 +7,7 @@
 .hc_live_0
 out.log
 
-resources/darwin/*
-resources/linux/*
+resources/*
 
 .DS_Store
 node_modules
