@@ -213,7 +213,7 @@ export default defineComponent({
     memberMentions(): any[] {
       return this.community.members.map((m) => ({
         name: (m.data as any).profile["foaf:AccountName"],
-        id: m.author.did.replace("did:key:", ""),
+        id: m.author.replace("did:key:", ""),
         trigger: "@",
       }));
     },
@@ -236,12 +236,12 @@ export default defineComponent({
 
       //Note; code below will break once we add other expression types since we try to extract body from exp data
       return sortedMessages.reduce((acc: Message[], item: ExpressionAndRef) => {
-        this.loadUser(item.expression.author.did);
+        this.loadUser(item.expression.author);
         return [
           ...acc,
           {
             id: item.expression.proof.signature,
-            did: item.expression.author.did,
+            did: item.expression.author,
             timestamp: item.expression.timestamp,
             //@ts-ignore
             message: item.expression.data.body,
@@ -277,9 +277,7 @@ export default defineComponent({
     },
     handleProfileClick(did: string) {
       this.showProfile = true;
-      this.activeProfile = this.community.members.find(
-        (m) => m.author.did === did
-      );
+      this.activeProfile = this.community.members.find((m) => m.author === did);
     },
     handleMentionClick(dataset: { label: string; id: string }) {
       const { label, id } = dataset;
@@ -295,7 +293,7 @@ export default defineComponent({
       if (label?.startsWith("@")) {
         this.showProfile = true;
         this.activeProfile = this.community.members.find(
-          (m) => m.author.did === `did:key:${id}`
+          (m) => m.author === `did:key:${id}`
         );
       }
     },
