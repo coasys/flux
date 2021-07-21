@@ -56,6 +56,13 @@
       /></j-button>
     </j-input>
   </j-modal>
+
+  <j-modal
+    :open="modals.showCommunitySettings"
+    @toggle="(e) => setShowCommunitySettings(e.target.open)"
+  >
+    <community-settings />
+  </j-modal>
 </template>
 
 <script lang="ts">
@@ -68,12 +75,14 @@ import { useStore, mapMutations } from "vuex";
 import EditCommunity from "@/containers/EditCommunity.vue";
 import CreateChannel from "@/containers/CreateChannel.vue";
 import CommunityMembers from "@/containers/CommunityMembers.vue";
+import CommunitySettings from "@/containers/CommunitySettings.vue";
 
 import { CommunityState, ModalsState } from "@/store";
 
 export default defineComponent({
   name: "CommunityView",
   components: {
+    CommunitySettings,
     EditCommunity,
     CreateChannel,
     CommunityMembers,
@@ -118,10 +127,19 @@ export default defineComponent({
   watch: {
     "currentCommunity.perspective": {
       handler: function (val) {
-        if (!this.currentCommunity) return;
+        if (!val) {
+          this.$store.commit("setCurrentTheme", "global");
+          return;
+        }
         const firstChannel = Object.values(this.currentCommunity.channels)[0];
         const currentChannelId =
           this.currentCommunity.currentChannelId || firstChannel.perspective;
+
+        this.$store.commit("setCurrentTheme", val);
+        this.$store.dispatch("updateCommunityTheme", {
+          communityId: val,
+          theme: this.currentCommunity.theme,
+        });
 
         this.$router.push({
           name: "channel",
@@ -140,6 +158,7 @@ export default defineComponent({
       "setShowEditCommunity",
       "setShowCommunityMembers",
       "setShowInviteCode",
+      "setShowCommunitySettings",
     ]),
     getInviteCode() {
       // Get the invite code to join community and copy to clipboard
