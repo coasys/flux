@@ -103,6 +103,7 @@ export default async (
       meta
     );
     console.log("Created neighbourhood with result", neighbourhood);
+    createSourcePerspective.sharedUrl = neighbourhood;
 
     //await sleep(10000);
 
@@ -150,7 +151,7 @@ export default async (
       target: createProfileExpression,
       predicate: "sioc://has_member",
     });
-    console.log("Created group expression link", addProfileLink);
+    console.log("Created profile expression link", addProfileLink);
 
     //Next steps: create another perspective + share with social-context-channel link language and add above expression DNA's onto it
     //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel
@@ -163,7 +164,8 @@ export default async (
     );
     console.log("created channel with result", channel);
 
-    const community = {
+    //Add the perspective to community store
+    commit("addCommunity", {
       name: perspectiveName,
       description: description,
       linkLanguageAddress: "",
@@ -174,14 +176,10 @@ export default async (
       groupExpressionRef: createExp,
       neighbourhoodUrl: neighbourhood,
       members: [],
-    } as CommunityState;
-    console.log("Final created community state", community);
-
-    //Add the perspective to community store
-    commit("addCommunity", community);
+    } as CommunityState);
 
     //Get and cache the expression UI for each expression language
-    for (const [, lang] of expressionLangs.entries()) {
+    for (const lang of expressionLangs) {
       console.log("CreateCommunity.vue: Fetching UI lang:", lang);
       const languageRes = await getLanguage(lang);
       const uiData: ExpressionUIIcons = {

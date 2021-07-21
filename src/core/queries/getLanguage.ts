@@ -4,11 +4,11 @@ import { LanguageHandle } from "@perspect3vism/ad4m-types";
 import { LANGUAGE } from "../graphql_queries";
 
 export async function getLanguage(address: string): Promise<LanguageHandle> {
-  const { languages } = unwrapApolloResult(
+  const { language } = unwrapApolloResult(
     await apolloClient.query({
       query: LANGUAGE,
       variables: { address },
     })
   );
-  return languages;
+  return language;
 }

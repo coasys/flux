@@ -7,11 +7,13 @@ export async function getLinks(
   perspective: string,
   linkQuery: LinkQuery
 ): Promise<LinkExpression[]> {
-  const { perspectiveQueryLinks } = unwrapApolloResult(await apolloClient.query({
-    query: PERSPECTIVE_LINK_QUERY,
-    variables: { uuid: perspective, query: linkQuery }
-}))
-return perspectiveQueryLinks
+  const { perspectiveQueryLinks } = unwrapApolloResult(
+    await apolloClient.query({
+      query: PERSPECTIVE_LINK_QUERY,
+      variables: { uuid: perspective, query: linkQuery },
+    })
+  );
+  return perspectiveQueryLinks;
 }
 
 export function getChatChannelLinks(

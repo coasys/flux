@@ -113,6 +113,10 @@ export async function createProfile(
         signed_agent: "NA",
       })
     );
+    console.log(
+      "Created profile expression with result",
+      createProfileExpression
+    );
 
     return createProfileExpression;
   } catch (error) {

@@ -30,10 +30,11 @@ export default async function (
     const profileLinks = await getLinks(
       communityId,
       new LinkQuery({
-        source: `${community.perspective.sharedUrl!}://self`,
-        target: "sioc://has_member",
+        source: `${community.neighbourhoodUrl!}://self`,
+        predicate: "sioc://has_member",
       })
     );
+    console.log(profileLinks);
 
     const profileLang = community?.typedExpressionLanguages.find(
       (t) => t.expressionType === ExpressionTypes.ProfileExpression
@@ -41,13 +42,12 @@ export default async function (
 
     if (profileLang) {
       for (const profileLink of profileLinks) {
-        const did = `${profileLang.languageAddress}://${profileLink.author!
-          .did!}`;
+        const did = `${profileLang.languageAddress}://${profileLink.author}`;
 
         //TODO: we should store the whole profile in the store but just the did and then resolve the profile via cache/network
         const profile = await getProfile(
           profileLang.languageAddress,
-          profileLink.author!.did!
+          profileLink.author
         );
 
         if (profile) {

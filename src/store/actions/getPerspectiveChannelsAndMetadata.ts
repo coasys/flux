@@ -35,7 +35,7 @@ export default async (
       variables: {
         uuid: community.perspective.uuid,
         query: new LinkQuery({
-          source: `${community.linkLanguageAddress}://self`,
+          source: `${community.neighbourhoodUrl}://self`,
           predicate: "sioc://has_space",
         }),
       },
@@ -100,7 +100,7 @@ export default async (
       variables: {
         uuid: community.perspective.uuid,
         query: new LinkQuery({
-          source: `${community.linkLanguageAddress}://self`,
+          source: `${community.neighbourhoodUrl}://self`,
           predicate: "rdf://class",
         }),
       },

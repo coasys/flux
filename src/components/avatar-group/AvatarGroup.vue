@@ -6,7 +6,7 @@
           class="avatar-group__avatar"
           v-for="(user, index) in firstUsers"
           :key="index"
-          :hash="user.author.did"
+          :hash="user.author"
           :src="
             user.data.profile['schema:image']
               ? JSON.parse(user.data.profile['schema:image'])[

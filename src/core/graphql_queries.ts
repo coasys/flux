@@ -318,7 +318,7 @@ export const GET_EXPRESSION = gql`
 `;
 
 export const LANGUAGE = gql`
-  query langauge($address: String!) {
+  query language($address: String!) {
     language(address: $address) {
       name
       address

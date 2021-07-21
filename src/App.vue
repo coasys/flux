@@ -136,7 +136,7 @@ export default defineComponent({
               route,
               store,
               perspective,
-              expression!.author!.did!,
+              expression!.author,
               message.body
             );
 

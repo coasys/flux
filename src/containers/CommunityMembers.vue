@@ -16,14 +16,14 @@
       <j-flex
         gap="300"
         v-for="communityMember in filteredCommunityMemberList"
-        :key="communityMember.author.did"
+        :key="communityMember.author"
         inline
         direction="column"
         a="center"
       >
         <j-avatar
           size="lg"
-          :hash="communityMember.author.did"
+          :hash="communityMember.author"
           :src="
             communityMember.data.profile['schema:image']
               ? JSON.parse(communityMember.data.profile['schema:image'])[
