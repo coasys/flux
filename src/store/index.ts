@@ -12,6 +12,7 @@ export interface CommunityState {
   description: string;
   channels: { [x: string]: ChannelState };
   perspective: PerspectiveHandle;
+  currentChannelId: string | undefined | null;
   linkLanguageAddress: string;
   expressionLanguages: string[];
   typedExpressionLanguages: JuntoExpressionReference[];
@@ -97,6 +98,7 @@ export interface ModalsState {
   showEditProfile: boolean;
   showSettings: boolean;
   showInviteCode: boolean;
+  showDisclaimer: boolean;
 }
 
 export interface UIState {
@@ -175,6 +177,7 @@ const vuexLocal = new VuexPersistence<State>({
     ui: {
       showSidebar: state.ui.showSidebar,
       theme: state.ui.theme,
+      modals: { showDisclaimer: state.ui.modals.showDisclaimer },
     },
   }),
 });
@@ -190,15 +193,16 @@ export default createStore({
         showEditProfile: false,
         showSettings: false,
         showInviteCode: false,
+        showDisclaimer: true,
       },
       showSidebar: true,
       showGlobalLoading: false,
       theme: {
         fontSize: "md",
         fontFamily: "default",
-        name: "",
+        name: "light",
         hue: 270,
-        saturation: 50,
+        saturation: 60,
       },
       toast: {
         variant: "",

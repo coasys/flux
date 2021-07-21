@@ -5,35 +5,59 @@ import {
   createWebHashHistory,
 } from "vue-router";
 import MainView from "@/views/main-view/MainView.vue";
-import WelcomeView from "@/views/welcome-view/WelcomeView.vue";
+import SignUp from "@/views/signup/SignUp.vue";
+import LogIn from "@/views/login/LogIn.vue";
 import CommunityView from "@/views/community-view/CommunityView.vue";
-import CommunityWelcomeView from "@/views/community-view/CommunityWelcomeView.vue";
 import ChannelView from "@/views/channel-view/ChannelView.vue";
+import HomeView from "@/views/home-view/HomeView.vue";
+import Settings from "@/containers/Settings.vue";
+import MyCommunities from "@/containers/MyCommunities.vue";
+import MyProfile from "@/containers/MyProfile.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/signup",
     name: "signup",
-    component: WelcomeView,
+    component: SignUp,
+  },
+  {
+    path: "/login",
+    name: "login",
+    component: LogIn,
   },
   {
     path: "/",
-    name: "home",
+    name: "main",
     component: MainView,
     children: [
+      {
+        path: "home",
+        name: "home",
+        component: HomeView,
+        redirect: { name: "my-communities" },
+        children: [
+          {
+            path: "settings",
+            name: "settings",
+            component: Settings,
+          },
+          {
+            path: "communities",
+            name: "my-communities",
+            component: MyCommunities,
+          },
+          {
+            path: "communities",
+            name: "my-profile",
+            component: MyProfile,
+          },
+        ],
+      },
       {
         path: "communities/:communityId",
         name: "community",
         component: CommunityView,
-        // explicitly reroute to default child on named navigation
-        // https://github.com/vuejs/vue-router/issues/822#issuecomment-255685008
-        redirect: { name: "communitywelcome" },
         children: [
-          {
-            path: "",
-            name: "communitywelcome",
-            component: CommunityWelcomeView,
-          },
           {
             path: ":channelId",
             name: "channel",
@@ -50,10 +74,6 @@ const router = createRouter({
     ? createWebHashHistory()
     : createWebHistory(),
   routes,
-});
-
-router.beforeEach((to, from) => {
-  return true;
 });
 
 export default router;

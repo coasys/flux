@@ -89,22 +89,24 @@ export default defineComponent({
 
     watch(
       () => route.params.communityId,
-      async (params: any) => {
+      async (id: any) => {
         if (channelWorkerLoop) {
           channelWorkerLoop.terminate();
         }
         if (groupExpWorkerLoop) {
           groupExpWorkerLoop.terminate();
         }
-        [channelWorkerLoop, groupExpWorkerLoop] = await store.dispatch(
-          "getPerspectiveChannelsAndMetadata",
-          {
-            communityId: params,
-          }
-        );
-        store.dispatch("getCommunityMembers", {
-          communityId: params,
-        });
+        if (id) {
+          [channelWorkerLoop, groupExpWorkerLoop] = await store.dispatch(
+            "getPerspectiveChannelsAndMetadata",
+            {
+              communityId: id,
+            }
+          );
+          store.dispatch("getCommunityMembers", {
+            communityId: id,
+          });
+        }
       },
       { immediate: true }
     );
@@ -112,6 +114,25 @@ export default defineComponent({
     return {
       hasCopied,
     };
+  },
+  watch: {
+    "currentCommunity.perspective": {
+      handler: function (val) {
+        if (!this.currentCommunity) return;
+        const firstChannel = Object.values(this.currentCommunity.channels)[0];
+        const currentChannelId =
+          this.currentCommunity.currentChannelId || firstChannel.perspective;
+
+        this.$router.push({
+          name: "channel",
+          params: {
+            communityId: val,
+            channelId: currentChannelId,
+          },
+        });
+      },
+      immediate: true,
+    },
   },
   methods: {
     ...mapMutations([

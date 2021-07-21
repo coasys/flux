@@ -91,6 +91,7 @@ export default defineComponent({
 .sidebar-layout__main {
   width: 100%;
   max-height: 100vh;
+  overflow-y: auto;
   flex: 1;
   position: relative;
   background: var(--app-main-content-bg-color);

@@ -35,7 +35,7 @@ export interface Payload {
 export default async (
   { commit, getters }: Context,
   { perspectiveName, description }: Payload
-): Promise<void> => {
+): Promise<CommunityState> => {
   try {
     const createSourcePerspective = await addPerspective(perspectiveName);
     console.log("Created source perspective", createSourcePerspective);
@@ -164,8 +164,7 @@ export default async (
     );
     console.log("created channel with result", channel);
 
-    //Add the perspective to community store
-    commit("addCommunity", {
+    const newCommunity = {
       name: perspectiveName,
       description: description,
       linkLanguageAddress: "",
@@ -176,7 +175,9 @@ export default async (
       groupExpressionRef: createExp,
       neighbourhoodUrl: neighbourhood,
       members: [],
-    } as CommunityState);
+      currentChannelId: null,
+    } as CommunityState;
+    commit("addCommunity", newCommunity);
 
     //Get and cache the expression UI for each expression language
     for (const lang of expressionLangs) {
@@ -191,6 +192,8 @@ export default async (
       commit("addExpressionUI", uiData);
       await sleep(40);
     }
+
+    return newCommunity;
   } catch (e) {
     commit("showDangerToast", {
       message: e.message,

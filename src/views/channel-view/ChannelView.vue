@@ -123,9 +123,6 @@ export default defineComponent({
   components: { DynamicScroller, DynamicScrollerItem, MessageItem },
   data() {
     return {
-      cachedChannelId: "",
-      chachedCommunityId: "",
-      lastScrollTop: 0,
       showNewMessagesButton: false,
       noDelayRef: 0,
       currentExpressionPost: "",
@@ -138,53 +135,43 @@ export default defineComponent({
       activeProfile: {} as any,
     };
   },
-  async beforeCreate() {
-    const { linksWorker } = await this.$store.dispatch("loadExpressions", {
-      communityId: this.$route.params.communityId,
-      channelId: this.$route.params.channelId,
-    });
-    this.linksWorker = linksWorker as Worker;
-  },
-  mounted() {
-    // Set cached id's as Vue has a bug where route params
-    // update before the component is unmounted/beforeUnmount
-    this.chachedCommunityId = this.$route.params.communityId as string;
-    this.cachedChannelId = this.$route.params.channelId as string;
-
+  async beforeRouteUpdate(to, from, next) {
     const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-
-    // Next tick waits for everything to be rendered
-    this.$nextTick(() => {
-      if (this.channel.scrollTop === undefined) {
-        this.scrollToBottom("auto");
-      } else {
-        scrollContainer.scrollTop = this.channel.scrollTop as number;
-      }
-
-      const isAtBottom =
-        scrollContainer.scrollHeight - window.innerHeight ===
-        scrollContainer.scrollTop;
-
-      if (isAtBottom && this.channel.hasNewMessages) {
-        this.markAsRead();
-      }
-      if (!isAtBottom && this.channel.hasNewMessages) {
-        this.showNewMessagesButton = true;
-      }
+    this.$store.commit("setChannelScrollTop", {
+      communityId: from.params.communityId,
+      channelId: from.params.channelId,
+      value: scrollContainer.scrollTop as any,
     });
-  },
-  beforeUnmount() {
+
     if (this.linksWorker) {
       this.linksWorker!.terminate();
     }
-    const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-    this.$store.commit("setChannelScrollTop", {
-      communityId: this.community.perspective.uuid,
-      channelId: this.channel.perspective.uuid,
-      value: scrollContainer.scrollTop as any,
-    });
+
+    next();
   },
   watch: {
+    $route: {
+      handler: async function (to) {
+        if (!to.params.channelId) return;
+
+        const { linksWorker } = await this.$store.dispatch("loadExpressions", {
+          communityId: to.params.communityId,
+          channelId: to.params.channelId,
+        });
+
+        this.linksWorker = linksWorker;
+
+        this.$store.commit("setCurrentChannelId", {
+          communityId: to.params.communityId,
+          channelId: to.params.channelId,
+        });
+
+        // TODO: On first mount view takes too long to render
+        // So we don't have the full height to scroll to the right place
+        this.scrollToLatestPos();
+      },
+      immediate: true,
+    },
     "channel.hasNewMessages": function (hasMessages) {
       if (hasMessages) {
         // If this channel is not in view, and only kept alive
@@ -252,15 +239,13 @@ export default defineComponent({
     community(): CommunityState {
       const { communityId } = this.$route.params;
 
-      return this.$store.getters.getCommunity(
-        this.chachedCommunityId || communityId
-      );
+      return this.$store.getters.getCommunity(communityId);
     },
     channel(): ChannelState {
       const { communityId, channelId } = this.$route.params;
       return this.$store.getters.getChannel({
-        channelId: this.cachedChannelId || channelId,
-        communityId: this.chachedCommunityId || communityId,
+        channelId: channelId,
+        communityId: communityId,
       });
     },
     profileLanguage(): string {
@@ -271,6 +256,29 @@ export default defineComponent({
     },
   },
   methods: {
+    scrollToLatestPos() {
+      // Next tick waits for everything to be rendered
+      this.$nextTick(() => {
+        const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
+        if (!scrollContainer) return;
+        if (this.channel.scrollTop === undefined) {
+          this.scrollToBottom("auto");
+        } else {
+          scrollContainer.scrollTop = this.channel.scrollTop as number;
+        }
+
+        const isAtBottom =
+          scrollContainer.scrollHeight - window.innerHeight ===
+          scrollContainer.scrollTop;
+
+        if (isAtBottom && this.channel.hasNewMessages) {
+          this.markAsRead();
+        }
+        if (!isAtBottom && this.channel.hasNewMessages) {
+          this.showNewMessagesButton = true;
+        }
+      });
+    },
     handleEditorChange(e: any) {
       //console.log(e.target.json);
       this.currentExpressionPost = e.target.value;
@@ -422,7 +430,9 @@ export default defineComponent({
 .channel-view__header {
   position: sticky;
   top: 0;
+  min-height: 74px;
   height: 74px;
+  max-height: 74px;
   padding: var(--j-space-400) var(--j-space-500);
   display: flex;
   align-items: center;
@@ -450,7 +460,7 @@ export default defineComponent({
   border-top: 1px solid var(--app-channel-border-color);
   background: var(--app-channel-footer-bg-color);
   position: sticky;
-  padding: var(--j-space-400);
+  padding: var(--j-space-500);
   bottom: 0;
 }
 

@@ -12,13 +12,9 @@
       </j-text>
     </div>
 
-    <j-tabs
-      size="lg"
-      :value="tabView"
-      @change="(e) => (tabView = e.target.value)"
-    >
-      <j-tab-item>Create</j-tab-item>
-      <j-tab-item>Join</j-tab-item>
+    <j-tabs :value="tabView" @change="(e) => (tabView = e.target.value)">
+      <j-tab-item size="lg" variant="button">Create</j-tab-item>
+      <j-tab-item size="lg" variant="button">Join</j-tab-item>
     </j-tabs>
     <j-flex direction="column" gap="500" v-if="tabView === 'Create'">
       <avatar-upload icon="people-fill" />
@@ -76,6 +72,7 @@
 <script lang="ts">
 import { isValid } from "@/utils/validation";
 import { defineComponent } from "vue";
+import { ChannelState, CommunityState } from "@/store";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 
 export default defineComponent({
@@ -123,10 +120,22 @@ export default defineComponent({
           perspectiveName: this.newCommunityName,
           description: this.newCommunityDesc,
         })
-        .then(() => {
+        .then((community: CommunityState) => {
           this.$emit("submit");
           this.newCommunityName = "";
           this.newCommunityDesc = "";
+
+          const firstChannel = Object.values(
+            community.channels
+          )[0] as ChannelState;
+
+          this.$router.push({
+            name: "channel",
+            params: {
+              communityId: community.perspective,
+              channelId: firstChannel.perspective,
+            },
+          });
         })
         .finally(() => {
           this.isCreatingCommunity = false;

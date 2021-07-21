@@ -250,6 +250,14 @@ export default {
     state.ui.globalError = payload;
   },
 
+  setCurrentChannelId(
+    state: State,
+    payload: { communityId: string; channelId: string }
+  ): void {
+    const { communityId, channelId } = payload;
+    state.communities[communityId].currentChannelId = channelId;
+  },
+
   setShowCreateCommunity(state: State, payload: boolean): void {
     state.ui.modals.showCreateCommunity = payload;
   },
@@ -268,6 +276,10 @@ export default {
 
   setShowEditProfile(state: State, payload: boolean): void {
     state.ui.modals.showEditProfile = payload;
+  },
+
+  setShowDisclaimer(state: State, payload: boolean): void {
+    state.ui.modals.showDisclaimer = payload;
   },
 
   setShowSettings(state: State, payload: boolean): void {
