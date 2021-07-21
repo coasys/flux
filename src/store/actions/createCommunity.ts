@@ -164,6 +164,13 @@ export default async (
     const newCommunity = {
       name: perspectiveName,
       description: description,
+      theme: {
+        fontSize: "md",
+        fontFamily: "default",
+        name: "light",
+        hue: 270,
+        saturation: 60,
+      },
       currentChannelId: null,
       linkLanguageAddress: publish.linkLanguages![0]!.address!,
       channels: { [channel.perspective]: channel },
@@ -192,6 +199,7 @@ export default async (
       await sleep(40);
     }
 
+    // @ts-ignore
     return newCommunity;
   } catch (e) {
     commit("showDangerToast", {

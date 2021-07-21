@@ -22,8 +22,14 @@
     </aside>
     <div class="settings__content">
       <theme-editor
-        v-if="currentView === 'theme-editor'"
-        @update="(theme) => updateGlobalTheme(theme)"
+        v-if="currentView === 'theme-editor' && theme"
+        @update="
+          (theme) =>
+            updateCommunityTheme({
+              communityId: $route.params.communityId,
+              theme: { ...theme },
+            })
+        "
         :theme="theme"
       />
     </div>
@@ -31,9 +37,9 @@
 </template>
 
 <script lang="ts">
+import { ThemeState } from "@/store";
 import { defineComponent } from "vue";
 import { mapActions } from "vuex";
-import { ThemeState } from "@/store";
 import ThemeEditor from "./ThemeEditor.vue";
 
 export default defineComponent({
@@ -44,11 +50,12 @@ export default defineComponent({
     };
   },
   methods: {
-    ...mapActions(["updateGlobalTheme"]),
+    ...mapActions(["updateCommunityTheme"]),
   },
   computed: {
     theme(): ThemeState {
-      return this.$store.state.ui.globalTheme;
+      const communityId: any = this.$route.params.communityId;
+      return this.$store.state.communities[communityId].theme;
     },
   },
 });

@@ -10,6 +10,9 @@ import updateProfile from "./updateProfile";
 import getCommunityMembers from "./getCommunityMembers";
 import loadExpressions from "./loadExpressions";
 import createExpression from "./createExpression";
+import updateCommunityTheme from "./updateCommunityTheme";
+import updateGlobalTheme from "./updateGlobalTheme";
+import changeCurrentTheme from "./changeCurrentTheme";
 
 export default {
   createChannel,
@@ -24,4 +27,7 @@ export default {
   getCommunityMembers,
   loadExpressions,
   createExpression,
+  updateCommunityTheme,
+  updateGlobalTheme,
+  changeCurrentTheme,
 };
