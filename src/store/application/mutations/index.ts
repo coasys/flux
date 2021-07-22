@@ -8,6 +8,21 @@ import {
 } from "@/store/types";
 
 export default {
+  getLanguagePath(state: ApplicationState): string {
+    return state.localLanguagesPath;
+  },
+
+  getDatabasePerspective(state: ApplicationState): string {
+    return state.databasePerspective;
+  },
+
+  getApplicationStartTime(state: ApplicationState): Date {
+    return state.applicationStartTime;
+  },
+
+  getLanguageUI: (state: ApplicationState) => (language: string) => {
+    return state.expressionUI[language];
+  },
   addExpressionUI(state: ApplicationState, payload: ExpressionUIIcons): void {
     state.expressionUI[payload.languageAddress] = payload;
   },
