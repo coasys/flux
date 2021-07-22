@@ -54,7 +54,7 @@
 <script lang="ts">
 import { defineComponent, onBeforeMount } from "vue";
 import { mapMutations } from "vuex";
-import { Profile } from "@/store";
+import { Profile } from "@/store/types";
 
 export default defineComponent({
   setup() {

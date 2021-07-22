@@ -1,5 +1,5 @@
 import { getExpressionNoCache } from "@/core/queries/getExpression";
-import { Profile } from "@/store";
+import { Profile } from "@/store/types";
 import type { Expression } from "@perspect3vism/ad4m-types";
 import { TimeoutCache } from "./timeoutCache";
 

@@ -1,10 +1,10 @@
 import { getProfile } from "@/utils/profileHelpers";
 import { getLinks } from "@/core/queries/getLinks";
 import { Commit } from "vuex";
-import { ExpressionTypes, State } from "..";
+import { ExpressionTypes, State } from "../..";
 import type { Expression } from "@perspect3vism/ad4m-types";
 import { LinkQuery } from "@perspect3vism/ad4m-types";
-import { TimeoutCache } from "../../utils/timeoutCache";
+import { TimeoutCache } from "../../../utils/timeoutCache";
 
 export interface Context {
   commit: Commit;

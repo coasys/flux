@@ -79,7 +79,7 @@ import CreateChannel from "@/containers/CreateChannel.vue";
 import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunitySettings from "@/containers/CommunitySettings.vue";
 
-import { CommunityState, ModalsState } from "@/store";
+import { CommunityState, ModalsState } from "@/store/types";
 import { PerspectiveHandle } from "@perspect3vism/ad4m-types";
 
 export default defineComponent({

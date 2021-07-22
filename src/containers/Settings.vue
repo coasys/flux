@@ -35,7 +35,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions } from "vuex";
-import { ThemeState } from "@/store";
+import { ThemeState } from "@/store/types";
 import ThemeEditor from "./ThemeEditor.vue";
 
 export default defineComponent({

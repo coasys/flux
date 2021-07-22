@@ -6,7 +6,7 @@ import { createStore, Store } from "vuex";
 import mutations from "@/store/mutations";
 import actions from "@/store/actions";
 import getters from "@/store/getters";
-import { State } from "@/store";
+import { State } from "@/store/types";
 
 describe("Store Mutations", async () => {
   let store: Store<State>;
@@ -101,8 +101,9 @@ describe("Store Mutations", async () => {
     );
 
     expect(
-      Object.values(store.state.communities[community.perspective.uuid].channels)
-        .length
+      Object.values(
+        store.state.communities[community.perspective.uuid].channels
+      ).length
     ).toBe(1);
 
     store.commit("addChannel", {
@@ -111,8 +112,9 @@ describe("Store Mutations", async () => {
     });
 
     expect(
-      Object.values(store.state.communities[community.perspective.uuid].channels)
-        .length
+      Object.values(
+        store.state.communities[community.perspective.uuid].channels
+      ).length
     ).toBe(2);
   });
 

@@ -27,7 +27,7 @@
 <script lang="ts">
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { defineComponent } from "vue";
-import { Profile } from "@/store";
+import { Profile } from "@/store/types";
 
 export default defineComponent({
   emits: ["cancel", "submit"],

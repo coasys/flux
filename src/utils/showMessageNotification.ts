@@ -1,4 +1,9 @@
-import { ChannelState, CommunityState, ExpressionTypes, State } from "@/store";
+import {
+  ChannelState,
+  CommunityState,
+  ExpressionTypes,
+  State,
+} from "@/store/types";
 import { RouteLocationNormalizedLoaded, Router } from "vue-router";
 import { Store } from "vuex";
 import { getProfile } from "./profileHelpers";

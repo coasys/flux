@@ -1,4 +1,4 @@
-import { ChannelState, FeedType, MembraneType } from "@/store";
+import { ChannelState, FeedType, MembraneType } from "@/store/types";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
 import { findNameFromMeta } from "./findNameFromMeta";
 import { joinNeighbourhood } from "../mutations/joinNeighbourhood";
@@ -9,15 +9,9 @@ export async function joinChannelFromSharedLink(
 ): Promise<ChannelState> {
   console.log("Starting sharedperspective join");
   const neighbourhood = await joinNeighbourhood(url);
-  console.log(
-    new Date(),
-    "Joined neighbourhood with result",
-    neighbourhood
-  );
+  console.log(new Date(), "Joined neighbourhood with result", neighbourhood);
 
-  const perspectiveSnapshot = await getPerspectiveSnapshot(
-    neighbourhood.uuid
-  );
+  const perspectiveSnapshot = await getPerspectiveSnapshot(neighbourhood.uuid);
 
   const typedExpressionLanguages = await getTypedExpressionLanguages(
     perspectiveSnapshot!,

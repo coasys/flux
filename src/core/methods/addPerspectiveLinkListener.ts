@@ -1,4 +1,3 @@
-
 // import { useQuery } from "@vue/apollo-composable";
 // import { useRoute, useRouter } from "vue-router";
 // import { gql } from "@apollo/client/core";
@@ -9,7 +8,7 @@
 // import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 // import { LinkExpression } from "@perspect3vism/ad4m-executor";
 // import { AGENT_STATUS, GET_EXPRESSION } from "@/core/graphql_queries";
-// import { CommunityState, ModalsState, ToastState } from "@/store";
+// import { CommunityState, ModalsState, ToastState } from "@/store/types";
 // import showMessageNotification from "@/utils/showMessageNotification";
 // import { print } from "graphql/language/printer";
 // import { AgentStatus } from "@perspect3vism/ad4m-types";
@@ -83,7 +82,7 @@
 //                     data { source, predicate, target }
 //                     proof { valid, invalid, signature, key }
 //                   }
-//               }   
+//               }
 //           `,
 //       })
 //       .subscribe({

@@ -1,5 +1,5 @@
 import { Commit } from "vuex";
-import { CommunityState, ChannelState } from "@/store";
+import { CommunityState, ChannelState } from "@/store/types";
 import { print } from "graphql/language/printer";
 import { joinChannelFromSharedLink } from "@/core/methods/joinChannelFromSharedLink";
 import { expressionGetRetries, expressionGetDelayMs } from "@/core/juntoTypes";

@@ -1,4 +1,4 @@
-import { State } from "@/store";
+import { State } from "@/store/types";
 import actions from "@/store/actions";
 import getters from "@/store/getters";
 import mutations from "@/store/mutations";

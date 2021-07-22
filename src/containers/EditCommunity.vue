@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts">
-import { CommunityState } from "@/store";
+import { CommunityState } from "@/store/types";
 import { defineComponent } from "vue";
 
 export default defineComponent({

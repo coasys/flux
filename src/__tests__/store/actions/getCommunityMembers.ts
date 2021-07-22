@@ -1,5 +1,5 @@
 import "@testing-library/vue";
-import { State } from "@/store";
+import { State } from "@/store/types";
 import actions from "@/store/actions";
 import getters from "@/store/getters";
 import mutations from "@/store/mutations";
@@ -48,7 +48,7 @@ describe("Get Community Members", () => {
             name: "",
             hue: 270,
             saturation: 50,
-            fontSize: "md"
+            fontSize: "md",
           },
           toast: {
             variant: "",

@@ -4,7 +4,7 @@ import {
   FeedType,
   MembraneType,
   JuntoExpressionReference,
-} from "@/store";
+} from "@/store/types";
 import { v4 } from "uuid";
 import path from "path";
 import { Perspective, Link } from "@perspect3vism/ad4m-types";

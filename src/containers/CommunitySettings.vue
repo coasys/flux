@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts">
-import { ThemeState } from "@/store";
+import { ThemeState } from "@/store/types";
 import { defineComponent } from "vue";
 import { mapActions } from "vuex";
 import ThemeEditor from "./ThemeEditor.vue";

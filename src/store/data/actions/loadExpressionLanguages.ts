@@ -1,6 +1,6 @@
 import { Commit } from "vuex";
 
-import { ExpressionUIIcons } from "@/store";
+import { ExpressionUIIcons } from "@/store/types";
 import { getLanguages } from "@/core/queries/getLanguages";
 
 export interface Context {

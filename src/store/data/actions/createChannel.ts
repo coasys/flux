@@ -1,7 +1,7 @@
 import { Commit } from "vuex";
 import { createChannel } from "@/core/methods/createChannel";
 
-import { ChannelState, MembraneType, CommunityState } from "@/store";
+import { ChannelState, MembraneType, CommunityState } from "@/store/types";
 
 export interface Context {
   commit: Commit;

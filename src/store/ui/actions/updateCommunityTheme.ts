@@ -1,5 +1,5 @@
 import { Commit } from "vuex";
-import { ThemeState } from "@/store";
+import { ThemeState } from "@/store/types";
 import { setTheme } from "@/utils/themeHelper";
 
 export interface Context {

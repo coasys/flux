@@ -97,7 +97,7 @@ import {
   CommunityState,
   ExpressionAndRef,
   ExpressionTypes,
-} from "@/store";
+} from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
 import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
 import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css";

@@ -39,13 +39,13 @@
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
 import { gql } from "@apollo/client/core";
-import { defineComponent, watch, computed } from "vue";
+import { defineComponent, computed } from "vue";
 import { useStore } from "vuex";
 import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { AGENT_STATUS, GET_EXPRESSION } from "@/core/graphql_queries";
-import { CommunityState, ModalsState, ToastState } from "@/store";
+import { CommunityState, ModalsState, ToastState } from "@/store/types";
 import showMessageNotification from "@/utils/showMessageNotification";
 import { print } from "graphql/language/printer";
 import { AgentStatus, LinkExpression } from "@perspect3vism/ad4m-types";

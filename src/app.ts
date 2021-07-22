@@ -37,6 +37,6 @@ createApp({
   },
   render: () => h(App),
 })
-  .use(store)
+  .use(store.original)
   .use(router)
   .mount("#app");

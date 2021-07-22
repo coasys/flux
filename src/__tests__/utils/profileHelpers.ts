@@ -1,4 +1,4 @@
-import { ExpressionTypes } from "@/store";
+import { ExpressionTypes } from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
 import { TimeoutCache } from "@/utils/timeoutCache";
 import community from "../fixtures/community.json";

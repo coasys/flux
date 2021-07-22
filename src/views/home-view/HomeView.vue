@@ -52,7 +52,7 @@
 import { defineComponent } from "vue";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 
-import { CommunityState } from "@/store";
+import { CommunityState } from "@/store/types";
 
 export default defineComponent({
   name: "HomeView",

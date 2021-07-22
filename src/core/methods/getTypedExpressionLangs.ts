@@ -3,7 +3,7 @@ import {
   JuntoExpressionReference,
   ExpressionTypes,
   ExpressionUIIcons,
-} from "@/store";
+} from "@/store/types";
 import { Perspective } from "@perspect3vism/ad4m-types";
 import { Store } from "vuex";
 

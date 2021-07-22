@@ -74,7 +74,7 @@
 <script lang="ts">
 import { isValid } from "@/utils/validation";
 import { defineComponent } from "vue";
-import { ChannelState, CommunityState } from "@/store";
+import { ChannelState, CommunityState } from "@/store/types";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 
 export default defineComponent({

@@ -1,4 +1,4 @@
-import { ThemeState } from "@/store";
+import { ThemeState } from "@/store/types";
 
 export function setTheme(theme: ThemeState): void {
   document.documentElement.style.setProperty(

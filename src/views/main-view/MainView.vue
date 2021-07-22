@@ -68,7 +68,7 @@ import CreateCommunity from "@/containers/CreateCommunity.vue";
 import EditProfile from "@/containers/EditProfile.vue";
 import Settings from "@/containers/Settings.vue";
 import { mapMutations } from "vuex";
-import { ModalsState } from "@/store";
+import { ModalsState } from "@/store/types";
 
 export default defineComponent({
   name: "MainAppView",
