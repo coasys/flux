@@ -25,7 +25,7 @@ export async function createChannel(
   console.debug("Created new perspective with result", perspective);
   const socialContextLanguage = await createUniqueHolochainLanguage(
     path.join(languagePath, "social-context-channel"),
-    "social-context-channel",
+    "social-context",
     v4().toString()
   );
   console.debug(
