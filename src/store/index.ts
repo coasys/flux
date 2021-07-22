@@ -8,29 +8,9 @@ import actions from "./actions";
 import mutations from "./mutations";
 import { State } from "./types";
 
-const persistApplication = new VuexPersistence<State>({
+const vuexLocal = new VuexPersistence({
   storage: window.localStorage,
-  modules: ["application"],
-  reducer: (state) => ({
-    communities: state.communities,
-    localLanguagesPath: state.localLanguagesPath,
-    databasePerspective: state.databasePerspective,
-    expressionUI: state.expressionUI,
-    userProfile: state.userProfile,
-    agentStatus: state.agentStatus,
-    ui: {
-      showSidebar: state.ui.showSidebar,
-      globalTheme: state.ui.globalTheme,
-      currentTheme: state.ui.currentTheme,
-      modals: { showDisclaimer: state.ui.modals.showDisclaimer },
-    },
-  }),
 });
-
-const persistUser = 
-
-const persistData = 
-
 
 const {
   store,
