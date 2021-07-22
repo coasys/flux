@@ -1,12 +1,7 @@
 import mutations from "./mutations";
 import actions from "./actions";
 import getters from "./getters";
-import { LocalCommunityState, NeighbourhoodState } from "@/store/types";
-
-export interface DataState {
-  communities: { [perspectiveUuid: string]: LocalCommunityState };
-  neighbourhoods: { [perspectiveUuid: string]: NeighbourhoodState };
-}
+import { DataState } from "@/store/types";
 
 export default {
   state: (): DataState => ({

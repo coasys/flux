@@ -6,9 +6,14 @@ import type {
 import { ExpressionRef, PerspectiveHandle } from "@perspect3vism/ad4m-types";
 
 export interface State {
-  neighbourhoods: { [perspectiveUuid: string]: NeighbourhoodState };
-  communities: { [perspectiveUuid: string]: LocalCommunityState };
+  application: ApplicationState;
+  data: DataState;
   user: UserState;
+}
+
+export interface DataState {
+  communities: { [perspectiveUuid: string]: LocalCommunityState };
+  neighbourhoods: { [perspectiveUuid: string]: NeighbourhoodState };
 }
 
 export interface UserState {
