@@ -1,12 +1,8 @@
-import { Commit } from "vuex";
-import { JuntoExpressionReference, ExpressionTypes, CommunityState } from "..";
 import { createExpression } from "@/core/mutations/createExpression";
 import { createLink } from "@/core/mutations/createLink";
 
-export interface Context {
-  commit: Commit;
-  getters: any;
-}
+import { rootActionContext, rootGetterContext } from "@/store/index";
+import { ExpressionTypes } from "@/store/types";
 
 export interface Payload {
   communityId: string;
@@ -15,16 +11,19 @@ export interface Payload {
 }
 
 export default async function updateCommunity(
-  { commit, getters }: Context,
+  context: any,
   { communityId, name, description }: Payload
 ): Promise<void> {
-  const community: CommunityState = getters.getCommunity(communityId);
+  const { getters } = rootGetterContext(context);
+  const { commit } = rootActionContext(context);
+
+  const community = getters.getCommunity(communityId);
 
   try {
-    const groupExpressionLang = community.typedExpressionLanguages.find(
-      (val: JuntoExpressionReference) =>
-        val.expressionType == ExpressionTypes.GroupExpression
-    );
+    const groupExpressionLang =
+      community.neighbourhood.typedExpressionLanguages.find(
+        (val) => val.expressionType == ExpressionTypes.GroupExpression
+      );
 
     if (groupExpressionLang != undefined) {
       console.log("Found group exp lang", groupExpressionLang);
@@ -38,15 +37,18 @@ export default async function updateCommunity(
         groupExpression
       );
 
-      const addGroupExpLink = await createLink(community.perspective.uuid, {
-        source: `${community.neighbourhoodUrl}://self`,
-        target: groupExpression,
-        predicate: "rdf://class",
-      });
+      const addGroupExpLink = await createLink(
+        community.neighbourhood.perspective.uuid,
+        {
+          source: `${community.neighbourhood.neighbourhoodUrl}://self`,
+          target: groupExpression,
+          predicate: "rdf://class",
+        }
+      );
       console.log("Created group expression link", addGroupExpLink);
 
-      commit("updateCommunityMetadata", {
-        communityId: community.perspective.uuid,
+      commit.updateCommunityMetadata({
+        communityId: community.neighbourhood.perspective.uuid,
         name: name,
         description: description,
         groupExpressionRef: groupExpression,
@@ -55,7 +57,7 @@ export default async function updateCommunity(
       throw Error("Expected to find group expression language for group");
     }
   } catch (e) {
-    commit("showDangerToast", {
+    commit.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

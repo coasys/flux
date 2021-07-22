@@ -1,15 +1,9 @@
-import { Commit } from "vuex";
 import hash from "object-hash";
 import { print } from "graphql/language/printer";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
-import { State } from "..";
 import { LinkQuery } from "@perspect3vism/ad4m-types";
 
-export interface Context {
-  commit: Commit;
-  getters: any;
-  state: State;
-}
+import { rootActionContext, rootGetterContext } from "@/store/index";
 
 export interface Payload {
   communityId: string;
@@ -24,15 +18,17 @@ export interface LoadExpressionResult {
 
 /// Function that polls for new messages on a channel using a web worker, if a message link is found then another web worker is spawned to retry getting the expression until its found
 export default async function (
-  { getters, commit, state }: Context,
+  context: any,
   { channelId, communityId, from, to }: Payload
 ): Promise<LoadExpressionResult> {
+  const { getters } = rootGetterContext(context);
+  const { commit, state } = rootActionContext(context);
   try {
     const fromDate = from || getters.getApplicationStartTime;
     const untilDate = to || new Date("August 19, 1975 23:15:30").toISOString();
 
-    const community = state.communities[communityId];
-    const channel = community?.channels[channelId];
+    const neighbourhood = state.data.neighbourhoods[communityId];
+    const channel = state.data.neighbourhoods[channelId];
     let latestLinkTimestamp: Date | null = null;
 
     const linksWorker = new Worker("pollingWorker.js");
@@ -92,12 +88,11 @@ export default async function (
                   //Expression not null so kill the worker to stop future polling
                   expressionWorker.terminate();
                   //Add the link and message to the store
-                  commit("addMessage", {
+                  commit.addMessage({
                     channelId,
                     communityId,
                     link: link,
                     expression: expression,
-                    linkLanguage: channel.linkLanguageAddress,
                   });
 
                   //Compare the timestamp of this link with the current highest
@@ -133,7 +128,7 @@ export default async function (
 
     return { linksWorker };
   } catch (e) {
-    commit("showDangerToast", {
+    commit.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

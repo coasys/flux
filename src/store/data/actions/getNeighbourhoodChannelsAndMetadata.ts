@@ -1,15 +1,10 @@
-import { Commit } from "vuex";
-import { CommunityState, ChannelState } from "@/store/types";
 import { print } from "graphql/language/printer";
 import { joinChannelFromSharedLink } from "@/core/methods/joinChannelFromSharedLink";
 import { expressionGetRetries, expressionGetDelayMs } from "@/core/juntoTypes";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 import { LinkQuery } from "@perspect3vism/ad4m-types";
 
-export interface Context {
-  commit: Commit;
-  getters: any;
-}
+import { rootActionContext, rootGetterContext } from "@/store/index";
 
 export interface Payload {
   communityId: string;
@@ -17,13 +12,15 @@ export interface Payload {
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async (
-  { commit, getters }: Context,
+  context: any,
   { communityId }: Payload
 ): Promise<[Worker, Worker]> => {
+  console.log("Getting community channel links for community: ", communityId);
+  const { getters } = rootGetterContext(context);
+  const { commit } = rootActionContext(context);
   try {
     //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button
-    const community: CommunityState = getters.getCommunity(communityId);
-    console.log("Getting community channel links for community: ", communityId);
+    const community = getters.getCommunity(communityId);
     const channelLinksWorker = new Worker("pollingWorker.js");
     //Use global isExecuting variable so that message callbacks on channel worker do not execute at the same time and both mutate state
     let isExecuting = false;
@@ -33,9 +30,9 @@ export default async (
       interval: 5000,
       query: print(PERSPECTIVE_LINK_QUERY),
       variables: {
-        uuid: community.perspective.uuid,
+        uuid: community.neighbourhood.perspective.uuid,
         query: new LinkQuery({
-          source: `${community.neighbourhoodUrl}://self`,
+          source: `${community.neighbourhood.neighbourhoodUrl}://self`,
           predicate: "sioc://has_space",
         }),
       },
@@ -57,9 +54,11 @@ export default async (
             for (let i = 0; i < channelLinks.length; i++) {
               //Check that the channel is not in the store
               if (
-                Object.values(community.channels).find(
-                  (element: ChannelState) =>
-                    element.neighbourhoodUrl === channelLinks[i].data!.target
+                Object.values(
+                  community.neighbourhood.linkedNeighbourhoods
+                ).find(
+                  (neighbourhoodUrl) =>
+                    neighbourhoodUrl === channelLinks[i].data!.target
                 ) == undefined
               ) {
                 console.log(
@@ -74,11 +73,11 @@ export default async (
                 console.log(
                   "trying to join channel",
                   channel,
-                  community.perspective.uuid
+                  community.neighbourhood.perspective.uuid
                 );
                 //Add the channel to the store
-                commit("addChannel", {
-                  communityId: community.perspective.uuid,
+                commit.addChannel({
+                  communityId: community.neighbourhood.perspective.uuid,
                   channel: channel,
                 });
               }
@@ -98,13 +97,13 @@ export default async (
       interval: 5000,
       query: print(PERSPECTIVE_LINK_QUERY),
       variables: {
-        uuid: community.perspective.uuid,
+        uuid: community.neighbourhood.perspective.uuid,
         query: new LinkQuery({
-          source: `${community.neighbourhoodUrl}://self`,
+          source: `${community.neighbourhood.neighbourhoodUrl}://self`,
           predicate: "rdf://class",
         }),
       },
-      name: `Get group expression links ${community.name}`,
+      name: `Get group expression links ${community.neighbourhood.name}`,
     });
 
     groupExpressionWorker.onerror = function (e) {
@@ -119,7 +118,7 @@ export default async (
         if (groupExpressionLinks != null && groupExpressionLinks.length > 0) {
           //Check that the group expression ref is not in the store
           if (
-            community.groupExpressionRef !=
+            community.neighbourhood.groupExpressionRef !=
             groupExpressionLinks[groupExpressionLinks.length - 1].data!.target!
           ) {
             const expressionWorker = new Worker("pollingWorker.js");
@@ -152,8 +151,8 @@ export default async (
                   groupExpData
                 );
                 //Update the community with the new group data
-                commit("updateCommunityMetadata", {
-                  communityId: community.perspective.uuid,
+                commit.updateCommunityMetadata({
+                  communityId: community.neighbourhood.perspective.uuid,
                   name: groupExpData["name"],
                   description: groupExpData["description"],
                   groupExpressionRef:

@@ -1,18 +1,15 @@
-import { Commit } from "vuex";
-
-import { ExpressionUIIcons } from "@/store/types";
 import { getLanguages } from "@/core/queries/getLanguages";
 
-export interface Context {
-  commit: Commit;
-  getters: any;
-}
+import { rootActionContext, rootGetterContext } from "@/store/index";
+import { ExpressionUIIcons } from "@/store/types";
 
 export interface Payload {
   joiningLink: string;
 }
 
-export default async ({ commit, getters }: Context): Promise<void> => {
+export default async (context: any): Promise<void> => {
+  const { getters } = rootGetterContext(context);
+  const { commit } = rootActionContext(context);
   try {
     const languages = await getLanguages();
 
@@ -26,13 +23,13 @@ export default async ({ commit, getters }: Context): Promise<void> => {
               viewIcon: language!.icon!.code!,
               name: language!.name!,
             };
-            commit("addExpressionUI", uiData);
+            commit.addExpressionUI(uiData);
           }
         }
       }
     }
   } catch (e) {
-    commit("showDangerToast", {
+    commit.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

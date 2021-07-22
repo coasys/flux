@@ -1,14 +1,10 @@
 import { createProfile } from "@/core/methods/createProfile";
-import { Commit } from "vuex";
-import { ExpressionTypes, State, Profile, CommunityState } from "..";
-import { TimeoutCache } from "../../utils/timeoutCache";
+import { TimeoutCache } from "@/utils/timeoutCache";
 import type { Expression } from "@perspect3vism/ad4m-types";
 import { getExpression } from "@/core/queries/getExpression";
 
-export interface Context {
-  commit: Commit;
-  state: State;
-}
+import { ExpressionTypes, Profile } from "@/store/types";
+import { rootActionContext, rootGetterContext } from "@/store/index";
 
 export interface Payload {
   username: string;
@@ -16,25 +12,35 @@ export interface Payload {
   thumbnail: string;
 }
 
-export default async (
-  { commit, state }: Context,
-  payload: Payload
-): Promise<any> => {
-  commit("setUserProfile", payload);
+export default async (context: any, payload: Payload): Promise<void> => {
+  const { getters } = rootGetterContext(context);
+  const { commit, state } = rootActionContext(context);
+
+  const currentProfile = getters.getProfile;
+  const newProfile = {
+    username: currentProfile?.username,
+    email: currentProfile?.email,
+    givenName: currentProfile?.givenName,
+    familyName: currentProfile?.familyName,
+    profilePicture: currentProfile?.profilePicture,
+    thumbnailPicture: currentProfile?.thumbnailPicture,
+  } as Profile;
+  newProfile.username = payload.username;
+  newProfile.profilePicture = payload.profilePicture;
+  commit.setUserProfile(newProfile);
 
   try {
-    const user: Profile | null = state.userProfile;
+    const user = state.user.profile;
 
-    const communities: CommunityState[] = Object.values(state.communities);
+    const neighbourhoods = Object.values(state.data.neighbourhoods);
     const cache = new TimeoutCache<Expression>(1000 * 60 * 5);
 
-    for (const community of communities) {
-      const profileExpression = community.typedExpressionLanguages.find(
+    for (const neighbourhood of neighbourhoods) {
+      const profileExpression = neighbourhood.typedExpressionLanguages.find(
         (t) => t.expressionType == ExpressionTypes.ProfileExpression
       );
-      const didExpression = `${
-        profileExpression!.languageAddress
-      }://${state.userDid!}`;
+      const didExpression = `${profileExpression!.languageAddress}://${state
+        .user.agent.did!}`;
 
       console.log("profileExpression: ", profileExpression);
 
@@ -62,14 +68,14 @@ export default async (
       } else {
         const errorMessage =
           "Expected to find profile expression language for this community";
-        commit("showDangerToast", {
+        commit.showDangerToast({
           message: errorMessage,
         });
         throw Error(errorMessage);
       }
     }
   } catch (e) {
-    commit("showDangerToast", {
+    commit.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

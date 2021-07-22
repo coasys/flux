@@ -4,6 +4,7 @@ import type {
   LinkExpression,
 } from "@perspect3vism/ad4m-types";
 import { ExpressionRef, PerspectiveHandle } from "@perspect3vism/ad4m-types";
+import { Commit } from "vuex";
 
 export interface State {
   application: ApplicationState;
@@ -174,4 +175,9 @@ export interface JuntoExpressionReference {
 export interface AddChannel {
   communityId: string;
   channel: ChannelState;
+}
+
+export interface Context {
+  commit: Commit;
+  getters: any;
 }

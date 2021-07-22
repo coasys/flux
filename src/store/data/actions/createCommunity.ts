@@ -1,6 +1,5 @@
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
-import { Commit } from "vuex";
 import { createChannel } from "@/core/methods/createChannel";
 import { createProfile } from "@/core/methods/createProfile";
 import { createExpression } from "@/core/mutations/createExpression";
@@ -9,7 +8,6 @@ import { createNeighbourhood } from "@/core/mutations/createNeighbourhood";
 import { addPerspective } from "@/core/mutations/addPerspective";
 import { createLink } from "@/core/mutations/createLink";
 import { getLanguage } from "@/core/queries/getLanguage";
-import { getPerspective } from "@/core/queries/getPerspective";
 import sleep from "@/utils/sleep";
 
 import {
@@ -21,11 +19,7 @@ import {
   CommunityState,
 } from "@/store/types";
 import { Perspective } from "@perspect3vism/ad4m-types";
-
-export interface Context {
-  commit: Commit;
-  getters: any;
-}
+import { rootGetterContext, rootActionContext } from "@/store/index";
 
 export interface Payload {
   perspectiveName: string;
@@ -33,9 +27,11 @@ export interface Payload {
 }
 
 export default async (
-  { commit, getters }: Context,
+  context: any,
   { perspectiveName, description }: Payload
 ): Promise<CommunityState> => {
+  const { getters } = rootGetterContext(context);
+  const { commit } = rootActionContext(context);
   try {
     const createSourcePerspective = await addPerspective(perspectiveName);
     console.log("Created source perspective", createSourcePerspective);
@@ -75,11 +71,6 @@ export default async (
       uid
     );
     console.log("Response from create profile exp lang", profileExpressionLang);
-    const expressionLangs = [
-      shortFormExpressionLang.address!,
-      groupExpressionLang.address!,
-      profileExpressionLang.address!,
-    ];
     const typedExpLangs = [
       {
         languageAddress: shortFormExpressionLang.address!,
@@ -165,45 +156,55 @@ export default async (
     console.log("created channel with result", channel);
 
     const newCommunity = {
-      name: perspectiveName,
-      description: description,
-      linkLanguageAddress: "",
-      channels: { [channel.perspective.uuid]: channel },
-      perspective: createSourcePerspective,
-      theme: {
-        fontSize: "md",
-        fontFamily: "default",
-        name: "light",
-        hue: 270,
-        saturation: 60,
+      neighbourhood: {
+        name: perspectiveName,
+        description: description,
+        perspective: createSourcePerspective,
+        typedExpressionLanguages: typedExpLangs,
+        groupExpressionRef: createExp,
+        neighbourhoodUrl: neighbourhood,
+        membraneType: MembraneType.Unique,
+        linkedNeighbourhoods: [channel.neighbourhood.perspective.uuid],
+        members: [],
+        currentChannelId: null,
+        currentExpressionLinks: {},
+        currentExpressionMessages: {},
       },
-      expressionLanguages: expressionLangs,
-      typedExpressionLanguages: typedExpLangs,
-      groupExpressionRef: createExp,
-      neighbourhoodUrl: neighbourhood,
-      members: [],
-      currentChannelId: null,
+      state: {
+        perspectiveUuid: createSourcePerspective.uuid,
+        theme: {
+          fontSize: "md",
+          fontFamily: "default",
+          name: "light",
+          hue: 270,
+          saturation: 60,
+        },
+        channels: {
+          [channel.neighbourhood.perspective.uuid]: channel.state,
+        },
+        currentChannelId: null,
+      },
     } as CommunityState;
-    commit("addCommunity", newCommunity);
+    commit.addCommunity(newCommunity);
 
     //Get and cache the expression UI for each expression language
-    for (const lang of expressionLangs) {
+    for (const lang of typedExpLangs) {
       console.log("CreateCommunity.vue: Fetching UI lang:", lang);
-      const languageRes = await getLanguage(lang);
+      const languageRes = await getLanguage(lang.languageAddress);
       const uiData: ExpressionUIIcons = {
-        languageAddress: lang,
+        languageAddress: lang.languageAddress,
         createIcon: languageRes.constructorIcon?.code || "",
         viewIcon: languageRes.icon?.code || "",
         name: languageRes.name!,
       };
-      commit("addExpressionUI", uiData);
+      commit.addExpressionUI(uiData);
       await sleep(40);
     }
 
     // @ts-ignore
     return newCommunity;
   } catch (e) {
-    commit("showDangerToast", {
+    commit.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

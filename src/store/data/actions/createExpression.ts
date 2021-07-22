@@ -1,12 +1,8 @@
-import { Commit } from "vuex";
 import { createExpression } from "@/core/mutations/createExpression";
 import { createLink } from "@/core/mutations/createLink";
 import { Link } from "@perspect3vism/ad4m-types";
 
-export interface Context {
-  commit: Commit;
-  getters: any;
-}
+import { rootActionContext } from "@/store/index";
 
 export interface Payload {
   languageAddress: string;
@@ -15,9 +11,10 @@ export interface Payload {
 }
 
 export default async (
-  { commit }: Context,
+  context: any,
   { languageAddress, content, perspective }: Payload
 ): Promise<void> => {
+  const { commit } = rootActionContext(context);
   try {
     console.log(
       new Date().toISOString(),
@@ -39,7 +36,7 @@ export default async (
 
     // TODO: Add optimistic UI pattern so it feels fast
   } catch (e) {
-    commit("showDangerToast", {
+    commit.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

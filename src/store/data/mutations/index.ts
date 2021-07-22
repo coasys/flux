@@ -15,7 +15,7 @@ interface UpdatePayload {
   communityId: string;
   name: string;
   description: string;
-  groupExpressionRef: any;
+  groupExpressionRef: string;
 }
 
 interface AddChannelMessages {
@@ -27,20 +27,21 @@ interface AddChannelMessages {
 
 interface AddChannelMessage {
   channelId: string;
-  communityId: string;
   link: LinkExpression;
   expression: Expression;
-  linkLanguage: string;
 }
 
 export default {
   addCommunity(state: State, payload: CommunityState): void {
     console.log("adding Community", payload);
-    state.communities[payload.perspective.uuid] = payload;
+    state.data.neighbourhoods[payload.neighbourhood.perspective.uuid] =
+      payload.neighbourhood;
+    state.data.communities[payload.neighbourhood.perspective.uuid] =
+      payload.state;
   },
+
   addMessages(state: State, payload: AddChannelMessages): void {
-    const community = state.communities[payload.communityId];
-    const channel = community?.channels[payload.channelId];
+    const neighbourhood = state.data.neighbourhoods[payload.channelId];
     console.log(
       "Adding ",
       Object.values(payload.links).length,
@@ -48,26 +49,23 @@ export default {
       Object.values(payload.expressions).length,
       " to channel"
     );
-    channel.currentExpressionLinks = {
-      ...channel.currentExpressionLinks,
+    neighbourhood.currentExpressionLinks = {
+      ...neighbourhood.currentExpressionLinks,
       ...payload.links,
     };
-    channel.currentExpressionMessages = {
-      ...channel.currentExpressionMessages,
+    neighbourhood.currentExpressionMessages = {
+      ...neighbourhood.currentExpressionMessages,
       ...payload.expressions,
     };
   },
-  addMessage(state: State, payload: AddChannelMessage): void {
-    const community = state.communities[payload.communityId];
-    const channel = community?.channels[payload.channelId];
 
-    channel.currentExpressionLinks[
+  addMessage(state: State, payload: AddChannelMessage): void {
+    const neighbourhood = state.data.neighbourhoods[payload.channelId];
+
+    neighbourhood.currentExpressionLinks[
       hash(payload.link.data!, { excludeValues: "__typename" })
-    ] = {
-      expression: payload.link,
-      language: payload.linkLanguage,
-    } as LinkExpressionAndLang;
-    channel.currentExpressionMessages[payload.expression.url!] = {
+    ] = payload.link;
+    neighbourhood.currentExpressionMessages[payload.expression.url!] = {
       expression: {
         author: payload.expression.author!,
         data: JSON.parse(payload.expression.data!),
@@ -77,23 +75,25 @@ export default {
       url: parseExprUrl(payload.link.data!.target!),
     };
   },
+
   setCurrentChannelId(
     state: State,
     payload: { communityId: string; channelId: string }
   ): void {
     const { communityId, channelId } = payload;
-    state.communities[communityId].currentChannelId = channelId;
+    state.data.communities[communityId].currentChannelId = channelId;
   },
+
   removeCommunity(state: State, id: string): void {
-    delete state.communities[id];
+    delete state.data.communities[id];
+    delete state.data.neighbourhoods[id];
   },
+
   setChannelNotificationState(
     state: State,
     { communityId, channelId }: { communityId: string; channelId: string }
   ): void {
-    console.log(state.communities[communityId], communityId);
-
-    const channel = state.communities[communityId].channels[channelId];
+    const channel = state.data.communities[communityId].channels[channelId];
 
     channel.notifications.mute = !channel.notifications.mute;
   },
@@ -102,7 +102,7 @@ export default {
     state: State,
     { members, communityId }: { members: Expression[]; communityId: string }
   ): void {
-    const community = state.communities[communityId];
+    const community = state.data.neighbourhoods[communityId];
 
     if (community) {
       community.members = members;
@@ -113,8 +113,8 @@ export default {
     state: State,
     payload: { communityId: string; theme: ThemeState }
   ): void {
-    state.communities[payload.communityId].theme = {
-      ...state.communities[payload.communityId].theme,
+    state.data.communities[payload.communityId].theme = {
+      ...state.data.communities[payload.communityId].theme,
       ...payload.theme,
     };
   },
@@ -123,7 +123,7 @@ export default {
     state: State,
     { communityId, name, description, groupExpressionRef }: UpdatePayload
   ): void {
-    const community = state.communities[communityId];
+    const community = state.data.neighbourhoods[communityId];
 
     if (community) {
       community.name = name;
@@ -131,24 +131,28 @@ export default {
       community.groupExpressionRef = groupExpressionRef;
     }
 
-    state.communities[communityId] = community;
+    state.data.neighbourhoods[communityId] = community;
   },
 
   setChannelScrollTop(
     state: State,
     payload: { channelId: string; communityId: string; value: number }
   ): void {
-    state.communities[payload.communityId].channels[
+    state.data.communities[payload.communityId].channels[
       payload.channelId
     ].scrollTop = payload.value;
   },
 
   addChannel(state: State, payload: AddChannel): void {
-    const community = state.communities[payload.communityId];
+    const neighbourhood = state.data.neighbourhoods[payload.communityId];
+    const community = state.data.communities[payload.communityId];
 
-    if (community !== undefined) {
-      community.channels[payload.channel.perspective.uuid] = {
-        ...payload.channel,
+    if (neighbourhood !== undefined) {
+      neighbourhood.linkedNeighbourhoods.push(
+        payload.channel.neighbourhood.perspective.uuid
+      );
+      community.channels[payload.channel.neighbourhood.perspective.uuid] = {
+        ...payload.channel.state,
         hasNewMessages: false,
       };
     }
@@ -158,12 +162,9 @@ export default {
     state: State,
     payload: { channelId: string; value: boolean }
   ): void {
-    //console.log(payload);
-    for (const community of Object.values(state.communities)) {
+    for (const community of Object.values(state.data.communities)) {
       for (const channel of Object.values(community.channels)) {
-        //console.log(channel);
-        if (channel.perspective.uuid === payload.channelId) {
-          //console.log({ channel });
+        if (channel.perspectiveUuid === payload.channelId) {
           channel.hasNewMessages = payload.value;
         }
       }
@@ -178,28 +179,23 @@ export default {
       message: Expression;
     }
   ): void => {
-    for (const community of Object.values(state.communities)) {
-      for (const channel of Object.values(community.channels)) {
-        if (channel.perspective.uuid === payload.channelId) {
-          console.log("Adding to link and exp to channel!", payload.message);
-          channel.currentExpressionLinks[
-            hash(payload.link.data!, { excludeValues: "__typename" })
-          ] = {
-            expression: payload.link,
-            language: "na",
-          } as LinkExpressionAndLang;
-          //TODO: make gql expression to ad4m expression conversion function
-          channel.currentExpressionMessages[payload.message.url!] = {
-            expression: {
-              author: payload.message.author!,
-              data: JSON.parse(payload.message.data!),
-              timestamp: payload.message.timestamp!,
-              proof: payload.message.proof!,
-            } as Expression,
-            url: parseExprUrl(payload.link.data!.target!),
-          } as ExpressionAndRef;
-        }
-      }
-    }
+    const channel = state.data.neighbourhoods[payload.channelId];
+    console.log("Adding to link and exp to channel!", payload.message);
+    channel.currentExpressionLinks[
+      hash(payload.link.data!, { excludeValues: "__typename" })
+    ] = {
+      expression: payload.link,
+      language: "na",
+    } as LinkExpressionAndLang;
+    //TODO: make gql expression to ad4m expression conversion function
+    channel.currentExpressionMessages[payload.message.url!] = {
+      expression: {
+        author: payload.message.author!,
+        data: JSON.parse(payload.message.data!),
+        timestamp: payload.message.timestamp!,
+        proof: payload.message.proof!,
+      } as Expression,
+      url: parseExprUrl(payload.link.data!.target!),
+    } as ExpressionAndRef;
   },
 };

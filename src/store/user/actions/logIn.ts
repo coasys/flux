@@ -1,26 +1,24 @@
-import { Commit } from "vuex";
 import { agentUnlock } from "@/core/mutations/agentUnlock";
+import { AgentStatus } from "@perspect3vism/ad4m-types";
 
-export interface Context {
-  commit: Commit;
-}
+import { rootActionContext } from "@/store/index";
 
 export interface Payload {
   password: string;
 }
 
 export default async (
-  { commit }: Context,
+  context: any,
   { password }: Payload
-): Promise<any> => {
+): Promise<AgentStatus> => {
+  const { commit } = rootActionContext(context);
   try {
     const lockRes = await agentUnlock(password);
 
-    commit("updateAgentInitState", lockRes.isInitialized!);
-    commit("updateAgentLockState", lockRes.isUnlocked!);
+    commit.updateAgentStatus(lockRes);
     return lockRes;
   } catch (e) {
-    commit("showDangerToast", {
+    commit.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

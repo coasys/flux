@@ -1,12 +1,6 @@
-import { Commit } from "vuex";
 import { CurrentThemeState } from "@/store/types";
 import { setTheme } from "@/utils/themeHelper";
-
-export interface Context {
-  commit: Commit;
-  getters: any;
-  state: any;
-}
+import { rootActionContext } from "@/store/index";
 
 export interface Payload {
   communityId: string;
@@ -15,15 +9,16 @@ export interface Payload {
 }
 
 export default async function updateGlobalTheme(
-  { commit, state }: Context,
+  context: any,
   payload: CurrentThemeState
 ): Promise<void> {
+  const { commit, state } = rootActionContext(context);
   if (payload === "global") {
-    setTheme(state.ui.globalTheme);
-    commit("setCurrentTheme", "global");
+    setTheme(state.application.globalTheme);
+    commit.setCurrentTheme("global");
   } else {
-    const theme = state.communities[payload].theme;
-    setTheme(theme);
-    commit("setCurrentTheme", payload);
+    const theme = state.data.communities[payload].theme;
+    setTheme(theme!);
+    commit.setCurrentTheme(payload);
   }
 }

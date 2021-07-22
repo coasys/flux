@@ -1,12 +1,8 @@
 import { Commit } from "vuex";
 import { createChannel } from "@/core/methods/createChannel";
 
-import { ChannelState, MembraneType, CommunityState } from "@/store/types";
-
-export interface Context {
-  commit: Commit;
-  getters: any;
-}
+import { ChannelState, MembraneType } from "@/store/types";
+import { rootGetterContext, rootActionContext } from "@/store/index";
 
 export interface Payload {
   communityId: string;
@@ -14,27 +10,29 @@ export interface Payload {
 }
 
 export default async (
-  { commit, getters }: Context,
-  { communityId, name }: Payload
+  context: any,
+  payload: Payload
 ): Promise<ChannelState> => {
+  const { getters } = rootGetterContext(context);
+  const { commit } = rootActionContext(context);
   try {
-    const community: CommunityState = getters.getCommunity(communityId);
+    const community = getters.getCommunity(payload.communityId);
     const channel = await createChannel(
-      name,
+      payload.name,
       getters.getLanguagePath,
-      community.perspective,
+      community.neighbourhood.perspective,
       MembraneType.Inherited,
-      community.typedExpressionLanguages
+      community.neighbourhood.typedExpressionLanguages
     );
 
-    commit("addChannel", {
-      communityId: community.perspective.uuid,
+    commit.addChannel({
+      communityId: community.neighbourhood.perspective.uuid,
       channel,
     });
 
     return channel;
   } catch (e) {
-    commit("showDangerToast", {
+    commit.showDangerToast({
       message: e.message,
     });
     throw new Error(e);
