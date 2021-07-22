@@ -1,42 +1,67 @@
 import { createStore } from "vuex";
 import VuexPersistence from "vuex-persist";
-import type { Expression, LinkExpression } from "@perspect3vism/ad4m-types";
+import type {
+  AgentStatus,
+  Expression,
+  LinkExpression,
+} from "@perspect3vism/ad4m-types";
 import { ExpressionRef, PerspectiveHandle } from "@perspect3vism/ad4m-types";
 
 import actions from "./actions";
 import mutations from "./mutations";
 import getters from "./getters";
 
-export interface CommunityState {
-  name: string;
-  description: string;
-  theme?: ThemeState;
-  channels: { [x: string]: ChannelState };
-  perspective: PerspectiveHandle;
-  currentChannelId: string | undefined | null;
-  linkLanguageAddress: string;
-  expressionLanguages: string[];
-  typedExpressionLanguages: JuntoExpressionReference[];
-  groupExpressionRef: string;
-  neighbourhoodUrl: string;
-  members: Expression[];
+export interface State {
+  ui: UIState;
+  neighbourhoods: { [perspectiveUuid: string]: NeighbourhoodState };
+  communities: { [perspectiveUuid: string]: LocalCommunityState };
+  localLanguagesPath: string;
+  databasePerspective: string;
+  applicationStartTime: Date;
+  expressionUI: { [x: string]: ExpressionUIIcons };
+  userProfile: Profile | null;
+  updateState: UpdateState;
+  agentStatus: AgentStatus;
+  windowState: "minimize" | "visible" | "foreground";
 }
 
-// Vuex state of a given channel
-export interface ChannelState {
+export interface NeighbourhoodState {
   name: string;
+  description: string;
+  perspective: PerspectiveHandle;
+  typedExpressionLanguages: JuntoExpressionReference[];
+  groupExpressionRef: string;
+  neighbourhoodUrl: string;
+  membraneType: MembraneType;
+  membraneRoot?: string;
+  linkedNeighbourhoods: string[];
+  members: Expression[];
+  currentExpressionLinks: { [x: string]: LinkExpression };
+  currentExpressionMessages: { [x: string]: ExpressionAndRef };
+}
+
+export interface CommunityState {
+  neighbourhood: NeighbourhoodState;
+  state: LocalCommunityState;
+}
+
+export interface ChannelState {
+  neighbourhood: NeighbourhoodState;
+  state: LocalChannelState;
+}
+
+export interface LocalCommunityState {
+  perspectiveUuid: string;
+  theme?: ThemeState;
+  channels: { [persectiveUuid: string]: LocalChannelState };
+  currentChannelId: string | undefined | null;
+}
+
+export interface LocalChannelState {
+  perspectiveUuid: string;
   hasNewMessages: boolean;
   scrollTop?: number;
-  perspective: PerspectiveHandle;
-  linkLanguageAddress: string;
-  neighbourhoodUrl: string;
-  type: FeedType;
-  createdAt: Date;
-  currentExpressionLinks: { [x: string]: LinkExpressionAndLang };
-  currentExpressionMessages: { [x: string]: ExpressionAndRef };
-  typedExpressionLanguages: JuntoExpressionReference[];
-  membraneType: MembraneType;
-  groupExpressionRef: string;
+  feedType: FeedType;
   notifications: {
     mute: boolean;
   };
@@ -125,25 +150,6 @@ export type UpdateState =
   | "downloaded"
   | "checking";
 
-export interface State {
-  ui: UIState;
-  communities: { [x: string]: CommunityState };
-  localLanguagesPath: string;
-  databasePerspective: string;
-  //This tells us when the application was started; this tells us that between startTime -> now all messages should have been received
-  //via signals and thus we do not need to query for this time period
-  applicationStartTime: Date;
-  //TODO: this is a horrible type for this use; would be better to have a real map with values pointing to same strings where appropriate
-  //fow now this is fine
-  expressionUI: { [x: string]: ExpressionUIIcons };
-  agentUnlocked: boolean;
-  agentInit: boolean;
-  userProfile: Profile | null;
-  updateState: UpdateState;
-  userDid: string;
-  windowState: "minimize" | "visible" | "foreground";
-}
-
 export interface ExpressionUIIcons {
   languageAddress: string;
   createIcon: string;
@@ -176,9 +182,7 @@ const vuexLocal = new VuexPersistence<State>({
     databasePerspective: state.databasePerspective,
     expressionUI: state.expressionUI,
     userProfile: state.userProfile,
-    userDid: state.userDid,
-    agentInit: state.agentInit,
-    agentUnlocked: state.agentUnlocked,
+    agentStatus: state.agentStatus,
     ui: {
       showSidebar: state.ui.showSidebar,
       globalTheme: state.ui.globalTheme,
@@ -222,16 +226,20 @@ export default createStore({
         message: "",
       },
     },
+    neighbourhoods: {},
     communities: {},
     localLanguagesPath: "",
     databasePerspective: "",
     applicationStartTime: new Date(),
     expressionUI: {},
-    agentUnlocked: false,
-    agentInit: false,
+    agentStatus: {
+      isInitialized: false,
+      isUnlocked: false,
+      did: "",
+      didDocument: "",
+    },
     userProfile: null,
     updateState: "not-available",
-    userDid: "",
     windowState: "visible",
   },
   plugins: [vuexLocal.plugin],

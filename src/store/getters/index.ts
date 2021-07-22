@@ -20,18 +20,41 @@ export default {
   getCommunity:
     (state: State) =>
     (id: string): CommunityState => {
+      const neighbourhood = state.neighbourhoods[id];
       const community = state.communities[id];
 
-      return community;
+      return {
+        neighbourhood,
+        state: community,
+      } as CommunityState;
+    },
+
+  getChannelsByCommunity:
+    (state: State) =>
+    (id: string): ChannelState[] => {
+      const neighbourhood = state.neighbourhoods[id];
+      const out = [];
+      for (const channelPerspectiveUuid of neighbourhood.linkedNeighbourhoods) {
+        out.push({
+          neighbourhood: state.neighbourhoods[channelPerspectiveUuid],
+          state: state.communities[id].channels[channelPerspectiveUuid],
+        } as ChannelState);
+      }
+
+      return out;
     },
 
   getChannel:
     (state: State) =>
-    (payload: any): ChannelState => {
+    (payload: { channelId: string; communityId: string }): ChannelState => {
       const { channelId, communityId } = payload;
-      const community = state.communities[communityId];
+      const neighbourhood = state.neighbourhoods[channelId];
+      const channel = state.communities[communityId].channels[channelId];
 
-      return community?.channels[channelId];
+      return {
+        neighbourhood,
+        state: channel,
+      } as ChannelState;
     },
 
   getDatabasePerspective(state: State): string {
