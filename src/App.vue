@@ -191,58 +191,6 @@ export default defineComponent({
       setToast: (payload: ToastState) => store.commit("setToast", payload),
     };
   },
-  watch: {
-    "ui.theme.hue": {
-      handler: function (hue) {
-        document.documentElement.style.setProperty(
-          "--j-color-primary-hue",
-          hue
-        );
-      },
-      immediate: true,
-    },
-    "ui.theme.saturation": {
-      handler: function (saturation) {
-        document.documentElement.style.setProperty(
-          "--j-color-saturation",
-          saturation + "%"
-        );
-      },
-      immediate: true,
-    },
-    "ui.theme.name": {
-      handler: function (themeName) {
-        if (themeName === "light") {
-          document.documentElement.removeAttribute("theme");
-        } else {
-          import(`./themes/${themeName}.css`);
-          document.documentElement.setAttribute("theme", themeName);
-        }
-      },
-      immediate: true,
-    },
-    "ui.theme.fontSize": {
-      handler: function (fontSize: "sm" | "md" | "lg") {
-        document.documentElement.setAttribute("font-size", fontSize);
-      },
-      immediate: true,
-    },
-    "ui.theme.fontFamily": {
-      handler: function (fontFamily: string) {
-        const font = {
-          default: `"Avenir", sans-serif`,
-          monospace: `monospace`,
-          system: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
-        };
-        document.documentElement.style.setProperty(
-          "--j-font-family",
-          // @ts-ignore
-          font[fontFamily]
-        );
-      },
-      immediate: true,
-    },
-  },
   computed: {
     ui() {
       return this.$store.state.ui;

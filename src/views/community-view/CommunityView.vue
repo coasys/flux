@@ -41,20 +41,29 @@
     :open="modals.showInviteCode"
     @toggle="(e) => setShowInviteCode(e.target.open)"
   >
-    <j-text variant="heading">Invite people</j-text>
-    <j-text variant="ingress">
-      Copy and send this code to the people you want to join your community
-    </j-text>
-    <j-input
-      @click="(e) => e.target.select()"
-      size="lg"
-      readonly
-      :value="currentCommunity.neighbourhoodUrl"
-    >
-      <j-button @click="getInviteCode" variant="subtle" slot="end"
-        ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
-      /></j-button>
-    </j-input>
+    <j-box p="800">
+      <j-text variant="heading">Invite people</j-text>
+      <j-text variant="ingress">
+        Copy and send this code to the people you want to join your community
+      </j-text>
+      <j-input
+        @click="(e) => e.target.select()"
+        size="lg"
+        readonly
+        :value="currentCommunity.neighbourhoodUrl"
+      >
+        <j-button @click="getInviteCode" variant="subtle" slot="end"
+          ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
+        /></j-button>
+      </j-input>
+    </j-box>
+  </j-modal>
+
+  <j-modal
+    :open="modals.showCommunitySettings"
+    @toggle="(e) => setShowCommunitySettings(e.target.open)"
+  >
+    <community-settings />
   </j-modal>
 </template>
 
@@ -68,6 +77,7 @@ import { useStore, mapMutations } from "vuex";
 import EditCommunity from "@/containers/EditCommunity.vue";
 import CreateChannel from "@/containers/CreateChannel.vue";
 import CommunityMembers from "@/containers/CommunityMembers.vue";
+import CommunitySettings from "@/containers/CommunitySettings.vue";
 
 import { CommunityState, ModalsState } from "@/store";
 import { PerspectiveHandle } from "@perspect3vism/ad4m-types";
@@ -75,6 +85,7 @@ import { PerspectiveHandle } from "@perspect3vism/ad4m-types";
 export default defineComponent({
   name: "CommunityView",
   components: {
+    CommunitySettings,
     EditCommunity,
     CreateChannel,
     CommunityMembers,
@@ -120,6 +131,10 @@ export default defineComponent({
     "currentCommunity.perspective": {
       handler: function (val: PerspectiveHandle) {
         if (!this.currentCommunity) return;
+        this.$store.dispatch("changeCurrentTheme", val ? val : "global");
+
+        if (!val) return;
+
         const firstChannel = Object.values(this.currentCommunity.channels)[0];
         const currentChannelId =
           this.currentCommunity.currentChannelId ||
@@ -142,6 +157,7 @@ export default defineComponent({
       "setShowEditCommunity",
       "setShowCommunityMembers",
       "setShowInviteCode",
+      "setShowCommunitySettings",
     ]),
     getInviteCode() {
       // Get the invite code to join community and copy to clipboard

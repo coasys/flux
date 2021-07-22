@@ -5,14 +5,23 @@
       :key="community.perspective.uuid"
       :title="community.name"
     >
-      <j-avatar
-        class="left-nav__community-item"
-        :selected="communityIsActive(community.perspective.uuid)"
-        size="xl"
-        :src="require('@/assets/images/junto_web_rainbow.png')"
-        initials="false"
-        @click="() => handleCommunityClick(community.perspective.uuid)"
-      ></j-avatar>
+      <j-popover event="contextmenu">
+        <j-avatar
+          slot="trigger"
+          class="left-nav__community-item"
+          :selected="communityIsActive(community.perspective.uuid)"
+          size="xl"
+          :src="require('@/assets/images/junto_web_rainbow.png')"
+          initials="false"
+          @click="() => handleCommunityClick(community.perspective.uuid)"
+        ></j-avatar>
+        <j-menu
+          slot="content"
+          @click="() => removeCommunity(community.perspective.uuid)"
+        >
+          <j-menu-item>Remove community</j-menu-item>
+        </j-menu>
+      </j-popover>
     </j-tooltip>
   </div>
 </template>
@@ -22,6 +31,10 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   methods: {
+    removeCommunity(id: string) {
+      this.$store.commit("removeCommunity", id);
+      this.$router.push({ name: "home" });
+    },
     handleCommunityClick(communityId: string) {
       if (this.communityIsActive(communityId)) {
         this.$store.commit("toggleSidebar");

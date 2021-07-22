@@ -4,6 +4,7 @@ import hash from "object-hash";
 
 import {
   State,
+  CurrentThemeState,
   CommunityState,
   LinkExpressionAndLang,
   ExpressionAndRef,
@@ -187,8 +188,22 @@ export default {
     state.ui.toast = { variant: "danger", open: true, ...payload };
   },
 
-  setTheme(state: State, payload: ThemeState): void {
-    state.ui.theme = { ...state.ui.theme, ...payload };
+  setCurrentTheme(state: State, payload: CurrentThemeState): void {
+    state.ui.currentTheme = payload;
+  },
+
+  setGlobalTheme(state: State, payload: ThemeState): void {
+    state.ui.globalTheme = { ...state.ui.globalTheme, ...payload };
+  },
+
+  setCommunityTheme(
+    state: State,
+    payload: { communityId: string; theme: ThemeState }
+  ): void {
+    state.communities[payload.communityId].theme = {
+      ...state.communities[payload.communityId].theme,
+      ...payload.theme,
+    };
   },
 
   toggleSidebar(state: State): void {
@@ -286,8 +301,16 @@ export default {
     state.ui.modals.showSettings = payload;
   },
 
+  setShowCommunitySettings(state: State, payload: boolean): void {
+    state.ui.modals.showCommunitySettings = payload;
+  },
+
   setShowInviteCode(state: State, payload: boolean): void {
     state.ui.modals.showInviteCode = payload;
+  },
+
+  removeCommunity(state: State, id: string): void {
+    delete state.communities[id];
   },
 
   setChannelNotificationState(

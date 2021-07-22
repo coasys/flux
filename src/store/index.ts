@@ -10,6 +10,7 @@ import getters from "./getters";
 export interface CommunityState {
   name: string;
   description: string;
+  theme?: ThemeState;
   channels: { [x: string]: ChannelState };
   perspective: PerspectiveHandle;
   currentChannelId: string | undefined | null;
@@ -82,6 +83,8 @@ export interface ToastState {
   open: boolean;
 }
 
+export type CurrentThemeState = "global" | string;
+
 export interface ThemeState {
   name: string;
   fontFamily: string;
@@ -97,13 +100,15 @@ export interface ModalsState {
   showCreateChannel: boolean;
   showEditProfile: boolean;
   showSettings: boolean;
+  showCommunitySettings: boolean;
   showInviteCode: boolean;
   showDisclaimer: boolean;
 }
 
 export interface UIState {
   toast: ToastState;
-  theme: ThemeState;
+  globalTheme: ThemeState;
+  currentTheme: CurrentThemeState;
   modals: ModalsState;
   showSidebar: boolean;
   showGlobalLoading: boolean;
@@ -176,7 +181,8 @@ const vuexLocal = new VuexPersistence<State>({
     agentUnlocked: state.agentUnlocked,
     ui: {
       showSidebar: state.ui.showSidebar,
-      theme: state.ui.theme,
+      globalTheme: state.ui.globalTheme,
+      currentTheme: state.ui.currentTheme,
       modals: { showDisclaimer: state.ui.modals.showDisclaimer },
     },
   }),
@@ -192,18 +198,20 @@ export default createStore({
         showCreateChannel: false,
         showEditProfile: false,
         showSettings: false,
+        showCommunitySettings: false,
         showInviteCode: false,
         showDisclaimer: true,
       },
       showSidebar: true,
       showGlobalLoading: false,
-      theme: {
+      globalTheme: {
         fontSize: "md",
         fontFamily: "default",
         name: "light",
         hue: 270,
         saturation: 60,
       },
+      currentTheme: "global",
       toast: {
         variant: "",
         message: "",

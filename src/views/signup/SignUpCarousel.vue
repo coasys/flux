@@ -49,15 +49,19 @@ export default defineComponent({
   data() {
     return {
       currentIndex: 0,
+      interval: null as any,
     };
   },
   mounted() {
-    setInterval(() => {
+    this.interval = setInterval(() => {
       this.currentIndex = this.currentIndex >= 3 ? 0 : this.currentIndex + 1;
-      // @ts-ignore
+      const carousel = this.$refs.carousel as any;
       // TODO: Make j-carousel take a attribute instead of prop
-      this.$refs.carousel.value = this.currentIndex;
+      carousel.value = this.currentIndex;
     }, 3000);
+  },
+  unmounted() {
+    clearInterval(this.interval);
   },
 });
 </script>

@@ -170,6 +170,13 @@ export default async (
       linkLanguageAddress: "",
       channels: { [channel.perspective.uuid]: channel },
       perspective: createSourcePerspective,
+      theme: {
+        fontSize: "md",
+        fontFamily: "default",
+        name: "light",
+        hue: 270,
+        saturation: 60,
+      },
       expressionLanguages: expressionLangs,
       typedExpressionLanguages: typedExpLangs,
       groupExpressionRef: createExp,
@@ -193,6 +200,7 @@ export default async (
       await sleep(40);
     }
 
+    // @ts-ignore
     return newCommunity;
   } catch (e) {
     commit("showDangerToast", {
