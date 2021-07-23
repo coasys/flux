@@ -124,12 +124,12 @@ export default defineComponent({
     };
   },
   watch: {
-    "currentCommunity.perspective": {
-      handler: function (val: PerspectiveHandle) {
+    communityId: {
+      handler: function (id: string) {
         if (!this.currentCommunity) return;
-        store.dispatch.changeCurrentTheme(val.uuid ? val.uuid : "global");
+        store.dispatch.changeCurrentTheme(id ? id : "global");
 
-        if (!val) return;
+        if (!id) return;
 
         const firstChannel =
           this.currentCommunity.neighbourhood.linkedPerspectives[0];
@@ -139,7 +139,7 @@ export default defineComponent({
         this.$router.push({
           name: "channel",
           params: {
-            communityId: val.uuid,
+            communityId: id,
             channelId: currentChannelId,
           },
         });
@@ -174,6 +174,9 @@ export default defineComponent({
   computed: {
     modals(): ModalsState {
       return store.state.app.modals;
+    },
+    communityId(): string {
+      return this.$route.params.communityId.toString();
     },
     currentCommunity(): CommunityState {
       const { communityId } = this.$route.params;
