@@ -40,6 +40,7 @@
 <script lang="ts">
 import { isValid } from "@/utils/validation";
 import { defineComponent } from "vue";
+import store from "@/store";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -64,11 +65,11 @@ export default defineComponent({
   },
   methods: {
     async createChannel() {
-      const { communityId } = this.$route.params;
+      const communityId = this.$route.params.communityId.toString();
       const name = this.channelName;
       this.isCreatingChannel = true;
-      this.$store
-        .dispatch("createChannel", {
+      store.dispatch
+        .createChannel({
           communityId,
           name,
         })

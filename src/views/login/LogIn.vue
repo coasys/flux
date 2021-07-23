@@ -95,8 +95,8 @@ export default defineComponent({
   methods: {
     logIn() {
       this.isLoggingIn = true;
-      this.$store
-        .dispatch("user/logIn", {
+      store.dispatch
+        .logIn({
           password: this.password,
         })
         .then((data: AgentStatus) => {
