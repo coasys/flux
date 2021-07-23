@@ -3,27 +3,15 @@ import {
   CommunityState,
   ChannelState,
   NeighbourhoodState,
+  LocalCommunityState,
 } from "@/store/types";
 
 export default {
-  // Get the list of communities a user is a part of
-
-  getCommunityNeighbourhoods(state: DataState): NeighbourhoodState[] {
-    return Object.values(state.communities).map(
-      (community) => state.neighbourhoods[community.perspectiveUuid]
-    );
-  },
-
-  getCommunities(state: DataState): CommunityState[] {
-    const out = [];
-    for (const community of Object.values(state.communities)) {
-      out.push({
-        neighbourhood: state.neighbourhoods[community.perspectiveUuid],
-        state: community,
-      } as CommunityState);
-    }
-    return out;
-  },
+  getNeighbourhood:
+    (state: DataState) =>
+    (id: string): NeighbourhoodState => {
+      return state.neighbourhoods[id];
+    },
 
   getCommunity:
     (state: DataState) =>
@@ -37,19 +25,27 @@ export default {
       } as CommunityState;
     },
 
-  getChannelsByCommunity:
-    (state: DataState) =>
-    (id: string): ChannelState[] => {
-      const neighbourhood = state.neighbourhoods[id];
-      const out = [];
-      for (const channelPerspectiveUuid of neighbourhood.linkedPerspectives) {
-        out.push({
-          neighbourhood: state.neighbourhoods[channelPerspectiveUuid],
-          state: state.channels[channelPerspectiveUuid],
-        } as ChannelState);
-      }
+  getCommunities(state: DataState): CommunityState[] {
+    const out = [];
+    for (const community of Object.values(state.communities)) {
+      out.push({
+        neighbourhood: state.neighbourhoods[community.perspectiveUuid],
+        state: community,
+      } as CommunityState);
+    }
+    return out;
+  },
 
-      return out;
+  getCommunityNeighbourhoods(state: DataState): NeighbourhoodState[] {
+    return Object.values(state.communities).map(
+      (community) => state.neighbourhoods[community.perspectiveUuid]
+    );
+  },
+
+  getCommunityState:
+    (state: DataState) =>
+    (id: string): LocalCommunityState => {
+      return state.communities[id];
     },
 
   getChannel:
@@ -63,5 +59,13 @@ export default {
         neighbourhood,
         state: channel,
       } as ChannelState;
+    },
+
+  getChannelNeighbourhoods:
+    (state: DataState) =>
+    (communityId: string): NeighbourhoodState[] => {
+      return Object.values(
+        state.neighbourhoods[communityId].linkedPerspectives
+      ).map((perspectiveUuid) => state.neighbourhoods[perspectiveUuid]);
     },
 };
