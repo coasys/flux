@@ -1,7 +1,10 @@
-import { Profile, State } from "@/store/types";
+import { Profile, UserState } from "@/store/types";
 
 export default {
-  getProfile(state: State): Profile | null {
-    return state.user.profile;
+  getProfile(state: UserState): Profile | null {
+    return state.profile;
+  },
+  getUser(state: UserState): UserState | null {
+    return state;
   },
 };

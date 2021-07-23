@@ -4,8 +4,8 @@
       <j-flex gap="500" a="center" j="between" wrap>
         <j-avatar
           style="--j-avatar-size: 150px"
-          :src="userProfile.profilePicture"
-          :hash="userDid"
+          :src="user.profile.profilePicture"
+          :hash="user.agent.did"
         />
         <j-button
           size="lg"
@@ -17,9 +17,9 @@
       </j-flex>
     </j-box>
     <j-box pb="500">
-      <j-text size="600" color="ui-300">@{{ userProfile.username }}</j-text>
+      <j-text size="600" color="ui-300">@{{ user.profile.username }}</j-text>
       <j-text variant="heading-lg"
-        >{{ userProfile.givenName }} {{ userProfile.familyName }}</j-text
+        >{{ user.profile.givenName }} {{ user.profile.familyName }}</j-text
       >
     </j-box>
   </j-box>
@@ -27,17 +27,15 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import store from "@/store";
 
 export default defineComponent({
   computed: {
     communities() {
-      return this.$store.state.communities;
+      return store.getters.getCommunityNeighbourhoods;
     },
-    userProfile() {
-      return this.$store.state.userProfile;
-    },
-    userDid() {
-      return this.$store.state.userDid;
+    user() {
+      return store.getters.getUser;
     },
   },
 });

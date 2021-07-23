@@ -28,6 +28,7 @@
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { defineComponent } from "vue";
 import { Profile } from "@/store/types";
+import store from "@/store";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -64,8 +65,8 @@ export default defineComponent({
   methods: {
     updateProfile() {
       this.isUpdatingProfile = true;
-      this.$store
-        .dispatch("updateProfile", {
+      store.dispatch
+        .updateProfile({
           username: this.username,
           profilePicture: this.profilePicture,
         })

@@ -80,7 +80,7 @@ export default defineComponent({
             name: "channel",
             params: {
               communityId: communityId,
-              channelId: channel.perspective.uuid,
+              channelId: channel.neighbourhood.perspective.uuid,
             },
           });
         })

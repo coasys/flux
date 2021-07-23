@@ -7,9 +7,9 @@ import { ExpressionTypes, Profile, ProfileExpression } from "@/store/types";
 import { rootActionContext, rootGetterContext } from "@/store/index";
 
 export interface Payload {
-  username: string;
-  profilePicture: string;
-  thumbnail: string;
+  username?: string;
+  profilePicture?: string;
+  thumbnail?: string;
 }
 
 export default async (context: any, payload: Payload): Promise<void> => {
