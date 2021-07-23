@@ -91,9 +91,9 @@ export default {
 
   setChannelNotificationState(
     state: DataState,
-    { communityId, channelId }: { communityId: string; channelId: string }
+    { channelId }: { channelId: string }
   ): void {
-    const channel = state.communities[communityId].channels[channelId];
+    const channel = state.channels[channelId];
 
     channel.notifications.mute = !channel.notifications.mute;
   },
@@ -136,22 +136,22 @@ export default {
 
   setChannelScrollTop(
     state: DataState,
-    payload: { channelId: string; communityId: string; value: number }
+    payload: { channelId: string; value: number }
   ): void {
-    state.communities[payload.communityId].channels[
-      payload.channelId
-    ].scrollTop = payload.value;
+    state.channels[payload.channelId].scrollTop = payload.value;
   },
 
   addChannel(state: DataState, payload: AddChannel): void {
-    const neighbourhood = state.neighbourhoods[payload.communityId];
-    const community = state.communities[payload.communityId];
+    const parentNeighbourhood = state.neighbourhoods[payload.communityId];
 
-    if (neighbourhood !== undefined) {
-      neighbourhood.linkedNeighbourhoods.push(
+    if (parentNeighbourhood !== undefined) {
+      parentNeighbourhood.linkedNeighbourhoods.push(
+        payload.channel.neighbourhood.neighbourhoodUrl
+      );
+      parentNeighbourhood.linkedPerspectives.push(
         payload.channel.neighbourhood.perspective.uuid
       );
-      community.channels[payload.channel.neighbourhood.perspective.uuid] = {
+      state.channels[payload.channel.neighbourhood.perspective.uuid] = {
         ...payload.channel.state,
         hasNewMessages: false,
       };
@@ -162,13 +162,8 @@ export default {
     state: DataState,
     payload: { channelId: string; value: boolean }
   ): void {
-    for (const community of Object.values(state.communities)) {
-      for (const channel of Object.values(community.channels)) {
-        if (channel.perspectiveUuid === payload.channelId) {
-          channel.hasNewMessages = payload.value;
-        }
-      }
-    }
+    const channel = state.channels[payload.channelId];
+    channel.hasNewMessages = payload.value;
   },
 
   addExpressionAndLink: (

@@ -52,6 +52,7 @@ export interface NeighbourhoodState {
   membraneType: MembraneType;
   membraneRoot?: string;
   linkedPerspectives: string[];
+  linkedNeighbourhoods: string[];
   members: Expression[];
   currentExpressionLinks: { [x: string]: LinkExpression };
   currentExpressionMessages: { [x: string]: ExpressionAndRef };

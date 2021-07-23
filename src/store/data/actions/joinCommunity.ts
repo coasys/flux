@@ -52,12 +52,12 @@ export default async (
 
         const createProfileExpression = await createProfile(
           profileExpLang.languageAddress!,
-          profile.username,
-          profile.email,
-          profile.givenName,
-          profile.familyName,
-          profile.profilePicture,
-          profile.thumbnailPicture
+          profile!.username,
+          profile!.email,
+          profile!.givenName,
+          profile!.familyName,
+          profile!.profilePicture,
+          profile!.thumbnailPicture
         );
 
         //Create link between perspective and group expression
@@ -82,6 +82,7 @@ export default async (
           neighbourhoodUrl: joiningLink,
           membraneType: MembraneType.Unique,
           linkedNeighbourhoods: [],
+          linkedPerspectives: [],
           members: [],
           currentChannelId: null,
           currentExpressionLinks: {},

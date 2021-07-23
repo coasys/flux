@@ -42,10 +42,10 @@ export default {
     (id: string): ChannelState[] => {
       const neighbourhood = state.neighbourhoods[id];
       const out = [];
-      for (const channelPerspectiveUuid of neighbourhood.linkedNeighbourhoods) {
+      for (const channelPerspectiveUuid of neighbourhood.linkedPerspectives) {
         out.push({
           neighbourhood: state.neighbourhoods[channelPerspectiveUuid],
-          state: Datastate.communities[id].channels[channelPerspectiveUuid],
+          state: state.channels[channelPerspectiveUuid],
         } as ChannelState);
       }
 
@@ -54,10 +54,10 @@ export default {
 
   getChannel:
     (state: DataState) =>
-    (payload: { channelId: string; communityId: string }): ChannelState => {
-      const { channelId, communityId } = payload;
+    (payload: { channelId: string }): ChannelState => {
+      const { channelId } = payload;
       const neighbourhood = state.neighbourhoods[channelId];
-      const channel = state.communities[communityId].channels[channelId];
+      const channel = state.channels[channelId];
 
       return {
         neighbourhood,
