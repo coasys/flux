@@ -42,7 +42,7 @@ export default defineComponent({
   },
   computed: {
     userProfile(): Profile {
-      return store.state.user.userProfile || {};
+      return store.state.user.profile!;
     },
     userDid(): string {
       return store.state.user.agent.did!;
