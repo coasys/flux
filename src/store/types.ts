@@ -70,7 +70,7 @@ export interface ChannelState {
 
 export interface LocalCommunityState {
   perspectiveUuid: string;
-  theme?: ThemeState;
+  theme: ThemeState;
   currentChannelId: string | undefined | null;
 }
 

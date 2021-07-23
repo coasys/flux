@@ -24,13 +24,7 @@
       <div class="settings__content">
         <theme-editor
           v-if="currentView === 'theme-editor' && theme"
-          @update="
-            (theme) =>
-              updateCommunityTheme({
-                communityId: $route.params.communityId,
-                theme: { ...theme },
-              })
-          "
+          @update="updateCommunityTheme"
           :theme="theme"
         />
       </div>
@@ -41,8 +35,8 @@
 <script lang="ts">
 import { ThemeState } from "@/store/types";
 import { defineComponent } from "vue";
-import { mapActions } from "vuex";
 import ThemeEditor from "./ThemeEditor.vue";
+import store from "@/store";
 
 export default defineComponent({
   components: { ThemeEditor },
@@ -52,12 +46,18 @@ export default defineComponent({
     };
   },
   methods: {
-    ...mapActions(["updateCommunityTheme"]),
+    updateCommunityTheme(val: ThemeState) {
+      const id = this.$route.params.communityId.toString();
+      store.dispatch.updateCommunityTheme({
+        communityId: id,
+        theme: { ...val },
+      });
+    },
   },
   computed: {
     theme(): ThemeState {
-      const communityId: any = this.$route.params.communityId;
-      return this.$store.state.communities[communityId].theme;
+      const id = this.$route.params.communityId.toString();
+      return store.getters.getCommunityState(id).theme;
     },
   },
 });
