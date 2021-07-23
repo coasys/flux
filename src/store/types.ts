@@ -7,7 +7,7 @@ import { ExpressionRef, PerspectiveHandle } from "@perspect3vism/ad4m-types";
 import { Commit } from "vuex";
 
 export interface State {
-  application: ApplicationState;
+  app: ApplicationState;
   data: DataState;
   user: UserState;
 }

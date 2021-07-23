@@ -14,7 +14,7 @@ export default async function updateGlobalTheme(
 ): Promise<void> {
   const { commit, state } = rootActionContext(context);
   if (payload === "global") {
-    setTheme(state.application.globalTheme);
+    setTheme(state.app.globalTheme);
     commit.setCurrentTheme("global");
   } else {
     const theme = state.data.communities[payload].theme;

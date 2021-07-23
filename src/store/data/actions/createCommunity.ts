@@ -124,16 +124,16 @@ export default async (
     });
     console.log("Created group expression link", addGroupExpLink);
 
-    const profile: Profile = getters.getProfile;
+    const profile = getters.getProfile;
 
     const createProfileExpression = await createProfile(
       profileExpressionLang.address!,
-      profile.username,
-      profile.email,
-      profile.givenName,
-      profile.familyName,
-      profile.profilePicture,
-      profile.thumbnailPicture
+      profile!.username,
+      profile!.email,
+      profile!.givenName,
+      profile!.familyName,
+      profile!.profilePicture,
+      profile!.thumbnailPicture
     );
 
     //Create link between perspective and group expression
