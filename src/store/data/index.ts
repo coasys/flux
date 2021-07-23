@@ -8,6 +8,7 @@ export default {
     return {
       communities: {},
       neighbourhoods: {},
+      channels: {},
     };
   },
   mutations,

@@ -13,7 +13,6 @@ import sleep from "@/utils/sleep";
 import {
   ExpressionUIIcons,
   MembraneType,
-  Profile,
   JuntoExpressionReference,
   ExpressionTypes,
   CommunityState,

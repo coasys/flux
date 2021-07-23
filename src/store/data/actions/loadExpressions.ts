@@ -90,7 +90,6 @@ export default async function (
                   //Add the link and message to the store
                   commit.addMessage({
                     channelId,
-                    communityId,
                     link: link,
                     expression: expression,
                   });
