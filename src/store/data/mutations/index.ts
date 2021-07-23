@@ -155,10 +155,10 @@ export default {
       parentNeighbourhood.linkedPerspectives.push(
         payload.channel.neighbourhood.perspective.uuid
       );
-      state.channels[payload.channel.neighbourhood.perspective.uuid] = {
-        ...payload.channel.state,
-        hasNewMessages: false,
-      };
+      state.channels[payload.channel.neighbourhood.perspective.uuid] =
+        payload.channel.state;
+      state.neighbourhoods[payload.channel.neighbourhood.perspective.uuid] =
+        payload.channel.neighbourhood;
     }
   },
 
