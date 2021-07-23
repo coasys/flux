@@ -74,7 +74,7 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
             languages: [],
             neighbourhoods: [],
           },
-          appBuiltInLangs: ["social-context"],
+          appBuiltInLangs: [],
           appLangAliases: null,
           mocks: false,
         })
