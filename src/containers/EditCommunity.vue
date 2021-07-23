@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts">
-import { CommunityState, NeighbourhoodState } from "@/store/types";
+import { NeighbourhoodState } from "@/store/types";
 import { defineComponent } from "vue";
 import store from "@/store";
 

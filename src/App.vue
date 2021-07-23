@@ -193,13 +193,13 @@ export default defineComponent({
   },
   computed: {
     ui() {
-      return this.$store.state.ui;
+      return store.state.app;
     },
     globalError(): { show: boolean; message: string } {
-      return this.$store.state.ui.globalError;
+      return store.state.app.globalError;
     },
     modals(): ModalsState {
-      return this.$store.state.ui.modals;
+      return store.state.app.modals;
     },
   },
   beforeCreate() {
