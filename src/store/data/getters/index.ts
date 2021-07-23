@@ -5,6 +5,7 @@ import {
   NeighbourhoodState,
   LocalCommunityState,
 } from "@/store/types";
+import { Expression } from "@perspect3vism/ad4m-types";
 
 export default {
   getNeighbourhood:
@@ -67,5 +68,14 @@ export default {
       return Object.values(
         state.neighbourhoods[communityId].linkedPerspectives
       ).map((perspectiveUuid) => state.neighbourhoods[perspectiveUuid]);
+    },
+
+  getCommunityMembers:
+    (state: DataState) =>
+    (communityId: string): Expression[] => {
+      if (!state.communities[communityId]) {
+        return [];
+      }
+      return state.neighbourhoods[communityId].members;
     },
 };

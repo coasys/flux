@@ -1,13 +1,12 @@
 import { getExpressionNoCache } from "@/core/queries/getExpression";
-import { Profile } from "@/store/types";
-import type { Expression } from "@perspect3vism/ad4m-types";
+import { ProfileExpression } from "@/store/types";
 import { TimeoutCache } from "./timeoutCache";
 
 export async function getProfile(
   profileLangAddress: string,
   did: string
-): Promise<Expression | null> {
-  const cache = new TimeoutCache<Expression>(1000 * 60 * 5);
+): Promise<ProfileExpression | null> {
+  const cache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
 
   const profileLink = `${profileLangAddress}://${did}`;
 
@@ -21,7 +20,7 @@ export async function getProfile(
         data: JSON.parse(profileGqlExp.data!),
         timestamp: profileGqlExp.timestamp!,
         proof: profileGqlExp.proof!,
-      } as Expression;
+      } as ProfileExpression;
 
       cache.set(profileLink, profileExp);
 

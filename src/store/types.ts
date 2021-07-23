@@ -3,6 +3,7 @@ import type {
   Expression,
   LinkExpression,
 } from "@perspect3vism/ad4m-types";
+import { ExpressionGeneric } from "@perspect3vism/ad4m-types";
 import { ExpressionRef, PerspectiveHandle } from "@perspect3vism/ad4m-types";
 
 export interface State {
@@ -16,6 +17,17 @@ export interface DataState {
   channels: { [perspectiveUuid: string]: LocalChannelState };
   neighbourhoods: { [perspectiveUuid: string]: NeighbourhoodState };
 }
+
+export class Profile {
+  username: string;
+  email: string;
+  givenName: string;
+  familyName: string;
+  profilePicture?: string;
+  thumbnailPicture?: string;
+}
+
+export class ProfileExpression extends ExpressionGeneric(Profile) {}
 
 export interface UserState {
   agent: AgentStatus;
@@ -52,7 +64,7 @@ export interface NeighbourhoodState {
   membraneRoot?: string;
   linkedPerspectives: string[];
   linkedNeighbourhoods: string[];
-  members: Expression[];
+  members: ProfileExpression[];
   currentExpressionLinks: { [x: string]: LinkExpression };
   currentExpressionMessages: { [x: string]: ExpressionAndRef };
   createdAt?: Date;
@@ -108,15 +120,6 @@ export interface CommunityView {
 export enum FeedType {
   Signaled,
   Static,
-}
-
-export interface Profile {
-  username: string;
-  email: string;
-  givenName: string;
-  familyName: string;
-  profilePicture?: string;
-  thumbnailPicture?: string;
 }
 
 export interface ToastState {

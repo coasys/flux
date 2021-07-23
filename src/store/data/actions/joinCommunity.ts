@@ -42,7 +42,7 @@ export default async (
 
       for (const uiIcon of uiIcons) {
         commit.addExpressionUI(uiIcon);
-      };
+      }
 
       const profileExpLang = typedExpressionLanguages.find(
         (val) => val.expressionType == ExpressionTypes.ProfileExpression

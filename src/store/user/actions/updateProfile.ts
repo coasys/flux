@@ -3,7 +3,7 @@ import { TimeoutCache } from "@/utils/timeoutCache";
 import type { Expression } from "@perspect3vism/ad4m-types";
 import { getExpression } from "@/core/queries/getExpression";
 
-import { ExpressionTypes, Profile } from "@/store/types";
+import { ExpressionTypes, Profile, ProfileExpression } from "@/store/types";
 import { rootActionContext, rootGetterContext } from "@/store/index";
 
 export interface Payload {
@@ -33,7 +33,7 @@ export default async (context: any, payload: Payload): Promise<void> => {
     const user = state.user.profile;
 
     const neighbourhoods = Object.values(state.data.neighbourhoods);
-    const cache = new TimeoutCache<Expression>(1000 * 60 * 5);
+    const cache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
 
     for (const neighbourhood of neighbourhoods) {
       const profileExpression = neighbourhood.typedExpressionLanguages.find(
@@ -63,7 +63,7 @@ export default async (context: any, payload: Payload): Promise<void> => {
           data: JSON.parse(expressionGql.data!),
           timestamp: expressionGql.timestamp!,
           proof: expressionGql.proof!,
-        } as Expression;
+        } as ProfileExpression;
         cache.set(didExpression, profileExp);
       } else {
         const errorMessage =

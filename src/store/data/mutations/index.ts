@@ -6,6 +6,7 @@ import {
   CommunityState,
   AddChannel,
   ThemeState,
+  ProfileExpression,
 } from "@/store/types";
 
 import { parseExprUrl } from "@perspect3vism/ad4m-types";
@@ -100,7 +101,10 @@ export default {
 
   setCommunityMembers(
     state: DataState,
-    { members, communityId }: { members: Expression[]; communityId: string }
+    {
+      members,
+      communityId,
+    }: { members: ProfileExpression[]; communityId: string }
   ): void {
     const community = state.neighbourhoods[communityId];
 

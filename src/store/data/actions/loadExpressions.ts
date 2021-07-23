@@ -6,7 +6,6 @@ import { LinkQuery } from "@perspect3vism/ad4m-types";
 import { rootActionContext, rootGetterContext } from "@/store/index";
 
 export interface Payload {
-  communityId: string;
   channelId: string;
   from: Date;
   to: Date;
@@ -19,7 +18,7 @@ export interface LoadExpressionResult {
 /// Function that polls for new messages on a channel using a web worker, if a message link is found then another web worker is spawned to retry getting the expression until its found
 export default async function (
   context: any,
-  { channelId, communityId, from, to }: Payload
+  { channelId, from, to }: Payload
 ): Promise<LoadExpressionResult> {
   const { getters } = rootGetterContext(context);
   const { commit, state } = rootActionContext(context);
@@ -27,7 +26,6 @@ export default async function (
     const fromDate = from || getters.getApplicationStartTime;
     const untilDate = to || new Date("August 19, 1975 23:15:30").toISOString();
 
-    const neighbourhood = state.data.neighbourhoods[communityId];
     const channel = state.data.neighbourhoods[channelId];
     let latestLinkTimestamp: Date | null = null;
 

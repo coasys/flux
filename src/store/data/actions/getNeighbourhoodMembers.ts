@@ -1,11 +1,10 @@
 import { getProfile } from "@/utils/profileHelpers";
 import { getLinks } from "@/core/queries/getLinks";
-import type { Expression } from "@perspect3vism/ad4m-types";
 import { LinkQuery } from "@perspect3vism/ad4m-types";
 import { TimeoutCache } from "../../../utils/timeoutCache";
 
 import { rootActionContext } from "@/store/index";
-import { ExpressionTypes } from "@/store/types";
+import { ExpressionTypes, ProfileExpression } from "@/store/types";
 
 export interface Payload {
   communityId: string;
@@ -16,8 +15,8 @@ export default async function (
   { communityId }: Payload
 ): Promise<void> {
   const { commit, state } = rootActionContext(context);
-  const profiles: { [x: string]: Expression } = {};
-  const cache = new TimeoutCache<Expression>(1000 * 60 * 5);
+  const profiles: { [x: string]: ProfileExpression } = {};
+  const cache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
 
   try {
     const communities = state.data.neighbourhoods;
