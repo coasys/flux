@@ -80,7 +80,7 @@
           }"
           custom
           v-slot="{ navigate, isExactActive }"
-          v-for="channel in community.neighbourhood.linkedPerspectives"
+          v-for="channel in channels"
           :key="channel"
         >
           <j-popover
