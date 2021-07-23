@@ -7,8 +7,8 @@ import { rootActionContext, rootGetterContext } from "@/store/index";
 
 export interface Payload {
   channelId: string;
-  from: Date;
-  to: Date;
+  from?: Date;
+  to?: Date;
 }
 
 export interface LoadExpressionResult {
