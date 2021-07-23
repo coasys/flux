@@ -52,35 +52,9 @@
 import { defineComponent } from "vue";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 
-import { CommunityState } from "@/store/types";
-
 export default defineComponent({
   name: "HomeView",
   components: { SidebarLayout },
-  methods: {
-    handleMembersClick(community: CommunityState) {
-      this.$store.commit("setShowCommunityMembers", true);
-      this.$router.push({
-        name: "community",
-        params: { communityId: community.perspective.uuid },
-      });
-    },
-    handleEditClick(community: CommunityState) {
-      this.$store.commit("setShowEditCommunity", true);
-      this.$router.push({
-        name: "community",
-        params: { communityId: community.perspective.uuid },
-      });
-    },
-  },
-  computed: {
-    communities() {
-      return this.$store.state.communities;
-    },
-    userProfile() {
-      return this.$store.state.userProfile;
-    },
-  },
 });
 </script>
 

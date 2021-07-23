@@ -2,7 +2,7 @@ import VuexPersistence from "vuex-persist";
 import { createDirectStore } from "direct-vuex";
 import user from "./user";
 import data from "./data";
-import application from "./application";
+import app from "./app";
 
 const vuexLocal = new VuexPersistence({
   storage: window.localStorage,
@@ -18,7 +18,7 @@ const {
   modules: {
     user,
     data,
-    application,
+    app,
   },
   plugins: [vuexLocal.plugin],
 });

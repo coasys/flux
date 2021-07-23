@@ -2,7 +2,7 @@
   <j-box px="800" pt="800" pb="1000">
     <j-flex wrap gap="500" a="center" j="between">
       <j-text nomargin variant="heading">
-        My communities ({{ Object.keys(communities).length }})
+        My communities ({{ communities.length }})
       </j-text>
       <j-button
         size="lg"
@@ -20,7 +20,7 @@
       }"
       class="community-item"
       v-for="community in communities"
-      :key="community.perspective.uuid"
+      :key="community.neighbourhood.perspective.uuid"
     >
       <j-avatar
         :src="require('@/assets/images/junto_web_rainbow.png')"
@@ -34,14 +34,16 @@
           color="ui-800"
           weight="600"
         >
-          {{ community.name }}
+          {{ community.neighbourhood.name }}
         </j-text>
-        <j-text variant="body">{{ community.description }}</j-text>
+        <j-text variant="body">{{
+          community.neighbourhood.description
+        }}</j-text>
         <j-flex gap="300" a="center">
           <avatar-group
             size="xs"
             @click="() => handleMembersClick(community)"
-            :users="community.members"
+            :users="community.neighbourhood.members"
           />
           <j-text size="300" color="ui-500" nomargin>
             Members ({{ Object.keys(community.members).length }})
@@ -62,12 +64,13 @@
 import { defineComponent } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { CommunityState } from "@/store/types";
+import store from "@/store";
 
 export default defineComponent({
   components: { AvatarGroup },
   computed: {
     communities() {
-      return this.$store.state.communities;
+      return store.getters.getCommunities;
     },
   },
   methods: {

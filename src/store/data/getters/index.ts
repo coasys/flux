@@ -1,23 +1,35 @@
-import { State, CommunityState, ChannelState } from "@/store/types";
+import {
+  DataState,
+  CommunityState,
+  ChannelState,
+  NeighbourhoodState,
+} from "@/store/types";
 
 export default {
   // Get the list of communities a user is a part of
-  getCommunities(state: State): CommunityState[] {
+
+  getCommunityNeighbourhoods(state: DataState): NeighbourhoodState[] {
+    return Object.values(state.communities).map(
+      (community) => state.neighbourhoods[community.perspectiveUuid]
+    );
+  },
+
+  getCommunities(state: DataState): CommunityState[] {
     const out = [];
-    for (const neighbourhood of Object.values(state.data.neighbourhoods)) {
+    for (const community of Object.values(state.communities)) {
       out.push({
-        neighbourhood,
-        state: state.data.communities[neighbourhood.perspective.uuid],
+        neighbourhood: state.neighbourhoods[community.perspectiveUuid],
+        state: community,
       } as CommunityState);
     }
     return out;
   },
 
   getCommunity:
-    (state: State) =>
+    (state: DataState) =>
     (id: string): CommunityState => {
-      const neighbourhood = state.data.neighbourhoods[id];
-      const community = state.data.communities[id];
+      const neighbourhood = state.neighbourhoods[id];
+      const community = state.communities[id];
 
       return {
         neighbourhood,
@@ -26,14 +38,14 @@ export default {
     },
 
   getChannelsByCommunity:
-    (state: State) =>
+    (state: DataState) =>
     (id: string): ChannelState[] => {
-      const neighbourhood = state.data.neighbourhoods[id];
+      const neighbourhood = state.neighbourhoods[id];
       const out = [];
       for (const channelPerspectiveUuid of neighbourhood.linkedNeighbourhoods) {
         out.push({
-          neighbourhood: state.data.neighbourhoods[channelPerspectiveUuid],
-          state: state.data.communities[id].channels[channelPerspectiveUuid],
+          neighbourhood: state.neighbourhoods[channelPerspectiveUuid],
+          state: Datastate.communities[id].channels[channelPerspectiveUuid],
         } as ChannelState);
       }
 
@@ -41,11 +53,11 @@ export default {
     },
 
   getChannel:
-    (state: State) =>
+    (state: DataState) =>
     (payload: { channelId: string; communityId: string }): ChannelState => {
       const { channelId, communityId } = payload;
-      const neighbourhood = state.data.neighbourhoods[channelId];
-      const channel = state.data.communities[communityId].channels[channelId];
+      const neighbourhood = state.neighbourhoods[channelId];
+      const channel = state.communities[communityId].channels[channelId];
 
       return {
         neighbourhood,
