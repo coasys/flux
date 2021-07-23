@@ -1,13 +1,8 @@
-import { Commit } from "vuex";
-import { initAgent } from "@/core/mutations/initAgent";
-import { lockAgent } from "@/core/mutations/lockAgent";
+import { agentGenerate } from "@/core/mutations/agentGenerate";
 import { addPerspective } from "@/core/mutations/addPerspective";
 
 import { databasePerspectiveName } from "@/core/juntoTypes";
-
-export interface Context {
-  commit: Commit;
-}
+import { rootActionContext } from "@/store/index";
 
 export interface Payload {
   givenName: string;
@@ -20,7 +15,7 @@ export interface Payload {
 }
 
 export default async (
-  { commit }: Context,
+  context: any,
   {
     givenName,
     familyName,
@@ -31,32 +26,25 @@ export default async (
     thumbnailPicture,
   }: Payload
 ): Promise<void> => {
+  const { commit } = rootActionContext(context);
   const perspectiveName = databasePerspectiveName;
 
   try {
-    const status = await initAgent();
-    await lockAgent(password);
-
+    const status = await agentGenerate(password);
     const addPerspectiveResult = await addPerspective(perspectiveName);
 
-    commit("addDatabasePerspective", addPerspectiveResult.uuid);
-
-    commit("createProfile", {
-      profile: {
-        username: username,
-        email: email,
-        givenName: givenName,
-        familyName: familyName,
-        profilePicture,
-        thumbnailPicture,
-      },
-      did: status.did!,
+    commit.setUserProfile({
+      username: username,
+      email: email,
+      givenName: givenName,
+      familyName: familyName,
+      profilePicture,
+      thumbnailPicture,
     });
-
-    commit("updateAgentInitState", true);
-    commit("updateAgentLockState", true);
+    commit.updateAgentStatus(status);
+    commit.setDatabasePerspective(addPerspectiveResult.uuid);
   } catch (e) {
-    commit("showDangerToast", {
+    commit.showDangerToast({
       message: e.message,
     });
     throw new Error(e);
