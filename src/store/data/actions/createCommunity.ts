@@ -30,7 +30,7 @@ export default async (
   { perspectiveName, description }: Payload
 ): Promise<CommunityState> => {
   const { getters } = rootGetterContext(context);
-  const { commit, state } = rootActionContext(context);
+  const { commit, rootState } = rootActionContext(context);
   try {
     const createSourcePerspective = await addPerspective(perspectiveName);
     console.log("Created source perspective", createSourcePerspective);
@@ -125,7 +125,7 @@ export default async (
 
     const createProfileExpression = await createProfile(
       profileExpressionLang.address!,
-      state.user.profile!
+      rootState.user.profile!
     );
 
     //Create link between perspective and group expression

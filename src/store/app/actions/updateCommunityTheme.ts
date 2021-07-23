@@ -13,10 +13,10 @@ export default async function updateGlobalTheme(
   context: any,
   payload: { communityId: string; theme: ThemeState }
 ): Promise<void> {
-  const { commit, state } = rootActionContext(context);
-  const isCurrentTheme = state.app.currentTheme === payload.communityId;
+  const { commit, rootState } = rootActionContext(context);
+  const isCurrentTheme = rootState.app.currentTheme === payload.communityId;
   const mergedTheme = {
-    ...state.data.communities[payload.communityId].theme,
+    ...rootState.data.communities[payload.communityId].theme,
     ...payload.theme,
   };
 

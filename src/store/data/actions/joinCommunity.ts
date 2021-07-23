@@ -19,9 +19,9 @@ export default async (
   { joiningLink }: Payload
 ): Promise<void> => {
   const { getters } = rootGetterContext(context);
-  const { commit, state } = rootActionContext(context);
+  const { commit, rootState } = rootActionContext(context);
   try {
-    const neighbourhoods = state.data.neighbourhoods;
+    const neighbourhoods = rootState.data.neighbourhoods;
     const isAlreadyPartOf = Object.values(neighbourhoods).find(
       (c) => c.neighbourhoodUrl === joiningLink
     );
@@ -50,7 +50,7 @@ export default async (
       if (profileExpLang != undefined) {
         const createProfileExpression = await createProfile(
           profileExpLang.languageAddress!,
-          state.user.profile!
+          rootState.user.profile!
         );
 
         //Create link between perspective and group expression

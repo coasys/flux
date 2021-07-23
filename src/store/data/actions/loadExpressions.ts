@@ -21,12 +21,12 @@ export default async function (
   { channelId, from, to }: Payload
 ): Promise<LoadExpressionResult> {
   const { getters } = rootGetterContext(context);
-  const { commit, state } = rootActionContext(context);
+  const { commit, rootState } = rootActionContext(context);
   try {
     const fromDate = from || getters.getApplicationStartTime;
     const untilDate = to || new Date("August 19, 1975 23:15:30").toISOString();
 
-    const channel = state.data.neighbourhoods[channelId];
+    const channel = rootState.data.neighbourhoods[channelId];
     let latestLinkTimestamp: Date | null = null;
 
     const linksWorker = new Worker("pollingWorker.js");

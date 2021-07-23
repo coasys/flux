@@ -14,12 +14,12 @@ export default async function (
   context: any,
   { communityId }: Payload
 ): Promise<void> {
-  const { commit, state } = rootActionContext(context);
+  const { commit, rootState } = rootActionContext(context);
   const profiles: { [x: string]: ProfileExpression } = {};
   const cache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
 
   try {
-    const communities = state.data.neighbourhoods;
+    const communities = rootState.data.neighbourhoods;
 
     const community = communities[communityId];
 

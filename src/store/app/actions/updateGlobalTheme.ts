@@ -13,9 +13,9 @@ export default async function updateGlobalTheme(
   context: any,
   payload: ThemeState
 ): Promise<void> {
-  const { commit, state } = rootActionContext(context);
-  const currentThemeIsGlobal = state.app.currentTheme === "global";
-  const mergedTheme = { ...state.app.globalTheme, ...payload };
+  const { commit, rootState } = rootActionContext(context);
+  const currentThemeIsGlobal = rootState.app.currentTheme === "global";
+  const mergedTheme = { ...rootState.app.globalTheme, ...payload };
 
   if (currentThemeIsGlobal) {
     setTheme(mergedTheme);

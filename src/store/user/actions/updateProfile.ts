@@ -13,7 +13,7 @@ export interface Payload {
 
 export default async (context: any, payload: Payload): Promise<void> => {
   const { getters } = rootGetterContext(context);
-  const { commit, state } = rootActionContext(context);
+  const { commit, rootState } = rootActionContext(context);
 
   const currentProfile = getters.getProfile;
   const newProfile = {
@@ -27,14 +27,14 @@ export default async (context: any, payload: Payload): Promise<void> => {
   commit.setUserProfile(newProfile);
 
   try {
-    const neighbourhoods = Object.values(state.data.neighbourhoods);
+    const neighbourhoods = Object.values(rootState.data.neighbourhoods);
     const cache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
 
     for (const neighbourhood of neighbourhoods) {
       const profileExpression = neighbourhood.typedExpressionLanguages.find(
         (t) => t.expressionType == ExpressionTypes.ProfileExpression
       );
-      const didExpression = `${profileExpression!.languageAddress}://${state
+      const didExpression = `${profileExpression!.languageAddress}://${rootState
         .user.agent.did!}`;
 
       console.log("profileExpression: ", profileExpression);
