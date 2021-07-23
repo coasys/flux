@@ -62,20 +62,27 @@ export async function createChannel(
   const now = new Date();
 
   return {
-    name: channelName,
-    hasNewMessages: false,
-    perspective: perspective,
-    type: FeedType.Signaled,
-    createdAt: now,
-    linkLanguageAddress: socialContextLanguage.address,
-    currentExpressionLinks: {},
-    currentExpressionMessages: {},
-    neighbourhoodUrl: neighbourhood,
-    membraneType: membraneType,
-    groupExpressionRef: "",
-    typedExpressionLanguages: typedExpressionLanguages,
-    notifications: {
-      mute: false,
+    neighbourhood: {
+      name: channelName,
+      perspective: perspective,
+      typedExpressionLanguages: typedExpressionLanguages,
+      neighbourhoodUrl: neighbourhood,
+      membraneType: membraneType,
+      linkedPerspectives: [],
+      linkedNeighbourhoods: [],
+      members: [],
+      currentExpressionLinks: {},
+      currentExpressionMessages: {},
+      createdAt: now,
+      membraneRoot: sourcePerspective.uuid,
+    },
+    state: {
+      perspectiveUuid: perspective.uuid,
+      hasNewMessages: false,
+      feedType: FeedType.Signaled,
+      notifications: {
+        mute: false,
+      },
     },
   } as ChannelState;
 }

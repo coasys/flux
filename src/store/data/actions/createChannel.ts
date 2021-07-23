@@ -1,4 +1,3 @@
-import { Commit } from "vuex";
 import { createChannel } from "@/core/methods/createChannel";
 
 import { ChannelState, MembraneType } from "@/store/types";

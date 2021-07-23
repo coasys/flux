@@ -75,16 +75,13 @@ export default async (
       const newCommunity = {
         neighbourhood: {
           name: name,
-          description: "",
           perspective: neighbourhood,
           typedExpressionLanguages: typedExpressionLanguages,
-          groupExpressionRef: "na",
           neighbourhoodUrl: joiningLink,
           membraneType: MembraneType.Unique,
           linkedNeighbourhoods: [],
           linkedPerspectives: [],
           members: [],
-          currentChannelId: null,
           currentExpressionLinks: {},
           currentExpressionMessages: {},
         },
@@ -97,7 +94,6 @@ export default async (
             hue: 270,
             saturation: 60,
           },
-          channels: {},
           currentChannelId: null,
         },
       } as CommunityState;

@@ -5,7 +5,8 @@ import { joinNeighbourhood } from "../mutations/joinNeighbourhood";
 import { getPerspectiveSnapshot } from "../queries/getPerspective";
 
 export async function joinChannelFromSharedLink(
-  url: string
+  url: string,
+  parentPerspectiveUUID: string
 ): Promise<ChannelState> {
   console.log("Starting sharedperspective join");
   const neighbourhood = await joinNeighbourhood(url);
@@ -13,7 +14,7 @@ export async function joinChannelFromSharedLink(
 
   const perspectiveSnapshot = await getPerspectiveSnapshot(neighbourhood.uuid);
 
-  const typedExpressionLanguages = await getTypedExpressionLanguages(
+  const [typedExpressionLanguages, _] = await getTypedExpressionLanguages(
     perspectiveSnapshot!,
     false
   );
@@ -22,24 +23,28 @@ export async function joinChannelFromSharedLink(
   const name = findNameFromMeta(perspectiveSnapshot!);
 
   //TODO: derive membraneType from link on sharedPerspective
-  //For now its hard coded inherited since we dont support anything else
-  const now = new Date();
-  //TODO: lets use a constructor on the ChannelState type
   return {
-    name: name,
-    hasNewMessages: false,
-    perspective: neighbourhood,
-    type: FeedType.Signaled,
-    createdAt: now,
-    linkLanguageAddress: "na",
-    currentExpressionLinks: {},
-    currentExpressionMessages: {},
-    neighbourhoodUrl: url,
-    membraneType: MembraneType.Inherited,
-    groupExpressionRef: "",
-    typedExpressionLanguages: typedExpressionLanguages,
-    notifications: {
-      mute: false,
+    neighbourhood: {
+      name: name,
+      perspective: neighbourhood,
+      typedExpressionLanguages: typedExpressionLanguages,
+      neighbourhoodUrl: url,
+      membraneType: MembraneType.Inherited,
+      linkedPerspectives: [],
+      linkedNeighbourhoods: [],
+      members: [],
+      currentExpressionLinks: {},
+      currentExpressionMessages: {},
+      createdAt: new Date(),
+      membraneRoot: parentPerspectiveUUID,
+    },
+    state: {
+      perspectiveUuid: neighbourhood.uuid,
+      hasNewMessages: false,
+      feedType: FeedType.Signaled,
+      notifications: {
+        mute: false,
+      },
     },
   } as ChannelState;
 }

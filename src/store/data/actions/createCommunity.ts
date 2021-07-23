@@ -166,9 +166,9 @@ export default async (
         linkedPerspectives: [channel.neighbourhood.perspective.uuid],
         linkedNeighbourhoods: [channel.neighbourhood.neighbourhoodUrl],
         members: [],
-        currentChannelId: null,
         currentExpressionLinks: {},
         currentExpressionMessages: {},
+        createdAt: new Date(),
       },
       state: {
         perspectiveUuid: createSourcePerspective.uuid,
@@ -178,9 +178,6 @@ export default async (
           name: "light",
           hue: 270,
           saturation: 60,
-        },
-        channels: {
-          [channel.neighbourhood.perspective.uuid]: channel.state,
         },
         currentChannelId: null,
       },

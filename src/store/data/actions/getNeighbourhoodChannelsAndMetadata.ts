@@ -68,7 +68,8 @@ export default async (
                 );
                 //Call ad4m and try to join the sharedperspective found at link target
                 const channel = await joinChannelFromSharedLink(
-                  channelLinks[i].data!.target!
+                  channelLinks[i].data!.target!,
+                  community.neighbourhood.perspective.uuid
                 );
                 console.log(
                   "trying to join channel",

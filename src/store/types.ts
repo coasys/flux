@@ -4,7 +4,6 @@ import type {
   LinkExpression,
 } from "@perspect3vism/ad4m-types";
 import { ExpressionRef, PerspectiveHandle } from "@perspect3vism/ad4m-types";
-import { Commit } from "vuex";
 
 export interface State {
   app: ApplicationState;
@@ -44,10 +43,10 @@ export interface ApplicationState {
 
 export interface NeighbourhoodState {
   name: string;
-  description: string;
+  description?: string;
   perspective: PerspectiveHandle;
   typedExpressionLanguages: JuntoExpressionReference[];
-  groupExpressionRef: string;
+  groupExpressionRef?: string;
   neighbourhoodUrl: string;
   membraneType: MembraneType;
   membraneRoot?: string;
@@ -56,6 +55,7 @@ export interface NeighbourhoodState {
   members: Expression[];
   currentExpressionLinks: { [x: string]: LinkExpression };
   currentExpressionMessages: { [x: string]: ExpressionAndRef };
+  createdAt?: Date;
 }
 
 export interface CommunityState {
