@@ -45,12 +45,13 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import type { Expression } from "@perspect3vism/ad4m-types";
+import { NeighbourhoodState } from "@/store/types";
 import store from "@/store";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
   mounted() {
-    store.getters.getCommunityMembers(this.community.perspective.uuid);
+    store.dispatch.getCommunityMembers(this.community.perspective.uuid);
   },
   data() {
     return {
@@ -58,7 +59,7 @@ export default defineComponent({
     };
   },
   computed: {
-    community() {
+    community(): NeighbourhoodState {
       const id = this.$route.params.communityId.toString();
       return store.getters.getNeighbourhood(id);
     },

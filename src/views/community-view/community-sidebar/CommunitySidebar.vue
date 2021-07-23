@@ -152,6 +152,7 @@ import { defineComponent } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { mapMutations } from "vuex";
 import store from "@/store";
+import { NeighbourhoodState } from "@/store/types";
 
 export default defineComponent({
   components: { AvatarGroup },
@@ -162,7 +163,7 @@ export default defineComponent({
     };
   },
   computed: {
-    channels() {
+    channels(): NeighbourhoodState[] {
       const communityId = this.$route.params.communityId.toString();
       return store.getters.getChannelNeighbourhoods(communityId);
     },
