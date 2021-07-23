@@ -135,10 +135,10 @@ export default defineComponent({
 
         if (!val) return;
 
-        const firstChannel = Object.values(this.currentCommunity.channels)[0];
+        const firstChannel =
+          this.currentCommunity.neighbourhood.linkedPerspectives[0];
         const currentChannelId =
-          this.currentCommunity.currentChannelId ||
-          firstChannel.perspective.uuid;
+          this.currentCommunity.state.currentChannelId || firstChannel;
 
         this.$router.push({
           name: "channel",
@@ -163,7 +163,7 @@ export default defineComponent({
       // Get the invite code to join community and copy to clipboard
       let currentCommunity = this.currentCommunity;
       const el = document.createElement("textarea");
-      el.value = `Hey! Here is an invite code to join my private community on Junto: ${currentCommunity.neighbourhoodUrl}`;
+      el.value = `Hey! Here is an invite code to join my private community on Junto: ${currentCommunity.neighbourhood.neighbourhoodUrl}`;
       document.body.appendChild(el);
       el.select();
       document.execCommand("copy");
