@@ -115,9 +115,7 @@ export default defineComponent({
               communityId: id,
             }
           );
-          store.dispatch("getCommunityMembers", {
-            communityId: id,
-          });
+          store.getters.getCommunityMembers(id);
         }
       },
       { immediate: true }
