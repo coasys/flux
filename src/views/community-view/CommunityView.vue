@@ -72,7 +72,8 @@ import { defineComponent, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
-import { useStore, mapMutations } from "vuex";
+import { mapMutations } from "vuex";
+import store from "@/store";
 
 import EditCommunity from "@/containers/EditCommunity.vue";
 import CreateChannel from "@/containers/CreateChannel.vue";
@@ -94,7 +95,6 @@ export default defineComponent({
   },
   setup() {
     const route = useRoute();
-    const store = useStore();
     const hasCopied = ref(false);
     let channelWorkerLoop = null as null | Worker;
     let groupExpWorkerLoop = null as null | Worker;
@@ -109,12 +109,10 @@ export default defineComponent({
           groupExpWorkerLoop.terminate();
         }
         if (id) {
-          [channelWorkerLoop, groupExpWorkerLoop] = await store.dispatch(
-            "getPerspectiveChannelsAndMetadata",
-            {
+          [channelWorkerLoop, groupExpWorkerLoop] =
+            await store.dispatch.getNeighbourhoodChannelsAndMetadata({
               communityId: id,
-            }
-          );
+            });
           store.getters.getCommunityMembers(id);
         }
       },
@@ -129,7 +127,7 @@ export default defineComponent({
     "currentCommunity.perspective": {
       handler: function (val: PerspectiveHandle) {
         if (!this.currentCommunity) return;
-        this.$store.dispatch("changeCurrentTheme", val ? val : "global");
+        store.dispatch.changeCurrentTheme(val.uuid ? val.uuid : "global");
 
         if (!val) return;
 
@@ -168,18 +166,18 @@ export default defineComponent({
       document.body.removeChild(el);
       this.hasCopied = true;
 
-      this.$store.commit("showSuccessToast", {
+      store.commit.showSuccessToast({
         message: "Your custom invite code is copied to your clipboard!",
       });
     },
   },
   computed: {
     modals(): ModalsState {
-      return this.$store.state.ui.modals;
+      return store.state.app.modals;
     },
     currentCommunity(): CommunityState {
       const { communityId } = this.$route.params;
-      return this.$store.getters.getCommunity(communityId);
+      return store.getters.getCommunity(communityId as string);
     },
   },
 });

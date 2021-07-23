@@ -42,10 +42,10 @@ export default defineComponent({
   },
   computed: {
     userProfile(): Profile {
-      return this.$store.state.userProfile || {};
+      return store.state.user.userProfile || {};
     },
     userDid(): string {
-      return this.$store.state.userDid;
+      return store.state.user.agent.did!;
     },
   },
   watch: {

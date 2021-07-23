@@ -52,7 +52,7 @@ export default defineComponent({
   },
   computed: {
     theme(): ThemeState {
-      return this.$store.state.ui.globalTheme;
+      return store.state.app.globalTheme;
     },
   },
 });
