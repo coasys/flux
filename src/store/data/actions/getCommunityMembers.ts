@@ -4,15 +4,14 @@ import { TimeoutCache } from "@/utils/timeoutCache";
 import { LinkQuery } from "@perspect3vism/ad4m-types";
 import type { Expression } from "@perspect3vism/ad4m-types";
 
-import { rootGetterContext, rootActionContext } from "@/store";
+import { rootActionContext } from "@/store";
 import { ExpressionTypes } from "@/store/types";
 
 export default async function (
   context: any,
   communityId: string
 ): Promise<void> {
-  const { getters } = rootGetterContext(context);
-  const { commit } = rootActionContext(context);
+  const { commit, getters } = rootActionContext(context);
 
   const profiles: { [x: string]: Expression } = {};
   const cache = new TimeoutCache<Expression>(1000 * 60 * 5);

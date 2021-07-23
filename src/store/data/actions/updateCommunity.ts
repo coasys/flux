@@ -1,7 +1,7 @@
 import { createExpression } from "@/core/mutations/createExpression";
 import { createLink } from "@/core/mutations/createLink";
 
-import { rootActionContext, rootGetterContext } from "@/store/index";
+import { rootActionContext } from "@/store/index";
 import { ExpressionTypes } from "@/store/types";
 
 export interface Payload {
@@ -14,8 +14,7 @@ export default async function updateCommunity(
   context: any,
   { communityId, name, description }: Payload
 ): Promise<void> {
-  const { getters } = rootGetterContext(context);
-  const { commit } = rootActionContext(context);
+  const { commit, getters } = rootActionContext(context);
 
   const community = getters.getCommunity(communityId);
 

@@ -3,7 +3,7 @@ import { TimeoutCache } from "@/utils/timeoutCache";
 import { getExpression } from "@/core/queries/getExpression";
 
 import { ExpressionTypes, Profile, ProfileExpression } from "@/store/types";
-import { rootActionContext, rootGetterContext } from "@/store/index";
+import { rootActionContext } from "@/store/index";
 
 export interface Payload {
   username?: string;
@@ -12,8 +12,7 @@ export interface Payload {
 }
 
 export default async (context: any, payload: Payload): Promise<void> => {
-  const { getters } = rootGetterContext(context);
-  const { commit, rootState } = rootActionContext(context);
+  const { commit, rootState, getters } = rootActionContext(context);
 
   const currentProfile = getters.getProfile;
   const newProfile = {

@@ -4,7 +4,7 @@ import { expressionGetRetries, expressionGetDelayMs } from "@/core/juntoTypes";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 import { LinkQuery } from "@perspect3vism/ad4m-types";
 
-import { rootActionContext, rootGetterContext } from "@/store/index";
+import { rootActionContext } from "@/store/index";
 
 export interface Payload {
   communityId: string;
@@ -16,8 +16,8 @@ export default async (
   { communityId }: Payload
 ): Promise<[Worker, Worker]> => {
   console.log("Getting community channel links for community: ", communityId);
-  const { getters } = rootGetterContext(context);
-  const { commit } = rootActionContext(context);
+
+  const { commit, getters } = rootActionContext(context);
   try {
     //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button
     const community = getters.getCommunity(communityId);

@@ -1,6 +1,6 @@
 import { getLanguages } from "@/core/queries/getLanguages";
 
-import { rootActionContext, rootGetterContext } from "@/store/index";
+import { rootActionContext } from "@/store/index";
 import { ExpressionUIIcons } from "@/store/types";
 
 export interface Payload {
@@ -8,8 +8,7 @@ export interface Payload {
 }
 
 export default async (context: any): Promise<void> => {
-  const { getters } = rootGetterContext(context);
-  const { commit } = rootActionContext(context);
+  const { commit, getters } = rootActionContext(context);
   try {
     const languages = await getLanguages();
 

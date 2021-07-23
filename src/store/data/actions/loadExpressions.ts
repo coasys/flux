@@ -3,7 +3,7 @@ import { print } from "graphql/language/printer";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 import { LinkQuery } from "@perspect3vism/ad4m-types";
 
-import { rootActionContext, rootGetterContext } from "@/store/index";
+import { rootActionContext } from "@/store/index";
 
 export interface Payload {
   channelId: string;
@@ -20,8 +20,7 @@ export default async function (
   context: any,
   { channelId, from, to }: Payload
 ): Promise<LoadExpressionResult> {
-  const { getters } = rootGetterContext(context);
-  const { commit, rootState } = rootActionContext(context);
+  const { commit, rootState, getters } = rootActionContext(context);
   try {
     const fromDate = from || getters.getApplicationStartTime;
     const untilDate = to || new Date("August 19, 1975 23:15:30").toISOString();

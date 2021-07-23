@@ -7,7 +7,7 @@ import { getPerspectiveSnapshot } from "@/core/queries/getPerspective";
 
 import { Link } from "@perspect3vism/ad4m-types";
 
-import { rootActionContext, rootGetterContext } from "@/store/index";
+import { rootActionContext } from "@/store/index";
 import { ExpressionTypes, CommunityState, MembraneType } from "@/store/types";
 
 export interface Payload {
@@ -18,7 +18,6 @@ export default async (
   context: any,
   { joiningLink }: Payload
 ): Promise<void> => {
-  const { getters } = rootGetterContext(context);
   const { commit, rootState } = rootActionContext(context);
   try {
     const neighbourhoods = rootState.data.neighbourhoods;

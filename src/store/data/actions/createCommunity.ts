@@ -29,8 +29,7 @@ export default async (
   context: any,
   { perspectiveName, description }: Payload
 ): Promise<CommunityState> => {
-  const { getters } = rootGetterContext(context);
-  const { commit, rootState } = rootActionContext(context);
+  const { commit, rootState, getters } = rootActionContext(context);
   try {
     const createSourcePerspective = await addPerspective(perspectiveName);
     console.log("Created source perspective", createSourcePerspective);
