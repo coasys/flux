@@ -37,7 +37,7 @@ export interface UserState {
 export interface ApplicationState {
   expressionUI: { [x: string]: ExpressionUIIcons };
   localLanguagesPath: string;
-  databasePerspective: string;
+  databasePerspective?: string;
   windowState: "minimize" | "visible" | "foreground";
   toast: ToastState;
   applicationStartTime: Date;

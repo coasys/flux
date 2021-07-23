@@ -9,6 +9,10 @@ export default {
     return state.applicationStartTime;
   },
 
+  getDatabasePerspective(state: ApplicationState): string | undefined {
+    return state.databasePerspective;
+  },
+
   getLanguageUI:
     (state: ApplicationState) =>
     (language: string): ExpressionUIIcons => {

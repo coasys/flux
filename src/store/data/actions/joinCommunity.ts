@@ -48,16 +48,9 @@ export default async (
         (val) => val.expressionType == ExpressionTypes.ProfileExpression
       );
       if (profileExpLang != undefined) {
-        const profile = getters.getProfile;
-
         const createProfileExpression = await createProfile(
           profileExpLang.languageAddress!,
-          profile!.username,
-          profile!.email,
-          profile!.givenName,
-          profile!.familyName,
-          profile!.profilePicture,
-          profile!.thumbnailPicture
+          state.user.profile!
         );
 
         //Create link between perspective and group expression

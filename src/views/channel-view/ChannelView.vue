@@ -257,9 +257,7 @@ export default defineComponent({
     },
     channel(): ChannelState {
       const { channelId } = this.$route.params;
-      return store.getters.getChannel({
-        channelId: channelId as string,
-      });
+      return store.getters.getChannel(channelId as string);
     },
     profileLanguage(): string {
       const profileLang =

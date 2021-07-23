@@ -6,6 +6,10 @@ export default {
     state.agent = payload;
   },
 
+  updateAgentLockState(state: UserState, payload: boolean): void {
+    state.agent.isUnlocked = payload;
+  },
+
   setUserProfile(state: UserState, payload: Profile): void {
     state.profile = payload;
   },

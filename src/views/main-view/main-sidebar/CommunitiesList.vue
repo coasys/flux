@@ -28,25 +28,26 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import store from "@/store";
 
 export default defineComponent({
   methods: {
     removeCommunity(id: string) {
-      this.$store.commit("removeCommunity", id);
+      store.commit.removeCommunity(id);
       this.$router.push({ name: "home" });
     },
     handleCommunityClick(communityId: string) {
       if (this.communityIsActive(communityId)) {
-        this.$store.commit("toggleSidebar");
+        store.commit.toggleSidebar;
       } else {
-        this.$store.commit("setSidebar", true);
+        store.commit.setSidebar(true);
         this.$router.push({ name: "community", params: { communityId } });
       }
     },
   },
   computed: {
     communities() {
-      return this.$store.state.communities;
+      return store.getters.getCommunityNeighbourhoods;
     },
     communityIsActive() {
       return (id: string) => this.$route.params.communityId === id;

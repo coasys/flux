@@ -1,6 +1,5 @@
 import { createProfile } from "@/core/methods/createProfile";
 import { TimeoutCache } from "@/utils/timeoutCache";
-import type { Expression } from "@perspect3vism/ad4m-types";
 import { getExpression } from "@/core/queries/getExpression";
 
 import { ExpressionTypes, Profile, ProfileExpression } from "@/store/types";
@@ -18,20 +17,16 @@ export default async (context: any, payload: Payload): Promise<void> => {
 
   const currentProfile = getters.getProfile;
   const newProfile = {
-    username: currentProfile?.username,
+    username: payload.username || currentProfile?.username,
     email: currentProfile?.email,
     givenName: currentProfile?.givenName,
     familyName: currentProfile?.familyName,
-    profilePicture: currentProfile?.profilePicture,
-    thumbnailPicture: currentProfile?.thumbnailPicture,
+    profilePicture: payload.profilePicture || currentProfile?.profilePicture,
+    thumbnailPicture: payload.thumbnail || currentProfile?.thumbnailPicture,
   } as Profile;
-  newProfile.username = payload.username;
-  newProfile.profilePicture = payload.profilePicture;
   commit.setUserProfile(newProfile);
 
   try {
-    const user = state.user.profile;
-
     const neighbourhoods = Object.values(state.data.neighbourhoods);
     const cache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
 
@@ -47,12 +42,7 @@ export default async (context: any, payload: Payload): Promise<void> => {
       if (profileExpression) {
         const exp = await createProfile(
           profileExpression.languageAddress,
-          payload.username,
-          user!.email,
-          user!.givenName,
-          user!.familyName,
-          payload.profilePicture,
-          payload.thumbnail
+          newProfile
         );
 
         console.log("Created new profileExpression: ", exp);

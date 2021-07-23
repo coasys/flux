@@ -51,8 +51,7 @@ export default {
 
   getChannel:
     (state: DataState) =>
-    (payload: { channelId: string }): ChannelState => {
-      const { channelId } = payload;
+    (channelId: string): ChannelState => {
       const neighbourhood = state.neighbourhoods[channelId];
       const channel = state.channels[channelId];
 

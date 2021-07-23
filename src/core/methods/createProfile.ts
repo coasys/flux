@@ -1,4 +1,5 @@
 import { createExpression } from "@/core/mutations/createExpression";
+import { Profile } from "@/store/types";
 
 const byteSize = (str: string) => new Blob([str]).size;
 
@@ -73,31 +74,26 @@ export const resizeImage = (file: any, maxSize: number): Promise<Blob> => {
 
 export async function createProfile(
   expressionLanguage: string,
-  username: string,
-  email: string,
-  givenName: string,
-  familyName: string,
-  profileImage?: string,
-  thumbnail?: string
+  profile: Profile
 ): Promise<string> {
   try {
-    const profile: { [x: string]: any } = {
-      "foaf:AccountName": username,
-      "schema:email": email,
-      "schema:givenName": givenName,
-      "schema:familyName": familyName,
+    const profileData: { [x: string]: any } = {
+      "foaf:AccountName": profile.username,
+      "schema:email": profile.email,
+      "schema:givenName": profile.givenName,
+      "schema:familyName": profile.familyName,
       "@type": "foaf:OnlineAccount",
     };
 
-    if (profileImage) {
-      profile["schema:image"] = JSON.stringify({
+    if (profile.profilePicture && profile.thumbnailPicture) {
+      profileData["schema:image"] = JSON.stringify({
         "@type": "schema:ImageObject",
-        "schema:contentSize": byteSize(profileImage),
-        "schema:contentUrl": profileImage,
+        "schema:contentSize": byteSize(profile.profilePicture),
+        "schema:contentUrl": profile.profilePicture,
         "schema:thumbnail": {
           "@type": "schema:ImageObject",
-          "schema:contentSize": byteSize(thumbnail!),
-          "schema:contentUrl": thumbnail,
+          "schema:contentSize": byteSize(profile.thumbnailPicture),
+          "schema:contentUrl": profile.thumbnailPicture,
         },
       });
     }
@@ -109,7 +105,7 @@ export async function createProfile(
           foaf: "http://xmlns.com/foaf/0.1/",
           schema: "https://schema.org/",
         },
-        profile,
+        profileData,
         signed_agent: "NA",
       })
     );

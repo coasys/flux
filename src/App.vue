@@ -40,16 +40,16 @@ import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
 import { gql } from "@apollo/client/core";
 import { defineComponent, computed } from "vue";
-import { useStore } from "vuex";
 import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { AGENT_STATUS, GET_EXPRESSION } from "@/core/graphql_queries";
-import { CommunityState, ModalsState, ToastState } from "@/store/types";
+import { ModalsState, ToastState } from "@/store/types";
 import showMessageNotification from "@/utils/showMessageNotification";
 import { print } from "graphql/language/printer";
 import { AgentStatus, LinkExpression } from "@perspect3vism/ad4m-types";
 import { apolloClient } from "./app";
+import store from "@/store";
 
 declare global {
   interface Window {
@@ -62,7 +62,7 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const route = useRoute();
-    const store = useStore();
+    //const store = useStore();
 
     onError((error) => {
       console.log("Got global graphql error, logging with error", error);
@@ -70,24 +70,26 @@ export default defineComponent({
         // can use error.operation.operationName to single out a query type.
         logErrorMessages(error);
 
-        store.commit("showDangerToast", {
+        store.commit.showDangerToast({
           message: JSON.stringify(error),
         });
       }
     });
 
     //Watch for agent unlock to set off running queries
-    store.watch(
-      (state) => state.agentUnlocked,
+    store.original.watch(
+      (state) => state.user.agent.isUnlocked,
       async (newValue) => {
         console.log("agent unlocked changed to", newValue);
         if (newValue) {
-          store.commit("updateApplicationStartTime", new Date());
+          store.commit.setApplicationStartTime(new Date());
         }
         if (newValue) {
-          store.dispatch("loadExpressionLanguages");
+          store.dispatch.loadExpressionLanguages;
         } else {
-          router.push({ name: store.state.agentInit ? "login" : "signup" });
+          router.push({
+            name: store.state.user.agent.isInitialized ? "login" : "signup",
+          });
         }
       },
       { immediate: true }
@@ -124,7 +126,7 @@ export default defineComponent({
 
             console.log("FOUND EXPRESSION FOR SIGNAL");
             //Add the expression to the store
-            store.commit("addExpressionAndLink", {
+            store.commit.addExpressionAndLink({
               channelId: perspective,
               link: link,
               message: expression,
@@ -133,14 +135,13 @@ export default defineComponent({
             showMessageNotification(
               router,
               route,
-              store,
               perspective,
               expression!.author,
               message.body
             );
 
             //Add UI notification on the channel to notify that there is a new message there
-            store.commit("setHasNewMessages", {
+            store.commit.setHasNewMessages({
               channelId: perspective,
               value: true,
             });
@@ -149,11 +150,10 @@ export default defineComponent({
       }
     };
 
-    let communities: CommunityState[] = Object.values(
-      store.getters.getCommunities
-    );
-    for (const community of communities) {
-      for (const channel of Object.values(community.channels)) {
+    for (const community of store.getters.getCommunityNeighbourhoods) {
+      for (const channel of store.getters.getChannelNeighbourhoods(
+        community.perspective.uuid
+      )) {
         apolloClient
           .subscribe({
             query: gql` subscription {
@@ -187,8 +187,8 @@ export default defineComponent({
     }
 
     return {
-      toast: computed(() => store.state.ui.toast),
-      setToast: (payload: ToastState) => store.commit("setToast", payload),
+      toast: computed(() => store.state.app.toast),
+      setToast: (payload: ToastState) => store.commit.setToast(payload),
     };
   },
   computed: {
@@ -204,52 +204,53 @@ export default defineComponent({
   },
   beforeCreate() {
     //Reset globalError & loading states in case application was exited with these states set to true before
-    this.$store.commit("setGlobalError", {
+    store.commit.setGlobalError({
       show: false,
       message: "",
     });
-    this.$store.commit("setGlobalLoading", false);
+    store.commit.setGlobalLoading(false);
 
     window.api.send("getLangPath");
 
     window.api.receive("unlockedStateOff", () => {
-      this.$store.commit("updateAgentLockState", false);
+      store.commit.updateAgentLockState(false);
     });
 
     window.api.receive("getLangPathResponse", (data: string) => {
       // console.log(`Received language path from main thread: ${data}`);
-      this.$store.commit("setLanguagesPath", data);
+      store.commit.setLanguagesPath(data);
     });
 
     window.api.receive("windowState", (data: string) => {
       console.log(`setWindowState: ${data}`);
-      this.$store.commit("setWindowState", data);
+      //@ts-ignore
+      store.commit.setWindowState(data);
     });
 
     window.api.receive("update_available", () => {
-      this.$store.commit("updateUpdateState", { updateState: "available" });
+      store.commit.setUpdateState({ updateState: "available" });
     });
 
     window.api.receive("update_not_available", () => {
-      this.$store.commit("updateUpdateState", { updateState: "not-available" });
+      store.commit.setUpdateState({ updateState: "not-available" });
     });
 
     window.api.receive("update_downloaded", () => {
-      this.$store.commit("updateUpdateState", { updateState: "downloaded" });
+      store.commit.setUpdateState({ updateState: "downloaded" });
     });
 
-    window.api.receive("download_progress", (data: any) => {
-      this.$store.commit("updateUpdateState", { updateState: "downloading" });
+    window.api.receive("download_progress", () => {
+      store.commit.setUpdateState({ updateState: "downloading" });
     });
 
     window.api.receive("setGlobalLoading", (val: boolean) => {
-      this.$store.commit("setGlobalLoading", val);
+      store.commit.setGlobalLoading(val);
     });
 
     window.api.receive(
       "globalError",
       (payload: { show: boolean; message: string }) => {
-        this.$store.commit("setGlobalError", payload);
+        store.commit.setGlobalError(payload);
       }
     );
 
@@ -257,14 +258,11 @@ export default defineComponent({
       agentStatus: AgentStatus;
     }>(AGENT_STATUS);
     onResult((val) => {
-      const isInit = val.data.agentStatus.isInitialized!;
-      const isUnlocked = val.data.agentStatus.isUnlocked!;
-      this.$store.commit("updateAgentInitState", isInit);
-      this.$store.commit("updateAgentLockState", isUnlocked);
-      if (isInit == true) {
+      store.commit.updateAgentStatus(val.data.agentStatus);
+      if (val.data.agentStatus.isInitialized == true) {
         //Get database perspective from store
-        let databasePerspective = this.$store.getters.getDatabasePerspective;
-        if (databasePerspective == "") {
+        let databasePerspective = store.getters.getDatabasePerspective;
+        if (!databasePerspective) {
           console.warn(
             "Does not have databasePerspective in store but has already been init'd! Add logic for getting databasePerspective as found with name"
           );

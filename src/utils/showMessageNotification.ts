@@ -1,66 +1,50 @@
-import {
-  ChannelState,
-  CommunityState,
-  ExpressionTypes,
-  State,
-} from "@/store/types";
+import { ExpressionTypes } from "@/store/types";
 import { RouteLocationNormalizedLoaded, Router } from "vue-router";
-import { Store } from "vuex";
 import { getProfile } from "./profileHelpers";
+import store from "@/store";
 
 export default async (
   router: Router,
   route: RouteLocationNormalizedLoaded,
-  store: Store<State>,
-  languageAddress: string,
+  perspectiveUuid: string,
   authorDid: string,
   message: string
-) => {
+): Promise<void> => {
   const escapedMessage = message.replace(/(\s*<.*?>\s*)+/g, " ");
 
-  let community: CommunityState | undefined;
-  let channel: ChannelState | undefined;
-
-  // Getting the community & channel this message belongs too
-  for (const comm of Object.values(store.state.communities)) {
-    const temp = comm as CommunityState;
-    channel = Object.values(temp.channels).find(
-      (c: any) => c.linkLanguageAddress === languageAddress
-    ) as ChannelState;
-
-    if (channel) {
-      community = temp;
-
-      break;
-    }
-  }
+  // Getting the channel & community this message belongs to
+  const channel = store.getters.getChannel(perspectiveUuid);
+  const community = store.getters.getCommunity(
+    channel.neighbourhood.membraneRoot!
+  );
 
   const isMinimized = ["minimize", "foreground"].includes(
-    store.state.windowState
+    store.state.app.windowState
   );
 
   const { channelId, communityId } = route.params;
 
   // Only show the notification when the the message is not from self & the active community & channel is different
   if (
-    (isMinimized && !channel?.notifications.mute) ||
-    (store.state.userDid !== authorDid &&
-      (community?.perspective.uuid === communityId
-        ? channel?.perspective.uuid !== channelId
+    (isMinimized && !channel?.state.notifications.mute) ||
+    (store.state.user.agent.did! !== authorDid &&
+      (community?.neighbourhood.perspective.uuid === communityId
+        ? channel?.neighbourhood.perspective.uuid !== channelId
         : true) &&
-      !channel?.notifications.mute)
+      !channel?.state.notifications.mute)
   ) {
     const isMentioned = message.includes(
-      store.state.userDid.replace("did:key:", "")
+      store.state.user.agent.did!.replace("did:key:", "")
     );
 
     let title = "";
     let body = "";
 
     if (isMentioned) {
-      const profileLanguage = community?.typedExpressionLanguages.find(
-        (t) => t.expressionType === ExpressionTypes.ProfileExpression
-      );
+      const profileLanguage =
+        community?.neighbourhood.typedExpressionLanguages.find(
+          (t) => t.expressionType === ExpressionTypes.ProfileExpression
+        );
       const profile = await getProfile(
         profileLanguage!.languageAddress,
         authorDid
@@ -68,11 +52,11 @@ export default async (
       //@ts-ignore
       const name = (profile!.data as any).profile["foaf:AccountName"];
 
-      title = `${name} mentioned you in #${channel?.name}}`;
+      title = `${name} mentioned you in #${channel?.neighbourhood.name}}`;
       body = escapedMessage;
     } else {
-      title = `New message in ${community?.name}`;
-      body = `#${channel?.name}: ${escapedMessage}`;
+      title = `New message in ${community?.neighbourhood.name}`;
+      body = `#${channel?.neighbourhood.name}: ${escapedMessage}`;
     }
 
     const notification = new Notification(title, {
@@ -87,8 +71,8 @@ export default async (
       router.push({
         name: "channel",
         params: {
-          communityId: community!.perspective!.uuid,
-          channelId: channel!.perspective!.uuid,
+          communityId: community!.neighbourhood.perspective!.uuid,
+          channelId: channel!.neighbourhood.perspective!.uuid,
         },
       });
     };
