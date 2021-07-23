@@ -252,7 +252,6 @@ export default defineComponent({
     },
     community(): CommunityState {
       const { communityId } = this.$route.params;
-
       return store.getters.getCommunity(communityId as string);
     },
     channel(): ChannelState {
