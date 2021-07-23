@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts">
-import { CommunityState } from "@/store/types";
+import { CommunityState, NeighbourhoodState } from "@/store/types";
 import { defineComponent } from "vue";
 import store from "@/store";
 
@@ -57,7 +57,7 @@ export default defineComponent({
     },
   },
   computed: {
-    community() {
+    community(): NeighbourhoodState {
       const id = this.$route.params.communityId.toString();
       return store.getters.getNeighbourhood(id);
     },
