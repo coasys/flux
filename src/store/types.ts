@@ -14,6 +14,7 @@ export interface State {
 
 export interface DataState {
   communities: { [perspectiveUuid: string]: LocalCommunityState };
+  channels: { [perspectiveUuid: string]: LocalChannelState };
   neighbourhoods: { [perspectiveUuid: string]: NeighbourhoodState };
 }
 
@@ -50,7 +51,7 @@ export interface NeighbourhoodState {
   neighbourhoodUrl: string;
   membraneType: MembraneType;
   membraneRoot?: string;
-  linkedNeighbourhoods: string[];
+  linkedPerspectives: string[];
   members: Expression[];
   currentExpressionLinks: { [x: string]: LinkExpression };
   currentExpressionMessages: { [x: string]: ExpressionAndRef };
@@ -69,7 +70,6 @@ export interface ChannelState {
 export interface LocalCommunityState {
   perspectiveUuid: string;
   theme?: ThemeState;
-  channels: { [persectiveUuid: string]: LocalChannelState };
   currentChannelId: string | undefined | null;
 }
 
