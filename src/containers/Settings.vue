@@ -24,7 +24,7 @@
       <div class="settings__content">
         <theme-editor
           v-if="currentView === 'theme-editor'"
-          @update="(theme) => updateGlobalTheme(theme)"
+          @update="updateGlobalTheme"
           :theme="theme"
         />
       </div>
@@ -34,9 +34,9 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions } from "vuex";
 import { ThemeState } from "@/store/types";
 import ThemeEditor from "./ThemeEditor.vue";
+import store from "@/store";
 
 export default defineComponent({
   components: { ThemeEditor },
@@ -46,7 +46,9 @@ export default defineComponent({
     };
   },
   methods: {
-    ...mapActions(["updateGlobalTheme"]),
+    updateGlobalTheme(val: ThemeState) {
+      store.dispatch.updateGlobalTheme(val);
+    },
   },
   computed: {
     theme(): ThemeState {
