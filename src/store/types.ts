@@ -176,8 +176,3 @@ export interface AddChannel {
   communityId: string;
   channel: ChannelState;
 }
-
-export interface Context {
-  commit: Commit;
-  getters: any;
-}
