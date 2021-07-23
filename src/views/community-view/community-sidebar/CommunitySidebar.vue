@@ -151,6 +151,7 @@
 import { defineComponent } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { mapMutations } from "vuex";
+import store from "@/store";
 
 export default defineComponent({
   components: { AvatarGroup },
@@ -159,6 +160,12 @@ export default defineComponent({
     return {
       showCommunityMenu: false,
     };
+  },
+  computed: {
+    channels() {
+      const communityId = this.$route.params.communityId.toString();
+      return store.getters.getChannelNeighbourhoods(communityId);
+    },
   },
   methods: {
     ...mapMutations([
