@@ -60,6 +60,7 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/vue": "^6.4.2",
     "@types/electron-devtools-installer": "^2.2.0",
+    "@types/object-hash": "^2.1.1",
     "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^4.28.1",
     "@typescript-eslint/parser": "^4.28.1",
