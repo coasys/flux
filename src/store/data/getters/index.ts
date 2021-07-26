@@ -72,7 +72,10 @@ export default {
   getChannelStates:
     (state: DataState) =>
     (communityId: string): ChannelState[] => {
-      return state.neighbourhoods[communityId].linkedPerspectives.map(
+      const links = state.neighbourhoods[communityId].linkedPerspectives;
+      return links
+        .filter((link, index) => links.indexOf(link) === index)
+        .map(
         (perspectiveUuid) => {
           return {
             neighbourhood: state.neighbourhoods[perspectiveUuid],
