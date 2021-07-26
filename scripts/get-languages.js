@@ -18,9 +18,9 @@ const languages = {
   },
   "neighbourhood-store": {
     targetDnaName: "neighbourhood-store",
-    dna: "https://github.com/perspect3vism/neighbourhood-language/releases/download/0.0.1/neighbourhood-store.dna",
+    //dna: "https://github.com/perspect3vism/neighbourhood-language/releases/download/0.0.2/neighbourhood-store.dna",
     bundle:
-      "https://github.com/perspect3vism/neighbourhood-language/releases/download/0.0.1/bundle.js",
+      "https://github.com/perspect3vism/neighbourhood-language/releases/download/0.0.2/bundle.js",
   },
   languages: {
     targetDnaName: "languages",
