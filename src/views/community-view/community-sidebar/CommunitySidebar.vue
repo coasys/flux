@@ -164,7 +164,7 @@ export default defineComponent({
   },
   computed: {
     channels(): ChannelState[] {
-      const communityId = this.$route.params.communityId.toString();
+      const communityId = this.$route.params.communityId as string;
       return store.getters.getChannelStates(communityId);
     },
   },

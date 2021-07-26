@@ -65,7 +65,7 @@ export default defineComponent({
   },
   methods: {
     async createChannel() {
-      const communityId = this.$route.params.communityId.toString();
+      const communityId = this.$route.params.communityId as string;
       const name = this.channelName;
       this.isCreatingChannel = true;
       store.dispatch

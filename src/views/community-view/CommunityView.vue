@@ -175,7 +175,7 @@ export default defineComponent({
       return store.state.app.modals;
     },
     communityId(): string {
-      return this.$route.params.communityId.toString();
+      return this.$route.params.communityId as string;
     },
     currentCommunity(): CommunityState {
       const { communityId } = this.$route.params;

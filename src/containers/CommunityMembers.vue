@@ -60,7 +60,7 @@ export default defineComponent({
   },
   computed: {
     community(): NeighbourhoodState {
-      const id = this.$route.params.communityId.toString();
+      const id = this.$route.params.communityId as string;
       return store.getters.getNeighbourhood(id);
     },
     filteredCommunityMemberList(): Expression[] {

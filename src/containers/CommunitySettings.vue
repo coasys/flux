@@ -47,7 +47,7 @@ export default defineComponent({
   },
   methods: {
     updateCommunityTheme(val: ThemeState) {
-      const id = this.$route.params.communityId.toString();
+      const id = this.$route.params.communityId as string;
       store.dispatch.updateCommunityTheme({
         communityId: id,
         theme: { ...val },
@@ -56,7 +56,7 @@ export default defineComponent({
   },
   computed: {
     theme(): ThemeState {
-      const id = this.$route.params.communityId.toString();
+      const id = this.$route.params.communityId as string;
       return store.getters.getCommunityState(id).theme;
     },
   },

@@ -421,7 +421,7 @@ export default defineComponent({
               (t) => t.expressionType === ExpressionTypes.ShortForm
             )!.languageAddress,
           content: { body: message, background: [""] },
-          perspective: this.channel.neighbourhood.perspective.uuid.toString(),
+          perspective: this.channel.neighbourhood.perspective.uuid as string,
         });
       }
     },
