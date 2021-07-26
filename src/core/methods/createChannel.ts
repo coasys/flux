@@ -64,6 +64,7 @@ export async function createChannel(
   return {
     neighbourhood: {
       name: channelName,
+      description: "",
       perspective: perspective,
       typedExpressionLanguages: typedExpressionLanguages,
       neighbourhoodUrl: neighbourhood,

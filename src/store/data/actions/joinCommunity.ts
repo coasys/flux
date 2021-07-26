@@ -2,7 +2,7 @@ import { createProfile } from "@/core/methods/createProfile";
 import { createLink } from "@/core/mutations/createLink";
 import { joinNeighbourhood } from "@/core/mutations/joinNeighbourhood";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
-import { findNameFromMeta } from "@/core/methods/findNameFromMeta";
+import { findNameDescriptionFromMeta } from "@/core/methods/findNameDescriptionFromMeta";
 import { getPerspectiveSnapshot } from "@/core/queries/getPerspective";
 
 import { Link } from "@perspect3vism/ad4m-types";
@@ -62,11 +62,12 @@ export default async (
       }
 
       //Read out metadata about the perspective from the meta
-      const name = findNameFromMeta(perspective!);
+      const { name, description } = findNameDescriptionFromMeta(perspective!);
 
       const newCommunity = {
         neighbourhood: {
-          name: name,
+          name,
+          description,
           perspective: neighbourhood,
           typedExpressionLanguages: typedExpressionLanguages,
           neighbourhoodUrl: joiningLink,

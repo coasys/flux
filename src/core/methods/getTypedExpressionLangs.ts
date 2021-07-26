@@ -17,7 +17,7 @@ export async function getTypedExpressionLanguages(
   //Get and cache the expression UI for each expression language
   //And used returned expression language names to populate typedExpressionLanguages field
   for (const link of perspective.links!) {
-    if (link.data.predicate == "expressionLanguage") {
+    if (link.data.predicate == "language") {
       console.log("JoinCommunity.vue: Fetching UI lang:", link.data.target);
       const languageRes = await getLanguage(link.data.target!);
       if (storeLanguageUI) {

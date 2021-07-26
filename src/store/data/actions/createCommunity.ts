@@ -19,6 +19,7 @@ import {
 } from "@/store/types";
 import { Perspective } from "@perspect3vism/ad4m-types";
 import { rootActionContext } from "@/store/index";
+import createNeighbourhoodMeta from "@/core/methods/createNeighbourhoodMeta";
 
 export interface Payload {
   perspectiveName: string;
@@ -85,7 +86,12 @@ export default async (
     ];
 
     //Publish perspective
-    const meta = new Perspective();
+    const metaLinks = await createNeighbourhoodMeta(
+      perspectiveName,
+      description,
+      typedExpLangs
+    );
+    const meta = new Perspective(metaLinks);
     const neighbourhood = await createNeighbourhood(
       createSourcePerspective.uuid,
       socialContextLang.address,
