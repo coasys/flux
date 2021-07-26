@@ -162,6 +162,7 @@ export default defineComponent({
         for (let [k, v] of Object.entries(newValue)) {
           if (watching.filter((val) => val == k).length == 0) {
             console.log("Starting watcher on perspective", k);
+            watching.push(k);
             apolloClient
               .subscribe({
                 query: gql` subscription {
@@ -193,7 +194,7 @@ export default defineComponent({
           }
         }
       },
-      { immediate: true, deep: true}
+      { immediate: true, deep: true }
     );
 
     return {
