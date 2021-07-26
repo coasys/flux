@@ -175,10 +175,7 @@ export default async (
       },
     } as CommunityState;
     commit.addCommunity(newCommunity);
-    commit.addChannel({
-      communityId: newCommunity.neighbourhood.perspective.uuid,
-      channel,
-    });
+    commit.createChannel(channel);
 
     //Get and cache the expression UI for each expression language
     for (const lang of typedExpLangs) {

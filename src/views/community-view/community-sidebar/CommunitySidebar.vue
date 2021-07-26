@@ -97,7 +97,7 @@
               @click="navigate"
             >
               <j-icon slot="start" size="sm" name="hash"></j-icon>
-              {{ channel.name }}
+              {{ channel.neighbourhood.name }}
               <j-icon
                 size="xs"
                 slot="end"
@@ -152,7 +152,7 @@ import { defineComponent } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { mapMutations } from "vuex";
 import store from "@/store";
-import { NeighbourhoodState } from "@/store/types";
+import { ChannelState } from "@/store/types";
 
 export default defineComponent({
   components: { AvatarGroup },
@@ -163,9 +163,11 @@ export default defineComponent({
     };
   },
   computed: {
-    channels(): NeighbourhoodState[] {
+    channels(): ChannelState[] {
       const communityId = this.$route.params.communityId.toString();
-      return store.getters.getChannelNeighbourhoods(communityId);
+      let channels = store.getters.getChannelStates(communityId);
+      console.log("Got channels", channels);
+      return store.getters.getChannelStates(communityId);
     },
   },
   methods: {

@@ -69,6 +69,20 @@ export default {
       ).map((perspectiveUuid) => state.neighbourhoods[perspectiveUuid]);
     },
 
+  getChannelStates:
+    (state: DataState) =>
+    (communityId: string): ChannelState[] => {
+      console.log(state.neighbourhoods[communityId].linkedPerspectives);
+      return state.neighbourhoods[communityId].linkedPerspectives.map(
+        (perspectiveUuid) => {
+          return {
+            neighbourhood: state.neighbourhoods[perspectiveUuid],
+            state: state.channels[perspectiveUuid],
+          } as ChannelState;
+        }
+      );
+    },
+
   getCommunityMembers:
     (state: DataState) =>
     (communityId: string): Expression[] => {
