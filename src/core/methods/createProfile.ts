@@ -74,26 +74,26 @@ export const resizeImage = (file: any, maxSize: number): Promise<Blob> => {
 
 export async function createProfile(
   expressionLanguage: string,
-  profile: Profile
+  profileData: Profile
 ): Promise<string> {
   try {
-    const profileData: { [x: string]: any } = {
-      "foaf:AccountName": profile.username,
-      "schema:email": profile.email,
-      "schema:givenName": profile.givenName,
-      "schema:familyName": profile.familyName,
+    const profile: { [x: string]: any } = {
+      "foaf:AccountName": profileData.username,
+      "schema:email": profileData.email,
+      "schema:givenName": profileData.givenName,
+      "schema:familyName": profileData.familyName,
       "@type": "foaf:OnlineAccount",
     };
 
-    if (profile.profilePicture && profile.thumbnailPicture) {
-      profileData["schema:image"] = JSON.stringify({
+    if (profileData.profilePicture && profileData.thumbnailPicture) {
+      profile["schema:image"] = JSON.stringify({
         "@type": "schema:ImageObject",
-        "schema:contentSize": byteSize(profile.profilePicture),
-        "schema:contentUrl": profile.profilePicture,
+        "schema:contentSize": byteSize(profileData.profilePicture),
+        "schema:contentUrl": profileData.profilePicture,
         "schema:thumbnail": {
           "@type": "schema:ImageObject",
-          "schema:contentSize": byteSize(profile.thumbnailPicture),
-          "schema:contentUrl": profile.thumbnailPicture,
+          "schema:contentSize": byteSize(profileData.thumbnailPicture),
+          "schema:contentUrl": profileData.thumbnailPicture,
         },
       });
     }
@@ -105,7 +105,7 @@ export async function createProfile(
           foaf: "http://xmlns.com/foaf/0.1/",
           schema: "https://schema.org/",
         },
-        profileData,
+        profile,
         signed_agent: "NA",
       })
     );

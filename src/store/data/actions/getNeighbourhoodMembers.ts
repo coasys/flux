@@ -10,10 +10,7 @@ export interface Payload {
   communityId: string;
 }
 
-export default async function (
-  context: any,
-  { communityId }: Payload
-): Promise<void> {
+export default async function (context: any, id: string): Promise<void> {
   const { commit, rootState } = rootActionContext(context);
   const profiles: { [x: string]: ProfileExpression } = {};
   const cache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
@@ -21,10 +18,10 @@ export default async function (
   try {
     const communities = rootState.data.neighbourhoods;
 
-    const community = communities[communityId];
+    const community = communities[id];
 
     const profileLinks = await getLinks(
-      communityId,
+      id,
       new LinkQuery({
         source: `${community.neighbourhoodUrl!}://self`,
         predicate: "sioc://has_member",
@@ -45,6 +42,7 @@ export default async function (
           profileLang.languageAddress,
           profileLink.author
         );
+        console.log(profile);
 
         if (profile) {
           profiles[did] = Object.assign({}, profile);
@@ -55,7 +53,7 @@ export default async function (
       const profileList = Object.values(profiles);
 
       commit.setCommunityMembers({
-        communityId,
+        communityId: id,
         members: profileList,
       });
     } else {

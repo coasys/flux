@@ -312,6 +312,7 @@ export const GET_EXPRESSION = gql`
       proof {
         valid
         invalid
+        signature
       }
     }
   }

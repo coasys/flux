@@ -112,7 +112,7 @@ export default defineComponent({
             await store.dispatch.getNeighbourhoodChannelsAndMetadata({
               communityId: id,
             });
-          store.getters.getCommunityMembers(id);
+          store.dispatch.getNeighbourhoodMembers(id);
         }
       },
       { immediate: true }

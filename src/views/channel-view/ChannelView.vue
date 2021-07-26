@@ -418,7 +418,7 @@ export default defineComponent({
         store.dispatch.createExpression({
           languageAddress:
             this.channel.neighbourhood.typedExpressionLanguages.find(
-              (t) => t.expressionType === ExpressionTypes.ProfileExpression
+              (t) => t.expressionType === ExpressionTypes.ShortForm
             )!.languageAddress,
           content: { body: message, background: [""] },
           perspective: this.channel.neighbourhood.perspective.uuid.toString(),

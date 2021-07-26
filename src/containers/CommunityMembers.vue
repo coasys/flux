@@ -51,7 +51,7 @@ import store from "@/store";
 export default defineComponent({
   emits: ["cancel", "submit"],
   mounted() {
-    store.dispatch.getCommunityMembers(this.community.perspective.uuid);
+    store.dispatch.getNeighbourhoodMembers(this.community.perspective.uuid);
   },
   data() {
     return {

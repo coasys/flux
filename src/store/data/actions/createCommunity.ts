@@ -18,7 +18,7 @@ import {
   CommunityState,
 } from "@/store/types";
 import { Perspective } from "@perspect3vism/ad4m-types";
-import { rootGetterContext, rootActionContext } from "@/store/index";
+import { rootActionContext } from "@/store/index";
 
 export interface Payload {
   perspectiveName: string;
