@@ -171,7 +171,7 @@ export default async (
           hue: 270,
           saturation: 60,
         },
-        currentChannelId: null,
+        currentChannelId: channel.neighbourhood.perspective.uuid,
       },
     } as CommunityState;
     commit.addCommunity(newCommunity);
