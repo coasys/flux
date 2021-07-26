@@ -2,7 +2,9 @@
   <div class="channel-view" @scroll="handleScroll" ref="scrollContainer">
     <header class="channel-view__header">
       <j-icon size="sm" name="hash" />
-      <j-text nomargin weight="500" size="500">{{ channel.name }}</j-text>
+      <j-text nomargin weight="500" size="500">{{
+        channel.neighbourhood.name
+      }}</j-text>
     </header>
 
     <div class="channel-view__main">
@@ -55,7 +57,7 @@
       <j-editor
         @send="(e) => createDirectMessage(e.target.value)"
         autofocus
-        :placeholder="`Write to #${channel.name}`"
+        :placeholder="`Write to #${channel.neighbourhood.name}`"
         :value="currentExpressionPost"
         @change="handleEditorChange"
         @onsuggestionlist="changeShowList"
