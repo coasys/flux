@@ -44,10 +44,14 @@ import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { AGENT_STATUS, GET_EXPRESSION } from "@/core/graphql_queries";
-import { ModalsState, ToastState } from "@/store/types";
+import { ModalsState, NeighbourhoodState, ToastState } from "@/store/types";
 import showMessageNotification from "@/utils/showMessageNotification";
 import { print } from "graphql/language/printer";
-import { AgentStatus, LinkExpression } from "@perspect3vism/ad4m-types";
+import {
+  AgentStatus,
+  LinkExpression,
+  Neighbourhood,
+} from "@perspect3vism/ad4m-types";
 import { apolloClient } from "./app";
 import store from "@/store";
 
@@ -150,41 +154,47 @@ export default defineComponent({
       }
     };
 
-    for (const community of store.getters.getCommunityNeighbourhoods) {
-      for (const channel of store.getters.getChannelNeighbourhoods(
-        community.perspective.uuid
-      )) {
-        apolloClient
-          .subscribe({
-            query: gql` subscription {
-                perspectiveLinkAdded(uuid: "${channel.perspective.uuid}") {
-                  author
-                  timestamp
-                  data { source, predicate, target }
-                  proof { valid, invalid, signature, key }
-                }
-            }   
-        `,
-          })
-          .subscribe({
-            next: (result) => {
-              console.debug(
-                "Got new link with data",
-                result.data,
-                "and channel",
-                channel
-              );
-              newLinkHandler(
-                result.data.perspectiveLinkAdded,
-                channel.perspective.uuid
-              );
-            },
-            error: (e) => {
-              throw Error(e);
-            },
-          });
-      }
-    }
+    let watching: string[] = [];
+    store.original.watch(
+      (state) => state.data.neighbourhoods,
+      async (newValue: { [perspectiveUuid: string]: NeighbourhoodState }) => {
+        console.log("Got values", newValue);
+        for (let [k, v] of Object.entries(newValue)) {
+          if (watching.filter((val) => val == k).length == 0) {
+            console.log("Starting watcher on perspective", k);
+            apolloClient
+              .subscribe({
+                query: gql` subscription {
+                  perspectiveLinkAdded(uuid: "${v.perspective.uuid}") {
+                    author
+                    timestamp
+                    data { source, predicate, target }
+                    proof { valid, invalid, signature, key }
+                  }
+                }`,
+              })
+              .subscribe({
+                next: (result) => {
+                  console.debug(
+                    "Got new link with data",
+                    result.data,
+                    "and channel",
+                    v
+                  );
+                  newLinkHandler(
+                    result.data.perspectiveLinkAdded,
+                    v.perspective.uuid
+                  );
+                },
+                error: (e) => {
+                  throw Error(e);
+                },
+              });
+          }
+        }
+      },
+      { immediate: true, deep: true}
+    );
 
     return {
       toast: computed(() => store.state.app.toast),

@@ -194,7 +194,7 @@ export default {
       language: "na",
     } as LinkExpressionAndLang;
     //TODO: make gql expression to ad4m expression conversion function
-    channel.currentExpressionMessages[payload.message.url!] = {
+    channel.currentExpressionMessages[payload.link.data.target] = {
       expression: {
         author: payload.message.author!,
         data: JSON.parse(payload.message.data!),

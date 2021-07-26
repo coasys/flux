@@ -165,8 +165,6 @@ export default defineComponent({
   computed: {
     channels(): ChannelState[] {
       const communityId = this.$route.params.communityId.toString();
-      let channels = store.getters.getChannelStates(communityId);
-      console.log("Got channels", channels);
       return store.getters.getChannelStates(communityId);
     },
   },

@@ -72,7 +72,6 @@ export default {
   getChannelStates:
     (state: DataState) =>
     (communityId: string): ChannelState[] => {
-      console.log(state.neighbourhoods[communityId].linkedPerspectives);
       return state.neighbourhoods[communityId].linkedPerspectives.map(
         (perspectiveUuid) => {
           return {

@@ -27,7 +27,6 @@ export default async function (context: any, id: string): Promise<void> {
         predicate: "sioc://has_member",
       })
     );
-    console.log(profileLinks);
 
     const profileLang = community?.typedExpressionLanguages.find(
       (t) => t.expressionType === ExpressionTypes.ProfileExpression
@@ -42,7 +41,6 @@ export default async function (context: any, id: string): Promise<void> {
           profileLang.languageAddress,
           profileLink.author
         );
-        console.log(profile);
 
         if (profile) {
           profiles[did] = Object.assign({}, profile);
