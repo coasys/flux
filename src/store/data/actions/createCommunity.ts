@@ -190,9 +190,9 @@ export default async (
       const languageRes = await getLanguage(lang.languageAddress);
       const uiData: ExpressionUIIcons = {
         languageAddress: lang.languageAddress,
-        createIcon: languageRes.constructorIcon?.code || "",
-        viewIcon: languageRes.icon?.code || "",
-        name: languageRes.name!,
+        createIcon: languageRes!.constructorIcon?.code || "",
+        viewIcon: languageRes!.icon?.code || "",
+        name: languageRes!.name!,
       };
       commit.addExpressionUI(uiData);
       await sleep(40);

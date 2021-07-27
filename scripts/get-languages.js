@@ -24,9 +24,9 @@ const languages = {
   },
   languages: {
     targetDnaName: "languages",
-    dna: "https://github.com/perspect3vism/language-persistence/releases/download/0.0.1/languages.dna",
+    dna: "https://github.com/perspect3vism/language-persistence/releases/download/0.0.2/languages.dna",
     bundle:
-      "https://github.com/perspect3vism/language-persistence/releases/download/0.0.1/bundle.js",
+      "https://github.com/perspect3vism/language-persistence/releases/download/0.0.2/bundle.js",
   },
   "group-expression": {
     targetDnaName: "group-expression",

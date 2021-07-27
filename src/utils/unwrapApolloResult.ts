@@ -10,7 +10,7 @@ export default function unwrapApolloResult(
     throw Error(result.error.message);
   }
   if (result.errors) {
-    throw Error(result.errors[0].message);
+    throw Error(result.errors.map((error) => error.message).toString());
   }
   return result.data;
 }

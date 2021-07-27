@@ -18,8 +18,12 @@ export async function getTypedExpressionLanguages(
   //And used returned expression language names to populate typedExpressionLanguages field
   for (const link of perspective.links!) {
     if (link.data.predicate == "language") {
-      console.log("JoinCommunity.vue: Fetching UI lang:", link.data.target);
       const languageRes = await getLanguage(link.data.target!);
+      if (!languageRes) {
+        throw Error(
+          `Could not find language with address: ${link.data.target}`
+        );
+      }
       if (storeLanguageUI) {
         const uiData: ExpressionUIIcons = {
           languageAddress: link.data.target!,
