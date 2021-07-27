@@ -125,7 +125,7 @@ export default defineComponent({
   watch: {
     communityId: {
       handler: function (id: string) {
-        if (!this.currentCommunity) return;
+        if (!id) return;
         store.dispatch.changeCurrentTheme(id ? id : "global");
 
         if (!id) return;
@@ -178,8 +178,8 @@ export default defineComponent({
       return this.$route.params.communityId as string;
     },
     currentCommunity(): CommunityState {
-      const { communityId } = this.$route.params;
-      return store.getters.getCommunity(communityId as string);
+      const communityId = this.$route.params.communityId as string;
+      return store.getters.getCommunity(communityId);
     },
   },
 });
