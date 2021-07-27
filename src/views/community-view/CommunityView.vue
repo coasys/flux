@@ -139,13 +139,15 @@ export default defineComponent({
         const currentChannelId =
           this.currentCommunity.state.currentChannelId || firstChannel;
 
-        this.$router.push({
-          name: "channel",
-          params: {
-            communityId: id,
-            channelId: currentChannelId,
-          },
-        });
+        if (currentChannelId) {
+          this.$router.push({
+            name: "channel",
+            params: {
+              communityId: id,
+              channelId: currentChannelId,
+            },
+          });
+        }
       },
       immediate: true,
     },
