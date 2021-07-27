@@ -49,7 +49,7 @@
         <j-text size="500" weight="400" color="ui-700">Saturation</j-text>
       </j-box>
       <j-tabs
-        :value="theme.saturation"
+        :value="theme.saturation.toString()"
         @change="(e) => updateTheme({ saturation: e.target.value })"
       >
         <j-tab-item variant="button" value="30">Weak</j-tab-item>
