@@ -84,6 +84,7 @@ export default async (
         },
         state: {
           perspectiveUuid: neighbourhood.uuid,
+          useGlobalTheme: false,
           theme: {
             fontSize: "md",
             fontFamily: "default",

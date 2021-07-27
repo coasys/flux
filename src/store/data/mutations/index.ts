@@ -169,6 +169,14 @@ export default {
       payload.neighbourhood;
   },
 
+  setUseGlobalTheme(
+    state: DataState,
+    payload: { communityId: string; value: boolean }
+  ): void {
+    const community = state.communities[payload.communityId];
+    community.useGlobalTheme = payload.value;
+  },
+
   setHasNewMessages(
     state: DataState,
     payload: { channelId: string; value: boolean }

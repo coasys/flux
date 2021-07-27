@@ -125,9 +125,14 @@ export default defineComponent({
   watch: {
     communityId: {
       handler: function (id: string) {
-        store.dispatch.changeCurrentTheme(id ? id : "global");
-
-        if (!id) return;
+        if (!id) {
+          store.dispatch.changeCurrentTheme("global");
+          return;
+        } else {
+          store.dispatch.changeCurrentTheme(
+            this.currentCommunity.state.useGlobalTheme ? "global" : id
+          );
+        }
 
         const firstChannel =
           this.currentCommunity.neighbourhood.linkedPerspectives[0];

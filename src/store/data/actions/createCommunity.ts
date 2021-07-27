@@ -177,6 +177,7 @@ export default async (
           hue: 270,
           saturation: 60,
         },
+        useGlobalTheme: false,
         currentChannelId: channel.neighbourhood.perspective.uuid,
       },
     } as CommunityState;
