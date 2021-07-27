@@ -23,8 +23,8 @@ export async function getTypedExpressionLanguages(
       if (storeLanguageUI) {
         const uiData: ExpressionUIIcons = {
           languageAddress: link.data.target!,
-          createIcon: languageRes.constructorIcon!.code!,
-          viewIcon: languageRes.icon!.code!,
+          createIcon: languageRes.constructorIcon?.code || "",
+          viewIcon: languageRes.icon?.code || "",
           name: languageRes.name!,
         };
         uiIcons.push(uiData);

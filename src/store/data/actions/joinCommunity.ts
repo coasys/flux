@@ -58,7 +58,11 @@ export default async (
           target: createProfileExpression,
           predicate: "sioc://has_member",
         } as Link);
-        console.log("Created group expression link", addProfileLink);
+        console.log("Created profile expression link", addProfileLink);
+      } else {
+        throw Error(
+          "Could not find profile expression language for installed neighbourhood"
+        );
       }
 
       //Read out metadata about the perspective from the meta
