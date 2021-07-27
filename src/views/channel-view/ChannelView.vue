@@ -178,7 +178,7 @@ export default defineComponent({
       },
       immediate: true,
     },
-    "channel.hasNewMessages": function (hasMessages) {
+    "channel.state.hasNewMessages": function (hasMessages) {
       if (hasMessages) {
         // If this channel is not in view, and only kept alive
         // show new messages button, so when you open the channel
