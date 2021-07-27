@@ -1,6 +1,6 @@
 import { ChannelState, FeedType, MembraneType } from "@/store/types";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
-import { findNameFromMeta } from "./findNameFromMeta";
+import { findNameDescriptionFromMeta } from "./findNameDescriptionFromMeta";
 import { joinNeighbourhood } from "../mutations/joinNeighbourhood";
 import { getPerspectiveSnapshot } from "../queries/getPerspective";
 
@@ -20,12 +20,15 @@ export async function joinChannelFromSharedLink(
   );
 
   //Read out metadata about the perspective from the meta
-  const name = findNameFromMeta(perspectiveSnapshot!);
+  const { name, description } = findNameDescriptionFromMeta(
+    perspectiveSnapshot!
+  );
 
   //TODO: derive membraneType from link on sharedPerspective
   return {
     neighbourhood: {
       name: name,
+      description: description,
       perspective: neighbourhood,
       typedExpressionLanguages: typedExpressionLanguages,
       neighbourhoodUrl: url,

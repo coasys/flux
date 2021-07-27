@@ -300,6 +300,22 @@ export const CREATE_EXPRESSION = gql`
   }
 `;
 
+export const EXPRESSION_SIGN = gql`
+  mutation expressionSign($data: String!) {
+    expressionSign(data: $data) {
+      author
+      timestamp
+      data
+      proof {
+        valid
+        invalid
+        signature
+        key
+      }
+    }
+  }
+`;
+
 export const GET_EXPRESSION = gql`
   query expression($url: String!) {
     expression(url: $url) {
