@@ -50,7 +50,7 @@
         @click="(e) => e.target.select()"
         size="lg"
         readonly
-        :value="currentCommunity.neighbourhoodUrl"
+        :value="currentCommunity.neighbourhood.neighbourhoodUrl"
       >
         <j-button @click="getInviteCode" variant="subtle" slot="end"
           ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
