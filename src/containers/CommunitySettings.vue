@@ -22,11 +22,13 @@
         </j-tabs>
       </aside>
       <div class="settings__content">
-        <j-checkbox
-          :checked="useGlobalTheme"
-          @change="(e) => setUseGlobalTheme(e.target.checked)"
-          >Use default theme</j-checkbox
-        >
+        <j-box pb="500">
+          <j-toggle
+            :checked="useGlobalTheme"
+            @change="(e) => setUseGlobalTheme(e.target.checked)"
+            >Use global theme</j-toggle
+          >
+        </j-box>
         <theme-editor
           v-if="currentView === 'theme-editor' && theme && !useGlobalTheme"
           @update="updateCommunityTheme"
