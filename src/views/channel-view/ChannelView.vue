@@ -70,22 +70,24 @@
       :open="showProfile"
       @toggle="(e) => (showProfile = e.target.open)"
     >
-      <j-flex a="center" direction="column" gap="500">
-        <j-avatar
-          style="--j-avatar-size: 100px"
-          :hash="activeProfile?.author"
-          :src="
-            activeProfile?.data?.profile['schema:image']
-              ? JSON.parse(activeProfile?.data?.profile['schema:image'])[
-                  'schema:contentUrl'
-                ]
-              : null
-          "
-        />
-        <j-text variant="heading-sm">{{
-          activeProfile?.data?.profile["foaf:AccountName"]
-        }}</j-text>
-      </j-flex>
+      <j-box p="800">
+        <j-flex a="center" direction="column" gap="500">
+          <j-avatar
+            style="--j-avatar-size: 100px"
+            :hash="activeProfile?.author"
+            :src="
+              activeProfile?.data?.profile['schema:image']
+                ? JSON.parse(activeProfile?.data?.profile['schema:image'])[
+                    'schema:contentUrl'
+                  ]
+                : null
+            "
+          />
+          <j-text variant="heading-sm">{{
+            activeProfile?.data?.profile["foaf:AccountName"]
+          }}</j-text>
+        </j-flex>
+      </j-box>
     </j-modal>
   </div>
 </template>
