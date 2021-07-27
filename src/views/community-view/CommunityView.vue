@@ -125,7 +125,6 @@ export default defineComponent({
   watch: {
     communityId: {
       handler: function (id: string) {
-        if (!id) return;
         store.dispatch.changeCurrentTheme(id ? id : "global");
 
         if (!id) return;
