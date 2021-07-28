@@ -23,7 +23,7 @@ export default async (
   const { state: dataState, commit: dataCommit } = dataActionContext(context);
   const { commit: appCommit } = appActionContext(context);
   const { state: userState } = userActionContext(context);
-  
+
   try {
     const neighbourhoods = dataState.neighbourhoods;
     const isAlreadyPartOf = Object.values(neighbourhoods).find(

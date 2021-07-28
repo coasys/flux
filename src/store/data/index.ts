@@ -1,4 +1,8 @@
-import { defineModule, localActionContext, localGetterContext } from "direct-vuex"
+import {
+  defineModule,
+  localActionContext,
+  localGetterContext,
+} from "direct-vuex";
 import mutations from "./mutations";
 import actions from "./actions";
 import getters from "./getters";
@@ -19,7 +23,7 @@ const dataModule = defineModule({
 
 export default dataModule;
 
-export const dataGetterContext = (args: [any, any, any, any]) => localGetterContext(args, dataModule);
-export const dataActionContext = (context: any) => localActionContext(context, dataModule);
-
-
+export const dataGetterContext = (args: [any, any, any, any]) =>
+  localGetterContext(args, dataModule);
+export const dataActionContext = (context: any) =>
+  localActionContext(context, dataModule);

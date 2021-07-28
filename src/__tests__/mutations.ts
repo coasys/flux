@@ -60,7 +60,7 @@ describe("Store Mutations", () => {
 
     expect(
       store.state.data.neighbourhoods[community.neighbourhood.perspective.uuid]
-      .linkedPerspectives.length
+        .linkedPerspectives.length
     ).toBe(1);
 
     store.commit.addChannel({
@@ -70,7 +70,7 @@ describe("Store Mutations", () => {
 
     expect(
       store.state.data.neighbourhoods[community.neighbourhood.perspective.uuid]
-      .linkedPerspectives.length
+        .linkedPerspectives.length
     ).toBe(2);
   });
 
@@ -90,9 +90,8 @@ describe("Store Mutations", () => {
     });
 
     expect(
-        store.state.data.neighbourhoods[
-          community.neighbourhood.perspective.uuid
-        ].linkedPerspectives
+      store.state.data.neighbourhoods[community.neighbourhood.perspective.uuid]
+        .linkedPerspectives
     ).toStrictEqual([
       "884f1238-c3d1-41b4-8489-aa73c5f9fc08",
       channel.neighbourhood.perspective.uuid,
@@ -105,7 +104,7 @@ describe("Store Mutations", () => {
 
     expect(
       store.state.data.neighbourhoods[community.neighbourhood.perspective.uuid]
-      .linkedPerspectives
+        .linkedPerspectives
     ).toStrictEqual([
       "884f1238-c3d1-41b4-8489-aa73c5f9fc08",
       channel.neighbourhood.perspective.uuid,

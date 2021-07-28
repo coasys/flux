@@ -16,12 +16,14 @@ export default async (
   const { getters: dataGetters } = dataActionContext(context);
   const { getters: appGetters } = appActionContext(context);
   const { getters: userGetters } = userActionContext(context);
-  
+
   const escapedMessage = message.replace(/(\s*<.*?>\s*)+/g, " ");
 
   // Getting the channel & community this message belongs to
   const channel = dataGetters.getChannel(perspectiveUuid);
-  const community = dataGetters.getCommunity(channel.neighbourhood.membraneRoot!);
+  const community = dataGetters.getCommunity(
+    channel.neighbourhood.membraneRoot!
+  );
 
   const isMinimized = ["minimize", "foreground"].includes(
     appGetters.getWindowState

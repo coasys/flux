@@ -15,9 +15,9 @@ export default async function updateCommunity(
   context: any,
   { communityId, name, description }: Payload
 ): Promise<void> {
-  const { commit: dataCommit, getters: dataGetters } = dataActionContext(context);
+  const { commit: dataCommit, getters: dataGetters } =
+    dataActionContext(context);
   const { commit: appCommit } = appActionContext(context);
-  
 
   const community = dataGetters.getCommunity(communityId);
 

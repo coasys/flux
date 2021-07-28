@@ -34,7 +34,7 @@ export default async (
   const { commit: dataCommit } = dataActionContext(context);
   const { commit: appCommit, getters: appGetters } = appActionContext(context);
   const { state: userState, getters: userGetters } = userActionContext(context);
-  
+
   try {
     const createSourcePerspective = await addPerspective(perspectiveName);
     console.log("Created source perspective", createSourcePerspective);
@@ -125,7 +125,12 @@ export default async (
       target: createExp,
       predicate: "rdf://class",
     });
-    console.log("Created group expression link", addGroupExpLink, userState, userGetters.getProfile);
+    console.log(
+      "Created group expression link",
+      addGroupExpLink,
+      userState,
+      userGetters.getProfile
+    );
 
     const createProfileExpression = await createProfile(
       profileExpressionLang.address!,

@@ -77,7 +77,7 @@ export async function createProfile(
   profileData: Profile
 ): Promise<string> {
   try {
-    console.log('profule', profileData)
+    console.log("profule", profileData);
     const profile: { [x: string]: any } = {
       "foaf:AccountName": profileData.username,
       "schema:email": profileData.email,

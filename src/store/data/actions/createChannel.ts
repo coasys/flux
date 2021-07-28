@@ -12,7 +12,8 @@ export default async (
   context: any,
   payload: Payload
 ): Promise<ChannelState> => {
-  const { commit: dataCommit, getters: dataGetters } = dataActionContext(context);
+  const { commit: dataCommit, getters: dataGetters } =
+    dataActionContext(context);
   const { commit: appCommit, getters: appGetters } = appActionContext(context);
   try {
     const community = dataGetters.getCommunity(payload.communityId);

@@ -149,13 +149,21 @@ export default {
     const parentNeighbourhood = state.neighbourhoods[payload.communityId];
 
     if (parentNeighbourhood !== undefined) {
-      if (parentNeighbourhood.linkedNeighbourhoods.indexOf(payload.channel.neighbourhood.neighbourhoodUrl) === -1) {        
+      if (
+        parentNeighbourhood.linkedNeighbourhoods.indexOf(
+          payload.channel.neighbourhood.neighbourhoodUrl
+        ) === -1
+      ) {
         parentNeighbourhood.linkedNeighbourhoods.push(
           payload.channel.neighbourhood.neighbourhoodUrl
         );
       }
 
-      if (parentNeighbourhood.linkedPerspectives.indexOf(payload.channel.neighbourhood.perspective.uuid) === -1) {        
+      if (
+        parentNeighbourhood.linkedPerspectives.indexOf(
+          payload.channel.neighbourhood.perspective.uuid
+        ) === -1
+      ) {
         parentNeighbourhood.linkedPerspectives.push(
           payload.channel.neighbourhood.perspective.uuid
         );

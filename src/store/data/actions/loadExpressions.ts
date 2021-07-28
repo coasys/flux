@@ -23,7 +23,7 @@ export default async function (
 ): Promise<LoadExpressionResult> {
   const { state: dataState, commit: dataCommit } = dataActionContext(context);
   const { commit: appCommit, getters: appGetters } = appActionContext(context);
-  
+
   try {
     const fromDate = from || appGetters.getApplicationStartTime;
     const untilDate = to || new Date("August 19, 1975 23:15:30").toISOString();

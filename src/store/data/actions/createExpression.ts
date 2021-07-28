@@ -15,7 +15,7 @@ export default async (
   { languageAddress, content, perspective }: Payload
 ): Promise<void> => {
   const { commit: appCommit } = appActionContext(context);
-  
+
   try {
     console.log(
       new Date().toISOString(),

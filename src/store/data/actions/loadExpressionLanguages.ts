@@ -9,7 +9,7 @@ export interface Payload {
 
 export default async (context: any): Promise<void> => {
   const { commit: appCommit, getters: appGetters } = appActionContext(context);
-  
+
   try {
     const languages = await getLanguages();
 

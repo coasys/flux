@@ -29,7 +29,7 @@ export default async (
 ): Promise<void> => {
   const { commit: appCommit } = appActionContext(context);
   const { commit: userCommit } = userActionContext(context);
-  
+
   const perspectiveName = databasePerspectiveName;
 
   try {

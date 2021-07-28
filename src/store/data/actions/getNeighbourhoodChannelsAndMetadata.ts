@@ -17,8 +17,9 @@ export default async (
 ): Promise<[Worker, Worker]> => {
   console.log("Getting community channel links for community: ", communityId);
 
-  const { commit: dataCommit, getters: dataGetters } = dataActionContext(context);
-  
+  const { commit: dataCommit, getters: dataGetters } =
+    dataActionContext(context);
+
   try {
     //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button
     const community = dataGetters.getCommunity(communityId);
