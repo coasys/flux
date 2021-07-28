@@ -6,9 +6,20 @@ import data from "@/store/data";
 import app from "@/store/app";
 import community from "../../../fixtures/community.json";
 import { State } from "vue-demi";
+import { createApp } from "vue";
 import { Store, createStore } from "vuex";
 import { createDirectStore } from "direct-vuex";
 // import { AppStore } from "@/store";
+
+function generateStore() {
+  return createDirectStore({
+    modules: {
+      user,
+      data,
+      app,
+    },
+  });
+}
 
 describe("Communities List", () => {
   let store: any;
@@ -16,16 +27,6 @@ describe("Communities List", () => {
   let mockRoute: any;
 
   beforeEach(() => {
-    // @ts-ignore
-    const directStore = createDirectStore({
-      modules: {
-        user,
-        data,
-        app,
-      },
-    });
-    store = directStore.store; //createStore(tempStore);
-
     mockRoute = {
       params: {},
     };
@@ -38,7 +39,7 @@ describe("Communities List", () => {
   test("Check there is no community avatar", () => {
     const { container, findByTitle } = render(CommunitiesList, {
       global: {
-        plugins: [store.original],
+        plugins: [generateStore().store.original],
         mocks: {
           $router: mockRouter,
           $route: mockRoute,
@@ -60,7 +61,7 @@ describe("Communities List", () => {
 
     const { container, findByTitle } = render(CommunitiesList, {
       global: {
-        plugins: [store.original],
+        plugins: [generateStore().store.original],
         mocks: {
           $router: mockRouter,
           $route: mockRoute,
@@ -82,7 +83,7 @@ describe("Communities List", () => {
 
     const { container } = render(CommunitiesList, {
       global: {
-        plugins: [store.original],
+        plugins: [generateStore().store.original],
         mocks: {
           $router: mockRouter,
           $route: mockRoute,
@@ -111,17 +112,12 @@ describe("Communities List", () => {
 
     const { container } = render(CommunitiesList, {
       global: {
-        plugins: [store.original],
+        plugins: [generateStore().store.original],
         mocks: {
           $router: mockRouter,
-          $route: {
-            params: {
-              communityId: community.neighbourhood.perspective.uuid,
-            },
-          },
+          $route: mockRoute,
         },
       },
-      
     });
 
     expect(store.state.app.showSidebar).toBeTruthy();
