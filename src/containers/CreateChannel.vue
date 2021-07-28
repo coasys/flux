@@ -73,7 +73,7 @@ export default defineComponent({
           communityId,
           name,
         })
-        .then((channel) => {
+        .then((channel: any) => {
           this.$emit("submit");
           this.channelName = "";
           this.$router.push({

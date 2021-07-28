@@ -15,8 +15,8 @@ describe("ProfileHelpers", () => {
   beforeAll(() => {
     const cache = new TimeoutCache<any>(10);
 
-    profileLangAddress = community.typedExpressionLanguages.find(
-      (t) => t.expressionType === ExpressionTypes.ProfileExpression
+    profileLangAddress = community.neighbourhood.typedExpressionLanguages.find(
+      (t: any) => t.expressionType === ExpressionTypes.ProfileExpression
     )!.languageAddress!;
 
     did = initAgentFixture.did;

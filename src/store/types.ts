@@ -3,8 +3,11 @@ import type {
   Expression,
   LinkExpression,
 } from "@perspect3vism/ad4m-types";
-import { ExpressionGeneric } from "@perspect3vism/ad4m-types";
-import { ExpressionRef, PerspectiveHandle } from "@perspect3vism/ad4m-types";
+import {
+  ExpressionGeneric,
+  ExpressionRef,
+  PerspectiveHandle,
+} from "@perspect3vism/ad4m-types";
 
 export interface State {
   app: ApplicationState;
@@ -34,11 +37,13 @@ export interface UserState {
   profile: Profile | null;
 }
 
+export type WindowState = "minimize" | "visible" | "foreground";
+
 export interface ApplicationState {
   expressionUI: { [x: string]: ExpressionUIIcons };
   localLanguagesPath: string;
   databasePerspective?: string;
-  windowState: "minimize" | "visible" | "foreground";
+  windowState: WindowState;
   toast: ToastState;
   applicationStartTime: Date;
   updateState: UpdateState;

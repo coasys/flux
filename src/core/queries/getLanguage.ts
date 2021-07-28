@@ -1,4 +1,5 @@
-import { apolloClient } from "@/app";
+import { apolloClient } from "@/utils/setupApolloClient";
+
 import unwrapApolloResult from "@/utils/unwrapApolloResult";
 import { LanguageHandle } from "@perspect3vism/ad4m-types";
 import { LANGUAGE } from "../graphql_queries";

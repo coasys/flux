@@ -1,8 +1,4 @@
-import {
-  LinkQuery,
-  Perspective,
-  LinkInput,
-} from "@perspect3vism/ad4m-types";
+import { LinkQuery, Perspective, LinkInput } from "@perspect3vism/ad4m-types";
 import { typeDefsString } from "@perspect3vism/ad4m";
 import {
   OPEN_LINK,

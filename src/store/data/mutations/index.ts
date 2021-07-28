@@ -36,7 +36,7 @@ interface AddChannelMessage {
 
 export default {
   addCommunity(state: DataState, payload: CommunityState): void {
-    console.log("adding Community", payload);
+    console.log("adding Community", JSON.stringify(payload));
     state.neighbourhoods[payload.neighbourhood.perspective.uuid] =
       payload.neighbourhood;
     state.communities[payload.neighbourhood.perspective.uuid] = payload.state;
@@ -147,6 +147,7 @@ export default {
   },
 
   addChannel(state: DataState, payload: AddChannel): void {
+    console.log(JSON.stringify(payload));
     const parentNeighbourhood = state.neighbourhoods[payload.communityId];
 
     if (parentNeighbourhood !== undefined) {

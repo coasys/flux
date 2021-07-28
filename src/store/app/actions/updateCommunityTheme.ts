@@ -1,7 +1,8 @@
 import { ThemeState } from "@/store/types";
 import { setTheme } from "@/utils/themeHelper";
 
-import { rootActionContext } from "@/store/index";
+import { appActionContext } from "@/store/app/index";
+import { dataActionContext } from "@/store/data/index";
 
 export interface Payload {
   communityId: string;
@@ -13,10 +14,11 @@ export default async function updateGlobalTheme(
   context: any,
   payload: { communityId: string; theme: ThemeState }
 ): Promise<void> {
-  const { commit, rootState } = rootActionContext(context);
-  const isCurrentTheme = rootState.app.currentTheme === payload.communityId;
+  const { commit: dataCommit, state: dataState } = dataActionContext(context);
+  const { state: appState } = appActionContext(context);
+  const isCurrentTheme = appState.currentTheme === payload.communityId;
   const mergedTheme = {
-    ...rootState.data.communities[payload.communityId].theme,
+    ...dataState.communities[payload.communityId].theme,
     ...payload.theme,
   };
 
@@ -24,7 +26,7 @@ export default async function updateGlobalTheme(
     setTheme(mergedTheme);
   }
 
-  commit.setCommunityTheme({
+  dataCommit.setCommunityTheme({
     communityId: payload.communityId,
     theme: mergedTheme,
   });

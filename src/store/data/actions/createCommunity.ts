@@ -18,7 +18,9 @@ import {
   CommunityState,
 } from "@/store/types";
 import { Perspective } from "@perspect3vism/ad4m-types";
-import { rootActionContext } from "@/store/index";
+import { dataActionContext } from "@/store/data/index";
+import { appActionContext } from "@/store/app/index";
+import { userActionContext } from "@/store/user/index";
 
 export interface Payload {
   perspectiveName: string;
@@ -29,14 +31,17 @@ export default async (
   context: any,
   { perspectiveName, description }: Payload
 ): Promise<CommunityState> => {
-  const { commit, rootState, getters } = rootActionContext(context);
+  const { state: dataState, commit: dataCommit } = dataActionContext(context);
+  const { commit: appCommit, state: appState, getters: appGetters } = appActionContext(context);
+  const { commit: userCommit, state: userState, getters: userGetters } = userActionContext(context);
+  
   try {
     const createSourcePerspective = await addPerspective(perspectiveName);
     console.log("Created source perspective", createSourcePerspective);
 
     //Get the variables that we need to create new unique languages
     const uid = uuidv4().toString();
-    const builtInLangPath = getters.getLanguagePath;
+    const builtInLangPath = appGetters.getLanguagePath;
 
     //Create unique social-context
     const socialContextLang = await createUniqueHolochainLanguage(
@@ -120,11 +125,11 @@ export default async (
       target: createExp,
       predicate: "rdf://class",
     });
-    console.log("Created group expression link", addGroupExpLink);
+    console.log("Created group expression link", addGroupExpLink, userState, userGetters.getProfile);
 
     const createProfileExpression = await createProfile(
       profileExpressionLang.address!,
-      rootState.user.profile!
+      userGetters.getProfile!
     );
 
     //Create link between perspective and group expression
@@ -174,8 +179,8 @@ export default async (
         currentChannelId: channel.neighbourhood.perspective.uuid,
       },
     } as CommunityState;
-    commit.addCommunity(newCommunity);
-    commit.createChannel(channel);
+    dataCommit.addCommunity(newCommunity);
+    dataCommit.createChannel(channel);
 
     //Get and cache the expression UI for each expression language
     for (const lang of typedExpLangs) {
@@ -187,14 +192,14 @@ export default async (
         viewIcon: languageRes.icon?.code || "",
         name: languageRes.name!,
       };
-      commit.addExpressionUI(uiData);
+      appCommit.addExpressionUI(uiData);
       await sleep(40);
     }
 
     // @ts-ignore
     return newCommunity;
   } catch (e) {
-    commit.showDangerToast({
+    appCommit.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

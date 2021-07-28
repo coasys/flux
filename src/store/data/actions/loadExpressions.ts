@@ -3,7 +3,9 @@ import { print } from "graphql/language/printer";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 import { LinkQuery } from "@perspect3vism/ad4m-types";
 
-import { rootActionContext } from "@/store/index";
+import { dataActionContext } from "@/store/data/index";
+import { appActionContext } from "@/store/app/index";
+import { userActionContext } from "@/store/user/index";
 
 export interface Payload {
   channelId: string;
@@ -20,12 +22,15 @@ export default async function (
   context: any,
   { channelId, from, to }: Payload
 ): Promise<LoadExpressionResult> {
-  const { commit, rootState, getters } = rootActionContext(context);
+  const { state: dataState, commit: dataCommit } = dataActionContext(context);
+  const { commit: appCommit, state: appState, getters: appGetters } = appActionContext(context);
+  const { commit: userCommit, state: userState, getters: userGetters } = userActionContext(context);
+  
   try {
-    const fromDate = from || getters.getApplicationStartTime;
+    const fromDate = from || appGetters.getApplicationStartTime;
     const untilDate = to || new Date("August 19, 1975 23:15:30").toISOString();
 
-    const channel = rootState.data.neighbourhoods[channelId];
+    const channel = dataState.neighbourhoods[channelId];
     let latestLinkTimestamp: Date | null = null;
 
     const linksWorker = new Worker("pollingWorker.js");
@@ -85,7 +90,7 @@ export default async function (
                   //Expression not null so kill the worker to stop future polling
                   expressionWorker.terminate();
                   //Add the link and message to the store
-                  commit.addMessage({
+                  dataCommit.addMessage({
                     channelId,
                     link: link,
                     expression: expression,
@@ -109,7 +114,7 @@ export default async function (
           if (latestLinkTimestamp) {
             if (
               Object.values(channel.currentExpressionLinks).filter(
-                (link) =>
+                (link: any) =>
                   new Date(link.expression.timestamp!) > latestLinkTimestamp!
               ).length > 0
             ) {
@@ -124,7 +129,7 @@ export default async function (
 
     return { linksWorker };
   } catch (e) {
-    commit.showDangerToast({
+    appCommit.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

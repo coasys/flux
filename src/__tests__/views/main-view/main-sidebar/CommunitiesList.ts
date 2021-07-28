@@ -1,68 +1,30 @@
 import "regenerator-runtime/runtime";
 import { fireEvent, render } from "@testing-library/vue";
 import CommunitiesList from "@/views/main-view/main-sidebar/CommunitiesList.vue";
-import actions from "@/store/actions";
-import getters from "@/store/getters";
-import mutations from "@/store/mutations";
+import user from "@/store/user";
+import data from "@/store/data";
+import app from "@/store/app";
 import community from "../../../fixtures/community.json";
 import { State } from "vue-demi";
 import { Store, createStore } from "vuex";
-
-const tempStore = {
-  state: {
-    ui: {
-      modals: {
-        showCreateCommunity: false,
-        showEditCommunity: false,
-        showCommunityMembers: false,
-        showCreateChannel: false,
-        showEditProfile: false,
-        showSettings: false,
-        showInviteCode: false,
-      },
-      showSidebar: true,
-      showGlobalLoading: false,
-      theme: {
-        fontFamily: "default",
-        name: "",
-        hue: 270,
-        saturation: 50,
-      },
-      toast: {
-        variant: "",
-        message: "",
-        open: false,
-      },
-      globalError: {
-        show: false,
-        message: "",
-      },
-    },
-    communities: {},
-    localLanguagesPath: "",
-    databasePerspective: "",
-    applicationStartTime: new Date(),
-    expressionUI: {},
-    agentUnlocked: false,
-    agentInit: false,
-    userProfile: null,
-    updateState: "not-available",
-    userDid: "",
-    windowState: "visible",
-  },
-  mutations: mutations,
-  actions: actions,
-  getters: getters,
-};
+import { createDirectStore } from "direct-vuex";
+// import { AppStore } from "@/store";
 
 describe("Communities List", () => {
-  let store: Store<State>;
+  let store: any;
   let mockRouter: any;
   let mockRoute: any;
 
   beforeEach(() => {
     // @ts-ignore
-    store = createStore(tempStore);
+    const directStore = createDirectStore({
+      modules: {
+        user,
+        data,
+        app,
+      },
+    });
+    store = directStore.store; //createStore(tempStore);
 
     mockRoute = {
       params: {},
@@ -76,7 +38,7 @@ describe("Communities List", () => {
   test("Check there is no community avatar", () => {
     const { container, findByTitle } = render(CommunitiesList, {
       global: {
-        plugins: [store],
+        plugins: [store.original],
         mocks: {
           $router: mockRouter,
           $route: mockRoute,
@@ -94,19 +56,11 @@ describe("Communities List", () => {
   });
 
   test("Check there is only one community avatar", async () => {
-    // @ts-ignore
-    store = createStore({
-      ...tempStore,
-      state: {
-        ...tempStore.state,
-        // @ts-ignore
-        communities: { [community.perspective.uuid]: community },
-      },
-    });
+    await store.commit.addCommunity(community);
 
     const { container, findByTitle } = render(CommunitiesList, {
       global: {
-        plugins: [store],
+        plugins: [store.original],
         mocks: {
           $router: mockRouter,
           $route: mockRoute,
@@ -124,19 +78,11 @@ describe("Communities List", () => {
   });
 
   test("Check there if onclick community chnages the route changes", async () => {
-    // @ts-ignore
-    store = createStore({
-      ...tempStore,
-      state: {
-        ...tempStore.state,
-        // @ts-ignore
-        communities: { [community.perspective.uuid]: community },
-      },
-    });
+    await store.commit.addCommunity(community);
 
     const { container } = render(CommunitiesList, {
       global: {
-        plugins: [store],
+        plugins: [store.original],
         mocks: {
           $router: mockRouter,
           $route: mockRoute,
@@ -153,36 +99,32 @@ describe("Communities List", () => {
     expect(mockRouter.push).toHaveBeenCalledTimes(1);
     expect(mockRouter.push).toHaveBeenCalledWith({
       name: "community",
-      params: { communityId: community.perspective.uuid },
+      params: { communityId: community.neighbourhood.perspective.uuid },
     });
   });
 
   test("Check there if onclick community works for community that is selected", async () => {
+    console.log(store.state);
     // @ts-ignore
-    store = createStore({
-      ...tempStore,
-      state: {
-        ...tempStore.state,
-        // @ts-ignore
-        communities: { [community.perspective.uuid]: community },
-      },
-    });
+    await store.commit.addCommunity(community);
+    console.log(store.state);
 
     const { container } = render(CommunitiesList, {
       global: {
-        plugins: [store],
+        plugins: [store.original],
         mocks: {
           $router: mockRouter,
           $route: {
             params: {
-              communityId: community.perspective.uuid,
+              communityId: community.neighbourhood.perspective.uuid,
             },
           },
         },
       },
+      
     });
 
-    expect(store.state.ui.showSidebar).toBeTruthy();
+    expect(store.state.app.showSidebar).toBeTruthy();
 
     const communities = container.querySelectorAll(".left-nav__community-item");
 
@@ -193,8 +135,8 @@ describe("Communities List", () => {
     expect(mockRouter.push).toHaveBeenCalledTimes(0);
     expect(mockRouter.push).not.toHaveBeenCalledWith({
       name: "community",
-      params: { communityId: community.perspective.uuid },
+      params: { communityId: community.neighbourhood.perspective.uuid },
     });
-    expect(store.state.ui.showSidebar).toBeFalsy();
+    expect(store.state.app.showSidebar).toBeFalsy();
   });
 });

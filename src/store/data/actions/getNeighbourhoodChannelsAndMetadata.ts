@@ -4,7 +4,9 @@ import { expressionGetRetries, expressionGetDelayMs } from "@/core/juntoTypes";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 import { LinkQuery } from "@perspect3vism/ad4m-types";
 
-import { rootActionContext } from "@/store/index";
+import { dataActionContext } from "@/store/data/index";
+import { appActionContext } from "@/store/app/index";
+import { userActionContext } from "@/store/user/index";
 
 export interface Payload {
   communityId: string;
@@ -17,10 +19,13 @@ export default async (
 ): Promise<[Worker, Worker]> => {
   console.log("Getting community channel links for community: ", communityId);
 
-  const { commit, getters } = rootActionContext(context);
+  const { state: dataState, commit: dataCommit, getters: dataGetters } = dataActionContext(context);
+  const { commit: appCommit, state: appState, getters: appGetters } = appActionContext(context);
+  const { commit: userCommit, state: userState, getters: userGetters } = userActionContext(context);
+  
   try {
     //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button
-    const community = getters.getCommunity(communityId);
+    const community = dataGetters.getCommunity(communityId);
     const channelLinksWorker = new Worker("pollingWorker.js");
     //Use global isExecuting variable so that message callbacks on channel worker do not execute at the same time and both mutate state
     let isExecuting = false;
@@ -77,7 +82,7 @@ export default async (
                   community.neighbourhood.perspective.uuid
                 );
                 //Add the channel to the store
-                commit.addChannel({
+                dataCommit.addChannel({
                   communityId: community.neighbourhood.perspective.uuid,
                   channel: channel,
                 });
@@ -152,7 +157,7 @@ export default async (
                   groupExpData
                 );
                 //Update the community with the new group data
-                commit.updateCommunityMetadata({
+                dataCommit.updateCommunityMetadata({
                   communityId: community.neighbourhood.perspective.uuid,
                   name: groupExpData["name"],
                   description: groupExpData["description"],

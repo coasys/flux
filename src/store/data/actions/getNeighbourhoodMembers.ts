@@ -3,7 +3,9 @@ import { getLinks } from "@/core/queries/getLinks";
 import { LinkQuery } from "@perspect3vism/ad4m-types";
 import { TimeoutCache } from "../../../utils/timeoutCache";
 
-import { rootActionContext } from "@/store/index";
+import { dataActionContext } from "@/store/data/index";
+import { appActionContext } from "@/store/app/index";
+import { userActionContext } from "@/store/user/index";
 import { ExpressionTypes, ProfileExpression } from "@/store/types";
 
 export interface Payload {
@@ -11,12 +13,15 @@ export interface Payload {
 }
 
 export default async function (context: any, id: string): Promise<void> {
-  const { commit, rootState } = rootActionContext(context);
+  const { state: dataState, commit: dataCommit } = dataActionContext(context);
+  const { commit: appCommit, state: appState, getters: appGetters } = appActionContext(context);
+  const { commit: userCommit, state: userState, getters: userGetters } = userActionContext(context);
+  
   const profiles: { [x: string]: ProfileExpression } = {};
   const cache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
 
   try {
-    const communities = rootState.data.neighbourhoods;
+    const communities = dataState.neighbourhoods;
 
     const community = communities[id];
 
@@ -29,7 +34,7 @@ export default async function (context: any, id: string): Promise<void> {
     );
 
     const profileLang = community?.typedExpressionLanguages.find(
-      (t) => t.expressionType === ExpressionTypes.ProfileExpression
+      (t: any) => t.expressionType === ExpressionTypes.ProfileExpression
     );
 
     if (profileLang) {
@@ -50,20 +55,20 @@ export default async function (context: any, id: string): Promise<void> {
 
       const profileList = Object.values(profiles);
 
-      commit.setCommunityMembers({
+      dataCommit.setCommunityMembers({
         communityId: id,
         members: profileList,
       });
     } else {
       const errorMessage =
         "Expected to find profile expression language for this community";
-      commit.showDangerToast({
+      appCommit.showDangerToast({
         message: errorMessage,
       });
       throw Error(errorMessage);
     }
   } catch (e) {
-    commit.showDangerToast({
+    appCommit.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

@@ -1,6 +1,8 @@
 import { getLanguages } from "@/core/queries/getLanguages";
 
-import { rootActionContext } from "@/store/index";
+import { dataActionContext } from "@/store/data/index";
+import { appActionContext } from "@/store/app/index";
+import { userActionContext } from "@/store/user/index";
 import { ExpressionUIIcons } from "@/store/types";
 
 export interface Payload {
@@ -8,27 +10,30 @@ export interface Payload {
 }
 
 export default async (context: any): Promise<void> => {
-  const { commit, getters } = rootActionContext(context);
+  const { state: dataState, commit: dataCommit } = dataActionContext(context);
+  const { commit: appCommit, state: appState, getters: appGetters } = appActionContext(context);
+  const { commit: userCommit, state: userState, getters: userGetters } = userActionContext(context);
+  
   try {
     const languages = await getLanguages();
 
     if (languages) {
       for (const language of languages) {
         if (language.icon) {
-          if (!getters.getLanguageUI(language.address!)) {
+          if (!appGetters.getLanguageUI(language.address!)) {
             const uiData: ExpressionUIIcons = {
               languageAddress: language!.address!,
               createIcon: language!.constructorIcon!.code!,
               viewIcon: language!.icon!.code!,
               name: language!.name!,
             };
-            commit.addExpressionUI(uiData);
+            appCommit.addExpressionUI(uiData);
           }
         }
       }
     }
   } catch (e) {
-    commit.showDangerToast({
+    appCommit.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

@@ -1,4 +1,5 @@
-import { apolloClient } from "@/app";
+import { apolloClient } from "@/utils/setupApolloClient";
+
 import { AgentStatus } from "@perspect3vism/ad4m-types";
 import unwrapApolloResult from "@/utils/unwrapApolloResult";
 import { AGENT_UNLOCK } from "../graphql_queries";

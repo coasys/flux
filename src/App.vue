@@ -47,9 +47,13 @@ import { AGENT_STATUS, GET_EXPRESSION } from "@/core/graphql_queries";
 import { ModalsState, NeighbourhoodState, ToastState } from "@/store/types";
 import showMessageNotification from "@/utils/showMessageNotification";
 import { print } from "graphql/language/printer";
-import { AgentStatus, LinkExpression } from "@perspect3vism/ad4m-types";
-import { apolloClient } from "./app";
+import {
+  AgentStatus,
+  LinkExpression,
+  Neighbourhood,
+} from "@perspect3vism/ad4m-types";
 import store from "@/store";
+import { apolloClient } from "./utils/setupApolloClient";
 
 declare global {
   interface Window {
@@ -78,8 +82,8 @@ export default defineComponent({
 
     //Watch for agent unlock to set off running queries
     store.original.watch(
-      (state) => state.user.agent.isUnlocked,
-      async (newValue) => {
+      (state: any) => state.user.agent.isUnlocked,
+      async (newValue: any) => {
         console.log("agent unlocked changed to", newValue);
         if (newValue) {
           store.commit.setApplicationStartTime(new Date());

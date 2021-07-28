@@ -1,161 +1,131 @@
 import "@testing-library/vue";
-// import store from '../store';
+import app from "@/store/app";
+// import { AppStore } from "@/store";
 import community from "./fixtures/community.json";
 import channel from "./fixtures/channel.json";
-import { createStore, Store } from "vuex";
-import mutations from "@/store/mutations";
-import actions from "@/store/actions";
-import getters from "@/store/getters";
-import { State } from "@/store/types";
+import user from "@/store/user";
+import data from "@/store/data";
+import { createDirectStore } from "direct-vuex";
 
-describe("Store Mutations", async () => {
-  let store: Store<State>;
+describe("Store Mutations", () => {
+  let store: any;
 
   beforeEach(() => {
-    // store.commit('resetState');
-    store = createStore({
-      state: {
-        ui: {
-          modals: {
-            showCreateCommunity: false,
-            showEditCommunity: false,
-            showCommunityMembers: false,
-            showCreateChannel: false,
-            showEditProfile: false,
-            showSettings: false,
-            showInviteCode: false,
-          },
-          showSidebar: true,
-          showGlobalLoading: false,
-          theme: {
-            fontFamily: "default",
-            name: "",
-            hue: 270,
-            saturation: 50,
-          },
-          toast: {
-            variant: "",
-            message: "",
-            open: false,
-          },
-          globalError: {
-            show: false,
-            message: "",
-          },
-        },
-        communities: {},
-        localLanguagesPath: "",
-        databasePerspective: "",
-        applicationStartTime: new Date(),
-        expressionUI: {},
-        agentUnlocked: false,
-        agentInit: false,
-        userProfile: null,
-        updateState: "not-available",
-        userDid: "",
-        windowState: "visible",
+    // @ts-ignore
+    const directStore = createDirectStore({
+      modules: {
+        user,
+        data,
+        app,
       },
-      mutations: mutations,
-      actions: actions,
-      getters: getters,
     });
+    store = directStore.store; //createStore(tempStore);
   });
 
   test("Add Community", async () => {
-    expect(Object.values(store.state.communities).length).toBe(0);
+    expect(Object.values(store.state.data.communities).length).toBe(0);
 
-    store.commit("addCommunity", community);
+    store.commit.addCommunity(community);
 
-    expect(Object.values(store.state.communities).length).toBe(1);
+    expect(Object.values(store.state.data.communities).length).toBe(1);
 
-    expect(Object.values(store.state.communities)[0].perspective.uuid).toBe(
-      community.perspective.uuid
-    );
+    expect(
+      (Object.values(store.state.data.neighbourhoods)[0] as any).perspective
+        .uuid
+    ).toBe(community.neighbourhood.perspective.uuid);
   });
 
   test("Check duplicate community if one exists already", async () => {
-    expect(Object.values(store.state.communities).length).toBe(0);
+    expect(Object.values(store.state.data.communities).length).toBe(0);
 
-    store.commit("addCommunity", community);
+    store.commit.addCommunity(community);
 
-    expect(Object.keys(store.state.communities)).toStrictEqual([
-      community.perspective.uuid,
+    expect(Object.keys(store.state.data.communities)).toStrictEqual([
+      community.neighbourhood.perspective.uuid,
     ]);
 
-    store.commit("addCommunity", community);
+    store.commit.addCommunity(community);
 
-    expect(Object.keys(store.state.communities)).toStrictEqual([
-      community.perspective.uuid,
+    expect(Object.keys(store.state.data.communities)).toStrictEqual([
+      community.neighbourhood.perspective.uuid,
     ]);
   });
 
   test("Add Channel", async () => {
-    expect(Object.values(store.state.communities).length).toBe(0);
+    expect(Object.values(store.state.data.communities).length).toBe(0);
 
-    store.commit("addCommunity", community);
+    store.commit.addCommunity(community);
 
-    expect(Object.values(store.state.communities).length).toBe(1);
+    expect(Object.values(store.state.data.communities).length).toBe(1);
 
-    expect(Object.values(store.state.communities)[0].perspective.uuid).toBe(
-      community.perspective.uuid
-    );
+    // expect(
+    //   (Object.values(store.state.data.neighbourhoods)[0] as any).perspectiveUuid
+    // ).toBe(community.neighbourhood.perspective.uuid);
 
     expect(
       Object.values(
-        store.state.communities[community.perspective.uuid].channels
+        store.state.data.communities[community.neighbourhood.perspective.uuid]
+          .channels
       ).length
     ).toBe(1);
 
     store.commit("addChannel", {
-      communityId: community.perspective.uuid,
+      communityId: community.neighbourhood.perspective.uuid,
       channel,
     });
 
     expect(
       Object.values(
-        store.state.communities[community.perspective.uuid].channels
+        store.state.data.communities[community.neighbourhood.perspective.uuid]
+          .channels
       ).length
     ).toBe(2);
   });
 
   test("Check duplicate channel if one exists already", async () => {
-    expect(Object.values(store.state.communities).length).toBe(0);
+    expect(Object.values(store.state.data.communities).length).toBe(0);
 
-    store.commit("addCommunity", community);
+    store.commit.addCommunity(community);
 
-    expect(Object.values(store.state.communities)[0].perspective.uuid).toBe(
-      community.perspective.uuid
-    );
+    expect(
+      (Object.values(store.state.data.neighbourhoods)[0] as any).perspective
+        .uuid
+    ).toBe(community.neighbourhood.perspective.uuid);
 
-    store.commit("addChannel", {
-      communityId: community.perspective.uuid,
+    store.commit.addChannel({
+      communityId: community.neighbourhood.perspective.uuid,
       channel,
     });
 
     expect(
-      Object.keys(store.state.communities[community.perspective.uuid].channels)
+      Object.keys(
+        store.state.data.neighbourhoods[
+          community.neighbourhood.perspective.uuid
+        ].linkedPerspectives
+      )
     ).toStrictEqual([
-      "30e4a29e-1373-4c8a-a5af-a2353c919e7a",
-      channel.perspective.uuid,
+      "884f1238-c3d1-41b4-8489-aa73c5f9fc08",
+      channel.neighbourhood.perspective.uuid,
     ]);
 
-    store.commit("addChannel", {
-      communityId: community.perspective.uuid,
+    store.commit.addChannel({
+      communityId: community.neighbourhood.perspective.uuid,
       channel,
     });
 
     expect(
-      Object.keys(store.state.communities[community.perspective.uuid].channels)
+      Object.keys(
+        store.state.data.communities[community.neighbourhood.perspective.uuid]
+          .channels
+      )
     ).toStrictEqual([
       "30e4a29e-1373-4c8a-a5af-a2353c919e7a",
-      channel.perspective.uuid,
+      channel.neighbourhood.perspective.uuid,
     ]);
   });
 
   test("Create Profile", async () => {
-    const did = "did:key:zQ3shZj7gEX6tbrQGvMJeHsL2hWRcQPUmJHoTFZzEZdEsHBwa";
-    expect(store.state.userDid).not.toBe(did);
-    expect(store.state.userProfile).toBeNull();
+    expect(store.state.user.profile).toBeNull();
 
     const profile = {
       givenName: "jhon",
@@ -166,13 +136,9 @@ describe("Store Mutations", async () => {
       thumbnailPicture: "test",
     };
 
-    await store.commit("createProfile", {
-      profile,
-      did,
-    });
+    await store.commit.setUserProfile(profile);
 
-    expect(store.state.userDid).toBe(did);
-    expect(store.state.userProfile).not.toBeNull();
-    expect(store.state.userProfile).toStrictEqual(profile);
+    expect(store.state.user.profile).not.toBeNull();
+    expect(store.state.user.profile).toStrictEqual(profile);
   });
 });

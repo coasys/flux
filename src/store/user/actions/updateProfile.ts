@@ -3,7 +3,9 @@ import { TimeoutCache } from "@/utils/timeoutCache";
 import { getExpression } from "@/core/queries/getExpression";
 
 import { ExpressionTypes, Profile, ProfileExpression } from "@/store/types";
-import { rootActionContext } from "@/store/index";
+import { dataActionContext } from "@/store/data/index";
+import { appActionContext } from "@/store/app/index";
+import { userActionContext } from "@/store/user/index";
 
 export interface Payload {
   username?: string;
@@ -12,9 +14,11 @@ export interface Payload {
 }
 
 export default async (context: any, payload: Payload): Promise<void> => {
-  const { commit, rootState, getters } = rootActionContext(context);
-
-  const currentProfile = getters.getProfile;
+  const { state: dataState, commit: dataCommit } = dataActionContext(context);
+  const { commit: appCommit, state: appState, getters: appGetters } = appActionContext(context);
+  const { commit: userCommit, state: userState, getters: userGetters } = userActionContext(context);
+  
+  const currentProfile = userGetters.getProfile;
   const newProfile = {
     username: payload.username || currentProfile?.username,
     email: currentProfile?.email,
@@ -23,18 +27,19 @@ export default async (context: any, payload: Payload): Promise<void> => {
     profilePicture: payload.profilePicture || currentProfile?.profilePicture,
     thumbnailPicture: payload.thumbnail || currentProfile?.thumbnailPicture,
   } as Profile;
-  commit.setUserProfile(newProfile);
+  userCommit.setUserProfile(newProfile);
 
   try {
-    const neighbourhoods = Object.values(rootState.data.neighbourhoods);
+    const neighbourhoods = Object.values(dataState.neighbourhoods);
     const cache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
 
     for (const neighbourhood of neighbourhoods) {
-      const profileExpression = neighbourhood.typedExpressionLanguages.find(
-        (t) => t.expressionType == ExpressionTypes.ProfileExpression
+      const profileExpression = (
+        neighbourhood as any
+      ).typedExpressionLanguages.find(
+        (t: any) => t.expressionType == ExpressionTypes.ProfileExpression
       );
-      const didExpression = `${profileExpression!.languageAddress}://${rootState
-        .user.agent.did!}`;
+      const didExpression = `${profileExpression!.languageAddress}://${userState.agent.did!}`;
 
       console.log("profileExpression: ", profileExpression);
 
@@ -57,14 +62,14 @@ export default async (context: any, payload: Payload): Promise<void> => {
       } else {
         const errorMessage =
           "Expected to find profile expression language for this community";
-        commit.showDangerToast({
+        appCommit.showDangerToast({
           message: errorMessage,
         });
         throw Error(errorMessage);
       }
     }
   } catch (e) {
-    commit.showDangerToast({
+    appCommit.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

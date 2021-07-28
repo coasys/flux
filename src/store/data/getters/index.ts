@@ -38,6 +38,7 @@ export default {
   },
 
   getCommunityNeighbourhoods(state: DataState): NeighbourhoodState[] {
+    console.log(state);
     return Object.values(state.communities).map(
       (community) => state.neighbourhoods[community.perspectiveUuid]
     );
@@ -75,14 +76,12 @@ export default {
       const links = state.neighbourhoods[communityId].linkedPerspectives;
       return links
         .filter((link, index) => links.indexOf(link) === index)
-        .map(
-        (perspectiveUuid) => {
+        .map((perspectiveUuid) => {
           return {
             neighbourhood: state.neighbourhoods[perspectiveUuid],
             state: state.channels[perspectiveUuid],
           } as ChannelState;
-        }
-      );
+        });
     },
 
   getCommunityMembers:

@@ -122,7 +122,7 @@ export default defineComponent({
           perspectiveName: this.newCommunityName,
           description: this.newCommunityDesc,
         })
-        .then((community) => {
+        .then((community: any) => {
           this.$emit("submit");
           this.newCommunityName = "";
           this.newCommunityDesc = "";

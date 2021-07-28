@@ -1,6 +1,7 @@
 import { createChannel } from "@/core/methods/createChannel";
 import { ChannelState, MembraneType } from "@/store/types";
-import { rootGetterContext, rootActionContext } from "@/store/index";
+import { dataActionContext } from "@/store/data/index";
+import { appActionContext } from "@/store/app/index";
 
 export interface Payload {
   communityId: string;
@@ -11,25 +12,26 @@ export default async (
   context: any,
   payload: Payload
 ): Promise<ChannelState> => {
-  const { commit, getters } = rootActionContext(context);
+  const { commit: dataCommit, getters: dataGetters } = dataActionContext(context);
+  const { commit: appCommit, getters: appGetters } = appActionContext(context);
   try {
-    const community = getters.getCommunity(payload.communityId);
+    const community = dataGetters.getCommunity(payload.communityId);
     const channel = await createChannel(
       payload.name,
-      getters.getLanguagePath,
+      appGetters.getLanguagePath,
       community.neighbourhood.perspective,
       MembraneType.Inherited,
       community.neighbourhood.typedExpressionLanguages
     );
 
-    commit.addChannel({
+    dataCommit.addChannel({
       communityId: community.neighbourhood.perspective.uuid,
       channel,
     });
 
     return channel;
   } catch (e) {
-    commit.showDangerToast({
+    appCommit.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

@@ -1,4 +1,5 @@
-import { apolloClient } from "@/app";
+import { apolloClient } from "@/utils/setupApolloClient";
+
 import unwrapApolloResult from "@/utils/unwrapApolloResult";
 import type { PerspectiveHandle } from "@perspect3vism/ad4m-types";
 import { NEIGHBOURHOOD_JOIN } from "../graphql_queries";

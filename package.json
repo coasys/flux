@@ -32,7 +32,7 @@
     "@vue/apollo-composable": "^4.0.0-alpha.12",
     "@vue/apollo-util": "^4.0.0-alpha.11",
     "date-fns": "^2.22.1",
-    "direct-vuex": "^0.12.1",
+    "direct-vuex": "^1.0.0-rc3",
     "electron-updater": "^4.3.9",
     "graphql": "^15.5.0",
     "object-hash": "^2.2.0",

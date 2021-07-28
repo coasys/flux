@@ -1,17 +1,27 @@
-import { State } from "@/store/types";
-import actions from "@/store/actions";
-import getters from "@/store/getters";
-import mutations from "@/store/mutations";
+import "@testing-library/vue";
 import { AgentStatus } from "@perspect3vism/ad4m-types";
-import { Store, createStore } from "vuex";
 import * as agentUnlock from "../../../core/mutations/agentUnlock";
 import lockAgentFixture from "../../fixtures/lockAgent.json";
+import { createDirectStore } from "direct-vuex";
+import user from "@/store/user";
+import data from "@/store/data";
+import app from "@/store/app";
+// import { AppStore } from "@/store";
 
 describe("Login", () => {
-  let store: Store<State>;
+  let store: any;
 
   beforeEach(() => {
     // @ts-ignore
+    // @ts-ignore
+    const directStore = createDirectStore({
+      modules: {
+        user,
+        data,
+        app,
+      },
+    });
+    store = directStore.store; //createStore(tempStore);
     jest
       .spyOn(agentUnlock, "agentUnlock")
       .mockImplementation(async (password) => {
@@ -21,64 +31,15 @@ describe("Login", () => {
 
         throw new Error("Password doesn't match");
       });
-
-    store = createStore({
-      state: {
-        ui: {
-          modals: {
-            showCreateCommunity: false,
-            showEditCommunity: false,
-            showCommunityMembers: false,
-            showCreateChannel: false,
-            showEditProfile: false,
-            showSettings: false,
-            showInviteCode: false,
-            showDisclaimer: false,
-          },
-          showSidebar: true,
-          showGlobalLoading: false,
-          theme: {
-            fontFamily: "default",
-            name: "",
-            hue: 270,
-            saturation: 50,
-            fontSize: "md",
-          },
-          toast: {
-            variant: "",
-            message: "",
-            open: false,
-          },
-          globalError: {
-            show: false,
-            message: "",
-          },
-        },
-        communities: {},
-        localLanguagesPath: "",
-        databasePerspective: "",
-        applicationStartTime: new Date(),
-        expressionUI: {},
-        agentUnlocked: false,
-        agentInit: false,
-        userProfile: null,
-        updateState: "not-available",
-        userDid: "",
-        windowState: "visible",
-      },
-      mutations: mutations,
-      actions: actions,
-      getters: getters,
-    });
   });
 
   test("Login with wrong password", async () => {
-    expect(store.state.agentInit).toBeFalsy();
-    expect(store.state.agentInit).toBeFalsy();
-    expect(store.state.userDid).toBe("");
+    expect(store.state.user.agent.isInitialized).toBeFalsy();
+    expect(store.state.user.agent.isUnlocked).toBeFalsy();
+    expect(store.state.user.agent.did).toBe("");
 
     try {
-      await store.dispatch("logIn", {
+      await store.dispatch.logIn({
         password: "test1",
       });
     } catch (error) {
@@ -86,20 +47,20 @@ describe("Login", () => {
       expect(error).toHaveProperty("message", "Error: Password doesn't match");
     }
 
-    expect(store.state.agentInit).toBeFalsy();
-    expect(store.state.agentInit).toBeFalsy();
-    expect(store.state.userDid).toBe("");
+    expect(store.state.user.agent.isInitialized).toBeFalsy();
+    expect(store.state.user.agent.isUnlocked).toBeFalsy();
+    expect(store.state.user.agent.did).toBe("");
   });
 
   test("Login with correct password", async () => {
-    expect(store.state.agentInit).toBeFalsy();
-    expect(store.state.agentInit).toBeFalsy();
+    expect(store.state.user.agent.isInitialized).toBeFalsy();
+    expect(store.state.user.agent.isUnlocked).toBeFalsy();
 
-    await store.dispatch("logIn", {
+    await store.dispatch.logIn({
       password: "test123",
     });
 
-    expect(store.state.agentInit).toBeTruthy();
-    expect(store.state.agentInit).toBeTruthy();
+    expect(store.state.user.agent.isInitialized).toBeTruthy();
+    expect(store.state.user.agent.isUnlocked).toBeTruthy();
   });
 });

@@ -1,9 +1,10 @@
+import { defineModule, localActionContext, localGetterContext } from "direct-vuex"
 import mutations from "./mutations";
 import actions from "./actions";
 import getters from "./getters";
 import { ApplicationState } from "../types";
 
-export default {
+const appModule = defineModule({
   state: (): ApplicationState => ({
     updateState: "not-available",
     windowState: "visible",
@@ -45,4 +46,9 @@ export default {
   mutations,
   actions,
   getters,
-};
+})
+
+export default appModule;
+
+export const appGetterContext = (args: [any, any, any, any]) => localGetterContext(args, appModule);
+export const appActionContext = (context: any) => localActionContext(context, appModule);
