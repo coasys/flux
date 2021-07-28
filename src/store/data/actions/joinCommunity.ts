@@ -3,7 +3,6 @@ import { createLink } from "@/core/mutations/createLink";
 import { joinNeighbourhood } from "@/core/mutations/joinNeighbourhood";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
 import { findNameDescriptionFromMeta } from "@/core/methods/findNameDescriptionFromMeta";
-import { getPerspectiveSnapshot } from "@/core/queries/getPerspective";
 
 import { Link } from "@perspect3vism/ad4m-types";
 
