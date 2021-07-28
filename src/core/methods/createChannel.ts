@@ -45,8 +45,14 @@ export async function createChannel(
     target: neighbourhood,
     predicate: "sioc://has_space",
   });
-  const addLinkToChannel = await createLink(perspective.uuid, channelLink);
-  console.debug("Created new link on channel with result", addLinkToChannel);
+  const addLinkToChannel = await createLink(
+    sourcePerspective.uuid,
+    channelLink
+  );
+  console.debug(
+    "Created new link on source social-context with result",
+    addLinkToChannel
+  );
 
   //Add link on channel social context declaring type
   const addChannelTypeLink = await createLink(perspective.uuid, {
@@ -55,7 +61,7 @@ export async function createChannel(
     predicate: "rdf://type",
   });
   console.log(
-    "Added link on channel social context with result",
+    "Added link on channel social-context with result",
     addChannelTypeLink
   );
 
