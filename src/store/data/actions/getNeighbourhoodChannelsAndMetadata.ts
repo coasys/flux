@@ -5,8 +5,6 @@ import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 import { LinkQuery } from "@perspect3vism/ad4m-types";
 
 import { dataActionContext } from "@/store/data/index";
-import { appActionContext } from "@/store/app/index";
-import { userActionContext } from "@/store/user/index";
 
 export interface Payload {
   communityId: string;
@@ -19,9 +17,7 @@ export default async (
 ): Promise<[Worker, Worker]> => {
   console.log("Getting community channel links for community: ", communityId);
 
-  const { state: dataState, commit: dataCommit, getters: dataGetters } = dataActionContext(context);
-  const { commit: appCommit, state: appState, getters: appGetters } = appActionContext(context);
-  const { commit: userCommit, state: userState, getters: userGetters } = userActionContext(context);
+  const { commit: dataCommit, getters: dataGetters } = dataActionContext(context);
   
   try {
     //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button

@@ -2,9 +2,7 @@ import { createExpression } from "@/core/mutations/createExpression";
 import { createLink } from "@/core/mutations/createLink";
 import { Link } from "@perspect3vism/ad4m-types";
 
-import { dataActionContext } from "@/store/data/index";
 import { appActionContext } from "@/store/app/index";
-import { userActionContext } from "@/store/user/index";
 
 export interface Payload {
   languageAddress: string;
@@ -16,9 +14,7 @@ export default async (
   context: any,
   { languageAddress, content, perspective }: Payload
 ): Promise<void> => {
-  const { state: dataState, commit: dataCommit } = dataActionContext(context);
-  const { commit: appCommit, state: appState, getters: appGetters } = appActionContext(context);
-  const { commit: userCommit, state: userState, getters: userGetters } = userActionContext(context);
+  const { commit: appCommit } = appActionContext(context);
   
   try {
     console.log(

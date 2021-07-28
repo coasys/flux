@@ -2,7 +2,6 @@ import { agentGenerate } from "@/core/mutations/agentGenerate";
 import { addPerspective } from "@/core/mutations/addPerspective";
 
 import { databasePerspectiveName } from "@/core/juntoTypes";
-import { dataActionContext } from "@/store/data/index";
 import { appActionContext } from "@/store/app/index";
 import { userActionContext } from "@/store/user/index";
 
@@ -28,9 +27,8 @@ export default async (
     thumbnailPicture,
   }: Payload
 ): Promise<void> => {
-  const { state: dataState, commit: dataCommit } = dataActionContext(context);
-  const { commit: appCommit, state: appState, getters: appGetters } = appActionContext(context);
-  const { commit: userCommit, state: userState, getters: userGetters } = userActionContext(context);
+  const { commit: appCommit } = appActionContext(context);
+  const { commit: userCommit } = userActionContext(context);
   
   const perspectiveName = databasePerspectiveName;
 

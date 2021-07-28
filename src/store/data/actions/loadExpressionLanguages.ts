@@ -1,8 +1,6 @@
 import { getLanguages } from "@/core/queries/getLanguages";
 
-import { dataActionContext } from "@/store/data/index";
 import { appActionContext } from "@/store/app/index";
-import { userActionContext } from "@/store/user/index";
 import { ExpressionUIIcons } from "@/store/types";
 
 export interface Payload {
@@ -10,9 +8,7 @@ export interface Payload {
 }
 
 export default async (context: any): Promise<void> => {
-  const { state: dataState, commit: dataCommit } = dataActionContext(context);
-  const { commit: appCommit, state: appState, getters: appGetters } = appActionContext(context);
-  const { commit: userCommit, state: userState, getters: userGetters } = userActionContext(context);
+  const { commit: appCommit, getters: appGetters } = appActionContext(context);
   
   try {
     const languages = await getLanguages();

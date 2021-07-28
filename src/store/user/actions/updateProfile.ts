@@ -14,8 +14,8 @@ export interface Payload {
 }
 
 export default async (context: any, payload: Payload): Promise<void> => {
-  const { state: dataState, commit: dataCommit } = dataActionContext(context);
-  const { commit: appCommit, state: appState, getters: appGetters } = appActionContext(context);
+  const { state: dataState } = dataActionContext(context);
+  const { commit: appCommit } = appActionContext(context);
   const { commit: userCommit, state: userState, getters: userGetters } = userActionContext(context);
   
   const currentProfile = userGetters.getProfile;

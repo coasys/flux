@@ -13,9 +13,9 @@ export default async (
   message: string
 ): Promise<void> => {
   // @ts-ignore
-  const { state: dataState, commit: dataCommit, getters: dataGetters } = dataActionContext(context);
-  const { commit: appCommit, state: appState, getters: appGetters } = appActionContext(context);
-  const { commit: userCommit, state: userState, getters: userGetters } = userActionContext(context);
+  const { getters: dataGetters } = dataActionContext(context);
+  const { getters: appGetters } = appActionContext(context);
+  const { getters: userGetters } = userActionContext(context);
   
   const escapedMessage = message.replace(/(\s*<.*?>\s*)+/g, " ");
 

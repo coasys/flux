@@ -31,9 +31,9 @@ export default async (
   context: any,
   { perspectiveName, description }: Payload
 ): Promise<CommunityState> => {
-  const { state: dataState, commit: dataCommit } = dataActionContext(context);
-  const { commit: appCommit, state: appState, getters: appGetters } = appActionContext(context);
-  const { commit: userCommit, state: userState, getters: userGetters } = userActionContext(context);
+  const { commit: dataCommit } = dataActionContext(context);
+  const { commit: appCommit, getters: appGetters } = appActionContext(context);
+  const { state: userState, getters: userGetters } = userActionContext(context);
   
   try {
     const createSourcePerspective = await addPerspective(perspectiveName);

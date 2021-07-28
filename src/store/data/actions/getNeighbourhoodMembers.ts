@@ -5,7 +5,6 @@ import { TimeoutCache } from "../../../utils/timeoutCache";
 
 import { dataActionContext } from "@/store/data/index";
 import { appActionContext } from "@/store/app/index";
-import { userActionContext } from "@/store/user/index";
 import { ExpressionTypes, ProfileExpression } from "@/store/types";
 
 export interface Payload {
@@ -14,8 +13,7 @@ export interface Payload {
 
 export default async function (context: any, id: string): Promise<void> {
   const { state: dataState, commit: dataCommit } = dataActionContext(context);
-  const { commit: appCommit, state: appState, getters: appGetters } = appActionContext(context);
-  const { commit: userCommit, state: userState, getters: userGetters } = userActionContext(context);
+  const { commit: appCommit } = appActionContext(context);
   
   const profiles: { [x: string]: ProfileExpression } = {};
   const cache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);

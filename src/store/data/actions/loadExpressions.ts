@@ -5,7 +5,6 @@ import { LinkQuery } from "@perspect3vism/ad4m-types";
 
 import { dataActionContext } from "@/store/data/index";
 import { appActionContext } from "@/store/app/index";
-import { userActionContext } from "@/store/user/index";
 
 export interface Payload {
   channelId: string;
@@ -23,8 +22,7 @@ export default async function (
   { channelId, from, to }: Payload
 ): Promise<LoadExpressionResult> {
   const { state: dataState, commit: dataCommit } = dataActionContext(context);
-  const { commit: appCommit, state: appState, getters: appGetters } = appActionContext(context);
-  const { commit: userCommit, state: userState, getters: userGetters } = userActionContext(context);
+  const { commit: appCommit, getters: appGetters } = appActionContext(context);
   
   try {
     const fromDate = from || appGetters.getApplicationStartTime;

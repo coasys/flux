@@ -3,7 +3,6 @@ import { createLink } from "@/core/mutations/createLink";
 
 import { dataActionContext } from "@/store/data/index";
 import { appActionContext } from "@/store/app/index";
-import { userActionContext } from "@/store/user/index";
 import { ExpressionTypes } from "@/store/types";
 
 export interface Payload {
@@ -16,9 +15,8 @@ export default async function updateCommunity(
   context: any,
   { communityId, name, description }: Payload
 ): Promise<void> {
-  const { state: dataState, commit: dataCommit, getters: dataGetters } = dataActionContext(context);
-  const { commit: appCommit, state: appState, getters: appGetters } = appActionContext(context);
-  const { commit: userCommit, state: userState, getters: userGetters } = userActionContext(context);
+  const { commit: dataCommit, getters: dataGetters } = dataActionContext(context);
+  const { commit: appCommit } = appActionContext(context);
   
 
   const community = dataGetters.getCommunity(communityId);

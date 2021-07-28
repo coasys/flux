@@ -21,8 +21,8 @@ export default async (
   { joiningLink }: Payload
 ): Promise<void> => {
   const { state: dataState, commit: dataCommit } = dataActionContext(context);
-  const { commit: appCommit, state: appState, getters: appGetters } = appActionContext(context);
-  const { commit: userCommit, state: userState, getters: userGetters } = userActionContext(context);
+  const { commit: appCommit } = appActionContext(context);
+  const { state: userState } = userActionContext(context);
   
   try {
     const neighbourhoods = dataState.neighbourhoods;
