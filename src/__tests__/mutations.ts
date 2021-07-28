@@ -58,27 +58,19 @@ describe("Store Mutations", () => {
 
     expect(Object.values(store.state.data.communities).length).toBe(1);
 
-    // expect(
-    //   (Object.values(store.state.data.neighbourhoods)[0] as any).perspectiveUuid
-    // ).toBe(community.neighbourhood.perspective.uuid);
-
     expect(
-      Object.values(
-        store.state.data.communities[community.neighbourhood.perspective.uuid]
-          .channels
-      ).length
+      store.state.data.neighbourhoods[community.neighbourhood.perspective.uuid]
+      .linkedPerspectives.length
     ).toBe(1);
 
-    store.commit("addChannel", {
+    store.commit.addChannel({
       communityId: community.neighbourhood.perspective.uuid,
       channel,
     });
 
     expect(
-      Object.values(
-        store.state.data.communities[community.neighbourhood.perspective.uuid]
-          .channels
-      ).length
+      store.state.data.neighbourhoods[community.neighbourhood.perspective.uuid]
+      .linkedPerspectives.length
     ).toBe(2);
   });
 
@@ -98,11 +90,9 @@ describe("Store Mutations", () => {
     });
 
     expect(
-      Object.keys(
         store.state.data.neighbourhoods[
           community.neighbourhood.perspective.uuid
         ].linkedPerspectives
-      )
     ).toStrictEqual([
       "884f1238-c3d1-41b4-8489-aa73c5f9fc08",
       channel.neighbourhood.perspective.uuid,
@@ -114,12 +104,10 @@ describe("Store Mutations", () => {
     });
 
     expect(
-      Object.keys(
-        store.state.data.communities[community.neighbourhood.perspective.uuid]
-          .channels
-      )
+      store.state.data.neighbourhoods[community.neighbourhood.perspective.uuid]
+      .linkedPerspectives
     ).toStrictEqual([
-      "30e4a29e-1373-4c8a-a5af-a2353c919e7a",
+      "884f1238-c3d1-41b4-8489-aa73c5f9fc08",
       channel.neighbourhood.perspective.uuid,
     ]);
   });
