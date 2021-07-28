@@ -32,12 +32,13 @@ export default async (
         neighbourhood
       );
 
-      const perspective = await getPerspectiveSnapshot(neighbourhood.uuid);
-
       //Get and cache the expression UI for each expression language
       //And used returned expression language names to populate typedExpressionLanguages field
       const [typedExpressionLanguages, uiIcons] =
-        await getTypedExpressionLanguages(perspective!, true);
+        await getTypedExpressionLanguages(
+          neighbourhood.neighbourhood!.meta.links,
+          true
+        );
 
       for (const uiIcon of uiIcons) {
         commit.addExpressionUI(uiIcon);
@@ -66,7 +67,9 @@ export default async (
       }
 
       //Read out metadata about the perspective from the meta
-      const { name, description } = findNameDescriptionFromMeta(perspective!);
+      const { name, description } = findNameDescriptionFromMeta(
+        neighbourhood.neighbourhood!.meta.links
+      );
 
       const newCommunity = {
         neighbourhood: {

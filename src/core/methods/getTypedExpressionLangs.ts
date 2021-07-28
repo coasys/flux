@@ -4,19 +4,19 @@ import {
   ExpressionTypes,
   ExpressionUIIcons,
 } from "@/store/types";
-import { Perspective } from "@perspect3vism/ad4m-types";
+import { LinkExpression } from "@perspect3vism/ad4m-types";
 
 ///NOTE: this function wont work in current setup and its still undecided if we want expression language hints on the perspective meta
 ///This behaviour should likely be deleted and achieved some other way
 export async function getTypedExpressionLanguages(
-  perspective: Perspective,
+  links: LinkExpression[],
   storeLanguageUI: boolean
 ): Promise<[JuntoExpressionReference[], ExpressionUIIcons[]]> {
   const typedExpressionLanguages = [];
   const uiIcons = [];
   //Get and cache the expression UI for each expression language
   //And used returned expression language names to populate typedExpressionLanguages field
-  for (const link of perspective.links!) {
+  for (const link of links) {
     if (link.data.predicate == "language") {
       const languageRes = await getLanguage(link.data.target!);
       if (!languageRes) {
