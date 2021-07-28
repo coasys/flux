@@ -26,7 +26,7 @@
   "dependencies": {
     "@apollo/client": "3.3.20",
     "@junto-foundation/junto-elements": "^0.3.3",
-    "@perspect3vism/ad4m-executor": "file:../ad4m-executor",
+    "@perspect3vism/ad4m-executor": "0.1.0",
     "@perspect3vism/ad4m-types": "file:../ad4m-types",
     "@tiptap/vue-3": "^2.0.0-beta.45",
     "@vue/apollo-composable": "^4.0.0-alpha.12",
