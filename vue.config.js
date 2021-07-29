@@ -25,14 +25,6 @@ module.exports = {
           );
         },
       ]);
-    config.module
-      .rule("babel")
-      .use("babel")
-      .loader("babel-loader")
-      .options({
-        presets: [["@babel/preset-env", { modules: false }]],
-        plugins: ["@babel/plugin-transform-typescript"],
-      });
   },
   pluginOptions: {
     electronBuilder: {
