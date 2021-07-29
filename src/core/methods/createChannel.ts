@@ -12,6 +12,7 @@ import type { PerspectiveHandle } from "@perspect3vism/ad4m";
 import { addPerspective } from "../mutations/addPerspective";
 import { createUniqueHolochainLanguage } from "../mutations/createUniqueHolochainLanguage";
 import { createNeighbourhood } from "../mutations/createNeighbourhood";
+import createNeighbourhoodMeta from "./createNeighbourhoodMeta";
 
 export async function createChannel(
   channelName: string,
@@ -31,7 +32,14 @@ export async function createChannel(
     "Created new social context language wuth result",
     socialContextLanguage
   );
-  const meta = new Perspective();
+
+  //Publish perspective
+  const metaLinks = await createNeighbourhoodMeta(
+    channelName,
+    "",
+    typedExpressionLanguages
+  );
+  const meta = new Perspective(metaLinks);
   const neighbourhood = await createNeighbourhood(
     perspective.uuid,
     socialContextLanguage.address,
