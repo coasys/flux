@@ -44,7 +44,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import type { Expression } from "@perspect3vism/ad4m-types";
+import type { Expression } from "@perspect3vism/ad4m";
 import { NeighbourhoodState } from "@/store/types";
 import store from "@/store";
 

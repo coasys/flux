@@ -10,8 +10,8 @@ import {
   ChannelState,
 } from "@/store/types";
 
-import { parseExprUrl } from "@perspect3vism/ad4m-types";
-import type { Expression, LinkExpression } from "@perspect3vism/ad4m-types";
+import { parseExprUrl } from "@perspect3vism/ad4m";
+import type { Expression, LinkExpression } from "@perspect3vism/ad4m";
 import hash from "object-hash";
 
 interface UpdatePayload {

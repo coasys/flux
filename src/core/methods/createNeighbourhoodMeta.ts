@@ -1,5 +1,5 @@
 import { JuntoExpressionReference } from "@/store/types";
-import { Link, LinkExpression } from "@perspect3vism/ad4m-types";
+import { Link, LinkExpression } from "@perspect3vism/ad4m";
 import { addPerspective } from "../mutations/addPerspective";
 import { createLink } from "../mutations/createLink";
 import { getPerspectiveSnapshot } from "../queries/getPerspective";

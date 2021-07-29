@@ -1,7 +1,7 @@
 import { apolloClient } from "@/app";
 import { GET_EXPRESSION } from "../graphql_queries";
 import sleep from "@/utils/sleep";
-import { ExpressionRendered } from "@perspect3vism/ad4m-types";
+import { ExpressionRendered } from "@perspect3vism/ad4m";
 
 //Query expression handler
 export function getExpression(url: string): Promise<ExpressionRendered> {

@@ -8,7 +8,7 @@ import getters from "@/store/getters";
 import { State } from "@/store/types";
 import { agentGenerate } from "../../../core/mutations/agentGenerate";
 import { addPerspective } from "../../../core/mutations/addPerspective";
-import { AgentStatus, PerspectiveHandle } from "@perspect3vism/ad4m-types";
+import { AgentStatus, PerspectiveHandle } from "@perspect3vism/ad4m";
 import createUser from "@/store/actions/createUser";
 
 describe("Store Actions", () => {

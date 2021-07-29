@@ -1,5 +1,5 @@
 import { agentUnlock } from "@/core/mutations/agentUnlock";
-import { AgentStatus } from "@perspect3vism/ad4m-types";
+import { AgentStatus } from "@perspect3vism/ad4m";
 
 import { rootActionContext } from "@/store/index";
 

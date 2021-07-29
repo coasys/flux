@@ -2,7 +2,7 @@ import { State } from "@/store/types";
 import actions from "@/store/actions";
 import getters from "@/store/getters";
 import mutations from "@/store/mutations";
-import { AgentStatus } from "@perspect3vism/ad4m-types";
+import { AgentStatus } from "@perspect3vism/ad4m";
 import { Store, createStore } from "vuex";
 import * as agentUnlock from "../../../core/mutations/agentUnlock";
 import lockAgentFixture from "../../fixtures/lockAgent.json";

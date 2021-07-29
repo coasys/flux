@@ -4,7 +4,7 @@ import {
   ExpressionTypes,
   ExpressionUIIcons,
 } from "@/store/types";
-import { LinkExpression } from "@perspect3vism/ad4m-types";
+import { LinkExpression } from "@perspect3vism/ad4m";
 
 ///NOTE: this function wont work in current setup and its still undecided if we want expression language hints on the perspective meta
 ///This behaviour should likely be deleted and achieved some other way

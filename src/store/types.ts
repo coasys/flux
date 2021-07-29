@@ -2,9 +2,9 @@ import type {
   AgentStatus,
   Expression,
   LinkExpression,
-} from "@perspect3vism/ad4m-types";
-import { ExpressionGeneric } from "@perspect3vism/ad4m-types";
-import { ExpressionRef, PerspectiveHandle } from "@perspect3vism/ad4m-types";
+} from "@perspect3vism/ad4m";
+import { ExpressionGeneric } from "@perspect3vism/ad4m";
+import { ExpressionRef, PerspectiveHandle } from "@perspect3vism/ad4m";
 
 export interface State {
   app: ApplicationState;

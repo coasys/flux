@@ -17,7 +17,7 @@ import {
   ExpressionTypes,
   CommunityState,
 } from "@/store/types";
-import { Perspective } from "@perspect3vism/ad4m-types";
+import { Perspective } from "@perspect3vism/ad4m";
 import { rootActionContext } from "@/store/index";
 import createNeighbourhoodMeta from "@/core/methods/createNeighbourhoodMeta";
 

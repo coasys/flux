@@ -1,4 +1,4 @@
-import { LinkExpression } from "@perspect3vism/ad4m-types";
+import { LinkExpression } from "@perspect3vism/ad4m";
 
 export function findNameDescriptionFromMeta(links: LinkExpression[]): {
   name: string;

@@ -6,7 +6,7 @@ import mutations from "@/store/mutations";
 import { createStore, Store } from "vuex";
 import community from "../../fixtures/community.json";
 import * as getLinks from "../../../core/queries/getLinks";
-import { Expression } from "@perspect3vism/ad4m-types";
+import { Expression } from "@perspect3vism/ad4m";
 import getCommunityMembersLinkFixture from "../../fixtures/getCommunityMembersLink.json";
 import getProfileFixture from "../../fixtures/getProfile.json";
 import * as getExpressionNoCache from "@/core/queries/getExpression";

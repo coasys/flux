@@ -1,6 +1,6 @@
 import { apolloClient } from "@/app";
 import unwrapApolloResult from "@/utils/unwrapApolloResult";
-import type { Perspective, PerspectiveHandle } from "@perspect3vism/ad4m-types";
+import type { Perspective, PerspectiveHandle } from "@perspect3vism/ad4m";
 import { PERSPECTIVE, PERSPECTIVE_SNAPSHOT } from "../graphql_queries";
 
 export async function getPerspective(

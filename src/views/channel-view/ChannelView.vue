@@ -95,7 +95,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import store from "@/store";
-import { Expression } from "@perspect3vism/ad4m-types";
+import { Expression } from "@perspect3vism/ad4m";
 import {
   ChannelState,
   CommunityState,

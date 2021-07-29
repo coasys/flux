@@ -5,7 +5,7 @@ import {
   NeighbourhoodState,
   LocalCommunityState,
 } from "@/store/types";
-import { Expression } from "@perspect3vism/ad4m-types";
+import { Expression } from "@perspect3vism/ad4m";
 
 export default {
   getNeighbourhood:

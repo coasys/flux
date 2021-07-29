@@ -1,6 +1,6 @@
 import { apolloClient } from "@/app";
 import unwrapApolloResult from "@/utils/unwrapApolloResult";
-import type { PerspectiveHandle } from "@perspect3vism/ad4m-types";
+import type { PerspectiveHandle } from "@perspect3vism/ad4m";
 import { NEIGHBOURHOOD_JOIN } from "../graphql_queries";
 
 export async function joinNeighbourhood(

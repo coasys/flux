@@ -1,6 +1,6 @@
 import { apolloClient } from "@/app";
 import unwrapApolloResult from "@/utils/unwrapApolloResult";
-import { LinkQuery, LinkExpression } from "@perspect3vism/ad4m-types";
+import { LinkQuery, LinkExpression } from "@perspect3vism/ad4m";
 import { PERSPECTIVE_LINK_QUERY } from "../graphql_queries";
 
 export async function getLinks(

@@ -1,7 +1,7 @@
 import hash from "object-hash";
 import { print } from "graphql/language/printer";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
-import { LinkQuery } from "@perspect3vism/ad4m-types";
+import { LinkQuery } from "@perspect3vism/ad4m";
 
 import { rootActionContext } from "@/store/index";
 

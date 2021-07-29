@@ -7,8 +7,8 @@ import {
 } from "@/store/types";
 import { v4 } from "uuid";
 import path from "path";
-import { Perspective, Link } from "@perspect3vism/ad4m-types";
-import type { PerspectiveHandle } from "@perspect3vism/ad4m-types";
+import { Perspective, Link } from "@perspect3vism/ad4m";
+import type { PerspectiveHandle } from "@perspect3vism/ad4m";
 import { addPerspective } from "../mutations/addPerspective";
 import { createUniqueHolochainLanguage } from "../mutations/createUniqueHolochainLanguage";
 import { createNeighbourhood } from "../mutations/createNeighbourhood";
@@ -20,7 +20,6 @@ export async function createChannel(
   membraneType: MembraneType,
   typedExpressionLanguages: JuntoExpressionReference[]
 ): Promise<ChannelState> {
-  console.debug("Create channel called");
   const perspective = await addPerspective(channelName);
   console.debug("Created new perspective with result", perspective);
   const socialContextLanguage = await createUniqueHolochainLanguage(
