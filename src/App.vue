@@ -89,7 +89,7 @@ export default defineComponent({
           store.commit.setApplicationStartTime(new Date());
         }
         if (newValue) {
-          store.dispatch.loadExpressionLanguages;
+          store.dispatch.loadExpressionLanguages();
         } else {
           router.push({
             name: store.state.user.agent.isInitialized ? "login" : "signup",
