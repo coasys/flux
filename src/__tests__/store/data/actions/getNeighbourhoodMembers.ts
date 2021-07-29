@@ -9,7 +9,6 @@ import { createDirectStore } from "direct-vuex";
 import user from "@/store/user";
 import data from "@/store/data";
 import app from "@/store/app";
-// import { AppStore } from "@/store";
 
 describe("Get Community Members", () => {
   let store: any;
