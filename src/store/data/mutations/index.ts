@@ -67,7 +67,7 @@ export default {
     neighbourhood.currentExpressionLinks[
       hash(payload.link.data!, { excludeValues: "__typename" })
     ] = payload.link;
-    neighbourhood.currentExpressionMessages[payload.expression.url!] = {
+    neighbourhood.currentExpressionMessages[payload.link.data.target] = {
       expression: {
         author: payload.expression.author!,
         data: JSON.parse(payload.expression.data!),

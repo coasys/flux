@@ -52,7 +52,7 @@ export default async function (
 
     //Listen for message callback saying we got some links
     linksWorker.addEventListener("message", async (e) => {
-      const linkQuery = e.data.links;
+      const linkQuery = e.data.perspectiveQueryLinks;
       if (linkQuery) {
         if (channel) {
           for (const link of linkQuery) {
@@ -61,8 +61,10 @@ export default async function (
               channel.currentExpressionLinks[
                 hash(link.data!, { excludeValues: "__typename" })
               ];
+            const currentExpression =
+              channel.currentExpressionMessages[link.data.target];
 
-            if (!currentExpressionLink) {
+            if (!currentExpressionLink || !currentExpression) {
               const expressionWorker = new Worker("pollingWorker.js");
 
               //Run expression worker to try and get expression on link target
