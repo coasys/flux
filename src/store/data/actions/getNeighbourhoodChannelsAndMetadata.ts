@@ -48,7 +48,7 @@ export default async (
       if (!isExecuting) {
         isExecuting = true;
         try {
-          const channelLinks = e.data.links;
+          const channelLinks = e.data.perspectiveQueryLinks;
 
           if (channelLinks) {
             for (let i = 0; i < channelLinks.length; i++) {
@@ -114,7 +114,7 @@ export default async (
     //Add event listener for receiving links grabbed by the worker
     groupExpressionWorker.addEventListener("message", async (e) => {
       try {
-        const groupExpressionLinks = e.data.links;
+        const groupExpressionLinks = e.data.perspectiveQueryLinks;
         //console.log("Got group expression links", groupExpressionLinks);
         if (groupExpressionLinks != null && groupExpressionLinks.length > 0) {
           //Check that the group expression ref is not in the store
