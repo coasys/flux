@@ -70,6 +70,25 @@
         >
           <j-icon size="sm" square name="plus"></j-icon>
         </j-button>
+        <j-menu-item
+          v-if="communityHasMessages"
+          @click="
+            () =>
+              $router.push({
+                name: 'channel',
+                params: {
+                  communityId: community.state.perspectiveUuid,
+                  channelId: community.state.perspectiveUuid,
+                },
+              })
+          "
+          :selected="
+            community.state.currentChannelId === community.state.perspectiveUuid
+          "
+        >
+          <j-icon size="sm" slot="start" name="hash" />
+          Home
+        </j-menu-item>
         <router-link
           :to="{
             name: 'channel',
@@ -111,6 +130,9 @@
               ></div>
             </j-menu-item>
             <j-menu slot="content">
+              <j-menu-item @click="() => makeIntoCommunity(channel)">
+                Make into a community
+              </j-menu-item>
               <j-menu-item
                 @click="
                   () =>
@@ -167,6 +189,12 @@ export default defineComponent({
       const communityId = this.$route.params.communityId as string;
       return store.getters.getChannelStates(communityId);
     },
+    communityHasMessages(): boolean {
+      return Object.keys(this.community.neighbourhood.currentExpressionMessages)
+        .length
+        ? true
+        : false;
+    },
   },
   methods: {
     ...mapMutations([
@@ -177,6 +205,20 @@ export default defineComponent({
       "setShowInviteCode",
       "setShowCommunitySettings",
     ]),
+    makeIntoCommunity(channel: ChannelState) {
+      store.commit.addCommunityState({
+        perspectiveUuid: channel.neighbourhood.perspective.uuid,
+        theme: {
+          fontSize: "md",
+          fontFamily: "default",
+          name: "light",
+          hue: 270,
+          saturation: 60,
+        },
+        useGlobalTheme: false,
+        currentChannelId: channel.neighbourhood.perspective.uuid,
+      });
+    },
     getValidId(val: string) {
       return "channel-" + val;
     },

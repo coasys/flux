@@ -20,8 +20,9 @@ export default async (
   const { commit, rootState } = rootActionContext(context);
   try {
     const neighbourhoods = rootState.data.neighbourhoods;
-    const isAlreadyPartOf = Object.values(neighbourhoods).find(
-      (c) => c.neighbourhoodUrl === joiningLink
+    const communities = rootState.data.communities;
+    const isAlreadyPartOf = Object.keys(communities).find(
+      (key) => neighbourhoods[key].neighbourhoodUrl === joiningLink
     );
     if (!isAlreadyPartOf) {
       const neighbourhood = await joinNeighbourhood(joiningLink);
