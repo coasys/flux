@@ -111,8 +111,7 @@ export default async function (
           if (latestLinkTimestamp) {
             if (
               Object.values(channel.currentExpressionLinks).filter(
-                (link) =>
-                  new Date(link.expression.timestamp!) > latestLinkTimestamp!
+                (link) => new Date(link.timestamp!) > latestLinkTimestamp!
               ).length > 0
             ) {
               return [false, linksWorker];
