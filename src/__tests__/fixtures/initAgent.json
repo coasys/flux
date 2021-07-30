@@ -1,0 +1,7 @@
+{
+  "did": "did:key:zQ3shZj7gEX6tbrQGvMJeHsL2hWRcQPUmJHoTFZzEZdEsHBwa",
+  "didDocument": "{'@context':'https://w3id.org/did-resolution/v1','didDocument':{'@context':['https://www.w3.org/ns/did/v1','https://ns.did.ai/transmute/v1',{'@base':'did:key:zQ3shZj7gEX6tbrQGvMJeHsL2hWRcQPUmJHoTFZzEZdEsHBwa'}],'id':'did:key:zQ3shZj7gEX6tbrQGvMJeHsL2hWRcQPUmJHoTFZzEZdEsHBwa','verificationMethod':[{'id':'#zQ3shZj7gEX6tbrQGvMJeHsL2hWRcQPUmJHoTFZzEZdEsHBwa','type':'EcdsaSecp256k1VerificationKey2019','controller':'did:key:zQ3shZj7gEX6tbrQGvMJeHsL2hWRcQPUmJHoTFZzEZdEsHBwa','publicKeyBase58':'omxfPNdRHDBPgFdDunSysv4AkdHo1jkvKeESGHZk4i5r'}],'authentication':['#zQ3shZj7gEX6tbrQGvMJeHsL2hWRcQPUmJHoTFZzEZdEsHBwa'],'assertionMethod':['#zQ3shZj7gEX6tbrQGvMJeHsL2hWRcQPUmJHoTFZzEZdEsHBwa'],'capabilityInvocation':['#zQ3shZj7gEX6tbrQGvMJeHsL2hWRcQPUmJHoTFZzEZdEsHBwa'],'capabilityDelegation':['#zQ3shZj7gEX6tbrQGvMJeHsL2hWRcQPUmJHoTFZzEZdEsHBwa']},'didDocumentMetadata':{'content-type':'application/did+ld+json'},'didResolutionMetadata':{}}",
+  "isInitialized": true,
+  "isUnlocked": true,
+  "__typename": "AgentService"
+}

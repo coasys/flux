@@ -11,15 +11,13 @@ import { ApolloClients } from "@vue/apollo-composable";
 import "@junto-foundation/junto-elements";
 import "@junto-foundation/junto-elements/dist/main.css";
 
-const wsLink = new WebSocketLink({
-  uri: `ws://localhost:4000/graphql`,
-  options: {
-    reconnect: true,
-  },
-});
-
 export const apolloClient = new ApolloClient({
-  link: wsLink,
+  link: new WebSocketLink({
+    uri: `ws://localhost:4000/graphql`,
+    options: {
+      reconnect: true,
+    },
+  }),
   cache: new InMemoryCache({}),
   defaultOptions: {
     watchQuery: {
@@ -39,6 +37,6 @@ createApp({
   },
   render: () => h(App),
 })
-  .use(store)
+  .use(store.original)
   .use(router)
   .mount("#app");

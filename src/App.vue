@@ -38,19 +38,18 @@
 <script lang="ts">
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
-import { useSubscription } from "@vue/apollo-composable";
-import { defineComponent, watch, computed } from "vue";
-import { AD4M_SIGNAL } from "@/core/graphql_queries";
-import { useStore } from "vuex";
+import { gql } from "@apollo/client/core";
+import { defineComponent, computed } from "vue";
 import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
-import ad4m from "@perspect3vism/ad4m-executor";
-import { AGENT_SERVICE_STATUS, QUERY_EXPRESSION } from "@/core/graphql_queries";
-import { ModalsState, ToastState } from "@/store";
-import parseSignalAsLink from "@/core/utils/parseSignalAsLink";
+import { AGENT_STATUS, GET_EXPRESSION } from "@/core/graphql_queries";
+import { ModalsState, NeighbourhoodState, ToastState } from "@/store/types";
 import showMessageNotification from "@/utils/showMessageNotification";
 import { print } from "graphql/language/printer";
+import { AgentStatus, LinkExpression } from "@perspect3vism/ad4m";
+import { apolloClient } from "./app";
+import store from "@/store";
 
 declare global {
   interface Window {
@@ -63,7 +62,7 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const route = useRoute();
-    const store = useStore();
+    //const store = useStore();
 
     onError((error) => {
       console.log("Got global graphql error, logging with error", error);
@@ -71,172 +70,205 @@ export default defineComponent({
         // can use error.operation.operationName to single out a query type.
         logErrorMessages(error);
 
-        store.commit("showDangerToast", {
+        store.commit.showDangerToast({
           message: JSON.stringify(error),
         });
       }
     });
 
-    //Ad4m signal watcher
-    const { result } = useSubscription<{ signal: ad4m.Signal }>(AD4M_SIGNAL);
-
     //Watch for agent unlock to set off running queries
-    store.watch(
-      (state) => state.agentUnlocked,
+    store.original.watch(
+      (state) => state.user.agent.isUnlocked,
       async (newValue) => {
         console.log("agent unlocked changed to", newValue);
         if (newValue) {
-          store.commit("updateApplicationStartTime", new Date());
+          store.commit.setApplicationStartTime(new Date());
         }
         if (newValue) {
-          store.dispatch("loadExpressionLanguages");
+          store.dispatch.loadExpressionLanguages;
         } else {
-          router.push({ name: store.state.agentInit ? "login" : "signup" });
+          router.push({
+            name: store.state.user.agent.isInitialized ? "login" : "signup",
+          });
         }
       },
       { immediate: true }
     );
 
     //Watch for incoming signals from holochain - an incoming signal should mean a DM is inbound
-    watch(result, async (data) => {
-      console.log("GOT INCOMING MESSAGE SIGNAL");
-      //Parse out the signal data to its link form and validate the link structure
-      const linkData = parseSignalAsLink(data.signal);
-      if (linkData) {
-        const link = linkData.link;
-        const language = linkData.language;
-        if (link.data!.predicate! == "sioc://content_of") {
-          //Start expression web worker to try and get the expression data pointed to in link target
-          const expressionWorker = new Worker("pollingWorker.js");
+    const newLinkHandler = async (
+      link: LinkExpression,
+      perspective: string
+    ) => {
+      console.log("GOT INCOMING MESSAGE SIGNAL", link, perspective);
+      if (link.data!.predicate! == "sioc://content_of") {
+        //Start expression web worker to try and get the expression data pointed to in link target
+        const expressionWorker = new Worker("pollingWorker.js");
 
-          expressionWorker.postMessage({
-            retry: expressionGetRetries,
-            interval: expressionGetDelayMs,
-            query: print(QUERY_EXPRESSION),
-            variables: { url: link.data!.target! },
-            name: "Expression signal get",
-          });
+        expressionWorker.postMessage({
+          retry: expressionGetRetries,
+          interval: expressionGetDelayMs,
+          query: print(GET_EXPRESSION),
+          variables: { url: link.data!.target! },
+          name: "Expression signal get",
+        });
 
-          expressionWorker.onerror = function (e) {
-            throw new Error(e.toString());
-          };
+        expressionWorker.onerror = function (e) {
+          throw new Error(e.toString());
+        };
 
-          expressionWorker.addEventListener("message", (e) => {
-            const expression = e.data.expression;
-            if (expression) {
-              //Expression is not null, which means we got the data and we can terminate the loop
-              expressionWorker.terminate();
-              const message = JSON.parse(expression!.data!);
+        expressionWorker.addEventListener("message", (e) => {
+          const expression = e.data.expression;
+          if (expression) {
+            //Expression is not null, which means we got the data and we can terminate the loop
+            expressionWorker.terminate();
+            const message = JSON.parse(expression!.data!);
 
-              console.log("FOUND EXPRESSION FOR SIGNAL");
-              //Add the expression to the store
-              store.commit("addExpressionAndLinkFromLanguageAddress", {
-                linkLanguage: language,
-                link: link,
-                message: expression,
-              });
+            console.log("FOUND EXPRESSION FOR SIGNAL");
+            //Add the expression to the store
+            store.commit.addExpressionAndLink({
+              channelId: perspective,
+              link: link,
+              message: expression,
+            });
 
-              showMessageNotification(
-                router,
-                route,
-                store,
-                language,
-                expression!.author!.did!,
-                message.body
-              );
+            showMessageNotification(
+              router,
+              route,
+              perspective,
+              expression!.author,
+              message.body
+            );
 
-              //Add UI notification on the channel to notify that there is a new message there
-              store.commit("setHasNewMessages", {
-                channelId:
-                  store.getters.getChannelFromLinkLanguage(language)
-                    .perspective,
-                value: true,
-              });
-            }
-          });
-        }
+            //Add UI notification on the channel to notify that there is a new message there
+            store.commit.setHasNewMessages({
+              channelId: perspective,
+              value: true,
+            });
+          }
+        });
       }
-    });
+    };
+
+    let watching: string[] = [];
+    store.original.watch(
+      (state) => state.data.neighbourhoods,
+      async (newValue: { [perspectiveUuid: string]: NeighbourhoodState }) => {
+        for (let [k, v] of Object.entries(newValue)) {
+          if (watching.filter((val) => val == k).length == 0) {
+            console.log("Starting watcher on perspective", k);
+            watching.push(k);
+            apolloClient
+              .subscribe({
+                query: gql` subscription {
+                  perspectiveLinkAdded(uuid: "${v.perspective.uuid}") {
+                    author
+                    timestamp
+                    data { source, predicate, target }
+                    proof { valid, invalid, signature, key }
+                  }
+                }`,
+              })
+              .subscribe({
+                next: (result) => {
+                  console.debug(
+                    "Got new link with data",
+                    result.data,
+                    "and channel",
+                    v
+                  );
+                  newLinkHandler(
+                    result.data.perspectiveLinkAdded,
+                    v.perspective.uuid
+                  );
+                },
+                error: (e) => {
+                  throw Error(e);
+                },
+              });
+          }
+        }
+      },
+      { immediate: true, deep: true }
+    );
 
     return {
-      toast: computed(() => store.state.ui.toast),
-      setToast: (payload: ToastState) => store.commit("setToast", payload),
+      toast: computed(() => store.state.app.toast),
+      setToast: (payload: ToastState) => store.commit.setToast(payload),
     };
   },
   computed: {
     ui() {
-      return this.$store.state.ui;
+      return store.state.app;
     },
     globalError(): { show: boolean; message: string } {
-      return this.$store.state.ui.globalError;
+      return store.state.app.globalError;
     },
     modals(): ModalsState {
-      return this.$store.state.ui.modals;
+      return store.state.app.modals;
     },
   },
   beforeCreate() {
     //Reset globalError & loading states in case application was exited with these states set to true before
-    this.$store.commit("setGlobalError", {
+    store.commit.setGlobalError({
       show: false,
       message: "",
     });
-    this.$store.commit("setGlobalLoading", false);
+    store.commit.setGlobalLoading(false);
 
     window.api.send("getLangPath");
 
     window.api.receive("unlockedStateOff", () => {
-      this.$store.commit("updateAgentLockState", false);
+      store.commit.updateAgentLockState(false);
     });
 
     window.api.receive("getLangPathResponse", (data: string) => {
       // console.log(`Received language path from main thread: ${data}`);
-      this.$store.commit("setLanguagesPath", data);
+      store.commit.setLanguagesPath(data);
     });
 
     window.api.receive("windowState", (data: string) => {
       console.log(`setWindowState: ${data}`);
-      this.$store.commit("setWindowState", data);
+      //@ts-ignore
+      store.commit.setWindowState(data);
     });
 
     window.api.receive("update_available", () => {
-      this.$store.commit("updateUpdateState", { updateState: "available" });
+      store.commit.setUpdateState({ updateState: "available" });
     });
 
     window.api.receive("update_not_available", () => {
-      this.$store.commit("updateUpdateState", { updateState: "not-available" });
+      store.commit.setUpdateState({ updateState: "not-available" });
     });
 
     window.api.receive("update_downloaded", () => {
-      this.$store.commit("updateUpdateState", { updateState: "downloaded" });
+      store.commit.setUpdateState({ updateState: "downloaded" });
     });
 
-    window.api.receive("download_progress", (data: any) => {
-      this.$store.commit("updateUpdateState", { updateState: "downloading" });
+    window.api.receive("download_progress", () => {
+      store.commit.setUpdateState({ updateState: "downloading" });
     });
 
     window.api.receive("setGlobalLoading", (val: boolean) => {
-      this.$store.commit("setGlobalLoading", val);
+      store.commit.setGlobalLoading(val);
     });
 
     window.api.receive(
       "globalError",
       (payload: { show: boolean; message: string }) => {
-        this.$store.commit("setGlobalError", payload);
+        store.commit.setGlobalError(payload);
       }
     );
 
     const { onResult, onError } = useQuery<{
-      agent: ad4m.AgentService;
-    }>(AGENT_SERVICE_STATUS);
+      agentStatus: AgentStatus;
+    }>(AGENT_STATUS);
     onResult((val) => {
-      const isInit = val.data.agent.isInitialized!;
-      const isUnlocked = val.data.agent.isUnlocked!;
-      this.$store.commit("updateAgentInitState", isInit);
-      this.$store.commit("updateAgentLockState", isUnlocked);
-      if (isInit == true) {
+      store.commit.updateAgentStatus(val.data.agentStatus);
+      if (val.data.agentStatus.isInitialized == true) {
         //Get database perspective from store
-        let databasePerspective = this.$store.getters.getDatabasePerspective;
-        if (databasePerspective == "") {
+        let databasePerspective = store.getters.getDatabasePerspective;
+        if (!databasePerspective) {
           console.warn(
             "Does not have databasePerspective in store but has already been init'd! Add logic for getting databasePerspective as found with name"
           );

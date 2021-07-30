@@ -2,22 +2,22 @@
   <div class="left-nav__communities-list">
     <j-tooltip
       v-for="community in communities"
-      :key="community.perspective"
+      :key="community.perspective.uuid"
       :title="community.name"
     >
       <j-popover event="contextmenu">
         <j-avatar
           slot="trigger"
           class="left-nav__community-item"
-          :selected="communityIsActive(community.perspective)"
+          :selected="communityIsActive(community.perspective.uuid)"
           size="xl"
           :src="require('@/assets/images/junto_web_rainbow.png')"
           initials="false"
-          @click="() => handleCommunityClick(community.perspective)"
+          @click="() => handleCommunityClick(community.perspective.uuid)"
         ></j-avatar>
         <j-menu
           slot="content"
-          @click="() => removeCommunity(community.perspective)"
+          @click="() => removeCommunity(community.perspective.uuid)"
         >
           <j-menu-item>Remove community</j-menu-item>
         </j-menu>
@@ -28,25 +28,26 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import store from "@/store";
 
 export default defineComponent({
   methods: {
     removeCommunity(id: string) {
-      this.$store.commit("removeCommunity", id);
+      store.commit.removeCommunity(id);
       this.$router.push({ name: "home" });
     },
     handleCommunityClick(communityId: string) {
       if (this.communityIsActive(communityId)) {
-        this.$store.commit("toggleSidebar");
+        store.commit.toggleSidebar;
       } else {
-        this.$store.commit("setSidebar", true);
+        store.commit.setSidebar(true);
         this.$router.push({ name: "community", params: { communityId } });
       }
     },
   },
   computed: {
     communities() {
-      return this.$store.state.communities;
+      return store.getters.getCommunityNeighbourhoods;
     },
     communityIsActive() {
       return (id: string) => this.$route.params.communityId === id;

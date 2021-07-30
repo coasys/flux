@@ -27,7 +27,8 @@
 <script lang="ts">
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { defineComponent } from "vue";
-import { Profile } from "@/store";
+import { Profile } from "@/store/types";
+import store from "@/store";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -41,10 +42,10 @@ export default defineComponent({
   },
   computed: {
     userProfile(): Profile {
-      return this.$store.state.userProfile || {};
+      return store.state.user.profile!;
     },
     userDid(): string {
-      return this.$store.state.userDid;
+      return store.state.user.agent.did!;
     },
   },
   watch: {
@@ -64,8 +65,8 @@ export default defineComponent({
   methods: {
     updateProfile() {
       this.isUpdatingProfile = true;
-      this.$store
-        .dispatch("updateProfile", {
+      store.dispatch
+        .updateProfile({
           username: this.username,
           profilePicture: this.profilePicture,
         })

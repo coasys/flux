@@ -1,4 +1,5 @@
 import { createExpression } from "@/core/mutations/createExpression";
+import { Profile } from "@/store/types";
 
 const byteSize = (str: string) => new Blob([str]).size;
 
@@ -17,9 +18,9 @@ export const dataURItoBlob = (dataURI: string) => {
 export const blobToDataURL = (blob: Blob): Promise<string> => {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (_e) => resolve(reader.result as string);
-    reader.onerror = (_e) => reject(reader.error);
-    reader.onabort = (_e) => reject(new Error("Read aborted"));
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.onabort = () => reject(new Error("Read aborted"));
     reader.readAsDataURL(blob);
   });
 };
@@ -73,31 +74,26 @@ export const resizeImage = (file: any, maxSize: number): Promise<Blob> => {
 
 export async function createProfile(
   expressionLanguage: string,
-  username: string,
-  email: string,
-  givenName: string,
-  familyName: string,
-  profileImage?: string,
-  thumbnail?: string
+  profileData: Profile
 ): Promise<string> {
   try {
     const profile: { [x: string]: any } = {
-      "foaf:AccountName": username,
-      "schema:email": email,
-      "schema:givenName": givenName,
-      "schema:familyName": familyName,
+      "foaf:AccountName": profileData.username,
+      "schema:email": profileData.email,
+      "schema:givenName": profileData.givenName,
+      "schema:familyName": profileData.familyName,
       "@type": "foaf:OnlineAccount",
     };
 
-    if (profileImage) {
+    if (profileData.profilePicture && profileData.thumbnailPicture) {
       profile["schema:image"] = JSON.stringify({
         "@type": "schema:ImageObject",
-        "schema:contentSize": byteSize(profileImage),
-        "schema:contentUrl": profileImage,
+        "schema:contentSize": byteSize(profileData.profilePicture),
+        "schema:contentUrl": profileData.profilePicture,
         "schema:thumbnail": {
           "@type": "schema:ImageObject",
-          "schema:contentSize": byteSize(thumbnail!),
-          "schema:contentUrl": thumbnail,
+          "schema:contentSize": byteSize(profileData.thumbnailPicture),
+          "schema:contentUrl": profileData.thumbnailPicture,
         },
       });
     }
@@ -112,6 +108,10 @@ export async function createProfile(
         profile,
         signed_agent: "NA",
       })
+    );
+    console.log(
+      "Created profile expression with result",
+      createProfileExpression
     );
 
     return createProfileExpression;

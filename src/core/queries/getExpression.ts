@@ -1,15 +1,15 @@
 import { apolloClient } from "@/app";
-import { QUERY_EXPRESSION } from "../graphql_queries";
-import ad4m from "@perspect3vism/ad4m-executor";
+import { GET_EXPRESSION } from "../graphql_queries";
 import sleep from "@/utils/sleep";
+import { ExpressionRendered } from "@perspect3vism/ad4m";
 
 //Query expression handler
-export function getExpression(url: string): Promise<ad4m.Expression> {
+export function getExpression(url: string): Promise<ExpressionRendered> {
   return new Promise((resolve, reject) => {
     apolloClient
       .query<{
-        expression: ad4m.Expression;
-      }>({ query: QUERY_EXPRESSION, variables: { url: url } })
+        expression: ExpressionRendered;
+      }>({ query: GET_EXPRESSION, variables: { url: url } })
       .then((result) => {
         resolve(result.data.expression);
       })
@@ -17,13 +17,15 @@ export function getExpression(url: string): Promise<ad4m.Expression> {
   });
 }
 
-export function getExpressionNoCache(url: string): Promise<ad4m.Expression> {
+export function getExpressionNoCache(
+  url: string
+): Promise<ExpressionRendered | null> {
   return new Promise((resolve, reject) => {
     apolloClient
       .query<{
-        expression: ad4m.Expression;
+        expression: ExpressionRendered;
       }>({
-        query: QUERY_EXPRESSION,
+        query: GET_EXPRESSION,
         variables: { url: url },
         fetchPolicy: "no-cache",
       })
@@ -38,7 +40,7 @@ export async function getExpressionAndRetry(
   url: string,
   retries: number,
   retryDelay: number
-): Promise<ad4m.Expression | null> {
+): Promise<ExpressionRendered | null> {
   let getExprRes = await getExpressionNoCache(url);
   if (getExprRes == null) {
     for (let i = 0; i < retries; i++) {

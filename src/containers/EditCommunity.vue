@@ -33,8 +33,9 @@
 </template>
 
 <script lang="ts">
-import { CommunityState } from "@/store";
+import { NeighbourhoodState } from "@/store/types";
 import { defineComponent } from "vue";
+import store from "@/store";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -56,16 +57,17 @@ export default defineComponent({
     },
   },
   computed: {
-    community(): CommunityState {
-      return this.$store.getters.getCommunity(this.$route.params.communityId);
+    community(): NeighbourhoodState {
+      const id = this.$route.params.communityId as string;
+      return store.getters.getNeighbourhood(id);
     },
   },
   methods: {
     async updateCommunity() {
-      const { communityId } = this.$route.params;
+      const communityId = this.$route.params.communityId as string;
       this.isUpdatingCommunity = true;
-      this.$store
-        .dispatch("updateCommunity", {
+      store.dispatch
+        .updateCommunity({
           communityId: communityId,
           name: this.communityName,
           description: this.communityDescription,

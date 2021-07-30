@@ -1,4 +1,4 @@
-import { ref, computed } from "vue";
+import { ref, computed, Ref, ComputedRef } from "vue";
 
 export interface ValidationRule {
   check: (val: string) => boolean;
@@ -33,10 +33,18 @@ interface ValidationProps {
   rules: ValidationRule[];
 }
 
+export interface ValidationReturnValue {
+  value: Ref<string>;
+  error: Ref<boolean>;
+  errorMessage: Ref<string>;
+  validate: () => void;
+  isValid: ComputedRef<boolean>;
+}
+
 export function useValidation({
   initialValue = "",
   rules = [],
-}: ValidationProps): any {
+}: ValidationProps): ValidationReturnValue {
   const value = ref(initialValue);
   const error = ref(false);
   const errorMessage = ref("");

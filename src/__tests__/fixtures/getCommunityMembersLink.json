@@ -1,0 +1,15 @@
+[
+  {
+    "author": {
+      "did": "did:key:zQ3shSbWAPWUNmG6jDpsgXyZ1KTWg4hNkV1pPWaqHpQ64qESh",
+      "__typename": "Agent"
+    },
+    "data": {
+      "predicate": "sioc://has_member",
+      "source": "QmRHawSS4H44VRK3VdEkwjYEfskmHiZNTLJE8VesQJJKjn://self",
+      "target": "QmU3KLU6z9ShSX25ornxgQkaiMtL9BoCaxiQwZrwVrbyGj://did:key:zQ3shSbWAPWUNmG6jDpsgXyZ1KTWg4hNkV1pPWaqHpQ64qESh"
+    },
+    "timestamp": "2021-07-09T13:03:05.615Z",
+    "__typename": "LinkExpression"
+  }
+]

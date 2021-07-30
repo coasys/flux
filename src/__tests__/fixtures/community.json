@@ -1,0 +1,74 @@
+{
+  "name": "test",
+  "description": "description",
+  "linkLanguageAddress": "QmUdJXaFhsqTv2XXm9no47qRbmCNqiZqbEqUprFdYqkjhg",
+  "channels": { 
+    "30e4a29e-1373-4c8a-a5af-a2353c919e7a": {
+      "createdAt": "2021-07-06T13:25:03.935Z",
+      "groupExpressionRef": "",
+      "hasNewMessages": false,
+      "linkLanguageAddress": "QmaRwVt2VpHRyGjdUwoKeLunabRFAofoHM2Cg4ZYUSe6Xv",
+      "membraneType": 0,
+      "name": "General",
+      "notifications": {"mute": false},
+      "perspective": "30e4a29e-1373-4c8a-a5af-a2353c919e7a",
+      "scrollTop": 0,
+      "sharedPerspectiveUrl": "perspective://QmPhrfGaQSBzDaQ5nzvoeG9PCkmDSCqUAKT9AGo7uEHaKQ",
+      "type": 0,
+      "typedExpressionLanguages": [{
+        "expressionType": 0,
+        "languageAddress": "QmWXrqpCo9id7KXBVYJjCFm5GucpAJ5tfkCqRaGqNtF4qA"
+      }, {
+        "expressionType": 1,
+        "languageAddress": "QmUMNHAW8w5M1A5UkBw12hjhupTTjzYG6iKt1N94wcoHHv"
+      }, {
+        "expressionType": 2,
+        "languageAddress": "QmfQnfMHheDDTQtqSXuRFzRUiBFjMTzCWQgK25RcgLKWps"
+      }],
+      "currentExpressionMessages": {},
+      "currentExpressionLinks": {
+        "0663ddf798220a905a7d0ad022d8c8be2a7317c1": {
+          "language": "QmaRwVt2VpHRyGjdUwoKeLunabRFAofoHM2Cg4ZYUSe6Xv",
+          "expression": {
+            "author": {
+              "did": "did:key:zQ3shnCoKuYhvzXkHykAqkgSbNS5ShxbS7yPuS564qhwW7qNw",
+              "email": null,
+              "name": null
+            },
+            "data": {
+              "predicate": "sioc://content_of",
+              "source": "sioc://chatchannel",
+              "target": "QmWXrqpCo9id7KXBVYJjCFm5GucpAJ5tfkCqRaGqNtF4qA://8429244c81974facaf714c73fdcff6a7c2b9121521b5158ace54b4bc729f3d7069ca5d03f689ce"
+            },
+            "proof": {
+              "key": "#zQ3shnCoKuYhvzXkHykAqkgSbNS5ShxbS7yPuS564qhwW7qNw",
+              "signature": "905d6cfd4b40677f2e2876b300910411e8c39ec5a8889b8abebb899461f3e83b3408a68ea04dba6b4a031e113ccb8b4af12beea875a7fd74db76b7df3c3c9b2b"
+            }
+          }
+        }
+      }
+  }},
+  "perspective": {
+    "uuid": "5a251e1b-5415-4886-911c-e2e829f71fec",
+    "name": "test perspective",
+    "sharedUrl": "neighbourhood://qmahash"
+  },
+  "expressionLanguages": [
+    "QmWXrqpCo9id7KXBVYJjCFm5GucpAJ5tfkCqRaGqNtF4qA",
+    "QmUMNHAW8w5M1A5UkBw12hjhupTTjzYG6iKt1N94wcoHHv",
+    "QmfQnfMHheDDTQtqSXuRFzRUiBFjMTzCWQgK25RcgLKWps"
+  ],
+  "typedExpressionLanguages": [{
+    "expressionType": 0,
+    "languageAddress": "QmWXrqpCo9id7KXBVYJjCFm5GucpAJ5tfkCqRaGqNtF4qA"
+  }, {
+    "expressionType": 1,
+    "languageAddress": "QmUMNHAW8w5M1A5UkBw12hjhupTTjzYG6iKt1N94wcoHHv"
+  }, {
+    "expressionType": 2,
+    "languageAddress": "QmfQnfMHheDDTQtqSXuRFzRUiBFjMTzCWQgK25RcgLKWps"
+  }],
+  "groupExpressionRef": "QmUMNHAW8w5M1A5UkBw12hjhupTTjzYG6iKt1N94wcoHHv://8429240ab3c113d933a889da1f8632ca2186b4831c7a1d8c25b97015c51864d5ac126e7bb656b3",
+  "sharedPerspectiveUrl": "perspective://QmbAvFpr7h3iBsf74q81gv6VPLjJT4NsSDcCq8qhs4enJ3",
+  "members": []
+}

@@ -54,7 +54,8 @@
 <script lang="ts">
 import { defineComponent, onBeforeMount } from "vue";
 import { mapMutations } from "vuex";
-import { Profile } from "@/store";
+import { Profile } from "@/store/types";
+import store from "@/store";
 
 export default defineComponent({
   setup() {
@@ -70,25 +71,25 @@ export default defineComponent({
     ...mapMutations(["setShowSettings", "setShowEditProfile"]),
     checkForUpdates() {
       window.api.send("check-update");
-      this.$store.commit("updateUpdateState", { updateState: "checking" });
+      store.commit.setUpdateState({ updateState: "checking" });
     },
     downloadUpdates() {
       window.api.send("download-update");
-      this.$store.commit("updateUpdateState", { updateState: "downloading" });
+      store.commit.setUpdateState({ updateState: "downloading" });
     },
     installNow() {
       window.api.send("quit-and-install");
     },
   },
   computed: {
-    userProfile(): Profile {
-      return this.$store.state.userProfile || {};
+    userProfile(): Profile | null {
+      return store.state.user.profile;
     },
     userDid(): string {
-      return this.$store.state.userDid;
+      return store.state.user.agent.did!;
     },
     updateApp(): { text: string; func?: () => void } {
-      const state = this.$store.state.updateState;
+      const state = store.state.app.updateState;
 
       let text = "Check for updates";
       let func: undefined | (() => void) = this.checkForUpdates;

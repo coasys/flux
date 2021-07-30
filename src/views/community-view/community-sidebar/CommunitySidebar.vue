@@ -13,7 +13,7 @@
           :src="require('@/assets/images/junto_app_icon.png')"
         />
         <div class="community-info">
-          {{ community.name }}
+          {{ community.neighbourhood.name }}
         </div>
         <j-icon size="xs" name="chevron-down"></j-icon>
       </button>
@@ -39,7 +39,10 @@
     </j-popover>
 
     <j-box pt="500">
-      <j-menu-group-item open :title="`Members (${community.members.length})`">
+      <j-menu-group-item
+        open
+        :title="`Members (${community.neighbourhood.members.length})`"
+      >
         <j-button
           @click.prevent="() => setShowInviteCode(true)"
           size="sm"
@@ -51,7 +54,7 @@
         <j-box px="500">
           <avatar-group
             @click="() => setShowCommunityMembers(true)"
-            :users="community.members"
+            :users="community.neighbourhood.members"
           />
         </j-box>
       </j-menu-group-item>
@@ -71,14 +74,14 @@
           :to="{
             name: 'channel',
             params: {
-              communityId: community.perspective,
-              channelId: channel.perspective,
+              communityId: community.neighbourhood.perspective.uuid,
+              channelId: channel.neighbourhood.perspective.uuid,
             },
           }"
           custom
           v-slot="{ navigate, isExactActive }"
-          v-for="channel in community.channels"
-          :key="channel.perspective"
+          v-for="channel in channels"
+          :key="channel.neighbourhood.perspective.uuid"
         >
           <j-popover
             class="community-sidebar__header-menu"
@@ -87,24 +90,24 @@
           >
             <j-menu-item
               slot="trigger"
-              :id="getValidId(channel.perspective)"
+              :id="getValidId(channel.neighbourhood.perspective.uuid)"
               class="channel"
-              :class="{ 'channel--mute': channel?.notifications?.mute }"
+              :class="{ 'channel--mute': channel?.state.notifications?.mute }"
               :selected="isExactActive"
               @click="navigate"
             >
               <j-icon slot="start" size="sm" name="hash"></j-icon>
-              {{ channel.name }}
+              {{ channel.neighbourhood.name }}
               <j-icon
                 size="xs"
                 slot="end"
-                v-if="channel?.notifications?.mute"
+                v-if="channel?.state.notifications?.mute"
                 name="volume-mute"
               />
               <div
                 slot="end"
                 class="channel__notification"
-                v-if="channel.hasNewMessages"
+                v-if="channel.state.hasNewMessages"
               ></div>
             </j-menu-item>
             <j-menu slot="content">
@@ -112,8 +115,8 @@
                 @click="
                   () =>
                     setChannelNotificationState({
-                      communityId: community.perspective,
-                      channelId: channel.perspective,
+                      communityId: community.neighbourhood.perspective.uuid,
+                      channelId: channel.neighbourhood.perspective.uuid,
                     })
                 "
               >
@@ -121,11 +124,15 @@
                   size="xs"
                   slot="start"
                   :name="
-                    channel?.notifications?.mute ? 'volume-mute' : 'volume-up'
+                    channel?.state.notifications?.mute
+                      ? 'volume-mute'
+                      : 'volume-up'
                   "
                 />
                 {{
-                  `${channel?.notifications?.mute ? "Unmute" : "Mute"} Channel`
+                  `${
+                    channel?.state.notifications?.mute ? "Unmute" : "Mute"
+                  } Channel`
                 }}
               </j-menu-item>
             </j-menu>
@@ -144,6 +151,8 @@
 import { defineComponent } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { mapMutations } from "vuex";
+import store from "@/store";
+import { ChannelState } from "@/store/types";
 
 export default defineComponent({
   components: { AvatarGroup },
@@ -152,6 +161,12 @@ export default defineComponent({
     return {
       showCommunityMenu: false,
     };
+  },
+  computed: {
+    channels(): ChannelState[] {
+      const communityId = this.$route.params.communityId as string;
+      return store.getters.getChannelStates(communityId);
+    },
   },
   methods: {
     ...mapMutations([

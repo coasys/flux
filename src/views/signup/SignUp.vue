@@ -116,7 +116,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, onUnmounted } from "vue";
+import { defineComponent, ref } from "vue";
 import Carousel from "./SignUpCarousel.vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import {
@@ -126,6 +126,7 @@ import {
 } from "@/core/methods/createProfile";
 import { useStore } from "vuex";
 import { useValidation } from "@/utils/validation";
+import store from "@/store";
 
 export default defineComponent({
   name: "Welcome",
@@ -234,15 +235,15 @@ export default defineComponent({
 
       this.isCreatingUser = true;
 
-      this.$store
-        .dispatch("createUser", {
+      store.dispatch
+        .createUser({
           givenName: this.name,
           familyName: this.familyName,
           email: this.email,
           username: this.username,
           password: this.password,
           profilePicture: this.profilePicture,
-          thumbnailPicture: thumbnail,
+          thumbnailPicture: this.profilePicture,
         })
         .then(() => this.$router.push("/"))
         .finally(() => {

@@ -11,6 +11,7 @@
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "strictPropertyInitialization": false,
+    "resolveJsonModule": true,
     "baseUrl": ".",
     "types": [
       "webpack-env", "jest", "mocha"
@@ -25,14 +26,13 @@
       "dom",
       "dom.iterable",
       "scripthost"
-    ],
+    ]
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "src/__tests__/**/*.ts"
   ],
   "exclude": [
     "node_modules", "__sapper__/*", "public/*", "ad4m/languages"

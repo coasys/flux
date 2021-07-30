@@ -22,6 +22,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import store from "@/store";
 
 export default defineComponent({
   data() {
@@ -33,7 +34,7 @@ export default defineComponent({
   },
   computed: {
     open() {
-      return this.$store.state.ui.showSidebar;
+      return store.state.app.showSidebar;
     },
   },
   methods: {

@@ -66,15 +66,15 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
           resourcePath: mainThreadState.binaryExecPath,
           appDefaultLangPath: mainThreadState.builtInLangPath,
           ad4mBootstrapLanguages: {
-            agents: "profiles",
+            agents: "agent-expression-store",
             languages: "languages",
-            perspectives: "shared-perspectives",
+            neighbourhoods: "neighbourhood-store",
           },
           ad4mBootstrapFixtures: {
             languages: [],
-            perspectives: [],
+            neighbourhoods: [],
           },
-          appBuiltInLangs: ["social-context"],
+          appBuiltInLangs: [],
           appLangAliases: null,
           mocks: false,
         })

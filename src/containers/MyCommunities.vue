@@ -2,12 +2,9 @@
   <j-box px="800" pt="800" pb="1000">
     <j-flex wrap gap="500" a="center" j="between">
       <j-text nomargin variant="heading">
-        My communities ({{ Object.keys(communities).length }})
+        My communities ({{ communities.length }})
       </j-text>
-      <j-button
-        size="lg"
-        variant="primary"
-        @click="() => $store.commit('setShowCreateCommunity', true)"
+      <j-button size="lg" variant="primary" @click="createCommunityClick"
         >Create a community</j-button
       >
     </j-flex>
@@ -16,11 +13,11 @@
     <router-link
       :to="{
         name: 'community',
-        params: { communityId: community.perspective },
+        params: { communityId: community.perspective.uuid },
       }"
       class="community-item"
       v-for="community in communities"
-      :key="community.perspective"
+      :key="community.perspective.uuid"
     >
       <j-avatar
         :src="require('@/assets/images/junto_web_rainbow.png')"
@@ -61,28 +58,32 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import { CommunityState } from "@/store";
+import { NeighbourhoodState } from "@/store/types";
+import store from "@/store";
 
 export default defineComponent({
   components: { AvatarGroup },
   computed: {
     communities() {
-      return this.$store.state.communities;
+      return store.getters.getCommunityNeighbourhoods;
     },
   },
   methods: {
-    handleMembersClick(community: CommunityState) {
-      this.$store.commit("setShowCommunityMembers", true);
+    createCommunityClick() {
+      store.commit.setShowCreateCommunity(true);
+    },
+    handleMembersClick(community: NeighbourhoodState) {
+      store.commit.setShowCommunityMembers(true);
       this.$router.push({
         name: "community",
-        params: { communityId: community.perspective },
+        params: { communityId: community.perspective.uuid },
       });
     },
-    handleEditClick(community: CommunityState) {
-      this.$store.commit("setShowEditCommunity", true);
+    handleEditClick(community: NeighbourhoodState) {
+      store.commit.setShowEditCommunity(true);
       this.$router.push({
         name: "community",
-        params: { communityId: community.perspective },
+        params: { communityId: community.perspective.uuid },
       });
     },
   },

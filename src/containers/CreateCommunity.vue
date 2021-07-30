@@ -74,8 +74,8 @@
 <script lang="ts">
 import { isValid } from "@/utils/validation";
 import { defineComponent } from "vue";
-import { ChannelState, CommunityState } from "@/store";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
+import store from "@/store";
 
 export default defineComponent({
   components: { AvatarUpload },
@@ -106,8 +106,8 @@ export default defineComponent({
   methods: {
     joinCommunity() {
       this.isJoiningCommunity = true;
-      this.$store
-        .dispatch("joinCommunity", { joiningLink: this.joiningLink })
+      store.dispatch
+        .joinCommunity({ joiningLink: this.joiningLink })
         .then(() => {
           this.$emit("submit");
         })
@@ -117,25 +117,25 @@ export default defineComponent({
     },
     createCommunity() {
       this.isCreatingCommunity = true;
-      this.$store
-        .dispatch("createCommunity", {
+      store.dispatch
+        .createCommunity({
           perspectiveName: this.newCommunityName,
           description: this.newCommunityDesc,
         })
-        .then((community: CommunityState) => {
+        .then((community) => {
           this.$emit("submit");
           this.newCommunityName = "";
           this.newCommunityDesc = "";
 
-          const firstChannel = Object.values(
-            community.channels
-          )[0] as ChannelState;
+          const channels = store.getters.getChannelNeighbourhoods(
+            community.neighbourhood.perspective.uuid
+          );
 
           this.$router.push({
             name: "channel",
             params: {
-              communityId: community.perspective,
-              channelId: firstChannel.perspective,
+              communityId: community.neighbourhood.perspective.uuid,
+              channelId: channels[0].perspective.uuid,
             },
           });
         })

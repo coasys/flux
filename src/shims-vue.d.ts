@@ -1,4 +1,5 @@
 /* eslint-disable */
+
 declare module "*.vue" {
   import type { DefineComponent } from "vue";
   const component: DefineComponent<{}, {}, any>;
@@ -10,3 +11,5 @@ declare module "vue3-virtual-scroller";
 declare module "vue-advanced-cropper";
 
 declare module "object-hash";
+
+declare module "easygraphql-tester";

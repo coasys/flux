@@ -76,12 +76,12 @@ export default defineComponent({
 
     for (const ele of emojiElements) {
       const emoji = ele as HTMLElement;
-      
-      if (emoji.parentNode?.nodeName !== 'J-TOOLTIP') {
-        var wrapper = document.createElement('j-tooltip');
+
+      if (emoji.parentNode?.nodeName !== "J-TOOLTIP") {
+        var wrapper = document.createElement("j-tooltip");
         wrapper.title = `:${emoji.dataset.id}:`;
-        wrapper.classList.add('emojitoolip');
-        (wrapper as any).placement = 'top';
+        wrapper.classList.add("emojitoolip");
+        (wrapper as any).placement = "top";
         emoji.parentNode?.insertBefore(wrapper, emoji);
         wrapper.appendChild(emoji);
 

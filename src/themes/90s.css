@@ -4,6 +4,8 @@
   --app-main-content-bg-color: white;
   --app-channel-bg-color: white;
 
+  --j-color-primary-hue: 230 !important;
+
   --j-font-family: System, monospace;
 
   --j-border-radius: 0px;
@@ -48,6 +50,18 @@
   position: relative;
 }
 
+[theme="90s"] j-toggle::part(indicator) {
+  border-radius: 0;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+}
+
+[theme="90s"] j-toggle::part(toggle) {
+  border-radius: 0;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+}
+
 [theme="90s"] j-modal::part(modal):before {
   position: absolute;
   content: "";
@@ -86,7 +100,6 @@
 }
 
 [theme="90s"] j-button[variant="primary"]::part(base) {
-  background: blue;
   border: 0;
   box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
     inset 2px 2px #dfdfdf;
@@ -105,26 +118,28 @@
   content: none;
 }
 
-[theme="90s"] j-tab-item::part(base):hover {
-  background: slategray;
+[theme="90s"] j-menu::part(base) {
+  background: var(--j-color-ui-100);
 }
 
-[theme="90s"] j-tab-item[checked]::part(base) {
-  color: white;
-  background: blue;
-}
-
-[theme="90s"] j-tab-item::part(base) {
-  color: black;
+[theme="90s"] j-menu-item::part(base) {
+  background: var(--j-color-ui-100);
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
 }
 
 [theme="90s"] j-menu-item[selected]::part(base) {
   color: white;
-  background: blue;
+  background: var(--j-color-primary-500);
 }
 
 [theme="90s"] j-menu-item:hover:not([selected])::part(base) {
   background: silver;
+}
+
+[theme="90s"] j-tab-item::part(base) {
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
 }
 
 [theme="90s"] j-input::part(input-wrapper) {

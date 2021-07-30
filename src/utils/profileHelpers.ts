@@ -1,32 +1,12 @@
 import { getExpressionNoCache } from "@/core/queries/getExpression";
-import { Profile } from "@/store";
-import type Expression from "@perspect3vism/ad4m/Expression";
+import { ProfileExpression } from "@/store/types";
 import { TimeoutCache } from "./timeoutCache";
-
-export function toProfile(obj: { [x: string]: any }): Profile {
-  const profile: Profile = {
-    username: obj["foaf:AccountName"],
-    email: obj["schema:email"],
-    familyName: obj["schema:familyName"],
-    givenName: obj["schema:givenName"],
-    thumbnailPicture: undefined,
-    profilePicture: undefined,
-  };
-
-  if (obj["schema:image"]) {
-    profile.profilePicture = obj["schema:image"]["schema:contentUrl"];
-    profile.thumbnailPicture =
-      obj["schema:image"]["schema:thumbnail"]["schema:contentUrl"];
-  }
-
-  return profile;
-}
 
 export async function getProfile(
   profileLangAddress: string,
   did: string
-): Promise<Expression | null> {
-  const cache = new TimeoutCache<Expression>(1000 * 60 * 5);
+): Promise<ProfileExpression | null> {
+  const cache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
 
   const profileLink = `${profileLangAddress}://${did}`;
 
@@ -40,7 +20,7 @@ export async function getProfile(
         data: JSON.parse(profileGqlExp.data!),
         timestamp: profileGqlExp.timestamp!,
         proof: profileGqlExp.proof!,
-      } as Expression;
+      } as ProfileExpression;
 
       cache.set(profileLink, profileExp);
 

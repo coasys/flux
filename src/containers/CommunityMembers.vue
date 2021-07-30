@@ -17,14 +17,14 @@
         <j-flex
           gap="300"
           v-for="communityMember in filteredCommunityMemberList"
-          :key="communityMember.author.did"
+          :key="communityMember.author"
           inline
           direction="column"
           a="center"
         >
           <j-avatar
             size="lg"
-            :hash="communityMember.author.did"
+            :hash="communityMember.author"
             :src="
               communityMember.data.profile['schema:image']
                 ? JSON.parse(communityMember.data.profile['schema:image'])[
@@ -44,15 +44,14 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import Expression from "@perspect3vism/ad4m/Expression";
-import { CommunityState } from "@/store";
+import type { Expression } from "@perspect3vism/ad4m";
+import { NeighbourhoodState } from "@/store/types";
+import store from "@/store";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
   mounted() {
-    this.$store.dispatch("getCommunityMembers", {
-      communityId: this.community.perspective,
-    });
+    store.dispatch.getNeighbourhoodMembers(this.community.perspective.uuid);
   },
   data() {
     return {
@@ -60,8 +59,9 @@ export default defineComponent({
     };
   },
   computed: {
-    community(): CommunityState {
-      return this.$store.getters.getCommunity(this.$route.params.communityId);
+    community(): NeighbourhoodState {
+      const id = this.$route.params.communityId as string;
+      return store.getters.getNeighbourhood(id);
     },
     filteredCommunityMemberList(): Expression[] {
       const members: Expression[] = this.community.members;

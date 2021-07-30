@@ -1,18 +1,14 @@
 import { apolloClient } from "@/app";
+import unwrapApolloResult from "@/utils/unwrapApolloResult";
+import { LanguageHandle } from "@perspect3vism/ad4m";
 import { LANGUAGES } from "../graphql_queries";
-import ad4m from "@perspect3vism/ad4m-executor";
 
-export async function getLanguages(): Promise<ad4m.Language[]> {
-  return new Promise((resolve, reject) => {
-    apolloClient
-      .query<{ languages: ad4m.Language[] }>({
-        query: LANGUAGES,
-      })
-      .then((result) => {
-        resolve(result.data!.languages);
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
+export async function getLanguages(): Promise<LanguageHandle[]> {
+  const { languages } = unwrapApolloResult(
+    await apolloClient.query({
+      query: LANGUAGES,
+      variables: { filter: "" },
+    })
+  );
+  return languages;
 }

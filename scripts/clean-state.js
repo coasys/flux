@@ -30,17 +30,16 @@ async function main() {
         process.env.HOME,
         "Library",
         "Application Support",
-        "junto",
-        "dev"
+        "junto"
       );
       break;
     }
     case "win32": {
-      configPath = path.join(process.env.APPDATA, "junto", "dev");
+      configPath = path.join(process.env.APPDATA, "junto");
       break;
     }
     case "linux": {
-      configPath = path.join(process.env.HOME, ".config", "junto", "dev");
+      configPath = path.join(process.env.HOME, ".config", "junto");
       break;
     }
   }

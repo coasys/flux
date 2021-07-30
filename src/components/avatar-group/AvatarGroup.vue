@@ -5,8 +5,9 @@
         <j-avatar
           class="avatar-group__avatar"
           v-for="(user, index) in firstUsers"
+          :data-testid="`avatar-group__avatar__${user.author.did}`"
           :key="index"
-          :hash="user.author.did"
+          :hash="user.author"
           :size="size"
           :src="
             user.data.profile['schema:image']

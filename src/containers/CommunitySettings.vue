@@ -22,16 +22,17 @@
         </j-tabs>
       </aside>
       <div class="settings__content">
+        <j-box pb="500">
+          <j-toggle
+            :checked="community.useGlobalTheme"
+            @change="(e) => setUseGlobalTheme(e.target.checked)"
+            >Use global theme</j-toggle
+          >
+        </j-box>
         <theme-editor
-          v-if="currentView === 'theme-editor' && theme"
-          @update="
-            (theme) =>
-              updateCommunityTheme({
-                communityId: $route.params.communityId,
-                theme: { ...theme },
-              })
-          "
-          :theme="theme"
+          v-if="showEditor"
+          @update="updateCommunityTheme"
+          :theme="community.theme"
         />
       </div>
     </div>
@@ -39,10 +40,10 @@
 </template>
 
 <script lang="ts">
-import { ThemeState } from "@/store";
+import { ThemeState } from "@/store/types";
 import { defineComponent } from "vue";
-import { mapActions } from "vuex";
 import ThemeEditor from "./ThemeEditor.vue";
+import store from "@/store";
 
 export default defineComponent({
   components: { ThemeEditor },
@@ -52,12 +53,31 @@ export default defineComponent({
     };
   },
   methods: {
-    ...mapActions(["updateCommunityTheme"]),
+    setUseGlobalTheme(val: boolean) {
+      const id = this.$route.params.communityId as string;
+      store.commit.setUseGlobalTheme({ communityId: id, value: val });
+      store.dispatch.changeCurrentTheme(val ? "global" : id);
+    },
+    updateCommunityTheme(val: ThemeState) {
+      const id = this.$route.params.communityId as string;
+      store.dispatch.updateCommunityTheme({
+        communityId: id,
+        theme: { ...val },
+      });
+    },
   },
   computed: {
-    theme(): ThemeState {
-      const communityId: any = this.$route.params.communityId;
-      return this.$store.state.communities[communityId].theme;
+    showEditor(): boolean {
+      return (
+        this.currentView === "theme-editor" &&
+        this.community.theme &&
+        !this.community.useGlobalTheme
+      );
+    },
+    community() {
+      const id = this.$route.params.communityId as string;
+      console.log("community-changed", store.getters.getCommunityState(id));
+      return store.getters.getCommunityState(id);
     },
   },
 });

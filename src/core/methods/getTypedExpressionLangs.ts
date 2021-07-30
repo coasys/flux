@@ -1,35 +1,37 @@
 import { getLanguage } from "@/core/queries/getLanguage";
-import { SharedPerspective } from "@perspect3vism/ad4m-executor";
 import {
   JuntoExpressionReference,
   ExpressionTypes,
   ExpressionUIIcons,
-} from "@/store";
-import { Store } from "vuex";
+} from "@/store/types";
+import { LinkExpression } from "@perspect3vism/ad4m";
 
-export async function getTypedExpressionLanguages<S>(
-  installedPerspective: SharedPerspective,
-  storeLanguageUI: boolean,
-  store?: Store<S>
-): Promise<JuntoExpressionReference[]> {
-  try {
-    const typedExpressionLanguages = [];
-    //Get and cache the expression UI for each expression language
-    //And used returned expression language names to populate typedExpressionLanguages field
-    for (const lang of installedPerspective.requiredExpressionLanguages!) {
-      console.log("JoinCommunity.vue: Fetching UI lang:", lang);
-      const languageRes = await getLanguage(lang!);
-      if (storeLanguageUI && store) {
+///NOTE: this function wont work in current setup and its still undecided if we want expression language hints on the perspective meta
+///This behaviour should likely be deleted and achieved some other way
+export async function getTypedExpressionLanguages(
+  links: LinkExpression[],
+  storeLanguageUI: boolean
+): Promise<[JuntoExpressionReference[], ExpressionUIIcons[]]> {
+  const typedExpressionLanguages = [];
+  const uiIcons = [];
+  //Get and cache the expression UI for each expression language
+  //And used returned expression language names to populate typedExpressionLanguages field
+  for (const link of links) {
+    if (link.data.predicate == "language") {
+      const languageRes = await getLanguage(link.data.target!);
+      if (!languageRes) {
+        throw Error(
+          `Could not find language with address: ${link.data.target}`
+        );
+      }
+      if (storeLanguageUI) {
         const uiData: ExpressionUIIcons = {
-          languageAddress: lang!,
-          createIcon: languageRes.constructorIcon!.code!,
-          viewIcon: languageRes.iconFor!.code!,
+          languageAddress: link.data.target!,
+          createIcon: languageRes.constructorIcon?.code || "",
+          viewIcon: languageRes.icon?.code || "",
           name: languageRes.name!,
         };
-        store!.commit({
-          type: "addExpressionUI",
-          value: uiData,
-        });
+        uiIcons.push(uiData);
       }
       let expressionType;
       switch (languageRes.name!) {
@@ -49,13 +51,10 @@ export async function getTypedExpressionLanguages<S>(
           expressionType = ExpressionTypes.Other;
       }
       typedExpressionLanguages.push({
-        languageAddress: lang!,
+        languageAddress: link.data.target!,
         expressionType: expressionType,
       } as JuntoExpressionReference);
-      //await this.sleep(40);
     }
-    return typedExpressionLanguages;
-  } catch (error) {
-    throw new Error(error);
   }
+  return [typedExpressionLanguages, uiIcons];
 }

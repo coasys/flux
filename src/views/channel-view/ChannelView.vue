@@ -2,7 +2,9 @@
   <div class="channel-view" @scroll="handleScroll" ref="scrollContainer">
     <header class="channel-view__header">
       <j-icon size="sm" name="hash" />
-      <j-text nomargin weight="500" size="500">{{ channel.name }}</j-text>
+      <j-text nomargin weight="500" size="500">{{
+        channel.neighbourhood.name
+      }}</j-text>
     </header>
 
     <div class="channel-view__main">
@@ -55,7 +57,7 @@
       <j-editor
         @send="(e) => createDirectMessage(e.target.value)"
         autofocus
-        :placeholder="`Write to #${channel.name}`"
+        :placeholder="`Write to #${channel.neighbourhood.name}`"
         :value="currentExpressionPost"
         @change="handleEditorChange"
         @onsuggestionlist="changeShowList"
@@ -68,42 +70,45 @@
       :open="showProfile"
       @toggle="(e) => (showProfile = e.target.open)"
     >
-      <j-flex a="center" direction="column" gap="500">
-        <j-avatar
-          style="--j-avatar-size: 100px"
-          :hash="activeProfile?.author?.did"
-          :src="
-            activeProfile?.data?.profile['schema:image']
-              ? JSON.parse(activeProfile?.data?.profile['schema:image'])[
-                  'schema:contentUrl'
-                ]
-              : null
-          "
-        />
-        <j-text variant="heading-sm">{{
-          activeProfile?.data?.profile["foaf:AccountName"]
-        }}</j-text>
-      </j-flex>
+      <j-box p="800">
+        <j-flex a="center" direction="column" gap="500">
+          <j-avatar
+            style="--j-avatar-size: 100px"
+            :hash="activeProfile?.author"
+            :src="
+              activeProfile?.data?.profile['schema:image']
+                ? JSON.parse(activeProfile?.data?.profile['schema:image'])[
+                    'schema:contentUrl'
+                  ]
+                : null
+            "
+          />
+          <j-text variant="heading-sm">{{
+            activeProfile?.data?.profile["foaf:AccountName"]
+          }}</j-text>
+        </j-flex>
+      </j-box>
     </j-modal>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { JuntoShortForm } from "@/core/juntoTypes";
-import Expression from "@perspect3vism/ad4m/Expression";
+import store from "@/store";
+import { Expression } from "@perspect3vism/ad4m";
 import {
   ChannelState,
   CommunityState,
   ExpressionAndRef,
   ExpressionTypes,
-} from "@/store";
+} from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
 import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
 import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css";
 import { differenceInMinutes, parseISO } from "date-fns";
 import MessageItem from "@/components/message-item/MessageItem.vue";
 import { Editor } from "@tiptap/vue-3";
+import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
 
 interface Message {
   id: string;
@@ -116,6 +121,12 @@ interface Message {
 
 interface UserMap {
   [key: string]: any;
+}
+
+interface MentionTrigger {
+  name: string;
+  id: string;
+  trigger: string;
 }
 
 export default defineComponent({
@@ -137,10 +148,9 @@ export default defineComponent({
   },
   async beforeRouteUpdate(to, from, next) {
     const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-    this.$store.commit("setChannelScrollTop", {
-      communityId: from.params.communityId,
-      channelId: from.params.channelId,
-      value: scrollContainer.scrollTop as any,
+    store.commit.setChannelScrollTop({
+      channelId: from.params.channelId as string,
+      value: scrollContainer.scrollTop,
     });
 
     if (this.linksWorker) {
@@ -154,14 +164,13 @@ export default defineComponent({
       handler: async function (to) {
         if (!to.params.channelId) return;
 
-        const { linksWorker } = await this.$store.dispatch("loadExpressions", {
-          communityId: to.params.communityId,
+        const { linksWorker } = await store.dispatch.loadExpressions({
           channelId: to.params.channelId,
         });
 
         this.linksWorker = linksWorker;
 
-        this.$store.commit("setCurrentChannelId", {
+        store.commit.setCurrentChannelId({
           communityId: to.params.communityId,
           channelId: to.params.channelId,
         });
@@ -172,63 +181,58 @@ export default defineComponent({
       },
       immediate: true,
     },
-    "channel.hasNewMessages": function (hasMessages) {
+    "channel.state.hasNewMessages": function (hasMessages) {
       if (hasMessages) {
-        // If this channel is not in view, and only kept alive
-        // show new messages button, so when you open the channel
-        // again the button will be there
-        if (this.$route.params.channelId !== this.channel.perspective) {
-          this.showNewMessagesButton = true;
-          return;
-        }
-
         const container = this.$refs.scrollContainer as HTMLDivElement;
-        if (!container) return;
+        if (container) {
+          const isAtBottom =
+            container.scrollHeight - window.innerHeight === container.scrollTop;
 
-        const isAtBottom =
-          container.scrollHeight - window.innerHeight === container.scrollTop;
-
-        if (isAtBottom) {
-          this.scrollToBottom("smooth");
-        } else {
-          this.showNewMessagesButton = true;
+          if (isAtBottom) {
+            this.scrollToBottom("smooth");
+          } else {
+            this.showNewMessagesButton = true;
+          }
         }
       }
     },
   },
   computed: {
-    memberMentions(): any[] {
-      return this.community.members.map((m) => ({
-        name: (m.data as any).profile["foaf:AccountName"],
-        id: m.author.did.replace("did:key:", ""),
-        trigger: "@",
-      }));
+    memberMentions(): MentionTrigger[] {
+      return this.community.neighbourhood.members.map(
+        (m) =>
+          ({
+            name: m.data.profile["foaf:AccountName"],
+            id: m.author.replace("did:key:", ""),
+            trigger: "@",
+          } as MentionTrigger)
+      );
     },
-    channelMentions(): any[] {
-      return Object.values(this.community.channels).map((c) => ({
-        name: c.name,
-        id: c.perspective,
-        trigger: "#",
-      }));
+    channelMentions(): MentionTrigger[] {
+      return store.getters
+        .getChannelNeighbourhoods(this.community.neighbourhood.perspective.uuid)
+        .map((channel) => {
+          return {
+            name: channel.name,
+            id: channel.perspective.uuid,
+            trigger: "#",
+          } as MentionTrigger;
+        });
     },
     messages(): any[] {
-      const sortedMessages = Object.values(
-        this.channel.currentExpressionMessages
-      ).sort((a: ExpressionAndRef, b: ExpressionAndRef) => {
-        return (
-          new Date(a.expression.timestamp).getTime() -
-          new Date(b.expression.timestamp).getTime()
-        );
-      });
+      const ascMessages = sortExpressionsByTimestamp(
+        this.channel.neighbourhood.currentExpressionMessages,
+        "asc"
+      );
 
       //Note; code below will break once we add other expression types since we try to extract body from exp data
-      return sortedMessages.reduce((acc: Message[], item: ExpressionAndRef) => {
-        this.loadUser(item.expression.author.did);
+      return ascMessages.reduce((acc: Message[], item: ExpressionAndRef) => {
+        this.loadUser(item.expression.author);
         return [
           ...acc,
           {
             id: item.expression.proof.signature,
-            did: item.expression.author.did,
+            did: item.expression.author,
             timestamp: item.expression.timestamp,
             //@ts-ignore
             message: item.expression.data.body,
@@ -238,20 +242,17 @@ export default defineComponent({
     },
     community(): CommunityState {
       const { communityId } = this.$route.params;
-
-      return this.$store.getters.getCommunity(communityId);
+      return store.getters.getCommunity(communityId as string);
     },
     channel(): ChannelState {
-      const { communityId, channelId } = this.$route.params;
-      return this.$store.getters.getChannel({
-        channelId: channelId,
-        communityId: communityId,
-      });
+      const { channelId } = this.$route.params;
+      return store.getters.getChannel(channelId as string);
     },
     profileLanguage(): string {
-      const profileLang = this.community?.typedExpressionLanguages.find(
-        (t) => t.expressionType === ExpressionTypes.ProfileExpression
-      );
+      const profileLang =
+        this.community.neighbourhood.typedExpressionLanguages.find(
+          (t) => t.expressionType === ExpressionTypes.ProfileExpression
+        );
       return profileLang!.languageAddress;
     },
   },
@@ -261,20 +262,20 @@ export default defineComponent({
       this.$nextTick(() => {
         const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
         if (!scrollContainer) return;
-        if (this.channel.scrollTop === undefined) {
+        if (this.channel.state.scrollTop === undefined) {
           this.scrollToBottom("auto");
         } else {
-          scrollContainer.scrollTop = this.channel.scrollTop as number;
+          scrollContainer.scrollTop = this.channel.state.scrollTop as number;
         }
 
         const isAtBottom =
           scrollContainer.scrollHeight - window.innerHeight ===
           scrollContainer.scrollTop;
 
-        if (isAtBottom && this.channel.hasNewMessages) {
+        if (isAtBottom && this.channel.state.hasNewMessages) {
           this.markAsRead();
         }
-        if (!isAtBottom && this.channel.hasNewMessages) {
+        if (!isAtBottom && this.channel.state.hasNewMessages) {
           this.showNewMessagesButton = true;
         }
       });
@@ -285,8 +286,8 @@ export default defineComponent({
     },
     handleProfileClick(did: string) {
       this.showProfile = true;
-      this.activeProfile = this.community.members.find(
-        (m) => m.author.did === did
+      this.activeProfile = this.community.neighbourhood.members.find(
+        (m) => m.author === did
       );
     },
     handleMentionClick(dataset: { label: string; id: string }) {
@@ -296,14 +297,14 @@ export default defineComponent({
           name: "channel",
           params: {
             channelId: id,
-            communityId: this.community.perspective,
+            communityId: this.community.neighbourhood.perspective.uuid,
           },
         });
       }
       if (label?.startsWith("@")) {
         this.showProfile = true;
-        this.activeProfile = this.community.members.find(
-          (m) => m.author.did === `did:key:${id}`
+        this.activeProfile = this.community.neighbourhood.members.find(
+          (m) => m.author === `did:key:${id}`
         );
       }
     },
@@ -315,8 +316,8 @@ export default defineComponent({
       this.showList = e.detail.showSuggestions;
     },
     markAsRead() {
-      this.$store.commit("setHasNewMessages", {
-        channelId: this.channel.perspective,
+      store.commit.setHasNewMessages({
+        channelId: this.channel.neighbourhood.perspective.uuid,
         value: false,
       });
       this.showNewMessagesButton = false;
@@ -378,11 +379,22 @@ export default defineComponent({
       }
     },
     loadMessages(from?: string, to?: string): void {
-      this.$store.dispatch("loadExpressions", {
-        from,
-        to,
-        communityId: this.community.perspective,
-        channelId: this.channel.perspective,
+      let fromDate;
+      if (from) {
+        fromDate = new Date(from);
+      } else {
+        fromDate = undefined;
+      }
+      let toDate;
+      if (to) {
+        toDate = new Date(to);
+      } else {
+        toDate = undefined;
+      }
+      store.dispatch.loadExpressions({
+        from: fromDate,
+        to: toDate,
+        channelId: this.channel.neighbourhood.perspective.uuid,
       });
     },
     async createDirectMessage(message: string) {
@@ -391,10 +403,13 @@ export default defineComponent({
       this.currentExpressionPost = "";
 
       if (escapedMessage) {
-        this.$store.dispatch("createExpression", {
-          languageAddress: this.community.expressionLanguages[0]!,
+        store.dispatch.createExpression({
+          languageAddress:
+            this.channel.neighbourhood.typedExpressionLanguages.find(
+              (t) => t.expressionType === ExpressionTypes.ShortForm
+            )!.languageAddress,
           content: { body: message, background: [""] },
-          perspective: this.channel.perspective.toString(),
+          perspective: this.channel.neighbourhood.perspective.uuid as string,
         });
       }
     },

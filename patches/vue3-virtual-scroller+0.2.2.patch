@@ -1,0 +1,24 @@
+diff --git a/node_modules/vue3-virtual-scroller/dist/vue3-virtual-scroller.esm.js b/node_modules/vue3-virtual-scroller/dist/vue3-virtual-scroller.esm.js
+index 6792231..2345041 100644
+--- a/node_modules/vue3-virtual-scroller/dist/vue3-virtual-scroller.esm.js
++++ b/node_modules/vue3-virtual-scroller/dist/vue3-virtual-scroller.esm.js
+@@ -1,5 +1,5 @@
+ import { ResizeObserver as ResizeObserver$1 } from 'vue3-resize';
+-import { ObserveVisibility } from '../../../../Users/cssr/project_ex/vue-observe-visibility/dist/vue3-observe-visibility2.esm.js';
++import { ObserveVisibility } from 'vue3-observe-visibility2/dist/vue3-observe-visibility2.esm.js';
+ import { defineComponent, resolveComponent, resolveDirective, withDirectives, openBlock, createBlock, renderSlot, createCommentVNode, createVNode, Fragment, renderList, mergeProps, toHandlers, withCtx, nextTick } from 'vue';
+ 
+ var config = {
+diff --git a/node_modules/vue3-virtual-scroller/dist/vue3-virtual-scroller.umd.js b/node_modules/vue3-virtual-scroller/dist/vue3-virtual-scroller.umd.js
+index a616a79..aebdae3 100644
+--- a/node_modules/vue3-virtual-scroller/dist/vue3-virtual-scroller.umd.js
++++ b/node_modules/vue3-virtual-scroller/dist/vue3-virtual-scroller.umd.js
+@@ -1,6 +1,6 @@
+ (function (global, factory) {
+-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('vue'), require('../../../../Users/cssr/project_ex/vue-observe-visibility/dist/vue3-observe-visibility2.esm.js')) :
+-  typeof define === 'function' && define.amd ? define(['exports', 'vue', '../../../../Users/cssr/project_ex/vue-observe-visibility/dist/vue3-observe-visibility2.esm.js'], factory) :
++  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('vue'), require('vue3-observe-visibility2/dist/vue3-observe-visibility2.esm.js')) :
++  typeof define === 'function' && define.amd ? define(['exports', 'vue', 'vue3-observe-visibility2/dist/vue3-observe-visibility2.esm.js'], factory) :
+   (global = global || self, factory(global['vue3-virtual-scroller'] = {}, global.vue, global.vue3ObserveVisibility2_esm_js));
+ }(this, (function (exports, vue, vue3ObserveVisibility2_esm_js) { 'use strict';
+ 

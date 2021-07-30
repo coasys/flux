@@ -50,7 +50,7 @@
         @click="(e) => e.target.select()"
         size="lg"
         readonly
-        :value="currentCommunity.sharedPerspectiveUrl"
+        :value="currentCommunity.neighbourhood.neighbourhoodUrl"
       >
         <j-button @click="getInviteCode" variant="subtle" slot="end"
           ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
@@ -72,14 +72,15 @@ import { defineComponent, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
-import { useStore, mapMutations } from "vuex";
+import { mapMutations } from "vuex";
+import store from "@/store";
 
 import EditCommunity from "@/containers/EditCommunity.vue";
 import CreateChannel from "@/containers/CreateChannel.vue";
 import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunitySettings from "@/containers/CommunitySettings.vue";
 
-import { CommunityState, ModalsState } from "@/store";
+import { CommunityState, ModalsState } from "@/store/types";
 
 export default defineComponent({
   name: "CommunityView",
@@ -93,7 +94,6 @@ export default defineComponent({
   },
   setup() {
     const route = useRoute();
-    const store = useStore();
     const hasCopied = ref(false);
     let channelWorkerLoop = null as null | Worker;
     let groupExpWorkerLoop = null as null | Worker;
@@ -108,15 +108,11 @@ export default defineComponent({
           groupExpWorkerLoop.terminate();
         }
         if (id) {
-          [channelWorkerLoop, groupExpWorkerLoop] = await store.dispatch(
-            "getPerspectiveChannelsAndMetadata",
-            {
+          [channelWorkerLoop, groupExpWorkerLoop] =
+            await store.dispatch.getNeighbourhoodChannelsAndMetadata({
               communityId: id,
-            }
-          );
-          store.dispatch("getCommunityMembers", {
-            communityId: id,
-          });
+            });
+          store.dispatch.getNeighbourhoodMembers(id);
         }
       },
       { immediate: true }
@@ -127,23 +123,31 @@ export default defineComponent({
     };
   },
   watch: {
-    "currentCommunity.perspective": {
-      handler: function (val) {
-        this.$store.dispatch("changeCurrentTheme", val ? val : "global");
+    communityId: {
+      handler: function (id: string) {
+        if (!id) {
+          store.dispatch.changeCurrentTheme("global");
+          return;
+        } else {
+          store.dispatch.changeCurrentTheme(
+            this.currentCommunity.state.useGlobalTheme ? "global" : id
+          );
+        }
 
-        if (!val) return;
-
-        const firstChannel = Object.values(this.currentCommunity.channels)[0];
+        const firstChannel =
+          this.currentCommunity.neighbourhood.linkedPerspectives[0];
         const currentChannelId =
-          this.currentCommunity.currentChannelId || firstChannel.perspective;
+          this.currentCommunity.state.currentChannelId || firstChannel;
 
-        this.$router.push({
-          name: "channel",
-          params: {
-            communityId: val,
-            channelId: currentChannelId,
-          },
-        });
+        if (currentChannelId) {
+          this.$router.push({
+            name: "channel",
+            params: {
+              communityId: id,
+              channelId: currentChannelId,
+            },
+          });
+        }
       },
       immediate: true,
     },
@@ -160,25 +164,28 @@ export default defineComponent({
       // Get the invite code to join community and copy to clipboard
       let currentCommunity = this.currentCommunity;
       const el = document.createElement("textarea");
-      el.value = `Hey! Here is an invite code to join my private community on Junto: ${currentCommunity.sharedPerspectiveUrl}`;
+      el.value = `Hey! Here is an invite code to join my private community on Junto: ${currentCommunity.neighbourhood.neighbourhoodUrl}`;
       document.body.appendChild(el);
       el.select();
       document.execCommand("copy");
       document.body.removeChild(el);
       this.hasCopied = true;
 
-      this.$store.commit("showSuccessToast", {
+      store.commit.showSuccessToast({
         message: "Your custom invite code is copied to your clipboard!",
       });
     },
   },
   computed: {
     modals(): ModalsState {
-      return this.$store.state.ui.modals;
+      return store.state.app.modals;
+    },
+    communityId(): string {
+      return this.$route.params.communityId as string;
     },
     currentCommunity(): CommunityState {
-      const { communityId } = this.$route.params;
-      return this.$store.getters.getCommunity(communityId);
+      const communityId = this.$route.params.communityId as string;
+      return store.getters.getCommunity(communityId);
     },
   },
 });

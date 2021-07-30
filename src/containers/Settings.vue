@@ -24,9 +24,10 @@
       <div class="settings__content">
         <theme-editor
           v-if="currentView === 'theme-editor'"
-          @update="(theme) => updateGlobalTheme(theme)"
+          @update="updateGlobalTheme"
           :theme="theme"
         />
+        <privacy v-if="currentView === 'privacy'" />
       </div>
     </div>
   </j-box>
@@ -34,23 +35,26 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions } from "vuex";
-import { ThemeState } from "@/store";
+import { ThemeState } from "@/store/types";
 import ThemeEditor from "./ThemeEditor.vue";
+import Privacy from "./Privacy.vue";
+import store from "@/store";
 
 export default defineComponent({
-  components: { ThemeEditor },
+  components: { ThemeEditor, Privacy },
   data() {
     return {
       currentView: "theme-editor",
     };
   },
   methods: {
-    ...mapActions(["updateGlobalTheme"]),
+    updateGlobalTheme(val: ThemeState) {
+      store.dispatch.updateGlobalTheme(val);
+    },
   },
   computed: {
     theme(): ThemeState {
-      return this.$store.state.ui.globalTheme;
+      return store.state.app.globalTheme;
     },
   },
 });

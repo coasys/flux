@@ -1,5 +1,7 @@
+const webpack = require("webpack");
+
 module.exports = {
-  transpileDependencies: ['@vue/apollo-composable'],
+  transpileDependencies: ["@vue/apollo-composable"],
   chainWebpack: (config) => {
     config.module
       .rule("vue")
@@ -12,6 +14,17 @@ module.exports = {
           },
         };
       });
+    config
+      .plugin("nativeModuleStub")
+      .use(webpack.NormalModuleReplacementPlugin, [
+        /type-graphql$/,
+        (resource) => {
+          resource.request = resource.request.replace(
+            /type-graphql/,
+            "type-graphql/dist/browser-shim.js"
+          );
+        },
+      ]);
   },
   pluginOptions: {
     electronBuilder: {
