@@ -108,6 +108,7 @@ import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css";
 import { differenceInMinutes, parseISO } from "date-fns";
 import MessageItem from "@/components/message-item/MessageItem.vue";
 import { Editor } from "@tiptap/vue-3";
+import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
 
 interface Message {
   id: string;
@@ -182,27 +183,16 @@ export default defineComponent({
     },
     "channel.state.hasNewMessages": function (hasMessages) {
       if (hasMessages) {
-        // If this channel is not in view, and only kept alive
-        // show new messages button, so when you open the channel
-        // again the button will be there
-        if (
-          this.$route.params.channelId !==
-          this.channel.neighbourhood.perspective.uuid
-        ) {
-          this.showNewMessagesButton = true;
-          return;
-        }
-
         const container = this.$refs.scrollContainer as HTMLDivElement;
-        if (!container) return;
+        if (container) {
+          const isAtBottom =
+            container.scrollHeight - window.innerHeight === container.scrollTop;
 
-        const isAtBottom =
-          container.scrollHeight - window.innerHeight === container.scrollTop;
-
-        if (isAtBottom) {
-          this.scrollToBottom("smooth");
-        } else {
-          this.showNewMessagesButton = true;
+          if (isAtBottom) {
+            this.scrollToBottom("smooth");
+          } else {
+            this.showNewMessagesButton = true;
+          }
         }
       }
     },
@@ -212,7 +202,7 @@ export default defineComponent({
       return this.community.neighbourhood.members.map(
         (m) =>
           ({
-            name: (m.data as any).profile["foaf:AccountName"],
+            name: m.data.profile["foaf:AccountName"],
             id: m.author.replace("did:key:", ""),
             trigger: "@",
           } as MentionTrigger)
@@ -230,17 +220,13 @@ export default defineComponent({
         });
     },
     messages(): any[] {
-      const sortedMessages = Object.values(
-        this.channel.neighbourhood.currentExpressionMessages
-      ).sort((a, b) => {
-        return (
-          new Date(a.expression.timestamp).getTime() -
-          new Date(b.expression.timestamp).getTime()
-        );
-      });
+      const ascMessages = sortExpressionsByTimestamp(
+        this.channel.neighbourhood.currentExpressionMessages,
+        "asc"
+      );
 
       //Note; code below will break once we add other expression types since we try to extract body from exp data
-      return sortedMessages.reduce((acc: Message[], item: ExpressionAndRef) => {
+      return ascMessages.reduce((acc: Message[], item: ExpressionAndRef) => {
         this.loadUser(item.expression.author);
         return [
           ...acc,
