@@ -10,10 +10,15 @@
             v-for="n in [0, 20, 50, 100, 150, 200, 220, 250, 270, 300, 340]"
             :key="n"
             class="color-button"
-            :class="{ 'color-button--active': theme.hue === n }"
             @click="() => updateTheme({ hue: n })"
             :style="`--hue: ${n}`"
-          ></button>
+          >
+            <j-icon
+              style="color: var(--j-color-white)"
+              v-if="theme.hue === n"
+              name="check"
+            />
+          </button>
         </div>
       </j-box>
       <j-box pb="300">
@@ -100,9 +105,7 @@ export default defineComponent({
   outline: 0;
   border-radius: var(--j-border-radius);
 }
-.color-button--active {
-  border-color: var(--j-color-primary-600);
-}
+
 .colors {
   display: flex;
   flex-wrap: wrap;

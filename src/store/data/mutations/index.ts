@@ -8,6 +8,7 @@ import {
   ThemeState,
   ProfileExpression,
   ChannelState,
+  LocalCommunityState,
 } from "@/store/types";
 
 import { parseExprUrl } from "@perspect3vism/ad4m";
@@ -40,6 +41,10 @@ export default {
     state.neighbourhoods[payload.neighbourhood.perspective.uuid] =
       payload.neighbourhood;
     state.communities[payload.neighbourhood.perspective.uuid] = payload.state;
+  },
+
+  addCommunityState(state: DataState, payload: LocalCommunityState): void {
+    state.communities[payload.perspectiveUuid] = payload;
   },
 
   addMessages(state: DataState, payload: AddChannelMessages): void {

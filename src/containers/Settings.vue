@@ -27,6 +27,7 @@
           @update="updateGlobalTheme"
           :theme="theme"
         />
+        <privacy v-if="currentView === 'privacy'" />
       </div>
     </div>
   </j-box>
@@ -36,10 +37,11 @@
 import { defineComponent } from "vue";
 import { ThemeState } from "@/store/types";
 import ThemeEditor from "./ThemeEditor.vue";
+import Privacy from "./Privacy.vue";
 import store from "@/store";
 
 export default defineComponent({
-  components: { ThemeEditor },
+  components: { ThemeEditor, Privacy },
   data() {
     return {
       currentView: "theme-editor",
