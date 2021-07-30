@@ -17,20 +17,29 @@ export default async (
   const { commit: appCommit, getters: appGetters } = appActionContext(context);
   try {
     const community = dataGetters.getCommunity(payload.communityId);
-    const channel = await createChannel(
-      payload.name,
-      appGetters.getLanguagePath,
-      community.neighbourhood.perspective,
-      MembraneType.Inherited,
-      community.neighbourhood.typedExpressionLanguages
-    );
 
-    dataCommit.addChannel({
-      communityId: community.neighbourhood.perspective.uuid,
-      channel,
-    });
-
-    return channel;
+    if (community.neighbourhood !== undefined) {      
+      const channel = await createChannel(
+        payload.name,
+        appGetters.getLanguagePath,
+        community.neighbourhood.perspective,
+        MembraneType.Inherited,
+        community.neighbourhood.typedExpressionLanguages
+      );
+  
+      dataCommit.addChannel({
+        communityId: community.neighbourhood.perspective.uuid,
+        channel,
+      });
+  
+      return channel;
+    } else {
+      const message = 'Community does not exists';
+      appCommit.showDangerToast({
+        message,
+      });
+      throw Error(message);
+    }
   } catch (e) {
     appCommit.showDangerToast({
       message: e.message,
