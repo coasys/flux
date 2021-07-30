@@ -52,6 +52,7 @@ function pollData(e) {
 
   getData({ query, variables })
     .then((res) => {
+      console.log(res);
       if (res) {
         self.postMessage(res);
         if (quitOnResponse) {

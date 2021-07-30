@@ -8,10 +8,11 @@ import {
   ThemeState,
   ProfileExpression,
   ChannelState,
+  LocalCommunityState,
 } from "@/store/types";
 
-import { parseExprUrl } from "@perspect3vism/ad4m-types";
-import type { Expression, LinkExpression } from "@perspect3vism/ad4m-types";
+import { parseExprUrl } from "@perspect3vism/ad4m";
+import type { Expression, LinkExpression } from "@perspect3vism/ad4m";
 import hash from "object-hash";
 
 interface UpdatePayload {
@@ -41,6 +42,10 @@ export default {
     state.communities[payload.neighbourhood.perspective.uuid] = payload.state;
   },
 
+  addCommunityState(state: DataState, payload: LocalCommunityState): void {
+    state.communities[payload.perspectiveUuid] = payload;
+  },
+
   addMessages(state: DataState, payload: AddChannelMessages): void {
     const neighbourhood = state.neighbourhoods[payload.channelId];
     console.log(
@@ -66,7 +71,7 @@ export default {
     neighbourhood.currentExpressionLinks[
       hash(payload.link.data!, { excludeValues: "__typename" })
     ] = payload.link;
-    neighbourhood.currentExpressionMessages[payload.expression.url!] = {
+    neighbourhood.currentExpressionMessages[payload.link.data.target] = {
       expression: {
         author: payload.expression.author!,
         data: JSON.parse(payload.expression.data!),
@@ -181,6 +186,14 @@ export default {
     state.channels[payload.neighbourhood.perspective.uuid] = payload.state;
     state.neighbourhoods[payload.neighbourhood.perspective.uuid] =
       payload.neighbourhood;
+  },
+
+  setUseGlobalTheme(
+    state: DataState,
+    payload: { communityId: string; value: boolean }
+  ): void {
+    const community = state.communities[payload.communityId];
+    community.useGlobalTheme = payload.value;
   },
 
   setHasNewMessages(

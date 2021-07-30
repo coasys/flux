@@ -24,9 +24,9 @@ const languages = {
   },
   languages: {
     targetDnaName: "languages",
-    dna: "https://github.com/perspect3vism/language-persistence/releases/download/0.0.1/languages.dna",
+    dna: "https://github.com/perspect3vism/language-persistence/releases/download/0.0.2/languages.dna",
     bundle:
-      "https://github.com/perspect3vism/language-persistence/releases/download/0.0.1/bundle.js",
+      "https://github.com/perspect3vism/language-persistence/releases/download/0.0.2/bundle.js",
   },
   "group-expression": {
     targetDnaName: "group-expression",
@@ -44,13 +44,13 @@ const languages = {
     zipped: true,
     targetDnaName: "social-context",
     resource:
-      "https://github.com/juntofoundation/Social-Context/releases/download/0.0.7/full_index.zip",
+      "https://github.com/juntofoundation/Social-Context/releases/download/0.0.9/full_index.zip",
   },
   "social-context-channel": {
     zipped: true,
     targetDnaName: "social-context",
     resource:
-      "https://github.com/juntofoundation/Social-Context/releases/download/0.0.7/signal.zip",
+      "https://github.com/juntofoundation/Social-Context/releases/download/0.0.9/signal.zip",
   },
 };
 

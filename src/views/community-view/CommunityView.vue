@@ -50,7 +50,7 @@
         @click="(e) => e.target.select()"
         size="lg"
         readonly
-        :value="currentCommunity.neighbourhoodUrl"
+        :value="currentCommunity.neighbourhood.neighbourhoodUrl"
       >
         <j-button @click="getInviteCode" variant="subtle" slot="end"
           ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
@@ -125,23 +125,29 @@ export default defineComponent({
   watch: {
     communityId: {
       handler: function (id: string) {
-        if (!this.currentCommunity) return;
-        store.dispatch.changeCurrentTheme(id ? id : "global");
-
-        if (!id) return;
+        if (!id) {
+          store.dispatch.changeCurrentTheme("global");
+          return;
+        } else {
+          store.dispatch.changeCurrentTheme(
+            this.currentCommunity.state.useGlobalTheme ? "global" : id
+          );
+        }
 
         const firstChannel =
           this.currentCommunity.neighbourhood.linkedPerspectives[0];
         const currentChannelId =
           this.currentCommunity.state.currentChannelId || firstChannel;
 
-        this.$router.push({
-          name: "channel",
-          params: {
-            communityId: id,
-            channelId: currentChannelId,
-          },
-        });
+        if (currentChannelId) {
+          this.$router.push({
+            name: "channel",
+            params: {
+              communityId: id,
+              channelId: currentChannelId,
+            },
+          });
+        }
       },
       immediate: true,
     },
@@ -178,8 +184,8 @@ export default defineComponent({
       return this.$route.params.communityId as string;
     },
     currentCommunity(): CommunityState {
-      const { communityId } = this.$route.params;
-      return store.getters.getCommunity(communityId as string);
+      const communityId = this.$route.params.communityId as string;
+      return store.getters.getCommunity(communityId);
     },
   },
 });

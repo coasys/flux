@@ -47,11 +47,7 @@ import { AGENT_STATUS, GET_EXPRESSION } from "@/core/graphql_queries";
 import { ModalsState, NeighbourhoodState, ToastState } from "@/store/types";
 import showMessageNotification from "@/utils/showMessageNotification";
 import { print } from "graphql/language/printer";
-import {
-  AgentStatus,
-  LinkExpression,
-  Neighbourhood,
-} from "@perspect3vism/ad4m-types";
+import { AgentStatus, LinkExpression } from "@perspect3vism/ad4m";
 import store from "@/store";
 import { apolloClient } from "./utils/setupApolloClient";
 

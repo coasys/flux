@@ -4,4 +4,6 @@ module.exports = {
     "@babel/preset-typescript",
     "@babel/preset-env",
   ],
+  plugins: ["@babel/plugin-transform-runtime"],
+  ignore: [/\/node_modules\//],
 };

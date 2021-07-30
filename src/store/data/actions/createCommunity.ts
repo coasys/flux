@@ -17,10 +17,11 @@ import {
   ExpressionTypes,
   CommunityState,
 } from "@/store/types";
-import { Perspective } from "@perspect3vism/ad4m-types";
 import { dataActionContext } from "@/store/data/index";
 import { appActionContext } from "@/store/app/index";
 import { userActionContext } from "@/store/user/index";
+import { Perspective } from "@perspect3vism/ad4m";
+import createNeighbourhoodMeta from "@/core/methods/createNeighbourhoodMeta";
 
 export interface Payload {
   perspectiveName: string;
@@ -90,7 +91,12 @@ export default async (
     ];
 
     //Publish perspective
-    const meta = new Perspective();
+    const metaLinks = await createNeighbourhoodMeta(
+      perspectiveName,
+      description,
+      typedExpLangs
+    );
+    const meta = new Perspective(metaLinks);
     const neighbourhood = await createNeighbourhood(
       createSourcePerspective.uuid,
       socialContextLang.address,
@@ -181,6 +187,7 @@ export default async (
           hue: 270,
           saturation: 60,
         },
+        useGlobalTheme: false,
         currentChannelId: channel.neighbourhood.perspective.uuid,
       },
     } as CommunityState;
@@ -193,9 +200,9 @@ export default async (
       const languageRes = await getLanguage(lang.languageAddress);
       const uiData: ExpressionUIIcons = {
         languageAddress: lang.languageAddress,
-        createIcon: languageRes.constructorIcon?.code || "",
-        viewIcon: languageRes.icon?.code || "",
-        name: languageRes.name!,
+        createIcon: languageRes!.constructorIcon?.code || "",
+        viewIcon: languageRes!.icon?.code || "",
+        name: languageRes!.name!,
       };
       appCommit.addExpressionUI(uiData);
       await sleep(40);

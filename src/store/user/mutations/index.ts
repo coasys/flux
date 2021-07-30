@@ -1,5 +1,5 @@
 import { UserState, Profile } from "@/store/types";
-import { AgentStatus } from "@perspect3vism/ad4m-types";
+import { AgentStatus } from "@perspect3vism/ad4m";
 
 export default {
   updateAgentStatus(state: UserState, payload: AgentStatus): void {

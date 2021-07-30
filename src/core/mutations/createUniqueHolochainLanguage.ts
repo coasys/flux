@@ -1,7 +1,7 @@
 import { apolloClient } from "@/utils/setupApolloClient";
 
 import unwrapApolloResult from "@/utils/unwrapApolloResult";
-import type { LanguageRef } from "@perspect3vism/ad4m-types";
+import type { LanguageRef } from "@perspect3vism/ad4m";
 import { LANGUAGE_CLONE_HOLOCHAIN_TEMPLATE } from "../graphql_queries";
 
 export async function createUniqueHolochainLanguage(

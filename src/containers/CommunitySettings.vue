@@ -22,10 +22,17 @@
         </j-tabs>
       </aside>
       <div class="settings__content">
+        <j-box pb="500">
+          <j-toggle
+            :checked="community.useGlobalTheme"
+            @change="(e) => setUseGlobalTheme(e.target.checked)"
+            >Use global theme</j-toggle
+          >
+        </j-box>
         <theme-editor
-          v-if="currentView === 'theme-editor' && theme"
+          v-if="showEditor"
           @update="updateCommunityTheme"
-          :theme="theme"
+          :theme="community.theme"
         />
       </div>
     </div>
@@ -46,6 +53,11 @@ export default defineComponent({
     };
   },
   methods: {
+    setUseGlobalTheme(val: boolean) {
+      const id = this.$route.params.communityId as string;
+      store.commit.setUseGlobalTheme({ communityId: id, value: val });
+      store.dispatch.changeCurrentTheme(val ? "global" : id);
+    },
     updateCommunityTheme(val: ThemeState) {
       const id = this.$route.params.communityId as string;
       store.dispatch.updateCommunityTheme({
@@ -55,9 +67,17 @@ export default defineComponent({
     },
   },
   computed: {
-    theme(): ThemeState {
+    showEditor(): boolean {
+      return (
+        this.currentView === "theme-editor" &&
+        this.community.theme &&
+        !this.community.useGlobalTheme
+      );
+    },
+    community() {
       const id = this.$route.params.communityId as string;
-      return store.getters.getCommunityState(id).theme;
+      console.log("community-changed", store.getters.getCommunityState(id));
+      return store.getters.getCommunityState(id);
     },
   },
 });

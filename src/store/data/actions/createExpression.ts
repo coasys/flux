@@ -1,6 +1,6 @@
 import { createExpression } from "@/core/mutations/createExpression";
 import { createLink } from "@/core/mutations/createLink";
-import { Link, LinkExpression } from "@perspect3vism/ad4m-types";
+import { Link, LinkExpression } from "@perspect3vism/ad4m";
 
 import { appActionContext } from "@/store/app/index";
 

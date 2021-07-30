@@ -1,7 +1,7 @@
 import hash from "object-hash";
 import { print } from "graphql/language/printer";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
-import { LinkQuery } from "@perspect3vism/ad4m-types";
+import { LinkQuery } from "@perspect3vism/ad4m";
 
 import { dataActionContext } from "@/store/data/index";
 import { appActionContext } from "@/store/app/index";
@@ -55,7 +55,7 @@ export default async function (
 
     //Listen for message callback saying we got some links
     linksWorker.addEventListener("message", async (e) => {
-      const linkQuery = e.data.links;
+      const linkQuery = e.data.perspectiveQueryLinks;
       if (linkQuery) {
         if (channel) {
           for (const link of linkQuery) {
@@ -64,8 +64,10 @@ export default async function (
               channel.currentExpressionLinks[
                 hash(link.data!, { excludeValues: "__typename" })
               ];
+            const currentExpression =
+              channel.currentExpressionMessages[link.data.target];
 
-            if (!currentExpressionLink) {
+            if (!currentExpressionLink || !currentExpression) {
               const expressionWorker = new Worker("pollingWorker.js");
 
               //Run expression worker to try and get expression on link target
@@ -112,8 +114,7 @@ export default async function (
           if (latestLinkTimestamp) {
             if (
               Object.values(channel.currentExpressionLinks).filter(
-                (link: any) =>
-                  new Date(link.expression.timestamp!) > latestLinkTimestamp!
+                (link) => new Date(link.timestamp!) > latestLinkTimestamp!
               ).length > 0
             ) {
               return [false, linksWorker];

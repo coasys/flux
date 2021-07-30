@@ -1,6 +1,6 @@
 import { getProfile } from "@/utils/profileHelpers";
 import { getLinks } from "@/core/queries/getLinks";
-import { LinkQuery } from "@perspect3vism/ad4m-types";
+import { LinkQuery } from "@perspect3vism/ad4m";
 import { TimeoutCache } from "../../../utils/timeoutCache";
 
 import { dataActionContext } from "@/store/data/index";

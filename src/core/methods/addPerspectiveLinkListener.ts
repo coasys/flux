@@ -11,7 +11,7 @@
 // import { CommunityState, ModalsState, ToastState } from "@/store/types";
 // import showMessageNotification from "@/utils/showMessageNotification";
 // import { print } from "graphql/language/printer";
-// import { AgentStatus } from "@perspect3vism/ad4m-types";
+// import { AgentStatus } from "@perspect3vism/ad4m";
 // import { apolloClient } from "./app";
 
 // //Watch for incoming signals from holochain - an incoming signal should mean a DM is inbound

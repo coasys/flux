@@ -1,7 +1,7 @@
 import { apolloClient } from "@/utils/setupApolloClient";
 
 import unwrapApolloResult from "@/utils/unwrapApolloResult";
-import type { Perspective } from "@perspect3vism/ad4m-types";
+import type { Perspective } from "@perspect3vism/ad4m";
 import { PUBLISH_NEIGHBOURHOOD_FROM_PERSPECTIVE } from "../graphql_queries";
 
 export async function createNeighbourhood(

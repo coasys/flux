@@ -362,6 +362,26 @@ export const NEIGHBOURHOOD_JOIN = gql`
       uuid
       name
       sharedUrl
+      neighbourhood {
+        linkLanguage
+        meta {
+          links {
+            author
+            timestamp
+            data {
+              source
+              predicate
+              target
+            }
+            proof {
+              valid
+              invalid
+              signature
+              key
+            }
+          }
+        }
+      }
     }
   }
 `;

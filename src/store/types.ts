@@ -2,12 +2,9 @@ import type {
   AgentStatus,
   Expression,
   LinkExpression,
-} from "@perspect3vism/ad4m-types";
-import {
-  ExpressionGeneric,
-  ExpressionRef,
-  PerspectiveHandle,
-} from "@perspect3vism/ad4m-types";
+} from "@perspect3vism/ad4m";
+import { ExpressionGeneric } from "@perspect3vism/ad4m";
+import { ExpressionRef, PerspectiveHandle } from "@perspect3vism/ad4m";
 
 export interface State {
   app: ApplicationState;
@@ -60,7 +57,7 @@ export interface ApplicationState {
 
 export interface NeighbourhoodState {
   name: string;
-  description?: string;
+  description: string;
   perspective: PerspectiveHandle;
   typedExpressionLanguages: JuntoExpressionReference[];
   groupExpressionRef?: string;
@@ -88,6 +85,7 @@ export interface ChannelState {
 export interface LocalCommunityState {
   perspectiveUuid: string;
   theme: ThemeState;
+  useGlobalTheme: boolean;
   currentChannelId: string | undefined | null;
 }
 

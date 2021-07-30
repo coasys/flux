@@ -41,7 +41,7 @@
 import { defineComponent, ref } from "vue";
 import { useStore } from "vuex";
 import { useValidation } from "@/utils/validation";
-import { AgentStatus } from "@perspect3vism/ad4m-types";
+import { AgentStatus } from "@perspect3vism/ad4m";
 import store from "@/store";
 
 export default defineComponent({

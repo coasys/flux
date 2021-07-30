@@ -7,11 +7,12 @@ import {
 } from "@/store/types";
 import { v4 } from "uuid";
 import path from "path";
-import { Perspective, Link } from "@perspect3vism/ad4m-types";
-import type { PerspectiveHandle } from "@perspect3vism/ad4m-types";
+import { Perspective, Link } from "@perspect3vism/ad4m";
+import type { PerspectiveHandle } from "@perspect3vism/ad4m";
 import { addPerspective } from "../mutations/addPerspective";
 import { createUniqueHolochainLanguage } from "../mutations/createUniqueHolochainLanguage";
 import { createNeighbourhood } from "../mutations/createNeighbourhood";
+import createNeighbourhoodMeta from "./createNeighbourhoodMeta";
 
 export async function createChannel(
   channelName: string,
@@ -20,7 +21,6 @@ export async function createChannel(
   membraneType: MembraneType,
   typedExpressionLanguages: JuntoExpressionReference[]
 ): Promise<ChannelState> {
-  console.debug("Create channel called");
   const perspective = await addPerspective(channelName);
   console.debug("Created new perspective with result", perspective);
   const socialContextLanguage = await createUniqueHolochainLanguage(
@@ -32,7 +32,14 @@ export async function createChannel(
     "Created new social context language wuth result",
     socialContextLanguage
   );
-  const meta = new Perspective();
+
+  //Publish perspective
+  const metaLinks = await createNeighbourhoodMeta(
+    channelName,
+    "",
+    typedExpressionLanguages
+  );
+  const meta = new Perspective(metaLinks);
   const neighbourhood = await createNeighbourhood(
     perspective.uuid,
     socialContextLanguage.address,
@@ -45,8 +52,14 @@ export async function createChannel(
     target: neighbourhood,
     predicate: "sioc://has_space",
   });
-  const addLinkToChannel = await createLink(perspective.uuid, channelLink);
-  console.debug("Created new link on channel with result", addLinkToChannel);
+  const addLinkToChannel = await createLink(
+    sourcePerspective.uuid,
+    channelLink
+  );
+  console.debug(
+    "Created new link on source social-context with result",
+    addLinkToChannel
+  );
 
   //Add link on channel social context declaring type
   const addChannelTypeLink = await createLink(perspective.uuid, {
@@ -55,7 +68,7 @@ export async function createChannel(
     predicate: "rdf://type",
   });
   console.log(
-    "Added link on channel social context with result",
+    "Added link on channel social-context with result",
     addChannelTypeLink
   );
 
@@ -64,6 +77,7 @@ export async function createChannel(
   return {
     neighbourhood: {
       name: channelName,
+      description: "",
       perspective: perspective,
       typedExpressionLanguages: typedExpressionLanguages,
       neighbourhoodUrl: neighbourhood,

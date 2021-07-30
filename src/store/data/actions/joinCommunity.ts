@@ -2,10 +2,9 @@ import { createProfile } from "@/core/methods/createProfile";
 import { createLink } from "@/core/mutations/createLink";
 import { joinNeighbourhood } from "@/core/mutations/joinNeighbourhood";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
-import { findNameFromMeta } from "@/core/methods/findNameFromMeta";
-import { getPerspectiveSnapshot } from "@/core/queries/getPerspective";
+import { findNameDescriptionFromMeta } from "@/core/methods/findNameDescriptionFromMeta";
 
-import { Link } from "@perspect3vism/ad4m-types";
+import { Link } from "@perspect3vism/ad4m";
 
 import { dataActionContext } from "@/store/data/index";
 import { appActionContext } from "@/store/app/index";
@@ -37,12 +36,13 @@ export default async (
         neighbourhood
       );
 
-      const perspective = await getPerspectiveSnapshot(neighbourhood.uuid);
-
       //Get and cache the expression UI for each expression language
       //And used returned expression language names to populate typedExpressionLanguages field
       const [typedExpressionLanguages, uiIcons] =
-        await getTypedExpressionLanguages(perspective!, true);
+        await getTypedExpressionLanguages(
+          neighbourhood.neighbourhood!.meta.links,
+          true
+        );
 
       for (const uiIcon of uiIcons) {
         appCommit.addExpressionUI(uiIcon);
@@ -59,19 +59,26 @@ export default async (
 
         //Create link between perspective and group expression
         const addProfileLink = await createLink(neighbourhood.uuid, {
-          source: `${neighbourhood.uuid}://self`,
+          source: `${neighbourhood.sharedUrl}://self`,
           target: createProfileExpression,
           predicate: "sioc://has_member",
         } as Link);
-        console.log("Created group expression link", addProfileLink);
+        console.log("Created profile expression link", addProfileLink);
+      } else {
+        throw Error(
+          "Could not find profile expression language for installed neighbourhood"
+        );
       }
 
       //Read out metadata about the perspective from the meta
-      const name = findNameFromMeta(perspective!);
+      const { name, description } = findNameDescriptionFromMeta(
+        neighbourhood.neighbourhood!.meta.links
+      );
 
       const newCommunity = {
         neighbourhood: {
-          name: name,
+          name,
+          description,
           perspective: neighbourhood,
           typedExpressionLanguages: typedExpressionLanguages,
           neighbourhoodUrl: joiningLink,
@@ -84,6 +91,7 @@ export default async (
         },
         state: {
           perspectiveUuid: neighbourhood.uuid,
+          useGlobalTheme: false,
           theme: {
             fontSize: "md",
             fontFamily: "default",

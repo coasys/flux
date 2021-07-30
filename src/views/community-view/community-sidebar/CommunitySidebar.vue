@@ -81,7 +81,7 @@
           custom
           v-slot="{ navigate, isExactActive }"
           v-for="channel in channels"
-          :key="channel"
+          :key="channel.neighbourhood.perspective.uuid"
         >
           <j-popover
             class="community-sidebar__header-menu"
