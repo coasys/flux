@@ -16,12 +16,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import store from "@/store";
-import {
-  ChannelState,
-  CommunityState,
-  ExpressionTypes,
-  ProfileExpression,
-} from "@/store/types";
+import { ExpressionTypes, ProfileExpression } from "@/store/types";
 import { Editor } from "@tiptap/vue-3";
 
 interface UserMap {
