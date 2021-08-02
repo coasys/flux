@@ -1,0 +1,36 @@
+[
+  [
+    {
+      "languageAddress": "QmUZr2iiGxCNjXP97Wz9AdRRe6HESP7wDbmAbLTksFTAmn",
+      "expressionType": 0
+    },
+    {
+      "languageAddress": "QmUCLri8MRJVpXsBRvry8KaQEkX7RhKcqBwfAkMmTo6Swq",
+      "expressionType": 1
+    },
+    {
+      "languageAddress": "QmUWgoGt6QAMfagvQkjsHN2X3egtu3P8bcqymYMjxnqFzQ",
+      "expressionType": 2
+    }
+  ],
+  [
+    {
+      "languageAddress": "QmUZr2iiGxCNjXP97Wz9AdRRe6HESP7wDbmAbLTksFTAmn",
+      "name": "social-context",
+      "createIcon": "",
+      "viewIcon": ""
+    },
+    {
+      "languageAddress": "QmUCLri8MRJVpXsBRvry8KaQEkX7RhKcqBwfAkMmTo6Swq",
+      "name": "languages",
+      "createIcon": "",
+      "viewIcon": ""
+    },
+    {
+      "languageAddress": "QmUWgoGt6QAMfagvQkjsHN2X3egtu3P8bcqymYMjxnqFzQ",
+      "name": "group-expression",
+      "createIcon": "",
+      "viewIcon": ""
+    }
+  ]
+]

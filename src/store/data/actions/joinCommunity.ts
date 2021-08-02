@@ -110,6 +110,8 @@ export default async (
       appCommit.showDangerToast({
         message,
       });
+
+      throw new Error(message);
     }
   } catch (e) {
     appCommit.showDangerToast({
