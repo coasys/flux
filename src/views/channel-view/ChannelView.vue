@@ -93,7 +93,9 @@ export default defineComponent({
 
         // TODO: On first mount view takes too long to render
         // So we don't have the full height to scroll to the right place
-        this.scrollToLatestPos();
+        setTimeout(() => {
+          this.scrollToLatestPos();
+        }, 0);
       },
       immediate: true,
     },
