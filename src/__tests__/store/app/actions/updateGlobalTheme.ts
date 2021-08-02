@@ -5,14 +5,12 @@ import data from "@/store/data";
 import app from "@/store/app";
 import * as setTheme from "@/utils/themeHelper";
 
-describe('Update Global Theme', () => {
+describe("Update Global Theme", () => {
   let store: any;
 
   beforeEach(() => {
     // @ts-ignore
-    jest
-    .spyOn(setTheme, "setTheme")
-      .mockReturnValue(undefined);
+    jest.spyOn(setTheme, "setTheme").mockReturnValue(undefined);
 
     // @ts-ignore
     const directStore = createDirectStore({
@@ -25,31 +23,31 @@ describe('Update Global Theme', () => {
     store = directStore.store;
   });
 
-  test('Update global theme', () => {
+  test("Update global theme", () => {
     store.commit.addCommunity(community);
 
     expect(store.state.app.currentTheme).toBe("global");
     expect(store.state.app.globalTheme).toStrictEqual({
-      name: 'light',
-      fontFamily: 'default',
+      name: "light",
+      fontFamily: "default",
       hue: 270,
       saturation: 60,
-      fontSize: "md"
+      fontSize: "md",
     });
-    
+
     store.dispatch.updateGlobalTheme({
-      name: 'test',
-      fontFamily: 'Arial',
+      name: "test",
+      fontFamily: "Arial",
       hue: 90,
     });
 
     expect(store.state.app.currentTheme).toBe("global");
     expect(store.state.app.globalTheme).toStrictEqual({
-      name: 'test',
-      fontFamily: 'Arial',
+      name: "test",
+      fontFamily: "Arial",
       hue: 90,
       saturation: 60,
-      fontSize: "md"
+      fontSize: "md",
     });
   });
 });

@@ -4,7 +4,7 @@ import user from "@/store/user";
 import data from "@/store/data";
 import { createDirectStore } from "direct-vuex";
 
-describe('User Mutations', () => {
+describe("User Mutations", () => {
   let store: any;
 
   beforeEach(() => {
@@ -19,7 +19,7 @@ describe('User Mutations', () => {
     store = directStore.store;
   });
 
-  test('Initial user store', () => {
+  test("Initial user store", () => {
     const initialState = store.state.user;
 
     expect(initialState.profile).toBeNull();
@@ -31,7 +31,7 @@ describe('User Mutations', () => {
     });
   });
 
-  test('Update Agent Status', () => {
+  test("Update Agent Status", () => {
     expect(store.state.user.agent).toStrictEqual({
       isInitialized: false,
       isUnlocked: false,
@@ -44,7 +44,7 @@ describe('User Mutations', () => {
     expect(store.state.user.agent).toStrictEqual(initAgent);
   });
 
-  test('Update Agent Lock State', () => {
+  test("Update Agent Lock State", () => {
     expect(store.state.user.agent.isUnlocked).toBeFalsy();
 
     store.commit.updateAgentLockState(true);
@@ -52,7 +52,7 @@ describe('User Mutations', () => {
     expect(store.state.user.agent.isUnlocked).toBeTruthy();
   });
 
-  test('Set User Profile', () => {
+  test("Set User Profile", () => {
     expect(store.state.user.profile).toBeNull();
 
     const profile = {

@@ -9,7 +9,7 @@ import user from "@/store/user";
 import data from "@/store/data";
 import app from "@/store/app";
 
-describe('Load Expression Languages', () => {
+describe("Load Expression Languages", () => {
   let store: any;
 
   beforeEach(() => {
@@ -24,27 +24,29 @@ describe('Load Expression Languages', () => {
     store = directStore.store;
   });
 
-  test('Load Expression Languages - Success', async () => {
+  test("Load Expression Languages - Success", async () => {
     // @ts-ignore
     jest
-    .spyOn(getLanguages, "getLanguages")
-    // @ts-ignore
-    .mockResolvedValue(languages);
+      .spyOn(getLanguages, "getLanguages")
+      // @ts-ignore
+      .mockResolvedValue(languages);
 
     expect(Object.values(store.state.app.expressionUI).length).toBe(0);
 
     await store.dispatch.loadExpressionLanguages();
 
     expect(Object.keys(store.state.app.expressionUI).length).toBe(3);
-    expect(Object.keys(store.state.app.expressionUI)).toStrictEqual(languages.map(e => e.address));
+    expect(Object.keys(store.state.app.expressionUI)).toStrictEqual(
+      languages.map((e) => e.address)
+    );
   });
 
-  test('Load Expression Languages - Failure', async () => {
+  test("Load Expression Languages - Failure", async () => {
     // @ts-ignore
     jest
-    .spyOn(getLanguages, "getLanguages")
-    // @ts-ignore
-    .mockRejectedValue('No languages found');
+      .spyOn(getLanguages, "getLanguages")
+      // @ts-ignore
+      .mockRejectedValue("No languages found");
 
     expect(Object.values(store.state.app.expressionUI).length).toBe(0);
 
@@ -56,6 +58,8 @@ describe('Load Expression Languages', () => {
     }
 
     expect(Object.keys(store.state.app.expressionUI).length).toBe(0);
-    expect(Object.keys(store.state.app.expressionUI)).not.toStrictEqual(languages.map(e => e.address));
+    expect(Object.keys(store.state.app.expressionUI)).not.toStrictEqual(
+      languages.map((e) => e.address)
+    );
   });
 });

@@ -7,7 +7,7 @@ import user from "@/store/user";
 import data from "@/store/data";
 import app from "@/store/app";
 
-describe('Update Profile', () => {
+describe("Update Profile", () => {
   let store: any;
 
   beforeEach(() => {
@@ -18,10 +18,8 @@ describe('Update Profile', () => {
       .mockResolvedValue(getProfileFixture);
 
     // @ts-ignore
-    jest
-    .spyOn(createProfile, "createProfile")
-    .mockImplementation(async () => {
-      return 'QmevBs9ztZwyZjseMD4X18zSHFuDp9eEaLJyirHazQWmxS://did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW';
+    jest.spyOn(createProfile, "createProfile").mockImplementation(async () => {
+      return "QmevBs9ztZwyZjseMD4X18zSHFuDp9eEaLJyirHazQWmxS://did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW";
     });
 
     // @ts-ignore
@@ -35,23 +33,23 @@ describe('Update Profile', () => {
     store = directStore.store;
   });
 
-  test('Update Profile - Success', () => {
+  test("Update Profile - Success", () => {
     store.commit.addCommunity(community);
 
     expect(store.state.user.profile).toBeNull();
 
     store.dispatch.updateProfile({
-      username: "jhon_doe"
+      username: "jhon_doe",
     });
 
-    expect(store.state.user.profile.username).toBe('jhon_doe');
+    expect(store.state.user.profile.username).toBe("jhon_doe");
   });
 
-  test('Update Profile - Failure', async () => {
+  test("Update Profile - Failure", async () => {
     // @ts-ignore
     jest
-    .spyOn(createProfile, "createProfile")
-    .mockRejectedValue(Error('Could not create new profile exp'));
+      .spyOn(createProfile, "createProfile")
+      .mockRejectedValue(Error("Could not create new profile exp"));
 
     store.commit.addCommunity(community);
 
@@ -59,7 +57,7 @@ describe('Update Profile', () => {
 
     try {
       await store.dispatch.updateProfile({
-        username: "jhon_doe"
+        username: "jhon_doe",
       });
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
@@ -69,6 +67,6 @@ describe('Update Profile', () => {
       );
     }
 
-    expect(store.state.user.profile.username).toBe('jhon_doe');
+    expect(store.state.user.profile.username).toBe("jhon_doe");
   });
-})
+});

@@ -18,7 +18,7 @@ export default async (
   try {
     const community = dataGetters.getCommunity(payload.communityId);
 
-    if (community.neighbourhood !== undefined) {      
+    if (community.neighbourhood !== undefined) {
       const channel = await createChannel(
         payload.name,
         appGetters.getLanguagePath,
@@ -26,15 +26,15 @@ export default async (
         MembraneType.Inherited,
         community.neighbourhood.typedExpressionLanguages
       );
-  
+
       dataCommit.addChannel({
         communityId: community.neighbourhood.perspective.uuid,
         channel,
       });
-  
+
       return channel;
     } else {
-      const message = 'Community does not exists';
+      const message = "Community does not exists";
       appCommit.showDangerToast({
         message,
       });

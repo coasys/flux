@@ -14,7 +14,11 @@ export default async function updateCommunityTheme(
   context: any,
   payload: { communityId: string; theme: ThemeState }
 ): Promise<void> {
-  const { commit: dataCommit, state: dataState, getters: dataGetters } = dataActionContext(context);
+  const {
+    commit: dataCommit,
+    state: dataState,
+    getters: dataGetters,
+  } = dataActionContext(context);
   const { state: appState } = appActionContext(context);
   const isCurrentTheme = appState.currentTheme === payload.communityId;
   const mergedTheme = {

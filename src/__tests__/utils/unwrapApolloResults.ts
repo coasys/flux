@@ -2,41 +2,45 @@ import unwrapApolloResult from "@/utils/unwrapApolloResult";
 import { ApolloError } from "@apollo/client/errors";
 import { GraphQLError } from "graphql";
 
-describe('Unwrap Apollo results', () => {
-  test('Unwrap Apollo results - Result', () => {
+describe("Unwrap Apollo results", () => {
+  test("Unwrap Apollo results - Result", () => {
     const data = {
-      expressionCreate: "QmfMfVxRpEzzXxLmraTQumQjfU1mT1NggkT1j9fWSnnC1s://8429246fa9e42d1d1e8cfe62291a79bfc3dd5667acf2b273207bf614b13615abcccb7d3406dd88"
+      expressionCreate:
+        "QmfMfVxRpEzzXxLmraTQumQjfU1mT1NggkT1j9fWSnnC1s://8429246fa9e42d1d1e8cfe62291a79bfc3dd5667acf2b273207bf614b13615abcccb7d3406dd88",
     };
 
     const result = unwrapApolloResult({
-      data
+      data,
     });
 
     expect(result).toStrictEqual(data);
   });
 
-  test('Unwrap Apollo results - Error', () => {
+  test("Unwrap Apollo results - Error", () => {
     const error: ApolloError = new ApolloError({
-      errorMessage: 'Test Error',
+      errorMessage: "Test Error",
     });
 
     try {
       //@ts-ignore
       unwrapApolloResult({
-        error
+        error,
       });
     } catch (error) {
       expect(error).toStrictEqual(Error("Test Error"));
     }
   });
 
-  test('Unwrap Apollo results - Errors', () => {
-    const errors: ReadonlyArray<GraphQLError> = [new GraphQLError('Test Error'), new GraphQLError('Test Error 1')];
+  test("Unwrap Apollo results - Errors", () => {
+    const errors: ReadonlyArray<GraphQLError> = [
+      new GraphQLError("Test Error"),
+      new GraphQLError("Test Error 1"),
+    ];
 
     try {
       //@ts-ignore
       unwrapApolloResult({
-        errors
+        errors,
       });
     } catch (error) {
       expect(error).toStrictEqual(Error("Test Error,Test Error 1"));

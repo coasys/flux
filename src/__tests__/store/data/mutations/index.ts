@@ -6,7 +6,7 @@ import user from "@/store/user";
 import data from "@/store/data";
 import { createDirectStore } from "direct-vuex";
 
-describe('Data Mutations', () => {
+describe("Data Mutations", () => {
   let store: any;
 
   beforeEach(() => {
@@ -21,7 +21,7 @@ describe('Data Mutations', () => {
     store = directStore.store;
   });
 
-  test('Add Community', () => {
+  test("Add Community", () => {
     expect(Object.values(store.state.data.communities).length).toBe(0);
 
     store.commit.addCommunity(community);
@@ -51,124 +51,159 @@ describe('Data Mutations', () => {
   });
 
   // TODO: @fayeed
-  test('Add message', () => {
-
-  });
+  // test("Add message", () => {});
 
   // TODO: @fayeed
-  test('Add messages', () => {
+  // test("Add messages", () => {});
 
-  });
-
-  test('Set current channel Id', () => {
+  test("Set current channel Id", () => {
     store.commit.addCommunity(community);
     store.commit.createChannel(createChannel);
 
-    expect(store.state.data.communities[community.state.perspectiveUuid].currentChannelId).toBeNull();
+    expect(
+      store.state.data.communities[community.state.perspectiveUuid]
+        .currentChannelId
+    ).toBeNull();
 
     store.commit.setCurrentChannelId({
       communityId: community.state.perspectiveUuid,
       channelId: createChannel.state.perspectiveUuid,
     });
 
-    expect(store.state.data.communities[community.state.perspectiveUuid].currentChannelId).toBe(createChannel.state.perspectiveUuid);
+    expect(
+      store.state.data.communities[community.state.perspectiveUuid]
+        .currentChannelId
+    ).toBe(createChannel.state.perspectiveUuid);
   });
 
-  test('Remove community', () => {
+  test("Remove community", () => {
     store.commit.addCommunity(community);
     store.commit.createChannel(createChannel);
 
     expect(Object.values(store.state.data.communities).length).toBe(1);
     expect(Object.values(store.state.data.neighbourhoods).length).toBe(2);
-  
+
     store.commit.removeCommunity(community.state.perspectiveUuid);
 
     expect(Object.values(store.state.data.communities).length).toBe(0);
     expect(Object.values(store.state.data.neighbourhoods).length).toBe(1);
   });
 
-  test('Set Channel Notification State', () => {
+  test("Set Channel Notification State", () => {
     store.commit.addCommunity(community);
     store.commit.createChannel(createChannel);
 
-    expect(store.state.data.channels[createChannel.state.perspectiveUuid].notifications.mute).toBeFalsy();
+    expect(
+      store.state.data.channels[createChannel.state.perspectiveUuid]
+        .notifications.mute
+    ).toBeFalsy();
 
     store.commit.setChannelNotificationState({
-      channelId: createChannel.state.perspectiveUuid
+      channelId: createChannel.state.perspectiveUuid,
     });
 
-    expect(store.state.data.channels[createChannel.state.perspectiveUuid].notifications.mute).toBeTruthy();
+    expect(
+      store.state.data.channels[createChannel.state.perspectiveUuid]
+        .notifications.mute
+    ).toBeTruthy();
   });
 
   // TODO: @fayeed
-  test('Set Community Members', () => {
+  // test("Set Community Members", () => {});
 
-  });
-
-  test('Set community Theme', () => {
+  test("Set community Theme", () => {
     store.commit.addCommunity(community);
     store.commit.createChannel(createChannel);
 
-    expect(store.state.data.communities[community.state.perspectiveUuid].theme).toStrictEqual({
-      "fontSize": "md",
-      "fontFamily": "default",
-      "name": "light",
-      "hue": 270,
-      "saturation": 60
+    expect(
+      store.state.data.communities[community.state.perspectiveUuid].theme
+    ).toStrictEqual({
+      fontSize: "md",
+      fontFamily: "default",
+      name: "light",
+      hue: 270,
+      saturation: 60,
     });
 
     store.commit.setCommunityTheme({
       communityId: community.state.perspectiveUuid,
       theme: {
-        "fontSize": "lg",
-        "saturation": 80
-      }
+        fontSize: "lg",
+        saturation: 80,
+      },
     });
 
-    expect(store.state.data.communities[community.state.perspectiveUuid].theme).toStrictEqual({
-      "fontSize": "lg",
-      "fontFamily": "default",
-      "name": "light",
-      "hue": 270,
-      "saturation": 80
+    expect(
+      store.state.data.communities[community.state.perspectiveUuid].theme
+    ).toStrictEqual({
+      fontSize: "lg",
+      fontFamily: "default",
+      name: "light",
+      hue: 270,
+      saturation: 80,
     });
   });
 
-  test('Update Community Metadata', () => {
+  test("Update Community Metadata", () => {
     store.commit.addCommunity(community);
     store.commit.createChannel(createChannel);
 
-    expect(store.state.data.neighbourhoods[community.state.perspectiveUuid].name).toBe('test');
-    expect(store.state.data.neighbourhoods[community.state.perspectiveUuid].description).toBe('');
-    expect(store.state.data.neighbourhoods[community.state.perspectiveUuid].groupExpressionRef).toBe('QmUCLri8MRJVpXsBRvry8KaQEkX7RhKcqBwfAkMmTo6Swq://842924ebd45599a4c749d87247368bed49c9d0b2b3716573f054b472b6a5b2a52eb97ab243d9ee');
+    expect(
+      store.state.data.neighbourhoods[community.state.perspectiveUuid].name
+    ).toBe("test");
+    expect(
+      store.state.data.neighbourhoods[community.state.perspectiveUuid]
+        .description
+    ).toBe("");
+    expect(
+      store.state.data.neighbourhoods[community.state.perspectiveUuid]
+        .groupExpressionRef
+    ).toBe(
+      "QmUCLri8MRJVpXsBRvry8KaQEkX7RhKcqBwfAkMmTo6Swq://842924ebd45599a4c749d87247368bed49c9d0b2b3716573f054b472b6a5b2a52eb97ab243d9ee"
+    );
 
     store.commit.updateCommunityMetadata({
       communityId: community.state.perspectiveUuid,
-      name: 'test1',
-      description: 'test',
-      groupExpressionRef: 'QmUCLri8MRJVpXsBRvry8KaQEkX7RhKcqBwfAkMmTo6Swq://842924ebd45599a4c749d87247368bed49c9d0b2b3716573f054b472b6a5b2a52eb97ab243d9e1'
-    })
+      name: "test1",
+      description: "test",
+      groupExpressionRef:
+        "QmUCLri8MRJVpXsBRvry8KaQEkX7RhKcqBwfAkMmTo6Swq://842924ebd45599a4c749d87247368bed49c9d0b2b3716573f054b472b6a5b2a52eb97ab243d9e1",
+    });
 
-    expect(store.state.data.neighbourhoods[community.state.perspectiveUuid].name).toBe('test1');
-    expect(store.state.data.neighbourhoods[community.state.perspectiveUuid].description).toBe('test');
-    expect(store.state.data.neighbourhoods[community.state.perspectiveUuid].groupExpressionRef).toBe('QmUCLri8MRJVpXsBRvry8KaQEkX7RhKcqBwfAkMmTo6Swq://842924ebd45599a4c749d87247368bed49c9d0b2b3716573f054b472b6a5b2a52eb97ab243d9e1');
+    expect(
+      store.state.data.neighbourhoods[community.state.perspectiveUuid].name
+    ).toBe("test1");
+    expect(
+      store.state.data.neighbourhoods[community.state.perspectiveUuid]
+        .description
+    ).toBe("test");
+    expect(
+      store.state.data.neighbourhoods[community.state.perspectiveUuid]
+        .groupExpressionRef
+    ).toBe(
+      "QmUCLri8MRJVpXsBRvry8KaQEkX7RhKcqBwfAkMmTo6Swq://842924ebd45599a4c749d87247368bed49c9d0b2b3716573f054b472b6a5b2a52eb97ab243d9e1"
+    );
   });
 
-  test('Set channel scrollTop', () => {
+  test("Set channel scrollTop", () => {
     store.commit.addCommunity(community);
     store.commit.createChannel(createChannel);
 
-    expect(store.state.data.channels[createChannel.state.perspectiveUuid].scrollTop).toBeUndefined();
+    expect(
+      store.state.data.channels[createChannel.state.perspectiveUuid].scrollTop
+    ).toBeUndefined();
 
     store.commit.setChannelScrollTop({
       channelId: createChannel.state.perspectiveUuid,
-      value: 100
+      value: 100,
     });
 
-    expect(store.state.data.channels[createChannel.state.perspectiveUuid].scrollTop).toBe(100);
+    expect(
+      store.state.data.channels[createChannel.state.perspectiveUuid].scrollTop
+    ).toBe(100);
   });
 
-  test('Add channel', () => {
+  test("Add channel", () => {
     expect(Object.values(store.state.data.communities).length).toBe(0);
 
     store.commit.addCommunity(community);
@@ -191,7 +226,7 @@ describe('Data Mutations', () => {
     ).toBe(2);
   });
 
-  test('Add channel without duplicate entries in community neighbourhood', () => {
+  test("Add channel without duplicate entries in community neighbourhood", () => {
     expect(Object.values(store.state.data.communities).length).toBe(0);
 
     store.commit.addCommunity(community);
@@ -228,38 +263,40 @@ describe('Data Mutations', () => {
     ]);
   });
 
-  test('Add channel to without adding an entry in community neighbourhood', () => {
+  test("Add channel to without adding an entry in community neighbourhood", () => {
     expect(Object.values(store.state.data.neighbourhoods).length).toBe(0);
 
     store.commit.addCommunity(community);
 
     store.commit.createChannel(createChannel);
 
-    expect(
-      Object.values(store.state.data.channels).length
-    ).toBe(1);
+    expect(Object.values(store.state.data.channels).length).toBe(1);
 
-    expect(
-      Object.keys(store.state.data.channels)
-    ).toStrictEqual([createChannel.neighbourhood.perspective.uuid]);
+    expect(Object.keys(store.state.data.channels)).toStrictEqual([
+      createChannel.neighbourhood.perspective.uuid,
+    ]);
   });
 
-  test('Set has new messages', () => {
+  test("Set has new messages", () => {
     store.commit.addCommunity(community);
     store.commit.createChannel(createChannel);
 
-    expect(store.state.data.channels[createChannel.state.perspectiveUuid].hasNewMessages).toBeFalsy();
+    expect(
+      store.state.data.channels[createChannel.state.perspectiveUuid]
+        .hasNewMessages
+    ).toBeFalsy();
 
     store.commit.setHasNewMessages({
       channelId: createChannel.state.perspectiveUuid,
-      value: true
+      value: true,
     });
 
-    expect(store.state.data.channels[createChannel.state.perspectiveUuid].hasNewMessages).toBeTruthy();
+    expect(
+      store.state.data.channels[createChannel.state.perspectiveUuid]
+        .hasNewMessages
+    ).toBeTruthy();
   });
 
   // TODO: @fayeed
-  test('Add Expression and Link', () => {
-
-  });
+  // test("Add Expression and Link", () => {});
 });
