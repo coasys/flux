@@ -7,6 +7,7 @@ import createChannelMeta from "../../../fixtures/createChannelMeta.json";
 import createCommunityGroupExpression from "../../../fixtures/createCommunityGroupExpression.json";
 import createCommunityProfileLink from "../../../fixtures/createCommunityProfileLink.json";
 import createCommunityChannel from "../../../fixtures/createCommunityChannel.json";
+import languages from "../../../fixtures/languages.json";
 import { createDirectStore } from "direct-vuex";
 import user from "@/store/user";
 import data from "@/store/data";
@@ -19,6 +20,7 @@ import * as createLink from "@/core/mutations/createLink";
 import * as createExpression from "@/core/mutations/createExpression";
 import * as createProfile from "@/core/methods/createProfile";
 import * as createChannel from "@/core/methods/createChannel";
+import * as getLanguage from "@/core/queries/getLanguage";
 
 describe("Create Community", () => {
   let store: any;
@@ -50,6 +52,12 @@ describe("Create Community", () => {
       .mockImplementation(async () => {
         return "neighbourhood://QmW6LEDuWFuRPBgWsaeh3D9KpjVLu3PZ7VeeV2WYATTJop";
       });
+
+    // @ts-ignore
+    jest
+    .spyOn(getLanguage, "getLanguage")
+    // @ts-ignore
+    .mockResolvedValue(languages[0]);
 
     // @ts-ignore
     jest
