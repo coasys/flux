@@ -1,9 +1,5 @@
-import community from "../../../fixtures/community.json";
 import * as getLanguages from "../../../../core/queries/getLanguages";
-import { Expression } from "@perspect3vism/ad4m-types";
 import languages from "../../../fixtures/languages.json";
-import getProfileFixture from "../../../fixtures/getProfile.json";
-import * as getExpressionNoCache from "@/core/queries/getExpression";
 import { createDirectStore } from "direct-vuex";
 import user from "@/store/user";
 import data from "@/store/data";

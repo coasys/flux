@@ -1,11 +1,11 @@
 import "@testing-library/vue";
-import { AgentStatus } from "@perspect3vism/ad4m-types";
 import * as agentUnlock from "../../../../core/mutations/agentUnlock";
 import lockAgentFixture from "../../../fixtures/lockAgent.json";
 import { createDirectStore } from "direct-vuex";
 import user from "@/store/user";
 import data from "@/store/data";
 import app from "@/store/app";
+import { AgentStatus } from "@perspect3vism/ad4m";
 // import { AppStore } from "@/store";
 
 describe("Login", () => {

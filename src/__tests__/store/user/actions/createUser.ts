@@ -3,12 +3,11 @@ import initAgentFixture from "../../../fixtures/initAgent.json";
 import addPerspectiveFixture from "../../../fixtures/addPerspective.json";
 import * as agentGenerate from "@/core/mutations/agentGenerate";
 import * as addPerspective from "@/core/mutations/addPerspective";
-import { AgentStatus, PerspectiveHandle } from "@perspect3vism/ad4m-types";
 import user from "@/store/user";
 import { createDirectStore } from "direct-vuex";
 import data from "@/store/data";
 import app from "@/store/app";
-// import { AppStore } from "@/store";
+import { AgentStatus, PerspectiveHandle } from "@perspect3vism/ad4m";
 
 describe("Store Actions", () => {
   let store: any;
