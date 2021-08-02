@@ -1,5 +1,5 @@
 import { app, BrowserWindow } from "electron";
-import installExtension from "electron-devtools-installer";
+import installExtension, { VUEJS3_DEVTOOLS } from "electron-devtools-installer";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { autoUpdater } from "electron-updater";
 import { MainThreadGlobal } from "./globals";
@@ -38,10 +38,7 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
       if (!app.isPackaged && !process.env.IS_TEST) {
         // Install Vue Devtools
         try {
-          await installExtension({
-            id: "ljjemllljcmogpfapbkkighbhhppjdbg",
-            electron: ">=1.2.1",
-          });
+          await installExtension(VUEJS3_DEVTOOLS);
         } catch (e) {
           console.error("Vue Devtools failed to install:", e.toString());
         }
