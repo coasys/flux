@@ -1,7 +1,6 @@
 import "@testing-library/vue";
 import community from "../../../fixtures/community.json";
 import * as getLinks from "../../../../core/queries/getLinks";
-import { Expression } from "@perspect3vism/ad4m-types";
 import getCommunityMembersLinkFixture from "../../../fixtures/getCommunityMembersLink.json";
 import getProfileFixture from "../../../fixtures/getProfile.json";
 import * as getExpressionNoCache from "@/core/queries/getExpression";
@@ -9,6 +8,7 @@ import { createDirectStore } from "direct-vuex";
 import user from "@/store/user";
 import data from "@/store/data";
 import app from "@/store/app";
+import { Expression } from "@perspect3vism/ad4m";
 
 describe("Get Community Members", () => {
   let store: any;

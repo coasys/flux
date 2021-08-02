@@ -10,15 +10,15 @@ export interface Payload {
   description: string;
 }
 
-export default async function updateGlobalTheme(
+export default async function updateCommunityTheme(
   context: any,
   payload: { communityId: string; theme: ThemeState }
 ): Promise<void> {
-  const { commit: dataCommit, state: dataState } = dataActionContext(context);
+  const { commit: dataCommit, state: dataState, getters: dataGetters } = dataActionContext(context);
   const { state: appState } = appActionContext(context);
   const isCurrentTheme = appState.currentTheme === payload.communityId;
   const mergedTheme = {
-    ...dataState.communities[payload.communityId].theme,
+    ...dataGetters.getCommunity(payload.communityId).state.theme,
     ...payload.theme,
   };
 

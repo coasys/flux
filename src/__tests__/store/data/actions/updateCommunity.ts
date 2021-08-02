@@ -1,14 +1,10 @@
 import community from "../../../fixtures/community.json";
-import addChannelPerspective from "../../../fixtures/addChannelPerspective.json";
-import addChannelUniqueHolochainLanguages from "../../../fixtures/addChannelUniqueHolochainLanguages.json";
-import addChannelCreateLinkType from "../../../fixtures/addChannelCreateLinkType.json";
 import updateCommunityLinkData from "../../../fixtures/updateCommunityLinkData.json";
 import { createDirectStore } from "direct-vuex";
 import user from "@/store/user";
 import data from "@/store/data";
 import app from "@/store/app";
 import * as createExpression from "@/core/mutations/createExpression";
-import * as createNeighbourhood from "@/core/mutations/createNeighbourhood";
 import * as createLink from "@/core/mutations/createLink";
 
 describe('Update Community', () => {
