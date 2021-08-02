@@ -14,7 +14,7 @@ export interface Payload {
 }
 
 export default async (context: any, payload: Payload): Promise<void> => {
-  const { state: dataState } = dataActionContext(context);
+  const { getters: dataGetter } = dataActionContext(context);
   const { commit: appCommit } = appActionContext(context);
   const {
     commit: userCommit,
@@ -34,7 +34,7 @@ export default async (context: any, payload: Payload): Promise<void> => {
   userCommit.setUserProfile(newProfile);
 
   try {
-    const neighbourhoods = Object.values(dataState.neighbourhoods);
+    const neighbourhoods = Object.values(dataGetter.getCommunityNeighbourhoods);
     const cache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
 
     for (const neighbourhood of neighbourhoods) {
