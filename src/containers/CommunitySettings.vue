@@ -76,7 +76,6 @@ export default defineComponent({
     },
     community() {
       const id = this.$route.params.communityId as string;
-      console.log("community-changed", store.getters.getCommunityState(id));
       return store.getters.getCommunityState(id);
     },
   },
