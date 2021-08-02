@@ -3,6 +3,7 @@ import addChannelPerspective from "../../../fixtures/addChannelPerspective.json"
 import addChannelUniqueHolochainLanguages from "../../../fixtures/addChannelUniqueHolochainLanguages.json";
 import addChannelCreateLinkType from "../../../fixtures/addChannelCreateLinkType.json";
 import addChannelCreateLink from "../../../fixtures/addChannelCreateLink.json";
+import createChannelMeta from "../../../fixtures/createChannelMeta.json";
 import { createDirectStore } from "direct-vuex";
 import user from "@/store/user";
 import data from "@/store/data";
@@ -10,6 +11,7 @@ import app from "@/store/app";
 import * as addPerspective from "@/core/mutations/addPerspective";
 import * as createUniqueHolochainLanguage from "@/core/mutations/createUniqueHolochainLanguage";
 import * as createNeighbourhood from "@/core/mutations/createNeighbourhood";
+import * as createNeighbourhoodMeta from "@/core/methods/createNeighbourhoodMeta";
 import * as createLink from "@/core/mutations/createLink";
 
 describe('Create Channel', () => {
@@ -34,6 +36,13 @@ describe('Create Channel', () => {
       .spyOn(createNeighbourhood, "createNeighbourhood")
       .mockImplementation(async () => {
         return "neighbourhood://8421244696ef9042d51add6f4517ae9353d7a4374459f3f50d3bf6f324219e3a62ebd46ec1b688";
+      });
+
+      // @ts-ignore
+      jest
+      .spyOn(createNeighbourhoodMeta, "createNeighbourhoodMeta")
+      .mockImplementation(async (name, desc, lang) => {
+        return createChannelMeta;
       });
 
     // @ts-ignore

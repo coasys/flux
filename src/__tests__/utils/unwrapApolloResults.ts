@@ -26,12 +26,12 @@ describe('Unwrap Apollo results', () => {
         error
       });
     } catch (error) {
-      expect(error).toBe("Test Error");
+      expect(error).toStrictEqual(Error("Test Error"));
     }
   });
 
   test('Unwrap Apollo results - Errors', () => {
-    const errors: ReadonlyArray<GraphQLError> = [new GraphQLError('Test Error')];
+    const errors: ReadonlyArray<GraphQLError> = [new GraphQLError('Test Error'), new GraphQLError('Test Error 1')];
 
     try {
       //@ts-ignore
@@ -39,7 +39,7 @@ describe('Unwrap Apollo results', () => {
         errors
       });
     } catch (error) {
-      expect(error.map((e: any) => e.message)).toStrictEqual(["Test Error"]);
+      expect(error).toStrictEqual(Error("Test Error,Test Error 1"));
     }
   });
 });

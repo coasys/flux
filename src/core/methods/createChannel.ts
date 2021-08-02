@@ -12,7 +12,7 @@ import type { PerspectiveHandle } from "@perspect3vism/ad4m";
 import { addPerspective } from "../mutations/addPerspective";
 import { createUniqueHolochainLanguage } from "../mutations/createUniqueHolochainLanguage";
 import { createNeighbourhood } from "../mutations/createNeighbourhood";
-import createNeighbourhoodMeta from "./createNeighbourhoodMeta";
+import { createNeighbourhoodMeta } from "./createNeighbourhoodMeta";
 
 export async function createChannel(
   channelName: string,
@@ -39,7 +39,9 @@ export async function createChannel(
     "",
     typedExpressionLanguages
   );
+
   const meta = new Perspective(metaLinks);
+
   const neighbourhood = await createNeighbourhood(
     perspective.uuid,
     socialContextLanguage.address,

@@ -21,7 +21,7 @@ import { dataActionContext } from "@/store/data/index";
 import { appActionContext } from "@/store/app/index";
 import { userActionContext } from "@/store/user/index";
 import { Perspective } from "@perspect3vism/ad4m";
-import createNeighbourhoodMeta from "@/core/methods/createNeighbourhoodMeta";
+import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta";
 
 export interface Payload {
   perspectiveName: string;
