@@ -2,6 +2,7 @@
   <div class="channel-view" @scroll="handleScroll" ref="scrollContainer">
     <channel-header :community="community" :channel="channel" />
     <channel-messages
+      :profileLanguage="profileLanguage"
       @scrollToBottom="scrollToBottom"
       :showNewMessagesButton="showNewMessagesButton"
       :community="community"

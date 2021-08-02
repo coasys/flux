@@ -53,11 +53,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import store from "@/store";
-import {
-  ExpressionAndRef,
-  ExpressionTypes,
-  ProfileExpression,
-} from "@/store/types";
+import { ExpressionAndRef, ProfileExpression } from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
 import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
 import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css";
@@ -76,7 +72,7 @@ interface ExpressionAndRefWithId extends ExpressionAndRef {
 
 export default defineComponent({
   emits: ["scrollToBottom", "profileClick", "mentionClick"],
-  props: ["channel", "community", "showNewMessagesButton"],
+  props: ["channel", "community", "showNewMessagesButton", "profileLanguage"],
   name: "ChannelView",
   components: {
     DynamicScroller,
@@ -112,49 +108,8 @@ export default defineComponent({
         "asc"
       ).map((item) => ({ ...item, id: item.expression.proof.signature }));
     },
-    profileLanguage(): string {
-      const profileLang =
-        this.community.neighbourhood.typedExpressionLanguages.find(
-          (t) => t.expressionType === ExpressionTypes.ProfileExpression
-        );
-      return profileLang!.languageAddress;
-    },
   },
   methods: {
-    handleEditorChange(e: any) {
-      //console.log(e.target.json);
-      this.currentExpressionPost = e.target.value;
-    },
-    handleProfileClick(did: string) {
-      this.showProfile = true;
-      this.activeProfile = this.community.neighbourhood.members.find(
-        (m) => m.author === did
-      );
-    },
-    handleMentionClick(dataset: { label: string; id: string }) {
-      const { label, id } = dataset;
-      if (label?.startsWith("#")) {
-        this.$router.push({
-          name: "channel",
-          params: {
-            channelId: id,
-            communityId: this.community.neighbourhood.perspective.uuid,
-          },
-        });
-      }
-      if (label?.startsWith("@")) {
-        this.showProfile = true;
-        this.activeProfile = this.community.neighbourhood.members.find(
-          (m) => m.author === `did:key:${id}`
-        );
-      }
-    },
-    editorinit(e: any) {
-      this.editor = e.detail.editorInstance;
-    },
-    changeShowList(e: any) {
-      this.showList = e.detail.showSuggestions;
-    },
     showAvatar(index: number): boolean {
       const previousExpression = this.messages[index - 1]?.expression;
       const expression = this.messages[index].expression;
@@ -174,13 +129,13 @@ export default defineComponent({
     async loadUser(did: string) {
       let profileLang = this.profileLanguage;
       const dataExp = await getProfile(profileLang, did);
-      console.log(dataExp);
       if (dataExp) {
         const { data } = dataExp;
         this.users[did] = data.profile;
       }
     },
-    loadMoreMessages() {
+    loadMoreMessages(): void {
+      // TODO: Not in use yet
       const messageAmount = this.messages.length;
       if (messageAmount) {
         const lastMessage = this.messages[messageAmount - 1];
@@ -190,54 +145,12 @@ export default defineComponent({
       }
     },
     loadMessages(from?: string, to?: string): void {
-      let fromDate;
-      if (from) {
-        fromDate = new Date(from);
-      } else {
-        fromDate = undefined;
-      }
-      let toDate;
-      if (to) {
-        toDate = new Date(to);
-      } else {
-        toDate = undefined;
-      }
+      // TODO: Not in use yet
       store.dispatch.loadExpressions({
-        from: fromDate,
-        to: toDate,
+        from: from ? new Date(from) : undefined,
+        to: to ? new Date(to) : undefined,
         channelId: this.channel.neighbourhood.perspective.uuid,
       });
-    },
-    async createDirectMessage(message: string) {
-      const escapedMessage = message.replace(/( |<([^>]+)>)/gi, "");
-
-      this.currentExpressionPost = "";
-
-      if (escapedMessage) {
-        store.dispatch.createExpression({
-          languageAddress:
-            this.channel.neighbourhood.typedExpressionLanguages.find(
-              (t) => t.expressionType === ExpressionTypes.ShortForm
-            )!.languageAddress,
-          content: { body: message, background: [""] },
-          perspective: this.channel.neighbourhood.perspective.uuid as string,
-        });
-      }
-    },
-    scrollToBottom(behavior: "smooth" | "auto") {
-      const container = this.$refs.scrollContainer as HTMLDivElement;
-      if (container) {
-        this.$nextTick(() => {
-          this.markAsRead();
-
-          setTimeout(() => {
-            container.scrollTo({
-              top: container.scrollHeight,
-              behavior,
-            });
-          }, 10);
-        });
-      }
     },
   },
 });
