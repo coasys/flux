@@ -72,7 +72,7 @@ describe('Update Community', () => {
     expect(store.state.data.neighbourhoods[community.state.perspectiveUuid].description).toBe("");
 
     try {
-      await store.dispatch.updateCommunity({
+      store.dispatch.updateCommunity({
         communityId: community.state.perspectiveUuid,
         name: 'hello',
         description: 'hello',
