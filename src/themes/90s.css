@@ -82,6 +82,11 @@
     inset 2px 2px #dfdfdf;
 }
 
+[theme="90s"] j-avatar[selected]::part(base) {
+  border-radius: 0;
+  box-shadow: 0px 0px 0px 2px var(--j-color-primary-500);
+}
+
 [theme="90s"] j-avatar::part(img) {
   border-radius: 0;
 }

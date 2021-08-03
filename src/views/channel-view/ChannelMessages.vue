@@ -34,9 +34,9 @@
             :showAvatar="showAvatar(index)"
             :message="item.expression.data.body"
             :timestamp="item.expression.timestamp"
-            :username="users[item.expression.author]['foaf:AccountName']"
+            :username="users[item.expression.author]?.['foaf:AccountName']"
             :profileImg="
-              users[item.expression.author]['schema:image'] &&
+              users[item.expression.author]?.['schema:image'] &&
               JSON.parse(users[item.expression.author]['schema:image'])[
                 'schema:contentUrl'
               ]

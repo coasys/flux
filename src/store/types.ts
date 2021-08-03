@@ -83,7 +83,7 @@ export interface ChannelState {
 export interface LocalCommunityState {
   perspectiveUuid: string;
   theme: ThemeState;
-  useGlobalTheme: boolean;
+  useLocalTheme: boolean;
   currentChannelId: string | undefined | null;
 }
 

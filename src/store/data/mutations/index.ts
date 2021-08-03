@@ -174,12 +174,12 @@ export default {
       payload.neighbourhood;
   },
 
-  setUseGlobalTheme(
+  setuseLocalTheme(
     state: DataState,
     payload: { communityId: string; value: boolean }
   ): void {
     const community = state.communities[payload.communityId];
-    community.useGlobalTheme = payload.value;
+    community.useLocalTheme = payload.value;
   },
 
   setHasNewMessages(
