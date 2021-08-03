@@ -9,6 +9,7 @@
       </div>
       <j-flex direction="column" gap="400">
         <j-input
+          autofocus
           size="lg"
           label="Name"
           :minlength="10"
