@@ -77,7 +77,6 @@ export async function createProfile(
   profileData: Profile
 ): Promise<string> {
   try {
-    console.log("profule", profileData);
     const profile: { [x: string]: any } = {
       "foaf:AccountName": profileData.username,
       "schema:email": profileData.email,
@@ -117,6 +116,6 @@ export async function createProfile(
 
     return createProfileExpression;
   } catch (error) {
-    throw new Error(error);
+    throw Error(error);
   }
 }
