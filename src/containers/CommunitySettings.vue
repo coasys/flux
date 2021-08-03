@@ -24,10 +24,11 @@
       <div class="settings__content">
         <j-box pb="500">
           <j-toggle
-            :checked="community.useGlobalTheme"
-            @change="(e) => setUseGlobalTheme(e.target.checked)"
-            >Use global theme</j-toggle
+            :checked="community.useLocalTheme"
+            @change="(e) => setuseLocalTheme(e.target.checked)"
           >
+            Use local theme
+          </j-toggle>
         </j-box>
         <theme-editor
           v-if="showEditor"
@@ -53,10 +54,11 @@ export default defineComponent({
     };
   },
   methods: {
-    setUseGlobalTheme(val: boolean) {
+    setuseLocalTheme(val: boolean) {
+      console.log({ val });
       const id = this.$route.params.communityId as string;
-      store.commit.setUseGlobalTheme({ communityId: id, value: val });
-      store.dispatch.changeCurrentTheme(val ? "global" : id);
+      store.commit.setuseLocalTheme({ communityId: id, value: val });
+      store.dispatch.changeCurrentTheme(val ? id : "global");
     },
     updateCommunityTheme(val: ThemeState) {
       const id = this.$route.params.communityId as string;
@@ -71,7 +73,7 @@ export default defineComponent({
       return (
         this.currentView === "theme-editor" &&
         this.community.theme &&
-        !this.community.useGlobalTheme
+        this.community.useLocalTheme
       );
     },
     community() {

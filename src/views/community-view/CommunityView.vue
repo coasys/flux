@@ -117,7 +117,8 @@ export default defineComponent({
       "setShowInviteCode",
       "setShowCommunitySettings",
     ]),
-    goToActiveChannel(id: string) {
+    goToActiveChannel(communityId: string) {
+      if (!communityId) return;
       const firstChannel = this.community.neighbourhood.linkedPerspectives[0];
       const currentChannelId =
         this.community.state.currentChannelId || firstChannel;
@@ -126,7 +127,7 @@ export default defineComponent({
         this.$router.push({
           name: "channel",
           params: {
-            communityId: id,
+            communityId,
             channelId: currentChannelId,
           },
         });
@@ -138,7 +139,7 @@ export default defineComponent({
         return;
       } else {
         store.dispatch.changeCurrentTheme(
-          this.community.state.useGlobalTheme ? "global" : id
+          this.community.state.useLocalTheme ? id : "global"
         );
       }
     },
