@@ -63,16 +63,8 @@ export default defineComponent({
     };
   },
   async beforeRouteUpdate(to, from, next) {
-    const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-    store.commit.setChannelScrollTop({
-      channelId: from.params.channelId as string,
-      value: scrollContainer.scrollTop,
-    });
-
-    if (this.linksWorker) {
-      this.linksWorker!.terminate();
-    }
-
+    this.linksWorker?.terminate();
+    this.saveScrollPos(from.params.channelId as string);
     next();
   },
   watch: {
@@ -133,6 +125,13 @@ export default defineComponent({
     },
   },
   methods: {
+    saveScrollPos(channelId: string) {
+      const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
+      store.commit.setChannelScrollTop({
+        channelId: channelId as string,
+        value: scrollContainer ? scrollContainer.scrollTop : 0,
+      });
+    },
     scrollToLatestPos() {
       // Next tick waits for everything to be rendered
       this.$nextTick(() => {
