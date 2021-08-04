@@ -64,8 +64,6 @@ describe("App Mutations", () => {
   test("setApplicationStartTime", () => {
     const currentDate = new Date();
     
-    expect(store.state.app.applicationStartTime).toStrictEqual(date);
-
     store.commit.setApplicationStartTime(currentDate);
 
     expect(store.state.app.applicationStartTime).toStrictEqual(currentDate);
