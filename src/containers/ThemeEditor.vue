@@ -3,7 +3,7 @@
     <j-box pb="800">
       <j-box pb="800">
         <j-box pb="300">
-          <j-text size="500" weight="400" color="ui-700">Primary color</j-text>
+          <j-text variant="label">Primary color</j-text>
         </j-box>
         <div class="colors">
           <button
@@ -22,7 +22,7 @@
         </div>
       </j-box>
       <j-box pb="300">
-        <j-text size="500" weight="400" color="ui-700">Theme</j-text>
+        <j-text variant="label">Theme</j-text>
       </j-box>
       <j-tabs
         :value="theme.name"
@@ -38,7 +38,7 @@
     </j-box>
     <j-box pb="800">
       <j-box pb="300">
-        <j-text size="500" weight="400" color="ui-700">Font family</j-text>
+        <j-text variant="label">Font family</j-text>
       </j-box>
       <j-tabs
         :value="theme.fontFamily"
@@ -51,7 +51,7 @@
     </j-box>
     <j-box pb="800">
       <j-box pb="300">
-        <j-text size="500" weight="400" color="ui-700">Saturation</j-text>
+        <j-text variant="label">Saturation</j-text>
       </j-box>
       <j-tabs
         :value="theme.saturation.toString()"
@@ -64,7 +64,7 @@
     </j-box>
     <j-box pb="800">
       <j-box pb="300">
-        <j-text size="500" weight="400" color="ui-700">Font size</j-text>
+        <j-text variant="label">Font size</j-text>
       </j-box>
       <j-tabs
         :value="theme.fontSize"

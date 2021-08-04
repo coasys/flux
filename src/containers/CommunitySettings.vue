@@ -11,11 +11,11 @@
           :value="currentView"
           @change="(e) => (currentView = e.target.value)"
         >
-          <j-tab-item value="theme-editor">
+          <j-tab-item variant="button" value="theme-editor">
             <j-icon size="sm" name="eye" slot="start" />
-            Theming
+            Apperance
           </j-tab-item>
-          <j-tab-item value="privacy">
+          <j-tab-item variant="button" value="privacy">
             <j-icon size="sm" name="lock" slot="start" />
             Privacy
           </j-tab-item>
