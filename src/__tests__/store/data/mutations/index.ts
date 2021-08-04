@@ -62,12 +62,14 @@ describe("Data Mutations", () => {
     const channelId = "884f1238-c3d1-41b4-8489-aa73c5f9fc08";
 
     expect(
-      Object.values(store.state.data.neighbourhoods[channelId]
-        .currentExpressionLinks).length
+      Object.values(
+        store.state.data.neighbourhoods[channelId].currentExpressionLinks
+      ).length
     ).toBe(0);
     expect(
-      Object.values(store.state.data.neighbourhoods[channelId]
-        .currentExpressionMessages).length
+      Object.values(
+        store.state.data.neighbourhoods[channelId].currentExpressionMessages
+      ).length
     ).toBe(0);
 
     store.commit.addMessage({
@@ -77,12 +79,14 @@ describe("Data Mutations", () => {
     });
 
     expect(
-      Object.values(store.state.data.neighbourhoods[channelId]
-        .currentExpressionLinks).length
+      Object.values(
+        store.state.data.neighbourhoods[channelId].currentExpressionLinks
+      ).length
     ).toBe(1);
     expect(
-      Object.values(store.state.data.neighbourhoods[channelId]
-        .currentExpressionMessages).length
+      Object.values(
+        store.state.data.neighbourhoods[channelId].currentExpressionMessages
+      ).length
     ).toBe(1);
   });
 
@@ -92,12 +96,16 @@ describe("Data Mutations", () => {
     store.commit.createChannel(channel);
 
     expect(
-      Object.values(store.state.data.neighbourhoods[channel.state.perspectiveUuid]
-        .currentExpressionLinks).length
+      Object.values(
+        store.state.data.neighbourhoods[channel.state.perspectiveUuid]
+          .currentExpressionLinks
+      ).length
     ).toBe(0);
     expect(
-      Object.values(store.state.data.neighbourhoods[channel.state.perspectiveUuid]
-        .currentExpressionMessages).length
+      Object.values(
+        store.state.data.neighbourhoods[channel.state.perspectiveUuid]
+          .currentExpressionMessages
+      ).length
     ).toBe(0);
 
     store.commit.addMessages({
@@ -107,12 +115,16 @@ describe("Data Mutations", () => {
     });
 
     expect(
-      Object.values(store.state.data.neighbourhoods[channel.state.perspectiveUuid]
-        .currentExpressionLinks).length
+      Object.values(
+        store.state.data.neighbourhoods[channel.state.perspectiveUuid]
+          .currentExpressionLinks
+      ).length
     ).toBe(1);
     expect(
-      Object.values(store.state.data.neighbourhoods[channel.state.perspectiveUuid]
-        .currentExpressionMessages).length
+      Object.values(
+        store.state.data.neighbourhoods[channel.state.perspectiveUuid]
+          .currentExpressionMessages
+      ).length
     ).toBe(1);
   });
 
@@ -362,12 +374,16 @@ describe("Data Mutations", () => {
     store.commit.createChannel(channel1);
 
     expect(
-      Object.values(store.state.data.neighbourhoods[channel1.state.perspectiveUuid]
-        .currentExpressionLinks).length
+      Object.values(
+        store.state.data.neighbourhoods[channel1.state.perspectiveUuid]
+          .currentExpressionLinks
+      ).length
     ).toBe(0);
     expect(
-      Object.values(store.state.data.neighbourhoods[channel1.state.perspectiveUuid]
-        .currentExpressionMessages).length
+      Object.values(
+        store.state.data.neighbourhoods[channel1.state.perspectiveUuid]
+          .currentExpressionMessages
+      ).length
     ).toBe(0);
 
     store.commit.addExpressionAndLink({
@@ -377,12 +393,16 @@ describe("Data Mutations", () => {
     });
 
     expect(
-      Object.values(store.state.data.neighbourhoods[channel1.state.perspectiveUuid]
-        .currentExpressionLinks).length
+      Object.values(
+        store.state.data.neighbourhoods[channel1.state.perspectiveUuid]
+          .currentExpressionLinks
+      ).length
     ).toBe(1);
     expect(
-      Object.values(store.state.data.neighbourhoods[channel1.state.perspectiveUuid]
-        .currentExpressionMessages).length
+      Object.values(
+        store.state.data.neighbourhoods[channel1.state.perspectiveUuid]
+          .currentExpressionMessages
+      ).length
     ).toBe(1);
   });
 });

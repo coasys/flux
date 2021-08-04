@@ -55,9 +55,9 @@ describe("Create Community", () => {
 
     // @ts-ignore
     jest
-    .spyOn(getLanguage, "getLanguage")
-    // @ts-ignore
-    .mockResolvedValue(languages[0]);
+      .spyOn(getLanguage, "getLanguage")
+      // @ts-ignore
+      .mockResolvedValue(languages[0]);
 
     // @ts-ignore
     jest

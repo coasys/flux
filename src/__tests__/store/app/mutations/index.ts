@@ -27,14 +27,19 @@ describe("App Mutations", () => {
   test("addExpressionUI", async () => {
     // @ts-ignore
     jest
-    .spyOn(getLanguage, "getLanguage")
-    // @ts-ignore
-    .mockImplementation(async (address) => {
-      return getTypedExpressionLangLanguages.find(e => e.address === address);
-    });
+      .spyOn(getLanguage, "getLanguage")
+      // @ts-ignore
+      .mockImplementation(async (address) => {
+        return getTypedExpressionLangLanguages.find(
+          (e) => e.address === address
+        );
+      });
 
     // @ts-ignore
-    const [exp, icons] = await getTypedExpressionLanguages(getTypedExpressionLangLinks, true);
+    const [exp, icons] = await getTypedExpressionLanguages(
+      getTypedExpressionLangLinks,
+      true
+    );
 
     expect(Object.values(store.state.app.expressionUI).length).toBe(0);
 
@@ -58,12 +63,14 @@ describe("App Mutations", () => {
 
     store.commit.setDatabasePerspective("bb8051d7-71aa-4ab1-83b2-71edbf967bc3");
 
-    expect(store.state.app.databasePerspective).toBe("bb8051d7-71aa-4ab1-83b2-71edbf967bc3");
+    expect(store.state.app.databasePerspective).toBe(
+      "bb8051d7-71aa-4ab1-83b2-71edbf967bc3"
+    );
   });
 
   test("setApplicationStartTime", () => {
     const currentDate = new Date();
-    
+
     store.commit.setApplicationStartTime(currentDate);
 
     expect(store.state.app.applicationStartTime).toStrictEqual(currentDate);
@@ -90,7 +97,9 @@ describe("App Mutations", () => {
 
     store.commit.setCurrentTheme("bebd2ac2-1e80-44d2-b807-0163c2bcef40");
 
-    expect(store.state.app.currentTheme).toBe("bebd2ac2-1e80-44d2-b807-0163c2bcef40");
+    expect(store.state.app.currentTheme).toBe(
+      "bebd2ac2-1e80-44d2-b807-0163c2bcef40"
+    );
   });
 
   test("setGlobalTheme", () => {
@@ -99,7 +108,7 @@ describe("App Mutations", () => {
       fontSize: "md",
       hue: 270,
       name: "light",
-      saturation: 60
+      saturation: 60,
     });
 
     store.commit.setGlobalTheme({ fontFamily: "Arial", hue: 70 });
@@ -109,72 +118,72 @@ describe("App Mutations", () => {
       fontSize: "md",
       hue: 70,
       name: "light",
-      saturation: 60
+      saturation: 60,
     });
   });
 
   test("setToast", () => {
     expect(store.state.app.toast).toStrictEqual({
-      variant: '',
+      variant: "",
       open: false,
-      message: ''
+      message: "",
     });
 
     store.commit.setToast({ message: "error", open: true, variant: "error" });
 
     expect(store.state.app.toast).toStrictEqual({
-      variant: 'error',
+      variant: "error",
       open: true,
-      message: 'error'
+      message: "error",
     });
   });
 
   test("showSuccessToast", () => {
     expect(store.state.app.toast).toStrictEqual({
-      variant: '',
+      variant: "",
       open: false,
-      message: ''
+      message: "",
     });
 
     store.commit.showSuccessToast({ message: "success" });
 
     expect(store.state.app.toast).toStrictEqual({
-      variant: 'success',
+      variant: "success",
       open: true,
-      message: 'success'
+      message: "success",
     });
   });
 
   test("showDangerToast", () => {
     expect(store.state.app.toast).toStrictEqual({
-      variant: '',
+      variant: "",
       open: false,
-      message: ''
+      message: "",
     });
 
     store.commit.showDangerToast({ message: "error" });
 
     expect(store.state.app.toast).toStrictEqual({
-      variant: 'danger',
+      variant: "danger",
       open: true,
-      message: 'error'
+      message: "error",
     });
   });
 
   test("setWindowState", () => {
-    expect(store.state.app.windowState).toBe('visible');
+    expect(store.state.app.windowState).toBe("visible");
 
-    store.commit.setWindowState('foreground');
+    store.commit.setWindowState("foreground");
 
-    expect(store.state.app.windowState).toBe('foreground');
+    expect(store.state.app.windowState).toBe("foreground");
   });
 
   test("setUpdateState", () => {
-    expect(store.state.app.updateState).toBe('not-available');
+    expect(store.state.app.updateState).toBe("not-available");
 
-    store.commit.setUpdateState({ updateState: 'available' });
+    store.commit.setUpdateState({ updateState: "available" });
 
-    expect(store.state.app.updateState).toBe('available');
+    expect(store.state.app.updateState).toBe("available");
   });
 
   test("setGlobalLoading", () => {
@@ -191,7 +200,7 @@ describe("App Mutations", () => {
 
     store.commit.setGlobalError({
       show: true,
-      message: "error"
+      message: "error",
     });
 
     expect(store.state.app.globalError.show).toBeTruthy();

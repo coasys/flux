@@ -8,7 +8,7 @@ import * as createLink from "@/core/mutations/createLink";
 import * as getPerspectiveSnapshot from "@/core/queries/getPerspective";
 
 const removeEmpty = (obj: any) => {
-  let newObj: {[x:string]: any} = {};
+  const newObj: { [x: string]: any } = {};
   Object.keys(obj).forEach((key) => {
     if (obj[key] === Object(obj[key])) newObj[key] = removeEmpty(obj[key]);
     else if (obj[key] !== undefined) newObj[key] = obj[key];
@@ -16,7 +16,7 @@ const removeEmpty = (obj: any) => {
   return newObj;
 };
 
-describe('Create Neighbourhood Meta', () => {
+describe("Create Neighbourhood Meta", () => {
   beforeEach(() => {
     // @ts-ignore
     jest
@@ -38,27 +38,70 @@ describe('Create Neighbourhood Meta', () => {
       });
   });
 
-  test('Create Neighbourhood Meta - Success', async () => {
-    const links = await createNeighbourhoodMeta('test', 'desc', [{"languageAddress":"QmNk28bBYP1SjF6tJAZX6t1pbUhw16GyYAn3oQtMCW5DPq","expressionType":0},{"languageAddress":"QmNaEewCPzVfyhzYtLoge6mG35yUe8TfhmzfFEVvY4QqRi","expressionType":1},{"languageAddress":"QmZsg9jEfRwV6QBRritJTaNQk86AEuJbVJCpMcNrzEffpP","expressionType":2}]);
+  test("Create Neighbourhood Meta - Success", async () => {
+    const links = await createNeighbourhoodMeta("test", "desc", [
+      {
+        languageAddress: "QmNk28bBYP1SjF6tJAZX6t1pbUhw16GyYAn3oQtMCW5DPq",
+        expressionType: 0,
+      },
+      {
+        languageAddress: "QmNaEewCPzVfyhzYtLoge6mG35yUe8TfhmzfFEVvY4QqRi",
+        expressionType: 1,
+      },
+      {
+        languageAddress: "QmZsg9jEfRwV6QBRritJTaNQk86AEuJbVJCpMcNrzEffpP",
+        expressionType: 2,
+      },
+    ]);
 
-    expect(Object.values(removeEmpty(links))).toStrictEqual(createNeighbourhoodMetaFixture);
+    expect(Object.values(removeEmpty(links))).toStrictEqual(
+      createNeighbourhoodMetaFixture
+    );
   });
 
-  test('Create Neighbourhood Meta with empty description - Success', async () => {
-    const links = await createNeighbourhoodMeta('test', '', [{"languageAddress":"QmNk28bBYP1SjF6tJAZX6t1pbUhw16GyYAn3oQtMCW5DPq","expressionType":0},{"languageAddress":"QmNaEewCPzVfyhzYtLoge6mG35yUe8TfhmzfFEVvY4QqRi","expressionType":1},{"languageAddress":"QmZsg9jEfRwV6QBRritJTaNQk86AEuJbVJCpMcNrzEffpP","expressionType":2}]);
+  test("Create Neighbourhood Meta with empty description - Success", async () => {
+    const links = await createNeighbourhoodMeta("test", "", [
+      {
+        languageAddress: "QmNk28bBYP1SjF6tJAZX6t1pbUhw16GyYAn3oQtMCW5DPq",
+        expressionType: 0,
+      },
+      {
+        languageAddress: "QmNaEewCPzVfyhzYtLoge6mG35yUe8TfhmzfFEVvY4QqRi",
+        expressionType: 1,
+      },
+      {
+        languageAddress: "QmZsg9jEfRwV6QBRritJTaNQk86AEuJbVJCpMcNrzEffpP",
+        expressionType: 2,
+      },
+    ]);
 
-    expect(Object.values(removeEmpty(links))).toStrictEqual(createNeighbourhoodMetaFixture);
+    expect(Object.values(removeEmpty(links))).toStrictEqual(
+      createNeighbourhoodMetaFixture
+    );
   });
 
-  test('Create Neighbourhood Meta - Failure', async () => {
+  test("Create Neighbourhood Meta - Failure", async () => {
     // @ts-ignore
     jest
-    .spyOn(addPerspective, "addPerspective")
-    // @ts-ignore
-    .mockRejectedValue(Error('Error while adding new perspective'));
+      .spyOn(addPerspective, "addPerspective")
+      // @ts-ignore
+      .mockRejectedValue(Error("Error while adding new perspective"));
 
     try {
-      await createNeighbourhoodMeta('test', '', [{"languageAddress":"QmNk28bBYP1SjF6tJAZX6t1pbUhw16GyYAn3oQtMCW5DPq","expressionType":0},{"languageAddress":"QmNaEewCPzVfyhzYtLoge6mG35yUe8TfhmzfFEVvY4QqRi","expressionType":1},{"languageAddress":"QmZsg9jEfRwV6QBRritJTaNQk86AEuJbVJCpMcNrzEffpP","expressionType":2}]);
+      await createNeighbourhoodMeta("test", "", [
+        {
+          languageAddress: "QmNk28bBYP1SjF6tJAZX6t1pbUhw16GyYAn3oQtMCW5DPq",
+          expressionType: 0,
+        },
+        {
+          languageAddress: "QmNaEewCPzVfyhzYtLoge6mG35yUe8TfhmzfFEVvY4QqRi",
+          expressionType: 1,
+        },
+        {
+          languageAddress: "QmZsg9jEfRwV6QBRritJTaNQk86AEuJbVJCpMcNrzEffpP",
+          expressionType: 2,
+        },
+      ]);
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
       expect(error).toHaveProperty(

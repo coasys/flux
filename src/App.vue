@@ -132,12 +132,12 @@ export default defineComponent({
             });
 
             store.dispatch.showMessageNotification({
-                router,
-                route,
-                perspectiveUuid: perspective,
-                authorDid: expression!.author,
-                message: message.body
-              });
+              router,
+              route,
+              perspectiveUuid: perspective,
+              authorDid: expression!.author,
+              message: message.body,
+            });
 
             //Add UI notification on the channel to notify that there is a new message there
             store.commit.setHasNewMessages({
