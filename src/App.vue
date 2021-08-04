@@ -45,7 +45,6 @@ import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { AGENT_STATUS, GET_EXPRESSION } from "@/core/graphql_queries";
 import { ModalsState, NeighbourhoodState, ToastState } from "@/store/types";
-import showMessageNotification from "@/utils/showMessageNotification";
 import { print } from "graphql/language/printer";
 import { AgentStatus, LinkExpression } from "@perspect3vism/ad4m";
 import store from "@/store";
@@ -132,13 +131,13 @@ export default defineComponent({
               message: expression,
             });
 
-            showMessageNotification(
-              router,
-              route,
-              perspective,
-              expression!.author,
-              message.body
-            );
+            store.dispatch.showMessageNotification({
+                router,
+                route,
+                perspectiveUuid: perspective,
+                authorDid: expression!.author,
+                message: message.body
+              });
 
             //Add UI notification on the channel to notify that there is a new message there
             store.commit.setHasNewMessages({

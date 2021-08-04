@@ -3,16 +3,23 @@ import { appActionContext } from "@/store/app/index";
 import { userActionContext } from "@/store/user/index";
 import { ExpressionTypes } from "@/store/types";
 import { RouteLocationNormalizedLoaded, Router } from "vue-router";
-import { getProfile } from "./profileHelpers";
+import { getProfile } from "../../../utils/profileHelpers";
 
-export default async (
+type Payload = {
   router: Router,
   route: RouteLocationNormalizedLoaded,
   perspectiveUuid: string,
   authorDid: string,
   message: string
-): Promise<void> => {
-  // @ts-ignore
+}
+
+export default async (context: any, {
+  router,
+  route,
+  perspectiveUuid,
+  authorDid,
+  message
+}: Payload): Promise<void> => {
   const { getters: dataGetters } = dataActionContext(context);
   const { getters: appGetters } = appActionContext(context);
   const { getters: userGetters } = userActionContext(context);

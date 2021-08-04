@@ -7,6 +7,7 @@ import joinCommunity from "./joinCommunity";
 import loadExpressionLanguages from "./loadExpressionLanguages";
 import loadExpressions from "./loadExpressions";
 import updateCommunity from "./updateCommunity";
+import showMessageNotification from './showMessageNotification';
 
 export default {
   createChannel,
@@ -18,4 +19,5 @@ export default {
   loadExpressionLanguages,
   loadExpressions,
   updateCommunity,
+  showMessageNotification
 };
