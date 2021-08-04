@@ -1,6 +1,9 @@
 import community from "../../../fixtures/community.json";
 import channel from "../../../fixtures/channel.json";
+import channel1 from "../../../fixtures/channel1.json";
 import createChannel from "../../../fixtures/createChannel.json";
+import messageLink from "../../../fixtures/messageLink.json";
+import messageExpression from "../../../fixtures/messageExpression.json";
 import app from "@/store/app";
 import user from "@/store/user";
 import data from "@/store/data";
@@ -18,6 +21,7 @@ describe("Data Mutations", () => {
         app,
       },
     });
+
     store = directStore.store;
   });
 
@@ -51,10 +55,66 @@ describe("Data Mutations", () => {
   });
 
   // TODO: @fayeed
-  // test("Add message", () => {});
+  test("Add message", () => {
+    store.commit.addCommunity(community);
+    store.commit.createChannel(createChannel);
+
+    const channelId = "884f1238-c3d1-41b4-8489-aa73c5f9fc08";
+
+    expect(
+      Object.values(store.state.data.neighbourhoods[channelId]
+        .currentExpressionLinks).length
+    ).toBe(0);
+    expect(
+      Object.values(store.state.data.neighbourhoods[channelId]
+        .currentExpressionMessages).length
+    ).toBe(0);
+
+    store.commit.addMessage({
+      channelId,
+      link: messageLink,
+      expression: messageExpression,
+    });
+
+    expect(
+      Object.values(store.state.data.neighbourhoods[channelId]
+        .currentExpressionLinks).length
+    ).toBe(1);
+    expect(
+      Object.values(store.state.data.neighbourhoods[channelId]
+        .currentExpressionMessages).length
+    ).toBe(1);
+  });
 
   // TODO: @fayeed
-  // test("Add messages", () => {});
+  test("Add messages", () => {
+    store.commit.addCommunity(community);
+    store.commit.createChannel(channel);
+
+    expect(
+      Object.values(store.state.data.neighbourhoods[channel.state.perspectiveUuid]
+        .currentExpressionLinks).length
+    ).toBe(0);
+    expect(
+      Object.values(store.state.data.neighbourhoods[channel.state.perspectiveUuid]
+        .currentExpressionMessages).length
+    ).toBe(0);
+
+    store.commit.addMessages({
+      channelId: channel.state.perspectiveUuid,
+      links: [messageLink],
+      expressions: [messageExpression],
+    });
+
+    expect(
+      Object.values(store.state.data.neighbourhoods[channel.state.perspectiveUuid]
+        .currentExpressionLinks).length
+    ).toBe(1);
+    expect(
+      Object.values(store.state.data.neighbourhoods[channel.state.perspectiveUuid]
+        .currentExpressionMessages).length
+    ).toBe(1);
+  });
 
   test("Set current channel Id", () => {
     store.commit.addCommunity(community);
@@ -297,6 +357,32 @@ describe("Data Mutations", () => {
     ).toBeTruthy();
   });
 
-  // TODO: @fayeed
-  // test("Add Expression and Link", () => {});
+  test("Add Expression and Link", () => {
+    store.commit.addCommunity(community);
+    store.commit.createChannel(channel1);
+
+    expect(
+      Object.values(store.state.data.neighbourhoods[channel1.state.perspectiveUuid]
+        .currentExpressionLinks).length
+    ).toBe(0);
+    expect(
+      Object.values(store.state.data.neighbourhoods[channel1.state.perspectiveUuid]
+        .currentExpressionMessages).length
+    ).toBe(0);
+
+    store.commit.addExpressionAndLink({
+      channelId: channel1.state.perspectiveUuid,
+      link: messageLink,
+      message: messageExpression,
+    });
+
+    expect(
+      Object.values(store.state.data.neighbourhoods[channel1.state.perspectiveUuid]
+        .currentExpressionLinks).length
+    ).toBe(1);
+    expect(
+      Object.values(store.state.data.neighbourhoods[channel1.state.perspectiveUuid]
+        .currentExpressionMessages).length
+    ).toBe(1);
+  });
 });
