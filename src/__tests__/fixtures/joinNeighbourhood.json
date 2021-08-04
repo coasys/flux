@@ -6,6 +6,40 @@
     "linkLanguage": "",
     "meta": {
       "links": [{
+        "__typename": "LinkExpression",
+        "author": "did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
+        "timestamp": "2021-08-03T06:17:27.832Z",
+        "data": {
+          "__typename": "Link",
+          "source": "self",
+          "predicate": "rdf://name",
+          "target": "safsafsaf"
+        },
+        "proof": {
+          "__typename": "ExpressionProof",
+          "valid": true,
+          "invalid": false,
+          "signature": "133e369d87690168f0b58553874adebbd45a5a6914e23350539ba373614955816a8d56f0c267653f78ccc449912406c5903e6b2fdd17ab42fd75f401e2a4494e",
+          "key": "#zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW"
+        }
+      },{
+        "__typename": "LinkExpression",
+        "author": "did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
+        "timestamp": "2021-08-03T06:17:27.844Z",
+        "data": {
+          "__typename": "Link",
+          "source": "self",
+          "predicate": "rdf://description",
+          "target": "-"
+        },
+        "proof": {
+          "__typename": "ExpressionProof",
+          "valid": true,
+          "invalid": false,
+          "signature": "bd00ba8d8311ccfdd76e1e1524a3299c74043737646fb18f08f9a785ec49d6c300ee2ffb3a066e9fc58d6c07d6b15b94dbd4b27576750b7b1c553ffac4cdb606",
+          "key": "#zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW"
+        }
+      }, {
         "author": "did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
         "data": {
           "predicate": "rdf://type",
