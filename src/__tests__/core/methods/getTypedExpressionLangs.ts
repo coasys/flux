@@ -16,8 +16,6 @@ describe('Get Typed Expression', () => {
     // @ts-ignore
     const [exp, icons] = await getTypedExpressionLanguages(getTypedExpressionLangLinks, true);
 
-    console.log(exp, icons)
-
     expect(exp.length).toBe(4);
     expect(icons.length).toBe(4);
     expect(exp.map(e => e.languageAddress)).toStrictEqual(getTypedExpressionLangLinks.filter(e => e.data.predicate === "language").map(e => e.data.target));
