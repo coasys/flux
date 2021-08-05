@@ -16,7 +16,7 @@ type Payload = {
 export default async (
   context: any,
   { router, route, perspectiveUuid, authorDid, message }: Payload
-): Promise<void> => {
+): Promise<Notification | undefined> => {
   const { getters: dataGetters } = dataActionContext(context);
   const { getters: appGetters } = appActionContext(context);
   const { getters: userGetters } = userActionContext(context);
@@ -89,5 +89,9 @@ export default async (
         },
       });
     };
+
+    return notification;
   }
+
+  return undefined;
 };
