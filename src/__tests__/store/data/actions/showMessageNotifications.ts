@@ -13,17 +13,17 @@ import { TimeoutCache } from "@/utils/timeoutCache";
 import { ExpressionTypes } from "@/store/types";
 import * as getExpressionNoCache from "@/core/queries/getExpression";
 
-describe('Show Message Notification', () => {
+describe("Show Message Notification", () => {
   let store: any;
   let profileLangAddress: string;
   let did: string;
   let profileLink: string;
 
   beforeAll(() => {
-    Object.defineProperty(global, 'Notification', {
+    Object.defineProperty(global, "Notification", {
       value: jest.fn(),
     });
-    
+
     const cache = new TimeoutCache<any>(10);
 
     profileLangAddress = community.neighbourhood.typedExpressionLanguages.find(
@@ -37,17 +37,16 @@ describe('Show Message Notification', () => {
     cache.remove(profileLink);
   });
 
-
   beforeEach(() => {
     jest
-    .spyOn(agentUnlock, "agentUnlock")
-    .mockImplementation(async (password) => {
-      if (password === "test123") {
-        return lockAgentFixture as AgentStatus;
-      }
+      .spyOn(agentUnlock, "agentUnlock")
+      .mockImplementation(async (password) => {
+        if (password === "test123") {
+          return lockAgentFixture as AgentStatus;
+        }
 
-      throw new Error("Password doesn't match");
-    });
+        throw new Error("Password doesn't match");
+      });
 
     // @ts-ignore
     const directStore = createDirectStore({
@@ -60,7 +59,7 @@ describe('Show Message Notification', () => {
     store = directStore.store;
   });
 
-  test('Show Message Notification for same user', async () => {
+  test("Show Message Notification for same user", async () => {
     await store.dispatch.logIn({
       password: "test123",
     });
@@ -69,23 +68,23 @@ describe('Show Message Notification', () => {
 
     const notification = await store.dispatch.showMessageNotification({
       router: {
-        push: jest.fn()
-        }, 
+        push: jest.fn(),
+      },
       route: {
         params: {
           channelId: channel.state.perspectiveUuid,
           communityId: community.state.perspectiveUuid,
-        }
-      }, 
-      perspectiveUuid: channel.state.perspectiveUuid, 
-      authorDid: lockAgentFixture.did, 
-      message: 'hello'
+        },
+      },
+      perspectiveUuid: channel.state.perspectiveUuid,
+      authorDid: lockAgentFixture.did,
+      message: "hello",
     });
 
     expect(notification).toBeUndefined();
   });
 
-  test('Show Message Notification for different user, with same community & channel', async () => {
+  test("Show Message Notification for different user, with same community & channel", async () => {
     await store.dispatch.logIn({
       password: "test123",
     });
@@ -94,23 +93,23 @@ describe('Show Message Notification', () => {
 
     const notification = await store.dispatch.showMessageNotification({
       router: {
-        push: jest.fn()
-        }, 
+        push: jest.fn(),
+      },
       route: {
         params: {
           channelId: channel.state.perspectiveUuid,
           communityId: community.state.perspectiveUuid,
-        }
-      }, 
-      perspectiveUuid: channel.state.perspectiveUuid, 
-      authorDid: "did:key:zQ3shP8NxwzjZkesAN71piLiSPjyYCZAnH22Cs2nyG5LpCwaC", 
-      message: 'hello'
+        },
+      },
+      perspectiveUuid: channel.state.perspectiveUuid,
+      authorDid: "did:key:zQ3shP8NxwzjZkesAN71piLiSPjyYCZAnH22Cs2nyG5LpCwaC",
+      message: "hello",
     });
 
     expect(notification).toBeUndefined();
   });
 
-  test('Show Message Notification for different user, with same community & different channel', async () => {
+  test("Show Message Notification for different user, with same community & different channel", async () => {
     await store.dispatch.logIn({
       password: "test123",
     });
@@ -119,35 +118,35 @@ describe('Show Message Notification', () => {
 
     const notification = await store.dispatch.showMessageNotification({
       router: {
-        push: jest.fn()
-        }, 
+        push: jest.fn(),
+      },
       route: {
         params: {
-          channelId: 'c6deef81-f6c6-421a-8f5b-642e2287c026',
+          channelId: "c6deef81-f6c6-421a-8f5b-642e2287c026",
           communityId: community.state.perspectiveUuid,
-        }
-      }, 
-      perspectiveUuid: channel.state.perspectiveUuid, 
-      authorDid: "did:key:zQ3shP8NxwzjZkesAN71piLiSPjyYCZAnH22Cs2nyG5LpCwaC", 
-      message: 'hello'
+        },
+      },
+      perspectiveUuid: channel.state.perspectiveUuid,
+      authorDid: "did:key:zQ3shP8NxwzjZkesAN71piLiSPjyYCZAnH22Cs2nyG5LpCwaC",
+      message: "hello",
     });
 
     expect(notification).not.toBeUndefined();
   });
 
-  test('Show mention Message Notification for different user, with same community & different channel', async () => {
+  test("Show mention Message Notification for different user, with same community & different channel", async () => {
     // @ts-ignore
     jest
-    .spyOn(getExpressionNoCache, "getExpressionNoCache")
-    .mockImplementation(async (url) => {
-      const split = url.split("://");
-      console.log(split[1], did, split[0], profileLangAddress)
-      if (split[1] === did && split[0] === profileLangAddress) {
-        return getProfileFixture as unknown as Expression;
-      }
+      .spyOn(getExpressionNoCache, "getExpressionNoCache")
+      .mockImplementation(async (url) => {
+        const split = url.split("://");
+        console.log(split[1], did, split[0], profileLangAddress);
+        if (split[1] === did && split[0] === profileLangAddress) {
+          return getProfileFixture as unknown as Expression;
+        }
 
-      return null;
-    });
+        return null;
+      });
     await store.dispatch.logIn({
       password: "test123",
     });
@@ -156,17 +155,18 @@ describe('Show Message Notification', () => {
 
     const notification = await store.dispatch.showMessageNotification({
       router: {
-        push: jest.fn()
-        }, 
+        push: jest.fn(),
+      },
       route: {
         params: {
-          channelId: 'c6deef81-f6c6-421a-8f5b-642e2287c026',
+          channelId: "c6deef81-f6c6-421a-8f5b-642e2287c026",
           communityId: community.state.perspectiveUuid,
-        }
-      }, 
-      perspectiveUuid: channel.state.perspectiveUuid, 
-      authorDid: "did:key:zQ3shP8NxwzjZkesAN71piLiSPjyYCZAnH22Cs2nyG5LpCwaC", 
-      message: '<p>hello <span data-id="did:key:zQ3shP8NxwzjZkesAN71piLiSPjyYCZAnH22Cs2nyG5LpCwaR">@jhon</span></p>'
+        },
+      },
+      perspectiveUuid: channel.state.perspectiveUuid,
+      authorDid: "did:key:zQ3shP8NxwzjZkesAN71piLiSPjyYCZAnH22Cs2nyG5LpCwaC",
+      message:
+        '<p>hello <span data-id="did:key:zQ3shP8NxwzjZkesAN71piLiSPjyYCZAnH22Cs2nyG5LpCwaR">@jhon</span></p>',
     });
 
     expect(notification).not.toBeUndefined();
