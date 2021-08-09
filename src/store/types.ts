@@ -57,7 +57,9 @@ export interface ApplicationState {
 
 export interface NeighbourhoodState {
   name: string;
-  description: string;
+  description?: string;
+  image?: string;
+  thumbnail: string;
   perspective: PerspectiveHandle;
   typedExpressionLanguages: JuntoExpressionReference[];
   groupExpressionRef?: string;

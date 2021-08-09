@@ -121,6 +121,8 @@ export default async (
       JSON.stringify({
         name: perspectiveName,
         description: description,
+        image: "IMAGE HERE",
+        thumbnail: "THUMBNAIL HERE",
       })
     );
     console.log("Created group expression with response", createExp);
@@ -166,6 +168,8 @@ export default async (
       neighbourhood: {
         name: perspectiveName,
         description: description,
+        image: "IMAGE HERE",
+        thumbnail: "THUMBNAIL HERE",
         perspective: createSourcePerspective,
         typedExpressionLanguages: typedExpLangs,
         groupExpressionRef: createExp,

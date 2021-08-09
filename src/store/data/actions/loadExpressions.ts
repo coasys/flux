@@ -5,6 +5,7 @@ import { LinkQuery } from "@perspect3vism/ad4m";
 
 import { dataActionContext } from "@/store/data/index";
 import { appActionContext } from "@/store/app/index";
+import { link } from "fs";
 
 export interface Payload {
   channelId: string;
@@ -25,6 +26,9 @@ export default async function (
   const { commit: appCommit, getters: appGetters } = appActionContext(context);
 
   try {
+    from = new Date();
+    to = new Date(new Date().getTime() - 1 * 60000);
+    console.log("Querying from", from, to);
     const fromDate = from || appGetters.getApplicationStartTime;
     const untilDate = to || new Date("August 19, 1975 23:15:30").toISOString();
 
@@ -56,6 +60,11 @@ export default async function (
     //Listen for message callback saying we got some links
     linksWorker.addEventListener("message", async (e) => {
       const linkQuery = e.data.perspectiveQueryLinks;
+      console.log(
+        "Got link query result",
+        //@ts-ignore
+        linkQuery.map((link) => (link.timestamp = new Date(link.timestamp)))
+      );
       if (linkQuery) {
         if (channel) {
           for (const link of linkQuery) {

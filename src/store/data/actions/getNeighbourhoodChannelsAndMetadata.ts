@@ -158,6 +158,8 @@ export default async (
                   communityId: community.neighbourhood.perspective.uuid,
                   name: groupExpData["name"],
                   description: groupExpData["description"],
+                  image: groupExpData["image"],
+                  thumbnail: groupExpData["thumnail"],
                   groupExpressionRef:
                     groupExpressionLinks[groupExpressionLinks.length - 1].data!
                       .target,
