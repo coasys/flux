@@ -1,4 +1,5 @@
-import { apolloClient } from "@/app";
+import { apolloClient } from "@/utils/setupApolloClient";
+
 import unwrapApolloResult from "@/utils/unwrapApolloResult";
 import type { LanguageRef } from "@perspect3vism/ad4m";
 import { LANGUAGE_CLONE_HOLOCHAIN_TEMPLATE } from "../graphql_queries";

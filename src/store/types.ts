@@ -34,11 +34,13 @@ export interface UserState {
   profile: Profile | null;
 }
 
+export type WindowState = "minimize" | "visible" | "foreground";
+
 export interface ApplicationState {
   expressionUI: { [x: string]: ExpressionUIIcons };
   localLanguagesPath: string;
   databasePerspective?: string;
-  windowState: "minimize" | "visible" | "foreground";
+  windowState: WindowState;
   toast: ToastState;
   applicationStartTime: Date;
   updateState: UpdateState;

@@ -4,7 +4,7 @@ import { addPerspective } from "../mutations/addPerspective";
 import { createLink } from "../mutations/createLink";
 import { getPerspectiveSnapshot } from "../queries/getPerspective";
 
-export default async function (
+export async function createNeighbourhoodMeta(
   name: string,
   description: string,
   expressionLanguages: JuntoExpressionReference[]

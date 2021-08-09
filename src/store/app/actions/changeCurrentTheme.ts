@@ -1,6 +1,7 @@
 import { CurrentThemeState } from "@/store/types";
 import { setTheme } from "@/utils/themeHelper";
-import { rootActionContext } from "@/store/index";
+import { dataActionContext } from "@/store/data/index";
+import { appActionContext } from "@/store/app/index";
 
 export interface Payload {
   communityId: string;
@@ -12,13 +13,14 @@ export default async function updateGlobalTheme(
   context: any,
   payload: CurrentThemeState
 ): Promise<void> {
-  const { commit, rootState } = rootActionContext(context);
+  const { getters: dataGetters } = dataActionContext(context);
+  const { commit: appCommit, state: appState } = appActionContext(context);
   if (payload === "global") {
-    setTheme(rootState.app.globalTheme);
-    commit.setCurrentTheme("global");
+    setTheme(appState.globalTheme);
+    appCommit.setCurrentTheme("global");
   } else {
-    const theme = rootState.data.communities[payload].theme;
+    const theme = dataGetters.getCommunity(payload).state.theme;
     setTheme(theme!);
-    commit.setCurrentTheme(payload);
+    appCommit.setCurrentTheme(payload);
   }
 }
