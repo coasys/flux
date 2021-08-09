@@ -13,3 +13,5 @@ declare module "vue-advanced-cropper";
 declare module "object-hash";
 
 declare module "easygraphql-tester";
+
+// declare module "direct-vuex";

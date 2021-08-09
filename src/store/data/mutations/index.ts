@@ -37,7 +37,6 @@ interface AddChannelMessage {
 
 export default {
   addCommunity(state: DataState, payload: CommunityState): void {
-    console.log("adding Community", payload);
     state.neighbourhoods[payload.neighbourhood.perspective.uuid] =
       payload.neighbourhood;
     state.communities[payload.neighbourhood.perspective.uuid] = payload.state;
@@ -155,14 +154,29 @@ export default {
     const parentNeighbourhood = state.neighbourhoods[payload.communityId];
 
     if (parentNeighbourhood !== undefined) {
-      parentNeighbourhood.linkedNeighbourhoods.push(
-        payload.channel.neighbourhood.neighbourhoodUrl
-      );
-      parentNeighbourhood.linkedPerspectives.push(
-        payload.channel.neighbourhood.perspective.uuid
-      );
+      if (
+        parentNeighbourhood.linkedNeighbourhoods.indexOf(
+          payload.channel.neighbourhood.neighbourhoodUrl
+        ) === -1
+      ) {
+        parentNeighbourhood.linkedNeighbourhoods.push(
+          payload.channel.neighbourhood.neighbourhoodUrl
+        );
+      }
+
+      if (
+        parentNeighbourhood.linkedPerspectives.indexOf(
+          payload.channel.neighbourhood.perspective.uuid
+        ) === -1
+      ) {
+        parentNeighbourhood.linkedPerspectives.push(
+          payload.channel.neighbourhood.perspective.uuid
+        );
+      }
+
       state.channels[payload.channel.neighbourhood.perspective.uuid] =
         payload.channel.state;
+
       state.neighbourhoods[payload.channel.neighbourhood.perspective.uuid] =
         payload.channel.neighbourhood;
     }

@@ -211,7 +211,7 @@ export default defineComponent({
     channelMentions(): MentionTrigger[] {
       return store.getters
         .getChannelNeighbourhoods(this.community.neighbourhood.perspective.uuid)
-        .map((channel) => {
+        .map((channel: any) => {
           return {
             name: channel.name,
             id: channel.perspective.uuid,

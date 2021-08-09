@@ -6,7 +6,9 @@ import { findNameDescriptionFromMeta } from "@/core/methods/findNameDescriptionF
 
 import { Link } from "@perspect3vism/ad4m";
 
-import { rootActionContext } from "@/store/index";
+import { dataActionContext } from "@/store/data/index";
+import { appActionContext } from "@/store/app/index";
+import { userActionContext } from "@/store/user/index";
 import { ExpressionTypes, CommunityState, MembraneType } from "@/store/types";
 
 export interface Payload {
@@ -17,11 +19,14 @@ export default async (
   context: any,
   { joiningLink }: Payload
 ): Promise<void> => {
-  const { commit, rootState } = rootActionContext(context);
+  const { state: dataState, commit: dataCommit } = dataActionContext(context);
+  const { commit: appCommit } = appActionContext(context);
+  const { state: userState } = userActionContext(context);
+
   try {
-    const neighbourhoods = rootState.data.neighbourhoods;
+    const neighbourhoods = dataState.neighbourhoods;
     const isAlreadyPartOf = Object.values(neighbourhoods).find(
-      (c) => c.neighbourhoodUrl === joiningLink
+      (c: any) => c.neighbourhoodUrl === joiningLink
     );
     if (!isAlreadyPartOf) {
       const neighbourhood = await joinNeighbourhood(joiningLink);
@@ -40,7 +45,7 @@ export default async (
         );
 
       for (const uiIcon of uiIcons) {
-        commit.addExpressionUI(uiIcon);
+        appCommit.addExpressionUI(uiIcon);
       }
 
       const profileExpLang = typedExpressionLanguages.find(
@@ -49,7 +54,7 @@ export default async (
       if (profileExpLang != undefined) {
         const createProfileExpression = await createProfile(
           profileExpLang.languageAddress!,
-          rootState.user.profile!
+          userState.profile!
         );
 
         //Create link between perspective and group expression
@@ -98,16 +103,18 @@ export default async (
         },
       } as CommunityState;
 
-      commit.addCommunity(newCommunity);
+      dataCommit.addCommunity(newCommunity);
     } else {
       const message = "You are already part of this group";
 
-      commit.showDangerToast({
+      appCommit.showDangerToast({
         message,
       });
+
+      throw new Error(message);
     }
   } catch (e) {
-    commit.showDangerToast({
+    appCommit.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

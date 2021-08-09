@@ -1,0 +1,18 @@
+{
+  "author": "did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
+  "data": {
+    "predicate": "rdf://class",
+    "source": "neighbourhood://QmW6LEDuWFuRPBgWsaeh3D9KpjVLu3PZ7VeeV2WYATTJop://self",
+    "target": "QmbhWYKXXa53H5hSEsPEuQ9FJL1dBurBNkRF2391gsL9DV://842924554879604b2130319f6cabb23e24ce4438ec52995ee322b91a934d7813ed34c344b0ee54",
+    "__typename": "Link"
+  },
+  "proof": {
+    "invalid": false,
+    "key": "#zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
+    "signature": "cc7647e9c97c6d1bb54fe85e64fec0481a7451390ee438b65db4bd150b586f267a45386a0349a90db5791c70c0905294f7f88e2eed8b4e1de55a08324718152e",
+    "valid": true,
+    "__typename": "ExpressionProof"
+  },
+  "timestamp": "2021-08-02T07:26:57.056Z",
+  "__typename": "LinkExpression"
+}

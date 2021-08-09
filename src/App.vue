@@ -45,11 +45,10 @@ import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { AGENT_STATUS, GET_EXPRESSION } from "@/core/graphql_queries";
 import { ModalsState, NeighbourhoodState, ToastState } from "@/store/types";
-import showMessageNotification from "@/utils/showMessageNotification";
 import { print } from "graphql/language/printer";
 import { AgentStatus, LinkExpression } from "@perspect3vism/ad4m";
-import { apolloClient } from "./app";
 import store from "@/store";
+import { apolloClient } from "./utils/setupApolloClient";
 
 declare global {
   interface Window {
@@ -78,14 +77,14 @@ export default defineComponent({
 
     //Watch for agent unlock to set off running queries
     store.original.watch(
-      (state) => state.user.agent.isUnlocked,
-      async (newValue) => {
+      (state: any) => state.user.agent.isUnlocked,
+      async (newValue: any) => {
         console.log("agent unlocked changed to", newValue);
         if (newValue) {
           store.commit.setApplicationStartTime(new Date());
         }
         if (newValue) {
-          store.dispatch.loadExpressionLanguages;
+          store.dispatch.loadExpressionLanguages();
         } else {
           router.push({
             name: store.state.user.agent.isInitialized ? "login" : "signup",
@@ -132,13 +131,13 @@ export default defineComponent({
               message: expression,
             });
 
-            showMessageNotification(
+            store.dispatch.showMessageNotification({
               router,
               route,
-              perspective,
-              expression!.author,
-              message.body
-            );
+              perspectiveUuid: perspective,
+              authorDid: expression!.author,
+              message: message.body,
+            });
 
             //Add UI notification on the channel to notify that there is a new message there
             store.commit.setHasNewMessages({
