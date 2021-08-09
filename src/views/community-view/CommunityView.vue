@@ -1,7 +1,7 @@
 <template>
   <sidebar-layout>
     <template v-slot:sidebar>
-      <community-sidebar :community="currentCommunity"></community-sidebar>
+      <community-sidebar :community="community"></community-sidebar>
     </template>
     <router-view :key="$route.fullPath"></router-view>
   </sidebar-layout>
@@ -50,7 +50,7 @@
         @click="(e) => e.target.select()"
         size="lg"
         readonly
-        :value="currentCommunity.neighbourhood.neighbourhoodUrl"
+        :value="community.neighbourhood.neighbourhoodUrl"
       >
         <j-button @click="getInviteCode" variant="subtle" slot="end"
           ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
@@ -92,62 +92,19 @@ export default defineComponent({
     CommunitySidebar,
     SidebarLayout,
   },
-  setup() {
-    const route = useRoute();
-    const hasCopied = ref(false);
-    let channelWorkerLoop = null as null | Worker;
-    let groupExpWorkerLoop = null as null | Worker;
-
-    watch(
-      () => route.params.communityId,
-      async (id: any) => {
-        if (channelWorkerLoop) {
-          channelWorkerLoop.terminate();
-        }
-        if (groupExpWorkerLoop) {
-          groupExpWorkerLoop.terminate();
-        }
-        if (id) {
-          [channelWorkerLoop, groupExpWorkerLoop] =
-            await store.dispatch.getNeighbourhoodChannelsAndMetadata({
-              communityId: id,
-            });
-          store.dispatch.getNeighbourhoodMembers(id);
-        }
-      },
-      { immediate: true }
-    );
-
+  data() {
     return {
-      hasCopied,
+      hasCopied: false,
+      channelWorkerLoop: null as null | Worker,
+      groupExpWorkerLoop: null as null | Worker,
     };
   },
   watch: {
-    communityId: {
+    "$route.params.communityId": {
       handler: function (id: string) {
-        if (!id) {
-          store.dispatch.changeCurrentTheme("global");
-          return;
-        } else {
-          store.dispatch.changeCurrentTheme(
-            this.currentCommunity.state.useGlobalTheme ? "global" : id
-          );
-        }
-
-        const firstChannel =
-          this.currentCommunity.neighbourhood.linkedPerspectives[0];
-        const currentChannelId =
-          this.currentCommunity.state.currentChannelId || firstChannel;
-
-        if (currentChannelId) {
-          this.$router.push({
-            name: "channel",
-            params: {
-              communityId: id,
-              channelId: currentChannelId,
-            },
-          });
-        }
+        this.handleWorker(id);
+        this.handleThemeChange(id);
+        this.goToActiveChannel(id);
       },
       immediate: true,
     },
@@ -160,11 +117,51 @@ export default defineComponent({
       "setShowInviteCode",
       "setShowCommunitySettings",
     ]),
+    goToActiveChannel(communityId: string) {
+      if (!communityId) return;
+      const firstChannel = this.community.neighbourhood.linkedPerspectives[0];
+      const currentChannelId =
+        this.community.state.currentChannelId || firstChannel;
+
+      if (currentChannelId) {
+        this.$router.push({
+          name: "channel",
+          params: {
+            communityId,
+            channelId: currentChannelId,
+          },
+        });
+      }
+    },
+    handleThemeChange(id: string) {
+      if (!id) {
+        store.dispatch.changeCurrentTheme("global");
+        return;
+      } else {
+        store.dispatch.changeCurrentTheme(
+          this.community.state.useLocalTheme ? id : "global"
+        );
+      }
+    },
+    async handleWorker(id: string): Promise<void> {
+      this.channelWorkerLoop?.terminate();
+      this.groupExpWorkerLoop?.terminate();
+
+      if (id) {
+        const { channelLinksWorker, groupExpressionWorker } =
+          await store.dispatch.getNeighbourhoodChannelsAndMetadata({
+            communityId: id,
+          });
+        store.dispatch.getNeighbourhoodMembers(id);
+        this.channelWorkerLoop = channelLinksWorker;
+        this.groupExpWorkerLoop = groupExpressionWorker;
+      }
+    },
     getInviteCode() {
       // Get the invite code to join community and copy to clipboard
-      let currentCommunity = this.currentCommunity;
+      const url = this.community.neighbourhood.neighbourhoodUrl;
       const el = document.createElement("textarea");
-      el.value = `Hey! Here is an invite code to join my private community on Junto: ${currentCommunity.neighbourhood.neighbourhoodUrl}`;
+      el.value = `Hey! Here is an invite code to join my private community on Junto: ${url}`;
       document.body.appendChild(el);
       el.select();
       document.execCommand("copy");
@@ -180,10 +177,7 @@ export default defineComponent({
     modals(): ModalsState {
       return store.state.app.modals;
     },
-    communityId(): string {
-      return this.$route.params.communityId as string;
-    },
-    currentCommunity(): CommunityState {
+    community(): CommunityState {
       const communityId = this.$route.params.communityId as string;
       return store.getters.getCommunity(communityId);
     },

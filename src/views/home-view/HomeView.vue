@@ -2,7 +2,7 @@
   <sidebar-layout>
     <template v-slot:sidebar>
       <div class="home-sidebar">
-        <j-box px="500" pb="400">
+        <j-box px="500" pb="700">
           <j-text nomargin size="700" weight="500" color="ui-900">Home</j-text>
         </j-box>
         <j-box pb="800">
