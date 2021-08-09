@@ -19,6 +19,8 @@ interface UpdatePayload {
   communityId: string;
   name: string;
   description: string;
+  image: string;
+  thumbnail: string;
   groupExpressionRef: string;
 }
 
@@ -131,13 +133,22 @@ export default {
 
   updateCommunityMetadata(
     state: DataState,
-    { communityId, name, description, groupExpressionRef }: UpdatePayload
+    {
+      communityId,
+      name,
+      description,
+      image,
+      thumbnail,
+      groupExpressionRef,
+    }: UpdatePayload
   ): void {
     const community = state.neighbourhoods[communityId];
 
     if (community) {
       community.name = name;
       community.description = description;
+      community.image = image;
+      community.thumbnail = thumbnail;
       community.groupExpressionRef = groupExpressionRef;
     }
 

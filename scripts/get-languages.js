@@ -30,9 +30,9 @@ const languages = {
   },
   "group-expression": {
     targetDnaName: "group-expression",
-    dna: "https://github.com/juntofoundation/Group-Expression/releases/download/0.0.1/group-expression.dna",
+    dna: "https://github.com/juntofoundation/Group-Expression/releases/download/0.0.2/group-expression.dna",
     bundle:
-      "https://github.com/juntofoundation/Group-Expression/releases/download/0.0.1/bundle.js",
+      "https://github.com/juntofoundation/Group-Expression/releases/download/0.0.2/bundle.js",
   },
   "shortform-expression": {
     targetDnaName: "shortform-expression",
