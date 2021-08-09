@@ -50,7 +50,7 @@ const languages = {
     zipped: true,
     targetDnaName: "social-context",
     resource:
-      "https://github.com/juntofoundation/Social-Context/releases/download/0.0.9/signal.zip",
+      "https://github.com/juntofoundation/Social-Context/releases/download/0.0.10/signal.zip",
   },
 };
 
