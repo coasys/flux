@@ -10,7 +10,7 @@
       <button slot="trigger" class="community-sidebar__header">
         <j-avatar
           style="--j-avatar-size: 30px"
-          :src="require('@/assets/images/junto_app_icon.png')"
+          :src="community.neighbourhood.image"
         />
         <div class="community-info">
           {{ community.neighbourhood.name }}
