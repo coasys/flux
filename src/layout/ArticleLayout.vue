@@ -15,7 +15,13 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
-  props: ["heroImg", "hideHero"],
+  props: {
+    heroImg: String,
+    hideHero: {
+      type: Boolean,
+      default: false,
+    },
+  },
 });
 </script>
 
