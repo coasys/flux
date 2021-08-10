@@ -53,11 +53,6 @@ export default async function (
     //Listen for message callback saying we got some links
     linksWorker.addEventListener("message", async (e) => {
       const linkQuery = e.data.perspectiveQueryLinks;
-      console.log(
-        "Got link query result",
-        //@ts-ignore
-        linkQuery.map((link) => (link.timestamp = new Date(link.timestamp)))
-      );
       if (linkQuery) {
         if (channel) {
           for (const link of linkQuery) {

@@ -162,13 +162,18 @@ export default defineComponent({
     handleMentionClick(dataset: { label: string; id: string }) {
       const { label, id } = dataset;
       if (label?.startsWith("#")) {
-        this.$router.push({
-          name: "channel",
-          params: {
-            channelId: id,
-            communityId: this.community.neighbourhood.perspective.uuid,
-          },
-        });
+        let channelId =
+          store.getters.getChannelByNeighbourhoodUrl(id)?.neighbourhood
+            .perspective.uuid;
+        if (channelId) {
+          this.$router.push({
+            name: "channel",
+            params: {
+              channelId: channelId,
+              communityId: this.community.neighbourhood.perspective.uuid,
+            },
+          });
+        }
       }
       if (label?.startsWith("@")) {
         this.showProfile = true;

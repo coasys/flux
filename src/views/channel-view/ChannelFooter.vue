@@ -62,7 +62,7 @@ export default defineComponent({
         .map((channel) => {
           return {
             name: channel.name,
-            id: channel.perspective.uuid,
+            id: channel.neighbourhoodUrl,
             trigger: "#",
           } as MentionTrigger;
         });

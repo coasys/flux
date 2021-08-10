@@ -43,6 +43,22 @@ export default {
     );
   },
 
+  getChannelByNeighbourhoodUrl:
+    (state: DataState) =>
+    (url: string): ChannelState | null => {
+      const neighbourhood = Object.values(state.neighbourhoods)
+        .filter((neighourhood) => neighourhood.neighbourhoodUrl == url)
+        .pop();
+      if (neighbourhood == undefined) {
+        return null;
+      }
+      const channel = state.channels[neighbourhood?.perspective.uuid];
+      return {
+        neighbourhood,
+        state: channel,
+      };
+    },
+
   getCommunityState:
     (state: DataState) =>
     (id: string): LocalCommunityState => {
@@ -75,14 +91,12 @@ export default {
       const links = state.neighbourhoods[communityId].linkedPerspectives;
       return links
         .filter((link, index) => links.indexOf(link) === index)
-        .map(
-        (perspectiveUuid) => {
+        .map((perspectiveUuid) => {
           return {
             neighbourhood: state.neighbourhoods[perspectiveUuid],
             state: state.channels[perspectiveUuid],
           } as ChannelState;
-        }
-      );
+        });
     },
 
   getCommunityMembers:
