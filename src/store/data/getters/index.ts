@@ -38,7 +38,6 @@ export default {
   },
 
   getCommunityNeighbourhoods(state: DataState): NeighbourhoodState[] {
-    console.log(state);
     return Object.values(state.communities).map(
       (community) => state.neighbourhoods[community.perspectiveUuid]
     );

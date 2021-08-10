@@ -34,7 +34,7 @@ export default async (
 ): Promise<CommunityState> => {
   const { commit: dataCommit } = dataActionContext(context);
   const { commit: appCommit, getters: appGetters } = appActionContext(context);
-  const { state: userState, getters: userGetters } = userActionContext(context);
+  const { getters: userGetters } = userActionContext(context);
 
   try {
     const createSourcePerspective = await addPerspective(perspectiveName);
@@ -134,7 +134,6 @@ export default async (
     console.log(
       "Created group expression link",
       addGroupExpLink,
-      userState,
       userGetters.getProfile
     );
 

@@ -16,7 +16,6 @@ export default async function updateCommunityTheme(
 ): Promise<void> {
   const {
     commit: dataCommit,
-    state: dataState,
     getters: dataGetters,
   } = dataActionContext(context);
   const { state: appState } = appActionContext(context);
