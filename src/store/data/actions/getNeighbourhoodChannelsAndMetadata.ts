@@ -10,11 +10,16 @@ export interface Payload {
   communityId: string;
 }
 
+export interface Response {
+  channelLinksWorker: Worker;
+  groupExpressionWorker: Worker;
+}
+
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async (
   context: any,
   { communityId }: Payload
-): Promise<[Worker, Worker]> => {
+): Promise<Response> => {
   console.log("Getting community channel links for community: ", communityId);
 
   const { commit, getters } = rootActionContext(context);
@@ -168,7 +173,7 @@ export default async (
         throw new Error(error);
       }
     });
-    return [channelLinksWorker, groupExpressionWorker];
+    return { channelLinksWorker, groupExpressionWorker };
   } catch (e) {
     throw new Error(e);
   }

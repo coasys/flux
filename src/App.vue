@@ -316,7 +316,7 @@ body {
 }
 
 html[font-size="sm"] {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 html[font-size="md"] {
@@ -324,7 +324,7 @@ html[font-size="md"] {
 }
 
 html[font-size="lg"] {
-  font-size: 16px;
+  font-size: 15px;
 }
 
 @media (min-width: 800px) {
@@ -335,7 +335,7 @@ html[font-size="lg"] {
     font-size: 16px;
   }
   html[font-size="lg"] {
-    font-size: 19px;
+    font-size: 17px;
   }
 }
 
