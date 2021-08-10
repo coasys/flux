@@ -52,7 +52,7 @@
         readonly
         :value="community.neighbourhood.neighbourhoodUrl"
       >
-        <j-button @click="getInviteCode" variant="subtle" slot="end"
+        <j-button @click.stop="getInviteCode" variant="subtle" slot="end"
           ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
         /></j-button>
       </j-input>
