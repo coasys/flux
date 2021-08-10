@@ -13,8 +13,8 @@
         <j-timestamp
           slot="title"
           :value="timestamp"
-          dateStyle="medium"
-          timeStyle="short"
+          datestyle="medium"
+          timestyle="short"
         ></j-timestamp>
         <j-timestamp
           class="message-item__timestamp"

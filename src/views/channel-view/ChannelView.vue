@@ -1,93 +1,23 @@
 <template>
   <div class="channel-view" @scroll="handleScroll" ref="scrollContainer">
-    <header class="channel-view__header">
-      <j-icon size="sm" name="hash" />
-      <j-text nomargin weight="500" size="500">{{
-        channel.neighbourhood.name
-      }}</j-text>
-    </header>
-
-    <div class="channel-view__main">
-      <div class="channel-view__load-more">
-        <j-button
-          variant="primary"
-          v-if="showNewMessagesButton && channel.hasNewMessages"
-          @click="scrollToBottom('smooth')"
-        >
-          Show new messages
-          <j-icon name="arrow-down-short" size="xs" />
-        </j-button>
-      </div>
-
-      <DynamicScroller
-        v-if="messages.length"
-        ref="scroller"
-        :items="messages"
-        :min-item-size="2"
-      >
-        <template v-slot="{ item, index, active }">
-          <DynamicScrollerItem
-            :item="item"
-            :active="active"
-            :size-dependencies="[item.message, item.timestamp]"
-            :data-index="index"
-            :data-active="active"
-            class="message"
-          >
-            <message-item
-              :did="item.did"
-              :showAvatar="showAvatar(index)"
-              :message="item.message"
-              :timestamp="item.timestamp"
-              :username="users[item.did]?.profile['foaf:AccountName']"
-              :profileImg="
-                users[item.did]?.profile['schema:image'] &&
-                JSON.parse(users[item.did].profile['schema:image'])[
-                  'schema:contentUrl'
-                ]
-              "
-              @profileClick="handleProfileClick"
-              @mentionClick="handleMentionClick"
-            />
-          </DynamicScrollerItem>
-        </template>
-      </DynamicScroller>
-    </div>
-    <footer class="channel-view__footer">
-      <j-editor
-        @send="(e) => createDirectMessage(e.target.value)"
-        autofocus
-        :placeholder="`Write to #${channel.neighbourhood.name}`"
-        :value="currentExpressionPost"
-        @change="handleEditorChange"
-        @onsuggestionlist="changeShowList"
-        @editorinit="editorinit"
-        :mentions="items"
-      ></j-editor>
-    </footer>
+    <channel-header :community="community" :channel="channel" />
+    <channel-messages
+      :profileLanguage="profileLanguage"
+      @scrollToBottom="scrollToBottom"
+      :showNewMessagesButton="showNewMessagesButton"
+      :community="community"
+      :channel="channel"
+      @profileClick="handleProfileClick"
+      @mentionClick="handleMentionClick"
+    />
+    <channel-footer :community="community" :channel="channel" />
     <j-modal
       size="xs"
+      v-if="activeProfile"
       :open="showProfile"
       @toggle="(e) => (showProfile = e.target.open)"
     >
-      <j-box p="800">
-        <j-flex a="center" direction="column" gap="500">
-          <j-avatar
-            style="--j-avatar-size: 100px"
-            :hash="activeProfile?.author"
-            :src="
-              activeProfile?.data?.profile['schema:image']
-                ? JSON.parse(activeProfile?.data?.profile['schema:image'])[
-                    'schema:contentUrl'
-                  ]
-                : null
-            "
-          />
-          <j-text variant="heading-sm">{{
-            activeProfile?.data?.profile["foaf:AccountName"]
-          }}</j-text>
-        </j-flex>
-      </j-box>
+      <Profile :did="activeProfile" :langAddress="profileLanguage" />
     </j-modal>
   </div>
 </template>
@@ -95,49 +25,35 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import store from "@/store";
-import { Expression } from "@perspect3vism/ad4m";
 import {
   ChannelState,
   CommunityState,
-  ExpressionAndRef,
   ExpressionTypes,
+  ProfileExpression,
 } from "@/store/types";
-import { getProfile } from "@/utils/profileHelpers";
-import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
-import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css";
-import { differenceInMinutes, parseISO } from "date-fns";
-import MessageItem from "@/components/message-item/MessageItem.vue";
 import { Editor } from "@tiptap/vue-3";
-import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
-
-interface Message {
-  id: string;
-  did: string;
-  date?: Date | string | number;
-  message?: Expression;
-  hideUser?: boolean;
-  timestamp: string;
-}
+import ChannelFooter from "./ChannelFooter.vue";
+import ChannelMessages from "./ChannelMessages.vue";
+import ChannelHeader from "./ChannelHeader.vue";
+import Profile from "@/containers/Profile.vue";
 
 interface UserMap {
-  [key: string]: any;
-}
-
-interface MentionTrigger {
-  name: string;
-  id: string;
-  trigger: string;
+  [key: string]: ProfileExpression;
 }
 
 export default defineComponent({
   name: "ChannelView",
-  components: { DynamicScroller, DynamicScrollerItem, MessageItem },
+  components: {
+    ChannelHeader,
+    ChannelMessages,
+    ChannelFooter,
+    Profile,
+  },
   data() {
     return {
       showNewMessagesButton: false,
       noDelayRef: 0,
       currentExpressionPost: "",
-      unsortedMessages: [],
       users: {} as UserMap,
       linksWorker: null as null | Worker,
       editor: null as Editor | null,
@@ -147,16 +63,8 @@ export default defineComponent({
     };
   },
   async beforeRouteUpdate(to, from, next) {
-    const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-    store.commit.setChannelScrollTop({
-      channelId: from.params.channelId as string,
-      value: scrollContainer.scrollTop,
-    });
-
-    if (this.linksWorker) {
-      this.linksWorker!.terminate();
-    }
-
+    this.linksWorker?.terminate();
+    this.saveScrollPos(from.params.channelId as string);
     next();
   },
   watch: {
@@ -177,7 +85,9 @@ export default defineComponent({
 
         // TODO: On first mount view takes too long to render
         // So we don't have the full height to scroll to the right place
-        this.scrollToLatestPos();
+        setTimeout(() => {
+          this.scrollToLatestPos();
+        }, 0);
       },
       immediate: true,
     },
@@ -198,48 +108,6 @@ export default defineComponent({
     },
   },
   computed: {
-    memberMentions(): MentionTrigger[] {
-      return this.community.neighbourhood.members.map(
-        (m) =>
-          ({
-            name: m.data.profile["foaf:AccountName"],
-            id: m.author.replace("did:key:", ""),
-            trigger: "@",
-          } as MentionTrigger)
-      );
-    },
-    channelMentions(): MentionTrigger[] {
-      return store.getters
-        .getChannelNeighbourhoods(this.community.neighbourhood.perspective.uuid)
-        .map((channel: any) => {
-          return {
-            name: channel.name,
-            id: channel.perspective.uuid,
-            trigger: "#",
-          } as MentionTrigger;
-        });
-    },
-    messages(): any[] {
-      const ascMessages = sortExpressionsByTimestamp(
-        this.channel.neighbourhood.currentExpressionMessages,
-        "asc"
-      );
-
-      //Note; code below will break once we add other expression types since we try to extract body from exp data
-      return ascMessages.reduce((acc: Message[], item: ExpressionAndRef) => {
-        this.loadUser(item.expression.author);
-        return [
-          ...acc,
-          {
-            id: item.expression.proof.signature,
-            did: item.expression.author,
-            timestamp: item.expression.timestamp,
-            //@ts-ignore
-            message: item.expression.data.body,
-          },
-        ];
-      }, []);
-    },
     community(): CommunityState {
       const { communityId } = this.$route.params;
       return store.getters.getCommunity(communityId as string);
@@ -257,6 +125,13 @@ export default defineComponent({
     },
   },
   methods: {
+    saveScrollPos(channelId: string) {
+      const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
+      store.commit.setChannelScrollTop({
+        channelId: channelId as string,
+        value: scrollContainer ? scrollContainer.scrollTop : 0,
+      });
+    },
     scrollToLatestPos() {
       // Next tick waits for everything to be rendered
       this.$nextTick(() => {
@@ -280,15 +155,9 @@ export default defineComponent({
         }
       });
     },
-    handleEditorChange(e: any) {
-      //console.log(e.target.json);
-      this.currentExpressionPost = e.target.value;
-    },
     handleProfileClick(did: string) {
       this.showProfile = true;
-      this.activeProfile = this.community.neighbourhood.members.find(
-        (m) => m.author === did
-      );
+      this.activeProfile = did;
     },
     handleMentionClick(dataset: { label: string; id: string }) {
       const { label, id } = dataset;
@@ -303,17 +172,8 @@ export default defineComponent({
       }
       if (label?.startsWith("@")) {
         this.showProfile = true;
-        this.activeProfile = this.community.neighbourhood.members.find(
-          (m) => m.author === `did:key:${id}`
-        );
+        this.activeProfile = id;
       }
-    },
-
-    editorinit(e: any) {
-      this.editor = e.detail.editorInstance;
-    },
-    changeShowList(e: any) {
-      this.showList = e.detail.showSuggestions;
     },
     markAsRead() {
       store.commit.setHasNewMessages({
@@ -327,90 +187,6 @@ export default defineComponent({
         e.target.scrollHeight - window.innerHeight === e.target.scrollTop;
       if (isAtBottom) {
         this.markAsRead();
-      }
-    },
-    showAvatar(index: number): boolean {
-      const previousMessage = this.messages[index - 1];
-      const message = this.messages[index];
-      if (!previousMessage || !message) {
-        return true;
-      }
-      if (previousMessage.did !== message.did) {
-        return true;
-      }
-      return (
-        previousMessage.did === message.did &&
-        differenceInMinutes(
-          parseISO(message.timestamp),
-          parseISO(previousMessage.timestamp)
-        ) >= 2
-      );
-    },
-    async loadUser(did: string) {
-      let profileLang = this.profileLanguage;
-      const dataExp = await getProfile(profileLang, did);
-      if (dataExp) {
-        const { data } = dataExp;
-        this.users[did] = data;
-      }
-    },
-    items(trigger: string, query: string) {
-      let list = [];
-
-      if (trigger === "@") {
-        list = this.memberMentions;
-      } else {
-        list = this.channelMentions;
-      }
-
-      return list
-        .filter((item) =>
-          item.name.toLowerCase().startsWith(query.toLowerCase())
-        )
-        .slice(0, 5);
-    },
-    loadMoreMessages() {
-      const messageAmount = this.messages.length;
-      if (messageAmount) {
-        const lastMessage = this.messages[messageAmount - 1];
-        this.loadMessages(lastMessage.timestamp);
-      } else {
-        this.loadMessages();
-      }
-    },
-    loadMessages(from?: string, to?: string): void {
-      let fromDate;
-      if (from) {
-        fromDate = new Date(from);
-      } else {
-        fromDate = undefined;
-      }
-      let toDate;
-      if (to) {
-        toDate = new Date(to);
-      } else {
-        toDate = undefined;
-      }
-      store.dispatch.loadExpressions({
-        from: fromDate,
-        to: toDate,
-        channelId: this.channel.neighbourhood.perspective.uuid,
-      });
-    },
-    async createDirectMessage(message: string) {
-      const escapedMessage = message.replace(/( |<([^>]+)>)/gi, "");
-
-      this.currentExpressionPost = "";
-
-      if (escapedMessage) {
-        store.dispatch.createExpression({
-          languageAddress:
-            this.channel.neighbourhood.typedExpressionLanguages.find(
-              (t) => t.expressionType === ExpressionTypes.ShortForm
-            )!.languageAddress,
-          content: { body: message, background: [""] },
-          perspective: this.channel.neighbourhood.perspective.uuid as string,
-        });
       }
     },
     scrollToBottom(behavior: "smooth" | "auto") {
@@ -444,19 +220,7 @@ export default defineComponent({
   flex-direction: column;
   overflow-y: auto;
 }
-.channel-view__header {
-  position: sticky;
-  top: 0;
-  min-height: 74px;
-  height: 74px;
-  max-height: 74px;
-  padding: var(--j-space-400) var(--j-space-500);
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid var(--app-channel-border-color);
-  background: var(--app-channel-header-bg-color);
-  z-index: 1;
-}
+
 .channel-view__main {
   background: var(--app-channel-bg-color);
   flex: 1;
@@ -473,21 +237,6 @@ export default defineComponent({
   z-index: 10;
 }
 
-.channel-view__footer {
-  border-top: 1px solid var(--app-channel-border-color);
-  background: var(--app-channel-footer-bg-color);
-  position: sticky;
-  padding: var(--j-space-500);
-  bottom: 0;
-}
-
-j-editor::part(base) {
-  border: 0;
-}
-
-j-editor::part(toolbar) {
-  border: 0;
-}
 #profileCard {
   position: fixed;
   opacity: 0;

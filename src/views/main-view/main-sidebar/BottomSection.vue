@@ -7,7 +7,7 @@
           slot="trigger"
           size="xl"
           :hash="userDid"
-          :src="userProfile.profilePicture"
+          :src="userProfile?.profilePicture"
         ></j-avatar>
         <j-menu slot="content">
           <j-flex
@@ -23,9 +23,9 @@
           >
             <j-avatar
               :hash="userDid"
-              :src="userProfile.profilePicture"
+              :src="userProfile?.profilePicture"
             ></j-avatar>
-            <j-text nomargin>{{ userProfile.username }}</j-text>
+            <j-text nomargin>{{ userProfile?.username }}</j-text>
           </j-flex>
           <j-menu-item @click="() => setShowEditProfile(true)">
             <j-icon size="sm" slot="start" name="pencil"></j-icon>
