@@ -1,6 +1,7 @@
 <template>
   <div class="article-layout">
     <header
+      v-if="hideHero === false"
       class="article-layout__hero"
       :class="{ 'article-layout__hero--loading': heroImg ? false : true }"
     >
@@ -14,7 +15,7 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
-  props: ["heroImg"],
+  props: ["heroImg", "hideHero"],
 });
 </script>
 

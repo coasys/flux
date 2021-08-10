@@ -1,67 +1,105 @@
 <template>
-  <article-layout :heroImg="foundation?.heroImg?.url">
-    <div v-if="foundation">
-      <j-text variant="heading-lg">{{ foundation.title }}</j-text>
-      <structured-text :content="foundation.content"></structured-text>
-    </div>
+  <article-layout hideHero>
+    <j-box pt="800">
+      <j-text variant="heading-lg">Frequently asked question</j-text>
+
+      <j-tabs
+        v-if="categories"
+        :value="currentCategory"
+        @change="(e) => (currentCategory = e.target.value)"
+      >
+        <j-tab-item variant="button" value="all">All</j-tab-item>
+        <j-tab-item
+          variant="button"
+          :value="cat.id"
+          :key="cat.name"
+          v-for="cat in categories"
+        >
+          {{ cat.name }}
+        </j-tab-item>
+      </j-tabs>
+      <j-box pt="700" pb="700" :key="faq.id" v-for="faq in sortedFaqs">
+        <j-text variant="heading">
+          {{ faq.question }}
+        </j-text>
+        <j-text>{{ faq.answer }}</j-text>
+      </j-box>
+    </j-box>
   </article-layout>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import ArticleLayout from "@/layout/ArticleLayout.vue";
-import StructuredText from "@/components/structured-text/StructuredText.vue";
+import { getData } from "@/utils/datocms";
 
-const token = "6dff7c12521d35098fcde1648a9d89";
+interface Category {
+  id: string;
+  name: string;
+}
 
-function getData({ query }: { query: string }) {
-  return fetch("https://graphql.datocms.com/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      query: query,
-    }),
-  })
-    .then((res) => res.json())
-    .then((res) => res.data)
-    .catch((error) => {
-      console.log(error);
-    });
+interface Faq {
+  id: string;
+  question: string;
+  answer: string;
+  category: Category[];
 }
 
 export default defineComponent({
-  components: { ArticleLayout, StructuredText },
+  components: { ArticleLayout },
   mounted() {
     this.getContent();
   },
   data() {
     return {
-      foundation: null,
+      currentCategory: "all",
+      faqs: null as Faq[] | null,
+      categories: null as Category[] | null,
     };
+  },
+  computed: {
+    sortedFaqs(): Faq[] {
+      if (this.faqs === null) return [];
+      if (this.currentCategory === "all") return this.faqs;
+      return this.faqs.filter((faq) => {
+        console.log(faq);
+        return faq.category.some((cat) => {
+          return cat.id === this.currentCategory;
+        });
+      });
+    },
   },
   methods: {
     async getContent() {
-      const data = await getData({
+      const { allFaqs } = await getData({
         query: /* GraphQL */ `
-          {
-            foundation {
-              title
-              heroImg {
-                url
-              }
-              content {
-                value
+          query AllFaqs {
+            allFaqs {
+              id
+              question
+              answer
+              category {
+                id
+                name
               }
             }
           }
         `,
       });
 
-      this.foundation = data.foundation;
+      const { allCategories } = await getData({
+        query: /* GraphQL */ `
+          query AllCategories {
+            allCategories {
+              id
+              name
+            }
+          }
+        `,
+      });
+
+      this.categories = allCategories;
+      this.faqs = allFaqs;
     },
   },
 });

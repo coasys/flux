@@ -26,11 +26,11 @@
         <j-box>
           <j-menu-group-item title="About">
             <j-menu-item
-              :selected="$route.name === 'guide'"
-              @click="() => $router.push({ name: 'guide' })"
+              :selected="$route.name === 'tutorial'"
+              @click="() => $router.push({ name: 'tutorial' })"
             >
               <j-icon size="sm" name="map" slot="start" />
-              Guide
+              Tutorial
             </j-menu-item>
             <j-menu-item
               :selected="$route.name === 'foundation'"
