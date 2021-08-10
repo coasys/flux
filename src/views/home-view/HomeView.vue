@@ -26,19 +26,32 @@
         <j-box>
           <j-menu-group-item title="About">
             <j-menu-item
-              :selected="$route.name === 'junto-foundation'"
-              @click="() => $router.push({ name: 'junto-foundation' })"
+              :selected="$route.name === 'guide'"
+              @click="() => $router.push({ name: 'guide' })"
+            >
+              <j-icon size="sm" name="map" slot="start" />
+              Guide
+            </j-menu-item>
+            <j-menu-item
+              :selected="$route.name === 'foundation'"
+              @click="() => $router.push({ name: 'foundation' })"
             >
               <j-icon size="sm" name="file-earmark-text" slot="start" />
               Junto Foundation
             </j-menu-item>
-            <j-menu-item>
+            <j-menu-item
+              :selected="$route.name === 'privacy-policy'"
+              @click="() => $router.push({ name: 'privacy-policy' })"
+            >
               <j-icon size="sm" name="lock" slot="start" />
-              Privacy
+              Privacy policy
             </j-menu-item>
-            <j-menu-item>
+            <j-menu-item
+              :selected="$route.name === 'faq'"
+              @click="() => $router.push({ name: 'faq' })"
+            >
               <j-icon size="sm" name="map" slot="start" />
-              Roadmap
+              FAQ
             </j-menu-item>
           </j-menu-group-item>
         </j-box>
