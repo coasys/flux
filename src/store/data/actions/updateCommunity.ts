@@ -6,10 +6,10 @@ import { ExpressionTypes } from "@/store/types";
 
 export interface Payload {
   communityId: string;
-  name: string;
-  description: string;
-  image: string;
-  thumbnail: string;
+  name?: string;
+  description?: string;
+  image?: string;
+  thumbnail?: string;
 }
 
 export default async function updateCommunity(
@@ -50,10 +50,10 @@ export default async function updateCommunity(
 
       commit.updateCommunityMetadata({
         communityId: community.neighbourhood.perspective.uuid,
-        name,
-        description,
-        image,
-        thumbnail,
+        name: name || community.neighbourhood.name,
+        description: description || community.neighbourhood.description,
+        image: image || community.neighbourhood.image || "",
+        thumbnail: thumbnail || community.neighbourhood.thumbnail || "",
         groupExpressionRef: groupExpression,
       });
     } else {

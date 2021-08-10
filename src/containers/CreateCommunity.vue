@@ -18,7 +18,11 @@
         <j-tab-item size="lg" variant="button">Join</j-tab-item>
       </j-tabs>
       <j-flex direction="column" gap="500" v-if="tabView === 'Create'">
-        <avatar-upload icon="people-fill" />
+        <avatar-upload
+          :value="newProfileImage"
+          @change="(val) => (newProfileImage = val)"
+          icon="people-fill"
+        />
         <j-input
           size="lg"
           label="Name"
@@ -86,6 +90,7 @@ export default defineComponent({
       joiningLink: "",
       newCommunityName: "",
       newCommunityDesc: "",
+      newProfileImage: "",
       isJoiningCommunity: false,
       isCreatingCommunity: false,
     };
@@ -121,11 +126,14 @@ export default defineComponent({
         .createCommunity({
           perspectiveName: this.newCommunityName,
           description: this.newCommunityDesc,
+          image: this.newProfileImage,
+          thumbnail: this.newProfileImage,
         })
         .then((community) => {
           this.$emit("submit");
           this.newCommunityName = "";
           this.newCommunityDesc = "";
+          this.newProfileImage = "";
 
           const channels = store.getters.getChannelNeighbourhoods(
             community.neighbourhood.perspective.uuid

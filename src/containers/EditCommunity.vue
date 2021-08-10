@@ -1,6 +1,10 @@
 <template>
   <j-box p="800">
     <j-text variant="heading">Edit Community</j-text>
+    <avatar-upload
+      :value="profileImage"
+      @change="(val) => (profileImage = val)"
+    />
     <j-flex direction="column" gap="400">
       <j-input
         size="lg"
@@ -36,21 +40,25 @@
 import { NeighbourhoodState } from "@/store/types";
 import { defineComponent } from "vue";
 import store from "@/store";
+import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 
 export default defineComponent({
+  components: { AvatarUpload },
   emits: ["cancel", "submit"],
   data() {
     return {
       isUpdatingCommunity: false,
       communityName: "",
       communityDescription: "",
+      profileImage: "",
     };
   },
   watch: {
     community: {
-      handler: function ({ name, description }) {
+      handler: function ({ name, description, image }) {
         this.communityName = name;
         this.communityDescription = description;
+        this.profileImage = image;
       },
       deep: true,
       immediate: true,
@@ -71,6 +79,8 @@ export default defineComponent({
           communityId: communityId,
           name: this.communityName,
           description: this.communityDescription,
+          image: this.profileImage,
+          thumbnail: this.profileImage,
         })
         .then(() => {
           this.$emit("submit");

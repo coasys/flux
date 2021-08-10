@@ -11,8 +11,8 @@
           class="left-nav__community-item"
           :selected="communityIsActive(community.perspective.uuid)"
           size="xl"
-          :src="require('@/assets/images/junto_web_rainbow.png')"
-          initials="false"
+          :src="community.image"
+          :initials="community.name.charAt(0).toUpperCase()"
           @click="() => handleCommunityClick(community.perspective.uuid)"
         ></j-avatar>
         <j-menu
