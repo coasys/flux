@@ -222,11 +222,11 @@ export default defineComponent({
     });
 
     window.api.receive("clearMessages", () => {
-      store.commit.updateAgentLockState(false);
+      store.commit.clearMessages();
     });
 
     window.api.receive("getLangPathResponse", (data: string) => {
-      store.commit.clearMessages();
+      store.commit.setLanguagesPath(data);
     });
 
     window.api.receive("windowState", (data: string) => {
