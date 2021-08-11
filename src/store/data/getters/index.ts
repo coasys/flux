@@ -38,11 +38,26 @@ export default {
   },
 
   getCommunityNeighbourhoods(state: DataState): NeighbourhoodState[] {
-    console.log(state);
     return Object.values(state.communities).map(
       (community) => state.neighbourhoods[community.perspectiveUuid]
     );
   },
+
+  getChannelByNeighbourhoodUrl:
+    (state: DataState) =>
+    (url: string): ChannelState | null => {
+      const neighbourhood = Object.values(state.neighbourhoods)
+        .filter((neighourhood) => neighourhood.neighbourhoodUrl == url)
+        .pop();
+      if (neighbourhood == undefined) {
+        return null;
+      }
+      const channel = state.channels[neighbourhood?.perspective.uuid];
+      return {
+        neighbourhood,
+        state: channel,
+      };
+    },
 
   getCommunityState:
     (state: DataState) =>

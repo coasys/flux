@@ -19,12 +19,12 @@ export default async (
   context: any,
   { joiningLink }: Payload
 ): Promise<void> => {
-  const { state: dataState, commit: dataCommit } = dataActionContext(context);
+  const { getters: dataGetters, commit: dataCommit } = dataActionContext(context);
   const { commit: appCommit } = appActionContext(context);
-  const { state: userState } = userActionContext(context);
+  const { getters: userGetters } = userActionContext(context);
 
   try {
-    const neighbourhoods = dataState.neighbourhoods;
+    const neighbourhoods = dataGetters.getCommunityNeighbourhoods;
     const isAlreadyPartOf = Object.values(neighbourhoods).find(
       (c: any) => c.neighbourhoodUrl === joiningLink
     );
@@ -54,7 +54,7 @@ export default async (
       if (profileExpLang != undefined) {
         const createProfileExpression = await createProfile(
           profileExpLang.languageAddress!,
-          userState.profile!
+          userGetters.getProfile!
         );
 
         //Create link between perspective and group expression
@@ -91,7 +91,7 @@ export default async (
         },
         state: {
           perspectiveUuid: neighbourhood.uuid,
-          useGlobalTheme: false,
+          useLocalTheme: false,
           theme: {
             fontSize: "md",
             fontFamily: "default",

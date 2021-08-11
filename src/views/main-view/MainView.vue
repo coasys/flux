@@ -42,20 +42,22 @@
     :open="modals.showDisclaimer"
     @toggle="(e) => setShowDisclaimer(e.target.open)"
   >
-    <j-box pb="500">
-      <j-flex gap="400" a="center">
-        <j-icon name="exclamation-diamond" size="xl" />
-        <j-text nomargin variant="heading-lg">Disclaimer</j-text>
-      </j-flex>
+    <j-box p="800">
+      <j-box pb="500">
+        <j-flex gap="400" a="center">
+          <j-icon name="exclamation-diamond" size="xl" />
+          <j-text nomargin variant="heading-lg">Disclaimer</j-text>
+        </j-flex>
+      </j-box>
+      <j-text variant="ingress">
+        This is an early version of Junto. Don't use this for essential
+        communication.
+      </j-text>
+      <ul>
+        <li>You might loose your communities and chat messages</li>
+        <li>Messages might not always be delivered reliably</li>
+      </ul>
     </j-box>
-    <j-text variant="ingress">
-      This is an early version of Junto. Don't use this for essential
-      communication.
-    </j-text>
-    <ul>
-      <li>You might loose your communities and chat messages</li>
-      <li>Messages might not always be delivered reliably</li>
-    </ul>
   </j-modal>
 </template>
 

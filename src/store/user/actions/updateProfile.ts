@@ -18,7 +18,6 @@ export default async (context: any, payload: Payload): Promise<void> => {
   const { commit: appCommit } = appActionContext(context);
   const {
     commit: userCommit,
-    state: userState,
     getters: userGetters,
   } = userActionContext(context);
 
@@ -43,7 +42,7 @@ export default async (context: any, payload: Payload): Promise<void> => {
       ).typedExpressionLanguages.find(
         (t: any) => t.expressionType == ExpressionTypes.ProfileExpression
       );
-      const didExpression = `${profileExpression!.languageAddress}://${userState
+      const didExpression = `${profileExpression!.languageAddress}://${userGetters.getUser!
         .agent.did!}`;
 
       console.log("profileExpression: ", profileExpression);

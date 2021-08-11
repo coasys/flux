@@ -11,11 +11,11 @@
           :value="currentView"
           @change="(e) => (currentView = e.target.value)"
         >
-          <j-tab-item value="theme-editor">
+          <j-tab-item variant="button" value="theme-editor">
             <j-icon size="sm" name="eye" slot="start" />
-            Theming
+            Apperance
           </j-tab-item>
-          <j-tab-item value="privacy">
+          <j-tab-item variant="button" value="privacy">
             <j-icon size="sm" name="lock" slot="start" />
             Privacy
           </j-tab-item>
@@ -24,10 +24,11 @@
       <div class="settings__content">
         <j-box pb="500">
           <j-toggle
-            :checked="community.useGlobalTheme"
-            @change="(e) => setUseGlobalTheme(e.target.checked)"
-            >Use global theme</j-toggle
+            :checked="community.useLocalTheme"
+            @change="(e) => setuseLocalTheme(e.target.checked)"
           >
+            Use local theme
+          </j-toggle>
         </j-box>
         <theme-editor
           v-if="showEditor"
@@ -53,10 +54,11 @@ export default defineComponent({
     };
   },
   methods: {
-    setUseGlobalTheme(val: boolean) {
+    setuseLocalTheme(val: boolean) {
+      console.log({ val });
       const id = this.$route.params.communityId as string;
-      store.commit.setUseGlobalTheme({ communityId: id, value: val });
-      store.dispatch.changeCurrentTheme(val ? "global" : id);
+      store.commit.setuseLocalTheme({ communityId: id, value: val });
+      store.dispatch.changeCurrentTheme(val ? id : "global");
     },
     updateCommunityTheme(val: ThemeState) {
       const id = this.$route.params.communityId as string;
@@ -71,12 +73,11 @@ export default defineComponent({
       return (
         this.currentView === "theme-editor" &&
         this.community.theme &&
-        !this.community.useGlobalTheme
+        this.community.useLocalTheme
       );
     },
     community() {
       const id = this.$route.params.communityId as string;
-      console.log("community-changed", store.getters.getCommunityState(id));
       return store.getters.getCommunityState(id);
     },
   },

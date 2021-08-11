@@ -58,6 +58,8 @@ export interface ApplicationState {
 export interface NeighbourhoodState {
   name: string;
   description: string;
+  image?: string;
+  thumbnail?: string;
   perspective: PerspectiveHandle;
   typedExpressionLanguages: JuntoExpressionReference[];
   groupExpressionRef?: string;
@@ -85,7 +87,7 @@ export interface ChannelState {
 export interface LocalCommunityState {
   perspectiveUuid: string;
   theme: ThemeState;
-  useGlobalTheme: boolean;
+  useLocalTheme: boolean;
   currentChannelId: string | undefined | null;
 }
 
