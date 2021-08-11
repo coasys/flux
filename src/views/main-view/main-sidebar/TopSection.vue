@@ -11,11 +11,8 @@
         <j-avatar
           :selected="isActive"
           @click="() => navigate()"
-          square
-          :src="require('@/assets/images/junto_app_icon.png')"
-          circle
+          icon="house"
           size="xl"
-          variant="primary"
         >
         </j-avatar>
       </j-tooltip>
