@@ -45,7 +45,7 @@ export default async function (
           untilDate,
         } as LinkQuery,
       },
-      name: `Get channel messages ${channel.name}`,
+      name: `Get channel messages ${channel.name} | ${from}`,
     });
 
     //If links worker gets an error then throw it
@@ -56,13 +56,31 @@ export default async function (
     //Listen for message callback saying we got some links
     linksWorker.addEventListener("message", async (e) => {
       const linkQuery = e.data.perspectiveQueryLinks;
+
+      if (!dataState.channels[channelId].initialWorkerStarted && from === undefined) {
+        dataCommit.loadMore({
+          channelId,
+          loadMore: linkQuery.length >= 50
+        });
+
+        dataCommit.setInitialWorkerStarted({
+          channelId,
+          initialWorkerStarted: true
+        });
+      } else if (from !== undefined) {
+        dataCommit.loadMore({
+          channelId,
+          loadMore: linkQuery.length >= 50
+        });
+      }
+      
       if (linkQuery) {
         if (channel) {
           for (const link of linkQuery) {
             //Hash the link data as the key for map and check if it exists in the store
             const currentExpressionLink =
               channel.currentExpressionLinks[
-                hash(link.data!, { excludeValues: "__typename" })
+                hash(link.data.target!, { excludeValues: "__typename" })
               ];
             const currentExpression =
               channel.currentExpressionMessages[link.data.target];

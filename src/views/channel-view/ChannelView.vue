@@ -18,6 +18,16 @@
           <j-icon name="arrow-down-short" size="xs" />
         </j-button>
       </div>
+      <div class="channel-view__load-more">
+        <j-button
+            variant="primary"
+            v-if="loadMoreBtn"
+            @click="loadMoreMessages"
+          >
+          Load more
+          <j-icon name="arrow-down-short" size="xs" />
+        </j-button>
+      </div>
 
       <DynamicScroller
         v-if="messages.length"
@@ -135,6 +145,7 @@ export default defineComponent({
   data() {
     return {
       showNewMessagesButton: false,
+      loadMoreBtn: false,
       noDelayRef: 0,
       currentExpressionPost: "",
       unsortedMessages: [],
@@ -145,6 +156,22 @@ export default defineComponent({
       showProfile: false,
       activeProfile: {} as any,
     };
+  },
+  mounted() {
+    const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
+
+    // TODO: @fayeed change this
+    const isAtTop = scrollContainer.scrollTop <= 20;
+    
+    this.loadMoreBtn = store.state.data.channels[this.channel.neighbourhood.perspective.uuid].loadMore && isAtTop
+
+    scrollContainer.addEventListener('scroll', (event) => {
+      const isAtTop = scrollContainer.scrollTop <= 20;
+
+      console.log(store.state.data.channels[this.channel.neighbourhood.perspective.uuid].loadMore, isAtTop)
+
+      this.loadMoreBtn = store.state.data.channels[this.channel.neighbourhood.perspective.uuid].loadMore && isAtTop
+    });
   },
   async beforeRouteUpdate(to, from, next) {
     const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
@@ -164,11 +191,13 @@ export default defineComponent({
       handler: async function (to) {
         if (!to.params.channelId) return;
 
-        const { linksWorker } = await store.dispatch.loadExpressions({
-          channelId: to.params.channelId,
-        });
+        if (this.linksWorker === null) {
+          const { linksWorker } = await store.dispatch.loadExpressions({
+            channelId: to.params.channelId,
+          });
 
-        this.linksWorker = linksWorker;
+          this.linksWorker = linksWorker;
+        }
 
         store.commit.setCurrentChannelId({
           communityId: to.params.communityId,
@@ -196,6 +225,11 @@ export default defineComponent({
         }
       }
     },
+    "channel.state.loadMore": function(loadMore) {
+      if(!loadMore) {
+        this.loadMoreBtn = false;
+      }
+    }
   },
   computed: {
     memberMentions(): MentionTrigger[] {
@@ -372,13 +406,13 @@ export default defineComponent({
     loadMoreMessages() {
       const messageAmount = this.messages.length;
       if (messageAmount) {
-        const lastMessage = this.messages[messageAmount - 1];
+        const lastMessage = this.messages[0];
         this.loadMessages(lastMessage.timestamp);
       } else {
         this.loadMessages();
       }
     },
-    loadMessages(from?: string, to?: string): void {
+    async loadMessages(from?: string, to?: string): Promise<void> {
       let fromDate;
       if (from) {
         fromDate = new Date(from);
@@ -389,13 +423,19 @@ export default defineComponent({
       if (to) {
         toDate = new Date(to);
       } else {
-        toDate = undefined;
+        toDate = undefined
       }
-      store.dispatch.loadExpressions({
+      if (this.linksWorker) {
+        this.linksWorker!.terminate();
+      }
+      
+      const { linksWorker } = await store.dispatch.loadExpressions({
         from: fromDate,
         to: toDate,
         channelId: this.channel.neighbourhood.perspective.uuid,
       });
+
+      this.linksWorker = linksWorker;
     },
     async createDirectMessage(message: string) {
       const escapedMessage = message.replace(/( |<([^>]+)>)/gi, "");

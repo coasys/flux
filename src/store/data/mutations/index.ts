@@ -14,6 +14,7 @@ import {
 import { parseExprUrl } from "@perspect3vism/ad4m";
 import type { Expression, LinkExpression } from "@perspect3vism/ad4m";
 import hash from "object-hash";
+import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
 
 interface UpdatePayload {
   communityId: string;
@@ -46,6 +47,43 @@ export default {
     state.communities[payload.perspectiveUuid] = payload;
   },
 
+  clearMessages(state: DataState): void {
+    for (const neighbourhood of Object.values(state.neighbourhoods)) {
+      const descMessages = sortExpressionsByTimestamp(
+        neighbourhood.currentExpressionMessages,
+        "desc"
+      );
+
+      const messages = descMessages.slice(0, 50);
+
+      if (messages.length === 50) {
+        state.channels[neighbourhood.perspective.uuid].loadMore = true;
+      }
+
+      for (const [key, exp] of Object.entries(neighbourhood.currentExpressionMessages)) {
+        console.log(messages.find(e => `${e.url.language.address}://${e.url.expression}` === key));
+        if (!messages.find(e => `${e.url.language.address}://${e.url.expression}` === key)) {
+          delete neighbourhood.currentExpressionMessages[key];
+        }
+      }
+
+      // TODO: @fayeed need to fix the duplicate links issuem hash function not working correctly.
+      // neighbourhood.currentExpressionLinks = {};
+    }
+  },
+
+  loadMore(state: DataState, payload: {channelId: string, loadMore: boolean}): void {
+    const channel = state.channels[payload.channelId];
+    
+    channel.loadMore = payload.loadMore;
+  },
+
+  setInitialWorkerStarted(state: DataState, payload: {channelId: string, initialWorkerStarted: boolean}): void {
+    const channel = state.channels[payload.channelId];
+    
+    channel.initialWorkerStarted = payload.initialWorkerStarted;
+  },
+
   addMessages(state: DataState, payload: AddChannelMessages): void {
     const neighbourhood = state.neighbourhoods[payload.channelId];
     console.log(
@@ -69,7 +107,7 @@ export default {
     const neighbourhood = state.neighbourhoods[payload.channelId];
 
     neighbourhood.currentExpressionLinks[
-      hash(payload.link.data!, { excludeValues: "__typename" })
+      hash(payload.link.data.target!, { excludeValues: "__typename" })
     ] = payload.link;
     neighbourhood.currentExpressionMessages[payload.link.data.target] = {
       expression: {
@@ -215,7 +253,7 @@ export default {
     const channel = state.neighbourhoods[payload.channelId];
     console.log("Adding to link and exp to channel!", payload.message);
     channel.currentExpressionLinks[
-      hash(payload.link.data!, { excludeValues: "__typename" })
+      hash(payload.link.data.target!, { excludeValues: "__typename" })
     ] = {
       expression: payload.link,
       language: "na",
