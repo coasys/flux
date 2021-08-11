@@ -1,7 +1,7 @@
 import hash from "object-hash";
 import { print } from "graphql/language/printer";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
-import { LinkQuery } from "@perspect3vism/ad4m";
+import { Expression, LinkQuery, parseExprUrl } from "@perspect3vism/ad4m";
 
 import { dataActionContext } from "@/store/data/index";
 import { appActionContext } from "@/store/app/index";
@@ -76,6 +76,7 @@ export default async function (
       
       if (linkQuery) {
         if (channel) {
+          const messages: {[x: string]: any} = {};
           for (const link of linkQuery) {
             //Hash the link data as the key for map and check if it exists in the store
             const currentExpressionLink =
@@ -108,11 +109,24 @@ export default async function (
                   //Expression not null so kill the worker to stop future polling
                   expressionWorker.terminate();
                   //Add the link and message to the store
-                  dataCommit.addMessage({
-                    channelId,
-                    link: link,
-                    expression: expression,
-                  });
+                  // messages.push(expression);
+                  messages[link.data.target] = {
+                    expression: {
+                      author: expression.author!,
+                      data: JSON.parse(expression.data!),
+                      timestamp: expression.timestamp!,
+                      proof: expression.proof!,
+                    } as Expression,
+                    url: parseExprUrl(link.data!.target!),
+                  };
+
+                  if (linkQuery[linkQuery.length - 1].data.target === link.data!.target!) {
+                    dataCommit.addMessages({
+                      channelId,
+                      links: linkQuery,
+                      expressions: messages,
+                    });
+                  }
 
                   //Compare the timestamp of this link with the current highest
                   const linkTimestamp = new Date(link.timestamp!);

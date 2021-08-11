@@ -25,7 +25,6 @@ interface UpdatePayload {
 
 interface AddChannelMessages {
   channelId: string;
-  communityId: string;
   links: { [x: string]: LinkExpressionAndLang };
   expressions: { [x: string]: ExpressionAndRef };
 }
