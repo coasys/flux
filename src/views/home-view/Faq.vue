@@ -3,6 +3,12 @@
     <j-box pt="800">
       <j-text variant="heading-lg">Frequently asked question</j-text>
 
+      <j-box p="900" v-if="loading">
+        <j-flex a="center" j="center">
+          <j-spinner />
+        </j-flex>
+      </j-box>
+
       <j-tabs
         v-if="categories"
         :value="currentCategory"
@@ -52,6 +58,7 @@ export default defineComponent({
   },
   data() {
     return {
+      loading: true,
       currentCategory: "all",
       faqs: null as Faq[] | null,
       categories: null as Category[] | null,
@@ -100,6 +107,7 @@ export default defineComponent({
 
       this.categories = allCategories;
       this.faqs = allFaqs;
+      this.loading = false;
     },
   },
 });

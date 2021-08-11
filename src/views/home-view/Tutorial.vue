@@ -1,8 +1,8 @@
 <template>
-  <article-layout :heroImg="foundation?.heroImg?.url">
-    <div v-if="foundation">
-      <j-text variant="heading-lg">{{ foundation.title }}</j-text>
-      <structured-text :content="foundation.content"></structured-text>
+  <article-layout :heroImg="page?.heroImg?.url">
+    <div v-if="page">
+      <j-text variant="heading-lg">{{ page.title }}</j-text>
+      <structured-text :content="page.content"></structured-text>
     </div>
   </article-layout>
 </template>
@@ -20,15 +20,15 @@ export default defineComponent({
   },
   data() {
     return {
-      foundation: null,
+      page: null,
     };
   },
   methods: {
     async getContent() {
-      const data = await getData({
+      const { tutorial } = await getData({
         query: /* GraphQL */ `
           {
-            foundation {
+            tutorial {
               title
               heroImg {
                 url
@@ -41,7 +41,7 @@ export default defineComponent({
         `,
       });
 
-      this.foundation = data.foundation;
+      this.page = tutorial;
     },
   },
 });
