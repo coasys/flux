@@ -1,4 +1,8 @@
-import { ApplicationState, ExpressionUIIcons } from "@/store/types";
+import {
+  ApplicationState,
+  ExpressionUIIcons,
+  WindowState,
+} from "@/store/types";
 
 export default {
   getLanguagePath(state: ApplicationState): string {
@@ -18,4 +22,8 @@ export default {
     (language: string): ExpressionUIIcons => {
       return state.expressionUI[language];
     },
+
+  getWindowState(state: ApplicationState): WindowState {
+    return state.windowState;
+  },
 };

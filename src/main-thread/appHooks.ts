@@ -56,7 +56,7 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
         mainThreadState.builtInLangPath
       );
 
-      console.log("\x1b[36m%s\x1b[0m", "Init AD4M...");
+      console.log("\x1b[36m%s\x1b[0m", "Init AD4M...", app.getPath("userData"));
       ad4m
         .init({
           appDataPath: app.getPath("userData"),

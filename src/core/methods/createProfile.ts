@@ -116,6 +116,6 @@ export async function createProfile(
 
     return createProfileExpression;
   } catch (error) {
-    throw new Error(error);
+    throw Error(error);
   }
 }

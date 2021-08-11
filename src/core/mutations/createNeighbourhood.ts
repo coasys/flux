@@ -1,4 +1,5 @@
-import { apolloClient } from "@/app";
+import { apolloClient } from "@/utils/setupApolloClient";
+
 import unwrapApolloResult from "@/utils/unwrapApolloResult";
 import type { Perspective } from "@perspect3vism/ad4m";
 import { PUBLISH_NEIGHBOURHOOD_FROM_PERSPECTIVE } from "../graphql_queries";
