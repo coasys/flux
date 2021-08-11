@@ -191,7 +191,7 @@ describe("Data Mutations", () => {
       store.state.data.communities[community.state.perspectiveUuid].theme
     ).toStrictEqual({
       fontSize: "md",
-      fontFamily: "default",
+      fontFamily: "Poppins",
       name: "light",
       hue: 270,
       saturation: 60,
@@ -209,7 +209,7 @@ describe("Data Mutations", () => {
       store.state.data.communities[community.state.perspectiveUuid].theme
     ).toStrictEqual({
       fontSize: "lg",
-      fontFamily: "default",
+      fontFamily: "Poppins",
       name: "light",
       hue: 270,
       saturation: 80,

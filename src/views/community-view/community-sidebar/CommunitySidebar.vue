@@ -211,7 +211,7 @@ export default defineComponent({
 }
 
 .community-sidebar__header:hover {
-  background: var(--j-color-ui-50);
+  background: rgba(128, 128, 128, 0.05);
 }
 
 .community-info {
