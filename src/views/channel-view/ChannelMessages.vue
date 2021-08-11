@@ -11,11 +11,7 @@
       </j-button>
     </div>
     <div class="channel-view__load-more">
-      <j-button
-        variant="primary"
-        v-if="loadMoreBtn"
-        @click="loadMoreMessages"
-      >
+      <j-button variant="primary" v-if="loadMoreBtn" @click="loadMoreMessages">
         Load more
         <j-icon name="arrow-up-short" size="xs" />
       </j-button>
@@ -82,7 +78,14 @@ interface ExpressionAndRefWithId extends ExpressionAndRef {
 
 export default defineComponent({
   emits: ["scrollToBottom", "profileClick", "mentionClick", "updateLinkWorker"],
-  props: ["channel", "community", "showNewMessagesButton", "profileLanguage", "loadMoreBtn", "linksWorker"],
+  props: [
+    "channel",
+    "community",
+    "showNewMessagesButton",
+    "profileLanguage",
+    "loadMoreBtn",
+    "linksWorker",
+  ],
   name: "ChannelView",
   components: {
     DynamicScroller,

@@ -11,7 +11,7 @@
       :loadMoreBtn="loadMoreBtn"
       @profileClick="handleProfileClick"
       @mentionClick="handleMentionClick"
-      @updateLinkWorker="e => linksWorker = e"
+      @updateLinkWorker="(e) => (linksWorker = e)"
     />
     <channel-footer :community="community" :channel="channel" />
     <j-modal

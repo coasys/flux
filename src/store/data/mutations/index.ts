@@ -61,9 +61,19 @@ export default {
         state.channels[neighbourhood.perspective.uuid].loadMore = true;
       }
 
-      for (const [key, exp] of Object.entries(neighbourhood.currentExpressionMessages)) {
-        console.log(messages.find(e => `${e.url.language.address}://${e.url.expression}` === key));
-        if (!messages.find(e => `${e.url.language.address}://${e.url.expression}` === key)) {
+      for (const [key, exp] of Object.entries(
+        neighbourhood.currentExpressionMessages
+      )) {
+        console.log(
+          messages.find(
+            (e) => `${e.url.language.address}://${e.url.expression}` === key
+          )
+        );
+        if (
+          !messages.find(
+            (e) => `${e.url.language.address}://${e.url.expression}` === key
+          )
+        ) {
           delete neighbourhood.currentExpressionMessages[key];
         }
       }
@@ -73,15 +83,21 @@ export default {
     }
   },
 
-  loadMore(state: DataState, payload: {channelId: string, loadMore: boolean}): void {
+  loadMore(
+    state: DataState,
+    payload: { channelId: string; loadMore: boolean }
+  ): void {
     const channel = state.channels[payload.channelId];
-    
+
     channel.loadMore = payload.loadMore;
   },
 
-  setInitialWorkerStarted(state: DataState, payload: {channelId: string, initialWorkerStarted: boolean}): void {
+  setInitialWorkerStarted(
+    state: DataState,
+    payload: { channelId: string; initialWorkerStarted: boolean }
+  ): void {
     const channel = state.channels[payload.channelId];
-    
+
     channel.initialWorkerStarted = payload.initialWorkerStarted;
   },
 

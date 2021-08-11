@@ -21,7 +21,8 @@ export default async function (
   context: any,
   { channelId, from, to }: Payload
 ): Promise<LoadExpressionResult> {
-  const { getters: dataGetters, commit: dataCommit } = dataActionContext(context);
+  const { getters: dataGetters, commit: dataCommit } =
+    dataActionContext(context);
   const { commit: appCommit, getters: appGetters } = appActionContext(context);
 
   try {
@@ -57,26 +58,29 @@ export default async function (
     linksWorker.addEventListener("message", async (e) => {
       const linkQuery = e.data.perspectiveQueryLinks;
 
-      if (!dataGetters.getChannel(channelId).state.initialWorkerStarted && from === undefined) {
+      if (
+        !dataGetters.getChannel(channelId).state.initialWorkerStarted &&
+        from === undefined
+      ) {
         dataCommit.loadMore({
           channelId,
-          loadMore: linkQuery.length >= 50
+          loadMore: linkQuery.length >= 50,
         });
 
         dataCommit.setInitialWorkerStarted({
           channelId,
-          initialWorkerStarted: true
+          initialWorkerStarted: true,
         });
       } else if (from !== undefined) {
         dataCommit.loadMore({
           channelId,
-          loadMore: linkQuery.length >= 50
+          loadMore: linkQuery.length >= 50,
         });
       }
-      
+
       if (linkQuery) {
         if (channel) {
-          const messages: {[x: string]: any} = {};
+          const messages: { [x: string]: any } = {};
           for (const link of linkQuery) {
             //Hash the link data as the key for map and check if it exists in the store
             const currentExpressionLink =
@@ -120,7 +124,10 @@ export default async function (
                     url: parseExprUrl(link.data!.target!),
                   };
 
-                  if (linkQuery[linkQuery.length - 1].data.target === link.data!.target!) {
+                  if (
+                    linkQuery[linkQuery.length - 1].data.target ===
+                    link.data!.target!
+                  ) {
                     dataCommit.addMessages({
                       channelId,
                       links: linkQuery,
