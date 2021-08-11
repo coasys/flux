@@ -31,7 +31,7 @@ const appModule = defineModule({
     showGlobalLoading: false,
     globalTheme: {
       fontSize: "md",
-      fontFamily: "default",
+      fontFamily: "Poppins",
       name: "light",
       hue: 270,
       saturation: 60,

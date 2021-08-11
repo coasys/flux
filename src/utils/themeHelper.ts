@@ -19,14 +19,29 @@ export function setTheme(theme: ThemeState): void {
 
   document.documentElement.setAttribute("font-size", theme.fontSize);
 
-  const font = {
-    default: `"Avenir", sans-serif`,
-    monospace: `monospace`,
-    system: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
-  };
+  const head = document.getElementsByTagName("head")[0];
+  let link = null;
+
+  link = head.querySelector("link[href^='https://fonts.googleapis.com']");
+
+  if (link) {
+    link.setAttribute(
+      "href",
+      `https://fonts.googleapis.com/css?family=${theme.fontFamily}`
+    );
+  } else {
+    link = document.createElement("link");
+    link.setAttribute("rel", "stylesheet");
+    link.setAttribute(
+      "href",
+      `https://fonts.googleapis.com/css?family=${theme.fontFamily}`
+    );
+    document.getElementsByTagName("head")[0].appendChild(link);
+  }
+
   document.documentElement.style.setProperty(
     "--j-font-family",
     // @ts-ignore
-    font[theme.fontFamily]
+    theme.fontFamily
   );
 }
