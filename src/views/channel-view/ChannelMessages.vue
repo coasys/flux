@@ -10,6 +10,16 @@
         <j-icon name="arrow-down-short" size="xs" />
       </j-button>
     </div>
+    <div class="channel-view__load-more">
+      <j-button
+        variant="primary"
+        v-if="loadMoreBtn"
+        @click="loadMoreMessages"
+      >
+        Load more
+        <j-icon name="arrow-up-short" size="xs" />
+      </j-button>
+    </div>
 
     <DynamicScroller
       v-if="messages.length"
@@ -71,8 +81,8 @@ interface ExpressionAndRefWithId extends ExpressionAndRef {
 }
 
 export default defineComponent({
-  emits: ["scrollToBottom", "profileClick", "mentionClick"],
-  props: ["channel", "community", "showNewMessagesButton", "profileLanguage"],
+  emits: ["scrollToBottom", "profileClick", "mentionClick", "updateLinkWorker"],
+  props: ["channel", "community", "showNewMessagesButton", "profileLanguage", "loadMoreBtn", "linksWorker"],
   name: "ChannelView",
   components: {
     DynamicScroller,
@@ -84,7 +94,6 @@ export default defineComponent({
       noDelayRef: 0,
       currentExpressionPost: "",
       users: {} as UserMap,
-      linksWorker: null as null | Worker,
       editor: null as Editor | null,
       showList: false,
       showProfile: false,
@@ -135,22 +144,26 @@ export default defineComponent({
       }
     },
     loadMoreMessages(): void {
-      // TODO: Not in use yet
       const messageAmount = this.messages.length;
       if (messageAmount) {
-        const lastMessage = this.messages[messageAmount - 1];
+        const lastMessage = this.messages[0];
         this.loadMessages(lastMessage.expression.timestamp);
       } else {
         this.loadMessages();
       }
     },
-    loadMessages(from?: string, to?: string): void {
-      // TODO: Not in use yet
-      store.dispatch.loadExpressions({
+    async loadMessages(from?: string, to?: string) {
+      if (this.linksWorker) {
+        this.linksWorker!.terminate();
+      }
+
+      const { linksWorker } = await store.dispatch.loadExpressions({
         from: from ? new Date(from) : undefined,
         to: to ? new Date(to) : undefined,
         channelId: this.channel.neighbourhood.perspective.uuid,
       });
+
+      this.$emit("updateLinkWorker", linksWorker);
     },
   },
 });

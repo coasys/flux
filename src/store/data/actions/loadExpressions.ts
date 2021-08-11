@@ -57,7 +57,7 @@ export default async function (
     linksWorker.addEventListener("message", async (e) => {
       const linkQuery = e.data.perspectiveQueryLinks;
 
-      if (!dataState.channels[channelId].initialWorkerStarted && from === undefined) {
+      if (!dataGetters.getChannel(channelId).state.initialWorkerStarted && from === undefined) {
         dataCommit.loadMore({
           channelId,
           loadMore: linkQuery.length >= 50
