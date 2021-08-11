@@ -178,7 +178,7 @@ export default async (
         perspectiveUuid: createSourcePerspective.uuid,
         theme: {
           fontSize: "md",
-          fontFamily: "default",
+          fontFamily: "Poppins",
           name: "light",
           hue: 270,
           saturation: 60,
