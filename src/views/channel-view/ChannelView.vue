@@ -20,12 +20,12 @@
       </div>
       <div class="channel-view__load-more">
         <j-button
-            variant="primary"
-            v-if="loadMoreBtn"
-            @click="loadMoreMessages"
-          >
+          variant="primary"
+          v-if="loadMoreBtn"
+          @click="loadMoreMessages"
+        >
           Load more
-          <j-icon name="arrow-down-short" size="xs" />
+          <j-icon name="arrow-up-short" size="xs" />
         </j-button>
       </div>
 
@@ -162,15 +162,23 @@ export default defineComponent({
 
     // TODO: @fayeed change this
     const isAtTop = scrollContainer.scrollTop <= 20;
-    
-    this.loadMoreBtn = store.state.data.channels[this.channel.neighbourhood.perspective.uuid].loadMore && isAtTop
 
-    scrollContainer.addEventListener('scroll', (event) => {
+    this.loadMoreBtn =
+      store.state.data.channels[this.channel.neighbourhood.perspective.uuid]
+        .loadMore && isAtTop;
+
+    scrollContainer.addEventListener("scroll", (event) => {
       const isAtTop = scrollContainer.scrollTop <= 20;
 
-      console.log(store.state.data.channels[this.channel.neighbourhood.perspective.uuid].loadMore, isAtTop)
+      console.log(
+        store.state.data.channels[this.channel.neighbourhood.perspective.uuid]
+          .loadMore,
+        isAtTop
+      );
 
-      this.loadMoreBtn = store.state.data.channels[this.channel.neighbourhood.perspective.uuid].loadMore && isAtTop
+      this.loadMoreBtn =
+        store.state.data.channels[this.channel.neighbourhood.perspective.uuid]
+          .loadMore && isAtTop;
     });
   },
   async beforeRouteUpdate(to, from, next) {
@@ -225,11 +233,11 @@ export default defineComponent({
         }
       }
     },
-    "channel.state.loadMore": function(loadMore) {
-      if(!loadMore) {
+    "channel.state.loadMore": function (loadMore) {
+      if (!loadMore) {
         this.loadMoreBtn = false;
       }
-    }
+    },
   },
   computed: {
     memberMentions(): MentionTrigger[] {
@@ -423,12 +431,12 @@ export default defineComponent({
       if (to) {
         toDate = new Date(to);
       } else {
-        toDate = undefined
+        toDate = undefined;
       }
       if (this.linksWorker) {
         this.linksWorker!.terminate();
       }
-      
+
       const { linksWorker } = await store.dispatch.loadExpressions({
         from: fromDate,
         to: toDate,
