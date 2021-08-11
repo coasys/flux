@@ -104,7 +104,7 @@ describe("App Mutations", () => {
 
   test("setGlobalTheme", () => {
     expect(store.state.app.globalTheme).toStrictEqual({
-      fontFamily: "default",
+      fontFamily: "Poppins",
       fontSize: "md",
       hue: 270,
       name: "light",
