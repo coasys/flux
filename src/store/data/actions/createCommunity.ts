@@ -25,12 +25,14 @@ import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta"
 
 export interface Payload {
   perspectiveName: string;
+  image?: string;
+  thumbnail?: string;
   description: string;
 }
 
 export default async (
   context: any,
-  { perspectiveName, description }: Payload
+  { perspectiveName, description, thumbnail = "", image = "" }: Payload
 ): Promise<CommunityState> => {
   const { commit: dataCommit } = dataActionContext(context);
   const { commit: appCommit, getters: appGetters } = appActionContext(context);
@@ -121,6 +123,8 @@ export default async (
       JSON.stringify({
         name: perspectiveName,
         description: description,
+        image: image,
+        thumbnail: thumbnail,
       })
     );
     console.log("Created group expression with response", createExp);
@@ -165,6 +169,8 @@ export default async (
       neighbourhood: {
         name: perspectiveName,
         description: description,
+        image: image,
+        thumbnail: thumbnail,
         perspective: createSourcePerspective,
         typedExpressionLanguages: typedExpLangs,
         groupExpressionRef: createExp,
@@ -186,7 +192,7 @@ export default async (
           hue: 270,
           saturation: 60,
         },
-        useGlobalTheme: false,
+        useLocalTheme: false,
         currentChannelId: channel.neighbourhood.perspective.uuid,
       },
     } as CommunityState;

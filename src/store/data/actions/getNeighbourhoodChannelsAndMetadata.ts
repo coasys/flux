@@ -10,11 +10,16 @@ export interface Payload {
   communityId: string;
 }
 
+export interface Response {
+  channelLinksWorker: Worker;
+  groupExpressionWorker: Worker;
+}
+
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async (
   context: any,
   { communityId }: Payload
-): Promise<[Worker, Worker]> => {
+): Promise<Response> => {
   console.log("Getting community channel links for community: ", communityId);
 
   const { commit: dataCommit, getters: dataGetters } =
@@ -158,6 +163,8 @@ export default async (
                   communityId: community.neighbourhood.perspective.uuid,
                   name: groupExpData["name"],
                   description: groupExpData["description"],
+                  image: groupExpData["image"],
+                  thumbnail: groupExpData["thumnail"],
                   groupExpressionRef:
                     groupExpressionLinks[groupExpressionLinks.length - 1].data!
                       .target,
@@ -170,7 +177,7 @@ export default async (
         throw new Error(error);
       }
     });
-    return [channelLinksWorker, groupExpressionWorker];
+    return { channelLinksWorker, groupExpressionWorker };
   } catch (e) {
     throw new Error(e);
   }

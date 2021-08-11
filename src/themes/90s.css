@@ -1,16 +1,18 @@
+@import url("https://fonts.googleapis.com/css2?family=VT323&display=swap");
+
 :root[theme="90s"] {
   --app-main-sidebar-bg-color: white;
-  --app-drawer-bg-color: #f1f1f1;
+  --app-drawer-bg-color: white;
   --app-main-content-bg-color: white;
   --app-channel-bg-color: white;
 
   --j-color-primary-hue: 230 !important;
 
-  --j-font-family: System, monospace;
-
   --j-border-radius: 0px;
 
   --j-border-color: silver;
+
+  --j-font-family: "VT323", monospace !important;
 
   --j-size-sm: 30px;
   --j-size-md: 40px;
@@ -43,11 +45,24 @@
   padding: 0;
 }
 
-[theme="90s"] j-modal::part(content) {
-  padding: var(--j-space-800);
+[theme="90s"] j-modal::part(close-button) {
+  top: 10px;
+  right: 10px;
+  padding: var(--j-space-200);
+  width: var(--j-size-sm);
+  height: var(--j-size-sm);
   background: silver;
-  z-index: 1;
-  position: relative;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[theme="90s"] j-modal::part(header) {
+  display: block;
+  height: 50px;
+  background: linear-gradient(90deg, navy, #1084d0);
 }
 
 [theme="90s"] j-toggle::part(indicator) {
@@ -62,19 +77,6 @@
     inset 2px 2px #dfdfdf;
 }
 
-[theme="90s"] j-modal::part(modal):before {
-  position: absolute;
-  content: "";
-  z-index: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  border: 2px solid white;
-  left: 19px;
-  top: 20px;
-}
-
 [theme="90s"] j-avatar::part(base) {
   border-radius: 0;
   border: 0;
@@ -82,21 +84,31 @@
     inset 2px 2px #dfdfdf;
 }
 
+[theme="90s"] j-avatar[selected]::part(base) {
+  border-radius: 0;
+  box-shadow: 0px 0px 0px 2px var(--j-color-primary-500);
+}
+
 [theme="90s"] j-avatar::part(img) {
   border-radius: 0;
 }
 
 [theme="90s"] j-button::part(base) {
-  transform: scale(1);
-  transition: all 0.2s ease;
-  background: silver;
+  background: silver !important;
+  color: #222 !important;
+  font-weight: 400;
   border: 0 !important;
   box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
     inset 2px 2px #dfdfdf;
 }
 
+[theme="90s"] j-button[disabled]::part(base) {
+  text-shadow: 1px 1px 0 #fff;
+}
+
 [theme="90s"] j-button::part(base):active {
-  transform: scale(0.95);
+  box-shadow: inset -1px -1px #fff, inset 1px 1px #0a0a0a,
+    inset -2px -2px #dfdfdf, inset 2px 2px grey;
 }
 
 [theme="90s"] j-button[variant="primary"]::part(base) {
@@ -122,19 +134,27 @@
   background: var(--j-color-ui-100);
 }
 
+[theme="90s"] j-menu-group-item::part(summary) {
+  padding-left: var(--j-space-300);
+}
+
+[theme="90s"] j-menu-group-item::part(content) {
+  border-left: 1px dotted grey;
+  margin-left: var(--j-space-500);
+}
+
 [theme="90s"] j-menu-item::part(base) {
-  background: var(--j-color-ui-100);
-  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
-    inset 2px 2px #dfdfdf;
+  position: relative;
 }
 
-[theme="90s"] j-menu-item[selected]::part(base) {
-  color: white;
-  background: var(--j-color-primary-500);
-}
-
-[theme="90s"] j-menu-item:hover:not([selected])::part(base) {
-  background: silver;
+[theme="90s"] j-menu-item::part(base):after {
+  position: absolute;
+  content: "";
+  display: block;
+  left: 0;
+  width: 15px;
+  height: 1px;
+  border-top: 1px dotted grey;
 }
 
 [theme="90s"] j-tab-item::part(base) {

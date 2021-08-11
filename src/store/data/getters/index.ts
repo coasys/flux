@@ -43,6 +43,22 @@ export default {
     );
   },
 
+  getChannelByNeighbourhoodUrl:
+    (state: DataState) =>
+    (url: string): ChannelState | null => {
+      const neighbourhood = Object.values(state.neighbourhoods)
+        .filter((neighourhood) => neighourhood.neighbourhoodUrl == url)
+        .pop();
+      if (neighbourhood == undefined) {
+        return null;
+      }
+      const channel = state.channels[neighbourhood?.perspective.uuid];
+      return {
+        neighbourhood,
+        state: channel,
+      };
+    },
+
   getCommunityState:
     (state: DataState) =>
     (id: string): LocalCommunityState => {

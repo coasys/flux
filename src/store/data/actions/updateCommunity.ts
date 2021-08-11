@@ -7,13 +7,15 @@ import { ExpressionTypes } from "@/store/types";
 
 export interface Payload {
   communityId: string;
-  name: string;
-  description: string;
+  name?: string;
+  description?: string;
+  image?: string;
+  thumbnail?: string;
 }
 
 export default async function updateCommunity(
   context: any,
-  { communityId, name, description }: Payload
+  { communityId, name, description, image, thumbnail }: Payload
 ): Promise<void> {
   const { commit: dataCommit, getters: dataGetters } =
     dataActionContext(context);
@@ -51,8 +53,10 @@ export default async function updateCommunity(
 
       dataCommit.updateCommunityMetadata({
         communityId: community.neighbourhood.perspective.uuid,
-        name: name,
-        description: description,
+        name: name || community.neighbourhood.name,
+        description: description || community.neighbourhood.description,
+        image: image || community.neighbourhood.image || "",
+        thumbnail: thumbnail || community.neighbourhood.thumbnail || "",
         groupExpressionRef: groupExpression,
       });
     } else {
