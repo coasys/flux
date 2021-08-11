@@ -2,7 +2,8 @@ import { agentGenerate } from "@/core/mutations/agentGenerate";
 import { addPerspective } from "@/core/mutations/addPerspective";
 
 import { databasePerspectiveName } from "@/core/juntoTypes";
-import { rootActionContext } from "@/store/index";
+import { appActionContext } from "@/store/app/index";
+import { userActionContext } from "@/store/user/index";
 
 export interface Payload {
   givenName: string;
@@ -26,14 +27,16 @@ export default async (
     thumbnailPicture,
   }: Payload
 ): Promise<void> => {
-  const { commit } = rootActionContext(context);
+  const { commit: appCommit } = appActionContext(context);
+  const { commit: userCommit } = userActionContext(context);
+
   const perspectiveName = databasePerspectiveName;
 
   try {
     const status = await agentGenerate(password);
     const addPerspectiveResult = await addPerspective(perspectiveName);
 
-    commit.setUserProfile({
+    userCommit.setUserProfile({
       username: username,
       email: email,
       givenName: givenName,
@@ -41,10 +44,10 @@ export default async (
       profilePicture,
       thumbnailPicture,
     });
-    commit.updateAgentStatus(status);
-    commit.setDatabasePerspective(addPerspectiveResult.uuid);
+    userCommit.updateAgentStatus(status);
+    appCommit.setDatabasePerspective(addPerspectiveResult.uuid);
   } catch (e) {
-    commit.showDangerToast({
+    appCommit.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

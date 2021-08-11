@@ -35,7 +35,7 @@ export async function createMainWindow(
     }
   });
 
-  mainThreadState.mainWindow.removeMenu();
+  // mainThreadState.mainWindow.removeMenu();
 
   mainThreadState.mainWindow.on("minimize", () => {
     mainThreadState.mainWindow!.webContents.send("windowState", "minimize");

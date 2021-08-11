@@ -1,6 +1,7 @@
 import { createChannel } from "@/core/methods/createChannel";
 import { ChannelState, MembraneType } from "@/store/types";
-import { rootGetterContext, rootActionContext } from "@/store/index";
+import { dataActionContext } from "@/store/data/index";
+import { appActionContext } from "@/store/app/index";
 
 export interface Payload {
   communityId: string;
@@ -11,25 +12,36 @@ export default async (
   context: any,
   payload: Payload
 ): Promise<ChannelState> => {
-  const { commit, getters } = rootActionContext(context);
+  const { commit: dataCommit, getters: dataGetters } =
+    dataActionContext(context);
+  const { commit: appCommit, getters: appGetters } = appActionContext(context);
   try {
-    const community = getters.getCommunity(payload.communityId);
-    const channel = await createChannel(
-      payload.name,
-      getters.getLanguagePath,
-      community.neighbourhood.perspective,
-      MembraneType.Inherited,
-      community.neighbourhood.typedExpressionLanguages
-    );
+    const community = dataGetters.getCommunity(payload.communityId);
 
-    commit.addChannel({
-      communityId: community.neighbourhood.perspective.uuid,
-      channel,
-    });
+    if (community.neighbourhood !== undefined) {
+      const channel = await createChannel(
+        payload.name,
+        appGetters.getLanguagePath,
+        community.neighbourhood.perspective,
+        MembraneType.Inherited,
+        community.neighbourhood.typedExpressionLanguages
+      );
 
-    return channel;
+      dataCommit.addChannel({
+        communityId: community.neighbourhood.perspective.uuid,
+        channel,
+      });
+
+      return channel;
+    } else {
+      const message = "Community does not exists";
+      appCommit.showDangerToast({
+        message,
+      });
+      throw Error(message);
+    }
   } catch (e) {
-    commit.showDangerToast({
+    appCommit.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

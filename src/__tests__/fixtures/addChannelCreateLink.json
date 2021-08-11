@@ -1,0 +1,18 @@
+{
+  "author": "did:key:zQ3shWoZNT5PAeiA5AKGZdN5JhPGoPR5LYnpE1EpWWWFidoKw",
+  "data": {
+    "predicate": "sioc://has_space",
+    "source": "neighbourhood://8421246162df2800c65c85b8b20fb50ce7fb95174699acb2723c8e3cf70c5f830ec43687c17856://self",
+    "target": "neighbourhood://8421244696ef9042d51add6f4517ae9353d7a4374459f3f50d3bf6f324219e3a62ebd46ec1b688",
+    "__typename": "Link"
+  },
+  "proof": {
+    "invalid": false,
+    "key": "#zQ3shWoZNT5PAeiA5AKGZdN5JhPGoPR5LYnpE1EpWWWFidoKw",
+    "signature": "c97d845f7adf2148025a2897d84731659a523a10dded0fa1289c3b19224f80b671869cc75b9c7be8136b30bfcafd29c4e06667d194765b72876b651f2b9db4eb",
+    "valid": true,
+    "__typename": "ExpressionProof"
+  },
+  "timestamp": "2021-07-30T07:07:00.587Z",
+  "__typename": "LinkExpression"
+}

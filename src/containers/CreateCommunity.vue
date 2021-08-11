@@ -129,7 +129,7 @@ export default defineComponent({
           image: this.newProfileImage,
           thumbnail: this.newProfileImage,
         })
-        .then((community) => {
+        .then((community: any) => {
           this.$emit("submit");
           this.newCommunityName = "";
           this.newCommunityDesc = "";
