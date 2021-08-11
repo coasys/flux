@@ -110,6 +110,7 @@ export default defineComponent({
           query: print(GET_EXPRESSION),
           variables: { url: link.data!.target! },
           name: "Expression signal get",
+          dataKey: "expression",
         });
 
         expressionWorker.onerror = function (e) {
@@ -118,33 +119,29 @@ export default defineComponent({
 
         expressionWorker.addEventListener("message", (e) => {
           const expression = e.data.expression;
-          if (expression) {
-            //Expression is not null, which means we got the data and we can terminate the loop
-            expressionWorker.terminate();
-            const message = JSON.parse(expression!.data!);
+          const message = JSON.parse(expression!.data!);
 
-            console.log("FOUND EXPRESSION FOR SIGNAL");
-            //Add the expression to the store
-            store.commit.addExpressionAndLink({
-              channelId: perspective,
-              link: link,
-              message: expression,
-            });
+          console.log("FOUND EXPRESSION FOR SIGNAL");
+          //Add the expression to the store
+          store.commit.addExpressionAndLink({
+            channelId: perspective,
+            link: link,
+            message: expression,
+          });
 
-            store.dispatch.showMessageNotification({
-              router,
-              route,
-              perspectiveUuid: perspective,
-              authorDid: expression!.author,
-              message: message.body,
-            });
+          store.dispatch.showMessageNotification({
+            router,
+            route,
+            perspectiveUuid: perspective,
+            authorDid: expression!.author,
+            message: message.body,
+          });
 
-            //Add UI notification on the channel to notify that there is a new message there
-            store.commit.setHasNewMessages({
-              channelId: perspective,
-              value: true,
-            });
-          }
+          //Add UI notification on the channel to notify that there is a new message there
+          store.commit.setHasNewMessages({
+            channelId: perspective,
+            value: true,
+          });
         });
       }
     };

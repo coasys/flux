@@ -13,8 +13,10 @@ export interface Payload {
 }
 
 export interface LoadExpressionResult {
-  linksWorker: any;
+  linksWorker: Worker;
 }
+
+const expressionWorker = new Worker("pollingWorker.js");
 
 /// Function that polls for new messages on a channel using a web worker, if a message link is found then another web worker is spawned to retry getting the expression until its found
 export default async function (
@@ -46,6 +48,7 @@ export default async function (
         } as LinkQuery,
       },
       name: `Get channel messages ${channel.name}`,
+      dataKey: "perspectiveQueryLinks",
     });
 
     //If links worker gets an error then throw it
@@ -68,8 +71,6 @@ export default async function (
               channel.currentExpressionMessages[link.data.target];
 
             if (!currentExpressionLink || !currentExpression) {
-              const expressionWorker = new Worker("pollingWorker.js");
-
               //Run expression worker to try and get expression on link target
               expressionWorker.postMessage({
                 retry: 50,
@@ -77,6 +78,7 @@ export default async function (
                 query: print(GET_EXPRESSION),
                 variables: { url: link.data.target },
                 name: "Get expression data from channel links",
+                dataKey: "expression",
               });
 
               expressionWorker.onerror = function (e) {
@@ -85,26 +87,21 @@ export default async function (
 
               expressionWorker.addEventListener("message", (e) => {
                 const expression = e.data.expression;
-                //Check an expression was actually found as not null
-                if (expression) {
-                  //Expression not null so kill the worker to stop future polling
-                  expressionWorker.terminate();
-                  //Add the link and message to the store
-                  dataCommit.addMessage({
-                    channelId,
-                    link: link,
-                    expression: expression,
-                  });
+                //Add the link and message to the store
+                dataCommit.addMessage({
+                  channelId,
+                  link: link,
+                  expression: expression,
+                });
 
-                  //Compare the timestamp of this link with the current highest
-                  const linkTimestamp = new Date(link.timestamp!);
-                  if (latestLinkTimestamp) {
-                    if (linkTimestamp > latestLinkTimestamp!) {
-                      latestLinkTimestamp = linkTimestamp;
-                    }
-                  } else {
+                //Compare the timestamp of this link with the current highest
+                const linkTimestamp = new Date(link.timestamp!);
+                if (latestLinkTimestamp) {
+                  if (linkTimestamp > latestLinkTimestamp!) {
                     latestLinkTimestamp = linkTimestamp;
                   }
+                } else {
+                  latestLinkTimestamp = linkTimestamp;
                 }
               });
             }

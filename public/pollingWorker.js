@@ -32,19 +32,19 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-let retries = 0;
+let polls = [];
 
 function pollData(e) {
   const {
     retry = null,
-    quitOnResponse = false,
+    quitOnResponse = true,
     interval = 1000,
     query,
     variables,
     name = "Undefined",
+    retries = 0,
+    dataKey,
   } = e.data;
-
-  console.log("Running worker loop: ", name);
 
   if (retry !== null && retries > retry) {
     self.close();
@@ -52,21 +52,44 @@ function pollData(e) {
 
   getData({ query, variables })
     .then((res) => {
-      console.log(res);
-      if (res) {
+      console.log("Polling ", retries, name, " Got response: ", res);
+      if (res[dataKey]) {
         self.postMessage(res);
         if (quitOnResponse) {
+          const pollsIndex = polls.indexOf(
+            query + JSON.stringify(e.data.variables)
+          );
+          if (pollsIndex > -1) {
+            polls.splice(pollsIndex);
+          }
           self.close();
         }
       }
     })
     .catch((e) => {
+      const pollsIndex = polls.indexOf(
+        query + JSON.stringify(e.data.variables)
+      );
+      if (pollsIndex > -1) {
+        polls.splice(pollsIndex);
+      }
       throw new Error(e);
     })
     .finally(() => {
-      retries = retries + 1;
-      sleep(interval * retries).then(() => pollData(e));
+      e.data.retries = retries + 1;
+      sleep(interval * retries + 1).then(() => pollData(e));
     });
 }
 
-self.addEventListener("message", pollData, false);
+self.addEventListener(
+  "message",
+  (e) => {
+    let pollIdentifier = e.data.query + JSON.stringify(e.data.variables);
+    if (polls.filter((poll) => poll == pollIdentifier).length == 0) {
+      polls.push(pollIdentifier);
+      e.data.retries = 0;
+      pollData(e);
+    }
+  },
+  false
+);
