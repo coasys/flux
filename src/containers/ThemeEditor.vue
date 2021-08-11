@@ -44,9 +44,20 @@
         :value="theme.fontFamily"
         @change="(e) => updateTheme({ fontFamily: e.target.value })"
       >
-        <j-tab-item variant="button" value="default">Default</j-tab-item>
-        <j-tab-item variant="button" value="system">System</j-tab-item>
-        <j-tab-item variant="button" value="monospace">Monospace</j-tab-item>
+        <j-tab-item variant="button" value="Poppins">Poppins</j-tab-item>
+        <j-tab-item variant="button" value="Roboto">Roboto</j-tab-item>
+        <j-tab-item variant="button" value="Inter">Inter</j-tab-item>
+        <j-tab-item variant="button" value="Fira Code">Fira Code</j-tab-item>
+        <j-tab-item variant="button" value="IBM Plex Mono">
+          IBM Plex Mono
+        </j-tab-item>
+        <j-tab-item variant="button" value="IBM Plex Sans">
+          IBM Plex Sans
+        </j-tab-item>
+        <j-tab-item variant="button" value="Rubik"> Rubik </j-tab-item>
+        <j-tab-item variant="button" value="Space Grotesk">
+          Space Grotesk
+        </j-tab-item>
       </j-tabs>
     </j-box>
     <j-box pb="800">
