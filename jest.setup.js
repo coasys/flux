@@ -1,7 +1,7 @@
 class Worker {
   constructor(stringUrl) {
     this.url = stringUrl;
-    this.onmessage = () => {};
+    this.onmessage = () => undefined;
   }
 
   postMessage(msg) {

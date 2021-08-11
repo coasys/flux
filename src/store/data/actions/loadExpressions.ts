@@ -23,7 +23,8 @@ export default async function (
   context: any,
   { channelId, from, to }: Payload
 ): Promise<LoadExpressionResult> {
-  const { getters: dataGetters, commit: dataCommit } = dataActionContext(context);
+  const { getters: dataGetters, commit: dataCommit } =
+    dataActionContext(context);
   const { commit: appCommit, getters: appGetters } = appActionContext(context);
 
   try {
