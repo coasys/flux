@@ -221,9 +221,12 @@ export default defineComponent({
       store.commit.updateAgentLockState(false);
     });
 
+    window.api.receive("clearMessages", () => {
+      store.commit.updateAgentLockState(false);
+    });
+
     window.api.receive("getLangPathResponse", (data: string) => {
-      // console.log(`Received language path from main thread: ${data}`);
-      store.commit.setLanguagesPath(data);
+      store.commit.clearMessages();
     });
 
     window.api.receive("windowState", (data: string) => {

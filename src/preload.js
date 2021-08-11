@@ -32,6 +32,7 @@ contextBridge.exposeInMainWorld("api", {
       "globalError",
       "windowState",
       "unlockedStateOff",
+      "clearMessages"
     ];
     if (validChannels.includes(channel)) {
       // Deliberately strip event as it includes `sender`
