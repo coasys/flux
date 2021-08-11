@@ -10,6 +10,7 @@
       <j-avatar
         style="--j-avatar-size: 30px"
         :src="community.neighbourhood.image"
+        :initials="community.neighbourhood.name.charAt(0)"
       />
       <div class="community-info">
         {{ community.neighbourhood.name }}
