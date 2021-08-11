@@ -20,7 +20,8 @@
       :key="community.perspective.uuid"
     >
       <j-avatar
-        :src="require('@/assets/images/junto_web_rainbow.png')"
+        :src="community.image"
+        :initials="community.name.charAt(0)"
         style="--j-avatar-size: 100px"
         size="xl"
       ></j-avatar>
