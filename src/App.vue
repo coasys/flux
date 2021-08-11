@@ -82,8 +82,6 @@ export default defineComponent({
         console.log("agent unlocked changed to", newValue);
         if (newValue) {
           store.commit.setApplicationStartTime(new Date());
-        }
-        if (newValue) {
           store.dispatch.loadExpressionLanguages();
         } else {
           router.push({
