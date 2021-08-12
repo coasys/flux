@@ -212,7 +212,7 @@ export default defineComponent({
       }
       if (label?.startsWith("@")) {
         this.showProfile = true;
-        this.activeProfile = id;
+        this.activeProfile = `did:key:${id}`;
       }
     },
     markAsRead() {
