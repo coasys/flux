@@ -29,7 +29,7 @@ describe("Update Global Theme", () => {
     expect(store.state.app.currentTheme).toBe("global");
     expect(store.state.app.globalTheme).toStrictEqual({
       name: "light",
-      fontFamily: "default",
+      fontFamily: "Poppins",
       hue: 270,
       saturation: 60,
       fontSize: "md",

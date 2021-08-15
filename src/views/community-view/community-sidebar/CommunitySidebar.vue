@@ -10,6 +10,7 @@
       <j-avatar
         style="--j-avatar-size: 30px"
         :src="community.neighbourhood.image"
+        :initials="community.neighbourhood.name.charAt(0)"
       />
       <div class="community-info">
         {{ community.neighbourhood.name }}
@@ -210,7 +211,7 @@ export default defineComponent({
 }
 
 .community-sidebar__header:hover {
-  background: var(--j-color-ui-50);
+  background: rgba(128, 128, 128, 0.05);
 }
 
 .community-info {

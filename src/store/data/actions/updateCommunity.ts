@@ -33,7 +33,7 @@ export default async function updateCommunity(
       console.log("Found group exp lang", groupExpressionLang);
       const groupExpression = await createExpression(
         groupExpressionLang.languageAddress,
-        JSON.stringify({ name, description })
+        JSON.stringify({ name, description, image, thumbnail })
       );
 
       console.log(

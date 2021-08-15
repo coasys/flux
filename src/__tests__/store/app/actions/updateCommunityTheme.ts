@@ -31,7 +31,7 @@ describe("Update community theme", () => {
       store.state.data.communities[community.state.perspectiveUuid].theme
     ).toStrictEqual({
       name: "light",
-      fontFamily: "default",
+      fontFamily: "Poppins",
       hue: 270,
       saturation: 60,
       fontSize: "md",

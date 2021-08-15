@@ -95,7 +95,7 @@ export default async (
           useLocalTheme: false,
           theme: {
             fontSize: "md",
-            fontFamily: "default",
+            fontFamily: "Poppins",
             name: "light",
             hue: 270,
             saturation: 60,

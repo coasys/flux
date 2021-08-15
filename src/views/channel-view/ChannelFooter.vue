@@ -51,6 +51,7 @@ export default defineComponent({
         (m: any) =>
           ({
             name: m.data.profile["foaf:AccountName"],
+            //todo: this should not be replaced, we want the full did identifier in the mentions in case message is consumed by another application
             id: m.author.replace("did:key:", ""),
             trigger: "@",
           } as MentionTrigger)
