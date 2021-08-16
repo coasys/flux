@@ -175,8 +175,7 @@ export default defineComponent({
       }
       if (label?.startsWith("@")) {
         this.showProfile = true;
-        //todo: this should not be here, the mention should have the did already formatted correctly
-        this.activeProfile = "did:key:" + id;
+        this.activeProfile = id;
       }
     },
     markAsRead() {
