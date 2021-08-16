@@ -22,10 +22,6 @@ export default async (
   try {
     //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button
     const community = dataGetters.getCommunity(communityId);
-    console.log(
-      "Getting community group expression links for community: ",
-      community.neighbourhood.name
-    );
 
     const groupExpressionWorker = new Worker("pollingWorker.js");
     // Start worker looking for group expression links

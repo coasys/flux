@@ -16,8 +16,6 @@ export default async (
   context: any,
   { communityId }: Payload
 ): Promise<Worker> => {
-  console.log("Getting community channel links for community: ", communityId);
-
   const { commit: dataCommit, getters: dataGetters } =
     dataActionContext(context);
 
@@ -36,7 +34,7 @@ export default async (
           predicate: "sioc://has_space",
         }),
       },
-      name: "Community channel links",
+      name: `Channel links for ${community.neighbourhood.name}`,
       dataKey: "perspectiveQueryLinks",
     });
 

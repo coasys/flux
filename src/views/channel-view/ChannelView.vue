@@ -72,7 +72,6 @@ export default defineComponent({
       handler: async function (to) {
         if (!to.params.channelId) return;
 
-        console.log("Adding new links worker");
         this.linksWorker?.terminate();
         const { linksWorker } = await store.dispatch.loadExpressions({
           channelId: to.params.channelId,
