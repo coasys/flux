@@ -37,8 +37,6 @@ export default async function (
       console.error(`No channel with id ${channelId} found`);
     }
 
-    let latestLinkTimestamp: Date | null = null;
-
     const linksWorker = new Worker("pollingWorker.js");
 
     linksWorker.postMessage({
@@ -76,14 +74,6 @@ export default async function (
         const currentExpression =
           channel.currentExpressionMessages[link.data.target];
 
-        //Compare the timestamp of this link with the current highest
-        const linkTimestamp = new Date(link.timestamp!);
-
-        latestLinkTimestamp =
-          latestLinkTimestamp === null || linkTimestamp > latestLinkTimestamp
-            ? linkTimestamp
-            : latestLinkTimestamp;
-
         if (!currentExpressionLink || !currentExpression) {
           //Run expression worker to try and get expression on link target
           expressionWorker.postMessage({
@@ -95,19 +85,6 @@ export default async function (
             name: `Get expression data from channel links ${channel.name}`,
             dataKey: "expression",
           });
-        }
-      }
-
-      //If we have a linktimestamp check if timestamp is > than current latest link to allow for dynamic scroll rendering
-      if (latestLinkTimestamp) {
-        if (
-          Object.values(channel.currentExpressionLinks).filter(
-            (link) => new Date(link.timestamp!) > latestLinkTimestamp!
-          ).length > 0
-        ) {
-          return [false, linksWorker];
-        } else {
-          return [true, linksWorker];
         }
       }
     });
