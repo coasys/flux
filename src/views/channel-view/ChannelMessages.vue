@@ -11,42 +11,23 @@
       </j-button>
     </div>
 
-    <DynamicScroller
-      v-if="messages.length"
-      ref="scroller"
-      :items="messages"
-      :min-item-size="2"
-    >
-      <template v-slot="{ item, index, active }">
-        <DynamicScrollerItem
-          :item="item"
-          :active="active"
-          :size-dependencies="[
-            item.expression.data.body,
-            item.expression.timestamp,
-          ]"
-          :data-index="index"
-          :data-active="active"
-          class="message"
-        >
-          <message-item
-            :did="item.expression.author"
-            :showAvatar="showAvatar(index)"
-            :message="item.expression.data.body"
-            :timestamp="item.expression.timestamp"
-            :username="users[item.expression.author]?.['foaf:AccountName']"
-            :profileImg="
-              users[item.expression.author]?.['schema:image'] &&
-              JSON.parse(users[item.expression.author]['schema:image'])[
-                'schema:contentUrl'
-              ]
-            "
-            @profileClick="(did) => $emit('profileClick', did)"
-            @mentionClick="(dataset) => $emit('mentionClick', dataset)"
-          />
-        </DynamicScrollerItem>
-      </template>
-    </DynamicScroller>
+    <div v-for="(item, index) in messages" :key="item.expression.timestamp">
+      <message-item
+        :did="item.expression.author"
+        :showAvatar="showAvatar(index)"
+        :message="item.expression.data.body"
+        :timestamp="item.expression.timestamp"
+        :username="users[item.expression.author]?.['foaf:AccountName']"
+        :profileImg="
+          users[item.expression.author]?.['schema:image'] &&
+          JSON.parse(users[item.expression.author]['schema:image'])[
+            'schema:contentUrl'
+          ]
+        "
+        @profileClick="(did) => $emit('profileClick', did)"
+        @mentionClick="(dataset) => $emit('mentionClick', dataset)"
+      />
+    </div>
   </div>
 </template>
 
@@ -75,8 +56,6 @@ export default defineComponent({
   props: ["channel", "community", "showNewMessagesButton", "profileLanguage"],
   name: "ChannelView",
   components: {
-    DynamicScroller,
-    DynamicScrollerItem,
     MessageItem,
   },
   data() {
