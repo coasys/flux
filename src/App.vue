@@ -208,6 +208,8 @@ export default defineComponent({
     },
   },
   beforeCreate() {
+    store.commit.clearMessages();
+    
     //Reset globalError & loading states in case application was exited with these states set to true before
     store.commit.setGlobalError({
       show: false,

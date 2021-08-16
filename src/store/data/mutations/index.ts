@@ -64,22 +64,16 @@ export default {
       for (const [key, exp] of Object.entries(
         neighbourhood.currentExpressionMessages
       )) {
-        console.log(
-          messages.find(
-            (e) => `${e.url.language.address}://${e.url.expression}` === key
-          )
-        );
         if (
           !messages.find(
             (e) => `${e.url.language.address}://${e.url.expression}` === key
           )
         ) {
           delete neighbourhood.currentExpressionMessages[key];
+          delete neighbourhood.currentExpressionLinks[hash(key, { excludeValues: "__typename" })];
         }
       }
 
-      // TODO: @fayeed need to fix the duplicate links issuem hash function not working correctly.
-      // neighbourhood.currentExpressionLinks = {};
     }
   },
 
@@ -122,6 +116,7 @@ export default {
 
   addMessage(state: DataState, payload: AddChannelMessage): void {
     const neighbourhood = state.neighbourhoods[payload.channelId];
+    console.log('Adding ')
 
     neighbourhood.currentExpressionLinks[
       hash(payload.link.data.target!, { excludeValues: "__typename" })
