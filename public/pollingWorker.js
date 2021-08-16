@@ -32,63 +32,63 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function createId({ query, variables }) {
+  return query + variables ? JSON.stringify(variables) : "";
+}
+
 let polls = [];
 
-function pollData(e) {
+function pollData(params) {
   const {
+    id = "",
     retry = null,
-    quitOnResponse = true,
     interval = 1000,
     query,
     variables,
     name = "Undefined",
     retries = 0,
+    callbackData = null,
     dataKey,
-  } = e.data;
+  } = params;
 
+  // remove poll if we are over our retries
   if (retry !== null && retries > retry) {
-    self.close();
+    polls = polls.filter((pollId) => pollId === id);
+  }
+
+  if (!polls.includes(id)) {
+    return;
   }
 
   getData({ query, variables })
     .then((res) => {
       console.log("Polling ", retries, name, " Got response: ", res);
+
+      // post data if we have a result
       if (res[dataKey]) {
-        self.postMessage(res);
-        if (quitOnResponse) {
-          const pollsIndex = polls.indexOf(
-            query + JSON.stringify(e.data.variables)
-          );
-          if (pollsIndex > -1) {
-            polls.splice(pollsIndex);
-          }
-          self.close();
-        }
+        self.postMessage({ ...res, callbackData });
       }
     })
     .catch((e) => {
-      const pollsIndex = polls.indexOf(
-        query + JSON.stringify(e.data.variables)
-      );
-      if (pollsIndex > -1) {
-        polls.splice(pollsIndex);
-      }
       throw new Error(e);
     })
     .finally(() => {
-      e.data.retries = retries + 1;
-      sleep(interval * retries + 1).then(() => pollData(e));
+      if (polls.includes(id)) {
+        sleep(interval * retries + 1).then(() => {
+          pollData({ ...params, retries: retries + 1 });
+        });
+      }
     });
 }
 
 self.addEventListener(
   "message",
   (e) => {
-    let pollIdentifier = e.data.query + JSON.stringify(e.data.variables);
-    if (polls.filter((poll) => poll == pollIdentifier).length == 0) {
+    let pollIdentifier = createId(e.data);
+    const isAlreadyPolling = polls.includes(pollIdentifier);
+    if (!isAlreadyPolling) {
       polls.push(pollIdentifier);
-      e.data.retries = 0;
-      pollData(e);
+      pollData({ ...e.data, id: pollIdentifier, retries: 0 });
     }
   },
   false
