@@ -53,7 +53,7 @@ function pollData(params) {
 
   // remove poll if we are over our retries
   if (retry !== null && retries > retry) {
-    polls = polls.filter((pollId) => pollId === id);
+    polls = polls.filter((pollId) => pollId !== id);
   }
 
   if (!polls.includes(id)) {
@@ -66,6 +66,12 @@ function pollData(params) {
 
       // post data if we have a result
       if (res[dataKey]) {
+        // if we have defined a retry amount,
+        // it means we want it to quit when we have a response
+        // TODO: Maybe make this more explicit
+        if (retry !== null) {
+          polls = polls.filter((pollId) => pollId !== id);
+        }
         self.postMessage({ ...res, callbackData });
       }
     })
