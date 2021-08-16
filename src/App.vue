@@ -97,7 +97,7 @@ export default defineComponent({
       perspective: string
     ) => {
       console.log("GOT INCOMING MESSAGE SIGNAL", link, perspective);
-      if (link.data!.predicate! == "sioc://content_of") {
+      if (link.data!.predicate! === "sioc://content_of") {
         //Start expression web worker to try and get the expression data pointed to in link target
         const expressionWorker = new Worker("pollingWorker.js");
 
