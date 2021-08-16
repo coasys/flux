@@ -1,5 +1,5 @@
 <template>
-  <div class="message-item">
+  <div class="message-item" ref="messageItem">
     <div class="message-item__left-column">
       <j-avatar
         class="message-item__avatar"
@@ -71,8 +71,8 @@ export default defineComponent({
     openedProfile: Object,
   },
   mounted() {
-    const mentionElements = document.querySelectorAll(".mention");
-    const emojiElements = document.querySelectorAll(".emoji");
+    const mentionElements = (this.$refs.messageItem as any).querySelectorAll(".mention");
+    const emojiElements = (this.$refs.messageItem as any).querySelectorAll(".emoji");
 
     for (const ele of emojiElements) {
       const emoji = ele as HTMLElement;

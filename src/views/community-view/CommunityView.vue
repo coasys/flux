@@ -68,8 +68,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { defineComponent } from "vue";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
 import { mapMutations } from "vuex";
@@ -148,8 +147,12 @@ export default defineComponent({
       this.groupExpWorkerLoop?.terminate();
 
       if (id) {
-        const { channelLinksWorker, groupExpressionWorker } =
-          await store.dispatch.getNeighbourhoodChannelsAndMetadata({
+        const channelLinksWorker =
+          await store.dispatch.getNeighbourhoodChannels({
+            communityId: id,
+          });
+        const groupExpressionWorker =
+          await store.dispatch.getNeighbourhoodMetadata({
             communityId: id,
           });
         store.dispatch.getNeighbourhoodMembers(id);

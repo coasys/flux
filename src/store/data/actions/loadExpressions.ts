@@ -1,7 +1,7 @@
 import hash from "object-hash";
 import { print } from "graphql/language/printer";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
-import { Expression, LinkQuery, parseExprUrl } from "@perspect3vism/ad4m";
+import { LinkQuery } from "@perspect3vism/ad4m";
 
 import { dataActionContext } from "@/store/data/index";
 import { appActionContext } from "@/store/app/index";
@@ -13,8 +13,10 @@ export interface Payload {
 }
 
 export interface LoadExpressionResult {
-  linksWorker: any;
+  linksWorker: Worker;
 }
+
+const expressionWorker = new Worker("pollingWorker.js");
 
 /// Function that polls for new messages on a channel using a web worker, if a message link is found then another web worker is spawned to retry getting the expression until its found
 export default async function (
@@ -30,7 +32,10 @@ export default async function (
     const untilDate = to || new Date("August 19, 1975 23:15:30").toISOString();
 
     const channel = dataGetters.getNeighbourhood(channelId);
-    let latestLinkTimestamp: Date | null = null;
+
+    if (!channel) {
+      console.error(`No channel with id ${channelId} found`);
+    }
 
     const linksWorker = new Worker("pollingWorker.js");
 
@@ -46,7 +51,9 @@ export default async function (
           untilDate,
         } as LinkQuery,
       },
-      name: `Get channel messages ${channel.name} | ${from}`,
+      name: `Get channel expressioLinks ${channel.name}`,
+      dataKey: "perspectiveQueryLinks",
+      quitOnResponse: false,
     });
 
     //If links worker gets an error then throw it
@@ -55,114 +62,47 @@ export default async function (
     };
 
     //Listen for message callback saying we got some links
-    linksWorker.addEventListener("message", async (e) => {
+    linksWorker.addEventListener("message", (e) => {
       const linkQuery = e.data.perspectiveQueryLinks;
 
-      if (
-        !dataGetters.getChannel(channelId).state.initialWorkerStarted &&
-        from === undefined
-      ) {
-        dataCommit.loadMore({
-          channelId,
-          loadMore: linkQuery.length >= 50,
-        });
+      for (const link of linkQuery) {
+        //Hash the link data as the key for map and check if it exists in the store
+        const currentExpressionLink =
+          channel.currentExpressionLinks[
+            hash(link.data!, { excludeValues: "__typename" })
+          ];
+        const currentExpression =
+          channel.currentExpressionMessages[link.data.target];
 
-        dataCommit.setInitialWorkerStarted({
-          channelId,
-          initialWorkerStarted: true,
-        });
-      } else if (from !== undefined) {
-        dataCommit.loadMore({
-          channelId,
-          loadMore: linkQuery.length >= 50,
-        });
-      }
-
-      if (linkQuery) {
-        if (channel) {
-          const messages: { [x: string]: any } = {};
-          for (const link of linkQuery) {
-            //Hash the link data as the key for map and check if it exists in the store
-            const currentExpressionLink =
-              channel.currentExpressionLinks[
-                hash(link.data.target!, { excludeValues: "__typename" })
-              ];
-            const currentExpression =
-              channel.currentExpressionMessages[link.data.target];
-
-            if (!currentExpressionLink || !currentExpression) {
-              const expressionWorker = new Worker("pollingWorker.js");
-
-              //Run expression worker to try and get expression on link target
-              expressionWorker.postMessage({
-                retry: 50,
-                interval: 5000,
-                query: print(GET_EXPRESSION),
-                variables: { url: link.data.target },
-                name: "Get expression data from channel links",
-              });
-
-              expressionWorker.onerror = function (e) {
-                throw new Error(e.toString());
-              };
-
-              expressionWorker.addEventListener("message", (e) => {
-                const expression = e.data.expression;
-                //Check an expression was actually found as not null
-                if (expression) {
-                  //Expression not null so kill the worker to stop future polling
-                  expressionWorker.terminate();
-                  //Add the link and message to the store
-                  // messages.push(expression);
-                  messages[link.data.target] = {
-                    expression: {
-                      author: expression.author!,
-                      data: JSON.parse(expression.data!),
-                      timestamp: expression.timestamp!,
-                      proof: expression.proof!,
-                    } as Expression,
-                    url: parseExprUrl(link.data!.target!),
-                  };
-
-                  if (
-                    linkQuery[linkQuery.length - 1].data.target ===
-                    link.data!.target!
-                  ) {
-                    dataCommit.addMessages({
-                      channelId,
-                      links: linkQuery,
-                      expressions: messages,
-                    });
-                  }
-
-                  //Compare the timestamp of this link with the current highest
-                  const linkTimestamp = new Date(link.timestamp!);
-                  if (latestLinkTimestamp) {
-                    if (linkTimestamp > latestLinkTimestamp!) {
-                      latestLinkTimestamp = linkTimestamp;
-                    }
-                  } else {
-                    latestLinkTimestamp = linkTimestamp;
-                  }
-                }
-              });
-            }
-          }
-
-          //If we have a linktimestamp check if timestamp is > than current latest link to allow for dynamic scroll rendering
-          if (latestLinkTimestamp) {
-            if (
-              Object.values(channel.currentExpressionLinks).filter(
-                (link) => new Date(link.timestamp!) > latestLinkTimestamp!
-              ).length > 0
-            ) {
-              return [false, linksWorker];
-            } else {
-              return [true, linksWorker];
-            }
-          }
+        if (!currentExpressionLink || !currentExpression) {
+          //Run expression worker to try and get expression on link target
+          expressionWorker.postMessage({
+            retry: 50,
+            interval: 5000,
+            query: print(GET_EXPRESSION),
+            variables: { url: link.data.target },
+            callbackData: { link },
+            name: `Get expression data from channel links ${channel.name}`,
+            dataKey: "expression",
+          });
         }
       }
+    });
+
+    expressionWorker.onerror = function (e) {
+      throw new Error(e.toString());
+    };
+
+    expressionWorker.addEventListener("message", (e: any) => {
+      const expression = e.data.expression;
+      const link = e.data.callbackData.link;
+
+      //Add the link and message to the store
+      dataCommit.addMessage({
+        channelId,
+        link: link,
+        expression: expression,
+      });
     });
 
     return { linksWorker };

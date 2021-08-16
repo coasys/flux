@@ -69,7 +69,6 @@ export default defineComponent({
       if (this.faqs === null) return [];
       if (this.currentCategory === "all") return this.faqs;
       return this.faqs.filter((faq) => {
-        console.log(faq);
         return faq.category.some((cat) => {
           return cat.id === this.currentCategory;
         });

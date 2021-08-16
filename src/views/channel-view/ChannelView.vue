@@ -52,6 +52,10 @@ export default defineComponent({
     ChannelFooter,
     Profile,
   },
+  beforeUnmount() {
+    this.saveScrollPos(this.channel.neighbourhood.perspective.uuid);
+    this.linksWorker?.terminate();
+  },
   data() {
     return {
       showNewMessagesButton: false,
@@ -66,7 +70,28 @@ export default defineComponent({
       activeProfile: {} as any,
     };
   },
-  mounted() {
+  async mounted() {
+    this.linksWorker?.terminate();
+
+    const { channelId, communityId } = this.$route.params;
+
+    const { linksWorker } = await store.dispatch.loadExpressions({
+      channelId: channelId as string,
+    });
+
+    this.linksWorker = linksWorker;
+
+    store.commit.setCurrentChannelId({
+      communityId: communityId as string,
+      channelId: channelId as string,
+    });
+
+    // TODO: On first mount view takes too long to render
+    // So we don't have the full height to scroll to the right place
+    setTimeout(() => {
+      this.scrollToLatestPos();
+    }, 0);
+
     const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
 
     // TODO: @fayeed change this
@@ -79,48 +104,18 @@ export default defineComponent({
     scrollContainer.addEventListener("scroll", (event) => {
       const isAtTop = scrollContainer.scrollTop <= 20;
 
-      console.log(
-        store.state.data.channels[this.channel.neighbourhood.perspective.uuid]
-          .loadMore,
-        isAtTop
-      );
+      // console.log(
+      //   store.state.data.channels[this.channel.neighbourhood.perspective.uuid]
+      //     .loadMore,
+      //   isAtTop
+      // );
 
       this.loadMoreBtn =
         store.state.data.channels[this.channel.neighbourhood.perspective.uuid]
           .loadMore && isAtTop;
     });
   },
-  async beforeRouteUpdate(to, from, next) {
-    this.linksWorker?.terminate();
-    this.saveScrollPos(from.params.channelId as string);
-    next();
-  },
   watch: {
-    $route: {
-      handler: async function (to) {
-        if (!to.params.channelId) return;
-
-        if (this.linksWorker === null) {
-          const { linksWorker } = await store.dispatch.loadExpressions({
-            channelId: to.params.channelId,
-          });
-
-          this.linksWorker = linksWorker;
-        }
-
-        store.commit.setCurrentChannelId({
-          communityId: to.params.communityId,
-          channelId: to.params.channelId,
-        });
-
-        // TODO: On first mount view takes too long to render
-        // So we don't have the full height to scroll to the right place
-        setTimeout(() => {
-          this.scrollToLatestPos();
-        }, 0);
-      },
-      immediate: true,
-    },
     "channel.state.hasNewMessages": function (hasMessages) {
       if (hasMessages) {
         const container = this.$refs.scrollContainer as HTMLDivElement;
@@ -212,7 +207,7 @@ export default defineComponent({
       }
       if (label?.startsWith("@")) {
         this.showProfile = true;
-        this.activeProfile = `did:key:${id}`;
+        this.activeProfile = id;
       }
     },
     markAsRead() {
