@@ -50,6 +50,7 @@ export default async function (
       },
       name: `Get channel messages ${channel.name}`,
       dataKey: "perspectiveQueryLinks",
+      quitOnResponse: false,
     });
 
     //If links worker gets an error then throw it
