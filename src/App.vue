@@ -79,7 +79,6 @@ export default defineComponent({
     store.original.watch(
       (state: any) => state.user.agent.isUnlocked,
       async (newValue: any) => {
-        console.log("agent unlocked changed to", newValue);
         if (newValue) {
           store.commit.setApplicationStartTime(new Date());
           store.dispatch.loadExpressionLanguages();
