@@ -49,6 +49,32 @@ export default defineComponent({
     ChannelFooter,
     Profile,
   },
+  async mounted() {
+    this.linksWorker?.terminate();
+
+    const { channelId, communityId } = this.$route.params;
+
+    const { linksWorker } = await store.dispatch.loadExpressions({
+      channelId: channelId as string,
+    });
+
+    this.linksWorker = linksWorker;
+
+    store.commit.setCurrentChannelId({
+      communityId: communityId as string,
+      channelId: channelId as string,
+    });
+
+    // TODO: On first mount view takes too long to render
+    // So we don't have the full height to scroll to the right place
+    setTimeout(() => {
+      this.scrollToLatestPos();
+    }, 0);
+  },
+  beforeUnmount() {
+    this.saveScrollPos(this.channel.neighbourhood.perspective.uuid);
+    this.linksWorker?.terminate();
+  },
   data() {
     return {
       showNewMessagesButton: false,
@@ -62,36 +88,7 @@ export default defineComponent({
       activeProfile: {} as any,
     };
   },
-  async beforeRouteUpdate(to, from, next) {
-    this.linksWorker?.terminate();
-    this.saveScrollPos(from.params.channelId as string);
-    next();
-  },
   watch: {
-    $route: {
-      handler: async function (to) {
-        if (!to.params.channelId) return;
-
-        this.linksWorker?.terminate();
-        const { linksWorker } = await store.dispatch.loadExpressions({
-          channelId: to.params.channelId,
-        });
-
-        this.linksWorker = linksWorker;
-
-        store.commit.setCurrentChannelId({
-          communityId: to.params.communityId,
-          channelId: to.params.channelId,
-        });
-
-        // TODO: On first mount view takes too long to render
-        // So we don't have the full height to scroll to the right place
-        setTimeout(() => {
-          this.scrollToLatestPos();
-        }, 0);
-      },
-      immediate: true,
-    },
     "channel.state.hasNewMessages": function (hasMessages) {
       if (hasMessages) {
         const container = this.$refs.scrollContainer as HTMLDivElement;
