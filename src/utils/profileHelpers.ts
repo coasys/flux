@@ -13,6 +13,9 @@ export async function getProfile(
   const profile = cache.get(profileLink);
 
   if (!profile) {
+    console.warn(
+      "Did not get profile expression from cache, calling holochain"
+    );
     const profileGqlExp = await getExpressionNoCache(profileLink);
     if (profileGqlExp) {
       const profileExp = {

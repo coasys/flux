@@ -12,7 +12,8 @@ export interface Payload {
 }
 
 export default async function (context: any, id: string): Promise<void> {
-  const { commit: dataCommit, getters: dataGetters } = dataActionContext(context);
+  const { commit: dataCommit, getters: dataGetters } =
+    dataActionContext(context);
   const { commit: appCommit } = appActionContext(context);
 
   const profiles: { [x: string]: ProfileExpression } = {};

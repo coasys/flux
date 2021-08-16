@@ -19,7 +19,8 @@ export default async (
   context: any,
   { joiningLink }: Payload
 ): Promise<void> => {
-  const { getters: dataGetters, commit: dataCommit } = dataActionContext(context);
+  const { getters: dataGetters, commit: dataCommit } =
+    dataActionContext(context);
   const { commit: appCommit } = appActionContext(context);
   const { getters: userGetters } = userActionContext(context);
 
