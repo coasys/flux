@@ -36,7 +36,6 @@ import { defineComponent } from "vue";
 import store from "@/store";
 import { ExpressionAndRef, ProfileExpression } from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
-import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
 import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css";
 import { differenceInMinutes, parseISO } from "date-fns";
 import MessageItem from "@/components/message-item/MessageItem.vue";
@@ -74,7 +73,9 @@ export default defineComponent({
     messages: {
       handler: async function (messages: ExpressionAndRef[]) {
         messages.forEach((msg: ExpressionAndRef) => {
-          this.loadUser(msg.expression.author);
+          if (!this.users[msg.expression.author]) {
+            this.loadUser(msg.expression.author);
+          }
         });
       },
       immediate: true,
