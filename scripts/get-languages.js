@@ -44,13 +44,13 @@ const languages = {
     zipped: true,
     targetDnaName: "social-context",
     resource:
-      "https://github.com/juntofoundation/Social-Context/releases/download/0.0.9/full_index.zip",
+      "https://github.com/juntofoundation/Social-Context/releases/download/0.0.11/full_index.zip",
   },
   "social-context-channel": {
     zipped: true,
     targetDnaName: "social-context",
     resource:
-      "https://github.com/juntofoundation/Social-Context/releases/download/0.0.10/signal.zip",
+      "https://github.com/juntofoundation/Social-Context/releases/download/0.0.11/signal.zip",
   },
 };
 
