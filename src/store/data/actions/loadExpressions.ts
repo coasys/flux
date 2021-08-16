@@ -32,6 +32,11 @@ export default async function (
     const untilDate = to || new Date("August 19, 1975 23:15:30").toISOString();
 
     const channel = dataGetters.getNeighbourhood(channelId);
+
+    if (!channel) {
+      console.error(`No channel with id ${channelId} found`);
+    }
+
     let latestLinkTimestamp: Date | null = null;
 
     const linksWorker = new Worker("pollingWorker.js");
@@ -48,7 +53,7 @@ export default async function (
           untilDate,
         } as LinkQuery,
       },
-      name: `Get channel messages ${channel.name}`,
+      name: `Get channel expressioLinks ${channel.name}`,
       dataKey: "perspectiveQueryLinks",
       quitOnResponse: false,
     });
@@ -61,68 +66,66 @@ export default async function (
     //Listen for message callback saying we got some links
     linksWorker.addEventListener("message", async (e) => {
       const linkQuery = e.data.perspectiveQueryLinks;
-      if (linkQuery) {
-        if (channel) {
-          for (const link of linkQuery) {
-            //Hash the link data as the key for map and check if it exists in the store
-            const currentExpressionLink =
-              channel.currentExpressionLinks[
-                hash(link.data!, { excludeValues: "__typename" })
-              ];
-            const currentExpression =
-              channel.currentExpressionMessages[link.data.target];
 
-            if (!currentExpressionLink || !currentExpression) {
-              //Run expression worker to try and get expression on link target
-              expressionWorker.postMessage({
-                retry: 50,
-                interval: 5000,
-                query: print(GET_EXPRESSION),
-                variables: { url: link.data.target },
-                name: "Get expression data from channel links",
-                dataKey: "expression",
-              });
+      for (const link of linkQuery) {
+        //Hash the link data as the key for map and check if it exists in the store
+        const currentExpressionLink =
+          channel.currentExpressionLinks[
+            hash(link.data!, { excludeValues: "__typename" })
+          ];
+        const currentExpression =
+          channel.currentExpressionMessages[link.data.target];
 
-              expressionWorker.onerror = function (e) {
-                throw new Error(e.toString());
-              };
+        //Compare the timestamp of this link with the current highest
+        const linkTimestamp = new Date(link.timestamp!);
 
-              expressionWorker.addEventListener("message", (e) => {
-                const expression = e.data.expression;
-                //Add the link and message to the store
-                dataCommit.addMessage({
-                  channelId,
-                  link: link,
-                  expression: expression,
-                });
+        latestLinkTimestamp =
+          latestLinkTimestamp === null || linkTimestamp > latestLinkTimestamp
+            ? linkTimestamp
+            : latestLinkTimestamp;
 
-                //Compare the timestamp of this link with the current highest
-                const linkTimestamp = new Date(link.timestamp!);
-                if (latestLinkTimestamp) {
-                  if (linkTimestamp > latestLinkTimestamp!) {
-                    latestLinkTimestamp = linkTimestamp;
-                  }
-                } else {
-                  latestLinkTimestamp = linkTimestamp;
-                }
-              });
-            }
-          }
-
-          //If we have a linktimestamp check if timestamp is > than current latest link to allow for dynamic scroll rendering
-          if (latestLinkTimestamp) {
-            if (
-              Object.values(channel.currentExpressionLinks).filter(
-                (link) => new Date(link.timestamp!) > latestLinkTimestamp!
-              ).length > 0
-            ) {
-              return [false, linksWorker];
-            } else {
-              return [true, linksWorker];
-            }
-          }
+        if (!currentExpressionLink || !currentExpression) {
+          //Run expression worker to try and get expression on link target
+          expressionWorker.postMessage({
+            retry: 50,
+            interval: 5000,
+            query: print(GET_EXPRESSION),
+            variables: { url: link.data.target },
+            callbackData: { link },
+            name: `Get expression data from channel links ${channel.name}`,
+            dataKey: "expression",
+          });
         }
       }
+
+      //If we have a linktimestamp check if timestamp is > than current latest link to allow for dynamic scroll rendering
+      if (latestLinkTimestamp) {
+        if (
+          Object.values(channel.currentExpressionLinks).filter(
+            (link) => new Date(link.timestamp!) > latestLinkTimestamp!
+          ).length > 0
+        ) {
+          return [false, linksWorker];
+        } else {
+          return [true, linksWorker];
+        }
+      }
+    });
+
+    expressionWorker.onerror = function (e) {
+      throw new Error(e.toString());
+    };
+
+    expressionWorker.addEventListener("message", (e: any) => {
+      const expression = e.data.expression;
+      const link = e.data.callbackData.link;
+
+      //Add the link and message to the store
+      dataCommit.addMessage({
+        channelId,
+        link: link,
+        expression: expression,
+      });
     });
 
     return { linksWorker };
