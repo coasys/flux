@@ -62,7 +62,7 @@ export default async function (
     };
 
     //Listen for message callback saying we got some links
-    linksWorker.addEventListener("message", async (e) => {
+    linksWorker.addEventListener("message", (e) => {
       const linkQuery = e.data.perspectiveQueryLinks;
 
       for (const link of linkQuery) {
