@@ -37,7 +37,6 @@
     "direct-vuex": "^1.0.0-rc3",
     "electron-updater": "^4.3.9",
     "graphql": "^15.5.0",
-    "object-hash": "^2.2.0",
     "patch-package": "^6.4.7",
     "register-service-worker": "^1.7.1",
     "subscriptions-transport-ws": "^0.9.19",

@@ -96,7 +96,7 @@ export default defineComponent({
       link: LinkExpression,
       perspective: string
     ) => {
-      console.log("GOT INCOMING MESSAGE SIGNAL", link, perspective);
+      console.debug("GOT INCOMING MESSAGE SIGNAL", link, perspective);
       if (link.data!.predicate! === "sioc://content_of") {
         //Start expression web worker to try and get the expression data pointed to in link target
         const expressionWorker = new Worker("pollingWorker.js");
@@ -118,7 +118,7 @@ export default defineComponent({
           const expression = e.data.expression;
           const message = JSON.parse(expression!.data!);
 
-          console.log("FOUND EXPRESSION FOR SIGNAL");
+          console.debug("FOUND EXPRESSION FOR SIGNAL");
           //Add the expression to the store
           store.commit.addExpressionAndLink({
             channelId: perspective,

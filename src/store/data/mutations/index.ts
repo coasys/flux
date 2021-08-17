@@ -1,7 +1,6 @@
 import {
   ExpressionAndRef,
   LinkExpressionAndLang,
-  State,
   DataState,
   CommunityState,
   AddChannel,
@@ -13,7 +12,6 @@ import {
 
 import { parseExprUrl } from "@perspect3vism/ad4m";
 import type { Expression, LinkExpression } from "@perspect3vism/ad4m";
-import hash from "object-hash";
 import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
 
 interface UpdatePayload {
@@ -61,19 +59,10 @@ export default {
         state.channels[neighbourhood.perspective.uuid].loadMore = true;
       }
 
-      for (const [key, exp] of Object.entries(
-        neighbourhood.currentExpressionMessages
-      )) {
-        if (
-          !messages.find(
-            (e) => `${e.url.language.address}://${e.url.expression}` === key
-          )
-        ) {
-          delete neighbourhood.currentExpressionMessages[key];
-          delete neighbourhood.currentExpressionLinks[hash(key, { excludeValues: "__typename" })];
-        }
+      for (const key of Object.keys(neighbourhood.currentExpressionMessages)) {
+        delete neighbourhood.currentExpressionMessages[key];
+        delete neighbourhood.currentExpressionLinks[key];
       }
-
     }
   },
 
@@ -116,11 +105,9 @@ export default {
 
   addMessage(state: DataState, payload: AddChannelMessage): void {
     const neighbourhood = state.neighbourhoods[payload.channelId];
-    console.log('Adding ')
 
-    neighbourhood.currentExpressionLinks[
-      hash(payload.link.data.target!, { excludeValues: "__typename" })
-    ] = payload.link;
+    neighbourhood.currentExpressionLinks[payload.link.data.target] =
+      payload.link;
     neighbourhood.currentExpressionMessages[payload.link.data.target] = {
       expression: {
         author: payload.expression.author!,
@@ -273,9 +260,7 @@ export default {
   ): void => {
     const channel = state.neighbourhoods[payload.channelId];
     console.log("Adding to link and exp to channel!", payload.message);
-    channel.currentExpressionLinks[
-      hash(payload.link.data.target!, { excludeValues: "__typename" })
-    ] = {
+    channel.currentExpressionLinks[payload.link.data.target!] = {
       expression: payload.link,
       language: "na",
     } as LinkExpressionAndLang;
