@@ -40,7 +40,7 @@
           <j-button
             @keydown.stop
             @click.stop="showPassword = !showPassword"
-            variant="transparent"
+            variant="ghost"
             square
             slot="end"
           >
