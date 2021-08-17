@@ -1,7 +1,7 @@
 <template>
   <j-box p="800">
     <j-box pl="500" pb="800">
-      <j-text variant="heading">Settings</j-text>
+      <j-text variant="heading-sm">Settings</j-text>
     </j-box>
     <div class="settings">
       <aside class="settings__sidebar">
