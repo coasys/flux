@@ -2,7 +2,7 @@
   <j-box p="800">
     <j-flex direction="column" gap="700">
       <div v-if="tabView === 'Create'">
-        <j-text variant="heading">Create a community </j-text>
+        <j-text variant="heading-sm">Create a community </j-text>
       </div>
       <div v-if="tabView === 'Join'">
         <j-text variant="heading">Join a community </j-text>

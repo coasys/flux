@@ -1,7 +1,7 @@
 <template>
   <j-box p="800">
     <j-flex direction="column" gap="700">
-      <j-text variant="heading">Edit profile</j-text>
+      <j-text variant="heading-sm">Edit profile</j-text>
       <avatar-upload
         :hash="userDid"
         :value="profilePicture"
