@@ -72,7 +72,9 @@ export default defineComponent({
     }, 0);
   },
   beforeUnmount() {
-    this.saveScrollPos(this.channel.neighbourhood.perspective.uuid);
+    if (this.channel.neighbourhood) {
+      this.saveScrollPos(this.channel.neighbourhood.perspective.uuid);
+    }
     this.linksWorker?.terminate();
   },
   data() {

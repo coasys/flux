@@ -39,6 +39,8 @@ export default async (
   const { getters: userGetters } = userActionContext(context);
 
   try {
+    const creatorDid = userGetters.getUser?.agent.did || "";
+
     const createSourcePerspective = await addPerspective(perspectiveName);
     console.log("Created source perspective", createSourcePerspective);
 
@@ -96,6 +98,7 @@ export default async (
     const metaLinks = await createNeighbourhoodMeta(
       perspectiveName,
       description,
+      creatorDid,
       typedExpLangs
     );
     const meta = new Perspective(metaLinks);
@@ -156,18 +159,20 @@ export default async (
 
     //Next steps: create another perspective + share with social-context-channel link language and add above expression DNA's onto it
     //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel
-    const channel = await createChannel(
-      "Home",
-      builtInLangPath,
-      createSourcePerspective,
-      MembraneType.Inherited,
-      typedExpLangs
-    );
+    const channel = await createChannel({
+      channelName: "Home",
+      creatorDid: creatorDid,
+      languagePath: builtInLangPath,
+      sourcePerspective: createSourcePerspective,
+      membraneType: MembraneType.Inherited,
+      typedExpressionLanguages: typedExpLangs,
+    });
     console.log("created channel with result", channel);
 
     const newCommunity = {
       neighbourhood: {
         name: perspectiveName,
+        creatorDid: creatorDid,
         description: description,
         image: image,
         thumbnail: thumbnail,

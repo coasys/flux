@@ -46,7 +46,10 @@
         </j-flex>
       </div>
       <div>
-        <j-button @click.prevent="() => handleEditClick(community)">
+        <j-button
+          v-if="isCreatorOfCommunity(community.perspective.uuid)"
+          @click.prevent="() => handleEditClick(community)"
+        >
           <j-icon size="sm" name="pencil"></j-icon>
           Edit
         </j-button>
@@ -69,6 +72,11 @@ export default defineComponent({
     },
   },
   methods: {
+    isCreatorOfCommunity(communityId: string): boolean {
+      const userDid = store.getters.getUser?.agent.did;
+      const neighbourhood = store.getters.getNeighbourhood(communityId);
+      return neighbourhood.creatorDid === userDid;
+    },
     createCommunityClick() {
       store.commit.setShowCreateCommunity(true);
     },

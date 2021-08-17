@@ -3,6 +3,7 @@
     :open="showCommunityMenu"
     @toggle="(e) => (showCommunityMenu = e.target.open)"
     class="community-sidebar__header"
+    :class="{ 'is-creator': isCreator }"
     event="click"
     placement="bottom-start"
   >
@@ -18,7 +19,7 @@
       <j-icon size="xs" name="chevron-down"></j-icon>
     </button>
     <j-menu slot="content">
-      <j-menu-item @click="() => setShowEditCommunity(true)">
+      <j-menu-item v-if="isCreator" @click="() => setShowEditCommunity(true)">
         <j-icon size="xs" slot="start" name="pencil" />
         Edit community
       </j-menu-item>
@@ -165,6 +166,12 @@ export default defineComponent({
     channels(): ChannelState[] {
       const communityId = this.$route.params.communityId as string;
       return store.getters.getChannelStates(communityId);
+    },
+    isCreator(): boolean {
+      return (
+        this.community.neighbourhood.creatorDid ===
+        store.getters.getUser?.agent.did
+      );
     },
   },
   methods: {

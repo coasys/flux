@@ -7,6 +7,7 @@ import { getPerspectiveSnapshot } from "../queries/getPerspective";
 export async function createNeighbourhoodMeta(
   name: string,
   description: string,
+  creatorDid: string,
   expressionLanguages: JuntoExpressionReference[]
 ): Promise<LinkExpression[]> {
   //Create the perspective to hold our meta
@@ -19,6 +20,14 @@ export async function createNeighbourhoodMeta(
       source: "self",
       target: name,
       predicate: "rdf://name",
+    })
+  );
+
+  expressionLinks.push(
+    new Link({
+      source: "self",
+      target: creatorDid,
+      predicate: "rdf://creator",
     })
   );
 

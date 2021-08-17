@@ -58,6 +58,7 @@ export interface ApplicationState {
 export interface NeighbourhoodState {
   name: string;
   description: string;
+  creatorDid: string;
   image?: string;
   thumbnail?: string;
   perspective: PerspectiveHandle;
