@@ -59,7 +59,6 @@ export default defineComponent({
   },
   computed: {
     communities() {
-      console.log(store.getters.getCommunityNeighbourhoods);
       return store.getters.getCommunityNeighbourhoods;
     },
     communityIsActive() {

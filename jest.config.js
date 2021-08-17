@@ -35,4 +35,5 @@ module.exports = {
     window: {},
     define: () => {},
   },
+  setupFiles: ["./jest.setup.js"]
 };

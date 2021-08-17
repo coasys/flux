@@ -16,10 +16,8 @@ export interface Payload {
 export default async (context: any, payload: Payload): Promise<void> => {
   const { getters: dataGetter } = dataActionContext(context);
   const { commit: appCommit } = appActionContext(context);
-  const {
-    commit: userCommit,
-    getters: userGetters,
-  } = userActionContext(context);
+  const { commit: userCommit, getters: userGetters } =
+    userActionContext(context);
 
   const currentProfile = userGetters.getProfile;
   const newProfile = {
@@ -42,8 +40,9 @@ export default async (context: any, payload: Payload): Promise<void> => {
       ).typedExpressionLanguages.find(
         (t: any) => t.expressionType == ExpressionTypes.ProfileExpression
       );
-      const didExpression = `${profileExpression!.languageAddress}://${userGetters.getUser!
-        .agent.did!}`;
+      const didExpression = `${
+        profileExpression!.languageAddress
+      }://${userGetters.getUser!.agent.did!}`;
 
       console.log("profileExpression: ", profileExpression);
 

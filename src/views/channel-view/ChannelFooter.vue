@@ -52,7 +52,7 @@ export default defineComponent({
           ({
             name: m.data.profile["foaf:AccountName"],
             //todo: this should not be replaced, we want the full did identifier in the mentions in case message is consumed by another application
-            id: m.author.replace("did:key:", ""),
+            id: m.author,
             trigger: "@",
           } as MentionTrigger)
       );
@@ -78,7 +78,6 @@ export default defineComponent({
   },
   methods: {
     handleEditorChange(e: any) {
-      //console.log(e.target.json);
       this.currentExpressionPost = e.target.value;
     },
     editorinit(e: any) {

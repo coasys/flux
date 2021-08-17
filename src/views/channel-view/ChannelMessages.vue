@@ -11,42 +11,23 @@
       </j-button>
     </div>
 
-    <DynamicScroller
-      v-if="messages.length"
-      ref="scroller"
-      :items="messages"
-      :min-item-size="2"
-    >
-      <template v-slot="{ item, index, active }">
-        <DynamicScrollerItem
-          :item="item"
-          :active="active"
-          :size-dependencies="[
-            item.expression.data.body,
-            item.expression.timestamp,
-          ]"
-          :data-index="index"
-          :data-active="active"
-          class="message"
-        >
-          <message-item
-            :did="item.expression.author"
-            :showAvatar="showAvatar(index)"
-            :message="item.expression.data.body"
-            :timestamp="item.expression.timestamp"
-            :username="users[item.expression.author]?.['foaf:AccountName']"
-            :profileImg="
-              users[item.expression.author]?.['schema:image'] &&
-              JSON.parse(users[item.expression.author]['schema:image'])[
-                'schema:contentUrl'
-              ]
-            "
-            @profileClick="(did) => $emit('profileClick', did)"
-            @mentionClick="(dataset) => $emit('mentionClick', dataset)"
-          />
-        </DynamicScrollerItem>
-      </template>
-    </DynamicScroller>
+    <div v-for="(item, index) in messages" :key="item.expression.timestamp">
+      <message-item
+        :did="item.expression.author"
+        :showAvatar="showAvatar(index)"
+        :message="item.expression.data.body"
+        :timestamp="item.expression.timestamp"
+        :username="users[item.expression.author]?.['foaf:AccountName']"
+        :profileImg="
+          users[item.expression.author]?.['schema:image'] &&
+          JSON.parse(users[item.expression.author]['schema:image'])[
+            'schema:contentUrl'
+          ]
+        "
+        @profileClick="(did) => $emit('profileClick', did)"
+        @mentionClick="(dataset) => $emit('mentionClick', dataset)"
+      />
+    </div>
   </div>
 </template>
 
@@ -55,7 +36,6 @@ import { defineComponent } from "vue";
 import store from "@/store";
 import { ExpressionAndRef, ProfileExpression } from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
-import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
 import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css";
 import { differenceInMinutes, parseISO } from "date-fns";
 import MessageItem from "@/components/message-item/MessageItem.vue";
@@ -75,8 +55,6 @@ export default defineComponent({
   props: ["channel", "community", "showNewMessagesButton", "profileLanguage"],
   name: "ChannelView",
   components: {
-    DynamicScroller,
-    DynamicScrollerItem,
     MessageItem,
   },
   data() {
@@ -95,7 +73,9 @@ export default defineComponent({
     messages: {
       handler: async function (messages: ExpressionAndRef[]) {
         messages.forEach((msg: ExpressionAndRef) => {
-          this.loadUser(msg.expression.author);
+          if (!this.users[msg.expression.author]) {
+            this.loadUser(msg.expression.author);
+          }
         });
       },
       immediate: true,
