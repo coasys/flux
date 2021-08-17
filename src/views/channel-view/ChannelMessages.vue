@@ -57,7 +57,13 @@ interface ExpressionAndRefWithId extends ExpressionAndRef {
 }
 
 export default defineComponent({
-  emits: ["scrollToBottom", "profileClick", "mentionClick", "updateLinkWorker"],
+  emits: [
+    "scrollToBottom",
+    "profileClick",
+    "mentionClick",
+    "updateLinkWorker",
+    "updateExpressionWorker",
+  ],
   props: [
     "channel",
     "community",
@@ -140,13 +146,15 @@ export default defineComponent({
         this.linksWorker!.terminate();
       }
 
-      const { linksWorker } = await store.dispatch.loadExpressions({
-        from: from ? new Date(from) : undefined,
-        to: to ? new Date(to) : undefined,
-        channelId: this.channel.neighbourhood.perspective.uuid,
-      });
+      const { linksWorker, expressionWorker } =
+        await store.dispatch.loadExpressions({
+          from: from ? new Date(from) : undefined,
+          to: to ? new Date(to) : undefined,
+          channelId: this.channel.neighbourhood.perspective.uuid,
+        });
 
       this.$emit("updateLinkWorker", linksWorker);
+      this.$emit("updateExpressionWorker", expressionWorker);
     },
   },
 });

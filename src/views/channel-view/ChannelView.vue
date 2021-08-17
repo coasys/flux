@@ -12,6 +12,7 @@
       @profileClick="handleProfileClick"
       @mentionClick="handleMentionClick"
       @updateLinkWorker="(e) => (linksWorker = e)"
+      @updateExpressionWorker="(e) => (expressionWorker = e)"
     />
     <channel-footer :community="community" :channel="channel" />
     <j-modal
@@ -64,6 +65,7 @@ export default defineComponent({
       currentExpressionPost: "",
       users: {} as UserMap,
       linksWorker: null as null | Worker,
+      expressionWorker: null as null | Worker,
       editor: null as Editor | null,
       showList: false,
       showProfile: false,
@@ -72,14 +74,17 @@ export default defineComponent({
   },
   async mounted() {
     this.linksWorker?.terminate();
+    this.expressionWorker?.terminate();
 
     const { channelId, communityId } = this.$route.params;
 
-    const { linksWorker } = await store.dispatch.loadExpressions({
-      channelId: channelId as string,
-    });
+    const { linksWorker, expressionWorker } =
+      await store.dispatch.loadExpressions({
+        channelId: channelId as string,
+      });
 
     this.linksWorker = linksWorker;
+    this.expressionWorker = expressionWorker;
 
     store.commit.setCurrentChannelId({
       communityId: communityId as string,

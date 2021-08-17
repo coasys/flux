@@ -1,4 +1,3 @@
-import hash from "object-hash";
 import { print } from "graphql/language/printer";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 import { LinkQuery } from "@perspect3vism/ad4m";
@@ -14,9 +13,8 @@ export interface Payload {
 
 export interface LoadExpressionResult {
   linksWorker: Worker;
+  expressionWorker: Worker;
 }
-
-const expressionWorker = new Worker("pollingWorker.js");
 
 /// Function that polls for new messages on a channel using a web worker, if a message link is found then another web worker is spawned to retry getting the expression until its found
 export default async function (
@@ -30,6 +28,7 @@ export default async function (
   try {
     const fromDate = from || appGetters.getApplicationStartTime;
     const untilDate = to || new Date("August 19, 1975 23:15:30").toISOString();
+    console.debug("Loading expression from", fromDate, untilDate);
 
     const channel = dataGetters.getNeighbourhood(channelId);
 
@@ -38,6 +37,7 @@ export default async function (
     }
 
     const linksWorker = new Worker("pollingWorker.js");
+    const expressionWorker = new Worker("pollingWorker.js");
 
     linksWorker.postMessage({
       interval: 10000,
@@ -51,9 +51,8 @@ export default async function (
           untilDate,
         } as LinkQuery,
       },
-      name: `Get channel expressioLinks ${channel.name}`,
+      name: `Get expressionLinks for channel: ${channel.name}`,
       dataKey: "perspectiveQueryLinks",
-      quitOnResponse: false,
     });
 
     //If links worker gets an error then throw it
@@ -63,14 +62,15 @@ export default async function (
 
     //Listen for message callback saying we got some links
     linksWorker.addEventListener("message", (e) => {
-      const linkQuery = e.data.perspectiveQueryLinks;
+      //@ts-ignore
+      const linkQuery = e.data.perspectiveQueryLinks.sort(function (x, y) {
+        return x.timestamp - y.timestamp;
+      });
 
       for (const link of linkQuery) {
         //Hash the link data as the key for map and check if it exists in the store
         const currentExpressionLink =
-          channel.currentExpressionLinks[
-            hash(link.data!, { excludeValues: "__typename" })
-          ];
+          channel.currentExpressionLinks[link.data.target];
         const currentExpression =
           channel.currentExpressionMessages[link.data.target];
 
@@ -105,7 +105,7 @@ export default async function (
       });
     });
 
-    return { linksWorker };
+    return { linksWorker, expressionWorker };
   } catch (e) {
     appCommit.showDangerToast({
       message: e.message,
