@@ -47,7 +47,7 @@
         @click.prevent="() => setShowInviteCode(true)"
         size="sm"
         slot="end"
-        variant="subtle"
+        variant="ghost"
       >
         <j-icon size="sm" square name="plus"></j-icon>
       </j-button>
@@ -66,7 +66,7 @@
         @click.prevent="() => setShowCreateChannel(true)"
         size="sm"
         slot="end"
-        variant="subtle"
+        variant="ghost"
       >
         <j-icon size="sm" square name="plus"></j-icon>
       </j-button>
