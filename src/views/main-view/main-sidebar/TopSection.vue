@@ -8,25 +8,18 @@
       v-slot="{ navigate, isActive }"
     >
       <j-tooltip title="Home">
-        <j-avatar
-          :selected="isActive"
+        <j-button
+          :class="{ active: isActive }"
           @click="() => navigate()"
-          icon="house"
           size="xl"
+          circle
+          square
+          variant="ghost"
         >
-        </j-avatar>
+          <j-icon size="lg" name="grid-3x3-gap"></j-icon>
+        </j-button>
       </j-tooltip>
     </router-link>
-    <j-tooltip title="Create a community">
-      <j-button
-        @click="() => $store.commit('setShowCreateCommunity', true)"
-        square
-        circle
-        size="xl"
-      >
-        <j-icon size="lg" name="plus"></j-icon>
-      </j-button>
-    </j-tooltip>
   </div>
 </template>
 
@@ -50,6 +43,10 @@ export default defineComponent({
 
 .left-nav__profile-icon {
   cursor: pointer;
+}
+
+j-button.active {
+  --j-button-color: var(--j-color-black);
 }
 
 j-avatar {
