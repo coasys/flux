@@ -27,14 +27,14 @@
       v-if="messages.length"
       ref="scroller"
       :items="messages"
-      :min-item-size="0"
+      :min-item-size="1"
       @resize="scrollToBottom"
     >
       <template v-slot="{ item, index, active }">
         <DynamicScrollerItem
           :item="item"
           :active="active"
-          :size-dependencies="[item.expression.message]"
+          :size-dependencies="[item.expression.data.body]"
           :data-index="index"
           :data-active="active"
           class="message"
