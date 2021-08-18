@@ -14,48 +14,31 @@
     <j-box px="500" py="500">
       <j-flex a="center" j="center" gap="500">
         <j-text color="ui-400" nomargin v-if="isAlreadyFetching">
-          Looking for messages..
+          🤫 Shhh.. Listening for gossip.
         </j-text>
         <j-button v-else size="sm" variant="subtle" @click="loadMoreMessages">
-          Look for messages
+          Look for older messages
         </j-button>
       </j-flex>
     </j-box>
 
-    <DynamicScroller
-      v-if="messages.length"
-      ref="scroller"
-      :items="messages"
-      :min-item-size="1"
-      @resize="scrollToBottom"
-    >
-      <template v-slot="{ item, index, active }">
-        <DynamicScrollerItem
-          :item="item"
-          :active="active"
-          :size-dependencies="[item.expression.data.body]"
-          :data-index="index"
-          :data-active="active"
-          class="message"
-        >
-          <message-item
-            :did="item.expression.author"
-            :showAvatar="showAvatar(index)"
-            :message="item.expression.data.body"
-            :timestamp="item.expression.timestamp"
-            :username="users[item.expression.author]?.['foaf:AccountName']"
-            :profileImg="
-              users[item.expression.author]?.['schema:image'] &&
-              JSON.parse(users[item.expression.author]['schema:image'])[
-                'schema:contentUrl'
-              ]
-            "
-            @profileClick="(did) => $emit('profileClick', did)"
-            @mentionClick="(dataset) => $emit('mentionClick', dataset)"
-          />
-        </DynamicScrollerItem>
-      </template>
-    </DynamicScroller>
+    <message-item
+      v-for="(item, index) in messages"
+      :key="item.expression.signature"
+      :did="item.expression.author"
+      :showAvatar="showAvatar(index)"
+      :message="item.expression.data.body"
+      :timestamp="item.expression.timestamp"
+      :username="users[item.expression.author]?.['foaf:AccountName']"
+      :profileImg="
+        users[item.expression.author]?.['schema:image'] &&
+        JSON.parse(users[item.expression.author]['schema:image'])[
+          'schema:contentUrl'
+        ]
+      "
+      @profileClick="(did) => $emit('profileClick', did)"
+      @mentionClick="(dataset) => $emit('mentionClick', dataset)"
+    />
   </div>
 </template>
 
@@ -69,7 +52,6 @@ import { differenceInMinutes, parseISO } from "date-fns";
 import MessageItem from "@/components/message-item/MessageItem.vue";
 import { Editor } from "@tiptap/vue-3";
 import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
-import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
 
 interface UserMap {
   [key: string]: ProfileExpression;
@@ -97,7 +79,7 @@ export default defineComponent({
     "scrolledToTop",
   ],
   name: "ChannelView",
-  components: { DynamicScroller, DynamicScrollerItem, MessageItem },
+  components: { MessageItem },
   data() {
     return {
       previousFetchedTimestamp: null as string | undefined | null,
@@ -118,6 +100,9 @@ export default defineComponent({
     },
     messages: {
       handler: async function (messages: ExpressionAndRef[]) {
+        if (!this.scrolledToTop) {
+          this.$emit("scrollToBottom", "smooth");
+        }
         messages.forEach((msg: ExpressionAndRef) => {
           if (!this.users[msg.expression.author]) {
             this.loadUser(msg.expression.author);
@@ -145,10 +130,6 @@ export default defineComponent({
     },
   },
   methods: {
-    scrollToBottom(): void {
-      // @ts-ignore
-      this.$refs?.scroller?.scrollToBottom();
-    },
     showAvatar(index: number): boolean {
       const previousExpression = this.messages[index - 1]?.expression;
       const expression = this.messages[index].expression;
