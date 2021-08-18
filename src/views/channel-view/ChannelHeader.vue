@@ -1,5 +1,5 @@
 <template>
-  <header class="channel-view__header">
+  <header class="channel-header">
     <j-icon size="sm" name="hash" />
     <j-text nomargin weight="500" size="500">
       {{ channel.neighbourhood.name }}</j-text
@@ -16,7 +16,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.channel-view__header {
+.channel-header {
   position: sticky;
   top: 0;
   min-height: 74px;

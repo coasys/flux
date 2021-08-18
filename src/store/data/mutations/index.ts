@@ -48,31 +48,8 @@ export default {
 
   clearMessages(state: DataState): void {
     for (const neighbourhood of Object.values(state.neighbourhoods)) {
-      const descMessages = sortExpressionsByTimestamp(
-        neighbourhood.currentExpressionMessages,
-        "desc"
-      );
-
-      const messages = descMessages.slice(0, 50);
-
-      if (messages.length === 50) {
-        state.channels[neighbourhood.perspective.uuid].loadMore = true;
-      }
-
-      for (const key of Object.keys(neighbourhood.currentExpressionMessages)) {
-        delete neighbourhood.currentExpressionMessages[key];
-        delete neighbourhood.currentExpressionLinks[key];
-      }
+      neighbourhood.currentExpressionMessages = {};
     }
-  },
-
-  loadMore(
-    state: DataState,
-    payload: { channelId: string; loadMore: boolean }
-  ): void {
-    const channel = state.channels[payload.channelId];
-
-    channel.loadMore = payload.loadMore;
   },
 
   setInitialWorkerStarted(

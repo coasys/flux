@@ -2,13 +2,14 @@
   <div class="channel-view" @scroll="handleScroll" ref="scrollContainer">
     <channel-header :community="community" :channel="channel" />
     <channel-messages
+      :scrolledToBottom="scrolledToBottom"
+      :scrolledToTop="scrolledToTop"
       :profileLanguage="profileLanguage"
       @scrollToBottom="scrollToBottom"
       :showNewMessagesButton="showNewMessagesButton"
       :community="community"
       :channel="channel"
       :linksWorker="linksWorker"
-      :loadMoreBtn="loadMoreBtn"
       @profileClick="handleProfileClick"
       @mentionClick="handleMentionClick"
       @updateLinkWorker="(e) => (linksWorker = e)"
@@ -40,6 +41,7 @@ import ChannelFooter from "./ChannelFooter.vue";
 import ChannelMessages from "./ChannelMessages.vue";
 import ChannelHeader from "./ChannelHeader.vue";
 import Profile from "@/containers/Profile.vue";
+import { isAtBottom } from "@/utils/scroll";
 
 interface UserMap {
   [key: string]: ProfileExpression;
@@ -54,13 +56,16 @@ export default defineComponent({
     Profile,
   },
   beforeUnmount() {
-    this.saveScrollPos(this.channel.neighbourhood.perspective.uuid);
+    if (this.channel.neighbourhood) {
+      this.saveScrollPos(this.channel.neighbourhood.perspective.uuid);
+    }
     this.linksWorker?.terminate();
   },
   data() {
     return {
+      scrolledToTop: false,
+      scrolledToBottom: false,
       showNewMessagesButton: false,
-      loadMoreBtn: false,
       noDelayRef: 0,
       currentExpressionPost: "",
       users: {} as UserMap,
@@ -96,49 +101,24 @@ export default defineComponent({
     setTimeout(() => {
       this.scrollToLatestPos();
     }, 0);
-
-    const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-
-    // TODO: @fayeed change this
-    const isAtTop = scrollContainer.scrollTop <= 20;
-
-    this.loadMoreBtn =
-      store.state.data.channels[this.channel.neighbourhood.perspective.uuid]
-        .loadMore && isAtTop;
-
-    scrollContainer.addEventListener("scroll", (event) => {
-      const isAtTop = scrollContainer.scrollTop <= 20;
-
-      // console.log(
-      //   store.state.data.channels[this.channel.neighbourhood.perspective.uuid]
-      //     .loadMore,
-      //   isAtTop
-      // );
-
-      this.loadMoreBtn =
-        store.state.data.channels[this.channel.neighbourhood.perspective.uuid]
-          .loadMore && isAtTop;
-    });
   },
   watch: {
+    scrolledToBottom: function (atBottom) {
+      if (atBottom) {
+        this.markAsRead();
+      }
+    },
     "channel.state.hasNewMessages": function (hasMessages) {
       if (hasMessages) {
         const container = this.$refs.scrollContainer as HTMLDivElement;
         if (container) {
-          const isAtBottom =
-            container.scrollHeight - window.innerHeight === container.scrollTop;
-
-          if (isAtBottom) {
+          const atBottom = isAtBottom(container);
+          if (atBottom) {
             this.scrollToBottom("smooth");
           } else {
             this.showNewMessagesButton = true;
           }
         }
-      }
-    },
-    "channel.state.loadMore": function (loadMore) {
-      if (!loadMore) {
-        this.loadMoreBtn = false;
       }
     },
   },
@@ -178,14 +158,12 @@ export default defineComponent({
           scrollContainer.scrollTop = this.channel.state.scrollTop as number;
         }
 
-        const isAtBottom =
-          scrollContainer.scrollHeight - window.innerHeight ===
-          scrollContainer.scrollTop;
+        this.scrolledToBottom = isAtBottom(scrollContainer);
 
-        if (isAtBottom && this.channel.state.hasNewMessages) {
+        if (this.scrolledToBottom && this.channel.state.hasNewMessages) {
           this.markAsRead();
         }
-        if (!isAtBottom && this.channel.state.hasNewMessages) {
+        if (!this.scrolledToBottom && this.channel.state.hasNewMessages) {
           this.showNewMessagesButton = true;
         }
       });
@@ -223,11 +201,8 @@ export default defineComponent({
       this.showNewMessagesButton = false;
     },
     handleScroll(e: any) {
-      const isAtBottom =
-        e.target.scrollHeight - window.innerHeight === e.target.scrollTop;
-      if (isAtBottom) {
-        this.markAsRead();
-      }
+      this.scrolledToTop = e.target.scrollTop <= 20;
+      this.scrolledToBottom = isAtBottom(e.target);
     },
     scrollToBottom(behavior: "smooth" | "auto") {
       const container = this.$refs.scrollContainer as HTMLDivElement;
@@ -249,51 +224,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.message {
-  min-height: 32px;
-}
-
 .channel-view {
   height: 100vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-}
-
-.channel-view__main {
-  background: var(--app-channel-bg-color);
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.channel-view__load-more {
-  position: absolute;
-  top: var(--j-space-1000);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-}
-
-#profileCard {
-  position: fixed;
-  opacity: 0;
-  z-index: -100;
-}
-.background {
-  height: 100vh;
-  width: 100vw;
-  background: transparent;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: -10;
-}
-.profileCard__container {
-  background-color: var(--j-color-white);
-  padding: var(--j-space-400);
-  border-radius: 10px;
 }
 </style>

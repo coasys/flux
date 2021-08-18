@@ -1,6 +1,6 @@
 <template>
-  <div class="channel-view__main">
-    <div class="channel-view__load-more">
+  <div class="channel-messages">
+    <div class="channel-messages__load-more">
       <j-button
         variant="primary"
         v-if="showNewMessagesButton && channel.state.hasNewMessages"
@@ -10,30 +10,53 @@
         <j-icon name="arrow-down-short" size="xs" />
       </j-button>
     </div>
-    <div class="channel-view__load-more">
-      <j-button variant="primary" v-if="loadMoreBtn" @click="loadMoreMessages">
-        Load more
-        <j-icon name="arrow-up-short" size="xs" />
-      </j-button>
-    </div>
 
-    <div v-for="(item, index) in messages" :key="item.expression.timestamp">
-      <message-item
-        :did="item.expression.author"
-        :showAvatar="showAvatar(index)"
-        :message="item.expression.data.body"
-        :timestamp="item.expression.timestamp"
-        :username="users[item.expression.author]?.['foaf:AccountName']"
-        :profileImg="
-          users[item.expression.author]?.['schema:image'] &&
-          JSON.parse(users[item.expression.author]['schema:image'])[
-            'schema:contentUrl'
-          ]
-        "
-        @profileClick="(did) => $emit('profileClick', did)"
-        @mentionClick="(dataset) => $emit('mentionClick', dataset)"
-      />
-    </div>
+    <j-box px="500" py="500">
+      <j-flex a="center" j="center" gap="500">
+        <j-text nomargin v-if="isAlreadyFetching">
+          Looking for messages
+        </j-text>
+        <j-spinner size="xs" v-if="isAlreadyFetching"></j-spinner>
+        <j-button v-else size="sm" variant="subtle" @click="loadMoreMessages">
+          Look for messages
+        </j-button>
+      </j-flex>
+    </j-box>
+
+    <DynamicScroller
+      v-if="messages.length"
+      ref="scroller"
+      :items="messages"
+      :min-item-size="0"
+      @resize="scrollToBottom"
+    >
+      <template v-slot="{ item, index, active }">
+        <DynamicScrollerItem
+          :item="item"
+          :active="active"
+          :size-dependencies="[item.expression.message]"
+          :data-index="index"
+          :data-active="active"
+          class="message"
+        >
+          <message-item
+            :did="item.expression.author"
+            :showAvatar="showAvatar(index)"
+            :message="item.expression.data.body"
+            :timestamp="item.expression.timestamp"
+            :username="users[item.expression.author]?.['foaf:AccountName']"
+            :profileImg="
+              users[item.expression.author]?.['schema:image'] &&
+              JSON.parse(users[item.expression.author]['schema:image'])[
+                'schema:contentUrl'
+              ]
+            "
+            @profileClick="(did) => $emit('profileClick', did)"
+            @mentionClick="(dataset) => $emit('mentionClick', dataset)"
+          />
+        </DynamicScrollerItem>
+      </template>
+    </DynamicScroller>
   </div>
 </template>
 
@@ -47,6 +70,7 @@ import { differenceInMinutes, parseISO } from "date-fns";
 import MessageItem from "@/components/message-item/MessageItem.vue";
 import { Editor } from "@tiptap/vue-3";
 import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
+import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
 
 interface UserMap {
   [key: string]: ProfileExpression;
@@ -69,15 +93,15 @@ export default defineComponent({
     "community",
     "showNewMessagesButton",
     "profileLanguage",
-    "loadMoreBtn",
     "linksWorker",
+    "scrolledToBottom",
+    "scrolledToTop",
   ],
   name: "ChannelView",
-  components: {
-    MessageItem,
-  },
+  components: { DynamicScroller, DynamicScrollerItem, MessageItem },
   data() {
     return {
+      previousFetchedTimestamp: null as string | undefined | null,
       noDelayRef: 0,
       currentExpressionPost: "",
       users: {} as UserMap,
@@ -88,6 +112,11 @@ export default defineComponent({
     };
   },
   watch: {
+    scrolledToTop: function (isAtTop) {
+      if (isAtTop) {
+        this.loadMoreMessages();
+      }
+    },
     messages: {
       handler: async function (messages: ExpressionAndRef[]) {
         messages.forEach((msg: ExpressionAndRef) => {
@@ -100,7 +129,16 @@ export default defineComponent({
     },
   },
   computed: {
+    isAlreadyFetching(): boolean {
+      if (this.messages.length) {
+        const oldestMessage = this.messages[0];
+        const from = oldestMessage.expression.timestamp;
+        return from === this.previousFetchedTimestamp;
+      }
+      return true;
+    },
     messages(): ExpressionAndRefWithId[] {
+      // Sort by desc, because we have column-reverse on chat messages
       return sortExpressionsByTimestamp(
         this.channel?.neighbourhood?.currentExpressionMessages || [],
         "asc"
@@ -108,6 +146,10 @@ export default defineComponent({
     },
   },
   methods: {
+    scrollToBottom(): void {
+      // @ts-ignore
+      this.$refs?.scroller?.scrollToBottom();
+    },
     showAvatar(index: number): boolean {
       const previousExpression = this.messages[index - 1]?.expression;
       const expression = this.messages[index].expression;
@@ -135,8 +177,10 @@ export default defineComponent({
     loadMoreMessages(): void {
       const messageAmount = this.messages.length;
       if (messageAmount) {
-        const lastMessage = this.messages[0];
-        this.loadMessages(lastMessage.expression.timestamp);
+        if (!this.isAlreadyFetching) {
+          const oldestMessage = this.messages[0];
+          this.loadMessages(oldestMessage.expression.timestamp);
+        }
       } else {
         this.loadMessages();
       }
@@ -155,25 +199,15 @@ export default defineComponent({
 
       this.$emit("updateLinkWorker", linksWorker);
       this.$emit("updateExpressionWorker", expressionWorker);
+
+      this.previousFetchedTimestamp = from;
     },
   },
 });
 </script>
 
 <style scoped>
-.message {
-  min-height: 32px;
-}
-
-.channel-view {
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-}
-
-.channel-view__main {
+.channel-messages {
   background: var(--app-channel-bg-color);
   flex: 1;
   display: flex;
@@ -181,31 +215,11 @@ export default defineComponent({
   justify-content: flex-end;
 }
 
-.channel-view__load-more {
+.channel-messages__load-more {
   position: absolute;
   top: var(--j-space-1000);
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
-}
-
-#profileCard {
-  position: fixed;
-  opacity: 0;
-  z-index: -100;
-}
-.background {
-  height: 100vh;
-  width: 100vw;
-  background: transparent;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: -10;
-}
-.profileCard__container {
-  background-color: var(--j-color-white);
-  padding: var(--j-space-400);
-  border-radius: 10px;
 }
 </style>

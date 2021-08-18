@@ -41,7 +41,6 @@ export async function joinChannelFromSharedLink(
     state: {
       perspectiveUuid: neighbourhood.uuid,
       hasNewMessages: false,
-      loadMore: false,
       initialWorkerStarted: false,
       messageLoading: false,
       feedType: FeedType.Signaled,
