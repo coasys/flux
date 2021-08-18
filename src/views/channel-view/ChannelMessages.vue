@@ -100,8 +100,9 @@ export default defineComponent({
     },
     messages: {
       handler: async function (messages: ExpressionAndRef[]) {
-        if (!this.scrolledToTop) {
-          this.$emit("scrollToBottom", "smooth");
+        if (this.scrolledToBottom) {
+          // TODO: Debounce this
+          this.$emit("scrollToBottom");
         }
         messages.forEach((msg: ExpressionAndRef) => {
           if (!this.users[msg.expression.author]) {
