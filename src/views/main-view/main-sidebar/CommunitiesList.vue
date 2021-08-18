@@ -1,5 +1,6 @@
 <template>
   <div class="left-nav__communities-list">
+    <div class="left-nav__divider"></div>
     <j-tooltip
       v-for="community in communities"
       :key="community.perspective.uuid"
@@ -22,6 +23,17 @@
           <j-menu-item>Remove community</j-menu-item>
         </j-menu>
       </j-popover>
+    </j-tooltip>
+    <j-tooltip title="Create a community">
+      <j-button
+        @click="() => $store.commit('setShowCreateCommunity', true)"
+        square
+        circle
+        size="xl"
+        variant="subtle"
+      >
+        <j-icon size="lg" name="plus"></j-icon>
+      </j-button>
     </j-tooltip>
   </div>
 </template>
@@ -61,8 +73,6 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   display: flex;
-  border-top: 1px solid var(--app-main-sidebar-border-color);
-  padding-top: var(--j-space-500);
   gap: var(--j-space-400);
   flex-direction: column;
   align-items: center;
@@ -76,5 +86,12 @@ export default defineComponent({
 
 .left-nav__community-item {
   cursor: pointer;
+}
+
+.left-nav__divider {
+  width: 80%;
+  margin: 0 auto;
+
+  border-top: 1px solid var(--j-color-ui-100);
 }
 </style>

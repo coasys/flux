@@ -72,13 +72,13 @@
 
   /*  App specific styles */
   --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
-  --app-main-sidebar-border-color: hsl(var(--j-color-ui-hue), 0%, 15%);
+  --app-main-sidebar-border-color: hsl(var(--j-color-ui-hue), 0%, 7%);
 
   --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
-  --app-drawer-border-color: hsl(var(--j-color-ui-hue), 0%, 15%);
+  --app-drawer-border-color: hsl(var(--j-color-ui-hue), 0%, 7%);
 
   --app-channel-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
-  --app-channel-border-color: hsl(var(--j-color-ui-hue), 0%, 15%);
+  --app-channel-border-color: hsl(var(--j-color-ui-hue), 0%, 7%);
   --app-channel-header-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
   --app-channel-footer-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
 }

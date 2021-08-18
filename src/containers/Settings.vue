@@ -1,7 +1,7 @@
 <template>
   <j-box p="800">
     <j-box pl="500" pb="800">
-      <j-text variant="heading">Settings</j-text>
+      <j-text variant="heading-sm">Settings</j-text>
     </j-box>
     <div class="settings">
       <aside class="settings__sidebar">
@@ -11,11 +11,11 @@
           :value="currentView"
           @change="(e) => (currentView = e.target.value)"
         >
-          <j-tab-item variant="button" value="theme-editor">
+          <j-tab-item value="theme-editor">
             <j-icon size="sm" name="eye" slot="start" />
             Appearance
           </j-tab-item>
-          <j-tab-item variant="button" value="privacy">
+          <j-tab-item value="privacy">
             <j-icon size="sm" name="lock" slot="start" />
             Privacy
           </j-tab-item>

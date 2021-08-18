@@ -2,7 +2,7 @@
   <j-box p="800">
     <j-flex direction="column" gap="700">
       <div>
-        <j-text variant="heading">Create Channel</j-text>
+        <j-text variant="heading-sm">Create Channel</j-text>
         <j-text variant="body">
           Channels are ways to organize your conversations by topics.
         </j-text>
