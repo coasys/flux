@@ -55,12 +55,6 @@ export default defineComponent({
     ChannelFooter,
     Profile,
   },
-  beforeUnmount() {
-    if (this.channel.neighbourhood) {
-      this.saveScrollPos(this.channel.neighbourhood.perspective.uuid);
-    }
-    this.linksWorker?.terminate();
-  },
   data() {
     return {
       scrolledToTop: false,
@@ -76,6 +70,13 @@ export default defineComponent({
       showProfile: false,
       activeProfile: {} as any,
     };
+  },
+  beforeRouteUpdate(to, from, next) {
+    if (this.channel.neighbourhood) {
+      this.saveScrollPos();
+    }
+    this.linksWorker?.terminate();
+    next();
   },
   async mounted() {
     this.linksWorker?.terminate();
@@ -96,11 +97,7 @@ export default defineComponent({
       channelId: channelId as string,
     });
 
-    // TODO: On first mount view takes too long to render
-    // So we don't have the full height to scroll to the right place
-    setTimeout(() => {
-      this.scrollToLatestPos();
-    }, 0);
+    this.scrollToLatestPos();
   },
   watch: {
     scrolledToBottom: function (atBottom) {
@@ -140,7 +137,8 @@ export default defineComponent({
     },
   },
   methods: {
-    saveScrollPos(channelId: string) {
+    saveScrollPos() {
+      const channelId = this.channel.neighbourhood.perspective.uuid;
       const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
       store.commit.setChannelScrollTop({
         channelId: channelId as string,
@@ -151,7 +149,7 @@ export default defineComponent({
       // Next tick waits for everything to be rendered
       this.$nextTick(() => {
         const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-        if (!scrollContainer) return;
+
         if (this.channel.state.scrollTop === undefined) {
           this.scrollToBottom("auto");
         } else {
@@ -203,19 +201,16 @@ export default defineComponent({
     handleScroll(e: any) {
       this.scrolledToTop = e.target.scrollTop <= 20;
       this.scrolledToBottom = isAtBottom(e.target);
+      this.saveScrollPos();
     },
     scrollToBottom(behavior: "smooth" | "auto") {
       const container = this.$refs.scrollContainer as HTMLDivElement;
       if (container) {
         this.$nextTick(() => {
-          this.markAsRead();
-
-          setTimeout(() => {
-            container.scrollTo({
-              top: container.scrollHeight,
-              behavior,
-            });
-          }, 10);
+          container.scrollTo({
+            top: container.scrollHeight,
+            behavior,
+          });
         });
       }
     },
@@ -226,9 +221,8 @@ export default defineComponent({
 <style scoped>
 .channel-view {
   height: 100vh;
-  overflow: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
 }
 </style>
