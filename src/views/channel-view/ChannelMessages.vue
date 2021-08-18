@@ -13,10 +13,9 @@
 
     <j-box px="500" py="500">
       <j-flex a="center" j="center" gap="500">
-        <j-text nomargin v-if="isAlreadyFetching">
-          Looking for messages
+        <j-text color="ui-400" nomargin v-if="isAlreadyFetching">
+          Looking for messages..
         </j-text>
-        <j-spinner size="xs" v-if="isAlreadyFetching"></j-spinner>
         <j-button v-else size="sm" variant="subtle" @click="loadMoreMessages">
           Look for messages
         </j-button>
