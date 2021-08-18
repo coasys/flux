@@ -213,7 +213,7 @@
   --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 10%, 17%);
   --app-drawer-border-color: hsl(var(--j-color-ui-hue), 10%, 17%);
   --app-channel-bg-color: hsl(var(--j-color-ui-hue), 10%, 20%);
-  --app-channel-border-color: hsl(var(--j-color-ui-hue), 10%, 20%);
+  --app-channel-border-color: hsl(var(--j-color-ui-hue), 10%, 16%);
   --app-channel-header-bg-color: hsl(var(--j-color-ui-hue), 10%, 20%);
   --app-channel-footer-bg-color: hsl(var(--j-color-ui-hue), 10%, 20%);
   --app-main-content-bg-color: hsl(var(--j-color-ui-hue), 10%, 20%);

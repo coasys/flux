@@ -4,9 +4,9 @@
       <j-text nomargin variant="heading-sm">
         My communities ({{ communities.length }})
       </j-text>
-      <j-button size="lg" variant="primary" @click="createCommunityClick"
-        >Create a community</j-button
-      >
+      <j-button size="lg" variant="primary" @click="createCommunityClick">
+        Create a community
+      </j-button>
     </j-flex>
   </j-box>
   <div class="community-items">
@@ -25,9 +25,11 @@
         size="xl"
       ></j-avatar>
       <div class="community-item__content">
-        <j-text size="600" nomargin color="ui-800" weight="600">
-          {{ community.name }}
-        </j-text>
+        <j-box pb="200">
+          <j-text size="600" nomargin color="ui-800" weight="600">
+            {{ community.name }}
+          </j-text>
+        </j-box>
         <j-text nomargin variant="body">{{ community.description }}</j-text>
         <j-flex gap="300" a="center">
           <j-text size="400">
@@ -37,6 +39,7 @@
       </div>
       <div>
         <j-button
+          variant="subtle"
           v-if="isCreatorOfCommunity(community.perspective.uuid)"
           @click.prevent="() => handleEditClick(community)"
         >
