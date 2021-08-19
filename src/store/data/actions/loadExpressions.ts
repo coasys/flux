@@ -9,6 +9,7 @@ export interface Payload {
   channelId: string;
   from?: Date;
   to?: Date;
+  expressionWorker: Worker
 }
 
 export interface LoadExpressionResult {
@@ -19,7 +20,7 @@ export interface LoadExpressionResult {
 /// Function that polls for new messages on a channel using a web worker, if a message link is found then another web worker is spawned to retry getting the expression until its found
 export default async function (
   context: any,
-  { channelId, from, to }: Payload
+  { channelId, from, to, expressionWorker }: Payload
 ): Promise<LoadExpressionResult> {
   const { getters: dataGetters, commit: dataCommit } =
     dataActionContext(context);
@@ -29,14 +30,14 @@ export default async function (
     const channel = dataGetters.getNeighbourhood(channelId);
     const fromDate = from || new Date();
     const untilDate = to || new Date("August 19, 1975 23:15:30");
-    console.debug("Loading expression from", fromDate, untilDate);
+    console.warn("Loading expression from", fromDate, untilDate);
 
     if (!channel) {
       console.error(`No channel with id ${channelId} found`);
     }
 
     const linksWorker = new Worker("pollingWorker.js");
-    const expressionWorker = new Worker("pollingWorker.js");
+    //const expressionWorker = new Worker("pollingWorker.js");
 
     console.log("Posting for links between", fromDate, untilDate);
     linksWorker.postMessage({

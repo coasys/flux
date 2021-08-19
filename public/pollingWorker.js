@@ -72,6 +72,10 @@ function pollData(params) {
         if (retry !== null) {
           polls = polls.filter((pollId) => pollId !== id);
         }
+        // Below code is useful if we want to see what messages are being returned by expression poll workers
+        // if (dataKey == "expression") {
+        //   console.warn("Sending response", JSON.parse(res.expression.data).body)
+        // }
         self.postMessage({ ...res, callbackData });
       }
     })

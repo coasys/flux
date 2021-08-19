@@ -75,6 +75,7 @@ export default defineComponent({
     "showNewMessagesButton",
     "profileLanguage",
     "linksWorker",
+    "expressionWorker",
     "scrolledToBottom",
     "scrolledToTop",
   ],
@@ -170,12 +171,16 @@ export default defineComponent({
       if (this.linksWorker) {
         this.linksWorker!.terminate();
       }
+      if (this.expressionWorker) {
+        this.expressionWorker!.terminate();
+      }
 
       const { linksWorker, expressionWorker } =
         await store.dispatch.loadExpressions({
           from: from ? new Date(from) : undefined,
           to: to ? new Date(to) : undefined,
           channelId: this.channel.neighbourhood.perspective.uuid,
+          expressionWorker: new Worker("pollingWorker.js"),
         });
 
       this.$emit("updateLinkWorker", linksWorker);

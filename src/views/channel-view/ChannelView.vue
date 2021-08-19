@@ -10,6 +10,7 @@
       :community="community"
       :channel="channel"
       :linksWorker="linksWorker"
+      :expressionWorker="expressionWorker"
       @profileClick="handleProfileClick"
       @mentionClick="handleMentionClick"
       @updateLinkWorker="(e) => (linksWorker = e)"
@@ -84,9 +85,11 @@ export default defineComponent({
 
     const { channelId, communityId } = this.$route.params;
 
+    this.expressionWorker = new Worker("pollingWorker.js");
     const { linksWorker, expressionWorker } =
       await store.dispatch.loadExpressions({
         channelId: channelId as string,
+        expressionWorker: this.expressionWorker,
       });
 
     this.linksWorker = linksWorker;
