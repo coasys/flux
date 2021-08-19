@@ -1,45 +1,45 @@
 import community from "../../../fixtures/community.json";
-import { createDirectStore } from "direct-vuex";
-import user from "@/store/user";
-import data from "@/store/data";
-import app from "@/store/app";
 import * as setTheme from "@/utils/themeHelper";
+import { createPinia, Pinia, setActivePinia } from "pinia";
+import { useDataStore } from "@/store/data";
+import { useAppStore } from "@/store/app";
 
 describe("Change Current Theme", () => {
-  let store: any;
+  let store: Pinia;
 
   beforeEach(() => {
-    // @ts-ignore
     jest.spyOn(setTheme, "setTheme").mockReturnValue(undefined);
 
-    // @ts-ignore
-    const directStore = createDirectStore({
-      modules: {
-        user,
-        data,
-        app,
-      },
-    });
-    store = directStore.store;
+    store = createPinia();
+
+    setActivePinia(store)
   });
 
   test("Change to global theme", () => {
-    store.commit.addCommunity(community);
+    const appStore = useAppStore();
+    const dataStore = useDataStore();
 
-    expect(store.state.app.currentTheme).toBe("global");
+    // @ts-ignore
+    dataStore.addCommunity(community);
 
-    store.dispatch.changeCurrentTheme("global");
+    expect(appStore.currentTheme).toBe("global");
 
-    expect(store.state.app.currentTheme).toBe("global");
+    appStore.changeCurrentTheme("global");
+
+    expect(appStore.currentTheme).toBe("global");
   });
 
   test("Change to local theme for community", async () => {
-    await store.commit.addCommunity(community);
+    const appStore = useAppStore();
+    const dataStore = useDataStore();
 
-    expect(store.state.app.currentTheme).toBe("global");
+    // @ts-ignore
+    await dataStore.addCommunity(community);
 
-    await store.dispatch.changeCurrentTheme(community.state.perspectiveUuid);
+    expect(appStore.currentTheme).toBe("global");
 
-    expect(store.state.app.currentTheme).toBe(community.state.perspectiveUuid);
+    await appStore.changeCurrentTheme(community.state.perspectiveUuid);
+
+    expect(appStore.currentTheme).toBe(community.state.perspectiveUuid);
   });
 });

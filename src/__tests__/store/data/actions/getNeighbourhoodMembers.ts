@@ -4,14 +4,12 @@ import * as getLinks from "../../../../core/queries/getLinks";
 import getCommunityMembersLinkFixture from "../../../fixtures/getCommunityMembersLink.json";
 import getProfileFixture from "../../../fixtures/getProfile.json";
 import * as getExpressionNoCache from "@/core/queries/getExpression";
-import { createDirectStore } from "direct-vuex";
-import user from "@/store/user";
-import data from "@/store/data";
-import app from "@/store/app";
 import { Expression } from "@perspect3vism/ad4m";
+import { createPinia, Pinia, setActivePinia } from "pinia";
+import { useDataStore } from "@/store/data";
 
 describe("Get Community Members", () => {
-  let store: any;
+  let store: Pinia;
 
   beforeEach(() => {
     // @ts-ignore
@@ -27,34 +25,32 @@ describe("Get Community Members", () => {
         return getProfileFixture as unknown as Expression;
       });
 
-    // @ts-ignore
-    const directStore = createDirectStore({
-      modules: {
-        user,
-        data,
-        app,
-      },
-    });
-    store = directStore.store; //createStore(tempStore);
+    store = createPinia();
+    setActivePinia(store);
   });
 
   test("Check if the getNeighbourhoodMembers work", async () => {
-    store.commit.addCommunity(community);
+    const dataStore = useDataStore();
+    
+    // @ts-ignore
+    dataStore.addCommunity(community);
     const communityId = community.neighbourhood.perspective.uuid;
-    expect(store.state.data.neighbourhoods[communityId].members).toStrictEqual(
+    expect(dataStore.neighbourhoods[communityId].members).toStrictEqual(
       []
     );
 
-    await store.dispatch.getNeighbourhoodMembers(communityId);
+    await dataStore.getNeighbourhoodMembers(communityId);
 
-    expect(store.state.data.neighbourhoods[communityId].members.length).toBe(1);
+    expect(dataStore.neighbourhoods[communityId].members.length).toBe(1);
   });
 
   test("Check if the getNeighbourhoodMembers with wrong community id or community that don't exists", async () => {
+    const dataStore = useDataStore();
+
     const communityId = community.neighbourhood.perspective.uuid;
 
     try {
-      await store.dispatch.getNeighbourhoodMembers(`${communityId}1`);
+      await dataStore.getNeighbourhoodMembers(`${communityId}1`);
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
       expect(error).toHaveProperty(

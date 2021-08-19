@@ -4,18 +4,16 @@ import addChannelUniqueHolochainLanguages from "../../../fixtures/addChannelUniq
 import addChannelCreateLinkType from "../../../fixtures/addChannelCreateLinkType.json";
 import addChannelCreateLink from "../../../fixtures/addChannelCreateLink.json";
 import createChannelMeta from "../../../fixtures/createChannelMeta.json";
-import { createDirectStore } from "direct-vuex";
-import user from "@/store/user";
-import data from "@/store/data";
-import app from "@/store/app";
 import * as addPerspective from "@/core/mutations/addPerspective";
 import * as createUniqueHolochainLanguage from "@/core/mutations/createUniqueHolochainLanguage";
 import * as createNeighbourhood from "@/core/mutations/createNeighbourhood";
 import * as createNeighbourhoodMeta from "@/core/methods/createNeighbourhoodMeta";
 import * as createLink from "@/core/mutations/createLink";
+import { createPinia, Pinia, setActivePinia } from "pinia";
+import { useDataStore } from "@/store/data";
 
 describe("Create Channel", () => {
-  let store: any;
+  let store: Pinia;
 
   beforeEach(() => {
     // @ts-ignore
@@ -55,22 +53,18 @@ describe("Create Channel", () => {
         return addChannelCreateLink;
       });
 
-    // @ts-ignore
-    const directStore = createDirectStore({
-      modules: {
-        user,
-        data,
-        app,
-      },
-    });
-    store = directStore.store;
+      store = createPinia();
+
+      setActivePinia(store);
   });
 
   test("Create channel for community that doesnt exist", async () => {
-    expect(Object.keys(store.state.data.neighbourhoods).length).toBe(0);
+    const dataStore = useDataStore();
+
+    expect(Object.keys(dataStore.neighbourhoods).length).toBe(0);
 
     try {
-      await store.dispatch.createChannel({
+      await dataStore.createChannel({
         communityId: community.state.perspectiveUuid,
         name: "test",
       });
@@ -82,22 +76,25 @@ describe("Create Channel", () => {
       );
     }
 
-    expect(Object.keys(store.state.data.neighbourhoods).length).toBe(0);
+    expect(Object.keys(dataStore.neighbourhoods).length).toBe(0);
   });
 
   test("Create channel for a community", async () => {
-    expect(Object.keys(store.state.data.neighbourhoods).length).toBe(0);
+    const dataStore = useDataStore();
 
-    store.commit.addCommunity(community);
+    expect(Object.keys(dataStore.neighbourhoods).length).toBe(0);
 
-    const channel = await store.dispatch.createChannel({
+    // @ts-ignore
+    dataStore.addCommunity(community);
+
+    const channel = await dataStore.createChannel({
       communityId: community.state.perspectiveUuid,
       name: "test",
     });
 
-    expect(Object.keys(store.state.data.neighbourhoods).length).toBe(2);
+    expect(Object.keys(dataStore.neighbourhoods).length).toBe(2);
     expect(
-      Object.keys(store.state.data.neighbourhoods).find(
+      Object.keys(dataStore.neighbourhoods).find(
         (e) => e === channel.state.perspectiveUuid
       )
     ).toBe(channel.state.perspectiveUuid);

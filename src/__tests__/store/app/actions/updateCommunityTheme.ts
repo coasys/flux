@@ -1,34 +1,31 @@
 import community from "../../../fixtures/community.json";
-import { createDirectStore } from "direct-vuex";
-import user from "@/store/user";
-import data from "@/store/data";
-import app from "@/store/app";
 import * as setTheme from "@/utils/themeHelper";
+import { createPinia, Pinia, setActivePinia } from "pinia";
+import { useAppStore } from "@/store/app";
+import { useDataStore } from "@/store/data";
 
 describe("Update community theme", () => {
-  let store: any;
+  let store: Pinia;
 
   beforeEach(() => {
     // @ts-ignore
     jest.spyOn(setTheme, "setTheme").mockReturnValue(undefined);
 
-    // @ts-ignore
-    const directStore = createDirectStore({
-      modules: {
-        user,
-        data,
-        app,
-      },
-    });
-    store = directStore.store;
+    store = createPinia();
+
+    setActivePinia(store);
   });
 
   test("Update community theme", async () => {
-    await store.commit.addCommunity(community);
+    const appStore = useAppStore();
+    const dataStore = useDataStore();
+    
+    // @ts-ignore
+    await dataStore.addCommunity(community);
 
-    expect(store.state.app.currentTheme).toBe("global");
+    expect(appStore.currentTheme).toBe("global");
     expect(
-      store.state.data.communities[community.state.perspectiveUuid].theme
+      dataStore.communities[community.state.perspectiveUuid].theme
     ).toStrictEqual({
       name: "light",
       fontFamily: "Poppins",
@@ -37,8 +34,9 @@ describe("Update community theme", () => {
       fontSize: "md",
     });
 
-    await store.dispatch.updateCommunityTheme({
+    await appStore.updateCommunityTheme({
       communityId: community.state.perspectiveUuid,
+      // @ts-ignore
       theme: {
         name: "test",
         fontFamily: "Arial",
@@ -46,9 +44,9 @@ describe("Update community theme", () => {
       },
     });
 
-    expect(store.state.app.currentTheme).toBe("global");
+    expect(appStore.currentTheme).toBe("global");
     expect(
-      store.state.data.communities[community.state.perspectiveUuid].theme
+      dataStore.communities[community.state.perspectiveUuid].theme
     ).toStrictEqual({
       name: "test",
       fontFamily: "Arial",
@@ -59,16 +57,21 @@ describe("Update community theme", () => {
   });
 
   test("Update current community theme", async () => {
-    await store.commit.addCommunity(community);
+    const appStore = useAppStore();
+    const dataStore = useDataStore();
 
-    expect(store.state.app.currentTheme).toBe("global");
+    // @ts-ignore
+    await dataStore.addCommunity(community);
 
-    await store.dispatch.changeCurrentTheme(community.state.perspectiveUuid);
+    expect(appStore.currentTheme).toBe("global");
 
-    expect(store.state.app.currentTheme).toBe(community.state.perspectiveUuid);
+    await appStore.changeCurrentTheme(community.state.perspectiveUuid);
 
-    await store.dispatch.updateCommunityTheme({
+    expect(appStore.currentTheme).toBe(community.state.perspectiveUuid);
+
+    await appStore.updateCommunityTheme({
       communityId: community.state.perspectiveUuid,
+      // @ts-ignore
       theme: {
         name: "test1",
         fontFamily: "Arial",
@@ -76,9 +79,9 @@ describe("Update community theme", () => {
       },
     });
 
-    expect(store.state.app.currentTheme).toBe(community.state.perspectiveUuid);
+    expect(appStore.currentTheme).toBe(community.state.perspectiveUuid);
     expect(
-      store.state.data.communities[community.state.perspectiveUuid].theme
+      dataStore.communities[community.state.perspectiveUuid].theme
     ).toStrictEqual({
       name: "test1",
       fontFamily: "Arial",
@@ -89,17 +92,22 @@ describe("Update community theme", () => {
   });
 
   test("Update community theme for wrong communtiy id", async () => {
-    await store.commit.addCommunity(community);
+    const appStore = useAppStore();
+    const dataStore = useDataStore();
 
-    expect(store.state.app.currentTheme).toBe("global");
+    // @ts-ignore
+    await dataStore.addCommunity(community);
 
-    await store.dispatch.changeCurrentTheme(community.state.perspectiveUuid);
+    expect(appStore.currentTheme).toBe("global");
 
-    expect(store.state.app.currentTheme).toBe(community.state.perspectiveUuid);
+    await appStore.changeCurrentTheme(community.state.perspectiveUuid);
+
+    expect(appStore.currentTheme).toBe(community.state.perspectiveUuid);
 
     try {
-      await store.dispatch.updateCommunityTheme({
+      await appStore.updateCommunityTheme({
         communityId: `${community.state.perspectiveUuid}1`,
+        // @ts-ignore
         theme: {
           name: "test",
           fontFamily: "Arial",
@@ -114,11 +122,11 @@ describe("Update community theme", () => {
       );
     }
 
-    expect(store.state.app.currentTheme).toBe(
+    expect(appStore.currentTheme).toBe(
       "bebd2ac2-1e80-44d2-b807-0163c2bcef40"
     );
     expect(
-      store.state.data.communities[community.state.perspectiveUuid].theme
+      dataStore.communities[community.state.perspectiveUuid].theme
     ).toStrictEqual({
       name: "test1",
       fontFamily: "Arial",

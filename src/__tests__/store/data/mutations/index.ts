@@ -4,75 +4,73 @@ import channel1 from "../../../fixtures/channel1.json";
 import createChannel from "../../../fixtures/createChannel.json";
 import messageLink from "../../../fixtures/messageLink.json";
 import messageExpression from "../../../fixtures/messageExpression.json";
-import app from "@/store/app";
-import user from "@/store/user";
-import data from "@/store/data";
-import { createDirectStore } from "direct-vuex";
+import { useDataStore } from "@/store/data";
+import { Pinia, createPinia, setActivePinia } from "pinia";
 
 describe("Data Mutations", () => {
-  let store: any;
+  let store: Pinia;
 
   beforeEach(() => {
-    // @ts-ignore
-    const directStore = createDirectStore({
-      modules: {
-        user,
-        data,
-        app,
-      },
-    });
-
-    store = directStore.store;
+    store = createPinia();
+    setActivePinia(store);
   });
 
   test("Add Community", () => {
-    expect(Object.values(store.state.data.communities).length).toBe(0);
+    const dataStore = useDataStore();
+    expect(Object.values(dataStore.communities).length).toBe(0);
 
-    store.commit.addCommunity(community);
+    // @ts-ignore
+    dataStore.addCommunity(community);
 
-    expect(Object.values(store.state.data.communities).length).toBe(1);
+    expect(Object.values(dataStore.communities).length).toBe(1);
 
     expect(
-      (Object.values(store.state.data.neighbourhoods)[0] as any).perspective
+      (Object.values(dataStore.neighbourhoods)[0] as any).perspective
         .uuid
     ).toBe(community.neighbourhood.perspective.uuid);
   });
 
   test("Check duplicate community if one exists already", async () => {
-    expect(Object.values(store.state.data.communities).length).toBe(0);
+    const dataStore = useDataStore();
+    expect(Object.values(dataStore.communities).length).toBe(0);
 
-    store.commit.addCommunity(community);
+    // @ts-ignore
+    dataStore.addCommunity(community);
 
-    expect(Object.keys(store.state.data.communities)).toStrictEqual([
+    expect(Object.keys(dataStore.communities)).toStrictEqual([
       community.neighbourhood.perspective.uuid,
     ]);
 
-    store.commit.addCommunity(community);
+    // @ts-ignore
+    dataStore.addCommunity(community);
 
-    expect(Object.keys(store.state.data.communities)).toStrictEqual([
+    expect(Object.keys(dataStore.communities)).toStrictEqual([
       community.neighbourhood.perspective.uuid,
     ]);
   });
 
   // TODO: @fayeed
   test("Add message", () => {
-    store.commit.addCommunity(community);
-    store.commit.createChannel(createChannel);
+    const dataStore = useDataStore();
+    // @ts-ignore
+    dataStore.addCommunity(community);
+    // @ts-ignore
+    dataStore.createChannelMutation(createChannel);
 
     const channelId = "884f1238-c3d1-41b4-8489-aa73c5f9fc08";
 
     expect(
       Object.values(
-        store.state.data.neighbourhoods[channelId].currentExpressionLinks
+        dataStore.neighbourhoods[channelId].currentExpressionLinks
       ).length
     ).toBe(0);
     expect(
       Object.values(
-        store.state.data.neighbourhoods[channelId].currentExpressionMessages
+        dataStore.neighbourhoods[channelId].currentExpressionMessages
       ).length
     ).toBe(0);
 
-    store.commit.addMessage({
+    dataStore.addMessage({
       channelId,
       link: messageLink,
       expression: messageExpression,
@@ -80,115 +78,129 @@ describe("Data Mutations", () => {
 
     expect(
       Object.values(
-        store.state.data.neighbourhoods[channelId].currentExpressionLinks
+        dataStore.neighbourhoods[channelId].currentExpressionLinks
       ).length
     ).toBe(1);
     expect(
       Object.values(
-        store.state.data.neighbourhoods[channelId].currentExpressionMessages
+        dataStore.neighbourhoods[channelId].currentExpressionMessages
       ).length
     ).toBe(1);
   });
 
   // TODO: @fayeed
   test("Add messages", () => {
-    store.commit.addCommunity(community);
-    store.commit.createChannel(channel);
+    const dataStore = useDataStore();
+    // @ts-ignore
+    dataStore.addCommunity(community);
+    // @ts-ignore
+    dataStore.createChannelMutation(channel);
 
     expect(
       Object.values(
-        store.state.data.neighbourhoods[channel.state.perspectiveUuid]
+        dataStore.neighbourhoods[channel.state.perspectiveUuid]
           .currentExpressionLinks
       ).length
     ).toBe(0);
     expect(
       Object.values(
-        store.state.data.neighbourhoods[channel.state.perspectiveUuid]
+        dataStore.neighbourhoods[channel.state.perspectiveUuid]
           .currentExpressionMessages
       ).length
     ).toBe(0);
 
-    store.commit.addMessages({
+    dataStore.addMessages({
       channelId: channel.state.perspectiveUuid,
+      // @ts-ignore
       links: [messageLink],
+      // @ts-ignore
       expressions: [messageExpression],
     });
 
     expect(
       Object.values(
-        store.state.data.neighbourhoods[channel.state.perspectiveUuid]
+        dataStore.neighbourhoods[channel.state.perspectiveUuid]
           .currentExpressionLinks
       ).length
     ).toBe(1);
     expect(
       Object.values(
-        store.state.data.neighbourhoods[channel.state.perspectiveUuid]
+        dataStore.neighbourhoods[channel.state.perspectiveUuid]
           .currentExpressionMessages
       ).length
     ).toBe(1);
   });
 
   test("Set current channel Id", () => {
-    store.commit.addCommunity(community);
-    store.commit.createChannel(createChannel);
+    const dataStore = useDataStore();
+    // @ts-ignore
+    dataStore.addCommunity(community);
+    // @ts-ignore
+    dataStore.createChannelMutation(createChannel);
 
     expect(
-      store.state.data.communities[community.state.perspectiveUuid]
+      dataStore.communities[community.state.perspectiveUuid]
         .currentChannelId
     ).toBeNull();
 
-    store.commit.setCurrentChannelId({
+    dataStore.setCurrentChannelId({
       communityId: community.state.perspectiveUuid,
       channelId: createChannel.state.perspectiveUuid,
     });
 
     expect(
-      store.state.data.communities[community.state.perspectiveUuid]
+      dataStore.communities[community.state.perspectiveUuid]
         .currentChannelId
     ).toBe(createChannel.state.perspectiveUuid);
   });
 
   test("Remove community", () => {
-    store.commit.addCommunity(community);
-    store.commit.createChannel(createChannel);
+    const dataStore = useDataStore();
+    // @ts-ignore
+    dataStore.addCommunity(community);
+    // @ts-ignore
+    dataStore.createChannelMutation(createChannel);
 
-    expect(Object.values(store.state.data.communities).length).toBe(1);
-    expect(Object.values(store.state.data.neighbourhoods).length).toBe(2);
+    expect(Object.values(dataStore.communities).length).toBe(1);
+    expect(Object.values(dataStore.neighbourhoods).length).toBe(2);
 
-    store.commit.removeCommunity(community.state.perspectiveUuid);
+    dataStore.removeCommunity(community.state.perspectiveUuid);
 
-    expect(Object.values(store.state.data.communities).length).toBe(0);
-    expect(Object.values(store.state.data.neighbourhoods).length).toBe(1);
+    expect(Object.values(dataStore.communities).length).toBe(0);
+    expect(Object.values(dataStore.neighbourhoods).length).toBe(1);
   });
 
   test("Set Channel Notification State", () => {
-    store.commit.addCommunity(community);
-    store.commit.createChannel(createChannel);
+    const dataStore = useDataStore();
+    // @ts-ignore
+    dataStore.addCommunity(community);
+    // @ts-ignore
+    dataStore.createChannelMutation(createChannel);
 
     expect(
-      store.state.data.channels[createChannel.state.perspectiveUuid]
+      dataStore.channels[createChannel.state.perspectiveUuid]
         .notifications.mute
     ).toBeFalsy();
 
-    store.commit.setChannelNotificationState({
+    dataStore.setChannelNotificationState({
       channelId: createChannel.state.perspectiveUuid,
     });
 
     expect(
-      store.state.data.channels[createChannel.state.perspectiveUuid]
+      dataStore.channels[createChannel.state.perspectiveUuid]
         .notifications.mute
     ).toBeTruthy();
   });
 
-  // TODO: @fayeed
-  // test("Set Community Members", () => {});
-
   test("Set community Theme", () => {
-    store.commit.addCommunity(community);
-    store.commit.createChannel(createChannel);
+    const dataStore = useDataStore();
+    // @ts-ignore
+    dataStore.addCommunity(community);
+    // @ts-ignore
+    dataStore.createChannelMutation(createChannel);
 
     expect(
-      store.state.data.communities[community.state.perspectiveUuid].theme
+      dataStore.communities[community.state.perspectiveUuid].theme
     ).toStrictEqual({
       fontSize: "md",
       fontFamily: "Poppins",
@@ -197,8 +209,9 @@ describe("Data Mutations", () => {
       saturation: 60,
     });
 
-    store.commit.setCommunityTheme({
+    dataStore.setCommunityTheme({
       communityId: community.state.perspectiveUuid,
+      // @ts-ignore
       theme: {
         fontSize: "lg",
         saturation: 80,
@@ -206,7 +219,7 @@ describe("Data Mutations", () => {
     });
 
     expect(
-      store.state.data.communities[community.state.perspectiveUuid].theme
+      dataStore.communities[community.state.perspectiveUuid].theme
     ).toStrictEqual({
       fontSize: "lg",
       fontFamily: "Poppins",
@@ -217,24 +230,28 @@ describe("Data Mutations", () => {
   });
 
   test("Update Community Metadata", () => {
-    store.commit.addCommunity(community);
-    store.commit.createChannel(createChannel);
+    const dataStore = useDataStore();
+    // @ts-ignore
+    dataStore.addCommunity(community);
+    // @ts-ignore
+    dataStore.createChannelMutation(createChannel);
 
     expect(
-      store.state.data.neighbourhoods[community.state.perspectiveUuid].name
+      dataStore.neighbourhoods[community.state.perspectiveUuid].name
     ).toBe("test");
     expect(
-      store.state.data.neighbourhoods[community.state.perspectiveUuid]
+      dataStore.neighbourhoods[community.state.perspectiveUuid]
         .description
     ).toBe("");
     expect(
-      store.state.data.neighbourhoods[community.state.perspectiveUuid]
+      dataStore.neighbourhoods[community.state.perspectiveUuid]
         .groupExpressionRef
     ).toBe(
       "QmUCLri8MRJVpXsBRvry8KaQEkX7RhKcqBwfAkMmTo6Swq://842924ebd45599a4c749d87247368bed49c9d0b2b3716573f054b472b6a5b2a52eb97ab243d9ee"
     );
 
-    store.commit.updateCommunityMetadata({
+    // @ts-ignore
+    dataStore.updateCommunityMetadata({
       communityId: community.state.perspectiveUuid,
       name: "test1",
       description: "test",
@@ -243,14 +260,14 @@ describe("Data Mutations", () => {
     });
 
     expect(
-      store.state.data.neighbourhoods[community.state.perspectiveUuid].name
+      dataStore.neighbourhoods[community.state.perspectiveUuid].name
     ).toBe("test1");
     expect(
-      store.state.data.neighbourhoods[community.state.perspectiveUuid]
+      dataStore.neighbourhoods[community.state.perspectiveUuid]
         .description
     ).toBe("test");
     expect(
-      store.state.data.neighbourhoods[community.state.perspectiveUuid]
+      dataStore.neighbourhoods[community.state.perspectiveUuid]
         .groupExpressionRef
     ).toBe(
       "QmUCLri8MRJVpXsBRvry8KaQEkX7RhKcqBwfAkMmTo6Swq://842924ebd45599a4c749d87247368bed49c9d0b2b3716573f054b472b6a5b2a52eb97ab243d9e1"
@@ -258,76 +275,86 @@ describe("Data Mutations", () => {
   });
 
   test("Set channel scrollTop", () => {
-    store.commit.addCommunity(community);
-    store.commit.createChannel(createChannel);
+    const dataStore = useDataStore();
+    // @ts-ignore
+    dataStore.addCommunity(community);
+    // @ts-ignore
+    dataStore.createChannelMutation(createChannel);
 
     expect(
-      store.state.data.channels[createChannel.state.perspectiveUuid].scrollTop
+      dataStore.channels[createChannel.state.perspectiveUuid].scrollTop
     ).toBeUndefined();
 
-    store.commit.setChannelScrollTop({
+    dataStore.setChannelScrollTop({
       channelId: createChannel.state.perspectiveUuid,
       value: 100,
     });
 
     expect(
-      store.state.data.channels[createChannel.state.perspectiveUuid].scrollTop
+      dataStore.channels[createChannel.state.perspectiveUuid].scrollTop
     ).toBe(100);
   });
 
   test("Add channel", () => {
-    expect(Object.values(store.state.data.communities).length).toBe(0);
+    const dataStore = useDataStore();
+    expect(Object.values(dataStore.communities).length).toBe(0);
 
-    store.commit.addCommunity(community);
+    // @ts-ignore
+    dataStore.addCommunity(community);
 
-    expect(Object.values(store.state.data.communities).length).toBe(1);
+    expect(Object.values(dataStore.communities).length).toBe(1);
 
     expect(
-      store.state.data.neighbourhoods[community.neighbourhood.perspective.uuid]
+      dataStore.neighbourhoods[community.neighbourhood.perspective.uuid]
         .linkedPerspectives.length
     ).toBe(1);
 
-    store.commit.addChannel({
+    dataStore.addChannel({
       communityId: community.neighbourhood.perspective.uuid,
+      // @ts-ignore
       channel,
     });
 
     expect(
-      store.state.data.neighbourhoods[community.neighbourhood.perspective.uuid]
+      dataStore.neighbourhoods[community.neighbourhood.perspective.uuid]
         .linkedPerspectives.length
     ).toBe(2);
   });
 
   test("Add channel without duplicate entries in community neighbourhood", () => {
-    expect(Object.values(store.state.data.communities).length).toBe(0);
+    const dataStore = useDataStore();
+    expect(Object.values(dataStore.communities).length).toBe(0);
 
-    store.commit.addCommunity(community);
+    // @ts-ignore
+    dataStore.addCommunity(community);
 
     expect(
-      (Object.values(store.state.data.neighbourhoods)[0] as any).perspective
+      (Object.values(dataStore.neighbourhoods)[0] as any).perspective
         .uuid
     ).toBe(community.neighbourhood.perspective.uuid);
 
-    store.commit.addChannel({
+    dataStore.addChannel({
       communityId: community.neighbourhood.perspective.uuid,
+      // @ts-ignore
       channel,
     });
 
     expect(
-      store.state.data.neighbourhoods[community.neighbourhood.perspective.uuid]
+      dataStore.neighbourhoods[community.neighbourhood.perspective.uuid]
         .linkedPerspectives
     ).toStrictEqual([
       "884f1238-c3d1-41b4-8489-aa73c5f9fc08",
       channel.neighbourhood.perspective.uuid,
     ]);
 
-    store.commit.addChannel({
+    dataStore.addChannel({
       communityId: community.neighbourhood.perspective.uuid,
+      // @ts-ignore
       channel,
     });
 
     expect(
-      store.state.data.neighbourhoods[community.neighbourhood.perspective.uuid]
+      dataStore.neighbourhoods[community.neighbourhood.perspective.uuid]
         .linkedPerspectives
     ).toStrictEqual([
       "884f1238-c3d1-41b4-8489-aa73c5f9fc08",
@@ -336,57 +363,65 @@ describe("Data Mutations", () => {
   });
 
   test("Add channel to without adding an entry in community neighbourhood", () => {
-    expect(Object.values(store.state.data.neighbourhoods).length).toBe(0);
+    const dataStore = useDataStore();
+    expect(Object.values(dataStore.neighbourhoods).length).toBe(0);
 
-    store.commit.addCommunity(community);
+    // @ts-ignore
+    dataStore.addCommunity(community);
+    // @ts-ignore
+    dataStore.createChannelMutation(createChannel);
 
-    store.commit.createChannel(createChannel);
+    expect(Object.values(dataStore.channels).length).toBe(1);
 
-    expect(Object.values(store.state.data.channels).length).toBe(1);
-
-    expect(Object.keys(store.state.data.channels)).toStrictEqual([
+    expect(Object.keys(dataStore.channels)).toStrictEqual([
       createChannel.neighbourhood.perspective.uuid,
     ]);
   });
 
   test("Set has new messages", () => {
-    store.commit.addCommunity(community);
-    store.commit.createChannel(createChannel);
+    const dataStore = useDataStore();
+    // @ts-ignore
+    dataStore.addCommunity(community);
+    // @ts-ignore
+    dataStore.createChannelMutation(createChannel);
 
     expect(
-      store.state.data.channels[createChannel.state.perspectiveUuid]
+      dataStore.channels[createChannel.state.perspectiveUuid]
         .hasNewMessages
     ).toBeFalsy();
 
-    store.commit.setHasNewMessages({
+    dataStore.setHasNewMessages({
       channelId: createChannel.state.perspectiveUuid,
       value: true,
     });
 
     expect(
-      store.state.data.channels[createChannel.state.perspectiveUuid]
+      dataStore.channels[createChannel.state.perspectiveUuid]
         .hasNewMessages
     ).toBeTruthy();
   });
 
   test("Add Expression and Link", () => {
-    store.commit.addCommunity(community);
-    store.commit.createChannel(channel1);
+    const dataStore = useDataStore();
+    // @ts-ignore
+    dataStore.addCommunity(community);
+    // @ts-ignore
+    dataStore.createChannelMutation(channel1);
 
     expect(
       Object.values(
-        store.state.data.neighbourhoods[channel1.state.perspectiveUuid]
+        dataStore.neighbourhoods[channel1.state.perspectiveUuid]
           .currentExpressionLinks
       ).length
     ).toBe(0);
     expect(
       Object.values(
-        store.state.data.neighbourhoods[channel1.state.perspectiveUuid]
+        dataStore.neighbourhoods[channel1.state.perspectiveUuid]
           .currentExpressionMessages
       ).length
     ).toBe(0);
 
-    store.commit.addExpressionAndLink({
+    dataStore.addExpressionAndLink({
       channelId: channel1.state.perspectiveUuid,
       link: messageLink,
       message: messageExpression,
@@ -394,13 +429,13 @@ describe("Data Mutations", () => {
 
     expect(
       Object.values(
-        store.state.data.neighbourhoods[channel1.state.perspectiveUuid]
+        dataStore.neighbourhoods[channel1.state.perspectiveUuid]
           .currentExpressionLinks
       ).length
     ).toBe(1);
     expect(
       Object.values(
-        store.state.data.neighbourhoods[channel1.state.perspectiveUuid]
+        dataStore.neighbourhoods[channel1.state.perspectiveUuid]
           .currentExpressionMessages
       ).length
     ).toBe(1);
