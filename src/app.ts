@@ -1,4 +1,4 @@
-import { createApp, h, provide } from "vue";
+import { createApp, h, provide, watch } from "vue";
 import App from "./App.vue";
 import "./registerServiceWorker";
 import router from "./router";
@@ -14,15 +14,17 @@ import { createPinia } from 'pinia';
 const pinia = createPinia();
 
 pinia.use(({ store }) => {
-  store.$subscribe(() => {
-    localStorage.setItem('pinia', JSON.stringify(store.$state))
-  });
-
-  const localState = localStorage.getItem('pinia');
+  const key = store.$id;
+  const localState = localStorage.getItem(key);
 
   if (localState) {
-    store.$patch(JSON.parse(localState))
+    store.$patch(JSON.parse(localState));
+    localStorage.setItem(key, JSON.stringify(store.$state));
   }
+
+  watch(store.$state, () => {
+    localStorage.setItem(key, JSON.stringify(store.$state))
+  });
 });
 
 createApp({
