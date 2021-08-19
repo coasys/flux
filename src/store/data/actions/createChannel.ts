@@ -1,7 +1,7 @@
 import { createChannel } from "@/core/methods/createChannel";
+import { useAppStore } from "@/store/app";
 import { ChannelState, MembraneType } from "@/store/types";
-import { dataActionContext } from "@/store/data/index";
-import { appActionContext } from "@/store/app/index";
+import { useDataStore } from "..";
 
 export interface Payload {
   communityId: string;
@@ -9,25 +9,24 @@ export interface Payload {
 }
 
 export default async (
-  context: any,
   payload: Payload
 ): Promise<ChannelState> => {
-  const { commit: dataCommit, getters: dataGetters } =
-    dataActionContext(context);
-  const { commit: appCommit, getters: appGetters } = appActionContext(context);
+  const dataStore =
+    useDataStore();
+  const appStore = useAppStore();
   try {
-    const community = dataGetters.getCommunity(payload.communityId);
+    const community = dataStore.getCommunity(payload.communityId);
 
     if (community.neighbourhood !== undefined) {
       const channel = await createChannel(
         payload.name,
-        appGetters.getLanguagePath,
+        appStore.getLanguagePath,
         community.neighbourhood.perspective,
         MembraneType.Inherited,
         community.neighbourhood.typedExpressionLanguages
       );
 
-      dataCommit.addChannel({
+      dataStore.addChannel({
         communityId: community.neighbourhood.perspective.uuid,
         channel,
       });
@@ -35,13 +34,13 @@ export default async (
       return channel;
     } else {
       const message = "Community does not exists";
-      appCommit.showDangerToast({
+      appStore.showDangerToast({
         message,
       });
       throw Error(message);
     }
   } catch (e) {
-    appCommit.showDangerToast({
+    appStore.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

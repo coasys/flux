@@ -3,9 +3,9 @@ import { TimeoutCache } from "@/utils/timeoutCache";
 import { getExpression } from "@/core/queries/getExpression";
 
 import { ExpressionTypes, Profile, ProfileExpression } from "@/store/types";
-import { dataActionContext } from "@/store/data/index";
-import { appActionContext } from "@/store/app/index";
-import { userActionContext } from "@/store/user/index";
+import { useAppStore } from "@/store/app";
+import { useUserStore } from "..";
+import { useDataStore } from "@/store/data";
 
 export interface Payload {
   username?: string;
@@ -13,15 +13,12 @@ export interface Payload {
   thumbnail?: string;
 }
 
-export default async (context: any, payload: Payload): Promise<void> => {
-  const { getters: dataGetter } = dataActionContext(context);
-  const { commit: appCommit } = appActionContext(context);
-  const {
-    commit: userCommit,
-    getters: userGetters,
-  } = userActionContext(context);
+export default async (payload: Payload): Promise<void> => {
+  const dataStore = useDataStore();
+  const appStore = useAppStore();
+  const userStore = useUserStore();
 
-  const currentProfile = userGetters.getProfile;
+  const currentProfile = userStore.getProfile;
   const newProfile = {
     username: payload.username || currentProfile?.username,
     email: currentProfile?.email,
@@ -30,10 +27,10 @@ export default async (context: any, payload: Payload): Promise<void> => {
     profilePicture: payload.profilePicture || currentProfile?.profilePicture,
     thumbnailPicture: payload.thumbnail || currentProfile?.thumbnailPicture,
   } as Profile;
-  userCommit.setUserProfile(newProfile);
+  userStore.setUserProfile(newProfile);
 
   try {
-    const neighbourhoods = Object.values(dataGetter.getCommunityNeighbourhoods);
+    const neighbourhoods = Object.values(dataStore.getCommunityNeighbourhoods);
     const cache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
 
     for (const neighbourhood of neighbourhoods) {
@@ -42,7 +39,7 @@ export default async (context: any, payload: Payload): Promise<void> => {
       ).typedExpressionLanguages.find(
         (t: any) => t.expressionType == ExpressionTypes.ProfileExpression
       );
-      const didExpression = `${profileExpression!.languageAddress}://${userGetters.getUser!
+      const didExpression = `${profileExpression!.languageAddress}://${userStore.getUser!
         .agent.did!}`;
 
       console.log("profileExpression: ", profileExpression);
@@ -66,14 +63,14 @@ export default async (context: any, payload: Payload): Promise<void> => {
       } else {
         const errorMessage =
           "Expected to find profile expression language for this community";
-        appCommit.showDangerToast({
+          appStore.showDangerToast({
           message: errorMessage,
         });
         throw Error(errorMessage);
       }
     }
   } catch (e) {
-    appCommit.showDangerToast({
+    appStore.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

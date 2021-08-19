@@ -1,95 +1,115 @@
 import {
-  ApplicationState,
   UpdateState,
   ToastState,
   ThemeState,
   CurrentThemeState,
   ExpressionUIIcons,
 } from "@/store/types";
+import { useAppStore } from "..";
 
 export default {
-  addExpressionUI(state: ApplicationState, payload: ExpressionUIIcons): void {
+  addExpressionUI(payload: ExpressionUIIcons): void {
+    const state = useAppStore();
     state.expressionUI[payload.languageAddress] = payload;
   },
-  setLanguagesPath(state: ApplicationState, payload: string): void {
+  setLanguagesPath(payload: string): void {
+    const state = useAppStore();
     state.localLanguagesPath = payload;
   },
-  setDatabasePerspective(state: ApplicationState, payload: string): void {
+  setDatabasePerspective(payload: string): void {
+    const state = useAppStore();
     state.databasePerspective = payload;
   },
-  setApplicationStartTime(state: ApplicationState, payload: Date): void {
+  setApplicationStartTime(payload: Date): void {
+    const state = useAppStore();
     state.applicationStartTime = payload;
   },
-  toggleSidebar(state: ApplicationState): void {
+  toggleSidebar(): void {
+    const state = useAppStore();
     state.showSidebar = !state.showSidebar;
   },
-  setSidebar(state: ApplicationState, open: boolean): void {
+  setSidebar(open: boolean): void {
+    const state = useAppStore();
     state.showSidebar = open;
   },
-  setCurrentTheme(state: ApplicationState, payload: CurrentThemeState): void {
+  setCurrentTheme(payload: CurrentThemeState): void {
+    const state = useAppStore();
     state.currentTheme = payload;
   },
-  setGlobalTheme(state: ApplicationState, payload: ThemeState): void {
+  setGlobalTheme(payload: ThemeState): void {
+    const state = useAppStore();
     state.globalTheme = { ...state.globalTheme, ...payload };
   },
-  setToast(state: ApplicationState, payload: ToastState): void {
+  setToast(payload: ToastState): void {
+    const state = useAppStore();
     state.toast = { ...state.toast, ...payload };
   },
   showSuccessToast(
-    state: ApplicationState,
     payload: { message: string }
   ): void {
+    const state = useAppStore();
     state.toast = { variant: "success", open: true, ...payload };
   },
-  showDangerToast(state: ApplicationState, payload: { message: string }): void {
+  showDangerToast(payload: { message: string }): void {
+    const state = useAppStore();
     state.toast = { variant: "danger", open: true, ...payload };
   },
   setWindowState(
-    state: ApplicationState,
     payload: "minimize" | "visible" | "foreground"
   ): void {
+    const state = useAppStore();
     state.windowState = payload;
   },
   setUpdateState(
-    state: ApplicationState,
     { updateState }: { updateState: UpdateState }
   ): void {
+    const state = useAppStore();
     state.updateState = updateState;
   },
-  setGlobalLoading(state: ApplicationState, payload: boolean): void {
+  setGlobalLoading(payload: boolean): void {
+    const state = useAppStore();
     state.showGlobalLoading = payload;
   },
   setGlobalError(
-    state: ApplicationState,
     payload: { show: boolean; message: string }
   ): void {
+    const state = useAppStore();
     state.globalError = payload;
   },
-  setShowCreateCommunity(state: ApplicationState, payload: boolean): void {
+  setShowCreateCommunity(payload: boolean): void {
+    const state = useAppStore();
     state.modals.showCreateCommunity = payload;
   },
-  setShowEditCommunity(state: ApplicationState, payload: boolean): void {
+  setShowEditCommunity(payload: boolean): void {
+    const state = useAppStore();
     state.modals.showEditCommunity = payload;
   },
-  setShowCommunityMembers(state: ApplicationState, payload: boolean): void {
+  setShowCommunityMembers(payload: boolean): void {
+    const state = useAppStore();
     state.modals.showCommunityMembers = payload;
   },
-  setShowCreateChannel(state: ApplicationState, payload: boolean): void {
+  setShowCreateChannel(payload: boolean): void {
+    const state = useAppStore();
     state.modals.showCreateChannel = payload;
   },
-  setShowEditProfile(state: ApplicationState, payload: boolean): void {
+  setShowEditProfile(payload: boolean): void {
+    const state = useAppStore();
     state.modals.showEditProfile = payload;
   },
-  setShowDisclaimer(state: ApplicationState, payload: boolean): void {
+  setShowDisclaimer(payload: boolean): void {
+    const state = useAppStore();
     state.modals.showDisclaimer = payload;
   },
-  setShowSettings(state: ApplicationState, payload: boolean): void {
+  setShowSettings(payload: boolean): void {
+    const state = useAppStore();
     state.modals.showSettings = payload;
   },
-  setShowCommunitySettings(state: ApplicationState, payload: boolean): void {
+  setShowCommunitySettings(payload: boolean): void {
+    const state = useAppStore();
     state.modals.showCommunitySettings = payload;
   },
-  setShowInviteCode(state: ApplicationState, payload: boolean): void {
+  setShowInviteCode(payload: boolean): void {
+    const state = useAppStore();
     state.modals.showInviteCode = payload;
   },
 };

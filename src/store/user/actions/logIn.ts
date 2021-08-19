@@ -1,26 +1,24 @@
 import { agentUnlock } from "@/core/mutations/agentUnlock";
+import { useAppStore } from "@/store/app";
 import { AgentStatus } from "@perspect3vism/ad4m";
-
-import { userActionContext } from "../index";
-import { appActionContext } from "@/store/app/index";
+import { useUserStore } from "..";
 
 export interface Payload {
   password: string;
 }
 
 export default async (
-  context: any,
   { password }: Payload
 ): Promise<AgentStatus> => {
-  const { commit: userCommit } = userActionContext(context);
-  const { commit: appCommit } = appActionContext(context);
+  const userStore = useUserStore();
+  const appStore = useAppStore();
   try {
     const lockRes = await agentUnlock(password);
 
-    userCommit.updateAgentStatus(lockRes);
+    userStore.updateAgentStatus(lockRes);
     return lockRes;
   } catch (e) {
-    appCommit.showDangerToast({
+    appStore.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

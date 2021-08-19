@@ -1,9 +1,9 @@
-import { dataActionContext } from "@/store/data/index";
-import { appActionContext } from "@/store/app/index";
-import { userActionContext } from "@/store/user/index";
+import { useAppStore } from "@/store/app";
 import { ExpressionTypes } from "@/store/types";
+import { useUserStore } from "@/store/user";
 import { RouteLocationNormalizedLoaded, Router } from "vue-router";
-import { getProfile } from "../../../utils/profileHelpers";
+import { useDataStore } from "..";
+import { getProfile } from "@/utils/profileHelpers";
 
 type Payload = {
   router: Router;
@@ -14,28 +14,27 @@ type Payload = {
 };
 
 export default async (
-  context: any,
   { router, route, perspectiveUuid, authorDid, message }: Payload
 ): Promise<Notification | undefined> => {
-  const { getters: dataGetters } = dataActionContext(context);
-  const { getters: appGetters } = appActionContext(context);
-  const { getters: userGetters } = userActionContext(context);
+  const dataStore = useDataStore();
+  const appStore = useAppStore();
+  const userStore = useUserStore();
 
   const escapedMessage = message.replace(/(\s*<.*?>\s*)+/g, " ");
 
   // Getting the channel & community this message belongs to
-  const channel = dataGetters.getChannel(perspectiveUuid);
-  const community = dataGetters.getCommunity(
+  const channel = dataStore.getChannel(perspectiveUuid);
+  const community = dataStore.getCommunity(
     channel.neighbourhood.membraneRoot!
   );
 
   const isMinimized = ["minimize", "foreground"].includes(
-    appGetters.getWindowState
+    appStore.getWindowState
   );
 
   const { channelId, communityId } = route.params;
 
-  const user = userGetters.getUser;
+  const user = userStore.getUser;
 
   // Only show the notification when the the message is not from self & the active community & channel is different
   if (

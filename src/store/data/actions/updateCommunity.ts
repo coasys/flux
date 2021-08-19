@@ -1,9 +1,9 @@
 import { createExpression } from "@/core/mutations/createExpression";
 import { createLink } from "@/core/mutations/createLink";
+import { useAppStore } from "@/store/app";
 
-import { dataActionContext } from "@/store/data/index";
-import { appActionContext } from "@/store/app/index";
 import { ExpressionTypes } from "@/store/types";
+import { useDataStore } from "..";
 
 export interface Payload {
   communityId: string;
@@ -14,14 +14,13 @@ export interface Payload {
 }
 
 export default async function updateCommunity(
-  context: any,
   { communityId, name, description, image, thumbnail }: Payload
 ): Promise<void> {
-  const { commit: dataCommit, getters: dataGetters } =
-    dataActionContext(context);
-  const { commit: appCommit } = appActionContext(context);
+  const dataStore =
+    useDataStore();
+  const appStore = useAppStore();
 
-  const community = dataGetters.getCommunity(communityId);
+  const community = dataStore.getCommunity(communityId);
 
   try {
     const groupExpressionLang =
@@ -51,7 +50,7 @@ export default async function updateCommunity(
       );
       console.log("Created group expression link", addGroupExpLink);
 
-      dataCommit.updateCommunityMetadata({
+      dataStore.updateCommunityMetadata({
         communityId: community.neighbourhood.perspective.uuid,
         name: name || community.neighbourhood.name,
         description: description || community.neighbourhood.description,
@@ -63,7 +62,7 @@ export default async function updateCommunity(
       throw Error("Expected to find group expression language for group");
     }
   } catch (e) {
-    appCommit.showDangerToast({
+    appStore.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

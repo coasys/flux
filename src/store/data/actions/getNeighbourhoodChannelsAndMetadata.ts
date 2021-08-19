@@ -3,8 +3,7 @@ import { joinChannelFromSharedLink } from "@/core/methods/joinChannelFromSharedL
 import { expressionGetRetries, expressionGetDelayMs } from "@/core/juntoTypes";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 import { LinkQuery } from "@perspect3vism/ad4m";
-
-import { dataActionContext } from "@/store/data/index";
+import { useDataStore } from "..";
 
 export interface Payload {
   communityId: string;
@@ -17,17 +16,15 @@ export interface Response {
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async (
-  context: any,
   { communityId }: Payload
 ): Promise<Response> => {
   console.log("Getting community channel links for community: ", communityId);
 
-  const { commit: dataCommit, getters: dataGetters } =
-    dataActionContext(context);
+  const dataStore = useDataStore();
 
   try {
     //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button
-    const community = dataGetters.getCommunity(communityId);
+    const community = dataStore.getCommunity(communityId);
     const channelLinksWorker = new Worker("pollingWorker.js");
     //Use global isExecuting variable so that message callbacks on channel worker do not execute at the same time and both mutate state
     let isExecuting = false;
@@ -84,7 +81,7 @@ export default async (
                   community.neighbourhood.perspective.uuid
                 );
                 //Add the channel to the store
-                dataCommit.addChannel({
+                dataStore.addChannel({
                   communityId: community.neighbourhood.perspective.uuid,
                   channel: channel,
                 });
@@ -159,7 +156,7 @@ export default async (
                   groupExpData
                 );
                 //Update the community with the new group data
-                dataCommit.updateCommunityMetadata({
+                dataStore.updateCommunityMetadata({
                   communityId: community.neighbourhood.perspective.uuid,
                   name: groupExpData["name"],
                   description: groupExpData["description"],

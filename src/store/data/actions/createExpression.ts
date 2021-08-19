@@ -1,8 +1,8 @@
 import { createExpression } from "@/core/mutations/createExpression";
 import { createLink } from "@/core/mutations/createLink";
+import { useAppStore } from "@/store/app";
 import { Link, LinkExpression } from "@perspect3vism/ad4m";
 
-import { appActionContext } from "@/store/app/index";
 
 export interface Payload {
   languageAddress: string;
@@ -11,10 +11,9 @@ export interface Payload {
 }
 
 export default async (
-  context: any,
   { languageAddress, content, perspective }: Payload
 ): Promise<LinkExpression> => {
-  const { commit: appCommit } = appActionContext(context);
+  const appStore = useAppStore();
 
   try {
     console.log(
@@ -38,7 +37,7 @@ export default async (
     // TODO: Add optimistic UI pattern so it feels fast
     return addLink;
   } catch (e) {
-    appCommit.showDangerToast({
+    appStore.showDangerToast({
       message: e.message,
     });
     throw new Error(e);
