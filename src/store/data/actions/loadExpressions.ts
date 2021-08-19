@@ -79,10 +79,7 @@ export default async function (
 
     //Listen for message callback saying we got some links
     linksWorker.addEventListener("message", (e) => {
-      //@ts-ignore
-      const linkQuery = e.data.perspectiveQueryLinks.sort(function (x, y) {
-        return x.timestamp - y.timestamp;
-      });
+      const linkQuery = e.data.perspectiveQueryLinks;
 
       for (const link of linkQuery) {
         //Hash the link data as the key for map and check if it exists in the store
