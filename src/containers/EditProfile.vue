@@ -28,11 +28,18 @@
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { defineComponent } from "vue";
 import { Profile } from "@/store/types";
-import store from "@/store";
+import { useUserStore } from "@/store/user";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
   components: { AvatarUpload },
+  setup() {
+    const userStore = useUserStore();
+
+    return {
+      userStore
+    }
+  },
   data() {
     return {
       isUpdatingProfile: false,
@@ -42,10 +49,10 @@ export default defineComponent({
   },
   computed: {
     userProfile(): Profile {
-      return store.state.user.profile!;
+      return this.userStore.profile!;
     },
     userDid(): string {
-      return store.state.user.agent.did!;
+      return this.userStore.agent.did!;
     },
   },
   watch: {
@@ -65,7 +72,7 @@ export default defineComponent({
   methods: {
     updateProfile() {
       this.isUpdatingProfile = true;
-      store.dispatch
+      this.userStore
         .updateProfile({
           username: this.username,
           profilePicture: this.profilePicture,

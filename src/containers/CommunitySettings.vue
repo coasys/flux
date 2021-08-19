@@ -41,13 +41,23 @@
 </template>
 
 <script lang="ts">
-import { ThemeState } from "@/store/types";
+import { useAppStore } from "@/store/app";
+import { useDataStore } from "@/store/data";
+import { LocalCommunityState, ThemeState } from "@/store/types";
 import { defineComponent } from "vue";
 import ThemeEditor from "./ThemeEditor.vue";
-import store from "@/store";
 
 export default defineComponent({
   components: { ThemeEditor },
+  setup() {
+    const appStore = useAppStore();
+    const dataStore = useDataStore();
+
+    return {
+      appStore,
+      dataStore
+    };
+  },
   data() {
     return {
       currentView: "theme-editor",
@@ -57,12 +67,12 @@ export default defineComponent({
     setuseLocalTheme(val: boolean) {
       console.log({ val });
       const id = this.$route.params.communityId as string;
-      store.commit.setuseLocalTheme({ communityId: id, value: val });
-      store.dispatch.changeCurrentTheme(val ? id : "global");
+      this.dataStore.setuseLocalTheme({ communityId: id, value: val });
+      this.appStore.changeCurrentTheme(val ? id : "global");
     },
     updateCommunityTheme(val: ThemeState) {
       const id = this.$route.params.communityId as string;
-      store.dispatch.updateCommunityTheme({
+      this.appStore.updateCommunityTheme({
         communityId: id,
         theme: { ...val },
       });
@@ -76,9 +86,9 @@ export default defineComponent({
         this.community.useLocalTheme
       );
     },
-    community() {
+    community(): LocalCommunityState {
       const id = this.$route.params.communityId as string;
-      return store.getters.getCommunityState(id);
+      return this.dataStore.getCommunityState(id);
     },
   },
 });

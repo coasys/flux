@@ -39,15 +39,14 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import { useStore } from "vuex";
 import { useValidation } from "@/utils/validation";
 import { AgentStatus } from "@perspect3vism/ad4m";
-import store from "@/store";
+import { useUserStore } from "@/store/user";
 
 export default defineComponent({
   name: "LogIn",
   setup() {
-    const store = useStore();
+    const userStore = useUserStore();
     const isCreatingUser = ref(false);
     const isLoggingIn = ref(false);
     const showPassword = ref(false);
@@ -80,7 +79,7 @@ export default defineComponent({
 
     return {
       isLoggingIn,
-      hasUser: store.state.agentInit,
+      hasUser: userStore.agent.isInitialized,
       isCreatingUser,
       name,
       password,
@@ -90,12 +89,13 @@ export default defineComponent({
       validatePassword,
       showPassword,
       logInError,
+      userStore
     };
   },
   methods: {
     logIn() {
       this.isLoggingIn = true;
-      store.dispatch
+      this.userStore
         .logIn({
           password: this.password,
         })

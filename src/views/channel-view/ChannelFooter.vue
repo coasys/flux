@@ -15,9 +15,9 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import store from "@/store";
 import { ExpressionTypes, ProfileExpression } from "@/store/types";
 import { Editor } from "@tiptap/vue-3";
+import { useDataStore } from "@/store/data";
 
 interface UserMap {
   [key: string]: ProfileExpression;
@@ -32,6 +32,13 @@ interface MentionTrigger {
 export default defineComponent({
   name: "ChannelFooter",
   props: ["channel", "community"],
+  setup() {
+    const dataStore = useDataStore();
+
+    return {
+      dataStore
+    }
+  },
   data() {
     return {
       showNewMessagesButton: false,
@@ -58,7 +65,7 @@ export default defineComponent({
       );
     },
     channelMentions(): MentionTrigger[] {
-      return store.getters
+      return this.dataStore
         .getChannelNeighbourhoods(this.community.neighbourhood.perspective.uuid)
         .map((channel) => {
           return {
@@ -108,7 +115,7 @@ export default defineComponent({
       this.currentExpressionPost = "";
 
       if (escapedMessage) {
-        store.dispatch.createExpression({
+        this.dataStore.createExpression({
           languageAddress:
             this.channel.neighbourhood.typedExpressionLanguages.find(
               (t: any) => t.expressionType === ExpressionTypes.ShortForm

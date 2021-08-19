@@ -68,12 +68,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { defineComponent } from "vue";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
-import { mapMutations } from "vuex";
-import store from "@/store";
 
 import EditCommunity from "@/containers/EditCommunity.vue";
 import CreateChannel from "@/containers/CreateChannel.vue";
@@ -81,6 +78,9 @@ import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunitySettings from "@/containers/CommunitySettings.vue";
 
 import { CommunityState, ModalsState } from "@/store/types";
+import { useAppStore } from "@/store/app";
+import { useDataStore } from "@/store/data";
+import { mapActions } from "pinia";
 
 export default defineComponent({
   name: "CommunityView",
@@ -91,6 +91,15 @@ export default defineComponent({
     CommunityMembers,
     CommunitySidebar,
     SidebarLayout,
+  },
+  setup() {
+    const appStore = useAppStore();
+    const dataStore = useDataStore();
+
+    return {
+      appStore,
+      dataStore
+    }
   },
   data() {
     return {
@@ -110,7 +119,7 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapMutations([
+    ...mapActions(useAppStore, [
       "setShowCreateChannel",
       "setShowEditCommunity",
       "setShowCommunityMembers",
@@ -135,11 +144,11 @@ export default defineComponent({
     },
     handleThemeChange(id: string) {
       if (!id) {
-        store.dispatch.changeCurrentTheme("global");
+        this.appStore.changeCurrentTheme("global");
         return;
       } else {
-        store.dispatch.changeCurrentTheme(
-          this.community.state.useLocalTheme ? id : "global"
+        this.appStore.changeCurrentTheme(
+          this.community.state?.useLocalTheme ? id : "global"
         );
       }
     },
@@ -149,10 +158,10 @@ export default defineComponent({
 
       if (id) {
         const { channelLinksWorker, groupExpressionWorker } =
-          await store.dispatch.getNeighbourhoodChannelsAndMetadata({
+          await this.dataStore.getNeighbourhoodChannelsAndMetadata({
             communityId: id,
           });
-        store.dispatch.getNeighbourhoodMembers(id);
+        this.dataStore.getNeighbourhoodMembers(id);
         this.channelWorkerLoop = channelLinksWorker;
         this.groupExpWorkerLoop = groupExpressionWorker;
       }
@@ -168,18 +177,18 @@ export default defineComponent({
       document.body.removeChild(el);
       this.hasCopied = true;
 
-      store.commit.showSuccessToast({
+      this.appStore.showSuccessToast({
         message: "Your custom invite code is copied to your clipboard!",
       });
     },
   },
   computed: {
     modals(): ModalsState {
-      return store.state.app.modals;
+      return this.appStore.modals;
     },
     community(): CommunityState {
       const communityId = this.$route.params.communityId as string;
-      return store.getters.getCommunity(communityId);
+      return this.dataStore.getCommunity(communityId);
     },
   },
 });

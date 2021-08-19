@@ -22,7 +22,7 @@
     </router-link>
     <j-tooltip title="Create a community">
       <j-button
-        @click="() => $store.commit('setShowCreateCommunity', true)"
+        @click="() => setShowCreateCommunity(true)"
         square
         circle
         size="xl"
@@ -34,10 +34,15 @@
 </template>
 
 <script lang="ts">
+import { useAppStore } from "@/store/app";
 import { defineComponent } from "vue";
+import { mapActions } from "pinia"
 
 export default defineComponent({
   name: "topsection",
+  methods: {
+    ...mapActions(useAppStore, ["setShowCreateCommunity"]),
+  }
 });
 </script>
 

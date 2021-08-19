@@ -24,7 +24,6 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import store from "@/store";
 import {
   ChannelState,
   CommunityState,
@@ -36,6 +35,7 @@ import ChannelFooter from "./ChannelFooter.vue";
 import ChannelMessages from "./ChannelMessages.vue";
 import ChannelHeader from "./ChannelHeader.vue";
 import Profile from "@/containers/Profile.vue";
+import { useDataStore } from "@/store/data";
 
 interface UserMap {
   [key: string]: ProfileExpression;
@@ -48,6 +48,13 @@ export default defineComponent({
     ChannelMessages,
     ChannelFooter,
     Profile,
+  },
+  setup() {
+    const dataStore = useDataStore();
+
+    return {
+      dataStore,
+    }
   },
   data() {
     return {
@@ -72,13 +79,13 @@ export default defineComponent({
       handler: async function (to) {
         if (!to.params.channelId) return;
 
-        const { linksWorker } = await store.dispatch.loadExpressions({
+        const { linksWorker } = await this.dataStore.loadExpressions({
           channelId: to.params.channelId,
         });
 
         this.linksWorker = linksWorker;
 
-        store.commit.setCurrentChannelId({
+        this.dataStore.setCurrentChannelId({
           communityId: to.params.communityId,
           channelId: to.params.channelId,
         });
@@ -110,11 +117,11 @@ export default defineComponent({
   computed: {
     community(): CommunityState {
       const { communityId } = this.$route.params;
-      return store.getters.getCommunity(communityId as string);
+      return this.dataStore.getCommunity(communityId as string);
     },
     channel(): ChannelState {
       const { channelId } = this.$route.params;
-      return store.getters.getChannel(channelId as string);
+      return this.dataStore.getChannel(channelId as string);
     },
     profileLanguage(): string {
       const profileLang =
@@ -127,7 +134,7 @@ export default defineComponent({
   methods: {
     saveScrollPos(channelId: string) {
       const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-      store.commit.setChannelScrollTop({
+      this.dataStore.setChannelScrollTop({
         channelId: channelId as string,
         value: scrollContainer ? scrollContainer.scrollTop : 0,
       });
@@ -163,7 +170,7 @@ export default defineComponent({
       const { label, id } = dataset;
       if (label?.startsWith("#")) {
         let channelId =
-          store.getters.getChannelByNeighbourhoodUrl(id)?.neighbourhood
+          this.dataStore.getChannelByNeighbourhoodUrl(id)?.neighbourhood
             .perspective.uuid;
         if (channelId) {
           this.$router.push({
@@ -182,7 +189,7 @@ export default defineComponent({
       }
     },
     markAsRead() {
-      store.commit.setHasNewMessages({
+      this.dataStore.setHasNewMessages({
         channelId: this.channel.neighbourhood.perspective.uuid,
         value: false,
       });

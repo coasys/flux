@@ -79,11 +79,18 @@
 import { isValid } from "@/utils/validation";
 import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
-import store from "@/store";
+import { useDataStore } from "@/store/data";
 
 export default defineComponent({
   components: { AvatarUpload },
   emits: ["cancel", "submit"],
+  setup() {
+    const dataStore = useDataStore();
+
+    return {
+      dataStore
+    };
+  },
   data() {
     return {
       tabView: "Create",
@@ -111,7 +118,7 @@ export default defineComponent({
   methods: {
     joinCommunity() {
       this.isJoiningCommunity = true;
-      store.dispatch
+      this.dataStore
         .joinCommunity({ joiningLink: this.joiningLink })
         .then(() => {
           this.$emit("submit");
@@ -122,7 +129,7 @@ export default defineComponent({
     },
     createCommunity() {
       this.isCreatingCommunity = true;
-      store.dispatch
+      this.dataStore
         .createCommunity({
           perspectiveName: this.newCommunityName,
           description: this.newCommunityDesc,
@@ -135,7 +142,7 @@ export default defineComponent({
           this.newCommunityDesc = "";
           this.newProfileImage = "";
 
-          const channels = store.getters.getChannelNeighbourhoods(
+          const channels = this.dataStore.getChannelNeighbourhoods(
             community.neighbourhood.perspective.uuid
           );
 

@@ -46,12 +46,19 @@
 import { defineComponent } from "vue";
 import type { Expression } from "@perspect3vism/ad4m";
 import { NeighbourhoodState } from "@/store/types";
-import store from "@/store";
+import { useDataStore } from "@/store/data";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
+  setup() {
+    const dataStore = useDataStore();
+
+    return {
+      dataStore
+    }
+  },
   mounted() {
-    store.dispatch.getNeighbourhoodMembers(this.community.perspective.uuid);
+    this.dataStore.getNeighbourhoodMembers(this.community.perspective.uuid);
   },
   data() {
     return {
@@ -61,7 +68,7 @@ export default defineComponent({
   computed: {
     community(): NeighbourhoodState {
       const id = this.$route.params.communityId as string;
-      return store.getters.getNeighbourhood(id);
+      return this.dataStore.getNeighbourhood(id);
     },
     filteredCommunityMemberList(): Expression[] {
       const members: Expression[] = this.community.members;

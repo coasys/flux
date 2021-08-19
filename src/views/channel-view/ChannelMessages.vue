@@ -52,7 +52,6 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import store from "@/store";
 import { ExpressionAndRef, ProfileExpression } from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
 import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
@@ -61,6 +60,7 @@ import { differenceInMinutes, parseISO } from "date-fns";
 import MessageItem from "@/components/message-item/MessageItem.vue";
 import { Editor } from "@tiptap/vue-3";
 import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
+import { useDataStore } from "@/store/data";
 
 interface UserMap {
   [key: string]: ProfileExpression;
@@ -78,6 +78,13 @@ export default defineComponent({
     DynamicScroller,
     DynamicScrollerItem,
     MessageItem,
+  },
+  setup() {
+    const dataStore = useDataStore();
+
+    return {
+      dataStore
+    }
   },
   data() {
     return {
@@ -146,7 +153,7 @@ export default defineComponent({
     },
     loadMessages(from?: string, to?: string): void {
       // TODO: Not in use yet
-      store.dispatch.loadExpressions({
+      this.dataStore.loadExpressions({
         from: from ? new Date(from) : undefined,
         to: to ? new Date(to) : undefined,
         channelId: this.channel.neighbourhood.perspective.uuid,

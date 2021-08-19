@@ -27,28 +27,38 @@
 </template>
 
 <script lang="ts">
+import { useAppStore } from "@/store/app";
+import { useDataStore } from "@/store/data";
+import { NeighbourhoodState } from "@/store/types";
 import { defineComponent } from "vue";
-import store from "@/store";
 
 export default defineComponent({
+  setup() {
+    const appStore = useAppStore();
+    const dataStore = useDataStore();
+    
+    return {
+      appStore,
+      dataStore,
+    }
+  },
   methods: {
     removeCommunity(id: string) {
-      store.commit.removeCommunity(id);
+      this.dataStore.removeCommunity(id);
       this.$router.push({ name: "home" });
     },
     handleCommunityClick(communityId: string) {
       if (this.communityIsActive(communityId)) {
-        store.commit.toggleSidebar;
+        this.appStore.toggleSidebar;
       } else {
-        store.commit.setSidebar(true);
+        this.appStore.setSidebar(true);
         this.$router.push({ name: "community", params: { communityId } });
       }
     },
   },
   computed: {
-    communities() {
-      console.log(store.getters.getCommunityNeighbourhoods);
-      return store.getters.getCommunityNeighbourhoods;
+    communities(): NeighbourhoodState[] {
+      return this.dataStore.getCommunityNeighbourhoods;
     },
     communityIsActive() {
       return (id: string) => this.$route.params.communityId === id;

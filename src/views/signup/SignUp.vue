@@ -124,9 +124,8 @@ import {
   dataURItoBlob,
   resizeImage,
 } from "@/core/methods/createProfile";
-import { useStore } from "vuex";
 import { useValidation } from "@/utils/validation";
-import store from "@/store";
+import { useUserStore } from "@/store/user";
 
 export default defineComponent({
   name: "Welcome",
@@ -137,12 +136,12 @@ export default defineComponent({
   setup() {
     const showSignup = ref(false);
     const step = ref(1);
-    const store = useStore();
     const profilePicture = ref();
     const modalOpen = ref(false);
     const isCreatingUser = ref(false);
     const isLoggingIn = ref(false);
     const showPassword = ref(false);
+    const userStore = useUserStore();
 
     const {
       value: username,
@@ -199,7 +198,7 @@ export default defineComponent({
       showSignup,
       isLoggingIn,
       profilePicture,
-      hasUser: store.state.agentInit,
+      hasUser: userStore.agent.isInitialized,
       modalOpen,
       isCreatingUser,
       name,
@@ -217,6 +216,7 @@ export default defineComponent({
       email,
       familyName,
       logInError,
+      userStore
     };
   },
   computed: {
@@ -235,7 +235,7 @@ export default defineComponent({
 
       this.isCreatingUser = true;
 
-      store.dispatch
+      this.userStore
         .createUser({
           givenName: this.name,
           familyName: this.familyName,
