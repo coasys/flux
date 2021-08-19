@@ -23,14 +23,13 @@ export default async function (
 ): Promise<LoadExpressionResult> {
   const { getters: dataGetters, commit: dataCommit } =
     dataActionContext(context);
-  const { commit: appCommit, getters: appGetters } = appActionContext(context);
+  const { commit: appCommit } = appActionContext(context);
 
   try {
-    const fromDate = from || appGetters.getApplicationStartTime;
-    const untilDate = to || new Date("August 19, 1975 23:15:30").toISOString();
-    console.debug("Loading expression from", fromDate, untilDate);
-
     const channel = dataGetters.getNeighbourhood(channelId);
+    const fromDate = from || new Date();
+    const untilDate = to || new Date("August 19, 1975 23:15:30");
+    console.debug("Loading expression from", fromDate, untilDate);
 
     if (!channel) {
       console.error(`No channel with id ${channelId} found`);
@@ -39,6 +38,7 @@ export default async function (
     const linksWorker = new Worker("pollingWorker.js");
     const expressionWorker = new Worker("pollingWorker.js");
 
+    console.log("Posting for links between", fromDate, untilDate);
     linksWorker.postMessage({
       interval: 10000,
       query: print(PERSPECTIVE_LINK_QUERY),
@@ -51,7 +51,24 @@ export default async function (
           untilDate,
         } as LinkQuery,
       },
-      name: `Get expressionLinks for channel: ${channel.name}`,
+      name: `Get desc expressionLinks for channel: ${channel.name}`,
+      dataKey: "perspectiveQueryLinks",
+    });
+
+    console.log("Posting for links between", fromDate, new Date());
+    linksWorker.postMessage({
+      interval: 10000,
+      query: print(PERSPECTIVE_LINK_QUERY),
+      variables: {
+        uuid: channelId.toString(),
+        query: {
+          source: "sioc://chatchannel",
+          predicate: "sioc://content_of",
+          fromDate,
+          untilDate: new Date(),
+        } as LinkQuery,
+      },
+      name: `Get forward expressionLinks for channel: ${channel.name}`,
       dataKey: "perspectiveQueryLinks",
     });
 
