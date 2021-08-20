@@ -78,9 +78,15 @@ export default defineComponent({
       this.scrollToLatestPos();
     }, 0);
   },
-  beforeUnmount() {
-    this.saveScrollPos(this.channel.neighbourhood.perspective.uuid);
+  beforeRouteLeave(to, from, next) {
     this.linksWorker?.terminate();
+    this.saveScrollPos(from.params.channelId as string);
+    next();
+  },
+  beforeRouteUpdate(to, from, next) {
+    this.linksWorker?.terminate();
+    this.saveScrollPos(from.params.channelId as string);
+    next();
   },
   data() {
     return {
