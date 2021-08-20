@@ -1,7 +1,7 @@
 <template>
   <j-box px="800" pt="800" pb="1000">
     <j-flex wrap gap="500" a="center" j="between">
-      <j-text nomargin variant="heading">
+      <j-text nomargin variant="heading-sm">
         My communities ({{ communities.length }})
       </j-text>
       <j-button size="lg" variant="primary" @click="createCommunityClick"
@@ -20,33 +20,26 @@
       :key="community.perspective.uuid"
     >
       <j-avatar
-        :src="require('@/assets/images/junto_web_rainbow.png')"
-        style="--j-avatar-size: 100px"
+        :src="community.image"
+        :initials="community.name.charAt(0)"
         size="xl"
       ></j-avatar>
       <div class="community-item__content">
-        <j-text
-          class="community-item__name"
-          size="600"
-          color="ui-800"
-          weight="600"
-        >
+        <j-text size="600" nomargin color="ui-800" weight="600">
           {{ community.name }}
         </j-text>
-        <j-text variant="body">{{ community.description }}</j-text>
+        <j-text nomargin variant="body">{{ community.description }}</j-text>
         <j-flex gap="300" a="center">
-          <avatar-group
-            size="xs"
-            @click="() => handleMembersClick(community)"
-            :users="community.members"
-          />
-          <j-text size="300" color="ui-500" nomargin>
-            Members ({{ Object.keys(community.members).length }})
+          <j-text size="400">
+            {{ Object.keys(community.members).length }} Members
           </j-text>
         </j-flex>
       </div>
       <div>
-        <j-button @click.prevent="() => handleEditClick(community)">
+        <j-button
+          variant="subtle"
+          @click.prevent="() => handleEditClick(community)"
+        >
           <j-icon size="sm" name="pencil"></j-icon>
           Edit
         </j-button>
@@ -57,13 +50,12 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
+
 import { NeighbourhoodState } from "@/store/types";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 
 export default defineComponent({
-  components: { AvatarGroup },
   setup() {
     const dataStore = useDataStore();
     const appStore = useAppStore();

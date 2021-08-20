@@ -83,18 +83,13 @@ export default defineComponent({
     userStore.$subscribe((mutation, state) => {
       if (state.agent.isUnlocked) {
         appStore.setApplicationStartTime(new Date());
-      }
-
-      if (state.agent.isUnlocked) {
         dataStore.loadExpressionLanguages()
       } else {
         router.push({
           name: userStore.agent.isInitialized ? "login" : "signup",
         });
       }
-    })
-
-
+    });
 
     //Watch for incoming signals from holochain - an incoming signal should mean a DM is inbound
     const newLinkHandler = async (
@@ -102,7 +97,7 @@ export default defineComponent({
       perspective: string
     ) => {
       console.log("GOT INCOMING MESSAGE SIGNAL", link, perspective);
-      if (link.data!.predicate! == "sioc://content_of") {
+      if (link.data!.predicate! === "sioc://content_of") {
         //Start expression web worker to try and get the expression data pointed to in link target
         const expressionWorker = new Worker("pollingWorker.js");
 
@@ -112,6 +107,7 @@ export default defineComponent({
           query: print(GET_EXPRESSION),
           variables: { url: link.data!.target! },
           name: "Expression signal get",
+          dataKey: "expression",
         });
 
         expressionWorker.onerror = function (e) {
@@ -120,33 +116,29 @@ export default defineComponent({
 
         expressionWorker.addEventListener("message", (e) => {
           const expression = e.data.expression;
-          if (expression) {
-            //Expression is not null, which means we got the data and we can terminate the loop
-            expressionWorker.terminate();
-            const message = JSON.parse(expression!.data!);
+          const message = JSON.parse(expression!.data!);
 
-            console.log("FOUND EXPRESSION FOR SIGNAL");
-            //Add the expression to the store
-            dataStore.addExpressionAndLink({
-              channelId: perspective,
-              link: link,
-              message: expression,
-            });
+          console.log("FOUND EXPRESSION FOR SIGNAL");
+          //Add the expression to the store
+          dataStore.addExpressionAndLink({
+            channelId: perspective,
+            link: link,
+            message: expression,
+          });
 
-            dataStore.showMessageNotification({
-              router,
-              route,
-              perspectiveUuid: perspective,
-              authorDid: expression!.author,
-              message: message.body,
-            });
+          dataStore.showMessageNotification({
+            router,
+            route,
+            perspectiveUuid: perspective,
+            authorDid: expression!.author,
+            message: message.body,
+          });
 
-            //Add UI notification on the channel to notify that there is a new message there
-            dataStore.setHasNewMessages({
-              channelId: perspective,
-              value: true,
-            });
-          }
+          //Add UI notification on the channel to notify that there is a new message there
+          dataStore.setHasNewMessages({
+            channelId: perspective,
+            value: true,
+          });
         });
       }
     };
@@ -306,6 +298,28 @@ body {
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+::-webkit-scrollbar {
+  width: var(--j-scrollbar-width, 10px);
+}
+
+::-webkit-scrollbar-track {
+  background-image: var(--j-scrollbar-background-image, none);
+  background: var(--j-scrollbar-background, transparent);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--j-scrollbar-corner-background, #dfdfdf);
+}
+
+::-webkit-scrollbar-thumb {
+  box-shadow: var(--j-scrollbar-thumb-box-shadow, none);
+  border-radius: var(--j-scrollbar-thumb-border-radius, 300px);
+  background-color: var(
+    --j-scrollbar-thumb-background,
+    rgba(180, 180, 180, 0.5)
+  );
 }
 
 :root {

@@ -1,6 +1,6 @@
 <template>
   <j-box p="800">
-    <j-text variant="heading">Edit Community</j-text>
+    <j-text variant="heading-sm">Edit Community</j-text>
     <avatar-upload
       :value="profileImage"
       @change="(val) => (profileImage = val)"

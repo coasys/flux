@@ -40,7 +40,7 @@
           <j-button
             @keydown.stop
             @click.stop="showPassword = !showPassword"
-            variant="transparent"
+            variant="ghost"
             square
             slot="end"
           >
@@ -80,7 +80,7 @@
           :value="email"
           @input="(e) => (email = e.target.value)"
         ></j-input>
-        <j-flex>
+        <j-flex gap="400">
           <j-button full style="width: 100%" size="lg" @click="step = 1">
             <j-icon slot="start" name="arrow-left-short" />
             Back

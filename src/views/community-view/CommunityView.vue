@@ -157,8 +157,12 @@ export default defineComponent({
       this.groupExpWorkerLoop?.terminate();
 
       if (id) {
-        const { channelLinksWorker, groupExpressionWorker } =
-          await this.dataStore.getNeighbourhoodChannelsAndMetadata({
+        const channelLinksWorker =
+          await this.dataStore.getNeighbourhoodChannels({
+            communityId: id,
+          });
+        const groupExpressionWorker =
+          await this.dataStore.getNeighbourhoodMetadata({
             communityId: id,
           });
         this.dataStore.getNeighbourhoodMembers(id);

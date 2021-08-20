@@ -56,6 +56,32 @@ export default defineComponent({
       dataStore,
     }
   },
+  async mounted() {
+    this.linksWorker?.terminate();
+
+    const { channelId, communityId } = this.$route.params;
+
+    const { linksWorker } = await this.dataStore.loadExpressions({
+      channelId: channelId as string,
+    });
+
+    this.linksWorker = linksWorker;
+
+    this.dataStore.setCurrentChannelId({
+      communityId: communityId as string,
+      channelId: channelId as string,
+    });
+
+    // TODO: On first mount view takes too long to render
+    // So we don't have the full height to scroll to the right place
+    setTimeout(() => {
+      this.scrollToLatestPos();
+    }, 0);
+  },
+  beforeUnmount() {
+    this.saveScrollPos(this.channel.neighbourhood.perspective.uuid);
+    this.linksWorker?.terminate();
+  },
   data() {
     return {
       showNewMessagesButton: false,
@@ -69,35 +95,7 @@ export default defineComponent({
       activeProfile: {} as any,
     };
   },
-  async beforeRouteUpdate(to, from, next) {
-    this.linksWorker?.terminate();
-    this.saveScrollPos(from.params.channelId as string);
-    next();
-  },
   watch: {
-    $route: {
-      handler: async function (to) {
-        if (!to.params.channelId) return;
-
-        const { linksWorker } = await this.dataStore.loadExpressions({
-          channelId: to.params.channelId,
-        });
-
-        this.linksWorker = linksWorker;
-
-        this.dataStore.setCurrentChannelId({
-          communityId: to.params.communityId,
-          channelId: to.params.channelId,
-        });
-
-        // TODO: On first mount view takes too long to render
-        // So we don't have the full height to scroll to the right place
-        setTimeout(() => {
-          this.scrollToLatestPos();
-        }, 0);
-      },
-      immediate: true,
-    },
     "channel.state.hasNewMessages": function (hasMessages) {
       if (hasMessages) {
         const container = this.$refs.scrollContainer as HTMLDivElement;
@@ -184,8 +182,7 @@ export default defineComponent({
       }
       if (label?.startsWith("@")) {
         this.showProfile = true;
-        //todo: this should not be here, the mention should have the did already formatted correctly
-        this.activeProfile = "did:key:" + id;
+        this.activeProfile = id;
       }
     },
     markAsRead() {
