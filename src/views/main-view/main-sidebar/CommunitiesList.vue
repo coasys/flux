@@ -26,7 +26,7 @@
     </j-tooltip>
     <j-tooltip title="Create a community">
       <j-button
-        @click="() => $store.commit('setShowCreateCommunity', true)"
+        @click="() => appStore.setShowCreateCommunity(true)"
         square
         circle
         size="xl"
