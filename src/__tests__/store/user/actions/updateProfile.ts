@@ -44,14 +44,14 @@ describe("Update Profile", () => {
   test("Update Profile - Failure", async () => {
     const userStore = useUserStore();
     const dataStore = useDataStore();
-    
+
     // @ts-ignore
     jest
       .spyOn(createProfile, "createProfile")
       .mockRejectedValue(Error("Could not create new profile exp"));
 
-      // @ts-ignore
-      dataStore.addCommunity(community);
+    // @ts-ignore
+    dataStore.addCommunity(community);
 
     expect(userStore.profile).toBeNull();
 

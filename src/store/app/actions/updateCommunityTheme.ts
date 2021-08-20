@@ -10,9 +10,10 @@ export interface Payload {
   description: string;
 }
 
-export default async function updateCommunityTheme(
-  payload: { communityId: string; theme: ThemeState }
-): Promise<void> {
+export default async function updateCommunityTheme(payload: {
+  communityId: string;
+  theme: ThemeState;
+}): Promise<void> {
   const dataStore = useDataStore();
   const appStore = useAppStore();
   const isCurrentTheme = appStore.currentTheme === payload.communityId;

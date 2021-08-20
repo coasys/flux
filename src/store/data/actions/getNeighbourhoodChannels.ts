@@ -11,11 +11,8 @@ export interface Payload {
 const channelLinksWorker = new Worker("pollingWorker.js");
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
-export default async (
-  { communityId }: Payload
-): Promise<Worker> => {
-  const dataStore =
-    useDataStore();
+export default async ({ communityId }: Payload): Promise<Worker> => {
+  const dataStore = useDataStore();
 
   try {
     //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button

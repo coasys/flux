@@ -27,8 +27,8 @@ describe("Store Actions", () => {
       .spyOn(addPerspective, "addPerspective")
       .mockResolvedValue(addPerspectiveFixture as PerspectiveHandle);
 
-      store = createPinia();
-      setActivePinia(store);
+    store = createPinia();
+    setActivePinia(store);
   });
 
   test("Create User with all the property", async () => {

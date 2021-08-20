@@ -73,14 +73,11 @@ export default defineComponent({
 
     return {
       appStore,
-      userStore
-    }
+      userStore,
+    };
   },
   methods: {
-    ...mapActions(useAppStore, [
-      "setShowEditProfile",
-      "setShowSettings"
-    ]),
+    ...mapActions(useAppStore, ["setShowEditProfile", "setShowSettings"]),
     checkForUpdates() {
       window.api.send("check-update");
       this.appStore.setUpdateState({ updateState: "checking" });

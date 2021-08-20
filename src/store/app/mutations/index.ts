@@ -44,9 +44,7 @@ export default {
     const state = useAppStore();
     state.toast = { ...state.toast, ...payload };
   },
-  showSuccessToast(
-    payload: { message: string }
-  ): void {
+  showSuccessToast(payload: { message: string }): void {
     const state = useAppStore();
     state.toast = { variant: "success", open: true, ...payload };
   },
@@ -54,15 +52,11 @@ export default {
     const state = useAppStore();
     state.toast = { variant: "danger", open: true, ...payload };
   },
-  setWindowState(
-    payload: "minimize" | "visible" | "foreground"
-  ): void {
+  setWindowState(payload: "minimize" | "visible" | "foreground"): void {
     const state = useAppStore();
     state.windowState = payload;
   },
-  setUpdateState(
-    { updateState }: { updateState: UpdateState }
-  ): void {
+  setUpdateState({ updateState }: { updateState: UpdateState }): void {
     const state = useAppStore();
     state.updateState = updateState;
   },
@@ -70,9 +64,7 @@ export default {
     const state = useAppStore();
     state.showGlobalLoading = payload;
   },
-  setGlobalError(
-    payload: { show: boolean; message: string }
-  ): void {
+  setGlobalError(payload: { show: boolean; message: string }): void {
     const state = useAppStore();
     state.globalError = payload;
   },

@@ -216,7 +216,7 @@ export default defineComponent({
       email,
       familyName,
       logInError,
-      userStore
+      userStore,
     };
   },
   computed: {

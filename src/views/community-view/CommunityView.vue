@@ -98,8 +98,8 @@ export default defineComponent({
 
     return {
       appStore,
-      dataStore
-    }
+      dataStore,
+    };
   },
   data() {
     return {

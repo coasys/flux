@@ -2,9 +2,9 @@ import mutations from "./mutations";
 import actions from "./actions";
 import getters from "./getters";
 import { ApplicationState } from "../types";
-import { defineStore } from 'pinia'
+import { defineStore } from "pinia";
 
-export const useAppStore = defineStore('app', {
+export const useAppStore = defineStore("app", {
   state(): ApplicationState {
     return {
       updateState: "not-available",
@@ -43,11 +43,11 @@ export const useAppStore = defineStore('app', {
         show: false,
         message: "",
       },
-    }
+    };
   },
   getters,
   actions: {
     ...mutations,
-    ...actions
-  }
-})
+    ...actions,
+  },
+});

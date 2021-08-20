@@ -3,16 +3,17 @@ import { createLink } from "@/core/mutations/createLink";
 import { useAppStore } from "@/store/app";
 import { Link, LinkExpression } from "@perspect3vism/ad4m";
 
-
 export interface Payload {
   languageAddress: string;
   content: any;
   perspective: string;
 }
 
-export default async (
-  { languageAddress, content, perspective }: Payload
-): Promise<LinkExpression> => {
+export default async ({
+  languageAddress,
+  content,
+  perspective,
+}: Payload): Promise<LinkExpression> => {
   const appStore = useAppStore();
 
   try {

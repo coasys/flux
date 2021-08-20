@@ -96,8 +96,8 @@ describe("Create Community", () => {
         return addChannelCreateLink;
       });
 
-      store = createPinia();
-      setActivePinia(store);
+    store = createPinia();
+    setActivePinia(store);
   });
 
   test("Create Community - Success", async () => {

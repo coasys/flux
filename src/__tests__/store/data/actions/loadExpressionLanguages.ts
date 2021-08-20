@@ -35,7 +35,7 @@ describe("Load Expression Languages", () => {
   test("Load Expression Languages - Failure", async () => {
     const appStore = useAppStore();
     const dataStore = useDataStore();
-    
+
     // @ts-ignore
     jest
       .spyOn(getLanguages, "getLanguages")

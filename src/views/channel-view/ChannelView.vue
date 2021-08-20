@@ -54,7 +54,7 @@ export default defineComponent({
 
     return {
       dataStore,
-    }
+    };
   },
   async mounted() {
     this.linksWorker?.terminate();

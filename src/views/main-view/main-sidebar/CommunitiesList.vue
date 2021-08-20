@@ -48,11 +48,11 @@ export default defineComponent({
   setup() {
     const appStore = useAppStore();
     const dataStore = useDataStore();
-    
+
     return {
       appStore,
       dataStore,
-    }
+    };
   },
   methods: {
     removeCommunity(id: string) {

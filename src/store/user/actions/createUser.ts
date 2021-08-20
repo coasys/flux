@@ -15,17 +15,15 @@ export interface Payload {
   thumbnailPicture: string;
 }
 
-export default async (
-  {
-    givenName,
-    familyName,
-    email,
-    username,
-    password,
-    profilePicture,
-    thumbnailPicture,
-  }: Payload
-): Promise<void> => {
+export default async ({
+  givenName,
+  familyName,
+  email,
+  username,
+  password,
+  profilePicture,
+  thumbnailPicture,
+}: Payload): Promise<void> => {
   const appStore = useAppStore();
   const userStore = useUserStore();
 

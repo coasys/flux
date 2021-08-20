@@ -31,13 +31,11 @@ describe("Get Community Members", () => {
 
   test("Check if the getNeighbourhoodMembers work", async () => {
     const dataStore = useDataStore();
-    
+
     // @ts-ignore
     dataStore.addCommunity(community);
     const communityId = community.neighbourhood.perspective.uuid;
-    expect(dataStore.neighbourhoods[communityId].members).toStrictEqual(
-      []
-    );
+    expect(dataStore.neighbourhoods[communityId].members).toStrictEqual([]);
 
     await dataStore.getNeighbourhoodMembers(communityId);
 

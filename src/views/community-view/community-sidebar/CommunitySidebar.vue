@@ -150,7 +150,7 @@
 import { defineComponent } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { ChannelState } from "@/store/types";
-import { mapActions, mapState } from 'pinia'
+import { mapActions, mapState } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 
@@ -169,12 +169,8 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useDataStore, [
-      "setChannelNotificationState",
-    ]),
-    ...mapState(useDataStore, [
-      "getChannelStates"
-    ]),
+    ...mapActions(useDataStore, ["setChannelNotificationState"]),
+    ...mapState(useDataStore, ["getChannelStates"]),
     ...mapActions(useAppStore, [
       "setShowCreateChannel",
       "setShowEditCommunity",

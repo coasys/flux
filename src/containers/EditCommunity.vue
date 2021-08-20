@@ -49,7 +49,7 @@ export default defineComponent({
     const dataStore = useDataStore();
 
     return {
-      dataStore
+      dataStore,
     };
   },
   data() {

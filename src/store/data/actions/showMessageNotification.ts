@@ -13,9 +13,13 @@ type Payload = {
   message: string;
 };
 
-export default async (
-  { router, route, perspectiveUuid, authorDid, message }: Payload
-): Promise<Notification | undefined> => {
+export default async ({
+  router,
+  route,
+  perspectiveUuid,
+  authorDid,
+  message,
+}: Payload): Promise<Notification | undefined> => {
   const dataStore = useDataStore();
   const appStore = useAppStore();
   const userStore = useUserStore();
@@ -24,9 +28,7 @@ export default async (
 
   // Getting the channel & community this message belongs to
   const channel = dataStore.getChannel(perspectiveUuid);
-  const community = dataStore.getCommunity(
-    channel.neighbourhood.membraneRoot!
-  );
+  const community = dataStore.getCommunity(channel.neighbourhood.membraneRoot!);
 
   const isMinimized = ["minimize", "foreground"].includes(
     appStore.getWindowState

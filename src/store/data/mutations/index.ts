@@ -87,9 +87,10 @@ export default {
     };
   },
 
-  setCurrentChannelId(
-    payload: { communityId: string; channelId: string }
-  ): void {
+  setCurrentChannelId(payload: {
+    communityId: string;
+    channelId: string;
+  }): void {
     const state = useDataStore();
     const { communityId, channelId } = payload;
     state.communities[communityId].currentChannelId = channelId;
@@ -101,21 +102,20 @@ export default {
     delete state.neighbourhoods[id];
   },
 
-  setChannelNotificationState(
-    { channelId }: { channelId: string }
-  ): void {
+  setChannelNotificationState({ channelId }: { channelId: string }): void {
     const state = useDataStore();
     const channel = state.channels[channelId];
 
     channel.notifications.mute = !channel.notifications.mute;
   },
 
-  setCommunityMembers(
-    {
-      members,
-      communityId,
-    }: { members: ProfileExpression[]; communityId: string }
-  ): void {
+  setCommunityMembers({
+    members,
+    communityId,
+  }: {
+    members: ProfileExpression[];
+    communityId: string;
+  }): void {
     const state = useDataStore();
     const community = state.neighbourhoods[communityId];
 
@@ -124,9 +124,7 @@ export default {
     }
   },
 
-  setCommunityTheme(
-    payload: { communityId: string; theme: ThemeState }
-  ): void {
+  setCommunityTheme(payload: { communityId: string; theme: ThemeState }): void {
     const state = useDataStore();
     state.communities[payload.communityId].theme = {
       ...state.communities[payload.communityId].theme,
@@ -134,16 +132,14 @@ export default {
     };
   },
 
-  updateCommunityMetadata(
-    {
-      communityId,
-      name,
-      description,
-      image,
-      thumbnail,
-      groupExpressionRef,
-    }: UpdatePayload
-  ): void {
+  updateCommunityMetadata({
+    communityId,
+    name,
+    description,
+    image,
+    thumbnail,
+    groupExpressionRef,
+  }: UpdatePayload): void {
     const state = useDataStore();
     const community = state.neighbourhoods[communityId];
 
@@ -158,9 +154,7 @@ export default {
     state.neighbourhoods[communityId] = community;
   },
 
-  setChannelScrollTop(
-    payload: { channelId: string; value: number }
-  ): void {
+  setChannelScrollTop(payload: { channelId: string; value: number }): void {
     const state = useDataStore();
     state.channels[payload.channelId].scrollTop = payload.value;
   },
@@ -205,29 +199,23 @@ export default {
       payload.neighbourhood;
   },
 
-  setuseLocalTheme(
-    payload: { communityId: string; value: boolean }
-  ): void {
+  setuseLocalTheme(payload: { communityId: string; value: boolean }): void {
     const state = useDataStore();
     const community = state.communities[payload.communityId];
     community.useLocalTheme = payload.value;
   },
 
-  setHasNewMessages(
-    payload: { channelId: string; value: boolean }
-  ): void {
+  setHasNewMessages(payload: { channelId: string; value: boolean }): void {
     const state = useDataStore();
     const channel = state.channels[payload.channelId];
     channel.hasNewMessages = payload.value;
   },
 
-  addExpressionAndLink: (
-    payload: {
-      channelId: string;
-      link: LinkExpression;
-      message: Expression;
-    }
-  ): void => {
+  addExpressionAndLink: (payload: {
+    channelId: string;
+    link: LinkExpression;
+    message: Expression;
+  }): void => {
     const state = useDataStore();
     const channel = state.neighbourhoods[payload.channelId];
     console.log("Adding to link and exp to channel!", payload.message);

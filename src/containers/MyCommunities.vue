@@ -62,8 +62,8 @@ export default defineComponent({
 
     return {
       dataStore,
-      appStore
-    }
+      appStore,
+    };
   },
   computed: {
     communities(): NeighbourhoodState[] {

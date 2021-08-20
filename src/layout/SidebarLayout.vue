@@ -29,8 +29,8 @@ export default defineComponent({
     const appStore = useAppStore();
 
     return {
-      appStore
-    }
+      appStore,
+    };
   },
   data() {
     return {

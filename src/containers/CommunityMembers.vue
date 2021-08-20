@@ -54,8 +54,8 @@ export default defineComponent({
     const dataStore = useDataStore();
 
     return {
-      dataStore
-    }
+      dataStore,
+    };
   },
   mounted() {
     this.dataStore.getNeighbourhoodMembers(this.community.perspective.uuid);

@@ -30,9 +30,12 @@ export interface Payload {
   description: string;
 }
 
-export default async (
-  { perspectiveName, description, thumbnail = "", image = "" }: Payload
-): Promise<CommunityState> => {
+export default async ({
+  perspectiveName,
+  description,
+  thumbnail = "",
+  image = "",
+}: Payload): Promise<CommunityState> => {
   const dataStore = useDataStore();
   const appStore = useAppStore();
   const userStore = useUserStore();

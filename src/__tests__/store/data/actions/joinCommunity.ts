@@ -44,8 +44,8 @@ describe("Join Community", () => {
         return addChannelCreateLink;
       });
 
-      store = createPinia();
-      setActivePinia(store);
+    store = createPinia();
+    setActivePinia(store);
   });
 
   test("Joining a Community that you are already part of should throw an error", async () => {

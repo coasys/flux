@@ -37,8 +37,8 @@ export default defineComponent({
     const userStore = useUserStore();
 
     return {
-      userStore
-    }
+      userStore,
+    };
   },
   data() {
     return {

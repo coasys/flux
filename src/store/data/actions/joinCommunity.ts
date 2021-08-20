@@ -15,9 +15,7 @@ export interface Payload {
   joiningLink: string;
 }
 
-export default async (
-  { joiningLink }: Payload
-): Promise<void> => {
+export default async ({ joiningLink }: Payload): Promise<void> => {
   const dataStore = useDataStore();
   const appStore = useAppStore();
   const userStore = useUserStore();

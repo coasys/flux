@@ -19,7 +19,7 @@ describe("Update community theme", () => {
   test("Update community theme", async () => {
     const appStore = useAppStore();
     const dataStore = useDataStore();
-    
+
     // @ts-ignore
     await dataStore.addCommunity(community);
 
@@ -122,9 +122,7 @@ describe("Update community theme", () => {
       );
     }
 
-    expect(appStore.currentTheme).toBe(
-      "bebd2ac2-1e80-44d2-b807-0163c2bcef40"
-    );
+    expect(appStore.currentTheme).toBe("bebd2ac2-1e80-44d2-b807-0163c2bcef40");
     expect(
       dataStore.communities[community.state.perspectiveUuid].theme
     ).toStrictEqual({

@@ -20,7 +20,7 @@ describe("Update Community", () => {
 
   test("Update Community with wrong community id", async () => {
     const dataStore = useDataStore();
-    
+
     const tempCommuntiy = {
       ...community,
       neighbourhood: {
@@ -35,12 +35,11 @@ describe("Update Community", () => {
     // @ts-ignore
     await dataStore.addCommunity(tempCommuntiy);
 
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].name).toBe(
+      "test"
+    );
     expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid].name
-    ).toBe("test");
-    expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid]
-        .description
+      dataStore.neighbourhoods[community.state.perspectiveUuid].description
     ).toBe("");
 
     try {
@@ -57,12 +56,11 @@ describe("Update Community", () => {
       );
     }
 
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].name).toBe(
+      "test"
+    );
     expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid].name
-    ).toBe("test");
-    expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid]
-        .description
+      dataStore.neighbourhoods[community.state.perspectiveUuid].description
     ).toBe("");
   });
 
@@ -72,12 +70,11 @@ describe("Update Community", () => {
     // @ts-ignore
     await dataStore.addCommunity(community);
 
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].name).toBe(
+      "test"
+    );
     expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid].name
-    ).toBe("test");
-    expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid]
-        .description
+      dataStore.neighbourhoods[community.state.perspectiveUuid].description
     ).toBe("");
 
     try {
@@ -94,12 +91,11 @@ describe("Update Community", () => {
       );
     }
 
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].name).toBe(
+      "test"
+    );
     expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid].name
-    ).toBe("test");
-    expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid]
-        .description
+      dataStore.neighbourhoods[community.state.perspectiveUuid].description
     ).toBe("");
   });
 
@@ -116,12 +112,11 @@ describe("Update Community", () => {
     // @ts-ignore
     dataStore.addCommunity(community);
 
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].name).toBe(
+      "test"
+    );
     expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid].name
-    ).toBe("test");
-    expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid]
-        .description
+      dataStore.neighbourhoods[community.state.perspectiveUuid].description
     ).toBe("");
 
     await dataStore.updateCommunity({
@@ -130,12 +125,11 @@ describe("Update Community", () => {
       description: "hello",
     });
 
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].name).toBe(
+      "hello"
+    );
     expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid].name
-    ).toBe("hello");
-    expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid]
-        .description
+      dataStore.neighbourhoods[community.state.perspectiveUuid].description
     ).toBe("hello");
   });
 });

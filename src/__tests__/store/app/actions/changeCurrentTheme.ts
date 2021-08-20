@@ -12,7 +12,7 @@ describe("Change Current Theme", () => {
 
     store = createPinia();
 
-    setActivePinia(store)
+    setActivePinia(store);
   });
 
   test("Change to global theme", () => {

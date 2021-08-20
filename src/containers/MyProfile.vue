@@ -7,10 +7,7 @@
           :src="user.profile.profilePicture"
           :hash="user.agent.did"
         />
-        <j-button
-          size="lg"
-          @click="() => appStore.setShowEditProfile(true)"
-        >
+        <j-button size="lg" @click="() => appStore.setShowEditProfile(true)">
           <j-icon size="sm" name="pencil" />
           Edit profile
         </j-button>
@@ -41,8 +38,8 @@ export default defineComponent({
     return {
       userStore,
       dataStore,
-      appStore
-    }
+      appStore,
+    };
   },
   computed: {
     communities(): NeighbourhoodState[] {

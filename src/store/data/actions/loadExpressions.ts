@@ -5,7 +5,6 @@ import { LinkQuery } from "@perspect3vism/ad4m";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 
-
 export interface Payload {
   channelId: string;
   from?: Date;
@@ -19,9 +18,11 @@ export interface LoadExpressionResult {
 const expressionWorker = new Worker("pollingWorker.js");
 
 /// Function that polls for new messages on a channel using a web worker, if a message link is found then another web worker is spawned to retry getting the expression until its found
-export default async function (
-  { channelId, from, to }: Payload
-): Promise<LoadExpressionResult> {
+export default async function ({
+  channelId,
+  from,
+  to,
+}: Payload): Promise<LoadExpressionResult> {
   const dataStore = useDataStore();
   const appStore = useAppStore();
 

@@ -7,9 +7,7 @@ export interface Payload {
   password: string;
 }
 
-export default async (
-  { password }: Payload
-): Promise<AgentStatus> => {
+export default async ({ password }: Payload): Promise<AgentStatus> => {
   const userStore = useUserStore();
   const appStore = useAppStore();
   try {

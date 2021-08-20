@@ -14,9 +14,9 @@ describe("App Mutations", () => {
 
     store = createPinia();
 
-    setActivePinia(store)
+    setActivePinia(store);
   });
-  
+
   test("addExpressionUI", async () => {
     const appStore = useAppStore();
     // @ts-ignore
@@ -103,9 +103,7 @@ describe("App Mutations", () => {
 
     appStore.setCurrentTheme("bebd2ac2-1e80-44d2-b807-0163c2bcef40");
 
-    expect(appStore.currentTheme).toBe(
-      "bebd2ac2-1e80-44d2-b807-0163c2bcef40"
-    );
+    expect(appStore.currentTheme).toBe("bebd2ac2-1e80-44d2-b807-0163c2bcef40");
   });
 
   test("setGlobalTheme", () => {

@@ -25,8 +25,7 @@ describe("Data Mutations", () => {
     expect(Object.values(dataStore.communities).length).toBe(1);
 
     expect(
-      (Object.values(dataStore.neighbourhoods)[0] as any).perspective
-        .uuid
+      (Object.values(dataStore.neighbourhoods)[0] as any).perspective.uuid
     ).toBe(community.neighbourhood.perspective.uuid);
   });
 
@@ -60,9 +59,8 @@ describe("Data Mutations", () => {
     const channelId = "884f1238-c3d1-41b4-8489-aa73c5f9fc08";
 
     expect(
-      Object.values(
-        dataStore.neighbourhoods[channelId].currentExpressionLinks
-      ).length
+      Object.values(dataStore.neighbourhoods[channelId].currentExpressionLinks)
+        .length
     ).toBe(0);
     expect(
       Object.values(
@@ -77,9 +75,8 @@ describe("Data Mutations", () => {
     });
 
     expect(
-      Object.values(
-        dataStore.neighbourhoods[channelId].currentExpressionLinks
-      ).length
+      Object.values(dataStore.neighbourhoods[channelId].currentExpressionLinks)
+        .length
     ).toBe(1);
     expect(
       Object.values(
@@ -139,8 +136,7 @@ describe("Data Mutations", () => {
     dataStore.createChannelMutation(createChannel);
 
     expect(
-      dataStore.communities[community.state.perspectiveUuid]
-        .currentChannelId
+      dataStore.communities[community.state.perspectiveUuid].currentChannelId
     ).toBeNull();
 
     dataStore.setCurrentChannelId({
@@ -149,8 +145,7 @@ describe("Data Mutations", () => {
     });
 
     expect(
-      dataStore.communities[community.state.perspectiveUuid]
-        .currentChannelId
+      dataStore.communities[community.state.perspectiveUuid].currentChannelId
     ).toBe(createChannel.state.perspectiveUuid);
   });
 
@@ -178,8 +173,7 @@ describe("Data Mutations", () => {
     dataStore.createChannelMutation(createChannel);
 
     expect(
-      dataStore.channels[createChannel.state.perspectiveUuid]
-        .notifications.mute
+      dataStore.channels[createChannel.state.perspectiveUuid].notifications.mute
     ).toBeFalsy();
 
     dataStore.setChannelNotificationState({
@@ -187,8 +181,7 @@ describe("Data Mutations", () => {
     });
 
     expect(
-      dataStore.channels[createChannel.state.perspectiveUuid]
-        .notifications.mute
+      dataStore.channels[createChannel.state.perspectiveUuid].notifications.mute
     ).toBeTruthy();
   });
 
@@ -236,12 +229,11 @@ describe("Data Mutations", () => {
     // @ts-ignore
     dataStore.createChannelMutation(createChannel);
 
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].name).toBe(
+      "test"
+    );
     expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid].name
-    ).toBe("test");
-    expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid]
-        .description
+      dataStore.neighbourhoods[community.state.perspectiveUuid].description
     ).toBe("");
     expect(
       dataStore.neighbourhoods[community.state.perspectiveUuid]
@@ -259,12 +251,11 @@ describe("Data Mutations", () => {
         "QmUCLri8MRJVpXsBRvry8KaQEkX7RhKcqBwfAkMmTo6Swq://842924ebd45599a4c749d87247368bed49c9d0b2b3716573f054b472b6a5b2a52eb97ab243d9e1",
     });
 
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].name).toBe(
+      "test1"
+    );
     expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid].name
-    ).toBe("test1");
-    expect(
-      dataStore.neighbourhoods[community.state.perspectiveUuid]
-        .description
+      dataStore.neighbourhoods[community.state.perspectiveUuid].description
     ).toBe("test");
     expect(
       dataStore.neighbourhoods[community.state.perspectiveUuid]
@@ -329,8 +320,7 @@ describe("Data Mutations", () => {
     dataStore.addCommunity(community);
 
     expect(
-      (Object.values(dataStore.neighbourhoods)[0] as any).perspective
-        .uuid
+      (Object.values(dataStore.neighbourhoods)[0] as any).perspective.uuid
     ).toBe(community.neighbourhood.perspective.uuid);
 
     dataStore.addChannel({
@@ -386,8 +376,7 @@ describe("Data Mutations", () => {
     dataStore.createChannelMutation(createChannel);
 
     expect(
-      dataStore.channels[createChannel.state.perspectiveUuid]
-        .hasNewMessages
+      dataStore.channels[createChannel.state.perspectiveUuid].hasNewMessages
     ).toBeFalsy();
 
     dataStore.setHasNewMessages({
@@ -396,8 +385,7 @@ describe("Data Mutations", () => {
     });
 
     expect(
-      dataStore.channels[createChannel.state.perspectiveUuid]
-        .hasNewMessages
+      dataStore.channels[createChannel.state.perspectiveUuid].hasNewMessages
     ).toBeTruthy();
   });
 

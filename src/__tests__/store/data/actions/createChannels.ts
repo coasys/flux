@@ -53,9 +53,9 @@ describe("Create Channel", () => {
         return addChannelCreateLink;
       });
 
-      store = createPinia();
+    store = createPinia();
 
-      setActivePinia(store);
+    setActivePinia(store);
   });
 
   test("Create channel for community that doesnt exist", async () => {

@@ -79,8 +79,8 @@ export default defineComponent({
     const appStore = useAppStore();
 
     return {
-      appStore
-    }
+      appStore,
+    };
   },
   components: {
     MainSidebar,
@@ -105,7 +105,7 @@ export default defineComponent({
       "setShowSettings",
       "setShowCreateCommunity",
       "setShowDisclaimer",
-    ])
+    ]),
   },
 });
 </script>

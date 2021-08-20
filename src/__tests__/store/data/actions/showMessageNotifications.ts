@@ -47,8 +47,8 @@ describe("Show Message Notification", () => {
         throw new Error("Password doesn't match");
       });
 
-      store = createPinia();
-      setActivePinia(store);
+    store = createPinia();
+    setActivePinia(store);
   });
 
   test("Show Message Notification for same user", async () => {

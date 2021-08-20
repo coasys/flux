@@ -4,7 +4,7 @@ import getters from "./getters";
 import { UserState } from "../types";
 import { defineStore } from "pinia";
 
-export const useUserStore = defineStore('user', {
+export const useUserStore = defineStore("user", {
   state(): UserState {
     return {
       profile: null,
@@ -14,11 +14,11 @@ export const useUserStore = defineStore('user', {
         did: "",
         didDocument: "",
       },
-    }
+    };
   },
   getters,
   actions: {
     ...mutations,
-    ...actions
-  }
-})
+    ...actions,
+  },
+});

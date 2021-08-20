@@ -39,8 +39,9 @@ export default async (payload: Payload): Promise<void> => {
       ).typedExpressionLanguages.find(
         (t: any) => t.expressionType == ExpressionTypes.ProfileExpression
       );
-      const didExpression = `${profileExpression!.languageAddress}://${userStore.getUser!
-        .agent.did!}`;
+      const didExpression = `${
+        profileExpression!.languageAddress
+      }://${userStore.getUser!.agent.did!}`;
 
       console.log("profileExpression: ", profileExpression);
 
@@ -63,7 +64,7 @@ export default async (payload: Payload): Promise<void> => {
       } else {
         const errorMessage =
           "Expected to find profile expression language for this community";
-          appStore.showDangerToast({
+        appStore.showDangerToast({
           message: errorMessage,
         });
         throw Error(errorMessage);

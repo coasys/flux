@@ -56,7 +56,7 @@ describe("Create Expression", () => {
 
   test("Create Expression - Success", async () => {
     const dataStore = useDataStore();
-    
+
     // @ts-ignore
     await dataStore.addCommunity(community);
     // @ts-ignore

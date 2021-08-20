@@ -8,11 +8,8 @@ export interface Payload {
   name: string;
 }
 
-export default async (
-  payload: Payload
-): Promise<ChannelState> => {
-  const dataStore =
-    useDataStore();
+export default async (payload: Payload): Promise<ChannelState> => {
+  const dataStore = useDataStore();
   const appStore = useAppStore();
   try {
     const community = dataStore.getCommunity(payload.communityId);

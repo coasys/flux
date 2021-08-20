@@ -89,7 +89,7 @@ export default defineComponent({
       validatePassword,
       showPassword,
       logInError,
-      userStore
+      userStore,
     };
   },
   methods: {

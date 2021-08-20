@@ -9,7 +9,7 @@ import "@junto-foundation/junto-elements";
 import "@junto-foundation/junto-elements/dist/main.css";
 import { apolloClient } from "./utils/setupApolloClient";
 
-import { createPinia } from 'pinia';
+import { createPinia } from "pinia";
 
 const pinia = createPinia();
 
@@ -23,7 +23,7 @@ pinia.use(({ store }) => {
   }
 
   watch(store.$state, () => {
-    localStorage.setItem(key, JSON.stringify(store.$state))
+    localStorage.setItem(key, JSON.stringify(store.$state));
   });
 });
 

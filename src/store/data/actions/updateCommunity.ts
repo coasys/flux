@@ -13,11 +13,14 @@ export interface Payload {
   thumbnail?: string;
 }
 
-export default async function updateCommunity(
-  { communityId, name, description, image, thumbnail }: Payload
-): Promise<void> {
-  const dataStore =
-    useDataStore();
+export default async function updateCommunity({
+  communityId,
+  name,
+  description,
+  image,
+  thumbnail,
+}: Payload): Promise<void> {
+  const dataStore = useDataStore();
   const appStore = useAppStore();
 
   const community = dataStore.getCommunity(communityId);

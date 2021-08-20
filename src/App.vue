@@ -44,7 +44,12 @@ import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { AGENT_STATUS, GET_EXPRESSION } from "@/core/graphql_queries";
-import { ApplicationState, ModalsState, NeighbourhoodState, ToastState } from "@/store/types";
+import {
+  ApplicationState,
+  ModalsState,
+  NeighbourhoodState,
+  ToastState,
+} from "@/store/types";
 import { print } from "graphql/language/printer";
 import { AgentStatus, LinkExpression } from "@perspect3vism/ad4m";
 import { apolloClient } from "./utils/setupApolloClient";
@@ -83,7 +88,7 @@ export default defineComponent({
     userStore.$subscribe((mutation, state) => {
       if (state.agent.isUnlocked) {
         appStore.setApplicationStartTime(new Date());
-        dataStore.loadExpressionLanguages()
+        dataStore.loadExpressionLanguages();
       } else {
         router.push({
           name: userStore.agent.isInitialized ? "login" : "signup",
@@ -226,7 +231,7 @@ export default defineComponent({
     window.api.receive("windowState", (data: string) => {
       console.log(`setWindowState: ${data}`);
       //@ts-ignore
-       this.appStore.setWindowState(data);
+      this.appStore.setWindowState(data);
     });
 
     window.api.receive("update_available", () => {
