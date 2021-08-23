@@ -4,6 +4,14 @@ import { addPerspective } from "../mutations/addPerspective";
 import { createLink } from "../mutations/createLink";
 import { getPerspectiveSnapshot } from "../queries/getPerspective";
 
+import {
+  CREATOR,
+  DESCRIPTION,
+  NAME,
+  SELF,
+  LANGUAGE,
+} from "@/constants/neighbourhoodMeta";
+
 export async function createNeighbourhoodMeta(
   name: string,
   description: string,
@@ -17,17 +25,17 @@ export async function createNeighbourhoodMeta(
   const expressionLinks = [];
   expressionLinks.push(
     new Link({
-      source: "self",
+      source: SELF,
       target: name,
-      predicate: "rdf://name",
+      predicate: NAME,
     })
   );
 
   expressionLinks.push(
     new Link({
-      source: "self",
+      source: SELF,
       target: creatorDid,
-      predicate: "rdf://creator",
+      predicate: CREATOR,
     })
   );
 
@@ -37,18 +45,18 @@ export async function createNeighbourhoodMeta(
   }
   expressionLinks.push(
     new Link({
-      source: "self",
+      source: SELF,
       target: description,
-      predicate: "rdf://description",
+      predicate: DESCRIPTION,
     })
   );
 
   for (const lang of expressionLanguages) {
     expressionLinks.push(
       new Link({
-        source: "self",
+        source: SELF,
         target: lang.languageAddress,
-        predicate: "language",
+        predicate: LANGUAGE,
       })
     );
   }

@@ -4,6 +4,7 @@ import { userActionContext } from "@/store/user/index";
 import { ExpressionTypes } from "@/store/types";
 import { RouteLocationNormalizedLoaded, Router } from "vue-router";
 import { getProfile } from "../../../utils/profileHelpers";
+import { ACCOUNT_NAME } from "@/constants/profile";
 
 type Payload = {
   router: Router;
@@ -63,7 +64,7 @@ export default async (
         authorDid
       );
       //@ts-ignore
-      const name = (profile!.data as any).profile["foaf:AccountName"];
+      const name = profile.data.profile[ACCOUNT_NAME];
 
       title = `${name} mentioned you in #${channel?.neighbourhood.name}}`;
       body = escapedMessage;
