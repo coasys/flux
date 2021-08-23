@@ -6,6 +6,12 @@ declare module "*.vue" {
   export default component;
 }
 
+declare global {
+  interface Window {
+    api: any;
+  }
+}
+
 declare module "vue3-virtual-scroller";
 
 declare module "vue-advanced-cropper";
@@ -13,5 +19,3 @@ declare module "vue-advanced-cropper";
 declare module "object-hash";
 
 declare module "easygraphql-tester";
-
-// declare module "direct-vuex";
