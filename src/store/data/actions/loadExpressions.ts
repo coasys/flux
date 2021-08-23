@@ -68,7 +68,7 @@ export default async function ({
         //Hash the link data as the key for map and check if it exists in the store
         const currentExpressionLink =
           channel.currentExpressionLinks[
-            hash(link.data!, { excludeValues: "__typename" })
+            hash(link.data!, { excludeKeys: (key) => key === "__typename" })
           ];
         const currentExpression =
           channel.currentExpressionMessages[link.data.target];

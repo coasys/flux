@@ -74,7 +74,7 @@ export default {
     const neighbourhood = state.neighbourhoods[payload.channelId];
 
     neighbourhood.currentExpressionLinks[
-      hash(payload.link.data!, { excludeValues: "__typename" })
+      hash(payload.link.data!, { excludeKeys: (key) => key === "__typename" })
     ] = payload.link;
     neighbourhood.currentExpressionMessages[payload.link.data.target] = {
       expression: {
@@ -220,7 +220,7 @@ export default {
     const channel = state.neighbourhoods[payload.channelId];
     console.log("Adding to link and exp to channel!", payload.message);
     channel.currentExpressionLinks[
-      hash(payload.link.data!, { excludeValues: "__typename" })
+      hash(payload.link.data!, { excludeKeys: (key) => key === "__typename" })
     ] = {
       expression: payload.link,
       language: "na",
