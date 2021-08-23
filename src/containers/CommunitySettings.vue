@@ -65,7 +65,6 @@ export default defineComponent({
   },
   methods: {
     setuseLocalTheme(val: boolean) {
-      console.log({ val });
       const id = this.$route.params.communityId as string;
       this.dataStore.setuseLocalTheme({ communityId: id, value: val });
       this.appStore.changeCurrentTheme(val ? id : "global");

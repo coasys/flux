@@ -1,4 +1,3 @@
-import "@testing-library/vue";
 import initAgentFixture from "../../../fixtures/initAgent.json";
 import addPerspectiveFixture from "../../../fixtures/addPerspective.json";
 import * as agentGenerate from "@/core/mutations/agentGenerate";

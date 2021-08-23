@@ -155,7 +155,6 @@ describe("Show Message Notification", () => {
       .spyOn(getExpressionNoCache, "getExpressionNoCache")
       .mockImplementation(async (url) => {
         const split = url.split("://");
-        console.log(split[1], did, split[0], profileLangAddress);
         if (split[1] === did && split[0] === profileLangAddress) {
           return getProfileFixture as unknown as Expression;
         }
