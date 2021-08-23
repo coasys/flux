@@ -17,13 +17,8 @@
         :showAvatar="showAvatar(index)"
         :message="item.expression.data.body"
         :timestamp="item.expression.timestamp"
-        :username="users[item.expression.author]?.['foaf:AccountName']"
-        :profileImg="
-          users[item.expression.author]?.['schema:image'] &&
-          JSON.parse(users[item.expression.author]['schema:image'])[
-            'schema:contentUrl'
-          ]
-        "
+        :username="users[item.expression.author]?.username"
+        :profileImg="users[item.expression.author]?.profilePicture"
         @profileClick="(did) => $emit('profileClick', did)"
         @mentionClick="(dataset) => $emit('mentionClick', dataset)"
       />
@@ -35,7 +30,7 @@
 import { defineComponent } from "vue";
 import store from "@/store";
 import { ExpressionAndRef, ProfileExpression } from "@/store/types";
-import { getProfile } from "@/utils/profileHelpers";
+import { getProfile, parseProfile } from "@/utils/profileHelpers";
 import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css";
 import { differenceInMinutes, parseISO } from "date-fns";
 import MessageItem from "@/components/message-item/MessageItem.vue";
@@ -111,7 +106,7 @@ export default defineComponent({
       const dataExp = await getProfile(profileLang, did);
       if (dataExp) {
         const { data } = dataExp;
-        this.users[did] = data.profile;
+        this.users[did] = parseProfile(data.profile);
       }
     },
     loadMoreMessages(): void {

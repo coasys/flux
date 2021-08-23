@@ -4,35 +4,33 @@
       <j-avatar
         style="--j-avatar-size: 100px"
         :hash="did"
-        :src="
-          profile['schema:image']
-            ? JSON.parse(profile['schema:image'])['schema:contentUrl']
-            : null
-        "
+        :src="profile.profilePicture"
       />
-      <j-text variant="heading-sm"> {{ profile["foaf:AccountName"] }}</j-text>
+      <j-text variant="heading-sm"> {{ profile.username }}</j-text>
     </j-flex>
   </j-box>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { getProfile } from "@/utils/profileHelpers";
+import { getProfile, parseProfile } from "@/utils/profileHelpers";
+import { Profile } from "@/store/types";
 
 export default defineComponent({
   props: ["did", "langAddress"],
   data() {
     return {
-      profile: null,
+      profile: null as null | Profile,
     };
   },
   watch: {
     did: async function (did) {
       let profileLang = this.langAddress;
       const dataExp = await getProfile(profileLang, did);
+
       if (dataExp) {
         const { data } = dataExp;
-        this.profile = data.profile;
+        this.profile = parseProfile(data.profile);
       }
     },
   },
