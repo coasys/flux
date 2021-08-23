@@ -1,21 +1,33 @@
-let 
+let
   holonixPath = builtins.fetchTarball {
-    url = "https://github.com/holochain/holonix/archive/3e94163765975f35f7d8ec509b33c3da52661bd1.tar.gz";
-    sha256 = "07sl281r29ygh54dxys1qpjvlvmnh7iv1ppf79fbki96dj9ip7d2";
+    url = "https://github.com/holochain/holonix/archive/55a5eef58979fb6bc476d8c3e0c028cdeb1b5421.tar.gz";
+    sha256 = "sha256:0q6d0rql1pyy93xw1c8s28jjjcgk1zgwxwixsp9z5r4w2ihaz3zg";
   };
   holonix = import (holonixPath) {
     includeHolochainBinaries = true;
     holochainVersionId = "custom";
 
-    holochainVersion = { 
-     rev = "8600350687dd80bbc7a5620e8fe71ad55c97eed2";
-     sha256 = "15qxmcscmj6mmmcdz1bbj03gw2kw1qyicjb40y2zccmyi2zl5by9";
-     cargoSha256 = "0c4jdb3myw9sdm24sxwk5mmgn5xl9ly11jiwkbpdds4pmnrz2mjd";
-     bins = {
-       holochain = "holochain";
-       hc = "hc";
-       lair-keystore = "lair-keystore";
-     };
+    holochainVersion = {
+      rev = "f3d17d993ad8d988402cc01d73a0095484efbabb";
+      sha256 = "1z0y1bl1j2cfv4cgr4k7y0pxnkbiv5c0xv89y8dqnr32vli3bld7";
+      cargoSha256 = "sha256:1rf8vg832qyymw0a4x247g0iikk6kswkllfrd5fqdr0qgf9prc31";
+      bins = {
+        holochain = "holochain";
+        hc = "hc";
+        kitsune-p2p-proxy = "kitsune_p2p/proxy";
+      };
+
+      lairKeystoreHashes = {
+        sha256 = "1jiz9y1d4ybh33h1ly24s7knsqyqjagsn1gzqbj1ngl22y5v3aqh";
+        cargoSha256 = "sha256:0agykcl7ysikssfwkjgb3hfw6xl0slzy38prc4rnzvagm5wd1jjv";
+      };
     };
+    holochainOtherDepsNames = ["lair-keystore"];
   };
-in holonix.main
+  nixpkgs = holonix.pkgs;
+in nixpkgs.mkShell {
+  inputsFrom = [ holonix.main ];
+  buildInputs = with nixpkgs; [
+    binaryen
+  ];
+}
