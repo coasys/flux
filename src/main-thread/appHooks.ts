@@ -153,6 +153,8 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
     mainThreadState.isQuiting = true;
 
     mainThreadState.mainWindow!.webContents.send("unlockedStateOff");
+
+    mainThreadState.mainWindow!.webContents.send("clearMessages");
   });
 
   app.on("activate", async () => {

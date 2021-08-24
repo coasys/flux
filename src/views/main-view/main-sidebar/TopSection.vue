@@ -46,7 +46,7 @@ export default defineComponent({
 }
 
 j-button.active {
-  --j-button-color: var(--j-color-black);
+  --j-button-opacity: 1;
 }
 
 j-avatar {

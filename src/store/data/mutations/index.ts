@@ -1,7 +1,6 @@
 import {
   ExpressionAndRef,
   LinkExpressionAndLang,
-  State,
   DataState,
   CommunityState,
   AddChannel,
@@ -13,7 +12,7 @@ import {
 
 import { parseExprUrl } from "@perspect3vism/ad4m";
 import type { Expression, LinkExpression } from "@perspect3vism/ad4m";
-import hash from "object-hash";
+import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
 
 interface UpdatePayload {
   communityId: string;
@@ -26,7 +25,6 @@ interface UpdatePayload {
 
 interface AddChannelMessages {
   channelId: string;
-  communityId: string;
   links: { [x: string]: LinkExpressionAndLang };
   expressions: { [x: string]: ExpressionAndRef };
 }
@@ -46,6 +44,21 @@ export default {
 
   addCommunityState(state: DataState, payload: LocalCommunityState): void {
     state.communities[payload.perspectiveUuid] = payload;
+  },
+
+  clearMessages(state: DataState): void {
+    for (const neighbourhood of Object.values(state.neighbourhoods)) {
+      neighbourhood.currentExpressionMessages = {};
+    }
+  },
+
+  setInitialWorkerStarted(
+    state: DataState,
+    payload: { channelId: string; initialWorkerStarted: boolean }
+  ): void {
+    const channel = state.channels[payload.channelId];
+
+    channel.initialWorkerStarted = payload.initialWorkerStarted;
   },
 
   addMessages(state: DataState, payload: AddChannelMessages): void {
@@ -70,9 +83,8 @@ export default {
   addMessage(state: DataState, payload: AddChannelMessage): void {
     const neighbourhood = state.neighbourhoods[payload.channelId];
 
-    neighbourhood.currentExpressionLinks[
-      hash(payload.link.data!, { excludeValues: "__typename" })
-    ] = payload.link;
+    neighbourhood.currentExpressionLinks[payload.link.data.target] =
+      payload.link;
     neighbourhood.currentExpressionMessages[payload.link.data.target] = {
       expression: {
         author: payload.expression.author!,
@@ -225,9 +237,7 @@ export default {
   ): void => {
     const channel = state.neighbourhoods[payload.channelId];
     console.log("Adding to link and exp to channel!", payload.message);
-    channel.currentExpressionLinks[
-      hash(payload.link.data!, { excludeValues: "__typename" })
-    ] = {
+    channel.currentExpressionLinks[payload.link.data.target!] = {
       expression: payload.link,
       language: "na",
     } as LinkExpressionAndLang;

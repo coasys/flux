@@ -1,33 +1,68 @@
 <template>
-  <div class="channel-view__main">
-    <div class="channel-view__load-more">
+  <div class="channel-messages">
+    <div class="channel-messages__load-more">
       <j-button
         variant="primary"
         v-if="showNewMessagesButton && channel.state.hasNewMessages"
-        @click="$emit('scrollToBottom', 'smooth')"
+        @click="() => scrollToBottom('smooth')"
       >
         Show new messages
         <j-icon name="arrow-down-short" size="xs" />
       </j-button>
     </div>
 
-    <div v-for="(item, index) in messages" :key="item.expression.timestamp">
-      <message-item
-        :did="item.expression.author"
-        :showAvatar="showAvatar(index)"
-        :message="item.expression.data.body"
-        :timestamp="item.expression.timestamp"
-        :username="users[item.expression.author]?.['foaf:AccountName']"
-        :profileImg="
-          users[item.expression.author]?.['schema:image'] &&
-          JSON.parse(users[item.expression.author]['schema:image'])[
-            'schema:contentUrl'
-          ]
-        "
-        @profileClick="(did) => $emit('profileClick', did)"
-        @mentionClick="(dataset) => $emit('mentionClick', dataset)"
-      />
-    </div>
+    <DynamicScroller
+      :class="{ hidden: !hasMounted }"
+      :items="messages"
+      :min-item-size="1"
+      class="scroller"
+      ref="scrollContainer"
+      @scroll="handleScroll"
+    >
+      <template #before>
+        <j-box px="500" py="500">
+          <j-flex a="center" j="center" gap="500">
+            <j-text color="ui-400" nomargin v-if="isAlreadyFetching">
+              🤫 Shhh.. Listening for gossip.
+            </j-text>
+            <j-button
+              v-else
+              size="sm"
+              variant="subtle"
+              @click="loadMoreMessages"
+            >
+              Look for older messages
+            </j-button>
+          </j-flex>
+        </j-box>
+      </template>
+
+      <template v-slot="{ item, index, active }">
+        <DynamicScrollerItem
+          :item="item"
+          :active="active"
+          :size-dependencies="[item.expression.data.body]"
+          :data-index="index"
+        >
+          <message-item
+            :key="item.expression.signature"
+            :did="item.expression.author"
+            :showAvatar="showAvatar(index)"
+            :message="item.expression.data.body"
+            :timestamp="item.expression.timestamp"
+            :username="users[item.expression.author]?.['foaf:AccountName']"
+            :profileImg="
+              users[item.expression.author]?.['schema:image'] &&
+              JSON.parse(users[item.expression.author]['schema:image'])[
+                'schema:contentUrl'
+              ]
+            "
+            @profileClick="(did) => $emit('profileClick', did)"
+            @mentionClick="(dataset) => $emit('mentionClick', dataset)"
+          />
+        </DynamicScrollerItem>
+      </template>
+    </DynamicScroller>
   </div>
 </template>
 
@@ -36,11 +71,13 @@ import { defineComponent } from "vue";
 import store from "@/store";
 import { ExpressionAndRef, ProfileExpression } from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
-import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css";
 import { differenceInMinutes, parseISO } from "date-fns";
 import MessageItem from "@/components/message-item/MessageItem.vue";
 import { Editor } from "@tiptap/vue-3";
 import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
+import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
+import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
+import { isAtBottom } from "@/utils/scroll";
 
 interface UserMap {
   [key: string]: ProfileExpression;
@@ -51,27 +88,82 @@ interface ExpressionAndRefWithId extends ExpressionAndRef {
 }
 
 export default defineComponent({
-  emits: ["scrollToBottom", "profileClick", "mentionClick"],
-  props: ["channel", "community", "showNewMessagesButton", "profileLanguage"],
   name: "ChannelView",
-  components: {
-    MessageItem,
-  },
+  components: { DynamicScroller, DynamicScrollerItem, MessageItem },
+  emits: [
+    "scrollToBottom",
+    "profileClick",
+    "mentionClick",
+    "updateLinkWorker",
+    "updateExpressionWorker",
+  ],
+  props: [
+    "channel",
+    "community",
+    "profileLanguage",
+    "linksWorker",
+    "expressionWorker",
+  ],
   data() {
     return {
+      hasMounted: false,
+      scrolledToTop: false,
+      scrolledToBottom: false,
+      previousFetchedTimestamp: null as string | undefined | null,
       noDelayRef: 0,
       currentExpressionPost: "",
       users: {} as UserMap,
-      linksWorker: null as null | Worker,
       editor: null as Editor | null,
       showList: false,
       showProfile: false,
+      showNewMessagesButton: false,
       activeProfile: {} as any,
     };
   },
+  beforeRouteUpdate(to, from, next) {
+    if (this.channel.neighbourhood) {
+      this.saveScrollPos();
+    }
+    next();
+  },
+  mounted() {
+    // TODO: Why do we need timeout here?
+    // Without virtual-scroller it worked
+    setTimeout(() => {
+      this.scrollToLatestPos();
+      this.hasMounted = true;
+    }, 0);
+  },
   watch: {
+    scrolledToTop: function (isAtTop) {
+      if (isAtTop) {
+        this.loadMoreMessages();
+      }
+    },
+    scrolledToBottom: function (atBottom) {
+      if (atBottom) {
+        this.markAsRead();
+      }
+    },
+    "channel.state.hasNewMessages": function (hasMessages) {
+      if (hasMessages) {
+        const container = this.$refs.scrollContainer as any;
+        const atBottom = isAtBottom(container.$el);
+        if (container) {
+          if (atBottom) {
+            this.scrollToBottom("smooth");
+          } else {
+            this.showNewMessagesButton = true;
+          }
+        }
+      }
+    },
     messages: {
-      handler: async function (messages: ExpressionAndRef[]) {
+      handler: function (messages: ExpressionAndRef[]): void {
+        if (this.scrolledToBottom) {
+          // TODO: Debounce this
+          this.scrollToBottom("smooth");
+        }
         messages.forEach((msg: ExpressionAndRef) => {
           if (!this.users[msg.expression.author]) {
             this.loadUser(msg.expression.author);
@@ -82,7 +174,16 @@ export default defineComponent({
     },
   },
   computed: {
+    isAlreadyFetching(): boolean {
+      if (this.messages.length) {
+        const oldestMessage = this.messages[0];
+        const from = oldestMessage.expression.timestamp;
+        return from === this.previousFetchedTimestamp;
+      }
+      return true;
+    },
     messages(): ExpressionAndRefWithId[] {
+      // Sort by desc, because we have column-reverse on chat messages
       return sortExpressionsByTimestamp(
         this.channel?.neighbourhood?.currentExpressionMessages || [],
         "asc"
@@ -90,6 +191,50 @@ export default defineComponent({
     },
   },
   methods: {
+    markAsRead() {
+      store.commit.setHasNewMessages({
+        channelId: this.channel.neighbourhood.perspective.uuid,
+        value: false,
+      });
+      this.showNewMessagesButton = false;
+    },
+    scrollToLatestPos(): void {
+      const scrollContainer = this.$refs.scrollContainer as any;
+
+      if (this.channel.state.scrollTop === undefined) {
+        this.scrollToBottom("auto");
+      } else {
+        console.log("scrolling to", this.channel.state.scrollTop);
+        scrollContainer.$el.scrollTop = this.channel.state.scrollTop as number;
+      }
+
+      this.scrolledToBottom = isAtBottom(scrollContainer.$el);
+
+      if (this.scrolledToBottom && this.channel.state.hasNewMessages) {
+        this.markAsRead();
+      }
+      if (!this.scrolledToBottom && this.channel.state.hasNewMessages) {
+        this.showNewMessagesButton = true;
+      }
+    },
+    saveScrollPos() {
+      const channelId = this.channel.neighbourhood.perspective.uuid;
+      const scrollContainer = this.$refs.scrollContainer as any;
+      store.commit.setChannelScrollTop({
+        channelId: channelId as string,
+        value: scrollContainer ? scrollContainer.$el.scrollTop : undefined,
+      });
+    },
+    handleScroll(e: any): void {
+      this.scrolledToTop = e.target.scrollTop <= 20;
+      this.scrolledToBottom = isAtBottom(e.target);
+      this.saveScrollPos();
+    },
+    scrollToBottom(behavior: "smooth" | "auto"): void {
+      this.markAsRead();
+      const container = this.$refs.scrollContainer as any;
+      container.scrollToBottom(behavior);
+    },
     showAvatar(index: number): boolean {
       const previousExpression = this.messages[index - 1]?.expression;
       const expression = this.messages[index].expression;
@@ -115,49 +260,52 @@ export default defineComponent({
       }
     },
     loadMoreMessages(): void {
-      // TODO: Not in use yet
       const messageAmount = this.messages.length;
       if (messageAmount) {
-        const lastMessage = this.messages[messageAmount - 1];
-        this.loadMessages(lastMessage.expression.timestamp);
+        if (!this.isAlreadyFetching) {
+          const oldestMessage = this.messages[0];
+          this.loadMessages(oldestMessage.expression.timestamp);
+        }
       } else {
         this.loadMessages();
       }
     },
-    loadMessages(from?: string, to?: string): void {
-      // TODO: Not in use yet
-      store.dispatch.loadExpressions({
-        from: from ? new Date(from) : undefined,
-        to: to ? new Date(to) : undefined,
-        channelId: this.channel.neighbourhood.perspective.uuid,
-      });
+    async loadMessages(from?: string, to?: string) {
+      if (this.linksWorker) {
+        this.linksWorker!.terminate();
+      }
+      if (this.expressionWorker) {
+        this.expressionWorker!.terminate();
+      }
+
+      const { linksWorker, expressionWorker } =
+        await store.dispatch.loadExpressions({
+          from: from ? new Date(from) : undefined,
+          to: to ? new Date(to) : undefined,
+          channelId: this.channel.neighbourhood.perspective.uuid,
+          expressionWorker: new Worker("pollingWorker.js"),
+        });
+
+      this.$emit("updateLinkWorker", linksWorker);
+      this.$emit("updateExpressionWorker", expressionWorker);
+
+      this.previousFetchedTimestamp = from;
     },
   },
 });
 </script>
 
 <style scoped>
-.message {
-  min-height: 32px;
-}
-
-.channel-view {
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-}
-
-.channel-view__main {
+.channel-messages {
   background: var(--app-channel-bg-color);
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  overflow: hidden;
 }
 
-.channel-view__load-more {
+.channel-messages__load-more {
   position: absolute;
   top: var(--j-space-1000);
   left: 50%;
@@ -165,23 +313,7 @@ export default defineComponent({
   z-index: 10;
 }
 
-#profileCard {
-  position: fixed;
+.hidden {
   opacity: 0;
-  z-index: -100;
-}
-.background {
-  height: 100vh;
-  width: 100vw;
-  background: transparent;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: -10;
-}
-.profileCard__container {
-  background-color: var(--j-color-white);
-  padding: var(--j-space-400);
-  border-radius: 10px;
 }
 </style>

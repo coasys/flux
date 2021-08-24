@@ -1,14 +1,16 @@
 <template>
-  <div class="channel-view" @scroll="handleScroll" ref="scrollContainer">
+  <div class="channel-view" ref="scrollContainer">
     <channel-header :community="community" :channel="channel" />
     <channel-messages
       :profileLanguage="profileLanguage"
-      @scrollToBottom="scrollToBottom"
-      :showNewMessagesButton="showNewMessagesButton"
       :community="community"
       :channel="channel"
+      :linksWorker="linksWorker"
+      :expressionWorker="expressionWorker"
       @profileClick="handleProfileClick"
       @mentionClick="handleMentionClick"
+      @updateLinkWorker="(e) => (linksWorker = e)"
+      @updateExpressionWorker="(e) => (expressionWorker = e)"
     />
     <channel-footer :community="community" :channel="channel" />
     <j-modal
@@ -49,61 +51,43 @@ export default defineComponent({
     ChannelFooter,
     Profile,
   },
-  async mounted() {
-    this.linksWorker?.terminate();
-
-    const { channelId, communityId } = this.$route.params;
-
-    const { linksWorker } = await store.dispatch.loadExpressions({
-      channelId: channelId as string,
-    });
-
-    this.linksWorker = linksWorker;
-
-    store.commit.setCurrentChannelId({
-      communityId: communityId as string,
-      channelId: channelId as string,
-    });
-
-    // TODO: On first mount view takes too long to render
-    // So we don't have the full height to scroll to the right place
-    setTimeout(() => {
-      this.scrollToLatestPos();
-    }, 0);
-  },
-  beforeUnmount() {
-    this.saveScrollPos(this.channel.neighbourhood.perspective.uuid);
-    this.linksWorker?.terminate();
-  },
   data() {
     return {
-      showNewMessagesButton: false,
       noDelayRef: 0,
       currentExpressionPost: "",
       users: {} as UserMap,
       linksWorker: null as null | Worker,
+      expressionWorker: null as null | Worker,
       editor: null as Editor | null,
       showList: false,
       showProfile: false,
       activeProfile: {} as any,
     };
   },
-  watch: {
-    "channel.state.hasNewMessages": function (hasMessages) {
-      if (hasMessages) {
-        const container = this.$refs.scrollContainer as HTMLDivElement;
-        if (container) {
-          const isAtBottom =
-            container.scrollHeight - window.innerHeight === container.scrollTop;
+  beforeRouteUpdate(to, from, next) {
+    this.linksWorker?.terminate();
+    next();
+  },
+  async mounted() {
+    this.linksWorker?.terminate();
+    this.expressionWorker?.terminate();
 
-          if (isAtBottom) {
-            this.scrollToBottom("smooth");
-          } else {
-            this.showNewMessagesButton = true;
-          }
-        }
-      }
-    },
+    const { channelId, communityId } = this.$route.params;
+
+    this.expressionWorker = new Worker("pollingWorker.js");
+    const { linksWorker, expressionWorker } =
+      await store.dispatch.loadExpressions({
+        channelId: channelId as string,
+        expressionWorker: this.expressionWorker,
+      });
+
+    this.linksWorker = linksWorker;
+    this.expressionWorker = expressionWorker;
+
+    store.commit.setCurrentChannelId({
+      communityId: communityId as string,
+      channelId: channelId as string,
+    });
   },
   computed: {
     community(): CommunityState {
@@ -123,36 +107,6 @@ export default defineComponent({
     },
   },
   methods: {
-    saveScrollPos(channelId: string) {
-      const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-      store.commit.setChannelScrollTop({
-        channelId: channelId as string,
-        value: scrollContainer ? scrollContainer.scrollTop : 0,
-      });
-    },
-    scrollToLatestPos() {
-      // Next tick waits for everything to be rendered
-      this.$nextTick(() => {
-        const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-        if (!scrollContainer) return;
-        if (this.channel.state.scrollTop === undefined) {
-          this.scrollToBottom("auto");
-        } else {
-          scrollContainer.scrollTop = this.channel.state.scrollTop as number;
-        }
-
-        const isAtBottom =
-          scrollContainer.scrollHeight - window.innerHeight ===
-          scrollContainer.scrollTop;
-
-        if (isAtBottom && this.channel.state.hasNewMessages) {
-          this.markAsRead();
-        }
-        if (!isAtBottom && this.channel.state.hasNewMessages) {
-          this.showNewMessagesButton = true;
-        }
-      });
-    },
     handleProfileClick(did: string) {
       this.showProfile = true;
       this.activeProfile = did;
@@ -178,85 +132,15 @@ export default defineComponent({
         this.activeProfile = id;
       }
     },
-    markAsRead() {
-      store.commit.setHasNewMessages({
-        channelId: this.channel.neighbourhood.perspective.uuid,
-        value: false,
-      });
-      this.showNewMessagesButton = false;
-    },
-    handleScroll(e: any) {
-      const isAtBottom =
-        e.target.scrollHeight - window.innerHeight === e.target.scrollTop;
-      if (isAtBottom) {
-        this.markAsRead();
-      }
-    },
-    scrollToBottom(behavior: "smooth" | "auto") {
-      const container = this.$refs.scrollContainer as HTMLDivElement;
-      if (container) {
-        this.$nextTick(() => {
-          this.markAsRead();
-
-          setTimeout(() => {
-            container.scrollTo({
-              top: container.scrollHeight,
-              behavior,
-            });
-          }, 10);
-        });
-      }
-    },
   },
 });
 </script>
 
 <style scoped>
-.message {
-  min-height: 32px;
-}
-
 .channel-view {
   height: 100vh;
-  overflow: hidden;
+  overflow-y: hidden;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-}
-
-.channel-view__main {
-  background: var(--app-channel-bg-color);
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.channel-view__load-more {
-  position: absolute;
-  top: var(--j-space-1000);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-}
-
-#profileCard {
-  position: fixed;
-  opacity: 0;
-  z-index: -100;
-}
-.background {
-  height: 100vh;
-  width: 100vw;
-  background: transparent;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: -10;
-}
-.profileCard__container {
-  background-color: var(--j-color-white);
-  padding: var(--j-space-400);
-  border-radius: 10px;
 }
 </style>

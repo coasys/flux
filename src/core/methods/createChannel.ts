@@ -95,6 +95,8 @@ export async function createChannel(
     state: {
       perspectiveUuid: perspective.uuid,
       hasNewMessages: false,
+      initialWorkerStarted: false,
+      messageLoading: false,
       feedType: FeedType.Signaled,
       notifications: {
         mute: false,
