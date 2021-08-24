@@ -46,6 +46,8 @@ export default defineComponent({
 }
 
 j-button.active {
+  display: inline-block;
+  border-radius: 50%;
   --j-button-opacity: 1;
 }
 
