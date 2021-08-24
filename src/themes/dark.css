@@ -21,6 +21,13 @@
     hsla(var(--j-color-primary-hue), var(--j-color-saturation), 20%, 0.05);
 }
 
+:root[theme="dark"] j-menu-item::part(base) {
+  margin-top: var(--j-space-100);
+  margin-left: var(--j-space-300);
+  margin-right: var(--j-space-300);
+  border-radius: 6px;
+}
+
 :root[theme="dark"] j-input::part(input-wrapper) {
   background-color: hsl(var(--j-color-ui-hue), 18%, 23%);
 }
