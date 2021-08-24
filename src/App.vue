@@ -324,9 +324,9 @@ body {
 }
 
 :root {
-  --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+  --app-main-sidebar-bg-color: var(--j-color-white);
   --app-main-sidebar-border-color: var(--j-border-color);
-  --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+  --app-drawer-bg-color: var(--j-color-white);
   --app-drawer-border-color: var(--j-border-color);
   --app-channel-bg-color: var(--j-color-white);
   --app-channel-border-color: var(--j-border-color);
