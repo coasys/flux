@@ -70,7 +70,6 @@ import { defineComponent } from "vue";
 import store from "@/store";
 import { ExpressionAndRef, ProfileExpression } from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
-import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css";
 import { differenceInMinutes, parseISO } from "date-fns";
 import MessageItem from "@/components/message-item/MessageItem.vue";
 import { Editor } from "@tiptap/vue-3";
