@@ -25,7 +25,7 @@
   "main": "background.js",
   "dependencies": {
     "@apollo/client": "3.3.20",
-    "@junto-foundation/junto-elements": "^0.3.9",
+    "@junto-foundation/junto-elements": "^0.3.10",
     "@perspect3vism/ad4m": "0.1.7",
     "@perspect3vism/ad4m-executor": "0.1.5",
     "@tiptap/vue-3": "^2.0.0-beta.45",
@@ -52,7 +52,6 @@
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.14.5",
     "@babel/preset-typescript": "^7.14.5",
-    "@perspect3vism/ad4m": "0.1.4",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/vue": "^6.4.2",
     "@types/electron-devtools-installer": "^2.2.0",
