@@ -12,6 +12,7 @@
     </div>
 
     <DynamicScroller
+      :class="{ hidden: !hasMounted }"
       :items="messages"
       :min-item-size="1"
       class="scroller"
@@ -95,8 +96,6 @@ export default defineComponent({
     "mentionClick",
     "updateLinkWorker",
     "updateExpressionWorker",
-    "scrolledToTop",
-    "scrolledToBottom",
   ],
   props: [
     "channel",
@@ -107,6 +106,7 @@ export default defineComponent({
   ],
   data() {
     return {
+      hasMounted: false,
       scrolledToTop: false,
       scrolledToBottom: false,
       previousFetchedTimestamp: null as string | undefined | null,
@@ -127,7 +127,12 @@ export default defineComponent({
     next();
   },
   mounted() {
-    this.scrollToLatestPos();
+    // TODO: Why do we need timeout here?
+    // Without virtual-scroller it worked
+    setTimeout(() => {
+      this.scrollToLatestPos();
+      this.hasMounted = true;
+    }, 0);
   },
   watch: {
     scrolledToTop: function (isAtTop) {
@@ -194,33 +199,30 @@ export default defineComponent({
       this.showNewMessagesButton = false;
     },
     scrollToLatestPos(): void {
-      // Next tick waits for everything to be rendered
-      //  @ts-ignore
-      this.$nextTick(() => {
-        const scrollContainer = this.$refs.scrollContainer as any;
+      const scrollContainer = this.$refs.scrollContainer as any;
 
-        if (this.channel.state.scrollTop === undefined) {
-          this.scrollToBottom("auto");
-        } else {
-          scrollContainer.scrollTop = this.channel.state.scrollTop as number;
-        }
+      if (this.channel.state.scrollTop === undefined) {
+        this.scrollToBottom("auto");
+      } else {
+        console.log("scrolling to", this.channel.state.scrollTop);
+        scrollContainer.$el.scrollTop = this.channel.state.scrollTop as number;
+      }
 
-        this.scrolledToBottom = isAtBottom(scrollContainer.$el);
+      this.scrolledToBottom = isAtBottom(scrollContainer.$el);
 
-        if (this.scrolledToBottom && this.channel.state.hasNewMessages) {
-          this.markAsRead();
-        }
-        if (!this.scrolledToBottom && this.channel.state.hasNewMessages) {
-          this.showNewMessagesButton = true;
-        }
-      });
+      if (this.scrolledToBottom && this.channel.state.hasNewMessages) {
+        this.markAsRead();
+      }
+      if (!this.scrolledToBottom && this.channel.state.hasNewMessages) {
+        this.showNewMessagesButton = true;
+      }
     },
     saveScrollPos() {
       const channelId = this.channel.neighbourhood.perspective.uuid;
-      const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
+      const scrollContainer = this.$refs.scrollContainer as any;
       store.commit.setChannelScrollTop({
         channelId: channelId as string,
-        value: scrollContainer ? scrollContainer.scrollTop : 0,
+        value: scrollContainer ? scrollContainer.$el.scrollTop : undefined,
       });
     },
     handleScroll(e: any): void {
@@ -309,5 +311,9 @@ export default defineComponent({
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
+}
+
+.hidden {
+  opacity: 0;
 }
 </style>
