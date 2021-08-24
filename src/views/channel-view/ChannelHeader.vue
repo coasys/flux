@@ -17,8 +17,6 @@ export default defineComponent({
 
 <style scoped>
 .channel-header {
-  position: sticky;
-  top: 0;
   min-height: 74px;
   height: 74px;
   max-height: 74px;

@@ -1,12 +1,8 @@
 <template>
-  <div class="channel-view" @scroll="handleScroll" ref="scrollContainer">
+  <div class="channel-view" ref="scrollContainer">
     <channel-header :community="community" :channel="channel" />
     <channel-messages
-      :scrolledToBottom="scrolledToBottom"
-      :scrolledToTop="scrolledToTop"
       :profileLanguage="profileLanguage"
-      @scrollToBottom="scrollToBottom"
-      :showNewMessagesButton="showNewMessagesButton"
       :community="community"
       :channel="channel"
       :linksWorker="linksWorker"
@@ -42,7 +38,6 @@ import ChannelFooter from "./ChannelFooter.vue";
 import ChannelMessages from "./ChannelMessages.vue";
 import ChannelHeader from "./ChannelHeader.vue";
 import Profile from "@/containers/Profile.vue";
-import { isAtBottom } from "@/utils/scroll";
 
 interface UserMap {
   [key: string]: ProfileExpression;
@@ -58,9 +53,6 @@ export default defineComponent({
   },
   data() {
     return {
-      scrolledToTop: false,
-      scrolledToBottom: false,
-      showNewMessagesButton: false,
       noDelayRef: 0,
       currentExpressionPost: "",
       users: {} as UserMap,
@@ -73,9 +65,6 @@ export default defineComponent({
     };
   },
   beforeRouteUpdate(to, from, next) {
-    if (this.channel.neighbourhood) {
-      this.saveScrollPos();
-    }
     this.linksWorker?.terminate();
     next();
   },
@@ -99,28 +88,6 @@ export default defineComponent({
       communityId: communityId as string,
       channelId: channelId as string,
     });
-
-    this.scrollToLatestPos();
-  },
-  watch: {
-    scrolledToBottom: function (atBottom) {
-      if (atBottom) {
-        this.markAsRead();
-      }
-    },
-    "channel.state.hasNewMessages": function (hasMessages) {
-      if (hasMessages) {
-        const container = this.$refs.scrollContainer as HTMLDivElement;
-        if (container) {
-          const atBottom = isAtBottom(container);
-          if (atBottom) {
-            this.scrollToBottom("smooth");
-          } else {
-            this.showNewMessagesButton = true;
-          }
-        }
-      }
-    },
   },
   computed: {
     community(): CommunityState {
@@ -140,35 +107,6 @@ export default defineComponent({
     },
   },
   methods: {
-    saveScrollPos() {
-      const channelId = this.channel.neighbourhood.perspective.uuid;
-      const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-      store.commit.setChannelScrollTop({
-        channelId: channelId as string,
-        value: scrollContainer ? scrollContainer.scrollTop : 0,
-      });
-    },
-    scrollToLatestPos() {
-      // Next tick waits for everything to be rendered
-      this.$nextTick(() => {
-        const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-
-        if (this.channel.state.scrollTop === undefined) {
-          this.scrollToBottom("auto");
-        } else {
-          scrollContainer.scrollTop = this.channel.state.scrollTop as number;
-        }
-
-        this.scrolledToBottom = isAtBottom(scrollContainer);
-
-        if (this.scrolledToBottom && this.channel.state.hasNewMessages) {
-          this.markAsRead();
-        }
-        if (!this.scrolledToBottom && this.channel.state.hasNewMessages) {
-          this.showNewMessagesButton = true;
-        }
-      });
-    },
     handleProfileClick(did: string) {
       this.showProfile = true;
       this.activeProfile = did;
@@ -194,29 +132,6 @@ export default defineComponent({
         this.activeProfile = id;
       }
     },
-    markAsRead() {
-      store.commit.setHasNewMessages({
-        channelId: this.channel.neighbourhood.perspective.uuid,
-        value: false,
-      });
-      this.showNewMessagesButton = false;
-    },
-    handleScroll(e: any) {
-      this.scrolledToTop = e.target.scrollTop <= 20;
-      this.scrolledToBottom = isAtBottom(e.target);
-      this.saveScrollPos();
-    },
-    scrollToBottom(behavior: "smooth" | "auto") {
-      const container = this.$refs.scrollContainer as HTMLDivElement;
-      if (container) {
-        this.$nextTick(() => {
-          container.scrollTo({
-            top: container.scrollHeight,
-            behavior,
-          });
-        });
-      }
-    },
   },
 });
 </script>
@@ -224,7 +139,7 @@ export default defineComponent({
 <style scoped>
 .channel-view {
   height: 100vh;
-  overflow-y: auto;
+  overflow-y: hidden;
   display: flex;
   flex-direction: column;
 }

@@ -4,41 +4,64 @@
       <j-button
         variant="primary"
         v-if="showNewMessagesButton && channel.state.hasNewMessages"
-        @click="$emit('scrollToBottom', 'smooth')"
+        @click="() => scrollToBottom('smooth')"
       >
         Show new messages
         <j-icon name="arrow-down-short" size="xs" />
       </j-button>
     </div>
 
-    <j-box px="500" py="500">
-      <j-flex a="center" j="center" gap="500">
-        <j-text color="ui-400" nomargin v-if="isAlreadyFetching">
-          🤫 Shhh.. Listening for gossip.
-        </j-text>
-        <j-button v-else size="sm" variant="subtle" @click="loadMoreMessages">
-          Look for older messages
-        </j-button>
-      </j-flex>
-    </j-box>
+    <DynamicScroller
+      :items="messages"
+      :min-item-size="1"
+      class="scroller"
+      ref="scrollContainer"
+      @scroll="handleScroll"
+    >
+      <template #before>
+        <j-box px="500" py="500">
+          <j-flex a="center" j="center" gap="500">
+            <j-text color="ui-400" nomargin v-if="isAlreadyFetching">
+              🤫 Shhh.. Listening for gossip.
+            </j-text>
+            <j-button
+              v-else
+              size="sm"
+              variant="subtle"
+              @click="loadMoreMessages"
+            >
+              Look for older messages
+            </j-button>
+          </j-flex>
+        </j-box>
+      </template>
 
-    <message-item
-      v-for="(item, index) in messages"
-      :key="item.expression.signature"
-      :did="item.expression.author"
-      :showAvatar="showAvatar(index)"
-      :message="item.expression.data.body"
-      :timestamp="item.expression.timestamp"
-      :username="users[item.expression.author]?.['foaf:AccountName']"
-      :profileImg="
-        users[item.expression.author]?.['schema:image'] &&
-        JSON.parse(users[item.expression.author]['schema:image'])[
-          'schema:contentUrl'
-        ]
-      "
-      @profileClick="(did) => $emit('profileClick', did)"
-      @mentionClick="(dataset) => $emit('mentionClick', dataset)"
-    />
+      <template v-slot="{ item, index, active }">
+        <DynamicScrollerItem
+          :item="item"
+          :active="active"
+          :size-dependencies="[item.expression.data.body]"
+          :data-index="index"
+        >
+          <message-item
+            :key="item.expression.signature"
+            :did="item.expression.author"
+            :showAvatar="showAvatar(index)"
+            :message="item.expression.data.body"
+            :timestamp="item.expression.timestamp"
+            :username="users[item.expression.author]?.['foaf:AccountName']"
+            :profileImg="
+              users[item.expression.author]?.['schema:image'] &&
+              JSON.parse(users[item.expression.author]['schema:image'])[
+                'schema:contentUrl'
+              ]
+            "
+            @profileClick="(did) => $emit('profileClick', did)"
+            @mentionClick="(dataset) => $emit('mentionClick', dataset)"
+          />
+        </DynamicScrollerItem>
+      </template>
+    </DynamicScroller>
   </div>
 </template>
 
@@ -52,6 +75,9 @@ import { differenceInMinutes, parseISO } from "date-fns";
 import MessageItem from "@/components/message-item/MessageItem.vue";
 import { Editor } from "@tiptap/vue-3";
 import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
+import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
+import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
+import { isAtBottom } from "@/utils/scroll";
 
 interface UserMap {
   [key: string]: ProfileExpression;
@@ -62,27 +88,28 @@ interface ExpressionAndRefWithId extends ExpressionAndRef {
 }
 
 export default defineComponent({
+  name: "ChannelView",
+  components: { DynamicScroller, DynamicScrollerItem, MessageItem },
   emits: [
     "scrollToBottom",
     "profileClick",
     "mentionClick",
     "updateLinkWorker",
     "updateExpressionWorker",
+    "scrolledToTop",
+    "scrolledToBottom",
   ],
   props: [
     "channel",
     "community",
-    "showNewMessagesButton",
     "profileLanguage",
     "linksWorker",
     "expressionWorker",
-    "scrolledToBottom",
-    "scrolledToTop",
   ],
-  name: "ChannelView",
-  components: { MessageItem },
   data() {
     return {
+      scrolledToTop: false,
+      scrolledToBottom: false,
       previousFetchedTimestamp: null as string | undefined | null,
       noDelayRef: 0,
       currentExpressionPost: "",
@@ -90,8 +117,18 @@ export default defineComponent({
       editor: null as Editor | null,
       showList: false,
       showProfile: false,
+      showNewMessagesButton: false,
       activeProfile: {} as any,
     };
+  },
+  beforeRouteUpdate(to, from, next) {
+    if (this.channel.neighbourhood) {
+      this.saveScrollPos();
+    }
+    next();
+  },
+  mounted() {
+    this.scrollToLatestPos();
   },
   watch: {
     scrolledToTop: function (isAtTop) {
@@ -99,11 +136,29 @@ export default defineComponent({
         this.loadMoreMessages();
       }
     },
+    scrolledToBottom: function (atBottom) {
+      if (atBottom) {
+        this.markAsRead();
+      }
+    },
+    "channel.state.hasNewMessages": function (hasMessages) {
+      if (hasMessages) {
+        const container = this.$refs.scrollContainer as any;
+        const atBottom = isAtBottom(container.$el);
+        if (container) {
+          if (atBottom) {
+            this.scrollToBottom("smooth");
+          } else {
+            this.showNewMessagesButton = true;
+          }
+        }
+      }
+    },
     messages: {
-      handler: async function (messages: ExpressionAndRef[]) {
+      handler: function (messages: ExpressionAndRef[]): void {
         if (this.scrolledToBottom) {
           // TODO: Debounce this
-          this.$emit("scrollToBottom");
+          this.scrollToBottom("smooth");
         }
         messages.forEach((msg: ExpressionAndRef) => {
           if (!this.users[msg.expression.author]) {
@@ -132,6 +187,53 @@ export default defineComponent({
     },
   },
   methods: {
+    markAsRead() {
+      store.commit.setHasNewMessages({
+        channelId: this.channel.neighbourhood.perspective.uuid,
+        value: false,
+      });
+      this.showNewMessagesButton = false;
+    },
+    scrollToLatestPos(): void {
+      // Next tick waits for everything to be rendered
+      //  @ts-ignore
+      this.$nextTick(() => {
+        const scrollContainer = this.$refs.scrollContainer as any;
+
+        if (this.channel.state.scrollTop === undefined) {
+          this.scrollToBottom("auto");
+        } else {
+          scrollContainer.scrollTop = this.channel.state.scrollTop as number;
+        }
+
+        this.scrolledToBottom = isAtBottom(scrollContainer.$el);
+
+        if (this.scrolledToBottom && this.channel.state.hasNewMessages) {
+          this.markAsRead();
+        }
+        if (!this.scrolledToBottom && this.channel.state.hasNewMessages) {
+          this.showNewMessagesButton = true;
+        }
+      });
+    },
+    saveScrollPos() {
+      const channelId = this.channel.neighbourhood.perspective.uuid;
+      const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
+      store.commit.setChannelScrollTop({
+        channelId: channelId as string,
+        value: scrollContainer ? scrollContainer.scrollTop : 0,
+      });
+    },
+    handleScroll(e: any): void {
+      this.scrolledToTop = e.target.scrollTop <= 20;
+      this.scrolledToBottom = isAtBottom(e.target);
+      this.saveScrollPos();
+    },
+    scrollToBottom(behavior: "smooth" | "auto"): void {
+      this.markAsRead();
+      const container = this.$refs.scrollContainer as any;
+      container.scrollToBottom(behavior);
+    },
     showAvatar(index: number): boolean {
       const previousExpression = this.messages[index - 1]?.expression;
       const expression = this.messages[index].expression;
@@ -199,6 +301,7 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  overflow: hidden;
 }
 
 .channel-messages__load-more {
