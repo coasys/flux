@@ -13,9 +13,8 @@ export function getMetaFromNeighbourhood(links: LinkExpression[]): {
   createdAt: string;
 } {
   return links.reduce((acc, link) => {
-    const { predicate, target } = link.data.predicate;
+    const { predicate, target } = link.data;
     return {
-      ...acc,
       name: predicate === NAME ? target : acc.name,
       description: predicate === DESCRIPTION ? target : acc.description,
       creatorDid: predicate === CREATOR ? target : acc.creatorDid,
