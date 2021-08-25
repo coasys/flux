@@ -102,7 +102,6 @@ export default defineComponent({
 .left-nav__divider {
   width: 80%;
   margin: 0 auto;
-
-  border-top: 1px solid var(--j-color-ui-100);
+  border-top: 1px solid var(--j-border-color);
 }
 </style>

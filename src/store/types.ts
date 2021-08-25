@@ -94,6 +94,8 @@ export interface LocalCommunityState {
 export interface LocalChannelState {
   perspectiveUuid: string;
   hasNewMessages: boolean;
+  initialWorkerStarted: boolean;
+  messageLoading: boolean;
   scrollTop?: number;
   feedType: FeedType;
   notifications: {

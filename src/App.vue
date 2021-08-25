@@ -101,7 +101,7 @@ export default defineComponent({
       link: LinkExpression,
       perspective: string
     ) => {
-      console.log("GOT INCOMING MESSAGE SIGNAL", link, perspective);
+      console.debug("GOT INCOMING MESSAGE SIGNAL", link, perspective);
       if (link.data!.predicate! === "sioc://content_of") {
         //Start expression web worker to try and get the expression data pointed to in link target
         const expressionWorker = new Worker("pollingWorker.js");
@@ -123,7 +123,7 @@ export default defineComponent({
           const expression = e.data.expression;
           const message = JSON.parse(expression!.data!);
 
-          console.log("FOUND EXPRESSION FOR SIGNAL");
+          console.debug("FOUND EXPRESSION FOR SIGNAL");
           //Add the expression to the store
           dataStore.addExpressionAndLink({
             channelId: perspective,
@@ -210,6 +210,7 @@ export default defineComponent({
     },
   },
   beforeCreate() {
+    this.dataStore.clearMessages();
     //Reset globalError & loading states in case application was exited with these states set to true before
     this.appStore.setGlobalError({
       show: false,
@@ -221,6 +222,10 @@ export default defineComponent({
 
     window.api.receive("unlockedStateOff", () => {
       this.userStore.updateAgentLockState(false);
+    });
+
+    window.api.receive("clearMessages", () => {
+      this.dataStore.clearMessages();
     });
 
     window.api.receive("getLangPathResponse", (data: string) => {
@@ -306,7 +311,7 @@ body {
 }
 
 ::-webkit-scrollbar {
-  width: var(--j-scrollbar-width, 10px);
+  width: var(--j-scrollbar-width, 6px);
 }
 
 ::-webkit-scrollbar-track {
@@ -323,14 +328,14 @@ body {
   border-radius: var(--j-scrollbar-thumb-border-radius, 300px);
   background-color: var(
     --j-scrollbar-thumb-background,
-    rgba(180, 180, 180, 0.5)
+    rgba(180, 180, 180, 0.4)
   );
 }
 
 :root {
-  --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+  --app-main-sidebar-bg-color: var(--j-color-white);
   --app-main-sidebar-border-color: var(--j-border-color);
-  --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+  --app-drawer-bg-color: var(--j-color-white);
   --app-drawer-border-color: var(--j-border-color);
   --app-channel-bg-color: var(--j-color-white);
   --app-channel-border-color: var(--j-border-color);

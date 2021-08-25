@@ -245,10 +245,6 @@ j-divider {
 }
 
 .channel__notification {
-  position: absolute;
-  right: var(--j-space-300);
-  top: 50%;
-  transform: translateY(-50%);
   width: 10px;
   height: 10px;
   border-radius: 50%;

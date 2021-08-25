@@ -1,17 +1,17 @@
 import {
   ExpressionAndRef,
   LinkExpressionAndLang,
-  CommunityState,
   AddChannel,
-  ThemeState,
   ProfileExpression,
+  CommunityState,
   ChannelState,
+  DataState,
+  ThemeState,
   LocalCommunityState,
 } from "@/store/types";
 
 import { parseExprUrl } from "@perspect3vism/ad4m";
 import type { Expression, LinkExpression } from "@perspect3vism/ad4m";
-import hash from "object-hash";
 import { useDataStore } from "..";
 
 interface UpdatePayload {
@@ -25,7 +25,6 @@ interface UpdatePayload {
 
 interface AddChannelMessages {
   channelId: string;
-  communityId: string;
   links: { [x: string]: LinkExpressionAndLang };
   expressions: { [x: string]: ExpressionAndRef };
 }
@@ -49,16 +48,26 @@ export default {
     state.communities[payload.perspectiveUuid] = payload;
   },
 
+  clearMessages(): void {
+    const state = useDataStore();
+    for (const neighbourhood of Object.values(state.neighbourhoods)) {
+      neighbourhood.currentExpressionMessages = {};
+    }
+  },
+
+  setInitialWorkerStarted(
+    state: DataState,
+    payload: { channelId: string; initialWorkerStarted: boolean }
+  ): void {
+    const channel = state.channels[payload.channelId];
+
+    channel.initialWorkerStarted = payload.initialWorkerStarted;
+  },
+
   addMessages(payload: AddChannelMessages): void {
     const state = useDataStore();
     const neighbourhood = state.neighbourhoods[payload.channelId];
-    console.log(
-      "Adding ",
-      Object.values(payload.links).length,
-      " to channel and ",
-      Object.values(payload.expressions).length,
-      " to channel"
-    );
+
     neighbourhood.currentExpressionLinks = {
       ...neighbourhood.currentExpressionLinks,
       ...payload.links,
@@ -73,9 +82,8 @@ export default {
     const state = useDataStore();
     const neighbourhood = state.neighbourhoods[payload.channelId];
 
-    neighbourhood.currentExpressionLinks[
-      hash(payload.link.data!, { excludeKeys: (key) => key === "__typename" })
-    ] = payload.link;
+    neighbourhood.currentExpressionLinks[payload.link.data.target] =
+      payload.link;
     neighbourhood.currentExpressionMessages[payload.link.data.target] = {
       expression: {
         author: payload.expression.author!,
@@ -219,9 +227,7 @@ export default {
     const state = useDataStore();
     const channel = state.neighbourhoods[payload.channelId];
     console.log("Adding to link and exp to channel!", payload.message);
-    channel.currentExpressionLinks[
-      hash(payload.link.data!, { excludeKeys: (key) => key === "__typename" })
-    ] = {
+    channel.currentExpressionLinks[payload.link.data.target!] = {
       expression: payload.link,
       language: "na",
     } as LinkExpressionAndLang;

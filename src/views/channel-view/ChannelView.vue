@@ -1,14 +1,17 @@
 <template>
-  <div class="channel-view" @scroll="handleScroll" ref="scrollContainer">
+  <div class="channel-view" ref="scrollContainer">
     <channel-header :community="community" :channel="channel" />
     <channel-messages
       :profileLanguage="profileLanguage"
-      @scrollToBottom="scrollToBottom"
-      :showNewMessagesButton="showNewMessagesButton"
       :community="community"
       :channel="channel"
+      :messages="messages"
+      :isAlreadyFetching="isAlreadyFetching"
       @profileClick="handleProfileClick"
       @mentionClick="handleMentionClick"
+      @loadMore="loadMoreMessages"
+      @updateLinkWorker="(e) => (linksWorker = e)"
+      @updateExpressionWorker="(e) => (expressionWorker = e)"
     />
     <channel-footer :community="community" :channel="channel" />
     <j-modal
@@ -29,6 +32,7 @@ import {
   CommunityState,
   ExpressionTypes,
   ProfileExpression,
+  ExpressionAndRef,
 } from "@/store/types";
 import { Editor } from "@tiptap/vue-3";
 import ChannelFooter from "./ChannelFooter.vue";
@@ -36,9 +40,14 @@ import ChannelMessages from "./ChannelMessages.vue";
 import ChannelHeader from "./ChannelHeader.vue";
 import Profile from "@/containers/Profile.vue";
 import { useDataStore } from "@/store/data";
+import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
 
 interface UserMap {
   [key: string]: ProfileExpression;
+}
+
+interface ExpressionAndRefWithId extends ExpressionAndRef {
+  id: string;
 }
 
 export default defineComponent({
@@ -58,67 +67,59 @@ export default defineComponent({
   },
   async mounted() {
     this.linksWorker?.terminate();
+    this.expressionWorker?.terminate();
 
     const { channelId, communityId } = this.$route.params;
 
-    const { linksWorker } = await this.dataStore.loadExpressions({
-      channelId: channelId as string,
-    });
+    this.expressionWorker = new Worker("pollingWorker.js");
+    const { linksWorker, expressionWorker } =
+      await this.dataStore.loadExpressions({
+        channelId: channelId as string,
+        expressionWorker: this.expressionWorker,
+      });
 
     this.linksWorker = linksWorker;
+    this.expressionWorker = expressionWorker;
 
     this.dataStore.setCurrentChannelId({
       communityId: communityId as string,
       channelId: channelId as string,
     });
-
-    // TODO: On first mount view takes too long to render
-    // So we don't have the full height to scroll to the right place
-    setTimeout(() => {
-      this.scrollToLatestPos();
-    }, 0);
-  },
-  beforeRouteLeave(to, from, next) {
-    this.linksWorker?.terminate();
-    this.saveScrollPos(from.params.channelId as string);
-    next();
   },
   beforeRouteUpdate(to, from, next) {
     this.linksWorker?.terminate();
-    this.saveScrollPos(from.params.channelId as string);
     next();
   },
   data() {
     return {
-      showNewMessagesButton: false,
       noDelayRef: 0,
       currentExpressionPost: "",
       users: {} as UserMap,
       linksWorker: null as null | Worker,
+      expressionWorker: null as null | Worker,
       editor: null as Editor | null,
       showList: false,
       showProfile: false,
       activeProfile: {} as any,
+      previousFetchedTimestamp: null as string | undefined | null,
     };
   },
-  watch: {
-    "channel.state.hasNewMessages": function (hasMessages) {
-      if (hasMessages) {
-        const container = this.$refs.scrollContainer as HTMLDivElement;
-        if (container) {
-          const isAtBottom =
-            container.scrollHeight - window.innerHeight === container.scrollTop;
-
-          if (isAtBottom) {
-            this.scrollToBottom("smooth");
-          } else {
-            this.showNewMessagesButton = true;
-          }
-        }
-      }
-    },
-  },
   computed: {
+    isAlreadyFetching(): boolean {
+      if (this.messages.length) {
+        const oldestMessage = this.messages[0];
+        const from = oldestMessage.expression.timestamp;
+        return from === this.previousFetchedTimestamp;
+      }
+      return true;
+    },
+    messages(): ExpressionAndRefWithId[] {
+      // Sort by desc, because we have column-reverse on chat messages
+      return sortExpressionsByTimestamp(
+        this.channel?.neighbourhood?.currentExpressionMessages || [],
+        "asc"
+      ).map((item) => ({ ...item, id: item.expression.proof.signature }));
+    },
     community(): CommunityState {
       const { communityId } = this.$route.params;
       return this.dataStore.getCommunity(communityId as string);
@@ -136,35 +137,33 @@ export default defineComponent({
     },
   },
   methods: {
-    saveScrollPos(channelId: string) {
-      const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-      this.dataStore.setChannelScrollTop({
-        channelId: channelId as string,
-        value: scrollContainer ? scrollContainer.scrollTop : 0,
-      });
+    loadMoreMessages(): void {
+      const messageAmount = this.messages.length;
+      if (messageAmount) {
+        if (!this.isAlreadyFetching) {
+          const oldestMessage = this.messages[0];
+          this.loadMessages(oldestMessage.expression.timestamp);
+        }
+      } else {
+        this.loadMessages();
+      }
     },
-    scrollToLatestPos() {
-      // Next tick waits for everything to be rendered
-      this.$nextTick(() => {
-        const scrollContainer = this.$refs.scrollContainer as HTMLDivElement;
-        if (!scrollContainer) return;
-        if (this.channel.state.scrollTop === undefined) {
-          this.scrollToBottom("auto");
-        } else {
-          scrollContainer.scrollTop = this.channel.state.scrollTop as number;
-        }
+    async loadMessages(from?: string, to?: string) {
+      this.linksWorker?.terminate();
+      this.expressionWorker?.terminate();
 
-        const isAtBottom =
-          scrollContainer.scrollHeight - window.innerHeight ===
-          scrollContainer.scrollTop;
+      const { linksWorker, expressionWorker } =
+        await this.dataStore.loadExpressions({
+          from: from ? new Date(from) : undefined,
+          to: to ? new Date(to) : undefined,
+          channelId: this.channel.neighbourhood.perspective.uuid,
+          expressionWorker: new Worker("pollingWorker.js"),
+        });
 
-        if (isAtBottom && this.channel.state.hasNewMessages) {
-          this.markAsRead();
-        }
-        if (!isAtBottom && this.channel.state.hasNewMessages) {
-          this.showNewMessagesButton = true;
-        }
-      });
+      this.$emit("updateLinkWorker", linksWorker);
+      this.$emit("updateExpressionWorker", expressionWorker);
+
+      this.previousFetchedTimestamp = from;
     },
     handleProfileClick(did: string) {
       this.showProfile = true;
@@ -191,85 +190,15 @@ export default defineComponent({
         this.activeProfile = id;
       }
     },
-    markAsRead() {
-      this.dataStore.setHasNewMessages({
-        channelId: this.channel.neighbourhood.perspective.uuid,
-        value: false,
-      });
-      this.showNewMessagesButton = false;
-    },
-    handleScroll(e: any) {
-      const isAtBottom =
-        e.target.scrollHeight - window.innerHeight === e.target.scrollTop;
-      if (isAtBottom) {
-        this.markAsRead();
-      }
-    },
-    scrollToBottom(behavior: "smooth" | "auto") {
-      const container = this.$refs.scrollContainer as HTMLDivElement;
-      if (container) {
-        this.$nextTick(() => {
-          this.markAsRead();
-
-          setTimeout(() => {
-            container.scrollTo({
-              top: container.scrollHeight,
-              behavior,
-            });
-          }, 10);
-        });
-      }
-    },
   },
 });
 </script>
 
 <style scoped>
-.message {
-  min-height: 32px;
-}
-
 .channel-view {
   height: 100vh;
-  overflow: hidden;
+  overflow-y: hidden;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-}
-
-.channel-view__main {
-  background: var(--app-channel-bg-color);
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.channel-view__load-more {
-  position: absolute;
-  top: var(--j-space-1000);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-}
-
-#profileCard {
-  position: fixed;
-  opacity: 0;
-  z-index: -100;
-}
-.background {
-  height: 100vh;
-  width: 100vw;
-  background: transparent;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: -10;
-}
-.profileCard__container {
-  background-color: var(--j-color-white);
-  padding: var(--j-space-400);
-  border-radius: 10px;
 }
 </style>
