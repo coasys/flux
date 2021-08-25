@@ -12,7 +12,7 @@
           class="left-nav__community-item"
           :selected="communityIsActive(community.perspective.uuid)"
           size="xl"
-          :src="community.image"
+          :src="community.image || null"
           :initials="community.name.charAt(0).toUpperCase()"
           @click="() => handleCommunityClick(community.perspective.uuid)"
         ></j-avatar>
