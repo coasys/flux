@@ -2,8 +2,7 @@ import { print } from "graphql/language/printer";
 import { joinChannelFromSharedLink } from "@/core/methods/joinChannelFromSharedLink";
 import { PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 import { LinkQuery } from "@perspect3vism/ad4m";
-
-import { dataActionContext } from "@/store/data/index";
+import { useDataStore } from "..";
 
 export interface Payload {
   communityId: string;
@@ -12,16 +11,12 @@ export interface Payload {
 const channelLinksWorker = new Worker("pollingWorker.js");
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
-export default async (
-  context: any,
-  { communityId }: Payload
-): Promise<Worker> => {
-  const { commit: dataCommit, getters: dataGetters } =
-    dataActionContext(context);
+export default async ({ communityId }: Payload): Promise<Worker> => {
+  const dataStore = useDataStore();
 
   try {
     //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button
-    const community = dataGetters.getCommunity(communityId);
+    const community = dataStore.getCommunity(communityId);
 
     //Start the worker looking for channels
     channelLinksWorker.postMessage({
@@ -71,7 +66,7 @@ export default async (
               community.neighbourhood.perspective.uuid
             );
             //Add the channel to the store
-            dataCommit.addChannel({
+            dataStore.addChannel({
               communityId: community.neighbourhood.perspective.uuid,
               channel: channel,
             });

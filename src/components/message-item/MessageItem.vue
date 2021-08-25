@@ -71,8 +71,12 @@ export default defineComponent({
     openedProfile: Object,
   },
   mounted() {
-    const mentionElements = (this.$refs.messageItem as any).querySelectorAll(".mention");
-    const emojiElements = (this.$refs.messageItem as any).querySelectorAll(".emoji");
+    const mentionElements = (this.$refs.messageItem as any).querySelectorAll(
+      ".mention"
+    );
+    const emojiElements = (this.$refs.messageItem as any).querySelectorAll(
+      ".emoji"
+    );
 
     for (const ele of emojiElements) {
       const emoji = ele as HTMLElement;

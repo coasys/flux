@@ -150,9 +150,10 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import { mapMutations } from "vuex";
-import store from "@/store";
 import { ChannelState } from "@/store/types";
+import { mapActions, mapState } from "pinia";
+import { useDataStore } from "@/store/data";
+import { useAppStore } from "@/store/app";
 
 export default defineComponent({
   components: { AvatarGroup },
@@ -165,7 +166,7 @@ export default defineComponent({
   computed: {
     channels(): ChannelState[] {
       const communityId = this.$route.params.communityId as string;
-      return store.getters.getChannelStates(communityId);
+      return this.getChannelStates()(communityId);
     },
     isCreator(): boolean {
       return (
@@ -175,11 +176,12 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapMutations([
+    ...mapActions(useDataStore, ["setChannelNotificationState"]),
+    ...mapState(useDataStore, ["getChannelStates"]),
+    ...mapActions(useAppStore, [
       "setShowCreateChannel",
       "setShowEditCommunity",
       "setShowCommunityMembers",
-      "setChannelNotificationState",
       "setShowInviteCode",
       "setShowCommunitySettings",
     ]),
@@ -250,10 +252,6 @@ j-divider {
 }
 
 .channel__notification {
-  position: absolute;
-  right: var(--j-space-300);
-  top: 50%;
-  transform: translateY(-50%);
   width: 10px;
   height: 10px;
   border-radius: 50%;

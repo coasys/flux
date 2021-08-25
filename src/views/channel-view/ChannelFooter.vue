@@ -1,7 +1,7 @@
 <template>
   <footer class="channel-view__footer">
     <j-editor
-      @send="(e) => createDirectMessage(e.target.value)"
+      @send="(e: any) => createDirectMessage(e.target.value)"
       autofocus
       :placeholder="`Write to #${channel.neighbourhood.name}`"
       :value="currentExpressionPost"
@@ -15,10 +15,10 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import store from "@/store";
 import { ExpressionTypes, ProfileExpression } from "@/store/types";
 import { Editor } from "@tiptap/vue-3";
 import { ACCOUNT_NAME } from "@/constants/profile";
+import { useDataStore } from "@/store/data";
 
 interface UserMap {
   [key: string]: ProfileExpression;
@@ -33,6 +33,13 @@ interface MentionTrigger {
 export default defineComponent({
   name: "ChannelFooter",
   props: ["channel", "community"],
+  setup() {
+    const dataStore = useDataStore();
+
+    return {
+      dataStore,
+    };
+  },
   data() {
     return {
       showNewMessagesButton: false,
@@ -59,7 +66,7 @@ export default defineComponent({
       );
     },
     channelMentions(): MentionTrigger[] {
-      return store.getters
+      return this.dataStore
         .getChannelNeighbourhoods(this.community.neighbourhood.perspective.uuid)
         .map((channel) => {
           return {
@@ -108,7 +115,7 @@ export default defineComponent({
       this.currentExpressionPost = "";
 
       if (escapedMessage) {
-        store.dispatch.createExpression({
+        this.dataStore.createExpression({
           languageAddress:
             this.channel.neighbourhood.typedExpressionLanguages.find(
               (t: any) => t.expressionType === ExpressionTypes.ShortForm
@@ -126,9 +133,7 @@ export default defineComponent({
 .channel-view__footer {
   border-top: 1px solid var(--app-channel-border-color);
   background: var(--app-channel-footer-bg-color);
-  position: sticky;
   padding: var(--j-space-500);
-  bottom: 0;
 }
 
 j-editor::part(base) {

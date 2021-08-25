@@ -55,12 +55,22 @@
 import { defineComponent } from "vue";
 
 import { NeighbourhoodState } from "@/store/types";
-import store from "@/store";
+import { useDataStore } from "@/store/data";
+import { useAppStore } from "@/store/app";
 
 export default defineComponent({
+  setup() {
+    const dataStore = useDataStore();
+    const appStore = useAppStore();
+
+    return {
+      dataStore,
+      appStore,
+    };
+  },
   computed: {
-    communities() {
-      return store.getters.getCommunityNeighbourhoods;
+    communities(): NeighbourhoodState[] {
+      return this.dataStore.getCommunityNeighbourhoods;
     },
   },
   methods: {
@@ -70,17 +80,17 @@ export default defineComponent({
       return neighbourhood.creatorDid === userDid;
     },
     createCommunityClick() {
-      store.commit.setShowCreateCommunity(true);
+      this.appStore.setShowCreateCommunity(true);
     },
     handleMembersClick(community: NeighbourhoodState) {
-      store.commit.setShowCommunityMembers(true);
+      this.appStore.setShowCommunityMembers(true);
       this.$router.push({
         name: "community",
         params: { communityId: community.perspective.uuid },
       });
     },
     handleEditClick(community: NeighbourhoodState) {
-      store.commit.setShowEditCommunity(true);
+      this.appStore.setShowEditCommunity(true);
       this.$router.push({
         name: "community",
         params: { communityId: community.perspective.uuid },

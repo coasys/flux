@@ -1,16 +1,20 @@
-import { UserState, Profile } from "@/store/types";
+import { Profile } from "@/store/types";
 import { AgentStatus } from "@perspect3vism/ad4m";
+import { useUserStore } from "..";
 
 export default {
-  updateAgentStatus(state: UserState, payload: AgentStatus): void {
-    state.agent = payload;
+  updateAgentStatus(payload: AgentStatus): void {
+    const store = useUserStore();
+    store.agent = payload;
   },
 
-  updateAgentLockState(state: UserState, payload: boolean): void {
-    state.agent.isUnlocked = payload;
+  updateAgentLockState(payload: boolean): void {
+    const store = useUserStore();
+    store.agent.isUnlocked = payload;
   },
 
-  setUserProfile(state: UserState, payload: Profile): void {
-    state.profile = payload;
+  setUserProfile(payload: Profile): void {
+    const store = useUserStore();
+    store.profile = payload;
   },
 };

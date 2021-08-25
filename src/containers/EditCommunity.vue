@@ -39,12 +39,19 @@
 <script lang="ts">
 import { NeighbourhoodState } from "@/store/types";
 import { defineComponent } from "vue";
-import store from "@/store";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
+import { useDataStore } from "@/store/data";
 
 export default defineComponent({
   components: { AvatarUpload },
   emits: ["cancel", "submit"],
+  setup() {
+    const dataStore = useDataStore();
+
+    return {
+      dataStore,
+    };
+  },
   data() {
     return {
       isUpdatingCommunity: false,
@@ -67,14 +74,14 @@ export default defineComponent({
   computed: {
     community(): NeighbourhoodState {
       const id = this.$route.params.communityId as string;
-      return store.getters.getNeighbourhood(id);
+      return this.dataStore.getNeighbourhood(id);
     },
   },
   methods: {
     async updateCommunity() {
       const communityId = this.$route.params.communityId as string;
       this.isUpdatingCommunity = true;
-      store.dispatch
+      this.dataStore
         .updateCommunity({
           communityId: communityId,
           name: this.communityName,

@@ -1,10 +1,13 @@
 import { Profile, UserState } from "@/store/types";
+import { useUserStore } from "..";
 
 export default {
-  getProfile(state: UserState): Profile | null {
-    return state.profile;
+  getProfile(): Profile | null {
+    const store = useUserStore();
+    return store.profile;
   },
-  getUser(state: UserState): UserState | null {
-    return state;
+  getUser(): UserState | null {
+    const store = useUserStore();
+    return store;
   },
 };

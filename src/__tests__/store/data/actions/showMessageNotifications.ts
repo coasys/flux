@@ -5,16 +5,15 @@ import getProfileFixture from "../../../fixtures/getProfile.json";
 import * as agentUnlock from "../../../../core/mutations/agentUnlock";
 import lockAgentFixture from "../../../fixtures/lockAgent.json";
 import { AgentStatus, Expression } from "@perspect3vism/ad4m";
-import { createDirectStore } from "direct-vuex";
-import user from "@/store/user";
-import data from "@/store/data";
-import app from "@/store/app";
 import { TimeoutCache } from "@/utils/timeoutCache";
 import { ExpressionTypes } from "@/store/types";
 import * as getExpressionNoCache from "@/core/queries/getExpression";
+import { createPinia, Pinia, setActivePinia } from "pinia";
+import { useUserStore } from "@/store/user";
+import { useDataStore } from "@/store/data";
 
 describe("Show Message Notification", () => {
-  let store: any;
+  let store: Pinia;
   let profileLangAddress: string;
   let did: string;
   let profileLink: string;
@@ -48,28 +47,27 @@ describe("Show Message Notification", () => {
         throw new Error("Password doesn't match");
       });
 
-    // @ts-ignore
-    const directStore = createDirectStore({
-      modules: {
-        user,
-        data,
-        app,
-      },
-    });
-    store = directStore.store;
+    store = createPinia();
+    setActivePinia(store);
   });
 
   test("Show Message Notification for same user", async () => {
-    await store.dispatch.logIn({
+    const dataStore = useDataStore();
+    const userStore = useUserStore();
+    await userStore.logIn({
       password: "test123",
     });
-    await store.commit.addCommunity(community);
-    await store.commit.createChannel(channel);
+    // @ts-ignore
+    await dataStore.addCommunity(community);
+    // @ts-ignore
+    await dataStore.createChannelMutation(channel);
 
-    const notification = await store.dispatch.showMessageNotification({
+    const notification = await dataStore.showMessageNotification({
+      // @ts-ignore
       router: {
         push: jest.fn(),
       },
+      // @ts-ignore
       route: {
         params: {
           channelId: channel.state.perspectiveUuid,
@@ -85,16 +83,23 @@ describe("Show Message Notification", () => {
   });
 
   test("Show Message Notification for different user, with same community & channel", async () => {
-    await store.dispatch.logIn({
+    const dataStore = useDataStore();
+    const userStore = useUserStore();
+
+    await userStore.logIn({
       password: "test123",
     });
-    await store.commit.addCommunity(community);
-    await store.commit.createChannel(channel);
+    // @ts-ignore
+    await dataStore.addCommunity(community);
+    // @ts-ignore
+    await dataStore.createChannelMutation(channel);
 
-    const notification = await store.dispatch.showMessageNotification({
+    const notification = await dataStore.showMessageNotification({
+      // @ts-ignore
       router: {
         push: jest.fn(),
       },
+      // @ts-ignore
       route: {
         params: {
           channelId: channel.state.perspectiveUuid,
@@ -110,16 +115,23 @@ describe("Show Message Notification", () => {
   });
 
   test("Show Message Notification for different user, with same community & different channel", async () => {
-    await store.dispatch.logIn({
+    const dataStore = useDataStore();
+    const userStore = useUserStore();
+
+    await userStore.logIn({
       password: "test123",
     });
-    await store.commit.addCommunity(community);
-    await store.commit.createChannel(channel);
+    // @ts-ignore
+    await dataStore.addCommunity(community);
+    // @ts-ignore
+    await dataStore.createChannelMutation(channel);
 
-    const notification = await store.dispatch.showMessageNotification({
+    const notification = await dataStore.showMessageNotification({
+      // @ts-ignore
       router: {
         push: jest.fn(),
       },
+      // @ts-ignore
       route: {
         params: {
           channelId: "c6deef81-f6c6-421a-8f5b-642e2287c026",
@@ -135,28 +147,34 @@ describe("Show Message Notification", () => {
   });
 
   test("Show mention Message Notification for different user, with same community & different channel", async () => {
+    const dataStore = useDataStore();
+    const userStore = useUserStore();
+
     // @ts-ignore
     jest
       .spyOn(getExpressionNoCache, "getExpressionNoCache")
       .mockImplementation(async (url) => {
         const split = url.split("://");
-        console.log(split[1], did, split[0], profileLangAddress);
         if (split[1] === did && split[0] === profileLangAddress) {
           return getProfileFixture as unknown as Expression;
         }
 
         return null;
       });
-    await store.dispatch.logIn({
+    await userStore.logIn({
       password: "test123",
     });
-    await store.commit.addCommunity(community);
-    await store.commit.createChannel(channel);
+    // @ts-ignore
+    await dataStore.addCommunity(community);
+    // @ts-ignore
+    await dataStore.createChannelMutation(channel);
 
-    const notification = await store.dispatch.showMessageNotification({
+    const notification = await dataStore.showMessageNotification({
+      // @ts-ignore
       router: {
         push: jest.fn(),
       },
+      // @ts-ignore
       route: {
         params: {
           channelId: "c6deef81-f6c6-421a-8f5b-642e2287c026",

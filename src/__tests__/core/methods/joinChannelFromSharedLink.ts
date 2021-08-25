@@ -25,8 +25,6 @@ describe("Join Channel From Shared Link", () => {
       "bebd2ac2-1e80-44d2-b807-0163c2bcef40"
     );
 
-    console.log(neighbourhood, state);
-
     expect(state.perspectiveUuid).toBe("9cac577c-0b0a-44f4-9d4f-66edcc236021");
     expect(neighbourhood.name).toBe("safsafsaf");
     expect(neighbourhood.description).toBe("-");

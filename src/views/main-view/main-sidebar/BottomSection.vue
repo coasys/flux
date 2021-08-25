@@ -53,12 +53,16 @@
 
 <script lang="ts">
 import { defineComponent, onBeforeMount } from "vue";
-import { mapMutations } from "vuex";
 import { Profile } from "@/store/types";
-import store from "@/store";
+import { useAppStore } from "@/store/app";
+import { useUserStore } from "@/store/user";
+import { mapActions } from "pinia";
 
 export default defineComponent({
   setup() {
+    const appStore = useAppStore();
+    const userStore = useUserStore();
+
     onBeforeMount(() => {
       window.api.receive("getCleanState", (data: string) => {
         localStorage.clear();
@@ -66,16 +70,21 @@ export default defineComponent({
         window.api.send("quitApp");
       });
     });
+
+    return {
+      appStore,
+      userStore,
+    };
   },
   methods: {
-    ...mapMutations(["setShowSettings", "setShowEditProfile"]),
+    ...mapActions(useAppStore, ["setShowEditProfile", "setShowSettings"]),
     checkForUpdates() {
       window.api.send("check-update");
-      store.commit.setUpdateState({ updateState: "checking" });
+      this.appStore.setUpdateState({ updateState: "checking" });
     },
     downloadUpdates() {
       window.api.send("download-update");
-      store.commit.setUpdateState({ updateState: "downloading" });
+      this.appStore.setUpdateState({ updateState: "downloading" });
     },
     installNow() {
       window.api.send("quit-and-install");
@@ -83,13 +92,13 @@ export default defineComponent({
   },
   computed: {
     userProfile(): Profile | null {
-      return store.state.user.profile;
+      return this.userStore.profile;
     },
     userDid(): string {
-      return store.state.user.agent.did!;
+      return this.userStore.agent.did!;
     },
     updateApp(): { text: string; func?: () => void } {
-      const state = store.state.app.updateState;
+      const state = this.appStore.updateState;
 
       let text = "Check for updates";
       let func: undefined | (() => void) = this.checkForUpdates;

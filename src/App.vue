@@ -39,16 +39,23 @@
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
 import { gql } from "@apollo/client/core";
-import { defineComponent, computed } from "vue";
+import { defineComponent, computed, watch } from "vue";
 import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
 import { AGENT_STATUS, GET_EXPRESSION } from "@/core/graphql_queries";
-import { ModalsState, NeighbourhoodState, ToastState } from "@/store/types";
+import {
+  ApplicationState,
+  ModalsState,
+  NeighbourhoodState,
+  ToastState,
+} from "@/store/types";
 import { print } from "graphql/language/printer";
 import { AgentStatus, LinkExpression } from "@perspect3vism/ad4m";
-import store from "@/store";
 import { apolloClient } from "./utils/setupApolloClient";
+import { useUserStore } from "./store/user";
+import { useAppStore } from "./store/app";
+import { useDataStore } from "./store/data";
 
 declare global {
   interface Window {
@@ -61,7 +68,9 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const route = useRoute();
-    //const store = useStore();
+    const userStore = useUserStore();
+    const appStore = useAppStore();
+    const dataStore = useDataStore();
 
     onError((error) => {
       console.log("Got global graphql error, logging with error", error);
@@ -69,34 +78,30 @@ export default defineComponent({
         // can use error.operation.operationName to single out a query type.
         logErrorMessages(error);
 
-        store.commit.showDangerToast({
+        appStore.showDangerToast({
           message: JSON.stringify(error),
         });
       }
     });
 
     //Watch for agent unlock to set off running queries
-    store.original.watch(
-      (state: any) => state.user.agent.isUnlocked,
-      async (newValue: any) => {
-        if (newValue) {
-          store.commit.setApplicationStartTime(new Date());
-          store.dispatch.loadExpressionLanguages();
-        } else {
-          router.push({
-            name: store.state.user.agent.isInitialized ? "login" : "signup",
-          });
-        }
-      },
-      { immediate: true }
-    );
+    userStore.$subscribe((mutation, state) => {
+      if (state.agent.isUnlocked) {
+        appStore.setApplicationStartTime(new Date());
+        dataStore.loadExpressionLanguages();
+      } else {
+        router.push({
+          name: userStore.agent.isInitialized ? "login" : "signup",
+        });
+      }
+    });
 
     //Watch for incoming signals from holochain - an incoming signal should mean a DM is inbound
     const newLinkHandler = async (
       link: LinkExpression,
       perspective: string
     ) => {
-      console.log("GOT INCOMING MESSAGE SIGNAL", link, perspective);
+      console.debug("GOT INCOMING MESSAGE SIGNAL", link, perspective);
       if (link.data!.predicate! === "sioc://content_of") {
         //Start expression web worker to try and get the expression data pointed to in link target
         const expressionWorker = new Worker("pollingWorker.js");
@@ -118,15 +123,15 @@ export default defineComponent({
           const expression = e.data.expression;
           const message = JSON.parse(expression!.data!);
 
-          console.log("FOUND EXPRESSION FOR SIGNAL");
+          console.debug("FOUND EXPRESSION FOR SIGNAL");
           //Add the expression to the store
-          store.commit.addExpressionAndLink({
+          dataStore.addExpressionAndLink({
             channelId: perspective,
             link: link,
             message: expression,
           });
 
-          store.dispatch.showMessageNotification({
+          dataStore.showMessageNotification({
             router,
             route,
             perspectiveUuid: perspective,
@@ -135,7 +140,7 @@ export default defineComponent({
           });
 
           //Add UI notification on the channel to notify that there is a new message there
-          store.commit.setHasNewMessages({
+          dataStore.setHasNewMessages({
             channelId: perspective,
             value: true,
           });
@@ -144,8 +149,8 @@ export default defineComponent({
     };
 
     let watching: string[] = [];
-    store.original.watch(
-      (state) => state.data.neighbourhoods,
+    watch(
+      dataStore.neighbourhoods,
       async (newValue: { [perspectiveUuid: string]: NeighbourhoodState }) => {
         for (let [k, v] of Object.entries(newValue)) {
           if (watching.filter((val) => val == k).length == 0) {
@@ -186,70 +191,78 @@ export default defineComponent({
     );
 
     return {
-      toast: computed(() => store.state.app.toast),
-      setToast: (payload: ToastState) => store.commit.setToast(payload),
+      toast: computed(() => appStore.toast),
+      setToast: (payload: ToastState) => appStore.setToast(payload),
+      userStore,
+      appStore,
+      dataStore,
     };
   },
   computed: {
-    ui() {
-      return store.state.app;
+    ui(): ApplicationState {
+      return this.appStore.$state;
     },
     globalError(): { show: boolean; message: string } {
-      return store.state.app.globalError;
+      return this.appStore.globalError;
     },
     modals(): ModalsState {
-      return store.state.app.modals;
+      return this.appStore.modals;
     },
   },
   beforeCreate() {
+    this.dataStore.clearMessages();
     //Reset globalError & loading states in case application was exited with these states set to true before
-    store.commit.setGlobalError({
+    this.appStore.setGlobalError({
       show: false,
       message: "",
     });
-    store.commit.setGlobalLoading(false);
+    this.appStore.setGlobalLoading(false);
 
     window.api.send("getLangPath");
 
     window.api.receive("unlockedStateOff", () => {
-      store.commit.updateAgentLockState(false);
+      this.userStore.updateAgentLockState(false);
+    });
+
+    window.api.receive("clearMessages", () => {
+      this.dataStore.clearMessages();
     });
 
     window.api.receive("getLangPathResponse", (data: string) => {
       // console.log(`Received language path from main thread: ${data}`);
-      store.commit.setLanguagesPath(data);
+      this.appStore.setLanguagesPath(data);
     });
 
     window.api.receive("windowState", (data: string) => {
       console.log(`setWindowState: ${data}`);
       //@ts-ignore
-      store.commit.setWindowState(data);
+      this.appStore.setWindowState(data);
     });
 
     window.api.receive("update_available", () => {
-      store.commit.setUpdateState({ updateState: "available" });
+      this.appStore.setUpdateState({ updateState: "available" });
     });
 
     window.api.receive("update_not_available", () => {
-      store.commit.setUpdateState({ updateState: "not-available" });
+      this.appStore.setUpdateState({ updateState: "not-available" });
     });
 
     window.api.receive("update_downloaded", () => {
-      store.commit.setUpdateState({ updateState: "downloaded" });
+      this.appStore.setUpdateState({ updateState: "downloaded" });
     });
 
     window.api.receive("download_progress", () => {
-      store.commit.setUpdateState({ updateState: "downloading" });
+      this.appStore.setUpdateState({ updateState: "downloading" });
     });
 
     window.api.receive("setGlobalLoading", (val: boolean) => {
-      store.commit.setGlobalLoading(val);
+      this.appStore.setGlobalLoading(val);
     });
 
     window.api.receive(
       "globalError",
       (payload: { show: boolean; message: string }) => {
-        store.commit.setGlobalError(payload);
+        this.appStore.setGlobalError(payload);
       }
     );
 
@@ -257,10 +270,10 @@ export default defineComponent({
       agentStatus: AgentStatus;
     }>(AGENT_STATUS);
     onResult((val) => {
-      store.commit.updateAgentStatus(val.data.agentStatus);
+      this.userStore.updateAgentStatus(val.data.agentStatus);
       if (val.data.agentStatus.isInitialized == true) {
         //Get database perspective from store
-        let databasePerspective = store.getters.getDatabasePerspective;
+        let databasePerspective = this.appStore.getDatabasePerspective;
         if (!databasePerspective) {
           console.warn(
             "Does not have databasePerspective in store but has already been init'd! Add logic for getting databasePerspective as found with name"
@@ -298,7 +311,7 @@ body {
 }
 
 ::-webkit-scrollbar {
-  width: var(--j-scrollbar-width, 10px);
+  width: var(--j-scrollbar-width, 6px);
 }
 
 ::-webkit-scrollbar-track {
@@ -315,14 +328,14 @@ body {
   border-radius: var(--j-scrollbar-thumb-border-radius, 300px);
   background-color: var(
     --j-scrollbar-thumb-background,
-    rgba(180, 180, 180, 0.5)
+    rgba(180, 180, 180, 0.4)
   );
 }
 
 :root {
-  --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+  --app-main-sidebar-bg-color: var(--j-color-white);
   --app-main-sidebar-border-color: var(--j-border-color);
-  --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+  --app-drawer-bg-color: var(--j-color-white);
   --app-drawer-border-color: var(--j-border-color);
   --app-channel-bg-color: var(--j-color-white);
   --app-channel-border-color: var(--j-border-color);
