@@ -1,7 +1,7 @@
 <template>
   <footer class="channel-view__footer">
     <j-editor
-      @send="(e: any) => createDirectMessage(e.target.value)"
+      @send="(e) => createDirectMessage(e.target.value)"
       autofocus
       :placeholder="`Write to #${channel.neighbourhood.name}`"
       :value="currentExpressionPost"
