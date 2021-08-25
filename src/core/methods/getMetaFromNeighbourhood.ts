@@ -13,13 +13,13 @@ export function getMetaFromNeighbourhood(links: LinkExpression[]): {
   createdAt: string;
 } {
   return links.reduce((acc, link) => {
-    const predicate = link.data.predicate;
+    const { predicate, target } = link.data.predicate;
     return {
       ...acc,
-      name: predicate === NAME ? predicate : acc.name,
-      description: predicate === DESCRIPTION ? predicate : acc.description,
-      creatorDid: predicate === CREATOR ? predicate : acc.creatorDid,
-      createdAt: predicate === CREATED_AT ? predicate : acc.createdAt,
+      name: predicate === NAME ? target : acc.name,
+      description: predicate === DESCRIPTION ? target : acc.description,
+      creatorDid: predicate === CREATOR ? target : acc.creatorDid,
+      createdAt: predicate === CREATED_AT ? target : acc.createdAt,
     };
   }, {});
 }
