@@ -71,11 +71,10 @@ export default defineComponent({
 
     const { channelId, communityId } = this.$route.params;
 
-    this.expressionWorker = new Worker("pollingWorker.js");
     const { linksWorker, expressionWorker } =
       await this.dataStore.loadExpressions({
         channelId: channelId as string,
-        expressionWorker: this.expressionWorker,
+        expressionWorker: new Worker("pollingWorker.js"),
       });
 
     this.linksWorker = linksWorker;
@@ -88,6 +87,7 @@ export default defineComponent({
   },
   beforeRouteUpdate(to, from, next) {
     this.linksWorker?.terminate();
+    this.expressionWorker?.terminate();
     next();
   },
   data() {
