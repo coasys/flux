@@ -186,7 +186,7 @@ export default async (
         members: [],
         currentExpressionLinks: {},
         currentExpressionMessages: {},
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
       },
       state: {
         perspectiveUuid: createSourcePerspective.uuid,

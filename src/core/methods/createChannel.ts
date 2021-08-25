@@ -85,8 +85,6 @@ export async function createChannel({
     addChannelTypeLink
   );
 
-  const now = new Date();
-
   return {
     neighbourhood: {
       name: channelName,
@@ -101,7 +99,7 @@ export async function createChannel({
       members: [],
       currentExpressionLinks: {},
       currentExpressionMessages: {},
-      createdAt: now,
+      createdAt: new Date().toISOString(),
       membraneRoot: sourcePerspective.uuid,
     },
     state: {

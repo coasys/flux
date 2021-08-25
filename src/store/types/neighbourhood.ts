@@ -4,6 +4,7 @@ import { JuntoExpressionReference, ExpressionAndRef } from "./expression";
 import { ProfileExpression } from "./userprofile";
 
 export interface NeighbourhoodState {
+  createdAt?: string;
   name: string;
   description: string;
   creatorDid: string;
@@ -20,7 +21,6 @@ export interface NeighbourhoodState {
   members: ProfileExpression[];
   currentExpressionLinks: { [x: string]: LinkExpression };
   currentExpressionMessages: { [x: string]: ExpressionAndRef };
-  createdAt?: Date;
 }
 
 export enum MembraneType {

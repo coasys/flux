@@ -10,6 +10,7 @@ import {
   NAME,
   SELF,
   LANGUAGE,
+  CREATED_AT,
 } from "@/constants/neighbourhoodMeta";
 
 export async function createNeighbourhoodMeta(
@@ -36,6 +37,14 @@ export async function createNeighbourhoodMeta(
       source: SELF,
       target: creatorDid,
       predicate: CREATOR,
+    })
+  );
+
+  expressionLinks.push(
+    new Link({
+      source: SELF,
+      target: new Date().toISOString(),
+      predicate: CREATED_AT,
     })
   );
 

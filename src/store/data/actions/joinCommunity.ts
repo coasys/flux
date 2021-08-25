@@ -72,14 +72,14 @@ export default async (
       }
 
       //Read out metadata about the perspective from the meta
-      const { name, description, creatorDid } = getMetaFromNeighbourhood(
-        neighbourhood.neighbourhood!.meta.links
-      );
+      const { name, description, creatorDid, createdAt } =
+        getMetaFromNeighbourhood(neighbourhood.neighbourhood!.meta.links);
 
       console.log(neighbourhood.neighbourhood?.meta.links);
 
       const newCommunity = {
         neighbourhood: {
+          createdAt,
           name,
           description,
           creatorDid,
