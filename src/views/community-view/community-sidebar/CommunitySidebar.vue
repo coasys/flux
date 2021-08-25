@@ -154,10 +154,16 @@ import { ChannelState } from "@/store/types";
 import { mapActions, mapState } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
+import { useUserStore } from "@/store/user";
 
 export default defineComponent({
   components: { AvatarGroup },
   props: ["community"],
+  setup() {
+    return {
+      userStore: useUserStore(),
+    };
+  },
   data: function () {
     return {
       showCommunityMenu: false,
@@ -171,7 +177,7 @@ export default defineComponent({
     isCreator(): boolean {
       return (
         this.community.neighbourhood.creatorDid ===
-        store.getters.getUser?.agent.did
+        this.userStore.getUser?.agent.did
       );
     },
   },

@@ -36,7 +36,7 @@ export async function joinChannelFromSharedLink(
       members: [],
       currentExpressionLinks: {},
       currentExpressionMessages: {},
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
       membraneRoot: parentPerspectiveUUID,
     },
     state: {

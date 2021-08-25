@@ -1,7 +1,6 @@
 import {
   ExpressionAndRef,
   LinkExpressionAndLang,
-  AddChannel,
   ProfileExpression,
   CommunityState,
   ChannelState,
@@ -21,6 +20,11 @@ interface UpdatePayload {
   image: string;
   thumbnail: string;
   groupExpressionRef: string;
+}
+
+interface AddChannel {
+  communityId: string;
+  channel: ChannelState;
 }
 
 interface AddChannelMessages {
@@ -53,15 +57,6 @@ export default {
     for (const neighbourhood of Object.values(state.neighbourhoods)) {
       neighbourhood.currentExpressionMessages = {};
     }
-  },
-
-  setInitialWorkerStarted(
-    state: DataState,
-    payload: { channelId: string; initialWorkerStarted: boolean }
-  ): void {
-    const channel = state.channels[payload.channelId];
-
-    channel.initialWorkerStarted = payload.initialWorkerStarted;
   },
 
   addMessages(payload: AddChannelMessages): void {

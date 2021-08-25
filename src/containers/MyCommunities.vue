@@ -57,15 +57,18 @@ import { defineComponent } from "vue";
 import { NeighbourhoodState } from "@/store/types";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
+import { useUserStore } from "@/store/user";
 
 export default defineComponent({
   setup() {
     const dataStore = useDataStore();
     const appStore = useAppStore();
+    const userStore = useUserStore();
 
     return {
       dataStore,
       appStore,
+      userStore,
     };
   },
   computed: {
@@ -75,8 +78,8 @@ export default defineComponent({
   },
   methods: {
     isCreatorOfCommunity(communityId: string): boolean {
-      const userDid = store.getters.getUser?.agent.did;
-      const neighbourhood = store.getters.getNeighbourhood(communityId);
+      const userDid = this.userStore.getUser?.agent.did;
+      const neighbourhood = this.dataStore.getNeighbourhood(communityId);
       return neighbourhood.creatorDid === userDid;
     },
     createCommunityClick() {

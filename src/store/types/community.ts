@@ -11,4 +11,6 @@ export interface LocalCommunityState {
   theme: ThemeState;
   useLocalTheme: boolean;
   currentChannelId: string | undefined | null;
+  initialWorkerStarted: boolean;
+  messageLoading: boolean;
 }
