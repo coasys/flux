@@ -10,6 +10,8 @@ import { createLink } from "@/core/mutations/createLink";
 import { getLanguage } from "@/core/queries/getLanguage";
 import sleep from "@/utils/sleep";
 
+import { MEMBER } from "@/constants/neighbourhoodMeta";
+
 import {
   ExpressionUIIcons,
   MembraneType,
@@ -155,7 +157,7 @@ export default async ({
     const addProfileLink = await createLink(createSourcePerspective.uuid!, {
       source: `${neighbourhood}://self`,
       target: createProfileExpression,
-      predicate: "sioc://has_member",
+      predicate: MEMBER,
     });
     console.log("Created profile expression link", addProfileLink);
 
@@ -188,7 +190,6 @@ export default async ({
         members: [],
         currentExpressionLinks: {},
         currentExpressionMessages: {},
-
         createdAt: new Date().toISOString(),
       },
       state: {

@@ -4,6 +4,8 @@ import { joinNeighbourhood } from "@/core/mutations/joinNeighbourhood";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
 import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
 
+import { MEMBER } from "@/constants/neighbourhoodMeta";
+
 import { Link } from "@perspect3vism/ad4m";
 
 import { ExpressionTypes, CommunityState, MembraneType } from "@/store/types";
@@ -58,7 +60,7 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
         const addProfileLink = await createLink(neighbourhood.uuid, {
           source: `${neighbourhood.sharedUrl}://self`,
           target: createProfileExpression,
-          predicate: "sioc://has_member",
+          predicate: MEMBER,
         } as Link);
         console.log("Created profile expression link", addProfileLink);
       } else {

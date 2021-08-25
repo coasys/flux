@@ -112,18 +112,20 @@ export default {
     channel.notifications.mute = !channel.notifications.mute;
   },
 
-  setCommunityMembers({
+  setNeighbourhoodMembers({
     members,
-    communityId,
+    perspectiveUuid,
   }: {
     members: ProfileExpression[];
-    communityId: string;
+    perspectiveUuid: string;
   }): void {
     const state = useDataStore();
-    const community = state.neighbourhoods[communityId];
+    const neighbourhood = state.neighbourhoods[perspectiveUuid];
 
-    if (community) {
-      community.members = members;
+    console.log("setting member", { neighbourhood, members });
+
+    if (neighbourhood) {
+      neighbourhood.members = members;
     }
   },
 

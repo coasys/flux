@@ -69,6 +69,7 @@ export async function getProfile(
       "Did not get profile expression from cache, calling holochain"
     );
     const profileGqlExp = await getExpressionNoCache(profileLink);
+
     if (profileGqlExp) {
       const profileExp = {
         author: profileGqlExp.author!,

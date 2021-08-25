@@ -7,9 +7,7 @@ import { ExpressionTypes, ProfileExpression } from "@/store/types";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 
-export interface Payload {
-  communityId: string;
-}
+import { MEMBER } from "@/constants/neighbourhoodMeta";
 
 export default async function (id: string): Promise<void> {
   const dataStore = useDataStore();
@@ -19,17 +17,17 @@ export default async function (id: string): Promise<void> {
   const cache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
 
   try {
-    const community = dataStore.getNeighbourhood(id);
+    const neighbourhood = dataStore.getNeighbourhood(id);
 
     const profileLinks = await getLinks(
       id,
       new LinkQuery({
-        source: `${community.neighbourhoodUrl!}://self`,
-        predicate: "sioc://has_member",
+        source: `${neighbourhood.neighbourhoodUrl!}://self`,
+        predicate: MEMBER,
       })
     );
 
-    const profileLang = community?.typedExpressionLanguages.find(
+    const profileLang = neighbourhood?.typedExpressionLanguages.find(
       (t: any) => t.expressionType === ExpressionTypes.ProfileExpression
     );
 
@@ -51,8 +49,8 @@ export default async function (id: string): Promise<void> {
 
       const profileList = Object.values(profiles);
 
-      dataStore.setCommunityMembers({
-        communityId: id,
+      dataStore.setNeighbourhoodMembers({
+        perspectiveUuid: id,
         members: profileList,
       });
     } else {
