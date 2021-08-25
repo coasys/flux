@@ -202,8 +202,6 @@ export default async ({
         },
         useLocalTheme: false,
         currentChannelId: channel.neighbourhood.perspective.uuid,
-        initialWorkerStarted: false,
-        messageLoading: false,
       },
     } as CommunityState;
     dataStore.addCommunity(newCommunity);
