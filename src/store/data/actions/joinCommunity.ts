@@ -2,7 +2,7 @@ import { createProfile } from "@/core/methods/createProfile";
 import { createLink } from "@/core/mutations/createLink";
 import { joinNeighbourhood } from "@/core/mutations/joinNeighbourhood";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
-import { findNameDescriptionFromMeta } from "@/core/methods/findNameDescriptionFromMeta";
+import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
 
 import { Link } from "@perspect3vism/ad4m";
 
@@ -48,7 +48,7 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
       const profileExpLang = typedExpressionLanguages.find(
         (val) => val.expressionType == ExpressionTypes.ProfileExpression
       );
-      if (profileExpLang != undefined) {
+      if (profileExpLang !== undefined) {
         const createProfileExpression = await createProfile(
           profileExpLang.languageAddress!,
           userStore.getProfile!
@@ -68,14 +68,17 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
       }
 
       //Read out metadata about the perspective from the meta
-      const { name, description } = findNameDescriptionFromMeta(
-        neighbourhood.neighbourhood!.meta.links
-      );
+      const { name, description, creatorDid, createdAt } =
+        getMetaFromNeighbourhood(neighbourhood.neighbourhood!.meta.links);
+
+      console.log(neighbourhood.neighbourhood?.meta.links);
 
       const newCommunity = {
         neighbourhood: {
+          createdAt,
           name,
           description,
+          creatorDid,
           perspective: neighbourhood,
           typedExpressionLanguages: typedExpressionLanguages,
           neighbourhoodUrl: joiningLink,

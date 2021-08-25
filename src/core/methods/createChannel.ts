@@ -14,13 +14,23 @@ import { createUniqueHolochainLanguage } from "../mutations/createUniqueHolochai
 import { createNeighbourhood } from "../mutations/createNeighbourhood";
 import { createNeighbourhoodMeta } from "./createNeighbourhoodMeta";
 
-export async function createChannel(
-  channelName: string,
-  languagePath: string,
-  sourcePerspective: PerspectiveHandle,
-  membraneType: MembraneType,
-  typedExpressionLanguages: JuntoExpressionReference[]
-): Promise<ChannelState> {
+interface ChannelProps {
+  channelName: string;
+  languagePath: string;
+  creatorDid: string;
+  sourcePerspective: PerspectiveHandle;
+  membraneType: MembraneType;
+  typedExpressionLanguages: JuntoExpressionReference[];
+}
+
+export async function createChannel({
+  channelName,
+  languagePath,
+  creatorDid,
+  sourcePerspective,
+  membraneType,
+  typedExpressionLanguages,
+}: ChannelProps): Promise<ChannelState> {
   const perspective = await addPerspective(channelName);
   console.debug("Created new perspective with result", perspective);
   const socialContextLanguage = await createUniqueHolochainLanguage(
@@ -37,6 +47,7 @@ export async function createChannel(
   const metaLinks = await createNeighbourhoodMeta(
     channelName,
     "",
+    creatorDid,
     typedExpressionLanguages
   );
 
@@ -74,12 +85,11 @@ export async function createChannel(
     addChannelTypeLink
   );
 
-  const now = new Date();
-
   return {
     neighbourhood: {
       name: channelName,
       description: "",
+      creatorDid,
       perspective: perspective,
       typedExpressionLanguages: typedExpressionLanguages,
       neighbourhoodUrl: neighbourhood,
@@ -89,14 +99,12 @@ export async function createChannel(
       members: [],
       currentExpressionLinks: {},
       currentExpressionMessages: {},
-      createdAt: now,
+      createdAt: new Date().toISOString(),
       membraneRoot: sourcePerspective.uuid,
     },
     state: {
       perspectiveUuid: perspective.uuid,
       hasNewMessages: false,
-      initialWorkerStarted: false,
-      messageLoading: false,
       feedType: FeedType.Signaled,
       notifications: {
         mute: false,

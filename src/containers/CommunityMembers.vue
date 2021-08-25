@@ -17,24 +17,18 @@
         <j-flex
           gap="300"
           v-for="communityMember in filteredCommunityMemberList"
-          :key="communityMember.author"
+          :key="communityMember.did"
           inline
           direction="column"
           a="center"
         >
           <j-avatar
             size="lg"
-            :hash="communityMember.author"
-            :src="
-              communityMember.data.profile['schema:image']
-                ? JSON.parse(communityMember.data.profile['schema:image'])[
-                    'schema:contentUrl'
-                  ]
-                : null
-            "
+            :hash="communityMember.did"
+            :src="communityMember.profile.profilePicture"
           />
           <j-text variant="body">
-            {{ communityMember.data.profile["foaf:AccountName"] }}
+            {{ communityMember.profile.username }}
           </j-text>
         </j-flex>
       </j-flex>
@@ -45,8 +39,10 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import type { Expression } from "@perspect3vism/ad4m";
-import { NeighbourhoodState } from "@/store/types";
+import { NeighbourhoodState, Profile } from "@/store/types";
 import { useDataStore } from "@/store/data";
+
+import { parseProfile } from "@/utils/profileHelpers";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -70,11 +66,16 @@ export default defineComponent({
       const id = this.$route.params.communityId as string;
       return this.dataStore.getNeighbourhood(id);
     },
-    filteredCommunityMemberList(): Expression[] {
+    filteredCommunityMemberList(): { did: string; profile: Profile }[] {
       const members: Expression[] = this.community.members;
-      return members.filter((m: Expression) =>
-        Object(m.data).profile["foaf:AccountName"].includes(this.searchValue)
-      );
+      return members
+        .map((expression: Expression) => ({
+          did: expression.author,
+          profile: parseProfile(expression.data.profile),
+        }))
+        .filter((member: { did: string; profile: Profile }) =>
+          member.profile.username.includes(this.searchValue)
+        );
     },
   },
 });

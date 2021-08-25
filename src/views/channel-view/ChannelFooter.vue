@@ -17,6 +17,7 @@
 import { defineComponent } from "vue";
 import { ExpressionTypes, ProfileExpression } from "@/store/types";
 import { Editor } from "@tiptap/vue-3";
+import { ACCOUNT_NAME } from "@/constants/profile";
 import { useDataStore } from "@/store/data";
 
 interface UserMap {
@@ -57,7 +58,7 @@ export default defineComponent({
       return this.community.neighbourhood.members.map(
         (m: any) =>
           ({
-            name: m.data.profile["foaf:AccountName"],
+            name: m.data.profile[ACCOUNT_NAME],
             //todo: this should not be replaced, we want the full did identifier in the mentions in case message is consumed by another application
             id: m.author,
             trigger: "@",

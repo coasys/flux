@@ -50,13 +50,8 @@
             :showAvatar="showAvatar(index)"
             :message="item.expression.data.body"
             :timestamp="item.expression.timestamp"
-            :username="users[item.expression.author]?.['foaf:AccountName']"
-            :profileImg="
-              users[item.expression.author]?.['schema:image'] &&
-              JSON.parse(users[item.expression.author]['schema:image'])[
-                'schema:contentUrl'
-              ]
-            "
+            :username="users[item.expression.author]?.username"
+            :profileImg="users[item.expression.author]?.profilePicture"
             @profileClick="(did) => $emit('profileClick', did)"
             @mentionClick="(dataset) => $emit('mentionClick', dataset)"
           />
@@ -68,19 +63,18 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { ExpressionAndRef, ProfileExpression } from "@/store/types";
-import { getProfile } from "@/utils/profileHelpers";
+import { ExpressionAndRef, Profile } from "@/store/types";
+import { getProfile, parseProfile } from "@/utils/profileHelpers";
 import { differenceInMinutes, parseISO } from "date-fns";
 import MessageItem from "@/components/message-item/MessageItem.vue";
 import { Editor } from "@tiptap/vue-3";
-import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
 import { useDataStore } from "@/store/data";
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 import { isAtBottom } from "@/utils/scroll";
 
 interface UserMap {
-  [key: string]: ProfileExpression;
+  [key: string]: Profile;
 }
 
 export default defineComponent({
@@ -248,7 +242,7 @@ export default defineComponent({
       const dataExp = await getProfile(profileLang, did);
       if (dataExp) {
         const { data } = dataExp;
-        this.users[did] = data.profile;
+        this.users[did] = parseProfile(data.profile);
       }
     },
   },
