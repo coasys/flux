@@ -5,10 +5,11 @@
       :profileLanguage="profileLanguage"
       :community="community"
       :channel="channel"
-      :linksWorker="linksWorker"
-      :expressionWorker="expressionWorker"
+      :messages="messages"
+      :isAlreadyFetching="isAlreadyFetching"
       @profileClick="handleProfileClick"
       @mentionClick="handleMentionClick"
+      @loadMore="loadMoreMessages"
       @updateLinkWorker="(e) => (linksWorker = e)"
       @updateExpressionWorker="(e) => (expressionWorker = e)"
     />
@@ -26,21 +27,27 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import store from "@/store";
 import {
   ChannelState,
   CommunityState,
   ExpressionTypes,
   ProfileExpression,
+  ExpressionAndRef,
 } from "@/store/types";
 import { Editor } from "@tiptap/vue-3";
 import ChannelFooter from "./ChannelFooter.vue";
 import ChannelMessages from "./ChannelMessages.vue";
 import ChannelHeader from "./ChannelHeader.vue";
 import Profile from "@/containers/Profile.vue";
+import { useDataStore } from "@/store/data";
+import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
 
 interface UserMap {
   [key: string]: ProfileExpression;
+}
+
+interface ExpressionAndRefWithId extends ExpressionAndRef {
+  id: string;
 }
 
 export default defineComponent({
@@ -50,6 +57,38 @@ export default defineComponent({
     ChannelMessages,
     ChannelFooter,
     Profile,
+  },
+  setup() {
+    const dataStore = useDataStore();
+
+    return {
+      dataStore,
+    };
+  },
+  async mounted() {
+    this.linksWorker?.terminate();
+    this.expressionWorker?.terminate();
+
+    const { channelId, communityId } = this.$route.params;
+
+    const { linksWorker, expressionWorker } =
+      await this.dataStore.loadExpressions({
+        channelId: channelId as string,
+        expressionWorker: new Worker("pollingWorker.js"),
+      });
+
+    this.linksWorker = linksWorker;
+    this.expressionWorker = expressionWorker;
+
+    this.dataStore.setCurrentChannelId({
+      communityId: communityId as string,
+      channelId: channelId as string,
+    });
+  },
+  beforeRouteUpdate(to, from, next) {
+    this.linksWorker?.terminate();
+    this.expressionWorker?.terminate();
+    next();
   },
   data() {
     return {
@@ -62,41 +101,32 @@ export default defineComponent({
       showList: false,
       showProfile: false,
       activeProfile: {} as any,
+      previousFetchedTimestamp: null as string | undefined | null,
     };
   },
-  beforeRouteUpdate(to, from, next) {
-    this.linksWorker?.terminate();
-    next();
-  },
-  async mounted() {
-    this.linksWorker?.terminate();
-    this.expressionWorker?.terminate();
-
-    const { channelId, communityId } = this.$route.params;
-
-    this.expressionWorker = new Worker("pollingWorker.js");
-    const { linksWorker, expressionWorker } =
-      await store.dispatch.loadExpressions({
-        channelId: channelId as string,
-        expressionWorker: this.expressionWorker,
-      });
-
-    this.linksWorker = linksWorker;
-    this.expressionWorker = expressionWorker;
-
-    store.commit.setCurrentChannelId({
-      communityId: communityId as string,
-      channelId: channelId as string,
-    });
-  },
   computed: {
+    isAlreadyFetching(): boolean {
+      if (this.messages.length) {
+        const oldestMessage = this.messages[0];
+        const from = oldestMessage.expression.timestamp;
+        return from === this.previousFetchedTimestamp;
+      }
+      return true;
+    },
+    messages(): ExpressionAndRefWithId[] {
+      // Sort by desc, because we have column-reverse on chat messages
+      return sortExpressionsByTimestamp(
+        this.channel?.neighbourhood?.currentExpressionMessages || [],
+        "asc"
+      ).map((item) => ({ ...item, id: item.expression.proof.signature }));
+    },
     community(): CommunityState {
       const { communityId } = this.$route.params;
-      return store.getters.getCommunity(communityId as string);
+      return this.dataStore.getCommunity(communityId as string);
     },
     channel(): ChannelState {
       const { channelId } = this.$route.params;
-      return store.getters.getChannel(channelId as string);
+      return this.dataStore.getChannel(channelId as string);
     },
     profileLanguage(): string {
       const profileLang =
@@ -107,6 +137,34 @@ export default defineComponent({
     },
   },
   methods: {
+    loadMoreMessages(): void {
+      const messageAmount = this.messages.length;
+      if (messageAmount) {
+        if (!this.isAlreadyFetching) {
+          const oldestMessage = this.messages[0];
+          this.loadMessages(oldestMessage.expression.timestamp);
+        }
+      } else {
+        this.loadMessages();
+      }
+    },
+    async loadMessages(from?: string, to?: string) {
+      this.linksWorker?.terminate();
+      this.expressionWorker?.terminate();
+
+      const { linksWorker, expressionWorker } =
+        await this.dataStore.loadExpressions({
+          from: from ? new Date(from) : undefined,
+          to: to ? new Date(to) : undefined,
+          channelId: this.channel.neighbourhood.perspective.uuid,
+          expressionWorker: new Worker("pollingWorker.js"),
+        });
+
+      this.$emit("updateLinkWorker", linksWorker);
+      this.$emit("updateExpressionWorker", expressionWorker);
+
+      this.previousFetchedTimestamp = from;
+    },
     handleProfileClick(did: string) {
       this.showProfile = true;
       this.activeProfile = did;
@@ -115,7 +173,7 @@ export default defineComponent({
       const { label, id } = dataset;
       if (label?.startsWith("#")) {
         let channelId =
-          store.getters.getChannelByNeighbourhoodUrl(id)?.neighbourhood
+          this.dataStore.getChannelByNeighbourhoodUrl(id)?.neighbourhood
             .perspective.uuid;
         if (channelId) {
           this.$router.push({

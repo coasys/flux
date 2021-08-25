@@ -48,7 +48,7 @@
 :root[theme="cyberpunk"] j-menu-item::part(base) {
   margin-top: var(--j-space-100);
   margin-left: var(--j-space-300);
-  margin-right: var(--j-space-300);
+  margin-right: 0;
   clip-path: polygon(90% 0, 0 0, 0 50%, 5% 100%, 0% 100%, 100% 100%, 100% 0%);
 }
 

@@ -1,27 +1,17 @@
 import "@testing-library/vue";
 import * as agentUnlock from "../../../../core/mutations/agentUnlock";
 import lockAgentFixture from "../../../fixtures/lockAgent.json";
-import { createDirectStore } from "direct-vuex";
-import user from "@/store/user";
-import data from "@/store/data";
-import app from "@/store/app";
 import { AgentStatus } from "@perspect3vism/ad4m";
-// import { AppStore } from "@/store";
+import { createPinia, Pinia, setActivePinia } from "pinia";
+import { useUserStore } from "@/store/user";
 
 describe("Login", () => {
-  let store: any;
+  let store: Pinia;
 
   beforeEach(() => {
-    // @ts-ignore
-    // @ts-ignore
-    const directStore = createDirectStore({
-      modules: {
-        user,
-        data,
-        app,
-      },
-    });
-    store = directStore.store; //createStore(tempStore);
+    store = createPinia();
+    setActivePinia(store);
+
     jest
       .spyOn(agentUnlock, "agentUnlock")
       .mockImplementation(async (password) => {
@@ -34,12 +24,13 @@ describe("Login", () => {
   });
 
   test("Login with wrong password", async () => {
-    expect(store.state.user.agent.isInitialized).toBeFalsy();
-    expect(store.state.user.agent.isUnlocked).toBeFalsy();
-    expect(store.state.user.agent.did).toBe("");
+    const userStore = useUserStore();
+    expect(userStore.agent.isInitialized).toBeFalsy();
+    expect(userStore.agent.isUnlocked).toBeFalsy();
+    expect(userStore.agent.did).toBe("");
 
     try {
-      await store.dispatch.logIn({
+      await userStore.logIn({
         password: "test1",
       });
     } catch (error) {
@@ -47,20 +38,21 @@ describe("Login", () => {
       expect(error).toHaveProperty("message", "Error: Password doesn't match");
     }
 
-    expect(store.state.user.agent.isInitialized).toBeFalsy();
-    expect(store.state.user.agent.isUnlocked).toBeFalsy();
-    expect(store.state.user.agent.did).toBe("");
+    expect(userStore.agent.isInitialized).toBeFalsy();
+    expect(userStore.agent.isUnlocked).toBeFalsy();
+    expect(userStore.agent.did).toBe("");
   });
 
   test("Login with correct password", async () => {
-    expect(store.state.user.agent.isInitialized).toBeFalsy();
-    expect(store.state.user.agent.isUnlocked).toBeFalsy();
+    const userStore = useUserStore();
+    expect(userStore.agent.isInitialized).toBeFalsy();
+    expect(userStore.agent.isUnlocked).toBeFalsy();
 
-    await store.dispatch.logIn({
+    await userStore.logIn({
       password: "test123",
     });
 
-    expect(store.state.user.agent.isInitialized).toBeTruthy();
-    expect(store.state.user.agent.isUnlocked).toBeTruthy();
+    expect(userStore.agent.isInitialized).toBeTruthy();
+    expect(userStore.agent.isUnlocked).toBeTruthy();
   });
 });

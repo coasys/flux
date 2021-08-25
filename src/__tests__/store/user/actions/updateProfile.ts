@@ -2,13 +2,12 @@ import community from "../../../fixtures/community.json";
 import * as getExpression from "../../../../core/queries/getExpression";
 import getProfileFixture from "../../../fixtures/updateProfile.json";
 import * as createProfile from "@/core/methods/createProfile";
-import { createDirectStore } from "direct-vuex";
-import user from "@/store/user";
-import data from "@/store/data";
-import app from "@/store/app";
+import { createPinia, Pinia, setActivePinia } from "pinia";
+import { useUserStore } from "@/store/user";
+import { useDataStore } from "@/store/data";
 
 describe("Update Profile", () => {
-  let store: any;
+  let store: Pinia;
 
   beforeEach(() => {
     // @ts-ignore
@@ -22,41 +21,42 @@ describe("Update Profile", () => {
       return "QmevBs9ztZwyZjseMD4X18zSHFuDp9eEaLJyirHazQWmxS://did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW";
     });
 
-    // @ts-ignore
-    const directStore = createDirectStore({
-      modules: {
-        user,
-        data,
-        app,
-      },
-    });
-    store = directStore.store;
+    store = createPinia();
+    setActivePinia(store);
   });
 
   test("Update Profile - Success", () => {
-    store.commit.addCommunity(community);
+    const userStore = useUserStore();
+    const dataStore = useDataStore();
 
-    expect(store.state.user.profile).toBeNull();
+    // @ts-ignore
+    dataStore.addCommunity(community);
 
-    store.dispatch.updateProfile({
+    expect(userStore.profile).toBeNull();
+
+    userStore.updateProfile({
       username: "jhon_doe",
     });
 
-    expect(store.state.user.profile.username).toBe("jhon_doe");
+    expect(userStore.profile!.username).toBe("jhon_doe");
   });
 
   test("Update Profile - Failure", async () => {
+    const userStore = useUserStore();
+    const dataStore = useDataStore();
+
     // @ts-ignore
     jest
       .spyOn(createProfile, "createProfile")
       .mockRejectedValue(Error("Could not create new profile exp"));
 
-    store.commit.addCommunity(community);
+    // @ts-ignore
+    dataStore.addCommunity(community);
 
-    expect(store.state.user.profile).toBeNull();
+    expect(userStore.profile).toBeNull();
 
     try {
-      await store.dispatch.updateProfile({
+      await userStore.updateProfile({
         username: "jhon_doe",
       });
     } catch (error) {
@@ -67,6 +67,6 @@ describe("Update Profile", () => {
       );
     }
 
-    expect(store.state.user.profile.username).toBe("jhon_doe");
+    expect(userStore.profile!.username).toBe("jhon_doe");
   });
 });

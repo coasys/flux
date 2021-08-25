@@ -1,14 +1,12 @@
 import community from "../../../fixtures/community.json";
 import updateCommunityLinkData from "../../../fixtures/updateCommunityLinkData.json";
-import { createDirectStore } from "direct-vuex";
-import user from "@/store/user";
-import data from "@/store/data";
-import app from "@/store/app";
 import * as createExpression from "@/core/mutations/createExpression";
 import * as createLink from "@/core/mutations/createLink";
+import { createPinia, Pinia, setActivePinia } from "pinia";
+import { useDataStore } from "@/store/data";
 
 describe("Update Community", () => {
-  let store: any;
+  let store: Pinia;
 
   beforeEach(() => {
     // @ts-ignore
@@ -16,18 +14,13 @@ describe("Update Community", () => {
       return updateCommunityLinkData;
     });
 
-    // @ts-ignore
-    const directStore = createDirectStore({
-      modules: {
-        user,
-        data,
-        app,
-      },
-    });
-    store = directStore.store;
+    store = createPinia();
+    setActivePinia(store);
   });
 
   test("Update Community with wrong community id", async () => {
+    const dataStore = useDataStore();
+
     const tempCommuntiy = {
       ...community,
       neighbourhood: {
@@ -39,18 +32,18 @@ describe("Update Community", () => {
       },
     };
 
-    await store.commit.addCommunity(tempCommuntiy);
+    // @ts-ignore
+    await dataStore.addCommunity(tempCommuntiy);
 
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].name).toBe(
+      "test"
+    );
     expect(
-      store.state.data.neighbourhoods[community.state.perspectiveUuid].name
-    ).toBe("test");
-    expect(
-      store.state.data.neighbourhoods[community.state.perspectiveUuid]
-        .description
+      dataStore.neighbourhoods[community.state.perspectiveUuid].description
     ).toBe("");
 
     try {
-      await store.dispatch.updateCommunity({
+      await dataStore.updateCommunity({
         communityId: community.state.perspectiveUuid,
         name: "hello",
         description: "hello",
@@ -63,28 +56,29 @@ describe("Update Community", () => {
       );
     }
 
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].name).toBe(
+      "test"
+    );
     expect(
-      store.state.data.neighbourhoods[community.state.perspectiveUuid].name
-    ).toBe("test");
-    expect(
-      store.state.data.neighbourhoods[community.state.perspectiveUuid]
-        .description
+      dataStore.neighbourhoods[community.state.perspectiveUuid].description
     ).toBe("");
   });
 
   test("Update Community - Failure", async () => {
-    await store.commit.addCommunity(community);
+    const dataStore = useDataStore();
 
+    // @ts-ignore
+    await dataStore.addCommunity(community);
+
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].name).toBe(
+      "test"
+    );
     expect(
-      store.state.data.neighbourhoods[community.state.perspectiveUuid].name
-    ).toBe("test");
-    expect(
-      store.state.data.neighbourhoods[community.state.perspectiveUuid]
-        .description
+      dataStore.neighbourhoods[community.state.perspectiveUuid].description
     ).toBe("");
 
     try {
-      store.dispatch.updateCommunity({
+      dataStore.updateCommunity({
         communityId: community.state.perspectiveUuid,
         name: "hello",
         description: "hello",
@@ -97,16 +91,17 @@ describe("Update Community", () => {
       );
     }
 
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].name).toBe(
+      "test"
+    );
     expect(
-      store.state.data.neighbourhoods[community.state.perspectiveUuid].name
-    ).toBe("test");
-    expect(
-      store.state.data.neighbourhoods[community.state.perspectiveUuid]
-        .description
+      dataStore.neighbourhoods[community.state.perspectiveUuid].description
     ).toBe("");
   });
 
   test("Update Community - Success", async () => {
+    const dataStore = useDataStore();
+
     // @ts-ignore
     jest
       .spyOn(createExpression, "createExpression")
@@ -114,28 +109,27 @@ describe("Update Community", () => {
         return "QmVWescmAofwfXim3QNqhvQbPee4WfezCpgGFbkaEBZHJS://8429242a7888abe19e8e625e2b390eeae4bff429db7ef825f1791ea7d89ac4073356f6f3039aed";
       });
 
-    store.commit.addCommunity(community);
+    // @ts-ignore
+    dataStore.addCommunity(community);
 
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].name).toBe(
+      "test"
+    );
     expect(
-      store.state.data.neighbourhoods[community.state.perspectiveUuid].name
-    ).toBe("test");
-    expect(
-      store.state.data.neighbourhoods[community.state.perspectiveUuid]
-        .description
+      dataStore.neighbourhoods[community.state.perspectiveUuid].description
     ).toBe("");
 
-    await store.dispatch.updateCommunity({
+    await dataStore.updateCommunity({
       communityId: community.state.perspectiveUuid,
       name: "hello",
       description: "hello",
     });
 
+    expect(dataStore.neighbourhoods[community.state.perspectiveUuid].name).toBe(
+      "hello"
+    );
     expect(
-      store.state.data.neighbourhoods[community.state.perspectiveUuid].name
-    ).toBe("hello");
-    expect(
-      store.state.data.neighbourhoods[community.state.perspectiveUuid]
-        .description
+      dataStore.neighbourhoods[community.state.perspectiveUuid].description
     ).toBe("hello");
   });
 });

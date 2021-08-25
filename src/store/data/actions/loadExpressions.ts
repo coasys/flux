@@ -1,9 +1,8 @@
 import { print } from "graphql/language/printer";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 import { LinkQuery } from "@perspect3vism/ad4m";
-
-import { dataActionContext } from "@/store/data/index";
-import { appActionContext } from "@/store/app/index";
+import { useDataStore } from "..";
+import { useAppStore } from "@/store/app";
 
 export interface Payload {
   channelId: string;
@@ -17,20 +16,23 @@ export interface LoadExpressionResult {
   expressionWorker: Worker;
 }
 
-/// Function that polls for new messages on a channel using a web worker, if a message link is found then another web worker is spawned to retry getting the expression until its found
+
 export default async function (
-  context: any,
-  { channelId, from, to, expressionWorker }: Payload
+  {
+    channelId,
+  expressionWorker,
+  from,
+  to,
+  }: Payload
 ): Promise<LoadExpressionResult> {
-  const { getters: dataGetters, commit: dataCommit } =
-    dataActionContext(context);
-  const { commit: appCommit } = appActionContext(context);
+    const dataStore = useDataStore();
+  const appStore = useAppStore();
 
   try {
-    const channel = dataGetters.getNeighbourhood(channelId);
-    const fromDate = from || new Date();
-    const untilDate = to || new Date("August 19, 1975 23:15:30");
-    console.warn("Loading expression from", fromDate, untilDate);
+    const fromDate = from || appStore.getApplicationStartTime;
+    const untilDate = to || new Date("August 19, 1975 23:15:30").toISOString();
+
+    const channel = dataStore.getNeighbourhood(channelId);
 
     if (!channel) {
       console.error(`No channel with id ${channelId} found`);
@@ -113,7 +115,7 @@ export default async function (
       const link = e.data.callbackData.link;
 
       //Add the link and message to the store
-      dataCommit.addMessage({
+      dataStore.addMessage({
         channelId,
         link: link,
         expression: expression,
@@ -122,7 +124,7 @@ export default async function (
 
     return { linksWorker, expressionWorker };
   } catch (e) {
-    appCommit.showDangerToast({
+    appStore.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

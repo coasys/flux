@@ -12,7 +12,7 @@
           class="left-nav__community-item"
           :selected="communityIsActive(community.perspective.uuid)"
           size="xl"
-          :src="community.image"
+          :src="community.image || null"
           :initials="community.name.charAt(0).toUpperCase()"
           @click="() => handleCommunityClick(community.perspective.uuid)"
         ></j-avatar>
@@ -26,7 +26,7 @@
     </j-tooltip>
     <j-tooltip title="Create a community">
       <j-button
-        @click="() => $store.commit('setShowCreateCommunity', true)"
+        @click="() => appStore.setShowCreateCommunity(true)"
         square
         circle
         size="xl"
@@ -39,27 +39,38 @@
 </template>
 
 <script lang="ts">
+import { useAppStore } from "@/store/app";
+import { useDataStore } from "@/store/data";
+import { NeighbourhoodState } from "@/store/types";
 import { defineComponent } from "vue";
-import store from "@/store";
 
 export default defineComponent({
+  setup() {
+    const appStore = useAppStore();
+    const dataStore = useDataStore();
+
+    return {
+      appStore,
+      dataStore,
+    };
+  },
   methods: {
     removeCommunity(id: string) {
-      store.commit.removeCommunity(id);
+      this.dataStore.removeCommunity(id);
       this.$router.push({ name: "home" });
     },
     handleCommunityClick(communityId: string) {
       if (this.communityIsActive(communityId)) {
-        store.commit.toggleSidebar;
+        this.appStore.toggleSidebar;
       } else {
-        store.commit.setSidebar(true);
+        this.appStore.setSidebar(true);
         this.$router.push({ name: "community", params: { communityId } });
       }
     },
   },
   computed: {
-    communities() {
-      return store.getters.getCommunityNeighbourhoods;
+    communities(): NeighbourhoodState[] {
+      return this.dataStore.getCommunityNeighbourhoods;
     },
     communityIsActive() {
       return (id: string) => this.$route.params.communityId === id;

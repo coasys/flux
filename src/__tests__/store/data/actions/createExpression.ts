@@ -1,16 +1,14 @@
 import community from "../../../fixtures/community.json";
 import channel from "../../../fixtures/channel.json";
 import addChatExpressionLink from "../../../fixtures/addChatExpressionLink.json";
-import { createDirectStore } from "direct-vuex";
-import user from "@/store/user";
-import data from "@/store/data";
-import app from "@/store/app";
 import * as createExpression from "@/core/mutations/createExpression";
 import * as createLink from "@/core/mutations/createLink";
 import { ExpressionTypes } from "@/store/types";
+import { createPinia, Pinia, setActivePinia } from "pinia";
+import { useDataStore } from "@/store/data";
 
 describe("Create Expression", () => {
-  let store: any;
+  let store: Pinia;
 
   beforeEach(() => {
     // @ts-ignore
@@ -27,23 +25,20 @@ describe("Create Expression", () => {
         return addChatExpressionLink;
       });
 
-    // @ts-ignore
-    const directStore = createDirectStore({
-      modules: {
-        user,
-        data,
-        app,
-      },
-    });
-    store = directStore.store;
+    store = createPinia();
+    setActivePinia(store);
   });
 
   test("Create Expression - Failure", async () => {
-    await store.commit.addCommunity(community);
-    await store.commit.createChannel(channel);
+    const dataStore = useDataStore();
+
+    // @ts-ignore
+    await dataStore.addCommunity(community);
+    // @ts-ignore
+    await dataStore.createChannelMutation(channel);
 
     try {
-      await store.dispatch.createExpression({
+      await dataStore.createExpression({
         languageAddress: channel.neighbourhood.typedExpressionLanguages.find(
           (t) => t.expressionType === ExpressionTypes.ShortForm
         )!.languageAddress,
@@ -60,10 +55,14 @@ describe("Create Expression", () => {
   });
 
   test("Create Expression - Success", async () => {
-    await store.commit.addCommunity(community);
-    await store.commit.createChannel(channel);
+    const dataStore = useDataStore();
 
-    const link = await store.dispatch.createExpression({
+    // @ts-ignore
+    await dataStore.addCommunity(community);
+    // @ts-ignore
+    await dataStore.createChannelMutation(channel);
+
+    const link = await dataStore.createExpression({
       languageAddress: channel.neighbourhood.typedExpressionLanguages.find(
         (t) => t.expressionType === ExpressionTypes.ShortForm
       )!.languageAddress,

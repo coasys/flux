@@ -38,10 +38,17 @@ import { defineComponent } from "vue";
 import { ThemeState } from "@/store/types";
 import ThemeEditor from "./ThemeEditor.vue";
 import Privacy from "./Privacy.vue";
-import store from "@/store";
+import { useAppStore } from "@/store/app";
 
 export default defineComponent({
   components: { ThemeEditor, Privacy },
+  setup() {
+    const appStore = useAppStore();
+
+    return {
+      appStore,
+    };
+  },
   data() {
     return {
       currentView: "theme-editor",
@@ -49,12 +56,12 @@ export default defineComponent({
   },
   methods: {
     updateGlobalTheme(val: ThemeState) {
-      store.dispatch.updateGlobalTheme(val);
+      this.appStore.updateGlobalTheme(val);
     },
   },
   computed: {
     theme(): ThemeState {
-      return store.state.app.globalTheme;
+      return this.appStore.globalTheme;
     },
   },
 });

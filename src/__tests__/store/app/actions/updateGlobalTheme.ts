@@ -1,33 +1,30 @@
 import community from "../../../fixtures/community.json";
-import { createDirectStore } from "direct-vuex";
-import user from "@/store/user";
-import data from "@/store/data";
-import app from "@/store/app";
 import * as setTheme from "@/utils/themeHelper";
+import { createPinia, Pinia, setActivePinia } from "pinia";
+import { useDataStore } from "@/store/data";
+import { useAppStore } from "@/store/app";
 
 describe("Update Global Theme", () => {
-  let store: any;
+  let store: Pinia;
 
   beforeEach(() => {
     // @ts-ignore
     jest.spyOn(setTheme, "setTheme").mockReturnValue(undefined);
 
-    // @ts-ignore
-    const directStore = createDirectStore({
-      modules: {
-        user,
-        data,
-        app,
-      },
-    });
-    store = directStore.store;
+    store = createPinia();
+
+    setActivePinia(store);
   });
 
   test("Update global theme", () => {
-    store.commit.addCommunity(community);
+    const dataStore = useDataStore();
+    const appStore = useAppStore();
 
-    expect(store.state.app.currentTheme).toBe("global");
-    expect(store.state.app.globalTheme).toStrictEqual({
+    // @ts-ignore
+    dataStore.addCommunity(community);
+
+    expect(appStore.currentTheme).toBe("global");
+    expect(appStore.globalTheme).toStrictEqual({
       name: "light",
       fontFamily: "Poppins",
       hue: 270,
@@ -35,14 +32,15 @@ describe("Update Global Theme", () => {
       fontSize: "md",
     });
 
-    store.dispatch.updateGlobalTheme({
+    // @ts-ignore
+    appStore.updateGlobalTheme({
       name: "test",
       fontFamily: "Arial",
       hue: 90,
     });
 
-    expect(store.state.app.currentTheme).toBe("global");
-    expect(store.state.app.globalTheme).toStrictEqual({
+    expect(appStore.currentTheme).toBe("global");
+    expect(appStore.globalTheme).toStrictEqual({
       name: "test",
       fontFamily: "Arial",
       hue: 90,
