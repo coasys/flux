@@ -65,7 +65,7 @@ function pollData(params) {
       console.log("Polling ", retries, name, " Got response: ", res);
 
       // post data if we have a result
-      if (res[dataKey]) {
+      if (res && res[dataKey]) {
         // if we have defined a retry amount,
         // it means we want it to quit when we have a response
         // TODO: Maybe make this more explicit
