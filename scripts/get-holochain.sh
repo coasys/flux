@@ -11,4 +11,4 @@ echo "Getting holochain from GitHub"
 [ ! -d "./resources/temp/holochain" ] && git clone https://github.com/holochain/holochain ./resources/temp/holochain
 
 cd ./resources/temp/holochain && git checkout $HOLOCHAIN_VER
-cd ../temp/lair && git checkout $LAIR_VERSION
+cd ../lair && git checkout $LAIR_VERSION
