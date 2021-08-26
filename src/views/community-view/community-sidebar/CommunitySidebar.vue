@@ -10,7 +10,7 @@
     <button slot="trigger" class="community-sidebar__header-button">
       <j-avatar
         style="--j-avatar-size: 30px"
-        :src="community.neighbourhood.image"
+        :src="community.neighbourhood.image || null"
         :initials="community.neighbourhood.name.charAt(0)"
       />
       <div class="community-info">
