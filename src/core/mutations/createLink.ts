@@ -1,25 +1,17 @@
-import { apolloClient } from "@/main";
-import ad4m from "@perspect3vism/ad4m-executor";
+import unwrapApolloResult from "@/utils/unwrapApolloResult";
 import { ADD_LINK } from "../graphql_queries";
+import { apolloClient } from "@/utils/setupApolloClient";
+import type { Link, LinkExpression } from "@perspect3vism/ad4m";
 
-export function createLink(
+export async function createLink(
   perspective: string,
-  link: ad4m.Link
-): Promise<ad4m.LinkExpression> {
-  return new Promise((resolve, reject) => {
-    apolloClient
-      .mutate<{ addLink: ad4m.LinkExpression }>({
-        mutation: ADD_LINK,
-        variables: {
-          perspectiveUUID: perspective,
-          link: JSON.stringify(link),
-        },
-      })
-      .then((result) => {
-        resolve(result.data!.addLink);
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
+  link: Link
+): Promise<LinkExpression> {
+  const { perspectiveAddLink } = unwrapApolloResult(
+    await apolloClient.mutate({
+      mutation: ADD_LINK,
+      variables: { uuid: perspective, link },
+    })
+  );
+  return perspectiveAddLink;
 }

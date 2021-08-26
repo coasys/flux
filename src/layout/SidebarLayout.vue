@@ -21,9 +21,17 @@
 </template>
 
 <script lang="ts">
+import { useAppStore } from "@/store/app";
 import { defineComponent } from "vue";
 
 export default defineComponent({
+  setup() {
+    const appStore = useAppStore();
+
+    return {
+      appStore,
+    };
+  },
   data() {
     return {
       isDragging: false,
@@ -32,8 +40,8 @@ export default defineComponent({
     };
   },
   computed: {
-    open() {
-      return this.$store.state.ui.showSidebar;
+    open(): boolean {
+      return this.appStore.showSidebar;
     },
   },
   methods: {
@@ -78,17 +86,20 @@ export default defineComponent({
 .sidebar-layout__drawer {
   height: 100%;
   width: 300px;
+  min-width: 200px;
+  max-width: 33vw;
   background: var(--app-drawer-bg-color);
   overflow-y: auto;
   position: relative;
-  transition: all 0.2s ease;
 }
 .sidebar-layout--closed .sidebar-layout__drawer {
+  min-width: 0px;
   width: 0px !important;
 }
 .sidebar-layout__main {
   width: 100%;
   max-height: 100vh;
+  overflow-y: auto;
   flex: 1;
   position: relative;
   background: var(--app-main-content-bg-color);
@@ -107,7 +118,7 @@ export default defineComponent({
 }
 .sidebar-layout__resize-handle:hover,
 .sidebar-layout--is-dragging .sidebar-layout__resize-handle {
-  border-right: 1px solid var(--j-focus-color);
-  background: var(--j-focus-color);
+  border-right: 1px solid var(--j-color-focus);
+  background: var(--j-color-focus);
 }
 </style>

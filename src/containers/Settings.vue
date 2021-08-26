@@ -1,105 +1,86 @@
 <template>
-  <j-flex direction="column" gap="700">
-    <j-text variant="heading">Settings</j-text>
-    <j-flex a="center" j="between">
-      <j-text variant="label">Theme</j-text>
-      <j-select
-        :value="theme.name"
-        @change="(e) => setTheme({ name: e.target.value })"
-      >
-        <j-menu-item value="">Light</j-menu-item>
-        <j-menu-item value="dark">Dark</j-menu-item>
-        <j-menu-item value="black">Black</j-menu-item>
-        <j-menu-item value="rainbow">Rainbow</j-menu-item>
-        <j-menu-item value="cyberpunk">Cyberpunk</j-menu-item>
-        <j-menu-item value="90s">90s</j-menu-item>
-      </j-select>
-    </j-flex>
-    <j-flex a="center" j="between">
-      <j-text variant="label">Font family</j-text>
-      <j-tabs
-        :value="theme.fontFamily"
-        @change="(e) => setTheme({ fontFamily: e.target.value })"
-      >
-        <j-tab-item value="default">Default</j-tab-item>
-        <j-tab-item value="system">System</j-tab-item>
-        <j-tab-item value="monospace">Monospace</j-tab-item>
-      </j-tabs>
-    </j-flex>
-    <j-flex a="center" j="between">
-      <j-text variant="label">Primary color</j-text>
-      <div class="colors">
-        <button
-          v-for="n in [0, 50, 100, 150, 200, 250, 270, 300]"
-          :key="n"
-          class="color-button"
-          :class="{ 'color-button--active': theme.hue === n }"
-          @click="() => setTheme({ hue: n })"
-          :style="`--hue: ${n}`"
-        ></button>
+  <j-box p="800">
+    <j-box pl="500" pb="800">
+      <j-text variant="heading-sm">Settings</j-text>
+    </j-box>
+    <div class="settings">
+      <aside class="settings__sidebar">
+        <j-tabs
+          full
+          vertical
+          :value="currentView"
+          @change="(e) => (currentView = e.target.value)"
+        >
+          <j-tab-item value="theme-editor">
+            <j-icon size="sm" name="eye" slot="start" />
+            Appearance
+          </j-tab-item>
+          <j-tab-item value="privacy">
+            <j-icon size="sm" name="lock" slot="start" />
+            Privacy
+          </j-tab-item>
+        </j-tabs>
+      </aside>
+      <div class="settings__content">
+        <theme-editor
+          v-if="currentView === 'theme-editor'"
+          @update="updateGlobalTheme"
+          :theme="theme"
+        />
+        <privacy v-if="currentView === 'privacy'" />
       </div>
-    </j-flex>
-    <j-flex a="center" j="between">
-      <j-text variant="label">Saturation</j-text>
-      <j-tabs
-        :value="theme.saturation"
-        @change="(e) => setTheme({ saturation: e.target.value })"
-      >
-        <j-tab-item value="30">Weak</j-tab-item>
-        <j-tab-item value="60">Normal</j-tab-item>
-        <j-tab-item value="100">Vibrant</j-tab-item>
-      </j-tabs>
-    </j-flex>
-    <j-flex a="center" j="between">
-      <j-text variant="label">Clear State</j-text>
-      <j-button size="md" variant="primary" @click="cleanState">
-        <j-icon size="sm" name="trash"></j-icon>
-        Clear state
-      </j-button>
-    </j-flex>
-    <div>
-      <j-button size="lg" variant="primary" @click="updateTheme">
-        Done
-      </j-button>
     </div>
-  </j-flex>
+  </j-box>
 </template>
 
 <script lang="ts">
-import { ThemeState } from "@/store";
 import { defineComponent } from "vue";
-import { mapMutations } from "vuex";
+import { ThemeState } from "@/store/types";
+import ThemeEditor from "./ThemeEditor.vue";
+import Privacy from "./Privacy.vue";
+import { useAppStore } from "@/store/app";
 
 export default defineComponent({
-  emits: ["cancel", "submit"],
+  components: { ThemeEditor, Privacy },
+  setup() {
+    const appStore = useAppStore();
+
+    return {
+      appStore,
+    };
+  },
   data() {
     return {
-      hue: 270,
-      saturation: 50,
-      fontFamily: "",
-      themeName: "",
-      themeHue: "",
+      currentView: "theme-editor",
     };
   },
   methods: {
-    ...mapMutations(["setTheme"]),
-    updateTheme() {
-      this.$emit("submit");
-    },
-    cleanState() {
-      console.log("Sending clean-state command");
-      window.api.send("cleanState");
+    updateGlobalTheme(val: ThemeState) {
+      this.appStore.updateGlobalTheme(val);
     },
   },
   computed: {
     theme(): ThemeState {
-      return this.$store.state.ui.theme;
+      return this.appStore.globalTheme;
     },
   },
 });
 </script>
 
 <style scoped>
+.settings {
+  display: grid;
+  gap: var(--j-space-1000);
+  grid-template-columns: 1fr 4fr;
+  overflow-y: auto;
+}
+
+.settings__sidebar {
+  position: sticky;
+  top: 0;
+  left: 0;
+}
+
 .color-button {
   --hue: 0;
   --saturation: 80%;

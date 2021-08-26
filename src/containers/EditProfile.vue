@@ -1,35 +1,45 @@
 <template>
-  <j-flex direction="column" gap="700">
-    <j-text variant="heading">Edit profile</j-text>
-    <avatar-upload
-      :hash="userDid"
-      :value="profilePicture"
-      @change="(url) => (profilePicture = url)"
-    ></avatar-upload>
-    <j-input
-      size="lg"
-      label="Username"
-      @keydown.enter="updateProfile"
-      :value="userProfile?.username"
-      @input="(e) => (username = e.target.value)"
-    ></j-input>
-    <div>
-      <j-button size="lg" @click="$emit('cancel')"> Cancel </j-button>
-      <j-button size="lg" variant="primary" @click="updateProfile">
-        Save
-      </j-button>
-    </div>
-  </j-flex>
+  <j-box p="800">
+    <j-flex direction="column" gap="700">
+      <j-text variant="heading-sm">Edit profile</j-text>
+      <avatar-upload
+        :hash="userDid"
+        :value="profilePicture"
+        @change="(url) => (profilePicture = url)"
+      ></avatar-upload>
+      <j-input
+        size="lg"
+        label="Username"
+        @keydown.enter="updateProfile"
+        :value="userProfile?.username"
+        @input="(e) => (username = e.target.value)"
+      ></j-input>
+      <div>
+        <j-button size="lg" @click="$emit('cancel')"> Cancel </j-button>
+        <j-button size="lg" variant="primary" @click="updateProfile">
+          Save
+        </j-button>
+      </div>
+    </j-flex>
+  </j-box>
 </template>
 
 <script lang="ts">
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { defineComponent } from "vue";
-import { Profile } from "@/store";
+import { Profile } from "@/store/types";
+import { useUserStore } from "@/store/user";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
   components: { AvatarUpload },
+  setup() {
+    const userStore = useUserStore();
+
+    return {
+      userStore,
+    };
+  },
   data() {
     return {
       isUpdatingProfile: false,
@@ -39,10 +49,10 @@ export default defineComponent({
   },
   computed: {
     userProfile(): Profile {
-      return this.$store.state.userProfile || {};
+      return this.userStore.profile!;
     },
     userDid(): string {
-      return this.$store.state.userDid;
+      return this.userStore.agent.did!;
     },
   },
   watch: {
@@ -62,8 +72,8 @@ export default defineComponent({
   methods: {
     updateProfile() {
       this.isUpdatingProfile = true;
-      this.$store
-        .dispatch("updateProfile", {
+      this.userStore
+        .updateProfile({
           username: this.username,
           profilePicture: this.profilePicture,
         })

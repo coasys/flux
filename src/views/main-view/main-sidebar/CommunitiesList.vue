@@ -1,64 +1,76 @@
 <template>
   <div class="left-nav__communities-list">
+    <div class="left-nav__divider"></div>
     <j-tooltip
       v-for="community in communities"
-      :key="community.perspective"
+      :key="community.perspective.uuid"
       :title="community.name"
     >
-      <j-avatar
-        :selected="communityIsActive(community.perspective)"
-        size="xl"
-        :src="require('@/assets/images/junto_app_icon.png')"
-        initials="false"
-        @click="() => handleCommunityClick(community.perspective)"
-      ></j-avatar>
+      <j-popover event="contextmenu">
+        <j-avatar
+          slot="trigger"
+          class="left-nav__community-item"
+          :selected="communityIsActive(community.perspective.uuid)"
+          size="xl"
+          :src="community.image || null"
+          :initials="community.name.charAt(0).toUpperCase()"
+          @click="() => handleCommunityClick(community.perspective.uuid)"
+        ></j-avatar>
+        <j-menu
+          slot="content"
+          @click="() => removeCommunity(community.perspective.uuid)"
+        >
+          <j-menu-item>Remove community</j-menu-item>
+        </j-menu>
+      </j-popover>
     </j-tooltip>
-
-    <j-tooltip title="Create community">
+    <j-tooltip title="Create a community">
       <j-button
-        @click="showModal = true"
-        variant="primary"
+        @click="() => appStore.setShowCreateCommunity(true)"
         square
         circle
         size="xl"
+        variant="subtle"
       >
         <j-icon size="lg" name="plus"></j-icon>
       </j-button>
     </j-tooltip>
-
-    <j-modal :open="showModal" @toggle="(e) => (showModal = e.target.open)">
-      <create-community
-        @submit="showModal = false"
-        @cancel="showModal = false"
-      />
-    </j-modal>
   </div>
 </template>
 
 <script lang="ts">
+import { useAppStore } from "@/store/app";
+import { useDataStore } from "@/store/data";
+import { NeighbourhoodState } from "@/store/types";
 import { defineComponent } from "vue";
-import CreateCommunity from "@/containers/CreateCommunity.vue";
 
 export default defineComponent({
-  components: { CreateCommunity },
-  data() {
+  setup() {
+    const appStore = useAppStore();
+    const dataStore = useDataStore();
+
     return {
-      showModal: false,
+      appStore,
+      dataStore,
     };
   },
   methods: {
+    removeCommunity(id: string) {
+      this.dataStore.removeCommunity(id);
+      this.$router.push({ name: "home" });
+    },
     handleCommunityClick(communityId: string) {
       if (this.communityIsActive(communityId)) {
-        this.$store.commit("toggleSidebar");
+        this.appStore.toggleSidebar;
       } else {
-        this.$store.commit("setSidebar", true);
+        this.appStore.setSidebar(true);
         this.$router.push({ name: "community", params: { communityId } });
       }
     },
   },
   computed: {
-    communities() {
-      return this.$store.state.communities;
+    communities(): NeighbourhoodState[] {
+      return this.dataStore.getCommunityNeighbourhoods;
     },
     communityIsActive() {
       return (id: string) => this.$route.params.communityId === id;
@@ -77,10 +89,19 @@ export default defineComponent({
   align-items: center;
   overflow-y: scroll;
   overflow-x: visible;
-  margin-bottom: 25vh;
 
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+.left-nav__community-item {
+  cursor: pointer;
+}
+
+.left-nav__divider {
+  width: 80%;
+  margin: 0 auto;
+  border-top: 1px solid var(--j-border-color);
 }
 </style>

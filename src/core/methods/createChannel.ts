@@ -1,89 +1,114 @@
-import { addPerspective } from "@/core/mutations/addPerspective";
 import { createLink } from "@/core/mutations/createLink";
-import { publishSharedPerspective } from "@/core/mutations/publishSharedPerspective";
-import { getPerspective } from "@/core/queries/getPerspective";
 import {
   ChannelState,
   FeedType,
   MembraneType,
   JuntoExpressionReference,
-} from "@/store";
+} from "@/store/types";
+import { v4 } from "uuid";
+import path from "path";
+import { Perspective, Link } from "@perspect3vism/ad4m";
+import type { PerspectiveHandle } from "@perspect3vism/ad4m";
+import { addPerspective } from "../mutations/addPerspective";
+import { createUniqueHolochainLanguage } from "../mutations/createUniqueHolochainLanguage";
+import { createNeighbourhood } from "../mutations/createNeighbourhood";
+import { createNeighbourhoodMeta } from "./createNeighbourhoodMeta";
 
-export async function createChannel(
-  channelName: string,
-  description: string,
-  communityUuid: string,
-  sourcePerspective: string,
-  sourcePerspectiveLinkLanguage: string,
-  expressionLangs: string[],
-  membraneType: MembraneType,
-  typedExpressionLanguages: JuntoExpressionReference[]
-): Promise<ChannelState> {
-  try {
-    const channelPerspective = await addPerspective(channelName);
-    console.log("Created channel perspective with result", channelPerspective);
+interface ChannelProps {
+  channelName: string;
+  languagePath: string;
+  creatorDid: string;
+  sourcePerspective: PerspectiveHandle;
+  membraneType: MembraneType;
+  typedExpressionLanguages: JuntoExpressionReference[];
+}
 
-    //Publish the perspective and add a social-context backend
-    const shareChannelPerspective = await publishSharedPerspective({
-      uuid: channelPerspective.uuid!,
+export async function createChannel({
+  channelName,
+  languagePath,
+  creatorDid,
+  sourcePerspective,
+  membraneType,
+  typedExpressionLanguages,
+}: ChannelProps): Promise<ChannelState> {
+  const perspective = await addPerspective(channelName);
+  console.debug("Created new perspective with result", perspective);
+  const socialContextLanguage = await createUniqueHolochainLanguage(
+    path.join(languagePath, "social-context-channel"),
+    "social-context",
+    v4().toString()
+  );
+  console.debug(
+    "Created new social context language wuth result",
+    socialContextLanguage
+  );
+
+  //Publish perspective
+  const metaLinks = await createNeighbourhoodMeta(
+    channelName,
+    "",
+    creatorDid,
+    typedExpressionLanguages
+  );
+
+  const meta = new Perspective(metaLinks);
+
+  const neighbourhood = await createNeighbourhood(
+    perspective.uuid,
+    socialContextLanguage.address,
+    meta
+  );
+  console.debug("Create a neighbourhood with result", neighbourhood);
+
+  const channelLink = new Link({
+    source: `${sourcePerspective.sharedUrl}://self`,
+    target: neighbourhood,
+    predicate: "sioc://has_space",
+  });
+  const addLinkToChannel = await createLink(
+    sourcePerspective.uuid,
+    channelLink
+  );
+  console.debug(
+    "Created new link on source social-context with result",
+    addLinkToChannel
+  );
+
+  //Add link on channel social context declaring type
+  const addChannelTypeLink = await createLink(perspective.uuid, {
+    source: `${neighbourhood}://self`,
+    target: "sioc://space",
+    predicate: "rdf://type",
+  });
+  console.log(
+    "Added link on channel social-context with result",
+    addChannelTypeLink
+  );
+
+  return {
+    neighbourhood: {
       name: channelName,
-      description: description,
-      type: "holochainChannel",
-      uid: communityUuid,
-      requiredExpressionLanguages: expressionLangs,
-      allowedExpressionLanguages: expressionLangs,
-    });
-    console.log(
-      "Shared channel perspective with result",
-      shareChannelPerspective
-    );
-
-    //Get the perspective again so that we have the SharedPerspective URL
-    const perspective = await getPerspective(channelPerspective.uuid!);
-    console.log("Got the channel perspective back with result", perspective);
-
-    //Link from source social context to new sharedperspective
-    const addLinkToChannel = await createLink(sourcePerspective, {
-      source: `${sourcePerspectiveLinkLanguage}://self`,
-      target: perspective.sharedURL!,
-      predicate: "sioc://has_space",
-    });
-    console.log(
-      "Added link from source social context to new SharedPerspective with result",
-      addLinkToChannel
-    );
-
-    //Add link on channel social context declaring type
-    const addChannelTypeLink = await createLink(channelPerspective.uuid!, {
-      source: `${shareChannelPerspective.linkLanguages![0]!.address!}://self`,
-      target: "sioc://space",
-      predicate: "rdf://type",
-    });
-    console.log(
-      "Added link on channel social context with result",
-      addChannelTypeLink
-    );
-
-    const now = new Date();
-
-    return {
-      name: channelPerspective.name!,
-      hasNewMessages: false,
-      perspective: channelPerspective.uuid!,
-      type: FeedType.Signaled,
-      createdAt: now,
-      linkLanguageAddress: shareChannelPerspective.linkLanguages![0]!.address!,
+      description: "",
+      creatorDid,
+      perspective: perspective,
+      typedExpressionLanguages: typedExpressionLanguages,
+      neighbourhoodUrl: neighbourhood,
+      membraneType: membraneType,
+      linkedPerspectives: [],
+      linkedNeighbourhoods: [],
+      members: [],
       currentExpressionLinks: {},
       currentExpressionMessages: {},
-      sharedPerspectiveUrl: perspective.sharedURL!,
-      membraneType: membraneType,
-      groupExpressionRef: "",
-      typedExpressionLanguages: typedExpressionLanguages,
+      createdAt: new Date().toISOString(),
+      membraneRoot: sourcePerspective.uuid,
+    },
+    state: {
+      perspectiveUuid: perspective.uuid,
+      hasNewMessages: false,
+      feedType: FeedType.Signaled,
       notifications: {
         mute: false,
       },
-    };
-  } catch (error) {
-    throw new Error(error);
-  }
+    },
+  } as ChannelState;
 }

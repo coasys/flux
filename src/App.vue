@@ -38,19 +38,24 @@
 <script lang="ts">
 import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
-import { useSubscription } from "@vue/apollo-composable";
-import { defineComponent, watch, computed } from "vue";
-import { AD4M_SIGNAL } from "@/core/graphql_queries";
-import { useStore } from "vuex";
+import { gql } from "@apollo/client/core";
+import { defineComponent, computed, watch } from "vue";
 import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
-import ad4m from "@perspect3vism/ad4m-executor";
-import { AGENT_SERVICE_STATUS, QUERY_EXPRESSION } from "@/core/graphql_queries";
-import { ModalsState, ToastState } from "@/store";
-import parseSignalAsLink from "@/core/utils/parseSignalAsLink";
-import showMessageNotification from "@/utils/showMessageNotification";
+import { AGENT_STATUS, GET_EXPRESSION } from "@/core/graphql_queries";
+import {
+  ApplicationState,
+  ModalsState,
+  NeighbourhoodState,
+  ToastState,
+} from "@/store/types";
 import { print } from "graphql/language/printer";
+import { AgentStatus, LinkExpression } from "@perspect3vism/ad4m";
+import { apolloClient } from "./utils/setupApolloClient";
+import { useUserStore } from "./store/user";
+import { useAppStore } from "./store/app";
+import { useDataStore } from "./store/data";
 
 declare global {
   interface Window {
@@ -63,7 +68,9 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const route = useRoute();
-    const store = useStore();
+    const userStore = useUserStore();
+    const appStore = useAppStore();
+    const dataStore = useDataStore();
 
     onError((error) => {
       console.log("Got global graphql error, logging with error", error);
@@ -71,214 +78,203 @@ export default defineComponent({
         // can use error.operation.operationName to single out a query type.
         logErrorMessages(error);
 
-        store.commit("showDangerToast", {
+        appStore.showDangerToast({
           message: JSON.stringify(error),
         });
       }
     });
 
-    //Ad4m signal watcher
-    const { result } = useSubscription<{ signal: ad4m.Signal }>(AD4M_SIGNAL);
-
     //Watch for agent unlock to set off running queries
-    store.watch(
-      (state) => state.agentUnlocked,
-      async (newValue) => {
-        console.log("agent unlocked changed to", newValue);
-        if (newValue) {
-          store.commit("updateApplicationStartTime", new Date());
-        }
-        if (newValue) {
-          store.dispatch("loadExpressionLanguages");
-        } else {
-          router.push({ name: "signup" });
-        }
-      },
-      { immediate: true }
-    );
-
-    //Watch for incoming signals from holochain - an incoming signal should mean a DM is inbound
-    watch(result, async (data) => {
-      console.log("GOT INCOMING MESSAGE SIGNAL");
-      //Parse out the signal data to its link form and validate the link structure
-      const linkData = parseSignalAsLink(data.signal);
-      if (linkData) {
-        const link = linkData.link;
-        const language = linkData.language;
-        if (link.data!.predicate! == "sioc://content_of") {
-          //Start expression web worker to try and get the expression data pointed to in link target
-          const expressionWorker = new Worker("pollingWorker.js");
-
-          expressionWorker.postMessage({
-            retry: expressionGetRetries,
-            interval: expressionGetDelayMs,
-            query: print(QUERY_EXPRESSION),
-            variables: { url: link.data!.target! },
-            name: "Expression signal get",
-          });
-
-          expressionWorker.onerror = function (e) {
-            throw new Error(e.toString());
-          };
-
-          expressionWorker.addEventListener("message", (e) => {
-            const expression = e.data.expression;
-            if (expression) {
-              //Expression is not null, which means we got the data and we can terminate the loop
-              expressionWorker.terminate();
-              const message = JSON.parse(expression!.data!);
-
-              console.log("FOUND EXPRESSION FOR SIGNAL");
-              //Add the expression to the store
-              store.commit("addExpressionAndLinkFromLanguageAddress", {
-                linkLanguage: language,
-                link: link,
-                message: expression,
-              });
-
-              showMessageNotification(
-                router,
-                route,
-                store,
-                language,
-                expression!.author!.did!,
-                message.body
-              );
-
-              //Add UI notification on the channel to notify that there is a new message there
-              store.commit("setHasNewMessages", {
-                channelId:
-                  store.getters.getChannelFromLinkLanguage(language)
-                    .perspective,
-                value: true,
-              });
-            }
-          });
-        }
+    userStore.$subscribe((mutation, state) => {
+      if (state.agent.isUnlocked) {
+        appStore.setApplicationStartTime(new Date());
+        dataStore.loadExpressionLanguages();
+      } else {
+        router.push({
+          name: userStore.agent.isInitialized ? "login" : "signup",
+        });
       }
     });
 
-    return {
-      toast: computed(() => store.state.ui.toast),
-      setToast: (payload: ToastState) => store.commit("setToast", payload),
+    //Watch for incoming signals from holochain - an incoming signal should mean a DM is inbound
+    const newLinkHandler = async (
+      link: LinkExpression,
+      perspective: string
+    ) => {
+      console.debug("GOT INCOMING MESSAGE SIGNAL", link, perspective);
+      if (link.data!.predicate! === "sioc://content_of") {
+        //Start expression web worker to try and get the expression data pointed to in link target
+        const expressionWorker = new Worker("pollingWorker.js");
+
+        expressionWorker.postMessage({
+          retry: expressionGetRetries,
+          interval: expressionGetDelayMs,
+          query: print(GET_EXPRESSION),
+          variables: { url: link.data!.target! },
+          name: "Expression signal get",
+          dataKey: "expression",
+        });
+
+        expressionWorker.onerror = function (e) {
+          throw new Error(e.toString());
+        };
+
+        expressionWorker.addEventListener("message", (e) => {
+          const expression = e.data.expression;
+          const message = JSON.parse(expression!.data!);
+
+          console.debug("FOUND EXPRESSION FOR SIGNAL");
+          //Add the expression to the store
+          dataStore.addExpressionAndLink({
+            channelId: perspective,
+            link: link,
+            message: expression,
+          });
+
+          dataStore.showMessageNotification({
+            router,
+            route,
+            perspectiveUuid: perspective,
+            authorDid: expression!.author,
+            message: message.body,
+          });
+
+          //Add UI notification on the channel to notify that there is a new message there
+          dataStore.setHasNewMessages({
+            channelId: perspective,
+            value: true,
+          });
+        });
+      }
     };
-  },
-  watch: {
-    "ui.theme.hue": {
-      handler: function (hue) {
-        document.documentElement.style.setProperty(
-          "--j-color-primary-hue",
-          hue
-        );
-      },
-      immediate: true,
-    },
-    "ui.theme.saturation": {
-      handler: function (saturation) {
-        document.documentElement.style.setProperty(
-          "--j-color-saturation",
-          saturation + "%"
-        );
-      },
-      immediate: true,
-    },
-    "ui.theme.name": {
-      handler: function (themeName) {
-        if (!themeName) {
-          document.documentElement.setAttribute("theme", "");
-        } else {
-          import(`./themes/${themeName}.css`);
-          document.documentElement.setAttribute("theme", themeName);
+
+    let watching: string[] = [];
+    watch(
+      dataStore.neighbourhoods,
+      async (newValue: { [perspectiveUuid: string]: NeighbourhoodState }) => {
+        for (let [k, v] of Object.entries(newValue)) {
+          if (watching.filter((val) => val == k).length == 0) {
+            console.log("Starting watcher on perspective", k);
+            watching.push(k);
+            apolloClient
+              .subscribe({
+                query: gql` subscription {
+                  perspectiveLinkAdded(uuid: "${v.perspective.uuid}") {
+                    author
+                    timestamp
+                    data { source, predicate, target }
+                    proof { valid, invalid, signature, key }
+                  }
+                }`,
+              })
+              .subscribe({
+                next: (result) => {
+                  console.debug(
+                    "Got new link with data",
+                    result.data,
+                    "and channel",
+                    v
+                  );
+                  newLinkHandler(
+                    result.data.perspectiveLinkAdded,
+                    v.perspective.uuid
+                  );
+                },
+                error: (e) => {
+                  throw Error(e);
+                },
+              });
+          }
         }
       },
-      immediate: true,
-    },
-    "ui.theme.fontFamily": {
-      handler: function (fontFamily: string) {
-        const font = {
-          default: `"Avenir", sans-serif`,
-          monospace: `monospace`,
-          system: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
-        };
-        document.documentElement.style.setProperty(
-          "--j-font-family",
-          // @ts-ignore
-          font[fontFamily]
-        );
-      },
-      immediate: true,
-    },
+      { immediate: true, deep: true }
+    );
+
+    return {
+      toast: computed(() => appStore.toast),
+      setToast: (payload: ToastState) => appStore.setToast(payload),
+      userStore,
+      appStore,
+      dataStore,
+    };
   },
   computed: {
-    ui() {
-      return this.$store.state.ui;
+    ui(): ApplicationState {
+      return this.appStore.$state;
     },
     globalError(): { show: boolean; message: string } {
-      return this.$store.state.ui.globalError;
+      return this.appStore.globalError;
     },
     modals(): ModalsState {
-      return this.$store.state.ui.modals;
+      return this.appStore.modals;
     },
   },
   beforeCreate() {
+    this.dataStore.clearMessages();
     //Reset globalError & loading states in case application was exited with these states set to true before
-    this.$store.commit("setGlobalError", {
+    this.appStore.setGlobalError({
       show: false,
       message: "",
     });
-    this.$store.commit("setGlobalLoading", false);
+    this.appStore.setGlobalLoading(false);
 
     window.api.send("getLangPath");
 
+    window.api.receive("unlockedStateOff", () => {
+      this.userStore.updateAgentLockState(false);
+    });
+
+    window.api.receive("clearMessages", () => {
+      this.dataStore.clearMessages();
+    });
+
     window.api.receive("getLangPathResponse", (data: string) => {
       // console.log(`Received language path from main thread: ${data}`);
-      this.$store.commit("setLanguagesPath", data);
+      this.appStore.setLanguagesPath(data);
     });
 
     window.api.receive("windowState", (data: string) => {
       console.log(`setWindowState: ${data}`);
-      this.$store.commit("setWindowState", data);
+      //@ts-ignore
+      this.appStore.setWindowState(data);
     });
 
     window.api.receive("update_available", () => {
-      this.$store.commit("updateUpdateState", { updateState: "available" });
+      this.appStore.setUpdateState({ updateState: "available" });
     });
 
     window.api.receive("update_not_available", () => {
-      this.$store.commit("updateUpdateState", { updateState: "not-available" });
+      this.appStore.setUpdateState({ updateState: "not-available" });
     });
 
     window.api.receive("update_downloaded", () => {
-      this.$store.commit("updateUpdateState", { updateState: "downloaded" });
+      this.appStore.setUpdateState({ updateState: "downloaded" });
     });
 
-    window.api.receive("download_progress", (data: any) => {
-      this.$store.commit("updateUpdateState", { updateState: "downloading" });
+    window.api.receive("download_progress", () => {
+      this.appStore.setUpdateState({ updateState: "downloading" });
     });
 
     window.api.receive("setGlobalLoading", (val: boolean) => {
-      this.$store.commit("setGlobalLoading", val);
+      this.appStore.setGlobalLoading(val);
     });
 
     window.api.receive(
       "globalError",
       (payload: { show: boolean; message: string }) => {
-        this.$store.commit("setGlobalError", payload);
+        this.appStore.setGlobalError(payload);
       }
     );
 
     const { onResult, onError } = useQuery<{
-      agent: ad4m.AgentService;
-    }>(AGENT_SERVICE_STATUS);
+      agentStatus: AgentStatus;
+    }>(AGENT_STATUS);
     onResult((val) => {
-      const isInit = val.data.agent.isInitialized!;
-      const isUnlocked = val.data.agent.isUnlocked!;
-      this.$store.commit("updateAgentInitState", isInit);
-      this.$store.commit("updateAgentLockState", isUnlocked);
-      if (isInit == true) {
+      this.userStore.updateAgentStatus(val.data.agentStatus);
+      if (val.data.agentStatus.isInitialized == true) {
         //Get database perspective from store
-        let databasePerspective = this.$store.getters.getDatabasePerspective;
-        if (databasePerspective == "") {
+        let databasePerspective = this.appStore.getDatabasePerspective;
+        if (!databasePerspective) {
           console.warn(
             "Does not have databasePerspective in store but has already been init'd! Add logic for getting databasePerspective as found with name"
           );
@@ -314,15 +310,65 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+::-webkit-scrollbar {
+  width: var(--j-scrollbar-width, 6px);
+}
+
+::-webkit-scrollbar-track {
+  background-image: var(--j-scrollbar-background-image, none);
+  background: var(--j-scrollbar-background, transparent);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--j-scrollbar-corner-background, #dfdfdf);
+}
+
+::-webkit-scrollbar-thumb {
+  box-shadow: var(--j-scrollbar-thumb-box-shadow, none);
+  border-radius: var(--j-scrollbar-thumb-border-radius, 300px);
+  background-color: var(
+    --j-scrollbar-thumb-background,
+    rgba(180, 180, 180, 0.4)
+  );
+}
+
 :root {
-  --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+  --app-main-sidebar-bg-color: var(--j-color-white);
   --app-main-sidebar-border-color: var(--j-border-color);
-  --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+  --app-drawer-bg-color: var(--j-color-white);
   --app-drawer-border-color: var(--j-border-color);
   --app-channel-bg-color: var(--j-color-white);
   --app-channel-border-color: var(--j-border-color);
   --app-channel-header-bg-color: var(--j-color-white);
   --app-channel-footer-bg-color: var(--j-color-white);
+}
+
+html[font-size="sm"] {
+  font-size: 13px;
+}
+
+html[font-size="md"] {
+  font-size: 14px;
+}
+
+html[font-size="lg"] {
+  font-size: 15px;
+}
+
+@media (min-width: 800px) {
+  html[font-size="sm"] {
+    font-size: 14px;
+  }
+  html[font-size="md"] {
+    font-size: 16px;
+  }
+  html[font-size="lg"] {
+    font-size: 17px;
+  }
+}
+
+j-avatar::part(base) {
+  transition: box-shadow 0.2s ease;
 }
 
 .global-loading {

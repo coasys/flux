@@ -1,49 +1,51 @@
-import { ChannelState, FeedType, MembraneType } from "@/store";
-import { installSharedPerspective } from "@/core/mutations/installSharedPerspective";
+import { ChannelState, FeedType, MembraneType } from "@/store/types";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
+import { getMetaFromNeighbourhood } from "./getMetaFromNeighbourhood";
+import { joinNeighbourhood } from "../mutations/joinNeighbourhood";
 
 export async function joinChannelFromSharedLink(
-  sharedPerspectiveUrl: string
+  url: string,
+  parentPerspectiveUUID: string
 ): Promise<ChannelState> {
-  try {
-    console.log("Starting sharedperspective join");
-    const installedChannelPerspective = await installSharedPerspective(
-      sharedPerspectiveUrl
-    );
-    console.log(
-      new Date(),
-      "Installed with SharedPerspective result",
-      installedChannelPerspective
-    );
+  console.log("Starting sharedperspective join");
+  const neighbourhood = await joinNeighbourhood(url);
+  console.log(new Date(), "Joined neighbourhood with result", neighbourhood);
 
-    const typedExpressionLanguages = await getTypedExpressionLanguages(
-      installedChannelPerspective.sharedPerspective!,
-      false
-    );
-    //TODO: derive membraneType from link on sharedPerspective
-    //For now its hard coded inherited since we dont support anything else
-    const now = new Date();
-    //TODO: lets use a constructor on the ChannelState type
-    return {
-      name: installedChannelPerspective.name!,
-      hasNewMessages: false,
-      perspective: installedChannelPerspective.uuid!,
-      type: FeedType.Signaled,
-      createdAt: now,
-      linkLanguageAddress:
-        installedChannelPerspective.sharedPerspective!.linkLanguages![0]!
-          .address!,
+  const [typedExpressionLanguages, _] = await getTypedExpressionLanguages(
+    neighbourhood.neighbourhood!.meta.links,
+    false
+  );
+
+  //Read out metadata about the perspective from the meta
+  const { name, description, creatorDid } = getMetaFromNeighbourhood(
+    neighbourhood.neighbourhood!.meta.links
+  );
+
+  //TODO: derive membraneType from link on sharedPerspective
+  return {
+    neighbourhood: {
+      name: name,
+      description: description,
+      creatorDid: creatorDid,
+      perspective: neighbourhood,
+      typedExpressionLanguages: typedExpressionLanguages,
+      neighbourhoodUrl: url,
+      membraneType: MembraneType.Inherited,
+      linkedPerspectives: [],
+      linkedNeighbourhoods: [],
+      members: [],
       currentExpressionLinks: {},
       currentExpressionMessages: {},
-      sharedPerspectiveUrl: sharedPerspectiveUrl,
-      membraneType: MembraneType.Inherited,
-      groupExpressionRef: "",
-      typedExpressionLanguages: typedExpressionLanguages,
+      createdAt: new Date().toISOString(),
+      membraneRoot: parentPerspectiveUUID,
+    },
+    state: {
+      perspectiveUuid: neighbourhood.uuid,
+      hasNewMessages: false,
+      feedType: FeedType.Signaled,
       notifications: {
         mute: false,
       },
-    };
-  } catch (error) {
-    throw new Error(error);
-  }
+    },
+  } as ChannelState;
 }

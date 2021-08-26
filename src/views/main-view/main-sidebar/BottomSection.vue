@@ -3,10 +3,11 @@
     <j-tooltip id="myProfile" title="My profile">
       <j-popover event="click">
         <j-avatar
+          class="left-nav__profile-icon"
           slot="trigger"
           size="xl"
           :hash="userDid"
-          :src="userProfile.profilePicture"
+          :src="userProfile?.profilePicture"
         ></j-avatar>
         <j-menu slot="content">
           <j-flex
@@ -22,9 +23,9 @@
           >
             <j-avatar
               :hash="userDid"
-              :src="userProfile.profilePicture"
+              :src="userProfile?.profilePicture"
             ></j-avatar>
-            <j-text nomargin>{{ userProfile.username }}</j-text>
+            <j-text nomargin>{{ userProfile?.username }}</j-text>
           </j-flex>
           <j-menu-item @click="() => setShowEditProfile(true)">
             <j-icon size="sm" slot="start" name="pencil"></j-icon>
@@ -38,7 +39,7 @@
             <j-icon size="sm" slot="start" name="gear"></j-icon>
             Settings
           </j-menu-item>
-          <router-link :to="{ name: 'signup' }" v-slot="{ navigate }">
+          <router-link :to="{ name: 'login' }" v-slot="{ navigate }">
             <j-menu-item @click="navigate">
               <j-icon size="sm" slot="start" name="door-closed"></j-icon>
               Log out
@@ -52,11 +53,16 @@
 
 <script lang="ts">
 import { defineComponent, onBeforeMount } from "vue";
-import { mapMutations } from "vuex";
-import { Profile } from "@/store";
+import { Profile } from "@/store/types";
+import { useAppStore } from "@/store/app";
+import { useUserStore } from "@/store/user";
+import { mapActions } from "pinia";
 
 export default defineComponent({
   setup() {
+    const appStore = useAppStore();
+    const userStore = useUserStore();
+
     onBeforeMount(() => {
       window.api.receive("getCleanState", (data: string) => {
         localStorage.clear();
@@ -64,30 +70,35 @@ export default defineComponent({
         window.api.send("quitApp");
       });
     });
+
+    return {
+      appStore,
+      userStore,
+    };
   },
   methods: {
-    ...mapMutations(["setShowSettings", "setShowEditProfile"]),
+    ...mapActions(useAppStore, ["setShowEditProfile", "setShowSettings"]),
     checkForUpdates() {
       window.api.send("check-update");
-      this.$store.commit("updateUpdateState", { updateState: "checking" });
+      this.appStore.setUpdateState({ updateState: "checking" });
     },
     downloadUpdates() {
       window.api.send("download-update");
-      this.$store.commit("updateUpdateState", { updateState: "downloading" });
+      this.appStore.setUpdateState({ updateState: "downloading" });
     },
     installNow() {
       window.api.send("quit-and-install");
     },
   },
   computed: {
-    userProfile(): Profile {
-      return this.$store.state.userProfile || {};
+    userProfile(): Profile | null {
+      return this.userStore.profile;
     },
     userDid(): string {
-      return this.$store.state.userDid;
+      return this.userStore.agent.did!;
     },
     updateApp(): { text: string; func?: () => void } {
-      const state = this.$store.state.updateState;
+      const state = this.appStore.updateState;
 
       let text = "Check for updates";
       let func: undefined | (() => void) = this.checkForUpdates;
@@ -120,11 +131,15 @@ export default defineComponent({
 <style lang="scss" scoped>
 .left-nav__bottom-section {
   width: 100%;
-  border-top: 1px var(--app-main-sidebar-border-color) solid;
+  border-top: 1px solid var(--app-main-sidebar-border-color);
   padding: 2rem 0;
   display: flex;
   gap: var(--j-space-400);
   flex-direction: column;
   align-items: center;
+}
+
+.left-nav__profile-icon {
+  cursor: pointer;
 }
 </style>

@@ -1,20 +1,28 @@
 <template>
-  <div class="message-item">
+  <div class="message-item" ref="messageItem">
     <div class="message-item__left-column">
       <j-avatar
+        class="message-item__avatar"
         @click="handleProfileClick"
         v-if="showAvatar"
         :hash="did"
         :src="profileImg"
       />
 
-      <j-timestamp
-        class="message-item__timestamp"
-        v-else
-        hour="numeric"
-        minute="numeric"
-        :value="timestamp"
-      ></j-timestamp>
+      <j-tooltip placement="top" v-else>
+        <j-timestamp
+          slot="title"
+          :value="timestamp"
+          datestyle="medium"
+          timestyle="short"
+        ></j-timestamp>
+        <j-timestamp
+          class="message-item__timestamp"
+          hour="numeric"
+          minute="numeric"
+          :value="timestamp"
+        ></j-timestamp>
+      </j-tooltip>
     </div>
     <div class="message-item__right-column">
       <div class="message-item__message-info" v-if="showAvatar">
@@ -28,12 +36,19 @@
           class="message-item__username"
           >{{ username }}
         </j-text>
-        <j-timestamp
-          hour="numeric"
-          minute="numeric"
-          class="message-item__timestamp"
-          :value="timestamp"
-        ></j-timestamp>
+        <j-tooltip placement="top">
+          <j-timestamp
+            slot="title"
+            :value="timestamp"
+            dateStyle="medium"
+            timeStyle="short"
+          ></j-timestamp>
+          <j-timestamp
+            class="message-item__timestamp"
+            relative
+            :value="timestamp"
+          ></j-timestamp>
+        </j-tooltip>
       </div>
       <div class="message-item__message" v-html="message"></div>
     </div>
@@ -56,7 +71,29 @@ export default defineComponent({
     openedProfile: Object,
   },
   mounted() {
-    const mentionElements = document.querySelectorAll(".mention");
+    const mentionElements = (this.$refs.messageItem as any).querySelectorAll(
+      ".mention"
+    );
+    const emojiElements = (this.$refs.messageItem as any).querySelectorAll(
+      ".emoji"
+    );
+
+    for (const ele of emojiElements) {
+      const emoji = ele as HTMLElement;
+
+      if (emoji.parentNode?.nodeName !== "J-TOOLTIP") {
+        var wrapper = document.createElement("j-tooltip");
+        wrapper.title = `:${emoji.dataset.id}:`;
+        wrapper.classList.add("emojitoolip");
+        (wrapper as any).placement = "top";
+        emoji.parentNode?.insertBefore(wrapper, emoji);
+        wrapper.appendChild(emoji);
+
+        if (emoji.parentNode?.nextSibling?.textContent?.trim().length === 0) {
+          emoji.parentNode?.nextSibling.remove();
+        }
+      }
+    }
 
     for (const ele of mentionElements) {
       const mention = ele as HTMLElement;
@@ -74,16 +111,27 @@ export default defineComponent({
 </script>
 
 <style>
+.emojitoolip::part(base) {
+  display: inline;
+}
+.emojitoolip::part(content) {
+  display: inline;
+}
+
 .message-item {
   padding: var(--j-space-300) 0;
-  font-size: var(--j-font-size-400);
   display: grid;
-  gap: var(--j-space-500);
+  gap: var(--j-space-300);
   grid-template-columns: 70px 1fr;
+  overflow: visible;
+}
+
+.message-item__avatar {
+  cursor: pointer;
 }
 
 .message-item:hover {
-  background: hsla(var(--j-color-primary-hue), 50%, 50%, 0.03);
+  background: hsla(var(--j-color-primary-hue), 50%, 50%, 0.06);
 }
 
 .message-item__left-column {
@@ -92,7 +140,14 @@ export default defineComponent({
 
 .message-item__timestamp {
   opacity: 0.5;
+  cursor: pointer;
   font-size: var(--j-font-size-300);
+  font-weight: 500;
+}
+
+.message-item__timestamp:hover {
+  opacity: 0.8;
+  text-decoration: underline;
 }
 
 .message-item__right-column {
@@ -111,8 +166,8 @@ export default defineComponent({
 .message-item__message-info {
   display: flex;
   align-items: center;
-  margin-bottom: var(--j-space-300);
-  gap: var(--j-space-400);
+  margin-bottom: var(--j-space-100);
+  gap: var(--j-space-300);
 }
 
 .message-item__message > :first-of-type {
@@ -129,6 +184,11 @@ export default defineComponent({
   border-radius: var(--j-border-radius);
   background: var(--j-color-primary-100);
   color: var(--j-color-primary-700);
+}
+
+.message-item__message a {
+  color: var(--j-color-primary-600);
+  text-decoration: underline;
 }
 
 .message-item__message .mention:hover {

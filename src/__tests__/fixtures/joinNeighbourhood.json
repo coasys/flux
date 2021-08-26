@@ -1,0 +1,113 @@
+{
+  "name": "aaaaaaaaaaa",
+  "sharedUrl": "neighbourhood://QmW6LEDuWFuRPBgWsaeh3D9KpjVLu3PZ7VeeV2WYATTJop",
+  "uuid": "9cac577c-0b0a-44f4-9d4f-66edcc236021",
+  "neighbourhood": {
+    "linkLanguage": "",
+    "meta": {
+      "links": [{
+        "__typename": "LinkExpression",
+        "author": "did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
+        "timestamp": "2021-08-03T06:17:27.832Z",
+        "data": {
+          "__typename": "Link",
+          "source": "self",
+          "predicate": "rdf://name",
+          "target": "safsafsaf"
+        },
+        "proof": {
+          "__typename": "ExpressionProof",
+          "valid": true,
+          "invalid": false,
+          "signature": "133e369d87690168f0b58553874adebbd45a5a6914e23350539ba373614955816a8d56f0c267653f78ccc449912406c5903e6b2fdd17ab42fd75f401e2a4494e",
+          "key": "#zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW"
+        }
+      },{
+        "__typename": "LinkExpression",
+        "author": "did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
+        "timestamp": "2021-08-03T06:17:27.844Z",
+        "data": {
+          "__typename": "Link",
+          "source": "self",
+          "predicate": "rdf://description",
+          "target": "-"
+        },
+        "proof": {
+          "__typename": "ExpressionProof",
+          "valid": true,
+          "invalid": false,
+          "signature": "bd00ba8d8311ccfdd76e1e1524a3299c74043737646fb18f08f9a785ec49d6c300ee2ffb3a066e9fc58d6c07d6b15b94dbd4b27576750b7b1c553ffac4cdb606",
+          "key": "#zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW"
+        }
+      }, {
+        "author": "did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
+        "data": {
+          "predicate": "rdf://type",
+          "source": "neighbourhood://QmW6LEDuWFuRPBgWsaeh3D9KpjVLu3PZ7VeeV2WYATTJop://self",
+          "target": "sioc://community",
+          "__typename": "Link"
+        },
+        "proof": {
+          "invalid": false,
+          "key": "#zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
+          "signature": "7f64ac7b9cbb6a62fd77a152742f17a298e86e618b3eff0f54a939022183e04f6fcf4a73da3075c2fa89187da33bf525b96d7d9174a91992cd75942c49ef7f9e",
+          "valid": true,
+          "__typename": "ExpressionProof"
+        },
+        "timestamp": "2021-08-02T07:26:56.509Z",
+        "__typename": "LinkExpression"
+      }, {
+        "author": "did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
+        "data": {
+          "predicate": "rdf://class",
+          "source": "neighbourhood://QmW6LEDuWFuRPBgWsaeh3D9KpjVLu3PZ7VeeV2WYATTJop://self",
+          "target": "QmbhWYKXXa53H5hSEsPEuQ9FJL1dBurBNkRF2391gsL9DV://842924554879604b2130319f6cabb23e24ce4438ec52995ee322b91a934d7813ed34c344b0ee54",
+          "__typename": "Link"
+        },
+        "proof": {
+          "invalid": false,
+          "key": "#zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
+          "signature": "cc7647e9c97c6d1bb54fe85e64fec0481a7451390ee438b65db4bd150b586f267a45386a0349a90db5791c70c0905294f7f88e2eed8b4e1de55a08324718152e",
+          "valid": true,
+          "__typename": "ExpressionProof"
+        },
+        "timestamp": "2021-08-02T07:26:57.056Z",
+        "__typename": "LinkExpression"
+      }, {
+        "author": "did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
+        "data": {
+          "predicate": "sioc://has_member",
+          "source": "neighbourhood://QmW6LEDuWFuRPBgWsaeh3D9KpjVLu3PZ7VeeV2WYATTJop://self",
+          "target": "QmUbmDdBMpv2vWa2kXPxcmcUtArLwAHQQgqvJ4XuDBfhtX://did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
+          "__typename": "Link"
+        },
+        "proof": {
+          "invalid": false,
+          "key": "#zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
+          "signature": "b411ef40e8895c68b3a72e8a264bbb4b82a0c2d5bf94d9986237b02cb483fead38a76f45c4c02d5cf2a4bdb2b120479caa99941ee85dbc68f3c4fb4f5fdeaaec",
+          "valid": true,
+          "__typename": "ExpressionProof"
+        },
+        "timestamp": "2021-08-02T07:26:57.581Z",
+        "__typename": "LinkExpression"
+      }, {
+        "author": "did:key:zQ3shWoZNT5PAeiA5AKGZdN5JhPGoPR5LYnpE1EpWWWFidoKw",
+        "data": {
+          "predicate": "sioc://has_space",
+          "source": "neighbourhood://8421246162df2800c65c85b8b20fb50ce7fb95174699acb2723c8e3cf70c5f830ec43687c17856://self",
+          "target": "neighbourhood://8421244696ef9042d51add6f4517ae9353d7a4374459f3f50d3bf6f324219e3a62ebd46ec1b688",
+          "__typename": "Link"
+        },
+        "proof": {
+          "invalid": false,
+          "key": "#zQ3shWoZNT5PAeiA5AKGZdN5JhPGoPR5LYnpE1EpWWWFidoKw",
+          "signature": "c97d845f7adf2148025a2897d84731659a523a10dded0fa1289c3b19224f80b671869cc75b9c7be8136b30bfcafd29c4e06667d194765b72876b651f2b9db4eb",
+          "valid": true,
+          "__typename": "ExpressionProof"
+        },
+        "timestamp": "2021-07-30T07:07:00.587Z",
+        "__typename": "LinkExpression"
+      }]
+    } 
+  }
+}

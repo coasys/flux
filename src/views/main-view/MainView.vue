@@ -5,6 +5,18 @@
     </template>
     <router-view></router-view>
   </app-layout>
+
+  <j-modal
+    :open="modals.showCreateCommunity"
+    @toggle="(e) => setShowCreateCommunity(e.target.open)"
+  >
+    <create-community
+      v-if="modals.showCreateCommunity"
+      @submit="() => setShowCreateCommunity(false)"
+      @cancel="() => setShowCreateCommunity(false)"
+    />
+  </j-modal>
+
   <j-modal
     :open="modals.showEditProfile"
     @toggle="(e) => setShowEditProfile(e.target.open)"
@@ -16,7 +28,7 @@
   </j-modal>
 
   <j-modal
-    class="settings-modal"
+    size="lg"
     :open="modals.showSettings"
     @toggle="(e) => setShowSettings(e.target.open)"
   >
@@ -25,6 +37,28 @@
       @cancel="setShowSettings(false)"
     />
   </j-modal>
+
+  <j-modal
+    :open="modals.showDisclaimer"
+    @toggle="(e) => setShowDisclaimer(e.target.open)"
+  >
+    <j-box p="800">
+      <j-box pb="500">
+        <j-flex gap="400" a="center">
+          <j-icon name="exclamation-diamond" size="xl" />
+          <j-text nomargin variant="heading-lg">Disclaimer</j-text>
+        </j-flex>
+      </j-box>
+      <j-text variant="ingress">
+        This is an early version of Junto. Don't use this for essential
+        communication.
+      </j-text>
+      <ul>
+        <li>You might loose your communities and chat messages</li>
+        <li>Messages might not always be delivered reliably</li>
+      </ul>
+    </j-box>
+  </j-modal>
 </template>
 
 <script lang="ts">
@@ -32,18 +66,28 @@ import AppLayout from "@/layout/AppLayout.vue";
 import MainSidebar from "./main-sidebar/MainSidebar.vue";
 import { defineComponent } from "vue";
 
+import CreateCommunity from "@/containers/CreateCommunity.vue";
 import EditProfile from "@/containers/EditProfile.vue";
 import Settings from "@/containers/Settings.vue";
-import { mapMutations } from "vuex";
-import { ModalsState } from "@/store";
+import { ModalsState } from "@/store/types";
+import { useAppStore } from "@/store/app";
+import { mapActions } from "pinia";
 
 export default defineComponent({
   name: "MainAppView",
+  setup() {
+    const appStore = useAppStore();
+
+    return {
+      appStore,
+    };
+  },
   components: {
     MainSidebar,
     AppLayout,
     EditProfile,
     Settings,
+    CreateCommunity,
   },
   data() {
     return {
@@ -52,11 +96,16 @@ export default defineComponent({
   },
   computed: {
     modals(): ModalsState {
-      return this.$store.state.ui.modals;
+      return this.appStore.modals;
     },
   },
   methods: {
-    ...mapMutations(["setShowEditProfile", "setShowSettings"]),
+    ...mapActions(useAppStore, [
+      "setShowEditProfile",
+      "setShowSettings",
+      "setShowCreateCommunity",
+      "setShowDisclaimer",
+    ]),
   },
 });
 </script>

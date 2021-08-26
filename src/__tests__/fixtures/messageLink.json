@@ -1,0 +1,18 @@
+{
+  "author": "did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
+  "timestamp": "2021-08-04T13:08:27.359Z",
+  "data": {
+    "source": "sioc://chatchannel",
+    "predicate": "sioc://content_of",
+    "target": "QmdaHUQG4K4XVahZecwmQJq46o3FJKs7WVvEiL9iJP8CaL://842924cdeba9e2e38fc79a8382ff638c2b3cc69bfe86b3ee405252e7d290f9ed54da8a2633d211",
+    "__typename": "Link"
+  },
+  "proof": {
+    "valid": true,
+    "invalid": false,
+    "signature": "d24c2c8f9e1bcedb3d66fac693487672da7137dafac3f419031720eef39fbb0e2b58839c7d06b60ad54e5d542f4984f6dc48a9571924d798f30e4eb6e23660f7",
+    "key": "#zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
+    "__typename": "ExpressionProof"
+  },
+  "__typename": "LinkExpression"
+}

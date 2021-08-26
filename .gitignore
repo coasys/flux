@@ -1,20 +1,13 @@
 /node_modules
 /ad4m/data
 /ad4m/holochain
-/ad4m/languages/**/*.js
-!/ad4m/languages/**/dna.js
-!/ad4m/languages/**/rollup.config.js
-!/ad4m/languages/**/rollup.config.icons.js
-/ad4m/languages/**/*.js.map
-/ad4m/languages/**/node_modules
-/ad4m/languages/**/build
-/ad4m/languages/profiles/**
+/ad4m/languages/**/
+/ad4m/language/*
 .hc
 .hc_live_0
 out.log
 
-resources/darwin/*
-resources/linux/*
+resources/*
 
 .DS_Store
 node_modules
@@ -43,3 +36,5 @@ pnpm-debug.log*
 
 #Electron-builder output
 /dist_electron
+
+coverage

@@ -1,56 +1,60 @@
 <template>
-  <j-flex gap="500" direction="column">
-    <j-text variant="heading"
-      >All group members ({{ community.members.length ?? 0 }})</j-text
-    >
-    <j-input
-      size="lg"
-      placeholder="Search for member"
-      type="search"
-      :value="searchValue"
-      @input="(e) => (searchValue = e.target.value)"
-    >
-      <j-icon name="search" size="sm" slot="end"></j-icon>
-    </j-input>
-    <j-flex wrap gap="600">
-      <j-flex
-        gap="300"
-        v-for="communityMember in filteredCommunityMemberList"
-        :key="communityMember.author.did"
-        inline
-        direction="column"
-        a="center"
+  <j-box p="800">
+    <j-flex gap="500" direction="column">
+      <j-text variant="heading-sm">
+        All group members ({{ community.members.length ?? 0 }})
+      </j-text>
+      <j-input
+        size="lg"
+        placeholder="Search members"
+        type="search"
+        :value="searchValue"
+        @input="(e) => (searchValue = e.target.value)"
       >
-        <j-avatar
-          size="lg"
-          :hash="communityMember.author.did"
-          :src="
-            communityMember.data.profile['schema:image']
-              ? JSON.parse(communityMember.data.profile['schema:image'])[
-                  'schema:contentUrl'
-                ]
-              : null
-          "
-        />
-        <j-text variant="body">
-          {{ communityMember.data.profile["foaf:AccountName"] }}
-        </j-text>
+        <j-icon name="search" size="sm" slot="end"></j-icon>
+      </j-input>
+      <j-flex wrap gap="600">
+        <j-flex
+          gap="300"
+          v-for="communityMember in filteredCommunityMemberList"
+          :key="communityMember.did"
+          inline
+          direction="column"
+          a="center"
+        >
+          <j-avatar
+            size="lg"
+            :hash="communityMember.did"
+            :src="communityMember.profile.profilePicture"
+          />
+          <j-text variant="body">
+            {{ communityMember.profile.username }}
+          </j-text>
+        </j-flex>
       </j-flex>
     </j-flex>
-  </j-flex>
+  </j-box>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import Expression from "@perspect3vism/ad4m/Expression";
-import { CommunityState } from "@/store";
+import type { Expression } from "@perspect3vism/ad4m";
+import { NeighbourhoodState, Profile } from "@/store/types";
+import { useDataStore } from "@/store/data";
+
+import { parseProfile } from "@/utils/profileHelpers";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
+  setup() {
+    const dataStore = useDataStore();
+
+    return {
+      dataStore,
+    };
+  },
   mounted() {
-    this.$store.dispatch("getCommunityMembers", {
-      communityId: this.community.perspective,
-    });
+    this.dataStore.getNeighbourhoodMembers(this.community.perspective.uuid);
   },
   data() {
     return {
@@ -58,14 +62,20 @@ export default defineComponent({
     };
   },
   computed: {
-    community(): CommunityState {
-      return this.$store.getters.getCommunity(this.$route.params.communityId);
+    community(): NeighbourhoodState {
+      const id = this.$route.params.communityId as string;
+      return this.dataStore.getNeighbourhood(id);
     },
-    filteredCommunityMemberList(): Expression[] {
+    filteredCommunityMemberList(): { did: string; profile: Profile }[] {
       const members: Expression[] = this.community.members;
-      return members.filter((m: Expression) =>
-        Object(m.data).profile["foaf:AccountName"].includes(this.searchValue)
-      );
+      return members
+        .map((expression: Expression) => ({
+          did: expression.author,
+          profile: parseProfile(expression.data.profile),
+        }))
+        .filter((member: { did: string; profile: Profile }) =>
+          member.profile.username.includes(this.searchValue)
+        );
     },
   },
 });

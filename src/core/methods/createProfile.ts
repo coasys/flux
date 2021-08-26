@@ -1,4 +1,20 @@
 import { createExpression } from "@/core/mutations/createExpression";
+import { Profile } from "@/store/types";
+
+import {
+  ACCOUNT_NAME,
+  GIVEN_NAME,
+  FAMILY_NAME,
+  EMAIL,
+  TYPE as PROFILETYPE,
+} from "@/constants/profile";
+import {
+  IMAGE,
+  CONTENT_URL,
+  CONTENT_SIZE,
+  TYPE as IMAGETYPE,
+  THUMBNAIL,
+} from "@/constants/image";
 
 const byteSize = (str: string) => new Blob([str]).size;
 
@@ -17,9 +33,9 @@ export const dataURItoBlob = (dataURI: string) => {
 export const blobToDataURL = (blob: Blob): Promise<string> => {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (_e) => resolve(reader.result as string);
-    reader.onerror = (_e) => reject(reader.error);
-    reader.onabort = (_e) => reject(new Error("Read aborted"));
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.onabort = () => reject(new Error("Read aborted"));
     reader.readAsDataURL(blob);
   });
 };
@@ -73,31 +89,27 @@ export const resizeImage = (file: any, maxSize: number): Promise<Blob> => {
 
 export async function createProfile(
   expressionLanguage: string,
-  username: string,
-  email: string,
-  givenName: string,
-  familyName: string,
-  profileImage?: string,
-  thumbnail?: string
+  profileData: Profile
 ): Promise<string> {
   try {
     const profile: { [x: string]: any } = {
-      "foaf:AccountName": username,
-      "schema:email": email,
-      "schema:givenName": givenName,
-      "schema:familyName": familyName,
-      "@type": "foaf:OnlineAccount",
+      [ACCOUNT_NAME]: profileData.username,
+      [EMAIL]: profileData.email,
+      [GIVEN_NAME]: profileData.givenName,
+      [FAMILY_NAME]: profileData.familyName,
+      // TODO: Is type also a const?
+      "@type": [PROFILETYPE],
     };
 
-    if (profileImage) {
-      profile["schema:image"] = JSON.stringify({
-        "@type": "schema:ImageObject",
-        "schema:contentSize": byteSize(profileImage),
-        "schema:contentUrl": profileImage,
-        "schema:thumbnail": {
-          "@type": "schema:ImageObject",
-          "schema:contentSize": byteSize(thumbnail!),
-          "schema:contentUrl": thumbnail,
+    if (profileData.profilePicture && profileData.thumbnailPicture) {
+      profile[IMAGE] = JSON.stringify({
+        "@type": IMAGETYPE,
+        [CONTENT_SIZE]: byteSize(profileData.profilePicture),
+        [CONTENT_URL]: profileData.profilePicture,
+        [THUMBNAIL]: {
+          "@type": IMAGETYPE,
+          [CONTENT_SIZE]: byteSize(profileData.thumbnailPicture),
+          [CONTENT_URL]: profileData.thumbnailPicture,
         },
       });
     }
@@ -113,9 +125,13 @@ export async function createProfile(
         signed_agent: "NA",
       })
     );
+    console.log(
+      "Created profile expression with result",
+      createProfileExpression
+    );
 
     return createProfileExpression;
   } catch (error) {
-    throw new Error(error);
+    throw Error(error);
   }
 }
