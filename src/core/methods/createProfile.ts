@@ -93,23 +93,23 @@ export async function createProfile(
 ): Promise<string> {
   try {
     const profile: { [x: string]: any } = {
-      [ACCOUNT_NAME]: profileData.username,
-      [EMAIL]: profileData.email,
-      [GIVEN_NAME]: profileData.givenName,
-      [FAMILY_NAME]: profileData.familyName,
+      ACCOUNT_NAME: profileData.username,
+      EMAIL: profileData.email,
+      GIVEN_NAME: profileData.givenName,
+      FAMILY_NAME: profileData.familyName,
       // TODO: Is type also a const?
-      "@type": [PROFILETYPE],
+      "@type": PROFILETYPE,
     };
 
     if (profileData.profilePicture && profileData.thumbnailPicture) {
       profile[IMAGE] = JSON.stringify({
         "@type": IMAGETYPE,
-        [CONTENT_SIZE]: byteSize(profileData.profilePicture),
-        [CONTENT_URL]: profileData.profilePicture,
-        [THUMBNAIL]: {
+        CONTENT_SIZE: byteSize(profileData.profilePicture),
+        CONTENT_URL: profileData.profilePicture,
+        THUMBNAIL: {
           "@type": IMAGETYPE,
-          [CONTENT_SIZE]: byteSize(profileData.thumbnailPicture),
-          [CONTENT_URL]: profileData.thumbnailPicture,
+          CONTENT_SIZE: byteSize(profileData.thumbnailPicture),
+          CONTENT_URL: profileData.thumbnailPicture,
         },
       });
     }
