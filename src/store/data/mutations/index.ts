@@ -1,18 +1,17 @@
 import {
   ExpressionAndRef,
   LinkExpressionAndLang,
-  DataState,
-  CommunityState,
-  AddChannel,
-  ThemeState,
   ProfileExpression,
+  CommunityState,
   ChannelState,
+  DataState,
+  ThemeState,
   LocalCommunityState,
 } from "@/store/types";
 
 import { parseExprUrl } from "@perspect3vism/ad4m";
 import type { Expression, LinkExpression } from "@perspect3vism/ad4m";
-import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
+import { useDataStore } from "..";
 
 interface UpdatePayload {
   communityId: string;
@@ -21,6 +20,11 @@ interface UpdatePayload {
   image: string;
   thumbnail: string;
   groupExpressionRef: string;
+}
+
+interface AddChannel {
+  communityId: string;
+  channel: ChannelState;
 }
 
 interface AddChannelMessages {
@@ -36,40 +40,29 @@ interface AddChannelMessage {
 }
 
 export default {
-  addCommunity(state: DataState, payload: CommunityState): void {
+  addCommunity(payload: CommunityState): void {
+    const state = useDataStore();
     state.neighbourhoods[payload.neighbourhood.perspective.uuid] =
       payload.neighbourhood;
     state.communities[payload.neighbourhood.perspective.uuid] = payload.state;
   },
 
-  addCommunityState(state: DataState, payload: LocalCommunityState): void {
+  addCommunityState(payload: LocalCommunityState): void {
+    const state = useDataStore();
     state.communities[payload.perspectiveUuid] = payload;
   },
 
-  clearMessages(state: DataState): void {
+  clearMessages(): void {
+    const state = useDataStore();
     for (const neighbourhood of Object.values(state.neighbourhoods)) {
       neighbourhood.currentExpressionMessages = {};
     }
   },
 
-  setInitialWorkerStarted(
-    state: DataState,
-    payload: { channelId: string; initialWorkerStarted: boolean }
-  ): void {
-    const channel = state.channels[payload.channelId];
-
-    channel.initialWorkerStarted = payload.initialWorkerStarted;
-  },
-
-  addMessages(state: DataState, payload: AddChannelMessages): void {
+  addMessages(payload: AddChannelMessages): void {
+    const state = useDataStore();
     const neighbourhood = state.neighbourhoods[payload.channelId];
-    console.log(
-      "Adding ",
-      Object.values(payload.links).length,
-      " to channel and ",
-      Object.values(payload.expressions).length,
-      " to channel"
-    );
+
     neighbourhood.currentExpressionLinks = {
       ...neighbourhood.currentExpressionLinks,
       ...payload.links,
@@ -80,7 +73,8 @@ export default {
     };
   },
 
-  addMessage(state: DataState, payload: AddChannelMessage): void {
+  addMessage(payload: AddChannelMessage): void {
+    const state = useDataStore();
     const neighbourhood = state.neighbourhoods[payload.channelId];
 
     neighbourhood.currentExpressionLinks[payload.link.data.target] =
@@ -96,63 +90,62 @@ export default {
     };
   },
 
-  setCurrentChannelId(
-    state: DataState,
-    payload: { communityId: string; channelId: string }
-  ): void {
+  setCurrentChannelId(payload: {
+    communityId: string;
+    channelId: string;
+  }): void {
+    const state = useDataStore();
     const { communityId, channelId } = payload;
     state.communities[communityId].currentChannelId = channelId;
   },
 
-  removeCommunity(state: DataState, id: string): void {
+  removeCommunity(id: string): void {
+    const state = useDataStore();
     delete state.communities[id];
     delete state.neighbourhoods[id];
   },
 
-  setChannelNotificationState(
-    state: DataState,
-    { channelId }: { channelId: string }
-  ): void {
+  setChannelNotificationState({ channelId }: { channelId: string }): void {
+    const state = useDataStore();
     const channel = state.channels[channelId];
 
     channel.notifications.mute = !channel.notifications.mute;
   },
 
-  setCommunityMembers(
-    state: DataState,
-    {
-      members,
-      communityId,
-    }: { members: ProfileExpression[]; communityId: string }
-  ): void {
-    const community = state.neighbourhoods[communityId];
+  setNeighbourhoodMembers({
+    members,
+    perspectiveUuid,
+  }: {
+    members: ProfileExpression[];
+    perspectiveUuid: string;
+  }): void {
+    const state = useDataStore();
+    const neighbourhood = state.neighbourhoods[perspectiveUuid];
 
-    if (community) {
-      community.members = members;
+    console.log("setting member", { neighbourhood, members });
+
+    if (neighbourhood) {
+      neighbourhood.members = members;
     }
   },
 
-  setCommunityTheme(
-    state: DataState,
-    payload: { communityId: string; theme: ThemeState }
-  ): void {
+  setCommunityTheme(payload: { communityId: string; theme: ThemeState }): void {
+    const state = useDataStore();
     state.communities[payload.communityId].theme = {
       ...state.communities[payload.communityId].theme,
       ...payload.theme,
     };
   },
 
-  updateCommunityMetadata(
-    state: DataState,
-    {
-      communityId,
-      name,
-      description,
-      image,
-      thumbnail,
-      groupExpressionRef,
-    }: UpdatePayload
-  ): void {
+  updateCommunityMetadata({
+    communityId,
+    name,
+    description,
+    image,
+    thumbnail,
+    groupExpressionRef,
+  }: UpdatePayload): void {
+    const state = useDataStore();
     const community = state.neighbourhoods[communityId];
 
     if (community) {
@@ -166,14 +159,13 @@ export default {
     state.neighbourhoods[communityId] = community;
   },
 
-  setChannelScrollTop(
-    state: DataState,
-    payload: { channelId: string; value: number }
-  ): void {
+  setChannelScrollTop(payload: { channelId: string; value: number }): void {
+    const state = useDataStore();
     state.channels[payload.channelId].scrollTop = payload.value;
   },
 
-  addChannel(state: DataState, payload: AddChannel): void {
+  addChannel(payload: AddChannel): void {
+    const state = useDataStore();
     const parentNeighbourhood = state.neighbourhoods[payload.communityId];
 
     if (parentNeighbourhood !== undefined) {
@@ -205,36 +197,31 @@ export default {
     }
   },
 
-  createChannel(state: DataState, payload: ChannelState): void {
+  createChannelMutation(payload: ChannelState): void {
+    const state = useDataStore();
     state.channels[payload.neighbourhood.perspective.uuid] = payload.state;
     state.neighbourhoods[payload.neighbourhood.perspective.uuid] =
       payload.neighbourhood;
   },
 
-  setuseLocalTheme(
-    state: DataState,
-    payload: { communityId: string; value: boolean }
-  ): void {
+  setuseLocalTheme(payload: { communityId: string; value: boolean }): void {
+    const state = useDataStore();
     const community = state.communities[payload.communityId];
     community.useLocalTheme = payload.value;
   },
 
-  setHasNewMessages(
-    state: DataState,
-    payload: { channelId: string; value: boolean }
-  ): void {
+  setHasNewMessages(payload: { channelId: string; value: boolean }): void {
+    const state = useDataStore();
     const channel = state.channels[payload.channelId];
     channel.hasNewMessages = payload.value;
   },
 
-  addExpressionAndLink: (
-    state: DataState,
-    payload: {
-      channelId: string;
-      link: LinkExpression;
-      message: Expression;
-    }
-  ): void => {
+  addExpressionAndLink: (payload: {
+    channelId: string;
+    link: LinkExpression;
+    message: Expression;
+  }): void => {
+    const state = useDataStore();
     const channel = state.neighbourhoods[payload.channelId];
     console.log("Adding to link and exp to channel!", payload.message);
     channel.currentExpressionLinks[payload.link.data.target!] = {

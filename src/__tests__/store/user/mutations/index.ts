@@ -1,26 +1,18 @@
-import app from "@/store/app";
+import { useUserStore } from "@/store/user";
+import { Pinia, createPinia, setActivePinia } from "pinia";
 import initAgent from "../../../fixtures/initAgent.json";
-import user from "@/store/user";
-import data from "@/store/data";
-import { createDirectStore } from "direct-vuex";
 
 describe("User Mutations", () => {
-  let store: any;
+  let store: Pinia;
 
   beforeEach(() => {
-    // @ts-ignore
-    const directStore = createDirectStore({
-      modules: {
-        user,
-        data,
-        app,
-      },
-    });
-    store = directStore.store;
+    store = createPinia();
+    setActivePinia(store);
   });
 
   test("Initial user store", () => {
-    const initialState = store.state.user;
+    const userStore = useUserStore();
+    const initialState = userStore;
 
     expect(initialState.profile).toBeNull();
     expect(initialState.agent).toStrictEqual({
@@ -32,28 +24,31 @@ describe("User Mutations", () => {
   });
 
   test("Update Agent Status", () => {
-    expect(store.state.user.agent).toStrictEqual({
+    const userStore = useUserStore();
+    expect(userStore.agent).toStrictEqual({
       isInitialized: false,
       isUnlocked: false,
       did: "",
       didDocument: "",
     });
 
-    store.commit.updateAgentStatus(initAgent);
+    userStore.updateAgentStatus(initAgent);
 
-    expect(store.state.user.agent).toStrictEqual(initAgent);
+    expect(userStore.agent).toStrictEqual(initAgent);
   });
 
   test("Update Agent Lock State", () => {
-    expect(store.state.user.agent.isUnlocked).toBeFalsy();
+    const userStore = useUserStore();
+    expect(userStore.agent.isUnlocked).toBeFalsy();
 
-    store.commit.updateAgentLockState(true);
+    userStore.updateAgentLockState(true);
 
-    expect(store.state.user.agent.isUnlocked).toBeTruthy();
+    expect(userStore.agent.isUnlocked).toBeTruthy();
   });
 
   test("Set User Profile", () => {
-    expect(store.state.user.profile).toBeNull();
+    const userStore = useUserStore();
+    expect(userStore.profile).toBeNull();
 
     const profile = {
       givenName: "jhon",
@@ -64,9 +59,9 @@ describe("User Mutations", () => {
       thumbnailPicture: "test",
     };
 
-    store.commit.setUserProfile(profile);
+    userStore.setUserProfile(profile);
 
-    expect(store.state.user.profile).not.toBeNull();
-    expect(store.state.user.profile).toStrictEqual(profile);
+    expect(userStore.profile).not.toBeNull();
+    expect(userStore.profile).toStrictEqual(profile);
   });
 });

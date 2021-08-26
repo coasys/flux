@@ -90,6 +90,24 @@
         "signature": "7b07314ec28fc6e977a95b5d609dc379688ed3e217e8d0c3832b80e25dd8f74a337660f853d84e4b5255e9dc2e6b86262b1944c4f63b63555dd2c48379cd7acf",
         "key": "#zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW"
       }
+    },
+    {
+      "__typename": "LinkExpression",
+      "author": "did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW",
+      "timestamp": "2021-08-03T06:17:27.857Z",
+      "data": {
+        "__typename": "Link",
+        "source": "self",
+        "predicate": "rdf://creator",
+        "target": "did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW"
+      },
+      "proof": {
+        "__typename": "ExpressionProof",
+        "valid": true,
+        "invalid": false,
+        "signature": "7b07314ec28fc6e977a95b5d609dc379688ed3e217e8d0c3832b80e25dd8f74a337660f853d84e4b5255e9dc2e6b86262b1944c4f63b63555dd2c48379cd7acf",
+        "key": "#zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW"
+      }
     }
   ]
 }

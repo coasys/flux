@@ -1,16 +1,13 @@
-import "@testing-library/vue";
 import initAgentFixture from "../../../fixtures/initAgent.json";
 import addPerspectiveFixture from "../../../fixtures/addPerspective.json";
 import * as agentGenerate from "@/core/mutations/agentGenerate";
 import * as addPerspective from "@/core/mutations/addPerspective";
-import user from "@/store/user";
-import { createDirectStore } from "direct-vuex";
-import data from "@/store/data";
-import app from "@/store/app";
 import { AgentStatus, PerspectiveHandle } from "@perspect3vism/ad4m";
+import { createPinia, Pinia, setActivePinia } from "pinia";
+import { useUserStore } from "@/store/user";
 
 describe("Store Actions", () => {
-  let store: any;
+  let store: Pinia;
 
   beforeEach(() => {
     // @ts-ignore
@@ -29,22 +26,16 @@ describe("Store Actions", () => {
       .spyOn(addPerspective, "addPerspective")
       .mockResolvedValue(addPerspectiveFixture as PerspectiveHandle);
 
-    // @ts-ignore
-    const directStore = createDirectStore({
-      modules: {
-        user,
-        data,
-        app,
-      },
-    });
-    store = directStore.store; //createStore(tempStore);
+    store = createPinia();
+    setActivePinia(store);
   });
 
   test("Create User with all the property", async () => {
-    expect(store.state.user.agent.isInitialized).toBeFalsy();
-    expect(store.state.user.agent.isInitialized).toBeFalsy();
-    expect(store.state.user.agent.did).toBe("");
-    expect(store.state.user.profile).toBeNull();
+    const userStore = useUserStore();
+    expect(userStore.agent.isInitialized).toBeFalsy();
+    expect(userStore.agent.isInitialized).toBeFalsy();
+    expect(userStore.agent.did).toBe("");
+    expect(userStore.profile).toBeNull();
 
     const profile = {
       givenName: "jhon",
@@ -55,23 +46,24 @@ describe("Store Actions", () => {
       thumbnailPicture: "test",
     };
 
-    await store.dispatch.createUser({
+    await userStore.createUser({
       ...profile,
       password: "test123456",
     });
 
-    expect(store.state.user.agent.isInitialized).toBeTruthy();
-    expect(store.state.user.agent.isInitialized).toBeTruthy();
-    expect(store.state.user.agent.did).toBe(initAgentFixture.did);
-    expect(store.state.user.profile).not.toBeNull();
-    expect(store.state.user.profile).toStrictEqual(profile);
+    expect(userStore.agent.isInitialized).toBeTruthy();
+    expect(userStore.agent.isInitialized).toBeTruthy();
+    expect(userStore.agent.did).toBe(initAgentFixture.did);
+    expect(userStore.profile).not.toBeNull();
+    expect(userStore.profile).toStrictEqual(profile);
   });
 
   test("Create User without password", async () => {
-    expect(store.state.user.agent.isInitialized).toBeFalsy();
-    expect(store.state.user.agent.isInitialized).toBeFalsy();
-    expect(store.state.user.agent.did).toBe("");
-    expect(store.state.user.profile).toBeNull();
+    const userStore = useUserStore();
+    expect(userStore.agent.isInitialized).toBeFalsy();
+    expect(userStore.agent.isInitialized).toBeFalsy();
+    expect(userStore.agent.did).toBe("");
+    expect(userStore.profile).toBeNull();
 
     const profile = {
       givenName: "jhon",
@@ -83,7 +75,7 @@ describe("Store Actions", () => {
     };
 
     try {
-      await store.dispatch.createUser({
+      await userStore.createUser({
         ...profile,
         password: "",
       });
@@ -92,9 +84,9 @@ describe("Store Actions", () => {
       expect(error).toHaveProperty("message", "Error: No Password passed");
     }
 
-    expect(store.state.user.agent.isInitialized).toBeFalsy();
-    expect(store.state.user.agent.isUnlocked).toBeFalsy();
-    expect(store.state.user.agent.did).toBe("");
-    expect(store.state.user.profile).toBeNull();
+    expect(userStore.agent.isInitialized).toBeFalsy();
+    expect(userStore.agent.isUnlocked).toBeFalsy();
+    expect(userStore.agent.did).toBe("");
+    expect(userStore.profile).toBeNull();
   });
 });

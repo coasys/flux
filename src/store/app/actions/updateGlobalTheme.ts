@@ -1,7 +1,6 @@
 import { ThemeState } from "@/store/types";
 import { setTheme } from "@/utils/themeHelper";
-
-import { appActionContext } from "@/store/app/index";
+import { useAppStore } from "..";
 
 export interface Payload {
   communityId: string;
@@ -10,16 +9,15 @@ export interface Payload {
 }
 
 export default async function updateGlobalTheme(
-  context: any,
   payload: ThemeState
 ): Promise<void> {
-  const { commit: appCommit, state: appState } = appActionContext(context);
-  const currentThemeIsGlobal = appState.currentTheme === "global";
-  const mergedTheme = { ...appState.globalTheme, ...payload };
+  const store = useAppStore();
+  const currentThemeIsGlobal = store.currentTheme === "global";
+  const mergedTheme = { ...store.globalTheme, ...payload };
 
   if (currentThemeIsGlobal) {
     setTheme(mergedTheme);
   }
 
-  appCommit.setGlobalTheme(mergedTheme);
+  store.setGlobalTheme(mergedTheme);
 }

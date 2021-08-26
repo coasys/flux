@@ -1,6 +1,6 @@
 import { ChannelState, FeedType, MembraneType } from "@/store/types";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
-import { findNameDescriptionFromMeta } from "./findNameDescriptionFromMeta";
+import { getMetaFromNeighbourhood } from "./getMetaFromNeighbourhood";
 import { joinNeighbourhood } from "../mutations/joinNeighbourhood";
 
 export async function joinChannelFromSharedLink(
@@ -17,7 +17,7 @@ export async function joinChannelFromSharedLink(
   );
 
   //Read out metadata about the perspective from the meta
-  const { name, description } = findNameDescriptionFromMeta(
+  const { name, description, creatorDid } = getMetaFromNeighbourhood(
     neighbourhood.neighbourhood!.meta.links
   );
 
@@ -26,6 +26,7 @@ export async function joinChannelFromSharedLink(
     neighbourhood: {
       name: name,
       description: description,
+      creatorDid: creatorDid,
       perspective: neighbourhood,
       typedExpressionLanguages: typedExpressionLanguages,
       neighbourhoodUrl: url,
@@ -35,14 +36,12 @@ export async function joinChannelFromSharedLink(
       members: [],
       currentExpressionLinks: {},
       currentExpressionMessages: {},
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
       membraneRoot: parentPerspectiveUUID,
     },
     state: {
       perspectiveUuid: neighbourhood.uuid,
       hasNewMessages: false,
-      initialWorkerStarted: false,
-      messageLoading: false,
       feedType: FeedType.Signaled,
       notifications: {
         mute: false,

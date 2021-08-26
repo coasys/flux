@@ -8,10 +8,6 @@ import createCommunityGroupExpression from "../../../fixtures/createCommunityGro
 import createCommunityProfileLink from "../../../fixtures/createCommunityProfileLink.json";
 import createCommunityChannel from "../../../fixtures/createCommunityChannel.json";
 import languages from "../../../fixtures/languages.json";
-import { createDirectStore } from "direct-vuex";
-import user from "@/store/user";
-import data from "@/store/data";
-import app from "@/store/app";
 import * as addPerspective from "@/core/mutations/addPerspective";
 import * as createUniqueHolochainLanguage from "@/core/mutations/createUniqueHolochainLanguage";
 import * as createNeighbourhood from "@/core/mutations/createNeighbourhood";
@@ -21,9 +17,11 @@ import * as createExpression from "@/core/mutations/createExpression";
 import * as createProfile from "@/core/methods/createProfile";
 import * as createChannel from "@/core/methods/createChannel";
 import * as getLanguage from "@/core/queries/getLanguage";
+import { createPinia, Pinia, setActivePinia } from "pinia";
+import { useDataStore } from "@/store/data";
 
 describe("Create Community", () => {
-  let store: any;
+  let store: Pinia;
 
   beforeEach(() => {
     // @ts-ignore
@@ -98,43 +96,40 @@ describe("Create Community", () => {
         return addChannelCreateLink;
       });
 
-    // @ts-ignore
-    const directStore = createDirectStore({
-      modules: {
-        user,
-        data,
-        app,
-      },
-    });
-    store = directStore.store;
+    store = createPinia();
+    setActivePinia(store);
   });
 
   test("Create Community - Success", async () => {
-    expect(Object.keys(store.state.data.neighbourhoods).length).toBe(0);
+    const dataStore = useDataStore();
 
-    await store.dispatch.createCommunity({
+    expect(Object.keys(dataStore.neighbourhoods).length).toBe(0);
+
+    await dataStore.createCommunity({
       perspectiveName: "aaaaaaaaaaa",
       description: "",
     });
 
-    expect(Object.keys(store.state.data.neighbourhoods).length).toBe(2);
-    expect(Object.keys(store.state.data.neighbourhoods)).toStrictEqual([
+    expect(Object.keys(dataStore.neighbourhoods).length).toBe(2);
+    expect(Object.keys(dataStore.neighbourhoods)).toStrictEqual([
       "9cac577c-0b0a-44f4-9d4f-66edcc236021",
       "6a37ca93-f693-471a-81dd-7993e48b659d",
     ]);
   });
 
   test("Create Community - Failure", async () => {
+    const dataStore = useDataStore();
+
     // @ts-ignore
     jest
       .spyOn(addPerspective, "addPerspective")
       // @ts-ignore
       .mockRejectedValue(Error("Could not create Perspective"));
 
-    expect(Object.keys(store.state.data.neighbourhoods).length).toBe(0);
+    expect(Object.keys(dataStore.neighbourhoods).length).toBe(0);
 
     try {
-      await store.dispatch.createCommunity({
+      await dataStore.createCommunity({
         perspectiveName: "aaaaaaaaaaa",
         description: "",
       });
@@ -146,6 +141,6 @@ describe("Create Community", () => {
       );
     }
 
-    expect(Object.keys(store.state.data.neighbourhoods).length).toBe(0);
+    expect(Object.keys(dataStore.neighbourhoods).length).toBe(0);
   });
 });

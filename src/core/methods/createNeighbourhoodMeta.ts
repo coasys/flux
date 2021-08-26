@@ -4,9 +4,19 @@ import { addPerspective } from "../mutations/addPerspective";
 import { createLink } from "../mutations/createLink";
 import { getPerspectiveSnapshot } from "../queries/getPerspective";
 
+import {
+  CREATOR,
+  DESCRIPTION,
+  NAME,
+  SELF,
+  LANGUAGE,
+  CREATED_AT,
+} from "@/constants/neighbourhoodMeta";
+
 export async function createNeighbourhoodMeta(
   name: string,
   description: string,
+  creatorDid: string,
   expressionLanguages: JuntoExpressionReference[]
 ): Promise<LinkExpression[]> {
   //Create the perspective to hold our meta
@@ -16,9 +26,25 @@ export async function createNeighbourhoodMeta(
   const expressionLinks = [];
   expressionLinks.push(
     new Link({
-      source: "self",
+      source: SELF,
       target: name,
-      predicate: "rdf://name",
+      predicate: NAME,
+    })
+  );
+
+  expressionLinks.push(
+    new Link({
+      source: SELF,
+      target: creatorDid,
+      predicate: CREATOR,
+    })
+  );
+
+  expressionLinks.push(
+    new Link({
+      source: SELF,
+      target: new Date().toISOString(),
+      predicate: CREATED_AT,
     })
   );
 
@@ -28,18 +54,18 @@ export async function createNeighbourhoodMeta(
   }
   expressionLinks.push(
     new Link({
-      source: "self",
+      source: SELF,
       target: description,
-      predicate: "rdf://description",
+      predicate: DESCRIPTION,
     })
   );
 
   for (const lang of expressionLanguages) {
     expressionLinks.push(
       new Link({
-        source: "self",
+        source: SELF,
         target: lang.languageAddress,
-        predicate: "language",
+        predicate: LANGUAGE,
       })
     );
   }

@@ -4,9 +4,9 @@
       <j-text nomargin variant="heading-sm">
         My communities ({{ communities.length }})
       </j-text>
-      <j-button size="lg" variant="primary" @click="createCommunityClick"
-        >Create a community</j-button
-      >
+      <j-button size="lg" variant="primary" @click="createCommunityClick">
+        Create a community
+      </j-button>
     </j-flex>
   </j-box>
   <div class="community-items">
@@ -25,9 +25,11 @@
         size="xl"
       ></j-avatar>
       <div class="community-item__content">
-        <j-text size="600" nomargin color="ui-800" weight="600">
-          {{ community.name }}
-        </j-text>
+        <j-box pb="200">
+          <j-text size="600" nomargin color="ui-800" weight="600">
+            {{ community.name }}
+          </j-text>
+        </j-box>
         <j-text nomargin variant="body">{{ community.description }}</j-text>
         <j-flex gap="300" a="center">
           <j-text size="400">
@@ -38,6 +40,7 @@
       <div>
         <j-button
           variant="subtle"
+          v-if="isCreatorOfCommunity(community.perspective.uuid)"
           @click.prevent="() => handleEditClick(community)"
         >
           <j-icon size="sm" name="pencil"></j-icon>
@@ -52,27 +55,45 @@
 import { defineComponent } from "vue";
 
 import { NeighbourhoodState } from "@/store/types";
-import store from "@/store";
+import { useDataStore } from "@/store/data";
+import { useAppStore } from "@/store/app";
+import { useUserStore } from "@/store/user";
 
 export default defineComponent({
+  setup() {
+    const dataStore = useDataStore();
+    const appStore = useAppStore();
+    const userStore = useUserStore();
+
+    return {
+      dataStore,
+      appStore,
+      userStore,
+    };
+  },
   computed: {
-    communities() {
-      return store.getters.getCommunityNeighbourhoods;
+    communities(): NeighbourhoodState[] {
+      return this.dataStore.getCommunityNeighbourhoods;
     },
   },
   methods: {
+    isCreatorOfCommunity(communityId: string): boolean {
+      const userDid = this.userStore.getUser?.agent.did;
+      const neighbourhood = this.dataStore.getNeighbourhood(communityId);
+      return neighbourhood.creatorDid === userDid;
+    },
     createCommunityClick() {
-      store.commit.setShowCreateCommunity(true);
+      this.appStore.setShowCreateCommunity(true);
     },
     handleMembersClick(community: NeighbourhoodState) {
-      store.commit.setShowCommunityMembers(true);
+      this.appStore.setShowCommunityMembers(true);
       this.$router.push({
         name: "community",
         params: { communityId: community.perspective.uuid },
       });
     },
     handleEditClick(community: NeighbourhoodState) {
-      store.commit.setShowEditCommunity(true);
+      this.appStore.setShowEditCommunity(true);
       this.$router.push({
         name: "community",
         params: { communityId: community.perspective.uuid },

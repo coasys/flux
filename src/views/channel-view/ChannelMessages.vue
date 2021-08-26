@@ -29,7 +29,7 @@
               v-else
               size="sm"
               variant="subtle"
-              @click="loadMoreMessages"
+              @click="$emit('loadMore')"
             >
               Look for older messages
             </j-button>
@@ -50,13 +50,8 @@
             :showAvatar="showAvatar(index)"
             :message="item.expression.data.body"
             :timestamp="item.expression.timestamp"
-            :username="users[item.expression.author]?.['foaf:AccountName']"
-            :profileImg="
-              users[item.expression.author]?.['schema:image'] &&
-              JSON.parse(users[item.expression.author]['schema:image'])[
-                'schema:contentUrl'
-              ]
-            "
+            :username="users[item.expression.author]?.username"
+            :profileImg="users[item.expression.author]?.profilePicture"
             @profileClick="(did) => $emit('profileClick', did)"
             @mentionClick="(dataset) => $emit('mentionClick', dataset)"
           />
@@ -68,34 +63,41 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import store from "@/store";
-import { ExpressionAndRef, ProfileExpression } from "@/store/types";
-import { getProfile } from "@/utils/profileHelpers";
+import { ExpressionAndRef, Profile } from "@/store/types";
+import { getProfile, parseProfile } from "@/utils/profileHelpers";
 import { differenceInMinutes, parseISO } from "date-fns";
 import MessageItem from "@/components/message-item/MessageItem.vue";
 import { Editor } from "@tiptap/vue-3";
-import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
+import { useDataStore } from "@/store/data";
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller";
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 import { isAtBottom } from "@/utils/scroll";
 
 interface UserMap {
-  [key: string]: ProfileExpression;
-}
-
-interface ExpressionAndRefWithId extends ExpressionAndRef {
-  id: string;
+  [key: string]: Profile;
 }
 
 export default defineComponent({
   name: "ChannelView",
-  components: { DynamicScroller, DynamicScrollerItem, MessageItem },
+  components: {
+    MessageItem,
+    DynamicScroller,
+    DynamicScrollerItem,
+  },
+  setup() {
+    const dataStore = useDataStore();
+
+    return {
+      dataStore,
+    };
+  },
   emits: [
     "scrollToBottom",
     "profileClick",
     "mentionClick",
     "updateLinkWorker",
     "updateExpressionWorker",
+    "loadMore",
   ],
   props: [
     "channel",
@@ -103,13 +105,14 @@ export default defineComponent({
     "profileLanguage",
     "linksWorker",
     "expressionWorker",
+    "messages",
+    "isAlreadyFetching",
   ],
   data() {
     return {
       hasMounted: false,
       scrolledToTop: false,
       scrolledToBottom: false,
-      previousFetchedTimestamp: null as string | undefined | null,
       noDelayRef: 0,
       currentExpressionPost: "",
       users: {} as UserMap,
@@ -137,7 +140,7 @@ export default defineComponent({
   watch: {
     scrolledToTop: function (isAtTop) {
       if (isAtTop) {
-        this.loadMoreMessages();
+        this.$emit("loadMore");
       }
     },
     scrolledToBottom: function (atBottom) {
@@ -173,26 +176,9 @@ export default defineComponent({
       immediate: true,
     },
   },
-  computed: {
-    isAlreadyFetching(): boolean {
-      if (this.messages.length) {
-        const oldestMessage = this.messages[0];
-        const from = oldestMessage.expression.timestamp;
-        return from === this.previousFetchedTimestamp;
-      }
-      return true;
-    },
-    messages(): ExpressionAndRefWithId[] {
-      // Sort by desc, because we have column-reverse on chat messages
-      return sortExpressionsByTimestamp(
-        this.channel?.neighbourhood?.currentExpressionMessages || [],
-        "asc"
-      ).map((item) => ({ ...item, id: item.expression.proof.signature }));
-    },
-  },
   methods: {
     markAsRead() {
-      store.commit.setHasNewMessages({
+      this.dataStore.setHasNewMessages({
         channelId: this.channel.neighbourhood.perspective.uuid,
         value: false,
       });
@@ -220,7 +206,7 @@ export default defineComponent({
     saveScrollPos() {
       const channelId = this.channel.neighbourhood.perspective.uuid;
       const scrollContainer = this.$refs.scrollContainer as any;
-      store.commit.setChannelScrollTop({
+      this.dataStore.setChannelScrollTop({
         channelId: channelId as string,
         value: scrollContainer ? scrollContainer.$el.scrollTop : undefined,
       });
@@ -256,40 +242,8 @@ export default defineComponent({
       const dataExp = await getProfile(profileLang, did);
       if (dataExp) {
         const { data } = dataExp;
-        this.users[did] = data.profile;
+        this.users[did] = parseProfile(data.profile);
       }
-    },
-    loadMoreMessages(): void {
-      const messageAmount = this.messages.length;
-      if (messageAmount) {
-        if (!this.isAlreadyFetching) {
-          const oldestMessage = this.messages[0];
-          this.loadMessages(oldestMessage.expression.timestamp);
-        }
-      } else {
-        this.loadMessages();
-      }
-    },
-    async loadMessages(from?: string, to?: string) {
-      if (this.linksWorker) {
-        this.linksWorker!.terminate();
-      }
-      if (this.expressionWorker) {
-        this.expressionWorker!.terminate();
-      }
-
-      const { linksWorker, expressionWorker } =
-        await store.dispatch.loadExpressions({
-          from: from ? new Date(from) : undefined,
-          to: to ? new Date(to) : undefined,
-          channelId: this.channel.neighbourhood.perspective.uuid,
-          expressionWorker: new Worker("pollingWorker.js"),
-        });
-
-      this.$emit("updateLinkWorker", linksWorker);
-      this.$emit("updateExpressionWorker", expressionWorker);
-
-      this.previousFetchedTimestamp = from;
     },
   },
 });

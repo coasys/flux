@@ -1,33 +1,33 @@
 import { createChannel } from "@/core/methods/createChannel";
+import { useAppStore } from "@/store/app";
 import { ChannelState, MembraneType } from "@/store/types";
-import { dataActionContext } from "@/store/data/index";
-import { appActionContext } from "@/store/app/index";
+import { useDataStore } from "..";
+import { useUserStore } from "@/store/user";
 
 export interface Payload {
   communityId: string;
   name: string;
 }
 
-export default async (
-  context: any,
-  payload: Payload
-): Promise<ChannelState> => {
-  const { commit: dataCommit, getters: dataGetters } =
-    dataActionContext(context);
-  const { commit: appCommit, getters: appGetters } = appActionContext(context);
+export default async (payload: Payload): Promise<ChannelState> => {
+  const dataStore = useDataStore();
+  const appStore = useAppStore();
+  const userStore = useUserStore();
   try {
-    const community = dataGetters.getCommunity(payload.communityId);
+    const community = dataStore.getCommunity(payload.communityId);
 
     if (community.neighbourhood !== undefined) {
-      const channel = await createChannel(
-        payload.name,
-        appGetters.getLanguagePath,
-        community.neighbourhood.perspective,
-        MembraneType.Inherited,
-        community.neighbourhood.typedExpressionLanguages
-      );
+      const channel = await createChannel({
+        channelName: payload.name,
+        languagePath: appStore.getLanguagePath,
+        creatorDid: userStore.getUser!.agent.did || "",
+        sourcePerspective: community.neighbourhood.perspective,
+        membraneType: MembraneType.Inherited,
+        typedExpressionLanguages:
+          community.neighbourhood.typedExpressionLanguages,
+      });
 
-      dataCommit.addChannel({
+      dataStore.addChannel({
         communityId: community.neighbourhood.perspective.uuid,
         channel,
       });
@@ -35,13 +35,13 @@ export default async (
       return channel;
     } else {
       const message = "Community does not exists";
-      appCommit.showDangerToast({
+      appStore.showDangerToast({
         message,
       });
       throw Error(message);
     }
   } catch (e) {
-    appCommit.showDangerToast({
+    appStore.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

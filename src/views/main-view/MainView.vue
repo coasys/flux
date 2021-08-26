@@ -69,12 +69,19 @@ import { defineComponent } from "vue";
 import CreateCommunity from "@/containers/CreateCommunity.vue";
 import EditProfile from "@/containers/EditProfile.vue";
 import Settings from "@/containers/Settings.vue";
-import { mapMutations } from "vuex";
 import { ModalsState } from "@/store/types";
-import store from "@/store";
+import { useAppStore } from "@/store/app";
+import { mapActions } from "pinia";
 
 export default defineComponent({
   name: "MainAppView",
+  setup() {
+    const appStore = useAppStore();
+
+    return {
+      appStore,
+    };
+  },
   components: {
     MainSidebar,
     AppLayout,
@@ -89,11 +96,11 @@ export default defineComponent({
   },
   computed: {
     modals(): ModalsState {
-      return store.state.app.modals;
+      return this.appStore.modals;
     },
   },
   methods: {
-    ...mapMutations([
+    ...mapActions(useAppStore, [
       "setShowEditProfile",
       "setShowSettings",
       "setShowCreateCommunity",

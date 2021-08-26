@@ -24,10 +24,15 @@
 </template>
 
 <script lang="ts">
+import { useAppStore } from "@/store/app";
 import { defineComponent } from "vue";
+import { mapActions } from "pinia";
 
 export default defineComponent({
   name: "topsection",
+  methods: {
+    ...mapActions(useAppStore, ["setShowCreateCommunity"]),
+  },
 });
 </script>
 
@@ -46,6 +51,8 @@ export default defineComponent({
 }
 
 j-button.active {
+  display: inline-block;
+  border-radius: 50%;
   --j-button-opacity: 1;
 }
 

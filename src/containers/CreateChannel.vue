@@ -39,12 +39,19 @@
 </template>
 
 <script lang="ts">
+import { useDataStore } from "@/store/data";
 import { isValid } from "@/utils/validation";
 import { defineComponent } from "vue";
-import store from "@/store";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
+  setup() {
+    const dataStore = useDataStore();
+
+    return {
+      dataStore,
+    };
+  },
   data() {
     return {
       channelName: "",
@@ -69,7 +76,7 @@ export default defineComponent({
       const communityId = this.$route.params.communityId as string;
       const name = this.channelName;
       this.isCreatingChannel = true;
-      store.dispatch
+      this.dataStore
         .createChannel({
           communityId,
           name,

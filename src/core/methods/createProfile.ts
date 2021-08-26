@@ -1,6 +1,21 @@
 import { createExpression } from "@/core/mutations/createExpression";
 import { Profile } from "@/store/types";
 
+import {
+  ACCOUNT_NAME,
+  GIVEN_NAME,
+  FAMILY_NAME,
+  EMAIL,
+  TYPE as PROFILETYPE,
+} from "@/constants/profile";
+import {
+  IMAGE,
+  CONTENT_URL,
+  CONTENT_SIZE,
+  TYPE as IMAGETYPE,
+  THUMBNAIL,
+} from "@/constants/image";
+
 const byteSize = (str: string) => new Blob([str]).size;
 
 export const dataURItoBlob = (dataURI: string) => {
@@ -78,22 +93,23 @@ export async function createProfile(
 ): Promise<string> {
   try {
     const profile: { [x: string]: any } = {
-      "foaf:AccountName": profileData.username,
-      "schema:email": profileData.email,
-      "schema:givenName": profileData.givenName,
-      "schema:familyName": profileData.familyName,
-      "@type": "foaf:OnlineAccount",
+      [ACCOUNT_NAME]: profileData.username,
+      [EMAIL]: profileData.email,
+      [GIVEN_NAME]: profileData.givenName,
+      [FAMILY_NAME]: profileData.familyName,
+      // TODO: Is type also a const?
+      "@type": [PROFILETYPE],
     };
 
     if (profileData.profilePicture && profileData.thumbnailPicture) {
-      profile["schema:image"] = JSON.stringify({
-        "@type": "schema:ImageObject",
-        "schema:contentSize": byteSize(profileData.profilePicture),
-        "schema:contentUrl": profileData.profilePicture,
-        "schema:thumbnail": {
-          "@type": "schema:ImageObject",
-          "schema:contentSize": byteSize(profileData.thumbnailPicture),
-          "schema:contentUrl": profileData.thumbnailPicture,
+      profile[IMAGE] = JSON.stringify({
+        "@type": IMAGETYPE,
+        [CONTENT_SIZE]: byteSize(profileData.profilePicture),
+        [CONTENT_URL]: profileData.profilePicture,
+        [THUMBNAIL]: {
+          "@type": IMAGETYPE,
+          [CONTENT_SIZE]: byteSize(profileData.thumbnailPicture),
+          [CONTENT_URL]: profileData.thumbnailPicture,
         },
       });
     }

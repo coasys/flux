@@ -3,6 +3,7 @@
     :open="showCommunityMenu"
     @toggle="(e) => (showCommunityMenu = e.target.open)"
     class="community-sidebar__header"
+    :class="{ 'is-creator': isCreator }"
     event="click"
     placement="bottom-start"
   >
@@ -18,7 +19,7 @@
       <j-icon size="xs" name="chevron-down"></j-icon>
     </button>
     <j-menu slot="content">
-      <j-menu-item @click="() => setShowEditCommunity(true)">
+      <j-menu-item v-if="isCreator" @click="() => setShowEditCommunity(true)">
         <j-icon size="xs" slot="start" name="pencil" />
         Edit community
       </j-menu-item>
@@ -149,13 +150,20 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import { mapMutations } from "vuex";
-import store from "@/store";
 import { ChannelState } from "@/store/types";
+import { mapActions, mapState } from "pinia";
+import { useDataStore } from "@/store/data";
+import { useAppStore } from "@/store/app";
+import { useUserStore } from "@/store/user";
 
 export default defineComponent({
   components: { AvatarGroup },
   props: ["community"],
+  setup() {
+    return {
+      userStore: useUserStore(),
+    };
+  },
   data: function () {
     return {
       showCommunityMenu: false,
@@ -164,15 +172,22 @@ export default defineComponent({
   computed: {
     channels(): ChannelState[] {
       const communityId = this.$route.params.communityId as string;
-      return store.getters.getChannelStates(communityId);
+      return this.getChannelStates()(communityId);
+    },
+    isCreator(): boolean {
+      return (
+        this.community.neighbourhood.creatorDid ===
+        this.userStore.getUser?.agent.did
+      );
     },
   },
   methods: {
-    ...mapMutations([
+    ...mapActions(useDataStore, ["setChannelNotificationState"]),
+    ...mapState(useDataStore, ["getChannelStates"]),
+    ...mapActions(useAppStore, [
       "setShowCreateChannel",
       "setShowEditCommunity",
       "setShowCommunityMembers",
-      "setChannelNotificationState",
       "setShowInviteCode",
       "setShowCommunitySettings",
     ]),

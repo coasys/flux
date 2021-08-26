@@ -3,34 +3,31 @@ import { getLinks } from "@/core/queries/getLinks";
 import { LinkQuery } from "@perspect3vism/ad4m";
 import { TimeoutCache } from "../../../utils/timeoutCache";
 
-import { dataActionContext } from "@/store/data/index";
-import { appActionContext } from "@/store/app/index";
 import { ExpressionTypes, ProfileExpression } from "@/store/types";
+import { useDataStore } from "..";
+import { useAppStore } from "@/store/app";
 
-export interface Payload {
-  communityId: string;
-}
+import { MEMBER } from "@/constants/neighbourhoodMeta";
 
-export default async function (context: any, id: string): Promise<void> {
-  const { commit: dataCommit, getters: dataGetters } =
-    dataActionContext(context);
-  const { commit: appCommit } = appActionContext(context);
+export default async function (id: string): Promise<void> {
+  const dataStore = useDataStore();
+  const appStore = useAppStore();
 
   const profiles: { [x: string]: ProfileExpression } = {};
   const cache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
 
   try {
-    const community = dataGetters.getNeighbourhood(id);
+    const neighbourhood = dataStore.getNeighbourhood(id);
 
     const profileLinks = await getLinks(
       id,
       new LinkQuery({
-        source: `${community.neighbourhoodUrl!}://self`,
-        predicate: "sioc://has_member",
+        source: `${neighbourhood.neighbourhoodUrl!}://self`,
+        predicate: MEMBER,
       })
     );
 
-    const profileLang = community?.typedExpressionLanguages.find(
+    const profileLang = neighbourhood?.typedExpressionLanguages.find(
       (t: any) => t.expressionType === ExpressionTypes.ProfileExpression
     );
 
@@ -52,20 +49,20 @@ export default async function (context: any, id: string): Promise<void> {
 
       const profileList = Object.values(profiles);
 
-      dataCommit.setCommunityMembers({
-        communityId: id,
+      dataStore.setNeighbourhoodMembers({
+        perspectiveUuid: id,
         members: profileList,
       });
     } else {
       const errorMessage =
         "Expected to find profile expression language for this community";
-      appCommit.showDangerToast({
+      appStore.showDangerToast({
         message: errorMessage,
       });
       throw Error(errorMessage);
     }
   } catch (e) {
-    appCommit.showDangerToast({
+    appStore.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

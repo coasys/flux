@@ -10,6 +10,8 @@ import { createLink } from "@/core/mutations/createLink";
 import { getLanguage } from "@/core/queries/getLanguage";
 import sleep from "@/utils/sleep";
 
+import { MEMBER } from "@/constants/neighbourhoodMeta";
+
 import {
   ExpressionUIIcons,
   MembraneType,
@@ -17,11 +19,11 @@ import {
   ExpressionTypes,
   CommunityState,
 } from "@/store/types";
-import { dataActionContext } from "@/store/data/index";
-import { appActionContext } from "@/store/app/index";
-import { userActionContext } from "@/store/user/index";
 import { Perspective } from "@perspect3vism/ad4m";
 import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta";
+import { useDataStore } from "..";
+import { useAppStore } from "@/store/app";
+import { useUserStore } from "@/store/user";
 
 export interface Payload {
   perspectiveName: string;
@@ -30,21 +32,25 @@ export interface Payload {
   description: string;
 }
 
-export default async (
-  context: any,
-  { perspectiveName, description, thumbnail = "", image = "" }: Payload
-): Promise<CommunityState> => {
-  const { commit: dataCommit } = dataActionContext(context);
-  const { commit: appCommit, getters: appGetters } = appActionContext(context);
-  const { getters: userGetters } = userActionContext(context);
+export default async ({
+  perspectiveName,
+  description,
+  thumbnail = "",
+  image = "",
+}: Payload): Promise<CommunityState> => {
+  const dataStore = useDataStore();
+  const appStore = useAppStore();
+  const userStore = useUserStore();
 
   try {
+    const creatorDid = userStore.getUser?.agent.did || "";
+
     const createSourcePerspective = await addPerspective(perspectiveName);
     console.log("Created source perspective", createSourcePerspective);
 
     //Get the variables that we need to create new unique languages
     const uid = uuidv4().toString();
-    const builtInLangPath = appGetters.getLanguagePath;
+    const builtInLangPath = appStore.getLanguagePath;
 
     //Create unique social-context
     const socialContextLang = await createUniqueHolochainLanguage(
@@ -96,6 +102,7 @@ export default async (
     const metaLinks = await createNeighbourhoodMeta(
       perspectiveName,
       description,
+      creatorDid,
       typedExpLangs
     );
     const meta = new Perspective(metaLinks);
@@ -138,36 +145,38 @@ export default async (
     console.log(
       "Created group expression link",
       addGroupExpLink,
-      userGetters.getProfile
+      userStore.getProfile
     );
 
     const createProfileExpression = await createProfile(
       profileExpressionLang.address!,
-      userGetters.getProfile!
+      userStore.getProfile!
     );
 
     //Create link between perspective and group expression
     const addProfileLink = await createLink(createSourcePerspective.uuid!, {
       source: `${neighbourhood}://self`,
       target: createProfileExpression,
-      predicate: "sioc://has_member",
+      predicate: MEMBER,
     });
     console.log("Created profile expression link", addProfileLink);
 
     //Next steps: create another perspective + share with social-context-channel link language and add above expression DNA's onto it
     //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel
-    const channel = await createChannel(
-      "Home",
-      builtInLangPath,
-      createSourcePerspective,
-      MembraneType.Inherited,
-      typedExpLangs
-    );
+    const channel = await createChannel({
+      channelName: "Home",
+      creatorDid: creatorDid,
+      languagePath: builtInLangPath,
+      sourcePerspective: createSourcePerspective,
+      membraneType: MembraneType.Inherited,
+      typedExpressionLanguages: typedExpLangs,
+    });
     console.log("created channel with result", channel);
 
     const newCommunity = {
       neighbourhood: {
         name: perspectiveName,
+        creatorDid: creatorDid,
         description: description,
         image: image,
         thumbnail: thumbnail,
@@ -181,7 +190,7 @@ export default async (
         members: [],
         currentExpressionLinks: {},
         currentExpressionMessages: {},
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
       },
       state: {
         perspectiveUuid: createSourcePerspective.uuid,
@@ -196,8 +205,8 @@ export default async (
         currentChannelId: channel.neighbourhood.perspective.uuid,
       },
     } as CommunityState;
-    dataCommit.addCommunity(newCommunity);
-    dataCommit.createChannel(channel);
+    dataStore.addCommunity(newCommunity);
+    dataStore.createChannelMutation(channel);
 
     //Get and cache the expression UI for each expression language
     for (const lang of typedExpLangs) {
@@ -209,14 +218,14 @@ export default async (
         viewIcon: languageRes!.icon?.code || "",
         name: languageRes!.name!,
       };
-      appCommit.addExpressionUI(uiData);
+      appStore.addExpressionUI(uiData);
       await sleep(40);
     }
 
     // @ts-ignore
     return newCommunity;
   } catch (e) {
-    appCommit.showDangerToast({
+    appStore.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

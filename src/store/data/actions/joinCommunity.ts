@@ -2,30 +2,28 @@ import { createProfile } from "@/core/methods/createProfile";
 import { createLink } from "@/core/mutations/createLink";
 import { joinNeighbourhood } from "@/core/mutations/joinNeighbourhood";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
-import { findNameDescriptionFromMeta } from "@/core/methods/findNameDescriptionFromMeta";
+import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
+
+import { MEMBER } from "@/constants/neighbourhoodMeta";
 
 import { Link } from "@perspect3vism/ad4m";
 
-import { dataActionContext } from "@/store/data/index";
-import { appActionContext } from "@/store/app/index";
-import { userActionContext } from "@/store/user/index";
 import { ExpressionTypes, CommunityState, MembraneType } from "@/store/types";
+import { useDataStore } from "..";
+import { useAppStore } from "@/store/app";
+import { useUserStore } from "@/store/user";
 
 export interface Payload {
   joiningLink: string;
 }
 
-export default async (
-  context: any,
-  { joiningLink }: Payload
-): Promise<void> => {
-  const { getters: dataGetters, commit: dataCommit } =
-    dataActionContext(context);
-  const { commit: appCommit } = appActionContext(context);
-  const { getters: userGetters } = userActionContext(context);
+export default async ({ joiningLink }: Payload): Promise<void> => {
+  const dataStore = useDataStore();
+  const appStore = useAppStore();
+  const userStore = useUserStore();
 
   try {
-    const neighbourhoods = dataGetters.getCommunityNeighbourhoods;
+    const neighbourhoods = dataStore.getCommunityNeighbourhoods;
     const isAlreadyPartOf = Object.values(neighbourhoods).find(
       (c: any) => c.neighbourhoodUrl === joiningLink
     );
@@ -46,23 +44,23 @@ export default async (
         );
 
       for (const uiIcon of uiIcons) {
-        appCommit.addExpressionUI(uiIcon);
+        appStore.addExpressionUI(uiIcon);
       }
 
       const profileExpLang = typedExpressionLanguages.find(
         (val) => val.expressionType == ExpressionTypes.ProfileExpression
       );
-      if (profileExpLang != undefined) {
+      if (profileExpLang !== undefined) {
         const createProfileExpression = await createProfile(
           profileExpLang.languageAddress!,
-          userGetters.getProfile!
+          userStore.getProfile!
         );
 
         //Create link between perspective and group expression
         const addProfileLink = await createLink(neighbourhood.uuid, {
           source: `${neighbourhood.sharedUrl}://self`,
           target: createProfileExpression,
-          predicate: "sioc://has_member",
+          predicate: MEMBER,
         } as Link);
         console.log("Created profile expression link", addProfileLink);
       } else {
@@ -72,14 +70,17 @@ export default async (
       }
 
       //Read out metadata about the perspective from the meta
-      const { name, description } = findNameDescriptionFromMeta(
-        neighbourhood.neighbourhood!.meta.links
-      );
+      const { name, description, creatorDid, createdAt } =
+        getMetaFromNeighbourhood(neighbourhood.neighbourhood!.meta.links);
+
+      console.log(neighbourhood.neighbourhood?.meta.links);
 
       const newCommunity = {
         neighbourhood: {
+          createdAt,
           name,
           description,
+          creatorDid,
           perspective: neighbourhood,
           typedExpressionLanguages: typedExpressionLanguages,
           neighbourhoodUrl: joiningLink,
@@ -104,18 +105,18 @@ export default async (
         },
       } as CommunityState;
 
-      dataCommit.addCommunity(newCommunity);
+      dataStore.addCommunity(newCommunity);
     } else {
       const message = "You are already part of this group";
 
-      appCommit.showDangerToast({
+      appStore.showDangerToast({
         message,
       });
 
       throw new Error(message);
     }
   } catch (e) {
-    appCommit.showDangerToast({
+    appStore.showDangerToast({
       message: e.message,
     });
     throw new Error(e);

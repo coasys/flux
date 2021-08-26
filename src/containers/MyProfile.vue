@@ -7,10 +7,7 @@
           :src="user.profile.profilePicture"
           :hash="user.agent.did"
         />
-        <j-button
-          size="lg"
-          @click="() => $store.commit('setShowEditProfile', true)"
-        >
+        <j-button size="lg" @click="() => appStore.setShowEditProfile(true)">
           <j-icon size="sm" name="pencil" />
           Edit profile
         </j-button>
@@ -26,16 +23,30 @@
 </template>
 
 <script lang="ts">
+import { useAppStore } from "@/store/app";
+import { useDataStore } from "@/store/data";
+import { NeighbourhoodState, UserState } from "@/store/types";
+import { useUserStore } from "@/store/user";
 import { defineComponent } from "vue";
-import store from "@/store";
 
 export default defineComponent({
+  setup() {
+    const userStore = useUserStore();
+    const dataStore = useDataStore();
+    const appStore = useAppStore();
+
+    return {
+      userStore,
+      dataStore,
+      appStore,
+    };
+  },
   computed: {
-    communities() {
-      return store.getters.getCommunityNeighbourhoods;
+    communities(): NeighbourhoodState[] {
+      return this.dataStore.getCommunityNeighbourhoods;
     },
-    user() {
-      return store.getters.getUser;
+    user(): UserState | null {
+      return this.userStore.getUser;
     },
   },
 });

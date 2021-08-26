@@ -1,29 +1,20 @@
-import {
-  defineModule,
-  localActionContext,
-  localGetterContext,
-} from "direct-vuex";
 import mutations from "./mutations";
 import actions from "./actions";
 import getters from "./getters";
 import { DataState } from "@/store/types";
+import { defineStore } from "pinia";
 
-const dataModule = defineModule({
-  state: (): DataState => {
+export const useDataStore = defineStore("data", {
+  state(): DataState {
     return {
       communities: {},
       neighbourhoods: {},
       channels: {},
     };
   },
-  mutations,
-  actions,
   getters,
+  actions: {
+    ...mutations,
+    ...actions,
+  },
 });
-
-export default dataModule;
-
-export const dataGetterContext = (args: [any, any, any, any]) =>
-  localGetterContext(args, dataModule);
-export const dataActionContext = (context: any) =>
-  localActionContext(context, dataModule);

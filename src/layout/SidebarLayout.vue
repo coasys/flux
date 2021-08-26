@@ -21,10 +21,17 @@
 </template>
 
 <script lang="ts">
+import { useAppStore } from "@/store/app";
 import { defineComponent } from "vue";
-import store from "@/store";
 
 export default defineComponent({
+  setup() {
+    const appStore = useAppStore();
+
+    return {
+      appStore,
+    };
+  },
   data() {
     return {
       isDragging: false,
@@ -33,8 +40,8 @@ export default defineComponent({
     };
   },
   computed: {
-    open() {
-      return store.state.app.showSidebar;
+    open(): boolean {
+      return this.appStore.showSidebar;
     },
   },
   methods: {
