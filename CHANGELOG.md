@@ -2,6 +2,49 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.2.0] - 26/08/2021
+
+### Added
+ - Signup now uses a carousel
+ - Auto navigate to community/channel after creation of either
+ - Home view which provides overview of installed neighbourhoods & overview of Junto
+ - Full testing environment which tests store code and util methods
+ - Ability to add an image to a community when creating or updating
+ - Pagination when getting channel messages that have not been loaded via signals
+ - Proper scrolling/loading of channel messages
+ - CMS layer for updating Junto home information 
+ - UI now looks for owner of neighbourhood/community and only allows edit community operations if current agent is owner
+ - Cached expression messages are now deleted on app close
+
+### Changed
+ - Background thread code now lives in its own module with proper code seperation
+ - Many general UI/style improvements
+ - Integrated with ad4m 0.1.0 ontology #84
+ - Large store structure refactor to improve app performance
+ - Web worker code optimized to avoid the spawning of many workers
+ - Pinia now used as storage layer vs vuex
+ - Holochain bumped to version 103
+ - Themeing now more simplified to allow for easier theme creation
+ - Cyberpunk theme improved to have different styles for button shapes and animations
+ - Name, description, author and createdAt attributes now saved on neighbourhood meta
+ - Refactor of ChannelView to make code more readible with multiple components
+
+### Deprecated
+
+### Removed
+
+### Fixed
+ - Bug where app would briefly flash on register screen before showing login screen even if agent had previously signed
+ - Fixed bug where paginated results from social-context would not be correctly returned
+ - Incorrect saving of scroll position when navigating between channels
+ - Duplicate expression message polling loops being created when navigating to channels
+ - Duplicate expression load polling loops being created when trying to resolve retreived channel link targets
+ - Bug where going to home view would break future navigation
+
+### Security
+
+---
+
 ## [0.1.9] - 30/06/2021
 
 ### Added
