@@ -129,6 +129,21 @@ export default {
     }
   },
 
+  setNeighbourhoodMember({
+    member,
+    perspectiveUuid,
+  }: {
+    member: ProfileExpression;
+    perspectiveUuid: string;
+  }): void {
+    const state = useDataStore();
+    const neighbourhood = state.neighbourhoods[perspectiveUuid];
+
+    if (neighbourhood) {
+      neighbourhood.members = [...neighbourhood.members, member];
+    }
+  },
+
   setCommunityTheme(payload: { communityId: string; theme: ThemeState }): void {
     const state = useDataStore();
     state.communities[payload.communityId].theme = {
