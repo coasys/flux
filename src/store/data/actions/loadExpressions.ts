@@ -61,6 +61,7 @@ export default async function (
     console.log("Posting for links between", fromDate, new Date());
     linksWorker.postMessage({
       interval: 10000,
+      staticSleep: true,
       query: print(PERSPECTIVE_LINK_QUERY),
       variables: {
         uuid: channelId.toString(),
