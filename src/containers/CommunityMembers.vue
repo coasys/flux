@@ -51,10 +51,16 @@ export default defineComponent({
 
     return {
       dataStore,
+      profileLinksWorker: null as null | Worker,
     };
   },
-  mounted() {
-    this.dataStore.getNeighbourhoodMembers(this.community.perspective.uuid);
+  async mounted() {
+    this.profileLinksWorker = await this.dataStore.getNeighbourhoodMembers(
+      this.community.perspective.uuid
+    );
+  },
+  unmounted() {
+    this.profileLinksWorker?.terminate();
   },
   data() {
     return {
