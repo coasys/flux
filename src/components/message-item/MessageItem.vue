@@ -178,6 +178,10 @@ export default defineComponent({
   margin-bottom: 0;
 }
 
+.message-item__message * {
+  user-select: text !important;
+}
+
 .message-item__message .mention {
   cursor: pointer;
   padding: 2px var(--j-space-200);

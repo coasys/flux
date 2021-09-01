@@ -298,6 +298,10 @@ body {
   color: var(--j-color-ui-500);
 }
 
+body :not(.message-item__message) {
+  user-select: none;
+}
+
 *,
 *:before,
 *:after {
