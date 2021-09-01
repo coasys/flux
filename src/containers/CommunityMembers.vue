@@ -2,7 +2,7 @@
   <j-box p="800">
     <j-flex gap="500" direction="column">
       <j-text variant="heading-sm">
-        All group members ({{ community.members.length ?? 0 }})
+        All group members ({{ Object.keys(community.members).length ?? 0 }})
       </j-text>
       <j-input
         size="lg"
