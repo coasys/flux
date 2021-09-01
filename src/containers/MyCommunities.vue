@@ -20,7 +20,7 @@
       :key="community.perspective.uuid"
     >
       <j-avatar
-        :src="community.image"
+        :src="community.image || null"
         :initials="community.name.charAt(0)"
         size="xl"
       ></j-avatar>
