@@ -92,6 +92,13 @@ export default defineComponent({
     (editor.shadowRoot?.querySelector('emoji-picker') as any)?.database.close()
     next();
   },
+  beforeRouteLeave(to, from, next) {
+    this.linksWorker?.terminate();
+    this.expressionWorker?.terminate();
+    const editor = document.getElementsByTagName('j-editor')[0];
+    (editor.shadowRoot?.querySelector('emoji-picker') as any)?.database.close()
+    next();
+  },
   data() {
     return {
       noDelayRef: 0,
