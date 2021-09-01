@@ -96,7 +96,7 @@ export async function createChannel({
       membraneType: membraneType,
       linkedPerspectives: [],
       linkedNeighbourhoods: [],
-      members: [],
+      members: {},
       currentExpressionLinks: {},
       currentExpressionMessages: {},
       createdAt: new Date().toISOString(),

@@ -28,17 +28,6 @@
   </j-modal>
 
   <j-modal
-    size="lg"
-    :open="modals.showSettings"
-    @toggle="(e) => setShowSettings(e.target.open)"
-  >
-    <settings
-      @submit="setShowSettings(false)"
-      @cancel="setShowSettings(false)"
-    />
-  </j-modal>
-
-  <j-modal
     :open="modals.showDisclaimer"
     @toggle="(e) => setShowDisclaimer(e.target.open)"
   >
@@ -68,7 +57,6 @@ import { defineComponent } from "vue";
 
 import CreateCommunity from "@/containers/CreateCommunity.vue";
 import EditProfile from "@/containers/EditProfile.vue";
-import Settings from "@/containers/Settings.vue";
 import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
@@ -86,7 +74,6 @@ export default defineComponent({
     MainSidebar,
     AppLayout,
     EditProfile,
-    Settings,
     CreateCommunity,
   },
   data() {

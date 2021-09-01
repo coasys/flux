@@ -2,7 +2,7 @@
   <j-box p="800">
     <j-flex gap="500" direction="column">
       <j-text variant="heading-sm">
-        All group members ({{ community.members.length ?? 0 }})
+        All group members ({{ Object.keys(community.members).length ?? 0 }})
       </j-text>
       <j-input
         size="lg"
@@ -51,10 +51,16 @@ export default defineComponent({
 
     return {
       dataStore,
+      profileLinksWorker: null as null | Worker,
     };
   },
-  mounted() {
-    this.dataStore.getNeighbourhoodMembers(this.community.perspective.uuid);
+  async mounted() {
+    this.profileLinksWorker = await this.dataStore.getNeighbourhoodMembers(
+      this.community.perspective.uuid
+    );
+  },
+  unmounted() {
+    this.profileLinksWorker?.terminate();
   },
   data() {
     return {
@@ -67,7 +73,7 @@ export default defineComponent({
       return this.dataStore.getNeighbourhood(id);
     },
     filteredCommunityMemberList(): { did: string; profile: Profile }[] {
-      const members: Expression[] = this.community.members;
+      const members: Expression[] = Object.values(this.community.members);
       return members
         .map((expression: Expression) => ({
           did: expression.author,

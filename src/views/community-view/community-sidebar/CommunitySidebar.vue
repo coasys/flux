@@ -10,7 +10,7 @@
     <button slot="trigger" class="community-sidebar__header-button">
       <j-avatar
         style="--j-avatar-size: 30px"
-        :src="community.neighbourhood.image"
+        :src="community.neighbourhood.image || null"
         :initials="community.neighbourhood.name.charAt(0)"
       />
       <div class="community-info">
@@ -23,7 +23,7 @@
         <j-icon size="xs" slot="start" name="pencil" />
         Edit community
       </j-menu-item>
-      <j-menu-item @click="() => setShowCommunitySettings(true)">
+      <j-menu-item @click="goToSettings">
         <j-icon size="xs" slot="start" name="gear" />
         Settings
       </j-menu-item>
@@ -42,7 +42,9 @@
   <j-box pt="500">
     <j-menu-group-item
       open
-      :title="`Members (${community.neighbourhood.members.length})`"
+      :title="`Members (${
+        Object.keys(community.neighbourhood.members).length
+      })`"
     >
       <j-button
         @click.prevent="() => setShowInviteCode(true)"
@@ -193,6 +195,10 @@ export default defineComponent({
     ]),
     getValidId(val: string) {
       return "channel-" + val;
+    },
+    goToSettings() {
+      this.$router.push({ name: "settings" });
+      this.showCommunityMenu = false;
     },
   },
 });

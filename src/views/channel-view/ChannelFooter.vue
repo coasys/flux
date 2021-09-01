@@ -55,7 +55,7 @@ export default defineComponent({
   },
   computed: {
     memberMentions(): MentionTrigger[] {
-      return this.community.neighbourhood.members.map(
+      return Object.values(this.community.neighbourhood.members).map(
         (m: any) =>
           ({
             name: m.data.profile[ACCOUNT_NAME],
