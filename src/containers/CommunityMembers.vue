@@ -67,7 +67,7 @@ export default defineComponent({
       return this.dataStore.getNeighbourhood(id);
     },
     filteredCommunityMemberList(): { did: string; profile: Profile }[] {
-      const members: Expression[] = this.community.members;
+      const members: Expression[] = Object.values(this.community.members);
       return members
         .map((expression: Expression) => ({
           did: expression.author,

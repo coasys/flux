@@ -33,7 +33,7 @@ export default defineComponent({
   props: ["users", "size"],
   computed: {
     firstUsers(): any {
-      return (this.users as any[]).slice(0, 3);
+      return (Object.values(this.users) as any[]).slice(0, 3);
     },
   },
 });

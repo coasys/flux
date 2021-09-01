@@ -116,7 +116,7 @@ export default {
     members,
     perspectiveUuid,
   }: {
-    members: ProfileExpression[];
+    members: { [x: string]: ProfileExpression };
     perspectiveUuid: string;
   }): void {
     const state = useDataStore();
@@ -140,7 +140,7 @@ export default {
     const neighbourhood = state.neighbourhoods[perspectiveUuid];
 
     if (neighbourhood) {
-      neighbourhood.members = [...neighbourhood.members, member];
+      neighbourhood.members = {...neighbourhood.members, [member.author]: member};
     }
   },
 

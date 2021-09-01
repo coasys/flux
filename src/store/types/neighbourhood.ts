@@ -18,7 +18,7 @@ export interface NeighbourhoodState {
   membraneRoot?: string;
   linkedPerspectives: string[];
   linkedNeighbourhoods: string[];
-  members: ProfileExpression[];
+  members: { [x: string]: ProfileExpression };
   currentExpressionLinks: { [x: string]: LinkExpression };
   currentExpressionMessages: { [x: string]: ExpressionAndRef };
 }

@@ -9,7 +9,6 @@ import { useAppStore } from "@/store/app";
 import { MEMBER } from "@/constants/neighbourhoodMeta";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 
-const profileLinksWorker = new Worker("pollingWorker.js");
 const expressionWorker = new Worker("pollingWorker.js");
 
 export default async function (id: string): Promise<Worker> {
@@ -26,10 +25,7 @@ export default async function (id: string): Promise<Worker> {
     );
 
     if (profileLang) {
-      dataStore.setNeighbourhoodMembers({
-        members: [],
-        perspectiveUuid: id,
-      })
+      const profileLinksWorker = new Worker("pollingWorker.js");
 
       profileLinksWorker.postMessage({
         interval: 5000,
@@ -51,8 +47,7 @@ export default async function (id: string): Promise<Worker> {
   
       profileLinksWorker.addEventListener("message", async (e) => {
         const profileLinks = e.data.perspectiveQueryLinks;
-  
-        
+
         for (const profileLink of profileLinks) {
           const profile = cache.get(profileLink.data.target);
 
@@ -80,18 +75,27 @@ export default async function (id: string): Promise<Worker> {
       };
   
       expressionWorker.addEventListener("message", (e: any) => {
-        const expression = e.data.expression;
+        const profileGqlExp = e.data.expression;
         const link = e.data.callbackData.link;
         const did = `${profileLang!.languageAddress}://${link.author}`;
 
-        if (expression) {
+        const profileExp = {
+          author: profileGqlExp.author!,
+          data: JSON.parse(profileGqlExp.data!),
+          timestamp: profileGqlExp.timestamp!,
+          proof: profileGqlExp.proof!,
+        } as ProfileExpression;
+
+        if (profileGqlExp) {
           dataStore.setNeighbourhoodMember({
             perspectiveUuid: id,
-            member: expression,
+            member: profileExp,
           });
     
-          cache.set(did, expression);
+          cache.set(did, profileExp);
         }
+
+        expressionWorker.terminate();
       });
 
       return profileLinksWorker;

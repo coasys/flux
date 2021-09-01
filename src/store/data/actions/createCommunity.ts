@@ -187,7 +187,7 @@ export default async ({
         membraneType: MembraneType.Unique,
         linkedPerspectives: [channel.neighbourhood.perspective.uuid],
         linkedNeighbourhoods: [channel.neighbourhood.neighbourhoodUrl],
-        members: [],
+        members: {},
         currentExpressionLinks: {},
         currentExpressionMessages: {},
         createdAt: new Date().toISOString(),

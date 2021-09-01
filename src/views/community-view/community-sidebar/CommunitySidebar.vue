@@ -42,7 +42,7 @@
   <j-box pt="500">
     <j-menu-group-item
       open
-      :title="`Members (${community.neighbourhood.members.length})`"
+      :title="`Members (${Object.keys(community.neighbourhood.members).length})`"
     >
       <j-button
         @click.prevent="() => setShowInviteCode(true)"
