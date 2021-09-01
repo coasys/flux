@@ -25,7 +25,7 @@ describe("Update Global Theme", () => {
 
     expect(appStore.currentTheme).toBe("global");
     expect(appStore.globalTheme).toStrictEqual({
-      name: "light",
+      name: "dark",
       fontFamily: "Poppins",
       hue: 270,
       saturation: 60,

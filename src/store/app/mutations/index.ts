@@ -32,6 +32,10 @@ export default {
     const state = useAppStore();
     state.showSidebar = open;
   },
+  setSidebarWidth(width: number): void {
+    const state = useAppStore();
+    state.sidebarWidth = width;
+  },
   setCurrentTheme(payload: CurrentThemeState): void {
     const state = useAppStore();
     state.currentTheme = payload;

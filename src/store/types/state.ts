@@ -36,6 +36,7 @@ export interface ApplicationState {
   currentTheme: CurrentThemeState;
   modals: ModalsState;
   showSidebar: boolean;
+  sidebarWidth: number;
   showGlobalLoading: boolean;
   globalError: {
     show: boolean;

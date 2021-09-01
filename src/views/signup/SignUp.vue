@@ -282,7 +282,7 @@ export default defineComponent({
   height: 100%;
   display: flex;
   align-items: center;
-  background: var(--j-color-primary-50);
+  background: var(--j-color-ui-50);
   overflow: hidden;
   text-align: center;
 }
