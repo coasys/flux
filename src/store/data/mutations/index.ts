@@ -140,7 +140,10 @@ export default {
     const neighbourhood = state.neighbourhoods[perspectiveUuid];
 
     if (neighbourhood) {
-      neighbourhood.members = {...neighbourhood.members, [member.author]: member};
+      neighbourhood.members = {
+        ...neighbourhood.members,
+        [member.author]: member,
+      };
     }
   },
 

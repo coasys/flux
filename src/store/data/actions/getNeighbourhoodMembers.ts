@@ -35,16 +35,16 @@ export default async function (id: string): Promise<Worker> {
           query: new LinkQuery({
             source: `${neighbourhood.neighbourhoodUrl!}://self`,
             predicate: MEMBER,
-          })
+          }),
         },
         name: `Community members for ${neighbourhood.perspective.name}`,
-        dataKey: `perspectiveQueryLinks`
+        dataKey: `perspectiveQueryLinks`,
       });
-  
-      profileLinksWorker.onerror = function(e) {
+
+      profileLinksWorker.onerror = function (e) {
         throw new Error(e.toString());
-      }
-  
+      };
+
       profileLinksWorker.addEventListener("message", async (e) => {
         const profileLinks = e.data.perspectiveQueryLinks;
 
@@ -56,7 +56,7 @@ export default async function (id: string): Promise<Worker> {
               perspectiveUuid: id,
               member: profile,
             });
-          } else {          
+          } else {
             expressionWorker.postMessage({
               retry: 50,
               interval: 5000,
@@ -69,11 +69,11 @@ export default async function (id: string): Promise<Worker> {
           }
         }
       });
-  
+
       expressionWorker.onerror = function (e) {
         throw new Error(e.toString());
       };
-  
+
       expressionWorker.addEventListener("message", (e: any) => {
         const profileGqlExp = e.data.expression;
         const link = e.data.callbackData.link;
@@ -91,7 +91,7 @@ export default async function (id: string): Promise<Worker> {
             perspectiveUuid: id,
             member: profileExp,
           });
-    
+
           cache.set(did, profileExp);
         }
       });

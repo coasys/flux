@@ -106,7 +106,7 @@ export default defineComponent({
       hasCopied: false,
       channelWorkerLoop: null as null | Worker,
       groupExpWorkerLoop: null as null | Worker,
-      memberExpressionLoop: null as null | Worker
+      memberExpressionLoop: null as null | Worker,
     };
   },
   watch: {
@@ -167,9 +167,9 @@ export default defineComponent({
           await this.dataStore.getNeighbourhoodMetadata({
             communityId: id,
           });
-        const memberExpressionWorker = 
+        const memberExpressionWorker =
           await this.dataStore.getNeighbourhoodMembers(id);
-        
+
         this.channelWorkerLoop = channelLinksWorker;
         this.groupExpWorkerLoop = groupExpressionWorker;
         this.memberExpressionLoop = memberExpressionWorker;
