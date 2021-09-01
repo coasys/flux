@@ -118,7 +118,6 @@
               @click="
                 () =>
                   setChannelNotificationState({
-                    communityId: community.neighbourhood.perspective.uuid,
                     channelId: channel.neighbourhood.perspective.uuid,
                   })
               "
@@ -197,7 +196,7 @@ export default defineComponent({
       return "channel-" + val;
     },
     goToSettings() {
-      this.$router.push({ name: "settings" });
+      this.setShowCommunitySettings(true);
       this.showCommunityMenu = false;
     },
   },
