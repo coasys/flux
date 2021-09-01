@@ -25,6 +25,7 @@ export const useAppStore = defineStore("app", {
         showDisclaimer: true,
       },
       showSidebar: true,
+      sidebarWidth: 330,
       showGlobalLoading: false,
       globalTheme: {
         fontSize: "md",
