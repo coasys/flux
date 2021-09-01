@@ -68,6 +68,7 @@ export default defineComponent({
     },
     filteredCommunityMemberList(): { did: string; profile: Profile }[] {
       const members: Expression[] = this.community.members;
+      console.log(members);
       return members
         .map((expression: Expression) => ({
           did: expression.author,
