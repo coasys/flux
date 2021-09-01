@@ -94,8 +94,6 @@ export default async function (id: string): Promise<Worker> {
     
           cache.set(did, profileExp);
         }
-
-        expressionWorker.terminate();
       });
 
       return profileLinksWorker;
