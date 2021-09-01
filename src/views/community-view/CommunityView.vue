@@ -58,13 +58,6 @@
       </j-input>
     </j-box>
   </j-modal>
-
-  <j-modal
-    :open="modals.showCommunitySettings"
-    @toggle="(e) => setShowCommunitySettings(e.target.open)"
-  >
-    <community-settings />
-  </j-modal>
 </template>
 
 <script lang="ts">
@@ -75,7 +68,6 @@ import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
 import EditCommunity from "@/containers/EditCommunity.vue";
 import CreateChannel from "@/containers/CreateChannel.vue";
 import CommunityMembers from "@/containers/CommunityMembers.vue";
-import CommunitySettings from "@/containers/CommunitySettings.vue";
 
 import { CommunityState, ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
@@ -85,7 +77,6 @@ import { mapActions } from "pinia";
 export default defineComponent({
   name: "CommunityView",
   components: {
-    CommunitySettings,
     EditCommunity,
     CreateChannel,
     CommunityMembers,

@@ -23,7 +23,7 @@
         <j-icon size="xs" slot="start" name="pencil" />
         Edit community
       </j-menu-item>
-      <j-menu-item @click="() => setShowCommunitySettings(true)">
+      <j-menu-item @click="goToSettings">
         <j-icon size="xs" slot="start" name="gear" />
         Settings
       </j-menu-item>
@@ -195,6 +195,10 @@ export default defineComponent({
     ]),
     getValidId(val: string) {
       return "channel-" + val;
+    },
+    goToSettings() {
+      this.$router.push({ name: "settings" });
+      this.showCommunityMenu = false;
     },
   },
 });
