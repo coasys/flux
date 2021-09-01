@@ -15,10 +15,6 @@
             <j-icon size="sm" name="eye" slot="start" />
             Apperance
           </j-tab-item>
-          <j-tab-item variant="button" value="privacy">
-            <j-icon size="sm" name="lock" slot="start" />
-            Privacy
-          </j-tab-item>
         </j-tabs>
       </aside>
       <div class="settings__content">
