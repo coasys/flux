@@ -210,6 +210,9 @@ export default defineComponent({
     },
   },
   beforeCreate() {
+    // Initialize theme
+    this.appStore.changeCurrentTheme("global");
+
     this.dataStore.clearMessages();
     //Reset globalError & loading states in case application was exited with these states set to true before
     this.appStore.setGlobalError({
