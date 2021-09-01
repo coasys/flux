@@ -95,7 +95,6 @@
             slot="trigger"
             :id="getValidId(channel.neighbourhood.perspective.uuid)"
             class="channel"
-            :class="{ 'channel--mute': channel?.state.notifications?.mute }"
             :selected="isExactActive"
             @click="navigate"
           >
@@ -105,7 +104,7 @@
               size="xs"
               slot="end"
               v-if="channel?.state.notifications?.mute"
-              name="volume-mute"
+              name="bell-slash"
             />
             <div
               slot="end"
@@ -126,9 +125,7 @@
                 size="xs"
                 slot="start"
                 :name="
-                  channel?.state.notifications?.mute
-                    ? 'volume-mute'
-                    : 'volume-up'
+                  channel?.state.notifications?.mute ? 'bell-slash' : 'bell'
                 "
               />
               {{
@@ -256,10 +253,6 @@ j-divider {
 .channel {
   position: relative;
   display: block;
-}
-
-.channel--mute {
-  opacity: 0.5;
 }
 
 .channel__notification {

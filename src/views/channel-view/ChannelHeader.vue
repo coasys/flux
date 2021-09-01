@@ -17,9 +17,7 @@
       >
         <j-icon
           slot="start"
-          :name="
-            channel?.state.notifications?.mute ? 'volume-mute' : 'volume-up'
-          "
+          :name="channel?.state.notifications?.mute ? 'bell-slash' : 'bell'"
         />
       </j-button>
     </j-flex>
