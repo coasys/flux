@@ -228,10 +228,10 @@ export default defineComponent({
     async createUser() {
       const resizedImage = this.profilePicture
         ? await resizeImage(dataURItoBlob(this.profilePicture as string), 400)
-        : null;
+        : undefined;
       const thumbnail = this.profilePicture
         ? await blobToDataURL(resizedImage!)
-        : null;
+        : undefined;
 
       this.isCreatingUser = true;
 
@@ -243,7 +243,7 @@ export default defineComponent({
           username: this.username,
           password: this.password,
           profilePicture: this.profilePicture,
-          thumbnailPicture: this.profilePicture,
+          thumbnailPicture: thumbnail,
         })
         .then(() => this.$router.push("/"))
         .finally(() => {
