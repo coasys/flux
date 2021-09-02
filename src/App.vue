@@ -210,6 +210,9 @@ export default defineComponent({
     },
   },
   beforeCreate() {
+    // Initialize theme
+    this.appStore.changeCurrentTheme("global");
+
     this.dataStore.clearMessages();
     //Reset globalError & loading states in case application was exited with these states set to true before
     this.appStore.setGlobalError({
@@ -298,6 +301,10 @@ body {
   color: var(--j-color-ui-500);
 }
 
+body :not(.message-item__message) {
+  user-select: none;
+}
+
 *,
 *:before,
 *:after {
@@ -308,28 +315,6 @@ body {
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-::-webkit-scrollbar {
-  width: var(--j-scrollbar-width, 6px);
-}
-
-::-webkit-scrollbar-track {
-  background-image: var(--j-scrollbar-background-image, none);
-  background: var(--j-scrollbar-background, transparent);
-}
-
-::-webkit-scrollbar-corner {
-  background: var(--j-scrollbar-corner-background, #dfdfdf);
-}
-
-::-webkit-scrollbar-thumb {
-  box-shadow: var(--j-scrollbar-thumb-box-shadow, none);
-  border-radius: var(--j-scrollbar-thumb-border-radius, 300px);
-  background-color: var(
-    --j-scrollbar-thumb-background,
-    rgba(180, 180, 180, 0.4)
-  );
 }
 
 :root {

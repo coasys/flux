@@ -2,6 +2,39 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.2.1] - 02/09/2021
+
+### Added
+ - New property on polling worker to handle static polling
+ - Now polling for community members
+ - Mute button now also added to channel header
+
+### Changed
+ - Save createdAt field for community on neighbourhood meta
+ - Use createdAt field for community to inform limit of expression link polling worker
+ - Dark theme now used by default
+ - Disable text selection across app except on messages
+ - Typescript version bumped
+ - Various small UI improvements and fixes
+
+### Deprecated
+
+### Removed
+
+### Fixed
+ - Error where polling for data the first time returned undefined
+ - IDB bug coming from emoji picker
+ - Community avatar src as unknown
+ - Random worker termination
+ - getMembers functionality
+ - Bug where profile expression would be of the wrong shape and not get saved into the DNA correctly
+ - Member search total fixed
+ - Init themes on startup 
+
+### Security
+
+---
+
 ## [0.2.0] - 26/08/2021
 
 ### Added

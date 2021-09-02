@@ -25,11 +25,12 @@ export const useAppStore = defineStore("app", {
         showDisclaimer: true,
       },
       showSidebar: true,
+      sidebarWidth: 330,
       showGlobalLoading: false,
       globalTheme: {
         fontSize: "md",
         fontFamily: "Poppins",
-        name: "light",
+        name: "dark",
         hue: 270,
         saturation: 60,
       },

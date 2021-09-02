@@ -85,11 +85,11 @@ import { mapActions } from "pinia";
 export default defineComponent({
   name: "CommunityView",
   components: {
-    CommunitySettings,
     EditCommunity,
     CreateChannel,
     CommunityMembers,
     CommunitySidebar,
+    CommunitySettings,
     SidebarLayout,
   },
   setup() {
@@ -106,6 +106,7 @@ export default defineComponent({
       hasCopied: false,
       channelWorkerLoop: null as null | Worker,
       groupExpWorkerLoop: null as null | Worker,
+      memberExpressionLoop: null as null | Worker,
     };
   },
   watch: {
@@ -155,6 +156,7 @@ export default defineComponent({
     async handleWorker(id: string): Promise<void> {
       this.channelWorkerLoop?.terminate();
       this.groupExpWorkerLoop?.terminate();
+      this.memberExpressionLoop?.terminate();
 
       if (id) {
         const channelLinksWorker =
@@ -165,9 +167,12 @@ export default defineComponent({
           await this.dataStore.getNeighbourhoodMetadata({
             communityId: id,
           });
-        this.dataStore.getNeighbourhoodMembers(id);
+        const memberExpressionWorker =
+          await this.dataStore.getNeighbourhoodMembers(id);
+
         this.channelWorkerLoop = channelLinksWorker;
         this.groupExpWorkerLoop = groupExpressionWorker;
+        this.memberExpressionLoop = memberExpressionWorker;
       }
     },
     getInviteCode() {

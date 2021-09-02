@@ -1,7 +1,11 @@
 <template>
   <div class="left-nav__bottom-section">
     <j-tooltip id="myProfile" title="My profile">
-      <j-popover event="click">
+      <j-popover
+        event="click"
+        :open="showBottomOptions"
+        @toggle="(e) => (showBottomOptions = e.target.open)"
+      >
         <j-avatar
           class="left-nav__profile-icon"
           slot="trigger"
@@ -35,7 +39,7 @@
             <j-icon size="sm" slot="start" name="cloud-download"></j-icon>
             {{ updateApp.text }}
           </j-menu-item>
-          <j-menu-item @click="() => setShowSettings(true)">
+          <j-menu-item @click="goToSettings">
             <j-icon size="sm" slot="start" name="gear"></j-icon>
             Settings
           </j-menu-item>
@@ -76,6 +80,11 @@ export default defineComponent({
       userStore,
     };
   },
+  data() {
+    return {
+      showBottomOptions: false,
+    };
+  },
   methods: {
     ...mapActions(useAppStore, ["setShowEditProfile", "setShowSettings"]),
     checkForUpdates() {
@@ -88,6 +97,10 @@ export default defineComponent({
     },
     installNow() {
       window.api.send("quit-and-install");
+    },
+    goToSettings() {
+      this.$router.push({ name: "settings" });
+      this.showBottomOptions = false;
     },
   },
   computed: {

@@ -24,6 +24,7 @@ jobs:
           working-directory: ./resources/temp/holochain
       - name: Build Holochain
         run: |
+          brew install sqlcipher
           rustup target add wasm32-unknown-unknown
           cd ./resources/temp/holochain 
           cargo install --path crates/holochain
@@ -83,6 +84,7 @@ jobs:
           working-directory: ./resources/temp/holochain
       - name: Build Holochain
         run: |
+          sudo apt-get install -y sqlcipher
           rustup target add wasm32-unknown-unknown
           cd ./resources/temp/holochain 
           cargo install --path crates/holochain

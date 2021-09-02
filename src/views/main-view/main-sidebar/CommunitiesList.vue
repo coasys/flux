@@ -56,8 +56,9 @@ export default defineComponent({
   },
   methods: {
     removeCommunity(id: string) {
-      this.dataStore.removeCommunity(id);
-      this.$router.push({ name: "home" });
+      this.$router.push({ name: "home" }).then(() => {
+        this.dataStore.removeCommunity(id);
+      });
     },
     handleCommunityClick(communityId: string) {
       if (this.communityIsActive(communityId)) {

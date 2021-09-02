@@ -10,7 +10,7 @@
     <button slot="trigger" class="community-sidebar__header-button">
       <j-avatar
         style="--j-avatar-size: 30px"
-        :src="community.neighbourhood.image"
+        :src="community.neighbourhood.image || null"
         :initials="community.neighbourhood.name.charAt(0)"
       />
       <div class="community-info">
@@ -23,7 +23,7 @@
         <j-icon size="xs" slot="start" name="pencil" />
         Edit community
       </j-menu-item>
-      <j-menu-item @click="() => setShowCommunitySettings(true)">
+      <j-menu-item @click="goToSettings">
         <j-icon size="xs" slot="start" name="gear" />
         Settings
       </j-menu-item>
@@ -42,7 +42,9 @@
   <j-box pt="500">
     <j-menu-group-item
       open
-      :title="`Members (${community.neighbourhood.members.length})`"
+      :title="`Members (${
+        Object.keys(community.neighbourhood.members).length
+      })`"
     >
       <j-button
         @click.prevent="() => setShowInviteCode(true)"
@@ -93,7 +95,6 @@
             slot="trigger"
             :id="getValidId(channel.neighbourhood.perspective.uuid)"
             class="channel"
-            :class="{ 'channel--mute': channel?.state.notifications?.mute }"
             :selected="isExactActive"
             @click="navigate"
           >
@@ -103,7 +104,7 @@
               size="xs"
               slot="end"
               v-if="channel?.state.notifications?.mute"
-              name="volume-mute"
+              name="bell-slash"
             />
             <div
               slot="end"
@@ -116,7 +117,6 @@
               @click="
                 () =>
                   setChannelNotificationState({
-                    communityId: community.neighbourhood.perspective.uuid,
                     channelId: channel.neighbourhood.perspective.uuid,
                   })
               "
@@ -125,9 +125,7 @@
                 size="xs"
                 slot="start"
                 :name="
-                  channel?.state.notifications?.mute
-                    ? 'volume-mute'
-                    : 'volume-up'
+                  channel?.state.notifications?.mute ? 'bell-slash' : 'bell'
                 "
               />
               {{
@@ -194,6 +192,10 @@ export default defineComponent({
     getValidId(val: string) {
       return "channel-" + val;
     },
+    goToSettings() {
+      this.setShowCommunitySettings(true);
+      this.showCommunityMenu = false;
+    },
   },
 });
 </script>
@@ -251,10 +253,6 @@ j-divider {
 .channel {
   position: relative;
   display: block;
-}
-
-.channel--mute {
-  opacity: 0.5;
 }
 
 .channel__notification {

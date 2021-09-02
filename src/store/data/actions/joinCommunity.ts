@@ -87,7 +87,7 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
           membraneType: MembraneType.Unique,
           linkedNeighbourhoods: [],
           linkedPerspectives: [],
-          members: [],
+          members: {},
           currentExpressionLinks: {},
           currentExpressionMessages: {},
         },

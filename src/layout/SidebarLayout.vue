@@ -6,7 +6,11 @@
       'sidebar-layout--is-dragging': isDragging,
     }"
   >
-    <aside class="sidebar-layout__drawer" ref="sidebar">
+    <aside
+      class="sidebar-layout__drawer"
+      :style="{ width: `${appStore.sidebarWidth}px` }"
+      ref="sidebar"
+    >
       <span
         role="presentation"
         class="sidebar-layout__resize-handle"
@@ -54,8 +58,9 @@ export default defineComponent({
       document.addEventListener("mouseup", this.stopResize, false);
     },
     doResize(e: any) {
-      const sidebar = this.$refs.sidebar as HTMLSpanElement;
-      sidebar.style.width = `${this.startWidth + (e.clientX - this.startX)}px`;
+      this.appStore.setSidebarWidth(
+        this.startWidth + (e.clientX - this.startX)
+      );
     },
     stopResize() {
       this.isDragging = false;

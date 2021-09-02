@@ -113,7 +113,7 @@ describe("App Mutations", () => {
       fontFamily: "Poppins",
       fontSize: "md",
       hue: 270,
-      name: "light",
+      name: "dark",
       saturation: 60,
     });
 
@@ -124,7 +124,7 @@ describe("App Mutations", () => {
       fontFamily: "Arial",
       fontSize: "md",
       hue: 70,
-      name: "light",
+      name: "dark",
       saturation: 60,
     });
   });

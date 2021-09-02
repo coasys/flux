@@ -17,7 +17,7 @@ export async function joinChannelFromSharedLink(
   );
 
   //Read out metadata about the perspective from the meta
-  const { name, description, creatorDid } = getMetaFromNeighbourhood(
+  const { name, description, creatorDid, createdAt } = getMetaFromNeighbourhood(
     neighbourhood.neighbourhood!.meta.links
   );
 
@@ -33,10 +33,10 @@ export async function joinChannelFromSharedLink(
       membraneType: MembraneType.Inherited,
       linkedPerspectives: [],
       linkedNeighbourhoods: [],
-      members: [],
+      members: {},
       currentExpressionLinks: {},
       currentExpressionMessages: {},
-      createdAt: new Date().toISOString(),
+      createdAt: createdAt,
       membraneRoot: parentPerspectiveUUID,
     },
     state: {

@@ -12,6 +12,7 @@
     "sourceMap": true,
     "strictPropertyInitialization": false,
     "resolveJsonModule": true,
+    "useUnknownInCatchVariables": false,
     "baseUrl": ".",
     "types": [
       "webpack-env", "jest", "mocha"

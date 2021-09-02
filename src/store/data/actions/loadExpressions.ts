@@ -8,7 +8,7 @@ export interface Payload {
   channelId: string;
   from?: Date;
   to?: Date;
-  expressionWorker: Worker
+  expressionWorker: Worker;
 }
 
 export interface LoadExpressionResult {
@@ -16,23 +16,19 @@ export interface LoadExpressionResult {
   expressionWorker: Worker;
 }
 
-
-export default async function (
-  {
-    channelId,
+export default async function ({
+  channelId,
   expressionWorker,
   from,
   to,
-  }: Payload
-): Promise<LoadExpressionResult> {
-    const dataStore = useDataStore();
+}: Payload): Promise<LoadExpressionResult> {
+  const dataStore = useDataStore();
   const appStore = useAppStore();
 
   try {
-    const fromDate = from || appStore.getApplicationStartTime;
-    const untilDate = to || new Date("August 19, 1975 23:15:30").toISOString();
-
     const channel = dataStore.getNeighbourhood(channelId);
+    const fromDate = from || appStore.getApplicationStartTime;
+    const untilDate = to || channel.createdAt!;
 
     if (!channel) {
       console.error(`No channel with id ${channelId} found`);
@@ -61,6 +57,7 @@ export default async function (
     console.log("Posting for links between", fromDate, new Date());
     linksWorker.postMessage({
       interval: 10000,
+      staticSleep: true,
       query: print(PERSPECTIVE_LINK_QUERY),
       variables: {
         uuid: channelId.toString(),

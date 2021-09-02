@@ -101,9 +101,9 @@ export default {
 
   getCommunityMembers:
     (state: DataState) =>
-    (communityId: string): Expression[] => {
+    (communityId: string): { [x: string]: Expression } => {
       if (!state.communities[communityId]) {
-        return [];
+        return {};
       }
       return state.neighbourhoods[communityId].members;
     },
