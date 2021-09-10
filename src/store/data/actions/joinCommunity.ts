@@ -73,8 +73,6 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
       const { name, description, creatorDid, createdAt } =
         getMetaFromNeighbourhood(neighbourhood.neighbourhood!.meta.links);
 
-      console.log(neighbourhood.neighbourhood?.meta.links);
-
       const newCommunity = {
         neighbourhood: {
           createdAt,
