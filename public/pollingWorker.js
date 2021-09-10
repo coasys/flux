@@ -49,7 +49,7 @@ function pollData(params) {
     retries = 0,
     callbackData = null,
     dataKey,
-    staticSleep = false
+    staticSleep = false,
   } = params;
 
   // remove poll if we are over our retries
@@ -66,7 +66,7 @@ function pollData(params) {
       console.log("Polling ", retries, name, " Got response: ", res);
 
       // post data if we have a result
-      if (res && dataKey in res) {
+      if (res && res[dataKey]) {
         // if we have defined a retry amount,
         // it means we want it to quit when we have a response
         // TODO: Maybe make this more explicit
@@ -84,7 +84,9 @@ function pollData(params) {
       throw new Error(e);
     })
     .finally(() => {
-      const time = !staticSleep ? interval * (retries + 1) : interval * (retries + 1);
+      const time = !staticSleep
+        ? interval * (retries + 1)
+        : interval * (retries + 1);
       if (polls.includes(id)) {
         sleep(time).then(() => {
           pollData({ ...params, retries: retries + 1 });
