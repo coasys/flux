@@ -6,17 +6,16 @@ import {
   JuntoExpressionReference,
 } from "@/store/types";
 import { v4 } from "uuid";
-import path from "path";
 import { Perspective, Link } from "@perspect3vism/ad4m";
 import type { PerspectiveHandle } from "@perspect3vism/ad4m";
 import { addPerspective } from "../mutations/addPerspective";
-import { createUniqueHolochainLanguage } from "../mutations/createUniqueHolochainLanguage";
+import { templateLanguage } from "../mutations/templateLanguage";
 import { createNeighbourhood } from "../mutations/createNeighbourhood";
 import { createNeighbourhoodMeta } from "./createNeighbourhoodMeta";
+import { SOCIAL_CONTEXT_OFFICIAL } from "@/languages";
 
 interface ChannelProps {
   channelName: string;
-  languagePath: string;
   creatorDid: string;
   sourcePerspective: PerspectiveHandle;
   membraneType: MembraneType;
@@ -25,7 +24,6 @@ interface ChannelProps {
 
 export async function createChannel({
   channelName,
-  languagePath,
   creatorDid,
   sourcePerspective,
   membraneType,
@@ -33,10 +31,12 @@ export async function createChannel({
 }: ChannelProps): Promise<ChannelState> {
   const perspective = await addPerspective(channelName);
   console.debug("Created new perspective with result", perspective);
-  const socialContextLanguage = await createUniqueHolochainLanguage(
-    path.join(languagePath, "social-context-channel"),
-    "social-context",
-    v4().toString()
+  const socialContextLanguage = await templateLanguage(
+    SOCIAL_CONTEXT_OFFICIAL,
+    JSON.stringify({
+      uid: v4().toString(),
+      name: `${channelName}-social-context`,
+    })
   );
   console.debug(
     "Created new social context language wuth result",

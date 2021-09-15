@@ -9,7 +9,7 @@ import createCommunityProfileLink from "../../../fixtures/createCommunityProfile
 import createCommunityChannel from "../../../fixtures/createCommunityChannel.json";
 import languages from "../../../fixtures/languages.json";
 import * as addPerspective from "@/core/mutations/addPerspective";
-import * as createUniqueHolochainLanguage from "@/core/mutations/templateLanguage";
+import * as templateLanguage from "@/core/mutations/templateLanguage";
 import * as createNeighbourhood from "@/core/mutations/createNeighbourhood";
 import * as createNeighbourhoodMeta from "@/core/methods/createNeighbourhoodMeta";
 import * as createLink from "@/core/mutations/createLink";
@@ -32,7 +32,7 @@ describe("Create Community", () => {
 
     // @ts-ignore
     jest
-      .spyOn(createUniqueHolochainLanguage, "createUniqueHolochainLanguage")
+      .spyOn(templateLanguage, "templateLanguage")
       .mockImplementation(async (path, dna, uid) => {
         if (dna === "social-context") {
           return createCommunityUniqueHolochainLanguage[0];
