@@ -14,7 +14,7 @@ import {
   GROUP_EXPRESSION_OFFICIAL,
   PROFILE_EXPRESSION_OFFICIAL,
   SHORTFORM_EXPRESSION_OFFICIAL,
-} from "@/languages";
+} from "@/ad4m-globals";
 
 import { MEMBER } from "@/constants/neighbourhoodMeta";
 

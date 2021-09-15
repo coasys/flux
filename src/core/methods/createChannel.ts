@@ -12,7 +12,7 @@ import { addPerspective } from "../mutations/addPerspective";
 import { templateLanguage } from "../mutations/templateLanguage";
 import { createNeighbourhood } from "../mutations/createNeighbourhood";
 import { createNeighbourhoodMeta } from "./createNeighbourhoodMeta";
-import { SOCIAL_CONTEXT_OFFICIAL } from "@/languages";
+import { SOCIAL_CONTEXT_OFFICIAL } from "@/ad4m-globals";
 
 interface ChannelProps {
   channelName: string;
