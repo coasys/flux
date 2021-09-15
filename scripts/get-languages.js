@@ -4,12 +4,6 @@ const unzipper = require("unzipper");
 const path = require("path");
 
 const languages = {
-  profiles: {
-    targetDnaName: "agent-profiles",
-    dna: "https://github.com/jdeepee/profiles/releases/download/0.0.4/agent-profiles.dna",
-    bundle:
-      "https://github.com/jdeepee/profiles/releases/download/0.0.4/bundle.js",
-  },
   "agent-expression-store": {
     targetDnaName: "agent-store",
     dna: "https://github.com/perspect3vism/agent-language/releases/download/0.0.5/agent-store.dna",
@@ -27,30 +21,6 @@ const languages = {
     dna: "https://github.com/perspect3vism/language-persistence/releases/download/0.0.3/languages.dna",
     bundle:
       "https://github.com/perspect3vism/language-persistence/releases/download/0.0.3/bundle.js",
-  },
-  "group-expression": {
-    targetDnaName: "group-expression",
-    dna: "https://github.com/juntofoundation/Group-Expression/releases/download/0.0.3/group-expression.dna",
-    bundle:
-      "https://github.com/juntofoundation/Group-Expression/releases/download/0.0.3/bundle.js",
-  },
-  "shortform-expression": {
-    targetDnaName: "shortform-expression",
-    dna: "https://github.com/juntofoundation/Short-Form-Expression/releases/download/0.0.2/shortform-expression.dna",
-    bundle:
-      "https://github.com/juntofoundation/Short-Form-Expression/releases/download/0.0.2/bundle.js",
-  },
-  "social-context": {
-    zipped: true,
-    targetDnaName: "social-context",
-    resource:
-      "https://github.com/juntofoundation/Social-Context/releases/download/0.0.12/full_index.zip",
-  },
-  "social-context-channel": {
-    zipped: true,
-    targetDnaName: "social-context",
-    resource:
-      "https://github.com/juntofoundation/Social-Context/releases/download/0.0.12/signal.zip",
   },
 };
 

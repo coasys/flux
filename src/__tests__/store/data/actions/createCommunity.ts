@@ -9,7 +9,7 @@ import createCommunityProfileLink from "../../../fixtures/createCommunityProfile
 import createCommunityChannel from "../../../fixtures/createCommunityChannel.json";
 import languages from "../../../fixtures/languages.json";
 import * as addPerspective from "@/core/mutations/addPerspective";
-import * as createUniqueHolochainLanguage from "@/core/mutations/createUniqueHolochainLanguage";
+import * as createUniqueHolochainLanguage from "@/core/mutations/templateLanguage";
 import * as createNeighbourhood from "@/core/mutations/createNeighbourhood";
 import * as createNeighbourhoodMeta from "@/core/methods/createNeighbourhoodMeta";
 import * as createLink from "@/core/mutations/createLink";

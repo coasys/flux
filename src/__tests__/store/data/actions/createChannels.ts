@@ -5,7 +5,7 @@ import addChannelCreateLinkType from "../../../fixtures/addChannelCreateLinkType
 import addChannelCreateLink from "../../../fixtures/addChannelCreateLink.json";
 import createChannelMeta from "../../../fixtures/createChannelMeta.json";
 import * as addPerspective from "@/core/mutations/addPerspective";
-import * as createUniqueHolochainLanguage from "@/core/mutations/createUniqueHolochainLanguage";
+import * as createUniqueHolochainLanguage from "@/core/mutations/templateLanguage";
 import * as createNeighbourhood from "@/core/mutations/createNeighbourhood";
 import * as createNeighbourhoodMeta from "@/core/methods/createNeighbourhoodMeta";
 import * as createLink from "@/core/mutations/createLink";

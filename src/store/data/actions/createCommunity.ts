@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { createChannel } from "@/core/methods/createChannel";
 import { createProfile } from "@/core/methods/createProfile";
 import { createExpression } from "@/core/mutations/createExpression";
-import { createUniqueHolochainLanguage } from "@/core/mutations/createUniqueHolochainLanguage";
+import { createUniqueHolochainLanguage } from "@/core/mutations/templateLanguage";
 import { createNeighbourhood } from "@/core/mutations/createNeighbourhood";
 import { addPerspective } from "@/core/mutations/addPerspective";
 import { createLink } from "@/core/mutations/createLink";
