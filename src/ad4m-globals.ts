@@ -8,7 +8,7 @@ export const PROFILE_EXPRESSION_OFFICIAL =
   "QmTCKNzoXpQrrPfXEyHYT241HGgGpHd3Uq3HBzSVXLY99R";
 
 export const SHORTFORM_EXPRESSION_OFFICIAL =
-  "QmTh48ahxV3Gr92HGpRz9kbRErRhvedjrxpXv7eru1PLJN";
+  "QmTR49sVKEUam1oUnf2UyeDKcsmXnP7F5fJThcXYqG8c8S";
 
 export const JUNTO_AGENT =
   "did:key:zQ3shpe32NARLJeuE3wwWLWLoy9NzkrD3oy1psPJNhbvkuMzK";
