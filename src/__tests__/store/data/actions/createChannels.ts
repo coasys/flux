@@ -5,7 +5,7 @@ import addChannelCreateLinkType from "../../../fixtures/addChannelCreateLinkType
 import addChannelCreateLink from "../../../fixtures/addChannelCreateLink.json";
 import createChannelMeta from "../../../fixtures/createChannelMeta.json";
 import * as addPerspective from "@/core/mutations/addPerspective";
-import * as createUniqueHolochainLanguage from "@/core/mutations/createUniqueHolochainLanguage";
+import * as templateLanguage from "@/core/mutations/templateLanguage";
 import * as createNeighbourhood from "@/core/mutations/createNeighbourhood";
 import * as createNeighbourhoodMeta from "@/core/methods/createNeighbourhoodMeta";
 import * as createLink from "@/core/mutations/createLink";
@@ -24,7 +24,7 @@ describe("Create Channel", () => {
 
     // @ts-ignore
     jest
-      .spyOn(createUniqueHolochainLanguage, "createUniqueHolochainLanguage")
+      .spyOn(templateLanguage, "templateLanguage")
       .mockImplementation(async () => {
         return addChannelUniqueHolochainLanguages;
       });

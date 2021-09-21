@@ -19,7 +19,6 @@ export default async (payload: Payload): Promise<ChannelState> => {
     if (community.neighbourhood !== undefined) {
       const channel = await createChannel({
         channelName: payload.name,
-        languagePath: appStore.getLanguagePath,
         creatorDid: userStore.getUser!.agent.did || "",
         sourcePerspective: community.neighbourhood.perspective,
         membraneType: MembraneType.Inherited,
