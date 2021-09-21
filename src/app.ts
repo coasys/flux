@@ -7,6 +7,13 @@ import { ApolloClients } from "@vue/apollo-composable";
 
 import "@junto-foundation/junto-elements";
 import "@junto-foundation/junto-elements/dist/main.css";
+
+import ChatView from "junto-plugin-chat-view";
+
+console.log(ChatView);
+
+customElements.define("chat-view", ChatView);
+
 import { apolloClient } from "./utils/setupApolloClient";
 
 import { createPinia } from "pinia";
