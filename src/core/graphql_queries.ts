@@ -205,23 +205,6 @@ export const PUBLISH_NEIGHBOURHOOD_FROM_PERSPECTIVE = gql`
   }
 `;
 
-export const LANGUAGE_CLONE_HOLOCHAIN_TEMPLATE = gql`
-  mutation languageCloneHolochainTemplate(
-    $languagePath: String!
-    $dnaNick: String!
-    $uid: String!
-  ) {
-    languageCloneHolochainTemplate(
-      languagePath: $languagePath
-      dnaNick: $dnaNick
-      uid: $uid
-    ) {
-      address
-      name
-    }
-  }
-`;
-
 export const PERSPECTIVE_REMOVE = gql`
   mutation perspectiveRemove($uuid: String!) {
     perspectiveRemove(uuid: $uuid)
@@ -401,6 +384,39 @@ export const NEIGHBOURHOOD_JOIN = gql`
           }
         }
       }
+    }
+  }
+`;
+
+export const ADD_TRUSTED_AGENTS = gql`
+  mutation addTrustedAgents($agents: [String!]!) {
+    addTrustedAgents(agents: $agents)
+  }
+`;
+
+export const DELETE_TRUSTED_AGENTS = gql`
+  mutation deleteTrustedAgents($agents: [String!]!) {
+    deleteTrustedAgents(agents: $agents)
+  }
+`;
+
+export const GET_TRUSTED_AGENTS = gql`
+  query getTrustedAgents {
+    getTrustedAgents
+  }
+`;
+
+export const LANGUAGE_APPLY_TEMPLATE_AND_PUBLISH = gql`
+  mutation languageApplyTemplateAndPublish(
+    $sourceLanguageHash: String!
+    $templateData: String!
+  ) {
+    languageApplyTemplateAndPublish(
+      sourceLanguageHash: $sourceLanguageHash
+      templateData: $templateData
+    ) {
+      name
+      address
     }
   }
 `;

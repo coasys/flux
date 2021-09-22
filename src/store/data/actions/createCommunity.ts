@@ -3,12 +3,18 @@ import { v4 as uuidv4 } from "uuid";
 import { createChannel } from "@/core/methods/createChannel";
 import { createProfile } from "@/core/methods/createProfile";
 import { createExpression } from "@/core/mutations/createExpression";
-import { createUniqueHolochainLanguage } from "@/core/mutations/createUniqueHolochainLanguage";
+import { templateLanguage } from "@/core/mutations/templateLanguage";
 import { createNeighbourhood } from "@/core/mutations/createNeighbourhood";
 import { addPerspective } from "@/core/mutations/addPerspective";
 import { createLink } from "@/core/mutations/createLink";
 import { getLanguage } from "@/core/queries/getLanguage";
 import sleep from "@/utils/sleep";
+import {
+  SOCIAL_CONTEXT_OFFICIAL,
+  GROUP_EXPRESSION_OFFICIAL,
+  PROFILE_EXPRESSION_OFFICIAL,
+  SHORTFORM_EXPRESSION_OFFICIAL,
+} from "@/ad4m-globals";
 
 import { MEMBER } from "@/constants/neighbourhoodMeta";
 
@@ -50,37 +56,44 @@ export default async ({
 
     //Get the variables that we need to create new unique languages
     const uid = uuidv4().toString();
-    const builtInLangPath = appStore.getLanguagePath;
 
     //Create unique social-context
-    const socialContextLang = await createUniqueHolochainLanguage(
-      path.join(builtInLangPath, "social-context"),
-      "social-context",
-      uid
+    const socialContextLang = await templateLanguage(
+      SOCIAL_CONTEXT_OFFICIAL,
+      JSON.stringify({
+        uid: uid,
+        name: `${perspectiveName}-social-context`,
+      })
     );
     console.log("Response from create social-context", socialContextLang);
     //Create shortform expression language
-    const shortFormExpressionLang = await createUniqueHolochainLanguage(
-      path.join(builtInLangPath, "shortform-expression"),
-      "shortform-expression",
-      uid
+    const shortFormExpressionLang = await templateLanguage(
+      SHORTFORM_EXPRESSION_OFFICIAL,
+      JSON.stringify({
+        uid: uid,
+        name: `${perspectiveName}-shortform-expression`,
+      })
     );
     console.log(
       "Response from create shortform exp lang",
       shortFormExpressionLang
     );
     //Create group expression language
-    const groupExpressionLang = await createUniqueHolochainLanguage(
-      path.join(builtInLangPath, "group-expression"),
-      "group-expression",
-      uid
+    const groupExpressionLang = await templateLanguage(
+      GROUP_EXPRESSION_OFFICIAL,
+      JSON.stringify({
+        uid: uid,
+        name: `${perspectiveName}-group-expression`,
+      })
     );
     console.log("Response from create group exp lang", groupExpressionLang);
     //Create profile expression language
-    const profileExpressionLang = await createUniqueHolochainLanguage(
-      path.join(builtInLangPath, "profiles"),
-      "agent-profiles",
-      uid
+    const profileExpressionLang = await templateLanguage(
+      PROFILE_EXPRESSION_OFFICIAL,
+      JSON.stringify({
+        uid: uid,
+        name: `${perspectiveName}-profile-expression`,
+      })
     );
     console.log("Response from create profile exp lang", profileExpressionLang);
     const typedExpLangs = [
@@ -166,7 +179,6 @@ export default async ({
     const channel = await createChannel({
       channelName: "Home",
       creatorDid: creatorDid,
-      languagePath: builtInLangPath,
       sourcePerspective: createSourcePerspective,
       membraneType: MembraneType.Inherited,
       typedExpressionLanguages: typedExpLangs,

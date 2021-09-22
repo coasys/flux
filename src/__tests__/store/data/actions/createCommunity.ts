@@ -9,7 +9,7 @@ import createCommunityProfileLink from "../../../fixtures/createCommunityProfile
 import createCommunityChannel from "../../../fixtures/createCommunityChannel.json";
 import languages from "../../../fixtures/languages.json";
 import * as addPerspective from "@/core/mutations/addPerspective";
-import * as createUniqueHolochainLanguage from "@/core/mutations/createUniqueHolochainLanguage";
+import * as templateLanguage from "@/core/mutations/templateLanguage";
 import * as createNeighbourhood from "@/core/mutations/createNeighbourhood";
 import * as createNeighbourhoodMeta from "@/core/methods/createNeighbourhoodMeta";
 import * as createLink from "@/core/mutations/createLink";
@@ -19,6 +19,7 @@ import * as createChannel from "@/core/methods/createChannel";
 import * as getLanguage from "@/core/queries/getLanguage";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useDataStore } from "@/store/data";
+import { GROUP_EXPRESSION_OFFICIAL, SHORTFORM_EXPRESSION_OFFICIAL, SOCIAL_CONTEXT_OFFICIAL } from "@/ad4m-globals";
 
 describe("Create Community", () => {
   let store: Pinia;
@@ -32,13 +33,13 @@ describe("Create Community", () => {
 
     // @ts-ignore
     jest
-      .spyOn(createUniqueHolochainLanguage, "createUniqueHolochainLanguage")
-      .mockImplementation(async (path, dna, uid) => {
-        if (dna === "social-context") {
+      .spyOn(templateLanguage, "templateLanguage")
+      .mockImplementation(async (sourceLanguageHash, templateData) => {
+        if (sourceLanguageHash === SOCIAL_CONTEXT_OFFICIAL) {
           return createCommunityUniqueHolochainLanguage[0];
-        } else if (dna === "shortform-expression") {
+        } else if (sourceLanguageHash === SHORTFORM_EXPRESSION_OFFICIAL) {
           return createCommunityUniqueHolochainLanguage[1];
-        } else if (dna === "group-expression") {
+        } else if (sourceLanguageHash === GROUP_EXPRESSION_OFFICIAL) {
           return createCommunityUniqueHolochainLanguage[2];
         }
         return createCommunityUniqueHolochainLanguage[3];

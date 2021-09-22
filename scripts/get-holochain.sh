@@ -2,7 +2,7 @@
 [ ! -d "./resources" ] && mkdir "./resources"
 [ ! -d "./resources/temp" ] && mkdir "./resources/temp"
 
-HOLOCHAIN_VER="f3d17d993ad8d988402cc01d73a0095484efbabb"
+HOLOCHAIN_VER="d003eb7a45f1d7125c4701332202761721793d68"
 
 echo "Getting holochain from GitHub"
 

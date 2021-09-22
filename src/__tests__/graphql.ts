@@ -18,7 +18,6 @@ import {
   PERSPECTIVE_ADD,
   PERSPECTIVE_UPDATE,
   PUBLISH_NEIGHBOURHOOD_FROM_PERSPECTIVE,
-  LANGUAGE_CLONE_HOLOCHAIN_TEMPLATE,
   PERSPECTIVE_REMOVE,
   PERSPECTIVE_ADDED,
   PERSPECTIVE_UPDATED,
@@ -29,10 +28,11 @@ import {
   GET_EXPRESSION,
   LANGUAGE,
   NEIGHBOURHOOD_JOIN,
-  GET_MANY_EXPRESSION
+  LANGUAGE_APPLY_TEMPLATE_AND_PUBLISH,
 } from "../core/graphql_queries";
 import EasyGraphQLTester from "easygraphql-tester";
 import { DocumentNode } from "graphql";
+import { SOCIAL_CONTEXT_OFFICIAL } from "@/ad4m-globals";
 
 const tester = new EasyGraphQLTester(typeDefsString);
 
@@ -82,10 +82,9 @@ describe("GraphQL schema correctness", () => {
       meta: new Perspective(),
       linkLanguage: "linklang",
     });
-    tester.test(true, getGqlString(LANGUAGE_CLONE_HOLOCHAIN_TEMPLATE), {
-      languagePath: "path",
-      dnaNick: "nick.dna",
-      uid: "uid",
+    tester.test(true, getGqlString(LANGUAGE_APPLY_TEMPLATE_AND_PUBLISH), {
+      sourceLanguageHash: SOCIAL_CONTEXT_OFFICIAL,
+      templateData: JSON.stringify({}),
     });
     tester.test(true, getGqlString(PERSPECTIVE_REMOVE), { uuid: "uuid" });
     tester.test(true, getGqlString(PERSPECTIVE_ADDED));

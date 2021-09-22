@@ -56,6 +56,8 @@ import { apolloClient } from "./utils/setupApolloClient";
 import { useUserStore } from "./store/user";
 import { useAppStore } from "./store/app";
 import { useDataStore } from "./store/data";
+import { addTrustedAgents } from "@/core/mutations/addTrustedAgents";
+import { JUNTO_AGENT, AD4M_AGENT } from "@/ad4m-globals";
 
 declare global {
   interface Window {
@@ -85,10 +87,11 @@ export default defineComponent({
     });
 
     //Watch for agent unlock to set off running queries
-    userStore.$subscribe((mutation, state) => {
+    userStore.$subscribe(async (mutation, state) => {
       if (state.agent.isUnlocked) {
         appStore.setApplicationStartTime(new Date());
         dataStore.loadExpressionLanguages();
+        await addTrustedAgents([JUNTO_AGENT, AD4M_AGENT]);
       } else {
         router.push({
           name: userStore.agent.isInitialized ? "login" : "signup",
