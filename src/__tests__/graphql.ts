@@ -29,6 +29,7 @@ import {
   LANGUAGE,
   NEIGHBOURHOOD_JOIN,
   LANGUAGE_APPLY_TEMPLATE_AND_PUBLISH,
+  GET_MANY_EXPRESSION
 } from "../core/graphql_queries";
 import EasyGraphQLTester from "easygraphql-tester";
 import { DocumentNode } from "graphql";
