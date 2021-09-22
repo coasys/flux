@@ -24,14 +24,18 @@ export default defineComponent({
     };
   },
   watch: {
-    did: async function (did) {
-      let profileLang = this.langAddress;
-      const dataExp = await getProfile(profileLang, did);
+    did: {
+      handler: async function (did) {
+        console.log("whaaat");
+        let profileLang = this.langAddress;
+        const dataExp = await getProfile(profileLang, did);
 
-      if (dataExp) {
-        const { data } = dataExp;
-        this.profile = parseProfile(data.profile);
-      }
+        if (dataExp) {
+          const { data } = dataExp;
+          this.profile = parseProfile(data.profile);
+        }
+      },
+      immediate: true,
     },
   },
 });

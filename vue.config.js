@@ -10,7 +10,7 @@ module.exports = {
         return {
           ...options,
           compilerOptions: {
-            isCustomElement: (tag) => /^j-/.test(tag),
+            isCustomElement: (tag) => /^j-/.test(tag) || tag === "chat-view",
           },
         };
       });
