@@ -29,6 +29,7 @@ import {
   LANGUAGE,
   NEIGHBOURHOOD_JOIN,
   LANGUAGE_APPLY_TEMPLATE_AND_PUBLISH,
+  GET_MANY_EXPRESSION
 } from "../core/graphql_queries";
 import EasyGraphQLTester from "easygraphql-tester";
 import { DocumentNode } from "graphql";
@@ -123,6 +124,7 @@ describe("GraphQL schema correctness", () => {
       languageAddress: "exp-lang",
     });
     tester.test(true, getGqlString(GET_EXPRESSION), { url: "lang://expr" });
+    tester.test(true, getGqlString(GET_MANY_EXPRESSION), { urls: ["lang://expr"] });
     tester.test(true, getGqlString(NEIGHBOURHOOD_JOIN), {
       url: "neighbourhood",
     });

@@ -301,6 +301,25 @@ export const GET_EXPRESSION = gql`
   }
 `;
 
+export const GET_MANY_EXPRESSION = gql`
+  query expressionMany($urls: [String!]!) {
+    expressionMany(urls: $urls) {
+      author
+      timestamp
+      data
+      language {
+        address
+        name
+      }
+      proof {
+        valid
+        invalid
+        signature
+      }
+    }
+  }
+`;
+
 export const LANGUAGE = gql`
   query language($address: String!) {
     language(address: $address) {
