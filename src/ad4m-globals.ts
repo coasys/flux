@@ -1,14 +1,14 @@
 export const SOCIAL_CONTEXT_OFFICIAL =
-  "QmNX6N6ztttFJHMqSSnmVdD7iJZSQuxnxMSk6f2M4v8nsP";
+  "QmS4QVRcLBskgnq2AuV3TaKn9Xb4evgBsGcbwDXVv3Lm7n";
 
 export const GROUP_EXPRESSION_OFFICIAL =
-  "QmPxdiSRmMkPENeZpAMr4roFwFKVNitGMZtjiEkQxXwipF";
+  "Qmd7Wssoo9kwzdqJBE5aSE7YyVJ4TmD5mqX7L8yffR8MU7";
 
 export const PROFILE_EXPRESSION_OFFICIAL =
-  "QmTCKNzoXpQrrPfXEyHYT241HGgGpHd3Uq3HBzSVXLY99R";
+  "QmSuJWiQFYWba6siE1fcKcP3yTYE7BssGg22UKShWGMVgp";
 
 export const SHORTFORM_EXPRESSION_OFFICIAL =
-  "QmTR49sVKEUam1oUnf2UyeDKcsmXnP7F5fJThcXYqG8c8S";
+  "QmVDh4jd75BgPgiV6Lttjm7xQ8JQBkQJtqwBcPn4xZyXgP";
 
 export const JUNTO_AGENT =
   "did:key:zQ3shpe32NARLJeuE3wwWLWLoy9NzkrD3oy1psPJNhbvkuMzK";
