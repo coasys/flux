@@ -11,8 +11,8 @@ export interface Payload {
   username: string;
   password: string;
   email: string;
-  profilePicture: string;
-  thumbnailPicture: string;
+  profilePicture?: string;
+  thumbnailPicture?: string;
 }
 
 export default async ({

@@ -7,7 +7,7 @@
         </j-box>
         <div class="colors">
           <button
-            v-for="n in [0, 20, 50, 100, 150, 200, 220, 250, 270, 300, 340]"
+            v-for="n in [0, 20, 50, 100, 150, 200, 220, 241, 270, 300, 340]"
             :key="n"
             class="color-button"
             @click="() => updateTheme({ hue: n })"

@@ -1,6 +1,6 @@
 import { apolloClient } from "@/utils/setupApolloClient";
 
-import { GET_EXPRESSION } from "../graphql_queries";
+import { GET_EXPRESSION, GET_MANY_EXPRESSION } from "../graphql_queries";
 import sleep from "@/utils/sleep";
 import { ExpressionRendered } from "@perspect3vism/ad4m";
 
@@ -57,4 +57,17 @@ export async function getExpressionAndRetry(
     }
   }
   return getExprRes;
+}
+
+export async function getManyExpression(urls: string[]): Promise<ExpressionRendered[]> {
+  return new Promise((resolve, reject) => {
+    apolloClient
+      .query<{
+        expressionMany: ExpressionRendered[];
+      }>({ query: GET_MANY_EXPRESSION, variables: { urls: urls } })
+      .then((result) => {
+        resolve(result.data.expressionMany);
+      })
+      .catch((error) => reject(error));
+  });
 }

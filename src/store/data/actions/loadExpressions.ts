@@ -1,8 +1,9 @@
 import { print } from "graphql/language/printer";
-import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
+import { GET_MANY_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 import { LinkQuery } from "@perspect3vism/ad4m";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
+import { getManyExpression } from "@/core/queries/getExpression";
 
 export interface Payload {
   channelId: string;
@@ -78,28 +79,31 @@ export default async function ({
     };
 
     //Listen for message callback saying we got some links
-    linksWorker.addEventListener("message", (e) => {
+    linksWorker.addEventListener("message", async (e) => {
       const linkQuery = e.data.perspectiveQueryLinks;
 
-      for (const link of linkQuery) {
-        //Hash the link data as the key for map and check if it exists in the store
+      const links = linkQuery.filter((link: any) => {
         const currentExpressionLink =
-          channel.currentExpressionLinks[link.data.target];
+        channel.currentExpressionLinks[link.data.target];
         const currentExpression =
-          channel.currentExpressionMessages[link.data.target];
+        channel.currentExpressionMessages[link.data.target];
 
-        if (!currentExpressionLink || !currentExpression) {
-          //Run expression worker to try and get expression on link target
-          expressionWorker.postMessage({
-            retry: 50,
-            interval: 5000,
-            query: print(GET_EXPRESSION),
-            variables: { url: link.data.target },
-            callbackData: { link },
-            name: `Get expression data from channel links ${channel.name}`,
-            dataKey: "expression",
-          });
-        }
+        return !currentExpressionLink || !currentExpression;
+      });
+
+      const linksHash = links.map((link: any) => link.data.target);
+
+      if (links.length > 0) {
+        //Run expression worker to try and get expression on link target        
+        expressionWorker.postMessage({
+          retry: 50,
+          interval: 5000,
+          query: print(GET_MANY_EXPRESSION),
+          variables: { urls: linksHash },
+          callbackData: { links },
+          name: `Get expression data from channel links ${channel.name}`,
+          dataKey: "expressionMany",
+        });
       }
     });
 
@@ -108,14 +112,14 @@ export default async function ({
     };
 
     expressionWorker.addEventListener("message", (e: any) => {
-      const expression = e.data.expression;
-      const link = e.data.callbackData.link;
+      const expressionMany = e.data.expressionMany;
+      const links = e.data.callbackData.links;
 
       //Add the link and message to the store
-      dataStore.addMessage({
+      dataStore.addMessages({
         channelId,
-        link: link,
-        expression: expression,
+        links: links,
+        expressions: expressionMany,
       });
     });
 

@@ -4,7 +4,6 @@ import {
   ProfileExpression,
   CommunityState,
   ChannelState,
-  DataState,
   ThemeState,
   LocalCommunityState,
 } from "@/store/types";
@@ -29,8 +28,8 @@ interface AddChannel {
 
 interface AddChannelMessages {
   channelId: string;
-  links: { [x: string]: LinkExpressionAndLang };
-  expressions: { [x: string]: ExpressionAndRef };
+  links: LinkExpression[];
+  expressions: Expression[];
 }
 
 interface AddChannelMessage {
@@ -63,13 +62,31 @@ export default {
     const state = useDataStore();
     const neighbourhood = state.neighbourhoods[payload.channelId];
 
+    const expressions: {[x: string]: any} = {}
+    const links: {[x: string]: any} = {}
+
+    for (const [index, exp] of Object.entries(payload.expressions)) {
+      const target = payload.links[parseInt(index)].data.target!;
+      expressions[target] = {
+        expression: {
+          author:exp.author!,
+          data: JSON.parse(exp.data!),
+          timestamp:exp.timestamp!,
+          proof:exp.proof!,
+        } as Expression,
+        url: parseExprUrl(target)
+      };
+
+      links[target] = payload.links[parseInt(index)];
+    }
+
     neighbourhood.currentExpressionLinks = {
       ...neighbourhood.currentExpressionLinks,
-      ...payload.links,
+      ...links,
     };
     neighbourhood.currentExpressionMessages = {
       ...neighbourhood.currentExpressionMessages,
-      ...payload.expressions,
+      ...expressions
     };
   },
 

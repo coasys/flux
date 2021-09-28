@@ -43,12 +43,10 @@
             <j-icon size="sm" slot="start" name="gear"></j-icon>
             Settings
           </j-menu-item>
-          <router-link :to="{ name: 'login' }" v-slot="{ navigate }">
-            <j-menu-item @click="navigate">
-              <j-icon size="sm" slot="start" name="door-closed"></j-icon>
-              Log out
-            </j-menu-item>
-          </router-link>
+          <j-menu-item @click="() => $router.replace({ name: 'login' })">
+            <j-icon size="sm" slot="start" name="door-closed"></j-icon>
+            Log out
+          </j-menu-item>
         </j-menu>
       </j-popover>
     </j-tooltip>

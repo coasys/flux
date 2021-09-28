@@ -34,21 +34,14 @@ export async function getTypedExpressionLanguages(
         uiIcons.push(uiData);
       }
       let expressionType;
-      switch (languageRes.name!) {
-        case "junto-shortform":
-          expressionType = ExpressionTypes.ShortForm;
-          break;
-
-        case "group-expression":
-          expressionType = ExpressionTypes.GroupExpression;
-          break;
-
-        case "agent-profiles":
-          expressionType = ExpressionTypes.ProfileExpression;
-          break;
-
-        default:
-          expressionType = ExpressionTypes.Other;
+      if (languageRes.name!.endsWith("shortform-expression")) {
+        expressionType = ExpressionTypes.ShortForm;
+      } else if (languageRes.name!.endsWith("group-expression")) {
+        expressionType = ExpressionTypes.GroupExpression;
+      } else if (languageRes.name!.endsWith("profile-expression")) {
+        expressionType = ExpressionTypes.ProfileExpression;
+      } else {
+        expressionType = ExpressionTypes.Other;
       }
       typedExpressionLanguages.push({
         languageAddress: link.data.target!,
