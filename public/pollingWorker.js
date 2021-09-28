@@ -84,9 +84,7 @@ function pollData(params) {
       throw new Error(e);
     })
     .finally(() => {
-      const time = !staticSleep
-        ? interval * (retries + 1)
-        : interval * (retries + 1);
+      const time = staticSleep ? interval : interval * (retries + 1);
       if (polls.includes(id)) {
         sleep(time).then(() => {
           pollData({ ...params, retries: retries + 1 });
