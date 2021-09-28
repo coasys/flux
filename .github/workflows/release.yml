@@ -25,11 +25,11 @@ jobs:
       - name: Build Holochain
         env:
           SQLCIPHER_STATIC: 1
-          LDFLAGS: "-L/usr/local/opt/openssl@1.1/lib"
-          CPPFLAGS: "-I/usr/local/opt/openssl@1.1/include"
-          PKG_CONFIG_PATH: "/usr/local/opt/openssl@1.1/lib/pkgconfig"
+          LDFLAGS: "-L/usr/local/opt/openssl/lib"
+          CPPFLAGS: "-I/usr/local/opt/openssl/include"
+          PKG_CONFIG_PATH: "/usr/local/opt/openssl/lib/pkgconfig"
         run: |
-          echo 'export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"' >> /Users/runner/.bash_profile
+          echo 'export PATH="/usr/local/opt/openssl/bin:$PATH"' >> /Users/runner/.bash_profile
           brew install sqlcipher openssl libsodium
           brew link openssl
           rustup target add wasm32-unknown-unknown
