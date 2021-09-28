@@ -26,7 +26,8 @@ jobs:
         env:
           SQLCIPHER_STATIC: 1
         run: |
-          brew install sqlcipher
+          brew install sqlcipher openssl libsodium
+          brew link openssl
           rustup target add wasm32-unknown-unknown
           cd ./resources/temp/holochain 
           cargo install --path crates/holochain
