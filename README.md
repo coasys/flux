@@ -31,6 +31,8 @@ This project makes use of the following holochain DNA's.
 [ShortForm-Expression](https://github.com/juntofoundation/Short-Form-Expression) DNA for text posting (more expression types to follow soon)<br>
 [Agent-Profiles](https://github.com/jdeepee/profiles) DNA for basic profile registration (optional for each agent)<br>
 [Language-Persistence](https://github.com/perspect3vism/language-persistence) DNA for the storing of language meta information under a given key<br>
+[Neighbourhood-Persistence](https://github.com/perspect3vism/neighbourhood-language) DNA/ad4m language for storing neighbourhood objects<br>
+[Agent-Language](https://github.com/perspect3vism/agent-language) DNA/ad4m language for storing ad4m Agent objects<br>
 
 These DNA's come bundled with the builtin languages, links above are provided for reference to anyone interested.
 
