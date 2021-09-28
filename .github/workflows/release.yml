@@ -52,7 +52,7 @@ jobs:
       - name: Install deps
         run: npm i
       - name: Build languages
-        run: npm run build-languages
+        run: npm run get-languages
       - name: Build app
         run: npm run release
         env:
@@ -75,7 +75,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: 1.54.0
       - name: Get Holochain
         run: |
           ./scripts/get-holochain.sh
@@ -84,7 +84,8 @@ jobs:
           working-directory: ./resources/temp/holochain
       - name: Build Holochain
         run: |
-          sudo apt-get install -y sqlcipher
+          sudo apt-get update
+          sudo apt-get install -y libsqlcipher-dev
           rustup target add wasm32-unknown-unknown
           cd ./resources/temp/holochain 
           cargo install --path crates/holochain
@@ -107,7 +108,7 @@ jobs:
       - name: Install deps
         run: npm i
       - name: Build languages
-        run: npm run build-languages
+        run: npm run get-languages
       - name: Build app
         run: npm run release
         env:
