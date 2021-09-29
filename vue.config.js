@@ -58,7 +58,7 @@ module.exports = {
           ],
         },
         linux: {
-          target: ["AppImage", "deb"],
+          target: ["AppImage", "deb", "nsis"],
           category: "Network",
           maintainer: "dev@junto.foundation",
         },
