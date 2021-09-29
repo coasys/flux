@@ -14,6 +14,7 @@ async function getData({ query, variables }) {
         query,
         variables,
       }),
+      cache: "no-cache",
     }).then((res) => res.json());
 
     if (errors.length > 0) {
