@@ -62,22 +62,24 @@ export default {
     const state = useDataStore();
     const neighbourhood = state.neighbourhoods[payload.channelId];
 
-    const expressions: {[x: string]: any} = {}
-    const links: {[x: string]: any} = {}
+    const expressions: { [x: string]: any } = {};
+    const links: { [x: string]: any } = {};
 
     for (const [index, exp] of Object.entries(payload.expressions)) {
-      const target = payload.links[parseInt(index)].data.target!;
-      expressions[target] = {
-        expression: {
-          author:exp.author!,
-          data: JSON.parse(exp.data!),
-          timestamp:exp.timestamp!,
-          proof:exp.proof!,
-        } as Expression,
-        url: parseExprUrl(target)
-      };
+      if (exp != null) {
+        const target = payload.links[parseInt(index)].data.target!;
+        expressions[target] = {
+          expression: {
+            author: exp.author!,
+            data: JSON.parse(exp.data!),
+            timestamp: exp.timestamp!,
+            proof: exp.proof!,
+          } as Expression,
+          url: parseExprUrl(target),
+        };
 
-      links[target] = payload.links[parseInt(index)];
+        links[target] = payload.links[parseInt(index)];
+      }
     }
 
     neighbourhood.currentExpressionLinks = {
@@ -86,7 +88,7 @@ export default {
     };
     neighbourhood.currentExpressionMessages = {
       ...neighbourhood.currentExpressionMessages,
-      ...expressions
+      ...expressions,
     };
   },
 
