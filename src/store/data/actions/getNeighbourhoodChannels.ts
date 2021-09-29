@@ -20,7 +20,8 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
 
     //Start the worker looking for channels
     channelLinksWorker.postMessage({
-      interval: 5000,
+      interval: 10000,
+      staticSleep: true,
       query: print(PERSPECTIVE_LINK_QUERY),
       variables: {
         uuid: community.neighbourhood.perspective.uuid,
