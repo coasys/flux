@@ -30,8 +30,10 @@ jobs:
           PKG_CONFIG_PATH: "/usr/local/opt/openssl/lib/pkgconfig"
         run: |
           echo 'export PATH="/usr/local/opt/openssl/bin:$PATH"' >> /Users/runner/.bash_profile
-          brew install sqlcipher openssl libsodium
-          brew link openssl
+          brew uninstall --ignore-dependencies openssl
+          curl https://raw.githubusercontent.com/Homebrew/homebrew-core/30fd2b68feb458656c2da2b91e577960b11c42f4/Formula/openssl.rb > openssl.rb
+          brew install ./openssl.rb
+          brew install sqlcipher libsodium
           rustup target add wasm32-unknown-unknown
           cd ./resources/temp/holochain 
           cargo install --path crates/holochain
