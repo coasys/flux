@@ -9,6 +9,7 @@ export interface Payload {
 }
 
 const channelLinksWorker = new Worker("pollingWorker.js");
+let isCallbackRunning = false;
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async ({ communityId }: Payload): Promise<Worker> => {
@@ -39,42 +40,47 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
     };
 
     channelLinksWorker.addEventListener("message", async (e) => {
-      //Check that no other worker callback is executing
-      try {
-        const channelLinks = e.data.perspectiveQueryLinks;
+      if (!isCallbackRunning) {
+        isCallbackRunning = true;
+        //Check that no other worker callback is executing
+        try {
+          const channelLinks = e.data.perspectiveQueryLinks;
 
-        for (let i = 0; i < channelLinks.length; i++) {
-          //Check that the channel is not in the store
-          if (
-            Object.values(community.neighbourhood.linkedNeighbourhoods).find(
-              (neighbourhoodUrl) =>
-                neighbourhoodUrl === channelLinks[i].data!.target
-            ) == undefined
-          ) {
-            console.log(
-              "Found channel link",
-              channelLinks[i],
-              "Adding to channel"
-            );
-            //Call ad4m and try to join the sharedperspective found at link target
-            const channel = await joinChannelFromSharedLink(
-              channelLinks[i].data!.target!,
-              community.neighbourhood.perspective.uuid
-            );
-            console.log(
-              "trying to join channel",
-              channel,
-              community.neighbourhood.perspective.uuid
-            );
-            //Add the channel to the store
-            dataStore.addChannel({
-              communityId: community.neighbourhood.perspective.uuid,
-              channel: channel,
-            });
+          for (let i = 0; i < channelLinks.length; i++) {
+            //Check that the channel is not in the store
+            if (
+              Object.values(community.neighbourhood.linkedNeighbourhoods).find(
+                (neighbourhoodUrl) =>
+                  neighbourhoodUrl === channelLinks[i].data!.target
+              ) == undefined
+            ) {
+              console.log(
+                "Found channel link",
+                channelLinks[i],
+                "Adding to channel"
+              );
+              //Call ad4m and try to join the sharedperspective found at link target
+              const channel = await joinChannelFromSharedLink(
+                channelLinks[i].data!.target!,
+                community.neighbourhood.perspective.uuid
+              );
+              console.log(
+                "trying to join channel",
+                channel,
+                community.neighbourhood.perspective.uuid
+              );
+              //Add the channel to the store
+              dataStore.addChannel({
+                communityId: community.neighbourhood.perspective.uuid,
+                channel: channel,
+              });
+              isCallbackRunning = false;
+            }
           }
+        } catch (error) {
+          isCallbackRunning = false;
+          throw new Error(error);
         }
-      } catch (error) {
-        throw new Error(error);
       }
     });
     return channelLinksWorker;
