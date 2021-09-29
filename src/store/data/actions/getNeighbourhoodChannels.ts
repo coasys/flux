@@ -74,9 +74,9 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
                 communityId: community.neighbourhood.perspective.uuid,
                 channel: channel,
               });
-              isCallbackRunning = false;
             }
           }
+          isCallbackRunning = false;
         } catch (error) {
           isCallbackRunning = false;
           throw new Error(error);
