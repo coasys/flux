@@ -6,7 +6,6 @@ import {
 import { LinkQuery } from "@perspect3vism/ad4m";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
-import { getManyExpression } from "@/core/queries/getExpression";
 
 export interface Payload {
   channelId: string;
@@ -39,8 +38,9 @@ export default async function ({
     }
 
     const linksWorker = new Worker("pollingWorker.js");
-    //const expressionWorker = new Worker("pollingWorker.js");
 
+    //Descending link worker that looks from current view location -> unix epoch
+    //Current view location could be now if application has just started or from some previous post if user is scrolling
     console.log("Posting for links between", fromDate, untilDate);
     linksWorker.postMessage({
       interval: 10000,
@@ -59,6 +59,7 @@ export default async function ({
       dataKey: "perspectiveQueryLinks",
     });
 
+    //Forward looking link worker that looks from current view location -> now()
     console.log("Posting for links between", fromDate, new Date());
     linksWorker.postMessage({
       interval: 10000,
@@ -73,6 +74,7 @@ export default async function ({
           untilDate: new Date(),
         } as LinkQuery,
       },
+      resetUntil: true,
       name: `Get forward expressionLinks for channel: ${channel.name}`,
       dataKey: "perspectiveQueryLinks",
     });
