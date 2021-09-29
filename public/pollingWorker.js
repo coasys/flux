@@ -8,6 +8,7 @@ async function getData({ query, variables }) {
         Accept: "application/json",
         "Content-Type": "application/json",
         "cache-control": "no-cache",
+        fetchPolicy: "no-cache",
         pragma: "no-cache",
       },
       body: JSON.stringify({
