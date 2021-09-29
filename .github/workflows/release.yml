@@ -16,12 +16,19 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: 1.55.0
-      - name: Get Holochain
+      # - name: Prepare cache directory
+      #   run: mkdir ./resources/temp
+      # - uses: Swatinem/rust-cache@v1
+      #   with:
+      #     working-directory: ./resources/temp/holochain
+      - name: Install depedencies
+        env:
+          LDFLAGS: "-L/usr/local/opt/openssl/lib"
+          CPPFLAGS: "-I/usr/local/opt/openssl/include"
+          PKG_CONFIG_PATH: "/usr/local/opt/openssl/lib/pkgconfig"
         run: |
-          ./scripts/get-holochain.sh
-      - uses: Swatinem/rust-cache@v1
-        with:
-          working-directory: ./resources/temp/holochain
+          brew install sqlcipher libsodium openssl
+          rustup target add wasm32-unknown-unknown
       - name: Build Holochain
         env:
           SQLCIPHER_STATIC: 1
@@ -29,17 +36,10 @@ jobs:
           CPPFLAGS: "-I/usr/local/opt/openssl/include"
           PKG_CONFIG_PATH: "/usr/local/opt/openssl/lib/pkgconfig"
         run: |
-          brew install sqlcipher libsodium openssl
-          rustup target add wasm32-unknown-unknown
-          cd ./resources/temp/holochain 
-          cargo install --path crates/holochain
-          cargo install --path crates/hc
-          cd ../lair 
-          cargo install --path crates/lair_keystore 
-          cd ../../../
+          cargo install lair_keystore --git https://github.com/guillemcordoba/lair --rev 53fea43d53352609978d550f72f987f0ce458896
+          cargo install holochain --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
+          cargo install holochain_cli --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
           ./scripts/copy-hc.sh
-          rm -rf ./resources/temp/holochain
-          rm -rf ./resources/temp/lair
       - name: Install Node.js, NPM & Yarn
         uses: actions/setup-node@v2
         with:
@@ -81,28 +81,24 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: 1.55.0
-      - name: Get Holochain
+      # - name: Prepare cache directory
+      #   run: mkdir ./resources/temp/holochain
+      # - uses: Swatinem/rust-cache@v1
+      #   with:
+      #     working-directory: ./resources/temp/holochain
+      - name: Install depedencies
         run: |
-          ./scripts/get-holochain.sh
-      - uses: Swatinem/rust-cache@v1
-        with:
-          working-directory: ./resources/temp/holochain
+          sudo apt-get update
+          sudo apt-get install -y build-essential libssl-dev libsqlcipher-dev
+          rustup target add wasm32-unknown-unknown
       - name: Build Holochain
         env:
           SQLCIPHER_STATIC: 1
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libsqlcipher-dev
-          rustup target add wasm32-unknown-unknown
-          cd ./resources/temp/holochain 
-          cargo install --path crates/holochain
-          cargo install --path crates/hc
-          cd ../lair 
-          cargo install --path crates/lair_keystore 
-          cd ../../../
+          cargo install holochain_cli --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
+          cargo install holochain --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
+          cargo install lair_keystore --git https://github.com/guillemcordoba/lair --rev 53fea43d53352609978d550f72f987f0ce458896
           ./scripts/copy-hc.sh
-          rm -rf ./resources/temp/holochain
-          rm -rf ./resources/temp/lair
       - name: Install Node.js, NPM & Yarn
         uses: actions/setup-node@v2
         with:
