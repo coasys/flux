@@ -10,7 +10,6 @@ async function getData({ query, variables }) {
         "cache-control": "no-cache",
         pragma: "no-cache",
       },
-      cache: "no-store",
       body: JSON.stringify({
         query,
         variables,
