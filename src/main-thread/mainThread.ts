@@ -5,6 +5,7 @@ import { MainThreadGlobal } from "./globals";
 import { registerAppHooks } from "./appHooks";
 import { registerIpcHooks } from "./ipcHooks";
 import { registerUpdateHooks } from "./updateHooks";
+import { setup } from "./setup";
 
 const mainThreadState = new MainThreadGlobal();
 
@@ -25,6 +26,9 @@ if (!hasAppLock) {
   console.log("App is already running, quitting and focusing other window...");
   app.quit();
 }
+
+// Run app data setup
+setup();
 
 registerAppHooks(mainThreadState);
 registerIpcHooks(mainThreadState);

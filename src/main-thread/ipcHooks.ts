@@ -1,5 +1,6 @@
 import { app, ipcMain } from "electron";
 import fs from "fs";
+import path from "path";
 import { MainThreadGlobal } from "./globals";
 
 export function registerIpcHooks(mainThreadState: MainThreadGlobal): void {
@@ -35,6 +36,12 @@ export function registerIpcHooks(mainThreadState: MainThreadGlobal): void {
     fs.rmdirSync(path, { recursive: true });
 
     mainThreadState.mainWindow!.webContents.send("getCleanState");
+  });
+
+  ipcMain.on("copyLogs", () => {
+    const logLocation = path.join(app.getPath("logs"), "debug.log");
+    const desktopLocation = app.getPath("desktop");
+    fs.copyFileSync(logLocation, desktopLocation);
   });
 
   ipcMain.on("quitApp", async () => {

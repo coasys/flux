@@ -7,11 +7,15 @@ async function getData({ query, variables }) {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        "cache-control": "no-store",
+        fetchPolicy: "no-store",
+        pragma: "no-store",
       },
       body: JSON.stringify({
         query,
         variables,
       }),
+      cache: "no-store",
     }).then((res) => res.json());
 
     if (errors.length > 0) {
@@ -43,13 +47,20 @@ function pollData(params) {
     id = "",
     retry = null,
     interval = 1000,
+    /// GraphQL query to be made
     query,
+    /// Variables for graphql query
     variables,
     name = "Undefined",
     retries = 0,
+    /// Optional data to send in callback once worker has executed
     callbackData = null,
     dataKey,
+    /// Determines if the sleep between loop execution should backoff or not
     staticSleep = false,
+    /// Hacky solution that allows for the updating of from/until dates in worker loops for perspective link queries
+    resetUntil = false,
+    resetFrom = false,
   } = params;
 
   // remove poll if we are over our retries
@@ -59,6 +70,13 @@ function pollData(params) {
 
   if (!polls.includes(id)) {
     return;
+  }
+
+  if (resetUntil) {
+    variables.query.untilDate = new Date();
+  }
+  if (resetFrom) {
+    variables.query.fromDate = new Date();
   }
 
   getData({ query, variables })
@@ -84,9 +102,7 @@ function pollData(params) {
       throw new Error(e);
     })
     .finally(() => {
-      const time = !staticSleep
-        ? interval * (retries + 1)
-        : interval * (retries + 1);
+      const time = staticSleep ? interval : interval * (retries + 1);
       if (polls.includes(id)) {
         sleep(time).then(() => {
           pollData({ ...params, retries: retries + 1 });

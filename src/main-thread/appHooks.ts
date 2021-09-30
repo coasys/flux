@@ -48,15 +48,17 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
         "\x1b[1m",
         "UserData path",
         app.getPath("userData"),
-        "AppData path",
+        "\nAppData path",
         app.getPath("appData"),
-        "Using Resource path",
+        "\nLog path",
+        app.getPath("logs"),
+        "\nUsing Resource path",
         mainThreadState.binaryExecPath,
-        "built in language path",
+        "\nbuilt in language path\n",
         mainThreadState.builtInLangPath
       );
 
-      console.log("\x1b[36m%s\x1b[0m", "Init AD4M...", app.getPath("userData"));
+      console.log("\x1b[36m%s\x1b[0m", "Init AD4M...\n");
       ad4m
         .init({
           appDataPath: app.getPath("userData"),
@@ -77,14 +79,14 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
         })
         .then(async (ad4mCore: ad4m.PerspectivismCore) => {
           mainThreadState.ad4mCore = ad4mCore;
-          console.log("\x1b[36m%s\x1b[0m", "Starting main UI window");
+          console.log("\x1b[36m%s\x1b[0m", "Starting main UI window\n\n");
 
           await createMainWindow(mainThreadState);
 
           mainThreadState.ad4mCore.waitForAgent().then(async () => {
             console.log(
               "\x1b[36m%s\x1b[0m",
-              "Agent has been init'd. Controllers now starting init..."
+              "Agent has been init'd. Controllers now starting init...\n\n"
             );
             mainThreadState.mainWindow!.webContents.send(
               "setGlobalLoading",
@@ -96,7 +98,7 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
               "setGlobalLoading",
               false
             );
-            console.log("\x1b[32m", "Controllers init complete!");
+            console.log("\x1b[32m", "\n\nControllers init complete!\n\n");
 
             //Check for updates
             if (app.isPackaged) {

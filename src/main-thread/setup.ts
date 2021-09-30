@@ -5,7 +5,12 @@ import fs from "fs";
 
 export function setup(): void {
   if (app.isPackaged) {
-    console.log("App is running in production mode");
+    console.log(
+      "\x1b[1m",
+      "App is running in production mode",
+      "\x1b[0m",
+      "\n"
+    );
 
     //Get the log file and redirect console logs to it
     const log_file = fs.createWriteStream(
@@ -29,7 +34,7 @@ export function setup(): void {
       });
     };
   } else {
-    console.log("App is running in dev mode");
+    console.log("\x1b[1m", "App is running in dev mode", "\x1b[0m", "\n");
 
     // Exit cleanly on request from parent process in development mode.
     if (process.platform === "win32") {
@@ -56,6 +61,6 @@ export function setup(): void {
 
     //Set the app paths to the new dev directory
     app.setPath("userData", path.join(app.getPath("userData"), "dev"));
-    app.setPath("appData", path.join(app.getPath("appData"), "dev"));
+    app.setPath("appData", path.join(app.getPath("appData"), "junto", "dev"));
   }
 }
