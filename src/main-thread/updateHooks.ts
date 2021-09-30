@@ -4,7 +4,6 @@ import { MainThreadGlobal } from "./globals";
 
 export function registerUpdateHooks(mainThreadState: MainThreadGlobal): void {
   ipcMain.on("check-update", () => {
-    console.log("Got check-update IPC communication");
     if (app.isPackaged) {
       autoUpdater.checkForUpdates();
     } else {
