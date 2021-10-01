@@ -6,7 +6,7 @@ import {
   JuntoExpressionReference,
 } from "@/store/types";
 import { v4 } from "uuid";
-import { Perspective, Link } from "@perspect3vism/ad4m";
+import { Perspective } from "@perspect3vism/ad4m";
 import type { PerspectiveHandle } from "@perspect3vism/ad4m";
 import { addPerspective } from "../mutations/addPerspective";
 import { templateLanguage } from "../mutations/templateLanguage";
@@ -58,21 +58,8 @@ export async function createChannel({
     socialContextLanguage.address,
     meta
   );
-  console.debug("Create a neighbourhood with result", neighbourhood);
-
-  const channelLink = new Link({
-    source: `${sourcePerspective.sharedUrl}://self`,
-    target: neighbourhood,
-    predicate: "sioc://has_space",
-  });
-  const addLinkToChannel = await createLink(
-    sourcePerspective.uuid,
-    channelLink
-  );
-  console.debug(
-    "Created new link on source social-context with result",
-    addLinkToChannel
-  );
+  console.log("Create a neighbourhood with result", neighbourhood);
+  perspective.sharedUrl = neighbourhood;
 
   //Add link on channel social context declaring type
   const addChannelTypeLink = await createLink(perspective.uuid, {

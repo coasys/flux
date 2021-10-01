@@ -3,6 +3,8 @@ import { useAppStore } from "@/store/app";
 import { ChannelState, MembraneType } from "@/store/types";
 import { useDataStore } from "..";
 import { useUserStore } from "@/store/user";
+import { Link } from "@perspect3vism/ad4m";
+import { createLink } from "@/core/mutations/createLink";
 
 export interface Payload {
   communityId: string;
@@ -30,6 +32,13 @@ export default async (payload: Payload): Promise<ChannelState> => {
         communityId: community.neighbourhood.perspective.uuid,
         channel,
       });
+
+      const channelLink = new Link({
+        source: community.neighbourhood.perspective.sharedUrl!,
+        target: channel.neighbourhood.perspective.sharedUrl!,
+        predicate: "sioc://has_space",
+      });
+      await createLink(community.neighbourhood.perspective.uuid, channelLink);
 
       return channel;
     } else {
