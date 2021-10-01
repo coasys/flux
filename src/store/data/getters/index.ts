@@ -59,6 +59,19 @@ export default {
       };
     },
 
+  getNeighbourhoodByUrl:
+    (state: DataState) =>
+    (url: string): NeighbourhoodState | null => {
+      const neighbourhood = Object.values(state.neighbourhoods)
+        .filter((community) => community.perspective.sharedUrl === url)
+        .pop();
+      if (neighbourhood == undefined) {
+        return null;
+      } else {
+        return neighbourhood;
+      }
+    },
+
   getCommunityState:
     (state: DataState) =>
     (id: string): LocalCommunityState => {

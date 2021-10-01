@@ -58,6 +58,7 @@ import { useAppStore } from "./store/app";
 import { useDataStore } from "./store/data";
 import { addTrustedAgents } from "@/core/mutations/addTrustedAgents";
 import { JUNTO_AGENT, AD4M_AGENT } from "@/ad4m-globals";
+import { joinChannelFromSharedLink } from "./core/methods/joinChannelFromSharedLink";
 
 declare global {
   interface Window {
@@ -148,6 +149,38 @@ export default defineComponent({
             value: true,
           });
         });
+      } else if (link.data!.predicate! === "sioc://has_space") {
+        console.log("FOUND NEW CHANNEL VIA SIGNAL");
+        const sourceNeighbourhood = await dataStore.getNeighbourhoodByUrl(
+          link.data!.source!
+        );
+        if (sourceNeighbourhood) {
+          if (
+            Object.values(sourceNeighbourhood.linkedNeighbourhoods).find(
+              (neighbourhoodUrl) => neighbourhoodUrl === link.data!.target
+            ) == undefined
+          ) {
+            console.log(
+              `Did not find channel on neighbourhood with source URL ${link.data!
+                .source!} adding new channel...`
+            );
+            //Call ad4m and try to join the sharedperspective found at link target
+            const channel = await joinChannelFromSharedLink(
+              link.data!.target!,
+              sourceNeighbourhood.perspective.uuid
+            );
+            console.log("Channel joined, adding to store, channel: ", channel);
+            //Add the channel to the store
+            dataStore.addChannel({
+              communityId: sourceNeighbourhood.perspective.uuid,
+              channel: channel,
+            });
+          }
+        } else {
+          console.warn(
+            "Could not find source neighbourhood for channel link, aborting..."
+          );
+        }
       }
     };
 
