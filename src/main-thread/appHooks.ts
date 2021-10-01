@@ -134,24 +134,22 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
 
   // Quit when all windows are closed.
   app.on("window-all-closed", async () => {
-    console.log("Got window-all-closed signal");
-    if (mainThreadState.ad4mCore) {
-      await mainThreadState.ad4mCore.exit();
-    }
+    console.warn("window-all-closed SIGNAL");
+    await mainThreadState.ad4mCore?.exit();
+    mainThreadState.ad4mCore = undefined;
     app.quit();
-    // On macOS it is common for applications and their menu bar
-    // to stay active until the user quits explicitly with Cmd + Q
-    //if (process.platform !== "darwin") {
-    //}
   });
 
   // Quit when all windows are closed.
   app.on("will-quit", async () => {
-    console.log("Got will-quit signal");
+    console.warn("will-quit SIGNAL");
+    await mainThreadState.ad4mCore?.exit();
+    mainThreadState.ad4mCore = undefined;
     app.quit();
   });
 
   app.on("before-quit", async () => {
+    console.warn("before-quit SIGNAL");
     mainThreadState.isQuiting = true;
 
     mainThreadState.mainWindow!.webContents.send("unlockedStateOff");
