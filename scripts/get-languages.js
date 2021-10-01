@@ -19,7 +19,7 @@ const languages = {
   languages: {
     targetDnaName: "languages",
     bundle:
-      "https://github.com/perspect3vism/language-persistence/releases/download/0.0.9/bundle.js",
+      "https://github.com/perspect3vism/language-persistence/releases/download/0.0.10/bundle.js",
   },
 };
 
