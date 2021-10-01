@@ -6,11 +6,6 @@
       </div>
       <div v-if="tabView === 'Join'">
         <j-text variant="heading">Join a community </j-text>
-        <j-text color="danger-500">
-          This is an early version of Junto with a remote code execution
-          vulnerability. DO NOT join any community from somebody you do not know
-          as its possible for people to use fake links to hack you!
-        </j-text>
       </div>
 
       <j-tabs :value="tabView" @change="(e) => (tabView = e.target.value)">

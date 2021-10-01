@@ -28,7 +28,7 @@ if (!hasAppLock) {
 }
 
 // Run app data setup
-setup();
+setup(mainThreadState);
 
 registerAppHooks(mainThreadState);
 registerIpcHooks(mainThreadState);

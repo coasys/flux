@@ -2,6 +2,22 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.2.4] - 01/10/2021
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+ - Vulnrability warning when joining a community
+### Fixed
+ - More ad4m-executor quit calls on sigint's and other application close events to fix ipfs.lock issues 
+ - Allow insecure requests in language due to ssl errors on language language API
+### Security
+
+---
 ## [0.2.3] - 30/09/2021
 
 ### Added
