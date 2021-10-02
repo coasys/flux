@@ -24,6 +24,7 @@ import {
   JuntoExpressionReference,
   ExpressionTypes,
   CommunityState,
+  FeedType,
 } from "@/store/types";
 import { Perspective } from "@perspect3vism/ad4m";
 import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta";
@@ -174,17 +175,6 @@ export default async ({
     });
     console.log("Created profile expression link", addProfileLink);
 
-    //Next steps: create another perspective + share with social-context-channel link language and add above expression DNA's onto it
-    //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel
-    const channel = await createChannel({
-      channelName: "Home",
-      creatorDid: creatorDid,
-      sourcePerspective: createSourcePerspective,
-      membraneType: MembraneType.Inherited,
-      typedExpressionLanguages: typedExpLangs,
-    });
-    console.log("created channel with result", channel);
-
     const newCommunity = {
       neighbourhood: {
         name: perspectiveName,
@@ -197,8 +187,8 @@ export default async ({
         groupExpressionRef: createExp,
         neighbourhoodUrl: neighbourhood,
         membraneType: MembraneType.Unique,
-        linkedPerspectives: [channel.neighbourhood.perspective.uuid],
-        linkedNeighbourhoods: [channel.neighbourhood.neighbourhoodUrl],
+        linkedPerspectives: [createSourcePerspective.uuid],
+        linkedNeighbourhoods: [createSourcePerspective.uuid],
         members: {},
         currentExpressionLinks: {},
         currentExpressionMessages: {},
@@ -214,11 +204,22 @@ export default async ({
           saturation: 60,
         },
         useLocalTheme: false,
-        currentChannelId: channel.neighbourhood.perspective.uuid,
+        currentChannelId: null,
       },
     } as CommunityState;
+
     dataStore.addCommunity(newCommunity);
-    dataStore.createChannelMutation(channel);
+    dataStore.addLocalChannel({
+      perspectiveUuid: createSourcePerspective.uuid,
+      channel: {
+        perspectiveUuid: createSourcePerspective.uuid,
+        hasNewMessages: false,
+        feedType: FeedType.Signaled,
+        notifications: {
+          mute: false,
+        },
+      },
+    });
 
     //Get and cache the expression UI for each expression language
     for (const lang of typedExpLangs) {
