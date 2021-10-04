@@ -10,8 +10,12 @@ import "@junto-foundation/junto-elements/dist/main.css";
 import { apolloClient } from "./utils/setupApolloClient";
 
 import { createPinia } from "pinia";
+import { Ad4mClient } from "@perspect3vism/ad4m";
 
 const pinia = createPinia();
+
+const ad4mClient = new Ad4mClient(apolloClient);
+export { ad4mClient };
 
 pinia.use(({ store }) => {
   const key = store.$id;
