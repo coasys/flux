@@ -57,6 +57,10 @@ module.exports = {
             "./resources/darwin/lair-keystore",
           ],
         },
+        win: {
+          target: ["nsis"],
+          icon: "./build/icon.png"
+        },
         linux: {
           target: ["AppImage", "deb"],
           category: "Network",
