@@ -277,16 +277,6 @@ export default defineComponent({
     }>(AGENT_STATUS);
     onResult((val) => {
       this.userStore.updateAgentStatus(val.data.agentStatus);
-      if (val.data.agentStatus.isInitialized == true) {
-        //Get database perspective from store
-        let databasePerspective = this.appStore.getDatabasePerspective;
-        if (!databasePerspective) {
-          console.warn(
-            "Does not have databasePerspective in store but has already been init'd! Add logic for getting databasePerspective as found with name"
-          );
-          //TODO: add the retrieval/state saving logic here
-        }
-      }
     });
     onError((error) => {
       console.log("WelcomeViewRight: AGENT_SERVICE_STATUS, error:", error);
