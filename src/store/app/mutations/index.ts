@@ -16,10 +16,6 @@ export default {
     const state = useAppStore();
     state.localLanguagesPath = payload;
   },
-  setDatabasePerspective(payload: string): void {
-    const state = useAppStore();
-    state.databasePerspective = payload;
-  },
   setApplicationStartTime(payload: Date): void {
     const state = useAppStore();
     state.applicationStartTime = payload;
