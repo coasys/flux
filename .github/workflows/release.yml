@@ -1,6 +1,7 @@
 name: Build/release
 
-on:
+on: 
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -101,8 +102,8 @@ jobs:
       - name: Retrieve tag version
         id: ref
         run: |
-          pkgver=$(node ./scripts/get-pkg-version.js)
-          echo ::set-output name=version::$pkgver
+          $Env:pkgver = node ./scripts/get-pkg-version.js
+          echo ::set-output name=version::$Env:pkgver
       - name: Install deps
         run: npm i
       - name: Build languages
@@ -115,7 +116,7 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: Junto-${{steps.ref.outputs.version}}.nsis
-          path: ./dist_electron/Junto-${{steps.ref.outputs.version}}.AppImage
+          path: ./dist_electron/Junto-${{steps.ref.outputs.version}}.nsis
       - name: Cache latest-windows.yml
         uses: actions/upload-artifact@v1
         with:
