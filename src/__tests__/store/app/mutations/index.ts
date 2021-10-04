@@ -27,18 +27,6 @@ describe("App Mutations", () => {
     expect(appStore.localLanguagesPath).toBe("user/some/path");
   });
 
-  test("setDatabasePerspective", () => {
-    const appStore = useAppStore();
-
-    expect(appStore.databasePerspective).toBe("");
-
-    appStore.setDatabasePerspective("bb8051d7-71aa-4ab1-83b2-71edbf967bc3");
-
-    expect(appStore.databasePerspective).toBe(
-      "bb8051d7-71aa-4ab1-83b2-71edbf967bc3"
-    );
-  });
-
   test("setApplicationStartTime", () => {
     const appStore = useAppStore();
 
