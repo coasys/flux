@@ -1,5 +1,7 @@
 # Junto
 
+[![Build/release](https://github.com/juntofoundation/communities/actions/workflows/release.yml/badge.svg)](https://github.com/juntofoundation/communities/actions/workflows/release.yml)
+
 ## Environment
 Node version: 14.16.0<br>
 
