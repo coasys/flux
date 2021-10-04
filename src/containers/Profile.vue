@@ -7,6 +7,9 @@
         :src="profile.profilePicture"
       />
       <j-text variant="heading-sm"> {{ profile.username }}</j-text>
+      <j-text variant="heading-sm">
+        {{ agentPerspective?.links.map((link) => link.data.target) }}</j-text
+      >
     </j-flex>
   </j-box>
 </template>
@@ -15,12 +18,15 @@
 import { defineComponent } from "vue";
 import { getProfile, parseProfile } from "@/utils/profileHelpers";
 import { Profile } from "@/store/types";
+import { Perspective } from "@perspect3vism/ad4m";
+import { ad4mClient } from "@/app";
 
 export default defineComponent({
   props: ["did", "langAddress"],
   data() {
     return {
       profile: null as null | Profile,
+      agentPerspective: undefined as undefined | Perspective | null,
     };
   },
   watch: {
@@ -32,6 +38,9 @@ export default defineComponent({
         const { data } = dataExp;
         this.profile = parseProfile(data.profile);
       }
+
+      const profilePerspective = await ad4mClient.agent.byDID(did);
+      this.agentPerspective = profilePerspective.perspective;
     },
   },
 });
