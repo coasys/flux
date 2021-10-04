@@ -1,4 +1,4 @@
-# Flux made by Junto
+# Flux by Junto
 
 [![Build/release](https://github.com/juntofoundation/communities/actions/workflows/release.yml/badge.svg)](https://github.com/juntofoundation/communities/actions/workflows/release.yml)
 
