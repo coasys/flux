@@ -17,33 +17,6 @@ describe("App Mutations", () => {
     setActivePinia(store);
   });
 
-  test("addExpressionUI", async () => {
-    const appStore = useAppStore();
-    // @ts-ignore
-    jest
-      .spyOn(getLanguage, "getLanguage")
-      // @ts-ignore
-      .mockImplementation(async (address) => {
-        return getTypedExpressionLangLanguages.find(
-          (e) => e.address === address
-        );
-      });
-
-    // @ts-ignore
-    const [exp, icons] = await getTypedExpressionLanguages(
-      getTypedExpressionLangLinks,
-      true
-    );
-
-    expect(Object.values(appStore.expressionUI).length).toBe(0);
-
-    for (const icon of icons) {
-      appStore.addExpressionUI(icon);
-    }
-
-    expect(Object.values(appStore.expressionUI).length).toBe(4);
-  });
-
   test("setLanguagesPath", () => {
     const appStore = useAppStore();
 

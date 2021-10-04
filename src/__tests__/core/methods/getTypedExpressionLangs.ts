@@ -16,19 +16,10 @@ describe("Get Typed Expression", () => {
       });
 
     // @ts-ignore
-    const [exp, icons] = await getTypedExpressionLanguages(
-      getTypedExpressionLangLinks,
-      true
-    );
+    const exp = await getTypedExpressionLanguages(getTypedExpressionLangLinks);
 
     expect(exp.length).toBe(4);
-    expect(icons.length).toBe(4);
     expect(exp.map((e) => e.languageAddress)).toStrictEqual(
-      getTypedExpressionLangLinks
-        .filter((e) => e.data.predicate === "language")
-        .map((e) => e.data.target)
-    );
-    expect(icons.map((e) => e.languageAddress)).toStrictEqual(
       getTypedExpressionLangLinks
         .filter((e) => e.data.predicate === "language")
         .map((e) => e.data.target)
@@ -46,7 +37,7 @@ describe("Get Typed Expression", () => {
 
     try {
       // @ts-ignore
-      await getTypedExpressionLanguages(getTypedExpressionLangLinks, true);
+      await getTypedExpressionLanguages(getTypedExpressionLangLinks);
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
       expect(error).toHaveProperty(

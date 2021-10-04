@@ -90,7 +90,6 @@ export default defineComponent({
     userStore.$subscribe(async (mutation, state) => {
       if (state.agent.isUnlocked) {
         appStore.setApplicationStartTime(new Date());
-        dataStore.loadExpressionLanguages();
         await addTrustedAgents([JUNTO_AGENT, AD4M_AGENT]);
       } else {
         router.push({

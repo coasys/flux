@@ -1,6 +1,5 @@
 import {
   ApplicationState,
-  ExpressionUIIcons,
   WindowState,
 } from "@/store/types";
 
@@ -12,12 +11,6 @@ export default {
   getApplicationStartTime(state: ApplicationState): Date {
     return state.applicationStartTime;
   },
-
-  getLanguageUI:
-    (state: ApplicationState) =>
-    (language: string): ExpressionUIIcons => {
-      return state.expressionUI[language];
-    },
 
   getWindowState(state: ApplicationState): WindowState {
     return state.windowState;

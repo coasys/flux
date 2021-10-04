@@ -1,7 +1,5 @@
 import { agentGenerate } from "@/core/mutations/agentGenerate";
-import { addPerspective } from "@/core/mutations/addPerspective";
 
-import { databasePerspectiveName } from "@/core/juntoTypes";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "..";
 
@@ -27,11 +25,8 @@ export default async ({
   const appStore = useAppStore();
   const userStore = useUserStore();
 
-  const perspectiveName = databasePerspectiveName;
-
   try {
     const status = await agentGenerate(password);
-    const addPerspectiveResult = await addPerspective(perspectiveName);
 
     userStore.setUserProfile({
       username: username,
@@ -42,7 +37,6 @@ export default async ({
       thumbnailPicture,
     });
     userStore.updateAgentStatus(status);
-    appStore.setDatabasePerspective(addPerspectiveResult.uuid);
   } catch (e) {
     appStore.showDangerToast({
       message: e.message,
