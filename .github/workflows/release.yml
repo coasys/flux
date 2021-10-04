@@ -91,7 +91,7 @@ jobs:
         run: |
           rustup target add wasm32-unknown-unknown
           cargo install holochain --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
-          cargo install hc --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
+          cargo install holochain_cli --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
           cargo install lair_keystore --git https://github.com/guillemcordoba/lair --rev 53fea43d53352609978d550f72f987f0ce458896
           ./scripts/copy-hc.sh
       - name: Install Node.js, NPM & Yarn
