@@ -51,13 +51,18 @@ import {
   ToastState,
 } from "@/store/types";
 import { print } from "graphql/language/printer";
-import { AgentStatus, LinkExpression } from "@perspect3vism/ad4m";
+import {
+  AgentStatus,
+  LinkExpression,
+  PerspectiveInput,
+} from "@perspect3vism/ad4m";
 import { apolloClient } from "./utils/setupApolloClient";
 import { useUserStore } from "./store/user";
 import { useAppStore } from "./store/app";
 import { useDataStore } from "./store/data";
 import { addTrustedAgents } from "@/core/mutations/addTrustedAgents";
 import { JUNTO_AGENT, AD4M_AGENT } from "@/ad4m-globals";
+import { ad4mClient } from "./app";
 
 declare global {
   interface Window {
@@ -224,6 +229,21 @@ export default defineComponent({
     this.appStore.setGlobalLoading(false);
 
     window.api.send("getLangPath");
+
+    window.api.receive("ad4mAgentInit", async (isAlreadySignedUp: boolean) => {
+      if (!isAlreadySignedUp) {
+        console.log(
+          "New agent and thus creating a Flux perspective & updating public profile"
+        );
+        const agentPerspective = await ad4mClient.perspective.add(
+          "My flux perspective"
+        );
+        await this.userStore.addFluxPerspectiveId(agentPerspective.uuid);
+        await ad4mClient.agent.updatePublicPerspective({
+          links: [],
+        } as PerspectiveInput);
+      }
+    });
 
     window.api.receive("unlockedStateOff", () => {
       this.userStore.updateAgentLockState(false);

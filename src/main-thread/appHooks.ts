@@ -79,6 +79,7 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
         })
         .then(async (ad4mCore: ad4m.PerspectivismCore) => {
           mainThreadState.ad4mCore = ad4mCore;
+          const isAlreadySignedUp = ad4mCore.agentService.isInitialized();
           console.log("\x1b[36m%s\x1b[0m", "Starting main UI window\n\n");
 
           await createMainWindow(mainThreadState);
@@ -88,16 +89,24 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
               "\x1b[36m%s\x1b[0m",
               "Agent has been init'd. Controllers now starting init...\n\n"
             );
+            //Show loading screen whilst ad4m controllers and languages start
             mainThreadState.mainWindow!.webContents.send(
               "setGlobalLoading",
               true
             );
             mainThreadState.ad4mCore.initControllers();
             await mainThreadState.ad4mCore.initLanguages();
+            //Stop loading screen
             mainThreadState.mainWindow!.webContents.send(
               "setGlobalLoading",
               false
             );
+            //Tell the UI that agent has been created/logged in
+            mainThreadState.mainWindow!.webContents.send(
+              "ad4mAgentInit",
+              isAlreadySignedUp
+            );
+
             console.log("\x1b[32m", "\n\nControllers init complete!\n\n");
 
             //Check for updates
