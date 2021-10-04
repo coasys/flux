@@ -21,6 +21,22 @@
         </j-button>
       </div>
     </j-flex>
+    <br />
+    <j-flex direction="column" gap="700">
+      <j-text>Edit agent perspective</j-text>
+      <j-input
+        size="lg"
+        label="Add Link"
+        :value="link"
+        @input="(e) => (link = e.target.value)"
+      ></j-input>
+      <div>
+        <j-button size="lg" @click="$emit('cancel')"> Cancel </j-button>
+        <j-button size="lg" variant="primary" @click="updateAgentPerspective">
+          Update
+        </j-button>
+      </div>
+    </j-flex>
   </j-box>
 </template>
 
@@ -29,16 +45,25 @@ import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { defineComponent } from "vue";
 import { Profile } from "@/store/types";
 import { useUserStore } from "@/store/user";
-import { blobToDataURL, dataURItoBlob, resizeImage } from "@/core/methods/createProfile";
+import {
+  blobToDataURL,
+  dataURItoBlob,
+  resizeImage,
+} from "@/core/methods/createProfile";
+import { Link, PerspectiveInput } from "@perspect3vism/ad4m";
+import { ad4mClient } from "@/app";
+import { useAppStore } from "@/store/app";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
   components: { AvatarUpload },
   setup() {
     const userStore = useUserStore();
+    const appStore = useAppStore();
 
     return {
       userStore,
+      appStore,
     };
   },
   data() {
@@ -46,6 +71,7 @@ export default defineComponent({
       isUpdatingProfile: false,
       profilePicture: "",
       username: "",
+      link: "",
     };
   },
   computed: {
@@ -84,7 +110,7 @@ export default defineComponent({
         .updateProfile({
           username: this.username,
           profilePicture: this.profilePicture,
-          thumbnail
+          thumbnail,
         })
         .then(() => {
           this.$emit("submit");
@@ -92,6 +118,35 @@ export default defineComponent({
         .finally(() => {
           this.isUpdatingProfile = false;
         });
+    },
+    async updateAgentPerspective() {
+      const userPerspective = this.userStore.getFluxPerspectiveId;
+      await ad4mClient.perspective.addLink(
+        userPerspective!,
+        new Link({ source: "self", target: this.link, predicate: "post" })
+      );
+      const perspectiveSnapshot = await ad4mClient.perspective.snapshotByUUID(
+        userPerspective!
+      );
+      const links = [];
+      //Remove __typename fields so the next gql does not fail
+      for (const link in perspectiveSnapshot!.links) {
+        //Deep copy the object... so we can delete __typename fields inject by apollo client
+        const newLink = JSON.parse(
+          JSON.stringify(perspectiveSnapshot!.links[link])
+        );
+        newLink.__typename = undefined;
+        newLink.data.__typename = undefined;
+        newLink.proof.__typename = undefined;
+        links.push(newLink);
+      }
+      await ad4mClient.agent.updatePublicPerspective({
+        links,
+      } as PerspectiveInput);
+      this.link = "";
+      this.appStore.showSuccessToast({
+        message: "Link added to agent perspective",
+      });
     },
   },
 });
