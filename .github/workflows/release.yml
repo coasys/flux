@@ -112,7 +112,7 @@ jobs:
       - name: Cache nsis release
         uses: actions/upload-artifact@v1
         with:
-          name: Junto-${{steps.ref.outputs.version}}.exe
+          name: Junto Setup ${{steps.ref.outputs.version}}.exe
           path: ./dist_electron/Junto Setup ${{steps.ref.outputs.version}}.exe
       - name: Cache latest-windows.yml
         uses: actions/upload-artifact@v1
