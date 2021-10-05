@@ -1,9 +1,11 @@
 import { print } from "graphql/language/printer";
-import { GET_MANY_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
+import {
+  GET_MANY_EXPRESSION,
+  PERSPECTIVE_LINK_QUERY,
+} from "@/core/graphql_queries";
 import { LinkQuery } from "@perspect3vism/ad4m";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
-import { getManyExpression } from "@/core/queries/getExpression";
 
 export interface Payload {
   channelId: string;
@@ -36,11 +38,13 @@ export default async function ({
     }
 
     const linksWorker = new Worker("pollingWorker.js");
-    //const expressionWorker = new Worker("pollingWorker.js");
 
+    //Descending link worker that looks from current view location -> unix epoch
+    //Current view location could be now if application has just started or from some previous post if user is scrolling
     console.log("Posting for links between", fromDate, untilDate);
     linksWorker.postMessage({
       interval: 10000,
+      staticSleep: true,
       query: print(PERSPECTIVE_LINK_QUERY),
       variables: {
         uuid: channelId.toString(),
@@ -55,6 +59,7 @@ export default async function ({
       dataKey: "perspectiveQueryLinks",
     });
 
+    //Forward looking link worker that looks from current view location -> now()
     console.log("Posting for links between", fromDate, new Date());
     linksWorker.postMessage({
       interval: 10000,
@@ -69,6 +74,7 @@ export default async function ({
           untilDate: new Date(),
         } as LinkQuery,
       },
+      resetUntil: true,
       name: `Get forward expressionLinks for channel: ${channel.name}`,
       dataKey: "perspectiveQueryLinks",
     });
@@ -84,9 +90,9 @@ export default async function ({
 
       const links = linkQuery.filter((link: any) => {
         const currentExpressionLink =
-        channel.currentExpressionLinks[link.data.target];
+          channel.currentExpressionLinks[link.data.target];
         const currentExpression =
-        channel.currentExpressionMessages[link.data.target];
+          channel.currentExpressionMessages[link.data.target];
 
         return !currentExpressionLink || !currentExpression;
       });
@@ -94,7 +100,7 @@ export default async function ({
       const linksHash = links.map((link: any) => link.data.target);
 
       if (links.length > 0) {
-        //Run expression worker to try and get expression on link target        
+        //Run expression worker to try and get expression on link target
         expressionWorker.postMessage({
           retry: 50,
           interval: 5000,

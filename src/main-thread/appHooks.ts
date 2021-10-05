@@ -48,15 +48,17 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
         "\x1b[1m",
         "UserData path",
         app.getPath("userData"),
-        "AppData path",
+        "\nAppData path",
         app.getPath("appData"),
-        "Using Resource path",
+        "\nLog path",
+        app.getPath("logs"),
+        "\nUsing Resource path",
         mainThreadState.binaryExecPath,
-        "built in language path",
+        "\nbuilt in language path\n",
         mainThreadState.builtInLangPath
       );
 
-      console.log("\x1b[36m%s\x1b[0m", "Init AD4M...", app.getPath("userData"));
+      console.log("\x1b[36m%s\x1b[0m", "Init AD4M...\n");
       ad4m
         .init({
           appDataPath: app.getPath("userData"),
@@ -77,14 +79,14 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
         })
         .then(async (ad4mCore: ad4m.PerspectivismCore) => {
           mainThreadState.ad4mCore = ad4mCore;
-          console.log("\x1b[36m%s\x1b[0m", "Starting main UI window");
+          console.log("\x1b[36m%s\x1b[0m", "Starting main UI window\n\n");
 
           await createMainWindow(mainThreadState);
 
           mainThreadState.ad4mCore.waitForAgent().then(async () => {
             console.log(
               "\x1b[36m%s\x1b[0m",
-              "Agent has been init'd. Controllers now starting init..."
+              "Agent has been init'd. Controllers now starting init...\n\n"
             );
             mainThreadState.mainWindow!.webContents.send(
               "setGlobalLoading",
@@ -96,7 +98,7 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
               "setGlobalLoading",
               false
             );
-            console.log("\x1b[32m", "Controllers init complete!");
+            console.log("\x1b[32m", "\n\nControllers init complete!\n\n");
 
             //Check for updates
             if (app.isPackaged) {
@@ -132,24 +134,22 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
 
   // Quit when all windows are closed.
   app.on("window-all-closed", async () => {
-    console.log("Got window-all-closed signal");
-    if (mainThreadState.ad4mCore) {
-      await mainThreadState.ad4mCore.exit();
-    }
+    console.warn("window-all-closed SIGNAL");
+    await mainThreadState.ad4mCore?.exit();
+    mainThreadState.ad4mCore = undefined;
     app.quit();
-    // On macOS it is common for applications and their menu bar
-    // to stay active until the user quits explicitly with Cmd + Q
-    //if (process.platform !== "darwin") {
-    //}
   });
 
   // Quit when all windows are closed.
   app.on("will-quit", async () => {
-    console.log("Got will-quit signal");
+    console.warn("will-quit SIGNAL");
+    await mainThreadState.ad4mCore?.exit();
+    mainThreadState.ad4mCore = undefined;
     app.quit();
   });
 
   app.on("before-quit", async () => {
+    console.warn("before-quit SIGNAL");
     mainThreadState.isQuiting = true;
 
     mainThreadState.mainWindow!.webContents.send("unlockedStateOff");

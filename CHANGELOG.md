@@ -2,6 +2,43 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.2.4] - 01/10/2021
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+ - Vulnrability warning when joining a community
+### Fixed
+ - More ad4m-executor quit calls on sigint's and other application close events to fix ipfs.lock issues 
+ - Allow insecure requests in language due to ssl errors on language language API
+### Security
+
+---
+## [0.2.3] - 30/09/2021
+
+### Added
+ - Added button to copy logs to desktop inside settings -> privacy to allow for easier error reporting
+ - Deadlock on channel worker to avoid duplicate channels being added
+
+### Changed
+ - Set no-cache headers in polling worker gql requests
+ - Added static sleep for polling on link expressions and chat expressions
+
+### Deprecated
+
+### Removed
+
+### Fixed
+ - Fixed bug where batched grabbed expressions returning null would break store mutation
+ - Logs when starting app cleaned up
+
+### Security
+
+---
 ## [0.2.2] - 28/09/2021
 
 ### Added
