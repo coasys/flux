@@ -9,70 +9,70 @@ on:
     #   - 'v*'
 
 jobs:
-  # build_macos:
-  #   name: MacOS build
-  #   runs-on: macos-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: actions-rs/toolchain@v1
-  #       with:
-  #         toolchain: 1.55.0
-  #     # - name: Prepare cache directory
-  #     #   run: mkdir ./resources/temp
-  #     # - uses: Swatinem/rust-cache@v1
-  #     #   with:
-  #     #     working-directory: ./resources/temp/holochain
-  #     - name: Install depedencies
-  #       env:
-  #         LDFLAGS: "-L/usr/local/opt/openssl/lib"
-  #         CPPFLAGS: "-I/usr/local/opt/openssl/include"
-  #         PKG_CONFIG_PATH: "/usr/local/opt/openssl/lib/pkgconfig"
-  #       run: |
-  #         brew install sqlcipher libsodium openssl
-  #         rustup target add wasm32-unknown-unknown
-  #     - name: Build Holochain
-  #       env:
-  #         SQLCIPHER_STATIC: 1
-  #         LDFLAGS: "-L/usr/local/opt/openssl/lib"
-  #         CPPFLAGS: "-I/usr/local/opt/openssl/include"
-  #         PKG_CONFIG_PATH: "/usr/local/opt/openssl/lib/pkgconfig"
-  #       run: |
-  #         cargo install lair_keystore --git https://github.com/guillemcordoba/lair --rev 53fea43d53352609978d550f72f987f0ce458896
-  #         cargo install holochain --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
-  #         cargo install holochain_cli --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
-  #         ./scripts/copy-hc.sh
-  #     - name: Install Node.js, NPM & Yarn
-  #       uses: actions/setup-node@v2
-  #       with:
-  #         node-version: 14.17.0
-  #     - name: Retrieve tag version
-  #       id: ref
-  #       run: |
-  #         pkgver=$(node ./scripts/get-pkg-version.js)
-  #         echo ::set-output name=version::$pkgver
-  #     - name: Setup codesiging certs
-  #       run: ./scripts/add-osx-cert.sh
-  #       env:
-  #         COMMUNITIES_APPLE_CERT: ${{ secrets.COMMUNITIES_APPLE_CERT }}
-  #         COMMUNITIES_APPLE_CERT_PASSWORD: ${{ secrets.COMMUNITIES_APPLE_CERT_PASSWORD }}
-  #     - name: Install deps
-  #       run: npm i
-  #     - name: Build languages
-  #       run: npm run get-languages
-  #     - name: Build app
-  #       run: npm run release
-  #       env:
-  #         GH_TOKEN: ${{ secrets.github_token }}
-  #     - name: Cache macOS release (x64)
-  #       uses: actions/upload-artifact@v1
-  #       with:
-  #         name: Junto-${{steps.ref.outputs.version}}.dmg
-  #         path: ./dist_electron/Junto-${{steps.ref.outputs.version}}.dmg
-  #     - name: Cache latest-mac.yml
-  #       uses: actions/upload-artifact@v1
-  #       with:
-  #         name: latest-mac.yml
-  #         path: ./dist_electron/latest-mac.yml
+  build_macos:
+    name: MacOS build
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 1.55.0
+      # - name: Prepare cache directory
+      #   run: mkdir ./resources/temp
+      # - uses: Swatinem/rust-cache@v1
+      #   with:
+      #     working-directory: ./resources/temp/holochain
+      - name: Install depedencies
+        env:
+          LDFLAGS: "-L/usr/local/opt/openssl/lib"
+          CPPFLAGS: "-I/usr/local/opt/openssl/include"
+          PKG_CONFIG_PATH: "/usr/local/opt/openssl/lib/pkgconfig"
+        run: |
+          brew install sqlcipher libsodium openssl
+          rustup target add wasm32-unknown-unknown
+      - name: Build Holochain
+        env:
+          SQLCIPHER_STATIC: 1
+          LDFLAGS: "-L/usr/local/opt/openssl/lib"
+          CPPFLAGS: "-I/usr/local/opt/openssl/include"
+          PKG_CONFIG_PATH: "/usr/local/opt/openssl/lib/pkgconfig"
+        run: |
+          cargo install lair_keystore --git https://github.com/guillemcordoba/lair --rev 53fea43d53352609978d550f72f987f0ce458896
+          cargo install holochain --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
+          cargo install holochain_cli --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
+          ./scripts/copy-hc.sh
+      - name: Install Node.js, NPM & Yarn
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.17.0
+      - name: Retrieve tag version
+        id: ref
+        run: |
+          pkgver=$(node ./scripts/get-pkg-version.js)
+          echo ::set-output name=version::$pkgver
+      - name: Setup codesiging certs
+        run: ./scripts/add-osx-cert.sh
+        env:
+          COMMUNITIES_APPLE_CERT: ${{ secrets.COMMUNITIES_APPLE_CERT }}
+          COMMUNITIES_APPLE_CERT_PASSWORD: ${{ secrets.COMMUNITIES_APPLE_CERT_PASSWORD }}
+      - name: Install deps
+        run: npm i
+      - name: Build languages
+        run: npm run get-languages
+      - name: Build app
+        run: npm run release
+        env:
+          GH_TOKEN: ${{ secrets.github_token }}
+      - name: Cache macOS release (x64)
+        uses: actions/upload-artifact@v1
+        with:
+          name: Junto-${{steps.ref.outputs.version}}.dmg
+          path: ./dist_electron/Junto-${{steps.ref.outputs.version}}.dmg
+      - name: Cache latest-mac.yml
+        uses: actions/upload-artifact@v1
+        with:
+          name: latest-mac.yml
+          path: ./dist_electron/latest-mac.yml
 
   build_windows:
     name: Windows build
@@ -109,8 +109,6 @@ jobs:
         run: npm run release
         env:
           GH_TOKEN: ${{ secrets.github_token }}
-      - name: Ls
-        run: dir ./dist_electron/
       - name: Cache nsis release
         uses: actions/upload-artifact@v1
         with:
@@ -122,177 +120,207 @@ jobs:
           name: latest-windows.yml
           path: ./dist_electron/latest.yml
 
-  # build_linux:
-  #   name: Linux build
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: actions-rs/toolchain@v1
-  #       with:
-  #         toolchain: 1.55.0
-  #     # - name: Prepare cache directory
-  #     #   run: mkdir ./resources/temp/holochain
-  #     # - uses: Swatinem/rust-cache@v1
-  #     #   with:
-  #     #     working-directory: ./resources/temp/holochain
-  #     - name: Install depedencies
-  #       run: |
-  #         sudo apt-get update
-  #         sudo apt-get install -y build-essential libssl-dev libsqlcipher-dev
-  #         rustup target add wasm32-unknown-unknown
-  #     - name: Build Holochain
-  #       env:
-  #         SQLCIPHER_STATIC: 1
-  #       run: |
-  #         cargo install holochain_cli --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
-  #         cargo install holochain --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
-  #         cargo install lair_keystore --git https://github.com/guillemcordoba/lair --rev 53fea43d53352609978d550f72f987f0ce458896
-  #         ./scripts/copy-hc.sh
-  #     - name: Install Node.js, NPM & Yarn
-  #       uses: actions/setup-node@v2
-  #       with:
-  #         node-version: 14.17.0
-  #     - name: Retrieve tag version
-  #       id: ref
-  #       run: |
-  #         pkgver=$(node ./scripts/get-pkg-version.js)
-  #         echo ::set-output name=version::$pkgver
-  #     - name: Install deps
-  #       run: npm i
-  #     - name: Build languages
-  #       run: npm run get-languages
-  #     - name: Build app
-  #       run: npm run release
-  #       env:
-  #         GH_TOKEN: ${{ secrets.github_token }}
-  #     - name: Cache AppImage
-  #       uses: actions/upload-artifact@v1
-  #       with:
-  #         name: Junto-${{steps.ref.outputs.version}}.AppImage
-  #         path: ./dist_electron/Junto-${{steps.ref.outputs.version}}.AppImage
-  #     - name: Cache .deb release (x64)
-  #       uses: actions/upload-artifact@v1
-  #       with:
-  #         name: junto_${{steps.ref.outputs.version}}_amd64.deb
-  #         path: ./dist_electron/junto_${{steps.ref.outputs.version}}_amd64.deb
-  #     - name: Cache latest-linux.yml
-  #       uses: actions/upload-artifact@v1
-  #       with:
-  #         name: latest-linux.yml
-  #         path: ./dist_electron/latest-linux.yml
+  build_linux:
+    name: Linux build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 1.55.0
+      # - name: Prepare cache directory
+      #   run: mkdir ./resources/temp/holochain
+      # - uses: Swatinem/rust-cache@v1
+      #   with:
+      #     working-directory: ./resources/temp/holochain
+      - name: Install depedencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libssl-dev libsqlcipher-dev
+          rustup target add wasm32-unknown-unknown
+      - name: Build Holochain
+        env:
+          SQLCIPHER_STATIC: 1
+        run: |
+          cargo install holochain_cli --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
+          cargo install holochain --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
+          cargo install lair_keystore --git https://github.com/guillemcordoba/lair --rev 53fea43d53352609978d550f72f987f0ce458896
+          ./scripts/copy-hc.sh
+      - name: Install Node.js, NPM & Yarn
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.17.0
+      - name: Retrieve tag version
+        id: ref
+        run: |
+          pkgver=$(node ./scripts/get-pkg-version.js)
+          echo ::set-output name=version::$pkgver
+      - name: Install deps
+        run: npm i
+      - name: Build languages
+        run: npm run get-languages
+      - name: Build app
+        run: npm run release
+        env:
+          GH_TOKEN: ${{ secrets.github_token }}
+      - name: Cache AppImage
+        uses: actions/upload-artifact@v1
+        with:
+          name: Junto-${{steps.ref.outputs.version}}.AppImage
+          path: ./dist_electron/Junto-${{steps.ref.outputs.version}}.AppImage
+      - name: Cache .deb release (x64)
+        uses: actions/upload-artifact@v1
+        with:
+          name: junto_${{steps.ref.outputs.version}}_amd64.deb
+          path: ./dist_electron/junto_${{steps.ref.outputs.version}}_amd64.deb
+      - name: Cache latest-linux.yml
+        uses: actions/upload-artifact@v1
+        with:
+          name: latest-linux.yml
+          path: ./dist_electron/latest-linux.yml
 
-  # prepare_release:
-  #   name: Prepare release draft
-  #   needs: [build_linux, build_macos]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Check out Git repository
-  #       uses: actions/checkout@v2
-  #     - name: Install Node.js, NPM & Yarn
-  #       uses: actions/setup-node@v2
-  #       with:
-  #         node-version: 14.17.0
-  #     - name: Retrieve tag version
-  #       id: ref
-  #       run: |
-  #         pkgver=$(node ./scripts/get-pkg-version.js)
-  #         echo ::set-output name=version::$pkgver
-  #     - name: Download AppImage
-  #       uses: actions/download-artifact@v1
-  #       with:
-  #         name: Junto-${{steps.ref.outputs.version}}.AppImage
-  #         path: .
-  #     - name: Download deb
-  #       uses: actions/download-artifact@v1
-  #       with:
-  #         name: junto_${{steps.ref.outputs.version}}_amd64.deb
-  #         path: .
-  #     - name: Download macOS image
-  #       uses: actions/download-artifact@v1
-  #       with:
-  #         name: Junto-${{steps.ref.outputs.version}}.dmg
-  #         path: .
-  #     - name: Download latest-linux.yml
-  #       uses: actions/download-artifact@v1
-  #       with:
-  #         name: latest-linux.yml
-  #         path: .
-  #     - name: Download latest-mac.yml
-  #       uses: actions/download-artifact@v1
-  #       with:
-  #         name: latest-mac.yml
-  #         path: .
-  #     - name: Generate SHA256 checksums
-  #       run: |
-  #         sha256sum "junto_${{steps.ref.outputs.version}}_amd64.deb" >> "SHA256SUMS.txt"
-  #         sha256sum "Junto-${{steps.ref.outputs.version}}.AppImage" >> "SHA256SUMS.txt"
-  #         sha256sum "Junto-${{steps.ref.outputs.version}}.dmg" >> "SHA256SUMS.txt"
-  #         sha256sum "latest-linux.yml" >> "SHA256SUMS.txt"
-  #         sha256sum "latest-mac.yml" >> "SHA256SUMS.txt"
-  #     - name: Verify checksums
-  #       run: sha256sum -c SHA256SUMS.txt
-  #     - name: Create a new release draft
-  #       id: create_release
-  #       uses: actions/create-release@v1
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.github_token }}
-  #       with:
-  #         tag_name: v${{steps.ref.outputs.version}}
-  #         release_name: Release v${{steps.ref.outputs.version}} 
-  #         body: If you can read this, we have forgotten to fill in the changelog. Sorry!
-  #         draft: true 
-  #     - name: Upload .deb installer (x64)
-  #       uses: actions/upload-release-asset@v1.0.1
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.github_token }}
-  #       with:
-  #         upload_url: ${{ steps.create_release.outputs.upload_url }}
-  #         asset_path: ./junto_${{steps.ref.outputs.version}}_amd64.deb
-  #         asset_name: junto_${{steps.ref.outputs.version}}_amd64.deb
-  #         asset_content_type: application/octet-stream
-  #     - name: Upload AppImage binary (arm64)
-  #       uses: actions/upload-release-asset@v1.0.1
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.github_token }}
-  #       with:
-  #         upload_url: ${{ steps.create_release.outputs.upload_url }}
-  #         asset_path: ./Junto-${{steps.ref.outputs.version}}.AppImage
-  #         asset_name: Junto-${{steps.ref.outputs.version}}.AppImage
-  #         asset_content_type: application/octet-stream
-  #     - name: Upload macOS image
-  #       uses: actions/upload-release-asset@v1.0.1
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       with:
-  #         upload_url: ${{ steps.create_release.outputs.upload_url }}
-  #         asset_path: ./Junto-${{steps.ref.outputs.version}}.dmg
-  #         asset_name: Junto-${{steps.ref.outputs.version}}.dmg
-  #         asset_content_type: application/octet-stream
-  #     - name: Upload latest-linux.yml
-  #       uses: actions/upload-release-asset@v1.0.1
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.github_token }}
-  #       with:
-  #         upload_url: ${{ steps.create_release.outputs.upload_url }}
-  #         asset_path: ./latest-linux.yml
-  #         asset_name: latest-linux.yml
-  #         asset_content_type: application/octet-stream
-  #     - name: Upload latest-mac.yml
-  #       uses: actions/upload-release-asset@v1.0.1
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.github_token }}
-  #       with:
-  #         upload_url: ${{ steps.create_release.outputs.upload_url }}
-  #         asset_path: ./latest-mac.yml
-  #         asset_name: latest-mac.yml
-  #         asset_content_type: application/octet-stream
-  #     - name: Upload the checksums
-  #       uses: actions/upload-release-asset@v1.0.1
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.github_token }}
-  #       with:
-  #         upload_url: ${{ steps.create_release.outputs.upload_url }}
-  #         asset_path: ./SHA256SUMS.txt
-  #         asset_name: SHA256SUMS.txt
-  #         asset_content_type: text/plain
+  prepare_release:
+    name: Prepare release draft
+    needs: [build_linux, build_macos, build_windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      - name: Install Node.js, NPM & Yarn
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.17.0
+      - name: Retrieve tag version
+        id: ref
+        run: |
+          pkgver=$(node ./scripts/get-pkg-version.js)
+          echo ::set-output name=version::$pkgver
+      - name: Download AppImage
+        uses: actions/download-artifact@v1
+        with:
+          name: Junto-${{steps.ref.outputs.version}}.AppImage
+          path: .
+      - name: Download deb
+        uses: actions/download-artifact@v1
+        with:
+          name: junto_${{steps.ref.outputs.version}}_amd64.deb
+          path: .
+      - name: Download macOS image
+        uses: actions/download-artifact@v1
+        with:
+          name: Junto-${{steps.ref.outputs.version}}.dmg
+          path: .
+      - name: Download Windows Exe
+        uses: actions/download-artifact@v1
+        with:
+          name: Junto Setup ${{steps.ref.outputs.version}}.exe
+          path: .
+      - name: Download latest-windows.yml
+        uses: actions/download-artifact@v1
+        with:
+          name: latest-windows.yml
+          path: .
+      - name: Download latest-linux.yml
+        uses: actions/download-artifact@v1
+        with:
+          name: latest-linux.yml
+          path: .
+      - name: Download latest-mac.yml
+        uses: actions/download-artifact@v1
+        with:
+          name: latest-mac.yml
+          path: .
+      - name: Generate SHA256 checksums
+        run: |
+          sha256sum "junto_${{steps.ref.outputs.version}}_amd64.deb" >> "SHA256SUMS.txt"
+          sha256sum "Junto-${{steps.ref.outputs.version}}.AppImage" >> "SHA256SUMS.txt"
+          sha256sum "Junto-${{steps.ref.outputs.version}}.dmg" >> "SHA256SUMS.txt"
+          sha256sum "Junto Setup ${{steps.ref.outputs.version}}.exe" >> "SHA256SUMS.txt"
+          sha256sum "latest-linux.yml" >> "SHA256SUMS.txt"
+          sha256sum "latest-mac.yml" >> "SHA256SUMS.txt"
+          sha256sum "latest-windows.yml" >> "SHA256SUMS.txt"
+      - name: Verify checksums
+        run: sha256sum -c SHA256SUMS.txt
+      - name: Create a new release draft
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+        with:
+          tag_name: v${{steps.ref.outputs.version}}
+          release_name: Release v${{steps.ref.outputs.version}} 
+          body: If you can read this, we have forgotten to fill in the changelog. Sorry!
+          draft: true 
+      - name: Upload .deb installer (x64)
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./junto_${{steps.ref.outputs.version}}_amd64.deb
+          asset_name: junto_${{steps.ref.outputs.version}}_amd64.deb
+          asset_content_type: application/octet-stream
+      - name: Upload AppImage binary (arm64)
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./Junto-${{steps.ref.outputs.version}}.AppImage
+          asset_name: Junto-${{steps.ref.outputs.version}}.AppImage
+          asset_content_type: application/octet-stream
+      - name: Upload macOS image
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./Junto-${{steps.ref.outputs.version}}.dmg
+          asset_name: Junto-${{steps.ref.outputs.version}}.dmg
+          asset_content_type: application/octet-stream
+      - name: Upload Windows exe
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./Junto Setup ${{steps.ref.outputs.version}}.exe
+          asset_name: Junto Setup ${{steps.ref.outputs.version}}.exe
+          asset_content_type: application/octet-stream
+      - name: Upload latest-linux.yml
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./latest-linux.yml
+          asset_name: latest-linux.yml
+          asset_content_type: application/octet-stream
+      - name: Upload latest-mac.yml
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./latest-mac.yml
+          asset_name: latest-mac.yml
+          asset_content_type: application/octet-stream
+      - name: Upload latest-windows.yml
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./latest-windows.yml
+          asset_name: latest-windows.yml
+          asset_content_type: application/octet-stream
+      - name: Upload the checksums
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./SHA256SUMS.txt
+          asset_name: SHA256SUMS.txt
+          asset_content_type: text/plain
 
