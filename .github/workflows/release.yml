@@ -238,7 +238,7 @@ jobs:
           sha256sum "Junto Setup ${{steps.ref.outputs.version}}.exe" >> "SHA256SUMS.txt"
           sha256sum "latest-linux.yml" >> "SHA256SUMS.txt"
           sha256sum "latest-mac.yml" >> "SHA256SUMS.txt"
-          sha256sum "latest-windows.yml" >> "SHA256SUMS.txt"
+          sha256sum "latest.yml" >> "SHA256SUMS.txt"
       - name: Verify checksums
         run: sha256sum -c SHA256SUMS.txt
       - name: Create a new release draft
@@ -311,8 +311,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.github_token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./latest-windows.yml
-          asset_name: latest-windows.yml
+          asset_path: ./latest.yml
+          asset_name: latest.yml
           asset_content_type: application/octet-stream
       - name: Upload the checksums
         uses: actions/upload-release-asset@v1.0.1
