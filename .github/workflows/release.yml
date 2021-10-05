@@ -120,7 +120,7 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: latest-windows.yml
-          path: ./dist_electron/latest-windows.yml
+          path: ./dist_electron/latest.yml
 
   # build_linux:
   #   name: Linux build
