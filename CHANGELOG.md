@@ -9,6 +9,8 @@ This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/
 
 ### Changed
  - Holochain upgraded to version 109
+ - Base social-context that is created when creating a community is now also used as the link store for the home channel
+
 ### Deprecated
 
 ### Removed
