@@ -93,13 +93,17 @@
         >
           <j-menu-item
             slot="trigger"
-            :id="getValidId(channel.neighbourhood.perspective.uuid)"
             class="channel"
             :selected="isExactActive"
             @click="navigate"
           >
             <j-icon slot="start" size="sm" name="hash"></j-icon>
-            {{ channel.neighbourhood.name }}
+            {{
+              channel.neighbourhood.perspective.uuid ===
+              community.neighbourhood.perspective.uuid
+                ? "Home"
+                : channel.neighbourhood.name
+            }}
             <j-icon
               size="xs"
               slot="end"
@@ -189,9 +193,6 @@ export default defineComponent({
       "setShowInviteCode",
       "setShowCommunitySettings",
     ]),
-    getValidId(val: string) {
-      return "channel-" + val;
-    },
     goToSettings() {
       this.setShowCommunitySettings(true);
       this.showCommunityMenu = false;

@@ -111,10 +111,9 @@ describe("Create Community", () => {
       description: "",
     });
 
-    expect(Object.keys(dataStore.neighbourhoods).length).toBe(2);
+    expect(Object.keys(dataStore.neighbourhoods).length).toBe(1);
     expect(Object.keys(dataStore.neighbourhoods)).toStrictEqual([
       "9cac577c-0b0a-44f4-9d4f-66edcc236021",
-      "6a37ca93-f693-471a-81dd-7993e48b659d",
     ]);
   });
 

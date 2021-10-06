@@ -6,6 +6,7 @@ import {
   ChannelState,
   ThemeState,
   LocalCommunityState,
+  LocalChannelState,
 } from "@/store/types";
 
 import { parseExprUrl } from "@perspect3vism/ad4m";
@@ -232,6 +233,14 @@ export default {
       state.neighbourhoods[payload.channel.neighbourhood.perspective.uuid] =
         payload.channel.neighbourhood;
     }
+  },
+
+  addLocalChannel(payload: {
+    perspectiveUuid: string;
+    channel: LocalChannelState;
+  }): void {
+    const state = useDataStore();
+    state.channels[payload.perspectiveUuid] = payload.channel;
   },
 
   createChannelMutation(payload: ChannelState): void {
