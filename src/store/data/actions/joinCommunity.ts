@@ -8,7 +8,12 @@ import { MEMBER } from "@/constants/neighbourhoodMeta";
 
 import { Link } from "@perspect3vism/ad4m";
 
-import { ExpressionTypes, CommunityState, MembraneType } from "@/store/types";
+import {
+  ExpressionTypes,
+  CommunityState,
+  MembraneType,
+  FeedType,
+} from "@/store/types";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
@@ -77,8 +82,8 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
           typedExpressionLanguages: typedExpressionLanguages,
           neighbourhoodUrl: joiningLink,
           membraneType: MembraneType.Unique,
-          linkedNeighbourhoods: [],
-          linkedPerspectives: [],
+          linkedNeighbourhoods: [neighbourhood.uuid],
+          linkedPerspectives: [neighbourhood.uuid],
           members: {},
           currentExpressionLinks: {},
           currentExpressionMessages: {},
@@ -98,6 +103,17 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
       } as CommunityState;
 
       dataStore.addCommunity(newCommunity);
+      dataStore.addLocalChannel({
+        perspectiveUuid: neighbourhood.uuid,
+        channel: {
+          perspectiveUuid: neighbourhood.uuid,
+          hasNewMessages: false,
+          feedType: FeedType.Signaled,
+          notifications: {
+            mute: false,
+          },
+        },
+      });
     } else {
       const message = "You are already part of this group";
 
