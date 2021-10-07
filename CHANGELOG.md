@@ -2,6 +2,24 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.2.5] - 01/10/2021
+
+### Added
+ - Windows build support
+
+### Changed
+ - Holochain upgraded to version 109
+ - Base social-context that is created when creating a community is now also used as the link store for the home channel
+
+### Deprecated
+
+### Removed
+
+### Fixed
+### Security
+
+---
+
 ## [0.2.4] - 01/10/2021
 
 ### Added

@@ -90,6 +90,8 @@ module.exports = {
             presets: [["@babel/preset-env", { modules: false }]],
             plugins: ["@babel/plugin-transform-typescript"],
           });
+        config.plugins.delete('workbox');
+        config.plugins.delete('pwa');
       },
     },
   },

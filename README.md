@@ -1,4 +1,4 @@
-# Junto
+# Flux by Junto
 
 [![Build/release](https://github.com/juntofoundation/communities/actions/workflows/release.yml/badge.svg)](https://github.com/juntofoundation/communities/actions/workflows/release.yml)
 
@@ -40,7 +40,7 @@ These DNA's come bundled with the builtin languages, links above are provided fo
 
 ### Compiles and minifies for production
 ```
-npm run build-holochain && npm run build-languages && npm run electron:build
+npm run build-holochain && npm run get-languages && npm run electron:build
 ```
 
 ### Lints and fixes files

@@ -28,7 +28,7 @@ jobs:
           CPPFLAGS: "-I/usr/local/opt/openssl/include"
           PKG_CONFIG_PATH: "/usr/local/opt/openssl/lib/pkgconfig"
         run: |
-          brew install sqlcipher libsodium openssl
+          brew install libsodium openssl
           rustup target add wasm32-unknown-unknown
       - name: Build Holochain
         env:
@@ -37,9 +37,9 @@ jobs:
           CPPFLAGS: "-I/usr/local/opt/openssl/include"
           PKG_CONFIG_PATH: "/usr/local/opt/openssl/lib/pkgconfig"
         run: |
-          cargo install lair_keystore --git https://github.com/guillemcordoba/lair --rev 53fea43d53352609978d550f72f987f0ce458896
-          cargo install holochain --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
-          cargo install holochain_cli --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
+          cargo install lair_keystore --git https://github.com/holochain/lair --rev bd92b76ad9cc18bc0c0db215e4bea9767c9003cf
+          cargo install holochain --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
+          cargo install holochain_cli --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
           ./scripts/copy-hc.sh
       - name: Install Node.js, NPM & Yarn
         uses: actions/setup-node@v2
@@ -90,9 +90,9 @@ jobs:
           SQLCIPHER_STATIC: 1
         run: |
           rustup target add wasm32-unknown-unknown
-          cargo install holochain --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
-          cargo install hc --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
-          cargo install lair_keystore --git https://github.com/guillemcordoba/lair --rev 53fea43d53352609978d550f72f987f0ce458896
+          cargo install lair_keystore --git https://github.com/holochain/lair --rev bd92b76ad9cc18bc0c0db215e4bea9767c9003cf
+          cargo install holochain --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
+          cargo install holochain_cli --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
           ./scripts/copy-hc.sh
       - name: Install Node.js, NPM & Yarn
         uses: actions/setup-node@v2
@@ -100,9 +100,7 @@ jobs:
           node-version: 14.17.0
       - name: Retrieve tag version
         id: ref
-        run: |
-          $Env:pkgver = node ./scripts/get-pkg-version.js
-          echo ::set-output name=version::$Env:pkgver
+        run: echo "::set-output name=version::$(node ./scripts/get-pkg-version.js)"
       - name: Install deps
         run: npm i
       - name: Build languages
@@ -114,13 +112,13 @@ jobs:
       - name: Cache nsis release
         uses: actions/upload-artifact@v1
         with:
-          name: Junto-${{steps.ref.outputs.version}}.nsis
-          path: ./dist_electron/Junto-${{steps.ref.outputs.version}}.nsis
+          name: Junto Setup ${{steps.ref.outputs.version}}.exe
+          path: ./dist_electron/Junto Setup ${{steps.ref.outputs.version}}.exe
       - name: Cache latest-windows.yml
         uses: actions/upload-artifact@v1
         with:
           name: latest-windows.yml
-          path: ./dist_electron/latest-windows.yml
+          path: ./dist_electron/latest.yml
 
   build_linux:
     name: Linux build
@@ -144,9 +142,9 @@ jobs:
         env:
           SQLCIPHER_STATIC: 1
         run: |
-          cargo install holochain_cli --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
-          cargo install holochain --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
-          cargo install lair_keystore --git https://github.com/guillemcordoba/lair --rev 53fea43d53352609978d550f72f987f0ce458896
+          cargo install lair_keystore --git https://github.com/holochain/lair --rev bd92b76ad9cc18bc0c0db215e4bea9767c9003cf
+          cargo install holochain --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
+          cargo install holochain_cli --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
           ./scripts/copy-hc.sh
       - name: Install Node.js, NPM & Yarn
         uses: actions/setup-node@v2
@@ -183,7 +181,7 @@ jobs:
 
   prepare_release:
     name: Prepare release draft
-    needs: [build_linux, build_macos]
+    needs: [build_linux, build_macos, build_windows]
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
@@ -212,6 +210,16 @@ jobs:
         with:
           name: Junto-${{steps.ref.outputs.version}}.dmg
           path: .
+      - name: Download Windows Exe
+        uses: actions/download-artifact@v1
+        with:
+          name: Junto Setup ${{steps.ref.outputs.version}}.exe
+          path: .
+      - name: Download latest-windows.yml
+        uses: actions/download-artifact@v1
+        with:
+          name: latest-windows.yml
+          path: .
       - name: Download latest-linux.yml
         uses: actions/download-artifact@v1
         with:
@@ -227,8 +235,10 @@ jobs:
           sha256sum "junto_${{steps.ref.outputs.version}}_amd64.deb" >> "SHA256SUMS.txt"
           sha256sum "Junto-${{steps.ref.outputs.version}}.AppImage" >> "SHA256SUMS.txt"
           sha256sum "Junto-${{steps.ref.outputs.version}}.dmg" >> "SHA256SUMS.txt"
+          sha256sum "Junto Setup ${{steps.ref.outputs.version}}.exe" >> "SHA256SUMS.txt"
           sha256sum "latest-linux.yml" >> "SHA256SUMS.txt"
           sha256sum "latest-mac.yml" >> "SHA256SUMS.txt"
+          sha256sum "latest.yml" >> "SHA256SUMS.txt"
       - name: Verify checksums
         run: sha256sum -c SHA256SUMS.txt
       - name: Create a new release draft
@@ -268,6 +278,15 @@ jobs:
           asset_path: ./Junto-${{steps.ref.outputs.version}}.dmg
           asset_name: Junto-${{steps.ref.outputs.version}}.dmg
           asset_content_type: application/octet-stream
+      - name: Upload Windows exe
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./Junto Setup ${{steps.ref.outputs.version}}.exe
+          asset_name: Junto Setup ${{steps.ref.outputs.version}}.exe
+          asset_content_type: application/octet-stream
       - name: Upload latest-linux.yml
         uses: actions/upload-release-asset@v1.0.1
         env:
@@ -285,6 +304,15 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./latest-mac.yml
           asset_name: latest-mac.yml
+          asset_content_type: application/octet-stream
+      - name: Upload latest-windows.yml
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./latest.yml
+          asset_name: latest.yml
           asset_content_type: application/octet-stream
       - name: Upload the checksums
         uses: actions/upload-release-asset@v1.0.1
