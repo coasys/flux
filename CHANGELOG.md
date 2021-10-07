@@ -2,6 +2,31 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.2.6] - 07/10/2021
+
+### Added
+ - Confirm modal when cleaning state
+
+### Changed
+
+### Deprecated
+
+### Removed
+ - Windows build
+ - Apollo composable dependency
+ - Old database perspective that was created on user signup
+ - Expression UI caching when joining or creating a community
+
+### Fixed
+ - Language language throwing error in production
+ - Service worker load error on mac in production
+ - Correctly init main neighbourhood as home channel when joining a channel
+ - Added membrane root value on neighbourhood when creating and joining a neighbourhood
+
+### Security
+
+---
+
 ## [0.2.5] - 01/10/2021
 
 ### Added
