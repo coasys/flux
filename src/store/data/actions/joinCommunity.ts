@@ -8,7 +8,12 @@ import { MEMBER } from "@/constants/neighbourhoodMeta";
 
 import { Link } from "@perspect3vism/ad4m";
 
-import { ExpressionTypes, CommunityState, MembraneType } from "@/store/types";
+import {
+  ExpressionTypes,
+  CommunityState,
+  MembraneType,
+  FeedType,
+} from "@/store/types";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
@@ -37,15 +42,9 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
 
       //Get and cache the expression UI for each expression language
       //And used returned expression language names to populate typedExpressionLanguages field
-      const [typedExpressionLanguages, uiIcons] =
-        await getTypedExpressionLanguages(
-          neighbourhood.neighbourhood!.meta.links,
-          true
-        );
-
-      for (const uiIcon of uiIcons) {
-        appStore.addExpressionUI(uiIcon);
-      }
+      const typedExpressionLanguages = await getTypedExpressionLanguages(
+        neighbourhood.neighbourhood!.meta.links
+      );
 
       const profileExpLang = typedExpressionLanguages.find(
         (val) => val.expressionType == ExpressionTypes.ProfileExpression
@@ -83,9 +82,10 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
           typedExpressionLanguages: typedExpressionLanguages,
           neighbourhoodUrl: joiningLink,
           membraneType: MembraneType.Unique,
-          linkedNeighbourhoods: [],
-          linkedPerspectives: [],
+          linkedNeighbourhoods: [neighbourhood.uuid],
+          linkedPerspectives: [neighbourhood.uuid],
           members: {},
+          membraneRoot: neighbourhood.uuid,
           currentExpressionLinks: {},
           currentExpressionMessages: {},
         },
@@ -104,6 +104,20 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
       } as CommunityState;
 
       dataStore.addCommunity(newCommunity);
+      // We add a default channel that is a reference to
+      // the community itself. This way we can utilize the fractal nature of
+      // neighbourhoods. Remember that this also need to happen in create community.
+      dataStore.addLocalChannel({
+        perspectiveUuid: neighbourhood.uuid,
+        channel: {
+          perspectiveUuid: neighbourhood.uuid,
+          hasNewMessages: false,
+          feedType: FeedType.Signaled,
+          notifications: {
+            mute: false,
+          },
+        },
+      });
     } else {
       const message = "You are already part of this group";
 

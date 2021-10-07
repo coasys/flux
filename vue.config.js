@@ -1,7 +1,5 @@
-const webpack = require("webpack");
-
 module.exports = {
-  transpileDependencies: ["@vue/apollo-composable"],
+  transpileDependencies: [],
   chainWebpack: (config) => {
     config.module
       .rule("vue")
@@ -14,17 +12,6 @@ module.exports = {
           },
         };
       });
-    config
-      .plugin("nativeModuleStub")
-      .use(webpack.NormalModuleReplacementPlugin, [
-        /type-graphql$/,
-        (resource) => {
-          resource.request = resource.request.replace(
-            /type-graphql/,
-            "type-graphql/dist/browser-shim.js"
-          );
-        },
-      ]);
     config.module
       .rule("mjs")
       .test(/\.mjs$/)
@@ -87,9 +74,10 @@ module.exports = {
           .use("babel")
           .loader("babel-loader")
           .options({
-            presets: [["@babel/preset-env", { modules: false }]],
             plugins: ["@babel/plugin-transform-typescript"],
           });
+        config.plugins.delete('workbox');
+        config.plugins.delete('pwa');
       },
     },
   },

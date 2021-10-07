@@ -1,4 +1,4 @@
-import { apolloClient } from "@/utils/setupApolloClient";
+import { apolloClient } from "@/app";
 
 import unwrapApolloResult from "@/utils/unwrapApolloResult";
 import { CREATE_EXPRESSION } from "../graphql_queries";

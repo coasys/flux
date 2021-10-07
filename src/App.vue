@@ -36,14 +36,13 @@
 </template>
 
 <script lang="ts">
-import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
 import { gql } from "@apollo/client/core";
 import { defineComponent, computed, watch } from "vue";
 import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
-import { AGENT_STATUS, GET_EXPRESSION } from "@/core/graphql_queries";
+import { GET_EXPRESSION } from "@/core/graphql_queries";
 import {
   ApplicationState,
   ModalsState,
@@ -51,13 +50,14 @@ import {
   ToastState,
 } from "@/store/types";
 import { print } from "graphql/language/printer";
-import { AgentStatus, LinkExpression } from "@perspect3vism/ad4m";
-import { apolloClient } from "./utils/setupApolloClient";
+import { LinkExpression } from "@perspect3vism/ad4m";
+import { apolloClient } from "@/app";
 import { useUserStore } from "./store/user";
 import { useAppStore } from "./store/app";
 import { useDataStore } from "./store/data";
 import { addTrustedAgents } from "@/core/mutations/addTrustedAgents";
 import { JUNTO_AGENT, AD4M_AGENT } from "@/ad4m-globals";
+import { ad4mClient } from "./app";
 
 declare global {
   interface Window {
@@ -90,7 +90,6 @@ export default defineComponent({
     userStore.$subscribe(async (mutation, state) => {
       if (state.agent.isUnlocked) {
         appStore.setApplicationStartTime(new Date());
-        dataStore.loadExpressionLanguages();
         await addTrustedAgents([JUNTO_AGENT, AD4M_AGENT]);
       } else {
         router.push({
@@ -272,24 +271,8 @@ export default defineComponent({
       }
     );
 
-    const { onResult, onError } = useQuery<{
-      agentStatus: AgentStatus;
-    }>(AGENT_STATUS);
-    onResult((val) => {
-      this.userStore.updateAgentStatus(val.data.agentStatus);
-      if (val.data.agentStatus.isInitialized == true) {
-        //Get database perspective from store
-        let databasePerspective = this.appStore.getDatabasePerspective;
-        if (!databasePerspective) {
-          console.warn(
-            "Does not have databasePerspective in store but has already been init'd! Add logic for getting databasePerspective as found with name"
-          );
-          //TODO: add the retrieval/state saving logic here
-        }
-      }
-    });
-    onError((error) => {
-      console.log("WelcomeViewRight: AGENT_SERVICE_STATUS, error:", error);
+    ad4mClient.agent.status().then((status) => {
+      this.userStore.updateAgentStatus(status);
     });
   },
 });

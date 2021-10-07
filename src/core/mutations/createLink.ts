@@ -1,6 +1,6 @@
 import unwrapApolloResult from "@/utils/unwrapApolloResult";
 import { ADD_LINK } from "../graphql_queries";
-import { apolloClient } from "@/utils/setupApolloClient";
+import { apolloClient } from "@/app";
 import type { Link, LinkExpression } from "@perspect3vism/ad4m";
 
 export async function createLink(
