@@ -93,7 +93,10 @@ jobs:
           cargo install lair_keystore --git https://github.com/holochain/lair --rev bd92b76ad9cc18bc0c0db215e4bea9767c9003cf
           cargo install holochain --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
           cargo install holochain_cli --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
-          ./scripts/copy-hc.sh
+          $HcPath = Get-Command holochain | Select-Object -ExpandProperty Definition
+          $LkPath = Get-Command lair-keystore | Select-Object -ExpandProperty Definition
+          Copy-Item $HcPath -Destination ./resources/win32/holochain-x86_64-pc-windows-msvc.exe
+          Copy-Item $LkPath -Destination ./resources/win32/lair-keystore-x86_64-pc-windows-msvc.exe
       - name: Install Node.js, NPM & Yarn
         uses: actions/setup-node@v2
         with:
