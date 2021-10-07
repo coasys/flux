@@ -274,16 +274,6 @@ export default defineComponent({
 
     ad4mClient.agent.status().then((status) => {
       this.userStore.updateAgentStatus(status);
-      if (status.isInitialized == true) {
-        //Get database perspective from store
-        let databasePerspective = this.appStore.getDatabasePerspective;
-        if (!databasePerspective) {
-          console.warn(
-            "Does not have databasePerspective in store but has already been init'd! Add logic for getting databasePerspective as found with name"
-          );
-          //TODO: add the retrieval/state saving logic here
-        }
-      }
     });
   },
 });
