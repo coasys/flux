@@ -1,14 +1,10 @@
-import path from "path";
 import { v4 as uuidv4 } from "uuid";
-import { createChannel } from "@/core/methods/createChannel";
 import { createProfile } from "@/core/methods/createProfile";
 import { createExpression } from "@/core/mutations/createExpression";
 import { templateLanguage } from "@/core/mutations/templateLanguage";
 import { createNeighbourhood } from "@/core/mutations/createNeighbourhood";
 import { addPerspective } from "@/core/mutations/addPerspective";
 import { createLink } from "@/core/mutations/createLink";
-import { getLanguage } from "@/core/queries/getLanguage";
-import sleep from "@/utils/sleep";
 import {
   SOCIAL_CONTEXT_OFFICIAL,
   GROUP_EXPRESSION_OFFICIAL,
@@ -19,7 +15,6 @@ import {
 import { MEMBER } from "@/constants/neighbourhoodMeta";
 
 import {
-  ExpressionUIIcons,
   MembraneType,
   JuntoExpressionReference,
   ExpressionTypes,
@@ -220,20 +215,6 @@ export default async ({
         },
       },
     });
-
-    //Get and cache the expression UI for each expression language
-    for (const lang of typedExpLangs) {
-      console.log("CreateCommunity.vue: Fetching UI lang:", lang);
-      const languageRes = await getLanguage(lang.languageAddress);
-      const uiData: ExpressionUIIcons = {
-        languageAddress: lang.languageAddress,
-        createIcon: languageRes!.constructorIcon?.code || "",
-        viewIcon: languageRes!.icon?.code || "",
-        name: languageRes!.name!,
-      };
-      appStore.addExpressionUI(uiData);
-      await sleep(40);
-    }
 
     // @ts-ignore
     return newCommunity;

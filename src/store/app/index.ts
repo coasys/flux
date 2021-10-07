@@ -11,7 +11,6 @@ export const useAppStore = defineStore("app", {
       windowState: "visible",
       applicationStartTime: new Date(),
       localLanguagesPath: "",
-      expressionUI: {},
       modals: {
         showCreateCommunity: false,
         showEditCommunity: false,

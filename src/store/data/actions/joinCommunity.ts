@@ -37,15 +37,9 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
 
       //Get and cache the expression UI for each expression language
       //And used returned expression language names to populate typedExpressionLanguages field
-      const [typedExpressionLanguages, uiIcons] =
-        await getTypedExpressionLanguages(
-          neighbourhood.neighbourhood!.meta.links,
-          true
-        );
-
-      for (const uiIcon of uiIcons) {
-        appStore.addExpressionUI(uiIcon);
-      }
+      const typedExpressionLanguages = await getTypedExpressionLanguages(
+        neighbourhood.neighbourhood!.meta.links
+      );
 
       const profileExpLang = typedExpressionLanguages.find(
         (val) => val.expressionType == ExpressionTypes.ProfileExpression

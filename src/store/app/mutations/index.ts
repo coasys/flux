@@ -8,10 +8,6 @@ import {
 import { useAppStore } from "..";
 
 export default {
-  addExpressionUI(payload: ExpressionUIIcons): void {
-    const state = useAppStore();
-    state.expressionUI[payload.languageAddress] = payload;
-  },
   setLanguagesPath(payload: string): void {
     const state = useAppStore();
     state.localLanguagesPath = payload;

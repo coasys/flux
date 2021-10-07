@@ -25,7 +25,6 @@ export interface DataState {
 }
 
 export interface ApplicationState {
-  expressionUI: { [x: string]: ExpressionUIIcons };
   localLanguagesPath: string;
   databasePerspective?: string;
   windowState: WindowState;
