@@ -1,6 +1,5 @@
 import { createApp, h, watch } from "vue";
 import App from "./App.vue";
-import "./registerServiceWorker";
 import router from "./router";
 
 import "@junto-foundation/junto-elements";
