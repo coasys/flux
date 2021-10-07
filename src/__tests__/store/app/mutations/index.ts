@@ -1,7 +1,3 @@
-import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
-import * as getLanguage from "@/core/queries/getLanguage";
-import getTypedExpressionLangLanguages from "../../../fixtures/getTypedExpressionLangLanguages.json";
-import getTypedExpressionLangLinks from "../../../fixtures/getTypedExpressionLangLinks.json";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useAppStore } from "@/store/app";
 
@@ -15,33 +11,6 @@ describe("App Mutations", () => {
     store = createPinia();
 
     setActivePinia(store);
-  });
-
-  test("addExpressionUI", async () => {
-    const appStore = useAppStore();
-    // @ts-ignore
-    jest
-      .spyOn(getLanguage, "getLanguage")
-      // @ts-ignore
-      .mockImplementation(async (address) => {
-        return getTypedExpressionLangLanguages.find(
-          (e) => e.address === address
-        );
-      });
-
-    // @ts-ignore
-    const [exp, icons] = await getTypedExpressionLanguages(
-      getTypedExpressionLangLinks,
-      true
-    );
-
-    expect(Object.values(appStore.expressionUI).length).toBe(0);
-
-    for (const icon of icons) {
-      appStore.addExpressionUI(icon);
-    }
-
-    expect(Object.values(appStore.expressionUI).length).toBe(4);
   });
 
   test("setLanguagesPath", () => {
