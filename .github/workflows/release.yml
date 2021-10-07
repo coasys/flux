@@ -74,51 +74,51 @@ jobs:
           name: latest-mac.yml
           path: ./dist_electron/latest-mac.yml
 
-  build_windows:
-    name: Windows build
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.55.0
-      - uses: Swatinem/rust-cache@v1
-        with:
-          working-directory: ./resources/temp/holochain
-      - name: Build Holochain
-        env:
-          SQLCIPHER_STATIC: 1
-        run: |
-          rustup target add wasm32-unknown-unknown
-          cargo install lair_keystore --git https://github.com/holochain/lair --rev bd92b76ad9cc18bc0c0db215e4bea9767c9003cf
-          cargo install holochain --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
-          cargo install holochain_cli --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
-          ./scripts/copy-hc.sh
-      - name: Install Node.js, NPM & Yarn
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14.17.0
-      - name: Retrieve tag version
-        id: ref
-        run: echo "::set-output name=version::$(node ./scripts/get-pkg-version.js)"
-      - name: Install deps
-        run: npm i
-      - name: Build languages
-        run: npm run get-languages
-      - name: Build app
-        run: npm run release
-        env:
-          GH_TOKEN: ${{ secrets.github_token }}
-      - name: Cache nsis release
-        uses: actions/upload-artifact@v1
-        with:
-          name: Junto Setup ${{steps.ref.outputs.version}}.exe
-          path: ./dist_electron/Junto Setup ${{steps.ref.outputs.version}}.exe
-      - name: Cache latest-windows.yml
-        uses: actions/upload-artifact@v1
-        with:
-          name: latest-windows.yml
-          path: ./dist_electron/latest.yml
+  # build_windows:
+  #   name: Windows build
+  #   runs-on: windows-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions-rs/toolchain@v1
+  #       with:
+  #         toolchain: 1.55.0
+  #     - uses: Swatinem/rust-cache@v1
+  #       with:
+  #         working-directory: ./resources/temp/holochain
+  #     - name: Build Holochain
+  #       env:
+  #         SQLCIPHER_STATIC: 1
+  #       run: |
+  #         rustup target add wasm32-unknown-unknown
+  #         cargo install lair_keystore --git https://github.com/holochain/lair --rev bd92b76ad9cc18bc0c0db215e4bea9767c9003cf
+  #         cargo install holochain --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
+  #         cargo install holochain_cli --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
+  #         ./scripts/copy-hc.sh
+  #     - name: Install Node.js, NPM & Yarn
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: 14.17.0
+  #     - name: Retrieve tag version
+  #       id: ref
+  #       run: echo "::set-output name=version::$(node ./scripts/get-pkg-version.js)"
+  #     - name: Install deps
+  #       run: npm i
+  #     - name: Build languages
+  #       run: npm run get-languages
+  #     - name: Build app
+  #       run: npm run release
+  #       env:
+  #         GH_TOKEN: ${{ secrets.github_token }}
+  #     - name: Cache nsis release
+  #       uses: actions/upload-artifact@v1
+  #       with:
+  #         name: Junto Setup ${{steps.ref.outputs.version}}.exe
+  #         path: ./dist_electron/Junto Setup ${{steps.ref.outputs.version}}.exe
+  #     - name: Cache latest-windows.yml
+  #       uses: actions/upload-artifact@v1
+  #       with:
+  #         name: latest-windows.yml
+  #         path: ./dist_electron/latest.yml
 
   build_linux:
     name: Linux build
@@ -181,7 +181,7 @@ jobs:
 
   prepare_release:
     name: Prepare release draft
-    needs: [build_linux, build_macos, build_windows]
+    needs: [build_linux, build_macos]
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
