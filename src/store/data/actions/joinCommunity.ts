@@ -85,6 +85,7 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
           linkedNeighbourhoods: [neighbourhood.uuid],
           linkedPerspectives: [neighbourhood.uuid],
           members: {},
+          membraneRoot: neighbourhood.uuid,
           currentExpressionLinks: {},
           currentExpressionMessages: {},
         },

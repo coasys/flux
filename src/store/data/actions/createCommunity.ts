@@ -185,6 +185,7 @@ export default async ({
         linkedPerspectives: [createSourcePerspective.uuid],
         linkedNeighbourhoods: [createSourcePerspective.uuid],
         members: {},
+        membraneRoot: createSourcePerspective.uuid,
         currentExpressionLinks: {},
         currentExpressionMessages: {},
         createdAt: new Date().toISOString(),

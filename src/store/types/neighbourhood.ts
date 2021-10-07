@@ -15,7 +15,7 @@ export interface NeighbourhoodState {
   groupExpressionRef?: string;
   neighbourhoodUrl: string;
   membraneType: MembraneType;
-  membraneRoot?: string;
+  membraneRoot: string;
   linkedPerspectives: string[];
   linkedNeighbourhoods: string[];
   members: { [x: string]: ProfileExpression };
