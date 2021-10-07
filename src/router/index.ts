@@ -18,6 +18,9 @@ import PrivacyPolicy from "@/views/home-view/PrivacyPolicy.vue";
 import Faq from "@/views/home-view/Faq.vue";
 import Tutorial from "@/views/home-view/Tutorial.vue";
 
+import ProfileFeed from "@/views/profile-feed/ProfileFeed.vue";
+import ProfileView from "@/views/profile-view/ProfileView.vue";
+
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/signup",
@@ -44,6 +47,11 @@ const routes: Array<RouteRecordRaw> = [
             path: "settings",
             name: "settings",
             component: Settings,
+          },
+          {
+            path: "my-feed",
+            name: "my-feed",
+            component: ProfileFeed,
           },
           {
             path: "communities",
@@ -86,6 +94,18 @@ const routes: Array<RouteRecordRaw> = [
             path: ":channelId",
             name: "channel",
             component: ChannelView,
+          },
+        ],
+      },
+      {
+        path: "profile/:did",
+        name: "profile",
+        component: ProfileView,
+        children: [
+          {
+            path: "feed",
+            name: "profile-feed",
+            component: ProfileFeed,
           },
         ],
       },
