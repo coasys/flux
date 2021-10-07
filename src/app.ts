@@ -1,15 +1,36 @@
-import { createApp, h, provide, watch } from "vue";
+import { createApp, h, watch } from "vue";
 import App from "./App.vue";
 import "./registerServiceWorker";
 import router from "./router";
 
-import { ApolloClients } from "@vue/apollo-composable";
-
 import "@junto-foundation/junto-elements";
 import "@junto-foundation/junto-elements/dist/main.css";
-import { apolloClient } from "./utils/setupApolloClient";
 
 import { createPinia } from "pinia";
+
+import { ApolloClient, InMemoryCache } from "@apollo/client";
+import { WebSocketLink } from "@apollo/client/link/ws";
+import { Ad4mClient } from "@perspect3vism/ad4m";
+
+export const apolloClient = new ApolloClient({
+  link: new WebSocketLink({
+    uri: `ws://localhost:4000/graphql`,
+    options: {
+      reconnect: true,
+    },
+  }),
+  cache: new InMemoryCache({}),
+  defaultOptions: {
+    watchQuery: {
+      errorPolicy: "ignore",
+    },
+    query: {
+      errorPolicy: "all",
+    },
+  },
+});
+
+export const ad4mClient = new Ad4mClient(apolloClient);
 
 const pinia = createPinia();
 
@@ -28,11 +49,6 @@ pinia.use(({ store }) => {
 });
 
 createApp({
-  setup() {
-    provide(ApolloClients, {
-      default: apolloClient,
-    });
-  },
   render: () => h(App),
 })
   .use(pinia)
