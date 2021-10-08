@@ -210,16 +210,16 @@ jobs:
         with:
           name: Junto-${{steps.ref.outputs.version}}.dmg
           path: .
-      - name: Download Windows Exe
-        uses: actions/download-artifact@v1
-        with:
-          name: Junto Setup ${{steps.ref.outputs.version}}.exe
-          path: .
-      - name: Download latest-windows.yml
-        uses: actions/download-artifact@v1
-        with:
-          name: latest-windows.yml
-          path: .
+      # - name: Download Windows Exe
+      #   uses: actions/download-artifact@v1
+      #   with:
+      #     name: Junto Setup ${{steps.ref.outputs.version}}.exe
+      #     path: .
+      # - name: Download latest-windows.yml
+      #   uses: actions/download-artifact@v1
+      #   with:
+      #     name: latest-windows.yml
+      #     path: .
       - name: Download latest-linux.yml
         uses: actions/download-artifact@v1
         with:
@@ -235,7 +235,6 @@ jobs:
           sha256sum "junto_${{steps.ref.outputs.version}}_amd64.deb" >> "SHA256SUMS.txt"
           sha256sum "Junto-${{steps.ref.outputs.version}}.AppImage" >> "SHA256SUMS.txt"
           sha256sum "Junto-${{steps.ref.outputs.version}}.dmg" >> "SHA256SUMS.txt"
-          sha256sum "Junto Setup ${{steps.ref.outputs.version}}.exe" >> "SHA256SUMS.txt"
           sha256sum "latest-linux.yml" >> "SHA256SUMS.txt"
           sha256sum "latest-mac.yml" >> "SHA256SUMS.txt"
           sha256sum "latest.yml" >> "SHA256SUMS.txt"
@@ -278,15 +277,15 @@ jobs:
           asset_path: ./Junto-${{steps.ref.outputs.version}}.dmg
           asset_name: Junto-${{steps.ref.outputs.version}}.dmg
           asset_content_type: application/octet-stream
-      - name: Upload Windows exe
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Junto Setup ${{steps.ref.outputs.version}}.exe
-          asset_name: Junto Setup ${{steps.ref.outputs.version}}.exe
-          asset_content_type: application/octet-stream
+      # - name: Upload Windows exe
+      #   uses: actions/upload-release-asset@v1.0.1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: ./Junto Setup ${{steps.ref.outputs.version}}.exe
+      #     asset_name: Junto Setup ${{steps.ref.outputs.version}}.exe
+      #     asset_content_type: application/octet-stream
       - name: Upload latest-linux.yml
         uses: actions/upload-release-asset@v1.0.1
         env:
