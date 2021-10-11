@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Tray, Menu } from "electron";
+import { app, BrowserWindow, Tray, Menu, shell } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import path from "path";
 import { MainThreadGlobal } from "./globals";
@@ -23,6 +23,12 @@ export async function createMainWindow(
     titleBarStyle: "hidden",
     show: false,
     icon: mainThreadState.iconPath!,
+  });
+
+  // Open external links in browser instead of inside the electron app
+  mainThreadState.mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url);
+    return { action: "deny" };
   });
 
   mainThreadState.mainWindow.on("close", (event) => {

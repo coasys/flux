@@ -24,7 +24,7 @@
         </j-menu>
       </j-popover>
     </j-tooltip>
-    <j-tooltip title="Create a community">
+    <j-tooltip title="Create or join community">
       <j-button
         @click="() => appStore.setShowCreateCommunity(true)"
         square
