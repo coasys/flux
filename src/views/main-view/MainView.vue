@@ -7,6 +7,7 @@
   </app-layout>
 
   <j-modal
+    size="sm"
     :open="modals.showCreateCommunity"
     @toggle="(e) => setShowCreateCommunity(e.target.open)"
   >

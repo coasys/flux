@@ -30,6 +30,21 @@ jobs:
         run: |
           brew install libsodium openssl
           rustup target add wasm32-unknown-unknown
+      - name: Cache cargo registry
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+      - name: Cache cargo index
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+      - name: Cache cargo bin
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/bin
+          key: ${{ runner.os }}-cargo-bin-${{ hashFiles('**/Cargo.lock') }}
       - name: Build Holochain
         env:
           SQLCIPHER_STATIC: 1
@@ -50,11 +65,6 @@ jobs:
         run: |
           pkgver=$(node ./scripts/get-pkg-version.js)
           echo ::set-output name=version::$pkgver
-      - name: Setup codesiging certs
-        run: ./scripts/add-osx-cert.sh
-        env:
-          COMMUNITIES_APPLE_CERT: ${{ secrets.COMMUNITIES_APPLE_CERT }}
-          COMMUNITIES_APPLE_CERT_PASSWORD: ${{ secrets.COMMUNITIES_APPLE_CERT_PASSWORD }}
       - name: Install deps
         run: npm i
       - name: Build languages
@@ -63,6 +73,8 @@ jobs:
         run: npm run release
         env:
           GH_TOKEN: ${{ secrets.github_token }}
+          CSC_LINK: ${{ secrets.COMMUNITIES_APPLE_CERT }}
+          CSC_KEY_PASSWORD: ${{ secrets.COMMUNITIES_APPLE_CERT_PASSWORD }}
       - name: Cache macOS release (x64)
         uses: actions/upload-artifact@v1
         with:
@@ -138,6 +150,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential libssl-dev libsqlcipher-dev
           rustup target add wasm32-unknown-unknown
+      - name: Cache cargo registry
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+      - name: Cache cargo index
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+      - name: Cache cargo bin
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/bin
+          key: ${{ runner.os }}-cargo-bin-${{ hashFiles('**/Cargo.lock') }}
       - name: Build Holochain
         env:
           SQLCIPHER_STATIC: 1
