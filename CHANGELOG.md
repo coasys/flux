@@ -2,6 +2,31 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.2.7] - 11/10/2021
+
+### Added
+ - Cargo caching to Github actions release build
+ - More detailed information when joining a community
+
+### Changed
+ - Tweak size and type of avatar upload button
+ - Improved join/create community
+
+### Deprecated
+
+### Removed
+
+### Fixed
+ - Broken jest config for test
+ - Profile picture being too large and killing holochain (now use IPFS for storage)
+ - Community picture being too large and killing holochain (now use IPFS for storage)
+ - Bug where ad4m would not be killed correctly in production MacOS
+ - Links in gitbook opening in the electron browser window (now opens in default browser)
+
+### Security
+
+---
+
 ## [0.2.6] - 07/10/2021
 
 ### Added
