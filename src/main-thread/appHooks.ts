@@ -135,16 +135,16 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
   // Quit when all windows are closed.
   app.on("window-all-closed", async () => {
     console.warn("window-all-closed SIGNAL");
-    await mainThreadState.ad4mCore?.exit();
-    mainThreadState.ad4mCore = undefined;
+    if (mainThreadState.ad4mCore) {
+      await mainThreadState.ad4mCore.exit();
+      mainThreadState.ad4mCore = undefined;
+    }
     app.quit();
   });
 
   // Quit when all windows are closed.
-  app.on("will-quit", async () => {
+  app.on("will-quit", () => {
     console.warn("will-quit SIGNAL");
-    await mainThreadState.ad4mCore?.exit();
-    mainThreadState.ad4mCore = undefined;
     app.quit();
   });
 
@@ -155,6 +155,11 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
     mainThreadState.mainWindow!.webContents.send("unlockedStateOff");
 
     mainThreadState.mainWindow!.webContents.send("clearMessages");
+
+    if (mainThreadState.ad4mCore) {
+      await mainThreadState.ad4mCore.exit();
+      mainThreadState.ad4mCore = undefined;
+    }
   });
 
   app.on("activate", async () => {
