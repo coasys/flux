@@ -49,7 +49,12 @@ export default defineComponent({
         renderRule(isLink, ({ node, children, key }) => {
           return h(
             `a`,
-            { key, href: node.url, style: "color: var(--j-color-primary-500)" },
+            {
+              key,
+              target: "_blank",
+              href: node.url,
+              style: "color: var(--j-color-primary-500)",
+            },
             [...(children || [])]
           );
         }),
