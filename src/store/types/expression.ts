@@ -13,13 +13,6 @@ export enum ExpressionTypes {
   Other,
 }
 
-export interface ExpressionUIIcons {
-  languageAddress: string;
-  createIcon: string;
-  viewIcon: string;
-  name: string;
-}
-
 export interface ExpressionAndRef {
   expression: Expression;
   url: ExpressionRef;
