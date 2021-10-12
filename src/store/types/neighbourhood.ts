@@ -1,6 +1,6 @@
 import type { LinkExpression } from "@perspect3vism/ad4m";
 import { PerspectiveHandle } from "@perspect3vism/ad4m";
-import { JuntoExpressionReference, ExpressionAndRef } from "./expression";
+import { FluxExpressionReference, ExpressionAndRef } from "./expression";
 import { ProfileExpression } from "./userprofile";
 
 export interface NeighbourhoodState {
@@ -11,7 +11,7 @@ export interface NeighbourhoodState {
   image?: string;
   thumbnail?: string;
   perspective: PerspectiveHandle;
-  typedExpressionLanguages: JuntoExpressionReference[];
+  typedExpressionLanguages: FluxExpressionReference[];
   groupExpressionRef?: string;
   neighbourhoodUrl: string;
   membraneType: MembraneType;

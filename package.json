@@ -1,12 +1,12 @@
 {
-  "name": "junto",
+  "name": "flux",
   "version": "0.2.7",
   "private": true,
-  "description": "Junto ad4m chat application leveraging distributed & decentralized technologies",
+  "description": "A social web3 tool kit for communities",
   "author": "josh@junto.foundation",
   "repository": {
     "type": "git",
-    "url": "https://github.com/juntofoundation/communities.git"
+    "url": "https://github.com/juntofoundation/flux.git"
   },
   "scripts": {
     "lint": "vue-cli-service lint",

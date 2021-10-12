@@ -34,8 +34,8 @@ module.exports = {
       preload: "src/preload.js",
       externals: ["@perspect3vism/ad4m-executor", "fs"],
       builderOptions: {
-        productName: "Junto",
-        appId: "junto.foundation.communities",
+        productName: "Flux",
+        appId: "junto.foundation.flux",
         mac: {
           target: "default",
           binaries: [

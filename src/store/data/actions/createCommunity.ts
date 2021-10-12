@@ -10,13 +10,13 @@ import {
   GROUP_EXPRESSION_OFFICIAL,
   PROFILE_EXPRESSION_OFFICIAL,
   SHORTFORM_EXPRESSION_OFFICIAL,
-} from "@/ad4m-globals";
+} from "@/constants/languages";
 
 import { MEMBER } from "@/constants/neighbourhoodMeta";
 
 import {
   MembraneType,
-  JuntoExpressionReference,
+  FluxExpressionReference,
   ExpressionTypes,
   CommunityState,
   FeedType,
@@ -96,15 +96,15 @@ export default async ({
       {
         languageAddress: shortFormExpressionLang.address!,
         expressionType: ExpressionTypes.ShortForm,
-      } as JuntoExpressionReference,
+      } as FluxExpressionReference,
       {
         languageAddress: groupExpressionLang.address!,
         expressionType: ExpressionTypes.GroupExpression,
-      } as JuntoExpressionReference,
+      } as FluxExpressionReference,
       {
         languageAddress: profileExpressionLang.address!,
         expressionType: ExpressionTypes.ProfileExpression,
-      } as JuntoExpressionReference,
+      } as FluxExpressionReference,
     ];
 
     //Publish perspective

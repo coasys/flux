@@ -41,7 +41,7 @@ import { gql } from "@apollo/client/core";
 import { defineComponent, computed, watch } from "vue";
 import { onError } from "@apollo/client/link/error";
 import { logErrorMessages } from "@vue/apollo-util";
-import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
+import { expressionGetDelayMs, expressionGetRetries } from "@/constants/config";
 import { GET_EXPRESSION } from "@/core/graphql_queries";
 import {
   ApplicationState,
@@ -56,7 +56,7 @@ import { useUserStore } from "./store/user";
 import { useAppStore } from "./store/app";
 import { useDataStore } from "./store/data";
 import { addTrustedAgents } from "@/core/mutations/addTrustedAgents";
-import { JUNTO_AGENT, AD4M_AGENT } from "@/ad4m-globals";
+import { JUNTO_AGENT, AD4M_AGENT } from "@/constants/agents";
 import { ad4mClient } from "./app";
 
 declare global {

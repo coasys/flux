@@ -10,9 +10,7 @@
         <j-box pb="500">
           <j-flex gap="400" a="center">
             <img src="@/assets/images/junto_web_logo--rainbow.png" width="25" />
-            <j-text size="800" color="ui-800" uppercase nomargin>
-              Junto
-            </j-text>
+            <j-text size="800" color="ui-800" uppercase nomargin> Flux </j-text>
           </j-flex>
         </j-box>
         <j-text variant="heading"> Create a user </j-text>
