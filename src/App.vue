@@ -40,7 +40,6 @@ import { useRoute, useRouter } from "vue-router";
 import { gql } from "@apollo/client/core";
 import { defineComponent, computed, watch } from "vue";
 import { onError } from "@apollo/client/link/error";
-import { logErrorMessages } from "@vue/apollo-util";
 import { expressionGetDelayMs, expressionGetRetries } from "@/constants/config";
 import { GET_EXPRESSION } from "@/core/graphql_queries";
 import {
@@ -77,9 +76,6 @@ export default defineComponent({
     onError((error) => {
       console.log("Got global graphql error, logging with error", error);
       if (process.env.NODE_ENV !== "production") {
-        // can use error.operation.operationName to single out a query type.
-        logErrorMessages(error);
-
         appStore.showDangerToast({
           message: JSON.stringify(error),
         });
