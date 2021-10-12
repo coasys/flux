@@ -167,9 +167,13 @@ export default defineComponent({
           // TODO: Debounce this
           this.scrollToBottom("smooth");
         }
-        messages.forEach((msg: ExpressionAndRef) => {
-          if (!this.users[msg.expression.author]) {
-            this.loadUser(msg.expression.author);
+        //Get an array of unique did's that we need to load
+        const uniqueDids = Array.from(
+          new Set(messages.map((a) => a.expression.author))
+        );
+        uniqueDids.forEach(async (did: string) => {
+          if (!this.users[did]) {
+            this.loadUser(did);
           }
         });
       },
