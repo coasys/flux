@@ -1,7 +1,6 @@
 import type { LinkExpression } from "@perspect3vism/ad4m";
 import { PerspectiveHandle } from "@perspect3vism/ad4m";
 import { FluxExpressionReference, ExpressionAndRef } from "./expression";
-import { ProfileExpression } from "./userprofile";
 
 export interface NeighbourhoodState {
   createdAt?: string;
@@ -18,7 +17,7 @@ export interface NeighbourhoodState {
   membraneRoot: string;
   linkedPerspectives: string[];
   linkedNeighbourhoods: string[];
-  members: { [x: string]: ProfileExpression };
+  members: string[];
   currentExpressionLinks: { [x: string]: LinkExpression };
   currentExpressionMessages: { [x: string]: ExpressionAndRef };
 }

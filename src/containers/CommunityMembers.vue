@@ -38,11 +38,15 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import type { Expression } from "@perspect3vism/ad4m";
-import { NeighbourhoodState, Profile } from "@/store/types";
+import {
+  NeighbourhoodState,
+  Profile,
+  ExpressionTypes,
+  FluxExpressionReference,
+} from "@/store/types";
 import { useDataStore } from "@/store/data";
 
-import { parseProfile } from "@/utils/profileHelpers";
+import { getProfile, parseProfile } from "@/utils/profileHelpers";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -67,21 +71,42 @@ export default defineComponent({
       searchValue: "",
     };
   },
+  //@LEIF: HELP
+  asyncComputed: {
+    async filteredCommunityMemberList(): Promise<
+      ({ did: string; profile: Profile } | undefined)[]
+    > {
+      const members = await Promise.all(
+        this.community.members.map(async (did: string) => {
+          const profile = await getProfile(this.profileLanguageAddress, did);
+          if (profile) {
+            return {
+              did: did,
+              profile: parseProfile(profile),
+            };
+          }
+        })
+      );
+      const filtered = members.filter((member) => {
+        if (member != undefined) {
+          return member.profile.username.includes(this.searchValue);
+        } else {
+          return false;
+        }
+      });
+      return filtered;
+    },
+  },
   computed: {
     community(): NeighbourhoodState {
       const id = this.$route.params.communityId as string;
       return this.dataStore.getNeighbourhood(id);
     },
-    filteredCommunityMemberList(): { did: string; profile: Profile }[] {
-      const members: Expression[] = Object.values(this.community.members);
-      return members
-        .map((expression: Expression) => ({
-          did: expression.author,
-          profile: parseProfile(expression.data.profile),
-        }))
-        .filter((member: { did: string; profile: Profile }) =>
-          member.profile.username.includes(this.searchValue)
-        );
+    profileLanguageAddress(): string {
+      return this.community.typedExpressionLanguages.find(
+        (t: FluxExpressionReference) =>
+          t.expressionType === ExpressionTypes.ProfileExpression
+      )!.languageAddress;
     },
   },
 });

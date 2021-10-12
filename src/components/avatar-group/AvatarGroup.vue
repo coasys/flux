@@ -26,14 +26,30 @@
 </template>
 
 <script lang="ts">
+import { ProfileExpression } from "@/store/types";
+import { getProfile } from "@/utils/profileHelpers";
 import { defineComponent } from "vue";
 
 export default defineComponent({
   emits: ["click"],
-  props: ["users", "size"],
-  computed: {
-    firstUsers(): any {
-      return (Object.values(this.users) as any[]).slice(0, 3);
+  props: ["profileLanguage", "users", "size"],
+  data() {
+    return {
+      firstUsers: [] as (ProfileExpression | null)[],
+    };
+  },
+  //@LEIF: HELP
+  watch: {
+    users: async function (users) {
+      console.log("updateing users");
+      const profiles: (ProfileExpression | null)[] = await Promise.all(
+        users
+          .slice(0, 3)
+          .map(
+            async (did: string) => await getProfile(this.profileLanguage, did)
+          )
+      );
+      this.firstUsers = profiles;
     },
   },
 });

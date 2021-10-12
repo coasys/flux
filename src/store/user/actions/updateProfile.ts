@@ -1,11 +1,11 @@
 import { createProfile } from "@/core/methods/createProfile";
-import { TimeoutCache } from "@/utils/timeoutCache";
 import { getExpression } from "@/core/queries/getExpression";
 
 import { ExpressionTypes, Profile, ProfileExpression } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "..";
 import { useDataStore } from "@/store/data";
+import { profileCache } from "@/app";
 
 export interface Payload {
   username?: string;
@@ -31,7 +31,6 @@ export default async (payload: Payload): Promise<void> => {
 
   try {
     const neighbourhoods = Object.values(dataStore.getCommunityNeighbourhoods);
-    const cache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
 
     for (const neighbourhood of neighbourhoods) {
       const profileExpression = (
@@ -60,7 +59,7 @@ export default async (payload: Payload): Promise<void> => {
           timestamp: expressionGql.timestamp!,
           proof: expressionGql.proof!,
         } as ProfileExpression;
-        cache.set(didExpression, profileExp);
+        await profileCache.set(didExpression, profileExp);
       } else {
         const errorMessage =
           "Expected to find profile expression language for this community";

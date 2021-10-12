@@ -1,6 +1,5 @@
 import { getExpressionNoCache } from "@/core/queries/getExpression";
 import { ProfileExpression } from "@/store/types";
-import { TimeoutCache } from "./timeoutCache";
 import { Profile } from "@/store/types";
 import {
   ACCOUNT_NAME,
@@ -9,6 +8,7 @@ import {
   GIVEN_NAME,
 } from "@/constants/profile";
 import { IMAGE, CONTENT_SIZE, CONTENT_URL, THUMBNAIL } from "@/constants/image";
+import { profileCache } from "@/app";
 
 interface Image {
   contentUrl: string;
@@ -40,15 +40,14 @@ export function parseImage(data: string): ImageWithThumbnail {
   };
 }
 
-export function parseProfile(data: any): Profile {
-  const profile = shouldParse(data) ? JSON.parse(data) : data;
-  const image = profile[IMAGE] && parseImage(profile[IMAGE]);
+export function parseProfile(data: ProfileExpression): Profile {
+  const image = data[IMAGE] && parseImage(data[IMAGE]);
 
   return {
-    username: profile[ACCOUNT_NAME],
-    email: profile[EMAIL],
-    givenName: profile[GIVEN_NAME],
-    familyName: profile[FAMILY_NAME],
+    username: data[ACCOUNT_NAME],
+    email: data[EMAIL],
+    givenName: data[GIVEN_NAME],
+    familyName: data[FAMILY_NAME],
     thumbnailPicture: image?.thumbnail?.contentUrl,
     profilePicture: image?.contentUrl,
   };
@@ -58,11 +57,9 @@ export async function getProfile(
   profileLangAddress: string,
   did: string
 ): Promise<ProfileExpression | null> {
-  const cache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
-
   const profileLink = `${profileLangAddress}://${did}`;
 
-  const profile = cache.get(profileLink);
+  const profile = await profileCache.get(did);
 
   if (!profile) {
     console.warn(
@@ -73,13 +70,12 @@ export async function getProfile(
     if (profileGqlExp) {
       const profileExp = {
         author: profileGqlExp.author!,
-        data: JSON.parse(profileGqlExp.data!),
+        data: JSON.parse(profileGqlExp.data),
         timestamp: profileGqlExp.timestamp!,
         proof: profileGqlExp.proof!,
       } as ProfileExpression;
 
-      cache.set(profileLink, profileExp);
-
+      await profileCache.set(did, profileExp);
       return profileExp;
     } else {
       return null;
