@@ -18,7 +18,7 @@ export class TimeoutCache<T> {
       expiry: now.getTime() + this.ttl,
     };
 
-    localStorage.setItem(key, JSON.stringify(item));
+    //localStorage.setItem(key, JSON.stringify(item));
   }
 
   get(key: string): T | undefined {

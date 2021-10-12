@@ -6,6 +6,7 @@ import {
 import { LinkQuery } from "@perspect3vism/ad4m";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
+import { chatMessageRefreshDuration } from "@/constants/config";
 
 export interface Payload {
   channelId: string;
@@ -43,7 +44,7 @@ export default async function ({
     //Current view location could be now if application has just started or from some previous post if user is scrolling
     console.log("Posting for links between", fromDate, untilDate);
     linksWorker.postMessage({
-      interval: 10000,
+      interval: chatMessageRefreshDuration,
       staticSleep: true,
       query: print(PERSPECTIVE_LINK_QUERY),
       variables: {
@@ -62,7 +63,7 @@ export default async function ({
     //Forward looking link worker that looks from current view location -> now()
     console.log("Posting for links between", fromDate, new Date());
     linksWorker.postMessage({
-      interval: 10000,
+      interval: chatMessageRefreshDuration,
       staticSleep: true,
       query: print(PERSPECTIVE_LINK_QUERY),
       variables: {

@@ -1,4 +1,6 @@
-export const channelRefreshDurationMs = 5000;
+export const channelRefreshDurationMs = 10000;
+export const groupExpressionRefreshDurationMS = 10000;
+export const memberRefreshDurationMs = 30000;
 export const expressionGetRetries = 100;
-export const expressionGetDelayMs = 20;
-export const chatMessageRefreshDuration = 15000;
+export const expressionGetDelayMs = 100;
+export const chatMessageRefreshDuration = 20000;

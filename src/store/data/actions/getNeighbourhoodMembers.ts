@@ -7,6 +7,7 @@ import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 
 import { MEMBER } from "@/constants/neighbourhoodMeta";
+import { memberRefreshDurationMs } from "@/constants/config";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 
 const expressionWorker = new Worker("pollingWorker.js");
@@ -28,7 +29,8 @@ export default async function (id: string): Promise<Worker> {
       const profileLinksWorker = new Worker("pollingWorker.js");
 
       profileLinksWorker.postMessage({
-        interval: 5000,
+        interval: memberRefreshDurationMs,
+        staticSleep: true,
         query: print(PERSPECTIVE_LINK_QUERY),
         variables: {
           uuid: id,

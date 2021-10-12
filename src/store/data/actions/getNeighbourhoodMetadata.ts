@@ -1,5 +1,9 @@
 import { print } from "graphql/language/printer";
-import { expressionGetRetries, expressionGetDelayMs } from "@/constants/config";
+import {
+  expressionGetRetries,
+  expressionGetDelayMs,
+  groupExpressionRefreshDurationMS,
+} from "@/constants/config";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 import { LinkQuery } from "@perspect3vism/ad4m";
 
@@ -22,7 +26,8 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
     const groupExpressionWorker = new Worker("pollingWorker.js");
     // Start worker looking for group expression links
     groupExpressionWorker.postMessage({
-      interval: 5000,
+      interval: groupExpressionRefreshDurationMS,
+      staticSleep: true,
       query: print(PERSPECTIVE_LINK_QUERY),
       variables: {
         uuid: community.neighbourhood.perspective.uuid,
