@@ -2,7 +2,6 @@ import { useAppStore } from "@/store/app";
 import { ExpressionTypes } from "@/store/types";
 import { useUserStore } from "@/store/user";
 import { RouteLocationNormalizedLoaded, Router } from "vue-router";
-import { ACCOUNT_NAME } from "@/constants/profile";
 import { useDataStore } from "..";
 import { getProfile } from "@/utils/profileHelpers";
 
@@ -64,8 +63,7 @@ export default async ({
         profileLanguage!.languageAddress,
         authorDid
       );
-      //@ts-ignore
-      const name = profile.data.profile[ACCOUNT_NAME];
+      const name = profile ? profile.username : "Someone";
 
       title = `${name} mentioned you in #${channel?.neighbourhood.name}}`;
       body = escapedMessage;
