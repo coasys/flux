@@ -112,7 +112,7 @@ export default async ({
       ICE_EXPRESSION_OFFICIAL,
       JSON.stringify({
         uid: uid,
-        name: `${perspectiveName}-sdp-expression`,
+        name: `${perspectiveName}-ice-expression`,
       })
     );
     
