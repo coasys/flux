@@ -1,6 +1,5 @@
 import { print } from "graphql/language/printer";
 import { LinkQuery } from "@perspect3vism/ad4m";
-import { TimeoutCache } from "../../../utils/timeoutCache";
 
 import { ExpressionTypes, ProfileExpression } from "@/store/types";
 import { useDataStore } from "..";
@@ -50,12 +49,12 @@ export default async function (id: string): Promise<Worker> {
         const profileLinks = e.data.perspectiveQueryLinks;
 
         for (const profileLink of profileLinks) {
-          const profile = await profileCache.get(profileLink.data.target);
+          const did = profileLink.data.target.split(":/")[1];
 
-          if (profile) {
+          if (did) {
             dataStore.setNeighbourhoodMember({
               perspectiveUuid: id,
-              member: profile.author,
+              member: did,
             });
           } else {
             expressionWorker.postMessage({

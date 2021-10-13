@@ -110,6 +110,8 @@ export default defineComponent({
   watch: {
     "$route.params.communityId": {
       handler: function (id: string) {
+        this.dataStore.fetchNeighbourhoodMembers(id);
+        this.dataStore.fetchNeighbourhoodMetadata(id);
         this.handleWorker(id);
         this.handleThemeChange(id);
         this.goToActiveChannel(id);
