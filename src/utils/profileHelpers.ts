@@ -57,15 +57,15 @@ export async function getProfile(
   profileLangAddress: string,
   did: string
 ): Promise<ProfileExpression | null> {
-  const profileLink = `${profileLangAddress}://${did}`;
+  const profileRef = `${profileLangAddress}://${did}`;
 
-  const profile = await profileCache.get(did);
+  const profile = await profileCache.get(profileRef);
 
   if (!profile) {
     console.warn(
       "Did not get profile expression from cache, calling holochain"
     );
-    const profileGqlExp = await getExpressionNoCache(profileLink);
+    const profileGqlExp = await getExpressionNoCache(profileRef);
 
     if (profileGqlExp) {
       const profileExp = {
@@ -75,7 +75,7 @@ export async function getProfile(
         proof: profileGqlExp.proof!,
       } as ProfileExpression;
 
-      await profileCache.set(did, profileExp);
+      await profileCache.set(profileRef, profileExp);
       return profileExp;
     } else {
       return null;

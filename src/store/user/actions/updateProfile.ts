@@ -38,7 +38,7 @@ export default async (payload: Payload): Promise<void> => {
       ).typedExpressionLanguages.find(
         (t: any) => t.expressionType == ExpressionTypes.ProfileExpression
       );
-      const didExpression = `${
+      const profileRef = `${
         profileExpression!.languageAddress
       }://${userStore.getUser!.agent.did!}`;
 
@@ -59,7 +59,7 @@ export default async (payload: Payload): Promise<void> => {
           timestamp: expressionGql.timestamp!,
           proof: expressionGql.proof!,
         } as ProfileExpression;
-        await profileCache.set(didExpression, profileExp);
+        await profileCache.set(profileRef, profileExp);
       } else {
         const errorMessage =
           "Expected to find profile expression language for this community";

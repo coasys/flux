@@ -78,7 +78,7 @@ export default async function (id: string): Promise<Worker> {
       expressionWorker.addEventListener("message", async (e: any) => {
         const profileGqlExp = e.data.expression;
         const link = e.data.callbackData.link;
-        const did = `${profileLang!.languageAddress}://${link.author}`;
+        const profileRef = `${profileLang!.languageAddress}://${link.author}`;
 
         const profileExp = {
           author: profileGqlExp.author!,
@@ -93,7 +93,7 @@ export default async function (id: string): Promise<Worker> {
             member: profileExp.author,
           });
 
-          await profileCache.set(did, profileExp);
+          await profileCache.set(profileRef, profileExp);
         }
       });
 
