@@ -10,6 +10,8 @@ export enum ExpressionTypes {
   ShortForm,
   GroupExpression,
   ProfileExpression,
+  AudiVideoExpression,
+  IceCandidateExpression,
   Other,
 }
 

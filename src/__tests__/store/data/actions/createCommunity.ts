@@ -19,7 +19,11 @@ import * as createChannel from "@/core/methods/createChannel";
 import * as getLanguage from "@/core/queries/getLanguage";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useDataStore } from "@/store/data";
-import { GROUP_EXPRESSION_OFFICIAL, SHORTFORM_EXPRESSION_OFFICIAL, SOCIAL_CONTEXT_OFFICIAL } from "@/ad4m-globals";
+import {
+  GROUP_EXPRESSION_OFFICIAL,
+  SHORTFORM_EXPRESSION_OFFICIAL,
+  SOCIAL_CONTEXT_OFFICIAL,
+} from "@/ad4m-globals";
 
 describe("Create Community", () => {
   let store: Pinia;

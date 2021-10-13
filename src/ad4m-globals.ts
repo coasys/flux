@@ -10,6 +10,12 @@ export const PROFILE_EXPRESSION_OFFICIAL =
 export const SHORTFORM_EXPRESSION_OFFICIAL =
   "QmVDh4jd75BgPgiV6Lttjm7xQ8JQBkQJtqwBcPn4xZyXgP";
 
+export const SDP_EXPRESSION_OFFICIAL =
+  "QmZcBnibiYAqe7Nq3qrEwjgGmg7dknkExXB4KzzUhniavQ";
+
+export const ICE_EXPRESSION_OFFICIAL = 
+  "QmSwqKKMaWXd1UW3eyBU9gBk7wz82cwg8CB8wsH94cDJpj";
+
 export const JUNTO_AGENT =
   "did:key:zQ3shpe32NARLJeuE3wwWLWLoy9NzkrD3oy1psPJNhbvkuMzK";
 

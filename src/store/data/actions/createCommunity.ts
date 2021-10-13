@@ -10,6 +10,8 @@ import {
   GROUP_EXPRESSION_OFFICIAL,
   PROFILE_EXPRESSION_OFFICIAL,
   SHORTFORM_EXPRESSION_OFFICIAL,
+  SDP_EXPRESSION_OFFICIAL,
+  ICE_EXPRESSION_OFFICIAL,
 } from "@/ad4m-globals";
 
 import { MEMBER } from "@/constants/neighbourhoodMeta";
@@ -92,6 +94,32 @@ export default async ({
       })
     );
     console.log("Response from create profile exp lang", profileExpressionLang);
+
+    const audioVideoExpressionLang = await templateLanguage(
+      SDP_EXPRESSION_OFFICIAL,
+      JSON.stringify({
+        uid: uid,
+        name: `${perspectiveName}-sdp-expression`,
+      })
+    );
+    
+    console.log(
+      "Response from create audiVideo exp lang",
+      audioVideoExpressionLang
+    );
+
+    const iceCandidateExpressionLang = await templateLanguage(
+      ICE_EXPRESSION_OFFICIAL,
+      JSON.stringify({
+        uid: uid,
+        name: `${perspectiveName}-sdp-expression`,
+      })
+    );
+    
+    console.log(
+      "Response from create ice-candidate exp lang",
+      iceCandidateExpressionLang
+    );
     const typedExpLangs = [
       {
         languageAddress: shortFormExpressionLang.address!,
@@ -104,6 +132,14 @@ export default async ({
       {
         languageAddress: profileExpressionLang.address!,
         expressionType: ExpressionTypes.ProfileExpression,
+      } as JuntoExpressionReference,
+      {
+        languageAddress: audioVideoExpressionLang.address!,
+        expressionType: ExpressionTypes.AudiVideoExpression,
+      } as JuntoExpressionReference,
+      {
+        languageAddress: iceCandidateExpressionLang.address!,
+        expressionType: ExpressionTypes.IceCandidateExpression,
       } as JuntoExpressionReference,
     ];
 

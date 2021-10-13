@@ -29,7 +29,11 @@ import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { defineComponent } from "vue";
 import { Profile } from "@/store/types";
 import { useUserStore } from "@/store/user";
-import { blobToDataURL, dataURItoBlob, resizeImage } from "@/core/methods/createProfile";
+import {
+  blobToDataURL,
+  dataURItoBlob,
+  resizeImage,
+} from "@/core/methods/createProfile";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -84,7 +88,7 @@ export default defineComponent({
         .updateProfile({
           username: this.username,
           profilePicture: this.profilePicture,
-          thumbnail
+          thumbnail,
         })
         .then(() => {
           this.$emit("submit");
