@@ -62,6 +62,7 @@ import { useDataStore } from "./store/data";
 import { addTrustedAgents } from "@/core/mutations/addTrustedAgents";
 import { JUNTO_AGENT, AD4M_AGENT } from "@/constants/agents";
 import { ad4mClient } from "./app";
+import { MEMBER } from "./constants/neighbourhoodMeta";
 
 declare global {
   interface Window {
@@ -148,6 +149,15 @@ export default defineComponent({
             value: true,
           });
         });
+      } else if (link.data!.predicate! === MEMBER) {
+        const did = link.data!.target!.split("://")[1];
+        console.log("Got new member in signal! Parsed out did: ", did);
+        if (did) {
+          dataStore.setNeighbourhoodMember({
+            member: did,
+            perspectiveUuid: perspective,
+          });
+        }
       }
     };
 
