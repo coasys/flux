@@ -1,4 +1,4 @@
-import indexedDB from "./indexedDb";
+import storeDb from "@/storeDb";
 
 export interface TimeoutCacheItem {
   value: any;
@@ -20,12 +20,12 @@ export class TimeoutCache<T> {
       expiry: now.getTime() + this.ttl,
     };
 
-    await indexedDB.saveItem(key, item);
+    await storeDb.setItem(key, item);
   }
 
   async get(key: string): Promise<T | undefined> {
     const now = new Date();
-    const item = await indexedDB.getItem(key);
+    const item = await storeDb.getItem(key);
 
     if (!item) {
       return undefined;
@@ -34,7 +34,7 @@ export class TimeoutCache<T> {
     const parseditem: TimeoutCacheItem = item;
 
     if (now.getTime() > parseditem.expiry) {
-      await indexedDB.deleteItemByKey(key);
+      await storeDb.deleteItemByKey(key);
 
       return undefined;
     }
@@ -43,6 +43,6 @@ export class TimeoutCache<T> {
   }
 
   async remove(key: string): Promise<void> {
-    await indexedDB.deleteItemByKey(key);
+    await storeDb.deleteItemByKey(key);
   }
 }
