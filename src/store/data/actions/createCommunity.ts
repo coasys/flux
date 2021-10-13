@@ -184,7 +184,7 @@ export default async ({
         membraneType: MembraneType.Unique,
         linkedPerspectives: [createSourcePerspective.uuid],
         linkedNeighbourhoods: [createSourcePerspective.uuid],
-        members: {},
+        members: [],
         membraneRoot: createSourcePerspective.uuid,
         currentExpressionLinks: {},
         currentExpressionMessages: {},
