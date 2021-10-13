@@ -38,18 +38,22 @@ export default defineComponent({
       firstUsers: [] as (ProfileExpression | null)[],
     };
   },
-  //@LEIF: HELP
   watch: {
-    users: async function (users) {
-      console.log("updateing users");
-      const profiles: (ProfileExpression | null)[] = await Promise.all(
-        users
-          .slice(0, 3)
-          .map(
-            async (did: string) => await getProfile(this.profileLanguage, did)
-          )
-      );
-      this.firstUsers = profiles;
+    users: {
+      handler: async function (users) {
+        const profiles: (ProfileExpression | null)[] = await Promise.all(
+          users
+            .slice(0, 3)
+            .map(
+              async (did: string) => await getProfile(this.profileLanguage, did)
+            )
+        );
+
+        console.log("profile", profiles);
+
+        this.firstUsers = profiles;
+      },
+      immediate: true,
     },
   },
 });
