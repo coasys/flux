@@ -3,16 +3,16 @@
     <div class="signup-view__flow">
       <j-flex direction="column" gap="400" v-if="step === 1">
         <j-box class="signup-view__flow-back" pb="500">
-          <j-button @click="showSignup = false" variant="link"
-            ><j-icon name="arrow-left-short" />Back</j-button
-          >
+          <j-button @click="showSignup = false" variant="link">
+            <j-icon name="arrow-left-short" />
+            Back
+          </j-button>
         </j-box>
-        <j-box pb="500">
-          <j-flex gap="400" a="center">
-            <img src="@/assets/images/junto_web_logo--rainbow.png" width="25" />
-            <j-text size="800" color="ui-800" uppercase nomargin> Flux </j-text>
-          </j-flex>
+
+        <j-box pb="800">
+          <Logo width="150px" />
         </j-box>
+
         <j-text variant="heading"> Create a user </j-text>
         <j-input
           label="Username"
@@ -125,11 +125,14 @@ import {
 import { useValidation } from "@/utils/validation";
 import { useUserStore } from "@/store/user";
 
+import Logo from "@/components/logo/Logo.vue";
+
 export default defineComponent({
   name: "Welcome",
   components: {
     AvatarUpload,
     Carousel,
+    Logo,
   },
   setup() {
     const showSignup = ref(false);
