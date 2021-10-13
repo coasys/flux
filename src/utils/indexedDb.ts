@@ -7,7 +7,11 @@ let DB: IDBPDatabase | undefined;
 export default {
   async getDb(): Promise<IDBPDatabase> {
     if (!DB) {
-      DB = await openDB(DB_NAME);
+      DB = await openDB(DB_NAME, 1, {
+        upgrade(db) {
+          db.createObjectStore("cache");
+        },
+      });
     }
     return DB!;
   },
