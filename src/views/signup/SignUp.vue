@@ -56,23 +56,27 @@
           <j-icon slot="end" name="arrow-right-short" />
         </j-button>
       </j-flex>
-      <j-flex direction="column" gap="400" v-if="step === 2">
+      <j-flex direction="column" gap="500" v-if="step === 2">
         <avatar-upload
+          icon="camera"
           :value="profilePicture"
           @change="(url) => (profilePicture = url)"
         >
         </avatar-upload>
         <j-input
+          size="lg"
           label="First Name (optional)"
           :value="name"
           @input="(e) => (name = e.target.value)"
         ></j-input>
         <j-input
+          size="lg"
           label="Last Name (optional)"
           :value="familyName"
           @input="(e) => (familyName = e.target.value)"
         ></j-input>
         <j-input
+          size="lg"
           type="email"
           label="Email (optional)"
           :value="email"
