@@ -64,7 +64,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { ExpressionAndRef, Profile } from "@/store/types";
-import { getProfile, parseProfile } from "@/utils/profileHelpers";
+import { getProfile } from "@/utils/profileHelpers";
 import { differenceInMinutes, parseISO } from "date-fns";
 import MessageItem from "@/components/message-item/MessageItem.vue";
 import { Editor } from "@tiptap/vue-3";
@@ -243,10 +243,9 @@ export default defineComponent({
     },
     async loadUser(did: string) {
       let profileLang = this.profileLanguage;
-      const dataExp = await getProfile(profileLang, did);
-      if (dataExp) {
-        const { data } = dataExp;
-        this.users[did] = parseProfile(data.profile);
+      const profile = await getProfile(profileLang, did);
+      if (profile) {
+        this.users[did] = profile;
       }
     },
   },

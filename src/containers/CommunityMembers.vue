@@ -9,7 +9,7 @@
         placeholder="Search members"
         type="search"
         :value="searchValue"
-        @input="(e) => (searchValue = e.target.value)"
+        @input="(e: any) => (searchValue = e.target.value)"
       >
         <j-icon name="search" size="sm" slot="end"></j-icon>
       </j-input>
@@ -25,10 +25,10 @@
           <j-avatar
             size="lg"
             :hash="communityMember.did"
-            :src="communityMember.profile.profilePicture"
+            :src="communityMember.thumbnailPicture"
           />
           <j-text variant="body">
-            {{ communityMember.profile.username }}
+            {{ communityMember.username }}
           </j-text>
         </j-flex>
       </j-flex>
@@ -40,13 +40,13 @@
 import { defineComponent } from "vue";
 import {
   NeighbourhoodState,
-  Profile,
   ExpressionTypes,
   FluxExpressionReference,
+  ProfileWithDID,
 } from "@/store/types";
 import { useDataStore } from "@/store/data";
 
-import { getProfile, parseProfile } from "@/utils/profileHelpers";
+import { getProfile } from "@/utils/profileHelpers";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -55,49 +55,37 @@ export default defineComponent({
 
     return {
       dataStore,
-      profileLinksWorker: null as null | Worker,
     };
-  },
-  async mounted() {
-    this.profileLinksWorker = await this.dataStore.getNeighbourhoodMembers(
-      this.community.perspective.uuid
-    );
-  },
-  unmounted() {
-    this.profileLinksWorker?.terminate();
   },
   data() {
     return {
       searchValue: "",
+      memberList: [] as ProfileWithDID[],
     };
   },
-  //@LEIF: HELP
-  asyncComputed: {
-    async filteredCommunityMemberList(): Promise<
-      ({ did: string; profile: Profile } | undefined)[]
-    > {
-      const members = await Promise.all(
-        this.community.members.map(async (did: string) => {
-          const profile = await getProfile(this.profileLanguageAddress, did);
-          if (profile) {
-            return {
-              did: did,
-              profile: parseProfile(profile),
-            };
-          }
-        })
-      );
-      const filtered = members.filter((member) => {
-        if (member != undefined) {
-          return member.profile.username.includes(this.searchValue);
-        } else {
-          return false;
-        }
-      });
-      return filtered;
+  watch: {
+    "community.members": {
+      handler: async function (users) {
+        const memberList = (await Promise.all(
+          users.map(
+            async (did: string): Promise<ProfileWithDID | null> =>
+              await getProfile(this.profileLanguageAddress, did)
+          )
+        )) as Array<ProfileWithDID | null>;
+
+        this.memberList = memberList.filter(
+          (profile) => profile !== null
+        ) as ProfileWithDID[];
+      },
+      immediate: true,
     },
   },
   computed: {
+    filteredCommunityMemberList() {
+      return this.memberList.filter((member) => {
+        return member.username.includes(this.searchValue);
+      });
+    },
     community(): NeighbourhoodState {
       const id = this.$route.params.communityId as string;
       return this.dataStore.getNeighbourhood(id);

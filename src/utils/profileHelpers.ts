@@ -1,5 +1,5 @@
 import { getExpressionNoCache } from "@/core/queries/getExpression";
-import { ProfileExpression } from "@/store/types";
+import { ProfileExpression, ProfileWithDID } from "@/store/types";
 import { Profile } from "@/store/types";
 import {
   ACCOUNT_NAME,
@@ -56,31 +56,37 @@ export function parseProfile(data: ProfileExpression): Profile {
 export async function getProfile(
   profileLangAddress: string,
   did: string
-): Promise<ProfileExpression | null> {
+): Promise<ProfileWithDID | null> {
   const profileRef = `${profileLangAddress}://${did}`;
 
-  const profile = await profileCache.get(profileRef);
+  const profileExp = await profileCache.get(profileRef);
 
-  if (!profile) {
+  if (!profileExp) {
     console.warn(
       "Did not get profile expression from cache, calling holochain"
     );
     const profileGqlExp = await getExpressionNoCache(profileRef);
 
     if (profileGqlExp) {
-      const profileExp = {
+      const exp = {
         author: profileGqlExp.author!,
         data: JSON.parse(profileGqlExp.data),
         timestamp: profileGqlExp.timestamp!,
         proof: profileGqlExp.proof!,
       } as ProfileExpression;
 
-      await profileCache.set(profileRef, profileExp);
-      return profileExp;
+      await profileCache.set(profileRef, exp);
+      return {
+        did,
+        ...parseProfile(exp.data.profile),
+      };
     } else {
       return null;
     }
+  } else {
+    return {
+      did,
+      ...parseProfile(profileExp.data.profile),
+    };
   }
-
-  return profile;
 }
