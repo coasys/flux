@@ -30,6 +30,11 @@
         <div class="global-error__message">
           {{ globalError.message }}
         </div>
+        <j-text nomargin variant="heading">
+          If you have also been asked to include a log file with your report,
+          click the button below to copy a log file to your desktop:
+        </j-text>
+        <j-button @click="copyLogFile" variant="primary">Copy</j-button>
       </j-flex>
     </div>
   </div>
@@ -270,6 +275,15 @@ export default defineComponent({
     ad4mClient.agent.status().then((status) => {
       this.userStore.updateAgentStatus(status);
     });
+  },
+  methods: {
+    copyLogFile() {
+      window.api.send("copyLogs");
+      this.appStore.showSuccessToast({
+        message:
+          "Log file called debug.log been copied to your desktop, please upload to Junto Discord, thanks <3",
+      });
+    },
   },
 });
 </script>
