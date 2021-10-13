@@ -31,6 +31,6 @@ export default {
   async setItem(key: string, item: any): Promise<void> {
     const db = await this.getDb();
 
-    await db.put(item, key);
+    await db.put(key, JSON.stringify(item));
   },
 };

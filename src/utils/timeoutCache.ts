@@ -26,12 +26,11 @@ export class TimeoutCache<T> {
   async get(key: string): Promise<T | undefined> {
     const now = new Date();
     const item = await storeDb.getItem(key);
-
     if (!item) {
       return undefined;
     }
 
-    const parseditem: TimeoutCacheItem = item;
+    const parseditem: TimeoutCacheItem = JSON.parse(item);
 
     if (now.getTime() > parseditem.expiry) {
       await storeDb.deleteItemByKey(key);
