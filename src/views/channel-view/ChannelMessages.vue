@@ -51,7 +51,7 @@
             :message="item.expression.data.body"
             :timestamp="item.expression.timestamp"
             :username="users[item.expression.author]?.username"
-            :profileImg="users[item.expression.author]?.profilePicture"
+            :profileImg="users[item.expression.author]?.thumbnailPicture"
             @profileClick="(did) => $emit('profileClick', did)"
             @mentionClick="(dataset) => $emit('mentionClick', dataset)"
           />
