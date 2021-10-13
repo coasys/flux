@@ -14,12 +14,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 import { ExpressionTypes, ProfileWithDID } from "@/store/types";
 import { Editor } from "@tiptap/vue-3";
-import { ACCOUNT_NAME } from "@/constants/profile";
 import { useDataStore } from "@/store/data";
 import { getProfile } from "@/utils/profileHelpers";
+import { ChannelState, CommunityState } from "@/store/types";
 
 interface MentionTrigger {
   name: string;
@@ -29,7 +29,16 @@ interface MentionTrigger {
 
 export default defineComponent({
   name: "ChannelFooter",
-  props: ["channel", "community"],
+  props: {
+    channel: {
+      type: Object as PropType<ChannelState>,
+      required: true,
+    },
+    community: {
+      type: Object as PropType<CommunityState>,
+      required: true,
+    },
+  },
   setup() {
     const dataStore = useDataStore();
 
@@ -52,14 +61,12 @@ export default defineComponent({
   watch: {
     channel: {
       handler: async function () {
-        console.log(this.community.neighbourhood.members);
         const profiles = await Promise.all(
-          this.community.neighourhood.members.map(
+          this.community.neighbourhood.members.map(
             async (did: string): Promise<ProfileWithDID | null> =>
               await getProfile(this.profileLanguage, did)
           )
         );
-        console.log(profiles);
 
         const filteredProfiles = profiles.filter(
           (profile) => profile !== null
@@ -74,7 +81,7 @@ export default defineComponent({
             trigger: "@",
           } as MentionTrigger;
         });
-        console.log(mentions);
+
         this.memberMentions = mentions;
       },
       immediate: true,
