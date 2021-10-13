@@ -1,7 +1,6 @@
 import {
   ExpressionAndRef,
   LinkExpressionAndLang,
-  ProfileExpression,
   CommunityState,
   ChannelState,
   ThemeState,

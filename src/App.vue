@@ -111,6 +111,7 @@ export default defineComponent({
         const expressionWorker = new Worker("pollingWorker.js");
 
         expressionWorker.postMessage({
+          id: link.data!.target!,
           retry: expressionGetRetries,
           interval: expressionGetDelayMs,
           query: print(GET_EXPRESSION),

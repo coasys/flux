@@ -49,15 +49,16 @@ export default async function (id: string): Promise<Worker> {
         const profileLinks = e.data.perspectiveQueryLinks;
 
         for (const profileLink of profileLinks) {
-          const did = profileLink.data.target.split(":/")[1];
+          const profile = await profileCache.get(profileLink.data.target);
 
-          if (did) {
+          if (profile) {
             dataStore.setNeighbourhoodMember({
               perspectiveUuid: id,
-              member: did,
+              member: profile.author,
             });
           } else {
             expressionWorker.postMessage({
+              id: profileLink.data.target,
               retry: 50,
               interval: 5000,
               query: print(GET_EXPRESSION),

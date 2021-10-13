@@ -15,14 +15,11 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { ExpressionTypes, ProfileExpression } from "@/store/types";
+import { ExpressionTypes, ProfileWithDID } from "@/store/types";
 import { Editor } from "@tiptap/vue-3";
 import { ACCOUNT_NAME } from "@/constants/profile";
 import { useDataStore } from "@/store/data";
-
-interface UserMap {
-  [key: string]: ProfileExpression;
-}
+import { getProfile } from "@/utils/profileHelpers";
 
 interface MentionTrigger {
   name: string;
@@ -45,26 +42,45 @@ export default defineComponent({
       showNewMessagesButton: false,
       noDelayRef: 0,
       currentExpressionPost: "",
-      users: {} as UserMap,
-      linksWorker: null as null | Worker,
       editor: null as Editor | null,
       showList: false,
       showProfile: false,
       activeProfile: {} as any,
+      memberMentions: [] as MentionTrigger[],
     };
   },
-  computed: {
-    memberMentions(): MentionTrigger[] {
-      return Object.values(this.community.neighbourhood.members).map(
-        (m: any) =>
-          ({
-            name: m.data.profile[ACCOUNT_NAME],
+  watch: {
+    channel: {
+      handler: async function () {
+        console.log(this.community.neighbourhood.members);
+        const profiles = await Promise.all(
+          this.community.neighourhood.members.map(
+            async (did: string): Promise<ProfileWithDID | null> =>
+              await getProfile(this.profileLanguage, did)
+          )
+        );
+        console.log(profiles);
+
+        const filteredProfiles = profiles.filter(
+          (profile) => profile !== null
+        ) as ProfileWithDID[];
+        console.log(filteredProfiles);
+
+        const mentions = filteredProfiles.map((user: ProfileWithDID) => {
+          return {
+            name: user.username,
             //todo: this should not be replaced, we want the full did identifier in the mentions in case message is consumed by another application
-            id: m.author,
+            id: user.did,
             trigger: "@",
-          } as MentionTrigger)
-      );
+          } as MentionTrigger;
+        });
+        console.log(mentions);
+        this.memberMentions = mentions;
+      },
+      immediate: true,
     },
+  },
+  computed: {
     channelMentions(): MentionTrigger[] {
       return this.dataStore
         .getChannelNeighbourhoods(this.community.neighbourhood.perspective.uuid)
