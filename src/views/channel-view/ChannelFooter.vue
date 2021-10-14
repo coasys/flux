@@ -71,7 +71,6 @@ export default defineComponent({
         const filteredProfiles = profiles.filter(
           (profile) => profile !== null
         ) as ProfileWithDID[];
-        console.log(filteredProfiles);
 
         const mentions = filteredProfiles.map((user: ProfileWithDID) => {
           return {
