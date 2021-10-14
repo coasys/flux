@@ -18,7 +18,7 @@ describe("Show Message Notification", () => {
   let did: string;
   let profileLink: string;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     Object.defineProperty(global, "Notification", {
       value: jest.fn(),
     });
@@ -33,7 +33,7 @@ describe("Show Message Notification", () => {
 
     profileLink = `${profileLangAddress}://${did}`;
 
-    cache.remove(profileLink);
+    await cache.remove(profileLink);
   });
 
   beforeEach(() => {

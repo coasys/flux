@@ -26,7 +26,6 @@ import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta"
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
-import { ad4mClient } from "@/app";
 
 export interface Payload {
   perspectiveName: string;
@@ -171,7 +170,7 @@ export default async ({
     });
     console.log("Created profile expression link", addProfileLink);
 
-    const myAgent = await ad4mClient.agent.me();
+    const myDid = userStore.getUser!.agent.did!;
 
     const newCommunity = {
       neighbourhood: {
@@ -187,7 +186,7 @@ export default async ({
         membraneType: MembraneType.Unique,
         linkedPerspectives: [createSourcePerspective.uuid],
         linkedNeighbourhoods: [createSourcePerspective.uuid],
-        members: [myAgent.did],
+        members: [myDid],
         membraneRoot: createSourcePerspective.uuid,
         currentExpressionLinks: {},
         currentExpressionMessages: {},

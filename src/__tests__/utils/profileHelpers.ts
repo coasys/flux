@@ -12,7 +12,7 @@ describe("ProfileHelpers", () => {
   let did: string;
   let profileLink: string;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     const cache = new TimeoutCache<any>(10);
 
     profileLangAddress = community.neighbourhood.typedExpressionLanguages.find(
@@ -23,7 +23,7 @@ describe("ProfileHelpers", () => {
 
     profileLink = `${profileLangAddress}://${did}`;
 
-    cache.remove(profileLink);
+    await cache.remove(profileLink);
   });
 
   beforeEach(() => {
@@ -43,7 +43,7 @@ describe("ProfileHelpers", () => {
   test("Test fetch profile with wrong did", async () => {
     const cache = new TimeoutCache<any>(10);
 
-    expect(cache.get(profileLink)).toBeUndefined();
+    expect(await cache.get(profileLink)).toBeUndefined();
 
     const testProfile = {
       author: getProfileFixture.author!,
@@ -55,13 +55,13 @@ describe("ProfileHelpers", () => {
     const profile = await getProfile(profileLangAddress, `${did}101`);
 
     expect(profile).toStrictEqual(null);
-    expect(cache.get(profileLink)).toBeUndefined();
+    expect(await cache.get(profileLink)).toBeUndefined();
   });
 
   test("Test fetch the correct profile", async () => {
     const cache = new TimeoutCache<any>(10);
 
-    expect(cache.get(profileLink)).toBeUndefined();
+    expect(await cache.get(profileLink)).toBeUndefined();
 
     const testProfile = {
       author: getProfileFixture.author!,
@@ -73,8 +73,8 @@ describe("ProfileHelpers", () => {
     const profile = await getProfile(profileLangAddress, did);
 
     expect(profile).toStrictEqual(testProfile);
-    expect(cache.get(profileLink)).not.toBeUndefined();
-    expect(cache.get(profileLink)).toStrictEqual(testProfile);
+    expect(await cache.get(profileLink)).not.toBeUndefined();
+    expect(await cache.get(profileLink)).toStrictEqual(testProfile);
   });
 
   test("Test fetch the correct profile from cache", async () => {
@@ -87,13 +87,13 @@ describe("ProfileHelpers", () => {
       proof: getProfileFixture.proof!,
     };
 
-    expect(cache.get(profileLink)).not.toBeUndefined();
-    expect(cache.get(profileLink)).toStrictEqual(testProfile);
+    expect(await cache.get(profileLink)).not.toBeUndefined();
+    expect(await cache.get(profileLink)).toStrictEqual(testProfile);
 
     const profile = await getProfile(profileLangAddress, did);
 
     expect(profile).toStrictEqual(testProfile);
-    expect(cache.get(profileLink)).not.toBeUndefined();
-    expect(cache.get(profileLink)).toStrictEqual(testProfile);
+    expect(await cache.get(profileLink)).not.toBeUndefined();
+    expect(await cache.get(profileLink)).toStrictEqual(testProfile);
   });
 });

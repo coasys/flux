@@ -9,7 +9,7 @@
         placeholder="Search members"
         type="search"
         :value="searchValue"
-        @input="(e: any) => (searchValue = e.target.value)"
+        @input="(e) => (searchValue = e.target.value)"
       >
         <j-icon name="search" size="sm" slot="end"></j-icon>
       </j-input>
