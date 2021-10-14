@@ -91,11 +91,22 @@ export default defineComponent({
       return this.dataStore
         .getChannelNeighbourhoods(this.community.neighbourhood.perspective.uuid)
         .map((channel) => {
-          return {
-            name: channel.name,
-            id: channel.neighbourhoodUrl,
-            trigger: "#",
-          } as MentionTrigger;
+          if (
+            channel.neighbourhoodUrl ===
+            this.community.neighbourhood.neighbourhoodUrl
+          ) {
+            return {
+              name: "Home",
+              id: channel.neighbourhoodUrl,
+              trigger: "#",
+            } as MentionTrigger;
+          } else {
+            return {
+              name: channel.name,
+              id: channel.neighbourhoodUrl,
+              trigger: "#",
+            } as MentionTrigger;
+          }
         });
     },
     profileLanguage(): string {
