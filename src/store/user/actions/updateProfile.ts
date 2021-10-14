@@ -33,20 +33,20 @@ export default async (payload: Payload): Promise<void> => {
     const neighbourhoods = Object.values(dataStore.getCommunityNeighbourhoods);
 
     for (const neighbourhood of neighbourhoods) {
-      const profileExpression = (
+      const profileLanguage = (
         neighbourhood as any
       ).typedExpressionLanguages.find(
         (t: any) => t.expressionType == ExpressionTypes.ProfileExpression
       );
       const profileRef = `${
-        profileExpression!.languageAddress
+        profileLanguage!.languageAddress
       }://${userStore.getUser!.agent.did!}`;
 
-      console.log("profileExpression: ", profileExpression);
+      console.log("profileLanguage: ", profileLanguage);
 
-      if (profileExpression) {
+      if (profileLanguage) {
         const exp = await createProfile(
-          profileExpression.languageAddress,
+          profileLanguage.languageAddress,
           newProfile
         );
 

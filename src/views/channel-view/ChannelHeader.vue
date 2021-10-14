@@ -35,7 +35,6 @@ export default defineComponent({
   },
   computed: {
     channelName() {
-      console.log(this.community, this.channel);
       if (
         this.community.neighbourhood.neighbourhoodUrl ==
         this.channel.neighbourhood.neighbourhoodUrl
