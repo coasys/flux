@@ -17,22 +17,22 @@ export default async (communityId: string): Promise<void> => {
   const dataStore = useDataStore();
   const community = dataStore.getCommunity(communityId);
 
-  let groupExpressionLinks = await ad4mClient.perspective.queryLinks(
+  const groupExpressionLinks = await ad4mClient.perspective.queryLinks(
     community.neighbourhood.perspective.uuid,
     new LinkQuery({
       source: `${community.neighbourhood.neighbourhoodUrl}://self`,
       predicate: "rdf://class",
     })
   );
-  groupExpressionLinks = groupExpressionLinks.sort(
-    //@ts-ignore
-    (a, b) =>
-      a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0
-  );
+  let sortedLinks = [...groupExpressionLinks];
+  sortedLinks = sortedLinks.sort((a, b) => {
+    console.log(a.timestamp, b.timestamp);
+    return a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0
+  });
   //Check that the group expression ref is not in the store
   if (
     community.neighbourhood.groupExpressionRef !=
-    groupExpressionLinks[groupExpressionLinks.length - 1].data!.target!
+    sortedLinks[sortedLinks.length - 1].data!.target!
   ) {
     //Start a worker polling to try and get the expression data
     expressionWorker.postMessage({
@@ -40,8 +40,7 @@ export default async (communityId: string): Promise<void> => {
       interval: expressionGetDelayMs,
       query: print(GET_EXPRESSION),
       variables: {
-        url: groupExpressionLinks[groupExpressionLinks.length - 1].data!
-          .target!,
+        url: sortedLinks[sortedLinks.length - 1].data!.target!,
       },
       name: "Get group expression data",
       dataKey: "expression",
