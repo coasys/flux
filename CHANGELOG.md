@@ -2,6 +2,38 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.2.8] - 15/10/2021
+
+### Added
+ - Added button to copy log file to desktop when global error is shown
+ - Members on community now also added by signals
+
+### Changed
+ - New Flux logo's!
+ - Renamed application name from Junto -> Flux where applicable
+ - Loading screen now uses flux wordmark
+ - Cache service now uses levelDB
+ - Store now only saves array of did's for user instead of entire profile data to save bloating the store
+ - Logo's and animations now use flux design 
+
+### Deprecated
+
+### Removed
+ - Old files & images
+ - Member & group expression workers removed and replaced with single gql call on community route change
+ - Logout option
+
+### Fixed
+ - Global variables now used for all places where worker polling happens and poll delay used
+ - MessageView now only tries to load unique did profiles for expression messages and not duplicate agents
+ - Now correctly using thumbnail for rendering profile images on messages
+ - Added id to expression worker loops to avoid duplicate getExpression calls when resolving signals / links 
+ - Home channel now shows correct name in Channel header information
+
+### Security
+
+---
+
 ## [0.2.7] - 11/10/2021
 
 ### Added
