@@ -41,7 +41,13 @@ export function registerIpcHooks(mainThreadState: MainThreadGlobal): void {
   ipcMain.on("copyLogs", () => {
     const logLocation = path.join(app.getPath("logs"), "debug.log");
     const desktopLocation = app.getPath("desktop");
-    fs.copyFileSync(logLocation, desktopLocation);
+    if (fs.existsSync(logLocation)) {
+      fs.copyFileSync(logLocation, desktopLocation);
+    } else {
+      console.error(
+        "Could not find log file, are you running the app in dev mode?"
+      );
+    }
   });
 
   ipcMain.on("quitApp", async () => {

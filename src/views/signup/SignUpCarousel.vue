@@ -3,7 +3,7 @@
     <div class="slider__slide">
       <div class="slider__slide-content">
         <j-box pt="500" pb="800">
-          <img width="500" src="@/assets/images/app-secure.png" />
+          <Orb3 height="35vh"></Orb3>
         </j-box>
         <j-text variant="heading">Communicate Privately and Freely</j-text>
         <j-text variant="ingress">
@@ -15,7 +15,7 @@
     <div class="slider__slide">
       <div class="slider__slide-content">
         <j-box pt="500" pb="800">
-          <img width="500" src="@/assets/images/app-secure.png" />
+          <Orb height="35vh"></Orb>
         </j-box>
         <j-text variant="heading">
           Create Groups, Communities and Networks
@@ -29,7 +29,7 @@
     <div class="slider__slide">
       <div class="slider__slide-content">
         <j-box pt="500" pb="800">
-          <img width="500" src="@/assets/images/app-secure.png" />
+          <Orb2 height="35vh"></Orb2>
         </j-box>
         <j-text variant="heading">Take Back the Internet</j-text>
         <j-text variant="ingress">
@@ -44,8 +44,16 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import Orb from "@/components/orb/Orb.vue";
+import Orb2 from "@/components/orb/Orb2.vue";
+import Orb3 from "@/components/orb/Orb3.vue";
 
 export default defineComponent({
+  components: {
+    Orb,
+    Orb2,
+    Orb3,
+  },
   data() {
     return {
       currentIndex: 0,

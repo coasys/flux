@@ -40,7 +40,7 @@
         </j-flex>
       </j-box>
       <j-text variant="ingress">
-        This is an early version of Junto. Don't use this for essential
+        This is an early version of Flux. Don't use this for essential
         communication.
       </j-text>
       <ul>

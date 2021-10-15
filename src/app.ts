@@ -10,6 +10,8 @@ import { createPinia } from "pinia";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { Ad4mClient } from "@perspect3vism/ad4m";
+import { TimeoutCache } from "./utils/timeoutCache";
+import { ProfileExpression } from "./store/types";
 
 export const apolloClient = new ApolloClient({
   link: new WebSocketLink({
@@ -29,6 +31,7 @@ export const apolloClient = new ApolloClient({
   },
 });
 
+export const profileCache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
 export const ad4mClient = new Ad4mClient(apolloClient);
 
 const pinia = createPinia();

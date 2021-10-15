@@ -3,6 +3,7 @@ import { joinChannelFromSharedLink } from "@/core/methods/joinChannelFromSharedL
 import { PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 import { LinkQuery } from "@perspect3vism/ad4m";
 import { useDataStore } from "..";
+import { channelRefreshDurationMs } from "@/constants/config";
 
 export interface Payload {
   communityId: string;
@@ -21,7 +22,7 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
 
     //Start the worker looking for channels
     channelLinksWorker.postMessage({
-      interval: 10000,
+      interval: channelRefreshDurationMs,
       staticSleep: true,
       query: print(PERSPECTIVE_LINK_QUERY),
       variables: {

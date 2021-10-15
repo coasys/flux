@@ -1,12 +1,12 @@
 {
-  "name": "junto",
-  "version": "0.2.7",
+  "name": "flux",
+  "version": "0.2.8",
   "private": true,
-  "description": "Junto ad4m chat application leveraging distributed & decentralized technologies",
+  "description": "A social web3 tool kit for communities",
   "author": "josh@junto.foundation",
   "repository": {
     "type": "git",
-    "url": "https://github.com/juntofoundation/communities.git"
+    "url": "https://github.com/juntofoundation/flux.git"
   },
   "scripts": {
     "lint": "vue-cli-service lint",
@@ -29,16 +29,15 @@
     "@perspect3vism/ad4m": "0.1.18",
     "@perspect3vism/ad4m-executor": "0.1.18",
     "@tiptap/vue-3": "^2.0.0-beta.45",
-    "@vue/apollo-util": "^4.0.0-alpha.11",
     "core-js": "^3.15.2",
     "date-fns": "^2.22.1",
     "datocms-structured-text-utils": "^1.2.0",
     "electron-updater": "^4.3.9",
     "graphql": "^15.5.0",
+    "idb": "^6.1.4",
+    "level": "^7.0.1",
     "patch-package": "^6.4.7",
     "pinia": "^2.0.0-rc.4",
-    "register-service-worker": "^1.7.1",
-    "subscriptions-transport-ws": "^0.9.19",
     "uuid": "^8.3.2",
     "vue": "^3.0.0",
     "vue-advanced-cropper": "^2.3.1",
@@ -53,6 +52,7 @@
     "@testing-library/vue": "^6.4.2",
     "@types/electron-devtools-installer": "^2.2.0",
     "@types/jest": "^26.0.20",
+    "@types/level": "^6.0.0",
     "@types/mocha": "^8.2.1",
     "@types/object-hash": "^2.1.1",
     "@types/uuid": "^8.3.0",
@@ -73,6 +73,7 @@
     "babel-jest": "^26.0.0",
     "babel-plugin-parameter-decorator": "^1.0.16",
     "babel-plugin-transform-typescript-metadata": "^0.3.2",
+    "canvas": "^2.8.0",
     "easygraphql-tester": "^6.0.1",
     "electron": "15.1.1",
     "electron-devtools-installer": "^3.1.0",
@@ -97,6 +98,7 @@
     "webpack-node-externals": "^2.5.2"
   },
   "contributors": [
-    "eric@junto.foundation"
+    "eric@junto.foundation",
+    "kaichaosuna@gmail.com"
   ]
 }

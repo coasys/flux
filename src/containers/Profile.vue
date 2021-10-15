@@ -13,7 +13,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { getProfile, parseProfile } from "@/utils/profileHelpers";
+import { getProfile } from "@/utils/profileHelpers";
 import { Profile } from "@/store/types";
 
 export default defineComponent({
@@ -26,12 +26,7 @@ export default defineComponent({
   watch: {
     did: async function (did) {
       let profileLang = this.langAddress;
-      const dataExp = await getProfile(profileLang, did);
-
-      if (dataExp) {
-        const { data } = dataExp;
-        this.profile = parseProfile(data.profile);
-      }
+      this.profile = await getProfile(profileLang, did);
     },
   },
 });

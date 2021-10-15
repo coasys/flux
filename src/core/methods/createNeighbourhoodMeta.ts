@@ -1,4 +1,4 @@
-import { JuntoExpressionReference } from "@/store/types";
+import { FluxExpressionReference } from "@/store/types";
 import { Link, LinkExpression } from "@perspect3vism/ad4m";
 import { addPerspective } from "../mutations/addPerspective";
 import { createLink } from "../mutations/createLink";
@@ -17,7 +17,7 @@ export async function createNeighbourhoodMeta(
   name: string,
   description: string,
   creatorDid: string,
-  expressionLanguages: JuntoExpressionReference[]
+  expressionLanguages: FluxExpressionReference[]
 ): Promise<LinkExpression[]> {
   //Create the perspective to hold our meta
   const perspective = await addPerspective(`${name}-meta`);

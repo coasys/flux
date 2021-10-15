@@ -43,10 +43,12 @@
             <j-icon size="sm" slot="start" name="gear"></j-icon>
             Settings
           </j-menu-item>
-          <j-menu-item @click="() => $router.replace({ name: 'login' })">
+          <!-- TODO: Wee need to lock the user first
+          <j-menu-item @click="logOut">
             <j-icon size="sm" slot="start" name="door-closed"></j-icon>
             Log out
           </j-menu-item>
+          -->
         </j-menu>
       </j-popover>
     </j-tooltip>
@@ -85,6 +87,9 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useAppStore, ["setShowEditProfile", "setShowSettings"]),
+    logOut(): void {
+      this.$router.replace({ name: "login" });
+    },
     checkForUpdates() {
       window.api.send("check-update");
       this.appStore.setUpdateState({ updateState: "checking" });

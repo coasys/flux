@@ -84,12 +84,13 @@ export function setup(mainThreadState: MainThreadGlobal): void {
 
     //Set the app paths to the new dev directory
     app.setPath("userData", path.join(app.getPath("userData"), "dev"));
-    app.setPath("appData", path.join(app.getPath("appData"), "junto", "dev"));
-  }
-  const repoLockPath = path.join(app.getPath("appData"), ".jsipfs/repo.lock");
-  console.debug("repo lock path", repoLockPath);
-  if (fs.existsSync(repoLockPath)) {
-    console.log("\x1b[31m", "\n\nFound repo.lock, deleting!");
-    fs.rmSync(repoLockPath);
+    app.setPath("appData", path.join(app.getPath("appData"), "flux", "dev"));
+
+    const repoLockPath = path.join(app.getPath("appData"), ".jsipfs/repo.lock");
+    console.debug("repo lock path", repoLockPath);
+    if (fs.existsSync(repoLockPath)) {
+      console.log("\x1b[31m", "\n\nFound repo.lock, deleting!");
+      fs.rmSync(repoLockPath);
+    }
   }
 }

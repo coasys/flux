@@ -1,5 +1,9 @@
 import { print } from "graphql/language/printer";
-import { expressionGetRetries, expressionGetDelayMs } from "@/core/juntoTypes";
+import {
+  expressionGetRetries,
+  expressionGetDelayMs,
+  groupExpressionRefreshDurationMS,
+} from "@/constants/config";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 import { LinkQuery } from "@perspect3vism/ad4m";
 
@@ -22,7 +26,8 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
     const groupExpressionWorker = new Worker("pollingWorker.js");
     // Start worker looking for group expression links
     groupExpressionWorker.postMessage({
-      interval: 5000,
+      interval: groupExpressionRefreshDurationMS,
+      staticSleep: true,
       query: print(PERSPECTIVE_LINK_QUERY),
       variables: {
         uuid: community.neighbourhood.perspective.uuid,
@@ -49,19 +54,18 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
             (a, b) =>
               a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0
           );
+          const latestExpression =
+            groupExpressionLinks[groupExpressionLinks.length - 1].data!.target!;
           //Check that the group expression ref is not in the store
-          if (
-            community.neighbourhood.groupExpressionRef !=
-            groupExpressionLinks[groupExpressionLinks.length - 1].data!.target!
-          ) {
+          if (community.neighbourhood.groupExpressionRef != latestExpression) {
             //Start a worker polling to try and get the expression data
             expressionWorker.postMessage({
+              id: latestExpression,
               retry: expressionGetRetries,
               interval: expressionGetDelayMs,
               query: print(GET_EXPRESSION),
               variables: {
-                url: groupExpressionLinks[groupExpressionLinks.length - 1].data!
-                  .target!,
+                url: latestExpression,
               },
               name: "Get group expression data",
               dataKey: "expression",

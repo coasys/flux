@@ -32,7 +32,7 @@ export async function joinChannelFromSharedLink(
       membraneType: MembraneType.Inherited,
       linkedPerspectives: [],
       linkedNeighbourhoods: [],
-      members: {},
+      members: [],
       currentExpressionLinks: {},
       currentExpressionMessages: {},
       createdAt: createdAt,

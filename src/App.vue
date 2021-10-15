@@ -30,6 +30,11 @@
         <div class="global-error__message">
           {{ globalError.message }}
         </div>
+        <j-text nomargin variant="heading">
+          If you have also been asked to include a log file with your report,
+          click the button below to copy a log file to your desktop:
+        </j-text>
+        <j-button @click="copyLogFile" variant="primary">Copy</j-button>
       </j-flex>
     </div>
   </div>
@@ -40,8 +45,7 @@ import { useRoute, useRouter } from "vue-router";
 import { gql } from "@apollo/client/core";
 import { defineComponent, computed, watch } from "vue";
 import { onError } from "@apollo/client/link/error";
-import { logErrorMessages } from "@vue/apollo-util";
-import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
+import { expressionGetDelayMs, expressionGetRetries } from "@/constants/config";
 import { GET_EXPRESSION } from "@/core/graphql_queries";
 import {
   ApplicationState,
@@ -56,8 +60,9 @@ import { useUserStore } from "./store/user";
 import { useAppStore } from "./store/app";
 import { useDataStore } from "./store/data";
 import { addTrustedAgents } from "@/core/mutations/addTrustedAgents";
-import { JUNTO_AGENT, AD4M_AGENT } from "@/ad4m-globals";
+import { JUNTO_AGENT, AD4M_AGENT } from "@/constants/agents";
 import { ad4mClient } from "./app";
+import { MEMBER } from "./constants/neighbourhoodMeta";
 
 declare global {
   interface Window {
@@ -77,9 +82,6 @@ export default defineComponent({
     onError((error) => {
       console.log("Got global graphql error, logging with error", error);
       if (process.env.NODE_ENV !== "production") {
-        // can use error.operation.operationName to single out a query type.
-        logErrorMessages(error);
-
         appStore.showDangerToast({
           message: JSON.stringify(error),
         });
@@ -109,6 +111,7 @@ export default defineComponent({
         const expressionWorker = new Worker("pollingWorker.js");
 
         expressionWorker.postMessage({
+          id: link.data!.target!,
           retry: expressionGetRetries,
           interval: expressionGetDelayMs,
           query: print(GET_EXPRESSION),
@@ -147,6 +150,15 @@ export default defineComponent({
             value: true,
           });
         });
+      } else if (link.data!.predicate! === MEMBER) {
+        const did = link.data!.target!.split("://")[1];
+        console.log("Got new member in signal! Parsed out did: ", did);
+        if (did) {
+          dataStore.setNeighbourhoodMember({
+            member: did,
+            perspectiveUuid: perspective,
+          });
+        }
       }
     };
 
@@ -274,6 +286,15 @@ export default defineComponent({
     ad4mClient.agent.status().then((status) => {
       this.userStore.updateAgentStatus(status);
     });
+  },
+  methods: {
+    copyLogFile() {
+      window.api.send("copyLogs");
+      this.appStore.showSuccessToast({
+        message:
+          "Log file called debug.log been copied to your desktop, please upload to Junto Discord, thanks <3",
+      });
+    },
   },
 });
 </script>
