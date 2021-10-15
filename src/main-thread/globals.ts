@@ -16,9 +16,9 @@ export class MainThreadGlobal {
   constructor() {
     let iconPath;
     if (process.env.WEBPACK_DEV_SERVER_URL) {
-      iconPath = `${process.env.PWD}/public/img/icons/favicon-32x32.png`;
+      iconPath = `${process.env.PWD}/public/img/icons/icon.png`;
     } else {
-      iconPath = `${__dirname}/img/icons/favicon-32x32.png`;
+      iconPath = `${__dirname}/img/icons/icon.png`;
     }
 
     let builtInLangPath;
