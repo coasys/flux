@@ -1,7 +1,6 @@
 import {
   ExpressionAndRef,
   LinkExpressionAndLang,
-  ProfileExpression,
   CommunityState,
   ChannelState,
   ThemeState,
@@ -132,38 +131,21 @@ export default {
     channel.notifications.mute = !channel.notifications.mute;
   },
 
-  setNeighbourhoodMembers({
-    members,
-    perspectiveUuid,
-  }: {
-    members: { [x: string]: ProfileExpression };
-    perspectiveUuid: string;
-  }): void {
-    const state = useDataStore();
-    const neighbourhood = state.neighbourhoods[perspectiveUuid];
-
-    console.log("setting member", { neighbourhood, members });
-
-    if (neighbourhood) {
-      neighbourhood.members = members;
-    }
-  },
-
   setNeighbourhoodMember({
     member,
     perspectiveUuid,
   }: {
-    member: ProfileExpression;
+    member: string;
     perspectiveUuid: string;
   }): void {
     const state = useDataStore();
     const neighbourhood = state.neighbourhoods[perspectiveUuid];
 
-    if (neighbourhood) {
-      neighbourhood.members = {
-        ...neighbourhood.members,
-        [member.author]: member,
-      };
+    if (
+      neighbourhood &&
+      !neighbourhood.members.find((existingMember) => existingMember === member)
+    ) {
+      neighbourhood.members.push(member);
     }
   },
 

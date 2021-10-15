@@ -3,7 +3,6 @@ import {
   ToastState,
   ThemeState,
   CurrentThemeState,
-  ExpressionUIIcons,
 } from "@/store/types";
 import { useAppStore } from "..";
 

@@ -1,7 +1,7 @@
 import type { Expression, LinkExpression } from "@perspect3vism/ad4m";
 import { ExpressionRef } from "@perspect3vism/ad4m";
 
-export interface JuntoExpressionReference {
+export interface FluxExpressionReference {
   languageAddress: string;
   expressionType: ExpressionTypes;
 }
@@ -11,13 +11,6 @@ export enum ExpressionTypes {
   GroupExpression,
   ProfileExpression,
   Other,
-}
-
-export interface ExpressionUIIcons {
-  languageAddress: string;
-  createIcon: string;
-  viewIcon: string;
-  name: string;
 }
 
 export interface ExpressionAndRef {

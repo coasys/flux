@@ -76,6 +76,7 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
           appBuiltInLangs: [],
           appLangAliases: null,
           mocks: false,
+          runDappServer: true
         })
         .then(async (ad4mCore: ad4m.PerspectivismCore) => {
           mainThreadState.ad4mCore = ad4mCore;

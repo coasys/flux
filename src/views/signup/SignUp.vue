@@ -3,18 +3,16 @@
     <div class="signup-view__flow">
       <j-flex direction="column" gap="400" v-if="step === 1">
         <j-box class="signup-view__flow-back" pb="500">
-          <j-button @click="showSignup = false" variant="link"
-            ><j-icon name="arrow-left-short" />Back</j-button
-          >
+          <j-button @click="showSignup = false" variant="link">
+            <j-icon name="arrow-left-short" />
+            Back
+          </j-button>
         </j-box>
-        <j-box pb="500">
-          <j-flex gap="400" a="center">
-            <img src="@/assets/images/junto_web_logo--rainbow.png" width="25" />
-            <j-text size="800" color="ui-800" uppercase nomargin>
-              Junto
-            </j-text>
-          </j-flex>
+
+        <j-box pb="800">
+          <Logo width="150px" />
         </j-box>
+
         <j-text variant="heading"> Create a user </j-text>
         <j-input
           label="Username"
@@ -58,23 +56,27 @@
           <j-icon slot="end" name="arrow-right-short" />
         </j-button>
       </j-flex>
-      <j-flex direction="column" gap="400" v-if="step === 2">
+      <j-flex direction="column" gap="500" v-if="step === 2">
         <avatar-upload
+          icon="camera"
           :value="profilePicture"
           @change="(url) => (profilePicture = url)"
         >
         </avatar-upload>
         <j-input
+          size="lg"
           label="First Name (optional)"
           :value="name"
           @input="(e) => (name = e.target.value)"
         ></j-input>
         <j-input
+          size="lg"
           label="Last Name (optional)"
           :value="familyName"
           @input="(e) => (familyName = e.target.value)"
         ></j-input>
         <j-input
+          size="lg"
           type="email"
           label="Email (optional)"
           :value="email"
@@ -127,11 +129,14 @@ import {
 import { useValidation } from "@/utils/validation";
 import { useUserStore } from "@/store/user";
 
+import Logo from "@/components/logo/Logo.vue";
+
 export default defineComponent({
   name: "Welcome",
   components: {
     AvatarUpload,
     Carousel,
+    Logo,
   },
   setup() {
     const showSignup = ref(false);
@@ -227,7 +232,7 @@ export default defineComponent({
   methods: {
     async createUser() {
       const resizedImage = this.profilePicture
-        ? await resizeImage(dataURItoBlob(this.profilePicture as string), 400)
+        ? await resizeImage(dataURItoBlob(this.profilePicture as string), 100)
         : undefined;
       const thumbnail = this.profilePicture
         ? await blobToDataURL(resizedImage!)

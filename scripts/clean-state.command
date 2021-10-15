@@ -1,9 +1,9 @@
 #!/bin/bash
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    path="$HOME/.config/junto"
+    path="$HOME/.config/flux"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-    path="$HOME/Library/Application Support/junto"
+    path="$HOME/Library/Application Support/flux"
 fi
 
 echo "Will delete path: $path"

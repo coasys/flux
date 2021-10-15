@@ -14,15 +14,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { ExpressionTypes, ProfileExpression } from "@/store/types";
+import { defineComponent, PropType } from "vue";
+import { ExpressionTypes, ProfileWithDID } from "@/store/types";
 import { Editor } from "@tiptap/vue-3";
-import { ACCOUNT_NAME } from "@/constants/profile";
 import { useDataStore } from "@/store/data";
-
-interface UserMap {
-  [key: string]: ProfileExpression;
-}
+import { getProfile } from "@/utils/profileHelpers";
+import { ChannelState, CommunityState } from "@/store/types";
 
 interface MentionTrigger {
   name: string;
@@ -32,7 +29,16 @@ interface MentionTrigger {
 
 export default defineComponent({
   name: "ChannelFooter",
-  props: ["channel", "community"],
+  props: {
+    channel: {
+      type: Object as PropType<ChannelState>,
+      required: true,
+    },
+    community: {
+      type: Object as PropType<CommunityState>,
+      required: true,
+    },
+  },
   setup() {
     const dataStore = useDataStore();
 
@@ -45,35 +51,62 @@ export default defineComponent({
       showNewMessagesButton: false,
       noDelayRef: 0,
       currentExpressionPost: "",
-      users: {} as UserMap,
-      linksWorker: null as null | Worker,
       editor: null as Editor | null,
       showList: false,
       showProfile: false,
       activeProfile: {} as any,
+      memberMentions: [] as MentionTrigger[],
     };
   },
-  computed: {
-    memberMentions(): MentionTrigger[] {
-      return Object.values(this.community.neighbourhood.members).map(
-        (m: any) =>
-          ({
-            name: m.data.profile[ACCOUNT_NAME],
+  watch: {
+    channel: {
+      handler: async function () {
+        const profiles = await Promise.all(
+          this.community.neighbourhood.members.map(
+            async (did: string): Promise<ProfileWithDID | null> =>
+              await getProfile(this.profileLanguage, did)
+          )
+        );
+
+        const filteredProfiles = profiles.filter(
+          (profile) => profile !== null
+        ) as ProfileWithDID[];
+
+        const mentions = filteredProfiles.map((user: ProfileWithDID) => {
+          return {
+            name: user.username,
             //todo: this should not be replaced, we want the full did identifier in the mentions in case message is consumed by another application
-            id: m.author,
+            id: user.did,
             trigger: "@",
-          } as MentionTrigger)
-      );
+          } as MentionTrigger;
+        });
+
+        this.memberMentions = mentions;
+      },
+      immediate: true,
     },
+  },
+  computed: {
     channelMentions(): MentionTrigger[] {
       return this.dataStore
         .getChannelNeighbourhoods(this.community.neighbourhood.perspective.uuid)
         .map((channel) => {
-          return {
-            name: channel.name,
-            id: channel.neighbourhoodUrl,
-            trigger: "#",
-          } as MentionTrigger;
+          if (
+            channel.neighbourhoodUrl ===
+            this.community.neighbourhood.neighbourhoodUrl
+          ) {
+            return {
+              name: "Home",
+              id: channel.neighbourhoodUrl,
+              trigger: "#",
+            } as MentionTrigger;
+          } else {
+            return {
+              name: channel.name,
+              id: channel.neighbourhoodUrl,
+              trigger: "#",
+            } as MentionTrigger;
+          }
         });
     },
     profileLanguage(): string {

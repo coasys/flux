@@ -10,7 +10,7 @@
           size="xl"
         ></j-icon>
       </div>
-      <j-button variant="subtle" v-if="!value" size="sm">Upload image</j-button>
+      <j-button variant="link" v-if="!value" size="sm">Upload image</j-button>
       <j-button v-if="value" @click.prevent="$emit('change', null)" size="sm">
         Remove image
       </j-button>
@@ -107,6 +107,7 @@ export default defineComponent({
   place-items: center;
   background: var(--j-color-ui-200);
   text-align: center;
+  cursor: pointer;
   width: 7rem;
   height: 7rem;
   border-radius: 50%;

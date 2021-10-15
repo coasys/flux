@@ -42,9 +42,7 @@
   <j-box pt="500">
     <j-menu-group-item
       open
-      :title="`Members (${
-        Object.keys(community.neighbourhood.members).length
-      })`"
+      :title="`Members (${community.neighbourhood.members.length})`"
     >
       <j-button
         @click.prevent="() => setShowInviteCode(true)"
@@ -58,6 +56,7 @@
         <avatar-group
           @click="() => setShowCommunityMembers(true)"
           :users="community.neighbourhood.members"
+          :profileLanguage="profileLanguage"
         />
       </j-box>
     </j-menu-group-item>
@@ -152,7 +151,11 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import { ChannelState } from "@/store/types";
+import {
+  ChannelState,
+  ExpressionTypes,
+  FluxExpressionReference,
+} from "@/store/types";
 import { mapActions, mapState } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
@@ -181,6 +184,12 @@ export default defineComponent({
         this.community.neighbourhood.creatorDid ===
         this.userStore.getUser?.agent.did
       );
+    },
+    profileLanguage(): string {
+      return this.community.neighbourhood.typedExpressionLanguages.find(
+        (t: FluxExpressionReference) =>
+          t.expressionType === ExpressionTypes.ProfileExpression
+      ).languageAddress;
     },
   },
   methods: {

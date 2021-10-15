@@ -2,9 +2,7 @@
   <header class="channel-header">
     <j-flex a="center" gap="200">
       <j-icon color="ui-500" name="hash" />
-      <j-text nomargin weight="500" size="500">
-        {{ channel.neighbourhood.name }}</j-text
-      >
+      <j-text nomargin weight="500" size="500"> {{ this.channelName }}</j-text>
     </j-flex>
     <j-flex a="center" gap="300">
       <j-button
@@ -34,6 +32,18 @@ export default defineComponent({
 
   methods: {
     ...mapActions(useDataStore, ["setChannelNotificationState"]),
+  },
+  computed: {
+    channelName() {
+      if (
+        this.community.neighbourhood.neighbourhoodUrl ==
+        this.channel.neighbourhood.neighbourhoodUrl
+      ) {
+        return "Home";
+      } else {
+        return this.channel.neighbourhood.name;
+      }
+    },
   },
 });
 </script>

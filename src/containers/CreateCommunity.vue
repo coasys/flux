@@ -20,9 +20,10 @@
     <j-flex direction="column" gap="700">
       <j-button
         :disabled="isCreatingCommunity || isJoiningCommunity"
-        variant="subtle"
+        variant="link"
         @click="tabView = ''"
       >
+        <j-icon name="arrow-left-short" />
         Back
       </j-button>
       <div v-if="tabView === 'Create'">

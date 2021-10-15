@@ -38,4 +38,5 @@ pnpm-debug.log*
 /dist_electron
 
 coverage
+
 cachedb

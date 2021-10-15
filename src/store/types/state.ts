@@ -1,5 +1,4 @@
 import { UserState } from "./userprofile";
-import { ExpressionUIIcons } from "./expression";
 import { LocalCommunityState } from "./community";
 import { LocalChannelState } from "./channel";
 import { NeighbourhoodState } from "./neighbourhood";
