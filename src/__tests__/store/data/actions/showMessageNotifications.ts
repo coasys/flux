@@ -5,12 +5,35 @@ import getProfileFixture from "../../../fixtures/getProfile.json";
 import * as agentUnlock from "../../../../core/mutations/agentUnlock";
 import lockAgentFixture from "../../../fixtures/lockAgent.json";
 import { AgentStatus, Expression } from "@perspect3vism/ad4m";
-import { TimeoutCache } from "@/utils/timeoutCache";
-import { ExpressionTypes } from "@/store/types";
+import { ExpressionTypes, ProfileExpression } from "@/store/types";
 import * as getExpressionNoCache from "@/core/queries/getExpression";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useUserStore } from "@/store/user";
 import { useDataStore } from "@/store/data";
+
+const testProfile = {
+  did: initAgentFixture.did,
+  data: JSON.parse(getProfileFixture.data!)
+} as ProfileExpression;
+
+
+jest.mock('@/utils/timeoutCache', () => {
+  return {
+    TimeoutCache: jest.fn().mockImplementation(() => {
+      return {
+        set: jest.fn(),
+        get: (link: string) => {
+          if (link.includes('101')) {
+            return undefined
+          } else {
+            return testProfile;
+          }
+        },
+        remove: jest.fn(),
+      };
+    })
+  };
+});
 
 describe("Show Message Notification", () => {
   let store: Pinia;
@@ -23,8 +46,6 @@ describe("Show Message Notification", () => {
       value: jest.fn(),
     });
 
-    const cache = new TimeoutCache<any>(10);
-
     profileLangAddress = community.neighbourhood.typedExpressionLanguages.find(
       (t: any) => t.expressionType === ExpressionTypes.ProfileExpression
     )!.languageAddress!;
@@ -32,8 +53,6 @@ describe("Show Message Notification", () => {
     did = initAgentFixture.did;
 
     profileLink = `${profileLangAddress}://${did}`;
-
-    await cache.remove(profileLink);
   });
 
   beforeEach(() => {
