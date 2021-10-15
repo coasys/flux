@@ -45,3 +45,5 @@ export class TimeoutCache<T> {
     await storeDb.deleteItemByKey(key);
   }
 }
+
+export default TimeoutCache;
