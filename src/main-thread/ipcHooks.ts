@@ -40,7 +40,7 @@ export function registerIpcHooks(mainThreadState: MainThreadGlobal): void {
 
   ipcMain.on("copyLogs", () => {
     const logLocation = path.join(app.getPath("logs"), "debug.log");
-    const desktopLocation = app.getPath("desktop");
+    const desktopLocation = path.join(app.getPath("desktop"), "debug.log");
     if (fs.existsSync(logLocation)) {
       fs.copyFileSync(logLocation, desktopLocation);
     } else {

@@ -2,6 +2,25 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.2.9] - 18/10/2021
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed 
+
+### Fixed
+ - Fix error when copying debug.log file to desktop on error splash screen
+ - Fix error when no group expression links are found on community 
+
+### Security
+
+---
+
+
 ## [0.2.8] - 15/10/2021
 
 ### Added
