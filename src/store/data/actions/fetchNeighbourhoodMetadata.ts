@@ -27,12 +27,13 @@ export default async (communityId: string): Promise<void> => {
   let sortedLinks = [...groupExpressionLinks];
   sortedLinks = sortedLinks.sort((a, b) => {
     console.log(a.timestamp, b.timestamp);
-    return a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0
+    return a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0;
   });
   //Check that the group expression ref is not in the store
   if (
+    sortedLinks.length > 0 &&
     community.neighbourhood.groupExpressionRef !=
-    sortedLinks[sortedLinks.length - 1].data!.target!
+      sortedLinks[sortedLinks.length - 1].data!.target!
   ) {
     //Start a worker polling to try and get the expression data
     expressionWorker.postMessage({
