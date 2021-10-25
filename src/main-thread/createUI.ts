@@ -104,10 +104,10 @@ export function createSplashScreen(mainThreadState: MainThreadGlobal): void {
 
 function createTray(mainThreadState: MainThreadGlobal): void {
   if (app.isPackaged) {
-    mainThreadState.tray = new Tray(`${__dirname}/img/icons/favicon-32x32.png`);
+    mainThreadState.tray = new Tray(`${__dirname}/img/icons/favicon-32x32-Template@2x.png`);
   } else {
     mainThreadState.tray = new Tray(
-      `${process.env.PWD}/public/img/icons/favicon-32x32.png`
+      `${process.env.PWD}/public/img/icons/favicon-32x32-Template@2x.png`
     );
   }
 
