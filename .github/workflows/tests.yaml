@@ -22,6 +22,6 @@ jobs:
     - name: Install modules
       run: npm i
     - name: Run lint
-      run: npm lint
+      run: npm run lint
     - name: Run tests
-      run: npm test
+      run: npm run test
