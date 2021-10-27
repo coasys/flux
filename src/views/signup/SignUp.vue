@@ -29,7 +29,7 @@
           label="Password"
           size="xl"
           :value="password"
-          @keydown.enter="step = 2"
+          @keydown.enter="passwordOnEnterValidate"
           @input="(e) => (password = e.target.value)"
           :error="passwordError"
           :errortext="passwordErrorMessage"
@@ -118,7 +118,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import Carousel from "./SignUpCarousel.vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import {
@@ -167,6 +167,7 @@ export default defineComponent({
         },
       ],
     });
+    
 
     const {
       value: password,
@@ -189,6 +190,20 @@ export default defineComponent({
         },
       ],
     });
+
+    watch([password, passwordIsValid], ([password, passwordIsValid]) => {
+      if (passwordIsValid) {
+        validatePassword();
+      }
+    });
+
+    const passwordOnEnterValidate = () => {
+      validatePassword();
+
+      if (passwordIsValid.value) {
+        step.value = 2
+      }
+    }
 
     const name = ref("");
 
@@ -222,6 +237,7 @@ export default defineComponent({
       familyName,
       logInError,
       userStore,
+      passwordOnEnterValidate
     };
   },
   computed: {

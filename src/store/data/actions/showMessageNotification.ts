@@ -74,7 +74,7 @@ export default async ({
 
     const notification = new Notification(title, {
       body,
-      icon: "/assets/images/junto_app_icon.png",
+      icon: "/assets/images/logo.png",
     });
 
     // Clicking on notification will take the user to that community & channel
