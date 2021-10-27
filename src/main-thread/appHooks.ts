@@ -1,4 +1,6 @@
 import { app, BrowserWindow } from "electron";
+import fs from "fs";
+import path from "path";
 import installExtension, { VUEJS3_DEVTOOLS } from "electron-devtools-installer";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { autoUpdater } from "electron-updater";
@@ -70,13 +72,49 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
             neighbourhoods: "neighbourhood-store",
           },
           ad4mBootstrapFixtures: {
-            languages: [],
+            languages: [
+              {
+                address: "QmR1dV5KuAQtYG98qqmYEvHXfxJZ3jKyjf7SFMriCMfHVQ",
+                meta: {
+                  author:
+                    "did:key:zQ3shkkuZLvqeFgHdgZgFMUx8VGkgVWsLA83w2oekhZxoCW2n",
+                  timestamp: "2021-10-07T21:39:36.607Z",
+                  data: {
+                    name: "Direct Message Language",
+                    address: "QmR1dV5KuAQtYG98qqmYEvHXfxJZ3jKyjf7SFMriCMfHVQ",
+                    description:
+                      "Template source for personal, per-agent DM languages. Holochain based.",
+                    possibleTemplateParams: [
+                      "recipient_did",
+                      "recipient_hc_agent_pubkey",
+                    ],
+                    sourceCodeLink:
+                      "https://github.com/perspect3vism/direct-message-language",
+                  },
+                  proof: {
+                    signature:
+                      "e933e34f88694816ea91361605c8c2553ceeb96e847f8c73b75477cc7d9bacaf11eae34e38c2e3f474897f59d20f5843d6f1d2c493b13552093bc16472b0ac33",
+                    key: "#zQ3shkkuZLvqeFgHdgZgFMUx8VGkgVWsLA83w2oekhZxoCW2n",
+                    valid: true,
+                  },
+                },
+                bundle: fs
+                  .readFileSync(
+                    path.join(
+                      mainThreadState.builtInLangPath,
+                      "direct-message-language",
+                      "build",
+                      "bundle.js"
+                    )
+                  )
+                  .toString(),
+              },
+            ],
             neighbourhoods: [],
           },
-          appBuiltInLangs: [],
+          appBuiltInLangs: ["direct-message-language"],
           appLangAliases: null,
           mocks: false,
-          runDappServer: true
         })
         .then(async (ad4mCore: ad4m.PerspectivismCore) => {
           mainThreadState.ad4mCore = ad4mCore;
