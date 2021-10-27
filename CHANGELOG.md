@@ -2,6 +2,27 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.2.10] - 27/10/2021
+
+### Added
+
+### Changed
+ - When user creating agent if password is invalid disable the next button
+
+### Deprecated
+
+### Removed 
+
+### Fixed
+ - Openssl/boringssl error when using older version of ipfs with bcrypto dependency that effected some Linux installations
+ - Low timeout on link query causing some channels not to load messages 
+ - If password error is shown, clear error when password requirements are met
+ - Issue where group avatar would not update for some members
+
+### Security
+
+---
+
 ## [0.2.9] - 18/10/2021
 
 ### Added
