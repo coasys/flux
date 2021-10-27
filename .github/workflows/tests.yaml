@@ -20,7 +20,7 @@ jobs:
       with:
         node-version: 14.17.0
     - name: Install modules
-      run: npm
+      run: npm i
     - name: Run lint
       run: npm lint
     - name: Run tests
