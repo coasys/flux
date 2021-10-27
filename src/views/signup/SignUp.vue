@@ -29,7 +29,7 @@
           label="Password"
           size="xl"
           :value="password"
-          @keydown.enter="step = 2"
+          @keydown.enter="passwordOnEnterValidate"
           @input="(e) => (password = e.target.value)"
           :error="passwordError"
           :errortext="passwordErrorMessage"
@@ -190,6 +190,14 @@ export default defineComponent({
       ],
     });
 
+    const passwordOnEnterValidate = () => {
+      validatePassword();
+
+      if (passwordIsValid.value) {
+        step.value = 2
+      }
+    }
+
     const name = ref("");
 
     const familyName = ref("");
@@ -222,6 +230,7 @@ export default defineComponent({
       familyName,
       logInError,
       userStore,
+      passwordOnEnterValidate
     };
   },
   computed: {
