@@ -32,7 +32,7 @@ module.exports = {
       ],
       rendererProcessFile: "src/app.ts",
       preload: "src/preload.js",
-      externals: ["@perspect3vism/ad4m-executor", "fs"],
+      externals: ["@perspect3vism/ad4m-executor"],
       builderOptions: {
         productName: "Flux",
         appId: "junto.foundation.flux",

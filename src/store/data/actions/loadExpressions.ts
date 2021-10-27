@@ -17,6 +17,7 @@ export interface Payload {
 
 export interface LoadExpressionResult {
   linksWorker: Worker;
+  fwdLinkWorker: Worker;
   expressionWorker: Worker;
 }
 
@@ -39,6 +40,7 @@ export default async function ({
     }
 
     const linksWorker = new Worker("pollingWorker.js");
+    const fwdLinkWorker = new Worker("pollingWorker.js");
 
     //Descending link worker that looks from current view location -> unix epoch
     //Current view location could be now if application has just started or from some previous post if user is scrolling
@@ -52,8 +54,8 @@ export default async function ({
         query: {
           source: "sioc://chatchannel",
           predicate: "sioc://content_of",
-          fromDate,
-          untilDate,
+          fromDate: untilDate,
+          untilDate: fromDate,
         } as LinkQuery,
       },
       name: `Get desc expressionLinks for channel: ${channel.name}`,
@@ -62,7 +64,7 @@ export default async function ({
 
     //Forward looking link worker that looks from current view location -> now()
     console.log("Posting for links between", fromDate, new Date());
-    linksWorker.postMessage({
+    fwdLinkWorker.postMessage({
       interval: chatMessageRefreshDuration,
       staticSleep: true,
       query: print(PERSPECTIVE_LINK_QUERY),
@@ -84,9 +86,12 @@ export default async function ({
     linksWorker.onerror = function (e) {
       throw new Error(e.toString());
     };
+    fwdLinkWorker.onerror = function (e) {
+      throw new Error(e.toString());
+    };
 
-    //Listen for message callback saying we got some links
-    linksWorker.addEventListener("message", async (e) => {
+    //@ts-ignore
+    const linkCallback = async (e) => {
       const linkQuery = e.data.perspectiveQueryLinks;
 
       const links = linkQuery.filter((link: any) => {
@@ -112,7 +117,11 @@ export default async function ({
           dataKey: "expressionMany",
         });
       }
-    });
+    };
+
+    //Listen for message callback saying we got some links
+    linksWorker.addEventListener("message", linkCallback);
+    fwdLinkWorker.addEventListener("message", linkCallback);
 
     expressionWorker.onerror = function (e) {
       throw new Error(e.toString());
@@ -130,7 +139,7 @@ export default async function ({
       });
     });
 
-    return { linksWorker, expressionWorker };
+    return { linksWorker, fwdLinkWorker, expressionWorker };
   } catch (e) {
     appStore.showDangerToast({
       message: e.message,
