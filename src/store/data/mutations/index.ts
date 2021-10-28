@@ -131,6 +131,17 @@ export default {
     channel.notifications.mute = !channel.notifications.mute;
   },
 
+  setCommunityNotificationState({ communityId }: { communityId: string }): void {
+    const state = useDataStore();
+    const community = state.communities[communityId];
+
+    if (community.notifications) {
+      community.notifications.mute = !community.notifications.mute;
+    } else {
+      community.notifications = { mute: true }
+    }
+  },
+
   setNeighbourhoodMember({
     member,
     perspectiveUuid,

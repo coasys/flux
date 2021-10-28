@@ -19,9 +19,25 @@
         ></j-avatar>
         <j-menu
           slot="content"
-          @click="() => removeCommunity(community.perspective.uuid)"
         >
-          <j-menu-item>Remove community</j-menu-item>
+          <j-menu-item 
+            @click="() => removeCommunity(community.perspective.uuid)"
+          >Remove community</j-menu-item>
+          <j-menu-item 
+            @click="() => muteCommunity(community.perspective.uuid)"
+          ><j-icon
+              size="xs"
+              slot="start"
+              :name="
+                getCommunityState(community.perspective.uuid).notifications?.mute ? 'bell-slash' : 'bell'
+              "
+            />
+            {{
+              `${
+                  getCommunityState(community.perspective.uuid).notifications?.mute ? "Unmute" : "Mute"
+              } Community`
+            }}
+          </j-menu-item>
         </j-menu>
       </j-popover>
     </j-tooltip>
@@ -56,6 +72,9 @@ export default defineComponent({
     };
   },
   methods: {
+    muteCommunity(id: string) {
+      this.dataStore.setCommunityNotificationState({communityId: id})
+    },  
     removeCommunity(id: string) {
       this.$router.push({ name: "home" }).then(() => {
         this.dataStore.removeCommunity(id);
@@ -82,6 +101,9 @@ export default defineComponent({
         return this.dataStore.getCommunity(id).state.hasNewMessages;
       };
     },
+    getCommunityState() {
+      return (id: string) => this.dataStore.getCommunityState(id)
+    }
   },
 });
 </script>

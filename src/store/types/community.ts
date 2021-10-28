@@ -12,4 +12,7 @@ export interface LocalCommunityState {
   useLocalTheme: boolean;
   currentChannelId: string | undefined | null;
   hasNewMessages: boolean;
+  notifications: {
+    mute: boolean;
+  };
 }
