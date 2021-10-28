@@ -12,6 +12,7 @@
           class="left-nav__community-item"
           :selected="communityIsActive(community.perspective.uuid)"
           size="xl"
+          :online="hasNotification(community.perspective.uuid)"
           :src="community.image || null"
           :initials="community.name.charAt(0).toUpperCase()"
           @click="() => handleCommunityClick(community.perspective.uuid)"
@@ -75,6 +76,11 @@ export default defineComponent({
     },
     communityIsActive() {
       return (id: string) => this.$route.params.communityId === id;
+    },
+    hasNotification() {
+      return (id: string) => {
+        return this.dataStore.getCommunity(id).state.hasNewMessages;
+      };
     },
   },
 });
