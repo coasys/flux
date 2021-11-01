@@ -63,7 +63,15 @@
   </j-box>
 
   <j-box pt="500">
-    <j-menu-group-item open title="Channels">
+    <j-menu-group-item open title="Channels" class="channel__heading">
+      <j-button
+        @click.prevent="() => toggleHideMutedChannels({communityId: community.neighbourhood.perspective.uuid})"
+        size="sm"
+        slot="start"
+        variant="ghost"
+      >
+        <j-icon size="sm" square :name="community.state.collapseChannelList ? 'chevron-down' : 'chevron-right'"></j-icon>
+      </j-button>
       <j-button
         @click.prevent="() => setShowCreateChannel(true)"
         size="sm"
@@ -171,13 +179,20 @@ export default defineComponent({
   },
   data: function () {
     return {
-      showCommunityMenu: false,
+      showCommunityMenu: false
     };
   },
   computed: {
     channels(): ChannelState[] {
       const communityId = this.$route.params.communityId as string;
-      return this.getChannelStates()(communityId);
+
+      const channels = this.getChannelStates()(communityId);
+
+      if (!this.community.state.collapseChannelList) {
+        return channels.filter(e => (e.state.hasNewMessages && !e.state.notifications.mute) || e.state.perspectiveUuid === this.community.state.currentChannelId)
+      } 
+
+      return channels;
     },
     isCreator(): boolean {
       return (
@@ -193,7 +208,7 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useDataStore, ["setChannelNotificationState"]),
+    ...mapActions(useDataStore, ["setChannelNotificationState", "toggleHideMutedChannels"]),
     ...mapState(useDataStore, ["getChannelStates"]),
     ...mapActions(useAppStore, [
       "setShowCreateChannel",
@@ -270,5 +285,9 @@ j-divider {
   height: 10px;
   border-radius: 50%;
   background: var(--j-color-primary-500);
+}
+
+.channel__heading::part(summary) {
+  padding-left: 0;
 }
 </style>
