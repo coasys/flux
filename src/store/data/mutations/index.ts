@@ -131,7 +131,7 @@ export default {
     channel.notifications.mute = !channel.notifications.mute;
   },
 
-  setCommunityNotificationState({ communityId }: { communityId: string }): void {
+  toggleCommunityMute({ communityId }: { communityId: string }): void {
     const state = useDataStore();
     const community = state.communities[communityId];
 

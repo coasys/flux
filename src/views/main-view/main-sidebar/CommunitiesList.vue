@@ -73,7 +73,7 @@ export default defineComponent({
   },
   methods: {
     muteCommunity(id: string) {
-      this.dataStore.setCommunityNotificationState({communityId: id})
+      this.dataStore.toggleCommunityMute({communityId: id})
     },  
     removeCommunity(id: string) {
       this.$router.push({ name: "home" }).then(() => {
