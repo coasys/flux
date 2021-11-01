@@ -63,7 +63,15 @@
   </j-box>
 
   <j-box pt="500">
-    <j-menu-group-item open title="Channels">
+    <j-menu-group-item open title="Channels" class="channel__heading">
+      <j-button
+        @click.prevent="toggleChannels"
+        size="sm"
+        slot="start"
+        variant="ghost"
+      >
+        <j-icon size="sm" square :name="showChannels ? 'chevron-down' : 'chevron-right'"></j-icon>
+      </j-button>
       <j-button
         @click.prevent="() => setShowCreateChannel(true)"
         size="sm"
@@ -172,12 +180,20 @@ export default defineComponent({
   data: function () {
     return {
       showCommunityMenu: false,
+      showChannels: true
     };
   },
   computed: {
     channels(): ChannelState[] {
       const communityId = this.$route.params.communityId as string;
-      return this.getChannelStates()(communityId);
+
+      const channels = this.getChannelStates()(communityId);
+
+      if (!this.showChannels) {
+        return channels.filter(e => (e.state.hasNewMessages && !e.state.notifications.mute) || e.state.perspectiveUuid === this.community.state.currentChannelId)
+      } 
+
+      return channels;
     },
     isCreator(): boolean {
       return (
@@ -206,6 +222,9 @@ export default defineComponent({
       this.setShowCommunitySettings(true);
       this.showCommunityMenu = false;
     },
+    toggleChannels() {
+      this.showChannels = !this.showChannels;
+    }
   },
 });
 </script>
@@ -270,5 +289,9 @@ j-divider {
   height: 10px;
   border-radius: 50%;
   background: var(--j-color-primary-500);
+}
+
+.channel__heading::part(summary) {
+  padding-left: 0;
 }
 </style>
