@@ -236,6 +236,19 @@ export default {
     state.channels[payload.perspectiveUuid] = payload.channel;
   },
 
+  toggleHideMutedChannels(payload: {
+    communityId: string;
+  }): void {
+    const state = useDataStore();
+    const community = state.communities[payload.communityId];
+    
+    if (community.collapseChannelList !== undefined) {
+      community.collapseChannelList = !community.collapseChannelList;
+    } else {
+      community.collapseChannelList = false;
+    }
+  },
+
   createChannelMutation(payload: ChannelState): void {
     const state = useDataStore();
     state.channels[payload.neighbourhood.perspective.uuid] = payload.state;

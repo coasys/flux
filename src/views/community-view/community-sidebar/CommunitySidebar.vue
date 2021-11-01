@@ -65,12 +65,12 @@
   <j-box pt="500">
     <j-menu-group-item open title="Channels" class="channel__heading">
       <j-button
-        @click.prevent="toggleChannels"
+        @click.prevent="() => toggleHideMutedChannels({communityId: community.neighbourhood.perspective.uuid})"
         size="sm"
         slot="start"
         variant="ghost"
       >
-        <j-icon size="sm" square :name="showChannels ? 'chevron-down' : 'chevron-right'"></j-icon>
+        <j-icon size="sm" square :name="community.state.collapseChannelList ? 'chevron-down' : 'chevron-right'"></j-icon>
       </j-button>
       <j-button
         @click.prevent="() => setShowCreateChannel(true)"
@@ -179,8 +179,7 @@ export default defineComponent({
   },
   data: function () {
     return {
-      showCommunityMenu: false,
-      showChannels: true
+      showCommunityMenu: false
     };
   },
   computed: {
@@ -189,7 +188,7 @@ export default defineComponent({
 
       const channels = this.getChannelStates()(communityId);
 
-      if (!this.showChannels) {
+      if (!this.community.state.collapseChannelList) {
         return channels.filter(e => (e.state.hasNewMessages && !e.state.notifications.mute) || e.state.perspectiveUuid === this.community.state.currentChannelId)
       } 
 
@@ -209,7 +208,7 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useDataStore, ["setChannelNotificationState"]),
+    ...mapActions(useDataStore, ["setChannelNotificationState", "toggleHideMutedChannels"]),
     ...mapState(useDataStore, ["getChannelStates"]),
     ...mapActions(useAppStore, [
       "setShowCreateChannel",
@@ -222,9 +221,6 @@ export default defineComponent({
       this.setShowCommunitySettings(true);
       this.showCommunityMenu = false;
     },
-    toggleChannels() {
-      this.showChannels = !this.showChannels;
-    }
   },
 });
 </script>

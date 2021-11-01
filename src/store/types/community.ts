@@ -12,6 +12,7 @@ export interface LocalCommunityState {
   useLocalTheme: boolean;
   currentChannelId: string | undefined | null;
   hasNewMessages: boolean;
+  collapseChannelList: boolean,
   notifications: {
     mute: boolean;
   };
