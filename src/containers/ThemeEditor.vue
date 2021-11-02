@@ -76,14 +76,20 @@
       <j-box pb="300">
         <j-text variant="label">Font size</j-text>
       </j-box>
-      <j-tabs
-        :value="theme.fontSize"
-        @change="(e) => updateTheme({ fontSize: e.target.value })"
-      >
-        <j-tab-item variant="button" value="sm">Small</j-tab-item>
-        <j-tab-item variant="button" value="md">Medium</j-tab-item>
-        <j-tab-item variant="button" value="lg">Large</j-tab-item>
-      </j-tabs>
+      <j-flex a="center" j="between">
+        <j-text>Small</j-text>
+        <j-text>Medium</j-text>
+        <j-text>Large</j-text>
+      </j-flex>
+      <input
+        class="range-slider"
+        type="range"
+        :value="theme.fontSize.replace('px', '')"
+        min="11"
+        max="19"
+        step="1"
+        @change="(e: any) => updateTheme({ fontSize: e.target.value + 'px' })"
+      />
     </j-box>
   </div>
 </template>
@@ -121,5 +127,31 @@ export default defineComponent({
   flex-wrap: wrap;
   gap: var(--j-space-200);
   max-width: 400px;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  margin: 0;
+  width: 100%;
+  background: none;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: calc(var(--j-size-sm) / 2);
+  background-color: var(--j-color-ui-100);
+  border: none;
+  border-radius: 3px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  border: none;
+  transition: all 0.5s ease;
+  height: var(--j-size-sm);
+  width: calc(var(--j-size-sm) / 2);
+  border-radius: var(--j-border-radius);
+  background: var(--j-color-primary-300);
+  margin-top: calc(var(--j-size-sm) / -4);
 }
 </style>

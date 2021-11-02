@@ -335,30 +335,6 @@ body :not(.message-item__message) {
   --app-channel-footer-bg-color: var(--j-color-white);
 }
 
-html[font-size="sm"] {
-  font-size: 13px;
-}
-
-html[font-size="md"] {
-  font-size: 14px;
-}
-
-html[font-size="lg"] {
-  font-size: 15px;
-}
-
-@media (min-width: 800px) {
-  html[font-size="sm"] {
-    font-size: 14px;
-  }
-  html[font-size="md"] {
-    font-size: 16px;
-  }
-  html[font-size="lg"] {
-    font-size: 17px;
-  }
-}
-
 j-avatar::part(base) {
   transition: box-shadow 0.2s ease;
 }
