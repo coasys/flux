@@ -138,7 +138,7 @@ export default {
     if (community.notifications) {
       community.notifications.mute = !community.notifications.mute;
     } else {
-      community.notifications = { mute: true }
+      community.notifications = { mute: true };
     }
   },
 
@@ -236,17 +236,10 @@ export default {
     state.channels[payload.perspectiveUuid] = payload.channel;
   },
 
-  toggleHideMutedChannels(payload: {
-    communityId: string;
-  }): void {
+  toggleHideMutedChannels(payload: { communityId: string }): void {
     const state = useDataStore();
     const community = state.communities[payload.communityId];
-    
-    if (community.collapseChannelList !== undefined) {
-      community.collapseChannelList = !community.collapseChannelList;
-    } else {
-      community.collapseChannelList = false;
-    }
+    community.hideMutedChannels = !community.hideMutedChannels;
   },
 
   createChannelMutation(payload: ChannelState): void {
@@ -265,16 +258,19 @@ export default {
   setHasNewMessages(payload: { channelId: string; value: boolean }): void {
     const state = useDataStore();
     const tempChannel = state.getChannel(payload.channelId);
-    const tempCommunity = state.getCommunity(tempChannel.neighbourhood.membraneRoot);
+    const tempCommunity = state.getCommunity(
+      tempChannel.neighbourhood.membraneRoot
+    );
     const channel = state.channels[payload.channelId];
     const community = state.communities[tempCommunity.state.perspectiveUuid];
     channel.hasNewMessages = payload.value;
-    community.hasNewMessages = state.getChannelNeighbourhoods(tempCommunity.state.perspectiveUuid).reduce((acc: boolean, curr) => {
-      const channel = state.channels[curr.perspective.uuid];
-      if (!acc) 
-        return channel.hasNewMessages
-      return true;
-    }, false);
+    community.hasNewMessages = state
+      .getChannelNeighbourhoods(tempCommunity.state.perspectiveUuid)
+      .reduce((acc: boolean, curr) => {
+        const channel = state.channels[curr.perspective.uuid];
+        if (!acc) return channel.hasNewMessages;
+        return true;
+      }, false);
   },
 
   addExpressionAndLink: (payload: {
