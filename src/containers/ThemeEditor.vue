@@ -88,7 +88,7 @@
         min="11"
         max="19"
         step="1"
-        @change="(e: any) => updateTheme({ fontSize: e.target.value + 'px' })"
+        @change="(e) => updateTheme({ fontSize: e.target.value + 'px' })"
       />
     </j-box>
   </div>
