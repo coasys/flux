@@ -36,6 +36,21 @@
         <j-icon size="xs" slot="start" name="plus" />
         Create channel
       </j-menu-item>
+      <j-menu-item
+        @click="
+          () =>
+            toggleHideMutedChannels({
+              communityId: community.neighbourhood.perspective.uuid,
+            })
+        "
+      >
+        <j-icon
+          size="xs"
+          slot="start"
+          :name="community.state.hideMutedChannels ? 'toggle-on' : 'toggle-off'"
+        />
+        Hide muted channels
+      </j-menu-item>
     </j-menu>
   </j-popover>
 
@@ -63,15 +78,7 @@
   </j-box>
 
   <j-box pt="500">
-    <j-menu-group-item open title="Channels" class="channel__heading">
-      <j-button
-        @click.prevent="() => toggleHideMutedChannels({communityId: community.neighbourhood.perspective.uuid})"
-        size="sm"
-        slot="start"
-        variant="ghost"
-      >
-        <j-icon size="sm" square :name="community.state.collapseChannelList ? 'chevron-down' : 'chevron-right'"></j-icon>
-      </j-button>
+    <j-menu-group-item open title="Channels">
       <j-button
         @click.prevent="() => setShowCreateChannel(true)"
         size="sm"
@@ -101,6 +108,7 @@
           <j-menu-item
             slot="trigger"
             class="channel"
+            :class="{ 'channel--muted': channel.state.notifications?.mute }"
             :selected="isExactActive"
             @click="navigate"
           >
@@ -148,19 +156,20 @@
           </j-menu>
         </j-popover>
       </router-link>
-      <j-menu-item @click="() => setShowCreateChannel(true)">
-        <j-icon size="xs" slot="start" name="plus" />
-        Add channel
-      </j-menu-item>
     </j-menu-group-item>
+    <j-menu-item @click="() => setShowCreateChannel(true)">
+      <j-icon size="xs" slot="start" name="plus" />
+      Add channel
+    </j-menu-item>
   </j-box>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import {
   ChannelState,
+  CommunityState,
   ExpressionTypes,
   FluxExpressionReference,
 } from "@/store/types";
@@ -171,7 +180,12 @@ import { useUserStore } from "@/store/user";
 
 export default defineComponent({
   components: { AvatarGroup },
-  props: ["community"],
+  props: {
+    community: {
+      type: Object as PropType<CommunityState>,
+      required: true,
+    },
+  },
   setup() {
     return {
       userStore: useUserStore(),
@@ -179,7 +193,7 @@ export default defineComponent({
   },
   data: function () {
     return {
-      showCommunityMenu: false
+      showCommunityMenu: false,
     };
   },
   computed: {
@@ -188,9 +202,9 @@ export default defineComponent({
 
       const channels = this.getChannelStates()(communityId);
 
-      if (!this.community.state.collapseChannelList) {
-        return channels.filter(e => (e.state.hasNewMessages && !e.state.notifications.mute) || e.state.perspectiveUuid === this.community.state.currentChannelId)
-      } 
+      if (this.community.state.hideMutedChannels) {
+        return channels.filter((e) => !e.state.notifications.mute);
+      }
 
       return channels;
     },
@@ -201,14 +215,22 @@ export default defineComponent({
       );
     },
     profileLanguage(): string {
-      return this.community.neighbourhood.typedExpressionLanguages.find(
+      // TODO: Don't use any
+      const typedExpressionLanguages = this.community.neighbourhood
+        .typedExpressionLanguages as any;
+
+      const langAddress = typedExpressionLanguages.find(
         (t: FluxExpressionReference) =>
           t.expressionType === ExpressionTypes.ProfileExpression
       ).languageAddress;
+      return langAddress || "";
     },
   },
   methods: {
-    ...mapActions(useDataStore, ["setChannelNotificationState", "toggleHideMutedChannels"]),
+    ...mapActions(useDataStore, [
+      "setChannelNotificationState",
+      "toggleHideMutedChannels",
+    ]),
     ...mapState(useDataStore, ["getChannelStates"]),
     ...mapActions(useAppStore, [
       "setShowCreateChannel",
@@ -280,14 +302,14 @@ j-divider {
   display: block;
 }
 
+.channel--muted {
+  opacity: 0.6;
+}
+
 .channel__notification {
   width: 10px;
   height: 10px;
   border-radius: 50%;
   background: var(--j-color-primary-500);
-}
-
-.channel__heading::part(summary) {
-  padding-left: 0;
 }
 </style>
