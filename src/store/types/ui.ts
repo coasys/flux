@@ -13,7 +13,7 @@ export interface ThemeState {
   fontFamily: string;
   hue: number;
   saturation: number;
-  fontSize: "sm" | "md" | "lg";
+  fontSize: string;
 }
 
 export interface ModalsState {
