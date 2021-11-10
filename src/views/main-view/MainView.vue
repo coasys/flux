@@ -7,6 +7,7 @@
   </app-layout>
 
   <j-modal
+    size="sm"
     :open="modals.showCreateCommunity"
     @toggle="(e) => setShowCreateCommunity(e.target.open)"
   >
@@ -39,7 +40,7 @@
         </j-flex>
       </j-box>
       <j-text variant="ingress">
-        This is an early version of Junto. Don't use this for essential
+        This is an early version of Flux. Don't use this for essential
         communication.
       </j-text>
       <ul>

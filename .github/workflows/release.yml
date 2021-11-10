@@ -1,6 +1,7 @@
 name: Build/release
 
-on:
+on: 
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -27,7 +28,7 @@ jobs:
           CPPFLAGS: "-I/usr/local/opt/openssl/include"
           PKG_CONFIG_PATH: "/usr/local/opt/openssl/lib/pkgconfig"
         run: |
-          brew install sqlcipher libsodium openssl
+          brew install libsodium openssl
           rustup target add wasm32-unknown-unknown
       - name: Build Holochain
         env:
@@ -36,10 +37,25 @@ jobs:
           CPPFLAGS: "-I/usr/local/opt/openssl/include"
           PKG_CONFIG_PATH: "/usr/local/opt/openssl/lib/pkgconfig"
         run: |
-          cargo install lair_keystore --git https://github.com/guillemcordoba/lair --rev 53fea43d53352609978d550f72f987f0ce458896
-          cargo install holochain --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
-          cargo install holochain_cli --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
+          cargo install lair_keystore --git https://github.com/holochain/lair --rev bd92b76ad9cc18bc0c0db215e4bea9767c9003cf
+          cargo install holochain --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
+          cargo install holochain_cli --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
           ./scripts/copy-hc.sh
+      - name: Cache cargo registry
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+      - name: Cache cargo index
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+      - name: Cache cargo bin
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/bin
+          key: ${{ runner.os }}-cargo-bin-${{ hashFiles('**/Cargo.lock') }}
       - name: Install Node.js, NPM & Yarn
         uses: actions/setup-node@v2
         with:
@@ -49,11 +65,6 @@ jobs:
         run: |
           pkgver=$(node ./scripts/get-pkg-version.js)
           echo ::set-output name=version::$pkgver
-      - name: Setup codesiging certs
-        run: ./scripts/add-osx-cert.sh
-        env:
-          COMMUNITIES_APPLE_CERT: ${{ secrets.COMMUNITIES_APPLE_CERT }}
-          COMMUNITIES_APPLE_CERT_PASSWORD: ${{ secrets.COMMUNITIES_APPLE_CERT_PASSWORD }}
       - name: Install deps
         run: npm i
       - name: Build languages
@@ -62,16 +73,64 @@ jobs:
         run: npm run release
         env:
           GH_TOKEN: ${{ secrets.github_token }}
+          CSC_LINK: ${{ secrets.COMMUNITIES_APPLE_CERT }}
+          CSC_KEY_PASSWORD: ${{ secrets.COMMUNITIES_APPLE_CERT_PASSWORD }}
       - name: Cache macOS release (x64)
         uses: actions/upload-artifact@v1
         with:
-          name: Junto-${{steps.ref.outputs.version}}.dmg
-          path: ./dist_electron/Junto-${{steps.ref.outputs.version}}.dmg
+          name: Flux-${{steps.ref.outputs.version}}.dmg
+          path: ./dist_electron/Flux-${{steps.ref.outputs.version}}.dmg
       - name: Cache latest-mac.yml
         uses: actions/upload-artifact@v1
         with:
           name: latest-mac.yml
           path: ./dist_electron/latest-mac.yml
+
+  # build_windows:
+  #   name: Windows build
+  #   runs-on: windows-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions-rs/toolchain@v1
+  #       with:
+  #         toolchain: 1.55.0
+  #     - uses: Swatinem/rust-cache@v1
+  #       with:
+  #         working-directory: ./resources/temp/holochain
+  #     - name: Build Holochain
+  #       env:
+  #         SQLCIPHER_STATIC: 1
+  #       run: |
+  #         rustup target add wasm32-unknown-unknown
+  #         cargo install lair_keystore --git https://github.com/holochain/lair --rev bd92b76ad9cc18bc0c0db215e4bea9767c9003cf
+  #         cargo install holochain --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
+  #         cargo install holochain_cli --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
+  #         ./scripts/copy-hc.sh
+  #     - name: Install Node.js, NPM & Yarn
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: 14.17.0
+  #     - name: Retrieve tag version
+  #       id: ref
+  #       run: echo "::set-output name=version::$(node ./scripts/get-pkg-version.js)"
+  #     - name: Install deps
+  #       run: npm i
+  #     - name: Build languages
+  #       run: npm run get-languages
+  #     - name: Build app
+  #       run: npm run release
+  #       env:
+  #         GH_TOKEN: ${{ secrets.github_token }}
+  #     - name: Cache nsis release
+  #       uses: actions/upload-artifact@v1
+  #       with:
+  #         name: Flux Setup ${{steps.ref.outputs.version}}.exe
+  #         path: ./dist_electron/Flux Setup ${{steps.ref.outputs.version}}.exe
+  #     - name: Cache latest-windows.yml
+  #       uses: actions/upload-artifact@v1
+  #       with:
+  #         name: latest-windows.yml
+  #         path: ./dist_electron/latest.yml
 
   build_linux:
     name: Linux build
@@ -95,10 +154,25 @@ jobs:
         env:
           SQLCIPHER_STATIC: 1
         run: |
-          cargo install holochain_cli --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
-          cargo install holochain --git https://github.com/holochain/holochain --rev b94acf0e250560957f404541673e809ac6a2b2ea
-          cargo install lair_keystore --git https://github.com/guillemcordoba/lair --rev 53fea43d53352609978d550f72f987f0ce458896
+          cargo install lair_keystore --git https://github.com/holochain/lair --rev bd92b76ad9cc18bc0c0db215e4bea9767c9003cf
+          cargo install holochain --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
+          cargo install holochain_cli --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
           ./scripts/copy-hc.sh
+      - name: Cache cargo registry
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+      - name: Cache cargo index
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+      - name: Cache cargo bin
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/bin
+          key: ${{ runner.os }}-cargo-bin-${{ hashFiles('**/Cargo.lock') }}
       - name: Install Node.js, NPM & Yarn
         uses: actions/setup-node@v2
         with:
@@ -119,13 +193,13 @@ jobs:
       - name: Cache AppImage
         uses: actions/upload-artifact@v1
         with:
-          name: Junto-${{steps.ref.outputs.version}}.AppImage
-          path: ./dist_electron/Junto-${{steps.ref.outputs.version}}.AppImage
+          name: Flux-${{steps.ref.outputs.version}}.AppImage
+          path: ./dist_electron/Flux-${{steps.ref.outputs.version}}.AppImage
       - name: Cache .deb release (x64)
         uses: actions/upload-artifact@v1
         with:
-          name: junto_${{steps.ref.outputs.version}}_amd64.deb
-          path: ./dist_electron/junto_${{steps.ref.outputs.version}}_amd64.deb
+          name: flux_${{steps.ref.outputs.version}}_amd64.deb
+          path: ./dist_electron/flux_${{steps.ref.outputs.version}}_amd64.deb
       - name: Cache latest-linux.yml
         uses: actions/upload-artifact@v1
         with:
@@ -151,18 +225,28 @@ jobs:
       - name: Download AppImage
         uses: actions/download-artifact@v1
         with:
-          name: Junto-${{steps.ref.outputs.version}}.AppImage
+          name: Flux-${{steps.ref.outputs.version}}.AppImage
           path: .
       - name: Download deb
         uses: actions/download-artifact@v1
         with:
-          name: junto_${{steps.ref.outputs.version}}_amd64.deb
+          name: flux_${{steps.ref.outputs.version}}_amd64.deb
           path: .
       - name: Download macOS image
         uses: actions/download-artifact@v1
         with:
-          name: Junto-${{steps.ref.outputs.version}}.dmg
+          name: Flux-${{steps.ref.outputs.version}}.dmg
           path: .
+      # - name: Download Windows Exe
+      #   uses: actions/download-artifact@v1
+      #   with:
+      #     name: Flux Setup ${{steps.ref.outputs.version}}.exe
+      #     path: .
+      # - name: Download latest-windows.yml
+      #   uses: actions/download-artifact@v1
+      #   with:
+      #     name: latest-windows.yml
+      #     path: .
       - name: Download latest-linux.yml
         uses: actions/download-artifact@v1
         with:
@@ -175,9 +259,9 @@ jobs:
           path: .
       - name: Generate SHA256 checksums
         run: |
-          sha256sum "junto_${{steps.ref.outputs.version}}_amd64.deb" >> "SHA256SUMS.txt"
-          sha256sum "Junto-${{steps.ref.outputs.version}}.AppImage" >> "SHA256SUMS.txt"
-          sha256sum "Junto-${{steps.ref.outputs.version}}.dmg" >> "SHA256SUMS.txt"
+          sha256sum "flux_${{steps.ref.outputs.version}}_amd64.deb" >> "SHA256SUMS.txt"
+          sha256sum "Flux-${{steps.ref.outputs.version}}.AppImage" >> "SHA256SUMS.txt"
+          sha256sum "Flux-${{steps.ref.outputs.version}}.dmg" >> "SHA256SUMS.txt"
           sha256sum "latest-linux.yml" >> "SHA256SUMS.txt"
           sha256sum "latest-mac.yml" >> "SHA256SUMS.txt"
       - name: Verify checksums
@@ -198,8 +282,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.github_token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./junto_${{steps.ref.outputs.version}}_amd64.deb
-          asset_name: junto_${{steps.ref.outputs.version}}_amd64.deb
+          asset_path: ./flux_${{steps.ref.outputs.version}}_amd64.deb
+          asset_name: flux_${{steps.ref.outputs.version}}_amd64.deb
           asset_content_type: application/octet-stream
       - name: Upload AppImage binary (arm64)
         uses: actions/upload-release-asset@v1.0.1
@@ -207,8 +291,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.github_token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Junto-${{steps.ref.outputs.version}}.AppImage
-          asset_name: Junto-${{steps.ref.outputs.version}}.AppImage
+          asset_path: ./Flux-${{steps.ref.outputs.version}}.AppImage
+          asset_name: Flux-${{steps.ref.outputs.version}}.AppImage
           asset_content_type: application/octet-stream
       - name: Upload macOS image
         uses: actions/upload-release-asset@v1.0.1
@@ -216,9 +300,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Junto-${{steps.ref.outputs.version}}.dmg
-          asset_name: Junto-${{steps.ref.outputs.version}}.dmg
+          asset_path: ./Flux-${{steps.ref.outputs.version}}.dmg
+          asset_name: Flux-${{steps.ref.outputs.version}}.dmg
           asset_content_type: application/octet-stream
+      # - name: Upload Windows exe
+      #   uses: actions/upload-release-asset@v1.0.1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: ./Flux Setup ${{steps.ref.outputs.version}}.exe
+      #     asset_name: Flux Setup ${{steps.ref.outputs.version}}.exe
+      #     asset_content_type: application/octet-stream
       - name: Upload latest-linux.yml
         uses: actions/upload-release-asset@v1.0.1
         env:
@@ -237,6 +330,15 @@ jobs:
           asset_path: ./latest-mac.yml
           asset_name: latest-mac.yml
           asset_content_type: application/octet-stream
+      # - name: Upload latest-windows.yml
+      #   uses: actions/upload-release-asset@v1.0.1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.github_token }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: ./latest.yml
+      #     asset_name: latest.yml
+      #     asset_content_type: application/octet-stream
       - name: Upload the checksums
         uses: actions/upload-release-asset@v1.0.1
         env:

@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import { useValidation } from "@/utils/validation";
 import { AgentStatus } from "@perspect3vism/ad4m";
 import { useUserStore } from "@/store/user";
@@ -71,6 +71,12 @@ export default defineComponent({
             "Password should be 8 or more characters and contain at least one number",
         },
       ],
+    });
+
+    watch([password, passwordIsValid], ([password, passwordIsValid]) => {
+      if (passwordIsValid) {
+        validatePassword();
+      }
     });
 
     const name = ref("");

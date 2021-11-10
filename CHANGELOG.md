@@ -2,6 +2,146 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.2.10] - 27/10/2021
+
+### Added
+
+### Changed
+ - When user creating agent if password is invalid disable the next button
+
+### Deprecated
+
+### Removed 
+
+### Fixed
+ - Openssl/boringssl error when using older version of ipfs with bcrypto dependency that effected some Linux installations
+ - Low timeout on link query causing some channels not to load messages 
+ - If password error is shown, clear error when password requirements are met
+ - Issue where group avatar would not update for some members
+
+### Security
+
+---
+
+## [0.2.9] - 18/10/2021
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed 
+
+### Fixed
+ - Fix error when copying debug.log file to desktop on error splash screen
+ - Fix error when no group expression links are found on community 
+
+### Security
+
+---
+
+
+## [0.2.8] - 15/10/2021
+
+### Added
+ - Added button to copy log file to desktop when global error is shown
+ - Members on community now also added by signals
+
+### Changed
+ - New Flux logo's!
+ - Renamed application name from Junto -> Flux where applicable
+ - Loading screen now uses flux wordmark
+ - Cache service now uses levelDB
+ - Store now only saves array of did's for user instead of entire profile data to save bloating the store
+ - Logo's and animations now use flux design 
+
+### Deprecated
+
+### Removed
+ - Old files & images
+ - Member & group expression workers removed and replaced with single gql call on community route change
+ - Logout option
+
+### Fixed
+ - Global variables now used for all places where worker polling happens and poll delay used
+ - MessageView now only tries to load unique did profiles for expression messages and not duplicate agents
+ - Now correctly using thumbnail for rendering profile images on messages
+ - Added id to expression worker loops to avoid duplicate getExpression calls when resolving signals / links 
+ - Home channel now shows correct name in Channel header information
+
+### Security
+
+---
+
+## [0.2.7] - 11/10/2021
+
+### Added
+ - Cargo caching to Github actions release build
+ - More detailed information when joining a community
+
+### Changed
+ - Tweak size and type of avatar upload button
+ - Improved join/create community
+
+### Deprecated
+
+### Removed
+
+### Fixed
+ - Broken jest config for test
+ - Profile picture being too large and killing holochain (now use IPFS for storage)
+ - Community picture being too large and killing holochain (now use IPFS for storage)
+ - Bug where ad4m would not be killed correctly in production MacOS
+ - Links in gitbook opening in the electron browser window (now opens in default browser)
+
+### Security
+
+---
+
+## [0.2.6] - 07/10/2021
+
+### Added
+ - Confirm modal when cleaning state
+
+### Changed
+
+### Deprecated
+
+### Removed
+ - Windows build
+ - Apollo composable dependency
+ - Old database perspective that was created on user signup
+ - Expression UI caching when joining or creating a community
+
+### Fixed
+ - Language language throwing error in production
+ - Service worker load error on mac in production
+ - Correctly init main neighbourhood as home channel when joining a channel
+ - Added membrane root value on neighbourhood when creating and joining a neighbourhood
+
+### Security
+
+---
+
+## [0.2.5] - 01/10/2021
+
+### Added
+ - Windows build support
+
+### Changed
+ - Holochain upgraded to version 109
+ - Base social-context that is created when creating a community is now also used as the link store for the home channel
+
+### Deprecated
+
+### Removed
+
+### Fixed
+### Security
+
+---
+
 ## [0.2.4] - 01/10/2021
 
 ### Added

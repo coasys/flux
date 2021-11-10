@@ -4,10 +4,7 @@ const { pathsToModuleNameMapper } = require("ts-jest/utils");
 const { compilerOptions } = require("./tsconfig");
 
 const esModules = [
-  "@junto-foundation/junto-elements",
   "runtime-dom",
-  "register-service-worker",
-  "vue-advanced-cropper",
   "vue3-observe-visibility2",
   "vue3-virtual-scroller",
 ].join("|");

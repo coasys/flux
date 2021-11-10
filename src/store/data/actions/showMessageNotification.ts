@@ -2,7 +2,6 @@ import { useAppStore } from "@/store/app";
 import { ExpressionTypes } from "@/store/types";
 import { useUserStore } from "@/store/user";
 import { RouteLocationNormalizedLoaded, Router } from "vue-router";
-import { ACCOUNT_NAME } from "@/constants/profile";
 import { useDataStore } from "..";
 import { getProfile } from "@/utils/profileHelpers";
 
@@ -41,12 +40,12 @@ export default async ({
 
   // Only show the notification when the the message is not from self & the active community & channel is different
   if (
-    (isMinimized && !channel?.state.notifications.mute) ||
+    (isMinimized && !channel?.state.notifications.mute && !community?.state.notifications.mute) ||
     (user!.agent.did! !== authorDid &&
       (community?.neighbourhood.perspective.uuid === communityId
         ? channel?.neighbourhood.perspective.uuid !== channelId
         : true) &&
-      !channel?.state.notifications.mute)
+      !channel?.state.notifications.mute && !community?.state.notifications.mute)
   ) {
     const isMentioned = message.includes(
       user!.agent.did!.replace("did:key:", "")
@@ -64,8 +63,7 @@ export default async ({
         profileLanguage!.languageAddress,
         authorDid
       );
-      //@ts-ignore
-      const name = profile.data.profile[ACCOUNT_NAME];
+      const name = profile ? profile.username : "Someone";
 
       title = `${name} mentioned you in #${channel?.neighbourhood.name}}`;
       body = escapedMessage;
@@ -76,7 +74,7 @@ export default async ({
 
     const notification = new Notification(title, {
       body,
-      icon: "/assets/images/junto_app_icon.png",
+      icon: "/assets/images/logo.png",
     });
 
     // Clicking on notification will take the user to that community & channel

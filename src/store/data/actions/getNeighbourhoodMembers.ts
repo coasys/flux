@@ -1,21 +1,20 @@
 import { print } from "graphql/language/printer";
 import { LinkQuery } from "@perspect3vism/ad4m";
-import { TimeoutCache } from "../../../utils/timeoutCache";
 
 import { ExpressionTypes, ProfileExpression } from "@/store/types";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 
 import { MEMBER } from "@/constants/neighbourhoodMeta";
+import { memberRefreshDurationMs } from "@/constants/config";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
+import { profileCache } from "@/app";
 
 const expressionWorker = new Worker("pollingWorker.js");
 
 export default async function (id: string): Promise<Worker> {
   const dataStore = useDataStore();
   const appStore = useAppStore();
-
-  const cache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
 
   try {
     const neighbourhood = dataStore.getNeighbourhood(id);
@@ -28,7 +27,8 @@ export default async function (id: string): Promise<Worker> {
       const profileLinksWorker = new Worker("pollingWorker.js");
 
       profileLinksWorker.postMessage({
-        interval: 5000,
+        interval: memberRefreshDurationMs,
+        staticSleep: true,
         query: print(PERSPECTIVE_LINK_QUERY),
         variables: {
           uuid: id,
@@ -49,15 +49,16 @@ export default async function (id: string): Promise<Worker> {
         const profileLinks = e.data.perspectiveQueryLinks;
 
         for (const profileLink of profileLinks) {
-          const profile = cache.get(profileLink.data.target);
+          const profile = await profileCache.get(profileLink.data.target);
 
           if (profile) {
             dataStore.setNeighbourhoodMember({
               perspectiveUuid: id,
-              member: profile,
+              member: profile.author,
             });
           } else {
             expressionWorker.postMessage({
+              id: profileLink.data.target,
               retry: 50,
               interval: 5000,
               query: print(GET_EXPRESSION),
@@ -74,10 +75,10 @@ export default async function (id: string): Promise<Worker> {
         throw new Error(e.toString());
       };
 
-      expressionWorker.addEventListener("message", (e: any) => {
+      expressionWorker.addEventListener("message", async (e: any) => {
         const profileGqlExp = e.data.expression;
         const link = e.data.callbackData.link;
-        const did = `${profileLang!.languageAddress}://${link.author}`;
+        const profileRef = `${profileLang!.languageAddress}://${link.author}`;
 
         const profileExp = {
           author: profileGqlExp.author!,
@@ -89,10 +90,10 @@ export default async function (id: string): Promise<Worker> {
         if (profileGqlExp) {
           dataStore.setNeighbourhoodMember({
             perspectiveUuid: id,
-            member: profileExp,
+            member: profileExp.author,
           });
 
-          cache.set(did, profileExp);
+          await profileCache.set(profileRef, profileExp);
         }
       });
 

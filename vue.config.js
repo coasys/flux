@@ -1,7 +1,5 @@
-const webpack = require("webpack");
-
 module.exports = {
-  transpileDependencies: ["@vue/apollo-composable"],
+  transpileDependencies: [],
   chainWebpack: (config) => {
     config.module
       .rule("vue")
@@ -14,17 +12,6 @@ module.exports = {
           },
         };
       });
-    config
-      .plugin("nativeModuleStub")
-      .use(webpack.NormalModuleReplacementPlugin, [
-        /type-graphql$/,
-        (resource) => {
-          resource.request = resource.request.replace(
-            /type-graphql/,
-            "type-graphql/dist/browser-shim.js"
-          );
-        },
-      ]);
     config.module
       .rule("mjs")
       .test(/\.mjs$/)
@@ -45,10 +32,10 @@ module.exports = {
       ],
       rendererProcessFile: "src/app.ts",
       preload: "src/preload.js",
-      externals: ["@perspect3vism/ad4m-executor", "fs"],
+      externals: ["@perspect3vism/ad4m-executor"],
       builderOptions: {
-        productName: "Junto",
-        appId: "junto.foundation.communities",
+        productName: "Flux",
+        appId: "junto.foundation.flux",
         mac: {
           target: "default",
           binaries: [
@@ -56,6 +43,10 @@ module.exports = {
             "./resources/darwin/holochain",
             "./resources/darwin/lair-keystore",
           ],
+        },
+        win: {
+          target: ["nsis"],
+          icon: "./build/icon.png"
         },
         linux: {
           target: ["AppImage", "deb"],
@@ -83,9 +74,10 @@ module.exports = {
           .use("babel")
           .loader("babel-loader")
           .options({
-            presets: [["@babel/preset-env", { modules: false }]],
             plugins: ["@babel/plugin-transform-typescript"],
           });
+        config.plugins.delete('workbox');
+        config.plugins.delete('pwa');
       },
     },
   },

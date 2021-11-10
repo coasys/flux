@@ -1,4 +1,4 @@
-import { apolloClient } from "@/utils/setupApolloClient";
+import { apolloClient } from "@/app";
 
 import unwrapApolloResult from "@/utils/unwrapApolloResult";
 import type { PerspectiveHandle } from "@perspect3vism/ad4m";

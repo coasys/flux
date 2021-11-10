@@ -1,4 +1,3 @@
-import community from "../../../fixtures/community.json";
 import createCommunityPerspective from "../../../fixtures/createCommunityPerspective.json";
 import createCommunityUniqueHolochainLanguage from "../../../fixtures/createCommunityUniqueHolochainLanguage.json";
 import createCommunityLinkType from "../../../fixtures/createCommunityLinkType.json";
@@ -19,7 +18,11 @@ import * as createChannel from "@/core/methods/createChannel";
 import * as getLanguage from "@/core/queries/getLanguage";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useDataStore } from "@/store/data";
-import { GROUP_EXPRESSION_OFFICIAL, SHORTFORM_EXPRESSION_OFFICIAL, SOCIAL_CONTEXT_OFFICIAL } from "@/ad4m-globals";
+import {
+  GROUP_EXPRESSION_OFFICIAL,
+  SHORTFORM_EXPRESSION_OFFICIAL,
+  SOCIAL_CONTEXT_OFFICIAL,
+} from "@/constants/languages";
 
 describe("Create Community", () => {
   let store: Pinia;

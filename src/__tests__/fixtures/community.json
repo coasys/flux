@@ -43,6 +43,9 @@
       "hue": 270,
       "saturation": 60
     },
-    "currentChannelId": null
+    "currentChannelId": null,
+    "notifications": {
+      "mute": false
+    }
   }
 }

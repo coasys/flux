@@ -1,7 +1,7 @@
 import type { Expression, LinkExpression } from "@perspect3vism/ad4m";
 import { ExpressionRef } from "@perspect3vism/ad4m";
 
-export interface JuntoExpressionReference {
+export interface FluxExpressionReference {
   languageAddress: string;
   expressionType: ExpressionTypes;
 }

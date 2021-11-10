@@ -51,7 +51,7 @@
             :message="item.expression.data.body"
             :timestamp="item.expression.timestamp"
             :username="users[item.expression.author]?.username"
-            :profileImg="users[item.expression.author]?.profilePicture"
+            :profileImg="users[item.expression.author]?.thumbnailPicture"
             @profileClick="(did) => $emit('profileClick', did)"
             @mentionClick="(dataset) => $emit('mentionClick', dataset)"
           />
@@ -64,7 +64,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { ExpressionAndRef, Profile } from "@/store/types";
-import { getProfile, parseProfile } from "@/utils/profileHelpers";
+import { getProfile } from "@/utils/profileHelpers";
 import { differenceInMinutes, parseISO } from "date-fns";
 import MessageItem from "@/components/message-item/MessageItem.vue";
 import { Editor } from "@tiptap/vue-3";
@@ -167,9 +167,13 @@ export default defineComponent({
           // TODO: Debounce this
           this.scrollToBottom("smooth");
         }
-        messages.forEach((msg: ExpressionAndRef) => {
-          if (!this.users[msg.expression.author]) {
-            this.loadUser(msg.expression.author);
+        //Get an array of unique did's that we need to load
+        const uniqueDids = Array.from(
+          new Set(messages.map((a) => a.expression.author))
+        );
+        uniqueDids.forEach(async (did: string) => {
+          if (!this.users[did]) {
+            this.loadUser(did);
           }
         });
       },
@@ -239,10 +243,9 @@ export default defineComponent({
     },
     async loadUser(did: string) {
       let profileLang = this.profileLanguage;
-      const dataExp = await getProfile(profileLang, did);
-      if (dataExp) {
-        const { data } = dataExp;
-        this.users[did] = parseProfile(data.profile);
+      const profile = await getProfile(profileLang, did);
+      if (profile) {
+        this.users[did] = profile;
       }
     },
   },

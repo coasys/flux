@@ -67,17 +67,19 @@ export default defineComponent({
   },
   async mounted() {
     this.linksWorker?.terminate();
+    this.fwdLinkWorker?.terminate();
     this.expressionWorker?.terminate();
 
     const { channelId, communityId } = this.$route.params;
 
-    const { linksWorker, expressionWorker } =
+    const { linksWorker, fwdLinkWorker, expressionWorker } =
       await this.dataStore.loadExpressions({
         channelId: channelId as string,
         expressionWorker: new Worker("pollingWorker.js"),
       });
 
     this.linksWorker = linksWorker;
+    this.fwdLinkWorker = fwdLinkWorker;
     this.expressionWorker = expressionWorker;
 
     this.dataStore.setCurrentChannelId({
@@ -105,6 +107,7 @@ export default defineComponent({
       currentExpressionPost: "",
       users: {} as UserMap,
       linksWorker: null as null | Worker,
+      fwdLinkWorker: null as null | Worker,
       expressionWorker: null as null | Worker,
       editor: null as Editor | null,
       showList: false,
@@ -159,9 +162,10 @@ export default defineComponent({
     },
     async loadMessages(from?: string, to?: string) {
       this.linksWorker?.terminate();
+      this.fwdLinkWorker?.terminate();
       this.expressionWorker?.terminate();
 
-      const { linksWorker, expressionWorker } =
+      const { linksWorker, fwdLinkWorker, expressionWorker } =
         await this.dataStore.loadExpressions({
           from: from ? new Date(from) : undefined,
           to: to ? new Date(to) : undefined,
@@ -170,6 +174,7 @@ export default defineComponent({
         });
 
       this.$emit("updateLinkWorker", linksWorker);
+      this.$emit("updateFwdLinkWorker", fwdLinkWorker);
       this.$emit("updateExpressionWorker", expressionWorker);
 
       this.previousFetchedTimestamp = from;

@@ -1,12 +1,13 @@
 import { getLanguage } from "@/core/queries/getLanguage";
-import { JuntoExpressionReference, ExpressionTypes } from "@/store/types";
+import { FluxExpressionReference, ExpressionTypes } from "@/store/types";
 import { LinkExpression } from "@perspect3vism/ad4m";
 
 export async function getTypedExpressionLanguages(
   links: LinkExpression[]
-): Promise<JuntoExpressionReference[]> {
+): Promise<FluxExpressionReference[]> {
   const typedExpressionLanguages = [];
-  //Parse links on a neighbourhood and search for expression languages we understand
+  //Get and cache the expression UI for each expression language
+  //And used returned expression language names to populate typedExpressionLanguages field
   for (const link of links) {
     if (link.data.predicate == "language") {
       const languageRes = await getLanguage(link.data.target!);
@@ -28,7 +29,7 @@ export async function getTypedExpressionLanguages(
       typedExpressionLanguages.push({
         languageAddress: link.data.target!,
         expressionType: expressionType,
-      } as JuntoExpressionReference);
+      } as FluxExpressionReference);
     }
   }
   return typedExpressionLanguages;

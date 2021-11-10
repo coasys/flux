@@ -12,19 +12,55 @@
           class="left-nav__community-item"
           :selected="communityIsActive(community.perspective.uuid)"
           size="xl"
+          :online="hasNotification(community.perspective.uuid)"
           :src="community.image || null"
           :initials="community.name.charAt(0).toUpperCase()"
           @click="() => handleCommunityClick(community.perspective.uuid)"
         ></j-avatar>
-        <j-menu
-          slot="content"
-          @click="() => removeCommunity(community.perspective.uuid)"
-        >
-          <j-menu-item>Remove community</j-menu-item>
+        <j-menu slot="content">
+          <j-menu-item
+            @click="() => removeCommunity(community.perspective.uuid)"
+            >Remove community</j-menu-item
+          >
+
+          <j-menu-item @click="() => muteCommunity(community.perspective.uuid)"
+            ><j-icon
+              size="xs"
+              slot="start"
+              :name="
+                getCommunityState(community.perspective.uuid).notifications
+                  ?.mute
+                  ? 'bell-slash'
+                  : 'bell'
+              "
+            />
+            {{
+              `${
+                getCommunityState(community.perspective.uuid).notifications
+                  ?.mute
+                  ? "Unmute"
+                  : "Mute"
+              } Community`
+            }}
+          </j-menu-item>
+          <j-menu-item
+            @click="() => toggleHideMutedChannels(community.perspective.uuid)"
+          >
+            <j-icon
+              size="xs"
+              slot="start"
+              :name="
+                getCommunityState(community.perspective.uuid).hideMutedChannels
+                  ? 'toggle-on'
+                  : 'toggle-off'
+              "
+            />
+            Hide muted channels
+          </j-menu-item>
         </j-menu>
       </j-popover>
     </j-tooltip>
-    <j-tooltip title="Create a community">
+    <j-tooltip title="Create or join community">
       <j-button
         @click="() => appStore.setShowCreateCommunity(true)"
         square
@@ -55,6 +91,12 @@ export default defineComponent({
     };
   },
   methods: {
+    toggleHideMutedChannels(id: string) {
+      this.dataStore.toggleHideMutedChannels({ communityId: id });
+    },
+    muteCommunity(id: string) {
+      this.dataStore.toggleCommunityMute({ communityId: id });
+    },
     removeCommunity(id: string) {
       this.$router.push({ name: "home" }).then(() => {
         this.dataStore.removeCommunity(id);
@@ -75,6 +117,14 @@ export default defineComponent({
     },
     communityIsActive() {
       return (id: string) => this.$route.params.communityId === id;
+    },
+    hasNotification() {
+      return (id: string) => {
+        return this.dataStore.getCommunity(id).state.hasNewMessages;
+      };
+    },
+    getCommunityState() {
+      return (id: string) => this.dataStore.getCommunityState(id);
     },
   },
 });

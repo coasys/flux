@@ -1,4 +1,4 @@
-import { apolloClient } from "@/utils/setupApolloClient";
+import { apolloClient } from "@/app";
 
 import unwrapApolloResult from "@/utils/unwrapApolloResult";
 import { GET_TRUSTED_AGENTS } from "../graphql_queries";

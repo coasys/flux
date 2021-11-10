@@ -10,14 +10,17 @@ export function setTheme(theme: ThemeState): void {
     theme.saturation + "%"
   );
 
+  document.documentElement.style.setProperty(
+    "--j-font-base-size",
+    theme.fontSize
+  );
+
   if (theme.name === "light") {
     document.documentElement.removeAttribute("theme");
   } else {
     import(`../themes/${theme.name}.css`);
     document.documentElement.setAttribute("theme", theme.name);
   }
-
-  document.documentElement.setAttribute("font-size", theme.fontSize);
 
   const head = document.getElementsByTagName("head")[0];
   let link = null;

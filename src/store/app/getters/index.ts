@@ -1,7 +1,4 @@
-import {
-  ApplicationState,
-  WindowState,
-} from "@/store/types";
+import { ApplicationState, WindowState } from "@/store/types";
 
 export default {
   getLanguagePath(state: ApplicationState): string {

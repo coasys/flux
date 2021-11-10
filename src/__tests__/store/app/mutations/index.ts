@@ -1,7 +1,3 @@
-import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
-import * as getLanguage from "@/core/queries/getLanguage";
-import getTypedExpressionLangLanguages from "../../../fixtures/getTypedExpressionLangLanguages.json";
-import getTypedExpressionLangLinks from "../../../fixtures/getTypedExpressionLangLinks.json";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useAppStore } from "@/store/app";
 

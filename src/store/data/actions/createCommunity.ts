@@ -10,13 +10,13 @@ import {
   GROUP_EXPRESSION_OFFICIAL,
   PROFILE_EXPRESSION_OFFICIAL,
   SHORTFORM_EXPRESSION_OFFICIAL,
-} from "@/ad4m-globals";
+} from "@/constants/languages";
 
 import { MEMBER } from "@/constants/neighbourhoodMeta";
 
 import {
   MembraneType,
-  JuntoExpressionReference,
+  FluxExpressionReference,
   ExpressionTypes,
   CommunityState,
   FeedType,
@@ -96,15 +96,15 @@ export default async ({
       {
         languageAddress: shortFormExpressionLang.address!,
         expressionType: ExpressionTypes.ShortForm,
-      } as JuntoExpressionReference,
+      } as FluxExpressionReference,
       {
         languageAddress: groupExpressionLang.address!,
         expressionType: ExpressionTypes.GroupExpression,
-      } as JuntoExpressionReference,
+      } as FluxExpressionReference,
       {
         languageAddress: profileExpressionLang.address!,
         expressionType: ExpressionTypes.ProfileExpression,
-      } as JuntoExpressionReference,
+      } as FluxExpressionReference,
     ];
 
     //Publish perspective
@@ -170,6 +170,8 @@ export default async ({
     });
     console.log("Created profile expression link", addProfileLink);
 
+    const myDid = userStore.getUser!.agent.did!;
+
     const newCommunity = {
       neighbourhood: {
         name: perspectiveName,
@@ -184,7 +186,8 @@ export default async ({
         membraneType: MembraneType.Unique,
         linkedPerspectives: [createSourcePerspective.uuid],
         linkedNeighbourhoods: [createSourcePerspective.uuid],
-        members: {},
+        members: [myDid],
+        membraneRoot: createSourcePerspective.uuid,
         currentExpressionLinks: {},
         currentExpressionMessages: {},
         createdAt: new Date().toISOString(),
@@ -200,10 +203,17 @@ export default async ({
         },
         useLocalTheme: false,
         currentChannelId: null,
+        hideMutedChannels: false,
+        notifications: {
+          mute: false,
+        },
       },
     } as CommunityState;
 
     dataStore.addCommunity(newCommunity);
+    // We add a default channel that is a reference to
+    // the community itself. This way we can utilize the fractal nature of
+    // neighbourhoods. Remember that this also need to happen in join community.
     dataStore.addLocalChannel({
       perspectiveUuid: createSourcePerspective.uuid,
       channel: {

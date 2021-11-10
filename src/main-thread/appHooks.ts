@@ -1,4 +1,6 @@
 import { app, BrowserWindow } from "electron";
+import fs from "fs";
+import path from "path";
 import installExtension, { VUEJS3_DEVTOOLS } from "electron-devtools-installer";
 import ad4m from "@perspect3vism/ad4m-executor";
 import { autoUpdater } from "electron-updater";
@@ -70,10 +72,47 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
             neighbourhoods: "neighbourhood-store",
           },
           ad4mBootstrapFixtures: {
-            languages: [],
+            languages: [
+              {
+                address: "QmR1dV5KuAQtYG98qqmYEvHXfxJZ3jKyjf7SFMriCMfHVQ",
+                meta: {
+                  author:
+                    "did:key:zQ3shkkuZLvqeFgHdgZgFMUx8VGkgVWsLA83w2oekhZxoCW2n",
+                  timestamp: "2021-10-07T21:39:36.607Z",
+                  data: {
+                    name: "Direct Message Language",
+                    address: "QmR1dV5KuAQtYG98qqmYEvHXfxJZ3jKyjf7SFMriCMfHVQ",
+                    description:
+                      "Template source for personal, per-agent DM languages. Holochain based.",
+                    possibleTemplateParams: [
+                      "recipient_did",
+                      "recipient_hc_agent_pubkey",
+                    ],
+                    sourceCodeLink:
+                      "https://github.com/perspect3vism/direct-message-language",
+                  },
+                  proof: {
+                    signature:
+                      "e933e34f88694816ea91361605c8c2553ceeb96e847f8c73b75477cc7d9bacaf11eae34e38c2e3f474897f59d20f5843d6f1d2c493b13552093bc16472b0ac33",
+                    key: "#zQ3shkkuZLvqeFgHdgZgFMUx8VGkgVWsLA83w2oekhZxoCW2n",
+                    valid: true,
+                  },
+                },
+                bundle: fs
+                  .readFileSync(
+                    path.join(
+                      mainThreadState.builtInLangPath,
+                      "direct-message-language",
+                      "build",
+                      "bundle.js"
+                    )
+                  )
+                  .toString(),
+              },
+            ],
             neighbourhoods: [],
           },
-          appBuiltInLangs: [],
+          appBuiltInLangs: ["direct-message-language"],
           appLangAliases: null,
           mocks: false,
         })
@@ -144,16 +183,16 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
   // Quit when all windows are closed.
   app.on("window-all-closed", async () => {
     console.warn("window-all-closed SIGNAL");
-    await mainThreadState.ad4mCore?.exit();
-    mainThreadState.ad4mCore = undefined;
+    if (mainThreadState.ad4mCore) {
+      await mainThreadState.ad4mCore.exit();
+      mainThreadState.ad4mCore = undefined;
+    }
     app.quit();
   });
 
   // Quit when all windows are closed.
-  app.on("will-quit", async () => {
+  app.on("will-quit", () => {
     console.warn("will-quit SIGNAL");
-    await mainThreadState.ad4mCore?.exit();
-    mainThreadState.ad4mCore = undefined;
     app.quit();
   });
 
@@ -164,6 +203,11 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
     mainThreadState.mainWindow!.webContents.send("unlockedStateOff");
 
     mainThreadState.mainWindow!.webContents.send("clearMessages");
+
+    if (mainThreadState.ad4mCore) {
+      await mainThreadState.ad4mCore.exit();
+      mainThreadState.ad4mCore = undefined;
+    }
   });
 
   app.on("activate", async () => {

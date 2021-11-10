@@ -100,7 +100,7 @@ export default defineComponent({
     async updateProfile() {
       this.isUpdatingProfile = true;
       const resizedImage = this.profilePicture
-        ? await resizeImage(dataURItoBlob(this.profilePicture as string), 400)
+        ? await resizeImage(dataURItoBlob(this.profilePicture as string), 100)
         : undefined;
       const thumbnail = this.profilePicture
         ? await blobToDataURL(resizedImage!)

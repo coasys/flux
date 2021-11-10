@@ -57,6 +57,18 @@ export function setup(mainThreadState: MainThreadGlobal): void {
         log_stdout.write(util.format(arg) + "\n");
       });
     };
+    console.warn = function (...args: any) {
+      args.forEach((arg: any) => {
+        log_file.write(util.format(arg) + "\n");
+        log_stdout.write(util.format(arg) + "\n");
+      });
+    };
+    console.debug = function (...args: any) {
+      args.forEach((arg: any) => {
+        log_file.write(util.format(arg) + "\n");
+        log_stdout.write(util.format(arg) + "\n");
+      });
+    };
   } else {
     console.log("\x1b[1m", "App is running in dev mode", "\x1b[0m", "\n");
 
@@ -72,6 +84,13 @@ export function setup(mainThreadState: MainThreadGlobal): void {
 
     //Set the app paths to the new dev directory
     app.setPath("userData", path.join(app.getPath("userData"), "dev"));
-    app.setPath("appData", path.join(app.getPath("appData"), "junto", "dev"));
+    app.setPath("appData", path.join(app.getPath("appData"), "flux", "dev"));
+
+    const repoLockPath = path.join(app.getPath("appData"), ".jsipfs/repo.lock");
+    console.debug("repo lock path", repoLockPath);
+    if (fs.existsSync(repoLockPath)) {
+      console.log("\x1b[31m", "\n\nFound repo.lock, deleting!");
+      fs.rmSync(repoLockPath);
+    }
   }
 }

@@ -10,6 +10,10 @@ export class Profile {
   thumbnailPicture?: string;
 }
 
+export class ProfileWithDID extends Profile {
+  did: string;
+}
+
 export class ProfileExpression extends ExpressionGeneric(Profile) {}
 
 export interface UserState {
