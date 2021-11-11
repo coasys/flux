@@ -35,8 +35,7 @@ export const profileCache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
 const pinia = createPinia();
 
 // @ts-ignore
-const ad4mClient = new Ad4mClient(apolloClient);
-export { ad4mClient };
+export const ad4mClient = new Ad4mClient(apolloClient);
 
 pinia.use(({ store }) => {
   const key = store.$id;
