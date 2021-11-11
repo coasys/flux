@@ -8,15 +8,14 @@ import "@junto-foundation/junto-elements/dist/main.css";
 import { createPinia } from "pinia";
 import { Ad4mClient } from "@perspect3vism/ad4m";
 
-import { ApolloClient, InMemoryCache } from "@apollo/client";
-import { WebSocketLink } from "@apollo/client/link/ws";
-import { Ad4mClient } from "@perspect3vism/ad4m";
 import { TimeoutCache } from "./utils/timeoutCache";
 import { ProfileExpression } from "./store/types";
+import { ApolloClient, InMemoryCache } from "@apollo/client";
+import { WebSocketLink } from "@apollo/client/link/ws";
 
 export const apolloClient = new ApolloClient({
   link: new WebSocketLink({
-    uri: `ws://localhost:4000/graphql`,
+    uri: `ws://localhost:5656/graphql`,
     options: {
       reconnect: true,
     },
@@ -33,10 +32,9 @@ export const apolloClient = new ApolloClient({
 });
 
 export const profileCache = new TimeoutCache<ProfileExpression>(1000 * 60 * 5);
-export const ad4mClient = new Ad4mClient(apolloClient);
-
 const pinia = createPinia();
 
+// @ts-ignore
 const ad4mClient = new Ad4mClient(apolloClient);
 export { ad4mClient };
 

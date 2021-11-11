@@ -16,7 +16,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { getProfile } from "@/utils/profileHelpers";
+import { getProfile, parseProfile } from "@/utils/profileHelpers";
 import { Profile } from "@/store/types";
 import { Perspective } from "@perspect3vism/ad4m";
 import { ad4mClient } from "@/app";
@@ -32,7 +32,13 @@ export default defineComponent({
   watch: {
     did: async function (did) {
       let profileLang = this.langAddress;
-      this.profile = await getProfile(profileLang, did);
+      const dataExp = await getProfile(profileLang, did);
+      if (dataExp) {
+        this.profile = dataExp;
+      }
+
+      const profilePerspective = await ad4mClient.agent.byDID(did);
+      this.agentPerspective = profilePerspective.perspective;
     },
   },
 });
