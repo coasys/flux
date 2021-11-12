@@ -60,7 +60,7 @@ import { useUserStore } from "./store/user";
 import { useAppStore } from "./store/app";
 import { useDataStore } from "./store/data";
 import { addTrustedAgents } from "@/core/mutations/addTrustedAgents";
-import { JUNTO_AGENT, AD4M_AGENT } from "@/constants/agents";
+import { JUNTO_AGENT, AD4M_AGENT, KAICHAO_AGENT } from "@/constants/agents";
 import { ad4mClient } from "./app";
 import { MEMBER } from "./constants/neighbourhoodMeta";
 
@@ -92,7 +92,7 @@ export default defineComponent({
     userStore.$subscribe(async (mutation, state) => {
       if (state.agent.isUnlocked) {
         appStore.setApplicationStartTime(new Date());
-        await addTrustedAgents([JUNTO_AGENT, AD4M_AGENT]);
+        await addTrustedAgents([JUNTO_AGENT, AD4M_AGENT, KAICHAO_AGENT]);
       } else {
         router.push({
           name: userStore.agent.isInitialized ? "login" : "signup",
