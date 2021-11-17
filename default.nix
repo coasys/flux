@@ -1,5 +1,5 @@
 {
-  holonixPath ?  builtins.fetchTarball { url = "https://github.com/holochain/holonix/archive/48a75e79b1713334ab0086767a214e5b1619d38d.tar.gz"; }
+  holonixPath ?  builtins.fetchTarball { url = "https://github.com/holochain/holonix/archive/d326ee858e051a2525a1ddb0452cab3085c4aa98.tar.gz"; }
 }:
 
 let
@@ -12,9 +12,9 @@ let
     holochainVersionId = "custom";
 
     holochainVersion = {
-      rev = "af7de6eca55d8dd3d22bbfccee738fd11f2a2e12";
-      sha256 = "1rwss1y8cd52ccd0875pfpbw6v518vcry3hjc1lja69x2g2x12qb";
-      cargoSha256 = "08a72d7nqpakml657z9vla739cbg8y046av4pwisdgj1ykyzyi60";
+      rev = "holochain-0.0.115";
+      sha256 = "sha256:163fvii27wqpni7f5f0m0nxivjjdgsycb2pnd1jcadx9i9d70ziv";
+      cargoSha256 = "sha256:1nmyk14d1v8y3wipjlff7bn38ay7zkp5fkzr7qbgm28kbai4ji3v";
       bins = {
         holochain = "holochain";
         hc = "hc";
@@ -22,8 +22,9 @@ let
       };
 
       lairKeystoreHashes = {
-        sha256 = "12n1h94b1r410lbdg4waj5jsx3rafscnw5qnhz3ky98lkdc1mnl3";
-        cargoSha256 = "0axr1b2hc0hhik0vrs6sm412cfndk358grfnax9wv4vdpm8bq33m";
+        rev = "f2de1f4d426e72714f48018349e4df799fbcb81b";
+        sha256 = "sha256:06vd1147323yhznf8qyhachcn6fs206h0c0bsx4npdc63p3a4m42";
+        cargoSha256 = "sha256:0brgy77kx797pjnjhvxhzjv9cjywdi4l4i3mdpqx3kyrklavggcy";
       };
     };
   };
