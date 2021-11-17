@@ -11,6 +11,7 @@ export interface Payload {
   username?: string;
   profilePicture?: string;
   thumbnail?: string;
+  bio?: string;
 }
 
 export default async (payload: Payload): Promise<void> => {

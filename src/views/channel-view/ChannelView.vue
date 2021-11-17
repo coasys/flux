@@ -1,6 +1,7 @@
 <template>
   <div class="channel-view" ref="scrollContainer">
     <channel-header :community="community" :channel="channel" />
+    {{activeProfile}}
     <channel-messages
       :profileLanguage="profileLanguage"
       :community="community"
@@ -18,7 +19,7 @@
       size="xs"
       v-if="activeProfile"
       :open="showProfile"
-      @toggle="(e) => (showProfile = e.target.open)"
+      @toggle="(e) => toggleProfile(e)"
     >
       <Profile :did="activeProfile" :langAddress="profileLanguage" />
     </j-modal>
@@ -149,6 +150,12 @@ export default defineComponent({
     },
   },
   methods: {
+    toggleProfile(e: any): void {
+      if (!e.target.open) {
+        this.activeProfile = undefined;
+      }
+      this.showProfile = e.target.open;
+    },
     loadMoreMessages(): void {
       const messageAmount = this.messages.length;
       if (messageAmount) {

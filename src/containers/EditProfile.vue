@@ -14,6 +14,13 @@
         :value="userProfile?.username"
         @input="(e) => (username = e.target.value)"
       ></j-input>
+      <j-input
+        size="lg"
+        label="Bio"
+        @keydown.enter="updateProfile"
+        :value="userProfile?.bio"
+        @input="(e) => (bio = e.target.value)"
+      ></j-input>
       <div>
         <j-button size="lg" @click="$emit('cancel')"> Cancel </j-button>
         <j-button size="lg" variant="primary" @click="updateProfile">
@@ -71,6 +78,7 @@ export default defineComponent({
       isUpdatingProfile: false,
       profilePicture: "",
       username: "",
+      bio: "",
       link: "",
     };
   },
@@ -106,11 +114,40 @@ export default defineComponent({
         ? await blobToDataURL(resizedImage!)
         : undefined;
 
+      const userPerspective = this.userStore.getFluxPerspectiveId;
+
+      const linked = await ad4mClient.perspective.addLink(
+        userPerspective!,
+        new Link({ source: 'flux://profile', target: `text://${this.bio}`, predicate: 'sioc://has_bio' })
+      );
+
+      const perspectiveSnapshot = await ad4mClient.perspective.snapshotByUUID(
+        userPerspective!
+      );
+  
+      const links = [];
+      //Remove __typename fields so the next gql does not fail
+      for (const link of [...perspectiveSnapshot!.links.filter(e => e.data.predicate === 'soic://has_bio'), linked]) {
+        //Deep copy the object... so we can delete __typename fields inject by apollo client
+        const newLink = JSON.parse(
+          JSON.stringify(link)
+        );
+        newLink.__typename = undefined;
+        newLink.data.__typename = undefined;
+        newLink.proof.__typename = undefined;
+
+          links.push(newLink);
+      }
+      const agent = await ad4mClient.agent.updatePublicPerspective({
+        links,
+      } as PerspectiveInput);
+
       this.userStore
         .updateProfile({
           username: this.username,
           profilePicture: this.profilePicture,
           thumbnail,
+          bio: this.bio
         })
         .then(() => {
           this.$emit("submit");
