@@ -8,6 +8,19 @@ import { MainThreadGlobal } from "./globals";
 import { createMainWindow, createSplashScreen } from "./createUI";
 
 export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
+  if (!fs.existsSync(path.join(app.getPath("appData"), "dontDelete-0.2.11"))) {
+    console.warn(
+      "Did not find dontDelete-0.2.11 deleting ad4m and Local Storage directories"
+    );
+    const ad4mPath = path.join(app.getPath("appData"), "ad4m");
+    if (fs.existsSync(ad4mPath)) fs.rmSync(ad4mPath, { recursive: true });
+
+    const localStoragePath = path.join(app.getPath("appData"), "Local Storage");
+    if (fs.existsSync(localStoragePath)) fs.rmSync(localStoragePath, { recursive: true });
+
+    fs.mkdirSync(path.join(app.getPath("appData"), "dontDelete-0.2.11"));
+  }
+
   // This method is called if a second instance of the application is started
   app.on("second-instance", () => {
     // Someone tried to run a second instance, we should focus our window.
