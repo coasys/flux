@@ -2,6 +2,30 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.2.11] - 19/11/2021
+
+### Added
+ - Notification indicator to community avatar
+ - Mute options for community
+ - Default values for community notification settings
+ - Channel list now collapsable
+ - Snap package to linux build
+
+### Changed
+ - Muted channels are now hidden
+ - Font sizes now scale to greater sizes and allow variable sizing
+ - Upgrade holochain to version 115! 
+
+### Deprecated
+
+### Removed 
+
+### Fixed
+
+### Security
+
+---
+
 ## [0.2.10] - 27/10/2021
 
 ### Added
