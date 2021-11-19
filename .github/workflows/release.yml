@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.55.0
+          toolchain: 1.54.0
       # - name: Prepare cache directory
       #   run: mkdir ./resources/temp
       # - uses: Swatinem/rust-cache@v1
@@ -139,7 +139,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.55.0
+          toolchain: 1.54.0
       # - name: Prepare cache directory
       #   run: mkdir ./resources/temp/holochain
       # - uses: Swatinem/rust-cache@v1
@@ -154,9 +154,9 @@ jobs:
         env:
           SQLCIPHER_STATIC: 1
         run: |
-          cargo install lair_keystore --git https://github.com/holochain/lair --rev bd92b76ad9cc18bc0c0db215e4bea9767c9003cf
-          cargo install holochain --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
-          cargo install holochain_cli --git https://github.com/holochain/holochain --rev af7de6eca55d8dd3d22bbfccee738fd11f2a2e12
+          cargo install lair_keystore --git https://github.com/holochain/lair --rev f2de1f4d426e72714f48018349e4df799fbcb81b
+          cargo install holochain --git https://github.com/holochain/holochain --rev 82febf81ae4eae5bab024cd36f67f51c1c0d8420
+          cargo install holochain_cli --git https://github.com/holochain/holochain --rev 82febf81ae4eae5bab024cd36f67f51c1c0d8420
           ./scripts/copy-hc.sh
       - name: Cache cargo registry
         uses: actions/cache@v1
