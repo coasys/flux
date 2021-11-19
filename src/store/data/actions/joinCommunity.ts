@@ -100,6 +100,10 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
             saturation: 60,
           },
           currentChannelId: null,
+          hideMutedChannels: false,
+          notifications: {
+            mute: false,
+          },
         },
       } as CommunityState;
 

@@ -1,4 +1,5 @@
 import community from "../../../fixtures/community.json";
+import createCommunity from "../../../fixtures/createCommunity.json";
 import channel from "../../../fixtures/channel.json";
 import channel1 from "../../../fixtures/channel1.json";
 import createChannel from "../../../fixtures/createChannel.json";
@@ -371,7 +372,7 @@ describe("Data Mutations", () => {
   test("Set has new messages", () => {
     const dataStore = useDataStore();
     // @ts-ignore
-    dataStore.addCommunity(community);
+    dataStore.addCommunity(createCommunity);
     // @ts-ignore
     dataStore.createChannelMutation(createChannel);
 

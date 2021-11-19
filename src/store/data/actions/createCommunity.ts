@@ -203,6 +203,10 @@ export default async ({
         },
         useLocalTheme: false,
         currentChannelId: null,
+        hideMutedChannels: false,
+        notifications: {
+          mute: false,
+        },
       },
     } as CommunityState;
 
