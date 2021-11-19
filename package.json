@@ -27,7 +27,7 @@
     "@apollo/client": "3.3.20",
     "@junto-foundation/junto-elements": "^0.3.11",
     "@perspect3vism/ad4m": "0.1.18",
-    "@perspect3vism/ad4m-executor": "git+https://github.com/perspect3vism/ad4m-executor/#hdk-115",
+    "@perspect3vism/ad4m-executor": "0.1.25",
     "@tiptap/vue-3": "^2.0.0-beta.45",
     "core-js": "^3.15.2",
     "date-fns": "^2.22.1",
