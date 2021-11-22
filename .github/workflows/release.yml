@@ -272,7 +272,7 @@ jobs:
           sha256sum "Flux-${{steps.ref.outputs.version}}.AppImage" >> "SHA256SUMS.txt"
           sha256sum "flux_${{steps.ref.outputs.version}}_amd64.deb" >> "SHA256SUMS.txt"
           sha256sum "Flux-${{steps.ref.outputs.version}}.dmg" >> "SHA256SUMS.txt"
-          sha256sum "flux_${{steps.ref.outputs.version}})_amd64.snap" >> "SHA256SUMS.txt"
+          sha256sum "flux_${{steps.ref.outputs.version}}_amd64.snap" >> "SHA256SUMS.txt"
           sha256sum "latest-linux.yml" >> "SHA256SUMS.txt"
           sha256sum "latest-mac.yml" >> "SHA256SUMS.txt"
       - name: Verify checksums
