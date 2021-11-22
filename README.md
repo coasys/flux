@@ -29,12 +29,13 @@ npm run clean-state
 
 This project makes use of the following holochain DNA's.
 
-[Social-Context](https://github.com/juntofoundation/Social-Context) link store DNA for persistence & signaling of links <br>
-[ShortForm-Expression](https://github.com/juntofoundation/Short-Form-Expression) DNA for text posting (more expression types to follow soon)<br>
-[Agent-Profiles](https://github.com/jdeepee/profiles) DNA for basic profile registration (optional for each agent)<br>
-[Language-Persistence](https://github.com/perspect3vism/language-persistence) DNA for the storing of language meta information under a given key<br>
-[Neighbourhood-Persistence](https://github.com/perspect3vism/neighbourhood-language) DNA/ad4m language for storing neighbourhood objects<br>
-[Agent-Language](https://github.com/perspect3vism/agent-language) DNA/ad4m language for storing ad4m Agent objects<br>
+- [Social-Context](https://github.com/juntofoundation/Social-Context) link store DNA for persistence & signaling of links
+- [ShortForm-Expression](https://github.com/juntofoundation/ad4m-languages/tree/master/shortform-expression) DNA for text posting (more expression types to follow soon)
+- [Group-Expression](https://github.com/juntofoundation/ad4m-languages/tree/master/group-expression) DNA to store group metadata
+- [Profile-Expression](https://github.com/jdeepee/profiles) DNA for basic profile registration (optional for each agent)
+- [Language-Persistence](https://github.com/perspect3vism/language-persistence) DNA for the storing of language meta information under a given key
+- [Neighbourhood-Persistence](https://github.com/perspect3vism/neighbourhood-language) DNA/ad4m language for storing neighbourhood objects
+- [Agent-Language](https://github.com/perspect3vism/agent-language) DNA/ad4m language for storing ad4m Agent objects
 
 These DNA's come bundled with the builtin languages, links above are provided for reference to anyone interested.
 
