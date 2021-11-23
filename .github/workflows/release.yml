@@ -269,10 +269,10 @@ jobs:
           path: .
       - name: Generate SHA256 checksums
         run: |
-          sha256sum "flux_${{steps.ref.outputs.version}}_amd64.deb" >> "SHA256SUMS.txt"
           sha256sum "Flux-${{steps.ref.outputs.version}}.AppImage" >> "SHA256SUMS.txt"
+          sha256sum "flux_${{steps.ref.outputs.version}}_amd64.deb" >> "SHA256SUMS.txt"
           sha256sum "Flux-${{steps.ref.outputs.version}}.dmg" >> "SHA256SUMS.txt"
-          sha256sum "flux-${{steps.ref.outputs.version}}.snap" >> "SHA256SUMS.txt"
+          sha256sum "flux_${{steps.ref.outputs.version}}_amd64.snap" >> "SHA256SUMS.txt"
           sha256sum "latest-linux.yml" >> "SHA256SUMS.txt"
           sha256sum "latest-mac.yml" >> "SHA256SUMS.txt"
       - name: Verify checksums
@@ -311,8 +311,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.github_token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./flux-${{steps.ref.outputs.version}}.snap
-          asset_name: flux-${{steps.ref.outputs.version}}.snap
+          asset_path: ./flux_${{steps.ref.outputs.version}}_amd64.snap
+          asset_name: flux_${{steps.ref.outputs.version}}_amd64.snap
           asset_content_type: application/octet-stream
       - name: Upload macOS image
         uses: actions/upload-release-asset@v1.0.1
