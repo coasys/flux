@@ -61,7 +61,7 @@ const routes: Array<RouteRecordRaw> = [
           {
             path: "profile",
             name: "my-profile",
-            component: MyProfile,
+            component: ProfileView,
           },
           {
             path: "tutorial",

@@ -12,14 +12,11 @@
           <j-button>Send message</j-button>
         </div>
         <j-text v-if="profile.familyName || profile.givenName" variant="heading-sm"> {{ `${profile.familyName} ${profile.givenName}` }}</j-text>
-        <j-text variant="heading-sm"> {{ profile.username }}</j-text>
+        <j-text variant="heading-sm">@{{ profile.username }}</j-text>
         <j-text variant="subheading"> {{ bio }}</j-text>
       </j-flex>
-      <div class="grid">
-        <ProfileCard title="My feed" description="A small description of this thing" />
-        <ProfileCard title="Blog" description="A small description of this thing" />
-        <ProfileCard title="Events" description="A small description of this thing" />
-        <ProfileCard title="My Private" description="A small description of this thing" />
+      <div class="grid"> 
+        <ProfileCard v-for="link in profileLinks" :key="link.id" :title="link.name" :description="link.description" />
         <div class="add" @click="() => (showAddlinkModal = true)">
           <j-icon name="plus" size="xl"></j-icon>
           <j-text>Add Link</j-text>
@@ -28,7 +25,7 @@
     </j-box>
   </div>
   <j-modal
-    size="xl"
+    size="lg"
     :open="showAddlinkModal"
     @toggle="(e) => toggleAddLinkModal(e)"
   >
@@ -58,7 +55,8 @@ export default defineComponent({
     return {
       profile: null as null | Profile,
       bio: "",
-      showAddlinkModal: false
+      showAddlinkModal: false,
+      profileLinks: [] as any[],
     }
   },
   methods: {
@@ -68,18 +66,23 @@ export default defineComponent({
   },
   async mounted() {
     const did = this.$route.params.did as string;
+    const me = await ad4mClient.agent.me();
     const userStore = useUserStore();
     const userPerspective = userStore.getFluxPerspectiveId;
     
-    const profileLang = Object.values(useDataStore().neighbourhoods)[0]
-      .typedExpressionLanguages.find((t) => t.expressionType === ExpressionTypes.ProfileExpression)?.languageAddress;
-    
-    const dataExp = await getProfile(profileLang!, did);
-    
-    if (dataExp) {
-      this.profile = dataExp;
-    }
 
+    if (did === me.did) {
+      this.profile = userStore.getProfile!;
+    } else {
+      const profileLang = Object.values(useDataStore().neighbourhoods)[0]
+        .typedExpressionLanguages.find((t) => t.expressionType === ExpressionTypes.ProfileExpression)?.languageAddress;
+      
+      const dataExp = await getProfile(profileLang!, did);
+  
+      if (dataExp) {
+        this.profile = dataExp;
+      }
+    }
 
     // @ts-ignore
     const { links } = await ad4mClient.perspective.snapshotByUUID(
@@ -95,6 +98,7 @@ export default defineComponent({
       console.log(e.data, predicate)
         if (!preArea[e.data.source]) {
           preArea[e.data.source] = {
+            id: e.data.source,
             [predicate]: predicate === 'has_post' ? e.data.target : e.data.target.split('://')[1],
           }
         }
@@ -103,6 +107,8 @@ export default defineComponent({
     });
 
     console.log('preArea', preArea)
+
+    this.profileLinks = Object.values(preArea).filter(e => e.id !== "flux://profile");
     
     const bioLink = links.find((e: any) => e.data.predicate === 'sioc://has_bio') as LinkExpression;
     

@@ -16,6 +16,14 @@
           </j-menu-item>
           <j-menu-item
             :selected="$route.name === 'settings'"
+            @click="() => $router.push({ name: 'my-profile', params: {did}})"
+            size="lg"
+          >
+            <j-icon name="gear" slot="start" />
+            Profile
+          </j-menu-item>
+          <j-menu-item
+            :selected="$route.name === 'settings'"
             @click="() => $router.push({ name: 'settings' })"
             size="lg"
           >
@@ -64,10 +72,23 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
+import { ad4mClient } from "@/app";
 
 export default defineComponent({
   name: "HomeView",
   components: { SidebarLayout },
+  data() {
+    return {
+      did: ""
+    }
+  },
+  async mounted() {
+    const me = await ad4mClient.agent.me();
+
+    console.log(me)
+
+    this.did = me.did;
+  },
 });
 </script>
 
