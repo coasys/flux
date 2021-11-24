@@ -1,6 +1,6 @@
 <template>
   <div class="profile__container">
-    <div class="profile__bg"></div>
+    <img :src="profilebg" class="profile__bg" />
     <j-box v-if="profile" p="800">
       <j-flex a="start" direction="column" gap="500">
         <div class="profile__avatar">
@@ -16,7 +16,7 @@
         <j-text variant="subheading"> {{ bio }}</j-text>
       </j-flex>
       <div class="grid"> 
-        <ProfileCard v-for="link in profileLinks" :key="link.id" :title="link.name" :description="link.description" />
+        <ProfileCard v-for="link in profileLinks" :key="link.id" :title="link.has_name" :description="link.has_description" />
         <div class="add" @click="() => (showAddlinkModal = true)">
           <j-icon name="plus" size="xl"></j-icon>
           <j-text>Add Link</j-text>
@@ -57,6 +57,7 @@ export default defineComponent({
       bio: "",
       showAddlinkModal: false,
       profileLinks: [] as any[],
+      profilebg: ""
     }
   },
   methods: {
@@ -93,17 +94,25 @@ export default defineComponent({
 
     const preArea: {[x: string]: any} = {};
 
-    links.forEach((e: any) => {
+    links.forEach(async (e: any) => {
       const predicate = e.data.predicate.split('://')[1];
       console.log(e.data, predicate)
         if (!preArea[e.data.source]) {
           preArea[e.data.source] = {
             id: e.data.source,
-            [predicate]: predicate === 'has_post' ? e.data.target : e.data.target.split('://')[1],
           }
         }
-
-        preArea[e.data.source][predicate] = predicate === 'has_post' ? e.data.target : e.data.target.split('://')[1];
+      
+        if (predicate === 'has_post') {
+          preArea[e.data.source][predicate] = e.data.target.replace('text://', '');
+        } else if (predicate === 'has_image') {
+          const expUrl = e.data.target.replace('image://', '');
+          const image = await ad4mClient.expression.get(expUrl);
+          preArea[e.data.source][predicate] = image.data;
+          this.profilebg = image.data.slice(1, -1);
+        } else {
+          preArea[e.data.source][predicate] = e.data.target.split('://')[1];
+        }
     });
 
     console.log('preArea', preArea)
