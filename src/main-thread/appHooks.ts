@@ -122,12 +122,41 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
                   )
                   .toString(),
               },
+              {
+                address: "QmQk9URTcHcLWcM3UqAKaw7i7zZxEw7KHbWYY4W4Qz2b1h",
+                meta: {
+                  data: {
+                    author: "did:key:zQ3shTiZjz6D17GCRKM8JV6Q32GH2nXfxaASDECTB74CUTmXn",
+                    description: "Template source for storing string in IPFS",
+                    name: "lang-note-ipfs",
+                    possibleTemplateParams: [],
+                    sourceCodeLink: "https://github.com/perspect3vism/lang-note-ipfs",
+                    templateAppliedParams: null,
+                    templateSourceLanguageAddress: null,
+                    templated: false
+                  },
+                },
+                bundle: fs
+                .readFileSync(
+                  path.join(
+                    mainThreadState.builtInLangPath,
+                    "lang-note-ipfs",
+                    "build",
+                    "bundle.js"
+                  )
+                )
+                .toString(),
+              }
             ],
             neighbourhoods: [],
           },
-          appBuiltInLangs: ["direct-message-language"],
+          appBuiltInLangs: ["direct-message-language", "lang-note-ipfs"],
           appLangAliases: null,
           mocks: false,
+          // @ts-ignore
+          runDappServer: true,
+          gqlPort: 5656,
+          hcPortAdmin: 5757,
         })
         .then(async (ad4mCore: ad4m.PerspectivismCore) => {
           mainThreadState.ad4mCore = ad4mCore;
