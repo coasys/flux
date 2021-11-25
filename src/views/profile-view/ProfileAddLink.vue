@@ -3,11 +3,45 @@
     <j-flex direction="column" gap="400" v-if="step === 1" class="steps">
       <j-text variant="heading">Add a link to profile</j-text>
       <j-button full @click="() => selectLinkType('community')">Add Community</j-button>
-      <j-button full @click="() => selectLinkType('channel')">Add Channel</j-button>
       <j-button full @click="() => selectLinkType('webLink')">Add a web link</j-button>
     </j-flex>
     <j-flex direction="column" gap="400" v-if="step === 2" class="steps">
       <j-text variant="heading">Add a link to profile</j-text>
+        <j-input
+          :label="linkType === 'community' ? 'Neighbourhood link' : 'Web link'"
+          size="xl"
+          :value="link"
+          @input="(e) => (link = e.target.value)"
+          :error="linkError"
+          :errorText="linkErrorMessage"
+          @blur="(e) => validateLink"
+        ></j-input>
+        <j-flex gap="400">
+          <j-button full style="width: 100%" size="lg" @click="step = 1">
+            <j-icon slot="start" name="arrow-left-short" />
+            Back
+          </j-button>
+          <j-button
+            style="width: 100%"
+            full
+            :disabled="isAddLink || !canAddLink"
+            :loading="isAddLink"
+            size="lg"
+            variant="primary"
+            @click="addLink"
+          >
+            Next
+            <j-icon slot="end" name="arrow-right-short" />
+          </j-button>
+    </j-flex>
+    </j-flex>
+    <j-flex direction="column" gap="400" v-if="step === 3" class="steps">
+      <j-text variant="heading">Add a link to profile</j-text>
+      <avatar-upload
+        :value="newProfileImage"
+        @change="(val) => (newProfileImage = val)"
+        icon="camera"
+      />
       <j-input
         label="Title"
         size="xl"
@@ -26,15 +60,6 @@
         :errorText="descriptionErrorMessage"
         @blur="(e) => validateDescription"
       ></j-input>
-        <j-input
-        label="Link"
-        size="xl"
-        :value="link"
-        @input="(e) => (link = e.target.value)"
-        :error="linkError"
-        :errorText="linkErrorMessage"
-        @blur="(e) => validateLink"
-      ></j-input>
       <j-flex gap="400">
         <j-button full style="width: 100%" size="lg" @click="step = 1">
           <j-icon slot="start" name="arrow-left-short" />
@@ -43,11 +68,11 @@
         <j-button
           style="width: 100%"
           full
-          :disabled="isAddLink || !canAddLink"
+          :disabled="isAddLink || !canCreateLink"
           :loading="isAddLink"
           size="lg"
           variant="primary"
-          @click="addLink"
+          @click="createLink"
         >
           <j-icon slot="end" name="add" />
           Add link
@@ -67,13 +92,16 @@ import { Link, PerspectiveInput } from "@perspect3vism/ad4m";
 import { LinkType } from "datocms-structured-text-utils";
 import { ref } from "vue";
 import { defineComponent } from "vue-demi";
+import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 
 type linkType = 'community' | 'channel' | 'webLink' | null;
 export default defineComponent({
+  emits: ["cancel", "submit"],
   setup() {
     const linkType = ref<linkType>(null);
     const step = ref(1);
     const isAddLink = ref(false);
+    const newProfileImage = ref("");
 
     const {
       value: title,
@@ -155,16 +183,20 @@ export default defineComponent({
       linkIsValid,
       validateLink,
       step,
-      isAddLink
+      isAddLink,
+      newProfileImage
     }
   },
   computed: {
     canAddLink(): boolean {
-      return this.titleIsValid && this.descriptionIsValid && this.linkIsValid;
+      return this.linkIsValid;
     },
+    canCreateLink(): boolean {
+      return this.titleIsValid && this.descriptionIsValid
+    }
   },
   methods: {
-    async addLink() {
+    async createLink() {
       this.isAddLink = true;
       const dataStore = useDataStore();
       const userStore = useUserStore();
@@ -195,7 +227,7 @@ export default defineComponent({
       );
       await ad4mClient.perspective.addLink(
         userPerspective!,
-        new Link({ source: `area-${Object.keys(preArea).length}`, target: 'flux://community', predicate: "flux://area_type" })
+        new Link({ source: `area-${Object.keys(preArea).length}`, target: `flux://${this.linkType}`, predicate: "flux://area_type" })
       );
       await ad4mClient.perspective.addLink(
         userPerspective!,
@@ -205,6 +237,27 @@ export default defineComponent({
         userPerspective!,
         new Link({ source: `area-${Object.keys(preArea).length}`, target: `text://${this.description}`, predicate: "sioc://has_description" })
       );
+
+
+      if (this.linkType === 'community') {
+        const community = dataStore.getCommunities.find(e => e.neighbourhood.neighbourhoodUrl === this.link);
+        console.log(community)
+        const image = this.newProfileImage || community?.neighbourhood.image;
+
+        if (image) {          
+          await ad4mClient.perspective.addLink(
+            userPerspective!,
+            new Link({ source: `area-${Object.keys(preArea).length}`, target: `image://${image}`, predicate: "sioc://has_image" })
+          );
+        }
+
+      } else if (this.linkType === 'webLink' && this.newProfileImage) {
+        await ad4mClient.perspective.addLink(
+          userPerspective!,
+          new Link({ source: `area-${Object.keys(preArea).length}`, target: `image://${this.newProfileImage}`, predicate: "sioc://has_image" })
+        );
+      }
+
       const perspectiveSnapshot = await ad4mClient.perspective.snapshotByUUID(
         userPerspective!
       );
@@ -227,19 +280,42 @@ export default defineComponent({
       appStore.showSuccessToast({
         message: "Link added to agent perspective",
       });
+
+      this.step = 1;
+      this.title = "";
+      this.description = "";
+      this.link = "";
+      this.newProfileImage = "";
+
+      this.$emit("submit");
     },
     selectLinkType(type: linkType) {
       this.linkType = type;
       this.step = 2;
+    },
+    addLink() {
+      this.validateLink();
+      this.step = 3;
+      if (this.linkType === 'community') {
+        const dataStore = useDataStore();
+        const community = dataStore.getCommunities.find(e => e.neighbourhood.neighbourhoodUrl === this.link);
+        console.log(community)
+        this.title = community?.neighbourhood.name as string;
+        this.description = community?.neighbourhood.description as string;
+        this.newProfileImage = community?.neighbourhood.image as string;
+      }
     }
-  }
+  },
+  components: { AvatarUpload },
 });
 </script>
 
 <style scoped>
 .container {
   margin: 0 auto;
-  height: 60vh;
+  min-height: 300px;
+  max-height: 800px;
+  height: 100%;
   width: 100%;
   display: flex;
   align-content: center;
