@@ -158,8 +158,6 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
           mocks: false,
           // @ts-ignore
           runDappServer: true,
-          gqlPort: 5656,
-          hcPortAdmin: 5757,
         })
         .then(async (ad4mCore: ad4m.PerspectivismCore) => {
           mainThreadState.ad4mCore = ad4mCore;
