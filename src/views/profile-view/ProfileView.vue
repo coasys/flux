@@ -27,9 +27,12 @@
   <j-modal
     size="lg"
     :open="showAddlinkModal"
-    @toggle="(e) => toggleAddLinkModal(e)"
+    @toggle="(e) => setAddLinkModal(e.target.open)"
   >
-    <ProfileAddLink></ProfileAddLink>
+    <ProfileAddLink
+      @submit="() => setAddLinkModal(false)"
+      @cancel="() => setAddLinkModal(false)"
+    ></ProfileAddLink>
   </j-modal>
   <router-view></router-view>
 </template>
@@ -61,8 +64,8 @@ export default defineComponent({
     }
   },
   methods: {
-    toggleAddLinkModal(e: any): void {
-      this.showAddlinkModal = e.target.open;
+    setAddLinkModal(value: boolean): void {
+      this.showAddlinkModal = value;
     },
   },
   async mounted() {
