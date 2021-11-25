@@ -15,7 +15,7 @@ import { WebSocketLink } from "@apollo/client/link/ws";
 
 export const apolloClient = new ApolloClient({
   link: new WebSocketLink({
-    uri: `ws://localhost:5656/graphql`,
+    uri: `ws://localhost:4000/graphql`,
     options: {
       reconnect: true,
     },
