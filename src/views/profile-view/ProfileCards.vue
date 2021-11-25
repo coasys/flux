@@ -12,7 +12,6 @@
 import {defineComponent} from 'vue'
 export default defineComponent({
   props: ['title', 'description', 'image'],
-  emits: ["click"],
 });
 </script>
 
