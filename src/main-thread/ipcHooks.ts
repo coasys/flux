@@ -13,6 +13,10 @@ export function registerIpcHooks(mainThreadState: MainThreadGlobal): void {
     );
   });
 
+  ipcMain.on("openLinkInBrowser", (event, link) => {
+    require('electron').shell.openExternal(link);
+  });
+
   ipcMain.on("restoreWindow", () => {
     if (mainThreadState.mainWindow!.isMinimized()) {
       mainThreadState.mainWindow!.restore();

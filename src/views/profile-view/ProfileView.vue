@@ -167,6 +167,8 @@ export default defineComponent({
           this.showJoinCommunityModal = true;
           this.joiningLink = link.has_post;
         }
+      } else if (link.area_type === 'webLink') {
+        window.api.send("openLinkInBrowser", link.has_post);
       }
     }
   },

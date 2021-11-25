@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld("api", {
       "check-update",
       "restoreWindow",
       "copyLogs",
+      'openLinkInBrowser'
     ];
     if (validChannels.includes(channel)) {
       ipcRenderer.send(channel, data);
