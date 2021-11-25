@@ -16,7 +16,13 @@
         <j-text variant="subheading"> {{ bio }}</j-text>
       </j-flex>
       <div class="grid"> 
-        <ProfileCard v-for="link in profileLinks" :key="link.id" :title="link.has_name" :description="link.has_description" />
+        <ProfileCard 
+          v-for="link in profileLinks" 
+          :key="link.id" 
+          :title="link.has_name" 
+          :description="link.has_description" 
+          @click="() => onLinkClick(link)" 
+        />
         <div class="add" @click="() => (showAddlinkModal = true)">
           <j-icon name="plus" size="xl"></j-icon>
           <j-text>Add Link</j-text>
@@ -34,6 +40,17 @@
       @cancel="() => setAddLinkModal(false)"
     ></ProfileAddLink>
   </j-modal>
+    <j-modal
+    size="lg"
+    :open="showJoinCommunityModal"
+    @toggle="(e) => setShowJoinCommunityModal(e.target.open)"
+  >
+    <ProfileJoinLink
+      @submit="() => setShowJoinCommunityModal(false)"
+      @cancel="() => setShowJoinCommunityModal(false)"
+      :joiningLink="joiningLink"
+    ></ProfileJoinLink>
+  </j-modal>
   <router-view></router-view>
 </template>
 
@@ -46,85 +63,120 @@ import { LinkExpression } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
 import ProfileCard from './ProfileCards.vue'
 import ProfileAddLink from './ProfileAddLink.vue'
+import ProfileJoinLink from './ProfileJoinLink.vue'
 import { useUserStore } from "@/store/user";
 
 export default defineComponent({
   name: "ProfileView",
   components: {
     ProfileCard,
-    ProfileAddLink
+    ProfileAddLink,
+    ProfileJoinLink
   },
   data() {
     return {
       profile: null as null | Profile,
       bio: "",
       showAddlinkModal: false,
+      showJoinCommunityModal: false,
       profileLinks: [] as any[],
-      profilebg: ""
+      profilebg: "",
+      joiningLink: "",
     }
   },
   methods: {
     setAddLinkModal(value: boolean): void {
       this.showAddlinkModal = value;
     },
-  },
-  async mounted() {
-    const did = this.$route.params.did as string;
-    const me = await ad4mClient.agent.me();
-    const userStore = useUserStore();
-    const userPerspective = userStore.getFluxPerspectiveId;
-    
+    setShowJoinCommunityModal(value: boolean): void {
+      this.showJoinCommunityModal = value;
+    },
+    async getAgentProfile() {
+      const did = this.$route.params.did as string;
+      const me = await ad4mClient.agent.me();
+      const userStore = useUserStore();
+      const userPerspective = userStore.getFluxPerspectiveId;
 
-    if (did === me.did) {
-      this.profile = userStore.getProfile!;
-    } else {
-      const profileLang = Object.values(useDataStore().neighbourhoods)[0]
-        .typedExpressionLanguages.find((t) => t.expressionType === ExpressionTypes.ProfileExpression)?.languageAddress;
+      console.log(did, me.did)
       
-      const dataExp = await getProfile(profileLang!, did);
-  
-      if (dataExp) {
-        this.profile = dataExp;
+
+      if (did === me.did) {
+        this.profile = userStore.getProfile!;
+      } else {
+        const profileLang = Object.values(useDataStore().neighbourhoods)[0]
+          .typedExpressionLanguages.find((t) => t.expressionType === ExpressionTypes.ProfileExpression)?.languageAddress;
+        
+        const dataExp = await getProfile(profileLang!, did);
+    
+        if (dataExp) {
+          this.profile = dataExp;
+        }
+      }
+
+      // @ts-ignore
+      const { links } = await ad4mClient.perspective.snapshotByUUID(
+        userPerspective!
+      );
+
+      console.log('profilePerspective', links)
+
+      const preArea: {[x: string]: any} = {};
+
+      links.forEach(async (e: any) => {
+        const predicate = e.data.predicate.split('://')[1];
+        console.log(e.data, predicate)
+          if (!preArea[e.data.source]) {
+            preArea[e.data.source] = {
+              id: e.data.source,
+            }
+          }
+        
+          if (predicate === 'has_post') {
+            preArea[e.data.source][predicate] = e.data.target.replace('text://', '');
+          } else if (predicate === 'has_image') {
+            const expUrl = e.data.target.replace('image://', '');
+            const image = await ad4mClient.expression.get(expUrl);
+            preArea[e.data.source][predicate] = image.data;
+            this.profilebg = image.data.slice(1, -1);
+          } else {
+            preArea[e.data.source][predicate] = e.data.target.split('://')[1];
+          }
+      });
+
+      console.log('preArea', preArea)
+
+      this.profileLinks = Object.values(preArea).filter(e => e.id !== "flux://profile");
+      
+      const bioLink = links.find((e: any) => e.data.predicate === 'sioc://has_bio') as LinkExpression;
+
+      if (bioLink) {
+        this.bio = bioLink.data.target.split('://')[1];
+      }
+      
+    },
+    onLinkClick(link: any) {
+      const dataStore = useDataStore();
+
+      if (link.area_type === 'community') {
+        const community = dataStore.getCommunities.find(e => e.neighbourhood.neighbourhoodUrl === link.has_post);
+        console.log(community, this.showJoinCommunityModal, this.showAddlinkModal)
+
+        if (community) {
+          this.$router.push({ name: "community", params: { communityId: community?.neighbourhood.perspective.uuid } });
+        } else {
+          this.showJoinCommunityModal = true;
+          this.joiningLink = link.has_post;
+        }
       }
     }
-
-    // @ts-ignore
-    const { links } = await ad4mClient.perspective.snapshotByUUID(
-      userPerspective!
-    );
-
-    console.log('profilePerspective', links)
-
-    const preArea: {[x: string]: any} = {};
-
-    links.forEach(async (e: any) => {
-      const predicate = e.data.predicate.split('://')[1];
-      console.log(e.data, predicate)
-        if (!preArea[e.data.source]) {
-          preArea[e.data.source] = {
-            id: e.data.source,
-          }
-        }
-      
-        if (predicate === 'has_post') {
-          preArea[e.data.source][predicate] = e.data.target.replace('text://', '');
-        } else if (predicate === 'has_image') {
-          const expUrl = e.data.target.replace('image://', '');
-          const image = await ad4mClient.expression.get(expUrl);
-          preArea[e.data.source][predicate] = image.data;
-          this.profilebg = image.data.slice(1, -1);
-        } else {
-          preArea[e.data.source][predicate] = e.data.target.split('://')[1];
-        }
-    });
-
-    console.log('preArea', preArea)
-
-    this.profileLinks = Object.values(preArea).filter(e => e.id !== "flux://profile");
-    
-    const bioLink = links.find((e: any) => e.data.predicate === 'sioc://has_bio') as LinkExpression;
-    
-    this.bio = bioLink.data.target.split('://')[1];
+  },
+  async mounted() {
+    this.getAgentProfile()
+  },
+  watch: {
+    showAddlinkModal() {
+      this.getAgentProfile()
+    }
   }
 });
 </script>
