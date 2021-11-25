@@ -24,7 +24,7 @@
           :image="link.has_image"
           @click="() => onLinkClick(link)" 
         />
-        <div class="add" @click="() => (showAddlinkModal = true)">
+        <div class="add" @click="() => (showAddlinkModal = true)" v-if="sameAgent">
           <j-icon name="plus" size="xl"></j-icon>
           <j-text>Add Link</j-text>
         </div>
@@ -83,6 +83,7 @@ export default defineComponent({
       profileLinks: [] as any[],
       profilebg: "",
       joiningLink: "",
+      sameAgent: false
     }
   },
   methods: {
@@ -179,6 +180,10 @@ export default defineComponent({
   },
   async mounted() {
     this.getAgentProfile()
+    const did = this.$route.params.did as string;
+    const me = await ad4mClient.agent.me();
+
+    this.sameAgent = did === me.did;
   },
   watch: {
     showAddlinkModal() {
