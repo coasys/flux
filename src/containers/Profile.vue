@@ -6,7 +6,12 @@
         :hash="did"
         :src="profile.profilePicture"
       />
-      <j-text v-if="profile.familyName || profile.givenName" variant="heading-sm"> {{ `${profile.familyName} ${profile.givenName}` }}</j-text>
+      <j-text
+        v-if="profile.familyName || profile.givenName"
+        variant="heading-sm"
+      >
+        {{ `${profile.familyName} ${profile.givenName}` }}</j-text
+      >
       <j-text variant="heading-sm"> {{ profile.username }}</j-text>
       <j-text variant="subheading"> {{ bio }}</j-text>
       <j-text variant="heading-sm">
@@ -29,7 +34,7 @@ export default defineComponent({
     return {
       profile: null as null | Profile,
       agentPerspective: undefined as undefined | Perspective | null,
-      bio: ""
+      bio: "",
     };
   },
   watch: {
@@ -43,12 +48,14 @@ export default defineComponent({
 
         const profilePerspective = await ad4mClient.agent.byDID(did);
         this.agentPerspective = profilePerspective.perspective;
-        
-        const bioLink = profilePerspective.perspective?.links.find(e => e.data.predicate === 'sioc://has_bio') as LinkExpression;
-        this.bio = bioLink.data.target.split('://')[1];
+
+        const bioLink = profilePerspective.perspective?.links.find(
+          (e) => e.data.predicate === "sioc://has_bio"
+        ) as LinkExpression;
+        this.bio = bioLink.data.target.split("://")[1];
       },
       immediate: true,
-    }
+    },
   },
 });
 </script>

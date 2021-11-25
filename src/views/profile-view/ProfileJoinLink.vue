@@ -1,18 +1,21 @@
 <template>
-    <j-box pt="1000" pb="800" px="700">
-      <j-text variant="heading-sm">Join Community</j-text>
-      <j-text variant="body">You are not part of this community, would you like to join this community?</j-text>
-      <j-button
-        :disabled="isJoiningCommunity || !joiningLink"
-        :loading="isJoiningCommunity"
-        @click="joinCommunity"
-        size="lg"
-        full
-        variant="primary"
-      >
-        Join Community
-      </j-button>
-    </j-box>
+  <j-box pt="1000" pb="800" px="700">
+    <j-text variant="heading-sm">Join Community</j-text>
+    <j-text variant="body"
+      >You are not part of this community, would you like to join this
+      community?</j-text
+    >
+    <j-button
+      :disabled="isJoiningCommunity || !joiningLink"
+      :loading="isJoiningCommunity"
+      @click="joinCommunity"
+      size="lg"
+      full
+      variant="primary"
+    >
+      Join Community
+    </j-button>
+  </j-box>
 </template>
 
 <script lang="ts">
@@ -46,8 +49,8 @@ export default defineComponent({
           this.isJoiningCommunity = false;
         });
     },
-  }
-})
+  },
+});
 </script>
 
 <style scoped>

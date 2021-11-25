@@ -48,7 +48,7 @@ import {
 import { Link, PerspectiveInput } from "@perspect3vism/ad4m";
 import { ad4mClient } from "@/app";
 import { useAppStore } from "@/store/app";
-import ImgUpload from '@/components/img-upload/ImgUpload.vue'
+import ImgUpload from "@/components/img-upload/ImgUpload.vue";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
 
 export default defineComponent({
@@ -70,7 +70,7 @@ export default defineComponent({
       username: "",
       bio: "",
       link: "",
-      profileBg: ""
+      profileBg: "",
     };
   },
   computed: {
@@ -108,52 +108,68 @@ export default defineComponent({
       const userPerspective = this.userStore.getFluxPerspectiveId;
 
       const langs = await ad4mClient.languages.all();
-      const ipfsLang = langs.find(e => e.address === NOTE_IPFS_EXPRESSION_OFFICIAL)
+      const ipfsLang = langs.find(
+        (e) => e.address === NOTE_IPFS_EXPRESSION_OFFICIAL
+      );
 
-      console.log('langs', ipfsLang)
+      console.log("langs", ipfsLang);
 
-      const image = await ad4mClient.expression.create(this.profileBg, NOTE_IPFS_EXPRESSION_OFFICIAL);
+      const image = await ad4mClient.expression.create(
+        this.profileBg,
+        NOTE_IPFS_EXPRESSION_OFFICIAL
+      );
 
-      console.log('langs', this.profileBg, image)
+      console.log("langs", this.profileBg, image);
 
       const linked = await ad4mClient.perspective.addLink(
         userPerspective!,
-        new Link({ source: 'flux://profile', target: `text://${this.bio}`, predicate: 'sioc://has_bio' })
+        new Link({
+          source: "flux://profile",
+          target: `text://${this.bio}`,
+          predicate: "sioc://has_bio",
+        })
       );
 
       const profileBgLinked = await ad4mClient.perspective.addLink(
         userPerspective!,
-        new Link({ source: 'flux://profile', target: `image://${image}`, predicate: 'sioc://has_image' })
+        new Link({
+          source: "flux://profile",
+          target: `image://${image}`,
+          predicate: "sioc://has_image",
+        })
       );
 
       const perspectiveSnapshot = await ad4mClient.perspective.snapshotByUUID(
         userPerspective!
       );
-  
+
       const links = [];
       //Remove __typename fields so the next gql does not fail
-      for (const link of [...perspectiveSnapshot!.links.filter(e => e.data.predicate === 'soic://has_bio' || 'sioc://has_image'), linked, profileBgLinked]) {
+      for (const link of [
+        ...perspectiveSnapshot!.links.filter(
+          (e) => e.data.predicate === "soic://has_bio" || "sioc://has_image"
+        ),
+        linked,
+        profileBgLinked,
+      ]) {
         //Deep copy the object... so we can delete __typename fields inject by apollo client
-        const newLink = JSON.parse(
-          JSON.stringify(link)
-        );
+        const newLink = JSON.parse(JSON.stringify(link));
         newLink.__typename = undefined;
         newLink.data.__typename = undefined;
         newLink.proof.__typename = undefined;
 
-          links.push(newLink);
+        links.push(newLink);
       }
       const agent = await ad4mClient.agent.updatePublicPerspective({
         links,
       } as PerspectiveInput);
-
 
       this.userStore
         .updateProfile({
           username: this.username,
           profilePicture: this.profilePicture,
           thumbnail,
-          bio: this.bio
+          bio: this.bio,
         })
         .then(() => {
           this.$emit("submit");

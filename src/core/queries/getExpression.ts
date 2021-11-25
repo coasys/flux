@@ -59,7 +59,9 @@ export async function getExpressionAndRetry(
   return getExprRes;
 }
 
-export async function getManyExpression(urls: string[]): Promise<ExpressionRendered[]> {
+export async function getManyExpression(
+  urls: string[]
+): Promise<ExpressionRendered[]> {
   return new Promise((resolve, reject) => {
     apolloClient
       .query<{

@@ -1,7 +1,6 @@
 <template>
   <div class="channel-view" ref="scrollContainer">
     <channel-header :community="community" :channel="channel" />
-    {{activeProfile}}
     <channel-messages
       :profileLanguage="profileLanguage"
       :community="community"
@@ -197,7 +196,6 @@ export default defineComponent({
       } else {
         this.$router.push({ name: "profile", params: { did } });
       }
-
     },
     handleMentionClick(dataset: { label: string; id: string }) {
       const { label, id } = dataset;

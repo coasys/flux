@@ -4,7 +4,12 @@
       <div class="img-upload__avatar">
         <img :src="value" v-if="value" />
         <j-button variant="link" v-if="!value" size="sm">Upload image</j-button>
-        <j-button class="remove" v-if="value" @click.prevent="$emit('change', null)" size="sm">
+        <j-button
+          class="remove"
+          v-if="value"
+          @click.prevent="$emit('change', null)"
+          size="sm"
+        >
           Remove image
         </j-button>
       </div>
@@ -13,7 +18,7 @@
   <input
     :disabled="disabled"
     id="bannerFileInput"
-    style="display: none;"
+    style="display: none"
     type="file"
     @change.prevent="selectFile"
   />

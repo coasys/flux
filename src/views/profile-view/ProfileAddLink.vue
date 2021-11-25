@@ -2,38 +2,42 @@
   <div class="container">
     <j-flex direction="column" gap="400" v-if="step === 1" class="steps">
       <j-text variant="heading">Add a link to profile</j-text>
-      <j-button full @click="() => selectLinkType('community')">Add Community</j-button>
-      <j-button full @click="() => selectLinkType('webLink')">Add a web link</j-button>
+      <j-button full @click="() => selectLinkType('community')"
+        >Add Community</j-button
+      >
+      <j-button full @click="() => selectLinkType('webLink')"
+        >Add a web link</j-button
+      >
     </j-flex>
     <j-flex direction="column" gap="400" v-if="step === 2" class="steps">
       <j-text variant="heading">Add a link to profile</j-text>
-        <j-input
-          :label="linkType === 'community' ? 'Neighbourhood link' : 'Web link'"
-          size="xl"
-          :value="link"
-          @input="(e) => (link = e.target.value)"
-          :error="linkError"
-          :errorText="linkErrorMessage"
-          @blur="(e) => validateLink"
-        ></j-input>
-        <j-flex gap="400">
-          <j-button full style="width: 100%" size="lg" @click="step = 1">
-            <j-icon slot="start" name="arrow-left-short" />
-            Back
-          </j-button>
-          <j-button
-            style="width: 100%"
-            full
-            :disabled="isAddLink || !canAddLink"
-            :loading="isAddLink"
-            size="lg"
-            variant="primary"
-            @click="addLink"
-          >
-            Next
-            <j-icon slot="end" name="arrow-right-short" />
-          </j-button>
-    </j-flex>
+      <j-input
+        :label="linkType === 'community' ? 'Neighbourhood link' : 'Web link'"
+        size="xl"
+        :value="link"
+        @input="(e) => (link = e.target.value)"
+        :error="linkError"
+        :errorText="linkErrorMessage"
+        @blur="(e) => validateLink"
+      ></j-input>
+      <j-flex gap="400">
+        <j-button full style="width: 100%" size="lg" @click="step = 1">
+          <j-icon slot="start" name="arrow-left-short" />
+          Back
+        </j-button>
+        <j-button
+          style="width: 100%"
+          full
+          :disabled="isAddLink || !canAddLink"
+          :loading="isAddLink"
+          size="lg"
+          variant="primary"
+          @click="addLink"
+        >
+          Next
+          <j-icon slot="end" name="arrow-right-short" />
+        </j-button>
+      </j-flex>
     </j-flex>
     <j-flex direction="column" gap="400" v-if="step === 3" class="steps">
       <j-text variant="heading">Add a link to profile</j-text>
@@ -51,7 +55,7 @@
         :errorText="titleErrorMessage"
         @blur="(e) => validateTitle"
       ></j-input>
-        <j-input
+      <j-input
         label="Description"
         size="xl"
         :value="description"
@@ -95,7 +99,7 @@ import { defineComponent } from "vue-demi";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
 
-type linkType = 'community' | 'channel' | 'webLink' | null;
+type linkType = "community" | "channel" | "webLink" | null;
 export default defineComponent({
   emits: ["cancel", "submit"],
   setup() {
@@ -124,7 +128,6 @@ export default defineComponent({
       ],
     });
 
-    
     const {
       value: description,
       error: descriptionError,
@@ -185,16 +188,16 @@ export default defineComponent({
       validateLink,
       step,
       isAddLink,
-      newProfileImage
-    }
+      newProfileImage,
+    };
   },
   computed: {
     canAddLink(): boolean {
       return this.linkIsValid;
     },
     canCreateLink(): boolean {
-      return this.titleIsValid && this.descriptionIsValid
-    }
+      return this.titleIsValid && this.descriptionIsValid;
+    },
   },
   methods: {
     async createLink() {
@@ -209,56 +212,89 @@ export default defineComponent({
         userPerspective!
       );
 
-      const preArea: {[x: string]: any} = {};
+      const preArea: { [x: string]: any } = {};
 
       preLinks.forEach((e: any) => {
-        const predicate = e.data.predicate.split('://')[1];
+        const predicate = e.data.predicate.split("://")[1];
         if (!preArea[e.data.source]) {
           preArea[e.data.source] = {
-            [predicate]: predicate === 'has_post' ? e.data.target : e.data.predicate.split('://')[1],
-          }
+            [predicate]:
+              predicate === "has_post"
+                ? e.data.target
+                : e.data.predicate.split("://")[1],
+          };
         }
 
-        preArea[e.data.source][predicate] = e.data.predicate.split('://')[1];
+        preArea[e.data.source][predicate] = e.data.predicate.split("://")[1];
       });
-      console.log('preLinks', preLinks)
+      console.log("preLinks", preLinks);
       await ad4mClient.perspective.addLink(
         userPerspective!,
-        new Link({ source: `area-${Object.keys(preArea).length}`, target: this.link, predicate: "sioc://has_post" })
+        new Link({
+          source: `area-${Object.keys(preArea).length}`,
+          target: this.link,
+          predicate: "sioc://has_post",
+        })
       );
       await ad4mClient.perspective.addLink(
         userPerspective!,
-        new Link({ source: `area-${Object.keys(preArea).length}`, target: `flux://${this.linkType}`, predicate: "flux://area_type" })
+        new Link({
+          source: `area-${Object.keys(preArea).length}`,
+          target: `flux://${this.linkType}`,
+          predicate: "flux://area_type",
+        })
       );
       await ad4mClient.perspective.addLink(
         userPerspective!,
-        new Link({ source: `area-${Object.keys(preArea).length}`, target: `text://${this.title}`, predicate: "sioc://has_name" })
+        new Link({
+          source: `area-${Object.keys(preArea).length}`,
+          target: `text://${this.title}`,
+          predicate: "sioc://has_name",
+        })
       );
       await ad4mClient.perspective.addLink(
         userPerspective!,
-        new Link({ source: `area-${Object.keys(preArea).length}`, target: `text://${this.description}`, predicate: "sioc://has_description" })
+        new Link({
+          source: `area-${Object.keys(preArea).length}`,
+          target: `text://${this.description}`,
+          predicate: "sioc://has_description",
+        })
       );
 
-
-      if (this.linkType === 'community') {
-        const community = dataStore.getCommunities.find(e => e.neighbourhood.neighbourhoodUrl === this.link);
-        console.log(community)
+      if (this.linkType === "community") {
+        const community = dataStore.getCommunities.find(
+          (e) => e.neighbourhood.neighbourhoodUrl === this.link
+        );
+        console.log(community);
         const image = this.newProfileImage || community?.neighbourhood.image;
 
-        const storedImage = await ad4mClient.expression.create(image, NOTE_IPFS_EXPRESSION_OFFICIAL);
+        const storedImage = await ad4mClient.expression.create(
+          image,
+          NOTE_IPFS_EXPRESSION_OFFICIAL
+        );
 
-        if (image) {          
+        if (image) {
           await ad4mClient.perspective.addLink(
             userPerspective!,
-            new Link({ source: `area-${Object.keys(preArea).length}`, target: `image://${storedImage}`, predicate: "sioc://has_image" })
+            new Link({
+              source: `area-${Object.keys(preArea).length}`,
+              target: `image://${storedImage}`,
+              predicate: "sioc://has_image",
+            })
           );
         }
-
-      } else if (this.linkType === 'webLink' && this.newProfileImage) {
-        const storedImage = await ad4mClient.expression.create(this.newProfileImage, NOTE_IPFS_EXPRESSION_OFFICIAL);
+      } else if (this.linkType === "webLink" && this.newProfileImage) {
+        const storedImage = await ad4mClient.expression.create(
+          this.newProfileImage,
+          NOTE_IPFS_EXPRESSION_OFFICIAL
+        );
         await ad4mClient.perspective.addLink(
           userPerspective!,
-          new Link({ source: `area-${Object.keys(preArea).length}`, target: `image://${storedImage}`, predicate: "sioc://has_image" })
+          new Link({
+            source: `area-${Object.keys(preArea).length}`,
+            target: `image://${storedImage}`,
+            predicate: "sioc://has_image",
+          })
         );
       }
 
@@ -300,15 +336,17 @@ export default defineComponent({
     addLink() {
       this.validateLink();
       this.step = 3;
-      if (this.linkType === 'community') {
+      if (this.linkType === "community") {
         const dataStore = useDataStore();
-        const community = dataStore.getCommunities.find(e => e.neighbourhood.neighbourhoodUrl === this.link);
-        console.log(community)
+        const community = dataStore.getCommunities.find(
+          (e) => e.neighbourhood.neighbourhoodUrl === this.link
+        );
+        console.log(community);
         this.title = community?.neighbourhood.name as string;
         this.description = community?.neighbourhood.description as string;
         this.newProfileImage = community?.neighbourhood.image as string;
       }
-    }
+    },
   },
   components: { AvatarUpload },
 });

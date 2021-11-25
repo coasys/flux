@@ -40,12 +40,15 @@ export default async ({
 
   // Only show the notification when the the message is not from self & the active community & channel is different
   if (
-    (isMinimized && !channel?.state.notifications.mute && !community?.state.notifications.mute) ||
+    (isMinimized &&
+      !channel?.state.notifications.mute &&
+      !community?.state.notifications.mute) ||
     (user!.agent.did! !== authorDid &&
       (community?.neighbourhood.perspective.uuid === communityId
         ? channel?.neighbourhood.perspective.uuid !== channelId
         : true) &&
-      !channel?.state.notifications.mute && !community?.state.notifications.mute)
+      !channel?.state.notifications.mute &&
+      !community?.state.notifications.mute)
   ) {
     const isMentioned = message.includes(
       user!.agent.did!.replace("did:key:", "")

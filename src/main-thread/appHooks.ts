@@ -16,7 +16,8 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
     if (fs.existsSync(ad4mPath)) fs.rmSync(ad4mPath, { recursive: true });
 
     const localStoragePath = path.join(app.getPath("appData"), "Local Storage");
-    if (fs.existsSync(localStoragePath)) fs.rmSync(localStoragePath, { recursive: true });
+    if (fs.existsSync(localStoragePath))
+      fs.rmSync(localStoragePath, { recursive: true });
 
     fs.mkdirSync(path.join(app.getPath("appData"), "dontDelete-0.2.11"));
   }
@@ -126,27 +127,29 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
                 address: "QmQk9URTcHcLWcM3UqAKaw7i7zZxEw7KHbWYY4W4Qz2b1h",
                 meta: {
                   data: {
-                    author: "did:key:zQ3shTiZjz6D17GCRKM8JV6Q32GH2nXfxaASDECTB74CUTmXn",
+                    author:
+                      "did:key:zQ3shTiZjz6D17GCRKM8JV6Q32GH2nXfxaASDECTB74CUTmXn",
                     description: "Template source for storing string in IPFS",
                     name: "lang-note-ipfs",
                     possibleTemplateParams: [],
-                    sourceCodeLink: "https://github.com/perspect3vism/lang-note-ipfs",
+                    sourceCodeLink:
+                      "https://github.com/perspect3vism/lang-note-ipfs",
                     templateAppliedParams: null,
                     templateSourceLanguageAddress: null,
-                    templated: false
+                    templated: false,
                   },
                 },
                 bundle: fs
-                .readFileSync(
-                  path.join(
-                    mainThreadState.builtInLangPath,
-                    "lang-note-ipfs",
-                    "build",
-                    "bundle.js"
+                  .readFileSync(
+                    path.join(
+                      mainThreadState.builtInLangPath,
+                      "lang-note-ipfs",
+                      "build",
+                      "bundle.js"
+                    )
                   )
-                )
-                .toString(),
-              }
+                  .toString(),
+              },
             ],
             neighbourhoods: [],
           },

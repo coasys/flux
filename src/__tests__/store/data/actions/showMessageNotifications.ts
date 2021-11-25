@@ -13,25 +13,24 @@ import { useDataStore } from "@/store/data";
 
 const testProfile = {
   did: initAgentFixture.did,
-  data: JSON.parse(getProfileFixture.data!)
+  data: JSON.parse(getProfileFixture.data!),
 } as ProfileExpression;
 
-
-jest.mock('@/utils/timeoutCache', () => {
+jest.mock("@/utils/timeoutCache", () => {
   return {
     TimeoutCache: jest.fn().mockImplementation(() => {
       return {
         set: jest.fn(),
         get: (link: string) => {
-          if (link.includes('101')) {
-            return undefined
+          if (link.includes("101")) {
+            return undefined;
           } else {
             return testProfile;
           }
         },
         remove: jest.fn(),
       };
-    })
+    }),
   };
 });
 

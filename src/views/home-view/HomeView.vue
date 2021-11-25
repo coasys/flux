@@ -16,7 +16,7 @@
           </j-menu-item>
           <j-menu-item
             :selected="$route.name === 'settings'"
-            @click="() => $router.push({ name: 'my-profile', params: {did}})"
+            @click="() => $router.push({ name: 'my-profile', params: { did } })"
             size="lg"
           >
             <j-icon name="gear" slot="start" />
@@ -79,13 +79,11 @@ export default defineComponent({
   components: { SidebarLayout },
   data() {
     return {
-      did: ""
-    }
+      did: "",
+    };
   },
   async mounted() {
     const me = await ad4mClient.agent.me();
-
-    console.log(me)
 
     this.did = me.did;
   },

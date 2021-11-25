@@ -1,6 +1,9 @@
 <template>
   <div class="profile__container">
-    <div :style="{ backgroundImage: `url(${profilebg})` }" class="profile__bg" />
+    <div
+      :style="{ backgroundImage: `url(${profilebg})` }"
+      class="profile__bg"
+    />
     <j-box v-if="profile" p="800">
       <j-flex a="start" direction="column" gap="500">
         <div class="profile__avatar">
@@ -11,20 +14,29 @@
           />
           <j-button>Send message</j-button>
         </div>
-        <j-text v-if="profile.familyName || profile.givenName" variant="heading-sm"> {{ `${profile.familyName} ${profile.givenName}` }}</j-text>
+        <j-text
+          v-if="profile.familyName || profile.givenName"
+          variant="heading-sm"
+        >
+          {{ `${profile.familyName} ${profile.givenName}` }}</j-text
+        >
         <j-text variant="heading-sm">@{{ profile.username }}</j-text>
         <j-text variant="subheading"> {{ bio }}</j-text>
       </j-flex>
-      <div class="grid"> 
-        <ProfileCard 
-          v-for="link in profileLinks" 
-          :key="link.id" 
-          :title="link.has_name" 
-          :description="link.has_description" 
+      <div class="grid">
+        <ProfileCard
+          v-for="link in profileLinks"
+          :key="link.id"
+          :title="link.has_name"
+          :description="link.has_description"
           :image="link.has_image"
-          @click="() => onLinkClick(link)" 
+          @click="() => onLinkClick(link)"
         />
-        <div class="add" @click="() => (showAddlinkModal = true)" v-if="sameAgent">
+        <div
+          class="add"
+          @click="() => (showAddlinkModal = true)"
+          v-if="sameAgent"
+        >
           <j-icon name="plus" size="xl"></j-icon>
           <j-text>Add Link</j-text>
         </div>
@@ -41,7 +53,7 @@
       @cancel="() => setAddLinkModal(false)"
     ></ProfileAddLink>
   </j-modal>
-    <j-modal
+  <j-modal
     size="lg"
     :open="showJoinCommunityModal"
     @toggle="(e) => setShowJoinCommunityModal(e.target.open)"
@@ -62,9 +74,9 @@ import { ExpressionTypes, Profile } from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
 import { LinkExpression } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
-import ProfileCard from './ProfileCards.vue'
-import ProfileAddLink from './ProfileAddLink.vue'
-import ProfileJoinLink from './ProfileJoinLink.vue'
+import ProfileCard from "./ProfileCards.vue";
+import ProfileAddLink from "./ProfileAddLink.vue";
+import ProfileJoinLink from "./ProfileJoinLink.vue";
 import { useUserStore } from "@/store/user";
 
 export default defineComponent({
@@ -72,7 +84,7 @@ export default defineComponent({
   components: {
     ProfileCard,
     ProfileAddLink,
-    ProfileJoinLink
+    ProfileJoinLink,
   },
   data() {
     return {
@@ -83,8 +95,8 @@ export default defineComponent({
       profileLinks: [] as any[],
       profilebg: "",
       joiningLink: "",
-      sameAgent: false
-    }
+      sameAgent: false,
+    };
   },
   methods: {
     setAddLinkModal(value: boolean): void {
@@ -99,17 +111,19 @@ export default defineComponent({
       const userStore = useUserStore();
       const userPerspective = userStore.getFluxPerspectiveId;
 
-      console.log(did, me.did)
-      
+      console.log(did, me.did);
 
       if (did === me.did) {
         this.profile = userStore.getProfile!;
       } else {
-        const profileLang = Object.values(useDataStore().neighbourhoods)[0]
-          .typedExpressionLanguages.find((t) => t.expressionType === ExpressionTypes.ProfileExpression)?.languageAddress;
-        
+        const profileLang = Object.values(
+          useDataStore().neighbourhoods
+        )[0].typedExpressionLanguages.find(
+          (t) => t.expressionType === ExpressionTypes.ProfileExpression
+        )?.languageAddress;
+
         const dataExp = await getProfile(profileLang!, did);
-    
+
         if (dataExp) {
           this.profile = dataExp;
         }
@@ -120,66 +134,82 @@ export default defineComponent({
         userPerspective!
       );
 
-      console.log('profilePerspective', links)
+      // @ts-ignore
+      const uuidLinks = await ad4mClient.agent.byDID(did);
 
-      const preArea: {[x: string]: any} = {};
+      console.log("profilePerspective", links, uuidLinks.perspective?.links);
+
+      const preArea: { [x: string]: any } = {};
 
       links.forEach(async (e: any) => {
-        const predicate = e.data.predicate.split('://')[1];
-        console.log(e.data, predicate)
-          if (!preArea[e.data.source]) {
-            preArea[e.data.source] = {
-              id: e.data.source,
-            }
-          }
-        
-          if (predicate === 'has_post') {
-            preArea[e.data.source][predicate] = e.data.target.replace('text://', '');
-          } else if (predicate === 'has_image') {
-            const expUrl = e.data.target.replace('image://', '');
-            const image = await ad4mClient.expression.get(expUrl);
-            console.log('image', e.data.source, image)
-            preArea[e.data.source][predicate] = image.data.slice(1, -1);
+        const predicate = e.data.predicate.split("://")[1];
+        if (!preArea[e.data.source]) {
+          preArea[e.data.source] = {
+            id: e.data.source,
+          };
+        }
 
-            if (e.data.source === "flux://profile") {
-              this.profilebg = image.data.slice(1, -1);
-            }
-          } else {
-            preArea[e.data.source][predicate] = e.data.target.split('://')[1];
+        if (predicate === "has_post") {
+          preArea[e.data.source][predicate] = e.data.target.replace(
+            "text://",
+            ""
+          );
+        } else if (predicate === "has_image") {
+          const expUrl = e.data.target.replace("image://", "");
+          const image = await ad4mClient.expression.get(expUrl);
+          preArea[e.data.source][predicate] = image.data.slice(1, -1);
+
+          if (e.data.source === "flux://profile") {
+            this.profilebg = image.data.slice(1, -1);
           }
+        } else {
+          preArea[e.data.source][predicate] = e.data.target.split("://")[1];
+        }
       });
 
-      console.log('preArea', preArea)
+      console.log("preArea", preArea);
 
-      this.profileLinks = Object.values(preArea).filter(e => e.id !== "flux://profile");
-      
-      const bioLink = links.find((e: any) => e.data.predicate === 'sioc://has_bio') as LinkExpression;
+      this.profileLinks = Object.values(preArea).filter(
+        (e) => e.id !== "flux://profile"
+      );
+
+      const bioLink = links.find(
+        (e: any) => e.data.predicate === "sioc://has_bio"
+      ) as LinkExpression;
 
       if (bioLink) {
-        this.bio = bioLink.data.target.split('://')[1];
+        this.bio = bioLink.data.target.split("://")[1];
       }
-      
     },
     onLinkClick(link: any) {
       const dataStore = useDataStore();
 
-      if (link.area_type === 'community') {
-        const community = dataStore.getCommunities.find(e => e.neighbourhood.neighbourhoodUrl === link.has_post);
-        console.log(community, this.showJoinCommunityModal, this.showAddlinkModal)
+      if (link.area_type === "community") {
+        const community = dataStore.getCommunities.find(
+          (e) => e.neighbourhood.neighbourhoodUrl === link.has_post
+        );
+        console.log(
+          community,
+          this.showJoinCommunityModal,
+          this.showAddlinkModal
+        );
 
         if (community) {
-          this.$router.push({ name: "community", params: { communityId: community?.neighbourhood.perspective.uuid } });
+          this.$router.push({
+            name: "community",
+            params: { communityId: community?.neighbourhood.perspective.uuid },
+          });
         } else {
           this.showJoinCommunityModal = true;
           this.joiningLink = link.has_post;
         }
-      } else if (link.area_type === 'webLink') {
+      } else if (link.area_type === "webLink") {
         window.api.send("openLinkInBrowser", link.has_post);
       }
-    }
+    },
   },
   async mounted() {
-    this.getAgentProfile()
+    this.getAgentProfile();
     const did = this.$route.params.did as string;
     const me = await ad4mClient.agent.me();
 
@@ -187,9 +217,9 @@ export default defineComponent({
   },
   watch: {
     showAddlinkModal() {
-      this.getAgentProfile()
-    }
-  }
+      this.getAgentProfile();
+    },
+  },
 });
 </script>
 
