@@ -42,6 +42,7 @@ import ChannelHeader from "./ChannelHeader.vue";
 import Profile from "@/containers/Profile.vue";
 import { useDataStore } from "@/store/data";
 import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
+import { ad4mClient } from "@/app";
 
 interface UserMap {
   [key: string]: ProfileExpression;
@@ -186,9 +187,17 @@ export default defineComponent({
 
       this.previousFetchedTimestamp = from;
     },
-    handleProfileClick(did: string) {
-      this.showProfile = true;
+    async handleProfileClick(did: string) {
       this.activeProfile = did;
+
+      const me = await ad4mClient.agent.me();
+
+      if (did === me.did) {
+        this.$router.push({ name: "my-profile", params: { did } });
+      } else {
+        this.$router.push({ name: "profile", params: { did } });
+      }
+
     },
     handleMentionClick(dataset: { label: string; id: string }) {
       const { label, id } = dataset;
