@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <img :src="image" class="img" />
+    <div :style="{ backgroundImage: `url(${image})` }" class="img" />
     <div class="bottomContainer">
       <j-text>{{ title }}</j-text>
       <j-text>{{ description }}</j-text>
@@ -25,6 +25,8 @@ export default defineComponent({
   margin-right: 20px;
   margin-bottom: 20px;
   position: relative;
+  overflow: hidden;
+  background-color: var(--j-color-white);
 }
 
 .bottomContainer {
@@ -36,6 +38,8 @@ export default defineComponent({
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
+  background-color: var(--j-color-white);
+  border: 1px solid grey;
   padding: 0 10px;
 }
 
@@ -45,5 +49,7 @@ export default defineComponent({
   left: 0;
   height: 100%;
   width: 100%;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 </style>

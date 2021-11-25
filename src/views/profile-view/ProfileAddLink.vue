@@ -93,6 +93,7 @@ import { LinkType } from "datocms-structured-text-utils";
 import { ref } from "vue";
 import { defineComponent } from "vue-demi";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
+import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
 
 type linkType = 'community' | 'channel' | 'webLink' | null;
 export default defineComponent({
@@ -244,17 +245,20 @@ export default defineComponent({
         console.log(community)
         const image = this.newProfileImage || community?.neighbourhood.image;
 
+        const storedImage = await ad4mClient.expression.create(image, NOTE_IPFS_EXPRESSION_OFFICIAL);
+
         if (image) {          
           await ad4mClient.perspective.addLink(
             userPerspective!,
-            new Link({ source: `area-${Object.keys(preArea).length}`, target: `image://${image}`, predicate: "sioc://has_image" })
+            new Link({ source: `area-${Object.keys(preArea).length}`, target: `image://${storedImage}`, predicate: "sioc://has_image" })
           );
         }
 
       } else if (this.linkType === 'webLink' && this.newProfileImage) {
+        const storedImage = await ad4mClient.expression.create(this.newProfileImage, NOTE_IPFS_EXPRESSION_OFFICIAL);
         await ad4mClient.perspective.addLink(
           userPerspective!,
-          new Link({ source: `area-${Object.keys(preArea).length}`, target: `image://${this.newProfileImage}`, predicate: "sioc://has_image" })
+          new Link({ source: `area-${Object.keys(preArea).length}`, target: `image://${storedImage}`, predicate: "sioc://has_image" })
         );
       }
 

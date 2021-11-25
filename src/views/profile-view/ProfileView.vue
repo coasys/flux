@@ -1,6 +1,6 @@
 <template>
   <div class="profile__container">
-    <img :src="profilebg" class="profile__bg" />
+    <div :style="{ backgroundImage: `url(${profilebg})` }" class="profile__bg" />
     <j-box v-if="profile" p="800">
       <j-flex a="start" direction="column" gap="500">
         <div class="profile__avatar">
@@ -21,6 +21,7 @@
           :key="link.id" 
           :title="link.has_name" 
           :description="link.has_description" 
+          :image="link.has_image"
           @click="() => onLinkClick(link)" 
         />
         <div class="add" @click="() => (showAddlinkModal = true)">
@@ -136,8 +137,12 @@ export default defineComponent({
           } else if (predicate === 'has_image') {
             const expUrl = e.data.target.replace('image://', '');
             const image = await ad4mClient.expression.get(expUrl);
-            preArea[e.data.source][predicate] = image.data;
-            this.profilebg = image.data.slice(1, -1);
+            console.log('image', e.data.source, image)
+            preArea[e.data.source][predicate] = image.data.slice(1, -1);
+
+            if (e.data.source === "flux://profile") {
+              this.profilebg = image.data.slice(1, -1);
+            }
           } else {
             preArea[e.data.source][predicate] = e.data.target.split('://')[1];
           }
@@ -193,6 +198,8 @@ export default defineComponent({
   height: clamp(200px, 10vh, 300px);
   width: 100%;
   background-color: grey;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .profile__avatar {
