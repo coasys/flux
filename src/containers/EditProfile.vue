@@ -2,6 +2,10 @@
   <j-box p="800">
     <j-flex direction="column" gap="700">
       <j-text variant="heading-sm">Edit profile</j-text>
+      <img-upload
+        :value="profileBg"
+        @change="(url) => (profileBg = url)"
+      ></img-upload>
       <avatar-upload
         :hash="userDid"
         :value="profilePicture"
@@ -28,22 +32,6 @@
         </j-button>
       </div>
     </j-flex>
-    <br />
-    <j-flex direction="column" gap="700">
-      <j-text>Edit agent perspective</j-text>
-      <j-input
-        size="lg"
-        label="Add Link"
-        :value="link"
-        @input="(e) => (link = e.target.value)"
-      ></j-input>
-      <div>
-        <j-button size="lg" @click="$emit('cancel')"> Cancel </j-button>
-        <j-button size="lg" variant="primary" @click="updateAgentPerspective">
-          Update
-        </j-button>
-      </div>
-    </j-flex>
   </j-box>
 </template>
 
@@ -60,10 +48,12 @@ import {
 import { Link, PerspectiveInput } from "@perspect3vism/ad4m";
 import { ad4mClient } from "@/app";
 import { useAppStore } from "@/store/app";
+import ImgUpload from '@/components/img-upload/ImgUpload.vue'
+import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
-  components: { AvatarUpload },
+  components: { AvatarUpload, ImgUpload },
   setup() {
     const userStore = useUserStore();
     const appStore = useAppStore();
@@ -80,6 +70,7 @@ export default defineComponent({
       username: "",
       bio: "",
       link: "",
+      profileBg: ""
     };
   },
   computed: {
@@ -116,9 +107,23 @@ export default defineComponent({
 
       const userPerspective = this.userStore.getFluxPerspectiveId;
 
+      const langs = await ad4mClient.languages.all();
+      const ipfsLang = langs.find(e => e.address === NOTE_IPFS_EXPRESSION_OFFICIAL)
+
+      console.log('langs', ipfsLang)
+
+      const image = await ad4mClient.expression.create(this.profileBg, NOTE_IPFS_EXPRESSION_OFFICIAL);
+
+      console.log('langs', this.profileBg, image)
+
       const linked = await ad4mClient.perspective.addLink(
         userPerspective!,
         new Link({ source: 'flux://profile', target: `text://${this.bio}`, predicate: 'sioc://has_bio' })
+      );
+
+      const profileBgLinked = await ad4mClient.perspective.addLink(
+        userPerspective!,
+        new Link({ source: 'flux://profile', target: `image://${image}`, predicate: 'sioc://has_image' })
       );
 
       const perspectiveSnapshot = await ad4mClient.perspective.snapshotByUUID(
@@ -127,7 +132,7 @@ export default defineComponent({
   
       const links = [];
       //Remove __typename fields so the next gql does not fail
-      for (const link of [...perspectiveSnapshot!.links.filter(e => e.data.predicate === 'soic://has_bio'), linked]) {
+      for (const link of [...perspectiveSnapshot!.links.filter(e => e.data.predicate === 'soic://has_bio' || 'sioc://has_image'), linked, profileBgLinked]) {
         //Deep copy the object... so we can delete __typename fields inject by apollo client
         const newLink = JSON.parse(
           JSON.stringify(link)
@@ -141,6 +146,7 @@ export default defineComponent({
       const agent = await ad4mClient.agent.updatePublicPerspective({
         links,
       } as PerspectiveInput);
+
 
       this.userStore
         .updateProfile({
@@ -188,3 +194,10 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.profile_bg {
+  width: 100%;
+  height: 100px;
+}
+</style>
