@@ -1,4 +1,4 @@
-import { app, ipcMain } from "electron";
+import { app, ipcMain, shell } from "electron";
 import fs from "fs";
 import path from "path";
 import { MainThreadGlobal } from "./globals";
@@ -14,7 +14,7 @@ export function registerIpcHooks(mainThreadState: MainThreadGlobal): void {
   });
 
   ipcMain.on("openLinkInBrowser", (event, link) => {
-    require('electron').shell.openExternal(link);
+    shell.openExternal(link);
   });
 
   ipcMain.on("restoreWindow", () => {
