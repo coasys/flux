@@ -8,7 +8,7 @@
       custom
       v-slot="{ navigate }"
     >
-      <j-tooltip title="Home">
+      <j-tooltip title="Profile">
         <j-avatar
           class="left-nav__profile-icon"
           size="xl"
