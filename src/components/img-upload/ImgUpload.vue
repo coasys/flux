@@ -34,7 +34,7 @@
     ></cropper>
     <j-box pt="300">
       <j-button @click="clearImage">Cancel</j-button>
-      <j-button variant="primary" @click="selectImage">Crop</j-button>
+      <j-button variant="primary" @click="selectImage">Ok</j-button>
     </j-box>
   </div>
 </template>
