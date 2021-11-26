@@ -22,7 +22,7 @@
         size="lg"
         label="Bio"
         @keydown.enter="updateProfile"
-        :value="userProfile?.bio"
+        :value="bio"
         @input="(e) => (bio = e.target.value)"
       ></j-input>
       <div>
@@ -37,7 +37,7 @@
 
 <script lang="ts">
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import { Profile } from "@/store/types";
 import { useUserStore } from "@/store/user";
 import {
@@ -50,14 +50,15 @@ import { ad4mClient } from "@/app";
 import { useAppStore } from "@/store/app";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
+import getByDid from "@/core/queries/getByDid";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
+  props: ["bg", "preBio"],
   components: { AvatarUpload, ImgUpload },
   setup() {
     const userStore = useUserStore();
     const appStore = useAppStore();
-
     return {
       userStore,
       appStore,
@@ -71,6 +72,8 @@ export default defineComponent({
       bio: "",
       link: "",
       profileBg: "",
+      profileBgChanged: false,
+      bioChanged: false
     };
   },
   computed: {
@@ -94,6 +97,18 @@ export default defineComponent({
       },
       immediate: true,
     },
+    preBio() {
+      this.bio = this.preBio;
+    },
+    bg() {
+      this.profileBg = this.bg;
+    },
+    bio() {
+      this.bioChanged = this.bio !== this.preBio;
+    },
+    profileBg() {
+      this.profileBgChanged = this.profileBg !== this.bg;
+    }
   },
   methods: {
     async updateProfile() {
@@ -107,51 +122,50 @@ export default defineComponent({
 
       const userPerspective = this.userStore.getFluxPerspectiveId;
 
-      const langs = await ad4mClient.languages.all();
-      const ipfsLang = langs.find(
-        (e) => e.address === NOTE_IPFS_EXPRESSION_OFFICIAL
+      const agentPerspective = await getByDid(
+        this.userDid
       );
 
-      console.log("langs", ipfsLang);
+      let filteredLinks = agentPerspective!.perspective!.links;
 
-      const image = await ad4mClient.expression.create(
-        this.profileBg,
-        NOTE_IPFS_EXPRESSION_OFFICIAL
-      );
+      if (this.profileBgChanged) {
+        filteredLinks = filteredLinks.filter(e => e.data.predicate !== 'sioc://has_image');
+        const image = await ad4mClient.expression.create(
+          this.profileBg,
+          NOTE_IPFS_EXPRESSION_OFFICIAL
+        );
 
-      console.log("langs", this.profileBg, image);
+        const profileBgLinked = await ad4mClient.perspective.addLink(
+          userPerspective!,
+          new Link({
+            source: "flux://profile",
+            target: `image://${image}`,
+            predicate: "sioc://has_image",
+          })
+        );
 
-      const linked = await ad4mClient.perspective.addLink(
-        userPerspective!,
-        new Link({
-          source: "flux://profile",
-          target: `text://${this.bio}`,
-          predicate: "sioc://has_bio",
-        })
-      );
+        filteredLinks.push(profileBgLinked)
+      }
 
-      const profileBgLinked = await ad4mClient.perspective.addLink(
-        userPerspective!,
-        new Link({
-          source: "flux://profile",
-          target: `image://${image}`,
-          predicate: "sioc://has_image",
-        })
-      );
 
-      const perspectiveSnapshot = await ad4mClient.perspective.snapshotByUUID(
-        userPerspective!
-      );
+      if (this.bioChanged) {
+        filteredLinks = filteredLinks.filter(e => e.data.predicate !== 'sioc://has_bio');
+
+        const linked = await ad4mClient.perspective.addLink(
+          userPerspective!,
+          new Link({
+            source: "flux://profile",
+            target: `text://${this.bio}`,
+            predicate: "sioc://has_bio",
+          })
+        );
+
+        filteredLinks.push(linked)
+      }
 
       const links = [];
       //Remove __typename fields so the next gql does not fail
-      for (const link of [
-        ...perspectiveSnapshot!.links.filter(
-          (e) => e.data.predicate === "soic://has_bio" || "sioc://has_image"
-        ),
-        linked,
-        profileBgLinked,
-      ]) {
+      for (const link of filteredLinks) {
         //Deep copy the object... so we can delete __typename fields inject by apollo client
         const newLink = JSON.parse(JSON.stringify(link));
         newLink.__typename = undefined;
