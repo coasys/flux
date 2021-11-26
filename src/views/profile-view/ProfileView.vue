@@ -168,7 +168,7 @@ export default defineComponent({
             ""
           );
         } else if (predicate === "has_image") {
-          const expUrl = e.data.target.replace("image://", "");
+          const expUrl = e.data.target;
           const image = await ad4mClient.expression.get(expUrl);
 
           if (image) {

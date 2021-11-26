@@ -135,7 +135,7 @@ export default defineComponent({
           userPerspective!,
           new Link({
             source: "flux://profile",
-            target: `image://${image}`,
+            target: image,
             predicate: "sioc://has_image",
           })
         );

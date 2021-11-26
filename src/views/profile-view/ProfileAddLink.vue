@@ -60,9 +60,6 @@
         size="xl"
         :value="description"
         @input="(e) => (description = e.target.value)"
-        :error="descriptionError"
-        :errorText="descriptionErrorMessage"
-        @blur="(e) => validateDescription"
       ></j-input>
       <j-flex gap="400">
         <j-button full style="width: 100%" size="lg" @click="step = 1">
@@ -107,6 +104,7 @@ export default defineComponent({
     const step = ref(1);
     const isAddLink = ref(false);
     const newProfileImage = ref("");
+    const description = ref("");
 
     const {
       value: title,
@@ -120,26 +118,6 @@ export default defineComponent({
         {
           check: (value: string) => (value ? false : true),
           message: "Title is required",
-        },
-        {
-          check: (value: string) => value.length < 3,
-          message: "Should be 3 or more characters",
-        },
-      ],
-    });
-
-    const {
-      value: description,
-      error: descriptionError,
-      errorMessage: descriptionErrorMessage,
-      isValid: descriptionIsValid,
-      validate: validateDescription,
-    } = useValidation({
-      initialValue: "",
-      rules: [
-        {
-          check: (value: string) => (value ? false : true),
-          message: "Description is required",
         },
         {
           check: (value: string) => value.length < 3,
@@ -177,10 +155,6 @@ export default defineComponent({
       titleIsValid,
       validateTitle,
       description,
-      descriptionError,
-      descriptionErrorMessage,
-      descriptionIsValid,
-      validateDescription,
       link,
       linkError,
       linkErrorMessage,
@@ -196,7 +170,7 @@ export default defineComponent({
       return this.linkIsValid;
     },
     canCreateLink(): boolean {
-      return this.titleIsValid && this.descriptionIsValid;
+      return this.titleIsValid;
     },
   },
   methods: {
@@ -285,7 +259,7 @@ export default defineComponent({
             userPerspective!,
             new Link({
               source: `area-${Object.keys(preArea).length}`,
-              target: `image://${storedImage}`,
+              target: storedImage,
               predicate: "sioc://has_image",
             })
           );
@@ -299,7 +273,7 @@ export default defineComponent({
           userPerspective!,
           new Link({
             source: `area-${Object.keys(preArea).length}`,
-            target: `image://${storedImage}`,
+            target: storedImage,
             predicate: "sioc://has_image",
           })
         );
