@@ -12,7 +12,7 @@
             :hash="$route.params.did"
             :src="profile.profilePicture"
           />
-          <j-button>Send message</j-button>
+          <j-button @click="() => setShowEditProfile(true)">Edit Profile</j-button>
         </div>
         <j-text
           v-if="profile.familyName || profile.givenName"
@@ -64,13 +64,22 @@
       :joiningLink="joiningLink"
     ></ProfileJoinLink>
   </j-modal>
+    <j-modal
+    :open="modals.showEditProfile"
+    @toggle="(e) => setShowEditProfile(e.target.open)"
+  >
+    <edit-profile
+      @submit="() => setShowEditProfile(false)"
+      @cancel="() => setShowEditProfile(false)"
+    />
+  </j-modal>
   <router-view></router-view>
 </template>
 
 <script lang="ts">
 import { ad4mClient } from "@/app";
 import { useDataStore } from "@/store/data";
-import { ExpressionTypes, Profile } from "@/store/types";
+import { ExpressionTypes, ModalsState, Profile } from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
 import { LinkExpression } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
@@ -78,6 +87,9 @@ import ProfileCard from "./ProfileCards.vue";
 import ProfileAddLink from "./ProfileAddLink.vue";
 import ProfileJoinLink from "./ProfileJoinLink.vue";
 import { useUserStore } from "@/store/user";
+import EditProfile from "@/containers/EditProfile.vue";
+import { useAppStore } from "@/store/app";
+import { mapActions } from "pinia";
 
 export default defineComponent({
   name: "ProfileView",
@@ -85,6 +97,14 @@ export default defineComponent({
     ProfileCard,
     ProfileAddLink,
     ProfileJoinLink,
+    EditProfile
+  },
+  setup() {
+    const appStore = useAppStore();
+
+    return {
+      appStore,
+    };
   },
   data() {
     return {
@@ -113,7 +133,7 @@ export default defineComponent({
 
       console.log(did, me.did);
 
-      if (did === me.did) {
+      if (did === undefined || did === me.did) {
         this.profile = userStore.getProfile!;
       } else {
         const profileLang = Object.values(
@@ -207,6 +227,9 @@ export default defineComponent({
         window.api.send("openLinkInBrowser", link.has_post);
       }
     },
+    ...mapActions(useAppStore, [
+      "setShowEditProfile",
+    ]),
   },
   async mounted() {
     this.getAgentProfile();
@@ -218,6 +241,11 @@ export default defineComponent({
   watch: {
     showAddlinkModal() {
       this.getAgentProfile();
+    },
+  },
+  computed: {
+    modals(): ModalsState {
+      return this.appStore.modals;
     },
   },
 });
