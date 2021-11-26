@@ -178,35 +178,6 @@ export default defineComponent({
           this.isUpdatingProfile = false;
         });
     },
-    async updateAgentPerspective() {
-      const userPerspective = this.userStore.getFluxPerspectiveId;
-      await ad4mClient.perspective.addLink(
-        userPerspective!,
-        new Link({ source: "self", target: this.link, predicate: "post" })
-      );
-      const perspectiveSnapshot = await ad4mClient.perspective.snapshotByUUID(
-        userPerspective!
-      );
-      const links = [];
-      //Remove __typename fields so the next gql does not fail
-      for (const link in perspectiveSnapshot!.links) {
-        //Deep copy the object... so we can delete __typename fields inject by apollo client
-        const newLink = JSON.parse(
-          JSON.stringify(perspectiveSnapshot!.links[link])
-        );
-        newLink.__typename = undefined;
-        newLink.data.__typename = undefined;
-        newLink.proof.__typename = undefined;
-        links.push(newLink);
-      }
-      await ad4mClient.agent.updatePublicPerspective({
-        links,
-      } as PerspectiveInput);
-      this.link = "";
-      this.appStore.showSuccessToast({
-        message: "Link added to agent perspective",
-      });
-    },
   },
 });
 </script>
