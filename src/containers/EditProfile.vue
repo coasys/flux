@@ -50,7 +50,7 @@ import { ad4mClient } from "@/app";
 import { useAppStore } from "@/store/app";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
-import getByDid from "@/core/queries/getByDid";
+import getAgentLinks from "@/utils/getAgentLinks";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -122,11 +122,7 @@ export default defineComponent({
 
       const userPerspective = this.userStore.getFluxPerspectiveId;
 
-      const agentPerspective = await getByDid(
-        this.userDid
-      );
-
-      let filteredLinks = agentPerspective!.perspective!.links;
+      let filteredLinks = await getAgentLinks(this.userDid, userPerspective!);
 
       if (this.profileBgChanged) {
         filteredLinks = filteredLinks.filter(e => e.data.predicate !== 'sioc://has_image');

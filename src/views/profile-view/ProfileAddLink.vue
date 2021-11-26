@@ -97,7 +97,7 @@ import { ref } from "vue";
 import { defineComponent } from "vue-demi";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
-import getByDid from "@/core/queries/getByDid";
+import getAgentLinks from "@/utils/getAgentLinks";
 
 type linkType = "community" | "channel" | "webLink" | null;
 export default defineComponent({
@@ -209,11 +209,7 @@ export default defineComponent({
 
       const did = userStore.getUser?.agent.did;
 
-      let agentPerspective = await getByDid(
-        did!
-      );
-
-      const preLinks = agentPerspective!.perspective!.links;
+      const preLinks = await getAgentLinks(did!, userPerspective!);
 
       const preArea: { [x: string]: any } = {};
 
@@ -309,16 +305,14 @@ export default defineComponent({
         );
       }
 
-      agentPerspective = await getByDid(
-        did!
-      );
+      const newLinks = await getAgentLinks(did!, userPerspective!);
 
       const links = [];
       //Remove __typename fields so the next gql does not fail
-      for (const link in agentPerspective!.perspective!.links) {
+      for (const link in newLinks) {
         //Deep copy the object... so we can delete __typename fields inject by apollo client
         const newLink = JSON.parse(
-          JSON.stringify(agentPerspective!.perspective!.links[link])
+          JSON.stringify(newLinks[link])
         );
         newLink.__typename = undefined;
         newLink.data.__typename = undefined;
@@ -338,6 +332,7 @@ export default defineComponent({
       this.description = "";
       this.link = "";
       this.newProfileImage = "";
+      this.isAddLink = false;
 
       this.$emit("submit");
     },

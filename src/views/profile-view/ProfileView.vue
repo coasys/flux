@@ -83,7 +83,7 @@ import { ad4mClient } from "@/app";
 import { useDataStore } from "@/store/data";
 import { ExpressionTypes, ModalsState, Profile } from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
-import { LinkExpression } from "@perspect3vism/ad4m";
+import { Link, LinkExpression } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
 import ProfileCard from "./ProfileCards.vue";
 import ProfileAddLink from "./ProfileAddLink.vue";
@@ -92,7 +92,7 @@ import { useUserStore } from "@/store/user";
 import EditProfile from "@/containers/EditProfile.vue";
 import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
-import getByDid from "@/core/queries/getByDid";
+import getAgentLinks from "@/utils/getAgentLinks";
 
 export default defineComponent({
   name: "ProfileView",
@@ -134,8 +134,6 @@ export default defineComponent({
       const userStore = useUserStore();
       const userPerspective = userStore.getFluxPerspectiveId;
 
-      console.log(did, me.did);
-
       if (did === undefined || did === me.did) {
         this.profile = userStore.getProfile!;
       } else {
@@ -152,17 +150,11 @@ export default defineComponent({
         }
       }
 
-      // @ts-ignore
-      const agentPerspective = await getByDid(
-        me.did!
-      );
-
-      const links = agentPerspective!.perspective!.links;
-
+      const links = await getAgentLinks(did || me.did, userPerspective!);
 
       const preArea: { [x: string]: any } = {};
 
-      links.forEach(async (e: any) => {
+      for (const e of links) {
         const predicate = e.data.predicate.split("://")[1];
         if (!preArea[e.data.source]) {
           preArea[e.data.source] = {
@@ -180,6 +172,7 @@ export default defineComponent({
           const image = await ad4mClient.expression.get(expUrl);
 
           if (image) {
+            console.log('image', image)
             preArea[e.data.source][predicate] = image.data.slice(1, -1);
 
             if (e.data.source === "flux://profile") {
@@ -190,9 +183,7 @@ export default defineComponent({
         } else {
           preArea[e.data.source][predicate] = e.data.target.split("://")[1];
         }
-      });
-
-      console.log("preArea", preArea);
+      }
 
       this.profileLinks = Object.values(preArea).filter(
         (e) => e.id !== "flux://profile"
@@ -249,10 +240,14 @@ export default defineComponent({
   },
   watch: {
     showAddlinkModal() {
-      this.getAgentProfile();
+      if (!this.showAddlinkModal) {
+        this.getAgentProfile();
+      }
     },
     "modals.showEditProfile"() {
-      this.getAgentProfile();
+      if (!this.modals.showEditProfile) {
+        this.getAgentProfile();
+      }
     }
   },
   computed: {
@@ -310,7 +305,3 @@ export default defineComponent({
   margin: auto;
 }
 </style>
-
-function getByDid(arg0: string) {
-  throw new Error("Function not implemented.");
-}
