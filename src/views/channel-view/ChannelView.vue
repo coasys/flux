@@ -192,7 +192,7 @@ export default defineComponent({
       const me = await ad4mClient.agent.me();
 
       if (did === me.did) {
-        this.$router.push({ name: "my-profile", params: { did } });
+        this.$router.push({ name: "home", params: { did } });
       } else {
         this.$router.push({ name: "profile", params: { did } });
       }
