@@ -40,49 +40,49 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "home",
         name: "home",
-        component: HomeView,
-        redirect: { name: "my-communities" },
+        component: ProfileView,
+        // redirect: { name: "my-communities" },
         children: [
-          {
-            path: "settings",
-            name: "settings",
-            component: Settings,
-          },
-          {
-            path: "my-feed",
-            name: "my-feed",
-            component: ProfileFeed,
-          },
-          {
-            path: "communities",
-            name: "my-communities",
-            component: MyCommunities,
-          },
-          {
-            path: "profile",
-            name: "my-profile",
-            component: ProfileView,
-          },
-          {
-            path: "tutorial",
-            name: "tutorial",
-            component: Tutorial,
-          },
-          {
-            path: "foundation",
-            name: "foundation",
-            component: Foundation,
-          },
-          {
-            path: "faq",
-            name: "faq",
-            component: Faq,
-          },
-          {
-            path: "privacy-policy",
-            name: "privacy-policy",
-            component: PrivacyPolicy,
-          },
+          // {
+          //   path: "settings",
+          //   name: "settings",
+          //   component: Settings,
+          // },
+          // {
+          //   path: "my-feed",
+          //   name: "my-feed",
+          //   component: ProfileFeed,
+          // },
+          // {
+          //   path: "communities",
+          //   name: "my-communities",
+          //   component: MyCommunities,
+          // },
+          // {
+          //   path: "profile",
+          //   name: "my-profile",
+          //   component: ProfileView,
+          // },
+          // {
+          //   path: "tutorial",
+          //   name: "tutorial",
+          //   component: Tutorial,
+          // },
+          // {
+          //   path: "foundation",
+          //   name: "foundation",
+          //   component: Foundation,
+          // },
+          // {
+          //   path: "faq",
+          //   name: "faq",
+          //   component: Faq,
+          // },
+          // {
+          //   path: "privacy-policy",
+          //   name: "privacy-policy",
+          //   component: PrivacyPolicy,
+          // },
         ],
       },
       {
@@ -108,6 +108,11 @@ const routes: Array<RouteRecordRaw> = [
             component: ProfileFeed,
           },
         ],
+      },
+      {
+        path: "settings",
+        name: "settings",
+        component: Settings,
       },
     ],
   },

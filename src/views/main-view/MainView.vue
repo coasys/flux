@@ -19,16 +19,6 @@
   </j-modal>
 
   <j-modal
-    :open="modals.showEditProfile"
-    @toggle="(e) => setShowEditProfile(e.target.open)"
-  >
-    <edit-profile
-      @submit="() => setShowEditProfile(false)"
-      @cancel="() => setShowEditProfile(false)"
-    />
-  </j-modal>
-
-  <j-modal
     :open="modals.showDisclaimer"
     @toggle="(e) => setShowDisclaimer(e.target.open)"
   >
@@ -57,7 +47,6 @@ import MainSidebar from "./main-sidebar/MainSidebar.vue";
 import { defineComponent } from "vue";
 
 import CreateCommunity from "@/containers/CreateCommunity.vue";
-import EditProfile from "@/containers/EditProfile.vue";
 import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
@@ -74,7 +63,6 @@ export default defineComponent({
   components: {
     MainSidebar,
     AppLayout,
-    EditProfile,
     CreateCommunity,
   },
   data() {
