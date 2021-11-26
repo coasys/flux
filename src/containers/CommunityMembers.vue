@@ -26,6 +26,7 @@
             size="lg"
             :hash="communityMember.did"
             :src="communityMember.thumbnailPicture"
+            @click="() => profileClick(communityMember.did)"
           />
           <j-text variant="body">
             {{ communityMember.username }}
@@ -47,6 +48,7 @@ import {
 import { useDataStore } from "@/store/data";
 
 import { getProfile } from "@/utils/profileHelpers";
+import { ad4mClient } from "@/app";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -97,5 +99,16 @@ export default defineComponent({
       )!.languageAddress;
     },
   },
+  methods: {
+    async profileClick(did: string) {
+      const me = await ad4mClient.agent.me();
+
+      if (did === me.did) {
+        this.$router.push({ name: "home", params: { did } });
+      } else {
+        this.$router.push({ name: "profile", params: { did } });
+      }
+    }
+  }
 });
 </script>
