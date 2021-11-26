@@ -4,7 +4,7 @@
       :style="{ backgroundImage: `url(${profilebg})` }"
       class="profile__bg"
     />
-    <j-box v-if="profile" p="800">
+    <div v-if="profile" class="profile">
       <j-flex a="start" direction="column" gap="500">
         <div class="profile__avatar">
           <j-avatar
@@ -41,7 +41,7 @@
           <j-text>Add Link</j-text>
         </div>
       </div>
-    </j-box>
+    </div>
   </div>
   <j-modal
     size="lg"
@@ -71,6 +71,8 @@
     <edit-profile
       @submit="() => setShowEditProfile(false)"
       @cancel="() => setShowEditProfile(false)"
+      :bg="profilebg"
+      :preBio="bio"
     />
   </j-modal>
   <router-view></router-view>
@@ -90,6 +92,7 @@ import { useUserStore } from "@/store/user";
 import EditProfile from "@/containers/EditProfile.vue";
 import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
+import getByDid from "@/core/queries/getByDid";
 
 export default defineComponent({
   name: "ProfileView",
@@ -150,14 +153,12 @@ export default defineComponent({
       }
 
       // @ts-ignore
-      const { links } = await ad4mClient.perspective.snapshotByUUID(
-        userPerspective!
+      const agentPerspective = await getByDid(
+        me.did!
       );
 
-      // @ts-ignore
-      const uuidLinks = await ad4mClient.agent.byDID(did);
+      const links = agentPerspective!.perspective!.links;
 
-      console.log("profilePerspective", links, uuidLinks.perspective?.links);
 
       const preArea: { [x: string]: any } = {};
 
@@ -177,11 +178,15 @@ export default defineComponent({
         } else if (predicate === "has_image") {
           const expUrl = e.data.target.replace("image://", "");
           const image = await ad4mClient.expression.get(expUrl);
-          preArea[e.data.source][predicate] = image.data.slice(1, -1);
 
-          if (e.data.source === "flux://profile") {
-            this.profilebg = image.data.slice(1, -1);
+          if (image) {
+            preArea[e.data.source][predicate] = image.data.slice(1, -1);
+
+            if (e.data.source === "flux://profile") {
+              this.profilebg = image.data.slice(1, -1);
+            }
           }
+
         } else {
           preArea[e.data.source][predicate] = e.data.target.split("://")[1];
         }
@@ -237,11 +242,18 @@ export default defineComponent({
     const me = await ad4mClient.agent.me();
 
     this.sameAgent = did === me.did;
+    if (did === undefined) {
+      this.sameAgent = true;  
+    }
+
   },
   watch: {
     showAddlinkModal() {
       this.getAgentProfile();
     },
+    "modals.showEditProfile"() {
+      this.getAgentProfile();
+    }
   },
   computed: {
     modals(): ModalsState {
@@ -254,11 +266,11 @@ export default defineComponent({
 <style lang="css" scoped>
 .profile__container {
   width: 100%;
-  max-width: 1000px;
-  margin: auto;
+  height: 100%;
+  overflow-y: auto;
 }
 .profile__bg {
-  height: clamp(200px, 10vh, 300px);
+  height: clamp(150px, 200px, 250px);
   width: 100%;
   background-color: grey;
   background-repeat: no-repeat;
@@ -270,7 +282,7 @@ export default defineComponent({
   align-items: end;
   justify-content: space-between;
   width: 100%;
-  margin-top: -90px;
+  margin-top: -40px;
 }
 
 .add {
@@ -291,4 +303,14 @@ export default defineComponent({
   display: flex;
   flex-wrap: wrap;
 }
+
+.profile {
+    width: 100%;
+  max-width: 1000px;
+  margin: auto;
+}
 </style>
+
+function getByDid(arg0: string) {
+  throw new Error("Function not implemented.");
+}

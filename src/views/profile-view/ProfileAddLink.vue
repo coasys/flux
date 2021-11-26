@@ -93,11 +93,11 @@ import { useDataStore } from "@/store/data";
 import { useUserStore } from "@/store/user";
 import { useValidation } from "@/utils/validation";
 import { Link, PerspectiveInput } from "@perspect3vism/ad4m";
-import { LinkType } from "datocms-structured-text-utils";
 import { ref } from "vue";
 import { defineComponent } from "vue-demi";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
+import getByDid from "@/core/queries/getByDid";
 
 type linkType = "community" | "channel" | "webLink" | null;
 export default defineComponent({
@@ -207,10 +207,13 @@ export default defineComponent({
       const appStore = useAppStore();
       const userPerspective = userStore.getFluxPerspectiveId;
 
-      // @ts-ignore
-      const { links: preLinks } = await ad4mClient.perspective.snapshotByUUID(
-        userPerspective!
+      const did = userStore.getUser?.agent.did;
+
+      let agentPerspective = await getByDid(
+        did!
       );
+
+      const preLinks = agentPerspective!.perspective!.links;
 
       const preArea: { [x: string]: any } = {};
 
@@ -228,6 +231,14 @@ export default defineComponent({
         preArea[e.data.source][predicate] = e.data.predicate.split("://")[1];
       });
       console.log("preLinks", preLinks);
+      await ad4mClient.perspective.addLink(
+        userPerspective!,
+        new Link({
+          source: `flux://profile`,
+          target: `area-${Object.keys(preArea).length}`,
+          predicate: "flux://has_area",
+        })
+      );
       await ad4mClient.perspective.addLink(
         userPerspective!,
         new Link({
@@ -298,15 +309,16 @@ export default defineComponent({
         );
       }
 
-      const perspectiveSnapshot = await ad4mClient.perspective.snapshotByUUID(
-        userPerspective!
+      agentPerspective = await getByDid(
+        did!
       );
+
       const links = [];
       //Remove __typename fields so the next gql does not fail
-      for (const link in perspectiveSnapshot!.links) {
+      for (const link in agentPerspective!.perspective!.links) {
         //Deep copy the object... so we can delete __typename fields inject by apollo client
         const newLink = JSON.parse(
-          JSON.stringify(perspectiveSnapshot!.links[link])
+          JSON.stringify(agentPerspective!.perspective!.links[link])
         );
         newLink.__typename = undefined;
         newLink.data.__typename = undefined;
