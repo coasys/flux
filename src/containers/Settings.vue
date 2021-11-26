@@ -19,6 +19,10 @@
             <j-icon size="sm" name="lock" slot="start" />
             Privacy
           </j-tab-item>
+          <j-tab-item value="updates">
+            <j-icon size="sm" name="cloud-download" slot="start" />
+            Updates
+          </j-tab-item>
         </j-tabs>
       </aside>
       <div class="settings__content">
@@ -28,6 +32,9 @@
           :theme="theme"
         />
         <privacy v-if="currentView === 'privacy'" />
+        <div v-if="currentView === 'updates'">
+          <j-button @click="updateApp.func" variant="primary">{{ updateApp.text }}</j-button>
+        </div>
       </div>
     </div>
   </j-box>
@@ -58,10 +65,48 @@ export default defineComponent({
     updateGlobalTheme(val: ThemeState) {
       this.appStore.updateGlobalTheme(val);
     },
+    checkForUpdates() {
+      window.api.send("check-update");
+      this.appStore.setUpdateState({ updateState: "checking" });
+    },
+    downloadUpdates() {
+      window.api.send("download-update");
+      this.appStore.setUpdateState({ updateState: "downloading" });
+    },
+    installNow() {
+      window.api.send("quit-and-install");
+    },
   },
   computed: {
     theme(): ThemeState {
       return this.appStore.globalTheme;
+    },
+    updateApp(): { text: string; func?: () => void } {
+      const state = this.appStore.updateState;
+
+      let text = "Check for updates";
+      let func: undefined | (() => void) = this.checkForUpdates;
+
+      if (state === "available") {
+        text = "Download now";
+        func = this.downloadUpdates;
+      } else if (state === "not-available") {
+        text = "Check for updates";
+      } else if (state === "checking") {
+        text = "Checking for updates";
+        func = undefined;
+      } else if (state === "downloading") {
+        text = "Downloading update";
+        func = undefined;
+      } else if (state === "downloaded") {
+        text = "Update downloaded, install now";
+        func = this.installNow;
+      }
+
+      return {
+        text,
+        func,
+      };
     },
   },
 });
