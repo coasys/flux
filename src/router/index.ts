@@ -86,6 +86,11 @@ const routes: Array<RouteRecordRaw> = [
         ],
       },
       {
+        path: "feed",
+        name: "profile-feed",
+        component: ProfileFeed,
+      },
+      {
         path: "communities/:communityId",
         name: "community",
         component: CommunityView,
@@ -101,13 +106,6 @@ const routes: Array<RouteRecordRaw> = [
         path: "profile/:did",
         name: "profile",
         component: ProfileView,
-        children: [
-          {
-            path: "feed",
-            name: "profile-feed",
-            component: ProfileFeed,
-          },
-        ],
       },
       {
         path: "settings",
