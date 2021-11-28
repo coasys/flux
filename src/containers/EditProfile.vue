@@ -1,10 +1,11 @@
 <template>
-  <j-box p="800">
+  <j-box p="800" :style="{ display: hideContainer ? 'none' : 'block' }">
     <j-flex direction="column" gap="700">
       <j-text variant="heading-sm">Edit profile</j-text>
       <img-upload
         :value="profileBg"
         @change="(url) => (profileBg = url)"
+        @hide="(val) => (hideContainer = val)"
       ></img-upload>
       <avatar-upload
         :hash="userDid"
@@ -73,7 +74,8 @@ export default defineComponent({
       link: "",
       profileBg: "",
       profileBgChanged: false,
-      bioChanged: false
+      bioChanged: false,
+      hideContainer: false
     };
   },
   computed: {

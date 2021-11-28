@@ -22,21 +22,27 @@
     type="file"
     @change.prevent="selectFile"
   />
-  <div class="cropper" v-if="tempProfileImage !== null">
-    <cropper
-      ref="cropper"
-      class="cropper__element"
-      backgroundClass="cropper__background"
-      :src="tempProfileImage"
-      :stencil-props="{
-        aspectRatio: 12 / 4,
-      }"
-    ></cropper>
-    <j-box pt="300">
-      <j-button @click="clearImage">Cancel</j-button>
-      <j-button variant="primary" @click="selectImage">Ok</j-button>
+  <teleport to="#popup-target">
+    <j-modal :open="tempProfileImage !== null">      
+    <j-box>
+      <div class="cropper">
+        <cropper
+          ref="cropper"
+          class="cropper__element"
+          backgroundClass="cropper__background"
+          :src="tempProfileImage"
+          :stencil-props="{
+            aspectRatio: 12 / 4,
+          }"
+        ></cropper>
+        <j-box pt="300">
+          <j-button @click="clearImage">Cancel</j-button>
+          <j-button variant="primary" @click="selectImage">Ok</j-button>
+        </j-box>
+      </div>
     </j-box>
-  </div>
+    </j-modal>
+  </teleport>
 </template>
 
 <script lang="ts">
@@ -46,7 +52,7 @@ import { Cropper } from "vue-advanced-cropper";
 
 export default defineComponent({
   components: { Cropper },
-  emits: ["change"],
+  emits: ["change", 'hide'],
   props: {
     value: String,
     disabled: Boolean,
@@ -88,6 +94,11 @@ export default defineComponent({
       this.$emit("change", data);
     },
   },
+  watch: {
+    tempProfileImage() {
+      this.$emit('hide', this.tempProfileImage !== null)
+    }
+  }
 });
 </script>
 
