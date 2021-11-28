@@ -180,6 +180,18 @@ export default defineComponent({
             }
           }
 
+        } else if (predicate === 'has_images') {
+          const expUrl = e.data.target;
+          const image = await ad4mClient.expression.get(expUrl);
+
+          if (image) {
+            if (!preArea[e.data.source][predicate]) {
+              preArea[e.data.source][predicate] = [];
+              preArea[e.data.source]['has_image'] = image.data.slice(1, -1);
+            }
+
+            preArea[e.data.source][predicate].push(image.data.slice(1, -1))
+          }
         } else {
           preArea[e.data.source][predicate] = e.data.target.split("://")[1];
         }
@@ -221,6 +233,11 @@ export default defineComponent({
         }
       } else if (link.area_type === "webLink") {
         window.api.send("openLinkInBrowser", link.has_post);
+      } else if (link.area_type === 'simpleArea') {
+        this.$router.push({
+          name: "profile-feed",
+          params: link
+        });
       }
     },
     ...mapActions(useAppStore, [
@@ -300,7 +317,7 @@ export default defineComponent({
 }
 
 .profile {
-    width: 100%;
+  width: 100%;
   max-width: 1000px;
   margin: auto;
 }
