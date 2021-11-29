@@ -18,7 +18,7 @@
     <j-text>Images</j-text>
     <div class="grid">
       <div v-for="(img, index) of imgs" :key="`${img}-${index}`" class="img_container">
-        <div class="img_bg" :style="{background: `url(${img})`}"></div>
+        <div class="img_bg" :style="{backgroundImage: `url(${img})`}"></div>
         <div class="close" @click="() => (imgs.splice(index, 1))">
           <j-icon name="x-circle"></j-icon>
         </div>
@@ -269,6 +269,9 @@ export default defineComponent({
   border: 1px solid grey;
   border-radius: 4px;
   cursor: pointer;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }
 
 .close {
