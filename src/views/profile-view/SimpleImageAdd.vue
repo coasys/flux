@@ -1,5 +1,6 @@
 <template>
   <j-flex direction="column" gap="400" v-if="step === 2" class="steps">
+    <j-text variant="heading">Gallery</j-text>
     <j-input
       label="Title"
       size="xl"

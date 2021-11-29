@@ -9,7 +9,7 @@
         >Add a web link</j-button
       >
       <j-button full @click="() => selectLinkType('simpleArea')"
-        >Add area</j-button
+        >Add Gallery</j-button
       >
     </j-flex>
     <simple-image-add 
