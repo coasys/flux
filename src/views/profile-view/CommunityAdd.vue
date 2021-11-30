@@ -240,13 +240,12 @@ export default defineComponent({
         );
         console.log(community);
         const image = this.newProfileImage || community?.neighbourhood.image;
-  
-        const storedImage = await ad4mClient.expression.create(
-          image,
-          NOTE_IPFS_EXPRESSION_OFFICIAL
-        );
-  
+    
         if (image) {
+          const storedImage = await ad4mClient.expression.create(
+            image,
+            NOTE_IPFS_EXPRESSION_OFFICIAL
+          );
           await ad4mClient.perspective.addLink(
             userPerspective!,
             new Link({
