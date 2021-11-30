@@ -134,6 +134,10 @@ export default defineComponent({
           check: (value: string) => value.length < 3,
           message: "Should be 3 or more characters",
         },
+        {
+          check: (value: string) => !value.startsWith('neighbourhood://'),
+          message: "Please add a valid neighbourhood link"
+        }
       ],
     });
 
