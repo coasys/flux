@@ -133,6 +133,14 @@ export default defineComponent({
           check: (value: string) => value.length < 3,
           message: "Should be 3 or more characters",
         },
+        {
+          check: (value: string) => {
+            const regex = /[(http(s)?)://(www.)?a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/
+
+            return !regex.test(value);
+          },
+          message: "Link is invalid"
+        }
       ],
     });
 
