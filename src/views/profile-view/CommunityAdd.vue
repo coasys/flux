@@ -50,6 +50,7 @@
       size="xl"
       :value="description"
       @input="(e) => (description = e.target.value)"
+      @keydown.enter="createLink"
     ></j-input>
     <j-flex gap="400">
       <j-button full style="width: 100%" size="lg" @click="$emit('changeStep', 1)">
@@ -162,127 +163,128 @@ export default defineComponent({
   },
   methods: {
     async createLink() {
-      this.isAddLink = true;
-      const dataStore = useDataStore();
-      const userStore = useUserStore();
-      const appStore = useAppStore();
-      const userPerspective = userStore.getFluxPerspectiveId;
-
-      const did = userStore.getUser?.agent.did;
-
-      const preLinks = await getAgentLinks(did!, userPerspective!);
-
-      const preArea: { [x: string]: any } = {};
-
-      preLinks.forEach((e: any) => {
-        const predicate = e.data.predicate.split("://")[1];
-        if (!preArea[e.data.source]) {
-          preArea[e.data.source] = {
-            [predicate]:
-              predicate === "has_post"
-                ? e.data.target
-                : e.data.predicate.split("://")[1],
-          };
-        }
-
-        preArea[e.data.source][predicate] = e.data.predicate.split("://")[1];
-      });
-      console.log("preLinks", preLinks);
-      await ad4mClient.perspective.addLink(
-        userPerspective!,
-        new Link({
-          source: `flux://profile`,
-          target: `area-${Object.keys(preArea).length}`,
-          predicate: "flux://has_area",
-        })
-      );
-      await ad4mClient.perspective.addLink(
-        userPerspective!,
-        new Link({
-          source: `area-${Object.keys(preArea).length}`,
-          target: this.link,
-          predicate: "sioc://has_post",
-        })
-      );
-      await ad4mClient.perspective.addLink(
-        userPerspective!,
-        new Link({
-          source: `area-${Object.keys(preArea).length}`,
-          target: `flux://community`,
-          predicate: "flux://area_type",
-        })
-      );
-      await ad4mClient.perspective.addLink(
-        userPerspective!,
-        new Link({
-          source: `area-${Object.keys(preArea).length}`,
-          target: `text://${this.title}`,
-          predicate: "sioc://has_name",
-        })
-      );
-      await ad4mClient.perspective.addLink(
-        userPerspective!,
-        new Link({
-          source: `area-${Object.keys(preArea).length}`,
-          target: `text://${this.description}`,
-          predicate: "sioc://has_description",
-        })
-      );
-
-      const community = dataStore.getCommunities.find(
-        (e) => e.neighbourhood.neighbourhoodUrl === this.link
-      );
-      console.log(community);
-      const image = this.newProfileImage || community?.neighbourhood.image;
-
-      const storedImage = await ad4mClient.expression.create(
-        image,
-        NOTE_IPFS_EXPRESSION_OFFICIAL
-      );
-
-      if (image) {
+      if (this.canCreateLink && !this.isAddLink) {
+        this.isAddLink = true;
+        const dataStore = useDataStore();
+        const userStore = useUserStore();
+        const appStore = useAppStore();
+        const userPerspective = userStore.getFluxPerspectiveId;
+  
+        const did = userStore.getUser?.agent.did;
+  
+        const preLinks = await getAgentLinks(did!, userPerspective!);
+  
+        const preArea: { [x: string]: any } = {};
+  
+        preLinks.forEach((e: any) => {
+          const predicate = e.data.predicate.split("://")[1];
+          if (!preArea[e.data.source]) {
+            preArea[e.data.source] = {
+              [predicate]:
+                predicate === "has_post"
+                  ? e.data.target
+                  : e.data.predicate.split("://")[1],
+            };
+          }
+  
+          preArea[e.data.source][predicate] = e.data.predicate.split("://")[1];
+        });
+        console.log("preLinks", preLinks);
+        await ad4mClient.perspective.addLink(
+          userPerspective!,
+          new Link({
+            source: `flux://profile`,
+            target: `area-${Object.keys(preArea).length}`,
+            predicate: "flux://has_area",
+          })
+        );
         await ad4mClient.perspective.addLink(
           userPerspective!,
           new Link({
             source: `area-${Object.keys(preArea).length}`,
-            target: storedImage,
-            predicate: "sioc://has_image",
+            target: this.link,
+            predicate: "sioc://has_post",
           })
         );
-      }
-
-
-      const newLinks = await getAgentLinks(did!, userPerspective!);
-
-      const links = [];
-      //Remove __typename fields so the next gql does not fail
-      for (const link in newLinks) {
-        //Deep copy the object... so we can delete __typename fields inject by apollo client
-        const newLink = JSON.parse(
-          JSON.stringify(newLinks[link])
+        await ad4mClient.perspective.addLink(
+          userPerspective!,
+          new Link({
+            source: `area-${Object.keys(preArea).length}`,
+            target: `flux://community`,
+            predicate: "flux://area_type",
+          })
         );
-        newLink.__typename = undefined;
-        newLink.data.__typename = undefined;
-        newLink.proof.__typename = undefined;
-        links.push(newLink);
+        await ad4mClient.perspective.addLink(
+          userPerspective!,
+          new Link({
+            source: `area-${Object.keys(preArea).length}`,
+            target: `text://${this.title}`,
+            predicate: "sioc://has_name",
+          })
+        );
+        await ad4mClient.perspective.addLink(
+          userPerspective!,
+          new Link({
+            source: `area-${Object.keys(preArea).length}`,
+            target: `text://${this.description}`,
+            predicate: "sioc://has_description",
+          })
+        );
+  
+        const community = dataStore.getCommunities.find(
+          (e) => e.neighbourhood.neighbourhoodUrl === this.link
+        );
+        console.log(community);
+        const image = this.newProfileImage || community?.neighbourhood.image;
+  
+        const storedImage = await ad4mClient.expression.create(
+          image,
+          NOTE_IPFS_EXPRESSION_OFFICIAL
+        );
+  
+        if (image) {
+          await ad4mClient.perspective.addLink(
+            userPerspective!,
+            new Link({
+              source: `area-${Object.keys(preArea).length}`,
+              target: storedImage,
+              predicate: "sioc://has_image",
+            })
+          );
+        }
+  
+        const newLinks = await getAgentLinks(did!, userPerspective!);
+  
+        const links = [];
+        //Remove __typename fields so the next gql does not fail
+        for (const link in newLinks) {
+          //Deep copy the object... so we can delete __typename fields inject by apollo client
+          const newLink = JSON.parse(
+            JSON.stringify(newLinks[link])
+          );
+          newLink.__typename = undefined;
+          newLink.data.__typename = undefined;
+          newLink.proof.__typename = undefined;
+          links.push(newLink);
+        }
+        await ad4mClient.agent.updatePublicPerspective({
+          links,
+        } as PerspectiveInput);
+        // await ad4mClient.perspective.remove()
+        this.link = "";
+        appStore.showSuccessToast({
+          message: "Link added to agent perspective",
+        });
+  
+        this.title = "";
+        this.description = "";
+        this.link = "";
+        this.newProfileImage = "";
+        this.isAddLink = false;
+  
+        this.$emit("submit");
+        this.$emit("changeStep", 1)
       }
-      await ad4mClient.agent.updatePublicPerspective({
-        links,
-      } as PerspectiveInput);
-      // await ad4mClient.perspective.remove()
-      this.link = "";
-      appStore.showSuccessToast({
-        message: "Link added to agent perspective",
-      });
-
-      this.title = "";
-      this.description = "";
-      this.link = "";
-      this.newProfileImage = "";
-      this.isAddLink = false;
-
-      this.$emit("submit");
-      this.$emit("changeStep", 1)
     },
     addLink() {
       this.validateLink();
