@@ -3,18 +3,22 @@
     <div a="start" direction="column" class="inner_container">
       <j-text variant="heading">{{link.has_name}}</j-text>
       <j-text variant="subheading">{{link.has_description}}</j-text> 
-      <j-flex a="center" direction="column" gap="1000">
-        <div class="img" :style="{backgroundImage: `url(${img})`}"  v-for="(img, index) in link.has_images" :key="`img-${index}`"/>
-      </j-flex>  
+      <div class="grid">
+        <expandable-image class="img" :style="{backgroundImage: `url(${img})`}"  v-for="(img, index) in link.has_images" :key="`img-${index}`"/>
+      </div>  
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
+import ExpandableImage from '@/components/expandable-img/expandable-img.vue'
 
 export default defineComponent({
   name: "ProfileFeed",
+  components: {
+    ExpandableImage
+  },
   setup() {
     const link = ref<any>({});
 
@@ -45,10 +49,16 @@ export default defineComponent({
 }
 
 .img {
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    width: 800px;
-    height: 400px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 240px;
+  height: 240px;
+  margin-right: 20px;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
 }
 </style>
