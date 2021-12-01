@@ -13,10 +13,8 @@
         {{ `${profile.familyName} ${profile.givenName}` }}</j-text
       >
       <j-text variant="heading-sm"> {{ profile.username }}</j-text>
-      <j-text variant="subheading"> {{ bio }}</j-text>
-      <j-text variant="heading-sm">
-        {{ agentPerspective?.links.map((link) => link.data.target) }}</j-text
-      >
+      <j-text v-if="bio" variant="subheading"> {{ bio }}</j-text>
+      <j-button @click="() => $emit('openCompleteProfile')">View complete profile</j-button>
     </j-flex>
   </j-box>
 </template>
@@ -30,6 +28,7 @@ import { ad4mClient } from "@/app";
 
 export default defineComponent({
   props: ["did", "langAddress"],
+  emits: ['openCompleteProfile'],
   data() {
     return {
       profile: null as null | Profile,

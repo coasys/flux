@@ -20,7 +20,11 @@
       :open="showProfile"
       @toggle="(e) => toggleProfile(e)"
     >
-      <Profile :did="activeProfile" :langAddress="profileLanguage" />
+      <Profile 
+        :did="activeProfile" 
+        :langAddress="profileLanguage" 
+        @openCompleteProfile="() => handleProfileClick(activeProfile)" 
+      />
     </j-modal>
   </div>
 </template>
@@ -194,7 +198,7 @@ export default defineComponent({
       if (did === me.did) {
         this.$router.push({ name: "home", params: { did } });
       } else {
-        this.$router.push({ name: "profile", params: { did } });
+        this.$router.push({ name: "profile", params: { did, communityId: this.community.neighbourhood.perspective.uuid } });
       }
     },
     handleMentionClick(dataset: { label: string; id: string }) {

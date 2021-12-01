@@ -42,6 +42,9 @@
         </div>
       </div>
     </div>
+    <div class="back" @click="() => $router.back()" v-if="$route.name !== 'home'">
+      <j-icon name="arrow-left" size="lg"></j-icon>
+    </div>
   </div>
   <j-modal
     size="lg"
@@ -137,20 +140,20 @@ export default defineComponent({
       if (did === undefined || did === me.did) {
         this.profile = userStore.getProfile!;
       } else {
-        const profileLang = Object.values(
-          useDataStore().neighbourhoods
-        )[0].typedExpressionLanguages.find(
+        const communityId = this.$route.params.communityId as string;
+        const profileLang = useDataStore().getCommunity(communityId).neighbourhood.typedExpressionLanguages.find(
           (t) => t.expressionType === ExpressionTypes.ProfileExpression
         )?.languageAddress;
 
         const dataExp = await getProfile(profileLang!, did);
+          console.log('profile',this.$route, did, me.did, profileLang, dataExp, did || me.did)
 
         if (dataExp) {
           this.profile = dataExp;
         }
       }
 
-      const links = await getAgentLinks(did || me.did, userPerspective!);
+      const links = await getAgentLinks(did || me.did, did === me.did ? userPerspective! : undefined);
 
       const preArea: { [x: string]: any } = {};
 
@@ -168,29 +171,36 @@ export default defineComponent({
             ""
           );
         } else if (predicate === "has_image") {
-          const expUrl = e.data.target;
-          const image = await ad4mClient.expression.get(expUrl);
-
-          if (image) {
-            console.log('image', image)
-            preArea[e.data.source][predicate] = image.data.slice(1, -1);
-
-            if (e.data.source === "flux://profile") {
-              this.profilebg = image.data.slice(1, -1);
+          try {
+            const expUrl = e.data.target;
+            const image = await ad4mClient.expression.get(expUrl);
+  
+            if (image) {
+              preArea[e.data.source][predicate] = image.data.slice(1, -1);
+  
+              if (e.data.source === "flux://profile") {
+                this.profilebg = image.data.slice(1, -1);
+              }
             }
+          } catch (e) {
+            console.log('Error encountered while parsing image');
           }
-
         } else if (predicate === 'has_images') {
-          const expUrl = e.data.target;
-          const image = await ad4mClient.expression.get(expUrl);
-
-          if (image) {
-            if (!preArea[e.data.source][predicate]) {
-              preArea[e.data.source][predicate] = [];
-              preArea[e.data.source]['has_image'] = image.data.slice(1, -1);
+          try {
+            const expUrl = e.data.target;
+            console.log('expUrl', expUrl)
+            const image = await ad4mClient.expression.get(expUrl);
+            console.log('image', image)
+            if (image) {
+              if (!preArea[e.data.source][predicate]) {
+                preArea[e.data.source][predicate] = [];
+                preArea[e.data.source]['has_image'] = image.data.slice(1, -1);
+              }
+  
+              preArea[e.data.source][predicate].push(image.data.slice(1, -1))
             }
-
-            preArea[e.data.source][predicate].push(image.data.slice(1, -1))
+          } catch (e) {
+            console.log('Error encountered while parsing images', e);
           }
         } else {
           preArea[e.data.source][predicate] = e.data.target.split("://")[1];
@@ -208,6 +218,8 @@ export default defineComponent({
       if (bioLink) {
         this.bio = bioLink.data.target.split("://")[1];
       }
+
+      console.log('profile', this.profileLinks, this.profile)
     },
     onLinkClick(link: any) {
       const dataStore = useDataStore();
@@ -265,6 +277,9 @@ export default defineComponent({
       if (!this.modals.showEditProfile) {
         this.getAgentProfile();
       }
+    },
+    '$route.path'(){
+      this.getAgentProfile();
     }
   },
   computed: {
@@ -280,6 +295,7 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   overflow-y: auto;
+  position: relative;
 }
 .profile__bg {
   height: clamp(150px, 200px, 250px);
@@ -320,5 +336,12 @@ export default defineComponent({
   width: 100%;
   max-width: 1000px;
   margin: auto;
+}
+
+.back {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  cursor: pointer;
 }
 </style>
