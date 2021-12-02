@@ -16,6 +16,7 @@
       <j-flex wrap gap="600">
         <j-flex
           gap="300"
+          style="cursor: pointer"
           v-for="communityMember in filteredCommunityMemberList"
           :key="communityMember.did"
           inline
@@ -106,9 +107,12 @@ export default defineComponent({
       if (did === me.did) {
         this.$router.push({ name: "home", params: { did } });
       } else {
-        this.$router.push({ name: "profile", params: { did, communityId: this.$route.params.communityId } });
+        this.$router.push({
+          name: "profile",
+          params: { did, communityId: this.$route.params.communityId },
+        });
       }
-    }
-  }
+    },
+  },
 });
 </script>

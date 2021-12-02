@@ -12,23 +12,23 @@
         >Add Gallery</j-button
       >
     </j-flex>
-    <simple-image-add 
-      v-if="linkType === 'simpleArea'" 
-      :step="step" 
-      @submit="$emit('submit')" 
-      @changeStep="(i) => (step = i)" 
+    <simple-image-add
+      v-if="linkType === 'simpleArea'"
+      :step="step"
+      @submit="$emit('submit')"
+      @changeStep="(i) => (step = i)"
     />
-    <community-add 
-      v-if="linkType === 'community'" 
-      :step="step" 
-      @submit="$emit('submit')" 
-      @changeStep="(i) => (step = i)" 
+    <community-add
+      v-if="linkType === 'community'"
+      :step="step"
+      @submit="$emit('submit')"
+      @changeStep="(i) => (step = i)"
     />
-    <web-link-add 
-      v-if="linkType === 'webLink'" 
-      :step="step" 
-      @submit="$emit('submit')" 
-      @changeStep="(i) => (step = i)" 
+    <web-link-add
+      v-if="linkType === 'webLink'"
+      :step="step"
+      @submit="$emit('submit')"
+      @changeStep="(i) => (step = i)"
     />
   </div>
 </template>
@@ -59,10 +59,10 @@ export default defineComponent({
       this.step = 2;
     },
   },
-  components: { 
+  components: {
     SimpleImageAdd,
     CommunityAdd,
-    WebLinkAdd
+    WebLinkAdd,
   },
 });
 </script>

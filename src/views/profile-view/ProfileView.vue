@@ -8,21 +8,37 @@
       <j-flex a="start" direction="column" gap="500">
         <div class="profile__avatar">
           <j-avatar
-            style="--j-avatar-size: 100px"
+            style="
+              --j-avatar-size: 130px;
+              --j-avatar-border: 3px solid var(--j-color-white);
+            "
             :hash="$route.params.did"
             :src="profile.profilePicture"
           />
-          <j-button @click="() => setShowEditProfile(true)">Edit Profile</j-button>
+          <j-button
+            v-if="sameAgent"
+            variant="subtle"
+            @click="() => setShowEditProfile(true)"
+          >
+            Edit Profile
+          </j-button>
         </div>
+      </j-flex>
+      <j-box pt="300" pb="500">
         <j-text
           v-if="profile.familyName || profile.givenName"
           variant="heading-sm"
         >
-          {{ `${profile.familyName} ${profile.givenName}` }}</j-text
-        >
-        <j-text variant="heading-sm">@{{ profile.username }}</j-text>
-        <j-text variant="subheading"> {{ bio }}</j-text>
-      </j-flex>
+          {{ `${profile.givenName} ${profile.familyName}` }}
+        </j-text>
+        <j-text nomargin size="500" weight="500" color="ui-700">
+          @{{ profile.username }}
+        </j-text>
+      </j-box>
+      <j-box pb="900">
+        <j-text nomargin size="500" color="black"> {{ bio }}</j-text>
+      </j-box>
+
       <div class="grid">
         <ProfileCard
           v-for="link in profileLinks"
@@ -42,7 +58,11 @@
         </div>
       </div>
     </div>
-    <div class="back" @click="() => $router.back()" v-if="$route.name !== 'home'">
+    <div
+      class="back"
+      @click="() => $router.back()"
+      v-if="$route.name !== 'home'"
+    >
       <j-icon name="arrow-left" size="lg"></j-icon>
     </div>
   </div>
@@ -67,7 +87,7 @@
       :joiningLink="joiningLink"
     ></ProfileJoinLink>
   </j-modal>
-    <j-modal
+  <j-modal
     :open="modals.showEditProfile"
     @toggle="(e) => setShowEditProfile(e.target.open)"
   >
@@ -103,7 +123,7 @@ export default defineComponent({
     ProfileCard,
     ProfileAddLink,
     ProfileJoinLink,
-    EditProfile
+    EditProfile,
   },
   setup() {
     const appStore = useAppStore();
@@ -141,19 +161,32 @@ export default defineComponent({
         this.profile = userStore.getProfile!;
       } else {
         const communityId = this.$route.params.communityId as string;
-        const profileLang = useDataStore().getCommunity(communityId).neighbourhood.typedExpressionLanguages.find(
-          (t) => t.expressionType === ExpressionTypes.ProfileExpression
-        )?.languageAddress;
+        const profileLang = useDataStore()
+          .getCommunity(communityId)
+          .neighbourhood.typedExpressionLanguages.find(
+            (t) => t.expressionType === ExpressionTypes.ProfileExpression
+          )?.languageAddress;
 
         const dataExp = await getProfile(profileLang!, did);
-          console.log('profile',this.$route, did, me.did, profileLang, dataExp, did || me.did)
+        console.log(
+          "profile",
+          this.$route,
+          did,
+          me.did,
+          profileLang,
+          dataExp,
+          did || me.did
+        );
 
         if (dataExp) {
           this.profile = dataExp;
         }
       }
 
-      const links = await getAgentLinks(did || me.did, did === me.did ? userPerspective! : undefined);
+      const links = await getAgentLinks(
+        did || me.did,
+        did === me.did ? userPerspective! : undefined
+      );
 
       const preArea: { [x: string]: any } = {};
 
@@ -174,33 +207,33 @@ export default defineComponent({
           try {
             const expUrl = e.data.target;
             const image = await ad4mClient.expression.get(expUrl);
-  
+
             if (image) {
               preArea[e.data.source][predicate] = image.data.slice(1, -1);
-  
+
               if (e.data.source === "flux://profile") {
                 this.profilebg = image.data.slice(1, -1);
               }
             }
           } catch (e) {
-            console.log('Error encountered while parsing image');
+            console.log("Error encountered while parsing image");
           }
-        } else if (predicate === 'has_images') {
+        } else if (predicate === "has_images") {
           try {
             const expUrl = e.data.target;
-            console.log('expUrl', expUrl)
+            console.log("expUrl", expUrl);
             const image = await ad4mClient.expression.get(expUrl);
-            console.log('image', image)
+            console.log("image", image);
             if (image) {
               if (!preArea[e.data.source][predicate]) {
                 preArea[e.data.source][predicate] = [];
-                preArea[e.data.source]['has_image'] = image.data.slice(1, -1);
+                preArea[e.data.source]["has_image"] = image.data.slice(1, -1);
               }
-  
-              preArea[e.data.source][predicate].push(image.data.slice(1, -1))
+
+              preArea[e.data.source][predicate].push(image.data.slice(1, -1));
             }
           } catch (e) {
-            console.log('Error encountered while parsing images', e);
+            console.log("Error encountered while parsing images", e);
           }
         } else {
           preArea[e.data.source][predicate] = e.data.target.split("://")[1];
@@ -219,7 +252,7 @@ export default defineComponent({
         this.bio = bioLink.data.target.split("://")[1];
       }
 
-      console.log('profile', this.profileLinks, this.profile)
+      console.log("profile", this.profileLinks, this.profile);
     },
     onLinkClick(link: any) {
       const dataStore = useDataStore();
@@ -245,16 +278,14 @@ export default defineComponent({
         }
       } else if (link.area_type === "webLink") {
         window.api.send("openLinkInBrowser", link.has_post);
-      } else if (link.area_type === 'simpleArea') {
+      } else if (link.area_type === "simpleArea") {
         this.$router.push({
           name: "profile-feed",
-          params: link
+          params: link,
         });
       }
     },
-    ...mapActions(useAppStore, [
-      "setShowEditProfile",
-    ]),
+    ...mapActions(useAppStore, ["setShowEditProfile"]),
   },
   async mounted() {
     this.getAgentProfile();
@@ -263,9 +294,8 @@ export default defineComponent({
 
     this.sameAgent = did === me.did;
     if (did === undefined) {
-      this.sameAgent = true;  
+      this.sameAgent = true;
     }
-
   },
   watch: {
     showAddlinkModal() {
@@ -278,9 +308,9 @@ export default defineComponent({
         this.getAgentProfile();
       }
     },
-    '$route.path'(){
+    "$route.path"() {
       this.getAgentProfile();
-    }
+    },
   },
   computed: {
     modals(): ModalsState {
@@ -300,7 +330,7 @@ export default defineComponent({
 .profile__bg {
   height: clamp(150px, 200px, 250px);
   width: 100%;
-  background-color: grey;
+  background-color: var(--j-color-ui-100);
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -314,22 +344,27 @@ export default defineComponent({
 }
 
 .add {
-  width: 200px;
-  height: 200px;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 1px solid grey;
+  border: 1px solid var(--j-color-ui-100);
   border-radius: 4px;
   cursor: pointer;
   margin-right: 20px;
   margin-bottom: 20px;
 }
 
+.add:hover {
+  background: var(--j-color-ui-50);
+}
+
 .grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  gap: var(--j-space-400);
+  grid-template-columns: 1fr 1fr 1fr;
 }
 
 .profile {

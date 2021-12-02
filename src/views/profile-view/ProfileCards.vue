@@ -1,9 +1,11 @@
 <template>
   <div class="container">
-    <div :style="{ backgroundImage: `url(${image})` }" class="img" />
-    <div class="bottomContainer">
-      <j-text>{{ title }}</j-text>
-      <j-text>{{ description }}</j-text>
+    <div class="img">
+      <img v-if="image" :src="image" />
+    </div>
+    <div class="content">
+      <j-text size="600" color="black">{{ title }}</j-text>
+      <j-text nomargin>{{ description }}</j-text>
     </div>
   </div>
 </template>
@@ -17,39 +19,38 @@ export default defineComponent({
 
 <style scoped>
 .container {
-  width: 200px;
-  height: 200px;
-  border: 1px solid grey;
+  width: 100%;
+  border: 1px solid var(--j-color-ui-100);
   border-radius: 4px;
   cursor: pointer;
-  margin-right: 20px;
-  margin-bottom: 20px;
-  position: relative;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   background-color: var(--j-color-white);
 }
 
-.bottomContainer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  background-color: var(--j-color-white);
-  border: 1px solid grey;
-  padding: 0 10px;
+.container:hover {
+  background-color: var(--j-color-ui-50);
 }
 
 .img {
-  position: absolute;
-  top: 0;
-  left: 0;
+  display: block;
+  width: 100%;
+  height: 200px;
+  background: var(--j-color-ui-100);
+}
+
+.img img {
+  max-width: 100%;
   height: 100%;
   width: 100%;
+  overflow: hidden;
+  object-fit: cover;
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+.content {
+  padding: var(--j-space-500);
 }
 </style>
