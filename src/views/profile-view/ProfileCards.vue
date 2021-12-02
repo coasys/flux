@@ -4,8 +4,15 @@
       <img v-if="image" :src="image" />
     </div>
     <div class="content">
-      <j-text size="600" color="black">{{ title }}</j-text>
-      <j-text nomargin>{{ description }}</j-text>
+      <j-flex j="between">
+        <div style="cursor: pointer">
+          <j-text size="600" color="black">{{ title }}</j-text>
+          <j-text nomargin>{{ description }}</j-text>
+        </div>
+        <j-button @click.stop variant="ghost" squared size="sm">
+          <j-icon name="three-dots-vertical"></j-icon>
+        </j-button>
+      </j-flex>
     </div>
   </div>
 </template>
@@ -20,9 +27,8 @@ export default defineComponent({
 <style scoped>
 .container {
   width: 100%;
-  border: 1px solid var(--j-color-ui-100);
-  border-radius: 4px;
-  cursor: pointer;
+  border: 1px solid var(--j-color-ui-50);
+  border-radius: var(--j-border-radius);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -34,6 +40,7 @@ export default defineComponent({
 }
 
 .img {
+  cursor: pointer;
   display: block;
   width: 100%;
   height: 200px;

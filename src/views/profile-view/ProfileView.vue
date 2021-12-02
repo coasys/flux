@@ -364,13 +364,27 @@ export default defineComponent({
 .grid {
   display: grid;
   gap: var(--j-space-400);
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1200px) {
+  .grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
 }
 
 .profile {
   width: 100%;
   max-width: 1000px;
   margin: auto;
+  padding-left: var(--j-space-500);
+  padding-right: var(--j-space-500);
 }
 
 .back {
