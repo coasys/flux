@@ -46,7 +46,9 @@
           :title="link.has_name"
           :description="link.has_description"
           :image="link.has_image"
+          :sameAgent="sameAgent"
           @click="() => onLinkClick(link)"
+          @delete="() => deleteLinks(link.id)"
         />
         <div
           class="add"
@@ -185,7 +187,7 @@ export default defineComponent({
 
       const links = await getAgentLinks(
         did || me.did,
-        did === me.did ? userPerspective! : undefined
+        did === me.did || did === undefined ? userPerspective! : undefined
       );
 
       const preArea: { [x: string]: any } = {};
@@ -284,6 +286,30 @@ export default defineComponent({
           params: link,
         });
       }
+    },
+    async deleteLinks(areaName: string) {
+      const userStore = useUserStore();
+      const me = await ad4mClient.agent.me();
+      const userPerspective = userStore.getFluxPerspectiveId;
+      const links = await getAgentLinks(
+        me.did,
+        userPerspective!
+      );
+
+      for (const link of links) {
+        console.log(link)
+        if (link.data.source === areaName || link.data.target === areaName) {
+          const newLink = JSON.parse(
+            JSON.stringify(link)
+          );
+          newLink.__typename = undefined;
+          newLink.data.__typename = undefined;
+          newLink.proof.__typename = undefined;
+          await ad4mClient.perspective.removeLink(userPerspective!, newLink);
+        }
+      }
+
+      this.profileLinks = this.profileLinks.filter(e => e.id !== areaName);
     },
     ...mapActions(useAppStore, ["setShowEditProfile"]),
   },

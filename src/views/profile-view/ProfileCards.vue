@@ -6,12 +6,32 @@
     <div class="content">
       <j-flex j="between">
         <div style="cursor: pointer">
-          <j-text size="600" color="black">{{ title }}</j-text>
-          <j-text nomargin>{{ description }}</j-text>
+          <j-text size="600" color="black">{{ computedTitle }}</j-text>
+          <j-text nomargin>{{ computedDescription }}</j-text>
         </div>
-        <j-button @click.stop variant="ghost" squared size="sm">
+        <j-popover 
+          placement="auto" 
+          event="click"
+          :open="showContextMenu"
+          @toggle="(e) => (showContextMenu = e.target.open)"
+          v-if="sameAgent"
+        >
+        <j-button 
+          slot="trigger" 
+          @click.stop="() => showContextMenu = !showContextMenu" 
+          variant="ghost" 
+          squared 
+          size="sm"
+        >
           <j-icon name="three-dots-vertical"></j-icon>
         </j-button>
+          <j-icon  name="three-dots-vertical"></j-icon>
+            <j-menu slot="content">
+              <j-menu-item @click.stop="() => $emit('delete')">Edit</j-menu-item>
+              <j-menu-item @click.stop="() => $emit('delete')">Delete</j-menu-item>
+            </j-menu>
+        </j-popover>
+
       </j-flex>
     </div>
   </div>
@@ -20,7 +40,21 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 export default defineComponent({
-  props: ["title", "description", "image"],
+  props: ["title", "description", "image", "sameAgent"],
+  emits: ['delete'],
+  data() {
+    return {
+      showContextMenu: false
+    }
+  },
+  computed: {
+    computedTitle() {
+      return this.title.length > 15 ? `${this.title.substring(0, 15)}...` : this.title;
+    },
+    computedDescription() {
+      return this.description.length > 20 ? `${this.description.substring(0, 15)}...` : this.description;
+    }
+  }
 });
 </script>
 
