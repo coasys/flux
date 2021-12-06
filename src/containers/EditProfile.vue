@@ -52,6 +52,7 @@ import { useAppStore } from "@/store/app";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
 import getAgentLinks from "@/utils/getAgentLinks";
+import removeTypeName from "@/utils/removeTypeName";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -127,6 +128,13 @@ export default defineComponent({
       let filteredLinks = await getAgentLinks(this.userDid, userPerspective!);
 
       if (this.profileBgChanged) {
+        const proBgLink = filteredLinks.find(e => e.data.predicate !== 'sioc://has_image');
+
+        if (proBgLink) {
+          const link = removeTypeName(proBgLink);
+          await ad4mClient.perspective.removeLink(userPerspective!, link);
+        }
+
         filteredLinks = filteredLinks.filter(e => e.data.predicate !== 'sioc://has_image');
         const image = await ad4mClient.expression.create(
           this.profileBg,
@@ -147,6 +155,13 @@ export default defineComponent({
 
 
       if (this.bioChanged) {
+        const bioLink = filteredLinks.find(e => e.data.predicate !== 'sioc://has_bio');
+
+        if (bioLink) {
+          const link = removeTypeName(bioLink);
+          await ad4mClient.perspective.removeLink(userPerspective!, link);
+        }
+        
         filteredLinks = filteredLinks.filter(e => e.data.predicate !== 'sioc://has_bio');
 
         const linked = await ad4mClient.perspective.addLink(
