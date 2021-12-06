@@ -100,6 +100,42 @@ export default defineComponent({
       }
     });
 
+    //Start expression web worker to try and get the expression data pointed to in link target
+    const expressionWorker = new Worker("pollingWorker.js");
+
+    expressionWorker.onerror = function (e) {
+      throw new Error(e.toString());
+    };
+
+    expressionWorker.addEventListener("message", (e) => {
+      const perspective = e.data.callbackData.perspective;
+      const link = e.data.callbackData.link;
+      const expression = e.data.expression;
+      const message = JSON.parse(expression!.data!);
+
+      console.debug("FOUND EXPRESSION FOR SIGNAL");
+      //Add the expression to the store
+      dataStore.addExpressionAndLink({
+        channelId: perspective,
+        link: link,
+        message: expression,
+      });
+
+      dataStore.showMessageNotification({
+        router,
+        route,
+        perspectiveUuid: perspective,
+        authorDid: expression!.author,
+        message: message.body,
+      });
+
+      //Add UI notification on the channel to notify that there is a new message there
+      dataStore.setHasNewMessages({
+        channelId: perspective,
+        value: true,
+      });
+    });
+
     //Watch for incoming signals from holochain - an incoming signal should mean a DM is inbound
     const newLinkHandler = async (
       link: LinkExpression,
@@ -107,48 +143,15 @@ export default defineComponent({
     ) => {
       console.debug("GOT INCOMING MESSAGE SIGNAL", link, perspective);
       if (link.data!.predicate! === "sioc://content_of") {
-        //Start expression web worker to try and get the expression data pointed to in link target
-        const expressionWorker = new Worker("pollingWorker.js");
-
         expressionWorker.postMessage({
           id: link.data!.target!,
           retry: expressionGetRetries,
+          callbackData: { perspective, link },
           interval: expressionGetDelayMs,
           query: print(GET_EXPRESSION),
           variables: { url: link.data!.target! },
           name: "Expression signal get",
           dataKey: "expression",
-        });
-
-        expressionWorker.onerror = function (e) {
-          throw new Error(e.toString());
-        };
-
-        expressionWorker.addEventListener("message", (e) => {
-          const expression = e.data.expression;
-          const message = JSON.parse(expression!.data!);
-
-          console.debug("FOUND EXPRESSION FOR SIGNAL");
-          //Add the expression to the store
-          dataStore.addExpressionAndLink({
-            channelId: perspective,
-            link: link,
-            message: expression,
-          });
-
-          dataStore.showMessageNotification({
-            router,
-            route,
-            perspectiveUuid: perspective,
-            authorDid: expression!.author,
-            message: message.body,
-          });
-
-          //Add UI notification on the channel to notify that there is a new message there
-          dataStore.setHasNewMessages({
-            channelId: perspective,
-            value: true,
-          });
         });
       } else if (link.data!.predicate! === MEMBER) {
         const did = link.data!.target!.split("://")[1];
