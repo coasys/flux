@@ -27,11 +27,10 @@
         </j-button>
           <j-icon  name="three-dots-vertical"></j-icon>
             <j-menu slot="content">
-              <j-menu-item @click.stop="() => $emit('delete')">Edit</j-menu-item>
+              <j-menu-item @click.stop="() => $emit('edit')">Edit</j-menu-item>
               <j-menu-item @click.stop="() => $emit('delete')">Delete</j-menu-item>
             </j-menu>
         </j-popover>
-
       </j-flex>
     </div>
   </div>
@@ -41,7 +40,7 @@
 import { defineComponent } from "vue";
 export default defineComponent({
   props: ["title", "description", "image", "sameAgent"],
-  emits: ['delete'],
+  emits: ['delete', 'edit'],
   data() {
     return {
       showContextMenu: false

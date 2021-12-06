@@ -36,7 +36,12 @@
       </div>
     </div>
     <j-flex gap="400">
-        <j-button full style="width: 100%" size="lg" @click="$emit('changeStep', 1)">
+        <j-button 
+          full 
+          style="width: 100%" 
+          size="lg" 
+          @click="area ? $emit('submit') : $emit('changeStep', 1)"
+        >
           <j-icon slot="start" name="arrow-left-short" />
           Back
         </j-button>
@@ -50,7 +55,7 @@
           @click="createLink"
         >
           <j-icon slot="end" name="add" />
-          Add link
+          {{area ? 'Edit link' : 'Add link'}}
         </j-button>
       </j-flex>
   </j-flex>
@@ -63,12 +68,14 @@ import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
 import { useUserStore } from "@/store/user";
 import getAgentLinks from "@/utils/getAgentLinks";
+import removeTypeName from "@/utils/removeTypeName";
 import { useValidation } from "@/utils/validation";
 import { Link, PerspectiveInput } from "@perspect3vism/ad4m";
+import { nanoid } from "nanoid";
 import { defineComponent, ref } from "vue";
 
 export default defineComponent({
-  props: ['step'],
+  props: ['step', 'area'],
   emits: ["cancel", "submit", "changeStep"],
   setup() {
     const imgs = ref<string[]>([]);
@@ -105,6 +112,17 @@ export default defineComponent({
       imgs,
       isAddLink
     };
+  },
+  watch: {
+    area: {
+      handler: function (area) {
+        this.title = area?.has_name ?? '';
+        this.description = area?.has_description ?? '';
+        this.imgs = area?.has_images ?? [];
+      },
+      immediate: true,
+      deep: true,
+    },
   },
   computed: {
     canCreateLink(): boolean {
@@ -155,18 +173,34 @@ export default defineComponent({
         preArea[e.data.source][predicate] = e.data.predicate.split("://")[1];
       });
       console.log("preLinks", preLinks);
+      const id = await nanoid();
+
+      let areaName = this.area?.id ?? `area://${id}`;
+
+      if (!this.area?.id) {
+        await ad4mClient.perspective.addLink(
+          userPerspective!,
+          new Link({
+            source: `flux://profile`,
+            target: areaName,
+            predicate: "flux://has_area",
+          })
+        );
+      }
+
+      if (this.area?.id) {
+          const foundLinks = preLinks.filter(e => e.data.source === this.area?.id);
+
+          for (const foundLink of foundLinks) {            
+            const link = removeTypeName(foundLink);
+            await ad4mClient.perspective.removeLink(userPerspective!, link);
+          }
+        }
+
       await ad4mClient.perspective.addLink(
         userPerspective!,
         new Link({
-          source: `flux://profile`,
-          target: `area-${Object.keys(preArea).length}`,
-          predicate: "flux://has_area",
-        })
-      );
-      await ad4mClient.perspective.addLink(
-        userPerspective!,
-        new Link({
-          source: `area-${Object.keys(preArea).length}`,
+          source: areaName,
           target: `flux://simpleArea`,
           predicate: "flux://area_type",
         })
@@ -174,7 +208,7 @@ export default defineComponent({
       await ad4mClient.perspective.addLink(
         userPerspective!,
         new Link({
-          source: `area-${Object.keys(preArea).length}`,
+          source: areaName,
           target: `text://${this.title}`,
           predicate: "sioc://has_name",
         })
@@ -182,7 +216,7 @@ export default defineComponent({
       await ad4mClient.perspective.addLink(
         userPerspective!,
         new Link({
-          source: `area-${Object.keys(preArea).length}`,
+          source: areaName,
           target: `text://${this.description}`,
           predicate: "sioc://has_description",
         })
@@ -197,7 +231,7 @@ export default defineComponent({
         await ad4mClient.perspective.addLink(
           userPerspective!,
           new Link({
-            source: `area-${Object.keys(preArea).length}`,
+            source: areaName,
             target: storedImage,
             predicate: `sioc://has_images`,
           })

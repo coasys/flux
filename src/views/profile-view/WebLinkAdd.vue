@@ -11,7 +11,12 @@
       @blur="(e) => validateLink"
     ></j-input>
     <j-flex gap="400">
-      <j-button full style="width: 100%" size="lg" @click="$emit('changeStep', 1)">
+      <j-button
+        full 
+        style="width: 100%" 
+        size="lg" 
+        @click="area ? $emit('submit') : $emit('changeStep', 1)"
+      >
         <j-icon slot="start" name="arrow-left-short" />
         Back
       </j-button>
@@ -53,7 +58,7 @@
       @keydown.enter="createLink"
     ></j-input>
     <j-flex gap="400">
-      <j-button full style="width: 100%" size="lg" @click="$emit('changeStep', 1)">
+      <j-button full style="width: 100%" size="lg" @click="$emit('changeStep', 2)">
         <j-icon slot="start" name="arrow-left-short" />
         Back
       </j-button>
@@ -67,7 +72,7 @@
         @click="createLink"
       >
         <j-icon slot="end" name="add" />
-        Add link
+        {{area ? 'Edit link' : 'Add link'}}
       </j-button>
     </j-flex>
   </j-flex>
@@ -84,9 +89,11 @@ import { useValidation } from "@/utils/validation";
 import { Link, PerspectiveInput } from "@perspect3vism/ad4m";
 import { defineComponent, ref } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
+import { nanoid } from "nanoid";
+import removeTypeName from "@/utils/removeTypeName";
 
 export default defineComponent({
-  props: ['step'],
+  props: ['step', 'area'],
   emits: ["cancel", "submit", "changeStep"],
   components: {
     AvatarUpload, 
@@ -169,6 +176,18 @@ export default defineComponent({
       return this.linkIsValid;
     },
   },
+  watch: {
+    area: {
+      handler: function (area) {
+        this.title = area?.has_name ?? '';
+        this.description = area?.has_description ?? '';
+        this.link = area?.has_post ?? '';
+        this.newProfileImage = area?.has_image ?? '';
+      },
+      immediate: true,
+      deep: true,
+    },
+  },
   methods: {
     async createLink() {
       if (this.canCreateLink && !this.isAddLink) {
@@ -199,18 +218,34 @@ export default defineComponent({
           preArea[e.data.source][predicate] = e.data.predicate.split("://")[1];
         });
         console.log("preLinks", preLinks);
+        const id = await nanoid();
+
+        let areaName = this.area?.id ?? `area://${id}`;
+
+        if (!this.area?.id) {
+          await ad4mClient.perspective.addLink(
+            userPerspective!,
+            new Link({
+              source: `flux://profile`,
+              target: areaName,
+              predicate: "flux://has_area",
+            })
+          );
+        }
+
+        if (this.area?.id) {
+          const foundLinks = preLinks.filter(e => e.data.source === this.area?.id);
+
+          for (const foundLink of foundLinks) {            
+            const link = removeTypeName(foundLink);
+            await ad4mClient.perspective.removeLink(userPerspective!, link);
+          }
+        }
+
         await ad4mClient.perspective.addLink(
           userPerspective!,
           new Link({
-            source: `flux://profile`,
-            target: `area-${Object.keys(preArea).length}`,
-            predicate: "flux://has_area",
-          })
-        );
-        await ad4mClient.perspective.addLink(
-          userPerspective!,
-          new Link({
-            source: `area-${Object.keys(preArea).length}`,
+            source: areaName,
             target: this.link,
             predicate: "sioc://has_post",
           })
@@ -218,7 +253,7 @@ export default defineComponent({
         await ad4mClient.perspective.addLink(
           userPerspective!,
           new Link({
-            source: `area-${Object.keys(preArea).length}`,
+            source: areaName,
             target: `flux://webLink`,
             predicate: "flux://area_type",
           })
@@ -226,7 +261,7 @@ export default defineComponent({
         await ad4mClient.perspective.addLink(
           userPerspective!,
           new Link({
-            source: `area-${Object.keys(preArea).length}`,
+            source: areaName,
             target: `text://${this.title}`,
             predicate: "sioc://has_name",
           })
@@ -234,7 +269,7 @@ export default defineComponent({
         await ad4mClient.perspective.addLink(
           userPerspective!,
           new Link({
-            source: `area-${Object.keys(preArea).length}`,
+            source: areaName,
             target: `text://${this.description}`,
             predicate: "sioc://has_description",
           })
@@ -248,7 +283,7 @@ export default defineComponent({
           await ad4mClient.perspective.addLink(
             userPerspective!,
             new Link({
-              source: `area-${Object.keys(preArea).length}`,
+              source: areaName,
               target: storedImage,
               predicate: "sioc://has_image",
             })

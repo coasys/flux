@@ -49,6 +49,7 @@
           :sameAgent="sameAgent"
           @click="() => onLinkClick(link)"
           @delete="() => deleteLinks(link.id)"
+          @edit="() => setEditLinkModal(true, link)"
         />
         <div
           class="add"
@@ -77,6 +78,17 @@
       @submit="() => setAddLinkModal(false)"
       @cancel="() => setAddLinkModal(false)"
     ></ProfileAddLink>
+  </j-modal>
+  <j-modal
+    size="lg"
+    :open="showEditlinkModal"
+    @toggle="(e) => setEditLinkModal(e.target.open, editArea)"
+  >
+    <ProfileEditLink
+      @submit="() => setEditLinkModal(false, editArea)"
+      @cancel="() => setEditLinkModal(false, editArea)"
+      :area="editArea"
+    ></ProfileEditLink>
   </j-modal>
   <j-modal
     size="lg"
@@ -112,6 +124,7 @@ import { Link, LinkExpression } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
 import ProfileCard from "./ProfileCards.vue";
 import ProfileAddLink from "./ProfileAddLink.vue";
+import ProfileEditLink from "./ProfileEditLink.vue";
 import ProfileJoinLink from "./ProfileJoinLink.vue";
 import { useUserStore } from "@/store/user";
 import EditProfile from "@/containers/EditProfile.vue";
@@ -124,6 +137,7 @@ export default defineComponent({
   components: {
     ProfileCard,
     ProfileAddLink,
+    ProfileEditLink,
     ProfileJoinLink,
     EditProfile,
   },
@@ -139,16 +153,23 @@ export default defineComponent({
       profile: null as null | Profile,
       bio: "",
       showAddlinkModal: false,
+      showEditlinkModal: false,
       showJoinCommunityModal: false,
       profileLinks: [] as any[],
       profilebg: "",
       joiningLink: "",
       sameAgent: false,
+      editArea: null as any
     };
   },
   methods: {
     setAddLinkModal(value: boolean): void {
       this.showAddlinkModal = value;
+    },
+    setEditLinkModal(value: boolean, area: any): void {
+      this.showEditlinkModal = value;
+      console.log('area', area)
+      this.editArea = area;
     },
     setShowJoinCommunityModal(value: boolean): void {
       this.showJoinCommunityModal = value;
@@ -326,6 +347,11 @@ export default defineComponent({
   watch: {
     showAddlinkModal() {
       if (!this.showAddlinkModal) {
+        this.getAgentProfile();
+      }
+    },
+    showEditlinkModal() {
+      if (!this.showEditlinkModal) {
         this.getAgentProfile();
       }
     },
