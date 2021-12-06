@@ -128,7 +128,7 @@ export default defineComponent({
       let filteredLinks = await getAgentLinks(this.userDid, userPerspective!);
 
       if (this.profileBgChanged) {
-        const proBgLink = filteredLinks.find(e => e.data.predicate !== 'sioc://has_image');
+        const proBgLink = filteredLinks.find(e => e.data.predicate === 'sioc://has_image');
 
         if (proBgLink) {
           const link = removeTypeName(proBgLink);
@@ -155,7 +155,7 @@ export default defineComponent({
 
 
       if (this.bioChanged) {
-        const bioLink = filteredLinks.find(e => e.data.predicate !== 'sioc://has_bio');
+        const bioLink = filteredLinks.find(e => e.data.predicate === 'sioc://has_bio');
 
         if (bioLink) {
           const link = removeTypeName(bioLink);
