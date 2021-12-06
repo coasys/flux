@@ -8,16 +8,12 @@ export default async function getAgentLinks(did: string, userPerspective?: strin
   if (userPerspective) {
     // @ts-ignore
     const {links: areaLinks} = await getSnapshotByUUID(userPerspective!)
-    // @ts-ignore
-    const agentPerspective = await getByDid(did);
-  
-    const agentLinks = agentPerspective!.perspective!.links;
-  
-    links = [...areaLinks.filter((e: LinkExpression) => e.data.source !== 'flux://profile'), ...agentLinks.filter(e => e.data.source === 'flux://profile')]
+
+    links = areaLinks;
   } else {
     // @ts-ignore
     const agentPerspective = await getByDid(did);
-  
+
     const agentLinks = agentPerspective!.perspective!.links;
   
     links = agentLinks;

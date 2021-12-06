@@ -120,7 +120,7 @@ import { ad4mClient } from "@/app";
 import { useDataStore } from "@/store/data";
 import { ExpressionTypes, ModalsState, Profile } from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
-import { Link, LinkExpression } from "@perspect3vism/ad4m";
+import { Link, LinkExpression, PerspectiveInput } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
 import ProfileCard from "./ProfileCards.vue";
 import ProfileAddLink from "./ProfileAddLink.vue";
@@ -317,20 +317,29 @@ export default defineComponent({
         userPerspective!
       );
 
+      const newLinks = [];
+
       for (const link of links) {
-        console.log(link)
+        const newLink = JSON.parse(
+          JSON.stringify(link)
+        );
+        newLink.__typename = undefined;
+        newLink.data.__typename = undefined;
+        newLink.proof.__typename = undefined;
+
         if (link.data.source === areaName || link.data.target === areaName) {
-          const newLink = JSON.parse(
-            JSON.stringify(link)
-          );
-          newLink.__typename = undefined;
-          newLink.data.__typename = undefined;
-          newLink.proof.__typename = undefined;
+          console.log(link)
           await ad4mClient.perspective.removeLink(userPerspective!, newLink);
+        } else {
+          newLinks.push(newLink)
         }
       }
 
       this.profileLinks = this.profileLinks.filter(e => e.id !== areaName);
+
+      await ad4mClient.agent.updatePublicPerspective({
+        links: newLinks
+      } as PerspectiveInput);
     },
     ...mapActions(useAppStore, ["setShowEditProfile"]),
   },
