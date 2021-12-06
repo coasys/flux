@@ -49,7 +49,7 @@ export default defineComponent({
         ) as ProfileWithDID[];
       },
       immediate: true,
-      deep: true
+      deep: true,
     },
   },
 });

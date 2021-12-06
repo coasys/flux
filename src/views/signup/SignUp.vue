@@ -167,7 +167,6 @@ export default defineComponent({
         },
       ],
     });
-    
 
     const {
       value: password,
@@ -201,9 +200,9 @@ export default defineComponent({
       validatePassword();
 
       if (passwordIsValid.value) {
-        step.value = 2
+        step.value = 2;
       }
-    }
+    };
 
     const name = ref("");
 
@@ -237,7 +236,7 @@ export default defineComponent({
       familyName,
       logInError,
       userStore,
-      passwordOnEnterValidate
+      passwordOnEnterValidate,
     };
   },
   computed: {
