@@ -31,6 +31,39 @@ export const AGENT = gql`
   }
 `;
 
+export const SNAPSHOT_BY_UUID = gql`
+  query perspectiveSnapshot($uuid: String!) {
+      perspectiveSnapshot(uuid: $uuid) {
+          links { 
+            author
+            timestamp
+            data { source, predicate, target }
+            proof { valid, invalid, signature, key }
+          }
+      }
+  }
+`
+
+export const AGENT_PERSPECTIVE_BY_DID = gql`
+  query agentByDID($did: String!) {
+    agentByDID(did: $did) {
+      did
+      directMessageLanguage
+      perspective { 
+          links {
+              author, timestamp, 
+              proof {
+                  signature, key, valid, invalid
+              }
+              data {
+                  source, predicate, target
+              }
+          }
+      }
+    }
+  }
+`
+
 export const AGENT_GENERATE = gql`
   mutation agentGenerate($passphrase: String!) {
     agentGenerate(passphrase: $passphrase) {

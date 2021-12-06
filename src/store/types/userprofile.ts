@@ -8,6 +8,7 @@ export class Profile {
   familyName: string;
   profilePicture?: string;
   thumbnailPicture?: string;
+  bio?: string;
 }
 
 export class ProfileWithDID extends Profile {
@@ -19,4 +20,5 @@ export class ProfileExpression extends ExpressionGeneric(Profile) {}
 export interface UserState {
   agent: AgentStatus;
   profile: Profile | null;
+  fluxPerspectiveId?: string;
 }

@@ -8,7 +8,7 @@ import joinCommunity from "./joinCommunity";
 import loadExpressions from "./loadExpressions";
 import updateCommunity from "./updateCommunity";
 import showMessageNotification from "./showMessageNotification";
-import fetchNeighbourhoodMembers from "./fetchNeighbourhoodMembers"
+import fetchNeighbourhoodMembers from "./fetchNeighbourhoodMembers";
 import fetchNeighbourhoodMetadata from "./fetchNeighbourhoodMetadata";
 
 export default {

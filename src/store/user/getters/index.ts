@@ -10,4 +10,8 @@ export default {
     const store = useUserStore();
     return store;
   },
+  getFluxPerspectiveId(): string | undefined {
+    const store = useUserStore();
+    return store.fluxPerspectiveId;
+  },
 };

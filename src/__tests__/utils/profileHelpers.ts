@@ -1,39 +1,39 @@
 import { ExpressionTypes, ProfileExpression } from "@/store/types";
 import { getProfile, parseProfile } from "@/utils/profileHelpers";
-import {TimeoutCache} from "@/utils/timeoutCache";
+import { TimeoutCache } from "@/utils/timeoutCache";
 import community from "../fixtures/community.json";
 import initAgentFixture from "../fixtures/initAgent.json";
 import getProfileFixture from "../fixtures/getProfile.json";
 import * as getExpressionNoCache from "@/core/queries/getExpression";
 import { Expression } from "@perspect3vism/ad4m";
-import { mocked } from 'ts-jest/utils';
+import { mocked } from "ts-jest/utils";
 
 const testProfile = {
   did: initAgentFixture.did,
-  data: JSON.parse(getProfileFixture.data!)
+  data: JSON.parse(getProfileFixture.data!),
 } as ProfileExpression;
 
-jest.mock('@/utils/timeoutCache', () => {
+jest.mock("@/utils/timeoutCache", () => {
   return {
     TimeoutCache: jest.fn().mockImplementation(() => {
       return {
         set: jest.fn(),
         get: (link: string) => {
-          if (link.includes('101')) {
-            return undefined
+          if (link.includes("101")) {
+            return undefined;
           } else {
             return testProfile;
           }
         },
         remove: jest.fn(),
       };
-    })
+    }),
   };
 });
 
 describe("ProfileHelpers", () => {
   const MockedSoundPlayer = mocked(TimeoutCache, true);
-  
+
   let profileLangAddress: string;
   let did: string;
   let profileLink: string;
@@ -76,11 +76,10 @@ describe("ProfileHelpers", () => {
   test("Test fetch the correct profile", async () => {
     const newTestProfile = {
       did: testProfile.did,
-      ...parseProfile(testProfile.data.profile)
+      ...parseProfile(testProfile.data.profile),
     };
 
     const profile = await getProfile(profileLangAddress, did);
-
 
     expect(profile).toStrictEqual(newTestProfile);
   });

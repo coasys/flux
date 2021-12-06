@@ -37,7 +37,7 @@ describe("Get Typed Expression", () => {
 
     try {
       // @ts-ignore
-      await getTypedExpressionLanguages(getTypedExpressionLangLinks, true);
+      await getTypedExpressionLanguages(getTypedExpressionLangLinks);
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
       expect(error).toHaveProperty(

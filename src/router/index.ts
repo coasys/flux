@@ -18,6 +18,9 @@ import PrivacyPolicy from "@/views/home-view/PrivacyPolicy.vue";
 import Faq from "@/views/home-view/Faq.vue";
 import Tutorial from "@/views/home-view/Tutorial.vue";
 
+import ProfileFeed from "@/views/profile-feed/ProfileFeed.vue";
+import ProfileView from "@/views/profile-view/ProfileView.vue";
+
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/signup",
@@ -37,45 +40,55 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "home",
         name: "home",
-        component: HomeView,
-        redirect: { name: "my-communities" },
+        component: ProfileView,
+        // redirect: { name: "my-communities" },
         children: [
-          {
-            path: "settings",
-            name: "settings",
-            component: Settings,
-          },
-          {
-            path: "communities",
-            name: "my-communities",
-            component: MyCommunities,
-          },
-          {
-            path: "profile",
-            name: "my-profile",
-            component: MyProfile,
-          },
-          {
-            path: "tutorial",
-            name: "tutorial",
-            component: Tutorial,
-          },
-          {
-            path: "foundation",
-            name: "foundation",
-            component: Foundation,
-          },
-          {
-            path: "faq",
-            name: "faq",
-            component: Faq,
-          },
-          {
-            path: "privacy-policy",
-            name: "privacy-policy",
-            component: PrivacyPolicy,
-          },
+          // {
+          //   path: "settings",
+          //   name: "settings",
+          //   component: Settings,
+          // },
+          // {
+          //   path: "my-feed",
+          //   name: "my-feed",
+          //   component: ProfileFeed,
+          // },
+          // {
+          //   path: "communities",
+          //   name: "my-communities",
+          //   component: MyCommunities,
+          // },
+          // {
+          //   path: "profile",
+          //   name: "my-profile",
+          //   component: ProfileView,
+          // },
+          // {
+          //   path: "tutorial",
+          //   name: "tutorial",
+          //   component: Tutorial,
+          // },
+          // {
+          //   path: "foundation",
+          //   name: "foundation",
+          //   component: Foundation,
+          // },
+          // {
+          //   path: "faq",
+          //   name: "faq",
+          //   component: Faq,
+          // },
+          // {
+          //   path: "privacy-policy",
+          //   name: "privacy-policy",
+          //   component: PrivacyPolicy,
+          // },
         ],
+      },
+      {
+        path: "feed",
+        name: "profile-feed",
+        component: ProfileFeed,
       },
       {
         path: "communities/:communityId",
@@ -88,6 +101,16 @@ const routes: Array<RouteRecordRaw> = [
             component: ChannelView,
           },
         ],
+      },
+      {
+        path: "profile/:did",
+        name: "profile",
+        component: ProfileView,
+      },
+      {
+        path: "settings",
+        name: "settings",
+        component: Settings,
       },
     ],
   },
