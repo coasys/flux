@@ -1,5 +1,5 @@
 <template>
-  <j-flex direction="column" gap="400" v-if="step === 2" class="steps">
+  <j-flex direction="column" gap="400" class="steps">
     <j-text variant="heading">Gallery</j-text>
     <j-input
       label="Title"
@@ -18,9 +18,13 @@
     ></j-input>
     <j-text>Images</j-text>
     <div class="grid">
-      <div v-for="(img, index) of imgs" :key="`${img}-${index}`" class="img_container">
-        <div class="img_bg" :style="{backgroundImage: `url(${img})`}"></div>
-        <div class="close" @click="() => (imgs.splice(index, 1))">
+      <div
+        v-for="(img, index) of imgs"
+        :key="`${img}-${index}`"
+        class="img_container"
+      >
+        <div class="img_bg" :style="{ backgroundImage: `url(${img})` }"></div>
+        <div class="close" @click="() => imgs.splice(index, 1)">
           <j-icon name="x-circle"></j-icon>
         </div>
       </div>
@@ -36,28 +40,23 @@
       </div>
     </div>
     <j-flex gap="400">
-        <j-button 
-          full 
-          style="width: 100%" 
-          size="lg" 
-          @click="area ? $emit('submit') : $emit('changeStep', 1)"
-        >
-          <j-icon slot="start" name="arrow-left-short" />
-          Back
-        </j-button>
-        <j-button
-          style="width: 100%"
-          full
-          :disabled="isAddLink || !canCreateLink"
-          :loading="isAddLink"
-          size="lg"
-          variant="primary"
-          @click="createLink"
-        >
-          <j-icon slot="end" name="add" />
-          {{area ? 'Edit link' : 'Add link'}}
-        </j-button>
-      </j-flex>
+      <j-button full style="width: 100%" size="lg" @click="$emit('cancel')">
+        <j-icon v-if="!isEditing" slot="start" name="arrow-left-short" />
+        {{ isEditing ? "Cancel" : "Back" }}
+      </j-button>
+      <j-button
+        style="width: 100%"
+        full
+        :disabled="isAddLink || !canCreateLink"
+        :loading="isAddLink"
+        size="lg"
+        variant="primary"
+        @click="createLink"
+      >
+        <j-icon slot="end" name="add" />
+        {{ isEditing ? "Save" : "Add link" }}
+      </j-button>
+    </j-flex>
   </j-flex>
 </template>
 
@@ -75,7 +74,7 @@ import { nanoid } from "nanoid";
 import { defineComponent, ref } from "vue";
 
 export default defineComponent({
-  props: ['step', 'area'],
+  props: ["area", "isEditing"],
   emits: ["cancel", "submit", "changeStep"],
   setup() {
     const imgs = ref<string[]>([]);
@@ -110,14 +109,14 @@ export default defineComponent({
       validateTitle,
       description,
       imgs,
-      isAddLink
+      isAddLink,
     };
   },
   watch: {
     area: {
       handler: function (area) {
-        this.title = area?.has_name ?? '';
-        this.description = area?.has_description ?? '';
+        this.title = area?.has_name ?? "";
+        this.description = area?.has_description ?? "";
         this.imgs = area?.has_images ?? [];
       },
       immediate: true,
@@ -189,13 +188,15 @@ export default defineComponent({
       }
 
       if (this.area?.id) {
-          const foundLinks = preLinks.filter(e => e.data.source === this.area?.id);
+        const foundLinks = preLinks.filter(
+          (e) => e.data.source === this.area?.id
+        );
 
-          for (const foundLink of foundLinks) {            
-            const link = removeTypeName(foundLink);
-            await ad4mClient.perspective.removeLink(userPerspective!, link);
-          }
+        for (const foundLink of foundLinks) {
+          const link = removeTypeName(foundLink);
+          await ad4mClient.perspective.removeLink(userPerspective!, link);
         }
+      }
 
       await ad4mClient.perspective.addLink(
         userPerspective!,
@@ -244,9 +245,7 @@ export default defineComponent({
       //Remove __typename fields so the next gql does not fail
       for (const link in newLinks) {
         //Deep copy the object... so we can delete __typename fields inject by apollo client
-        const newLink = JSON.parse(
-          JSON.stringify(newLinks[link])
-        );
+        const newLink = JSON.parse(JSON.stringify(newLinks[link]));
         newLink.__typename = undefined;
         newLink.data.__typename = undefined;
         newLink.proof.__typename = undefined;
@@ -255,7 +254,7 @@ export default defineComponent({
       await ad4mClient.agent.updatePublicPerspective({
         links,
       } as PerspectiveInput);
-      
+
       appStore.showSuccessToast({
         message: "Link added to agent perspective",
       });
@@ -266,10 +265,9 @@ export default defineComponent({
       this.imgs = [];
 
       this.$emit("submit");
-      this.$emit("changeStep", 1)
     },
-  }
-})
+  },
+});
 </script>
 
 <style scoped>

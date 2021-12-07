@@ -75,6 +75,7 @@
     @toggle="(e) => setAddLinkModal(e.target.open)"
   >
     <ProfileAddLink
+      v-if="showAddlinkModal"
       @submit="() => setAddLinkModal(false)"
       @cancel="() => setAddLinkModal(false)"
     ></ProfileAddLink>
@@ -85,6 +86,7 @@
     @toggle="(e) => setEditLinkModal(e.target.open, editArea)"
   >
     <ProfileEditLink
+      v-if="showEditlinkModal"
       @submit="() => setEditLinkModal(false, editArea)"
       @cancel="() => setEditLinkModal(false, editArea)"
       :area="editArea"
@@ -159,7 +161,7 @@ export default defineComponent({
       profilebg: "",
       joiningLink: "",
       sameAgent: false,
-      editArea: null as any
+      editArea: null as any,
     };
   },
   methods: {
@@ -168,7 +170,7 @@ export default defineComponent({
     },
     setEditLinkModal(value: boolean, area: any): void {
       this.showEditlinkModal = value;
-      console.log('area', area)
+      console.log("area", area);
       this.editArea = area;
     },
     setShowJoinCommunityModal(value: boolean): void {
@@ -312,33 +314,28 @@ export default defineComponent({
       const userStore = useUserStore();
       const me = await ad4mClient.agent.me();
       const userPerspective = userStore.getFluxPerspectiveId;
-      const links = await getAgentLinks(
-        me.did,
-        userPerspective!
-      );
+      const links = await getAgentLinks(me.did, userPerspective!);
 
       const newLinks = [];
 
       for (const link of links) {
-        const newLink = JSON.parse(
-          JSON.stringify(link)
-        );
+        const newLink = JSON.parse(JSON.stringify(link));
         newLink.__typename = undefined;
         newLink.data.__typename = undefined;
         newLink.proof.__typename = undefined;
 
         if (link.data.source === areaName || link.data.target === areaName) {
-          console.log(link)
+          console.log(link);
           await ad4mClient.perspective.removeLink(userPerspective!, newLink);
         } else {
-          newLinks.push(newLink)
+          newLinks.push(newLink);
         }
       }
 
-      this.profileLinks = this.profileLinks.filter(e => e.id !== areaName);
+      this.profileLinks = this.profileLinks.filter((e) => e.id !== areaName);
 
       await ad4mClient.agent.updatePublicPerspective({
-        links: newLinks
+        links: newLinks,
       } as PerspectiveInput);
     },
     ...mapActions(useAppStore, ["setShowEditProfile"]),

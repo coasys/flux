@@ -1,41 +1,18 @@
 <template>
-  <j-flex direction="column" gap="400" v-if="step === 2" class="steps">
+  <j-flex direction="column" gap="400" class="steps">
     <j-text variant="heading">Add a link to profile</j-text>
     <j-input
       label="Neighbourhood link"
       size="xl"
       :value="link"
-      @input="(e) => (link = e.target.value)"
+      @input="(e: any) => (link = e.target.value)"
       :error="linkError"
       :errorText="linkErrorMessage"
-      @blur="(e) => validateLink"
+      @blur="() => validateLink"
+      :disabled="isAddLink || !canAddLink"
+      :loading="isAddLink"
+      variant="primary"
     ></j-input>
-    <j-flex gap="400">
-      <j-button 
-        full 
-        style="width: 100%" 
-        size="lg" 
-        @click="area ? $emit('submit') : $emit('changeStep', 1)"
-      >
-        <j-icon slot="start" name="arrow-left-short" />
-        Back
-      </j-button>
-      <j-button
-        style="width: 100%"
-        full
-        :disabled="isAddLink || !canAddLink"
-        :loading="isAddLink"
-        size="lg"
-        variant="primary"
-        @click="addLink"
-      >
-        Next
-        <j-icon slot="end" name="arrow-right-short" />
-      </j-button>
-    </j-flex>
-  </j-flex>
-  <j-flex direction="column" gap="400" v-if="step === 3" class="steps">
-    <j-text variant="heading">Add a link to profile</j-text>
     <avatar-upload
       :value="newProfileImage"
       @change="(val) => (newProfileImage = val)"
@@ -58,9 +35,9 @@
       @keydown.enter="createLink"
     ></j-input>
     <j-flex gap="400">
-      <j-button full style="width: 100%" size="lg" @click="$emit('changeStep', 2)">
-        <j-icon slot="start" name="arrow-left-short" />
-        Back
+      <j-button full style="width: 100%" size="lg" @click="$emit('cancel')">
+        <j-icon v-if="!isEditing" slot="start" name="arrow-left-short" />
+        {{ isEditing ? "Cancel" : "Back" }}
       </j-button>
       <j-button
         style="width: 100%"
@@ -72,7 +49,7 @@
         @click="createLink"
       >
         <j-icon slot="end" name="add" />
-        {{area ? 'Edit link' : 'Add link'}}
+        {{ isEditing ? "Save" : "Add link" }}
       </j-button>
     </j-flex>
   </j-flex>
@@ -90,13 +67,13 @@ import { Link, PerspectiveInput } from "@perspect3vism/ad4m";
 import { defineComponent, ref } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import removeTypeName from "@/utils/removeTypeName";
-import { nanoid } from 'nanoid'
+import { nanoid } from "nanoid";
 
 export default defineComponent({
-  props: ['step', 'area'],
-  emits: ["cancel", "submit", "changeStep"],
+  props: ["area", "isEditing"],
+  emits: ["cancel", "submit"],
   components: {
-    AvatarUpload, 
+    AvatarUpload,
   },
   setup() {
     const isAddLink = ref(false);
@@ -142,9 +119,9 @@ export default defineComponent({
           message: "Should be 3 or more characters",
         },
         {
-          check: (value: string) => !value.startsWith('neighbourhood://'),
-          message: "Please add a valid neighbourhood link"
-        }
+          check: (value: string) => !value.startsWith("neighbourhood://"),
+          message: "Please add a valid neighbourhood link",
+        },
       ],
     });
 
@@ -175,10 +152,10 @@ export default defineComponent({
   watch: {
     area: {
       handler: function (area) {
-        this.title = area?.has_name ?? '';
-        this.description = area?.has_description ?? '';
-        this.link = area?.has_post ?? '';
-        this.newProfileImage = area?.has_image ?? '';
+        this.title = area?.has_name ?? "";
+        this.description = area?.has_description ?? "";
+        this.link = area?.has_post ?? "";
+        this.newProfileImage = area?.has_image ?? "";
       },
       immediate: true,
       deep: true,
@@ -192,13 +169,13 @@ export default defineComponent({
         const userStore = useUserStore();
         const appStore = useAppStore();
         const userPerspective = userStore.getFluxPerspectiveId;
-  
+
         const did = userStore.getUser?.agent.did;
-  
+
         const preLinks = await getAgentLinks(did!, userPerspective!);
-  
+
         const preArea: { [x: string]: any } = {};
-  
+
         preLinks.forEach((e: any) => {
           const predicate = e.data.predicate.split("://")[1];
           if (!preArea[e.data.source]) {
@@ -209,7 +186,7 @@ export default defineComponent({
                   : e.data.predicate.split("://")[1],
             };
           }
-  
+
           preArea[e.data.source][predicate] = e.data.predicate.split("://")[1];
         });
         console.log("preLinks", preLinks);
@@ -229,9 +206,11 @@ export default defineComponent({
         }
 
         if (this.area?.id) {
-          const foundLinks = preLinks.filter(e => e.data.source === this.area?.id);
+          const foundLinks = preLinks.filter(
+            (e) => e.data.source === this.area?.id
+          );
 
-          for (const foundLink of foundLinks) {            
+          for (const foundLink of foundLinks) {
             const link = removeTypeName(foundLink);
             await ad4mClient.perspective.removeLink(userPerspective!, link);
           }
@@ -269,13 +248,13 @@ export default defineComponent({
             predicate: "sioc://has_description",
           })
         );
-  
+
         const community = dataStore.getCommunities.find(
           (e) => e.neighbourhood.neighbourhoodUrl === this.link
         );
         console.log(community);
         const image = this.newProfileImage || community?.neighbourhood.image;
-    
+
         if (image) {
           const storedImage = await ad4mClient.expression.create(
             image,
@@ -290,16 +269,14 @@ export default defineComponent({
             })
           );
         }
-  
+
         const newLinks = await getAgentLinks(did!, userPerspective!);
-  
+
         const links = [];
         //Remove __typename fields so the next gql does not fail
         for (const link in newLinks) {
           //Deep copy the object... so we can delete __typename fields inject by apollo client
-          const newLink = JSON.parse(
-            JSON.stringify(newLinks[link])
-          );
+          const newLink = JSON.parse(JSON.stringify(newLinks[link]));
           newLink.__typename = undefined;
           newLink.data.__typename = undefined;
           newLink.proof.__typename = undefined;
@@ -313,20 +290,18 @@ export default defineComponent({
         appStore.showSuccessToast({
           message: "Link added to agent perspective",
         });
-  
+
         this.title = "";
         this.description = "";
         this.link = "";
         this.newProfileImage = "";
         this.isAddLink = false;
-  
+
         this.$emit("submit");
-        this.$emit("changeStep", 1)
       }
     },
     addLink() {
       this.validateLink();
-      this.$emit("changeStep", 3)
 
       const dataStore = useDataStore();
       const community = dataStore.getCommunities.find(
@@ -339,8 +314,8 @@ export default defineComponent({
         this.newProfileImage = community?.neighbourhood.image as string;
       }
     },
-  }
-})
+  },
+});
 </script>
 
 <style scoped>
