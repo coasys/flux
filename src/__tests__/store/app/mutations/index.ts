@@ -1,7 +1,3 @@
-import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
-import * as getLanguage from "@/core/queries/getLanguage";
-import getTypedExpressionLangLanguages from "../../../fixtures/getTypedExpressionLangLanguages.json";
-import getTypedExpressionLangLinks from "../../../fixtures/getTypedExpressionLangLinks.json";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useAppStore } from "@/store/app";
 
@@ -17,33 +13,6 @@ describe("App Mutations", () => {
     setActivePinia(store);
   });
 
-  test("addExpressionUI", async () => {
-    const appStore = useAppStore();
-    // @ts-ignore
-    jest
-      .spyOn(getLanguage, "getLanguage")
-      // @ts-ignore
-      .mockImplementation(async (address) => {
-        return getTypedExpressionLangLanguages.find(
-          (e) => e.address === address
-        );
-      });
-
-    // @ts-ignore
-    const [exp, icons] = await getTypedExpressionLanguages(
-      getTypedExpressionLangLinks,
-      true
-    );
-
-    expect(Object.values(appStore.expressionUI).length).toBe(0);
-
-    for (const icon of icons) {
-      appStore.addExpressionUI(icon);
-    }
-
-    expect(Object.values(appStore.expressionUI).length).toBe(4);
-  });
-
   test("setLanguagesPath", () => {
     const appStore = useAppStore();
 
@@ -52,18 +21,6 @@ describe("App Mutations", () => {
     appStore.setLanguagesPath("user/some/path");
 
     expect(appStore.localLanguagesPath).toBe("user/some/path");
-  });
-
-  test("setDatabasePerspective", () => {
-    const appStore = useAppStore();
-
-    expect(appStore.databasePerspective).toBe("");
-
-    appStore.setDatabasePerspective("bb8051d7-71aa-4ab1-83b2-71edbf967bc3");
-
-    expect(appStore.databasePerspective).toBe(
-      "bb8051d7-71aa-4ab1-83b2-71edbf967bc3"
-    );
   });
 
   test("setApplicationStartTime", () => {

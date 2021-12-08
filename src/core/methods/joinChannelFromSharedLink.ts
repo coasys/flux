@@ -11,9 +11,8 @@ export async function joinChannelFromSharedLink(
   const neighbourhood = await joinNeighbourhood(url);
   console.log(new Date(), "Joined neighbourhood with result", neighbourhood);
 
-  const [typedExpressionLanguages, _] = await getTypedExpressionLanguages(
-    neighbourhood.neighbourhood!.meta.links,
-    false
+  const typedExpressionLanguages = await getTypedExpressionLanguages(
+    neighbourhood.neighbourhood!.meta.links
   );
 
   //Read out metadata about the perspective from the meta
@@ -33,7 +32,7 @@ export async function joinChannelFromSharedLink(
       membraneType: MembraneType.Inherited,
       linkedPerspectives: [],
       linkedNeighbourhoods: [],
-      members: {},
+      members: [],
       currentExpressionLinks: {},
       currentExpressionMessages: {},
       createdAt: createdAt,

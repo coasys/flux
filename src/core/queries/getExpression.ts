@@ -1,4 +1,4 @@
-import { apolloClient } from "@/utils/setupApolloClient";
+import { apolloClient } from "@/app";
 
 import { GET_EXPRESSION, GET_MANY_EXPRESSION } from "../graphql_queries";
 import sleep from "@/utils/sleep";
@@ -59,7 +59,9 @@ export async function getExpressionAndRetry(
   return getExprRes;
 }
 
-export async function getManyExpression(urls: string[]): Promise<ExpressionRendered[]> {
+export async function getManyExpression(
+  urls: string[]
+): Promise<ExpressionRendered[]> {
   return new Promise((resolve, reject) => {
     apolloClient
       .query<{

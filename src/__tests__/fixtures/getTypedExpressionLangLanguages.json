@@ -16,7 +16,7 @@
   },
   {
     "__typename": "LanguageHandle",
-    "name": "junto-shortform",
+    "name": "shortform-expression",
     "address": "QmdaHUQG4K4XVahZecwmQJq46o3FJKs7WVvEiL9iJP8CaL",
     "settings": "{}",
     "icon": {
@@ -42,7 +42,7 @@
   },
   {
     "__typename": "LanguageHandle",
-    "name": "profile",
+    "name": "profile-expression",
     "address": "QmdkJuko1HtFqoeMvUPW8eK2xifHMiaCa1xcjafGk652ta",
     "settings": "{}",
     "icon": {

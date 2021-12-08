@@ -30,20 +30,23 @@
         <div class="global-error__message">
           {{ globalError.message }}
         </div>
+        <j-text nomargin variant="heading">
+          If you have also been asked to include a log file with your report,
+          click the button below to copy a log file to your desktop:
+        </j-text>
+        <j-button @click="copyLogFile" variant="primary">Copy</j-button>
       </j-flex>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { useQuery } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
 import { gql } from "@apollo/client/core";
 import { defineComponent, computed, watch } from "vue";
 import { onError } from "@apollo/client/link/error";
-import { logErrorMessages } from "@vue/apollo-util";
-import { expressionGetDelayMs, expressionGetRetries } from "@/core/juntoTypes";
-import { AGENT_STATUS, GET_EXPRESSION } from "@/core/graphql_queries";
+import { expressionGetDelayMs, expressionGetRetries } from "@/constants/config";
+import { GET_EXPRESSION } from "@/core/graphql_queries";
 import {
   ApplicationState,
   ModalsState,
@@ -51,13 +54,15 @@ import {
   ToastState,
 } from "@/store/types";
 import { print } from "graphql/language/printer";
-import { AgentStatus, LinkExpression } from "@perspect3vism/ad4m";
-import { apolloClient } from "./utils/setupApolloClient";
+import { LinkExpression, PerspectiveInput } from "@perspect3vism/ad4m";
+import { apolloClient } from "@/app";
 import { useUserStore } from "./store/user";
 import { useAppStore } from "./store/app";
 import { useDataStore } from "./store/data";
 import { addTrustedAgents } from "@/core/mutations/addTrustedAgents";
-import { JUNTO_AGENT, AD4M_AGENT } from "@/ad4m-globals";
+import { JUNTO_AGENT, AD4M_AGENT, KAICHAO_AGENT } from "@/constants/agents";
+import { ad4mClient } from "./app";
+import { MEMBER } from "./constants/neighbourhoodMeta";
 
 declare global {
   interface Window {
@@ -77,9 +82,6 @@ export default defineComponent({
     onError((error) => {
       console.log("Got global graphql error, logging with error", error);
       if (process.env.NODE_ENV !== "production") {
-        // can use error.operation.operationName to single out a query type.
-        logErrorMessages(error);
-
         appStore.showDangerToast({
           message: JSON.stringify(error),
         });
@@ -90,13 +92,48 @@ export default defineComponent({
     userStore.$subscribe(async (mutation, state) => {
       if (state.agent.isUnlocked) {
         appStore.setApplicationStartTime(new Date());
-        dataStore.loadExpressionLanguages();
-        await addTrustedAgents([JUNTO_AGENT, AD4M_AGENT]);
+        await addTrustedAgents([JUNTO_AGENT, AD4M_AGENT, KAICHAO_AGENT]);
       } else {
         router.push({
           name: userStore.agent.isInitialized ? "login" : "signup",
         });
       }
+    });
+
+    //Start expression web worker to try and get the expression data pointed to in link target
+    const expressionWorker = new Worker("pollingWorker.js");
+
+    expressionWorker.onerror = function (e) {
+      throw new Error(e.toString());
+    };
+
+    expressionWorker.addEventListener("message", (e) => {
+      const perspective = e.data.callbackData.perspective;
+      const link = e.data.callbackData.link;
+      const expression = e.data.expression;
+      const message = JSON.parse(expression!.data!);
+
+      console.debug("FOUND EXPRESSION FOR SIGNAL");
+      //Add the expression to the store
+      dataStore.addExpressionAndLink({
+        channelId: perspective,
+        link: link,
+        message: expression,
+      });
+
+      dataStore.showMessageNotification({
+        router,
+        route,
+        perspectiveUuid: perspective,
+        authorDid: expression!.author,
+        message: message.body,
+      });
+
+      //Add UI notification on the channel to notify that there is a new message there
+      dataStore.setHasNewMessages({
+        channelId: perspective,
+        value: true,
+      });
     });
 
     //Watch for incoming signals from holochain - an incoming signal should mean a DM is inbound
@@ -106,48 +143,25 @@ export default defineComponent({
     ) => {
       console.debug("GOT INCOMING MESSAGE SIGNAL", link, perspective);
       if (link.data!.predicate! === "sioc://content_of") {
-        //Start expression web worker to try and get the expression data pointed to in link target
-        const expressionWorker = new Worker("pollingWorker.js");
-
         expressionWorker.postMessage({
+          id: link.data!.target!,
           retry: expressionGetRetries,
+          callbackData: { perspective, link },
           interval: expressionGetDelayMs,
           query: print(GET_EXPRESSION),
           variables: { url: link.data!.target! },
           name: "Expression signal get",
           dataKey: "expression",
         });
-
-        expressionWorker.onerror = function (e) {
-          throw new Error(e.toString());
-        };
-
-        expressionWorker.addEventListener("message", (e) => {
-          const expression = e.data.expression;
-          const message = JSON.parse(expression!.data!);
-
-          console.debug("FOUND EXPRESSION FOR SIGNAL");
-          //Add the expression to the store
-          dataStore.addExpressionAndLink({
-            channelId: perspective,
-            link: link,
-            message: expression,
-          });
-
-          dataStore.showMessageNotification({
-            router,
-            route,
+      } else if (link.data!.predicate! === MEMBER) {
+        const did = link.data!.target!.split("://")[1];
+        console.log("Got new member in signal! Parsed out did: ", did);
+        if (did) {
+          dataStore.setNeighbourhoodMember({
+            member: did,
             perspectiveUuid: perspective,
-            authorDid: expression!.author,
-            message: message.body,
           });
-
-          //Add UI notification on the channel to notify that there is a new message there
-          dataStore.setHasNewMessages({
-            channelId: perspective,
-            value: true,
-          });
-        });
+        }
       }
     };
 
@@ -226,6 +240,21 @@ export default defineComponent({
 
     window.api.send("getLangPath");
 
+    window.api.receive("ad4mAgentInit", async (isAlreadySignedUp: boolean) => {
+      if (!isAlreadySignedUp) {
+        console.log(
+          "New agent and thus creating a Flux perspective & updating public profile"
+        );
+        const agentPerspective = await ad4mClient.perspective.add(
+          "My flux perspective"
+        );
+        await this.userStore.addFluxPerspectiveId(agentPerspective.uuid);
+        await ad4mClient.agent.updatePublicPerspective({
+          links: [],
+        } as PerspectiveInput);
+      }
+    });
+
     window.api.receive("unlockedStateOff", () => {
       this.userStore.updateAgentLockState(false);
     });
@@ -272,25 +301,18 @@ export default defineComponent({
       }
     );
 
-    const { onResult, onError } = useQuery<{
-      agentStatus: AgentStatus;
-    }>(AGENT_STATUS);
-    onResult((val) => {
-      this.userStore.updateAgentStatus(val.data.agentStatus);
-      if (val.data.agentStatus.isInitialized == true) {
-        //Get database perspective from store
-        let databasePerspective = this.appStore.getDatabasePerspective;
-        if (!databasePerspective) {
-          console.warn(
-            "Does not have databasePerspective in store but has already been init'd! Add logic for getting databasePerspective as found with name"
-          );
-          //TODO: add the retrieval/state saving logic here
-        }
-      }
+    ad4mClient.agent.status().then((status) => {
+      this.userStore.updateAgentStatus(status);
     });
-    onError((error) => {
-      console.log("WelcomeViewRight: AGENT_SERVICE_STATUS, error:", error);
-    });
+  },
+  methods: {
+    copyLogFile() {
+      window.api.send("copyLogs");
+      this.appStore.showSuccessToast({
+        message:
+          "Log file called debug.log been copied to your desktop, please upload to Junto Discord, thanks <3",
+      });
+    },
   },
 });
 </script>
@@ -329,30 +351,6 @@ body :not(.message-item__message) {
   --app-channel-border-color: var(--j-border-color);
   --app-channel-header-bg-color: var(--j-color-white);
   --app-channel-footer-bg-color: var(--j-color-white);
-}
-
-html[font-size="sm"] {
-  font-size: 13px;
-}
-
-html[font-size="md"] {
-  font-size: 14px;
-}
-
-html[font-size="lg"] {
-  font-size: 15px;
-}
-
-@media (min-width: 800px) {
-  html[font-size="sm"] {
-    font-size: 14px;
-  }
-  html[font-size="md"] {
-    font-size: 16px;
-  }
-  html[font-size="lg"] {
-    font-size: 17px;
-  }
 }
 
 j-avatar::part(base) {

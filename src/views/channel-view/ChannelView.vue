@@ -6,8 +6,18 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { ChannelState, CommunityState } from "@/store/types";
+import { ChannelState, CommunityState, ExpressionAndRef, ProfileExpression } from "@/store/types";
 import { useDataStore } from "@/store/data";
+import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
+import { ad4mClient } from "@/app";
+
+interface UserMap {
+  [key: string]: ProfileExpression;
+}
+
+interface ExpressionAndRefWithId extends ExpressionAndRef {
+  id: string;
+}
 
 export default defineComponent({
   name: "ChannelView",
@@ -19,7 +29,6 @@ export default defineComponent({
       script: null as HTMLElement | null,
     };
   },
-
   async mounted() {
     this.script = document.createElement("script");
     this.script.setAttribute("type", "module");
@@ -34,7 +43,6 @@ export default defineComponent({
   unmounted() {
     document.body.removeChild(this.script as any);
   },
-
   computed: {
     community(): CommunityState {
       const { communityId } = this.$route.params;

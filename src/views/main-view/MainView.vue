@@ -7,6 +7,7 @@
   </app-layout>
 
   <j-modal
+    size="sm"
     :open="modals.showCreateCommunity"
     @toggle="(e) => setShowCreateCommunity(e.target.open)"
   >
@@ -14,16 +15,6 @@
       v-if="modals.showCreateCommunity"
       @submit="() => setShowCreateCommunity(false)"
       @cancel="() => setShowCreateCommunity(false)"
-    />
-  </j-modal>
-
-  <j-modal
-    :open="modals.showEditProfile"
-    @toggle="(e) => setShowEditProfile(e.target.open)"
-  >
-    <edit-profile
-      @submit="() => setShowEditProfile(false)"
-      @cancel="() => setShowEditProfile(false)"
     />
   </j-modal>
 
@@ -39,7 +30,7 @@
         </j-flex>
       </j-box>
       <j-text variant="ingress">
-        This is an early version of Junto. Don't use this for essential
+        This is an early version of Flux. Don't use this for essential
         communication.
       </j-text>
       <ul>
@@ -56,7 +47,6 @@ import MainSidebar from "./main-sidebar/MainSidebar.vue";
 import { defineComponent } from "vue";
 
 import CreateCommunity from "@/containers/CreateCommunity.vue";
-import EditProfile from "@/containers/EditProfile.vue";
 import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
@@ -73,7 +63,6 @@ export default defineComponent({
   components: {
     MainSidebar,
     AppLayout,
-    EditProfile,
     CreateCommunity,
   },
   data() {

@@ -5,17 +5,11 @@
         <j-avatar
           class="avatar-group__avatar"
           v-for="(user, index) in firstUsers"
-          :data-testid="`avatar-group__avatar__${user.author.did}`"
+          :data-testid="`avatar-group__avatar__${user.did}`"
           :key="index"
-          :hash="user.author"
+          :hash="user.did"
           :size="size"
-          :src="
-            user.data.profile['schema:image']
-              ? JSON.parse(user.data.profile['schema:image'])[
-                  'schema:contentUrl'
-                ]
-              : null
-          "
+          :src="user.thumbnailPicture"
         ></j-avatar>
         <span v-if="users.length >= 4" class="avatar-group__see-all">
           +{{ users.length - 3 }}
@@ -26,14 +20,36 @@
 </template>
 
 <script lang="ts">
+import { ProfileWithDID } from "@/store/types";
+import { getProfile } from "@/utils/profileHelpers";
 import { defineComponent } from "vue";
 
 export default defineComponent({
   emits: ["click"],
-  props: ["users", "size"],
-  computed: {
-    firstUsers(): any {
-      return (Object.values(this.users) as any[]).slice(0, 3);
+  props: ["profileLanguage", "users", "size"],
+  data() {
+    return {
+      firstUsers: [] as ProfileWithDID[],
+    };
+  },
+  watch: {
+    users: {
+      handler: async function (users) {
+        const profiles = await Promise.all(
+          users
+            .slice(0, 3)
+            .map(
+              async (did: string): Promise<ProfileWithDID | null> =>
+                await getProfile(this.profileLanguage, did)
+            )
+        );
+
+        this.firstUsers = profiles.filter(
+          (profile) => profile !== null
+        ) as ProfileWithDID[];
+      },
+      immediate: true,
+      deep: true,
     },
   },
 });

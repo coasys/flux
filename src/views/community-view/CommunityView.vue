@@ -105,13 +105,15 @@ export default defineComponent({
     return {
       hasCopied: false,
       channelWorkerLoop: null as null | Worker,
-      groupExpWorkerLoop: null as null | Worker,
-      memberExpressionLoop: null as null | Worker,
     };
   },
   watch: {
     "$route.params.communityId": {
       handler: function (id: string) {
+        if (id != undefined) {
+          this.dataStore.fetchNeighbourhoodMembers(id);
+          this.dataStore.fetchNeighbourhoodMetadata(id);
+        }
         this.handleWorker(id);
         this.handleThemeChange(id);
         this.goToActiveChannel(id);
@@ -155,31 +157,20 @@ export default defineComponent({
     },
     async handleWorker(id: string): Promise<void> {
       this.channelWorkerLoop?.terminate();
-      this.groupExpWorkerLoop?.terminate();
-      this.memberExpressionLoop?.terminate();
 
       if (id) {
         const channelLinksWorker =
           await this.dataStore.getNeighbourhoodChannels({
             communityId: id,
           });
-        const groupExpressionWorker =
-          await this.dataStore.getNeighbourhoodMetadata({
-            communityId: id,
-          });
-        const memberExpressionWorker =
-          await this.dataStore.getNeighbourhoodMembers(id);
-
         this.channelWorkerLoop = channelLinksWorker;
-        this.groupExpWorkerLoop = groupExpressionWorker;
-        this.memberExpressionLoop = memberExpressionWorker;
       }
     },
     getInviteCode() {
       // Get the invite code to join community and copy to clipboard
       const url = this.community.neighbourhood.neighbourhoodUrl;
       const el = document.createElement("textarea");
-      el.value = `Hey! Here is an invite code to join my private community on Junto: ${url}`;
+      el.value = `Hey! Here is an invite code to join my private community on Flux: ${url}`;
       document.body.appendChild(el);
       el.select();
       document.execCommand("copy");

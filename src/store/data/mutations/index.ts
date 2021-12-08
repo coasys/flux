@@ -1,11 +1,11 @@
 import {
   ExpressionAndRef,
   LinkExpressionAndLang,
-  ProfileExpression,
   CommunityState,
   ChannelState,
   ThemeState,
   LocalCommunityState,
+  LocalChannelState,
 } from "@/store/types";
 
 import { parseExprUrl } from "@perspect3vism/ad4m";
@@ -131,20 +131,14 @@ export default {
     channel.notifications.mute = !channel.notifications.mute;
   },
 
-  setNeighbourhoodMembers({
-    members,
-    perspectiveUuid,
-  }: {
-    members: { [x: string]: ProfileExpression };
-    perspectiveUuid: string;
-  }): void {
+  toggleCommunityMute({ communityId }: { communityId: string }): void {
     const state = useDataStore();
-    const neighbourhood = state.neighbourhoods[perspectiveUuid];
+    const community = state.communities[communityId];
 
-    console.log("setting member", { neighbourhood, members });
-
-    if (neighbourhood) {
-      neighbourhood.members = members;
+    if (community.notifications) {
+      community.notifications.mute = !community.notifications.mute;
+    } else {
+      community.notifications = { mute: true };
     }
   },
 
@@ -152,17 +146,17 @@ export default {
     member,
     perspectiveUuid,
   }: {
-    member: ProfileExpression;
+    member: string;
     perspectiveUuid: string;
   }): void {
     const state = useDataStore();
     const neighbourhood = state.neighbourhoods[perspectiveUuid];
 
-    if (neighbourhood) {
-      neighbourhood.members = {
-        ...neighbourhood.members,
-        [member.author]: member,
-      };
+    if (
+      neighbourhood &&
+      !neighbourhood.members.find((existingMember) => existingMember === member)
+    ) {
+      neighbourhood.members.push(member);
     }
   },
 
@@ -234,6 +228,20 @@ export default {
     }
   },
 
+  addLocalChannel(payload: {
+    perspectiveUuid: string;
+    channel: LocalChannelState;
+  }): void {
+    const state = useDataStore();
+    state.channels[payload.perspectiveUuid] = payload.channel;
+  },
+
+  toggleHideMutedChannels(payload: { communityId: string }): void {
+    const state = useDataStore();
+    const community = state.communities[payload.communityId];
+    community.hideMutedChannels = !community.hideMutedChannels;
+  },
+
   createChannelMutation(payload: ChannelState): void {
     const state = useDataStore();
     state.channels[payload.neighbourhood.perspective.uuid] = payload.state;
@@ -249,8 +257,20 @@ export default {
 
   setHasNewMessages(payload: { channelId: string; value: boolean }): void {
     const state = useDataStore();
+    const tempChannel = state.getChannel(payload.channelId);
+    const tempCommunity = state.getCommunity(
+      tempChannel.neighbourhood.membraneRoot
+    );
     const channel = state.channels[payload.channelId];
+    const community = state.communities[tempCommunity.state.perspectiveUuid];
     channel.hasNewMessages = payload.value;
+    community.hasNewMessages = state
+      .getChannelNeighbourhoods(tempCommunity.state.perspectiveUuid)
+      .reduce((acc: boolean, curr) => {
+        const channel = state.channels[curr.perspective.uuid];
+        if (!acc) return channel.hasNewMessages;
+        return true;
+      }, false);
   },
 
   addExpressionAndLink: (payload: {

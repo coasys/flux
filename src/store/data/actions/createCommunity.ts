@@ -1,29 +1,25 @@
-import path from "path";
 import { v4 as uuidv4 } from "uuid";
-import { createChannel } from "@/core/methods/createChannel";
 import { createProfile } from "@/core/methods/createProfile";
 import { createExpression } from "@/core/mutations/createExpression";
 import { templateLanguage } from "@/core/mutations/templateLanguage";
 import { createNeighbourhood } from "@/core/mutations/createNeighbourhood";
 import { addPerspective } from "@/core/mutations/addPerspective";
 import { createLink } from "@/core/mutations/createLink";
-import { getLanguage } from "@/core/queries/getLanguage";
-import sleep from "@/utils/sleep";
 import {
   SOCIAL_CONTEXT_OFFICIAL,
   GROUP_EXPRESSION_OFFICIAL,
   PROFILE_EXPRESSION_OFFICIAL,
   SHORTFORM_EXPRESSION_OFFICIAL,
-} from "@/ad4m-globals";
+} from "@/constants/languages";
 
 import { MEMBER } from "@/constants/neighbourhoodMeta";
 
 import {
-  ExpressionUIIcons,
   MembraneType,
-  JuntoExpressionReference,
+  FluxExpressionReference,
   ExpressionTypes,
   CommunityState,
+  FeedType,
 } from "@/store/types";
 import { Perspective } from "@perspect3vism/ad4m";
 import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta";
@@ -100,15 +96,15 @@ export default async ({
       {
         languageAddress: shortFormExpressionLang.address!,
         expressionType: ExpressionTypes.ShortForm,
-      } as JuntoExpressionReference,
+      } as FluxExpressionReference,
       {
         languageAddress: groupExpressionLang.address!,
         expressionType: ExpressionTypes.GroupExpression,
-      } as JuntoExpressionReference,
+      } as FluxExpressionReference,
       {
         languageAddress: profileExpressionLang.address!,
         expressionType: ExpressionTypes.ProfileExpression,
-      } as JuntoExpressionReference,
+      } as FluxExpressionReference,
     ];
 
     //Publish perspective
@@ -174,16 +170,7 @@ export default async ({
     });
     console.log("Created profile expression link", addProfileLink);
 
-    //Next steps: create another perspective + share with social-context-channel link language and add above expression DNA's onto it
-    //Then create link from source social context pointing to newly created SharedPerspective w/appropriate predicate to denote its a dm channel
-    const channel = await createChannel({
-      channelName: "Home",
-      creatorDid: creatorDid,
-      sourcePerspective: createSourcePerspective,
-      membraneType: MembraneType.Inherited,
-      typedExpressionLanguages: typedExpLangs,
-    });
-    console.log("created channel with result", channel);
+    const myDid = userStore.getUser!.agent.did!;
 
     const newCommunity = {
       neighbourhood: {
@@ -197,9 +184,10 @@ export default async ({
         groupExpressionRef: createExp,
         neighbourhoodUrl: neighbourhood,
         membraneType: MembraneType.Unique,
-        linkedPerspectives: [channel.neighbourhood.perspective.uuid],
-        linkedNeighbourhoods: [channel.neighbourhood.neighbourhoodUrl],
-        members: {},
+        linkedPerspectives: [createSourcePerspective.uuid],
+        linkedNeighbourhoods: [createSourcePerspective.uuid],
+        members: [myDid],
+        membraneRoot: createSourcePerspective.uuid,
         currentExpressionLinks: {},
         currentExpressionMessages: {},
         createdAt: new Date().toISOString(),
@@ -214,25 +202,29 @@ export default async ({
           saturation: 60,
         },
         useLocalTheme: false,
-        currentChannelId: channel.neighbourhood.perspective.uuid,
+        currentChannelId: null,
+        hideMutedChannels: false,
+        notifications: {
+          mute: false,
+        },
       },
     } as CommunityState;
-    dataStore.addCommunity(newCommunity);
-    dataStore.createChannelMutation(channel);
 
-    //Get and cache the expression UI for each expression language
-    for (const lang of typedExpLangs) {
-      console.log("CreateCommunity.vue: Fetching UI lang:", lang);
-      const languageRes = await getLanguage(lang.languageAddress);
-      const uiData: ExpressionUIIcons = {
-        languageAddress: lang.languageAddress,
-        createIcon: languageRes!.constructorIcon?.code || "",
-        viewIcon: languageRes!.icon?.code || "",
-        name: languageRes!.name!,
-      };
-      appStore.addExpressionUI(uiData);
-      await sleep(40);
-    }
+    dataStore.addCommunity(newCommunity);
+    // We add a default channel that is a reference to
+    // the community itself. This way we can utilize the fractal nature of
+    // neighbourhoods. Remember that this also need to happen in join community.
+    dataStore.addLocalChannel({
+      perspectiveUuid: createSourcePerspective.uuid,
+      channel: {
+        perspectiveUuid: createSourcePerspective.uuid,
+        hasNewMessages: false,
+        feedType: FeedType.Signaled,
+        notifications: {
+          mute: false,
+        },
+      },
+    });
 
     // @ts-ignore
     return newCommunity;

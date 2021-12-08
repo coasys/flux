@@ -36,15 +36,28 @@
         <j-icon size="xs" slot="start" name="plus" />
         Create channel
       </j-menu-item>
+      <j-menu-item
+        @click="
+          () =>
+            toggleHideMutedChannels({
+              communityId: community.neighbourhood.perspective.uuid,
+            })
+        "
+      >
+        <j-icon
+          size="xs"
+          slot="start"
+          :name="community.state.hideMutedChannels ? 'toggle-on' : 'toggle-off'"
+        />
+        Hide muted channels
+      </j-menu-item>
     </j-menu>
   </j-popover>
 
   <j-box pt="500">
     <j-menu-group-item
       open
-      :title="`Members (${
-        Object.keys(community.neighbourhood.members).length
-      })`"
+      :title="`Members (${community.neighbourhood.members.length})`"
     >
       <j-button
         @click.prevent="() => setShowInviteCode(true)"
@@ -58,6 +71,7 @@
         <avatar-group
           @click="() => setShowCommunityMembers(true)"
           :users="community.neighbourhood.members"
+          :profileLanguage="profileLanguage"
         />
       </j-box>
     </j-menu-group-item>
@@ -93,13 +107,18 @@
         >
           <j-menu-item
             slot="trigger"
-            :id="getValidId(channel.neighbourhood.perspective.uuid)"
             class="channel"
+            :class="{ 'channel--muted': channel.state.notifications?.mute }"
             :selected="isExactActive"
             @click="navigate"
           >
             <j-icon slot="start" size="sm" name="hash"></j-icon>
-            {{ channel.neighbourhood.name }}
+            {{
+              channel.neighbourhood.perspective.uuid ===
+              community.neighbourhood.perspective.uuid
+                ? "Home"
+                : channel.neighbourhood.name
+            }}
             <j-icon
               size="xs"
               slot="end"
@@ -137,18 +156,23 @@
           </j-menu>
         </j-popover>
       </router-link>
-      <j-menu-item @click="() => setShowCreateChannel(true)">
-        <j-icon size="xs" slot="start" name="plus" />
-        Add channel
-      </j-menu-item>
     </j-menu-group-item>
+    <j-menu-item @click="() => setShowCreateChannel(true)">
+      <j-icon size="xs" slot="start" name="plus" />
+      Add channel
+    </j-menu-item>
   </j-box>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import { ChannelState } from "@/store/types";
+import {
+  ChannelState,
+  CommunityState,
+  ExpressionTypes,
+  FluxExpressionReference,
+} from "@/store/types";
 import { mapActions, mapState } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
@@ -156,7 +180,12 @@ import { useUserStore } from "@/store/user";
 
 export default defineComponent({
   components: { AvatarGroup },
-  props: ["community"],
+  props: {
+    community: {
+      type: Object as PropType<CommunityState>,
+      required: true,
+    },
+  },
   setup() {
     return {
       userStore: useUserStore(),
@@ -170,7 +199,14 @@ export default defineComponent({
   computed: {
     channels(): ChannelState[] {
       const communityId = this.$route.params.communityId as string;
-      return this.getChannelStates()(communityId);
+
+      const channels = this.getChannelStates()(communityId);
+
+      if (this.community.state.hideMutedChannels) {
+        return channels.filter((e) => !e.state.notifications.mute);
+      }
+
+      return channels;
     },
     isCreator(): boolean {
       return (
@@ -178,9 +214,23 @@ export default defineComponent({
         this.userStore.getUser?.agent.did
       );
     },
+    profileLanguage(): string {
+      // TODO: Don't use any
+      const typedExpressionLanguages = this.community.neighbourhood
+        .typedExpressionLanguages as any;
+
+      const langAddress = typedExpressionLanguages.find(
+        (t: FluxExpressionReference) =>
+          t.expressionType === ExpressionTypes.ProfileExpression
+      ).languageAddress;
+      return langAddress || "";
+    },
   },
   methods: {
-    ...mapActions(useDataStore, ["setChannelNotificationState"]),
+    ...mapActions(useDataStore, [
+      "setChannelNotificationState",
+      "toggleHideMutedChannels",
+    ]),
     ...mapState(useDataStore, ["getChannelStates"]),
     ...mapActions(useAppStore, [
       "setShowCreateChannel",
@@ -189,9 +239,6 @@ export default defineComponent({
       "setShowInviteCode",
       "setShowCommunitySettings",
     ]),
-    getValidId(val: string) {
-      return "channel-" + val;
-    },
     goToSettings() {
       this.setShowCommunitySettings(true);
       this.showCommunityMenu = false;
@@ -253,6 +300,10 @@ j-divider {
 .channel {
   position: relative;
   display: block;
+}
+
+.channel--muted {
+  opacity: 0.6;
 }
 
 .channel__notification {

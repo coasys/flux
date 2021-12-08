@@ -1,4 +1,3 @@
-import community from "../../../fixtures/community.json";
 import createCommunityPerspective from "../../../fixtures/createCommunityPerspective.json";
 import createCommunityUniqueHolochainLanguage from "../../../fixtures/createCommunityUniqueHolochainLanguage.json";
 import createCommunityLinkType from "../../../fixtures/createCommunityLinkType.json";
@@ -19,7 +18,11 @@ import * as createChannel from "@/core/methods/createChannel";
 import * as getLanguage from "@/core/queries/getLanguage";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useDataStore } from "@/store/data";
-import { GROUP_EXPRESSION_OFFICIAL, SHORTFORM_EXPRESSION_OFFICIAL, SOCIAL_CONTEXT_OFFICIAL } from "@/ad4m-globals";
+import {
+  GROUP_EXPRESSION_OFFICIAL,
+  SHORTFORM_EXPRESSION_OFFICIAL,
+  SOCIAL_CONTEXT_OFFICIAL,
+} from "@/constants/languages";
 
 describe("Create Community", () => {
   let store: Pinia;
@@ -111,10 +114,9 @@ describe("Create Community", () => {
       description: "",
     });
 
-    expect(Object.keys(dataStore.neighbourhoods).length).toBe(2);
+    expect(Object.keys(dataStore.neighbourhoods).length).toBe(1);
     expect(Object.keys(dataStore.neighbourhoods)).toStrictEqual([
       "9cac577c-0b0a-44f4-9d4f-66edcc236021",
-      "6a37ca93-f693-471a-81dd-7993e48b659d",
     ]);
   });
 

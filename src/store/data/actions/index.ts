@@ -5,10 +5,11 @@ import getNeighbourhoodChannels from "./getNeighbourhoodChannels";
 import getNeighbourhoodMetadata from "./getNeighbourhoodMetadata";
 import getNeighbourhoodMembers from "./getNeighbourhoodMembers";
 import joinCommunity from "./joinCommunity";
-import loadExpressionLanguages from "./loadExpressionLanguages";
 import loadExpressions from "./loadExpressions";
 import updateCommunity from "./updateCommunity";
 import showMessageNotification from "./showMessageNotification";
+import fetchNeighbourhoodMembers from "./fetchNeighbourhoodMembers";
+import fetchNeighbourhoodMetadata from "./fetchNeighbourhoodMetadata";
 
 export default {
   createChannel,
@@ -18,8 +19,9 @@ export default {
   getNeighbourhoodMetadata,
   getNeighbourhoodMembers,
   joinCommunity,
-  loadExpressionLanguages,
   loadExpressions,
   updateCommunity,
   showMessageNotification,
+  fetchNeighbourhoodMembers,
+  fetchNeighbourhoodMetadata,
 };

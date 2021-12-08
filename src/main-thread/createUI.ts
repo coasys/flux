@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Tray, Menu } from "electron";
+import { app, BrowserWindow, Tray, Menu, shell } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import path from "path";
 import { MainThreadGlobal } from "./globals";
@@ -23,6 +23,12 @@ export async function createMainWindow(
     titleBarStyle: "hidden",
     show: false,
     icon: mainThreadState.iconPath!,
+  });
+
+  // Open external links in browser instead of inside the electron app
+  mainThreadState.mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url);
+    return { action: "deny" };
   });
 
   mainThreadState.mainWindow.on("close", (event) => {
@@ -99,11 +105,11 @@ export function createSplashScreen(mainThreadState: MainThreadGlobal): void {
 function createTray(mainThreadState: MainThreadGlobal): void {
   if (app.isPackaged) {
     mainThreadState.tray = new Tray(
-      `${__dirname}/img/icons/favicon-white-32x32@2x.png`
+      `${__dirname}/img/icons/favicon-32x32-Template@2x.png`
     );
   } else {
     mainThreadState.tray = new Tray(
-      `${process.env.PWD}/public/img/icons/favicon-white-32x32@2x.png`
+      `${process.env.PWD}/public/img/icons/favicon-32x32-Template@2x.png`
     );
   }
 

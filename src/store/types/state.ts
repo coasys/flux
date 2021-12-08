@@ -1,5 +1,4 @@
 import { UserState } from "./userprofile";
-import { ExpressionUIIcons } from "./expression";
 import { LocalCommunityState } from "./community";
 import { LocalChannelState } from "./channel";
 import { NeighbourhoodState } from "./neighbourhood";
@@ -25,9 +24,7 @@ export interface DataState {
 }
 
 export interface ApplicationState {
-  expressionUI: { [x: string]: ExpressionUIIcons };
   localLanguagesPath: string;
-  databasePerspective?: string;
   windowState: WindowState;
   toast: ToastState;
   applicationStartTime: Date;

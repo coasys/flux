@@ -16,6 +16,7 @@
       <j-flex wrap gap="600">
         <j-flex
           gap="300"
+          style="cursor: pointer"
           v-for="communityMember in filteredCommunityMemberList"
           :key="communityMember.did"
           inline
@@ -25,10 +26,11 @@
           <j-avatar
             size="lg"
             :hash="communityMember.did"
-            :src="communityMember.profile.profilePicture"
+            :src="communityMember.thumbnailPicture"
+            @click="() => profileClick(communityMember.did)"
           />
           <j-text variant="body">
-            {{ communityMember.profile.username }}
+            {{ communityMember.username }}
           </j-text>
         </j-flex>
       </j-flex>
@@ -38,11 +40,16 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import type { Expression } from "@perspect3vism/ad4m";
-import { NeighbourhoodState, Profile } from "@/store/types";
+import {
+  NeighbourhoodState,
+  ExpressionTypes,
+  FluxExpressionReference,
+  ProfileWithDID,
+} from "@/store/types";
 import { useDataStore } from "@/store/data";
 
-import { parseProfile } from "@/utils/profileHelpers";
+import { getProfile } from "@/utils/profileHelpers";
+import { ad4mClient } from "@/app";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -51,37 +58,60 @@ export default defineComponent({
 
     return {
       dataStore,
-      profileLinksWorker: null as null | Worker,
     };
-  },
-  async mounted() {
-    this.profileLinksWorker = await this.dataStore.getNeighbourhoodMembers(
-      this.community.perspective.uuid
-    );
-  },
-  unmounted() {
-    this.profileLinksWorker?.terminate();
   },
   data() {
     return {
       searchValue: "",
+      memberList: [] as ProfileWithDID[],
     };
   },
+  watch: {
+    "community.members": {
+      handler: async function (users) {
+        const memberList = (await Promise.all(
+          users.map(
+            async (did: string): Promise<ProfileWithDID | null> =>
+              await getProfile(this.profileLanguageAddress, did)
+          )
+        )) as Array<ProfileWithDID | null>;
+
+        this.memberList = memberList.filter(
+          (profile) => profile !== null
+        ) as ProfileWithDID[];
+      },
+      immediate: true,
+    },
+  },
   computed: {
+    filteredCommunityMemberList() {
+      return this.memberList.filter((member) => {
+        return member.username.includes(this.searchValue);
+      });
+    },
     community(): NeighbourhoodState {
       const id = this.$route.params.communityId as string;
       return this.dataStore.getNeighbourhood(id);
     },
-    filteredCommunityMemberList(): { did: string; profile: Profile }[] {
-      const members: Expression[] = Object.values(this.community.members);
-      return members
-        .map((expression: Expression) => ({
-          did: expression.author,
-          profile: parseProfile(expression.data.profile),
-        }))
-        .filter((member: { did: string; profile: Profile }) =>
-          member.profile.username.includes(this.searchValue)
-        );
+    profileLanguageAddress(): string {
+      return this.community.typedExpressionLanguages.find(
+        (t: FluxExpressionReference) =>
+          t.expressionType === ExpressionTypes.ProfileExpression
+      )!.languageAddress;
+    },
+  },
+  methods: {
+    async profileClick(did: string) {
+      const me = await ad4mClient.agent.me();
+
+      if (did === me.did) {
+        this.$router.push({ name: "home", params: { did } });
+      } else {
+        this.$router.push({
+          name: "profile",
+          params: { did, communityId: this.$route.params.communityId },
+        });
+      }
     },
   },
 });

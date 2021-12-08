@@ -3,7 +3,7 @@ import {
   ChannelState,
   FeedType,
   MembraneType,
-  JuntoExpressionReference,
+  FluxExpressionReference,
 } from "@/store/types";
 import { v4 } from "uuid";
 import { Perspective, Link } from "@perspect3vism/ad4m";
@@ -12,14 +12,14 @@ import { addPerspective } from "../mutations/addPerspective";
 import { templateLanguage } from "../mutations/templateLanguage";
 import { createNeighbourhood } from "../mutations/createNeighbourhood";
 import { createNeighbourhoodMeta } from "./createNeighbourhoodMeta";
-import { SOCIAL_CONTEXT_OFFICIAL } from "@/ad4m-globals";
+import { SOCIAL_CONTEXT_OFFICIAL } from "@/constants/languages";
 
 interface ChannelProps {
   channelName: string;
   creatorDid: string;
   sourcePerspective: PerspectiveHandle;
   membraneType: MembraneType;
-  typedExpressionLanguages: JuntoExpressionReference[];
+  typedExpressionLanguages: FluxExpressionReference[];
 }
 
 export async function createChannel({
@@ -96,7 +96,7 @@ export async function createChannel({
       membraneType: membraneType,
       linkedPerspectives: [],
       linkedNeighbourhoods: [],
-      members: {},
+      members: [],
       currentExpressionLinks: {},
       currentExpressionMessages: {},
       createdAt: new Date().toISOString(),

@@ -1,18 +1,44 @@
-import { ExpressionTypes } from "@/store/types";
-import { getProfile } from "@/utils/profileHelpers";
+import { ExpressionTypes, ProfileExpression } from "@/store/types";
+import { getProfile, parseProfile } from "@/utils/profileHelpers";
 import { TimeoutCache } from "@/utils/timeoutCache";
 import community from "../fixtures/community.json";
 import initAgentFixture from "../fixtures/initAgent.json";
 import getProfileFixture from "../fixtures/getProfile.json";
 import * as getExpressionNoCache from "@/core/queries/getExpression";
 import { Expression } from "@perspect3vism/ad4m";
+import { mocked } from "ts-jest/utils";
+
+const testProfile = {
+  did: initAgentFixture.did,
+  data: JSON.parse(getProfileFixture.data!),
+} as ProfileExpression;
+
+jest.mock("@/utils/timeoutCache", () => {
+  return {
+    TimeoutCache: jest.fn().mockImplementation(() => {
+      return {
+        set: jest.fn(),
+        get: (link: string) => {
+          if (link.includes("101")) {
+            return undefined;
+          } else {
+            return testProfile;
+          }
+        },
+        remove: jest.fn(),
+      };
+    }),
+  };
+});
 
 describe("ProfileHelpers", () => {
+  const MockedSoundPlayer = mocked(TimeoutCache, true);
+
   let profileLangAddress: string;
   let did: string;
   let profileLink: string;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     const cache = new TimeoutCache<any>(10);
 
     profileLangAddress = community.neighbourhood.typedExpressionLanguages.find(
@@ -23,11 +49,12 @@ describe("ProfileHelpers", () => {
 
     profileLink = `${profileLangAddress}://${did}`;
 
-    cache.remove(profileLink);
+    await cache.remove(profileLink);
   });
 
   beforeEach(() => {
-    // @ts-ignore
+    MockedSoundPlayer.mockClear();
+
     jest
       .spyOn(getExpressionNoCache, "getExpressionNoCache")
       .mockImplementation(async (url) => {
@@ -41,59 +68,19 @@ describe("ProfileHelpers", () => {
   });
 
   test("Test fetch profile with wrong did", async () => {
-    const cache = new TimeoutCache<any>(10);
-
-    expect(cache.get(profileLink)).toBeUndefined();
-
-    const testProfile = {
-      author: getProfileFixture.author!,
-      data: JSON.parse(getProfileFixture.data!),
-      timestamp: getProfileFixture.timestamp!,
-      proof: getProfileFixture.proof!,
-    };
-
     const profile = await getProfile(profileLangAddress, `${did}101`);
 
     expect(profile).toStrictEqual(null);
-    expect(cache.get(profileLink)).toBeUndefined();
   });
 
   test("Test fetch the correct profile", async () => {
-    const cache = new TimeoutCache<any>(10);
-
-    expect(cache.get(profileLink)).toBeUndefined();
-
-    const testProfile = {
-      author: getProfileFixture.author!,
-      data: JSON.parse(getProfileFixture.data!),
-      timestamp: getProfileFixture.timestamp!,
-      proof: getProfileFixture.proof!,
+    const newTestProfile = {
+      did: testProfile.did,
+      ...parseProfile(testProfile.data.profile),
     };
 
     const profile = await getProfile(profileLangAddress, did);
 
-    expect(profile).toStrictEqual(testProfile);
-    expect(cache.get(profileLink)).not.toBeUndefined();
-    expect(cache.get(profileLink)).toStrictEqual(testProfile);
-  });
-
-  test("Test fetch the correct profile from cache", async () => {
-    const cache = new TimeoutCache<any>(10);
-
-    const testProfile = {
-      author: getProfileFixture.author!,
-      data: JSON.parse(getProfileFixture.data!),
-      timestamp: getProfileFixture.timestamp!,
-      proof: getProfileFixture.proof!,
-    };
-
-    expect(cache.get(profileLink)).not.toBeUndefined();
-    expect(cache.get(profileLink)).toStrictEqual(testProfile);
-
-    const profile = await getProfile(profileLangAddress, did);
-
-    expect(profile).toStrictEqual(testProfile);
-    expect(cache.get(profileLink)).not.toBeUndefined();
-    expect(cache.get(profileLink)).toStrictEqual(testProfile);
+    expect(profile).toStrictEqual(newTestProfile);
   });
 });
