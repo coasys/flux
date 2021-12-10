@@ -25,7 +25,7 @@ const languages = {
   languages: {
     targetDnaName: "languages",
     bundle:
-      "https://github.com/juntofoundation/language-persistence/releases/download/0.0.15/bundle.js",
+      "https://github.com/juntofoundation/language-persistence/releases/download/0.0.16/bundle.js",
   },
   "direct-message-language": {
     bundle:
