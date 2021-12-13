@@ -63,6 +63,7 @@ import { addTrustedAgents } from "@/core/mutations/addTrustedAgents";
 import { JUNTO_AGENT, AD4M_AGENT, KAICHAO_AGENT } from "@/constants/agents";
 import { ad4mClient } from "./app";
 import { MEMBER } from "./constants/neighbourhoodMeta";
+import useEventEmitter from "./utils/useEventEmitter";
 
 declare global {
   interface Window {
@@ -78,6 +79,8 @@ export default defineComponent({
     const userStore = useUserStore();
     const appStore = useAppStore();
     const dataStore = useDataStore();
+    const bus = useEventEmitter();
+    
 
     onError((error) => {
       console.log("Got global graphql error, logging with error", error);

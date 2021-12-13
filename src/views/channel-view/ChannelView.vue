@@ -1,6 +1,5 @@
 <template>
   <chat-view
-    ref="chatView"
     :perspective-uuid="channel.neighbourhood.perspective.uuid"
     :members="JSON.stringify(memberMentions)"
     :channels="JSON.stringify(channelMentions)"
@@ -9,7 +8,7 @@
     size="xs"
     v-if="activeProfile"
     :open="showProfile"
-    @toggle="(e) => toggleProfile(e)"
+    @toggle="(e) => toggleProfile(e.target.open, activeProfile)"
   >
     <Profile 
       :did="activeProfile" 
@@ -25,6 +24,8 @@ import { ChannelState, CommunityState, ExpressionAndRef, ExpressionTypes, Profil
 import { useDataStore } from "@/store/data";
 import { ad4mClient } from "@/app";
 import { getProfile } from "@/utils/profileHelpers";
+import Profile from "@/containers/Profile.vue";
+import useEventEmitter from "@/utils/useEventEmitter";
 
 interface MentionTrigger {
   label: string;
@@ -35,25 +36,49 @@ interface MentionTrigger {
 
 export default defineComponent({
   name: "ChannelView",
+  components: {
+    Profile,
+  },
   setup() {
     const dataStore = useDataStore();
     const memberMentions = ref<MentionTrigger[]>([])
     const activeProfile = ref<any>({})
-    const showProfile = ref(false)
+    const showProfile = ref(false);
+    const bus = useEventEmitter();
 
     return {
       dataStore,
       script: null as HTMLElement | null,
       memberMentions,
       activeProfile,
-      showProfile
+      showProfile,
+      bus
     };
   },
   async mounted() {
-    (this.$refs as any).chatView.addEventListener('memberClick', (e: any) => {
-      console.log('evt triggered', e.detail);
-      this.toggleProfile(true, e.detail)
+    this.bus.bus.addEventListener('pv-member-click', ({ detail }: any) => {
+      const { did } = detail;
+      this.toggleProfile(true, did);
     });
+
+    this.bus.bus.addEventListener('pv-channel-click', ({ detail }: any) => {
+      const { id } = detail;
+
+      let channelId =
+        this.dataStore.getChannelByNeighbourhoodUrl(id)?.neighbourhood
+          .perspective.uuid;
+
+      if (channelId) {
+        this.$router.push({
+          name: "channel",
+          params: {
+            channelId: channelId,
+            communityId: this.community.neighbourhood.perspective.uuid,
+          },
+        });
+      }
+    });
+
     this.script = document.createElement("script");
     this.script.setAttribute("type", "module");
     this.script.innerHTML = `
