@@ -14,7 +14,7 @@ const languages = {
     targetDnaName: "neighbourhood-store",
     //dna: "https://github.com/perspect3vism/neighbourhood-language/releases/download/0.0.2/neighbourhood-store.dna",
     bundle:
-      "https://github.com/perspect3vism/neighbourhood-language/releases/download/0.0.3/bundle.js",
+      "https://github.com/juntofoundation/neighbourhood-language/releases/download/0.0.4/bundle.js",
   },
   "lang-note-ipfs": {
     targetDnaName: "lang-note-ipfs",
@@ -25,7 +25,7 @@ const languages = {
   languages: {
     targetDnaName: "languages",
     bundle:
-      "https://github.com/juntofoundation/language-persistence/releases/download/0.0.15/bundle.js",
+      "https://github.com/juntofoundation/language-persistence/releases/download/0.0.17/bundle.js",
   },
   "direct-message-language": {
     bundle:
