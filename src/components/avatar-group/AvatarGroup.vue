@@ -2,15 +2,26 @@
   <button @click="$emit('click')" class="avatar-group">
     <j-tooltip title="See all members">
       <div class="avatar-group__avatars">
-        <j-avatar
-          class="avatar-group__avatar"
-          v-for="(user, index) in firstUsers"
-          :data-testid="`avatar-group__avatar__${user.did}`"
-          :key="index"
-          :hash="user.did"
-          :size="size"
-          :src="user.thumbnailPicture"
-        ></j-avatar>
+        <template v-if="!loading">
+          <j-avatar
+            class="avatar-group__avatar"
+            v-for="(user, index) in firstUsers"
+            :data-testid="`avatar-group__avatar__${user.did}`"
+            :key="index"
+            :hash="user.did"
+            :size="size"
+            :src="user.thumbnailPicture"
+          ></j-avatar>
+        </template>
+        <template v-if="loading">
+          <Skeleton
+            v-for="i in 3"
+            :key="i"
+            variant="circle"
+            width="var(--j-size-md)"
+            height="var(--j-size-md)"
+          ></Skeleton>
+        </template>
         <span v-if="users.length >= 4" class="avatar-group__see-all">
           +{{ users.length - 3 }}
         </span>
@@ -23,18 +34,24 @@
 import { ProfileWithDID } from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
 import { defineComponent } from "vue";
+import Skeleton from "@/components/skeleton/Skeleton.vue";
 
 export default defineComponent({
   emits: ["click"],
+  components: { Skeleton },
   props: ["profileLanguage", "users", "size"],
   data() {
     return {
       firstUsers: [] as ProfileWithDID[],
+      loading: false,
     };
   },
   watch: {
     users: {
       handler: async function (users) {
+        // reset on change
+        this.firstUsers = [];
+        this.loading = true;
         const profiles = await Promise.all(
           users
             .slice(0, 3)
@@ -43,10 +60,10 @@ export default defineComponent({
                 await getProfile(this.profileLanguage, did)
             )
         );
-
         this.firstUsers = profiles.filter(
           (profile) => profile !== null
         ) as ProfileWithDID[];
+        this.loading = false;
       },
       immediate: true,
       deep: true,
