@@ -8,9 +8,9 @@ import { MainThreadGlobal } from "./globals";
 import { createMainWindow, createSplashScreen } from "./createUI";
 
 export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
-  if (!fs.existsSync(path.join(app.getPath("userData"), "dontDelete-0.2.12"))) {
+  if (!fs.existsSync(path.join(app.getPath("userData"), "dontDelete-0.2.13"))) {
     console.warn(
-      "Did not find dontDelete-0.2.12 deleting ad4m and Local Storage directories"
+      "Did not find dontDelete-0.2.13 deleting ad4m and Local Storage directories"
     );
     const ad4mPath = path.join(app.getPath("userData"), "ad4m");
     if (fs.existsSync(ad4mPath)) fs.rmSync(ad4mPath, { recursive: true });
@@ -22,9 +22,9 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
     if (fs.existsSync(localStoragePath))
       fs.rmSync(localStoragePath, { recursive: true });
 
-    fs.mkdirSync(path.join(app.getPath("userData"), "dontDelete-0.2.12"));
+    fs.mkdirSync(path.join(app.getPath("userData"), "dontDelete-0.2.13"));
   } else {
-    console.warn("Found dontDelete-0.2.12, skipping deletion of config");
+    console.warn("Found dontDelete-0.2.13, skipping deletion of config");
   }
 
   // This method is called if a second instance of the application is started
