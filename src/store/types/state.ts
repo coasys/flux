@@ -25,7 +25,6 @@ export interface DataState {
 
 export interface ApplicationState {
   localLanguagesPath: string;
-  databasePerspective?: string;
   windowState: WindowState;
   toast: ToastState;
   applicationStartTime: Date;

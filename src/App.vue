@@ -54,13 +54,13 @@ import {
   ToastState,
 } from "@/store/types";
 import { print } from "graphql/language/printer";
-import { LinkExpression } from "@perspect3vism/ad4m";
+import { LinkExpression, PerspectiveInput } from "@perspect3vism/ad4m";
 import { apolloClient } from "@/app";
 import { useUserStore } from "./store/user";
 import { useAppStore } from "./store/app";
 import { useDataStore } from "./store/data";
 import { addTrustedAgents } from "@/core/mutations/addTrustedAgents";
-import { JUNTO_AGENT, AD4M_AGENT } from "@/constants/agents";
+import { JUNTO_AGENT, AD4M_AGENT, KAICHAO_AGENT } from "@/constants/agents";
 import { ad4mClient } from "./app";
 import { MEMBER } from "./constants/neighbourhoodMeta";
 
@@ -92,12 +92,48 @@ export default defineComponent({
     userStore.$subscribe(async (mutation, state) => {
       if (state.agent.isUnlocked) {
         appStore.setApplicationStartTime(new Date());
-        await addTrustedAgents([JUNTO_AGENT, AD4M_AGENT]);
+        await addTrustedAgents([JUNTO_AGENT, AD4M_AGENT, KAICHAO_AGENT]);
       } else {
         router.push({
           name: userStore.agent.isInitialized ? "login" : "signup",
         });
       }
+    });
+
+    //Start expression web worker to try and get the expression data pointed to in link target
+    const expressionWorker = new Worker("pollingWorker.js");
+
+    expressionWorker.onerror = function (e) {
+      throw new Error(e.toString());
+    };
+
+    expressionWorker.addEventListener("message", (e) => {
+      const perspective = e.data.callbackData.perspective;
+      const link = e.data.callbackData.link;
+      const expression = e.data.expression;
+      const message = JSON.parse(expression!.data!);
+
+      console.debug("FOUND EXPRESSION FOR SIGNAL");
+      //Add the expression to the store
+      dataStore.addExpressionAndLink({
+        channelId: perspective,
+        link: link,
+        message: expression,
+      });
+
+      dataStore.showMessageNotification({
+        router,
+        route,
+        perspectiveUuid: perspective,
+        authorDid: expression!.author,
+        message: message.body,
+      });
+
+      //Add UI notification on the channel to notify that there is a new message there
+      dataStore.setHasNewMessages({
+        channelId: perspective,
+        value: true,
+      });
     });
 
     //Watch for incoming signals from holochain - an incoming signal should mean a DM is inbound
@@ -107,48 +143,15 @@ export default defineComponent({
     ) => {
       console.debug("GOT INCOMING MESSAGE SIGNAL", link, perspective);
       if (link.data!.predicate! === "sioc://content_of") {
-        //Start expression web worker to try and get the expression data pointed to in link target
-        const expressionWorker = new Worker("pollingWorker.js");
-
         expressionWorker.postMessage({
           id: link.data!.target!,
           retry: expressionGetRetries,
+          callbackData: { perspective, link },
           interval: expressionGetDelayMs,
           query: print(GET_EXPRESSION),
           variables: { url: link.data!.target! },
           name: "Expression signal get",
           dataKey: "expression",
-        });
-
-        expressionWorker.onerror = function (e) {
-          throw new Error(e.toString());
-        };
-
-        expressionWorker.addEventListener("message", (e) => {
-          const expression = e.data.expression;
-          const message = JSON.parse(expression!.data!);
-
-          console.debug("FOUND EXPRESSION FOR SIGNAL");
-          //Add the expression to the store
-          dataStore.addExpressionAndLink({
-            channelId: perspective,
-            link: link,
-            message: expression,
-          });
-
-          dataStore.showMessageNotification({
-            router,
-            route,
-            perspectiveUuid: perspective,
-            authorDid: expression!.author,
-            message: message.body,
-          });
-
-          //Add UI notification on the channel to notify that there is a new message there
-          dataStore.setHasNewMessages({
-            channelId: perspective,
-            value: true,
-          });
         });
       } else if (link.data!.predicate! === MEMBER) {
         const did = link.data!.target!.split("://")[1];
@@ -236,6 +239,21 @@ export default defineComponent({
     this.appStore.setGlobalLoading(false);
 
     window.api.send("getLangPath");
+
+    window.api.receive("ad4mAgentInit", async (isAlreadySignedUp: boolean) => {
+      if (!isAlreadySignedUp) {
+        console.log(
+          "New agent and thus creating a Flux perspective & updating public profile"
+        );
+        const agentPerspective = await ad4mClient.perspective.add(
+          "My flux perspective"
+        );
+        await this.userStore.addFluxPerspectiveId(agentPerspective.uuid);
+        await ad4mClient.agent.updatePublicPerspective({
+          links: [],
+        } as PerspectiveInput);
+      }
+    });
 
     window.api.receive("unlockedStateOff", () => {
       this.userStore.updateAgentLockState(false);
@@ -333,30 +351,6 @@ body :not(.message-item__message) {
   --app-channel-border-color: var(--j-border-color);
   --app-channel-header-bg-color: var(--j-color-white);
   --app-channel-footer-bg-color: var(--j-color-white);
-}
-
-html[font-size="sm"] {
-  font-size: 13px;
-}
-
-html[font-size="md"] {
-  font-size: 14px;
-}
-
-html[font-size="lg"] {
-  font-size: 15px;
-}
-
-@media (min-width: 800px) {
-  html[font-size="sm"] {
-    font-size: 14px;
-  }
-  html[font-size="md"] {
-    font-size: 16px;
-  }
-  html[font-size="lg"] {
-    font-size: 17px;
-  }
 }
 
 j-avatar::part(base) {

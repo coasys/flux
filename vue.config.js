@@ -49,7 +49,7 @@ module.exports = {
           icon: "./build/icon.png"
         },
         linux: {
-          target: ["AppImage", "deb"],
+          target: ["AppImage", "deb", "snap"],
           category: "Network",
           maintainer: "dev@junto.foundation",
         },

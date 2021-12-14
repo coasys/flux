@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld("api", {
       "check-update",
       "restoreWindow",
       "copyLogs",
+      "openLinkInBrowser",
     ];
     if (validChannels.includes(channel)) {
       ipcRenderer.send(channel, data);
@@ -34,6 +35,7 @@ contextBridge.exposeInMainWorld("api", {
       "windowState",
       "unlockedStateOff",
       "clearMessages",
+      "ad4mAgentInit",
     ];
     if (validChannels.includes(channel)) {
       // Deliberately strip event as it includes `sender`

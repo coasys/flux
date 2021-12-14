@@ -2,27 +2,27 @@ import sleep from "@/utils/sleep";
 import { TimeoutCache } from "@/utils/timeoutCache";
 import { mocked } from "ts-jest/utils";
 
-jest.mock('@/utils/timeoutCache', () => {
+jest.mock("@/utils/timeoutCache", () => {
   return {
     TimeoutCache: jest.fn().mockImplementation(() => {
       return {
         set: jest.fn(),
         get: (key: string) => {
-          if (key === 'test') {
-            return undefined
+          if (key === "test") {
+            return undefined;
           } else {
-            return 'test';
+            return "test";
           }
         },
         remove: jest.fn(),
       };
-    })
+    }),
   };
 });
 
 describe("Timeoutcache", () => {
   mocked(TimeoutCache, true);
-  
+
   beforeEach(async () => {
     const cache = new TimeoutCache<any>(10);
 

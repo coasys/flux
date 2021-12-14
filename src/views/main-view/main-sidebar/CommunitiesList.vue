@@ -17,26 +17,45 @@
           :initials="community.name.charAt(0).toUpperCase()"
           @click="() => handleCommunityClick(community.perspective.uuid)"
         ></j-avatar>
-        <j-menu
-          slot="content"
-        >
-          <j-menu-item 
+        <j-menu slot="content">
+          <j-menu-item
             @click="() => removeCommunity(community.perspective.uuid)"
-          >Remove community</j-menu-item>
-          <j-menu-item 
-            @click="() => muteCommunity(community.perspective.uuid)"
-          ><j-icon
+            >Remove community</j-menu-item
+          >
+
+          <j-menu-item @click="() => muteCommunity(community.perspective.uuid)"
+            ><j-icon
               size="xs"
               slot="start"
               :name="
-                getCommunityState(community.perspective.uuid).notifications?.mute ? 'bell-slash' : 'bell'
+                getCommunityState(community.perspective.uuid).notifications
+                  ?.mute
+                  ? 'bell-slash'
+                  : 'bell'
               "
             />
             {{
               `${
-                  getCommunityState(community.perspective.uuid).notifications?.mute ? "Unmute" : "Mute"
+                getCommunityState(community.perspective.uuid).notifications
+                  ?.mute
+                  ? "Unmute"
+                  : "Mute"
               } Community`
             }}
+          </j-menu-item>
+          <j-menu-item
+            @click="() => toggleHideMutedChannels(community.perspective.uuid)"
+          >
+            <j-icon
+              size="xs"
+              slot="start"
+              :name="
+                getCommunityState(community.perspective.uuid).hideMutedChannels
+                  ? 'toggle-on'
+                  : 'toggle-off'
+              "
+            />
+            Hide muted channels
           </j-menu-item>
         </j-menu>
       </j-popover>
@@ -72,9 +91,12 @@ export default defineComponent({
     };
   },
   methods: {
+    toggleHideMutedChannels(id: string) {
+      this.dataStore.toggleHideMutedChannels({ communityId: id });
+    },
     muteCommunity(id: string) {
-      this.dataStore.toggleCommunityMute({communityId: id})
-    },  
+      this.dataStore.toggleCommunityMute({ communityId: id });
+    },
     removeCommunity(id: string) {
       this.$router.push({ name: "home" }).then(() => {
         this.dataStore.removeCommunity(id);
@@ -102,8 +124,8 @@ export default defineComponent({
       };
     },
     getCommunityState() {
-      return (id: string) => this.dataStore.getCommunityState(id)
-    }
+      return (id: string) => this.dataStore.getCommunityState(id);
+    },
   },
 });
 </script>

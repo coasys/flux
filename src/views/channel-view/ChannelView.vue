@@ -18,9 +18,13 @@
       size="xs"
       v-if="activeProfile"
       :open="showProfile"
-      @toggle="(e) => (showProfile = e.target.open)"
+      @toggle="(e) => toggleProfile(e)"
     >
-      <Profile :did="activeProfile" :langAddress="profileLanguage" />
+      <Profile 
+        :did="activeProfile" 
+        :langAddress="profileLanguage" 
+        @openCompleteProfile="() => handleProfileClick(activeProfile)" 
+      />
     </j-modal>
   </div>
 </template>
@@ -41,6 +45,7 @@ import ChannelHeader from "./ChannelHeader.vue";
 import Profile from "@/containers/Profile.vue";
 import { useDataStore } from "@/store/data";
 import { sortExpressionsByTimestamp } from "@/utils/expressionHelpers";
+import { ad4mClient } from "@/app";
 
 interface UserMap {
   [key: string]: ProfileExpression;
@@ -89,6 +94,7 @@ export default defineComponent({
   },
   beforeRouteUpdate(to, from, next) {
     this.linksWorker?.terminate();
+    this.fwdLinkWorker?.terminate();
     this.expressionWorker?.terminate();
     const editor = document.getElementsByTagName("j-editor")[0];
     (editor.shadowRoot?.querySelector("emoji-picker") as any)?.database.close();
@@ -96,6 +102,7 @@ export default defineComponent({
   },
   beforeRouteLeave(to, from, next) {
     this.linksWorker?.terminate();
+    this.fwdLinkWorker?.terminate();
     this.expressionWorker?.terminate();
     const editor = document.getElementsByTagName("j-editor")[0];
     (editor.shadowRoot?.querySelector("emoji-picker") as any)?.database.close();
@@ -149,6 +156,12 @@ export default defineComponent({
     },
   },
   methods: {
+    toggleProfile(e: any): void {
+      if (!e.target.open) {
+        this.activeProfile = undefined;
+      }
+      this.showProfile = e.target.open;
+    },
     loadMoreMessages(): void {
       const messageAmount = this.messages.length;
       if (messageAmount) {
@@ -179,9 +192,16 @@ export default defineComponent({
 
       this.previousFetchedTimestamp = from;
     },
-    handleProfileClick(did: string) {
-      this.showProfile = true;
+    async handleProfileClick(did: string) {
       this.activeProfile = did;
+
+      const me = await ad4mClient.agent.me();
+
+      if (did === me.did) {
+        this.$router.push({ name: "home", params: { did } });
+      } else {
+        this.$router.push({ name: "profile", params: { did, communityId: this.community.neighbourhood.perspective.uuid } });
+      }
     },
     handleMentionClick(dataset: { label: string; id: string }) {
       const { label, id } = dataset;

@@ -56,6 +56,7 @@ export default async function ({
           predicate: "sioc://content_of",
           fromDate: untilDate,
           untilDate: fromDate,
+          limit: 50
         } as LinkQuery,
       },
       name: `Get desc expressionLinks for channel: ${channel.name}`,
@@ -75,6 +76,7 @@ export default async function ({
           predicate: "sioc://content_of",
           fromDate,
           untilDate: new Date(),
+          limit: 50
         } as LinkQuery,
       },
       resetUntil: true,

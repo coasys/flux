@@ -170,7 +170,7 @@ export default defineComponent({
       // Get the invite code to join community and copy to clipboard
       const url = this.community.neighbourhood.neighbourhoodUrl;
       const el = document.createElement("textarea");
-      el.value = `Hey! Here is an invite code to join my private community on Junto: ${url}`;
+      el.value = `Hey! Here is an invite code to join my private community on Flux: ${url}`;
       document.body.appendChild(el);
       el.select();
       document.execCommand("copy");

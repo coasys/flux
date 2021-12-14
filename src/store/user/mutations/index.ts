@@ -17,4 +17,9 @@ export default {
     const store = useUserStore();
     store.profile = payload;
   },
+
+  addFluxPerspectiveId(payload: string): void {
+    const store = useUserStore();
+    store.fluxPerspectiveId = payload;
+  },
 };
