@@ -5,7 +5,7 @@
       label="Neighbourhood link"
       size="xl"
       :value="link"
-      @input="(e: any) => (link = e.target.value)"
+      @input="(e) => (link = e.target.value)"
       :error="linkError"
       :errorText="linkErrorMessage"
       @blur="() => validateLink"
