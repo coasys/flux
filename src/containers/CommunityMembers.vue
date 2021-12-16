@@ -13,7 +13,7 @@
       >
         <j-icon name="search" size="sm" slot="end"></j-icon>
       </j-input>
-      <j-flex wrap gap="600">
+      <j-flex wrap gap="600" v-if="!loading">
         <j-flex
           gap="300"
           style="cursor: pointer"
@@ -34,6 +34,24 @@
           </j-text>
         </j-flex>
       </j-flex>
+      <j-flex wrap gap="600" v-else>
+        <j-flex
+          inline
+          direction="column"
+          a="center"
+          gap="300"
+          v-for="i in 4"
+          :key="i"
+        >
+          <Skeleton
+            :key="i"
+            variant="circle"
+            width="var(--j-size-lg)"
+            height="var(--j-size-lg)"
+          />
+          <Skeleton></Skeleton>
+        </j-flex>
+      </j-flex>
     </j-flex>
   </j-box>
 </template>
@@ -50,9 +68,11 @@ import { useDataStore } from "@/store/data";
 
 import { getProfile } from "@/utils/profileHelpers";
 import { ad4mClient } from "@/app";
+import Skeleton from "@/components/skeleton/Skeleton.vue";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
+  components: { Skeleton },
   setup() {
     const dataStore = useDataStore();
 
@@ -64,11 +84,15 @@ export default defineComponent({
     return {
       searchValue: "",
       memberList: [] as ProfileWithDID[],
+      loading: false,
     };
   },
   watch: {
     "community.members": {
       handler: async function (users) {
+        // reset before fetching again
+        this.memberList = [];
+        this.loading = true;
         const memberList = (await Promise.all(
           users.map(
             async (did: string): Promise<ProfileWithDID | null> =>
@@ -79,6 +103,7 @@ export default defineComponent({
         this.memberList = memberList.filter(
           (profile) => profile !== null
         ) as ProfileWithDID[];
+        this.loading = false;
       },
       immediate: true,
     },
