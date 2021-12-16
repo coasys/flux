@@ -8,54 +8,54 @@
       @input="(e) => (link = e.target.value)"
       :error="linkError"
       :errorText="linkErrorMessage"
-      @blur="(e) => validateLink"
-    ></j-input>
+      @blur="getMeta"
+    >
+    </j-input>
 
-    <j-button @click="getMeta">Get metadata</j-button>
-
-    <template v-if="hasLoadedMeta">
+    <j-flex a="center" gap="500">
       <avatar-upload
         size="3rem"
         :value="newProfileImage"
         @change="(val) => (newProfileImage = val)"
         icon="camera"
       />
-
-      <j-input
-        label="Title"
-        size="xl"
-        :value="title"
-        @input="(e) => (title = e.target.value)"
-        :error="titleError"
-        :errorText="titleErrorMessage"
-        @blur="(e) => validateTitle"
-      ></j-input>
-      <j-input
-        label="Description"
-        size="xl"
-        :value="description"
-        @input="(e) => (description = e.target.value)"
-        @keydown.enter="createLink"
-      ></j-input>
-      <j-flex gap="400">
-        <j-button full style="width: 100%" size="lg" @click="$emit('cancel')">
-          <j-icon v-if="!isEditing" slot="start" name="arrow-left-short" />
-          {{ isEditing ? "Cancel" : "Back" }}
-        </j-button>
-        <j-button
-          style="width: 100%"
-          full
-          :disabled="isAddLink || !canCreateLink"
-          :loading="isAddLink"
-          size="lg"
-          variant="primary"
-          @click="createLink"
-        >
-          <j-icon slot="end" name="add" />
-          {{ isEditing ? "Save" : "Add link" }}
-        </j-button>
+      <j-flex style="width: 100%" gap="400" direction="column">
+        <j-input
+          label="Title"
+          size="xl"
+          :value="title"
+          @input="(e) => (title = e.target.value)"
+          :error="titleError"
+          :errorText="titleErrorMessage"
+          @blur="(e) => validateTitle"
+        ></j-input>
+        <j-input
+          label="Description"
+          size="xl"
+          :value="description"
+          @input="(e) => (description = e.target.value)"
+          @keydown.enter="createLink"
+        ></j-input>
       </j-flex>
-    </template>
+    </j-flex>
+    <j-flex gap="400">
+      <j-button full style="width: 100%" size="lg" @click="$emit('cancel')">
+        <j-icon v-if="!isEditing" slot="start" name="arrow-left-short" />
+        {{ isEditing ? "Cancel" : "Back" }}
+      </j-button>
+      <j-button
+        style="width: 100%"
+        full
+        :disabled="isAddLink || !canCreateLink"
+        :loading="isAddLink"
+        size="lg"
+        variant="primary"
+        @click="createLink"
+      >
+        <j-icon slot="end" name="add" />
+        {{ isEditing ? "Save" : "Add link" }}
+      </j-button>
+    </j-flex>
   </j-flex>
 </template>
 
@@ -79,7 +79,6 @@ export default defineComponent({
     AvatarUpload,
   },
   setup() {
-    const hasLoadedMeta = ref(false);
     const isAddLink = ref(false);
     const newProfileImage = ref("");
     const description = ref("");
@@ -135,7 +134,6 @@ export default defineComponent({
     });
 
     return {
-      hasLoadedMeta,
       title,
       titleError,
       titleErrorMessage,
@@ -200,8 +198,6 @@ export default defineComponent({
         reader.readAsDataURL(blob);
       } catch (e) {
         console.log(e);
-      } finally {
-        this.hasLoadedMeta = true;
       }
     },
     async createLink() {

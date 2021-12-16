@@ -8,32 +8,37 @@
       @input="(e) => (link = e.target.value)"
       :error="linkError"
       :errorText="linkErrorMessage"
-      @blur="() => addLink"
+      @blur="addLink"
       :loading="isAddLink"
       variant="primary"
     ></j-input>
 
-    <avatar-upload
-      :value="newProfileImage"
-      @change="(val) => (newProfileImage = val)"
-      icon="camera"
-    />
-    <j-input
-      label="Title"
-      size="xl"
-      :value="title"
-      @input="(e) => (title = e.target.value)"
-      :error="titleError"
-      :errorText="titleErrorMessage"
-      @blur="(e) => validateTitle"
-    ></j-input>
-    <j-input
-      label="Description"
-      size="xl"
-      :value="description"
-      @input="(e) => (description = e.target.value)"
-      @keydown.enter="createLink"
-    ></j-input>
+    <j-flex gap="500" a="center">
+      <avatar-upload
+        size="4rem"
+        :value="newProfileImage"
+        @change="(val) => (newProfileImage = val)"
+        icon="camera"
+      />
+      <j-flex style="width: 100%" direction="column" gap="300">
+        <j-input
+          label="Title"
+          size="xl"
+          :value="title"
+          @input="(e) => (title = e.target.value)"
+          :error="titleError"
+          :errorText="titleErrorMessage"
+          @blur="(e) => validateTitle"
+        ></j-input>
+        <j-input
+          label="Description"
+          size="xl"
+          :value="description"
+          @input="(e) => (description = e.target.value)"
+          @keydown.enter="createLink"
+        ></j-input>
+      </j-flex>
+    </j-flex>
     <j-flex gap="400">
       <j-button full style="width: 100%" size="lg" @click="$emit('cancel')">
         <j-icon v-if="!isEditing" slot="start" name="arrow-left-short" />

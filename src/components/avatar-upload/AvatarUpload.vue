@@ -7,11 +7,16 @@
           v-else
           class="avatar-upload__icon"
           :name="icon"
-          size="xl"
+          size="lg"
         ></j-icon>
       </div>
       <j-button variant="link" v-if="!value" size="sm">Upload image</j-button>
-      <j-button v-if="value" @click.prevent="$emit('change', null)" size="sm">
+      <j-button
+        variant="link"
+        v-if="value"
+        @click.prevent="$emit('change', null)"
+        size="sm"
+      >
         Remove image
       </j-button>
     </j-flex>
