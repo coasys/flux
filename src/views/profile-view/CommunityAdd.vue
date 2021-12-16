@@ -8,11 +8,11 @@
       @input="(e) => (link = e.target.value)"
       :error="linkError"
       :errorText="linkErrorMessage"
-      @blur="() => validateLink"
-      :disabled="isAddLink || !canAddLink"
+      @blur="() => addLink"
       :loading="isAddLink"
       variant="primary"
     ></j-input>
+
     <avatar-upload
       :value="newProfileImage"
       @change="(val) => (newProfileImage = val)"

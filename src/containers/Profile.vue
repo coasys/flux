@@ -14,9 +14,9 @@
       >
       <j-text variant="heading-sm"> {{ profile.username }}</j-text>
       <j-text v-if="bio" variant="subheading"> {{ bio }}</j-text>
-      <j-button @click="() => $emit('openCompleteProfile')"
-        >View complete profile</j-button
-      >
+      <j-button @click="() => $emit('openCompleteProfile')">
+        View complete profile
+      </j-button>
     </j-flex>
   </j-box>
   <j-box p="800" v-else>

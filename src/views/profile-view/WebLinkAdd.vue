@@ -11,45 +11,51 @@
       @blur="(e) => validateLink"
     ></j-input>
 
-    <avatar-upload
-      :value="newProfileImage"
-      @change="(val) => (newProfileImage = val)"
-      icon="camera"
-    />
-    <j-input
-      label="Title"
-      size="xl"
-      :value="title"
-      @input="(e) => (title = e.target.value)"
-      :error="titleError"
-      :errorText="titleErrorMessage"
-      @blur="(e) => validateTitle"
-    ></j-input>
-    <j-input
-      label="Description"
-      size="xl"
-      :value="description"
-      @input="(e) => (description = e.target.value)"
-      @keydown.enter="createLink"
-    ></j-input>
-    <j-flex gap="400">
-      <j-button full style="width: 100%" size="lg" @click="$emit('cancel')">
-        <j-icon v-if="!isEditing" slot="start" name="arrow-left-short" />
-        {{ isEditing ? "Cancel" : "Back" }}
-      </j-button>
-      <j-button
-        style="width: 100%"
-        full
-        :disabled="isAddLink || !canCreateLink"
-        :loading="isAddLink"
-        size="lg"
-        variant="primary"
-        @click="createLink"
-      >
-        <j-icon slot="end" name="add" />
-        {{ isEditing ? "Save" : "Add link" }}
-      </j-button>
-    </j-flex>
+    <j-button @click="getMeta">Get metadata</j-button>
+
+    <template v-if="hasLoadedMeta">
+      <avatar-upload
+        size="3rem"
+        :value="newProfileImage"
+        @change="(val) => (newProfileImage = val)"
+        icon="camera"
+      />
+
+      <j-input
+        label="Title"
+        size="xl"
+        :value="title"
+        @input="(e) => (title = e.target.value)"
+        :error="titleError"
+        :errorText="titleErrorMessage"
+        @blur="(e) => validateTitle"
+      ></j-input>
+      <j-input
+        label="Description"
+        size="xl"
+        :value="description"
+        @input="(e) => (description = e.target.value)"
+        @keydown.enter="createLink"
+      ></j-input>
+      <j-flex gap="400">
+        <j-button full style="width: 100%" size="lg" @click="$emit('cancel')">
+          <j-icon v-if="!isEditing" slot="start" name="arrow-left-short" />
+          {{ isEditing ? "Cancel" : "Back" }}
+        </j-button>
+        <j-button
+          style="width: 100%"
+          full
+          :disabled="isAddLink || !canCreateLink"
+          :loading="isAddLink"
+          size="lg"
+          variant="primary"
+          @click="createLink"
+        >
+          <j-icon slot="end" name="add" />
+          {{ isEditing ? "Save" : "Add link" }}
+        </j-button>
+      </j-flex>
+    </template>
   </j-flex>
 </template>
 
@@ -57,7 +63,6 @@
 import { ad4mClient } from "@/app";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
 import { useAppStore } from "@/store/app";
-import { useDataStore } from "@/store/data";
 import { useUserStore } from "@/store/user";
 import getAgentLinks from "@/utils/getAgentLinks";
 import { useValidation } from "@/utils/validation";
@@ -74,6 +79,7 @@ export default defineComponent({
     AvatarUpload,
   },
   setup() {
+    const hasLoadedMeta = ref(false);
     const isAddLink = ref(false);
     const newProfileImage = ref("");
     const description = ref("");
@@ -129,6 +135,7 @@ export default defineComponent({
     });
 
     return {
+      hasLoadedMeta,
       title,
       titleError,
       titleErrorMessage,
@@ -165,11 +172,42 @@ export default defineComponent({
     },
   },
   methods: {
+    async getMeta() {
+      try {
+        const res = await fetch(
+          "http://url-metadata.herokuapp.com/api/metadata?url=" + this.link
+        );
+        const { data } = await res.json();
+        console.log({ data });
+        this.title = data.title;
+        this.description = data.description;
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64data = reader.result;
+          console.log({ base64data });
+          if (base64data) {
+            this.newProfileImage = base64data.toString();
+          }
+        };
+        const { hostname } = new URL(this.link);
+        const image = await fetch(
+          "https://services.keeweb.info/favicon/" + hostname
+        );
+        console.log(image);
+        const blob = await image.blob();
+        console.log(blob);
+        reader.readAsDataURL(blob);
+      } catch (e) {
+        console.log(e);
+      } finally {
+        this.hasLoadedMeta = true;
+      }
+    },
     async createLink() {
       if (this.canCreateLink && !this.isAddLink) {
         this.isAddLink = true;
 
-        const dataStore = useDataStore();
         const userStore = useUserStore();
         const appStore = useAppStore();
         const userPerspective = userStore.getFluxPerspectiveId;
