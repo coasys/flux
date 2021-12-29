@@ -1,17 +1,22 @@
 <template>
   <div class="avatar-upload" id="fileInputButton" @click="onFileClick">
     <j-flex direction="column" gap="400" a="center">
-      <div class="avatar-upload__avatar">
+      <div class="avatar-upload__avatar" :style="{ width: size, height: size }">
         <img :src="value" v-if="value" />
         <j-icon
           v-else
           class="avatar-upload__icon"
           :name="icon"
-          size="xl"
+          size="lg"
         ></j-icon>
       </div>
       <j-button variant="link" v-if="!value" size="sm">Upload image</j-button>
-      <j-button v-if="value" @click.prevent="$emit('change', null)" size="sm">
+      <j-button
+        variant="link"
+        v-if="value"
+        @click.prevent="$emit('change', null)"
+        size="sm"
+      >
         Remove image
       </j-button>
     </j-flex>
@@ -52,6 +57,10 @@ export default defineComponent({
     value: String,
     disabled: Boolean,
     hash: String,
+    size: {
+      default: "7rem",
+      type: String,
+    },
     icon: {
       default: "person-fill",
       type: String,
@@ -86,6 +95,7 @@ export default defineComponent({
       const result = (this.$refs.cropper as any).getResult();
       const data = result.canvas.toDataURL();
       this.tempProfileImage = null;
+      console.log({ data });
       this.$emit("change", data);
     },
   },
