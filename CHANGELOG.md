@@ -2,7 +2,25 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
-## [0.2.12] - 6/12/2021
+## [0.2.13] - 14/12/2021
+
+### Added
+ - Loading indicator now shown when community member links have been found but no profiles resolved
+
+### Changed
+ - Storj now used for storing language & neighbourhood objects to improve community creation & joining reliability
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+---
+
+## [0.2.12] - 9/12/2021
 
 ### Added
  - Agent profiles!!! Includes linking neighbourhoods, galleries and web links
@@ -10,6 +28,7 @@ This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/
 ### Changed
  - Improved naming solution for languages
  - Social Context can now listen to limit in link queries
+ - holochain updated to 119!
 
 ### Deprecated
 

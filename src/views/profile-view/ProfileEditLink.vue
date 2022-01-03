@@ -1,24 +1,24 @@
-t<template>
+<template>
   <div class="container">
     <simple-image-add
+      :isEditing="true"
       v-if="linkType === 'simpleArea'"
-      :step="step"
-      @submit="$emit('submit')"
-      @changeStep="(i) => (step = i)"
+      @submit="onSubmit"
+      @cancel="onCancel"
       :area="area"
     />
     <community-add
+      :isEditing="true"
       v-if="linkType === 'community'"
-      :step="step"
-      @submit="$emit('submit')"
-      @changeStep="(i) => (step = i)"
+      @submit="onSubmit"
+      @cancel="onCancel"
       :area="area"
     />
     <web-link-add
+      :isEditing="true"
       v-if="linkType === 'webLink'"
-      :step="step"
-      @submit="$emit('submit')"
-      @changeStep="(i) => (step = i)"
+      @submit="onSubmit"
+      @cancel="onCancel"
       :area="area"
     />
   </div>
@@ -34,28 +34,34 @@ import WebLinkAdd from "./WebLinkAdd.vue";
 export type linkType = "community" | "simpleArea" | "webLink" | null;
 
 export default defineComponent({
-  props: ['area'],
+  props: ["area"],
   emits: ["cancel", "submit"],
   setup() {
     const linkType = ref<linkType>(null);
-    const step = ref(2);
 
     return {
       linkType,
-      step,
     };
   },
   watch: {
-    area() {
-      if (this.area) {
-        this.linkType = this.area.area_type;
-      }
-    }
+    area: {
+      handler: function (area) {
+        if (area) {
+          this.linkType = area.area_type;
+        }
+      },
+      immediate: true,
+    },
   },
   methods: {
+    onSubmit(): void {
+      this.$emit("submit");
+    },
+    onCancel(): void {
+      this.$emit("cancel");
+    },
     selectLinkType(type: linkType) {
       this.linkType = type;
-      this.step = 2;
     },
   },
   components: {

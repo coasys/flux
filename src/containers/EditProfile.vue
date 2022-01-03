@@ -76,7 +76,7 @@ export default defineComponent({
       profileBg: "",
       profileBgChanged: false,
       bioChanged: false,
-      hideContainer: false
+      hideContainer: false,
     };
   },
   computed: {
@@ -111,7 +111,7 @@ export default defineComponent({
     },
     profileBg() {
       this.profileBgChanged = this.profileBg !== this.bg;
-    }
+    },
   },
   methods: {
     async updateProfile() {
@@ -128,14 +128,18 @@ export default defineComponent({
       let filteredLinks = await getAgentLinks(this.userDid, userPerspective!);
 
       if (this.profileBgChanged) {
-        const proBgLink = filteredLinks.find(e => e.data.predicate === 'sioc://has_image');
+        const proBgLink = filteredLinks.find(
+          (e) => e.data.predicate === "sioc://has_image"
+        );
 
         if (proBgLink) {
           const link = removeTypeName(proBgLink);
           await ad4mClient.perspective.removeLink(userPerspective!, link);
         }
 
-        filteredLinks = filteredLinks.filter(e => e.data.predicate !== 'sioc://has_image');
+        filteredLinks = filteredLinks.filter(
+          (e) => e.data.predicate !== "sioc://has_image"
+        );
         const image = await ad4mClient.expression.create(
           this.profileBg,
           NOTE_IPFS_EXPRESSION_OFFICIAL
@@ -150,19 +154,22 @@ export default defineComponent({
           })
         );
 
-        filteredLinks.push(profileBgLinked)
+        filteredLinks.push(profileBgLinked);
       }
 
-
       if (this.bioChanged) {
-        const bioLink = filteredLinks.find(e => e.data.predicate === 'sioc://has_bio');
+        const bioLink = filteredLinks.find(
+          (e) => e.data.predicate === "sioc://has_bio"
+        );
 
         if (bioLink) {
           const link = removeTypeName(bioLink);
           await ad4mClient.perspective.removeLink(userPerspective!, link);
         }
-        
-        filteredLinks = filteredLinks.filter(e => e.data.predicate !== 'sioc://has_bio');
+
+        filteredLinks = filteredLinks.filter(
+          (e) => e.data.predicate !== "sioc://has_bio"
+        );
 
         const linked = await ad4mClient.perspective.addLink(
           userPerspective!,
@@ -173,7 +180,7 @@ export default defineComponent({
           })
         );
 
-        filteredLinks.push(linked)
+        filteredLinks.push(linked);
       }
 
       const links = [];

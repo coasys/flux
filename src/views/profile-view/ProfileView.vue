@@ -4,14 +4,12 @@
       :style="{ backgroundImage: `url(${profilebg})` }"
       class="profile__bg"
     />
+
     <div v-if="profile" class="profile">
       <j-flex a="start" direction="column" gap="500">
         <div class="profile__avatar">
           <j-avatar
-            style="
-              --j-avatar-size: 130px;
-              --j-avatar-border: 3px solid var(--j-color-white);
-            "
+            class="avatar"
             :hash="$route.params.did"
             :src="profile.profilePicture"
           />
@@ -24,43 +22,55 @@
           </j-button>
         </div>
       </j-flex>
-      <j-box pt="300" pb="500">
-        <j-text
-          v-if="profile.familyName || profile.givenName"
-          variant="heading-sm"
-        >
-          {{ `${profile.givenName} ${profile.familyName}` }}
-        </j-text>
-        <j-text nomargin size="500" weight="500" color="ui-700">
-          @{{ profile.username }}
-        </j-text>
-      </j-box>
-      <j-box pb="900">
-        <j-text nomargin size="500" color="black"> {{ bio }}</j-text>
-      </j-box>
+      <div class="content">
+        <div>
+          <div class="profile-info">
+            <j-box pb="300">
+              <j-text
+                v-if="profile.familyName || profile.givenName"
+                variant="heading-sm"
+              >
+                {{ `${profile.givenName} ${profile.familyName}` }}
+              </j-text>
+              <j-text nomargin size="500" weight="500" color="ui-700">
+                @{{ profile.username }}
+              </j-text>
+            </j-box>
+            <j-box>
+              <j-text nomargin size="500" color="black" v-if="bio">
+                {{ bio }}</j-text
+              >
+              <j-text nomargin size="500" color="black" v-else>
+                No bio yet</j-text
+              >
+            </j-box>
+          </div>
+        </div>
 
-      <div class="grid">
-        <ProfileCard
-          v-for="link in profileLinks"
-          :key="link.id"
-          :title="link.has_name"
-          :description="link.has_description"
-          :image="link.has_image"
-          :sameAgent="sameAgent"
-          @click="() => onLinkClick(link)"
-          @delete="() => deleteLinks(link.id)"
-          @edit="() => setEditLinkModal(true, link)"
-        />
-        <div
-          class="add"
-          @click="() => (showAddlinkModal = true)"
-          v-if="sameAgent"
-        >
-          <j-icon name="plus" size="xl"></j-icon>
-          <j-text>Add Link</j-text>
+        <div class="grid">
+          <ProfileCard
+            v-for="link in profileLinks"
+            :key="link.id"
+            :title="link.has_name"
+            :description="link.has_description"
+            :image="link.has_image"
+            :sameAgent="sameAgent"
+            @click="() => onLinkClick(link)"
+            @delete="() => deleteLinks(link.id)"
+            @edit="() => setEditLinkModal(true, link)"
+          />
+          <div
+            class="add"
+            @click="() => (showAddlinkModal = true)"
+            v-if="sameAgent"
+          >
+            <j-icon name="plus" size="xl"></j-icon>
+            <j-text>Add Link</j-text>
+          </div>
         </div>
       </div>
     </div>
+
     <div
       class="back"
       @click="() => $router.back()"
@@ -75,6 +85,7 @@
     @toggle="(e) => setAddLinkModal(e.target.open)"
   >
     <ProfileAddLink
+      v-if="showAddlinkModal"
       @submit="() => setAddLinkModal(false)"
       @cancel="() => setAddLinkModal(false)"
     ></ProfileAddLink>
@@ -85,6 +96,7 @@
     @toggle="(e) => setEditLinkModal(e.target.open, editArea)"
   >
     <ProfileEditLink
+      v-if="showEditlinkModal"
       @submit="() => setEditLinkModal(false, editArea)"
       @cancel="() => setEditLinkModal(false, editArea)"
       :area="editArea"
@@ -159,7 +171,7 @@ export default defineComponent({
       profilebg: "",
       joiningLink: "",
       sameAgent: false,
-      editArea: null as any
+      editArea: null as any,
     };
   },
   methods: {
@@ -168,7 +180,7 @@ export default defineComponent({
     },
     setEditLinkModal(value: boolean, area: any): void {
       this.showEditlinkModal = value;
-      console.log('area', area)
+      console.log("area", area);
       this.editArea = area;
     },
     setShowJoinCommunityModal(value: boolean): void {
@@ -312,33 +324,28 @@ export default defineComponent({
       const userStore = useUserStore();
       const me = await ad4mClient.agent.me();
       const userPerspective = userStore.getFluxPerspectiveId;
-      const links = await getAgentLinks(
-        me.did,
-        userPerspective!
-      );
+      const links = await getAgentLinks(me.did, userPerspective!);
 
       const newLinks = [];
 
       for (const link of links) {
-        const newLink = JSON.parse(
-          JSON.stringify(link)
-        );
+        const newLink = JSON.parse(JSON.stringify(link));
         newLink.__typename = undefined;
         newLink.data.__typename = undefined;
         newLink.proof.__typename = undefined;
 
         if (link.data.source === areaName || link.data.target === areaName) {
-          console.log(link)
+          console.log(link);
           await ad4mClient.perspective.removeLink(userPerspective!, newLink);
         } else {
-          newLinks.push(newLink)
+          newLinks.push(newLink);
         }
       }
 
-      this.profileLinks = this.profileLinks.filter(e => e.id !== areaName);
+      this.profileLinks = this.profileLinks.filter((e) => e.id !== areaName);
 
       await ad4mClient.agent.updatePublicPerspective({
-        links: newLinks
+        links: newLinks,
       } as PerspectiveInput);
     },
     ...mapActions(useAppStore, ["setShowEditProfile"]),
@@ -404,6 +411,28 @@ export default defineComponent({
   margin-top: -40px;
 }
 
+.profile-info {
+  padding: var(--j-space-500);
+}
+
+.content {
+  display: grid;
+  padding-top: var(--j-space-800);
+  grid-template-columns: 2fr 5fr;
+  gap: var(--j-space-500);
+}
+
+.avatar {
+  display: block;
+  border-radius: 50%;
+  background: white;
+  padding: 3px;
+  height: 130px;
+  width: 130px;
+  --j-avatar-size: 100%;
+  --j-avatar-border: none;
+}
+
 .add {
   width: 100%;
   height: 100%;
@@ -426,18 +455,6 @@ export default defineComponent({
   display: grid;
   gap: var(--j-space-400);
   grid-template-columns: 1fr;
-}
-
-@media (min-width: 900px) {
-  .grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (min-width: 1200px) {
-  .grid {
-    grid-template-columns: 1fr 1fr 1fr;
-  }
 }
 
 .profile {
