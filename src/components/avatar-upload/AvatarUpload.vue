@@ -46,7 +46,8 @@
 </template>
 
 <script lang="ts">
-import "vue-advanced-cropper/dist/style.css";
+import "vue-advanced-cropper";
+import "vue-advanced-cropper/dist/theme.bubble.css";
 import { defineComponent } from "vue";
 import { Cropper } from "vue-advanced-cropper";
 
@@ -158,5 +159,10 @@ export default defineComponent({
   &__background {
     background: transparent !important;
   }
+}
+
+/* Deep selector inside scoped styles */
+.cropper /deep/ .vue-simple-handler {
+  background: var(--j-color-primary-500) !important;
 }
 </style>
