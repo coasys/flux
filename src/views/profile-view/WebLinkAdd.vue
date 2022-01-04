@@ -1,5 +1,5 @@
 <template>
-  <j-flex direction="column" gap="400" v-if="step === 2" class="steps">
+  <j-flex direction="column" gap="400" class="steps">
     <j-text variant="heading">Add a link to profile</j-text>
     <j-input
       label="Web link"
@@ -8,59 +8,40 @@
       @input="(e) => (link = e.target.value)"
       :error="linkError"
       :errorText="linkErrorMessage"
-      @blur="(e) => validateLink"
-    ></j-input>
-    <j-flex gap="400">
-      <j-button
-        full 
-        style="width: 100%" 
-        size="lg" 
-        @click="area ? $emit('submit') : $emit('changeStep', 1)"
-      >
-        <j-icon slot="start" name="arrow-left-short" />
-        Back
-      </j-button>
-      <j-button
-        style="width: 100%"
-        full
-        :disabled="isAddLink || !canAddLink"
-        :loading="isAddLink"
-        size="lg"
-        variant="primary"
-        @click="addLink"
-      >
-        Next
-        <j-icon slot="end" name="arrow-right-short" />
-      </j-button>
+      @blur="getMeta"
+    >
+    </j-input>
+
+    <j-flex a="center" gap="500">
+      <avatar-upload
+        size="3rem"
+        :value="newProfileImage"
+        @change="(val) => (newProfileImage = val)"
+        icon="camera"
+      />
+      <j-flex style="width: 100%" gap="400" direction="column">
+        <j-input
+          label="Title"
+          size="xl"
+          :value="title"
+          @input="(e) => (title = e.target.value)"
+          :error="titleError"
+          :errorText="titleErrorMessage"
+          @blur="(e) => validateTitle"
+        ></j-input>
+        <j-input
+          label="Description"
+          size="xl"
+          :value="description"
+          @input="(e) => (description = e.target.value)"
+          @keydown.enter="createLink"
+        ></j-input>
+      </j-flex>
     </j-flex>
-  </j-flex>
-  <j-flex direction="column" gap="400" v-if="step === 3" class="steps">
-    <j-text variant="heading">Add a link to profile</j-text>
-    <avatar-upload
-      :value="newProfileImage"
-      @change="(val) => (newProfileImage = val)"
-      icon="camera"
-    />
-    <j-input
-      label="Title"
-      size="xl"
-      :value="title"
-      @input="(e) => (title = e.target.value)"
-      :error="titleError"
-      :errorText="titleErrorMessage"
-      @blur="(e) => validateTitle"
-    ></j-input>
-    <j-input
-      label="Description"
-      size="xl"
-      :value="description"
-      @input="(e) => (description = e.target.value)"
-      @keydown.enter="createLink"
-    ></j-input>
     <j-flex gap="400">
-      <j-button full style="width: 100%" size="lg" @click="$emit('changeStep', 2)">
-        <j-icon slot="start" name="arrow-left-short" />
-        Back
+      <j-button full style="width: 100%" size="lg" @click="$emit('cancel')">
+        <j-icon v-if="!isEditing" slot="start" name="arrow-left-short" />
+        {{ isEditing ? "Cancel" : "Back" }}
       </j-button>
       <j-button
         style="width: 100%"
@@ -72,7 +53,7 @@
         @click="createLink"
       >
         <j-icon slot="end" name="add" />
-        {{area ? 'Edit link' : 'Add link'}}
+        {{ isEditing ? "Save" : "Add link" }}
       </j-button>
     </j-flex>
   </j-flex>
@@ -82,7 +63,6 @@
 import { ad4mClient } from "@/app";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
 import { useAppStore } from "@/store/app";
-import { useDataStore } from "@/store/data";
 import { useUserStore } from "@/store/user";
 import getAgentLinks from "@/utils/getAgentLinks";
 import { useValidation } from "@/utils/validation";
@@ -93,10 +73,10 @@ import { nanoid } from "nanoid";
 import removeTypeName from "@/utils/removeTypeName";
 
 export default defineComponent({
-  props: ['step', 'area'],
-  emits: ["cancel", "submit", "changeStep"],
+  props: ["step", "area", "isEditing"],
+  emits: ["cancel", "submit"],
   components: {
-    AvatarUpload, 
+    AvatarUpload,
   },
   setup() {
     const isAddLink = ref(false);
@@ -143,12 +123,13 @@ export default defineComponent({
         },
         {
           check: (value: string) => {
-            const regex = /[(http(s)?)://(www.)?a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/
+            const regex =
+              /[(http(s)?)://(www.)?a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
 
             return !regex.test(value);
           },
-          message: "Link is invalid"
-        }
+          message: "Link is invalid",
+        },
       ],
     });
 
@@ -179,21 +160,50 @@ export default defineComponent({
   watch: {
     area: {
       handler: function (area) {
-        this.title = area?.has_name ?? '';
-        this.description = area?.has_description ?? '';
-        this.link = area?.has_post ?? '';
-        this.newProfileImage = area?.has_image ?? '';
+        this.title = area?.has_name ?? "";
+        this.description = area?.has_description ?? "";
+        this.link = area?.has_post ?? "";
+        this.newProfileImage = area?.has_image ?? "";
       },
       immediate: true,
       deep: true,
     },
   },
   methods: {
+    async getMeta() {
+      try {
+        const res = await fetch(
+          "http://url-metadata.herokuapp.com/api/metadata?url=" + this.link
+        );
+        const { data } = await res.json();
+        console.log({ data });
+        this.title = data.title;
+        this.description = data.description;
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64data = reader.result;
+          console.log({ base64data });
+          if (base64data) {
+            this.newProfileImage = base64data.toString();
+          }
+        };
+        const { hostname } = new URL(this.link);
+        const image = await fetch(
+          "https://services.keeweb.info/favicon/" + hostname
+        );
+        console.log(image);
+        const blob = await image.blob();
+        console.log(blob);
+        reader.readAsDataURL(blob);
+      } catch (e) {
+        console.log(e);
+      }
+    },
     async createLink() {
       if (this.canCreateLink && !this.isAddLink) {
         this.isAddLink = true;
 
-        const dataStore = useDataStore();
         const userStore = useUserStore();
         const appStore = useAppStore();
         const userPerspective = userStore.getFluxPerspectiveId;
@@ -234,9 +244,11 @@ export default defineComponent({
         }
 
         if (this.area?.id) {
-          const foundLinks = preLinks.filter(e => e.data.source === this.area?.id);
+          const foundLinks = preLinks.filter(
+            (e) => e.data.source === this.area?.id
+          );
 
-          for (const foundLink of foundLinks) {            
+          for (const foundLink of foundLinks) {
             const link = removeTypeName(foundLink);
             await ad4mClient.perspective.removeLink(userPerspective!, link);
           }
@@ -296,9 +308,7 @@ export default defineComponent({
         //Remove __typename fields so the next gql does not fail
         for (const link in newLinks) {
           //Deep copy the object... so we can delete __typename fields inject by apollo client
-          const newLink = JSON.parse(
-            JSON.stringify(newLinks[link])
-          );
+          const newLink = JSON.parse(JSON.stringify(newLinks[link]));
           newLink.__typename = undefined;
           newLink.data.__typename = undefined;
           newLink.proof.__typename = undefined;
@@ -320,16 +330,13 @@ export default defineComponent({
         this.isAddLink = false;
 
         this.$emit("submit");
-        this.$emit("changeStep", 1)
-
       }
     },
     addLink() {
       this.validateLink();
-      this.$emit("changeStep", 3)
     },
-  }
-})
+  },
+});
 </script>
 
 <style scoped>

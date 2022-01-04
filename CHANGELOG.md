@@ -2,6 +2,27 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.2.14] - 04/01/2022
+
+### Added
+ - Use new neighbourhood persistence language that leverages storj + lambda
+ - New language language which leverages CDN + lambda for faster downloads / uploads
+
+### Changed
+ - Improve UI for agent profiles
+
+### Deprecated
+
+### Removed
+
+### Fixed
+ - Bugs with editing / adding links on profile
+ - Bug where languages for community would not be installed after creation
+
+### Security
+
+---
+
 ## [0.2.13] - 14/12/2021
 
 ### Added

@@ -26,6 +26,7 @@ import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta"
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
+import { ad4mClient } from "@/app";
 
 export interface Payload {
   perspectiveName: string;
@@ -74,6 +75,8 @@ export default async ({
       "Response from create shortform exp lang",
       shortFormExpressionLang
     );
+    //Get language after templating to install it
+    ad4mClient.languages.byAddress(shortFormExpressionLang.address);
     //Create group expression language
     const groupExpressionLang = await templateLanguage(
       GROUP_EXPRESSION_OFFICIAL,
@@ -83,6 +86,8 @@ export default async ({
       })
     );
     console.log("Response from create group exp lang", groupExpressionLang);
+    //Get language after templating to install it
+    ad4mClient.languages.byAddress(groupExpressionLang.address);
     //Create profile expression language
     const profileExpressionLang = await templateLanguage(
       PROFILE_EXPRESSION_OFFICIAL,
@@ -92,6 +97,8 @@ export default async ({
       })
     );
     console.log("Response from create profile exp lang", profileExpressionLang);
+    //Get language after templating to install it
+    ad4mClient.languages.byAddress(profileExpressionLang.address);
     const typedExpLangs = [
       {
         languageAddress: shortFormExpressionLang.address!,

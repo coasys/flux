@@ -12,24 +12,26 @@
         >Add Gallery</j-button
       >
     </j-flex>
-    <simple-image-add
-      v-if="linkType === 'simpleArea'"
-      :step="step"
-      @submit="$emit('submit')"
-      @changeStep="(i) => (step = i)"
-    />
-    <community-add
-      v-if="linkType === 'community'"
-      :step="step"
-      @submit="$emit('submit')"
-      @changeStep="(i) => (step = i)"
-    />
-    <web-link-add
-      v-if="linkType === 'webLink'"
-      :step="step"
-      @submit="$emit('submit')"
-      @changeStep="(i) => (step = i)"
-    />
+    <div v-else>
+      <simple-image-add
+        v-if="linkType === 'simpleArea'"
+        @cancel="onGoBack"
+        @submit="onSubmit"
+        @changeStep="(i) => (step = i)"
+      />
+      <community-add
+        v-if="linkType === 'community'"
+        @cancel="onGoBack"
+        @submit="onSubmit"
+        @changeStep="(i) => (step = i)"
+      />
+      <web-link-add
+        v-if="linkType === 'webLink'"
+        @cancel="onGoBack"
+        @submit="onSubmit"
+        @changeStep="(i) => (step = i)"
+      />
+    </div>
   </div>
 </template>
 
@@ -54,6 +56,13 @@ export default defineComponent({
     };
   },
   methods: {
+    onSubmit() {
+      this.step = 1;
+      this.$emit("submit");
+    },
+    onGoBack() {
+      this.step = 1;
+    },
     selectLinkType(type: linkType) {
       this.linkType = type;
       this.step = 2;
@@ -74,8 +83,6 @@ export default defineComponent({
   max-height: 800px;
   height: 100%;
   width: 100%;
-  display: flex;
-  align-content: center;
   padding: var(--j-space-1000);
 }
 
