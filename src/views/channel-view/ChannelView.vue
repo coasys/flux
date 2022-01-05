@@ -11,17 +11,24 @@
     :open="showProfile"
     @toggle="(e) => toggleProfile(e.target.open, activeProfile)"
   >
-    <Profile 
-      :did="activeProfile" 
-      :langAddress="profileLanguage" 
-      @openCompleteProfile="() => handleProfileClick(activeProfile)" 
+    <Profile
+      :did="activeProfile"
+      :langAddress="profileLanguage"
+      @openCompleteProfile="() => handleProfileClick(activeProfile)"
     />
   </j-modal>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import { ChannelState, CommunityState, ExpressionAndRef, ExpressionTypes, ProfileExpression, ProfileWithDID } from "@/store/types";
+import {
+  ChannelState,
+  CommunityState,
+  ExpressionAndRef,
+  ExpressionTypes,
+  ProfileExpression,
+  ProfileWithDID,
+} from "@/store/types";
 import { useDataStore } from "@/store/data";
 import { ad4mClient } from "@/app";
 import { getProfile } from "@/utils/profileHelpers";
@@ -34,7 +41,6 @@ interface MentionTrigger {
   trigger: string;
 }
 
-
 export default defineComponent({
   name: "ChannelView",
   components: {
@@ -42,8 +48,8 @@ export default defineComponent({
   },
   setup() {
     const dataStore = useDataStore();
-    const memberMentions = ref<MentionTrigger[]>([])
-    const activeProfile = ref<any>({})
+    const memberMentions = ref<MentionTrigger[]>([]);
+    const activeProfile = ref<any>({});
     const showProfile = ref(false);
     const bus = useEventEmitter();
 
@@ -53,14 +59,14 @@ export default defineComponent({
       memberMentions,
       activeProfile,
       showProfile,
-      bus
+      bus,
     };
   },
   async mounted() {
     this.script = document.createElement("script");
     this.script.setAttribute("type", "module");
     this.script.innerHTML = `
-      import ChatView from 'file:///home/fayeed/dev/perspective-views/packages/mini-chat-view/dist/main.js';
+      import ChatView from 'file:///Users/leifriksheim/Apps/perspective-views/packages/mini-chat-view/dist/main.js';
       if(customElements.get('chat-view') === undefined) 
         customElements.define("chat-view", ChatView);
     `;
@@ -72,12 +78,20 @@ export default defineComponent({
   },
   beforeRouteUpdate(to, from, next) {
     const editor = document.getElementsByTagName("footer")[0];
-    (editor?.getElementsByTagName('j-flex')[0]?.querySelector("emoji-picker") as any)?.database.close();
+    (
+      editor
+        ?.getElementsByTagName("j-flex")[0]
+        ?.querySelector("emoji-picker") as any
+    )?.database.close();
     next();
   },
   beforeRouteLeave(to, from, next) {
     const editor = document.getElementsByTagName("footer")[0];
-    (editor?.getElementsByTagName('j-flex')[0]?.querySelector("emoji-picker") as any)?.database.close();
+    (
+      editor
+        ?.getElementsByTagName("j-flex")[0]
+        ?.querySelector("emoji-picker") as any
+    )?.database.close();
     next();
   },
   computed: {
@@ -138,9 +152,15 @@ export default defineComponent({
       if (did === me.did) {
         this.$router.push({ name: "home", params: { did } });
       } else {
-        this.$router.push({ name: "profile", params: { did, communityId: this.community.neighbourhood.perspective.uuid } });
+        this.$router.push({
+          name: "profile",
+          params: {
+            did,
+            communityId: this.community.neighbourhood.perspective.uuid,
+          },
+        });
       }
     },
-  }
+  },
 });
 </script>
