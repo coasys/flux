@@ -1,10 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
 import { createProfile } from "@/core/methods/createProfile";
-import { createExpression } from "@/core/mutations/createExpression";
-import { templateLanguage } from "@/core/mutations/templateLanguage";
-import { createNeighbourhood } from "@/core/mutations/createNeighbourhood";
-import { addPerspective } from "@/core/mutations/addPerspective";
-import { createLink } from "@/core/mutations/createLink";
 import {
   SOCIAL_CONTEXT_OFFICIAL,
   GROUP_EXPRESSION_OFFICIAL,
@@ -21,7 +16,7 @@ import {
   CommunityState,
   FeedType,
 } from "@/store/types";
-import { Perspective } from "@perspect3vism/ad4m";
+import { Perspective, PerspectiveHandle } from "@perspect3vism/ad4m";
 import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
@@ -48,29 +43,33 @@ export default async ({
   try {
     const creatorDid = userStore.getUser?.agent.did || "";
 
-    const createSourcePerspective = await addPerspective(perspectiveName);
+    const createSourcePerspective = await ad4mClient.perspective.add(
+      perspectiveName
+    ) as PerspectiveHandle;
     console.log("Created source perspective", createSourcePerspective);
 
     //Get the variables that we need to create new unique languages
     const uid = uuidv4().toString();
 
     //Create unique social-context
-    const socialContextLang = await templateLanguage(
-      SOCIAL_CONTEXT_OFFICIAL,
-      JSON.stringify({
-        uid: uid,
-        name: `${perspectiveName}-social-context`,
-      })
-    );
+    const socialContextLang =
+      await ad4mClient.languages.applyTemplateAndPublish(
+        SOCIAL_CONTEXT_OFFICIAL,
+        JSON.stringify({
+          uid: uid,
+          name: `${perspectiveName}-social-context`,
+        })
+      );
     console.log("Response from create social-context", socialContextLang);
     //Create shortform expression language
-    const shortFormExpressionLang = await templateLanguage(
-      SHORTFORM_EXPRESSION_OFFICIAL,
-      JSON.stringify({
-        uid: uid,
-        name: `${perspectiveName}-shortform-expression`,
-      })
-    );
+    const shortFormExpressionLang =
+      await ad4mClient.languages.applyTemplateAndPublish(
+        SHORTFORM_EXPRESSION_OFFICIAL,
+        JSON.stringify({
+          uid: uid,
+          name: `${perspectiveName}-shortform-expression`,
+        })
+      );
     console.log(
       "Response from create shortform exp lang",
       shortFormExpressionLang
@@ -78,24 +77,26 @@ export default async ({
     //Get language after templating to install it
     ad4mClient.languages.byAddress(shortFormExpressionLang.address);
     //Create group expression language
-    const groupExpressionLang = await templateLanguage(
-      GROUP_EXPRESSION_OFFICIAL,
-      JSON.stringify({
-        uid: uid,
-        name: `${perspectiveName}-group-expression`,
-      })
-    );
+    const groupExpressionLang =
+      await ad4mClient.languages.applyTemplateAndPublish(
+        GROUP_EXPRESSION_OFFICIAL,
+        JSON.stringify({
+          uid: uid,
+          name: `${perspectiveName}-group-expression`,
+        })
+      );
     console.log("Response from create group exp lang", groupExpressionLang);
     //Get language after templating to install it
     ad4mClient.languages.byAddress(groupExpressionLang.address);
     //Create profile expression language
-    const profileExpressionLang = await templateLanguage(
-      PROFILE_EXPRESSION_OFFICIAL,
-      JSON.stringify({
-        uid: uid,
-        name: `${perspectiveName}-profile-expression`,
-      })
-    );
+    const profileExpressionLang =
+      await ad4mClient.languages.applyTemplateAndPublish(
+        PROFILE_EXPRESSION_OFFICIAL,
+        JSON.stringify({
+          uid: uid,
+          name: `${perspectiveName}-profile-expression`,
+        })
+      );
     console.log("Response from create profile exp lang", profileExpressionLang);
     //Get language after templating to install it
     ad4mClient.languages.byAddress(profileExpressionLang.address);
@@ -122,7 +123,7 @@ export default async ({
       typedExpLangs
     );
     const meta = new Perspective(metaLinks);
-    const neighbourhood = await createNeighbourhood(
+    const neighbourhood = await ad4mClient.neighbourhood.publishFromPerspective(
       createSourcePerspective.uuid,
       socialContextLang.address,
       meta
@@ -133,31 +134,37 @@ export default async ({
     //await sleep(10000);
 
     //Create link denoting type of community
-    const addLink = await createLink(createSourcePerspective.uuid!, {
-      source: `${neighbourhood}://self`,
-      target: "sioc://community",
-      predicate: "rdf://type",
-    });
+    const addLink = await ad4mClient.perspective.addLink(
+      createSourcePerspective.uuid!,
+      {
+        source: `${neighbourhood}://self`,
+        target: "sioc://community",
+        predicate: "rdf://type",
+      }
+    );
     console.log("Added typelink with response", addLink);
 
     //Create the group expression
-    const createExp = await createExpression(
-      groupExpressionLang.address!,
-      JSON.stringify({
+    const createExp = await ad4mClient.expression.create(
+      {
         name: perspectiveName,
         description: description,
         image: image,
         thumbnail: thumbnail,
-      })
+      },
+      groupExpressionLang.address!
     );
     console.log("Created group expression with response", createExp);
 
     //Create link between perspective and group expression
-    const addGroupExpLink = await createLink(createSourcePerspective.uuid!, {
-      source: `${neighbourhood}://self`,
-      target: createExp,
-      predicate: "rdf://class",
-    });
+    const addGroupExpLink = await ad4mClient.perspective.addLink(
+      createSourcePerspective.uuid!,
+      {
+        source: `${neighbourhood}://self`,
+        target: createExp,
+        predicate: "rdf://class",
+      }
+    );
     console.log(
       "Created group expression link",
       addGroupExpLink,
@@ -170,11 +177,14 @@ export default async ({
     );
 
     //Create link between perspective and group expression
-    const addProfileLink = await createLink(createSourcePerspective.uuid!, {
-      source: `${neighbourhood}://self`,
-      target: createProfileExpression,
-      predicate: MEMBER,
-    });
+    const addProfileLink = await ad4mClient.perspective.addLink(
+      createSourcePerspective.uuid!,
+      {
+        source: `${neighbourhood}://self`,
+        target: createProfileExpression,
+        predicate: MEMBER,
+      }
+    );
     console.log("Created profile expression link", addProfileLink);
 
     const myDid = userStore.getUser!.agent.did!;

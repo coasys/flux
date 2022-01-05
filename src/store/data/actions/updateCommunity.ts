@@ -1,5 +1,4 @@
-import { createExpression } from "@/core/mutations/createExpression";
-import { createLink } from "@/core/mutations/createLink";
+import { ad4mClient } from "@/app";
 import { useAppStore } from "@/store/app";
 
 import { ExpressionTypes } from "@/store/types";
@@ -33,9 +32,9 @@ export default async function updateCommunity({
 
     if (groupExpressionLang != undefined) {
       console.log("Found group exp lang", groupExpressionLang);
-      const groupExpression = await createExpression(
-        groupExpressionLang.languageAddress,
-        JSON.stringify({ name, description, image, thumbnail })
+      const groupExpression = await ad4mClient.expression.create(
+        { name, description, image, thumbnail },
+        groupExpressionLang.languageAddress
       );
 
       console.log(
@@ -43,7 +42,7 @@ export default async function updateCommunity({
         groupExpression
       );
 
-      const addGroupExpLink = await createLink(
+      const addGroupExpLink = await ad4mClient.perspective.addLink(
         community.neighbourhood.perspective.uuid,
         {
           source: `${community.neighbourhood.neighbourhoodUrl}://self`,

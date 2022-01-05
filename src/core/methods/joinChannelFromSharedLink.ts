@@ -1,14 +1,14 @@
 import { ChannelState, FeedType, MembraneType } from "@/store/types";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
 import { getMetaFromNeighbourhood } from "./getMetaFromNeighbourhood";
-import { joinNeighbourhood } from "../mutations/joinNeighbourhood";
+import { ad4mClient } from "@/app";
 
 export async function joinChannelFromSharedLink(
   url: string,
   parentPerspectiveUUID: string
 ): Promise<ChannelState> {
   console.log("Starting sharedperspective join");
-  const neighbourhood = await joinNeighbourhood(url);
+  const neighbourhood = await ad4mClient.neighbourhood.joinFromUrl(url);
   console.log(new Date(), "Joined neighbourhood with result", neighbourhood);
 
   const typedExpressionLanguages = await getTypedExpressionLanguages(

@@ -1,4 +1,4 @@
-import { getLanguage } from "@/core/queries/getLanguage";
+import { ad4mClient } from "@/app";
 import { FluxExpressionReference, ExpressionTypes } from "@/store/types";
 import { LinkExpression } from "@perspect3vism/ad4m";
 
@@ -10,7 +10,9 @@ export async function getTypedExpressionLanguages(
   //And used returned expression language names to populate typedExpressionLanguages field
   for (const link of links) {
     if (link.data.predicate == "language") {
-      const languageRes = await getLanguage(link.data.target!);
+      const languageRes = await ad4mClient.languages.byAddress(
+        link.data.target!
+      );
       if (!languageRes) {
         throw Error(
           `Could not find language with address: ${link.data.target}`
