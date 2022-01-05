@@ -1,8 +1,6 @@
 <template>
   <chat-view
     :perspective-uuid="channel.neighbourhood.perspective.uuid"
-    :members="JSON.stringify(memberMentions)"
-    :channels="JSON.stringify(channelMentions)"
   ></chat-view>
   <j-modal
     size="xs"
@@ -56,16 +54,14 @@ export default defineComponent({
     };
   },
   async mounted() {
-    this.bus.bus.addEventListener('pv-member-click', ({ detail }: any) => {
-      const { did } = detail;
-      this.toggleProfile(true, did);
+    this.bus.bus.addEventListener('agent-click', ({ detail }: any) => {
+      this.toggleProfile(true, detail);
     });
 
-    this.bus.bus.addEventListener('pv-channel-click', ({ detail }: any) => {
-      const { id } = detail;
 
+    this.bus.bus.addEventListener('perspective-click', ({ detail }: any) => {
       let channelId =
-        this.dataStore.getChannelByNeighbourhoodUrl(id)?.neighbourhood
+        this.dataStore.getChannelByNeighbourhoodUrl(detail)?.neighbourhood
           .perspective.uuid;
 
       if (channelId) {
@@ -78,6 +74,15 @@ export default defineComponent({
         });
       }
     });
+
+    this.bus.bus.addEventListener('hide-notification-indicator', ({ detail }: any) => {
+      console.log('isAtBottom 1', detail)
+      this.dataStore.setHasNewMessages({
+        channelId: detail,
+        value: false,
+      });
+    });
+
 
     this.script = document.createElement("script");
     this.script.setAttribute("type", "module");
@@ -102,41 +107,6 @@ export default defineComponent({
     (editor?.getElementsByTagName('j-flex')[0]?.querySelector("emoji-picker") as any)?.database.close();
     next();
   },
-  watch: {
-    channel: {
-      handler: async function () {
-        const profiles = await Promise.all(
-          this.community.neighbourhood.members.map(
-            async (did: string): Promise<ProfileWithDID | null> => {
-              return await getProfile(this.profileLanguage, did)
-            }
-          )
-        );
-
-        console.log('profiles', profiles)
-
-        const filteredProfiles = profiles.filter(
-          (profile) => profile !== null
-        ) as ProfileWithDID[];
-
-        console.log('profiles', filteredProfiles)
-
-        const mentions = filteredProfiles.map((user: ProfileWithDID) => {
-          return {
-            label: user.username,
-            //todo: this should not be replaced, we want the full did identifier in the mentions in case message is consumed by another application
-            id: user.did,
-            trigger: "@",
-          } as MentionTrigger;
-        });
-
-        console.log('profiles', mentions)
-
-        this.memberMentions = mentions;
-      },
-      immediate: true,
-    },
-  },
   computed: {
     community(): CommunityState {
       const { communityId } = this.$route.params;
@@ -145,28 +115,6 @@ export default defineComponent({
     channel(): ChannelState {
       const { channelId } = this.$route.params;
       return this.dataStore.getChannel(channelId as string);
-    },
-    channelMentions(): MentionTrigger[] {
-      return this.dataStore
-        .getChannelNeighbourhoods(this.community.neighbourhood.perspective.uuid)
-        .map((channel: any) => {
-          if (
-            channel.neighbourhoodUrl ===
-            this.community.neighbourhood.neighbourhoodUrl
-          ) {
-            return {
-              label: "Home",
-              id: channel.neighbourhoodUrl,
-              trigger: "#",
-            } as MentionTrigger;
-          } else {
-            return {
-              label: channel.name,
-              id: channel.neighbourhoodUrl,
-              trigger: "#",
-            } as MentionTrigger;
-          }
-        });
     },
     profileLanguage(): string {
       const profileLang =
