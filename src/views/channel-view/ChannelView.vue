@@ -1,6 +1,9 @@
 <template>
   <chat-view
     :perspective-uuid="channel.neighbourhood.perspective.uuid"
+    @agent-click="onAgentClick"
+    @perspective-click="onPerspectiveClick"
+    @hide-notification-indicator="onHideNotificationIndicator"
   ></chat-view>
   <j-modal
     size="xs"
@@ -54,36 +57,6 @@ export default defineComponent({
     };
   },
   async mounted() {
-    this.bus.bus.addEventListener('agent-click', ({ detail }: any) => {
-      this.toggleProfile(true, detail);
-    });
-
-
-    this.bus.bus.addEventListener('perspective-click', ({ detail }: any) => {
-      let channelId =
-        this.dataStore.getChannelByNeighbourhoodUrl(detail)?.neighbourhood
-          .perspective.uuid;
-
-      if (channelId) {
-        this.$router.push({
-          name: "channel",
-          params: {
-            channelId: channelId,
-            communityId: this.community.neighbourhood.perspective.uuid,
-          },
-        });
-      }
-    });
-
-    this.bus.bus.addEventListener('hide-notification-indicator', ({ detail }: any) => {
-      console.log('isAtBottom 1', detail)
-      this.dataStore.setHasNewMessages({
-        channelId: detail,
-        value: false,
-      });
-    });
-
-
     this.script = document.createElement("script");
     this.script.setAttribute("type", "module");
     this.script.innerHTML = `
@@ -125,6 +98,30 @@ export default defineComponent({
     },
   },
   methods: {
+    onAgentClick({ detail }: any) {
+      this.toggleProfile(true, detail);
+    },
+    onPerspectiveClick({ detail }: any) {
+      let channelId =
+        this.dataStore.getChannelByNeighbourhoodUrl(detail)?.neighbourhood
+          .perspective.uuid;
+
+      if (channelId) {
+        this.$router.push({
+          name: "channel",
+          params: {
+            channelId: channelId,
+            communityId: this.community.neighbourhood.perspective.uuid,
+          },
+        });
+      }
+    },
+    onHideNotificationIndicator({ detail }: any) {
+      this.dataStore.setHasNewMessages({
+        channelId: detail,
+        value: false,
+      });
+    },
     toggleProfile(open: boolean, did?: any): void {
       if (!open) {
         this.activeProfile = undefined;
