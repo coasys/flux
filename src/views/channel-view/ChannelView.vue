@@ -66,7 +66,7 @@ export default defineComponent({
     this.script = document.createElement("script");
     this.script.setAttribute("type", "module");
     this.script.innerHTML = `
-      import ChatView from 'file:///Users/leifriksheim/Apps/perspective-views/packages/mini-chat-view/dist/main.js';
+      import ChatView from 'https://unpkg.com/@junto-foundation/chat-view';
       if(customElements.get('chat-view') === undefined) 
         customElements.define("chat-view", ChatView);
     `;
