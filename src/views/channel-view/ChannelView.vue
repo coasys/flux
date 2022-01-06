@@ -113,12 +113,11 @@ export default defineComponent({
   },
   methods: {
     onAgentClick({ detail }: any) {
-      this.toggleProfile(true, detail);
+      this.toggleProfile(true, detail.did);
     },
     onPerspectiveClick({ detail }: any) {
-      let channelId =
-        this.dataStore.getChannelByNeighbourhoodUrl(detail)?.neighbourhood
-          .perspective.uuid;
+      let channelId = this.dataStore.getChannelByNeighbourhoodUrl(detail.uuid)
+        ?.neighbourhood.perspective.uuid;
 
       if (channelId) {
         this.$router.push({
@@ -132,7 +131,7 @@ export default defineComponent({
     },
     onHideNotificationIndicator({ detail }: any) {
       this.dataStore.setHasNewMessages({
-        channelId: detail,
+        channelId: detail.uuid,
         value: false,
       });
     },
