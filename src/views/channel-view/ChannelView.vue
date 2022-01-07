@@ -1,6 +1,7 @@
 <template>
   <chat-view
     :perspective-uuid="channel.neighbourhood.perspective.uuid"
+    :source-perspective-uuid="community.neighbourhood.perspective.uuid"
     @agent-click="onAgentClick"
     @perspective-click="onPerspectiveClick"
     @hide-notification-indicator="onHideNotificationIndicator"
@@ -66,7 +67,7 @@ export default defineComponent({
     this.script = document.createElement("script");
     this.script.setAttribute("type", "module");
     this.script.innerHTML = `
-      import ChatView from 'https://unpkg.com/@junto-foundation/chat-view';
+      import ChatView from 'file:///home/fayeed/dev/perspective-views/packages/mini-chat-view/dist/main.js';
       if(customElements.get('chat-view') === undefined) 
         customElements.define("chat-view", ChatView);
     `;
