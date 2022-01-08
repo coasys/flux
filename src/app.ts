@@ -27,6 +27,7 @@ export const apolloClient = new ApolloClient({
     },
     query: {
       errorPolicy: "all",
+      fetchPolicy: "no-cache",
     },
   },
 });
