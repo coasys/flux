@@ -61,7 +61,7 @@ export async function createChannel({
   console.debug("Create a neighbourhood with result", neighbourhood);
 
   const channelLink = new Link({
-    source: `${sourcePerspective.sharedUrl}://self`,
+    source: sourcePerspective.sharedUrl!,
     target: neighbourhood,
     predicate: "sioc://has_space",
   });
@@ -76,13 +76,24 @@ export async function createChannel({
 
   //Add link on channel social context declaring type
   const addChannelTypeLink = await createLink(perspective.uuid, {
-    source: `${neighbourhood}://self`,
+    source: neighbourhood,
     target: "sioc://space",
     predicate: "rdf://type",
   });
   console.log(
     "Added link on channel social-context with result",
     addChannelTypeLink
+  );
+
+  //Add link on channel social context declaring type
+  const addSourceNeighbourhoodLink = await createLink(perspective.uuid, {
+    source: neighbourhood,
+    target: sourcePerspective.sharedUrl!,
+    predicate: "flux://parentCommunity",
+  });
+  console.log(
+    "Added link on channel pointing to parent neighbourhood",
+    addSourceNeighbourhoodLink
   );
 
   return {
