@@ -9,6 +9,7 @@ import updateCommunity from "./updateCommunity";
 import showMessageNotification from "./showMessageNotification";
 import fetchNeighbourhoodMembers from "./fetchNeighbourhoodMembers";
 import fetchNeighbourhoodMetadata from "./fetchNeighbourhoodMetadata";
+import joinChannelNeighbourhood from "./joinChannelNeighbourhood";
 
 export default {
   createChannel,
@@ -22,4 +23,5 @@ export default {
   showMessageNotification,
   fetchNeighbourhoodMembers,
   fetchNeighbourhoodMetadata,
+  joinChannelNeighbourhood,
 };
