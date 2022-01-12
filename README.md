@@ -8,6 +8,15 @@ Node version: 14.16.0<br>
 ## Project setup
 This project requires nix for building holochain! You can download nix here: https://nixos.wiki/wiki/Nix_Installation_Guide
 
+Once Nix is installed it also recommended to use the holochain cachix, this can be enabled with the following commands:
+
+```
+nix-env -iA cachix -f https://cachix.org/api/v1/install
+cachix use holochain-ci
+```
+
+Installing dependencies for flux and compiling holochain can be done with:
+
 ```
 npm install && npm run get-languages && npm run build-holochain
 ```
