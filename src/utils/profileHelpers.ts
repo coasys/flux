@@ -1,6 +1,9 @@
 import { getExpressionNoCache } from "@/core/queries/getExpression";
 import { ProfileExpression, ProfileWithDID } from "@/store/types";
 import { Profile } from "@/store/types";
+
+import getByDid from "@/core/queries/getByDid";
+
 import {
   ACCOUNT_NAME,
   EMAIL,
@@ -54,39 +57,23 @@ export function parseProfile(data: ProfileExpression): Profile {
 }
 
 export async function getProfile(
-  profileLangAddress: string,
+  test: string,
   did: string
 ): Promise<ProfileWithDID | null> {
-  const profileRef = `${profileLangAddress}://${did}`;
+  const agent = await getByDid(did);
 
-  const profileExp = await profileCache.get(profileRef);
+  const links = agent?.perspective?.links;
 
-  if (!profileExp) {
-    console.warn(
-      "Did not get profile expression from cache, calling holochain"
-    );
-    const profileGqlExp = await getExpressionNoCache(profileRef);
+  console.log(links);
 
-    if (profileGqlExp) {
-      const exp = {
-        author: profileGqlExp.author!,
-        data: JSON.parse(profileGqlExp.data),
-        timestamp: profileGqlExp.timestamp!,
-        proof: profileGqlExp.proof!,
-      } as ProfileExpression;
-
-      await profileCache.set(profileRef, exp);
-      return {
-        did,
-        ...parseProfile(exp.data.profile),
-      };
-    } else {
-      return null;
-    }
-  } else {
-    return {
-      did,
-      ...parseProfile(profileExp.data.profile),
-    };
-  }
+  return {
+    did: did,
+    username: "test",
+    email: "",
+    givenName: "",
+    familyName: "",
+    profilePicture: "",
+    thumbnailPicture: "",
+    bio: "",
+  };
 }

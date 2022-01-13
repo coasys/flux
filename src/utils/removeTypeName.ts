@@ -1,8 +1,7 @@
 export default function removeTypeName(link: any) {
   const newLink = JSON.parse(JSON.stringify(link));
-  newLink.__typename = undefined;
-  newLink.data.__typename = undefined;
-  newLink.proof.__typename = undefined;
-
+  delete newLink.__typename;
+  delete newLink.data.__typename;
+  delete newLink.proof.__typename;
   return newLink;
 }

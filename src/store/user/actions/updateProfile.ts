@@ -1,11 +1,54 @@
 import { createProfile } from "@/core/methods/createProfile";
 import { getExpression } from "@/core/queries/getExpression";
+import getSnapshotByUUID from "@/core/queries/getSnapshotByUUID";
+import {
+  Link,
+  LinkExpression,
+  PerspectiveInput,
+  linkEqual,
+} from "@perspect3vism/ad4m";
 
 import { ExpressionTypes, Profile, ProfileExpression } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "..";
 import { useDataStore } from "@/store/data";
 import { profileCache } from "@/app";
+import getAgentLinks from "@/utils/getAgentLinks";
+import { ad4mClient } from "@/app";
+import { link } from "original-fs";
+import getByDid from "@/core/queries/getByDid";
+import removeTypeName from "@/utils/removeTypeName";
+
+function getProfileLinks(links: LinkExpression[]) {
+  return {
+    username: links.find((l) => l.data.predicate === "sioc://username"),
+  };
+}
+
+function createProfileLinks(user: any) {
+  return {
+    username: new Link({
+      source: "flux://profile",
+      target: user.username,
+      predicate: "sioc://username",
+    }),
+  };
+}
+
+function updateProfileLinks(oldLinks: any, newLinks: any, uuid: string) {
+  Object.keys(newLinks).map((key) => {
+    const newLink = newLinks[key];
+    const oldLink = removeTypeName(oldLinks[key]);
+
+    if (oldLink) {
+      ad4mClient.perspective.updateLink(uuid, oldLink, newLink);
+    } else if (linkEqual(oldLink, newLink)) {
+      return;
+    } else {
+      ad4mClient.perspective.addLink(uuid, newLink);
+    }
+  });
+}
 
 export interface Payload {
   username?: string;
@@ -21,55 +64,29 @@ export default async (payload: Payload): Promise<void> => {
 
   const currentProfile = userStore.getProfile;
   const newProfile = {
-    username: payload.username || currentProfile?.username,
-    email: currentProfile?.email,
-    givenName: currentProfile?.givenName,
-    familyName: currentProfile?.familyName,
-    profilePicture: payload.profilePicture || currentProfile?.profilePicture,
-    thumbnailPicture: payload.thumbnail || currentProfile?.thumbnailPicture,
+    ...currentProfile,
+    ...payload,
   } as Profile;
+
   userStore.setUserProfile(newProfile);
 
   try {
-    const neighbourhoods = Object.values(dataStore.getCommunityNeighbourhoods);
+    const userPerspectiveId = userStore.getFluxPerspectiveId!;
 
-    for (const neighbourhood of neighbourhoods) {
-      const profileLanguage = (
-        neighbourhood as any
-      ).typedExpressionLanguages.find(
-        (t: any) => t.expressionType == ExpressionTypes.ProfileExpression
-      );
-      const profileRef = `${
-        profileLanguage!.languageAddress
-      }://${userStore.getUser!.agent.did!}`;
+    const perspective = await ad4mClient.perspective.snapshotByUUID(
+      userPerspectiveId
+    );
 
-      console.log("profileLanguage: ", profileLanguage);
+    const links: any = perspective?.links || [];
 
-      if (profileLanguage) {
-        const exp = await createProfile(
-          profileLanguage.languageAddress,
-          newProfile
-        );
+    const oldProfileLinks = getProfileLinks(links);
+    const newProfileLinks = createProfileLinks(newProfile);
 
-        console.log("Created new profileExpression: ", exp);
-
-        const expressionGql = await getExpression(exp);
-        const profileExp = {
-          author: expressionGql.author!,
-          data: JSON.parse(expressionGql.data!),
-          timestamp: expressionGql.timestamp!,
-          proof: expressionGql.proof!,
-        } as ProfileExpression;
-        await profileCache.set(profileRef, profileExp);
-      } else {
-        const errorMessage =
-          "Expected to find profile expression language for this community";
-        appStore.showDangerToast({
-          message: errorMessage,
-        });
-        throw Error(errorMessage);
-      }
-    }
+    updateProfileLinks(
+      oldProfileLinks,
+      newProfileLinks,
+      userStore.getFluxPerspectiveId!
+    );
   } catch (e) {
     appStore.showDangerToast({
       message: e.message,

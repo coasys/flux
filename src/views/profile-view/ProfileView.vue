@@ -118,6 +118,7 @@
     @toggle="(e) => setShowEditProfile(e.target.open)"
   >
     <edit-profile
+      v-if="modals.showEditProfile"
       @submit="() => setShowEditProfile(false)"
       @cancel="() => setShowEditProfile(false)"
       :bg="profilebg"
