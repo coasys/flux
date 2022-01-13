@@ -60,15 +60,11 @@ export async function createChannel({
   );
   console.debug("Create a neighbourhood with result", neighbourhood);
 
-  const channelLink = new Link({
+  const addLinkToChannel = await createLink(sourcePerspective.uuid, {
     source: sourcePerspective.sharedUrl!,
     target: neighbourhood,
     predicate: "sioc://has_space",
   });
-  const addLinkToChannel = await createLink(
-    sourcePerspective.uuid,
-    channelLink
-  );
   console.debug(
     "Created new link on source social-context with result",
     addLinkToChannel
