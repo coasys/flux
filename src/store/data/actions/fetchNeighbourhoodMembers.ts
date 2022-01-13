@@ -12,7 +12,7 @@ export default async function (id: string): Promise<void> {
   const memberLinks = await ad4mClient.perspective.queryLinks(
     id,
     new LinkQuery({
-      source: `${neighbourhood.neighbourhoodUrl!}://self`,
+      source: neighbourhood.neighbourhoodUrl!,
       predicate: MEMBER,
     })
   );

@@ -32,7 +32,7 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
       variables: {
         uuid: community.neighbourhood.perspective.uuid,
         query: new LinkQuery({
-          source: `${community.neighbourhood.neighbourhoodUrl}://self`,
+          source: community.neighbourhood.neighbourhoodUrl,
           predicate: "rdf://class",
         }),
       },

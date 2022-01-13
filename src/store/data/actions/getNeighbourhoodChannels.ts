@@ -26,7 +26,7 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
       variables: {
         uuid: community.neighbourhood.perspective.uuid,
         query: new LinkQuery({
-          source: `${community.neighbourhood.neighbourhoodUrl}://self`,
+          source: community.neighbourhood.neighbourhoodUrl,
           predicate: "sioc://has_space",
         }),
       },
@@ -42,6 +42,8 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
       //Check that no other worker callback is executing
       try {
         const channelLinks = e.data.perspectiveQueryLinks;
+
+      console.log(channelLinks);
 
         for (let i = 0; i < channelLinks.length; i++) {
           //Check that the channel is not in the store

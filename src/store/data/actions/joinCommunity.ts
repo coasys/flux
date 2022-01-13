@@ -57,7 +57,7 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
 
         //Create link between perspective and group expression
         const addProfileLink = await createLink(neighbourhood.uuid, {
-          source: `${neighbourhood.sharedUrl}://self`,
+          source: neighbourhood.sharedUrl,
           target: createProfileExpression,
           predicate: MEMBER,
         } as Link);
