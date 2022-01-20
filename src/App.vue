@@ -144,18 +144,7 @@ export default defineComponent({
       perspective: string
     ) => {
       console.debug("GOT INCOMING MESSAGE SIGNAL", link, perspective);
-      if (link.data!.predicate! === EXPRESSION) {
-        expressionWorker.postMessage({
-          id: link.data!.target!,
-          retry: expressionGetRetries,
-          callbackData: { perspective, link },
-          interval: expressionGetDelayMs,
-          query: print(GET_EXPRESSION),
-          variables: { url: link.data!.target! },
-          name: "Expression signal get",
-          dataKey: "expression",
-        });
-      } else if (link.data!.predicate! === MEMBER) {
+      if (link.data!.predicate! === MEMBER) {
         const did = link.data!.target!.split("://")[1];
         console.log("Got new member in signal! Parsed out did: ", did);
         if (did) {
