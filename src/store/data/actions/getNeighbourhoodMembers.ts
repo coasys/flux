@@ -33,7 +33,7 @@ export default async function (id: string): Promise<Worker> {
         variables: {
           uuid: id,
           query: new LinkQuery({
-            source: `${neighbourhood.neighbourhoodUrl!}://self`,
+            source: neighbourhood.neighbourhoodUrl!,
             predicate: MEMBER,
           }),
         },

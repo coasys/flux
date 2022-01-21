@@ -9,10 +9,11 @@
       <j-text
         v-if="profile.familyName || profile.givenName"
         variant="heading-sm"
+        nomargin
       >
-        {{ `${profile.familyName} ${profile.givenName}` }}</j-text
-      >
-      <j-text variant="heading-sm"> {{ profile.username }}</j-text>
+        {{ `${profile.givenName} ${profile.familyName}` }}
+      </j-text>
+      <j-text variant="body"> @{{ profile.username }}</j-text>
       <j-text v-if="bio" variant="subheading"> {{ bio }}</j-text>
       <j-button @click="() => $emit('openCompleteProfile')">
         View complete profile

@@ -134,7 +134,7 @@ export default async ({
 
     //Create link denoting type of community
     const addLink = await createLink(createSourcePerspective.uuid!, {
-      source: `${neighbourhood}://self`,
+      source: neighbourhood,
       target: "sioc://community",
       predicate: "rdf://type",
     });
@@ -154,7 +154,7 @@ export default async ({
 
     //Create link between perspective and group expression
     const addGroupExpLink = await createLink(createSourcePerspective.uuid!, {
-      source: `${neighbourhood}://self`,
+      source: neighbourhood,
       target: createExp,
       predicate: "rdf://class",
     });
@@ -171,7 +171,7 @@ export default async ({
 
     //Create link between perspective and group expression
     const addProfileLink = await createLink(createSourcePerspective.uuid!, {
-      source: `${neighbourhood}://self`,
+      source: neighbourhood,
       target: createProfileExpression,
       predicate: MEMBER,
     });

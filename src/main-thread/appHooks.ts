@@ -130,6 +130,7 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
               },
             ],
             neighbourhoods: [],
+            perspectives: []
           },
           appBuiltInLangs: ["direct-message-language", "lang-note-ipfs"],
           appLangAliases: null,

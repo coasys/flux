@@ -19,12 +19,12 @@ export async function getLinks(
 
 export function getChatChannelLinks(
   perspectiveUUID: string,
-  linkLanguageAddress: string
+  neighbourhoodUrl: string
 ): Promise<LinkExpression[]> {
   return getLinks(
     perspectiveUUID,
     new LinkQuery({
-      source: `${linkLanguageAddress}://self`,
+      source: neighbourhoodUrl,
       predicate: "sioc://has_space",
     })
   );
@@ -32,12 +32,12 @@ export function getChatChannelLinks(
 
 export function getGroupExpressionLinks(
   perspectiveUUID: string,
-  linkLanguageAddress: string
+  neighbourhoodUrl: string
 ): Promise<LinkExpression[]> {
   return getLinks(
     perspectiveUUID,
     new LinkQuery({
-      source: `${linkLanguageAddress}://self`,
+      source: neighbourhoodUrl,
       predicate: "rdf://class",
     })
   );

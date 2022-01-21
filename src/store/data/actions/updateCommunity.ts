@@ -46,7 +46,7 @@ export default async function updateCommunity({
       const addGroupExpLink = await createLink(
         community.neighbourhood.perspective.uuid,
         {
-          source: `${community.neighbourhood.neighbourhoodUrl}://self`,
+          source: community.neighbourhood.neighbourhoodUrl,
           target: groupExpression,
           predicate: "rdf://class",
         }
