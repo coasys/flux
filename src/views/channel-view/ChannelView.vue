@@ -22,17 +22,9 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import {
-  ChannelState,
-  CommunityState,
-  ExpressionAndRef,
-  ExpressionTypes,
-  ProfileExpression,
-  ProfileWithDID,
-} from "@/store/types";
+import { ChannelState, CommunityState, ExpressionTypes } from "@/store/types";
 import { useDataStore } from "@/store/data";
 import { ad4mClient } from "@/app";
-import { getProfile } from "@/utils/profileHelpers";
 import Profile from "@/containers/Profile.vue";
 import useEventEmitter from "@/utils/useEventEmitter";
 
@@ -67,7 +59,7 @@ export default defineComponent({
     this.script = document.createElement("script");
     this.script.setAttribute("type", "module");
     this.script.innerHTML = `
-      import ChatView from 'file:///home/fayeed/dev/perspective-views/packages/mini-chat-view/dist/main.js';
+      import ChatView from 'https://unpkg.com/@junto-foundation/chat-view/dist/main.js';
       if(customElements.get('chat-view') === undefined) 
         customElements.define("chat-view", ChatView);
     `;
