@@ -2,6 +2,37 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.2.15] - 23/01/2022
+
+### Added 
+ - Laid foundation for custom perspective views allowing for different views over neighbourhoods
+ - Emoji responses on messages!
+ - Reply to messages!
+ - new members & channels are now added to state as they are created and received via signals
+
+### Changed
+ - Chatview now react based component loaded via cdn at runtime
+ - holochain now on version 0.0.123
+ - improve neighbourhood references within links and remove use of: self://
+ - increased wait time for channel polling queries
+
+### Deprecated
+
+### Removed
+
+### Fixed
+ - Chatview performance now considerably improved
+ - Several bugs fixed with pagination on chat messages
+ - App crashing on load when many communities installed now fixed
+ - Fixed async holochain bug in holochain when multiple zome calls run in async causing some interactions not to complete fully
+ - Order of firstname and second name now correct on profile
+ - ascending querying of messages now working correctly
+ - improved query time for link languages
+
+### Security
+
+---
+
 ## [0.2.14] - 04/01/2022
 
 ### Added
