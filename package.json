@@ -1,6 +1,6 @@
 {
   "name": "flux",
-  "version": "0.2.14",
+  "version": "0.2.15",
   "private": true,
   "description": "A social web3 tool kit for communities",
   "author": "josh@junto.foundation",
@@ -26,8 +26,8 @@
   "dependencies": {
     "@apollo/client": "3.4.17",
     "@junto-foundation/junto-elements": "^0.4.0",
-    "@perspect3vism/ad4m": "0.1.21",
-    "@perspect3vism/ad4m-executor": "0.1.26",
+    "@perspect3vism/ad4m": "0.1.24",
+    "@perspect3vism/ad4m-executor": "0.1.29",
     "@tiptap/vue-3": "^2.0.0-beta.45",
     "core-js": "^3.15.2",
     "date-fns": "^2.22.1",

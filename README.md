@@ -3,7 +3,7 @@
 [![Build/release](https://github.com/juntofoundation/communities/actions/workflows/release.yml/badge.svg)](https://github.com/juntofoundation/communities/actions/workflows/release.yml)
 
 ## Environment
-Node version: 14.16.0<br>
+Node version: 16.13.0<br>
 
 ## Project setup
 This project requires nix for building holochain! You can download nix here: https://nixos.wiki/wiki/Nix_Installation_Guide
