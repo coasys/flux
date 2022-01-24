@@ -67,7 +67,7 @@ jobs:
           pkgver=$(node ./scripts/get-pkg-version.js)
           echo ::set-output name=version::$pkgver
       - name: Install deps
-        run: npm i
+        run: npm i --legacy-peer-deps
       - name: Build languages
         run: npm run get-languages
       - name: Build app
@@ -115,7 +115,7 @@ jobs:
   #       id: ref
   #       run: echo "::set-output name=version::$(node ./scripts/get-pkg-version.js)"
   #     - name: Install deps
-  #       run: npm i
+  #       run: npm i --legacy-peer-deps
   #     - name: Build languages
   #       run: npm run get-languages
   #     - name: Build app
@@ -185,7 +185,7 @@ jobs:
           pkgver=$(node ./scripts/get-pkg-version.js)
           echo ::set-output name=version::$pkgver
       - name: Install deps
-        run: npm i
+        run: npm i --legacy-peer-deps
       - name: Build languages
         run: npm run get-languages
       - name: Build app

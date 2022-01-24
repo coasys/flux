@@ -162,7 +162,7 @@ export default defineComponent({
 }
 
 /* Deep selector inside scoped styles */
-.cropper /deep/ .vue-simple-handler {
+.cropper >>> .vue-simple-handler {
   background: var(--j-color-primary-500) !important;
 }
 </style>
