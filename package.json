@@ -40,7 +40,8 @@
     "uuid": "^8.3.2",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0",
-    "fs-extra": "^10.0.0"
+    "fs-extra": "^10.0.0",
+    "nanoid": "^3.1.30"
   },
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.14.5",
