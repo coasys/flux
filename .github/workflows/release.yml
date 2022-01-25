@@ -39,8 +39,8 @@ jobs:
           PKG_CONFIG_PATH: "/usr/local/opt/openssl/lib/pkgconfig"
         run: |
           cargo install lair_keystore --git https://github.com/guillemcordoba/lair --rev 8c0a3683d93540301af53688ea431c7cc0beb438
-          cargo install --locked holochain --git https://github.com/holochain/holochain.git --tag holochain-0.0.119
-          cargo install holochain_cli --version 0.0.20
+          cargo install --locked holochain --git https://github.com/holochain/holochain.git --tag holochain-0.0.123
+          cargo install holochain_cli --version 0.0.24
           ./scripts/copy-hc.sh
       - name: Cache cargo registry
         uses: actions/cache@v1
@@ -60,14 +60,14 @@ jobs:
       - name: Install Node.js, NPM & Yarn
         uses: actions/setup-node@v2
         with:
-          node-version: 14.17.0
+          node-version: 16.13.0
       - name: Retrieve tag version
         id: ref
         run: |
           pkgver=$(node ./scripts/get-pkg-version.js)
           echo ::set-output name=version::$pkgver
       - name: Install deps
-        run: npm i
+        run: npm i --legacy-peer-deps
       - name: Build languages
         run: npm run get-languages
       - name: Build app
@@ -110,12 +110,12 @@ jobs:
   #     - name: Install Node.js, NPM & Yarn
   #       uses: actions/setup-node@v2
   #       with:
-  #         node-version: 14.17.0
+  #         node-version: 16.13.0
   #     - name: Retrieve tag version
   #       id: ref
   #       run: echo "::set-output name=version::$(node ./scripts/get-pkg-version.js)"
   #     - name: Install deps
-  #       run: npm i
+  #       run: npm i --legacy-peer-deps
   #     - name: Build languages
   #       run: npm run get-languages
   #     - name: Build app
@@ -157,8 +157,8 @@ jobs:
           SQLCIPHER_STATIC: 1
         run: |
           cargo install lair_keystore --git https://github.com/guillemcordoba/lair --rev 8c0a3683d93540301af53688ea431c7cc0beb438
-          cargo install --locked holochain --git https://github.com/holochain/holochain.git --tag holochain-0.0.119
-          cargo install holochain_cli --version 0.0.20
+          cargo install --locked holochain --git https://github.com/holochain/holochain.git --tag holochain-0.0.123
+          cargo install holochain_cli --version 0.0.24
           ./scripts/copy-hc.sh
       - name: Cache cargo registry
         uses: actions/cache@v1
@@ -178,14 +178,14 @@ jobs:
       - name: Install Node.js, NPM & Yarn
         uses: actions/setup-node@v2
         with:
-          node-version: 14.17.0
+          node-version: 16.13.0
       - name: Retrieve tag version
         id: ref
         run: |
           pkgver=$(node ./scripts/get-pkg-version.js)
           echo ::set-output name=version::$pkgver
       - name: Install deps
-        run: npm i
+        run: npm i --legacy-peer-deps
       - name: Build languages
         run: npm run get-languages
       - name: Build app
@@ -223,7 +223,7 @@ jobs:
       - name: Install Node.js, NPM & Yarn
         uses: actions/setup-node@v2
         with:
-          node-version: 14.17.0
+          node-version: 16.13.0
       - name: Retrieve tag version
         id: ref
         run: |

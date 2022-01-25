@@ -1,4 +1,4 @@
-export const channelRefreshDurationMs = 10000;
+export const channelRefreshDurationMs = 60000;
 export const groupExpressionRefreshDurationMS = 10000;
 export const memberRefreshDurationMs = 60000;
 export const expressionGetRetries = 100;

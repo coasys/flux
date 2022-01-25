@@ -118,7 +118,7 @@ describe("Update community theme", () => {
       expect(error).toBeInstanceOf(Error);
       expect(error).toHaveProperty(
         "message",
-        `Cannot read property 'theme' of undefined`
+        `Cannot read properties of undefined (reading 'theme')`
       );
     }
 

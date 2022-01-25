@@ -20,7 +20,7 @@ export default async (communityId: string): Promise<void> => {
   const groupExpressionLinks = await ad4mClient.perspective.queryLinks(
     community.neighbourhood.perspective.uuid,
     new LinkQuery({
-      source: `${community.neighbourhood.neighbourhoodUrl}://self`,
+      source: community.neighbourhood.neighbourhoodUrl,
       predicate: "rdf://class",
     })
   );

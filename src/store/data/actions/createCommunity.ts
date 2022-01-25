@@ -137,7 +137,7 @@ export default async ({
     const addLink = await ad4mClient.perspective.addLink(
       createSourcePerspective.uuid!,
       {
-        source: `${neighbourhood}://self`,
+        source: neighbourhood,
         target: "sioc://community",
         predicate: "rdf://type",
       }
@@ -160,7 +160,7 @@ export default async ({
     const addGroupExpLink = await ad4mClient.perspective.addLink(
       createSourcePerspective.uuid!,
       {
-        source: `${neighbourhood}://self`,
+        source: neighbourhood,
         target: createExp,
         predicate: "rdf://class",
       }
@@ -180,7 +180,7 @@ export default async ({
     const addProfileLink = await ad4mClient.perspective.addLink(
       createSourcePerspective.uuid!,
       {
-        source: `${neighbourhood}://self`,
+        source: neighbourhood,
         target: createProfileExpression,
         predicate: MEMBER,
       }

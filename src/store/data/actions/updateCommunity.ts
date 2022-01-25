@@ -45,7 +45,7 @@ export default async function updateCommunity({
       const addGroupExpLink = await ad4mClient.perspective.addLink(
         community.neighbourhood.perspective.uuid,
         {
-          source: `${community.neighbourhood.neighbourhoodUrl}://self`,
+          source: community.neighbourhood.neighbourhoodUrl,
           target: groupExpression,
           predicate: "rdf://class",
         }

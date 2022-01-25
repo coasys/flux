@@ -60,7 +60,7 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
         const addProfileLink = await ad4mClient.perspective.addLink(
           neighbourhood.uuid,
           {
-            source: `${neighbourhood.sharedUrl}://self`,
+            source: neighbourhood.sharedUrl,
             target: createProfileExpression,
             predicate: MEMBER,
           } as Link

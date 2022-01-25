@@ -61,7 +61,8 @@ import { useAppStore } from "./store/app";
 import { useDataStore } from "./store/data";
 import { JUNTO_AGENT, AD4M_AGENT, KAICHAO_AGENT } from "@/constants/agents";
 import { ad4mClient } from "./app";
-import { MEMBER } from "./constants/neighbourhoodMeta";
+import { MEMBER, EXPRESSION, CHANNEL } from "./constants/neighbourhoodMeta";
+import useEventEmitter from "./utils/useEventEmitter";
 
 declare global {
   interface Window {
@@ -77,6 +78,7 @@ export default defineComponent({
     const userStore = useUserStore();
     const appStore = useAppStore();
     const dataStore = useDataStore();
+    const bus = useEventEmitter();
 
     onError((error) => {
       console.log("Got global graphql error, logging with error", error);
@@ -145,18 +147,7 @@ export default defineComponent({
       perspective: string
     ) => {
       console.debug("GOT INCOMING MESSAGE SIGNAL", link, perspective);
-      if (link.data!.predicate! === "sioc://content_of") {
-        expressionWorker.postMessage({
-          id: link.data!.target!,
-          retry: expressionGetRetries,
-          callbackData: { perspective, link },
-          interval: expressionGetDelayMs,
-          query: print(GET_EXPRESSION),
-          variables: { url: link.data!.target! },
-          name: "Expression signal get",
-          dataKey: "expression",
-        });
-      } else if (link.data!.predicate! === MEMBER) {
+      if (link.data!.predicate! === MEMBER) {
         const did = link.data!.target!.split("://")[1];
         console.log("Got new member in signal! Parsed out did: ", did);
         if (did) {
@@ -165,6 +156,15 @@ export default defineComponent({
             perspectiveUuid: perspective,
           });
         }
+      } else if (
+        link.data!.predicate! === CHANNEL &&
+        link.author != userStore.getUser?.agent.did
+      ) {
+        console.log("Joining channel via link signal!");
+        await dataStore.joinChannelNeighbourhood({
+          parentCommunityId: perspective,
+          neighbourhoodUrl: link.data!.target!,
+        });
       }
     };
 

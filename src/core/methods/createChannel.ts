@@ -58,14 +58,13 @@ export async function createChannel({
   );
   console.debug("Create a neighbourhood with result", neighbourhood);
 
-  const channelLink = new Link({
-    source: `${sourcePerspective.sharedUrl}://self`,
-    target: neighbourhood,
-    predicate: "sioc://has_space",
-  });
   const addLinkToChannel = await ad4mClient.perspective.addLink(
     sourcePerspective.uuid,
-    channelLink
+    {
+      source: sourcePerspective.sharedUrl!,
+      target: neighbourhood,
+      predicate: "sioc://has_space",
+    }
   );
   console.debug(
     "Created new link on source social-context with result",
@@ -76,7 +75,7 @@ export async function createChannel({
   const addChannelTypeLink = await ad4mClient.perspective.addLink(
     perspective.uuid,
     {
-      source: `${neighbourhood}://self`,
+      source: neighbourhood,
       target: "sioc://space",
       predicate: "rdf://type",
     }
@@ -84,6 +83,20 @@ export async function createChannel({
   console.log(
     "Added link on channel social-context with result",
     addChannelTypeLink
+  );
+
+  //Add link on channel social context declaring type
+  const addSourceNeighbourhoodLink = await ad4mClient.perspective.addLink(
+    perspective.uuid,
+    {
+      source: neighbourhood,
+      target: sourcePerspective.sharedUrl!,
+      predicate: "flux://parentCommunity",
+    }
+  );
+  console.log(
+    "Added link on channel pointing to parent neighbourhood",
+    addSourceNeighbourhoodLink
   );
 
   return {

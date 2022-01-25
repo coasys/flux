@@ -84,6 +84,7 @@ export function createSplashScreen(mainThreadState: MainThreadGlobal): void {
       nodeIntegration: false,
       contextIsolation: true, // protect against prototype pollution
       enableRemoteModule: false,
+      preload: path.join(__dirname, "preload.js"), // use a preload script
     },
     minimizable: false,
     alwaysOnTop: false,
