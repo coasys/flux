@@ -4,9 +4,9 @@ import { TimeoutCache } from "@/utils/timeoutCache";
 import community from "../fixtures/community.json";
 import initAgentFixture from "../fixtures/initAgent.json";
 import getProfileFixture from "../fixtures/getProfile.json";
-import * as getExpressionNoCache from "@/core/queries/getExpression";
 import { Expression } from "@perspect3vism/ad4m";
 import { mocked } from "ts-jest/utils";
+import { ad4mClient } from "@/app";
 
 const testProfile = {
   did: initAgentFixture.did,
@@ -56,7 +56,8 @@ describe("ProfileHelpers", () => {
     MockedSoundPlayer.mockClear();
 
     jest
-      .spyOn(getExpressionNoCache, "getExpressionNoCache")
+      .spyOn(ad4mClient.expression, "get")
+      // @ts-ignore
       .mockImplementation(async (url) => {
         const split = url.split("://");
         if (split[1] === did && split[0] === profileLangAddress) {

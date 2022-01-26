@@ -4,13 +4,10 @@ import addChannelUniqueHolochainLanguages from "../../../fixtures/addChannelUniq
 import addChannelCreateLinkType from "../../../fixtures/addChannelCreateLinkType.json";
 import addChannelCreateLink from "../../../fixtures/addChannelCreateLink.json";
 import createChannelMeta from "../../../fixtures/createChannelMeta.json";
-import * as addPerspective from "@/core/mutations/addPerspective";
-import * as templateLanguage from "@/core/mutations/templateLanguage";
-import * as createNeighbourhood from "@/core/mutations/createNeighbourhood";
 import * as createNeighbourhoodMeta from "@/core/methods/createNeighbourhoodMeta";
-import * as createLink from "@/core/mutations/createLink";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useDataStore } from "@/store/data";
+import { ad4mClient } from "@/app";
 
 describe("Create Channel", () => {
   let store: Pinia;
@@ -18,20 +15,20 @@ describe("Create Channel", () => {
   beforeEach(() => {
     // @ts-ignore
     jest
-      .spyOn(addPerspective, "addPerspective")
+      .spyOn(ad4mClient.perspective, "add")
       // @ts-ignore
       .mockResolvedValue(addChannelPerspective);
 
     // @ts-ignore
     jest
-      .spyOn(templateLanguage, "templateLanguage")
+      .spyOn(ad4mClient.languages, "applyTemplateAndPublish")
       .mockImplementation(async () => {
         return addChannelUniqueHolochainLanguages;
       });
 
     // @ts-ignore
     jest
-      .spyOn(createNeighbourhood, "createNeighbourhood")
+      .spyOn(ad4mClient.neighbourhood, "publishFromPerspective")
       .mockImplementation(async () => {
         return "neighbourhood://8421244696ef9042d51add6f4517ae9353d7a4374459f3f50d3bf6f324219e3a62ebd46ec1b688";
       });
@@ -45,7 +42,7 @@ describe("Create Channel", () => {
 
     // @ts-ignore
     jest
-      .spyOn(createLink, "createLink")
+      .spyOn(ad4mClient.perspective, "addLink")
       .mockImplementation(async (perspective, link) => {
         if (link.predicate === "rdf://type") {
           return addChannelCreateLinkType;
