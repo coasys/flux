@@ -70,12 +70,19 @@ jobs:
         run: npm i --legacy-peer-deps
       - name: Build languages
         run: npm run get-languages
+      - name: setup for codesigning (macos only)
+        uses:  figleafteam/import-codesign-certs@v2
+        with:
+          p12-file-base64: ${{ secrets.COMMUNITIES_APPLE_CERT }}
+          p12-password: ${{ secrets.COMMUNITIES_APPLE_CERT_PASSWORD }}
       - name: Build app
         run: npm run release
         env:
           GH_TOKEN: ${{ secrets.github_token }}
-          CSC_LINK: ${{ secrets.COMMUNITIES_APPLE_CERT }}
-          CSC_KEY_PASSWORD: ${{ secrets.COMMUNITIES_APPLE_CERT_PASSWORD }}
+          APPLE_DEV_IDENTITY: ${{ secrets.APPLE_DEV_IDENTITY }}
+          APPLE_ID_EMAIL: ${{ secrets.APPLE_ID_EMAIL }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          DEBUG: electron-osx-sign*,electron-notarize*
       - name: Cache macOS release (x64)
         uses: actions/upload-artifact@v1
         with:
