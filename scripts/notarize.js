@@ -17,7 +17,7 @@ exports.default = async function notarizing(context) {
     return
   }
 
-  console.log(`Notarizing ${appId} found at ${appPath}`)
+  console.log(`Notarizing ${appName} found at ${appPath}`)
 
   return await notarize({
     appBundleId: 'junto.foundation.flux',
