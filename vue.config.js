@@ -36,8 +36,13 @@ module.exports = {
       builderOptions: {
         productName: "Flux",
         appId: "junto.foundation.flux",
+        afterSign: "scripts/notarize.js",
         mac: {
           target: "default",
+          entitlements: "build/entitlements.mac.plist",
+          hardenedRuntime : true,
+          gatekeeperAssess: false,
+          entitlementsInherit: "build/entitlements.mac.plist",
           binaries: [
             "./resources/darwin/hc",
             "./resources/darwin/holochain",
