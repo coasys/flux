@@ -6,6 +6,7 @@ import ad4m from "@perspect3vism/ad4m-executor";
 import { autoUpdater } from "electron-updater";
 import { MainThreadGlobal } from "./globals";
 import { createMainWindow, createSplashScreen } from "./createUI";
+import getPort from "get-port";
 
 export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
   if (!fs.existsSync(path.join(app.getPath("userData"), "dontDelete-0.2.15"))) {
@@ -130,13 +131,14 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
               },
             ],
             neighbourhoods: [],
-            perspectives: []
+            perspectives: [],
           },
           appBuiltInLangs: ["direct-message-language", "lang-note-ipfs"],
           appLangAliases: null,
           mocks: false,
           // @ts-ignore
           runDappServer: true,
+          gqlPort: await getPort({ port: 4000 }),
         })
         .then(async (ad4mCore: ad4m.PerspectivismCore) => {
           mainThreadState.ad4mCore = ad4mCore;
