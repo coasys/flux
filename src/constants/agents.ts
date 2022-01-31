@@ -1,5 +1,5 @@
 export const JUNTO_AGENT =
-  "did:key:zQ3shbBYwqHtBMXfe96MN5YVDvZPLLC87EFAPL9SnoqLDd9Jm";
+  "did:key:zQ3sheV6m6sT83woZtVL2PHiz6J1qWRh4FWW2aiJvxy6d2o7S";
 
 export const AD4M_AGENT =
   "did:key:zQ3shkkuZLvqeFgHdgZgFMUx8VGkgVWsLA83w2oekhZxoCW2n";
