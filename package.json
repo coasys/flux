@@ -27,7 +27,7 @@
     "@apollo/client": "3.4.17",
     "@junto-foundation/junto-elements": "^0.4.0",
     "@perspect3vism/ad4m": "0.1.25",
-    "@perspect3vism/ad4m-executor": "0.1.31",
+    "@perspect3vism/ad4m-executor": "0.1.32",
     "core-js": "^3.15.2",
     "date-fns": "^2.22.1",
     "electron-updater": "^4.3.9",
