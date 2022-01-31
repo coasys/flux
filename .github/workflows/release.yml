@@ -67,11 +67,11 @@ jobs:
           pkgver=$(node ./scripts/get-pkg-version.js)
           echo ::set-output name=version::$pkgver
       - name: Install deps
-        run: npm i --legacy-peer-deps
+        run: yarn install
       - name: Build languages
-        run: npm run get-languages
+        run: yarn run get-languages
       - name: Build app
-        run: npm run release
+        run: yarn run release
         env:
           GH_TOKEN: ${{ secrets.github_token }}
           CSC_LINK: ${{ secrets.COMMUNITIES_APPLE_CERT }}
@@ -115,11 +115,11 @@ jobs:
   #       id: ref
   #       run: echo "::set-output name=version::$(node ./scripts/get-pkg-version.js)"
   #     - name: Install deps
-  #       run: npm i --legacy-peer-deps
+  #       run: yarn install
   #     - name: Build languages
-  #       run: npm run get-languages
+  #       run: yarn run get-languages
   #     - name: Build app
-  #       run: npm run release
+  #       run: yarn run release
   #       env:
   #         GH_TOKEN: ${{ secrets.github_token }}
   #     - name: Cache nsis release
@@ -185,11 +185,11 @@ jobs:
           pkgver=$(node ./scripts/get-pkg-version.js)
           echo ::set-output name=version::$pkgver
       - name: Install deps
-        run: npm i --legacy-peer-deps
+        run: yarn install
       - name: Build languages
-        run: npm run get-languages
+        run: yarn run get-languages
       - name: Build app
-        run: npm run release
+        run: yarn run release
         env:
           GH_TOKEN: ${{ secrets.github_token }}
       - name: Cache AppImage

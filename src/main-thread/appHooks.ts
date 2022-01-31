@@ -94,14 +94,14 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
           ad4mBootstrapFixtures: {
             languages: [
               {
-                address: "QmR1dV5KuAQtYG98qqmYEvHXfxJZ3jKyjf7SFMriCMfHVQ",
+                address: "QmRENn31FvsZZx99tg8nd8oM52MmGYa1tLUYaDvYdjnJsb",
                 meta: {
                   author:
                     "did:key:zQ3shkkuZLvqeFgHdgZgFMUx8VGkgVWsLA83w2oekhZxoCW2n",
                   timestamp: "2021-10-07T21:39:36.607Z",
                   data: {
                     name: "Direct Message Language",
-                    address: "QmR1dV5KuAQtYG98qqmYEvHXfxJZ3jKyjf7SFMriCMfHVQ",
+                    address: "QmRENn31FvsZZx99tg8nd8oM52MmGYa1tLUYaDvYdjnJsb",
                     description:
                       "Template source for personal, per-agent DM languages. Holochain based.",
                     possibleTemplateParams: [
