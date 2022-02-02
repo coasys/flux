@@ -64,7 +64,7 @@ export default async (communityId: string): Promise<void> => {
         image: groupExpData["image"],
         thumbnail: groupExpData["thumnail"],
         groupExpressionRef:
-          groupExpressionLinks[groupExpressionLinks.length - 1].data!.target,
+          sortedLinks[sortedLinks.length - 1].data!.target,
       });
     });
   }
