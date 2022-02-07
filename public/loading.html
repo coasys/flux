@@ -26,6 +26,14 @@
       height: 100vh;
       width: 100vw;
     }
+
+    .error {
+      padding: 40px 80px;
+      visibility: collapse;
+      opacity: 0;
+      transition: visibility 0s, opacity 0.5s linear, height 1s;
+      height: 0;
+    }
   </style>
   <body>
     <div class="main">
@@ -52,6 +60,40 @@
           fill="var(--j-color-black)"
         />
       </svg>
+      <div class="error">
+        <j-flex a="center" direction="column" gap="900">
+          <j-text nomargin variant="heading-lg"
+            >Whoops, something broke! 😅</j-text
+          >
+          <j-text nomargin variant="subheading">
+            If you have also been asked to include a log file with your report,
+            click the button below to copy a log file to your desktop:
+          </j-text>
+          <j-button onclick="copyFile()" variant="primary">Copy</j-button>
+        </j-flex>
+      </div>
     </div>
   </body>
+  <script>
+    setTimeout(() => {
+      const error = document.getElementsByClassName('error');
+      error[0].style.display = 'block'
+      error[0].style.visibility = 'visible'
+      error[0].style.opacity = 1
+      error[0].style.height = '160px'
+    }, 30000);
+
+    function copyFile() {
+      const button = document.getElementsByTagName('j-button');
+      window.api.send("copyLogs");
+
+      setTimeout(() => {
+        button[0].innerHTML = 'Copied'
+
+        setTimeout(() => {
+          button[0].innerHTML = 'Copy'
+        }, 2000);
+      }, 500);
+    }
+  </script>
 </html>

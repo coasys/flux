@@ -6,11 +6,12 @@ import ad4m from "@perspect3vism/ad4m-executor";
 import { autoUpdater } from "electron-updater";
 import { MainThreadGlobal } from "./globals";
 import { createMainWindow, createSplashScreen } from "./createUI";
+import getPort from "get-port";
 
 export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
-  if (!fs.existsSync(path.join(app.getPath("userData"), "dontDelete-0.2.15"))) {
+  if (!fs.existsSync(path.join(app.getPath("userData"), "dontDelete-0.2.16"))) {
     console.warn(
-      "Did not find dontDelete-0.2.15 deleting ad4m and Local Storage directories"
+      "Did not find dontDelete-0.2.16 deleting ad4m and Local Storage directories"
     );
     const ad4mPath = path.join(app.getPath("userData"), "ad4m");
     if (fs.existsSync(ad4mPath)) fs.rmSync(ad4mPath, { recursive: true });
@@ -22,9 +23,9 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
     if (fs.existsSync(localStoragePath))
       fs.rmSync(localStoragePath, { recursive: true });
 
-    fs.mkdirSync(path.join(app.getPath("userData"), "dontDelete-0.2.15"));
+    fs.mkdirSync(path.join(app.getPath("userData"), "dontDelete-0.2.16"));
   } else {
-    console.warn("Found dontDelete-0.2.15, skipping deletion of config");
+    console.warn("Found dontDelete-0.2.16, skipping deletion of config");
   }
 
   // This method is called if a second instance of the application is started
@@ -130,13 +131,14 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
               },
             ],
             neighbourhoods: [],
-            perspectives: []
+            perspectives: [],
           },
           appBuiltInLangs: ["direct-message-language", "lang-note-ipfs"],
           appLangAliases: null,
           mocks: false,
           // @ts-ignore
           runDappServer: true,
+          gqlPort: await getPort({ port: 4000 }),
         })
         .then(async (ad4mCore: ad4m.PerspectivismCore) => {
           mainThreadState.ad4mCore = ad4mCore;
