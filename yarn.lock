@@ -2076,10 +2076,10 @@
     tslib "^2.3.1"
     webcrypto-core "^1.4.0"
 
-"@perspect3vism/ad4m-executor@0.1.31":
-  version "0.1.31"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-executor/-/ad4m-executor-0.1.31.tgz#cc1b04269b28203ff23dd935a1cf361ab44798fb"
-  integrity sha512-lQGqxdJ8MMbLhiGGwc1jGPfthO6U+6uAos41SBmMfsGJajfzITDXCvLT6aagmwi9gih1ujq7jSP53xiKfrEzcA==
+"@perspect3vism/ad4m-executor@0.1.32":
+  version "0.1.32"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-executor/-/ad4m-executor-0.1.32.tgz#91b480d58aa23c1d02b2437b026852c2bdfe6e6d"
+  integrity sha512-NJTJPq6Xxgq9UYnByfBiWrcklNmH5ilab1HGZMgDsbg2uvg+DOYcH56PlduHFxXMq78G8fkNH8dJowTeojmE9A==
   dependencies:
     "@holochain/client" "0.3.2"
     "@perspect3vism/ad4m" "0.1.25"
