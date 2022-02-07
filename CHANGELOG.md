@@ -2,6 +2,36 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.2.16] - 07/02/2022
+
+### Added 
+ - Ability to copy Flux logs from splash screen 
+ - caching on expressions @ ad4m-executor where language is immutable
+ - added CAL 
+
+### Changed
+ - Using holochain version 0.0.125
+ - replies and emojis are loaded async after initial message load to reduce loading time
+ - use indexdb for profile storage to avoid filling localStorage
+ - only fetch 35 messages per page
+
+### Deprecated
+
+### Removed
+ - Many un-used dependencies
+
+### Fixed
+ - Notifications working again
+ - ad4m-executor will now check which port to use when starting gql server to avoid collisions
+ - fixed bug where name for communities could all become the same
+ - members name not being present when making a reply
+ - various bugs with the handling of emojis on a message
+ - error when channel views would sometimes not load correctly
+
+### Security
+
+---
+
 ## [0.2.15] - 23/01/2022
 
 ### Added 
