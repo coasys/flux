@@ -30,6 +30,7 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
           predicate: "sioc://has_space",
         }),
       },
+      callbackData: { communityId: community.neighbourhood.perspective.uuid },
       name: `Channel links for ${community.neighbourhood.name}`,
       dataKey: "perspectiveQueryLinks",
     });
@@ -43,7 +44,7 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
       try {
         const channelLinks = e.data.perspectiveQueryLinks;
 
-      console.log(channelLinks);
+        console.log(channelLinks);
 
         for (let i = 0; i < channelLinks.length; i++) {
           //Check that the channel is not in the store
@@ -51,7 +52,7 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
             Object.values(community.neighbourhood.linkedNeighbourhoods).find(
               (neighbourhoodUrl) =>
                 neighbourhoodUrl === channelLinks[i].data!.target
-            ) == undefined
+            ) === undefined
           ) {
             console.log(
               "Found channel link from un-joined channel neighbourhood",
@@ -59,7 +60,7 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
             );
             //Call ad4m and try to join the sharedperspective found at link target
             await dataStore.joinChannelNeighbourhood({
-              parentCommunityId: community.neighbourhood.perspective.uuid,
+              parentCommunityId: e.data.callbackData.communityId,
               neighbourhoodUrl: channelLinks[i].data!.target,
             });
           }
