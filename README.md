@@ -18,12 +18,12 @@ cachix use holochain-ci
 Installing dependencies for flux and compiling holochain can be done with:
 
 ```
-npm install && npm run get-languages && npm run build-holochain
+yarn install && yarn run get-languages && yarn run build-holochain
 ```
 
 ### Compiles and hot-reloads for development
 ```
-npm run electron:serve
+yarn run electron:serve
 ```
 
 ## Cleaning local state
@@ -31,7 +31,7 @@ npm run electron:serve
 The following commands will remove all installed ad4m languages (except defaults), holochain DNA's, ad4m did store & vuex store.
 
 ```
-npm run clean-state
+yarn run clean-state
 ```
 
 ## Holochain DNA's
@@ -50,10 +50,10 @@ These DNA's come bundled with the builtin languages, links above are provided fo
 
 ### Compiles and minifies for production
 ```
-npm run build-holochain && npm run get-languages && npm run electron:build
+yarn run build-holochain && yarn run get-languages && yarn run electron:build
 ```
 
 ### Lints and fixes files
 ```
-npm run lint
+yarn run lint
 ```
