@@ -1,7 +1,6 @@
 <template>
   <chat-view
     :perspective-uuid="channel.neighbourhood.perspective.uuid"
-    :source-perspective-uuid="community.neighbourhood.perspective.uuid"
     @agent-click="onAgentClick"
     @perspective-click="onPerspectiveClick"
     @hide-notification-indicator="onHideNotificationIndicator"
