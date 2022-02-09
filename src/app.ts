@@ -20,13 +20,17 @@ export const apolloClient = new ApolloClient({
       reconnect: true,
     },
   }),
-  cache: new InMemoryCache({}),
+  cache: new InMemoryCache({ resultCaching: false }),
   defaultOptions: {
     watchQuery: {
       errorPolicy: "ignore",
+      fetchPolicy: "no-cache",
     },
     query: {
       errorPolicy: "all",
+      fetchPolicy: "no-cache",
+    },
+    mutate: {
       fetchPolicy: "no-cache",
     },
   },
