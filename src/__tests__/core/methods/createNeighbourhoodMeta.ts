@@ -6,6 +6,7 @@ import * as addPerspective from "@/core/mutations/addPerspective";
 import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta";
 import * as createLink from "@/core/mutations/createLink";
 import * as getPerspectiveSnapshot from "@/core/queries/getPerspective";
+import { ad4mClient } from "@/app";
 
 const removeEmpty = (obj: any) => {
   const newObj: { [x: string]: any } = {};
@@ -35,6 +36,15 @@ describe("Create Neighbourhood Meta", () => {
       .spyOn(createLink, "createLink")
       .mockImplementation(async (perspective, link) => {
         return addChannelCreateLink;
+      });
+
+    // @ts-ignore
+    jest
+      .spyOn(ad4mClient.perspective, "remove")
+      .mockImplementation(async () => {
+        return {
+          perspectiveRemove: true
+        };
       });
   });
 
