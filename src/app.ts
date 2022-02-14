@@ -13,9 +13,11 @@ import { ProfileExpression } from "./store/types";
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { WebSocketLink } from "@apollo/client/link/ws";
 
+const PORT = parseInt(global.location.search.slice(6)) || 4000;
+
 export const apolloClient = new ApolloClient({
   link: new WebSocketLink({
-    uri: `ws://localhost:4000/graphql`,
+    uri: `ws://localhost:${PORT}/graphql`,
     options: {
       reconnect: true,
     },

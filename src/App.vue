@@ -102,6 +102,8 @@ export default defineComponent({
       }
     });
 
+    const PORT = parseInt(global.location.search.slice(6))
+
     //Start expression web worker to try and get the expression data pointed to in link target
     const expressionWorker = new Worker("pollingWorker.js");
 
@@ -154,6 +156,7 @@ export default defineComponent({
           variables: { url: link.data!.target! },
           name: "Expression signal get",
           dataKey: "expression",
+          port: PORT
         });
       } else if (link.data!.predicate! === MEMBER) {
         const did = link.data!.target!.split("://")[1];
@@ -217,7 +220,6 @@ export default defineComponent({
       },
       { immediate: true, deep: true }
     );
-
     return {
       toast: computed(() => appStore.toast),
       setToast: (payload: ToastState) => appStore.setToast(payload),
