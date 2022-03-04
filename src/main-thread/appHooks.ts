@@ -81,6 +81,9 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
       );
 
       console.log("\x1b[36m%s\x1b[0m", "Init AD4M...\n");
+
+      const gqlPort = await getPort()
+
       ad4m
         .init({
           appDataPath: app.getPath("userData"),
@@ -138,14 +141,14 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
           mocks: false,
           // @ts-ignore
           runDappServer: true,
-          gqlPort: await getPort({ port: 4000 }),
+          gqlPort
         })
         .then(async (ad4mCore: ad4m.PerspectivismCore) => {
           mainThreadState.ad4mCore = ad4mCore;
           const isAlreadySignedUp = ad4mCore.agentService.isInitialized();
           console.log("\x1b[36m%s\x1b[0m", "Starting main UI window\n\n");
 
-          await createMainWindow(mainThreadState);
+          await createMainWindow(mainThreadState, gqlPort);
 
           mainThreadState.ad4mCore.waitForAgent().then(async () => {
             console.log(
