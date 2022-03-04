@@ -17,7 +17,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           override: true
-          toolchain: 1.56.1
+          toolchain: 1.58.1
       # - name: Prepare cache directory
       #   run: mkdir ./resources/temp
       # - uses: Swatinem/rust-cache@v1
@@ -141,7 +141,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           override: true
-          toolchain: 1.56.1
+          toolchain: 1.58.1
       # - name: Prepare cache directory
       #   run: mkdir ./resources/temp/holochain
       # - uses: Swatinem/rust-cache@v1
