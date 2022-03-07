@@ -82,7 +82,7 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
 
       console.log("\x1b[36m%s\x1b[0m", "Init AD4M...\n");
 
-      const gqlPort = await getPort()
+      const gqlPort = await getPort({ port: 4000 });
 
       ad4m
         .init({
@@ -141,7 +141,7 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
           mocks: false,
           // @ts-ignore
           runDappServer: true,
-          gqlPort
+          gqlPort,
         })
         .then(async (ad4mCore: ad4m.PerspectivismCore) => {
           mainThreadState.ad4mCore = ad4mCore;
