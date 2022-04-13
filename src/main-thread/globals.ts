@@ -9,7 +9,7 @@ export class MainThreadGlobal {
   tray?: Tray;
   ad4mCore?: ad4m.PerspectivismCore;
   isQuiting: boolean;
-  builtInLangPath: string;
+  seedPath: string;
   binaryExecPath: string;
   iconPath: string;
 
@@ -21,19 +21,19 @@ export class MainThreadGlobal {
       iconPath = `${__dirname}/img/icons/icon.png`;
     }
 
-    let builtInLangPath;
+    let seedPath;
     let binaryExecPath;
     if (app.isPackaged) {
       //Set languages path
-      builtInLangPath = path.resolve(
-        `${process.resourcesPath}/../resources/packaged-resources/languages`
+      seedPath = path.resolve(
+        `${process.resourcesPath}/../resources/packaged-resources/seed/mainnetSeed.json`
       );
       //Set binary path
       binaryExecPath = path.resolve(
         `${process.resourcesPath}/../resources/packaged-resources/bin`
       );
     } else {
-      builtInLangPath = path.resolve(`${__dirname}/../ad4m/languages`);
+      seedPath = path.resolve(`${__dirname}/../ad4m/mainnetSeed.json`);
       binaryExecPath = path.resolve(
         `${__dirname}/../resources/${os.platform}/`
       );
@@ -42,7 +42,7 @@ export class MainThreadGlobal {
     return {
       isQuiting: false,
       iconPath,
-      builtInLangPath,
+      seedPath,
       binaryExecPath,
     } as MainThreadGlobal;
   }

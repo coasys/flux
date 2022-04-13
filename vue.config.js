@@ -60,9 +60,9 @@ module.exports = {
             filter: ["**/*"],
           },
           {
-            from: "./ad4m/languages",
-            to: "packaged-resources/languages",
-            filter: ["**/build/bundle.js", "**/*.dna"],
+            from: "./ad4m",
+            to: "packaged-resources/seed",
+            filter: ["*.json"],
           },
         ],
         publish: ["github"],
