@@ -76,68 +76,24 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
         app.getPath("logs"),
         "\nUsing Resource path",
         mainThreadState.binaryExecPath,
-        "\nbuilt in language path\n",
-        mainThreadState.builtInLangPath
+        "\nSeed path\n",
+        mainThreadState.seedPath
       );
 
       console.log("\x1b[36m%s\x1b[0m", "Init AD4M...\n");
 
-      const gqlPort = await getPort()
+      const gqlPort = await getPort();
 
       ad4m
         .init({
           appDataPath: app.getPath("userData"),
           resourcePath: mainThreadState.binaryExecPath,
-          appDefaultLangPath: mainThreadState.builtInLangPath,
-          ad4mBootstrapLanguages: {
-            agents: "agent-expression-store",
-            languages: "languages",
-            neighbourhoods: "neighbourhood-store",
-          },
-          ad4mBootstrapFixtures: {
-            languages: [
-              {
-                address: "QmRENn31FvsZZx99tg8nd8oM52MmGYa1tLUYaDvYdjnJsb",
-                meta: {
-                  author:
-                    "did:key:zQ3shkkuZLvqeFgHdgZgFMUx8VGkgVWsLA83w2oekhZxoCW2n",
-                  timestamp: "2021-10-07T21:39:36.607Z",
-                  data: {
-                    name: "Direct Message Language",
-                    address: "QmRENn31FvsZZx99tg8nd8oM52MmGYa1tLUYaDvYdjnJsb",
-                    description:
-                      "Template source for personal, per-agent DM languages. Holochain based.",
-                    possibleTemplateParams: [
-                      "recipient_did",
-                      "recipient_hc_agent_pubkey",
-                    ],
-                    sourceCodeLink:
-                      "https://github.com/perspect3vism/direct-message-language",
-                  },
-                  proof: {
-                    signature:
-                      "e933e34f88694816ea91361605c8c2553ceeb96e847f8c73b75477cc7d9bacaf11eae34e38c2e3f474897f59d20f5843d6f1d2c493b13552093bc16472b0ac33",
-                    key: "#zQ3shkkuZLvqeFgHdgZgFMUx8VGkgVWsLA83w2oekhZxoCW2n",
-                    valid: true,
-                  },
-                },
-                bundle: fs
-                  .readFileSync(
-                    path.join(
-                      mainThreadState.builtInLangPath,
-                      "direct-message-language",
-                      "build",
-                      "bundle.js"
-                    )
-                  )
-                  .toString(),
-              },
-            ],
-            neighbourhoods: [],
+          networkBootstrapSeed: mainThreadState.seedPath,
+          bootstrapFixtures: {
+            languages: [],
             perspectives: [],
           },
-          appBuiltInLangs: ["direct-message-language", "lang-note-ipfs"],
-          appLangAliases: null,
+          appLangAliases: {},
           mocks: false,
           // @ts-ignore
           runDappServer: true,
@@ -193,7 +149,7 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
               message: err,
             });
           } else {
-            await createMainWindow(mainThreadState);
+            await createMainWindow(mainThreadState, gqlPort);
             mainThreadState.mainWindow!.webContents.send(
               "setGlobalLoading",
               false
@@ -241,6 +197,6 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0)
-      await createMainWindow(mainThreadState);
+      await createMainWindow(mainThreadState, gqlPort);
   });
 }
