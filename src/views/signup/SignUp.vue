@@ -273,6 +273,7 @@ export default defineComponent({
         })
         .finally(() => {
           this.isCreatingUser = false;
+          this.appStore.setGlobalLoading(false);
         });
     },
   },

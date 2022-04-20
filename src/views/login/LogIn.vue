@@ -42,6 +42,7 @@ import { defineComponent, ref, watch } from "vue";
 import { useValidation } from "@/utils/validation";
 import { AgentStatus } from "@perspect3vism/ad4m";
 import { useUserStore } from "@/store/user";
+import { useAppStore } from "@/store/app";
 
 export default defineComponent({
   name: "LogIn",
@@ -50,6 +51,7 @@ export default defineComponent({
     const isCreatingUser = ref(false);
     const isLoggingIn = ref(false);
     const showPassword = ref(false);
+    const appStore = useAppStore();
 
     const {
       value: password,
@@ -96,6 +98,7 @@ export default defineComponent({
       showPassword,
       logInError,
       userStore,
+      appStore
     };
   },
   methods: {
@@ -117,6 +120,7 @@ export default defineComponent({
         })
         .finally(() => {
           this.isLoggingIn = false;
+          this.appStore.setGlobalLoading(false);
         });
     },
   },
