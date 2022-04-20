@@ -130,6 +130,7 @@ import { useValidation } from "@/utils/validation";
 import { useUserStore } from "@/store/user";
 
 import Logo from "@/components/logo/Logo.vue";
+import { useAppStore } from "@/store/app";
 
 export default defineComponent({
   name: "Welcome",
@@ -147,6 +148,7 @@ export default defineComponent({
     const isLoggingIn = ref(false);
     const showPassword = ref(false);
     const userStore = useUserStore();
+    const appStore = useAppStore();
 
     const {
       value: username,
@@ -237,6 +239,7 @@ export default defineComponent({
       logInError,
       userStore,
       passwordOnEnterValidate,
+      appStore
     };
   },
   computed: {
@@ -265,7 +268,9 @@ export default defineComponent({
           profilePicture: this.profilePicture,
           thumbnailPicture: thumbnail,
         })
-        .then(() => this.$router.push("/"))
+        .then(() => {
+          this.$router.push("/")
+        })
         .finally(() => {
           this.isCreatingUser = false;
         });

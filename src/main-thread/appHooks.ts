@@ -118,11 +118,7 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
             );
             mainThreadState.ad4mCore.initControllers();
             await mainThreadState.ad4mCore.initLanguages();
-            //Stop loading screen
-            mainThreadState.mainWindow!.webContents.send(
-              "setGlobalLoading",
-              false
-            );
+
             //Tell the UI that agent has been created/logged in
             mainThreadState.mainWindow!.webContents.send(
               "ad4mAgentInit",

@@ -266,6 +266,8 @@ export default defineComponent({
           links: [],
         } as PerspectiveInput);
       }
+      
+      this.appStore.setGlobalLoading(false);
     });
 
     window.api.receive("unlockedStateOff", () => {
