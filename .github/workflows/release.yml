@@ -215,7 +215,8 @@ jobs:
 
   prepare_release:
     name: Prepare release draft
-    needs: [build_linux, build_macos]
+    # needs: [build_linux, build_macos]
+    needs: [build_windows]
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
