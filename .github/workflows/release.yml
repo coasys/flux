@@ -68,8 +68,6 @@ jobs:
           echo ::set-output name=version::$pkgver
       - name: Install deps
         run: yarn install
-      - name: Build languages
-        run: yarn run get-languages
       - name: Build app
         run: yarn run release
         env:
