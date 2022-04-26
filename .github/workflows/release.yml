@@ -4,7 +4,9 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - window-build-error
+      - master
+    tags:
+      - 'v*'
 
 jobs:
   build_macos:
