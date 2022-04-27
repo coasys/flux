@@ -4,14 +4,12 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - master
-    tags:
-      - 'v*'
+      - macos-10
 
 jobs:
   build_macos:
     name: MacOS build
-    runs-on: macos-latest
+    runs-on: macos-10.15
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -87,7 +85,7 @@ jobs:
 
   build_windows:
     name: Windows build
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -141,7 +139,7 @@ jobs:
 
   build_linux:
     name: Linux build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
