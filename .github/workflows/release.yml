@@ -149,6 +149,7 @@ jobs:
           sudo apt-get install -y build-essential libssl-dev libsqlcipher-dev
           rustup target add wasm32-unknown-unknown
       - name: Cache cargo
+        id: cache-cargo
         uses: actions/cache@v3
         with:
           path: |
@@ -164,7 +165,7 @@ jobs:
       - name: Build Holochain
         env:
           SQLCIPHER_STATIC: 1
-        if: steps.cache-primes.outputs.cache-hit != 'true'
+        if: steps.cache-cargo.outputs.cache-hit != 'true'
         run: |
           cargo install lair_keystore --version 0.0.9
           cargo install --locked holochain --git https://github.com/holochain/holochain.git --tag holochain-0.0.127
