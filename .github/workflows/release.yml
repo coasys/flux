@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - ci-cache
-    # tags:
-    #   - 'v*'
+      - master
+    tags:
+      - 'v*'
 
 jobs:
   build_macos:
