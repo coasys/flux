@@ -165,7 +165,6 @@ jobs:
       - name: Build Holochain
         env:
           SQLCIPHER_STATIC: 1
-        if: steps.cache-cargo.outputs.cache-hit != 'true'
         run: |
           cargo install lair_keystore --version 0.0.9
           cargo install --locked holochain --git https://github.com/holochain/holochain.git --tag holochain-0.0.127
