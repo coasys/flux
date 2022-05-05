@@ -59,9 +59,9 @@ export async function getProfile(
 ): Promise<ProfileWithDID | null> {
   return new Promise(async (resolve) => {
     const profileRef = `${profileLangAddress}://${did}`;
-  
+
     const profileExp = await profileCache.get(profileRef);
-  
+
     if (!profileExp) {
       console.warn(
         "Did not get profile expression from cache, calling holochain"
@@ -69,11 +69,11 @@ export async function getProfile(
       const id = setTimeout(() => {
         resolve(null);
       }, 10000);
-  
+
       const profileGqlExp = await getExpressionNoCache(profileRef);
-  
+
       clearTimeout(id);
-  
+
       if (profileGqlExp) {
         const exp = {
           author: profileGqlExp.author!,
@@ -81,9 +81,9 @@ export async function getProfile(
           timestamp: profileGqlExp.timestamp!,
           proof: profileGqlExp.proof!,
         } as ProfileExpression;
-  
+
         await profileCache.set(profileRef, exp);
-        
+
         resolve({
           did,
           ...parseProfile(exp.data.profile),
@@ -97,5 +97,5 @@ export async function getProfile(
         ...parseProfile(profileExp.data.profile),
       });
     }
-  })
+  });
 }
