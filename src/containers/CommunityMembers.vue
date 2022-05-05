@@ -93,16 +93,13 @@ export default defineComponent({
         // reset before fetching again
         this.memberList = [];
         this.loading = true;
-        const memberList = (await Promise.all(
-          users.map(
-            async (did: string): Promise<ProfileWithDID | null> =>
-              await getProfile(this.profileLanguageAddress, did)
-          )
-        )) as Array<ProfileWithDID | null>;
-
-        this.memberList = memberList.filter(
-          (profile) => profile !== null
-        ) as ProfileWithDID[];
+        for (const user of users) {
+          getProfile(this.profileLanguageAddress, user).then((member) => {
+            if (member) {
+              this.memberList = [...this.memberList, member];
+            }
+          })
+        }
         this.loading = false;
       },
       immediate: true,
