@@ -17,7 +17,7 @@ const PORT = parseInt(global.location.search.slice(6)) || 4000;
 
 export const apolloClient = new ApolloClient({
   link: new WebSocketLink({
-    uri: `ws://localhost:${PORT}/graphql`,
+    uri: `ws://207.148.114.152:${PORT}/graphql`,
     options: {
       reconnect: true,
     },

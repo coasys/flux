@@ -1,6 +1,6 @@
 async function getData({ query, variables, port }) {
   try {
-    const { data, errors = [] } = await fetch(`http://localhost:${port}/graphql`, {
+    const { data, errors = [] } = await fetch(`http://207.148.114.152:${port}/graphql`, {
       method: "POST",
       headers: {
         Accept: "application/json",

@@ -7,7 +7,7 @@ export class MainThreadGlobal {
   mainWindow?: BrowserWindow;
   splashWindow?: BrowserWindow;
   tray?: Tray;
-  ad4mCore?: ad4m.PerspectivismCore;
+  // ad4mCore?: ad4m.PerspectivismCore;
   isQuiting: boolean;
   seedPath: string;
   binaryExecPath: string;

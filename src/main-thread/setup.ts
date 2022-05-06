@@ -9,21 +9,21 @@ export function setup(mainThreadState: MainThreadGlobal): void {
     process.on("message", async (data) => {
       if (data === "graceful-exit") {
         console.warn("GRACEFUL-EXIT MESSAGE");
-        await mainThreadState.ad4mCore!.exit();
+        // await mainThreadState.ad4mCore!.exit();
         app.quit();
       }
     });
   } else {
     process.on("SIGTERM", async () => {
       console.warn("SIGTERM SIGNAL");
-      await mainThreadState.ad4mCore?.exit();
-      mainThreadState.ad4mCore = undefined;
+      // await mainThreadState.ad4mCore?.exit();
+      // mainThreadState.ad4mCore = undefined;
       app.quit();
     });
     process.on("SIGINT", async () => {
       console.warn("SIGINT SIGNAL");
-      await mainThreadState.ad4mCore?.exit();
-      mainThreadState.ad4mCore = undefined;
+      // await mainThreadState.ad4mCore?.exit();
+      // mainThreadState.ad4mCore = undefined;
       app.quit();
     });
   }

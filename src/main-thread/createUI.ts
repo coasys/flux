@@ -130,9 +130,9 @@ function createTray(mainThreadState: MainThreadGlobal): void {
         label: "Quit",
         click: async () => {
           mainThreadState.isQuiting = true;
-          if (mainThreadState.ad4mCore) {
-            await mainThreadState.ad4mCore!.exit();
-          }
+          // if (mainThreadState.ad4mCore) {
+          //   await mainThreadState.ad4mCore!.exit();
+          // }
           app.quit();
         },
       },

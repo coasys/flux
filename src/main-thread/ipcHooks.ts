@@ -56,10 +56,10 @@ export function registerIpcHooks(mainThreadState: MainThreadGlobal): void {
 
   ipcMain.on("quitApp", async () => {
     console.log("Got quitApp ipc signal");
-    if (mainThreadState.ad4mCore) {
-      await mainThreadState.ad4mCore.exit();
-    }
-    mainThreadState.ad4mCore = undefined;
+    // if (mainThreadState.ad4mCore) {
+    //   await mainThreadState.ad4mCore.exit();
+    // }
+    // mainThreadState.ad4mCore = undefined;
     app.quit();
   });
 }
