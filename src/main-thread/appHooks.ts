@@ -7,7 +7,7 @@ import { autoUpdater } from "electron-updater";
 import { MainThreadGlobal } from "./globals";
 import { createMainWindow, createSplashScreen } from "./createUI";
 import getPort from "get-port";
-import { ad4mClient } from "@/app";
+// import { ad4mClient } from "@/app";
 
 export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
   if (!fs.existsSync(path.join(app.getPath("userData"), "dontDelete-0.2.17"))) {
@@ -162,9 +162,9 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
       //     }
       //   });
 
-      const status = await ad4mClient.agent.status();
+      // const status = await ad4mClient.agent.status();
 
-      console.log("\x1b[36m%s\x1b[0m", "Starting main UI window\n\n", status);
+      console.log("\x1b[36m%s\x1b[0m", "Starting main UI window\n\n");
 
       await createMainWindow(mainThreadState, gqlPort);
 
@@ -174,7 +174,7 @@ export function registerAppHooks(mainThreadState: MainThreadGlobal): void {
         true
       );
 
-      console.log("\x1b[32m", "\n\nControllers init complete!\n\n");
+      console.log("\x1b[32m", "\n\nad4m agent init send!\n\n");
 
       //Check for updates
       if (app.isPackaged) {
