@@ -11,18 +11,13 @@ on:
 jobs:
   build_macos:
     name: MacOS build
-    runs-on: macos-latest
+    runs-on: macos-10.15
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           override: true
           toolchain: 1.58.1
-      # - name: Prepare cache directory
-      #   run: mkdir ./resources/temp
-      # - uses: Swatinem/rust-cache@v1
-      #   with:
-      #     working-directory: ./resources/temp/holochain
       - name: Install depedencies
         env:
           LDFLAGS: "-L/usr/local/opt/openssl/lib"
@@ -31,6 +26,20 @@ jobs:
         run: |
           brew install libsodium openssl
           rustup target add wasm32-unknown-unknown
+      - name: Cache cargo
+        id: cache-cargo
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+            ${{ runner.os }}-cargo
       - name: Build Holochain
         env:
           SQLCIPHER_STATIC: 1
@@ -38,25 +47,10 @@ jobs:
           CPPFLAGS: "-I/usr/local/opt/openssl/include"
           PKG_CONFIG_PATH: "/usr/local/opt/openssl/lib/pkgconfig"
         run: |
-          cargo install lair_keystore --version 0.0.9
-          cargo install --locked holochain --git https://github.com/holochain/holochain.git --tag holochain-0.0.127
-          cargo install holochain_cli --version 0.0.28
+          (cargo install lair_keystore --version 0.0.9 || true)
+          (cargo install --locked holochain --git https://github.com/holochain/holochain.git --tag holochain-0.0.127 || true)
+          (cargo install holochain_cli --version 0.0.28 || true)
           ./scripts/copy-hc.sh
-      - name: Cache cargo registry
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-      - name: Cache cargo index
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/git
-          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
-      - name: Cache cargo bin
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/bin
-          key: ${{ runner.os }}-cargo-bin-${{ hashFiles('**/Cargo.lock') }}
       - name: Install Node.js, NPM & Yarn
         uses: actions/setup-node@v2
         with:
@@ -87,23 +81,34 @@ jobs:
 
   build_windows:
     name: Windows build
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: 1.58.1
-      - uses: Swatinem/rust-cache@v1
+      - name: Cache cargo
+        id: cache-cargo
+        uses: actions/cache@v3
         with:
-          working-directory: ./resources/temp/holochain
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+            ${{ runner.os }}-cargo
       - name: Build Holochain
         env:
           SQLCIPHER_STATIC: 1
         run: |
           rustup target add wasm32-unknown-unknown
-          cargo install lair_keystore --version 0.0.9
-          cargo install --locked holochain --git https://github.com/holochain/holochain.git --tag holochain-0.0.127
-          cargo install holochain_cli --version 0.0.28
+          (cargo install lair_keystore --version 0.0.9 || true)
+          (cargo install --locked holochain --git https://github.com/holochain/holochain.git --tag holochain-0.0.127 || true)
+          (cargo install holochain_cli --version 0.0.28 || true)
           
           mkdir resources/win32
 
@@ -141,46 +146,40 @@ jobs:
 
   build_linux:
     name: Linux build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           override: true
           toolchain: 1.58.1
-      # - name: Prepare cache directory
-      #   run: mkdir ./resources/temp/holochain
-      # - uses: Swatinem/rust-cache@v1
-      #   with:
-      #     working-directory: ./resources/temp/holochain
       - name: Install depedencies
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential libssl-dev libsqlcipher-dev
           rustup target add wasm32-unknown-unknown
+      - name: Cache cargo
+        id: cache-cargo
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+            ${{ runner.os }}-cargo
       - name: Build Holochain
         env:
           SQLCIPHER_STATIC: 1
         run: |
-          cargo install lair_keystore --version 0.0.9
-          cargo install --locked holochain --git https://github.com/holochain/holochain.git --tag holochain-0.0.127
-          cargo install holochain_cli --version 0.0.28
+          (cargo install lair_keystore --version 0.0.9 || true)
+          (cargo install --locked holochain --git https://github.com/holochain/holochain.git --tag holochain-0.0.127 || true)
+          (cargo install holochain_cli --version 0.0.28 || true)
           ./scripts/copy-hc.sh
-      - name: Cache cargo registry
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-      - name: Cache cargo index
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/git
-          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
-      - name: Cache cargo bin
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/bin
-          key: ${{ runner.os }}-cargo-bin-${{ hashFiles('**/Cargo.lock') }}
       - name: Install Node.js, NPM & Yarn
         uses: actions/setup-node@v2
         with:
