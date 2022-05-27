@@ -1,13 +1,7 @@
 <template>
   <div class="left-nav__bottom-section">
     <j-tooltip id="settings" title="Settings">
-      <j-button
-        size="xl"
-        circle
-        square
-        variant="ghost"
-        @click="goToSettings"
-      >
+      <j-button size="xl" circle square variant="ghost" @click="goToSettings">
         <j-icon size="lg" name="gear"></j-icon>
       </j-button>
     </j-tooltip>
@@ -24,14 +18,6 @@ export default defineComponent({
   setup() {
     const appStore = useAppStore();
     const userStore = useUserStore();
-
-    onBeforeMount(() => {
-      window.api.receive("getCleanState", (data: string) => {
-        localStorage.clear();
-
-        window.api.send("quitApp");
-      });
-    });
 
     return {
       appStore,
