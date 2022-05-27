@@ -3,7 +3,7 @@
     <router-link
       :to="{
         name: 'home',
-        params: { did }
+        params: { did },
       }"
       custom
       v-slot="{ navigate }"
@@ -35,20 +35,20 @@ export default defineComponent({
 
     return {
       did: userStore.agent.did,
-      userStore
-    }
+      userStore,
+    };
   },
   methods: {
     ...mapActions(useAppStore, ["setShowCreateCommunity"]),
   },
   computed: {
-        userProfile(): Profile | null {
+    userProfile(): Profile | null {
       return this.userStore.profile;
     },
     userDid(): string {
       return this.userStore.agent.did!;
     },
-  }
+  },
 });
 </script>
 

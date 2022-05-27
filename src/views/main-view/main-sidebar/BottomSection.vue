@@ -1,13 +1,7 @@
 <template>
   <div class="left-nav__bottom-section">
     <j-tooltip id="settings" title="Settings">
-      <j-button
-        size="xl"
-        circle
-        square
-        variant="ghost"
-        @click="goToSettings"
-      >
+      <j-button size="xl" circle square variant="ghost" @click="goToSettings">
         <j-icon size="lg" name="gear"></j-icon>
       </j-button>
     </j-tooltip>

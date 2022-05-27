@@ -57,36 +57,45 @@ export async function getProfile(
   profileLangAddress: string,
   did: string
 ): Promise<ProfileWithDID | null> {
-  const profileRef = `${profileLangAddress}://${did}`;
+  return new Promise(async (resolve) => {
+    const profileRef = `${profileLangAddress}://${did}`;
 
-  const profileExp = await profileCache.get(profileRef);
+    const profileExp = await profileCache.get(profileRef);
 
-  if (!profileExp) {
-    console.warn(
-      "Did not get profile expression from cache, calling holochain"
-    );
-    const profileGqlExp = await getExpressionNoCache(profileRef);
+    if (!profileExp) {
+      console.warn(
+        "Did not get profile expression from cache, calling holochain"
+      );
+      const id = setTimeout(() => {
+        resolve(null);
+      }, 10000);
 
-    if (profileGqlExp) {
-      const exp = {
-        author: profileGqlExp.author!,
-        data: JSON.parse(profileGqlExp.data),
-        timestamp: profileGqlExp.timestamp!,
-        proof: profileGqlExp.proof!,
-      } as ProfileExpression;
+      const profileGqlExp = await getExpressionNoCache(profileRef);
 
-      await profileCache.set(profileRef, exp);
-      return {
-        did,
-        ...parseProfile(exp.data.profile),
-      };
+      clearTimeout(id);
+
+      if (profileGqlExp) {
+        const exp = {
+          author: profileGqlExp.author!,
+          data: JSON.parse(profileGqlExp.data),
+          timestamp: profileGqlExp.timestamp!,
+          proof: profileGqlExp.proof!,
+        } as ProfileExpression;
+
+        await profileCache.set(profileRef, exp);
+
+        resolve({
+          did,
+          ...parseProfile(exp.data.profile),
+        });
+      } else {
+        resolve(null);
+      }
     } else {
-      return null;
+      resolve({
+        did,
+        ...parseProfile(profileExp.data.profile),
+      });
     }
-  } else {
-    return {
-      did,
-      ...parseProfile(profileExp.data.profile),
-    };
-  }
+  });
 }
