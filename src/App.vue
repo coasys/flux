@@ -102,7 +102,7 @@ export default defineComponent({
       }
     });
 
-    const PORT = parseInt(global.location.search.slice(6))
+    const PORT = parseInt(global.location.search.slice(6));
 
     //Start expression web worker to try and get the expression data pointed to in link target
     const expressionWorker = new Worker("pollingWorker.js");
@@ -156,7 +156,7 @@ export default defineComponent({
           variables: { url: link.data!.target! },
           name: "Expression signal get",
           dataKey: "expression",
-          port: PORT
+          port: PORT,
         });
       } else if (link.data!.predicate! === MEMBER) {
         const did = link.data!.target!.split("://")[1];
@@ -249,70 +249,8 @@ export default defineComponent({
       show: false,
       message: "",
     });
+
     this.appStore.setGlobalLoading(false);
-
-    window.api.send("getLangPath");
-
-    window.api.receive("ad4mAgentInit", async (isAlreadySignedUp: boolean) => {
-      if (!isAlreadySignedUp) {
-        console.log(
-          "New agent and thus creating a Flux perspective & updating public profile"
-        );
-        const agentPerspective = await ad4mClient.perspective.add(
-          "My flux perspective"
-        );
-        await this.userStore.addFluxPerspectiveId(agentPerspective.uuid);
-        await ad4mClient.agent.updatePublicPerspective({
-          links: [],
-        } as PerspectiveInput);
-      }
-    });
-
-    window.api.receive("unlockedStateOff", () => {
-      this.userStore.updateAgentLockState(false);
-    });
-
-    window.api.receive("clearMessages", () => {
-      this.dataStore.clearMessages();
-    });
-
-    window.api.receive("getLangPathResponse", (data: string) => {
-      // console.log(`Received language path from main thread: ${data}`);
-      this.appStore.setLanguagesPath(data);
-    });
-
-    window.api.receive("windowState", (data: string) => {
-      console.log(`setWindowState: ${data}`);
-      //@ts-ignore
-      this.appStore.setWindowState(data);
-    });
-
-    window.api.receive("update_available", () => {
-      this.appStore.setUpdateState({ updateState: "available" });
-    });
-
-    window.api.receive("update_not_available", () => {
-      this.appStore.setUpdateState({ updateState: "not-available" });
-    });
-
-    window.api.receive("update_downloaded", () => {
-      this.appStore.setUpdateState({ updateState: "downloaded" });
-    });
-
-    window.api.receive("download_progress", () => {
-      this.appStore.setUpdateState({ updateState: "downloading" });
-    });
-
-    window.api.receive("setGlobalLoading", (val: boolean) => {
-      this.appStore.setGlobalLoading(val);
-    });
-
-    window.api.receive(
-      "globalError",
-      (payload: { show: boolean; message: string }) => {
-        this.appStore.setGlobalError(payload);
-      }
-    );
 
     ad4mClient.agent.status().then((status) => {
       this.userStore.updateAgentStatus(status);
