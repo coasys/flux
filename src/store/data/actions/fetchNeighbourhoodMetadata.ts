@@ -12,6 +12,8 @@ export interface Payload {
 
 const expressionWorker = new Worker("pollingWorker.js");
 
+const PORT = parseInt(global.location.search.slice(6))
+
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async (communityId: string): Promise<void> => {
   const dataStore = useDataStore();
@@ -43,8 +45,10 @@ export default async (communityId: string): Promise<void> => {
       variables: {
         url: sortedLinks[sortedLinks.length - 1].data!.target!,
       },
+      callbackData: { communityId: community.neighbourhood.perspective.uuid },
       name: "Get group expression data",
       dataKey: "expression",
+      port: PORT
     });
 
     expressionWorker.onerror = function (e) {
@@ -57,13 +61,13 @@ export default async (communityId: string): Promise<void> => {
       console.log("Got new group expression data for community", groupExpData);
       //Update the community with the new group data
       dataStore.updateCommunityMetadata({
-        communityId: community.neighbourhood.perspective.uuid,
+        communityId: e.data.callbackData.communityId, 
         name: groupExpData["name"],
         description: groupExpData["description"],
         image: groupExpData["image"],
         thumbnail: groupExpData["thumnail"],
         groupExpressionRef:
-          groupExpressionLinks[groupExpressionLinks.length - 1].data!.target,
+          sortedLinks[sortedLinks.length - 1].data!.target,
       });
     });
   }

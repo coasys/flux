@@ -1,8 +1,6 @@
-const API_ENDPOINT = "http://localhost:4000/graphql";
-
-async function getData({ query, variables }) {
+async function getData({ query, variables, port }) {
   try {
-    const { data, errors = [] } = await fetch(API_ENDPOINT, {
+    const { data, errors = [] } = await fetch(`http://localhost:${port}/graphql`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -61,6 +59,7 @@ function pollData(params) {
     /// Hacky solution that allows for the updating of from/until dates in worker loops for perspective link queries
     resetUntil = false,
     resetFrom = false,
+    port
   } = params;
 
   // remove poll if we are over our retries
@@ -79,7 +78,7 @@ function pollData(params) {
     variables.query.fromDate = new Date();
   }
 
-  getData({ query, variables })
+  getData({ query, variables, port })
     .then((res) => {
       console.log("Polling ", retries, name, " Got response: ", res);
 

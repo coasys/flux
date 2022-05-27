@@ -18,7 +18,16 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
     cp `which lair-keystore` ./resources/darwin && echo "Copied lair to resources"
     [ -f "./resources/darwin/hc" ] && rm ./resources/darwin/hc
     cp `which hc` ./resources/darwin/ && echo "Copied hc to resources"
+
+elif [[ "$OSTYPE" == "win32"* ]]; then
+    [ ! -d "./resources/win32" ] && mkdir "./resources/win32"
+    [ -f "./resources/win32/holochain" ] && rm ./resources/win32/holochain
+    cp `which holochain` ./resources/win32 && echo "Copied Holochain to resources"
+    [ -f "./resources/win32/lair-keystore" ] && rm ./resources/win32/lair-keystore
+    cp `which lair-keystore` ./resources/win32 && echo "Copied lair to resources"
+    [ -f "./resources/win32/hc" ] && rm ./resources/win32/hc
+    cp `which hc` ./resources/win32/ && echo "Copied hc to resources"
     
 else
-    echo "Sorry your OS type is not supported"
+    echo "Sorry your OS type is not supported $OSTYPE"
 fi

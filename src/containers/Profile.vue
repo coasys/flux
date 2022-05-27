@@ -64,7 +64,9 @@ export default defineComponent({
         const bioLink = profilePerspective.perspective?.links.find(
           (e) => e.data.predicate === "sioc://has_bio"
         ) as LinkExpression;
-        this.bio = bioLink.data.target.split("://")[1];
+        if (bioLink) {
+          this.bio = bioLink.data.target.split("://")[1];
+        }
       },
       immediate: true,
     },

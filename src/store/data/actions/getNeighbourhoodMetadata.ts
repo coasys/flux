@@ -15,6 +15,8 @@ export interface Payload {
 
 const expressionWorker = new Worker("pollingWorker.js");
 
+const PORT = parseInt(global.location.search.slice(6))
+
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async ({ communityId }: Payload): Promise<Worker> => {
   const dataStore = useDataStore();
@@ -37,6 +39,7 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
         }),
       },
       name: `Get group expression links for community: ${community.neighbourhood.name}`,
+      port: PORT
     });
 
     groupExpressionWorker.onerror = function (e) {
@@ -69,6 +72,7 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
               },
               name: "Get group expression data",
               dataKey: "expression",
+              port: PORT
             });
 
             expressionWorker.onerror = function (e) {

@@ -4,7 +4,8 @@ import path from "path";
 import { MainThreadGlobal } from "./globals";
 
 export async function createMainWindow(
-  mainThreadState: MainThreadGlobal
+  mainThreadState: MainThreadGlobal,
+  gqlPort: number
 ): Promise<void> {
   createTray(mainThreadState);
 
@@ -62,14 +63,14 @@ export async function createMainWindow(
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
     await mainThreadState.mainWindow.loadURL(
-      process.env.WEBPACK_DEV_SERVER_URL as string
+      `${process.env.WEBPACK_DEV_SERVER_URL as string}?port=${gqlPort}`
     );
     if (!process.env.IS_TEST)
       mainThreadState.mainWindow.webContents.openDevTools();
   } else {
     createProtocol("app");
     // Load the index.html when not in development
-    await mainThreadState.mainWindow.loadURL(`file://${__dirname}/index.html`);
+    await mainThreadState.mainWindow.loadURL(`file://${__dirname}/index.html?port=${gqlPort}`);
   }
 
   mainThreadState.mainWindow.show();

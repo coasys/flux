@@ -12,6 +12,8 @@ import { profileCache } from "@/app";
 
 const expressionWorker = new Worker("pollingWorker.js");
 
+const PORT = parseInt(global.location.search.slice(6))
+
 export default async function (id: string): Promise<Worker> {
   const dataStore = useDataStore();
   const appStore = useAppStore();
@@ -39,6 +41,7 @@ export default async function (id: string): Promise<Worker> {
         },
         name: `Community members for ${neighbourhood.perspective.name}`,
         dataKey: `perspectiveQueryLinks`,
+        port: PORT
       });
 
       profileLinksWorker.onerror = function (e) {
@@ -66,6 +69,7 @@ export default async function (id: string): Promise<Worker> {
               callbackData: { link: profileLink },
               name: `Get community member expression data from link ${neighbourhood.perspective.name}`,
               dataKey: "expression",
+              port: PORT
             });
           }
         }

@@ -77,6 +77,7 @@ export async function createNeighbourhoodMeta(
   const perspectiveSnapshot = await ad4mClient.perspective.snapshotByUUID(
     perspective.uuid
   );
+  await ad4mClient.perspective.remove(perspective.uuid);
   const links = [];
   for (const link in perspectiveSnapshot!.links) {
     //Deep copy the object... so we can delete __typename fields inject by apollo client

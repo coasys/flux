@@ -34,6 +34,15 @@ describe("Create Neighbourhood Meta", () => {
       .mockImplementation(async (perspective, link) => {
         return addChannelCreateLink;
       });
+
+    // @ts-ignore
+    jest
+      .spyOn(ad4mClient.perspective, "remove")
+      .mockImplementation(async () => {
+        return {
+          perspectiveRemove: true
+        };
+      });
   });
 
   test("Create Neighbourhood Meta - Success", async () => {

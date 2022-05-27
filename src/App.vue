@@ -105,6 +105,8 @@ export default defineComponent({
       }
     });
 
+    const PORT = parseInt(global.location.search.slice(6))
+
     //Start expression web worker to try and get the expression data pointed to in link target
     const expressionWorker = new Worker("pollingWorker.js");
 
@@ -147,7 +149,19 @@ export default defineComponent({
       perspective: string
     ) => {
       console.debug("GOT INCOMING MESSAGE SIGNAL", link, perspective);
-      if (link.data!.predicate! === MEMBER) {
+      if (link.data!.predicate! === EXPRESSION) {
+        expressionWorker.postMessage({
+          id: link.data!.target!,
+          retry: expressionGetRetries,
+          callbackData: { perspective, link },
+          interval: expressionGetDelayMs,
+          query: print(GET_EXPRESSION),
+          variables: { url: link.data!.target! },
+          name: "Expression signal get",
+          dataKey: "expression",
+          port: PORT
+        });
+      } else if (link.data!.predicate! === MEMBER) {
         const did = link.data!.target!.split("://")[1];
         console.log("Got new member in signal! Parsed out did: ", did);
         if (did) {
@@ -209,7 +223,6 @@ export default defineComponent({
       },
       { immediate: true, deep: true }
     );
-
     return {
       toast: computed(() => appStore.toast),
       setToast: (payload: ToastState) => appStore.setToast(payload),
