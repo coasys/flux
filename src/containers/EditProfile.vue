@@ -116,94 +116,13 @@ export default defineComponent({
   methods: {
     async updateProfile() {
       this.isUpdatingProfile = true;
-      const resizedImage = this.profilePicture
-        ? await resizeImage(dataURItoBlob(this.profilePicture as string), 100)
-        : undefined;
-      const thumbnail = this.profilePicture
-        ? await blobToDataURL(resizedImage!)
-        : undefined;
-
-      const userPerspective = this.userStore.getFluxPerspectiveId;
-
-      let filteredLinks = await getAgentLinks(this.userDid, userPerspective!);
-
-      if (this.profileBgChanged) {
-        const proBgLink = filteredLinks.find(
-          (e) => e.data.predicate === "sioc://has_image"
-        );
-
-        if (proBgLink) {
-          const link = removeTypeName(proBgLink);
-          await ad4mClient.perspective.removeLink(userPerspective!, link);
-        }
-
-        filteredLinks = filteredLinks.filter(
-          (e) => e.data.predicate !== "sioc://has_image"
-        );
-        const image = await ad4mClient.expression.create(
-          this.profileBg,
-          NOTE_IPFS_EXPRESSION_OFFICIAL
-        );
-
-        const profileBgLinked = await ad4mClient.perspective.addLink(
-          userPerspective!,
-          new Link({
-            source: "flux://profile",
-            target: image,
-            predicate: "sioc://has_image",
-          })
-        );
-
-        filteredLinks.push(profileBgLinked);
-      }
-
-      if (this.bioChanged) {
-        const bioLink = filteredLinks.find(
-          (e) => e.data.predicate === "sioc://has_bio"
-        );
-
-        if (bioLink) {
-          const link = removeTypeName(bioLink);
-          await ad4mClient.perspective.removeLink(userPerspective!, link);
-        }
-
-        filteredLinks = filteredLinks.filter(
-          (e) => e.data.predicate !== "sioc://has_bio"
-        );
-
-        const linked = await ad4mClient.perspective.addLink(
-          userPerspective!,
-          new Link({
-            source: "flux://profile",
-            target: `text://${this.bio}`,
-            predicate: "sioc://has_bio",
-          })
-        );
-
-        filteredLinks.push(linked);
-      }
-
-      const links = [];
-      //Remove __typename fields so the next gql does not fail
-      for (const link of filteredLinks) {
-        //Deep copy the object... so we can delete __typename fields inject by apollo client
-        const newLink = JSON.parse(JSON.stringify(link));
-        newLink.__typename = undefined;
-        newLink.data.__typename = undefined;
-        newLink.proof.__typename = undefined;
-
-        links.push(newLink);
-      }
-      const agent = await ad4mClient.agent.updatePublicPerspective({
-        links,
-      } as PerspectiveInput);
 
       this.userStore
         .updateProfile({
           username: this.username,
           profilePicture: this.profilePicture,
-          thumbnail,
           bio: this.bio,
+          profileBg: this.profileBg
         })
         .then(() => {
           this.$emit("submit");
