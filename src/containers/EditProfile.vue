@@ -38,21 +38,11 @@
 
 <script lang="ts">
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 import { Profile } from "@/store/types";
 import { useUserStore } from "@/store/user";
-import {
-  blobToDataURL,
-  dataURItoBlob,
-  resizeImage,
-} from "@/core/methods/createProfile";
-import { Link, PerspectiveInput } from "@perspect3vism/ad4m";
-import { ad4mClient } from "@/app";
 import { useAppStore } from "@/store/app";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
-import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
-import getAgentLinks from "@/utils/getAgentLinks";
-import removeTypeName from "@/utils/removeTypeName";
 
 export default defineComponent({
   emits: ["cancel", "submit"],

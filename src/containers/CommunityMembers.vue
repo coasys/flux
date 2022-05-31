@@ -96,7 +96,7 @@ export default defineComponent({
         const memberList = (await Promise.all(
           users.map(
             async (did: string): Promise<ProfileWithDID | null> =>
-              await getProfile(this.profileLanguageAddress, did)
+              await getProfile(did)
           )
         )) as Array<ProfileWithDID | null>;
 

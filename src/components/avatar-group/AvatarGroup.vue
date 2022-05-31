@@ -57,7 +57,7 @@ export default defineComponent({
             .slice(0, 3)
             .map(
               async (did: string): Promise<ProfileWithDID | null> =>
-                await getProfile(this.profileLanguage, did)
+                await getProfile(did)
             )
         );
         this.firstUsers = profiles.filter(

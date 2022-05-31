@@ -1,5 +1,4 @@
 import { useAppStore } from "@/store/app";
-import { ExpressionTypes } from "@/store/types";
 import { useUserStore } from "@/store/user";
 import { RouteLocationNormalizedLoaded, Router } from "vue-router";
 import { useDataStore } from "..";
@@ -58,14 +57,7 @@ export default async ({
     let body = "";
 
     if (isMentioned) {
-      const profileLanguage =
-        community?.neighbourhood.typedExpressionLanguages.find(
-          (t: any) => t.expressionType === ExpressionTypes.ProfileExpression
-        );
-      const profile = await getProfile(
-        profileLanguage!.languageAddress,
-        authorDid
-      );
+      const profile = await getProfile(authorDid);
       const name = profile ? profile.username : "Someone";
 
       title = `${name} mentioned you in #${channel?.neighbourhood.name}}`;

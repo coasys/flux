@@ -8,8 +8,9 @@ import {
 } from "@/constants/profile";
 import { IMAGE, CONTENT_SIZE, CONTENT_URL, THUMBNAIL } from "@/constants/image";
 import { ad4mClient, apolloClient, profileCache } from "@/app";
-import { ExpressionRendered } from "@perspect3vism/ad4m";
+import { ExpressionRendered, LinkExpression } from "@perspect3vism/ad4m";
 import { GET_EXPRESSION } from "@/core/graphql_queries";
+import getAgentLinks from "./getAgentLinks";
 
 interface Image {
   contentUrl: string;
@@ -71,40 +72,106 @@ function getExpressionNoCache(url: string): Promise<ExpressionRendered | null> {
   });
 }
 
-export async function getProfile(
-  profileLangAddress: string,
-  did: string
-): Promise<ProfileWithDID | null> {
-  const profileRef = `${profileLangAddress}://${did}`;
+export async function getProfile(did: string): Promise<ProfileWithDID | null> {
+  const links = await getAgentLinks(did);
 
-  const profileExp = await profileCache.get(profileRef);
+  const profile: Profile = {
+    username: '',
+    bio: '',
+    email: '',
+    givenName: '',
+    familyName: ''
+  };
 
-  if (!profileExp) {
-    console.warn(
-      "Did not get profile expression from cache, calling holochain"
-    );
-    const profileGqlExp = await ad4mClient.expression.get(profileRef);
+  const bioLink = links.find(
+    (e: any) => e.data.predicate === "sioc://has_bio"
+  ) as LinkExpression;
 
-    if (profileGqlExp) {
-      const exp = {
-        author: profileGqlExp.author!,
-        data: JSON.parse(profileGqlExp.data),
-        timestamp: profileGqlExp.timestamp!,
-        proof: profileGqlExp.proof!,
-      } as ProfileExpression;
+  const usernameLink = links.find(
+    (e: any) => e.data.predicate === "sioc://has_username"
+  ) as LinkExpression;
 
-      await profileCache.set(profileRef, exp);
-      return {
-        did,
-        ...parseProfile(exp.data.profile),
-      };
-    } else {
-      return null;
+  const givenNameLink = links.find(
+    (e: any) => e.data.predicate === "sioc://has_given_name"
+  ) as LinkExpression;
+
+  const familyNameLink = links.find(
+    (e: any) => e.data.predicate === "sioc://has_family_name"
+  ) as LinkExpression;
+
+  const profilePictureLink = links.find(
+    (e: any) => e.data.predicate === "sioc://has_profile_image"
+  ) as LinkExpression;
+
+  const thumbnailLink = links.find(
+    (e: any) => e.data.predicate === "sioc://has_profile_thumbnail_image"
+  ) as LinkExpression;
+
+  const emailLink = links.find(
+    (e: any) => e.data.predicate === "sioc://has_email"
+  ) as LinkExpression;
+
+  const bgImageLink = links.find(
+    (e: any) => e.data.predicate === "sioc://has_bg_image"
+  ) as LinkExpression;
+
+  if (bgImageLink) {
+    const expUrl = bgImageLink.data.target;
+    const image = await ad4mClient.expression.get(expUrl);
+
+    if (image) {
+      if (bgImageLink.data.source === "flux://profile") {
+        profile.profileBg = image.data.slice(1, -1);
+      }
     }
   } else {
-    return {
-      did,
-      ...parseProfile(profileExp.data.profile),
-    };
+    profile.profileBg = ''
   }
+
+  profile!.bio = bioLink ? bioLink.data.target : '';
+
+  if (usernameLink) {
+    profile!.username = usernameLink.data.target;
+  }
+
+  if (givenNameLink) {
+    profile!.givenName = givenNameLink.data.target;
+  }
+
+  if (familyNameLink) {
+    profile!.familyName = familyNameLink.data.target;
+  }
+  
+  if (profilePictureLink) {
+    const expUrl = profilePictureLink.data.target;
+    const image = await ad4mClient.expression.get(expUrl);
+
+    if (image) {
+      if (profilePictureLink.data.source === "flux://profile") {
+        profile!.profilePicture = image.data.slice(1, -1);
+      }
+    }
+  } else {
+    profile!.profilePicture = '';
+  }
+
+  if (thumbnailLink) {
+    const expUrl = thumbnailLink.data.target;
+    const image = await ad4mClient.expression.get(expUrl);
+
+    if (image) {
+      if (thumbnailLink.data.source === "flux://profile") {
+        profile!.thumbnailPicture = image.data.slice(1, -1);
+      }
+    }
+  } else {
+    profile!.thumbnailPicture = '';
+  }
+  
+  if (emailLink) {
+    profile!.email = emailLink.data.target;
+  }
+
+  return {...profile, did}
 }
+

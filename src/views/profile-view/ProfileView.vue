@@ -130,7 +130,7 @@
 <script lang="ts">
 import { ad4mClient } from "@/app";
 import { useDataStore } from "@/store/data";
-import { ExpressionTypes, ModalsState, Profile } from "@/store/types";
+import { ExpressionTypes, ModalsState, Profile, ProfileWithDID } from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
 import { Link, LinkExpression, PerspectiveInput } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
@@ -162,7 +162,7 @@ export default defineComponent({
   },
   data() {
     return {
-      profile: {} as Profile,
+      profile: {} as ProfileWithDID | null,
       showAddlinkModal: false,
       showEditlinkModal: false,
       showJoinCommunityModal: false,
@@ -211,21 +211,6 @@ export default defineComponent({
             "text://",
             ""
           );
-        } else if (predicate === "has_bg_image") {
-          try {
-            const expUrl = e.data.target;
-            const image = await ad4mClient.expression.get(expUrl);
-
-            if (image) {
-              preArea[e.data.source][predicate] = image.data.slice(1, -1);
-
-              if (e.data.source === "flux://profile") {
-                this.profilebg = image.data.slice(1, -1);
-              }
-            }
-          } catch (e) {
-            console.log("Error encountered while parsing image");
-          }
         } else if (predicate === "has_images") {
           try {
             const expUrl = e.data.target;
@@ -254,94 +239,7 @@ export default defineComponent({
 
       console.log('links', links)
 
-      const bioLink = links.find(
-        (e: any) => e.data.predicate === "sioc://has_bio"
-      ) as LinkExpression;
-
-      const usernameLink = links.find(
-        (e: any) => e.data.predicate === "sioc://has_username"
-      ) as LinkExpression;
-
-      const givenNameLink = links.find(
-        (e: any) => e.data.predicate === "sioc://has_given_name"
-      ) as LinkExpression;
-
-      const familyNameLink = links.find(
-        (e: any) => e.data.predicate === "sioc://has_family_name"
-      ) as LinkExpression;
-
-      const profilePictureLink = links.find(
-        (e: any) => e.data.predicate === "sioc://has_profile_image"
-      ) as LinkExpression;
-
-      const thumbnailLink = links.find(
-        (e: any) => e.data.predicate === "sioc://has_profile_thumbnail_image"
-      ) as LinkExpression;
-
-      const emailLink = links.find(
-        (e: any) => e.data.predicate === "sioc://has_email"
-      ) as LinkExpression;
-
-      const bgImageLink = links.find(
-        (e: any) => e.data.predicate === "sioc://has_bg_image"
-      ) as LinkExpression;
-
-      if (bgImageLink) {
-        const expUrl = bgImageLink.data.target;
-        const image = await ad4mClient.expression.get(expUrl);
-
-        if (image) {
-          if (bgImageLink.data.source === "flux://profile") {
-            this.profilebg = image.data.slice(1, -1);
-          }
-        }
-      } else {
-        this.profilebg = ''
-      }
-
-      this.profile!.bio = bioLink ? bioLink.data.target : '';
-
-      if (usernameLink) {
-        this.profile!.username = usernameLink.data.target;
-      }
-
-      if (givenNameLink) {
-        this.profile!.givenName = givenNameLink.data.target;
-      }
-
-      if (familyNameLink) {
-        this.profile!.familyName = familyNameLink.data.target;
-      }
-      
-      if (profilePictureLink) {
-        const expUrl = profilePictureLink.data.target;
-        const image = await ad4mClient.expression.get(expUrl);
-
-        if (image) {
-          if (profilePictureLink.data.source === "flux://profile") {
-            this.profile!.profilePicture = image.data.slice(1, -1);
-          }
-        }
-      } else {
-        this.profile!.profilePicture = '';
-      }
-
-      if (thumbnailLink) {
-        const expUrl = thumbnailLink.data.target;
-        const image = await ad4mClient.expression.get(expUrl);
-
-        if (image) {
-          if (thumbnailLink.data.source === "flux://profile") {
-            this.profile!.thumbnailPicture = image.data.slice(1, -1);
-          }
-        }
-      } else {
-        this.profile!.thumbnailPicture = '';
-      }
-      
-      if (emailLink) {
-        this.profile!.email = emailLink.data.target;
-      }
+      this.profile = await getProfile(did || me.did);
 
       console.log("profile", this.profileLinks, this.profile);
     },

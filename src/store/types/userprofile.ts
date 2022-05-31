@@ -9,6 +9,7 @@ export class Profile {
   profilePicture?: string;
   thumbnailPicture?: string;
   bio?: string;
+  profileBg?: string;
 }
 
 export class ProfileWithDID extends Profile {
