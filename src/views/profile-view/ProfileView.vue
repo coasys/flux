@@ -282,9 +282,24 @@ export default defineComponent({
         (e: any) => e.data.predicate === "sioc://has_email"
       ) as LinkExpression;
 
-      if (bioLink) {
-        this.profile!.bio = bioLink.data.target;
+      const bgImageLink = links.find(
+        (e: any) => e.data.predicate === "sioc://has_bg_image"
+      ) as LinkExpression;
+
+      if (bgImageLink) {
+        const expUrl = bgImageLink.data.target;
+        const image = await ad4mClient.expression.get(expUrl);
+
+        if (image) {
+          if (bgImageLink.data.source === "flux://profile") {
+            this.profilebg = image.data.slice(1, -1);
+          }
+        }
+      } else {
+        this.profilebg = ''
       }
+
+      this.profile!.bio = bioLink ? bioLink.data.target : '';
 
       if (usernameLink) {
         this.profile!.username = usernameLink.data.target;
@@ -307,6 +322,8 @@ export default defineComponent({
             this.profile!.profilePicture = image.data.slice(1, -1);
           }
         }
+      } else {
+        this.profile!.profilePicture = '';
       }
 
       if (thumbnailLink) {
@@ -318,6 +335,8 @@ export default defineComponent({
             this.profile!.thumbnailPicture = image.data.slice(1, -1);
           }
         }
+      } else {
+        this.profile!.thumbnailPicture = '';
       }
       
       if (emailLink) {

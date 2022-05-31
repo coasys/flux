@@ -17,6 +17,20 @@ export interface Payload {
   profileBg?: string;
 }
 
+async function removeLink(links: LinkExpression[], link: Link) {
+  const userStore = useUserStore();
+  const userPerspective = userStore.getFluxPerspectiveId;
+
+  const foundLink = links.find(
+    (e) => e.data.predicate === link.predicate
+  );
+
+  if (foundLink) {
+    const link = removeTypeName(foundLink);
+    await ad4mClient.perspective.removeLink(userPerspective!, link);
+  }
+}
+
 async function replaceLink(links: LinkExpression[], newLink: Link) {
   const userStore = useUserStore();
   const userPerspective = userStore.getFluxPerspectiveId;
@@ -72,6 +86,12 @@ export default async (payload: Payload): Promise<void> => {
       }));
     
       tempLinks.push(bioLink);
+    } else {
+      removeLink(links, new Link({
+        source: "flux://profile",
+        target: newProfile.bio,
+        predicate: "sioc://has_bio",
+      }));
     }
 
     const usernameLink = await replaceLink(links, new Link({
