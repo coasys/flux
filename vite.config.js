@@ -2,7 +2,17 @@ import vue from "@vitejs/plugin-vue";
 import path from "path";
 
 export default {
-  plugins: [vue()],
+  plugins: [
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => {
+            return tag.startsWith("j-");
+          },
+        },
+      },
+    }),
+  ],
   define: {
     "process.env": {},
   },
