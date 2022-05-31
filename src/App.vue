@@ -102,7 +102,7 @@ export default defineComponent({
       }
     });
 
-    const PORT = parseInt(global.location.search.slice(6));
+    const PORT = 12000;
 
     //Start expression web worker to try and get the expression data pointed to in link target
     const expressionWorker = new Worker("pollingWorker.js");
