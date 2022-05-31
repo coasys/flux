@@ -37,8 +37,8 @@
               </j-text>
             </j-box>
             <j-box>
-              <j-text nomargin size="500" color="black" v-if="bio">
-                {{ bio }}</j-text
+              <j-text nomargin size="500" color="black" v-if="profile.bio">
+                {{ profile.bio }}</j-text
               >
               <j-text nomargin size="500" color="black" v-else>
                 No bio yet</j-text
@@ -162,8 +162,7 @@ export default defineComponent({
   },
   data() {
     return {
-      profile: null as null | Profile,
-      bio: "",
+      profile: {} as Profile,
       showAddlinkModal: false,
       showEditlinkModal: false,
       showJoinCommunityModal: false,
@@ -192,32 +191,6 @@ export default defineComponent({
       const userStore = useUserStore();
       const userPerspective = userStore.getFluxPerspectiveId;
 
-      if (did === undefined || did === me.did) {
-        this.profile = userStore.getProfile!;
-      } else {
-        const communityId = this.$route.params.communityId as string;
-        const profileLang = useDataStore()
-          .getCommunity(communityId)
-          .neighbourhood.typedExpressionLanguages.find(
-            (t) => t.expressionType === ExpressionTypes.ProfileExpression
-          )?.languageAddress;
-
-        const dataExp = await getProfile(profileLang!, did);
-        console.log(
-          "profile",
-          this.$route,
-          did,
-          me.did,
-          profileLang,
-          dataExp,
-          did || me.did
-        );
-
-        if (dataExp) {
-          this.profile = dataExp;
-        }
-      }
-
       const links = await getAgentLinks(
         did || me.did,
         did === me.did || did === undefined ? userPerspective! : undefined
@@ -238,7 +211,7 @@ export default defineComponent({
             "text://",
             ""
           );
-        } else if (predicate === "has_image") {
+        } else if (predicate === "has_bg_image") {
           try {
             const expUrl = e.data.target;
             const image = await ad4mClient.expression.get(expUrl);
@@ -279,12 +252,76 @@ export default defineComponent({
         (e) => e.id !== "flux://profile"
       );
 
+      console.log('links', links)
+
       const bioLink = links.find(
         (e: any) => e.data.predicate === "sioc://has_bio"
       ) as LinkExpression;
 
+      const usernameLink = links.find(
+        (e: any) => e.data.predicate === "sioc://has_username"
+      ) as LinkExpression;
+
+      const givenNameLink = links.find(
+        (e: any) => e.data.predicate === "sioc://has_given_name"
+      ) as LinkExpression;
+
+      const familyNameLink = links.find(
+        (e: any) => e.data.predicate === "sioc://has_family_name"
+      ) as LinkExpression;
+
+      const profilePictureLink = links.find(
+        (e: any) => e.data.predicate === "sioc://has_profile_image"
+      ) as LinkExpression;
+
+      const thumbnailLink = links.find(
+        (e: any) => e.data.predicate === "sioc://has_profile_thumbnail_image"
+      ) as LinkExpression;
+
+      const emailLink = links.find(
+        (e: any) => e.data.predicate === "sioc://has_email"
+      ) as LinkExpression;
+
       if (bioLink) {
-        this.bio = bioLink.data.target.split("://")[1];
+        this.profile!.bio = bioLink.data.target;
+      }
+
+      if (usernameLink) {
+        this.profile!.username = usernameLink.data.target;
+      }
+
+      if (givenNameLink) {
+        this.profile!.givenName = givenNameLink.data.target;
+      }
+
+      if (familyNameLink) {
+        this.profile!.familyName = familyNameLink.data.target;
+      }
+      
+      if (profilePictureLink) {
+        const expUrl = profilePictureLink.data.target;
+        const image = await ad4mClient.expression.get(expUrl);
+
+        if (image) {
+          if (profilePictureLink.data.source === "flux://profile") {
+            this.profile!.profilePicture = image.data.slice(1, -1);
+          }
+        }
+      }
+
+      if (thumbnailLink) {
+        const expUrl = thumbnailLink.data.target;
+        const image = await ad4mClient.expression.get(expUrl);
+
+        if (image) {
+          if (thumbnailLink.data.source === "flux://profile") {
+            this.profile!.thumbnailPicture = image.data.slice(1, -1);
+          }
+        }
+      }
+      
+      if (emailLink) {
+        this.profile!.email = emailLink.data.target;
       }
 
       console.log("profile", this.profileLinks, this.profile);
