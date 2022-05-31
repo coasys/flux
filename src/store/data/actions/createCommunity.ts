@@ -164,6 +164,7 @@ export default async ({
       userStore.getProfile
     );
 
+    /*
     const createProfileExpression = await createProfile(
       profileExpressionLang.address!,
       userStore.getProfile!
@@ -177,6 +178,7 @@ export default async ({
     });
     console.log("Created profile expression link", addProfileLink);
 
+    */
     const myDid = userStore.getUser!.agent.did!;
 
     const newCommunity = {
