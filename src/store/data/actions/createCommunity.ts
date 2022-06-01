@@ -3,8 +3,8 @@ import { createProfile } from "@/core/methods/createProfile";
 import {
   SOCIAL_CONTEXT_OFFICIAL,
   GROUP_EXPRESSION_OFFICIAL,
-  PROFILE_EXPRESSION_OFFICIAL,
   SHORTFORM_EXPRESSION_OFFICIAL,
+  PROFILE_EXPRESSION_OFFICIAL,
 } from "@/constants/languages";
 
 import { MEMBER } from "@/constants/neighbourhoodMeta";
@@ -129,7 +129,6 @@ export default async ({
       meta
     );
     console.log("Created neighbourhood with result", neighbourhood);
-    createSourcePerspective.sharedUrl = neighbourhood;
 
     //await sleep(10000);
 
@@ -196,7 +195,12 @@ export default async ({
         description: description,
         image: image,
         thumbnail: thumbnail,
-        perspective: createSourcePerspective,
+        perspective: {
+          uuid: createSourcePerspective.uuid,
+          name: createSourcePerspective.name,
+          sharedUrl: neighbourhood,
+          neighbourhood: createSourcePerspective.neighbourhood
+        },
         typedExpressionLanguages: typedExpLangs,
         groupExpressionRef: createExp,
         neighbourhoodUrl: neighbourhood,
