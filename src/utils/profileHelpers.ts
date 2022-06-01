@@ -83,93 +83,57 @@ export async function getProfile(did: string): Promise<ProfileWithDID | null> {
     familyName: ''
   };
 
-  const bioLink = links.find(
-    (e: any) => e.data.predicate === "sioc://has_bio"
-  ) as LinkExpression;
+  for (const link of links.filter(e => e.data.source === 'flux://profile')) {
+    let expUrl;
+    let image;
 
-  const usernameLink = links.find(
-    (e: any) => e.data.predicate === "sioc://has_username"
-  ) as LinkExpression;
+    switch (link.data.predicate) {
+      case "sioc://has_username":
+        profile!.username = link.data.target;
+        break;
+      case "sioc://has_bio":
+        profile!.username = link.data.target;
+        break;
+      case "sioc://has_given_name":
+        profile!.givenName = link.data.target;
+        break;
+      case "sioc://has_family_name":
+        profile!.familyName = link.data.target;
+        break;
+      case "sioc://has_profile_image":
+        expUrl = link.data.target;
+        image = await ad4mClient.expression.get(expUrl);
+    
+        if (image) {
+          profile!.profilePicture = image.data.slice(1, -1);
+        }
+        break;
+      case "sioc://has_profile_thumbnail_image":
+        expUrl = link.data.target;
+        image = await ad4mClient.expression.get(expUrl);
 
-  const givenNameLink = links.find(
-    (e: any) => e.data.predicate === "sioc://has_given_name"
-  ) as LinkExpression;
+        if (image) {
+          if (link.data.source === "flux://profile") {
+            profile!.thumbnailPicture = image.data.slice(1, -1);
+          }
+        }
+        break;
+      case "sioc://has_bg_image":
+        expUrl = link.data.target;
+        image = await ad4mClient.expression.get(expUrl);
 
-  const familyNameLink = links.find(
-    (e: any) => e.data.predicate === "sioc://has_family_name"
-  ) as LinkExpression;
-
-  const profilePictureLink = links.find(
-    (e: any) => e.data.predicate === "sioc://has_profile_image"
-  ) as LinkExpression;
-
-  const thumbnailLink = links.find(
-    (e: any) => e.data.predicate === "sioc://has_profile_thumbnail_image"
-  ) as LinkExpression;
-
-  const emailLink = links.find(
-    (e: any) => e.data.predicate === "sioc://has_email"
-  ) as LinkExpression;
-
-  const bgImageLink = links.find(
-    (e: any) => e.data.predicate === "sioc://has_bg_image"
-  ) as LinkExpression;
-
-  if (bgImageLink) {
-    const expUrl = bgImageLink.data.target;
-    const image = await ad4mClient.expression.get(expUrl);
-
-    if (image) {
-      if (bgImageLink.data.source === "flux://profile") {
-        profile.profileBg = image.data.slice(1, -1);
-      }
+        if (image) {
+          if (link.data.source === "flux://profile") {
+            profile!.profileBg = image.data.slice(1, -1);
+          }
+        }
+        break;
+      case "sioc://has_email":
+        profile!.email = link.data.target;
+        break;
+      default:
+        break;
     }
-  } else {
-    profile.profileBg = ''
-  }
-
-  profile!.bio = bioLink ? bioLink.data.target : '';
-
-  if (usernameLink) {
-    profile!.username = usernameLink.data.target;
-  }
-
-  if (givenNameLink) {
-    profile!.givenName = givenNameLink.data.target;
-  }
-
-  if (familyNameLink) {
-    profile!.familyName = familyNameLink.data.target;
-  }
-  
-  if (profilePictureLink) {
-    const expUrl = profilePictureLink.data.target;
-    const image = await ad4mClient.expression.get(expUrl);
-
-    if (image) {
-      if (profilePictureLink.data.source === "flux://profile") {
-        profile!.profilePicture = image.data.slice(1, -1);
-      }
-    }
-  } else {
-    profile!.profilePicture = '';
-  }
-
-  if (thumbnailLink) {
-    const expUrl = thumbnailLink.data.target;
-    const image = await ad4mClient.expression.get(expUrl);
-
-    if (image) {
-      if (thumbnailLink.data.source === "flux://profile") {
-        profile!.thumbnailPicture = image.data.slice(1, -1);
-      }
-    }
-  } else {
-    profile!.thumbnailPicture = '';
-  }
-  
-  if (emailLink) {
-    profile!.email = emailLink.data.target;
   }
 
   return {...profile, did}
