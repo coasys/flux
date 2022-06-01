@@ -71,7 +71,18 @@ export default async (payload: Payload): Promise<void> => {
   
   userStore.setUserProfile(newProfile);
 
-  const userPerspective = userStore.getFluxPerspectiveId;
+  const userPerspective = userStore.getFluxPerspectiveId || 
+    await (await ad4mClient.perspective.all())?.find(e => e.name === "My flux perspective")?.uuid;
+
+  if (userPerspective) {
+    userStore.addFluxPerspectiveId(userPerspective)
+  } else {
+    const error = "No user perspective found";
+    appStore.showDangerToast({
+      message: error,
+    });
+    throw new Error(error)
+  }
 
   try {
     const links = await getAgentLinks(userStore.agent.did!, userPerspective!);
