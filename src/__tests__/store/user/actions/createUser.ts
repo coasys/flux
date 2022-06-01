@@ -21,24 +21,29 @@ describe("Store Actions", () => {
         }
       });
 
+    jest
+      .spyOn(ad4mClient.agent, "updatePublicPerspective")
+      // @ts-ignore
+      .mockReturnValue(true);
+
     // @ts-ignore
     jest
       .spyOn(ad4mClient.perspective, "add")
       // @ts-ignore
       .mockResolvedValue(addPerspectiveFixture as PerspectiveHandle);
 
+    // @ts-ignore
+    jest
+      .spyOn(ad4mClient.perspective, "all")
       // @ts-ignore
-      jest
-        .spyOn(ad4mClient.perspective, "all")
+      .mockResolvedValue([{
+        name: "My flux perspective",
         // @ts-ignore
-        .mockResolvedValue([{
-          name: "My flux perspective",
-          // @ts-ignore
-          neighbourhood: null,
-          // @ts-ignore
-          sharedUrl: null,
-          uuid: "2a912c2c-6d30-46f2-b451-880349fced08"
-        }]);
+        neighbourhood: null,
+        // @ts-ignore
+        sharedUrl: null,
+        uuid: "2a912c2c-6d30-46f2-b451-880349fced08"
+      }]);
   
 
     // @ts-ignore
