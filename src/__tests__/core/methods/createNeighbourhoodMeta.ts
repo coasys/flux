@@ -40,7 +40,7 @@ describe("Create Neighbourhood Meta", () => {
       .spyOn(ad4mClient.perspective, "remove")
       .mockImplementation(async () => {
         return {
-          perspectiveRemove: true
+          perspectiveRemove: true,
         };
       });
   });

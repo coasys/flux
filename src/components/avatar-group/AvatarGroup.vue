@@ -52,17 +52,13 @@ export default defineComponent({
         // reset on change
         this.firstUsers = [];
         this.loading = true;
-        const profiles = await Promise.all(
-          users
-            .slice(0, 3)
-            .map(
-              async (did: string): Promise<ProfileWithDID | null> =>
-                await getProfile(this.profileLanguage, did)
-            )
-        );
-        this.firstUsers = profiles.filter(
-          (profile) => profile !== null
-        ) as ProfileWithDID[];
+        for (const user of users.slice(0, 3)) {
+          getProfile(this.profileLanguage, user).then((member) => {
+            if (member) {
+              this.firstUsers = [...this.firstUsers, member];
+            }
+          })
+        }
         this.loading = false;
       },
       immediate: true,

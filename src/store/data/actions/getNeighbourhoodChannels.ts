@@ -10,7 +10,7 @@ export interface Payload {
 
 const channelLinksWorker = new Worker("pollingWorker.js");
 
-const PORT = parseInt(global.location.search.slice(6))
+const PORT = parseInt(global.location.search.slice(6));
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async ({ communityId }: Payload): Promise<Worker> => {
@@ -35,7 +35,7 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
       callbackData: { communityId: community.neighbourhood.perspective.uuid },
       name: `Channel links for ${community.neighbourhood.name}`,
       dataKey: "perspectiveQueryLinks",
-      port: PORT
+      port: PORT,
     });
 
     channelLinksWorker.onerror = function (e) {
