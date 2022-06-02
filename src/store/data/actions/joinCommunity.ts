@@ -47,30 +47,16 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
         neighbourhood.neighbourhood!.meta.links
       );
 
-      const profileExpLang = typedExpressionLanguages.find(
-        (val) => val.expressionType == ExpressionTypes.ProfileExpression
+      //Create link between perspective and group expression
+      const addProfileLink = await ad4mClient.perspective.addLink(
+        neighbourhood.uuid,
+        {
+          source: neighbourhood.sharedUrl,
+          target: userStore.agent.did,
+          predicate: MEMBER,
+        } as Link
       );
-      if (profileExpLang !== undefined) {
-        const createProfileExpression = await createProfile(
-          profileExpLang.languageAddress!,
-          userStore.getProfile!
-        );
-
-        //Create link between perspective and group expression
-        const addProfileLink = await ad4mClient.perspective.addLink(
-          neighbourhood.uuid,
-          {
-            source: neighbourhood.sharedUrl,
-            target: createProfileExpression,
-            predicate: MEMBER,
-          } as Link
-        );
-        console.log("Created profile expression link", addProfileLink);
-      } else {
-        throw Error(
-          "Could not find profile expression language for installed neighbourhood"
-        );
-      }
+      console.log("Created profile expression link", addProfileLink);
 
       //Read out metadata about the perspective from the meta
       const { name, description, creatorDid, createdAt } =

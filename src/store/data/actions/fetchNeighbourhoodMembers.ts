@@ -17,7 +17,8 @@ export default async function (id: string): Promise<void> {
     })
   );
   const dids = memberLinks.map((link: LinkExpression) => {
-    return link.data.target.split("://")[1];
+    const url = link.data.target;
+    return url.includes("://") ? url.split("://")[1] : url;
   });
   for (const did of dids) {
     dataStore.setNeighbourhoodMember({ member: did, perspectiveUuid: id });

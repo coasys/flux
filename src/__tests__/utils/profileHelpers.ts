@@ -1,87 +1,72 @@
-import { ExpressionTypes, ProfileExpression } from "@/store/types";
+import { ExpressionTypes, ProfileExpression, ProfileWithDID } from "@/store/types";
 import { getProfile, parseProfile } from "@/utils/profileHelpers";
 import { TimeoutCache } from "@/utils/timeoutCache";
 import community from "../fixtures/community.json";
 import initAgentFixture from "../fixtures/initAgent.json";
 import getProfileFixture from "../fixtures/getProfile.json";
+import agentByDIDLinksFixture from "../fixtures/agentByDIDLinks.json";
 import { Expression } from "@perspect3vism/ad4m";
 import { mocked } from "ts-jest/utils";
 import { ad4mClient } from "@/app";
 
 const testProfile = {
-  did: initAgentFixture.did,
-  data: JSON.parse(getProfileFixture.data!),
-} as ProfileExpression;
+  did: "did:key:zQ3shsHqvZpPJzvm2PDc8kbJzWHsVhHcYSzY9KJzkxSyVpDYG101",
+  email: "",
+  familyName: "",
+  givenName: "",
+  username: "",
+  bio: "",
+} as ProfileWithDID;
 
-jest.mock("@/utils/timeoutCache", () => {
-  return {
-    TimeoutCache: jest.fn().mockImplementation(() => {
-      return {
-        set: jest.fn(),
-        get: (link: string) => {
-          if (link.includes("101")) {
-            return undefined;
-          } else {
-            return testProfile;
-          }
-        },
-        remove: jest.fn(),
-      };
-    }),
-  };
-});
+const testProfile1 = {
+  did: "did:key:zQ3shsHqvZpPJzvm2PDc8kbJzWHsVhHcYSzY9KJzkxSyVpDYG",
+  email: "",
+  familyName: "",
+  givenName: "",
+  username: "jhon",
+  profileBg: "mag",
+  profilePicture: "mag",
+  thumbnailPicture: "mag",
+  bio: "",
+} as ProfileWithDID;
 
 describe("ProfileHelpers", () => {
-  const MockedSoundPlayer = mocked(TimeoutCache, true);
-
-  let profileLangAddress: string;
-  let did: string;
-  let profileLink: string;
-
-  beforeAll(async () => {
-    const cache = new TimeoutCache<any>(10);
-
-    profileLangAddress = community.neighbourhood.typedExpressionLanguages.find(
-      (t: any) => t.expressionType === ExpressionTypes.ProfileExpression
-    )!.languageAddress!;
-
-    did = initAgentFixture.did;
-
-    profileLink = `${profileLangAddress}://${did}`;
-
-    await cache.remove(profileLink);
-  });
+  const did = "did:key:zQ3shsHqvZpPJzvm2PDc8kbJzWHsVhHcYSzY9KJzkxSyVpDYG";
 
   beforeEach(() => {
-    MockedSoundPlayer.mockClear();
+    jest
+      .spyOn(ad4mClient.agent, "byDID")
+      // @ts-ignore
+      .mockImplementation(async (did) => {
+        if (did.includes('101')) {
+          return {
+            perspective: {
+              links: []
+            }
+          }
+        }
+        return agentByDIDLinksFixture;
+      });
 
     jest
       .spyOn(ad4mClient.expression, "get")
       // @ts-ignore
-      .mockImplementation(async (url) => {
-        const split = url.split("://");
-        if (split[1] === did && split[0] === profileLangAddress) {
-          return getProfileFixture as unknown as Expression;
-        }
-
-        return null;
+      .mockImplementation(async () => {
+        return {
+          data: "image"
+        };
       });
   });
 
   test("Test fetch profile with wrong did", async () => {
-    const profile = await getProfile(profileLangAddress, `${did}101`);
+    const profile = await getProfile(`${did}101`);
 
-    expect(profile).toStrictEqual(null);
+    expect(profile).toStrictEqual(testProfile);
   });
 
   test("Test fetch the correct profile", async () => {
-    const newTestProfile = {
-      did: testProfile.did,
-      ...parseProfile(testProfile.data.profile),
-    };
+    const profile = await getProfile(did);
 
-    const profile = await getProfile(profileLangAddress, did);
-
-    expect(profile).toStrictEqual(newTestProfile);
+    expect(profile).toStrictEqual(testProfile1);
   });
 });

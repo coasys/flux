@@ -4,7 +4,6 @@ import {
   SOCIAL_CONTEXT_OFFICIAL,
   GROUP_EXPRESSION_OFFICIAL,
   SHORTFORM_EXPRESSION_OFFICIAL,
-  PROFILE_EXPRESSION_OFFICIAL,
 } from "@/constants/languages";
 
 import { MEMBER } from "@/constants/neighbourhoodMeta";
@@ -88,18 +87,6 @@ export default async ({
     console.log("Response from create group exp lang", groupExpressionLang);
     //Get language after templating to install it
     ad4mClient.languages.byAddress(groupExpressionLang.address);
-    //Create profile expression language
-    const profileExpressionLang =
-      await ad4mClient.languages.applyTemplateAndPublish(
-        PROFILE_EXPRESSION_OFFICIAL,
-        JSON.stringify({
-          uid: uid,
-          name: `${perspectiveName}-profile-expression`,
-        })
-      );
-    console.log("Response from create profile exp lang", profileExpressionLang);
-    //Get language after templating to install it
-    ad4mClient.languages.byAddress(profileExpressionLang.address);
     const typedExpLangs = [
       {
         languageAddress: shortFormExpressionLang.address!,
@@ -108,11 +95,7 @@ export default async ({
       {
         languageAddress: groupExpressionLang.address!,
         expressionType: ExpressionTypes.GroupExpression,
-      } as FluxExpressionReference,
-      {
-        languageAddress: profileExpressionLang.address!,
-        expressionType: ExpressionTypes.ProfileExpression,
-      } as FluxExpressionReference,
+      } as FluxExpressionReference
     ];
 
     //Publish perspective
@@ -170,17 +153,12 @@ export default async ({
       userStore.getProfile
     );
 
-    const createProfileExpression = await createProfile(
-      profileExpressionLang.address!,
-      userStore.getProfile!
-    );
-
     //Create link between perspective and group expression
     const addProfileLink = await ad4mClient.perspective.addLink(
       createSourcePerspective.uuid!,
       {
         source: neighbourhood,
-        target: createProfileExpression,
+        target: creatorDid,
         predicate: MEMBER,
       }
     );

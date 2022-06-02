@@ -94,11 +94,13 @@ export default defineComponent({
         this.memberList = [];
         this.loading = true;
         for (const user of users) {
-          getProfile(this.profileLanguageAddress, user).then((member) => {
+          if (user) {
+            const member = await getProfile(user);
+  
             if (member) {
               this.memberList = [...this.memberList, member];
             }
-          })
+          }
         }
         this.loading = false;
       },
@@ -114,12 +116,6 @@ export default defineComponent({
     community(): NeighbourhoodState {
       const id = this.$route.params.communityId as string;
       return this.dataStore.getNeighbourhood(id);
-    },
-    profileLanguageAddress(): string {
-      return this.community.typedExpressionLanguages.find(
-        (t: FluxExpressionReference) =>
-          t.expressionType === ExpressionTypes.ProfileExpression
-      )!.languageAddress;
     },
   },
   methods: {
