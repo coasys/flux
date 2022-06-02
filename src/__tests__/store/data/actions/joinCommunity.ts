@@ -3,12 +3,10 @@ import joinNeighbourhoodFixture from "../../../fixtures/joinNeighbourhood.json";
 import createCommunityProfileLink from "../../../fixtures/createCommunityProfileLink.json";
 import joinComunityExpressionTypes from "../../../fixtures/joinComunityExpressionTypes.json";
 import addChannelCreateLink from "../../../fixtures/addChannelCreateLink.json";
-import * as joinNeighbourhood from "@/core/mutations/joinNeighbourhood";
-import * as getTypedExpressionLanguages from "@/core/methods/getTypedExpressionLangs";
 import * as createProfile from "@/core/methods/createProfile";
-import * as createLink from "@/core/mutations/createLink";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useDataStore } from "@/store/data";
+import { ad4mClient } from "@/app";
 
 // TODO: @fayeed - Add a timeout error if the joincode is wrong.
 describe("Join Community", () => {
@@ -17,16 +15,16 @@ describe("Join Community", () => {
   beforeEach(() => {
     // @ts-ignore
     jest
-      .spyOn(joinNeighbourhood, "joinNeighbourhood")
+      .spyOn(ad4mClient.neighbourhood, "joinFromUrl")
       // @ts-ignore
       .mockResolvedValue(joinNeighbourhoodFixture);
 
     // @ts-ignore
     jest
-      .spyOn(getTypedExpressionLanguages, "getTypedExpressionLanguages")
+    .spyOn(ad4mClient.languages, "byAddress")
       // @ts-ignore
       .mockImplementation(async () => {
-        return joinComunityExpressionTypes;
+        return joinComunityExpressionTypes[2];
       });
 
     // @ts-ignore
@@ -36,7 +34,7 @@ describe("Join Community", () => {
 
     // @ts-ignore
     jest
-      .spyOn(createLink, "createLink")
+    .spyOn(ad4mClient.perspective, "addLink")
       .mockImplementation(async (perspective, link) => {
         if (link.predicate === "sioc://has_member") {
           return createCommunityProfileLink;
@@ -91,7 +89,7 @@ describe("Join Community", () => {
 
     // @ts-ignore
     jest
-      .spyOn(joinNeighbourhood, "joinNeighbourhood")
+      .spyOn(ad4mClient.neighbourhood, "joinFromUrl")
       // @ts-ignore
       .mockRejectedValue(Error("No neighbourhood found"));
 

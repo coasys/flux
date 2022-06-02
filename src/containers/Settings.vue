@@ -33,7 +33,9 @@
         />
         <privacy v-if="currentView === 'privacy'" />
         <div v-if="currentView === 'updates'">
-          <j-button @click="updateApp.func" variant="primary">{{ updateApp.text }}</j-button>
+          <j-button @click="updateApp.func" variant="primary">{{
+            updateApp.text
+          }}</j-button>
         </div>
       </div>
     </div>

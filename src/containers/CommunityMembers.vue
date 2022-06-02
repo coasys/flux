@@ -93,16 +93,15 @@ export default defineComponent({
         // reset before fetching again
         this.memberList = [];
         this.loading = true;
-        const memberList = (await Promise.all(
-          users.map(
-            async (did: string): Promise<ProfileWithDID | null> =>
-              await getProfile(this.profileLanguageAddress, did)
-          )
-        )) as Array<ProfileWithDID | null>;
-
-        this.memberList = memberList.filter(
-          (profile) => profile !== null
-        ) as ProfileWithDID[];
+        for (const user of users) {
+          if (user) {
+            const member = await getProfile(user);
+  
+            if (member) {
+              this.memberList = [...this.memberList, member];
+            }
+          }
+        }
         this.loading = false;
       },
       immediate: true,
@@ -117,12 +116,6 @@ export default defineComponent({
     community(): NeighbourhoodState {
       const id = this.$route.params.communityId as string;
       return this.dataStore.getNeighbourhood(id);
-    },
-    profileLanguageAddress(): string {
-      return this.community.typedExpressionLanguages.find(
-        (t: FluxExpressionReference) =>
-          t.expressionType === ExpressionTypes.ProfileExpression
-      )!.languageAddress;
     },
   },
   methods: {

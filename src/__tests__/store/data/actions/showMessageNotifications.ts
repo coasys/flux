@@ -2,37 +2,19 @@ import community from "../../../fixtures/community.json";
 import channel from "../../../fixtures/channel.json";
 import initAgentFixture from "../../../fixtures/initAgent.json";
 import getProfileFixture from "../../../fixtures/getProfile.json";
-import * as agentUnlock from "../../../../core/mutations/agentUnlock";
 import lockAgentFixture from "../../../fixtures/lockAgent.json";
 import { AgentStatus, Expression } from "@perspect3vism/ad4m";
 import { ExpressionTypes, ProfileExpression } from "@/store/types";
-import * as getExpressionNoCache from "@/core/queries/getExpression";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useUserStore } from "@/store/user";
 import { useDataStore } from "@/store/data";
+import { ad4mClient } from "@/app";
+import agentByDIDLinksFixture from "../../../fixtures/agentByDIDLinks.json";
 
 const testProfile = {
   did: initAgentFixture.did,
   data: JSON.parse(getProfileFixture.data!),
 } as ProfileExpression;
-
-jest.mock("@/utils/timeoutCache", () => {
-  return {
-    TimeoutCache: jest.fn().mockImplementation(() => {
-      return {
-        set: jest.fn(),
-        get: (link: string) => {
-          if (link.includes("101")) {
-            return undefined;
-          } else {
-            return testProfile;
-          }
-        },
-        remove: jest.fn(),
-      };
-    }),
-  };
-});
 
 describe("Show Message Notification", () => {
   let store: Pinia;
@@ -56,13 +38,27 @@ describe("Show Message Notification", () => {
 
   beforeEach(() => {
     jest
-      .spyOn(agentUnlock, "agentUnlock")
+      .spyOn(ad4mClient.agent, "unlock")
       .mockImplementation(async (password) => {
         if (password === "test123") {
           return lockAgentFixture as AgentStatus;
         }
 
         throw new Error("Password doesn't match");
+      });
+
+    jest
+      .spyOn(ad4mClient.agent, "byDID")
+      // @ts-ignore
+      .mockImplementation(async (did) => {
+        if (did.includes('101')) {
+          return {
+            perspective: {
+              links: []
+            }
+          }
+        }
+        return agentByDIDLinksFixture;
       });
 
     store = createPinia();
@@ -170,7 +166,8 @@ describe("Show Message Notification", () => {
 
     // @ts-ignore
     jest
-      .spyOn(getExpressionNoCache, "getExpressionNoCache")
+      .spyOn(ad4mClient.expression, "get")
+      // @ts-ignore
       .mockImplementation(async (url) => {
         const split = url.split("://");
         if (split[1] === did && split[0] === profileLangAddress) {

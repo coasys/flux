@@ -21,33 +21,33 @@ export default defineComponent({
     return {
       clonedEl,
       closeButtonRef,
-    }
+    };
   },
   data() {
     return {
       expanded: false,
-    }
+    };
   },
   methods: {
     closeViewer() {
       console.log("clicked");
-      this.expanded = false
-    }
+      this.expanded = false;
+    },
   },
   watch: {
-    expanded (expanded) {
+    expanded(expanded) {
       this.$nextTick(() => {
         if (expanded) {
           this.clonedEl = this.$el.cloneNode(true);
 
-          this.closeButtonRef = this.clonedEl.querySelector('.close-button');
-          console.log(this.clonedEl)
+          this.closeButtonRef = this.clonedEl.querySelector(".close-button");
+          console.log(this.clonedEl);
 
-          this.closeButtonRef.addEventListener('click', this.closeViewer);
+          this.closeButtonRef.addEventListener("click", this.closeViewer);
 
           document.body.appendChild(this.clonedEl);
-          document.body.style.overflow = 'hidden';
-          
+          document.body.style.overflow = "hidden";
+
           setTimeout(() => {
             this.clonedEl.style.opacity = 1;
           }, 0);
@@ -58,13 +58,13 @@ export default defineComponent({
             this.clonedEl.remove();
             this.clonedEl = null;
             this.closeButtonRef = null;
-            document.body.style.overflow = 'auto';
+            document.body.style.overflow = "auto";
           }, 250);
         }
-      })
-    }
-  }
-})
+      });
+    },
+  },
+});
 </script>
 
 <style scoped>
@@ -79,7 +79,7 @@ body > .expandable-image.expanded {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   opacity: 0;
@@ -108,7 +108,7 @@ body > .expandable-image.expanded > .close-button {
 }
 
 svg path {
-  fill: #FFF;
+  fill: #fff;
 }
 .expand-button {
   position: absolute;
@@ -130,7 +130,7 @@ svg path {
   height: 20px;
 }
 .expand-button path {
-  fill: #FFF;
+  fill: #fff;
 }
 .expandable-image img {
   width: 100%;

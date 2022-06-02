@@ -1,6 +1,4 @@
 import { createProfile } from "@/core/methods/createProfile";
-import { createLink } from "@/core/mutations/createLink";
-import { joinNeighbourhood } from "@/core/mutations/joinNeighbourhood";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
 import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
 
@@ -17,6 +15,7 @@ import {
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
+import { ad4mClient } from "@/app";
 
 export interface Payload {
   joiningLink: string;
@@ -33,7 +32,9 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
       (c: any) => c.neighbourhoodUrl === joiningLink
     );
     if (!isAlreadyPartOf) {
-      const neighbourhood = await joinNeighbourhood(joiningLink);
+      const neighbourhood = await ad4mClient.neighbourhood.joinFromUrl(
+        joiningLink
+      );
       console.log(
         new Date(),
         "Installed neighbourhood with result",
@@ -46,27 +47,16 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
         neighbourhood.neighbourhood!.meta.links
       );
 
-      const profileExpLang = typedExpressionLanguages.find(
-        (val) => val.expressionType == ExpressionTypes.ProfileExpression
-      );
-      if (profileExpLang !== undefined) {
-        const createProfileExpression = await createProfile(
-          profileExpLang.languageAddress!,
-          userStore.getProfile!
-        );
-
-        //Create link between perspective and group expression
-        const addProfileLink = await createLink(neighbourhood.uuid, {
+      //Create link between perspective and group expression
+      const addProfileLink = await ad4mClient.perspective.addLink(
+        neighbourhood.uuid,
+        {
           source: neighbourhood.sharedUrl,
-          target: createProfileExpression,
+          target: userStore.agent.did,
           predicate: MEMBER,
-        } as Link);
-        console.log("Created profile expression link", addProfileLink);
-      } else {
-        throw Error(
-          "Could not find profile expression language for installed neighbourhood"
-        );
-      }
+        } as Link
+      );
+      console.log("Created profile expression link", addProfileLink);
 
       //Read out metadata about the perspective from the meta
       const { name, description, creatorDid, createdAt } =

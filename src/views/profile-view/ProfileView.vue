@@ -37,8 +37,8 @@
               </j-text>
             </j-box>
             <j-box>
-              <j-text nomargin size="500" color="black" v-if="bio">
-                {{ bio }}</j-text
+              <j-text nomargin size="500" color="black" v-if="profile.bio">
+                {{ profile.bio }}</j-text
               >
               <j-text nomargin size="500" color="black" v-else>
                 No bio yet</j-text
@@ -130,7 +130,7 @@
 <script lang="ts">
 import { ad4mClient } from "@/app";
 import { useDataStore } from "@/store/data";
-import { ExpressionTypes, ModalsState, Profile } from "@/store/types";
+import { ExpressionTypes, ModalsState, Profile, ProfileWithDID } from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
 import { Link, LinkExpression, PerspectiveInput } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
@@ -162,8 +162,7 @@ export default defineComponent({
   },
   data() {
     return {
-      profile: null as null | Profile,
-      bio: "",
+      profile: {} as ProfileWithDID | null,
       showAddlinkModal: false,
       showEditlinkModal: false,
       showJoinCommunityModal: false,
@@ -192,32 +191,6 @@ export default defineComponent({
       const userStore = useUserStore();
       const userPerspective = userStore.getFluxPerspectiveId;
 
-      if (did === undefined || did === me.did) {
-        this.profile = userStore.getProfile!;
-      } else {
-        const communityId = this.$route.params.communityId as string;
-        const profileLang = useDataStore()
-          .getCommunity(communityId)
-          .neighbourhood.typedExpressionLanguages.find(
-            (t) => t.expressionType === ExpressionTypes.ProfileExpression
-          )?.languageAddress;
-
-        const dataExp = await getProfile(profileLang!, did);
-        console.log(
-          "profile",
-          this.$route,
-          did,
-          me.did,
-          profileLang,
-          dataExp,
-          did || me.did
-        );
-
-        if (dataExp) {
-          this.profile = dataExp;
-        }
-      }
-
       const links = await getAgentLinks(
         did || me.did,
         did === me.did || did === undefined ? userPerspective! : undefined
@@ -238,21 +211,6 @@ export default defineComponent({
             "text://",
             ""
           );
-        } else if (predicate === "has_image") {
-          try {
-            const expUrl = e.data.target;
-            const image = await ad4mClient.expression.get(expUrl);
-
-            if (image) {
-              preArea[e.data.source][predicate] = image.data.slice(1, -1);
-
-              if (e.data.source === "flux://profile") {
-                this.profilebg = image.data.slice(1, -1);
-              }
-            }
-          } catch (e) {
-            console.log("Error encountered while parsing image");
-          }
         } else if (predicate === "has_images") {
           try {
             const expUrl = e.data.target;
@@ -279,13 +237,9 @@ export default defineComponent({
         (e) => e.id !== "flux://profile"
       );
 
-      const bioLink = links.find(
-        (e: any) => e.data.predicate === "sioc://has_bio"
-      ) as LinkExpression;
+      console.log('links', links)
 
-      if (bioLink) {
-        this.bio = bioLink.data.target.split("://")[1];
-      }
+      this.profile = await getProfile(did || me.did);
 
       console.log("profile", this.profileLinks, this.profile);
     },

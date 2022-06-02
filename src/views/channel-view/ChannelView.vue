@@ -13,7 +13,6 @@
   >
     <Profile
       :did="activeProfile"
-      :langAddress="profileLanguage"
       @openCompleteProfile="() => handleProfileClick(activeProfile)"
     />
   </j-modal>
@@ -94,13 +93,6 @@ export default defineComponent({
     channel(): ChannelState {
       const { channelId } = this.$route.params;
       return this.dataStore.getChannel(channelId as string);
-    },
-    profileLanguage(): string {
-      const profileLang =
-        this.community.neighbourhood.typedExpressionLanguages.find(
-          (t: any) => t.expressionType === ExpressionTypes.ProfileExpression
-        );
-      return profileLang!.languageAddress;
     },
   },
   methods: {

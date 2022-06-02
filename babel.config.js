@@ -6,5 +6,5 @@ module.exports = {
   ],
   plugins: ["@babel/plugin-transform-runtime"],
   ignore: [/\/node_modules\//],
-  exclude: [/\bcore-js\b/,]
+  exclude: [/\bcore-js\b/],
 };

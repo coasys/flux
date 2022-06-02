@@ -1,4 +1,3 @@
-import { getExpressionNoCache } from "@/core/queries/getExpression";
 import { ProfileExpression, ProfileWithDID } from "@/store/types";
 import { Profile } from "@/store/types";
 import {
@@ -8,7 +7,10 @@ import {
   GIVEN_NAME,
 } from "@/constants/profile";
 import { IMAGE, CONTENT_SIZE, CONTENT_URL, THUMBNAIL } from "@/constants/image";
-import { profileCache } from "@/app";
+import { ad4mClient, apolloClient, profileCache } from "@/app";
+import { ExpressionRendered, LinkExpression } from "@perspect3vism/ad4m";
+import { GET_EXPRESSION } from "@/core/graphql_queries";
+import getAgentLinks from "./getAgentLinks";
 
 interface Image {
   contentUrl: string;
@@ -53,40 +55,87 @@ export function parseProfile(data: ProfileExpression): Profile {
   };
 }
 
-export async function getProfile(
-  profileLangAddress: string,
-  did: string
-): Promise<ProfileWithDID | null> {
-  const profileRef = `${profileLangAddress}://${did}`;
-
-  const profileExp = await profileCache.get(profileRef);
-
-  if (!profileExp) {
-    console.warn(
-      "Did not get profile expression from cache, calling holochain"
-    );
-    const profileGqlExp = await getExpressionNoCache(profileRef);
-
-    if (profileGqlExp) {
-      const exp = {
-        author: profileGqlExp.author!,
-        data: JSON.parse(profileGqlExp.data),
-        timestamp: profileGqlExp.timestamp!,
-        proof: profileGqlExp.proof!,
-      } as ProfileExpression;
-
-      await profileCache.set(profileRef, exp);
-      return {
-        did,
-        ...parseProfile(exp.data.profile),
-      };
-    } else {
-      return null;
-    }
-  } else {
-    return {
-      did,
-      ...parseProfile(profileExp.data.profile),
-    };
-  }
+function getExpressionNoCache(url: string): Promise<ExpressionRendered | null> {
+  return new Promise((resolve, reject) => {
+    apolloClient
+      .query<{
+        expression: ExpressionRendered;
+      }>({
+        query: GET_EXPRESSION,
+        variables: { url: url },
+        fetchPolicy: "no-cache",
+      })
+      .then((result) => {
+        resolve(result.data.expression);
+      })
+      .catch((error) => reject(error));
+  });
 }
+
+export async function getProfile(did: string): Promise<ProfileWithDID | null> {
+  const links = await getAgentLinks(did);
+
+  const profile: Profile = {
+    username: '',
+    bio: '',
+    email: '',
+    givenName: '',
+    familyName: ''
+  };
+
+  for (const link of links.filter(e => e.data.source === 'flux://profile')) {
+    let expUrl;
+    let image;
+
+    switch (link.data.predicate) {
+      case "sioc://has_username":
+        profile!.username = link.data.target;
+        break;
+      case "sioc://has_bio":
+        profile!.username = link.data.target;
+        break;
+      case "sioc://has_given_name":
+        profile!.givenName = link.data.target;
+        break;
+      case "sioc://has_family_name":
+        profile!.familyName = link.data.target;
+        break;
+      case "sioc://has_profile_image":
+        expUrl = link.data.target;
+        image = await ad4mClient.expression.get(expUrl);
+    
+        if (image) {
+          profile!.profilePicture = image.data.slice(1, -1);
+        }
+        break;
+      case "sioc://has_profile_thumbnail_image":
+        expUrl = link.data.target;
+        image = await ad4mClient.expression.get(expUrl);
+
+        if (image) {
+          if (link.data.source === "flux://profile") {
+            profile!.thumbnailPicture = image.data.slice(1, -1);
+          }
+        }
+        break;
+      case "sioc://has_bg_image":
+        expUrl = link.data.target;
+        image = await ad4mClient.expression.get(expUrl);
+
+        if (image) {
+          if (link.data.source === "flux://profile") {
+            profile!.profileBg = image.data.slice(1, -1);
+          }
+        }
+        break;
+      case "sioc://has_email":
+        profile!.email = link.data.target;
+        break;
+      default:
+        break;
+    }
+  }
+
+  return {...profile, did}
+}
+
