@@ -1,4 +1,5 @@
-import { createLink } from "@/core/mutations/createLink";
+// TODO: remove profile code
+
 import {
   ChannelState,
   FeedType,
@@ -8,11 +9,9 @@ import {
 import { v4 } from "uuid";
 import { Perspective, Link } from "@perspect3vism/ad4m";
 import type { PerspectiveHandle } from "@perspect3vism/ad4m";
-import { addPerspective } from "../mutations/addPerspective";
-import { templateLanguage } from "../mutations/templateLanguage";
-import { createNeighbourhood } from "../mutations/createNeighbourhood";
 import { createNeighbourhoodMeta } from "./createNeighbourhoodMeta";
 import { SOCIAL_CONTEXT_OFFICIAL } from "@/constants/languages";
+import { ad4mClient } from "@/app";
 
 interface ChannelProps {
   channelName: string;
@@ -29,15 +28,16 @@ export async function createChannel({
   membraneType,
   typedExpressionLanguages,
 }: ChannelProps): Promise<ChannelState> {
-  const perspective = await addPerspective(channelName);
+  const perspective = await ad4mClient.perspective.add(channelName);
   console.debug("Created new perspective with result", perspective);
-  const socialContextLanguage = await templateLanguage(
-    SOCIAL_CONTEXT_OFFICIAL,
-    JSON.stringify({
-      uid: v4().toString(),
-      name: `${channelName}-social-context`,
-    })
-  );
+  const socialContextLanguage =
+    await ad4mClient.languages.applyTemplateAndPublish(
+      SOCIAL_CONTEXT_OFFICIAL,
+      JSON.stringify({
+        uid: v4().toString(),
+        name: `${channelName}-social-context`,
+      })
+    );
   console.debug(
     "Created new social context language wuth result",
     socialContextLanguage
@@ -53,40 +53,49 @@ export async function createChannel({
 
   const meta = new Perspective(metaLinks);
 
-  const neighbourhood = await createNeighbourhood(
+  const neighbourhood = await ad4mClient.neighbourhood.publishFromPerspective(
     perspective.uuid,
     socialContextLanguage.address,
     meta
   );
   console.debug("Create a neighbourhood with result", neighbourhood);
 
-  const addLinkToChannel = await createLink(sourcePerspective.uuid, {
-    source: sourcePerspective.sharedUrl!,
-    target: neighbourhood,
-    predicate: "sioc://has_space",
-  });
+  const addLinkToChannel = await ad4mClient.perspective.addLink(
+    sourcePerspective.uuid,
+    {
+      source: sourcePerspective.sharedUrl!,
+      target: neighbourhood,
+      predicate: "sioc://has_space",
+    }
+  );
   console.debug(
     "Created new link on source social-context with result",
     addLinkToChannel
   );
 
   //Add link on channel social context declaring type
-  const addChannelTypeLink = await createLink(perspective.uuid, {
-    source: neighbourhood,
-    target: "sioc://space",
-    predicate: "rdf://type",
-  });
+  const addChannelTypeLink = await ad4mClient.perspective.addLink(
+    perspective.uuid,
+    {
+      source: neighbourhood,
+      target: "sioc://space",
+      predicate: "rdf://type",
+    }
+  );
   console.log(
     "Added link on channel social-context with result",
     addChannelTypeLink
   );
 
   //Add link on channel social context declaring type
-  const addSourceNeighbourhoodLink = await createLink(perspective.uuid, {
-    source: neighbourhood,
-    target: sourcePerspective.sharedUrl!,
-    predicate: "flux://parentCommunity",
-  });
+  const addSourceNeighbourhoodLink = await ad4mClient.perspective.addLink(
+    perspective.uuid,
+    {
+      source: neighbourhood,
+      target: sourcePerspective.sharedUrl!,
+      predicate: "flux://parentCommunity",
+    }
+  );
   console.log(
     "Added link on channel pointing to parent neighbourhood",
     addSourceNeighbourhoodLink
@@ -97,7 +106,12 @@ export async function createChannel({
       name: channelName,
       description: "",
       creatorDid,
-      perspective: perspective,
+      perspective: {
+        uuid: perspective.uuid,
+        name: perspective.name,
+        neighbourhood: perspective.neighbourhood,
+        sharedUrl: perspective.sharedUrl
+      },
       typedExpressionLanguages: typedExpressionLanguages,
       neighbourhoodUrl: neighbourhood,
       membraneType: membraneType,

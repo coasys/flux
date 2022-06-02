@@ -1,5 +1,4 @@
-import { createExpression } from "@/core/mutations/createExpression";
-import { createLink } from "@/core/mutations/createLink";
+import { ad4mClient } from "@/app";
 import { useAppStore } from "@/store/app";
 import { Link, LinkExpression } from "@perspect3vism/ad4m";
 
@@ -23,12 +22,12 @@ export default async ({
       languageAddress
     );
 
-    const exprUrl = await createExpression(
-      languageAddress,
-      JSON.stringify(content)
+    const exprUrl = await ad4mClient.expression.create(
+      content,
+      languageAddress
     );
-    console.log("Created expression with hash", exprUrl);
-    const addLink = await createLink(perspective, {
+    console.warn("Created expression with hash", exprUrl);
+    const addLink = await ad4mClient.perspective.addLink(perspective, {
       source: "sioc://chatchannel",
       target: exprUrl,
       predicate: "sioc://content_of",

@@ -1,10 +1,9 @@
 import initAgentFixture from "../../../fixtures/initAgent.json";
 import addPerspectiveFixture from "../../../fixtures/addPerspective.json";
-import * as agentGenerate from "@/core/mutations/agentGenerate";
-import * as addPerspective from "@/core/mutations/addPerspective";
 import { AgentStatus, PerspectiveHandle } from "@perspect3vism/ad4m";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useUserStore } from "@/store/user";
+import { ad4mClient } from "@/app";
 
 describe("Store Actions", () => {
   let store: Pinia;
@@ -12,7 +11,7 @@ describe("Store Actions", () => {
   beforeEach(() => {
     // @ts-ignore
     jest
-      .spyOn(agentGenerate, "agentGenerate")
+      .spyOn(ad4mClient.agent, "generate")
       .mockImplementation(async (password) => {
         if (password) {
           return initAgentFixture as AgentStatus;
@@ -23,7 +22,8 @@ describe("Store Actions", () => {
 
     // @ts-ignore
     jest
-      .spyOn(addPerspective, "addPerspective")
+      .spyOn(ad4mClient.perspective, "add")
+      // @ts-ignore
       .mockResolvedValue(addPerspectiveFixture as PerspectiveHandle);
 
     store = createPinia();

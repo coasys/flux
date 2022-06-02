@@ -1,11 +1,10 @@
 import { createProfile } from "@/core/methods/createProfile";
-import { getExpression } from "@/core/queries/getExpression";
 
 import { ExpressionTypes, Profile, ProfileExpression } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "..";
 import { useDataStore } from "@/store/data";
-import { profileCache } from "@/app";
+import { ad4mClient, profileCache } from "@/app";
 
 export interface Payload {
   username?: string;
@@ -53,12 +52,12 @@ export default async (payload: Payload): Promise<void> => {
 
         console.log("Created new profileExpression: ", exp);
 
-        const expressionGql = await getExpression(exp);
+        const expression = await ad4mClient.expression.get(exp);
         const profileExp = {
-          author: expressionGql.author!,
-          data: JSON.parse(expressionGql.data!),
-          timestamp: expressionGql.timestamp!,
-          proof: expressionGql.proof!,
+          author: expression.author!,
+          data: JSON.parse(expression.data!),
+          timestamp: expression.timestamp!,
+          proof: expression.proof!,
         } as ProfileExpression;
         await profileCache.set(profileRef, profileExp);
       } else {

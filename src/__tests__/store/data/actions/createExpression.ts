@@ -1,11 +1,10 @@
 import community from "../../../fixtures/community.json";
 import channel from "../../../fixtures/channel.json";
 import addChatExpressionLink from "../../../fixtures/addChatExpressionLink.json";
-import * as createExpression from "@/core/mutations/createExpression";
-import * as createLink from "@/core/mutations/createLink";
 import { ExpressionTypes } from "@/store/types";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useDataStore } from "@/store/data";
+import { ad4mClient } from "@/app";
 
 describe("Create Expression", () => {
   let store: Pinia;
@@ -13,14 +12,15 @@ describe("Create Expression", () => {
   beforeEach(() => {
     // @ts-ignore
     jest
-      .spyOn(createExpression, "createExpression")
+      .spyOn(ad4mClient.expression, "create")
       .mockImplementation(async () => {
         return "QmfMfVxRpEzzXxLmraTQumQjfU1mT1NggkT1j9fWSnnC1s://QmfMfVxRpEzzXxLmraTQumQjfU1mT1NggkT1j9fWSnnC1s";
       });
 
     // @ts-ignore
     jest
-      .spyOn(createLink, "createLink")
+      .spyOn(ad4mClient.perspective, "addLink")
+      // @ts-ignore
       .mockImplementation(async (perspective, link) => {
         return addChatExpressionLink;
       });

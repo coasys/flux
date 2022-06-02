@@ -1,4 +1,4 @@
-import { agentGenerate } from "@/core/mutations/agentGenerate";
+import { ad4mClient } from "@/app";
 
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "..";
@@ -26,7 +26,7 @@ export default async ({
   const userStore = useUserStore();
 
   try {
-    const status = await agentGenerate(password);
+    const status = await ad4mClient.agent.generate(password);
 
     userStore.setUserProfile({
       username: username,

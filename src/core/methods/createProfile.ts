@@ -1,4 +1,3 @@
-import { createExpression } from "@/core/mutations/createExpression";
 import { Profile } from "@/store/types";
 
 import {
@@ -15,6 +14,7 @@ import {
   TYPE as IMAGETYPE,
   THUMBNAIL,
 } from "@/constants/image";
+import { ad4mClient } from "@/app";
 
 const byteSize = (str: string) => new Blob([str]).size;
 
@@ -114,16 +114,16 @@ export async function createProfile(
       });
     }
 
-    const createProfileExpression = await createExpression(
-      expressionLanguage,
-      JSON.stringify({
+    const createProfileExpression = await ad4mClient.expression.create(
+      {
         "@context": {
           foaf: "http://xmlns.com/foaf/0.1/",
           schema: "https://schema.org/",
         },
         profile,
         signed_agent: "NA",
-      })
+      },
+      expressionLanguage,
     );
     console.log(
       "Created profile expression with result",

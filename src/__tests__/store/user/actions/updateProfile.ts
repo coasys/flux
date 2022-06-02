@@ -1,10 +1,10 @@
 import community from "../../../fixtures/community.json";
-import * as getExpression from "../../../../core/queries/getExpression";
 import getProfileFixture from "../../../fixtures/updateProfile.json";
 import * as createProfile from "@/core/methods/createProfile";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useUserStore } from "@/store/user";
 import { useDataStore } from "@/store/data";
+import { ad4mClient } from "@/app";
 
 describe("Update Profile", () => {
   let store: Pinia;
@@ -12,7 +12,7 @@ describe("Update Profile", () => {
   beforeEach(() => {
     // @ts-ignore
     jest
-      .spyOn(getExpression, "getExpression")
+      .spyOn(ad4mClient.expression, "get")
       // @ts-ignore
       .mockResolvedValue(getProfileFixture);
 

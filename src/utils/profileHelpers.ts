@@ -1,4 +1,3 @@
-import { getExpressionNoCache } from "@/core/queries/getExpression";
 import { ProfileExpression, ProfileWithDID } from "@/store/types";
 import { Profile } from "@/store/types";
 import {
@@ -8,7 +7,9 @@ import {
   GIVEN_NAME,
 } from "@/constants/profile";
 import { IMAGE, CONTENT_SIZE, CONTENT_URL, THUMBNAIL } from "@/constants/image";
-import { profileCache } from "@/app";
+import { ad4mClient, apolloClient, profileCache } from "@/app";
+import { ExpressionRendered } from "@perspect3vism/ad4m";
+import { GET_EXPRESSION } from "@/core/graphql_queries";
 
 interface Image {
   contentUrl: string;
@@ -53,6 +54,23 @@ export function parseProfile(data: ProfileExpression): Profile {
   };
 }
 
+function getExpressionNoCache(url: string): Promise<ExpressionRendered | null> {
+  return new Promise((resolve, reject) => {
+    apolloClient
+      .query<{
+        expression: ExpressionRendered;
+      }>({
+        query: GET_EXPRESSION,
+        variables: { url: url },
+        fetchPolicy: "no-cache",
+      })
+      .then((result) => {
+        resolve(result.data.expression);
+      })
+      .catch((error) => reject(error));
+  });
+}
+
 export async function getProfile(
   profileLangAddress: string,
   did: string
@@ -62,15 +80,15 @@ export async function getProfile(
 
     const profileExp = await profileCache.get(profileRef);
 
-    if (!profileExp) {
-      console.warn(
-        "Did not get profile expression from cache, calling holochain"
-      );
+  if (!profileExp) {
+    console.warn(
+      "Did not get profile expression from cache, calling holochain"
+    );
       const id = setTimeout(() => {
         resolve(null);
       }, 10000);
-
-      const profileGqlExp = await getExpressionNoCache(profileRef);
+      
+      const profileGqlExp = await ad4mClient.expression.get(profileRef);
 
       clearTimeout(id);
 

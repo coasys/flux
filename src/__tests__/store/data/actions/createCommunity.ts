@@ -7,15 +7,10 @@ import createCommunityGroupExpression from "../../../fixtures/createCommunityGro
 import createCommunityProfileLink from "../../../fixtures/createCommunityProfileLink.json";
 import createCommunityChannel from "../../../fixtures/createCommunityChannel.json";
 import languages from "../../../fixtures/languages.json";
-import * as addPerspective from "@/core/mutations/addPerspective";
-import * as templateLanguage from "@/core/mutations/templateLanguage";
-import * as createNeighbourhood from "@/core/mutations/createNeighbourhood";
+import addChannelUniqueHolochainLanguages from "../../../fixtures/addChannelUniqueHolochainLanguages.json";
 import * as createNeighbourhoodMeta from "@/core/methods/createNeighbourhoodMeta";
-import * as createLink from "@/core/mutations/createLink";
-import * as createExpression from "@/core/mutations/createExpression";
 import * as createProfile from "@/core/methods/createProfile";
 import * as createChannel from "@/core/methods/createChannel";
-import * as getLanguage from "@/core/queries/getLanguage";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useDataStore } from "@/store/data";
 import {
@@ -23,6 +18,7 @@ import {
   SHORTFORM_EXPRESSION_OFFICIAL,
   SOCIAL_CONTEXT_OFFICIAL,
 } from "@/constants/languages";
+import { ad4mClient } from "@/app";
 
 describe("Create Community", () => {
   let store: Pinia;
@@ -30,14 +26,14 @@ describe("Create Community", () => {
   beforeEach(() => {
     // @ts-ignore
     jest
-      .spyOn(addPerspective, "addPerspective")
+      .spyOn(ad4mClient.perspective, "add")
       // @ts-ignore
       .mockResolvedValue(createCommunityPerspective);
 
     // @ts-ignore
     jest
-      .spyOn(templateLanguage, "templateLanguage")
-      .mockImplementation(async (sourceLanguageHash, templateData) => {
+      .spyOn(ad4mClient.languages, "byAddress")
+      .mockImplementation(async (sourceLanguageHash) => {
         if (sourceLanguageHash === SOCIAL_CONTEXT_OFFICIAL) {
           return createCommunityUniqueHolochainLanguage[0];
         } else if (sourceLanguageHash === SHORTFORM_EXPRESSION_OFFICIAL) {
@@ -50,14 +46,21 @@ describe("Create Community", () => {
 
     // @ts-ignore
     jest
-      .spyOn(createNeighbourhood, "createNeighbourhood")
+      .spyOn(ad4mClient.neighbourhood, "publishFromPerspective")
       .mockImplementation(async () => {
         return "neighbourhood://QmW6LEDuWFuRPBgWsaeh3D9KpjVLu3PZ7VeeV2WYATTJop";
       });
 
+          // @ts-ignore
+    jest
+    .spyOn(ad4mClient.languages, "applyTemplateAndPublish")
+    .mockImplementation(async () => {
+      return addChannelUniqueHolochainLanguages;
+    });
+
     // @ts-ignore
     jest
-      .spyOn(getLanguage, "getLanguage")
+      .spyOn(ad4mClient.languages, "byAddress")
       // @ts-ignore
       .mockResolvedValue(languages[0]);
 
@@ -70,7 +73,7 @@ describe("Create Community", () => {
 
     // @ts-ignore
     jest
-      .spyOn(createExpression, "createExpression")
+      .spyOn(ad4mClient.expression, "create")
       .mockImplementation(async () => {
         return "QmbhWYKXXa53H5hSEsPEuQ9FJL1dBurBNkRF2391gsL9DV://842924554879604b2130319f6cabb23e24ce4438ec52995ee322b91a934d7813ed34c344b0ee54";
       });
@@ -88,7 +91,7 @@ describe("Create Community", () => {
 
     // @ts-ignore
     jest
-      .spyOn(createLink, "createLink")
+      .spyOn(ad4mClient.perspective, "addLink")
       .mockImplementation(async (perspective, link) => {
         if (link.predicate === "rdf://type") {
           return createCommunityLinkType;
@@ -125,7 +128,7 @@ describe("Create Community", () => {
 
     // @ts-ignore
     jest
-      .spyOn(addPerspective, "addPerspective")
+      .spyOn(ad4mClient.perspective, "add")
       // @ts-ignore
       .mockRejectedValue(Error("Could not create Perspective"));
 
