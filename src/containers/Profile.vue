@@ -48,7 +48,9 @@ export default defineComponent({
       handler: async function (did) {
         // reset profile before fetching again
         this.profile = null;
-        this.profile = await getProfile(did);
+        if (typeof did === 'string') {
+          this.profile = await getProfile(did);
+        }
       },
       immediate: true,
     },
