@@ -71,7 +71,6 @@
         <avatar-group
           @click="() => setShowCommunityMembers(true)"
           :users="community.neighbourhood.members"
-          :profileLanguage="profileLanguage"
         />
       </j-box>
     </j-menu-group-item>
@@ -213,17 +212,6 @@ export default defineComponent({
         this.community.neighbourhood.creatorDid ===
         this.userStore.getUser?.agent.did
       );
-    },
-    profileLanguage(): string {
-      // TODO: Don't use any
-      const typedExpressionLanguages = this.community.neighbourhood
-        .typedExpressionLanguages as any;
-
-      const langAddress = typedExpressionLanguages.find(
-        (t: FluxExpressionReference) =>
-          t.expressionType === ExpressionTypes.ProfileExpression
-      ).languageAddress;
-      return langAddress || "";
     },
   },
   methods: {

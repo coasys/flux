@@ -39,7 +39,7 @@ import Skeleton from "@/components/skeleton/Skeleton.vue";
 export default defineComponent({
   emits: ["click"],
   components: { Skeleton },
-  props: ["profileLanguage", "users", "size"],
+  props: ["users", "size"],
   data() {
     return {
       firstUsers: [] as ProfileWithDID[],
@@ -53,10 +53,12 @@ export default defineComponent({
         this.firstUsers = [];
         this.loading = true;
         for (const user of users.slice(0, 3)) {
-          const member = await getProfile(user);
-
-          if (member) {
-            this.firstUsers = [...this.firstUsers, member];
+          if (user) {            
+            const member = await getProfile(user);
+  
+            if (member) {
+              this.firstUsers = [...this.firstUsers, member];
+            }
           }
         }
         this.loading = false;
