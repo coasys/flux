@@ -4,7 +4,6 @@ import {
   SOCIAL_CONTEXT_OFFICIAL,
   GROUP_EXPRESSION_OFFICIAL,
   SHORTFORM_EXPRESSION_OFFICIAL,
-  PROFILE_EXPRESSION_OFFICIAL,
 } from "@/constants/languages";
 
 import { MEMBER } from "@/constants/neighbourhoodMeta";
