@@ -1,3 +1,5 @@
+// TODO: remove profile code
+
 import {
   ChannelState,
   FeedType,
@@ -104,7 +106,12 @@ export async function createChannel({
       name: channelName,
       description: "",
       creatorDid,
-      perspective: perspective,
+      perspective: {
+        uuid: perspective.uuid,
+        name: perspective.name,
+        neighbourhood: perspective.neighbourhood,
+        sharedUrl: perspective.sharedUrl
+      },
       typedExpressionLanguages: typedExpressionLanguages,
       neighbourhoodUrl: neighbourhood,
       membraneType: membraneType,
