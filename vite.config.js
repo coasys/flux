@@ -7,7 +7,7 @@ export default {
       template: {
         compilerOptions: {
           isCustomElement: (tag) => {
-            return tag.startsWith("j-");
+            return tag.startsWith("j-") || tag === "perspective-view";
           },
         },
       },
