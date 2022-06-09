@@ -38,6 +38,16 @@
       </j-flex>
     </div>
   </div>
+    <j-modal
+    size="sm"
+    :open="modals.showCode"
+    @toggle="(e) => setShowCode(e.target.open)"
+  >
+    <connect-client
+      @submit="() => setShowCode(false)"
+      @cancel="() => setShowCode(false)"
+    />
+  </j-modal>
 </template>
 
 <script lang="ts">
@@ -54,15 +64,17 @@ import {
   ToastState,
 } from "@/store/types";
 import { print } from "graphql/language/printer";
-import { LinkExpression, PerspectiveInput } from "@perspect3vism/ad4m";
-import { apolloClient } from "@/app";
+import { LinkExpression } from "@perspect3vism/ad4m";
+import {  ad4mClient, MainClient } from "@/app";
 import { useUserStore } from "./store/user";
 import { useAppStore } from "./store/app";
 import { useDataStore } from "./store/data";
 import { JUNTO_AGENT, AD4M_AGENT, KAICHAO_AGENT } from "@/constants/agents";
-import { ad4mClient } from "./app";
 import { MEMBER, EXPRESSION, CHANNEL } from "./constants/neighbourhoodMeta";
 import useEventEmitter from "./utils/useEventEmitter";
+import { mapActions } from "pinia";
+import ConnectClient from "@/containers/ConnectClient.vue";
+
 
 declare global {
   interface Window {
@@ -72,6 +84,9 @@ declare global {
 
 export default defineComponent({
   name: "App",
+  components: {
+    ConnectClient
+  },
   setup() {
     const router = useRouter();
     const route = useRoute();
@@ -259,6 +274,13 @@ export default defineComponent({
       this.userStore.updateAgentStatus(status);
     });
   },
+  mounted() {
+    MainClient.requestCapability().then((val) => {
+      if (val) {
+        this.setShowCode(true);
+      }
+    });
+  },
   methods: {
     copyLogFile() {
       window.api.send("copyLogs");
@@ -267,6 +289,9 @@ export default defineComponent({
           "Log file called debug.log been copied to your desktop, please upload to Junto Discord, thanks <3",
       });
     },
+    ...mapActions(useAppStore, [
+      "setShowCode",
+    ]),
   },
 });
 </script>

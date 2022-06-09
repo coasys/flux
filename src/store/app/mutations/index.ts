@@ -99,4 +99,8 @@ export default {
     const state = useAppStore();
     state.modals.showInviteCode = payload;
   },
+  setShowCode(payload: boolean): void {
+    const state = useAppStore();
+    state.modals.showCode = payload;
+  },
 };
