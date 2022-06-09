@@ -38,7 +38,7 @@
       </j-flex>
     </div>
   </div>
-    <j-modal
+  <j-modal
     size="sm"
     :open="modals.showCode"
     @toggle="(e) => setShowCode(e.target.open)"
@@ -65,7 +65,7 @@ import {
 } from "@/store/types";
 import { print } from "graphql/language/printer";
 import { LinkExpression } from "@perspect3vism/ad4m";
-import {  ad4mClient, MainClient } from "@/app";
+import { ad4mClient, MainClient } from "@/app";
 import { useUserStore } from "./store/user";
 import { useAppStore } from "./store/app";
 import { useDataStore } from "./store/data";
@@ -74,7 +74,6 @@ import { MEMBER, EXPRESSION, CHANNEL } from "./constants/neighbourhoodMeta";
 import useEventEmitter from "./utils/useEventEmitter";
 import { mapActions } from "pinia";
 import ConnectClient from "@/containers/ConnectClient.vue";
-
 
 declare global {
   interface Window {
@@ -85,7 +84,7 @@ declare global {
 export default defineComponent({
   name: "App",
   components: {
-    ConnectClient
+    ConnectClient,
   },
   setup() {
     const router = useRouter();
@@ -123,7 +122,7 @@ export default defineComponent({
     const PORT = 12000;
 
     //Start expression web worker to try and get the expression data pointed to in link target
-    const expressionWorker = new Worker("pollingWorker.js");
+    const expressionWorker = new Worker("/pollingWorker.js");
 
     expressionWorker.onerror = function (e) {
       throw new Error(e.toString());
@@ -205,34 +204,21 @@ export default defineComponent({
           if (watching.filter((val) => val == k).length == 0) {
             console.log("Starting watcher on perspective", k);
             watching.push(k);
-            apolloClient
-              .subscribe({
-                query: gql` subscription {
-                  perspectiveLinkAdded(uuid: "${v.perspective.uuid}") {
-                    author
-                    timestamp
-                    data { source, predicate, target }
-                    proof { valid, invalid, signature, key }
-                  }
-                }`,
-              })
-              .subscribe({
-                next: (result) => {
-                  console.debug(
-                    "Got new link with data",
-                    result.data,
-                    "and channel",
-                    v
-                  );
-                  newLinkHandler(
-                    result.data.perspectiveLinkAdded,
-                    v.perspective.uuid
-                  );
-                },
-                error: (e) => {
-                  throw Error(e);
-                },
-              });
+            ad4mClient.perspective.addPerspectiveLinkAddedListener(
+              k,
+              (result: any) => {
+                console.debug(
+                  "Got new link with data",
+                  result.data,
+                  "and channel",
+                  v
+                );
+                newLinkHandler(
+                  result.data.perspectiveLinkAdded,
+                  v.perspective.uuid
+                );
+              }
+            );
           }
         }
       },
@@ -289,9 +275,7 @@ export default defineComponent({
           "Log file called debug.log been copied to your desktop, please upload to Junto Discord, thanks <3",
       });
     },
-    ...mapActions(useAppStore, [
-      "setShowCode",
-    ]),
+    ...mapActions(useAppStore, ["setShowCode"]),
   },
 });
 </script>
