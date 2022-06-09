@@ -13,9 +13,9 @@ export interface Payload {
   communityId: string;
 }
 
-const expressionWorker = new Worker("pollingWorker.js");
+const expressionWorker = new Worker("/pollingWorker.js");
 
-const PORT = parseInt(global.location.search.slice(6));
+const PORT = 12000;
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async ({ communityId }: Payload): Promise<Worker> => {
@@ -25,7 +25,7 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
     //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button
     const community = dataStore.getCommunity(communityId);
 
-    const groupExpressionWorker = new Worker("pollingWorker.js");
+    const groupExpressionWorker = new Worker("/pollingWorker.js");
     // Start worker looking for group expression links
     groupExpressionWorker.postMessage({
       interval: groupExpressionRefreshDurationMS,

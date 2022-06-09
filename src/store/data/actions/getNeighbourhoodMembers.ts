@@ -9,9 +9,9 @@ import { MEMBER } from "@/constants/neighbourhoodMeta";
 import { memberRefreshDurationMs } from "@/constants/config";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 
-const expressionWorker = new Worker("pollingWorker.js");
+const expressionWorker = new Worker("/pollingWorker.js");
 
-const PORT = parseInt(global.location.search.slice(6));
+const PORT = 12000;
 
 export default async function (id: string): Promise<Worker> {
   const dataStore = useDataStore();
@@ -25,7 +25,7 @@ export default async function (id: string): Promise<Worker> {
     );
 
     if (profileLang) {
-      const profileLinksWorker = new Worker("pollingWorker.js");
+      const profileLinksWorker = new Worker("/pollingWorker.js");
 
       profileLinksWorker.postMessage({
         interval: memberRefreshDurationMs,

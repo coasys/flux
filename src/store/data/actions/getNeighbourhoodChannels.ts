@@ -8,9 +8,9 @@ export interface Payload {
   communityId: string;
 }
 
-const channelLinksWorker = new Worker("pollingWorker.js");
+const channelLinksWorker = new Worker("/pollingWorker.js");
 
-const PORT = parseInt(global.location.search.slice(6));
+const PORT = 12000;
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async ({ communityId }: Payload): Promise<Worker> => {
