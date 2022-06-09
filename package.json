@@ -24,8 +24,8 @@
   "dependencies": {
     "@apollo/client": "3.4.17",
     "@junto-foundation/junto-elements": "^0.4.0",
-    "@perspect3vism/ad4m": "0.1.25",
-    "@perspect3vism/ad4m-executor": "0.1.36",
+    "@perspect3vism/ad4m": "0.1.30",
+    "@perspect3vism/ad4m-executor": "0.1.37",
     "core-js": "^3.15.2",
     "date-fns": "^2.22.1",
     "graphql": "^15.5.0",
@@ -40,7 +40,6 @@
     "vue-router": "^4.0.0-0"
   },
   "devDependencies": {
-    "patch-package": "^6.4.7",
     "@babel/plugin-transform-runtime": "^7.14.5",
     "@babel/preset-typescript": "^7.14.5",
     "@testing-library/jest-dom": "^5.14.1",
@@ -69,6 +68,7 @@
     "jest-transform-stub": "^2.0.0",
     "node-sass": "^6.0.0",
     "node-wget-js": "^1.0.1",
+    "patch-package": "^6.4.7",
     "prettier": "^2.3.2",
     "react": "^17.0.2",
     "sass-loader": "^8.0.2",
