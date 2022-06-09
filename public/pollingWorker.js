@@ -1,20 +1,23 @@
 async function getData({ query, variables, port }) {
   try {
-    const { data, errors = [] } = await fetch(`http://localhost:${port}/graphql`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        "cache-control": "no-store",
-        fetchPolicy: "no-store",
-        pragma: "no-store",
-      },
-      body: JSON.stringify({
-        query,
-        variables,
-      }),
-      cache: "no-store",
-    }).then((res) => res.json());
+    const { data, errors = [] } = await fetch(
+      `http://localhost:${port}/graphql`,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "cache-control": "no-store",
+          fetchPolicy: "no-store",
+          pragma: "no-store",
+        },
+        body: JSON.stringify({
+          query,
+          variables,
+        }),
+        cache: "no-store",
+      }
+    ).then((res) => res.json());
 
     if (errors.length > 0) {
       console.log(
@@ -59,7 +62,7 @@ function pollData(params) {
     /// Hacky solution that allows for the updating of from/until dates in worker loops for perspective link queries
     resetUntil = false,
     resetFrom = false,
-    port
+    port = 12000,
   } = params;
 
   // remove poll if we are over our retries
