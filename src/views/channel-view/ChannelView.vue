@@ -1,10 +1,10 @@
 <template>
-  <chat-view
+  <perspective-view
     :perspective-uuid="channel.neighbourhood.perspective.uuid"
     @agent-click="onAgentClick"
     @perspective-click="onPerspectiveClick"
     @hide-notification-indicator="onHideNotificationIndicator"
-  ></chat-view>
+  ></perspective-view>
   <j-modal
     size="xs"
     v-if="activeProfile"
@@ -57,9 +57,9 @@ export default defineComponent({
     this.script = document.createElement("script");
     this.script.setAttribute("type", "module");
     this.script.innerHTML = `
-      import ChatView from 'http://127.0.0.1:8080/dist/main.js';
-      if(customElements.get('chat-view') === undefined) 
-        customElements.define("chat-view", ChatView);
+      import PerspectiveView from 'http://127.0.0.1:8080/dist/main.js';
+      if(customElements.get('perspective-view') === undefined) 
+        customElements.define("perspective-view", PerspectiveView);
     `;
     this.script;
     document.body.appendChild(this.script);
