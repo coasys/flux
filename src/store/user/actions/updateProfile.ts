@@ -1,8 +1,8 @@
-import { ExpressionTypes, Profile, ProfileExpression } from "@/store/types";
+import { Profile } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "..";
 import { useDataStore } from "@/store/data";
-import { ad4mClient, profileCache } from "@/app";
+import { ad4mClient } from "@/app";
 import { Link, LinkExpression, PerspectiveInput } from "@perspect3vism/ad4m";
 import removeTypeName from "@/utils/removeTypeName";
 import getAgentLinks from "@/utils/getAgentLinks";

@@ -1,12 +1,6 @@
-import { ExpressionTypes, ProfileExpression, ProfileWithDID } from "@/store/types";
-import { getProfile, parseProfile } from "@/utils/profileHelpers";
-import { TimeoutCache } from "@/utils/timeoutCache";
-import community from "../fixtures/community.json";
-import initAgentFixture from "../fixtures/initAgent.json";
-import getProfileFixture from "../fixtures/getProfile.json";
+import { ProfileWithDID } from "@/store/types";
+import { getProfile } from "@/utils/profileHelpers";
 import agentByDIDLinksFixture from "../fixtures/agentByDIDLinks.json";
-import { Expression } from "@perspect3vism/ad4m";
-import { mocked } from "ts-jest/utils";
 import { ad4mClient } from "@/app";
 
 const testProfile = {

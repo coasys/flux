@@ -8,7 +8,6 @@ import { useAppStore } from "@/store/app";
 import { MEMBER } from "@/constants/neighbourhoodMeta";
 import { memberRefreshDurationMs } from "@/constants/config";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
-import { profileCache } from "@/app";
 
 const expressionWorker = new Worker("pollingWorker.js");
 
@@ -52,26 +51,17 @@ export default async function (id: string): Promise<Worker> {
         const profileLinks = e.data.perspectiveQueryLinks;
 
         for (const profileLink of profileLinks) {
-          const profile = await profileCache.get(profileLink.data.target);
-
-          if (profile) {
-            dataStore.setNeighbourhoodMember({
-              perspectiveUuid: id,
-              member: profile.author,
-            });
-          } else {
-            expressionWorker.postMessage({
-              id: profileLink.data.target,
-              retry: 50,
-              interval: 5000,
-              query: print(GET_EXPRESSION),
-              variables: { url: profileLink.data.target },
-              callbackData: { link: profileLink },
-              name: `Get community member expression data from link ${neighbourhood.perspective.name}`,
-              dataKey: "expression",
-              port: PORT,
-            });
-          }
+          expressionWorker.postMessage({
+            id: profileLink.data.target,
+            retry: 50,
+            interval: 5000,
+            query: print(GET_EXPRESSION),
+            variables: { url: profileLink.data.target },
+            callbackData: { link: profileLink },
+            name: `Get community member expression data from link ${neighbourhood.perspective.name}`,
+            dataKey: "expression",
+            port: PORT,
+          });
         }
       });
 
@@ -81,8 +71,6 @@ export default async function (id: string): Promise<Worker> {
 
       expressionWorker.addEventListener("message", async (e: any) => {
         const profileGqlExp = e.data.expression;
-        const link = e.data.callbackData.link;
-        const profileRef = `${profileLang!.languageAddress}://${link.author}`;
 
         const profileExp = {
           author: profileGqlExp.author!,
@@ -96,8 +84,6 @@ export default async function (id: string): Promise<Worker> {
             perspectiveUuid: id,
             member: profileExp.author,
           });
-
-          await profileCache.set(profileRef, profileExp);
         }
       });
 

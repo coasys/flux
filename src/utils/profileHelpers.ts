@@ -7,9 +7,7 @@ import {
   GIVEN_NAME,
 } from "@/constants/profile";
 import { IMAGE, CONTENT_SIZE, CONTENT_URL, THUMBNAIL } from "@/constants/image";
-import { ad4mClient, apolloClient, profileCache } from "@/app";
-import { ExpressionRendered, LinkExpression } from "@perspect3vism/ad4m";
-import { GET_EXPRESSION } from "@/core/graphql_queries";
+import { ad4mClient } from "@/app";
 import getAgentLinks from "./getAgentLinks";
 
 interface Image {
@@ -53,23 +51,6 @@ export function parseProfile(data: ProfileExpression): Profile {
     thumbnailPicture: image?.thumbnail?.contentUrl,
     profilePicture: image?.contentUrl,
   };
-}
-
-function getExpressionNoCache(url: string): Promise<ExpressionRendered | null> {
-  return new Promise((resolve, reject) => {
-    apolloClient
-      .query<{
-        expression: ExpressionRendered;
-      }>({
-        query: GET_EXPRESSION,
-        variables: { url: url },
-        fetchPolicy: "no-cache",
-      })
-      .then((result) => {
-        resolve(result.data.expression);
-      })
-      .catch((error) => reject(error));
-  });
 }
 
 export async function getProfile(did: string): Promise<ProfileWithDID | null> {
