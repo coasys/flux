@@ -8,38 +8,58 @@ import "@junto-foundation/junto-elements/dist/main.css";
 import { createPinia } from "pinia";
 import { Ad4mClient } from "@perspect3vism/ad4m";
 
-import { ProfileExpression } from "./store/types";
-import { ApolloClient, InMemoryCache, NormalizedCacheObject } from "@apollo/client";
+import {
+  ApolloClient,
+  InMemoryCache,
+  NormalizedCacheObject,
+} from "@apollo/client";
 import { WebSocketLink } from "@apollo/client/link/ws";
-
-const PORT = 12000;
 
 class Client {
   apolloClient: ApolloClient<NormalizedCacheObject>;
   ad4mClient: Ad4mClient;
   requestId: string;
   isFullyInitialized = false;
+  port = 12000;
 
   constructor() {
-    const token = localStorage.getItem('ad4minToken')
-    this.buildClient(token!);
+    this.buildClient();
   }
 
-  buildClient(token = '') {
-    this.apolloClient = new ApolloClient({
-      link: new WebSocketLink({
-        uri: `ws://localhost:${PORT}/graphql`,
-        options: {
-          reconnect: true,
-          connectionParams: async () => {
-            return {
-              headers: {
-                authorization: token
-              }
-            }
-          }
+  setPort(port: number) {
+    this.port = port;
+    this.buildClient();
+  }
+
+  url() {
+    return `ws://localhost:${this.port}/graphql`;
+  }
+
+  setToken(jwt: string) {
+    localStorage.setItem("ad4minToken", jwt);
+    this.buildClient();
+  }
+
+  token() {
+    return localStorage.getItem("ad4minToken") || "";
+  }
+
+  async buildClient() {
+    const wsLink = new WebSocketLink({
+      uri: this.url(),
+      options: {
+        reconnect: true,
+        connectionParams: async () => {
+          return {
+            headers: {
+              authorization: this.token(),
+            },
+          };
         },
-      }),
+      },
+    });
+    this.apolloClient = new ApolloClient({
+      link: wsLink,
       cache: new InMemoryCache({ resultCaching: false }),
       defaultOptions: {
         watchQuery: {
@@ -57,13 +77,11 @@ class Client {
     });
 
     // @ts-ignore
-    this.ad4mClient = new Ad4mClient(this.apolloClient)
+    this.ad4mClient = new Ad4mClient(this.apolloClient);
   }
 
   async requestCapability() {
-    const token = localStorage.getItem('ad4minToken')
-
-    if (!token) {
+    if (!this.token) {
       this.requestId = await this.ad4mClient.agent.requestCapability(
         "flux",
         "flux-desc",
@@ -79,15 +97,10 @@ class Client {
 
   async generateJwt(code: string) {
     const jwt = await this.ad4mClient.agent.generateJwt(this.requestId, code);
-
-    this.buildClient(jwt);
-
-    localStorage.setItem('ad4minToken', jwt)
-
+    this.setToken(jwt);
     this.isFullyInitialized = true;
   }
 }
-
 
 const pinia = createPinia();
 
