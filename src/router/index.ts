@@ -7,6 +7,7 @@ import ChannelView from "@/views/channel/ChannelView.vue";
 import Settings from "@/containers/Settings.vue";
 import ProfileView from "@/views/profile/ProfileView.vue";
 import ConnectView from "@/views/connect/ConnectView.vue";
+import UnlockAgent from "@/views/connect/UnlockAgent.vue";
 import { ad4mClient, MainClient } from "@/app";
 import { nextDay } from "date-fns";
 
@@ -15,6 +16,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/connect",
     name: "connect",
     component: ConnectView,
+  },
+  {
+    path: "/unlock",
+    name: "unlock",
+    component: UnlockAgent,
   },
   {
     path: "/",
@@ -77,13 +83,25 @@ router.beforeEach(async (to, from, next) => {
 
   try {
     await portIsOpen(url);
-    if (to.name === "connect") {
+    await MainClient.ad4mClient.agent.status();
+
+    if (to.name === "connect" || to.name === "unlock") {
       next("/home");
     } else {
       next();
     }
   } catch (e) {
-    if (to.name === "connect") next();
-    else next("/connect");
+    console.log({ e, to });
+    if (
+      to.name !== "unlock" &&
+      e.message ===
+        "Cannot extractByTags from a ciphered wallet. You must unlock first."
+    ) {
+      next("/unlock");
+    } else if (to.name !== "connect" && e === false) {
+      next("/connect");
+    } else {
+      next();
+    }
   }
 });
