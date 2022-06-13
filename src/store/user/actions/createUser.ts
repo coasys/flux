@@ -38,7 +38,7 @@ export default async ({
       : undefined;
 
     const status = await ad4mClient.agent.generate(password);
-    const userPerspective = await (await ad4mClient.perspective.all()).find(e => e.name === "My flux perspective")?.uuid;
+    const userPerspective = await (await ad4mClient.perspective.all()).find(e => e.name === "Agent Profile")?.uuid;
     const tempLinks = [];
     
     if (profilePicture) {
