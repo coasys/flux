@@ -191,10 +191,10 @@ export default defineComponent({
       const userStore = useUserStore();
       const userPerspective = userStore.getFluxPerspectiveId;
 
-      const links = await getAgentLinks(
+      const links = (await getAgentLinks(
         did || me.did,
         did === me.did || did === undefined ? userPerspective! : undefined
-      );
+      )).filter(e => e.data.source.startsWith('flux://'));
 
       const preArea: { [x: string]: any } = {};
 
