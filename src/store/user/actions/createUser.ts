@@ -11,7 +11,6 @@ export interface Payload {
   givenName: string;
   familyName: string;
   username: string;
-  password: string;
   email: string;
   profilePicture?: string;
   thumbnailPicture?: string;
@@ -22,7 +21,6 @@ export default async ({
   familyName = "",
   email = "",
   username,
-  password,
   profilePicture
 }: Payload): Promise<void> => {
   const appStore = useAppStore();
@@ -37,7 +35,6 @@ export default async ({
       ? await blobToDataURL(resizedImage!)
       : undefined;
 
-    const status = await ad4mClient.agent.generate(password);
     const userPerspective = await (await ad4mClient.perspective.all()).find(e => e.name === "Agent Profile")?.uuid;
     const tempLinks = [];
     

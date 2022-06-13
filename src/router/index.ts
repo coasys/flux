@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import MainView from "@/views/main/MainView.vue";
 import SignUp from "@/views/signup/SignUp.vue";
-import LogIn from "@/views/login/LogIn.vue";
 import CommunityView from "@/views/community/CommunityView.vue";
 import ChannelView from "@/views/channel/ChannelView.vue";
 import Settings from "@/containers/Settings.vue";
@@ -9,7 +8,6 @@ import ProfileView from "@/views/profile/ProfileView.vue";
 import ConnectView from "@/views/connect/ConnectView.vue";
 import UnlockAgent from "@/views/connect/UnlockAgent.vue";
 import { ad4mClient, MainClient } from "@/app";
-import { nextDay } from "date-fns";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -21,6 +19,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/unlock",
     name: "unlock",
     component: UnlockAgent,
+  },
+  {
+    path: "/signup",
+    name: "signup",
+    component: SignUp,
   },
   {
     path: "/",
@@ -83,10 +86,17 @@ router.beforeEach(async (to, from, next) => {
 
   try {
     await portIsOpen(url);
+    
     await MainClient.ad4mClient.agent.status();
 
-    if (to.name === "connect" || to.name === "unlock") {
-      next("/home");
+    const { perspective } = await MainClient.ad4mClient.agent.me();
+
+    const fluxLinksFound = perspective?.links.find(e => e.data.source.startsWith('flux://'));
+
+    if (!fluxLinksFound && to.name !== 'signup') {
+      next("/signup");
+    } else if (to.name === "connect" || to.name === "unlock") {
+        next("/home");
     } else {
       next();
     }
