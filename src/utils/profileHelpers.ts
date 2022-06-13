@@ -57,14 +57,14 @@ export async function getProfile(did: string): Promise<ProfileWithDID | null> {
   const links = await getAgentLinks(did);
 
   const profile: Profile = {
-    username: '',
-    bio: '',
-    email: '',
-    givenName: '',
-    familyName: ''
+    username: "",
+    bio: "",
+    email: "",
+    givenName: "",
+    familyName: "",
   };
 
-  for (const link of links.filter(e => e.data.source === 'flux://profile')) {
+  for (const link of links.filter((e) => e.data.source === "flux://profile")) {
     let expUrl;
     let image;
 
@@ -73,7 +73,7 @@ export async function getProfile(did: string): Promise<ProfileWithDID | null> {
         profile!.username = link.data.target;
         break;
       case "sioc://has_bio":
-        profile!.username = link.data.target;
+        profile!.bio = link.data.target;
         break;
       case "sioc://has_given_name":
         profile!.givenName = link.data.target;
@@ -84,7 +84,7 @@ export async function getProfile(did: string): Promise<ProfileWithDID | null> {
       case "sioc://has_profile_image":
         expUrl = link.data.target;
         image = await ad4mClient.expression.get(expUrl);
-    
+
         if (image) {
           profile!.profilePicture = image.data.slice(1, -1);
         }
@@ -117,6 +117,5 @@ export async function getProfile(did: string): Promise<ProfileWithDID | null> {
     }
   }
 
-  return {...profile, did}
+  return { ...profile, did };
 }
-
