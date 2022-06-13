@@ -81,7 +81,7 @@ class Client {
   }
 
   async requestCapability() {
-    if (!this.token) {
+    if (!this.token()) {
       this.requestId = await this.ad4mClient.agent.requestCapability(
         "flux",
         "flux-desc",
