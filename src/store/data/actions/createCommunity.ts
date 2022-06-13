@@ -20,7 +20,7 @@ import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta"
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
-import { ad4mClient } from "@/app";
+import { ad4mClient, MainClient } from "@/app";
 
 export interface Payload {
   perspectiveName: string;
@@ -40,7 +40,9 @@ export default async ({
   const userStore = useUserStore();
 
   try {
-    const creatorDid = userStore.getUser?.agent.did || "";
+    const agent = await ad4mClient.agent.me()
+
+    const creatorDid = agent.did;
 
     const createSourcePerspective = (await ad4mClient.perspective.add(
       perspectiveName
