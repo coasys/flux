@@ -15,18 +15,7 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { MainClient } from "@/app";
-
-function portIsOpen(url: string) {
-  return new Promise((resolve, reject) => {
-    const ws = new WebSocket(url);
-    ws.onerror = () => {
-      reject(false);
-    };
-    ws.onopen = () => {
-      resolve(true);
-    };
-  });
-}
+import { findAd4mPort } from "@/utils/findAd4minPort";
 
 export default defineComponent({
   name: "ChannelView",
@@ -42,8 +31,7 @@ export default defineComponent({
   methods: {
     async startPortCheck() {
       try {
-        await portIsOpen(`ws://localhost:${this.port}/graphql`);
-        MainClient.setPort(this.port);
+        await findAd4mPort(this.port);
         this.$router.push({ name: "home" });
       } catch (e) {
         this.startPortCheck();

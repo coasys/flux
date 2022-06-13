@@ -8,6 +8,7 @@ import ProfileView from "@/views/profile/ProfileView.vue";
 import ConnectView from "@/views/connect/ConnectView.vue";
 import UnlockAgent from "@/views/connect/UnlockAgent.vue";
 import { ad4mClient, MainClient } from "@/app";
+import { findAd4mPort } from "@/utils/findAd4minPort";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -67,25 +68,11 @@ const router = createRouter({
   routes,
 });
 
-function portIsOpen(url: string) {
-  return new Promise((resolve, reject) => {
-    const ws = new WebSocket(url);
-    ws.onerror = () => {
-      reject(false);
-    };
-    ws.onopen = () => {
-      resolve(true);
-    };
-  });
-}
-
 export default router;
 
 router.beforeEach(async (to, from, next) => {
-  const url = MainClient.url();
-
   try {
-    await portIsOpen(url);
+    await findAd4mPort(MainClient.portSearchState === 'found' ? MainClient.port : undefined);
     
     await MainClient.ad4mClient.agent.status();
 
@@ -108,7 +95,7 @@ router.beforeEach(async (to, from, next) => {
         "Cannot extractByTags from a ciphered wallet. You must unlock first."
     ) {
       next("/unlock");
-    } else if (to.name !== "connect" && e === false) {
+    } else if (to.name !== "connect" && e.message === "Couldn't find an open port") {
       next("/connect");
     } else {
       next();
