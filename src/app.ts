@@ -57,7 +57,7 @@ class Client {
       uri: this.url(),
       options: {
         reconnect: true,
-        connectionParams: async () => {
+        connectionParams: () => {
           return {
             headers: {
               authorization: this.token(),

@@ -166,7 +166,6 @@ export default async ({
     );
     console.log("Created profile expression link", addProfileLink);
 
-    const myDid = userStore.getUser!.agent.did!;
 
     const newCommunity = {
       neighbourhood: {
@@ -187,7 +186,7 @@ export default async ({
         membraneType: MembraneType.Unique,
         linkedPerspectives: [createSourcePerspective.uuid],
         linkedNeighbourhoods: [createSourcePerspective.uuid],
-        members: [myDid],
+        members: [creatorDid],
         membraneRoot: createSourcePerspective.uuid,
         currentExpressionLinks: {},
         currentExpressionMessages: {},
