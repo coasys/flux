@@ -58,7 +58,6 @@ class Client {
   }
 
   buildClient() {
-    console.log('hah', this.url(), this.port, this.token())
     const wsLink = new WebSocketLink({
       uri: this.url(),
       options: {

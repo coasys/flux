@@ -70,12 +70,30 @@ const router = createRouter({
 
 export default router;
 
-router.beforeEach(async (to, from, next) => {
-  try {
-    await findAd4mPort(MainClient.portSearchState === 'found' ? MainClient.port : undefined);
-    
+function checkConnection() {
+  return new Promise(async (resolve, reject) => {
+    const id = setTimeout(() => {
+      resolve(false);
+    }, 1000);
+
     await MainClient.ad4mClient.agent.status();
 
+    clearTimeout(id);
+
+    resolve(true);
+  })
+}
+
+router.beforeEach(async (to, from, next) => {
+  try {
+    const status = await checkConnection();
+    
+    if (!status) {
+      await findAd4mPort(MainClient.portSearchState === 'found' ? MainClient.port : undefined)
+  
+      await MainClient.ad4mClient.agent.status();
+    }
+  
     const { perspective } = await MainClient.ad4mClient.agent.me();
 
     const fluxLinksFound = perspective?.links.find(e => e.data.source.startsWith('flux://'));
@@ -83,7 +101,7 @@ router.beforeEach(async (to, from, next) => {
     if (!fluxLinksFound && to.name !== 'signup') {
       next("/signup");
     } else if (to.name === "connect" || to.name === "unlock") {
-        next("/home");
+      next("/home");
     } else {
       next();
     }
