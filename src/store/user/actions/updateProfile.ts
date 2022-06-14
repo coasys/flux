@@ -7,8 +7,8 @@ import { Link, LinkExpression, PerspectiveInput } from "@perspect3vism/ad4m";
 import removeTypeName from "@/utils/removeTypeName";
 import getAgentLinks from "@/utils/getAgentLinks";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
-import { resizeImage, dataURItoBlob, blobToDataURL } from "@/core/methods/createProfile";
 import { FLUX_PROFILE, HAS_BG_IMAGE, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "@/constants/profile";
+import { resizeImage, dataURItoBlob, blobToDataURL } from "@/utils/profileHelpers";
 
 export interface Payload {
   username?: string;

@@ -1,10 +1,10 @@
 import { ad4mClient } from "@/app";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
 import { FLUX_PROFILE, HAS_EMAIL, HAS_FAMILY_NAME, HAS_GIVEN_NAME, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "@/constants/profile";
-import { blobToDataURL, dataURItoBlob, resizeImage } from "@/core/methods/createProfile";
 
 import { useAppStore } from "@/store/app";
 import getAgentLinks from "@/utils/getAgentLinks";
+import { resizeImage, dataURItoBlob, blobToDataURL } from "@/utils/profileHelpers";
 import removeTypeName from "@/utils/removeTypeName";
 import { Link, PerspectiveInput } from "@perspect3vism/ad4m";
 import { useUserStore } from "..";
