@@ -1,5 +1,6 @@
 <template>
   <perspective-view
+    :port="port"
     :perspective-uuid="channel.neighbourhood.perspective.uuid"
     @agent-click="onAgentClick"
     @perspective-click="onPerspectiveClick"
@@ -22,7 +23,7 @@
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState, ExpressionTypes } from "@/store/types";
 import { useDataStore } from "@/store/data";
-import { ad4mClient } from "@/app";
+import { ad4mClient, MainClient } from "@/app";
 import Profile from "@/containers/Profile.vue";
 import useEventEmitter from "@/utils/useEventEmitter";
 
@@ -86,6 +87,10 @@ export default defineComponent({
     next();
   },
   computed: {
+    port(): number {
+      // TODO: This needs to be reactive, probaly not now as we using a normal class
+      return MainClient.port;
+    },
     community(): CommunityState {
       const { communityId } = this.$route.params;
       return this.dataStore.getCommunity(communityId as string);
