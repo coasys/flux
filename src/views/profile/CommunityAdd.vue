@@ -73,6 +73,7 @@ import { defineComponent, ref } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import removeTypeName from "@/utils/removeTypeName";
 import { nanoid } from "nanoid";
+import { AREA_COMMUNITY, AREA_HAS_DESCRIPTION, AREA_HAS_IMAGE, AREA_HAS_NAME, AREA_TYPE, FLUX_PROFILE, HAS_AREA, HAS_POST } from "@/constants/profile";
 
 export default defineComponent({
   props: ["area", "isEditing"],
@@ -203,9 +204,9 @@ export default defineComponent({
           await ad4mClient.perspective.addLink(
             userPerspective!,
             new Link({
-              source: `flux://profile`,
+              source: FLUX_PROFILE,
               target: areaName,
-              predicate: "flux://has_area",
+              predicate: HAS_AREA,
             })
           );
         }
@@ -226,15 +227,15 @@ export default defineComponent({
           new Link({
             source: areaName,
             target: this.link,
-            predicate: "sioc://has_post",
+            predicate: HAS_POST,
           })
         );
         await ad4mClient.perspective.addLink(
           userPerspective!,
           new Link({
             source: areaName,
-            target: `flux://community`,
-            predicate: "flux://area_type",
+            target: AREA_COMMUNITY,
+            predicate: AREA_TYPE,
           })
         );
         await ad4mClient.perspective.addLink(
@@ -242,7 +243,7 @@ export default defineComponent({
           new Link({
             source: areaName,
             target: `text://${this.title}`,
-            predicate: "sioc://has_name",
+            predicate: AREA_HAS_NAME,
           })
         );
         await ad4mClient.perspective.addLink(
@@ -250,7 +251,7 @@ export default defineComponent({
           new Link({
             source: areaName,
             target: `text://${this.description}`,
-            predicate: "sioc://has_description",
+            predicate: AREA_HAS_DESCRIPTION,
           })
         );
 
@@ -270,7 +271,7 @@ export default defineComponent({
             new Link({
               source: areaName,
               target: storedImage,
-              predicate: "sioc://has_image",
+              predicate: AREA_HAS_IMAGE,
             })
           );
         }

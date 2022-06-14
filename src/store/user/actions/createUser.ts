@@ -1,5 +1,6 @@
 import { ad4mClient } from "@/app";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
+import { FLUX_PROFILE, HAS_EMAIL, HAS_FAMILY_NAME, HAS_GIVEN_NAME, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "@/constants/profile";
 import { blobToDataURL, dataURItoBlob, resizeImage } from "@/core/methods/createProfile";
 
 import { useAppStore } from "@/store/app";
@@ -56,18 +57,18 @@ export default async ({
       const profileImageLink = await ad4mClient.perspective.addLink(
         userPerspective!.uuid,
         new Link({
-          source: "flux://profile",
+          source: FLUX_PROFILE,
           target: profileImage,
-          predicate: `sioc://has_profile_image`,
+          predicate: HAS_PROFILE_IMAGE,
         })
       );
   
       const thumbnailImageLink = await ad4mClient.perspective.addLink(
         userPerspective!.uuid,
         new Link({
-          source: "flux://profile",
+          source: FLUX_PROFILE,
           target: thumbnailImage,
-          predicate: `sioc://has_profile_thumbnail_image`,
+          predicate: HAS_THUMBNAIL_IMAGE,
         })
       );
 
@@ -78,9 +79,9 @@ export default async ({
       const givenNameLink = await ad4mClient.perspective.addLink(
         userPerspective!.uuid,
         new Link({
-          source: "flux://profile",
+          source: FLUX_PROFILE,
           target: givenName,
-          predicate: "sioc://has_given_name",
+          predicate: HAS_GIVEN_NAME,
         })
       );
 
@@ -91,9 +92,9 @@ export default async ({
       const familyNameLink = await ad4mClient.perspective.addLink(
         userPerspective!.uuid,
         new Link({
-          source: "flux://profile",
+          source: FLUX_PROFILE,
           target: familyName,
-          predicate: "sioc://has_family_name",
+          predicate: HAS_FAMILY_NAME,
         })
       );
 
@@ -104,9 +105,9 @@ export default async ({
       const emailLink = await ad4mClient.perspective.addLink(
         userPerspective!.uuid,
         new Link({
-          source: "flux://profile",
+          source: FLUX_PROFILE,
           target: email,
-          predicate: "sioc://has_email",
+          predicate: HAS_EMAIL,
         })
       );
 
@@ -117,9 +118,9 @@ export default async ({
       const userNameLink = await ad4mClient.perspective.addLink(
         userPerspective!.uuid,
         new Link({
-          source: "flux://profile",
+          source: FLUX_PROFILE,
           target: username,
-          predicate: "sioc://has_username",
+          predicate: HAS_USERNAME,
         })
       );
 

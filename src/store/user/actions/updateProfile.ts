@@ -8,6 +8,7 @@ import removeTypeName from "@/utils/removeTypeName";
 import getAgentLinks from "@/utils/getAgentLinks";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
 import { resizeImage, dataURItoBlob, blobToDataURL } from "@/core/methods/createProfile";
+import { FLUX_PROFILE, HAS_BG_IMAGE, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "@/constants/profile";
 
 export interface Payload {
   username?: string;
@@ -91,24 +92,24 @@ export default async (payload: Payload): Promise<void> => {
 
     if (payload.bio) {    
       const bioLink = await replaceLink(links, new Link({
-        source: "flux://profile",
+        source: FLUX_PROFILE,
         target: newProfile.bio,
-        predicate: "sioc://has_bio",
+        predicate: HAS_USERNAME,
       }));
     
       tempLinks.push(bioLink);
     } else {
       removeLink(links, new Link({
-        source: "flux://profile",
+        source: FLUX_PROFILE,
         target: newProfile.bio,
-        predicate: "sioc://has_bio",
+        predicate: HAS_USERNAME,
       }));
     }
 
     const usernameLink = await replaceLink(links, new Link({
-      source: "flux://profile",
+      source: FLUX_PROFILE,
       target: newProfile.username,
-      predicate: "sioc://has_username",
+      predicate: HAS_USERNAME,
     }));
 
     if (payload.profileBg) {
@@ -118,9 +119,9 @@ export default async (payload: Payload): Promise<void> => {
       );
 
       const profileBgLink = await replaceLink(links, new Link({
-        source: "flux://profile",
+        source: FLUX_PROFILE,
         target: image,
-        predicate: "sioc://has_bg_image",
+        predicate: HAS_BG_IMAGE,
       }));
 
       tempLinks.push(profileBgLink);
@@ -148,18 +149,18 @@ export default async (payload: Payload): Promise<void> => {
       const profileImageLink = await replaceLink(
         links,
         new Link({
-          source: "flux://profile",
+          source: FLUX_PROFILE,
           target: profileImage,
-          predicate: `sioc://has_profile_image`,
+          predicate: HAS_PROFILE_IMAGE,
         })
       );
   
       const thumbnailImageLink = await replaceLink(
         links,
         new Link({
-          source: "flux://profile",
+          source: FLUX_PROFILE,
           target: thumbnailImage,
-          predicate: `sioc://has_profile_thumbnail_image`,
+          predicate: HAS_THUMBNAIL_IMAGE,
         })
       );
 

@@ -143,6 +143,7 @@ import EditProfile from "@/containers/EditProfile.vue";
 import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
 import getAgentLinks from "@/utils/getAgentLinks";
+import { FLUX_PROFILE } from "@/constants/profile";
 
 export default defineComponent({
   name: "ProfileView",
@@ -234,7 +235,7 @@ export default defineComponent({
       }
 
       this.profileLinks = Object.values(preArea).filter(
-        (e) => e.id !== "flux://profile"
+        (e) => e.id !== FLUX_PROFILE
       );
 
       console.log('links', links)

@@ -5,6 +5,7 @@ import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useUserStore } from "@/store/user";
 import { ad4mClient } from "@/app";
 import agentByDIDLinksFixture from "../../../fixtures/agentByDIDLinks.json";
+import { HAS_BG_IMAGE, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "@/constants/profile";
 
 describe("Store Actions", () => {
   let store: Pinia;
@@ -51,13 +52,13 @@ describe("Store Actions", () => {
       .spyOn(ad4mClient.perspective, "addLink")
       // @ts-ignore
       .mockImplementation((_, link) => {
-        if (link.predicate === 'sioc://has_username') {
+        if (link.predicate === HAS_USERNAME) {
           return agentByDIDLinksFixture.perspective.links[0]
-        } else if (link.predicate === 'sioc://has_bg_image') {
+        } else if (link.predicate === HAS_BG_IMAGE) {
           return agentByDIDLinksFixture.perspective.links[1]
-        } else if (link.predicate === 'sioc://has_profile_image') {
+        } else if (link.predicate === HAS_PROFILE_IMAGE) {
           return agentByDIDLinksFixture.perspective.links[2]
-        } else if (link.predicate === 'sioc://has_profile_thumbnail_image') {
+        } else if (link.predicate === HAS_THUMBNAIL_IMAGE) {
           return agentByDIDLinksFixture.perspective.links[4]
         }
       });

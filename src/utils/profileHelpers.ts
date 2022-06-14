@@ -1,10 +1,15 @@
 import { ProfileExpression, ProfileWithDID } from "@/store/types";
 import { Profile } from "@/store/types";
 import {
-  ACCOUNT_NAME,
-  EMAIL,
-  FAMILY_NAME,
-  GIVEN_NAME,
+  FLUX_PROFILE,
+  HAS_BG_IMAGE,
+  HAS_BIO,
+  HAS_EMAIL,
+  HAS_FAMILY_NAME,
+  HAS_GIVEN_NAME,
+  HAS_PROFILE_IMAGE,
+  HAS_THUMBNAIL_IMAGE,
+  HAS_USERNAME,
 } from "@/constants/profile";
 import { IMAGE, CONTENT_SIZE, CONTENT_URL, THUMBNAIL } from "@/constants/image";
 import { ad4mClient } from "@/app";
@@ -40,19 +45,6 @@ export function parseImage(data: string): ImageWithThumbnail {
   };
 }
 
-export function parseProfile(data: ProfileExpression): Profile {
-  const image = data[IMAGE] && parseImage(data[IMAGE]);
-
-  return {
-    username: data[ACCOUNT_NAME],
-    email: data[EMAIL],
-    givenName: data[GIVEN_NAME],
-    familyName: data[FAMILY_NAME],
-    thumbnailPicture: image?.thumbnail?.contentUrl,
-    profilePicture: image?.contentUrl,
-  };
-}
-
 export async function getProfile(did: string): Promise<ProfileWithDID | null> {
   const links = await getAgentLinks(did);
 
@@ -64,24 +56,24 @@ export async function getProfile(did: string): Promise<ProfileWithDID | null> {
     familyName: "",
   };
 
-  for (const link of links.filter((e) => e.data.source === "flux://profile")) {
+  for (const link of links.filter((e) => e.data.source === FLUX_PROFILE)) {
     let expUrl;
     let image;
 
     switch (link.data.predicate) {
-      case "sioc://has_username":
+      case HAS_USERNAME:
         profile!.username = link.data.target;
         break;
-      case "sioc://has_bio":
+      case HAS_BIO:
         profile!.bio = link.data.target;
         break;
-      case "sioc://has_given_name":
+      case HAS_GIVEN_NAME:
         profile!.givenName = link.data.target;
         break;
-      case "sioc://has_family_name":
+      case HAS_FAMILY_NAME:
         profile!.familyName = link.data.target;
         break;
-      case "sioc://has_profile_image":
+      case HAS_PROFILE_IMAGE:
         expUrl = link.data.target;
         image = await ad4mClient.expression.get(expUrl);
 
@@ -89,27 +81,27 @@ export async function getProfile(did: string): Promise<ProfileWithDID | null> {
           profile!.profilePicture = image.data.slice(1, -1);
         }
         break;
-      case "sioc://has_profile_thumbnail_image":
+      case HAS_THUMBNAIL_IMAGE:
         expUrl = link.data.target;
         image = await ad4mClient.expression.get(expUrl);
 
         if (image) {
-          if (link.data.source === "flux://profile") {
+          if (link.data.source === FLUX_PROFILE) {
             profile!.thumbnailPicture = image.data.slice(1, -1);
           }
         }
         break;
-      case "sioc://has_bg_image":
+      case HAS_BG_IMAGE:
         expUrl = link.data.target;
         image = await ad4mClient.expression.get(expUrl);
 
         if (image) {
-          if (link.data.source === "flux://profile") {
+          if (link.data.source === FLUX_PROFILE) {
             profile!.profileBg = image.data.slice(1, -1);
           }
         }
         break;
-      case "sioc://has_email":
+      case HAS_EMAIL:
         profile!.email = link.data.target;
         break;
       default:
