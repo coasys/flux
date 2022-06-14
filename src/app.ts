@@ -15,7 +15,7 @@ import {
 } from "@apollo/client";
 import { WebSocketLink } from "@apollo/client/link/ws";
 
-type PortSearchStateType = 'na' | 'searching' | 'found' | 'not_found'
+type PortSearchStateType = "na" | "searching" | "found" | "not_found";
 
 let ad4mClient: Ad4mClient;
 let apolloClient: ApolloClient<NormalizedCacheObject>;
@@ -26,15 +26,15 @@ class Client {
   requestId: string;
   isFullyInitialized = false;
   port = 12000;
-  portSearchState: PortSearchStateType = 'na';
+  portSearchState: PortSearchStateType = "na";
 
   constructor() {
     this.buildClient();
   }
 
   setPort(port: number) {
-    console.log('2')
-    this.portSearchState = 'found';
+    console.log("2");
+    this.portSearchState = "found";
     this.port = port;
     this.buildClient();
   }
@@ -44,7 +44,7 @@ class Client {
   }
 
   setToken(jwt: string) {
-    console.log('1', jwt)
+    console.log("1", jwt);
     localStorage.setItem("ad4minToken", jwt);
     this.buildClient();
   }
