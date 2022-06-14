@@ -71,11 +71,11 @@ export default async (payload: Payload): Promise<void> => {
   
   userStore.setUserProfile(newProfile);
 
-  const userPerspective = userStore.getFluxPerspectiveId || 
-    await (await ad4mClient.perspective.all())?.find(e => e.name === "Agent Profile")?.uuid;
+  const perspectives = await ad4mClient.perspective.all();
+  const userPerspective = perspectives.find(e => e.name === "Agent Profile");
 
   if (userPerspective) {
-    userStore.addFluxPerspectiveId(userPerspective)
+    userStore.addFluxPerspectiveId(userPerspective.uuid)
   } else {
     const error = "No user perspective found";
     appStore.showDangerToast({
@@ -85,9 +85,9 @@ export default async (payload: Payload): Promise<void> => {
   }
 
   try {
-    const links = await getAgentLinks(userStore.agent.did!, userPerspective!);
+    const links = await getAgentLinks(userStore.agent.did!, userPerspective.uuid);
 
-    const tempLinks = [];
+    const tempLinks = [...links];
 
     if (payload.bio) {    
       const bioLink = await replaceLink(links, new Link({

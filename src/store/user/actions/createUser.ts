@@ -3,6 +3,7 @@ import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
 import { blobToDataURL, dataURItoBlob, resizeImage } from "@/core/methods/createProfile";
 
 import { useAppStore } from "@/store/app";
+import getAgentLinks from "@/utils/getAgentLinks";
 import removeTypeName from "@/utils/removeTypeName";
 import { Link, PerspectiveInput } from "@perspect3vism/ad4m";
 import { useUserStore } from "..";
@@ -35,8 +36,11 @@ export default async ({
       ? await blobToDataURL(resizedImage!)
       : undefined;
 
-    const userPerspective = await (await ad4mClient.perspective.all()).find(e => e.name === "Agent Profile")?.uuid;
-    const tempLinks = [];
+      
+    const perspectives = await ad4mClient.perspective.all();
+    const userPerspective = perspectives.find(e => e.name === "Agent Profile");
+    const currentLinks = await getAgentLinks(userStore.agent.did!, userPerspective?.uuid);
+    const tempLinks = [...currentLinks];
     
     if (profilePicture) {
       const thumbnailImage = await ad4mClient.expression.create(
@@ -50,7 +54,7 @@ export default async ({
       );
 
       const profileImageLink = await ad4mClient.perspective.addLink(
-        userPerspective!,
+        userPerspective!.uuid,
         new Link({
           source: "flux://profile",
           target: profileImage,
@@ -59,7 +63,7 @@ export default async ({
       );
   
       const thumbnailImageLink = await ad4mClient.perspective.addLink(
-        userPerspective!,
+        userPerspective!.uuid,
         new Link({
           source: "flux://profile",
           target: thumbnailImage,
@@ -72,7 +76,7 @@ export default async ({
 
     if (givenName) {
       const givenNameLink = await ad4mClient.perspective.addLink(
-        userPerspective!,
+        userPerspective!.uuid,
         new Link({
           source: "flux://profile",
           target: givenName,
@@ -85,7 +89,7 @@ export default async ({
 
     if (familyName) {
       const familyNameLink = await ad4mClient.perspective.addLink(
-        userPerspective!,
+        userPerspective!.uuid,
         new Link({
           source: "flux://profile",
           target: familyName,
@@ -98,7 +102,7 @@ export default async ({
 
     if (email) {
       const emailLink = await ad4mClient.perspective.addLink(
-        userPerspective!,
+        userPerspective!.uuid,
         new Link({
           source: "flux://profile",
           target: email,
@@ -111,7 +115,7 @@ export default async ({
 
     if (username) {
       const userNameLink = await ad4mClient.perspective.addLink(
-        userPerspective!,
+        userPerspective!.uuid,
         new Link({
           source: "flux://profile",
           target: username,
@@ -140,7 +144,12 @@ export default async ({
       thumbnailPicture: thumbnail,
       bio: ""
     });
+
+    const status = await ad4mClient.agent.status();
+
     userStore.updateAgentStatus(status);
+
+    userStore.addFluxPerspectiveId(userPerspective?.uuid!)
   } catch (e) {
     appStore.showDangerToast({
       message: e.message,
