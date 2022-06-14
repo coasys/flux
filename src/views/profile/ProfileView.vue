@@ -121,7 +121,7 @@
       @submit="() => setShowEditProfile(false)"
       @cancel="() => setShowEditProfile(false)"
       :bg="profilebg"
-      :preBio="bio"
+      :preBio="profile?.bio || ''"
     />
   </j-modal>
   <router-view></router-view>

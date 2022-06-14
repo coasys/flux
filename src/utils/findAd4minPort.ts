@@ -14,7 +14,7 @@ async function checkConnection(url: string, client: Ad4mClient): Promise<string>
         const id = setTimeout(() => {
           resolve('')
         }, 1000);
-        await client.agent.status(); // TODO runtime info is broken
+        await client.runtime.hcAgentInfos(); // TODO runtime info is broken
         clearTimeout(id);
         console.log("get hc agent infos success.");
         resolve(url)
@@ -56,16 +56,23 @@ async function checkPort(port: number) {
     })
 
     MainClient.setPort(port);
-    
+
     const client = MainClient.ad4mClient;
     
     const ad4mUrl = await checkConnection(url, client);
 
-    const status = await client.agent.status();
+    const status = await client.runtime.hcAgentInfos();
 
     return status;
   } catch (e) {
-    console.log('failed', e.message)
+    console.error('failed', e)
+    
+    if (Array.isArray(e)) {
+      if (e.length > 0 && e[0].message.startsWith("Capability is not matched, you have capabilities:")) {
+        throw e[0];
+      } 
+    }
+
     if (e.message === "Cannot extractByTags from a ciphered wallet. You must unlock first.") {
       throw e;
     }

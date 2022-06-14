@@ -1,12 +1,12 @@
 <template>
-  <router-view></router-view>
+  <router-view :key="componentKey"></router-view>
   <j-modal
     size="sm"
     :open="modals.showCode"
     @toggle="(e) => setShowCode(e.target.open)"
   >
     <connect-client
-      @submit="() => setShowCode(false)"
+      @submit="capabilitiesCreated"
       @cancel="() => setShowCode(false)"
     />
   </j-modal>
@@ -14,7 +14,7 @@
 
 <script lang="ts">
 import { MainClient } from "./app";
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import ConnectClient from "@/containers/ConnectClient.vue";
 import { mapActions } from "pinia";
 import { useAppStore } from "./store/app";
@@ -26,7 +26,8 @@ export default defineComponent({
 
   setup() {
     const appStore = useAppStore();
-    return { appStore };
+    const componentKey = ref(0);
+    return { appStore, componentKey };
   },
 
   mounted() {
@@ -45,6 +46,11 @@ export default defineComponent({
 
   methods: {
     ...mapActions(useAppStore, ["setShowCode"]),
+    async capabilitiesCreated() {
+      this.setShowCode(false);
+
+      this.componentKey += 1;
+    }
   },
 });
 </script>

@@ -17,6 +17,9 @@ import { WebSocketLink } from "@apollo/client/link/ws";
 
 type PortSearchStateType = 'na' | 'searching' | 'found' | 'not_found'
 
+let ad4mClient: Ad4mClient;
+let apolloClient: ApolloClient<NormalizedCacheObject>;
+
 class Client {
   apolloClient: ApolloClient<NormalizedCacheObject>;
   ad4mClient: Ad4mClient;
@@ -30,6 +33,7 @@ class Client {
   }
 
   setPort(port: number) {
+    console.log('2')
     this.portSearchState = 'found';
     this.port = port;
     this.buildClient();
@@ -40,6 +44,7 @@ class Client {
   }
 
   setToken(jwt: string) {
+    console.log('1', jwt)
     localStorage.setItem("ad4minToken", jwt);
     this.buildClient();
   }
@@ -52,7 +57,8 @@ class Client {
     this.portSearchState = state;
   }
 
-  async buildClient() {
+  buildClient() {
+    console.log('hah', this.url(), this.port, this.token())
     const wsLink = new WebSocketLink({
       uri: this.url(),
       options: {
@@ -86,6 +92,9 @@ class Client {
 
     // @ts-ignore
     this.ad4mClient = new Ad4mClient(this.apolloClient);
+
+    ad4mClient = this.ad4mClient;
+    apolloClient = this.apolloClient;
   }
 
   async requestCapability() {
@@ -113,8 +122,7 @@ class Client {
 const pinia = createPinia();
 
 export const MainClient = new Client();
-export const ad4mClient = MainClient.ad4mClient;
-export const apolloClient = MainClient.apolloClient;
+export { ad4mClient, apolloClient };
 
 pinia.use(({ store }) => {
   const key = store.$id;
