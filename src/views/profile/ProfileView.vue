@@ -186,7 +186,7 @@ export default defineComponent({
     setShowJoinCommunityModal(value: boolean): void {
       this.showJoinCommunityModal = value;
     },
-    async getAgentProfile() {
+    async getAgentAreas() {
       const did = this.$route.params.did as string;
       const me = await ad4mClient.agent.me();
       const userStore = useUserStore();
@@ -239,6 +239,10 @@ export default defineComponent({
       );
 
       console.log('links', links)
+    },
+    async getAgentProfile() {
+      const did = this.$route.params.did as string;
+      const me = await ad4mClient.agent.me();
 
       this.profile = await getProfile(did || me.did);
 
@@ -307,6 +311,7 @@ export default defineComponent({
   },
   async mounted() {
     this.getAgentProfile();
+    this.getAgentAreas();
     const did = this.$route.params.did as string;
     const me = await ad4mClient.agent.me();
 
@@ -319,20 +324,24 @@ export default defineComponent({
     showAddlinkModal() {
       if (!this.showAddlinkModal) {
         this.getAgentProfile();
+        this.getAgentAreas();
       }
     },
     showEditlinkModal() {
       if (!this.showEditlinkModal) {
         this.getAgentProfile();
+        this.getAgentAreas();
       }
     },
     "modals.showEditProfile"() {
       if (!this.modals.showEditProfile) {
         this.getAgentProfile();
+        this.getAgentAreas();
       }
     },
     "$route.path"() {
       this.getAgentProfile();
+      this.getAgentAreas();
     },
   },
   computed: {
