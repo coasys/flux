@@ -5,39 +5,18 @@
       Are you sure ad4m is downloaded and running?</j-text
     >
     <j-text variant="body">
-      Download the latest version here. We will automatically detect when it is
-      running, and you can use a completely decentralized version of Flux
+      Download the latest version <a target="_blank" href="https://github.com/perspect3vism/ad4min/releases/latest">here</a>. We will automatically detect when it is
+      running, and you can use a completely decentralized version of Flux, if it doesn't connect automatically refresh the page.
     </j-text>
-    <j-input :value="port" @change="(e) => (port = e.target.value)"></j-input>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
-import { MainClient } from "@/app";
-import { findAd4mPort } from "@/utils/findAd4minPort";
+import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "ChannelView",
   components: {},
-  data() {
-    return {
-      port: 12000,
-    };
-  },
-  mounted() {
-    this.startPortCheck();
-  },
-  methods: {
-    async startPortCheck() {
-      try {
-        await findAd4mPort(this.port);
-        this.$router.push({ name: "home" });
-      } catch (e) {
-        this.startPortCheck();
-      }
-    },
-  },
 });
 </script>
 
