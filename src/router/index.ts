@@ -70,7 +70,7 @@ const router = createRouter({
 
 export default router;
 
-function checkConnection() {
+export function checkConnection() {
   return new Promise(async (resolve, reject) => {
     const id = setTimeout(() => {
       resolve(false);
@@ -87,21 +87,17 @@ function checkConnection() {
 router.beforeEach(async (to, from, next) => {
   try {
     const status = await checkConnection();
-    
-    if (!status) {
-      await findAd4mPort(MainClient.portSearchState === 'found' ? MainClient.port : undefined)
-  
-      await MainClient.ad4mClient.agent.status();
-    }
-  
-    const { perspective } = await MainClient.ad4mClient.agent.me();
 
-    const fluxLinksFound = perspective?.links.find(e => e.data.source.startsWith('flux://'));
-
-    if (!fluxLinksFound && to.name !== 'signup') {
-      next("/signup");
-    } else if (to.name === "connect" || to.name === "unlock") {
-      next("/home");
+    if (status) {
+      const { perspective } = await MainClient.ad4mClient.agent.me();
+  
+      const fluxLinksFound = perspective?.links.find(e => e.data.source.startsWith('flux://'));
+  
+      if (!fluxLinksFound && to.name !== 'signup') {
+        next("/signup");
+      } else {
+        next();
+      }
     } else {
       next();
     }
