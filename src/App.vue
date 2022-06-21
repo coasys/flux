@@ -90,13 +90,19 @@ export default defineComponent({
   
           if (!fluxLinksFound) {
             await this.router.replace("/signup");
-          } else {
-            await this.router.replace("/home");
           }
         } catch (e) {
           console.log('main', {e}, e.message === "Couldn't find an open port");
 
-          if (e.message === "Cannot extractByTags from a ciphered wallet. You must unlock first."
+          if (e.message.startsWith(
+          "Capability is not matched, you have capabilities:"
+          )) {
+            MainClient.requestCapability().then((val) => {
+              if (val) {
+                this.setShowCode(true);
+              }
+            });
+          } else if (e.message === "Cannot extractByTags from a ciphered wallet. You must unlock first."
           ) {
             await this.router.replace("/unlock");
           } else if (e.message === "Couldn't find an open port") {

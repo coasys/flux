@@ -66,7 +66,7 @@ async function checkPort(port: number) {
 
     const ad4mUrl = await checkConnection(url, client);
 
-    const status = await client.runtime.hcAgentInfos();
+    const status = await client.agent.status();
 
     return status;
   } catch (e) {

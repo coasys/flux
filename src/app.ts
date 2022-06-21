@@ -33,9 +33,9 @@ class Client {
   }
 
   setPort(port: number) {
-    console.log("2");
     this.portSearchState = "found";
     this.port = port;
+    localStorage.setItem("ad4minPort", port.toString());
     this.buildClient();
   }
 
