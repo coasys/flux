@@ -23,6 +23,11 @@ describe("Store Actions", () => {
       });
 
     jest
+      .spyOn(ad4mClient.agent, "status")
+      // @ts-ignore
+      .mockReturnValue(initAgentFixture);
+
+    jest
       .spyOn(ad4mClient.agent, "updatePublicPerspective")
       // @ts-ignore
       .mockReturnValue(true);
@@ -35,10 +40,16 @@ describe("Store Actions", () => {
 
     // @ts-ignore
     jest
+     .spyOn(ad4mClient.perspective, "snapshotByUUID")
+     // @ts-ignore
+     .mockResolvedValue({links: []});
+
+    // @ts-ignore
+    jest
       .spyOn(ad4mClient.perspective, "all")
       // @ts-ignore
       .mockResolvedValue([{
-        name: "My flux perspective",
+        name: "Agent Profile",
         // @ts-ignore
         neighbourhood: null,
         // @ts-ignore
@@ -93,7 +104,6 @@ describe("Store Actions", () => {
 
     await userStore.createUser({
       ...profile,
-      password: "test123456",
     });
 
     expect(userStore.agent.isInitialized).toBeTruthy();
@@ -101,37 +111,5 @@ describe("Store Actions", () => {
     expect(userStore.agent.did).toBe(initAgentFixture.did);
     expect(userStore.profile).not.toBeNull();
     expect(userStore.profile).toStrictEqual(profile);
-  });
-
-  test("Create User without password", async () => {
-    const userStore = useUserStore();
-    expect(userStore.agent.isInitialized).toBeFalsy();
-    expect(userStore.agent.isInitialized).toBeFalsy();
-    expect(userStore.agent.did).toBe("");
-    expect(userStore.profile).toBeNull();
-
-    const profile = {
-      givenName: "jhon",
-      familyName: "doe",
-      email: "jhon@test.com",
-      username: "",
-      profilePicture: "",
-      thumbnailPicture: "",
-    };
-
-    try {
-      await userStore.createUser({
-        ...profile,
-        password: "",
-      });
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error);
-      expect(error).toHaveProperty("message", "Error: No Password passed");
-    }
-
-    expect(userStore.agent.isInitialized).toBeFalsy();
-    expect(userStore.agent.isUnlocked).toBeFalsy();
-    expect(userStore.agent.did).toBe("");
-    expect(userStore.profile).toBeNull();
   });
 });

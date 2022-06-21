@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from "uuid";
-import { createProfile } from "@/core/methods/createProfile";
 import {
   SOCIAL_CONTEXT_OFFICIAL,
   GROUP_EXPRESSION_OFFICIAL,

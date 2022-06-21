@@ -9,10 +9,10 @@ import createCommunityChannel from "../../../fixtures/createCommunityChannel.jso
 import languages from "../../../fixtures/languages.json";
 import addChannelUniqueHolochainLanguages from "../../../fixtures/addChannelUniqueHolochainLanguages.json";
 import * as createNeighbourhoodMeta from "@/core/methods/createNeighbourhoodMeta";
-import * as createProfile from "@/core/methods/createProfile";
 import * as createChannel from "@/core/methods/createChannel";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useDataStore } from "@/store/data";
+import agentByDIDLinksFixture from "../../../fixtures/agentByDIDLinks.json";
 import {
   GROUP_EXPRESSION_OFFICIAL,
   SHORTFORM_EXPRESSION_OFFICIAL,
@@ -29,6 +29,13 @@ describe("Create Community", () => {
       .spyOn(ad4mClient.perspective, "add")
       // @ts-ignore
       .mockResolvedValue(createCommunityPerspective);
+    
+    jest
+      .spyOn(ad4mClient.agent, "me")
+      // @ts-ignore
+      .mockImplementation(async (did) => {
+        return agentByDIDLinksFixture;
+      });
 
     // @ts-ignore
     jest
@@ -77,11 +84,6 @@ describe("Create Community", () => {
       .mockImplementation(async () => {
         return "QmbhWYKXXa53H5hSEsPEuQ9FJL1dBurBNkRF2391gsL9DV://842924554879604b2130319f6cabb23e24ce4438ec52995ee322b91a934d7813ed34c344b0ee54";
       });
-
-    // @ts-ignore
-    jest.spyOn(createProfile, "createProfile").mockImplementation(async () => {
-      return "QmUbmDdBMpv2vWa2kXPxcmcUtArLwAHQQgqvJ4XuDBfhtX://did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW";
-    });
 
     // @ts-ignore
     jest

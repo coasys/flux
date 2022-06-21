@@ -1,4 +1,3 @@
-import { createProfile } from "@/core/methods/createProfile";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
 import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
 
