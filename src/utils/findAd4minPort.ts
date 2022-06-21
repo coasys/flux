@@ -2,7 +2,7 @@ import { MainClient } from "@/app";
 import { Ad4mClient } from "@perspect3vism/ad4m";
 
 function Timeout() {
-  let controller = new AbortController();
+  const controller = new AbortController();
   setTimeout(() => controller.abort(), 20);
   return controller;
 };
