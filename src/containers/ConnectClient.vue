@@ -48,11 +48,12 @@ export default defineComponent({
       this.isConnecting = true;
 
       MainClient.generateJwt(this.code)
-      .then(() => {
-        this.$emit("submit");
-      }).finally(() => {
-        this.isConnecting = false;
-      });
+        .then(() => {
+          this.$emit("submit");
+        })
+        .finally(() => {
+          this.isConnecting = false;
+        });
     },
   },
 });

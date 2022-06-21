@@ -96,7 +96,7 @@ export default defineComponent({
         for (const user of users) {
           if (user) {
             const member = await getProfile(user);
-  
+
             if (member) {
               this.memberList = [...this.memberList, member];
             }

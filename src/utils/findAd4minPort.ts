@@ -5,33 +5,38 @@ function Timeout() {
   const controller = new AbortController();
   setTimeout(() => controller.abort(), 20);
   return controller;
-};
+}
 
-async function checkConnection(url: string, client: Ad4mClient): Promise<string> {
+async function checkConnection(
+  url: string,
+  client: Ad4mClient
+): Promise<string> {
   return new Promise(async (resolve, reject) => {
     try {
       if (client) {
         const id = setTimeout(() => {
-          resolve('')
+          resolve("");
         }, 1000);
         await client.runtime.hcAgentInfos(); // TODO runtime info is broken
         clearTimeout(id);
         console.log("get hc agent infos success.");
-        resolve(url)
+        resolve(url);
       }
     } catch (err) {
       if (url) {
-        throw Error('Cannot connect to the URL provided please check if the executor is running or pass a different URL')
+        throw Error(
+          "Cannot connect to the URL provided please check if the executor is running or pass a different URL"
+        );
       }
-      resolve('')
+      resolve("");
     }
-  })
+  });
 }
 
 export async function findAd4mPort(port?: number) {
   if (port) {
     return await checkPort(port);
-  } else {    
+  } else {
     for (let i = 12000; i <= 13000; i++) {
       const status = await checkPort(i);
       if (!status) {
@@ -42,9 +47,9 @@ export async function findAd4mPort(port?: number) {
     }
   }
 
-  MainClient.setPortSearchState('not_found')
+  MainClient.setPortSearchState("not_found");
 
-  throw Error('Couldn\'t find an open port')
+  throw Error("Couldn't find an open port");
 }
 
 async function checkPort(port: number) {
@@ -52,29 +57,37 @@ async function checkPort(port: number) {
 
   try {
     const res = await fetch(`http://localhost:${port}`, {
-      signal: Timeout().signal
-    })
+      signal: Timeout().signal,
+    });
 
     MainClient.setPort(port);
 
     const client = MainClient.ad4mClient;
-    
+
     const ad4mUrl = await checkConnection(url, client);
 
     const status = await client.runtime.hcAgentInfos();
 
     return status;
   } catch (e) {
-    console.error('failed', e)
-    
+    console.error("failed", e);
+
     if (Array.isArray(e)) {
-      if (e.length > 0 && e[0].message.startsWith("Capability is not matched, you have capabilities:")) {
+      if (
+        e.length > 0 &&
+        e[0].message.startsWith(
+          "Capability is not matched, you have capabilities:"
+        )
+      ) {
         throw e[0];
-      } 
+      }
     }
 
-    if (e.message === "Cannot extractByTags from a ciphered wallet. You must unlock first.") {
+    if (
+      e.message ===
+      "Cannot extractByTags from a ciphered wallet. You must unlock first."
+    ) {
       throw e;
     }
-  } 
+  }
 }

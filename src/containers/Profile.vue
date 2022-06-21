@@ -14,7 +14,9 @@
         {{ `${profile.givenName} ${profile.familyName}` }}
       </j-text>
       <j-text variant="body"> @{{ profile.username }}</j-text>
-      <j-text v-if="profile.bio" variant="subheading"> {{ profile.bio }}</j-text>
+      <j-text v-if="profile.bio" variant="subheading">
+        {{ profile.bio }}</j-text
+      >
       <j-button @click="() => $emit('openCompleteProfile')">
         View complete profile
       </j-button>
@@ -48,7 +50,7 @@ export default defineComponent({
       handler: async function (did) {
         // reset profile before fetching again
         this.profile = null;
-        if (typeof did === 'string') {
+        if (typeof did === "string") {
           this.profile = await getProfile(did);
         }
       },
