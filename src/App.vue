@@ -1,5 +1,5 @@
 <template>
-  <router-view :key="componentKey"></router-view>
+  <router-view :key="componentKey" v-if="!ui.showGlobalLoading"></router-view>
   <j-modal
     size="sm"
     :open="modals.showCode"
@@ -90,6 +90,10 @@ export default defineComponent({
   
           if (!fluxLinksFound) {
             await this.router.replace("/signup");
+          } else {
+            if (['unlock', 'connect', 'signup'].includes(this.router.currentRoute.value.name as string)) {
+              await this.router.replace("/home");
+            }
           }
         } catch (e) {
           console.log('main', {e}, e.message === "signature verification failed");
