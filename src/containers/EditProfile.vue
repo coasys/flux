@@ -112,7 +112,7 @@ export default defineComponent({
           username: this.username,
           profilePicture: this.profilePicture,
           bio: this.bio,
-          profileBg: this.profileBg
+          profileBg: this.profileBg,
         })
         .then(() => {
           this.$emit("submit");

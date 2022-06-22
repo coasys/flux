@@ -21,5 +21,5 @@ export class ProfileExpression extends ExpressionGeneric(Profile) {}
 export interface UserState {
   agent: AgentStatus;
   profile: Profile | null;
-  fluxPerspectiveId?: string;
+  agentProfileProxyPerspectiveId?: string;
 }

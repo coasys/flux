@@ -8,6 +8,7 @@ import * as createNeighbourhoodMeta from "@/core/methods/createNeighbourhoodMeta
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useDataStore } from "@/store/data";
 import { ad4mClient } from "@/app";
+import agentByDIDLinksFixture from "../../../fixtures/agentByDIDLinks.json";
 
 describe("Create Channel", () => {
   let store: Pinia;
@@ -38,6 +39,13 @@ describe("Create Channel", () => {
       .spyOn(createNeighbourhoodMeta, "createNeighbourhoodMeta")
       .mockImplementation(async (name, desc, lang) => {
         return createChannelMeta;
+      });
+
+    jest
+      .spyOn(ad4mClient.agent, "me")
+      // @ts-ignore
+      .mockImplementation(async (did) => {
+        return agentByDIDLinksFixture;
       });
 
     // @ts-ignore

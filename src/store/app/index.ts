@@ -21,6 +21,7 @@ export const useAppStore = defineStore("app", {
         showCommunitySettings: false,
         showInviteCode: false,
         showDisclaimer: true,
+        showCode: false,
       },
       showSidebar: true,
       sidebarWidth: 330,

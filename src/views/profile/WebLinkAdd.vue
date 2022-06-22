@@ -71,6 +71,7 @@ import { defineComponent, ref } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { nanoid } from "nanoid";
 import removeTypeName from "@/utils/removeTypeName";
+import { AREA_HAS_DESCRIPTION, AREA_HAS_IMAGE, AREA_HAS_NAME, AREA_TYPE, AREA_WEBLINK, FLUX_PROFILE, HAS_AREA, HAS_POST } from "@/constants/profile";
 
 export default defineComponent({
   props: ["step", "area", "isEditing"],
@@ -206,7 +207,7 @@ export default defineComponent({
 
         const userStore = useUserStore();
         const appStore = useAppStore();
-        const userPerspective = userStore.getFluxPerspectiveId;
+        const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
 
         const did = userStore.getUser?.agent.did;
 
@@ -236,9 +237,9 @@ export default defineComponent({
           await ad4mClient.perspective.addLink(
             userPerspective!,
             new Link({
-              source: `flux://profile`,
+              source: FLUX_PROFILE,
               target: areaName,
-              predicate: "flux://has_area",
+              predicate: HAS_AREA,
             })
           );
         }
@@ -259,15 +260,15 @@ export default defineComponent({
           new Link({
             source: areaName,
             target: this.link,
-            predicate: "sioc://has_post",
+            predicate: HAS_POST,
           })
         );
         await ad4mClient.perspective.addLink(
           userPerspective!,
           new Link({
             source: areaName,
-            target: `flux://webLink`,
-            predicate: "flux://area_type",
+            target: AREA_WEBLINK,
+            predicate: AREA_TYPE,
           })
         );
         await ad4mClient.perspective.addLink(
@@ -275,7 +276,7 @@ export default defineComponent({
           new Link({
             source: areaName,
             target: `text://${this.title}`,
-            predicate: "sioc://has_name",
+            predicate: AREA_HAS_NAME,
           })
         );
         await ad4mClient.perspective.addLink(
@@ -283,7 +284,7 @@ export default defineComponent({
           new Link({
             source: areaName,
             target: `text://${this.description}`,
-            predicate: "sioc://has_description",
+            predicate: AREA_HAS_DESCRIPTION,
           })
         );
 
@@ -297,7 +298,7 @@ export default defineComponent({
             new Link({
               source: areaName,
               target: storedImage,
-              predicate: "sioc://has_image",
+              predicate: AREA_HAS_IMAGE,
             })
           );
         }

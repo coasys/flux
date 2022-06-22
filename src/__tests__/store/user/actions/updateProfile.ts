@@ -1,6 +1,5 @@
 import community from "../../../fixtures/community.json";
 import getProfileFixture from "../../../fixtures/updateProfile.json";
-import * as createProfile from "@/core/methods/createProfile";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useUserStore } from "@/store/user";
 import { useDataStore } from "@/store/data";
@@ -31,11 +30,6 @@ describe("Update Profile", () => {
           return agentByDIDLinksFixture;
         });
 
-    // @ts-ignore
-    jest.spyOn(createProfile, "createProfile").mockImplementation(async () => {
-      return "QmevBs9ztZwyZjseMD4X18zSHFuDp9eEaLJyirHazQWmxS://did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW";
-    });
-
     store = createPinia();
     setActivePinia(store);
   });
@@ -46,7 +40,7 @@ describe("Update Profile", () => {
       .spyOn(ad4mClient.perspective, "all")
       // @ts-ignore
       .mockResolvedValue([{
-        name: "My flux perspective",
+        name: "Agent Profile",
         // @ts-ignore
         neighbourhood: null,
         // @ts-ignore
@@ -74,7 +68,7 @@ describe("Update Profile", () => {
     jest
       .spyOn(ad4mClient.perspective, "all")
       // @ts-ignore
-      .mockResolvedValue(null);
+      .mockResolvedValue([]);
 
     const userStore = useUserStore();
     const dataStore = useDataStore();

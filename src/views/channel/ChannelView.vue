@@ -1,10 +1,11 @@
 <template>
-  <chat-view
+  <perspective-view
+    :port="port"
     :perspective-uuid="channel.neighbourhood.perspective.uuid"
     @agent-click="onAgentClick"
     @perspective-click="onPerspectiveClick"
     @hide-notification-indicator="onHideNotificationIndicator"
-  ></chat-view>
+  ></perspective-view>
   <j-modal
     size="xs"
     v-if="activeProfile"
@@ -22,7 +23,7 @@
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState, ExpressionTypes } from "@/store/types";
 import { useDataStore } from "@/store/data";
-import { ad4mClient } from "@/app";
+import { ad4mClient, MainClient } from "@/app";
 import Profile from "@/containers/Profile.vue";
 import useEventEmitter from "@/utils/useEventEmitter";
 
@@ -57,9 +58,9 @@ export default defineComponent({
     this.script = document.createElement("script");
     this.script.setAttribute("type", "module");
     this.script.innerHTML = `
-      import ChatView from 'https://unpkg.com/@junto-foundation/chat-view/dist/main.js';
-      if(customElements.get('chat-view') === undefined) 
-        customElements.define("chat-view", ChatView);
+      import PerspectiveView from 'https://unpkg.com/@junto-foundation/chat-view/dist/main.js';
+      if(customElements.get('perspective-view') === undefined) 
+        customElements.define("perspective-view", PerspectiveView);
     `;
     this.script;
     document.body.appendChild(this.script);
@@ -86,6 +87,10 @@ export default defineComponent({
     next();
   },
   computed: {
+    port(): number {
+      // TODO: This needs to be reactive, probaly not now as we using a normal class
+      return MainClient.port;
+    },
     community(): CommunityState {
       const { communityId } = this.$route.params;
       return this.dataStore.getCommunity(communityId as string);

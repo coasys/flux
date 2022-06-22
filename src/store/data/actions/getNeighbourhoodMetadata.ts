@@ -13,9 +13,11 @@ export interface Payload {
   communityId: string;
 }
 
-const expressionWorker = new Worker("pollingWorker.js");
+const token = localStorage.getItem('ad4minToken');
 
-const PORT = parseInt(global.location.search.slice(6));
+const expressionWorker = new Worker("/pollingWorker.js");
+
+const PORT = localStorage.getItem('ad4minPort');
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async ({ communityId }: Payload): Promise<Worker> => {
@@ -25,12 +27,13 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
     //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button
     const community = dataStore.getCommunity(communityId);
 
-    const groupExpressionWorker = new Worker("pollingWorker.js");
+    const groupExpressionWorker = new Worker("/pollingWorker.js");
     // Start worker looking for group expression links
     groupExpressionWorker.postMessage({
       interval: groupExpressionRefreshDurationMS,
       staticSleep: true,
       query: print(PERSPECTIVE_LINK_QUERY),
+      token,
       variables: {
         uuid: community.neighbourhood.perspective.uuid,
         query: new LinkQuery({
@@ -67,6 +70,7 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
               retry: expressionGetRetries,
               interval: expressionGetDelayMs,
               query: print(GET_EXPRESSION),
+              token,
               variables: {
                 url: latestExpression,
               },

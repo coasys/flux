@@ -3,7 +3,6 @@ import joinNeighbourhoodFixture from "../../../fixtures/joinNeighbourhood.json";
 import createCommunityProfileLink from "../../../fixtures/createCommunityProfileLink.json";
 import joinComunityExpressionTypes from "../../../fixtures/joinComunityExpressionTypes.json";
 import addChannelCreateLink from "../../../fixtures/addChannelCreateLink.json";
-import * as createProfile from "@/core/methods/createProfile";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useDataStore } from "@/store/data";
 import { ad4mClient } from "@/app";
@@ -26,11 +25,6 @@ describe("Join Community", () => {
       .mockImplementation(async () => {
         return joinComunityExpressionTypes[2];
       });
-
-    // @ts-ignore
-    jest.spyOn(createProfile, "createProfile").mockImplementation(async () => {
-      return "QmUbmDdBMpv2vWa2kXPxcmcUtArLwAHQQgqvJ4XuDBfhtX://did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW";
-    });
 
     // @ts-ignore
     jest

@@ -12,6 +12,7 @@ import type { PerspectiveHandle } from "@perspect3vism/ad4m";
 import { createNeighbourhoodMeta } from "./createNeighbourhoodMeta";
 import { SOCIAL_CONTEXT_OFFICIAL } from "@/constants/languages";
 import { ad4mClient } from "@/app";
+import { CHANNEL } from "@/constants/neighbourhoodMeta";
 
 interface ChannelProps {
   channelName: string;
@@ -65,7 +66,7 @@ export async function createChannel({
     {
       source: sourcePerspective.sharedUrl!,
       target: neighbourhood,
-      predicate: "sioc://has_space",
+      predicate: CHANNEL,
     }
   );
   console.debug(
@@ -78,7 +79,7 @@ export async function createChannel({
     perspective.uuid,
     {
       source: neighbourhood,
-      target: "sioc://space",
+      target: CHANNEL,
       predicate: "rdf://type",
     }
   );

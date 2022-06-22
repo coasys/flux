@@ -1,15 +1,17 @@
 import { ProfileExpression, ProfileWithDID } from "@/store/types";
 import { Profile } from "@/store/types";
 import {
-  ACCOUNT_NAME,
-  EMAIL,
-  FAMILY_NAME,
-  GIVEN_NAME,
+  FLUX_PROFILE,
+  HAS_BG_IMAGE,
+  HAS_BIO,
+  HAS_EMAIL,
+  HAS_FAMILY_NAME,
+  HAS_GIVEN_NAME,
+  HAS_PROFILE_IMAGE,
+  HAS_THUMBNAIL_IMAGE,
+  HAS_USERNAME,
 } from "@/constants/profile";
-import { IMAGE, CONTENT_SIZE, CONTENT_URL, THUMBNAIL } from "@/constants/image";
-import { ad4mClient, apolloClient, profileCache } from "@/app";
-import { ExpressionRendered, LinkExpression } from "@perspect3vism/ad4m";
-import { GET_EXPRESSION } from "@/core/graphql_queries";
+import { ad4mClient } from "@/app";
 import getAgentLinks from "./getAgentLinks";
 
 interface Image {
@@ -17,118 +19,134 @@ interface Image {
   contentSize: string;
 }
 
-interface ImageWithThumbnail extends Image {
-  thumbnail?: Image;
-}
+const byteSize = (str: string) => new Blob([str]).size;
 
-function shouldParse(data: any) {
-  return data && typeof data === "string";
-}
+export const dataURItoBlob = (dataURI: string) => {
+  const bytes =
+    dataURI.split(",")[0].indexOf("base64") >= 0
+      ? atob(dataURI.split(",")[1])
+      : unescape(dataURI.split(",")[1]);
+  const mime = dataURI.split(",")[0].split(":")[1].split(";")[0];
+  const max = bytes.length;
+  const ia = new Uint8Array(max);
+  for (let i = 0; i < max; i += 1) ia[i] = bytes.charCodeAt(i);
+  return new Blob([ia], { type: mime });
+};
 
-export function parseThumbnail(data: any): Image {
-  const thumbnail = shouldParse(data) ? JSON.parse(data) : data;
-  return {
-    contentUrl: thumbnail[CONTENT_URL],
-    contentSize: thumbnail[CONTENT_SIZE],
-  };
-}
-
-export function parseImage(data: string): ImageWithThumbnail {
-  const image = shouldParse(data) ? JSON.parse(data) : data;
-  return {
-    contentUrl: image[CONTENT_URL],
-    contentSize: image[CONTENT_SIZE],
-    thumbnail: image[THUMBNAIL] && parseThumbnail(image[THUMBNAIL]),
-  };
-}
-
-export function parseProfile(data: ProfileExpression): Profile {
-  const image = data[IMAGE] && parseImage(data[IMAGE]);
-
-  return {
-    username: data[ACCOUNT_NAME],
-    email: data[EMAIL],
-    givenName: data[GIVEN_NAME],
-    familyName: data[FAMILY_NAME],
-    thumbnailPicture: image?.thumbnail?.contentUrl,
-    profilePicture: image?.contentUrl,
-  };
-}
-
-function getExpressionNoCache(url: string): Promise<ExpressionRendered | null> {
-  return new Promise((resolve, reject) => {
-    apolloClient
-      .query<{
-        expression: ExpressionRendered;
-      }>({
-        query: GET_EXPRESSION,
-        variables: { url: url },
-        fetchPolicy: "no-cache",
-      })
-      .then((result) => {
-        resolve(result.data.expression);
-      })
-      .catch((error) => reject(error));
+export const blobToDataURL = (blob: Blob): Promise<string> => {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.onabort = () => reject(new Error("Read aborted"));
+    reader.readAsDataURL(blob);
   });
-}
+};
+
+// Resizes the image by creating a canvas and resizing it to the resized image
+export const resizeImage = (file: any, maxSize: number): Promise<Blob> => {
+  const reader = new FileReader();
+  const image = new Image();
+  const canvas = document.createElement("canvas");
+
+  const resize = () => {
+    let { width, height } = image;
+
+    if (width > height) {
+      if (width > maxSize) {
+        height *= maxSize / width;
+        width = maxSize;
+      }
+    } else if (height > maxSize) {
+      width *= maxSize / height;
+      height = maxSize;
+    }
+
+    canvas.width = width;
+    canvas.height = height;
+    canvas.getContext("2d")?.drawImage(image, 0, 0, width, height);
+
+    const dataUrl = canvas.toDataURL("image/png");
+
+    return dataURItoBlob(dataUrl);
+  };
+
+  return new Promise((ok, no) => {
+    if (!file.type.match(/image.*/)) {
+      no(new Error("Not an image"));
+      return;
+    }
+
+    reader.onload = (readerEvent) => {
+      image.onload = () => ok(resize());
+      image.src = readerEvent.target?.result as string;
+    };
+
+    reader.onerror = (err) => {
+      image.onerror = () => no(err);
+    };
+
+    reader.readAsDataURL(file);
+  });
+};
 
 export async function getProfile(did: string): Promise<ProfileWithDID | null> {
   const links = await getAgentLinks(did);
 
   const profile: Profile = {
-    username: '',
-    bio: '',
-    email: '',
-    givenName: '',
-    familyName: ''
+    username: "",
+    bio: "",
+    email: "",
+    givenName: "",
+    familyName: "",
   };
 
-  for (const link of links.filter(e => e.data.source === 'flux://profile')) {
+  for (const link of links.filter((e) => e.data.source === FLUX_PROFILE)) {
     let expUrl;
     let image;
 
     switch (link.data.predicate) {
-      case "sioc://has_username":
+      case HAS_USERNAME:
         profile!.username = link.data.target;
         break;
-      case "sioc://has_bio":
-        profile!.username = link.data.target;
+      case HAS_BIO:
+        profile!.bio = link.data.target;
         break;
-      case "sioc://has_given_name":
+      case HAS_GIVEN_NAME:
         profile!.givenName = link.data.target;
         break;
-      case "sioc://has_family_name":
+      case HAS_FAMILY_NAME:
         profile!.familyName = link.data.target;
         break;
-      case "sioc://has_profile_image":
+      case HAS_PROFILE_IMAGE:
         expUrl = link.data.target;
         image = await ad4mClient.expression.get(expUrl);
-    
+
         if (image) {
           profile!.profilePicture = image.data.slice(1, -1);
         }
         break;
-      case "sioc://has_profile_thumbnail_image":
+      case HAS_THUMBNAIL_IMAGE:
         expUrl = link.data.target;
         image = await ad4mClient.expression.get(expUrl);
 
         if (image) {
-          if (link.data.source === "flux://profile") {
+          if (link.data.source === FLUX_PROFILE) {
             profile!.thumbnailPicture = image.data.slice(1, -1);
           }
         }
         break;
-      case "sioc://has_bg_image":
+      case HAS_BG_IMAGE:
         expUrl = link.data.target;
         image = await ad4mClient.expression.get(expUrl);
 
         if (image) {
-          if (link.data.source === "flux://profile") {
+          if (link.data.source === FLUX_PROFILE) {
             profile!.profileBg = image.data.slice(1, -1);
           }
         }
         break;
-      case "sioc://has_email":
+      case HAS_EMAIL:
         profile!.email = link.data.target;
         break;
       default:
@@ -136,6 +154,5 @@ export async function getProfile(did: string): Promise<ProfileWithDID | null> {
     }
   }
 
-  return {...profile, did}
+  return { ...profile, did };
 }
-

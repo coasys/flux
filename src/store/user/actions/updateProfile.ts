@@ -1,13 +1,14 @@
-import { ExpressionTypes, Profile, ProfileExpression } from "@/store/types";
+import { Profile } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "..";
 import { useDataStore } from "@/store/data";
-import { ad4mClient, profileCache } from "@/app";
+import { ad4mClient } from "@/app";
 import { Link, LinkExpression, PerspectiveInput } from "@perspect3vism/ad4m";
 import removeTypeName from "@/utils/removeTypeName";
 import getAgentLinks from "@/utils/getAgentLinks";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
-import { resizeImage, dataURItoBlob, blobToDataURL } from "@/core/methods/createProfile";
+import { FLUX_PROFILE, HAS_BG_IMAGE, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "@/constants/profile";
+import { resizeImage, dataURItoBlob, blobToDataURL } from "@/utils/profileHelpers";
 
 export interface Payload {
   username?: string;
@@ -19,7 +20,7 @@ export interface Payload {
 
 async function removeLink(links: LinkExpression[], link: Link) {
   const userStore = useUserStore();
-  const userPerspective = userStore.getFluxPerspectiveId;
+  const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
 
   const foundLink = links.find(
     (e) => e.data.predicate === link.predicate
@@ -33,7 +34,7 @@ async function removeLink(links: LinkExpression[], link: Link) {
 
 async function replaceLink(links: LinkExpression[], newLink: Link) {
   const userStore = useUserStore();
-  const userPerspective = userStore.getFluxPerspectiveId;
+  const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
 
   const foundLink = links.find(
     (e) => e.data.predicate === newLink.predicate
@@ -71,11 +72,11 @@ export default async (payload: Payload): Promise<void> => {
   
   userStore.setUserProfile(newProfile);
 
-  const userPerspective = userStore.getFluxPerspectiveId || 
-    await (await ad4mClient.perspective.all())?.find(e => e.name === "My flux perspective")?.uuid;
+  const perspectives = await ad4mClient.perspective.all();
+  const userPerspective = perspectives.find(e => e.name === "Agent Profile");
 
   if (userPerspective) {
-    userStore.addFluxPerspectiveId(userPerspective)
+    userStore.addAgentProfileProxyPerspectiveId(userPerspective.uuid)
   } else {
     const error = "No user perspective found";
     appStore.showDangerToast({
@@ -85,30 +86,30 @@ export default async (payload: Payload): Promise<void> => {
   }
 
   try {
-    const links = await getAgentLinks(userStore.agent.did!, userPerspective!);
+    const links = await getAgentLinks(userStore.agent.did!, userPerspective.uuid);
 
-    const tempLinks = [];
+    const tempLinks = [...links];
 
     if (payload.bio) {    
       const bioLink = await replaceLink(links, new Link({
-        source: "flux://profile",
+        source: FLUX_PROFILE,
         target: newProfile.bio,
-        predicate: "sioc://has_bio",
+        predicate: HAS_USERNAME,
       }));
     
       tempLinks.push(bioLink);
     } else {
       removeLink(links, new Link({
-        source: "flux://profile",
+        source: FLUX_PROFILE,
         target: newProfile.bio,
-        predicate: "sioc://has_bio",
+        predicate: HAS_USERNAME,
       }));
     }
 
     const usernameLink = await replaceLink(links, new Link({
-      source: "flux://profile",
+      source: FLUX_PROFILE,
       target: newProfile.username,
-      predicate: "sioc://has_username",
+      predicate: HAS_USERNAME,
     }));
 
     if (payload.profileBg) {
@@ -118,9 +119,9 @@ export default async (payload: Payload): Promise<void> => {
       );
 
       const profileBgLink = await replaceLink(links, new Link({
-        source: "flux://profile",
+        source: FLUX_PROFILE,
         target: image,
-        predicate: "sioc://has_bg_image",
+        predicate: HAS_BG_IMAGE,
       }));
 
       tempLinks.push(profileBgLink);
@@ -148,18 +149,18 @@ export default async (payload: Payload): Promise<void> => {
       const profileImageLink = await replaceLink(
         links,
         new Link({
-          source: "flux://profile",
+          source: FLUX_PROFILE,
           target: profileImage,
-          predicate: `sioc://has_profile_image`,
+          predicate: HAS_PROFILE_IMAGE,
         })
       );
   
       const thumbnailImageLink = await replaceLink(
         links,
         new Link({
-          source: "flux://profile",
+          source: FLUX_PROFILE,
           target: thumbnailImage,
-          predicate: `sioc://has_profile_thumbnail_image`,
+          predicate: HAS_THUMBNAIL_IMAGE,
         })
       );
 

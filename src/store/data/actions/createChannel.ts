@@ -3,6 +3,7 @@ import { useAppStore } from "@/store/app";
 import { ChannelState, MembraneType } from "@/store/types";
 import { useDataStore } from "..";
 import { useUserStore } from "@/store/user";
+import { ad4mClient } from "@/app";
 
 export interface Payload {
   communityId: string;
@@ -16,10 +17,14 @@ export default async (payload: Payload): Promise<ChannelState> => {
   try {
     const community = dataStore.getCommunity(payload.communityId);
 
+    const agent = await ad4mClient.agent.me()
+
+    const creatorDid = agent.did;
+
     if (community.neighbourhood !== undefined) {
       const channel = await createChannel({
         channelName: payload.name,
-        creatorDid: userStore.getUser!.agent.did || "",
+        creatorDid,
         sourcePerspective: community.neighbourhood.perspective,
         membraneType: MembraneType.Inherited,
         typedExpressionLanguages:

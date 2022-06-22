@@ -3,14 +3,17 @@ import { PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 import { LinkQuery } from "@perspect3vism/ad4m";
 import { useDataStore } from "..";
 import { channelRefreshDurationMs } from "@/constants/config";
+import { CHANNEL } from "@/constants/neighbourhoodMeta";
 
 export interface Payload {
   communityId: string;
 }
 
-const channelLinksWorker = new Worker("pollingWorker.js");
+var token = localStorage.getItem('ad4minToken');
 
-const PORT = parseInt(global.location.search.slice(6));
+const channelLinksWorker = new Worker("/pollingWorker.js");
+
+const PORT = localStorage.getItem('ad4minPort');
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async ({ communityId }: Payload): Promise<Worker> => {
@@ -25,11 +28,12 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
       interval: channelRefreshDurationMs,
       staticSleep: true,
       query: print(PERSPECTIVE_LINK_QUERY),
+      token,
       variables: {
         uuid: community.neighbourhood.perspective.uuid,
         query: new LinkQuery({
           source: community.neighbourhood.neighbourhoodUrl,
-          predicate: "sioc://has_space",
+          predicate: CHANNEL,
         }),
       },
       callbackData: { communityId: community.neighbourhood.perspective.uuid },
@@ -44,8 +48,10 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
 
     channelLinksWorker.addEventListener("message", async (e) => {
       //Check that no other worker callback is executing
+
       try {
         const channelLinks = e.data.perspectiveQueryLinks;
+        console.log('profileLinks', channelLinks)
 
         console.log(channelLinks);
 

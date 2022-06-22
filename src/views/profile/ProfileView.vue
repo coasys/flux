@@ -121,7 +121,7 @@
       @submit="() => setShowEditProfile(false)"
       @cancel="() => setShowEditProfile(false)"
       :bg="profilebg"
-      :preBio="bio"
+      :preBio="profile?.bio || ''"
     />
   </j-modal>
   <router-view></router-view>
@@ -143,6 +143,7 @@ import EditProfile from "@/containers/EditProfile.vue";
 import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
 import getAgentLinks from "@/utils/getAgentLinks";
+import { FLUX_PROFILE } from "@/constants/profile";
 
 export default defineComponent({
   name: "ProfileView",
@@ -185,16 +186,16 @@ export default defineComponent({
     setShowJoinCommunityModal(value: boolean): void {
       this.showJoinCommunityModal = value;
     },
-    async getAgentProfile() {
+    async getAgentAreas() {
       const did = this.$route.params.did as string;
       const me = await ad4mClient.agent.me();
       const userStore = useUserStore();
-      const userPerspective = userStore.getFluxPerspectiveId;
+      const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
 
-      const links = await getAgentLinks(
+      const links = (await getAgentLinks(
         did || me.did,
         did === me.did || did === undefined ? userPerspective! : undefined
-      );
+      )).filter(e => e.data.source.startsWith('flux://'));
 
       const preArea: { [x: string]: any } = {};
 
@@ -234,10 +235,14 @@ export default defineComponent({
       }
 
       this.profileLinks = Object.values(preArea).filter(
-        (e) => e.id !== "flux://profile"
+        (e) => e.id !== FLUX_PROFILE
       );
 
       console.log('links', links)
+    },
+    async getAgentProfile() {
+      const did = this.$route.params.did as string;
+      const me = await ad4mClient.agent.me();
 
       this.profile = await getProfile(did || me.did);
 
@@ -277,7 +282,7 @@ export default defineComponent({
     async deleteLinks(areaName: string) {
       const userStore = useUserStore();
       const me = await ad4mClient.agent.me();
-      const userPerspective = userStore.getFluxPerspectiveId;
+      const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
       const links = await getAgentLinks(me.did, userPerspective!);
 
       const newLinks = [];
@@ -306,6 +311,7 @@ export default defineComponent({
   },
   async mounted() {
     this.getAgentProfile();
+    this.getAgentAreas();
     const did = this.$route.params.did as string;
     const me = await ad4mClient.agent.me();
 
@@ -318,20 +324,24 @@ export default defineComponent({
     showAddlinkModal() {
       if (!this.showAddlinkModal) {
         this.getAgentProfile();
+        this.getAgentAreas();
       }
     },
     showEditlinkModal() {
       if (!this.showEditlinkModal) {
         this.getAgentProfile();
+        this.getAgentAreas();
       }
     },
     "modals.showEditProfile"() {
       if (!this.modals.showEditProfile) {
         this.getAgentProfile();
+        this.getAgentAreas();
       }
     },
     "$route.path"() {
       this.getAgentProfile();
+      this.getAgentAreas();
     },
   },
   computed: {

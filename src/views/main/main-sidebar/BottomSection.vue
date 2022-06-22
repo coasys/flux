@@ -19,14 +19,6 @@ export default defineComponent({
     const appStore = useAppStore();
     const userStore = useUserStore();
 
-    onBeforeMount(() => {
-      window.api.receive("getCleanState", (data: string) => {
-        localStorage.clear();
-
-        window.api.send("quitApp");
-      });
-    });
-
     return {
       appStore,
       userStore,

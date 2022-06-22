@@ -63,6 +63,7 @@
 <script lang="ts">
 import { ad4mClient } from "@/app";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
+import { AREA_HAS_DESCRIPTION, AREA_HAS_IMAGES, AREA_HAS_NAME, AREA_SIMPLE_AREA, AREA_TYPE, FLUX_PROFILE, HAS_AREA } from "@/constants/profile";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
 import { useUserStore } from "@/store/user";
@@ -150,7 +151,7 @@ export default defineComponent({
       const dataStore = useDataStore();
       const userStore = useUserStore();
       const appStore = useAppStore();
-      const userPerspective = userStore.getFluxPerspectiveId;
+      const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
 
       const did = userStore.getUser?.agent.did;
 
@@ -180,9 +181,9 @@ export default defineComponent({
         await ad4mClient.perspective.addLink(
           userPerspective!,
           new Link({
-            source: `flux://profile`,
+            source: FLUX_PROFILE,
             target: areaName,
-            predicate: "flux://has_area",
+            predicate: HAS_AREA,
           })
         );
       }
@@ -202,8 +203,8 @@ export default defineComponent({
         userPerspective!,
         new Link({
           source: areaName,
-          target: `flux://simpleArea`,
-          predicate: "flux://area_type",
+          target: AREA_SIMPLE_AREA,
+          predicate: AREA_TYPE,
         })
       );
       await ad4mClient.perspective.addLink(
@@ -211,7 +212,7 @@ export default defineComponent({
         new Link({
           source: areaName,
           target: `text://${this.title}`,
-          predicate: "sioc://has_name",
+          predicate: AREA_HAS_NAME,
         })
       );
       await ad4mClient.perspective.addLink(
@@ -219,7 +220,7 @@ export default defineComponent({
         new Link({
           source: areaName,
           target: `text://${this.description}`,
-          predicate: "sioc://has_description",
+          predicate: AREA_HAS_DESCRIPTION,
         })
       );
 
@@ -234,7 +235,7 @@ export default defineComponent({
           new Link({
             source: areaName,
             target: storedImage,
-            predicate: `sioc://has_images`,
+            predicate: AREA_HAS_IMAGES,
           })
         );
       }

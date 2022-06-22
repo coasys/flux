@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from "uuid";
-import { createProfile } from "@/core/methods/createProfile";
 import {
   SOCIAL_CONTEXT_OFFICIAL,
   GROUP_EXPRESSION_OFFICIAL,
@@ -20,7 +19,7 @@ import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta"
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
-import { ad4mClient } from "@/app";
+import { ad4mClient, MainClient } from "@/app";
 
 export interface Payload {
   perspectiveName: string;
@@ -40,11 +39,13 @@ export default async ({
   const userStore = useUserStore();
 
   try {
-    const creatorDid = userStore.getUser?.agent.did || "";
+    const agent = await ad4mClient.agent.me()
 
-    const createSourcePerspective = await ad4mClient.perspective.add(
+    const creatorDid = agent.did;
+
+    const createSourcePerspective = (await ad4mClient.perspective.add(
       perspectiveName
-    ) as PerspectiveHandle;
+    )) as PerspectiveHandle;
     console.log("Created source perspective", createSourcePerspective);
 
     //Get the variables that we need to create new unique languages
@@ -95,7 +96,7 @@ export default async ({
       {
         languageAddress: groupExpressionLang.address!,
         expressionType: ExpressionTypes.GroupExpression,
-      } as FluxExpressionReference
+      } as FluxExpressionReference,
     ];
 
     //Publish perspective
@@ -164,7 +165,6 @@ export default async ({
     );
     console.log("Created profile expression link", addProfileLink);
 
-    const myDid = userStore.getUser!.agent.did!;
 
     const newCommunity = {
       neighbourhood: {
@@ -177,7 +177,7 @@ export default async ({
           uuid: createSourcePerspective.uuid,
           name: createSourcePerspective.name,
           sharedUrl: neighbourhood,
-          neighbourhood: createSourcePerspective.neighbourhood
+          neighbourhood: createSourcePerspective.neighbourhood,
         },
         typedExpressionLanguages: typedExpLangs,
         groupExpressionRef: createExp,
@@ -185,7 +185,7 @@ export default async ({
         membraneType: MembraneType.Unique,
         linkedPerspectives: [createSourcePerspective.uuid],
         linkedNeighbourhoods: [createSourcePerspective.uuid],
-        members: [myDid],
+        members: [creatorDid],
         membraneRoot: createSourcePerspective.uuid,
         currentExpressionLinks: {},
         currentExpressionMessages: {},
