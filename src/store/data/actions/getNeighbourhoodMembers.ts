@@ -9,9 +9,11 @@ import { MEMBER } from "@/constants/neighbourhoodMeta";
 import { memberRefreshDurationMs } from "@/constants/config";
 import { GET_EXPRESSION, PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
 
+const token = localStorage.getItem('ad4minToken');
+
 const expressionWorker = new Worker("/pollingWorker.js");
 
-const PORT = 12000;
+const PORT = localStorage.getItem('ad4minPort');
 
 export default async function (id: string): Promise<Worker> {
   const dataStore = useDataStore();
@@ -31,6 +33,7 @@ export default async function (id: string): Promise<Worker> {
         interval: memberRefreshDurationMs,
         staticSleep: true,
         query: print(PERSPECTIVE_LINK_QUERY),
+        token,
         variables: {
           uuid: id,
           query: new LinkQuery({
@@ -50,10 +53,13 @@ export default async function (id: string): Promise<Worker> {
       profileLinksWorker.addEventListener("message", async (e) => {
         const profileLinks = e.data.perspectiveQueryLinks;
 
+        console.log('profileLinks', profileLinks)
+
         for (const profileLink of profileLinks) {
           expressionWorker.postMessage({
             id: profileLink.data.target,
             retry: 50,
+            token,
             interval: 5000,
             query: print(GET_EXPRESSION),
             variables: { url: profileLink.data.target },

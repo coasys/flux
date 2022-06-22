@@ -10,9 +10,11 @@ export interface Payload {
   communityId: string;
 }
 
+const token = localStorage.getItem('ad4minToken');
+
 const expressionWorker = new Worker("/pollingWorker.js");
 
-const PORT = 12000;
+const PORT = localStorage.getItem('ad4minPort');
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async (communityId: string): Promise<void> => {
@@ -42,6 +44,7 @@ export default async (communityId: string): Promise<void> => {
       retry: expressionGetRetries,
       interval: expressionGetDelayMs,
       query: print(GET_EXPRESSION),
+      token,
       variables: {
         url: sortedLinks[sortedLinks.length - 1].data!.target!,
       },

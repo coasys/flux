@@ -13,9 +13,11 @@ export interface Payload {
   communityId: string;
 }
 
+const token = localStorage.getItem('ad4minToken');
+
 const expressionWorker = new Worker("/pollingWorker.js");
 
-const PORT = 12000;
+const PORT = localStorage.getItem('ad4minPort');
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async ({ communityId }: Payload): Promise<Worker> => {
@@ -31,6 +33,7 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
       interval: groupExpressionRefreshDurationMS,
       staticSleep: true,
       query: print(PERSPECTIVE_LINK_QUERY),
+      token,
       variables: {
         uuid: community.neighbourhood.perspective.uuid,
         query: new LinkQuery({
@@ -67,6 +70,7 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
               retry: expressionGetRetries,
               interval: expressionGetDelayMs,
               query: print(GET_EXPRESSION),
+              token,
               variables: {
                 url: latestExpression,
               },
