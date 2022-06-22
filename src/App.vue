@@ -92,12 +92,12 @@ export default defineComponent({
             await this.router.replace("/signup");
           }
         } catch (e) {
-          console.log('main', {e}, e.message === "Couldn't find an open port");
+          console.log('main', {e}, e.message === "signature verification failed");
 
           if (e.message.startsWith(
           "Capability is not matched, you have capabilities:"
-          )) {
-            MainClient.requestCapability().then((val) => {
+          ) || e.message === 'signature verification failed') {
+            MainClient.requestCapability(true).then((val) => {
               if (val) {
                 this.setShowCode(true);
               }

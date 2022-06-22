@@ -96,8 +96,12 @@ class Client {
     apolloClient = this.apolloClient;
   }
 
-  async requestCapability() {
-    if (!this.token()) {
+  async requestCapability(invalidateToken = false) {
+    if (invalidateToken || !this.token()) {
+      localStorage.removeItem("ad4minToken");
+
+      this.buildClient();
+
       this.requestId = await this.ad4mClient.agent.requestCapability(
         "flux",
         "flux-desc",
