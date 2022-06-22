@@ -7,7 +7,7 @@ import { Link, LinkExpression, PerspectiveInput } from "@perspect3vism/ad4m";
 import removeTypeName from "@/utils/removeTypeName";
 import getAgentLinks from "@/utils/getAgentLinks";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
-import { FLUX_PROFILE, HAS_BG_IMAGE, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "@/constants/profile";
+import { FLUX_PROFILE, HAS_BG_IMAGE, HAS_BIO, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "@/constants/profile";
 import { resizeImage, dataURItoBlob, blobToDataURL } from "@/utils/profileHelpers";
 
 export interface Payload {
@@ -94,7 +94,7 @@ export default async (payload: Payload): Promise<void> => {
       const bioLink = await replaceLink(links, new Link({
         source: FLUX_PROFILE,
         target: newProfile.bio,
-        predicate: HAS_USERNAME,
+        predicate: HAS_BIO,
       }));
     
       tempLinks.push(bioLink);
@@ -102,7 +102,7 @@ export default async (payload: Payload): Promise<void> => {
       removeLink(links, new Link({
         source: FLUX_PROFILE,
         target: newProfile.bio,
-        predicate: HAS_USERNAME,
+        predicate: HAS_BIO,
       }));
     }
 
