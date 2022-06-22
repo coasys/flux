@@ -58,7 +58,7 @@ export default defineComponent({
     this.script = document.createElement("script");
     this.script.setAttribute("type", "module");
     this.script.innerHTML = `
-      import PerspectiveView from 'http://127.0.0.1:8080/dist/main.js';
+      import PerspectiveView from 'https://unpkg.com/@junto-foundation/chat-view/dist/main.js';
       if(customElements.get('perspective-view') === undefined) 
         customElements.define("perspective-view", PerspectiveView);
     `;
