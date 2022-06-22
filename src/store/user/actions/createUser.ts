@@ -150,7 +150,7 @@ export default async ({
 
     userStore.updateAgentStatus(status);
 
-    userStore.addFluxPerspectiveId(userPerspective?.uuid!)
+    userStore.addAgentProfileProxyPerspectiveId(userPerspective?.uuid!)
   } catch (e) {
     appStore.showDangerToast({
       message: e.message,

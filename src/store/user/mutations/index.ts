@@ -18,8 +18,8 @@ export default {
     store.profile = payload;
   },
 
-  addFluxPerspectiveId(payload: string): void {
+  addAgentProfileProxyPerspectiveId(payload: string): void {
     const store = useUserStore();
-    store.fluxPerspectiveId = payload;
+    store.agentProfileProxyPerspectiveId = payload;
   },
 };

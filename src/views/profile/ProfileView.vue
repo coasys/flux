@@ -190,7 +190,7 @@ export default defineComponent({
       const did = this.$route.params.did as string;
       const me = await ad4mClient.agent.me();
       const userStore = useUserStore();
-      const userPerspective = userStore.getFluxPerspectiveId;
+      const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
 
       const links = (await getAgentLinks(
         did || me.did,
@@ -282,7 +282,7 @@ export default defineComponent({
     async deleteLinks(areaName: string) {
       const userStore = useUserStore();
       const me = await ad4mClient.agent.me();
-      const userPerspective = userStore.getFluxPerspectiveId;
+      const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
       const links = await getAgentLinks(me.did, userPerspective!);
 
       const newLinks = [];

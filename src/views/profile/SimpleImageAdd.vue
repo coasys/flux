@@ -151,7 +151,7 @@ export default defineComponent({
       const dataStore = useDataStore();
       const userStore = useUserStore();
       const appStore = useAppStore();
-      const userPerspective = userStore.getFluxPerspectiveId;
+      const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
 
       const did = userStore.getUser?.agent.did;
 

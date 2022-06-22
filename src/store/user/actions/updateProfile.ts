@@ -20,7 +20,7 @@ export interface Payload {
 
 async function removeLink(links: LinkExpression[], link: Link) {
   const userStore = useUserStore();
-  const userPerspective = userStore.getFluxPerspectiveId;
+  const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
 
   const foundLink = links.find(
     (e) => e.data.predicate === link.predicate
@@ -34,7 +34,7 @@ async function removeLink(links: LinkExpression[], link: Link) {
 
 async function replaceLink(links: LinkExpression[], newLink: Link) {
   const userStore = useUserStore();
-  const userPerspective = userStore.getFluxPerspectiveId;
+  const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
 
   const foundLink = links.find(
     (e) => e.data.predicate === newLink.predicate
@@ -76,7 +76,7 @@ export default async (payload: Payload): Promise<void> => {
   const userPerspective = perspectives.find(e => e.name === "Agent Profile");
 
   if (userPerspective) {
-    userStore.addFluxPerspectiveId(userPerspective.uuid)
+    userStore.addAgentProfileProxyPerspectiveId(userPerspective.uuid)
   } else {
     const error = "No user perspective found";
     appStore.showDangerToast({
