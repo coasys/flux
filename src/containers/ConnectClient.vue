@@ -27,14 +27,17 @@
 import { defineComponent } from "vue";
 import { useDataStore } from "@/store/data";
 import { MainClient } from "@/app";
+import { useAppStore } from "@/store/app";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
   setup() {
     const dataStore = useDataStore();
+    const appStore = useAppStore();
 
     return {
       dataStore,
+      appStore
     };
   },
   data() {
@@ -53,6 +56,7 @@ export default defineComponent({
         })
         .finally(() => {
           this.isConnecting = false;
+          this.appStore.setGlobalLoading(false);
         });
     },
   },

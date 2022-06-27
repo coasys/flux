@@ -48,11 +48,7 @@ export default defineComponent({
   },
 
   mounted() {
-    MainClient.requestCapability().then((val) => {
-      if (val) {
-        this.setShowCode(true);
-      }
-    });
+    this.appStore.setGlobalLoading(true);
 
     this.checkConnection();
   },
@@ -95,6 +91,8 @@ export default defineComponent({
               await this.router.replace("/home");
             }
           }
+
+          this.appStore.setGlobalLoading(false);
         } catch (e) {
           console.log('main', {e}, e.message === "signature verification failed");
 
@@ -109,19 +107,18 @@ export default defineComponent({
           } else if (e.message === "Cannot extractByTags from a ciphered wallet. You must unlock first."
           ) {
             await this.router.replace("/unlock");
+            this.appStore.setGlobalLoading(false);
           } else if (e.message === "Couldn't find an open port") {
             await this.router.replace("/connect");
+            this.appStore.setGlobalLoading(false);
           } else {
             await this.router.replace('/home');
+            this.appStore.setGlobalLoading(false);
           }
         }
       }
 
-      this.appStore.setGlobalLoading(true);
-
       await checkConnectionReroute();
-
-      this.appStore.setGlobalLoading(false);
 
       setInterval(async () => {
         await checkConnectionReroute();
