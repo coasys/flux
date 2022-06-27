@@ -116,11 +116,13 @@ export default defineComponent({
         if (e.message.startsWith(
         "Capability is not matched, you have capabilities:"
         ) || e.message === 'signature verification failed') {
-          MainClient.requestCapability(true).then((val) => {
-            if (val) {
-              this.setShowCode(true);
-            }
-          });
+          if (!this.modals.showCode) {
+            MainClient.requestCapability(true).then((val) => {
+              if (val) {
+                this.setShowCode(true);
+              }
+            });
+          }
         } else if (e.message === "Cannot extractByTags from a ciphered wallet. You must unlock first."
         ) {
           await this.router.replace("/unlock");
