@@ -68,60 +68,63 @@ export default defineComponent({
       this.setShowCode(false);
 
       this.componentKey += 1;
+
+      this.appStore.setGlobalLoading(true);
+
+      this.checkConnectionReroute();
     },
-    async checkConnection() {
-      const checkConnectionReroute = async () => {
-        try {
-          const status = await checkConnection();
+    async checkConnectionReroute() {
+      try {
+        const status = await checkConnection();
 
-          if (!status) {
-            await findAd4mPort(MainClient.portSearchState === 'found' ? MainClient.port : undefined)
-        
-            await MainClient.ad4mClient.agent.status();
-          }
+        if (!status) {
+          await findAd4mPort(MainClient.portSearchState === 'found' ? MainClient.port : undefined)
+      
+          await MainClient.ad4mClient.agent.status();
+        }
 
-          const { perspective } = await MainClient.ad4mClient.agent.me();
-  
-          const fluxLinksFound = perspective?.links.find(e => e.data.source.startsWith('flux://'));
-  
-          if (!fluxLinksFound) {
-            await this.router.replace("/signup");
-          } else {
-            if (['unlock', 'connect', 'signup'].includes(this.router.currentRoute.value.name as string)) {
-              await this.router.replace("/home");
-            }
-          }
+        const { perspective } = await MainClient.ad4mClient.agent.me();
 
-          this.appStore.setGlobalLoading(false);
-        } catch (e) {
-          console.log('main', {e}, e.message === "signature verification failed");
+        const fluxLinksFound = perspective?.links.find(e => e.data.source.startsWith('flux://'));
 
-          if (e.message.startsWith(
-          "Capability is not matched, you have capabilities:"
-          ) || e.message === 'signature verification failed') {
-            MainClient.requestCapability(true).then((val) => {
-              if (val) {
-                this.setShowCode(true);
-              }
-            });
-          } else if (e.message === "Cannot extractByTags from a ciphered wallet. You must unlock first."
-          ) {
-            await this.router.replace("/unlock");
-            this.appStore.setGlobalLoading(false);
-          } else if (e.message === "Couldn't find an open port") {
-            await this.router.replace("/connect");
-            this.appStore.setGlobalLoading(false);
-          } else {
-            await this.router.replace('/home');
-            this.appStore.setGlobalLoading(false);
+        if (!fluxLinksFound) {
+          await this.router.replace("/signup");
+        } else {
+          if (['unlock', 'connect', 'signup'].includes(this.router.currentRoute.value.name as string)) {
+            await this.router.replace("/home");
           }
         }
-      }
 
-      await checkConnectionReroute();
+        this.appStore.setGlobalLoading(false);
+      } catch (e) {
+        console.log('main', {e}, e.message === "signature verification failed");
+
+        if (e.message.startsWith(
+        "Capability is not matched, you have capabilities:"
+        ) || e.message === 'signature verification failed') {
+          MainClient.requestCapability(true).then((val) => {
+            if (val) {
+              this.setShowCode(true);
+            }
+          });
+        } else if (e.message === "Cannot extractByTags from a ciphered wallet. You must unlock first."
+        ) {
+          await this.router.replace("/unlock");
+          this.appStore.setGlobalLoading(false);
+        } else if (e.message === "Couldn't find an open port") {
+          await this.router.replace("/connect");
+          this.appStore.setGlobalLoading(false);
+        } else {
+          await this.router.replace('/home');
+          this.appStore.setGlobalLoading(false);
+        }
+      }
+    },
+    async checkConnection() {
+      await this.checkConnectionReroute();
 
       setInterval(async () => {
-        await checkConnectionReroute();
+        await this.checkConnectionReroute();
       }, 30000);
     }
   },
