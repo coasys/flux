@@ -289,7 +289,7 @@ export default {
     channel.currentExpressionMessages[payload.link.data.target] = {
       expression: {
         author: payload.message.author!,
-        data: JSON.parse(payload.message.data!),
+        data: payload.message.data,
         timestamp: payload.message.timestamp!,
         proof: payload.message.proof!,
       } as Expression,

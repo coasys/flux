@@ -23,14 +23,19 @@
 
 <script lang="ts">
 import { MainClient } from "./app";
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import ConnectClient from "@/containers/ConnectClient.vue";
 import { mapActions } from "pinia";
 import { useAppStore } from "./store/app";
-import { ApplicationState, ModalsState } from "@/store/types";
-import { useRouter } from "vue-router";
+import { ApplicationState, ModalsState, NeighbourhoodState } from "@/store/types";
+import { useRoute, useRouter } from "vue-router";
 import { checkConnection } from "./router";
 import { findAd4mPort } from "./utils/findAd4minPort";
+import { useDataStore } from "./store/data";
+import { LinkExpression } from "@perspect3vism/ad4m";
+import { CHANNEL, EXPRESSION, MEMBER } from "./constants/neighbourhoodMeta";
+import { useUserStore } from "./store/user";
+import retry from "./utils/retry";
 
 export default defineComponent({
   name: "App",
@@ -39,11 +44,18 @@ export default defineComponent({
   setup() {
     const appStore = useAppStore();
     const router = useRouter();
+    const route = useRoute();
     const componentKey = ref(0);
+    const dataStore = useDataStore();
+    const userStore = useUserStore();
+
     return { 
       appStore, 
       componentKey, 
-      router
+      router,
+      route,
+      dataStore,
+      userStore,
     };
   },
 
@@ -95,6 +107,8 @@ export default defineComponent({
           }
         }
 
+        this.startWatcher();
+
         this.appStore.setGlobalLoading(false);
       } catch (e) {
         console.log('main', {e}, e.message === "signature verification failed");
@@ -126,6 +140,105 @@ export default defineComponent({
       setInterval(async () => {
         await this.checkConnectionReroute();
       }, 30000);
+    },
+    async startWatcher() {
+      const router = this.router;
+      const route = this.route;
+      let watching: string[] = [];
+
+      //Watch for incoming signals from holochain - an incoming signal should mean a DM is inbound
+      const newLinkHandler = async (
+        link: LinkExpression,
+        perspective: string
+      ) => {
+        console.debug("GOT INCOMING MESSAGE SIGNAL", link, perspective);
+        if (link.data!.predicate! === EXPRESSION) {
+          try {
+            const expression = await retry(async () => {
+              const exp = await MainClient.ad4mClient.expression.get(link.data.target);
+              if (exp) {
+                return { ...exp, data: JSON.parse(exp.data) };
+              } else {
+                return null
+              }
+            }, {});
+
+            console.debug("FOUND EXPRESSION FOR SIGNAL", expression);
+            //Add the expression to the store
+            this.dataStore.addExpressionAndLink({
+              channelId: perspective,
+              link: link,
+              message: expression,
+            });
+
+            this.dataStore.showMessageNotification({
+              router,
+              route,
+              perspectiveUuid: perspective,
+              authorDid: (expression as any)!.author,
+              message: (expression as any).data.body,
+            });
+
+            //Add UI notification on the channel to notify that there is a new message there
+            this.dataStore.setHasNewMessages({
+              channelId: perspective,
+              value: true,
+            });
+          } catch (e: any) {
+            throw new Error(e);
+          }
+        } else if (link.data!.predicate! === MEMBER) {
+          const did = link.data!.target!.split("://")[1];
+          console.log("Got new member in signal! Parsed out did: ", did);
+          if (did) {
+            this.dataStore.setNeighbourhoodMember({
+              member: did,
+              perspectiveUuid: perspective,
+            });
+          }
+        } else if (
+          link.data!.predicate! === CHANNEL &&
+          link.author != this.userStore.getUser?.agent.did
+        ) {
+          console.log("Joining channel via link signal!");
+          await this.dataStore.joinChannelNeighbourhood({
+            parentCommunityId: perspective,
+            neighbourhoodUrl: link.data!.target!,
+          });
+        }
+      };
+
+      watch(
+        this.dataStore.neighbourhoods,
+        async (newValue: { [perspectiveUuid: string]: NeighbourhoodState }) => {
+          console.log('wallah', Object.entries(newValue))
+          for (let [k, v] of Object.entries(newValue)) {
+            if (watching.filter((val) => val == k).length == 0) {
+              console.log("Starting watcher on perspective", k);
+              watching.push(k);
+              const perspective = await MainClient.ad4mClient.perspective.byUUID(k);
+
+              if (perspective) {
+                perspective.addListener('link-added', (result) => {
+                  console.debug(
+                    "Got new link with data",
+                    result.data,
+                    "and channel",
+                    v
+                  );
+                  newLinkHandler(
+                    result,
+                    v.perspective.uuid
+                  );
+                });
+              }
+
+            }
+          }
+        },
+        { immediate: true, deep: true }
+      );
+
     }
   },
 });
