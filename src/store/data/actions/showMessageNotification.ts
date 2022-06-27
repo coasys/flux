@@ -30,7 +30,6 @@ export default async ({
 
   const isMinimized = document.hasFocus();
 
-
   const { channelId, communityId } = route.params;
 
   const user = userStore.getUser;
@@ -65,12 +64,15 @@ export default async ({
       body = `#${channel?.neighbourhood.name}: ${escapedMessage}`;
     }
 
-    Notification.requestPermission().then((permission) => {
+    if (Notification.permission === "granted") {
+      const permission = await Notification.requestPermission();
+
       if (permission === "granted") {
         const notification = new Notification(title, {
           body,
           icon: "/assets/images/logo.png",
         });
+        
         notification.onclick = () => {
           window.focus();
 
@@ -84,7 +86,11 @@ export default async ({
 
           notification.close();
         }
+
+        return notification;
       }
-    })
+    }
   }
+
+  return undefined;
 };

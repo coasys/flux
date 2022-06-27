@@ -22,10 +22,19 @@ describe("Show Message Notification", () => {
   let did: string;
   let profileLink: string;
 
-  beforeAll(async () => {
+  beforeAll(async () => {  
     Object.defineProperty(global, "Notification", {
       value: jest.fn(),
     });
+
+    const staticMembers = {
+      requestPermission: jest.fn().mockImplementation(async () => {
+        return 'granted';
+      }),
+      permission: 'granted',
+    };
+  
+    Object.assign(global.Notification, staticMembers);
 
     profileLangAddress = community.neighbourhood.typedExpressionLanguages.find(
       (t: any) => t.expressionType === ExpressionTypes.ProfileExpression
@@ -60,6 +69,11 @@ describe("Show Message Notification", () => {
         }
         return agentByDIDLinksFixture;
       });
+
+    jest
+      .spyOn(document, "hasFocus")
+      // @ts-ignore
+      .mockResolvedValue(true);
 
     store = createPinia();
     setActivePinia(store);
