@@ -49,6 +49,14 @@ class Client {
     this.buildClient();
   }
 
+  setCapabilities(capabilities: string) {
+    localStorage.setItem("capabilities", capabilities);
+  }
+
+  capabilities() {
+    return localStorage.getItem("capabilities") || "";
+  }
+
   token() {
     return localStorage.getItem("ad4minToken") || "";
   }
@@ -99,15 +107,18 @@ class Client {
   async requestCapability(invalidateToken = false) {
     if (invalidateToken || !this.token()) {
       localStorage.removeItem("ad4minToken");
+      localStorage.removeItem("capabilities");
 
       this.buildClient();
 
+      const capabilities = '[{"with":{"domain":"*","pointers":["*"]},"can":["*"]}]';
       this.requestId = await this.ad4mClient.agent.requestCapability(
         "flux",
         "flux-desc",
         "fluxsocial.io",
-        '[{"with":{"domain":"*","pointers":["*"]},"can":["*"]}]'
+        capabilities
       );
+      this.setCapabilities(capabilities);
 
       return true;
     } else {

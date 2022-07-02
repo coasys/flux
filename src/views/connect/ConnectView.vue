@@ -1,22 +1,41 @@
 <template>
-  <div class="container">
-    <j-text variant="heading-lg"> Trying to connect to ad4m</j-text>
-    <j-text variant="body">
-      Are you sure ad4m is downloaded and running?</j-text
-    >
-    <j-text variant="body">
-      Download the latest version <a target="_blank" href="https://github.com/perspect3vism/ad4min/releases/latest">here</a>. We will automatically detect when it is
-      running, and you can use a completely decentralized version of Flux, if it doesn't connect automatically refresh the page.
-    </j-text>
+  <h4>Ad4m Connect</h4>
+  <div class="container" id="container">
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import Ad4mConnectDialog from "@perspect3vism/ad4m-connect/public/Ad4mConnectDialog";
+import { MainClient } from "@/app";
+import { Ad4mClient } from "@perspect3vism/ad4m";
 
 export default defineComponent({
   name: "ChannelView",
   components: {},
+  async mounted() {
+    const tempTarget = document.createElement("connect");
+    const dialog = new Ad4mConnectDialog({ target: tempTarget });
+
+    dialog.appName = "Flux";
+    dialog.appIconPath = "/assets/images/logo.png";
+    dialog.executorUrl = MainClient.url;
+    dialog.capToken = MainClient.token;
+    dialog.capabilities = MainClient.capabilities;
+    //dialog.showQrScanner = true
+
+    dialog.resolve = (executorUrl: string, capabilityToken: string, client: Ad4mClient) => {
+      console.log("Resolved with", executorUrl, capabilityToken, client);
+    };
+
+    dialog.reject = () => {
+      console.error("Got rejected");
+    };
+
+    document.getElementById("container")!.appendChild(tempTarget)  ;
+    
+    dialog.run();
+  }
 });
 </script>
 

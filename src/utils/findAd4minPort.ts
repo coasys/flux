@@ -37,7 +37,7 @@ export async function findAd4mPort(port?: number) {
   if (port) {
     return await checkPort(port);
   } else {
-    for (let i = 12000; i <= 13000; i++) {
+    for (let i = 12000; i <= 12010; i++) {
       const status = await checkPort(i);
       if (!status) {
         continue;
@@ -50,6 +50,10 @@ export async function findAd4mPort(port?: number) {
   MainClient.setPortSearchState("not_found");
 
   throw Error("Couldn't find an open port");
+}
+
+async function checkPostSimple(port: number) {
+
 }
 
 async function checkPort(port: number) {

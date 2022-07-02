@@ -36,6 +36,7 @@ import { LinkExpression } from "@perspect3vism/ad4m";
 import { CHANNEL, EXPRESSION, MEMBER } from "./constants/neighbourhoodMeta";
 import { useUserStore } from "./store/user";
 import retry from "./utils/retry";
+import Ad4mConnectDialog from "@perspect3vism/ad4m-connect/public/Ad4mConnectDialog";
 
 export default defineComponent({
   name: "App",
@@ -60,6 +61,7 @@ export default defineComponent({
   },
 
   mounted() {
+    console.log("mounted app");
     this.appStore.setGlobalLoading(true);
 
     this.checkConnection();
@@ -86,8 +88,20 @@ export default defineComponent({
       this.checkConnectionReroute();
     },
     async checkConnectionReroute() {
+      console.log("Checking connection");
       try {
+        const tempTarget = document.createElement("connect");
+        const dialog = new Ad4mConnectDialog({ target: tempTarget });
+
+        dialog.appName = "Flux";
+        dialog.appIconPath = "/assets/images/logo.png";
+        dialog.executorUrl = MainClient.url;
+        dialog.capToken = MainClient.token;
+        dialog.capabilities = MainClient.capabilities;
+
+
         const status = await checkConnection();
+        console.log(status);
 
         if (!status) {
           await findAd4mPort(MainClient.portSearchState === 'found' ? MainClient.port : undefined)
@@ -137,6 +151,7 @@ export default defineComponent({
       }
     },
     async checkConnection() {
+      console.log("Checkconnection");
       await this.checkConnectionReroute();
 
       setInterval(async () => {

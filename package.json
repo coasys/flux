@@ -23,6 +23,7 @@
     "@apollo/client": "3.4.17",
     "@junto-foundation/junto-elements": "^0.4.0",
     "@perspect3vism/ad4m": "^0.1.30",
+    "@perspect3vism/ad4m-connect": "^0.0.2",
     "@perspect3vism/ad4m-executor": "0.1.37",
     "date-fns": "^2.22.1",
     "graphql": "^15.5.0",
