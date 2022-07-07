@@ -21,6 +21,7 @@ export interface ExpressionAndRef {
 export interface LinkExpressionAndLang {
   expression: LinkExpression;
   language: string;
+  hash: () => number;
 }
 
 export interface ExpressionAndRef {

@@ -12,7 +12,7 @@ describe("Update Community", () => {
     jest
     .spyOn(ad4mClient.perspective, "addLink")
       .mockImplementation(async () => {
-        return updateCommunityLinkData;
+        return {...updateCommunityLinkData, hash: () => 12345};
       });
 
     store = createPinia();

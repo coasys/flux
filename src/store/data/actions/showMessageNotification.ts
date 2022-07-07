@@ -18,9 +18,8 @@ export default async ({
   perspectiveUuid,
   authorDid,
   message,
-}: Payload): Promise<Notification | undefined> => {
+}: Payload) => {
   const dataStore = useDataStore();
-  const appStore = useAppStore();
   const userStore = useUserStore();
 
   const escapedMessage = message.replace(/(\s*<.*?>\s*)+/g, " ");
@@ -29,9 +28,7 @@ export default async ({
   const channel = dataStore.getChannel(perspectiveUuid);
   const community = dataStore.getCommunity(channel.neighbourhood.membraneRoot!);
 
-  const isMinimized = ["minimize", "foreground"].includes(
-    appStore.getWindowState
-  );
+  const isMinimized = document.hasFocus();
 
   const { channelId, communityId } = route.params;
 
@@ -39,7 +36,7 @@ export default async ({
 
   // Only show the notification when the the message is not from self & the active community & channel is different
   if (
-    (isMinimized &&
+    (!isMinimized &&
       !channel?.state.notifications.mute &&
       !community?.state.notifications.mute) ||
     (user!.agent.did! !== authorDid &&
@@ -67,25 +64,32 @@ export default async ({
       body = `#${channel?.neighbourhood.name}: ${escapedMessage}`;
     }
 
-    const notification = new Notification(title, {
-      body,
-      icon: "/assets/images/logo.png",
-    });
+    if (Notification.permission === "granted") {
+      const permission = await Notification.requestPermission();
 
-    // Clicking on notification will take the user to that community & channel
-    notification.onclick = () => {
-      window.api.send("restoreWindow");
+      if (permission === "granted") {
+        const notification = new Notification(title, {
+          body,
+          icon: "/assets/images/logo.png",
+        });
+        
+        notification.onclick = () => {
+          window.focus();
 
-      router.push({
-        name: "channel",
-        params: {
-          communityId: community!.neighbourhood.perspective!.uuid,
-          channelId: channel!.neighbourhood.perspective!.uuid,
-        },
-      });
-    };
+          router.push({
+            name: "channel",
+            params: {
+              communityId: community!.neighbourhood.perspective!.uuid,
+              channelId: channel!.neighbourhood.perspective!.uuid,
+            },
+          });
 
-    return notification;
+          notification.close();
+        }
+
+        return notification;
+      }
+    }
   }
 
   return undefined;

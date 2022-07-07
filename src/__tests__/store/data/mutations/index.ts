@@ -71,7 +71,10 @@ describe("Data Mutations", () => {
 
     dataStore.addMessage({
       channelId,
-      link: messageLink,
+      link: {
+        ...messageLink,
+        hash: () => 12345
+      },
       expression: messageExpression,
     });
 
@@ -412,7 +415,7 @@ describe("Data Mutations", () => {
 
     dataStore.addExpressionAndLink({
       channelId: channel1.state.perspectiveUuid,
-      link: messageLink,
+      link: {...messageLink, hash: () => 12345},
       message: messageExpression,
     });
 

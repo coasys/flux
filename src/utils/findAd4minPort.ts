@@ -90,7 +90,7 @@ async function checkPort(port: number) {
       throw e;
     }
 
-    if (e.message === 'signature verification failed') {
+    if (e.message === "signature verification failed") {
       throw e;
     }
   }

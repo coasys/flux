@@ -32,7 +32,10 @@ describe("Create Neighbourhood Meta", () => {
     jest
       .spyOn(ad4mClient.perspective, "addLink")
       .mockImplementation(async (perspective, link) => {
-        return addChannelCreateLink;
+        return {
+          ...addChannelCreateLink,
+          hash: () => 12345
+        };
       });
 
     // @ts-ignore
