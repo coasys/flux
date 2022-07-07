@@ -5,7 +5,7 @@ import { contextBridge, ipcRenderer } from "electron";
 contextBridge.exposeInMainWorld("api", {
   send: (channel, data) => {
     // whitelist channels
-    let validChannels = [
+    const validChannels = [
       "ping",
       "getLangPath",
       "cleanState",
@@ -22,7 +22,7 @@ contextBridge.exposeInMainWorld("api", {
     }
   },
   receive: (channel, func) => {
-    let validChannels = [
+    const validChannels = [
       "pong",
       "getLangPathResponse",
       "getCleanState",

@@ -37,7 +37,7 @@ export default defineComponent({
 
     return {
       dataStore,
-      appStore
+      appStore,
     };
   },
   data() {
