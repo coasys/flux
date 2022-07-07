@@ -31,9 +31,9 @@ describe("Join Community", () => {
     .spyOn(ad4mClient.perspective, "addLink")
       .mockImplementation(async (perspective, link) => {
         if (link.predicate === "sioc://has_member") {
-          return createCommunityProfileLink;
+          return {...createCommunityProfileLink, hash: () => 12345};
         }
-        return addChannelCreateLink;
+        return {...addChannelCreateLink, hash: () => 12345};
       });
 
     store = createPinia();

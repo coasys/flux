@@ -29,7 +29,7 @@ describe("Create Community", () => {
       .spyOn(ad4mClient.perspective, "add")
       // @ts-ignore
       .mockResolvedValue(createCommunityPerspective);
-    
+
     jest
       .spyOn(ad4mClient.agent, "me")
       // @ts-ignore
@@ -75,7 +75,10 @@ describe("Create Community", () => {
     jest
       .spyOn(createNeighbourhoodMeta, "createNeighbourhoodMeta")
       .mockImplementation(async (name, desc, lang) => {
-        return createChannelMeta;
+        return [{
+          ...createChannelMeta,
+          hash: () => 12345
+        }];
       });
 
     // @ts-ignore
@@ -96,13 +99,13 @@ describe("Create Community", () => {
       .spyOn(ad4mClient.perspective, "addLink")
       .mockImplementation(async (perspective, link) => {
         if (link.predicate === "rdf://type") {
-          return createCommunityLinkType;
+          return {...createCommunityLinkType, hash: () => 12345};
         } else if (link.predicate === "rdf://class") {
-          return createCommunityGroupExpression;
+          return {...createCommunityGroupExpression, hash: () => 12345};
         } else if (link.predicate === "sioc://has_member") {
-          return createCommunityProfileLink;
+          return {...createCommunityProfileLink, hash: () => 12345};
         }
-        return addChannelCreateLink;
+        return {...addChannelCreateLink, hash: () => 12345};
       });
 
     store = createPinia();

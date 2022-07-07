@@ -38,7 +38,7 @@ describe("Create Channel", () => {
     jest
       .spyOn(createNeighbourhoodMeta, "createNeighbourhoodMeta")
       .mockImplementation(async (name, desc, lang) => {
-        return createChannelMeta;
+        return [{...createChannelMeta, hash: () => 12345}];
       });
 
     jest
@@ -53,9 +53,9 @@ describe("Create Channel", () => {
       .spyOn(ad4mClient.perspective, "addLink")
       .mockImplementation(async (perspective, link) => {
         if (link.predicate === "rdf://type") {
-          return addChannelCreateLinkType;
+          return {...addChannelCreateLinkType, hash: () => 12345};
         }
-        return addChannelCreateLink;
+        return {...addChannelCreateLink, hash: () => 12345};
       });
 
     store = createPinia();
