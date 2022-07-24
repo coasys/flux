@@ -2,10 +2,9 @@ import {
   ExpressionAndRef,
   LinkExpressionAndLang,
   CommunityState,
-  ChannelState,
   ThemeState,
   LocalCommunityState,
-  LocalChannelState,
+  ChannelState,
 } from "@/store/types";
 
 import { parseExprUrl } from "@perspect3vism/ad4m";
@@ -200,37 +199,14 @@ export default {
     const parentNeighbourhood = state.neighbourhoods[payload.communityId];
 
     if (parentNeighbourhood !== undefined) {
-      if (
-        parentNeighbourhood.linkedNeighbourhoods.indexOf(
-          payload.channel.neighbourhood.neighbourhoodUrl
-        ) === -1
-      ) {
-        parentNeighbourhood.linkedNeighbourhoods.push(
-          payload.channel.neighbourhood.neighbourhoodUrl
-        );
-      }
-
-      if (
-        parentNeighbourhood.linkedPerspectives.indexOf(
-          payload.channel.neighbourhood.perspective.uuid
-        ) === -1
-      ) {
-        parentNeighbourhood.linkedPerspectives.push(
-          payload.channel.neighbourhood.perspective.uuid
-        );
-      }
-
-      state.channels[payload.channel.neighbourhood.perspective.uuid] =
-        payload.channel.state;
-
-      state.neighbourhoods[payload.channel.neighbourhood.perspective.uuid] =
-        payload.channel.neighbourhood;
+      state.channels[payload.channel.id] =
+        payload.channel;
     }
   },
 
   addLocalChannel(payload: {
     perspectiveUuid: string;
-    channel: LocalChannelState;
+    channel: ChannelState;
   }): void {
     const state = useDataStore();
     state.channels[payload.perspectiveUuid] = payload.channel;
@@ -244,9 +220,7 @@ export default {
 
   createChannelMutation(payload: ChannelState): void {
     const state = useDataStore();
-    state.channels[payload.neighbourhood.perspective.uuid] = payload.state;
-    state.neighbourhoods[payload.neighbourhood.perspective.uuid] =
-      payload.neighbourhood;
+    state.channels[payload.id] = payload;
   },
 
   setuseLocalTheme(payload: { communityId: string; value: boolean }): void {
@@ -259,15 +233,15 @@ export default {
     const state = useDataStore();
     const tempChannel = state.getChannel(payload.channelId);
     const tempCommunity = state.getCommunity(
-      tempChannel.neighbourhood.membraneRoot
-    );
-    const channel = state.channels[payload.channelId];
-    const community = state.communities[tempCommunity.state.perspectiveUuid];
+      tempChannel.sourcePerspective
+      );
+      const channel = state.channels[payload.channelId];
+      const community = state.communities[tempCommunity.state.perspectiveUuid];
+      console.log('lol', channel, community);
     channel.hasNewMessages = payload.value;
     community.hasNewMessages = state
-      .getChannelNeighbourhoods(tempCommunity.state.perspectiveUuid)
-      .reduce((acc: boolean, curr) => {
-        const channel = state.channels[curr.perspective.uuid];
+      .getChannelStates(tempCommunity.state.perspectiveUuid)
+      .reduce((acc: boolean, channel) => {
         if (!acc) return channel.hasNewMessages;
         return true;
       }, false);

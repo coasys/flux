@@ -213,16 +213,9 @@ export default async ({
     // We add a default channel that is a reference to
     // the community itself. This way we can utilize the fractal nature of
     // neighbourhoods. Remember that this also need to happen in join community.
-    dataStore.addLocalChannel({
-      perspectiveUuid: createSourcePerspective.uuid,
-      channel: {
-        perspectiveUuid: createSourcePerspective.uuid,
-        hasNewMessages: false,
-        feedType: FeedType.Signaled,
-        notifications: {
-          mute: false,
-        },
-      },
+    await dataStore.createChannel({
+      name: "Home",
+      communityId: createSourcePerspective.uuid
     });
 
     // @ts-ignore

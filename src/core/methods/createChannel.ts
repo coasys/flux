@@ -3,134 +3,72 @@
 import {
   ChannelState,
   FeedType,
-  MembraneType,
-  FluxExpressionReference,
 } from "@/store/types";
-import { v4 } from "uuid";
-import { Perspective, Link } from "@perspect3vism/ad4m";
 import type { PerspectiveHandle } from "@perspect3vism/ad4m";
-import { createNeighbourhoodMeta } from "./createNeighbourhoodMeta";
-import { SOCIAL_CONTEXT_OFFICIAL } from "@/constants/languages";
 import { ad4mClient } from "@/app";
 import { CHANNEL } from "@/constants/neighbourhoodMeta";
+import { nanoid } from "nanoid";
 
 interface ChannelProps {
   channelName: string;
   creatorDid: string;
   sourcePerspective: PerspectiveHandle;
-  membraneType: MembraneType;
-  typedExpressionLanguages: FluxExpressionReference[];
 }
 
 export async function createChannel({
   channelName,
   creatorDid,
   sourcePerspective,
-  membraneType,
-  typedExpressionLanguages,
 }: ChannelProps): Promise<ChannelState> {
-  const perspective = await ad4mClient.perspective.add(channelName);
-  console.debug("Created new perspective with result", perspective);
-  const socialContextLanguage =
-    await ad4mClient.languages.applyTemplateAndPublish(
-      SOCIAL_CONTEXT_OFFICIAL,
-      JSON.stringify({
-        uid: v4().toString(),
-        name: `${channelName}-social-context`,
-      })
-    );
-  console.debug(
-    "Created new social context language wuth result",
-    socialContextLanguage
-  );
-
-  //Publish perspective
-  const metaLinks = await createNeighbourhoodMeta(
-    channelName,
-    "",
-    creatorDid,
-    typedExpressionLanguages
-  );
-
-  const meta = new Perspective(metaLinks);
-
-  const neighbourhood = await ad4mClient.neighbourhood.publishFromPerspective(
-    perspective.uuid,
-    socialContextLanguage.address,
-    meta
-  );
-  console.debug("Create a neighbourhood with result", neighbourhood);
+  const id = nanoid();
 
   const addLinkToChannel = await ad4mClient.perspective.addLink(
     sourcePerspective.uuid,
     {
       source: sourcePerspective.sharedUrl!,
-      target: neighbourhood,
+      target: id,
       predicate: CHANNEL,
     }
   );
+  
   console.debug(
     "Created new link on source social-context with result",
     addLinkToChannel
   );
 
-  //Add link on channel social context declaring type
-  const addChannelTypeLink = await ad4mClient.perspective.addLink(
-    perspective.uuid,
+  const channelNameLink = await ad4mClient.perspective.addLink(
+    sourcePerspective.uuid,
     {
-      source: neighbourhood,
-      target: CHANNEL,
-      predicate: "rdf://type",
+      source: addLinkToChannel.data.target,
+      target: channelName,
+      predicate: 'flux://name',
     }
-  );
-  console.log(
-    "Added link on channel social-context with result",
-    addChannelTypeLink
   );
 
-  //Add link on channel social context declaring type
-  const addSourceNeighbourhoodLink = await ad4mClient.perspective.addLink(
-    perspective.uuid,
+  console.log("Created channel name link", channelNameLink);
+
+  const channelCreatorDidLink = await ad4mClient.perspective.addLink(
+    sourcePerspective.uuid,
     {
-      source: neighbourhood,
-      target: sourcePerspective.sharedUrl!,
-      predicate: "flux://parentCommunity",
+      source: addLinkToChannel.data.target,
+      target: creatorDid,
+      predicate: 'flux://creator_did',
     }
   );
-  console.log(
-    "Added link on channel pointing to parent neighbourhood",
-    addSourceNeighbourhoodLink
-  );
+
+  console.log("Created channel creator did link", channelCreatorDidLink);
 
   return {
-    neighbourhood: {
-      name: channelName,
-      description: "",
-      creatorDid,
-      perspective: {
-        uuid: perspective.uuid,
-        name: perspective.name,
-        neighbourhood: perspective.neighbourhood,
-        sharedUrl: perspective.sharedUrl
-      },
-      typedExpressionLanguages: typedExpressionLanguages,
-      neighbourhoodUrl: neighbourhood,
-      membraneType: membraneType,
-      linkedPerspectives: [],
-      linkedNeighbourhoods: [],
-      members: [],
-      currentExpressionLinks: {},
-      currentExpressionMessages: {},
-      createdAt: new Date().toISOString(),
-      membraneRoot: sourcePerspective.uuid,
-    },
-    state: {
-      perspectiveUuid: perspective.uuid,
-      hasNewMessages: false,
-      feedType: FeedType.Signaled,
-      notifications: {
-        mute: false,
-      },
+    name: channelName,
+    description: "",
+    creatorDid,
+    id,
+    createdAt: new Date().toISOString(),
+    sourcePerspective: sourcePerspective.uuid,
+    hasNewMessages: false,
+    feedType: FeedType.Signaled,
+    notifications: {
+      mute: false,
     },
   } as ChannelState;
 }
