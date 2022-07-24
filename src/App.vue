@@ -213,7 +213,6 @@ export default defineComponent({
       watch(
         this.dataStore.neighbourhoods,
         async (newValue: { [perspectiveUuid: string]: NeighbourhoodState }) => {
-          console.log('wallah', Object.entries(newValue))
           for (let [k, v] of Object.entries(newValue)) {
             if (watching.filter((val) => val == k).length == 0) {
               console.log("Starting watcher on perspective", k);

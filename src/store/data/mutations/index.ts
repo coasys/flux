@@ -237,7 +237,6 @@ export default {
       );
       const channel = state.channels[payload.channelId];
       const community = state.communities[tempCommunity.state.perspectiveUuid];
-      console.log('lol', channel, community);
     channel.hasNewMessages = payload.value;
     community.hasNewMessages = state
       .getChannelStates(tempCommunity.state.perspectiveUuid)
