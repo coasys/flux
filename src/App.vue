@@ -27,7 +27,7 @@ import { defineComponent, ref, watch } from "vue";
 import ConnectClient from "@/containers/ConnectClient.vue";
 import { mapActions } from "pinia";
 import { useAppStore } from "./store/app";
-import { ApplicationState, ModalsState, NeighbourhoodState } from "@/store/types";
+import { ApplicationState, FeedType, ModalsState, NeighbourhoodState } from "@/store/types";
 import { useRoute, useRouter } from "vue-router";
 import { checkConnection } from "./router";
 import { findAd4mPort } from "./utils/findAd4minPort";
@@ -203,9 +203,21 @@ export default defineComponent({
           link.author != this.userStore.getUser?.agent.did
         ) {
           console.log("Joining channel via link signal!");
-          await this.dataStore.joinChannelNeighbourhood({
-            parentCommunityId: perspective,
-            neighbourhoodUrl: link.data!.target!,
+
+          this.dataStore.addChannel({
+            communityId: perspective,
+            channel: {
+                id: link.data.target,
+                name: link.data.target,
+                creatorDid: link.author,
+                sourcePerspective: perspective,
+                hasNewMessages: false,
+                createdAt: link.timestamp,
+                feedType: FeedType.Signaled,
+                notifications: {
+                  mute: false,
+                },
+            },
           });
         }
       };
