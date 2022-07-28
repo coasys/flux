@@ -26,7 +26,7 @@ export async function createChannel({
 
   const channel = dataStore.channels[channelName];
   if (!channel || channel.sourcePerspective !== sourcePerspective.uuid) {
-    const addLinkToChannel = await ad4mClient.perspective.addLink(
+    const linkExpression = await ad4mClient.perspective.addLink(
       sourcePerspective.uuid,
       {
         source: sourcePerspective.sharedUrl!,
@@ -37,19 +37,8 @@ export async function createChannel({
 
     console.debug(
       "Created new link on source social-context with result",
-      addLinkToChannel
+      linkExpression
     );
-
-    const channelCreatorDidLink = await ad4mClient.perspective.addLink(
-      sourcePerspective.uuid,
-      {
-        source: addLinkToChannel.data.target,
-        target: creatorDid,
-        predicate: 'flux://creator_did',
-      }
-    );
-
-    console.log("Created channel creator did link", channelCreatorDidLink);
 
     return {
       name: channelName,
