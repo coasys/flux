@@ -6,7 +6,7 @@ import {
 } from "@/store/types";
 import type { PerspectiveHandle } from "@perspect3vism/ad4m";
 import { ad4mClient } from "@/app";
-import { CHANNEL } from "@/constants/neighbourhoodMeta";
+import { CHANNEL, SELF } from "@/constants/neighbourhoodMeta";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 
@@ -29,7 +29,7 @@ export async function createChannel({
     const linkExpression = await ad4mClient.perspective.addLink(
       sourcePerspective.uuid,
       {
-        source: sourcePerspective.sharedUrl!,
+        source: SELF,
         target: channelName,
         predicate: CHANNEL,
       }

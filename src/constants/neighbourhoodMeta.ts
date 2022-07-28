@@ -1,8 +1,8 @@
 export const DESCRIPTION = "rdf://description";
 
-export const SELF = "self";
+export const SELF = "ad4m://self";
 
-export const LANGUAGE = "language";
+export const LANGUAGE = "ad4m://language";
 
 export const CREATOR = "rdf://creator";
 
