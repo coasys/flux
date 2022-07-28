@@ -1,20 +1,20 @@
 import { print } from "graphql/language/printer";
 import { PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
-import { linkEqual, LinkQuery } from "@perspect3vism/ad4m";
+import { LinkQuery } from "@perspect3vism/ad4m";
 import { useDataStore } from "..";
 import { channelRefreshDurationMs } from "@/constants/config";
-import { CHANNEL } from "@/constants/neighbourhoodMeta";
+import { CHANNEL, SELF } from "@/constants/neighbourhoodMeta";
 import { FeedType } from "@/store/types";
 
 export interface Payload {
   communityId: string;
 }
 
-var token = localStorage.getItem('ad4minToken');
+const token = localStorage.getItem("ad4minToken");
 
 const channelLinksWorker = new Worker("/pollingWorker.js");
 
-const PORT = localStorage.getItem('ad4minPort');
+const PORT = localStorage.getItem("ad4minPort");
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async ({ communityId }: Payload): Promise<Worker> => {
@@ -33,7 +33,7 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
       variables: {
         uuid: community.neighbourhood.perspective.uuid,
         query: new LinkQuery({
-          source: community.neighbourhood.neighbourhoodUrl,
+          source: SELF,
           predicate: CHANNEL,
         }),
       },
@@ -52,7 +52,7 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
 
       try {
         const channelLinks = e.data.perspectiveQueryLinks;
-        console.log('profileLinks', channelLinks)
+        console.log("Channel links", channelLinks);
 
         console.log(channelLinks);
 
@@ -67,16 +67,16 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
             dataStore.addChannel({
               communityId: community.state.perspectiveUuid,
               channel: {
-                  id: name,
-                  name,
-                  creatorDid: channelLinks[i].author,
-                  sourcePerspective: community.state.perspectiveUuid,
-                  hasNewMessages: false,
-                  createdAt: new Date().toISOString(),
-                  feedType: FeedType.Signaled,
-                  notifications: {
-                    mute: false,
-                  },
+                id: name,
+                name,
+                creatorDid: channelLinks[i].author,
+                sourcePerspective: community.state.perspectiveUuid,
+                hasNewMessages: false,
+                createdAt: new Date().toISOString(),
+                feedType: FeedType.Signaled,
+                notifications: {
+                  mute: false,
+                },
               },
             });
           }
