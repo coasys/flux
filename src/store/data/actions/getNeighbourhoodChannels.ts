@@ -1,9 +1,10 @@
 import { print } from "graphql/language/printer";
 import { PERSPECTIVE_LINK_QUERY } from "@/core/graphql_queries";
-import { LinkQuery } from "@perspect3vism/ad4m";
+import { linkEqual, LinkQuery } from "@perspect3vism/ad4m";
 import { useDataStore } from "..";
 import { channelRefreshDurationMs } from "@/constants/config";
 import { CHANNEL } from "@/constants/neighbourhoodMeta";
+import { FeedType } from "@/store/types";
 
 export interface Payload {
   communityId: string;
@@ -56,21 +57,27 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
         console.log(channelLinks);
 
         for (let i = 0; i < channelLinks.length; i++) {
+          const name = channelLinks[i].data!.target;
           //Check that the channel is not in the store
-          if (
-            Object.values(community.neighbourhood.linkedNeighbourhoods).find(
-              (neighbourhoodUrl) =>
-                neighbourhoodUrl === channelLinks[i].data!.target
-            ) === undefined
-          ) {
+          if (dataStore.channels[name] === undefined) {
             console.log(
               "Found channel link from un-joined channel neighbourhood",
               channelLinks[i]
             );
-            //Call ad4m and try to join the sharedperspective found at link target
-            await dataStore.joinChannelNeighbourhood({
-              parentCommunityId: e.data.callbackData.communityId,
-              neighbourhoodUrl: channelLinks[i].data!.target,
+            dataStore.addChannel({
+              communityId: community.state.perspectiveUuid,
+              channel: {
+                  id: name,
+                  name,
+                  creatorDid: channelLinks[i].author,
+                  sourcePerspective: community.state.perspectiveUuid,
+                  hasNewMessages: false,
+                  createdAt: new Date().toISOString(),
+                  feedType: FeedType.Signaled,
+                  notifications: {
+                    mute: false,
+                  },
+              },
             });
           }
         }
