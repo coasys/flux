@@ -146,7 +146,7 @@ export default defineComponent({
     async startWatcher() {
       const router = this.router;
       const route = this.route;
-      let watching: string[] = [];
+      const watching: string[] = [];
 
       //Watch for incoming signals from holochain - an incoming signal should mean a DM is inbound
       const newLinkHandler = async (
@@ -157,28 +157,23 @@ export default defineComponent({
         if (link.data!.predicate! === EXPRESSION) {
           try {
             const expression = await retry(async () => {
-              const exp = await MainClient.ad4mClient.expression.get(link.data.target);
+              const exp = await MainClient.ad4mClient.expression.getRaw(link.data.target);
+              const expObj = JSON.parse(exp);
               if (exp) {
-                return { ...exp, data: JSON.parse(exp.data) };
+                return { ...expObj, data: expObj.data };
               } else {
-                return null
+                return null;
               }
             }, {});
 
             console.debug("FOUND EXPRESSION FOR SIGNAL", expression);
-            //Add the expression to the store
-            this.dataStore.addExpressionAndLink({
-              channelId: perspective,
-              link: link,
-              message: expression,
-            });
 
             this.dataStore.showMessageNotification({
               router,
               route,
               perspectiveUuid: perspective,
               authorDid: (expression as any)!.author,
-              message: (expression as any).data.body,
+              message: (expression as any).data,
             });
 
             //Add UI notification on the channel to notify that there is a new message there
