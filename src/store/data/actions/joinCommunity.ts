@@ -97,12 +97,24 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
       } as CommunityState;
 
       dataStore.addCommunity(newCommunity);
+      
       // We add a default channel that is a reference to
       // the community itself. This way we can utilize the fractal nature of
       // neighbourhoods. Remember that this also need to happen in create community.
-      await dataStore.createChannel({
-        name: "Home",
-        communityId: neighbourhood.uuid
+      dataStore.addChannel({
+        communityId: neighbourhood.uuid,
+        channel: {
+            id: "Home",
+            name: "Home",
+            creatorDid: creatorDid,
+            sourcePerspective: neighbourhood.uuid,
+            hasNewMessages: false,
+            createdAt: new Date().toISOString(),
+            feedType: FeedType.Signaled,
+            notifications: {
+              mute: false,
+            },
+        },
       });
     } else {
       const message = "You are already part of this group";
