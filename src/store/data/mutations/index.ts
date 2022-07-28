@@ -57,57 +57,6 @@ export default {
     }
   },
 
-  addMessages(payload: AddChannelMessages): void {
-    const state = useDataStore();
-    const neighbourhood = state.neighbourhoods[payload.channelId];
-
-    const expressions: { [x: string]: any } = {};
-    const links: { [x: string]: any } = {};
-
-    for (const [index, exp] of Object.entries(payload.expressions)) {
-      if (exp != null) {
-        const target = payload.links[parseInt(index)].data.target!;
-        expressions[target] = {
-          expression: {
-            author: exp.author!,
-            data: JSON.parse(exp.data!),
-            timestamp: exp.timestamp!,
-            proof: exp.proof!,
-          } as Expression,
-          url: parseExprUrl(target),
-        };
-
-        links[target] = payload.links[parseInt(index)];
-      }
-    }
-
-    neighbourhood.currentExpressionLinks = {
-      ...neighbourhood.currentExpressionLinks,
-      ...links,
-    };
-    neighbourhood.currentExpressionMessages = {
-      ...neighbourhood.currentExpressionMessages,
-      ...expressions,
-    };
-  },
-
-  addMessage(payload: AddChannelMessage): void {
-    const state = useDataStore();
-    const neighbourhood = state.neighbourhoods[payload.channelId];
-
-    neighbourhood.currentExpressionLinks[payload.link.data.target] =
-      payload.link;
-    neighbourhood.currentExpressionMessages[payload.link.data.target] = {
-      expression: {
-        author: payload.expression.author!,
-        data: JSON.parse(payload.expression.data!),
-        timestamp: payload.expression.timestamp!,
-        proof: payload.expression.proof!,
-      } as Expression,
-      url: parseExprUrl(payload.link.data!.target!),
-    };
-  },
-
   setCurrentChannelId(payload: {
     communityId: string;
     channelId: string;

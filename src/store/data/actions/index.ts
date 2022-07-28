@@ -1,6 +1,5 @@
 import createChannel from "./createChannel";
 import createCommunity from "./createCommunity";
-import createExpression from "./createExpression";
 import getNeighbourhoodChannels from "./getNeighbourhoodChannels";
 import getNeighbourhoodMetadata from "./getNeighbourhoodMetadata";
 import getNeighbourhoodMembers from "./getNeighbourhoodMembers";
@@ -14,7 +13,6 @@ import joinChannelNeighbourhood from "./joinChannelNeighbourhood";
 export default {
   createChannel,
   createCommunity,
-  createExpression,
   getNeighbourhoodChannels,
   getNeighbourhoodMetadata,
   getNeighbourhoodMembers,
