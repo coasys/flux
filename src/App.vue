@@ -36,6 +36,7 @@ import { LinkExpression } from "@perspect3vism/ad4m";
 import { CHANNEL, EXPRESSION, MEMBER } from "./constants/neighbourhoodMeta";
 import { useUserStore } from "./store/user";
 import retry from "./utils/retry";
+import { hydrateState } from "./store/data/hydrateState";
 
 export default defineComponent({
   name: "App",
@@ -93,6 +94,8 @@ export default defineComponent({
           await findAd4mPort(MainClient.portSearchState === 'found' ? MainClient.port : undefined)
       
           await MainClient.ad4mClient.agent.status();
+
+          await hydrateState()
         }
 
         const { perspective } = await MainClient.ad4mClient.agent.me();
