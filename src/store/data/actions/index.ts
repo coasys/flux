@@ -8,6 +8,7 @@ import updateCommunity from "./updateCommunity";
 import showMessageNotification from "./showMessageNotification";
 import fetchNeighbourhoodMembers from "./fetchNeighbourhoodMembers";
 import fetchNeighbourhoodMetadata from "./fetchNeighbourhoodMetadata";
+import removeCommunity from "./removeCommunity";
 
 export default {
   createChannel,
@@ -20,4 +21,5 @@ export default {
   showMessageNotification,
   fetchNeighbourhoodMembers,
   fetchNeighbourhoodMetadata,
+  removeCommunity
 };

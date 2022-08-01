@@ -66,18 +66,6 @@ export default {
     state.communities[communityId].currentChannelId = channelId;
   },
 
-  removeCommunity(id: string): void {
-    const state = useDataStore();
-    delete state.communities[id];
-    delete state.neighbourhoods[id];
-    
-    for (const channel of Object.values(state.channels)) {
-      if (channel.sourcePerspective === id) {
-        delete state.channels[channel.id];
-      }
-    }
-  },
-
   setChannelNotificationState({ channelId }: { channelId: string }): void {
     const state = useDataStore();
     const channel = state.channels[channelId];

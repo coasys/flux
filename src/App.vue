@@ -293,7 +293,7 @@ export default defineComponent({
         const isCommunity = this.dataStore.getCommunity(perspective);
 
         if (isCommunity) {
-          this.dataStore.removeCommunity(perspective);
+          this.dataStore.removeCommunity({communityId: perspective});
         }
       });
 
