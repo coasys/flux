@@ -15,6 +15,7 @@ import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { ad4mClient } from "@/app";
+import { nanoid } from "nanoid";
 
 export interface Payload {
   joiningLink: string;
@@ -104,7 +105,7 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
       dataStore.addChannel({
         communityId: neighbourhood.uuid,
         channel: {
-            id: "Home",
+            id: nanoid(),
             name: "Home",
             creatorDid: creatorDid,
             sourcePerspective: neighbourhood.uuid,

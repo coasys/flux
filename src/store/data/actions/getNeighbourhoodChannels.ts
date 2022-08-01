@@ -5,6 +5,7 @@ import { useDataStore } from "..";
 import { channelRefreshDurationMs } from "@/constants/config";
 import { CHANNEL } from "@/constants/neighbourhoodMeta";
 import { FeedType } from "@/store/types";
+import { nanoid } from "nanoid";
 
 export interface Payload {
   communityId: string;
@@ -67,7 +68,7 @@ export default async ({ communityId }: Payload): Promise<Worker> => {
             dataStore.addChannel({
               communityId: community.state.perspectiveUuid,
               channel: {
-                  id: name,
+                  id: nanoid(),
                   name,
                   creatorDid: channelLinks[i].author,
                   sourcePerspective: community.state.perspectiveUuid,

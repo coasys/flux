@@ -9,6 +9,7 @@ import { ad4mClient } from "@/app";
 import { CHANNEL, SELF } from "@/constants/neighbourhoodMeta";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
+import { nanoid } from "nanoid";
 
 interface ChannelProps {
   channelName: string;
@@ -44,7 +45,7 @@ export async function createChannel({
       name: channelName,
       description: "",
       creatorDid,
-      id: channelName,
+      id: nanoid(),
       createdAt: new Date().toISOString(),
       sourcePerspective: sourcePerspective.uuid,
       hasNewMessages: false,
