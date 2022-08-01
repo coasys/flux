@@ -5,7 +5,7 @@ import {
   SHORTFORM_EXPRESSION_OFFICIAL,
 } from "@/constants/languages";
 
-import { MEMBER } from "@/constants/neighbourhoodMeta";
+import { MEMBER, SELF } from "@/constants/neighbourhoodMeta";
 
 import {
   MembraneType,
@@ -26,6 +26,7 @@ export interface Payload {
   image?: string;
   thumbnail?: string;
   description: string;
+  perspective?: Perspective;
 }
 
 export default async ({
@@ -33,6 +34,7 @@ export default async ({
   description,
   thumbnail = "",
   image = "",
+  perspective
 }: Payload): Promise<CommunityState> => {
   const dataStore = useDataStore();
   const appStore = useAppStore();
@@ -43,7 +45,7 @@ export default async ({
 
     const creatorDid = agent.did;
 
-    const createSourcePerspective = (await ad4mClient.perspective.add(
+    const createSourcePerspective = perspective || (await ad4mClient.perspective.add(
       perspectiveName
     )) as PerspectiveHandle;
     console.log("Created source perspective", createSourcePerspective);
@@ -107,20 +109,22 @@ export default async ({
       typedExpLangs
     );
     const meta = new Perspective(metaLinks);
-    const neighbourhood = await ad4mClient.neighbourhood.publishFromPerspective(
-      createSourcePerspective.uuid,
-      socialContextLang.address,
-      meta
-    );
-    console.log("Created neighbourhood with result", neighbourhood);
+    const sharedUrl = createSourcePerspective.sharedUrl;
 
-    //await sleep(10000);
+    if (!sharedUrl) {
+      const neighbourhood = await ad4mClient.neighbourhood.publishFromPerspective(
+        createSourcePerspective.uuid,
+        socialContextLang.address,
+        meta
+      );
+      console.log("Created neighbourhood with result", neighbourhood);
+    }
 
     //Create link denoting type of community
     const addLink = await ad4mClient.perspective.addLink(
       createSourcePerspective.uuid!,
       {
-        source: neighbourhood,
+        source: SELF,
         target: "sioc://community",
         predicate: "rdf://type",
       }
@@ -143,7 +147,7 @@ export default async ({
     const addGroupExpLink = await ad4mClient.perspective.addLink(
       createSourcePerspective.uuid!,
       {
-        source: neighbourhood,
+        source: SELF,
         target: createExp,
         predicate: "rdf://class",
       }
@@ -158,7 +162,7 @@ export default async ({
     const addProfileLink = await ad4mClient.perspective.addLink(
       createSourcePerspective.uuid!,
       {
-        source: neighbourhood,
+        source: SELF,
         target: creatorDid,
         predicate: MEMBER,
       }
@@ -176,12 +180,12 @@ export default async ({
         perspective: {
           uuid: createSourcePerspective.uuid,
           name: createSourcePerspective.name,
-          sharedUrl: neighbourhood,
+          sharedUrl,
           neighbourhood: createSourcePerspective.neighbourhood,
         },
         typedExpressionLanguages: typedExpLangs,
         groupExpressionRef: createExp,
-        neighbourhoodUrl: neighbourhood,
+        neighbourhoodUrl: sharedUrl,
         membraneType: MembraneType.Unique,
         linkedPerspectives: [createSourcePerspective.uuid],
         linkedNeighbourhoods: [createSourcePerspective.uuid],
