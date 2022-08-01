@@ -1,13 +1,10 @@
 import {
-  ExpressionAndRef,
-  LinkExpressionAndLang,
   CommunityState,
   ThemeState,
   LocalCommunityState,
   ChannelState,
 } from "@/store/types";
 
-import { parseExprUrl } from "@perspect3vism/ad4m";
 import type { Expression, LinkExpression } from "@perspect3vism/ad4m";
 import { useDataStore } from "..";
 
@@ -48,13 +45,6 @@ export default {
   addCommunityState(payload: LocalCommunityState): void {
     const state = useDataStore();
     state.communities[payload.perspectiveUuid] = payload;
-  },
-
-  clearMessages(): void {
-    const state = useDataStore();
-    for (const neighbourhood of Object.values(state.neighbourhoods)) {
-      neighbourhood.currentExpressionMessages = {};
-    }
   },
 
   setCurrentChannelId(payload: {
@@ -197,30 +187,5 @@ export default {
         if (!acc) return channel.hasNewMessages;
         return true;
       }, false);
-  },
-
-  addExpressionAndLink: (payload: {
-    channelId: string;
-    link: LinkExpression;
-    message: Expression;
-  }): void => {
-    const state = useDataStore();
-    const channel = state.neighbourhoods[payload.channelId];
-    console.log("Adding to link and exp to channel!", payload.message);
-    channel.currentExpressionLinks[payload.link.data.target!] = {
-      expression: payload.link,
-      language: "na",
-      hash: payload.link.hash
-    } as LinkExpressionAndLang;
-    //TODO: make gql expression to ad4m expression conversion function
-    channel.currentExpressionMessages[payload.link.data.target] = {
-      expression: {
-        author: payload.message.author!,
-        data: payload.message.data,
-        timestamp: payload.message.timestamp!,
-        proof: payload.message.proof!,
-      } as Expression,
-      url: parseExprUrl(payload.link.data!.target!),
-    } as ExpressionAndRef;
   },
 };

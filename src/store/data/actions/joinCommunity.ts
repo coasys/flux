@@ -5,12 +5,7 @@ import { MEMBER } from "@/constants/neighbourhoodMeta";
 
 import { Link } from "@perspect3vism/ad4m";
 
-import {
-  ExpressionTypes,
-  CommunityState,
-  MembraneType,
-  FeedType,
-} from "@/store/types";
+import { CommunityState, MembraneType, FeedType } from "@/store/types";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
@@ -76,8 +71,6 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
           linkedPerspectives: [neighbourhood.uuid],
           members: [userStore.getUser!.agent.did!],
           membraneRoot: neighbourhood.uuid,
-          currentExpressionLinks: {},
-          currentExpressionMessages: {},
         },
         state: {
           perspectiveUuid: neighbourhood.uuid,
@@ -98,23 +91,23 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
       } as CommunityState;
 
       dataStore.addCommunity(newCommunity);
-      
+
       // We add a default channel that is a reference to
       // the community itself. This way we can utilize the fractal nature of
       // neighbourhoods. Remember that this also need to happen in create community.
       dataStore.addChannel({
         communityId: neighbourhood.uuid,
         channel: {
-            id: nanoid(),
-            name: "Home",
-            creatorDid: creatorDid,
-            sourcePerspective: neighbourhood.uuid,
-            hasNewMessages: false,
-            createdAt: new Date().toISOString(),
-            feedType: FeedType.Signaled,
-            notifications: {
-              mute: false,
-            },
+          id: nanoid(),
+          name: "Home",
+          creatorDid: creatorDid,
+          sourcePerspective: neighbourhood.uuid,
+          hasNewMessages: false,
+          createdAt: new Date().toISOString(),
+          feedType: FeedType.Signaled,
+          notifications: {
+            mute: false,
+          },
         },
       });
     } else {
