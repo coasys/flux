@@ -84,6 +84,8 @@ export async function hydrateState() {
 
         dataStore.addCommunity(newCommunity);
 
+        dataStore.clearChannels({communityId: perspective.uuid});
+
         for (const link of links) {
           dataStore.addChannel({
             communityId: perspective.uuid,

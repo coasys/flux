@@ -149,13 +149,26 @@ export default {
     state.channels[payload.channelId].scrollTop = payload.value;
   },
 
+  clearChannels({communityId}: {communityId: string}): void {
+    const state = useDataStore();
+    Object.values(state.channels).forEach(c => {
+      if (c.sourcePerspective === communityId) {
+        delete state.channels[c.id]
+      }
+    });
+  },
+
   addChannel(payload: AddChannel): void {
     const state = useDataStore();
     const parentNeighbourhood = state.neighbourhoods[payload.communityId];
 
     if (parentNeighbourhood !== undefined) {
-      state.channels[payload.channel.id] =
-        payload.channel;
+      const exists = Object.values(state.channels).find(c => c.name === payload.channel.name && c.sourcePerspective === payload.communityId);
+
+      if (!exists) {
+        state.channels[payload.channel.id] =
+          payload.channel;
+      }
     }
   },
 
