@@ -1,7 +1,7 @@
 <template>
   <perspective-view
     :port="port"
-    :channel="channel.id"
+    :channel="channel.name"
     :perspective-uuid="channel.sourcePerspective"
     @agent-click="onAgentClick"
     @perspective-click="onPerspectiveClick"
@@ -97,8 +97,8 @@ export default defineComponent({
       return this.dataStore.getCommunity(communityId as string);
     },
     channel(): ChannelState {
-      const { channelId } = this.$route.params;
-      return this.dataStore.getChannel(channelId as string);
+      const { channelId, communityId } = this.$route.params;
+      return this.dataStore.getChannel(communityId as string, channelId as string)!;
     },
   },
   methods: {
@@ -106,21 +106,26 @@ export default defineComponent({
       this.toggleProfile(true, detail.did);
     },
     onPerspectiveClick({ detail }: any) {
-      let channelId = detail.uuid;
+      let channelId = Object.values(this.dataStore.channels).find(
+        (channel) => channel.sourcePerspective === this.community.neighbourhood.perspective.uuid && detail.uuid === channel.name
+      )?.id;
+      
 
       if (channelId) {
         this.$router.push({
           name: "channel",
           params: {
-            channelId: channelId,
+            channelId,
             communityId: this.community.neighbourhood.perspective.uuid,
           },
         });
       }
     },
     onHideNotificationIndicator({ detail }: any) {
+      const { channelId } = this.$route.params;
+      console.log("hide notification indicator", detail);
       this.dataStore.setHasNewMessages({
-        channelId: detail.uuid,
+        channelId: channelId as string,
         value: false,
       });
     },
