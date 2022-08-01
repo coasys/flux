@@ -125,6 +125,7 @@ export default defineComponent({
       const { channelId } = this.$route.params;
       console.log("hide notification indicator", detail);
       this.dataStore.setHasNewMessages({
+        communityId: this.community.neighbourhood.perspective.uuid,
         channelId: channelId as string,
         value: false,
       });

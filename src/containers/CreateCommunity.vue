@@ -103,7 +103,7 @@
         <j-flex direction="column" gap="500" v-if="!isCreatingCommunity">
           <j-text variant="body" v-if="nonFluxPerspectives.length === 0">No perspective found that is not a flux community</j-text>
           <j-menu-item 
-            v-for="(perspective, index) of nonFluxPerspectives" 
+            v-for="(perspective) of nonFluxPerspectives" 
             :key="perspective.uuid"
             class="choice-button" 
             size="xl" 

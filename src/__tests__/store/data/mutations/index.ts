@@ -256,6 +256,7 @@ describe("Data Mutations", () => {
     ).toBeFalsy();
 
     dataStore.setHasNewMessages({
+      communityId: createCommunity.state.perspectiveUuid,
       channelId: createChannel.id,
       value: true,
     });

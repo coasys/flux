@@ -189,6 +189,7 @@ export default defineComponent({
 
             //Add UI notification on the channel to notify that there is a new message there
             this.dataStore.setHasNewMessages({
+              communityId: perspective,
               channelId: perspective,
               value: true,
             });

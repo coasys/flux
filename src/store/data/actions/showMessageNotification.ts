@@ -21,16 +21,16 @@ export default async ({
 }: Payload) => {
   const dataStore = useDataStore();
   const userStore = useUserStore();
+  const { channelId, communityId } = route.params;
 
   const escapedMessage = message.replace(/(\s*<.*?>\s*)+/g, " ");
 
   // Getting the channel & community this message belongs to
-  const channel = dataStore.getChannel(perspectiveUuid);
-  const community = dataStore.getCommunity(channel.sourcePerspective!);
+  const community = dataStore.getCommunity(perspectiveUuid);
+  // TODO: @fayeed change this.
+  const channel = dataStore.getChannel(perspectiveUuid, "Home");
 
   const isMinimized = document.hasFocus();
-
-  const { channelId, communityId } = route.params;
 
   const user = userStore.getUser;
 

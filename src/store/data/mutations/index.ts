@@ -185,15 +185,12 @@ export default {
     community.useLocalTheme = payload.value;
   },
 
-  setHasNewMessages(payload: { channelId: string; value: boolean }): void {
+  setHasNewMessages(payload: { communityId: string, channelId: string; value: boolean }): void {
     const state = useDataStore();
-    const tempChannel = state.getChannel(payload.channelId);
-    const tempCommunity = state.getCommunity(
-      tempChannel.sourcePerspective
-      );
-      const channel = state.channels[payload.channelId];
-      const community = state.communities[tempCommunity.state.perspectiveUuid];
-    channel.hasNewMessages = payload.value;
+    const channel = state.getChannel(payload.communityId, payload.channelId);
+    const tempCommunity = state.getCommunity(payload.communityId);
+    const community = state.communities[tempCommunity.state.perspectiveUuid];
+    channel!.hasNewMessages = payload.value;
     community.hasNewMessages = state
       .getChannelStates(tempCommunity.state.perspectiveUuid)
       .reduce((acc: boolean, channel) => {
