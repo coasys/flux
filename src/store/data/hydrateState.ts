@@ -4,7 +4,7 @@ import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhoo
 import { Ad4mClient, LinkExpression, LinkQuery, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { nanoid } from "nanoid";
 import { useDataStore } from ".";
-import { CommunityState, ExpressionTypes, FeedType, MembraneType } from "../types";
+import { CommunityState, ExpressionTypes, FeedType, LocalCommunityState, MembraneType } from "../types";
 
 export function getMetaFromLinks(links: LinkExpression[]) {
   const langs = links.map((link) => MainClient.ad4mClient.languages.meta(link.data.target));
@@ -12,6 +12,32 @@ export function getMetaFromLinks(links: LinkExpression[]) {
 }
 
 export async function buildCommunity(perspective: PerspectiveProxy) {
+  const dataStore = useDataStore();
+  const community = dataStore.getCommunity(perspective.uuid);
+
+  let state: LocalCommunityState = {
+    perspectiveUuid: perspective.uuid,
+    theme: {
+      fontSize: "md",
+      fontFamily: "Poppins",
+      name: "light",
+      hue: 270,
+      saturation: 60,
+    },
+    useLocalTheme: false,
+    currentChannelId: null,
+    hideMutedChannels: false,
+    hasNewMessages: false,
+    collapseChannelList: false,
+    notifications: {
+      mute: false,
+    },
+  }
+
+  if (community && community.state) {
+    state = community.state;
+  }
+
   const meta = getMetaFromNeighbourhood(perspective.neighbourhood?.meta?.links!);
 
   const metaLangs = perspective.neighbourhood?.meta?.links!.filter((link: any) => link.data.predicate === "language");
@@ -20,7 +46,7 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
 
   const typedExpressionLanguages = typeLangs!.map((link: any) => ({
     languageAddress: link.address,
-    expressionType: link.name.endsWith('shortform-expression') ? ExpressionTypes.ShortForm : ExpressionTypes.GroupExpression,
+    expressionType: link.name.endsWith('group-expression') ? ExpressionTypes.GroupExpression : ExpressionTypes.Other,
   }));
 
   return {
@@ -44,26 +70,9 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
       linkedNeighbourhoods: [perspective.uuid],
       members: [meta.creatorDid],
       membraneRoot: perspective.uuid,
-      currentExpressionLinks: {},
-      currentExpressionMessages: {},
       createdAt: new Date().toISOString(),
     },
-    state: {
-      perspectiveUuid: perspective.uuid,
-      theme: {
-        fontSize: "md",
-        fontFamily: "Poppins",
-        name: "light",
-        hue: 270,
-        saturation: 60,
-      },
-      useLocalTheme: false,
-      currentChannelId: null,
-      hideMutedChannels: false,
-      notifications: {
-        mute: false,
-      },
-    },
+    state,
   } as CommunityState;
 }
 
@@ -71,10 +80,18 @@ export async function hydrateState() {
   const client = MainClient.ad4mClient;
   const dataStore = useDataStore();
   const perspectives = await client.perspective.all();
+  
+  const communities = dataStore.getCommunities.filter((community) => !perspectives.map(e => e.uuid).includes(community.state.perspectiveUuid));
+
+  for (const community of communities) {
+    dataStore.removeCommunity({ communityId: community.state.perspectiveUuid });
+
+    dataStore.clearChannels({ communityId: community.state.perspectiveUuid });
+  }
 
   for (const perspective of perspectives) {
     const links = await client.perspective.queryLinks(perspective.uuid, new LinkQuery({
-      source: perspective.sharedUrl, // TODO: change this to self
+      source: SELF,
       predicate: CHANNEL
     }));
 
@@ -84,24 +101,28 @@ export async function hydrateState() {
 
         dataStore.addCommunity(newCommunity);
 
-        dataStore.clearChannels({communityId: perspective.uuid});
+        const channels = [...Object.values(dataStore.channels)]
 
         for (const link of links) {
-          dataStore.addChannel({
-            communityId: perspective.uuid,
-            channel: {
-                id: nanoid(),
-                name: link.data.target,
-                creatorDid: link.author,
-                sourcePerspective: perspective.uuid,
-                hasNewMessages: false,
-                createdAt: new Date().toISOString(),
-                feedType: FeedType.Signaled,
-                notifications: {
-                  mute: false,
-                },
-            },
-          });
+          const exist = channels.find((channel: any) => channel.name === link.data.target && channel.sourcePerspective === perspective.uuid);
+          
+          if (!exist) {
+            dataStore.addChannel({
+              communityId: perspective.uuid,
+              channel: {
+                  id: nanoid(),
+                  name: link.data.target,
+                  creatorDid: link.author,
+                  sourcePerspective: perspective.uuid,
+                  hasNewMessages: false,
+                  createdAt: new Date().toISOString(),
+                  feedType: FeedType.Signaled,
+                  notifications: {
+                    mute: false,
+                  },
+              },
+            });
+          }
         }
       }
     }

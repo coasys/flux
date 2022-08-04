@@ -149,6 +149,11 @@ export default {
       }
     }
   },
+  removeChannel(payload: { channelId: string }): void {
+    const state = useDataStore();
+
+    delete state.channels[payload.channelId];
+  },
 
   addLocalChannel(payload: {
     perspectiveUuid: string;
