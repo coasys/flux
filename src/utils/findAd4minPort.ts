@@ -24,9 +24,7 @@ async function checkConnection(
       }
     } catch (err) {
       if (url) {
-        throw Error(
-          "Cannot connect to the URL provided please check if the executor is running or pass a different URL"
-        );
+        throw Error(err);
       }
       resolve("");
     }
@@ -37,11 +35,12 @@ export async function findAd4mPort(port?: number) {
   if (port) {
     return await checkPort(port);
   } else {
-    for (let i = 12000; i <= 13000; i++) {
+    for (let i = 12000; i <= 12010; i++) {
       const status = await checkPort(i);
       if (!status) {
         continue;
       } else {
+        MainClient.setPort(status);
         return status;
       }
     }
@@ -56,26 +55,23 @@ async function checkPort(port: number) {
   const url = `ws://localhost:${port}/graphql`;
 
   try {
-    const res = await fetch(`http://localhost:${port}`, {
+    const res = await fetch(`http://localhost:${port}/graphql`, {
       signal: Timeout().signal,
+      mode: 'no-cors'
     });
 
-    MainClient.setPort(port);
-
-    const client = MainClient.ad4mClient;
-
-    const ad4mUrl = await checkConnection(url, client);
-
-    const status = await client.agent.status();
-
-    return status;
+    if (res.status == 0) {
+      return port
+    } else {
+      return null
+    }
   } catch (e) {
     console.error("failed", e);
 
     if (Array.isArray(e)) {
       if (
         e.length > 0 &&
-        e[0].message.startsWith(
+        e[0].message.contains(
           "Capability is not matched, you have capabilities:"
         )
       ) {
