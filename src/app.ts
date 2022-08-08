@@ -8,12 +8,9 @@ import "@junto-foundation/junto-elements/dist/main.css";
 import { createPinia } from "pinia";
 import { Ad4mClient } from "@perspect3vism/ad4m";
 
-import {
-  ApolloClient,
-  InMemoryCache,
-  NormalizedCacheObject,
-} from "@apollo/client";
-import { WebSocketLink } from "@apollo/client/link/ws";
+import { ApolloClient, InMemoryCache, HttpLink, split, ApolloLink, NormalizedCacheObject } from "@apollo/client/core";
+import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
+import { createClient } from "graphql-ws";
 
 type PortSearchStateType = "na" | "searching" | "found" | "not_found";
 
@@ -33,6 +30,7 @@ class Client {
   }
 
   setPort(port: number) {
+    console.warn("setting client port to", status);
     this.portSearchState = "found";
     this.port = port;
     localStorage.setItem("ad4minPort", port.toString());
@@ -58,35 +56,28 @@ class Client {
   }
 
   buildClient() {
-    const wsLink = new WebSocketLink({
-      uri: this.url(),
-      options: {
-        reconnect: true,
+    const wsLink = new GraphQLWsLink(createClient({
+        url: this.url(),
         connectionParams: () => {
-          return {
-            headers: {
-              authorization: this.token(),
-            },
-          };
+            return {
+                headers: {
+                    authorization: this.token()
+                }
+            }
         },
-      },
-    });
+    }));
+  
     this.apolloClient = new ApolloClient({
-      link: wsLink,
-      cache: new InMemoryCache({ resultCaching: false }),
-      defaultOptions: {
-        watchQuery: {
-          errorPolicy: "ignore",
-          fetchPolicy: "no-cache",
+        link: wsLink,
+        cache: new InMemoryCache({ resultCaching: false, addTypename: false }),
+        defaultOptions: {
+            watchQuery: {
+                fetchPolicy: "no-cache",
+            },
+            query: {
+                fetchPolicy: "no-cache",
+            }
         },
-        query: {
-          errorPolicy: "all",
-          fetchPolicy: "no-cache",
-        },
-        mutate: {
-          fetchPolicy: "no-cache",
-        },
-      },
     });
 
     // @ts-ignore
