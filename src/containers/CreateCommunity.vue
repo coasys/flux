@@ -165,7 +165,7 @@ export default defineComponent({
           this.newCommunityDesc = "";
           this.newProfileImage = "";
 
-          const channels = this.dataStore.getChannelNeighbourhoods(
+          const channels = this.dataStore.getChannelStates(
             community.neighbourhood.perspective.uuid
           );
 
@@ -173,7 +173,7 @@ export default defineComponent({
             name: "channel",
             params: {
               communityId: community.neighbourhood.perspective.uuid,
-              channelId: channels[0].perspective.uuid,
+              channelId: channels[0].id,
             },
           });
         })
