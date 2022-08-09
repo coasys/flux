@@ -1,7 +1,7 @@
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
 import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
 
-import { MEMBER } from "@/constants/neighbourhoodMeta";
+import { MEMBER, SELF } from "@/constants/neighbourhoodMeta";
 
 import { Link } from "@perspect3vism/ad4m";
 
@@ -41,11 +41,11 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
         neighbourhood.neighbourhood!.meta.links
       );
 
-      //Create link between perspective and group expression
+      //Create member link between self and joining agent
       const addProfileLink = await ad4mClient.perspective.addLink(
         neighbourhood.uuid,
         {
-          source: neighbourhood.sharedUrl,
+          source: SELF,
           target: userStore.agent.did,
           predicate: MEMBER,
         } as Link
@@ -84,10 +84,12 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
             saturation: 60,
           },
           currentChannelId: null,
+          hasNewMessages: false,
+          collapseChannelList: false,
           hideMutedChannels: false,
           notifications: {
             mute: false,
-          },
+          }
         },
       } as CommunityState;
 
