@@ -48,6 +48,7 @@ export default defineComponent({
     const componentKey = ref(0);
     const dataStore = useDataStore();
     const userStore = useUserStore();
+    const watcherStarted = ref(false);
 
     return { 
       appStore, 
@@ -56,6 +57,7 @@ export default defineComponent({
       route,
       dataStore,
       userStore,
+      watcherStarted
     };
   },
 
@@ -107,7 +109,11 @@ export default defineComponent({
           }
         }
 
-        this.startWatcher();
+        if (!this.watcherStarted) {
+          this.startWatcher();
+          this.watcherStarted = true;
+        }
+
 
         this.appStore.setGlobalLoading(false);
       } catch (e) {
