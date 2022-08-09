@@ -315,7 +315,7 @@ export default defineComponent({
     const me = await ad4mClient.agent.me();
 
     this.sameAgent = did === me.did;
-    if (did === undefined) {
+    if (did === undefined || did.length === 0) {
       this.sameAgent = true;
     }
   },
