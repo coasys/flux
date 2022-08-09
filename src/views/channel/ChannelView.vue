@@ -22,7 +22,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import { ChannelState, CommunityState, ExpressionTypes } from "@/store/types";
+import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
 import { ad4mClient, MainClient } from "@/app";
 import Profile from "@/containers/Profile.vue";

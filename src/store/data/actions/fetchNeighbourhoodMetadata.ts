@@ -5,6 +5,7 @@ import { LinkQuery } from "@perspect3vism/ad4m";
 
 import { useDataStore } from "@/store/data/index";
 import { ad4mClient } from "@/app";
+import { SELF, FLUX_GROUP } from "@/constants/neighbourhoodMeta";
 
 export interface Payload {
   communityId: string;
@@ -24,8 +25,8 @@ export default async (communityId: string): Promise<void> => {
   const groupExpressionLinks = await ad4mClient.perspective.queryLinks(
     community.neighbourhood.perspective.uuid,
     new LinkQuery({
-      source: community.neighbourhood.neighbourhoodUrl,
-      predicate: "rdf://class",
+      source: SELF,
+      predicate: FLUX_GROUP,
     })
   );
   let sortedLinks = [...groupExpressionLinks];

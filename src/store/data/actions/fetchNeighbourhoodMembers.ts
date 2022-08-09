@@ -8,9 +8,15 @@ import { ad4mClient } from "@/app";
 export default async function (id: string): Promise<void> {
   const dataStore = useDataStore();
 
-  const memberLinks = await ad4mClient.perspective.queryProlog(id, `triple(${SELF}, T, ${MEMBER}).`);
-  const dids = memberLinks.map((linkTarget: any) => {
-    const url = linkTarget.T;
+  const memberLinks = await ad4mClient.perspective.queryLinks(
+    id,
+    new LinkQuery({
+      source: SELF,
+      predicate: MEMBER,
+    })
+  );
+  const dids = memberLinks.map((link: LinkExpression) => {
+    const url = link.data.target;
     return url.includes("://") ? url.split("://")[1] : url;
   });
   for (const did of dids) {

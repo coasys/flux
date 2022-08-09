@@ -4,7 +4,7 @@ import {
   GROUP_EXPRESSION_OFFICIAL
 } from "@/constants/languages";
 
-import { MEMBER } from "@/constants/neighbourhoodMeta";
+import { MEMBER, SELF, FLUX_GROUP } from "@/constants/neighbourhoodMeta";
 
 import {
   MembraneType,
@@ -96,17 +96,6 @@ export default async ({
 
     //await sleep(10000);
 
-    //Create link denoting type of community
-    const addLink = await ad4mClient.perspective.addLink(
-      createSourcePerspective.uuid!,
-      {
-        source: neighbourhood,
-        target: "sioc://community",
-        predicate: "rdf://type",
-      }
-    );
-    console.log("Added typelink with response", addLink);
-
     //Create the group expression
     const createExp = await ad4mClient.expression.create(
       {
@@ -123,9 +112,9 @@ export default async ({
     const addGroupExpLink = await ad4mClient.perspective.addLink(
       createSourcePerspective.uuid!,
       {
-        source: neighbourhood,
+        source: SELF,
         target: createExp,
-        predicate: "rdf://class",
+        predicate: FLUX_GROUP,
       }
     );
     console.log(
@@ -138,7 +127,7 @@ export default async ({
     const addProfileLink = await ad4mClient.perspective.addLink(
       createSourcePerspective.uuid!,
       {
-        source: neighbourhood,
+        source: SELF,
         target: creatorDid,
         predicate: MEMBER,
       }
@@ -181,6 +170,8 @@ export default async ({
           saturation: 60,
         },
         useLocalTheme: false,
+        hasNewMessages: false,
+        collapseChannelList: false,
         currentChannelId: null,
         hideMutedChannels: false,
         notifications: {

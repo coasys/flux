@@ -1,4 +1,5 @@
 import { ad4mClient } from "@/app";
+import { SELF, FLUX_GROUP } from "@/constants/neighbourhoodMeta";
 import { useAppStore } from "@/store/app";
 
 import { ExpressionTypes } from "@/store/types";
@@ -45,9 +46,9 @@ export default async function updateCommunity({
       const addGroupExpLink = await ad4mClient.perspective.addLink(
         community.neighbourhood.perspective.uuid,
         {
-          source: community.neighbourhood.neighbourhoodUrl,
+          source: SELF,
           target: groupExpression,
-          predicate: "rdf://class",
+          predicate: FLUX_GROUP,
         }
       );
       console.log("Created group expression link", addGroupExpLink);

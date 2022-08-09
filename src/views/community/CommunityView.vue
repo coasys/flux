@@ -104,7 +104,6 @@ export default defineComponent({
   data() {
     return {
       hasCopied: false,
-      channelWorkerLoop: null as null | Worker,
     };
   },
   watch: {
@@ -113,8 +112,8 @@ export default defineComponent({
         if (id != undefined) {
           this.dataStore.fetchNeighbourhoodMembers(id);
           this.dataStore.fetchNeighbourhoodMetadata(id);
+          this.dataStore.fetchNeighbourhoodChannels(id);
         }
-        this.handleWorker(id);
         this.handleThemeChange(id);
         this.goToActiveChannel(id);
       },
@@ -153,17 +152,6 @@ export default defineComponent({
         this.appStore.changeCurrentTheme(
           this.community.state?.useLocalTheme ? id : "global"
         );
-      }
-    },
-    async handleWorker(id: string): Promise<void> {
-      this.channelWorkerLoop?.terminate();
-
-      if (id) {
-        const channelLinksWorker =
-          await this.dataStore.getNeighbourhoodChannels({
-            communityId: id,
-          });
-        this.channelWorkerLoop = channelLinksWorker;
       }
     },
     getInviteCode() {

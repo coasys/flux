@@ -21,3 +21,5 @@ export const CHANNEL_NAME = "flux://has_channel_name";
 export const AD4M_CLASS = "ad4m://has_class";
 
 export const FLUX_CHANNEL = "flux://channel";
+
+export const FLUX_GROUP = "flux://group";
