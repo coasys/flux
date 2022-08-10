@@ -51,7 +51,7 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
 
   return {
     neighbourhood: {
-      name: perspective.name,
+      name: meta.name,
       creatorDid: meta.creatorDid,
       description: meta.description,
       image: "",
