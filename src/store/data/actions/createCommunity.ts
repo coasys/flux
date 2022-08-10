@@ -25,6 +25,7 @@ export interface Payload {
   image?: string;
   thumbnail?: string;
   description: string;
+  perspective?: Perspective;
 }
 
 export default async ({
@@ -32,6 +33,7 @@ export default async ({
   description,
   thumbnail = "",
   image = "",
+  perspective
 }: Payload): Promise<CommunityState> => {
   const dataStore = useDataStore();
   const appStore = useAppStore();
@@ -42,7 +44,7 @@ export default async ({
 
     const creatorDid = agent.did;
 
-    const createSourcePerspective = (await ad4mClient.perspective.add(
+    const createSourcePerspective = perspective || (await ad4mClient.perspective.add(
       perspectiveName
     )) as PerspectiveHandle;
     console.log("Created source perspective", createSourcePerspective);
@@ -87,14 +89,16 @@ export default async ({
       typedExpLangs
     );
     const meta = new Perspective(metaLinks);
-    const neighbourhood = await ad4mClient.neighbourhood.publishFromPerspective(
-      createSourcePerspective.uuid,
-      socialContextLang.address,
-      meta
-    );
-    console.log("Created neighbourhood with result", neighbourhood);
+    const sharedUrl = createSourcePerspective.sharedUrl;
 
-    //await sleep(10000);
+    if (!sharedUrl) {
+      const neighbourhood = await ad4mClient.neighbourhood.publishFromPerspective(
+        createSourcePerspective.uuid,
+        socialContextLang.address,
+        meta
+      );
+      console.log("Created neighbourhood with result", neighbourhood);
+    }
 
     //Create the group expression
     const createExp = await ad4mClient.expression.create(
@@ -145,19 +149,17 @@ export default async ({
         perspective: {
           uuid: createSourcePerspective.uuid,
           name: createSourcePerspective.name,
-          sharedUrl: neighbourhood,
+          sharedUrl,
           neighbourhood: createSourcePerspective.neighbourhood,
         },
         typedExpressionLanguages: typedExpLangs,
         groupExpressionRef: createExp,
-        neighbourhoodUrl: neighbourhood,
+        neighbourhoodUrl: sharedUrl,
         membraneType: MembraneType.Unique,
         linkedPerspectives: [createSourcePerspective.uuid],
         linkedNeighbourhoods: [createSourcePerspective.uuid],
         members: [creatorDid],
         membraneRoot: createSourcePerspective.uuid,
-        currentExpressionLinks: {},
-        currentExpressionMessages: {},
         createdAt: new Date().toISOString(),
       },
       state: {

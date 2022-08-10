@@ -56,12 +56,6 @@ export default {
     state.communities[communityId].currentChannelId = channelId;
   },
 
-  removeCommunity(id: string): void {
-    const state = useDataStore();
-    delete state.communities[id];
-    delete state.neighbourhoods[id];
-  },
-
   setChannelNotificationState({ channelId }: { channelId: string }): void {
     const state = useDataStore();
     const channel = state.channels[channelId];
@@ -133,14 +127,32 @@ export default {
     state.channels[payload.channelId].scrollTop = payload.value;
   },
 
+  clearChannels({communityId}: {communityId: string}): void {
+    const state = useDataStore();
+    Object.values(state.channels).forEach(c => {
+      if (c.sourcePerspective === communityId) {
+        delete state.channels[c.id]
+      }
+    });
+  },
+
   addChannel(payload: AddChannel): void {
     const state = useDataStore();
     const parentNeighbourhood = state.neighbourhoods[payload.communityId];
 
     if (parentNeighbourhood !== undefined) {
-      state.channels[payload.channel.id] =
-        payload.channel;
+      const exists = Object.values(state.channels).find(c => c.name === payload.channel.name && c.sourcePerspective === payload.communityId);
+
+      if (!exists) {
+        state.channels[payload.channel.id] =
+          payload.channel;
+      }
     }
+  },
+  removeChannel(payload: { channelId: string }): void {
+    const state = useDataStore();
+
+    delete state.channels[payload.channelId];
   },
 
   addLocalChannel(payload: {
@@ -168,15 +180,12 @@ export default {
     community.useLocalTheme = payload.value;
   },
 
-  setHasNewMessages(payload: { channelId: string; value: boolean }): void {
+  setHasNewMessages(payload: { communityId: string, channelId: string; value: boolean }): void {
     const state = useDataStore();
-    const tempChannel = state.getChannel(payload.channelId);
-    const tempCommunity = state.getCommunity(
-      tempChannel.sourcePerspective
-      );
-      const channel = state.channels[payload.channelId];
-      const community = state.communities[tempCommunity.state.perspectiveUuid];
-    channel.hasNewMessages = payload.value;
+    const channel = state.getChannel(payload.communityId, payload.channelId);
+    const tempCommunity = state.getCommunity(payload.communityId);
+    const community = state.communities[tempCommunity.state.perspectiveUuid];
+    channel!.hasNewMessages = payload.value;
     community.hasNewMessages = state
       .getChannelStates(tempCommunity.state.perspectiveUuid)
       .reduce((acc: boolean, channel) => {

@@ -36,6 +36,8 @@ import { LinkExpression } from "@perspect3vism/ad4m";
 import { CHANNEL, EXPRESSION, MEMBER } from "./constants/neighbourhoodMeta";
 import { useUserStore } from "./store/user";
 import retry from "./utils/retry";
+import { buildCommunity, hydrateState } from "./store/data/hydrateState";
+import { nanoid } from "nanoid";
 
 export default defineComponent({
   name: "App",
@@ -98,9 +100,8 @@ export default defineComponent({
         if (!status) {
           await findAd4mPort(MainClient.portSearchState === 'found' ? MainClient.port : undefined)
       
-          const status = await MainClient.ad4mClient.agent.status();
+          await MainClient.ad4mClient.agent.status();
 
-          this.userStore.updateAgentStatus(status)
         }
 
         const { perspective } = await MainClient.ad4mClient.agent.me();
@@ -118,10 +119,13 @@ export default defineComponent({
         if (!this.watcherStarted) {
           this.startWatcher();
           this.watcherStarted = true;
+          await hydrateState();
         }
 
 
         this.appStore.setGlobalLoading(false);
+
+        return true;
       } catch (e) {
         console.log('main', {e}, e.message === "signature verification failed");
 
@@ -190,6 +194,7 @@ export default defineComponent({
 
             //Add UI notification on the channel to notify that there is a new message there
             this.dataStore.setHasNewMessages({
+              communityId: perspective,
               channelId: perspective,
               value: true,
             });
@@ -214,7 +219,7 @@ export default defineComponent({
           this.dataStore.addChannel({
             communityId: perspective,
             channel: {
-                id: link.data.target,
+                id: nanoid(),
                 name: link.data.target,
                 creatorDid: link.author,
                 sourcePerspective: perspective,
@@ -239,6 +244,7 @@ export default defineComponent({
               const perspective = await MainClient.ad4mClient.perspective.byUUID(k);
 
               if (perspective) {
+                // @ts-ignore
                 perspective.addListener('link-added', (result) => {
                   console.debug(
                     "Got new link with data",
@@ -259,6 +265,71 @@ export default defineComponent({
         { immediate: true, deep: true }
       );
 
+
+      // @ts-ignore
+      MainClient.ad4mClient.perspective.addPerspectiveAddedListener(async (perspective) => {
+        const proxy = await MainClient.ad4mClient.perspective.byUUID(perspective.uuid);
+        proxy!.addListener('link-added', (link) => {
+          if (link.data!.predicate! === CHANNEL && link.data.target === 'Home') {
+            buildCommunity(proxy!).then((community) => {
+              this.dataStore.addCommunity(community);
+
+              this.dataStore.addChannel({
+                communityId: perspective.uuid,
+                channel: {
+                    id: nanoid(),
+                    name: "Home",
+                    creatorDid: link.author,
+                    sourcePerspective: perspective.uuid,
+                    hasNewMessages: false,
+                    createdAt: new Date().toISOString(),
+                    feedType: FeedType.Signaled,
+                    notifications: {
+                      mute: false,
+                    },
+                },
+              });
+            });
+          }
+        });
+      });
+
+      // @ts-ignore
+      MainClient.ad4mClient.perspective.addPerspectiveRemovedListener((perspective) => {
+        const isCommunity = this.dataStore.getCommunity(perspective);
+
+        if (isCommunity) {
+          this.dataStore.removeCommunity({communityId: perspective});
+        }
+      });
+
+      const allPerspectives = await MainClient.ad4mClient.perspective.all();
+
+      for (const perspective of allPerspectives) {
+        perspective.addListener('link-added', (link) => {
+          if (link.data!.predicate! === CHANNEL && link.data.target === 'Home') {
+            buildCommunity(perspective).then((community) => {
+              this.dataStore.addCommunity(community);
+
+              this.dataStore.addChannel({
+                communityId: perspective.uuid,
+                channel: {
+                    id: nanoid(),
+                    name: "Home",
+                    creatorDid: link.author,
+                    sourcePerspective: perspective.uuid,
+                    hasNewMessages: false,
+                    createdAt: new Date().toISOString(),
+                    feedType: FeedType.Signaled,
+                    notifications: {
+                      mute: false,
+                    },
+                },
+              });
+            });
+          }
+        });
+      }
     }
   },
 });

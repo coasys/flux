@@ -98,7 +98,7 @@ describe("Show Message Notification", () => {
       // @ts-ignore
       route: {
         params: {
-          channelId: channel.id,
+          channelId: channel.name,
           communityId: community.state.perspectiveUuid,
         },
       },
@@ -130,7 +130,7 @@ describe("Show Message Notification", () => {
       // @ts-ignore
       route: {
         params: {
-          channelId: channel.id,
+          channelId: channel.name,
           communityId: community.state.perspectiveUuid,
         },
       },

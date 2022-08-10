@@ -80,7 +80,7 @@ describe("Data Mutations", () => {
     expect(Object.values(dataStore.communities).length).toBe(1);
     expect(Object.values(dataStore.channels).length).toBe(1);
 
-    dataStore.removeCommunity(community.state.perspectiveUuid);
+    dataStore.removeCommunity({communityId: community.state.perspectiveUuid});
 
     expect(Object.values(dataStore.communities).length).toBe(0);
     expect(Object.values(dataStore.neighbourhoods).length).toBe(0);
@@ -256,6 +256,7 @@ describe("Data Mutations", () => {
     ).toBeFalsy();
 
     dataStore.setHasNewMessages({
+      communityId: createCommunity.state.perspectiveUuid,
       channelId: createChannel.id,
       value: true,
     });
