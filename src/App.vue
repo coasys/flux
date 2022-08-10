@@ -91,10 +91,16 @@ export default defineComponent({
       try {
         const status = await checkConnection();
 
+        const temp = await MainClient.ad4mClient.agent.status();
+
+        this.userStore.updateAgentStatus(temp)
+
         if (!status) {
           await findAd4mPort(MainClient.portSearchState === 'found' ? MainClient.port : undefined)
       
-          await MainClient.ad4mClient.agent.status();
+          const status = await MainClient.ad4mClient.agent.status();
+
+          this.userStore.updateAgentStatus(status)
         }
 
         const { perspective } = await MainClient.ad4mClient.agent.me();
