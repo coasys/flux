@@ -270,15 +270,33 @@ export default defineComponent({
       MainClient.ad4mClient.perspective.addPerspectiveAddedListener(async (perspective) => {
         const proxy = await MainClient.ad4mClient.perspective.byUUID(perspective.uuid);
         proxy!.addListener('link-added', (link) => {
-          if (link.data!.predicate! === CHANNEL && link.data.target === 'Home') {
-            buildCommunity(proxy!).then((community) => {
-              this.dataStore.addCommunity(community);
+          if (link.data!.predicate! === CHANNEL && link.data.target === 'Home' && link.author != this.userStore.getUser?.agent.did) {
+            if (link.data.target === 'Home') {
+              buildCommunity(proxy!).then((community) => {
+                this.dataStore.addCommunity(community);
 
+                this.dataStore.addChannel({
+                  communityId: perspective.uuid,
+                  channel: {
+                      id: nanoid(),
+                      name: "Home",
+                      creatorDid: link.author,
+                      sourcePerspective: perspective.uuid,
+                      hasNewMessages: false,
+                      createdAt: new Date().toISOString(),
+                      feedType: FeedType.Signaled,
+                      notifications: {
+                        mute: false,
+                      },
+                  },
+                });
+              });
+            } else {
               this.dataStore.addChannel({
                 communityId: perspective.uuid,
                 channel: {
                     id: nanoid(),
-                    name: "Home",
+                    name: link.data.target,
                     creatorDid: link.author,
                     sourcePerspective: perspective.uuid,
                     hasNewMessages: false,
@@ -289,15 +307,16 @@ export default defineComponent({
                     },
                 },
               });
-            });
+            }
           }
         });
       });
 
       // @ts-ignore
       MainClient.ad4mClient.perspective.addPerspectiveRemovedListener((perspective) => {
+        console.log('called')
         const isCommunity = this.dataStore.getCommunity(perspective);
-
+        console.log('called', isCommunity)
         if (isCommunity) {
           this.dataStore.removeCommunity({communityId: perspective});
         }
