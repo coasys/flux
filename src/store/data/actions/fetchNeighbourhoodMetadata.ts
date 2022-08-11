@@ -11,12 +11,6 @@ export interface Payload {
   communityId: string;
 }
 
-const token = localStorage.getItem('ad4minToken');
-
-const expressionWorker = new Worker("/pollingWorker.js");
-
-const PORT = localStorage.getItem('ad4minPort');
-
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async (communityId: string): Promise<void> => {
   const dataStore = useDataStore();
@@ -34,44 +28,25 @@ export default async (communityId: string): Promise<void> => {
     console.log(a.timestamp, b.timestamp);
     return a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0;
   });
+
   //Check that the group expression ref is not in the store
   if (
     sortedLinks.length > 0 &&
     community.neighbourhood.groupExpressionRef !=
       sortedLinks[sortedLinks.length - 1].data!.target!
   ) {
-    //Start a worker polling to try and get the expression data
-    expressionWorker.postMessage({
-      retry: expressionGetRetries,
-      interval: expressionGetDelayMs,
-      query: print(GET_EXPRESSION),
-      token,
-      variables: {
-        url: sortedLinks[sortedLinks.length - 1].data!.target!,
-      },
-      callbackData: { communityId: community.neighbourhood.perspective.uuid },
-      name: "Get group expression data",
-      dataKey: "expression",
-      port: PORT,
-    });
+    const exp = await ad4mClient.expression.get(sortedLinks[sortedLinks.length - 1].data!.target!)
 
-    expressionWorker.onerror = function (e) {
-      throw new Error(e.toString());
-    };
 
-    expressionWorker.addEventListener("message", (e) => {
-      const getExpRes = e.data.expression;
-      const groupExpData = JSON.parse(getExpRes.data!);
-      console.log("Got new group expression data for community", groupExpData);
-      //Update the community with the new group data
-      dataStore.updateCommunityMetadata({
-        communityId: e.data.callbackData.communityId,
-        name: groupExpData["name"],
-        description: groupExpData["description"],
-        image: groupExpData["image"],
-        thumbnail: groupExpData["thumnail"],
-        groupExpressionRef: sortedLinks[sortedLinks.length - 1].data!.target,
-      });
+    const groupExpData = JSON.parse(exp.data)
+
+    dataStore.updateCommunityMetadata({
+      communityId: community.neighbourhood.perspective.uuid,
+      name: groupExpData["name"],
+      description: groupExpData["description"],
+      image: groupExpData["image"],
+      thumbnail: groupExpData["thumnail"],
+      groupExpressionRef: sortedLinks[sortedLinks.length - 1].data!.target,
     });
   }
 };
