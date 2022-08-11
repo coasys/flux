@@ -1,5 +1,5 @@
 import { ad4mClient, MainClient } from "@/app";
-import { CHANNEL, SELF } from "@/constants/neighbourhoodMeta";
+import { CHANNEL, LANGUAGE, SELF } from "@/constants/neighbourhoodMeta";
 import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
 import { Ad4mClient, LinkExpression, LinkQuery, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { nanoid } from "nanoid";
@@ -40,7 +40,7 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
 
   const meta = getMetaFromNeighbourhood(perspective.neighbourhood?.meta?.links!);
 
-  const metaLangs = perspective.neighbourhood?.meta?.links!.filter((link: any) => link.data.predicate === "language");
+  const metaLangs = perspective.neighbourhood?.meta?.links!.filter((link: any) => link.data.predicate === LANGUAGE);
 
   const typeLangs = await getMetaFromLinks(metaLangs!);
 
