@@ -33,7 +33,7 @@ import { checkConnection } from "./router";
 import { findAd4mPort } from "./utils/findAd4minPort";
 import { useDataStore } from "./store/data";
 import { LinkExpression } from "@perspect3vism/ad4m";
-import { CHANNEL, EXPRESSION, MEMBER } from "./constants/neighbourhoodMeta";
+import { CHANNEL, EXPRESSION, FLUX_GROUP, MEMBER } from "./constants/neighbourhoodMeta";
 import { useUserStore } from "./store/user";
 import retry from "./utils/retry";
 import { buildCommunity, hydrateState } from "./store/data/hydrateState";
@@ -230,6 +230,24 @@ export default defineComponent({
                   mute: false,
                 },
             },
+          });
+        } else if (
+          link.data!.predicate! === FLUX_GROUP &&
+          link.author !== this.userStore.getUser?.agent.did
+        ) {
+          console.log("Community update via link signal!");
+
+          const exp = await MainClient.ad4mClient.expression.get(link.data.target);
+
+          const expParse = JSON.parse(exp.data);
+
+          this.dataStore.updateCommunityMetadata({
+            communityId: perspective,
+            name: expParse.name,
+            description: expParse.description,
+            image: expParse.image || "",
+            thumbnail: expParse.thumbnail || "",
+            groupExpressionRef: link.data.target,
           });
         }
       };
