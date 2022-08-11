@@ -19,12 +19,14 @@ export default async (communityId: string): Promise<void> => {
         predicate: CHANNEL,
       })
     );
-    console.log(channelLinks);
 
     for (let i = 0; i < channelLinks.length; i++) {
         const name = channelLinks[i].data!.target;
+
+        const found = dataStore.getChannel(community.neighbourhood.perspective.uuid, name)
+
         //Check that the channel is not in the store
-        if (dataStore.channels[name] === undefined) {
+        if (!found) {
         console.log(
             "Found channel link not in local state, adding...",
             channelLinks[i]
