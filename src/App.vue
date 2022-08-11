@@ -314,10 +314,8 @@ export default defineComponent({
 
       // @ts-ignore
       MainClient.ad4mClient.perspective.addPerspectiveRemovedListener((perspective) => {
-        console.log('called')
         const isCommunity = this.dataStore.getCommunity(perspective);
-        console.log('called', isCommunity)
-        if (isCommunity) {
+        if (isCommunity && isCommunity.neighbourhood) {
           this.dataStore.removeCommunity({communityId: perspective});
         }
       });
