@@ -1,9 +1,9 @@
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
 import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
 
-import { MEMBER, SELF } from "@/constants/neighbourhoodMeta";
+import { FLUX_GROUP, MEMBER, SELF } from "@/constants/neighbourhoodMeta";
 
-import { Link } from "@perspect3vism/ad4m";
+import { Link, LinkQuery } from "@perspect3vism/ad4m";
 
 import { CommunityState, MembraneType, FeedType } from "@/store/types";
 import { useDataStore } from "..";
@@ -52,6 +52,21 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
         } as Link
       );
       console.log("Created profile expression link", addProfileLink);
+        
+
+      const groupExpressionLinks = await ad4mClient.perspective.queryLinks(
+        neighbourhood.uuid,
+        new LinkQuery({
+          source: SELF,
+          predicate: FLUX_GROUP,
+        })
+      );
+
+      let sortedLinks = [...groupExpressionLinks];
+      sortedLinks = sortedLinks.sort((a, b) => {
+        console.log(a.timestamp, b.timestamp);
+        return a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0;
+      });
 
       //Read out metadata about the perspective from the meta
       const { name, description, creatorDid, createdAt } =
@@ -65,6 +80,7 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
           creatorDid,
           perspective: neighbourhood,
           typedExpressionLanguages: typedExpressionLanguages,
+          groupExpressionRef: sortedLinks[sortedLinks.length - 1].data.target,
           neighbourhoodUrl: joiningLink,
           membraneType: MembraneType.Unique,
           linkedNeighbourhoods: [neighbourhood.uuid],
