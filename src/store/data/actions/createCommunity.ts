@@ -73,7 +73,7 @@ export default async ({
       );
     console.log("Response from create group exp lang", groupExpressionLang);
     //Get language after templating to install it
-    ad4mClient.languages.byAddress(groupExpressionLang.address);
+    await ad4mClient.languages.byAddress(groupExpressionLang.address);
     const typedExpLangs = [
       {
         languageAddress: groupExpressionLang.address!,
