@@ -66,6 +66,8 @@ class Client {
             }
         },
     }));
+
+    localStorage.setItem("ad4minPort", this.port.toString());
   
     this.apolloClient = new ApolloClient({
         link: wsLink,
