@@ -68,6 +68,11 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
         return a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0;
       });
 
+      let groupExpressionRef = "";
+      if (sortedLinks.length > 0) {
+        groupExpressionRef = sortedLinks[sortedLinks.length - 1].data.target;
+      }
+
       //Read out metadata about the perspective from the meta
       const { name, description, creatorDid, createdAt } =
         getMetaFromNeighbourhood(neighbourhood.neighbourhood!.meta.links);
@@ -80,7 +85,7 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
           creatorDid,
           perspective: neighbourhood,
           typedExpressionLanguages: typedExpressionLanguages,
-          groupExpressionRef: sortedLinks[sortedLinks.length - 1].data.target,
+          groupExpressionRef,
           neighbourhoodUrl: joiningLink,
           membraneType: MembraneType.Unique,
           linkedNeighbourhoods: [neighbourhood.uuid],
