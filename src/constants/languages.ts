@@ -1,5 +1,5 @@
 export const SOCIAL_CONTEXT_OFFICIAL =
-  "QmSLEAnWg8YN7ESZVoXSYkwEatHQsry1ESvfrruxsS2rcQ";
+  "QmVDnwdSWyj9Zm8nDqexu9yRcjra6FdLcQYWpfbLE9CFWr";
 
 export const GROUP_EXPRESSION_OFFICIAL =
   "Qma6Jb7U5pYGkKw1KjitECUuzYQXiHU1kAwnYSVcNk7kGx";
