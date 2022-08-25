@@ -13,7 +13,7 @@ import {
   CommunityState,
   FeedType,
 } from "@/store/types";
-import { Perspective, PerspectiveHandle } from "@perspect3vism/ad4m";
+import { Perspective, PerspectiveHandle, Literal } from "@perspect3vism/ad4m";
 import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
@@ -137,6 +137,20 @@ export default async ({
       }
     );
     console.log("Created profile expression link", addProfileLink);
+
+
+    let sdnaLiteral = Literal.from(`flux_message(Channel, Message, Timestamp, Author, Reactions, Replies):-
+    link(Channel, "temp://directly_succeeded_by", Message, Timestamp, Author),
+    findall((Reaction, ReactionTimestamp, ReactionAuthor), link(Message, "flux://has_reaction", Reaction, ReactionTimestamp, ReactionAuthor), Reactions),
+    findall((Reply, ReplyTimestamp, ReplyAuthor), link(Message, "flux://has_reply", Reply, ReplyTimestamp, ReplyAuthor), Replies).`)
+
+
+    // await ad4mClient.perspective.addLink(perspectiveUuid, {source: "self", predicate: "ad4m://has_zome", target: sdnaLiteral.toUrl()});
+    const addSocialDnaLink = await ad4mClient.perspective.addLink(
+      createSourcePerspective.uuid!,
+      {source: "self", predicate: "ad4m://has_zome", target: sdnaLiteral.toUrl()}
+    );
+    console.log("Created social dna link", addSocialDnaLink);
 
 
     const newCommunity = {
