@@ -142,7 +142,7 @@ export default async ({
     let sdnaLiteral = Literal.from(`flux_message(Channel, Message, Timestamp, Author, Reactions, Replies):-
     link(Channel, "temp://directly_succeeded_by", Message, Timestamp, Author),
     findall((Reaction, ReactionTimestamp, ReactionAuthor), link(Message, "flux://has_reaction", Reaction, ReactionTimestamp, ReactionAuthor), Reactions),
-    findall((Reply, ReplyTimestamp, ReplyAuthor), link(Message, "flux://has_reply", Reply, ReplyTimestamp, ReplyAuthor), Replies).`)
+    findall((Reply, ReplyTimestamp, ReplyAuthor), link(Reply, "flux://has_reply", Message, ReplyTimestamp, ReplyAuthor), Replies).`)
 
 
     // await ad4mClient.perspective.addLink(perspectiveUuid, {source: "self", predicate: "ad4m://has_zome", target: sdnaLiteral.toUrl()});
