@@ -14,9 +14,8 @@ export interface Payload {
 export async function getGroupExpression(communityId: string) {
   const dataStore = useDataStore();
   const community = dataStore.getCommunity(communityId);
-
   const groupExpressionLinks = await ad4mClient.perspective.queryLinks(
-    community.neighbourhood.perspective.uuid,
+    communityId,
     new LinkQuery({
       source: SELF,
       predicate: FLUX_GROUP,
@@ -35,7 +34,7 @@ export async function getGroupExpression(communityId: string) {
     const groupExpData = JSON.parse(exp.data)
 
     return {
-      communityId: community.neighbourhood.perspective.uuid,
+      communityId,
       name: groupExpData["name"],
       description: groupExpData["description"],
       image: groupExpData["image"],
