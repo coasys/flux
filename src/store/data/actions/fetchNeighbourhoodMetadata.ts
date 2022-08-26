@@ -11,8 +11,7 @@ export interface Payload {
   communityId: string;
 }
 
-/// Function that uses web workers to poll for channels and new group expressions on a community
-export default async (communityId: string): Promise<void> => {
+export async function getGroupExpression(communityId: string) {
   const dataStore = useDataStore();
   const community = dataStore.getCommunity(communityId);
 
@@ -30,23 +29,30 @@ export default async (communityId: string): Promise<void> => {
   });
 
   //Check that the group expression ref is not in the store
-  if (
-    sortedLinks.length > 0 &&
-    community.neighbourhood.groupExpressionRef !=
-      sortedLinks[sortedLinks.length - 1].data!.target!
-  ) {
+  if (sortedLinks.length > 0) {
     const exp = await ad4mClient.expression.get(sortedLinks[sortedLinks.length - 1].data!.target!)
-
 
     const groupExpData = JSON.parse(exp.data)
 
-    dataStore.updateCommunityMetadata({
+    return {
       communityId: community.neighbourhood.perspective.uuid,
       name: groupExpData["name"],
       description: groupExpData["description"],
       image: groupExpData["image"],
       thumbnail: groupExpData["thumnail"],
       groupExpressionRef: sortedLinks[sortedLinks.length - 1].data!.target,
-    });
+    }
+  }
+
+  return undefined
+}
+
+export default async (communityId: string): Promise<void> => {
+  const dataStore = useDataStore();
+
+  const exp = await getGroupExpression(communityId);
+
+  if (exp) {
+    dataStore.updateCommunityMetadata(exp);
   }
 };
