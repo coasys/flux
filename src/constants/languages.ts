@@ -2,7 +2,7 @@ export const SOCIAL_CONTEXT_OFFICIAL =
   "QmVwad8ajnQdjKXMvzdh2J1ta3pcJfq2SRV88dnVKWVHs3";
 
 export const GROUP_EXPRESSION_OFFICIAL =
-  "QmWDotw8BpVvHacQsCh35KEtWRuMmdeJfGsWt42yTfWhTr";
+  "Qma6Jb7U5pYGkKw1KjitECUuzYQXiHU1kAwnYSVcNk7kGx";
 
 export const NOTE_IPFS_EXPRESSION_OFFICIAL =
   "QmYVsrMpiFmV9S7bTWNAkUzSqjRJskQ8g4TWKKwKrHAPqL";
