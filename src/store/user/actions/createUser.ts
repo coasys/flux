@@ -29,6 +29,9 @@ export default async ({
   const userStore = useUserStore();
 
   try {
+    //Install the noteipfs language
+    await ad4mClient.languages.byAddress(NOTE_IPFS_EXPRESSION_OFFICIAL);
+
     const resizedImage = profilePicture
       ? await resizeImage(dataURItoBlob(profilePicture as string), 100)
       : undefined;
