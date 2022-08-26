@@ -174,6 +174,9 @@ export default defineComponent({
       editArea: null as any,
     };
   },
+  beforeCreate() {
+    this.appStore.changeCurrentTheme("global");
+  },
   methods: {
     setAddLinkModal(value: boolean): void {
       this.showAddlinkModal = value;
