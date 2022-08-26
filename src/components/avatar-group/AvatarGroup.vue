@@ -52,12 +52,17 @@ export default defineComponent({
         // reset on change
         this.firstUsers = [];
         this.loading = true;
-        for (const user of users.slice(0, 3)) {
+
+        for (const user of users) {
           if (user) {            
             const member = await getProfile(user);
-  
-            if (member) {
+
+            if (member && !this.firstUsers.find(e => e.did === user)) {
               this.firstUsers = [...this.firstUsers, member];
+
+              if (this.firstUsers.length === 3) {
+                break;
+              }
             }
           }
         }

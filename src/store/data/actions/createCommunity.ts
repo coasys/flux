@@ -89,7 +89,7 @@ export default async ({
       typedExpLangs
     );
     const meta = new Perspective(metaLinks);
-    const sharedUrl = createSourcePerspective.sharedUrl;
+    let sharedUrl = createSourcePerspective.sharedUrl;
 
     if (!sharedUrl) {
       const neighbourhood = await ad4mClient.neighbourhood.publishFromPerspective(
@@ -97,6 +97,9 @@ export default async ({
         socialContextLang.address,
         meta
       );
+
+      sharedUrl = neighbourhood;
+
       console.log("Created neighbourhood with result", neighbourhood);
     }
 
