@@ -119,32 +119,46 @@ export async function getProfile(did: string): Promise<ProfileWithDID | null> {
         profile!.familyName = link.data.target;
         break;
       case HAS_PROFILE_IMAGE:
-        expUrl = link.data.target;
-        image = await ad4mClient.expression.get(expUrl);
+        try {
+          expUrl = link.data.target;
+          image = await ad4mClient.expression.get(expUrl);
 
-        if (image) {
-          profile!.profilePicture = image.data.slice(1, -1);
+          if (image) {
+            profile!.profilePicture = image.data.slice(1, -1);
+          }
+        } catch (e) {
+          console.error(e)
         }
+
         break;
       case HAS_THUMBNAIL_IMAGE:
-        expUrl = link.data.target;
-        image = await ad4mClient.expression.get(expUrl);
-
-        if (image) {
-          if (link.data.source === FLUX_PROFILE) {
-            profile!.thumbnailPicture = image.data.slice(1, -1);
+        try {
+          expUrl = link.data.target;
+          image = await ad4mClient.expression.get(expUrl);
+  
+          if (image) {
+            if (link.data.source === FLUX_PROFILE) {
+              profile!.thumbnailPicture = image.data.slice(1, -1);
+            }
           }
+        } catch (e) {
+          console.error(e);
         }
         break;
       case HAS_BG_IMAGE:
-        expUrl = link.data.target;
-        image = await ad4mClient.expression.get(expUrl);
-
-        if (image) {
-          if (link.data.source === FLUX_PROFILE) {
-            profile!.profileBg = image.data.slice(1, -1);
+        try {
+          expUrl = link.data.target;
+          image = await ad4mClient.expression.get(expUrl);
+  
+          if (image) {
+            if (link.data.source === FLUX_PROFILE) {
+              profile!.profileBg = image.data.slice(1, -1);
+            }
           }
+        } catch (e) {
+          console.error(e);
         }
+
         break;
       case HAS_EMAIL:
         profile!.email = link.data.target;
