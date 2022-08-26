@@ -176,7 +176,7 @@ export default async ({
     // await ad4mClient.perspective.addLink(perspectiveUuid, {source: "self", predicate: "ad4m://has_zome", target: sdnaLiteral.toUrl()});
     const addSocialDnaLink = await ad4mClient.perspective.addLink(
       createSourcePerspective.uuid!,
-      {source: "self", predicate: "ad4m://has_zome", target: sdnaLiteral.toUrl()}
+      {source: "ad4m://self", predicate: "ad4m://has_zome", target: sdnaLiteral.toUrl()}
     );
     console.log("Created social dna link", addSocialDnaLink);
 
