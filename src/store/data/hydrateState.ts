@@ -102,6 +102,9 @@ export async function hydrateState() {
       if (perspective.sharedUrl !== undefined) {
         const newCommunity = await buildCommunity(perspective);
 
+
+        console.log('newCommunity', newCommunity)
+
         dataStore.addCommunity(newCommunity);
 
         const channels = [...Object.values(dataStore.channels)]

@@ -11,6 +11,7 @@ import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { ad4mClient } from "@/app";
 import { nanoid } from "nanoid";
+import { getGroupExpression } from "./fetchNeighbourhoodMetadata";
 
 export interface Payload {
   joiningLink: string;
@@ -53,39 +54,23 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
       );
       console.log("Created profile expression link", addProfileLink);
         
-
-      const groupExpressionLinks = await ad4mClient.perspective.queryLinks(
-        neighbourhood.uuid,
-        new LinkQuery({
-          source: SELF,
-          predicate: FLUX_GROUP,
-        })
-      );
-
-      let sortedLinks = [...groupExpressionLinks];
-      sortedLinks = sortedLinks.sort((a, b) => {
-        console.log(a.timestamp, b.timestamp);
-        return a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0;
-      });
-
-      let groupExpressionRef = "";
-      if (sortedLinks.length > 0) {
-        groupExpressionRef = sortedLinks[sortedLinks.length - 1].data.target;
-      }
-
       //Read out metadata about the perspective from the meta
       const { name, description, creatorDid, createdAt } =
         getMetaFromNeighbourhood(neighbourhood.neighbourhood!.meta.links);
 
+      const groupExp = await getGroupExpression(neighbourhood.uuid);
+
       const newCommunity = {
         neighbourhood: {
           createdAt,
-          name,
-          description,
+          name: groupExp?.name || name,
+          description: groupExp?.description || description,
+          image: groupExp?.image || "",
+          thumbnail: groupExp?.thumbnail || "",
           creatorDid,
           perspective: neighbourhood,
           typedExpressionLanguages: typedExpressionLanguages,
-          groupExpressionRef,
+          groupExpressionRef: groupExp?.groupExpressionRef,
           neighbourhoodUrl: joiningLink,
           membraneType: MembraneType.Unique,
           linkedNeighbourhoods: [neighbourhood.uuid],

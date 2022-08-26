@@ -90,7 +90,7 @@ export const resizeImage = (file: any, maxSize: number): Promise<Blob> => {
   });
 };
 
-async function getImage(expUrl: string): Promise<string> {
+export async function getImage(expUrl: string): Promise<string> {
   return new Promise(async (resolve, reject) => {
     setTimeout(() => {
       resolve("");

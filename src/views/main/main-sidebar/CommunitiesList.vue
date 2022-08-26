@@ -77,18 +77,53 @@
 <script lang="ts">
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
-import { NeighbourhoodState } from "@/store/types";
-import { defineComponent } from "vue";
+import { DexieIPFS } from "@/utils/storageHelpers";
+import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   setup() {
     const appStore = useAppStore();
     const dataStore = useDataStore();
+    const communities = ref(dataStore.getCommunityNeighbourhoods.map(e => ({...e, image: null})));
 
     return {
       appStore,
       dataStore,
+      communities
     };
+  },
+  async mounted() {
+    let communities = this.dataStore.getCommunityNeighbourhoods;
+    const tempCommunities = []
+
+    for (const community of communities) {
+      const tempCommunity = {...community};
+      const dexie = new DexieIPFS(tempCommunity.perspective.uuid);
+      const image = await dexie.get(tempCommunity.image!);
+      tempCommunity.image = image
+      tempCommunities.push({...tempCommunity})
+    }
+
+    this.communities = tempCommunities;
+  },
+    watch: {
+    "$route.params.communityId": {
+      handler: async function (id: string) {
+        let communities = this.dataStore.getCommunityNeighbourhoods;
+        const tempCommunities = []
+
+        for (const community of communities) {
+          const tempCommunity = {...community};
+          const dexie = new DexieIPFS(tempCommunity.perspective.uuid);
+          const image = await dexie.get(tempCommunity.image!);
+          tempCommunity.image = image
+          tempCommunities.push({...tempCommunity})
+        }
+
+        this.communities = tempCommunities;
+      },
+      immediate: true,
+    },
   },
   methods: {
     toggleHideMutedChannels(id: string) {
@@ -112,9 +147,6 @@ export default defineComponent({
     },
   },
   computed: {
-    communities(): NeighbourhoodState[] {
-      return this.dataStore.getCommunityNeighbourhoods;
-    },
     communityIsActive() {
       return (id: string) => this.$route.params.communityId === id;
     },

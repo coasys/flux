@@ -10,7 +10,7 @@
     <button slot="trigger" class="community-sidebar__header-button">
       <j-avatar
         style="--j-avatar-size: 30px"
-        :src="community.neighbourhood.image || null"
+        :src="communityImage || null"
         :initials="community.neighbourhood.name.charAt(0)"
       />
       <div class="community-info">
@@ -173,6 +173,7 @@ import { mapActions, mapState } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
+import { DexieIPFS } from "@/utils/storageHelpers";
 
 export default defineComponent({
   components: { AvatarGroup },
@@ -185,11 +186,13 @@ export default defineComponent({
   setup() {
     return {
       userStore: useUserStore(),
+      dataStore: useDataStore()
     };
   },
   data: function () {
     return {
       showCommunityMenu: false,
+      communityImage: null
     };
   },
   computed: {
@@ -209,6 +212,22 @@ export default defineComponent({
         this.community.neighbourhood.creatorDid ===
         this.userStore.getUser?.agent.did
       );
+    }
+  },
+  watch: {
+    "$route.params.communityId": {
+      handler: async function (id: string) {
+        if (id) {
+          const communityId = this.$route.params.communityId as string;
+          const community = this.dataStore.getCommunity(communityId);
+          const dexie = new DexieIPFS(communityId);
+
+          const image = await dexie.get(community.neighbourhood.image!);
+          // @ts-ignore
+          this.communityImage = image
+        }
+      },
+      immediate: true,
     },
   },
   methods: {

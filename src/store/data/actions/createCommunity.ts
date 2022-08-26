@@ -1,7 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
 import {
   SOCIAL_CONTEXT_OFFICIAL,
-  GROUP_EXPRESSION_OFFICIAL
+  GROUP_EXPRESSION_OFFICIAL,
+  NOTE_IPFS_EXPRESSION_OFFICIAL
 } from "@/constants/languages";
 
 import { MEMBER, SELF, FLUX_GROUP } from "@/constants/neighbourhoodMeta";
@@ -19,6 +20,7 @@ import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { ad4mClient, MainClient } from "@/app";
+import { blobToDataURL, dataURItoBlob, resizeImage } from "@/utils/profileHelpers";
 
 export interface Payload {
   perspectiveName: string;
@@ -103,13 +105,36 @@ export default async ({
       console.log("Created neighbourhood with result", neighbourhood);
     }
 
+    let tempImage = image;
+    let tempThumbnail = thumbnail;
+
+    if (image) {
+      const resizedImage = image
+        ? await resizeImage(dataURItoBlob(image as string), 100)
+        : undefined;
+      
+      const thumbnail = image
+        ? await blobToDataURL(resizedImage!)
+        : undefined;
+
+      tempImage = await ad4mClient.expression.create(
+        image,
+        NOTE_IPFS_EXPRESSION_OFFICIAL
+      );
+
+      tempThumbnail = await ad4mClient.expression.create(
+        thumbnail,
+        NOTE_IPFS_EXPRESSION_OFFICIAL
+      );
+    }
+
     //Create the group expression
     const createExp = await ad4mClient.expression.create(
       {
         name: perspectiveName,
         description: description,
-        image: image,
-        thumbnail: thumbnail,
+        image: tempImage,
+        thumbnail: tempThumbnail,
       },
       groupExpressionLang.address!
     );
@@ -161,8 +186,8 @@ export default async ({
         name: perspectiveName,
         creatorDid: creatorDid,
         description: description,
-        image: image,
-        thumbnail: thumbnail,
+        image: tempImage,
+        thumbnail: tempThumbnail,
         perspective: {
           uuid: createSourcePerspective.uuid,
           name: createSourcePerspective.name,
