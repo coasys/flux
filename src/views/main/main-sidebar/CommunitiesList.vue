@@ -99,8 +99,10 @@ export default defineComponent({
     for (const community of communities) {
       const tempCommunity = {...community};
       const dexie = new DexieIPFS(tempCommunity.perspective.uuid);
-      const image = await dexie.get(tempCommunity.image!);
-      tempCommunity.image = image
+      if (tempCommunity.image) {
+        const image = await dexie.get(tempCommunity.image!);
+        tempCommunity.image = image
+      }
       tempCommunities.push({...tempCommunity})
     }
 
@@ -115,8 +117,10 @@ export default defineComponent({
         for (const community of communities) {
           const tempCommunity = {...community};
           const dexie = new DexieIPFS(tempCommunity.perspective.uuid);
-          const image = await dexie.get(tempCommunity.image!);
-          tempCommunity.image = image
+          if (tempCommunity.image) {
+            const image = await dexie.get(tempCommunity.image!);
+            tempCommunity.image = image
+          }
           tempCommunities.push({...tempCommunity})
         }
 
