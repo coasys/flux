@@ -161,7 +161,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType, watch } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import {
   ChannelState,
@@ -213,6 +213,18 @@ export default defineComponent({
         this.userStore.getUser?.agent.did
       );
     }
+  },
+  async mounted() {
+    const communityId = this.$route.params.communityId as string;
+
+    watch(this.dataStore.neighbourhoods, async () => {
+      const community = this.dataStore.getCommunity(communityId);
+      const dexie = new DexieIPFS(communityId);
+
+      const image = await dexie.get(community.neighbourhood.image!);
+      // @ts-ignore
+      this.communityImage = image
+    })
   },
   watch: {
     "$route.params.communityId": {

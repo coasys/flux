@@ -78,7 +78,7 @@
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
 import { DexieIPFS } from "@/utils/storageHelpers";
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch } from "vue";
 
 export default defineComponent({
   setup() {
@@ -93,41 +93,24 @@ export default defineComponent({
     };
   },
   async mounted() {
-    let communities = this.dataStore.getCommunityNeighbourhoods;
-    const tempCommunities = []
-
-    for (const community of communities) {
-      const tempCommunity = {...community};
-      const dexie = new DexieIPFS(tempCommunity.perspective.uuid);
-      if (tempCommunity.image) {
-        const image = await dexie.get(tempCommunity.image!);
-        tempCommunity.image = image
+    const updateCommunityListWithImage = async () => {
+      let communities = this.dataStore.getCommunityNeighbourhoods;
+      const tempCommunities = []
+  
+      for (const community of communities) {
+        const tempCommunity = {...community};
+        const dexie = new DexieIPFS(tempCommunity.perspective.uuid);
+        if (tempCommunity.image) {
+          const image = await dexie.get(tempCommunity.image!);
+          tempCommunity.image = image
+        }
+        tempCommunities.push({...tempCommunity})
       }
-      tempCommunities.push({...tempCommunity})
+  
+      this.communities = tempCommunities;
     }
 
-    this.communities = tempCommunities;
-  },
-    watch: {
-    "$route.params.communityId": {
-      handler: async function (id: string) {
-        let communities = this.dataStore.getCommunityNeighbourhoods;
-        const tempCommunities = []
-
-        for (const community of communities) {
-          const tempCommunity = {...community};
-          const dexie = new DexieIPFS(tempCommunity.perspective.uuid);
-          if (tempCommunity.image) {
-            const image = await dexie.get(tempCommunity.image!);
-            tempCommunity.image = image
-          }
-          tempCommunities.push({...tempCommunity})
-        }
-
-        this.communities = tempCommunities;
-      },
-      immediate: true,
-    },
+    watch(this.dataStore.neighbourhoods, updateCommunityListWithImage)
   },
   methods: {
     toggleHideMutedChannels(id: string) {
@@ -156,7 +139,7 @@ export default defineComponent({
     },
     hasNotification() {
       return (id: string) => {
-        return this.dataStore.getCommunity(id).state.hasNewMessages;
+        return this.dataStore.getCommunity(id)?.state?.hasNewMessages;
       };
     },
     getCommunityState() {
