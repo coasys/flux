@@ -25,7 +25,6 @@ export async function getGroupExpression(communityId: string) {
   );
   let sortedLinks = [...groupExpressionLinks];
   sortedLinks = sortedLinks.sort((a, b) => {
-    console.log(a.timestamp, b.timestamp);
     return a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0;
   });
 

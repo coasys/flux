@@ -80,29 +80,30 @@
     </div>
   </div>
   <j-modal
+    v-if="showAddlinkModal"
     size="lg"
     :open="showAddlinkModal"
     @toggle="(e) => setAddLinkModal(e.target.open)"
   >
     <ProfileAddLink
-      v-if="showAddlinkModal"
       @submit="() => setAddLinkModal(false)"
       @cancel="() => setAddLinkModal(false)"
     ></ProfileAddLink>
   </j-modal>
   <j-modal
+    v-if="showEditlinkModal"
     size="lg"
     :open="showEditlinkModal"
     @toggle="(e) => setEditLinkModal(e.target.open, editArea)"
   >
     <ProfileEditLink
-      v-if="showEditlinkModal"
       @submit="() => setEditLinkModal(false, editArea)"
       @cancel="() => setEditLinkModal(false, editArea)"
       :area="editArea"
     ></ProfileEditLink>
   </j-modal>
   <j-modal
+    v-if="showJoinCommunityModal"
     size="lg"
     :open="showJoinCommunityModal"
     @toggle="(e) => setShowJoinCommunityModal(e.target.open)"
@@ -114,6 +115,7 @@
     ></ProfileJoinLink>
   </j-modal>
   <j-modal
+    v-if="modals.showEditProfile"
     :open="modals.showEditProfile"
     @toggle="(e) => setShowEditProfile(e.target.open)"
   >
