@@ -199,7 +199,7 @@ export default defineComponent({
       const links = (await getAgentLinks(
         did || me.did,
         did === me.did || did === undefined ? userPerspective! : undefined
-      )).filter(e => e.data.source.startsWith('flux://'));
+      )).filter(e => !e.data.source.startsWith('flux://'));
 
       const preArea: { [x: string]: any } = {};
 
@@ -216,7 +216,7 @@ export default defineComponent({
             "text://",
             ""
           );
-        } else if (predicate === "has_images") {
+        } else if (predicate === "has_images" || predicate === 'has_image') {
           try {
             const expUrl = e.data.target;
             console.log("expUrl", expUrl);
@@ -241,8 +241,6 @@ export default defineComponent({
       this.profileLinks = Object.values(preArea).filter(
         (e) => e.id !== FLUX_PROFILE
       );
-
-      console.log('links', links)
     },
     async getAgentProfile() {
       const did = this.$route.params.did as string;
@@ -275,11 +273,11 @@ export default defineComponent({
           this.joiningLink = link.has_post;
         }
       } else if (link.area_type === "webLink") {
-        window.api.send("openLinkInBrowser", link.has_post);
+        window.open(link.has_post, '_blank');
       } else if (link.area_type === "simpleArea") {
         this.$router.push({
-          name: "profile-feed",
-          params: link,
+          name: `profile-feed`,
+          params: {fid: link.id},
         });
       }
     },
