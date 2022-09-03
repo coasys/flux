@@ -18,10 +18,10 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import ExpandableImage from "@/components/expandable-img/expandable-img.vue";
-import { ad4mClient } from "@/app";
 import { useUserStore } from "@/store/user";
 import getAgentLinks from "@/utils/getAgentLinks";
 import { useAppStore } from "@/store/app";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export default defineComponent({
   name: "ProfileFeed",
@@ -47,8 +47,9 @@ export default defineComponent({
   },
   methods: {
     async getAgentAreas(id: string) {
+      const client = await getAd4mClient();
       const did = this.$route.params.did as string;
-      const me = await ad4mClient.agent.me();
+      const me = await client.agent.me();
       const userStore = useUserStore();
       const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
 
@@ -77,7 +78,7 @@ export default defineComponent({
           try {
             const expUrl = e.data.target;
             console.log("expUrl", expUrl);
-            const image = await ad4mClient.expression.get(expUrl);
+            const image = await client.expression.get(expUrl);
             console.log("image", image);
             if (image) {
               if (!preArea[e.data.source][predicate]) {

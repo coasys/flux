@@ -19,7 +19,7 @@ import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta"
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
-import { ad4mClient, MainClient } from "@/app";
+import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/web'
 import { blobToDataURL, dataURItoBlob, resizeImage } from "@/utils/profileHelpers";
 
 export interface Payload {
@@ -42,11 +42,12 @@ export default async ({
   const userStore = useUserStore();
 
   try {
-    const agent = await ad4mClient.agent.me()
+    const client = await getAd4mClient();
+    const agent = await client.agent.me()
 
     const creatorDid = agent.did;
 
-    const createSourcePerspective = perspective || (await ad4mClient.perspective.add(
+    const createSourcePerspective = perspective || (await client.perspective.add(
       perspectiveName
     )) as PerspectiveHandle;
     console.log("Created source perspective", createSourcePerspective);
@@ -56,7 +57,7 @@ export default async ({
 
     //Create unique social-context
     const socialContextLang =
-      await ad4mClient.languages.applyTemplateAndPublish(
+      await client.languages.applyTemplateAndPublish(
         SOCIAL_CONTEXT_OFFICIAL,
         JSON.stringify({
           uid: uid,
@@ -66,7 +67,7 @@ export default async ({
     console.log("Response from create social-context", socialContextLang);
     //Create group expression language
     const groupExpressionLang =
-      await ad4mClient.languages.applyTemplateAndPublish(
+      await client.languages.applyTemplateAndPublish(
         GROUP_EXPRESSION_OFFICIAL,
         JSON.stringify({
           uid: uid,
@@ -75,7 +76,7 @@ export default async ({
       );
     console.log("Response from create group exp lang", groupExpressionLang);
     //Get language after templating to install it
-    await ad4mClient.languages.byAddress(groupExpressionLang.address);
+    await client.languages.byAddress(groupExpressionLang.address);
     const typedExpLangs = [
       {
         languageAddress: groupExpressionLang.address!,
@@ -94,7 +95,7 @@ export default async ({
     let sharedUrl = createSourcePerspective.sharedUrl;
 
     if (!sharedUrl) {
-      const neighbourhood = await ad4mClient.neighbourhood.publishFromPerspective(
+      const neighbourhood = await client.neighbourhood.publishFromPerspective(
         createSourcePerspective.uuid,
         socialContextLang.address,
         meta
@@ -117,19 +118,19 @@ export default async ({
         ? await blobToDataURL(resizedImage!)
         : undefined;
 
-      tempImage = await ad4mClient.expression.create(
+      tempImage = await client.expression.create(
         image,
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
 
-      tempThumbnail = await ad4mClient.expression.create(
+      tempThumbnail = await client.expression.create(
         thumbnail,
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
     }
 
     //Create the group expression
-    const createExp = await ad4mClient.expression.create(
+    const createExp = await client.expression.create(
       {
         name: perspectiveName,
         description: description,
@@ -141,7 +142,7 @@ export default async ({
     console.log("Created group expression with response", createExp);
 
     //Create link between perspective and group expression
-    const addGroupExpLink = await ad4mClient.perspective.addLink(
+    const addGroupExpLink = await client.perspective.addLink(
       createSourcePerspective.uuid!,
       {
         source: SELF,
@@ -156,7 +157,7 @@ export default async ({
     );
 
     //Create link between perspective and group expression
-    const addProfileLink = await ad4mClient.perspective.addLink(
+    const addProfileLink = await client.perspective.addLink(
       createSourcePerspective.uuid!,
       {
         source: SELF,
@@ -174,7 +175,7 @@ export default async ({
 
 
     // await ad4mClient.perspective.addLink(perspectiveUuid, {source: "self", predicate: "ad4m://has_zome", target: sdnaLiteral.toUrl()});
-    const addSocialDnaLink = await ad4mClient.perspective.addLink(
+    const addSocialDnaLink = await client.perspective.addLink(
       createSourcePerspective.uuid!,
       {source: "ad4m://self", predicate: "ad4m://has_zome", target: sdnaLiteral.toUrl()}
     );

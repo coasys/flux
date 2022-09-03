@@ -3,7 +3,7 @@ import { useAppStore } from "@/store/app";
 import { ChannelState, MembraneType } from "@/store/types";
 import { useDataStore } from "..";
 import { useUserStore } from "@/store/user";
-import { ad4mClient } from "@/app";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export interface Payload {
   communityId: string;
@@ -15,9 +15,11 @@ export default async (payload: Payload): Promise<ChannelState> => {
   const appStore = useAppStore();
   const userStore = useUserStore();
   try {
+    const client = await getAd4mClient();
+
     const community = dataStore.getCommunity(payload.communityId);
 
-    const agent = await ad4mClient.agent.me()
+    const agent = await client.agent.me()
 
     const creatorDid = agent.did;
 

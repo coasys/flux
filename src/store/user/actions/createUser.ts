@@ -1,4 +1,3 @@
-import { ad4mClient } from "@/app";
 import { AD4M_AGENT, KAICHAO_AGENT, JUNTO_AGENT } from "@/constants/agents";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
 import { FLUX_PROFILE, HAS_EMAIL, HAS_FAMILY_NAME, HAS_GIVEN_NAME, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "@/constants/profile";
@@ -8,6 +7,7 @@ import getAgentLinks from "@/utils/getAgentLinks";
 import { resizeImage, dataURItoBlob, blobToDataURL } from "@/utils/profileHelpers";
 import removeTypeName from "@/utils/removeTypeName";
 import { Link, LinkExpression, PerspectiveInput } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 import { useUserStore } from "..";
 
 export interface Payload {
@@ -28,11 +28,12 @@ export default async ({
 }: Payload): Promise<void> => {
   const appStore = useAppStore();
   const userStore = useUserStore();
+  const client = await getAd4mClient();
 
   try {
     //Install the noteipfs language
-    await ad4mClient.runtime.addTrustedAgents([AD4M_AGENT, KAICHAO_AGENT, JUNTO_AGENT]);
-    await ad4mClient.languages.byAddress(NOTE_IPFS_EXPRESSION_OFFICIAL);
+    await client.runtime.addTrustedAgents([AD4M_AGENT, KAICHAO_AGENT, JUNTO_AGENT]);
+    await client.languages.byAddress(NOTE_IPFS_EXPRESSION_OFFICIAL);
 
     const resizedImage = profilePicture
       ? await resizeImage(dataURItoBlob(profilePicture as string), 100)
@@ -42,28 +43,28 @@ export default async ({
       ? await blobToDataURL(resizedImage!)
       : undefined;
 
-    const perspectives = await ad4mClient.perspective.all();
+    const perspectives = await client.perspective.all();
     let userPerspective = perspectives.find(e => e.name === "Flux Agent Profile Data");
     let currentLinks = [] as LinkExpression[];
     if (userPerspective) {
       currentLinks = await getAgentLinks(userStore.agent.did!, userPerspective?.uuid);
     } else {
-      userPerspective = await ad4mClient.perspective.add("Flux Agent Profile Data");
+      userPerspective = await client.perspective.add("Flux Agent Profile Data");
     };
     const tempLinks = [...currentLinks];
     
     if (profilePicture) {
-      const thumbnailImage = await ad4mClient.expression.create(
+      const thumbnailImage = await client.expression.create(
         thumbnail,
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
 
-      const profileImage = await ad4mClient.expression.create(
+      const profileImage = await client.expression.create(
         profilePicture,
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
 
-      const profileImageLink = await ad4mClient.perspective.addLink(
+      const profileImageLink = await client.perspective.addLink(
         userPerspective!.uuid,
         new Link({
           source: FLUX_PROFILE,
@@ -72,7 +73,7 @@ export default async ({
         })
       );
   
-      const thumbnailImageLink = await ad4mClient.perspective.addLink(
+      const thumbnailImageLink = await client.perspective.addLink(
         userPerspective!.uuid,
         new Link({
           source: FLUX_PROFILE,
@@ -85,7 +86,7 @@ export default async ({
     }
 
     if (givenName) {
-      const givenNameLink = await ad4mClient.perspective.addLink(
+      const givenNameLink = await client.perspective.addLink(
         userPerspective!.uuid,
         new Link({
           source: FLUX_PROFILE,
@@ -98,7 +99,7 @@ export default async ({
     }
 
     if (familyName) {
-      const familyNameLink = await ad4mClient.perspective.addLink(
+      const familyNameLink = await client.perspective.addLink(
         userPerspective!.uuid,
         new Link({
           source: FLUX_PROFILE,
@@ -111,7 +112,7 @@ export default async ({
     }
 
     if (email) {
-      const emailLink = await ad4mClient.perspective.addLink(
+      const emailLink = await client.perspective.addLink(
         userPerspective!.uuid,
         new Link({
           source: FLUX_PROFILE,
@@ -124,7 +125,7 @@ export default async ({
     }
 
     if (username) {
-      const userNameLink = await ad4mClient.perspective.addLink(
+      const userNameLink = await client.perspective.addLink(
         userPerspective!.uuid,
         new Link({
           source: FLUX_PROFILE,
@@ -141,7 +142,7 @@ export default async ({
       links.push(removeTypeName(link));
     }
 
-    await ad4mClient.agent.updatePublicPerspective({
+    await client.agent.updatePublicPerspective({
       links,
     } as PerspectiveInput);
 
@@ -155,7 +156,7 @@ export default async ({
       bio: ""
     });
 
-    const status = await ad4mClient.agent.status();
+    const status = await client.agent.status();
 
     userStore.updateAgentStatus(status);
 

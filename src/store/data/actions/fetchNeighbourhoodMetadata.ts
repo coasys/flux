@@ -1,13 +1,10 @@
-import { print } from "graphql/language/printer";
-import { expressionGetRetries, expressionGetDelayMs } from "@/constants/config";
-import { GET_EXPRESSION } from "@/core/graphql_queries";
 import { LinkQuery } from "@perspect3vism/ad4m";
 
 import { useDataStore } from "@/store/data/index";
-import { ad4mClient } from "@/app";
 import { SELF, FLUX_GROUP } from "@/constants/neighbourhoodMeta";
 import { DexieIPFS } from "@/utils/storageHelpers";
 import { getImage } from "../../../utils/profileHelpers";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export interface Payload {
   communityId: string;
@@ -16,7 +13,8 @@ export interface Payload {
 export async function getGroupExpression(communityId: string) {
   const dataStore = useDataStore();
   const community = dataStore.getCommunity(communityId);
-  const groupExpressionLinks = await ad4mClient.perspective.queryLinks(
+  const client = await getAd4mClient();
+  const groupExpressionLinks = await client.perspective.queryLinks(
     communityId,
     new LinkQuery({
       source: SELF,
@@ -33,7 +31,7 @@ export async function getGroupExpression(communityId: string) {
   if (sortedLinks.length > 0) {
     const dexie = new DexieIPFS(communityId);
 
-    const exp = await ad4mClient.expression.get(sortedLinks[sortedLinks.length - 1].data!.target!)
+    const exp = await client.expression.get(sortedLinks[sortedLinks.length - 1].data!.target!)
 
     const groupExpData = JSON.parse(exp.data)
 

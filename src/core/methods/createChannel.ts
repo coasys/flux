@@ -2,7 +2,6 @@
 
 import { ChannelState, FeedType } from "@/store/types";
 import type { PerspectiveHandle } from "@perspect3vism/ad4m";
-import { ad4mClient } from "@/app";
 import {
   AD4M_CLASS,
   CHANNEL,
@@ -13,6 +12,7 @@ import {
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { nanoid } from "nanoid";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 interface ChannelProps {
   channelName: string;
@@ -27,10 +27,11 @@ export async function createChannel({
 }: ChannelProps): Promise<ChannelState> {
   const dataStore = useDataStore();
   const appStore = useAppStore();
+  const client = await getAd4mClient();
 
   const channel = dataStore.channels[channelName];
   if (!channel || channel.sourcePerspective !== sourcePerspective.uuid) {
-    const linkExpression = await ad4mClient.perspective.addLink(
+    const linkExpression = await client.perspective.addLink(
       sourcePerspective.uuid,
       {
         source: SELF,
@@ -38,7 +39,7 @@ export async function createChannel({
         predicate: CHANNEL,
       }
     );
-    const linkExpressionChannelName = await ad4mClient.perspective.addLink(
+    const linkExpressionChannelName = await client.perspective.addLink(
       sourcePerspective.uuid,
       {
         source: channelName,
@@ -46,7 +47,7 @@ export async function createChannel({
         predicate: CHANNEL_NAME,
       }
     );
-    const linkExpressionChannelClass = await ad4mClient.perspective.addLink(
+    const linkExpressionChannelClass = await client.perspective.addLink(
       sourcePerspective.uuid,
       {
         source: channelName,

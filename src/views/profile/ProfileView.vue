@@ -130,7 +130,6 @@
 </template>
 
 <script lang="ts">
-import { ad4mClient } from "@/app";
 import { useDataStore } from "@/store/data";
 import { ExpressionTypes, ModalsState, Profile, ProfileWithDID } from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
@@ -146,6 +145,7 @@ import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
 import getAgentLinks from "@/utils/getAgentLinks";
 import { FLUX_PROFILE } from "@/constants/profile";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export default defineComponent({
   name: "ProfileView",
@@ -191,8 +191,9 @@ export default defineComponent({
       this.showJoinCommunityModal = value;
     },
     async getAgentAreas() {
+      const client = await getAd4mClient();
       const did = this.$route.params.did as string;
-      const me = await ad4mClient.agent.me();
+      const me = await client.agent.me();
       const userStore = useUserStore();
       const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
 
@@ -220,7 +221,7 @@ export default defineComponent({
           try {
             const expUrl = e.data.target;
             console.log("expUrl", expUrl);
-            const image = await ad4mClient.expression.get(expUrl);
+            const image = await client.expression.get(expUrl);
             console.log("image", image);
             if (image) {
               if (!preArea[e.data.source][predicate]) {
@@ -243,8 +244,9 @@ export default defineComponent({
       );
     },
     async getAgentProfile() {
+      const client = await getAd4mClient();
       const did = this.$route.params.did as string;
-      const me = await ad4mClient.agent.me();
+      const me = await client.agent.me();
 
       this.profile = await getProfile(did || me.did);
 
@@ -282,8 +284,9 @@ export default defineComponent({
       }
     },
     async deleteLinks(areaName: string) {
+      const client = await getAd4mClient();
       const userStore = useUserStore();
-      const me = await ad4mClient.agent.me();
+      const me = await client.agent.me();
       const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
       const links = await getAgentLinks(me.did, userPerspective!);
 
@@ -297,7 +300,7 @@ export default defineComponent({
 
         if (link.data.source === areaName || link.data.target === areaName) {
           console.log(link);
-          await ad4mClient.perspective.removeLink(userPerspective!, newLink);
+          await client.perspective.removeLink(userPerspective!, newLink);
         } else {
           newLinks.push(newLink);
         }
@@ -305,17 +308,18 @@ export default defineComponent({
 
       this.profileLinks = this.profileLinks.filter((e) => e.id !== areaName);
 
-      await ad4mClient.agent.updatePublicPerspective({
+      await client.agent.updatePublicPerspective({
         links: newLinks,
       } as PerspectiveInput);
     },
     ...mapActions(useAppStore, ["setShowEditProfile"]),
   },
   async mounted() {
+    const client = await getAd4mClient();
     this.getAgentProfile();
     this.getAgentAreas();
     const did = this.$route.params.did as string;
-    const me = await ad4mClient.agent.me();
+    const me = await client.agent.me();
 
     this.sameAgent = did === me.did;
     if (did === undefined || did.length === 0) {

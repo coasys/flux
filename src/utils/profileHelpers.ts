@@ -11,8 +11,8 @@ import {
   HAS_THUMBNAIL_IMAGE,
   HAS_USERNAME,
 } from "@/constants/profile";
-import { ad4mClient } from "@/app";
 import getAgentLinks from "./getAgentLinks";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 interface Image {
   contentUrl: string;
@@ -92,12 +92,14 @@ export const resizeImage = (file: any, maxSize: number): Promise<Blob> => {
 
 export async function getImage(expUrl: string): Promise<string> {
   return new Promise(async (resolve, reject) => {
+    const client = await getAd4mClient();
+
     setTimeout(() => {
       resolve("");
     }, 1000);
 
     try {
-      const image = await ad4mClient.expression.get(expUrl);
+      const image = await client.expression.get(expUrl);
       
       if (image) {
         resolve(image.data.slice(1, -1));

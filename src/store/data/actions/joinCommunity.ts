@@ -9,9 +9,9 @@ import { CommunityState, MembraneType, FeedType } from "@/store/types";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
-import { ad4mClient } from "@/app";
 import { nanoid } from "nanoid";
 import { getGroupExpression } from "./fetchNeighbourhoodMetadata";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export interface Payload {
   joiningLink: string;
@@ -21,6 +21,7 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
   const dataStore = useDataStore();
   const appStore = useAppStore();
   const userStore = useUserStore();
+  const client = await getAd4mClient();
 
   try {
     const neighbourhoods = dataStore.getCommunityNeighbourhoods;
@@ -28,7 +29,7 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
       (c: any) => c.neighbourhoodUrl === joiningLink
     );
     if (!isAlreadyPartOf) {
-      const neighbourhood = await ad4mClient.neighbourhood.joinFromUrl(
+      const neighbourhood = await client.neighbourhood.joinFromUrl(
         joiningLink
       );
       console.log(
@@ -44,7 +45,7 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
       );
 
       //Create member link between self and joining agent
-      const addProfileLink = await ad4mClient.perspective.addLink(
+      const addProfileLink = await client.perspective.addLink(
         neighbourhood.uuid,
         {
           source: SELF,

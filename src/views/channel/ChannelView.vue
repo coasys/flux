@@ -25,7 +25,7 @@
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
-import { ad4mClient, MainClient } from "@/app";
+import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/web'
 import Profile from "@/containers/Profile.vue";
 import useEventEmitter from "@/utils/useEventEmitter";
 
@@ -91,7 +91,7 @@ export default defineComponent({
   computed: {
     port(): number {
       // TODO: This needs to be reactive, probaly not now as we using a normal class
-      return MainClient.port;
+      return parseInt(localStorage.getItem('ad4minPort') || '') || 12000;
     },
     community(): CommunityState {
       const { communityId } = this.$route.params;
@@ -140,9 +140,10 @@ export default defineComponent({
       this.showProfile = open;
     },
     async handleProfileClick(did: string) {
+      const client = await getAd4mClient();
       this.activeProfile = did;
 
-      const me = await ad4mClient.agent.me();
+      const me = await client.agent.me();
 
       if (did === me.did) {
         this.$router.push({ name: "home", params: { did } });

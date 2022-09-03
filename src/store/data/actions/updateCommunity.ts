@@ -1,10 +1,10 @@
-import { ad4mClient } from "@/app";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
 import { SELF, FLUX_GROUP } from "@/constants/neighbourhoodMeta";
 import { useAppStore } from "@/store/app";
 
 import { ExpressionTypes } from "@/store/types";
 import { resizeImage, dataURItoBlob, blobToDataURL } from "@/utils/profileHelpers";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 import { useDataStore } from "..";
 
 export interface Payload {
@@ -24,6 +24,7 @@ export default async function updateCommunity({
 }: Payload): Promise<void> {
   const dataStore = useDataStore();
   const appStore = useAppStore();
+  const client = await getAd4mClient();
 
   const community = dataStore.getCommunity(communityId);
 
@@ -40,12 +41,12 @@ export default async function updateCommunity({
         ? await blobToDataURL(resizedImage!)
         : undefined;
 
-      tempImage = await ad4mClient.expression.create(
+      tempImage = await client.expression.create(
         image,
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
 
-      tempThumbnail = await ad4mClient.expression.create(
+      tempThumbnail = await client.expression.create(
         thumbnail,
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
@@ -57,7 +58,7 @@ export default async function updateCommunity({
 
     if (groupExpressionLang != undefined) {
       console.log("Found group exp lang", groupExpressionLang);
-      const groupExpression = await ad4mClient.expression.create(
+      const groupExpression = await client.expression.create(
         { 
           name, 
           description, 
@@ -72,7 +73,7 @@ export default async function updateCommunity({
         groupExpression
       );
 
-      const addGroupExpLink = await ad4mClient.perspective.addLink(
+      const addGroupExpLink = await client.perspective.addLink(
         community.neighbourhood.perspective.uuid,
         {
           source: SELF,

@@ -1,8 +1,6 @@
-import { ad4mClient, MainClient } from "@/app";
+import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/web'
 import { CHANNEL, SELF } from "@/constants/neighbourhoodMeta";
 import { useAppStore } from "@/store/app";
-
-import { ExpressionTypes } from "@/store/types";
 import { LinkQuery } from "@perspect3vism/ad4m";
 import { useDataStore } from "..";
 
@@ -21,10 +19,12 @@ export default async function removeCommunity({
   const appStore = useAppStore();
 
   try {
+    const client = await getAd4mClient();
+
     delete dataStore.communities[communityId];
     delete dataStore.neighbourhoods[communityId];
   
-    const channels = await MainClient.ad4mClient.perspective.queryLinks(communityId, new LinkQuery({
+    const channels = await client.perspective.queryLinks(communityId, new LinkQuery({
       source: SELF,
       predicate: CHANNEL
     }));
@@ -32,7 +32,7 @@ export default async function removeCommunity({
     const promises = [];
   
     for (const channel of channels) {
-      promises.push(MainClient.ad4mClient.perspective.removeLink(communityId, channel));
+      promises.push(client.perspective.removeLink(communityId, channel));
     }
   
     await Promise.all(promises);

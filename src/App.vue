@@ -236,7 +236,7 @@ export default defineComponent({
 
       // @ts-ignore
       client!.perspective.addPerspectiveAddedListener(async (perspective) => {
-        const proxy = await this.client!.perspective.byUUID(perspective.uuid);
+        const proxy = await client!.perspective.byUUID(perspective.uuid);
         proxy!.addListener('link-added', (link) => {
           if (link.data!.predicate! === CHANNEL && link.data.target === 'Home' && link.author != this.userStore.getUser?.agent.did) {
             if (link.data.target === 'Home') {

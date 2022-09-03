@@ -135,7 +135,7 @@ import { isValid } from "@/utils/validation";
 import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useDataStore } from "@/store/data";
-import { MainClient } from "@/app";
+import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/web'
 
 export default defineComponent({
   components: { AvatarUpload },
@@ -248,8 +248,9 @@ export default defineComponent({
         });
     },
     async getPerspectives() {
+      const client = await getAd4mClient()
       const keys = Object.keys(this.dataStore.neighbourhoods);
-      const perspectives = await MainClient.ad4mClient.perspective.all();
+      const perspectives = await client.perspective.all();
 
       const nonFluxPerspectives = perspectives.filter(
         (perspective) => !keys.includes(perspective.uuid) && perspective.name !== "Agent Profile"
