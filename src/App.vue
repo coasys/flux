@@ -5,10 +5,6 @@
     :open="modals.showCode"
     @toggle="(e) => setShowCode(e.target.open)"
   >
-    <connect-client
-      @submit="capabilitiesCreated"
-      @cancel="() => setShowCode(false)"
-    />
   </j-modal>
   <div class="global-loading" v-if="ui.showGlobalLoading">
     <div class="global-loading__backdrop"></div>
@@ -19,30 +15,33 @@
       </j-flex>
     </div>
   </div>
+  <ad4m-connect 
+    appName="Flux"
+    appDesc="Flux - A SOCIAL TOOLKIT FOR THE NEW INTERNET"
+    appDomain="https://www.fluxsocial.io/"
+    capabilities='[{"with":{"domain":"*","pointers":["*"]},"can": ["*"]}]'
+    appiconpath="./assets/images/icon.png"
+    ></ad4m-connect>
 </template>
 
 <script lang="ts">
-import { MainClient } from "./app";
 import { defineComponent, ref, watch } from "vue";
-import ConnectClient from "@/containers/ConnectClient.vue";
 import { mapActions } from "pinia";
 import { useAppStore } from "./store/app";
 import { ApplicationState, FeedType, ModalsState, NeighbourhoodState } from "@/store/types";
 import { useRoute, useRouter } from "vue-router";
-import { checkConnection } from "./router";
-import { findAd4mPort } from "./utils/findAd4minPort";
 import { useDataStore } from "./store/data";
-import { LinkExpression } from "@perspect3vism/ad4m";
+import { Ad4mClient, LinkExpression } from "@perspect3vism/ad4m";
 import { CHANNEL, EXPRESSION, FLUX_GROUP, MEMBER } from "./constants/neighbourhoodMeta";
 import { useUserStore } from "./store/user";
 import retry from "./utils/retry";
 import { buildCommunity, hydrateState } from "./store/data/hydrateState";
 import { nanoid } from "nanoid";
 import { getGroupExpression } from "./store/data/actions/fetchNeighbourhoodMetadata";
+import { getAd4mClient, isConnected } from '@perspect3vism/ad4m-connect/dist/web'
 
 export default defineComponent({
   name: "App",
-  components: { ConnectClient },
 
   setup() {
     const appStore = useAppStore();
@@ -60,14 +59,36 @@ export default defineComponent({
       route,
       dataStore,
       userStore,
-      watcherStarted
+      watcherStarted,
     };
   },
 
   mounted() {
-    this.appStore.setGlobalLoading(true);
+    isConnected().then(async () => {
+      this.appStore.setGlobalLoading(true);
 
-    this.checkConnection();
+      const client = await getAd4mClient();
+      const { perspective } = await client.agent.me();
+
+      const fluxLinksFound = perspective?.links.find(e => e.data.source.startsWith('flux://'));
+
+      if (!fluxLinksFound) {
+        await this.router.replace("/signup");
+      } else {
+        if (['unlock', 'connect', 'signup'].includes(this.router.currentRoute.value.name as string)) {
+          await this.router.replace("/home");
+        }
+      }
+
+      if (!this.watcherStarted) {
+        this.appStore.setGlobalLoading(true);
+        this.startWatcher();
+        this.watcherStarted = true;
+        await hydrateState();
+      }
+
+      this.appStore.setGlobalLoading(false);
+    })
   },
 
   computed: {
@@ -90,77 +111,8 @@ export default defineComponent({
 
       this.checkConnectionReroute();
     },
-    async checkConnectionReroute() {
-      try {
-        const status = await checkConnection();
-
-        const temp = await MainClient.ad4mClient.agent.status();
-
-        this.userStore.updateAgentStatus(temp)
-
-        if (!status) {
-          await findAd4mPort(MainClient.portSearchState === 'found' ? MainClient.port : undefined)
-      
-          await MainClient.ad4mClient.agent.status();
-
-        }
-
-        const { perspective } = await MainClient.ad4mClient.agent.me();
-
-        const fluxLinksFound = perspective?.links.find(e => e.data.source.startsWith('flux://'));
-
-        if (!fluxLinksFound) {
-          await this.router.replace("/signup");
-        } else {
-          if (['unlock', 'connect', 'signup'].includes(this.router.currentRoute.value.name as string)) {
-            await this.router.replace("/home");
-          }
-        }
-
-        if (!this.watcherStarted) {
-          this.startWatcher();
-          this.watcherStarted = true;
-          await hydrateState();
-        }
-
-
-        this.appStore.setGlobalLoading(false);
-
-        return true;
-      } catch (e) {
-        console.log('main', {e}, e.message === "signature verification failed");
-
-        if (e.message.startsWith(
-        "Capability is not matched, you have capabilities:"
-        ) || e.message === 'signature verification failed') {
-          if (!this.modals.showCode) {
-            MainClient.requestCapability(true).then((val) => {
-              if (val) {
-                this.setShowCode(true);
-              }
-            });
-          }
-        } else if (e.message === "Cannot extractByTags from a ciphered wallet. You must unlock first."
-        ) {
-          await this.router.replace("/unlock");
-          this.appStore.setGlobalLoading(false);
-        } else if (e.message === "Couldn't find an open port") {
-          await this.router.replace("/connect");
-          this.appStore.setGlobalLoading(false);
-        } else {
-          await this.router.replace('/home');
-          this.appStore.setGlobalLoading(false);
-        }
-      }
-    },
-    async checkConnection() {
-      await this.checkConnectionReroute();
-
-      setInterval(async () => {
-        await this.checkConnectionReroute();
-      }, 30000);
-    },
     async startWatcher() {
+      const client = await getAd4mClient();
       const router = this.router;
       const route = this.route;
       const watching: string[] = [];
@@ -174,7 +126,7 @@ export default defineComponent({
         if (link.data!.predicate! === EXPRESSION) {
           try {
             const expression = await retry(async () => {
-              const exp = await MainClient.ad4mClient.expression.getRaw(link.data.target);
+              const exp = await client!.expression.getRaw(link.data.target);
               const expObj = JSON.parse(exp);
               if (exp) {
                 return { ...expObj, data: expObj.data };
@@ -257,7 +209,7 @@ export default defineComponent({
             if (watching.filter((val) => val == k).length == 0) {
               console.log("Starting watcher on perspective", k);
               watching.push(k);
-              const perspective = await MainClient.ad4mClient.perspective.byUUID(k);
+              const perspective = await client!.perspective.byUUID(k);
 
               if (perspective) {
                 // @ts-ignore
@@ -283,8 +235,8 @@ export default defineComponent({
 
 
       // @ts-ignore
-      MainClient.ad4mClient.perspective.addPerspectiveAddedListener(async (perspective) => {
-        const proxy = await MainClient.ad4mClient.perspective.byUUID(perspective.uuid);
+      client!.perspective.addPerspectiveAddedListener(async (perspective) => {
+        const proxy = await this.client!.perspective.byUUID(perspective.uuid);
         proxy!.addListener('link-added', (link) => {
           if (link.data!.predicate! === CHANNEL && link.data.target === 'Home' && link.author != this.userStore.getUser?.agent.did) {
             if (link.data.target === 'Home') {
@@ -329,14 +281,14 @@ export default defineComponent({
       });
 
       // @ts-ignore
-      MainClient.ad4mClient.perspective.addPerspectiveRemovedListener((perspective) => {
+      client!.perspective.addPerspectiveRemovedListener((perspective) => {
         const isCommunity = this.dataStore.getCommunity(perspective);
         if (isCommunity && isCommunity.neighbourhood) {
           this.dataStore.removeCommunity({communityId: perspective});
         }
       });
 
-      const allPerspectives = await MainClient.ad4mClient.perspective.all();
+      const allPerspectives = await client!.perspective.all();
 
       for (const perspective of allPerspectives) {
         perspective.addListener('link-added', (link) => {
