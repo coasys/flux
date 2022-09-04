@@ -21,6 +21,7 @@
     appDomain="https://www.fluxsocial.io/"
     capabilities='[{"with":{"domain":"*","pointers":["*"]},"can": ["*"]}]'
     appiconpath="./assets/images/icon.png"
+    openonshortcut
     ></ad4m-connect>
 </template>
 
