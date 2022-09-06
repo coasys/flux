@@ -1,5 +1,5 @@
 <template>
-  <router-view :key="componentKey" v-if="!ui.showGlobalLoading"></router-view>
+  <router-view :key="componentKey" v-if="!ui.showGlobalLoading && connected"></router-view>
   <j-modal
     size="sm"
     :open="modals.showCode"
@@ -52,6 +52,7 @@ export default defineComponent({
     const dataStore = useDataStore();
     const userStore = useUserStore();
     const watcherStarted = ref(false);
+    const connected = ref(false);
 
     return { 
       appStore, 
@@ -61,11 +62,13 @@ export default defineComponent({
       dataStore,
       userStore,
       watcherStarted,
+      connected
     };
   },
 
   mounted() {
     isConnected().then(async () => {
+      this.connected = true;
       this.appStore.setGlobalLoading(true);
 
       const client = await getAd4mClient();
