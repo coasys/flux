@@ -20,7 +20,7 @@
     appDesc="Flux - A SOCIAL TOOLKIT FOR THE NEW INTERNET"
     appDomain="https://www.fluxsocial.io/"
     capabilities='[{"with":{"domain":"*","pointers":["*"]},"can": ["*"]}]'
-    appiconpath="./assets/images/icon.png"
+    appiconpath="https://i.ibb.co/GnqjPJP/icon.png"
     openonshortcut
     ></ad4m-connect>
 </template>
