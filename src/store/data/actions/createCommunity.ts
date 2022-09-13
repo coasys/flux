@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import {
   SOCIAL_CONTEXT_OFFICIAL,
-  GROUP_EXPRESSION_OFFICIAL,
   NOTE_IPFS_EXPRESSION_OFFICIAL
 } from "@/constants/languages";
 
@@ -65,24 +64,8 @@ export default async ({
         })
       );
     console.log("Response from create social-context", socialContextLang);
-    //Create group expression language
-    const groupExpressionLang =
-      await client.languages.applyTemplateAndPublish(
-        GROUP_EXPRESSION_OFFICIAL,
-        JSON.stringify({
-          uid: uid,
-          name: `${perspectiveName}-group-expression`,
-        })
-      );
-    console.log("Response from create group exp lang", groupExpressionLang);
     //Get language after templating to install it
-    await client.languages.byAddress(groupExpressionLang.address);
-    const typedExpLangs = [
-      {
-        languageAddress: groupExpressionLang.address!,
-        expressionType: ExpressionTypes.GroupExpression,
-      } as FluxExpressionReference,
-    ];
+    const typedExpLangs: FluxExpressionReference[] = [];
 
     //Publish perspective
     const metaLinks = await createNeighbourhoodMeta(

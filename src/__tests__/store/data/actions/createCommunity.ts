@@ -14,8 +14,6 @@ import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useDataStore } from "@/store/data";
 import agentByDIDLinksFixture from "../../../fixtures/agentByDIDLinks.json";
 import {
-  GROUP_EXPRESSION_OFFICIAL,
-  SHORTFORM_EXPRESSION_OFFICIAL,
   SOCIAL_CONTEXT_OFFICIAL,
 } from "@/constants/languages";
 import { ad4mClient } from "@/app";
@@ -43,11 +41,8 @@ describe("Create Community", () => {
       .mockImplementation(async (sourceLanguageHash) => {
         if (sourceLanguageHash === SOCIAL_CONTEXT_OFFICIAL) {
           return createCommunityUniqueHolochainLanguage[0];
-        } else if (sourceLanguageHash === SHORTFORM_EXPRESSION_OFFICIAL) {
-          return createCommunityUniqueHolochainLanguage[1];
-        } else if (sourceLanguageHash === GROUP_EXPRESSION_OFFICIAL) {
-          return createCommunityUniqueHolochainLanguage[2];
         }
+        
         return createCommunityUniqueHolochainLanguage[3];
       });
 
