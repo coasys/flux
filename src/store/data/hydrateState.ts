@@ -4,7 +4,7 @@ import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhoo
 import { Ad4mClient, LinkExpression, LinkQuery, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { nanoid } from "nanoid";
 import { useDataStore } from ".";
-import { CommunityState, ExpressionTypes, FeedType, LocalCommunityState, MembraneType } from "../types";
+import { CommunityState, FeedType, LocalCommunityState, MembraneType } from "../types";
 import { getGroupExpression } from "./actions/fetchNeighbourhoodMetadata";
 
 export async function getMetaFromLinks(links: LinkExpression[]) {
@@ -42,15 +42,6 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
 
   const meta = getMetaFromNeighbourhood(perspective.neighbourhood?.meta?.links!);
 
-  const metaLangs = perspective.neighbourhood?.meta?.links!.filter((link: any) => link.data.predicate === LANGUAGE);
-
-  const typeLangs = await getMetaFromLinks(metaLangs!);
-
-  const typedExpressionLanguages = typeLangs!.map((link: any) => ({
-    languageAddress: link.address,
-    expressionType: link.name.endsWith('group-expression') ? ExpressionTypes.GroupExpression : ExpressionTypes.Other,
-  }));
-
   const groupExp = await getGroupExpression(perspective.uuid);
 
   return {
@@ -66,7 +57,6 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
         sharedUrl: perspective.sharedUrl,
         neighbourhood: perspective.neighbourhood,
       },
-      typedExpressionLanguages,
       neighbourhoodUrl: perspective.sharedUrl,
       membraneType: MembraneType.Unique,
       linkedPerspectives: [perspective.uuid],
