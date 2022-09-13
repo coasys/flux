@@ -1,16 +1,17 @@
-import { ad4mClient } from "@/app";
 import { FluxExpressionReference, ExpressionTypes } from "@/store/types";
 import { LinkExpression } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export async function getTypedExpressionLanguages(
   links: LinkExpression[]
 ): Promise<FluxExpressionReference[]> {
+  const client = await getAd4mClient();
   const typedExpressionLanguages = [];
   //Get and cache the expression UI for each expression language
   //And used returned expression language names to populate typedExpressionLanguages field
   for (const link of links) {
     if (link.data.predicate == "language") {
-      const languageRes = await ad4mClient.languages.byAddress(
+      const languageRes = await client.languages.byAddress(
         link.data.target!
       );
       if (!languageRes) {
@@ -19,9 +20,7 @@ export async function getTypedExpressionLanguages(
         );
       }
       let expressionType;
-      if (languageRes.name!.endsWith("shortform-expression")) {
-        expressionType = ExpressionTypes.ShortForm;
-      } else if (languageRes.name!.endsWith("group-expression")) {
+      if (languageRes.name!.endsWith("group-expression")) {
         expressionType = ExpressionTypes.GroupExpression;
       } else if (languageRes.name!.endsWith("profile-expression")) {
         expressionType = ExpressionTypes.ProfileExpression;

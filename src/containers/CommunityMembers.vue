@@ -60,15 +60,13 @@
 import { defineComponent } from "vue";
 import {
   NeighbourhoodState,
-  ExpressionTypes,
-  FluxExpressionReference,
   ProfileWithDID,
 } from "@/store/types";
 import { useDataStore } from "@/store/data";
 
 import { getProfile } from "@/utils/profileHelpers";
-import { ad4mClient } from "@/app";
 import Skeleton from "@/components/skeleton/Skeleton.vue";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -120,7 +118,8 @@ export default defineComponent({
   },
   methods: {
     async profileClick(did: string) {
-      const me = await ad4mClient.agent.me();
+      const client = await getAd4mClient();
+      const me = await client.agent.me();
 
       if (did === me.did) {
         this.$router.push({ name: "home", params: { did } });

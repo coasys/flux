@@ -14,9 +14,7 @@ import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useDataStore } from "@/store/data";
 import agentByDIDLinksFixture from "../../../fixtures/agentByDIDLinks.json";
 import {
-  GROUP_EXPRESSION_OFFICIAL,
-  SHORTFORM_EXPRESSION_OFFICIAL,
-  SOCIAL_CONTEXT_OFFICIAL,
+  PERSPECTIVE_DIFF_SYNC,
 } from "@/constants/languages";
 import { ad4mClient } from "@/app";
 
@@ -41,13 +39,10 @@ describe("Create Community", () => {
     jest
       .spyOn(ad4mClient.languages, "byAddress")
       .mockImplementation(async (sourceLanguageHash) => {
-        if (sourceLanguageHash === SOCIAL_CONTEXT_OFFICIAL) {
+        if (sourceLanguageHash === PERSPECTIVE_DIFF_SYNC) {
           return createCommunityUniqueHolochainLanguage[0];
-        } else if (sourceLanguageHash === SHORTFORM_EXPRESSION_OFFICIAL) {
-          return createCommunityUniqueHolochainLanguage[1];
-        } else if (sourceLanguageHash === GROUP_EXPRESSION_OFFICIAL) {
-          return createCommunityUniqueHolochainLanguage[2];
         }
+        
         return createCommunityUniqueHolochainLanguage[3];
       });
 

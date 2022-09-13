@@ -1,6 +1,6 @@
-import { ad4mClient } from "@/app";
 import { useAppStore } from "@/store/app";
 import { AgentStatus } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 import { useUserStore } from "..";
 
 export interface Payload {
@@ -10,8 +10,10 @@ export interface Payload {
 export default async ({ password }: Payload): Promise<AgentStatus> => {
   const userStore = useUserStore();
   const appStore = useAppStore();
+  const client = await getAd4mClient();
+
   try {
-    const lockRes = await ad4mClient.agent.unlock(password);
+    const lockRes = await client.agent.unlock(password);
 
     userStore.updateAgentStatus(lockRes);
     return lockRes;

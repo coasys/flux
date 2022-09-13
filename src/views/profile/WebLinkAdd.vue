@@ -60,7 +60,6 @@
 </template>
 
 <script lang="ts">
-import { ad4mClient } from "@/app";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
@@ -72,6 +71,7 @@ import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { nanoid } from "nanoid";
 import removeTypeName from "@/utils/removeTypeName";
 import { AREA_HAS_DESCRIPTION, AREA_HAS_IMAGE, AREA_HAS_NAME, AREA_TYPE, AREA_WEBLINK, FLUX_PROFILE, HAS_AREA, HAS_POST } from "@/constants/profile";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export default defineComponent({
   props: ["step", "area", "isEditing"],
@@ -203,6 +203,8 @@ export default defineComponent({
     },
     async createLink() {
       if (this.canCreateLink && !this.isAddLink) {
+        const client = await getAd4mClient();
+
         this.isAddLink = true;
 
         const userStore = useUserStore();
@@ -234,7 +236,7 @@ export default defineComponent({
         let areaName = this.area?.id ?? `area://${id}`;
 
         if (!this.area?.id) {
-          await ad4mClient.perspective.addLink(
+          await client.perspective.addLink(
             userPerspective!,
             new Link({
               source: FLUX_PROFILE,
@@ -251,11 +253,11 @@ export default defineComponent({
 
           for (const foundLink of foundLinks) {
             const link = removeTypeName(foundLink);
-            await ad4mClient.perspective.removeLink(userPerspective!, link);
+            await client.perspective.removeLink(userPerspective!, link);
           }
         }
 
-        await ad4mClient.perspective.addLink(
+        await client.perspective.addLink(
           userPerspective!,
           new Link({
             source: areaName,
@@ -263,7 +265,7 @@ export default defineComponent({
             predicate: HAS_POST,
           })
         );
-        await ad4mClient.perspective.addLink(
+        await client.perspective.addLink(
           userPerspective!,
           new Link({
             source: areaName,
@@ -271,7 +273,7 @@ export default defineComponent({
             predicate: AREA_TYPE,
           })
         );
-        await ad4mClient.perspective.addLink(
+        await client.perspective.addLink(
           userPerspective!,
           new Link({
             source: areaName,
@@ -279,7 +281,7 @@ export default defineComponent({
             predicate: AREA_HAS_NAME,
           })
         );
-        await ad4mClient.perspective.addLink(
+        await client.perspective.addLink(
           userPerspective!,
           new Link({
             source: areaName,
@@ -289,11 +291,11 @@ export default defineComponent({
         );
 
         if (this.newProfileImage) {
-          const storedImage = await ad4mClient.expression.create(
+          const storedImage = await client.expression.create(
             this.newProfileImage,
             NOTE_IPFS_EXPRESSION_OFFICIAL
           );
-          await ad4mClient.perspective.addLink(
+          await client.perspective.addLink(
             userPerspective!,
             new Link({
               source: areaName,
@@ -315,10 +317,10 @@ export default defineComponent({
           newLink.proof.__typename = undefined;
           links.push(newLink);
         }
-        await ad4mClient.agent.updatePublicPerspective({
+        await client.agent.updatePublicPerspective({
           links,
         } as PerspectiveInput);
-        // await ad4mClient.perspective.remove()
+        // await client.perspective.remove()
         this.link = "";
         appStore.showSuccessToast({
           message: "Link added to agent perspective",

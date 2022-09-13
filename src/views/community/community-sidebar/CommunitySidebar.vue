@@ -10,7 +10,7 @@
     <button slot="trigger" class="community-sidebar__header-button">
       <j-avatar
         style="--j-avatar-size: 30px"
-        :src="community.neighbourhood.image || null"
+        :src="communityImage || null"
         :initials="community.neighbourhood.name.charAt(0)"
       />
       <div class="community-info">
@@ -91,13 +91,13 @@
           name: 'channel',
           params: {
             communityId: community.neighbourhood.perspective.uuid,
-            channelId: channel.neighbourhood.perspective.uuid,
+            channelId: channel.name,
           },
         }"
         custom
         v-slot="{ navigate, isExactActive }"
         v-for="channel in channels"
-        :key="channel.neighbourhood.perspective.uuid"
+        :key="channel.id"
       >
         <j-popover
           class="community-sidebar__header-menu"
@@ -107,27 +107,24 @@
           <j-menu-item
             slot="trigger"
             class="channel"
-            :class="{ 'channel--muted': channel.state.notifications?.mute }"
+            :class="{ 'channel--muted': channel.notifications?.mute }"
             :selected="isExactActive"
             @click="navigate"
           >
             <j-icon slot="start" size="sm" name="hash"></j-icon>
             {{
-              channel.neighbourhood.perspective.uuid ===
-              community.neighbourhood.perspective.uuid
-                ? "Home"
-                : channel.neighbourhood.name
+              channel.name
             }}
             <j-icon
               size="xs"
               slot="end"
-              v-if="channel?.state.notifications?.mute"
+              v-if="channel?.notifications?.mute"
               name="bell-slash"
             />
             <div
               slot="end"
               class="channel__notification"
-              v-if="channel.state.hasNewMessages"
+              v-if="channel.hasNewMessages"
             ></div>
           </j-menu-item>
           <j-menu slot="content">
@@ -135,7 +132,7 @@
               @click="
                 () =>
                   setChannelNotificationState({
-                    channelId: channel.neighbourhood.perspective.uuid,
+                    channelId: channel.id,
                   })
               "
             >
@@ -143,12 +140,12 @@
                 size="xs"
                 slot="start"
                 :name="
-                  channel?.state.notifications?.mute ? 'bell-slash' : 'bell'
+                  channel?.notifications?.mute ? 'bell-slash' : 'bell'
                 "
               />
               {{
                 `${
-                  channel?.state.notifications?.mute ? "Unmute" : "Mute"
+                  channel?.notifications?.mute ? "Unmute" : "Mute"
                 } Channel`
               }}
             </j-menu-item>
@@ -164,7 +161,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType, watch } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import {
   ChannelState,
@@ -176,6 +173,7 @@ import { mapActions, mapState } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
+import { DexieIPFS } from "@/utils/storageHelpers";
 
 export default defineComponent({
   components: { AvatarGroup },
@@ -188,11 +186,13 @@ export default defineComponent({
   setup() {
     return {
       userStore: useUserStore(),
+      dataStore: useDataStore()
     };
   },
   data: function () {
     return {
       showCommunityMenu: false,
+      communityImage: null
     };
   },
   computed: {
@@ -202,7 +202,7 @@ export default defineComponent({
       const channels = this.getChannelStates()(communityId);
 
       if (this.community.state.hideMutedChannels) {
-        return channels.filter((e) => !e.state.notifications.mute);
+        return channels.filter((e) => !e.notifications.mute);
       }
 
       return channels;
@@ -212,6 +212,38 @@ export default defineComponent({
         this.community.neighbourhood.creatorDid ===
         this.userStore.getUser?.agent.did
       );
+    }
+  },
+  async mounted() {
+    
+    watch(this.dataStore.neighbourhoods, async () => {
+      setTimeout(async () => {
+        const communityId = this.$route.params.communityId as string;
+        const community = this.dataStore.getCommunity(communityId);
+        const dexie = new DexieIPFS(communityId);
+  
+        const image = await dexie.get(community.neighbourhood.image!);
+        // @ts-ignore
+        this.communityImage = image
+      }, 500)
+    })
+  },
+  watch: {
+    "$route.params.communityId": {
+      handler: async function (id: string) {
+        if (id) {
+          this.communityImage = null;
+          setTimeout(async () => {
+            const community = this.dataStore.getCommunity(id);
+            const dexie = new DexieIPFS(id);
+  
+            const image = await dexie.get(community.neighbourhood.image!);
+            // @ts-ignore
+            this.communityImage = image
+          }, 500)
+        }
+      },
+      immediate: true,
     },
   },
   methods: {

@@ -1,7 +1,9 @@
 <template>
   <perspective-view
+    v-if="channel"
     :port="port"
-    :perspective-uuid="channel.neighbourhood.perspective.uuid"
+    :channel="channel.name"
+    :perspective-uuid="channel.sourcePerspective"
     @agent-click="onAgentClick"
     @perspective-click="onPerspectiveClick"
     @hide-notification-indicator="onHideNotificationIndicator"
@@ -21,9 +23,9 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import { ChannelState, CommunityState, ExpressionTypes } from "@/store/types";
+import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
-import { ad4mClient, MainClient } from "@/app";
+import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/web'
 import Profile from "@/containers/Profile.vue";
 import useEventEmitter from "@/utils/useEventEmitter";
 
@@ -89,15 +91,15 @@ export default defineComponent({
   computed: {
     port(): number {
       // TODO: This needs to be reactive, probaly not now as we using a normal class
-      return MainClient.port;
+      return parseInt(localStorage.getItem('ad4minPort') || '') || 12000;
     },
     community(): CommunityState {
       const { communityId } = this.$route.params;
       return this.dataStore.getCommunity(communityId as string);
     },
     channel(): ChannelState {
-      const { channelId } = this.$route.params;
-      return this.dataStore.getChannel(channelId as string);
+      const { channelId, communityId } = this.$route.params;
+      return this.dataStore.getChannel(communityId as string, channelId as string)!;
     },
   },
   methods: {
@@ -105,22 +107,27 @@ export default defineComponent({
       this.toggleProfile(true, detail.did);
     },
     onPerspectiveClick({ detail }: any) {
-      let channelId = this.dataStore.getChannelByNeighbourhoodUrl(detail.uuid)
-        ?.neighbourhood.perspective.uuid;
+      let channelId = Object.values(this.dataStore.channels).find(
+        (channel) => channel.sourcePerspective === this.community.neighbourhood.perspective.uuid && detail.uuid === channel.name
+      )?.id;
+      
 
       if (channelId) {
         this.$router.push({
           name: "channel",
           params: {
-            channelId: channelId,
+            channelId,
             communityId: this.community.neighbourhood.perspective.uuid,
           },
         });
       }
     },
     onHideNotificationIndicator({ detail }: any) {
+      const { channelId } = this.$route.params;
+      console.log("hide notification indicator", detail);
       this.dataStore.setHasNewMessages({
-        channelId: detail.uuid,
+        communityId: this.community.neighbourhood.perspective.uuid,
+        channelId: channelId as string,
         value: false,
       });
     },
@@ -133,9 +140,10 @@ export default defineComponent({
       this.showProfile = open;
     },
     async handleProfileClick(did: string) {
+      const client = await getAd4mClient();
       this.activeProfile = did;
 
-      const me = await ad4mClient.agent.me();
+      const me = await client.agent.me();
 
       if (did === me.did) {
         this.$router.push({ name: "home", params: { did } });

@@ -7,7 +7,8 @@ import Settings from "@/containers/Settings.vue";
 import ProfileView from "@/views/profile/ProfileView.vue";
 import ConnectView from "@/views/connect/ConnectView.vue";
 import UnlockAgent from "@/views/connect/UnlockAgent.vue";
-import { MainClient } from "@/app";
+import ProfileFeed from "@/views/profile/ProfileFeed.vue";
+import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/web'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -35,6 +36,11 @@ const routes: Array<RouteRecordRaw> = [
         path: "home",
         name: "home",
         component: ProfileView,
+      },
+      {
+        path: "feed/:fid",
+        name: "profile-feed",
+        component: ProfileFeed,
       },
       {
         path: "communities/:communityId",
@@ -75,7 +81,9 @@ export function checkConnection() {
       resolve(false);
     }, 1000);
 
-    await MainClient.ad4mClient.agent.status();
+    const client = await getAd4mClient();
+
+    await client.agent.status();
 
     clearTimeout(id);
 
@@ -88,7 +96,9 @@ router.beforeEach(async (to, from, next) => {
     const status = await checkConnection();
 
     if (status) {
-      const { perspective } = await MainClient.ad4mClient.agent.me();
+      const client = await getAd4mClient();
+
+      const { perspective } = await client.agent.me();
 
       const fluxLinksFound = perspective?.links.find((e) =>
         e.data.source.startsWith("flux://")

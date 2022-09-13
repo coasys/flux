@@ -61,7 +61,6 @@
 </template>
 
 <script lang="ts">
-import { ad4mClient } from "@/app";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
 import { AREA_HAS_DESCRIPTION, AREA_HAS_IMAGES, AREA_HAS_NAME, AREA_SIMPLE_AREA, AREA_TYPE, FLUX_PROFILE, HAS_AREA } from "@/constants/profile";
 import { useAppStore } from "@/store/app";
@@ -71,6 +70,7 @@ import getAgentLinks from "@/utils/getAgentLinks";
 import removeTypeName from "@/utils/removeTypeName";
 import { useValidation } from "@/utils/validation";
 import { Link, PerspectiveInput } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 import { nanoid } from "nanoid";
 import { defineComponent, ref } from "vue";
 
@@ -147,6 +147,7 @@ export default defineComponent({
       reader.readAsDataURL(files[0]);
     },
     async createLink() {
+      const client = await getAd4mClient();
       this.isAddLink = true;
       const dataStore = useDataStore();
       const userStore = useUserStore();
@@ -178,7 +179,7 @@ export default defineComponent({
       let areaName = this.area?.id ?? `area://${id}`;
 
       if (!this.area?.id) {
-        await ad4mClient.perspective.addLink(
+        await client.perspective.addLink(
           userPerspective!,
           new Link({
             source: FLUX_PROFILE,
@@ -195,11 +196,11 @@ export default defineComponent({
 
         for (const foundLink of foundLinks) {
           const link = removeTypeName(foundLink);
-          await ad4mClient.perspective.removeLink(userPerspective!, link);
+          await client.perspective.removeLink(userPerspective!, link);
         }
       }
 
-      await ad4mClient.perspective.addLink(
+      await client.perspective.addLink(
         userPerspective!,
         new Link({
           source: areaName,
@@ -207,7 +208,7 @@ export default defineComponent({
           predicate: AREA_TYPE,
         })
       );
-      await ad4mClient.perspective.addLink(
+      await client.perspective.addLink(
         userPerspective!,
         new Link({
           source: areaName,
@@ -215,7 +216,7 @@ export default defineComponent({
           predicate: AREA_HAS_NAME,
         })
       );
-      await ad4mClient.perspective.addLink(
+      await client.perspective.addLink(
         userPerspective!,
         new Link({
           source: areaName,
@@ -226,11 +227,11 @@ export default defineComponent({
 
       for (let index = 0; index < this.imgs.length; index++) {
         const element = this.imgs[index];
-        const storedImage = await ad4mClient.expression.create(
+        const storedImage = await client.expression.create(
           element,
           NOTE_IPFS_EXPRESSION_OFFICIAL
         );
-        await ad4mClient.perspective.addLink(
+        await client.perspective.addLink(
           userPerspective!,
           new Link({
             source: areaName,
@@ -252,7 +253,7 @@ export default defineComponent({
         newLink.proof.__typename = undefined;
         links.push(newLink);
       }
-      await ad4mClient.agent.updatePublicPerspective({
+      await client.agent.updatePublicPerspective({
         links,
       } as PerspectiveInput);
 

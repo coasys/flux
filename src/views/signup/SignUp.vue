@@ -84,8 +84,17 @@ import Carousel from "./SignUpCarousel.vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useValidation } from "@/utils/validation";
 import { useUserStore } from "@/store/user";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import {
+  AD4M_SOURCE_PROFILE,
+  AD4M_PREDICATE_USERNAME,
+  AD4M_PREDICATE_FIRSTNAME,
+  AD4M_PREDICATE_LASTNAME,
+} from "@/constants/profile";
 
 import Logo from "@/components/logo/Logo.vue";
+import { LinkQuery, Literal } from "@perspect3vism/ad4m";
+import { mapLiteralLinks } from "@/utils/linkHelpers";
 
 export default defineComponent({
   name: "SignUp",
@@ -150,6 +159,32 @@ export default defineComponent({
       logInError,
       userStore,
     };
+  },
+  async created() {
+    // Auto fill profile with ad4m profile
+    try {
+      const client = await getAd4mClient();
+
+      const perspectives = await client.perspective.all();
+      const ad4mAgentPerspective = perspectives.find(
+        ({ name }) => name === "Agent Profile"
+      );
+      if (ad4mAgentPerspective) {
+        const agentPers = await client.perspective.snapshotByUUID(
+          ad4mAgentPerspective.uuid
+        );
+        const profile = mapLiteralLinks(agentPers?.links, {
+          username: AD4M_PREDICATE_USERNAME,
+          name: AD4M_PREDICATE_FIRSTNAME,
+          familyName: AD4M_PREDICATE_LASTNAME,
+        });
+        this.username = profile.username;
+        this.name = profile.name;
+        this.familyName = profile.familyName;
+      }
+    } catch (e) {
+      console.log(e);
+    }
   },
   computed: {
     canSignUp(): boolean {

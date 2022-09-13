@@ -1,11 +1,5 @@
-export const SOCIAL_CONTEXT_OFFICIAL =
-  "QmVN4Rv8BXP8kwMxsJPgFki9zGNtvovunxKrNxtWgwcbGg";
-
-export const GROUP_EXPRESSION_OFFICIAL =
-  "QmX2SYF6C12QGF9pxaSThk55huNKti4vq4ssHy4cynP7SV";
-
-export const SHORTFORM_EXPRESSION_OFFICIAL =
-  "QmZpLtX6wgdzPydDHQvSpqHzeVPwxeJs7pK6Ub6mHuFAVm";
+export const PERSPECTIVE_DIFF_SYNC =
+  "QmWzn1os3WRTz3fnxFQeGu8dNMUJotg21zVQ34wqbTbFbC";
 
 export const NOTE_IPFS_EXPRESSION_OFFICIAL =
   "QmYVsrMpiFmV9S7bTWNAkUzSqjRJskQ8g4TWKKwKrHAPqL";

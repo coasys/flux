@@ -77,18 +77,40 @@
 <script lang="ts">
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
-import { NeighbourhoodState } from "@/store/types";
-import { defineComponent } from "vue";
+import { DexieIPFS } from "@/utils/storageHelpers";
+import { defineComponent, ref, watch } from "vue";
 
 export default defineComponent({
   setup() {
     const appStore = useAppStore();
     const dataStore = useDataStore();
+    const communities = ref(dataStore.getCommunityNeighbourhoods.map(e => ({...e, image: null})));
 
     return {
       appStore,
       dataStore,
+      communities
     };
+  },
+  async mounted() {
+    const updateCommunityListWithImage = async () => {
+      let communities = this.dataStore.getCommunityNeighbourhoods;
+      const tempCommunities = []
+  
+      for (const community of communities) {
+        const tempCommunity = {...community};
+        const dexie = new DexieIPFS(tempCommunity.perspective.uuid);
+        if (tempCommunity.image) {
+          const image = await dexie.get(tempCommunity.image!);
+          tempCommunity.image = image
+        }
+        tempCommunities.push({...tempCommunity})
+      }
+
+      this.communities = tempCommunities;
+    }
+
+    watch(this.dataStore.neighbourhoods, () => setTimeout(() => updateCommunityListWithImage(), 500))
   },
   methods: {
     toggleHideMutedChannels(id: string) {
@@ -99,7 +121,7 @@ export default defineComponent({
     },
     removeCommunity(id: string) {
       this.$router.push({ name: "home" }).then(() => {
-        this.dataStore.removeCommunity(id);
+        this.dataStore.removeCommunity({communityId: id});
       });
     },
     handleCommunityClick(communityId: string) {
@@ -112,15 +134,12 @@ export default defineComponent({
     },
   },
   computed: {
-    communities(): NeighbourhoodState[] {
-      return this.dataStore.getCommunityNeighbourhoods;
-    },
     communityIsActive() {
       return (id: string) => this.$route.params.communityId === id;
     },
     hasNotification() {
       return (id: string) => {
-        return this.dataStore.getCommunity(id).state.hasNewMessages;
+        return this.dataStore.getCommunity(id)?.state?.hasNewMessages;
       };
     },
     getCommunityState() {

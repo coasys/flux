@@ -11,8 +11,8 @@ import {
   HAS_THUMBNAIL_IMAGE,
   HAS_USERNAME,
 } from "@/constants/profile";
-import { ad4mClient } from "@/app";
 import getAgentLinks from "./getAgentLinks";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 interface Image {
   contentUrl: string;
@@ -90,6 +90,29 @@ export const resizeImage = (file: any, maxSize: number): Promise<Blob> => {
   });
 };
 
+export async function getImage(expUrl: string): Promise<string> {
+  return new Promise(async (resolve, reject) => {
+    const client = await getAd4mClient();
+
+    setTimeout(() => {
+      resolve("");
+    }, 1000);
+
+    try {
+      const image = await client.expression.get(expUrl);
+      
+      if (image) {
+        resolve(image.data.slice(1, -1));
+      }
+
+      resolve("")
+    } catch (e) {
+      console.error(e)
+      resolve("");
+    }
+  })
+}
+
 export async function getProfile(did: string): Promise<ProfileWithDID | null> {
   const links = await getAgentLinks(did);
 
@@ -120,31 +143,18 @@ export async function getProfile(did: string): Promise<ProfileWithDID | null> {
         break;
       case HAS_PROFILE_IMAGE:
         expUrl = link.data.target;
-        image = await ad4mClient.expression.get(expUrl);
+        profile!.profilePicture = await getImage(expUrl);
 
-        if (image) {
-          profile!.profilePicture = image.data.slice(1, -1);
-        }
         break;
       case HAS_THUMBNAIL_IMAGE:
         expUrl = link.data.target;
-        image = await ad4mClient.expression.get(expUrl);
+        profile!.thumbnailPicture = await getImage(expUrl);
 
-        if (image) {
-          if (link.data.source === FLUX_PROFILE) {
-            profile!.thumbnailPicture = image.data.slice(1, -1);
-          }
-        }
         break;
       case HAS_BG_IMAGE:
         expUrl = link.data.target;
-        image = await ad4mClient.expression.get(expUrl);
+        profile!.profileBg = await getImage(expUrl);
 
-        if (image) {
-          if (link.data.source === FLUX_PROFILE) {
-            profile!.profileBg = image.data.slice(1, -1);
-          }
-        }
         break;
       case HAS_EMAIL:
         profile!.email = link.data.target;

@@ -2,13 +2,13 @@ import { Profile } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "..";
 import { useDataStore } from "@/store/data";
-import { ad4mClient } from "@/app";
 import { Link, LinkExpression, PerspectiveInput } from "@perspect3vism/ad4m";
 import removeTypeName from "@/utils/removeTypeName";
 import getAgentLinks from "@/utils/getAgentLinks";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
 import { FLUX_PROFILE, HAS_BG_IMAGE, HAS_BIO, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "@/constants/profile";
 import { resizeImage, dataURItoBlob, blobToDataURL } from "@/utils/profileHelpers";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export interface Payload {
   username?: string;
@@ -21,6 +21,7 @@ export interface Payload {
 async function removeLink(links: LinkExpression[], link: Link) {
   const userStore = useUserStore();
   const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
+  const client = await getAd4mClient();
 
   const foundLink = links.find(
     (e) => e.data.predicate === link.predicate
@@ -28,13 +29,14 @@ async function removeLink(links: LinkExpression[], link: Link) {
 
   if (foundLink) {
     const link = removeTypeName(foundLink);
-    await ad4mClient.perspective.removeLink(userPerspective!, link);
+    await client.perspective.removeLink(userPerspective!, link);
   }
 }
 
 async function replaceLink(links: LinkExpression[], newLink: Link) {
   const userStore = useUserStore();
   const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
+  const client = await getAd4mClient();
 
   const foundLink = links.find(
     (e) => e.data.predicate === newLink.predicate
@@ -42,10 +44,10 @@ async function replaceLink(links: LinkExpression[], newLink: Link) {
 
   if (foundLink) {
     const link = removeTypeName(foundLink);
-    await ad4mClient.perspective.removeLink(userPerspective!, link);
+    await client.perspective.removeLink(userPerspective!, link);
   }
 
-  const linked = await ad4mClient.perspective.addLink(
+  const linked = await client.perspective.addLink(
     userPerspective!,
     newLink
   );
@@ -57,6 +59,7 @@ export default async (payload: Payload): Promise<void> => {
   const dataStore = useDataStore();
   const appStore = useAppStore();
   const userStore = useUserStore();
+  const client = await getAd4mClient();
 
   const currentProfile = userStore.getProfile;
   // TODO: add profilebg here.
@@ -72,8 +75,8 @@ export default async (payload: Payload): Promise<void> => {
   
   userStore.setUserProfile(newProfile);
 
-  const perspectives = await ad4mClient.perspective.all();
-  const userPerspective = perspectives.find(e => e.name === "Agent Profile");
+  const perspectives = await client.perspective.all();
+  const userPerspective = perspectives.find(e => e.name === "Flux Agent Profile Data");
 
   if (userPerspective) {
     userStore.addAgentProfileProxyPerspectiveId(userPerspective.uuid)
@@ -113,7 +116,7 @@ export default async (payload: Payload): Promise<void> => {
     }));
 
     if (payload.profileBg) {
-      const image = await ad4mClient.expression.create(
+      const image = await client.expression.create(
         payload.profileBg,
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
@@ -136,12 +139,12 @@ export default async (payload: Payload): Promise<void> => {
         ? await blobToDataURL(resizedImage!)
         : undefined;
 
-      const thumbnailImage = await ad4mClient.expression.create(
+      const thumbnailImage = await client.expression.create(
         thumbnail,
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
 
-      const profileImage = await ad4mClient.expression.create(
+      const profileImage = await client.expression.create(
         payload.profilePicture,
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
@@ -175,7 +178,7 @@ export default async (payload: Payload): Promise<void> => {
       finalLinks.push(removeTypeName(link));
     }
 
-    await ad4mClient.agent.updatePublicPerspective({
+    await client.agent.updatePublicPerspective({
       links: finalLinks,
     } as PerspectiveInput);
   } catch (e) {

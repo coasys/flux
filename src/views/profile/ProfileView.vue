@@ -80,29 +80,30 @@
     </div>
   </div>
   <j-modal
+    v-if="showAddlinkModal"
     size="lg"
     :open="showAddlinkModal"
     @toggle="(e) => setAddLinkModal(e.target.open)"
   >
     <ProfileAddLink
-      v-if="showAddlinkModal"
       @submit="() => setAddLinkModal(false)"
       @cancel="() => setAddLinkModal(false)"
     ></ProfileAddLink>
   </j-modal>
   <j-modal
+    v-if="showEditlinkModal"
     size="lg"
     :open="showEditlinkModal"
     @toggle="(e) => setEditLinkModal(e.target.open, editArea)"
   >
     <ProfileEditLink
-      v-if="showEditlinkModal"
       @submit="() => setEditLinkModal(false, editArea)"
       @cancel="() => setEditLinkModal(false, editArea)"
       :area="editArea"
     ></ProfileEditLink>
   </j-modal>
   <j-modal
+    v-if="showJoinCommunityModal"
     size="lg"
     :open="showJoinCommunityModal"
     @toggle="(e) => setShowJoinCommunityModal(e.target.open)"
@@ -114,6 +115,7 @@
     ></ProfileJoinLink>
   </j-modal>
   <j-modal
+    v-if="modals.showEditProfile"
     :open="modals.showEditProfile"
     @toggle="(e) => setShowEditProfile(e.target.open)"
   >
@@ -128,7 +130,6 @@
 </template>
 
 <script lang="ts">
-import { ad4mClient } from "@/app";
 import { useDataStore } from "@/store/data";
 import { ExpressionTypes, ModalsState, Profile, ProfileWithDID } from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
@@ -144,6 +145,7 @@ import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
 import getAgentLinks from "@/utils/getAgentLinks";
 import { FLUX_PROFILE } from "@/constants/profile";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export default defineComponent({
   name: "ProfileView",
@@ -174,28 +176,31 @@ export default defineComponent({
       editArea: null as any,
     };
   },
+  beforeCreate() {
+    this.appStore.changeCurrentTheme("global");
+  },
   methods: {
     setAddLinkModal(value: boolean): void {
       this.showAddlinkModal = value;
     },
     setEditLinkModal(value: boolean, area: any): void {
       this.showEditlinkModal = value;
-      console.log("area", area);
       this.editArea = area;
     },
     setShowJoinCommunityModal(value: boolean): void {
       this.showJoinCommunityModal = value;
     },
     async getAgentAreas() {
+      const client = await getAd4mClient();
       const did = this.$route.params.did as string;
-      const me = await ad4mClient.agent.me();
+      const me = await client.agent.me();
       const userStore = useUserStore();
       const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
 
       const links = (await getAgentLinks(
         did || me.did,
         did === me.did || did === undefined ? userPerspective! : undefined
-      )).filter(e => e.data.source.startsWith('flux://'));
+      )).filter(e => !e.data.source.startsWith('flux://'));
 
       const preArea: { [x: string]: any } = {};
 
@@ -212,11 +217,11 @@ export default defineComponent({
             "text://",
             ""
           );
-        } else if (predicate === "has_images") {
+        } else if (predicate === "has_images" || predicate === 'has_image') {
           try {
             const expUrl = e.data.target;
             console.log("expUrl", expUrl);
-            const image = await ad4mClient.expression.get(expUrl);
+            const image = await client.expression.get(expUrl);
             console.log("image", image);
             if (image) {
               if (!preArea[e.data.source][predicate]) {
@@ -237,12 +242,11 @@ export default defineComponent({
       this.profileLinks = Object.values(preArea).filter(
         (e) => e.id !== FLUX_PROFILE
       );
-
-      console.log('links', links)
     },
     async getAgentProfile() {
+      const client = await getAd4mClient();
       const did = this.$route.params.did as string;
-      const me = await ad4mClient.agent.me();
+      const me = await client.agent.me();
 
       this.profile = await getProfile(did || me.did);
 
@@ -271,17 +275,18 @@ export default defineComponent({
           this.joiningLink = link.has_post;
         }
       } else if (link.area_type === "webLink") {
-        window.api.send("openLinkInBrowser", link.has_post);
+        window.open(link.has_post, '_blank');
       } else if (link.area_type === "simpleArea") {
         this.$router.push({
-          name: "profile-feed",
-          params: link,
+          name: `profile-feed`,
+          params: {fid: link.id},
         });
       }
     },
     async deleteLinks(areaName: string) {
+      const client = await getAd4mClient();
       const userStore = useUserStore();
-      const me = await ad4mClient.agent.me();
+      const me = await client.agent.me();
       const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
       const links = await getAgentLinks(me.did, userPerspective!);
 
@@ -295,7 +300,7 @@ export default defineComponent({
 
         if (link.data.source === areaName || link.data.target === areaName) {
           console.log(link);
-          await ad4mClient.perspective.removeLink(userPerspective!, newLink);
+          await client.perspective.removeLink(userPerspective!, newLink);
         } else {
           newLinks.push(newLink);
         }
@@ -303,20 +308,21 @@ export default defineComponent({
 
       this.profileLinks = this.profileLinks.filter((e) => e.id !== areaName);
 
-      await ad4mClient.agent.updatePublicPerspective({
+      await client.agent.updatePublicPerspective({
         links: newLinks,
       } as PerspectiveInput);
     },
     ...mapActions(useAppStore, ["setShowEditProfile"]),
   },
   async mounted() {
+    const client = await getAd4mClient();
     this.getAgentProfile();
     this.getAgentAreas();
     const did = this.$route.params.did as string;
-    const me = await ad4mClient.agent.me();
+    const me = await client.agent.me();
 
     this.sameAgent = did === me.did;
-    if (did === undefined) {
+    if (did === undefined || did.length === 0) {
       this.sameAgent = true;
     }
   },

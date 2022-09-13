@@ -2,17 +2,17 @@ import { LinkExpression, LinkQuery } from "@perspect3vism/ad4m";
 
 import { useDataStore } from "..";
 
-import { MEMBER } from "@/constants/neighbourhoodMeta";
-import { ad4mClient } from "@/app";
+import { MEMBER, SELF } from "@/constants/neighbourhoodMeta";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export default async function (id: string): Promise<void> {
   const dataStore = useDataStore();
+  const client = await getAd4mClient();
 
-  const neighbourhood = dataStore.getNeighbourhood(id);
-  const memberLinks = await ad4mClient.perspective.queryLinks(
+  const memberLinks = await client.perspective.queryLinks(
     id,
     new LinkQuery({
-      source: neighbourhood.neighbourhoodUrl!,
+      source: SELF,
       predicate: MEMBER,
     })
   );

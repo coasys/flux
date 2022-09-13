@@ -11,15 +11,12 @@ export interface NeighbourhoodState {
   thumbnail?: string;
   perspective: PerspectiveHandle;
   typedExpressionLanguages: FluxExpressionReference[];
-  groupExpressionRef?: string;
   neighbourhoodUrl: string;
   membraneType: MembraneType;
   membraneRoot: string;
   linkedPerspectives: string[];
   linkedNeighbourhoods: string[];
   members: string[];
-  currentExpressionLinks: { [x: string]: LinkExpression };
-  currentExpressionMessages: { [x: string]: ExpressionAndRef };
 }
 
 export enum MembraneType {
