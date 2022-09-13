@@ -159,7 +159,7 @@ export default defineComponent({
             throw new Error(e);
           }
         } else if (link.data!.predicate! === MEMBER) {
-          const did = link.data!.target!.split("://")[1];
+          const did = link.data!.target!;
           console.log("Got new member in signal! Parsed out did: ", did);
           if (did) {
             this.dataStore.setNeighbourhoodMember({
