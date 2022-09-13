@@ -142,6 +142,14 @@ export default async ({
       links.push(removeTypeName(link));
     }
 
+    const me = await client.agent.me();
+    const existingAgentLinks = me.perspective?.links;
+    if (existingAgentLinks) {
+      for (const link of existingAgentLinks) {
+        links.push(removeTypeName(link));
+      }
+    }
+
     await client.agent.updatePublicPerspective({
       links,
     } as PerspectiveInput);
