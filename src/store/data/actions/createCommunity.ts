@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import {
-  SOCIAL_CONTEXT_OFFICIAL,
+  PERSPECTIVE_DIFF_SYNC,
   NOTE_IPFS_EXPRESSION_OFFICIAL
 } from "@/constants/languages";
 
@@ -9,9 +9,7 @@ import { MEMBER, SELF, FLUX_GROUP_NAME, FLUX_GROUP_IMAGE, FLUX_GROUP_DESCRIPTION
 import {
   MembraneType,
   FluxExpressionReference,
-  ExpressionTypes,
   CommunityState,
-  FeedType,
 } from "@/store/types";
 import { Perspective, PerspectiveHandle, Literal } from "@perspect3vism/ad4m";
 import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta";
@@ -38,7 +36,6 @@ export default async ({
 }: Payload): Promise<CommunityState> => {
   const dataStore = useDataStore();
   const appStore = useAppStore();
-  const userStore = useUserStore();
 
   try {
     const client = await getAd4mClient();
@@ -57,10 +54,10 @@ export default async ({
     //Create unique social-context
     const socialContextLang =
       await client.languages.applyTemplateAndPublish(
-        SOCIAL_CONTEXT_OFFICIAL,
+        PERSPECTIVE_DIFF_SYNC,
         JSON.stringify({
           uid: uid,
-          name: `${perspectiveName}-social-context`,
+          name: `${perspectiveName}-link-language`,
         })
       );
     console.log("Response from create social-context", socialContextLang);

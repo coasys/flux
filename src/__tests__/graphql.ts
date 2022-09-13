@@ -7,7 +7,6 @@ import {
 } from "../core/graphql_queries";
 import EasyGraphQLTester from "easygraphql-tester";
 import { DocumentNode } from "graphql";
-import { SOCIAL_CONTEXT_OFFICIAL } from "@/constants/languages";
 
 const tester = new EasyGraphQLTester(typeDefsString);
 
