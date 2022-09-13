@@ -6,6 +6,8 @@ import { nanoid } from "nanoid";
 import { useDataStore } from ".";
 import { CommunityState, ExpressionTypes, FeedType, LocalCommunityState, MembraneType } from "../types";
 import { getGroupExpression } from "./actions/fetchNeighbourhoodMetadata";
+import { useUserStore } from '../user';
+import { getProfile } from '@/utils/profileHelpers';
 
 export async function getMetaFromLinks(links: LinkExpression[]) {
   const client = await getAd4mClient();
@@ -82,7 +84,15 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
 export async function hydrateState() {
   const client = await getAd4mClient();
   const dataStore = useDataStore();
+  const userStore = useUserStore();
   const perspectives = await client.perspective.all();
+  const status = await client.agent.status();
+
+  const profile = await getProfile(status.did!);
+
+  userStore.setUserProfile(profile!);
+
+  userStore.updateAgentStatus(status);
   
   const communities = dataStore.getCommunities.filter((community) => !perspectives.map(e => e.uuid).includes(community.state.perspectiveUuid));
 
