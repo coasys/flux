@@ -35,3 +35,13 @@ export const AREA_HAS_IMAGES = "sioc://has_images";
 export const AREA_TYPE = "flux://area_type";
 
 export const HAS_AREA = "flux://has_aread";
+
+// AD4M Agent
+
+export const AD4M_SOURCE_PROFILE = "ad4m://profile";
+
+export const AD4M_PREDICATE_USERNAME = "sioc://has_username";
+
+export const AD4M_PREDICATE_FIRSTNAME = "sioc://has_firstname";
+
+export const AD4M_PREDICATE_LASTNAME = "sioc://has_lastname";
