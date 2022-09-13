@@ -1,5 +1,8 @@
 <template>
-  <router-view :key="componentKey" v-if="!ui.showGlobalLoading && connected"></router-view>
+  <router-view
+    :key="componentKey"
+    v-if="!ui.showGlobalLoading && connected"
+  ></router-view>
   <j-modal
     size="sm"
     :open="modals.showCode"
@@ -15,31 +18,47 @@
       </j-flex>
     </div>
   </div>
-  <ad4m-connect 
+  <ad4m-connect
     appName="Flux"
     appDesc="Flux - A SOCIAL TOOLKIT FOR THE NEW INTERNET"
     appDomain="https://www.fluxsocial.io/"
     capabilities='[{"with":{"domain":"*","pointers":["*"]},"can": ["*"]}]'
     appiconpath="https://i.ibb.co/GnqjPJP/icon.png"
     openonshortcut
-    ></ad4m-connect>
+  ></ad4m-connect>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
 import { mapActions } from "pinia";
 import { useAppStore } from "./store/app";
-import { ApplicationState, FeedType, ModalsState, NeighbourhoodState } from "@/store/types";
+import {
+  ApplicationState,
+  FeedType,
+  ModalsState,
+  NeighbourhoodState,
+} from "@/store/types";
 import { useRoute, useRouter } from "vue-router";
 import { useDataStore } from "./store/data";
-import { Ad4mClient, LinkExpression } from "@perspect3vism/ad4m";
-import { CHANNEL, EXPRESSION, FLUX_GROUP_DESCRIPTION, FLUX_GROUP_IMAGE, FLUX_GROUP_NAME, FLUX_GROUP_THUMBNAIL, MEMBER } from "./constants/neighbourhoodMeta";
+import { LinkExpression } from "@perspect3vism/ad4m";
+import {
+  CHANNEL,
+  EXPRESSION,
+  FLUX_GROUP_DESCRIPTION,
+  FLUX_GROUP_IMAGE,
+  FLUX_GROUP_NAME,
+  FLUX_GROUP_THUMBNAIL,
+  MEMBER,
+} from "./constants/neighbourhoodMeta";
 import { useUserStore } from "./store/user";
 import retry from "./utils/retry";
 import { buildCommunity, hydrateState } from "./store/data/hydrateState";
 import { nanoid } from "nanoid";
 import { getGroupExpression } from "./store/data/actions/fetchNeighbourhoodMetadata";
-import { getAd4mClient, isConnected } from '@perspect3vism/ad4m-connect/dist/web'
+import {
+  getAd4mClient,
+  isConnected,
+} from "@perspect3vism/ad4m-connect/dist/web";
 
 export default defineComponent({
   name: "App",
@@ -54,15 +73,15 @@ export default defineComponent({
     const watcherStarted = ref(false);
     const connected = ref(false);
 
-    return { 
-      appStore, 
-      componentKey, 
+    return {
+      appStore,
+      componentKey,
       router,
       route,
       dataStore,
       userStore,
       watcherStarted,
-      connected
+      connected,
     };
   },
 
@@ -74,12 +93,18 @@ export default defineComponent({
       const client = await getAd4mClient();
       const { perspective } = await client.agent.me();
 
-      const fluxLinksFound = perspective?.links.find(e => e.data.source.startsWith('flux://'));
+      const fluxLinksFound = perspective?.links.find((e) =>
+        e.data.source.startsWith("flux://")
+      );
 
       if (!fluxLinksFound) {
         await this.router.replace("/signup");
       } else {
-        if (['unlock', 'connect', 'signup'].includes(this.router.currentRoute.value.name as string)) {
+        if (
+          ["unlock", "connect", "signup"].includes(
+            this.router.currentRoute.value.name as string
+          )
+        ) {
           await this.router.replace("/home");
         }
       }
@@ -92,7 +117,7 @@ export default defineComponent({
       }
 
       this.appStore.setGlobalLoading(false);
-    })
+    });
   },
 
   computed: {
@@ -176,21 +201,23 @@ export default defineComponent({
           this.dataStore.addChannel({
             communityId: perspective,
             channel: {
-                id: nanoid(),
-                name: link.data.target,
-                creatorDid: link.author,
-                sourcePerspective: perspective,
-                hasNewMessages: false,
-                createdAt: link.timestamp,
-                feedType: FeedType.Signaled,
-                notifications: {
-                  mute: false,
-                },
+              id: nanoid(),
+              name: link.data.target,
+              creatorDid: link.author,
+              sourcePerspective: perspective,
+              hasNewMessages: false,
+              createdAt: link.timestamp,
+              feedType: FeedType.Signaled,
+              notifications: {
+                mute: false,
+              },
             },
           });
         } else if (
-          link.data!.predicate! === FLUX_GROUP_NAME || link.data!.predicate! === FLUX_GROUP_DESCRIPTION || 
-          link.data!.predicate! === FLUX_GROUP_IMAGE || link.data!.predicate! === FLUX_GROUP_THUMBNAIL
+          link.data!.predicate! === FLUX_GROUP_NAME ||
+          link.data!.predicate! === FLUX_GROUP_DESCRIPTION ||
+          link.data!.predicate! === FLUX_GROUP_IMAGE ||
+          link.data!.predicate! === FLUX_GROUP_THUMBNAIL
         ) {
           console.log("Community update via link signal!");
 
@@ -209,7 +236,7 @@ export default defineComponent({
       watch(
         this.dataStore.neighbourhoods,
         async (newValue: { [perspectiveUuid: string]: NeighbourhoodState }) => {
-          for (let [k, v] of Object.entries(newValue)) {
+          for (const [k, v] of Object.entries(newValue)) {
             if (watching.filter((val) => val == k).length == 0) {
               console.log("Starting watcher on perspective", k);
               watching.push(k);
@@ -217,58 +244,40 @@ export default defineComponent({
 
               if (perspective) {
                 // @ts-ignore
-                perspective.addListener('link-added', (result) => {
+                perspective.addListener("link-added", (result) => {
                   console.debug(
                     "Got new link with data",
                     result.data,
                     "and channel",
                     v
                   );
-                  newLinkHandler(
-                    result,
-                    v.perspective.uuid
-                  );
+                  newLinkHandler(result, v.perspective.uuid);
                 });
               }
-
             }
           }
         },
         { immediate: true, deep: true }
       );
 
-
       // @ts-ignore
       client!.perspective.addPerspectiveAddedListener(async (perspective) => {
         const proxy = await client!.perspective.byUUID(perspective.uuid);
-        proxy!.addListener('link-added', (link) => {
-          if (link.data!.predicate! === CHANNEL && link.data.target === 'Home' && link.author != this.userStore.getUser?.agent.did) {
-            if (link.data.target === 'Home') {
+        proxy!.addListener("link-added", (link) => {
+          if (
+            link.data!.predicate! === CHANNEL &&
+            link.data.target === "Home" &&
+            link.author != this.userStore.getUser?.agent.did
+          ) {
+            if (link.data.target === "Home") {
               buildCommunity(proxy!).then((community) => {
                 this.dataStore.addCommunity(community);
 
                 this.dataStore.addChannel({
                   communityId: perspective.uuid,
                   channel: {
-                      id: nanoid(),
-                      name: "Home",
-                      creatorDid: link.author,
-                      sourcePerspective: perspective.uuid,
-                      hasNewMessages: false,
-                      createdAt: new Date().toISOString(),
-                      feedType: FeedType.Signaled,
-                      notifications: {
-                        mute: false,
-                      },
-                  },
-                });
-              });
-            } else {
-              this.dataStore.addChannel({
-                communityId: perspective.uuid,
-                channel: {
                     id: nanoid(),
-                    name: link.data.target,
+                    name: "Home",
                     creatorDid: link.author,
                     sourcePerspective: perspective.uuid,
                     hasNewMessages: false,
@@ -277,6 +286,23 @@ export default defineComponent({
                     notifications: {
                       mute: false,
                     },
+                  },
+                });
+              });
+            } else {
+              this.dataStore.addChannel({
+                communityId: perspective.uuid,
+                channel: {
+                  id: nanoid(),
+                  name: link.data.target,
+                  creatorDid: link.author,
+                  sourcePerspective: perspective.uuid,
+                  hasNewMessages: false,
+                  createdAt: new Date().toISOString(),
+                  feedType: FeedType.Signaled,
+                  notifications: {
+                    mute: false,
+                  },
                 },
               });
             }
@@ -288,38 +314,41 @@ export default defineComponent({
       client!.perspective.addPerspectiveRemovedListener((perspective) => {
         const isCommunity = this.dataStore.getCommunity(perspective);
         if (isCommunity && isCommunity.neighbourhood) {
-          this.dataStore.removeCommunity({communityId: perspective});
+          this.dataStore.removeCommunity({ communityId: perspective });
         }
       });
 
       const allPerspectives = await client!.perspective.all();
 
       for (const perspective of allPerspectives) {
-        perspective.addListener('link-added', (link) => {
-          if (link.data!.predicate! === CHANNEL && link.data.target === 'Home') {
+        perspective.addListener("link-added", (link) => {
+          if (
+            link.data!.predicate! === CHANNEL &&
+            link.data.target === "Home"
+          ) {
             buildCommunity(perspective).then((community) => {
               this.dataStore.addCommunity(community);
 
               this.dataStore.addChannel({
                 communityId: perspective.uuid,
                 channel: {
-                    id: nanoid(),
-                    name: "Home",
-                    creatorDid: link.author,
-                    sourcePerspective: perspective.uuid,
-                    hasNewMessages: false,
-                    createdAt: new Date().toISOString(),
-                    feedType: FeedType.Signaled,
-                    notifications: {
-                      mute: false,
-                    },
+                  id: nanoid(),
+                  name: "Home",
+                  creatorDid: link.author,
+                  sourcePerspective: perspective.uuid,
+                  hasNewMessages: false,
+                  createdAt: new Date().toISOString(),
+                  feedType: FeedType.Signaled,
+                  notifications: {
+                    mute: false,
+                  },
                 },
               });
             });
           }
         });
       }
-    }
+    },
   },
 });
 </script>
