@@ -1,5 +1,6 @@
 <template>
   <perspective-view
+    v-if="channel"
     :port="port"
     :channel="channel.name"
     :perspective-uuid="channel.sourcePerspective"

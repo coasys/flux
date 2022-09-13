@@ -10,7 +10,7 @@
     <button slot="trigger" class="community-sidebar__header-button">
       <j-avatar
         style="--j-avatar-size: 30px"
-        :src="community.neighbourhood.image || null"
+        :src="communityImage || null"
         :initials="community.neighbourhood.name.charAt(0)"
       />
       <div class="community-info">
@@ -161,7 +161,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType, watch } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import {
   ChannelState,
@@ -173,6 +173,7 @@ import { mapActions, mapState } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
+import { DexieIPFS } from "@/utils/storageHelpers";
 
 export default defineComponent({
   components: { AvatarGroup },
@@ -185,11 +186,13 @@ export default defineComponent({
   setup() {
     return {
       userStore: useUserStore(),
+      dataStore: useDataStore()
     };
   },
   data: function () {
     return {
       showCommunityMenu: false,
+      communityImage: null
     };
   },
   computed: {
@@ -209,6 +212,34 @@ export default defineComponent({
         this.community.neighbourhood.creatorDid ===
         this.userStore.getUser?.agent.did
       );
+    }
+  },
+  async mounted() {
+    const communityId = this.$route.params.communityId as string;
+
+    watch(this.dataStore.neighbourhoods, async () => {
+      const community = this.dataStore.getCommunity(communityId);
+      const dexie = new DexieIPFS(communityId);
+
+      const image = await dexie.get(community.neighbourhood.image!);
+      // @ts-ignore
+      this.communityImage = image
+    })
+  },
+  watch: {
+    "$route.params.communityId": {
+      handler: async function (id: string) {
+        if (id) {
+          const communityId = this.$route.params.communityId as string;
+          const community = this.dataStore.getCommunity(communityId);
+          const dexie = new DexieIPFS(communityId);
+
+          const image = await dexie.get(community.neighbourhood.image!);
+          // @ts-ignore
+          this.communityImage = image
+        }
+      },
+      immediate: true,
     },
   },
   methods: {

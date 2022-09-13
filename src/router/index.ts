@@ -7,6 +7,7 @@ import Settings from "@/containers/Settings.vue";
 import ProfileView from "@/views/profile/ProfileView.vue";
 import ConnectView from "@/views/connect/ConnectView.vue";
 import UnlockAgent from "@/views/connect/UnlockAgent.vue";
+import ProfileFeed from "@/views/profile/ProfileFeed.vue";
 import { MainClient } from "@/app";
 
 const routes: Array<RouteRecordRaw> = [
@@ -35,6 +36,11 @@ const routes: Array<RouteRecordRaw> = [
         path: "home",
         name: "home",
         component: ProfileView,
+      },
+      {
+        path: "feed/:fid",
+        name: "profile-feed",
+        component: ProfileFeed,
       },
       {
         path: "communities/:communityId",

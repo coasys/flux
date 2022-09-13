@@ -38,6 +38,7 @@ import { useUserStore } from "./store/user";
 import retry from "./utils/retry";
 import { buildCommunity, hydrateState } from "./store/data/hydrateState";
 import { nanoid } from "nanoid";
+import { getGroupExpression } from "./store/data/actions/fetchNeighbourhoodMetadata";
 
 export default defineComponent({
   name: "App",
@@ -232,21 +233,18 @@ export default defineComponent({
             },
           });
         } else if (
-          link.data!.predicate! === FLUX_GROUP &&
-          link.author !== this.userStore.getUser?.agent.did
+          link.data!.predicate! === FLUX_GROUP
         ) {
           console.log("Community update via link signal!");
 
-          const exp = await MainClient.ad4mClient.expression.get(link.data.target);
-
-          const expParse = JSON.parse(exp.data);
+          const groupExp = await getGroupExpression(perspective);
 
           this.dataStore.updateCommunityMetadata({
             communityId: perspective,
-            name: expParse.name,
-            description: expParse.description,
-            image: expParse.image || "",
-            thumbnail: expParse.thumbnail || "",
+            name: groupExp?.name,
+            description: groupExp?.description,
+            image: groupExp?.image || "",
+            thumbnail: groupExp?.thumbnail || "",
             groupExpressionRef: link.data.target,
           });
         }

@@ -1,7 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
 import {
   SOCIAL_CONTEXT_OFFICIAL,
-  GROUP_EXPRESSION_OFFICIAL
+  GROUP_EXPRESSION_OFFICIAL,
+  NOTE_IPFS_EXPRESSION_OFFICIAL
 } from "@/constants/languages";
 
 import { MEMBER, SELF, FLUX_GROUP } from "@/constants/neighbourhoodMeta";
@@ -13,12 +14,13 @@ import {
   CommunityState,
   FeedType,
 } from "@/store/types";
-import { Perspective, PerspectiveHandle } from "@perspect3vism/ad4m";
+import { Perspective, PerspectiveHandle, Literal } from "@perspect3vism/ad4m";
 import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { ad4mClient, MainClient } from "@/app";
+import { blobToDataURL, dataURItoBlob, resizeImage } from "@/utils/profileHelpers";
 
 export interface Payload {
   perspectiveName: string;
@@ -89,7 +91,7 @@ export default async ({
       typedExpLangs
     );
     const meta = new Perspective(metaLinks);
-    const sharedUrl = createSourcePerspective.sharedUrl;
+    let sharedUrl = createSourcePerspective.sharedUrl;
 
     if (!sharedUrl) {
       const neighbourhood = await ad4mClient.neighbourhood.publishFromPerspective(
@@ -97,7 +99,33 @@ export default async ({
         socialContextLang.address,
         meta
       );
+
+      sharedUrl = neighbourhood;
+
       console.log("Created neighbourhood with result", neighbourhood);
+    }
+
+    let tempImage = image;
+    let tempThumbnail = thumbnail;
+
+    if (image) {
+      const resizedImage = image
+        ? await resizeImage(dataURItoBlob(image as string), 100)
+        : undefined;
+      
+      const thumbnail = image
+        ? await blobToDataURL(resizedImage!)
+        : undefined;
+
+      tempImage = await ad4mClient.expression.create(
+        image,
+        NOTE_IPFS_EXPRESSION_OFFICIAL
+      );
+
+      tempThumbnail = await ad4mClient.expression.create(
+        thumbnail,
+        NOTE_IPFS_EXPRESSION_OFFICIAL
+      );
     }
 
     //Create the group expression
@@ -105,8 +133,8 @@ export default async ({
       {
         name: perspectiveName,
         description: description,
-        image: image,
-        thumbnail: thumbnail,
+        image: tempImage,
+        thumbnail: tempThumbnail,
       },
       groupExpressionLang.address!
     );
@@ -139,13 +167,27 @@ export default async ({
     console.log("Created profile expression link", addProfileLink);
 
 
+    let sdnaLiteral = Literal.from(`flux_message(Channel, Message, Timestamp, Author, Reactions, Replies):-
+    link(Channel, "temp://directly_succeeded_by", Message, Timestamp, Author),
+    findall((Reaction, ReactionTimestamp, ReactionAuthor), link(Message, "flux://has_reaction", Reaction, ReactionTimestamp, ReactionAuthor), Reactions),
+    findall((Reply, ReplyTimestamp, ReplyAuthor), link(Reply, "flux://has_reply", Message, ReplyTimestamp, ReplyAuthor), Replies).`)
+
+
+    // await ad4mClient.perspective.addLink(perspectiveUuid, {source: "self", predicate: "ad4m://has_zome", target: sdnaLiteral.toUrl()});
+    const addSocialDnaLink = await ad4mClient.perspective.addLink(
+      createSourcePerspective.uuid!,
+      {source: "ad4m://self", predicate: "ad4m://has_zome", target: sdnaLiteral.toUrl()}
+    );
+    console.log("Created social dna link", addSocialDnaLink);
+
+
     const newCommunity = {
       neighbourhood: {
         name: perspectiveName,
         creatorDid: creatorDid,
         description: description,
-        image: image,
-        thumbnail: thumbnail,
+        image: tempImage,
+        thumbnail: tempThumbnail,
         perspective: {
           uuid: createSourcePerspective.uuid,
           name: createSourcePerspective.name,

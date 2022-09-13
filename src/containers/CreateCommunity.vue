@@ -189,6 +189,7 @@ export default defineComponent({
     },
     createCommunity() {
       this.isCreatingCommunity = true;
+      
       this.dataStore
         .createCommunity({
           perspectiveName: this.newCommunityName,

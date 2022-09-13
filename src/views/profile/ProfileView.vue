@@ -80,29 +80,30 @@
     </div>
   </div>
   <j-modal
+    v-if="showAddlinkModal"
     size="lg"
     :open="showAddlinkModal"
     @toggle="(e) => setAddLinkModal(e.target.open)"
   >
     <ProfileAddLink
-      v-if="showAddlinkModal"
       @submit="() => setAddLinkModal(false)"
       @cancel="() => setAddLinkModal(false)"
     ></ProfileAddLink>
   </j-modal>
   <j-modal
+    v-if="showEditlinkModal"
     size="lg"
     :open="showEditlinkModal"
     @toggle="(e) => setEditLinkModal(e.target.open, editArea)"
   >
     <ProfileEditLink
-      v-if="showEditlinkModal"
       @submit="() => setEditLinkModal(false, editArea)"
       @cancel="() => setEditLinkModal(false, editArea)"
       :area="editArea"
     ></ProfileEditLink>
   </j-modal>
   <j-modal
+    v-if="showJoinCommunityModal"
     size="lg"
     :open="showJoinCommunityModal"
     @toggle="(e) => setShowJoinCommunityModal(e.target.open)"
@@ -114,6 +115,7 @@
     ></ProfileJoinLink>
   </j-modal>
   <j-modal
+    v-if="modals.showEditProfile"
     :open="modals.showEditProfile"
     @toggle="(e) => setShowEditProfile(e.target.open)"
   >
@@ -174,6 +176,9 @@ export default defineComponent({
       editArea: null as any,
     };
   },
+  beforeCreate() {
+    this.appStore.changeCurrentTheme("global");
+  },
   methods: {
     setAddLinkModal(value: boolean): void {
       this.showAddlinkModal = value;
@@ -194,7 +199,7 @@ export default defineComponent({
       const links = (await getAgentLinks(
         did || me.did,
         did === me.did || did === undefined ? userPerspective! : undefined
-      )).filter(e => e.data.source.startsWith('flux://'));
+      )).filter(e => !e.data.source.startsWith('flux://'));
 
       const preArea: { [x: string]: any } = {};
 
@@ -211,7 +216,7 @@ export default defineComponent({
             "text://",
             ""
           );
-        } else if (predicate === "has_images") {
+        } else if (predicate === "has_images" || predicate === 'has_image') {
           try {
             const expUrl = e.data.target;
             console.log("expUrl", expUrl);
@@ -236,8 +241,6 @@ export default defineComponent({
       this.profileLinks = Object.values(preArea).filter(
         (e) => e.id !== FLUX_PROFILE
       );
-
-      console.log('links', links)
     },
     async getAgentProfile() {
       const did = this.$route.params.did as string;
@@ -270,11 +273,11 @@ export default defineComponent({
           this.joiningLink = link.has_post;
         }
       } else if (link.area_type === "webLink") {
-        window.api.send("openLinkInBrowser", link.has_post);
+        window.open(link.has_post, '_blank');
       } else if (link.area_type === "simpleArea") {
         this.$router.push({
-          name: "profile-feed",
-          params: link,
+          name: `profile-feed`,
+          params: {fid: link.id},
         });
       }
     },

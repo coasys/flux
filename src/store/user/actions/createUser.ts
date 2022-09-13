@@ -1,4 +1,5 @@
 import { ad4mClient } from "@/app";
+import { AD4M_AGENT, KAICHAO_AGENT, JUNTO_AGENT } from "@/constants/agents";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
 import { FLUX_PROFILE, HAS_EMAIL, HAS_FAMILY_NAME, HAS_GIVEN_NAME, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "@/constants/profile";
 
@@ -29,6 +30,10 @@ export default async ({
   const userStore = useUserStore();
 
   try {
+    //Install the noteipfs language
+    await ad4mClient.runtime.addTrustedAgents([AD4M_AGENT, KAICHAO_AGENT, JUNTO_AGENT]);
+    await ad4mClient.languages.byAddress(NOTE_IPFS_EXPRESSION_OFFICIAL);
+
     const resizedImage = profilePicture
       ? await resizeImage(dataURItoBlob(profilePicture as string), 100)
       : undefined;
