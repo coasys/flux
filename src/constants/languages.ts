@@ -1,5 +1,5 @@
 export const PERSPECTIVE_DIFF_SYNC =
-  "QmNMV6rRVe3eV8evT8Xo9j7RYmzjwtCG7P7C5UoVvdBYTY";
+  "QmQ1ercgpx8S4dcZxmf1U4P3Sgdetbqd88NAxehSdmKgRT";
 
 export const NOTE_IPFS_EXPRESSION_OFFICIAL =
   "QmYVsrMpiFmV9S7bTWNAkUzSqjRJskQ8g4TWKKwKrHAPqL";
