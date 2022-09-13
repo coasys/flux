@@ -22,4 +22,10 @@ export const AD4M_CLASS = "ad4m://has_class";
 
 export const FLUX_CHANNEL = "flux://channel";
 
-export const FLUX_GROUP = "flux://group";
+export const FLUX_GROUP_NAME = "flux://communityName";
+
+export const FLUX_GROUP_DESCRIPTION = "flux://communityDescription";
+
+export const FLUX_GROUP_IMAGE = "flux://communityImage";
+
+export const FLUX_GROUP_THUMBNAIL = "flux://communityThumbnail";

@@ -33,7 +33,7 @@ import { ApplicationState, FeedType, ModalsState, NeighbourhoodState } from "@/s
 import { useRoute, useRouter } from "vue-router";
 import { useDataStore } from "./store/data";
 import { Ad4mClient, LinkExpression } from "@perspect3vism/ad4m";
-import { CHANNEL, EXPRESSION, FLUX_GROUP, MEMBER } from "./constants/neighbourhoodMeta";
+import { CHANNEL, EXPRESSION, FLUX_GROUP_DESCRIPTION, FLUX_GROUP_IMAGE, FLUX_GROUP_NAME, FLUX_GROUP_THUMBNAIL, MEMBER } from "./constants/neighbourhoodMeta";
 import { useUserStore } from "./store/user";
 import retry from "./utils/retry";
 import { buildCommunity, hydrateState } from "./store/data/hydrateState";
@@ -189,7 +189,8 @@ export default defineComponent({
             },
           });
         } else if (
-          link.data!.predicate! === FLUX_GROUP
+          link.data!.predicate! === FLUX_GROUP_NAME || link.data!.predicate! === FLUX_GROUP_DESCRIPTION || 
+          link.data!.predicate! === FLUX_GROUP_IMAGE || link.data!.predicate! === FLUX_GROUP_THUMBNAIL
         ) {
           console.log("Community update via link signal!");
 
@@ -201,7 +202,6 @@ export default defineComponent({
             description: groupExp?.description,
             image: groupExp?.image || "",
             thumbnail: groupExp?.thumbnail || "",
-            groupExpressionRef: link.data.target,
           });
         }
       };

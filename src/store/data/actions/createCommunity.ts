@@ -5,7 +5,7 @@ import {
   NOTE_IPFS_EXPRESSION_OFFICIAL
 } from "@/constants/languages";
 
-import { MEMBER, SELF, FLUX_GROUP } from "@/constants/neighbourhoodMeta";
+import { MEMBER, SELF, FLUX_GROUP_NAME, FLUX_GROUP_IMAGE, FLUX_GROUP_DESCRIPTION, FLUX_GROUP_THUMBNAIL } from "@/constants/neighbourhoodMeta";
 
 import {
   MembraneType,
@@ -127,35 +127,43 @@ export default async ({
         thumbnail,
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
+
+      const addGroupImageLink = await client.perspective.addLink(
+        createSourcePerspective.uuid!,
+        {
+          source: SELF,
+          target: tempImage,
+          predicate: FLUX_GROUP_IMAGE,
+        }
+      );
+      const addGroupThumbnailLink = await client.perspective.addLink(
+        createSourcePerspective.uuid!,
+        {
+          source: SELF,
+          target: tempThumbnail,
+          predicate: FLUX_GROUP_THUMBNAIL,
+        }
+      );  
     }
 
-    //Create the group expression
-    const createExp = await client.expression.create(
-      {
-        name: perspectiveName,
-        description: description,
-        image: tempImage,
-        thumbnail: tempThumbnail,
-      },
-      groupExpressionLang.address!
-    );
-    console.log("Created group expression with response", createExp);
-
     //Create link between perspective and group expression
-    const addGroupExpLink = await client.perspective.addLink(
+    const addGroupNameLink = await client.perspective.addLink(
       createSourcePerspective.uuid!,
       {
         source: SELF,
-        target: createExp,
-        predicate: FLUX_GROUP,
+        target: perspectiveName,
+        predicate: FLUX_GROUP_NAME,
       }
     );
-    console.log(
-      "Created group expression link",
-      addGroupExpLink,
-      userStore.getProfile
+    const addGroupDescriptionLink = await client.perspective.addLink(
+      createSourcePerspective.uuid!,
+      {
+        source: SELF,
+        target: description || '-',
+        predicate: FLUX_GROUP_DESCRIPTION,
+      }
     );
-
+  
     //Create link between perspective and group expression
     const addProfileLink = await client.perspective.addLink(
       createSourcePerspective.uuid!,
@@ -190,13 +198,12 @@ export default async ({
         image: tempImage,
         thumbnail: tempThumbnail,
         perspective: {
-          uuid: createSourcePerspective.uuid,
-          name: createSourcePerspective.name,
+          uuid: createSourcePerspective?.uuid,
+          name: createSourcePerspective?.name,
           sharedUrl,
           neighbourhood: createSourcePerspective.neighbourhood,
         },
         typedExpressionLanguages: typedExpLangs,
-        groupExpressionRef: createExp,
         neighbourhoodUrl: sharedUrl,
         membraneType: MembraneType.Unique,
         linkedPerspectives: [createSourcePerspective.uuid],

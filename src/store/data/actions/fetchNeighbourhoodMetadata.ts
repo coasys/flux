@@ -1,7 +1,7 @@
 import { LinkQuery } from "@perspect3vism/ad4m";
 
 import { useDataStore } from "@/store/data/index";
-import { SELF, FLUX_GROUP } from "@/constants/neighbourhoodMeta";
+import { SELF, FLUX_GROUP_NAME, FLUX_GROUP_DESCRIPTION, FLUX_CHANNEL, FLUX_GROUP_IMAGE, FLUX_GROUP_THUMBNAIL } from "@/constants/neighbourhoodMeta";
 import { DexieIPFS } from "@/utils/storageHelpers";
 import { getImage } from "../../../utils/profileHelpers";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
@@ -11,53 +11,69 @@ export interface Payload {
 }
 
 export async function getGroupExpression(communityId: string) {
-  const dataStore = useDataStore();
-  const community = dataStore.getCommunity(communityId);
   const client = await getAd4mClient();
-  const groupExpressionLinks = await client.perspective.queryLinks(
+  const dexie = new DexieIPFS(communityId);
+
+  const groupNameLink = client.perspective.queryLinks(
     communityId,
     new LinkQuery({
       source: SELF,
-      predicate: FLUX_GROUP,
+      predicate: FLUX_GROUP_NAME,
     })
   );
-  let sortedLinks = [...groupExpressionLinks];
-  sortedLinks = sortedLinks.sort((a, b) => {
-    return a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0;
-  });
+  const groupDescriptionLink = client.perspective.queryLinks(
+    communityId,
+    new LinkQuery({
+      source: SELF,
+      predicate: FLUX_GROUP_DESCRIPTION,
+    })
+  );
+  const groupImageLink = client.perspective.queryLinks(
+    communityId,
+    new LinkQuery({
+      source: SELF,
+      predicate: FLUX_GROUP_IMAGE,
+    })
+  );
+  const groupThumbnailLink = client.perspective.queryLinks(
+    communityId,
+    new LinkQuery({
+      source: SELF,
+      predicate: FLUX_GROUP_THUMBNAIL,
+    })
+  );
+
+  const values = await Promise.all([groupNameLink, groupDescriptionLink, groupImageLink, groupThumbnailLink])
+  const links = values.flat()
+  const group = {
+    name: '',
+    description: '',
+    image: null,
+    thumbnail: null
+  };
 
 
-  //Check that the group expression ref is not in the store
-  if (sortedLinks.length > 0) {
-    const dexie = new DexieIPFS(communityId);
-
-    const exp = await client.expression.get(sortedLinks[sortedLinks.length - 1].data!.target!)
-
-    const groupExpData = JSON.parse(exp.data)
-
-    if (groupExpData["image"]) {
-      const image = await getImage(groupExpData["image"]);
+  for (const link of links) {
+    if (link.data.predicate === FLUX_GROUP_NAME) {
+      group.name = link.data.target
+    } else if (link.data.predicate === FLUX_GROUP_DESCRIPTION) {
+      group.description = link.data.target
+    } else if (link.data.predicate === FLUX_GROUP_IMAGE) {
+      const image = await getImage(link.data.target);
   
-      await dexie.save(groupExpData["image"], image);
-    }
+      await dexie.save(link.data.target, image);
 
-    if (groupExpData["thumbnail"]) {
-      const thumbnail = await getImage(groupExpData["thumbnail"]);
+      group.image = link.data.target;
+    } else if (link.data.predicate === FLUX_GROUP_THUMBNAIL) {
+      const image = await getImage(link.data.target);
   
-      await dexie.save(groupExpData["thumbnail"], thumbnail);
-    }
+      await dexie.save(link.data.target, image);
 
-    return {
-      communityId,
-      name: groupExpData["name"],
-      description: groupExpData["description"],
-      image: groupExpData["image"],
-      thumbnail: groupExpData["thumnail"],
-      groupExpressionRef: sortedLinks[sortedLinks.length - 1].data!.target,
+      group.thumbnail = link.data.target;
     }
   }
 
-  return undefined
+  return group
 }
 
 export default async (communityId: string): Promise<void> => {

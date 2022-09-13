@@ -106,11 +106,11 @@ export default defineComponent({
         }
         tempCommunities.push({...tempCommunity})
       }
-  
+
       this.communities = tempCommunities;
     }
 
-    watch(this.dataStore.neighbourhoods, updateCommunityListWithImage)
+    watch(this.dataStore.neighbourhoods, () => setTimeout(() => updateCommunityListWithImage(), 500))
   },
   methods: {
     toggleHideMutedChannels(id: string) {

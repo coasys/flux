@@ -11,7 +11,6 @@ export interface NeighbourhoodState {
   thumbnail?: string;
   perspective: PerspectiveHandle;
   typedExpressionLanguages: FluxExpressionReference[];
-  groupExpressionRef?: string;
   neighbourhoodUrl: string;
   membraneType: MembraneType;
   membraneRoot: string;

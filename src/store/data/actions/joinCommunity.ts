@@ -1,7 +1,7 @@
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
 import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
 
-import { FLUX_GROUP, MEMBER, SELF } from "@/constants/neighbourhoodMeta";
+import { MEMBER, SELF } from "@/constants/neighbourhoodMeta";
 
 import { Link, LinkQuery } from "@perspect3vism/ad4m";
 
@@ -71,7 +71,6 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
           creatorDid,
           perspective: neighbourhood,
           typedExpressionLanguages: typedExpressionLanguages,
-          groupExpressionRef: groupExp?.groupExpressionRef,
           neighbourhoodUrl: joiningLink,
           membraneType: MembraneType.Unique,
           linkedNeighbourhoods: [neighbourhood.uuid],

@@ -14,7 +14,6 @@ interface UpdatePayload {
   description: string;
   image: string;
   thumbnail: string;
-  groupExpressionRef: string;
 }
 
 interface AddChannel {
@@ -106,7 +105,6 @@ export default {
     description,
     image,
     thumbnail,
-    groupExpressionRef,
   }: UpdatePayload): void {
     const state = useDataStore();
     const community = state.neighbourhoods[communityId];
@@ -116,7 +114,6 @@ export default {
       community.description = description;
       community.image = image;
       community.thumbnail = thumbnail;
-      community.groupExpressionRef = groupExpressionRef;
     }
 
     state.neighbourhoods[communityId] = community;

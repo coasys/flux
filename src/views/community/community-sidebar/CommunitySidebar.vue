@@ -215,28 +215,32 @@ export default defineComponent({
     }
   },
   async mounted() {
-    const communityId = this.$route.params.communityId as string;
-
+    
     watch(this.dataStore.neighbourhoods, async () => {
-      const community = this.dataStore.getCommunity(communityId);
-      const dexie = new DexieIPFS(communityId);
-
-      const image = await dexie.get(community.neighbourhood.image!);
-      // @ts-ignore
-      this.communityImage = image
+      setTimeout(async () => {
+        const communityId = this.$route.params.communityId as string;
+        const community = this.dataStore.getCommunity(communityId);
+        const dexie = new DexieIPFS(communityId);
+  
+        const image = await dexie.get(community.neighbourhood.image!);
+        // @ts-ignore
+        this.communityImage = image
+      }, 500)
     })
   },
   watch: {
     "$route.params.communityId": {
       handler: async function (id: string) {
         if (id) {
-          const communityId = this.$route.params.communityId as string;
-          const community = this.dataStore.getCommunity(communityId);
-          const dexie = new DexieIPFS(communityId);
-
-          const image = await dexie.get(community.neighbourhood.image!);
-          // @ts-ignore
-          this.communityImage = image
+          this.communityImage = null;
+          setTimeout(async () => {
+            const community = this.dataStore.getCommunity(id);
+            const dexie = new DexieIPFS(id);
+  
+            const image = await dexie.get(community.neighbourhood.image!);
+            // @ts-ignore
+            this.communityImage = image
+          }, 500)
         }
       },
       immediate: true,

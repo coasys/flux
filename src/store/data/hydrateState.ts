@@ -67,7 +67,6 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
         neighbourhood: perspective.neighbourhood,
       },
       typedExpressionLanguages,
-      groupExpressionRef: groupExp?.groupExpressionRef || typedExpressionLanguages.find((lang: any) => lang.expressionType === ExpressionTypes.GroupExpression)?.languageAddress,
       neighbourhoodUrl: perspective.sharedUrl,
       membraneType: MembraneType.Unique,
       linkedPerspectives: [perspective.uuid],
