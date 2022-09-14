@@ -33,8 +33,6 @@
 }
 
 :root[theme="default"] j-menu-item {
-  --j-menu-item-height: var(--j-size-sm);
-  --j-menu-item-padding: 0 var(--j-space-300);
   --j-menu-item-color: hsl(var(--j-color-ui-hue), 0%, 70%);
 }
 
