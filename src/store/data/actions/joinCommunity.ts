@@ -38,12 +38,6 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
         neighbourhood
       );
 
-      //Get and cache the expression UI for each expression language
-      //And used returned expression language names to populate typedExpressionLanguages field
-      const typedExpressionLanguages = await getTypedExpressionLanguages(
-        neighbourhood.neighbourhood!.meta.links
-      );
-
       //Create member link between self and joining agent
       const addProfileLink = await client.perspective.addLink(
         neighbourhood.uuid,
@@ -70,7 +64,6 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
           thumbnail: groupExp?.thumbnail || "",
           creatorDid,
           perspective: neighbourhood,
-          typedExpressionLanguages: typedExpressionLanguages,
           neighbourhoodUrl: joiningLink,
           membraneType: MembraneType.Unique,
           linkedNeighbourhoods: [neighbourhood.uuid],
