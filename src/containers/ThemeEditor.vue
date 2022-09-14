@@ -28,6 +28,7 @@
         :value="theme.name"
         @change="(e) => updateTheme({ name: e.target.value })"
       >
+        <j-tab-item variant="button" value="default">Default</j-tab-item>
         <j-tab-item variant="button" value="light">Light</j-tab-item>
         <j-tab-item variant="button" value="dark">Dark</j-tab-item>
         <j-tab-item variant="button" value="black">Black</j-tab-item>
@@ -43,6 +44,7 @@
         :value="theme.fontFamily"
         @change="(e) => updateTheme({ fontFamily: e.target.value })"
       >
+        <j-tab-item variant="button" value="DM Sans">DM Sans</j-tab-item>
         <j-tab-item variant="button" value="Poppins">Poppins</j-tab-item>
         <j-tab-item variant="button" value="Roboto">Roboto</j-tab-item>
         <j-tab-item variant="button" value="Inter">Inter</j-tab-item>

@@ -58,10 +58,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import {
-  NeighbourhoodState,
-  ProfileWithDID,
-} from "@/store/types";
+import { NeighbourhoodState, ProfileWithDID } from "@/store/types";
 import { useDataStore } from "@/store/data";
 
 import { getProfile } from "@/utils/profileHelpers";
@@ -69,7 +66,7 @@ import Skeleton from "@/components/skeleton/Skeleton.vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export default defineComponent({
-  emits: ["cancel", "submit"],
+  emits: ["close", "submit"],
   components: { Skeleton },
   setup() {
     const dataStore = useDataStore();
@@ -90,13 +87,13 @@ export default defineComponent({
       handler: async function (users) {
         // reset before fetching again
         this.memberList = [];
+        if (!users) return;
         this.loading = true;
         for (const user of users) {
           if (user) {
             const member = await getProfile(user);
-
             if (member) {
-              this.memberList = [...this.memberList, member];
+              this.memberList.push(member);
             }
           }
         }
@@ -120,6 +117,8 @@ export default defineComponent({
     async profileClick(did: string) {
       const client = await getAd4mClient();
       const me = await client.agent.me();
+
+      this.$emit("close");
 
       if (did === me.did) {
         this.$router.push({ name: "home", params: { did } });

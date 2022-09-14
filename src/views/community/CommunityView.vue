@@ -10,7 +10,10 @@
     :open="modals.showCommunityMembers"
     @toggle="(e) => setShowCommunityMembers(e.target.open)"
   >
-    <community-members v-if="modals.showCommunityMembers" />
+    <community-members
+      @close="() => setShowCommunityMembers(false)"
+      v-if="modals.showCommunityMembers"
+    />
   </j-modal>
 
   <j-modal

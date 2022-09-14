@@ -25,7 +25,7 @@
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
-import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/web'
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 import Profile from "@/containers/Profile.vue";
 import useEventEmitter from "@/utils/useEventEmitter";
 
@@ -57,11 +57,17 @@ export default defineComponent({
     };
   },
   async mounted() {
+    const pkg =
+      /* @ts-ignore */
+      import.meta.env.MODE === "development"
+        ? "http://localhost:3030/dist/main.js"
+        : "https://unpkg.com/@junto-foundation/chat-view/dist/main.js";
+
     this.script = document.createElement("script");
     this.script.setAttribute("type", "module");
     this.script.innerHTML = `
-      import PerspectiveView from 'https://unpkg.com/@junto-foundation/chat-view/dist/main.js';
-      if(customElements.get('perspective-view') === undefined) 
+      import PerspectiveView from '${pkg}';
+      if(customElements.get('perspective-view') === undefined)
         customElements.define("perspective-view", PerspectiveView);
     `;
     this.script;
@@ -91,7 +97,7 @@ export default defineComponent({
   computed: {
     port(): number {
       // TODO: This needs to be reactive, probaly not now as we using a normal class
-      return parseInt(localStorage.getItem('ad4minPort') || '') || 12000;
+      return parseInt(localStorage.getItem("ad4minPort") || "") || 12000;
     },
     community(): CommunityState {
       const { communityId } = this.$route.params;
@@ -99,7 +105,10 @@ export default defineComponent({
     },
     channel(): ChannelState {
       const { channelId, communityId } = this.$route.params;
-      return this.dataStore.getChannel(communityId as string, channelId as string)!;
+      return this.dataStore.getChannel(
+        communityId as string,
+        channelId as string
+      )!;
     },
   },
   methods: {
@@ -107,10 +116,12 @@ export default defineComponent({
       this.toggleProfile(true, detail.did);
     },
     onPerspectiveClick({ detail }: any) {
-      let channelId = Object.values(this.dataStore.channels).find(
-        (channel) => channel.sourcePerspective === this.community.neighbourhood.perspective.uuid && detail.uuid === channel.name
+      const channelId = Object.values(this.dataStore.channels).find(
+        (channel) =>
+          channel.sourcePerspective ===
+            this.community.neighbourhood.perspective.uuid &&
+          detail.uuid === channel.name
       )?.id;
-      
 
       if (channelId) {
         this.$router.push({
