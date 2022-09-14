@@ -131,7 +131,12 @@
 
 <script lang="ts">
 import { useDataStore } from "@/store/data";
-import { ExpressionTypes, ModalsState, Profile, ProfileWithDID } from "@/store/types";
+import {
+  ExpressionTypes,
+  ModalsState,
+  Profile,
+  ProfileWithDID,
+} from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
 import { Link, LinkExpression, PerspectiveInput } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
@@ -197,10 +202,12 @@ export default defineComponent({
       const userStore = useUserStore();
       const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
 
-      const links = (await getAgentLinks(
-        did || me.did,
-        did === me.did || did === undefined ? userPerspective! : undefined
-      )).filter(e => !e.data.source.startsWith('flux://'));
+      const links = (
+        await getAgentLinks(
+          did || me.did,
+          did === me.did || did === undefined ? userPerspective! : undefined
+        )
+      ).filter((e) => !e.data.source.startsWith("flux://"));
 
       const preArea: { [x: string]: any } = {};
 
@@ -217,7 +224,7 @@ export default defineComponent({
             "text://",
             ""
           );
-        } else if (predicate === "has_images" || predicate === 'has_image') {
+        } else if (predicate === "has_images" || predicate === "has_image") {
           try {
             const expUrl = e.data.target;
             console.log("expUrl", expUrl);
@@ -275,11 +282,11 @@ export default defineComponent({
           this.joiningLink = link.has_post;
         }
       } else if (link.area_type === "webLink") {
-        window.open(link.has_post, '_blank');
+        window.open(link.has_post, "_blank");
       } else if (link.area_type === "simpleArea") {
         this.$router.push({
           name: `profile-feed`,
-          params: {fid: link.id},
+          params: { fid: link.id },
         });
       }
     },
@@ -314,7 +321,7 @@ export default defineComponent({
     },
     ...mapActions(useAppStore, ["setShowEditProfile"]),
   },
-  async mounted() {
+  async created() {
     const client = await getAd4mClient();
     this.getAgentProfile();
     this.getAgentAreas();
@@ -344,10 +351,6 @@ export default defineComponent({
         this.getAgentProfile();
         this.getAgentAreas();
       }
-    },
-    "$route.path"() {
-      this.getAgentProfile();
-      this.getAgentAreas();
     },
   },
   computed: {

@@ -27,8 +27,8 @@ export const useAppStore = defineStore("app", {
       showGlobalLoading: false,
       globalTheme: {
         fontSize: "md",
-        fontFamily: "Poppins",
-        name: "dark",
+        fontFamily: "DM Sans",
+        name: "default",
         hue: 270,
         saturation: 60,
       },
