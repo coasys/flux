@@ -1,13 +1,24 @@
-import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/web'
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 import { CHANNEL, LANGUAGE, SELF } from "@/constants/neighbourhoodMeta";
 import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
-import { Ad4mClient, LinkExpression, LinkQuery, PerspectiveProxy } from "@perspect3vism/ad4m";
+import {
+  Ad4mClient,
+  LinkExpression,
+  LinkQuery,
+  PerspectiveProxy,
+} from "@perspect3vism/ad4m";
 import { nanoid } from "nanoid";
 import { useDataStore } from ".";
-import { CommunityState, ExpressionTypes, FeedType, LocalCommunityState, MembraneType } from "../types";
+import {
+  CommunityState,
+  ExpressionTypes,
+  FeedType,
+  LocalCommunityState,
+  MembraneType,
+} from "../types";
 import { getGroupExpression } from "./actions/fetchNeighbourhoodMetadata";
-import { useUserStore } from '../user';
-import { getProfile } from '@/utils/profileHelpers';
+import { useUserStore } from "../user";
+import { getProfile } from "@/utils/profileHelpers";
 
 export async function getMetaFromLinks(links: LinkExpression[]) {
   const client = await getAd4mClient();
@@ -23,8 +34,8 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
     perspectiveUuid: perspective.uuid,
     theme: {
       fontSize: "md",
-      fontFamily: "Poppins",
-      name: "light",
+      fontFamily: "DM Sans",
+      name: "default",
       hue: 270,
       saturation: 60,
     },
@@ -36,21 +47,27 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
     notifications: {
       mute: false,
     },
-  }
+  };
 
   if (community && community.state) {
     state = community.state;
   }
 
-  const meta = getMetaFromNeighbourhood(perspective.neighbourhood?.meta?.links!);
+  const meta = getMetaFromNeighbourhood(
+    perspective.neighbourhood?.meta?.links!
+  );
 
-  const metaLangs = perspective.neighbourhood?.meta?.links!.filter((link: any) => link.data.predicate === LANGUAGE);
+  const metaLangs = perspective.neighbourhood?.meta?.links!.filter(
+    (link: any) => link.data.predicate === LANGUAGE
+  );
 
   const typeLangs = await getMetaFromLinks(metaLangs!);
 
   const typedExpressionLanguages = typeLangs!.map((link: any) => ({
     languageAddress: link.address,
-    expressionType: link.name.endsWith('group-expression') ? ExpressionTypes.GroupExpression : ExpressionTypes.Other,
+    expressionType: link.name.endsWith("group-expression")
+      ? ExpressionTypes.GroupExpression
+      : ExpressionTypes.Other,
   }));
 
   const groupExp = await getGroupExpression(perspective.uuid);
@@ -60,8 +77,8 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
       name: groupExp?.name || meta.name,
       creatorDid: meta.creatorDid,
       description: groupExp?.description || meta.description,
-      image: groupExp?.image || '',
-      thumbnail: groupExp?.thumbnail || '',
+      image: groupExp?.image || "",
+      thumbnail: groupExp?.thumbnail || "",
       perspective: {
         uuid: perspective.uuid,
         name: perspective.name,
@@ -93,8 +110,11 @@ export async function hydrateState() {
   userStore.setUserProfile(profile!);
 
   userStore.updateAgentStatus(status);
-  
-  const communities = dataStore.getCommunities.filter((community) => !perspectives.map(e => e.uuid).includes(community.state.perspectiveUuid));
+
+  const communities = dataStore.getCommunities.filter(
+    (community) =>
+      !perspectives.map((e) => e.uuid).includes(community.state.perspectiveUuid)
+  );
 
   for (const community of communities) {
     dataStore.removeCommunity({ communityId: community.state.perspectiveUuid });
@@ -103,10 +123,13 @@ export async function hydrateState() {
   }
 
   for (const perspective of perspectives) {
-    const links = await client.perspective.queryLinks(perspective.uuid, new LinkQuery({
-      source: SELF,
-      predicate: CHANNEL
-    }));
+    const links = await client.perspective.queryLinks(
+      perspective.uuid,
+      new LinkQuery({
+        source: SELF,
+        predicate: CHANNEL,
+      })
+    );
 
     if (links.length > 0) {
       if (perspective.sharedUrl !== undefined) {
@@ -114,25 +137,29 @@ export async function hydrateState() {
 
         dataStore.addCommunity(newCommunity);
 
-        const channels = [...Object.values(dataStore.channels)]
+        const channels = [...Object.values(dataStore.channels)];
 
         for (const link of links) {
-          const exist = channels.find((channel: any) => channel.name === link.data.target && channel.sourcePerspective === perspective.uuid);
-          
+          const exist = channels.find(
+            (channel: any) =>
+              channel.name === link.data.target &&
+              channel.sourcePerspective === perspective.uuid
+          );
+
           if (!exist) {
             dataStore.addChannel({
               communityId: perspective.uuid,
               channel: {
-                  id: nanoid(),
-                  name: link.data.target,
-                  creatorDid: link.author,
-                  sourcePerspective: perspective.uuid,
-                  hasNewMessages: false,
-                  createdAt: new Date().toISOString(),
-                  feedType: FeedType.Signaled,
-                  notifications: {
-                    mute: false,
-                  },
+                id: nanoid(),
+                name: link.data.target,
+                creatorDid: link.author,
+                sourcePerspective: perspective.uuid,
+                hasNewMessages: false,
+                createdAt: new Date().toISOString(),
+                feedType: FeedType.Signaled,
+                notifications: {
+                  mute: false,
+                },
               },
             });
           }
