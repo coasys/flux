@@ -1,4 +1,3 @@
-import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
 import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
 
 import { MEMBER, SELF } from "@/constants/neighbourhoodMeta";
@@ -10,7 +9,7 @@ import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { nanoid } from "nanoid";
-import { getGroupExpression } from "./fetchNeighbourhoodMetadata";
+import { getGroupMetadata } from "./fetchNeighbourhoodMetadata";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export interface Payload {
@@ -53,7 +52,7 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
       const { name, description, creatorDid, createdAt } =
         getMetaFromNeighbourhood(neighbourhood.neighbourhood!.meta.links);
 
-      const groupExp = await getGroupExpression(neighbourhood.uuid);
+      const groupExp = await getGroupMetadata(neighbourhood.uuid);
 
       const newCommunity = {
         neighbourhood: {

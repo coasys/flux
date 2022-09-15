@@ -116,18 +116,11 @@ export default defineComponent({
       this.toggleProfile(true, detail.did);
     },
     onPerspectiveClick({ detail }: any) {
-      const channelId = Object.values(this.dataStore.channels).find(
-        (channel) =>
-          channel.sourcePerspective ===
-            this.community.neighbourhood.perspective.uuid &&
-          detail.uuid === channel.name
-      )?.id;
-
-      if (channelId) {
+      if (detail.uuid) {
         this.$router.push({
           name: "channel",
           params: {
-            channelId,
+            channelId: detail.uuid,
             communityId: this.community.neighbourhood.perspective.uuid,
           },
         });

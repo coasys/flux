@@ -9,15 +9,9 @@ export default async function (id: string): Promise<void> {
   const dataStore = useDataStore();
   const client = await getAd4mClient();
 
-  const memberLinks = await client.perspective.queryLinks(
-    id,
-    new LinkQuery({
-      source: SELF,
-      predicate: MEMBER,
-    })
-  );
+  const memberLinks = await client.perspective.queryProlog(id, `triple("${SELF}", "${MEMBER}", M).`);
   const dids = memberLinks.map((link: LinkExpression) => {
-    const url = link.data.target;
+    const url = link.M;
     return url.includes("://") ? url.split("://")[1] : url;
   });
   for (const did of dids) {

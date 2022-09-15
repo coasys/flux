@@ -13,17 +13,10 @@ export default async (communityId: string): Promise<void> => {
 
     //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button
     const community = dataStore.getCommunity(communityId);
-    console.log(community);
-    const channelLinks = await client.perspective.queryLinks(
-      community.neighbourhood.perspective.uuid,
-      new LinkQuery({
-        source: SELF,
-        predicate: CHANNEL,
-      })
-    );
+    const channelLinks = await client.perspective.queryProlog(community.neighbourhood.perspective.uuid, `triple("${SELF}", "${CHANNEL}", C).`);
 
     for (let i = 0; i < channelLinks.length; i++) {
-        const name = channelLinks[i].data!.target;
+        const name = channelLinks[i].C;
 
         const found = dataStore.getChannel(community.neighbourhood.perspective.uuid, name)
 

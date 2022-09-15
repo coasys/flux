@@ -12,8 +12,8 @@ interface UpdatePayload {
   communityId: string;
   name: string;
   description: string;
-  image: string;
-  thumbnail: string;
+  image: string | null;
+  thumbnail: string | null;
 }
 
 interface AddChannel {
@@ -112,8 +112,8 @@ export default {
     if (community) {
       community.name = name;
       community.description = description;
-      community.image = image;
-      community.thumbnail = thumbnail;
+      if (image) {community.image = image };
+      if (thumbnail) { community.thumbnail = thumbnail };
     }
 
     state.neighbourhoods[communityId] = community;
