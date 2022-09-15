@@ -131,14 +131,9 @@
 
 <script lang="ts">
 import { useDataStore } from "@/store/data";
-import {
-  ExpressionTypes,
-  ModalsState,
-  Profile,
-  ProfileWithDID,
-} from "@/store/types";
+import { ModalsState, ProfileWithDID } from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
-import { Link, LinkExpression, PerspectiveInput } from "@perspect3vism/ad4m";
+import { PerspectiveInput } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
 import ProfileCard from "./ProfileCards.vue";
 import ProfileAddLink from "./ProfileAddLink.vue";
@@ -207,9 +202,15 @@ export default defineComponent({
           did || me.did,
           did === me.did || did === undefined ? userPerspective! : undefined
         )
-      ).filter((e) => !e.data.source.startsWith("flux://"));
+      ).filter(
+        (e) =>
+          //Filter out the flux and ad4m profile links
+          !e.data.source.startsWith("flux://") &&
+          !e.data.source.startsWith(did || me.did)
+      );
+      console.log(links);
 
-      const preArea: { [x: string]: any } = {};
+      const preArea: { [x: string]: { [x: string]: any } } = {};
 
       for (const e of links) {
         const predicate = e.data.predicate.split("://")[1];
@@ -227,16 +228,18 @@ export default defineComponent({
         } else if (predicate === "has_images" || predicate === "has_image") {
           try {
             const expUrl = e.data.target;
-            console.log("expUrl", expUrl);
             const image = await client.expression.get(expUrl);
-            console.log("image", image);
             if (image) {
               if (!preArea[e.data.source][predicate]) {
                 preArea[e.data.source][predicate] = [];
                 preArea[e.data.source]["has_image"] = image.data.slice(1, -1);
               }
 
-              preArea[e.data.source][predicate].push(image.data.slice(1, -1));
+              if (predicate === "has_images") {
+                preArea[e.data.source][predicate].push(image.data.slice(1, -1));
+              } else {
+                preArea[e.data.source][predicate] = image.data.slice(1, -1);
+              }
             }
           } catch (e) {
             console.log("Error encountered while parsing images", e);
@@ -245,6 +248,8 @@ export default defineComponent({
           preArea[e.data.source][predicate] = e.data.target.split("://")[1];
         }
       }
+
+      console.log(preArea);
 
       this.profileLinks = Object.values(preArea).filter(
         (e) => e.id !== FLUX_PROFILE
