@@ -1,10 +1,8 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
-import { CHANNEL, LANGUAGE, SELF } from "@/constants/neighbourhoodMeta";
+import { CHANNEL, SELF } from "@/constants/neighbourhoodMeta";
 import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
 import {
-  Ad4mClient,
   LinkExpression,
-  LinkQuery,
   PerspectiveProxy,
 } from "@perspect3vism/ad4m";
 import { nanoid } from "nanoid";
@@ -86,6 +84,11 @@ export async function hydrateState() {
   const status = await client.agent.status();
 
   const profile = await getProfile(status.did!, true);
+
+  const fluxAgentPerspective = await (await client.perspective.all()).filter(val => val.name == "Flux Agent Profile Data");
+  if (fluxAgentPerspective.length > 0) {
+    userStore.addAgentProfileProxyPerspectiveId(fluxAgentPerspective[0].uuid);
+  }
 
   userStore.setUserProfile(profile!);
 
