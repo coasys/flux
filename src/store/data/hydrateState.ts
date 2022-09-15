@@ -10,7 +10,7 @@ import {
 import { nanoid } from "nanoid";
 import { useDataStore } from ".";
 import { CommunityState, FeedType, LocalCommunityState, MembraneType } from "../types";
-import { getGroupExpression } from "./actions/fetchNeighbourhoodMetadata";
+import { getGroupMetadata } from "./actions/fetchNeighbourhoodMetadata";
 import { useUserStore } from "../user";
 import { getProfile } from "@/utils/profileHelpers";
 
@@ -51,7 +51,7 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
     perspective.neighbourhood?.meta?.links!
   );
 
-  const groupExp = await getGroupExpression(perspective.uuid);
+  const groupExp = await getGroupMetadata(perspective.uuid);
 
   return {
     neighbourhood: {
@@ -103,15 +103,9 @@ export async function hydrateState() {
   }
 
   for (const perspective of perspectives) {
-    const links = await client.perspective.queryLinks(
-      perspective.uuid,
-      new LinkQuery({
-        source: SELF,
-        predicate: CHANNEL,
-      })
-    );
+    const channelLinks = await client.perspective.queryProlog(perspective.uuid, `triple("${SELF}", "${CHANNEL}", C).`);
 
-    if (links.length > 0) {
+    if (channelLinks) {
       if (perspective.sharedUrl !== undefined) {
         const newCommunity = await buildCommunity(perspective);
 
@@ -119,10 +113,10 @@ export async function hydrateState() {
 
         const channels = [...Object.values(dataStore.channels)];
 
-        for (const link of links) {
+        for (const link of channelLinks) {
           const exist = channels.find(
             (channel: any) =>
-              channel.name === link.data.target &&
+              channel.name === link.C &&
               channel.sourcePerspective === perspective.uuid
           );
 
@@ -131,7 +125,7 @@ export async function hydrateState() {
               communityId: perspective.uuid,
               channel: {
                 id: nanoid(),
-                name: link.data.target,
+                name: link.C,
                 creatorDid: link.author,
                 sourcePerspective: perspective.uuid,
                 hasNewMessages: false,

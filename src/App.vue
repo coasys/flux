@@ -54,7 +54,7 @@ import { useUserStore } from "./store/user";
 import retry from "./utils/retry";
 import { buildCommunity, hydrateState } from "./store/data/hydrateState";
 import { nanoid } from "nanoid";
-import { getGroupExpression } from "./store/data/actions/fetchNeighbourhoodMetadata";
+import { getGroupMetadata } from "./store/data/actions/fetchNeighbourhoodMetadata";
 import {
   getAd4mClient,
   isConnected,
@@ -221,7 +221,7 @@ export default defineComponent({
         ) {
           console.log("Community update via link signal!");
 
-          const groupExp = await getGroupExpression(perspective);
+          const groupExp = await getGroupMetadata(perspective);
 
           this.dataStore.updateCommunityMetadata({
             communityId: perspective,

@@ -2,7 +2,6 @@ import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
 import { SELF, FLUX_GROUP_NAME, FLUX_GROUP_DESCRIPTION, FLUX_GROUP_IMAGE, FLUX_GROUP_THUMBNAIL } from "@/constants/neighbourhoodMeta";
 import { useAppStore } from "@/store/app";
 
-import { ExpressionTypes } from "@/store/types";
 import { resizeImage, dataURItoBlob, blobToDataURL } from "@/utils/profileHelpers";
 import { LinkQuery } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
@@ -19,6 +18,8 @@ export interface Payload {
 async function deleteCommunityLinks(communityId: string) {
   const client = await getAd4mClient();
   
+  //TODO; this should be prolog queries, but right now we are not able to get the full link expression from prolog
+  //we should add hashing for each link expression
   const groupNameLink = client.perspective.queryLinks(
     communityId,
     new LinkQuery({
