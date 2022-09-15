@@ -57,10 +57,11 @@ export default defineComponent({
           if (user) {            
             const member = await getProfile(user);
 
-            if (member && !this.firstUsers.find(e => e.did === user)) {
+            
+            if (member && !this.firstUsers.find(e => e.did === user) && this.firstUsers.length <= 2) {
               this.firstUsers = [...this.firstUsers, member];
 
-              if (this.firstUsers.length === 3) {
+              if (this.firstUsers.length >= 3) {
                 break;
               }
             }
