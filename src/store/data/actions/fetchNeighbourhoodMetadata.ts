@@ -27,23 +27,25 @@ export async function getGroupMetadata(communityId: string) {
   };
 
 
-  for (const link of groupMetaData) {
-    if (typeof link.GN == 'string') {
-      group.name = link.GN
-    } else if (typeof link.GD == 'string') {
-      group.description = link.GD
-    } else if (typeof link.GI == 'string') {
-      const image = await getImage(link.GI);
+  if (groupMetaData) {
+    for (const link of groupMetaData) {
+      if (typeof link.GN == 'string') {
+        group.name = link.GN
+      } else if (typeof link.GD == 'string') {
+        group.description = link.GD
+      } else if (typeof link.GI == 'string') {
+        const image = await getImage(link.GI);
+    
+        await dexie.save(link.GI, image);
   
-      await dexie.save(link.GI, image);
-
-      group.image = link.GI;
-    } else if (typeof link.GT == 'string') {
-      const image = await getImage(link.GT);
+        group.image = link.GI;
+      } else if (typeof link.GT == 'string') {
+        const image = await getImage(link.GT);
+    
+        await dexie.save(link.GT, image);
   
-      await dexie.save(link.GT, image);
-
-      group.thumbnail = link.GT;
+        group.thumbnail = link.GT;
+      }
     }
   }
 
