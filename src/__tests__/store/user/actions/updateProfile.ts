@@ -5,6 +5,7 @@ import { useUserStore } from "@/store/user";
 import { useDataStore } from "@/store/data";
 import { ad4mClient } from "@/app";
 import agentByDIDLinksFixture from "../../../fixtures/agentByDIDLinks.json";
+import { FLUX_PROXY_PROFILE_NAME } from "@/constants/profile";
 
 describe("Update Profile", () => {
   let store: Pinia;
@@ -40,7 +41,7 @@ describe("Update Profile", () => {
       .spyOn(ad4mClient.perspective, "all")
       // @ts-ignore
       .mockResolvedValue([{
-        name: "Flux Agent Profile Data",
+        name: FLUX_PROXY_PROFILE_NAME,
         // @ts-ignore
         neighbourhood: null,
         // @ts-ignore

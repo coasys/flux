@@ -5,7 +5,7 @@ import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useUserStore } from "@/store/user";
 import { ad4mClient } from "@/app";
 import agentByDIDLinksFixture from "../../../fixtures/agentByDIDLinks.json";
-import { HAS_BG_IMAGE, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "@/constants/profile";
+import { FLUX_PROXY_PROFILE_NAME, HAS_BG_IMAGE, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "@/constants/profile";
 
 describe("Store Actions", () => {
   let store: Pinia;
@@ -49,7 +49,7 @@ describe("Store Actions", () => {
       .spyOn(ad4mClient.perspective, "all")
       // @ts-ignore
       .mockResolvedValue([{
-        name: "Flux Agent Profile Data",
+        name: FLUX_PROXY_PROFILE_NAME,
         // @ts-ignore
         neighbourhood: null,
         // @ts-ignore

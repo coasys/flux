@@ -11,6 +11,7 @@ import { CommunityState, FeedType, LocalCommunityState, MembraneType } from "../
 import { getGroupMetadata } from "./actions/fetchNeighbourhoodMetadata";
 import { useUserStore } from "../user";
 import { getProfile } from "@/utils/profileHelpers";
+import { FLUX_PROXY_PROFILE_NAME } from "@/constants/profile";
 
 export async function getMetaFromLinks(links: LinkExpression[]) {
   const client = await getAd4mClient();
@@ -85,7 +86,7 @@ export async function hydrateState() {
 
   const profile = await getProfile(status.did!, true);
 
-  const fluxAgentPerspective = await (await client.perspective.all()).filter(val => val.name == "Flux Agent Profile Data");
+  const fluxAgentPerspective = await (await client.perspective.all()).filter(val => val.name == FLUX_PROXY_PROFILE_NAME);
   if (fluxAgentPerspective.length > 0) {
     userStore.addAgentProfileProxyPerspectiveId(fluxAgentPerspective[0].uuid);
   }

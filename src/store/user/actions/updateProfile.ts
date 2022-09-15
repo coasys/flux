@@ -6,7 +6,7 @@ import { Link, LinkExpression, PerspectiveInput } from "@perspect3vism/ad4m";
 import removeTypeName from "@/utils/removeTypeName";
 import getAgentLinks from "@/utils/getAgentLinks";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
-import { FLUX_PROFILE, HAS_BG_IMAGE, HAS_BIO, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "@/constants/profile";
+import { FLUX_PROFILE, FLUX_PROXY_PROFILE_NAME, HAS_BG_IMAGE, HAS_BIO, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "@/constants/profile";
 import { resizeImage, dataURItoBlob, blobToDataURL } from "@/utils/profileHelpers";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
@@ -74,7 +74,7 @@ export default async (payload: Payload): Promise<void> => {
   } as Profile;
   
   const perspectives = await client.perspective.all();
-  const userPerspective = perspectives.find(e => e.name === "Flux Agent Profile Data");
+  const userPerspective = perspectives.find(e => e.name === FLUX_PROXY_PROFILE_NAME);
 
   if (userPerspective) {
     userStore.addAgentProfileProxyPerspectiveId(userPerspective.uuid)

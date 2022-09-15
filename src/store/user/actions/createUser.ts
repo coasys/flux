@@ -1,6 +1,6 @@
 import { AD4M_AGENT, KAICHAO_AGENT, JUNTO_AGENT } from "@/constants/agents";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
-import { FLUX_PROFILE, HAS_EMAIL, HAS_FAMILY_NAME, HAS_GIVEN_NAME, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "@/constants/profile";
+import { FLUX_PROFILE, FLUX_PROXY_PROFILE_NAME, HAS_EMAIL, HAS_FAMILY_NAME, HAS_GIVEN_NAME, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "@/constants/profile";
 
 import { useAppStore } from "@/store/app";
 import getAgentLinks from "@/utils/getAgentLinks";
@@ -44,12 +44,12 @@ export default async ({
       : undefined;
 
     const perspectives = await client.perspective.all();
-    let userPerspective = perspectives.find(e => e.name === "Flux Agent Profile Data");
+    let userPerspective = perspectives.find(e => e.name === FLUX_PROXY_PROFILE_NAME);
     let currentLinks = [] as LinkExpression[];
     if (userPerspective) {
       currentLinks = await getAgentLinks(userStore.agent.did!, userPerspective?.uuid);
     } else {
-      userPerspective = await client.perspective.add("Flux Agent Profile Data");
+      userPerspective = await client.perspective.add(FLUX_PROXY_PROFILE_NAME);
     };
     const tempLinks = [...currentLinks];
 
