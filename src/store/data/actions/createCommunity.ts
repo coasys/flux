@@ -8,14 +8,12 @@ import { MEMBER, SELF, FLUX_GROUP_NAME, FLUX_GROUP_IMAGE, FLUX_GROUP_DESCRIPTION
 
 import {
   MembraneType,
-  FluxExpressionReference,
   CommunityState,
 } from "@/store/types";
 import { Perspective, PerspectiveHandle, Literal } from "@perspect3vism/ad4m";
 import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
-import { useUserStore } from "@/store/user";
 import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/web'
 import { blobToDataURL, dataURItoBlob, resizeImage } from "@/utils/profileHelpers";
 
@@ -61,15 +59,12 @@ export default async ({
         })
       );
     console.log("Response from create social-context", socialContextLang);
-    //Get language after templating to install it
-    const typedExpLangs: FluxExpressionReference[] = [];
 
     //Publish perspective
     const metaLinks = await createNeighbourhoodMeta(
       perspectiveName,
       description,
       creatorDid,
-      typedExpLangs
     );
     const meta = new Perspective(metaLinks);
     let sharedUrl = createSourcePerspective.sharedUrl;
@@ -183,7 +178,6 @@ export default async ({
           sharedUrl,
           neighbourhood: createSourcePerspective.neighbourhood,
         },
-        typedExpressionLanguages: typedExpLangs,
         neighbourhoodUrl: sharedUrl,
         membraneType: MembraneType.Unique,
         linkedPerspectives: [createSourcePerspective.uuid],

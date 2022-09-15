@@ -1,4 +1,3 @@
-import { FluxExpressionReference } from "@/store/types";
 import { Link, LinkExpression } from "@perspect3vism/ad4m";
 
 import {
@@ -15,7 +14,6 @@ export async function createNeighbourhoodMeta(
   name: string,
   description: string,
   creatorDid: string,
-  expressionLanguages: FluxExpressionReference[]
 ): Promise<LinkExpression[]> {
   const client = await getAd4mClient();
   //Create the perspective to hold our meta
@@ -58,16 +56,6 @@ export async function createNeighbourhoodMeta(
       predicate: DESCRIPTION,
     })
   );
-
-  for (const lang of expressionLanguages) {
-    expressionLinks.push(
-      new Link({
-        source: SELF,
-        target: lang.languageAddress,
-        predicate: LANGUAGE,
-      })
-    );
-  }
 
   //Create the links on the perspective
   for (const exp of expressionLinks) {
