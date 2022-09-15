@@ -13,7 +13,7 @@
           class="left-nav__profile-icon"
           size="xl"
           :hash="userDid"
-          :src="userProfile?.profilePicture"
+          :src="userProfileImage"
           @click="() => navigate()"
         ></j-avatar>
       </j-tooltip>
@@ -23,23 +23,38 @@
 
 <script lang="ts">
 import { useAppStore } from "@/store/app";
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import { mapActions } from "pinia";
 import { useUserStore } from "@/store/user";
 import { Profile } from "@/store/types/userprofile";
+import { getImage } from "@/utils/profileHelpers";
 
 export default defineComponent({
   name: "topsection",
   setup() {
     const userStore = useUserStore();
+    const userProfileImage = ref();
 
     return {
       did: userStore.agent.did,
       userStore,
+      userProfileImage
     };
   },
   methods: {
     ...mapActions(useAppStore, ["setShowCreateCommunity"]),
+  },
+  watch:{
+    userProfile: {
+      async handler() {
+        if (this.userStore.profile?.profilePicture) {
+          this.userProfileImage =  await getImage(this.userStore.profile?.profilePicture)
+        } else {
+          this.userProfileImage = null;
+        }
+      },
+      immediate: true,
+    }
   },
   computed: {
     userProfile(): Profile | null {

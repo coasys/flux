@@ -85,7 +85,7 @@ export async function hydrateState() {
   const perspectives = await client.perspective.all();
   const status = await client.agent.status();
 
-  const profile = await getProfile(status.did!);
+  const profile = await getProfile(status.did!, true);
 
   userStore.setUserProfile(profile!);
 

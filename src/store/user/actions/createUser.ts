@@ -52,6 +52,9 @@ export default async ({
       userPerspective = await client.perspective.add("Flux Agent Profile Data");
     };
     const tempLinks = [...currentLinks];
+
+    let profileImageLink = null;
+    let thumbnailImageLink = null;
     
     if (profilePicture) {
       const thumbnailImage = await client.expression.create(
@@ -64,7 +67,7 @@ export default async ({
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
 
-      const profileImageLink = await client.perspective.addLink(
+      profileImageLink = await client.perspective.addLink(
         userPerspective!.uuid,
         new Link({
           source: FLUX_PROFILE,
@@ -73,7 +76,7 @@ export default async ({
         })
       );
   
-      const thumbnailImageLink = await client.perspective.addLink(
+      thumbnailImageLink = await client.perspective.addLink(
         userPerspective!.uuid,
         new Link({
           source: FLUX_PROFILE,
@@ -159,8 +162,8 @@ export default async ({
       email: email,
       givenName: givenName,
       familyName: familyName,
-      profilePicture,
-      thumbnailPicture: thumbnail,
+      profilePicture: profileImageLink?.data?.target || null,
+      thumbnailPicture: thumbnailImageLink?.data?.target || null,
       bio: ""
     });
 

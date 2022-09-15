@@ -73,8 +73,6 @@ export default async (payload: Payload): Promise<void> => {
     bio: payload.bio || currentProfile?.bio
   } as Profile;
   
-  userStore.setUserProfile(newProfile);
-
   const perspectives = await client.perspective.all();
   const userPerspective = perspectives.find(e => e.name === "Flux Agent Profile Data");
 
@@ -115,6 +113,10 @@ export default async (payload: Payload): Promise<void> => {
       predicate: HAS_USERNAME,
     }));
 
+    let profileImageLink: any = null;
+    let thumbnailImageLink: any = null;
+    let profileBgLink: any = null;
+
     if (payload.profileBg) {
       const image = await client.expression.create(
         payload.profileBg,
@@ -149,7 +151,7 @@ export default async (payload: Payload): Promise<void> => {
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
 
-      const profileImageLink = await replaceLink(
+      profileImageLink = await replaceLink(
         links,
         new Link({
           source: FLUX_PROFILE,
@@ -158,7 +160,7 @@ export default async (payload: Payload): Promise<void> => {
         })
       );
   
-      const thumbnailImageLink = await replaceLink(
+      thumbnailImageLink = await replaceLink(
         links,
         new Link({
           source: FLUX_PROFILE,
@@ -177,6 +179,14 @@ export default async (payload: Payload): Promise<void> => {
     ]) {
       finalLinks.push(removeTypeName(link));
     }
+
+  userStore.setUserProfile({
+    ...newProfile,
+    profilePicture: profileImageLink?.data?.target || null,
+    thumbnailPicture: thumbnailImageLink?.data?.target || null,
+    profileBg: profileBgLink || null
+  });
+
 
     await client.agent.updatePublicPerspective({
       links: finalLinks,

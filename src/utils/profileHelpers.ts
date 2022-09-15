@@ -113,7 +113,7 @@ export async function getImage(expUrl: string): Promise<string> {
   })
 }
 
-export async function getProfile(did: string): Promise<ProfileWithDID | null> {
+export async function getProfile(did: string, url = false): Promise<ProfileWithDID | null> {
   const links = await getAgentLinks(did);
 
   const profile: Profile = {
@@ -143,17 +143,16 @@ export async function getProfile(did: string): Promise<ProfileWithDID | null> {
         break;
       case HAS_PROFILE_IMAGE:
         expUrl = link.data.target;
-        profile!.profilePicture = await getImage(expUrl);
-
+        profile!.profilePicture = !url ? await getImage(expUrl) : expUrl;
         break;
       case HAS_THUMBNAIL_IMAGE:
         expUrl = link.data.target;
-        profile!.thumbnailPicture = await getImage(expUrl);
+        profile!.thumbnailPicture = !url ? await getImage(expUrl) : expUrl;
 
         break;
       case HAS_BG_IMAGE:
         expUrl = link.data.target;
-        profile!.profileBg = await getImage(expUrl);
+        profile!.profileBg = !url ? await getImage(expUrl) : expUrl;
 
         break;
       case HAS_EMAIL:

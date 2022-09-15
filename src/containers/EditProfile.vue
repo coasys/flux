@@ -43,6 +43,7 @@ import { Profile } from "@/store/types";
 import { useUserStore } from "@/store/user";
 import { useAppStore } from "@/store/app";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
+import { getImage } from "@/utils/profileHelpers";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -79,8 +80,12 @@ export default defineComponent({
   },
   watch: {
     "userProfile.profilePicture": {
-      handler: function (val: string): void {
-        this.profilePicture = val;
+      handler: async function (val: string) {
+        if (this.userStore.profile?.profilePicture) {
+          this.profilePicture =  await getImage(this.userStore.profile?.profilePicture)
+        } else {
+          this.profilePicture = '';
+        }
       },
       immediate: true,
     },
