@@ -23,21 +23,7 @@ export default async function removeCommunity({
 
     delete dataStore.communities[communityId];
     delete dataStore.neighbourhoods[communityId];
-  
-    //TODO: this should be a prolog query
-    const channels = await client.perspective.queryLinks(communityId, new LinkQuery({
-      source: SELF,
-      predicate: CHANNEL
-    }));
-  
-    const promises = [];
-  
-    for (const channel of channels) {
-      promises.push(client.perspective.removeLink(communityId, channel));
-    }
-  
-    await Promise.all(promises);
-    
+
     for (const channel of Object.values(dataStore.channels)) {
       if (channel.sourcePerspective === communityId) {
         delete dataStore.channels[channel.id];
