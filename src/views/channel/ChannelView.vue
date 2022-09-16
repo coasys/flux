@@ -2,8 +2,8 @@
   <div style="height: 100%">
     <perspective-view
       :port="port"
-      :channel="channel.name"
-      :perspective-uuid="channel.sourcePerspective"
+      :channel="channelId"
+      :perspective-uuid="communityId"
       @agent-click="onAgentClick"
       @perspective-click="onPerspectiveClick"
       @hide-notification-indicator="onHideNotificationIndicator"
