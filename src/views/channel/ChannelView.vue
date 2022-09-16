@@ -1,24 +1,25 @@
 <template>
-  <perspective-view
-    v-if="channel"
-    :port="port"
-    :channel="channel.name"
-    :perspective-uuid="channel.sourcePerspective"
-    @agent-click="onAgentClick"
-    @perspective-click="onPerspectiveClick"
-    @hide-notification-indicator="onHideNotificationIndicator"
-  ></perspective-view>
-  <j-modal
-    size="xs"
-    v-if="activeProfile"
-    :open="showProfile"
-    @toggle="(e) => toggleProfile(e.target.open, activeProfile)"
-  >
-    <Profile
-      :did="activeProfile"
-      @openCompleteProfile="() => handleProfileClick(activeProfile)"
-    />
-  </j-modal>
+  <div style="height: 100%">
+    <perspective-view
+      :port="port"
+      :channel="channel.name"
+      :perspective-uuid="channel.sourcePerspective"
+      @agent-click="onAgentClick"
+      @perspective-click="onPerspectiveClick"
+      @hide-notification-indicator="onHideNotificationIndicator"
+    ></perspective-view>
+    <j-modal
+      size="xs"
+      v-if="activeProfile"
+      :open="showProfile"
+      @toggle="(e) => toggleProfile(e.target.open, activeProfile)"
+    >
+      <Profile
+        :did="activeProfile"
+        @openCompleteProfile="() => handleProfileClick(activeProfile)"
+      />
+    </j-modal>
+  </div>
 </template>
 
 <script lang="ts">
@@ -37,6 +38,7 @@ interface MentionTrigger {
 
 export default defineComponent({
   name: "ChannelView",
+  props: ["channelId", "communityId"],
   components: {
     Profile,
   },
@@ -76,35 +78,18 @@ export default defineComponent({
   unmounted() {
     document.body.removeChild(this.script as any);
   },
-  beforeRouteUpdate(to, from, next) {
-    const editor = document.getElementsByTagName("footer")[0];
-    (
-      editor
-        ?.getElementsByTagName("j-flex")[0]
-        ?.querySelector("emoji-picker") as any
-    )?.database.close();
-    next();
-  },
-  beforeRouteLeave(to, from, next) {
-    const editor = document.getElementsByTagName("footer")[0];
-    (
-      editor
-        ?.getElementsByTagName("j-flex")[0]
-        ?.querySelector("emoji-picker") as any
-    )?.database.close();
-    next();
-  },
   computed: {
     port(): number {
       // TODO: This needs to be reactive, probaly not now as we using a normal class
       return parseInt(localStorage.getItem("ad4minPort") || "") || 12000;
     },
     community(): CommunityState {
-      const { communityId } = this.$route.params;
+      const communityId = this.communityId;
       return this.dataStore.getCommunity(communityId as string);
     },
     channel(): ChannelState {
-      const { channelId, communityId } = this.$route.params;
+      const communityId = this.communityId;
+      const channelId = this.channelId;
       return this.dataStore.getChannel(
         communityId as string,
         channelId as string
