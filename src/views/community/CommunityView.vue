@@ -3,7 +3,21 @@
     <template v-slot:sidebar>
       <community-sidebar :community="community"></community-sidebar>
     </template>
-    <router-view :key="$route.fullPath"></router-view>
+
+    <div
+      style="height: 100%"
+      v-for="channel in channels"
+      :key="channel.name"
+      :style="{
+        height: channel.name === $route.params.channelId ? '100%' : '0',
+      }"
+    >
+      <channel-view
+        v-show="channel.name === $route.params.channelId"
+        :channelId="channel.name"
+        :communityId="community.neighbourhood.perspective.uuid"
+      ></channel-view>
+    </div>
   </sidebar-layout>
 
   <j-modal
@@ -79,17 +93,19 @@ import EditCommunity from "@/containers/EditCommunity.vue";
 import CreateChannel from "@/containers/CreateChannel.vue";
 import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunitySettings from "@/containers/CommunitySettings.vue";
+import ChannelView from "@/views/channel/ChannelView.vue";
 
-import { CommunityState, ModalsState } from "@/store/types";
+import { CommunityState, ModalsState, ChannelState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
-import { mapActions } from "pinia";
+import { mapActions, mapState } from "pinia";
 
 export default defineComponent({
   name: "CommunityView",
   components: {
     EditCommunity,
     CreateChannel,
+    ChannelView,
     CommunityMembers,
     CommunitySidebar,
     CommunitySettings,
@@ -112,18 +128,19 @@ export default defineComponent({
   watch: {
     "$route.params.communityId": {
       handler: function (id: string) {
-        if (id != undefined) {
+        if (id) {
           this.dataStore.fetchNeighbourhoodMembers(id);
           this.dataStore.fetchNeighbourhoodMetadata(id);
           this.dataStore.fetchNeighbourhoodChannels(id);
+          this.handleThemeChange(id);
+          this.goToActiveChannel(id);
         }
-        this.handleThemeChange(id);
-        this.goToActiveChannel(id);
       },
       immediate: true,
     },
   },
   methods: {
+    ...mapState(useDataStore, ["getChannelStates"]),
     ...mapActions(useAppStore, [
       "setShowCreateChannel",
       "setShowEditCommunity",
@@ -180,6 +197,13 @@ export default defineComponent({
     community(): CommunityState {
       const communityId = this.$route.params.communityId as string;
       return this.dataStore.getCommunity(communityId);
+    },
+    channels(): ChannelState[] {
+      const communityId = this.$route.params.communityId as string;
+
+      const channels = this.getChannelStates()(communityId);
+
+      return channels;
     },
   },
 });
