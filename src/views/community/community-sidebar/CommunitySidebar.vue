@@ -166,8 +166,6 @@ import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import {
   ChannelState,
   CommunityState,
-  ExpressionTypes,
-  FluxExpressionReference,
 } from "@/store/types";
 import { mapActions, mapState } from "pinia";
 import { useDataStore } from "@/store/data";
@@ -215,7 +213,6 @@ export default defineComponent({
     }
   },
   async mounted() {
-    
     watch(this.dataStore.neighbourhoods, async () => {
       setTimeout(async () => {
         const communityId = this.$route.params.communityId as string;
