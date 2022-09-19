@@ -96,7 +96,7 @@ export default defineComponent({
     const updateCommunityListWithImage = async () => {
       let communities = this.dataStore.getCommunityNeighbourhoods;
       const tempCommunities = []
-  
+
       for (const community of communities) {
         const tempCommunity = {...community};
         const dexie = new DexieIPFS(tempCommunity.perspective.uuid);
@@ -109,6 +109,8 @@ export default defineComponent({
 
       this.communities = tempCommunities;
     }
+
+    updateCommunityListWithImage()
 
     watch(this.dataStore.neighbourhoods, () => setTimeout(() => updateCommunityListWithImage(), 500))
   },
