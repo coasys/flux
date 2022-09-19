@@ -7,7 +7,7 @@
     <div
       style="height: 100%"
       v-for="channel in filteredChannels"
-      :key="`${$route.params.communityId}-${channel.name}`"
+      :key="`${channel.sourcePerspective}-${channel.name}`"
       :style="{
         height: channel.name === $route.params.channelId ? '100%' : '0',
       }"
@@ -153,7 +153,10 @@ export default defineComponent({
           const communityId = this.$route.params.communityId as string;
           const channel = this.dataStore.getChannel(communityId, id);
           if (channel) {
-            this.loadedChannels[channel.id] = true;
+            this.loadedChannels = {
+              ...this.loadedChannels,
+              [channel.id]: true,
+            };
           }
         }
       },
