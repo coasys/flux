@@ -7,7 +7,7 @@
     <div
       style="height: 100%"
       v-for="channel in filteredChannels"
-      :key="channel.id"
+      :key="`${$route.params.communityId}-${channel.name}`"
       :style="{
         height: channel.name === $route.params.channelId ? '100%' : '0',
       }"
