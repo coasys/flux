@@ -38,4 +38,8 @@ export interface ApplicationState {
     show: boolean;
     message: string;
   };
+  route: {
+    activeCommunity: string;
+    loadedChannels: {[x: string]: boolean}
+  }
 }

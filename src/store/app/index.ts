@@ -42,6 +42,10 @@ export const useAppStore = defineStore("app", {
         show: false,
         message: "",
       },
+      route: {
+        activeCommunity: '',
+        loadedChannels: {}
+      }
     };
   },
   getters,

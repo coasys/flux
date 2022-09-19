@@ -6,7 +6,7 @@
 
     <div
       style="height: 100%"
-      v-for="channel in channels"
+      v-for="channel in filteredChannels"
       :key="channel.name"
       :style="{
         height: channel.name === $route.params.channelId ? '100%' : '0',
@@ -134,6 +134,15 @@ export default defineComponent({
           this.dataStore.fetchNeighbourhoodChannels(id);
           this.handleThemeChange(id);
           this.goToActiveChannel(id);
+          this.setActiveCommunity(id);
+        }
+      },
+      immediate: true,
+    },
+    "$route.params.channelId": {
+      handler: function (id: string) {
+        if (id) {
+          this.appStore.addLoadedChannels(id);
         }
       },
       immediate: true,
@@ -147,6 +156,7 @@ export default defineComponent({
       "setShowCommunityMembers",
       "setShowInviteCode",
       "setShowCommunitySettings",
+      "setActiveCommunity"
     ]),
     goToActiveChannel(communityId: string) {
       if (!communityId) return;
@@ -204,6 +214,11 @@ export default defineComponent({
       const channels = this.getChannelStates()(communityId);
 
       return channels;
+    },
+    filteredChannels(): ChannelState[] {
+      const loadedChannels = this.appStore.route.loadedChannels;
+      const channels = this.channels;
+      return channels.filter(c => loadedChannels[c.name]);
     },
   },
 });

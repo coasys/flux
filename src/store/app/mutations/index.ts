@@ -1,3 +1,4 @@
+import { useDataStore } from "@/store/data";
 import {
   UpdateState,
   ToastState,
@@ -99,4 +100,17 @@ export default {
     const state = useAppStore();
     state.modals.showCode = payload;
   },
+  setActiveCommunity(payload: string): void {
+    const state = useAppStore();
+    const dataState = useDataStore();
+    const channels = dataState.getChannelStates(payload);
+    state.route.activeCommunity = payload;
+    const data: {[x: string]: boolean} = {};
+    channels.forEach(c => data[c.name] = c.name === 'Home');
+    state.route.loadedChannels = data;
+  },
+  addLoadedChannels(payload: string): void {
+    const state = useAppStore();
+    state.route.loadedChannels[payload] = true
+  }
 };
