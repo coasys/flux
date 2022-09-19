@@ -7,13 +7,16 @@
     <div
       style="height: 100%"
       v-for="channel in filteredChannels"
-      :key="`${$route.params.communityId}-${channel.name}`"
+      :key="channel.id"
       :style="{
         height: channel.name === $route.params.channelId ? '100%' : '0',
       }"
     >
       <channel-view
-        v-show="channel.name === $route.params.channelId && $route.params.communityId === community.state.perspectiveUuid"
+        v-show="
+          channel.name === $route.params.channelId &&
+          $route.params.communityId === community.state.perspectiveUuid
+        "
         :channelId="channel.name"
         :communityId="$route.params.communityId"
       ></channel-view>
@@ -85,7 +88,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
 
@@ -99,6 +102,10 @@ import { CommunityState, ModalsState, ChannelState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
 import { mapActions, mapState } from "pinia";
+
+type LoadedChannels = {
+  [channelId: string]: boolean;
+};
 
 export default defineComponent({
   name: "CommunityView",
@@ -116,10 +123,12 @@ export default defineComponent({
     const dataStore = useDataStore();
 
     return {
+      loadedChannels: ref<LoadedChannels>({}),
       appStore,
       dataStore,
     };
   },
+
   data() {
     return {
       hasCopied: false,
@@ -134,7 +143,6 @@ export default defineComponent({
           this.dataStore.fetchNeighbourhoodChannels(id);
           this.handleThemeChange(id);
           this.goToActiveChannel(id);
-          this.setActiveCommunity(id);
         }
       },
       immediate: true,
@@ -142,7 +150,11 @@ export default defineComponent({
     "$route.params.channelId": {
       handler: function (id: string) {
         if (id) {
-          this.appStore.addLoadedChannels(id);
+          const communityId = this.$route.params.communityId as string;
+          const channel = this.dataStore.getChannel(communityId, id);
+          if (channel) {
+            this.loadedChannels[channel.id] = true;
+          }
         }
       },
       immediate: true,
@@ -156,7 +168,6 @@ export default defineComponent({
       "setShowCommunityMembers",
       "setShowInviteCode",
       "setShowCommunitySettings",
-      "setActiveCommunity"
     ]),
     goToActiveChannel(communityId: string) {
       if (!communityId) return;
@@ -216,9 +227,20 @@ export default defineComponent({
       return channels;
     },
     filteredChannels(): ChannelState[] {
-      const loadedChannels = this.appStore.route.loadedChannels;
-      const channels = this.channels;
-      return channels.filter(c => loadedChannels[c.name]);
+      const filteredChannels: ChannelState[] = [];
+
+      const allChannels = this.dataStore.channels;
+
+      Object.keys(allChannels).forEach((channelId) => {
+        const loadedChannel = this.loadedChannels[channelId];
+
+        if (loadedChannel) {
+          const channel = this.dataStore.channels[channelId];
+          filteredChannels.push(channel);
+        }
+      });
+
+      return filteredChannels;
     },
   },
 });
