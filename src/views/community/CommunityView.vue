@@ -7,15 +7,15 @@
     <div
       style="height: 100%"
       v-for="channel in filteredChannels"
-      :key="channel.name"
+      :key="`${$route.params.communityId}-${channel.name}`"
       :style="{
         height: channel.name === $route.params.channelId ? '100%' : '0',
       }"
     >
       <channel-view
-        v-show="channel.name === $route.params.channelId"
+        v-show="channel.name === $route.params.channelId && $route.params.communityId === community.state.perspectiveUuid"
         :channelId="channel.name"
-        :communityId="community.neighbourhood.perspective.uuid"
+        :communityId="$route.params.communityId"
       ></channel-view>
     </div>
   </sidebar-layout>
