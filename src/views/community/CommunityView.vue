@@ -6,19 +6,24 @@
 
     <div
       style="height: 100%"
-      v-for="channel in filteredChannels"
-      :key="`${channel.sourcePerspective}-${channel.name}`"
+      v-for="channel in channels"
+      :key="channel.id"
       :style="{
-        height: channel.name === $route.params.channelId ? '100%' : '0',
+        height:
+          channel.name === channelId &&
+          channel.sourcePerspective === communityId
+            ? '100%'
+            : '0',
       }"
     >
       <channel-view
+        v-if="loadedChannels[channel.id]"
         v-show="
-          channel.name === $route.params.channelId &&
-          $route.params.communityId === community.state.perspectiveUuid
+          channel.name === channelId &&
+          channel.sourcePerspective === communityId
         "
         :channelId="channel.name"
-        :communityId="$route.params.communityId"
+        :communityId="channel.sourcePerspective"
       ></channel-view>
     </div>
   </sidebar-layout>
@@ -128,7 +133,6 @@ export default defineComponent({
       dataStore,
     };
   },
-
   data() {
     return {
       hasCopied: false,
@@ -150,8 +154,13 @@ export default defineComponent({
     "$route.params.channelId": {
       handler: function (id: string) {
         if (id) {
-          const communityId = this.$route.params.communityId as string;
-          const channel = this.dataStore.getChannel(communityId, id);
+          this.dataStore.setCurrentChannelId({
+            communityId: this.communityId,
+            channelId: id,
+          });
+
+          const channel = this.dataStore.getChannel(this.communityId, id);
+
           if (channel) {
             this.loadedChannels = {
               ...this.loadedChannels,
@@ -215,35 +224,23 @@ export default defineComponent({
     },
   },
   computed: {
+    communityId() {
+      return this.$route.params.communityId as string;
+    },
+    channelId() {
+      return this.$route.params.channelId as string;
+    },
     modals(): ModalsState {
       return this.appStore.modals;
     },
     community(): CommunityState {
-      const communityId = this.$route.params.communityId as string;
+      const communityId = this.communityId;
       return this.dataStore.getCommunity(communityId);
     },
     channels(): ChannelState[] {
-      const communityId = this.$route.params.communityId as string;
-
-      const channels = this.getChannelStates()(communityId);
+      const channels = this.dataStore.getChannels;
 
       return channels;
-    },
-    filteredChannels(): ChannelState[] {
-      const filteredChannels: ChannelState[] = [];
-
-      const allChannels = this.dataStore.channels;
-
-      Object.keys(allChannels).forEach((channelId) => {
-        const loadedChannel = this.loadedChannels[channelId];
-
-        if (loadedChannel) {
-          const channel = this.dataStore.channels[channelId];
-          filteredChannels.push(channel);
-        }
-      });
-
-      return filteredChannels;
     },
   },
 });
