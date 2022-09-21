@@ -21,6 +21,8 @@ export default async function removeCommunity({
   try {
     const client = await getAd4mClient();
 
+    await client.perspective.remove(communityId);
+
     delete dataStore.communities[communityId];
     delete dataStore.neighbourhoods[communityId];
 
