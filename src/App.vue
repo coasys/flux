@@ -366,15 +366,22 @@ export default defineComponent({
 
 html {
   height: 100%;
+  width: 100%;
 }
 
 body {
   height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--app-main-sidebar-bg-color);
   overflow: hidden;
 }
 
 #app {
   height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .global-loading {
