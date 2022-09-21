@@ -358,6 +358,12 @@ export default defineComponent({
   --app-main-sidebar-width: 100px;
 }
 
+@media (max-width: 800px) {
+  :root {
+    --j-font-base-size: 13px !important;
+  }
+}
+
 html {
   height: 100%;
 }

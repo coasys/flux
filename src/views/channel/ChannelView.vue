@@ -6,7 +6,7 @@
         variant="ghost"
         @click="() => toggleSidebar()"
       >
-        <j-icon color="ui-800" size="md" name="layout-sidebar" />
+        <j-icon color="ui-800" size="md" name="arrow-left-short" />
       </j-button>
       <j-text color="black" variant="heading-md"># {{ channel.name }}</j-text>
     </div>
