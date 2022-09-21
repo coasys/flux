@@ -99,11 +99,6 @@ export default defineComponent({
   position: relative;
 }
 
-.sidebar-layout--closed .sidebar-layout__drawer {
-  min-width: 0px;
-  width: 0px !important;
-}
-
 @media (max-width: 800px) {
   .sidebar-layout .sidebar-layout__drawer {
     height: 100%;
