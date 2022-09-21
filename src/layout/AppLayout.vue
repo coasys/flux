@@ -7,9 +7,7 @@
 
 <style>
 .app-layout {
-  height: 100vh;
-  min-height: 100vh;
-  max-height: 100vh;
+  height: 100%;
   display: grid;
   grid-template-columns: var(--app-main-sidebar-width) 1fr;
 }
@@ -22,7 +20,7 @@
   justify-content: space-between;
 }
 .app-layout__main {
-  max-height: 100vh;
+  height: 100%;
   z-index: 0;
 }
 </style>

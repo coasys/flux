@@ -18,7 +18,7 @@
       ></span>
       <slot name="sidebar"></slot>
     </aside>
-    <main class="sidebar-layout__main">
+    <main v-if="!open" class="sidebar-layout__main">
       <slot></slot>
     </main>
   </div>
@@ -73,9 +73,7 @@ export default defineComponent({
 
 <style>
 .sidebar-layout {
-  height: 100vh;
-  min-height: 100vh;
-  max-height: 100vh;
+  height: 100%;
   display: flex;
   transition: all 0.2s ease;
   overflow: hidden;
@@ -107,6 +105,14 @@ export default defineComponent({
     background: var(--app-drawer-bg-color);
     overflow-y: auto;
     position: relative;
+  }
+  .sidebar-layout .sidebar-layout__main {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
   }
   .sidebar-layout--closed .sidebar-layout__drawer {
     min-width: 0px;

@@ -357,6 +357,20 @@ export default defineComponent({
 :root {
   --app-main-sidebar-width: 100px;
 }
+
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+#app {
+  height: 100%;
+}
+
 .global-loading {
   width: 100vw;
   height: 100vh;
