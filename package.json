@@ -9,7 +9,7 @@
     "url": "https://github.com/juntofoundation/flux.git"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src/**/*.ts src/**/*.js src/**/*.vue",
