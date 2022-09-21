@@ -113,10 +113,23 @@ export default defineComponent({
     width: 100%;
     height: 100%;
     overflow: hidden;
+    animation: fade-in 0.2s ease;
+    animation-fill-mode: forwards;
+    opacity: 0;
   }
   .sidebar-layout--closed .sidebar-layout__drawer {
-    min-width: 0px;
-    width: 0px !important;
+    display: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 1;
+    transform: translateX(200px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0px);
   }
 }
 
