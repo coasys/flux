@@ -20,8 +20,8 @@ export default defineComponent({
 <style scoped>
 .sidebar-container {
   padding-top: var(--j-space-700);
-  height: 100vh;
   width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
