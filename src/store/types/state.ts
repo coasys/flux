@@ -19,7 +19,7 @@ export interface State {
 
 export interface DataState {
   communities: { [perspectiveUuid: string]: LocalCommunityState };
-  channels: { [perspectiveUuid: string]: ChannelState };
+  channels: { [communityId: string]: ChannelState };
   neighbourhoods: { [perspectiveUuid: string]: NeighbourhoodState };
 }
 

@@ -3,7 +3,29 @@
     <template v-slot:sidebar>
       <community-sidebar :community="community"></community-sidebar>
     </template>
-    <router-view :key="$route.fullPath"></router-view>
+
+    <div
+      style="height: 100%"
+      v-for="channel in channels"
+      :key="channel.id"
+      :style="{
+        height:
+          channel.name === channelId &&
+          channel.sourcePerspective === communityId
+            ? '100%'
+            : '0',
+      }"
+    >
+      <channel-view
+        v-if="loadedChannels[channel.id]"
+        v-show="
+          channel.name === channelId &&
+          channel.sourcePerspective === communityId
+        "
+        :channelId="channel.name"
+        :communityId="channel.sourcePerspective"
+      ></channel-view>
+    </div>
   </sidebar-layout>
 
   <j-modal
@@ -71,7 +93,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
 
@@ -79,17 +101,23 @@ import EditCommunity from "@/containers/EditCommunity.vue";
 import CreateChannel from "@/containers/CreateChannel.vue";
 import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunitySettings from "@/containers/CommunitySettings.vue";
+import ChannelView from "@/views/channel/ChannelView.vue";
 
-import { CommunityState, ModalsState } from "@/store/types";
+import { CommunityState, ModalsState, ChannelState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
-import { mapActions } from "pinia";
+import { mapActions, mapState } from "pinia";
+
+type LoadedChannels = {
+  [channelId: string]: boolean;
+};
 
 export default defineComponent({
   name: "CommunityView",
   components: {
     EditCommunity,
     CreateChannel,
+    ChannelView,
     CommunityMembers,
     CommunitySidebar,
     CommunitySettings,
@@ -100,6 +128,7 @@ export default defineComponent({
     const dataStore = useDataStore();
 
     return {
+      loadedChannels: ref<LoadedChannels>({}),
       appStore,
       dataStore,
     };
@@ -112,18 +141,39 @@ export default defineComponent({
   watch: {
     "$route.params.communityId": {
       handler: function (id: string) {
-        if (id != undefined) {
+        if (id) {
           this.dataStore.fetchNeighbourhoodMembers(id);
           this.dataStore.fetchNeighbourhoodMetadata(id);
           this.dataStore.fetchNeighbourhoodChannels(id);
+          this.handleThemeChange(id);
+          this.goToActiveChannel(id);
         }
-        this.handleThemeChange(id);
-        this.goToActiveChannel(id);
+      },
+      immediate: true,
+    },
+    "$route.params.channelId": {
+      handler: function (id: string) {
+        if (id) {
+          this.dataStore.setCurrentChannelId({
+            communityId: this.communityId,
+            channelId: id,
+          });
+
+          const channel = this.dataStore.getChannel(this.communityId, id);
+
+          if (channel) {
+            this.loadedChannels = {
+              ...this.loadedChannels,
+              [channel.id]: true,
+            };
+          }
+        }
       },
       immediate: true,
     },
   },
   methods: {
+    ...mapState(useDataStore, ["getChannelStates"]),
     ...mapActions(useAppStore, [
       "setShowCreateChannel",
       "setShowEditCommunity",
@@ -174,12 +224,23 @@ export default defineComponent({
     },
   },
   computed: {
+    communityId() {
+      return this.$route.params.communityId as string;
+    },
+    channelId() {
+      return this.$route.params.channelId as string;
+    },
     modals(): ModalsState {
       return this.appStore.modals;
     },
     community(): CommunityState {
-      const communityId = this.$route.params.communityId as string;
+      const communityId = this.communityId;
       return this.dataStore.getCommunity(communityId);
+    },
+    channels(): ChannelState[] {
+      const channels = this.dataStore.getChannels;
+
+      return channels;
     },
   },
 });

@@ -87,7 +87,7 @@ export default defineComponent({
           this.$router.push({
             name: "channel",
             params: {
-              communityId: communityId,
+              communityId: communityId.toString(),
               channelId: channel.name,
             },
           });

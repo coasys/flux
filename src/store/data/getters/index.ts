@@ -5,7 +5,6 @@ import {
   NeighbourhoodState,
   LocalCommunityState,
 } from "@/store/types";
-import { Expression } from "@perspect3vism/ad4m";
 
 export default {
   getNeighbourhood:
@@ -33,6 +32,14 @@ export default {
         neighbourhood: state.neighbourhoods[community.perspectiveUuid],
         state: community,
       } as CommunityState);
+    }
+    return out;
+  },
+
+  getChannels(state: DataState): ChannelState[] {
+    const out = [];
+    for (const channel of Object.values(state.channels)) {
+      out.push(channel);
     }
     return out;
   },
@@ -65,7 +72,9 @@ export default {
   getChannel:
     (state: DataState) =>
     (communityId: string, channelId: string): ChannelState | undefined => {
-      const channel = Object.values(state.channels).find(c => c.sourcePerspective === communityId && c.name === channelId);
+      const channel = Object.values(state.channels).find(
+        (c) => c.sourcePerspective === communityId && c.name === channelId
+      );
 
       return channel;
     },
@@ -81,7 +90,9 @@ export default {
   getChannelStates:
     (state: DataState) =>
     (communityId: string): ChannelState[] => {
-      return Object.values(state.channels).filter((c: ChannelState) => c.sourcePerspective === communityId)
+      return Object.values(state.channels).filter(
+        (c: ChannelState) => c.sourcePerspective === communityId
+      );
     },
 
   getCommunityMembers:

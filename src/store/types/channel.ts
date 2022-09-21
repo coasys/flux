@@ -1,5 +1,3 @@
-import { NeighbourhoodState } from "./neighbourhood";
-
 export interface ChannelState {
   id: string;
   name: string;
@@ -7,7 +5,7 @@ export interface ChannelState {
   description?: string;
   sourcePerspective: string;
   hasNewMessages: boolean;
-  createdAt: String;
+  createdAt: string;
   scrollTop?: number;
   feedType: FeedType;
   notifications: {
