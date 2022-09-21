@@ -109,12 +109,10 @@
             class="channel"
             :class="{ 'channel--muted': channel.notifications?.mute }"
             :selected="isExactActive"
-            @click="navigate"
+            @click="() => navigate() && setSidebar(false)"
           >
             <j-icon slot="start" size="sm" name="hash"></j-icon>
-            {{
-              channel.name
-            }}
+            {{ channel.name }}
             <j-icon
               size="xs"
               slot="end"
@@ -139,14 +137,10 @@
               <j-icon
                 size="xs"
                 slot="start"
-                :name="
-                  channel?.notifications?.mute ? 'bell-slash' : 'bell'
-                "
+                :name="channel?.notifications?.mute ? 'bell-slash' : 'bell'"
               />
               {{
-                `${
-                  channel?.notifications?.mute ? "Unmute" : "Mute"
-                } Channel`
+                `${channel?.notifications?.mute ? "Unmute" : "Mute"} Channel`
               }}
             </j-menu-item>
           </j-menu>
@@ -163,10 +157,7 @@
 <script lang="ts">
 import { defineComponent, PropType, watch } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import {
-  ChannelState,
-  CommunityState,
-} from "@/store/types";
+import { ChannelState, CommunityState } from "@/store/types";
 import { mapActions, mapState } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
@@ -184,13 +175,13 @@ export default defineComponent({
   setup() {
     return {
       userStore: useUserStore(),
-      dataStore: useDataStore()
+      dataStore: useDataStore(),
     };
   },
   data: function () {
     return {
       showCommunityMenu: false,
-      communityImage: null
+      communityImage: null,
     };
   },
   computed: {
@@ -210,7 +201,7 @@ export default defineComponent({
         this.community.neighbourhood.creatorDid ===
         this.userStore.getUser?.agent.did
       );
-    }
+    },
   },
   async mounted() {
     watch(this.dataStore.neighbourhoods, async () => {
@@ -218,12 +209,12 @@ export default defineComponent({
         const communityId = this.$route.params.communityId as string;
         const community = this.dataStore.getCommunity(communityId);
         const dexie = new DexieIPFS(communityId);
-  
+
         const image = await dexie.get(community.neighbourhood.image!);
         // @ts-ignore
-        this.communityImage = image
-      }, 500)
-    })
+        this.communityImage = image;
+      }, 500);
+    });
   },
   watch: {
     "$route.params.communityId": {
@@ -233,11 +224,11 @@ export default defineComponent({
           setTimeout(async () => {
             const community = this.dataStore.getCommunity(id);
             const dexie = new DexieIPFS(id);
-  
+
             const image = await dexie.get(community.neighbourhood.image!);
             // @ts-ignore
-            this.communityImage = image
-          }, 500)
+            this.communityImage = image;
+          }, 500);
         }
       },
       immediate: true,
@@ -250,6 +241,7 @@ export default defineComponent({
     ]),
     ...mapState(useDataStore, ["getChannelStates"]),
     ...mapActions(useAppStore, [
+      "setSidebar",
       "setShowCreateChannel",
       "setShowEditCommunity",
       "setShowCommunityMembers",

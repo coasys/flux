@@ -11,7 +11,7 @@
   min-height: 100vh;
   max-height: 100vh;
   display: grid;
-  grid-template-columns: 100px 1fr;
+  grid-template-columns: var(--app-main-sidebar-width) 1fr;
 }
 .app-layout__sidebar {
   background: var(--app-main-sidebar-bg-color);

@@ -353,7 +353,10 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
+<style>
+:root {
+  --app-main-sidebar-width: 100px;
+}
 .global-loading {
   width: 100vw;
   height: 100vh;

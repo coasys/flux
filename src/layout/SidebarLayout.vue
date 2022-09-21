@@ -78,6 +78,7 @@ export default defineComponent({
   max-height: 100vh;
   display: flex;
   transition: all 0.2s ease;
+  overflow: hidden;
 }
 .sidebar-layout__toggle-button {
   position: absolute;
@@ -97,10 +98,27 @@ export default defineComponent({
   overflow-y: auto;
   position: relative;
 }
+
 .sidebar-layout--closed .sidebar-layout__drawer {
   min-width: 0px;
   width: 0px !important;
 }
+
+@media (max-width: 800px) {
+  .sidebar-layout .sidebar-layout__drawer {
+    height: 100%;
+    width: 100% !important;
+    max-width: 100%;
+    background: var(--app-drawer-bg-color);
+    overflow-y: auto;
+    position: relative;
+  }
+  .sidebar-layout--closed .sidebar-layout__drawer {
+    min-width: 0px;
+    width: 0px !important;
+  }
+}
+
 .sidebar-layout__main {
   width: 100%;
   max-height: 100vh;

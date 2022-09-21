@@ -1,6 +1,20 @@
 <template>
-  <div style="height: 100%">
+  <div class="channel-view" style="height: 100%">
+    <div class="channel-view__header">
+      <j-button
+        class="channel-view__sidebar-toggle"
+        variant="ghost"
+        @click="() => toggleSidebar()"
+      >
+        <j-icon color="ui-800" size="md" name="layout-sidebar" />
+      </j-button>
+      <j-text color="black" variant="heading-md"># {{ channel.name }}</j-text>
+    </div>
     <perspective-view
+      style="
+        height: calc(100% - var(--channel-view-header-height));
+        display: block;
+      "
       :port="port"
       :channel="channelId"
       :perspective-uuid="communityId"
@@ -29,6 +43,7 @@ import { useDataStore } from "@/store/data";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 import Profile from "@/containers/Profile.vue";
 import useEventEmitter from "@/utils/useEventEmitter";
+import { useAppStore } from "@/store/app";
 
 interface MentionTrigger {
   label: string;
@@ -43,6 +58,7 @@ export default defineComponent({
     Profile,
   },
   setup() {
+    const appStore = useAppStore();
     const dataStore = useDataStore();
     const memberMentions = ref<MentionTrigger[]>([]);
     const activeProfile = ref<any>({});
@@ -50,6 +66,7 @@ export default defineComponent({
     const bus = useEventEmitter();
 
     return {
+      appStore,
       dataStore,
       script: null as HTMLElement | null,
       memberMentions,
@@ -97,6 +114,9 @@ export default defineComponent({
     },
   },
   methods: {
+    toggleSidebar() {
+      this.appStore.toggleSidebar();
+    },
     onAgentClick({ detail }: any) {
       this.toggleProfile(true, detail.did);
     },
@@ -149,3 +169,27 @@ export default defineComponent({
   },
 });
 </script>
+
+<style>
+.channel-view {
+  --channel-view-header-height: 50px;
+}
+
+.channel-view__header {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--j-space-200);
+  position: sticky;
+  border-bottom: 1px solid var(--j-color-white);
+  height: var(--channel-view-header-height);
+}
+
+@media (min-width: 800px) {
+  .channel-view__sidebar-toggle {
+    display: none;
+  }
+  .channel-view__header {
+    padding: 0 var(--j-space-500);
+  }
+}
+</style>
