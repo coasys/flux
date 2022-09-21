@@ -4,6 +4,7 @@ import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhoo
 import {
   LinkExpression,
   PerspectiveProxy,
+  LinkQuery
 } from "@perspect3vism/ad4m";
 import { nanoid } from "nanoid";
 import { useDataStore } from ".";
