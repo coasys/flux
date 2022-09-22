@@ -11,7 +11,7 @@
           slot="trigger"
           class="left-nav__community-item"
           :selected="communityIsActive(community.perspective.uuid)"
-          size="xl"
+          size="lg"
           :online="hasNotification(community.perspective.uuid)"
           :src="community.image || null"
           :initials="community.name.charAt(0).toUpperCase()"
@@ -84,35 +84,39 @@ export default defineComponent({
   setup() {
     const appStore = useAppStore();
     const dataStore = useDataStore();
-    const communities = ref(dataStore.getCommunityNeighbourhoods.map(e => ({...e, image: null})));
+    const communities = ref(
+      dataStore.getCommunityNeighbourhoods.map((e) => ({ ...e, image: null }))
+    );
 
     return {
       appStore,
       dataStore,
-      communities
+      communities,
     };
   },
   async mounted() {
     const updateCommunityListWithImage = async () => {
-      let communities = this.dataStore.getCommunityNeighbourhoods;
-      const tempCommunities = []
+      const communities = this.dataStore.getCommunityNeighbourhoods;
+      const tempCommunities = [];
 
       for (const community of communities) {
-        const tempCommunity = {...community};
+        const tempCommunity = { ...community };
         const dexie = new DexieIPFS(tempCommunity.perspective.uuid);
         if (tempCommunity.image) {
           const image = await dexie.get(tempCommunity.image!);
-          tempCommunity.image = image
+          tempCommunity.image = image;
         }
-        tempCommunities.push({...tempCommunity})
+        tempCommunities.push({ ...tempCommunity });
       }
 
       this.communities = tempCommunities;
-    }
+    };
 
-    updateCommunityListWithImage()
+    updateCommunityListWithImage();
 
-    watch(this.dataStore.neighbourhoods, () => setTimeout(() => updateCommunityListWithImage(), 500))
+    watch(this.dataStore.neighbourhoods, () =>
+      setTimeout(() => updateCommunityListWithImage(), 500)
+    );
   },
   methods: {
     toggleHideMutedChannels(id: string) {
@@ -123,7 +127,7 @@ export default defineComponent({
     },
     removeCommunity(id: string) {
       this.$router.push({ name: "home" }).then(() => {
-        this.dataStore.removeCommunity({communityId: id});
+        this.dataStore.removeCommunity({ communityId: id });
       });
     },
     handleCommunityClick(communityId: string) {

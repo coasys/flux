@@ -89,6 +89,7 @@ export default defineComponent({
 }
 .sidebar-layout__drawer {
   height: 100%;
+  max-height: 100vh;
   width: 300px;
   min-width: 200px;
   max-width: 33vw;

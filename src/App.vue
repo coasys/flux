@@ -360,6 +360,7 @@ export default defineComponent({
 
 @media (max-width: 800px) {
   :root {
+    --app-main-sidebar-width: 75px;
     --j-font-base-size: 13px !important;
   }
 }
