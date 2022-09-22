@@ -23,7 +23,7 @@
     "@apollo/client": "^3.6.9",
     "@junto-foundation/junto-elements": "^0.4.3",
     "@perspect3vism/ad4m": "^0.1.33",
-    "@perspect3vism/ad4m-connect": "^0.0.6",
+    "@perspect3vism/ad4m-connect": "^0.0.7",
     "date-fns": "^2.22.1",
     "dexie": "^3.2.2",
     "graphql": "^15.5.0",
