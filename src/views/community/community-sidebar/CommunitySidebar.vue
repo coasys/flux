@@ -109,7 +109,7 @@
             class="channel"
             :class="{ 'channel--muted': channel.notifications?.mute }"
             :selected="isExactActive"
-            @click="() => navigate() && setSidebar(false)"
+            @click="async () => (await navigate()) && setSidebar(false)"
           >
             <j-icon slot="start" size="sm" name="hash"></j-icon>
             {{ channel.name }}
