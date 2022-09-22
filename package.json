@@ -23,6 +23,7 @@
     "@apollo/client": "^3.6.9",
     "@junto-foundation/junto-elements": "^0.4.3",
     "@perspect3vism/ad4m": "^0.1.33",
+    "@perspect3vism/ad4m-connect": "^0.0.6",
     "date-fns": "^2.22.1",
     "dexie": "^3.2.2",
     "graphql": "^15.5.0",
@@ -35,8 +36,7 @@
     "uuid": "^8.3.2",
     "vue": "^3.0.0",
     "vue-advanced-cropper": "^2.3.1",
-    "vue-router": "^4.0.0-0",
-    "@perspect3vism/ad4m-connect": "0.0.5"
+    "vue-router": "^4.0.0-0"
   },
   "devDependencies": {
     "@testing-library/vue": "^6.4.2",
