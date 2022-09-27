@@ -361,7 +361,7 @@ export default defineComponent({
 @media (max-width: 800px) {
   :root {
     --app-main-sidebar-width: 75px;
-    --j-font-base-size: 13px !important;
+    --j-font-base-size: 15px !important;
   }
 }
 
@@ -381,7 +381,7 @@ body {
 
 #app {
   height: 100%;
-  overflow-y: auto;
+  width: 100%;
   -webkit-overflow-scrolling: touch;
 }
 

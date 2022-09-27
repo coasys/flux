@@ -1,58 +1,56 @@
 <template>
-  <j-popover
-    :open="showCommunityMenu"
-    @toggle="(e) => (showCommunityMenu = e.target.open)"
-    class="community-sidebar__header"
-    :class="{ 'is-creator': isCreator }"
-    event="click"
-    placement="bottom-start"
-  >
-    <button slot="trigger" class="community-sidebar__header-button">
-      <j-avatar
-        style="--j-avatar-size: 30px"
-        :src="communityImage || null"
-        :initials="community.neighbourhood.name.charAt(0)"
-      />
-      <div class="community-info">
-        {{ community.neighbourhood.name }}
-      </div>
-      <j-icon size="xs" name="chevron-down"></j-icon>
-    </button>
-    <j-menu slot="content">
-      <j-menu-item v-if="isCreator" @click="() => setShowEditCommunity(true)">
-        <j-icon size="xs" slot="start" name="pencil" />
-        Edit community
-      </j-menu-item>
-      <j-menu-item @click="goToSettings">
-        <j-icon size="xs" slot="start" name="gear" />
-        Settings
-      </j-menu-item>
-      <j-menu-item @click="() => setShowInviteCode(true)">
-        <j-icon size="xs" slot="start" name="person-plus" />
-        Invite people
-      </j-menu-item>
-      <j-divider />
-      <j-menu-item @click="() => setShowCreateChannel(true)">
-        <j-icon size="xs" slot="start" name="plus" />
-        Create channel
-      </j-menu-item>
-      <j-menu-item
-        @click="
-          () =>
-            toggleHideMutedChannels({
-              communityId: community.neighbourhood.perspective.uuid,
-            })
-        "
-      >
-        <j-icon
-          size="xs"
-          slot="start"
-          :name="community.state.hideMutedChannels ? 'toggle-on' : 'toggle-off'"
-        />
-        Hide muted channels
-      </j-menu-item>
-    </j-menu>
-  </j-popover>
+  <div class="community-sidebar__header">
+    <div class="community-info">
+      {{ community.neighbourhood.name }}
+    </div>
+    <j-popover
+      :open="showCommunityMenu"
+      @toggle="(e) => (showCommunityMenu = e.target.open)"
+      :class="{ 'is-creator': isCreator }"
+      event="click"
+      placement="bottom-end"
+    >
+      <button slot="trigger" class="community-sidebar__header-button">
+        <j-icon size="xs" name="three-dots"></j-icon>
+      </button>
+      <j-menu slot="content">
+        <j-menu-item v-if="isCreator" @click="() => setShowEditCommunity(true)">
+          <j-icon size="xs" slot="start" name="pencil" />
+          Edit community
+        </j-menu-item>
+        <j-menu-item @click="goToSettings">
+          <j-icon size="xs" slot="start" name="gear" />
+          Settings
+        </j-menu-item>
+        <j-menu-item @click="() => setShowInviteCode(true)">
+          <j-icon size="xs" slot="start" name="person-plus" />
+          Invite people
+        </j-menu-item>
+        <j-divider />
+        <j-menu-item @click="() => setShowCreateChannel(true)">
+          <j-icon size="xs" slot="start" name="plus" />
+          Create channel
+        </j-menu-item>
+        <j-menu-item
+          @click="
+            () =>
+              toggleHideMutedChannels({
+                communityId: community.neighbourhood.perspective.uuid,
+              })
+          "
+        >
+          <j-icon
+            size="xs"
+            slot="start"
+            :name="
+              community.state.hideMutedChannels ? 'toggle-on' : 'toggle-off'
+            "
+          />
+          Hide muted channels
+        </j-menu-item>
+      </j-menu>
+    </j-popover>
+  </div>
 
   <j-box pt="500">
     <j-menu-group-item
@@ -109,7 +107,7 @@
             class="channel"
             :class="{ 'channel--muted': channel.notifications?.mute }"
             :selected="isExactActive"
-            @click="async () => (await navigate()) && setSidebar(false)"
+            @click="() => navigateTo(navigate)"
           >
             <j-icon slot="start" size="sm" name="hash"></j-icon>
             {{ channel.name }}
@@ -155,14 +153,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, watch } from "vue";
+import { defineComponent, ref, PropType, watch } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import { ChannelState, CommunityState } from "@/store/types";
+import { ChannelState, CommunityState, Profile } from "@/store/types";
 import { mapActions, mapState } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { DexieIPFS } from "@/utils/storageHelpers";
+import { getImage } from "@/utils/profileHelpers";
 
 export default defineComponent({
   components: { AvatarGroup },
@@ -174,6 +173,7 @@ export default defineComponent({
   },
   setup() {
     return {
+      userProfileImage: ref<null | string>(null),
       userStore: useUserStore(),
       dataStore: useDataStore(),
     };
@@ -202,6 +202,12 @@ export default defineComponent({
         this.userStore.getUser?.agent.did
       );
     },
+    userProfile(): Profile | null {
+      return this.userStore.profile;
+    },
+    userDid(): string {
+      return this.userStore.agent.did!;
+    },
   },
   async mounted() {
     watch(this.dataStore.neighbourhoods, async () => {
@@ -217,6 +223,18 @@ export default defineComponent({
     });
   },
   watch: {
+    userProfile: {
+      async handler() {
+        if (this.userStore.profile?.profilePicture) {
+          this.userProfileImage = await getImage(
+            this.userStore.profile?.profilePicture
+          );
+        } else {
+          this.userProfileImage = null;
+        }
+      },
+      immediate: true,
+    },
     "$route.params.communityId": {
       handler: async function (id: string) {
         if (id) {
@@ -248,6 +266,10 @@ export default defineComponent({
       "setShowInviteCode",
       "setShowCommunitySettings",
     ]),
+    navigateTo(navigate: any) {
+      this.setSidebar(false);
+      navigate();
+    },
     goToSettings() {
       this.setShowCommunitySettings(true);
       this.showCommunityMenu = false;
@@ -259,8 +281,9 @@ export default defineComponent({
 <style lang="scss" scoped>
 .community-sidebar__header {
   z-index: 1;
-  background: var(--app-drawer-bg-color);
-  display: block;
+  display: flex;
+  align-items: center;
+  padding-left: var(--j-space-500);
   position: sticky;
   top: 0;
   left: 0;
@@ -281,10 +304,6 @@ export default defineComponent({
   cursor: pointer;
   padding: 0 var(--j-space-500);
   border-bottom: 1px solid var(--app-drawer-border-color);
-}
-
-.community-sidebar__header:hover {
-  background: rgba(128, 128, 128, 0.05);
 }
 
 .community-info {

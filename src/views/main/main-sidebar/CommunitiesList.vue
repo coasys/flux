@@ -1,6 +1,5 @@
 <template>
   <div class="left-nav__communities-list">
-    <div class="left-nav__divider"></div>
     <j-tooltip
       v-for="community in communities"
       :key="community.perspective.uuid"
@@ -65,10 +64,10 @@
         @click="() => appStore.setShowCreateCommunity(true)"
         square
         circle
-        size="xl"
+        size="lg"
         variant="subtle"
       >
-        <j-icon size="lg" name="plus"></j-icon>
+        <j-icon size="md" name="plus"></j-icon>
       </j-button>
     </j-tooltip>
   </div>
@@ -157,6 +156,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .left-nav__communities-list {
+  padding-top: 4px;
   width: 100%;
   height: 100%;
   display: flex;
@@ -173,11 +173,5 @@ export default defineComponent({
 
 .left-nav__community-item {
   cursor: pointer;
-}
-
-.left-nav__divider {
-  width: 80%;
-  margin: 0 auto;
-  border-top: 1px solid var(--j-border-color);
 }
 </style>
