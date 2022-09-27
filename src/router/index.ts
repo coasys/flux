@@ -1,4 +1,9 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import {
+  createRouter,
+  createWebHistory,
+  createWebHashHistory,
+  RouteRecordRaw,
+} from "vue-router";
 import MainView from "@/views/main/MainView.vue";
 import SignUp from "@/views/signup/SignUp.vue";
 import CommunityView from "@/views/community/CommunityView.vue";
@@ -8,7 +13,7 @@ import ProfileView from "@/views/profile/ProfileView.vue";
 import ConnectView from "@/views/connect/ConnectView.vue";
 import UnlockAgent from "@/views/connect/UnlockAgent.vue";
 import ProfileFeed from "@/views/profile/ProfileFeed.vue";
-import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/web'
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -69,7 +74,7 @@ const routes: Array<RouteRecordRaw> = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes,
 });
 
