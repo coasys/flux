@@ -10,6 +10,7 @@
       </j-button>
       <j-text color="black" variant="heading-md"># {{ channel.name }}</j-text>
     </div>
+
     <perspective-view
       style="
         height: calc(100% - var(--channel-view-header-height));
@@ -37,6 +38,7 @@
 </template>
 
 <script lang="ts">
+import ChatView from "@junto-foundation/chat-view";
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
@@ -75,25 +77,9 @@ export default defineComponent({
       bus,
     };
   },
-  async mounted() {
-    const pkg =
-      /* @ts-ignore */
-      import.meta.env.MODE === "development"
-        ? "http://localhost:3030/dist/main.js"
-        : "https://unpkg.com/@junto-foundation/chat-view/dist/main.js";
-
-    this.script = document.createElement("script");
-    this.script.setAttribute("type", "module");
-    this.script.innerHTML = `
-      import PerspectiveView from '${pkg}';
-      if(customElements.get('perspective-view') === undefined)
-        customElements.define("perspective-view", PerspectiveView);
-    `;
-    this.script;
-    document.body.appendChild(this.script);
-  },
-  unmounted() {
-    document.body.removeChild(this.script as any);
+  mounted() {
+    if (customElements.get("perspective-view") === undefined)
+      customElements.define("perspective-view", ChatView);
   },
   computed: {
     port(): number {
