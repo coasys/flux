@@ -12,10 +12,7 @@
     </div>
 
     <perspective-view
-      style="
-        height: calc(100% - var(--channel-view-header-height));
-        display: block;
-      "
+      class="perspective-view"
       :port="port"
       :channel="channelId"
       :perspective-uuid="communityId"
@@ -157,17 +154,18 @@ export default defineComponent({
 </script>
 
 <style>
-.channel-view {
-  --channel-view-header-height: 50px;
-}
-
 .channel-view__header {
   display: flex;
   align-items: center;
   padding: 0 var(--j-space-200);
   position: sticky;
   border-bottom: 1px solid var(--j-color-white);
-  height: var(--channel-view-header-height);
+  height: var(--app-header-height);
+}
+
+.perspective-view {
+  height: calc(100% - var(--app-header-height));
+  display: block;
 }
 
 @media (min-width: 800px) {

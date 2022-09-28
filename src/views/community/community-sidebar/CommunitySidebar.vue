@@ -291,8 +291,10 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .community-sidebar__header {
+  border-bottom: 1px solid var(--j-color-white);
   z-index: 1;
   display: flex;
+  height: var(--app-header-height);
   align-items: center;
   padding-left: var(--j-space-400);
   position: sticky;

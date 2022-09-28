@@ -356,6 +356,7 @@ export default defineComponent({
 <style>
 :root {
   --app-main-sidebar-width: 100px;
+  --app-header-height: 60px;
 }
 
 @media (max-width: 800px) {
