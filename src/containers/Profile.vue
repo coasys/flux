@@ -17,7 +17,7 @@
       <j-text v-if="profile.bio" variant="subheading">
         {{ profile.bio }}</j-text
       >
-      <j-button @click="() => $emit('openCompleteProfile')">
+      <j-button variant="primary" @click="() => $emit('openCompleteProfile')">
         View complete profile
       </j-button>
     </j-flex>

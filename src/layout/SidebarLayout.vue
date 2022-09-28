@@ -64,11 +64,21 @@ export default defineComponent({
     },
     checkDirection() {
       const treshold = 70;
+      // left swipe
       if (this.touchendX + treshold < this.touchstartX) {
-        this.appStore.setSidebar(false);
+        if (this.appStore.showMainSidebar) {
+          this.appStore.setMainSidebar(false);
+        } else {
+          this.appStore.setSidebar(false);
+        }
       }
+      // right swipe
       if (this.touchendX > this.touchstartX + treshold) {
-        this.appStore.setSidebar(true);
+        if (!this.appStore.showMainSidebar && this.appStore.showSidebar) {
+          this.appStore.setMainSidebar(true);
+        } else {
+          this.appStore.setSidebar(true);
+        }
       }
     },
     startResize(e: any) {
