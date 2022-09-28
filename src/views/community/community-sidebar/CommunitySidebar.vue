@@ -1,5 +1,15 @@
 <template>
   <div class="community-sidebar__header">
+    <j-button
+      variant="ghost"
+      size="sm"
+      @click="() => appStore.toggleMainSidebar()"
+    >
+      <j-icon
+        size="sm"
+        :name="appStore.showMainSidebar ? 'arrow-bar-left' : 'arrow-bar-right'"
+      ></j-icon>
+    </j-button>
     <div class="community-info">
       {{ community.neighbourhood.name }}
     </div>
@@ -174,6 +184,7 @@ export default defineComponent({
   setup() {
     return {
       userProfileImage: ref<null | string>(null),
+      appStore: useAppStore(),
       userStore: useUserStore(),
       dataStore: useDataStore(),
     };
@@ -285,6 +296,7 @@ export default defineComponent({
   align-items: center;
   padding-left: var(--j-space-500);
   position: sticky;
+  gap: var(--j-space-300);
   top: 0;
   left: 0;
 }

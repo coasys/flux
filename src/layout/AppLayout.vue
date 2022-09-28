@@ -24,21 +24,24 @@ export default {
 .app-layout {
   height: 100%;
   display: grid;
+  grid-template-columns: 1fr;
+}
+
+.app-layout--show-sidebar {
   grid-template-columns: var(--app-main-sidebar-width) 1fr;
 }
 
 .app-layout--show-sidebar .app-layout__sidebar {
   display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .app-layout__sidebar {
-  display: none;
   background: var(--app-main-sidebar-bg-color);
   height: 100%;
   border-right: 1px var(--app-main-sidebar-border-color) solid;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: none;
 }
 .app-layout__main {
   height: 100%;
