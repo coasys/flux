@@ -1,5 +1,7 @@
 <template>
   <div
+    @touchstart="handleTouchStart"
+    @touchend="handleTouchEnd"
     class="sidebar-layout"
     :class="{
       'sidebar-layout--closed': !open,
@@ -38,6 +40,8 @@ export default defineComponent({
   },
   data() {
     return {
+      touchstartX: 0,
+      touchendX: 0,
       isDragging: false,
       startX: 0,
       startWidth: 0,
@@ -49,6 +53,24 @@ export default defineComponent({
     },
   },
   methods: {
+    handleTouchStart(e: any) {
+      this.touchstartX = e.changedTouches[0].screenX;
+      console.log("start", this.touchstartX);
+    },
+    handleTouchEnd(e: any) {
+      this.touchendX = e.changedTouches[0].screenX;
+      console.log("end", this.touchendX);
+      this.checkDirection();
+    },
+    checkDirection() {
+      const treshold = 70;
+      if (this.touchendX + treshold < this.touchstartX) {
+        this.appStore.setSidebar(false);
+      }
+      if (this.touchendX > this.touchstartX + treshold) {
+        this.appStore.setSidebar(true);
+      }
+    },
     startResize(e: any) {
       const sidebar = this.$refs.sidebar as HTMLSpanElement;
       this.startWidth = sidebar.getBoundingClientRect().width;
@@ -77,6 +99,7 @@ export default defineComponent({
   display: flex;
   transition: all 0.2s ease;
   overflow: hidden;
+  position: relative;
 }
 .sidebar-layout__toggle-button {
   position: absolute;
@@ -105,27 +128,27 @@ export default defineComponent({
     max-width: 100%;
     background: var(--app-drawer-bg-color);
     overflow-y: auto;
-    position: relative;
-  }
-
-  .sidebar-layout .sidebar-layout__main {
+    opacity: 1;
     position: absolute;
-    top: 0;
     left: 0;
+    top: 0;
+  }
+  .sidebar-layout--closed .sidebar-layout__drawer {
+    opacity: 0;
+  }
+  .sidebar-layout .sidebar-layout__main {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    animation: fade-in 0.2s ease;
-    animation-fill-mode: forwards;
-    opacity: 0;
-    z-index: 10;
-    display: none;
+    transform: translateX(100%);
+    transition: all 0.2s ease;
   }
   .sidebar-layout--closed .sidebar-layout__main {
-    display: block;
-  }
-  .sidebar-layout--closed .sidebar-layout__drawer {
-    display: none;
+    transform: translateX(0);
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 999;
   }
 }
 
@@ -145,7 +168,6 @@ export default defineComponent({
   max-height: 100vh;
   overflow-y: auto;
   flex: 1;
-  position: relative;
   background: var(--app-main-content-bg-color);
 }
 .sidebar-layout__resize-handle {
