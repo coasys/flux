@@ -294,7 +294,7 @@ export default defineComponent({
   z-index: 1;
   display: flex;
   align-items: center;
-  padding-left: var(--j-space-500);
+  padding-left: var(--j-space-400);
   position: sticky;
   gap: var(--j-space-300);
   top: 0;

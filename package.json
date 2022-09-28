@@ -46,8 +46,6 @@
     "@types/mocha": "^8.2.1",
     "@types/uuid": "^8.3.0",
     "@vitejs/plugin-vue": "^2.3.3",
-    "@vue/eslint-config-prettier": "^7.0.0",
-    "@vue/eslint-config-typescript": "^11.0.0",
     "babel-jest": "^26.0.0",
     "easygraphql-tester": "^6.0.1",
     "eslint": "7.1.0",
