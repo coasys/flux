@@ -1,7 +1,5 @@
 <template>
   <div
-    @touchstart="handleTouchStart"
-    @touchend="handleTouchEnd"
     class="sidebar-layout"
     :class="{
       'sidebar-layout--closed': !open,
@@ -40,8 +38,6 @@ export default defineComponent({
   },
   data() {
     return {
-      touchstartX: 0,
-      touchendX: 0,
       isDragging: false,
       startX: 0,
       startWidth: 0,
@@ -53,34 +49,6 @@ export default defineComponent({
     },
   },
   methods: {
-    handleTouchStart(e: any) {
-      this.touchstartX = e.changedTouches[0].screenX;
-      console.log("start", this.touchstartX);
-    },
-    handleTouchEnd(e: any) {
-      this.touchendX = e.changedTouches[0].screenX;
-      console.log("end", this.touchendX);
-      this.checkDirection();
-    },
-    checkDirection() {
-      const treshold = 70;
-      // left swipe
-      if (this.touchendX + treshold < this.touchstartX) {
-        if (this.appStore.showMainSidebar) {
-          this.appStore.setMainSidebar(false);
-        } else {
-          this.appStore.setSidebar(false);
-        }
-      }
-      // right swipe
-      if (this.touchendX > this.touchstartX + treshold) {
-        if (!this.appStore.showMainSidebar && this.appStore.showSidebar) {
-          this.appStore.setMainSidebar(true);
-        } else {
-          this.appStore.setSidebar(true);
-        }
-      }
-    },
     startResize(e: any) {
       const sidebar = this.$refs.sidebar as HTMLSpanElement;
       this.startWidth = sidebar.getBoundingClientRect().width;

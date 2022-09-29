@@ -1,5 +1,7 @@
 <template>
   <div
+    @touchstart="handleTouchStart"
+    @touchend="handleTouchEnd"
     class="app-layout"
     :class="{ 'app-layout--show-sidebar': appStore.showMainSidebar }"
   >
@@ -9,15 +11,48 @@
 </template>
 
 <script lang="ts">
+import { ref, defineComponent } from "vue";
 import { useAppStore } from "@/store/app";
 
-export default {
+export default defineComponent({
   setup() {
     return {
       appStore: useAppStore(),
+      touchstartX: ref(0),
+      touchendX: ref(0),
     };
   },
-};
+  methods: {
+    handleTouchStart(e: any) {
+      this.touchstartX = e.changedTouches[0].screenX;
+      console.log("start", this.touchstartX);
+    },
+    handleTouchEnd(e: any) {
+      this.touchendX = e.changedTouches[0].screenX;
+      console.log("end", this.touchendX);
+      this.checkDirection();
+    },
+    checkDirection() {
+      const treshold = 70;
+      // left swipe
+      if (this.touchendX + treshold < this.touchstartX) {
+        if (this.appStore.showMainSidebar) {
+          this.appStore.setMainSidebar(false);
+        } else {
+          this.appStore.setSidebar(false);
+        }
+      }
+      // right swipe
+      if (this.touchendX > this.touchstartX + treshold) {
+        if (!this.appStore.showMainSidebar && this.appStore.showSidebar) {
+          this.appStore.setMainSidebar(true);
+        } else {
+          this.appStore.setSidebar(true);
+        }
+      }
+    },
+  },
+});
 </script>
 
 <style>
