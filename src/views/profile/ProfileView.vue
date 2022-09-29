@@ -11,7 +11,7 @@
           <div class="profile__avatar">
             <j-avatar
               class="avatar"
-              :hash="$route.params.did"
+              :hash="userStore.agent().did"
               :src="profile.profilePicture"
             />
             <j-button
@@ -175,9 +175,9 @@ import ProfileCard from "./ProfileCards.vue";
 import ProfileAddLink from "./ProfileAddLink.vue";
 import ProfileEditLink from "./ProfileEditLink.vue";
 import ProfileJoinLink from "./ProfileJoinLink.vue";
-import { useUserStore } from "@/store/user";
 import EditProfile from "@/containers/EditProfile.vue";
 import { useAppStore } from "@/store/app";
+import { useUserStore } from "@/store/user";
 import { mapActions } from "pinia";
 import getAgentLinks from "@/utils/getAgentLinks";
 import { FLUX_PROFILE } from "@/constants/profile";
@@ -195,9 +195,11 @@ export default defineComponent({
   setup() {
     const appStore = useAppStore();
     const dataStore = useDataStore();
+    const userStore = useUserStore();
     return {
       appStore,
       dataStore,
+      userStore,
     };
   },
   data() {

@@ -16,7 +16,7 @@
         <j-avatar
           class="left-nav__profile-icon"
           size="lg"
-          :hash="agent.did"
+          :hash="agent().did"
           :src="userProfileImage"
           @click="() => navigate()"
         ></j-avatar>
