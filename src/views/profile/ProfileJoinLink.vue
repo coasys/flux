@@ -20,7 +20,7 @@
 
 <script lang="ts">
 import { useDataStore } from "@/store/data";
-import { defineComponent } from "vue-demi";
+import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   props: ["joiningLink"],
@@ -30,11 +30,7 @@ export default defineComponent({
 
     return {
       dataStore,
-    };
-  },
-  data() {
-    return {
-      isJoiningCommunity: false,
+      isJoiningCommunity: ref(false),
     };
   },
   methods: {

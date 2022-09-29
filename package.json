@@ -9,7 +9,7 @@
     "url": "https://github.com/juntofoundation/flux.git"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src/**/*.ts src/**/*.js src/**/*.vue",
@@ -21,8 +21,10 @@
   "main": "background.js",
   "dependencies": {
     "@apollo/client": "^3.6.9",
+    "@junto-foundation/chat-view": "^0.1.27",
     "@junto-foundation/junto-elements": "^0.4.3",
     "@perspect3vism/ad4m": "^0.1.33",
+    "@perspect3vism/ad4m-connect": "^0.0.7",
     "date-fns": "^2.22.1",
     "dexie": "^3.2.2",
     "graphql": "^15.5.0",
@@ -35,8 +37,7 @@
     "uuid": "^8.3.2",
     "vue": "^3.0.0",
     "vue-advanced-cropper": "^2.3.1",
-    "vue-router": "^4.0.0-0",
-    "@perspect3vism/ad4m-connect": "0.0.5"
+    "vue-router": "^4.0.0-0"
   },
   "devDependencies": {
     "@testing-library/vue": "^6.4.2",
@@ -45,17 +46,17 @@
     "@types/mocha": "^8.2.1",
     "@types/uuid": "^8.3.0",
     "@vitejs/plugin-vue": "^2.3.3",
-    "@vue/eslint-config-prettier": "^7.0.0",
-    "@vue/eslint-config-typescript": "^11.0.0",
+    "@vue/eslint-config-prettier": "^6.0.0",
+    "@vue/eslint-config-typescript": "^7.0.0",
+    "eslint": "^7.28.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-vue": "^7.10.0",
     "babel-jest": "^26.0.0",
     "easygraphql-tester": "^6.0.1",
-    "eslint": "7.1.0",
-    "eslint-plugin-prettier": "^3.3.1",
-    "eslint-plugin-vue": "^7.12.1",
     "jest": "^26.0.0",
     "jest-transform-stub": "^2.0.0",
     "patch-package": "^6.4.7",
-    "prettier": "^2.3.2",
     "react": "^17.0.2",
     "ts-jest": "^26.0.0",
     "typescript": "^4.4.2",

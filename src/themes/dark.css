@@ -21,6 +21,11 @@
     hsla(var(--j-color-primary-hue), var(--j-color-saturation), 20%, 0.05);
 }
 
+:root[theme="dark"] j-tooltip::part(tooltip) {
+  background: var(--j-color-ui-50);
+  color: var(--j-color-black);
+}
+
 :root[theme="dark"] j-menu-item::part(base) {
   margin-top: var(--j-space-100);
   margin-left: var(--j-space-300);

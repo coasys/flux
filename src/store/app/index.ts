@@ -23,6 +23,7 @@ export const useAppStore = defineStore("app", {
         showCode: false,
       },
       showSidebar: true,
+      showMainSidebar: true,
       sidebarWidth: 330,
       showGlobalLoading: false,
       globalTheme: {

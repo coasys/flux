@@ -1,6 +1,18 @@
 <template>
-  <div style="height: 100%">
+  <div class="channel-view" style="height: 100%">
+    <div class="channel-view__header">
+      <j-button
+        class="channel-view__sidebar-toggle"
+        variant="ghost"
+        @click="() => toggleSidebar()"
+      >
+        <j-icon color="ui-800" size="md" name="arrow-left-short" />
+      </j-button>
+      <j-text color="black" variant="heading-md"># {{ channel.name }}</j-text>
+    </div>
+
     <perspective-view
+      class="perspective-view"
       :port="port"
       :channel="channelId"
       :perspective-uuid="communityId"
@@ -23,12 +35,14 @@
 </template>
 
 <script lang="ts">
+import ChatView from "@junto-foundation/chat-view";
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 import Profile from "@/containers/Profile.vue";
 import useEventEmitter from "@/utils/useEventEmitter";
+import { useAppStore } from "@/store/app";
 
 interface MentionTrigger {
   label: string;
@@ -43,6 +57,7 @@ export default defineComponent({
     Profile,
   },
   setup() {
+    const appStore = useAppStore();
     const dataStore = useDataStore();
     const memberMentions = ref<MentionTrigger[]>([]);
     const activeProfile = ref<any>({});
@@ -50,6 +65,7 @@ export default defineComponent({
     const bus = useEventEmitter();
 
     return {
+      appStore,
       dataStore,
       script: null as HTMLElement | null,
       memberMentions,
@@ -58,25 +74,9 @@ export default defineComponent({
       bus,
     };
   },
-  async mounted() {
-    const pkg =
-      /* @ts-ignore */
-      import.meta.env.MODE === "development"
-        ? "http://localhost:3030/dist/main.js"
-        : "https://unpkg.com/@junto-foundation/chat-view/dist/main.js";
-
-    this.script = document.createElement("script");
-    this.script.setAttribute("type", "module");
-    this.script.innerHTML = `
-      import PerspectiveView from '${pkg}';
-      if(customElements.get('perspective-view') === undefined)
-        customElements.define("perspective-view", PerspectiveView);
-    `;
-    this.script;
-    document.body.appendChild(this.script);
-  },
-  unmounted() {
-    document.body.removeChild(this.script as any);
+  mounted() {
+    if (customElements.get("perspective-view") === undefined)
+      customElements.define("perspective-view", ChatView);
   },
   computed: {
     port(): number {
@@ -97,6 +97,9 @@ export default defineComponent({
     },
   },
   methods: {
+    toggleSidebar() {
+      this.appStore.toggleSidebar();
+    },
     onAgentClick({ detail }: any) {
       this.toggleProfile(true, detail.did);
     },
@@ -149,3 +152,28 @@ export default defineComponent({
   },
 });
 </script>
+
+<style>
+.channel-view__header {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--j-space-200);
+  position: sticky;
+  border-bottom: 1px solid var(--j-color-white);
+  height: var(--app-header-height);
+}
+
+.perspective-view {
+  height: calc(100% - var(--app-header-height));
+  display: block;
+}
+
+@media (min-width: 800px) {
+  .channel-view__sidebar-toggle {
+    display: none;
+  }
+  .channel-view__header {
+    padding: 0 var(--j-space-500);
+  }
+}
+</style>

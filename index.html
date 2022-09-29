@@ -3,8 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <meta name="theme-color" content="#222222" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <title>Flux</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/inobounce/0.2.0/inobounce.js"></script>
   </head>
   <style>
     body {
@@ -23,6 +33,7 @@
   <body>
     <div id="app"></div>
     <div id="popup-target"></div>
+    <script src="https://unpkg.com/construct-style-sheets-polyfill"></script>
     <script>
       if (global === undefined) {
         var global = window;
