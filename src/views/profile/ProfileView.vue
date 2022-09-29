@@ -11,7 +11,7 @@
           <div class="profile__avatar">
             <j-avatar
               class="avatar"
-              :hash="userStore.agent().did"
+              :hash="userStore.agent.did"
               :src="profile.profilePicture"
             />
             <j-button
