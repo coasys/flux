@@ -2,9 +2,9 @@ import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhoo
 
 import { MEMBER, SELF } from "@/constants/neighbourhoodMeta";
 
-import { Link, LinkQuery } from "@perspect3vism/ad4m";
+import { Link } from "@perspect3vism/ad4m";
 
-import { CommunityState, MembraneType, FeedType } from "@/store/types";
+import { CommunityState, FeedType } from "@/store/types";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
@@ -28,9 +28,7 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
       (c: any) => c.neighbourhoodUrl === joiningLink
     );
     if (!isAlreadyPartOf) {
-      const neighbourhood = await client.neighbourhood.joinFromUrl(
-        joiningLink
-      );
+      const neighbourhood = await client.neighbourhood.joinFromUrl(joiningLink);
       console.log(
         new Date(),
         "Installed neighbourhood with result",
@@ -47,7 +45,7 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
         } as Link
       );
       console.log("Created profile expression link", addProfileLink);
-        
+
       //Read out metadata about the perspective from the meta
       const { name, description, creatorDid, createdAt } =
         getMetaFromNeighbourhood(neighbourhood.neighbourhood!.meta.links);
@@ -64,7 +62,6 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
           creatorDid,
           perspective: neighbourhood,
           neighbourhoodUrl: joiningLink,
-          membraneType: MembraneType.Unique,
           linkedNeighbourhoods: [neighbourhood.uuid],
           linkedPerspectives: [neighbourhood.uuid],
           members: [userStore.getUser!.agent.did!],
@@ -86,7 +83,7 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
           hideMutedChannels: false,
           notifications: {
             mute: false,
-          }
+          },
         },
       } as CommunityState;
 

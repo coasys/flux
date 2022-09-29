@@ -30,27 +30,29 @@ export async function createChannel({
   const client = await getAd4mClient();
 
   const channel = dataStore.channels[channelName];
+  const channelExpr = await client.expression.create(channel, "literal");
+
   if (!channel || channel.sourcePerspective !== sourcePerspective.uuid) {
     const linkExpression = await client.perspective.addLink(
       sourcePerspective.uuid,
       {
         source: SELF,
-        target: channelName,
+        target: channelExpr,
         predicate: CHANNEL,
       }
     );
     const linkExpressionChannelName = await client.perspective.addLink(
       sourcePerspective.uuid,
       {
-        source: channelName,
-        target: channelName,
+        source: channelExpr,
+        target: channelExpr,
         predicate: CHANNEL_NAME,
       }
     );
     const linkExpressionChannelClass = await client.perspective.addLink(
       sourcePerspective.uuid,
       {
-        source: channelName,
+        source: channelExpr,
         target: FLUX_CHANNEL,
         predicate: AD4M_CLASS,
       }
@@ -67,7 +69,7 @@ export async function createChannel({
       name: channelName,
       description: "",
       creatorDid,
-      id: nanoid(),
+      id: channelExpr,
       createdAt: new Date().toISOString(),
       sourcePerspective: sourcePerspective.uuid,
       hasNewMessages: false,

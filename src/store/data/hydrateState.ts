@@ -1,14 +1,10 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 import { CHANNEL, SELF } from "@/constants/neighbourhoodMeta";
 import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
-import {
-  LinkExpression,
-  PerspectiveProxy,
-  LinkQuery
-} from "@perspect3vism/ad4m";
+import { LinkExpression, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { nanoid } from "nanoid";
 import { useDataStore } from ".";
-import { CommunityState, FeedType, LocalCommunityState, MembraneType } from "../types";
+import { CommunityState, FeedType, LocalCommunityState } from "../types";
 import { getGroupMetadata } from "./actions/fetchNeighbourhoodMetadata";
 import { useUserStore } from "../user";
 import { getProfile } from "@/utils/profileHelpers";
@@ -67,7 +63,6 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
         neighbourhood: perspective.neighbourhood,
       },
       neighbourhoodUrl: perspective.sharedUrl,
-      membraneType: MembraneType.Unique,
       linkedPerspectives: [perspective.uuid],
       linkedNeighbourhoods: [perspective.uuid],
       members: [meta.creatorDid],
@@ -87,7 +82,9 @@ export async function hydrateState() {
 
   const profile = await getProfile(status.did!, true);
 
-  const fluxAgentPerspective = await (await client.perspective.all()).filter(val => val.name == FLUX_PROXY_PROFILE_NAME);
+  const fluxAgentPerspective = await (
+    await client.perspective.all()
+  ).filter((val) => val.name == FLUX_PROXY_PROFILE_NAME);
   if (fluxAgentPerspective.length > 0) {
     userStore.addAgentProfileProxyPerspectiveId(fluxAgentPerspective[0].uuid);
   }
@@ -108,7 +105,10 @@ export async function hydrateState() {
   }
 
   for (const perspective of perspectives) {
-    const channelLinks = await client.perspective.queryProlog(perspective.uuid, `triple("${SELF}", "${CHANNEL}", C).`);
+    const channelLinks = await client.perspective.queryProlog(
+      perspective.uuid,
+      `triple("${SELF}", "${CHANNEL}", C).`
+    );
 
     if (channelLinks) {
       if (perspective.sharedUrl !== undefined) {
