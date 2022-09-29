@@ -4232,6 +4232,7 @@
     "graceful-fs" "^4.1.6"
 
 "junto-utils@file:../junto-utils":
+  "resolved" "file:node_modules/@junto-foundation/junto-utils"
 
 "keyv@^3.0.0":
   "integrity" "sha512-9ykJ/46SN/9KPM/sichzQ7OvXyGDYKGTaDlKMGCAlg2UK8KRy4jb0d8sFc+0Tt0YYnThq8X2RZgCg74RPxgcVA=="
