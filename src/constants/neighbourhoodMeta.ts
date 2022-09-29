@@ -14,6 +14,8 @@ export const MEMBER = "sioc://has_member";
 
 export const EXPRESSION = "sioc://content_of";
 
+export const MESSAGE = "temp://directly_succeeded_by";
+
 export const CHANNEL = "flux://has_channel";
 
 export const CHANNEL_NAME = "flux://has_channel_name";

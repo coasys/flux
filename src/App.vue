@@ -40,15 +40,15 @@ import {
 } from "@/store/types";
 import { useRoute, useRouter } from "vue-router";
 import { useDataStore } from "./store/data";
-import { LinkExpression } from "@perspect3vism/ad4m";
+import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import {
   CHANNEL,
-  EXPRESSION,
   FLUX_GROUP_DESCRIPTION,
   FLUX_GROUP_IMAGE,
   FLUX_GROUP_NAME,
   FLUX_GROUP_THUMBNAIL,
   MEMBER,
+  MESSAGE,
 } from "./constants/neighbourhoodMeta";
 import { useUserStore } from "./store/user";
 import retry from "./utils/retry";
@@ -137,8 +137,6 @@ export default defineComponent({
       this.componentKey += 1;
 
       this.appStore.setGlobalLoading(true);
-
-      this.checkConnectionReroute();
     },
     async startWatcher() {
       const client = await getAd4mClient();
@@ -152,34 +150,35 @@ export default defineComponent({
         perspective: string
       ) => {
         console.debug("GOT INCOMING MESSAGE SIGNAL", link, perspective);
-        if (link.data!.predicate! === EXPRESSION) {
+        if (link.data!.predicate! === MESSAGE) {
           try {
-            const expression = await retry(async () => {
-              const exp = await client!.expression.getRaw(link.data.target);
-              const expObj = JSON.parse(exp);
-              if (exp) {
-                return { ...expObj, data: expObj.data };
-              } else {
-                return null;
+            const channels = this.dataStore.getChannelStates(perspective);
+
+            for (const channel of channels) {
+              const isSameChannel = await client.perspective.queryProlog(perspective, `triple("${channel.name}", "${MESSAGE}", "${link.data.target}").`);
+
+              if (isSameChannel) {
+                const expression = Literal.fromUrl(link.data.target).get();
+            
+                console.debug("FOUND EXPRESSION FOR SIGNAL", expression);
+
+                this.dataStore.showMessageNotification({
+                  router,
+                  route,
+                  perspectiveUuid: perspective,
+                  notificationChannelId: channel.name,
+                  authorDid: (expression as any)!.author,
+                  message: (expression as any).data,
+                });
+
+                //Add UI notification on the channel to notify that there is a new message there
+                this.dataStore.setHasNewMessages({
+                  communityId: perspective,
+                  channelId: channel.name,
+                  value: true,
+                });
               }
-            }, {});
-
-            console.debug("FOUND EXPRESSION FOR SIGNAL", expression);
-
-            this.dataStore.showMessageNotification({
-              router,
-              route,
-              perspectiveUuid: perspective,
-              authorDid: (expression as any)!.author,
-              message: (expression as any).data,
-            });
-
-            //Add UI notification on the channel to notify that there is a new message there
-            this.dataStore.setHasNewMessages({
-              communityId: perspective,
-              channelId: perspective,
-              value: true,
-            });
+            }
           } catch (e: any) {
             throw new Error(e);
           }
