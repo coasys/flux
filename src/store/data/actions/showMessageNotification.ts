@@ -66,31 +66,29 @@ export default async ({
         body = `#${channel?.name}: ${escapedMessage}`;
       }
   
-      if (Notification.permission === "granted") {
-        const permission = await Notification.requestPermission();
-  
-        if (permission === "granted") {
-          const notification = new Notification(title, {
-            body,
-            icon: "/assets/images/icon.png",
+      const permission = await Notification.requestPermission();
+      
+      if (permission === "granted") {
+        const notification = new Notification(title, {
+          body,
+          icon: "/assets/images/icon.png",
+        });
+        
+        notification.onclick = () => {
+          window.focus();
+
+          router.push({
+            name: "channel",
+            params: {
+              communityId: community!.neighbourhood.perspective!.uuid,
+              channelId: channel!.name,
+            },
           });
-          
-          notification.onclick = () => {
-            window.focus();
-  
-            router.push({
-              name: "channel",
-              params: {
-                communityId: community!.neighbourhood.perspective!.uuid,
-                channelId: channel!.name,
-              },
-            });
-  
-            notification.close();
-          }
-  
-          return notification;
+
+          notification.close();
         }
+
+        return notification;
       }
   }
 
