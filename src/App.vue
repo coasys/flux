@@ -171,12 +171,15 @@ export default defineComponent({
                   message: (expression as any).data,
                 });
 
-                //Add UI notification on the channel to notify that there is a new message there
-                this.dataStore.setHasNewMessages({
-                  communityId: perspective,
-                  channelId: channel.name,
-                  value: true,
-                });
+                const { channelId } = this.$route.params;
+                if (channelId !== channel.name) {
+                  //Add UI notification on the channel to notify that there is a new message there
+                  this.dataStore.setHasNewMessages({
+                    communityId: perspective,
+                    channelId: channel.name,
+                    value: true,
+                  });
+                }
               }
             }
           } catch (e: any) {
