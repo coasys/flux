@@ -43,7 +43,7 @@ export default async ({
       !community?.state.notifications.mute) ||
     (user!.agent.did! !== authorDid &&
       (community?.neighbourhood.perspective.uuid === communityId
-        ? channel?.id !== channelId
+        ? channel?.name !== channelId
         : true) &&
       !channel?.notifications.mute &&
       !community?.state.notifications.mute)
