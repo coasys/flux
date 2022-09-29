@@ -1,7 +1,7 @@
 <template>
   <div class="profile__container">
     <div
-      :style="{ backgroundImage: `url(${profilebg})` }"
+      :style="{ backgroundImage: `url(${profile.profileBg})` }"
       class="profile__bg"
     />
 
