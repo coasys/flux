@@ -9,11 +9,11 @@
       <div class="profile__layout">
         <div class="profile__info">
           <div class="profile__avatar">
-            <j-avatar
+            <Avatar
               class="avatar"
               :hash="userStore.agent.did"
-              :src="profile.profilePicture"
-            />
+              :url="profile?.profilePicture"
+            ></Avatar>
             <j-button
               v-if="sameAgent"
               variant="ghost"
@@ -182,6 +182,7 @@ import { mapActions } from "pinia";
 import getAgentLinks from "@/utils/getAgentLinks";
 import { FLUX_PROFILE } from "@/constants/profile";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import Avatar from "@/components/avatar/Avatar.vue";
 
 export default defineComponent({
   name: "ProfileView",
@@ -191,6 +192,7 @@ export default defineComponent({
     ProfileEditLink,
     ProfileJoinLink,
     EditProfile,
+    Avatar,
   },
   setup() {
     const appStore = useAppStore();
@@ -205,7 +207,6 @@ export default defineComponent({
   data() {
     return {
       currentTab: "communities",
-      profile: {} as ProfileWithDID | null,
       showAddlinkModal: false,
       showEditlinkModal: false,
       showJoinCommunityModal: false,
@@ -295,15 +296,6 @@ export default defineComponent({
         (e) => e.id !== FLUX_PROFILE
       );
     },
-    async getAgentProfile() {
-      const client = await getAd4mClient();
-      const did = this.$route.params.did as string;
-      const me = await client.agent.me();
-
-      this.profile = await getProfile(did || me.did);
-
-      console.log("profile", this.profileLinks, this.profile);
-    },
     onLinkClick(link: any) {
       const dataStore = useDataStore();
 
@@ -371,7 +363,7 @@ export default defineComponent({
   },
   async created() {
     const client = await getAd4mClient();
-    this.getAgentProfile();
+
     this.getAgentAreas();
     const did = this.$route.params.did as string;
     const me = await client.agent.me();
@@ -384,24 +376,24 @@ export default defineComponent({
   watch: {
     showAddlinkModal() {
       if (!this.showAddlinkModal) {
-        this.getAgentProfile();
         this.getAgentAreas();
       }
     },
     showEditlinkModal() {
       if (!this.showEditlinkModal) {
-        this.getAgentProfile();
         this.getAgentAreas();
       }
     },
     "modals.showEditProfile"() {
       if (!this.modals.showEditProfile) {
-        this.getAgentProfile();
         this.getAgentAreas();
       }
     },
   },
   computed: {
+    profile() {
+      return this.userStore.profile;
+    },
     communities() {
       return this.dataStore.getCommunities;
     },

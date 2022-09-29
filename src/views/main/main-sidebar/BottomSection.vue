@@ -13,26 +13,29 @@
       v-slot="{ navigate }"
     >
       <j-tooltip title="Profile">
-        <j-avatar
+        <Avatar
           class="left-nav__profile-icon"
           size="lg"
-          :hash="userStore.agent.did"
-          :src="userProfileImage"
+          :did="userStore.agent.did"
+          :url="userStore.profile?.profilePicture"
           @click="() => navigate()"
-        ></j-avatar>
+        ></Avatar>
       </j-tooltip>
     </router-link>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onBeforeMount } from "vue";
+import { defineComponent } from "vue";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { mapActions, mapState } from "pinia";
-import { getImage } from "@/utils/profileHelpers";
+import Avatar from "@/components/avatar/Avatar.vue";
 
 export default defineComponent({
+  components: {
+    Avatar,
+  },
   setup() {
     const appStore = useAppStore();
     const userStore = useUserStore();
@@ -44,24 +47,10 @@ export default defineComponent({
   },
   data() {
     return {
-      userProfileImage: "",
       showBottomOptions: false,
     };
   },
-  watch: {
-    userProfile: {
-      async handler() {
-        if (this.userStore.profile?.profilePicture) {
-          this.userProfileImage = await getImage(
-            this.userStore.profile?.profilePicture
-          );
-        } else {
-          this.userProfileImage = "";
-        }
-      },
-      immediate: true,
-    },
-  },
+
   methods: {
     ...mapState(useUserStore, ["profile", "agent"]),
     ...mapActions(useAppStore, ["setShowEditProfile", "setShowSettings"]),
