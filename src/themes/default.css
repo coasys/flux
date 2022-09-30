@@ -21,6 +21,11 @@
     hsla(var(--j-color-primary-hue), var(--j-color-saturation), 20%, 0.05);
 }
 
+:root[theme="default"] j-tooltip::part(tooltip) {
+  background: var(--j-color-ui-50);
+  color: var(--j-color-black);
+}
+
 :root[theme="default"] j-input::part(input-wrapper) {
   background-color: hsl(var(--j-color-ui-hue), 18%, 23%);
 }

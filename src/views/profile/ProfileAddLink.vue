@@ -36,8 +36,7 @@
 </template>
 
 <script lang="ts">
-import { ref } from "vue";
-import { defineComponent } from "vue-demi";
+import { ref, defineComponent } from "vue";
 import SimpleImageAdd from "./SimpleImageAdd.vue";
 import CommunityAdd from "./CommunityAdd.vue";
 import WebLinkAdd from "./WebLinkAdd.vue";

@@ -29,6 +29,7 @@
   </sidebar-layout>
 
   <j-modal
+    size="sm"
     :open="modals.showCommunityMembers"
     @toggle="(e) => setShowCommunityMembers(e.target.open)"
   >
@@ -51,6 +52,7 @@
   </j-modal>
 
   <j-modal
+    size="sm"
     :open="modals.showCreateChannel"
     @toggle="(e) => setShowCreateChannel(e.target.open)"
   >

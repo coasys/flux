@@ -3,15 +3,15 @@
     <j-tooltip title="See all members">
       <div class="avatar-group__avatars">
         <template v-if="!loading">
-          <j-avatar
+          <Avatar
             class="avatar-group__avatar"
             v-for="(user, index) in firstUsers"
             :data-testid="`avatar-group__avatar__${user.did}`"
             :key="index"
             :hash="user.did"
             :size="size"
-            :src="user.thumbnailPicture"
-          ></j-avatar>
+            :url="user.thumbnailPicture"
+          ></Avatar>
         </template>
         <template v-if="loading">
           <Skeleton
@@ -35,14 +35,15 @@ import { ProfileWithDID } from "@/store/types";
 import { getProfile } from "@/utils/profileHelpers";
 import { defineComponent } from "vue";
 import Skeleton from "@/components/skeleton/Skeleton.vue";
+import Avatar from "@/components/avatar/Avatar.vue";
 
 export default defineComponent({
   emits: ["click"],
-  components: { Skeleton },
+  components: { Skeleton, Avatar },
   props: ["users", "size"],
   data() {
     return {
-      firstUsers: [] as ProfileWithDID[],
+      firstUsers: {} as Record<string, ProfileWithDID>,
       loading: false,
     };
   },
@@ -50,23 +51,18 @@ export default defineComponent({
     users: {
       handler: async function (users) {
         // reset on change
-        this.firstUsers = [];
+        this.firstUsers = {};
         this.loading = true;
 
-        for (const user of users) {
-          if (user) {            
-            const member = await getProfile(user);
-
-            
-            if (member && !this.firstUsers.find(e => e.did === user) && this.firstUsers.length <= 2) {
-              this.firstUsers = [...this.firstUsers, member];
-
-              if (this.firstUsers.length >= 3) {
-                break;
-              }
+        users.forEach(async (user: string, i: number) => {
+          if (i <= 5 && !this.firstUsers[user]) {
+            const profile = await getProfile(user);
+            if (profile) {
+              this.firstUsers[user] = profile;
             }
           }
-        }
+        });
+
         this.loading = false;
       },
       immediate: true,

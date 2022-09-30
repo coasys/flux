@@ -13,13 +13,7 @@ import {
 } from "@/constants/profile";
 import getAgentLinks from "./getAgentLinks";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
-
-interface Image {
-  contentUrl: string;
-  contentSize: string;
-}
-
-const byteSize = (str: string) => new Blob([str]).size;
+import { mapLiteralLinks } from "./linkHelpers";
 
 export const dataURItoBlob = (dataURI: string) => {
   const bytes =
@@ -100,68 +94,32 @@ export async function getImage(expUrl: string): Promise<string> {
 
     try {
       const image = await client.expression.get(expUrl);
-      
+
       if (image) {
         resolve(image.data.slice(1, -1));
       }
 
-      resolve("")
+      resolve("");
     } catch (e) {
-      console.error(e)
+      console.error(e);
       resolve("");
     }
-  })
+  });
 }
 
-export async function getProfile(did: string, url = false): Promise<ProfileWithDID | null> {
+export async function getProfile(did: string): Promise<ProfileWithDID | null> {
   const links = await getAgentLinks(did);
 
-  const profile: Profile = {
-    username: "",
-    bio: "",
-    email: "",
-    givenName: "",
-    familyName: "",
-  };
-
-  for (const link of links.filter((e) => e.data.source === FLUX_PROFILE)) {
-    let expUrl;
-    let image;
-
-    switch (link.data.predicate) {
-      case HAS_USERNAME:
-        profile!.username = link.data.target;
-        break;
-      case HAS_BIO:
-        profile!.bio = link.data.target;
-        break;
-      case HAS_GIVEN_NAME:
-        profile!.givenName = link.data.target;
-        break;
-      case HAS_FAMILY_NAME:
-        profile!.familyName = link.data.target;
-        break;
-      case HAS_PROFILE_IMAGE:
-        expUrl = link.data.target;
-        profile!.profilePicture = !url ? await getImage(expUrl) : expUrl;
-        break;
-      case HAS_THUMBNAIL_IMAGE:
-        expUrl = link.data.target;
-        profile!.thumbnailPicture = !url ? await getImage(expUrl) : expUrl;
-
-        break;
-      case HAS_BG_IMAGE:
-        expUrl = link.data.target;
-        profile!.profileBg = !url ? await getImage(expUrl) : expUrl;
-
-        break;
-      case HAS_EMAIL:
-        profile!.email = link.data.target;
-        break;
-      default:
-        break;
-    }
-  }
+  const profile = mapLiteralLinks(links, {
+    username: HAS_USERNAME,
+    bio: HAS_BIO,
+    givenName: HAS_GIVEN_NAME,
+    email: HAS_EMAIL,
+    familyName: HAS_FAMILY_NAME,
+    profilePicture: HAS_PROFILE_IMAGE,
+    thumbnailPicture: HAS_THUMBNAIL_IMAGE,
+    profileBg: HAS_BG_IMAGE,
+  });
 
   return { ...profile, did };
 }

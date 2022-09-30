@@ -1,6 +1,5 @@
 <template>
   <div class="sidebar-container">
-    <top-section></top-section>
     <communities-list></communities-list>
     <bottom-section></bottom-section>
   </div>
@@ -10,18 +9,17 @@
 import { defineComponent } from "vue";
 import CommunitiesList from "./CommunitiesList.vue";
 import BottomSection from "./BottomSection.vue";
-import TopSection from "./TopSection.vue";
 
 export default defineComponent({
-  components: { CommunitiesList, BottomSection, TopSection },
+  components: { CommunitiesList, BottomSection },
 });
 </script>
 
 <style scoped>
 .sidebar-container {
-  padding-top: var(--j-space-700);
-  height: 100vh;
+  padding-top: var(--j-space-500);
   width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;

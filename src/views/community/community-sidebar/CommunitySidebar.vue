@@ -1,58 +1,66 @@
 <template>
-  <j-popover
-    :open="showCommunityMenu"
-    @toggle="(e) => (showCommunityMenu = e.target.open)"
-    class="community-sidebar__header"
-    :class="{ 'is-creator': isCreator }"
-    event="click"
-    placement="bottom-start"
-  >
-    <button slot="trigger" class="community-sidebar__header-button">
-      <j-avatar
-        style="--j-avatar-size: 30px"
-        :src="communityImage || null"
-        :initials="community.neighbourhood.name.charAt(0)"
-      />
-      <div class="community-info">
-        {{ community.neighbourhood.name }}
-      </div>
-      <j-icon size="xs" name="chevron-down"></j-icon>
-    </button>
-    <j-menu slot="content">
-      <j-menu-item v-if="isCreator" @click="() => setShowEditCommunity(true)">
-        <j-icon size="xs" slot="start" name="pencil" />
-        Edit community
-      </j-menu-item>
-      <j-menu-item @click="goToSettings">
-        <j-icon size="xs" slot="start" name="gear" />
-        Settings
-      </j-menu-item>
-      <j-menu-item @click="() => setShowInviteCode(true)">
-        <j-icon size="xs" slot="start" name="person-plus" />
-        Invite people
-      </j-menu-item>
-      <j-divider />
-      <j-menu-item @click="() => setShowCreateChannel(true)">
-        <j-icon size="xs" slot="start" name="plus" />
-        Create channel
-      </j-menu-item>
-      <j-menu-item
-        @click="
-          () =>
-            toggleHideMutedChannels({
-              communityId: community.neighbourhood.perspective.uuid,
-            })
-        "
-      >
-        <j-icon
-          size="xs"
-          slot="start"
-          :name="community.state.hideMutedChannels ? 'toggle-on' : 'toggle-off'"
-        />
-        Hide muted channels
-      </j-menu-item>
-    </j-menu>
-  </j-popover>
+  <div class="community-sidebar__header">
+    <j-button
+      variant="ghost"
+      size="sm"
+      @click="() => appStore.toggleMainSidebar()"
+    >
+      <j-icon
+        size="sm"
+        :name="appStore.showMainSidebar ? 'arrow-bar-left' : 'arrow-bar-right'"
+      ></j-icon>
+    </j-button>
+    <div class="community-info">
+      {{ community.neighbourhood.name }}
+    </div>
+    <j-popover
+      :open="showCommunityMenu"
+      @toggle="(e) => (showCommunityMenu = e.target.open)"
+      :class="{ 'is-creator': isCreator }"
+      event="click"
+      placement="bottom-end"
+    >
+      <button slot="trigger" class="community-sidebar__header-button">
+        <j-icon size="xs" name="three-dots"></j-icon>
+      </button>
+      <j-menu slot="content">
+        <j-menu-item v-if="isCreator" @click="() => setShowEditCommunity(true)">
+          <j-icon size="xs" slot="start" name="pencil" />
+          Edit community
+        </j-menu-item>
+        <j-menu-item @click="goToSettings">
+          <j-icon size="xs" slot="start" name="gear" />
+          Settings
+        </j-menu-item>
+        <j-menu-item @click="() => setShowInviteCode(true)">
+          <j-icon size="xs" slot="start" name="person-plus" />
+          Invite people
+        </j-menu-item>
+        <j-divider />
+        <j-menu-item @click="() => setShowCreateChannel(true)">
+          <j-icon size="xs" slot="start" name="plus" />
+          Create channel
+        </j-menu-item>
+        <j-menu-item
+          @click="
+            () =>
+              toggleHideMutedChannels({
+                communityId: community.neighbourhood.perspective.uuid,
+              })
+          "
+        >
+          <j-icon
+            size="xs"
+            slot="start"
+            :name="
+              community.state.hideMutedChannels ? 'toggle-on' : 'toggle-off'
+            "
+          />
+          Hide muted channels
+        </j-menu-item>
+      </j-menu>
+    </j-popover>
+  </div>
 
   <j-box pt="500">
     <j-menu-group-item
@@ -109,12 +117,10 @@
             class="channel"
             :class="{ 'channel--muted': channel.notifications?.mute }"
             :selected="isExactActive"
-            @click="navigate"
+            @click="() => navigateTo(navigate)"
           >
             <j-icon slot="start" size="sm" name="hash"></j-icon>
-            {{
-              channel.name
-            }}
+            {{ channel.name }}
             <j-icon
               size="xs"
               slot="end"
@@ -139,14 +145,10 @@
               <j-icon
                 size="xs"
                 slot="start"
-                :name="
-                  channel?.notifications?.mute ? 'bell-slash' : 'bell'
-                "
+                :name="channel?.notifications?.mute ? 'bell-slash' : 'bell'"
               />
               {{
-                `${
-                  channel?.notifications?.mute ? "Unmute" : "Mute"
-                } Channel`
+                `${channel?.notifications?.mute ? "Unmute" : "Mute"} Channel`
               }}
             </j-menu-item>
           </j-menu>
@@ -161,17 +163,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, watch } from "vue";
+import { defineComponent, ref, PropType, watch } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import {
-  ChannelState,
-  CommunityState,
-} from "@/store/types";
+import { ChannelState, CommunityState, Profile } from "@/store/types";
 import { mapActions, mapState } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { DexieIPFS } from "@/utils/storageHelpers";
+import { getImage } from "@/utils/profileHelpers";
 
 export default defineComponent({
   components: { AvatarGroup },
@@ -183,14 +183,16 @@ export default defineComponent({
   },
   setup() {
     return {
+      userProfileImage: ref<null | string>(null),
+      appStore: useAppStore(),
       userStore: useUserStore(),
-      dataStore: useDataStore()
+      dataStore: useDataStore(),
     };
   },
   data: function () {
     return {
       showCommunityMenu: false,
-      communityImage: null
+      communityImage: null,
     };
   },
   computed: {
@@ -210,7 +212,13 @@ export default defineComponent({
         this.community.neighbourhood.creatorDid ===
         this.userStore.getUser?.agent.did
       );
-    }
+    },
+    userProfile(): Profile | null {
+      return this.userStore.profile;
+    },
+    userDid(): string {
+      return this.userStore.agent.did!;
+    },
   },
   async mounted() {
     watch(this.dataStore.neighbourhoods, async () => {
@@ -218,14 +226,26 @@ export default defineComponent({
         const communityId = this.$route.params.communityId as string;
         const community = this.dataStore.getCommunity(communityId);
         const dexie = new DexieIPFS(communityId);
-  
+
         const image = await dexie.get(community.neighbourhood.image!);
         // @ts-ignore
-        this.communityImage = image
-      }, 500)
-    })
+        this.communityImage = image;
+      }, 500);
+    });
   },
   watch: {
+    userProfile: {
+      async handler() {
+        if (this.userStore.profile?.profilePicture) {
+          this.userProfileImage = await getImage(
+            this.userStore.profile?.profilePicture
+          );
+        } else {
+          this.userProfileImage = null;
+        }
+      },
+      immediate: true,
+    },
     "$route.params.communityId": {
       handler: async function (id: string) {
         if (id) {
@@ -233,11 +253,11 @@ export default defineComponent({
           setTimeout(async () => {
             const community = this.dataStore.getCommunity(id);
             const dexie = new DexieIPFS(id);
-  
+
             const image = await dexie.get(community.neighbourhood.image!);
             // @ts-ignore
-            this.communityImage = image
-          }, 500)
+            this.communityImage = image;
+          }, 500);
         }
       },
       immediate: true,
@@ -250,12 +270,17 @@ export default defineComponent({
     ]),
     ...mapState(useDataStore, ["getChannelStates"]),
     ...mapActions(useAppStore, [
+      "setSidebar",
       "setShowCreateChannel",
       "setShowEditCommunity",
       "setShowCommunityMembers",
       "setShowInviteCode",
       "setShowCommunitySettings",
     ]),
+    navigateTo(navigate: any) {
+      this.setSidebar(false);
+      navigate();
+    },
     goToSettings() {
       this.setShowCommunitySettings(true);
       this.showCommunityMenu = false;
@@ -266,10 +291,14 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .community-sidebar__header {
+  border-bottom: 1px solid var(--j-color-white);
   z-index: 1;
-  background: var(--app-drawer-bg-color);
-  display: block;
+  display: flex;
+  height: var(--app-header-height);
+  align-items: center;
+  padding-left: var(--j-space-400);
   position: sticky;
+  gap: var(--j-space-300);
   top: 0;
   left: 0;
 }
@@ -289,10 +318,6 @@ export default defineComponent({
   cursor: pointer;
   padding: 0 var(--j-space-500);
   border-bottom: 1px solid var(--app-drawer-border-color);
-}
-
-.community-sidebar__header:hover {
-  background: rgba(128, 128, 128, 0.05);
 }
 
 .community-info {

@@ -1,20 +1,41 @@
 <template>
   <div class="left-nav__bottom-section">
     <j-tooltip id="settings" title="Settings">
-      <j-button size="xl" circle square variant="ghost" @click="goToSettings">
-        <j-icon size="lg" name="gear"></j-icon>
+      <j-button size="lg" circle square variant="ghost" @click="goToSettings">
+        <j-icon size="md" name="gear"></j-icon>
       </j-button>
     </j-tooltip>
+    <router-link
+      :to="{
+        name: 'home',
+      }"
+      custom
+      v-slot="{ navigate }"
+    >
+      <j-tooltip title="Profile">
+        <Avatar
+          class="left-nav__profile-icon"
+          size="lg"
+          :did="userStore.agent.did"
+          :url="userStore.profile?.profilePicture"
+          @click="() => navigate()"
+        ></Avatar>
+      </j-tooltip>
+    </router-link>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onBeforeMount } from "vue";
+import { defineComponent } from "vue";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
-import { mapActions } from "pinia";
+import { mapActions, mapState } from "pinia";
+import Avatar from "@/components/avatar/Avatar.vue";
 
 export default defineComponent({
+  components: {
+    Avatar,
+  },
   setup() {
     const appStore = useAppStore();
     const userStore = useUserStore();
@@ -29,7 +50,9 @@ export default defineComponent({
       showBottomOptions: false,
     };
   },
+
   methods: {
+    ...mapState(useUserStore, ["profile", "agent"]),
     ...mapActions(useAppStore, ["setShowEditProfile", "setShowSettings"]),
     logOut(): void {
       this.$router.replace({ name: "login" });
