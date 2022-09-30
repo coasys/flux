@@ -1,6 +1,6 @@
 // TODO: remove profile code
 
-import { ChannelState, FeedType } from "@/store/types";
+import { ChannelState } from "@/store/types";
 import type { PerspectiveHandle } from "@perspect3vism/ad4m";
 import {
   AD4M_CLASS,
@@ -11,7 +11,6 @@ import {
 } from "@/constants/neighbourhoodMeta";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
-import { nanoid } from "nanoid";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 interface ChannelProps {
@@ -30,7 +29,7 @@ export async function createChannel({
   const client = await getAd4mClient();
 
   const channel = dataStore.channels[channelName];
-  const channelExpr = await client.expression.create(channel, "literal");
+  const channelExpr = await client.expression.create(channelName, "literal");
 
   if (!channel || channel.sourcePerspective !== sourcePerspective.uuid) {
     const linkExpression = await client.perspective.addLink(
@@ -73,7 +72,6 @@ export async function createChannel({
       createdAt: new Date().toISOString(),
       sourcePerspective: sourcePerspective.uuid,
       hasNewMessages: false,
-      feedType: FeedType.Signaled,
       notifications: {
         mute: false,
       },
