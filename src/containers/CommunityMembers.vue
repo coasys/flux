@@ -1,35 +1,36 @@
 <template>
   <j-box p="800">
     <j-flex gap="500" direction="column">
-      <j-text variant="heading-sm">
-        All group members ({{ Object.keys(community.members).length ?? 0 }})
+      <j-text nomargin variant="heading-sm">
+        Members ({{ Object.keys(community.members).length ?? 0 }})
       </j-text>
       <j-input
         size="lg"
-        placeholder="Search members"
+        placeholder="Search members..."
         type="search"
         :value="searchValue"
         @input="(e) => (searchValue = e.target.value)"
       >
-        <j-icon name="search" size="sm" slot="end"></j-icon>
+        <j-icon name="search" size="sm" slot="start"></j-icon>
       </j-input>
-      <j-flex wrap gap="600" v-if="!loading">
+      <j-flex direction="column" gap="400" v-if="!loading">
         <j-flex
-          gap="300"
+          gap="500"
           style="cursor: pointer"
           v-for="communityMember in filteredCommunityMemberList"
           :key="communityMember.did"
           inline
-          direction="column"
+          direction="row"
+          j="center"
           a="center"
         >
-          <j-avatar
-            size="lg"
+          <Avatar
+            size="xl"
             :hash="communityMember.did"
-            :src="communityMember.thumbnailPicture"
+            :url="communityMember.thumbnailPicture"
             @click="() => profileClick(communityMember.did)"
-          />
-          <j-text variant="body">
+          ></Avatar>
+          <j-text color="black" nomargin variant="body">
             {{ communityMember.username }}
           </j-text>
         </j-flex>
@@ -64,10 +65,11 @@ import { useDataStore } from "@/store/data";
 import { getProfile } from "@/utils/profileHelpers";
 import Skeleton from "@/components/skeleton/Skeleton.vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import Avatar from "@/components/avatar/Avatar.vue";
 
 export default defineComponent({
   emits: ["close", "submit"],
-  components: { Skeleton },
+  components: { Skeleton, Avatar },
   setup() {
     const dataStore = useDataStore();
 
