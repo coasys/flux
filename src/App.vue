@@ -163,7 +163,7 @@ export default defineComponent({
             for (const channel of channels) {
               const isSameChannel = await client.perspective.queryProlog(
                 perspective,
-                `triple("${channel.name}", "${MESSAGE}", "${link.data.target}").`
+                `triple("${channel.id}", "${MESSAGE}", "${link.data.target}").`
               );
 
               if (isSameChannel) {
@@ -173,18 +173,18 @@ export default defineComponent({
                   router,
                   route,
                   perspectiveUuid: perspective,
-                  notificationChannelId: channel.name,
+                  notificationChannelId: channel.id,
                   authorDid: (expression as any)!.author,
                   message: (expression as any).data,
                   timestamp: (expression as any).timestamp,
                 });
 
                 const { channelId } = this.$route.params;
-                if (channelId !== channel.name) {
+                if (channelId !== channel.id) {
                   //Add UI notification on the channel to notify that there is a new message there
                   this.dataStore.setHasNewMessages({
                     communityId: perspective,
-                    channelId: channel.name,
+                    channelId: channel.id,
                     value: true,
                   });
                 }
