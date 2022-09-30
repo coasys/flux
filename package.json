@@ -19,7 +19,7 @@
   },
   "main": "background.js",
   "dependencies": {
-    "@junto-foundation/chat-view": "^0.1.27",
+    "@junto-foundation/chat-view": "file:../perspective-views/packages/mini-chat-view",
     "@junto-foundation/junto-elements": "^0.4.3",
     "@perspect3vism/ad4m": "^0.1.33",
     "@perspect3vism/ad4m-connect": "^0.0.7",
@@ -27,6 +27,7 @@
     "level": "^7.0.1",
     "nanoid": "^3.1.30",
     "pinia": "^2.0.2",
+    "sass": "^1.55.0",
     "uuid": "^8.3.2",
     "vue": "^3.0.0",
     "vue-advanced-cropper": "^2.3.1",
