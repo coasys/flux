@@ -1,4 +1,3 @@
-import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { RouteLocationNormalizedLoaded, Router } from "vue-router";
 import { useDataStore } from "..";
@@ -72,7 +71,7 @@ export default async ({
           body,
           icon: "/assets/images/logo.png",
         });
-        
+
         notification.onclick = () => {
           window.focus();
 
@@ -85,7 +84,7 @@ export default async ({
           });
 
           notification.close();
-        }
+        };
 
         return notification;
       }
