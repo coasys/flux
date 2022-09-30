@@ -95,6 +95,7 @@ import {
 import Logo from "@/components/logo/Logo.vue";
 import { LinkQuery, Literal } from "@perspect3vism/ad4m";
 import { mapLiteralLinks } from "@/utils/linkHelpers";
+import { useAppStore } from "@/store/app";
 
 export default defineComponent({
   name: "SignUp",
@@ -111,6 +112,7 @@ export default defineComponent({
     const isLoggingIn = ref(false);
     const showPassword = ref(false);
     const userStore = useUserStore();
+    const appStore = useAppStore();
 
     const {
       value: username,
@@ -158,6 +160,7 @@ export default defineComponent({
       familyName,
       logInError,
       userStore,
+      appStore
     };
   },
   async created() {
@@ -204,8 +207,9 @@ export default defineComponent({
           profilePicture: this.profilePicture,
         })
         .then(() => this.$router.push("/"))
-        .finally(() => {
+        .finally(async () => {
           this.isCreatingUser = false;
+          this.appStore.changeNotificationState(true);
         });
     },
   },
