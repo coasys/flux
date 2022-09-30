@@ -13,15 +13,13 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src/**/*.ts src/**/*.js src/**/*.vue",
-    "get-bootstrap": "node scripts/getBootstrapSeed.js",
-    "clean-state": "node scripts/clean-state.js",
     "test": "jest --env=jsdom",
     "test-gql": "jest --env=jsdom src/__tests__/graphql.ts"
   },
   "main": "background.js",
   "dependencies": {
     "@apollo/client": "^3.6.9",
-    "@junto-foundation/chat-view": "^0.1.27",
+    "@junto-foundation/chat-view": "^0.1.28",
     "@junto-foundation/junto-elements": "^0.4.3",
     "@perspect3vism/ad4m": "^0.1.33",
     "@perspect3vism/ad4m-connect": "^0.0.7",
