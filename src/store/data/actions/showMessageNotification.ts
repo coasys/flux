@@ -3,6 +3,7 @@ import { RouteLocationNormalizedLoaded, Router } from "vue-router";
 import { useDataStore } from "..";
 import { getProfile } from "@/utils/profileHelpers";
 import { differenceInSeconds, parseISO } from "date-fns";
+import { useAppStore } from "@/store/app";
 
 type Payload = {
   router: Router;
@@ -25,6 +26,7 @@ export default async ({
 }: Payload) => {
   const dataStore = useDataStore();
   const userStore = useUserStore();
+  const appStore = useAppStore();
   const { channelId, communityId } = route.params;
 
   const escapedMessage = message.replace(/(\s*<.*?>\s*)+/g, " ");
@@ -43,7 +45,8 @@ export default async ({
     (!isMinimized &&
       !channel?.notifications.mute &&
       !community?.state.notifications.mute && 
-      !(differenceInSeconds(new Date(), parseISO(timestamp)) > 30)) ||
+      !(differenceInSeconds(new Date(), parseISO(timestamp)) > 30) &&
+      appStore.notification.globalNotification) ||
     (user!.agent.did! !== authorDid &&
       (community?.neighbourhood.perspective.uuid === communityId
         ? channel?.name !== channelId
