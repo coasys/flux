@@ -43,7 +43,7 @@ export default defineComponent({
   props: ["users", "size"],
   data() {
     return {
-      firstUsers: [] as ProfileWithDID[],
+      firstUsers: {} as Record<string, ProfileWithDID>,
       loading: false,
     };
   },
@@ -51,14 +51,14 @@ export default defineComponent({
     users: {
       handler: async function (users) {
         // reset on change
-        this.firstUsers = [];
+        this.firstUsers = {};
         this.loading = true;
 
         users.forEach(async (user: string, i: number) => {
-          if (i <= 5) {
+          if (i <= 5 && !this.firstUsers[user]) {
             const profile = await getProfile(user);
             if (profile) {
-              this.firstUsers.push(profile);
+              this.firstUsers[user] = profile;
             }
           }
         });
