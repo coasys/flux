@@ -38,4 +38,7 @@ export interface ApplicationState {
     show: boolean;
     message: string;
   };
+  notification: {
+    globalNotification: boolean;
+  }
 }

@@ -42,6 +42,9 @@ export const useAppStore = defineStore("app", {
         show: false,
         message: "",
       },
+      notification: {
+        globalNotification: false,
+      }
     };
   },
   getters,
