@@ -26,6 +26,10 @@
     appiconpath="https://i.ibb.co/GnqjPJP/icon.png"
     openonshortcut
   ></ad4m-connect>
+  <j-toast autohide="10" :variant="ui.toast.variant" :open="ui.toast.open" @toggle="e => appStore.setToast({open: e.target.open})">
+    <j-text>{{ui.toast.message}}</j-text>
+  </j-toast>
+
 </template>
 
 <script lang="ts">

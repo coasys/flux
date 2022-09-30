@@ -13,8 +13,11 @@ export default async function changeNotificationState(
 
   if (payload) {
     const state = await Notification.requestPermission();
-
     if (state === 'denied') {
+      appStore.showDangerToast({
+        message: 'Notification is disabled from the browser please enable from there first'
+      })
+
       appStore.setGlobalNotification(false);
 
       return;
