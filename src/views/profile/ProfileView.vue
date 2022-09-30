@@ -184,7 +184,7 @@
 
 <script lang="ts">
 import { useDataStore } from "@/store/data";
-import { ModalsState, Profile, ProfileWithDID } from "@/store/types";
+import { ModalsState, ProfileWithDID } from "@/store/types";
 import { PerspectiveInput } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
 import ProfileCard from "./ProfileCards.vue";

@@ -99,7 +99,7 @@
           name: 'channel',
           params: {
             communityId: community.neighbourhood.perspective.uuid,
-            channelId: channel.name,
+            channelId: channel.id,
           },
         }"
         custom
