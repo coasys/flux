@@ -34,13 +34,12 @@ import { mapActions } from "pinia";
 import { useAppStore } from "./store/app";
 import {
   ApplicationState,
-  FeedType,
   ModalsState,
   NeighbourhoodState,
 } from "@/store/types";
 import { useRoute, useRouter } from "vue-router";
 import { useDataStore } from "./store/data";
-import { LinkExpression } from "@perspect3vism/ad4m";
+import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import {
   CHANNEL,
   EXPRESSION,
@@ -51,9 +50,7 @@ import {
   MEMBER,
 } from "./constants/neighbourhoodMeta";
 import { useUserStore } from "./store/user";
-import retry from "./utils/retry";
 import { buildCommunity, hydrateState } from "./store/data/hydrateState";
-import { nanoid } from "nanoid";
 import { getGroupMetadata } from "./store/data/actions/fetchNeighbourhoodMetadata";
 import {
   getAd4mClient,
@@ -153,25 +150,16 @@ export default defineComponent({
       ) => {
         console.debug("GOT INCOMING MESSAGE SIGNAL", link, perspective);
         if (link.data!.predicate! === EXPRESSION) {
+          //If the link is an expression, it's a message parse and show notification
           try {
-            const expression = await retry(async () => {
-              const exp = await client!.expression.getRaw(link.data.target);
-              const expObj = JSON.parse(exp);
-              if (exp) {
-                return { ...expObj, data: expObj.data };
-              } else {
-                return null;
-              }
-            }, {});
-
-            console.debug("FOUND EXPRESSION FOR SIGNAL", expression);
+            const expression = Literal.fromUrl(link.data!.target).get();
 
             this.dataStore.showMessageNotification({
               router,
               route,
               perspectiveUuid: perspective,
-              authorDid: (expression as any)!.author,
-              message: (expression as any).data,
+              authorDid: expression.author,
+              message: expression.data,
             });
 
             //Add UI notification on the channel to notify that there is a new message there
@@ -180,15 +168,16 @@ export default defineComponent({
               channelId: perspective,
               value: true,
             });
-          } catch (e: any) {
-            throw new Error(e);
+          } catch (e) {
+            console.log("Error parsing expression from signal", e);
           }
         } else if (link.data!.predicate! === MEMBER) {
+          //If the link is a member, it's a new member in a community
           const did = link.data!.target!;
-          console.log("Got new member in signal! Parsed out did: ", did);
-          if (did) {
+          const rawDid = did.includes("://") ? did.split("://")[1] : did;
+          if (rawDid) {
             this.dataStore.setNeighbourhoodMember({
-              member: did,
+              member: rawDid,
               perspectiveUuid: perspective,
             });
           }
@@ -196,30 +185,38 @@ export default defineComponent({
           link.data!.predicate! === CHANNEL &&
           link.author != this.userStore.getUser?.agent.did
         ) {
-          console.log("Joining channel via link signal!");
+          //If the link is a channel, it's a new channel in a community
+          console.log("Found a new channel via signal");
 
-          this.dataStore.addChannel({
-            communityId: perspective,
-            channel: {
-              id: nanoid(),
-              name: link.data.target,
-              creatorDid: link.author,
-              sourcePerspective: perspective,
-              hasNewMessages: false,
-              createdAt: link.timestamp,
-              feedType: FeedType.Signaled,
-              notifications: {
-                mute: false,
+          try {
+            const channel = link.data.target;
+            const channelExpression = Literal.fromUrl(channel).get();
+
+            this.dataStore.addChannel({
+              communityId: perspective,
+              channel: {
+                id: channel,
+                name: channelExpression.data,
+                creatorDid: link.author,
+                sourcePerspective: perspective,
+                hasNewMessages: false,
+                createdAt: link.timestamp,
+                notifications: {
+                  mute: false,
+                },
               },
-            },
-          });
+            });
+          } catch (e) {
+            console.log("Error parsing channel link signal", e);
+          }
         } else if (
           link.data!.predicate! === FLUX_GROUP_NAME ||
           link.data!.predicate! === FLUX_GROUP_DESCRIPTION ||
           link.data!.predicate! === FLUX_GROUP_IMAGE ||
           link.data!.predicate! === FLUX_GROUP_THUMBNAIL
         ) {
-          console.log("Community update via link signal!");
+          //If the link has predicate which is for group metadata, it's a group metadata update
+          console.log("Community update via link signal");
 
           const groupExp = await getGroupMetadata(perspective);
 
@@ -266,23 +263,24 @@ export default defineComponent({
         proxy!.addListener("link-added", (link) => {
           if (
             link.data!.predicate! === CHANNEL &&
-            link.data.target === "Home" &&
             link.author != this.userStore.getUser?.agent.did
           ) {
-            if (link.data.target === "Home") {
+            const channel = link.data.target;
+            const channelExpression = Literal.fromUrl(channel).get();
+            const channelName = channelExpression.name;
+            if (channelName === "Home") {
               buildCommunity(proxy!).then((community) => {
                 this.dataStore.addCommunity(community);
 
                 this.dataStore.addChannel({
                   communityId: perspective.uuid,
                   channel: {
-                    id: nanoid(),
-                    name: "Home",
+                    id: channel,
+                    name: channelName,
                     creatorDid: link.author,
                     sourcePerspective: perspective.uuid,
                     hasNewMessages: false,
-                    createdAt: new Date().toISOString(),
-                    feedType: FeedType.Signaled,
+                    createdAt: link.timestamp,
                     notifications: {
                       mute: false,
                     },
@@ -293,13 +291,12 @@ export default defineComponent({
               this.dataStore.addChannel({
                 communityId: perspective.uuid,
                 channel: {
-                  id: nanoid(),
-                  name: link.data.target,
+                  id: channel,
+                  name: channelName,
                   creatorDid: link.author,
                   sourcePerspective: perspective.uuid,
                   hasNewMessages: false,
-                  createdAt: new Date().toISOString(),
-                  feedType: FeedType.Signaled,
+                  createdAt: link.timestamp,
                   notifications: {
                     mute: false,
                   },
@@ -322,29 +319,30 @@ export default defineComponent({
 
       for (const perspective of allPerspectives) {
         perspective.addListener("link-added", (link) => {
-          if (
-            link.data!.predicate! === CHANNEL &&
-            link.data.target === "Home"
-          ) {
-            buildCommunity(perspective).then((community) => {
-              this.dataStore.addCommunity(community);
+          if (link.data!.predicate! === CHANNEL) {
+            const channel = link.data.target;
+            const channelExpression = Literal.fromUrl(channel).get();
+            const channelName = channelExpression.name;
+            if (channelName == "Home") {
+              buildCommunity(perspective).then((community) => {
+                this.dataStore.addCommunity(community);
 
-              this.dataStore.addChannel({
-                communityId: perspective.uuid,
-                channel: {
-                  id: nanoid(),
-                  name: "Home",
-                  creatorDid: link.author,
-                  sourcePerspective: perspective.uuid,
-                  hasNewMessages: false,
-                  createdAt: new Date().toISOString(),
-                  feedType: FeedType.Signaled,
-                  notifications: {
-                    mute: false,
+                this.dataStore.addChannel({
+                  communityId: perspective.uuid,
+                  channel: {
+                    id: channel,
+                    name: channelName,
+                    creatorDid: link.author,
+                    sourcePerspective: perspective.uuid,
+                    hasNewMessages: false,
+                    createdAt: link.timestamp,
+                    notifications: {
+                      mute: false,
+                    },
                   },
-                },
+                });
               });
-            });
+            }
           }
         });
       }
