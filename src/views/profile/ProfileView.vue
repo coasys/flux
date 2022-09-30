@@ -128,11 +128,7 @@
       </div>
     </div>
 
-    <div
-      class="back"
-      @click="() => $router.back()"
-      v-if="$route.name !== 'home'"
-    >
+    <div v-if="hasHistory" class="back" @click="() => $router.back()">
       <j-icon name="arrow-left" size="lg"></j-icon>
     </div>
   </div>
@@ -393,6 +389,9 @@ export default defineComponent({
     },
   },
   computed: {
+    hasHistory() {
+      return this.$router.options.history.state.back;
+    },
     did(): string {
       return (
         (this.$route.params.did as string) || this.userStore.agent.did || ""
