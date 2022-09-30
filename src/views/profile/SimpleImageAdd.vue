@@ -214,19 +214,28 @@ export default defineComponent({
           predicate: AREA_TYPE,
         })
       );
-      await client.perspective.addLink(
-        userPerspective!,
-        new Link({
-          source: areaName,
-          target: `text://${this.title}`,
-          predicate: AREA_HAS_NAME,
-        })
+
+      const titleExpression = await client.expression.create(
+        this.title,
+        "literal"
       );
       await client.perspective.addLink(
         userPerspective!,
         new Link({
           source: areaName,
-          target: `text://${this.description}`,
+          target: titleExpression,
+          predicate: AREA_HAS_NAME,
+        })
+      );
+      const descriptionExpression = await client.expression.create(
+        this.description,
+        "literal"
+      );
+      await client.perspective.addLink(
+        userPerspective!,
+        new Link({
+          source: areaName,
+          target: descriptionExpression,
           predicate: AREA_HAS_DESCRIPTION,
         })
       );

@@ -1,7 +1,5 @@
-import { ProfileExpression, ProfileWithDID } from "@/store/types";
-import { Profile } from "@/store/types";
+import { ProfileWithDID } from "@/store/types";
 import {
-  FLUX_PROFILE,
   HAS_BG_IMAGE,
   HAS_BIO,
   HAS_EMAIL,
