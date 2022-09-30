@@ -14,8 +14,14 @@ export function mapLiteralLinks(
   return Object.keys(map).reduce((acc, key) => {
     const predicate = map[key];
     const link = links?.find((link) => link.data.predicate === predicate);
+
     if (link) {
-      return { ...acc, [key]: Literal.fromUrl(link.data.target).get() };
+      return {
+        ...acc,
+        [key]: link.data.target.startsWith("literal://")
+          ? Literal.fromUrl(link.data.target).get().data
+          : link.data.target,
+      };
     }
     return acc;
   }, {});

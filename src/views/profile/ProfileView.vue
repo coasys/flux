@@ -1,19 +1,19 @@
 <template>
-  <div class="profile__container">
+  <div v-if="profile" class="profile__container">
     <div
-      :style="{ backgroundImage: `url(${profile.profileBg})` }"
+      :style="{ backgroundImage: `url(${profileBg})` }"
       class="profile__bg"
     />
 
-    <div v-if="profile" class="profile">
+    <div class="profile">
       <div class="profile__layout">
         <div class="profile__info">
           <div class="profile__avatar">
-            <j-avatar
+            <Avatar
               class="avatar"
-              :hash="userStore.agent.did"
-              :src="profile.profilePicture"
-            />
+              :hash="did"
+              :url="profile?.profilePicture"
+            ></Avatar>
             <j-button
               v-if="sameAgent"
               variant="ghost"
@@ -42,76 +42,93 @@
         </div>
 
         <div class="profile__content">
-          <j-box py="500">
+          <div class="grid">
+            <j-box my="500" v-if="!sameAgent">
+              <j-text>Links ({{ weblinks.length }})</j-text>
+              <ProfileCard
+                v-for="link in weblinks"
+                :key="link.id"
+                :title="link.name"
+                :description="link.description"
+                :image="link.image"
+                :sameAgent="sameAgent"
+                @click="() => onLinkClick(link)"
+                @delete="() => deleteLinks(link.id)"
+                @edit="() => setEditLinkModal(true, link)"
+              />
+            </j-box>
+          </div>
+
+          <j-box my="500" v-if="sameAgent">
             <j-tabs
               @change="(e: any) => (currentTab = e.target.value)"
               :value="currentTab"
             >
-              <j-tab-item value="communities"
-                >Communities ({{ communities.length }})</j-tab-item
-              >
-              <j-tab-item value="weblinks"
-                >Weblinks ({{ profileLinks.length }})</j-tab-item
-              >
+              <j-tab-item value="communities">
+                Communities ({{ communities.length }})
+              </j-tab-item>
+              <j-tab-item value="weblinks">
+                Weblinks ({{ weblinks.length }})
+              </j-tab-item>
             </j-tabs>
+
+            <div class="grid" v-show="currentTab === 'communities'">
+              <router-link
+                class="grid-item"
+                :to="{
+                  name: 'community',
+                  params: { communityId: community.state.perspectiveUuid },
+                }"
+                v-for="(community, key) in communities"
+                :key="key"
+              >
+                <Avatar
+                  size="xl"
+                  style="--j-avatar-bg: var(--j-color-ui-500)"
+                  :initials="
+                    community.neighbourhood.name?.charAt(0).toUpperCase()
+                  "
+                  :url="community.neighbourhood.image"
+                ></Avatar>
+                <j-text color="black" size="500" weight="bold" nomargin>
+                  {{ community.neighbourhood.name }}
+                </j-text>
+                <j-text nomargin size="400" color="ui-300">{{
+                  community.neighbourhood.description
+                }}</j-text>
+              </router-link>
+              <div
+                class="grid-item"
+                @click="() => setShowCreateCommunity(true)"
+                v-if="sameAgent"
+              >
+                <j-icon name="plus" size="xl"></j-icon>
+                <j-text>Add Community</j-text>
+              </div>
+            </div>
+            <div class="grid" v-show="currentTab === 'weblinks'">
+              <ProfileCard
+                v-for="link in weblinks"
+                :key="link.id"
+                :title="link.name"
+                :description="link.description"
+                :image="link.image"
+                :sameAgent="sameAgent"
+                @click="() => onLinkClick(link)"
+                @delete="() => deleteLinks(link.id)"
+                @edit="() => setEditLinkModal(true, link)"
+              />
+              <div class="grid-item" @click="() => (showAddlinkModal = true)">
+                <j-icon name="plus" size="xl"></j-icon>
+                <j-text>Add Link</j-text>
+              </div>
+            </div>
           </j-box>
-          <div class="grid" v-if="currentTab === 'communities'">
-            <router-link
-              class="community-item"
-              :to="{
-                name: 'community',
-                params: { communityId: community.state.perspectiveUuid },
-              }"
-              v-for="(community, key) in communities"
-              :key="key"
-            >
-              <j-avatar
-                size="xl"
-                :did="community.state.perspectiveUuid"
-              ></j-avatar>
-              <j-text color="black" nomargin>
-                {{ community.neighbourhood.name }}
-              </j-text>
-            </router-link>
-            <div
-              class="add"
-              @click="() => setShowCreateCommunity(true)"
-              v-if="sameAgent"
-            >
-              <j-icon name="plus" size="xl"></j-icon>
-              <j-text>Add Community</j-text>
-            </div>
-          </div>
-          <div class="grid" v-if="currentTab === 'weblinks'">
-            <ProfileCard
-              v-for="link in profileLinks"
-              :key="link.id"
-              :title="link.has_name"
-              :description="link.has_description"
-              :image="link.has_image"
-              :sameAgent="sameAgent"
-              @click="() => onLinkClick(link)"
-              @delete="() => deleteLinks(link.id)"
-              @edit="() => setEditLinkModal(true, link)"
-            />
-            <div
-              class="add"
-              @click="() => (showAddlinkModal = true)"
-              v-if="sameAgent"
-            >
-              <j-icon name="plus" size="xl"></j-icon>
-              <j-text>Add Link</j-text>
-            </div>
-          </div>
         </div>
       </div>
     </div>
 
-    <div
-      class="back"
-      @click="() => $router.back()"
-      v-if="$route.name !== 'home'"
-    >
+    <div v-if="hasHistory" class="back" @click="() => $router.back()">
       <j-icon name="arrow-left" size="lg"></j-icon>
     </div>
   </div>
@@ -158,7 +175,7 @@
     <edit-profile
       @submit="() => setShowEditProfile(false)"
       @cancel="() => setShowEditProfile(false)"
-      :bg="profilebg"
+      :bg="profileBg"
       :preBio="profile?.bio || ''"
     />
   </j-modal>
@@ -167,8 +184,7 @@
 
 <script lang="ts">
 import { useDataStore } from "@/store/data";
-import { ModalsState, ProfileWithDID } from "@/store/types";
-import { getProfile } from "@/utils/profileHelpers";
+import { ModalsState, Profile, ProfileWithDID } from "@/store/types";
 import { PerspectiveInput } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
 import ProfileCard from "./ProfileCards.vue";
@@ -180,8 +196,20 @@ import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { mapActions } from "pinia";
 import getAgentLinks from "@/utils/getAgentLinks";
-import { FLUX_PROFILE } from "@/constants/profile";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import Avatar from "@/components/avatar/Avatar.vue";
+import { mapLiteralLinks } from "@/utils/linkHelpers";
+import {
+  AREA_COMMUNITY,
+  AREA_HAS_DESCRIPTION,
+  AREA_HAS_IMAGE,
+  AREA_HAS_NAME,
+  AREA_SIMPLE_AREA,
+  AREA_TYPE,
+  AREA_WEBLINK,
+  HAS_POST,
+} from "@/constants/profile";
+import { getImage, getProfile } from "@/utils/profileHelpers";
 
 export default defineComponent({
   name: "ProfileView",
@@ -191,6 +219,7 @@ export default defineComponent({
     ProfileEditLink,
     ProfileJoinLink,
     EditProfile,
+    Avatar,
   },
   setup() {
     const appStore = useAppStore();
@@ -205,21 +234,28 @@ export default defineComponent({
   data() {
     return {
       currentTab: "communities",
-      profile: {} as ProfileWithDID | null,
       showAddlinkModal: false,
       showEditlinkModal: false,
       showJoinCommunityModal: false,
-      profileLinks: [] as any[],
-      profilebg: "",
+      weblinks: [] as any,
+      profileBg: "",
+      profile: null as ProfileWithDID | null,
       joiningLink: "",
-      sameAgent: false,
       editArea: null as any,
     };
+  },
+
+  async created() {
+    this.getProfile();
+    this.getAgentAreas();
   },
   beforeCreate() {
     this.appStore.changeCurrentTheme("global");
   },
   methods: {
+    async getProfile() {
+      this.profile = await getProfile(this.did);
+    },
     setAddLinkModal(value: boolean): void {
       this.showAddlinkModal = value;
     },
@@ -234,87 +270,41 @@ export default defineComponent({
       const client = await getAd4mClient();
       const did = this.$route.params.did as string;
       const me = await client.agent.me();
-      const userStore = useUserStore();
-      const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
 
-      const links = (
-        await getAgentLinks(
-          did || me.did,
-          did === me.did || did === undefined ? userPerspective! : undefined
-        )
-      ).filter(
-        (e) =>
-          //Filter out the flux and ad4m profile links
-          !e.data.source.startsWith("flux://") &&
-          !e.data.source.startsWith(did || me.did)
+      const links = await getAgentLinks(did || me.did);
+
+      const areaLinks = links.filter((link) =>
+        link.data.source.startsWith("area://")
       );
-      console.log(links);
 
-      const preArea: { [x: string]: { [x: string]: any } } = {};
+      const uniqueAreas = [
+        ...new Set(areaLinks.map((link) => link.data.source as string)),
+      ];
 
-      for (const e of links) {
-        const predicate = e.data.predicate.split("://")[1];
-        if (!preArea[e.data.source]) {
-          preArea[e.data.source] = {
-            id: e.data.source,
-          };
-        }
+      const weblinkMap = uniqueAreas.reduce((acc, key) => {
+        const area = areaLinks.filter((link) => link.data.source === key);
+        return {
+          ...acc,
+          [key]: mapLiteralLinks(area, {
+            type: AREA_TYPE,
+            name: AREA_HAS_NAME,
+            description: AREA_HAS_DESCRIPTION,
+            link: HAS_POST,
+            image: AREA_HAS_IMAGE,
+          }),
+        };
+      }, {});
 
-        if (predicate === "has_post") {
-          preArea[e.data.source][predicate] = e.data.target.replace(
-            "text://",
-            ""
-          );
-        } else if (predicate === "has_images" || predicate === "has_image") {
-          try {
-            const expUrl = e.data.target;
-            const image = await client.expression.get(expUrl);
-            if (image) {
-              if (!preArea[e.data.source][predicate]) {
-                preArea[e.data.source][predicate] = [];
-                preArea[e.data.source]["has_image"] = image.data.slice(1, -1);
-              }
-
-              if (predicate === "has_images") {
-                preArea[e.data.source][predicate].push(image.data.slice(1, -1));
-              } else {
-                preArea[e.data.source][predicate] = image.data.slice(1, -1);
-              }
-            }
-          } catch (e) {
-            console.log("Error encountered while parsing images", e);
-          }
-        } else {
-          preArea[e.data.source][predicate] = e.data.target.split("://")[1];
-        }
-      }
-
-      console.log(preArea);
-
-      this.profileLinks = Object.values(preArea).filter(
-        (e) => e.id !== FLUX_PROFILE
-      );
-    },
-    async getAgentProfile() {
-      const client = await getAd4mClient();
-      const did = this.$route.params.did as string;
-      const me = await client.agent.me();
-
-      this.profile = await getProfile(did || me.did);
-
-      console.log("profile", this.profileLinks, this.profile);
+      this.weblinks = Object.values(weblinkMap);
     },
     onLinkClick(link: any) {
       const dataStore = useDataStore();
 
-      if (link.area_type === "community") {
+      console.log("link click", link);
+
+      if (link.type === AREA_COMMUNITY) {
         const community = dataStore.getCommunities.find(
-          (e) => e.neighbourhood.neighbourhoodUrl === link.has_post
-        );
-        console.log(
-          community,
-          this.showJoinCommunityModal,
-          this.showAddlinkModal
+          (e) => e.neighbourhood.neighbourhoodUrl === link.link
         );
 
         if (community) {
@@ -326,9 +316,9 @@ export default defineComponent({
           this.showJoinCommunityModal = true;
           this.joiningLink = link.has_post;
         }
-      } else if (link.area_type === "webLink") {
-        window.open(link.has_post, "_blank");
-      } else if (link.area_type === "simpleArea") {
+      } else if (link.type === AREA_WEBLINK) {
+        window.open(link.link, "_blank");
+      } else if (link.area_type === AREA_SIMPLE_AREA) {
         this.$router.push({
           name: `profile-feed`,
           params: { fid: link.id },
@@ -358,7 +348,7 @@ export default defineComponent({
         }
       }
 
-      this.profileLinks = this.profileLinks.filter((e) => e.id !== areaName);
+      this.weblinks = this.weblinks.filter((e) => e.id !== areaName);
 
       await client.agent.updatePublicPerspective({
         links: newLinks,
@@ -369,39 +359,48 @@ export default defineComponent({
       "setShowCreateCommunity",
     ]),
   },
-  async created() {
-    const client = await getAd4mClient();
-    this.getAgentProfile();
-    this.getAgentAreas();
-    const did = this.$route.params.did as string;
-    const me = await client.agent.me();
-
-    this.sameAgent = did === me.did;
-    if (did === undefined || did.length === 0) {
-      this.sameAgent = true;
-    }
-  },
   watch: {
     showAddlinkModal() {
       if (!this.showAddlinkModal) {
-        this.getAgentProfile();
         this.getAgentAreas();
+        this.getProfile();
       }
     },
     showEditlinkModal() {
       if (!this.showEditlinkModal) {
-        this.getAgentProfile();
         this.getAgentAreas();
+        this.getProfile();
       }
     },
     "modals.showEditProfile"() {
       if (!this.modals.showEditProfile) {
-        this.getAgentProfile();
         this.getAgentAreas();
+        this.getProfile();
       }
+    },
+    profile: {
+      handler: async function (val) {
+        if (val) {
+          console.log("profilee", val);
+          this.profileBg = await getImage(val.profileBg);
+        }
+      },
+      immediate: true,
     },
   },
   computed: {
+    hasHistory() {
+      return this.$router.options.history.state.back;
+    },
+    did(): string {
+      return (
+        (this.$route.params.did as string) || this.userStore.agent.did || ""
+      );
+    },
+    sameAgent() {
+      return this.did === this.userStore.agent.did;
+    },
+
     communities() {
       return this.dataStore.getCommunities;
     },
@@ -460,12 +459,14 @@ export default defineComponent({
   padding: var(--j-space-500);
 }
 
-.community-item {
+.grid-item {
   width: 100%;
   border-radius: var(--j-border-radius);
-  display: grid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
   gap: var(--j-space-400);
-  place-content: center;
   text-align: center;
   text-decoration: none;
   padding: var(--j-space-700);

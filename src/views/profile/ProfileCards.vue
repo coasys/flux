@@ -1,18 +1,18 @@
 <template>
   <div class="container">
-    <div>
-      <div class="img">
-        <img v-if="image" :src="image" />
-      </div>
-    </div>
-    <j-flex j="between">
-      <div style="cursor: pointer">
-        <j-text nomargin size="600" color="black">{{ title }}</j-text>
-        <j-text nomargin>{{ description }}</j-text>
-      </div>
+    <Avatar
+      size="lg"
+      style="--j-avatar-bg: var(--j-color-ui-500)"
+      :url="image"
+    ></Avatar>
+    <j-flex direction="column" j="between">
+      <j-text size="600" weight="800" color="black">
+        {{ title }}
+      </j-text>
+      <j-text nomargin size="400" color="ui-300">{{ description }}</j-text>
     </j-flex>
     <j-popover
-      placement="auto"
+      placement="top-start"
       event="click"
       :open="showContextMenu"
       @toggle="(e) => (showContextMenu = e.target.open)"
@@ -38,7 +38,9 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import Avatar from "@/components/avatar/Avatar.vue";
 export default defineComponent({
+  components: { Avatar },
   props: ["title", "description", "image", "sameAgent"],
   emits: ["delete", "edit"],
   data() {
@@ -46,32 +48,24 @@ export default defineComponent({
       showContextMenu: false,
     };
   },
-  computed: {
-    computedTitle() {
-      return this.title.length > 15
-        ? `${this.title.substring(0, 15)}...`
-        : this.title;
-    },
-    computedDescription() {
-      return this.description.length > 20
-        ? `${this.description.substring(0, 15)}...`
-        : this.description;
-    },
-  },
 });
 </script>
 
 <style scoped>
 .container {
   position: relative;
+  cursor: pointer;
   width: 100%;
-  border: 1px solid var(--j-color-ui-50);
   border-radius: var(--j-border-radius);
   display: flex;
-  overflow: hidden;
-  gap: var(--j-space-500);
-  background-color: var(--j-color-white);
-  padding: var(--j-space-500);
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--j-space-400);
+  text-align: center;
+  text-decoration: none;
+  padding: var(--j-space-700);
+  background-color: var(--j-color-ui-50);
 }
 
 .container:hover {

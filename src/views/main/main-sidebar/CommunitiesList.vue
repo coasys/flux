@@ -2,32 +2,34 @@
   <div class="left-nav__communities-list">
     <j-tooltip
       v-for="community in communities"
-      :key="community.perspective.uuid"
-      :title="community.name"
+      :key="community.state.perspectiveUuid"
+      :title="community.neighbourhood.name"
     >
       <j-popover event="contextmenu">
-        <j-avatar
+        <Avatar
           slot="trigger"
+          style="--j-avatar-bg: var(--j-color-ui-200)"
           class="left-nav__community-item"
-          :selected="communityIsActive(community.perspective.uuid)"
+          :selected="communityIsActive(community.state.perspectiveUuid)"
           size="lg"
-          :online="hasNotification(community.perspective.uuid)"
-          :src="community.image || null"
-          :initials="community.name.charAt(0).toUpperCase()"
-          @click="() => handleCommunityClick(community.perspective.uuid)"
-        ></j-avatar>
+          :online="hasNotification(community.state.perspectiveUuid)"
+          :url="community.neighbourhood.image"
+          :initials="community.neighbourhood.name.charAt(0).toUpperCase()"
+          @click="() => handleCommunityClick(community.state.perspectiveUuid)"
+        ></Avatar>
         <j-menu slot="content">
           <j-menu-item
-            @click="() => removeCommunity(community.perspective.uuid)"
+            @click="() => removeCommunity(community.state.perspectiveUuid)"
             >Remove community</j-menu-item
           >
 
-          <j-menu-item @click="() => muteCommunity(community.perspective.uuid)"
+          <j-menu-item
+            @click="() => muteCommunity(community.state.perspectiveUuid)"
             ><j-icon
               size="xs"
               slot="start"
               :name="
-                getCommunityState(community.perspective.uuid).notifications
+                getCommunityState(community.state.perspectiveUuid).notifications
                   ?.mute
                   ? 'bell-slash'
                   : 'bell'
@@ -35,7 +37,7 @@
             />
             {{
               `${
-                getCommunityState(community.perspective.uuid).notifications
+                getCommunityState(community.state.perspectiveUuid).notifications
                   ?.mute
                   ? "Unmute"
                   : "Mute"
@@ -43,13 +45,16 @@
             }}
           </j-menu-item>
           <j-menu-item
-            @click="() => toggleHideMutedChannels(community.perspective.uuid)"
+            @click="
+              () => toggleHideMutedChannels(community.state.perspectiveUuid)
+            "
           >
             <j-icon
               size="xs"
               slot="start"
               :name="
-                getCommunityState(community.perspective.uuid).hideMutedChannels
+                getCommunityState(community.state.perspectiveUuid)
+                  .hideMutedChannels
                   ? 'toggle-on'
                   : 'toggle-off'
               "
@@ -76,46 +81,21 @@
 <script lang="ts">
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
-import { DexieIPFS } from "@/utils/storageHelpers";
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent } from "vue";
+import Avatar from "@/components/avatar/Avatar.vue";
 
 export default defineComponent({
+  components: {
+    Avatar,
+  },
   setup() {
     const appStore = useAppStore();
     const dataStore = useDataStore();
-    const communities = ref(
-      dataStore.getCommunityNeighbourhoods.map((e) => ({ ...e, image: null }))
-    );
 
     return {
       appStore,
       dataStore,
-      communities,
     };
-  },
-  async mounted() {
-    const updateCommunityListWithImage = async () => {
-      const communities = this.dataStore.getCommunityNeighbourhoods;
-      const tempCommunities = [];
-
-      for (const community of communities) {
-        const tempCommunity = { ...community };
-        const dexie = new DexieIPFS(tempCommunity.perspective.uuid);
-        if (tempCommunity.image) {
-          const image = await dexie.get(tempCommunity.image!);
-          tempCommunity.image = image;
-        }
-        tempCommunities.push({ ...tempCommunity });
-      }
-
-      this.communities = tempCommunities;
-    };
-
-    updateCommunityListWithImage();
-
-    watch(this.dataStore.neighbourhoods, () =>
-      setTimeout(() => updateCommunityListWithImage(), 500)
-    );
   },
   methods: {
     toggleHideMutedChannels(id: string) {
@@ -139,6 +119,9 @@ export default defineComponent({
     },
   },
   computed: {
+    communities() {
+      return this.dataStore.getCommunities;
+    },
     communityIsActive() {
       return (id: string) => this.$route.params.communityId === id;
     },
