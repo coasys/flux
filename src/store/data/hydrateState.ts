@@ -1,10 +1,9 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 import { CHANNEL, SELF } from "@/constants/neighbourhoodMeta";
 import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
-import { LinkExpression, PerspectiveProxy } from "@perspect3vism/ad4m";
-import { nanoid } from "nanoid";
+import { LinkExpression, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useDataStore } from ".";
-import { CommunityState, FeedType, LocalCommunityState } from "../types";
+import { CommunityState, LocalCommunityState } from "../types";
 import { getGroupMetadata } from "./actions/fetchNeighbourhoodMetadata";
 import { useUserStore } from "../user";
 import { getProfile } from "@/utils/profileHelpers";
@@ -119,28 +118,32 @@ export async function hydrateState() {
         const channels = [...Object.values(dataStore.channels)];
 
         for (const link of channelLinks) {
-          const exist = channels.find(
-            (channel: any) =>
-              channel.name === link.C &&
-              channel.sourcePerspective === perspective.uuid
-          );
-
-          if (!exist) {
-            dataStore.addChannel({
-              communityId: perspective.uuid,
-              channel: {
-                id: nanoid(),
-                name: link.C,
-                creatorDid: link.author,
-                sourcePerspective: perspective.uuid,
-                hasNewMessages: false,
-                createdAt: new Date().toISOString(),
-                feedType: FeedType.Signaled,
-                notifications: {
-                  mute: false,
+          try {
+            const channel = link.C;
+            const channelData = await Literal.fromUrl(channel).get();
+            const exist = channels.find(
+              (channel: any) =>
+                channel.id === channel &&
+                channel.sourcePerspective === perspective.uuid
+            );
+            if (!exist) {
+              dataStore.addChannel({
+                communityId: perspective.uuid,
+                channel: {
+                  id: channel,
+                  name: channelData.data,
+                  creatorDid: link.author,
+                  sourcePerspective: perspective.uuid,
+                  hasNewMessages: false,
+                  createdAt: channelData.timestamp || new Date().toISOString(),
+                  notifications: {
+                    mute: false,
+                  },
                 },
-              },
-            });
+              });
+            }
+          } catch (e) {
+            console.error("Got error when trying to hydrate community channel state", e);
           }
         }
       }
