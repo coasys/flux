@@ -5,7 +5,6 @@ import {
   DESCRIPTION,
   NAME,
   SELF,
-  LANGUAGE,
   CREATED_AT,
 } from "@/constants/neighbourhoodMeta";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
@@ -13,18 +12,20 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 export async function createNeighbourhoodMeta(
   name: string,
   description: string,
-  creatorDid: string,
+  creatorDid: string
 ): Promise<LinkExpression[]> {
   const client = await getAd4mClient();
   //Create the perspective to hold our meta
   const perspective = await client.perspective.add(`${name}-meta`);
+
+  const nameExpression = await client.expression.create(name, "literal");
 
   //Create the links we want on meta
   const expressionLinks = [];
   expressionLinks.push(
     new Link({
       source: SELF,
-      target: name,
+      target: nameExpression,
       predicate: NAME,
     })
   );
@@ -45,17 +46,19 @@ export async function createNeighbourhoodMeta(
     })
   );
 
-  //Ad4m-executor throws an error if target is an empty string
-  if (description == "") {
-    description = "-";
+  if (description != "") {
+    const descriptionExpression = await client.expression.create(
+      description,
+      "literal"
+    );
+    expressionLinks.push(
+      new Link({
+        source: SELF,
+        target: descriptionExpression,
+        predicate: DESCRIPTION,
+      })
+    );
   }
-  expressionLinks.push(
-    new Link({
-      source: SELF,
-      target: description,
-      predicate: DESCRIPTION,
-    })
-  );
 
   //Create the links on the perspective
   for (const exp of expressionLinks) {

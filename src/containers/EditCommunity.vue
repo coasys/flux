@@ -2,8 +2,8 @@
   <j-box p="800">
     <j-text variant="heading-sm">Edit Community</j-text>
     <avatar-upload
-      :value="profileImage"
-      @change="(val) => (profileImage = val)"
+      :value="communityImage"
+      @change="(val) => (communityImage = val)"
     />
     <j-flex direction="column" gap="400">
       <j-input
@@ -58,7 +58,7 @@ export default defineComponent({
       isUpdatingCommunity: false,
       communityName: "",
       communityDescription: "",
-      profileImage: "",
+      communityImage: "",
     };
   },
   watch: {
@@ -67,7 +67,7 @@ export default defineComponent({
         this.communityName = name;
         this.communityDescription = description;
         const dexie = new DexieIPFS(id);
-        this.profileImage = await dexie.get(image!) as any;
+        this.communityImage = (await dexie.get(image!)) as any;
       },
       deep: true,
       immediate: true,
@@ -86,10 +86,22 @@ export default defineComponent({
       this.dataStore
         .updateCommunity({
           communityId: communityId,
-          name: this.communityName,
-          description: this.communityDescription,
-          image: this.profileImage,
-          thumbnail: this.profileImage,
+          name:
+            this.communityName != this.community.name
+              ? this.communityName
+              : undefined,
+          description:
+            this.communityDescription != this.community.description
+              ? this.communityDescription
+              : undefined,
+          image:
+            this.communityImage != this.community.image
+              ? this.communityImage
+              : undefined,
+          thumbnail:
+            this.communityImage != this.community.image
+              ? this.communityImage
+              : undefined,
         })
         .then(() => {
           this.$emit("submit");
