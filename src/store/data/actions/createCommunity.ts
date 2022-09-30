@@ -11,6 +11,7 @@ import {
   FLUX_GROUP_IMAGE,
   FLUX_GROUP_DESCRIPTION,
   FLUX_GROUP_THUMBNAIL,
+  ZOME,
 } from "@/constants/neighbourhoodMeta";
 
 import { CommunityState } from "@/store/types";
@@ -123,7 +124,7 @@ export default async ({
     //Create link between perspective and group expression
     const groupNameExpr = await client.expression.create(
       perspectiveName,
-      "Literal"
+      "literal"
     );
     await client.perspective.addLink(createSourcePerspective.uuid!, {
       source: SELF,
@@ -134,7 +135,7 @@ export default async ({
     if (description) {
       const descriptionExpr = await client.expression.create(
         description,
-        "Literal"
+        "literal"
       );
       await client.perspective.addLink(createSourcePerspective.uuid!, {
         source: SELF,
@@ -164,8 +165,8 @@ export default async ({
     const addSocialDnaLink = await client.perspective.addLink(
       createSourcePerspective.uuid!,
       {
-        source: "ad4m://self",
-        predicate: "ad4m://has_zome",
+        source: SELF,
+        predicate: ZOME,
         target: sdnaLiteral.toUrl(),
       }
     );
