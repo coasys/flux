@@ -1,8 +1,8 @@
-import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { RouteLocationNormalizedLoaded, Router } from "vue-router";
 import { useDataStore } from "..";
 import { getProfile } from "@/utils/profileHelpers";
+import { differenceInSeconds, parseISO } from "date-fns";
 
 type Payload = {
   router: Router;
@@ -11,6 +11,7 @@ type Payload = {
   notificationChannelId: string;
   authorDid: string;
   message: string;
+  timestamp: string;
 };
 
 export default async ({
@@ -20,6 +21,7 @@ export default async ({
   notificationChannelId,
   authorDid,
   message,
+  timestamp
 }: Payload) => {
   const dataStore = useDataStore();
   const userStore = useUserStore();
@@ -40,7 +42,8 @@ export default async ({
   if (
     (!isMinimized &&
       !channel?.notifications.mute &&
-      !community?.state.notifications.mute) ||
+      !community?.state.notifications.mute && 
+      !(differenceInSeconds(new Date(), parseISO(timestamp)) > 30)) ||
     (user!.agent.did! !== authorDid &&
       (community?.neighbourhood.perspective.uuid === communityId
         ? channel?.name !== channelId

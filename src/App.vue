@@ -169,6 +169,7 @@ export default defineComponent({
                   notificationChannelId: channel.name,
                   authorDid: (expression as any)!.author,
                   message: (expression as any).data,
+                  timestamp: (expression as any).timestamp
                 });
 
                 const { channelId } = this.$route.params;
