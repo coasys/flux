@@ -30,14 +30,14 @@ export function setTheme(theme: ThemeState): void {
   if (link) {
     link.setAttribute(
       "href",
-      `https://fonts.googleapis.com/css?family=${theme.fontFamily}`
+      `https://fonts.googleapis.com/css?family=${theme.fontFamily}:wght@300;400;500;600;700;800;900&display=swap`
     );
   } else {
     link = document.createElement("link");
     link.setAttribute("rel", "stylesheet");
     link.setAttribute(
       "href",
-      `https://fonts.googleapis.com/css?family=${theme.fontFamily}`
+      `https://fonts.googleapis.com/css?family=${theme.fontFamily}:wght@300;400;500;600;700;800;900&display=swap`
     );
     document.getElementsByTagName("head")[0].appendChild(link);
   }

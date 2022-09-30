@@ -65,12 +65,21 @@ import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import getAgentLinks from "@/utils/getAgentLinks";
 import { useValidation } from "@/utils/validation";
-import { Link, PerspectiveInput } from "@perspect3vism/ad4m";
+import { Link, PerspectiveInput, Literal } from "@perspect3vism/ad4m";
 import { defineComponent, ref } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { nanoid } from "nanoid";
 import removeTypeName from "@/utils/removeTypeName";
-import { AREA_HAS_DESCRIPTION, AREA_HAS_IMAGE, AREA_HAS_NAME, AREA_TYPE, AREA_WEBLINK, FLUX_PROFILE, HAS_AREA, HAS_POST } from "@/constants/profile";
+import {
+  AREA_HAS_DESCRIPTION,
+  AREA_HAS_IMAGE,
+  AREA_HAS_NAME,
+  AREA_TYPE,
+  AREA_WEBLINK,
+  FLUX_PROFILE,
+  HAS_AREA,
+  HAS_POST,
+} from "@/constants/profile";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export default defineComponent({
@@ -222,7 +231,7 @@ export default defineComponent({
           if (!preArea[e.data.source]) {
             preArea[e.data.source] = {
               [predicate]:
-                predicate === "has_post"
+                predicate === HAS_POST
                   ? e.data.target
                   : e.data.predicate.split("://")[1],
             };
@@ -230,7 +239,7 @@ export default defineComponent({
 
           preArea[e.data.source][predicate] = e.data.predicate.split("://")[1];
         });
-        console.log("preLinks", preLinks);
+
         const id = await nanoid();
 
         let areaName = this.area?.id ?? `area://${id}`;
@@ -257,14 +266,17 @@ export default defineComponent({
           }
         }
 
+        const linkExpr = await client.expression.create(this.link, "literal");
+
         await client.perspective.addLink(
           userPerspective!,
           new Link({
             source: areaName,
-            target: this.link,
+            target: linkExpr,
             predicate: HAS_POST,
           })
         );
+
         await client.perspective.addLink(
           userPerspective!,
           new Link({
@@ -273,19 +285,28 @@ export default defineComponent({
             predicate: AREA_TYPE,
           })
         );
+
+        const titleExpr = await client.expression.create(this.title, "literal");
+
         await client.perspective.addLink(
           userPerspective!,
           new Link({
             source: areaName,
-            target: `text://${this.title}`,
+            target: titleExpr,
             predicate: AREA_HAS_NAME,
           })
         );
+
+        const descExpr = await client.expression.create(
+          this.description,
+          "literal"
+        );
+
         await client.perspective.addLink(
           userPerspective!,
           new Link({
             source: areaName,
-            target: `text://${this.description}`,
+            target: descExpr,
             predicate: AREA_HAS_DESCRIPTION,
           })
         );

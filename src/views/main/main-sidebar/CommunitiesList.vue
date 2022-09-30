@@ -8,6 +8,7 @@
       <j-popover event="contextmenu">
         <Avatar
           slot="trigger"
+          style="--j-avatar-bg: var(--j-color-ui-200)"
           class="left-nav__community-item"
           :selected="communityIsActive(community.state.perspectiveUuid)"
           size="lg"
@@ -80,8 +81,7 @@
 <script lang="ts">
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
-import { DexieIPFS } from "@/utils/storageHelpers";
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent } from "vue";
 import Avatar from "@/components/avatar/Avatar.vue";
 
 export default defineComponent({

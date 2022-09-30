@@ -3,7 +3,7 @@
     :slot="slot"
     :initials="initials"
     :hash="did"
-    :src="src"
+    :src="realSrc"
     :size="size"
     :online="online"
   ></j-avatar>
@@ -16,21 +16,22 @@ export default defineComponent({
   props: {
     did: String,
     url: String,
+    src: String,
     size: String,
     slot: String,
     online: Boolean,
     initials: String,
   },
   data() {
-    return { src: "" };
+    return { realSrc: "" };
   },
   watch: {
     url: {
       async handler(url) {
         if (url) {
-          this.src = await getImage(url);
+          this.realSrc = await getImage(url);
         } else {
-          this.src = "";
+          this.realSrc = "";
         }
       },
       immediate: true,
