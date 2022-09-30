@@ -360,7 +360,40 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
+<style>
+:root {
+  --app-main-sidebar-width: 100px;
+  --app-header-height: 60px;
+}
+
+@media (max-width: 800px) {
+  :root {
+    --app-main-sidebar-width: 75px;
+    --j-font-base-size: 15px !important;
+  }
+}
+
+html {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--app-main-sidebar-bg-color);
+  overflow: hidden;
+}
+
+#app {
+  height: 100%;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
 .global-loading {
   width: 100vw;
   height: 100vh;

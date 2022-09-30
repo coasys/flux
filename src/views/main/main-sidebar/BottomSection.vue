@@ -1,10 +1,27 @@
 <template>
   <div class="left-nav__bottom-section">
     <j-tooltip id="settings" title="Settings">
-      <j-button size="xl" circle square variant="ghost" @click="goToSettings">
-        <j-icon size="lg" name="gear"></j-icon>
+      <j-button size="lg" circle square variant="ghost" @click="goToSettings">
+        <j-icon size="md" name="gear"></j-icon>
       </j-button>
     </j-tooltip>
+    <router-link
+      :to="{
+        name: 'home',
+      }"
+      custom
+      v-slot="{ navigate }"
+    >
+      <j-tooltip title="Profile">
+        <j-avatar
+          class="left-nav__profile-icon"
+          size="lg"
+          :hash="userStore.agent.did"
+          :src="userProfileImage"
+          @click="() => navigate()"
+        ></j-avatar>
+      </j-tooltip>
+    </router-link>
   </div>
 </template>
 
@@ -12,7 +29,8 @@
 import { defineComponent, onBeforeMount } from "vue";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
-import { mapActions } from "pinia";
+import { mapActions, mapState } from "pinia";
+import { getImage } from "@/utils/profileHelpers";
 
 export default defineComponent({
   setup() {
@@ -26,10 +44,26 @@ export default defineComponent({
   },
   data() {
     return {
+      userProfileImage: "",
       showBottomOptions: false,
     };
   },
+  watch: {
+    userProfile: {
+      async handler() {
+        if (this.userStore.profile?.profilePicture) {
+          this.userProfileImage = await getImage(
+            this.userStore.profile?.profilePicture
+          );
+        } else {
+          this.userProfileImage = "";
+        }
+      },
+      immediate: true,
+    },
+  },
   methods: {
+    ...mapState(useUserStore, ["profile", "agent"]),
     ...mapActions(useAppStore, ["setShowEditProfile", "setShowSettings"]),
     logOut(): void {
       this.$router.replace({ name: "login" });

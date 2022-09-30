@@ -6,66 +6,102 @@
     />
 
     <div v-if="profile" class="profile">
-      <j-flex a="start" direction="column" gap="500">
-        <div class="profile__avatar">
-          <j-avatar
-            class="avatar"
-            :hash="$route.params.did"
-            :src="profile.profilePicture"
-          />
-          <j-button
-            v-if="sameAgent"
-            variant="subtle"
-            @click="() => setShowEditProfile(true)"
-          >
-            Edit Profile
-          </j-button>
-        </div>
-      </j-flex>
-      <div class="content">
-        <div>
-          <div class="profile-info">
-            <j-box pb="300">
-              <j-text
-                v-if="profile.familyName || profile.givenName"
-                variant="heading-sm"
-              >
-                {{ `${profile.givenName} ${profile.familyName}` }}
-              </j-text>
-              <j-text nomargin size="500" weight="500" color="ui-700">
-                @{{ profile.username }}
-              </j-text>
-            </j-box>
-            <j-box>
-              <j-text nomargin size="500" color="black" v-if="profile.bio">
-                {{ profile.bio }}</j-text
-              >
-              <j-text nomargin size="500" color="black" v-else>
-                No bio yet</j-text
-              >
-            </j-box>
+      <div class="profile__layout">
+        <div class="profile__info">
+          <div class="profile__avatar">
+            <j-avatar
+              class="avatar"
+              :hash="userStore.agent.did"
+              :src="profile.profilePicture"
+            />
+            <j-button
+              v-if="sameAgent"
+              variant="ghost"
+              @click="() => setShowEditProfile(true)"
+            >
+              <j-icon size="sm" name="pen"></j-icon>
+            </j-button>
           </div>
+          <j-box pt="400" pb="300">
+            <j-text
+              nomargin
+              v-if="profile.familyName || profile.givenName"
+              variant="heading-sm"
+            >
+              {{ `${profile.givenName} ${profile.familyName}` }}
+            </j-text>
+            <j-text nomargin size="500" weight="500" color="ui-500">
+              @{{ profile.username }}
+            </j-text>
+          </j-box>
+          <j-box pt="400">
+            <j-text nomargin size="500" color="ui-800" v-if="profile.bio">
+              {{ profile.bio || "No bio yet" }}
+            </j-text>
+          </j-box>
         </div>
 
-        <div class="grid">
-          <ProfileCard
-            v-for="link in profileLinks"
-            :key="link.id"
-            :title="link.has_name"
-            :description="link.has_description"
-            :image="link.has_image"
-            :sameAgent="sameAgent"
-            @click="() => onLinkClick(link)"
-            @delete="() => deleteLinks(link.id)"
-            @edit="() => setEditLinkModal(true, link)"
-          />
-          <div
-            class="add"
-            @click="() => (showAddlinkModal = true)"
-            v-if="sameAgent"
-          >
-            <j-icon name="plus" size="xl"></j-icon>
-            <j-text>Add Link</j-text>
+        <div class="profile__content">
+          <j-box py="500">
+            <j-tabs
+              @change="(e: any) => (currentTab = e.target.value)"
+              :value="currentTab"
+            >
+              <j-tab-item value="communities"
+                >Communities ({{ communities.length }})</j-tab-item
+              >
+              <j-tab-item value="weblinks"
+                >Weblinks ({{ profileLinks.length }})</j-tab-item
+              >
+            </j-tabs>
+          </j-box>
+          <div class="grid" v-if="currentTab === 'communities'">
+            <router-link
+              class="community-item"
+              :to="{
+                name: 'community',
+                params: { communityId: community.state.perspectiveUuid },
+              }"
+              v-for="(community, key) in communities"
+              :key="key"
+            >
+              <j-avatar
+                size="xl"
+                :did="community.state.perspectiveUuid"
+              ></j-avatar>
+              <j-text color="black" nomargin>
+                {{ community.neighbourhood.name }}
+              </j-text>
+            </router-link>
+            <div
+              class="add"
+              @click="() => setShowCreateCommunity(true)"
+              v-if="sameAgent"
+            >
+              <j-icon name="plus" size="xl"></j-icon>
+              <j-text>Add Community</j-text>
+            </div>
+          </div>
+          <div class="grid" v-if="currentTab === 'weblinks'">
+            <ProfileCard
+              v-for="link in profileLinks"
+              :key="link.id"
+              :title="link.has_name"
+              :description="link.has_description"
+              :image="link.has_image"
+              :sameAgent="sameAgent"
+              @click="() => onLinkClick(link)"
+              @delete="() => deleteLinks(link.id)"
+              @edit="() => setEditLinkModal(true, link)"
+            />
+            <div
+              class="add"
+              @click="() => (showAddlinkModal = true)"
+              v-if="sameAgent"
+            >
+              <j-icon name="plus" size="xl"></j-icon>
+              <j-text>Add Link</j-text>
+            </div>
           </div>
         </div>
       </div>
@@ -139,9 +175,9 @@ import ProfileCard from "./ProfileCards.vue";
 import ProfileAddLink from "./ProfileAddLink.vue";
 import ProfileEditLink from "./ProfileEditLink.vue";
 import ProfileJoinLink from "./ProfileJoinLink.vue";
-import { useUserStore } from "@/store/user";
 import EditProfile from "@/containers/EditProfile.vue";
 import { useAppStore } from "@/store/app";
+import { useUserStore } from "@/store/user";
 import { mapActions } from "pinia";
 import getAgentLinks from "@/utils/getAgentLinks";
 import { FLUX_PROFILE } from "@/constants/profile";
@@ -158,13 +194,17 @@ export default defineComponent({
   },
   setup() {
     const appStore = useAppStore();
-
+    const dataStore = useDataStore();
+    const userStore = useUserStore();
     return {
       appStore,
+      dataStore,
+      userStore,
     };
   },
   data() {
     return {
+      currentTab: "communities",
       profile: {} as ProfileWithDID | null,
       showAddlinkModal: false,
       showEditlinkModal: false,
@@ -324,7 +364,10 @@ export default defineComponent({
         links: newLinks,
       } as PerspectiveInput);
     },
-    ...mapActions(useAppStore, ["setShowEditProfile"]),
+    ...mapActions(useAppStore, [
+      "setShowEditProfile",
+      "setShowCreateCommunity",
+    ]),
   },
   async created() {
     const client = await getAd4mClient();
@@ -359,6 +402,9 @@ export default defineComponent({
     },
   },
   computed: {
+    communities() {
+      return this.dataStore.getCommunities;
+    },
     modals(): ModalsState {
       return this.appStore.modals;
     },
@@ -367,6 +413,27 @@ export default defineComponent({
 </script>
 
 <style lang="css" scoped>
+.profile {
+  width: 100%;
+  max-width: 1300px;
+  margin: auto;
+  padding-left: var(--j-space-500);
+  padding-right: var(--j-space-500);
+}
+
+.profile__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--j-space-500);
+}
+
+@media (min-width: 800px) {
+  .profile__layout {
+    display: grid;
+    grid-template-columns: 2fr 5fr;
+    gap: var(--j-space-900);
+  }
+}
 .profile__container {
   width: 100%;
   height: 100%;
@@ -386,29 +453,39 @@ export default defineComponent({
   align-items: end;
   justify-content: space-between;
   width: 100%;
-  margin-top: -40px;
+  margin-top: -60px;
 }
 
-.profile-info {
+.profile__info {
   padding: var(--j-space-500);
 }
 
-.content {
+.community-item {
+  width: 100%;
+  border-radius: var(--j-border-radius);
   display: grid;
-  padding-top: var(--j-space-800);
-  grid-template-columns: 2fr 5fr;
-  gap: var(--j-space-500);
+  gap: var(--j-space-400);
+  place-content: center;
+  text-align: center;
+  text-decoration: none;
+  padding: var(--j-space-700);
+  background-color: var(--j-color-ui-50);
 }
 
 .avatar {
   display: block;
   border-radius: 50%;
-  background: white;
-  padding: 3px;
-  height: 130px;
-  width: 130px;
+  height: 80px;
+  width: 80px;
   --j-avatar-size: 100%;
   --j-avatar-border: none;
+}
+
+@media (min-width: 800px) {
+  .avatar {
+    height: 130px;
+    width: 130px;
+  }
 }
 
 .add {
@@ -431,16 +508,16 @@ export default defineComponent({
 
 .grid {
   display: grid;
-  gap: var(--j-space-400);
-  grid-template-columns: 1fr;
+  gap: var(--j-space-600);
+  grid-template-columns: 1fr 1fr;
 }
 
-.profile {
-  width: 100%;
-  max-width: 1000px;
-  margin: auto;
-  padding-left: var(--j-space-500);
-  padding-right: var(--j-space-500);
+@media (min-width: 800px) {
+  .grid {
+    display: grid;
+    gap: var(--j-space-400);
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
 }
 
 .back {

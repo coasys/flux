@@ -15,6 +15,14 @@ export default {
     const state = useAppStore();
     state.showSidebar = !state.showSidebar;
   },
+  toggleMainSidebar(): void {
+    const state = useAppStore();
+    state.showMainSidebar = !state.showMainSidebar;
+  },
+  setMainSidebar(open: boolean): void {
+    const state = useAppStore();
+    state.showMainSidebar = open;
+  },
   setSidebar(open: boolean): void {
     const state = useAppStore();
     state.showSidebar = open;

@@ -62,12 +62,12 @@ export default defineComponent({
   methods: {
     updateGlobalTheme(val: ThemeState) {
       this.appStore.updateGlobalTheme(val);
-    }
+    },
   },
   computed: {
     theme(): ThemeState {
       return this.appStore.globalTheme;
-    }
+    },
   },
 });
 </script>
