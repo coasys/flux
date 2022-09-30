@@ -148,7 +148,7 @@ export default async ({
       createSourcePerspective.uuid!,
       {
         source: SELF,
-        target: creatorDid,
+        target: `did://${creatorDid}`,
         predicate: MEMBER,
       }
     );

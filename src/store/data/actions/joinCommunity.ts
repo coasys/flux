@@ -4,11 +4,10 @@ import { MEMBER, SELF } from "@/constants/neighbourhoodMeta";
 
 import { Link } from "@perspect3vism/ad4m";
 
-import { CommunityState, FeedType } from "@/store/types";
+import { CommunityState } from "@/store/types";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
-import { nanoid } from "nanoid";
 import { getGroupMetadata } from "./fetchNeighbourhoodMetadata";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
@@ -40,7 +39,7 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
         neighbourhood.uuid,
         {
           source: SELF,
-          target: userStore.agent.did,
+          target: `did://${userStore.agent.did}`,
           predicate: MEMBER,
         } as Link
       );
@@ -88,25 +87,6 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
       } as CommunityState;
 
       dataStore.addCommunity(newCommunity);
-
-      // We add a default channel that is a reference to
-      // the community itself. This way we can utilize the fractal nature of
-      // neighbourhoods. Remember that this also need to happen in create community.
-      dataStore.addChannel({
-        communityId: neighbourhood.uuid,
-        channel: {
-          id: nanoid(),
-          name: "Home",
-          creatorDid: creatorDid,
-          sourcePerspective: neighbourhood.uuid,
-          hasNewMessages: false,
-          createdAt: new Date().toISOString(),
-          feedType: FeedType.Signaled,
-          notifications: {
-            mute: false,
-          },
-        },
-      });
     } else {
       const message = "You are already part of this group";
 

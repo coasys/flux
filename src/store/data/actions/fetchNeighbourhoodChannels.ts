@@ -1,7 +1,7 @@
 import { useDataStore } from "..";
 import { CHANNEL, SELF } from "@/constants/neighbourhoodMeta";
-import { FeedType } from "@/store/types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import { Literal } from "@perspect3vism/ad4m";
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async (communityId: string): Promise<void> => {
@@ -17,12 +17,14 @@ export default async (communityId: string): Promise<void> => {
     );
 
     for (let i = 0; i < channelLinks.length; i++) {
-      const name = channelLinks[i].C;
+      const channel = channelLinks[i].C;
 
       const found = dataStore.getChannel(
         community.neighbourhood.perspective.uuid,
-        name
+        channel
       );
+
+      const channelExp = await Literal.fromUrl(channel).get();
 
       //Check that the channel is not in the store
       if (!found) {
@@ -33,13 +35,12 @@ export default async (communityId: string): Promise<void> => {
         dataStore.addChannel({
           communityId: community.state.perspectiveUuid,
           channel: {
-            id: name,
-            name,
+            id: channel,
+            name: channelExp.data,
             creatorDid: channelLinks[i].author,
             sourcePerspective: community.state.perspectiveUuid,
             hasNewMessages: false,
-            createdAt: new Date().toISOString(),
-            feedType: FeedType.Signaled,
+            createdAt: channelExp.timestamp || new Date().toISOString(),
             notifications: {
               mute: false,
             },
