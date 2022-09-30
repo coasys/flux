@@ -16,8 +16,8 @@
             Appearance
           </j-tab-item>
           <j-tab-item value="privacy">
-            <j-icon size="sm" name="lock" slot="start" />
-            Privacy
+            <j-icon size="sm" name="bell" slot="start" />
+            Notifications
           </j-tab-item>
         </j-tabs>
       </aside>
