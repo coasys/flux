@@ -44,15 +44,13 @@ export default async ({
   if (
     (!isMinimized &&
       !channel?.notifications.mute &&
-      !community?.state.notifications.mute && 
-      !(differenceInSeconds(new Date(), parseISO(timestamp)) > 30) &&
-      appStore.notification.globalNotification) ||
+      !community?.state.notifications.mute) ||
     (user!.agent.did! !== authorDid &&
       (community?.neighbourhood.perspective.uuid === communityId
         ? channel?.name !== channelId
         : true) &&
       !channel?.notifications.mute &&
-      !community?.state.notifications.mute)
+      !community?.state.notifications.mute && differenceInSeconds(new Date(), parseISO(timestamp)) <= 30) && appStore.notification.globalNotification
   ) {
       const isMentioned = message.includes(
         user!.agent.did!.replace("did:key:", "")
