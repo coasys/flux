@@ -12,8 +12,14 @@ export default async function changeNotificationState(
   const appStore = useAppStore();
 
   if (payload) {
-    await Notification.requestPermission();
-  } 
+    const state = await Notification.requestPermission();
+
+    if (state === 'denied') {
+      appStore.setGlobalNotification(false);
+
+      return;
+    } 
+  }
 
   appStore.setGlobalNotification(payload);
 }
