@@ -62,9 +62,16 @@
 
 <script lang="ts">
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
-import { AREA_HAS_DESCRIPTION, AREA_HAS_IMAGES, AREA_HAS_NAME, AREA_SIMPLE_AREA, AREA_TYPE, FLUX_PROFILE, HAS_AREA } from "@/constants/profile";
+import {
+  AREA_HAS_DESCRIPTION,
+  AREA_HAS_IMAGES,
+  AREA_HAS_NAME,
+  AREA_SIMPLE_AREA,
+  AREA_TYPE,
+  FLUX_PROFILE,
+  HAS_AREA,
+} from "@/constants/profile";
 import { useAppStore } from "@/store/app";
-import { useDataStore } from "@/store/data";
 import { useUserStore } from "@/store/user";
 import getAgentLinks from "@/utils/getAgentLinks";
 import removeTypeName from "@/utils/removeTypeName";
@@ -149,7 +156,6 @@ export default defineComponent({
     async createLink() {
       const client = await getAd4mClient();
       this.isAddLink = true;
-      const dataStore = useDataStore();
       const userStore = useUserStore();
       const appStore = useAppStore();
       const userPerspective = userStore.getAgentProfileProxyPerspectiveId;

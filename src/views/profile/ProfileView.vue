@@ -250,9 +250,8 @@ export default defineComponent({
     async getAgentAreas() {
       const client = await getAd4mClient();
       const did = this.$route.params.did as string;
-      const me = await client.agent.me();
 
-      const links = await getAgentLinks(did || me.did);
+      const links = await getAgentLinks(did || (await client.agent.me().did));
 
       const areaLinks = links.filter((link) =>
         link.data.source.startsWith("area://")
