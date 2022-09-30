@@ -1,11 +1,12 @@
 <template>
   <j-box v-if="profile" p="800">
     <j-flex a="center" direction="column" gap="500">
-      <j-avatar
+      <Avatar
         style="--j-avatar-size: 100px"
         :hash="did"
-        :src="profile.profilePicture"
-      />
+        :url="profile.thumbnailPicture"
+      ></Avatar>
+
       <j-text
         v-if="profile.familyName || profile.givenName"
         variant="heading-sm"
@@ -35,9 +36,10 @@ import { defineComponent } from "vue";
 import { Profile } from "@/store/types";
 import Skeleton from "@/components/skeleton/Skeleton.vue";
 import { getProfile } from "@/utils/profileHelpers";
+import Avatar from "@/components/avatar/Avatar.vue";
 
 export default defineComponent({
-  components: { Skeleton },
+  components: { Skeleton, Avatar },
   props: ["did", "langAddress"],
   emits: ["openCompleteProfile"],
   data() {
@@ -50,7 +52,8 @@ export default defineComponent({
       handler: async function (did) {
         // reset profile before fetching again
         this.profile = null;
-        if (typeof did === "string") {
+        if (did) {
+          console.log("did", did);
           this.profile = await getProfile(did);
         }
       },
