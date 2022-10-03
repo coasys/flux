@@ -1,35 +1,36 @@
 <template>
   <j-box p="800">
     <j-flex gap="500" direction="column">
-      <j-text variant="heading-sm">
-        All group members ({{ Object.keys(community.members).length ?? 0 }})
+      <j-text nomargin variant="heading-sm">
+        Members ({{ Object.keys(community.members).length ?? 0 }})
       </j-text>
       <j-input
         size="lg"
-        placeholder="Search members"
+        placeholder="Search members..."
         type="search"
         :value="searchValue"
         @input="(e) => (searchValue = e.target.value)"
       >
-        <j-icon name="search" size="sm" slot="end"></j-icon>
+        <j-icon name="search" size="sm" slot="start"></j-icon>
       </j-input>
-      <j-flex wrap gap="600" v-if="!loading">
+      <j-flex direction="column" gap="400" v-if="!loading">
         <j-flex
-          gap="300"
+          gap="500"
           style="cursor: pointer"
           v-for="communityMember in filteredCommunityMemberList"
           :key="communityMember.did"
           inline
-          direction="column"
+          direction="row"
+          j="center"
           a="center"
         >
-          <j-avatar
-            size="lg"
+          <Avatar
+            size="xl"
             :hash="communityMember.did"
-            :src="communityMember.thumbnailPicture"
+            :url="communityMember.thumbnailPicture"
             @click="() => profileClick(communityMember.did)"
-          />
-          <j-text variant="body">
+          ></Avatar>
+          <j-text color="black" nomargin variant="body">
             {{ communityMember.username }}
           </j-text>
         </j-flex>
@@ -58,21 +59,17 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import {
-  NeighbourhoodState,
-  ExpressionTypes,
-  FluxExpressionReference,
-  ProfileWithDID,
-} from "@/store/types";
+import { NeighbourhoodState, ProfileWithDID } from "@/store/types";
 import { useDataStore } from "@/store/data";
 
 import { getProfile } from "@/utils/profileHelpers";
-import { ad4mClient } from "@/app";
 import Skeleton from "@/components/skeleton/Skeleton.vue";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import Avatar from "@/components/avatar/Avatar.vue";
 
 export default defineComponent({
-  emits: ["cancel", "submit"],
-  components: { Skeleton },
+  emits: ["close", "submit"],
+  components: { Skeleton, Avatar },
   setup() {
     const dataStore = useDataStore();
 
@@ -92,17 +89,16 @@ export default defineComponent({
       handler: async function (users) {
         // reset before fetching again
         this.memberList = [];
+        if (!users) return;
         this.loading = true;
-        const memberList = (await Promise.all(
-          users.map(
-            async (did: string): Promise<ProfileWithDID | null> =>
-              await getProfile(this.profileLanguageAddress, did)
-          )
-        )) as Array<ProfileWithDID | null>;
-
-        this.memberList = memberList.filter(
-          (profile) => profile !== null
-        ) as ProfileWithDID[];
+        for (const user of users) {
+          if (user) {
+            const member = await getProfile(user);
+            if (member) {
+              this.memberList.push(member);
+            }
+          }
+        }
         this.loading = false;
       },
       immediate: true,
@@ -118,16 +114,13 @@ export default defineComponent({
       const id = this.$route.params.communityId as string;
       return this.dataStore.getNeighbourhood(id);
     },
-    profileLanguageAddress(): string {
-      return this.community.typedExpressionLanguages.find(
-        (t: FluxExpressionReference) =>
-          t.expressionType === ExpressionTypes.ProfileExpression
-      )!.languageAddress;
-    },
   },
   methods: {
     async profileClick(did: string) {
-      const me = await ad4mClient.agent.me();
+      const client = await getAd4mClient();
+      const me = await client.agent.me();
+
+      this.$emit("close");
 
       if (did === me.did) {
         this.$router.push({ name: "home", params: { did } });

@@ -18,7 +18,7 @@ cachix use holochain-ci
 Installing dependencies for flux and compiling holochain can be done with:
 
 ```
-yarn install && yarn run get-languages && yarn run build-holochain
+yarn install && yarn run get-bootstrap && yarn run build-holochain
 ```
 
 ### Compiles and hot-reloads for development

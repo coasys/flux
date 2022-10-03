@@ -1,38 +1,28 @@
 import { v4 as uuidv4 } from "uuid";
-import { createProfile } from "@/core/methods/createProfile";
-import { createExpression } from "@/core/mutations/createExpression";
-import { templateLanguage } from "@/core/mutations/templateLanguage";
-import { createNeighbourhood } from "@/core/mutations/createNeighbourhood";
-import { addPerspective } from "@/core/mutations/addPerspective";
-import { createLink } from "@/core/mutations/createLink";
 import {
-  SOCIAL_CONTEXT_OFFICIAL,
-  GROUP_EXPRESSION_OFFICIAL,
-  PROFILE_EXPRESSION_OFFICIAL,
-  SHORTFORM_EXPRESSION_OFFICIAL,
+  PERSPECTIVE_DIFF_SYNC,
+  NOTE_IPFS_EXPRESSION_OFFICIAL
 } from "@/constants/languages";
 
-import { MEMBER } from "@/constants/neighbourhoodMeta";
+import { MEMBER, SELF, FLUX_GROUP_NAME, FLUX_GROUP_IMAGE, FLUX_GROUP_DESCRIPTION, FLUX_GROUP_THUMBNAIL } from "@/constants/neighbourhoodMeta";
 
 import {
   MembraneType,
-  FluxExpressionReference,
-  ExpressionTypes,
   CommunityState,
-  FeedType,
 } from "@/store/types";
-import { Perspective } from "@perspect3vism/ad4m";
+import { Perspective, PerspectiveHandle, Literal } from "@perspect3vism/ad4m";
 import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
-import { useUserStore } from "@/store/user";
-import { ad4mClient } from "@/app";
+import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/web'
+import { blobToDataURL, dataURItoBlob, resizeImage } from "@/utils/profileHelpers";
 
 export interface Payload {
   perspectiveName: string;
   image?: string;
   thumbnail?: string;
   description: string;
+  perspective?: Perspective;
 }
 
 export default async ({
@@ -40,163 +30,160 @@ export default async ({
   description,
   thumbnail = "",
   image = "",
+  perspective
 }: Payload): Promise<CommunityState> => {
   const dataStore = useDataStore();
   const appStore = useAppStore();
-  const userStore = useUserStore();
 
   try {
-    const creatorDid = userStore.getUser?.agent.did || "";
+    const client = await getAd4mClient();
+    const agent = await client.agent.me()
 
-    const createSourcePerspective = await addPerspective(perspectiveName);
+    const creatorDid = agent.did;
+
+    const createSourcePerspective = perspective || (await client.perspective.add(
+      perspectiveName
+    )) as PerspectiveHandle;
     console.log("Created source perspective", createSourcePerspective);
 
     //Get the variables that we need to create new unique languages
     const uid = uuidv4().toString();
 
     //Create unique social-context
-    const socialContextLang = await templateLanguage(
-      SOCIAL_CONTEXT_OFFICIAL,
-      JSON.stringify({
-        uid: uid,
-        name: `${perspectiveName}-social-context`,
-      })
-    );
+    const socialContextLang =
+      await client.languages.applyTemplateAndPublish(
+        PERSPECTIVE_DIFF_SYNC,
+        JSON.stringify({
+          uid: uid,
+          name: `${perspectiveName}-link-language`,
+        })
+      );
     console.log("Response from create social-context", socialContextLang);
-    //Create shortform expression language
-    const shortFormExpressionLang = await templateLanguage(
-      SHORTFORM_EXPRESSION_OFFICIAL,
-      JSON.stringify({
-        uid: uid,
-        name: `${perspectiveName}-shortform-expression`,
-      })
-    );
-    console.log(
-      "Response from create shortform exp lang",
-      shortFormExpressionLang
-    );
-    //Get language after templating to install it
-    ad4mClient.languages.byAddress(shortFormExpressionLang.address);
-    //Create group expression language
-    const groupExpressionLang = await templateLanguage(
-      GROUP_EXPRESSION_OFFICIAL,
-      JSON.stringify({
-        uid: uid,
-        name: `${perspectiveName}-group-expression`,
-      })
-    );
-    console.log("Response from create group exp lang", groupExpressionLang);
-    //Get language after templating to install it
-    ad4mClient.languages.byAddress(groupExpressionLang.address);
-    //Create profile expression language
-    const profileExpressionLang = await templateLanguage(
-      PROFILE_EXPRESSION_OFFICIAL,
-      JSON.stringify({
-        uid: uid,
-        name: `${perspectiveName}-profile-expression`,
-      })
-    );
-    console.log("Response from create profile exp lang", profileExpressionLang);
-    //Get language after templating to install it
-    ad4mClient.languages.byAddress(profileExpressionLang.address);
-    const typedExpLangs = [
-      {
-        languageAddress: shortFormExpressionLang.address!,
-        expressionType: ExpressionTypes.ShortForm,
-      } as FluxExpressionReference,
-      {
-        languageAddress: groupExpressionLang.address!,
-        expressionType: ExpressionTypes.GroupExpression,
-      } as FluxExpressionReference,
-      {
-        languageAddress: profileExpressionLang.address!,
-        expressionType: ExpressionTypes.ProfileExpression,
-      } as FluxExpressionReference,
-    ];
 
     //Publish perspective
     const metaLinks = await createNeighbourhoodMeta(
       perspectiveName,
       description,
       creatorDid,
-      typedExpLangs
     );
     const meta = new Perspective(metaLinks);
-    const neighbourhood = await createNeighbourhood(
-      createSourcePerspective.uuid,
-      socialContextLang.address,
-      meta
-    );
-    console.log("Created neighbourhood with result", neighbourhood);
-    createSourcePerspective.sharedUrl = neighbourhood;
+    let sharedUrl = createSourcePerspective.sharedUrl;
 
-    //await sleep(10000);
+    if (!sharedUrl) {
+      const neighbourhood = await client.neighbourhood.publishFromPerspective(
+        createSourcePerspective.uuid,
+        socialContextLang.address,
+        meta
+      );
 
-    //Create link denoting type of community
-    const addLink = await createLink(createSourcePerspective.uuid!, {
-      source: neighbourhood,
-      target: "sioc://community",
-      predicate: "rdf://type",
-    });
-    console.log("Added typelink with response", addLink);
+      sharedUrl = neighbourhood;
 
-    //Create the group expression
-    const createExp = await createExpression(
-      groupExpressionLang.address!,
-      JSON.stringify({
-        name: perspectiveName,
-        description: description,
-        image: image,
-        thumbnail: thumbnail,
-      })
-    );
-    console.log("Created group expression with response", createExp);
+      console.log("Created neighbourhood with result", neighbourhood);
+    }
+
+    let tempImage = image;
+    let tempThumbnail = thumbnail;
+
+    if (image) {
+      const resizedImage = image
+        ? await resizeImage(dataURItoBlob(image as string), 100)
+        : undefined;
+      
+      const thumbnail = image
+        ? await blobToDataURL(resizedImage!)
+        : undefined;
+
+      tempImage = await client.expression.create(
+        image,
+        NOTE_IPFS_EXPRESSION_OFFICIAL
+      );
+
+      tempThumbnail = await client.expression.create(
+        thumbnail,
+        NOTE_IPFS_EXPRESSION_OFFICIAL
+      );
+
+      const addGroupImageLink = await client.perspective.addLink(
+        createSourcePerspective.uuid!,
+        {
+          source: SELF,
+          target: tempImage,
+          predicate: FLUX_GROUP_IMAGE,
+        }
+      );
+      const addGroupThumbnailLink = await client.perspective.addLink(
+        createSourcePerspective.uuid!,
+        {
+          source: SELF,
+          target: tempThumbnail,
+          predicate: FLUX_GROUP_THUMBNAIL,
+        }
+      );  
+    }
 
     //Create link between perspective and group expression
-    const addGroupExpLink = await createLink(createSourcePerspective.uuid!, {
-      source: neighbourhood,
-      target: createExp,
-      predicate: "rdf://class",
-    });
-    console.log(
-      "Created group expression link",
-      addGroupExpLink,
-      userStore.getProfile
+    const addGroupNameLink = await client.perspective.addLink(
+      createSourcePerspective.uuid!,
+      {
+        source: SELF,
+        target: perspectiveName,
+        predicate: FLUX_GROUP_NAME,
+      }
     );
-
-    const createProfileExpression = await createProfile(
-      profileExpressionLang.address!,
-      userStore.getProfile!
+    const addGroupDescriptionLink = await client.perspective.addLink(
+      createSourcePerspective.uuid!,
+      {
+        source: SELF,
+        target: description || '-',
+        predicate: FLUX_GROUP_DESCRIPTION,
+      }
     );
-
+  
     //Create link between perspective and group expression
-    const addProfileLink = await createLink(createSourcePerspective.uuid!, {
-      source: neighbourhood,
-      target: createProfileExpression,
-      predicate: MEMBER,
-    });
+    const addProfileLink = await client.perspective.addLink(
+      createSourcePerspective.uuid!,
+      {
+        source: SELF,
+        target: creatorDid,
+        predicate: MEMBER,
+      }
+    );
     console.log("Created profile expression link", addProfileLink);
 
-    const myDid = userStore.getUser!.agent.did!;
+
+    let sdnaLiteral = Literal.from(`flux_message(Channel, Message, Timestamp, Author, Reactions, Replies):-
+    link(Channel, "temp://directly_succeeded_by", Message, Timestamp, Author),
+    findall((Reaction, ReactionTimestamp, ReactionAuthor), link(Message, "flux://has_reaction", Reaction, ReactionTimestamp, ReactionAuthor), Reactions),
+    findall((Reply, ReplyTimestamp, ReplyAuthor), link(Reply, "flux://has_reply", Message, ReplyTimestamp, ReplyAuthor), Replies).`)
+
+
+    // await ad4mClient.perspective.addLink(perspectiveUuid, {source: "self", predicate: "ad4m://has_zome", target: sdnaLiteral.toUrl()});
+    const addSocialDnaLink = await client.perspective.addLink(
+      createSourcePerspective.uuid!,
+      {source: "ad4m://self", predicate: "ad4m://has_zome", target: sdnaLiteral.toUrl()}
+    );
+    console.log("Created social dna link", addSocialDnaLink);
+
 
     const newCommunity = {
       neighbourhood: {
         name: perspectiveName,
         creatorDid: creatorDid,
         description: description,
-        image: image,
-        thumbnail: thumbnail,
-        perspective: createSourcePerspective,
-        typedExpressionLanguages: typedExpLangs,
-        groupExpressionRef: createExp,
-        neighbourhoodUrl: neighbourhood,
+        image: tempImage,
+        thumbnail: tempThumbnail,
+        perspective: {
+          uuid: createSourcePerspective?.uuid,
+          name: createSourcePerspective?.name,
+          sharedUrl,
+          neighbourhood: createSourcePerspective.neighbourhood,
+        },
+        neighbourhoodUrl: sharedUrl,
         membraneType: MembraneType.Unique,
         linkedPerspectives: [createSourcePerspective.uuid],
         linkedNeighbourhoods: [createSourcePerspective.uuid],
-        members: [myDid],
+        members: [creatorDid],
         membraneRoot: createSourcePerspective.uuid,
-        currentExpressionLinks: {},
-        currentExpressionMessages: {},
         createdAt: new Date().toISOString(),
       },
       state: {
@@ -209,6 +196,8 @@ export default async ({
           saturation: 60,
         },
         useLocalTheme: false,
+        hasNewMessages: false,
+        collapseChannelList: false,
         currentChannelId: null,
         hideMutedChannels: false,
         notifications: {
@@ -221,16 +210,9 @@ export default async ({
     // We add a default channel that is a reference to
     // the community itself. This way we can utilize the fractal nature of
     // neighbourhoods. Remember that this also need to happen in join community.
-    dataStore.addLocalChannel({
-      perspectiveUuid: createSourcePerspective.uuid,
-      channel: {
-        perspectiveUuid: createSourcePerspective.uuid,
-        hasNewMessages: false,
-        feedType: FeedType.Signaled,
-        notifications: {
-          mute: false,
-        },
-      },
+    await dataStore.createChannel({
+      name: "Home",
+      communityId: createSourcePerspective.uuid
     });
 
     // @ts-ignore

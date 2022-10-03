@@ -20,5 +20,10 @@ export function getMetaFromNeighbourhood(links: LinkExpression[]): {
       creatorDid: predicate === CREATOR ? target : acc.creatorDid,
       createdAt: predicate === CREATED_AT ? target : acc.createdAt,
     };
-  }, {});
+  }, {
+    name: '',
+    description: '',
+    createdAt: '',
+    creatorDid: ''
+  });
 }

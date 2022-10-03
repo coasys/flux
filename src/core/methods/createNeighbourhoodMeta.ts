@@ -1,8 +1,4 @@
-import { FluxExpressionReference } from "@/store/types";
 import { Link, LinkExpression } from "@perspect3vism/ad4m";
-import { addPerspective } from "../mutations/addPerspective";
-import { createLink } from "../mutations/createLink";
-import { getPerspectiveSnapshot } from "../queries/getPerspective";
 
 import {
   CREATOR,
@@ -12,16 +8,16 @@ import {
   LANGUAGE,
   CREATED_AT,
 } from "@/constants/neighbourhoodMeta";
-import { ad4mClient } from "@/app";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export async function createNeighbourhoodMeta(
   name: string,
   description: string,
   creatorDid: string,
-  expressionLanguages: FluxExpressionReference[]
 ): Promise<LinkExpression[]> {
+  const client = await getAd4mClient();
   //Create the perspective to hold our meta
-  const perspective = await addPerspective(`${name}-meta`);
+  const perspective = await client.perspective.add(`${name}-meta`);
 
   //Create the links we want on meta
   const expressionLinks = [];
@@ -61,24 +57,16 @@ export async function createNeighbourhoodMeta(
     })
   );
 
-  for (const lang of expressionLanguages) {
-    expressionLinks.push(
-      new Link({
-        source: SELF,
-        target: lang.languageAddress,
-        predicate: LANGUAGE,
-      })
-    );
-  }
-
   //Create the links on the perspective
   for (const exp of expressionLinks) {
-    await createLink(perspective.uuid, exp);
+    await client.perspective.addLink(perspective.uuid, exp);
   }
 
   //Get the signed links back
-  const perspectiveSnapshot = await getPerspectiveSnapshot(perspective.uuid);
-  await ad4mClient.perspective.remove(perspective.uuid);
+  const perspectiveSnapshot = await client.perspective.snapshotByUUID(
+    perspective.uuid
+  );
+  await client.perspective.remove(perspective.uuid);
   const links = [];
   for (const link in perspectiveSnapshot!.links) {
     //Deep copy the object... so we can delete __typename fields inject by apollo client

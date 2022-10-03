@@ -5,10 +5,5 @@ declare module "*.vue" {
   export default component;
 }
 
-
-declare module "vue-virtual-scroller";
-
 declare module "vue-advanced-cropper";
-
-declare module "easygraphql-tester";
 

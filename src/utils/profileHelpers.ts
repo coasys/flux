@@ -1,92 +1,125 @@
-import { getExpressionNoCache } from "@/core/queries/getExpression";
 import { ProfileExpression, ProfileWithDID } from "@/store/types";
 import { Profile } from "@/store/types";
 import {
-  ACCOUNT_NAME,
-  EMAIL,
-  FAMILY_NAME,
-  GIVEN_NAME,
+  FLUX_PROFILE,
+  HAS_BG_IMAGE,
+  HAS_BIO,
+  HAS_EMAIL,
+  HAS_FAMILY_NAME,
+  HAS_GIVEN_NAME,
+  HAS_PROFILE_IMAGE,
+  HAS_THUMBNAIL_IMAGE,
+  HAS_USERNAME,
 } from "@/constants/profile";
-import { IMAGE, CONTENT_SIZE, CONTENT_URL, THUMBNAIL } from "@/constants/image";
-import { profileCache } from "@/app";
+import getAgentLinks from "./getAgentLinks";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import { mapLiteralLinks } from "./linkHelpers";
 
-interface Image {
-  contentUrl: string;
-  contentSize: string;
-}
+export const dataURItoBlob = (dataURI: string) => {
+  const bytes =
+    dataURI.split(",")[0].indexOf("base64") >= 0
+      ? atob(dataURI.split(",")[1])
+      : unescape(dataURI.split(",")[1]);
+  const mime = dataURI.split(",")[0].split(":")[1].split(";")[0];
+  const max = bytes.length;
+  const ia = new Uint8Array(max);
+  for (let i = 0; i < max; i += 1) ia[i] = bytes.charCodeAt(i);
+  return new Blob([ia], { type: mime });
+};
 
-interface ImageWithThumbnail extends Image {
-  thumbnail?: Image;
-}
+export const blobToDataURL = (blob: Blob): Promise<string> => {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.onabort = () => reject(new Error("Read aborted"));
+    reader.readAsDataURL(blob);
+  });
+};
 
-function shouldParse(data: any) {
-  return data && typeof data === "string";
-}
+// Resizes the image by creating a canvas and resizing it to the resized image
+export const resizeImage = (file: any, maxSize: number): Promise<Blob> => {
+  const reader = new FileReader();
+  const image = new Image();
+  const canvas = document.createElement("canvas");
 
-export function parseThumbnail(data: any): Image {
-  const thumbnail = shouldParse(data) ? JSON.parse(data) : data;
-  return {
-    contentUrl: thumbnail[CONTENT_URL],
-    contentSize: thumbnail[CONTENT_SIZE],
-  };
-}
+  const resize = () => {
+    let { width, height } = image;
 
-export function parseImage(data: string): ImageWithThumbnail {
-  const image = shouldParse(data) ? JSON.parse(data) : data;
-  return {
-    contentUrl: image[CONTENT_URL],
-    contentSize: image[CONTENT_SIZE],
-    thumbnail: image[THUMBNAIL] && parseThumbnail(image[THUMBNAIL]),
-  };
-}
-
-export function parseProfile(data: ProfileExpression): Profile {
-  const image = data[IMAGE] && parseImage(data[IMAGE]);
-
-  return {
-    username: data[ACCOUNT_NAME],
-    email: data[EMAIL],
-    givenName: data[GIVEN_NAME],
-    familyName: data[FAMILY_NAME],
-    thumbnailPicture: image?.thumbnail?.contentUrl,
-    profilePicture: image?.contentUrl,
-  };
-}
-
-export async function getProfile(
-  profileLangAddress: string,
-  did: string
-): Promise<ProfileWithDID | null> {
-  const profileRef = `${profileLangAddress}://${did}`;
-
-  const profileExp = await profileCache.get(profileRef);
-
-  if (!profileExp) {
-    console.warn(
-      "Did not get profile expression from cache, calling holochain"
-    );
-    const profileGqlExp = await getExpressionNoCache(profileRef);
-
-    if (profileGqlExp) {
-      const exp = {
-        author: profileGqlExp.author!,
-        data: JSON.parse(profileGqlExp.data),
-        timestamp: profileGqlExp.timestamp!,
-        proof: profileGqlExp.proof!,
-      } as ProfileExpression;
-
-      await profileCache.set(profileRef, exp);
-      return {
-        did,
-        ...parseProfile(exp.data.profile),
-      };
-    } else {
-      return null;
+    if (width > height) {
+      if (width > maxSize) {
+        height *= maxSize / width;
+        width = maxSize;
+      }
+    } else if (height > maxSize) {
+      width *= maxSize / height;
+      height = maxSize;
     }
-  } else {
-    return {
-      did,
-      ...parseProfile(profileExp.data.profile),
+
+    canvas.width = width;
+    canvas.height = height;
+    canvas.getContext("2d")?.drawImage(image, 0, 0, width, height);
+
+    const dataUrl = canvas.toDataURL("image/png");
+
+    return dataURItoBlob(dataUrl);
+  };
+
+  return new Promise((ok, no) => {
+    if (!file.type.match(/image.*/)) {
+      no(new Error("Not an image"));
+      return;
+    }
+
+    reader.onload = (readerEvent) => {
+      image.onload = () => ok(resize());
+      image.src = readerEvent.target?.result as string;
     };
-  }
+
+    reader.onerror = (err) => {
+      image.onerror = () => no(err);
+    };
+
+    reader.readAsDataURL(file);
+  });
+};
+
+export async function getImage(expUrl: string): Promise<string> {
+  return new Promise(async (resolve, reject) => {
+    const client = await getAd4mClient();
+
+    setTimeout(() => {
+      resolve("");
+    }, 1000);
+
+    try {
+      const image = await client.expression.get(expUrl);
+
+      if (image) {
+        resolve(image.data.slice(1, -1));
+      }
+
+      resolve("");
+    } catch (e) {
+      console.error(e);
+      resolve("");
+    }
+  });
+}
+
+export async function getProfile(did: string): Promise<ProfileWithDID | null> {
+  const links = await getAgentLinks(did);
+
+  const profile = mapLiteralLinks(links, {
+    username: HAS_USERNAME,
+    bio: HAS_BIO,
+    givenName: HAS_GIVEN_NAME,
+    email: HAS_EMAIL,
+    familyName: HAS_FAMILY_NAME,
+    profilePicture: HAS_PROFILE_IMAGE,
+    thumbnailPicture: HAS_THUMBNAIL_IMAGE,
+    profileBg: HAS_BG_IMAGE,
+  });
+
+  return { ...profile, did };
 }

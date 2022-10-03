@@ -1,9 +1,9 @@
 import "@testing-library/vue";
-import * as agentUnlock from "../../../../core/mutations/agentUnlock";
 import lockAgentFixture from "../../../fixtures/lockAgent.json";
 import { AgentStatus } from "@perspect3vism/ad4m";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useUserStore } from "@/store/user";
+import { ad4mClient } from "@/app";
 
 describe("Login", () => {
   let store: Pinia;
@@ -13,7 +13,7 @@ describe("Login", () => {
     setActivePinia(store);
 
     jest
-      .spyOn(agentUnlock, "agentUnlock")
+      .spyOn(ad4mClient.agent, "unlock")
       .mockImplementation(async (password) => {
         if (password === "test123") {
           return lockAgentFixture as AgentStatus;

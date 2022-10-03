@@ -10,7 +10,6 @@ export const useAppStore = defineStore("app", {
       updateState: "not-available",
       windowState: "visible",
       applicationStartTime: new Date(),
-      localLanguagesPath: "",
       modals: {
         showCreateCommunity: false,
         showEditCommunity: false,
@@ -21,14 +20,16 @@ export const useAppStore = defineStore("app", {
         showCommunitySettings: false,
         showInviteCode: false,
         showDisclaimer: true,
+        showCode: false,
       },
       showSidebar: true,
+      showMainSidebar: true,
       sidebarWidth: 330,
       showGlobalLoading: false,
       globalTheme: {
         fontSize: "md",
-        fontFamily: "Poppins",
-        name: "dark",
+        fontFamily: "DM Sans",
+        name: "default",
         hue: 270,
         saturation: 60,
       },
@@ -42,6 +43,9 @@ export const useAppStore = defineStore("app", {
         show: false,
         message: "",
       },
+      notification: {
+        globalNotification: false,
+      }
     };
   },
   getters,

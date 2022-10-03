@@ -2,10 +2,7 @@ import createCommunityPerspective from "../../fixtures/createCommunityPerspectiv
 import getPerspectiveSnapshotFixture from "../../fixtures/getPerspectiveSnapshot.json";
 import createNeighbourhoodMetaFixture from "../../fixtures/createNeighbourhoodMeta.json";
 import addChannelCreateLink from "../../fixtures/addChannelCreateLink.json";
-import * as addPerspective from "@/core/mutations/addPerspective";
 import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta";
-import * as createLink from "@/core/mutations/createLink";
-import * as getPerspectiveSnapshot from "@/core/queries/getPerspective";
 import { ad4mClient } from "@/app";
 
 const removeEmpty = (obj: any) => {
@@ -21,21 +18,24 @@ describe("Create Neighbourhood Meta", () => {
   beforeEach(() => {
     // @ts-ignore
     jest
-      .spyOn(addPerspective, "addPerspective")
+      .spyOn(ad4mClient.perspective, "add")
       // @ts-ignore
       .mockResolvedValue(createCommunityPerspective);
 
     // @ts-ignore
     jest
-      .spyOn(getPerspectiveSnapshot, "getPerspectiveSnapshot")
+      .spyOn(ad4mClient.perspective, "snapshotByUUID")
       // @ts-ignore
       .mockResolvedValue(getPerspectiveSnapshotFixture);
 
     // @ts-ignore
     jest
-      .spyOn(createLink, "createLink")
+      .spyOn(ad4mClient.perspective, "addLink")
       .mockImplementation(async (perspective, link) => {
-        return addChannelCreateLink;
+        return {
+          ...addChannelCreateLink,
+          hash: () => 12345
+        };
       });
 
     // @ts-ignore
@@ -43,7 +43,7 @@ describe("Create Neighbourhood Meta", () => {
       .spyOn(ad4mClient.perspective, "remove")
       .mockImplementation(async () => {
         return {
-          perspectiveRemove: true
+          perspectiveRemove: true,
         };
       });
   });
@@ -103,7 +103,7 @@ describe("Create Neighbourhood Meta", () => {
   test("Create Neighbourhood Meta - Failure", async () => {
     // @ts-ignore
     jest
-      .spyOn(addPerspective, "addPerspective")
+      .spyOn(ad4mClient.perspective, "add")
       // @ts-ignore
       .mockRejectedValue(Error("Error while adding new perspective"));
 

@@ -2,6 +2,24 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project *loosely* adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.2.17] - 04/03/2022
+
+### Added 
+
+### Changed
+ - Holochain upgraded to version 127
+
+### Deprecated
+
+### Removed
+
+### Fixed
+ - GraphQL app port is now correctly communicated with ad4mClient & perspective views
+
+### Security
+
+---
+
 ## [0.2.16] - 07/02/2022
 
 ### Added 

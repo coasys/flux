@@ -1,8 +1,8 @@
 export const DESCRIPTION = "rdf://description";
 
-export const SELF = "self";
+export const SELF = "ad4m://self";
 
-export const LANGUAGE = "language";
+export const LANGUAGE = "ad4m://language";
 
 export const CREATOR = "rdf://creator";
 
@@ -14,4 +14,20 @@ export const MEMBER = "sioc://has_member";
 
 export const EXPRESSION = "sioc://content_of";
 
-export const CHANNEL = "sioc://has_space";
+export const MESSAGE = "temp://directly_succeeded_by";
+
+export const CHANNEL = "flux://has_channel";
+
+export const CHANNEL_NAME = "flux://has_channel_name";
+
+export const AD4M_CLASS = "ad4m://has_class";
+
+export const FLUX_CHANNEL = "flux://channel";
+
+export const FLUX_GROUP_NAME = "flux://communityName";
+
+export const FLUX_GROUP_DESCRIPTION = "flux://communityDescription";
+
+export const FLUX_GROUP_IMAGE = "flux://communityImage";
+
+export const FLUX_GROUP_THUMBNAIL = "flux://communityThumbnail";

@@ -1,7 +1,7 @@
 <template>
   <div class="signup-view" :class="{ 'signup-view--show-signup': showSignup }">
     <div class="signup-view__flow">
-      <j-flex direction="column" gap="400" v-if="step === 1">
+      <j-flex direction="column" gap="400">
         <j-box class="signup-view__flow-back" pb="500">
           <j-button @click="showSignup = false" variant="link">
             <j-icon name="arrow-left-short" />
@@ -14,6 +14,13 @@
         </j-box>
 
         <j-text variant="heading"> Create a user </j-text>
+
+        <avatar-upload
+          icon="camera"
+          :value="profilePicture"
+          @change="(url) => (profilePicture = url)"
+        >
+        </avatar-upload>
         <j-input
           label="Username"
           size="xl"
@@ -23,46 +30,6 @@
           :errortext="usernameErrorMessage"
           @blur="(e) => validateUsername()"
         ></j-input>
-
-        <j-input
-          :type="showPassword ? 'text' : 'password'"
-          label="Password"
-          size="xl"
-          :value="password"
-          @keydown.enter="passwordOnEnterValidate"
-          @input="(e) => (password = e.target.value)"
-          :error="passwordError"
-          :errortext="passwordErrorMessage"
-          @blur="(e) => validatePassword()"
-        >
-          <j-button
-            @keydown.stop
-            @click.stop="showPassword = !showPassword"
-            variant="ghost"
-            square
-            slot="end"
-          >
-            <j-icon :name="showPassword ? 'eye-slash' : 'eye'" />
-          </j-button>
-        </j-input>
-        <j-button
-          full
-          size="xl"
-          :disabled="!canSignUp"
-          variant="primary"
-          @click="step = 2"
-        >
-          Next
-          <j-icon slot="end" name="arrow-right-short" />
-        </j-button>
-      </j-flex>
-      <j-flex direction="column" gap="500" v-if="step === 2">
-        <avatar-upload
-          icon="camera"
-          :value="profilePicture"
-          @change="(url) => (profilePicture = url)"
-        >
-        </avatar-upload>
         <j-input
           size="lg"
           label="First Name (optional)"
@@ -82,24 +49,18 @@
           :value="email"
           @input="(e) => (email = e.target.value)"
         ></j-input>
-        <j-flex gap="400">
-          <j-button full style="width: 100%" size="lg" @click="step = 1">
-            <j-icon slot="start" name="arrow-left-short" />
-            Back
-          </j-button>
-          <j-button
-            style="width: 100%"
-            full
-            :disabled="isCreatingUser || !canSignUp"
-            :loading="isCreatingUser"
-            size="lg"
-            variant="primary"
-            @click="createUser"
-          >
-            <j-icon slot="end" name="check" />
-            Create user
-          </j-button>
-        </j-flex>
+        <j-button
+          style="width: 100%"
+          full
+          :disabled="isCreatingUser || !canSignUp"
+          :loading="isCreatingUser"
+          size="lg"
+          variant="primary"
+          @click="createUser"
+        >
+          <j-icon slot="end" name="check" />
+          Create user
+        </j-button>
       </j-flex>
     </div>
     <div class="signup-view__intro">
@@ -121,32 +82,37 @@
 import { defineComponent, ref, watch } from "vue";
 import Carousel from "./SignUpCarousel.vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
-import {
-  blobToDataURL,
-  dataURItoBlob,
-  resizeImage,
-} from "@/core/methods/createProfile";
 import { useValidation } from "@/utils/validation";
 import { useUserStore } from "@/store/user";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import {
+  AD4M_SOURCE_PROFILE,
+  AD4M_PREDICATE_USERNAME,
+  AD4M_PREDICATE_FIRSTNAME,
+  AD4M_PREDICATE_LASTNAME,
+} from "@/constants/profile";
 
 import Logo from "@/components/logo/Logo.vue";
+import { LinkQuery, Literal } from "@perspect3vism/ad4m";
+import { mapLiteralLinks } from "@/utils/linkHelpers";
+import { useAppStore } from "@/store/app";
 
 export default defineComponent({
-  name: "Welcome",
+  name: "SignUp",
   components: {
     AvatarUpload,
     Carousel,
     Logo,
   },
   setup() {
-    const showSignup = ref(false);
-    const step = ref(1);
+    const showSignup = ref(true);
     const profilePicture = ref();
     const modalOpen = ref(false);
     const isCreatingUser = ref(false);
     const isLoggingIn = ref(false);
     const showPassword = ref(false);
     const userStore = useUserStore();
+    const appStore = useAppStore();
 
     const {
       value: username,
@@ -168,42 +134,6 @@ export default defineComponent({
       ],
     });
 
-    const {
-      value: password,
-      error: passwordError,
-      errorMessage: passwordErrorMessage,
-      isValid: passwordIsValid,
-      validate: validatePassword,
-    } = useValidation({
-      initialValue: "",
-      rules: [
-        {
-          check: (value: string) => value.length < 8,
-          message: "Password should be 8 or more characters",
-        },
-        {
-          check: (value: string) =>
-            !(/[a-zA-Z]/.test(value) && /[0-9]/.test(value)),
-          message:
-            "Password should be 8 or more characters and contain at least one number",
-        },
-      ],
-    });
-
-    watch([password, passwordIsValid], ([password, passwordIsValid]) => {
-      if (passwordIsValid) {
-        validatePassword();
-      }
-    });
-
-    const passwordOnEnterValidate = () => {
-      validatePassword();
-
-      if (passwordIsValid.value) {
-        step.value = 2;
-      }
-    };
-
     const name = ref("");
 
     const familyName = ref("");
@@ -213,7 +143,6 @@ export default defineComponent({
     const logInError = ref(false);
 
     return {
-      step,
       showSignup,
       isLoggingIn,
       profilePicture,
@@ -226,33 +155,47 @@ export default defineComponent({
       usernameErrorMessage,
       usernameIsValid,
       validateUsername,
-      password,
-      passwordError,
-      passwordErrorMessage,
-      passwordIsValid,
-      validatePassword,
       showPassword,
       email,
       familyName,
       logInError,
       userStore,
-      passwordOnEnterValidate,
+      appStore
     };
+  },
+  async created() {
+    // Auto fill profile with ad4m profile
+    try {
+      const client = await getAd4mClient();
+
+      const perspectives = await client.perspective.all();
+      const ad4mAgentPerspective = perspectives.find(
+        ({ name }) => name === "Agent Profile"
+      );
+      if (ad4mAgentPerspective) {
+        const agentPers = await client.perspective.snapshotByUUID(
+          ad4mAgentPerspective.uuid
+        );
+        const profile = mapLiteralLinks(agentPers?.links, {
+          username: AD4M_PREDICATE_USERNAME,
+          name: AD4M_PREDICATE_FIRSTNAME,
+          familyName: AD4M_PREDICATE_LASTNAME,
+        });
+        this.username = profile.username;
+        this.name = profile.name;
+        this.familyName = profile.familyName;
+      }
+    } catch (e) {
+      console.log(e);
+    }
   },
   computed: {
     canSignUp(): boolean {
-      return this.usernameIsValid && this.passwordIsValid;
+      return this.usernameIsValid;
     },
   },
   methods: {
     async createUser() {
-      const resizedImage = this.profilePicture
-        ? await resizeImage(dataURItoBlob(this.profilePicture as string), 100)
-        : undefined;
-      const thumbnail = this.profilePicture
-        ? await blobToDataURL(resizedImage!)
-        : undefined;
-
       this.isCreatingUser = true;
 
       this.userStore
@@ -261,13 +204,12 @@ export default defineComponent({
           familyName: this.familyName,
           email: this.email,
           username: this.username,
-          password: this.password,
           profilePicture: this.profilePicture,
-          thumbnailPicture: thumbnail,
         })
         .then(() => this.$router.push("/"))
-        .finally(() => {
+        .finally(async () => {
           this.isCreatingUser = false;
+          this.appStore.changeNotificationState(true);
         });
     },
   },
@@ -284,7 +226,6 @@ export default defineComponent({
 .signup-view__flow {
   display: none;
   width: 100%;
-  height: 100%;
   align-content: center;
   padding: var(--j-space-1000);
 }

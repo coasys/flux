@@ -41,6 +41,7 @@ import { NeighbourhoodState } from "@/store/types";
 import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useDataStore } from "@/store/data";
+import { DexieIPFS } from "@/utils/storageHelpers";
 
 export default defineComponent({
   components: { AvatarUpload },
@@ -62,10 +63,11 @@ export default defineComponent({
   },
   watch: {
     community: {
-      handler: function ({ name, description, image }) {
+      handler: async function ({ id, name, description, image }) {
         this.communityName = name;
         this.communityDescription = description;
-        this.profileImage = image;
+        const dexie = new DexieIPFS(id);
+        this.profileImage = await dexie.get(image!) as any;
       },
       deep: true,
       immediate: true,
