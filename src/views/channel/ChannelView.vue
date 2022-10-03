@@ -113,7 +113,7 @@ export default defineComponent({
     const pkg =
       /* @ts-ignore */
       import.meta.env.MODE === "development"
-        ? "http://localhost:4000/dist/main.js"
+        ? "http://localhost:3030/dist/main.js"
         : "https://unpkg.com/@junto-foundation/chat-view/dist/main.js";
 
     this.script = document.createElement("script");
@@ -157,7 +157,7 @@ export default defineComponent({
       this.toggleProfile(true, detail.did);
     },
     onPerspectiveClick({ detail }: any) {
-      let community = this.dataStore.getCommunities.find(e => e.neighbourhood.neighbourhoodUrl === detail.uuid)
+      let community = this.dataStore.getCommunities.find(e => e.neighbourhood.perspective.uuid === detail.uuid)
 
       if (!community) {
         this.toggleJoinCommunityModal(true, detail.link)
