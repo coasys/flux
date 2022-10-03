@@ -157,7 +157,8 @@ export default defineComponent({
       this.toggleProfile(true, detail.did);
     },
     onPerspectiveClick({ detail }: any) {
-      let community = this.dataStore.getCommunities.find(e => e.neighbourhood.perspective.uuid === detail.uuid)
+      let community = this.dataStore.getCommunities.find(e => e.neighbourhood.perspective.uuid === detail.uuid || this.community.neighbourhood.perspective.uuid)
+
 
       if (!community) {
         this.toggleJoinCommunityModal(true, detail.link)
