@@ -4,6 +4,7 @@ import { useDataStore } from "..";
 import { getProfile } from "@/utils/profileHelpers";
 import { differenceInSeconds, parseISO } from "date-fns";
 import { useAppStore } from "@/store/app";
+import { Literal } from "@perspect3vism/ad4m";
 
 type Payload = {
   router: Router;
@@ -31,10 +32,12 @@ export default async ({
 
   const escapedMessage = message.replace(/(\s*<.*?>\s*)+/g, " ");
 
+  const channelLiteral = Literal.fromUrl(notificationChannelId).get();
+
   // Getting the channel & community this message belongs to
   const community = dataStore.getCommunity(perspectiveUuid);
   // TODO: @fayeed change this.
-  const channel = dataStore.getChannel(perspectiveUuid, notificationChannelId);
+  const channel = dataStore.getChannel(perspectiveUuid, channelLiteral.data);
 
   const isMinimized = document.hasFocus();
 
