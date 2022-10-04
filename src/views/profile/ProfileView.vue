@@ -185,7 +185,7 @@
 <script lang="ts">
 import { useDataStore } from "@/store/data";
 import { ModalsState, ProfileWithDID } from "@/store/types";
-import { PerspectiveInput } from "@perspect3vism/ad4m";
+import { Literal, PerspectiveInput } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
 import ProfileCard from "./ProfileCards.vue";
 import ProfileAddLink from "./ProfileAddLink.vue";
@@ -198,16 +198,11 @@ import { mapActions } from "pinia";
 import getAgentLinks from "@/utils/getAgentLinks";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 import Avatar from "@/components/avatar/Avatar.vue";
-import { mapLiteralLinks } from "@/utils/linkHelpers";
 import {
   AREA_COMMUNITY,
-  AREA_HAS_DESCRIPTION,
-  AREA_HAS_IMAGE,
-  AREA_HAS_NAME,
   AREA_SIMPLE_AREA,
-  AREA_TYPE,
   AREA_WEBLINK,
-  HAS_POST,
+  HAS_AREA,
 } from "@/constants/profile";
 import { getImage, getProfile } from "@/utils/profileHelpers";
 
@@ -270,31 +265,18 @@ export default defineComponent({
       const client = await getAd4mClient();
       const did = this.$route.params.did as string;
 
-      const links = await getAgentLinks(did || (await client.agent.me().did));
-
+      const links = await getAgentLinks(did || (await client.agent.me()).did);
       const areaLinks = links.filter((link) =>
-        link.data.source.startsWith("area://")
+        link.data.source.startsWith("area://") && link.data.predicate === HAS_AREA
       );
 
-      const uniqueAreas = [
-        ...new Set(areaLinks.map((link) => link.data.source as string)),
-      ];
 
-      const weblinkMap = uniqueAreas.reduce((acc, key) => {
-        const area = areaLinks.filter((link) => link.data.source === key);
-        return {
-          ...acc,
-          [key]: mapLiteralLinks(area, {
-            type: AREA_TYPE,
-            name: AREA_HAS_NAME,
-            description: AREA_HAS_DESCRIPTION,
-            link: HAS_POST,
-            image: AREA_HAS_IMAGE,
-          }),
-        };
-      }, {});
+      const weblinkMap = areaLinks.map((area: any) => {
+        const literal = Literal.fromUrl(area.data.target).get();
+        return literal.data;
+      });
 
-      this.weblinks = Object.values(weblinkMap);
+      this.weblinks = weblinkMap;
     },
     onLinkClick(link: any) {
       const dataStore = useDataStore();
@@ -317,7 +299,7 @@ export default defineComponent({
         }
       } else if (link.type === AREA_WEBLINK) {
         window.open(link.link, "_blank");
-      } else if (link.area_type === AREA_SIMPLE_AREA) {
+      } else if (link.type === AREA_SIMPLE_AREA) {
         this.$router.push({
           name: `profile-feed`,
           params: { fid: link.id },
