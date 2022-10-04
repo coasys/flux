@@ -86,21 +86,25 @@ export async function getImage(expUrl: string): Promise<string> {
   return new Promise(async (resolve, reject) => {
     const client = await getAd4mClient();
 
-    setTimeout(() => {
-      resolve("");
-    }, 1000);
-
-    try {
-      const image = await client.expression.get(expUrl);
-
-      if (image) {
-        resolve(image.data.slice(1, -1));
+    if (expUrl) {
+      setTimeout(() => {
+        resolve("");
+      }, 1000);
+  
+      try {
+        const image = await client.expression.get(expUrl);
+  
+        if (image) {
+          resolve(image.data.slice(1, -1));
+        }
+  
+        resolve("");
+      } catch (e) {
+        console.error(e);
+        resolve("");
       }
-
-      resolve("");
-    } catch (e) {
-      console.error(e);
-      resolve("");
+    } else {
+      resolve("")
     }
   });
 }
