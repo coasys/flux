@@ -19,12 +19,12 @@ export default async (communityId: string): Promise<void> => {
     for (let i = 0; i < channelLinks.length; i++) {
       const channel = channelLinks[i].C;
 
+      const channelExp = await Literal.fromUrl(channel).get();
+
       const found = dataStore.getChannel(
         community.neighbourhood.perspective.uuid,
-        channel
+        channelExp.data
       );
-
-      const channelExp = await Literal.fromUrl(channel).get();
 
       //Check that the channel is not in the store
       if (!found) {
