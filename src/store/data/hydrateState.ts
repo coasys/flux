@@ -109,14 +109,14 @@ export async function hydrateState() {
       `triple("${SELF}", "${CHANNEL}", C).`
     );
 
-    if (channelLinks) {
-      if (perspective.sharedUrl !== undefined) {
-        const newCommunity = await buildCommunity(perspective);
+    if (perspective.sharedUrl !== undefined && perspective.neighbourhood) {
+      const newCommunity = await buildCommunity(perspective);
 
-        dataStore.addCommunity(newCommunity);
+      dataStore.addCommunity(newCommunity);
 
-        const channels = [...Object.values(dataStore.channels)];
+      const channels = [...Object.values(dataStore.channels)];
 
+      if (channelLinks) {
         for (const link of channelLinks) {
           try {
             const channel = link.C;
