@@ -14,7 +14,7 @@
     <perspective-view
       class="perspective-view"
       :port="port"
-      :channel="channelId"
+      :channel="channel.id"
       :perspective-uuid="communityId"
       @agent-click="onAgentClick"
       @perspective-click="onPerspectiveClick"
@@ -75,8 +75,21 @@ export default defineComponent({
     };
   },
   mounted() {
-    if (customElements.get("perspective-view") === undefined)
-      customElements.define("perspective-view", ChatView);
+    const pkg =
+      /* @ts-ignore */
+      import.meta.env.MODE === "development"
+        ? "http://localhost:3030/dist/main.js"
+        : "https://unpkg.com/@junto-foundation/chat-view/dist/main.js";
+
+    this.script = document.createElement("script");
+    this.script.setAttribute("type", "module");
+    this.script.innerHTML = `
+      import PerspectiveView from '${pkg}';
+      if(customElements.get('perspective-view') === undefined)
+        customElements.define("perspective-view", PerspectiveView);
+    `;
+    this.script;
+    document.body.appendChild(this.script);
   },
   computed: {
     port(): number {
