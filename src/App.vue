@@ -180,7 +180,7 @@ export default defineComponent({
                 });
 
                 const { channelId } = this.$route.params;
-                if (channelId !== channel.id) {
+                if (channelId !== channel.name) {
                   //Add UI notification on the channel to notify that there is a new message there
                   this.dataStore.setHasNewMessages({
                     communityId: perspective,
