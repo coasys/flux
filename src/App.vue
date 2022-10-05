@@ -228,6 +228,18 @@ export default defineComponent({
                 },
               },
             });
+            const channels = this.dataStore.getChannels.filter(
+              (channel) => channel.sourcePerspective === perspective
+            );
+            if (channels.length === 1) {
+              this.$router.push({
+                name: "channel",
+                params: {
+                  communityId: perspective,
+                  channelId: channelExpression.data,
+                },
+              });
+            }
           } catch (e) {
             console.log("Error parsing channel link signal", e);
           }

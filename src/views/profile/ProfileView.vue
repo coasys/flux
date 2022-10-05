@@ -266,10 +266,11 @@ export default defineComponent({
       const did = this.$route.params.did as string;
 
       const links = await getAgentLinks(did || (await client.agent.me()).did);
-      const areaLinks = links.filter((link) =>
-        link.data.source.startsWith("area://") && link.data.predicate === HAS_AREA
+      const areaLinks = links.filter(
+        (link) =>
+          link.data.source.startsWith("area://") &&
+          link.data.predicate === HAS_AREA
       );
-
 
       const weblinkMap = areaLinks.map((area: any) => {
         const literal = Literal.fromUrl(area.data.target).get();
@@ -381,7 +382,6 @@ export default defineComponent({
     sameAgent() {
       return this.did === this.userStore.agent.did;
     },
-
     communities() {
       return this.dataStore.getCommunities;
     },
