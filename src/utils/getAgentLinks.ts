@@ -20,9 +20,11 @@ export default async function getAgentLinks(
     // @ts-ignore
     const agentPerspective = await client.agent.byDID(did);
 
-    const agentLinks = agentPerspective!.perspective!.links;
-
-    links = agentLinks;
+    if (agentPerspective) {
+      links = agentPerspective!.perspective!.links;
+    } else {
+      links = [];
+    }
   }
 
   return links;

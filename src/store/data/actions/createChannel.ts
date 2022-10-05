@@ -1,8 +1,7 @@
 import { createChannel } from "@/core/methods/createChannel";
 import { useAppStore } from "@/store/app";
-import { ChannelState, MembraneType } from "@/store/types";
+import { ChannelState } from "@/store/types";
 import { useDataStore } from "..";
-import { useUserStore } from "@/store/user";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export interface Payload {
@@ -13,7 +12,7 @@ export interface Payload {
 export default async (payload: Payload): Promise<ChannelState> => {
   const dataStore = useDataStore();
   const appStore = useAppStore();
-  const userStore = useUserStore();
+
   try {
     const client = await getAd4mClient();
 

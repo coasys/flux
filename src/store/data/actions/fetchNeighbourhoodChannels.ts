@@ -1,8 +1,7 @@
-import { LinkQuery } from "@perspect3vism/ad4m";
 import { useDataStore } from "..";
 import { CHANNEL, SELF } from "@/constants/neighbourhoodMeta";
-import { FeedType } from "@/store/types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import { Literal } from "@perspect3vism/ad4m";
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async (communityId: string): Promise<void> => {
@@ -11,37 +10,43 @@ export default async (communityId: string): Promise<void> => {
   try {
     const client = await getAd4mClient();
 
-    //NOTE/TODO: if this becomes too heavy for certain communities this might be best executed via a refresh button
     const community = dataStore.getCommunity(communityId);
-    const channelLinks = await client.perspective.queryProlog(community.neighbourhood.perspective.uuid, `triple("${SELF}", "${CHANNEL}", C).`);
+    const channelLinks = await client.perspective.queryProlog(
+      community.neighbourhood.perspective.uuid,
+      `triple("${SELF}", "${CHANNEL}", C).`
+    );
 
     for (let i = 0; i < channelLinks.length; i++) {
-        const name = channelLinks[i].C;
+      const channel = channelLinks[i].C;
 
-        const found = dataStore.getChannel(community.neighbourhood.perspective.uuid, name)
+      const channelExp = await Literal.fromUrl(channel).get();
 
-        //Check that the channel is not in the store
-        if (!found) {
+      const found = dataStore.getChannel(
+        community.neighbourhood.perspective.uuid,
+        channelExp.data
+      );
+
+      //Check that the channel is not in the store
+      if (!found) {
         console.log(
-            "Found channel link not in local state, adding...",
-            channelLinks[i]
+          "Found channel link not in local state, adding...",
+          channelLinks[i]
         );
         dataStore.addChannel({
-            communityId: community.state.perspectiveUuid,
-            channel: {
-            id: name,
-            name,
+          communityId: community.state.perspectiveUuid,
+          channel: {
+            id: channel,
+            name: channelExp.data,
             creatorDid: channelLinks[i].author,
             sourcePerspective: community.state.perspectiveUuid,
             hasNewMessages: false,
-            createdAt: new Date().toISOString(),
-            feedType: FeedType.Signaled,
+            createdAt: channelExp.timestamp || new Date().toISOString(),
             notifications: {
-                mute: false,
+              mute: false,
             },
-            },
+          },
         });
-        }
+      }
     }
   } catch (error) {
     throw new Error(error);

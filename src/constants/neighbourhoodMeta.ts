@@ -31,3 +31,5 @@ export const FLUX_GROUP_DESCRIPTION = "flux://communityDescription";
 export const FLUX_GROUP_IMAGE = "flux://communityImage";
 
 export const FLUX_GROUP_THUMBNAIL = "flux://communityThumbnail";
+
+export const ZOME = "ad4m://has_zome";

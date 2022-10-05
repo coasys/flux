@@ -5,7 +5,6 @@ import {
   ChannelState,
 } from "@/store/types";
 
-import type { Expression, LinkExpression } from "@perspect3vism/ad4m";
 import { useDataStore } from "..";
 
 interface UpdatePayload {
@@ -19,18 +18,6 @@ interface UpdatePayload {
 interface AddChannel {
   communityId: string;
   channel: ChannelState;
-}
-
-interface AddChannelMessages {
-  channelId: string;
-  links: LinkExpression[];
-  expressions: Expression[];
-}
-
-interface AddChannelMessage {
-  channelId: string;
-  link: LinkExpression;
-  expression: Expression;
 }
 
 export default {
@@ -112,8 +99,12 @@ export default {
     if (community) {
       community.name = name;
       community.description = description;
-      if (image) {community.image = image };
-      if (thumbnail) { community.thumbnail = thumbnail };
+      if (image) {
+        community.image = image;
+      }
+      if (thumbnail) {
+        community.thumbnail = thumbnail;
+      }
     }
 
     state.neighbourhoods[communityId] = community;
@@ -124,11 +115,11 @@ export default {
     state.channels[payload.channelId].scrollTop = payload.value;
   },
 
-  clearChannels({communityId}: {communityId: string}): void {
+  clearChannels({ communityId }: { communityId: string }): void {
     const state = useDataStore();
-    Object.values(state.channels).forEach(c => {
+    Object.values(state.channels).forEach((c) => {
       if (c.sourcePerspective === communityId) {
-        delete state.channels[c.id]
+        delete state.channels[c.id];
       }
     });
   },
@@ -138,11 +129,14 @@ export default {
     const parentNeighbourhood = state.neighbourhoods[payload.communityId];
 
     if (parentNeighbourhood !== undefined) {
-      const exists = Object.values(state.channels).find(c => c.name === payload.channel.name && c.sourcePerspective === payload.communityId);
+      const exists = Object.values(state.channels).find(
+        (c) =>
+          c.name === payload.channel.name &&
+          c.sourcePerspective === payload.communityId
+      );
 
       if (!exists) {
-        state.channels[payload.channel.id] =
-          payload.channel;
+        state.channels[payload.channel.id] = payload.channel;
       }
     }
   },
@@ -177,7 +171,11 @@ export default {
     community.useLocalTheme = payload.value;
   },
 
-  setHasNewMessages(payload: { communityId: string, channelId: string; value: boolean }): void {
+  setHasNewMessages(payload: {
+    communityId: string;
+    channelId: string;
+    value: boolean;
+  }): void {
     const state = useDataStore();
     const channel = state.getChannel(payload.communityId, payload.channelId);
     const tempCommunity = state.getCommunity(payload.communityId);

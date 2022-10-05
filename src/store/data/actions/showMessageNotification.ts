@@ -4,6 +4,7 @@ import { useDataStore } from "..";
 import { getProfile } from "@/utils/profileHelpers";
 import { differenceInSeconds, parseISO } from "date-fns";
 import { useAppStore } from "@/store/app";
+import { Literal } from "@perspect3vism/ad4m";
 
 type Payload = {
   router: Router;
@@ -22,7 +23,7 @@ export default async ({
   notificationChannelId,
   authorDid,
   message,
-  timestamp
+  timestamp,
 }: Payload) => {
   const dataStore = useDataStore();
   const userStore = useUserStore();
@@ -31,10 +32,12 @@ export default async ({
 
   const escapedMessage = message.replace(/(\s*<.*?>\s*)+/g, " ");
 
+  const channelLiteral = Literal.fromUrl(notificationChannelId).get();
+
   // Getting the channel & community this message belongs to
   const community = dataStore.getCommunity(perspectiveUuid);
   // TODO: @fayeed change this.
-  const channel = dataStore.getChannel(perspectiveUuid, notificationChannelId);
+  const channel = dataStore.getChannel(perspectiveUuid, channelLiteral.data);
 
   const isMinimized = document.hasFocus();
 
@@ -50,50 +53,52 @@ export default async ({
         ? channel?.name !== channelId
         : true) &&
       !channel?.notifications.mute &&
-      !community?.state.notifications.mute && differenceInSeconds(new Date(), parseISO(timestamp)) <= 30) && appStore.notification.globalNotification
+      !community?.state.notifications.mute &&
+      differenceInSeconds(new Date(), parseISO(timestamp)) <= 30 &&
+      appStore.notification.globalNotification)
   ) {
-      const isMentioned = message.includes(
-        user!.agent.did!.replace("did:key:", "")
-      );
-  
-      let title = "";
-      let body = "";
-  
-      if (isMentioned) {
-        const profile = await getProfile(authorDid);
-        const name = profile ? profile.username : "Someone";
-  
-        title = `${name} mentioned you in #${channel?.name}}`;
-        body = escapedMessage;
-      } else {
-        title = `New message in ${community?.neighbourhood.name}`;
-        body = `#${channel?.name}: ${escapedMessage}`;
-      }
-  
-      const permission = await Notification.requestPermission();
-      
-      if (permission === "granted") {
-        const notification = new Notification(title, {
-          body,
-          icon: "/assets/images/icon.png",
+    const isMentioned = message.includes(
+      user!.agent.did!.replace("did:key:", "")
+    );
+
+    let title = "";
+    let body = "";
+
+    if (isMentioned) {
+      const profile = await getProfile(authorDid);
+      const name = profile ? profile.username : "Someone";
+
+      title = `${name} mentioned you in #${channel?.name}}`;
+      body = escapedMessage;
+    } else {
+      title = `New message in ${community?.neighbourhood.name}`;
+      body = `#${channel?.name}: ${escapedMessage}`;
+    }
+
+    const permission = await Notification.requestPermission();
+
+    if (permission === "granted") {
+      const notification = new Notification(title, {
+        body,
+        icon: "/assets/images/icon.png",
+      });
+
+      notification.onclick = () => {
+        window.focus();
+
+        router.push({
+          name: "channel",
+          params: {
+            communityId: community!.neighbourhood.perspective!.uuid,
+            channelId: channel!.name,
+          },
         });
-        
-        notification.onclick = () => {
-          window.focus();
 
-          router.push({
-            name: "channel",
-            params: {
-              communityId: community!.neighbourhood.perspective!.uuid,
-              channelId: channel!.name,
-            },
-          });
+        notification.close();
+      };
 
-          notification.close();
-        }
-
-        return notification;
-      }
+      return notification;
+    }
   }
 
   return undefined;

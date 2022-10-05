@@ -7,13 +7,7 @@ export interface ChannelState {
   hasNewMessages: boolean;
   createdAt: string;
   scrollTop?: number;
-  feedType: FeedType;
   notifications: {
     mute: boolean;
   };
-}
-
-export enum FeedType {
-  Signaled,
-  Static,
 }

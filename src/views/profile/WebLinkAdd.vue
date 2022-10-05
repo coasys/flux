@@ -244,15 +244,13 @@ export default defineComponent({
 
         let areaName = this.area?.id ?? `area://${id}`;
 
-        if (!this.area?.id) {
-          await client.perspective.addLink(
-            userPerspective!,
-            new Link({
-              source: FLUX_PROFILE,
-              target: areaName,
-              predicate: HAS_AREA,
-            })
-          );
+        let area = {
+          id: areaName,
+          link: this.link,
+          type: AREA_WEBLINK,
+          name: this.title,
+          description: this.description,
+          image: null
         }
 
         if (this.area?.id) {
@@ -266,65 +264,21 @@ export default defineComponent({
           }
         }
 
-        const linkExpr = await client.expression.create(this.link, "literal");
-
-        await client.perspective.addLink(
-          userPerspective!,
-          new Link({
-            source: areaName,
-            target: linkExpr,
-            predicate: HAS_POST,
-          })
-        );
-
-        await client.perspective.addLink(
-          userPerspective!,
-          new Link({
-            source: areaName,
-            target: AREA_WEBLINK,
-            predicate: AREA_TYPE,
-          })
-        );
-
-        const titleExpr = await client.expression.create(this.title, "literal");
-
-        await client.perspective.addLink(
-          userPerspective!,
-          new Link({
-            source: areaName,
-            target: titleExpr,
-            predicate: AREA_HAS_NAME,
-          })
-        );
-
-        const descExpr = await client.expression.create(
-          this.description,
-          "literal"
-        );
-
-        await client.perspective.addLink(
-          userPerspective!,
-          new Link({
-            source: areaName,
-            target: descExpr,
-            predicate: AREA_HAS_DESCRIPTION,
-          })
-        );
-
         if (this.newProfileImage) {
           const storedImage = await client.expression.create(
             this.newProfileImage,
             NOTE_IPFS_EXPRESSION_OFFICIAL
           );
-          await client.perspective.addLink(
-            userPerspective!,
-            new Link({
-              source: areaName,
-              target: storedImage,
-              predicate: AREA_HAS_IMAGE,
-            })
-          );
+          area['image'] = storedImage;
         }
+
+        const literal = await client.expression.create(area, 'literal');
+
+        await client.perspective.addLink(userPerspective!, {
+          source: areaName,
+          predicate: HAS_AREA,
+          target: literal
+        })
 
         const newLinks = await getAgentLinks(did!, userPerspective!);
 

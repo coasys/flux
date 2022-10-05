@@ -1,4 +1,4 @@
-import { LinkExpression, LinkQuery } from "@perspect3vism/ad4m";
+import { LinkExpression } from "@perspect3vism/ad4m";
 
 import { useDataStore } from "..";
 
@@ -9,7 +9,10 @@ export default async function (id: string): Promise<void> {
   const dataStore = useDataStore();
   const client = await getAd4mClient();
 
-  const memberLinks = await client.perspective.queryProlog(id, `triple("${SELF}", "${MEMBER}", M).`);
+  const memberLinks = await client.perspective.queryProlog(
+    id,
+    `triple("${SELF}", "${MEMBER}", M).`
+  );
   const dids = memberLinks.map((link: LinkExpression) => {
     const url = link.M;
     return url.includes("://") ? url.split("://")[1] : url;

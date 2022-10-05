@@ -1,21 +1,30 @@
 import { v4 as uuidv4 } from "uuid";
 import {
   PERSPECTIVE_DIFF_SYNC,
-  NOTE_IPFS_EXPRESSION_OFFICIAL
+  NOTE_IPFS_EXPRESSION_OFFICIAL,
 } from "@/constants/languages";
 
-import { MEMBER, SELF, FLUX_GROUP_NAME, FLUX_GROUP_IMAGE, FLUX_GROUP_DESCRIPTION, FLUX_GROUP_THUMBNAIL } from "@/constants/neighbourhoodMeta";
-
 import {
-  MembraneType,
-  CommunityState,
-} from "@/store/types";
+  MEMBER,
+  SELF,
+  FLUX_GROUP_NAME,
+  FLUX_GROUP_IMAGE,
+  FLUX_GROUP_DESCRIPTION,
+  FLUX_GROUP_THUMBNAIL,
+  ZOME,
+} from "@/constants/neighbourhoodMeta";
+
+import { CommunityState } from "@/store/types";
 import { Perspective, PerspectiveHandle, Literal } from "@perspect3vism/ad4m";
 import { createNeighbourhoodMeta } from "@/core/methods/createNeighbourhoodMeta";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
-import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/web'
-import { blobToDataURL, dataURItoBlob, resizeImage } from "@/utils/profileHelpers";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import {
+  blobToDataURL,
+  dataURItoBlob,
+  resizeImage,
+} from "@/utils/profileHelpers";
 
 export interface Payload {
   perspectiveName: string;
@@ -30,41 +39,40 @@ export default async ({
   description,
   thumbnail = "",
   image = "",
-  perspective
+  perspective,
 }: Payload): Promise<CommunityState> => {
   const dataStore = useDataStore();
   const appStore = useAppStore();
 
   try {
     const client = await getAd4mClient();
-    const agent = await client.agent.me()
+    const agent = await client.agent.me();
 
     const creatorDid = agent.did;
 
-    const createSourcePerspective = perspective || (await client.perspective.add(
-      perspectiveName
-    )) as PerspectiveHandle;
+    const createSourcePerspective =
+      perspective ||
+      ((await client.perspective.add(perspectiveName)) as PerspectiveHandle);
     console.log("Created source perspective", createSourcePerspective);
 
     //Get the variables that we need to create new unique languages
     const uid = uuidv4().toString();
 
     //Create unique social-context
-    const socialContextLang =
-      await client.languages.applyTemplateAndPublish(
-        PERSPECTIVE_DIFF_SYNC,
-        JSON.stringify({
-          uid: uid,
-          name: `${perspectiveName}-link-language`,
-        })
-      );
+    const socialContextLang = await client.languages.applyTemplateAndPublish(
+      PERSPECTIVE_DIFF_SYNC,
+      JSON.stringify({
+        uid: uid,
+        name: `${perspectiveName}-link-language`,
+      })
+    );
     console.log("Response from create social-context", socialContextLang);
 
     //Publish perspective
     const metaLinks = await createNeighbourhoodMeta(
       perspectiveName,
       description,
-      creatorDid,
+      creatorDid
     );
     const meta = new Perspective(metaLinks);
     let sharedUrl = createSourcePerspective.sharedUrl;
@@ -88,10 +96,8 @@ export default async ({
       const resizedImage = image
         ? await resizeImage(dataURItoBlob(image as string), 100)
         : undefined;
-      
-      const thumbnail = image
-        ? await blobToDataURL(resizedImage!)
-        : undefined;
+
+      const thumbnail = image ? await blobToDataURL(resizedImage!) : undefined;
 
       tempImage = await client.expression.create(
         image,
@@ -103,48 +109,47 @@ export default async ({
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
 
-      const addGroupImageLink = await client.perspective.addLink(
-        createSourcePerspective.uuid!,
-        {
-          source: SELF,
-          target: tempImage,
-          predicate: FLUX_GROUP_IMAGE,
-        }
-      );
-      const addGroupThumbnailLink = await client.perspective.addLink(
-        createSourcePerspective.uuid!,
-        {
-          source: SELF,
-          target: tempThumbnail,
-          predicate: FLUX_GROUP_THUMBNAIL,
-        }
-      );  
+      await client.perspective.addLink(createSourcePerspective.uuid!, {
+        source: SELF,
+        target: tempImage,
+        predicate: FLUX_GROUP_IMAGE,
+      });
+      await client.perspective.addLink(createSourcePerspective.uuid!, {
+        source: SELF,
+        target: tempThumbnail,
+        predicate: FLUX_GROUP_THUMBNAIL,
+      });
     }
 
     //Create link between perspective and group expression
-    const addGroupNameLink = await client.perspective.addLink(
-      createSourcePerspective.uuid!,
-      {
-        source: SELF,
-        target: perspectiveName,
-        predicate: FLUX_GROUP_NAME,
-      }
+    const groupNameExpr = await client.expression.create(
+      perspectiveName,
+      "literal"
     );
-    const addGroupDescriptionLink = await client.perspective.addLink(
-      createSourcePerspective.uuid!,
-      {
+    await client.perspective.addLink(createSourcePerspective.uuid!, {
+      source: SELF,
+      target: groupNameExpr,
+      predicate: FLUX_GROUP_NAME,
+    });
+
+    if (description) {
+      const descriptionExpr = await client.expression.create(
+        description,
+        "literal"
+      );
+      await client.perspective.addLink(createSourcePerspective.uuid!, {
         source: SELF,
-        target: description || '-',
+        target: descriptionExpr,
         predicate: FLUX_GROUP_DESCRIPTION,
-      }
-    );
-  
+      });
+    }
+
     //Create link between perspective and group expression
     const addProfileLink = await client.perspective.addLink(
       createSourcePerspective.uuid!,
       {
         source: SELF,
-        target: creatorDid,
+        target: `did://${creatorDid}`,
         predicate: MEMBER,
       }
     );
@@ -160,10 +165,13 @@ export default async ({
     // await ad4mClient.perspective.addLink(perspectiveUuid, {source: "self", predicate: "ad4m://has_zome", target: sdnaLiteral.toUrl()});
     const addSocialDnaLink = await client.perspective.addLink(
       createSourcePerspective.uuid!,
-      {source: "ad4m://self", predicate: "ad4m://has_zome", target: sdnaLiteral.toUrl()}
+      {
+        source: SELF,
+        predicate: ZOME,
+        target: sdnaLiteral.toUrl(),
+      }
     );
     console.log("Created social dna link", addSocialDnaLink);
-
 
     const newCommunity = {
       neighbourhood: {
@@ -179,7 +187,6 @@ export default async ({
           neighbourhood: createSourcePerspective.neighbourhood,
         },
         neighbourhoodUrl: sharedUrl,
-        membraneType: MembraneType.Unique,
         linkedPerspectives: [createSourcePerspective.uuid],
         linkedNeighbourhoods: [createSourcePerspective.uuid],
         members: [creatorDid],
@@ -212,7 +219,7 @@ export default async ({
     // neighbourhoods. Remember that this also need to happen in join community.
     await dataStore.createChannel({
       name: "Home",
-      communityId: createSourcePerspective.uuid
+      communityId: createSourcePerspective.uuid,
     });
 
     // @ts-ignore

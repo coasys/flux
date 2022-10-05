@@ -62,9 +62,16 @@
 
 <script lang="ts">
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
-import { AREA_HAS_DESCRIPTION, AREA_HAS_IMAGES, AREA_HAS_NAME, AREA_SIMPLE_AREA, AREA_TYPE, FLUX_PROFILE, HAS_AREA } from "@/constants/profile";
+import {
+  AREA_HAS_DESCRIPTION,
+  AREA_HAS_IMAGES,
+  AREA_HAS_NAME,
+  AREA_SIMPLE_AREA,
+  AREA_TYPE,
+  FLUX_PROFILE,
+  HAS_AREA,
+} from "@/constants/profile";
 import { useAppStore } from "@/store/app";
-import { useDataStore } from "@/store/data";
 import { useUserStore } from "@/store/user";
 import getAgentLinks from "@/utils/getAgentLinks";
 import removeTypeName from "@/utils/removeTypeName";
@@ -149,7 +156,6 @@ export default defineComponent({
     async createLink() {
       const client = await getAd4mClient();
       this.isAddLink = true;
-      const dataStore = useDataStore();
       const userStore = useUserStore();
       const appStore = useAppStore();
       const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
@@ -173,20 +179,17 @@ export default defineComponent({
 
         preArea[e.data.source][predicate] = e.data.predicate.split("://")[1];
       });
-      console.log("preLinks", preLinks);
       const id = await nanoid();
 
       let areaName = this.area?.id ?? `area://${id}`;
 
-      if (!this.area?.id) {
-        await client.perspective.addLink(
-          userPerspective!,
-          new Link({
-            source: FLUX_PROFILE,
-            target: areaName,
-            predicate: HAS_AREA,
-          })
-        );
+      let area: any = {
+        id: areaName,
+        link: this.link,
+        type: AREA_SIMPLE_AREA,
+        name: this.title,
+        description: this.description,
+        images: []
       }
 
       if (this.area?.id) {
@@ -200,46 +203,22 @@ export default defineComponent({
         }
       }
 
-      await client.perspective.addLink(
-        userPerspective!,
-        new Link({
-          source: areaName,
-          target: AREA_SIMPLE_AREA,
-          predicate: AREA_TYPE,
-        })
-      );
-      await client.perspective.addLink(
-        userPerspective!,
-        new Link({
-          source: areaName,
-          target: `text://${this.title}`,
-          predicate: AREA_HAS_NAME,
-        })
-      );
-      await client.perspective.addLink(
-        userPerspective!,
-        new Link({
-          source: areaName,
-          target: `text://${this.description}`,
-          predicate: AREA_HAS_DESCRIPTION,
-        })
-      );
-
       for (let index = 0; index < this.imgs.length; index++) {
         const element = this.imgs[index];
-        const storedImage = await client.expression.create(
+        const storedImage: string = await client.expression.create(
           element,
           NOTE_IPFS_EXPRESSION_OFFICIAL
         );
-        await client.perspective.addLink(
-          userPerspective!,
-          new Link({
-            source: areaName,
-            target: storedImage,
-            predicate: AREA_HAS_IMAGES,
-          })
-        );
+        area.images.push(storedImage);
       }
+
+      const literal = await client.expression.create(area, 'literal');
+
+      await client.perspective.addLink(userPerspective!, {
+        source: areaName,
+        predicate: HAS_AREA,
+        target: literal
+      })
 
       const newLinks = await getAgentLinks(did!, userPerspective!);
 

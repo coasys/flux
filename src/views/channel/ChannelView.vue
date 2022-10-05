@@ -14,7 +14,7 @@
     <perspective-view
       class="perspective-view"
       :port="port"
-      :channel="channelId"
+      :channel="channel.id"
       :perspective-uuid="communityId"
       @agent-click="onAgentClick"
       @perspective-click="onPerspectiveClick"
@@ -129,7 +129,6 @@ export default defineComponent({
     // ! Revert back  
     // if (customElements.get("perspective-view") === undefined)
     //   customElements.define("perspective-view", ChatView);
-
   },
   computed: {
     port(): number {
@@ -196,11 +195,13 @@ export default defineComponent({
     onHideNotificationIndicator({ detail }: any) {
       const { channelId } = this.$route.params;
       console.log("hide notification indicator", detail);
-      this.dataStore.setHasNewMessages({
-        communityId: this.community.neighbourhood.perspective.uuid,
-        channelId: channelId as string,
-        value: false,
-      });
+      if (channelId) {
+        this.dataStore.setHasNewMessages({
+          communityId: this.community.neighbourhood.perspective.uuid,
+          channelId: channelId as string,
+          value: false,
+        });
+      }
     },
     toggleProfile(open: boolean, did?: any): void {
       if (!open) {
