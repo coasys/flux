@@ -31,6 +31,35 @@
         @openCompleteProfile="() => handleProfileClick(activeProfile)"
       />
     </j-modal>
+      <j-modal
+        size="xs"
+        v-if="activeCommunity"
+        :open="showJoinCommuinityModal"
+        @toggle="(e) => toggleJoinCommunityModal(e.target.open, activeCommunity)"
+      >
+        <j-box v-if="activeCommunity" p="800">
+          <j-flex a="center" direction="column" gap="500">
+            <j-text v-if="activeCommunity.name">{{activeCommunity.name}}</j-text>
+            <j-text
+              v-if="activeCommunity.description"
+              variant="heading-sm"
+              nomargin
+            >
+              {{ activeCommunity.description }}
+            </j-text>
+            <j-button 
+              :disabled="isJoiningCommunity"
+              :loading="isJoiningCommunity"
+              @click="joinCommunity"
+              size="lg"
+              full
+              variant="primary"
+              >
+              Join Community
+            </j-button>
+          </j-flex>
+        </j-box>
+      </j-modal>
   </div>
 </template>
 
@@ -63,6 +92,9 @@ export default defineComponent({
     const activeProfile = ref<any>({});
     const showProfile = ref(false);
     const bus = useEventEmitter();
+    const activeCommunity = ref<any>({});
+    const showJoinCommuinityModal = ref(false);
+    const isJoiningCommunity = ref(false);
 
     return {
       appStore,
@@ -72,6 +104,9 @@ export default defineComponent({
       activeProfile,
       showProfile,
       bus,
+      showJoinCommuinityModal,
+      activeCommunity,
+      isJoiningCommunity
     };
   },
   mounted() {
@@ -90,6 +125,10 @@ export default defineComponent({
     `;
     this.script;
     document.body.appendChild(this.script);
+
+    // ! Revert back  
+    // if (customElements.get("perspective-view") === undefined)
+    //   customElements.define("perspective-view", ChatView);
   },
   computed: {
     port(): number {
@@ -117,15 +156,41 @@ export default defineComponent({
       this.toggleProfile(true, detail.did);
     },
     onPerspectiveClick({ detail }: any) {
-      if (detail.uuid) {
-        this.$router.push({
-          name: "channel",
-          params: {
-            channelId: detail.uuid,
-            communityId: this.community.neighbourhood.perspective.uuid,
-          },
-        });
+      let community = this.dataStore.getCommunities.find(e => e.neighbourhood.perspective.uuid === detail.uuid)
+
+      if (!community) {
+        this.toggleJoinCommunityModal(true, detail.link)
+      } else {
+        if (detail.channel) {
+          this.$router.push({
+            name: "channel",
+            params: {
+              channelId: detail.channel,
+              communityId: detail.uuid || this.community.neighbourhood.perspective.uuid,
+            },
+          });
+        }
       }
+    },
+    toggleJoinCommunityModal(open: boolean, community?: any): void {
+      if (!open) {
+        this.activeCommunity = undefined;
+      } else {
+        this.activeCommunity = community;
+      }
+      this.showJoinCommuinityModal = open;
+    },
+    joinCommunity() {
+      this.isJoiningCommunity = true;
+      this.dataStore
+        .joinCommunity({ joiningLink: this.activeCommunity.url })
+        .then(() => {
+          this.$emit("submit");
+        })
+        .finally(() => {
+          this.isJoiningCommunity = false;
+          this.showJoinCommuinityModal = false;
+        });
     },
     onHideNotificationIndicator({ detail }: any) {
       const { channelId } = this.$route.params;
