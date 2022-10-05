@@ -1,14 +1,9 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 import { CHANNEL, SELF } from "@/constants/neighbourhoodMeta";
 import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
-import {
-  LinkExpression,
-  PerspectiveProxy,
-  LinkQuery
-} from "@perspect3vism/ad4m";
-import { nanoid } from "nanoid";
+import { LinkExpression, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useDataStore } from ".";
-import { CommunityState, FeedType, LocalCommunityState, MembraneType } from "../types";
+import { CommunityState, LocalCommunityState } from "../types";
 import { getGroupMetadata } from "./actions/fetchNeighbourhoodMetadata";
 import { useUserStore } from "../user";
 import { getProfile } from "@/utils/profileHelpers";
@@ -67,7 +62,6 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
         neighbourhood: perspective.neighbourhood,
       },
       neighbourhoodUrl: perspective.sharedUrl,
-      membraneType: MembraneType.Unique,
       linkedPerspectives: [perspective.uuid],
       linkedNeighbourhoods: [perspective.uuid],
       members: [meta.creatorDid],
@@ -87,7 +81,9 @@ export async function hydrateState() {
 
   const profile = await getProfile(status.did!, true);
 
-  const fluxAgentPerspective = await (await client.perspective.all()).filter(val => val.name == FLUX_PROXY_PROFILE_NAME);
+  const fluxAgentPerspective = await (
+    await client.perspective.all()
+  ).filter((val) => val.name == FLUX_PROXY_PROFILE_NAME);
   if (fluxAgentPerspective.length > 0) {
     userStore.addAgentProfileProxyPerspectiveId(fluxAgentPerspective[0].uuid);
   }
@@ -108,39 +104,46 @@ export async function hydrateState() {
   }
 
   for (const perspective of perspectives) {
-    const channelLinks = await client.perspective.queryProlog(perspective.uuid, `triple("${SELF}", "${CHANNEL}", C).`);
+    const channelLinks = await client.perspective.queryProlog(
+      perspective.uuid,
+      `triple("${SELF}", "${CHANNEL}", C).`
+    );
 
-    if (channelLinks) {
-      if (perspective.sharedUrl !== undefined) {
-        const newCommunity = await buildCommunity(perspective);
+    if (perspective.sharedUrl !== undefined && perspective.neighbourhood) {
+      const newCommunity = await buildCommunity(perspective);
 
-        dataStore.addCommunity(newCommunity);
+      dataStore.addCommunity(newCommunity);
 
-        const channels = [...Object.values(dataStore.channels)];
+      const channels = [...Object.values(dataStore.channels)];
 
+      if (channelLinks) {
         for (const link of channelLinks) {
-          const exist = channels.find(
-            (channel: any) =>
-              channel.name === link.C &&
-              channel.sourcePerspective === perspective.uuid
-          );
-
-          if (!exist) {
-            dataStore.addChannel({
-              communityId: perspective.uuid,
-              channel: {
-                id: nanoid(),
-                name: link.C,
-                creatorDid: link.author,
-                sourcePerspective: perspective.uuid,
-                hasNewMessages: false,
-                createdAt: new Date().toISOString(),
-                feedType: FeedType.Signaled,
-                notifications: {
-                  mute: false,
+          try {
+            const channel = link.C;
+            const channelData = await Literal.fromUrl(channel).get();
+            const exist = channels.find(
+              (channel: any) =>
+                channel.id === channel &&
+                channel.sourcePerspective === perspective.uuid
+            );
+            if (!exist) {
+              dataStore.addChannel({
+                communityId: perspective.uuid,
+                channel: {
+                  id: channel,
+                  name: channelData.data,
+                  creatorDid: link.author,
+                  sourcePerspective: perspective.uuid,
+                  hasNewMessages: false,
+                  createdAt: channelData.timestamp || new Date().toISOString(),
+                  notifications: {
+                    mute: false,
+                  },
                 },
-              },
-            });
+              });
+            }
+          } catch (e) {
+            console.error("Got error when trying to hydrate community channel state", e);
           }
         }
       }

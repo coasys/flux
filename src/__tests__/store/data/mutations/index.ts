@@ -240,7 +240,7 @@ describe("Data Mutations", () => {
     expect(Object.values(dataStore.channels).length).toBe(1);
 
     expect(Object.keys(dataStore.channels)).toStrictEqual([
-      createChannel.name,
+      createChannel.id,
     ]);
   });
 

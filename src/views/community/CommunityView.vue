@@ -10,8 +10,7 @@
       :key="channel.id"
       :style="{
         height:
-          channel.name === channelId &&
-          channel.sourcePerspective === communityId
+          channel.name === channelId && channel.sourcePerspective === communityId
             ? '100%'
             : '0',
       }"
@@ -19,12 +18,17 @@
       <channel-view
         v-if="loadedChannels[channel.id]"
         v-show="
-          channel.name === channelId &&
-          channel.sourcePerspective === communityId
+          channel.name === channelId && channel.sourcePerspective === communityId
         "
         :channelId="channel.name"
         :communityId="channel.sourcePerspective"
       ></channel-view>
+    </div>
+    <div v-if="notSynced" class="center">
+      <j-spinner size="lg"> </j-spinner>
+      <j-box pt="700"></j-box>
+      <j-text size="700">Community not synced yet. </j-text>
+      <j-text size="700">please wait... </j-text>
     </div>
   </sidebar-layout>
 
@@ -128,11 +132,13 @@ export default defineComponent({
   setup() {
     const appStore = useAppStore();
     const dataStore = useDataStore();
+    const notSynced = ref(false);
 
     return {
       loadedChannels: ref<LoadedChannels>({}),
       appStore,
       dataStore,
+      notSynced
     };
   },
   data() {
@@ -185,18 +191,24 @@ export default defineComponent({
     ]),
     goToActiveChannel(communityId: string) {
       if (!communityId) return;
-      const firstChannel = this.dataStore.getChannelStates(communityId)[0].name;
-      const currentChannelId =
-        this.community.state.currentChannelId || firstChannel;
-
-      if (currentChannelId) {
-        this.$router.push({
-          name: "channel",
-          params: {
-            communityId,
-            channelId: currentChannelId,
-          },
-        });
+      const channels = this.dataStore.getChannelStates(communityId);
+      if (channels.length > 0) {
+        this.notSynced = false;
+        const firstChannel = this.dataStore.getChannelStates(communityId)[0].name;
+        const currentChannelId =
+          this.community.state.currentChannelId || firstChannel;
+  
+        if (currentChannelId) {
+          this.$router.push({
+            name: "channel",
+            params: {
+              communityId,
+              channelId: currentChannelId,
+            },
+          });
+        }
+      } else {
+        this.notSynced = true;
       }
     },
     handleThemeChange(id: string) {
@@ -247,3 +259,14 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+  .center {
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    display: flex;
+  }
+</style>
