@@ -31,35 +31,37 @@
         @openCompleteProfile="() => handleProfileClick(activeProfile)"
       />
     </j-modal>
-      <j-modal
-        size="xs"
-        v-if="activeCommunity"
-        :open="showJoinCommuinityModal"
-        @toggle="(e) => toggleJoinCommunityModal(e.target.open, activeCommunity)"
-      >
-        <j-box v-if="activeCommunity" p="800">
-          <j-flex a="center" direction="column" gap="500">
-            <j-text v-if="activeCommunity.name">{{activeCommunity.name}}</j-text>
-            <j-text
-              v-if="activeCommunity.description"
-              variant="heading-sm"
-              nomargin
-            >
-              {{ activeCommunity.description }}
-            </j-text>
-            <j-button 
-              :disabled="isJoiningCommunity"
-              :loading="isJoiningCommunity"
-              @click="joinCommunity"
-              size="lg"
-              full
-              variant="primary"
-              >
-              Join Community
-            </j-button>
-          </j-flex>
-        </j-box>
-      </j-modal>
+    <j-modal
+      size="xs"
+      v-if="activeCommunity"
+      :open="showJoinCommuinityModal"
+      @toggle="(e) => toggleJoinCommunityModal(e.target.open, activeCommunity)"
+    >
+      <j-box v-if="activeCommunity" p="800">
+        <j-flex a="center" direction="column" gap="500">
+          <j-text v-if="activeCommunity.name">{{
+            activeCommunity.name
+          }}</j-text>
+          <j-text
+            v-if="activeCommunity.description"
+            variant="heading-sm"
+            nomargin
+          >
+            {{ activeCommunity.description }}
+          </j-text>
+          <j-button
+            :disabled="isJoiningCommunity"
+            :loading="isJoiningCommunity"
+            @click="joinCommunity"
+            size="lg"
+            full
+            variant="primary"
+          >
+            Join Community
+          </j-button>
+        </j-flex>
+      </j-box>
+    </j-modal>
   </div>
 </template>
 
@@ -106,29 +108,12 @@ export default defineComponent({
       bus,
       showJoinCommuinityModal,
       activeCommunity,
-      isJoiningCommunity
+      isJoiningCommunity,
     };
   },
   mounted() {
-    const pkg =
-      /* @ts-ignore */
-      import.meta.env.MODE === "development"
-        ? "http://localhost:3030/dist/main.js"
-        : "https://unpkg.com/@junto-foundation/chat-view/dist/main.js";
-
-    this.script = document.createElement("script");
-    this.script.setAttribute("type", "module");
-    this.script.innerHTML = `
-      import PerspectiveView from '${pkg}';
-      if(customElements.get('perspective-view') === undefined)
-        customElements.define("perspective-view", PerspectiveView);
-    `;
-    this.script;
-    document.body.appendChild(this.script);
-
-    // ! Revert back  
-    // if (customElements.get("perspective-view") === undefined)
-    //   customElements.define("perspective-view", ChatView);
+    if (customElements.get("perspective-view") === undefined)
+      customElements.define("perspective-view", ChatView);
   },
   computed: {
     port(): number {
@@ -156,17 +141,20 @@ export default defineComponent({
       this.toggleProfile(true, detail.did);
     },
     onPerspectiveClick({ detail }: any) {
-      let community = this.dataStore.getCommunities.find(e => e.neighbourhood.perspective.uuid === detail.uuid)
+      let community = this.dataStore.getCommunities.find(
+        (e) => e.neighbourhood.perspective.uuid === detail.uuid
+      );
 
       if (!community) {
-        this.toggleJoinCommunityModal(true, detail.link)
+        this.toggleJoinCommunityModal(true, detail.link);
       } else {
         if (detail.channel) {
           this.$router.push({
             name: "channel",
             params: {
               channelId: detail.channel,
-              communityId: detail.uuid || this.community.neighbourhood.perspective.uuid,
+              communityId:
+                detail.uuid || this.community.neighbourhood.perspective.uuid,
             },
           });
         }
