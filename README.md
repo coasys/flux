@@ -1,5 +1,7 @@
 # Flux
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/819366d6-adfb-480c-bad9-2a6b9f85b58e/deploy-status)](https://app.netlify.com/sites/fluxsocial-main/deploys)
+
 https://app.fluxsocial.io
 
 ## Project setup
