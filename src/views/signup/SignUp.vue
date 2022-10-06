@@ -79,21 +79,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent, ref } from "vue";
 import Carousel from "./SignUpCarousel.vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useValidation } from "@/utils/validation";
 import { useUserStore } from "@/store/user";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 import {
-  AD4M_SOURCE_PROFILE,
   AD4M_PREDICATE_USERNAME,
   AD4M_PREDICATE_FIRSTNAME,
   AD4M_PREDICATE_LASTNAME,
 } from "@/constants/profile";
 
 import Logo from "@/components/logo/Logo.vue";
-import { LinkQuery, Literal } from "@perspect3vism/ad4m";
 import { mapLiteralLinks } from "@/utils/linkHelpers";
 import { useAppStore } from "@/store/app";
 
@@ -160,7 +158,7 @@ export default defineComponent({
       familyName,
       logInError,
       userStore,
-      appStore
+      appStore,
     };
   },
   async created() {
@@ -184,6 +182,19 @@ export default defineComponent({
         this.username = profile.username;
         this.name = profile.name;
         this.familyName = profile.familyName;
+      } else {
+        const me = await client.agent.me();
+        if (me.perspective) {
+          const agentPerspectiveLinks = me.perspective.links;
+          const profile = mapLiteralLinks(agentPerspectiveLinks, {
+            username: AD4M_PREDICATE_USERNAME,
+            name: AD4M_PREDICATE_FIRSTNAME,
+            familyName: AD4M_PREDICATE_LASTNAME,
+          });
+          this.username = profile.username;
+          this.name = profile.name;
+          this.familyName = profile.familyName;
+        }
       }
     } catch (e) {
       console.log(e);
