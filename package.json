@@ -1,6 +1,6 @@
 {
   "name": "flux",
-  "version": "0.2.17",
+  "version": "0.3.0",
   "private": true,
   "description": "A social web3 tool kit for communities",
   "author": "josh@junto.foundation",
@@ -13,8 +13,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src/**/*.ts src/**/*.js src/**/*.vue",
-    "test": "jest --env=jsdom",
-    "test-gql": "jest --env=jsdom src/__tests__/graphql.ts"
+    "test": "jest --env=jsdom"
   },
   "main": "background.js",
   "dependencies": {
