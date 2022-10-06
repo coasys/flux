@@ -1,23 +1,21 @@
-import { LinkExpression, LinkQuery } from "@perspect3vism/ad4m";
+import { LinkExpression } from "@perspect3vism/ad4m";
 
 import { useDataStore } from "..";
 
-import { MEMBER } from "@/constants/neighbourhoodMeta";
-import { ad4mClient } from "@/app";
+import { MEMBER, SELF } from "@/constants/neighbourhoodMeta";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export default async function (id: string): Promise<void> {
   const dataStore = useDataStore();
+  const client = await getAd4mClient();
 
-  const neighbourhood = dataStore.getNeighbourhood(id);
-  const memberLinks = await ad4mClient.perspective.queryLinks(
+  const memberLinks = await client.perspective.queryProlog(
     id,
-    new LinkQuery({
-      source: neighbourhood.neighbourhoodUrl!,
-      predicate: MEMBER,
-    })
+    `triple("${SELF}", "${MEMBER}", M).`
   );
   const dids = memberLinks.map((link: LinkExpression) => {
-    return link.data.target.split("://")[1];
+    const url = link.M;
+    return url.includes("://") ? url.split("://")[1] : url;
   });
   for (const did of dids) {
     dataStore.setNeighbourhoodMember({ member: did, perspectiveUuid: id });

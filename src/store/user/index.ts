@@ -14,7 +14,7 @@ export const useUserStore = defineStore("user", {
         did: "",
         didDocument: "",
       },
-      fluxPerspectiveId: undefined,
+      agentProfileProxyPerspectiveId: undefined,
     };
   },
   getters,

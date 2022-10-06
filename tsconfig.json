@@ -13,6 +13,7 @@
     "strictPropertyInitialization": false,
     "resolveJsonModule": true,
     "useUnknownInCatchVariables": false,
+    "experimentalDecorators": true,
     "baseUrl": ".",
     "types": [
       "webpack-env", "jest", "mocha"

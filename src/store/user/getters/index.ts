@@ -10,8 +10,8 @@ export default {
     const store = useUserStore();
     return store;
   },
-  getFluxPerspectiveId(): string | undefined {
+  getAgentProfileProxyPerspectiveId(): string | undefined {
     const store = useUserStore();
-    return store.fluxPerspectiveId;
+    return store.agentProfileProxyPerspectiveId;
   },
 };

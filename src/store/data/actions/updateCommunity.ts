@@ -1,8 +1,20 @@
-import { createExpression } from "@/core/mutations/createExpression";
-import { createLink } from "@/core/mutations/createLink";
+import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
+import {
+  SELF,
+  FLUX_GROUP_NAME,
+  FLUX_GROUP_DESCRIPTION,
+  FLUX_GROUP_IMAGE,
+  FLUX_GROUP_THUMBNAIL,
+} from "@/constants/neighbourhoodMeta";
 import { useAppStore } from "@/store/app";
 
-import { ExpressionTypes } from "@/store/types";
+import {
+  resizeImage,
+  dataURItoBlob,
+  blobToDataURL,
+} from "@/utils/profileHelpers";
+import { LinkQuery } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 import { useDataStore } from "..";
 
 export interface Payload {
@@ -13,57 +25,134 @@ export interface Payload {
   thumbnail?: string;
 }
 
-export default async function updateCommunity({
-  communityId,
-  name,
-  description,
-  image,
-  thumbnail,
-}: Payload): Promise<void> {
+async function deleteCommunityLinks(communityId: string, updates: Payload) {
+  const client = await getAd4mClient();
+  const deletes = [];
+
+  if (updates.name) {
+    deletes.push(
+      client.perspective.queryLinks(
+        communityId,
+        new LinkQuery({
+          source: SELF,
+          predicate: FLUX_GROUP_NAME,
+        })
+      )
+    );
+  }
+
+  if (updates.description) {
+    deletes.push(
+      client.perspective.queryLinks(
+        communityId,
+        new LinkQuery({
+          source: SELF,
+          predicate: FLUX_GROUP_DESCRIPTION,
+        })
+      )
+    );
+  }
+
+  if (updates.image) {
+    deletes.push(
+      client.perspective.queryLinks(
+        communityId,
+        new LinkQuery({
+          source: SELF,
+          predicate: FLUX_GROUP_IMAGE,
+        })
+      )
+    );
+    deletes.push(
+      client.perspective.queryLinks(
+        communityId,
+        new LinkQuery({
+          source: SELF,
+          predicate: FLUX_GROUP_THUMBNAIL,
+        })
+      )
+    );
+  }
+
+  const values = await Promise.all(deletes);
+  const links = values.flat();
+
+  for (const link of links) {
+    await client.perspective.removeLink(communityId, link);
+  }
+}
+
+export default async function updateCommunity(update: Payload): Promise<void> {
   const dataStore = useDataStore();
   const appStore = useAppStore();
+  const client = await getAd4mClient();
+  const { communityId, name, description, image, thumbnail } = update;
 
   const community = dataStore.getCommunity(communityId);
 
+  await deleteCommunityLinks(communityId, update);
+
   try {
-    const groupExpressionLang =
-      community.neighbourhood.typedExpressionLanguages.find(
-        (val: any) => val.expressionType == ExpressionTypes.GroupExpression
+    let tempImage = image;
+    let tempThumbnail = thumbnail;
+
+    if (image) {
+      const resizedImage = image
+        ? await resizeImage(dataURItoBlob(image as string), 100)
+        : undefined;
+
+      const thumbnail = image ? await blobToDataURL(resizedImage!) : undefined;
+
+      tempImage = await client.expression.create(
+        image,
+        NOTE_IPFS_EXPRESSION_OFFICIAL
       );
 
-    if (groupExpressionLang != undefined) {
-      console.log("Found group exp lang", groupExpressionLang);
-      const groupExpression = await createExpression(
-        groupExpressionLang.languageAddress,
-        JSON.stringify({ name, description, image, thumbnail })
+      tempThumbnail = await client.expression.create(
+        thumbnail,
+        NOTE_IPFS_EXPRESSION_OFFICIAL
       );
 
-      console.log(
-        "Created new group expression for updateCommunity",
-        groupExpression
-      );
-
-      const addGroupExpLink = await createLink(
-        community.neighbourhood.perspective.uuid,
-        {
-          source: community.neighbourhood.neighbourhoodUrl,
-          target: groupExpression,
-          predicate: "rdf://class",
-        }
-      );
-      console.log("Created group expression link", addGroupExpLink);
-
-      dataStore.updateCommunityMetadata({
-        communityId: community.neighbourhood.perspective.uuid,
-        name: name || community.neighbourhood.name,
-        description: description || community.neighbourhood.description,
-        image: image || community.neighbourhood.image || "",
-        thumbnail: thumbnail || community.neighbourhood.thumbnail || "",
-        groupExpressionRef: groupExpression,
+      await client.perspective.addLink(communityId, {
+        source: SELF,
+        target: tempImage,
+        predicate: FLUX_GROUP_IMAGE,
       });
-    } else {
-      throw Error("Expected to find group expression language for group");
+      await client.perspective.addLink(communityId, {
+        source: SELF,
+        target: tempThumbnail,
+        predicate: FLUX_GROUP_THUMBNAIL,
+      });
     }
+
+    if (name) {
+      const nameExpression = await client.expression.create(name, "literal");
+      await client.perspective.addLink(communityId, {
+        source: SELF,
+        target: nameExpression,
+        predicate: FLUX_GROUP_NAME,
+      });
+    }
+
+    if (description) {
+      const descriptionExpression = await client.expression.create(
+        description,
+        "literal"
+      );
+      await client.perspective.addLink(communityId, {
+        source: SELF,
+        target: descriptionExpression,
+        predicate: FLUX_GROUP_DESCRIPTION,
+      });
+    }
+
+    dataStore.updateCommunityMetadata({
+      communityId: community.neighbourhood.perspective.uuid,
+      name: name || community.neighbourhood.name,
+      description: description || community.neighbourhood.description,
+      image: tempImage || community.neighbourhood.image || "",
+      thumbnail: tempThumbnail || community.neighbourhood.thumbnail || "",
+    });
   } catch (e) {
     appStore.showDangerToast({
       message: e.message,

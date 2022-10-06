@@ -5,7 +5,6 @@ import {
   NeighbourhoodState,
   LocalCommunityState,
 } from "@/store/types";
-import { Expression } from "@perspect3vism/ad4m";
 
 export default {
   getNeighbourhood:
@@ -37,6 +36,14 @@ export default {
     return out;
   },
 
+  getChannels(state: DataState): ChannelState[] {
+    const out = [];
+    for (const channel of Object.values(state.channels)) {
+      out.push(channel);
+    }
+    return out;
+  },
+
   getCommunityNeighbourhoods(state: DataState): NeighbourhoodState[] {
     return Object.values(state.communities).map(
       (community) => state.neighbourhoods[community.perspectiveUuid]
@@ -53,10 +60,7 @@ export default {
         return null;
       }
       const channel = state.channels[neighbourhood?.perspective.uuid];
-      return {
-        neighbourhood,
-        state: channel,
-      };
+      return channel;
     },
 
   getCommunityState:
@@ -67,14 +71,12 @@ export default {
 
   getChannel:
     (state: DataState) =>
-    (channelId: string): ChannelState => {
-      const neighbourhood = state.neighbourhoods[channelId];
-      const channel = state.channels[channelId];
+    (communityId: string, channelId: string): ChannelState | undefined => {
+      const channel = Object.values(state.channels).find(
+        (c) => c.sourcePerspective === communityId && c.name === channelId
+      );
 
-      return {
-        neighbourhood,
-        state: channel,
-      } as ChannelState;
+      return channel;
     },
 
   getChannelNeighbourhoods:
@@ -88,15 +90,9 @@ export default {
   getChannelStates:
     (state: DataState) =>
     (communityId: string): ChannelState[] => {
-      const links = state.neighbourhoods[communityId].linkedPerspectives;
-      return links
-        .filter((link, index) => links.indexOf(link) === index)
-        .map((perspectiveUuid) => {
-          return {
-            neighbourhood: state.neighbourhoods[perspectiveUuid],
-            state: state.channels[perspectiveUuid],
-          } as ChannelState;
-        });
+      return Object.values(state.channels).filter(
+        (c: ChannelState) => c.sourcePerspective === communityId
+      );
     },
 
   getCommunityMembers:

@@ -2,8 +2,8 @@
   <j-box p="800">
     <j-text variant="heading-sm">Edit Community</j-text>
     <avatar-upload
-      :value="profileImage"
-      @change="(val) => (profileImage = val)"
+      :value="communityImage"
+      @change="(val) => (communityImage = val)"
     />
     <j-flex direction="column" gap="400">
       <j-input
@@ -41,6 +41,7 @@ import { NeighbourhoodState } from "@/store/types";
 import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useDataStore } from "@/store/data";
+import { DexieIPFS } from "@/utils/storageHelpers";
 
 export default defineComponent({
   components: { AvatarUpload },
@@ -57,15 +58,16 @@ export default defineComponent({
       isUpdatingCommunity: false,
       communityName: "",
       communityDescription: "",
-      profileImage: "",
+      communityImage: "",
     };
   },
   watch: {
     community: {
-      handler: function ({ name, description, image }) {
+      handler: async function ({ id, name, description, image }) {
         this.communityName = name;
         this.communityDescription = description;
-        this.profileImage = image;
+        const dexie = new DexieIPFS(id);
+        this.communityImage = (await dexie.get(image!)) as any;
       },
       deep: true,
       immediate: true,
@@ -84,10 +86,22 @@ export default defineComponent({
       this.dataStore
         .updateCommunity({
           communityId: communityId,
-          name: this.communityName,
-          description: this.communityDescription,
-          image: this.profileImage,
-          thumbnail: this.profileImage,
+          name:
+            this.communityName != this.community.name
+              ? this.communityName
+              : undefined,
+          description:
+            this.communityDescription != this.community.description
+              ? this.communityDescription
+              : undefined,
+          image:
+            this.communityImage != this.community.image
+              ? this.communityImage
+              : undefined,
+          thumbnail:
+            this.communityImage != this.community.image
+              ? this.communityImage
+              : undefined,
         })
         .then(() => {
           this.$emit("submit");

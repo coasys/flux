@@ -1,18 +1,19 @@
 import community from "../../../fixtures/community.json";
 import updateCommunityLinkData from "../../../fixtures/updateCommunityLinkData.json";
-import * as createExpression from "@/core/mutations/createExpression";
-import * as createLink from "@/core/mutations/createLink";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useDataStore } from "@/store/data";
+import { ad4mClient } from "@/app";
 
 describe("Update Community", () => {
   let store: Pinia;
 
   beforeEach(() => {
     // @ts-ignore
-    jest.spyOn(createLink, "createLink").mockImplementation(async () => {
-      return updateCommunityLinkData;
-    });
+    jest
+    .spyOn(ad4mClient.perspective, "addLink")
+      .mockImplementation(async () => {
+        return {...updateCommunityLinkData, hash: () => 12345};
+      });
 
     store = createPinia();
     setActivePinia(store);
@@ -104,7 +105,7 @@ describe("Update Community", () => {
 
     // @ts-ignore
     jest
-      .spyOn(createExpression, "createExpression")
+    .spyOn(ad4mClient.expression, "create")
       .mockImplementation(async () => {
         return "QmVWescmAofwfXim3QNqhvQbPee4WfezCpgGFbkaEBZHJS://8429242a7888abe19e8e625e2b390eeae4bff429db7ef825f1791ea7d89ac4073356f6f3039aed";
       });

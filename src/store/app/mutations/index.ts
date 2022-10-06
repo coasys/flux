@@ -7,10 +7,6 @@ import {
 import { useAppStore } from "..";
 
 export default {
-  setLanguagesPath(payload: string): void {
-    const state = useAppStore();
-    state.localLanguagesPath = payload;
-  },
   setApplicationStartTime(payload: Date): void {
     const state = useAppStore();
     state.applicationStartTime = payload;
@@ -18,6 +14,14 @@ export default {
   toggleSidebar(): void {
     const state = useAppStore();
     state.showSidebar = !state.showSidebar;
+  },
+  toggleMainSidebar(): void {
+    const state = useAppStore();
+    state.showMainSidebar = !state.showMainSidebar;
+  },
+  setMainSidebar(open: boolean): void {
+    const state = useAppStore();
+    state.showMainSidebar = open;
   },
   setSidebar(open: boolean): void {
     const state = useAppStore();
@@ -99,4 +103,12 @@ export default {
     const state = useAppStore();
     state.modals.showInviteCode = payload;
   },
+  setShowCode(payload: boolean): void {
+    const state = useAppStore();
+    state.modals.showCode = payload;
+  },
+  setGlobalNotification(payload: boolean): void {
+    const state = useAppStore();
+    state.notification.globalNotification = payload;
+  }
 };

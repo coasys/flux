@@ -8,7 +8,6 @@ module.exports = {
     "eslint:recommended",
     "@vue/typescript/recommended",
     "@vue/prettier",
-    "@vue/prettier/@typescript-eslint",
   ],
   parserOptions: {
     ecmaVersion: 2020,
@@ -21,5 +20,6 @@ module.exports = {
     "max-len": ["warn", { code: 140 }],
     "@typescript-eslint/ban-ts-ignore": "off",
     "@typescript-eslint/ban-ts-comment": "off",
+    "no-async-promise-executor": 'off'
   },
 };

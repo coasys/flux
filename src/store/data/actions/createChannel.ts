@@ -1,8 +1,8 @@
 import { createChannel } from "@/core/methods/createChannel";
 import { useAppStore } from "@/store/app";
-import { ChannelState, MembraneType } from "@/store/types";
+import { ChannelState } from "@/store/types";
 import { useDataStore } from "..";
-import { useUserStore } from "@/store/user";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export interface Payload {
   communityId: string;
@@ -12,18 +12,21 @@ export interface Payload {
 export default async (payload: Payload): Promise<ChannelState> => {
   const dataStore = useDataStore();
   const appStore = useAppStore();
-  const userStore = useUserStore();
+
   try {
+    const client = await getAd4mClient();
+
     const community = dataStore.getCommunity(payload.communityId);
+
+    const agent = await client.agent.me()
+
+    const creatorDid = agent.did;
 
     if (community.neighbourhood !== undefined) {
       const channel = await createChannel({
         channelName: payload.name,
-        creatorDid: userStore.getUser!.agent.did || "",
+        creatorDid,
         sourcePerspective: community.neighbourhood.perspective,
-        membraneType: MembraneType.Inherited,
-        typedExpressionLanguages:
-          community.neighbourhood.typedExpressionLanguages,
       });
 
       dataStore.addChannel({

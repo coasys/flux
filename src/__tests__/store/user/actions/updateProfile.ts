@@ -1,10 +1,11 @@
 import community from "../../../fixtures/community.json";
-import * as getExpression from "../../../../core/queries/getExpression";
 import getProfileFixture from "../../../fixtures/updateProfile.json";
-import * as createProfile from "@/core/methods/createProfile";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useUserStore } from "@/store/user";
 import { useDataStore } from "@/store/data";
+import { ad4mClient } from "@/app";
+import agentByDIDLinksFixture from "../../../fixtures/agentByDIDLinks.json";
+import { FLUX_PROXY_PROFILE_NAME } from "@/constants/profile";
 
 describe("Update Profile", () => {
   let store: Pinia;
@@ -12,20 +13,42 @@ describe("Update Profile", () => {
   beforeEach(() => {
     // @ts-ignore
     jest
-      .spyOn(getExpression, "getExpression")
+      .spyOn(ad4mClient.expression, "get")
       // @ts-ignore
       .mockResolvedValue(getProfileFixture);
 
-    // @ts-ignore
-    jest.spyOn(createProfile, "createProfile").mockImplementation(async () => {
-      return "QmevBs9ztZwyZjseMD4X18zSHFuDp9eEaLJyirHazQWmxS://did:key:zQ3shYePYmPqfvWtPDuAiKUwkpPhgqSRuZurJiwH2VwdWpyWW";
-    });
+      jest
+        .spyOn(ad4mClient.agent, "byDID")
+        // @ts-ignore
+        .mockImplementation(async (did) => {
+          if (did.includes('101')) {
+            return {
+              perspective: {
+                links: []
+              }
+            }
+          }
+          return agentByDIDLinksFixture;
+        });
 
     store = createPinia();
     setActivePinia(store);
   });
 
   test("Update Profile - Success", () => {
+    // @ts-ignore
+    jest
+      .spyOn(ad4mClient.perspective, "all")
+      // @ts-ignore
+      .mockResolvedValue([{
+        name: FLUX_PROXY_PROFILE_NAME,
+        // @ts-ignore
+        neighbourhood: null,
+        // @ts-ignore
+        sharedUrl: null,
+        uuid: "2a912c2c-6d30-46f2-b451-880349fced08"
+      }]);
+
     const userStore = useUserStore();
     const dataStore = useDataStore();
 
@@ -42,13 +65,14 @@ describe("Update Profile", () => {
   });
 
   test("Update Profile - Failure", async () => {
-    const userStore = useUserStore();
-    const dataStore = useDataStore();
-
     // @ts-ignore
     jest
-      .spyOn(createProfile, "createProfile")
-      .mockRejectedValue(Error("Could not create new profile exp"));
+      .spyOn(ad4mClient.perspective, "all")
+      // @ts-ignore
+      .mockResolvedValue([]);
+
+    const userStore = useUserStore();
+    const dataStore = useDataStore();
 
     // @ts-ignore
     dataStore.addCommunity(community);
@@ -60,10 +84,11 @@ describe("Update Profile", () => {
         username: "jhon_doe",
       });
     } catch (error) {
+      console.log('clone', error)
       expect(error).toBeInstanceOf(Error);
       expect(error).toHaveProperty(
         "message",
-        "Error: Could not create new profile exp"
+        "No user perspective found"
       );
     }
 

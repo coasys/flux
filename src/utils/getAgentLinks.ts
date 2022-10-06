@@ -1,22 +1,30 @@
 import { LinkExpression } from "@perspect3vism/ad4m";
-import getByDid from "@/core/queries/getByDid";
-import getSnapshotByUUID from "@/core/queries/getSnapshotByUUID";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
-export default async function getAgentLinks(did: string, userPerspective?: string) {
-  let links: any[] = [];
+export default async function getAgentLinks(
+  did: string,
+  userPerspective?: string
+): Promise<LinkExpression[]> {
+  const client = await getAd4mClient();
+
+  let links: LinkExpression[] = [];
 
   if (userPerspective) {
     // @ts-ignore
-    const {links: areaLinks} = await getSnapshotByUUID(userPerspective!)
+    const { links: areaLinks } = await client.perspective.snapshotByUUID(
+      userPerspective!
+    );
 
     links = areaLinks;
   } else {
     // @ts-ignore
-    const agentPerspective = await getByDid(did);
+    const agentPerspective = await client.agent.byDID(did);
 
-    const agentLinks = agentPerspective!.perspective!.links;
-  
-    links = agentLinks;
+    if (agentPerspective) {
+      links = agentPerspective!.perspective!.links;
+    } else {
+      links = [];
+    }
   }
 
   return links;

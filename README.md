@@ -1,59 +1,36 @@
-# Flux by Junto
+# Flux
 
-[![Build/release](https://github.com/juntofoundation/communities/actions/workflows/release.yml/badge.svg)](https://github.com/juntofoundation/communities/actions/workflows/release.yml)
-
-## Environment
-Node version: 16.13.0<br>
+https://app.fluxsocial.io
 
 ## Project setup
-This project requires nix for building holochain! You can download nix here: https://nixos.wiki/wiki/Nix_Installation_Guide
 
-Once Nix is installed it also recommended to use the holochain cachix, this can be enabled with the following commands:
-
-```
-nix-env -iA cachix -f https://cachix.org/api/v1/install
-cachix use holochain-ci
-```
-
-Installing dependencies for flux and compiling holochain can be done with:
-
-```
-yarn install && yarn run get-languages && yarn run build-holochain
-```
+This project requires AD4M! The easiest way to have an AD4M runtime operating, is to [download AD4MIN](https://github.com/perspect3vism/ad4min).
 
 ### Compiles and hot-reloads for development
-```
-yarn run electron:serve
-```
-
-## Cleaning local state
-
-The following commands will remove all installed ad4m languages (except defaults), holochain DNA's, ad4m did store & vuex store.
 
 ```
-yarn run clean-state
+yarn run dev
 ```
+
+Any PR's will also trigger netlify to make a new deployment of your new branch, the URL for this branch will be included as a comment on your PR.
 
 ## Holochain DNA's
 
 This project makes use of the following holochain DNA's.
 
-- [Social-Context](https://github.com/juntofoundation/Social-Context) link store DNA for persistence & signaling of links
-- [ShortForm-Expression](https://github.com/juntofoundation/ad4m-languages/tree/master/shortform-expression) DNA for text posting (more expression types to follow soon)
-- [Group-Expression](https://github.com/juntofoundation/ad4m-languages/tree/master/group-expression) DNA to store group metadata
-- [Profile-Expression](https://github.com/jdeepee/profiles) DNA for basic profile registration (optional for each agent)
-- [Language-Persistence](https://github.com/perspect3vism/language-persistence) DNA for the storing of language meta information under a given key
-- [Neighbourhood-Persistence](https://github.com/perspect3vism/neighbourhood-language) DNA/ad4m language for storing neighbourhood objects
+- [perspective-diff-sync](https://github.com/perspect3vism/perspective-diff-sync) DNA/ad4m language for storing link data for ad4m perspectives
 - [Agent-Language](https://github.com/perspect3vism/agent-language) DNA/ad4m language for storing ad4m Agent objects
 
 These DNA's come bundled with the builtin languages, links above are provided for reference to anyone interested.
 
 ### Compiles and minifies for production
+
 ```
-yarn run build-holochain && yarn run get-languages && yarn run electron:build
+yarn run build
 ```
 
 ### Lints and fixes files
+
 ```
 yarn run lint
 ```

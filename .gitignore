@@ -1,8 +1,5 @@
 /node_modules
-/ad4m/data
-/ad4m/holochain
-/ad4m/languages/**/
-/ad4m/language/*
+/ad4m
 .hc
 .hc_live_0
 out.log

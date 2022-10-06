@@ -73,11 +73,11 @@ export default defineComponent({
 
 <style>
 .sidebar-layout {
-  height: 100vh;
-  min-height: 100vh;
-  max-height: 100vh;
+  height: 100%;
   display: flex;
   transition: all 0.2s ease;
+  overflow: hidden;
+  position: relative;
 }
 .sidebar-layout__toggle-button {
   position: absolute;
@@ -90,6 +90,7 @@ export default defineComponent({
 }
 .sidebar-layout__drawer {
   height: 100%;
+  max-height: 100vh;
   width: 300px;
   min-width: 200px;
   max-width: 33vw;
@@ -97,16 +98,54 @@ export default defineComponent({
   overflow-y: auto;
   position: relative;
 }
-.sidebar-layout--closed .sidebar-layout__drawer {
-  min-width: 0px;
-  width: 0px !important;
+
+@media (max-width: 800px) {
+  .sidebar-layout .sidebar-layout__drawer {
+    height: 100%;
+    width: 100% !important;
+    max-width: 100%;
+    background: var(--app-drawer-bg-color);
+    overflow-y: auto;
+    opacity: 1;
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+  .sidebar-layout--closed .sidebar-layout__drawer {
+    opacity: 0;
+  }
+  .sidebar-layout .sidebar-layout__main {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    transform: translateX(100%);
+    transition: all 0.2s ease;
+  }
+  .sidebar-layout--closed .sidebar-layout__main {
+    transform: translateX(0);
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 999;
+  }
 }
+
+@keyframes fade-in {
+  from {
+    opacity: 1;
+    transform: translateX(200px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+}
+
 .sidebar-layout__main {
   width: 100%;
   max-height: 100vh;
   overflow-y: auto;
   flex: 1;
-  position: relative;
   background: var(--app-main-content-bg-color);
 }
 .sidebar-layout__resize-handle {

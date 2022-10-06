@@ -9,6 +9,7 @@ export class Profile {
   profilePicture?: string;
   thumbnailPicture?: string;
   bio?: string;
+  profileBg?: string;
 }
 
 export class ProfileWithDID extends Profile {
@@ -20,5 +21,5 @@ export class ProfileExpression extends ExpressionGeneric(Profile) {}
 export interface UserState {
   agent: AgentStatus;
   profile: Profile | null;
-  fluxPerspectiveId?: string;
+  agentProfileProxyPerspectiveId?: string;
 }

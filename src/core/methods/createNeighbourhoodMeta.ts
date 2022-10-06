@@ -1,34 +1,31 @@
-import { FluxExpressionReference } from "@/store/types";
 import { Link, LinkExpression } from "@perspect3vism/ad4m";
-import { addPerspective } from "../mutations/addPerspective";
-import { createLink } from "../mutations/createLink";
-import { getPerspectiveSnapshot } from "../queries/getPerspective";
 
 import {
   CREATOR,
   DESCRIPTION,
   NAME,
   SELF,
-  LANGUAGE,
   CREATED_AT,
 } from "@/constants/neighbourhoodMeta";
-import { ad4mClient } from "@/app";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export async function createNeighbourhoodMeta(
   name: string,
   description: string,
-  creatorDid: string,
-  expressionLanguages: FluxExpressionReference[]
+  creatorDid: string
 ): Promise<LinkExpression[]> {
+  const client = await getAd4mClient();
   //Create the perspective to hold our meta
-  const perspective = await addPerspective(`${name}-meta`);
+  const perspective = await client.perspective.add(`${name}-meta`);
+
+  const nameExpression = await client.expression.create(name, "literal");
 
   //Create the links we want on meta
   const expressionLinks = [];
   expressionLinks.push(
     new Link({
       source: SELF,
-      target: name,
+      target: nameExpression,
       predicate: NAME,
     })
   );
@@ -49,36 +46,30 @@ export async function createNeighbourhoodMeta(
     })
   );
 
-  //Ad4m-executor throws an error if target is an empty string
-  if (description == "") {
-    description = "-";
-  }
-  expressionLinks.push(
-    new Link({
-      source: SELF,
-      target: description,
-      predicate: DESCRIPTION,
-    })
-  );
-
-  for (const lang of expressionLanguages) {
+  if (description != "") {
+    const descriptionExpression = await client.expression.create(
+      description,
+      "literal"
+    );
     expressionLinks.push(
       new Link({
         source: SELF,
-        target: lang.languageAddress,
-        predicate: LANGUAGE,
+        target: descriptionExpression,
+        predicate: DESCRIPTION,
       })
     );
   }
 
   //Create the links on the perspective
   for (const exp of expressionLinks) {
-    await createLink(perspective.uuid, exp);
+    await client.perspective.addLink(perspective.uuid, exp);
   }
 
   //Get the signed links back
-  const perspectiveSnapshot = await getPerspectiveSnapshot(perspective.uuid);
-  await ad4mClient.perspective.remove(perspective.uuid);
+  const perspectiveSnapshot = await client.perspective.snapshotByUUID(
+    perspective.uuid
+  );
+  await client.perspective.remove(perspective.uuid);
   const links = [];
   for (const link in perspectiveSnapshot!.links) {
     //Deep copy the object... so we can delete __typename fields inject by apollo client

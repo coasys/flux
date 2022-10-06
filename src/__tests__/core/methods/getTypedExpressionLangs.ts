@@ -1,5 +1,5 @@
+import { ad4mClient } from "@/app";
 import { getTypedExpressionLanguages } from "@/core/methods/getTypedExpressionLangs";
-import * as getLanguage from "@/core/queries/getLanguage";
 import getTypedExpressionLangLanguages from "../../fixtures/getTypedExpressionLangLanguages.json";
 import getTypedExpressionLangLinks from "../../fixtures/getTypedExpressionLangLinks.json";
 
@@ -7,7 +7,7 @@ describe("Get Typed Expression", () => {
   test("Get Typed Expression - Success", async () => {
     // @ts-ignore
     jest
-      .spyOn(getLanguage, "getLanguage")
+      .spyOn(ad4mClient.languages, "byAddress")
       // @ts-ignore
       .mockImplementation(async (address) => {
         return getTypedExpressionLangLanguages.find(
@@ -29,7 +29,7 @@ describe("Get Typed Expression", () => {
   test("Get Typed Expression - Failure", async () => {
     // @ts-ignore
     jest
-      .spyOn(getLanguage, "getLanguage")
+    .spyOn(ad4mClient.languages, "byAddress")
       // @ts-ignore
       .mockImplementation(async (address) => {
         return undefined;
