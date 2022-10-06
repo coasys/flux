@@ -170,6 +170,7 @@ export default defineComponent({
           const channel = this.dataStore.getChannel(this.communityId, id);
 
           if (channel) {
+            this.notSynced = false;
             this.loadedChannels = {
               ...this.loadedChannels,
               [channel.id]: true,
