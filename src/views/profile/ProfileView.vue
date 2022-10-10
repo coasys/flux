@@ -42,9 +42,9 @@
         </div>
 
         <div class="profile__content">
-          <div class="grid">
-            <j-box my="500" v-if="!sameAgent">
-              <j-text>Links ({{ weblinks.length }})</j-text>
+          <div v-if="!sameAgent">
+            <j-text>Links ({{ weblinks.length }})</j-text>
+            <div class="grid">
               <ProfileCard
                 v-for="link in weblinks"
                 :key="link.id"
@@ -56,7 +56,7 @@
                 @delete="() => deleteLinks(link.id)"
                 @edit="() => setEditLinkModal(true, link)"
               />
-            </j-box>
+            </div>
           </div>
 
           <j-box my="500" v-if="sameAgent">
