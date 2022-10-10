@@ -17,7 +17,7 @@
   },
   "main": "background.js",
   "dependencies": {
-    "@junto-foundation/chat-view": "^0.1.30",
+    "@junto-foundation/chat-view": "^0.1.31",
     "@junto-foundation/junto-elements": "^0.4.3",
     "@perspect3vism/ad4m": "^0.1.37",
     "@perspect3vism/ad4m-connect": "^0.0.9",
