@@ -25,13 +25,11 @@ export default async function ({
         perspectiveUuid, 
         `limit(${MAX_MESSAGES}, (order_by([desc(Timestamp)], flux_message("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden)), Timestamp =< ${fromTime})).`
       );
-      console.log(expressionLinks);
     } else {
       expressionLinks = await client.perspective.queryProlog(
         perspectiveUuid,
         `limit(${MAX_MESSAGES}, order_by([desc(Timestamp)], flux_message("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden))).`
       );
-      console.log(expressionLinks);
     }
     let cleanedLinks = [];
 

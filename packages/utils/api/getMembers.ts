@@ -15,7 +15,6 @@ export default async function ({ perspectiveUuid, neighbourhoodUrl, addProfile }
     const memberLinks = await client.perspective.queryProlog(perspectiveUuid, `triple("${SELF}", "${MEMBER}", M).`);
     for (const link of memberLinks) {
       getMember(link.M).then((member) => {
-        console.log('wwww', member)
         if (member) {
           addProfile(member)
         }
