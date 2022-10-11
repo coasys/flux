@@ -64,14 +64,13 @@ export default async ({
     let title = "";
     let body = "";
 
+    const profile = await getProfile(authorDid);
+    const name = profile ? profile.username : "Someone";
     if (isMentioned) {
-      const profile = await getProfile(authorDid);
-      const name = profile ? profile.username : "Someone";
-
       title = `${name} mentioned you in #${channel?.name}}`;
       body = escapedMessage;
     } else {
-      title = `New message in ${community?.neighbourhood.name}`;
+      title = `New message in ${community?.neighbourhood.name} from @${name}`;
       body = `#${channel?.name}: ${escapedMessage}`;
     }
 
