@@ -135,7 +135,7 @@ import { isValid } from "@/utils/validation";
 import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useDataStore } from "@/store/data";
-import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/web'
+import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/utils'
 
 export default defineComponent({
   components: { AvatarUpload },

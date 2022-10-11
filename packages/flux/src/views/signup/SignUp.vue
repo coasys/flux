@@ -84,7 +84,7 @@ import Carousel from "./SignUpCarousel.vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useValidation } from "@/utils/validation";
 import { useUserStore } from "@/store/user";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import {
   AD4M_PREDICATE_USERNAME,
   AD4M_PREDICATE_FIRSTNAME,

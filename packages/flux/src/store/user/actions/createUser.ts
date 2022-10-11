@@ -7,7 +7,7 @@ import getAgentLinks from "utils/api/getAgentLinks";
 import { resizeImage, dataURItoBlob, blobToDataURL } from "utils/helpers/profileHelpers";
 import removeTypeName from "utils/helpers/removeTypeName";
 import { Link, LinkExpression, PerspectiveInput } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { useUserStore } from "..";
 
 export interface Payload {

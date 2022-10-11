@@ -8,7 +8,7 @@ import {
 } from "utils/constants/neighbourhoodMeta";
 import { DexieIPFS } from "@/utils/storageHelpers";
 import { getImage } from "utils/api/getProfile";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { Literal } from "@perspect3vism/ad4m";
 
 export interface Payload {

@@ -75,7 +75,7 @@ import {
   HAS_AREA,
   HAS_POST,
 } from "utils/constants/profile";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 export default defineComponent({
   props: ["step", "area", "isEditing"],

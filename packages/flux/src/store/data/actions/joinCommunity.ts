@@ -9,7 +9,7 @@ import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { getGroupMetadata } from "./fetchNeighbourhoodMetadata";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 export interface Payload {
   joiningLink: string;

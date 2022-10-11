@@ -73,7 +73,7 @@ import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import removeTypeName from "utils/helpers/removeTypeName";
 import { nanoid } from "nanoid";
 import { AREA_COMMUNITY, HAS_AREA } from "utils/constants/profile";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 export default defineComponent({
   props: ["area", "isEditing"],

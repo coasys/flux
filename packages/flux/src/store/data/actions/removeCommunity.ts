@@ -1,4 +1,4 @@
-import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/web'
+import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/utils'
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "..";
 

@@ -20,7 +20,7 @@ import { defineComponent, ref } from "vue";
 import ExpandableImage from "@/components/expandable-img/expandable-img.vue";
 import getAgentLinks from "utils/api/getAgentLinks";
 import { useAppStore } from "@/store/app";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { Literal } from "@perspect3vism/ad4m";
 import { getImage } from "utils/api/getProfile";
 

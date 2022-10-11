@@ -72,7 +72,7 @@ import getAgentLinks from "utils/api/getAgentLinks";
 import removeTypeName from "utils/helpers/removeTypeName";
 import { useValidation } from "@/utils/validation";
 import { Link, PerspectiveInput } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { nanoid } from "nanoid";
 import { defineComponent, ref } from "vue";
 

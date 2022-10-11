@@ -8,7 +8,7 @@ import getAgentLinks from "utils/api/getAgentLinks";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
 import { FLUX_PROFILE, FLUX_PROXY_PROFILE_NAME, HAS_BG_IMAGE, HAS_BIO, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "utils/constants/profile";
 import { resizeImage, dataURItoBlob, blobToDataURL } from "utils/helpers/profileHelpers";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 export interface Payload {
   username?: string;

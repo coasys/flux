@@ -698,10 +698,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@perspect3vism/ad4m-connect@^0.0.9":
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.0.9.tgz#112cca9e29e744710aeb229100037744fcc39676"
-  integrity sha512-vQjyhqf3PlIxJnQZ7kJNMALRC+Fqk0cY2O1e7RfERuVapma2dwgyx1iXxZ8V/7vFIu9YLUAtzeqwqcKPU6Umhw==
+"@perspect3vism/ad4m-connect@^0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.0.10.tgz#8b9275e3471ae7e43ddc00bd0e3aaaeeb5af5cc0"
+  integrity sha512-FmkUfsvFHTphkTxMZ62z8nwMQ/dLITmFT6a3Rm0Cv7nn3ilzJnzyL29drtT1w9YWODPnA0rJMpr0WO5lT2G1wg==
   dependencies:
     electron "^20.0.3"
     esbuild-plugin-inline-image "^0.0.8"

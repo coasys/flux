@@ -11,7 +11,7 @@ import {
 } from "utils/constants/neighbourhoodMeta";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 interface ChannelProps {
   channelName: string;

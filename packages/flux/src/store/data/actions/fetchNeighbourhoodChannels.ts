@@ -1,6 +1,6 @@
 import { useDataStore } from "..";
 import { CHANNEL, SELF } from "utils/constants/neighbourhoodMeta";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { Literal } from "@perspect3vism/ad4m";
 
 /// Function that uses web workers to poll for channels and new group expressions on a community

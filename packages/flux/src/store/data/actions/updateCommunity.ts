@@ -14,7 +14,7 @@ import {
   blobToDataURL,
 } from "utils/helpers/profileHelpers";
 import { LinkQuery } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { useDataStore } from "..";
 
 export interface Payload {

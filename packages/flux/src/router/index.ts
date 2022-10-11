@@ -13,7 +13,7 @@ import ProfileView from "@/views/profile/ProfileView.vue";
 import ConnectView from "@/views/connect/ConnectView.vue";
 import UnlockAgent from "@/views/connect/UnlockAgent.vue";
 import ProfileFeed from "@/views/profile/ProfileFeed.vue";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 const routes: Array<RouteRecordRaw> = [
   {

@@ -63,7 +63,8 @@ import { getGroupMetadata } from "./store/data/actions/fetchNeighbourhoodMetadat
 import {
   getAd4mClient,
   isConnected,
-} from "@perspect3vism/ad4m-connect/dist/web";
+} from "@perspect3vism/ad4m-connect/dist/utils";
+import "@perspect3vism/ad4m-connect/dist/web";
 
 export default defineComponent({
   name: "App",
