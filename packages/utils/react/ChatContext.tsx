@@ -14,10 +14,10 @@ import { sortExpressionsByTimestamp } from "../helpers/expressionHelpers";
 import getMe from "../api/getMe";
 import { SHORT_FORM_EXPRESSION } from "../helpers/languageHelpers";
 import { DexieMessages, DexieUI } from "../helpers/storageHelpers";
-import { getNeighbourhoodCardHidden } from "../api/getNeighbourhoodLink";
 import { DIRECTLY_SUCCEEDED_BY, REACTION } from "../constants/ad4m";
 import ad4mClient from "../api/client";
 import hideEmbeds from "../api/hideEmbeds";
+import { MAX_MESSAGES } from "../constants/general";
 
 type State = {
   isFetchingMessages: boolean;
@@ -314,14 +314,11 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
   async function fetchMessages(payload?: {
     from?: Date;
-    to?: Date;
     again: boolean;
   }) {
     console.log(
       "Fetch messages with from: ",
-      payload.from,
-      "and to: ",
-      payload.to
+      payload.from
     );
     setState((oldState) => ({
       ...oldState,
@@ -336,8 +333,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       await getMessages({
         perspectiveUuid,
         channelId,
-        from: payload?.from,
-        to: payload?.to,
+        from: payload?.from
       });
 
     setState((oldState) => ({
@@ -350,7 +346,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
     setState((oldState) => ({
       ...oldState,
-      showLoadMore: expressionLinkLength === 35,
+      showLoadMore: expressionLinkLength === MAX_MESSAGES,
       isFetchingMessages: false,
     }));
   }

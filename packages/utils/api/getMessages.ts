@@ -1,26 +1,36 @@
 import { Literal } from "@perspect3vism/ad4m";
+import { MAX_MESSAGES } from "../constants/general";
 import { Reaction } from "../types";
 import ad4mClient from "./client";
-import getMessage from "./getMessage";
 
 export interface Payload {
   perspectiveUuid: string;
   channelId: string;
   from?: Date;
-  to?: Date;
 }
 
 export default async function ({
   perspectiveUuid,
   channelId,
   from,
-  to,
 }: Payload) {
   try {
-    const expressionLinks = await ad4mClient.perspective.queryProlog(
-      perspectiveUuid,
-      `limit(200, order_by([desc(Timestamp)], flux_message("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden))).`
-    );
+    let expressionLinks;
+    if (from) {
+      console.log("Making time based query");
+      let fromTime = from.getTime();
+      expressionLinks = await ad4mClient.perspective.queryProlog(
+        perspectiveUuid, 
+        `limit(${MAX_MESSAGES}, (order_by([desc(Timestamp)], flux_message("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden)), Timestamp =< ${fromTime})).`
+      );
+      console.log(expressionLinks);
+    } else {
+      expressionLinks = await ad4mClient.perspective.queryProlog(
+        perspectiveUuid,
+        `limit(${MAX_MESSAGES}, order_by([desc(Timestamp)], flux_message("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden))).`
+      );
+      console.log(expressionLinks);
+    }
     let cleanedLinks = [];
 
     //TODO; the below extracting of data from head & tail can likely happen in ad4m-executor, it currently gets returned like this since this is how the node.js swipl wrapper serializes results from swipl
