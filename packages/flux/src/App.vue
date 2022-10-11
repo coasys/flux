@@ -168,16 +168,20 @@ export default defineComponent({
 
               if (isSameChannel) {
                 const expression = Literal.fromUrl(link.data.target).get();
-
-                this.dataStore.showMessageNotification({
-                  router,
-                  route,
-                  perspectiveUuid: perspective,
-                  notificationChannelId: channel.id,
-                  authorDid: (expression as any)!.author,
-                  message: (expression as any).data,
-                  timestamp: (expression as any).timestamp,
-                });
+                const expressionDate = new Date(expression.timestamp);
+                let minuteAgo = new Date();
+                minuteAgo.setSeconds(minuteAgo.getSeconds() - 30);
+                if (expressionDate > minuteAgo) {
+                  this.dataStore.showMessageNotification({
+                    router,
+                    route,
+                    perspectiveUuid: perspective,
+                    notificationChannelId: channel.id,
+                    authorDid: (expression as any)!.author,
+                    message: (expression as any).data,
+                    timestamp: (expression as any).timestamp,
+                  });
+                }
 
                 const { channelId } = this.$route.params;
                 if (channelId !== channel.name) {
