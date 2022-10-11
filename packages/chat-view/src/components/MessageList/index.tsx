@@ -191,6 +191,10 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
       if (mainRef) {
         observer.observe(mainRef)
       }
+
+      return () => {
+        observer.disconnect()
+      }
     }
   }, [atBottom, mainRef, channelId, perspectiveUuid])
 
