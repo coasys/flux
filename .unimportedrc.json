@@ -1,7 +1,0 @@
-{
-  "entry": ["src/*"],
-  "extensions": [".ts", ".js", ".vue"],
-  "ignorePatterns": ["**/node_modules/**", "private/**"],
-  "ignoreUnimported": [],
-  "ignoreUnused": []
-}

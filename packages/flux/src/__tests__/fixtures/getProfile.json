@@ -1,0 +1,17 @@
+{
+  "author": {
+    "did": "did:key:zQ3shSbWAPWUNmG6jDpsgXyZ1KTWg4hNkV1pPWaqHpQ64qESh",
+    "__typename": "Agent"
+  },
+  "data": "{\"signed_agent\":\"NA\",\"profile\":{\"@type\":\"foaf:OnlineAccount\",\"foaf:AccountName\":\"fayeed\",\"schema:email\":\"\",\"schema:familyName\":\"\",\"schema:givenName\":\"\"},\"@context\":{\"foaf\":\"http://xmlns.com/foaf/0.1/\",\"schema\":\"https://schema.org/\"}}",
+  "proof": {
+    "invalid": true,
+    "key": "#zQ3shSbWAPWUNmG6jDpsgXyZ1KTWg4hNkV1pPWaqHpQ64qESh",
+    "signature": "fbceb40e901d6cb02bf10c4f9229338e28d3e1d3a5152464025d88c30376d4d35bc3b8321999ca51338baec1c8b282d7730376473f19efc2fa21383e1c7a7fff",
+    "valid": null,
+    "__typename": "ExpressionProof"
+  },
+  "timestamp": "2021-07-09T13:03:05.615Z",
+  "url": "QmU3KLU6z9ShSX25ornxgQkaiMtL9BoCaxiQwZrwVrbyGj://did:key:zQ3shSbWAPWUNmG6jDpsgXyZ1KTWg4hNkV1pPWaqHpQ64qESh",
+  "__typename": "Expression"
+}

@@ -1,0 +1,117 @@
+{
+  "name": "aaaaaaaaaaa",
+  "sharedUrl": "neighbourhood://QmW6LEDuWFuRPBgWsaeh3D9KpjVLu3PZ7VeeV2WYATTJop",
+  "uuid": "9cac577c-0b0a-44f4-9d4f-66edcc236021",
+  "neighbourhood": {
+    "linkLanguage": "",
+    "meta": {
+      "links": [
+        {
+          "author": "did:key:zQ3shQT67eomj2QvQt2hY8847kNexvtrf8rGFjew9zwza17mL",
+          "timestamp": "2022-01-25T03:58:20.404Z",
+          "data": {
+            "source": "self",
+            "predicate": "language",
+            "target": "QmTLBRkm38QMUG6dRwXMRcB7q6c38Lns2TmvZUp4jGkxkR"
+          },
+          "proof": {
+            "valid": true,
+            "invalid": false,
+            "signature": "c757883b7c4c4769b2fcb929a9fb08b89208f00ed01a7991a6adacc5ffcceda11eac80c86f35006b6286f57ffebe2999bb19fb18e415deb49062d79c456adfc8",
+            "key": "#zQ3shQT67eomj2QvQt2hY8847kNexvtrf8rGFjew9zwza17mL"
+          }
+        },
+        {
+          "author": "did:key:zQ3shQT67eomj2QvQt2hY8847kNexvtrf8rGFjew9zwza17mL",
+          "timestamp": "2022-01-25T03:58:20.389Z",
+          "data": {
+            "source": "self",
+            "predicate": "rdf://name",
+            "target": "1"
+          },
+          "proof": {
+            "valid": true,
+            "invalid": false,
+            "signature": "6dfb2bed3e575af45d6e9ad274018fe1e7335cfd861208da1aee994d35aad96578aee10d3771919f61b489de02cff0987a2ef1b7dd874d2934a66162f9b27f5d",
+            "key": "#zQ3shQT67eomj2QvQt2hY8847kNexvtrf8rGFjew9zwza17mL"
+          }
+        },
+        {
+          "author": "did:key:zQ3shQT67eomj2QvQt2hY8847kNexvtrf8rGFjew9zwza17mL",
+          "timestamp": "2022-01-25T03:58:20.397Z",
+          "data": {
+            "source": "self",
+            "predicate": "rdf://dateCreated",
+            "target": "2022-01-25T03:58:20.388Z"
+          },
+          "proof": {
+            "valid": true,
+            "invalid": false,
+            "signature": "b3fe8b36ff4b072a03fb9342f290d8e87b122b97672742e3c76bb65f41eaf07a4bd9c6140cf010b2bd89f1605bd0d0f8bb6fd92f8e3ebf9d88727acc4e423aa1",
+            "key": "#zQ3shQT67eomj2QvQt2hY8847kNexvtrf8rGFjew9zwza17mL"
+          }
+        },
+        {
+          "author": "did:key:zQ3shQT67eomj2QvQt2hY8847kNexvtrf8rGFjew9zwza17mL",
+          "timestamp": "2022-01-25T03:58:20.400Z",
+          "data": {
+            "source": "self",
+            "predicate": "rdf://description",
+            "target": "-"
+          },
+          "proof": {
+            "valid": true,
+            "invalid": false,
+            "signature": "897e33020ba1954b123c8f0d127e1274ac267bb2ca5e0e41c3f42525ec076f440dc75a4eac9c5a52cfab459ba3e5c8456cdfe01d09056d1cb3594701626294fb",
+            "key": "#zQ3shQT67eomj2QvQt2hY8847kNexvtrf8rGFjew9zwza17mL"
+          }
+        },
+        {
+          "author": "did:key:zQ3shQT67eomj2QvQt2hY8847kNexvtrf8rGFjew9zwza17mL",
+          "timestamp": "2022-01-25T03:58:20.394Z",
+          "data": {
+            "source": "self",
+            "predicate": "rdf://creator",
+            "target": "did:key:zQ3shQT67eomj2QvQt2hY8847kNexvtrf8rGFjew9zwza17mL"
+          },
+          "proof": {
+            "valid": true,
+            "invalid": false,
+            "signature": "18714f84710690144821f9791b036e4f63dbb37385bfe71eb9d75b6e880065aa48ee9aaf77acacfbef83c3b57c928d67bf13b8f8e9f4a0cdff35a7c3d37ca7f6",
+            "key": "#zQ3shQT67eomj2QvQt2hY8847kNexvtrf8rGFjew9zwza17mL"
+          }
+        },
+        {
+          "author": "did:key:zQ3shQT67eomj2QvQt2hY8847kNexvtrf8rGFjew9zwza17mL",
+          "timestamp": "2022-01-25T03:58:20.407Z",
+          "data": {
+            "source": "self",
+            "predicate": "language",
+            "target": "QmZHidmpcFxLMPqakkugA8vBhJnN5dRe26h7krNakQdfa8"
+          },
+          "proof": {
+            "valid": true,
+            "invalid": false,
+            "signature": "29761593b0f9f0df8bf3d2c66f22a74a0ef10621e7be1dd65a19eb221ec6d8d9004175ef6b2a3e314332919791941674efcbd05b6b70c98322b5adfbc3ce1604",
+            "key": "#zQ3shQT67eomj2QvQt2hY8847kNexvtrf8rGFjew9zwza17mL"
+          }
+        },
+        {
+          "author": "did:key:zQ3shQT67eomj2QvQt2hY8847kNexvtrf8rGFjew9zwza17mL",
+          "timestamp": "2022-01-25T03:58:20.410Z",
+          "data": {
+            "source": "self",
+            "predicate": "language",
+            "target": "QmaYHPWYsnM4mUbT4qxYkBHMPyzzYgku3f6imRsuKndLF2"
+          },
+          "proof": {
+            "valid": true,
+            "invalid": false,
+            "signature": "2cad0f672feab5111fa86065ce2adf45ecce9abed997d57930e65d2dbdd2554e678ecf2a116a4af5fc4ead9b2182f71dbc9c3442907b0357afd7737666fdd19d",
+            "key": "#zQ3shQT67eomj2QvQt2hY8847kNexvtrf8rGFjew9zwza17mL"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,63 +1,22 @@
 {
-  "name": "flux",
-  "version": "0.3.0",
-  "private": true,
-  "description": "A social web3 tool kit for communities",
-  "author": "josh@junto.foundation",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/juntofoundation/flux.git"
-  },
+  "name": "flux-monorepo",
+  "version": "0.1.0",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite --host",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "eslint src/**/*.ts src/**/*.js src/**/*.vue",
-    "test": "jest --env=jsdom"
-  },
-  "main": "background.js",
-  "dependencies": {
-    "@junto-foundation/chat-view": "^0.1.31",
-    "@junto-foundation/junto-elements": "^0.4.3",
-    "@perspect3vism/ad4m": "^0.1.37",
-    "@perspect3vism/ad4m-connect": "^0.0.9",
-    "date-fns": "^2.29.3",
-    "dexie": "^3.2.2",
-    "level": "^7.0.1",
-    "nanoid": "^3.1.30",
-    "pinia": "^2.0.2",
-    "sass": "^1.55.0",
-    "uuid": "^8.3.2",
-    "vue": "^3.0.0",
-    "vue-advanced-cropper": "^2.3.1",
-    "vue-router": "^4.0.0-0"
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint"
   },
   "devDependencies": {
-    "@testing-library/vue": "^6.4.2",
-    "@types/jest": "^26.0.20",
-    "@types/level": "^6.0.0",
-    "@types/mocha": "^8.2.1",
-    "@types/uuid": "^8.3.0",
-    "@vitejs/plugin-vue": "^2.3.3",
-    "@vue/eslint-config-prettier": "^6.0.0",
-    "@vue/eslint-config-typescript": "^7.0.0",
-    "babel-jest": "^26.0.0",
-    "eslint": "^7.28.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-prettier": "^3.4.0",
-    "eslint-plugin-vue": "^7.10.0",
-    "jest": "^26.0.0",
-    "jest-transform-stub": "^2.0.0",
-    "react": "^17.0.2",
-    "ts-jest": "^26.0.0",
-    "typescript": "^4.4.2",
-    "vite": "^2.9.9",
-    "vue-devtools": "^5.1.4",
-    "vue-jest": "^5.0.0-alpha.10"
+    "eslint-config-custom": "*",
+    "prettier": "latest",
+    "turbo": "latest"
   },
-  "contributors": [
-    "eric@junto.foundation",
-    "kaichaosuna@gmail.com"
-  ]
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {},
+  "packageManager": "yarn@1.22.19"
 }

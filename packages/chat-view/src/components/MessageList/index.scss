@@ -1,0 +1,46 @@
+.main {
+  flex: 1;
+  position: relative;
+}
+
+.newMessagesButton {
+  position: absolute;
+  top: var(--j-space-500);
+  left: 50%;
+  z-index: 10;
+  transform: translateX(-50%);
+}
+
+.reactHint {
+  position: absolute;
+  z-index: 99;
+  font-size: var(--j-font-size-400);
+  font-weight: 500;
+  padding: var(--j-space-300) var(--j-space-300);
+  background: var(--j-color-ui-800);
+  color: var(--j-color-ui-200);
+  border-radius: var(--j-border-radius);
+  white-space: nowrap;
+  z-index: 999;
+  margin-left: 10px;
+}
+
+.arrow,
+.arrow::before {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--j-color-ui-800);
+}
+
+.arrow {
+  visibility: hidden;
+}
+
+.arrow::before {
+  visibility: visible;
+  content: "";
+  transform: rotate(45deg);
+  left: -12px;
+  top: -14px;
+}

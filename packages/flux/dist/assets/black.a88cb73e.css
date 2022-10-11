@@ -1,0 +1,1 @@
+:root[theme=black]{--j-color-subtractor: 100%;--j-color-multiplier: -1}:root[theme=black] j-tooltip::part(tooltip){background:var(--j-color-ui-100);color:var(--j-color-black)}

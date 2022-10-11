@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mini Chat View</title>
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+      }
+      html {
+        box-sizing: border-box;
+      }
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@junto-foundation/junto-elements@latest/dist/main.css"
+    />
+    <script src="https://unpkg.com/@junto-foundation/junto-elements@latest"></script>
+  </head>
+  <body>
+    <perspective-view style="height: 100vh; display: block"></perspective-view>
+    <script type="module">
+      const uuid = window.location.href.split("/").pop().replace("#", "");
+      const el = document.querySelector("perspective-view");
+      el.setAttribute("perspective-uuid", uuid);
+      el.addEventListener("perspective-click", (e) => {
+        el.setAttribute(e.detail.uuid);
+      });
+
+      import MiniChatView from "./dist/main.js";
+      customElements.define("perspective-view", MiniChatView);
+    </script>
+  </body>
+</html>

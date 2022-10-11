@@ -1,0 +1,11 @@
+{
+  "id": "Test1",
+  "name": "Test1",
+  "creatorDid": "",
+  "createdAt":"2021-07-26T13:08:27.239Z",
+  "sourcePerspective": "bebd2ac2-1e80-44d2-b807-0163c2bcef40",
+  "hasNewMessages": false,
+  "notifications": {
+    "mute": false
+  }
+}

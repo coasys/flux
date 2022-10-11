@@ -1,0 +1,5 @@
+export const SHORT_FORM_EXPRESSION =
+  "QmVUzUeNYin7CQp9oAdVvRyPYLN4mcPxEQ39TJr3Xi28uW";
+
+export const GROUP_EXPRESSION =
+  "QmbHzPQZBcSUBkKExJzM46QVdveenZSPTH5Pe3hQzrJJ2t";
