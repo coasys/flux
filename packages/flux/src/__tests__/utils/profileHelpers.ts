@@ -1,5 +1,5 @@
 import { ProfileWithDID } from "@/store/types";
-import { getProfile } from "@/utils/profileHelpers";
+import getProfile from "utils/api/getProfile";
 import agentByDIDLinksFixture from "../fixtures/agentByDIDLinks.json";
 import { ad4mClient } from "@/app";
 

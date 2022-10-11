@@ -5,7 +5,7 @@ import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useUserStore } from "@/store/user";
 import { ad4mClient } from "@/app";
 import agentByDIDLinksFixture from "../../../fixtures/agentByDIDLinks.json";
-import { FLUX_PROXY_PROFILE_NAME, HAS_BG_IMAGE, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "@/constants/profile";
+import { FLUX_PROXY_PROFILE_NAME, HAS_BG_IMAGE, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "utils/constants/profile";
 
 describe("Store Actions", () => {
   let store: Pinia;

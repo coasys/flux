@@ -15,7 +15,7 @@ import { useDataStore } from "@/store/data";
 import agentByDIDLinksFixture from "../../../fixtures/agentByDIDLinks.json";
 import {
   PERSPECTIVE_DIFF_SYNC,
-} from "@/constants/languages";
+} from "utils/constants/languages";
 import { ad4mClient } from "@/app";
 
 describe("Create Community", () => {

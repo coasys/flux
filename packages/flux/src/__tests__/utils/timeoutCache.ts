@@ -1,4 +1,4 @@
-import sleep from "@/utils/sleep";
+import sleep from "utils/helpers/sleep";
 import { TimeoutCache } from "@/utils/timeoutCache";
 import { mocked } from "ts-jest/utils";
 

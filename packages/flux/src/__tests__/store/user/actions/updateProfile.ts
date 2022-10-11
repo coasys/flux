@@ -5,7 +5,7 @@ import { useUserStore } from "@/store/user";
 import { useDataStore } from "@/store/data";
 import { ad4mClient } from "@/app";
 import agentByDIDLinksFixture from "../../../fixtures/agentByDIDLinks.json";
-import { FLUX_PROXY_PROFILE_NAME } from "@/constants/profile";
+import { FLUX_PROXY_PROFILE_NAME } from "utils/constants/profile";
 
 describe("Update Profile", () => {
   let store: Pinia;
