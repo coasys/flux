@@ -7,6 +7,12 @@ if (customElements.get("emoji-picker") === undefined) {
   });
 }
 
+if (customElements.get("ad4m-connect") === undefined) {
+  import("@perspect3vism/ad4m-connect").then((widget) => {
+    console.log("imported?");
+  });
+}
+
 import register from "./custom-element.js";
 import MyComponent from "./App";
 

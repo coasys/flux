@@ -23,12 +23,5 @@ export default {
   },
   server: {
     port: 3030,
-    proxy: {
-      "/dist/main.js": {
-        target: "http://127.0.0.1:8080",
-        changeOrigin: true,
-        secure: false,
-      },
-    },
   },
 };
