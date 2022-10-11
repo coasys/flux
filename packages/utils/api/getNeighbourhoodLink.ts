@@ -1,8 +1,8 @@
-import ad4mClient from "./client";
 import retry from "../helpers/retry";
 import { LinkQuery, Literal } from "@perspect3vism/ad4m";
 import { findLink } from "../helpers/linkHelpers";
 import { CARD_HIDDEN } from "../constants/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 
 export interface Payload {
@@ -40,6 +40,8 @@ export default async function ({
   isHidden
 }: Payload) {
   try {
+    const client = await getAd4mClient();
+    
     // @ts-ignore
     const [neighbourhoods] = findNeighbourhood(message);
 
@@ -47,10 +49,10 @@ export default async function ({
 
     if (!isHidden) {
       for (const neighbourhood of neighbourhoods) {
-        const exp = await ad4mClient.expression.get(neighbourhood);
+        const exp = await client.expression.get(neighbourhood);
         const links = JSON.parse(exp.data).meta.links;
 
-        const perspectives = await ad4mClient.perspective.all();
+        const perspectives = await client.perspective.all();
         const perspectiveUuid = perspectives.find(e => e.sharedUrl === neighbourhood)?.uuid;
 
         hoods.push({
@@ -76,8 +78,10 @@ export async function getNeighbourhoodCardHidden({
   messageUrl,
 }) {
   try {
+    const client = await getAd4mClient();
+    
     const isHidden = await retry(async () => {
-      return await ad4mClient.perspective.queryLinks(
+      return await client.perspective.queryLinks(
         perspectiveUuid,
         new LinkQuery({
           source: messageUrl,

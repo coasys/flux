@@ -1,6 +1,6 @@
 import { Link } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { REACTION } from "../constants/ad4m";
-import ad4mClient from "./client";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -14,7 +14,9 @@ export default async function ({
   reaction,
 }: Payload) {
   try {
-    const link = await ad4mClient.perspective.addLink(
+    const client = await getAd4mClient();
+    
+    const link = await client.perspective.addLink(
       perspectiveUuid,
       new Link({
         source: messageUrl,

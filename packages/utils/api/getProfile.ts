@@ -1,17 +1,18 @@
 import {
-  USERNAME,
-  GIVEN_NAME,
-  FAMILY_NAME,
-  EMAIL,
-  PROFILE_IMAGE,
-  PROFILE_THUMBNNAIL_IMAGE,
+  HAS_USERNAME,
+  HAS_GIVEN_NAME,
+  HAS_FAMILY_NAME,
+  HAS_EMAIL,
+  HAS_PROFILE_IMAGE,
+  HAS_THUMBNAIL_IMAGE,
   FLUX_PROFILE,
-  BG_IMAGE,
-  BIO,
+  HAS_BG_IMAGE,
+  HAS_BIO,
 } from "../constants/profile";
 import { DexieProfile } from "../helpers/storageHelpers";
 import { Profile } from "../types";
-import ad4mClient from "./client";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { mapLiteralLinks } from "../helpers/linkHelpers";
 
 export interface Payload {
   url: string;
@@ -20,28 +21,35 @@ export interface Payload {
 
 export async function getImage(expUrl: string): Promise<string> {
   return new Promise(async (resolve, reject) => {
-    setTimeout(() => {
-      resolve("");
-    }, 1000);
+    const client = await getAd4mClient();
 
-    try {
-      const image = await ad4mClient.expression.get(expUrl);
-      
-      if (image) {
-        resolve(image.data.slice(1, -1));
+    if (expUrl) {
+      setTimeout(() => {
+        resolve("");
+      }, 1000);
+  
+      try {
+        const image = await client.expression.get(expUrl);
+  
+        if (image) {
+          resolve(image.data.slice(1, -1));
+        }
+  
+        resolve("");
+      } catch (e) {
+        console.error(e);
+        resolve("");
       }
-
+    } else {
       resolve("")
-    } catch (e) {
-      console.error(e)
-      resolve("");
     }
-  })
+  });
 }
 
 export default async function getProfile(did: string): Promise<any | null> {
-  const cleanedDid = did.replace('did://', '');
-  const profile: any = {
+  const client = await getAd4mClient();
+
+  let profile: any = {
     username: "",
     bio: "",
     email: "",
@@ -50,49 +58,47 @@ export default async function getProfile(did: string): Promise<any | null> {
     thumbnailPicture: "",
     givenName: "",
     familyName: "",
-    did: cleanedDid,
+    did: "",
   };
 
-  const agentPerspective = await ad4mClient.agent.byDID(cleanedDid);
+  if (typeof did === 'string') {
+    const cleanedDid = did.replace('did://', '');
 
-  if (agentPerspective) {
-    const links = agentPerspective!.perspective!.links;
+    profile.did = cleanedDid;
 
-    const dexie = new DexieProfile(`flux://profile`, 1);
+    const agentPerspective = await client.agent.byDID(cleanedDid);
+
+    if (agentPerspective) {
+      const links = agentPerspective!.perspective!.links;
   
-    let cachedProfile = await dexie.get(cleanedDid);
-  
-    if (cachedProfile) {
-      return cachedProfile as Profile;
-    }
-  
-    for (const link of links.filter((e) => e.data.source === FLUX_PROFILE)) {  
-      switch (link.data.predicate) {
-        case USERNAME:
-          profile!.username = link.data.target;
-          break;
-        case BIO:
-          profile!.username = link.data.target;
-          break;
-        case GIVEN_NAME:
-          profile!.givenName = link.data.target;
-          break;
-        case FAMILY_NAME:
-          profile!.familyName = link.data.target;
-          break;
-        case PROFILE_THUMBNNAIL_IMAGE:
-          profile!.thumbnailPicture = link.data.target;
-          break;
-        case EMAIL:
-          profile!.email = link.data.target;
-          break;
-        default:
-          break;
+      const dexie = new DexieProfile(`flux://profile`, 1);
+    
+      let cachedProfile = await dexie.get(cleanedDid);
+    
+      if (cachedProfile) {
+        return cachedProfile as Profile;
       }
-    }
   
-    dexie.save(cleanedDid, profile);
-  }
+      const mappedProfile = mapLiteralLinks(links.filter((e) => e.data.source === FLUX_PROFILE), {
+        username: HAS_USERNAME,
+        bio: HAS_BIO,
+        givenName: HAS_GIVEN_NAME,
+        email: HAS_EMAIL,
+        familyName: HAS_FAMILY_NAME,
+        profilePicture: HAS_PROFILE_IMAGE,
+        thumbnailPicture: HAS_THUMBNAIL_IMAGE,
+        profileBg: HAS_BG_IMAGE,
+      });
 
+
+      profile = {
+        ...mappedProfile,
+        did: cleanedDid
+      }
+  
+      dexie.save(cleanedDid, profile as any);
+    }
+  }
+  
   return profile;
 }

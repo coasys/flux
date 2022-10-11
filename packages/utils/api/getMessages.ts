@@ -1,7 +1,7 @@
 import { Literal } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { MAX_MESSAGES } from "../constants/general";
 import { Reaction } from "../types";
-import ad4mClient from "./client";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -15,17 +15,19 @@ export default async function ({
   from,
 }: Payload) {
   try {
+    const client = await getAd4mClient();
+    
     let expressionLinks;
     if (from) {
       console.log("Making time based query");
       let fromTime = from.getTime();
-      expressionLinks = await ad4mClient.perspective.queryProlog(
+      expressionLinks = await client.perspective.queryProlog(
         perspectiveUuid, 
         `limit(${MAX_MESSAGES}, (order_by([desc(Timestamp)], flux_message("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden)), Timestamp =< ${fromTime})).`
       );
       console.log(expressionLinks);
     } else {
-      expressionLinks = await ad4mClient.perspective.queryProlog(
+      expressionLinks = await client.perspective.queryProlog(
         perspectiveUuid,
         `limit(${MAX_MESSAGES}, order_by([desc(Timestamp)], flux_message("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden))).`
       );

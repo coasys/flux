@@ -1,6 +1,6 @@
 import getMember from "./getProfile";
-import ad4mClient from "./client";
 import { SELF, MEMBER } from "../constants/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -10,9 +10,12 @@ export interface Payload {
 
 export default async function ({ perspectiveUuid, neighbourhoodUrl, addProfile }: Payload) {
   try {
-    const memberLinks = await ad4mClient.perspective.queryProlog(perspectiveUuid, `triple("${SELF}", "${MEMBER}", M).`);
+    const client = await getAd4mClient();
+    
+    const memberLinks = await client.perspective.queryProlog(perspectiveUuid, `triple("${SELF}", "${MEMBER}", M).`);
     for (const link of memberLinks) {
       getMember(link.M).then((member) => {
+        console.log('wwww', member)
         if (member) {
           addProfile(member)
         }

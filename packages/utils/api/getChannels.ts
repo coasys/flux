@@ -1,6 +1,6 @@
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { CHANNEL, SELF } from "../constants/ad4m";
-import ad4mClient from "./client";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -9,7 +9,9 @@ export interface Payload {
 
 export default async function ({ perspectiveUuid, neighbourhoodUrl }: Payload) {
   try {
-    const expressionLinks = await ad4mClient.perspective.queryProlog(perspectiveUuid, `link("${SELF}", "${CHANNEL}", C, T, A).`);
+    const client = await getAd4mClient();
+    
+    const expressionLinks = await client.perspective.queryProlog(perspectiveUuid, `link("${SELF}", "${CHANNEL}", C, T, A).`);
     const channels: {[x: string]: any} = {}
 
     if (expressionLinks) {

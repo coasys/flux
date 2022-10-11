@@ -1,6 +1,6 @@
-import ad4mClient from "./client";
-import { LinkQuery, Link } from "@perspect3vism/ad4m";
+import { Link } from "@perspect3vism/ad4m";
 import { CARD_HIDDEN, OMIT } from "../constants/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -12,7 +12,9 @@ export default async function ({
   messageUrl,
 }: Payload) {
   try {
-    const link = await ad4mClient.perspective.addLink(
+    const client = await getAd4mClient();
+    
+    const link = await client.perspective.addLink(
       perspectiveUuid,
       new Link({
         source: messageUrl,

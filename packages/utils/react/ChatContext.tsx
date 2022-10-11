@@ -15,9 +15,9 @@ import getMe from "../api/getMe";
 import { SHORT_FORM_EXPRESSION } from "../helpers/languageHelpers";
 import { DexieMessages, DexieUI } from "../helpers/storageHelpers";
 import { DIRECTLY_SUCCEEDED_BY, REACTION } from "../constants/ad4m";
-import ad4mClient from "../api/client";
 import hideEmbeds from "../api/hideEmbeds";
 import { MAX_MESSAGES } from "../constants/general";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 type State = {
   isFetchingMessages: boolean;
@@ -253,6 +253,8 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   }
 
   async function handleLinkAdded(link) {
+    const client = await getAd4mClient();
+    
     console.log("Got message link", link);
 
     const agent = await getMe();
@@ -260,7 +262,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     const isMessageFromSelf = link.author === agent.did;
     if (!isMessageFromSelf) {
       if (linkIs.message(link)) {
-        const isSameChannel = await ad4mClient.perspective.queryProlog(perspectiveUuid, `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.target}").`);
+        const isSameChannel = await client.perspective.queryProlog(perspectiveUuid, `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.target}").`);
         if (isSameChannel) {
           const message = getMessage(link);
   
@@ -280,7 +282,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       }
 
       if (linkIs.reply(link)) {
-        const isSameChannel = await ad4mClient.perspective.queryProlog(perspectiveUuid, `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.source}").`);
+        const isSameChannel = await client.perspective.queryProlog(perspectiveUuid, `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.source}").`);
   
         if (isSameChannel) {
           const message = getMessage(link);

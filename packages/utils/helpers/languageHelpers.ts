@@ -1,4 +1,5 @@
 import { LinkExpression, LanguageMeta } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import ad4mClient from "../api/client";
 
 export const SHORT_FORM_EXPRESSION = "shortform-expression";
@@ -6,8 +7,10 @@ export const SHORT_FORM_EXPRESSION = "shortform-expression";
 export const GROUP_EXPRESSION = "group-expression";
 
 
-export function getLanguageMeta(link: LinkExpression) {
-  return ad4mClient.languages.meta(link.data.target);
+export async function getLanguageMeta(link: LinkExpression) {
+  const client = await getAd4mClient();
+
+  return client.languages.meta(link.data.target);
 }
 
 export function getMetaFromLinks(links: LinkExpression[]) {

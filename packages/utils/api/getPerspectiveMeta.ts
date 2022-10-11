@@ -1,9 +1,11 @@
 import { findLink } from "../helpers/linkHelpers";
 import { getMetaFromLinks, keyedLanguages } from "../helpers/languageHelpers";
-import ad4mClient from "./client";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 export default async function getPerspectiveMeta(uuid: string) {
-  const perspective = await ad4mClient.perspective.byUUID(uuid);
+  const client = await getAd4mClient();
+  
+  const perspective = await client.perspective.byUUID(uuid);
   
   if (!perspective || !perspective.neighbourhood) {
     throw new Error("Could not load meta data from perspective");

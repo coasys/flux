@@ -1,4 +1,4 @@
-import ad4mClient from "./client";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -8,7 +8,9 @@ export interface Payload {
 
 export default async function ({ perspectiveUuid, added, removed }: Payload) {
   try {
-    const perspective = await ad4mClient.perspective.byUUID(perspectiveUuid);
+    const client = await getAd4mClient();
+    
+    const perspective = await client.perspective.byUUID(perspectiveUuid);
     
     if (added) {
       perspective.addListener('link-added', added);

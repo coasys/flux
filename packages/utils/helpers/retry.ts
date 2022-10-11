@@ -1,12 +1,9 @@
+import sleep from './sleep';
+
 type RetryOptions = {
   defaultValue?: any;
   count?: number;
   sleepDuration?: number;
-}
-
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export default async function retry(fn: () => any, {
