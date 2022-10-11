@@ -89,10 +89,10 @@ import {
   AD4M_PREDICATE_USERNAME,
   AD4M_PREDICATE_FIRSTNAME,
   AD4M_PREDICATE_LASTNAME,
-} from "@/constants/profile";
+} from "utils/constants/profile";
 
 import Logo from "@/components/logo/Logo.vue";
-import { mapLiteralLinks } from "@/utils/linkHelpers";
+import { mapLiteralLinks } from "utils/helpers/linkHelpers";
 import { useAppStore } from "@/store/app";
 
 export default defineComponent({

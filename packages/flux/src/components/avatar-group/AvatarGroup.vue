@@ -32,7 +32,7 @@
 
 <script lang="ts">
 import { ProfileWithDID } from "@/store/types";
-import { getProfile } from "@/utils/profileHelpers";
+import getProfile from "utils/api/getProfile";
 import { defineComponent } from "vue";
 import Skeleton from "@/components/skeleton/Skeleton.vue";
 import Avatar from "@/components/avatar/Avatar.vue";

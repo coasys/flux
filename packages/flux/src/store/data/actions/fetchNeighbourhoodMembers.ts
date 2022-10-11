@@ -2,7 +2,7 @@ import { LinkExpression } from "@perspect3vism/ad4m";
 
 import { useDataStore } from "..";
 
-import { MEMBER, SELF } from "@/constants/neighbourhoodMeta";
+import { MEMBER, SELF } from "utils/constants/neighbourhoodMeta";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export default async function (id: string): Promise<void> {

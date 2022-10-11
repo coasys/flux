@@ -60,26 +60,21 @@
 </template>
 
 <script lang="ts">
-import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
+import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
-import getAgentLinks from "@/utils/getAgentLinks";
+import getAgentLinks from "utils/api/getAgentLinks";
 import { useValidation } from "@/utils/validation";
-import { Link, PerspectiveInput, Literal } from "@perspect3vism/ad4m";
+import { PerspectiveInput } from "@perspect3vism/ad4m";
 import { defineComponent, ref } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { nanoid } from "nanoid";
-import removeTypeName from "@/utils/removeTypeName";
+import removeTypeName from "utils/helpers/removeTypeName";
 import {
-  AREA_HAS_DESCRIPTION,
-  AREA_HAS_IMAGE,
-  AREA_HAS_NAME,
-  AREA_TYPE,
   AREA_WEBLINK,
-  FLUX_PROFILE,
   HAS_AREA,
   HAS_POST,
-} from "@/constants/profile";
+} from "utils/constants/profile";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 
 export default defineComponent({

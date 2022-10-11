@@ -195,7 +195,7 @@ import EditProfile from "@/containers/EditProfile.vue";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { mapActions } from "pinia";
-import getAgentLinks from "@/utils/getAgentLinks";
+import getAgentLinks from "utils/api/getAgentLinks";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 import Avatar from "@/components/avatar/Avatar.vue";
 import {
@@ -203,8 +203,8 @@ import {
   AREA_SIMPLE_AREA,
   AREA_WEBLINK,
   HAS_AREA,
-} from "@/constants/profile";
-import { getImage, getProfile } from "@/utils/profileHelpers";
+} from "utils/constants/profile";
+import getProfile, { getImage } from "utils/api/getProfile";
 
 export default defineComponent({
   name: "ProfileView",

@@ -61,20 +61,15 @@
 </template>
 
 <script lang="ts">
-import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
+import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
 import {
-  AREA_HAS_DESCRIPTION,
-  AREA_HAS_IMAGES,
-  AREA_HAS_NAME,
   AREA_SIMPLE_AREA,
-  AREA_TYPE,
-  FLUX_PROFILE,
   HAS_AREA,
-} from "@/constants/profile";
+} from "utils/constants/profile";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
-import getAgentLinks from "@/utils/getAgentLinks";
-import removeTypeName from "@/utils/removeTypeName";
+import getAgentLinks from "utils/api/getAgentLinks";
+import removeTypeName from "utils/helpers/removeTypeName";
 import { useValidation } from "@/utils/validation";
 import { Link, PerspectiveInput } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";

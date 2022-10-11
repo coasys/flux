@@ -56,7 +56,7 @@ import {
   FLUX_GROUP_THUMBNAIL,
   MEMBER,
   MESSAGE,
-} from "./constants/neighbourhoodMeta";
+} from "utils/constants/neighbourhoodMeta";
 import { useUserStore } from "./store/user";
 import { buildCommunity, hydrateState } from "./store/data/hydrateState";
 import { getGroupMetadata } from "./store/data/actions/fetchNeighbourhoodMetadata";

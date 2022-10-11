@@ -62,7 +62,7 @@ import { defineComponent } from "vue";
 import { NeighbourhoodState, ProfileWithDID } from "@/store/types";
 import { useDataStore } from "@/store/data";
 
-import { getProfile } from "@/utils/profileHelpers";
+import getProfile from "utils/api/getProfile";
 import Skeleton from "@/components/skeleton/Skeleton.vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 import Avatar from "@/components/avatar/Avatar.vue";

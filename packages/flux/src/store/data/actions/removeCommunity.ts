@@ -1,7 +1,5 @@
 import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/web'
-import { CHANNEL, SELF } from "@/constants/neighbourhoodMeta";
 import { useAppStore } from "@/store/app";
-import { LinkQuery } from "@perspect3vism/ad4m";
 import { useDataStore } from "..";
 
 export interface Payload {

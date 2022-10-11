@@ -35,7 +35,7 @@
 import { defineComponent } from "vue";
 import { Profile } from "@/store/types";
 import Skeleton from "@/components/skeleton/Skeleton.vue";
-import { getProfile } from "@/utils/profileHelpers";
+import getProfile from "utils/api/getProfile";
 import Avatar from "@/components/avatar/Avatar.vue";
 
 export default defineComponent({

@@ -1,7 +1,7 @@
 import { useUserStore } from "@/store/user";
 import { RouteLocationNormalizedLoaded, Router } from "vue-router";
 import { useDataStore } from "..";
-import { getProfile } from "@/utils/profileHelpers";
+import getProfile from "utils/api/getProfile";
 import { differenceInSeconds, parseISO } from "date-fns";
 import { useAppStore } from "@/store/app";
 import { Literal } from "@perspect3vism/ad4m";

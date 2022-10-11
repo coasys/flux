@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import {
   PERSPECTIVE_DIFF_SYNC,
   NOTE_IPFS_EXPRESSION_OFFICIAL,
-} from "@/constants/languages";
+} from "utils/constants/languages";
 
 import {
   MEMBER,
@@ -12,7 +12,7 @@ import {
   FLUX_GROUP_DESCRIPTION,
   FLUX_GROUP_THUMBNAIL,
   ZOME,
-} from "@/constants/neighbourhoodMeta";
+} from "utils/constants/neighbourhoodMeta";
 
 import { CommunityState } from "@/store/types";
 import { Perspective, PerspectiveHandle, Literal } from "@perspect3vism/ad4m";
@@ -24,7 +24,7 @@ import {
   blobToDataURL,
   dataURItoBlob,
   resizeImage,
-} from "@/utils/profileHelpers";
+} from "utils/helpers/profileHelpers";
 
 export interface Payload {
   perspectiveName: string;

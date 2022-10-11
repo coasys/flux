@@ -18,14 +18,11 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import ExpandableImage from "@/components/expandable-img/expandable-img.vue";
-import { useUserStore } from "@/store/user";
-import getAgentLinks from "@/utils/getAgentLinks";
+import getAgentLinks from "utils/api/getAgentLinks";
 import { useAppStore } from "@/store/app";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
-import { AREA_TYPE, AREA_HAS_NAME, AREA_HAS_DESCRIPTION, HAS_POST, AREA_HAS_IMAGE, AREA_HAS_IMAGES } from "@/constants/profile";
-import { mapLiteralLinks } from "@/utils/linkHelpers";
 import { Literal } from "@perspect3vism/ad4m";
-import { getImage } from "@/utils/profileHelpers";
+import { getImage } from "utils/api/getProfile";
 
 export default defineComponent({
   name: "ProfileFeed",

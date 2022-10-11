@@ -1,13 +1,13 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
-import { CHANNEL, SELF } from "@/constants/neighbourhoodMeta";
+import { CHANNEL, SELF } from "utils/constants/neighbourhoodMeta";
 import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
 import { LinkExpression, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useDataStore } from ".";
 import { CommunityState, LocalCommunityState } from "../types";
 import { getGroupMetadata } from "./actions/fetchNeighbourhoodMetadata";
 import { useUserStore } from "../user";
-import { getProfile } from "@/utils/profileHelpers";
-import { FLUX_PROXY_PROFILE_NAME } from "@/constants/profile";
+import getProfile from "utils/api/getProfile";
+import { FLUX_PROXY_PROFILE_NAME } from "utils/constants/profile";
 
 export async function getMetaFromLinks(links: LinkExpression[]) {
   const client = await getAd4mClient();

@@ -171,7 +171,7 @@ import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { DexieIPFS } from "@/utils/storageHelpers";
-import { getImage } from "@/utils/profileHelpers";
+import { getImage } from "utils/api/getProfile";
 
 export default defineComponent({
   components: { AvatarGroup },

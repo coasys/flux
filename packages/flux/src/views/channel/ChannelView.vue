@@ -66,13 +66,12 @@
 </template>
 
 <script lang="ts">
-import ChatView from "chat-view";
+import ChatView from "@junto-foundation/chat-view";
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 import Profile from "@/containers/Profile.vue";
-import useEventEmitter from "@/utils/useEventEmitter";
 import { useAppStore } from "@/store/app";
 
 interface MentionTrigger {
@@ -93,7 +92,6 @@ export default defineComponent({
     const memberMentions = ref<MentionTrigger[]>([]);
     const activeProfile = ref<any>({});
     const showProfile = ref(false);
-    const bus = useEventEmitter();
     const activeCommunity = ref<any>({});
     const showJoinCommuinityModal = ref(false);
     const isJoiningCommunity = ref(false);
@@ -105,7 +103,6 @@ export default defineComponent({
       memberMentions,
       activeProfile,
       showProfile,
-      bus,
       showJoinCommuinityModal,
       activeCommunity,
       isJoiningCommunity,

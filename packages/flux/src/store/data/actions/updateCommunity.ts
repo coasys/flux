@@ -1,18 +1,18 @@
-import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "@/constants/languages";
+import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
 import {
   SELF,
   FLUX_GROUP_NAME,
   FLUX_GROUP_DESCRIPTION,
   FLUX_GROUP_IMAGE,
   FLUX_GROUP_THUMBNAIL,
-} from "@/constants/neighbourhoodMeta";
+} from "utils/constants/neighbourhoodMeta";
 import { useAppStore } from "@/store/app";
 
 import {
   resizeImage,
   dataURItoBlob,
   blobToDataURL,
-} from "@/utils/profileHelpers";
+} from "utils/helpers/profileHelpers";
 import { LinkQuery } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/web";
 import { useDataStore } from "..";

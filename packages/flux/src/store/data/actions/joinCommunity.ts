@@ -1,6 +1,6 @@
 import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
 
-import { MEMBER, SELF } from "@/constants/neighbourhoodMeta";
+import { MEMBER, SELF } from "utils/constants/neighbourhoodMeta";
 
 import { Link } from "@perspect3vism/ad4m";
 

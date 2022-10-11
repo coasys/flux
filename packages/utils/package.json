@@ -21,6 +21,7 @@
   },
   "peerDependencies": {
     "react": "^17.0.2",
-    "vue": "^3.2.12"
+    "vue": "^3.2.12",
+    "@perspect3vism/ad4m-connect": "^0.0.9"
   }
 }

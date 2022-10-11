@@ -4,7 +4,7 @@ import {
   NAME,
   CREATOR,
   CREATED_AT,
-} from "@/constants/neighbourhoodMeta";
+} from "utils/constants/neighbourhoodMeta";
 
 export function getMetaFromNeighbourhood(links: LinkExpression[]): {
   name: string;
