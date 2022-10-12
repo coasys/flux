@@ -2,13 +2,19 @@
   padding-top: var(--j-space-300);
   padding-bottom: var(--j-space-300);
   padding-left: var(--j-space-500);
-  display: grid;
+  padding-right: var(--j-space-500);
   position: relative;
-  grid-template-columns: 60px 1fr;
-  column-gap: var(--j-space-100);
-
+  
   &:hover {
     background: rgba(0, 0, 0, 0.02);
+  }
+
+  & .messageItemWrapper {
+    width: 100%;
+    max-width: 1000px;
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    column-gap: var(--j-space-100);
   }
 
   & .messageAvatar {

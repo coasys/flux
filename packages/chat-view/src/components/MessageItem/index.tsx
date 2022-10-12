@@ -33,7 +33,7 @@ export default function MessageItem({
   showAvatar,
   onOpenEmojiPicker,
   mainRef,
-  perspectiveUuid
+  perspectiveUuid,
 }) {
   const [showToolbar, setShowToolbar] = useState(false);
   const messageRef = useRef<any>(null);
@@ -81,7 +81,7 @@ export default function MessageItem({
         author: alreadyMadeReaction.author,
         data: {
           predicate: REACTION,
-          target:`emoji://${alreadyMadeReaction.content}`,
+          target: `emoji://${alreadyMadeReaction.content}`,
           source: message.id,
         },
         proof: {
@@ -162,7 +162,7 @@ export default function MessageItem({
       detail: {
         uuid: link.perspectiveUuid,
         channel: "Home",
-        link
+        link,
       },
       bubbles: true,
     });
@@ -170,20 +170,23 @@ export default function MessageItem({
   }
 
   useEffect(() => {
-    getNeighbourhoodCards()
+    getNeighbourhoodCards();
   }, [message]);
 
   useEffect(() => {
-    getNeighbourhoodCards()
+    getNeighbourhoodCards();
   }, [message.isNeighbourhoodCardHidden]);
 
-
   const getNeighbourhoodCards = async () => {
-    const links = await getNeighbourhoodLink({perspectiveUuid, messageUrl: message.id, message: message.content, isHidden: message.isNeighbourhoodCardHidden });
+    const links = await getNeighbourhoodLink({
+      perspectiveUuid,
+      messageUrl: message.id,
+      message: message.content,
+      isHidden: message.isNeighbourhoodCardHidden,
+    });
 
     setNeighbourhoodCards(links);
   };
-
 
   const author = members[message.author] || {};
   const replyAuthor = members[message?.replies[0]?.author] || {};
@@ -196,115 +199,139 @@ export default function MessageItem({
       class={styles.message}
       isReplying={keyedMessages[currentReply]?.id === message.id}
     >
-      {replyMessage && (
-        <>
-          <div class={styles.replyLineWrapper}>
-            <div class={styles.replyLine} />
-          </div>
-          <div class={styles.messageFlex}>
-            <div
-              class={styles.messageFlex}
-              onClick={() => onProfileClick(replyAuthor?.did)}
-            >
-              {replyAuthor?.did ? <Avatar author={replyAuthor} size="small" /> : <Skeleton variant="circle" width={20} height={20} />}
-              {replyAuthor.username ? <div class={styles.messageUsernameNoMargin}>
-                {replyAuthor?.username}
-              </div> : <div style={{marginBottom: 5}}>
-              <Skeleton width={60} height={20} />
-            </div>}
+      <div class={styles.messageItemWrapper}>
+        {replyMessage && (
+          <>
+            <div class={styles.replyLineWrapper}>
+              <div class={styles.replyLine} />
             </div>
-            <div
-              class={styles.replyContent}
-              dangerouslySetInnerHTML={{ __html: replyMessage.content }}
-            />
-          </div>
-        </>
-      )}
-      <div>
-        {replyMessage || showAvatar ? (
-          <j-flex>
-            {author?.did ? <Avatar
-              author={author}
-              onProfileClick={onProfileClick}
-            ></Avatar> : <Skeleton variant="circle" width={42} height={42} />}
-          </j-flex>
-        ) : (
-          <small
-            class={styles.timestampLeft}
-            data-rh
-            data-timestamp={format(
-              new Date(message.timestamp),
-              "EEEE, MMMM d, yyyy, HH:MM"
-            )}
-          >
-            {format(new Date(message.timestamp), "HH:MM ")}
-          </small>
+            <div class={styles.messageFlex}>
+              <div
+                class={styles.messageFlex}
+                onClick={() => onProfileClick(replyAuthor?.did)}
+              >
+                {replyAuthor?.did ? (
+                  <Avatar author={replyAuthor} size="small" />
+                ) : (
+                  <Skeleton variant="circle" width={20} height={20} />
+                )}
+                {replyAuthor.username ? (
+                  <div class={styles.messageUsernameNoMargin}>
+                    {replyAuthor?.username}
+                  </div>
+                ) : (
+                  <div style={{ marginBottom: 5 }}>
+                    <Skeleton width={60} height={20} />
+                  </div>
+                )}
+              </div>
+              <div
+                class={styles.replyContent}
+                dangerouslySetInnerHTML={{ __html: replyMessage.content }}
+              />
+            </div>
+          </>
         )}
-      </div>
-      <div>
-        {(replyMessage || showAvatar) && (
-          <header class={styles.messageItemHeader}>
-            {author?.username ? <div
-              onClick={() => onProfileClick(author?.did)}
-              class={styles.messageUsername}
-            >
-              {author?.username}
-            </div> : 
-            <div style={{marginBottom: 5}}>
-              <Skeleton width={60} height={20} />
-            </div> }
+        <div>
+          {replyMessage || showAvatar ? (
+            <j-flex>
+              {author?.did ? (
+                <Avatar
+                  author={author}
+                  onProfileClick={onProfileClick}
+                ></Avatar>
+              ) : (
+                <Skeleton variant="circle" width={42} height={42} />
+              )}
+            </j-flex>
+          ) : (
             <small
-              class={styles.timestamp}
+              class={styles.timestampLeft}
               data-rh
               data-timestamp={format(
                 new Date(message.timestamp),
-                "EEEE, MMMM d, yyyy, hh:mm b"
+                "EEEE, MMMM d, yyyy, HH:MM"
               )}
             >
-              {formatRelative(new Date(message.timestamp), new Date())}
+              {format(new Date(message.timestamp), "HH:MM ")}
             </small>
-          </header>
-        )}
+          )}
+        </div>
+        <div class={styles.messageItemContentWrapper}>
+          {(replyMessage || showAvatar) && (
+            <header class={styles.messageItemHeader}>
+              {author?.username ? (
+                <div
+                  onClick={() => onProfileClick(author?.did)}
+                  class={styles.messageUsername}
+                >
+                  {author?.username}
+                </div>
+              ) : (
+                <div style={{ marginBottom: 5 }}>
+                  <Skeleton width={60} height={20} />
+                </div>
+              )}
+              <small
+                class={styles.timestamp}
+                data-rh
+                data-timestamp={format(
+                  new Date(message.timestamp),
+                  "EEEE, MMMM d, yyyy, hh:mm b"
+                )}
+              >
+                {formatRelative(new Date(message.timestamp), new Date())}
+              </small>
+            </header>
+          )}
 
-        <div
-          ref={messageRef}
-          class={styles.messageItemContent}
-          dangerouslySetInnerHTML={{ __html: message.content }}
-        ></div>
-        {message.reactions.length > 0 && (
-          <j-box pt="400">
-            <MessageReactions
-              onEmojiClick={onEmojiClick}
-              reactions={message.reactions}
-            />
-          </j-box>
-        )}
-        {neighbourhoodCards.length > 0 && (
-          <div style={{position: 'relative'}}>
-            {
-              neighbourhoodCards.map(e => (
-                <div class={styles.neighbourhoodCards} size="300" onClick={() => onLinkClick(e)}>
+          <div
+            ref={messageRef}
+            class={styles.messageItemContent}
+            dangerouslySetInnerHTML={{ __html: message.content }}
+          ></div>
+          {message.reactions.length > 0 && (
+            <j-box pt="400">
+              <MessageReactions
+                onEmojiClick={onEmojiClick}
+                reactions={message.reactions}
+              />
+            </j-box>
+          )}
+          {neighbourhoodCards.length > 0 && (
+            <div style={{ position: "relative" }}>
+              {neighbourhoodCards.map((e) => (
+                <div
+                  class={styles.neighbourhoodCards}
+                  size="300"
+                  onClick={() => onLinkClick(e)}
+                >
                   <j-text variant="footnote">Neighbourhood</j-text>
                   <j-text>{e.name}</j-text>
-                  {(e.description && e.description !== '-') && (<j-text>{e.description}</j-text>)}
+                  {e.description && e.description !== "-" && (
+                    <j-text>{e.description}</j-text>
+                  )}
                 </div>
-              ))
-            }
-            {agentState.did === message.author && (
-            <div class={styles.neighbourhoodCardsClose} onClick={() => hideMessageEmbeds(message.id)}>
-              <j-icon name="x"></j-icon>
-            </div>)}
-          </div>
-
-        )}
-      </div>
-      <div>
-        {showToolbar && (
-          <MessageToolbar
-            onReplyClick={onReplyClick}
-            onOpenEmojiPicker={onOpenEmojiPicker}
-          />
-        )}
+              ))}
+              {agentState.did === message.author && (
+                <div
+                  class={styles.neighbourhoodCardsClose}
+                  onClick={() => hideMessageEmbeds(message.id)}
+                >
+                  <j-icon name="x"></j-icon>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        <div>
+          {showToolbar && (
+            <MessageToolbar
+              onReplyClick={onReplyClick}
+              onOpenEmojiPicker={onOpenEmojiPicker}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
