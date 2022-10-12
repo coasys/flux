@@ -10,7 +10,8 @@
       :key="channel.id"
       :style="{
         height:
-          channel.name === channelId && channel.sourcePerspective === communityId
+          channel.name === channelId &&
+          channel.sourcePerspective === communityId
             ? '100%'
             : '0',
       }"
@@ -18,7 +19,8 @@
       <channel-view
         v-if="loadedChannels[channel.id]"
         v-show="
-          channel.name === channelId && channel.sourcePerspective === communityId
+          channel.name === channelId &&
+          channel.sourcePerspective === communityId
         "
         :channelId="channel.name"
         :communityId="channel.sourcePerspective"
@@ -138,7 +140,7 @@ export default defineComponent({
       loadedChannels: ref<LoadedChannels>({}),
       appStore,
       dataStore,
-      notSynced
+      notSynced,
     };
   },
   data() {
@@ -155,6 +157,8 @@ export default defineComponent({
           this.dataStore.fetchNeighbourhoodChannels(id);
           this.handleThemeChange(id);
           this.goToActiveChannel(id);
+        } else {
+          this.handleThemeChange();
         }
       },
       immediate: true,
@@ -195,10 +199,11 @@ export default defineComponent({
       const channels = this.dataStore.getChannelStates(communityId);
       if (channels.length > 0) {
         this.notSynced = false;
-        const firstChannel = this.dataStore.getChannelStates(communityId)[0].name;
+        const firstChannel =
+          this.dataStore.getChannelStates(communityId)[0].name;
         const currentChannelId =
           this.community.state.currentChannelId || firstChannel;
-  
+
         if (currentChannelId) {
           this.$router.push({
             name: "channel",
@@ -212,7 +217,7 @@ export default defineComponent({
         this.notSynced = true;
       }
     },
-    handleThemeChange(id: string) {
+    handleThemeChange(id?: string) {
       if (!id) {
         this.appStore.changeCurrentTheme("global");
         return;
@@ -262,12 +267,12 @@ export default defineComponent({
 </script>
 
 <style scoped>
-  .center {
-    height: 100%;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    display: flex;
-  }
+.center {
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  display: flex;
+}
 </style>
