@@ -49,6 +49,14 @@
           :value="email"
           @input="(e) => (email = e.target.value)"
         ></j-input>
+        <j-toggle
+          style="width: 100%"
+          full
+          size="lg"
+          variant="primary"
+          @change="allowNotifications"
+          >Allow Notifications</j-toggle
+        >
         <j-button
           style="width: 100%"
           full
@@ -222,6 +230,11 @@ export default defineComponent({
           this.isCreatingUser = false;
           this.appStore.changeNotificationState(true);
         });
+    },
+    async allowNotifications(value) {
+      this.appStore.changeNotificationState(
+        !this.appStore.notification.globalNotification
+      );
     },
   },
 });
