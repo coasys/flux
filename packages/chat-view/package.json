@@ -11,7 +11,7 @@
     "prepare": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "node esbuild.js",
-    "dev": "node esbuild.js",
+    "dev": "NODE_ENV=dev node esbuild.js",
     "release": "np --no-tests"
   },
   "keywords": [],
