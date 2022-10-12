@@ -1,0 +1,35 @@
+.editorWrapper {
+  padding-left: var(--j-space-400);
+  padding-right: var(--j-space-400);
+  padding-top: var(--j-space-300);
+  padding-bottom: var(--j-space-300);
+  border-radius: var(--j-border-radius);
+  border: 1px solid var(--j-border-color);
+  display: flex;
+  box-sizing: border-box;
+}
+
+.editorContent {
+  width: 100%;
+  padding-top: var(--j-space-200);
+}
+
+.editorParagraph {
+  &:first-of-type {
+    padding-top: 0;
+    margin-top: 0;
+  }
+
+  &:last-of-type {
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+}
+
+.editorMentions {
+  cursor: pointer;
+  padding: 2px var(--j-space-200);
+  border-radius: var(--j-border-radius);
+  background: var(--j-color-primary-100);
+  color: var(--j-color-primary-700);
+}

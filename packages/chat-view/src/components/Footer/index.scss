@@ -1,0 +1,15 @@
+.footer {
+  position: relative;
+  border-top: 1px solid var(--j-border-color);
+  padding: var(--j-space-400) var(--j-space-500) var(--j-space-400)
+    var(--j-space-500);
+}
+
+.currentReply {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--j-space-400);
+  max-height: 200px;
+  overflow-y: auto;
+}
