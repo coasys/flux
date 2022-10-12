@@ -10,6 +10,21 @@
   box-sizing: border-box;
 }
 
+.picker {
+  --background: var(--j-color-ui-50);
+  --border-color: var(--j-color-ui-50);
+  --indicator-color: var(--j-color-primary-500);
+  --button-active-background: var(--j-color-ui-100);
+  --button-hover-background: var(--j-color-ui-200);
+  --input-border-radius: var(--j-border-radius);
+  --input-border-color: var(--j-color-ui-200);
+  --input-padding: var(--j-space-200);
+  --outline-size: 1px;
+  --outline-color: var(--j-color-ui-300);
+  --input-font-color: var(--j-color-ui-800);
+  --input-placeholder-color: varr(--j-color-ui-400);
+}
+
 .editorContent {
   width: 100%;
   padding-top: var(--j-space-200);
