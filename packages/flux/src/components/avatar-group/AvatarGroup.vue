@@ -88,6 +88,7 @@ export default defineComponent({
 
 .avatar-group__avatar {
   border-radius: 50%;
+  display: block;
   background: var(--j-color-white);
 }
 
@@ -105,8 +106,8 @@ export default defineComponent({
   background: var(--j-color-white);
   border: 0.25px solid var(--j-border-color);
   border-radius: 50%;
-  height: var(--j-size-sm);
-  width: var(--j-size-sm);
+  height: var(--j-size-md);
+  width: var(--j-size-md);
   font-size: var(--j-font-size-300);
   font-weight: 500;
   color: var(--j-color-ui-400);
