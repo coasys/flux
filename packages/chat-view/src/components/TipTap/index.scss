@@ -1,3 +1,13 @@
+.editor {
+  position: relative;
+}
+
+.mentionWrapper {
+  position: absolute;
+  bottom: calc(100% + var(--j-space-200));
+  width: 100%;
+}
+
 .editorWrapper {
   padding-left: var(--j-space-400);
   padding-right: var(--j-space-400);

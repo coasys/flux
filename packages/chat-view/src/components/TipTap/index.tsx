@@ -250,6 +250,7 @@ export default function Tiptap({
 
   return (
     <div class={styles.editor}>
+      <div id="mentionWrapper" class={styles.mentionWrapper}></div>
       {showToolbar && (
         <div>
           <j-button
