@@ -47,7 +47,7 @@ export default async ({
   if (
     (!isMinimized &&
       !channel?.notifications.mute &&
-      !community?.state.notifications.mute) ||
+      !community?.state.notifications.mute && user!.agent.did! !== authorDid) ||
     (user!.agent.did! !== authorDid &&
       (community?.neighbourhood.perspective.uuid === communityId
         ? channel?.name !== channelId
