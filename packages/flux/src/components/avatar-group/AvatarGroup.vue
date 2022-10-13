@@ -55,7 +55,7 @@ export default defineComponent({
         this.loading = true;
 
         users.forEach(async (user: string, i: number) => {
-          if (i <= 5 && !this.firstUsers[user]) {
+          if (i <= 4 && !this.firstUsers[user]) {
             const profile = await getProfile(user);
             if (profile) {
               this.firstUsers[user] = profile;
