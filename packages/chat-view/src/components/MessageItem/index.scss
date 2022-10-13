@@ -11,7 +11,6 @@
 
   & .messageItemWrapper {
     width: 100%;
-    max-width: 1000px;
     display: grid;
     grid-template-columns: 60px 1fr;
     column-gap: var(--j-space-100);
@@ -71,6 +70,7 @@
 
   & .messageItemContent a {
     user-select: text !important;
+    color: var(--j-color-primary-500);
   }
 
   & .messageItemContent p:last-of-type {
