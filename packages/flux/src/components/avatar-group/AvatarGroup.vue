@@ -23,7 +23,7 @@
           ></Skeleton>
         </template>
         <span v-if="users.length >= 4" class="avatar-group__see-all">
-          +{{ users.length - 3 }}
+          +{{ users.length - 5 }}
         </span>
       </div>
     </j-tooltip>
