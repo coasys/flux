@@ -96,6 +96,17 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
     }
   }
 
+  function loadMoreMessages() {
+    loadMore().then(fetchedMessageCount => {
+      if (fetchedMessageCount > 0) {
+        scroller?.current?.scrollToIndex({
+          index: fetchedMessageCount-1,
+          align: 'end'
+        });
+      }
+    })
+  }
+
   function showAvatar(index: number): boolean {
     const previousMessage = messages[index - 1];
     const message = messages[index];
@@ -222,7 +233,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
                       <j-spinner size="xxs"></j-spinner>
                     </j-flex>
                   ) : (
-                    <j-button size="sm" onClick={loadMore} variant="subtle">
+                    <j-button size="sm" onClick={loadMoreMessages} variant="subtle">
                       Load more
                     </j-button>
                   )}

@@ -109,7 +109,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
         }));
       });
 
-      fetchMessages({ again: false });
+      fetchMessages();
     }
   }, [perspectiveUuid, channelId, agent]);
 
@@ -314,13 +314,10 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     }
   }
 
-  async function fetchMessages(payload?: {
-    from?: Date;
-    again: boolean;
-  }) {
+  async function fetchMessages(from?: Date) {
     console.log(
       "Fetch messages with from: ",
-      payload.from
+      from
     );
     setState((oldState) => ({
       ...oldState,
@@ -335,7 +332,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       await getMessages({
         perspectiveUuid,
         channelId,
-        from: payload?.from
+        from: from
       });
 
     setState((oldState) => ({
@@ -351,6 +348,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       showLoadMore: expressionLinkLength === MAX_MESSAGES,
       isFetchingMessages: false,
     }));
+    return expressionLinkLength;
   }
 
   async function sendMessage(value) {
@@ -417,10 +415,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   async function loadMore() {
     const oldestMessage = messages[0];
     console.log("Loading more messages with oldest timestamp", oldestMessage);
-    fetchMessages({
-      from: oldestMessage ? new Date(oldestMessage.timestamp) : new Date(),
-      again: false,
-    });
+    return await fetchMessages(oldestMessage ? new Date(oldestMessage.timestamp) : new Date());
   }
 
   function saveScrollPos(pos?: number) {
