@@ -179,8 +179,9 @@ export default defineComponent({
       appStore,
     };
   },
-  async created() {
+  async mounted() {
     isConnected().then(async () => {
+      console.log("is connected");
       try {
         const client = await getAd4mClient();
 

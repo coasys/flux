@@ -19,7 +19,7 @@
     </div>
   </div>
   <ad4m-connect
-    v-if="showConnect"
+    v-show="showConnect"
     appName="Flux"
     appDesc="Flux - A SOCIAL TOOLKIT FOR THE NEW INTERNET"
     appDomain="https://www.fluxsocial.io/"
