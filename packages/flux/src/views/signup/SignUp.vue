@@ -1,6 +1,25 @@
 <template>
-  <div class="signup-view" :class="{ 'signup-view--show-signup': showSignup }">
-    <div class="signup-view__flow">
+  <div class="signup-view">
+    <div class="signup-view__intro" v-if="!showSignup">
+      <j-box pt="1000" p="300">
+        <Logo class="logo" width="150px"></Logo>
+      </j-box>
+      <Carousel />
+      <j-box
+        class="signup-view__intro-button"
+        @click="showSignup = true"
+        pt="900"
+      >
+        <j-button
+          @click="() => $emit('showConnect')"
+          variant="primary"
+          size="xl"
+        >
+          Sign up
+        </j-button>
+      </j-box>
+    </div>
+    <div class="signup-view__flow" v-else>
       <j-flex direction="column" gap="400">
         <j-box class="signup-view__flow-back" pb="500">
           <j-button @click="showSignup = false" variant="link">
@@ -71,18 +90,6 @@
         </j-button>
       </j-flex>
     </div>
-    <div class="signup-view__intro">
-      <div class="signup-view__intro-content">
-        <Carousel />
-        <j-box
-          class="signup-view__intro-button"
-          @click="showSignup = true"
-          pt="900"
-        >
-          <j-button variant="primary" size="xl"> Sign up </j-button>
-        </j-box>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -92,7 +99,10 @@ import Carousel from "./SignUpCarousel.vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useValidation } from "@/utils/validation";
 import { useUserStore } from "@/store/user";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import {
+  getAd4mClient,
+  isConnected,
+} from "@perspect3vism/ad4m-connect/dist/utils";
 import {
   AD4M_PREDICATE_USERNAME,
   AD4M_PREDICATE_FIRSTNAME,
@@ -111,7 +121,7 @@ export default defineComponent({
     Logo,
   },
   setup() {
-    const showSignup = ref(true);
+    const showSignup = ref(false);
     const profilePicture = ref();
     const modalOpen = ref(false);
     const isCreatingUser = ref(false);
@@ -170,28 +180,12 @@ export default defineComponent({
     };
   },
   async created() {
-    // Auto fill profile with ad4m profile
-    try {
-      const client = await getAd4mClient();
+    isConnected().then(async () => {
+      try {
+        const client = await getAd4mClient();
 
-      const perspectives = await client.perspective.all();
-      const ad4mAgentPerspective = perspectives.find(
-        ({ name }) => name === "Agent Profile"
-      );
-      if (ad4mAgentPerspective) {
-        const agentPers = await client.perspective.snapshotByUUID(
-          ad4mAgentPerspective.uuid
-        );
-        const profile = mapLiteralLinks(agentPers?.links, {
-          username: AD4M_PREDICATE_USERNAME,
-          name: AD4M_PREDICATE_FIRSTNAME,
-          familyName: AD4M_PREDICATE_LASTNAME,
-        });
-        this.username = profile.username;
-        this.name = profile.name;
-        this.familyName = profile.familyName;
-      } else {
         const me = await client.agent.me();
+
         if (me.perspective) {
           const agentPerspectiveLinks = me.perspective.links;
           const profile = mapLiteralLinks(agentPerspectiveLinks, {
@@ -203,10 +197,10 @@ export default defineComponent({
           this.name = profile.name;
           this.familyName = profile.familyName;
         }
+      } catch (e) {
+        console.log(e);
       }
-    } catch (e) {
-      console.log(e);
-    }
+    });
   },
   computed: {
     canSignUp(): boolean {
@@ -244,63 +238,25 @@ export default defineComponent({
 .signup-view {
   margin: 0 auto;
   height: 100vh;
-  display: flex;
 }
 
 .signup-view__flow {
-  display: none;
+  display: grid;
   width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
   align-content: center;
   padding: var(--j-space-1000);
-}
-
-.signup-view--show-signup .signup-view__flow {
-  display: grid;
-}
-
-.signup-view--show-signup .signup-view__intro {
-  display: none;
 }
 
 .signup-view__intro {
   width: 100%;
   height: 100%;
-  display: flex;
+  display: block;
   align-items: center;
   background: var(--j-color-ui-50);
   overflow: hidden;
   text-align: center;
-}
-
-@media (min-width: 1100px) {
-  .signup-view__flow {
-    display: grid;
-  }
-  .signup-view--show-signup .signup-view__flow {
-    display: grid;
-  }
-  .signup-view__intro {
-    display: flex;
-  }
-  .signup-view--show-signup .signup-view__intro {
-    display: flex;
-  }
-  .signup-view__intro-button {
-    display: none;
-  }
-  .signup-view__flow-back {
-    display: none;
-  }
-}
-
-@media (min-width: 1100px) {
-  .signup-view__flow {
-    width: 40%;
-  }
-
-  .signup-view__intro {
-    width: 60%;
-  }
 }
 
 .signup-view__intro-content {

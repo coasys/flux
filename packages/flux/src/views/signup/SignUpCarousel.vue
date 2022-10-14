@@ -3,7 +3,7 @@
     <div class="slider__slide">
       <div class="slider__slide-content">
         <j-box pt="500" pb="800">
-          <Orb3 height="35vh"></Orb3>
+          <Orb3 height="25vh"></Orb3>
         </j-box>
         <j-text variant="heading">Communicate Privately and Freely</j-text>
         <j-text variant="ingress">
@@ -15,7 +15,7 @@
     <div class="slider__slide">
       <div class="slider__slide-content">
         <j-box pt="500" pb="800">
-          <Orb height="35vh"></Orb>
+          <Orb height="25vh"></Orb>
         </j-box>
         <j-text variant="heading">
           Create Groups, Communities and Networks
@@ -29,7 +29,7 @@
     <div class="slider__slide">
       <div class="slider__slide-content">
         <j-box pt="500" pb="800">
-          <Orb2 height="35vh"></Orb2>
+          <Orb2 height="25vh"></Orb2>
         </j-box>
         <j-text variant="heading">Take Back the Internet</j-text>
         <j-text variant="ingress">

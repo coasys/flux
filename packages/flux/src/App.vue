@@ -1,7 +1,7 @@
 <template>
   <router-view
     :key="componentKey"
-    v-if="!ui.showGlobalLoading && connected"
+    @showConnect="() => (showConnect = true)"
   ></router-view>
   <j-modal
     size="sm"
@@ -19,6 +19,7 @@
     </div>
   </div>
   <ad4m-connect
+    v-if="showConnect"
     appName="Flux"
     appDesc="Flux - A SOCIAL TOOLKIT FOR THE NEW INTERNET"
     appDomain="https://www.fluxsocial.io/"
@@ -78,8 +79,10 @@ export default defineComponent({
     const userStore = useUserStore();
     const watcherStarted = ref(false);
     const connected = ref(false);
+    const showConnect = ref(false);
 
     return {
+      showConnect,
       appStore,
       componentKey,
       router,
@@ -92,6 +95,8 @@ export default defineComponent({
   },
 
   mounted() {
+    this.appStore.changeCurrentTheme("global");
+
     isConnected().then(async () => {
       this.connected = true;
       this.appStore.setGlobalLoading(true);
@@ -104,14 +109,14 @@ export default defineComponent({
       );
 
       if (!fluxLinksFound) {
-        await this.router.replace("/signup");
+        await this.router.push("/signup");
       } else {
         if (
           ["unlock", "connect", "signup"].includes(
             this.router.currentRoute.value.name as string
           )
         ) {
-          await this.router.replace("/home");
+          await this.router.push("/home");
         }
       }
 
