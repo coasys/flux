@@ -5,6 +5,7 @@ import getProfile from "utils/api/getProfile";
 import { differenceInSeconds, parseISO } from "date-fns";
 import { useAppStore } from "@/store/app";
 import { Literal } from "@perspect3vism/ad4m";
+import iconPath from "@/assets/images/icon.png";
 
 type Payload = {
   router: Router;
@@ -47,7 +48,8 @@ export default async ({
   if (
     (!isMinimized &&
       !channel?.notifications.mute &&
-      !community?.state.notifications.mute && user!.agent.did! !== authorDid) ||
+      !community?.state.notifications.mute &&
+      user!.agent.did! !== authorDid) ||
     (user!.agent.did! !== authorDid &&
       (community?.neighbourhood.perspective.uuid === communityId
         ? channel?.name !== channelId
@@ -67,10 +69,10 @@ export default async ({
     const profile = await getProfile(authorDid);
     const name = profile ? profile.username : "Someone";
     if (isMentioned) {
-      title = `${name} mentioned you in #${channel?.name}}`;
-      body = escapedMessage;
+      title = `${name} mentioned you`;
+      body = `#${channel?.name}: ${escapedMessage}`;
     } else {
-      title = `New message in ${community?.neighbourhood.name} from @${name}`;
+      title = `@${name} (${community?.neighbourhood.name})`;
       body = `#${channel?.name}: ${escapedMessage}`;
     }
 
@@ -79,7 +81,7 @@ export default async ({
     if (permission === "granted") {
       const notification = new Notification(title, {
         body,
-        icon: "/assets/images/icon.png",
+        icon: iconPath,
       });
 
       notification.onclick = () => {

@@ -1,12 +1,24 @@
 <template>
   <j-box pb="800">
-    <j-box pb="300">
-      <j-text variant="label">Notifications</j-text>
+    <j-box pb="500">
+      <j-text variant="heading-sm">Notifications</j-text>
     </j-box>
-    <j-button size="md" variant="primary" @click="changeNotificationState">
-      <j-icon size="sm" :name="appStore.notification.globalNotification ? 'bell-slash' : 'bell'"></j-icon>
-      {{this.appStore.notification.globalNotification ? 'Disable' : 'Enable'}} Notifications
-    </j-button>
+    <j-box pb="300">
+      <j-flex a="center" j="between">
+        <j-toggle
+          class="toggle"
+          size="lg"
+          :checked="appStore.notification.globalNotification"
+          @change="(e) => changeNotificationState()"
+        >
+          <div>
+            <j-text nomargin color="black" weight="600" size="500">
+              Enable Desktop Notifications
+            </j-text>
+          </div>
+        </j-toggle>
+      </j-flex>
+    </j-box>
   </j-box>
 </template>
 
@@ -25,8 +37,16 @@ export default defineComponent({
   },
   methods: {
     changeNotificationState() {
-      this.appStore.changeNotificationState(!this.appStore.notification.globalNotification);
+      this.appStore.changeNotificationState(
+        !this.appStore.notification.globalNotification
+      );
     },
   },
 });
 </script>
+
+<style scoped>
+.toggle::part(base) {
+  flex-direction: row-reverse;
+}
+</style>
