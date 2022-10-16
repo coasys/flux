@@ -102,6 +102,7 @@ import { useUserStore } from "@/store/user";
 import {
   getAd4mClient,
   isConnected,
+  onAuthStateChanged,
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import {
   AD4M_PREDICATE_USERNAME,
@@ -180,8 +181,24 @@ export default defineComponent({
     };
   },
   async mounted() {
-    isConnected().then(async () => {
-      console.log("is connected");
+    const connected = await isConnected();
+    if (connected) {
+      this.autoFillUser();
+    } else {
+      onAuthStateChanged((status: string) => {
+        if (status === "connected_with_capabilities") {
+          this.autoFillUser();
+        }
+      });
+    }
+  },
+  computed: {
+    canSignUp(): boolean {
+      return this.usernameIsValid;
+    },
+  },
+  methods: {
+    async autoFillUser() {
       try {
         const client = await getAd4mClient();
 
@@ -201,14 +218,7 @@ export default defineComponent({
       } catch (e) {
         console.log(e);
       }
-    });
-  },
-  computed: {
-    canSignUp(): boolean {
-      return this.usernameIsValid;
     },
-  },
-  methods: {
     async createUser() {
       this.isCreatingUser = true;
 

@@ -63,7 +63,7 @@ import { buildCommunity, hydrateState } from "./store/data/hydrateState";
 import { getGroupMetadata } from "./store/data/actions/fetchNeighbourhoodMetadata";
 import {
   getAd4mClient,
-  isConnected,
+  onAuthStateChanged,
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import "@perspect3vism/ad4m-connect/dist/web";
 
@@ -97,37 +97,42 @@ export default defineComponent({
   mounted() {
     this.appStore.changeCurrentTheme("global");
 
-    isConnected().then(async () => {
-      this.connected = true;
-      this.appStore.setGlobalLoading(true);
-
-      const client = await getAd4mClient();
-      const { perspective } = await client.agent.me();
-
-      const fluxLinksFound = perspective?.links.find((e) =>
-        e.data.source.startsWith("flux://")
-      );
-
-      if (!fluxLinksFound) {
-        await this.router.push("/signup");
-      } else {
-        if (
-          ["unlock", "connect", "signup"].includes(
-            this.router.currentRoute.value.name as string
-          )
-        ) {
-          await this.router.push("/home");
-        }
-      }
-
-      if (!this.watcherStarted) {
+    onAuthStateChanged(async (event: string) => {
+      if (event === "connected_with_capabilities") {
+        this.connected = true;
+        this.showConnect = true;
         this.appStore.setGlobalLoading(true);
-        this.startWatcher();
-        this.watcherStarted = true;
-        await hydrateState();
-      }
 
-      this.appStore.setGlobalLoading(false);
+        const client = await getAd4mClient();
+
+        const { perspective } = await client.agent.me();
+
+        const fluxLinksFound = perspective?.links.find((e) =>
+          e.data.source.startsWith("flux://")
+        );
+
+        if (!fluxLinksFound) {
+          this.appStore.setGlobalLoading(false);
+          this.router.push("/signup");
+        } else {
+          if (
+            ["unlock", "connect", "signup"].includes(
+              this.router.currentRoute.value.name as string
+            )
+          ) {
+            this.router.push("/home");
+          }
+        }
+
+        if (!this.watcherStarted) {
+          this.appStore.setGlobalLoading(true);
+          this.startWatcher();
+          this.watcherStarted = true;
+          hydrateState();
+        }
+
+        this.appStore.setGlobalLoading(false);
+      }
     });
   },
 
