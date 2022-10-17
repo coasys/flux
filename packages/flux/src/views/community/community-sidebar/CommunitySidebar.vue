@@ -11,6 +11,7 @@
       ></j-icon>
     </j-button>
     <div class="community-info">
+      <Skeleton v-if="notSynced"></Skeleton>
       {{ community.neighbourhood.name }}
     </div>
     <j-popover
@@ -191,14 +192,19 @@ import { getImage } from "utils/api/getProfile";
 import { Literal } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { CHANNEL, SELF } from "utils/constants/neighbourhoodMeta";
+import Skeleton from "@/components/skeleton/Skeleton.vue";
 
 export default defineComponent({
-  components: { AvatarGroup },
+  components: { AvatarGroup, Skeleton },
   props: {
     community: {
       type: Object as PropType<CommunityState>,
       required: true,
     },
+    notSynced: {
+      type: Boolean,
+      required: true
+    }
   },
   setup() {
     return {
