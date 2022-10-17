@@ -14,7 +14,11 @@
             </aside>
         <div class="settings__content">
             <j-box pb="500">
-                <j-input label = "Trigger Emoji" :value="emoji" @input="(e) => (emoji = e.target.value)"></j-input>
+                <j-input label = "Trigger Emoji" :value="emoji" disabled=true @click="emojiPicker = !emojiPicker"></j-input>
+                <emoji-picker
+                  v-if="emojiPicker"
+                  @emojiClick="onEmojiClick"
+                />
             </j-box>
             <j-box pb="500">
                 <j-input label = "Number of Emojis" type="number" :value="emojiCount" @input="(e) => (emojiCount = e.target.value)"></j-input>
@@ -35,6 +39,7 @@ import { LinkQuery, Literal } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { ZOME, SELF } from "utils/constants/neighbourhoodMeta";
 import { defineComponent, ref } from "vue";
+import { mapActions } from "pinia";
 import ThemeEditor from "./ThemeEditor.vue";
 
 export default defineComponent({
@@ -44,12 +49,14 @@ export default defineComponent({
     const dataStore = useDataStore();
     const emoji = ref("");
     const emojiCount = ref(0);
+    const emojiPicker = ref(false);
 
     return {
       appStore,
       dataStore,
       emoji,
-      emojiCount
+      emojiCount,
+      emojiPicker
     };
   },
   data() {
@@ -73,6 +80,14 @@ export default defineComponent({
     }
   },
   methods: {
+    ...mapActions(useAppStore, [
+      "setShowCommunityTweaks"
+    ]),
+    async onEmojiClick(emoji) {
+      console.log("got emoji click", emoji.detail.unicode);
+      this.emoji = emoji.detail.unicode;
+      this.emojiPicker = false;
+    },
     async getSDNALinks(perspectiveUuid) {
         const ad4mClient = await getAd4mClient();
         return await ad4mClient.perspective.queryLinks(perspectiveUuid, {source: SELF, predicate: ZOME} as LinkQuery);
@@ -118,8 +133,7 @@ export default defineComponent({
             }
         );
 
-        const test = await ad4mClient.perspective.queryProlog(perspectiveUuid, `isPopular(X)`);
-        console.log(test);
+        this.setShowCommunityTweaks(false);
     }
   },
   computed: {
