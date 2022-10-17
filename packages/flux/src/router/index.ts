@@ -10,6 +10,7 @@ import {
   getAd4mClient,
   isConnected,
 } from "@perspect3vism/ad4m-connect/dist/utils";
+import { useAppStore } from "@/store/app";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -67,11 +68,15 @@ const router = createRouter({
 export default router;
 
 router.beforeEach(async (to, from, next) => {
+  const appStore = useAppStore();
+
   try {
     const connected = await isConnected();
 
     if (connected) {
       const client = await getAd4mClient();
+
+      appStore.setGlobalLoading(true);
 
       const { perspective } = await client.agent.me();
 
@@ -97,5 +102,7 @@ router.beforeEach(async (to, from, next) => {
     } else {
       next();
     }
+  } finally {
+    appStore.setGlobalLoading(false);
   }
 });

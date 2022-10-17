@@ -19,11 +19,7 @@
             >By connectinng to AD4M you are able to surf the internet completely
             decentralized, secure and bladibla</j-text
           >
-          <j-box
-            class="signup-view__intro-button"
-            @click="showSignup = true"
-            pt="900"
-          >
+          <j-box class="signup-view__intro-button" pt="900">
             <j-button
               @click="() => $emit('connectToAd4m')"
               variant="primary"
@@ -119,6 +115,7 @@ import { useUserStore } from "@/store/user";
 import ad4mLogo from "@/assets/images/ad4mLogo.svg";
 import {
   getAd4mClient,
+  isConnected,
   onAuthStateChanged,
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import {
@@ -201,8 +198,15 @@ export default defineComponent({
     };
   },
   async mounted() {
+    isConnected().then((connected) => {
+      if (connected) {
+        this.showSignup = true;
+        this.autoFillUser();
+      }
+    });
     onAuthStateChanged((status: string) => {
       if (status === "connected_with_capabilities") {
+        this.showSignup = true;
         this.autoFillUser();
       }
     });
@@ -264,6 +268,7 @@ export default defineComponent({
 .signup-view {
   margin: 0 auto;
   height: 100vh;
+  overflow-y: auto;
 }
 
 .signup-view__flow {
