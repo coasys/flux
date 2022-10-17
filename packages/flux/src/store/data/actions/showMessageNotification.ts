@@ -79,7 +79,10 @@ export default async ({
     if (permission === "granted") {
       const notification = new Notification(title, {
         body,
-        icon: "/assets/images/icon.png",
+        icon: "/public/icon.png",
+        tag: `flux_${authorDid}`,
+        silent: false,
+        renotify: true
       });
 
       notification.onclick = () => {
