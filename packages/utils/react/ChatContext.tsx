@@ -329,10 +329,10 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
           addHiddenToMessageToState(oldState, id, true)
         );
       }
-
-      if (linkIs.socialDNA(link)) {
-        fetchMessages();
-      }
+    }
+    if (linkIs.socialDNA(link)) {
+      console.log("Got new Social DNA, reloading the messages", link);
+      fetchMessages();
     }
   }
 
