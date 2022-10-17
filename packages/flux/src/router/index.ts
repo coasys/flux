@@ -80,17 +80,21 @@ router.beforeEach(async (to, from, next) => {
         e.data.source.startsWith("flux://")
       );
 
+      if (fluxLinksFound && to.name === "signup") {
+        next("/home");
+      }
+
       if (!fluxLinksFound && to.name !== "signup") {
         next("/signup");
-      } else {
-        next();
       }
+
+      next();
     } else {
       if (to.name !== "signup") {
         next("/signup");
-      } else {
-        next();
       }
+
+      next();
     }
   } catch (e) {
     if (to.name !== "signup") {
