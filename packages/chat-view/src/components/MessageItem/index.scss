@@ -195,5 +195,10 @@ j-tooltip::part(base) {
 }
 
 .popularMessage {
-  background: gold;
+  border: 1px solid rgba(246, 206, 2, 0.15);
+  background-color: rgba(246, 206, 2, 0.1);
+}
+
+.popularMessage:hover {
+  background-color: rgba(246, 206, 2, 0.15);
 }
