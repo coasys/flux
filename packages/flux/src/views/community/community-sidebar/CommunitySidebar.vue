@@ -151,6 +151,22 @@
                 `${channel?.notifications?.mute ? "Unmute" : "Mute"} Channel`
               }}
             </j-menu-item>
+            <j-menu-item
+              v-if="isChannelCreator(channel.id)"
+              @click="
+                () =>
+                  deleteChannel(channel.id)
+              "
+            >
+              <j-icon
+                size="xs"
+                slot="start"
+                name="trash"
+              />
+              {{
+                `Delete Channel`
+              }}
+            </j-menu-item>
           </j-menu>
         </j-popover>
       </router-link>
@@ -172,6 +188,9 @@ import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { DexieIPFS } from "@/utils/storageHelpers";
 import { getImage } from "utils/api/getProfile";
+import { Literal } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { CHANNEL, SELF } from "utils/constants/neighbourhoodMeta";
 
 export default defineComponent({
   components: { AvatarGroup },
@@ -285,6 +304,51 @@ export default defineComponent({
       this.setShowCommunitySettings(true);
       this.showCommunityMenu = false;
     },
+    isChannelCreator(channelId: string): boolean {
+      const channel = this.channels.find(e => e.id === channelId)
+
+      return (
+        channel.creatorDid ===
+        this.userStore.getUser?.agent.did
+      );
+    },
+    async deleteChannel(channelId: string) {
+      const channel = this.channels.find(e => e.id === channelId)
+
+      const client = await getAd4mClient();
+
+      await client.perspective.removeLink(channel.sourcePerspective, {
+        author: channel.creatorDid,
+        data: {
+          predicate: CHANNEL,
+          target: channel.id,
+          source: SELF,
+        },
+        proof: {
+          invalid: false,
+          key: "",
+          signature: "",
+          valid: true,
+        },
+        timestamp: channel.createdAt,
+      });
+
+      this.dataStore.removeChannel({
+        channelId: channel.id
+      })
+
+      const isSameChannel = this.$route.params.channelId === channel.name;
+
+      if (isSameChannel) {
+        this.$router.push({
+          name: "channel",
+          params: {
+            communityId: channel.sourcePerspective,
+            channelId: "Home",
+          },
+        })
+      }
+    }
   },
 });
 </script>

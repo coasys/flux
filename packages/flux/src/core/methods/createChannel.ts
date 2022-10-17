@@ -69,7 +69,7 @@ export async function createChannel({
       description: "",
       creatorDid,
       id: channelExpr,
-      createdAt: new Date().toISOString(),
+      createdAt: linkExpression.timestamp ||new Date().toISOString(),
       sourcePerspective: sourcePerspective.uuid,
       hasNewMessages: false,
       notifications: {
