@@ -89,11 +89,12 @@ export default defineComponent({
       watcherStarted,
     };
   },
-
-  mounted() {
+  created() {
     this.appStore.changeCurrentTheme("global");
-
+  },
+  mounted() {
     onAuthStateChanged(async (event: string) => {
+      console.log("event", event);
       if (event === "connected_with_capabilities") {
         if (!this.watcherStarted) {
           this.startWatcher();
@@ -103,7 +104,6 @@ export default defineComponent({
       }
     });
   },
-
   computed: {
     modals(): ModalsState {
       return this.appStore.modals;
@@ -112,7 +112,6 @@ export default defineComponent({
       return this.appStore.$state;
     },
   },
-
   methods: {
     ...mapActions(useAppStore, ["setShowCode"]),
     async capabilitiesCreated() {
@@ -250,7 +249,6 @@ export default defineComponent({
           });
         }
       };
-
       watch(
         this.dataStore.neighbourhoods,
         async (newValue: { [perspectiveUuid: string]: NeighbourhoodState }) => {

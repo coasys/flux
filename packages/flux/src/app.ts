@@ -23,7 +23,7 @@ pinia.use(({ store }) => {
   });
 });
 
-const app = createApp({
+createApp({
   render: () => h(App),
 })
   .use(pinia)
