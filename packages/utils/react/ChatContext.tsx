@@ -330,8 +330,8 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
         );
       }
 
-      if (linkIs.socialDNA) {
-        
+      if (linkIs.socialDNA(link)) {
+        fetchMessages();
       }
     }
   }
