@@ -23,12 +23,12 @@ export default async function ({
       let fromTime = from.getTime();
       expressionLinks = await client.perspective.queryProlog(
         perspectiveUuid, 
-        `limit(${MAX_MESSAGES}, (order_by([desc(Timestamp)], flux_message("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden)), Timestamp =< ${fromTime})).`
+        `limit(${MAX_MESSAGES}, (order_by([desc(Timestamp)], flux_message_query_popular("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden, IsPopular)), Timestamp =< ${fromTime})).`
       );
     } else {
       expressionLinks = await client.perspective.queryProlog(
         perspectiveUuid,
-        `limit(${MAX_MESSAGES}, order_by([desc(Timestamp)], flux_message("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden))).`
+        `limit(${MAX_MESSAGES}, order_by([desc(Timestamp)], flux_message_query_popular("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden, IsPopular))).`
       );
     }
     let cleanedLinks = [];
@@ -37,7 +37,7 @@ export default async function ({
     if (expressionLinks) {
       for (const message of expressionLinks) {
         let reactions: Reaction[] = [];
-        if (typeof message.Reactions !== "string") {
+        if (typeof message.Reactions !== "string" && !message.Reactions.variable) {
           if (message.Reactions.head) {
             reactions.push({
               content: message.Reactions.head.args[0].replace('emoji://', ''),
@@ -46,7 +46,7 @@ export default async function ({
             });
           }
           let tail = message.Reactions.tail;
-          while (typeof tail !== "string") {
+          while (typeof tail !== "string" && !message.Reactions.variable) {
             reactions.push({
               content: tail.head.args[0].replace('emoji://', ''),
               timestamp: new Date(tail.head.args[1].args[0]),
@@ -57,7 +57,7 @@ export default async function ({
         }
 
         let replies = [];
-        if (typeof message.Replies != "string") {
+        if (typeof message.Replies != "string" && !message.Replies.variable) {
           if (message.Replies.head) {
             const literal = Literal.fromUrl(message.Replies.head.args[0]).get();
             replies.push({
@@ -78,7 +78,7 @@ export default async function ({
           }
         }
 
-        let isNeighbourhoodCardHidden = typeof message.AllCardHidden != "string";
+        let isNeighbourhoodCardHidden = typeof message.AllCardHidden != "string"  && !message.AllCardHidden.variable;
 
         cleanedLinks.push({
           id: message.MessageExpr,
@@ -87,7 +87,8 @@ export default async function ({
           timestamp: new Date(message.Timestamp),
           reactions: reactions,
           replies: replies,
-          isNeighbourhoodCardHidden
+          isNeighbourhoodCardHidden,
+          isPopular: message.IsPopular,
         });
       }
     }

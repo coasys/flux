@@ -98,6 +98,13 @@
   >
     <community-settings />
   </j-modal>
+
+  <j-modal
+    :open="modals.showCommunityTweaks"
+    @toggle="(e) => setShowCommunityTweaks(e.target.open)"
+  >
+    <community-tweaks v-if="modals.showCommunityTweaks"/>
+  </j-modal>
 </template>
 
 <script lang="ts">
@@ -110,6 +117,7 @@ import CreateChannel from "@/containers/CreateChannel.vue";
 import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunitySettings from "@/containers/CommunitySettings.vue";
 import ChannelView from "@/views/channel/ChannelView.vue";
+import CommunityTweaks from "@/containers/CommunityTweaks.vue";
 
 import { CommunityState, ModalsState, ChannelState } from "@/store/types";
 import { useAppStore } from "@/store/app";
@@ -130,6 +138,7 @@ export default defineComponent({
     CommunitySidebar,
     CommunitySettings,
     SidebarLayout,
+    CommunityTweaks
   },
   setup() {
     const appStore = useAppStore();
@@ -193,6 +202,7 @@ export default defineComponent({
       "setShowCommunityMembers",
       "setShowInviteCode",
       "setShowCommunitySettings",
+      "setShowCommunityTweaks",
     ]),
     goToActiveChannel(communityId: string) {
       if (!communityId) return;
