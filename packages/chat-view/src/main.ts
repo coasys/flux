@@ -2,15 +2,11 @@ if (!window.ResizeObserver) window.ResizeObserver = ResizeObserver;
 
 // dynamic import of emoji picker only if it's not defined already
 if (customElements.get("emoji-picker") === undefined) {
-  import("emoji-picker-element").then((widget) => {
-    console.log("imported?");
-  });
+  import("emoji-picker-element").then((widget) => {});
 }
 
 if (customElements.get("ad4m-connect") === undefined) {
-  import("@perspect3vism/ad4m-connect").then((widget) => {
-    console.log("imported?");
-  });
+  import("@perspect3vism/ad4m-connect").then((widget) => {});
 }
 
 import register from "./custom-element.js";

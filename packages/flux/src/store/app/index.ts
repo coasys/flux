@@ -20,7 +20,6 @@ export const useAppStore = defineStore("app", {
         showCommunitySettings: false,
         showInviteCode: false,
         showDisclaimer: true,
-        showCode: false,
       },
       showSidebar: true,
       showMainSidebar: true,
@@ -45,7 +44,7 @@ export const useAppStore = defineStore("app", {
       },
       notification: {
         globalNotification: false,
-      }
+      },
     };
   },
   getters,

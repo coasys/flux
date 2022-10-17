@@ -27,7 +27,6 @@ export interface ModalsState {
   showCommunityTweaks: boolean;
   showInviteCode: boolean;
   showDisclaimer: boolean;
-  showCode: boolean;
 }
 
 export type UpdateState =

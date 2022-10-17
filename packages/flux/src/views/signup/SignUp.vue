@@ -1,23 +1,36 @@
 <template>
   <div class="signup-view">
     <div class="signup-view__intro" v-if="!showSignup">
-      <j-box pt="1000" p="300">
-        <Logo class="logo" width="150px"></Logo>
-      </j-box>
-      <Carousel />
-      <j-box
-        class="signup-view__intro-button"
-        @click="showSignup = true"
-        pt="900"
-      >
-        <j-button
-          @click="() => $emit('showConnect')"
-          variant="primary"
-          size="xl"
-        >
-          Sign up
-        </j-button>
-      </j-box>
+      <div>
+        <j-box pb="700">
+          <Logo class="signup-view__intro-logo" width="150px"></Logo>
+        </j-box>
+        <j-box align="center">
+          <j-text variant="heading-lg">
+            Create your own decentralized community.
+          </j-text>
+        </j-box>
+
+        <div class="signup-view__intro-extension">
+          <j-text variant="heading-sm">
+            You need the AD4M extension to use Flux.
+          </j-text>
+          <j-text
+            >By connectinng to AD4M you are able to surf the internet completely
+            decentralized, secure and bladibla</j-text
+          >
+          <j-box class="signup-view__intro-button" pt="900">
+            <j-button
+              @click="() => $emit('connectToAd4m')"
+              variant="primary"
+              size="lg"
+            >
+              <Ad4mLogo width="25px" slot="start" />
+              Connect with AD4M
+            </j-button>
+          </j-box>
+        </div>
+      </div>
     </div>
     <div class="signup-view__flow" v-else>
       <j-flex direction="column" gap="400">
@@ -99,9 +112,11 @@ import Carousel from "./SignUpCarousel.vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useValidation } from "@/utils/validation";
 import { useUserStore } from "@/store/user";
+import ad4mLogo from "@/assets/images/ad4mLogo.svg";
 import {
   getAd4mClient,
   isConnected,
+  onAuthStateChanged,
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import {
   AD4M_PREDICATE_USERNAME,
@@ -112,6 +127,7 @@ import {
 import Logo from "@/components/logo/Logo.vue";
 import { mapLiteralLinks } from "utils/helpers/linkHelpers";
 import { useAppStore } from "@/store/app";
+import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";
 
 export default defineComponent({
   name: "SignUp",
@@ -119,6 +135,7 @@ export default defineComponent({
     AvatarUpload,
     Carousel,
     Logo,
+    Ad4mLogo,
   },
   setup() {
     const showSignup = ref(false);
@@ -159,6 +176,7 @@ export default defineComponent({
     const logInError = ref(false);
 
     return {
+      ad4mLogo,
       showSignup,
       isLoggingIn,
       profilePicture,
@@ -180,8 +198,26 @@ export default defineComponent({
     };
   },
   async mounted() {
-    isConnected().then(async () => {
-      console.log("is connected");
+    isConnected().then((connected) => {
+      if (connected) {
+        this.showSignup = true;
+        this.autoFillUser();
+      }
+    });
+    onAuthStateChanged((status: string) => {
+      if (status === "connected_with_capabilities") {
+        this.showSignup = true;
+        this.autoFillUser();
+      }
+    });
+  },
+  computed: {
+    canSignUp(): boolean {
+      return this.usernameIsValid;
+    },
+  },
+  methods: {
+    async autoFillUser() {
       try {
         const client = await getAd4mClient();
 
@@ -201,14 +237,7 @@ export default defineComponent({
       } catch (e) {
         console.log(e);
       }
-    });
-  },
-  computed: {
-    canSignUp(): boolean {
-      return this.usernameIsValid;
     },
-  },
-  methods: {
     async createUser() {
       this.isCreatingUser = true;
 
@@ -239,6 +268,7 @@ export default defineComponent({
 .signup-view {
   margin: 0 auto;
   height: 100vh;
+  overflow-y: auto;
 }
 
 .signup-view__flow {
@@ -253,11 +283,12 @@ export default defineComponent({
 .signup-view__intro {
   width: 100%;
   height: 100%;
-  display: block;
+  display: grid;
+  place-items: center;
+  max-width: 800px;
+  margin: 0 auto;
   align-items: center;
-  background: var(--j-color-ui-50);
   overflow: hidden;
-  text-align: center;
 }
 
 .signup-view__intro-content {
@@ -268,6 +299,20 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   gap: var(--j-space-400);
+}
+
+.signup-view__intro-logo {
+  margin: 0 auto;
+  display: block;
+}
+
+.signup-view__intro-button {
+  text-align: center;
+}
+
+.signup-view__intro-extension {
+  padding-top: var(--j-space-800);
+  text-align: center;
 }
 
 .signup-view__logo {
