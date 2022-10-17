@@ -1,5 +1,5 @@
 import getMember from "./getProfile";
-import { SELF, MEMBER } from "../constants/ad4m";
+import { SELF, MEMBER } from "../constants/communityPredicates";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 export interface Payload {

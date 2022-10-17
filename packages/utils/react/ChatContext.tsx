@@ -14,7 +14,7 @@ import { sortExpressionsByTimestamp } from "../helpers/expressionHelpers";
 import getMe from "../api/getMe";
 import { SHORT_FORM_EXPRESSION } from "../helpers/languageHelpers";
 import { DexieMessages, DexieUI } from "../helpers/storageHelpers";
-import { DIRECTLY_SUCCEEDED_BY, REACTION } from "../constants/ad4m";
+import { DIRECTLY_SUCCEEDED_BY, REACTION } from "../constants/communityPredicates";
 import hideEmbeds from "../api/hideEmbeds";
 import { MAX_MESSAGES } from "../constants/general";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
@@ -328,6 +328,10 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
         setState((oldState) =>
           addHiddenToMessageToState(oldState, id, true)
         );
+      }
+
+      if (linkIs.socialDNA) {
+        
       }
     }
   }

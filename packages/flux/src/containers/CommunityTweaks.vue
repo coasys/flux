@@ -37,7 +37,7 @@ import { useDataStore } from "@/store/data";
 import { LocalCommunityState } from "@/store/types";
 import { LinkQuery, Literal } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { ZOME, SELF } from "utils/constants/neighbourhoodMeta";
+import { ZOME, SELF } from "utils/constants/communityPredicates";
 import { defineComponent, ref } from "vue";
 import { mapActions } from "pinia";
 import ThemeEditor from "./ThemeEditor.vue";

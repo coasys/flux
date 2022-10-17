@@ -11,7 +11,7 @@ const ReactHint = ReactHintFactory({ createElement: h, Component, createRef });
 import "react-hint/css/index.css";
 import styles from "./index.scss";
 import { Reaction } from "utils/types";
-import { REACTION } from "utils/constants/ad4m";
+import { REACTION } from "utils/constants/communityPredicates";
 
 export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
   const emojiPicker = useRef(document.createElement("emoji-picker"));

@@ -7,7 +7,7 @@ import MessageReactions from "./MessageReactions";
 import UIContext from "../../context/UIContext";
 import styles from "./index.scss";
 import { format, formatRelative } from "date-fns/esm";
-import { REACTION } from "utils/constants/ad4m";
+import { REACTION } from "utils/constants/communityPredicates";
 import Skeleton from "../Skeleton";
 import { Avatar } from "./Avatar";
 

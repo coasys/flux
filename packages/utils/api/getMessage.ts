@@ -1,15 +1,11 @@
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
-import { getExpression } from "../helpers/expressionHelpers";
 import { Message } from "../types";
-import retry from "../helpers/retry";
-import { REPLY_TO } from "../constants/ad4m";
+import { REPLY_TO } from "../constants/communityPredicates";
 
 export interface Payload {
   perspectiveUuid: string;
   link: LinkExpression;
 }
-
-
 
 export default function (link: LinkExpression): Message {
   try {

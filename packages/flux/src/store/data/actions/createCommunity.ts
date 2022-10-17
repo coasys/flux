@@ -12,7 +12,7 @@ import {
   FLUX_GROUP_DESCRIPTION,
   FLUX_GROUP_THUMBNAIL,
   ZOME,
-} from "utils/constants/neighbourhoodMeta";
+} from "utils/constants/communityPredicates";
 
 import { CommunityState } from "@/store/types";
 import { Perspective, PerspectiveHandle, Literal } from "@perspect3vism/ad4m";

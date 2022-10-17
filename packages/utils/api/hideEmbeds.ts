@@ -1,5 +1,5 @@
 import { Link } from "@perspect3vism/ad4m";
-import { CARD_HIDDEN, OMIT } from "../constants/ad4m";
+import { CARD_HIDDEN, OMIT } from "../constants/communityPredicates";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 export interface Payload {
