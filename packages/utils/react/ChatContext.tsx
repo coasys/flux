@@ -260,7 +260,10 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     const agent = await getMe();
 
     const isMessageFromSelf = link.author === agent.did;
-    if (!isMessageFromSelf) {
+
+    const hasFocus = document.hasFocus();
+
+    if (!isMessageFromSelf || !hasFocus) {
       if (linkIs.message(link)) {
         const isSameChannel = await client.perspective.queryProlog(perspectiveUuid, `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.target}").`);
         if (isSameChannel) {
