@@ -1,8 +1,5 @@
 <template>
-  <router-view
-    :key="componentKey"
-    @showConnect="() => (showConnect = true)"
-  ></router-view>
+  <router-view :key="componentKey" @connectToAd4m="connectToAd4m"></router-view>
   <j-modal
     size="sm"
     :open="modals.showCode"
@@ -19,7 +16,7 @@
     </div>
   </div>
   <ad4m-connect
-    v-show="showConnect"
+    ref="ad4mConnect"
     appName="Flux"
     appDesc="Flux - A SOCIAL TOOLKIT FOR THE NEW INTERNET"
     appDomain="https://www.fluxsocial.io/"
@@ -78,11 +75,11 @@ export default defineComponent({
     const dataStore = useDataStore();
     const userStore = useUserStore();
     const watcherStarted = ref(false);
-    const connected = ref(false);
-    const showConnect = ref(false);
+
+    const ad4mConnect = ref(null);
 
     return {
-      showConnect,
+      ad4mConnect,
       appStore,
       componentKey,
       router,
@@ -90,7 +87,6 @@ export default defineComponent({
       dataStore,
       userStore,
       watcherStarted,
-      connected,
     };
   },
 
@@ -99,39 +95,11 @@ export default defineComponent({
 
     onAuthStateChanged(async (event: string) => {
       if (event === "connected_with_capabilities") {
-        this.connected = true;
-        this.showConnect = true;
-        this.appStore.setGlobalLoading(true);
-
-        const client = await getAd4mClient();
-
-        const { perspective } = await client.agent.me();
-
-        const fluxLinksFound = perspective?.links.find((e) =>
-          e.data.source.startsWith("flux://")
-        );
-
-        if (!fluxLinksFound) {
-          this.appStore.setGlobalLoading(false);
-          this.router.push("/signup");
-        } else {
-          if (
-            ["unlock", "connect", "signup"].includes(
-              this.router.currentRoute.value.name as string
-            )
-          ) {
-            this.router.push("/home");
-          }
-        }
-
         if (!this.watcherStarted) {
-          this.appStore.setGlobalLoading(true);
           this.startWatcher();
           this.watcherStarted = true;
           hydrateState();
         }
-
-        this.appStore.setGlobalLoading(false);
       }
     });
   },
@@ -153,6 +121,10 @@ export default defineComponent({
       this.componentKey += 1;
 
       this.appStore.setGlobalLoading(true);
+    },
+    connectToAd4m() {
+      // @ts-ignore
+      this.ad4mConnect?.connect();
     },
     async startWatcher() {
       const client = await getAd4mClient();

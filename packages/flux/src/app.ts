@@ -7,7 +7,6 @@ import "@junto-foundation/junto-elements/dist/main.css";
 
 import { createPinia } from "pinia";
 
-
 const pinia = createPinia();
 
 pinia.use(({ store }) => {

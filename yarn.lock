@@ -677,11 +677,12 @@
     "html5-qrcode" "^2.2.1"
     "lit" "^2.3.1"
 
-"@perspect3vism/ad4m-connect@^0.0.11-3":
-  "integrity" "sha512-GRPqL2dp372/ysmg9rwKMSboNiqM8Gxw5kcTOl6fyKk7N4L7y/0hgq7TWPVA1E90LMOggpZ/5xhvb/NL2YGCuA=="
-  "resolved" "https://registry.npmjs.org/@perspect3vism/ad4m-connect/-/ad4m-connect-0.0.11-3.tgz"
-  "version" "0.0.11-3"
+"@perspect3vism/ad4m-connect@^0.0.11-4":
+  "integrity" "sha512-aI2rlmkWMqQGZzkI9Wl9+MVjP2dhgMxa+Dh3uHAGq6VNqdUo/Zz9SH8GvJUxb0Aob7GxrbRNK6Zf1tHGGhGIog=="
+  "resolved" "https://registry.npmjs.org/@perspect3vism/ad4m-connect/-/ad4m-connect-0.0.11-4.tgz"
+  "version" "0.0.11-4"
   dependencies:
+    "auto-bind" "^5.0.1"
     "electron" "^20.0.3"
     "esbuild-plugin-inline-image" "^0.0.8"
     "html5-qrcode" "^2.2.1"
@@ -1677,6 +1678,11 @@
   "integrity" "sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg=="
   "resolved" "https://registry.npmjs.org/atob/-/atob-2.1.2.tgz"
   "version" "2.1.2"
+
+"auto-bind@^5.0.1":
+  "integrity" "sha512-ooviqdwwgfIfNmDwo94wlshcdzfO64XV0Cg6oDsDYBJfITDz1EngD2z7DkbvCWn+XIMsIqW27sEVF6qcpJrRcg=="
+  "resolved" "https://registry.npmjs.org/auto-bind/-/auto-bind-5.0.1.tgz"
+  "version" "5.0.1"
 
 "axe-core@^4.4.3":
   "integrity" "sha512-32+ub6kkdhhWick/UjvEwRchgoetXqTK14INLqbGm5U2TzBkBNF3nQtLYm8ovxSkQWArjEQvftCKryjZaATu3w=="

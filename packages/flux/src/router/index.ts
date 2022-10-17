@@ -1,9 +1,4 @@
-import {
-  createRouter,
-  createWebHistory,
-  createWebHashHistory,
-  RouteRecordRaw,
-} from "vue-router";
+import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 import MainView from "@/views/main/MainView.vue";
 import SignUp from "@/views/signup/SignUp.vue";
 import CommunityView from "@/views/community/CommunityView.vue";
@@ -11,8 +6,10 @@ import ChannelView from "@/views/channel/ChannelView.vue";
 import Settings from "@/containers/Settings.vue";
 import ProfileView from "@/views/profile/ProfileView.vue";
 import ProfileFeed from "@/views/profile/ProfileFeed.vue";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { useAppStore } from "@/store/app";
+import {
+  getAd4mClient,
+  isConnected,
+} from "@perspect3vism/ad4m-connect/dist/utils";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -69,42 +66,30 @@ const router = createRouter({
 
 export default router;
 
-export function checkConnection(): Promise<any> {
-  return new Promise(async (resolve, reject) => {
-    const appStore = useAppStore();
-
-    try {
-      appStore.setGlobalLoading(true);
-
-      const client = await getAd4mClient();
-
-      const status = await client.agent.status();
-
-      appStore.setGlobalLoading(false);
-
-      resolve(status);
-    } catch (e) {
-      appStore.setGlobalLoading(false);
-      reject();
-    }
-  });
-}
-
 router.beforeEach(async (to, from, next) => {
   try {
-    const status = await checkConnection();
-    const client = await getAd4mClient();
+    const connected = await isConnected();
 
-    const { perspective } = await client.agent.me();
+    if (connected) {
+      const client = await getAd4mClient();
 
-    const fluxLinksFound = perspective?.links.find((e) =>
-      e.data.source.startsWith("flux://")
-    );
+      const { perspective } = await client.agent.me();
 
-    if (!fluxLinksFound && to.name !== "signup") {
-      next("/signup");
+      const fluxLinksFound = perspective?.links.find((e) =>
+        e.data.source.startsWith("flux://")
+      );
+
+      if (!fluxLinksFound && to.name !== "signup") {
+        next("/signup");
+      } else {
+        next();
+      }
     } else {
-      next();
+      if (to.name !== "signup") {
+        next("/signup");
+      } else {
+        next();
+      }
     }
   } catch (e) {
     if (to.name !== "signup") {
