@@ -1,5 +1,3 @@
-import { LinkExpression } from "@perspect3vism/ad4m";
-
 export interface NeighbourhoodMeta {
   name: string;
   description: string;
@@ -20,6 +18,7 @@ export interface Message {
   timestamp: string;
   content: string;
   reply?: string;
+  isPopular: boolean;
 }
 export interface Messages {
   [x: string]: Message;

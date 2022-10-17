@@ -1,6 +1,6 @@
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { CHANNEL, SELF } from "../constants/ad4m";
+import { CHANNEL, SELF } from "../constants/communityPredicates";
 
 export interface Payload {
   perspectiveUuid: string;

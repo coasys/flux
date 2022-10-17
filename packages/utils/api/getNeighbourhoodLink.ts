@@ -1,7 +1,7 @@
 import retry from "../helpers/retry";
 import { LinkQuery, Literal } from "@perspect3vism/ad4m";
 import { findLink } from "../helpers/linkHelpers";
-import { CARD_HIDDEN } from "../constants/ad4m";
+import { CARD_HIDDEN } from "../constants/communityPredicates";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 

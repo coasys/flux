@@ -24,6 +24,7 @@ export interface ModalsState {
   showEditProfile: boolean;
   showSettings: boolean;
   showCommunitySettings: boolean;
+  showCommunityTweaks: boolean;
   showInviteCode: boolean;
   showDisclaimer: boolean;
 }

@@ -68,15 +68,11 @@ const router = createRouter({
 export default router;
 
 router.beforeEach(async (to, from, next) => {
-  const appStore = useAppStore();
-
   try {
     const connected = await isConnected();
 
     if (connected) {
       const client = await getAd4mClient();
-
-      appStore.setGlobalLoading(true);
 
       const { perspective } = await client.agent.me();
 
@@ -84,17 +80,21 @@ router.beforeEach(async (to, from, next) => {
         e.data.source.startsWith("flux://")
       );
 
+      if (fluxLinksFound && to.name === "signup") {
+        next("/home");
+      }
+
       if (!fluxLinksFound && to.name !== "signup") {
         next("/signup");
-      } else {
-        next();
       }
+
+      next();
     } else {
       if (to.name !== "signup") {
         next("/signup");
-      } else {
-        next();
       }
+
+      next();
     }
   } catch (e) {
     if (to.name !== "signup") {
@@ -102,7 +102,5 @@ router.beforeEach(async (to, from, next) => {
     } else {
       next();
     }
-  } finally {
-    appStore.setGlobalLoading(false);
   }
 });

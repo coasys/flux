@@ -5,7 +5,7 @@ import {
   FLUX_GROUP_DESCRIPTION,
   FLUX_GROUP_IMAGE,
   FLUX_GROUP_THUMBNAIL,
-} from "utils/constants/neighbourhoodMeta";
+} from "utils/constants/communityPredicates";
 import { DexieIPFS } from "@/utils/storageHelpers";
 import { getImage } from "utils/api/getProfile";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";

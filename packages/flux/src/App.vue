@@ -47,8 +47,8 @@ import {
   FLUX_GROUP_NAME,
   FLUX_GROUP_THUMBNAIL,
   MEMBER,
-  MESSAGE,
-} from "utils/constants/neighbourhoodMeta";
+  DIRECTLY_SUCCEEDED_BY,
+} from "utils/constants/communityPredicates";
 import { useUserStore } from "./store/user";
 import { buildCommunity, hydrateState } from "./store/data/hydrateState";
 import { getGroupMetadata } from "./store/data/actions/fetchNeighbourhoodMetadata";
@@ -122,8 +122,8 @@ export default defineComponent({
         link: LinkExpression,
         perspective: string
       ) => {
-        console.debug("GOT INCOMING MESSAGE SIGNAL", link, perspective);
-        if (link.data!.predicate! === MESSAGE) {
+        console.debug("GOT INCOMING DIRECTLY_SUCCEEDED_BY SIGNAL", link, perspective);
+        if (link.data!.predicate! === DIRECTLY_SUCCEEDED_BY) {
           console.log("Got a new message signal");
           try {
             const channels = this.dataStore.getChannelStates(perspective);
@@ -131,7 +131,7 @@ export default defineComponent({
             for (const channel of channels) {
               const isSameChannel = await client.perspective.queryProlog(
                 perspective,
-                `triple("${channel.id}", "${MESSAGE}", "${link.data.target}").`
+                `triple("${channel.id}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.target}").`
               );
 
               if (isSameChannel) {

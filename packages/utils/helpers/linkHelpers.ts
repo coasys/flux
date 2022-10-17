@@ -1,5 +1,5 @@
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
-import { CARD_HIDDEN, CHANNEL, DIRECTLY_SUCCEEDED_BY, MEMBER, REACTION, REPLY_TO } from "../constants/ad4m";
+import { CARD_HIDDEN, CHANNEL, DIRECTLY_SUCCEEDED_BY, MEMBER, REACTION, REPLY_TO, ZOME } from "../constants/communityPredicates";
 
 export const findLink = {
   name: (link: LinkExpression) => link.data.predicate === "rdf://name",
@@ -22,7 +22,8 @@ export const linkIs = {
   member: (link: LinkExpression) => 
     link.data.predicate === MEMBER,
   hideNeighbourhoodCard: (link: LinkExpression) =>
-    link.data.predicate === CARD_HIDDEN
+    link.data.predicate === CARD_HIDDEN,
+  socialDNA: (link: LinkExpression) => link.data.predicate === ZOME
     
 
   // TODO: SHould we check if the link is proof.valid?

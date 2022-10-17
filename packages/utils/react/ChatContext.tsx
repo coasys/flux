@@ -14,7 +14,7 @@ import { sortExpressionsByTimestamp } from "../helpers/expressionHelpers";
 import getMe from "../api/getMe";
 import { SHORT_FORM_EXPRESSION } from "../helpers/languageHelpers";
 import { DexieMessages, DexieUI } from "../helpers/storageHelpers";
-import { DIRECTLY_SUCCEEDED_BY, REACTION } from "../constants/ad4m";
+import { DIRECTLY_SUCCEEDED_BY, REACTION } from "../constants/communityPredicates";
 import hideEmbeds from "../api/hideEmbeds";
 import { MAX_MESSAGES } from "../constants/general";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
@@ -158,6 +158,27 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       },
     };
     return newState;
+  }
+
+  function updateMessagePopularStatus(link, status) {
+    const id = link.data.source;
+
+    setState((oldState) => {
+      const message: Message = oldState.keyedMessages[id];
+
+      if (message) {
+        return {
+          ...oldState,
+          keyedMessages: {
+            ...oldState.keyedMessages,
+            [id]: {
+              ...message,
+              isPopular: status
+            },
+          },
+        };
+      }
+    });
   }
 
   function addReactionToState(link) {
@@ -304,13 +325,33 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
         );
       }
     }
+    if (linkIs.socialDNA(link)) {
+      console.log("Got new Social DNA, reloading the messages", link);
+      fetchMessages();
+    }
+    if (linkIs.reaction(link)) {
+      //TODO; this could read if the message is already popular and if so skip this check
+      const isPopularPost = await client.perspective.queryProlog(perspectiveUuid, `isPopular("${link.data.source}").`);
+
+      if (isPopularPost) {
+        updateMessagePopularStatus(link, true);
+      }
+    }
   }
 
   async function handleLinkRemoved(link) {
+    const client = await getAd4mClient();
+
     //TODO: link.proof.valid === false when we recive
     // the remove link somehow. Ad4m bug?
     if (link.data.predicate === REACTION) {
       removeReactionFromState(link);
+
+      const isPopularPost = await client.perspective.queryProlog(perspectiveUuid, `isPopular("${link.data.source}").`);
+
+      if (!isPopularPost) {
+        updateMessagePopularStatus(link, false);
+      }
     }
   }
 

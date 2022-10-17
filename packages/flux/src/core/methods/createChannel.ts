@@ -8,7 +8,7 @@ import {
   CHANNEL_NAME,
   SELF,
   FLUX_CHANNEL,
-} from "utils/constants/neighbourhoodMeta";
+} from "utils/constants/communityPredicates";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";

@@ -62,25 +62,6 @@
           :errortext="usernameErrorMessage"
           @blur="(e) => validateUsername()"
         ></j-input>
-        <j-input
-          size="lg"
-          label="First Name (optional)"
-          :value="name"
-          @input="(e) => (name = e.target.value)"
-        ></j-input>
-        <j-input
-          size="lg"
-          label="Last Name (optional)"
-          :value="familyName"
-          @input="(e) => (familyName = e.target.value)"
-        ></j-input>
-        <j-input
-          size="lg"
-          type="email"
-          label="Email (optional)"
-          :value="email"
-          @input="(e) => (email = e.target.value)"
-        ></j-input>
         <j-toggle
           style="width: 100%"
           full
@@ -221,18 +202,24 @@ export default defineComponent({
       try {
         const client = await getAd4mClient();
 
-        const me = await client.agent.me();
+        const perspectives = await client.perspective.all();
+        const ad4mAgentPerspective = perspectives.find(
+          ({ name }) => name === "Agent Profile"
+        );
 
-        if (me.perspective) {
-          const agentPerspectiveLinks = me.perspective.links;
-          const profile = mapLiteralLinks(agentPerspectiveLinks, {
+        if (ad4mAgentPerspective) {
+          const agentPers = await client.perspective.snapshotByUUID(
+            ad4mAgentPerspective.uuid
+          );
+
+          const profile = mapLiteralLinks(agentPers?.links, {
             username: AD4M_PREDICATE_USERNAME,
             name: AD4M_PREDICATE_FIRSTNAME,
             familyName: AD4M_PREDICATE_LASTNAME,
           });
-          this.username = profile.username;
-          this.name = profile.name;
-          this.familyName = profile.familyName;
+          this.username = profile.username || "";
+          this.name = profile.name || "";
+          this.familyName = profile.familyName || "";
         }
       } catch (e) {
         console.log(e);

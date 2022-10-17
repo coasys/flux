@@ -4,7 +4,7 @@ import {
   NAME,
   CREATOR,
   CREATED_AT,
-} from "utils/constants/neighbourhoodMeta";
+} from "utils/constants/communityPredicates";
 
 export function getMetaFromNeighbourhood(links: LinkExpression[]): {
   name: string;

@@ -14,7 +14,7 @@ export const MEMBER = "sioc://has_member";
 
 export const EXPRESSION = "sioc://content_of";
 
-export const MESSAGE = "temp://directly_succeeded_by";
+export const DIRECTLY_SUCCEEDED_BY = "temp://directly_succeeded_by";
 
 export const CHANNEL = "flux://has_channel";
 
@@ -33,3 +33,11 @@ export const FLUX_GROUP_IMAGE = "flux://communityImage";
 export const FLUX_GROUP_THUMBNAIL = "flux://communityThumbnail";
 
 export const ZOME = "ad4m://has_zome";
+
+export const CARD_HIDDEN = "flux://is_card_hidden";
+
+export const OMIT = "flux://null";
+
+export const REPLY_TO = "flux://has_reply";
+
+export const REACTION = "flux://has_reaction";

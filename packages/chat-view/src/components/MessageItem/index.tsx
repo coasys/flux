@@ -7,7 +7,7 @@ import MessageReactions from "./MessageReactions";
 import UIContext from "../../context/UIContext";
 import styles from "./index.scss";
 import { format, formatRelative } from "date-fns/esm";
-import { REACTION } from "utils/constants/ad4m";
+import { REACTION } from "utils/constants/communityPredicates";
 import Skeleton from "../Skeleton";
 import { Avatar } from "./Avatar";
 
@@ -191,12 +191,13 @@ export default function MessageItem({
   const author = members[message.author] || {};
   const replyAuthor = members[message?.replies[0]?.author] || {};
   const replyMessage = message?.replies[0];
+  const popularStyle = message.isPopular? styles.popularMessage : "";
 
   return (
     <div
       onMouseOver={() => setShowToolbar(true)}
       onMouseLeave={() => setShowToolbar(false)}
-      class={styles.message}
+      class={[styles.message, popularStyle].join(" ")}
       isReplying={keyedMessages[currentReply]?.id === message.id}
     >
       <div class={styles.messageItemWrapper}>
