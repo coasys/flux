@@ -2,7 +2,7 @@ import { useUserStore } from "@/store/user";
 import { RouteLocationNormalizedLoaded, Router } from "vue-router";
 import { useDataStore } from "..";
 import getProfile from "utils/api/getProfile";
-import { differenceInSeconds, parseISO } from "date-fns";
+import { differenceInSeconds, parseISO, parse } from "date-fns";
 import { useAppStore } from "@/store/app";
 import { Literal } from "@perspect3vism/ad4m";
 
@@ -43,11 +43,19 @@ export default async ({
 
   const user = userStore.getUser;
 
+  const currentDate = new Date();
+
+  const lastDate = parseISO(localStorage.getItem('lastNotificationDate') || currentDate.toISOString());
+
+  localStorage.setItem('lastNotificationDate', currentDate.toISOString())
+
+  const slient = differenceInSeconds(currentDate, lastDate) <= 3
+
   // Only show the notification when the the message is not from self & the active community & channel is different
   if (
     (!isMinimized &&
       !channel?.notifications.mute &&
-      !community?.state.notifications.mute) ||
+      !community?.state.notifications.mute && !slient) ||
     (user!.agent.did! !== authorDid &&
       (community?.neighbourhood.perspective.uuid === communityId
         ? channel?.name !== channelId
@@ -55,7 +63,7 @@ export default async ({
       !channel?.notifications.mute &&
       !community?.state.notifications.mute &&
       differenceInSeconds(new Date(), parseISO(timestamp)) <= 30 &&
-      appStore.notification.globalNotification)
+      appStore.notification.globalNotification && !slient)
   ) {
     const isMentioned = message.includes(
       user!.agent.did!.replace("did:key:", "")
