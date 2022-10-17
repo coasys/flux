@@ -677,10 +677,10 @@
     "html5-qrcode" "^2.2.1"
     "lit" "^2.3.1"
 
-"@perspect3vism/ad4m-connect@^0.0.11-4":
-  "integrity" "sha512-aI2rlmkWMqQGZzkI9Wl9+MVjP2dhgMxa+Dh3uHAGq6VNqdUo/Zz9SH8GvJUxb0Aob7GxrbRNK6Zf1tHGGhGIog=="
-  "resolved" "https://registry.npmjs.org/@perspect3vism/ad4m-connect/-/ad4m-connect-0.0.11-4.tgz"
-  "version" "0.0.11-4"
+"@perspect3vism/ad4m-connect@^0.0.11-5":
+  "integrity" "sha512-ZGooCBcBkmyhh4PSZO9zb9Gr+xu2VVte/6e1M9/0va2ZUsbOCQtBivVkTVkaB2OPmk9WwM+5wLL8Zx+8MS8czg=="
+  "resolved" "https://registry.npmjs.org/@perspect3vism/ad4m-connect/-/ad4m-connect-0.0.11-5.tgz"
+  "version" "0.0.11-5"
   dependencies:
     "auto-bind" "^5.0.1"
     "electron" "^20.0.3"
@@ -3583,7 +3583,7 @@
     "@junto-foundation/chat-view" "*"
     "@junto-foundation/junto-elements" "^0.4.3"
     "@perspect3vism/ad4m" "^0.1.37"
-    "@perspect3vism/ad4m-connect" "^0.0.11-3"
+    "@perspect3vism/ad4m-connect" "^0.0.11-4"
     "date-fns" "^2.29.3"
     "dexie" "^3.2.2"
     "level" "^7.0.1"
