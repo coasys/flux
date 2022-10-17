@@ -300,11 +300,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
       if (linkIs.reaction(link)) {
         addReactionToState(link);
-        const isPopularPost = await client.perspective.queryProlog(perspectiveUuid, `isPopular("${link.data.source}").`);
-
-        if (isPopularPost) {
-          updateMessagePopularStatus(link, true);
-        }
       }
 
       if (linkIs.reply(link)) {
@@ -333,6 +328,14 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     if (linkIs.socialDNA(link)) {
       console.log("Got new Social DNA, reloading the messages", link);
       fetchMessages();
+    }
+    if (linkIs.reaction(link)) {
+      //TODO; this could read if the message is already popular and if so skip this check
+      const isPopularPost = await client.perspective.queryProlog(perspectiveUuid, `isPopular("${link.data.source}").`);
+
+      if (isPopularPost) {
+        updateMessagePopularStatus(link, true);
+      }
     }
   }
 
