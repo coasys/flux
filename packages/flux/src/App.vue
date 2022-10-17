@@ -1,11 +1,5 @@
 <template>
   <router-view :key="componentKey" @connectToAd4m="connectToAd4m"></router-view>
-  <j-modal
-    size="sm"
-    :open="modals.showCode"
-    @toggle="(e) => setShowCode(e.target.open)"
-  >
-  </j-modal>
   <div class="global-loading" v-if="ui.showGlobalLoading">
     <div class="global-loading__backdrop"></div>
     <div class="global-loading__content">
@@ -113,14 +107,6 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useAppStore, ["setShowCode"]),
-    async capabilitiesCreated() {
-      this.setShowCode(false);
-
-      this.componentKey += 1;
-
-      this.appStore.setGlobalLoading(true);
-    },
     connectToAd4m() {
       // @ts-ignore
       this.ad4mConnect?.connect();

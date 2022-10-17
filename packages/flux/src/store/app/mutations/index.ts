@@ -103,12 +103,8 @@ export default {
     const state = useAppStore();
     state.modals.showInviteCode = payload;
   },
-  setShowCode(payload: boolean): void {
-    const state = useAppStore();
-    state.modals.showCode = payload;
-  },
   setGlobalNotification(payload: boolean): void {
     const state = useAppStore();
     state.notification.globalNotification = payload;
-  }
+  },
 };
