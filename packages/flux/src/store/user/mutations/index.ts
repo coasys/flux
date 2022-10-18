@@ -16,10 +16,5 @@ export default {
   setUserProfile(payload: Profile): void {
     const store = useUserStore();
     store.profile = payload;
-  },
-
-  addAgentProfileProxyPerspectiveId(payload: string): void {
-    const store = useUserStore();
-    store.agentProfileProxyPerspectiveId = payload;
-  },
+  }
 };

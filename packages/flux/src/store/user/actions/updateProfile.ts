@@ -1,12 +1,9 @@
 import { Profile } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "..";
-import { useDataStore } from "@/store/data";
-import { Link, LinkExpression, PerspectiveInput } from "@perspect3vism/ad4m";
-import removeTypeName from "utils/helpers/removeTypeName";
-import getAgentLinks from "utils/api/getAgentLinks";
+import { Link, LinkMutations } from "@perspect3vism/ad4m";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
-import { FLUX_PROFILE, FLUX_PROXY_PROFILE_NAME, HAS_BG_IMAGE, HAS_BIO, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "utils/constants/profile";
+import { FLUX_PROFILE, HAS_BG_IMAGE, HAS_BIO, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "utils/constants/profile";
 import { resizeImage, dataURItoBlob, blobToDataURL } from "utils/helpers/profileHelpers";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
@@ -18,51 +15,12 @@ export interface Payload {
   profileBg?: string;
 }
 
-async function removeLink(links: LinkExpression[], link: Link) {
-  const userStore = useUserStore();
-  const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
-  const client = await getAd4mClient();
-
-  const foundLink = links.find(
-    (e) => e.data.predicate === link.predicate
-  );
-
-  if (foundLink) {
-    const link = removeTypeName(foundLink);
-    await client.perspective.removeLink(userPerspective!, link);
-  }
-}
-
-async function replaceLink(links: LinkExpression[], newLink: Link) {
-  const userStore = useUserStore();
-  const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
-  const client = await getAd4mClient();
-
-  const foundLink = links.find(
-    (e) => e.data.predicate === newLink.predicate
-  );
-
-  if (foundLink) {
-    const link = removeTypeName(foundLink);
-    await client.perspective.removeLink(userPerspective!, link);
-  }
-
-  const linked = await client.perspective.addLink(
-    userPerspective!,
-    newLink
-  );
-
-  return linked;
-}
-
 export default async (payload: Payload): Promise<void> => {
-  const dataStore = useDataStore();
   const appStore = useAppStore();
   const userStore = useUserStore();
   const client = await getAd4mClient();
 
   const currentProfile = userStore.getProfile;
-  // TODO: add profilebg here.
   const newProfile = {
     username: payload.username || currentProfile?.username,
     email: currentProfile?.email,
@@ -72,46 +30,51 @@ export default async (payload: Payload): Promise<void> => {
     thumbnailPicture: payload.thumbnail || currentProfile?.thumbnailPicture,
     bio: payload.bio || currentProfile?.bio
   } as Profile;
-  
-  const perspectives = await client.perspective.all();
-  const userPerspective = perspectives.find(e => e.name === FLUX_PROXY_PROFILE_NAME);
 
-  if (userPerspective) {
-    userStore.addAgentProfileProxyPerspectiveId(userPerspective.uuid)
-  } else {
-    const error = "No user perspective found";
-    appStore.showDangerToast({
-      message: error,
-    });
-    throw new Error(error)
-  }
+  //try {
+    const links = (await client.agent.me()).perspective?.links;
 
-  try {
-    const links = await getAgentLinks(userStore.agent.did!, userPerspective.uuid);
-
-    const tempLinks = [...links];
-
-    if (payload.bio) {    
-      const bioLink = await replaceLink(links, new Link({
-        source: FLUX_PROFILE,
-        target: newProfile.bio,
-        predicate: HAS_BIO,
-      }));
-    
-      tempLinks.push(bioLink);
-    } else {
-      removeLink(links, new Link({
-        source: FLUX_PROFILE,
-        target: newProfile.bio,
-        predicate: HAS_BIO,
-      }));
+    if (!links) {
+      throw new Error("No links found, cannot update the profile");
     }
 
-    const usernameLink = await replaceLink(links, new Link({
-      source: FLUX_PROFILE,
-      target: newProfile.username,
-      predicate: HAS_USERNAME,
-    }));
+    const additions = [];
+    const removals = [];
+
+    if (payload.bio) {    
+      const bioLink = links.filter(link => link.data.predicate === HAS_BIO);
+      if (bioLink.length > 0) {
+        for (const link of bioLink) {
+          removals.push(link);
+        }
+      }
+      additions.push(new Link({
+        source: FLUX_PROFILE,
+        target: payload.bio,
+        predicate: HAS_BIO,
+      }));
+    } else {
+      const bioLink = links.filter(link => link.data.predicate === HAS_BIO);
+      if (bioLink.length > 0) {
+        for (const link of bioLink) {
+          removals.push(link);
+        }
+      }
+    }
+
+    if (payload.username) {
+      const usernameLink = links.filter(link => link.data.predicate === HAS_USERNAME);
+      if (usernameLink.length > 0) {
+        for (const username of usernameLink) {
+          removals.push(username);
+        }
+      }
+      additions.push(new Link({
+        source: FLUX_PROFILE,
+        target: payload.username,
+        predicate: HAS_USERNAME,
+      }));
+    };
 
     let profileImageLink: any = null;
     let thumbnailImageLink: any = null;
@@ -122,14 +85,24 @@ export default async (payload: Payload): Promise<void> => {
         payload.profileBg,
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
-
-      const profileBgLink = await replaceLink(links, new Link({
+      const profileBgLink = links.filter(link => link.data.predicate === HAS_BG_IMAGE);
+      if (profileBgLink.length > 0) {
+        for (const profileBg of profileBgLink) {
+          removals.push(profileBg);
+        }
+      }
+      additions.push(new Link({
         source: FLUX_PROFILE,
         target: image,
         predicate: HAS_BG_IMAGE,
       }));
-
-      tempLinks.push(profileBgLink);
+    } else {
+      const profileBgLink = links.filter(link => link.data.predicate === HAS_BG_IMAGE);
+      if (profileBgLink.length > 0) {
+        for (const profileBg of profileBgLink) {
+          removals.push(profileBg);
+        }
+      }
     }
 
     if (payload.profilePicture) {
@@ -151,50 +124,59 @@ export default async (payload: Payload): Promise<void> => {
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
 
-      profileImageLink = await replaceLink(
-        links,
-        new Link({
-          source: FLUX_PROFILE,
-          target: profileImage,
-          predicate: HAS_PROFILE_IMAGE,
-        })
-      );
-  
-      thumbnailImageLink = await replaceLink(
-        links,
-        new Link({
-          source: FLUX_PROFILE,
-          target: thumbnailImage,
-          predicate: HAS_THUMBNAIL_IMAGE,
-        })
-      );
+      const profileImageLink = links.filter(link => link.data.predicate === HAS_PROFILE_IMAGE);
+      const thumbnailImageLink = links.filter(link => link.data.predicate === HAS_THUMBNAIL_IMAGE);
 
-      tempLinks.push(profileImageLink, thumbnailImageLink);
-    }
+      if (profileImageLink.length > 0) {
+        for (const profileImage of profileImageLink) {
+          removals.push(profileImage);
+        }
+      };
+      if (thumbnailImageLink.length > 0) {
+        for (const thumbnailImage of thumbnailImageLink) {
+          removals.push(thumbnailImage);
+        }
+      };
 
-    const finalLinks = [];
-    for (const link of [
-      ...tempLinks,
-      usernameLink
-    ]) {
-      finalLinks.push(removeTypeName(link));
-    }
+      additions.push(new Link({
+        source: FLUX_PROFILE,
+        target: profileImage,
+        predicate: HAS_PROFILE_IMAGE,
+      }));
+      additions.push(new Link({
+        source: FLUX_PROFILE,
+        target: thumbnailImage,
+        predicate: HAS_THUMBNAIL_IMAGE,
+      }));
+    } else {
+      const profileImageLink = links.filter(link => link.data.predicate === HAS_PROFILE_IMAGE);
+      const thumbnailImageLink = links.filter(link => link.data.predicate === HAS_THUMBNAIL_IMAGE);
 
-  userStore.setUserProfile({
-    ...newProfile,
-    profilePicture: profileImageLink?.data?.target || null,
-    thumbnailPicture: thumbnailImageLink?.data?.target || null,
-    profileBg: profileBgLink || null
-  });
+      if (profileImageLink.length > 0) {
+        for (const profileImage of profileImageLink) {
+          removals.push(profileImage);
+        }
+      };
+      if (thumbnailImageLink.length > 0) {
+        for (const thumbnailImage of thumbnailImageLink) {
+          removals.push(thumbnailImage);
+        }
+      };
+    };
 
+    await client.agent.mutatePublicPerspective({additions, removals} as LinkMutations);
 
-    await client.agent.updatePublicPerspective({
-      links: finalLinks,
-    } as PerspectiveInput);
-  } catch (e) {
-    appStore.showDangerToast({
-      message: e.message,
+    userStore.setUserProfile({
+      ...newProfile,
+      profilePicture: profileImageLink?.data?.target || null,
+      thumbnailPicture: thumbnailImageLink?.data?.target || null,
+      profileBg: profileBgLink || null
     });
-    throw new Error(e);
-  }
+  //}
+  //  catch (e) {
+  //   appStore.showDangerToast({
+  //     message: e.message,
+  //   });
+  //   throw new Error(e);
+  // }
 };
