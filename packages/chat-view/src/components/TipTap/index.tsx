@@ -5,7 +5,7 @@ import styles from "./index.scss";
 import UIContext from "../../context/UIContext";
 import EditorContext from "../../context/EditorContext";
 
-export default function Tiptap({}) {
+export default function Tiptap({perspectiveUuid, channelId}) {
   const [showToolbar, setShowToolbar] = useState(false);
   const {
     state: { editor, value },
@@ -62,7 +62,7 @@ export default function Tiptap({}) {
 
   return (
     <div class={styles.editor}>
-      <div id="mentionWrapper" class={styles.mentionWrapper}></div>
+      <div id={`mentionWrapper-${perspectiveUuid}-${channelId}`} class={styles.mentionWrapper}></div>
       {showToolbar && (
         <div>
           <j-button

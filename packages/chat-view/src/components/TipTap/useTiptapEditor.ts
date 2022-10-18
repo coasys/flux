@@ -23,7 +23,7 @@ import { NeighbourhoddLink } from "./NeighourhoodPlugin";
 import HardBreak from "@tiptap/extension-hard-break";
 import { useEffect, useRef } from "preact/hooks";
 
-export default ({ value, onSend, members, channels, onChange }) => {
+export default ({value, onSend, members, channels, onChange, perspectiveUuid, channelId}) => {
   // This is needed because React ugh.
   const sendCB = useRef(onSend);
   const membersCB = useRef(members);
@@ -131,7 +131,7 @@ export default ({ value, onSend, members, channels, onChange }) => {
                 .filter((e) => e.id.startsWith(query))
                 .slice(0, 10);
             },
-            render: renderMention,
+            render: () => renderMention(perspectiveUuid, channelId),
           },
         }),
         Mention("neighbourhood-mention").configure({
@@ -152,7 +152,7 @@ export default ({ value, onSend, members, channels, onChange }) => {
                 )
                 .slice(0, 5);
             },
-            render: renderMention,
+            render: () => renderMention(perspectiveUuid, channelId),
           },
         }),
         Mention("agent-mention").configure({
@@ -173,7 +173,7 @@ export default ({ value, onSend, members, channels, onChange }) => {
                 )
                 .slice(0, 5);
             },
-            render: renderMention,
+            render: () => renderMention(perspectiveUuid, channelId),
           },
         }),
       ],
@@ -182,7 +182,7 @@ export default ({ value, onSend, members, channels, onChange }) => {
         onChange(value);
       },
     },
-    [membersCB, channelsCB]
+    [membersCB, channelsCB, perspectiveUuid, channelId]
   );
 
   return editor;

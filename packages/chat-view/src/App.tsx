@@ -15,14 +15,14 @@ const MainComponent = ({ perspectiveUuid, channel }) => {
   const [ref, setRef] = useState(null);
 
   return (
-    <EditorProvider>
+    <EditorProvider perspectiveUuid={perspectiveUuid} channelId={channel}>
       <div class={styles.container} ref={setRef}>
         <MessageList
           perspectiveUuid={perspectiveUuid}
           channelId={channel}
           mainRef={ref}
         />
-        <Footer />
+        <Footer perspectiveUuid={perspectiveUuid} channelId={channel} />
       </div>
     </EditorProvider>
   );
