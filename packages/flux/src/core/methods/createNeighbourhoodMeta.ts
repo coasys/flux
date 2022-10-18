@@ -6,7 +6,7 @@ import {
   NAME,
   SELF,
   CREATED_AT,
-} from "utils/constants/neighbourhoodMeta";
+} from "utils/constants/communityPredicates";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 export async function createNeighbourhoodMeta(

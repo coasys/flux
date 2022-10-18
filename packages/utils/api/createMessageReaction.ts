@@ -1,6 +1,6 @@
 import { Link } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { REACTION } from "../constants/ad4m";
+import { REACTION } from "../constants/communityPredicates";
 
 export interface Payload {
   perspectiveUuid: string;

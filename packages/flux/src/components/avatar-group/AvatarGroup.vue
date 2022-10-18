@@ -23,7 +23,7 @@
           ></Skeleton>
         </template>
         <span v-if="users.length >= 4" class="avatar-group__see-all">
-          +{{ users.length - 3 }}
+          +{{ users.length - 5 }}
         </span>
       </div>
     </j-tooltip>
@@ -55,7 +55,7 @@ export default defineComponent({
         this.loading = true;
 
         users.forEach(async (user: string, i: number) => {
-          if (i <= 5 && !this.firstUsers[user]) {
+          if (i <= 4 && !this.firstUsers[user]) {
             const profile = await getProfile(user);
             if (profile) {
               this.firstUsers[user] = profile;

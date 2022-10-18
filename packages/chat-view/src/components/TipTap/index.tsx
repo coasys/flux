@@ -1,5 +1,11 @@
 import { useState, useRef, useContext } from "preact/hooks";
-import { useEditor, EditorContent, findParentNode, getNodeType, isList } from "@tiptap/react";
+import {
+  useEditor,
+  EditorContent,
+  findParentNode,
+  getNodeType,
+  isList,
+} from "@tiptap/react";
 import BulletList from "@tiptap/extension-bullet-list";
 import ListItem from "@tiptap/extension-list-item";
 import Text from "@tiptap/extension-text";
@@ -77,28 +83,36 @@ export default function Tiptap({
               Enter: (props) => {
                 const { state, commands } = props.editor;
                 const listNodeType = getNodeType("listItem", state.schema);
-        
+
                 const executedCommand = commands.first([
                   (props) => {
-                    if (state.selection.$anchor.node().textContent.length <= 0) {
+                    if (
+                      state.selection.$anchor.node().textContent.length <= 0
+                    ) {
                       const parentList = findParentNode((node) =>
-                        isList(node.type.name, props.editor.extensionManager.extensions)
+                        isList(
+                          node.type.name,
+                          props.editor.extensionManager.extensions
+                        )
                       )(state.selection);
 
                       if (parentList) {
-                        return props.commands.toggleList(parentList.node.type, listNodeType);
+                        return props.commands.toggleList(
+                          parentList.node.type,
+                          listNodeType
+                        );
                       }
                     }
-        
+
                     return props.commands.splitListItem(listNodeType);
                   },
                 ]);
-                
+
                 if (!executedCommand) {
                   const value = props.editor.getHTML();
                   sendCB.current(value);
-                
-                  return true
+
+                  return true;
                 }
 
                 // Prevents us from getting a new paragraph if user pressed Enter
@@ -236,6 +250,7 @@ export default function Tiptap({
 
   return (
     <div class={styles.editor}>
+      <div id="mentionWrapper" class={styles.mentionWrapper}></div>
       {showToolbar && (
         <div>
           <j-button
@@ -308,7 +323,11 @@ export default function Tiptap({
               <j-icon size="sm" name="emoji-smile"></j-icon>
             </j-button>
             <div slot="content">
-              <emoji-picker ref={emojiPicker} onEmojiClick={onEmojiClick} />
+              <emoji-picker
+                class={styles.picker}
+                ref={emojiPicker}
+                onEmojiClick={onEmojiClick}
+              />
             </div>
           </j-popover>
           <j-button

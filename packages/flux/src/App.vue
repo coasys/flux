@@ -1,14 +1,5 @@
 <template>
-  <router-view
-    :key="componentKey"
-    v-if="!ui.showGlobalLoading && connected"
-  ></router-view>
-  <j-modal
-    size="sm"
-    :open="modals.showCode"
-    @toggle="(e) => setShowCode(e.target.open)"
-  >
-  </j-modal>
+  <router-view :key="componentKey" @connectToAd4m="connectToAd4m"></router-view>
   <div class="global-loading" v-if="ui.showGlobalLoading">
     <div class="global-loading__backdrop"></div>
     <div class="global-loading__content">
@@ -19,6 +10,7 @@
     </div>
   </div>
   <ad4m-connect
+    ref="ad4mConnect"
     appName="Flux"
     appDesc="Flux - A SOCIAL TOOLKIT FOR THE NEW INTERNET"
     appDomain="https://www.fluxsocial.io/"
@@ -55,14 +47,14 @@ import {
   FLUX_GROUP_NAME,
   FLUX_GROUP_THUMBNAIL,
   MEMBER,
-  MESSAGE,
-} from "utils/constants/neighbourhoodMeta";
+  DIRECTLY_SUCCEEDED_BY,
+} from "utils/constants/communityPredicates";
 import { useUserStore } from "./store/user";
 import { buildCommunity, hydrateState } from "./store/data/hydrateState";
 import { getGroupMetadata } from "./store/data/actions/fetchNeighbourhoodMetadata";
 import {
   getAd4mClient,
-  isConnected,
+  onAuthStateChanged,
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import "@perspect3vism/ad4m-connect/dist/web";
 
@@ -77,9 +69,11 @@ export default defineComponent({
     const dataStore = useDataStore();
     const userStore = useUserStore();
     const watcherStarted = ref(false);
-    const connected = ref(false);
+
+    const ad4mConnect = ref(null);
 
     return {
+      ad4mConnect,
       appStore,
       componentKey,
       router,
@@ -87,45 +81,23 @@ export default defineComponent({
       dataStore,
       userStore,
       watcherStarted,
-      connected,
     };
   },
-
+  created() {
+    this.appStore.changeCurrentTheme("global");
+  },
   mounted() {
-    isConnected().then(async () => {
-      this.connected = true;
-      this.appStore.setGlobalLoading(true);
-
-      const client = await getAd4mClient();
-      const { perspective } = await client.agent.me();
-
-      const fluxLinksFound = perspective?.links.find((e) =>
-        e.data.source.startsWith("flux://")
-      );
-
-      if (!fluxLinksFound) {
-        await this.router.replace("/signup");
-      } else {
-        if (
-          ["unlock", "connect", "signup"].includes(
-            this.router.currentRoute.value.name as string
-          )
-        ) {
-          await this.router.replace("/home");
+    onAuthStateChanged(async (event: string) => {
+      console.log("event", event);
+      if (event === "connected_with_capabilities") {
+        if (!this.watcherStarted) {
+          this.startWatcher();
+          this.watcherStarted = true;
+          hydrateState();
         }
       }
-
-      if (!this.watcherStarted) {
-        this.appStore.setGlobalLoading(true);
-        this.startWatcher();
-        this.watcherStarted = true;
-        await hydrateState();
-      }
-
-      this.appStore.setGlobalLoading(false);
     });
   },
-
   computed: {
     modals(): ModalsState {
       return this.appStore.modals;
@@ -134,15 +106,10 @@ export default defineComponent({
       return this.appStore.$state;
     },
   },
-
   methods: {
-    ...mapActions(useAppStore, ["setShowCode"]),
-    async capabilitiesCreated() {
-      this.setShowCode(false);
-
-      this.componentKey += 1;
-
-      this.appStore.setGlobalLoading(true);
+    connectToAd4m() {
+      // @ts-ignore
+      this.ad4mConnect?.connect();
     },
     async startWatcher() {
       const client = await getAd4mClient();
@@ -155,8 +122,8 @@ export default defineComponent({
         link: LinkExpression,
         perspective: string
       ) => {
-        console.debug("GOT INCOMING MESSAGE SIGNAL", link, perspective);
-        if (link.data!.predicate! === MESSAGE) {
+        console.debug("GOT INCOMING DIRECTLY_SUCCEEDED_BY SIGNAL", link, perspective);
+        if (link.data!.predicate! === DIRECTLY_SUCCEEDED_BY) {
           console.log("Got a new message signal");
           try {
             const channels = this.dataStore.getChannelStates(perspective);
@@ -164,7 +131,7 @@ export default defineComponent({
             for (const channel of channels) {
               const isSameChannel = await client.perspective.queryProlog(
                 perspective,
-                `triple("${channel.id}", "${MESSAGE}", "${link.data.target}").`
+                `triple("${channel.id}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.target}").`
               );
 
               if (isSameChannel) {
@@ -268,7 +235,6 @@ export default defineComponent({
           });
         }
       };
-
       watch(
         this.dataStore.neighbourhoods,
         async (newValue: { [perspectiveUuid: string]: NeighbourhoodState }) => {

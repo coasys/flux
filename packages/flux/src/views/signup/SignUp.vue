@@ -1,6 +1,38 @@
 <template>
-  <div class="signup-view" :class="{ 'signup-view--show-signup': showSignup }">
-    <div class="signup-view__flow">
+  <div class="signup-view">
+    <div class="signup-view__intro" v-if="!showSignup">
+      <div>
+        <j-box pb="700">
+          <Logo class="signup-view__intro-logo" width="150px"></Logo>
+        </j-box>
+        <j-box align="center">
+          <j-text variant="heading-lg">
+            Create your own decentralized community.
+          </j-text>
+        </j-box>
+
+        <div class="signup-view__intro-extension">
+          <j-text variant="heading-sm">
+            You need the AD4M extension to use Flux.
+          </j-text>
+          <j-text
+            >By connectinng to AD4M you are able to surf the internet completely
+            decentralized, secure and bladibla</j-text
+          >
+          <j-box class="signup-view__intro-button" pt="900">
+            <j-button
+              @click="() => $emit('connectToAd4m')"
+              variant="primary"
+              size="lg"
+            >
+              <Ad4mLogo width="25px" slot="start" />
+              Connect with AD4M
+            </j-button>
+          </j-box>
+        </div>
+      </div>
+    </div>
+    <div class="signup-view__flow" v-else>
       <j-flex direction="column" gap="400">
         <j-box class="signup-view__flow-back" pb="500">
           <j-button @click="showSignup = false" variant="link">
@@ -30,25 +62,6 @@
           :errortext="usernameErrorMessage"
           @blur="(e) => validateUsername()"
         ></j-input>
-        <j-input
-          size="lg"
-          label="First Name (optional)"
-          :value="name"
-          @input="(e) => (name = e.target.value)"
-        ></j-input>
-        <j-input
-          size="lg"
-          label="Last Name (optional)"
-          :value="familyName"
-          @input="(e) => (familyName = e.target.value)"
-        ></j-input>
-        <j-input
-          size="lg"
-          type="email"
-          label="Email (optional)"
-          :value="email"
-          @input="(e) => (email = e.target.value)"
-        ></j-input>
         <j-toggle
           style="width: 100%"
           full
@@ -71,18 +84,6 @@
         </j-button>
       </j-flex>
     </div>
-    <div class="signup-view__intro">
-      <div class="signup-view__intro-content">
-        <Carousel />
-        <j-box
-          class="signup-view__intro-button"
-          @click="showSignup = true"
-          pt="900"
-        >
-          <j-button variant="primary" size="xl"> Sign up </j-button>
-        </j-box>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -92,7 +93,12 @@ import Carousel from "./SignUpCarousel.vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useValidation } from "@/utils/validation";
 import { useUserStore } from "@/store/user";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import ad4mLogo from "@/assets/images/ad4mLogo.svg";
+import {
+  getAd4mClient,
+  isConnected,
+  onAuthStateChanged,
+} from "@perspect3vism/ad4m-connect/dist/utils";
 import {
   AD4M_PREDICATE_USERNAME,
   AD4M_PREDICATE_FIRSTNAME,
@@ -102,6 +108,7 @@ import {
 import Logo from "@/components/logo/Logo.vue";
 import { mapLiteralLinks } from "utils/helpers/linkHelpers";
 import { useAppStore } from "@/store/app";
+import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";
 
 export default defineComponent({
   name: "SignUp",
@@ -109,9 +116,10 @@ export default defineComponent({
     AvatarUpload,
     Carousel,
     Logo,
+    Ad4mLogo,
   },
   setup() {
-    const showSignup = ref(true);
+    const showSignup = ref(false);
     const profilePicture = ref();
     const modalOpen = ref(false);
     const isCreatingUser = ref(false);
@@ -149,6 +157,7 @@ export default defineComponent({
     const logInError = ref(false);
 
     return {
+      ad4mLogo,
       showSignup,
       isLoggingIn,
       profilePicture,
@@ -169,44 +178,19 @@ export default defineComponent({
       appStore,
     };
   },
-  async created() {
-    // Auto fill profile with ad4m profile
-    try {
-      const client = await getAd4mClient();
-
-      const perspectives = await client.perspective.all();
-      const ad4mAgentPerspective = perspectives.find(
-        ({ name }) => name === "Agent Profile"
-      );
-      if (ad4mAgentPerspective) {
-        const agentPers = await client.perspective.snapshotByUUID(
-          ad4mAgentPerspective.uuid
-        );
-        const profile = mapLiteralLinks(agentPers?.links, {
-          username: AD4M_PREDICATE_USERNAME,
-          name: AD4M_PREDICATE_FIRSTNAME,
-          familyName: AD4M_PREDICATE_LASTNAME,
-        });
-        this.username = profile.username;
-        this.name = profile.name;
-        this.familyName = profile.familyName;
-      } else {
-        const me = await client.agent.me();
-        if (me.perspective) {
-          const agentPerspectiveLinks = me.perspective.links;
-          const profile = mapLiteralLinks(agentPerspectiveLinks, {
-            username: AD4M_PREDICATE_USERNAME,
-            name: AD4M_PREDICATE_FIRSTNAME,
-            familyName: AD4M_PREDICATE_LASTNAME,
-          });
-          this.username = profile.username;
-          this.name = profile.name;
-          this.familyName = profile.familyName;
-        }
+  async mounted() {
+    isConnected().then((connected) => {
+      if (connected) {
+        this.showSignup = true;
+        this.autoFillUser();
       }
-    } catch (e) {
-      console.log(e);
-    }
+    });
+    onAuthStateChanged((status: string) => {
+      if (status === "connected_with_capabilities") {
+        this.showSignup = true;
+        this.autoFillUser();
+      }
+    });
   },
   computed: {
     canSignUp(): boolean {
@@ -214,6 +198,33 @@ export default defineComponent({
     },
   },
   methods: {
+    async autoFillUser() {
+      try {
+        const client = await getAd4mClient();
+
+        const perspectives = await client.perspective.all();
+        const ad4mAgentPerspective = perspectives.find(
+          ({ name }) => name === "Agent Profile"
+        );
+
+        if (ad4mAgentPerspective) {
+          const agentPers = await client.perspective.snapshotByUUID(
+            ad4mAgentPerspective.uuid
+          );
+
+          const profile = mapLiteralLinks(agentPers?.links, {
+            username: AD4M_PREDICATE_USERNAME,
+            name: AD4M_PREDICATE_FIRSTNAME,
+            familyName: AD4M_PREDICATE_LASTNAME,
+          });
+          this.username = profile.username || "";
+          this.name = profile.name || "";
+          this.familyName = profile.familyName || "";
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    },
     async createUser() {
       this.isCreatingUser = true;
 
@@ -244,63 +255,27 @@ export default defineComponent({
 .signup-view {
   margin: 0 auto;
   height: 100vh;
-  display: flex;
+  overflow-y: auto;
 }
 
 .signup-view__flow {
-  display: none;
+  display: grid;
   width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
   align-content: center;
   padding: var(--j-space-1000);
-}
-
-.signup-view--show-signup .signup-view__flow {
-  display: grid;
-}
-
-.signup-view--show-signup .signup-view__intro {
-  display: none;
 }
 
 .signup-view__intro {
   width: 100%;
   height: 100%;
-  display: flex;
+  display: grid;
+  place-items: center;
+  max-width: 800px;
+  margin: 0 auto;
   align-items: center;
-  background: var(--j-color-ui-50);
   overflow: hidden;
-  text-align: center;
-}
-
-@media (min-width: 1100px) {
-  .signup-view__flow {
-    display: grid;
-  }
-  .signup-view--show-signup .signup-view__flow {
-    display: grid;
-  }
-  .signup-view__intro {
-    display: flex;
-  }
-  .signup-view--show-signup .signup-view__intro {
-    display: flex;
-  }
-  .signup-view__intro-button {
-    display: none;
-  }
-  .signup-view__flow-back {
-    display: none;
-  }
-}
-
-@media (min-width: 1100px) {
-  .signup-view__flow {
-    width: 40%;
-  }
-
-  .signup-view__intro {
-    width: 60%;
-  }
 }
 
 .signup-view__intro-content {
@@ -311,6 +286,20 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   gap: var(--j-space-400);
+}
+
+.signup-view__intro-logo {
+  margin: 0 auto;
+  display: block;
+}
+
+.signup-view__intro-button {
+  text-align: center;
+}
+
+.signup-view__intro-extension {
+  padding-top: var(--j-space-800);
+  text-align: center;
 }
 
 .signup-view__logo {

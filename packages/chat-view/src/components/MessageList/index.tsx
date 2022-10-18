@@ -11,10 +11,11 @@ const ReactHint = ReactHintFactory({ createElement: h, Component, createRef });
 import "react-hint/css/index.css";
 import styles from "./index.scss";
 import { Reaction } from "utils/types";
-import { REACTION } from "utils/constants/ad4m";
+import { REACTION } from "utils/constants/communityPredicates";
 
 export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
   const emojiPicker = useRef(document.createElement("emoji-picker"));
+  emojiPicker.current.classList.add(styles.picker);
   const [atBottom, setAtBottom] = useState(true);
   const [initialScroll, setinitialScroll] = useState(false);
   const scroller = useRef();
@@ -95,6 +96,17 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
     }
   }
 
+  function loadMoreMessages() {
+    loadMore().then((fetchedMessageCount) => {
+      if (fetchedMessageCount > 0) {
+        scroller?.current?.scrollToIndex({
+          index: fetchedMessageCount - 1,
+          align: "end",
+        });
+      }
+    });
+  }
+
   function showAvatar(index: number): boolean {
     const previousMessage = messages[index - 1];
     const message = messages[index];
@@ -105,10 +117,10 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
       return previousMessage.author !== message.author
         ? true
         : previousMessage.author === message.author &&
-        differenceInMinutes(
-          parseISO(message.timestamp),
-          parseISO(previousMessage.timestamp)
-        ) >= 2;
+            differenceInMinutes(
+              parseISO(message.timestamp),
+              parseISO(previousMessage.timestamp)
+            ) >= 2;
     }
   }
 
@@ -141,7 +153,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
     const alreadyMadeReaction = message.reactions.find((reaction: Reaction) => {
       return reaction.author === me.did && reaction.content === utf;
     });
-    
+
     if (alreadyMadeReaction) {
       removeReaction({
         author: alreadyMadeReaction.author,
@@ -173,10 +185,10 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
   useEffect(() => {
     if (mainRef && perspectiveUuid && channelId) {
       let options = {
-        root: document.querySelector('.sidebar-layout__main'),
-        rootMargin: '0px',
-        threshold: 1.0
-      }
+        root: document.querySelector(".sidebar-layout__main"),
+        rootMargin: "0px",
+        threshold: 1.0,
+      };
 
       let observer = new IntersectionObserver(() => {
         if (atBottom) {
@@ -189,14 +201,14 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
       }, options);
 
       if (mainRef) {
-        observer.observe(mainRef)
+        observer.observe(mainRef);
       }
 
       return () => {
-        observer.disconnect()
-      }
+        observer.disconnect();
+      };
     }
-  }, [atBottom, mainRef, channelId, perspectiveUuid])
+  }, [atBottom, mainRef, channelId, perspectiveUuid]);
 
   return (
     <main class={styles.main}>
@@ -221,7 +233,11 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
                       <j-spinner size="xxs"></j-spinner>
                     </j-flex>
                   ) : (
-                    <j-button size="sm" onClick={loadMore} variant="subtle">
+                    <j-button
+                      size="sm"
+                      onClick={loadMoreMessages}
+                      variant="subtle"
+                    >
                       Load more
                     </j-button>
                   )}
@@ -247,7 +263,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
           }
           setAtBottom(bool);
         }}
-        style={{ height: "100%" }}
+        style={{ height: "100%", overflowX: "hidden" }}
         overscan={20}
         totalCount={messages.length}
         rangeChanged={rangeChanged}
@@ -266,14 +282,19 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
       />
       <ReactHint
         position="right"
-        className={styles.reactHint}
+        className={styles.reactHintWrapper}
         events={{ hover: true }}
-        onRenderContent={(target) => (
-          <div>
-            <span>{target.dataset["timestamp"]}</span>
-            <div class={styles.arrow}></div>
-          </div>
-        )}
+        onRenderContent={(target) => {
+          const content = target.dataset["timestamp"];
+          if (content) {
+            return (
+              <div className={styles.reactHint}>
+                <span>{content}</span>
+                <div class={styles.arrow}></div>
+              </div>
+            );
+          }
+        }}
       />
     </main>
   );

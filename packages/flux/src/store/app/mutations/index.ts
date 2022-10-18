@@ -99,16 +99,16 @@ export default {
     const state = useAppStore();
     state.modals.showCommunitySettings = payload;
   },
+  setShowCommunityTweaks(payload: boolean): void {
+    const state = useAppStore();
+    state.modals.showCommunityTweaks = payload;
+  },
   setShowInviteCode(payload: boolean): void {
     const state = useAppStore();
     state.modals.showInviteCode = payload;
   },
-  setShowCode(payload: boolean): void {
-    const state = useAppStore();
-    state.modals.showCode = payload;
-  },
   setGlobalNotification(payload: boolean): void {
     const state = useAppStore();
     state.notification.globalNotification = payload;
-  }
+  },
 };

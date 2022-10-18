@@ -489,15 +489,28 @@ export default defineComponent({
 }
 
 .grid {
+  padding-top: var(--j-space-500);
   display: grid;
   gap: var(--j-space-600);
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (min-width: 800px) {
   .grid {
     display: grid;
     gap: var(--j-space-400);
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+@media (min-width: 1100px) {
+  .grid {
     grid-template-columns: 1fr 1fr 1fr 1fr;
   }
 }

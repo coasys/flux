@@ -5,7 +5,7 @@ import {
   FLUX_GROUP_DESCRIPTION,
   FLUX_GROUP_IMAGE,
   FLUX_GROUP_THUMBNAIL,
-} from "utils/constants/neighbourhoodMeta";
+} from "utils/constants/communityPredicates";
 import { useAppStore } from "@/store/app";
 
 import {

@@ -1,6 +1,6 @@
 import { Link } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { REPLY_TO, DIRECTLY_SUCCEEDED_BY } from "../constants/ad4m";
+import { REPLY_TO, DIRECTLY_SUCCEEDED_BY } from "../constants/communityPredicates";
 import getMessage from "./getMessage";
 
 export interface Payload {
