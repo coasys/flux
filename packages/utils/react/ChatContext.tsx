@@ -101,7 +101,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   const messages = sortExpressionsByTimestamp(state.keyedMessages, "asc");
 
   useEffect(() => {
-    if (perspectiveUuid && channelId) {
+    if (perspectiveUuid && channelId && agent) {
       dexieUI.get("scroll-position").then((position) => {
         setState((oldState) => ({
           ...oldState,
