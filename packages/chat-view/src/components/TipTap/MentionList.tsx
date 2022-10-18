@@ -102,7 +102,11 @@ export default class MentionList extends Component<
               onClick={() => this.selectItem(index)}
             >
               <j-flex gap="300" a="center">
-                <Avatar size="xs" did={profile.did}></Avatar>
+                <Avatar
+                  size="xs"
+                  url={profile.thumbnailPicture}
+                  did={profile.did}
+                ></Avatar>
                 <j-text nomargin> {profile.username}</j-text>
               </j-flex>
             </j-menu-item>
