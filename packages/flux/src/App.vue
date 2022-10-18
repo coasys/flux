@@ -289,6 +289,22 @@ export default defineComponent({
                   );
                   newLinkHandler(result, v.perspective.uuid);
                 });
+
+                perspective.addListener("link-removed", (link) => {
+                  console.log(
+                    "Got new link with data",
+                    link.data,
+                    "and channel",
+                    v
+                  );
+                  if (link.data!.predicate! === CHANNEL && link.author !== this.userStore.getUser?.agent.did) {
+                    const channel = Literal.fromUrl(link.data.target).get();
+
+                    this.dataStore.removeChannel({
+                      channelId: channel.id
+                    })
+                  }
+                });
               }
             }
           }
