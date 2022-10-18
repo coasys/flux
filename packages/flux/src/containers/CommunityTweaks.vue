@@ -70,11 +70,10 @@ export default defineComponent({
       const sdna = Literal.fromUrl(sdnaLinks[0].data.target).get();
       console.log("Loaded existing SDNA: ", sdna);
 
-      const emojiRegex = new RegExp('emoji:\/\/.+?(?=")');
-      const emojiCountRegex = new RegExp('(?:Count >= )(.*(?=.))');
-
+      const emojiRegex = new RegExp('emoji:\/\/[A-Za-z0-9]+');
+      const emojiCountRegex = new RegExp('[a-zA-Z]+ >= ([0-9])');
       const emoji = sdna.match(emojiRegex)[0].replace("emoji://", "");
-      this.emoji = String.fromCodePoint(parseInt(`0x${emoji}`))
+      this.emoji = String.fromCodePoint(parseInt(`0x${emoji}`));
       this.emojiCount = sdna.match(emojiCountRegex)[1];
       console.log("Found emoji in sdna", this.emoji, this.emojiCount);
     }
