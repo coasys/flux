@@ -9,6 +9,14 @@
     background: rgba(0, 0, 0, 0.02);
   }
 
+  &:hover .toolbarWrapper {
+    display: block;
+  }
+
+  .toolbarWrapper {
+    display: none;
+  }
+
   & .messageItemWrapper {
     width: 100%;
     display: grid;
