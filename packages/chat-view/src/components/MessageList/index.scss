@@ -32,8 +32,8 @@
   font-size: var(--j-font-size-400);
   font-weight: 500;
   padding: var(--j-space-300) var(--j-space-300);
-  background: var(--j-color-ui-800);
-  color: var(--j-color-ui-200);
+  background: rgb(28, 28, 28);
+  color: white;
   border-radius: var(--j-border-radius);
   white-space: nowrap;
   z-index: 999;
@@ -45,7 +45,7 @@
   position: absolute;
   width: 8px;
   height: 8px;
-  background: var(--j-color-ui-800);
+  background: rgb(28, 28, 28);
 }
 
 .arrow {

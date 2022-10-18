@@ -97,14 +97,14 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
   }
 
   function loadMoreMessages() {
-    loadMore().then(fetchedMessageCount => {
+    loadMore().then((fetchedMessageCount) => {
       if (fetchedMessageCount > 0) {
         scroller?.current?.scrollToIndex({
-          index: fetchedMessageCount-1,
-          align: 'end'
+          index: fetchedMessageCount - 1,
+          align: "end",
         });
       }
-    })
+    });
   }
 
   function showAvatar(index: number): boolean {
@@ -233,7 +233,11 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
                       <j-spinner size="xxs"></j-spinner>
                     </j-flex>
                   ) : (
-                    <j-button size="sm" onClick={loadMoreMessages} variant="subtle">
+                    <j-button
+                      size="sm"
+                      onClick={loadMoreMessages}
+                      variant="subtle"
+                    >
                       Load more
                     </j-button>
                   )}
@@ -281,10 +285,10 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
         className={styles.reactHint}
         events={{ hover: true }}
         onRenderContent={(target) => (
-          <div>
+          <>
             <span>{target.dataset["timestamp"]}</span>
             <div class={styles.arrow}></div>
-          </div>
+          </>
         )}
       />
     </main>
