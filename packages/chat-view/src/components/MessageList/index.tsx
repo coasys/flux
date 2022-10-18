@@ -282,14 +282,19 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
       />
       <ReactHint
         position="right"
-        className={styles.reactHint}
+        className={styles.reactHintWrapper}
         events={{ hover: true }}
-        onRenderContent={(target) => (
-          <>
-            <span>{target.dataset["timestamp"]}</span>
-            <div class={styles.arrow}></div>
-          </>
-        )}
+        onRenderContent={(target) => {
+          const content = target.dataset["timestamp"];
+          if (content) {
+            return (
+              <div className={styles.reactHint}>
+                <span>{content}</span>
+                <div class={styles.arrow}></div>
+              </div>
+            );
+          }
+        }}
       />
     </main>
   );

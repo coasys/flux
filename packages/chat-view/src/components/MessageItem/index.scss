@@ -169,6 +169,7 @@
 }
 
 .emojiButton {
+  position: relative;
   background: var(--j-color-white);
   color: var(--j-color-black);
   display: flex;
@@ -177,6 +178,34 @@
   cursor: pointer;
   border-radius: var(--j-border-radius);
   border: 1px solid var(--j-color-ui-200);
+}
+
+.reactionTooltip {
+  cursor: default;
+  position: absolute;
+  visibility: hidden;
+  display: flex;
+  gap: var(--j-space-500);
+  align-items: center;
+  transition: all 0.2s ease;
+  opacity: 0;
+  bottom: calc(100% + var(--j-space-200));
+  left: 20px;
+  z-index: 999;
+  width: 200px;
+  transform: translateX(-50%) scale(0.8);
+  background-color: var(--j-color-ui-100);
+  color: var(--j-color-black);
+  font-size: var(--j-font-size-500);
+  padding: var(--j-space-300) var(--j-space-300);
+  border-radius: var(--j-border-radius);
+  text-align: left;
+}
+
+.emojiButton:hover .reactionTooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
 }
 
 .emojiButtonActive {
@@ -210,3 +239,4 @@ j-tooltip::part(base) {
 .popularMessage:hover {
   background-color: rgba(246, 206, 2, 0.15);
 }
+
