@@ -10,6 +10,7 @@
     </div>
   </div>
   <ad4m-connect
+    theme="dark"
     ref="ad4mConnect"
     appName="Flux"
     appDesc="Flux - A SOCIAL TOOLKIT FOR THE NEW INTERNET"
@@ -122,7 +123,11 @@ export default defineComponent({
         link: LinkExpression,
         perspective: string
       ) => {
-        console.debug("GOT INCOMING DIRECTLY_SUCCEEDED_BY SIGNAL", link, perspective);
+        console.debug(
+          "GOT INCOMING DIRECTLY_SUCCEEDED_BY SIGNAL",
+          link,
+          perspective
+        );
         if (link.data!.predicate! === DIRECTLY_SUCCEEDED_BY) {
           console.log("Got a new message signal");
           try {
