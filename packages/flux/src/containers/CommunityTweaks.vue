@@ -120,10 +120,10 @@ export default defineComponent({
         findall((Reply, ReplyTimestamp, ReplyAuthor), link(Reply, "flux://has_reply", Message, ReplyTimestamp, ReplyAuthor), Replies).
         
         flux_message_query_popular(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, true):- 
-        flux_message(Channel, Message, Timestamp, Author, Reactions, Repies, AllCardsHidden), isPopular(Message).
+        flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden), isPopular(Message).
         
         flux_message_query_popular(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, false):- 
-        flux_message(Channel, Message, Timestamp, Author, Reactions, Repies, AllCardsHidden), isNotPopular(Message).`);
+        flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden), isNotPopular(Message).`);
         await ad4mClient.perspective.addLink(
             perspectiveUuid,
             {
