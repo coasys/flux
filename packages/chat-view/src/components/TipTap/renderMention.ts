@@ -1,5 +1,6 @@
 import { ReactRenderer } from "@tiptap/react";
 import MentionList from "./MentionList";
+import EmojiList from "./EmojiList";
 
 export default function renderMention() {
   let reactRenderer = null as any;
@@ -8,7 +9,9 @@ export default function renderMention() {
 
   return {
     onStart: (props) => {
-      reactRenderer = new ReactRenderer(MentionList, {
+      const component = props.text === "@" ? MentionList : EmojiList;
+
+      reactRenderer = new ReactRenderer(component, {
         props,
         editor: props.editor,
       });

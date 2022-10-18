@@ -23,21 +23,21 @@ import { NeighbourhoddLink } from "./NeighourhoodPlugin";
 import HardBreak from "@tiptap/extension-hard-break";
 import { useEffect, useRef } from "preact/hooks";
 
-export default ({value, onSend, members, channels, onChange}) => {
-    // This is needed because React ugh.
-    const sendCB = useRef(onSend);
-    const membersCB = useRef(members);
-    const channelsCB = useRef(channels);
-    useEffect(() => {
-      sendCB.current = onSend;
-    }, [onSend]);
-    useEffect(() => {
-      membersCB.current = members;
-    }, [members]);
-    useEffect(() => {
-      channelsCB.current = channels;
-    }, [channels]);
-    
+export default ({ value, onSend, members, channels, onChange }) => {
+  // This is needed because React ugh.
+  const sendCB = useRef(onSend);
+  const membersCB = useRef(members);
+  const channelsCB = useRef(channels);
+  useEffect(() => {
+    sendCB.current = onSend;
+  }, [onSend]);
+  useEffect(() => {
+    membersCB.current = members;
+  }, [members]);
+  useEffect(() => {
+    channelsCB.current = channels;
+  }, [channels]);
+
   const editor = useEditor(
     {
       content: value as any,
@@ -56,28 +56,36 @@ export default ({value, onSend, members, channels, onChange}) => {
               Enter: (props) => {
                 const { state, commands } = props.editor;
                 const listNodeType = getNodeType("listItem", state.schema);
-        
+
                 const executedCommand = commands.first([
                   (props) => {
-                    if (state.selection.$anchor.node().textContent.length <= 0) {
+                    if (
+                      state.selection.$anchor.node().textContent.length <= 0
+                    ) {
                       const parentList = findParentNode((node) =>
-                        isList(node.type.name, props.editor.extensionManager.extensions)
+                        isList(
+                          node.type.name,
+                          props.editor.extensionManager.extensions
+                        )
                       )(state.selection);
 
                       if (parentList) {
-                        return props.commands.toggleList(parentList.node.type, listNodeType);
+                        return props.commands.toggleList(
+                          parentList.node.type,
+                          listNodeType
+                        );
                       }
                     }
-        
+
                     return props.commands.splitListItem(listNodeType);
                   },
                 ]);
-                
+
                 if (!executedCommand) {
                   const value = props.editor.getHTML();
                   sendCB.current(value);
-                
-                  return true
+
+                  return true;
                 }
 
                 // Prevents us from getting a new paragraph if user pressed Enter
@@ -178,4 +186,4 @@ export default ({value, onSend, members, channels, onChange}) => {
   );
 
   return editor;
-}
+};
