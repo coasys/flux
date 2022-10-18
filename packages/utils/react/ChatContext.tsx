@@ -101,7 +101,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   const messages = sortExpressionsByTimestamp(state.keyedMessages, "asc");
 
   useEffect(() => {
-    if (perspectiveUuid && channelId) {
+    if (perspectiveUuid && channelId && agent) {
       dexieUI.get("scroll-position").then((position) => {
         setState((oldState) => ({
           ...oldState,
@@ -281,7 +281,10 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     const agent = await getMe();
 
     const isMessageFromSelf = link.author === agent.did;
-    if (!isMessageFromSelf) {
+
+    const hasFocus = document.hasFocus();
+
+    if (!isMessageFromSelf || !hasFocus) {
       if (linkIs.message(link)) {
         const isSameChannel = await client.perspective.queryProlog(perspectiveUuid, `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.target}").`);
         if (isSameChannel) {

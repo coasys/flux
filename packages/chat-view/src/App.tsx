@@ -1,4 +1,3 @@
-import Header from "./components/Header";
 import Footer from "./components/Footer";
 import MessageList from "./components/MessageList";
 
@@ -10,19 +9,22 @@ import {
 import { UIProvider } from "./context/UIContext";
 import { useState } from "preact/hooks";
 import styles from "./index.scss";
+import { EditorProvider } from "./context/EditorContext";
 
 const MainComponent = ({ perspectiveUuid, channel }) => {
   const [ref, setRef] = useState(null);
 
   return (
-    <div class={styles.container} ref={setRef}>
-      <MessageList
-        perspectiveUuid={perspectiveUuid}
-        channelId={channel}
-        mainRef={ref}
-      />
-      <Footer />
-    </div>
+    <EditorProvider>
+      <div class={styles.container} ref={setRef}>
+        <MessageList
+          perspectiveUuid={perspectiveUuid}
+          channelId={channel}
+          mainRef={ref}
+        />
+        <Footer />
+      </div>
+    </EditorProvider>
   );
 };
 

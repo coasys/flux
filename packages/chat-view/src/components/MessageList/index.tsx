@@ -11,6 +11,8 @@ const ReactHint = ReactHintFactory({ createElement: h, Component, createRef });
 import "react-hint/css/index.css";
 import styles from "./index.scss";
 import { Reaction } from "utils/types";
+import EditorContext from "../../context/EditorContext";
+
 import { REACTION } from "utils/constants/communityPredicates";
 
 export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
@@ -19,6 +21,9 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
   const [atBottom, setAtBottom] = useState(true);
   const [initialScroll, setinitialScroll] = useState(false);
   const scroller = useRef();
+  const {
+    state: { editor },
+  } = useContext(EditorContext);
 
   const {
     state: {
@@ -191,6 +196,8 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
       };
 
       let observer = new IntersectionObserver(() => {
+        editor?.chain().focus();
+
         if (atBottom) {
           const event = new CustomEvent("hide-notification-indicator", {
             detail: { uuid: channelId },
@@ -208,7 +215,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
         observer.disconnect();
       };
     }
-  }, [atBottom, mainRef, channelId, perspectiveUuid]);
+  }, [atBottom, mainRef, channelId, perspectiveUuid, editor])
 
   return (
     <main class={styles.main}>
