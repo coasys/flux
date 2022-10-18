@@ -310,9 +310,9 @@ export default defineComponent({
     async deleteLinks(areaName: string) {
       const client = await getAd4mClient();
       const userStore = useUserStore();
-      const me = await client.agent.me();
-      const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
-      const links = await getAgentLinks(me.did, userPerspective!);
+      
+      const did = userStore.getUser?.agent.did;
+      const links = await getAgentLinks(did);
 
       const newLinks = [];
 

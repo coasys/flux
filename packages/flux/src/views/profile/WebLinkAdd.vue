@@ -213,11 +213,10 @@ export default defineComponent({
 
         const userStore = useUserStore();
         const appStore = useAppStore();
-        const userPerspective = userStore.getAgentProfileProxyPerspectiveId;
 
         const did = userStore.getUser?.agent.did;
 
-        const preLinks = await getAgentLinks(did!, userPerspective!);
+        const preLinks = await getAgentLinks(did!);
 
         const preArea: { [x: string]: any } = {};
 

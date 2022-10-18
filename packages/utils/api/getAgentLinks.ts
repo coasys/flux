@@ -1,21 +1,23 @@
 import { LinkExpression } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { useUserStore } from "@/store/user";
 
 export default async function getAgentLinks(
-  did: string,
-  userPerspective?: string
+  did: string
 ): Promise<LinkExpression[]> {
+  const userStore = useUserStore();
+
   const client = await getAd4mClient();
 
   let links: LinkExpression[] = [];
 
-  if (userPerspective) {
-    // @ts-ignore
-    const { links: areaLinks } = await client.perspective.snapshotByUUID(
-      userPerspective!
-    );
-
-    links = areaLinks;
+  if (userStore.getUser?.agent.did === did) {
+    const me = await client.agent.me();
+    if (me.perspective) {
+      links = me.perspective.links;
+    } else {
+      throw new Error("Could not find public perspective for agent self");
+    }
   } else {
     // @ts-ignore
     const agentPerspective = await client.agent.byDID(did);

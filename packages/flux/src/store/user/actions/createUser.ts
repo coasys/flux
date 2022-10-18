@@ -1,12 +1,10 @@
 import { AD4M_AGENT, KAICHAO_AGENT, JUNTO_AGENT } from "utils/constants/agents";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
-import { FLUX_PROFILE, FLUX_PROXY_PROFILE_NAME, HAS_EMAIL, HAS_FAMILY_NAME, HAS_GIVEN_NAME, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "utils/constants/profile";
+import { FLUX_PROFILE, HAS_EMAIL, HAS_FAMILY_NAME, HAS_GIVEN_NAME, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "utils/constants/profile";
 
 import { useAppStore } from "@/store/app";
-import getAgentLinks from "utils/api/getAgentLinks";
 import { resizeImage, dataURItoBlob, blobToDataURL } from "utils/helpers/profileHelpers";
-import removeTypeName from "utils/helpers/removeTypeName";
-import { Link, LinkExpression, LinkMutations, PerspectiveInput } from "@perspect3vism/ad4m";
+import { Link, LinkExpression, LinkMutations } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { useUserStore } from "..";
 

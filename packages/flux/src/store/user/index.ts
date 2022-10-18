@@ -13,8 +13,7 @@ export const useUserStore = defineStore("user", {
         isUnlocked: false,
         did: "",
         didDocument: "",
-      },
-      agentProfileProxyPerspectiveId: undefined,
+      }
     };
   },
   getters,
