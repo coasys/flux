@@ -4,9 +4,18 @@
   padding-left: var(--j-space-500);
   padding-right: var(--j-space-500);
   position: relative;
+  transition: background-color 0.2s ease;
   
   &:hover {
     background: rgba(0, 0, 0, 0.02);
+  }
+
+  &:hover .toolbarWrapper {
+    display: block;
+  }
+
+  .toolbarWrapper {
+    display: none;
   }
 
   & .messageItemWrapper {
@@ -195,7 +204,6 @@ j-tooltip::part(base) {
 }
 
 .popularMessage {
-  border: 1px solid rgba(246, 206, 2, 0.15);
   background-color: rgba(246, 206, 2, 0.1);
 }
 

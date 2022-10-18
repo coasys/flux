@@ -35,7 +35,6 @@ export default function MessageItem({
   mainRef,
   perspectiveUuid,
 }) {
-  const [showToolbar, setShowToolbar] = useState(false);
   const messageRef = useRef<any>(null);
   const {
     state: { members },
@@ -188,15 +187,15 @@ export default function MessageItem({
     setNeighbourhoodCards(links);
   };
 
+  console.log("rerender");
+
   const author = members[message.author] || {};
   const replyAuthor = members[message?.replies[0]?.author] || {};
   const replyMessage = message?.replies[0];
-  const popularStyle = message.isPopular? styles.popularMessage : "";
+  const popularStyle = message.isPopular ? styles.popularMessage : "";
 
   return (
     <div
-      onMouseOver={() => setShowToolbar(true)}
-      onMouseLeave={() => setShowToolbar(false)}
       class={[styles.message, popularStyle].join(" ")}
       isReplying={keyedMessages[currentReply]?.id === message.id}
     >
@@ -325,13 +324,11 @@ export default function MessageItem({
             </div>
           )}
         </div>
-        <div>
-          {showToolbar && (
-            <MessageToolbar
-              onReplyClick={onReplyClick}
-              onOpenEmojiPicker={onOpenEmojiPicker}
-            />
-          )}
+        <div class={styles.toolbarWrapper}>
+          <MessageToolbar
+            onReplyClick={onReplyClick}
+            onOpenEmojiPicker={onOpenEmojiPicker}
+          />
         </div>
       </div>
     </div>
