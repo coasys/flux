@@ -91,6 +91,8 @@ export default defineComponent({
 }
 .app-layout__main {
   height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
   transition: all 0.3s ease;
   margin-left: 0;
 }

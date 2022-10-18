@@ -1,10 +1,10 @@
 import { ReactRenderer } from "@tiptap/react";
-import tippy from "tippy.js";
 import MentionList from "./MentionList";
 
 export default function renderMention() {
   let reactRenderer = null as any;
-  let popup = null as any;
+
+  const container = document.getElementById("mentionWrapper");
 
   return {
     onStart: (props) => {
@@ -13,28 +13,18 @@ export default function renderMention() {
         editor: props.editor,
       });
 
-      popup = tippy("body", {
-        getReferenceClientRect: props.clientRect,
-        appendTo: () => document.body,
-        content: reactRenderer.element,
-        showOnCreate: true,
-        interactive: true,
-        trigger: "manual",
-        placement: "bottom-start",
-      });
+      container.style.display = "block";
+      container.append(reactRenderer.element);
     },
     onUpdate(props) {
       reactRenderer.updateProps(props);
-
-      popup[0].setProps({
-        getReferenceClientRect: props.clientRect,
-      });
     },
     onKeyDown(props) {
       return reactRenderer.ref?.onKeyDown(props);
     },
     onExit() {
-      popup[0].destroy();
+      container.style.display = "none";
+      container.innerHTML = "";
       reactRenderer.destroy();
     },
   };

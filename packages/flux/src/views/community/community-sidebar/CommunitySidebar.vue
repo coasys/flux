@@ -33,6 +33,10 @@
           <j-icon size="xs" slot="start" name="gear" />
           Settings
         </j-menu-item>
+        <j-menu-item @click="goToTweaks">
+          <j-icon size="xs" slot="start" name="wrench" />
+          Community Tweaks
+        </j-menu-item>
         <j-menu-item @click="() => setShowInviteCode(true)">
           <j-icon size="xs" slot="start" name="person-plus" />
           Invite people
@@ -191,7 +195,7 @@ import { DexieIPFS } from "@/utils/storageHelpers";
 import { getImage } from "utils/api/getProfile";
 import { Literal } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { CHANNEL, SELF } from "utils/constants/neighbourhoodMeta";
+import { CHANNEL, SELF } from "utils/constants/communityPredicates";
 import Skeleton from "@/components/skeleton/Skeleton.vue";
 
 export default defineComponent({
@@ -301,6 +305,7 @@ export default defineComponent({
       "setShowCommunityMembers",
       "setShowInviteCode",
       "setShowCommunitySettings",
+      "setShowCommunityTweaks"
     ]),
     navigateTo(navigate: any) {
       this.setSidebar(false);
@@ -354,7 +359,11 @@ export default defineComponent({
           },
         })
       }
-    }
+    },
+    goToTweaks() {
+      this.setShowCommunityTweaks(true);
+      this.showCommunityMenu = false;
+    },
   },
 });
 </script>

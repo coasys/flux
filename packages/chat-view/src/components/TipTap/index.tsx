@@ -62,6 +62,7 @@ export default function Tiptap({}) {
 
   return (
     <div class={styles.editor}>
+      <div id="mentionWrapper" class={styles.mentionWrapper}></div>
       {showToolbar && (
         <div>
           <j-button
@@ -134,7 +135,11 @@ export default function Tiptap({}) {
               <j-icon size="sm" name="emoji-smile"></j-icon>
             </j-button>
             <div slot="content">
-              <emoji-picker ref={emojiPicker} onEmojiClick={onEmojiClick} />
+              <emoji-picker
+                class={styles.picker}
+                ref={emojiPicker}
+                onEmojiClick={onEmojiClick}
+              />
             </div>
           </j-popover>
           <j-button
