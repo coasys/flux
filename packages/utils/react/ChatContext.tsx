@@ -93,8 +93,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     setAgent({ ...agent });
   }
 
-  console.log("state  is", state);
-
   const messages = sortExpressionsByTimestamp(state.keyedMessages, "asc");
 
   useEffect(() => {
@@ -170,8 +168,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
         const linkFound = message.reactions.find(
           (e) => e.content === link.data.target && e.author === link.author
         );
-
-        console.log({ linkFound, link, message });
 
         if (linkFound) return oldState;
 
@@ -251,8 +247,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   async function handleLinkAdded(link) {
     const client = await getAd4mClient();
 
-    console.log("Got message link", link);
-
     const agent = await getMe();
 
     const isMessageFromSelf = link.author === agent.did;
@@ -308,7 +302,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       }
     }
     if (linkIs.socialDNA(link)) {
-      console.log("Got new Social DNA, reloading the messages", link);
       fetchMessages();
     }
     if (linkIs.reaction(link)) {
@@ -343,7 +336,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   }
 
   async function fetchMessages(from?: Date) {
-    console.log("Fetch messages with from: ", from);
     setState((oldState) => ({
       ...oldState,
       isFetchingMessages: true,
@@ -402,8 +394,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   }
 
   async function addReaction(messageUrl: string, reaction: string) {
-    console.log("addReaction");
-
     const link = await createMessageReaction({
       perspectiveUuid,
       messageUrl,
@@ -421,7 +411,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   }
 
   async function removeReaction(linkExpression: LinkExpression) {
-    console.log("removeReaction", linkExpression);
     await deleteMessageReaction({
       perspectiveUuid,
       linkExpression,
@@ -432,7 +421,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
   async function loadMore() {
     const oldestMessage = messages[0];
-    console.log("Loading more messages with oldest timestamp", oldestMessage);
+
     return await fetchMessages(
       oldestMessage ? new Date(oldestMessage.timestamp) : new Date()
     );

@@ -187,8 +187,6 @@ export default function MessageItem({
     setNeighbourhoodCards(links);
   };
 
-  console.log("rerender");
-
   const author = members[message.author] || {};
   const replyAuthor = members[message?.replies[0]?.author] || {};
   const replyMessage = message?.replies[0];

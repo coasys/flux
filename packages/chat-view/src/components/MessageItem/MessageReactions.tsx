@@ -1,6 +1,6 @@
 import { AgentContext } from "utils/react";
 import { Reaction } from "utils/types";
-import { useContext, useEffect, useMemo, useState } from "preact/hooks";
+import { useContext, useMemo, useState } from "preact/hooks";
 import styles from "./index.scss";
 import getProfile from "utils/api/getProfile";
 import emojiShortName from "emoji-short-name";
@@ -74,7 +74,13 @@ export default function MessageReactions({ onEmojiClick, reactions = [] }) {
   return (
     <div style={{ display: "inline-flex", gap: "var(--j-space-200)" }}>
       {sortedReactions.map((reaction: any, i) => {
-        return ReactionButton({ reaction, onEmojiClick, key: i });
+        return (
+          <ReactionButton
+            key={i}
+            reaction={reaction}
+            onEmojiClick={onEmojiClick}
+          ></ReactionButton>
+        );
       })}
     </div>
   );
@@ -95,7 +101,6 @@ function ReactionButton({ reaction, onEmojiClick }) {
     const profiles = await Promise.all(
       reaction.authors.slice(0, 3).map((did) => getProfile(did))
     );
-
     setProfiles(profiles);
   }
 
