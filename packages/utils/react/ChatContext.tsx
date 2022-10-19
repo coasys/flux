@@ -12,9 +12,11 @@ import createMessageReaction from "../api/createMessageReaction";
 import createReply from "../api/createReply";
 import { sortExpressionsByTimestamp } from "../helpers/expressionHelpers";
 import getMe from "../api/getMe";
-import { SHORT_FORM_EXPRESSION } from "../helpers/languageHelpers";
 import { DexieMessages, DexieUI } from "../helpers/storageHelpers";
-import { DIRECTLY_SUCCEEDED_BY, REACTION } from "../constants/communityPredicates";
+import {
+  DIRECTLY_SUCCEEDED_BY,
+  REACTION,
+} from "../constants/communityPredicates";
 import hideEmbeds from "../api/hideEmbeds";
 import { MAX_MESSAGES } from "../constants/general";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
@@ -71,13 +73,10 @@ let dexieUI: DexieUI;
 let dexieMessages: DexieMessages;
 
 export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
-  const [shortFormHash, setShortFormHash] = useState("");
-  const messageInterval = useRef();
   const linkSubscriberRef = useRef();
 
   const [state, setState] = useState(initialState.state);
   const [agent, setAgent] = useState();
-  const ranOnce = useRef(false);
 
   useEffect(() => {
     fetchAgent();
@@ -97,6 +96,8 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
     setAgent({ ...agent });
   }
+
+  console.log("state  is", state);
 
   const messages = sortExpressionsByTimestamp(state.keyedMessages, "asc");
 
@@ -143,11 +144,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     dexieUI.save("scroll-position", state.scrollPosition);
   }, [state.scrollPosition]);
 
-  async function fetchLanguages() {
-    const { languages } = await getPerspectiveMeta(perspectiveUuid);
-    setShortFormHash(languages[SHORT_FORM_EXPRESSION]);
-  }
-
   function addMessage(oldState, message) {
     const newState = {
       ...oldState,
@@ -166,18 +162,18 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     setState((oldState) => {
       const message: Message = oldState.keyedMessages[id];
 
-      if (message) {
-        return {
-          ...oldState,
-          keyedMessages: {
-            ...oldState.keyedMessages,
-            [id]: {
-              ...message,
-              isPopular: status
-            },
+      if (!message) return oldState;
+
+      return {
+        ...oldState,
+        keyedMessages: {
+          ...oldState.keyedMessages,
+          [id]: {
+            ...message,
+            isPopular: status,
           },
-        };
-      }
+        },
+      };
     });
   }
 
@@ -206,7 +202,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
                 ...message.reactions,
                 {
                   author: link.author,
-                  content: link.data.target.replace('emoji://', ''),
+                  content: link.data.target.replace("emoji://", ""),
                   timestamp: link.timestamp,
                 },
               ],
@@ -230,7 +226,8 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       function filterReactions(reaction, link) {
         const isSameAuthor = reaction.author === link.author;
         const isSameAuthorAndContent =
-          isSameAuthor && reaction.content === link.data.target.replace('emoji://', '');
+          isSameAuthor &&
+          reaction.content === link.data.target.replace("emoji://", "");
         return isSameAuthorAndContent ? false : true;
       }
 
@@ -249,25 +246,20 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     });
   }
 
-  function addHiddenToMessageToState(oldState, messageId, isNeighbourhoodCardHidden) {
+  function addHiddenToMessageToState(
+    oldState,
+    messageId,
+    isNeighbourhoodCardHidden
+  ) {
     const newState = {
       ...oldState,
       hasNewMessage: false,
       keyedMessages: {
         ...oldState.keyedMessages,
-        [messageId]: { ...oldState.keyedMessages[messageId], isNeighbourhoodCardHidden },
-      },
-    };
-    return newState;
-  }
-
-  function addReplyToState(oldState, messageId, replyUrl) {
-    const newState = {
-      ...oldState,
-      hasNewMessage: false,
-      keyedMessages: {
-        ...oldState.keyedMessages,
-        [messageId]: { ...oldState.keyedMessages[messageId], replyUrl },
+        [messageId]: {
+          ...oldState.keyedMessages[messageId],
+          isNeighbourhoodCardHidden,
+        },
       },
     };
     return newState;
@@ -275,7 +267,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
   async function handleLinkAdded(link) {
     const client = await getAd4mClient();
-    
+
     console.log("Got message link", link);
 
     const agent = await getMe();
@@ -286,13 +278,16 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
     if (!isMessageFromSelf || !hasFocus) {
       if (linkIs.message(link)) {
-        const isSameChannel = await client.perspective.queryProlog(perspectiveUuid, `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.target}").`);
+        const isSameChannel = await client.perspective.queryProlog(
+          perspectiveUuid,
+          `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.target}").`
+        );
         if (isSameChannel) {
           const message = getMessage(link);
-  
+
           if (message) {
             setState((oldState) => addMessage(oldState, message));
-  
+
             setState((oldState) => ({
               ...oldState,
               isMessageFromSelf: false,
@@ -306,13 +301,16 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       }
 
       if (linkIs.reply(link)) {
-        const isSameChannel = await client.perspective.queryProlog(perspectiveUuid, `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.source}").`);
-  
+        const isSameChannel = await client.perspective.queryProlog(
+          perspectiveUuid,
+          `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.source}").`
+        );
+
         if (isSameChannel) {
           const message = getMessage(link);
-  
+
           setState((oldState) => addMessage(oldState, message));
-    
+
           setState((oldState) => ({
             ...oldState,
             isMessageFromSelf: false,
@@ -322,10 +320,8 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
       if (linkIs.hideNeighbourhoodCard(link)) {
         const id = link.data.source;
-  
-        setState((oldState) =>
-          addHiddenToMessageToState(oldState, id, true)
-        );
+
+        setState((oldState) => addHiddenToMessageToState(oldState, id, true));
       }
     }
     if (linkIs.socialDNA(link)) {
@@ -334,7 +330,10 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     }
     if (linkIs.reaction(link)) {
       //TODO; this could read if the message is already popular and if so skip this check
-      const isPopularPost = await client.perspective.queryProlog(perspectiveUuid, `isPopular("${link.data.source}").`);
+      const isPopularPost = await client.perspective.queryProlog(
+        perspectiveUuid,
+        `isPopular("${link.data.source}").`
+      );
 
       if (isPopularPost) {
         updateMessagePopularStatus(link, true);
@@ -348,7 +347,10 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     //TODO: link.proof.valid === false when we recive
     // the remove link somehow. Ad4m bug?
     if (link.data.predicate === REACTION) {
-      const isPopularPost = await client.perspective.queryProlog(perspectiveUuid, `isPopular("${link.data.source}").`);
+      const isPopularPost = await client.perspective.queryProlog(
+        perspectiveUuid,
+        `isPopular("${link.data.source}").`
+      );
 
       if (!isPopularPost) {
         updateMessagePopularStatus(link, false);
@@ -358,10 +360,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   }
 
   async function fetchMessages(from?: Date) {
-    console.log(
-      "Fetch messages with from: ",
-      from
-    );
+    console.log("Fetch messages with from: ", from);
     setState((oldState) => ({
       ...oldState,
       isFetchingMessages: true,
@@ -375,7 +374,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       await getMessages({
         perspectiveUuid,
         channelId,
-        from: from
+        from: from,
       });
 
     setState((oldState) => ({
@@ -452,13 +451,15 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       linkExpression,
     });
 
-    removeReactionFromState(linkExpression)
+    removeReactionFromState(linkExpression);
   }
 
   async function loadMore() {
     const oldestMessage = messages[0];
     console.log("Loading more messages with oldest timestamp", oldestMessage);
-    return await fetchMessages(oldestMessage ? new Date(oldestMessage.timestamp) : new Date());
+    return await fetchMessages(
+      oldestMessage ? new Date(oldestMessage.timestamp) : new Date()
+    );
   }
 
   function saveScrollPos(pos?: number) {
@@ -488,7 +489,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
           saveScrollPos,
           setHasNewMessage,
           setIsMessageFromSelf,
-          hideMessageEmbeds
+          hideMessageEmbeds,
         },
       }}
     >
