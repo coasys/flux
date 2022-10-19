@@ -84,6 +84,7 @@ export default class MentionList extends Component<
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.items.length !== this.props.items.length) {
+      this.getProfiles();
       this.setState({ selectedIndex: 0 });
     }
   }
