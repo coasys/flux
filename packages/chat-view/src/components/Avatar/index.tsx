@@ -25,7 +25,7 @@ export default function Avatar({
         .then((data) => setImage(data))
         .catch((e) => console.error(e));
     }
-  }, [did]);
+  }, [did, url]);
 
   return (
     <j-avatar
