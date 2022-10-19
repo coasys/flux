@@ -1,7 +1,4 @@
 import { Component } from "preact";
-import getProfile from "utils/api/getProfile";
-import { Profile } from "utils/types";
-import Avatar from "../Avatar";
 
 type MentionListProps = {
   items: any[];
@@ -9,7 +6,6 @@ type MentionListProps = {
 };
 type MentionListState = {
   selectedIndex: number;
-  profiles: Profile[];
 };
 
 export default class MentionList extends Component<
@@ -20,7 +16,6 @@ export default class MentionList extends Component<
     super();
     this.state = {
       selectedIndex: 0,
-      profiles: [],
     };
     this.selectItem = this.selectItem.bind(this);
   }
@@ -70,47 +65,26 @@ export default class MentionList extends Component<
     }
   }
 
-  async getProfiles() {
-    console.log("get profiles");
-    const profiles = await Promise.all(
-      this.props.items.map((item) => getProfile(item.id))
-    );
-    this.setState({ profiles });
-  }
-
-  componentDidMount(): void {
-    this.getProfiles();
-  }
-
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.items.length !== this.props.items.length) {
-      this.getProfiles();
       this.setState({ selectedIndex: 0 });
     }
   }
 
   render() {
     const { items } = this.props;
-    const { selectedIndex, profiles } = this.state;
+    const { selectedIndex } = this.state;
 
     return (
       <div>
         <j-menu>
-          {profiles.map((profile, index) => (
+          {items.map((item, index) => (
             <j-menu-item
               active={index === selectedIndex}
               key={index}
               onClick={() => this.selectItem(index)}
-              onMouseOver={() => this.setState({ selectedIndex: index}) }
             >
-              <j-flex gap="300" a="center">
-                <Avatar
-                  size="xs"
-                  url={profile.thumbnailPicture}
-                  did={profile.did}
-                ></Avatar>
-                <j-text nomargin> {profile.username}</j-text>
-              </j-flex>
+              {item.label}
             </j-menu-item>
           ))}
         </j-menu>

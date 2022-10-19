@@ -11,6 +11,7 @@ import CodeBlock from "@tiptap/extension-code-block";
 import History from "@tiptap/extension-history";
 import Link from "@tiptap/extension-link";
 import OrderedList from "@tiptap/extension-ordered-list";
+import { PluginKey } from "prosemirror-state";
 
 import Mention from "./Mention";
 import LineBreak from "./LineBreak";
@@ -19,25 +20,33 @@ import renderMention from "./renderMention";
 import emojiList from "node-emoji/lib/emoji";
 
 import styles from "./index.scss";
-import { NeighbourhoddLink } from "./NeighourhoodPlugin";
+import { NeighbourhoodLink } from "./NeighourhoodPlugin";
 import HardBreak from "@tiptap/extension-hard-break";
 import { useEffect, useRef } from "preact/hooks";
 
-export default ({value, onSend, members, channels, onChange}) => {
-    // This is needed because React ugh.
-    const sendCB = useRef(onSend);
-    const membersCB = useRef(members);
-    const channelsCB = useRef(channels);
-    useEffect(() => {
-      sendCB.current = onSend;
-    }, [onSend]);
-    useEffect(() => {
-      membersCB.current = members;
-    }, [members]);
-    useEffect(() => {
-      channelsCB.current = channels;
-    }, [channels]);
-    
+export default ({
+  value,
+  onSend,
+  members,
+  channels,
+  onChange,
+  perspectiveUuid,
+  channelId,
+}) => {
+  // This is needed because React ugh.
+  const sendCB = useRef(onSend);
+  const membersCB = useRef(members);
+  const channelsCB = useRef(channels);
+  useEffect(() => {
+    sendCB.current = onSend;
+  }, [onSend]);
+  useEffect(() => {
+    membersCB.current = members;
+  }, [members]);
+  useEffect(() => {
+    channelsCB.current = channels;
+  }, [channels]);
+
   const editor = useEditor(
     {
       content: value as any,
@@ -56,28 +65,36 @@ export default ({value, onSend, members, channels, onChange}) => {
               Enter: (props) => {
                 const { state, commands } = props.editor;
                 const listNodeType = getNodeType("listItem", state.schema);
-        
+
                 const executedCommand = commands.first([
                   (props) => {
-                    if (state.selection.$anchor.node().textContent.length <= 0) {
+                    if (
+                      state.selection.$anchor.node().textContent.length <= 0
+                    ) {
                       const parentList = findParentNode((node) =>
-                        isList(node.type.name, props.editor.extensionManager.extensions)
+                        isList(
+                          node.type.name,
+                          props.editor.extensionManager.extensions
+                        )
                       )(state.selection);
 
                       if (parentList) {
-                        return props.commands.toggleList(parentList.node.type, listNodeType);
+                        return props.commands.toggleList(
+                          parentList.node.type,
+                          listNodeType
+                        );
                       }
                     }
-        
+
                     return props.commands.splitListItem(listNodeType);
                   },
                 ]);
-                
+
                 if (!executedCommand) {
                   const value = props.editor.getHTML();
                   sendCB.current(value);
-                
-                  return true
+
+                  return true;
                 }
 
                 // Prevents us from getting a new paragraph if user pressed Enter
@@ -93,7 +110,7 @@ export default ({value, onSend, members, channels, onChange}) => {
           },
         }),
         Link,
-        NeighbourhoddLink,
+        NeighbourhoodLink,
         Bold,
         Strike,
         Italic,
@@ -114,6 +131,7 @@ export default ({value, onSend, members, channels, onChange}) => {
           },
           suggestion: {
             char: ":",
+            pluginKey: new PluginKey("emoji"),
             items: ({ query }) => {
               const formattedEmojiList = Object.entries(emojiList.emoji).map(
                 ([id, label]) => ({ id, label })
@@ -123,10 +141,10 @@ export default ({value, onSend, members, channels, onChange}) => {
                 .filter((e) => e.id.startsWith(query))
                 .slice(0, 10);
             },
-            render: renderMention,
+            render: () => renderMention(perspectiveUuid, channelId),
           },
         }),
-        Mention("neighbourhood-mention").configure({
+        Mention("channel-mention").configure({
           HTMLAttributes: {
             class: styles.editorMentions,
           },
@@ -137,6 +155,7 @@ export default ({value, onSend, members, channels, onChange}) => {
           },
           suggestion: {
             char: "#",
+            pluginKey: new PluginKey("channel-mention"),
             items: ({ query }) => {
               return channelsCB.current
                 .filter((item) =>
@@ -144,7 +163,7 @@ export default ({value, onSend, members, channels, onChange}) => {
                 )
                 .slice(0, 5);
             },
-            render: renderMention,
+            render: () => renderMention(perspectiveUuid, channelId),
           },
         }),
         Mention("agent-mention").configure({
@@ -158,6 +177,7 @@ export default ({value, onSend, members, channels, onChange}) => {
           },
           suggestion: {
             char: "@",
+            pluginKey: new PluginKey("agent-mention"),
             items: ({ query }) => {
               return membersCB.current
                 .filter((item) =>
@@ -165,7 +185,7 @@ export default ({value, onSend, members, channels, onChange}) => {
                 )
                 .slice(0, 5);
             },
-            render: renderMention,
+            render: () => renderMention(perspectiveUuid, channelId),
           },
         }),
       ],
@@ -174,8 +194,8 @@ export default ({value, onSend, members, channels, onChange}) => {
         onChange(value);
       },
     },
-    [membersCB, channelsCB]
+    [membersCB, channelsCB, perspectiveUuid, channelId]
   );
 
   return editor;
-}
+};

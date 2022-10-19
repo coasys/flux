@@ -1,16 +1,18 @@
-import { getImage } from "utils/api/getProfile";
-import { useEffect, useState } from "preact/hooks";
+import getProfile, { getImage } from "utils/api/getProfile";
+import { useEffect, useMemo, useState } from "preact/hooks";
 import { Profile } from "utils/types";
 
 type AvatarProps = {
-  author: Profile;
+  did: string;
+  url: string;
   style: any;
   onProfileClick?: (did: string) => void;
   size?: "xs" | "sm" | "md" | "lg";
 };
 
 export default function Avatar({
-  author,
+  did,
+  url,
   style,
   onProfileClick = () => {},
   size = "md",
@@ -18,19 +20,19 @@ export default function Avatar({
   const [img, setImage] = useState(null);
 
   useEffect(() => {
-    if (author.thumbnailPicture) {
-      getImage(author.thumbnailPicture)
+    if (url) {
+      getImage(url)
         .then((data) => setImage(data))
         .catch((e) => console.error(e));
     }
-  }, [author]);
+  }, [did, url]);
 
   return (
     <j-avatar
       style={style}
       src={img}
-      hash={author.did}
-      onClick={() => onProfileClick(author.did)}
+      hash={did}
+      onClick={() => onProfileClick(did)}
       size={size}
     ></j-avatar>
   );

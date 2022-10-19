@@ -17,6 +17,7 @@
       :channel="channel.id"
       :perspective-uuid="communityId"
       @agent-click="onAgentClick"
+      @channel-click="onChannelClick"
       @perspective-click="onPerspectiveClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></perspective-view>
@@ -137,6 +138,16 @@ export default defineComponent({
     onAgentClick({ detail }: any) {
       this.toggleProfile(true, detail.did);
     },
+    onChannelClick({ detail }: any) {
+      this.$router.push({
+        name: "channel",
+        params: {
+          channelId: detail.channel,
+          communityId:
+            detail.uuid || this.community.neighbourhood.perspective.uuid,
+        },
+      });
+    },
     onPerspectiveClick({ detail }: any) {
       let community = this.dataStore.getCommunities.find(
         (e) => e.neighbourhood.perspective.uuid === detail.uuid
@@ -145,16 +156,12 @@ export default defineComponent({
       if (!community) {
         this.toggleJoinCommunityModal(true, detail.link);
       } else {
-        if (detail.channel) {
-          this.$router.push({
-            name: "channel",
-            params: {
-              channelId: detail.channel,
-              communityId:
-                detail.uuid || this.community.neighbourhood.perspective.uuid,
-            },
-          });
-        }
+        this.$router.push({
+          name: "community",
+          params: {
+            communityId: community.neighbourhood.perspective.uuid,
+          },
+        });
       }
     },
     toggleJoinCommunityModal(open: boolean, community?: any): void {

@@ -29,7 +29,7 @@ const initialState: ContextProps = {
 
 const EditorContext = createContext(initialState);
 
-export function EditorProvider({ children }: any) {
+export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
   const [state, setState] = useState(initialState.state);
   const {
     state: { members, channels, url, sourceUrl },
@@ -97,7 +97,9 @@ export function EditorProvider({ children }: any) {
     onChange: setInputValue, 
     onSend: handleSendMessage, 
     members: mentionMembers, 
-    channels: mentionChannels
+    channels: mentionChannels,
+    channelId,
+    perspectiveUuid
   })
 
   useEffect(() => {

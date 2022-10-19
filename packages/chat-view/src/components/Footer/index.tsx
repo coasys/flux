@@ -4,14 +4,13 @@ import UIContext from "../../context/UIContext";
 import TipTap from "../TipTap";
 import styles from "./index.scss";
 
-export default function Footer({ }) {
+export default function Footer({ perspectiveUuid, channelId }) {
   const {
     state: { members },
   } = useContext(PerspectiveContext);
 
   const {
     state: { keyedMessages },
-    methods: { sendMessage, sendReply },
   } = useContext(ChatContext);
 
   const {
@@ -40,7 +39,7 @@ export default function Footer({ }) {
           </j-button>
         </div>
       )}
-      <TipTap />
+      <TipTap perspectiveUuid={perspectiveUuid} channelId={channelId} />
     </footer>
   );
 }
