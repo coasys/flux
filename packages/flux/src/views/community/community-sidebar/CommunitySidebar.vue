@@ -158,19 +158,10 @@
             </j-menu-item>
             <j-menu-item
               v-if="isChannelCreator(channel.id)"
-              @click="
-                () =>
-                  deleteChannel(channel.id)
-              "
+              @click="() => deleteChannel(channel.id)"
             >
-              <j-icon
-                size="xs"
-                slot="start"
-                name="trash"
-              />
-              {{
-                `Delete Channel`
-              }}
+              <j-icon size="xs" slot="start" name="trash" />
+              {{ `Delete Channel` }}
             </j-menu-item>
           </j-menu>
         </j-popover>
@@ -193,7 +184,6 @@ import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { DexieIPFS } from "@/utils/storageHelpers";
 import { getImage } from "utils/api/getProfile";
-import { Literal } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { CHANNEL, SELF } from "utils/constants/communityPredicates";
 import Skeleton from "@/components/skeleton/Skeleton.vue";
@@ -207,8 +197,8 @@ export default defineComponent({
     },
     notSynced: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
   },
   setup() {
     return {
@@ -305,7 +295,7 @@ export default defineComponent({
       "setShowCommunityMembers",
       "setShowInviteCode",
       "setShowCommunitySettings",
-      "setShowCommunityTweaks"
+      "setShowCommunityTweaks",
     ]),
     navigateTo(navigate: any) {
       this.setSidebar(false);
@@ -316,15 +306,12 @@ export default defineComponent({
       this.showCommunityMenu = false;
     },
     isChannelCreator(channelId: string): boolean {
-      const channel = this.channels.find(e => e.id === channelId)
+      const channel = this.channels.find((e) => e.id === channelId);
 
-      return (
-        channel.creatorDid ===
-        this.userStore.getUser?.agent.did
-      );
+      return channel.creatorDid === this.userStore.getUser?.agent.did;
     },
     async deleteChannel(channelId: string) {
-      const channel = this.channels.find(e => e.id === channelId)
+      const channel = this.channels.find((e) => e.id === channelId);
 
       const client = await getAd4mClient();
 
@@ -345,8 +332,8 @@ export default defineComponent({
       });
 
       this.dataStore.removeChannel({
-        channelId: channel.id
-      })
+        channelId: channel.id,
+      });
 
       const isSameChannel = this.$route.params.channelId === channel.name;
 
@@ -357,7 +344,7 @@ export default defineComponent({
             communityId: channel.sourcePerspective,
             channelId: "Home",
           },
-        })
+        });
       }
     },
     goToTweaks() {

@@ -1,7 +1,10 @@
 <template>
   <sidebar-layout>
     <template v-slot:sidebar>
-      <community-sidebar :community="community" :notSynced="notSynced"></community-sidebar>
+      <community-sidebar
+        :community="community"
+        :notSynced="notSynced"
+      ></community-sidebar>
     </template>
 
     <div
@@ -103,7 +106,7 @@
     :open="modals.showCommunityTweaks"
     @toggle="(e) => setShowCommunityTweaks(e.target.open)"
   >
-    <community-tweaks v-if="modals.showCommunityTweaks"/>
+    <community-tweaks v-if="modals.showCommunityTweaks" />
   </j-modal>
 </template>
 
@@ -138,7 +141,7 @@ export default defineComponent({
     CommunitySidebar,
     CommunitySettings,
     SidebarLayout,
-    CommunityTweaks
+    CommunityTweaks,
   },
   setup() {
     const appStore = useAppStore();

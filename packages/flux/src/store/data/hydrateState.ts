@@ -93,33 +93,26 @@ export async function hydrateState() {
 
   userStore.updateAgentStatus(status);
 
-  const communities = dataStore.getCommunities.filter(
-    (community) =>
-      !perspectives.map((e) => e.uuid).includes(community.state.perspectiveUuid)
-  );
-
-  for (const community of communities) {
-    dataStore.removeCommunity({ communityId: community.state.perspectiveUuid });
-
-    dataStore.clearChannels({ communityId: community.state.perspectiveUuid });
-  }
-
   for (const perspective of perspectives) {
-    // ! Replaced this with querylinks because this returns the string literal and not the link itself 
+    // ! Replaced this with querylinks because this returns the string literal and not the link itself
     // ! so deleting the link becomes difficult because the timestamp difference between the channel link & literal link
     // const channelLinks = await client.perspective.queryProlog(
     //   perspective.uuid,
     //   `triple("${SELF}", "${CHANNEL}", C).`
     // );
+    const hasCommunityAlready = dataStore.getCommunities.find(
+      (c) => c.state.perspectiveUuid === perspective.uuid
+    );
+
+    if (hasCommunityAlready) return;
 
     const channelLinks = await client.perspective.queryLinks(
       perspective.uuid,
       new LinkQuery({
         source: SELF,
-        predicate: CHANNEL
+        predicate: CHANNEL,
       })
     );
-
 
     if (perspective.sharedUrl !== undefined && perspective.neighbourhood) {
       const newCommunity = await buildCommunity(perspective);
@@ -128,16 +121,17 @@ export async function hydrateState() {
 
       const channels = [...Object.values(dataStore.channels)];
 
-      const filteredChannels = dataStore.getChannelStates(perspective.uuid).filter(
-        (channel) =>
-          !channelLinks.map((e) => e.data.target).includes(channel.id)
-      );
-
+      const filteredChannels = dataStore
+        .getChannelStates(perspective.uuid)
+        .filter(
+          (channel) =>
+            !channelLinks.map((e) => e.data.target).includes(channel.id)
+        );
 
       for (const c of filteredChannels) {
         dataStore.removeChannel({
-          channelId: c.id
-        })
+          channelId: c.id,
+        });
       }
 
       if (channelLinks) {
@@ -146,9 +140,8 @@ export async function hydrateState() {
             const channel = link.data.target;
             const channelData = await Literal.fromUrl(channel).get();
             const exist = channels.find(
-              (c: any) => 
-                c.id === channel &&
-                c.sourcePerspective === perspective.uuid
+              (c: any) =>
+                c.id === channel && c.sourcePerspective === perspective.uuid
             );
             if (!exist) {
               dataStore.addChannel({
@@ -167,7 +160,10 @@ export async function hydrateState() {
               });
             }
           } catch (e) {
-            console.error("Got error when trying to hydrate community channel state", e);
+            console.error(
+              "Got error when trying to hydrate community channel state",
+              e
+            );
           }
         }
       }
