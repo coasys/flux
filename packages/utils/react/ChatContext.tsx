@@ -24,7 +24,6 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 type State = {
   isFetchingMessages: boolean;
   keyedMessages: Messages;
-  scrollPosition?: number;
   hasNewMessage: boolean;
   isMessageFromSelf: boolean;
   showLoadMore: boolean;
@@ -38,7 +37,6 @@ type ContextProps = {
     removeReaction: (linkExpression: LinkExpression) => void;
     addReaction: (messageUrl: string, reaction: string) => void;
     sendMessage: (message: string) => void;
-    saveScrollPos: (pos?: number) => void;
     setHasNewMessage: (value: boolean) => void;
     setIsMessageFromSelf: (value: boolean) => void;
     hideMessageEmbeds: (messageUrl: string) => void;
@@ -49,7 +47,6 @@ const initialState: ContextProps = {
   state: {
     isFetchingMessages: false,
     keyedMessages: {},
-    scrollPosition: 0,
     hasNewMessage: false,
     isMessageFromSelf: false,
     showLoadMore: true,
@@ -60,7 +57,6 @@ const initialState: ContextProps = {
     removeReaction: () => null,
     addReaction: () => null,
     sendMessage: () => null,
-    saveScrollPos: () => null,
     setHasNewMessage: () => null,
     setIsMessageFromSelf: () => null,
     hideMessageEmbeds: () => null,
@@ -102,16 +98,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   const messages = sortExpressionsByTimestamp(state.keyedMessages, "asc");
 
   useEffect(() => {
-    if (perspectiveUuid && channelId && agent) {
-      dexieUI.get("scroll-position").then((position) => {
-        setState((oldState) => ({
-          ...oldState,
-          scrollPosition: parseInt(position),
-        }));
-      });
-
-      fetchMessages();
-    }
+    fetchMessages();
   }, [perspectiveUuid, channelId, agent]);
 
   useEffect(() => {
@@ -139,10 +126,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   useEffect(() => {
     dexieMessages.saveAll(Object.values(state.keyedMessages));
   }, [JSON.stringify(state.keyedMessages)]);
-
-  useEffect(() => {
-    dexieUI.save("scroll-position", state.scrollPosition);
-  }, [state.scrollPosition]);
 
   function addMessage(oldState, message) {
     const newState = {
@@ -366,10 +349,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       isFetchingMessages: true,
     }));
 
-    const oldMessages = {
-      ...state.keyedMessages,
-    };
-
     const { keyedMessages: newMessages, expressionLinkLength } =
       await getMessages({
         perspectiveUuid,
@@ -379,17 +358,14 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
     setState((oldState) => ({
       ...oldState,
+      showLoadMore: expressionLinkLength === MAX_MESSAGES,
+      isFetchingMessages: false,
       keyedMessages: {
         ...oldState.keyedMessages,
         ...newMessages,
       },
     }));
 
-    setState((oldState) => ({
-      ...oldState,
-      showLoadMore: expressionLinkLength === MAX_MESSAGES,
-      isFetchingMessages: false,
-    }));
     return expressionLinkLength;
   }
 
@@ -462,13 +438,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     );
   }
 
-  function saveScrollPos(pos?: number) {
-    setState((oldState) => ({
-      ...oldState,
-      scrollPosition: pos,
-    }));
-  }
-
   function setHasNewMessage(value: boolean) {
     setState((oldState) => ({
       ...oldState,
@@ -486,7 +455,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
           addReaction,
           sendReply,
           removeReaction,
-          saveScrollPos,
           setHasNewMessage,
           setIsMessageFromSelf,
           hideMessageEmbeds,

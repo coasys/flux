@@ -29,7 +29,6 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
     state: {
       messages,
       isFetchingMessages,
-      scrollPosition,
       hasNewMessage,
       isMessageFromSelf,
       showLoadMore,
@@ -38,27 +37,10 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
       loadMore,
       removeReaction,
       addReaction,
-      saveScrollPos,
       setHasNewMessage,
       setIsMessageFromSelf,
     },
   } = useContext(ChatContext);
-
-  useEffect(() => {
-    if (scroller.current && messages.length > 0 && !initialScroll) {
-      if (!scrollPosition) {
-        scroller.current.scrollToIndex({
-          index: messages.length,
-        });
-      } else {
-        scroller.current.scrollToIndex({
-          index: scrollPosition,
-        });
-      }
-
-      setinitialScroll(true);
-    }
-  }, [messages, initialScroll, scrollPosition]);
 
   useEffect(() => {
     if (atBottom && hasNewMessage) {
@@ -182,7 +164,6 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
 
   const rangeChanged = ({ startIndex, endIndex }) => {
     if (typeof startIndex === "number" && initialScroll) {
-      saveScrollPos(startIndex);
       setIsMessageFromSelf(false);
     }
   };
@@ -215,7 +196,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
         observer.disconnect();
       };
     }
-  }, [atBottom, mainRef, channelId, perspectiveUuid, editor])
+  }, [atBottom, mainRef, channelId, perspectiveUuid, editor]);
 
   return (
     <main class={styles.main}>
@@ -274,7 +255,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
         overscan={20}
         totalCount={messages.length}
         rangeChanged={rangeChanged}
-        initialTopMostItemIndex={scrollPosition || 0}
+        initialTopMostItemIndex={messages.length - 1}
         itemContent={(index) => {
           return (
             <MessageItem
