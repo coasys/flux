@@ -93,6 +93,17 @@ export async function hydrateState() {
 
   userStore.updateAgentStatus(status);
 
+  const communities = dataStore.getCommunities.filter(
+    (community) =>
+      !perspectives.map((e) => e.uuid).includes(community.state.perspectiveUuid)
+  );
+
+  for (const community of communities) {
+    dataStore.removeCommunity({ communityId: community.state.perspectiveUuid });
+
+    dataStore.clearChannels({ communityId: community.state.perspectiveUuid });
+  }
+
   for (const perspective of perspectives) {
     // ! Replaced this with querylinks because this returns the string literal and not the link itself
     // ! so deleting the link becomes difficult because the timestamp difference between the channel link & literal link
