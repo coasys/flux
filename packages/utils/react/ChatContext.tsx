@@ -348,13 +348,12 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     //TODO: link.proof.valid === false when we recive
     // the remove link somehow. Ad4m bug?
     if (link.data.predicate === REACTION) {
-      removeReactionFromState(link);
-
       const isPopularPost = await client.perspective.queryProlog(perspectiveUuid, `isPopular("${link.data.source}").`);
 
       if (!isPopularPost) {
         updateMessagePopularStatus(link, false);
       }
+      removeReactionFromState(link);
     }
   }
 
