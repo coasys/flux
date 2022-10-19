@@ -1,52 +1,52 @@
-import { Mark, markPasteRule, mergeAttributes } from '@tiptap/core'
-import { find } from 'linkifyjs'
-import { autolink } from './helpers/autoLink'
+import { Mark, markPasteRule, mergeAttributes } from "@tiptap/core";
+import { find } from "linkifyjs";
+import { autolink } from "./helpers/autoLink";
 
 export interface LinkOptions {
   /**
    * If enabled, it adds links as you type.
    */
-  autolink: boolean,
+  autolink: boolean;
   /**
    * If enabled, links will be opened on click.
    */
-  openOnClick: boolean,
+  openOnClick: boolean;
   /**
    * Adds a link to the current selection if the pasted content only contains an url.
    */
-  linkOnPaste: boolean,
+  linkOnPaste: boolean;
 
   HTMLAttributes: Record<string, any>;
 }
 
-declare module '@tiptap/core' {
+declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     link: {
       /**
        * Set a link mark
        */
-      setLink: (attributes: { href: string, target?: string }) => ReturnType,
+      setLink: (attributes: { href: string; target?: string }) => ReturnType;
       /**
        * Toggle a link mark
        */
-      toggleLink: (attributes: { href: string, target?: string }) => ReturnType,
+      toggleLink: (attributes: { href: string; target?: string }) => ReturnType;
       /**
        * Unset a link mark
        */
-      unsetLink: () => ReturnType,
-    }
+      unsetLink: () => ReturnType;
+    };
   }
 }
 
-export const NeighbourhoddLink = Mark.create<LinkOptions>({
-  name: 'neighbourhood-link',
+export const NeighbourhoodLink = Mark.create<LinkOptions>({
+  name: "neighbourhood-link",
 
   priority: 1000,
 
   keepOnSplit: false,
 
   inclusive() {
-    return this.options.autolink
+    return this.options.autolink;
   },
 
   addOptions() {
@@ -55,46 +55,52 @@ export const NeighbourhoddLink = Mark.create<LinkOptions>({
       linkOnPaste: true,
       autolink: true,
       HTMLAttributes: {},
-    }
+    };
   },
 
   addAttributes() {
-    return {}
+    return {};
   },
 
   parseHTML() {
-    return [
-      { tag: 'span[data-neighbourhood]' },
-    ]
+    return [{ tag: "span[data-neighbourhood]" }];
   },
 
   renderHTML({ mark, HTMLAttributes }) {
-    console.log('mark', mark, HTMLAttributes)
+    console.log("mark", mark, HTMLAttributes);
     return [
-      'span',
+      "span",
       mergeAttributes(
-        { 'data-neighbourhood': '' }, 
+        { "data-neighbourhood": "" },
         this.options.HTMLAttributes,
         HTMLAttributes
       ),
       0,
-    ]
+    ];
   },
 
   addCommands() {
     return {
-      setLink: attributes => ({ commands }) => {
-        return commands.setMark(this.name, attributes)
-      },
+      setLink:
+        (attributes) =>
+        ({ commands }) => {
+          return commands.setMark(this.name, attributes);
+        },
 
-      toggleLink: attributes => ({ commands }) => {
-        return commands.toggleMark(this.name, attributes, { extendEmptyMarkRange: true })
-      },
+      toggleLink:
+        (attributes) =>
+        ({ commands }) => {
+          return commands.toggleMark(this.name, attributes, {
+            extendEmptyMarkRange: true,
+          });
+        },
 
-      unsetLink: () => ({ commands }) => {
-        return commands.unsetMark(this.name, { extendEmptyMarkRange: true })
-      },
-    }
+      unsetLink:
+        () =>
+        ({ commands }) => {
+          return commands.unsetMark(this.name, { extendEmptyMarkRange: true });
+        },
+    };
   },
 
   renderText({ node }) {
@@ -107,30 +113,33 @@ export const NeighbourhoddLink = Mark.create<LinkOptions>({
   addPasteRules() {
     return [
       markPasteRule({
-        find: text => find(text)
-          .filter(link => link.isLink)
-          .map(link => ({
-            text: link.value,
-            index: link.start,
-            data: link,
-          })),
+        find: (text) =>
+          find(text)
+            .filter((link) => link.isLink)
+            .map((link) => ({
+              text: link.value,
+              index: link.start,
+              data: link,
+            })),
         type: this.type,
-        getAttributes: match => ({
+        getAttributes: (match) => ({
           href: match.data?.href,
         }),
       }),
-    ]
+    ];
   },
 
   addProseMirrorPlugins() {
-    const plugins = []
+    const plugins = [];
 
     if (this.options.autolink) {
-      plugins.push(autolink({
-        type: this.type,
-      }))
+      plugins.push(
+        autolink({
+          type: this.type,
+        })
+      );
     }
-    
-    return plugins
+
+    return plugins;
   },
-})
+});

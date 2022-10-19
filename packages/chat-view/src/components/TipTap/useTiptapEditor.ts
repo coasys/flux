@@ -11,6 +11,7 @@ import CodeBlock from "@tiptap/extension-code-block";
 import History from "@tiptap/extension-history";
 import Link from "@tiptap/extension-link";
 import OrderedList from "@tiptap/extension-ordered-list";
+import { PluginKey } from "prosemirror-state";
 
 import Mention from "./Mention";
 import LineBreak from "./LineBreak";
@@ -19,11 +20,19 @@ import renderMention from "./renderMention";
 import emojiList from "node-emoji/lib/emoji";
 
 import styles from "./index.scss";
-import { NeighbourhoddLink } from "./NeighourhoodPlugin";
+import { NeighbourhoodLink } from "./NeighourhoodPlugin";
 import HardBreak from "@tiptap/extension-hard-break";
 import { useEffect, useRef } from "preact/hooks";
 
-export default ({value, onSend, members, channels, onChange, perspectiveUuid, channelId}) => {
+export default ({
+  value,
+  onSend,
+  members,
+  channels,
+  onChange,
+  perspectiveUuid,
+  channelId,
+}) => {
   // This is needed because React ugh.
   const sendCB = useRef(onSend);
   const membersCB = useRef(members);
@@ -101,7 +110,7 @@ export default ({value, onSend, members, channels, onChange, perspectiveUuid, ch
           },
         }),
         Link,
-        NeighbourhoddLink,
+        NeighbourhoodLink,
         Bold,
         Strike,
         Italic,
@@ -122,6 +131,7 @@ export default ({value, onSend, members, channels, onChange, perspectiveUuid, ch
           },
           suggestion: {
             char: ":",
+            pluginKey: new PluginKey("emoji"),
             items: ({ query }) => {
               const formattedEmojiList = Object.entries(emojiList.emoji).map(
                 ([id, label]) => ({ id, label })
@@ -134,7 +144,7 @@ export default ({value, onSend, members, channels, onChange, perspectiveUuid, ch
             render: () => renderMention(perspectiveUuid, channelId),
           },
         }),
-        Mention("neighbourhood-mention").configure({
+        Mention("channel-mention").configure({
           HTMLAttributes: {
             class: styles.editorMentions,
           },
@@ -145,6 +155,7 @@ export default ({value, onSend, members, channels, onChange, perspectiveUuid, ch
           },
           suggestion: {
             char: "#",
+            pluginKey: new PluginKey("channel-mention"),
             items: ({ query }) => {
               return channelsCB.current
                 .filter((item) =>
@@ -166,6 +177,7 @@ export default ({value, onSend, members, channels, onChange, perspectiveUuid, ch
           },
           suggestion: {
             char: "@",
+            pluginKey: new PluginKey("agent-mention"),
             items: ({ query }) => {
               return membersCB.current
                 .filter((item) =>
