@@ -101,6 +101,7 @@ export default class MentionList extends Component<
               active={index === selectedIndex}
               key={index}
               onClick={() => this.selectItem(index)}
+              onMouseOver={() => this.setState({ selectedIndex: index}) }
             >
               <j-flex gap="300" a="center">
                 <Avatar
