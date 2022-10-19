@@ -22,7 +22,13 @@ export default function Tiptap({perspectiveUuid, channelId}) {
     if (emojiPicker.current) {
       emojiPicker.current.addEventListener("emoji-click", onEmojiClick);
     }
-  }, [emojiPicker.current]);
+
+    return () => {
+      if (emojiPicker.current) {
+        emojiPicker.current.removeEventListener("emoji-click", onEmojiClick);
+      }
+    }
+  }, [emojiPicker.current, editor]);
 
   useEffect(() => {
     if (editor && value.length === 0) {
