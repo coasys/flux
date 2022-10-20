@@ -12,3 +12,10 @@
   --app-channel-footer-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
   --app-channel-border-color: hsl(var(--j-color-ui-hue), 0%, 100%);
 }
+
+:root[theme="light"] j-menu-item::part(base) {
+  margin-top: var(--j-space-100);
+  margin-left: var(--j-space-400);
+  margin-right: var(--j-space-400);
+  border-radius: 6px;
+}
