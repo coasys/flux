@@ -39,3 +39,9 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+j-avatar::part(base) {
+  aspect-ratio: 1/1;
+}
+</style>
