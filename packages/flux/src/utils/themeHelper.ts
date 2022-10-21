@@ -15,12 +15,8 @@ export function setTheme(theme: ThemeState): void {
     theme.fontSize
   );
 
-  if (theme.name === "light") {
-    document.documentElement.removeAttribute("theme");
-  } else {
-    import(`../themes/${theme.name}.css`);
-    document.documentElement.setAttribute("theme", theme.name);
-  }
+  import(`../themes/${theme.name}.css`);
+  document.documentElement.setAttribute("theme", theme.name);
 
   const head = document.getElementsByTagName("head")[0];
   let link = null;
