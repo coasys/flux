@@ -30,15 +30,12 @@
 <script lang="ts">
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { getLiteralObjectLinks } from "utils/helpers/linkHelpers";
-import getOGData from "utils/helpers/getOGData";
 import { defineComponent } from "vue";
 export default defineComponent({
-  props: ["id", "url", "sameAgent"],
+  props: ["id", "title", "description", "url", "sameAgent"],
   emits: ["delete", "edit"],
   data() {
     return {
-      title: "",
-      description: "",
       image: "",
       icon: "",
     };
@@ -60,14 +57,6 @@ export default defineComponent({
         div.innerHTML = html;
         const icon = div.querySelector("link[rel='apple-touch-icon']");
         this.icon = icon?.getAttribute("href") || "";
-        this.description =
-          div
-            .querySelector("meta[property='og:description']")
-            ?.getAttribute("content") || "";
-        this.title =
-          div
-            .querySelector("meta[property='og:title']")
-            ?.getAttribute("content") || "";
       } catch (e) {
         console.log(e);
       }

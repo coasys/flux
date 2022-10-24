@@ -1,6 +1,6 @@
 <template>
   <j-box p="800">
-    <j-flex direction="column" gap="400" class="steps">
+    <j-flex direction="column" gap="600" class="steps">
       <j-text variant="heading-sm">Add a link to your profile</j-text>
       <j-input
         label="Web link"
@@ -13,7 +13,30 @@
         required
         @blur="getMeta"
       >
+        <j-box pr="300" v-if="loadingMeta" slot="end">
+          <j-spinner size="xxs"></j-spinner>
+        </j-box>
       </j-input>
+
+      <j-input
+        ref="titleEl"
+        v-if="isValidLink"
+        :disabled="loadingMeta"
+        size="xl"
+        label="Title"
+        :value="title"
+        @input="(e) => (title = e.target.value)"
+      ></j-input>
+
+      <j-input
+        v-if="isValidLink"
+        :disabled="loadingMeta"
+        size="xl"
+        type="textarea"
+        label="Description"
+        :value="description"
+        @input="(e) => (description = e.target.value)"
+      ></j-input>
 
       <j-flex gap="400">
         <j-button full style="width: 100%" size="lg" @click="$emit('cancel')">
@@ -60,6 +83,7 @@ export default defineComponent({
       description: ref(""),
       imageUrl: ref(""),
       link: ref(""),
+      loadingMeta: ref(false),
       isAddingLink: ref(false),
       isValidLink: ref(false),
     };
@@ -67,34 +91,26 @@ export default defineComponent({
   methods: {
     async getMeta() {
       try {
+        this.loadingMeta = true;
         const data = await getOGData(this.link);
-
-        console.log(data);
-
-        this.title = data.title || data["og:title"];
-        this.description = data.description || data["og:description"];
-        this.imageUrl = data["og:image"];
+        this.title = data.title || data["og:title"] || "";
+        this.description = data.description || data["og:description"] || "";
+        this.imageUrl = data["og:image"] || "";
       } catch (e) {
         console.log(e);
+      } finally {
+        this.loadingMeta = false;
+        this.$refs.titleEl?.focus();
       }
     },
-    handleInput(e: any) {
-      function validURL(str: string) {
-        var pattern = new RegExp(
-          "^(https?:\\/\\/)?" + // protocol
-            "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
-            "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
-            "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
-            "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
-            "(\\#[-a-z\\d_]*)?$",
-          "i"
-        ); // fragment locator
-        return !!pattern.test(str);
+    async handleInput(e: any) {
+      try {
+        this.link = e.target.value;
+        await new URL(e.target.value);
+        this.isValidLink = true;
+      } catch (e) {
+        this.isValidLink = false;
       }
-      this.link = e.target.value;
-      const isValidLink = validURL(e.target.value);
-      this.getMeta();
-      this.isValidLink = isValidLink;
     },
     async createLink() {
       const client = await getAd4mClient();
@@ -109,8 +125,8 @@ export default defineComponent({
           target: this.link || "",
         },
         children: {
-          [OG_DESCRIPTION]: this.link || "",
           [OG_TITLE]: this.title || "",
+          [OG_DESCRIPTION]: this.link || "",
           [OG_DESCRIPTION]: this.description || "",
           [OG_IMAGE]: this.imageUrl || "",
         },
