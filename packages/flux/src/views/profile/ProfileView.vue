@@ -378,6 +378,7 @@ export default defineComponent({
   background-color: var(--j-color-ui-100);
   background-repeat: no-repeat;
   background-size: cover;
+  background-position: center;
 }
 
 .profile__avatar {
