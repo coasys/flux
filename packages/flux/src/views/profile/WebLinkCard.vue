@@ -1,7 +1,7 @@
 <template>
   <div class="link-card">
     <div class="link-card__image">
-      <img v-if="icon" :src="icon" />
+      <img v-if="image" :src="image" />
       <j-icon class="link-card__icon" v-else name="link"></j-icon>
     </div>
     <div class="link-card__content">
@@ -32,35 +32,15 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { getLiteralObjectLinks } from "utils/helpers/linkHelpers";
 import { defineComponent } from "vue";
 export default defineComponent({
-  props: ["id", "title", "description", "url", "sameAgent"],
+  props: ["id", "title", "description", "url", "image", "sameAgent"],
   emits: ["delete", "edit"],
-  data() {
-    return {
-      image: "",
-      icon: "",
-    };
-  },
-  created() {
-    this.getIcon();
-  },
+
   computed: {
     hostname() {
       return new URL(this.url).hostname;
     },
   },
   methods: {
-    async getIcon() {
-      try {
-        const res = await fetch(this.url);
-        const html = await res.text();
-        const div = document.createElement("div");
-        div.innerHTML = html;
-        const icon = div.querySelector("link[rel='apple-touch-icon']");
-        this.icon = icon?.getAttribute("href") || "";
-      } catch (e) {
-        console.log(e);
-      }
-    },
     async deleteLink() {
       const client = await getAd4mClient();
       const { perspective } = await client.agent.me();

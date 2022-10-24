@@ -92,10 +92,13 @@ export default defineComponent({
     async getMeta() {
       try {
         this.loadingMeta = true;
-        const data = await getOGData(this.link);
-        this.title = data.title || data["og:title"] || "";
-        this.description = data.description || data["og:description"] || "";
-        this.imageUrl = data["og:image"] || "";
+        const data = await fetch(
+          "https://jsonlink.io/api/extract?url=" + this.link
+        ).then((res) => res.json());
+
+        this.title = data.title || "";
+        this.description = data.description || "";
+        this.imageUrl = data.images[0] || "";
       } catch (e) {
         console.log(e);
       } finally {
