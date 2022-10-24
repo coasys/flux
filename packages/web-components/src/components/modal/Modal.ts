@@ -17,7 +17,7 @@ const styles = css`
     --j-modal-translateY: 100%;
     --j-modal-translateX: 0px;
     --j-modal-justify: center;
-    --j-modal-align: end;
+    --j-modal-align: flex-end;
   }
 
   :host([size="xs"]) {
