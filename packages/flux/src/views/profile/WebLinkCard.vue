@@ -1,24 +1,18 @@
 <template>
   <div class="link-card">
     <div class="link-card__image">
-      <img v-if="image" :src="image" />
-      <j-icon v-else name="link" size="xl"></j-icon>
+      <img v-if="icon" :src="icon" />
+      <j-icon class="link-card__icon" v-else name="link"></j-icon>
     </div>
-    <j-box py="400" pl="500" pr="700">
+    <div class="link-card__content">
       <a :href="url" target="_blank" class="link-card__info">
-        <j-text
-          class="title"
-          v-if="title"
-          size="500"
-          weight="800"
-          color="black"
-        >
-          {{ title }}
-        </j-text>
-        <j-text v-if="title" size="400" color="ui-400">{{
-          description
-        }}</j-text>
-        <j-text v-if="url" size="300" variant="link">{{ url }}</j-text>
+        <h2 class="link-card__title">
+          {{ title || url }}
+        </h2>
+        <div class="link-card__description" v-if="description">
+          {{ description }}
+        </div>
+        <div class="link-card__url" v-if="title">{{ hostname }}</div>
       </a>
       <j-button
         size="sm"
@@ -29,18 +23,55 @@
         @click.stop="deleteLink"
         ><j-icon name="x"></j-icon
       ></j-button>
-    </j-box>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { getLiteralObjectLinks } from "utils/helpers/linkHelpers";
+import getOGData from "utils/helpers/getOGData";
 import { defineComponent } from "vue";
 export default defineComponent({
-  props: ["id", "title", "url", "description", "image", "sameAgent"],
+  props: ["id", "url", "sameAgent"],
   emits: ["delete", "edit"],
+  data() {
+    return {
+      title: "",
+      description: "",
+      image: "",
+      icon: "",
+    };
+  },
+  created() {
+    this.getIcon();
+  },
+  computed: {
+    hostname() {
+      return new URL(this.url).hostname;
+    },
+  },
   methods: {
+    async getIcon() {
+      try {
+        const res = await fetch(this.url);
+        const html = await res.text();
+        const div = document.createElement("div");
+        div.innerHTML = html;
+        const icon = div.querySelector("link[rel='apple-touch-icon']");
+        this.icon = icon?.getAttribute("href") || "";
+        this.description =
+          div
+            .querySelector("meta[property='og:description']")
+            ?.getAttribute("content") || "";
+        this.title =
+          div
+            .querySelector("meta[property='og:title']")
+            ?.getAttribute("content") || "";
+      } catch (e) {
+        console.log(e);
+      }
+    },
     async deleteLink() {
       const client = await getAd4mClient();
       const { perspective } = await client.agent.me();
@@ -61,40 +92,82 @@ export default defineComponent({
 .link-card {
   position: relative;
   width: 100%;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 3fr;
   gap: var(--j-space-300);
   border-radius: var(--j-border-radius);
-  gap: var(--j-space-400);
   text-decoration: none;
-  border: 1px solid var(--j-color-ui-200);
-  border-radius: var(--j-border-radius);
+  background-color: var(--j-color-ui-50);
+  overflow: hidden;
 }
 
-.link-card:hover {
-  background-color: var(--j-color-ui-50);
+@media (min-width: 800px) {
+  .link-card {
+    grid-template-columns: 1fr 4fr;
+  }
 }
 
 .link-card__image {
   display: grid;
   place-items: center;
   cursor: pointer;
-  border-radius: var(--j-border-radius) 0 var(--j-border-radius) 0;
   width: 100%;
-  max-width: 200px;
-  aspect-ratio: 16/9;
+  height: 100%;
+  padding: var(--j-space-500);
   overflow: hidden;
 }
 
 .link-card__image img {
   width: 100%;
-  aspect-ratio: 16/9;
+  border-radius: 100%;
+  aspect-ratio: 1/1;
   overflow: hidden;
   object-fit: cover;
+}
+
+.link-card__content {
+  padding: var(--j-space-400);
+  padding-right: var(--j-space-900);
+  overflow: hidden;
 }
 
 .link-card__info {
   cursor: pointer;
   text-decoration: none;
+}
+
+.link-card__icon {
+  --j-icon-size: 50px;
+}
+
+.link-card__title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+  margin-bottom: var(--j-space-300);
+  font-size: var(--j-font-size-500);
+  font-weight: 800;
+  color: var(--j-color-black);
+}
+
+.link-card__description {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+  margin-bottom: var(--j-space-300);
+  font-size: var(--j-font-size-500);
+  font-weight: 400;
+  color: var(--j-color-ui-500);
+}
+
+.link-card__url {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--j-font-size-500);
+  color: var(--j-color-ui-800);
 }
 
 .delete-button {

@@ -42,7 +42,7 @@
         </div>
 
         <div class="profile__content">
-          <div v-if="!sameAgent">
+          <j-box my="500" v-if="!sameAgent">
             <j-text>Links ({{ weblinks.length }})</j-text>
             <div class="grid">
               <ProfileCard
@@ -52,10 +52,9 @@
                 :description="link.description"
                 :image="link.image"
                 :sameAgent="sameAgent"
-                @edit="() => setEditLinkModal(true, link)"
               />
             </div>
-          </div>
+          </j-box>
 
           <j-box my="500" v-if="sameAgent">
             <j-tabs
@@ -355,6 +354,11 @@ export default defineComponent({
   height: 100%;
   overflow-y: auto;
   position: relative;
+}
+
+.profile__content {
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .profile__links {

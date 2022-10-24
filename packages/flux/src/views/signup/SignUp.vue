@@ -5,20 +5,16 @@
         <j-box pb="700">
           <Logo class="signup-view__intro-logo" width="150px"></Logo>
         </j-box>
-        <j-box align="center">
-          <j-text variant="heading-lg">
-            Create your own decentralized community.
-          </j-text>
-        </j-box>
 
         <div class="signup-view__intro-extension">
-          <j-text variant="heading-sm">
-            You need the AD4M extension to use Flux.
+          <j-box align="center">
+            <j-text variant="heading">Get started with Flux</j-text>
+          </j-box>
+          <j-text>
+            You need the AD4M extension to use Flux. By connecting to AD4M you
+            are able to surf the internet completely decentralized, secure and
+            bladibla
           </j-text>
-          <j-text
-            >By connectinng to AD4M you are able to surf the internet completely
-            decentralized, secure and bladibla</j-text
-          >
           <j-box class="signup-view__intro-button" pt="900">
             <j-button
               @click="() => $emit('connectToAd4m')"
