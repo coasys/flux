@@ -17,21 +17,21 @@ const styles = css`
     --j-modal-translateY: 100%;
     --j-modal-translateX: 0px;
     --j-modal-justify: center;
-    --j-modal-align: center;
+    --j-modal-align: end;
   }
 
   :host([size="xs"]) {
-    --j-modal-width-mobile: 80vw;
+    --j-modal-width-mobile: 95vw;
     --j-modal-width: clamp(350px, 30vw, 500px);
   }
 
   :host([size="sm"]) {
-    --j-modal-width-mobile: 80vw;
+    --j-modal-width-mobile: 95vw;
     --j-modal-width: clamp(350px, 40vw, 600px);
   }
 
   :host([size="lg"]) {
-    --j-modal-width-mobile: 90vw;
+    --j-modal-width-mobile: 95vw;
     --j-modal-width: clamp(350px, 50vw, 1000px);
   }
 
@@ -80,6 +80,9 @@ const styles = css`
   }
 
   @media screen and (min-width: 1000px) {
+    :host {
+      --j-modal-align: center;
+    }
     [part="modal"] {
       width: var(--j-modal-width);
     }
