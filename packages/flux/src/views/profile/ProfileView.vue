@@ -44,14 +44,17 @@
         <div class="profile__content">
           <j-box my="500" v-if="!sameAgent">
             <j-text>Links ({{ weblinks.length }})</j-text>
-            <div class="grid">
-              <ProfileCard
-                v-for="link in weblinks"
-                :key="link.id"
-                :title="link.name"
+            <div class="profile__links">
+              <WebLinkCard
+                v-for="(link, i) in weblinks"
+                :key="i"
+                :id="link.id"
+                :url="link.url"
+                :title="link.title"
                 :description="link.description"
                 :image="link.image"
                 :sameAgent="sameAgent"
+                @edit="() => setEditLinkModal(true, link)"
               />
             </div>
           </j-box>
@@ -220,11 +223,6 @@ export default defineComponent({
       editArea: null as any,
     };
   },
-
-  async created() {
-    this.getProfile();
-    this.getAgentAreas();
-  },
   beforeCreate() {
     this.appStore.changeCurrentTheme("global");
   },
@@ -244,7 +242,8 @@ export default defineComponent({
     },
     async getAgentAreas() {
       const client = await getAd4mClient();
-      const { perspective } = await client.agent.me();
+
+      const { perspective } = await client.agent.byDID(this.did);
 
       if (!perspective) return;
 
@@ -295,6 +294,13 @@ export default defineComponent({
         this.getAgentAreas();
         this.getProfile();
       }
+    },
+    did: {
+      handler: async function () {
+        this.getProfile();
+        this.getAgentAreas();
+      },
+      immediate: true,
     },
     profile: {
       handler: async function (val) {
