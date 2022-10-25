@@ -12,8 +12,7 @@
           </j-box>
           <j-text>
             You need the AD4M extension to use Flux. By connecting to AD4M you
-            are able to surf the internet completely decentralized, secure and
-            bladibla
+            are able to surf the internet completely decentralized.
           </j-text>
           <j-box class="signup-view__intro-button" pt="900">
             <j-button
