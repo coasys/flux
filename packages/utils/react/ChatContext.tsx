@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useRef } from "react";
 import { Messages, Message } from "../types";
-import { LinkExpression } from "@perspect3vism/ad4m";
+import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import getMessages from "../api/getMessages";
 import createMessage from "../api/createMessage";
 import subscribeToLinks from "../api/subscribeToLinks";
@@ -294,11 +294,11 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       }
       
       if (linkIs.editedMessage(link)) {
-        const message = getMessage(link.data.target);
+        const message = Literal.fromUrl(link.data.target).get();
         setState((oldState) => addEditMessage(oldState, link.data.source, {
-          author: message.author,
-          content: message.content,
-          timestamp: message.timestamp
+          author: link.author,
+          content: message.data,
+          timestamp: link.timestamp
         }));
       }
 
