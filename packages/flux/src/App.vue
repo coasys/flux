@@ -10,6 +10,7 @@
     </div>
   </div>
   <ad4m-connect
+    theme="dark"
     ref="ad4mConnect"
     appName="Flux"
     appDesc="Flux - A SOCIAL TOOLKIT FOR THE NEW INTERNET"
@@ -54,6 +55,7 @@ import { buildCommunity, hydrateState } from "./store/data/hydrateState";
 import { getGroupMetadata } from "./store/data/actions/fetchNeighbourhoodMetadata";
 import {
   getAd4mClient,
+  isConnected,
   onAuthStateChanged,
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import "@perspect3vism/ad4m-connect/dist/web";
@@ -88,12 +90,11 @@ export default defineComponent({
   },
   mounted() {
     onAuthStateChanged(async (event: string) => {
-      console.log("event", event);
       if (event === "connected_with_capabilities") {
         if (!this.watcherStarted) {
           this.startWatcher();
           this.watcherStarted = true;
-          hydrateState();
+          await hydrateState();
         }
       }
     });
@@ -122,9 +123,7 @@ export default defineComponent({
         link: LinkExpression,
         perspective: string
       ) => {
-        console.debug("GOT INCOMING DIRECTLY_SUCCEEDED_BY SIGNAL", link, perspective);
         if (link.data!.predicate! === DIRECTLY_SUCCEEDED_BY) {
-          console.log("Got a new message signal");
           try {
             const channels = this.dataStore.getChannelStates(perspective);
 
@@ -254,6 +253,25 @@ export default defineComponent({
                     v
                   );
                   newLinkHandler(result, v.perspective.uuid);
+                });
+
+                perspective.addListener("link-removed", (link) => {
+                  console.log(
+                    "Got new link with data",
+                    link.data,
+                    "and channel",
+                    v
+                  );
+                  if (
+                    link.data!.predicate! === CHANNEL &&
+                    link.author !== this.userStore.getUser?.agent.did
+                  ) {
+                    const channel = Literal.fromUrl(link.data.target).get();
+
+                    this.dataStore.removeChannel({
+                      channelId: channel.id,
+                    });
+                  }
                 });
               }
             }

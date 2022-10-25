@@ -1,9 +1,9 @@
 import { AgentContext } from "utils/react";
 import { Reaction } from "utils/types";
-import { useContext, useEffect, useMemo, useState } from "preact/hooks";
+import { useContext, useMemo, useState } from "preact/hooks";
 import styles from "./index.scss";
 import getProfile from "utils/api/getProfile";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import emojiShortName from "emoji-short-name";
 
 interface ReactionType {
   authors: string[];
@@ -33,19 +33,20 @@ function generateReactionText(
 ) {
   if (profiles.length) {
     const emoji = String.fromCodePoint(parseInt(`0x${reaction.content}`));
+    const shortName = `:${emojiShortName[emoji]}:`;
 
     if (reaction.authors.find((author) => author === me)) {
       const authors = reaction.authors.filter((author) => author !== me);
       if (authors.length > 2) {
         return `You, ${profiles[0].username}, ${profiles[1].username}, and ${
           authors.length - 3
-        } others`;
+        } others reacted with ${shortName}`;
       } else if (authors.length == 2) {
-        return `You, ${profiles[0].username} and ${profiles[1].username}`;
+        return `You, ${profiles[0].username} and ${profiles[1].username} reacted with ${shortName}`;
       } else if (authors.length == 1) {
-        return `You and ${profiles[0].username}`;
+        return `You and ${profiles[0].username} reacted with ${shortName}`;
       } else {
-        return `You`;
+        return `You reacted with ${shortName}`;
       }
     } else {
       if (reaction.authors.length > 3) {
@@ -61,7 +62,7 @@ function generateReactionText(
       }
     }
   } else {
-    return "";
+    return null;
   }
 }
 
@@ -73,7 +74,13 @@ export default function MessageReactions({ onEmojiClick, reactions = [] }) {
   return (
     <div style={{ display: "inline-flex", gap: "var(--j-space-200)" }}>
       {sortedReactions.map((reaction: any, i) => {
-        return ReactionButton({ reaction, onEmojiClick, key: i });
+        return (
+          <ReactionButton
+            key={i}
+            reaction={reaction}
+            onEmojiClick={onEmojiClick}
+          ></ReactionButton>
+        );
       })}
     </div>
   );
@@ -92,30 +99,31 @@ function ReactionButton({ reaction, onEmojiClick }) {
 
   async function getProfiles() {
     const profiles = await Promise.all(
-      reaction.authors
-        .filter((author) => author !== agentState.did)
-        .slice(0, 3)
-        .map((did) => getProfile(did))
+      reaction.authors.slice(0, 3).map((did) => getProfile(did))
     );
     setProfiles(profiles);
   }
 
   return (
-    <j-popover event="mouseover">
-      <button
-        onMouseEnter={() => getProfiles()}
-        class={`${styles.emojiButton} ${activeClass}`}
-        onClick={() => onEmojiClick(reaction.content)}
-        slot="trigger"
-      >
-        <span>{String.fromCodePoint(parseInt(`0x${reaction.content}`))}</span>
-        <span>{reaction.count}</span>
-      </button>
-      <j-box slot="content" bg="ui-100">
-        <j-text>
-          {generateReactionText(reaction, profiles, agentState.did)}
+    <button
+      onMouseOver={() => getProfiles()}
+      class={`${styles.emojiButton} ${activeClass}`}
+      onClick={() => onEmojiClick(reaction.content)}
+    >
+      <span>{String.fromCodePoint(parseInt(`0x${reaction.content}`))}</span>
+      <span>{reaction.count}</span>
+      <div onClick={(e) => e.stopPropagation()} class={styles.reactionTooltip}>
+        <j-text nomargin size="900">
+          {String.fromCodePoint(parseInt(`0x${reaction.content}`))}
         </j-text>
-      </j-box>
-    </j-popover>
+        {profiles.length === 0 ? (
+          <j-spinner size="sm"></j-spinner>
+        ) : (
+          <j-text nomargin color="black" size="400">
+            {generateReactionText(reaction, profiles, agentState.did)}
+          </j-text>
+        )}
+      </div>
+    </button>
   );
 }

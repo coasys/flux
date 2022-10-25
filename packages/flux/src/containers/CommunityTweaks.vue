@@ -70,11 +70,10 @@ export default defineComponent({
       const sdna = Literal.fromUrl(sdnaLinks[0].data.target).get();
       console.log("Loaded existing SDNA: ", sdna);
 
-      const emojiRegex = new RegExp('emoji:\/\/.+?(?=")');
-      const emojiCountRegex = new RegExp('(?:Count >= )(.*(?=.))');
-
+      const emojiRegex = new RegExp('emoji:\/\/[A-Za-z0-9]+');
+      const emojiCountRegex = new RegExp('[a-zA-Z]+ >= ([0-9])');
       const emoji = sdna.match(emojiRegex)[0].replace("emoji://", "");
-      this.emoji = String.fromCodePoint(parseInt(`0x${emoji}`))
+      this.emoji = String.fromCodePoint(parseInt(`0x${emoji}`));
       this.emojiCount = sdna.match(emojiCountRegex)[1];
       console.log("Found emoji in sdna", this.emoji, this.emojiCount);
     }
@@ -120,10 +119,10 @@ export default defineComponent({
         findall((Reply, ReplyTimestamp, ReplyAuthor), link(Reply, "flux://has_reply", Message, ReplyTimestamp, ReplyAuthor), Replies).
         
         flux_message_query_popular(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, true):- 
-        flux_message(Channel, Message, Timestamp, Author, Reactions, Repies, AllCardsHidden), isPopular(Message).
+        flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden), isPopular(Message).
         
         flux_message_query_popular(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, false):- 
-        flux_message(Channel, Message, Timestamp, Author, Reactions, Repies, AllCardsHidden), isNotPopular(Message).`);
+        flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden), isNotPopular(Message).`);
         await ad4mClient.perspective.addLink(
             perspectiveUuid,
             {

@@ -12,9 +12,11 @@ import createMessageReaction from "../api/createMessageReaction";
 import createReply from "../api/createReply";
 import { sortExpressionsByTimestamp } from "../helpers/expressionHelpers";
 import getMe from "../api/getMe";
-import { SHORT_FORM_EXPRESSION } from "../helpers/languageHelpers";
 import { DexieMessages, DexieUI } from "../helpers/storageHelpers";
-import { DIRECTLY_SUCCEEDED_BY, REACTION } from "../constants/communityPredicates";
+import {
+  DIRECTLY_SUCCEEDED_BY,
+  REACTION,
+} from "../constants/communityPredicates";
 import hideEmbeds from "../api/hideEmbeds";
 import { MAX_MESSAGES } from "../constants/general";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
@@ -22,7 +24,6 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 type State = {
   isFetchingMessages: boolean;
   keyedMessages: Messages;
-  scrollPosition?: number;
   hasNewMessage: boolean;
   isMessageFromSelf: boolean;
   showLoadMore: boolean;
@@ -36,7 +37,6 @@ type ContextProps = {
     removeReaction: (linkExpression: LinkExpression) => void;
     addReaction: (messageUrl: string, reaction: string) => void;
     sendMessage: (message: string) => void;
-    saveScrollPos: (pos?: number) => void;
     setHasNewMessage: (value: boolean) => void;
     setIsMessageFromSelf: (value: boolean) => void;
     hideMessageEmbeds: (messageUrl: string) => void;
@@ -47,7 +47,6 @@ const initialState: ContextProps = {
   state: {
     isFetchingMessages: false,
     keyedMessages: {},
-    scrollPosition: 0,
     hasNewMessage: false,
     isMessageFromSelf: false,
     showLoadMore: true,
@@ -58,7 +57,6 @@ const initialState: ContextProps = {
     removeReaction: () => null,
     addReaction: () => null,
     sendMessage: () => null,
-    saveScrollPos: () => null,
     setHasNewMessage: () => null,
     setIsMessageFromSelf: () => null,
     hideMessageEmbeds: () => null,
@@ -71,13 +69,10 @@ let dexieUI: DexieUI;
 let dexieMessages: DexieMessages;
 
 export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
-  const [shortFormHash, setShortFormHash] = useState("");
-  const messageInterval = useRef();
   const linkSubscriberRef = useRef();
 
   const [state, setState] = useState(initialState.state);
   const [agent, setAgent] = useState();
-  const ranOnce = useRef(false);
 
   useEffect(() => {
     fetchAgent();
@@ -101,16 +96,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   const messages = sortExpressionsByTimestamp(state.keyedMessages, "asc");
 
   useEffect(() => {
-    if (perspectiveUuid && channelId) {
-      dexieUI.get("scroll-position").then((position) => {
-        setState((oldState) => ({
-          ...oldState,
-          scrollPosition: parseInt(position),
-        }));
-      });
-
-      fetchMessages();
-    }
+    fetchMessages();
   }, [perspectiveUuid, channelId, agent]);
 
   useEffect(() => {
@@ -139,15 +125,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     dexieMessages.saveAll(Object.values(state.keyedMessages));
   }, [JSON.stringify(state.keyedMessages)]);
 
-  useEffect(() => {
-    dexieUI.save("scroll-position", state.scrollPosition);
-  }, [state.scrollPosition]);
-
-  async function fetchLanguages() {
-    const { languages } = await getPerspectiveMeta(perspectiveUuid);
-    setShortFormHash(languages[SHORT_FORM_EXPRESSION]);
-  }
-
   function addMessage(oldState, message) {
     const newState = {
       ...oldState,
@@ -166,18 +143,18 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     setState((oldState) => {
       const message: Message = oldState.keyedMessages[id];
 
-      if (message) {
-        return {
-          ...oldState,
-          keyedMessages: {
-            ...oldState.keyedMessages,
-            [id]: {
-              ...message,
-              isPopular: status
-            },
+      if (!message) return oldState;
+
+      return {
+        ...oldState,
+        keyedMessages: {
+          ...oldState.keyedMessages,
+          [id]: {
+            ...message,
+            isPopular: status,
           },
-        };
-      }
+        },
+      };
     });
   }
 
@@ -192,8 +169,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
           (e) => e.content === link.data.target && e.author === link.author
         );
 
-        console.log({ linkFound, link, message });
-
         if (linkFound) return oldState;
 
         return {
@@ -206,7 +181,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
                 ...message.reactions,
                 {
                   author: link.author,
-                  content: link.data.target.replace('emoji://', ''),
+                  content: link.data.target.replace("emoji://", ""),
                   timestamp: link.timestamp,
                 },
               ],
@@ -230,7 +205,8 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       function filterReactions(reaction, link) {
         const isSameAuthor = reaction.author === link.author;
         const isSameAuthorAndContent =
-          isSameAuthor && reaction.content === link.data.target.replace('emoji://', '');
+          isSameAuthor &&
+          reaction.content === link.data.target.replace("emoji://", "");
         return isSameAuthorAndContent ? false : true;
       }
 
@@ -249,25 +225,20 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     });
   }
 
-  function addHiddenToMessageToState(oldState, messageId, isNeighbourhoodCardHidden) {
+  function addHiddenToMessageToState(
+    oldState,
+    messageId,
+    isNeighbourhoodCardHidden
+  ) {
     const newState = {
       ...oldState,
       hasNewMessage: false,
       keyedMessages: {
         ...oldState.keyedMessages,
-        [messageId]: { ...oldState.keyedMessages[messageId], isNeighbourhoodCardHidden },
-      },
-    };
-    return newState;
-  }
-
-  function addReplyToState(oldState, messageId, replyUrl) {
-    const newState = {
-      ...oldState,
-      hasNewMessage: false,
-      keyedMessages: {
-        ...oldState.keyedMessages,
-        [messageId]: { ...oldState.keyedMessages[messageId], replyUrl },
+        [messageId]: {
+          ...oldState.keyedMessages[messageId],
+          isNeighbourhoodCardHidden,
+        },
       },
     };
     return newState;
@@ -275,21 +246,25 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
   async function handleLinkAdded(link) {
     const client = await getAd4mClient();
-    
-    console.log("Got message link", link);
 
     const agent = await getMe();
 
     const isMessageFromSelf = link.author === agent.did;
-    if (!isMessageFromSelf) {
+
+    const hasFocus = document.hasFocus();
+
+    if (!isMessageFromSelf || !hasFocus) {
       if (linkIs.message(link)) {
-        const isSameChannel = await client.perspective.queryProlog(perspectiveUuid, `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.target}").`);
+        const isSameChannel = await client.perspective.queryProlog(
+          perspectiveUuid,
+          `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.target}").`
+        );
         if (isSameChannel) {
           const message = getMessage(link);
-  
+
           if (message) {
             setState((oldState) => addMessage(oldState, message));
-  
+
             setState((oldState) => ({
               ...oldState,
               isMessageFromSelf: false,
@@ -303,13 +278,16 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       }
 
       if (linkIs.reply(link)) {
-        const isSameChannel = await client.perspective.queryProlog(perspectiveUuid, `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.source}").`);
-  
+        const isSameChannel = await client.perspective.queryProlog(
+          perspectiveUuid,
+          `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.source}").`
+        );
+
         if (isSameChannel) {
           const message = getMessage(link);
-  
+
           setState((oldState) => addMessage(oldState, message));
-    
+
           setState((oldState) => ({
             ...oldState,
             isMessageFromSelf: false,
@@ -319,19 +297,19 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
       if (linkIs.hideNeighbourhoodCard(link)) {
         const id = link.data.source;
-  
-        setState((oldState) =>
-          addHiddenToMessageToState(oldState, id, true)
-        );
+
+        setState((oldState) => addHiddenToMessageToState(oldState, id, true));
       }
     }
     if (linkIs.socialDNA(link)) {
-      console.log("Got new Social DNA, reloading the messages", link);
       fetchMessages();
     }
     if (linkIs.reaction(link)) {
       //TODO; this could read if the message is already popular and if so skip this check
-      const isPopularPost = await client.perspective.queryProlog(perspectiveUuid, `isPopular("${link.data.source}").`);
+      const isPopularPost = await client.perspective.queryProlog(
+        perspectiveUuid,
+        `isPopular("${link.data.source}").`
+      );
 
       if (isPopularPost) {
         updateMessagePopularStatus(link, true);
@@ -345,50 +323,41 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     //TODO: link.proof.valid === false when we recive
     // the remove link somehow. Ad4m bug?
     if (link.data.predicate === REACTION) {
-      removeReactionFromState(link);
-
-      const isPopularPost = await client.perspective.queryProlog(perspectiveUuid, `isPopular("${link.data.source}").`);
+      const isPopularPost = await client.perspective.queryProlog(
+        perspectiveUuid,
+        `isPopular("${link.data.source}").`
+      );
 
       if (!isPopularPost) {
         updateMessagePopularStatus(link, false);
       }
+      removeReactionFromState(link);
     }
   }
 
   async function fetchMessages(from?: Date) {
-    console.log(
-      "Fetch messages with from: ",
-      from
-    );
     setState((oldState) => ({
       ...oldState,
       isFetchingMessages: true,
     }));
 
-    const oldMessages = {
-      ...state.keyedMessages,
-    };
-
     const { keyedMessages: newMessages, expressionLinkLength } =
       await getMessages({
         perspectiveUuid,
         channelId,
-        from: from
+        from: from,
       });
 
     setState((oldState) => ({
       ...oldState,
+      showLoadMore: expressionLinkLength === MAX_MESSAGES,
+      isFetchingMessages: false,
       keyedMessages: {
         ...oldState.keyedMessages,
         ...newMessages,
       },
     }));
 
-    setState((oldState) => ({
-      ...oldState,
-      showLoadMore: expressionLinkLength === MAX_MESSAGES,
-      isFetchingMessages: false,
-    }));
     return expressionLinkLength;
   }
 
@@ -425,8 +394,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   }
 
   async function addReaction(messageUrl: string, reaction: string) {
-    console.log("addReaction");
-
     const link = await createMessageReaction({
       perspectiveUuid,
       messageUrl,
@@ -444,26 +411,20 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   }
 
   async function removeReaction(linkExpression: LinkExpression) {
-    console.log("removeReaction", linkExpression);
     await deleteMessageReaction({
       perspectiveUuid,
       linkExpression,
     });
 
-    removeReactionFromState(linkExpression)
+    removeReactionFromState(linkExpression);
   }
 
   async function loadMore() {
     const oldestMessage = messages[0];
-    console.log("Loading more messages with oldest timestamp", oldestMessage);
-    return await fetchMessages(oldestMessage ? new Date(oldestMessage.timestamp) : new Date());
-  }
 
-  function saveScrollPos(pos?: number) {
-    setState((oldState) => ({
-      ...oldState,
-      scrollPosition: pos,
-    }));
+    return await fetchMessages(
+      oldestMessage ? new Date(oldestMessage.timestamp) : new Date()
+    );
   }
 
   function setHasNewMessage(value: boolean) {
@@ -483,10 +444,9 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
           addReaction,
           sendReply,
           removeReaction,
-          saveScrollPos,
           setHasNewMessage,
           setIsMessageFromSelf,
-          hideMessageEmbeds
+          hideMessageEmbeds,
         },
       }}
     >

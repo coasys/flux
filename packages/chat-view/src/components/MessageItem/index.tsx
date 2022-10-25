@@ -126,7 +126,7 @@ export default function MessageItem({
 
       mention.addEventListener("click", () => {
         if (mention.innerText.startsWith("#")) {
-          const event = new CustomEvent("perspective-click", {
+          const event = new CustomEvent("channel-click", {
             detail: {
               channel: mention.dataset["id"],
             },
@@ -186,8 +186,6 @@ export default function MessageItem({
 
     setNeighbourhoodCards(links);
   };
-
-  console.log("rerender");
 
   const author = members[message.author] || {};
   const replyAuthor = members[message?.replies[0]?.author] || {};

@@ -11,6 +11,8 @@ const ReactHint = ReactHintFactory({ createElement: h, Component, createRef });
 import "react-hint/css/index.css";
 import styles from "./index.scss";
 import { Reaction } from "utils/types";
+import EditorContext from "../../context/EditorContext";
+
 import { REACTION } from "utils/constants/communityPredicates";
 
 export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
@@ -19,12 +21,14 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
   const [atBottom, setAtBottom] = useState(true);
   const [initialScroll, setinitialScroll] = useState(false);
   const scroller = useRef();
+  const {
+    state: { editor },
+  } = useContext(EditorContext);
 
   const {
     state: {
       messages,
       isFetchingMessages,
-      scrollPosition,
       hasNewMessage,
       isMessageFromSelf,
       showLoadMore,
@@ -33,27 +37,10 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
       loadMore,
       removeReaction,
       addReaction,
-      saveScrollPos,
       setHasNewMessage,
       setIsMessageFromSelf,
     },
   } = useContext(ChatContext);
-
-  useEffect(() => {
-    if (scroller.current && messages.length > 0 && !initialScroll) {
-      if (!scrollPosition) {
-        scroller.current.scrollToIndex({
-          index: messages.length,
-        });
-      } else {
-        scroller.current.scrollToIndex({
-          index: scrollPosition,
-        });
-      }
-
-      setinitialScroll(true);
-    }
-  }, [messages, initialScroll, scrollPosition]);
 
   useEffect(() => {
     if (atBottom && hasNewMessage) {
@@ -177,7 +164,6 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
 
   const rangeChanged = ({ startIndex, endIndex }) => {
     if (typeof startIndex === "number" && initialScroll) {
-      saveScrollPos(startIndex);
       setIsMessageFromSelf(false);
     }
   };
@@ -191,6 +177,8 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
       };
 
       let observer = new IntersectionObserver(() => {
+        editor?.chain().focus();
+
         if (atBottom) {
           const event = new CustomEvent("hide-notification-indicator", {
             detail: { uuid: channelId },
@@ -208,7 +196,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
         observer.disconnect();
       };
     }
-  }, [atBottom, mainRef, channelId, perspectiveUuid]);
+  }, [atBottom, mainRef, channelId, perspectiveUuid, editor]);
 
   return (
     <main class={styles.main}>
@@ -267,7 +255,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
         overscan={20}
         totalCount={messages.length}
         rangeChanged={rangeChanged}
-        initialTopMostItemIndex={scrollPosition || 0}
+        initialTopMostItemIndex={messages.length - 1}
         itemContent={(index) => {
           return (
             <MessageItem
@@ -282,14 +270,19 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
       />
       <ReactHint
         position="right"
-        className={styles.reactHint}
+        className={styles.reactHintWrapper}
         events={{ hover: true }}
-        onRenderContent={(target) => (
-          <>
-            <span>{target.dataset["timestamp"]}</span>
-            <div class={styles.arrow}></div>
-          </>
-        )}
+        onRenderContent={(target) => {
+          const content = target.dataset["timestamp"];
+          if (content) {
+            return (
+              <div className={styles.reactHint}>
+                <span>{content}</span>
+                <div class={styles.arrow}></div>
+              </div>
+            );
+          }
+        }}
       />
     </main>
   );

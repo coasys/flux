@@ -17,6 +17,7 @@ export default async function (id: string): Promise<void> {
     const url = link.M;
     return url.includes("://") ? url.split("://")[1] : url;
   });
+
   for (const did of dids) {
     dataStore.setNeighbourhoodMember({ member: did, perspectiveUuid: id });
   }

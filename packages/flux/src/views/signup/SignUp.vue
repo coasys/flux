@@ -181,13 +181,11 @@ export default defineComponent({
   async mounted() {
     isConnected().then((connected) => {
       if (connected) {
-        this.showSignup = true;
         this.autoFillUser();
       }
     });
     onAuthStateChanged((status: string) => {
       if (status === "connected_with_capabilities") {
-        this.showSignup = true;
         this.autoFillUser();
       }
     });
@@ -198,8 +196,27 @@ export default defineComponent({
     },
   },
   methods: {
+    async checkIfHasFluxProfile() {
+      const client = await getAd4mClient();
+
+      const { perspective } = await client.agent.me();
+
+      const fluxLinksFound = perspective?.links.find((e) =>
+        e.data.source.startsWith("flux://")
+      );
+
+      return fluxLinksFound ? true : false;
+    },
     async autoFillUser() {
       try {
+        const hasFluxProfile = await this.checkIfHasFluxProfile();
+        if (hasFluxProfile) {
+          this.$router.push("/home");
+          return;
+        }
+
+        this.showSignup = true;
+
         const client = await getAd4mClient();
 
         const agentLinks = (await client.agent.me()).perspective.links;

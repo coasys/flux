@@ -7,6 +7,7 @@ import { CommunityState, LocalCommunityState } from "../types";
 import { getGroupMetadata } from "./actions/fetchNeighbourhoodMetadata";
 import { useUserStore } from "../user";
 import getProfile from "utils/api/getProfile";
+import { LinkQuery } from "@perspect3vism/ad4m";
 
 export async function getMetaFromLinks(links: LinkExpression[]) {
   const client = await getAd4mClient();
@@ -96,9 +97,24 @@ export async function hydrateState() {
   }
 
   for (const perspective of perspectives) {
-    const channelLinks = await client.perspective.queryProlog(
+    // ! Replaced this with querylinks because this returns the string literal and not the link itself
+    // ! so deleting the link becomes difficult because the timestamp difference between the channel link & literal link
+    // const channelLinks = await client.perspective.queryProlog(
+    //   perspective.uuid,
+    //   `triple("${SELF}", "${CHANNEL}", C).`
+    // );
+    const hasCommunityAlready = dataStore.getCommunities.find(
+      (c) => c.state.perspectiveUuid === perspective.uuid
+    );
+
+    if (hasCommunityAlready) return;
+
+    const channelLinks = await client.perspective.queryLinks(
       perspective.uuid,
-      `triple("${SELF}", "${CHANNEL}", C).`
+      new LinkQuery({
+        source: SELF,
+        predicate: CHANNEL,
+      })
     );
 
     if (perspective.sharedUrl !== undefined && perspective.neighbourhood) {
@@ -108,15 +124,27 @@ export async function hydrateState() {
 
       const channels = [...Object.values(dataStore.channels)];
 
+      const filteredChannels = dataStore
+        .getChannelStates(perspective.uuid)
+        .filter(
+          (channel) =>
+            !channelLinks.map((e) => e.data.target).includes(channel.id)
+        );
+
+      for (const c of filteredChannels) {
+        dataStore.removeChannel({
+          channelId: c.id,
+        });
+      }
+
       if (channelLinks) {
         for (const link of channelLinks) {
           try {
-            const channel = link.C;
+            const channel = link.data.target;
             const channelData = await Literal.fromUrl(channel).get();
             const exist = channels.find(
-              (channel: any) =>
-                channel.id === channel &&
-                channel.sourcePerspective === perspective.uuid
+              (c: any) =>
+                c.id === channel && c.sourcePerspective === perspective.uuid
             );
             if (!exist) {
               dataStore.addChannel({
@@ -124,10 +152,10 @@ export async function hydrateState() {
                 channel: {
                   id: channel,
                   name: channelData.data,
-                  creatorDid: link.author,
+                  creatorDid: channelData.author,
                   sourcePerspective: perspective.uuid,
                   hasNewMessages: false,
-                  createdAt: channelData.timestamp || new Date().toISOString(),
+                  createdAt: link.timestamp,
                   notifications: {
                     mute: false,
                   },
@@ -135,7 +163,10 @@ export async function hydrateState() {
               });
             }
           } catch (e) {
-            console.error("Got error when trying to hydrate community channel state", e);
+            console.error(
+              "Got error when trying to hydrate community channel state",
+              e
+            );
           }
         }
       }

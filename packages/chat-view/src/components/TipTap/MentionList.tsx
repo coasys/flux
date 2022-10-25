@@ -1,18 +1,26 @@
 import { Component } from "preact";
+import getProfile from "utils/api/getProfile";
+import { Profile } from "utils/types";
+import Avatar from "../Avatar";
 
 type MentionListProps = {
-  items: any[],
-  command: (item: any) => {}
+  items: any[];
+  command: (item: any) => {};
 };
 type MentionListState = {
-  selectedIndex: number
+  selectedIndex: number;
+  profiles: Profile[];
 };
 
-export default class MentionList extends Component<MentionListProps, MentionListState> {
+export default class MentionList extends Component<
+  MentionListProps,
+  MentionListState
+> {
   constructor() {
     super();
     this.state = {
       selectedIndex: 0,
+      profiles: [],
     };
     this.selectItem = this.selectItem.bind(this);
   }
@@ -28,7 +36,7 @@ export default class MentionList extends Component<MentionListProps, MentionList
       return true;
     }
 
-    if (event.key === "Enter" || event.key === 'Tab') {
+    if (event.key === "Enter" || event.key === "Tab") {
       this.enterHandler();
       return true;
     }
@@ -62,26 +70,47 @@ export default class MentionList extends Component<MentionListProps, MentionList
     }
   }
 
+  async getProfiles() {
+    console.log("get profiles");
+    const profiles = await Promise.all(
+      this.props.items.map((item) => getProfile(item.id))
+    );
+    this.setState({ profiles });
+  }
+
+  componentDidMount(): void {
+    this.getProfiles();
+  }
+
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.items.length !== this.props.items.length) {
+      this.getProfiles();
       this.setState({ selectedIndex: 0 });
     }
   }
 
   render() {
     const { items } = this.props;
-    const { selectedIndex } = this.state;
+    const { selectedIndex, profiles } = this.state;
 
     return (
       <div>
         <j-menu>
-          {items.map((item, index) => (
+          {profiles.map((profile, index) => (
             <j-menu-item
               active={index === selectedIndex}
               key={index}
               onClick={() => this.selectItem(index)}
+              onMouseOver={() => this.setState({ selectedIndex: index}) }
             >
-              {item.label}
+              <j-flex gap="300" a="center">
+                <Avatar
+                  size="xs"
+                  url={profile.thumbnailPicture}
+                  did={profile.did}
+                ></Avatar>
+                <j-text nomargin> {profile.username}</j-text>
+              </j-flex>
             </j-menu-item>
           ))}
         </j-menu>
