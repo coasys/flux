@@ -42,22 +42,22 @@
         </div>
 
         <div class="profile__content">
-          <div v-if="!sameAgent">
+          <j-box my="500" v-if="!sameAgent">
             <j-text>Links ({{ weblinks.length }})</j-text>
-            <div class="grid">
-              <ProfileCard
-                v-for="link in weblinks"
-                :key="link.id"
-                :title="link.name"
+            <div class="profile__links">
+              <WebLinkCard
+                v-for="(link, i) in weblinks"
+                :key="i"
+                :id="link.id"
+                :url="link.url"
+                :title="link.title"
                 :description="link.description"
                 :image="link.image"
                 :sameAgent="sameAgent"
-                @click="() => onLinkClick(link)"
-                @delete="() => deleteLinks(link.id)"
                 @edit="() => setEditLinkModal(true, link)"
               />
             </div>
-          </div>
+          </j-box>
 
           <j-box my="500" v-if="sameAgent">
             <j-tabs
@@ -72,55 +72,50 @@
               </j-tab-item>
             </j-tabs>
 
-            <div class="grid" v-show="currentTab === 'communities'">
-              <router-link
-                class="grid-item"
-                :to="{
-                  name: 'community',
-                  params: { communityId: community.state.perspectiveUuid },
-                }"
-                v-for="(community, key) in communities"
-                :key="key"
-              >
-                <Avatar
-                  size="xl"
-                  style="--j-avatar-bg: var(--j-color-ui-500)"
-                  :initials="
-                    community.neighbourhood.name?.charAt(0).toUpperCase()
-                  "
+            <div v-show="currentTab === 'communities'">
+              <j-box py="500" align="right">
+                <j-button
+                  variant="subtle"
+                  @click="() => setShowCreateCommunity(true)"
+                  v-if="sameAgent"
+                >
+                  <j-icon slot="start" name="plus" size="sm"></j-icon>
+                  Add Community
+                </j-button>
+              </j-box>
+              <div class="profile__links">
+                <CommunityCard
+                  v-for="(community, key) in communities"
+                  :key="key"
+                  :name="community.neighbourhood.name"
+                  :description="community.neighbourhood.description"
                   :url="community.neighbourhood.image"
-                ></Avatar>
-                <j-text color="black" size="500" weight="bold" nomargin>
-                  {{ community.neighbourhood.name }}
-                </j-text>
-                <j-text nomargin size="400" color="ui-300">{{
-                  community.neighbourhood.description
-                }}</j-text>
-              </router-link>
-              <div
-                class="grid-item"
-                @click="() => setShowCreateCommunity(true)"
-                v-if="sameAgent"
-              >
-                <j-icon name="plus" size="xl"></j-icon>
-                <j-text>Add Community</j-text>
+                  :uuid="community.neighbourhood.perspective.uuid"
+                ></CommunityCard>
               </div>
             </div>
-            <div class="grid" v-show="currentTab === 'weblinks'">
-              <ProfileCard
-                v-for="link in weblinks"
-                :key="link.id"
-                :title="link.name"
-                :description="link.description"
-                :image="link.image"
-                :sameAgent="sameAgent"
-                @click="() => onLinkClick(link)"
-                @delete="() => deleteLinks(link.id)"
-                @edit="() => setEditLinkModal(true, link)"
-              />
-              <div class="grid-item" @click="() => (showAddlinkModal = true)">
-                <j-icon name="plus" size="xl"></j-icon>
-                <j-text>Add Link</j-text>
+            <div v-show="currentTab === 'weblinks'">
+              <j-box py="500" align="right">
+                <j-button
+                  variant="subtle"
+                  @click="() => (showAddlinkModal = true)"
+                >
+                  <j-icon slot="start" name="plus" size="sm"></j-icon>
+                  Add Link
+                </j-button>
+              </j-box>
+              <div class="profile__links">
+                <WebLinkCard
+                  v-for="(link, i) in weblinks"
+                  :key="i"
+                  :id="link.id"
+                  :url="link.url"
+                  :title="link.title"
+                  :description="link.description"
+                  :image="link.image"
+                  :sameAgent="sameAgent"
+                  @edit="() => setEditLinkModal(true, link)"
+                />
               </div>
             </div>
           </j-box>
@@ -134,27 +129,16 @@
   </div>
   <j-modal
     v-if="showAddlinkModal"
-    size="lg"
+    size="sm"
     :open="showAddlinkModal"
     @toggle="(e) => setAddLinkModal(e.target.open)"
   >
-    <ProfileAddLink
-      @submit="() => setAddLinkModal(false)"
+    <WebLinkAdd
       @cancel="() => setAddLinkModal(false)"
-    ></ProfileAddLink>
+      @submit="() => setAddLinkModal(false)"
+    />
   </j-modal>
-  <j-modal
-    v-if="showEditlinkModal"
-    size="lg"
-    :open="showEditlinkModal"
-    @toggle="(e) => setEditLinkModal(e.target.open, editArea)"
-  >
-    <ProfileEditLink
-      @submit="() => setEditLinkModal(false, editArea)"
-      @cancel="() => setEditLinkModal(false, editArea)"
-      :area="editArea"
-    ></ProfileEditLink>
-  </j-modal>
+
   <j-modal
     v-if="showJoinCommunityModal"
     size="lg"
@@ -185,35 +169,35 @@
 <script lang="ts">
 import { useDataStore } from "@/store/data";
 import { ModalsState, ProfileWithDID } from "@/store/types";
-import { Literal, PerspectiveInput } from "@perspect3vism/ad4m";
+import { Literal } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
-import ProfileCard from "./ProfileCards.vue";
-import ProfileAddLink from "./ProfileAddLink.vue";
-import ProfileEditLink from "./ProfileEditLink.vue";
+import WebLinkCard from "./WebLinkCard.vue";
+import CommunityCard from "./CommunityCard.vue";
 import ProfileJoinLink from "./ProfileJoinLink.vue";
 import EditProfile from "@/containers/EditProfile.vue";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { mapActions } from "pinia";
-import getAgentLinks from "utils/api/getAgentLinks";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import Avatar from "@/components/avatar/Avatar.vue";
 import {
-  AREA_COMMUNITY,
-  AREA_SIMPLE_AREA,
   AREA_WEBLINK,
-  HAS_AREA,
+  OG_DESCRIPTION,
+  OG_IMAGE,
+  OG_TITLE,
 } from "utils/constants/profile";
 import getProfile, { getImage } from "utils/api/getProfile";
+import { mapLiteralLinks } from "utils/helpers/linkHelpers";
+import WebLinkAdd from "./WebLinkAdd.vue";
 
 export default defineComponent({
   name: "ProfileView",
   components: {
-    ProfileCard,
-    ProfileAddLink,
-    ProfileEditLink,
+    CommunityCard,
+    WebLinkCard,
     ProfileJoinLink,
     EditProfile,
+    WebLinkAdd,
     Avatar,
   },
   setup() {
@@ -239,11 +223,6 @@ export default defineComponent({
       editArea: null as any,
     };
   },
-
-  async created() {
-    this.getProfile();
-    this.getAgentAreas();
-  },
   beforeCreate() {
     this.appStore.changeCurrentTheme("global");
   },
@@ -263,78 +242,34 @@ export default defineComponent({
     },
     async getAgentAreas() {
       const client = await getAd4mClient();
-      const did = this.$route.params.did as string;
 
-      const links = await getAgentLinks(did || (await client.agent.me()).did);
-      const areaLinks = links.filter(
-        (link) =>
-          link.data.source.startsWith("area://") &&
-          link.data.predicate === HAS_AREA
+      const { perspective } = await client.agent.byDID(this.did);
+
+      if (!perspective) return;
+
+      const webLinkAreas = perspective.links.filter(
+        (l) => l.data.predicate === AREA_WEBLINK
       );
 
-      const weblinkMap = areaLinks.map((area: any) => {
-        const literal = Literal.fromUrl(area.data.target).get();
-        return literal.data;
-      });
-
-      this.weblinks = weblinkMap;
-    },
-    onLinkClick(link: any) {
-      const dataStore = useDataStore();
-
-      console.log("link click", link);
-
-      if (link.type === AREA_COMMUNITY) {
-        const community = dataStore.getCommunities.find(
-          (e) => e.neighbourhood.neighbourhoodUrl === link.link
+      const webLinks = webLinkAreas.map((parentLink) => {
+        const associatedLinks = perspective.links.filter(
+          (link) => link.data.source === parentLink.data.target
         );
 
-        if (community) {
-          this.$router.push({
-            name: "community",
-            params: { communityId: community?.neighbourhood.perspective.uuid },
-          });
-        } else {
-          this.showJoinCommunityModal = true;
-          this.joiningLink = link.has_post;
-        }
-      } else if (link.type === AREA_WEBLINK) {
-        window.open(link.link, "_blank");
-      } else if (link.type === AREA_SIMPLE_AREA) {
-        this.$router.push({
-          name: `profile-feed`,
-          params: { fid: link.id },
+        const ogData = mapLiteralLinks(associatedLinks, {
+          title: OG_TITLE,
+          description: OG_DESCRIPTION,
+          image: OG_IMAGE,
         });
-      }
-    },
-    async deleteLinks(areaName: string) {
-      const client = await getAd4mClient();
-      const userStore = useUserStore();
-      
-      const did = userStore.getUser?.agent.did;
-      const links = await getAgentLinks(did);
 
-      const newLinks = [];
+        return {
+          ...ogData,
+          url: Literal.fromUrl(parentLink.data.target).get().data,
+          id: parentLink.data.target,
+        };
+      });
 
-      for (const link of links) {
-        const newLink = JSON.parse(JSON.stringify(link));
-        newLink.__typename = undefined;
-        newLink.data.__typename = undefined;
-        newLink.proof.__typename = undefined;
-
-        if (link.data.source === areaName || link.data.target === areaName) {
-          console.log(link);
-          await client.perspective.removeLink(userPerspective!, newLink);
-        } else {
-          newLinks.push(newLink);
-        }
-      }
-
-      this.weblinks = this.weblinks.filter((e) => e.id !== areaName);
-
-      await client.agent.updatePublicPerspective({
-        links: newLinks,
-      } as PerspectiveInput);
+      this.weblinks = webLinks;
     },
     ...mapActions(useAppStore, [
       "setShowEditProfile",
@@ -360,10 +295,16 @@ export default defineComponent({
         this.getProfile();
       }
     },
+    did: {
+      handler: async function () {
+        this.getProfile();
+        this.getAgentAreas();
+      },
+      immediate: true,
+    },
     profile: {
       handler: async function (val) {
         if (val) {
-          console.log("profilee", val);
           this.profileBg = await getImage(val.profileBg);
         }
       },
@@ -395,7 +336,7 @@ export default defineComponent({
 <style lang="css" scoped>
 .profile {
   width: 100%;
-  max-width: 1300px;
+  max-width: 1200px;
   margin: auto;
   padding-left: var(--j-space-500);
   padding-right: var(--j-space-500);
@@ -420,12 +361,24 @@ export default defineComponent({
   overflow-y: auto;
   position: relative;
 }
+
+.profile__content {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.profile__links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--j-space-500);
+}
 .profile__bg {
   height: clamp(150px, 200px, 250px);
   width: 100%;
   background-color: var(--j-color-ui-100);
   background-repeat: no-repeat;
   background-size: cover;
+  background-position: center;
 }
 
 .profile__avatar {
@@ -438,20 +391,6 @@ export default defineComponent({
 
 .profile__info {
   padding: var(--j-space-500);
-}
-
-.grid-item {
-  width: 100%;
-  border-radius: var(--j-border-radius);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: var(--j-space-400);
-  text-align: center;
-  text-decoration: none;
-  padding: var(--j-space-700);
-  background-color: var(--j-color-ui-50);
 }
 
 .avatar {
@@ -486,33 +425,6 @@ export default defineComponent({
 
 .add:hover {
   background: var(--j-color-ui-50);
-}
-
-.grid {
-  padding-top: var(--j-space-500);
-  display: grid;
-  gap: var(--j-space-600);
-  grid-template-columns: 1fr;
-}
-
-@media (min-width: 600px) {
-  .grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (min-width: 800px) {
-  .grid {
-    display: grid;
-    gap: var(--j-space-400);
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-}
-
-@media (min-width: 1100px) {
-  .grid {
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-  }
 }
 
 .back {

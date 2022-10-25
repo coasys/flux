@@ -27,21 +27,21 @@ export async function getImage(expUrl: string): Promise<string> {
       setTimeout(() => {
         resolve("");
       }, 1000);
-  
+
       try {
         const image = await client.expression.get(expUrl);
-  
+
         if (image) {
           resolve(image.data.slice(1, -1));
         }
-  
+
         resolve("");
       } catch (e) {
         console.error(e);
         resolve("");
       }
     } else {
-      resolve("")
+      resolve("");
     }
   });
 }
@@ -61,8 +61,8 @@ export default async function getProfile(did: string): Promise<any | null> {
     did: "",
   };
 
-  if (typeof did === 'string') {
-    const cleanedDid = did.replace('did://', '');
+  if (typeof did === "string") {
+    const cleanedDid = did.replace("did://", "");
 
     profile.did = cleanedDid;
 
@@ -72,35 +72,37 @@ export default async function getProfile(did: string): Promise<any | null> {
 
     if (agentPerspective) {
       const links = agentPerspective!.perspective!.links;
-  
+
       const dexie = new DexieProfile(`flux://profile`, 1);
-    
+
       let cachedProfile = await dexie.get(cleanedDid);
-    
+
       if (cachedProfile) {
         return cachedProfile as Profile;
       }
-  
-      const mappedProfile = mapLiteralLinks(links.filter((e) => e.data.source === FLUX_PROFILE), {
-        username: HAS_USERNAME,
-        bio: HAS_BIO,
-        givenName: HAS_GIVEN_NAME,
-        email: HAS_EMAIL,
-        familyName: HAS_FAMILY_NAME,
-        profilePicture: HAS_PROFILE_IMAGE,
-        thumbnailPicture: HAS_THUMBNAIL_IMAGE,
-        profileBg: HAS_BG_IMAGE,
-      });
 
+      const mappedProfile = mapLiteralLinks(
+        links.filter((e) => e.data.source === FLUX_PROFILE),
+        {
+          username: HAS_USERNAME,
+          bio: HAS_BIO,
+          givenName: HAS_GIVEN_NAME,
+          email: HAS_EMAIL,
+          familyName: HAS_FAMILY_NAME,
+          profilePicture: HAS_PROFILE_IMAGE,
+          thumbnailPicture: HAS_THUMBNAIL_IMAGE,
+          profileBg: HAS_BG_IMAGE,
+        }
+      );
 
       profile = {
         ...mappedProfile,
-        did: cleanedDid
-      }
-  
+        did: cleanedDid,
+      };
+
       dexie.save(cleanedDid, profile as any);
     }
   }
-  
+
   return profile;
 }
