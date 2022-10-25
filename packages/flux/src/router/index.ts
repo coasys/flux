@@ -5,12 +5,10 @@ import CommunityView from "@/views/community/CommunityView.vue";
 import ChannelView from "@/views/channel/ChannelView.vue";
 import Settings from "@/containers/Settings.vue";
 import ProfileView from "@/views/profile/ProfileView.vue";
-import ProfileFeed from "@/views/profile/ProfileFeed.vue";
 import {
   getAd4mClient,
   isConnected,
 } from "@perspect3vism/ad4m-connect/dist/utils";
-import { useAppStore } from "@/store/app";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -28,11 +26,6 @@ const routes: Array<RouteRecordRaw> = [
         path: "home",
         name: "home",
         component: ProfileView,
-      },
-      {
-        path: "feed/:fid",
-        name: "profile-feed",
-        component: ProfileFeed,
       },
       {
         path: "communities/:communityId",

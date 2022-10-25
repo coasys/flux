@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet"
+      href="https://unpkg.com/highlight.js@11.2.0/styles/atom-one-dark-reasonable.css">
+    <link href="dist/main.css" rel="stylesheet" />
+    <link href="docs/styles.css" rel="stylesheet" />
+  </head>
+  <body>
+    <script type="importmap">
+      {
+        "imports": {
+          "hast-to-hyperscript": "https://ga.jspm.io/npm:hast-to-hyperscript@10.0.1/index.js",
+          "highlight.js": "https://ga.jspm.io/npm:highlight.js@11.2.0/es/index.js",
+          "htm/preact": "https://ga.jspm.io/npm:htm@3.1.0/preact/standalone.module.js",
+          "lowlight/lib/core.js": "https://ga.jspm.io/npm:lowlight@2.2.0/lib/core.js",
+          "highlight.js/lib/languages/xml.js": "https://ga.jspm.io/npm:highlight.js@11.2.0/es/languages/xml.js.js"
+        },
+        "scopes": {
+          "https://ga.jspm.io/": {
+            "fault": "https://ga.jspm.io/npm:fault@2.0.0/index.js",
+            "format": "https://ga.jspm.io/npm:format@0.2.2/format.js",
+            "highlight.js/lib/core": "https://ga.jspm.io/npm:highlight.js@11.2.0/es/core.js",
+            "comma-separated-tokens": "https://ga.jspm.io/npm:comma-separated-tokens@2.0.2/index.js",
+            "inline-style-parser": "https://ga.jspm.io/npm:inline-style-parser@0.1.1/index.js",
+            "property-information": "https://ga.jspm.io/npm:property-information@6.0.1/index.js",
+            "space-separated-tokens": "https://ga.jspm.io/npm:space-separated-tokens@2.0.1/index.js",
+            "style-to-object": "https://ga.jspm.io/npm:style-to-object@0.3.0/index.js",
+            "unist-util-is": "https://ga.jspm.io/npm:unist-util-is@5.1.1/index.js",
+            "web-namespaces": "https://ga.jspm.io/npm:web-namespaces@2.0.0/index.js"
+          }
+        }
+      }
+    </script>
+    <script async src="https://ga.jspm.io/npm:es-module-shims@0.12.1/dist/es-module-shims.min.js"></script>
+    <script src="dist/main.js" type="module"></script>
+    <script type="module" src="docs/main.js"></script>
+</html>

@@ -1,59 +1,126 @@
+import { Link, LinkInput } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
-import { CARD_HIDDEN, CHANNEL, DIRECTLY_SUCCEEDED_BY, EDITED_TO, MEMBER, REACTION, REPLY_TO, ZOME } from "../constants/communityPredicates";
+
+import {
+  CARD_HIDDEN,
+  CHANNEL,
+  DIRECTLY_SUCCEEDED_BY,
+  MEMBER,
+  REACTION,
+  EDITED_TO,
+  REPLY_TO,
+  ZOME,
+} from "../constants/communityPredicates";
 
 export const findLink = {
   name: (link: LinkExpression) => link.data.predicate === "rdf://name",
   description: (link: LinkExpression) =>
     link.data.predicate === "rdf://description",
   language: (link: LinkExpression) => link.data.predicate === "language",
-  dateCreated: (link: LinkExpression) => link.data.predicate === "rdf://dateCreated"
+  dateCreated: (link: LinkExpression) =>
+    link.data.predicate === "rdf://dateCreated",
 };
 
 export const linkIs = {
   message: (link: LinkExpression) =>
     link.data.predicate === DIRECTLY_SUCCEEDED_BY,
-  reply: (link: LinkExpression) =>
-    link.data.predicate === REPLY_TO,
+  reply: (link: LinkExpression) => link.data.predicate === REPLY_TO,
   // TODO: SHould we check if the link is proof.valid?
-  reaction: (link: LinkExpression) =>
-    link.data.predicate === REACTION,
-  channel: (link: LinkExpression) => 
-    link.data.predicate === CHANNEL,
-  member: (link: LinkExpression) => 
-    link.data.predicate === MEMBER,
+  reaction: (link: LinkExpression) => link.data.predicate === REACTION,
+  channel: (link: LinkExpression) => link.data.predicate === CHANNEL,
+  member: (link: LinkExpression) => link.data.predicate === MEMBER,
   hideNeighbourhoodCard: (link: LinkExpression) =>
     link.data.predicate === CARD_HIDDEN,
-  editedMessage: (link: LinkExpression) =>
-    link.data.predicate === EDITED_TO,
-  socialDNA: (link: LinkExpression) => link.data.predicate === ZOME
-    
+  editedMessage: (link: LinkExpression) => link.data.predicate === EDITED_TO,
+  socialDNA: (link: LinkExpression) => link.data.predicate === ZOME,
 
   // TODO: SHould we check if the link is proof.valid?
 };
 
-type MapKey = string;
+type Target = string;
 type Predicate = string;
 
+type PredicateMap = {
+  [property: string]: Predicate;
+};
+
+type TargetMap = {
+  [predicate: string]: Target;
+};
+
 type Map = {
-  [x: MapKey]: Predicate;
+  [x: string]: string;
 };
 
 export function mapLiteralLinks(
   links: LinkExpression[] | undefined,
-  map: Map
+  map: PredicateMap
 ): Map {
   return Object.keys(map).reduce((acc, key) => {
     const predicate = map[key];
     const link = links?.find((link) => link.data.predicate === predicate);
-    
+
     if (link) {
       return {
         ...acc,
         [key]: link.data.target.startsWith("literal://")
-          ? Literal.fromUrl(link.data.target).get().data ? Literal.fromUrl(link.data.target).get().data : Literal.fromUrl(link.data.target).get()
+          ? Literal.fromUrl(link.data.target).get().data
           : link.data.target,
       };
     }
     return acc;
   }, {});
+}
+
+export async function createLiteralLinks(source: string, map: TargetMap) {
+  const client = await getAd4mClient();
+
+  const targets = Object.keys(map);
+
+  const promises = targets.map(async (predicate) => {
+    const message = map[predicate];
+    const exp = await client.expression.create(message, "literal");
+    return new Link({ source, predicate, target: exp });
+  });
+
+  return Promise.all(promises);
+}
+
+export async function createLiteralObject({
+  parent,
+  children,
+}: {
+  parent: LinkInput;
+  children: TargetMap;
+}) {
+  const client = await getAd4mClient();
+  const expUrl = await client.expression.create(parent.target, "literal");
+
+  const parentLink = new Link({
+    source: parent.source,
+    predicate: parent.predicate,
+    target: expUrl,
+  });
+
+  const childrenLinks = await createLiteralLinks(expUrl, children);
+
+  return [parentLink, ...childrenLinks];
+}
+
+export async function getLiteralObjectLinks(
+  targetExp: string,
+  links: LinkExpression[]
+) {
+  const parentLink = links.find((l) => l.data.target === targetExp);
+  console.log({ parentLink, targetExp, links });
+  if (parentLink) {
+    const associatedLinks = links.filter(
+      (link) => link.data.source === targetExp
+    );
+
+    return [parentLink, ...associatedLinks];
+  } else {
+    return [];
+  }
 }

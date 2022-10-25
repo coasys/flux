@@ -1,0 +1,419 @@
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css");
+
+:root {
+  /* COLORS */
+  --j-color-saturation: 60%;
+  --j-color-subtractor: 0%;
+  --j-color-multiplier: 1;
+
+  --j-color-lightness-0: calc(
+    (100% - var(--j-color-subtractor)) * var(--j-color-multiplier)
+  );
+  --j-color-lightness-50: calc(
+    (95% - var(--j-color-subtractor)) * var(--j-color-multiplier)
+  );
+  --j-color-lightness-100: calc(
+    (90% - var(--j-color-subtractor)) * var(--j-color-multiplier)
+  );
+  --j-color-lightness-200: calc(
+    (80% - var(--j-color-subtractor)) * var(--j-color-multiplier)
+  );
+  --j-color-lightness-300: calc(
+    (70% - var(--j-color-subtractor)) * var(--j-color-multiplier)
+  );
+  --j-color-lightness-400: calc(
+    (60% - var(--j-color-subtractor)) * var(--j-color-multiplier)
+  );
+  --j-color-lightness-500: calc(
+    (50% - var(--j-color-subtractor)) * var(--j-color-multiplier)
+  );
+  --j-color-lightness-600: calc(
+    (40% - var(--j-color-subtractor)) * var(--j-color-multiplier)
+  );
+  --j-color-lightness-700: calc(
+    (30% - var(--j-color-subtractor)) * var(--j-color-multiplier)
+  );
+  --j-color-lightness-800: calc(
+    (20% - var(--j-color-subtractor)) * var(--j-color-multiplier)
+  );
+  --j-color-lightness-900: calc(
+    (10% - var(--j-color-subtractor)) * var(--j-color-multiplier)
+  );
+  --j-color-lightness-1000: calc(
+    (0% - var(--j-color-subtractor)) * var(--j-color-multiplier)
+  );
+
+  --j-color-primary-hue: 610;
+  --j-color-primary-50: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-50)
+  );
+  --j-color-primary-100: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-100)
+  );
+  --j-color-primary-200: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-200)
+  );
+  --j-color-primary-300: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-300)
+  );
+  --j-color-primary-400: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-400)
+  );
+  --j-color-primary-500: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-500)
+  );
+  --j-color-primary-600: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-600)
+  );
+  --j-color-primary-700: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-700)
+  );
+  --j-color-primary-800: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-800)
+  );
+  --j-color-primary-900: hsl(
+    var(--j-color-primary-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-900)
+  );
+
+  --j-color-success-hue: 130;
+  --j-color-success-50: hsl(
+    var(--j-color-success-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-50)
+  );
+  --j-color-success-100: hsl(
+    var(--j-color-success-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-100)
+  );
+  --j-color-success-200: hsl(
+    var(--j-color-success-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-200)
+  );
+  --j-color-success-300: hsl(
+    var(--j-color-success-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-300)
+  );
+  --j-color-success-400: hsl(
+    var(--j-color-success-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-400)
+  );
+  --j-color-success-500: hsl(
+    var(--j-color-success-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-500)
+  );
+  --j-color-success-600: hsl(
+    var(--j-color-success-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-600)
+  );
+  --j-color-success-700: hsl(
+    var(--j-color-success-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-700)
+  );
+  --j-color-success-800: hsl(
+    var(--j-color-success-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-800)
+  );
+  --j-color-success-900: hsl(
+    var(--j-color-success-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-900)
+  );
+
+  --j-color-warning-hue: 45;
+  --j-color-warning-50: hsl(
+    var(--j-color-warning-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-50)
+  );
+  --j-color-warning-100: hsl(
+    var(--j-color-warning-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-100)
+  );
+  --j-color-warning-200: hsl(
+    var(--j-color-warning-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-200)
+  );
+  --j-color-warning-300: hsl(
+    var(--j-color-warning-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-300)
+  );
+  --j-color-warning-400: hsl(
+    var(--j-color-warning-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-400)
+  );
+  --j-color-warning-500: hsl(
+    var(--j-color-warning-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-500)
+  );
+  --j-color-warning-600: hsl(
+    var(--j-color-warning-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-600)
+  );
+  --j-color-warning-700: hsl(
+    var(--j-color-warning-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-700)
+  );
+  --j-color-warning-800: hsl(
+    var(--j-color-warning-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-800)
+  );
+  --j-color-warning-900: hsl(
+    var(--j-color-warning-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-900)
+  );
+
+  --j-color-danger-hue: 350;
+  --j-color-danger-50: hsl(
+    var(--j-color-danger-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-50)
+  );
+  --j-color-danger-100: hsl(
+    var(--j-color-danger-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-100)
+  );
+  --j-color-danger-200: hsl(
+    var(--j-color-danger-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-200)
+  );
+  --j-color-danger-300: hsl(
+    var(--j-color-danger-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-300)
+  );
+  --j-color-danger-400: hsl(
+    var(--j-color-danger-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-400)
+  );
+  --j-color-danger-500: hsl(
+    var(--j-color-danger-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-500)
+  );
+  --j-color-danger-600: hsl(
+    var(--j-color-danger-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-600)
+  );
+  --j-color-danger-700: hsl(
+    var(--j-color-danger-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-700)
+  );
+  --j-color-danger-800: hsl(
+    var(--j-color-danger-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-800)
+  );
+  --j-color-danger-900: hsl(
+    var(--j-color-danger-hue),
+    var(--j-color-saturation),
+    var(--j-color-lightness-900)
+  );
+
+  --j-color-ui-hue: var(--j-color-primary-hue);
+  --j-color-ui-50: hsl(var(--j-color-ui-hue), 10%, var(--j-color-lightness-50));
+  --j-color-ui-100: hsl(
+    var(--j-color-ui-hue),
+    10%,
+    var(--j-color-lightness-100)
+  );
+  --j-color-ui-200: hsl(
+    var(--j-color-ui-hue),
+    10%,
+    var(--j-color-lightness-200)
+  );
+  --j-color-ui-300: hsl(
+    var(--j-color-ui-hue),
+    10%,
+    var(--j-color-lightness-300)
+  );
+  --j-color-ui-400: hsl(
+    var(--j-color-ui-hue),
+    10%,
+    var(--j-color-lightness-400)
+  );
+  --j-color-ui-500: hsl(
+    var(--j-color-ui-hue),
+    10%,
+    var(--j-color-lightness-500)
+  );
+  --j-color-ui-600: hsl(
+    var(--j-color-ui-hue),
+    10%,
+    var(--j-color-lightness-600)
+  );
+  --j-color-ui-700: hsl(
+    var(--j-color-ui-hue),
+    10%,
+    var(--j-color-lightness-700)
+  );
+  --j-color-ui-800: hsl(
+    var(--j-color-ui-hue),
+    10%,
+    var(--j-color-lightness-800)
+  );
+  --j-color-ui-900: hsl(
+    var(--j-color-ui-hue),
+    10%,
+    var(--j-color-lightness-900)
+  );
+
+  --j-color-white: hsl(var(--j-color-ui-hue), 10%, var(--j-color-lightness-0));
+  --j-color-black: hsl(
+    var(--j-color-ui-hue),
+    10%,
+    var(--j-color-lightness-1000)
+  );
+
+  /* FOCUS COLORS */
+  --j-color-focus: var(--j-color-primary-500);
+
+  --j-focus-outline: 0px 0px 0px 4px var(--j-color-focus);
+
+  /* FONT FAMILY */
+  --j-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol";
+
+  --j-font-base-size: 16px;
+
+  /* FONT SIZES */
+  --j-font-size-100: 0.56rem;
+  --j-font-size-200: 0.63rem;
+  --j-font-size-300: 0.75rem;
+  --j-font-size-400: 0.88rem;
+  --j-font-size-500: 1rem;
+  --j-font-size-600: 1.25rem;
+  --j-font-size-700: 1.5rem;
+  --j-font-size-800: 2rem;
+  --j-font-size-900: 2.63rem;
+  --j-font-size-1000: 3.63rem;
+
+  /* SPACING */
+  --j-space-100: 0.25rem;
+  --j-space-200: 0.38rem;
+  --j-space-300: 0.5rem;
+  --j-space-400: 1rem;
+  --j-space-500: 1.5rem;
+  --j-space-600: 2rem;
+  --j-space-700: 2.38rem;
+  --j-space-800: 2.75rem;
+  --j-space-900: 3.25rem;
+  --j-space-1000: 4rem;
+
+  /* BORDERS  */
+  --j-border-width: 1px;
+  --j-border-radius: 8px;
+  --j-border-color: var(--j-color-ui-100);
+  --j-border-color-strong: var(--j-color-ui-200);
+
+  /* SIZES */
+  --j-size-xxs: 1.25rem;
+  --j-size-xs: 1.75rem;
+  --j-size-sm: 2.25rem;
+  --j-size-md: 2.625rem;
+  --j-size-lg: 3.25rem;
+  --j-size-xl: 3.8rem;
+  --j-size-xxl: 4.2rem;
+
+  /* SCROLLBAR */
+  --j-scrollbar-width: 6px;
+  --j-scrollbar-background-image: none;
+  --j-scrollbar-background: transparent;
+  --j-scrollbar-corner-background: #dfdfdf;
+  --j-scrollbar-thumb-box-shadow: none;
+  --j-scrollbar-thumb-border-radius: var(--j-border-radius);
+  --j-scrollbar-thumb-background: rgba(180, 180, 180, 0.5);
+
+  /* DEPTH */
+  --j-depth-none: none;
+  --j-depth-100: 0px 1px 1px 0px rgba(9, 30, 66, 0.06),
+    0px 2px 4px 0px rgba(9, 30, 66, 0.15);
+  --j-depth-200: 0px 2px 2px 0px rgba(9, 30, 66, 0.06),
+    0px 4px 8px -2px rgba(9, 30, 66, 0.25);
+  --j-depth-300: 0px 2px 2px 0px rgba(9, 30, 66, 0.06),
+    0px 8px 16px -4px rgba(9, 30, 66, 0.25);
+  --j-depth-400: 0px 4px 4px 0px rgba(9, 30, 66, 0.06),
+    0px 12px 24px -6px rgba(9, 30, 66, 0.25);
+  --j-depth-500: 0px 6px 6px 0px rgba(9, 30, 66, 0.1),
+    0px 20px 32px -8px rgba(9, 30, 66, 0.25);
+
+  /*  ANIMATION */
+  --j-transition-100: 50ms;
+  --j-transition-200: 1500ms;
+  --j-transition-300: 250ms;
+  --j-transition-400: 500ms;
+  --j-transition-500: 1000ms;
+}
+
+html {
+  font-size: var(--j-font-base-size);
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  color: var(--j-color-ui-800);
+  font-family: var(--j-font-family);
+  background-color: var(--j-color-white);
+}
+
+::-webkit-scrollbar {
+  height: var(--j-scrollbar-width);
+  width: var(--j-scrollbar-width);
+}
+
+::-webkit-scrollbar-track {
+  background-image: var(--j-scrollbar-background-image);
+  background: var(--j-scrollbar-background, transparent);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--j-scrollbar-corner-background);
+}
+
+::-webkit-scrollbar-thumb {
+  box-shadow: var(--j-scrollbar-thumb-box-shadow);
+  border-radius: var(--j-scrollbar-thumb-border-radius);
+  background-color: var(--j-scrollbar-thumb-background);
+}
