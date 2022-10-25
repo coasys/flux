@@ -36,6 +36,14 @@ export const AREA_TYPE = "flux://area_type";
 
 export const HAS_AREA = "flux://has_aread";
 
+export const OG_LINK = "og://link";
+
+export const OG_DESCRIPTION = "og://description";
+
+export const OG_TITLE = "og://title";
+
+export const OG_IMAGE = "og://image";
+
 // AD4M Agent
 
 export const AD4M_SOURCE_PROFILE = "ad4m://profile";

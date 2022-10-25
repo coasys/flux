@@ -1,27 +1,27 @@
 <template>
-  <j-box v-if="profile" p="800">
-    <j-flex a="center" direction="column" gap="500">
+  <j-box class="profile" v-if="profile" p="800">
+    <j-box pb="500">
       <Avatar
         style="--j-avatar-size: 100px"
         :hash="did"
         :url="profile.thumbnailPicture"
       ></Avatar>
+    </j-box>
 
-      <j-text
-        v-if="profile.familyName || profile.givenName"
-        variant="heading-sm"
-        nomargin
-      >
-        {{ `${profile.givenName} ${profile.familyName}` }}
-      </j-text>
-      <j-text variant="body"> @{{ profile.username }}</j-text>
-      <j-text v-if="profile.bio" variant="subheading">
-        {{ profile.bio }}</j-text
-      >
-      <j-button variant="primary" @click="() => $emit('openCompleteProfile')">
-        View complete profile
-      </j-button>
-    </j-flex>
+    <j-text
+      v-if="profile.familyName || profile.givenName"
+      size="600"
+      color="black"
+      weight="800"
+      nomargin
+    >
+      {{ `${profile.givenName} ${profile.familyName}` }}
+    </j-text>
+    <j-text color="ui-500"> @{{ profile.username }}</j-text>
+    <j-text v-if="profile.bio" size="400"> {{ profile.bio }}</j-text>
+    <j-button variant="link" @click="() => $emit('openCompleteProfile')">
+      View full profile
+    </j-button>
   </j-box>
   <j-box p="800" v-else>
     <j-flex a="center" direction="column" gap="500">
@@ -63,4 +63,8 @@ export default defineComponent({
 });
 </script>
 
-<style></style>
+<style scoped>
+.profile {
+  text-align: center;
+}
+</style>

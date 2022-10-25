@@ -1601,7 +1601,7 @@
       ]
     },
     "src/components/tooltip/Tooltip.ts": {
-      "bytes": 4096,
+      "bytes": 4095,
       "imports": [
         {
           "path": "../../node_modules/lit/index.js",
@@ -2025,7 +2025,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 491798
+      "bytes": 491797
     },
     "dist/main.js": {
       "imports": [],
@@ -2312,7 +2312,7 @@
           "bytesInOutput": 4388
         },
         "src/components/tooltip/Tooltip.ts": {
-          "bytesInOutput": 2825
+          "bytesInOutput": 2824
         },
         "src/components/icon/Icon.ts": {
           "bytesInOutput": 1283
@@ -2354,7 +2354,7 @@
           "bytesInOutput": 0
         }
       },
-      "bytes": 111551
+      "bytes": 111550
     },
     "dist/main.css.map": {
       "imports": [],
