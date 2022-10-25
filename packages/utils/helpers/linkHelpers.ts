@@ -1,5 +1,5 @@
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
-import { CARD_HIDDEN, CHANNEL, DIRECTLY_SUCCEEDED_BY, MEMBER, REACTION, REPLY_TO, ZOME } from "../constants/communityPredicates";
+import { CARD_HIDDEN, CHANNEL, DIRECTLY_SUCCEEDED_BY, EDITED_TO, MEMBER, REACTION, REPLY_TO, ZOME } from "../constants/communityPredicates";
 
 export const findLink = {
   name: (link: LinkExpression) => link.data.predicate === "rdf://name",
@@ -23,6 +23,8 @@ export const linkIs = {
     link.data.predicate === MEMBER,
   hideNeighbourhoodCard: (link: LinkExpression) =>
     link.data.predicate === CARD_HIDDEN,
+  editedMessage: (link: LinkExpression) =>
+    link.data.predicate === EDITED_TO,
   socialDNA: (link: LinkExpression) => link.data.predicate === ZOME
     
 
