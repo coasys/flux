@@ -107,10 +107,10 @@ export default defineComponent({
 
         const parsedEmoji = this.emoji.codePointAt(0).toString(16);
         const newSDNA = Literal.from(`emojiCount(Message, Count):- 
-      aggregate_all(count, link(Message, "flux://has_reaction", "emoji://1f44d", _, _), Count).
+      aggregate_all(count, link(Message, "flux://has_reaction", "emoji://${parsedEmoji}", _, _), Count).
 
-      isPopular(Message) :- emojiCount(Message, Count), Count >= 3.
-      isNotPopular(Message) :- emojiCount(Message, Count), Count < 3.
+      isPopular(Message) :- emojiCount(Message, Count), Count >= ${this.emojiCount}.
+      isNotPopular(Message) :- emojiCount(Message, Count), Count < ${this.emojiCount}.
 
       flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages):-
       link(Channel, "temp://directly_succeeded_by", Message, Timestamp, Author),
