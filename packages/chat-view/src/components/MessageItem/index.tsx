@@ -348,6 +348,7 @@ export default function MessageItem({
             onReplyClick={onReplyClick}
             onOpenEmojiPicker={onOpenEmojiPicker}
             onEditClick={onEditClick}
+            showEditIcon={agentState.did === message.author}
           />
         </div>
       </div>
