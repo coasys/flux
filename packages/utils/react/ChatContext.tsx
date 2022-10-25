@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useRef } from "react";
 import { Messages, Message } from "../types";
-import { LinkExpression } from "@perspect3vism/ad4m";
+import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import getMessages from "../api/getMessages";
 import createMessage from "../api/createMessage";
 import subscribeToLinks from "../api/subscribeToLinks";
@@ -20,6 +20,7 @@ import {
 import hideEmbeds from "../api/hideEmbeds";
 import { MAX_MESSAGES } from "../constants/general";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import editCurrentMessage from "../api/editCurrentMessage";
 
 type State = {
   isFetchingMessages: boolean;
@@ -37,6 +38,7 @@ type ContextProps = {
     removeReaction: (linkExpression: LinkExpression) => void;
     addReaction: (messageUrl: string, reaction: string) => void;
     sendMessage: (message: string) => void;
+    editMessage: (message: string, editedMesage: string) => void;
     setHasNewMessage: (value: boolean) => void;
     setIsMessageFromSelf: (value: boolean) => void;
     hideMessageEmbeds: (messageUrl: string) => void;
@@ -57,6 +59,7 @@ const initialState: ContextProps = {
     removeReaction: () => null,
     addReaction: () => null,
     sendMessage: () => null,
+    editMessage: () => null,
     setHasNewMessage: () => null,
     setIsMessageFromSelf: () => null,
     hideMessageEmbeds: () => null,
@@ -136,6 +139,19 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     };
     return newState;
   }
+
+  function addEditMessage(oldState, oldMessage, message) {
+    const newState = {
+      ...oldState,
+      hasNewMessage: false,
+      keyedMessages: {
+        ...oldState.keyedMessages,
+        [oldMessage]: { ...oldState.keyedMessages[oldMessage], editMessages: [...oldState.keyedMessages[oldMessage].editMessages, message] },
+      },
+    };
+    return newState;
+  }
+
 
   function updateMessagePopularStatus(link, status) {
     const id = link.data.source;
@@ -276,6 +292,15 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       if (linkIs.reaction(link)) {
         addReactionToState(link);
       }
+      
+      if (linkIs.editedMessage(link)) {
+        const message = Literal.fromUrl(link.data.target).get();
+        setState((oldState) => addEditMessage(oldState, link.data.source, {
+          author: link.author,
+          content: message.data,
+          timestamp: link.timestamp
+        }));
+      }
 
       if (linkIs.reply(link)) {
         const isSameChannel = await client.perspective.queryProlog(
@@ -371,6 +396,20 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     setState((oldState) => addMessage(oldState, message));
   }
 
+  async function editMessage(message, editedMessage) {
+    const res = await editCurrentMessage({
+      perspectiveUuid,
+      lastMessage: message,
+      message: editedMessage,
+    });
+
+    setState((oldState) => addEditMessage(oldState, message, {
+      author: res.author,
+      content: res.content,
+      timestamp: res.timestamp
+    }));
+  }
+
   async function sendReply(message: string, replyUrl: string) {
     const link = await createReply({
       perspectiveUuid: perspectiveUuid,
@@ -447,6 +486,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
           setHasNewMessage,
           setIsMessageFromSelf,
           hideMessageEmbeds,
+          editMessage
         },
       }}
     >

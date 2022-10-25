@@ -10,6 +10,7 @@ import { format, formatRelative } from "date-fns/esm";
 import { REACTION } from "utils/constants/communityPredicates";
 import Skeleton from "../Skeleton";
 import { Avatar } from "./Avatar";
+import EditorContext from "../../context/EditorContext";
 
 type timeOptions = {
   dateStyle?: string;
@@ -46,9 +47,13 @@ export default function MessageItem({
   const [neighbourhoodCards, setNeighbourhoodCards] = useState<any[]>([]);
 
   const {
-    state: { currentReply },
-    methods: { setCurrentReply },
+    state: { currentReply, currentMessageEdit },
+    methods: { setCurrentReply, setCurrentEditMessage },
   } = useContext(UIContext);
+
+  const {
+    methods: { setInputValue },
+  } = useContext(EditorContext);
 
   const { state: agentState } = useContext(AgentContext);
 
@@ -64,6 +69,12 @@ export default function MessageItem({
 
   function onReplyClick() {
     setCurrentReply(message.id);
+  }
+
+  function onEditClick() {
+    setCurrentEditMessage(message.id);
+
+    setInputValue(message.editMessages[message.editMessages.length-1].content);
   }
 
   async function onEmojiClick(utf: string) {
@@ -180,7 +191,7 @@ export default function MessageItem({
     const links = await getNeighbourhoodLink({
       perspectiveUuid,
       messageUrl: message.id,
-      message: message.content,
+      message: message.editMessages[message.editMessages.length-1].content,
       isHidden: message.isNeighbourhoodCardHidden,
     });
 
@@ -286,8 +297,18 @@ export default function MessageItem({
           <div
             ref={messageRef}
             class={styles.messageItemContent}
-            dangerouslySetInnerHTML={{ __html: message.content }}
+            style={{display: 'inline-flex'}}
+            dangerouslySetInnerHTML={{ __html: message.editMessages[message.editMessages.length-1].content }}
           ></div>
+              { message.editMessages.length > 1 && <small 
+                data-rh
+                data-timestamp={format(
+                  new Date(message.editMessages[message.editMessages.length-1].timestamp),
+                  "EEEE, MMMM d, yyyy, hh:mm b"
+                )}
+                class={styles.timestamp}
+                style={{display: 'inline-flex'}}>&nbsp;(edited)</small> 
+              }
           {message.reactions.length > 0 && (
             <j-box pt="400">
               <MessageReactions
@@ -326,6 +347,8 @@ export default function MessageItem({
           <MessageToolbar
             onReplyClick={onReplyClick}
             onOpenEmojiPicker={onOpenEmojiPicker}
+            onEditClick={onEditClick}
+            showEditIcon={agentState.did === message.author}
           />
         </div>
       </div>

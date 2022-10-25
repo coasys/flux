@@ -1,12 +1,14 @@
 import { Link, LinkInput } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
+
 import {
   CARD_HIDDEN,
   CHANNEL,
   DIRECTLY_SUCCEEDED_BY,
   MEMBER,
   REACTION,
+  EDITED_TO,
   REPLY_TO,
   ZOME,
 } from "../constants/communityPredicates";
@@ -30,6 +32,7 @@ export const linkIs = {
   member: (link: LinkExpression) => link.data.predicate === MEMBER,
   hideNeighbourhoodCard: (link: LinkExpression) =>
     link.data.predicate === CARD_HIDDEN,
+  editedMessage: (link: LinkExpression) => link.data.predicate === EDITED_TO,
   socialDNA: (link: LinkExpression) => link.data.predicate === ZOME,
 
   // TODO: SHould we check if the link is proof.valid?

@@ -163,17 +163,18 @@ export default async ({
       isPopular(Message) :- emojiCount(Message, Count), Count >= 3.
       isNotPopular(Message) :- emojiCount(Message, Count), Count < 3.
 
-      flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden):-
+      flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages):-
       link(Channel, "temp://directly_succeeded_by", Message, Timestamp, Author),
+      findall((EditMessage, EditMessageTimestamp, EditMessageAuthor), link(Message, "temp://edited_to", EditMessage, EditMessageTimestamp, EditMessageAuthor), EditMessages),
       findall((Reaction, ReactionTimestamp, ReactionAuthor), link(Message, "flux://has_reaction", Reaction, ReactionTimestamp, ReactionAuthor), Reactions),
       findall((IsHidden, IsHiddenTimestamp, IsHiddenAuthor), link(Message, "flux://is_card_hidden", IsHidden, IsHiddenTimestamp, IsHiddenAuthor), AllCardHidden),
       findall((Reply, ReplyTimestamp, ReplyAuthor), link(Reply, "flux://has_reply", Message, ReplyTimestamp, ReplyAuthor), Replies).
       
-      flux_message_query_popular(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, true):- 
-      flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden), isPopular(Message).
+      flux_message_query_popular(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, true):- 
+      flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages), isPopular(Message).
       
-      flux_message_query_popular(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, false):- 
-      flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden), isNotPopular(Message).`);
+      flux_message_query_popular(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, false):- 
+      flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages), isNotPopular(Message).`);
 
     // await ad4mClient.perspective.addLink(perspectiveUuid, {source: "self", predicate: "ad4m://has_zome", target: sdnaLiteral.toUrl()});
     const addSocialDnaLink = await client.perspective.addLink(
