@@ -143,7 +143,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   function addEditMessage(oldState, oldMessage, message) {
     const newState = {
       ...oldState,
-      hasNewMessage: true,
+      hasNewMessage: false,
       keyedMessages: {
         ...oldState.keyedMessages,
         [oldMessage]: { ...oldState.keyedMessages[oldMessage], editMessages: [...oldState.keyedMessages[oldMessage].editMessages, message] },
