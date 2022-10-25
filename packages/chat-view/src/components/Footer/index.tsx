@@ -15,7 +15,7 @@ export default function Footer({ perspectiveUuid, channelId }) {
 
   const {
     state: { currentReply, currentMessageEdit },
-    methods: { setCurrentReply },
+    methods: { setCurrentReply, setCurrentEditMessage },
   } = useContext(UIContext);
 
   const currentReplyMessage = keyedMessages[currentReply];
@@ -30,7 +30,7 @@ export default function Footer({ perspectiveUuid, channelId }) {
             Editing: <span style={{display: 'inline-flex'}} dangerouslySetInnerHTML={{ __html: currentMessageEditMessage.editMessages[currentMessageEditMessage.editMessages.length-1].content }}></span>
           </j-text>
           <j-button
-            onClick={() => setCurrentReply("")}
+            onClick={() => setCurrentEditMessage("")}
             square
             circle
             size="xs"
