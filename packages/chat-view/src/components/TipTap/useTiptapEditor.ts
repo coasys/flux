@@ -39,12 +39,15 @@ export default ({
   onChange,
   perspectiveUuid,
   channelId,
-  currentMessageEdit
+  currentMessageEdit,
+  onMessageEdit
 }) => {
+  
   // This is needed because React ugh.
   const sendCB = useRef(onSend);
   const membersCB = useRef(members);
   const channelsCB = useRef(channels);
+  const onMessageEditCB = useRef(onMessageEdit);
   useEffect(() => {
     sendCB.current = onSend;
   }, [onSend]);
@@ -54,6 +57,9 @@ export default ({
   useEffect(() => {
     channelsCB.current = channels;
   }, [channels]);
+  useEffect(() => {
+    onMessageEditCB.current = onMessageEdit;
+  }, [onMessageEdit]);
 
   const editor = useEditor(
     {
@@ -108,6 +114,15 @@ export default ({
                 // Prevents us from getting a new paragraph if user pressed Enter
                 return false;
               },
+              ArrowUp: (props) => {
+                const value = props.editor.getText() as any;
+
+                if (value.length === 0) {
+                  onMessageEditCB.current()
+                }
+
+                return false;
+              }
             };
           },
         }),
@@ -203,7 +218,7 @@ export default ({
         onChange(value);
       },
     },
-    [membersCB, channelsCB, perspectiveUuid, channelId, currentMessageEdit]
+    [membersCB, channelsCB, perspectiveUuid, channelId, currentMessageEdit, onMessageEditCB]
   );
 
   return editor;

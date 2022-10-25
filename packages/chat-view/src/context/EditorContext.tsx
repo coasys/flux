@@ -1,6 +1,6 @@
-import { useContext, useEffect, useMemo, useState } from "preact/hooks";
+import { useCallback, useContext, useEffect, useMemo, useState } from "preact/hooks";
 import { createContext } from "preact";
-import { ChatContext, PerspectiveContext } from "utils/react";
+import { AgentContext, ChatContext, PerspectiveContext } from "utils/react";
 import UIContext from "./UIContext";
 import useTiptapEditor from "../components/TipTap/useTiptapEditor";
 import { Editor } from "@tiptap/core";
@@ -38,7 +38,7 @@ export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
   } = useContext(PerspectiveContext);
 
   const {
-    state: { keyedMessages },
+    state: { keyedMessages, messages },
     methods: { sendMessage, sendReply, editMessage},
   } = useContext(ChatContext);
 
@@ -46,6 +46,8 @@ export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
     state: { currentReply, currentMessageEdit },
     methods: { setCurrentReply, setCurrentEditMessage },
   } = useContext(UIContext);
+
+  const { state: agentState } = useContext(AgentContext);
 
   const currentReplyMessage = keyedMessages[currentReply];
 
@@ -100,6 +102,17 @@ export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
     });
   }, [channels]);
 
+
+  const onMessageEdit = useCallback(() => {
+    if (messages.length) {
+      const message = messages.findLast(message => message.author === agentState.did);
+      if (message) {
+        setCurrentEditMessage(message.id);
+        setInputValue(message.editMessages[message.editMessages.length-1].content);
+      }
+    }
+  }, [setCurrentEditMessage, messages])
+
   const editor = useTiptapEditor({ 
     value: state.value, 
     onChange: setInputValue, 
@@ -108,7 +121,8 @@ export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
     channels: mentionChannels,
     channelId,
     perspectiveUuid,
-    currentMessageEdit
+    currentMessageEdit,
+    onMessageEdit
   })
 
   useEffect(() => {
