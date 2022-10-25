@@ -1,7 +1,7 @@
 import { Literal } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { MAX_MESSAGES } from "../constants/general";
-import { Reaction } from "../types";
+import { Message, Reaction } from "../types";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -23,15 +23,16 @@ export default async function ({
       let fromTime = from.getTime();
       expressionLinks = await client.perspective.queryProlog(
         perspectiveUuid, 
-        `limit(${MAX_MESSAGES}, (order_by([desc(Timestamp)], flux_message_query_popular("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden, IsPopular)), Timestamp =< ${fromTime})).`
+        `limit(${MAX_MESSAGES}, (order_by([desc(Timestamp)], flux_message_query_popular("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp =< ${fromTime})).`
       );
     } else {
       expressionLinks = await client.perspective.queryProlog(
         perspectiveUuid,
-        `limit(${MAX_MESSAGES}, order_by([desc(Timestamp)], flux_message_query_popular("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden, IsPopular))).`
+        `limit(${MAX_MESSAGES}, order_by([desc(Timestamp)], flux_message_query_popular("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular))).`
       );
     }
-    let cleanedLinks = [];
+
+    let cleanedLinks: Message[] = [];
 
     //TODO; the below extracting of data from head & tail can likely happen in ad4m-executor, it currently gets returned like this since this is how the node.js swipl wrapper serializes results from swipl
     if (expressionLinks) {
@@ -78,6 +79,33 @@ export default async function ({
           }
         }
 
+        let editMessages = [{
+          content: Literal.fromUrl(message.MessageExpr).get().data,
+          timestamp: new Date(message.Timestamp),
+          author: message.Author,
+        }];
+
+        if (typeof message.EditMessages != "string" && !message.EditMessages.variable) {
+          if (message.EditMessages.head) {
+            const literal = Literal.fromUrl(message.EditMessages.head.args[0]).get();
+            editMessages.push({
+              content: literal.data,
+              timestamp: new Date(message.EditMessages.head.args[1].args[0]),
+              author: literal.author,
+            });
+          }
+          let tail = message.EditMessages.tail;
+          while (typeof tail != "string") {
+            const literal = Literal.fromUrl(tail.head.args[0]).get();
+            editMessages.push({
+              content: literal.data,
+              timestamp: new Date(tail.head.args[1].args[0]),
+              author: literal.author,
+            });
+            tail = tail.tail;
+          }
+        }
+
         let isNeighbourhoodCardHidden = typeof message.AllCardHidden != "string"  && !message.AllCardHidden.variable;
 
         cleanedLinks.push({
@@ -89,6 +117,7 @@ export default async function ({
           replies: replies,
           isNeighbourhoodCardHidden,
           isPopular: message.IsPopular,
+          editMessages: editMessages
         });
       }
     }

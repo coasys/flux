@@ -14,15 +14,32 @@ export default function Footer({ perspectiveUuid, channelId }) {
   } = useContext(ChatContext);
 
   const {
-    state: { currentReply },
+    state: { currentReply, currentMessageEdit },
     methods: { setCurrentReply },
   } = useContext(UIContext);
 
   const currentReplyMessage = keyedMessages[currentReply];
   const currentReplyProfile = members[currentReplyMessage?.author] || {};
+  const currentMessageEditMessage = keyedMessages[currentMessageEdit];
 
   return (
     <footer class={styles.footer}>
+      {currentMessageEditMessage && (
+        <div class={styles.currentReply}>
+          <j-text size="400" nomargin>
+            Editing: <span style={{display: 'inline-flex'}} dangerouslySetInnerHTML={{ __html: currentMessageEditMessage.editMessages[currentMessageEditMessage.editMessages.length-1].content }}></span>
+          </j-text>
+          <j-button
+            onClick={() => setCurrentReply("")}
+            square
+            circle
+            size="xs"
+            variant="subtle"
+          >
+            <j-icon size="sm" name="x"></j-icon>
+          </j-button>
+        </div>
+      )}
       {currentReply && (
         <div class={styles.currentReply}>
           <j-text size="400" nomargin>

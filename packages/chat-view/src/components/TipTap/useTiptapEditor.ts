@@ -24,6 +24,13 @@ import { NeighbourhoodLink } from "./NeighourhoodPlugin";
 import HardBreak from "@tiptap/extension-hard-break";
 import { useEffect, useRef } from "preact/hooks";
 
+// ! Fix for an error with posemirror in react strict-mode
+import { EditorView } from 'prosemirror-view'
+EditorView.prototype.updateState = function updateState(state) {
+  if (!this.docView) return // This prevents the matchesNode error on hot reloads
+  this.updateStateInner(state, this.state.plugins != state.plugins)
+}
+
 export default ({
   value,
   onSend,
@@ -32,6 +39,7 @@ export default ({
   onChange,
   perspectiveUuid,
   channelId,
+  currentMessageEdit
 }) => {
   // This is needed because React ugh.
   const sendCB = useRef(onSend);
@@ -191,10 +199,11 @@ export default ({
       ],
       onUpdate: (props) => {
         const value = props.editor.getJSON() as any;
+        console.log('wwwweeee', value)
         onChange(value);
       },
     },
-    [membersCB, channelsCB, perspectiveUuid, channelId]
+    [membersCB, channelsCB, perspectiveUuid, channelId, currentMessageEdit]
   );
 
   return editor;

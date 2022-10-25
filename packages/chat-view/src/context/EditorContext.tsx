@@ -14,6 +14,7 @@ type ContextProps = {
   state: State;
   methods: {
     onSend: (message: string) => void;
+    setInputValue: (value: string) => void;
   };
 };
 
@@ -24,6 +25,7 @@ const initialState: ContextProps = {
   },
   methods: {
     onSend: (message: string) => null,
+    setInputValue: (value: string) => null
   },
 };
 
@@ -37,33 +39,15 @@ export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
 
   const {
     state: { keyedMessages },
-    methods: { sendMessage, sendReply },
+    methods: { sendMessage, sendReply, editMessage},
   } = useContext(ChatContext);
 
   const {
-    state: { currentReply },
-    methods: { setCurrentReply },
+    state: { currentReply, currentMessageEdit },
+    methods: { setCurrentReply, setCurrentEditMessage },
   } = useContext(UIContext);
 
   const currentReplyMessage = keyedMessages[currentReply];
-
-  function handleSendMessage(value) {
-    const escapedMessage = value.replace(/( |<([^>]+)>)/gi, "");
-
-    if (escapedMessage) {
-      if (currentReplyMessage) {
-        sendReply(value, currentReplyMessage.id);
-      } else {
-        sendMessage(value);
-      }
-
-      setInputValue("");
-
-      setCurrentReply("");
-
-      editor.chain().focus();
-    }
-  }
 
   const setInputValue = (value: string) => {
     setState((oldState) => ({
@@ -71,6 +55,30 @@ export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
       value
     }))
   } 
+
+  async function handleSendMessage(value) {
+    const escapedMessage = value.replace(/( |<([^>]+)>)/gi, "");
+
+    if (escapedMessage) {
+      if (currentReplyMessage) {
+        await sendReply(value, currentReplyMessage.id);
+      } else if (currentMessageEdit) {
+        await editMessage(currentMessageEdit, value);
+      } else {
+        await sendMessage(value);
+      }
+
+      // editor.chain().clearContent(true);
+
+      setInputValue("");
+
+      setCurrentReply("");
+
+      setCurrentEditMessage("");
+
+      editor.chain().focus();
+    }
+  }
   
   const mentionMembers = useMemo(() => {
     return Object.values(members).map((user: any) => {
@@ -99,7 +107,8 @@ export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
     members: mentionMembers, 
     channels: mentionChannels,
     channelId,
-    perspectiveUuid
+    perspectiveUuid,
+    currentMessageEdit
   })
 
   useEffect(() => {
@@ -114,7 +123,8 @@ export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
       value={{
         state,
         methods: {
-          onSend: handleSendMessage
+          onSend: handleSendMessage,
+          setInputValue: setInputValue
         },
       }}
     >
