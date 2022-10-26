@@ -21,7 +21,7 @@
   </j-box>
   <j-box p="800" v-else>
     <j-flex a="center" direction="column" gap="500">
-      <j-skeleton variant="circle" width="xl" height="xl" />
+      <j-skeleton variant="circle" width="xxl" height="xxl" />
       <j-skeleton width="xxl" height="text" />
       <j-skeleton width="xxl" height="text" />
       <j-button
