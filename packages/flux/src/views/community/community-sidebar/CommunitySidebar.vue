@@ -11,7 +11,10 @@
       ></j-icon>
     </j-button>
     <div class="community-info">
-      <Skeleton v-if="notSynced"></Skeleton>
+      <j-skeleton
+        :style="{ '--j-skeleton-height': '1em', '--j-skeleton-width': '60px' }"
+        v-if="notSynced"
+      ></j-skeleton>
       {{ community.neighbourhood.name }}
     </div>
     <j-popover

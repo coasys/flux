@@ -24,11 +24,11 @@ export async function getImage(expUrl: string): Promise<string> {
     const client = await getAd4mClient();
 
     if (expUrl) {
-      setTimeout(() => {
-        resolve("");
-      }, 1000);
-
       try {
+        setTimeout(() => {
+          resolve("");
+        }, 1000);
+
         const image = await client.expression.get(expUrl);
 
         if (image) {
@@ -46,10 +46,10 @@ export async function getImage(expUrl: string): Promise<string> {
   });
 }
 
-export default async function getProfile(did: string): Promise<any | null> {
+export default async function getProfile(did: string): Promise<Profile> {
   const client = await getAd4mClient();
 
-  let profile: any = {
+  let profile: Profile = {
     username: "",
     bio: "",
     email: "",
@@ -79,7 +79,7 @@ export default async function getProfile(did: string): Promise<any | null> {
         return cachedProfile as Profile;
       }
 
-      const mappedProfile = mapLiteralLinks(
+      const mappedProfile: any = mapLiteralLinks(
         links.filter((e) => e.data.source === FLUX_PROFILE),
         {
           username: HAS_USERNAME,
@@ -98,7 +98,7 @@ export default async function getProfile(did: string): Promise<any | null> {
         did: cleanedDid,
       };
 
-      dexie.save(cleanedDid, profile as any);
+      dexie.save(cleanedDid, profile as Profile);
     }
   }
 

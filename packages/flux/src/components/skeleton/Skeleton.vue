@@ -2,7 +2,7 @@
   <div
     class="skeleton"
     :class="{ 'skeleton--circle': variant === 'circle' }"
-    :style="{ width, height }"
+    :style="{ width: computedWidth, height: computedHeight }"
   ></div>
 </template>
 
@@ -22,6 +22,24 @@ export default defineComponent({
     variant: {
       type: String as PropType<"circle" | "rectangle">,
       default: "rectangle",
+    },
+  },
+  computed: {
+    computedHeight() {
+      switch (this.height) {
+        case "xs" || "sm" || "md" || "lg" || "xl":
+          return `var(--j-size-${this.height})`;
+        default:
+          return this.height;
+      }
+    },
+    computedWidth() {
+      switch (this.width) {
+        case "xs" || "sm" || "md" || "lg" || "xl":
+          return `var(--j-size-${this.width})`;
+        default:
+          return this.width;
+      }
     },
   },
 });

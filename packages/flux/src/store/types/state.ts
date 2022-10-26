@@ -41,5 +41,5 @@ export interface ApplicationState {
   };
   notification: {
     globalNotification: boolean;
-  }
+  };
 }

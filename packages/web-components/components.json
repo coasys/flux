@@ -1304,6 +1304,52 @@
       ]
     },
     {
+      "name": "j-skeleton",
+      "path": "./src/components/skeleton/Skeleton.ts",
+      "attributes": [
+        {
+          "name": "variant",
+          "description": "Variant",
+          "type": "\"\"|\"circle\""
+        },
+        {
+          "name": "height",
+          "description": "Height",
+          "type": "\"\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\""
+        },
+        {
+          "name": "width",
+          "description": "Width",
+          "type": "\"\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "styles",
+          "type": "CSSResult[]",
+          "default": "[\"styles\",\"sharedStyles\"]"
+        },
+        {
+          "name": "variant",
+          "attribute": "variant",
+          "description": "Variant",
+          "type": "\"\"|\"circle\""
+        },
+        {
+          "name": "height",
+          "attribute": "height",
+          "description": "Height",
+          "type": "\"\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\""
+        },
+        {
+          "name": "width",
+          "attribute": "width",
+          "description": "Width",
+          "type": "\"\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\""
+        }
+      ]
+    },
+    {
       "name": "j-spinner",
       "path": "./src/components/spinner/Spinner.ts",
       "attributes": [

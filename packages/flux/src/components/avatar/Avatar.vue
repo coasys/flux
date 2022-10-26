@@ -1,5 +1,13 @@
 <template>
+  <j-skeleton
+    :slot="slot"
+    variant="circle"
+    :height="size"
+    :width="size"
+    v-if="loading"
+  ></j-skeleton>
   <j-avatar
+    v-else
     :slot="slot"
     :initials="initials"
     :hash="did"
@@ -12,31 +20,47 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { getImage } from "utils/api/getProfile";
+import Skeleton from "../skeleton/Skeleton.vue";
 export default defineComponent({
   props: {
     did: String,
     url: String,
     src: String,
-    size: String,
+    size: {
+      type: String,
+      default: "md",
+    },
     slot: String,
     online: Boolean,
     initials: String,
   },
   data() {
-    return { realSrc: "" };
+    return { realSrc: null as null | string, loading: false };
   },
   watch: {
     url: {
-      async handler(url) {
+      handler(url: string) {
         if (url) {
-          this.realSrc = await getImage(url);
+          this.getProfileImage(url);
         } else {
-          this.realSrc = "";
+          this.realSrc = null;
         }
       },
       immediate: true,
     },
   },
+  methods: {
+    async getProfileImage(url: string) {
+      try {
+        this.loading = true;
+        const src = await getImage(url);
+        this.realSrc = src || null;
+      } finally {
+        this.loading = false;
+      }
+    },
+  },
+  components: { Skeleton },
 });
 </script>
 

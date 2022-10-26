@@ -35,22 +35,23 @@
           </j-text>
         </j-flex>
       </j-flex>
-      <j-flex wrap gap="600" v-else>
+      <j-flex direction="column" gap="400" v-else>
         <j-flex
           inline
-          direction="column"
+          direction="row"
+          j="center"
           a="center"
-          gap="300"
+          gap="500"
           v-for="i in 4"
           :key="i"
         >
-          <Skeleton
-            :key="i"
-            variant="circle"
-            width="var(--j-size-lg)"
-            height="var(--j-size-lg)"
+          <j-skeleton :key="i" variant="circle" width="xl" height="xl" />
+          <j-skeleton
+            :style="{
+              '--j-skeleton-width': '60px',
+              '--j-skeleton-height': '1em',
+            }"
           />
-          <Skeleton></Skeleton>
         </j-flex>
       </j-flex>
     </j-flex>

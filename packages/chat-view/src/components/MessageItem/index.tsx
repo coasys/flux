@@ -4,30 +4,15 @@ import getMe from "utils/api/getMe";
 import getNeighbourhoodLink from "utils/api/getNeighbourhoodLink";
 import MessageToolbar from "./MessageToolbar";
 import MessageReactions from "./MessageReactions";
+import MessageReply from "./MessageReply";
 import UIContext from "../../context/UIContext";
 import styles from "./index.scss";
 import { format, formatRelative } from "date-fns/esm";
 import { REACTION } from "utils/constants/communityPredicates";
 import Skeleton from "../Skeleton";
-import { Avatar } from "./Avatar";
+import Avatar from "../../components/Avatar";
 import EditorContext from "../../context/EditorContext";
-
-type timeOptions = {
-  dateStyle?: string;
-  timeStyle?: string;
-  dayPeriod?: string;
-  timeZone?: string;
-  weekday?: string;
-  era?: string;
-  year?: string;
-  month?: string;
-  day?: string;
-  second?: string;
-  hour?: string;
-  minute?: string;
-  hourCycle?: string;
-  relative?: boolean;
-};
+import { Message, Profile } from "utils/types";
 
 export default function MessageItem({
   index,
@@ -74,11 +59,12 @@ export default function MessageItem({
   function onEditClick() {
     setCurrentEditMessage(message.id);
 
-    setInputValue(message.editMessages[message.editMessages.length-1].content);
+    setInputValue(
+      message.editMessages[message.editMessages.length - 1].content
+    );
   }
 
   async function onEmojiClick(utf: string) {
-    console.log({ utf });
     const me = await getMe();
 
     const alreadyMadeReaction = message.reactions.find((reaction) => {
@@ -191,16 +177,16 @@ export default function MessageItem({
     const links = await getNeighbourhoodLink({
       perspectiveUuid,
       messageUrl: message.id,
-      message: message.editMessages[message.editMessages.length-1].content,
+      message: message.editMessages[message.editMessages.length - 1].content,
       isHidden: message.isNeighbourhoodCardHidden,
     });
 
     setNeighbourhoodCards(links);
   };
 
-  const author = members[message.author] || {};
-  const replyAuthor = members[message?.replies[0]?.author] || {};
-  const replyMessage = message?.replies[0];
+  const author: Profile = members[message.author] || {};
+  const replyAuthor: Profile = members[message?.replies[0]?.author] || {};
+  const replyMessage: Message = message?.replies[0];
   const popularStyle = message.isPopular ? styles.popularMessage : "";
 
   return (
@@ -210,48 +196,20 @@ export default function MessageItem({
     >
       <div class={styles.messageItemWrapper}>
         {replyMessage && (
-          <>
-            <div class={styles.replyLineWrapper}>
-              <div class={styles.replyLine} />
-            </div>
-            <div class={styles.messageFlex}>
-              <div
-                class={styles.messageFlex}
-                onClick={() => onProfileClick(replyAuthor?.did)}
-              >
-                {replyAuthor?.did ? (
-                  <Avatar author={replyAuthor} size="small" />
-                ) : (
-                  <Skeleton variant="circle" width={20} height={20} />
-                )}
-                {replyAuthor.username ? (
-                  <div class={styles.messageUsernameNoMargin}>
-                    {replyAuthor?.username}
-                  </div>
-                ) : (
-                  <div style={{ marginBottom: 5 }}>
-                    <Skeleton width={60} height={20} />
-                  </div>
-                )}
-              </div>
-              <div
-                class={styles.replyContent}
-                dangerouslySetInnerHTML={{ __html: replyMessage.content }}
-              />
-            </div>
-          </>
+          <MessageReply
+            onProfileClick={onProfileClick}
+            replyAuthor={replyAuthor}
+            replyMessage={replyMessage}
+          ></MessageReply>
         )}
         <div>
           {replyMessage || showAvatar ? (
             <j-flex>
-              {author?.did ? (
-                <Avatar
-                  author={author}
-                  onProfileClick={onProfileClick}
-                ></Avatar>
-              ) : (
-                <Skeleton variant="circle" width={42} height={42} />
-              )}
+              <Avatar
+                did={author.did}
+                url={author.thumbnailPicture}
+                onProfileClick={onProfileClick}
+              ></Avatar>
             </j-flex>
           ) : (
             <small
@@ -277,9 +235,12 @@ export default function MessageItem({
                   {author?.username}
                 </div>
               ) : (
-                <div style={{ marginBottom: 5 }}>
-                  <Skeleton width={60} height={20} />
-                </div>
+                <j-skeleton
+                  style={{
+                    "--j-skeleton-width": "50px",
+                    "--j-skeleton-height": "1em",
+                  }}
+                ></j-skeleton>
               )}
               <small
                 class={styles.timestamp}
@@ -297,18 +258,29 @@ export default function MessageItem({
           <div
             ref={messageRef}
             class={styles.messageItemContent}
-            style={{display: 'inline-flex'}}
-            dangerouslySetInnerHTML={{ __html: message.editMessages[message.editMessages.length-1].content }}
+            style={{ display: "inline-flex" }}
+            dangerouslySetInnerHTML={{
+              __html:
+                message.editMessages[message.editMessages.length - 1].content,
+            }}
           ></div>
-              { message.editMessages.length > 1 && <small 
-                data-rh
-                data-timestamp={format(
-                  new Date(message.editMessages[message.editMessages.length-1].timestamp),
-                  "EEEE, MMMM d, yyyy, hh:mm b"
-                )}
-                class={styles.timestamp}
-                style={{display: 'inline-flex'}}>&nbsp;(edited)</small> 
-              }
+          {message.editMessages.length > 1 && (
+            <small
+              data-rh
+              data-timestamp={format(
+                new Date(
+                  message.editMessages[
+                    message.editMessages.length - 1
+                  ].timestamp
+                ),
+                "EEEE, MMMM d, yyyy, hh:mm b"
+              )}
+              class={styles.timestamp}
+              style={{ display: "inline-flex" }}
+            >
+              &nbsp;(edited)
+            </small>
+          )}
           {message.reactions.length > 0 && (
             <j-box pt="400">
               <MessageReactions

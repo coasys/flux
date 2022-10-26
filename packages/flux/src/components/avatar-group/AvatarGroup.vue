@@ -2,28 +2,25 @@
   <button @click="$emit('click')" class="avatar-group">
     <j-tooltip title="See all members">
       <div class="avatar-group__avatars">
-        <template v-if="!loading">
-          <Avatar
-            class="avatar-group__avatar"
-            v-for="(user, index) in firstUsers"
-            :data-testid="`avatar-group__avatar__${user.did}`"
-            :key="index"
-            :hash="user.did"
-            :size="size"
-            :url="user.thumbnailPicture"
-          ></Avatar>
-        </template>
-        <template v-if="loading">
-          <Skeleton
-            v-for="i in 3"
-            :key="i"
-            variant="circle"
-            width="var(--j-size-md)"
-            height="var(--j-size-md)"
-          ></Skeleton>
-        </template>
-        <span v-if="users.length >= 4" class="avatar-group__see-all">
-          +{{ users.length - 5 }}
+        <j-skeleton
+          v-if="loading"
+          v-for="i in 4"
+          variant="circle"
+          :height="size"
+          :width="size"
+        ></j-skeleton>
+        <Avatar
+          v-else
+          v-for="(user, index) in firstUsers"
+          :data-testid="`avatar-group__avatar__${user.did}`"
+          :key="index"
+          :hash="user.did"
+          :size="size"
+          :url="user.thumbnailPicture"
+        ></Avatar>
+
+        <span v-if="users.length >= 5" class="avatar-group__see-all">
+          +{{ users.length - 4 }}
         </span>
       </div>
     </j-tooltip>
@@ -31,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import { ProfileWithDID } from "@/store/types";
+import { Profile } from "utils/types";
 import getProfile from "utils/api/getProfile";
 import { defineComponent } from "vue";
 import Skeleton from "@/components/skeleton/Skeleton.vue";
@@ -43,26 +40,27 @@ export default defineComponent({
   props: ["users", "size"],
   data() {
     return {
-      firstUsers: {} as Record<string, ProfileWithDID>,
+      firstUsers: {} as Record<string, Profile>,
       loading: false,
     };
   },
   watch: {
     users: {
-      handler: async function (users) {
+      handler: async function (users: string[]) {
         // reset on change
-        this.firstUsers = {};
+        let firstUsers = {} as any;
         this.loading = true;
 
-        users.forEach(async (user: string, i: number) => {
-          if (i <= 4 && !this.firstUsers[user]) {
+        for (let [i, user] of users.entries()) {
+          if (i <= 4) {
             const profile = await getProfile(user);
             if (profile) {
-              this.firstUsers[user] = profile;
+              firstUsers[user] = profile;
             }
           }
-        });
+        }
 
+        this.firstUsers = firstUsers;
         this.loading = false;
       },
       immediate: true,
@@ -83,17 +81,13 @@ export default defineComponent({
 
 .avatar-group__avatars {
   gap: var(--j-space-200);
-  display: inline-flex;
-}
-
-.avatar-group__avatar {
-  border-radius: 50%;
-  display: block;
-  background: var(--j-color-white);
+  display: flex;
+  height: var(--j-size-md);
 }
 
 .avatar-group__avatars > *:not(:first-child) {
   margin-left: -15px;
+  display: block;
 }
 
 .avatar-group__see-all {

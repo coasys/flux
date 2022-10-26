@@ -33,7 +33,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { Profile } from "@/store/types";
+import { Profile } from "utils/types";
 import Skeleton from "@/components/skeleton/Skeleton.vue";
 import getProfile from "utils/api/getProfile";
 import Avatar from "@/components/avatar/Avatar.vue";
@@ -53,7 +53,6 @@ export default defineComponent({
         // reset profile before fetching again
         this.profile = null;
         if (did) {
-          console.log("did", did);
           this.profile = await getProfile(did);
         }
       },

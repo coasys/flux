@@ -1,4 +1,10 @@
-import React, { createContext, useState, useEffect,useContext, useRef } from "react";
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  useRef,
+} from "react";
 import getMembers from "../api/getMembers";
 import getChannels from "../api/getChannels";
 import getPerspectiveMeta from "../api/getPerspectiveMeta";
@@ -22,7 +28,7 @@ type State = {
 type ContextProps = {
   state: State;
   methods: {
-    getProfile: (did: string) => any
+    getProfile: (did: string) => any;
   };
 };
 
@@ -37,7 +43,7 @@ const initialState: ContextProps = {
     channels: {},
   },
   methods: {
-    getProfile: (did: string) => null
+    getProfile: (did: string) => null,
   },
 };
 
@@ -54,8 +60,8 @@ export function PerspectiveProvider({ perspectiveUuid, children }: any) {
   }, [perspectiveUuid]);
 
   useEffect(() => {
-      fetchChannels();
-      fetchMembers();
+    fetchChannels();
+    fetchMembers();
   }, [state.url, state.sourceUrl]);
 
   useEffect(() => {
@@ -64,7 +70,7 @@ export function PerspectiveProvider({ perspectiveUuid, children }: any) {
     }
 
     return () => {
-      linkSubscriberRef.current?.removeListener('link-added', handleLinkAdded);
+      linkSubscriberRef.current?.removeListener("link-added", handleLinkAdded);
     };
   }, [perspectiveUuid]);
 
@@ -82,7 +88,7 @@ export function PerspectiveProvider({ perspectiveUuid, children }: any) {
       const literal = Literal.fromUrl(link.data.target).get();
       const channelObj = {
         name: literal.data,
-        description: '',
+        description: "",
         id: link.data.target,
       };
 
@@ -106,7 +112,11 @@ export function PerspectiveProvider({ perspectiveUuid, children }: any) {
     }
 
     if (linkIs.member(link)) {
-      await getProfile(link.data.target);
+      const profile = await getProfile(link.data.target);
+      setState((prev) => ({
+        ...prev,
+        members: { ...prev.members, [profile.did]: profile },
+      }));
     }
   }
 
@@ -114,9 +124,19 @@ export function PerspectiveProvider({ perspectiveUuid, children }: any) {
     if (state.url) {
       const members = await getMembers({
         perspectiveUuid: perspectiveUuid,
-        neighbourhoodUrl: state.sourceUrl || state.url,
-        addProfile: (profile: any) => setState((prev) => ({...prev, members: {...prev.members, [profile.did]: profile}}))
       });
+
+      const keyedMembers = members.reduce((acc, member) => {
+        return {
+          ...acc,
+          [member.did]: member,
+        };
+      }, {});
+
+      setState((prev) => ({
+        ...prev,
+        members: keyedMembers,
+      }));
     }
   };
 
@@ -148,16 +168,19 @@ export function PerspectiveProvider({ perspectiveUuid, children }: any) {
     const did = url.split("://").length > 1 ? url.split("://")[1] : url;
 
     if (state.members[did]) {
-      return state.members[did]
+      return state.members[did];
     } else {
       const profile = await getPerspectiveProfile(url);
 
       if (profile) {
-        setState((oldState) => ({...oldState, members: {...oldState.members, [profile.did]: profile}}))
-  
+        setState((oldState) => ({
+          ...oldState,
+          members: { ...oldState.members, [profile.did]: profile },
+        }));
+
         return profile;
       } else {
-        return null
+        return null;
       }
     }
   }
@@ -167,7 +190,7 @@ export function PerspectiveProvider({ perspectiveUuid, children }: any) {
       value={{
         state,
         methods: {
-          getProfile
+          getProfile,
         },
       }}
     >

@@ -3,6 +3,7 @@ import {
   ThemeState,
   LocalCommunityState,
   ChannelState,
+  Profile,
 } from "@/store/types";
 
 import { useDataStore } from "..";
@@ -76,6 +77,19 @@ export default {
     ) {
       neighbourhood.members.push(member);
     }
+  },
+
+  setNeighbourhoodMembers({
+    members,
+    perspectiveUuid,
+  }: {
+    members: string[];
+    perspectiveUuid: string;
+  }): void {
+    const state = useDataStore();
+    const neighbourhood = state.neighbourhoods[perspectiveUuid];
+
+    neighbourhood.members = members;
   },
 
   setCommunityTheme(payload: { communityId: string; theme: ThemeState }): void {

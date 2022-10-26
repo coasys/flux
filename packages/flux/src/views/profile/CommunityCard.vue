@@ -7,7 +7,7 @@
     }"
   >
     <Avatar
-      class="community-card__image"
+      size="xl"
       :initials="name?.charAt(0).toUpperCase()"
       :url="url"
     ></Avatar>

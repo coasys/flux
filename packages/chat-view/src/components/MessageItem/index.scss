@@ -31,12 +31,12 @@
 
   & .timestamp {
     font-size: var(--j-font-size-300);
-    color: var(--j-color-ui-300);
+    color: var(--j-color-ui-500);
   }
 
   & .timestampLeft {
     font-size: var(--j-font-size-300);
-    color: var(--j-color-ui-300);
+    color: var(--j-color-ui-500);
     opacity: 0;
   }
 
@@ -100,17 +100,11 @@
     cursor: pointer;
     color: var(--j-color-black);
     font-size: var(--j-font-size-500);
-    font-weight: 400;
+    font-weight: 600;
 
     &:hover {
       text-decoration: underline;
     }
-  }
-
-  & .messageUsernameNoMargin {
-    color: var(--j-color-ui-600);
-    font-size: var(--j-font-size-500);
-    font-weight: 400;
   }
 }
 
@@ -128,20 +122,13 @@
 .replyLine {
   display: block;
   position: absolute;
-  top: 5px;
+  top: var(--j-space-300);
   right: 0;
   width: 70%;
   height: 15px;
   border-left: 2px solid var(--j-color-ui-200);
   border-top: 2px solid var(--j-color-ui-200);
   border-top-left-radius: var(--j-border-radius);
-}
-
-.messageFlex {
-  display: flex;
-  gap: var(--j-space-200);
-  align-items: center;
-  margin-bottom: var(--j-space-200);
 }
 
 .replyContent {
