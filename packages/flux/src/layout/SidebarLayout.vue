@@ -117,13 +117,13 @@ export default defineComponent({
     width: 100%;
     height: 100%;
     overflow: hidden;
-    margin-left: 100%;
-    will-change: margin-left;
-    z-index: 999;
+    transform: translateX(100%);
+    will-change: transform;
+    z-index: 500;
     transition: all 0.2s ease;
   }
   .sidebar-layout--closed .sidebar-layout__main {
-    margin-left: 0px;
+    transform: translateX(0);
     position: fixed;
     left: 0;
     top: 0;
