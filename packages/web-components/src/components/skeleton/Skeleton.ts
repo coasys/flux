@@ -7,8 +7,10 @@ const styles = css`
     --j-skeleton-height: var(--j-size-md);
     --j-skeleton-width: 100%;
     --j-skeleton-border-radius: var(--j-border-radius, 0px);
+    --j-skeleton-display: inline-block;
   }
   [part="base"] {
+    display: var(--j-skeleton-display);
     width: var(--j-skeleton-width);
     height: var(--j-skeleton-height);
     border-radius: var(--j-skeleton-border-radius);
@@ -71,6 +73,7 @@ const styles = css`
 
   :host([width="full"]) {
     --j-skeleton-width: 100%;
+    --j-skeleton-displa: block;
   }
 
   :host([width="text"]) {
