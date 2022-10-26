@@ -1,13 +1,12 @@
 <template>
   <j-box p="800">
-    <j-box pl="500" pb="800">
-      <j-text variant="heading-sm">Settings</j-text>
+    <j-box pb="800">
+      <j-text variant="heading">Settings</j-text>
     </j-box>
     <div class="settings">
       <aside class="settings__sidebar">
         <j-tabs
           full
-          vertical
           :value="currentView"
           @change="(e) => (currentView = e.target.value)"
         >
@@ -93,8 +92,14 @@ export default defineComponent({
 .settings {
   display: grid;
   gap: var(--j-space-1000);
-  grid-template-columns: 1fr 4fr;
+  grid-template-columns: 1fr;
   overflow-y: auto;
+}
+
+@media (min-width: 800px) {
+  .settings {
+    grid-template-columns: 1fr 4fr;
+  }
 }
 
 .settings__sidebar {
