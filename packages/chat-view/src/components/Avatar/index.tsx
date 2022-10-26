@@ -6,7 +6,7 @@ type AvatarProps = {
   url: string;
   style?: any;
   onProfileClick?: (did: string) => void;
-  size?: "xs" | "sm" | "md" | "lg";
+  size?: "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
 };
 
 export default function Avatar({

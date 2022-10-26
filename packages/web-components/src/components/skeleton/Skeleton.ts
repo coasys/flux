@@ -23,6 +23,10 @@ const styles = css`
     animation: placeHolderShimmer 10s linear infinite;
   }
 
+  :host([height="xxs"]) {
+    --j-skeleton-height: var(--j-size-xxs);
+  }
+
   :host([height="xs"]) {
     --j-skeleton-height: var(--j-size-xs);
   }
@@ -43,12 +47,20 @@ const styles = css`
     --j-skeleton-height: var(--j-size-xl);
   }
 
+  :host([height="xxl"]) {
+    --j-skeleton-height: var(--j-size-xxl);
+  }
+
   :host([height="full"]) {
     --j-skeleton-height: 100%;
   }
 
   :host([height="text"]) {
     --j-skeleton-height: 1em;
+  }
+
+  :host([width="xxs"]) {
+    --j-skeleton-width: var(--j-size-xxs);
   }
 
   :host([width="xs"]) {
@@ -69,6 +81,10 @@ const styles = css`
 
   :host([width="xl"]) {
     --j-skeleton-width: var(--j-size-xl);
+  }
+
+  :host([width="xxl"]) {
+    --j-skeleton-width: var(--j-size-xxl);
   }
 
   :host([width="full"]) {
@@ -111,14 +127,14 @@ export default class Skeleton extends LitElement {
 
   /**
    * Height
-   * @type {""|"xs"|"sm"|"md"|"lg"|"xl"|"text"}
+   * @type {""|"xxs"|"xs"|"sm"|"md"|"lg"|"xl"|"xxl"|"text"}
    * @attr
    */
   @property({ type: String, reflect: true }) height = null;
 
   /**
    * Width
-   * @type {""|"xs"|"sm"|"md"|"lg"|"xl"|"text"}
+   * @type {""|"xxs"|"xs"|"sm"|"md"|"lg"|"xl"|"xxl"|"text"}
    * @attr
    */
   @property({ type: String, reflect: true }) width = null;

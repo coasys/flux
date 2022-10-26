@@ -21,7 +21,7 @@ export default function MessageReply({
             <Avatar
               did={replyAuthor.did}
               url={replyAuthor.thumbnailPicture}
-              size="xs"
+              size="xxs"
             ></Avatar>
             <j-text nomargin color="black" size="400" weight="600">
               {replyAuthor.username || <j-skeleton width="xl" height="text" />}
