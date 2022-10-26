@@ -1,11 +1,7 @@
 <template>
   <j-box class="profile" v-if="profile" p="800">
     <j-box pb="500">
-      <Avatar
-        style="--j-avatar-size: 100px"
-        :hash="did"
-        :url="profile.thumbnailPicture"
-      ></Avatar>
+      <Avatar size="xl" :hash="did" :url="profile.thumbnailPicture"></Avatar>
     </j-box>
 
     <j-text
@@ -25,8 +21,10 @@
   </j-box>
   <j-box p="800" v-else>
     <j-flex a="center" direction="column" gap="500">
-      <Skeleton variant="circle" width="100px" height="100px" />
-      <Skeleton />
+      <j-skeleton variant="circle" width="xl" height="xl" />
+      <j-skeleton
+        :style="{ '--j-skeleton-width': '60px', '--j-skeleton-height': '1em' }"
+      />
     </j-flex>
   </j-box>
 </template>
@@ -34,12 +32,11 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { Profile } from "utils/types";
-import Skeleton from "@/components/skeleton/Skeleton.vue";
 import getProfile from "utils/api/getProfile";
 import Avatar from "@/components/avatar/Avatar.vue";
 
 export default defineComponent({
-  components: { Skeleton, Avatar },
+  components: { Avatar },
   props: ["did", "langAddress"],
   emits: ["openCompleteProfile"],
   data() {

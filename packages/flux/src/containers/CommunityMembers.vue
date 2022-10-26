@@ -60,17 +60,17 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { NeighbourhoodState, ProfileWithDID } from "@/store/types";
+import { Profile } from "utils/types";
+import { NeighbourhoodState } from "@/store/types";
 import { useDataStore } from "@/store/data";
 
 import getProfile from "utils/api/getProfile";
-import Skeleton from "@/components/skeleton/Skeleton.vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import Avatar from "@/components/avatar/Avatar.vue";
 
 export default defineComponent({
   emits: ["close", "submit"],
-  components: { Skeleton, Avatar },
+  components: { Avatar },
   setup() {
     const dataStore = useDataStore();
 
@@ -81,7 +81,7 @@ export default defineComponent({
   data() {
     return {
       searchValue: "",
-      memberList: [] as ProfileWithDID[],
+      memberList: [] as Profile[],
       loading: false,
     };
   },

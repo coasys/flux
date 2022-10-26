@@ -20,7 +20,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { getImage } from "utils/api/getProfile";
-import Skeleton from "../skeleton/Skeleton.vue";
 export default defineComponent({
   props: {
     did: String,
@@ -60,7 +59,6 @@ export default defineComponent({
       }
     },
   },
-  components: { Skeleton },
 });
 </script>
 

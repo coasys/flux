@@ -180,7 +180,8 @@
 <script lang="ts">
 import { defineComponent, ref, PropType, watch } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import { ChannelState, CommunityState, Profile } from "@/store/types";
+import { Profile } from "utils/types";
+import { ChannelState, CommunityState } from "@/store/types";
 import { mapActions, mapState } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
@@ -189,10 +190,9 @@ import { DexieIPFS } from "@/utils/storageHelpers";
 import { getImage } from "utils/api/getProfile";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { CHANNEL, SELF } from "utils/constants/communityPredicates";
-import Skeleton from "@/components/skeleton/Skeleton.vue";
 
 export default defineComponent({
-  components: { AvatarGroup, Skeleton },
+  components: { AvatarGroup },
   props: {
     community: {
       type: Object as PropType<CommunityState>,

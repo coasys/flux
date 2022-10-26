@@ -31,12 +31,11 @@
 import { Profile } from "utils/types";
 import getProfile from "utils/api/getProfile";
 import { defineComponent } from "vue";
-import Skeleton from "@/components/skeleton/Skeleton.vue";
 import Avatar from "@/components/avatar/Avatar.vue";
 
 export default defineComponent({
   emits: ["click"],
-  components: { Skeleton, Avatar },
+  components: { Avatar },
   props: ["users", "size"],
   data() {
     return {

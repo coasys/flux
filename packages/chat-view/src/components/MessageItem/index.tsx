@@ -9,7 +9,6 @@ import UIContext from "../../context/UIContext";
 import styles from "./index.scss";
 import { format, formatRelative } from "date-fns/esm";
 import { REACTION } from "utils/constants/communityPredicates";
-import Skeleton from "../Skeleton";
 import Avatar from "../../components/Avatar";
 import EditorContext from "../../context/EditorContext";
 import { Message, Profile } from "utils/types";
