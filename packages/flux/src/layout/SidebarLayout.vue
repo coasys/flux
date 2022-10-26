@@ -77,7 +77,6 @@ export default defineComponent({
   display: flex;
   transition: all 0.2s ease;
   overflow: hidden;
-  position: relative;
 }
 .sidebar-layout__toggle-button {
   position: absolute;
@@ -118,11 +117,13 @@ export default defineComponent({
     width: 100%;
     height: 100%;
     overflow: hidden;
-    transform: translateX(100%);
+    margin-left: 100%;
+    will-change: margin-left;
+    z-index: 500;
     transition: all 0.2s ease;
   }
   .sidebar-layout--closed .sidebar-layout__main {
-    transform: translateX(0);
+    margin-left: 0px;
     position: fixed;
     left: 0;
     top: 0;

@@ -89,7 +89,7 @@
     </j-menu-group-item>
   </j-box>
 
-  <j-box pt="500">
+  <j-box pt="500" pb="800">
     <j-menu-group-item open title="Channels">
       <j-button
         @click.prevent="() => setShowCreateChannel(true)"
@@ -357,6 +357,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .community-sidebar__header {
+  background: var(--app-drawer-bg-color);
   border-bottom: 1px solid var(--j-color-white);
   z-index: 1;
   display: flex;

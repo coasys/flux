@@ -95,5 +95,6 @@ export default defineComponent({
   overflow-x: hidden;
   transition: all 0.3s ease;
   margin-left: 0;
+  position: relative;
 }
 </style>
