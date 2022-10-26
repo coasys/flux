@@ -23,13 +23,9 @@ export default function MessageReply({
               url={replyAuthor.thumbnailPicture}
               size="xs"
             ></Avatar>
-            {replyAuthor.username ? (
-              <j-text nomargin color="black" size="400" weight="600">
-                {replyAuthor?.username}
-              </j-text>
-            ) : (
-              <j-skeleton width="full" height="sm" />
-            )}
+            <j-text nomargin color="black" size="400" weight="600">
+              {replyAuthor.username || <j-skeleton width="xl" height="text" />}
+            </j-text>
           </j-flex>
           <div
             class={styles.replyContent}

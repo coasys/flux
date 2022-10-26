@@ -46,12 +46,7 @@
           :key="i"
         >
           <j-skeleton :key="i" variant="circle" width="xl" height="xl" />
-          <j-skeleton
-            :style="{
-              '--j-skeleton-width': '60px',
-              '--j-skeleton-height': '1em',
-            }"
-          />
+          <j-skeleton width="xl" height="text" />
         </j-flex>
       </j-flex>
     </j-flex>
@@ -88,6 +83,7 @@ export default defineComponent({
   watch: {
     "community.members": {
       handler: async function (users) {
+        console.log({ users });
         // reset before fetching again
         this.memberList = [];
         if (!users) return;

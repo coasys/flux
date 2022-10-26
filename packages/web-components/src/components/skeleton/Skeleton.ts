@@ -45,6 +45,10 @@ const styles = css`
     --j-skeleton-height: 100%;
   }
 
+  :host([height="text"]) {
+    --j-skeleton-height: 1em;
+  }
+
   :host([width="xs"]) {
     --j-skeleton-width: var(--j-size-xs);
   }
@@ -67,6 +71,10 @@ const styles = css`
 
   :host([width="full"]) {
     --j-skeleton-width: 100%;
+  }
+
+  :host([width="text"]) {
+    --j-skeleton-width: 1em;
   }
 
   :host([variant="circle"]) {
@@ -100,14 +108,14 @@ export default class Skeleton extends LitElement {
 
   /**
    * Height
-   * @type {""|"xs"|"sm"|"md"|"lg"|"xl"}
+   * @type {""|"xs"|"sm"|"md"|"lg"|"xl"|"text"}
    * @attr
    */
   @property({ type: String, reflect: true }) height = null;
 
   /**
    * Width
-   * @type {""|"xs"|"sm"|"md"|"lg"|"xl"}
+   * @type {""|"xs"|"sm"|"md"|"lg"|"xl"|"text"}
    * @attr
    */
   @property({ type: String, reflect: true }) width = null;

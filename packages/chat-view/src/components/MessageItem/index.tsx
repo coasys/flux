@@ -226,21 +226,14 @@ export default function MessageItem({
         <div class={styles.messageItemContentWrapper}>
           {(replyMessage || showAvatar) && (
             <header class={styles.messageItemHeader}>
-              {author?.username ? (
-                <div
-                  onClick={() => onProfileClick(author?.did)}
-                  class={styles.messageUsername}
-                >
-                  {author?.username}
-                </div>
-              ) : (
-                <j-skeleton
-                  style={{
-                    "--j-skeleton-width": "50px",
-                    "--j-skeleton-height": "1em",
-                  }}
-                ></j-skeleton>
-              )}
+              <div
+                onClick={() => onProfileClick(author?.did)}
+                class={styles.messageUsername}
+              >
+                {author?.username || (
+                  <j-skeleton width="xl" height="text"></j-skeleton>
+                )}
+              </div>
               <small
                 class={styles.timestamp}
                 data-rh

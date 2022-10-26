@@ -1315,12 +1315,12 @@
         {
           "name": "height",
           "description": "Height",
-          "type": "\"\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\""
+          "type": "\"\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\"|\"text\""
         },
         {
           "name": "width",
           "description": "Width",
-          "type": "\"\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\""
+          "type": "\"\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\"|\"text\""
         }
       ],
       "properties": [
@@ -1339,13 +1339,13 @@
           "name": "height",
           "attribute": "height",
           "description": "Height",
-          "type": "\"\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\""
+          "type": "\"\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\"|\"text\""
         },
         {
           "name": "width",
           "attribute": "width",
           "description": "Width",
-          "type": "\"\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\""
+          "type": "\"\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\"|\"text\""
         }
       ]
     },

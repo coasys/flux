@@ -22,9 +22,7 @@
   <j-box p="800" v-else>
     <j-flex a="center" direction="column" gap="500">
       <j-skeleton variant="circle" width="xl" height="xl" />
-      <j-skeleton
-        :style="{ '--j-skeleton-width': '60px', '--j-skeleton-height': '1em' }"
-      />
+      <j-skeleton width="xl" height="text" />
     </j-flex>
   </j-box>
 </template>
