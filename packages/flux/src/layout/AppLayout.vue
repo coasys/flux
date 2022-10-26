@@ -80,7 +80,6 @@ export default defineComponent({
   top: 0;
   width: var(--app-main-sidebar-width);
   display: flex;
-  z-index: 10;
   flex-direction: column;
   justify-content: space-between;
   background: var(--app-main-sidebar-bg-color);

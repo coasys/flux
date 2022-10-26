@@ -119,7 +119,7 @@ export default defineComponent({
     overflow: hidden;
     margin-left: 100%;
     will-change: margin-left;
-    z-index: 500;
+    z-index: 999;
     transition: all 0.2s ease;
   }
   .sidebar-layout--closed .sidebar-layout__main {
