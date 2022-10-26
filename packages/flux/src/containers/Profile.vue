@@ -1,7 +1,7 @@
 <template>
   <j-box class="profile" v-if="profile" p="800">
     <j-box pb="500">
-      <Avatar size="xl" :hash="did" :url="profile.thumbnailPicture"></Avatar>
+      <Avatar size="xxl" :hash="did" :url="profile.thumbnailPicture"></Avatar>
     </j-box>
 
     <j-text
@@ -22,7 +22,15 @@
   <j-box p="800" v-else>
     <j-flex a="center" direction="column" gap="500">
       <j-skeleton variant="circle" width="xl" height="xl" />
-      <j-skeleton width="xl" height="text" />
+      <j-skeleton width="xxl" height="text" />
+      <j-skeleton width="xxl" height="text" />
+      <j-button
+        disabled
+        variant="link"
+        @click="() => $emit('openCompleteProfile')"
+      >
+        View full profile
+      </j-button>
     </j-flex>
   </j-box>
 </template>
