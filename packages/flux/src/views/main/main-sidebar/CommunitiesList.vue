@@ -3,7 +3,7 @@
     <j-tooltip
       v-for="community in communities"
       :key="community.state.perspectiveUuid"
-      :title="community.neighbourhood.name"
+      :title="community.neighbourhood.name || 'Uknown Communit'"
     >
       <j-popover event="contextmenu">
         <Avatar
@@ -18,8 +18,9 @@
         <j-menu slot="content">
           <j-menu-item
             @click="() => removeCommunity(community.state.perspectiveUuid)"
-            >Remove community</j-menu-item
           >
+            Remove community
+          </j-menu-item>
 
           <j-menu-item
             @click="() => muteCommunity(community.state.perspectiveUuid)"

@@ -13,7 +13,7 @@
     ></Avatar>
     <div>
       <j-text size="600" color="black" weight="bold">
-        {{ name }}
+        {{ name || "Unknown Community" }}
       </j-text>
       <j-text nomargin size="500" color="ui-400">{{
         description || "No description"
