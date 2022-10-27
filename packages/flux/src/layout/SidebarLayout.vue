@@ -117,14 +117,16 @@ export default defineComponent({
     width: 100%;
     height: 100%;
     overflow: hidden;
-    transform: translateX(100%);
+    transform: translate3d(100%, 0, 0);
     will-change: transform;
     z-index: 500;
+    opacity: 0;
     transition: all 0.2s ease;
   }
   .sidebar-layout--closed .sidebar-layout__main {
-    transform: translateX(0);
-    position: fixed;
+    transform: translate3d(0, 0, 0);
+    position: absolute;
+    opacity: 1;
     left: 0;
     top: 0;
     z-index: 999;
@@ -147,7 +149,7 @@ export default defineComponent({
   max-height: 100vh;
   overflow-y: auto;
   flex: 1;
-  background: var(--app-main-content-bg-color);
+  background: var(--app-main-content-bg-color, var(--j-color-white));
 }
 .sidebar-layout__resize-handle {
   position: absolute;
