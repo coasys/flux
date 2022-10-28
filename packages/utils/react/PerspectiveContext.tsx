@@ -9,10 +9,8 @@ import getMembers from "../api/getMembers";
 import getChannels from "../api/getChannels";
 import getPerspectiveMeta from "../api/getPerspectiveMeta";
 import subscribeToLinks from "../api/subscribeToLinks";
-import { findLink, linkIs } from "../helpers/linkHelpers";
-import { getMetaFromLinks, keyedLanguages } from "../helpers/languageHelpers";
+import { linkIs } from "../helpers/linkHelpers";
 import getPerspectiveProfile from "../api/getProfile";
-import ad4mClient from "../api/client";
 import { Literal } from "@perspect3vism/ad4m";
 
 type State = {

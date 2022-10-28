@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "preact/hooks";
+import { useContext, useMemo, useEffect, useRef, useState } from "preact/hooks";
 import { AgentContext, ChatContext, PerspectiveContext } from "utils/react";
 import getMe from "utils/api/getMe";
 import getNeighbourhoodLink from "utils/api/getNeighbourhoodLink";
@@ -12,22 +12,28 @@ import { REACTION } from "utils/constants/communityPredicates";
 import Avatar from "../../components/Avatar";
 import EditorContext from "../../context/EditorContext";
 import { Message, Profile } from "utils/types";
+import NeighbourhoodCard from "./NeighbourhoodCard";
 
 export default function MessageItem({
-  index,
+  message,
   showAvatar,
   onOpenEmojiPicker,
   mainRef,
   perspectiveUuid,
 }) {
+  const messageContent =
+    message.editMessages[message.editMessages.length - 1].content;
+
   const messageRef = useRef<any>(null);
+
   const {
     state: { members },
   } = useContext(PerspectiveContext);
+
   const {
-    state: { messages, keyedMessages },
-    methods: { addReaction, removeReaction, hideMessageEmbeds },
+    methods: { addReaction, removeReaction },
   } = useContext(ChatContext);
+
   const [neighbourhoodCards, setNeighbourhoodCards] = useState<any[]>([]);
 
   const {
@@ -41,33 +47,19 @@ export default function MessageItem({
 
   const { state: agentState } = useContext(AgentContext);
 
-  const message = messages[index] || {
-    id: "unknown",
-    url: "",
-    author: "",
-    reactions: [],
-    timestamp: "'1995-12-17T03:24:00'",
-    content: "",
-    replyUrl: "",
-  };
-
   function onReplyClick() {
     setCurrentReply(message.id);
   }
 
   function onEditClick() {
     setCurrentEditMessage(message.id);
-
-    setInputValue(
-      message.editMessages[message.editMessages.length - 1].content
-    );
+    setInputValue(messageContent);
   }
 
   async function onEmojiClick(utf: string) {
     const me = await getMe();
 
     const alreadyMadeReaction = message.reactions.find((reaction) => {
-      console.log({ reaction, utf });
       return reaction.author === me.did && reaction.content === utf;
     });
 
@@ -92,73 +84,42 @@ export default function MessageItem({
     }
   }
 
-  useEffect(() => {
-    const mentionElements = (messageRef.current as any).querySelectorAll(
-      "[data-mention]"
-    );
-    const emojiElements = (messageRef.current as any).querySelectorAll(
-      ".emoji"
-    );
+  function onMessageClick(e) {
+    const { mention, id } = e.target.dataset;
 
-    for (const ele of emojiElements) {
-      const emoji = ele as HTMLElement;
-
-      if (emoji.parentNode?.nodeName !== "J-TOOLTIP") {
-        var wrapper = document.createElement("j-tooltip");
-        wrapper.title = `:${emoji.dataset.id}:`;
-        wrapper.classList.add("emojitoolip");
-        (wrapper as any).placement = "top";
-        emoji.parentNode?.insertBefore(wrapper, emoji);
-        wrapper.appendChild(emoji);
-
-        if (emoji.parentNode?.nextSibling?.textContent?.trim().length === 0) {
-          emoji.parentNode?.nextSibling.remove();
-        }
-      }
+    if (mention === "agent") {
+      onProfileClick(id);
     }
 
-    for (const ele of mentionElements) {
-      const mention = ele as HTMLElement;
-
-      mention.addEventListener("click", () => {
-        if (mention.innerText.startsWith("#")) {
-          const event = new CustomEvent("channel-click", {
-            detail: {
-              channel: mention.dataset["id"],
-            },
-            bubbles: true,
-          });
-          mainRef?.dispatchEvent(event);
-        } else if (mention.innerText.startsWith("@")) {
-          const event = new CustomEvent("agent-click", {
-            detail: {
-              did: mention.dataset["id"],
-            },
-            bubbles: true,
-          });
-          mainRef?.dispatchEvent(event);
-        }
-      });
+    if (mention === "neighbourhood") {
+      const url = e.target.innerText;
+      onNeighbourhoodClick(url);
     }
-  }, [messageRef]);
 
-  function onProfileClick(did) {
-    const event = new CustomEvent("agent-click", {
-      detail: {
-        did,
-      },
+    if (mention === "channel") {
+      onChannnelClick(id);
+    }
+  }
+
+  function onChannnelClick(channel: string) {
+    const event = new CustomEvent("channel-click", {
+      detail: { channel },
       bubbles: true,
     });
     mainRef?.dispatchEvent(event);
   }
 
-  function onLinkClick(link: any) {
-    const event = new CustomEvent("perspective-click", {
-      detail: {
-        uuid: link.perspectiveUuid,
-        channel: "Home",
-        link,
-      },
+  function onProfileClick(did: string) {
+    const event = new CustomEvent("agent-click", {
+      detail: { did },
+      bubbles: true,
+    });
+    mainRef?.dispatchEvent(event);
+  }
+
+  function onNeighbourhoodClick(url: string) {
+    const event = new CustomEvent("neighbourhood-click", {
+      detail: { url, channel: "Home" },
       bubbles: true,
     });
     mainRef?.dispatchEvent(event);
@@ -166,7 +127,7 @@ export default function MessageItem({
 
   useEffect(() => {
     getNeighbourhoodCards();
-  }, [message]);
+  }, [message.id]);
 
   useEffect(() => {
     getNeighbourhoodCards();
@@ -176,7 +137,7 @@ export default function MessageItem({
     const links = await getNeighbourhoodLink({
       perspectiveUuid,
       messageUrl: message.id,
-      message: message.editMessages[message.editMessages.length - 1].content,
+      message: messageContent,
       isHidden: message.isNeighbourhoodCardHidden,
     });
 
@@ -186,12 +147,14 @@ export default function MessageItem({
   const author: Profile = members[message.author] || {};
   const replyAuthor: Profile = members[message?.replies[0]?.author] || {};
   const replyMessage: Message = message?.replies[0];
-  const popularStyle = message.isPopular ? styles.popularMessage : "";
+  const popularStyle: string = message.isPopular ? styles.popularMessage : "";
+  const isReplying: boolean = currentReply === message.id;
+  const isEdited: boolean = message.editMessages.length > 1;
 
   return (
     <div
       class={[styles.message, popularStyle].join(" ")}
-      isReplying={keyedMessages[currentReply]?.id === message.id}
+      isReplying={isReplying}
     >
       <div class={styles.messageItemWrapper}>
         {replyMessage && (
@@ -248,15 +211,15 @@ export default function MessageItem({
           )}
 
           <div
+            onClick={onMessageClick}
             ref={messageRef}
             class={styles.messageItemContent}
             style={{ display: "inline-flex" }}
             dangerouslySetInnerHTML={{
-              __html:
-                message.editMessages[message.editMessages.length - 1].content,
+              __html: messageContent,
             }}
           ></div>
-          {message.editMessages.length > 1 && (
+          {isEdited && (
             <small
               data-rh
               data-timestamp={format(
@@ -281,31 +244,13 @@ export default function MessageItem({
               />
             </j-box>
           )}
-          {neighbourhoodCards.length > 0 && (
-            <div style={{ position: "relative" }}>
-              {neighbourhoodCards.map((e) => (
-                <div
-                  class={styles.neighbourhoodCards}
-                  size="300"
-                  onClick={() => onLinkClick(e)}
-                >
-                  <j-text variant="footnote">Neighbourhood</j-text>
-                  <j-text>{e.name}</j-text>
-                  {e.description && e.description !== "-" && (
-                    <j-text>{e.description}</j-text>
-                  )}
-                </div>
-              ))}
-              {agentState.did === message.author && (
-                <div
-                  class={styles.neighbourhoodCardsClose}
-                  onClick={() => hideMessageEmbeds(message.id)}
-                >
-                  <j-icon name="x"></j-icon>
-                </div>
-              )}
-            </div>
-          )}
+          {neighbourhoodCards.map((e) => (
+            <NeighbourhoodCard
+              onClick={() => onNeighbourhoodClick(e.url)}
+              name={e.name}
+              description={e.description}
+            ></NeighbourhoodCard>
+          ))}
         </div>
         <div class={styles.toolbarWrapper}>
           <MessageToolbar

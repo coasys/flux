@@ -3,7 +3,6 @@
   padding-bottom: var(--j-space-300);
   padding-left: var(--j-space-500);
   padding-right: var(--j-space-500);
-  position: relative;
   transition: background-color 0.2s ease;
   
   &:hover {
@@ -21,6 +20,7 @@
   & .messageItemWrapper {
     width: 100%;
     display: grid;
+    position: relative;
     grid-template-columns: 60px 1fr;
     column-gap: var(--j-space-100);
   }
@@ -62,19 +62,27 @@
   & .messageItemContent p:first-of-type {
     user-select: text !important;
     margin-top: 0;
-
-    & > span[data-mention*="agent-mention"],
-    & > span[data-neighbourhood=""] {
-      cursor: pointer;
-      padding: 2px var(--j-space-200);
-      border-radius: var(--j-border-radius);
-      background: var(--j-color-primary-100);
-      color: var(--j-color-primary-700);
-    }
   }
 
   & .messageItemContent span {
     user-select: text !important;
+  }
+
+  & .messageItemContent [data-mention="neighbourhood"] {
+    cursor: pointer;
+    color: var(--j-color-primary-500);
+    text-decoration: underline;
+  }
+
+  & .messageItemContent [data-mention="channel"],
+  & .messageItemContent [data-mention="agent"]
+   {
+    word-break: break-word;
+    cursor: pointer;
+    padding: 2px var(--j-space-200);
+    border-radius: var(--j-border-radius);
+    background: var(--j-color-primary-100);
+    color: var(--j-color-primary-700);
   }
 
   & .messageItemContent a {
@@ -85,15 +93,6 @@
   & .messageItemContent p:last-of-type {
     user-select: text !important;
     margin-bottom: 0;
-
-    & > span[data-mention*="agent-mention"],
-    & > span[data-neighbourhood=""] {
-      cursor: pointer;
-      padding: 2px var(--j-space-200);
-      border-radius: var(--j-border-radius);
-      background: var(--j-color-primary-100);
-      color: var(--j-color-primary-700);
-    }
   }
 
   & .messageUsername {
@@ -204,13 +203,20 @@ j-tooltip::part(base) {
   display: inline;
 }
 
-.neighbourhoodCards {
-  background: var(--app-drawer-bg-color);
+.neighbourhoodCard {
+  cursor: pointer;
+  background: var(--j-color-ui-50);
+  border: 1px solid var(--j-color-ui-200);
   padding: 20px;
-  margin: 10px 60px 0 10px;
-  border-radius: 10px; 
-  border-left: solid 6px var(--app-main-sidebar-bg-color);
+  width: 100%;
+  max-width: 400px;
+  margin: var(--j-space-500) 0 var(--j-space-500) 0px;
+  border-radius: var(--j-border-radius); 
   position: relative;
+}
+
+.neighbourhoodCard:hover {
+  background: var(--j-color-ui-100);
 }
 
 .neighbourhoodCardsClose {

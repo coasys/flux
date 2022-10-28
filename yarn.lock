@@ -7489,10 +7489,10 @@ react-is@^17.0.1:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.2.tgz#e691d4a8e9c789365655539ab372762b0efb54f0"
   integrity sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==
 
-react-virtuoso@^2.19.0:
-  version "2.19.1"
-  resolved "https://registry.yarnpkg.com/react-virtuoso/-/react-virtuoso-2.19.1.tgz#a660a5c3cafcc7a84b59dfc356e1916e632c1e3a"
-  integrity sha512-zF6MAwujNGy2nJWCx/Df92ay/RnV2Kj4glUZfdyadI4suAn0kAZHB1BeI7yPFVp2iSccLzFlszhakWyr+fJ4Dw==
+react-virtuoso@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/react-virtuoso/-/react-virtuoso-3.1.1.tgz#ec8049746cfd30c5bd1a80e55fc712d8255b2fc8"
+  integrity sha512-bwLs68ttOwTjwub3ZbPrZhHkL6wUDAkcbugypPGgRS1ZLnuKuGmzuyHDUYhElUOCdYUcHuB3KYbA5gWKdx1tdA==
   dependencies:
     "@virtuoso.dev/react-urx" "^0.2.12"
     "@virtuoso.dev/urx" "^0.2.12"
