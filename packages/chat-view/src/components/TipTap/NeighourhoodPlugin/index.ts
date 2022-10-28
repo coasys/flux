@@ -67,11 +67,10 @@ export const NeighbourhoodLink = Mark.create<LinkOptions>({
   },
 
   renderHTML({ mark, HTMLAttributes }) {
-    console.log("mark", mark, HTMLAttributes);
     return [
       "span",
       mergeAttributes(
-        { "data-neighbourhood": "" },
+        { "data-mention": "neighbourhood" },
         this.options.HTMLAttributes,
         HTMLAttributes
       ),

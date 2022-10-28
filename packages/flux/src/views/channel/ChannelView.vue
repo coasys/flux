@@ -18,7 +18,7 @@
       :perspective-uuid="communityId"
       @agent-click="onAgentClick"
       @channel-click="onChannelClick"
-      @perspective-click="onPerspectiveClick"
+      @neighbourhood-click="onNeighbourhoodClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></perspective-view>
     <j-modal
@@ -148,9 +148,9 @@ export default defineComponent({
         },
       });
     },
-    onPerspectiveClick({ detail }: any) {
+    onNeighbourhoodClick({ detail }: any) {
       let community = this.dataStore.getCommunities.find(
-        (e) => e.neighbourhood.perspective.uuid === detail.uuid
+        (e) => e.neighbourhood.neighbourhoodUrl === detail.url
       );
 
       if (!community) {
@@ -186,7 +186,7 @@ export default defineComponent({
     },
     onHideNotificationIndicator({ detail }: any) {
       const { channelId } = this.$route.params;
-      console.log("hide notification indicator", detail);
+
       if (channelId) {
         this.dataStore.setHasNewMessages({
           communityId: this.community.neighbourhood.perspective.uuid,

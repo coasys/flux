@@ -3,15 +3,13 @@
     <j-tooltip
       v-for="community in communities"
       :key="community.state.perspectiveUuid"
-      :title="community.neighbourhood.name"
+      :title="community.neighbourhood.name || 'Uknown Communit'"
     >
       <j-popover event="contextmenu">
         <Avatar
           slot="trigger"
-          style="--j-avatar-bg: var(--j-color-ui-200)"
           class="left-nav__community-item"
           :selected="communityIsActive(community.state.perspectiveUuid)"
-          size="lg"
           :online="hasNotification(community.state.perspectiveUuid)"
           :url="community.neighbourhood.image"
           :initials="community.neighbourhood.name.charAt(0).toUpperCase()"
@@ -20,8 +18,9 @@
         <j-menu slot="content">
           <j-menu-item
             @click="() => removeCommunity(community.state.perspectiveUuid)"
-            >Remove community</j-menu-item
           >
+            Remove community
+          </j-menu-item>
 
           <j-menu-item
             @click="() => muteCommunity(community.state.perspectiveUuid)"
@@ -69,7 +68,6 @@
         @click="() => appStore.setShowCreateCommunity(true)"
         square
         circle
-        size="lg"
         variant="subtle"
       >
         <j-icon size="md" name="plus"></j-icon>

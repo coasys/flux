@@ -11,6 +11,11 @@
           <div class="profile__avatar">
             <Avatar
               class="avatar"
+              :style="{
+                '--j-avatar-size': '100px',
+                '--j-skeleton-height': '100px',
+                '--j-skeleton-width': '100px',
+              }"
               :hash="did"
               :url="profile?.profilePicture"
             ></Avatar>
@@ -131,7 +136,7 @@
     v-if="showAddlinkModal"
     size="sm"
     :open="showAddlinkModal"
-    @toggle="(e) => setAddLinkModal(e.target.open)"
+    @toggle="(e: any) => setAddLinkModal(e.target.open)"
   >
     <WebLinkAdd
       @cancel="() => setAddLinkModal(false)"
@@ -143,7 +148,7 @@
     v-if="showJoinCommunityModal"
     size="lg"
     :open="showJoinCommunityModal"
-    @toggle="(e) => setShowJoinCommunityModal(e.target.open)"
+    @toggle="(e: any) => setShowJoinCommunityModal(e.target.open)"
   >
     <ProfileJoinLink
       @submit="() => setShowJoinCommunityModal(false)"
@@ -154,13 +159,11 @@
   <j-modal
     v-if="modals.showEditProfile"
     :open="modals.showEditProfile"
-    @toggle="(e) => setShowEditProfile(e.target.open)"
+    @toggle="(e: any) => setShowEditProfile(e.target.open)"
   >
     <edit-profile
       @submit="() => setShowEditProfile(false)"
       @cancel="() => setShowEditProfile(false)"
-      :bg="profileBg"
-      :preBio="profile?.bio || ''"
     />
   </j-modal>
   <router-view></router-view>
@@ -168,7 +171,8 @@
 
 <script lang="ts">
 import { useDataStore } from "@/store/data";
-import { ModalsState, ProfileWithDID } from "@/store/types";
+import { Profile } from "utils/types";
+import { ModalsState } from "@/store/types";
 import { Literal } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
 import WebLinkCard from "./WebLinkCard.vue";
@@ -218,7 +222,7 @@ export default defineComponent({
       showJoinCommunityModal: false,
       weblinks: [] as any,
       profileBg: "",
-      profile: null as ProfileWithDID | null,
+      profile: null as Profile | null,
       joiningLink: "",
       editArea: null as any,
     };
@@ -228,7 +232,11 @@ export default defineComponent({
   },
   methods: {
     async getProfile() {
-      this.profile = await getProfile(this.did);
+      if (this.sameAgent) {
+        this.profile = this.userStore.profile;
+      } else {
+        this.profile = await getProfile(this.did);
+      }
     },
     setAddLinkModal(value: boolean): void {
       this.showAddlinkModal = value;
@@ -391,22 +399,6 @@ export default defineComponent({
 
 .profile__info {
   padding: var(--j-space-500);
-}
-
-.avatar {
-  display: block;
-  border-radius: 50%;
-  height: 80px;
-  width: 80px;
-  --j-avatar-size: 100%;
-  --j-avatar-border: none;
-}
-
-@media (min-width: 800px) {
-  .avatar {
-    height: 130px;
-    width: 130px;
-  }
 }
 
 .add {

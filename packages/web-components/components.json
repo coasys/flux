@@ -63,7 +63,7 @@
         {
           "name": "size",
           "description": "Sizes",
-          "type": "\"\"|\"xs\"|\"sm\"|\"lg\"|\"xl\""
+          "type": "\"\"|\"xxs\"|\"xs\"|\"sm\"|\"lg\"|\"xl\"|\"xxl\""
         }
       ],
       "properties": [
@@ -115,7 +115,7 @@
           "name": "size",
           "attribute": "size",
           "description": "Sizes",
-          "type": "\"\"|\"xs\"|\"sm\"|\"lg\"|\"xl\""
+          "type": "\"\"|\"xxs\"|\"xs\"|\"sm\"|\"lg\"|\"xl\"|\"xxl\""
         }
       ]
     },
@@ -1300,6 +1300,52 @@
       "events": [
         {
           "name": "change"
+        }
+      ]
+    },
+    {
+      "name": "j-skeleton",
+      "path": "./src/components/skeleton/Skeleton.ts",
+      "attributes": [
+        {
+          "name": "variant",
+          "description": "Variant",
+          "type": "\"\"|\"circle\""
+        },
+        {
+          "name": "height",
+          "description": "Height",
+          "type": "\"\"|\"xxs\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\"|\"xxl\"|\"text\""
+        },
+        {
+          "name": "width",
+          "description": "Width",
+          "type": "\"\"|\"xxs\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\"|\"xxl\"|\"text\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "styles",
+          "type": "CSSResult[]",
+          "default": "[\"styles\",\"sharedStyles\"]"
+        },
+        {
+          "name": "variant",
+          "attribute": "variant",
+          "description": "Variant",
+          "type": "\"\"|\"circle\""
+        },
+        {
+          "name": "height",
+          "attribute": "height",
+          "description": "Height",
+          "type": "\"\"|\"xxs\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\"|\"xxl\"|\"text\""
+        },
+        {
+          "name": "width",
+          "attribute": "width",
+          "description": "Width",
+          "type": "\"\"|\"xxs\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\"|\"xxl\"|\"text\""
         }
       ]
     },

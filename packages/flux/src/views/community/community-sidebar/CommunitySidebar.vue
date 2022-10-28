@@ -11,7 +11,7 @@
       ></j-icon>
     </j-button>
     <div class="community-info">
-      <Skeleton v-if="notSynced"></Skeleton>
+      <j-skeleton width="xl" height="text" v-if="notSynced"></j-skeleton>
       {{ community.neighbourhood.name }}
     </div>
     <j-popover
@@ -89,7 +89,7 @@
     </j-menu-group-item>
   </j-box>
 
-  <j-box pt="500">
+  <j-box pt="500" pb="800">
     <j-menu-group-item open title="Channels">
       <j-button
         @click.prevent="() => setShowCreateChannel(true)"
@@ -177,7 +177,8 @@
 <script lang="ts">
 import { defineComponent, ref, PropType, watch } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
-import { ChannelState, CommunityState, Profile } from "@/store/types";
+import { Profile } from "utils/types";
+import { ChannelState, CommunityState } from "@/store/types";
 import { mapActions, mapState } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
@@ -186,10 +187,9 @@ import { DexieIPFS } from "@/utils/storageHelpers";
 import { getImage } from "utils/api/getProfile";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { CHANNEL, SELF } from "utils/constants/communityPredicates";
-import Skeleton from "@/components/skeleton/Skeleton.vue";
 
 export default defineComponent({
-  components: { AvatarGroup, Skeleton },
+  components: { AvatarGroup },
   props: {
     community: {
       type: Object as PropType<CommunityState>,
@@ -357,6 +357,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .community-sidebar__header {
+  background: var(--app-drawer-bg-color);
   border-bottom: 1px solid var(--j-color-white);
   z-index: 1;
   display: flex;

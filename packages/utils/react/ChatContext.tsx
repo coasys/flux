@@ -1,10 +1,15 @@
-import React, { createContext, useState, useEffect, useRef } from "react";
+import React, {
+  createContext,
+  useMemo,
+  useState,
+  useEffect,
+  useRef,
+} from "react";
 import { Messages, Message } from "../types";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import getMessages from "../api/getMessages";
 import createMessage from "../api/createMessage";
 import subscribeToLinks from "../api/subscribeToLinks";
-import getPerspectiveMeta from "../api/getPerspectiveMeta";
 import getMessage from "../api/getMessage";
 import { linkIs } from "../helpers/linkHelpers";
 import deleteMessageReaction from "../api/deleteMessageReaction";
@@ -96,7 +101,10 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     setAgent({ ...agent });
   }
 
-  const messages = sortExpressionsByTimestamp(state.keyedMessages, "asc");
+  const messages = useMemo(
+    () => sortExpressionsByTimestamp(state.keyedMessages, "asc"),
+    [state.keyedMessages]
+  );
 
   useEffect(() => {
     fetchMessages();
@@ -146,12 +154,17 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       hasNewMessage: false,
       keyedMessages: {
         ...oldState.keyedMessages,
-        [oldMessage]: { ...oldState.keyedMessages[oldMessage], editMessages: [...oldState.keyedMessages[oldMessage].editMessages, message] },
+        [oldMessage]: {
+          ...oldState.keyedMessages[oldMessage],
+          editMessages: [
+            ...oldState.keyedMessages[oldMessage].editMessages,
+            message,
+          ],
+        },
       },
     };
     return newState;
   }
-
 
   function updateMessagePopularStatus(link, status) {
     const id = link.data.source;
@@ -292,14 +305,16 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       if (linkIs.reaction(link)) {
         addReactionToState(link);
       }
-      
+
       if (linkIs.editedMessage(link)) {
         const message = Literal.fromUrl(link.data.target).get();
-        setState((oldState) => addEditMessage(oldState, link.data.source, {
-          author: link.author,
-          content: message.data,
-          timestamp: link.timestamp
-        }));
+        setState((oldState) =>
+          addEditMessage(oldState, link.data.source, {
+            author: link.author,
+            content: message.data,
+            timestamp: link.timestamp,
+          })
+        );
       }
 
       if (linkIs.reply(link)) {
@@ -403,11 +418,13 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       message: editedMessage,
     });
 
-    setState((oldState) => addEditMessage(oldState, message, {
-      author: res.author,
-      content: res.content,
-      timestamp: res.timestamp
-    }));
+    setState((oldState) =>
+      addEditMessage(oldState, message, {
+        author: res.author,
+        content: res.content,
+        timestamp: res.timestamp,
+      })
+    );
   }
 
   async function sendReply(message: string, replyUrl: string) {
@@ -486,7 +503,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
           setHasNewMessage,
           setIsMessageFromSelf,
           hideMessageEmbeds,
-          editMessage
+          editMessage,
         },
       }}
     >

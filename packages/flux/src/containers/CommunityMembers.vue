@@ -35,22 +35,18 @@
           </j-text>
         </j-flex>
       </j-flex>
-      <j-flex wrap gap="600" v-else>
+      <j-flex direction="column" gap="400" v-else>
         <j-flex
           inline
-          direction="column"
+          direction="row"
+          j="center"
           a="center"
-          gap="300"
+          gap="500"
           v-for="i in 4"
           :key="i"
         >
-          <Skeleton
-            :key="i"
-            variant="circle"
-            width="var(--j-size-lg)"
-            height="var(--j-size-lg)"
-          />
-          <Skeleton></Skeleton>
+          <j-skeleton :key="i" variant="circle" width="xl" height="xl" />
+          <j-skeleton width="xl" height="text" />
         </j-flex>
       </j-flex>
     </j-flex>
@@ -59,17 +55,17 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { NeighbourhoodState, ProfileWithDID } from "@/store/types";
+import { Profile } from "utils/types";
+import { NeighbourhoodState } from "@/store/types";
 import { useDataStore } from "@/store/data";
 
 import getProfile from "utils/api/getProfile";
-import Skeleton from "@/components/skeleton/Skeleton.vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import Avatar from "@/components/avatar/Avatar.vue";
 
 export default defineComponent({
   emits: ["close", "submit"],
-  components: { Skeleton, Avatar },
+  components: { Avatar },
   setup() {
     const dataStore = useDataStore();
 
@@ -80,13 +76,14 @@ export default defineComponent({
   data() {
     return {
       searchValue: "",
-      memberList: [] as ProfileWithDID[],
+      memberList: [] as Profile[],
       loading: false,
     };
   },
   watch: {
     "community.members": {
       handler: async function (users) {
+        console.log({ users });
         // reset before fetching again
         this.memberList = [];
         if (!users) return;

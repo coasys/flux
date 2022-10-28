@@ -46,7 +46,7 @@ type PredicateMap = {
 };
 
 type TargetMap = {
-  [predicate: string]: Target;
+  [predicate: string]: Target | undefined | null;
 };
 
 type Map = {
@@ -78,11 +78,15 @@ export async function createLiteralLinks(source: string, map: TargetMap) {
 
   const targets = Object.keys(map);
 
-  const promises = targets.map(async (predicate) => {
-    const message = map[predicate];
-    const exp = await client.expression.create(message, "literal");
-    return new Link({ source, predicate, target: exp });
-  });
+  const promises = targets
+    .filter((predicate: any) => {
+      return typeof map[predicate] === "string";
+    })
+    .map(async (predicate: string) => {
+      const message = map[predicate];
+      const exp = await client.expression.create(message, "literal");
+      return new Link({ source, predicate, target: exp });
+    });
 
   return Promise.all(promises);
 }

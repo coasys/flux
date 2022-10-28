@@ -30,6 +30,9 @@ const styles = css`
     border-radius: 50%;
     background: var(--j-color-primary-500);
   }
+  :host([size="xxs"]) {
+    --j-avatar-size: var(--j-size-xxs);
+  }
   :host([size="xs"]) {
     --j-avatar-size: var(--j-size-xs);
   }
@@ -41,6 +44,9 @@ const styles = css`
   }
   :host([size="xl"]) {
     --j-avatar-size: var(--j-size-xl);
+  }
+  :host([size="xxl"]) {
+    --j-avatar-size: var(--j-size-xxl);
   }
   [part="base"] {
     cursor: inherit;
@@ -123,7 +129,7 @@ export default class Component extends LitElement {
 
   /**
    * Sizes
-   * @type {""|"xs"|"sm"|"lg"|"xl"}
+   * @type {""|"xxs"|"xs"|"sm"|"lg"|"xl"|"xxl"}
    * @attr
    */
   @property({ type: String, reflect: true }) size = null;
