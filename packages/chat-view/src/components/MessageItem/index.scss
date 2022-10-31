@@ -130,6 +130,30 @@
   border-top-left-radius: var(--j-border-radius);
 }
 
+.replyMessage {
+  display: flex;
+  gap: var(--j-space-300);
+  align-items: center;
+  margin-bottom: var(--j-space-300);
+}
+
+.replyAuthor {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-200);
+}
+
+.replyUsername {
+  font-weight: 600;
+  font-size: var(--j-font-size-400);
+  color: var(--j-color-ui-400);
+}
+
+.replyUsername:hover {
+  text-decoration: underline;
+}
+
 .replyContent {
   max-height: 15px;
   line-height: 15px;
@@ -154,6 +178,12 @@
   right: var(--j-space-500);
 }
 
+.messageReactions {
+  display: flex;
+  gap: var(--j-space-300);
+  margin-top: var(--j-space-300);
+}
+
 .emojiButton {
   position: relative;
   background: var(--j-color-white);
@@ -162,6 +192,7 @@
   gap: var(--j-space-200);
   align-items: center;
   cursor: pointer;
+  padding: 3px 6px;
   border-radius: var(--j-border-radius);
   border: 1px solid var(--j-color-ui-200);
 }

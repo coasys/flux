@@ -25,7 +25,7 @@ export default function MessageItem({
     message.editMessages[message.editMessages.length - 1].content;
 
   const messageRef = useRef<any>(null);
-  
+
   const [showToolbar, setShowToolbar] = useState(false);
 
   const {
@@ -152,6 +152,8 @@ export default function MessageItem({
   const popularStyle: string = message.isPopular ? styles.popularMessage : "";
   const isReplying: boolean = currentReply === message.id;
   const isEdited: boolean = message.editMessages.length > 1;
+  const hasReactions: boolean = message.reactions.length > 0;
+  const showAuthor: boolean = replyMessage || showAvatar;
 
   return (
     <div
@@ -169,29 +171,30 @@ export default function MessageItem({
           ></MessageReply>
         )}
         <div>
-          {replyMessage || showAvatar ? (
-            <div>
-              <Avatar
-                did={author.did}
-                url={author.thumbnailPicture}
-                onProfileClick={onProfileClick}
-              ></Avatar>
-            </div>
+          {showAuthor ? (
+            <Avatar
+              onClick={() => onProfileClick(author?.did)}
+              did={author?.did}
+              url={author?.thumbnailPicture}
+            />
           ) : (
-            showToolbar && <small
-              class={styles.timestampLeft}
-              data-rh
-              data-timestamp={format(
-                new Date(message.timestamp),
-                "EEEE, MMMM d, yyyy, HH:MM"
-              )}
-            >
-              {format(new Date(message.timestamp), "HH:MM ")}
-            </small>
+            showToolbar && (
+              <small
+                class={styles.timestampLeft}
+                data-rh
+                data-timestamp={format(
+                  new Date(message.timestamp),
+                  "EEEE, MMMM d, yyyy, HH:MM"
+                )}
+              >
+                {format(new Date(message.timestamp), "HH:MM ")}
+              </small>
+            )
           )}
         </div>
+
         <div class={styles.messageItemContentWrapper}>
-          {(replyMessage || showAvatar) && (
+          {showAuthor && (
             <header class={styles.messageItemHeader}>
               <div
                 onClick={() => onProfileClick(author?.did)}
@@ -223,6 +226,7 @@ export default function MessageItem({
               __html: messageContent,
             }}
           ></div>
+
           {isEdited && (
             <small
               data-rh
@@ -240,14 +244,14 @@ export default function MessageItem({
               &nbsp;(edited)
             </small>
           )}
-          {message.reactions.length > 0 && (
-            <j-box pt="400">
-              <MessageReactions
-                onEmojiClick={onEmojiClick}
-                reactions={message.reactions}
-              />
-            </j-box>
+
+          {hasReactions && (
+            <MessageReactions
+              onEmojiClick={onEmojiClick}
+              reactions={message.reactions}
+            />
           )}
+
           {neighbourhoodCards.map((e) => (
             <NeighbourhoodCard
               onClick={() => onNeighbourhoodClick(e.url)}
@@ -256,14 +260,17 @@ export default function MessageItem({
             ></NeighbourhoodCard>
           ))}
         </div>
-        {showToolbar && <div class={styles.toolbarWrapper}>
-          <MessageToolbar
-            onReplyClick={onReplyClick}
-            onOpenEmojiPicker={onOpenEmojiPicker}
-            onEditClick={onEditClick}
-            showEditIcon={agentState.did === message.author}
-          />
-        </div>}
+
+        {showToolbar && (
+          <div class={styles.toolbarWrapper}>
+            <MessageToolbar
+              onReplyClick={onReplyClick}
+              onOpenEmojiPicker={onOpenEmojiPicker}
+              onEditClick={onEditClick}
+              showEditIcon={agentState.did === message.author}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

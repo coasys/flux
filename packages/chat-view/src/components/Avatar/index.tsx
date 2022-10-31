@@ -5,7 +5,7 @@ type AvatarProps = {
   did: string;
   url: string;
   style?: any;
-  onProfileClick?: (did: string) => void;
+  onClick?: (event: any) => void;
   size?: "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
 };
 
@@ -13,7 +13,7 @@ export default function Avatar({
   did,
   url,
   style,
-  onProfileClick = () => {},
+  onClick,
   size = "md",
 }: AvatarProps) {
   const [loading, setLoading] = useState(false);
@@ -40,7 +40,7 @@ export default function Avatar({
       <j-skeleton
         variant="circle"
         style={style}
-        onClick={() => onProfileClick(did)}
+        onClick={(e: any) => onClick && onClick(e)}
         height={size}
         width={size}
       ></j-skeleton>
@@ -48,10 +48,10 @@ export default function Avatar({
 
   return (
     <j-avatar
-      style={style}
+      style={{ ...style, cursor: onClick ? "pointer" : "default" }}
       src={img}
       hash={did}
-      onClick={() => onProfileClick(did)}
+      onClick={(e: any) => onClick && onClick(e)}
       size={size}
     ></j-avatar>
   );
