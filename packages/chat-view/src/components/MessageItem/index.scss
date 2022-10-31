@@ -236,6 +236,10 @@ j-tooltip::part(base) {
 
 .neighbourhoodCard {
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--j-space-300);
   background: var(--j-color-ui-50);
   border: 1px solid var(--j-color-ui-200);
   padding: 20px;
@@ -250,10 +254,24 @@ j-tooltip::part(base) {
   background: var(--j-color-ui-100);
 }
 
-.neighbourhoodCardsClose {
-  position: absolute;
-  top: 0;
-  right: 30px;
+.neighbourhoodCardTitle {
+  font-weight: 600;
+  font-size: var(--j-font-size-300);
+  text-transform: uppercase;
+}
+
+.neighbourhoodCardName {
+  margin-top: var(--j-space-300);
+  font-weight: 800;
+  font-size: var(--j-font-size-500);
+  color: var(--j-color-black);
+}
+
+.neighbourhoodCardDescription {
+  margin-top: var(--j-space-200);
+  font-size: var(--j-font-size-500);
+  font-weight: 400;
+  color: var(--j-color-ui-300);
 }
 
 .popularMessage {
