@@ -72,7 +72,7 @@ export default function MessageReactions({ onEmojiClick, reactions = [] }) {
   }, [reactions.length]);
 
   return (
-    <div style={{ display: "inline-flex", gap: "var(--j-space-200)" }}>
+    <div class={styles.messageReactions}>
       {sortedReactions.map((reaction: any, i) => {
         return (
           <ReactionButton
@@ -113,15 +113,13 @@ function ReactionButton({ reaction, onEmojiClick }) {
       <span>{String.fromCodePoint(parseInt(`0x${reaction.content}`))}</span>
       <span>{reaction.count}</span>
       <div onClick={(e) => e.stopPropagation()} class={styles.reactionTooltip}>
-        <j-text nomargin size="900">
-          {String.fromCodePoint(parseInt(`0x${reaction.content}`))}
-        </j-text>
+        <div>{String.fromCodePoint(parseInt(`0x${reaction.content}`))}</div>
         {profiles.length === 0 ? (
           <j-spinner size="sm"></j-spinner>
         ) : (
-          <j-text nomargin color="black" size="400">
+          <div nomargin color="black" size="400">
             {generateReactionText(reaction, profiles, agentState.did)}
-          </j-text>
+          </div>
         )}
       </div>
     </button>

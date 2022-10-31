@@ -130,6 +130,30 @@
   border-top-left-radius: var(--j-border-radius);
 }
 
+.replyMessage {
+  display: flex;
+  gap: var(--j-space-300);
+  align-items: center;
+  margin-bottom: var(--j-space-300);
+}
+
+.replyAuthor {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-200);
+}
+
+.replyUsername {
+  font-weight: 600;
+  font-size: var(--j-font-size-400);
+  color: var(--j-color-ui-400);
+}
+
+.replyUsername:hover {
+  text-decoration: underline;
+}
+
 .replyContent {
   max-height: 15px;
   line-height: 15px;
@@ -154,6 +178,12 @@
   right: var(--j-space-500);
 }
 
+.messageReactions {
+  display: flex;
+  gap: var(--j-space-300);
+  margin-top: var(--j-space-300);
+}
+
 .emojiButton {
   position: relative;
   background: var(--j-color-white);
@@ -162,6 +192,7 @@
   gap: var(--j-space-200);
   align-items: center;
   cursor: pointer;
+  padding: 3px 6px;
   border-radius: var(--j-border-radius);
   border: 1px solid var(--j-color-ui-200);
 }
@@ -205,6 +236,10 @@ j-tooltip::part(base) {
 
 .neighbourhoodCard {
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--j-space-300);
   background: var(--j-color-ui-50);
   border: 1px solid var(--j-color-ui-200);
   padding: 20px;
@@ -219,10 +254,24 @@ j-tooltip::part(base) {
   background: var(--j-color-ui-100);
 }
 
-.neighbourhoodCardsClose {
-  position: absolute;
-  top: 0;
-  right: 30px;
+.neighbourhoodCardTitle {
+  font-weight: 600;
+  font-size: var(--j-font-size-300);
+  text-transform: uppercase;
+}
+
+.neighbourhoodCardName {
+  margin-top: var(--j-space-300);
+  font-weight: 800;
+  font-size: var(--j-font-size-500);
+  color: var(--j-color-black);
+}
+
+.neighbourhoodCardDescription {
+  margin-top: var(--j-space-200);
+  font-size: var(--j-font-size-500);
+  font-weight: 400;
+  color: var(--j-color-ui-300);
 }
 
 .popularMessage {

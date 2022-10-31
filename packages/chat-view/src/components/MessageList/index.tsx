@@ -1,4 +1,11 @@
-import { useState, useContext, useRef, useEffect, useMemo } from "preact/hooks";
+import {
+  useState,
+  useContext,
+  useRef,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "preact/hooks";
 import { ChatContext } from "utils/react";
 import MessageItem from "../MessageItem";
 import getMe from "utils/api/getMe";
@@ -109,8 +116,8 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
         ? true
         : previousMessage.author === message.author &&
             differenceInMinutes(
-              parseISO(message.timestamp),
-              parseISO(previousMessage.timestamp)
+              new Date(message.timestamp),
+              new Date(previousMessage.timestamp)
             ) >= 2;
     }
   }
@@ -177,8 +184,6 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
       return;
     }
 
-    console.log("at bottom", bool);
-
     if (bool) {
       setHasNewMessage(false);
       const event = new CustomEvent("hide-notification-indicator", {
@@ -234,24 +239,23 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
         style={{ height: "100%", overflowX: "hidden" }}
         ref={scroller}
         alignToBottom
+        overscan={{main: 1000, reverse: 1000}}
         atBottomThreshold={10}
+        computeItemKey={(index, message) => message.id}
         endReached={() => handleAtBottom(true)}
         atBottomStateChange={handleAtBottom}
         data={messages}
         rangeChanged={rangeChanged}
         initialTopMostItemIndex={messages.length - 1}
-        itemContent={(index, message) => {
-          return (
-            <MessageItem
-              key={index}
-              message={message}
-              onOpenEmojiPicker={(unicode) => openEmojiPicker(unicode, index)}
-              showAvatar={showAvatar(index)}
-              mainRef={mainRef}
-              perspectiveUuid={perspectiveUuid}
-            />
-          );
-        }}
+        itemContent={(index, message) => (
+          <MessageItem
+            message={message}
+            onOpenEmojiPicker={(unicode) => openEmojiPicker(unicode, index)}
+            showAvatar={showAvatar(index)}
+            mainRef={mainRef}
+            perspectiveUuid={perspectiveUuid}
+          />
+        )}
       />
       <ReactHint
         position="right"
