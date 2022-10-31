@@ -25,6 +25,8 @@ export default function MessageItem({
     message.editMessages[message.editMessages.length - 1].content;
 
   const messageRef = useRef<any>(null);
+  
+  const [showToolbar, setShowToolbar] = useState(false);
 
   const {
     state: { members },
@@ -155,6 +157,8 @@ export default function MessageItem({
     <div
       class={[styles.message, popularStyle].join(" ")}
       isReplying={isReplying}
+      onMouseEnter={() => setShowToolbar(true)}
+      onMouseLeave={() => setShowToolbar(false)}
     >
       <div class={styles.messageItemWrapper}>
         {replyMessage && (
@@ -166,15 +170,15 @@ export default function MessageItem({
         )}
         <div>
           {replyMessage || showAvatar ? (
-            <j-flex>
+            <div>
               <Avatar
                 did={author.did}
                 url={author.thumbnailPicture}
                 onProfileClick={onProfileClick}
               ></Avatar>
-            </j-flex>
+            </div>
           ) : (
-            <small
+            showToolbar && <small
               class={styles.timestampLeft}
               data-rh
               data-timestamp={format(
@@ -252,14 +256,14 @@ export default function MessageItem({
             ></NeighbourhoodCard>
           ))}
         </div>
-        <div class={styles.toolbarWrapper}>
+        {showToolbar && <div class={styles.toolbarWrapper}>
           <MessageToolbar
             onReplyClick={onReplyClick}
             onOpenEmojiPicker={onOpenEmojiPicker}
             onEditClick={onEditClick}
             showEditIcon={agentState.did === message.author}
           />
-        </div>
+        </div>}
       </div>
     </div>
   );
