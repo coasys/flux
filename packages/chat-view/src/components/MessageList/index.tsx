@@ -109,8 +109,8 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
         ? true
         : previousMessage.author === message.author &&
             differenceInMinutes(
-              parseISO(message.timestamp),
-              parseISO(previousMessage.timestamp)
+              new Date(message.timestamp),
+              new Date(previousMessage.timestamp)
             ) >= 2;
     }
   }
@@ -234,6 +234,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
         style={{ height: "100%", overflowX: "hidden" }}
         ref={scroller}
         alignToBottom
+        overscan={{main: 1000, reverse: 1000}}
         atBottomThreshold={10}
         endReached={() => handleAtBottom(true)}
         atBottomStateChange={handleAtBottom}
