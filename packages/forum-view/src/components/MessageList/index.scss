@@ -1,0 +1,64 @@
+.main {
+  flex: 1;
+  position: relative;
+}
+
+.picker {
+  --background: var(--j-color-white);
+  --border-color: var(--j-color-ui-50);
+  --indicator-color: var(--j-color-primary-500);
+  --button-active-background: var(--j-color-ui-100);
+  --button-hover-background: var(--j-color-ui-200);
+  --input-border-radius: var(--j-border-radius);
+  --input-border-color: var(--j-color-ui-200);
+  --input-padding: var(--j-space-200);
+  --outline-size: 1px;
+  --outline-color: var(--j-color-ui-300);
+  --input-font-color: var(--j-color-ui-800);
+  --input-placeholder-color: varr(--j-color-ui-400);
+}
+
+.newMessagesButton {
+  position: absolute;
+  top: var(--j-space-500);
+  left: 50%;
+  z-index: 10;
+  transform: translateX(-50%);
+}
+
+.reactHintWrapper {
+  position: absolute;
+  z-index: 999;
+  margin-left: 10px;
+}
+
+.reactHint {
+  font-size: var(--j-font-size-400);
+  font-weight: 500;
+  padding: var(--j-space-300) var(--j-space-300);
+  background: rgb(28, 28, 28);
+  color: white;
+  border-radius: var(--j-border-radius);
+  white-space: nowrap;
+  
+}
+
+.arrow,
+.arrow::before {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: rgb(28, 28, 28);
+}
+
+.arrow {
+  visibility: hidden;
+}
+
+.arrow::before {
+  visibility: visible;
+  content: "";
+  transform: rotate(45deg);
+  left: -12px;
+  top: -14px;
+}
