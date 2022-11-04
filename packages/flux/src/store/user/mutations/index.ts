@@ -1,4 +1,4 @@
-import { Profile } from "@/store/types";
+import { Profile } from "utils/types";
 import { AgentStatus } from "@perspect3vism/ad4m";
 import { useUserStore } from "..";
 

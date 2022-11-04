@@ -34,6 +34,11 @@ export default function (link: LinkExpression): Message {
       reactions: [],
       replies: [reply],
       content: expression.data,
+      editMessages: [{
+        author: link.author,
+        content: expression.data,
+        imestamp: expression.timestamp,
+      }]
     };
 
     return message as Message;

@@ -10,7 +10,7 @@ const styles = css`
     --j-modal-transition: all 0.4s cubic-bezier(0.785, 0.135, 0.15, 0.86);
     --j-modal-box-shadow: none;
     --j-modal-width: clamp(600px, 50vw, 800px);
-    --j-modal-width-mobile: 80vw;
+    --j-modal-width-mobile: 95vw;
     --j-modal-height: auto;
     --j-modal-padding: var(--j-space-400);
     --j-modal-border: 1px solid transparent;
@@ -50,6 +50,7 @@ const styles = css`
     display: flex;
     align-items: var(--j-modal-align);
     justify-content: var(--j-modal-justify);
+    padding-bottom: var(--j-space-400);
     visibility: hidden;
   }
 

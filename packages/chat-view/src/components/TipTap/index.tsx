@@ -5,11 +5,11 @@ import styles from "./index.scss";
 import UIContext from "../../context/UIContext";
 import EditorContext from "../../context/EditorContext";
 
-export default function Tiptap({perspectiveUuid, channelId}) {
+export default function Tiptap({ perspectiveUuid, channelId }) {
   const [showToolbar, setShowToolbar] = useState(false);
   const {
     state: { editor, value },
-    methods: {onSend}
+    methods: { onSend },
   } = useContext(EditorContext);
 
   const emojiPicker = useRef();
@@ -27,7 +27,7 @@ export default function Tiptap({perspectiveUuid, channelId}) {
       if (emojiPicker.current) {
         emojiPicker.current.removeEventListener("emoji-click", onEmojiClick);
       }
-    }
+    };
   }, [emojiPicker.current, editor]);
 
   useEffect(() => {
@@ -68,7 +68,10 @@ export default function Tiptap({perspectiveUuid, channelId}) {
 
   return (
     <div class={styles.editor}>
-      <div id={`mentionWrapper-${perspectiveUuid}-${channelId}`} class={styles.mentionWrapper}></div>
+      <div
+        id={`mentionWrapper-${perspectiveUuid}-${channelId}`}
+        class={styles.mentionWrapper}
+      ></div>
       {showToolbar && (
         <div>
           <j-button
@@ -141,11 +144,7 @@ export default function Tiptap({perspectiveUuid, channelId}) {
               <j-icon size="sm" name="emoji-smile"></j-icon>
             </j-button>
             <div slot="content">
-              <emoji-picker
-                class={styles.picker}
-                ref={emojiPicker}
-                onEmojiClick={onEmojiClick}
-              />
+              <emoji-picker class={styles.picker} ref={emojiPicker} />
             </div>
           </j-popover>
           <j-button

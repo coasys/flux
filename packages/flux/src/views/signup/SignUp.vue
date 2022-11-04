@@ -107,6 +107,7 @@ import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";
 
 export default defineComponent({
   name: "SignUp",
+  emits: ["connectToAd4m"],
   components: {
     AvatarUpload,
     Carousel,

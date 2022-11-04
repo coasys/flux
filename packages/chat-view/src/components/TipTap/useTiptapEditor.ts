@@ -24,6 +24,13 @@ import { NeighbourhoodLink } from "./NeighourhoodPlugin";
 import HardBreak from "@tiptap/extension-hard-break";
 import { useEffect, useRef } from "preact/hooks";
 
+// ! Fix for an error with posemirror in react strict-mode
+import { EditorView } from "prosemirror-view";
+EditorView.prototype.updateState = function updateState(state) {
+  if (!this.docView) return; // This prevents the matchesNode error on hot reloads
+  this.updateStateInner(state, this.state.plugins != state.plugins);
+};
+
 export default ({
   value,
   onSend,
@@ -32,11 +39,14 @@ export default ({
   onChange,
   perspectiveUuid,
   channelId,
+  currentMessageEdit,
+  onMessageEdit,
 }) => {
   // This is needed because React ugh.
   const sendCB = useRef(onSend);
   const membersCB = useRef(members);
   const channelsCB = useRef(channels);
+  const onMessageEditCB = useRef(onMessageEdit);
   useEffect(() => {
     sendCB.current = onSend;
   }, [onSend]);
@@ -46,6 +56,9 @@ export default ({
   useEffect(() => {
     channelsCB.current = channels;
   }, [channels]);
+  useEffect(() => {
+    onMessageEditCB.current = onMessageEdit;
+  }, [onMessageEdit]);
 
   const editor = useEditor(
     {
@@ -100,6 +113,15 @@ export default ({
                 // Prevents us from getting a new paragraph if user pressed Enter
                 return false;
               },
+              ArrowUp: (props) => {
+                const value = props.editor.getText() as any;
+
+                if (value.length === 0) {
+                  onMessageEditCB.current();
+                }
+
+                return false;
+              },
             };
           },
         }),
@@ -144,7 +166,7 @@ export default ({
             render: () => renderMention(perspectiveUuid, channelId),
           },
         }),
-        Mention("channel-mention").configure({
+        Mention("channel").configure({
           HTMLAttributes: {
             class: styles.editorMentions,
           },
@@ -155,7 +177,7 @@ export default ({
           },
           suggestion: {
             char: "#",
-            pluginKey: new PluginKey("channel-mention"),
+            pluginKey: new PluginKey("channel"),
             items: ({ query }) => {
               return channelsCB.current
                 .filter((item) =>
@@ -166,7 +188,7 @@ export default ({
             render: () => renderMention(perspectiveUuid, channelId),
           },
         }),
-        Mention("agent-mention").configure({
+        Mention("agent").configure({
           HTMLAttributes: {
             class: styles.editorMentions,
           },
@@ -177,7 +199,7 @@ export default ({
           },
           suggestion: {
             char: "@",
-            pluginKey: new PluginKey("agent-mention"),
+            pluginKey: new PluginKey("agent"),
             items: ({ query }) => {
               return membersCB.current
                 .filter((item) =>
@@ -191,10 +213,18 @@ export default ({
       ],
       onUpdate: (props) => {
         const value = props.editor.getJSON() as any;
+        console.log("wwwweeee", value);
         onChange(value);
       },
     },
-    [membersCB, channelsCB, perspectiveUuid, channelId]
+    [
+      membersCB,
+      channelsCB,
+      perspectiveUuid,
+      channelId,
+      currentMessageEdit,
+      onMessageEditCB,
+    ]
   );
 
   return editor;

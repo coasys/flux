@@ -16,6 +16,8 @@ export const EXPRESSION = "sioc://content_of";
 
 export const DIRECTLY_SUCCEEDED_BY = "temp://directly_succeeded_by";
 
+export const EDITED_TO = "temp://edited_to";
+
 export const CHANNEL = "flux://has_channel";
 
 export const CHANNEL_NAME = "flux://has_channel_name";

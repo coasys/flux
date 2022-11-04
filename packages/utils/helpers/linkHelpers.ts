@@ -1,12 +1,14 @@
 import { Link, LinkInput } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
+
 import {
   CARD_HIDDEN,
   CHANNEL,
   DIRECTLY_SUCCEEDED_BY,
   MEMBER,
   REACTION,
+  EDITED_TO,
   REPLY_TO,
   ZOME,
 } from "../constants/communityPredicates";
@@ -30,6 +32,7 @@ export const linkIs = {
   member: (link: LinkExpression) => link.data.predicate === MEMBER,
   hideNeighbourhoodCard: (link: LinkExpression) =>
     link.data.predicate === CARD_HIDDEN,
+  editedMessage: (link: LinkExpression) => link.data.predicate === EDITED_TO,
   socialDNA: (link: LinkExpression) => link.data.predicate === ZOME,
 
   // TODO: SHould we check if the link is proof.valid?
@@ -43,7 +46,7 @@ type PredicateMap = {
 };
 
 type TargetMap = {
-  [predicate: string]: Target;
+  [predicate: string]: Target | undefined | null;
 };
 
 type Map = {
@@ -75,11 +78,15 @@ export async function createLiteralLinks(source: string, map: TargetMap) {
 
   const targets = Object.keys(map);
 
-  const promises = targets.map(async (predicate) => {
-    const message = map[predicate];
-    const exp = await client.expression.create(message, "literal");
-    return new Link({ source, predicate, target: exp });
-  });
+  const promises = targets
+    .filter((predicate: any) => {
+      return typeof map[predicate] === "string";
+    })
+    .map(async (predicate: string) => {
+      const message = map[predicate];
+      const exp = await client.expression.create(message, "literal");
+      return new Link({ source, predicate, target: exp });
+    });
 
   return Promise.all(promises);
 }

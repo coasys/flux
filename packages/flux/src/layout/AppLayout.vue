@@ -80,11 +80,11 @@ export default defineComponent({
   top: 0;
   width: var(--app-main-sidebar-width);
   display: flex;
-  z-index: 10;
   flex-direction: column;
   justify-content: space-between;
   background: var(--app-main-sidebar-bg-color);
   height: 100%;
+  z-index: 10;
   border-right: 1px var(--app-main-sidebar-border-color) solid;
   transition: all 0.3s ease;
   transform: translateX(calc(var(--app-main-sidebar-width) * -1));
@@ -95,5 +95,6 @@ export default defineComponent({
   overflow-x: hidden;
   transition: all 0.3s ease;
   margin-left: 0;
+  position: relative;
 }
 </style>

@@ -40,8 +40,7 @@
 
       <j-flex gap="400">
         <j-button full style="width: 100%" size="lg" @click="$emit('cancel')">
-          <j-icon v-if="!isEditing" slot="start" name="arrow-left-short" />
-          {{ isEditing ? "Cancel" : "Back" }}
+          Cancel
         </j-button>
         <j-button
           style="width: 100%"
@@ -53,7 +52,7 @@
           @click="createLink"
         >
           <j-icon slot="end" name="add" />
-          {{ isEditing ? "Save" : "Add link" }}
+          Add link
         </j-button>
       </j-flex>
     </j-flex>
@@ -70,11 +69,10 @@ import {
   OG_TITLE,
   OG_IMAGE,
 } from "utils/constants/profile";
-import getOGData from "utils/helpers/getOGData";
 import { createLiteralObject } from "utils/helpers/linkHelpers";
 
 export default defineComponent({
-  props: ["step", "isEditing"],
+  props: ["step"],
   emits: ["cancel", "submit"],
 
   setup() {

@@ -1,4 +1,11 @@
-import { useState, useContext, useRef, useEffect } from "preact/hooks";
+import {
+  useState,
+  useContext,
+  useRef,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "preact/hooks";
 import { ChatContext } from "utils/react";
 import MessageItem from "../MessageItem";
 import getMe from "utils/api/getMe";
@@ -16,9 +23,13 @@ import EditorContext from "../../context/EditorContext";
 import { REACTION } from "utils/constants/communityPredicates";
 
 export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
-  const emojiPicker = useRef(document.createElement("emoji-picker"));
-  emojiPicker.current.classList.add(styles.picker);
-  const [atBottom, setAtBottom] = useState(true);
+  const emojiPicker = useMemo(() => {
+    const el = document.createElement("emoji-picker");
+    el.classList.add(styles.picker);
+    return el;
+  }, []);
+
+  const [atBottom, setAtBottom] = useState(false);
   const [initialScroll, setinitialScroll] = useState(false);
   const scroller = useRef();
   const {
@@ -105,24 +116,24 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
         ? true
         : previousMessage.author === message.author &&
             differenceInMinutes(
-              parseISO(message.timestamp),
-              parseISO(previousMessage.timestamp)
+              new Date(message.timestamp),
+              new Date(previousMessage.timestamp)
             ) >= 2;
     }
   }
 
   function openEmojiPicker(e: any, index: number) {
-    emojiPicker.current.setAttribute("message-index", index.toString());
+    emojiPicker.setAttribute("message-index", index.toString());
     const instance = tippy(e.target as HTMLElement, {
-      content: emojiPicker.current,
+      content: emojiPicker,
       trigger: "click",
       appendTo: document.body,
       interactive: true,
       onShow: () => {
-        emojiPicker.current.addEventListener("emoji-click", onEmojiClick);
+        emojiPicker.addEventListener("emoji-click", onEmojiClick);
       },
       onHide: () => {
-        emojiPicker.current.removeEventListener("emoji-click", onEmojiClick);
+        emojiPicker.removeEventListener("emoji-click", onEmojiClick);
       },
     });
     instance.show();
@@ -168,35 +179,21 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
     }
   };
 
-  useEffect(() => {
-    if (mainRef && perspectiveUuid && channelId) {
-      let options = {
-        root: document.querySelector(".sidebar-layout__main"),
-        rootMargin: "0px",
-        threshold: 1.0,
-      };
-
-      let observer = new IntersectionObserver(() => {
-        editor?.chain().focus();
-
-        if (atBottom) {
-          const event = new CustomEvent("hide-notification-indicator", {
-            detail: { uuid: channelId },
-            bubbles: true,
-          });
-          mainRef?.dispatchEvent(event);
-        }
-      }, options);
-
-      if (mainRef) {
-        observer.observe(mainRef);
-      }
-
-      return () => {
-        observer.disconnect();
-      };
+  function handleAtBottom(bool) {
+    if (atBottom === bool) {
+      return;
     }
-  }, [atBottom, mainRef, channelId, perspectiveUuid, editor]);
+
+    if (bool) {
+      setHasNewMessage(false);
+      const event = new CustomEvent("hide-notification-indicator", {
+        detail: { uuid: channelId },
+        bubbles: true,
+      });
+      mainRef?.dispatchEvent(event);
+    }
+    setAtBottom(bool);
+  }
 
   return (
     <main class={styles.main}>
@@ -239,34 +236,26 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
               </j-box>
             ),
         }}
+        style={{ height: "100%", overflowX: "hidden" }}
         ref={scroller}
         alignToBottom
-        startReached={() => console.log("start reached")}
-        atBottomStateChange={(bool) => {
-          if (atBottom === bool) {
-            return;
-          }
-          if (bool) {
-            setHasNewMessage(false);
-          }
-          setAtBottom(bool);
-        }}
-        style={{ height: "100%", overflowX: "hidden" }}
-        overscan={20}
-        totalCount={messages.length}
+        overscan={{main: 1000, reverse: 1000}}
+        atBottomThreshold={10}
+        computeItemKey={(index, message) => message.id}
+        endReached={() => handleAtBottom(true)}
+        atBottomStateChange={handleAtBottom}
+        data={messages}
         rangeChanged={rangeChanged}
         initialTopMostItemIndex={messages.length - 1}
-        itemContent={(index) => {
-          return (
-            <MessageItem
-              onOpenEmojiPicker={(unicode) => openEmojiPicker(unicode, index)}
-              showAvatar={showAvatar(index)}
-              index={index}
-              mainRef={mainRef}
-              perspectiveUuid={perspectiveUuid}
-            />
-          );
-        }}
+        itemContent={(index, message) => (
+          <MessageItem
+            message={message}
+            onOpenEmojiPicker={(unicode) => openEmojiPicker(unicode, index)}
+            showAvatar={showAvatar(index)}
+            mainRef={mainRef}
+            perspectiveUuid={perspectiveUuid}
+          />
+        )}
       />
       <ReactHint
         position="right"

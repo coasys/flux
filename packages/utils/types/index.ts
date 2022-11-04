@@ -12,13 +12,18 @@ export interface Reaction {
 
 export interface Message {
   id: string;
-  url: string;
   author: string; // did
   reactions: Reaction[];
-  timestamp: string;
-  content: string;
+  timestamp: Date | string;
   reply?: string;
   isPopular: boolean;
+  replies: any[];
+  isNeighbourhoodCardHidden: boolean;
+  editMessages: {
+    content: string;
+    author: string;
+    timestamp: Date | string;
+  }[];
 }
 export interface Messages {
   [x: string]: Message;
@@ -26,16 +31,14 @@ export interface Messages {
 
 export interface Profile {
   did: string;
-  url: string;
-  author: string;
-  timestamp: string;
   username: string;
+  bio: string;
   email: string;
   givenName: string;
   familyName: string;
+  profileBg: string;
   thumbnailPicture: string;
   profilePicture: string;
-  isNeighbourhoodCardHidden: boolean;
 }
 export interface Profiles {
   [x: string]: Profile;

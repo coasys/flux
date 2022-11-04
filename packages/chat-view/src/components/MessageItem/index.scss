@@ -3,7 +3,6 @@
   padding-bottom: var(--j-space-300);
   padding-left: var(--j-space-500);
   padding-right: var(--j-space-500);
-  position: relative;
   transition: background-color 0.2s ease;
   
   &:hover {
@@ -21,6 +20,7 @@
   & .messageItemWrapper {
     width: 100%;
     display: grid;
+    position: relative;
     grid-template-columns: 60px 1fr;
     column-gap: var(--j-space-100);
   }
@@ -31,12 +31,12 @@
 
   & .timestamp {
     font-size: var(--j-font-size-300);
-    color: var(--j-color-ui-300);
+    color: var(--j-color-ui-500);
   }
 
   & .timestampLeft {
     font-size: var(--j-font-size-300);
-    color: var(--j-color-ui-300);
+    color: var(--j-color-ui-500);
     opacity: 0;
   }
 
@@ -62,19 +62,27 @@
   & .messageItemContent p:first-of-type {
     user-select: text !important;
     margin-top: 0;
-
-    & > span[data-mention*="agent-mention"],
-    & > span[data-neighbourhood=""] {
-      cursor: pointer;
-      padding: 2px var(--j-space-200);
-      border-radius: var(--j-border-radius);
-      background: var(--j-color-primary-100);
-      color: var(--j-color-primary-700);
-    }
   }
 
   & .messageItemContent span {
     user-select: text !important;
+  }
+
+  & .messageItemContent [data-mention="neighbourhood"] {
+    cursor: pointer;
+    color: var(--j-color-primary-500);
+    text-decoration: underline;
+  }
+
+  & .messageItemContent [data-mention="channel"],
+  & .messageItemContent [data-mention="agent"]
+   {
+    word-break: break-word;
+    cursor: pointer;
+    padding: 2px var(--j-space-200);
+    border-radius: var(--j-border-radius);
+    background: var(--j-color-primary-100);
+    color: var(--j-color-primary-700);
   }
 
   & .messageItemContent a {
@@ -85,32 +93,17 @@
   & .messageItemContent p:last-of-type {
     user-select: text !important;
     margin-bottom: 0;
-
-    & > span[data-mention*="agent-mention"],
-    & > span[data-neighbourhood=""] {
-      cursor: pointer;
-      padding: 2px var(--j-space-200);
-      border-radius: var(--j-border-radius);
-      background: var(--j-color-primary-100);
-      color: var(--j-color-primary-700);
-    }
   }
 
   & .messageUsername {
     cursor: pointer;
     color: var(--j-color-black);
     font-size: var(--j-font-size-500);
-    font-weight: 400;
+    font-weight: 600;
 
     &:hover {
       text-decoration: underline;
     }
-  }
-
-  & .messageUsernameNoMargin {
-    color: var(--j-color-ui-600);
-    font-size: var(--j-font-size-500);
-    font-weight: 400;
   }
 }
 
@@ -128,7 +121,7 @@
 .replyLine {
   display: block;
   position: absolute;
-  top: 5px;
+  top: var(--j-space-300);
   right: 0;
   width: 70%;
   height: 15px;
@@ -137,11 +130,28 @@
   border-top-left-radius: var(--j-border-radius);
 }
 
-.messageFlex {
+.replyMessage {
   display: flex;
-  gap: var(--j-space-200);
+  gap: var(--j-space-300);
   align-items: center;
-  margin-bottom: var(--j-space-200);
+  margin-bottom: var(--j-space-300);
+}
+
+.replyAuthor {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-200);
+}
+
+.replyUsername {
+  font-weight: 600;
+  font-size: var(--j-font-size-400);
+  color: var(--j-color-ui-400);
+}
+
+.replyUsername:hover {
+  text-decoration: underline;
 }
 
 .replyContent {
@@ -168,6 +178,12 @@
   right: var(--j-space-500);
 }
 
+.messageReactions {
+  display: flex;
+  gap: var(--j-space-300);
+  margin-top: var(--j-space-300);
+}
+
 .emojiButton {
   position: relative;
   background: var(--j-color-white);
@@ -176,6 +192,7 @@
   gap: var(--j-space-200);
   align-items: center;
   cursor: pointer;
+  padding: 3px 6px;
   border-radius: var(--j-border-radius);
   border: 1px solid var(--j-color-ui-200);
 }
@@ -217,19 +234,44 @@ j-tooltip::part(base) {
   display: inline;
 }
 
-.neighbourhoodCards {
-  background: var(--app-drawer-bg-color);
+.neighbourhoodCard {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--j-space-300);
+  background: var(--j-color-ui-50);
+  border: 1px solid var(--j-color-ui-200);
   padding: 20px;
-  margin: 10px 60px 0 10px;
-  border-radius: 10px; 
-  border-left: solid 6px var(--app-main-sidebar-bg-color);
+  width: 100%;
+  max-width: 400px;
+  margin: var(--j-space-500) 0 var(--j-space-500) 0px;
+  border-radius: var(--j-border-radius); 
   position: relative;
 }
 
-.neighbourhoodCardsClose {
-  position: absolute;
-  top: 0;
-  right: 30px;
+.neighbourhoodCard:hover {
+  background: var(--j-color-ui-100);
+}
+
+.neighbourhoodCardTitle {
+  font-weight: 600;
+  font-size: var(--j-font-size-300);
+  text-transform: uppercase;
+}
+
+.neighbourhoodCardName {
+  margin-top: var(--j-space-300);
+  font-weight: 800;
+  font-size: var(--j-font-size-500);
+  color: var(--j-color-black);
+}
+
+.neighbourhoodCardDescription {
+  margin-top: var(--j-space-200);
+  font-size: var(--j-font-size-500);
+  font-weight: 400;
+  color: var(--j-color-ui-300);
 }
 
 .popularMessage {

@@ -28,7 +28,13 @@
       ></j-input>
       <div>
         <j-button size="lg" @click="$emit('cancel')"> Cancel </j-button>
-        <j-button size="lg" variant="primary" @click="updateProfile">
+        <j-button
+          :disabled="isUpdatingProfile"
+          size="lg"
+          :loading="isUpdatingProfile"
+          variant="primary"
+          @click="updateProfile"
+        >
           Save
         </j-button>
       </div>
@@ -39,7 +45,7 @@
 <script lang="ts">
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { defineComponent } from "vue";
-import { Profile } from "@/store/types";
+import { Profile } from "utils/types";
 import { useUserStore } from "@/store/user";
 import { useAppStore } from "@/store/app";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
@@ -47,7 +53,6 @@ import { getImage } from "utils/api/getProfile";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
-  props: ["bg", "preBio"],
   components: { AvatarUpload, ImgUpload },
   setup() {
     const userStore = useUserStore();
@@ -60,15 +65,18 @@ export default defineComponent({
   data() {
     return {
       isUpdatingProfile: false,
-      profilePicture: "",
       username: "",
       bio: "",
-      link: "",
       profileBg: "",
-      profileBgChanged: false,
-      bioChanged: false,
+      profilePicture: "",
       hideContainer: false,
     };
+  },
+  async mounted() {
+    this.username = this.userProfile.username || "";
+    this.bio = this.userProfile.bio || "";
+    this.profilePicture = await getImage(this.userProfile?.profilePicture);
+    this.profileBg = await getImage(this.userProfile.profileBg);
   },
   computed: {
     userProfile(): Profile {
@@ -76,36 +84,6 @@ export default defineComponent({
     },
     userDid(): string {
       return this.userStore.agent.did!;
-    },
-  },
-  watch: {
-    "userProfile.profilePicture": {
-      handler: async function (val: string) {
-        if (this.userStore.profile?.profilePicture) {
-          this.profilePicture =  await getImage(this.userStore.profile?.profilePicture)
-        } else {
-          this.profilePicture = '';
-        }
-      },
-      immediate: true,
-    },
-    "userProfile.username": {
-      handler: function (val: string): void {
-        this.username = val;
-      },
-      immediate: true,
-    },
-    preBio() {
-      this.bio = this.preBio;
-    },
-    bg() {
-      this.profileBg = this.bg;
-    },
-    bio() {
-      this.bioChanged = this.bio !== this.preBio;
-    },
-    profileBg() {
-      this.profileBgChanged = this.profileBg !== this.bg;
     },
   },
   methods: {

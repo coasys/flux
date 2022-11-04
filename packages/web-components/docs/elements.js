@@ -22,6 +22,7 @@ import Toast from "../src/components/toast/Toast.docs.js";
 import Tooltip from "../src/components/tooltip/Tooltip.docs.js";
 import Carousel from "../src/components/carousel/Carousel.docs.js";
 import Toggle from "../src/components/toggle/Toggle.docs.js";
+import Skeleton from "../src/components/skeleton/Skeleton.docs.js";
 
 export default {
   Avatar,
@@ -48,4 +49,5 @@ export default {
   Tooltip,
   Carousel,
   Toggle,
+  Skeleton,
 };

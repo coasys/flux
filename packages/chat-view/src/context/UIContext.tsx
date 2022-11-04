@@ -3,21 +3,25 @@ import { createContext } from "preact";
 
 type State = {
   currentReply: string;
+  currentMessageEdit: string;
 };
 
 type ContextProps = {
   state: State;
   methods: {
     setCurrentReply: (id: string) => void;
+    setCurrentEditMessage: (id: string) => void;
   };
 };
 
 const initialState: ContextProps = {
   state: {
     currentReply: "",
+    currentMessageEdit: null
   },
   methods: {
     setCurrentReply: (id: string) => null,
+    setCurrentEditMessage: (id: string) => null,
   },
 };
 
@@ -33,6 +37,9 @@ export function UIProvider({ children }: any) {
         methods: {
           setCurrentReply(id: string) {
             setState({ ...state, currentReply: id });
+          },
+          setCurrentEditMessage(id: string) {
+            setState({ ...state, currentMessageEdit: id });
           },
         },
       }}
