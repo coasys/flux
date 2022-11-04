@@ -3,8 +3,8 @@ import {
   ThemeState,
   LocalCommunityState,
   ChannelState,
-  Profile,
 } from "@/store/types";
+import { Channel } from "utils/types";
 
 import { useDataStore } from "..";
 
@@ -138,13 +138,34 @@ export default {
     });
   },
 
+  putChannelView(payload: { channelId: string; view: string }) {
+    const state = useDataStore();
+    const channel = state.channels[payload.channelId];
+    if (channel) {
+      const alreadyHasView = channel.views?.includes(payload.view);
+      if (!alreadyHasView) {
+        channel.views =
+          channel.views?.length > 0
+            ? [...channel.views, payload.view]
+            : [payload.view];
+      }
+    }
+  },
+
+  setChannels(payload: { communityId: string; channels: ChannelState[] }) {
+    const state = useDataStore();
+    payload.channels.forEach((channel) => {
+      state.channels[channel.id] = channel;
+    });
+  },
+
   addChannel(payload: AddChannel): void {
     const state = useDataStore();
     const parentNeighbourhood = state.neighbourhoods[payload.communityId];
 
-    if (parentNeighbourhood !== undefined) {
+    if (parentNeighbourhood) {
       const exists = Object.values(state.channels).find(
-        (c) =>
+        (c: ChannelState) =>
           c.name === payload.channel.name &&
           c.sourcePerspective === payload.communityId
       );
@@ -154,9 +175,9 @@ export default {
       }
     }
   },
+
   removeChannel(payload: { channelId: string }): void {
     const state = useDataStore();
-
     delete state.channels[payload.channelId];
   },
 

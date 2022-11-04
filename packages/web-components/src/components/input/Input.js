@@ -95,6 +95,7 @@ class Input extends LitElement {
     this.required = false;
     this.readonly = false;
     this.type = "text";
+    this.focus = this.focus.bind(this);
     this.onFocus = this.onFocus.bind(this);
     this.onBlur = this.onBlur.bind(this);
   }
@@ -154,6 +155,10 @@ class Input extends LitElement {
 
   select() {
     this.renderRoot.querySelector("input").select();
+  }
+
+  focus() {
+    this.renderRoot.querySelector("input").focus();
   }
 
   onFocus(e) {

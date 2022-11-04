@@ -25,7 +25,7 @@
           channel.name === channelId &&
           channel.sourcePerspective === communityId
         "
-        :channelId="channel.name"
+        :channelId="channelId"
         :communityId="channel.sourcePerspective"
       ></channel-view>
     </div>

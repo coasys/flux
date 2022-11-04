@@ -9,9 +9,17 @@
         <j-icon color="ui-800" size="md" name="arrow-left-short" />
       </j-button>
       <j-text color="black" variant="heading-md"># {{ channel.name }}</j-text>
+      <div v-for="view in channel.views">{{ view }}</div>
+      <j-button
+        @click="() => (showAddChannelView = true)"
+        size="sm"
+        variant="subtle"
+        >Add View</j-button
+      >
     </div>
 
-    <perspective-view
+    <forum-view
+      v-show="currentView === 'forum-view'"
       class="perspective-view"
       :port="port"
       :channel="channel.id"
@@ -20,7 +28,36 @@
       @channel-click="onChannelClick"
       @neighbourhood-click="onNeighbourhoodClick"
       @hide-notification-indicator="onHideNotificationIndicator"
-    ></perspective-view>
+    ></forum-view>
+    <chat-view
+      v-show="currentView === 'chat-view'"
+      class="perspective-view"
+      :port="port"
+      :channel="channel.id"
+      :perspective-uuid="communityId"
+      @agent-click="onAgentClick"
+      @channel-click="onChannelClick"
+      @neighbourhood-click="onNeighbourhoodClick"
+      @hide-notification-indicator="onHideNotificationIndicator"
+    ></chat-view>
+    <j-modal
+      :open="showAddChannelView"
+      @toggle="(e: any) => (showAddChannelView = e.target.open)"
+    >
+      <j-box p="800">
+        <j-flex direction="column" gap="500">
+          <j-text variant="heading-sm">Add Channel View</j-text>
+          <j-tabs
+            :value="selectedChannelView"
+            @change="(e: any) => (selectedChannelView = e.target.value)"
+          >
+            <j-tab-item variant="button" value="chat">Chat</j-tab-item>
+            <j-tab-item variant="button" value="forum">Forum</j-tab-item>
+          </j-tabs>
+          <j-button @click="addChannelView">Add View</j-button>
+        </j-flex>
+      </j-box>
+    </j-modal>
     <j-modal
       size="xs"
       v-if="activeProfile"
@@ -40,9 +77,9 @@
     >
       <j-box v-if="activeCommunity" p="800">
         <j-flex a="center" direction="column" gap="500">
-          <j-text v-if="activeCommunity.name">{{
-            activeCommunity.name
-          }}</j-text>
+          <j-text v-if="activeCommunity.name">
+            {{ activeCommunity.name }}
+          </j-text>
           <j-text
             v-if="activeCommunity.description"
             variant="heading-sm"
@@ -67,6 +104,7 @@
 </template>
 
 <script lang="ts">
+import ForumView from "@junto-foundation/forum-view";
 import ChatView from "@junto-foundation/chat-view";
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
@@ -74,6 +112,11 @@ import { useDataStore } from "@/store/data";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import Profile from "@/containers/Profile.vue";
 import { useAppStore } from "@/store/app";
+
+const componentMap = {
+  chat: "chat-view",
+  forum: "forum-view",
+};
 
 interface MentionTrigger {
   label: string;
@@ -88,32 +131,30 @@ export default defineComponent({
     Profile,
   },
   setup() {
-    const appStore = useAppStore();
-    const dataStore = useDataStore();
-    const memberMentions = ref<MentionTrigger[]>([]);
-    const activeProfile = ref<any>({});
-    const showProfile = ref(false);
-    const activeCommunity = ref<any>({});
-    const showJoinCommuinityModal = ref(false);
-    const isJoiningCommunity = ref(false);
-
     return {
-      appStore,
-      dataStore,
+      showAddChannelView: ref(false),
+      selectedChannelView: ref("chat"),
+      appStore: useAppStore(),
+      dataStore: useDataStore(),
       script: null as HTMLElement | null,
-      memberMentions,
-      activeProfile,
-      showProfile,
-      showJoinCommuinityModal,
-      activeCommunity,
-      isJoiningCommunity,
+      memberMentions: ref<MentionTrigger[]>([]),
+      activeProfile: ref<any>({}),
+      showProfile: ref(false),
+      showJoinCommuinityModal: ref(false),
+      activeCommunity: ref<any>({}),
+      isJoiningCommunity: ref(false),
     };
   },
   mounted() {
-    if (customElements.get("perspective-view") === undefined)
-      customElements.define("perspective-view", ChatView);
+    if (!customElements.get("chat-view"))
+      customElements.define("chat-view", ChatView);
+    if (!customElements.get("forum-view"))
+      customElements.define("forum-view", ForumView);
   },
   computed: {
+    currentView(): string {
+      return componentMap[this.channel.currentView || "chat"] || "chat-view";
+    },
     port(): number {
       // TODO: This needs to be reactive, probaly not now as we using a normal class
       return parseInt(localStorage.getItem("ad4minPort") || "") || 12000;
@@ -132,6 +173,20 @@ export default defineComponent({
     },
   },
   methods: {
+    addChannelView() {
+      this.dataStore
+        .addChannelView({
+          perspectiveUuid: this.communityId,
+          channelId: this.channelId,
+          view: this.selectedChannelView,
+        })
+        .then(() => {
+          this.showAddChannelView = false;
+        });
+    },
+    getChannelView(view: string) {
+      return componentMap[view || "chat"] || "chat-view";
+    },
     toggleSidebar() {
       this.appStore.toggleSidebar();
     },

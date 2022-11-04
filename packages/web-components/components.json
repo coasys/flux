@@ -880,6 +880,9 @@
           "default": "\"text\""
         },
         {
+          "name": "focus"
+        },
+        {
           "name": "onFocus"
         },
         {

@@ -19,8 +19,17 @@
           type="text"
           :value="channelName"
           @keydown.enter="createChannel"
-          @input="(e) => (channelName = e.target.value)"
+          @input="(e: any) => (channelName = e.target.value)"
         ></j-input>
+        <div>
+          <j-tabs
+            :value="channelView"
+            @change="(e: any) => (channelView = e.target.value)"
+          >
+            <j-tab-item variant="button" value="chat">Chat</j-tab-item>
+            <j-tab-item variant="button" value="forum">Forum</j-tab-item>
+          </j-tabs>
+        </div>
         <div>
           <j-button size="lg" @click="$emit('cancel')"> Cancel </j-button>
           <j-button
@@ -54,6 +63,7 @@ export default defineComponent({
   },
   data() {
     return {
+      channelView: "chat",
       channelName: "",
       isCreatingChannel: false,
     };
@@ -78,8 +88,9 @@ export default defineComponent({
       this.isCreatingChannel = true;
       this.dataStore
         .createChannel({
-          communityId,
+          perspectiveUuid: communityId,
           name,
+          view: this.channelView,
         })
         .then((channel: any) => {
           this.$emit("submit");

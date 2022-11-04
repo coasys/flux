@@ -1,4 +1,5 @@
 import createChannel from "./createChannel";
+import addChannelView from "./addChannelView";
 import createCommunity from "./createCommunity";
 import joinCommunity from "./joinCommunity";
 import updateCommunity from "./updateCommunity";
@@ -9,6 +10,7 @@ import fetchNeighbourhoodChannels from "./fetchNeighbourhoodChannels";
 import removeCommunity from "./removeCommunity";
 
 export default {
+  addChannelView,
   createChannel,
   createCommunity,
   joinCommunity,
@@ -17,5 +19,5 @@ export default {
   fetchNeighbourhoodMembers,
   fetchNeighbourhoodMetadata,
   fetchNeighbourhoodChannels,
-  removeCommunity
+  removeCommunity,
 };

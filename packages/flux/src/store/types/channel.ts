@@ -5,7 +5,9 @@ export interface ChannelState {
   description?: string;
   sourcePerspective: string;
   hasNewMessages: boolean;
-  createdAt: string;
+  createdAt: Date | string;
+  currentView: string;
+  views: string[];
   scrollTop?: number;
   notifications: {
     mute: boolean;

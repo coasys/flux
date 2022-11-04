@@ -4,6 +4,16 @@ export interface NeighbourhoodMeta {
   languages: { [x: string]: string };
 }
 
+export interface Channel {
+  id: string;
+  name: string;
+  description: string;
+  perspectiveUuid: string;
+  timestamp: Date | string;
+  author: string; // did
+  views: string[];
+}
+
 export interface Reaction {
   author: string;
   content: string;

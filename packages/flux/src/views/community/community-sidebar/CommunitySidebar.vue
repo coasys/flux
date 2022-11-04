@@ -124,7 +124,6 @@
             :selected="isExactActive"
             @click="() => navigateTo(navigate)"
           >
-            <j-icon slot="start" size="sm" name="hash"></j-icon>
             {{ channel.name }}
             <j-icon
               size="xs"
