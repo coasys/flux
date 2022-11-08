@@ -3,6 +3,53 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.3.1] - 08/11/2022
+
+### Added
+
+- Chat view repo
+- Utils repo
+- Pagination now used when fecthing messages
+- Toggle for enabling notifications on signup and in settings
+- picker styles on texteditor
+- Hovering over emoji's will now popup author
+- Ability to delete a channel
+- Community tweaks! Ability to determine popular posts by emoji counts
+- Ability to edit messages!
+
+### Changed
+
+- Flux code base is now a monorepo
+- Display username in message notifications
+- Limit message width
+- Improve mention rendering
+- Increase message page size to 50
+- Use latest ad4m connect version
+- Improve hydrate state
+- Autofocus improved to focus message input when changing channels
+- Improve loading of profiles
+
+### Deprecated
+
+### Removed
+
+- Usage of perspective proxy and instead rely on new mutateAgentPerspective function in ad4m
+
+### Fixed
+
+- Theme handling
+- Small colour tweaks to increase visibility
+- Getting notifications from self
+- Chat messages do not jump around when messages load
+- MessageItem are now less expensive to render
+- Better placeholder skelto
+- Scrolling performance increased
+- Image & member loading performance increased
+
+### Security
+
+---
+
 ## [0.3.0] - 06/10/2022
 
 ### Added
