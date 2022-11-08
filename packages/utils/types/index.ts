@@ -60,7 +60,7 @@ export enum EntryType {
   "flux://channel",
 }
 
-export type Did = String;
+export type Did = string;
 
 export interface Entry {
   id: string;
