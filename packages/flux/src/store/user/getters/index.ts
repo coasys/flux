@@ -9,9 +9,5 @@ export default {
   getUser(): UserState | null {
     const store = useUserStore();
     return store;
-  },
-  getAgentProfileProxyPerspectiveId(): string | undefined {
-    const store = useUserStore();
-    return store.agentProfileProxyPerspectiveId;
-  },
+  }
 };

@@ -215,25 +215,16 @@ export default defineComponent({
 
         const client = await getAd4mClient();
 
-        const perspectives = await client.perspective.all();
-        const ad4mAgentPerspective = perspectives.find(
-          ({ name }) => name === "Agent Profile"
-        );
+        const agentLinks = (await client.agent.me()).perspective.links;
 
-        if (ad4mAgentPerspective) {
-          const agentPers = await client.perspective.snapshotByUUID(
-            ad4mAgentPerspective.uuid
-          );
-
-          const profile = mapLiteralLinks(agentPers?.links, {
-            username: AD4M_PREDICATE_USERNAME,
-            name: AD4M_PREDICATE_FIRSTNAME,
-            familyName: AD4M_PREDICATE_LASTNAME,
-          });
-          this.username = profile.username || "";
-          this.name = profile.name || "";
-          this.familyName = profile.familyName || "";
-        }
+        const profile = mapLiteralLinks(agentLinks, {
+          username: AD4M_PREDICATE_USERNAME,
+          name: AD4M_PREDICATE_FIRSTNAME,
+          familyName: AD4M_PREDICATE_LASTNAME,
+        });
+        this.username = profile.username || "";
+        this.name = profile.name || "";
+        this.familyName = profile.familyName || "";
       } catch (e) {
         console.log(e);
       }

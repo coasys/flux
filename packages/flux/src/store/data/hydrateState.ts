@@ -7,7 +7,6 @@ import { CommunityState, LocalCommunityState } from "../types";
 import { getGroupMetadata } from "./actions/fetchNeighbourhoodMetadata";
 import { useUserStore } from "../user";
 import getProfile from "utils/api/getProfile";
-import { FLUX_PROXY_PROFILE_NAME } from "utils/constants/profile";
 import { LinkQuery } from "@perspect3vism/ad4m";
 
 export async function getMetaFromLinks(links: LinkExpression[]) {

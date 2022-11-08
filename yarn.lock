@@ -698,10 +698,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@perspect3vism/ad4m-connect@0.0.11-11":
-  version "0.0.11-11"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.0.11-11.tgz#fdff8fefadafb769c339c0cb4a110bbb99da8367"
-  integrity sha512-Zjf8kV6vP6jgICgSOf+W2VTSm7nj9rjEy0GRlErrJpXFdXfRSdm9MWiw5lBRYqD1iMBuC/07IQkddNxwdHfFYw==
+"@perspect3vism/ad4m-connect@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.2.0.tgz#ac6b7acad84199ad88f96f04d00cf559775fb6d7"
+  integrity sha512-ls6TrbfVvwUvst91PHZ7tqcpb/5ZhccIbgmS6YqRzYqbToQozYTUq9zODPfKBUH6d3k6/X8Sj3BT5LrffQv5Tw==
   dependencies:
     auto-bind "^5.0.1"
     electron "^20.0.3"
@@ -717,6 +717,20 @@
     "@apollo/client" "3.6.9"
     "@holochain/client" "0.3.2"
     "@types/jest" "^27.0.1"
+    class-validator "^0.13.1"
+    express "^4.18.1"
+    graphql "^15.7.2"
+    reflect-metadata "^0.1.13"
+    type-graphql "^1.1.1"
+
+"@perspect3vism/ad4m@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.2.0.tgz#4d10afe2a4e2b1bd697394009cfd675e42256813"
+  integrity sha512-F4a1q8stazNXsVRVSjV3YXPykMGKib6SZ68+hhAh4P9SAkPKbMfwgC8fQQy3GZkGwiKEsRBvHb+fGhLKVqjkug==
+  dependencies:
+    "@apollo/client" "3.6.9"
+    "@holochain/client" "0.3.2"
+    "@types/jest" "^26.0.14"
     class-validator "^0.13.1"
     express "^4.18.1"
     graphql "^15.7.2"
@@ -1033,7 +1047,7 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
-"@types/jest@^26.0.20":
+"@types/jest@^26.0.14", "@types/jest@^26.0.20":
   version "26.0.24"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-26.0.24.tgz#943d11976b16739185913a1936e0de0c4a7d595a"
   integrity sha512-E/X5Vib8BWqZNRlDxj9vYXhsDwPYbPINqKF9BsnSoon4RQ0D9moEuLD8txgyypFLH7J4+Lho9Nr/c8H0Fi+17w==
