@@ -7,7 +7,8 @@ import {
   CHANNEL_VIEW,
 } from "utils/constants/communityPredicates";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { Channel } from "../types";
+import { Channel, EntryType } from "../types";
+import { createEntry } from "../helpers/entryHelpers";
 
 interface ChannelProps {
   view?: string;
@@ -21,40 +22,22 @@ export async function createChannel({
   perspectiveUuid,
 }: ChannelProps): Promise<Channel> {
   try {
-    const client = await getAd4mClient();
-
-    const channelExpr = await client.expression.create(channelName, "literal");
-
-    const linkExpression = await client.perspective.addLink(perspectiveUuid, {
-      source: SELF,
-      target: channelExpr,
-      predicate: CHANNEL,
-    });
-
-    await client.perspective.addLink(perspectiveUuid, {
-      source: channelExpr,
-      target: channelExpr,
-      predicate: CHANNEL_NAME,
-    });
-
-    await client.perspective.addLink(perspectiveUuid, {
-      source: channelExpr,
-      target: await client.expression.create(view, "literal"),
-      predicate: CHANNEL_VIEW,
-    });
-
-    await client.perspective.addLink(perspectiveUuid, {
-      source: channelExpr,
-      target: FLUX_CHANNEL,
-      predicate: AD4M_CLASS,
+    const channel = await createEntry({
+      perspectiveUuid,
+      type: EntryType["flux://channel"],
+      data: {
+        [CHANNEL_NAME]: channelName,
+        [CHANNEL_VIEW]: view,
+        [AD4M_CLASS]: FLUX_CHANNEL,
+      },
     });
 
     return {
-      id: channelExpr,
+      id: channel.id,
       name: channelName,
       description: "",
-      author: linkExpression.author,
-      timestamp: linkExpression.timestamp || new Date().toISOString(),
+      author: channel.author,
+      timestamp: channel.createdAt,
       perspectiveUuid: perspectiveUuid,
       views: [view],
     };

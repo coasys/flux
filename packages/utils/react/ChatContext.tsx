@@ -404,7 +404,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   async function sendMessage(value) {
     const message = await createMessage({
       perspectiveUuid,
-      lastMessage: channelId,
+      channelId: channelId,
       message: value,
     });
 

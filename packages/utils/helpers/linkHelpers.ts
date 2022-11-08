@@ -41,11 +41,11 @@ export const linkIs = {
 type Target = string;
 type Predicate = string;
 
-type PredicateMap = {
+type TargetMap = {
   [property: string]: Predicate;
 };
 
-type TargetMap = {
+type PredicateMap = {
   [predicate: string]: Target | undefined | null;
 };
 
@@ -55,7 +55,7 @@ type Map = {
 
 export function mapLiteralLinks(
   links: LinkExpression[] | undefined,
-  map: PredicateMap
+  map: TargetMap
 ): Map {
   return Object.keys(map).reduce((acc, key) => {
     const predicate = map[key];
@@ -73,7 +73,7 @@ export function mapLiteralLinks(
   }, {});
 }
 
-export async function createLiteralLinks(source: string, map: TargetMap) {
+export async function createLiteralLinks(source: string, map: PredicateMap) {
   const client = await getAd4mClient();
 
   const targets = Object.keys(map);
@@ -96,7 +96,7 @@ export async function createLiteralObject({
   children,
 }: {
   parent: LinkInput;
-  children: TargetMap;
+  children: PredicateMap;
 }) {
   const client = await getAd4mClient();
   const expUrl = await client.expression.create(parent.target, "literal");
