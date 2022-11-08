@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mini Chat View</title>
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+      }
+      html {
+        box-sizing: border-box;
+      }
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@junto-foundation/junto-elements@latest/dist/main.css"
+    />
+    <script src="https://unpkg.com/@junto-foundation/junto-elements@latest"></script>
+  </head>
+  <body>
+    <j-input id="perspectiveId" label="Perspective id"></j-input>
+    <j-input id="channelId" label="Channel id"></j-input>
+    <j-button>Load</j-button>
+    <ad4m-connect
+      theme="dark"
+      appName="Flux"
+      appDesc="Flux - A SOCIAL TOOLKIT FOR THE NEW INTERNET"
+      appDomain="https://www.test.io/"
+      capabilities='[{"with":{"domain":"*","pointers":["*"]},"can": ["*"]}]'
+      appiconpath="https://i.ibb.co/GnqjPJP/icon.png"
+      openonshortcut
+    ></ad4m-connect>
+    <perspective-view style="height: 100vh; display: block"></perspective-view>
+    <script type="module">
+      import "https://unpkg.com/@perspect3vism/ad4m-connect@0.0.11-11/dist/web.js";
+      import MiniChatView from "./dist/main.js";
+      const el = document.querySelector("perspective-view");
+      const button = document.querySelector("j-button");
+      const perspectiveId = document.getElementById("perspectiveId");
+      const channelId = document.getElementById("channelId");
+
+      const ad4mConnect = document.querySelector("ad4m-connect");
+      ad4mConnect.connect();
+
+      button.addEventListener("click", () => {
+        const id = perspectiveId.value;
+        const channel = channelId.value;
+        console.log({ channel, id });
+        el.setAttribute("perspective-uuid", id);
+        el.setAttribute("channel", channel);
+        customElements.define("perspective-view", MiniChatView);
+      });
+    </script>
+  </body>
+</html>

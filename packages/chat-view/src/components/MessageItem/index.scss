@@ -1,0 +1,284 @@
+.message {
+  padding-top: var(--j-space-300);
+  padding-bottom: var(--j-space-300);
+  padding-left: var(--j-space-500);
+  padding-right: var(--j-space-500);
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  &:hover .toolbarWrapper {
+    display: block;
+  }
+
+  .toolbarWrapper {
+    display: none;
+  }
+
+  & .messageItemWrapper {
+    width: 100%;
+    display: grid;
+    position: relative;
+    grid-template-columns: 60px 1fr;
+    column-gap: var(--j-space-100);
+  }
+
+  & .messageAvatar {
+    cursor: pointer;
+  }
+
+  & .timestamp {
+    font-size: var(--j-font-size-300);
+    color: var(--j-color-ui-500);
+  }
+
+  & .timestampLeft {
+    font-size: var(--j-font-size-300);
+    color: var(--j-color-ui-500);
+    opacity: 0;
+  }
+
+  &:hover .timestampLeft {
+    opacity: 1;
+  }
+
+  & .chat-view-toolbar {
+    position: absolute;
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 40px;
+    background: none;
+    -webkit-app-region: drag;
+  }
+
+  &:hover .chat-view-toolbar {
+    opacity: 1;
+  }
+
+  & .messageItemContent p:first-of-type {
+    user-select: text !important;
+    margin-top: 0;
+  }
+
+  & .messageItemContent span {
+    user-select: text !important;
+  }
+
+  & .messageItemContent [data-mention="neighbourhood"] {
+    cursor: pointer;
+    color: var(--j-color-primary-500);
+    text-decoration: underline;
+  }
+
+  & .messageItemContent [data-mention="channel"],
+  & .messageItemContent [data-mention="agent"]
+   {
+    word-break: break-word;
+    cursor: pointer;
+    padding: 2px var(--j-space-200);
+    border-radius: var(--j-border-radius);
+    background: var(--j-color-primary-100);
+    color: var(--j-color-primary-700);
+  }
+
+  & .messageItemContent a {
+    user-select: text !important;
+    color: var(--j-color-primary-500);
+  }
+
+  & .messageItemContent p:last-of-type {
+    user-select: text !important;
+    margin-bottom: 0;
+  }
+
+  & .messageUsername {
+    cursor: pointer;
+    color: var(--j-color-black);
+    font-size: var(--j-font-size-500);
+    font-weight: 600;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.messageItemHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-200);
+  margin-bottom: var(--j-space-200);
+}
+
+.replyLineWrapper {
+  position: relative;
+}
+
+.replyLine {
+  display: block;
+  position: absolute;
+  top: var(--j-space-300);
+  right: 0;
+  width: 70%;
+  height: 15px;
+  border-left: 2px solid var(--j-color-ui-200);
+  border-top: 2px solid var(--j-color-ui-200);
+  border-top-left-radius: var(--j-border-radius);
+}
+
+.replyMessage {
+  display: flex;
+  gap: var(--j-space-300);
+  align-items: center;
+  margin-bottom: var(--j-space-300);
+}
+
+.replyAuthor {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-200);
+}
+
+.replyUsername {
+  font-weight: 600;
+  font-size: var(--j-font-size-400);
+  color: var(--j-color-ui-400);
+}
+
+.replyUsername:hover {
+  text-decoration: underline;
+}
+
+.replyContent {
+  max-height: 15px;
+  line-height: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  color: var(--j-color-ui-400);
+}
+
+.replyContent p:first-of-type {
+  margin-top: 0;
+}
+
+.messageToolbar {
+  display: flex;
+  position: absolute;
+  z-index: 100;
+  background: var(--j-color-white);
+  border-radius: var(--j-border-radius);
+  box-shadow: var(--j-depth-100);
+  top: -10px;
+  right: var(--j-space-500);
+}
+
+.messageReactions {
+  display: flex;
+  gap: var(--j-space-300);
+  margin-top: var(--j-space-300);
+}
+
+.emojiButton {
+  position: relative;
+  background: var(--j-color-white);
+  color: var(--j-color-black);
+  display: flex;
+  gap: var(--j-space-200);
+  align-items: center;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: var(--j-border-radius);
+  border: 1px solid var(--j-color-ui-200);
+}
+
+.reactionTooltip {
+  cursor: default;
+  position: absolute;
+  visibility: hidden;
+  display: flex;
+  gap: var(--j-space-500);
+  align-items: center;
+  transition: all 0.2s ease;
+  opacity: 0;
+  bottom: calc(100% + var(--j-space-200));
+  left: 20px;
+  z-index: 999;
+  width: 200px;
+  transform: translateX(-50%) scale(0.8);
+  background-color: var(--j-color-ui-100);
+  color: var(--j-color-black);
+  font-size: var(--j-font-size-500);
+  padding: var(--j-space-300) var(--j-space-300);
+  border-radius: var(--j-border-radius);
+  text-align: left;
+}
+
+.emojiButton:hover .reactionTooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+.emojiButtonActive {
+  background-color: var(--j-color-primary-50);
+  border: 1px solid var(--j-color-primary-500);
+}
+
+j-tooltip::part(base) {
+  display: inline;
+}
+
+.neighbourhoodCard {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--j-space-300);
+  background: var(--j-color-ui-50);
+  border: 1px solid var(--j-color-ui-200);
+  padding: 20px;
+  width: 100%;
+  max-width: 400px;
+  margin: var(--j-space-500) 0 var(--j-space-500) 0px;
+  border-radius: var(--j-border-radius); 
+  position: relative;
+}
+
+.neighbourhoodCard:hover {
+  background: var(--j-color-ui-100);
+}
+
+.neighbourhoodCardTitle {
+  font-weight: 600;
+  font-size: var(--j-font-size-300);
+  text-transform: uppercase;
+}
+
+.neighbourhoodCardName {
+  margin-top: var(--j-space-300);
+  font-weight: 800;
+  font-size: var(--j-font-size-500);
+  color: var(--j-color-black);
+}
+
+.neighbourhoodCardDescription {
+  margin-top: var(--j-space-200);
+  font-size: var(--j-font-size-500);
+  font-weight: 400;
+  color: var(--j-color-ui-300);
+}
+
+.popularMessage {
+  background-color: rgba(246, 206, 2, 0.1);
+}
+
+.popularMessage:hover {
+  background-color: rgba(246, 206, 2, 0.15);
+}
+
