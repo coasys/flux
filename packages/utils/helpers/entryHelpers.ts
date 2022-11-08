@@ -48,3 +48,11 @@ export async function createEntry(entry: EntryInput): Promise<Entry> {
     data: entry.data,
   };
 }
+
+export async function getEntry(id: string): Promise<Entry | undefined> {
+  return undefined
+}
+
+export async function getEntries(): Promise<Entry[]> {
+  return []
+}

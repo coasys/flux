@@ -1,12 +1,9 @@
 import {
   AD4M_CLASS,
-  CHANNEL,
   CHANNEL_NAME,
-  SELF,
   FLUX_CHANNEL,
   CHANNEL_VIEW,
 } from "utils/constants/communityPredicates";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { Channel, EntryType } from "../types";
 import { createEntry } from "../helpers/entryHelpers";
 

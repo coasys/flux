@@ -401,7 +401,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     return expressionLinkLength;
   }
 
-  async function sendMessage(value) {
+  async function sendMessage(value: string) {
     const message = await createMessage({
       perspectiveUuid,
       channelId: channelId,
