@@ -1583,7 +1583,7 @@
       ]
     },
     "src/components/modal/Modal.ts": {
-      "bytes": 4897,
+      "bytes": 4948,
       "imports": [
         {
           "path": "../../node_modules/lit/index.js",
@@ -2033,7 +2033,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 491793
+      "bytes": 491862
     },
     "dist/main.js": {
       "imports": [],
@@ -2320,7 +2320,7 @@
           "bytesInOutput": 4178
         },
         "src/components/modal/Modal.ts": {
-          "bytesInOutput": 4388
+          "bytesInOutput": 4439
         },
         "src/components/tooltip/Tooltip.ts": {
           "bytesInOutput": 2824
@@ -2365,7 +2365,7 @@
           "bytesInOutput": 0
         }
       },
-      "bytes": 111644
+      "bytes": 111695
     },
     "dist/main.css.map": {
       "imports": [],
