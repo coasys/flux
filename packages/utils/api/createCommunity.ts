@@ -41,7 +41,7 @@ export default async function createCommunity({
     const client = await getAd4mClient();
     const agent = await client.agent.me();
 
-    const creatorDid = agent.did;
+    const author = agent.did;
 
     const perspective = perspectiveUuid
       ? await client.perspective.byUUID(perspectiveUuid)
@@ -62,7 +62,7 @@ export default async function createCommunity({
     const metaLinks = await createNeighbourhoodMeta(
       name,
       description,
-      creatorDid
+      author
     );
 
     const meta = new Perspective(metaLinks);
@@ -138,7 +138,7 @@ export default async function createCommunity({
     //Create link between perspective and group expression
     const addProfileLink = await client.perspective.addLink(perspective!.uuid, {
       source: SELF,
-      target: `did://${creatorDid}`,
+      target: `did://${author}`,
       predicate: MEMBER,
     });
     console.log("Created profile expression link", addProfileLink);
@@ -177,14 +177,14 @@ export default async function createCommunity({
     // @ts-ignore
     return {
       uuid: perspective!.uuid,
-      author: creatorDid,
+      author: author,
       timestamp: addSocialDnaLink.timestamp,
       name: name,
       description: description || "",
       image: tempImage,
       thumbnail: tempThumbnail,
       neighbourhoodUrl: sharedUrl,
-      members: [creatorDid],
+      members: [author],
     };
   } catch (e) {
     throw new Error(e);

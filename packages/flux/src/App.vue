@@ -187,10 +187,10 @@ export default defineComponent({
               channel: {
                 id: channel,
                 name: channelExpression.data,
-                creatorDid: link.author,
+                author: link.author,
                 sourcePerspective: perspective,
                 hasNewMessages: false,
-                createdAt: link.timestamp,
+                timestamp: link.timestamp,
                 notifications: {
                   mute: false,
                 },
@@ -298,10 +298,10 @@ export default defineComponent({
                   channel: {
                     id: channel,
                     name: channelName,
-                    creatorDid: link.author,
+                    author: link.author,
                     sourcePerspective: perspective.uuid,
                     hasNewMessages: false,
-                    createdAt: link.timestamp,
+                    timestamp: link.timestamp,
                     notifications: {
                       mute: false,
                     },
@@ -314,10 +314,10 @@ export default defineComponent({
                 channel: {
                   id: channel,
                   name: channelName,
-                  creatorDid: link.author,
+                  author: link.author,
                   sourcePerspective: perspective.uuid,
                   hasNewMessages: false,
-                  createdAt: link.timestamp,
+                  timestamp: link.timestamp,
                   notifications: {
                     mute: false,
                   },
@@ -354,10 +354,10 @@ export default defineComponent({
                   channel: {
                     id: channel,
                     name: channelName,
-                    creatorDid: link.author,
+                    author: link.author,
                     sourcePerspective: perspective.uuid,
                     hasNewMessages: false,
-                    createdAt: link.timestamp,
+                    timestamp: link.timestamp,
                     notifications: {
                       mute: false,
                     },

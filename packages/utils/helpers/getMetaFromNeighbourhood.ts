@@ -28,15 +28,15 @@ export function getMetaFromNeighbourhood(
           predicate === DESCRIPTION
             ? Literal.fromUrl(target).get().data
             : acc.description,
-        creatorDid: predicate === CREATOR ? target : acc.creatorDid,
-        createdAt: predicate === CREATED_AT ? target : acc.createdAt,
+        author: predicate === CREATOR ? target : acc.author,
+        timestamp: predicate === CREATED_AT ? target : acc.timestamp,
       };
     },
     {
       name: "",
       description: "",
-      createdAt: "",
-      creatorDid: "",
+      timestamp: "",
+      author: "",
     }
   );
 }

@@ -309,7 +309,7 @@ export default defineComponent({
       const channel = this.channels.find((e) => e.id === channelId);
 
       if (channel) {
-        return channel.creatorDid === this.userStore.getUser?.agent.did;
+        return channel.author === this.userStore.getUser?.agent.did;
       } else {
         throw new Error("Did not find channel");
       }
@@ -318,9 +318,7 @@ export default defineComponent({
       const channel = this.channels.find((e) => e.id === channelId);
 
       if (channel) {
-        const client = await getAd4mClient();
-
-        await deleteChannel(channel.sourcePerspective, {id: channelId, timestamp: channel.createdAt, author: channel.creatorDid});
+        await deleteChannel(channel.sourcePerspective, { id: channelId, timestamp: channel.timestamp, author: channel.author});
 
         this.dataStore.removeChannel({
           channelId: channel.id,

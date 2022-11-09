@@ -33,8 +33,8 @@ export default async (payload: Payload): Promise<ChannelState> => {
     const channelState = {
       id: channel.id,
       name: channel.name,
-      createdAt: channel.timestamp,
-      creatorDid: channel.author,
+      timestamp: channel.timestamp,
+      author: channel.author,
       sourcePerspective: channel.perspectiveUuid,
       currentView: channel.views[0] || "chat",
       views: channel.views,

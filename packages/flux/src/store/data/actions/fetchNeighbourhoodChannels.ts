@@ -13,12 +13,12 @@ export default async (communityId: string): Promise<void> => {
       return {
         id: channel.id,
         name: channel.name,
-        creatorDid: channel.author,
+        author: channel.author,
         sourcePerspective: channel.perspectiveUuid,
         hasNewMessages: false,
         currentView: channel.views[0] || "chat",
         views: channel.views,
-        createdAt: channel.timestamp,
+        timestamp: channel.timestamp,
         notifications: {
           mute: false,
         },

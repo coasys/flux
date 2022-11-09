@@ -33,20 +33,20 @@ export default async ({ joiningLink }: Payload): Promise<Community> => {
       predicate: MEMBER,
     } as Link);
 
-    const { name, description, creatorDid, createdAt } =
+    const { name, description, author, timestamp } =
       getMetaFromNeighbourhood(perspective.neighbourhood!.meta.links);
     const groupExp = await getGroupMetadata(perspective.uuid);
 
     return {
       uuid: perspective!.uuid,
-      author: creatorDid,
-      timestamp: createdAt,
+      author: author,
+      timestamp: timestamp,
       name: name,
       description: description || "",
       image: groupExp.image || "",
       thumbnail: groupExp.thumbnail || "",
       neighbourhoodUrl: perspective.sharedUrl!,
-      members: [agent.did, creatorDid],
+      members: [agent.did, author],
     };
   } catch (e) {
     throw new Error(e);

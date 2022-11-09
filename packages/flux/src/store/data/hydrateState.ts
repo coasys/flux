@@ -20,7 +20,7 @@ export async function getMetaFromLinks(links: LinkExpression[]) {
 
 export async function buildCommunity(perspective: PerspectiveProxy) {
   const dataStore = useDataStore();
-  const community = dataStore.getCommunity(perspective.uuid);
+  const communityState = dataStore.getLocalCommunityState(perspective.uuid);
 
   let state: LocalCommunityState = {
     perspectiveUuid: perspective.uuid,
@@ -41,8 +41,8 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
     },
   };
 
-  if (community && community.state) {
-    state = community.state;
+  if (communityState && communityState) {
+    state = communityState;
   }
 
   const meta = getMetaFromNeighbourhood(
@@ -57,7 +57,7 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
       author: meta.author,
       timestamp: new Date().toISOString(),
       name: groupExp?.name || meta.name,
-      creatorDid: meta.author,
+      author: meta.author,
       description: groupExp?.description || meta.description,
       image: groupExp?.image || "",
       thumbnail: groupExp?.thumbnail || "",
@@ -148,10 +148,10 @@ export async function hydrateState() {
                 channel: {
                   id: channel,
                   name: channelData.data,
-                  creatorDid: channelData.author,
+                  author: channelData.author,
                   sourcePerspective: perspective.uuid,
                   hasNewMessages: false,
-                  createdAt: link.timestamp,
+                  timestamp: link.timestamp,
                   notifications: {
                     mute: false,
                   },
