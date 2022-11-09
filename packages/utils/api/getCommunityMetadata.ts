@@ -9,14 +9,11 @@ import { DexieIPFS } from "utils/helpers/storageHelpers";
 import { getImage } from "utils/api/getProfile";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { Literal } from "@perspect3vism/ad4m";
+import { CommunityMetaData } from "../types";
 
-export async function getCommunityMetadata(communityId: string): Promise<{
-  communityId: string;
-  name: string;
-  description: string;
-  image: string | null;
-  thumbnail: string | null;
-}> {
+export default async function getCommunityMetadata(
+  communityId: string
+): Promise<CommunityMetaData> {
   const client = await getAd4mClient();
   const dexie = new DexieIPFS(communityId);
 
@@ -30,11 +27,10 @@ export async function getCommunityMetadata(communityId: string): Promise<{
   );
 
   const group = {
-    communityId,
     name: "",
     description: "",
-    image: null,
-    thumbnail: null,
+    image: "",
+    thumbnail: "",
   };
 
   if (groupMetaData) {

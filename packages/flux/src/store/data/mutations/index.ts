@@ -4,9 +4,8 @@ import {
   LocalCommunityState,
   ChannelState,
 } from "@/store/types";
-import { Channel, CommunityMetaData } from "utils/types";
-
-import { useDataStore } from "..";
+import { CommunityMetaData } from "utils/types";
+import { useDataStore } from "@/store/data";
 
 interface UpdatePayload {
   communityId: string;

@@ -1,22 +1,13 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { CHANNEL, SELF } from "utils/constants/communityPredicates";
-import {
-  getMetaFromNeighbourhood,
-  getGroupMetadata,
-} from "utils/helpers/getMetaFromNeighbourhood";
+import { getMetaFromLinks } from "utils/helpers/getNeighbourhoodMeta";
 import { LinkExpression, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useDataStore } from ".";
 import { CommunityState, LocalCommunityState } from "../types";
-import { getCommunityMetadata } from "utils/api/getCommunityMetadata";
+import getCommunityMetadata from "utils/api/getCommunityMetadata";
 import { useUserStore } from "../user";
 import getProfile from "utils/api/getProfile";
 import { LinkQuery } from "@perspect3vism/ad4m";
-
-export async function getMetaFromLinks(links: LinkExpression[]) {
-  const client = await getAd4mClient();
-  const langs = links.map((link) => client.languages.meta(link.data.target));
-  return Promise.all(langs);
-}
 
 export async function buildCommunity(perspective: PerspectiveProxy) {
   const dataStore = useDataStore();
@@ -45,9 +36,7 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
     state = communityState;
   }
 
-  const meta = getMetaFromNeighbourhood(
-    perspective.neighbourhood?.meta?.links!
-  );
+  const meta = getMetaFromLinks(perspective.neighbourhood?.meta?.links!);
 
   const groupExp = await getCommunityMetadata(perspective.uuid);
 

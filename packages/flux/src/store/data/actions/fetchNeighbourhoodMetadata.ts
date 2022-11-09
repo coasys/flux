@@ -1,5 +1,5 @@
 import { useDataStore } from "@/store/data/index";
-import { getGroupMetadata } from "utils/helpers/getMetaFromNeighbourhood";
+import getCommunityMetaData from "utils/api/getCommunityMetadata";
 
 export interface Payload {
   communityId: string;
@@ -8,7 +8,7 @@ export interface Payload {
 export default async (communityId: string): Promise<void> => {
   const dataStore = useDataStore();
 
-  const metadata = await getGroupMetadata(communityId);
+  const metadata = await getCommunityMetaData(communityId);
 
   if (metadata) {
     dataStore.updateCommunityMetadata({ communityId, metadata });

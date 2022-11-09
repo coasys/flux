@@ -1,11 +1,9 @@
-import {
-  getMetaFromNeighbourhood,
-  getGroupMetadata,
-} from "../helpers/getMetaFromNeighbourhood";
+import { getMetaFromLinks } from "../helpers/getNeighbourhoodMeta";
 import { MEMBER, SELF } from "utils/constants/communityPredicates";
 import { Link } from "@perspect3vism/ad4m";
 import { Community } from "../types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import getCommunityMetadata from "./getCommunityMetadata";
 
 export interface Payload {
   joiningLink: string;
@@ -33,20 +31,23 @@ export default async ({ joiningLink }: Payload): Promise<Community> => {
       predicate: MEMBER,
     } as Link);
 
-    const { name, description, author, timestamp } =
-      getMetaFromNeighbourhood(perspective.neighbourhood!.meta.links);
-    const groupExp = await getGroupMetadata(perspective.uuid);
+    const neighbourhoodMeta = getMetaFromLinks(
+      perspective.neighbourhood!.meta.links
+    );
+
+    const communityMeta = await getCommunityMetadata(perspective.uuid);
 
     return {
       uuid: perspective!.uuid,
-      author: author,
-      timestamp: timestamp,
-      name: name,
-      description: description || "",
-      image: groupExp.image || "",
-      thumbnail: groupExp.thumbnail || "",
+      author: neighbourhoodMeta.author!,
+      timestamp: neighbourhoodMeta.timestamp!,
+      name: communityMeta.name || neighbourhoodMeta.name,
+      description:
+        communityMeta.description || neighbourhoodMeta.description || "",
+      image: communityMeta.image || "",
+      thumbnail: communityMeta.thumbnail || "",
       neighbourhoodUrl: perspective.sharedUrl!,
-      members: [agent.did, author],
+      members: [agent.did, neighbourhoodMeta.author!],
     };
   } catch (e) {
     throw new Error(e);

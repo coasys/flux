@@ -32,10 +32,7 @@
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
 import { useAppStore } from "./store/app";
-import {
-  ApplicationState,
-  ModalsState
-} from "@/store/types";
+import { ApplicationState, ModalsState } from "@/store/types";
 import { useRoute, useRouter } from "vue-router";
 import { useDataStore } from "./store/data";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
@@ -50,7 +47,7 @@ import {
 } from "utils/constants/communityPredicates";
 import { useUserStore } from "./store/user";
 import { buildCommunity, hydrateState } from "./store/data/hydrateState";
-import { getCommunityMetadata } from "utils/api/getCommunityMetadata";
+import getCommunityMetadata from "utils/api/getCommunityMetadata";
 import {
   getAd4mClient,
   onAuthStateChanged,

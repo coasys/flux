@@ -19,10 +19,15 @@ export interface Community {
 export interface CommunityMetaData {
   name: string;
   description?: string;
-  author?: string;
-  timestamp?: string;
   image?: string;
   thumbnail?: string;
+}
+
+export interface NeighbourhoodMetaData {
+  name: string;
+  author?: string;
+  timestamp?: string;
+  description?: string;
 }
 
 export interface Channel {
