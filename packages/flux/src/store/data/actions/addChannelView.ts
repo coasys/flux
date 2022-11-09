@@ -1,6 +1,5 @@
 import addChannelView from "utils/api/addChannelView";
 import { useAppStore } from "@/store/app";
-import { ChannelState } from "@/store/types";
 import { useDataStore } from "..";
 
 export interface Payload {

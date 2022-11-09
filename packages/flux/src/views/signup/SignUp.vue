@@ -52,10 +52,10 @@
           label="Username"
           size="xl"
           :value="username"
-          @input="(e) => (username = e.target.value)"
+          @input="(e: any) => (username = e.target.value)"
           :error="usernameError"
           :errortext="usernameErrorMessage"
-          @blur="(e) => validateUsername()"
+          @blur="(e: any) => validateUsername()"
         ></j-input>
         <j-toggle
           style="width: 100%"
@@ -175,7 +175,7 @@ export default defineComponent({
     };
   },
   async mounted() {
-    isConnected().then((connected) => {
+    isConnected().then((connected: any) => {
       if (connected) {
         this.autoFillUser();
       }
@@ -215,7 +215,7 @@ export default defineComponent({
 
         const client = await getAd4mClient();
 
-        const agentLinks = (await client.agent.me()).perspective.links;
+        const agentLinks = (await client.agent.me()).perspective!.links;
 
         const profile = mapLiteralLinks(agentLinks, {
           username: AD4M_PREDICATE_USERNAME,
@@ -246,6 +246,7 @@ export default defineComponent({
           this.appStore.changeNotificationState(true);
         });
     },
+    //@ts-ignore
     async allowNotifications(value) {
       this.appStore.changeNotificationState(
         !this.appStore.notification.globalNotification

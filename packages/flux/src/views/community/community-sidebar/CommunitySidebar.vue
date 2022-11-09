@@ -16,7 +16,7 @@
     </div>
     <j-popover
       :open="showCommunityMenu"
-      @toggle="(e) => (showCommunityMenu = e.target.open)"
+      @toggle="(e: any) => (showCommunityMenu = e.target.open)"
       :class="{ 'is-creator': isCreator }"
       event="click"
       placement="bottom-end"
@@ -227,7 +227,7 @@ export default defineComponent({
     },
     isCreator(): boolean {
       return (
-        this.community.neighbourhood.creatorDid ===
+        this.community.neighbourhood.author ===
         this.userStore.getUser?.agent.did
       );
     },
@@ -245,7 +245,7 @@ export default defineComponent({
         const community = this.dataStore.getCommunity(communityId);
         const dexie = new DexieIPFS(communityId);
 
-        const image = await dexie.get(community.neighbourhood.image!);
+        const image = await dexie.get(community.image!);
         // @ts-ignore
         this.communityImage = image;
       }, 500);
@@ -272,7 +272,7 @@ export default defineComponent({
             const community = this.dataStore.getCommunity(id);
             const dexie = new DexieIPFS(id);
 
-            const image = await dexie.get(community.neighbourhood.image!);
+            const image = await dexie.get(community.image!);
             // @ts-ignore
             this.communityImage = image;
           }, 500);
@@ -307,43 +307,52 @@ export default defineComponent({
     isChannelCreator(channelId: string): boolean {
       const channel = this.channels.find((e) => e.id === channelId);
 
-      return channel.creatorDid === this.userStore.getUser?.agent.did;
+      if (channel) {
+        return channel.creatorDid === this.userStore.getUser?.agent.did;
+      } else {
+        throw new Error("Did not find channel");
+      }
     },
     async deleteChannel(channelId: string) {
       const channel = this.channels.find((e) => e.id === channelId);
 
-      const client = await getAd4mClient();
+      if (channel) {
+        const client = await getAd4mClient();
 
-      await client.perspective.removeLink(channel.sourcePerspective, {
-        author: channel.creatorDid,
-        data: {
-          predicate: CHANNEL,
-          target: channel.id,
-          source: SELF,
-        },
-        proof: {
-          invalid: false,
-          key: "",
-          signature: "",
-          valid: true,
-        },
-        timestamp: channel.createdAt,
-      });
-
-      this.dataStore.removeChannel({
-        channelId: channel.id,
-      });
-
-      const isSameChannel = this.$route.params.channelId === channel.name;
-
-      if (isSameChannel) {
-        this.$router.push({
-          name: "channel",
-          params: {
-            communityId: channel.sourcePerspective,
-            channelId: "Home",
+        //TODO; this needs to be its own api method
+        await client.perspective.removeLink(channel.sourcePerspective, {
+          author: channel.creatorDid,
+          data: {
+            predicate: CHANNEL,
+            target: channel.id,
+            source: SELF,
           },
+          proof: {
+            invalid: false,
+            key: "",
+            signature: "",
+            valid: true,
+          },
+          timestamp: channel.createdAt,
         });
+
+        this.dataStore.removeChannel({
+          channelId: channel.id,
+        });
+
+        const isSameChannel = this.$route.params.channelId === channel.name;
+
+        if (isSameChannel) {
+          this.$router.push({
+            name: "channel",
+            params: {
+              communityId: channel.sourcePerspective,
+              channelId: "Home",
+            },
+          });
+        }
+      } else {
+        throw new Error("Did not find channel");
       }
     },
     goToTweaks() {

@@ -9,7 +9,7 @@
         placeholder="Search members..."
         type="search"
         :value="searchValue"
-        @input="(e) => (searchValue = e.target.value)"
+        @input="(e: any) => (searchValue = e.target.value)"
       >
         <j-icon name="search" size="sm" slot="start"></j-icon>
       </j-input>
@@ -56,12 +56,12 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { Profile } from "utils/types";
-import { NeighbourhoodState } from "@/store/types";
 import { useDataStore } from "@/store/data";
 
 import getProfile from "utils/api/getProfile";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import Avatar from "@/components/avatar/Avatar.vue";
+import { Community } from "utils/types";
 
 export default defineComponent({
   emits: ["close", "submit"],
@@ -107,9 +107,9 @@ export default defineComponent({
         return member.username.includes(this.searchValue);
       });
     },
-    community(): NeighbourhoodState {
+    community(): Community {
       const id = this.$route.params.communityId as string;
-      return this.dataStore.getNeighbourhood(id);
+      return this.dataStore.getCommunity(id);
     },
   },
   methods: {

@@ -67,7 +67,7 @@
       size="xs"
       v-if="activeProfile"
       :open="showProfile"
-      @toggle="(e) => toggleProfile(e.target.open, activeProfile)"
+      @toggle="(e: any) => toggleProfile(e.target.open, activeProfile)"
     >
       <Profile
         :did="activeProfile"
@@ -78,7 +78,7 @@
       size="xs"
       v-if="activeCommunity"
       :open="showJoinCommuinityModal"
-      @toggle="(e) => toggleJoinCommunityModal(e.target.open, activeCommunity)"
+      @toggle="(e: any) => toggleJoinCommunityModal(e.target.open, activeCommunity)"
     >
       <j-box v-if="activeCommunity" p="800">
         <j-flex a="center" direction="column" gap="500">
@@ -166,7 +166,7 @@ export default defineComponent({
     },
     community(): CommunityState {
       const communityId = this.communityId;
-      return this.dataStore.getCommunity(communityId as string);
+      return this.dataStore.getCommunityState(communityId as string);
     },
     channel(): ChannelState {
       const communityId = this.communityId;

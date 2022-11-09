@@ -17,14 +17,14 @@
         label="Username"
         @keydown.enter="updateProfile"
         :value="userProfile?.username"
-        @input="(e) => (username = e.target.value)"
+        @input="(e: any) => (username = e.target.value)"
       ></j-input>
       <j-input
         size="lg"
         label="Bio"
         @keydown.enter="updateProfile"
         :value="bio"
-        @input="(e) => (bio = e.target.value)"
+        @input="(e: any) => (bio = e.target.value)"
       ></j-input>
       <div>
         <j-button size="lg" @click="$emit('cancel')"> Cancel </j-button>

@@ -23,7 +23,7 @@
     autohide="10"
     :variant="ui.toast.variant"
     :open="ui.toast.open"
-    @toggle="(e) => appStore.setToast({ open: e.target.open })"
+    @toggle="(e: any) => appStore.setToast({ open: e.target.open })"
   >
     <j-text>{{ ui.toast.message }}</j-text>
   </j-toast>
@@ -31,12 +31,10 @@
 
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
-import { mapActions } from "pinia";
 import { useAppStore } from "./store/app";
 import {
   ApplicationState,
-  ModalsState,
-  NeighbourhoodState,
+  ModalsState
 } from "@/store/types";
 import { useRoute, useRouter } from "vue-router";
 import { useDataStore } from "./store/data";
@@ -55,10 +53,10 @@ import { buildCommunity, hydrateState } from "./store/data/hydrateState";
 import { getCommunityMetadata } from "utils/api/getCommunityMetadata";
 import {
   getAd4mClient,
-  isConnected,
   onAuthStateChanged,
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import "@perspect3vism/ad4m-connect/dist/web";
+import { Community } from "utils/types";
 
 export default defineComponent({
   name: "App",
@@ -236,7 +234,7 @@ export default defineComponent({
       };
       watch(
         this.dataStore.neighbourhoods,
-        async (newValue: { [perspectiveUuid: string]: NeighbourhoodState }) => {
+        async (newValue: { [perspectiveUuid: string]: Community }) => {
           for (const [k, v] of Object.entries(newValue)) {
             if (watching.filter((val) => val == k).length == 0) {
               console.log("Starting watcher on perspective", k);
@@ -252,7 +250,7 @@ export default defineComponent({
                     "and channel",
                     v
                   );
-                  newLinkHandler(result, v.perspective.uuid);
+                  newLinkHandler(result, v.uuid);
                 });
 
                 perspective.addListener("link-removed", (link) => {
@@ -272,6 +270,7 @@ export default defineComponent({
                       channelId: channel.id,
                     });
                   }
+                  return null;
                 });
               }
             }
@@ -327,13 +326,14 @@ export default defineComponent({
               });
             }
           }
+          return null;
         });
       });
 
       // @ts-ignore
       client!.perspective.addPerspectiveRemovedListener((perspective) => {
         const isCommunity = this.dataStore.getCommunity(perspective);
-        if (isCommunity && isCommunity.neighbourhood) {
+        if (isCommunity) {
           this.dataStore.removeCommunity({ communityId: perspective });
         }
       });
@@ -367,6 +367,7 @@ export default defineComponent({
               });
             }
           }
+          return null;
         });
       }
     },

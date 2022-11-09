@@ -1,7 +1,6 @@
 import { UserState } from "./userprofile";
 import { LocalCommunityState } from "./community";
 import { ChannelState } from "./channel";
-import { NeighbourhoodState } from "./neighbourhood";
 import { Community } from "utils/types";
 import {
   WindowState,

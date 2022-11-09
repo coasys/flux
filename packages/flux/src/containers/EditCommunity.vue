@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts">
-import { NeighbourhoodState } from "@/store/types";
+import { CommunityState } from "@/store/types";
 import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useDataStore } from "@/store/data";
@@ -74,9 +74,9 @@ export default defineComponent({
     },
   },
   computed: {
-    community(): NeighbourhoodState {
+    community(): CommunityState {
       const id = this.$route.params.communityId as string;
-      return this.dataStore.getNeighbourhood(id);
+      return this.dataStore.getCommunity(id);
     },
   },
   methods: {

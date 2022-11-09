@@ -40,6 +40,7 @@ import { mapActions } from "pinia";
 import ThemeEditor from "./ThemeEditor.vue";
 import { getSDNAValues } from "utils/api/getSDNA";
 import { updateSDNA } from "utils/api/updateSDNA";
+import { emoji, emojiCount } from "utils/constants/sdna";
 
 export default defineComponent({
   components: { ThemeEditor },
@@ -65,13 +66,14 @@ export default defineComponent({
   async mounted() {
     const perspectiveUuid = this.community.perspectiveUuid;
     const sdnaValues = await getSDNAValues(perspectiveUuid);
-    this.emoji = sdnaValues.emoji;
-    this.emojiCount = sdnaValues.emojiCount;
+    this.emoji = sdnaValues ? sdnaValues.emoji : emoji;
+    this.emojiCount = sdnaValues ? sdnaValues.emojiCount : emojiCount;
   },
   methods: {
     ...mapActions(useAppStore, [
       "setShowCommunityTweaks"
     ]),
+    //@ts-ignore
     async onEmojiClick(emoji) {
       console.log("got emoji click", emoji.detail.unicode);
       this.emoji = emoji.detail.unicode;
@@ -87,7 +89,7 @@ export default defineComponent({
   computed: {
     community(): LocalCommunityState {
       const id = this.$route.params.communityId as string;
-      return this.dataStore.getCommunityState(id);
+      return this.dataStore.getLocalCommunityState(id);
     },
   },
 });

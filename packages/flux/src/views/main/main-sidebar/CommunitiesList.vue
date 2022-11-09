@@ -125,11 +125,11 @@ export default defineComponent({
     },
     hasNotification() {
       return (id: string) => {
-        return this.dataStore.getCommunity(id)?.state?.hasNewMessages;
+        return this.dataStore.getCommunityState(id)?.state?.hasNewMessages;
       };
     },
     getCommunityState() {
-      return (id: string) => this.dataStore.getCommunityState(id);
+      return (id: string) => this.dataStore.getLocalCommunityState(id);
     },
   },
 });
