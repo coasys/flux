@@ -35,12 +35,11 @@
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
 import { LocalCommunityState } from "@/store/types";
-import { LinkQuery, Literal } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { ZOME, SELF } from "utils/constants/communityPredicates";
 import { defineComponent, ref } from "vue";
 import { mapActions } from "pinia";
 import ThemeEditor from "./ThemeEditor.vue";
+import { getSDNAValues } from "utils/api/getSDNA";
+import { updateSDNA } from "utils/api/updateSDNA";
 
 export default defineComponent({
   components: { ThemeEditor },
@@ -65,18 +64,9 @@ export default defineComponent({
   },
   async mounted() {
     const perspectiveUuid = this.community.perspectiveUuid;
-    const sdnaLinks = await this.getSDNALinks(perspectiveUuid);
-    if (sdnaLinks.length > 0) {
-      const sdna = Literal.fromUrl(sdnaLinks[0].data.target).get();
-      console.log("Loaded existing SDNA: ", sdna);
-
-      const emojiRegex = new RegExp('emoji:\/\/[A-Za-z0-9]+');
-      const emojiCountRegex = new RegExp('[a-zA-Z]+ >= ([0-9])');
-      const emoji = sdna.match(emojiRegex)[0].replace("emoji://", "");
-      this.emoji = String.fromCodePoint(parseInt(`0x${emoji}`));
-      this.emojiCount = sdna.match(emojiCountRegex)[1];
-      console.log("Found emoji in sdna", this.emoji, this.emojiCount);
-    }
+    const sdnaValues = await getSDNAValues(perspectiveUuid);
+    this.emoji = sdnaValues.emoji;
+    this.emojiCount = sdnaValues.emojiCount;
   },
   methods: {
     ...mapActions(useAppStore, [
@@ -87,51 +77,9 @@ export default defineComponent({
       this.emoji = emoji.detail.unicode;
       this.emojiPicker = false;
     },
-    async getSDNALinks(perspectiveUuid) {
-        const ad4mClient = await getAd4mClient();
-        return await ad4mClient.perspective.queryLinks(perspectiveUuid, {source: SELF, predicate: ZOME} as LinkQuery);
-    },
     async updateSDNA() {
-        const ad4mClient = await getAd4mClient();
         const perspectiveUuid = this.community.perspectiveUuid;
-        console.log("Updating SDNA", this.emoji, this.emojiCount, perspectiveUuid);
-
-        const existingSDNALinks = await this.getSDNALinks(perspectiveUuid);
-
-        for (const link of existingSDNALinks) {
-            console.log(link.data.target);
-            if (link.data.target.includes("flux_message")) {
-                await ad4mClient.perspective.removeLink(perspectiveUuid, link);
-            }
-        }
-
-        const parsedEmoji = this.emoji.codePointAt(0).toString(16);
-        const newSDNA = Literal.from(`emojiCount(Message, Count):- 
-      aggregate_all(count, link(Message, "flux://has_reaction", "emoji://${parsedEmoji}", _, _), Count).
-
-      isPopular(Message) :- emojiCount(Message, Count), Count >= ${this.emojiCount}.
-      isNotPopular(Message) :- emojiCount(Message, Count), Count < ${this.emojiCount}.
-
-      flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages):-
-      link(Channel, "temp://directly_succeeded_by", Message, Timestamp, Author),
-      findall((EditMessage, EditMessageTimestamp, EditMessageAuthor), link(Message, "temp://edited_to", EditMessage, EditMessageTimestamp, EditMessageAuthor), EditMessages),
-      findall((Reaction, ReactionTimestamp, ReactionAuthor), link(Message, "flux://has_reaction", Reaction, ReactionTimestamp, ReactionAuthor), Reactions),
-      findall((IsHidden, IsHiddenTimestamp, IsHiddenAuthor), link(Message, "flux://is_card_hidden", IsHidden, IsHiddenTimestamp, IsHiddenAuthor), AllCardHidden),
-      findall((Reply, ReplyTimestamp, ReplyAuthor), link(Reply, "flux://has_reply", Message, ReplyTimestamp, ReplyAuthor), Replies).
-      
-      flux_message_query_popular(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, true):- 
-      flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages), isPopular(Message).
-      
-      flux_message_query_popular(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, false):- 
-      flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages), isNotPopular(Message).`);
-        await ad4mClient.perspective.addLink(
-            perspectiveUuid,
-            {
-                source: SELF,
-                predicate: ZOME,
-                target: newSDNA.toUrl(),
-            }
-        );
+        updateSDNA(perspectiveUuid, {emoji: this.emoji, emojiCount: this.emojiCount});
 
         this.setShowCommunityTweaks(false);
     }
