@@ -1,4 +1,4 @@
-import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
+import { getMetaFromNeighbourhood } from "utils/helpers/getMetaFromNeighbourhood";
 
 import { MEMBER, SELF } from "utils/constants/communityPredicates";
 

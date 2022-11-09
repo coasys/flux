@@ -1,6 +1,6 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { CHANNEL, SELF } from "utils/constants/communityPredicates";
-import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
+import { getMetaFromNeighbourhood } from "utils/helpers/getMetaFromNeighbourhood";
 import { LinkExpression, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useDataStore } from ".";
 import { CommunityState, LocalCommunityState } from "../types";
