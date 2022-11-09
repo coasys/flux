@@ -4,7 +4,7 @@ import { getMetaFromNeighbourhood } from "utils/helpers/getMetaFromNeighbourhood
 import { LinkExpression, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useDataStore } from ".";
 import { CommunityState, LocalCommunityState } from "../types";
-import { getGroupMetadata } from "./actions/fetchNeighbourhoodMetadata";
+import { getCommunityMetadata } from "utils/api/getCommunityMetadata";
 import { useUserStore } from "../user";
 import getProfile from "utils/api/getProfile";
 import { LinkQuery } from "@perspect3vism/ad4m";
@@ -46,7 +46,7 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
     perspective.neighbourhood?.meta?.links!
   );
 
-  const groupExp = await getGroupMetadata(perspective.uuid);
+  const groupExp = await getCommunityMetadata(perspective.uuid);
 
   return {
     neighbourhood: {

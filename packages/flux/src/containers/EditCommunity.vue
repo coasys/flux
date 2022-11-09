@@ -41,7 +41,7 @@ import { NeighbourhoodState } from "@/store/types";
 import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useDataStore } from "@/store/data";
-import { DexieIPFS } from "@/utils/storageHelpers";
+import { DexieIPFS } from "utils/helpers/storageHelpers";
 
 export default defineComponent({
   components: { AvatarUpload },

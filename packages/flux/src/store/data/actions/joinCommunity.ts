@@ -8,7 +8,7 @@ import { CommunityState } from "@/store/types";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
-import { getGroupMetadata } from "./fetchNeighbourhoodMetadata";
+import { getCommunityMetadata } from "utils/api/getCommunityMetadata";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 export interface Payload {
@@ -49,7 +49,7 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
       const { name, description, creatorDid, createdAt } =
         getMetaFromNeighbourhood(neighbourhood.neighbourhood!.meta.links);
 
-      const groupExp = await getGroupMetadata(neighbourhood.uuid);
+      const groupExp = await getCommunityMetadata(neighbourhood.uuid);
 
       const newCommunity = {
         neighbourhood: {

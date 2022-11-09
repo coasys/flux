@@ -52,7 +52,7 @@ import {
 } from "utils/constants/communityPredicates";
 import { useUserStore } from "./store/user";
 import { buildCommunity, hydrateState } from "./store/data/hydrateState";
-import { getGroupMetadata } from "./store/data/actions/fetchNeighbourhoodMetadata";
+import { getCommunityMetadata } from "utils/api/getCommunityMetadata";
 import {
   getAd4mClient,
   isConnected,
@@ -223,7 +223,7 @@ export default defineComponent({
           //If the link has predicate which is for group metadata, it's a group metadata update
           console.log("Community update via link signal");
 
-          const groupExp = await getGroupMetadata(perspective);
+          const groupExp = await getCommunityMetadata(perspective);
 
           this.dataStore.updateCommunityMetadata({
             communityId: perspective,

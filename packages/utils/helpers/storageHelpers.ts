@@ -14,25 +14,44 @@ export const session = {
   },
 };
 
-export class DexieStorage extends Dexie {
-  messages: Dexie.Table<IDexieMessage, string>;
-  profile: Dexie.Table<IDexieProfile, string>;
-  ui: Dexie.Table<IDexieUI, string>;
-
-  constructor(perspectiveId: string, version = 1) {
-    super(perspectiveId);
-    this.version(version).stores({
-      messages: 'id, expression, timestamp',
-      profile: 'id, expression, timestamp',
-      ui: 'id, data, timestamp'
-    });
-  }
+export interface IDexieIPFS {
+  id: string;
+  data: string;
+  timestamp: Date;
 }
 
 export interface IDexieProfile {
   id: string;
   expression: Profile;
   timestamp: Date;
+}
+
+export interface IDexieMessage {
+  id: string;
+  expression: Message;
+  timestamp: Date;
+}
+
+export interface IDexieUI {
+  id: string;
+  data: string;
+}
+
+export class DexieStorage extends Dexie {
+  messages: Dexie.Table<IDexieMessage, string>;
+  profile: Dexie.Table<IDexieProfile, string>;
+  ui: Dexie.Table<IDexieUI, string>;
+  ipfs: Dexie.Table<IDexieIPFS, string>;
+
+  constructor(perspectiveId: string, version = 1) {
+    super(perspectiveId);
+    this.version(version).stores({
+      messages: 'id, expression, timestamp',
+      profile: 'id, expression, timestamp',
+      ui: 'id, data, timestamp',
+      ipfs: 'id, data, timestamp'
+    });
+  }
 }
 
 export class DexieProfile {
@@ -59,12 +78,6 @@ export class DexieProfile {
       return undefined;
     }
   }
-}
-
-export interface IDexieMessage {
-  id: string;
-  expression: Message;
-  timestamp: Date;
 }
 
 export class DexieMessages {
@@ -110,11 +123,6 @@ export class DexieMessages {
   }
 }
 
-export interface IDexieUI {
-  id: string;
-  data: string;
-}
-
 export class DexieUI {
   db: DexieStorage
   constructor(perspectiveId: string, version = 1) {
@@ -132,5 +140,31 @@ export class DexieUI {
     const item = await this.db.ui.get(id);
     if (item) return item.data;
     else return undefined;
+  }
+}
+
+export class DexieIPFS {
+  db: DexieStorage;
+  
+  constructor(perspectiveId: string, version = 1) {
+    this.db = new DexieStorage(perspectiveId, version);
+  }
+
+  async save(url: string, data: string) {
+    await this.db.ipfs.put({
+      id: url,
+      data,
+      timestamp: new Date()
+    });
+  }
+
+  async get(url: string) {
+    const item = await this.db.ipfs.get(url);
+
+    if (item) {
+      return item.data;
+    } else {
+      return undefined;
+    }
   }
 }
