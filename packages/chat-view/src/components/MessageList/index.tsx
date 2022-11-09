@@ -3,24 +3,24 @@ import {
   useContext,
   useRef,
   useEffect,
-  useMemo,
-  useCallback,
+  useMemo
 } from "preact/hooks";
 import { ChatContext } from "utils/react";
 import MessageItem from "../MessageItem";
 import getMe from "utils/api/getMe";
-import { differenceInMinutes, parseISO } from "date-fns";
+import { differenceInMinutes } from "date-fns";
 import tippy from "tippy.js";
 import { Virtuoso } from "react-virtuoso";
 import { h, Component, createRef } from "preact";
 import ReactHintFactory from "react-hint";
-const ReactHint = ReactHintFactory({ createElement: h, Component, createRef });
 import "react-hint/css/index.css";
 import styles from "./index.scss";
 import { Reaction } from "utils/types";
 import EditorContext from "../../context/EditorContext";
 
 import { REACTION } from "utils/constants/communityPredicates";
+
+const ReactHint = ReactHintFactory({ createElement: h, Component, createRef });
 
 export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
   const emojiPicker = useMemo(() => {
