@@ -100,14 +100,16 @@ export default {
     const community = state.neighbourhoods[communityId];
 
     if (community) {
-      community.name = metadata.name;
-      if (metadata.description) {
+      if (metadata?.name) {
+        community.name = metadata.name;
+      }
+      if (metadata?.description) {
         community.description = metadata.description;
       }
-      if (metadata.image) {
+      if (metadata?.image) {
         community.image = metadata.image;
       }
-      if (metadata.thumbnail) {
+      if (metadata?.thumbnail) {
         community.thumbnail = metadata.thumbnail;
       }
     }

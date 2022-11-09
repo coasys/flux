@@ -17,7 +17,7 @@ export interface Community {
 }
 
 export interface CommunityMetaData {
-  name: string;
+  name?: string;
   description?: string;
   image?: string;
   thumbnail?: string;
