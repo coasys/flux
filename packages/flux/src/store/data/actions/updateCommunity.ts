@@ -147,7 +147,7 @@ export default async function updateCommunity(update: Payload): Promise<void> {
     }
 
     dataStore.updateCommunityMetadata({
-      communityId: community.neighbourhood.perspective.uuid,
+      communityId: community.neighbourhood.uuid,
       name: name || community.neighbourhood.name,
       description: description || community.neighbourhood.description,
       image: tempImage || community.neighbourhood.image || "",

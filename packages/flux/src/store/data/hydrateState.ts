@@ -50,23 +50,16 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
 
   return {
     neighbourhood: {
+      uuid: perspective.uuid,
+      author: meta.creatorDid,
+      timestamp: new Date().toISOString(),
       name: groupExp?.name || meta.name,
       creatorDid: meta.creatorDid,
       description: groupExp?.description || meta.description,
       image: groupExp?.image || "",
       thumbnail: groupExp?.thumbnail || "",
-      perspective: {
-        uuid: perspective.uuid,
-        name: perspective.name,
-        sharedUrl: perspective.sharedUrl,
-        neighbourhood: perspective.neighbourhood,
-      },
       neighbourhoodUrl: perspective.sharedUrl,
-      linkedPerspectives: [perspective.uuid],
-      linkedNeighbourhoods: [perspective.uuid],
       members: [meta.creatorDid],
-      membraneRoot: perspective.uuid,
-      createdAt: new Date().toISOString(),
     },
     state,
   } as CommunityState;

@@ -27,7 +27,7 @@ describe("Data Mutations", () => {
 
     expect(
       (Object.values(dataStore.neighbourhoods)[0] as any).perspective.uuid
-    ).toBe(community.neighbourhood.perspective.uuid);
+    ).toBe(community.neighbourhood.uuid);
   });
 
   test("Check duplicate community if one exists already", async () => {
@@ -38,14 +38,14 @@ describe("Data Mutations", () => {
     dataStore.addCommunity(community);
 
     expect(Object.keys(dataStore.communities)).toStrictEqual([
-      community.neighbourhood.perspective.uuid,
+      community.neighbourhood.uuid,
     ]);
 
     // @ts-ignore
     dataStore.addCommunity(community);
 
     expect(Object.keys(dataStore.communities)).toStrictEqual([
-      community.neighbourhood.perspective.uuid,
+      community.neighbourhood.uuid,
     ]);
   });
 
@@ -80,7 +80,7 @@ describe("Data Mutations", () => {
     expect(Object.values(dataStore.communities).length).toBe(1);
     expect(Object.values(dataStore.channels).length).toBe(1);
 
-    dataStore.removeCommunity({communityId: community.state.perspectiveUuid});
+    dataStore.removeCommunity({ communityId: community.state.perspectiveUuid });
 
     expect(Object.values(dataStore.communities).length).toBe(0);
     expect(Object.values(dataStore.neighbourhoods).length).toBe(0);
@@ -93,9 +93,7 @@ describe("Data Mutations", () => {
     // @ts-ignore
     dataStore.createChannelMutation(createChannel);
 
-    expect(
-      dataStore.channels[createChannel.id].notifications.mute
-    ).toBeFalsy();
+    expect(dataStore.channels[createChannel.id].notifications.mute).toBeFalsy();
 
     dataStore.setChannelNotificationState({
       channelId: createChannel.id,
@@ -193,18 +191,14 @@ describe("Data Mutations", () => {
     // @ts-ignore
     dataStore.createChannelMutation(createChannel);
 
-    expect(
-      dataStore.channels[createChannel.id].scrollTop
-    ).toBeUndefined();
+    expect(dataStore.channels[createChannel.id].scrollTop).toBeUndefined();
 
     dataStore.setChannelScrollTop({
       channelId: createChannel.id,
       value: 100,
     });
 
-    expect(
-      dataStore.channels[createChannel.id].scrollTop
-    ).toBe(100);
+    expect(dataStore.channels[createChannel.id].scrollTop).toBe(100);
   });
 
   test("Add channel", () => {
@@ -217,12 +211,12 @@ describe("Data Mutations", () => {
     expect(Object.values(dataStore.communities).length).toBe(1);
 
     expect(
-      dataStore.neighbourhoods[community.neighbourhood.perspective.uuid]
-        .linkedPerspectives.length
+      dataStore.neighbourhoods[community.neighbourhood.uuid].linkedPerspectives
+        .length
     ).toBe(1);
 
     dataStore.addChannel({
-      communityId: community.neighbourhood.perspective.uuid,
+      communityId: community.neighbourhood.uuid,
       // @ts-ignore
       channel,
     });
@@ -239,9 +233,7 @@ describe("Data Mutations", () => {
 
     expect(Object.values(dataStore.channels).length).toBe(1);
 
-    expect(Object.keys(dataStore.channels)).toStrictEqual([
-      createChannel.id,
-    ]);
+    expect(Object.keys(dataStore.channels)).toStrictEqual([createChannel.id]);
   });
 
   test("Set has new messages", () => {
@@ -251,9 +243,7 @@ describe("Data Mutations", () => {
     // @ts-ignore
     dataStore.createChannelMutation(createChannel);
 
-    expect(
-      dataStore.channels[createChannel.id].hasNewMessages
-    ).toBeFalsy();
+    expect(dataStore.channels[createChannel.id].hasNewMessages).toBeFalsy();
 
     dataStore.setHasNewMessages({
       communityId: createCommunity.state.perspectiveUuid,
@@ -261,8 +251,6 @@ describe("Data Mutations", () => {
       value: true,
     });
 
-    expect(
-      dataStore.channels[createChannel.id].hasNewMessages
-    ).toBeTruthy();
+    expect(dataStore.channels[createChannel.id].hasNewMessages).toBeTruthy();
   });
 });

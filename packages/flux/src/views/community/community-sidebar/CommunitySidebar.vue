@@ -50,7 +50,7 @@
           @click="
             () =>
               toggleHideMutedChannels({
-                communityId: community.neighbourhood.perspective.uuid,
+                communityId: community.neighbourhood.uuid,
               })
           "
         >
@@ -103,7 +103,7 @@
         :to="{
           name: 'channel',
           params: {
-            communityId: community.neighbourhood.perspective.uuid,
+            communityId: community.neighbourhood.uuid,
             channelId: channel.name,
           },
         }"

@@ -24,9 +24,8 @@ interface AddChannel {
 export default {
   addCommunity(payload: CommunityState): void {
     const state = useDataStore();
-    state.neighbourhoods[payload.neighbourhood.perspective.uuid] =
-      payload.neighbourhood;
-    state.communities[payload.neighbourhood.perspective.uuid] = payload.state;
+    state.neighbourhoods[payload.neighbourhood.uuid] = payload.neighbourhood;
+    state.communities[payload.neighbourhood.uuid] = payload.state;
   },
 
   addCommunityState(payload: LocalCommunityState): void {

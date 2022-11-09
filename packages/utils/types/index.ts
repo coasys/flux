@@ -4,6 +4,18 @@ export interface NeighbourhoodMeta {
   languages: { [x: string]: string };
 }
 
+export interface Community {
+  uuid: string;
+  author: string;
+  timestamp: string;
+  name: string;
+  description: string;
+  image: string;
+  thumbnail: string;
+  neighbourhoodUrl: string;
+  members: string[];
+}
+
 export interface Channel {
   id: string;
   name: string;

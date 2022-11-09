@@ -198,8 +198,7 @@ export default defineComponent({
         name: "channel",
         params: {
           channelId: detail.channel,
-          communityId:
-            detail.uuid || this.community.neighbourhood.perspective.uuid,
+          communityId: detail.uuid || this.community.neighbourhood.uuid,
         },
       });
     },
@@ -214,7 +213,7 @@ export default defineComponent({
         this.$router.push({
           name: "community",
           params: {
-            communityId: community.neighbourhood.perspective.uuid,
+            communityId: community.neighbourhood.uuid,
           },
         });
       }
@@ -244,7 +243,7 @@ export default defineComponent({
 
       if (channelId) {
         this.dataStore.setHasNewMessages({
-          communityId: this.community.neighbourhood.perspective.uuid,
+          communityId: this.community.neighbourhood.uuid,
           channelId: channelId as string,
           value: false,
         });
@@ -271,7 +270,7 @@ export default defineComponent({
           name: "profile",
           params: {
             did,
-            communityId: this.community.neighbourhood.perspective.uuid,
+            communityId: this.community.neighbourhood.uuid,
           },
         });
       }

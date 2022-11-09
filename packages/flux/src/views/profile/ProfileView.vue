@@ -95,7 +95,7 @@
                   :name="community.neighbourhood.name"
                   :description="community.neighbourhood.description"
                   :url="community.neighbourhood.image"
-                  :uuid="community.neighbourhood.perspective.uuid"
+                  :uuid="community.neighbourhood.uuid"
                 ></CommunityCard>
               </div>
             </div>

@@ -46,26 +46,30 @@ export default async ({
 
   const currentDate = new Date();
 
-  const lastDate = parseISO(localStorage.getItem('lastNotificationDate') || currentDate.toISOString());
+  const lastDate = parseISO(
+    localStorage.getItem("lastNotificationDate") || currentDate.toISOString()
+  );
 
-  localStorage.setItem('lastNotificationDate', currentDate.toISOString())
+  localStorage.setItem("lastNotificationDate", currentDate.toISOString());
 
-  const slient = differenceInSeconds(currentDate, lastDate) <= 3
+  const slient = differenceInSeconds(currentDate, lastDate) <= 3;
 
   // Only show the notification when the the message is not from self & the active community & channel is different
   if (
     (!isMinimized &&
       !channel?.notifications.mute &&
-      !community?.state.notifications.mute && !slient &&
+      !community?.state.notifications.mute &&
+      !slient &&
       user!.agent.did! !== authorDid) ||
     (user!.agent.did! !== authorDid &&
-      (community?.neighbourhood.perspective.uuid === communityId
+      (community?.neighbourhood.uuid === communityId
         ? channel?.name !== channelId
         : true) &&
       !channel?.notifications.mute &&
       !community?.state.notifications.mute &&
       differenceInSeconds(new Date(), parseISO(timestamp)) <= 30 &&
-      appStore.notification.globalNotification && !slient)
+      appStore.notification.globalNotification &&
+      !slient)
   ) {
     const isMentioned = message.includes(
       user!.agent.did!.replace("did:key:", "")
@@ -101,7 +105,7 @@ export default async ({
         router.push({
           name: "channel",
           params: {
-            communityId: community!.neighbourhood.perspective!.uuid,
+            communityId: community!.neighbourhood.uuid,
             channelId: channel!.name,
           },
         });
