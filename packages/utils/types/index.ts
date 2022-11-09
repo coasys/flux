@@ -16,6 +16,15 @@ export interface Community {
   members: string[];
 }
 
+export interface CommunityMetaData {
+  name: string;
+  description?: string;
+  author?: string;
+  timestamp?: string;
+  image?: string;
+  thumbnail?: string;
+}
+
 export interface Channel {
   id: string;
   name: string;

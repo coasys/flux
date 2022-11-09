@@ -4,16 +4,13 @@ import {
   LocalCommunityState,
   ChannelState,
 } from "@/store/types";
-import { Channel } from "utils/types";
+import { Channel, CommunityMetaData } from "utils/types";
 
 import { useDataStore } from "..";
 
 interface UpdatePayload {
   communityId: string;
-  name: string;
-  description: string;
-  image: string | null;
-  thumbnail: string | null;
+  metadata: CommunityMetaData;
 }
 
 interface AddChannel {
@@ -99,24 +96,20 @@ export default {
     };
   },
 
-  updateCommunityMetadata({
-    communityId,
-    name,
-    description,
-    image,
-    thumbnail,
-  }: UpdatePayload): void {
+  updateCommunityMetadata({ communityId, metadata }: UpdatePayload): void {
     const state = useDataStore();
     const community = state.neighbourhoods[communityId];
 
     if (community) {
-      community.name = name;
-      community.description = description;
-      if (image) {
-        community.image = image;
+      community.name = metadata.name;
+      if (metadata.description) {
+        community.description = metadata.description;
       }
-      if (thumbnail) {
-        community.thumbnail = thumbnail;
+      if (metadata.image) {
+        community.image = metadata.image;
+      }
+      if (metadata.thumbnail) {
+        community.thumbnail = metadata.thumbnail;
       }
     }
 

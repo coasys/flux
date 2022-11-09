@@ -55,14 +55,12 @@ import { buildCommunity, hydrateState } from "./store/data/hydrateState";
 import { getCommunityMetadata } from "utils/api/getCommunityMetadata";
 import {
   getAd4mClient,
-  isConnected,
   onAuthStateChanged,
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import "@perspect3vism/ad4m-connect/dist/web";
 
 export default defineComponent({
   name: "App",
-
   setup() {
     const appStore = useAppStore();
     const router = useRouter();
