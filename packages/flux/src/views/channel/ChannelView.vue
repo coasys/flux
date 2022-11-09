@@ -9,13 +9,18 @@
         <j-icon color="ui-800" size="md" name="arrow-left-short" />
       </j-button>
       <j-text color="black" variant="heading-md"># {{ channel.name }}</j-text>
-      <div v-for="view in channel.views">{{ view }}</div>
+      <j-tabs :value="channel.currentView" @change="changeCurrentView">
+        <j-tab-item v-for="view in channel.views">
+          {{ view }}
+        </j-tab-item>
+      </j-tabs>
       <j-button
         @click="() => (showAddChannelView = true)"
         size="sm"
         variant="subtle"
-        >Add View</j-button
       >
+        Add View
+      </j-button>
     </div>
 
     <forum-view
@@ -173,6 +178,13 @@ export default defineComponent({
     },
   },
   methods: {
+    changeCurrentView(e: any) {
+      const value = e.target.value;
+      this.dataStore.setCurrentChannelView({
+        channelId: this.channel.id,
+        view: value,
+      });
+    },
     addChannelView() {
       this.dataStore
         .addChannelView({

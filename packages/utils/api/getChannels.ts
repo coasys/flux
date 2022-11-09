@@ -1,7 +1,6 @@
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { CHANNEL, CHANNEL_VIEW, SELF } from "../constants/communityPredicates";
-import { mapLiteralLinks } from "../helpers/linkHelpers";
 import { Channel } from "../types";
 
 export interface Payload {
@@ -29,12 +28,12 @@ export default async function ({ perspectiveUuid }: Payload) {
         const literal = Literal.fromUrl(channel.Target).get();
 
         channels.push({
-          id: literal.data,
+          id: channel.Target,
           perspectiveUuid: perspectiveUuid,
           name: literal.data,
           description: "",
           timestamp: literal.timestamp,
-          author: channel.A,
+          author: channel.Author,
           views: channelViews.map(
             (view: LinkExpression) => Literal.fromUrl(view.Target).get().data
           ),

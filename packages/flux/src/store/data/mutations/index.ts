@@ -158,6 +158,11 @@ export default {
     });
   },
 
+  setCurrentChannelView(payload: { channelId: string; view: string }) {
+    const state = useDataStore();
+    state.channels[payload.channelId].currentView = payload.view;
+  },
+
   addChannel(payload: AddChannel): void {
     const state = useDataStore();
     const parentNeighbourhood = state.neighbourhoods[payload.communityId];
