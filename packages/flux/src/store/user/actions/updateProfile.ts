@@ -2,9 +2,6 @@ import { Profile } from "utils/types";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "..";
 import { useDataStore } from "@/store/data";
-import { Link, LinkExpression, PerspectiveInput } from "@perspect3vism/ad4m";
-import removeTypeName from "utils/helpers/removeTypeName";
-import getAgentLinks from "utils/api/getAgentLinks";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
 import {
   FLUX_PROFILE,
