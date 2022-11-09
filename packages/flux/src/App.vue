@@ -60,7 +60,6 @@ import { Community } from "utils/types";
 
 export default defineComponent({
   name: "App",
-
   setup() {
     const appStore = useAppStore();
     const router = useRouter();
