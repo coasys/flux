@@ -401,10 +401,10 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     return expressionLinkLength;
   }
 
-  async function sendMessage(value: string) {
+  async function sendMessage(value) {
     const message = await createMessage({
       perspectiveUuid,
-      channelId: channelId,
+      lastMessage: channelId,
       message: value,
     });
 

@@ -53,31 +53,3 @@ export interface Profile {
 export interface Profiles {
   [x: string]: Profile;
 }
-
-export enum EntryType {
-  "flux://post",
-  "flux://message",
-  "flux://channel",
-}
-
-export type Did = string;
-
-export interface Entry {
-  id: string;
-  author: Did;
-  createdAt: Date;
-  type: EntryType[];
-  source?: string;
-  data?: PredicateMap;
-}
-
-export type PredicateMap = {
-  [predicate: string]: string;
-};
-
-export interface EntryInput {
-  perspectiveUuid: string;
-  source?: string;
-  type: EntryType[] | EntryType;
-  data: PredicateMap;
-}

@@ -1,37 +1,35 @@
-import { createEntry } from "../helpers/entryHelpers";
-import { EntryType } from "../types";
+import { Link } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { DIRECTLY_SUCCEEDED_BY } from "../constants/communityPredicates";
 import getMessage from "./getMessage";
 
 export interface Payload {
   perspectiveUuid: string;
-  channelId: string;
-  message: string;
+  lastMessage: string;
+  message: Object;
 }
 
 export default async function ({
   perspectiveUuid,
-  channelId,
+  lastMessage,
   message,
 }: Payload) {
   try {
-    const messageEntry = await createEntry({
-      perspectiveUuid,
-      source: channelId,
-      type: EntryType["flux://message"],
-      data: {
-        ["flux://content"]: message,
-      },
-    });
+    const client = await getAd4mClient();
+    const exp = await client.expression.create(message, 'literal');
 
-    return {
-      id: messageEntry.id,
-      timestamp: messageEntry.createdAt,
-      author: messageEntry.author,
-      reactions: [],
-      replies: [],
-      content: message,
-      editMessages: [],
-    };
+    const result = await client.perspective.addLink(
+      perspectiveUuid,
+      new Link({
+        source: lastMessage,
+        target: exp,
+        predicate: DIRECTLY_SUCCEEDED_BY,
+      })
+    );
+
+    const messageParsed = getMessage(result);
+
+    return messageParsed;
   } catch (e: any) {
     throw new Error(e);
   }
