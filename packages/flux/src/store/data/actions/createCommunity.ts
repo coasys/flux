@@ -155,7 +155,6 @@ export default async ({
     );
     console.log("Created profile expression link", addProfileLink);
 
-
     //Default popular setting is 3 upvotes on thumbsup emoji
     const sdnaLiteral = Literal.from(`emojiCount(Message, Count):- 
       aggregate_all(count, link(Message, "flux://has_reaction", "emoji://1f44d", _, _), Count).
@@ -233,7 +232,7 @@ export default async ({
     // neighbourhoods. Remember that this also need to happen in join community.
     await dataStore.createChannel({
       name: "Home",
-      communityId: createSourcePerspective.uuid,
+      perspectiveUuid: createSourcePerspective.uuid,
     });
 
     // @ts-ignore
