@@ -186,6 +186,7 @@ import { DexieIPFS } from "utils/helpers/storageHelpers";
 import { getImage } from "utils/api/getProfile";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { CHANNEL, SELF } from "utils/constants/communityPredicates";
+import { deleteChannel } from "utils/api/deleteChannel";
 
 export default defineComponent({
   components: { AvatarGroup },
@@ -319,22 +320,7 @@ export default defineComponent({
       if (channel) {
         const client = await getAd4mClient();
 
-        //TODO; this needs to be its own api method
-        await client.perspective.removeLink(channel.sourcePerspective, {
-          author: channel.creatorDid,
-          data: {
-            predicate: CHANNEL,
-            target: channel.id,
-            source: SELF,
-          },
-          proof: {
-            invalid: false,
-            key: "",
-            signature: "",
-            valid: true,
-          },
-          timestamp: channel.createdAt,
-        });
+        await deleteChannel(channel.sourcePerspective, {id: channelId, timestamp: channel.createdAt, author: channel.creatorDid});
 
         this.dataStore.removeChannel({
           channelId: channel.id,

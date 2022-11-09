@@ -37,7 +37,6 @@ export default async ({
 
   // Getting the channel & community this message belongs to
   const community = dataStore.getCommunity(perspectiveUuid);
-  // TODO: @fayeed change this.
   const channel = dataStore.getChannel(perspectiveUuid, channelLiteral.data);
 
   const isMinimized = document.hasFocus();
