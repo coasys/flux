@@ -53,5 +53,3 @@ export const AD4M_PREDICATE_USERNAME = "sioc://has_username";
 export const AD4M_PREDICATE_FIRSTNAME = "sioc://has_firstname";
 
 export const AD4M_PREDICATE_LASTNAME = "sioc://has_lastname";
-
-export const FLUX_PROXY_PROFILE_NAME = "Flux Agent Profile Data";

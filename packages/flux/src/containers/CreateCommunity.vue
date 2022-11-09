@@ -253,7 +253,7 @@ export default defineComponent({
       const perspectives = await client.perspective.all();
 
       const nonFluxPerspectives = perspectives.filter(
-        (perspective) => !keys.includes(perspective.uuid) && perspective.name !== "Agent Profile"
+        (perspective) => !keys.includes(perspective.uuid)
       );
 
       // @ts-ignore

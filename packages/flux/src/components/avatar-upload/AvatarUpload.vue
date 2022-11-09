@@ -97,7 +97,6 @@ export default defineComponent({
       const data = result.canvas.toDataURL();
       this.tempProfileImage = null;
       console.log({ data });
-      this.$emit("change", data);
     },
   },
 });
