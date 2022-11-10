@@ -8,19 +8,25 @@
       >
         <j-icon color="ui-800" size="md" name="arrow-left-short" />
       </j-button>
-      <j-text color="black" variant="heading-md"># {{ channel.name }}</j-text>
-      <j-tabs :value="channel.currentView" @change="changeCurrentView">
-        <j-tab-item v-for="view in channel.views">
-          {{ view }}
-        </j-tab-item>
-      </j-tabs>
-      <j-button
-        @click="() => (showAddChannelView = true)"
-        size="sm"
-        variant="subtle"
-      >
-        Add View
-      </j-button>
+
+      <div class="channel-view__header-left">
+        <j-text color="black" nomargin variant="heading-md">
+          # {{ channel.name }}
+        </j-text>
+        <j-tabs :value="channel.currentView" @change="changeCurrentView">
+          <j-tab-item size="sm" v-for="view in channel.views">
+            {{ view }}
+          </j-tab-item>
+        </j-tabs>
+        <j-button
+          @click="() => (showAddChannelView = true)"
+          size="sm"
+          variant="ghost"
+        >
+          <j-icon name="plus"></j-icon>
+        </j-button>
+      </div>
+      <div class="channel-view__header-right"></div>
     </div>
 
     <forum-view
@@ -295,10 +301,17 @@ export default defineComponent({
 .channel-view__header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 var(--j-space-200);
   position: sticky;
   border-bottom: 1px solid var(--j-color-white);
   height: var(--app-header-height);
+}
+
+.channel-view__header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-300);
 }
 
 .perspective-view {
