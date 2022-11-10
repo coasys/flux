@@ -149,7 +149,7 @@ export default defineComponent({
       dataStore: useDataStore(),
       script: null as HTMLElement | null,
       memberMentions: ref<MentionTrigger[]>([]),
-      activeProfile: ref<any>({}),
+      activeProfile: ref<string>(""),
       showProfile: ref(false),
       showJoinCommuinityModal: ref(false),
       activeCommunity: ref<any>({}),
@@ -269,7 +269,7 @@ export default defineComponent({
     },
     toggleProfile(open: boolean, did?: any): void {
       if (!open) {
-        this.activeProfile = undefined;
+        this.activeProfile = "";
       } else {
         this.activeProfile = did;
       }
