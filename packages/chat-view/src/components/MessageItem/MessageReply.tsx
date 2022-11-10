@@ -18,7 +18,7 @@ export default function MessageReply({
         >
           <Avatar
             did={replyAuthor.did}
-            url={replyAuthor.thumbnailPicture}
+            url={replyAuthor.profileThumbnailPicture}
             size="xxs"
           ></Avatar>
           <div class={styles.replyUsername}>

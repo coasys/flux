@@ -175,7 +175,7 @@ export default function MessageItem({
             <Avatar
               onClick={() => onProfileClick(author?.did)}
               did={author?.did}
-              url={author?.thumbnailPicture}
+              url={author?.profileThumbnailPicture}
             />
           ) : (
             showToolbar && (
