@@ -16,7 +16,7 @@
         <Avatar
           class="left-nav__profile-icon"
           :did="userStore.agent.did"
-          :url="userStore.profile?.profilePicture"
+          :url="userStore.profile?.profileThumbnailPicture"
           @click="() => navigate()"
         ></Avatar>
       </j-tooltip>
