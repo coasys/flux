@@ -1,4 +1,4 @@
-import { getImage } from "utils/api/getProfile";
+import { getImage } from "utils/helpers/getImage";
 import { useEffect, useState } from "preact/hooks";
 
 type AvatarProps = {

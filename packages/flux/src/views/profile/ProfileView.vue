@@ -190,7 +190,8 @@ import {
   OG_IMAGE,
   OG_TITLE,
 } from "utils/constants/profile";
-import getProfile, { getImage } from "utils/api/getProfile";
+import getProfile from "utils/api/getProfile";
+import { getImage } from "utils/helpers/getImage";
 import { mapLiteralLinks } from "utils/helpers/linkHelpers";
 import WebLinkAdd from "./WebLinkAdd.vue";
 

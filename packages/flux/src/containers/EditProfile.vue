@@ -49,7 +49,7 @@ import { Profile } from "utils/types";
 import { useUserStore } from "@/store/user";
 import { useAppStore } from "@/store/app";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
-import { getImage } from "utils/api/getProfile";
+import { getImage } from "utils/helpers/getImage";
 
 export default defineComponent({
   emits: ["cancel", "submit"],

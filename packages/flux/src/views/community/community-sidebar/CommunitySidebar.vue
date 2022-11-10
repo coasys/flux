@@ -183,9 +183,7 @@ import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { DexieIPFS } from "utils/helpers/storageHelpers";
-import { getImage } from "utils/api/getProfile";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { CHANNEL, SELF } from "utils/constants/communityPredicates";
+import { getImage } from "utils/helpers/getImage";
 import { deleteChannel } from "utils/api/deleteChannel";
 
 export default defineComponent({

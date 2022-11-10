@@ -9,7 +9,6 @@ import {
   HAS_BG_IMAGE,
   HAS_BIO,
 } from "../constants/profile";
-import { DexieProfile, DexieIPFS } from "../helpers/storageHelpers";
 import { Profile } from "../types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { mapLiteralLinks } from "../helpers/linkHelpers";
@@ -17,41 +16,6 @@ import { mapLiteralLinks } from "../helpers/linkHelpers";
 export interface Payload {
   url: string;
   perspectiveUuid: string;
-}
-
-export async function getImage(expUrl: string): Promise<string> {
-  return new Promise(async (resolve, reject) => {
-    console.log("get image", expUrl);
-    const client = await getAd4mClient();
-
-    if (expUrl || expUrl !== "") {
-      try {
-        // setTimeout(() => {
-        //   resolve("");
-        // }, 1000);
-
-        const dexie = new DexieIPFS("ipfs", 1);
-        const cachedImage = await dexie.get(expUrl);
-        if (cachedImage) {
-          console.log("Got cached image from dexie");
-          resolve(cachedImage);
-        } else {
-          const expression = await client.expression.get(expUrl);
-          if (expression) {
-            const image = expression.data.slice(1, -1);
-            dexie.save(expUrl, image);
-            resolve(image);
-          }
-        }
-        resolve("");
-      } catch (e) {
-        console.error(e);
-        resolve("");
-      }
-    } else {
-      resolve("");
-    }
-  });
 }
 
 export default async function getProfile(did: string): Promise<Profile> {

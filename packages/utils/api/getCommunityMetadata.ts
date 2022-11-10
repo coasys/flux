@@ -6,7 +6,7 @@ import {
   FLUX_GROUP_THUMBNAIL,
 } from "utils/constants/communityPredicates";
 import { DexieIPFS } from "utils/helpers/storageHelpers";
-import { getImage } from "utils/api/getProfile";
+import { getImage } from "utils/helpers/getImage";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { Literal } from "@perspect3vism/ad4m";
 import { CommunityMetaData } from "../types";
