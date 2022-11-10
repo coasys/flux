@@ -3,10 +3,10 @@ import { SELF, ZOME } from "../constants/communityPredicates";
 import { LinkQuery, Literal, LinkExpression } from "@perspect3vism/ad4m";
 import { SDNAValues } from "./generateSDNALiteral";
 
-export async function getSDNALinkLiteral(perspectiveUuid: string): Promise<Literal | null> {
+export async function getSDNALinkLiteral(perspectiveUuid: string): Promise<string | null> {
     const existingSDNALinks = await getSDNALinks(perspectiveUuid);
     if (existingSDNALinks.length > 0) {
-        return Literal.fromUrl(existingSDNALinks[0].data.target);
+        return Literal.fromUrl(existingSDNALinks[0].data.target).get();
     }
     return null;
 }
@@ -24,11 +24,10 @@ export async function getSDNAValues(perspectiveUuid: string): Promise<SDNAValues
         return null;
     }
 
-    const existingSDNAString = existingSDNA.toUrl();
     const emojiRegex = new RegExp('emoji:\/\/[A-Za-z0-9]+');
     const emojiCountRegex = new RegExp('[a-zA-Z]+ >= ([0-9])');
-    const emoji = existingSDNAString.match(emojiRegex)![0].replace("emoji://", "");
+    const emoji = existingSDNA.match(emojiRegex)![0].replace("emoji://", "");
     const emojiString = String.fromCodePoint(parseInt(`0x${emoji}`));
-    const emojiCount = parseInt(existingSDNAString.match(emojiCountRegex)![1]);
+    const emojiCount = parseInt(existingSDNA.match(emojiCountRegex)![1]);
     return {emoji: emojiString, emojiCount}
 }

@@ -21,7 +21,7 @@
                 />
             </j-box>
             <j-box pb="500">
-                <j-input label = "Number of Emojis" type="number" :value="emojiCount" @input="(e) => (emojiCount = e.target.value)"></j-input>
+                <j-input label = "Number of Emojis" type="number" :value="emojiCount" @input="(e: any) => (emojiCount = e.target.value)"></j-input>
             </j-box>
             <j-box pb="500">
                 <j-button @click="updateSDNA">Update</j-button>
