@@ -10,7 +10,7 @@ export default [
   },
   {
     title: "Post",
-    description: "A chat",
+    description: "A feed of posts that users can publish",
     icon: "postcard",
     type: ChannelView.Forum,
     component: "chat-view",

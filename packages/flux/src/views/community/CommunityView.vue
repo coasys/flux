@@ -61,7 +61,6 @@
   </j-modal>
 
   <j-modal
-    size="sm"
     :open="modals.showCreateChannel"
     @toggle="(e: any) => setShowCreateChannel(e.target.open)"
   >

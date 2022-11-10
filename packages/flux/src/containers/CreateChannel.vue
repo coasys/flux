@@ -27,18 +27,23 @@
             @change="(views: ChannelView[]) => (selectedViews = views)"
           ></ChannelViewOptions>
         </j-box>
-        <div>
-          <j-button size="lg" @click="$emit('cancel')"> Cancel </j-button>
-          <j-button
-            size="lg"
-            :loading="isCreatingChannel"
-            :disabled="isCreatingChannel || !canSubmit"
-            @click="createChannel"
-            variant="primary"
-          >
-            Create Channel
-          </j-button>
-        </div>
+
+        <j-box mt="500">
+          <j-flex direction="row" j="end" gap="300">
+            <j-button size="lg" variant="link" @click="() => $emit('cancel')">
+              Cancel
+            </j-button>
+            <j-button
+              size="lg"
+              :loading="isCreatingChannel"
+              :disabled="isCreatingChannel || !canSubmit"
+              @click="createChannel"
+              variant="primary"
+            >
+              Create
+            </j-button>
+          </j-flex>
+        </j-box>
       </j-flex>
     </j-flex>
   </j-box>

@@ -115,7 +115,7 @@ const styles = css`
 
   [part="backdrop"] {
     opacity: 0;
-    transition: opacity 0.5s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    transition: opacity 0.2s cubic-bezier(0.785, 0.135, 0.15, 0.86);
     overflow: visible;
     z-index: 400;
     position: absolute;
@@ -123,7 +123,7 @@ const styles = css`
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.6);
   }
 
   :host([open]) [part="backdrop"] {
