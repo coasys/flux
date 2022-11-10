@@ -264,25 +264,23 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
     const isMessageFromSelf = link.author === agent.did;
 
-    const hasFocus = document.hasFocus();
+    //const hasFocus = document.hasFocus();
 
-    if (!isMessageFromSelf || !hasFocus) {
-      if (linkIs.message(link)) {
-        const isSameChannel = await client.perspective.queryProlog(
-          perspectiveUuid,
-          `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.target}").`
-        );
-        if (isSameChannel) {
-          const message = getMessage(link);
+    if (linkIs.message(link)) {
+      const isSameChannel = await client.perspective.queryProlog(
+        perspectiveUuid,
+        `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.target}").`
+      );
+      if (isSameChannel) {
+        const message = getMessage(link);
 
-          if (message) {
-            setState((oldState) => addMessage(oldState, message));
+        if (message) {
+          setState((oldState) => addMessage(oldState, message));
 
-            setState((oldState) => ({
-              ...oldState,
-              isMessageFromSelf: false,
-            }));
-          }
+          setState((oldState) => ({
+            ...oldState,
+            isMessageFromSelf: isMessageFromSelf,
+          }));
         }
       }
 

@@ -316,7 +316,11 @@ export default defineComponent({
       const channel = this.channels.find((e) => e.id === channelId);
 
       if (channel) {
-        await deleteChannel(channel.sourcePerspective, { id: channelId, timestamp: channel.timestamp, author: channel.author});
+        await deleteChannel(channel.sourcePerspective, {
+          id: channelId,
+          timestamp: channel.timestamp,
+          author: channel.author,
+        });
 
         this.dataStore.removeChannel({
           channelId: channel.id,
