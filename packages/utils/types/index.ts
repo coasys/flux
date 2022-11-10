@@ -79,3 +79,8 @@ export interface Profile {
 export interface Profiles {
   [x: string]: Profile;
 }
+
+export interface ChannelViews {
+  CHAT;
+  FORUM;
+}
