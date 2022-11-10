@@ -11,7 +11,7 @@ export async function getImage(expUrl: string): Promise<string> {
       try {
         setTimeout(() => {
           resolve("");
-        }, 1000);
+        }, 3000);
 
         const dexie = new DexieIPFS("ipfs", 1);
         const cachedImage = await dexie.get(expUrl);
