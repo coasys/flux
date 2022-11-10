@@ -21,15 +21,12 @@
           @keydown.enter="createChannel"
           @input="(e: any) => (channelName = e.target.value)"
         ></j-input>
-        <div>
-          <j-tabs
-            :value="channelView"
-            @change="(e: any) => (channelView = e.target.value)"
-          >
-            <j-tab-item variant="button" value="chat">Chat</j-tab-item>
-            <j-tab-item variant="button" value="forum">Forum</j-tab-item>
-          </j-tabs>
-        </div>
+        <j-box pb="500" pt="300">
+          <ChannelViewOptions
+            :views="selectedViews"
+            @change="(views: ChannelView[]) => (selectedViews = views)"
+          ></ChannelViewOptions>
+        </j-box>
         <div>
           <j-button size="lg" @click="$emit('cancel')"> Cancel </j-button>
           <j-button
@@ -50,10 +47,13 @@
 <script lang="ts">
 import { useDataStore } from "@/store/data";
 import { isValid } from "@/utils/validation";
+import { ChannelView } from "utils/types";
 import { defineComponent } from "vue";
+import ChannelViewOptions from "@/components/channel-view-options/ChannelViewOptions.vue";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
+  components: { ChannelViewOptions },
   setup() {
     const dataStore = useDataStore();
 
@@ -63,6 +63,7 @@ export default defineComponent({
   },
   data() {
     return {
+      selectedViews: [] as ChannelView[],
       channelView: "chat",
       channelName: "",
       isCreatingChannel: false,
@@ -90,7 +91,7 @@ export default defineComponent({
         .createChannel({
           perspectiveUuid: communityId,
           name,
-          view: this.channelView,
+          views: this.selectedViews,
         })
         .then((channel: any) => {
           this.$emit("submit");

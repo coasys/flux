@@ -2,11 +2,12 @@ import { createChannel } from "utils/api/createChannel";
 import { useAppStore } from "@/store/app";
 import { ChannelState } from "@/store/types";
 import { useDataStore } from "..";
+import { ChannelView } from "utils/types";
 
 export interface Payload {
   perspectiveUuid: string;
   name: string;
-  view?: string;
+  views: ChannelView[];
 }
 
 export default async (payload: Payload): Promise<ChannelState> => {
@@ -26,7 +27,7 @@ export default async (payload: Payload): Promise<ChannelState> => {
 
     const channel = await createChannel({
       channelName: payload.name,
-      view: payload.view || "chat",
+      views: payload.views,
       perspectiveUuid: payload.perspectiveUuid,
     });
 
@@ -36,7 +37,7 @@ export default async (payload: Payload): Promise<ChannelState> => {
       timestamp: channel.timestamp,
       author: channel.author,
       sourcePerspective: channel.perspectiveUuid,
-      currentView: channel.views[0] || "chat",
+      currentView: channel.views[0],
       views: channel.views,
       hasNewMessages: false,
       notifications: {

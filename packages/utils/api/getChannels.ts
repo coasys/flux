@@ -25,6 +25,12 @@ export default async function ({ perspectiveUuid }: Payload) {
           `link("${channel.Target}", "${CHANNEL_VIEW}", Target, Timestamp, Author).`
         );
 
+        const views = channelViews
+          ? channelViews.map(
+              (view: LinkExpression) => Literal.fromUrl(view.Target).get().data
+            )
+          : [];
+
         const literal = Literal.fromUrl(channel.Target).get();
 
         channels.push({
@@ -34,9 +40,7 @@ export default async function ({ perspectiveUuid }: Payload) {
           description: "",
           timestamp: literal.timestamp,
           author: channel.Author,
-          views: channelViews.map(
-            (view: LinkExpression) => Literal.fromUrl(view.Target).get().data
-          ),
+          views: views,
         });
       }
     }

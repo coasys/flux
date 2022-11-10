@@ -37,7 +37,7 @@ export interface Channel {
   perspectiveUuid: string;
   timestamp: Date | string;
   author: string; // did
-  views: ChannelView;
+  views: ChannelView[];
 }
 
 export interface Reaction {
