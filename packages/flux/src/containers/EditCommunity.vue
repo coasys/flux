@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts">
-import { CommunityState } from "@/store/types";
+import { Community } from "utils/types";
 import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useDataStore } from "@/store/data";
@@ -74,7 +74,7 @@ export default defineComponent({
     },
   },
   computed: {
-    community(): CommunityState {
+    community(): Community {
       const id = this.$route.params.communityId as string;
       return this.dataStore.getCommunity(id);
     },
@@ -87,19 +87,19 @@ export default defineComponent({
         .updateCommunity({
           communityId: communityId,
           name:
-            this.communityName != this.community.name
+            this.communityName !== this.community.name
               ? this.communityName
               : undefined,
           description:
-            this.communityDescription != this.community.description
+            this.communityDescription !== this.community.description
               ? this.communityDescription
               : undefined,
           image:
-            this.communityImage != this.community.image
+            this.communityImage !== this.community.image
               ? this.communityImage
               : undefined,
           thumbnail:
-            this.communityImage != this.community.image
+            this.communityImage !== this.community.image
               ? this.communityImage
               : undefined,
         })

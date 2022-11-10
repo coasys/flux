@@ -10,22 +10,26 @@ export interface Payload {
   thumbnail?: string;
 }
 
-export default async function updateCommunityData(update: Payload): Promise<void> {
+export default async function updateCommunityData(
+  update: Payload
+): Promise<void> {
   const dataStore = useDataStore();
   const appStore = useAppStore();
   const { communityId } = update;
 
-  const community = dataStore.getCommunity(communityId);
-
   try {
-    const { image, thumbnail, name, description } = await updateCommunity(update);
+    const { name, description, image, thumbnail } = await updateCommunity(
+      update
+    );
 
     dataStore.updateCommunityMetadata({
-      communityId: community.uuid,
-      name: name || community.name,
-      description: description || community.description,
-      image: image || community.image || "",
-      thumbnail: thumbnail || community.thumbnail || "",
+      communityId,
+      metadata: {
+        name: name!,
+        description,
+        image,
+        thumbnail,
+      },
     });
   } catch (e) {
     appStore.showDangerToast({

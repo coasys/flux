@@ -100,14 +100,16 @@ export default {
     const community = state.neighbourhoods[communityId];
 
     if (community) {
-      community.name = metadata.name;
-      if (metadata.description) {
+      if (metadata?.name) {
+        community.name = metadata.name;
+      }
+      if (metadata?.description) {
         community.description = metadata.description;
       }
-      if (metadata.image) {
+      if (metadata?.image) {
         community.image = metadata.image;
       }
-      if (metadata.thumbnail) {
+      if (metadata?.thumbnail) {
         community.thumbnail = metadata.thumbnail;
       }
     }
@@ -210,10 +212,10 @@ export default {
     const state = useDataStore();
     const channel = state.getChannel(payload.communityId, payload.channelId);
     const tempCommunity = state.getCommunity(payload.communityId);
-    const community = state.communities[tempCommunity.state.perspectiveUuid];
+    const community = state.communities[tempCommunity.uuid];
     channel!.hasNewMessages = payload.value;
     community.hasNewMessages = state
-      .getChannelStates(tempCommunity.state.perspectiveUuid)
+      .getChannelStates(tempCommunity.uuid)
       .reduce((acc: boolean, channel) => {
         if (!acc) return channel.hasNewMessages;
         return true;
