@@ -60,6 +60,7 @@
                 :image="link.image"
                 :sameAgent="sameAgent"
                 @edit="() => setEditLinkModal(true, link)"
+                @delete="() => deleteWebLink(link)"
               />
             </div>
           </j-box>
@@ -120,6 +121,7 @@
                   :image="link.image"
                   :sameAgent="sameAgent"
                   @edit="() => setEditLinkModal(true, link)"
+                  @delete="() => deleteWebLink(link)"
                 />
               </div>
             </div>
@@ -173,7 +175,7 @@
 import { useDataStore } from "@/store/data";
 import { Profile } from "utils/types";
 import { ModalsState } from "@/store/types";
-import { Literal } from "@perspect3vism/ad4m";
+import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
 import WebLinkCard from "./WebLinkCard.vue";
 import CommunityCard from "./CommunityCard.vue";
@@ -248,6 +250,9 @@ export default defineComponent({
     },
     setShowJoinCommunityModal(value: boolean): void {
       this.showJoinCommunityModal = value;
+    },
+    async deleteWebLink(link: LinkExpression) {
+      this.weblinks = this.weblinks.filter((l: any) => l.id !== link.id);
     },
     async getAgentAreas() {
       const client = await getAd4mClient();
