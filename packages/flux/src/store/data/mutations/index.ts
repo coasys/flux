@@ -212,10 +212,10 @@ export default {
     const state = useDataStore();
     const channel = state.getChannel(payload.communityId, payload.channelId);
     const tempCommunity = state.getCommunity(payload.communityId);
-    const community = state.communities[tempCommunity.state.perspectiveUuid];
+    const community = state.communities[tempCommunity.uuid];
     channel!.hasNewMessages = payload.value;
     community.hasNewMessages = state
-      .getChannelStates(tempCommunity.state.perspectiveUuid)
+      .getChannelStates(tempCommunity.uuid)
       .reduce((acc: boolean, channel) => {
         if (!acc) return channel.hasNewMessages;
         return true;

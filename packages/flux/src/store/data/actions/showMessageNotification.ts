@@ -37,6 +37,7 @@ export default async ({
 
   // Getting the channel & community this message belongs to
   const community = dataStore.getCommunity(perspectiveUuid);
+  const communityState = dataStore.getLocalCommunityState(perspectiveUuid);
   const channel = dataStore.getChannel(perspectiveUuid, channelLiteral.data);
 
   const isMinimized = document.hasFocus();
@@ -57,15 +58,13 @@ export default async ({
   if (
     (!isMinimized &&
       !channel?.notifications.mute &&
-      !community?.state.notifications.mute &&
+      !communityState.notifications.mute &&
       !slient &&
       user!.agent.did! !== authorDid) ||
     (user!.agent.did! !== authorDid &&
-      (community?.neighbourhood.uuid === communityId
-        ? channel?.name !== channelId
-        : true) &&
+      (community?.uuid === communityId ? channel?.name !== channelId : true) &&
       !channel?.notifications.mute &&
-      !community?.state.notifications.mute &&
+      !communityState.notifications.mute &&
       differenceInSeconds(new Date(), parseISO(timestamp)) <= 30 &&
       appStore.notification.globalNotification &&
       !slient)
@@ -83,7 +82,7 @@ export default async ({
       title = `${name} mentioned you`;
       body = `#${channel?.name}: ${escapedMessage}`;
     } else {
-      title = `@${name} (${community?.neighbourhood.name})`;
+      title = `@${name} (${community?.name})`;
       body = `#${channel?.name}: ${escapedMessage}`;
     }
 
@@ -104,7 +103,7 @@ export default async ({
         router.push({
           name: "channel",
           params: {
-            communityId: community!.neighbourhood.uuid,
+            communityId: community!.uuid,
             channelId: channel!.name,
           },
         });
