@@ -75,8 +75,8 @@ export default defineComponent({
   async mounted() {
     this.username = this.userProfile.username || "";
     this.bio = this.userProfile.bio || "";
-    this.profilePicture = await getImage(this.userProfile?.profilePicture);
-    this.profileBackground = await getImage(this.userProfile?.profileBackground);
+    this.profilePicture = await getImage(this.userProfile.profilePicture);
+    this.profileBackground = await getImage(this.userProfile.profileBackground);
   },
   computed: {
     userProfile(): Profile {
@@ -95,7 +95,7 @@ export default defineComponent({
           username: this.username,
           profilePicture: this.profilePicture,
           bio: this.bio,
-          profileBackground: this.profileBackground,
+          profileBackground: this.profileBackground
         })
         .then(() => {
           this.$emit("submit");

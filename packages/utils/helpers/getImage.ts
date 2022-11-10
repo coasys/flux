@@ -1,7 +1,5 @@
 import { DexieIPFS } from "../helpers/storageHelpers";
-import { Profile } from "../types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { mapLiteralLinks } from "../helpers/linkHelpers";
 
 //Uses the dexie store to check for cached ipfs images and if it doesn't find it, it fetches it from ad4m and saves it to the dexie store
 export async function getImage(expUrl: string): Promise<string> {
@@ -9,7 +7,7 @@ export async function getImage(expUrl: string): Promise<string> {
     console.log("get image", expUrl);
     const client = await getAd4mClient();
 
-    if (expUrl || expUrl !== "") {
+    if (expUrl && expUrl !== "") {
       try {
         setTimeout(() => {
           resolve("");

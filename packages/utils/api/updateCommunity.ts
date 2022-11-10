@@ -14,6 +14,7 @@ import {
 import { LinkQuery } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { LinkExpression } from "@perspect3vism/ad4m";
+import { cacheImage } from "../helpers/cacheImage";
 
 export interface CommunityData {
     communityId: string;
@@ -92,48 +93,50 @@ export async function updateCommunity(update: CommunityData): Promise<CommunityD
     if (image) {
         const resizedImage = await resizeImage(dataURItoBlob(image as string), 100);
 
-        const thumbnail = image ? await blobToDataURL(resizedImage!) : undefined;
+        const thumbnail = await blobToDataURL(resizedImage!);
 
         tempImage = await client.expression.create(
-        image,
-        NOTE_IPFS_EXPRESSION_OFFICIAL
+            image,
+            NOTE_IPFS_EXPRESSION_OFFICIAL
         );
+        cacheImage(tempImage, image);
 
         tempThumbnail = await client.expression.create(
-        thumbnail,
-        NOTE_IPFS_EXPRESSION_OFFICIAL
+            thumbnail,
+            NOTE_IPFS_EXPRESSION_OFFICIAL
         );
+        cacheImage(tempThumbnail, thumbnail);
 
         await client.perspective.addLink(communityId, {
-        source: SELF,
-        target: tempImage,
-        predicate: FLUX_GROUP_IMAGE,
+            source: SELF,
+            target: tempImage,
+            predicate: FLUX_GROUP_IMAGE,
         });
         await client.perspective.addLink(communityId, {
-        source: SELF,
-        target: tempThumbnail,
-        predicate: FLUX_GROUP_THUMBNAIL,
+            source: SELF,
+            target: tempThumbnail,
+            predicate: FLUX_GROUP_THUMBNAIL,
         });
     }
 
     if (name) {
         const nameExpression = await client.expression.create(name, "literal");
         await client.perspective.addLink(communityId, {
-        source: SELF,
-        target: nameExpression,
-        predicate: FLUX_GROUP_NAME,
+            source: SELF,
+            target: nameExpression,
+            predicate: FLUX_GROUP_NAME,
         });
     }
 
     if (description) {
         const descriptionExpression = await client.expression.create(
-        description,
-        "literal"
+            description,
+            "literal"
         );
         await client.perspective.addLink(communityId, {
-        source: SELF,
-        target: descriptionExpression,
-        predicate: FLUX_GROUP_DESCRIPTION,
+            source: SELF,
+            target: descriptionExpression,
+            predicate: FLUX_GROUP_DESCRIPTION,
         });
     }
 

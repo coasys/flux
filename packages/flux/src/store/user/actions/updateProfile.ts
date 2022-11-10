@@ -17,6 +17,7 @@ import {
 } from "utils/helpers/profileHelpers";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { createLinks, createLiteralLinks } from "utils/helpers/linkHelpers";
+import { cacheImage } from "utils/helpers/cacheImage";
 
 export interface Payload {
   username?: string;
@@ -33,7 +34,6 @@ export default async (payload: Payload): Promise<void> => {
     const client = await getAd4mClient();
 
     const currentProfile = userStore.getProfile;
-    // TODO: add profilebg here.
     const newProfile = {
       ...currentProfile,
       ...payload,
@@ -58,6 +58,7 @@ export default async (payload: Payload): Promise<void> => {
         payload.profileBackground,
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
+      cacheImage(profileBackgroundUrl, payload.profileBackground);
     }
 
     if (payload.profilePicture) {
@@ -65,6 +66,7 @@ export default async (payload: Payload): Promise<void> => {
         payload.profilePicture,
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
+      cacheImage(profilePictureUrl, payload.profilePicture);
     }
 
     if (payload.profilePicture) {
@@ -78,6 +80,7 @@ export default async (payload: Payload): Promise<void> => {
         thumbnail,
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
+      cacheImage(profileThumbnailUrl, thumbnail);
     }
 
     const removals = perspective.links.filter(
