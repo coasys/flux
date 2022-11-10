@@ -76,7 +76,9 @@ export default defineComponent({
     this.username = this.userProfile.username || "";
     this.bio = this.userProfile.bio || "";
     this.profilePicture = await getImage(this.userProfile?.profilePicture);
-    this.profileBackground = await getImage(this.userProfile?.profileBackground);
+    this.profileBackground = await getImage(
+      this.userProfile?.profileBackground
+    );
   },
   computed: {
     userProfile(): Profile {
