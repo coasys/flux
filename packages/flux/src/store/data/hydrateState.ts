@@ -46,7 +46,6 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
       author: meta.author,
       timestamp: new Date().toISOString(),
       name: groupExp?.name || meta.name,
-      author: meta.author,
       description: groupExp?.description || meta.description,
       image: groupExp?.image || "",
       thumbnail: groupExp?.thumbnail || "",
