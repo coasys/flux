@@ -5,7 +5,13 @@ import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useUserStore } from "@/store/user";
 import { ad4mClient } from "@/app";
 import agentByDIDLinksFixture from "../../../fixtures/agentByDIDLinks.json";
-import { FLUX_PROXY_PROFILE_NAME, HAS_BG_IMAGE, HAS_PROFILE_IMAGE, HAS_THUMBNAIL_IMAGE, HAS_USERNAME } from "utils/constants/profile";
+import {
+  FLUX_PROXY_PROFILE_NAME,
+  HAS_BG_IMAGE,
+  HAS_PROFILE_IMAGE,
+  HAS_THUMBNAIL_IMAGE,
+  HAS_USERNAME,
+} from "utils/constants/profile";
 
 describe("Store Actions", () => {
   let store: Pinia;
@@ -40,23 +46,24 @@ describe("Store Actions", () => {
 
     // @ts-ignore
     jest
-     .spyOn(ad4mClient.perspective, "snapshotByUUID")
-     // @ts-ignore
-     .mockResolvedValue({links: []});
+      .spyOn(ad4mClient.perspective, "snapshotByUUID")
+      // @ts-ignore
+      .mockResolvedValue({ links: [] });
 
     // @ts-ignore
     jest
       .spyOn(ad4mClient.perspective, "all")
       // @ts-ignore
-      .mockResolvedValue([{
-        name: FLUX_PROXY_PROFILE_NAME,
-        // @ts-ignore
-        neighbourhood: null,
-        // @ts-ignore
-        sharedUrl: null,
-        uuid: "2a912c2c-6d30-46f2-b451-880349fced08"
-      }]);
-  
+      .mockResolvedValue([
+        {
+          name: FLUX_PROXY_PROFILE_NAME,
+          // @ts-ignore
+          neighbourhood: null,
+          // @ts-ignore
+          sharedUrl: null,
+          uuid: "2a912c2c-6d30-46f2-b451-880349fced08",
+        },
+      ]);
 
     // @ts-ignore
     jest
@@ -64,17 +71,16 @@ describe("Store Actions", () => {
       // @ts-ignore
       .mockImplementation((_, link) => {
         if (link.predicate === HAS_USERNAME) {
-          return agentByDIDLinksFixture.perspective.links[0]
+          return agentByDIDLinksFixture.perspective.links[0];
         } else if (link.predicate === HAS_BG_IMAGE) {
-          return agentByDIDLinksFixture.perspective.links[1]
+          return agentByDIDLinksFixture.perspective.links[1];
         } else if (link.predicate === HAS_PROFILE_IMAGE) {
-          return agentByDIDLinksFixture.perspective.links[2]
+          return agentByDIDLinksFixture.perspective.links[2];
         } else if (link.predicate === HAS_THUMBNAIL_IMAGE) {
-          return agentByDIDLinksFixture.perspective.links[4]
+          return agentByDIDLinksFixture.perspective.links[4];
         }
       });
 
-        
     // @ts-ignore
     jest
       .spyOn(ad4mClient.expression, "create")
@@ -99,7 +105,7 @@ describe("Store Actions", () => {
       username: "jhon",
       bio: "",
       profilePicture: "",
-      thumbnailPicture: undefined,
+      profileThumbnailPicture: undefined,
     };
 
     await userStore.createUser({

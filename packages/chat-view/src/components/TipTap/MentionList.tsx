@@ -100,12 +100,12 @@ export default class MentionList extends Component<
               active={index === selectedIndex}
               key={index}
               onClick={() => this.selectItem(index)}
-              onMouseOver={() => this.setState({ selectedIndex: index}) }
+              onMouseOver={() => this.setState({ selectedIndex: index })}
             >
               <j-flex gap="300" a="center">
                 <Avatar
                   size="xs"
-                  url={profile.thumbnailPicture}
+                  url={profile.profileThumbnailPicture}
                   did={profile.did}
                 ></Avatar>
                 <j-text nomargin> {profile.username}</j-text>

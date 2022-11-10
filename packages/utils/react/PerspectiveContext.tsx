@@ -142,9 +142,7 @@ export function PerspectiveProvider({ perspectiveUuid, children }: any) {
     if (state.url) {
       const channels = await getChannels({
         perspectiveUuid: perspectiveUuid,
-        neighbourhoodUrl: state.sourceUrl || state.url,
       });
-
       setState((prev, curr) => ({ ...prev, channels }));
     }
   };

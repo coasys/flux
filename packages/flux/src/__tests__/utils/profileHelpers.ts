@@ -20,7 +20,7 @@ const testProfile1 = {
   username: "jhon",
   profileBg: "mag",
   profilePicture: "mag",
-  thumbnailPicture: "mag",
+  profileThumbnailPicture: "mag",
   bio: "",
 } as ProfileWithDID;
 
@@ -32,12 +32,12 @@ describe("ProfileHelpers", () => {
       .spyOn(ad4mClient.agent, "byDID")
       // @ts-ignore
       .mockImplementation(async (did) => {
-        if (did.includes('101')) {
+        if (did.includes("101")) {
           return {
             perspective: {
-              links: []
-            }
-          }
+              links: [],
+            },
+          };
         }
         return agentByDIDLinksFixture;
       });
@@ -47,7 +47,7 @@ describe("ProfileHelpers", () => {
       // @ts-ignore
       .mockImplementation(async () => {
         return {
-          data: "image"
+          data: "image",
         };
       });
   });

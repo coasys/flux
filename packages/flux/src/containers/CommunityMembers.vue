@@ -27,7 +27,7 @@
           <Avatar
             size="xl"
             :hash="communityMember.did"
-            :url="communityMember.thumbnailPicture"
+            :url="communityMember.profileThumbnailPicture"
             @click="() => profileClick(communityMember.did)"
           ></Avatar>
           <j-text color="black" nomargin variant="body">
