@@ -1,3 +1,4 @@
+import { ChannelView } from "utils/types";
 export interface ChannelState {
   id: string;
   name: string;
@@ -7,7 +8,7 @@ export interface ChannelState {
   hasNewMessages: boolean;
   timestamp: Date | string;
   currentView: string;
-  views: string[];
+  views: ChannelView[];
   scrollTop?: number;
   notifications: {
     mute: boolean;

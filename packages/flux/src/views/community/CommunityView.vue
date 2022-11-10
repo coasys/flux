@@ -25,8 +25,8 @@
           channel.name === channelId &&
           channel.sourcePerspective === communityId
         "
-        :channelId="channelId"
-        :communityId="channel.sourcePerspective"
+        :channelId="channel.id"
+        :communityId="communityId"
       ></channel-view>
     </div>
     <div v-if="notSynced" class="center">
