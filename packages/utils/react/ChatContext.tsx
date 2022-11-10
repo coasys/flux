@@ -73,9 +73,6 @@ const initialState: ContextProps = {
 
 const ChatContext = createContext(initialState);
 
-let dexieUI: DexieUI;
-let dexieMessages: DexieMessages;
-
 export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   const linkSubscriberRef = useRef();
 
@@ -85,15 +82,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   useEffect(() => {
     fetchAgent();
   }, []);
-
-  useEffect(() => {
-    if (channelId) {
-      dexieUI = new DexieUI(`${perspectiveUuid}://${channelId}`);
-      dexieMessages = new DexieMessages(`${perspectiveUuid}://${channelId}`);
-      // Set messages to cached messages
-      // so we have something before we load more
-    }
-  }, [channelId]);
 
   async function fetchAgent() {
     const agent = await getMe();
@@ -131,10 +119,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       removed: handleLinkRemoved,
     });
   }
-
-  useEffect(() => {
-    dexieMessages.saveAll(Object.values(state.keyedMessages));
-  }, [JSON.stringify(state.keyedMessages)]);
 
   function addMessage(oldState, message) {
     const newState = {

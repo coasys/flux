@@ -56,7 +56,7 @@ type Map = {
 export function mapLiteralLinks(
   links: LinkExpression[] | undefined,
   map: PredicateMap
-): Map {
+) {
   return Object.keys(map).reduce((acc, key) => {
     const predicate = map[key];
     const link = links?.find((link) => link.data.predicate === predicate);
@@ -88,6 +88,22 @@ export async function createLiteralLinks(source: string, map: TargetMap) {
       return new Link({ source, predicate, target: exp });
     });
 
+  return Promise.all(promises);
+}
+
+//function to create links from a map of predicates to targets
+export async function createLinks(source: string, map: TargetMap) {
+  const targets = Object.keys(map);
+
+  const promises = targets
+    .filter((predicate: any) => {
+      return typeof map[predicate] === "string" && map[predicate] !== "";
+    })
+    .map(async (predicate: string) => {
+      const target = map[predicate];
+      return new Link({ source, predicate, target });
+    });
+    
   return Promise.all(promises);
 }
 

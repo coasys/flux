@@ -72,8 +72,8 @@ export interface Profile {
   email: string;
   givenName: string;
   familyName: string;
-  profileBg: string;
-  thumbnailPicture: string;
+  profileBackground: string;
+  profileThumbnailPicture: string;
   profilePicture: string;
 }
 export interface Profiles {

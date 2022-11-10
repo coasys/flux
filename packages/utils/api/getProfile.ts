@@ -9,7 +9,7 @@ import {
   HAS_BG_IMAGE,
   HAS_BIO,
 } from "../constants/profile";
-import { DexieProfile } from "../helpers/storageHelpers";
+import { DexieProfile, DexieIPFS } from "../helpers/storageHelpers";
 import { Profile } from "../types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { mapLiteralLinks } from "../helpers/linkHelpers";
@@ -21,20 +21,28 @@ export interface Payload {
 
 export async function getImage(expUrl: string): Promise<string> {
   return new Promise(async (resolve, reject) => {
+    console.log("get image", expUrl);
     const client = await getAd4mClient();
 
-    if (expUrl) {
+    if (expUrl || expUrl !== "") {
       try {
-        setTimeout(() => {
-          resolve("");
-        }, 1000);
+        // setTimeout(() => {
+        //   resolve("");
+        // }, 1000);
 
-        const image = await client.expression.get(expUrl);
-
-        if (image) {
-          resolve(image.data.slice(1, -1));
+        const dexie = new DexieIPFS("ipfs", 1);
+        const cachedImage = await dexie.get(expUrl);
+        if (cachedImage) {
+          console.log("Got cached image from dexie");
+          resolve(cachedImage);
+        } else {
+          const expression = await client.expression.get(expUrl);
+          if (expression) {
+            const image = expression.data.slice(1, -1);
+            dexie.save(expUrl, image);
+            resolve(image);
+          }
         }
-
         resolve("");
       } catch (e) {
         console.error(e);
@@ -53,9 +61,9 @@ export default async function getProfile(did: string): Promise<Profile> {
     username: "",
     bio: "",
     email: "",
-    profileBg: "",
+    profileBackground: "",
     profilePicture: "",
-    thumbnailPicture: "",
+    profileThumbnailPicture: "",
     givenName: "",
     familyName: "",
     did: "",
@@ -73,13 +81,15 @@ export default async function getProfile(did: string): Promise<Profile> {
     if (agentPerspective) {
       const links = agentPerspective!.perspective!.links;
 
-      const dexie = new DexieProfile(`flux://profile`, 1);
+      // const dexie = new DexieProfile(`flux://profile`, 1);
 
-      let cachedProfile = await dexie.get(cleanedDid);
+      // console.log("get profile", links);
+      // let cachedProfile = await dexie.get(cleanedDid);
+      // console.log("got cached profile", cachedProfile);
 
-      if (cachedProfile) {
-        return cachedProfile as Profile;
-      }
+      // if (cachedProfile) {
+      //   return cachedProfile as Profile;
+      // }
 
       const mappedProfile: any = mapLiteralLinks(
         links.filter((e) => e.data.source === FLUX_PROFILE),
@@ -90,8 +100,8 @@ export default async function getProfile(did: string): Promise<Profile> {
           email: HAS_EMAIL,
           familyName: HAS_FAMILY_NAME,
           profilePicture: HAS_PROFILE_IMAGE,
-          thumbnailPicture: HAS_THUMBNAIL_IMAGE,
-          profileBg: HAS_BG_IMAGE,
+          profileThumbnailPicture: HAS_THUMBNAIL_IMAGE,
+          profileBackground: HAS_BG_IMAGE,
         }
       );
 
@@ -100,7 +110,7 @@ export default async function getProfile(did: string): Promise<Profile> {
         did: cleanedDid,
       };
 
-      dexie.save(cleanedDid, profile as Profile);
+      //dexie.save(cleanedDid, profile as Profile);
     }
   }
 

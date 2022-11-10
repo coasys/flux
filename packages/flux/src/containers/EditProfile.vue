@@ -3,8 +3,8 @@
     <j-flex direction="column" gap="700">
       <j-text variant="heading-sm">Edit profile</j-text>
       <img-upload
-        :value="profileBg"
-        @change="(url) => (profileBg = url)"
+        :value="profileBackground"
+        @change="(url) => (profileBackground = url)"
         @hide="(val) => (hideContainer = val)"
       ></img-upload>
       <avatar-upload
@@ -67,7 +67,7 @@ export default defineComponent({
       isUpdatingProfile: false,
       username: "",
       bio: "",
-      profileBg: "",
+      profileBackground: "",
       profilePicture: "",
       hideContainer: false,
     };
@@ -76,7 +76,7 @@ export default defineComponent({
     this.username = this.userProfile.username || "";
     this.bio = this.userProfile.bio || "";
     this.profilePicture = await getImage(this.userProfile?.profilePicture);
-    this.profileBg = await getImage(this.userProfile.profileBg);
+    this.profileBackground = await getImage(this.userProfile?.profileBackground);
   },
   computed: {
     userProfile(): Profile {
@@ -95,7 +95,7 @@ export default defineComponent({
           username: this.username,
           profilePicture: this.profilePicture,
           bio: this.bio,
-          profileBg: this.profileBg,
+          profileBackground: this.profileBackground,
         })
         .then(() => {
           this.$emit("submit");

@@ -1,7 +1,7 @@
 <template>
   <div v-if="profile" class="profile__container">
     <div
-      :style="{ backgroundImage: `url(${profileBg})` }"
+      :style="{ backgroundImage: `url(${profileBackground})` }"
       class="profile__bg"
     />
 
@@ -221,7 +221,7 @@ export default defineComponent({
       showEditlinkModal: false,
       showJoinCommunityModal: false,
       weblinks: [] as any,
-      profileBg: "",
+      profileBackground: "",
       profile: null as Profile | null,
       joiningLink: "",
       editArea: null as any,
@@ -313,7 +313,7 @@ export default defineComponent({
     profile: {
       handler: async function (val) {
         if (val) {
-          this.profileBg = await getImage(val.profileBg);
+          this.profileBackground = await getImage(val.profileBackground);
         }
       },
       immediate: true,
