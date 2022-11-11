@@ -36,6 +36,7 @@ export default async (payload: Payload): Promise<ChannelState> => {
       name: channel.name,
       timestamp: channel.timestamp,
       author: channel.author,
+      collapsed: false,
       sourcePerspective: channel.perspectiveUuid,
       currentView: channel.views[0],
       views: channel.views,

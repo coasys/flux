@@ -157,7 +157,12 @@ export default {
     });
   },
 
-  setCurrentChannelView(payload: { channelId: string; view: string }) {
+  toggleChannelCollapse(channelId: string) {
+    const state = useDataStore();
+    state.channels[channelId].collapsed = !state.channels[channelId].collapsed;
+  },
+
+  setCurrentChannelView(payload: { channelId: string; view: ChannelView }) {
     const state = useDataStore();
     state.channels[payload.channelId].currentView = payload.view;
   },

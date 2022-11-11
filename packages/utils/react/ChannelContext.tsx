@@ -1,25 +1,34 @@
 import React, { createContext, useState, useEffect } from "react";
-import { PostType } from "../types";
+import { EntryType } from "../types";
 
 type State = {
   communityId: string;
   channelId: string;
   entries: {
-    [PostType];
+    [x: EntryType]: {
+      [x: string]: any;
+    };
   };
 };
 
 type ContextProps = {
   state: State;
-  methods: {};
+  methods: {
+    getEntry: (id: string, type: EntryType) => void;
+    loadEntries: (type: EntryType) => void;
+  };
 };
 
 const initialState: ContextProps = {
   state: {
     communityId: "",
     channelId: "",
+    entries: {},
   },
-  methods: {},
+  methods: {
+    getEntry: () => null,
+    loadEntries: () => null,
+  },
 };
 
 const AgentContext = createContext(initialState);
@@ -27,21 +36,13 @@ const AgentContext = createContext(initialState);
 export function AgentProvider({ channelId, communityId, children }: any) {
   const [state, setState] = useState(initialState.state);
 
-  useEffect(() => {
-    fetchAgent();
-  }, []);
-
-  async function fetchAgent() {
-    const agent = await getMe();
-
-    setState({ ...state, ...agent });
-  }
-
   return (
     <AgentContext.Provider
       value={{
         state,
-        methods: {},
+        methods: {
+          loadEntries,
+        },
       }}
     >
       {children}

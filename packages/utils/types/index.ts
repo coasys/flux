@@ -89,7 +89,7 @@ export enum ChannelView {
 
 export enum EntryType {
   Message = "flux://message",
-  Forum = "flux://forum"
+  SimplePost = "flux://simple_post",
 }
 
 export interface Entry {
@@ -142,5 +142,5 @@ export enum PrologQueries {
   GetMessages,
   GetForumPosts,
   GetChannel,
-  GetNeighbourhood
+  GetNeighbourhood,
 }

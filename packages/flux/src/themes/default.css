@@ -42,11 +42,11 @@
 }
 
 :root[theme="default"] j-menu-item:hover {
-  --j-menu-item-bg: hsl(var(--j-color-ui-hue), 0%, 20%);
+  --j-menu-item-bg: hsl(var(--j-color-ui-hue), 0%, 15%);
   --j-menu-item-color: hsl(var(--j-color-ui-hue), 0%, 70%);
 }
 
 :root[theme="default"] j-menu-item[selected] {
-  --j-menu-item-bg: hsl(var(--j-color-ui-hue), 0%, 26%);
+  --j-menu-item-bg: hsl(var(--j-color-ui-hue), 0%, 15%);
   --j-menu-item-color: var(--j-color-black);
 }
