@@ -14,9 +14,14 @@ export async function getSDNALinkLiteral(perspectiveUuid: string): Promise<strin
 export async function getSDNAVersion(perspectiveUuid): Promise<number | null> {
     const ad4mClient = await getAd4mClient();
     const existingSDNALinks = await getSDNALinks(perspectiveUuid);
-    const sdnaLinkVersion = await ad4mClient.perspective.queryLinks(perspectiveUuid, {source: existingSDNALinks[0].data.target, predicate: SDNA_VERSION} as LinkQuery);
-    if (sdnaLinkVersion.length > 0) {
-        return parseInt(sdnaLinkVersion[0].data.target.replace("int://", ""));
+    if (existingSDNALinks.length > 0) {
+        const sdnaLinkVersion = await ad4mClient.perspective.queryLinks(perspectiveUuid, {source: existingSDNALinks[0].data.target, predicate: SDNA_VERSION} as LinkQuery);
+        if (sdnaLinkVersion.length > 0) {
+            console.log(sdnaLinkVersion);
+            return parseInt(sdnaLinkVersion[0].data.target.replace("int://", ""));
+        } else {
+            return null;
+        }
     } else {
         return null;
     }

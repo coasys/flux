@@ -7,7 +7,12 @@ import { LATEST_SDNA_VERSION } from "../constants/sdna";
 
 export async function updateSDNA(perspectiveUuid: string, values?: SDNAValues): Promise<LinkExpression> {
     await deleteSDNALinks(perspectiveUuid);
-    const sdnaLink = await createSDNA(perspectiveUuid, values);
+    let sdnaLink;
+    try {
+        sdnaLink = await createSDNA(perspectiveUuid, values);
+    } catch {
+        sdnaLink = await createSDNA(perspectiveUuid);
+    }
     return sdnaLink;
 }
 

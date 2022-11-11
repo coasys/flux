@@ -78,8 +78,14 @@ export default defineComponent({
   async mounted() {
     const perspectiveUuid = this.community.perspectiveUuid;
     const sdnaValues = await getSDNAValues(perspectiveUuid);
-    this.emoji = sdnaValues ? sdnaValues.emoji : emoji;
-    this.emojiCount = sdnaValues ? sdnaValues.emojiCount : emojiCount;
+    if (sdnaValues) {
+      this.emoji = sdnaValues.emoji;
+      this.emojiCount = sdnaValues.emojiCount;
+    } else {
+      const emojiString = String.fromCodePoint(parseInt(`0x${emoji}`));
+      this.emoji = emojiString;
+      this.emojiCount = emojiCount;
+    }
     this.sdnaVersion = await getSDNAVersion(perspectiveUuid) || 0;
   },
   methods: {

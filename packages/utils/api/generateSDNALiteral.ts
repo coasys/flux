@@ -25,10 +25,10 @@ export async function generateSDNALiteral(values?: SDNAValues): Promise<Literal>
             throw new Error("Could not parse code point for emoji in getSDNALiteral");
         }
 
-        emojiInput = emojiInput.emoji(16);
+        emojiInput = emojiInput.toString(16);
     }
 
-    const templatedSDNA = format(SDNA, emoji, emojiCountInput, emojiCountInput);
+    const templatedSDNA = format(SDNA, emojiInput, emojiCountInput, emojiCountInput);
 
     return Literal.from(templatedSDNA);
 }
