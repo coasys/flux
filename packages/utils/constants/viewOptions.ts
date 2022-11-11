@@ -9,7 +9,7 @@ export default [
     component: "chat-view",
   },
   {
-    title: "Post",
+    title: "Posts",
     description: "A feed of posts that users can publish",
     icon: "card-heading",
     type: ChannelView.Forum,

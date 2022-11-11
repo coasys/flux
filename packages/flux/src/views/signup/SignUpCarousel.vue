@@ -5,11 +5,12 @@
         <j-box pt="500" pb="800">
           <Orb3 height="40vh"></Orb3>
         </j-box>
-        <j-text variant="heading-lg">Welcome to Flux</j-text>
-        <j-text variant="ingress">
-          With Flux you are able to create your own decentralized community
-          completely free from control.
-        </j-text>
+        <Logo height="7vh" />
+        <j-box pt="500">
+          <j-text size="800" color="black">
+            A Toolkit for the New Internet
+          </j-text>
+        </j-box>
         <j-box py="500">
           <j-button size="xl" @click="currentIndex = 1" variant="primary">
             Get Started
