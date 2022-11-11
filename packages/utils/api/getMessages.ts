@@ -12,6 +12,7 @@ export interface Payload {
 }
 
 export default async function ({ perspectiveUuid, channelId, from }: Payload) {
+  console.warn("Getting messages...");
   const client = await getAd4mClient();
 
   let prologQuery;
