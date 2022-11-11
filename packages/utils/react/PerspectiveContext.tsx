@@ -14,6 +14,7 @@ import getPerspectiveProfile from "../api/getProfile";
 import { Literal } from "@perspect3vism/ad4m";
 
 type State = {
+  uuid: string;
   name: string;
   description: string;
   languages: Array<any>;
@@ -32,6 +33,7 @@ type ContextProps = {
 
 const initialState: ContextProps = {
   state: {
+    uuid: "",
     name: "",
     description: "",
     url: "",
@@ -48,7 +50,10 @@ const initialState: ContextProps = {
 const PerspectiveContext = createContext(initialState);
 
 export function PerspectiveProvider({ perspectiveUuid, children }: any) {
-  const [state, setState] = useState(initialState.state);
+  const [state, setState] = useState({
+    ...initialState.state,
+    uuid: perspectiveUuid,
+  });
   const linkSubscriberRef = useRef();
 
   useEffect(() => {

@@ -28,6 +28,8 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import editCurrentMessage from "../api/editCurrentMessage";
 
 type State = {
+  communityId: string;
+  channelId: string;
   isFetchingMessages: boolean;
   keyedMessages: Messages;
   hasNewMessage: boolean;
@@ -52,6 +54,8 @@ type ContextProps = {
 
 const initialState: ContextProps = {
   state: {
+    communityId: "",
+    channelId: "",
     isFetchingMessages: false,
     keyedMessages: {},
     hasNewMessage: false,
@@ -76,7 +80,12 @@ const ChatContext = createContext(initialState);
 export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   const linkSubscriberRef = useRef();
 
-  const [state, setState] = useState(initialState.state);
+  const [state, setState] = useState({
+    ...initialState.state,
+    communityId: perspectiveUuid,
+    channelId,
+  });
+
   const [agent, setAgent] = useState();
 
   useEffect(() => {

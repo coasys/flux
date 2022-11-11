@@ -30,7 +30,11 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
           />
         );
       })}
-      <j-button onClick={() => loadMoreMessages()}>Load more</j-button>
+      <j-flex a="center" j="center">
+        <j-button variant="link" onClick={() => loadMoreMessages()}>
+          Load more
+        </j-button>
+      </j-flex>
     </div>
   );
 }
