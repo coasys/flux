@@ -31,12 +31,6 @@
               v-if="channel?.notifications?.mute"
               name="bell-slash"
             />
-            <j-icon
-              size="xs"
-              slot="end"
-              v-if="channel?.notifications?.mute"
-              name="bell-slash"
-            />
             <div
               slot="end"
               class="channel__notification"
@@ -44,12 +38,18 @@
             ></div>
 
             <j-icon
-              @click.stop="handleToggleClick(channel.id, channel.name)"
-              slot="start"
-              size="xs"
+              @click.stop="handleToggleClick(channel.id)"
+              slot="end"
+              style="--j-icon-size: 13px"
               v-if="channel.views.length > 1"
               :name="channel.collapsed ? 'chevron-down' : 'chevron-right'"
             />
+            <j-icon
+              slot="end"
+              size="xs"
+              v-else
+              :name="getIcon(channel.views[0])"
+            ></j-icon>
           </j-menu-item>
           <div v-if="channel.collapsed">
             <j-menu-item
