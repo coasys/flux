@@ -4,6 +4,7 @@ import getEntries from "./getEntries";
 import { DEFAULT_LIMIT, forumFilteredQuery, forumQuery } from "../constants/sdna";
 
 export default async function getPosts(perspectiveUuid: string, source: string, fromDate?: Date): Promise<Post[]> {
+    console.log("GETTING POSTS");
     let prologQuery;
     if (fromDate) {
         prologQuery = forumFilteredQuery;

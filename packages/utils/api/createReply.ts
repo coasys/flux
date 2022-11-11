@@ -1,6 +1,7 @@
 import { Link } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { REPLY_TO, DIRECTLY_SUCCEEDED_BY } from "../constants/communityPredicates";
+import { REPLY_TO } from "../constants/communityPredicates";
+import { EntryType } from "../types";
 import getMessage from "./getMessage";
 
 export interface Payload {
@@ -26,7 +27,7 @@ export default async function ({
       new Link({
         source: channelId,
         target: expUrl,
-        predicate: DIRECTLY_SUCCEEDED_BY,
+        predicate: EntryType.Message,
       })
     );
     const link = await client.perspective.addLink(

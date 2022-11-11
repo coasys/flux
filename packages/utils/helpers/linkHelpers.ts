@@ -5,13 +5,13 @@ import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import {
   CARD_HIDDEN,
   CHANNEL,
-  DIRECTLY_SUCCEEDED_BY,
   MEMBER,
   REACTION,
   EDITED_TO,
   REPLY_TO,
   ZOME,
 } from "../constants/communityPredicates";
+import { EntryType } from "../types";
 
 export const findLink = {
   name: (link: LinkExpression) => link.data.predicate === "rdf://name",
@@ -24,7 +24,7 @@ export const findLink = {
 
 export const linkIs = {
   message: (link: LinkExpression) =>
-    link.data.predicate === DIRECTLY_SUCCEEDED_BY,
+    link.data.predicate === EntryType.Message,
   reply: (link: LinkExpression) => link.data.predicate === REPLY_TO,
   // TODO: SHould we check if the link is proof.valid?
   reaction: (link: LinkExpression) => link.data.predicate === REACTION,

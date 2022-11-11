@@ -43,7 +43,6 @@ import {
   FLUX_GROUP_NAME,
   FLUX_GROUP_THUMBNAIL,
   MEMBER,
-  DIRECTLY_SUCCEEDED_BY,
 } from "utils/constants/communityPredicates";
 import { useUserStore } from "./store/user";
 import { buildCommunity, hydrateState } from "./store/data/hydrateState";
@@ -53,7 +52,7 @@ import {
   onAuthStateChanged,
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import "@perspect3vism/ad4m-connect/dist/web";
-import { Community } from "utils/types";
+import { Community, EntryType } from "utils/types";
 
 export default defineComponent({
   name: "App",
@@ -117,14 +116,14 @@ export default defineComponent({
         link: LinkExpression,
         perspective: string
       ) => {
-        if (link.data!.predicate! === DIRECTLY_SUCCEEDED_BY) {
+        if (link.data!.predicate! === EntryType.Message) {
           try {
             const channels = this.dataStore.getChannelStates(perspective);
 
             for (const channel of channels) {
               const isSameChannel = await client.perspective.queryProlog(
                 perspective,
-                `triple("${channel.id}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.target}").`
+                `triple("${channel.id}", "${EntryType.Message}", "${link.data.target}").`
               );
 
               if (isSameChannel) {

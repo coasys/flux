@@ -20,7 +20,7 @@ export default async function ({
   const entryInput = {
     perspectiveUuid,
     source,
-    types: [EntryType.Forum],
+    types: [EntryType.SimplePost],
     data: {
       [TITLE]: await client.expression.create(title, 'literal'),
       [BODY]: await client.expression.create(body, 'literal')

@@ -8,22 +8,26 @@ export interface SDNAValues {
 }
 
 export async function generateSDNALiteral(values?: SDNAValues): Promise<Literal> {
+    let emojiInput;
+    let emojiCountInput;
     if (!values) {
-        values = {emoji, emojiCount};
+        emojiInput = emoji;
+        emojiCountInput = emojiCount;
+    } else {
+        if (values.emojiCount < 1) {
+            throw new Error("Emoji count must be greater than 0");
+        }
+        emojiCountInput = values.emojiCount;
+        emojiInput = values.emoji.codePointAt(0);
+
+        if (!emojiInput) {
+            throw new Error("Could not parse code point for emoji in getSDNALiteral");
+        }
+
+        emojiInput = emojiInput.emoji(16);
     }
 
-    if (values.emojiCount < 1) {
-        throw new Error("Emoji count must be greater than 0");
-    }
-    const parsedEmoji = values.emoji.codePointAt(0);
-
-    if (!parsedEmoji) {
-        throw new Error("Could not parse code point for emoji in getSDNALiteral");
-    }
-
-    const parsedEmojiString = parsedEmoji.toString(16);
-
-    const templatedSDNA = format(SDNA, parsedEmojiString, emojiCount, emojiCount);
+    const templatedSDNA = format(SDNA, emoji, emojiCount, emojiCountInput);
 
     return Literal.from(templatedSDNA);
 }

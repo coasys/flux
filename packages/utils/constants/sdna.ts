@@ -18,7 +18,7 @@ export const SDNA = `
         link(Channel, "${EntryType.Message}", Message, Timestamp, Author),
         findall((EditMessage, EditMessageTimestamp, EditMessageAuthor), link(Message, "${EDITED_TO}", EditMessage, EditMessageTimestamp, EditMessageAuthor), EditMessages),
         findall((Reaction, ReactionTimestamp, ReactionAuthor), link(Message, "${REACTION}", Reaction, ReactionTimestamp, ReactionAuthor), Reactions),
-        findall((IsHidden, IsHiddenTimestamp, IsHiddenAuthor), link(Message, "${CARD_HIDDEN}, IsHidden, IsHiddenTimestamp, IsHiddenAuthor), AllCardHidden),
+        findall((IsHidden, IsHiddenTimestamp, IsHiddenAuthor), link(Message, "${CARD_HIDDEN}", IsHidden, IsHiddenTimestamp, IsHiddenAuthor), AllCardHidden),
         findall((Reply, ReplyTimestamp, ReplyAuthor), link(Reply, "${REPLY_TO}", Message, ReplyTimestamp, ReplyAuthor), Replies).
     
     flux_message_query_popular(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, true):- 
@@ -28,20 +28,20 @@ export const SDNA = `
         flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages), isNotPopular(Message).  
 
     flux_post(Source, Id, Timestamp, Author, Titles, Bodys, Reactions, Replies):- 
-        link(Source, "${EntryType.Forum}", Id, Timestamp, Author),
+        link(Source, "${EntryType.SimplePost}", Id, Timestamp, Author),
         findall((Title, TitleTimestamp, TitleAuthor), link(Id, "${TITLE}", Title, TitleTimestamp, TitleAuthor), Titles),
         findall((Body, BodyTimestamp, BodyAuthor), link(Id, "${BODY}", Body, BodyTimestamp, BodyAuthor), Bodys),
         findall((Reaction, ReactionTimestamp, ReactionAuthor), link(Id, "${REACTION}", Reaction, ReactionTimestamp, ReactionAuthor), Reactions),
         findall((flux_post(Source, Reply, Timestamp, Author, Titles, Bodys, Reactions)), link(Reply, "${REPLY_TO}", Id, ReplyTimestamp, ReplyAuthor), Replies).
     
     flux_post_query_popular(Source, Id, Timestamp, Author, Titles, Bodys, Reactions, Replies, true) :-
-        flux_post(Source, Id, Timestamp, Author, Titles, Bodys, Reactions), isPopular(Id).
+        flux_post(Source, Id, Timestamp, Author, Titles, Bodys, Reactions, Replies), isPopular(Id).
 
     flux_post_query_popular(Source, Id, Timestamp, Author, Titles, Bodys, Reactions, Replies, false) :-
-        flux_post(Source, Id, Timestamp, Author, Titles, Bodys, Reactions), isNotPopular(Id).`;
+        flux_post(Source, Id, Timestamp, Author, Titles, Bodys, Reactions, Replies), isNotPopular(Id).`;
 
-export const messageFilteredQuery = `limit(%%, (order_by([desc(Timestamp)], flux_message_query_popular("%%", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp =< %%)).`;
-export const messageQuery = `limit(%%, order_by([desc(Timestamp)], flux_message_query_popular("%%", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular))).`;
+export const messageFilteredQuery = `limit(%%, (order_by([desc(Timestamp)], flux_message_query_popular("%%", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp =< %%)).`;
+export const messageQuery = `limit(%%, order_by([desc(Timestamp)], flux_message_query_popular("%%", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular))).`;
 
 export const forumFilteredQuery = `limit(%%, (order_by([desc(Timestamp)], flux_post_query_popular("%%", Id, Timestamp, Author, Titles, Bodys, Reactions, Replies, IsPopular)), Timestamp =< %%)).`;
 export const forumQuery = `limit(%%, order_by([desc(Timestamp)], flux_post_query_popular("%%", Id, Timestamp, Author, Titles, Bodys, Reactions, Replies, IsPopular))).`;

@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useRef,
 } from "react";
-import { Messages, Message } from "../types";
+import { Messages, Message, EntryType } from "../types";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import getMessages from "../api/getMessages";
 import createMessage from "../api/createMessage";
@@ -17,9 +17,7 @@ import createMessageReaction from "../api/createMessageReaction";
 import createReply from "../api/createReply";
 import { sortExpressionsByTimestamp } from "../helpers/expressionHelpers";
 import getMe from "../api/getMe";
-import { DexieMessages, DexieUI } from "../helpers/storageHelpers";
 import {
-  DIRECTLY_SUCCEEDED_BY,
   REACTION,
 } from "../constants/communityPredicates";
 import hideEmbeds from "../api/hideEmbeds";
@@ -278,7 +276,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     if (linkIs.message(link)) {
       const isSameChannel = await client.perspective.queryProlog(
         perspectiveUuid,
-        `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.target}").`
+        `triple("${channelId}", "${EntryType.Message}", "${link.data.target}").`
       );
       if (isSameChannel) {
         const message = getMessage(link);
@@ -311,7 +309,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       if (linkIs.reply(link)) {
         const isSameChannel = await client.perspective.queryProlog(
           perspectiveUuid,
-          `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.source}").`
+          `triple("${channelId}", "${EntryType.Message}", "${link.data.source}").`
         );
 
         if (isSameChannel) {

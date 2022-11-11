@@ -17,17 +17,18 @@ export default async function ({ perspectiveUuid, channelId, from }: Payload) {
   let prologQuery;
   if (from) {
       prologQuery = messageFilteredQuery;
+      prologQuery = format(prologQuery, DEFAULT_LIMIT, channelId, from!.getTime());
   } else {
       prologQuery = messageQuery
+      prologQuery = format(prologQuery, DEFAULT_LIMIT, channelId);
   }
-  prologQuery = format(prologQuery, [DEFAULT_LIMIT, channelId, from?.getTime()]);
 
   const expressionLinks = await client.perspective.queryProlog(perspectiveUuid, prologQuery);
-  const cleanedResults = extractPrologResults(expressionLinks, ["Reactions", "Replies", "EditMessages", "MessageExpr", "Author", "Timestamp", "AllCardHidden", "IsPopular"]);
+  const cleanedResults = extractPrologResults(expressionLinks, ["Reactions", "Replies", "EditMessages", "Message", "Author", "Timestamp", "AllCardHidden", "IsPopular"]);
   const cleanedMessages: Message[] = [];
 
   cleanedResults.forEach((result: any) => {
-    const expressionData = Literal.fromUrl(result.MessageExpr).get().data;
+    const expressionData = Literal.fromUrl(result.Message).get().data;
     result.EditMessages.push({
         content: expressionData,
         timestamp: new Date(result.Timestamp),
@@ -40,7 +41,7 @@ export default async function ({ perspectiveUuid, channelId, from }: Payload) {
       reply.content = Literal.fromUrl(reply.content).get().data;
     });
     cleanedMessages.push({
-      id: result.MessageExpr,
+      id: result.Message,
       author: result.Author,
       content: expressionData,
       timestamp: new Date(result.Timestamp),
