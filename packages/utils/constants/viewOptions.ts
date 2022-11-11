@@ -11,8 +11,8 @@ export default [
   {
     title: "Post",
     description: "A feed of posts that users can publish",
-    icon: "postcard",
+    icon: "card-heading",
     type: ChannelView.Forum,
-    component: "chat-view",
+    component: "forum-view",
   },
 ];

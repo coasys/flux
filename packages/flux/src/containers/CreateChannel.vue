@@ -22,6 +22,9 @@
           @input="(e: any) => (channelName = e.target.value)"
         ></j-input>
         <j-box pb="500" pt="300">
+          <j-box pb="300">
+            <j-text variant="label">Select at least one view</j-text>
+          </j-box>
           <ChannelViewOptions
             :views="selectedViews"
             @change="(views: ChannelView[]) => (selectedViews = views)"
@@ -75,16 +78,14 @@ export default defineComponent({
     };
   },
   computed: {
+    hasName(): boolean {
+      return this.channelName?.length >= 3;
+    },
     canSubmit(): boolean {
-      return isValid(
-        [
-          {
-            check: (val: string) => (val ? false : true),
-            message: "This field is required",
-          },
-        ],
-        this.channelName
-      );
+      return this.hasName && this.validSelectedViews;
+    },
+    validSelectedViews() {
+      return this.selectedViews.length >= 1;
     },
   },
   methods: {
