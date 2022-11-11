@@ -5,7 +5,7 @@ import format from "../helpers/formatString";
 
 export default async function getEntries(input: GetEntries): Promise<Entry[]> {
     const client = await getAd4mClient();
-    const entries = [];
+    const entries = [] as Entry[];
     for (const query of input.queries) {
         const prologQuery = format(query.query, ...query.arguments);
         const prologResult = await client.perspective.queryProlog(input.perspectiveUuid, prologQuery);
@@ -33,8 +33,8 @@ export default async function getEntries(input: GetEntries): Promise<Entry[]> {
                 delete result.Types;
             }
             entry.data = result;
+            entries.push(entry);
         }
     }
-    
     return entries;
 }
