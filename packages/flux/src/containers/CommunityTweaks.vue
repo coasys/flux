@@ -1,34 +1,41 @@
 <template>
   <j-box p="800">
-        <j-box pl="500" pb="800">
-            <j-text variant="heading-sm">Community Tweaks</j-text>
-        </j-box>
-        <j-box pl="500" pb="800">
-            <j-text variant="subheading" size="300">Rules for popular message</j-text>
-        </j-box>
-        
-        <div class="settings">
-            <aside class="settings__sidebar">
-                <j-icon size="sm" name="magic" slot="start" />
-                Rules
-            </aside>
-        <div class="settings__content">
-            <j-box pb="500">
-                <j-input label = "Trigger Emoji" :value="emoji" disabled=true @click="emojiPicker = !emojiPicker"></j-input>
-                <emoji-picker
-                  v-if="emojiPicker"
-                  @emojiClick="onEmojiClick"
-                />
-            </j-box>
-            <j-box pb="500">
-                <j-input label = "Number of Emojis" type="number" :value="emojiCount" @input="(e: any) => (emojiCount = e.target.value)"></j-input>
-            </j-box>
-            <j-box pb="500">
-                <j-button @click="updateSDNA">Update</j-button>
-            </j-box>
-        </div>
-        </div>
+    <j-box pl="500" pb="800">
+      <j-text variant="heading-sm">Community Tweaks</j-text>
     </j-box>
+    <j-box pl="500" pb="800">
+      <j-text variant="subheading" size="300">Rules for popular message</j-text>
+    </j-box>
+
+    <div class="settings">
+      <aside class="settings__sidebar">
+        <j-icon size="sm" name="magic" slot="start" />
+        Rules
+      </aside>
+      <div class="settings__content">
+        <j-box pb="500">
+          <j-input
+            label="Trigger Emoji"
+            :value="emoji"
+            disabled="true"
+            @click="emojiPicker = !emojiPicker"
+          ></j-input>
+          <emoji-picker v-if="emojiPicker" @emojiClick="onEmojiClick" />
+        </j-box>
+        <j-box pb="500">
+          <j-input
+            label="Number of Emojis"
+            type="number"
+            :value="emojiCount"
+            @input="(e: any) => (emojiCount = e.target.value)"
+          ></j-input>
+        </j-box>
+        <j-box pb="500">
+          <j-button @click="updateSDNA">Update</j-button>
+        </j-box>
+      </div>
+    </div>
+  </j-box>
 </template>
 
 <script lang="ts">
@@ -56,12 +63,11 @@ export default defineComponent({
       dataStore,
       emoji,
       emojiCount,
-      emojiPicker
+      emojiPicker,
     };
   },
   data() {
-    return {
-    };
+    return {};
   },
   async mounted() {
     const perspectiveUuid = this.community.perspectiveUuid;
@@ -70,21 +76,21 @@ export default defineComponent({
     this.emojiCount = sdnaValues ? sdnaValues.emojiCount : emojiCount;
   },
   methods: {
-    ...mapActions(useAppStore, [
-      "setShowCommunityTweaks"
-    ]),
+    ...mapActions(useAppStore, ["setShowCommunityTweaks"]),
     //@ts-ignore
     async onEmojiClick(emoji) {
-      console.log("got emoji click", emoji.detail.unicode);
       this.emoji = emoji.detail.unicode;
       this.emojiPicker = false;
     },
     async updateSDNA() {
-        const perspectiveUuid = this.community.perspectiveUuid;
-        updateSDNA(perspectiveUuid, {emoji: this.emoji, emojiCount: this.emojiCount});
+      const perspectiveUuid = this.community.perspectiveUuid;
+      updateSDNA(perspectiveUuid, {
+        emoji: this.emoji,
+        emojiCount: this.emojiCount,
+      });
 
-        this.setShowCommunityTweaks(false);
-    }
+      this.setShowCommunityTweaks(false);
+    },
   },
   computed: {
     community(): LocalCommunityState {

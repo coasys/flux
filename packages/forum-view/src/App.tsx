@@ -23,8 +23,6 @@ const MainComponent = ({ perspectiveUuid, channel }) => {
 };
 
 export default ({ perspectiveUuid = "", port = "", channel = "" }) => {
-  console.log({ perspectiveUuid, port, channel });
-
   return (
     <UIProvider>
       <AgentProvider>

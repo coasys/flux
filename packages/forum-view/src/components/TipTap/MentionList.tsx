@@ -71,7 +71,6 @@ export default class MentionList extends Component<
   }
 
   async getProfiles() {
-    console.log("get profiles");
     const profiles = await Promise.all(
       this.props.items.map((item) => getProfile(item.id))
     );

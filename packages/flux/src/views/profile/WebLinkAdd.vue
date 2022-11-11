@@ -96,8 +96,6 @@ export default defineComponent({
         this.title = data.title || "";
         this.description = data.description || "";
         this.imageUrl = data.images[0] || "";
-      } catch (e) {
-        console.log(e);
       } finally {
         this.loadingMeta = false;
         this.$refs.titleEl?.focus();

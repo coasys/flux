@@ -213,7 +213,6 @@ export default ({
       ],
       onUpdate: (props) => {
         const value = props.editor.getJSON() as any;
-        console.log("wwwweeee", value);
         onChange(value);
       },
     },

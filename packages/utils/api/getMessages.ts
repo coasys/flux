@@ -9,20 +9,15 @@ export interface Payload {
   from?: Date;
 }
 
-export default async function ({
-  perspectiveUuid,
-  channelId,
-  from,
-}: Payload) {
+export default async function ({ perspectiveUuid, channelId, from }: Payload) {
   try {
     const client = await getAd4mClient();
-    
+
     let expressionLinks;
     if (from) {
-      console.log("Making time based query");
       let fromTime = from.getTime();
       expressionLinks = await client.perspective.queryProlog(
-        perspectiveUuid, 
+        perspectiveUuid,
         `limit(${MAX_MESSAGES}, (order_by([desc(Timestamp)], flux_message_query_popular("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp =< ${fromTime})).`
       );
     } else {
@@ -38,10 +33,13 @@ export default async function ({
     if (expressionLinks) {
       for (const message of expressionLinks) {
         let reactions: Reaction[] = [];
-        if (typeof message.Reactions !== "string" && !message.Reactions.variable) {
+        if (
+          typeof message.Reactions !== "string" &&
+          !message.Reactions.variable
+        ) {
           if (message.Reactions.head) {
             reactions.push({
-              content: message.Reactions.head.args[0].replace('emoji://', ''),
+              content: message.Reactions.head.args[0].replace("emoji://", ""),
               timestamp: new Date(message.Reactions.head.args[1].args[0]),
               author: message.Reactions.head.args[1].args[1],
             });
@@ -49,7 +47,7 @@ export default async function ({
           let tail = message.Reactions.tail;
           while (typeof tail !== "string" && !message.Reactions.variable) {
             reactions.push({
-              content: tail.head.args[0].replace('emoji://', ''),
+              content: tail.head.args[0].replace("emoji://", ""),
               timestamp: new Date(tail.head.args[1].args[0]),
               author: tail.head.args[1].args[1],
             });
@@ -79,15 +77,22 @@ export default async function ({
           }
         }
 
-        let editMessages = [{
-          content: Literal.fromUrl(message.MessageExpr).get().data,
-          timestamp: new Date(message.Timestamp),
-          author: message.Author,
-        }];
+        let editMessages = [
+          {
+            content: Literal.fromUrl(message.MessageExpr).get().data,
+            timestamp: new Date(message.Timestamp),
+            author: message.Author,
+          },
+        ];
 
-        if (typeof message.EditMessages != "string" && !message.EditMessages.variable) {
+        if (
+          typeof message.EditMessages != "string" &&
+          !message.EditMessages.variable
+        ) {
           if (message.EditMessages.head) {
-            const literal = Literal.fromUrl(message.EditMessages.head.args[0]).get();
+            const literal = Literal.fromUrl(
+              message.EditMessages.head.args[0]
+            ).get();
             editMessages.push({
               content: literal.data,
               timestamp: new Date(message.EditMessages.head.args[1].args[0]),
@@ -106,7 +111,9 @@ export default async function ({
           }
         }
 
-        let isNeighbourhoodCardHidden = typeof message.AllCardHidden != "string"  && !message.AllCardHidden.variable;
+        let isNeighbourhoodCardHidden =
+          typeof message.AllCardHidden != "string" &&
+          !message.AllCardHidden.variable;
 
         cleanedLinks.push({
           id: message.MessageExpr,
@@ -117,7 +124,7 @@ export default async function ({
           replies: replies,
           isNeighbourhoodCardHidden,
           isPopular: message.IsPopular,
-          editMessages: editMessages
+          editMessages: editMessages,
         });
       }
     }

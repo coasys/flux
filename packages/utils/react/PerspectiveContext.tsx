@@ -80,8 +80,6 @@ export function PerspectiveProvider({ perspectiveUuid, children }: any) {
   }
 
   async function handleLinkAdded(link) {
-    console.log("handle link added", link);
-
     if (linkIs.channel(link)) {
       const literal = Literal.fromUrl(link.data.target).get();
       const channelObj = {

@@ -225,8 +225,6 @@ export default defineComponent({
         this.username = profile.username || "";
         this.name = profile.name || "";
         this.familyName = profile.familyName || "";
-      } catch (e) {
-        console.log(e);
       }
     },
     async createUser() {
