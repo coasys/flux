@@ -10,8 +10,9 @@ import EditorContext from "../../context/EditorContext";
 import { Profile } from "utils/types";
 
 export default function MessageItem({ message, mainRef, perspectiveUuid }) {
-  const messageContent =
-    message.editMessages[message.editMessages.length - 1].content;
+  console.warn("Loading message item");
+  const messageTitle = message.titles[0].content;
+  const messageBody = message.bodys[0].content;
 
   const messageRef = useRef<any>(null);
 
@@ -44,7 +45,7 @@ export default function MessageItem({ message, mainRef, perspectiveUuid }) {
 
   function onEditClick() {
     setCurrentEditMessage(message.id);
-    setInputValue(messageContent);
+    setInputValue(messageBody);
   }
 
   async function onEmojiClick(utf: string) {
@@ -128,7 +129,7 @@ export default function MessageItem({ message, mainRef, perspectiveUuid }) {
     const links = await getNeighbourhoodLink({
       perspectiveUuid,
       messageUrl: message.id,
-      message: messageContent,
+      message: messageBody,
       isHidden: message.isNeighbourhoodCardHidden,
     });
 
@@ -138,7 +139,7 @@ export default function MessageItem({ message, mainRef, perspectiveUuid }) {
   const author: Profile = members[message.author] || {};
   const popularStyle: string = message.isPopular ? styles.popularMessage : "";
   const isReplying: boolean = currentReply === message.id;
-  const isEdited: boolean = message.editMessages.length > 1;
+  const isEdited: boolean = message.titles.length > 1;
   return (
     <div
       class={[styles.message, popularStyle].join(" ")}
@@ -172,7 +173,7 @@ export default function MessageItem({ message, mainRef, perspectiveUuid }) {
           <div
             className={styles.messageTitle}
             dangerouslySetInnerHTML={{
-              __html: messageContent.split(" ").slice(0, 8).join(" "),
+              __html: messageTitle
             }}
           ></div>
           <div
@@ -181,7 +182,7 @@ export default function MessageItem({ message, mainRef, perspectiveUuid }) {
             class={styles.messageItemContent}
             style={{ display: "inline-flex" }}
             dangerouslySetInnerHTML={{
-              __html: messageContent,
+              __html: messageBody
             }}
           ></div>
 
@@ -190,7 +191,7 @@ export default function MessageItem({ message, mainRef, perspectiveUuid }) {
               data-rh
               data-timestamp={format(
                 new Date(
-                  message.editMessages[
+                  message.titles[
                     message.editMessages.length - 1
                   ].timestamp
                 ),

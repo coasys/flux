@@ -21,9 +21,9 @@ import {
   REACTION,
 } from "../constants/communityPredicates";
 import hideEmbeds from "../api/hideEmbeds";
-import { MAX_MESSAGES } from "../constants/general";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import editCurrentMessage from "../api/editCurrentMessage";
+import { DEFAULT_LIMIT } from "../constants/sdna";
 
 type State = {
   communityId: string;
@@ -379,7 +379,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
     setState((oldState) => ({
       ...oldState,
-      showLoadMore: expressionLinkLength === MAX_MESSAGES,
+      showLoadMore: expressionLinkLength === DEFAULT_LIMIT,
       isFetchingMessages: false,
       keyedMessages: {
         ...oldState.keyedMessages,
