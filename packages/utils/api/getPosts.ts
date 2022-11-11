@@ -6,7 +6,7 @@ import { Literal } from "@perspect3vism/ad4m";
 
 function cleanPostData(prologEntry: any) {
     const post = prologEntry as Post;
-    
+
     //Clean up the emoji string
     prologEntry.data?.Reactions.forEach((reaction: any) => {
         reaction.content = reaction.content.replace("emoji://");
@@ -15,8 +15,6 @@ function cleanPostData(prologEntry: any) {
 
     //Clean up the titles and bodys
     prologEntry.data?.Titles.forEach((title: any) => {
-        console.log(title);
-        console.log(Literal.fromUrl(title.content).get().data);
         title.content = Literal.fromUrl(title.content).get().data;
     });
     post.titles = prologEntry.data?.Titles;
