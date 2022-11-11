@@ -1,32 +1,11 @@
 <template>
   <div class="signup-view">
     <div class="signup-view__intro" v-if="!showSignup">
-      <div>
-        <j-box pb="700">
-          <Logo class="signup-view__intro-logo" width="150px"></Logo>
-        </j-box>
-
-        <div class="signup-view__intro-extension">
-          <j-box align="center">
-            <j-text variant="heading">Get started with Flux</j-text>
-          </j-box>
-          <j-text>
-            You need the AD4M extension to use Flux. By connecting to AD4M you
-            are able to surf the internet completely decentralized.
-          </j-text>
-          <j-box class="signup-view__intro-button" pt="900">
-            <j-button
-              @click="() => $emit('connectToAd4m')"
-              variant="primary"
-              size="lg"
-            >
-              <Ad4mLogo width="25px" slot="start" />
-              Connect with AD4M
-            </j-button>
-          </j-box>
-        </div>
-      </div>
+      <SignUpCarousel
+        @connectToAd4m="() => $emit('connectToAd4m')"
+      ></SignUpCarousel>
     </div>
+
     <div class="signup-view__flow" v-else>
       <j-flex direction="column" gap="400">
         <j-box class="signup-view__flow-back" pb="500">
@@ -104,6 +83,7 @@ import Logo from "@/components/logo/Logo.vue";
 import { mapLiteralLinks } from "utils/helpers/linkHelpers";
 import { useAppStore } from "@/store/app";
 import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";
+import SignUpCarousel from "./SignUpCarousel.vue";
 
 export default defineComponent({
   name: "SignUp",
@@ -113,6 +93,7 @@ export default defineComponent({
     Carousel,
     Logo,
     Ad4mLogo,
+    SignUpCarousel,
   },
   setup() {
     const showSignup = ref(false);
