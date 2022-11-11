@@ -1,5 +1,4 @@
 import createChannel from "./createChannel";
-import addChannelView from "./addChannelView";
 import createCommunity from "./createCommunity";
 import joinCommunity from "./joinCommunity";
 import updateCommunity from "./updateCommunity";
@@ -11,7 +10,6 @@ import removeCommunity from "./removeCommunity";
 import updateChannelViews from "./updateChannelViews";
 
 export default {
-  addChannelView,
   updateChannelViews,
   createChannel,
   createCommunity,

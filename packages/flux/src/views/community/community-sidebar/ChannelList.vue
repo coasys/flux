@@ -9,26 +9,20 @@
       >
         <j-icon size="sm" square name="plus"></j-icon>
       </j-button>
-      <router-link
-        :to="{
-          name: 'channel',
-          params: {
-            communityId: community.neighbourhood.uuid,
-            channelId: channel.name,
-          },
-        }"
-        custom
-        v-slot="{ navigate, isExactActive }"
+
+      <j-popover
+        event="contextmenu"
+        placement="bottom-start"
         v-for="channel in channels"
         :key="channel.id"
       >
-        <j-popover event="contextmenu" placement="bottom-start">
+        <div slot="trigger">
           <j-menu-item
-            slot="trigger"
+            tag="j-menu-item"
             class="channel"
             :class="{ 'channel--muted': channel.notifications?.mute }"
-            :selected="isExactActive"
-            @click="() => navigateTo(navigate)"
+            :selected="channel.name === $route.params.channelId"
+            @click="() => navigateToChannel(channel.name)"
           >
             {{ channel.name }}
             <j-icon
@@ -42,35 +36,78 @@
               class="channel__notification"
               v-if="channel.hasNewMessages"
             ></div>
+
+            <j-icon
+              @click.stop="handleToggleClick(channel.id)"
+              slot="end"
+              style="--j-icon-size: 13px"
+              v-if="channel.views.length > 1"
+              :name="channel.collapsed ? 'chevron-down' : 'chevron-right'"
+            />
+            <j-icon
+              slot="end"
+              size="xs"
+              v-else
+              :name="getIcon(channel.views[0])"
+            ></j-icon>
           </j-menu-item>
-          <j-menu slot="content">
+          <div v-if="channel.collapsed">
             <j-menu-item
+              size="sm"
+              v-for="view in getViewOptions(channel.views)"
               @click="
-                () =>
-                  setChannelNotificationState({
-                    channelId: channel.id,
-                  })
+                () => handleChangeView(channel.id, channel.name, view.type)
               "
             >
               <j-icon
+                :color="
+                  view.type === channel.currentView &&
+                  channel.name === $route.params.channelId
+                    ? 'primary-500'
+                    : 'ui-500'
+                "
                 size="xs"
-                slot="start"
-                :name="channel?.notifications?.mute ? 'bell-slash' : 'bell'"
-              />
-              {{
-                `${channel?.notifications?.mute ? "Unmute" : "Mute"} Channel`
-              }}
+                slot="end"
+                :name="view.icon"
+              ></j-icon>
+              <j-text
+                :color="
+                  view.type === channel.currentView &&
+                  channel.name === $route.params.channelId
+                    ? 'primary-500'
+                    : 'ui-500'
+                "
+                nomargin
+                >{{ view.title }}
+              </j-text>
             </j-menu-item>
-            <j-menu-item
-              v-if="isChannelCreator(channel.id)"
-              @click="() => deleteChannel(channel.id)"
-            >
-              <j-icon size="xs" slot="start" name="trash" />
-              {{ `Delete Channel` }}
-            </j-menu-item>
-          </j-menu>
-        </j-popover>
-      </router-link>
+          </div>
+        </div>
+        <j-menu slot="content">
+          <j-menu-item
+            @click="
+              () =>
+                setChannelNotificationState({
+                  channelId: channel.id,
+                })
+            "
+          >
+            <j-icon
+              size="xs"
+              slot="start"
+              :name="channel?.notifications?.mute ? 'bell-slash' : 'bell'"
+            />
+            {{ `${channel?.notifications?.mute ? "Unmute" : "Mute"} Channel` }}
+          </j-menu-item>
+          <j-menu-item
+            v-if="isChannelCreator(channel.id)"
+            @click="() => deleteChannel(channel.id)"
+          >
+            <j-icon size="xs" slot="start" name="trash" />
+            {{ `Delete Channel` }}
+          </j-menu-item>
+        </j-menu>
+      </j-popover>
     </j-menu-group-item>
     <j-menu-item @click="() => setShowCreateChannel(true)">
       <j-icon size="xs" slot="start" name="plus" />
@@ -129,6 +166,26 @@ export default defineComponent({
       this.setSidebar(false);
       navigate();
     },
+    handleToggleClick(channelId: string) {
+      this.dataStore.toggleChannelCollapse(channelId);
+    },
+    handleChangeView(
+      channelId: string,
+      channelName: string,
+      view: ChannelView
+    ) {
+      this.dataStore.setCurrentChannelView({ channelId, view });
+      this.navigateToChannel(channelName);
+    },
+    navigateToChannel(channelName: string) {
+      this.$router.push({
+        name: "channel",
+        params: {
+          communityId: this.community.neighbourhood.uuid,
+          channelId: channelName,
+        },
+      });
+    },
     isChannelCreator(channelId: string): boolean {
       const channel = this.channels.find((e) => e.id === channelId);
 
@@ -137,6 +194,9 @@ export default defineComponent({
       } else {
         throw new Error("Did not find channel");
       }
+    },
+    getViewOptions(views: ChannelView[]) {
+      return channelViewOptions.filter((o) => views.includes(o.type));
     },
     getIcon(view: ChannelView) {
       return channelViewOptions.find((o) => o.type === view)?.icon || "hash";

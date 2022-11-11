@@ -16,6 +16,7 @@ export default async (communityId: string): Promise<void> => {
         author: channel.author,
         sourcePerspective: channel.perspectiveUuid,
         hasNewMessages: false,
+        collapsed: false,
         currentView: channel.views[0] || "chat",
         views: channel.views,
         timestamp: channel.timestamp,
