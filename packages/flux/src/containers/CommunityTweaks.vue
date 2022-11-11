@@ -14,6 +14,10 @@
       </aside>
       <div class="settings__content">
         <j-box pb="500">
+          <j-text variant="subheading" size="300">DNA VERSION</j-text>
+          <j-text variant="subheading" size="300">{{ sdnaVersion }}</j-text>
+        </j-box>
+        <j-box pb="500">
           <j-input
             label="Trigger Emoji"
             :value="emoji"
@@ -45,7 +49,7 @@ import { LocalCommunityState } from "@/store/types";
 import { defineComponent, ref } from "vue";
 import { mapActions } from "pinia";
 import ThemeEditor from "./ThemeEditor.vue";
-import { getSDNAValues } from "utils/api/getSDNA";
+import { getSDNAValues, getSDNAVersion } from "utils/api/getSDNA";
 import { updateSDNA } from "utils/api/updateSDNA";
 import { emoji, emojiCount } from "utils/constants/sdna";
 
@@ -57,6 +61,7 @@ export default defineComponent({
     const emoji = ref("");
     const emojiCount = ref(0);
     const emojiPicker = ref(false);
+    const sdnaVersion = ref(0);
 
     return {
       appStore,
@@ -64,6 +69,7 @@ export default defineComponent({
       emoji,
       emojiCount,
       emojiPicker,
+      sdnaVersion
     };
   },
   data() {
@@ -74,6 +80,7 @@ export default defineComponent({
     const sdnaValues = await getSDNAValues(perspectiveUuid);
     this.emoji = sdnaValues ? sdnaValues.emoji : emoji;
     this.emojiCount = sdnaValues ? sdnaValues.emojiCount : emojiCount;
+    this.sdnaVersion = await getSDNAVersion(perspectiveUuid) || 0;
   },
   methods: {
     ...mapActions(useAppStore, ["setShowCommunityTweaks"]),

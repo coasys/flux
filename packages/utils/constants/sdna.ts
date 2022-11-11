@@ -4,6 +4,7 @@ import { EntryType } from "../types";
 export const emojiCount = 3;
 export const emoji = "1f44d";
 export const DEFAULT_LIMIT = 50;
+export const LATEST_SDNA_VERSION = 1;
 
 //Note: in the prolog queries below, the %% values are to be string templated before use
 

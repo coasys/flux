@@ -49,3 +49,5 @@ export const ENTRY_TYPE = "flux://entry_type";
 export const TITLE = "flux://title";
 
 export const BODY = "flux://body";
+
+export const SDNA_VERSION = "ad4m://sdna_version";

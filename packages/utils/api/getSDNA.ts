@@ -1,5 +1,5 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { SELF, ZOME } from "../constants/communityPredicates";
+import { SELF, ZOME, SDNA_VERSION } from "../constants/communityPredicates";
 import { LinkQuery, Literal, LinkExpression } from "@perspect3vism/ad4m";
 import { SDNAValues } from "./generateSDNALiteral";
 
@@ -9,6 +9,17 @@ export async function getSDNALinkLiteral(perspectiveUuid: string): Promise<strin
         return Literal.fromUrl(existingSDNALinks[0].data.target).get();
     }
     return null;
+}
+
+export async function getSDNAVersion(perspectiveUuid): Promise<number | null> {
+    const ad4mClient = await getAd4mClient();
+    const existingSDNALinks = await getSDNALinks(perspectiveUuid);
+    const sdnaLinkVersion = await ad4mClient.perspective.queryLinks(perspectiveUuid, {source: existingSDNALinks[0].data.target, predicate: SDNA_VERSION} as LinkQuery);
+    if (sdnaLinkVersion.length > 0) {
+        return parseInt(sdnaLinkVersion[0].data.target.replace("int://", ""));
+    } else {
+        return null;
+    }
 }
 
 export async function getSDNALinks(perspectiveUuid: string): Promise<LinkExpression[]> {
