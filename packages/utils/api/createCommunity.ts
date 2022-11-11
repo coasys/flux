@@ -59,11 +59,7 @@ export default async function createCommunity({
     );
 
     //Publish perspective
-    const metaLinks = await createNeighbourhoodMeta(
-      name,
-      description,
-      author
-    );
+    const metaLinks = await createNeighbourhoodMeta(name, description, author);
 
     const meta = new Perspective(metaLinks);
     let sharedUrl = perspective!.sharedUrl;

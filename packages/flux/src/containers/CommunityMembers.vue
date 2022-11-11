@@ -83,7 +83,6 @@ export default defineComponent({
   watch: {
     "community.members": {
       handler: async function (users) {
-        console.log({ users });
         // reset before fetching again
         this.memberList = [];
         if (!users) return;

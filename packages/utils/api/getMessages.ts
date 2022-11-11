@@ -10,20 +10,15 @@ export interface Payload {
   from?: Date;
 }
 
-export default async function ({
-  perspectiveUuid,
-  channelId,
-  from,
-}: Payload) {
+export default async function ({ perspectiveUuid, channelId, from }: Payload) {
   try {
     const client = await getAd4mClient();
-    
+
     let expressionLinks;
     if (from) {
-      console.log("Making time based query");
       let fromTime = from.getTime();
       expressionLinks = await client.perspective.queryProlog(
-        perspectiveUuid, 
+        perspectiveUuid,
         `limit(${MAX_MESSAGES}, (order_by([desc(Timestamp)], flux_message_query_popular("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp =< ${fromTime})).`
       );
     } else {

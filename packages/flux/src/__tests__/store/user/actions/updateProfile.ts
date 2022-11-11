@@ -17,19 +17,19 @@ describe("Update Profile", () => {
       // @ts-ignore
       .mockResolvedValue(getProfileFixture);
 
-      jest
-        .spyOn(ad4mClient.agent, "byDID")
-        // @ts-ignore
-        .mockImplementation(async (did) => {
-          if (did.includes('101')) {
-            return {
-              perspective: {
-                links: []
-              }
-            }
-          }
-          return agentByDIDLinksFixture;
-        });
+    jest
+      .spyOn(ad4mClient.agent, "byDID")
+      // @ts-ignore
+      .mockImplementation(async (did) => {
+        if (did.includes("101")) {
+          return {
+            perspective: {
+              links: [],
+            },
+          };
+        }
+        return agentByDIDLinksFixture;
+      });
 
     store = createPinia();
     setActivePinia(store);
@@ -40,14 +40,16 @@ describe("Update Profile", () => {
     jest
       .spyOn(ad4mClient.perspective, "all")
       // @ts-ignore
-      .mockResolvedValue([{
-        name: FLUX_PROXY_PROFILE_NAME,
-        // @ts-ignore
-        neighbourhood: null,
-        // @ts-ignore
-        sharedUrl: null,
-        uuid: "2a912c2c-6d30-46f2-b451-880349fced08"
-      }]);
+      .mockResolvedValue([
+        {
+          name: FLUX_PROXY_PROFILE_NAME,
+          // @ts-ignore
+          neighbourhood: null,
+          // @ts-ignore
+          sharedUrl: null,
+          uuid: "2a912c2c-6d30-46f2-b451-880349fced08",
+        },
+      ]);
 
     const userStore = useUserStore();
     const dataStore = useDataStore();
@@ -84,12 +86,8 @@ describe("Update Profile", () => {
         username: "jhon_doe",
       });
     } catch (error) {
-      console.log('clone', error)
       expect(error).toBeInstanceOf(Error);
-      expect(error).toHaveProperty(
-        "message",
-        "No user perspective found"
-      );
+      expect(error).toHaveProperty("message", "No user perspective found");
     }
 
     expect(userStore.profile!.username).toBe("jhon_doe");

@@ -10,16 +10,22 @@
       </j-button>
 
       <div class="channel-view__header-left">
-        <j-text color="black" nomargin variant="heading-md">
-          # {{ channel.name }}
-        </j-text>
-        <j-tabs :value="channel.currentView" @change="changeCurrentView">
-          <j-tab-item size="sm" v-for="view in channel.views">
-            {{ view }}
-          </j-tab-item>
-        </j-tabs>
+        <div class="channel-view__tabs">
+          <label class="channel-view-tab" v-for="view in filteredViewOptions">
+            <input
+              name="view"
+              type="radio"
+              :checked.prop="view.type === currentView"
+              :value="view.type"
+              @change="changeCurrentView"
+            />
+            <j-icon size="xs" :name="view.icon"></j-icon>
+            <span>{{ view.title }}</span>
+          </label>
+        </div>
+
         <j-button
-          @click="() => (showAddChannelView = true)"
+          @click="() => (showUpdateChannelViews = true)"
           size="sm"
           variant="ghost"
         >
@@ -30,7 +36,7 @@
     </div>
 
     <forum-view
-      v-show="currentView === 'forum-view'"
+      v-show="currentView === ChannelView.Forum"
       class="perspective-view"
       :port="port"
       :channel="channel.id"
@@ -41,10 +47,10 @@
       @hide-notification-indicator="onHideNotificationIndicator"
     ></forum-view>
     <chat-view
-      v-show="currentView === 'chat-view'"
+      v-show="currentView === ChannelView.Chat"
       class="perspective-view"
       :port="port"
-      :channel="channel.id"
+      :channel="channelId"
       :perspective-uuid="communityId"
       @agent-click="onAgentClick"
       @channel-click="onChannelClick"
@@ -52,22 +58,16 @@
       @hide-notification-indicator="onHideNotificationIndicator"
     ></chat-view>
     <j-modal
-      :open="showAddChannelView"
-      @toggle="(e: any) => (showAddChannelView = e.target.open)"
+      :open="showUpdateChannelViews"
+      @toggle="(e: any) => (showUpdateChannelViews = e.target.open)"
     >
-      <j-box p="800">
-        <j-flex direction="column" gap="500">
-          <j-text variant="heading-sm">Add Channel View</j-text>
-          <j-tabs
-            :value="selectedChannelView"
-            @change="(e: any) => (selectedChannelView = e.target.value)"
-          >
-            <j-tab-item variant="button" value="chat">Chat</j-tab-item>
-            <j-tab-item variant="button" value="forum">Forum</j-tab-item>
-          </j-tabs>
-          <j-button @click="addChannelView">Add View</j-button>
-        </j-flex>
-      </j-box>
+      <UpdateChannelViews
+        v-if="showUpdateChannelViews"
+        @cancel="() => (showUpdateChannelViews = false)"
+        @submit="() => (showUpdateChannelViews = false)"
+        :channelId="channelId"
+        :communityId="communityId"
+      ></UpdateChannelViews>
     </j-modal>
     <j-modal
       size="xs"
@@ -122,12 +122,10 @@ import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import Profile from "@/containers/Profile.vue";
+import UpdateChannelViews from "@/containers/UpdateChannelViews.vue";
 import { useAppStore } from "@/store/app";
-
-const componentMap = {
-  chat: "chat-view",
-  forum: "forum-view",
-};
+import { ChannelView } from "utils/types";
+import viewOptions from "utils/constants/viewOptions";
 
 interface MentionTrigger {
   label: string;
@@ -140,10 +138,13 @@ export default defineComponent({
   props: ["channelId", "communityId"],
   components: {
     Profile,
+    UpdateChannelViews,
   },
   setup() {
     return {
-      showAddChannelView: ref(false),
+      ChannelView: ChannelView,
+      selectedViews: ref<ChannelView[]>([]),
+      showUpdateChannelViews: ref(false),
       selectedChannelView: ref("chat"),
       appStore: useAppStore(),
       dataStore: useDataStore(),
@@ -164,7 +165,12 @@ export default defineComponent({
   },
   computed: {
     currentView(): string {
-      return componentMap[this.channel.currentView || "chat"] || "chat-view";
+      return this.channel.currentView || this.channel.views[0] || "";
+    },
+    filteredViewOptions() {
+      return viewOptions.filter((view) =>
+        this.channel.views.includes(view.type)
+      );
     },
     port(): number {
       // TODO: This needs to be reactive, probaly not now as we using a normal class
@@ -175,12 +181,7 @@ export default defineComponent({
       return this.dataStore.getCommunityState(communityId as string);
     },
     channel(): ChannelState {
-      const communityId = this.communityId;
-      const channelId = this.channelId;
-      return this.dataStore.getChannel(
-        communityId as string,
-        channelId as string
-      )!;
+      return this.dataStore.channels[this.channelId];
     },
   },
   methods: {
@@ -190,20 +191,6 @@ export default defineComponent({
         channelId: this.channel.id,
         view: value,
       });
-    },
-    addChannelView() {
-      this.dataStore
-        .addChannelView({
-          perspectiveUuid: this.communityId,
-          channelId: this.channelId,
-          view: this.selectedChannelView,
-        })
-        .then(() => {
-          this.showAddChannelView = false;
-        });
-    },
-    getChannelView(view: string) {
-      return componentMap[view || "chat"] || "chat-view";
     },
     toggleSidebar() {
       this.appStore.toggleSidebar();
@@ -317,6 +304,39 @@ export default defineComponent({
 .perspective-view {
   height: calc(100% - var(--app-header-height));
   display: block;
+}
+
+.channel-view__tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-300);
+}
+
+.channel-view-tab {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-300);
+  cursor: pointer;
+  position: relative;
+  padding: var(--j-space-200) var(--j-space-400);
+  border-radius: var(--j-border-radius);
+}
+
+.channel-view-tab:hover {
+  background-color: var(--j-color-ui-50);
+}
+
+.channel-view-tab:has(input:checked) {
+  position: relative;
+  color: var(--j-color-primary-500);
+}
+
+.channel-view-tab input {
+  position: absolute;
+  clip: rect(1px 1px 1px 1px);
+  clip: rect(1px, 1px, 1px, 1px);
+  vertical-align: middle;
 }
 
 @media (min-width: 800px) {

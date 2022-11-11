@@ -2,6 +2,7 @@ import createCommunity from "utils/api/createCommunity";
 import { CommunityState } from "@/store/types";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
+import { ChannelView } from "utils/types";
 
 export interface Payload {
   perspectiveName: string;
@@ -58,6 +59,7 @@ export default async ({
     // neighbourhoods. Remember that this also need to happen in join community.
     await dataStore.createChannel({
       name: "Home",
+      views: [ChannelView.Chat],
       perspectiveUuid: community.uuid,
     });
 

@@ -25,11 +25,9 @@ export default defineComponent({
   methods: {
     handleTouchStart(e: any) {
       this.touchstartX = e.changedTouches[0].screenX;
-      console.log("start", this.touchstartX);
     },
     handleTouchEnd(e: any) {
       this.touchendX = e.changedTouches[0].screenX;
-      console.log("end", this.touchendX);
       this.checkDirection();
     },
     checkDirection() {

@@ -7,17 +7,17 @@ import {
   CHANNEL_VIEW,
 } from "utils/constants/communityPredicates";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { Channel } from "../types";
+import { Channel, ChannelView } from "../types";
 
 interface ChannelProps {
-  view?: string;
+  views: ChannelView[];
   channelName: string;
   perspectiveUuid: string;
 }
 
 export async function createChannel({
   channelName,
-  view = "chat",
+  views,
   perspectiveUuid,
 }: ChannelProps): Promise<Channel> {
   try {
@@ -39,14 +39,16 @@ export async function createChannel({
 
     await client.perspective.addLink(perspectiveUuid, {
       source: channelExpr,
-      target: await client.expression.create(view, "literal"),
-      predicate: CHANNEL_VIEW,
-    });
-
-    await client.perspective.addLink(perspectiveUuid, {
-      source: channelExpr,
       target: FLUX_CHANNEL,
       predicate: AD4M_CLASS,
+    });
+
+    views.forEach(async (view) => {
+      await client.perspective.addLink(perspectiveUuid, {
+        source: channelExpr,
+        target: await client.expression.create(view, "literal"),
+        predicate: CHANNEL_VIEW,
+      });
     });
 
     return {
@@ -56,7 +58,7 @@ export async function createChannel({
       author: linkExpression.author,
       timestamp: linkExpression.timestamp || new Date().toISOString(),
       perspectiveUuid: perspectiveUuid,
-      views: [view],
+      views: views,
     };
   } catch (e) {
     throw new Error(e);

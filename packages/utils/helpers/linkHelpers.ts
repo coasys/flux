@@ -103,7 +103,7 @@ export async function createLinks(source: string, map: TargetMap) {
       const target = map[predicate];
       return new Link({ source, predicate, target });
     });
-    
+
   return Promise.all(promises);
 }
 
@@ -133,7 +133,6 @@ export async function getLiteralObjectLinks(
   links: LinkExpression[]
 ) {
   const parentLink = links.find((l) => l.data.target === targetExp);
-  console.log({ parentLink, targetExp, links });
   if (parentLink) {
     const associatedLinks = links.filter(
       (link) => link.data.source === targetExp

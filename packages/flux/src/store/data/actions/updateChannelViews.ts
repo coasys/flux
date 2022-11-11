@@ -1,11 +1,12 @@
-import addChannelView from "utils/api/addChannelView";
+import updateChannelViews from "utils/api/updateChannelViews";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "..";
+import { ChannelView } from "utils/types";
 
 export interface Payload {
   perspectiveUuid: string;
   channelId: string;
-  view: string;
+  views: ChannelView[];
 }
 
 export default async (payload: Payload): Promise<any> => {
@@ -20,22 +21,16 @@ export default async (payload: Payload): Promise<any> => {
     });
   }
 
-  if (channel.views.includes(payload.view)) {
-    appStore.showDangerToast({
-      message: "This view is already installed",
-    });
-    return;
-  }
-
   try {
-    await addChannelView({
+    await updateChannelViews({
       perspectiveUuid: payload.perspectiveUuid,
       channelId: channel.id,
-      view: payload.view,
+      views: payload.views,
     });
-    dataStore.putChannelView({
+
+    dataStore.putChannelViews({
       channelId: channel.id,
-      view: payload.view,
+      views: payload.views,
     });
   } catch (e) {
     appStore.showDangerToast({

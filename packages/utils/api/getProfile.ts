@@ -20,7 +20,6 @@ export interface Payload {
 }
 
 export default async function getProfile(did: string): Promise<Profile> {
-  console.log("Get profile", did);
   const cleanedDid = did.replace("did://", "");
   const client = await getAd4mClient();
 
@@ -38,9 +37,8 @@ export default async function getProfile(did: string): Promise<Profile> {
 
   const dexie = new DexieProfile(`flux://profile`, 1);
   let cachedProfile = await dexie.get(cleanedDid);
-  
+
   if (cachedProfile) {
-    console.log("Got cached profile from dexie");
     return cachedProfile as Profile;
   }
 

@@ -1,7 +1,12 @@
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useContext, useEffect, useRef, useState } from "preact/hooks";
 import styles from "./index.scss";
+import createPost from "utils/api/createPost";
+import { ChatContext } from "utils/react";
 
 export default function Header() {
+  const { state } = useContext(ChatContext);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
   const [open, setOpen] = useState(false);
   const inputRef = useRef(null);
 
@@ -13,6 +18,19 @@ export default function Header() {
     }
   }, [open]);
 
+  function publish() {
+    createPost({
+      perspectiveUuid: state.communityId,
+      channelId: state.channnelId,
+      title,
+      body,
+    })
+      .then(() => setOpen(false))
+      .catch((e) => {
+        console.log(e);
+      });
+  }
+
   return (
     <header class={styles.header}>
       <j-modal size="sm" open={open} onToggle={(e) => setOpen(e.target.open)}>
@@ -22,8 +40,19 @@ export default function Header() {
           </j-text>
           <j-box mt="500">
             <j-flex direction="column" gap="300">
-              <j-input ref={inputRef} size="xl" placeholder="Title"></j-input>
-              <j-input ref={inputRef} size="xl" placeholder="Text"></j-input>
+              <j-input
+                onInput={(e) => setTitle(e.target.value)}
+                value={title}
+                ref={inputRef}
+                size="xl"
+                placeholder="Title"
+              ></j-input>
+              <j-input
+                onInput={(e) => setBody(e.target.value)}
+                value={body}
+                size="xl"
+                placeholder="Text"
+              ></j-input>
             </j-flex>
           </j-box>
           <j-box mt="500">
@@ -31,7 +60,7 @@ export default function Header() {
               <j-button size="lg" variant="link">
                 Cancel
               </j-button>
-              <j-button size="lg" variant="primary">
+              <j-button onClick={() => publish()} size="lg" variant="primary">
                 Post
               </j-button>
             </j-flex>

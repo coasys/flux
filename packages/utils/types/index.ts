@@ -37,7 +37,7 @@ export interface Channel {
   perspectiveUuid: string;
   timestamp: Date | string;
   author: string; // did
-  views: string[];
+  views: ChannelView[];
 }
 
 export interface Reaction {
@@ -82,9 +82,9 @@ export interface Profiles {
   [x: string]: Profile;
 }
 
-export interface ChannelViews {
-  CHAT;
-  FORUM;
+export enum ChannelView {
+  Chat = "CHAT",
+  Forum = "FORUM",
 }
 
 export enum EntryType {
