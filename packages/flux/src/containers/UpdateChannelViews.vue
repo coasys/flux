@@ -14,7 +14,12 @@
           <j-button size="lg" variant="link" @click="() => $emit('cancel')">
             Cancel
           </j-button>
-          <j-button @click="updateChannelViews" size="lg" variant="primary">
+          <j-button
+            :disabled="!canSave"
+            @click="updateChannelViews"
+            size="lg"
+            variant="primary"
+          >
             Save
           </j-button>
         </j-flex>
@@ -46,6 +51,9 @@ export default defineComponent({
     this.selectedViews = this.channel?.views || [];
   },
   computed: {
+    canSave() {
+      return this.selectedViews.length >= 1;
+    },
     channel() {
       return this.dataStore.channels[this.channelId];
     },
