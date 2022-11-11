@@ -15,11 +15,12 @@
             <input
               name="view"
               type="radio"
-              :checked="view.type === currentView"
+              :checked.prop="view.type === currentView"
               :value="view.type"
               @change="changeCurrentView"
             />
-            {{ view.title }}
+            <j-icon size="xs" :name="view.icon"></j-icon>
+            <span>{{ view.title }}</span>
           </label>
         </div>
 
@@ -312,7 +313,10 @@ export default defineComponent({
 }
 
 .channel-view-tab {
-  font-weight: 500;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-300);
   cursor: pointer;
   position: relative;
   padding: var(--j-space-200) var(--j-space-400);
@@ -320,12 +324,11 @@ export default defineComponent({
 }
 
 .channel-view-tab:hover {
-  background-color: var(--j-color-white);
+  background-color: var(--j-color-ui-50);
 }
 
 .channel-view-tab:has(input:checked) {
   position: relative;
-  font-weight: 600;
   color: var(--j-color-primary-500);
 }
 

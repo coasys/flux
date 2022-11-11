@@ -7,7 +7,7 @@ export interface ChannelState {
   sourcePerspective: string;
   hasNewMessages: boolean;
   timestamp: Date | string;
-  currentView: string;
+  currentView: ChannelView;
   views: ChannelView[];
   scrollTop?: number;
   notifications: {
