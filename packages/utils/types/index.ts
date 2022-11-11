@@ -106,6 +106,7 @@ export interface Post extends Entry {
   isPopular: boolean;
   titles: string[];
   bodys: string[];
+  replies: Post[];
 }
 
 export interface EntryInput {

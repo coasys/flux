@@ -18,6 +18,7 @@ export async function generateSDNALiteral(values?: SDNAValues): Promise<Literal>
             throw new Error("Emoji count must be greater than 0");
         }
         emojiCountInput = values.emojiCount;
+
         emojiInput = values.emoji.codePointAt(0);
 
         if (!emojiInput) {
@@ -27,7 +28,7 @@ export async function generateSDNALiteral(values?: SDNAValues): Promise<Literal>
         emojiInput = emojiInput.emoji(16);
     }
 
-    const templatedSDNA = format(SDNA, emoji, emojiCount, emojiCountInput);
+    const templatedSDNA = format(SDNA, emoji, emojiCountInput, emojiCountInput);
 
     return Literal.from(templatedSDNA);
 }
