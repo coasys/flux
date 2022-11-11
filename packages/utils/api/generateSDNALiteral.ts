@@ -1,5 +1,6 @@
 import { Literal } from "@perspect3vism/ad4m";
-import { emoji, emojiCount } from "../constants/sdna";
+import { emoji, emojiCount, SDNA } from "../constants/sdna";
+import format from "../helpers/formatString";
 
 export interface SDNAValues {
     emoji: string,
@@ -22,23 +23,7 @@ export async function generateSDNALiteral(values?: SDNAValues): Promise<Literal>
 
     const parsedEmojiString = parsedEmoji.toString(16);
 
-    return Literal.from(`
-        emojiCount(Message, Count):- aggregate_all(count, link(Message, "flux://has_reaction", "emoji://${parsedEmojiString}", _, _), Count).
+    const templatedSDNA = format(SDNA, parsedEmojiString, emojiCount, emojiCount);
 
-        isPopular(Message) :- emojiCount(Message, Count), Count >= ${values.emojiCount}.
-        isNotPopular(Message) :- emojiCount(Message, Count), Count < ${values.emojiCount}.
-
-        flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages):-
-        link(Channel, "temp://directly_succeeded_by", Message, Timestamp, Author),
-        findall((EditMessage, EditMessageTimestamp, EditMessageAuthor), link(Message, "temp://edited_to", EditMessage, EditMessageTimestamp, EditMessageAuthor), EditMessages),
-        findall((Reaction, ReactionTimestamp, ReactionAuthor), link(Message, "flux://has_reaction", Reaction, ReactionTimestamp, ReactionAuthor), Reactions),
-        findall((IsHidden, IsHiddenTimestamp, IsHiddenAuthor), link(Message, "flux://is_card_hidden", IsHidden, IsHiddenTimestamp, IsHiddenAuthor), AllCardHidden),
-        findall((Reply, ReplyTimestamp, ReplyAuthor), link(Reply, "flux://has_reply", Message, ReplyTimestamp, ReplyAuthor), Replies).
-        
-        flux_message_query_popular(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, true):- 
-        flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages), isPopular(Message).
-        
-        flux_message_query_popular(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, false):- 
-        flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages), isNotPopular(Message).
-    `);
+    return Literal.from(templatedSDNA);
 }

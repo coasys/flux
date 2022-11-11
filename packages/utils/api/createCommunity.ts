@@ -14,13 +14,14 @@ import {
 } from "../constants/communityPredicates";
 import { createNeighbourhoodMeta } from "../helpers/createNeighbourhoodMeta";
 import { Community } from "../types";
-import { Perspective, Literal } from "@perspect3vism/ad4m";
+import { Perspective } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import {
   blobToDataURL,
   dataURItoBlob,
   resizeImage,
 } from "utils/helpers/profileHelpers";
+import { createSDNA } from "./createSDNA";
 
 export interface Payload {
   name: string;
@@ -140,41 +141,14 @@ export default async function createCommunity({
     console.log("Created profile expression link", addProfileLink);
 
     //Default popular setting is 3 upvotes on thumbsup emoji
-    const sdnaLiteral = Literal.from(`emojiCount(Message, Count):- 
-      aggregate_all(count, link(Message, "flux://has_reaction", "emoji://1f44d", _, _), Count).
-
-      isPopular(Message) :- emojiCount(Message, Count), Count >= 3.
-      isNotPopular(Message) :- emojiCount(Message, Count), Count < 3.
-
-      flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages):-
-      link(Channel, "temp://directly_succeeded_by", Message, Timestamp, Author),
-      findall((EditMessage, EditMessageTimestamp, EditMessageAuthor), link(Message, "temp://edited_to", EditMessage, EditMessageTimestamp, EditMessageAuthor), EditMessages),
-      findall((Reaction, ReactionTimestamp, ReactionAuthor), link(Message, "flux://has_reaction", Reaction, ReactionTimestamp, ReactionAuthor), Reactions),
-      findall((IsHidden, IsHiddenTimestamp, IsHiddenAuthor), link(Message, "flux://is_card_hidden", IsHidden, IsHiddenTimestamp, IsHiddenAuthor), AllCardHidden),
-      findall((Reply, ReplyTimestamp, ReplyAuthor), link(Reply, "flux://has_reply", Message, ReplyTimestamp, ReplyAuthor), Replies).
-      
-      flux_message_query_popular(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, true):- 
-      flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages), isPopular(Message).
-      
-      flux_message_query_popular(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, false):- 
-      flux_message(Channel, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages), isNotPopular(Message).      
-    `);
-
-    const addSocialDnaLink = await client.perspective.addLink(
-      perspective!.uuid,
-      {
-        source: SELF,
-        predicate: ZOME,
-        target: sdnaLiteral.toUrl(),
-      }
-    );
-    console.log("Created social dna link", addSocialDnaLink);
+    const socialDnaLink = await createSDNA(perspective!.uuid);
+    console.log("Created social dna link", socialDnaLink);
 
     // @ts-ignore
     return {
       uuid: perspective!.uuid,
       author: author,
-      timestamp: addSocialDnaLink.timestamp,
+      timestamp: socialDnaLink.timestamp,
       name: name,
       description: description || "",
       image: tempImage,

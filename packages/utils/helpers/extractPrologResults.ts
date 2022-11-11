@@ -1,6 +1,6 @@
-export default function extractPrologResults(prologResults: any, values: string[]): any | null {
-    if (prologResults === null) {
-        return null;
+export default function extractPrologResults(prologResults: any, values: string[]): any[] {
+    if (prologResults === null || prologResults === false) {
+        return [];
     }
     if (!Array.isArray(prologResults)) {
         prologResults = [prologResults];
@@ -13,7 +13,7 @@ export default function extractPrologResults(prologResults: any, values: string[
         for (const value of values) {
             const prologResultValue = prologResult[value];
             if (!prologResultValue.head) {
-                if (prologResultValue != "[]") {
+                if (prologResultValue != "[]" && !prologResultValue.variable) {
                     result[value] = prologResultValue;
                 } else {
                     result[value] = [];

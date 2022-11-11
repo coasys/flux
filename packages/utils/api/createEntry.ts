@@ -3,13 +3,13 @@ import {v4 as uuidv4} from "uuid";
 import { Link } from "@perspect3vism/ad4m";
 import { Entry, EntryInput } from "../types";
 import { createLinks } from "../helpers/linkHelpers";
-import { ENTRY_TYPE } from "../constants/communityPredicates";
+import { ENTRY_TYPE, SELF } from "../constants/communityPredicates";
 
 export async function createEntry(entry: EntryInput): Promise<Entry> {
   const client = await getAd4mClient();
 
-  const id = uuidv4();
-  const source = entry.source || "ad4m://self";
+  const id = `flux_entry://${uuidv4()}`;
+  const source = entry.source || SELF;
 
   const typeLinks = [] as Link[];
   for (const entryType of entry.types) {
@@ -31,18 +31,16 @@ export async function createEntry(entry: EntryInput): Promise<Entry> {
 
   const allLinks = [...typeLinks, ...propertyLinks];
 
-  let firstLink;
-  allLinks.forEach(async (link) => {
-    const linkExpression = await client.perspective.addLink(entry.perspectiveUuid, link);
-    firstLink = linkExpression.timestamp;
-  });
+  const linkPromises = allLinks.map((link) => client.perspective.addLink(entry.perspectiveUuid, link));
+
+  const createdLinks = await Promise.all(linkPromises);
 
   return {
     id,
     source,
     types: entry.types,
-    createdAt: firstLink.timestamp,
-    author: firstLink.author,
+    timestamp: createdLinks[0].timestamp,
+    author: createdLinks[0].author,
     data: entry.data,
   };
 }

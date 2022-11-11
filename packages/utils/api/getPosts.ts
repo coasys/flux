@@ -1,69 +1,22 @@
 import { Post } from "../types";
-import { EntryType, GetEntries } from "../types";
-import { TITLE, BODY, REACTION, REPLY_TO } from "../constants/communityPredicates";
+import { GetEntries } from "../types";
 import getEntries from "./getEntries";
+import { DEFAULT_LIMIT, forumFilteredQuery, forumQuery } from "../constants/sdna";
 
-//TODO; try to recrusively call flux_post and not flux_post_simple to get all the replies
-//Todo; add IsPopular result to the query
-
-export function generatePrologQuery(fromDate?: Date): string {
-    let query;
+export default async function getPosts(perspectiveUuid: string, source: string, fromDate?: Date): Promise<Post[]> {
+    let prologQuery;
     if (fromDate) {
-        query = `
-            flux_post_simple(Source, Id, Timestamp, Author, Titles, Bodys, Reactions):-
-                link(Source, "${EntryType.Forum}", Id, Timestamp, Author),
-                findall((Title, TitleTimestamp, TitleAuthor), link(Id, "${TITLE}", Title, TitleTimestamp, TitleAuthor), Titles),
-                findall((Body, BodyTimestamp, BodyAuthor), link(Id, "${BODY}", Body, BodyTimestamp, BodyAuthor), Bodys),
-                findall((Reaction, ReactionTimestamp, ReactionAuthor), link(Id, "${REACTION}", Reaction, ReactionTimestamp, ReactionAuthor), Reactions),
-
-            flux_post(Source, Id, Timestamp, Author, Titles, Bodys, Reactions, Replies):- 
-                link(Source, "${EntryType.Forum}", Id, Timestamp, Author),
-                findall((Title, TitleTimestamp, TitleAuthor), link(Id, "${TITLE}", Title, TitleTimestamp, TitleAuthor), Titles),
-                findall((Body, BodyTimestamp, BodyAuthor), link(Id, "${BODY}", Body, BodyTimestamp, BodyAuthor), Bodys),
-                findall((Reaction, ReactionTimestamp, ReactionAuthor), link(Id, "${REACTION}", Reaction, ReactionTimestamp, ReactionAuthor), Reactions),
-                findall((flux_post_simple(Source, Reply, Timestamp, Author, Titles, Bodys, Reactions)), link(Reply, "${REPLY_TO}", Id, ReplyTimestamp, ReplyAuthor), Replies);
-            
-            flux_post_query_popular(Source, Id, Timestamp, Author, Titles, Bodys, Reactions, Replies, true):- 
-                flux_post(Source, Id, Timestamp, Author, Titles, Bodys, Reactions, Replies), isPopular(Message).
-      
-            flux_post_query_popular(Source, Id, Timestamp, Author, Titles, Bodys, Reactions, Replies, false):- 
-                flux_post(Source, Id, Timestamp, Author, Titles, Bodys, Reactions, Replies), isNotPopular(Message).    
-
-
-            limit(%%, (order_by([desc(Timestamp)], flux_post_query_popular("%%", Id, Timestamp, Author, Titles, Bodys, Reactions, Replies, IsPopular)), Timestamp =< %%)).`;
+        prologQuery = forumFilteredQuery;
     } else {
-        query = `
-            flux_post_simple(Source, Id, Timestamp, Author, Titles, Bodys, Reactions):-
-                link(Source, "${EntryType.Forum}", Id, Timestamp, Author),
-                findall((Title, TitleTimestamp, TitleAuthor), link(Id, "${TITLE}", Title, TitleTimestamp, TitleAuthor), Titles),
-                findall((Body, BodyTimestamp, BodyAuthor), link(Id, "${BODY}", Body, BodyTimestamp, BodyAuthor), Bodys),
-                findall((Reaction, ReactionTimestamp, ReactionAuthor), link(Id, "${REACTION}", Reaction, ReactionTimestamp, ReactionAuthor), Reactions),
-
-            flux_post(Source, Id, Timestamp, Author, Titles, Bodys, Reactions, Replies):- 
-                link(Source, "${EntryType.Forum}", Id, Timestamp, Author),
-                findall((Title, TitleTimestamp, TitleAuthor), link(Id, "${TITLE}", Title, TitleTimestamp, TitleAuthor), Titles),
-                findall((Body, BodyTimestamp, BodyAuthor), link(Id, "${BODY}", Body, BodyTimestamp, BodyAuthor), Bodys),
-                findall((Reaction, ReactionTimestamp, ReactionAuthor), link(Id, "${REACTION}", Reaction, ReactionTimestamp, ReactionAuthor), Reactions),
-                findall((flux_post_simple(Source, Reply, Timestamp, Author, Titles, Bodys, Reactions)), link(Reply, "${REPLY_TO}", Id, ReplyTimestamp, ReplyAuthor), Replies);
-            
-            flux_post_query_popular(Source, Id, Timestamp, Author, Titles, Bodys, Reactions, Replies, true):- 
-                flux_post(Source, Id, Timestamp, Author, Titles, Bodys, Reactions, Replies), isPopular(Message).
-      
-            flux_post_query_popular(Source, Id, Timestamp, Author, Titles, Bodys, Reactions, Replies, false):- 
-                flux_post(Source, Id, Timestamp, Author, Titles, Bodys, Reactions, Replies), isNotPopular(Message).    
-
-            limit(%%, order_by([desc(Timestamp)], flux_post_query_popular("%%", Id, Timestamp, Author, Titles, Bodys, Reactions, Replies, IsPopular))).`;
+        prologQuery = forumQuery
     }
-    return query;
-}
-
-export default async function getPosts(perspectiveUuid: string, fromDate?: Date): Promise<Post[]> {
-    const prologQuery = generatePrologQuery(fromDate);
+    
     const getEntriesInput = {
         perspectiveUuid,
         queries: [{
             query: prologQuery,
-            arguments: [50, fromDate?.getTime()]
+            arguments: [DEFAULT_LIMIT, source, fromDate?.getTime()],
+            resultKeys: ["Id", "Timestamp", "Author", "Titles", "Bodys", "Reactions", "Replies", "IsPopular"]
         }],
     } as GetEntries;
     const entries = await getEntries(getEntriesInput);
@@ -77,5 +30,6 @@ export default async function getPosts(perspectiveUuid: string, fromDate?: Date)
         post.isPopular = entry.data?.IsPopular;
         posts.push(post);
     }
+    console.log("Getting posts", posts);
     return posts;
 }

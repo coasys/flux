@@ -1,37 +1,37 @@
-import { useContext } from "preact/hooks";
-import { ChatContext } from "utils/react";
+import { useContext, useEffect, useState } from "preact/hooks";
 import MessageItem from "../MessageItem";
 import Header from "../Header";
 import "react-hint/css/index.css";
-import styles from "./index.scss";
+import getPosts from "utils/api/getPosts";
 
 export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
-  const {
-    state: { messages: orderedMessages },
-    methods: { loadMore },
-  } = useContext(ChatContext);
+  const [posts, setPosts] = useState([]);
 
-  const messages = [...orderedMessages.reverse()];
-
-  function loadMoreMessages() {
-    loadMore();
+  async function loadMoreMessages(source: string, fromDate?: Date) {
+    const posts = await getPosts(perspectiveUuid, source, fromDate);
+    setPosts(posts)
   }
+
+  useEffect(() => {
+    loadMoreMessages(channelId); 
+  }, []);
+   
 
   return (
     <div style={{ overflowY: "auto" }}>
       <Header></Header>
-      {messages.map((message) => {
+      {posts.map((post) => {
         return (
           <MessageItem
-            key={message.id}
-            message={message}
+            key={post.id}
+            message={post}
             mainRef={mainRef}
             perspectiveUuid={perspectiveUuid}
           />
         );
       })}
       <j-flex a="center" j="center">
-        <j-button variant="link" onClick={() => loadMoreMessages()}>
+        <j-button variant="link" onClick={() => loadMoreMessages(channelId)}>
           Load more
         </j-button>
       </j-flex>

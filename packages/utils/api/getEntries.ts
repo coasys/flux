@@ -1,15 +1,7 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import extractPrologResults from "../helpers/extractPrologResults";
 import { GetEntries, Entry } from "../types";
-
-//usage: format("Hello %%! I ate %% apples today.", "World", 44);
-//@ts-ignore
-function format(fmt, ...args){
-    return fmt
-        .split("%%")
-        .reduce((aggregate, chunk, i) =>
-            aggregate + chunk + (args[i] || ""), "");
-}
+import format from "../helpers/formatString";
 
 export default async function getEntries(input: GetEntries): Promise<Entry[]> {
     const client = await getAd4mClient();
@@ -18,7 +10,6 @@ export default async function getEntries(input: GetEntries): Promise<Entry[]> {
         const prologQuery = format(query.query, ...query.arguments);
         const prologResult = await client.perspective.queryProlog(input.perspectiveUuid, prologQuery);
         const cleanedPrologResult = await extractPrologResults(prologResult, query.resultKeys);
-        console.log("Got cleaned prolog result", cleanedPrologResult);
         for (const result of cleanedPrologResult) {
             const entry = {} as Entry;
             if (result.Id) {

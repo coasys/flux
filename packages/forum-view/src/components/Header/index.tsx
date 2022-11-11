@@ -21,13 +21,13 @@ export default function Header() {
   function publish() {
     createPost({
       perspectiveUuid: state.communityId,
-      channelId: state.channnelId,
+      source: state.channelId,
       title,
       body,
     })
       .then(() => setOpen(false))
       .catch((e) => {
-        console.log(e);
+        console.error(e);
       });
   }
 
