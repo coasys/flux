@@ -45,3 +45,9 @@ export const OMIT = "flux://null";
 export const REPLY_TO = "flux://has_reply";
 
 export const REACTION = "flux://has_reaction";
+
+export const ENTRY_TYPE = "flux://entry_type";
+
+export const TITLE = "flux://title";
+
+export const BODY = "flux://body";

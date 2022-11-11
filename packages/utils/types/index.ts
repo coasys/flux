@@ -49,6 +49,7 @@ export interface Reaction {
 export interface Message {
   id: string;
   author: string; // did
+  content: string;
   reactions: Reaction[];
   timestamp: Date | string;
   reply?: string;
@@ -61,6 +62,7 @@ export interface Message {
     timestamp: Date | string;
   }[];
 }
+
 export interface Messages {
   [x: string]: Message;
 }
@@ -83,4 +85,62 @@ export interface Profiles {
 export interface ChannelViews {
   CHAT;
   FORUM;
+}
+
+export enum EntryType {
+  Message = "flux://message",
+  Forum = "flux://forum"
+}
+
+export interface Entry {
+  id: string;
+  author: String;
+  timestamp: Date;
+  types: EntryType[];
+  source?: string;
+  data?: PredicateAnyMap;
+}
+
+export interface Post extends Entry {
+  reactions: Reaction[];
+  isPopular: boolean;
+  titles: string[];
+  bodys: string[];
+}
+
+export interface EntryInput {
+  perspectiveUuid: string;
+  source?: string;
+  types: EntryType[];
+  data: PredicateMap;
+}
+
+export type PredicateMap = {
+  [predicate: string]: string;
+};
+
+export type PredicateAnyMap = {
+  [predicate: string]: any;
+};
+
+export interface GetEntry {
+  id: string;
+}
+
+export interface GetEntries {
+  perspectiveUuid: string;
+  queries: PrologQuery[];
+}
+
+export interface PrologQuery {
+  query: string;
+  resultKeys: string[];
+  arguments: any[];
+}
+
+export enum PrologQueries {
+  GetMessages,
+  GetForumPosts,
+  GetChannel,
+  GetNeighbourhood
 }

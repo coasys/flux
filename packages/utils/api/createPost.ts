@@ -1,7 +1,7 @@
-import { Link } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { DIRECTLY_SUCCEEDED_BY } from "../constants/communityPredicates";
-import getMessage from "./getMessage";
+import { Literal } from "@perspect3vism/ad4m";
+import { TITLE, BODY } from "../constants/communityPredicates";
+import { EntryInput, EntryType } from "../types";
+import { createEntry } from "./createEntry";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -17,22 +17,18 @@ export default async function ({
   body,
 }: Payload) {
   try {
-    const client = await getAd4mClient();
-    const titleExp = await client.expression.create(title, "literal");
-    const contentExp = await client.expression.create(body, "literal");
-
-    const result = await client.perspective.addLink(
+    const entryInput = {
       perspectiveUuid,
-      new Link({
-        source: channelId,
-        target: contentExp,
-        predicate: DIRECTLY_SUCCEEDED_BY,
-      })
-    );
+      source: channelId,
+      types: [EntryType.Forum],
+      data: {
+        [TITLE]: Literal.from(title).toUrl(),
+        [BODY]: Literal.from(body).toUrl()
+      }
+    } as EntryInput
 
-    const messageParsed = getMessage(result);
-
-    return messageParsed;
+    const entry = await createEntry(entryInput);
+    console.log("created entry", entry);
   } catch (e: any) {
     throw new Error(e);
   }
