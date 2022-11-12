@@ -17,9 +17,7 @@ import createMessageReaction from "../api/createMessageReaction";
 import createReply from "../api/createReply";
 import { sortExpressionsByTimestamp } from "../helpers/expressionHelpers";
 import getMe from "../api/getMe";
-import {
-  REACTION,
-} from "../constants/communityPredicates";
+import { REACTION } from "../constants/communityPredicates";
 import hideEmbeds from "../api/hideEmbeds";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import editCurrentMessage from "../api/editCurrentMessage";
@@ -102,7 +100,9 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   );
 
   useEffect(() => {
-    fetchMessages();
+    if (perspectiveUuid && channelId) {
+      fetchMessages();
+    }
   }, [perspectiveUuid, channelId, agent]);
 
   useEffect(() => {

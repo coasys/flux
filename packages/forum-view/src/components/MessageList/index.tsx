@@ -9,13 +9,15 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
 
   async function loadMoreMessages(source: string, fromDate?: Date) {
     const posts = await getPosts(perspectiveUuid, source, fromDate);
-    setPosts(posts)
+    setPosts(posts);
   }
 
   useEffect(() => {
-    loadMoreMessages(channelId); 
-  }, []);
-   
+    console.log("fetcing onn first load");
+    if (channelId && perspectiveUuid) {
+      loadMoreMessages(channelId);
+    }
+  }, [channelId, perspectiveUuid]);
 
   return (
     <div style={{ overflowY: "auto" }}>

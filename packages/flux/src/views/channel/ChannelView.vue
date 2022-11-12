@@ -36,7 +36,7 @@
     </div>
 
     <forum-view
-      v-show="currentView === ChannelView.Forum"
+      v-if="currentView === ChannelView.Forum"
       class="perspective-view"
       :port="port"
       :channel="channel.id"
@@ -47,7 +47,7 @@
       @hide-notification-indicator="onHideNotificationIndicator"
     ></forum-view>
     <chat-view
-      v-show="currentView === ChannelView.Chat"
+      v-if="currentView === ChannelView.Chat"
       class="perspective-view"
       :port="port"
       :channel="channelId"
