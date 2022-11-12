@@ -13,10 +13,10 @@
         <div class="channel-view__tabs">
           <label class="channel-view-tab" v-for="view in filteredViewOptions">
             <input
-              name="view"
+              :name="channel.id"
               type="radio"
               :checked.prop="view.type === currentView"
-              :value="view.type"
+              :value.prop="view.type"
               @change="changeCurrentView"
             />
             <j-icon size="xs" :name="view.icon"></j-icon>
