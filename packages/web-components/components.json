@@ -708,6 +708,10 @@
           "type": "string"
         },
         {
+          "name": "name",
+          "type": "string"
+        },
+        {
           "name": "size",
           "type": "string"
         },
@@ -803,6 +807,11 @@
         {
           "name": "label",
           "attribute": "label",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "attribute": "name",
           "type": "string"
         },
         {

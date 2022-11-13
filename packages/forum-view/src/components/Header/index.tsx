@@ -1,71 +1,57 @@
 import { useContext, useEffect, useRef, useState } from "preact/hooks";
 import styles from "./index.scss";
 import createPost from "utils/api/createPost";
-import { ChatContext } from "utils/react";
+import { AgentContext, ChatContext, PerspectiveContext } from "utils/react";
+import Avatar from "../Avatar";
+import MakeEntry from "../MakeEntry";
 
 export default function Header() {
+  const { state: agentState } = useContext(AgentContext);
   const { state } = useContext(ChatContext);
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
   const [open, setOpen] = useState(false);
-  const inputRef = useRef(null);
 
-  useEffect(() => {
-    if (open) {
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
-    }
-  }, [open]);
-
-  function publish() {
-    createPost({
-      perspectiveUuid: state.communityId,
-      source: state.channelId,
-      title,
-      body,
-    })
-      .then(() => setOpen(false))
-      .catch((e) => {
-        console.error(e);
-      });
-  }
+  console.log({ state });
 
   return (
     <header class={styles.header}>
-      <j-modal size="sm" open={open} onToggle={(e) => setOpen(e.target.open)}>
-        <j-box p="800">
-          <j-text variant="heading-sm" nomargin>
-            Create a New Post
-          </j-text>
-          <j-box mt="500">
-            <j-flex direction="column" gap="300">
-              <j-input
-                onInput={(e) => setTitle(e.target.value)}
-                value={title}
-                ref={inputRef}
-                size="xl"
-                placeholder="Title"
-              ></j-input>
-              <j-input
-                onInput={(e) => setBody(e.target.value)}
-                value={body}
-                size="xl"
-                placeholder="Text"
-              ></j-input>
-            </j-flex>
-          </j-box>
-          <j-box mt="500">
-            <j-flex direction="row" j="end" gap="300">
-              <j-button size="lg" variant="link">
-                Cancel
-              </j-button>
-              <j-button onClick={() => publish()} size="lg" variant="primary">
+      <j-flex a="start" gap="500">
+        <div>
+          <Avatar
+            size="lg"
+            did={agentState.did}
+            url={agentState.profile?.profileThumbnailPicture}
+          ></Avatar>
+        </div>
+        <div style="display: block; width: 100%;">
+          <j-input full size="lg" placeholder="Create a post"></j-input>
+          <j-box pt="300" pb="400">
+            <j-tabs value="post">
+              <j-tab-item value="post" variant="button">
+                <j-icon slot="start" name="card-heading"></j-icon>
                 Post
-              </j-button>
-            </j-flex>
+              </j-tab-item>
+              <j-tab-item variant="button">
+                <j-icon slot="start" name="card-image"></j-icon>
+                Image
+              </j-tab-item>
+              <j-tab-item variant="button">
+                <j-icon slot="start" name="card-list"></j-icon>
+                Poll
+              </j-tab-item>
+              <j-tab-item variant="button">
+                <j-icon slot="start" name="calendar-date"></j-icon>
+                Event
+              </j-tab-item>
+            </j-tabs>
           </j-box>
-        </j-box>
+        </div>
+      </j-flex>
+      <j-modal open={open} onToggle={(e) => setOpen(e.target.open)}>
+        <MakeEntry
+          communityId={state.communityId}
+          channelId={state.channelId}
+          onPublished={() => setOpen(false)}
+        ></MakeEntry>
       </j-modal>
 
       <j-button
