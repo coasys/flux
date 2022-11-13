@@ -11,8 +11,8 @@ import { Profile } from "utils/types";
 
 export default function MessageItem({ message, mainRef, perspectiveUuid }) {
   console.warn("Loading message item");
-  const messageTitle = message.titles[0].content;
-  const messageBody = message.bodys[0].content;
+  const messageTitle = message.title[0].content;
+  const messageBody = message.body[0].content;
 
   const messageRef = useRef<any>(null);
 
@@ -139,7 +139,7 @@ export default function MessageItem({ message, mainRef, perspectiveUuid }) {
   const author: Profile = members[message.author] || {};
   const popularStyle: string = message.isPopular ? styles.popularMessage : "";
   const isReplying: boolean = currentReply === message.id;
-  const isEdited: boolean = message.titles.length > 1;
+  const isEdited: boolean = message.title.length > 1;
   return (
     <div
       class={[styles.message, popularStyle].join(" ")}
@@ -191,7 +191,7 @@ export default function MessageItem({ message, mainRef, perspectiveUuid }) {
               data-rh
               data-timestamp={format(
                 new Date(
-                  message.titles[
+                  message.title[
                     message.editMessages.length - 1
                   ].timestamp
                 ),

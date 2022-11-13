@@ -13,15 +13,15 @@ function cleanPostData(prologEntry: any) {
     });
     post.reactions = prologEntry.data?.Reactions;
 
-    //Clean up the titles and bodys
-    prologEntry.data?.Titles.forEach((title: any) => {
+    //Clean up the title and body
+    prologEntry.data?.Title.forEach((title: any) => {
         title.content = Literal.fromUrl(title.content).get().data;
     });
-    post.titles = prologEntry.data?.Titles;
-    prologEntry.data?.Bodys.forEach((body: any) => {
+    post.title = prologEntry.data?.Title;
+    prologEntry.data?.Body.forEach((body: any) => {
         body.content = Literal.fromUrl(body.content).get().data;
     });
-    post.bodys = prologEntry.data?.Bodys;
+    post.body = prologEntry.data?.Body;
     post.isPopular = prologEntry.data?.IsPopular;
 
     //Clean up the replies
@@ -46,7 +46,7 @@ export default async function getPosts(perspectiveUuid: string, source: string, 
         queries: [{
             query: prologQuery,
             arguments: [DEFAULT_LIMIT, source, fromDate?.getTime()],
-            resultKeys: ["Id", "Timestamp", "Author", "Titles", "Bodys", "Reactions", "Replies", "IsPopular"]
+            resultKeys: ["Id", "Timestamp", "Author", "Title", "Body", "Reactions", "Replies", "IsPopular"]
         }],
     } as GetEntries;
     const entries = await getEntries(getEntriesInput);
