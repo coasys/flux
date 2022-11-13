@@ -50,4 +50,12 @@ export const TITLE = "flux://title";
 
 export const BODY = "flux://body";
 
+export const URL = "flux://url";
+
+export const IMAGE = "flux://image";
+
+export const START_DATE = "flux://start_date";
+
+export const END_DATE = "flux://end_date";
+
 export const SDNA_VERSION = "ad4m://sdna_version";
