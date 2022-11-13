@@ -18,6 +18,7 @@ export async function updateSDNA(perspectiveUuid: string, values?: SDNAValues): 
 
 export async function checkUpdateSDNAVersion(perspectiveUuid: string, lastSeenTimestamp: Date, values?: SDNAValues): Promise<boolean> {
     const sdnaVersion = await getSDNAVersion(perspectiveUuid);
+    console.warn("checkUpdateSDNAVersion: SDNA version", sdnaVersion);
     if (sdnaVersion === null) {
         return false;
     } else {

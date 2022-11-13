@@ -332,6 +332,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       }
     }
     if (linkIs.socialDNA(link)) {
+      console.warn("got new social dna fetching messages again");
       fetchMessages();
     }
     if (linkIs.reaction(link)) {

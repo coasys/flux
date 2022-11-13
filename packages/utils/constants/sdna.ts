@@ -5,8 +5,8 @@ export const emojiCount = 3;
 export const emoji = "1f44d";
 export const DEFAULT_LIMIT = 50;
 
-export const LATEST_SDNA_VERSION = 2;
-export const SDNA_CREATION_DATE = new Date("2022-11-13T23:16:33Z");
+export const LATEST_SDNA_VERSION = 3;
+export const SDNA_CREATION_DATE = new Date("2022-11-13T23:41:33Z");
 
 //Note: in the prolog queries below, the %% values are to be string templated before use
 
@@ -42,10 +42,10 @@ export const SDNA = `
         findall((flux_post(Source, Reply, Timestamp, Author, Title, Body, Reactions)), link(Reply, "${REPLY_TO}", Id, ReplyTimestamp, ReplyAuthor), Replies).
     
     flux_post_query_popular(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Replies, true) :-
-        flux_post(Source, Id, Timestamp, Author, Title, Body, Reactions, Replies), isPopular(Id).
+        flux_post(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Replies), isPopular(Id).
 
     flux_post_query_popular(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Replies, false) :-
-        flux_post(Source, Id, Timestamp, Author, Title, Body, Reactions, Replies), isNotPopular(Id).`;
+        flux_post(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Replies), isNotPopular(Id).`;
 
 export const messageFilteredQuery = `limit(%%, (order_by([desc(Timestamp)], flux_message_query_popular("%%", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp =< %%)).`;
 export const messageQuery = `limit(%%, order_by([desc(Timestamp)], flux_message_query_popular("%%", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular))).`;
