@@ -4,6 +4,7 @@ import extractPrologResults from "../helpers/extractPrologResults";
 import { DEFAULT_LIMIT, messageFilteredQuery, messageQuery } from "../constants/sdna";
 import format from "../helpers/formatString";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { checkUpdateSDNAVersion } from "./updateSDNA";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -53,6 +54,10 @@ export default async function ({ perspectiveUuid, channelId, from }: Payload) {
       editMessages: result.EditMessages
     });
   });
+  if (cleanedMessages.length > 0) {
+    //@ts-ignore
+    checkUpdateSDNAVersion(perspectiveUuid, cleanedMessages[0].timestamp);
+  }
 
   const keyedMessages = cleanedMessages.reduce((acc, message) => {
     //@ts-ignore

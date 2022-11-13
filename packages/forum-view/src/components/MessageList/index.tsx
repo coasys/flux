@@ -3,17 +3,31 @@ import MessageItem from "../MessageItem";
 import Header from "../Header";
 import "react-hint/css/index.css";
 import getPosts from "utils/api/getPosts";
+import { checkUpdateSDNAVersion } from "utils/api/updateSDNA";
 
 export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
   const [posts, setPosts] = useState([]);
 
   async function loadMoreMessages(source: string, fromDate?: Date) {
-    const posts = await getPosts(perspectiveUuid, source, fromDate);
+    let posts;
+    try {
+      posts = await getPosts(perspectiveUuid, source, fromDate);
+    } catch (e) {
+      if (e.message.includes("existence_error")) {
+        console.error("We dont have the SDNA to make this query, please wait for community to sync");
+        checkUpdateSDNAVersion(perspectiveUuid, new Date());
+        throw(e);
+      } else {
+        throw (e)
+      }
+    }
     setPosts(posts);
+    if (posts.length > 0) {
+      checkUpdateSDNAVersion(perspectiveUuid, posts[0].timestamp);
+    }
   }
 
   useEffect(() => {
-    console.log("fetcing onn first load");
     if (channelId && perspectiveUuid) {
       loadMoreMessages(channelId);
     }

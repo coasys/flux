@@ -1,7 +1,8 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { SELF, ZOME, SDNA_VERSION } from "../constants/communityPredicates";
+import { SELF, ZOME, SDNA_VERSION, CREATED_AT } from "../constants/communityPredicates";
 import { LinkQuery, Literal, LinkExpression } from "@perspect3vism/ad4m";
 import { SDNAValues } from "./generateSDNALiteral";
+import { SdnaVersion } from "../types";
 
 export async function getSDNALinkLiteral(perspectiveUuid: string): Promise<string | null> {
     const existingSDNALinks = await getSDNALinks(perspectiveUuid);
@@ -11,18 +12,28 @@ export async function getSDNALinkLiteral(perspectiveUuid: string): Promise<strin
     return null;
 }
 
-export async function getSDNAVersion(perspectiveUuid): Promise<number | null> {
+export async function getSDNAVersion(perspectiveUuid): Promise<SdnaVersion | null> {
     const ad4mClient = await getAd4mClient();
     const existingSDNALinks = await getSDNALinks(perspectiveUuid);
     if (existingSDNALinks.length > 0) {
         const sdnaLinkVersion = await ad4mClient.perspective.queryLinks(perspectiveUuid, {source: existingSDNALinks[0].data.target, predicate: SDNA_VERSION} as LinkQuery);
         if (sdnaLinkVersion.length > 0) {
-            console.log(sdnaLinkVersion);
-            return parseInt(sdnaLinkVersion[0].data.target.replace("int://", ""));
+            const sdnaCreatedAt = await ad4mClient.perspective.queryLinks(perspectiveUuid, {source: existingSDNALinks[0].data.target, predicate: CREATED_AT} as LinkQuery);
+            if (sdnaCreatedAt.length > 0) {
+                return {
+                    version: parseInt(sdnaLinkVersion[0].data.target.replace("int://", "")),
+                    timestamp: new Date(sdnaCreatedAt[0].data.target)
+                }
+            } else {
+                console.warn("getSDNAVersion: No SDNA creation date found");
+                return null;
+            }
         } else {
+            console.warn("getSDNAVersion: No SDNA version found");
             return null;
         }
     } else {
+        console.warn("getSDNAVersion: No SDNA link found");
         return null;
     }
 }

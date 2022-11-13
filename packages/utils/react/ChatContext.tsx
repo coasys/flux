@@ -22,6 +22,7 @@ import hideEmbeds from "../api/hideEmbeds";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import editCurrentMessage from "../api/editCurrentMessage";
 import { DEFAULT_LIMIT } from "../constants/sdna";
+import { checkUpdateSDNAVersion } from "../api/updateSDNA";
 
 type State = {
   communityId: string;
@@ -100,7 +101,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   );
 
   useEffect(() => {
-    if (perspectiveUuid && channelId) {
+    if (perspectiveUuid && channelId && agent) {
       fetchMessages();
     }
   }, [perspectiveUuid, channelId, agent]);
@@ -370,12 +371,25 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       isFetchingMessages: true,
     }));
 
-    const { keyedMessages: newMessages, expressionLinkLength } =
-      await getMessages({
-        perspectiveUuid,
-        channelId,
-        from: from,
-      });
+    let newMessages;
+    let expressionLinkLength;
+    try {
+        const data = await getMessages({
+          perspectiveUuid,
+          channelId,
+          from: from,
+        });
+        newMessages = data.keyedMessages;
+        expressionLinkLength = data.expressionLinkLength;
+    } catch (e) {
+      if (e.message.includes("existence_error")) {
+        console.error("We dont have the SDNA to make this query, please wait for community to sync");
+        checkUpdateSDNAVersion(perspectiveUuid, new Date());
+        throw(e);
+      } else {
+        throw (e)
+      }
+    }
 
     setState((oldState) => ({
       ...oldState,

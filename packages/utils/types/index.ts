@@ -104,8 +104,8 @@ export interface Entry {
 export interface Post extends Entry {
   reactions: Reaction[];
   isPopular: boolean;
-  titles: string[];
-  bodys: string[];
+  title: string[];
+  body: string[];
   replies: Post[];
 }
 
@@ -144,4 +144,9 @@ export enum PrologQueries {
   GetForumPosts,
   GetChannel,
   GetNeighbourhood,
+}
+
+export interface SdnaVersion {
+  version: number;
+  timestamp: Date;
 }

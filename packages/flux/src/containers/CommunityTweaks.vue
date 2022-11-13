@@ -86,7 +86,8 @@ export default defineComponent({
       this.emoji = emojiString;
       this.emojiCount = emojiCount;
     }
-    this.sdnaVersion = await getSDNAVersion(perspectiveUuid) || 0;
+    const sdnaVersionData = await getSDNAVersion(perspectiveUuid);
+    this.sdnaVersion = sdnaVersionData? sdnaVersionData.version : 0;
   },
   methods: {
     ...mapActions(useAppStore, ["setShowCommunityTweaks"]),

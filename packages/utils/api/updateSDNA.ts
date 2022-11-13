@@ -16,12 +16,14 @@ export async function updateSDNA(perspectiveUuid: string, values?: SDNAValues): 
     return sdnaLink;
 }
 
-export async function checkSDNAVersion(perspectiveUuid: string, values?: SDNAValues): Promise<boolean> {
+export async function checkUpdateSDNAVersion(perspectiveUuid: string, lastSeenTimestamp: Date, values?: SDNAValues): Promise<boolean> {
     const sdnaVersion = await getSDNAVersion(perspectiveUuid);
     if (sdnaVersion === null) {
         return false;
     } else {
-        if (sdnaVersion < LATEST_SDNA_VERSION) {
+        if (sdnaVersion.version < LATEST_SDNA_VERSION && sdnaVersion.timestamp < lastSeenTimestamp) {
+            console.warn("checkUpdateSDNAVersion: SDNA version is outdated, updating SDNA");
+            console.warn("checkUpdateSDNAVersion: Found version data: ", sdnaVersion);
             createSDNA(perspectiveUuid, values);
             return true;
         }
