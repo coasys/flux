@@ -90,6 +90,9 @@ export enum ChannelView {
 export enum EntryType {
   Message = "flux://message",
   SimplePost = "flux://simple_post",
+  ImagePost = "flux://image_post",
+  PollPost = "flux://poll_post",
+  CalendarEvent = "flux://calendar_event",
 }
 
 export interface Entry {

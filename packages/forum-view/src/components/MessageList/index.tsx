@@ -1,9 +1,9 @@
-import { useContext, useEffect, useState } from "preact/hooks";
-import MessageItem from "../MessageItem";
+import { useEffect, useState } from "preact/hooks";
 import Header from "../Header";
-import "react-hint/css/index.css";
 import getPosts from "utils/api/getPosts";
 import { checkUpdateSDNAVersion } from "utils/api/updateSDNA";
+import { EntryType } from "utils/types";
+import SimplePost from "../Posts/SimplePost";
 
 export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
   const [posts, setPosts] = useState([]);
@@ -14,11 +14,13 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
       posts = await getPosts(perspectiveUuid, source, fromDate);
     } catch (e) {
       if (e.message.includes("existence_error")) {
-        console.error("We dont have the SDNA to make this query, please wait for community to sync");
+        console.error(
+          "We dont have the SDNA to make this query, please wait for community to sync"
+        );
         checkUpdateSDNAVersion(perspectiveUuid, new Date());
-        throw(e);
+        throw e;
       } else {
-        throw (e)
+        throw e;
       }
     }
     setPosts(posts);
@@ -36,16 +38,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
   return (
     <div style={{ overflowY: "auto" }}>
       <Header></Header>
-      {posts.map((post) => {
-        return (
-          <MessageItem
-            key={post.id}
-            message={post}
-            mainRef={mainRef}
-            perspectiveUuid={perspectiveUuid}
-          />
-        );
-      })}
+      {posts.map(renderPosts)}
       <j-flex a="center" j="center">
         <j-button variant="link" onClick={() => loadMoreMessages(channelId)}>
           Load more
@@ -53,4 +46,11 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
       </j-flex>
     </div>
   );
+}
+
+function renderPosts(post) {
+  switch (post.entryType) {
+    case EntryType.SimplePost:
+      <SimplePost post={post}></SimplePost>;
+  }
 }

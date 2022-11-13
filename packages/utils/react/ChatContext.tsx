@@ -77,11 +77,7 @@ const ChatContext = createContext(initialState);
 export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   const linkSubscriberRef = useRef();
 
-  const [state, setState] = useState({
-    ...initialState.state,
-    communityId: perspectiveUuid,
-    channelId,
-  });
+  const [state, setState] = useState(initialState.state);
 
   const [agent, setAgent] = useState();
 
@@ -496,7 +492,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   return (
     <ChatContext.Provider
       value={{
-        state: { ...state, messages },
+        state: { ...state, messages, communityId: perspectiveUuid, channelId },
         methods: {
           loadMore,
           sendMessage,
