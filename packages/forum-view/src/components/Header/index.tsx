@@ -3,7 +3,7 @@ import styles from "./index.scss";
 import createPost from "utils/api/createPost";
 import { AgentContext, ChatContext, PerspectiveContext } from "utils/react";
 import Avatar from "../Avatar";
-import MakeEntry from "../MakeEntry";
+import CreatePost from "../CreatePost";
 
 export default function Header() {
   const { state: agentState } = useContext(AgentContext);
@@ -47,11 +47,11 @@ export default function Header() {
         </div>
       </j-flex>
       <j-modal open={open} onToggle={(e) => setOpen(e.target.open)}>
-        <MakeEntry
+        <CreatePost
           communityId={state.communityId}
           channelId={state.channelId}
           onPublished={() => setOpen(false)}
-        ></MakeEntry>
+        ></CreatePost>
       </j-modal>
 
       <j-button

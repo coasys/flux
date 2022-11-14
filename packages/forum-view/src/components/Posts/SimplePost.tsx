@@ -1,15 +1,10 @@
-import { useContext, useMemo, useEffect, useRef, useState } from "preact/hooks";
-import { AgentContext, ChatContext, PerspectiveContext } from "utils/react";
-import getMe from "utils/api/getMe";
-import getNeighbourhoodLink from "utils/api/getNeighbourhoodLink";
-import UIContext from "../../context/UIContext";
+import { useContext, useRef } from "preact/hooks";
+import { PerspectiveContext } from "utils/react";
 import styles from "./index.scss";
 import { format, formatRelative } from "date-fns/esm";
-import { REACTION } from "utils/constants/communityPredicates";
-import EditorContext from "../../context/EditorContext";
 import { Profile } from "utils/types";
 
-export default function MessageItem({ post, mainRef, perspectiveUuid }) {
+export default function MessageItem({ post }) {
   const messageTitle = post.titles[0].content;
   const messageBody = post.bodys[0].content;
 
@@ -24,7 +19,6 @@ export default function MessageItem({ post, mainRef, perspectiveUuid }) {
       detail: { did },
       bubbles: true,
     });
-    mainRef?.dispatchEvent(event);
   }
 
   const author: Profile = members[post.author] || {};
