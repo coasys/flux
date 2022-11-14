@@ -47,7 +47,7 @@ const initialState: ContextProps = {
   },
 };
 
-const PerspectiveContext = createContext(initialState);
+const PerspectiveContext = createContext<ContextProps>(initialState);
 
 export function PerspectiveProvider({ perspectiveUuid, children }: any) {
   const [state, setState] = useState({
