@@ -6,7 +6,7 @@ export const emoji = "1f44d";
 export const DEFAULT_LIMIT = 50;
 
 export const LATEST_SDNA_VERSION = 3;
-export const SDNA_CREATION_DATE = new Date("2022-11-13T23:41:33Z");
+export const SDNA_CREATION_DATE = new Date("2022-11-13T23:50:33Z");
 
 //Note: in the prolog queries below, the %% values are to be string templated before use
 
@@ -30,7 +30,7 @@ export const SDNA = `
     flux_message_query_popular(Source, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, false):- 
         flux_message(Source, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages), isNotPopular(Message).  
 
-    flux_post(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Replies):- 
+    flux_post(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies):- 
         link(Source, "${EntryType.SimplePost}", Id, Timestamp, Author),
         findall((Title, TitleTimestamp, TitleAuthor), link(Id, "${TITLE}", Title, TitleTimestamp, TitleAuthor), Title),
         findall((Body, BodyTimestamp, BodyAuthor), link(Id, "${BODY}", Body, BodyTimestamp, BodyAuthor), Body),
@@ -39,16 +39,17 @@ export const SDNA = `
         findall((Image, ImageTimestamp, ImageAuthor), link(Id, "${IMAGE}", Image, ImageTimestamp, ImageAuthor), Image),
         findall((StartDate, StartDateTimestamp, StartDateAuthor), link(Id, "${START_DATE}", StartDate, StartDateTimestamp, StartDateAuthor), StartDate),
         findall((EndDate, EndDateTimestamp, EndDateAuthor), link(Id, "${END_DATE}", EndDate, EndDateTimestamp, EndDateAuthor), EndDate),
+        findall((Type, TypeTimestamp, TypeAuthor), link(Id, "${END_DATE}", Type, TypeTimestamp, TypeAuthor), Types),
         findall((flux_post(Source, Reply, Timestamp, Author, Title, Body, Reactions)), link(Reply, "${REPLY_TO}", Id, ReplyTimestamp, ReplyAuthor), Replies).
     
-    flux_post_query_popular(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Replies, true) :-
-        flux_post(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Replies), isPopular(Id).
+    flux_post_query_popular(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies, true) :-
+        flux_post(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies), isPopular(Id).
 
-    flux_post_query_popular(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Replies, false) :-
-        flux_post(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Replies), isNotPopular(Id).`;
+    flux_post_query_popular(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies, false) :-
+        flux_post(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies), isNotPopular(Id).`;
 
 export const messageFilteredQuery = `limit(%%, (order_by([desc(Timestamp)], flux_message_query_popular("%%", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp =< %%)).`;
 export const messageQuery = `limit(%%, order_by([desc(Timestamp)], flux_message_query_popular("%%", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular))).`;
 
-export const forumFilteredQuery = `limit(%%, (order_by([desc(Timestamp)], flux_post_query_popular("%%", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Replies, IsPopular)), Timestamp =< %%)).`;
-export const forumQuery = `limit(%%, order_by([desc(Timestamp)], flux_post_query_popular("%%", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Replies, IsPopular))).`;
+export const forumFilteredQuery = `limit(%%, (order_by([desc(Timestamp)], flux_post_query_popular("%%", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies, IsPopular)), Timestamp =< %%)).`;
+export const forumQuery = `limit(%%, order_by([desc(Timestamp)], flux_post_query_popular("%%", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies, IsPopular))).`;

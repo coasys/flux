@@ -17,7 +17,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
         console.error(
           "We dont have the SDNA to make this query, please wait for community to sync"
         );
-        checkUpdateSDNAVersion(perspectiveUuid, new Date());
+        await checkUpdateSDNAVersion(perspectiveUuid, new Date());
         throw e;
       } else {
         throw e;
@@ -25,7 +25,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
     }
     setPosts(posts);
     if (posts.length > 0) {
-      checkUpdateSDNAVersion(perspectiveUuid, posts[0].timestamp);
+      await checkUpdateSDNAVersion(perspectiveUuid, posts[0].timestamp);
     }
   }
 

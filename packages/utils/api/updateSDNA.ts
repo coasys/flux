@@ -6,14 +6,15 @@ import { getSDNAVersion } from "./getSDNA";
 import { LATEST_SDNA_VERSION } from "../constants/sdna";
 
 export async function updateSDNA(perspectiveUuid: string, values?: SDNAValues): Promise<LinkExpression> {
-    await deleteSDNALinks(perspectiveUuid);
     let sdnaLink;
+    await deleteSDNALinks(perspectiveUuid);
     try {
         sdnaLink = await createSDNA(perspectiveUuid, values);
-    } catch {
+    } catch (e) {
         sdnaLink = await createSDNA(perspectiveUuid);
+    } finally {
+        return sdnaLink;
     }
-    return sdnaLink;
 }
 
 export async function checkUpdateSDNAVersion(perspectiveUuid: string, lastSeenTimestamp: Date, values?: SDNAValues): Promise<boolean> {
@@ -25,7 +26,7 @@ export async function checkUpdateSDNAVersion(perspectiveUuid: string, lastSeenTi
         if (sdnaVersion.version < LATEST_SDNA_VERSION && sdnaVersion.timestamp < lastSeenTimestamp) {
             console.warn("checkUpdateSDNAVersion: SDNA version is outdated, updating SDNA");
             console.warn("checkUpdateSDNAVersion: Found version data: ", sdnaVersion);
-            createSDNA(perspectiveUuid, values);
+            await updateSDNA(perspectiveUuid, values);
             return true;
         }
         return false;

@@ -381,7 +381,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     } catch (e) {
       if (e.message.includes("existence_error")) {
         console.error("We dont have the SDNA to make this query, please wait for community to sync");
-        checkUpdateSDNAVersion(perspectiveUuid, new Date());
+        await checkUpdateSDNAVersion(perspectiveUuid, new Date());
         throw(e);
       } else {
         throw (e)

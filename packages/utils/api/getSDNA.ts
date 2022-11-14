@@ -17,8 +17,10 @@ export async function getSDNAVersion(perspectiveUuid): Promise<SdnaVersion | nul
     const existingSDNALinks = await getSDNALinks(perspectiveUuid);
     if (existingSDNALinks.length > 0) {
         const sdnaLinkVersion = await ad4mClient.perspective.queryLinks(perspectiveUuid, {source: existingSDNALinks[0].data.target, predicate: SDNA_VERSION} as LinkQuery);
+        sdnaLinkVersion.sort((linka, linkb) => linka.timestamp > linkb.timestamp ? -1 : 1);
         if (sdnaLinkVersion.length > 0) {
             const sdnaCreatedAt = await ad4mClient.perspective.queryLinks(perspectiveUuid, {source: existingSDNALinks[0].data.target, predicate: CREATED_AT} as LinkQuery);
+            sdnaCreatedAt.sort((linka, linkb) => linka.timestamp > linkb.timestamp ? -1 : 1);
             if (sdnaCreatedAt.length > 0) {
                 return {
                     version: parseInt(sdnaLinkVersion[0].data.target.replace("int://", "")),
