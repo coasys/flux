@@ -4,13 +4,18 @@ import createPost from "utils/api/createPost";
 import { AgentContext, ChatContext, PerspectiveContext } from "utils/react";
 import Avatar from "../Avatar";
 import CreatePost from "../CreatePost";
+import { EntryType } from "utils/types";
 
 export default function Header() {
+  const [initialType, setInitialType] = useState(EntryType.SimplePost);
   const { state: agentState } = useContext(AgentContext);
   const { state } = useContext(ChatContext);
   const [open, setOpen] = useState(false);
 
-  console.log({ state });
+  function handlePostClick(type) {
+    setInitialType(type);
+    setOpen(true);
+  }
 
   return (
     <header class={styles.header}>
@@ -23,35 +28,56 @@ export default function Header() {
           ></Avatar>
         </div>
         <div style="display: block; width: 100%;">
-          <j-input full size="lg" placeholder="Create a post"></j-input>
+          <j-input
+            onFocus={() => handlePostClick(EntryType.SimplePost)}
+            full
+            size="lg"
+            placeholder="Create a post"
+          ></j-input>
           <j-box pt="300" pb="400">
-            <j-tabs value="post">
-              <j-tab-item value="post" variant="button">
+            <j-flex>
+              <j-button
+                onClick={() => handlePostClick(EntryType.SimplePost)}
+                value="post"
+                variant="ghost"
+              >
                 <j-icon slot="start" name="card-heading"></j-icon>
                 Post
-              </j-tab-item>
-              <j-tab-item variant="button">
+              </j-button>
+              <j-button
+                onClick={() => handlePostClick(EntryType.ImagePost)}
+                variant="ghost"
+              >
                 <j-icon slot="start" name="card-image"></j-icon>
                 Image
-              </j-tab-item>
-              <j-tab-item variant="button">
+              </j-button>
+              <j-button
+                onClick={() => handlePostClick(EntryType.PollPost)}
+                variant="ghost"
+              >
                 <j-icon slot="start" name="card-list"></j-icon>
                 Poll
-              </j-tab-item>
-              <j-tab-item variant="button">
+              </j-button>
+              <j-button
+                onClick={() => handlePostClick(EntryType.CalendarEvent)}
+                variant="ghost"
+              >
                 <j-icon slot="start" name="calendar-date"></j-icon>
                 Event
-              </j-tab-item>
-            </j-tabs>
+              </j-button>
+            </j-flex>
           </j-box>
         </div>
       </j-flex>
       <j-modal open={open} onToggle={(e) => setOpen(e.target.open)}>
-        <CreatePost
-          communityId={state.communityId}
-          channelId={state.channelId}
-          onPublished={() => setOpen(false)}
-        ></CreatePost>
+        {open && (
+          <CreatePost
+            communityId={state.communityId}
+            channelId={state.channelId}
+            initialType={initialType}
+            onPublished={() => setOpen(false)}
+          ></CreatePost>
+        )}
       </j-modal>
 
       <j-button

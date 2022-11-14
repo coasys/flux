@@ -6,9 +6,12 @@ import {
   START_DATE,
   END_DATE,
 } from "utils/constants/communityPredicates";
+import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
 import { EntryType } from "utils/types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { createEntry } from "utils/api/createEntry";
+
+function createImage(imageUrl) {}
 
 async function createEntryData({ entryType, data }) {
   console.log("create entrydata");
@@ -25,7 +28,10 @@ async function createEntryData({ entryType, data }) {
     case EntryType.ImagePost:
       return {
         [TITLE]: await expression.create(data.title, "literal"),
-        [IMAGE]: data.image,
+        [IMAGE]: await expression.create(
+          data.image,
+          NOTE_IPFS_EXPRESSION_OFFICIAL
+        ),
       };
     case EntryType.CalendarEvent:
       return {
@@ -37,13 +43,19 @@ async function createEntryData({ entryType, data }) {
   }
 }
 
-export default function MakeEntry({ channelId, communityId, onPublished }) {
+export default function MakeEntry({
+  channelId,
+  communityId,
+  onPublished,
+  initialType,
+}) {
   const inputRef = useRef(null);
-  const [entryType, setEntryType] = useState(EntryType.SimplePost);
+  const [entryType, setEntryType] = useState(initialType);
   const [state, setState] = useState({
     title: "",
     body: "",
     url: "",
+    imagePath: "",
     image: "",
     startDate: "",
     endDate: "",
@@ -58,13 +70,8 @@ export default function MakeEntry({ channelId, communityId, onPublished }) {
 
   async function publish() {
     const data = await createEntryData({ entryType, data: state });
-    console.log({
-      perspectiveUuid: communityId,
-      source: channelId,
-      types: [entryType],
-      data,
-    });
-    const entry = await createEntry({
+
+    await createEntry({
       perspectiveUuid: communityId,
       source: channelId,
       types: [entryType],
@@ -74,6 +81,22 @@ export default function MakeEntry({ channelId, communityId, onPublished }) {
 
   function handleChange(e: any) {
     setState({ ...state, [e.target.name]: e.target.value });
+  }
+
+  function handleImage(e: any) {
+    const target = e.target;
+    if (!target.files || !target.files[0]) return;
+    const FR = new FileReader();
+    FR.addEventListener("load", function (evt) {
+      const img = document.createElement("img");
+      img.src = evt.target.result;
+      setState({
+        ...state,
+        imagePath: e.target.value,
+        image: evt.target.result,
+      });
+    });
+    FR.readAsDataURL(target.files[0]);
   }
 
   return (
@@ -154,7 +177,7 @@ export default function MakeEntry({ channelId, communityId, onPublished }) {
                 required
                 value={state.image}
                 name="image"
-                onChange={handleChange}
+                onChange={handleImage}
                 type="file"
               />
             </>

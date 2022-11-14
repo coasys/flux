@@ -1,12 +1,24 @@
-import { TITLE, BODY, REACTION, REPLY_TO, EDITED_TO, CARD_HIDDEN, URL, IMAGE, START_DATE, END_DATE } from "../constants/communityPredicates";
+import {
+  TITLE,
+  BODY,
+  REACTION,
+  REPLY_TO,
+  EDITED_TO,
+  CARD_HIDDEN,
+  URL,
+  IMAGE,
+  START_DATE,
+  END_DATE,
+  ENTRY_TYPE,
+} from "../constants/communityPredicates";
 import { EntryType } from "../types";
 
 export const emojiCount = 3;
 export const emoji = "1f44d";
 export const DEFAULT_LIMIT = 50;
 
-export const LATEST_SDNA_VERSION = 3;
-export const SDNA_CREATION_DATE = new Date("2022-11-13T23:50:33Z");
+export const LATEST_SDNA_VERSION = 4;
+export const SDNA_CREATION_DATE = new Date("2022-11-13T23:51:33Z");
 
 //Note: in the prolog queries below, the %% values are to be string templated before use
 
@@ -39,7 +51,7 @@ export const SDNA = `
         findall((Image, ImageTimestamp, ImageAuthor), link(Id, "${IMAGE}", Image, ImageTimestamp, ImageAuthor), Image),
         findall((StartDate, StartDateTimestamp, StartDateAuthor), link(Id, "${START_DATE}", StartDate, StartDateTimestamp, StartDateAuthor), StartDate),
         findall((EndDate, EndDateTimestamp, EndDateAuthor), link(Id, "${END_DATE}", EndDate, EndDateTimestamp, EndDateAuthor), EndDate),
-        findall((Type, TypeTimestamp, TypeAuthor), link(Id, "${END_DATE}", Type, TypeTimestamp, TypeAuthor), Types),
+        findall((Type, TypeTimestamp, TypeAuthor), link(Id, "${ENTRY_TYPE}", Type, TypeTimestamp, TypeAuthor), Types),
         findall((flux_post(Source, Reply, Timestamp, Author, Title, Body, Reactions)), link(Reply, "${REPLY_TO}", Id, ReplyTimestamp, ReplyAuthor), Replies).
     
     flux_post_query_popular(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies, true) :-

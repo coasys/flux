@@ -1,4 +1,4 @@
-import { Post } from "../types";
+import { Post, Entry } from "../types";
 import { GetEntries } from "../types";
 import getEntries from "./getEntries";
 import {
@@ -8,32 +8,27 @@ import {
 } from "../constants/sdna";
 import { Literal } from "@perspect3vism/ad4m";
 
-function cleanPostData(prologEntry: any) {
-  const post = prologEntry as Post;
+function getContent(acc, link: any) {
+  return acc?.timestamp > link?.timestamp
+    ? acc
+    : link.content.startsWith("literal://")
+    ? Literal.fromUrl(link.content).get()
+    : link;
+}
 
-  //Clean up the emoji string
-  prologEntry.data?.Reactions.forEach((reaction: any) => {
-    reaction.content = reaction.content.replace("emoji://");
-  });
-  post.reactions = prologEntry.data?.Reactions;
-
-  //Clean up the title and body
-  prologEntry.data?.Title.forEach((title: any) => {
-    title.content = Literal.fromUrl(title.content).get().data;
-  });
-  post.title = prologEntry.data?.Title;
-  prologEntry.data?.Body.forEach((body: any) => {
-    body.content = Literal.fromUrl(body.content).get().data;
-  });
-  post.body = prologEntry.data?.Body;
-  post.isPopular = prologEntry.data?.IsPopular;
-
-  //Clean up the replies
-  prologEntry.data?.Replies.forEach((reply: any) => {
-    cleanPostData(reply);
-  });
-  post.replies = prologEntry.data?.Replies;
-  return post;
+function cleanPostData(entry: Entry): Post {
+  const data = entry.data;
+  return {
+    id: entry.id,
+    types: entry.types?.map((d) => d.content),
+    author: entry.author,
+    timestamp: entry.timestamp,
+    title: data?.Title?.reduce(getContent, null)?.data,
+    body: data?.Body?.reduce(getContent, null)?.data,
+    isPopular: data?.IsPopular,
+    replies: data?.Replies.map(cleanPostData),
+    reactions: data?.Reactions.map((r) => r.content.replace("emoji://")),
+  };
 }
 
 export default async function getPosts(
@@ -49,6 +44,7 @@ export default async function getPosts(
         arguments: [DEFAULT_LIMIT, source, fromDate?.getTime()],
         resultKeys: [
           "Id",
+          "Types",
           "Timestamp",
           "Author",
           "Title",

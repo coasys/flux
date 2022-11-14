@@ -4,19 +4,11 @@ import styles from "./index.scss";
 import { format, formatRelative } from "date-fns/esm";
 import { Profile } from "utils/types";
 
-export default function SimplePost({ post }) {
-  const messageRef = useRef<any>(null);
-
+export default function ImagePost({ post }) {
+  console.log(post);
   const {
     state: { members },
   } = useContext(PerspectiveContext);
-
-  function onProfileClick(did: string) {
-    const event = new CustomEvent("agent-click", {
-      detail: { did },
-      bubbles: true,
-    });
-  }
 
   const author: Profile = members[post.author] || {};
   const popularStyle: string = post.isPopular ? styles.popularMessage : "";
@@ -26,10 +18,7 @@ export default function SimplePost({ post }) {
       <div class={styles.messageItemWrapper}>
         <div class={styles.messageItemContentWrapper}>
           <header class={styles.messageItemHeader}>
-            <div
-              onClick={() => onProfileClick(author?.did)}
-              class={styles.messageUsername}
-            >
+            <div class={styles.messageUsername}>
               {author?.username || (
                 <j-skeleton width="xl" height="text"></j-skeleton>
               )}
@@ -53,7 +42,6 @@ export default function SimplePost({ post }) {
             }}
           ></div>
           <div
-            ref={messageRef}
             class={styles.messageItemContent}
             style={{ display: "inline-flex" }}
             dangerouslySetInnerHTML={{
