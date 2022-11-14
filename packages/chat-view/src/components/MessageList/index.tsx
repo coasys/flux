@@ -195,6 +195,13 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
     setAtBottom(bool);
   }
 
+  function handleLoadMore() {
+    if (showLoadMore && !isFetchingMessages) {
+      loadMoreMessages();
+    }
+  }
+
+
   return (
     <main class={styles.main}>
       {hasNewMessage && !atBottom && (
@@ -212,19 +219,11 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
             showLoadMore ? (
               <j-box py="500">
                 <j-flex a="center" j="center">
-                  {isFetchingMessages ? (
+                  {!isFetchingMessages && (
                     <j-flex a="center" gap="300">
                       <span>Loading</span>
                       <j-spinner size="xxs"></j-spinner>
                     </j-flex>
-                  ) : (
-                    <j-button
-                      size="sm"
-                      onClick={loadMoreMessages}
-                      variant="subtle"
-                    >
-                      Load more
-                    </j-button>
                   )}
                 </j-flex>
               </j-box>
@@ -242,8 +241,9 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
         overscan={{main: 1000, reverse: 1000}}
         atBottomThreshold={10}
         computeItemKey={(index, message) => message.id}
-        endReached={() => handleAtBottom(true)}
+        endReached={(index) => handleAtBottom(true)}
         atBottomStateChange={handleAtBottom}
+        atTopStateChange={()=> handleLoadMore()}
         data={messages}
         rangeChanged={rangeChanged}
         initialTopMostItemIndex={messages.length - 1}
