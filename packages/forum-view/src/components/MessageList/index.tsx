@@ -5,6 +5,7 @@ import { checkUpdateSDNAVersion } from "utils/api/updateSDNA";
 import { EntryType } from "utils/types";
 import SimplePost from "../Posts/SimplePost";
 import ImagePost from "../Posts/ImagePost";
+import LinkPost from "../Posts/LinkPost";
 import style from "./index.scss";
 
 export default function MessageList({ perspectiveUuid, channelId }) {
@@ -56,5 +57,8 @@ function renderPosts(post) {
   }
   if (post.types.includes(EntryType.ImagePost)) {
     return <ImagePost post={post}></ImagePost>;
+  }
+  if (post.types.includes(EntryType.LinkPost)) {
+    return <LinkPost post={post}></LinkPost>;
   }
 }

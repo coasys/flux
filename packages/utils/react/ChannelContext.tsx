@@ -1,12 +1,12 @@
-import React, { createContext, useState, useEffect } from "react";
-import { EntryType } from "../types";
+import React, { createContext, useState } from "react";
+import { EntryType, Post } from "../types";
 
 type State = {
   communityId: string;
   channelId: string;
-  entries: {
+  posts: {
     [x: EntryType]: {
-      [x: string]: any;
+      [x: string]: Post;
     };
   };
 };
@@ -14,8 +14,8 @@ type State = {
 type ContextProps = {
   state: State;
   methods: {
-    getEntry: (id: string, type: EntryType) => void;
-    loadEntries: (type: EntryType) => void;
+    loadPost: (id: string, type: EntryType) => void;
+    loadPosts: (type: EntryType) => void;
   };
 };
 
@@ -23,31 +23,31 @@ const initialState: ContextProps = {
   state: {
     communityId: "",
     channelId: "",
-    entries: {},
+    posts: {},
   },
   methods: {
-    getEntry: () => null,
-    loadEntries: () => null,
+    loadPost: () => null,
+    loadPosts: () => null,
   },
 };
 
-const AgentContext = createContext(initialState);
+const ChannelContext = createContext(initialState);
 
-export function AgentProvider({ channelId, communityId, children }: any) {
+export function ChannelProvider({ channelId, communityId, children }: any) {
   const [state, setState] = useState(initialState.state);
 
+  function loadPosts() {}
+
   return (
-    <AgentContext.Provider
+    <ChannelContext.Provider
       value={{
-        state,
-        methods: {
-          loadEntries,
-        },
+        state: { ...state, channelId, communityId },
+        methods: {},
       }}
     >
       {children}
-    </AgentContext.Provider>
+    </ChannelContext.Provider>
   );
 }
 
-export default AgentContext;
+export default ChannelContext;

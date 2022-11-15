@@ -51,11 +51,11 @@ export default function Header() {
                 Image
               </j-button>
               <j-button
-                onClick={() => handlePostClick(EntryType.PollPost)}
+                onClick={() => handlePostClick(EntryType.LinkPost)}
                 variant="ghost"
               >
-                <j-icon slot="start" name="card-list"></j-icon>
-                Poll
+                <j-icon slot="start" name="link"></j-icon>
+                Url
               </j-button>
               <j-button
                 onClick={() => handlePostClick(EntryType.CalendarEvent)}

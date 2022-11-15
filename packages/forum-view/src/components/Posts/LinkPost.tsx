@@ -1,45 +1,41 @@
-import { useContext, useRef } from "preact/hooks";
+import { useContext, useEffect, useState } from "preact/hooks";
 import { PerspectiveContext } from "utils/react";
 import styles from "./index.scss";
-import { format, formatRelative } from "date-fns/esm";
+import { formatRelative } from "date-fns/esm";
 import { Profile } from "utils/types";
+import { getImage } from "utils/helpers/getImage";
 
-export default function SimplePost({ post }) {
-  const messageRef = useRef<any>(null);
-
+export default function ImagePost({ post }) {
   const {
     state: { members },
   } = useContext(PerspectiveContext);
-
-  function onProfileClick(did: string) {
-    const event = new CustomEvent("agent-click", {
-      detail: { did },
-      bubbles: true,
-    });
-  }
 
   const author: Profile = members[post.author] || {};
   const popularStyle: string = post.isPopular ? styles.popularMessage : "";
 
   return (
-    <div class={[styles.post, popularStyle].join(" ")}>
+    <a
+      href={post.url}
+      target="_blank"
+      class={[styles.post, popularStyle].join(" ")}
+    >
       <div class={styles.postImageWrapper}>
-        <j-icon size="xl" name="body-text"></j-icon>
+        <j-icon size="xl" name="link"></j-icon>
       </div>
       <div class={styles.postContentWrapper}>
         <div className={styles.postTitle}>{post.title}</div>
         <div className={styles.postDetails}>
           Posted by
-          <div class={styles.messageUsername}>
+          <span class={styles.messageUsername}>
             {author?.username || (
               <j-skeleton width="lg" height="text"></j-skeleton>
             )}
-          </div>
-          <small class={styles.timestamp}>
+          </span>
+          <span class={styles.timestamp}>
             {formatRelative(new Date(post.timestamp), new Date())}
-          </small>
+          </span>
         </div>
       </div>
-    </div>
+    </a>
   );
 }

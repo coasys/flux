@@ -303,6 +303,7 @@ export default defineComponent({
 
 .perspective-view {
   height: calc(100% - var(--app-header-height));
+  overflow-y: auto;
   display: block;
 }
 

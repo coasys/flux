@@ -5,18 +5,15 @@ import {
   IMAGE,
   START_DATE,
   END_DATE,
+  URL,
 } from "utils/constants/communityPredicates";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
 import { EntryType } from "utils/types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { createEntry } from "utils/api/createEntry";
 
-function createImage(imageUrl) {}
-
 async function createEntryData({ entryType, data }) {
-  console.log("create entrydata");
   const client = await getAd4mClient();
-  console.log("got client");
   const expression = client.expression;
 
   switch (entryType) {
@@ -32,6 +29,11 @@ async function createEntryData({ entryType, data }) {
           data.image,
           NOTE_IPFS_EXPRESSION_OFFICIAL
         ),
+      };
+    case EntryType.LinkPost:
+      return {
+        [TITLE]: await expression.create(data.title, "literal"),
+        [URL]: await expression.create(data.url, "literal"),
       };
     case EntryType.CalendarEvent:
       return {
@@ -50,6 +52,7 @@ export default function MakeEntry({
   initialType,
 }) {
   const inputRef = useRef(null);
+  const [isCreating, setIsCreating] = useState(false);
   const [entryType, setEntryType] = useState(initialType);
   const [state, setState] = useState({
     title: "",
@@ -69,14 +72,20 @@ export default function MakeEntry({
   }, []);
 
   async function publish() {
-    const data = await createEntryData({ entryType, data: state });
-
-    await createEntry({
-      perspectiveUuid: communityId,
-      source: channelId,
-      types: [entryType],
-      data,
-    }).then(onPublished);
+    setIsCreating(true);
+    try {
+      const data = await createEntryData({ entryType, data: state });
+      await createEntry({
+        perspectiveUuid: communityId,
+        source: channelId,
+        types: [entryType],
+        data,
+      }).then(onPublished);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setIsCreating(false);
+    }
   }
 
   function handleChange(e: any) {
@@ -99,6 +108,12 @@ export default function MakeEntry({
     FR.readAsDataURL(target.files[0]);
   }
 
+  const showBody = entryType === EntryType.SimplePost;
+  const showUrl = entryType === EntryType.LinkPost;
+  const showStartDate = entryType === EntryType.CalendarEvent;
+  const showEndDate = entryType === EntryType.CalendarEvent;
+  const showImage = entryType === EntryType.ImagePost;
+
   return (
     <j-box p="800">
       <j-text variant="heading-sm" nomargin>
@@ -117,9 +132,9 @@ export default function MakeEntry({
             <j-icon slot="start" name="card-image"></j-icon>
             Image
           </j-tab-item>
-          <j-tab-item size="sm" value={EntryType.PollPost} variant="button">
-            <j-icon slot="start" name="card-list"></j-icon>
-            Poll
+          <j-tab-item size="sm" value={EntryType.LinkPost} variant="button">
+            <j-icon slot="start" name="link"></j-icon>
+            Url
           </j-tab-item>
           <j-tab-item
             size="sm"
@@ -141,36 +156,49 @@ export default function MakeEntry({
             ref={inputRef}
             size="xl"
             name="title"
-            placeholder="Title"
           ></j-input>
-          <j-input
-            required
-            label="Body"
-            name="body"
-            onInput={handleChange}
-            value={state.body}
-            size="xl"
-            placeholder="Text"
-          ></j-input>
-          {entryType === EntryType.CalendarEvent && (
-            <>
-              <j-input
-                required
-                name="startDate"
-                onInput={handleChange}
-                label="Start"
-                type="datetime-local"
-              ></j-input>
-              <j-input
-                required
-                name="endDate"
-                onInput={handleChange}
-                label="End"
-                type="datetime-local"
-              ></j-input>
-            </>
+
+          {showBody && (
+            <j-input
+              required
+              label="Body"
+              name="body"
+              onInput={handleChange}
+              value={state.body}
+              size="xl"
+            ></j-input>
           )}
-          {entryType === EntryType.ImagePost && (
+          {showUrl && (
+            <j-input
+              label="Url"
+              autovalidate
+              size="xl"
+              name="url"
+              onInput={handleChange}
+              value={state.url}
+              required
+              type="url"
+            ></j-input>
+          )}
+          {showStartDate && (
+            <j-input
+              required
+              name="startDate"
+              onInput={handleChange}
+              label="Start"
+              type="datetime-local"
+            ></j-input>
+          )}
+          {showEndDate && (
+            <j-input
+              required
+              name="endDate"
+              onInput={handleChange}
+              label="End"
+              type="datetime-local"
+            ></j-input>
+          )}
+          {showImage && (
             <>
               <j-text variant="label">Image</j-text>
               <input
@@ -189,7 +217,13 @@ export default function MakeEntry({
           <j-button size="lg" variant="link">
             Cancel
           </j-button>
-          <j-button onClick={() => publish()} size="lg" variant="primary">
+          <j-button
+            loading={isCreating}
+            disabled={isCreating}
+            onClick={() => publish()}
+            size="lg"
+            variant="primary"
+          >
             Post
           </j-button>
         </j-flex>

@@ -93,6 +93,7 @@ export enum EntryType {
   ImagePost = "flux://image_post",
   PollPost = "flux://poll_post",
   CalendarEvent = "flux://calendar_event",
+  LinkPost = "flux://link_post",
 }
 
 export interface Entry {
@@ -106,6 +107,7 @@ export interface Entry {
 
 export interface Post extends Entry {
   image: string;
+  url: string;
   reactions: Reaction[];
   isPopular: boolean;
   title: string;
