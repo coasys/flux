@@ -17,8 +17,6 @@ export default async function getEntries(input: GetEntries): Promise<Entry[]> {
       query.resultKeys
     );
 
-    console.log({ cleanedPrologResult });
-
     for (const result of cleanedPrologResult) {
       const entry = {} as Entry;
       if (result.Id) {

@@ -1,22 +1,14 @@
-import Header from "./components/Header";
 import MessageList from "./components/MessageList";
 import { ChatProvider, PerspectiveProvider, AgentProvider } from "utils/react";
 import { UIProvider } from "./context/UIContext";
-import { useState } from "preact/hooks";
 import styles from "./index.scss";
 import { EditorProvider } from "./context/EditorContext";
 
 const MainComponent = ({ perspectiveUuid, channel }) => {
-  const [ref, setRef] = useState(null);
-
   return (
     <EditorProvider perspectiveUuid={perspectiveUuid} channelId={channel}>
-      <div class={styles.container} ref={setRef}>
-        <MessageList
-          perspectiveUuid={perspectiveUuid}
-          channelId={channel}
-          mainRef={ref}
-        />
+      <div class={styles.container}>
+        <MessageList perspectiveUuid={perspectiveUuid} channelId={channel} />
       </div>
     </EditorProvider>
   );

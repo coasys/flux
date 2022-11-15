@@ -1,7 +1,6 @@
-import { useContext, useEffect, useRef, useState } from "preact/hooks";
+import { useContext, useState } from "preact/hooks";
 import styles from "./index.scss";
-import createPost from "utils/api/createPost";
-import { AgentContext, ChatContext, PerspectiveContext } from "utils/react";
+import { AgentContext, ChatContext } from "utils/react";
 import Avatar from "../Avatar";
 import CreatePost from "../CreatePost";
 import { EntryType } from "utils/types";
@@ -35,7 +34,7 @@ export default function Header() {
             placeholder="Create a post"
           ></j-input>
           <j-box pt="300" pb="400">
-            <j-flex>
+            <j-flex gap="200">
               <j-button
                 onClick={() => handlePostClick(EntryType.SimplePost)}
                 value="post"

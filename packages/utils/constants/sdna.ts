@@ -17,7 +17,7 @@ export const emojiCount = 3;
 export const emoji = "1f44d";
 export const DEFAULT_LIMIT = 50;
 
-export const LATEST_SDNA_VERSION = 4;
+export const LATEST_SDNA_VERSION = 7;
 export const SDNA_CREATION_DATE = new Date("2022-11-13T23:51:33Z");
 
 //Note: in the prolog queries below, the %% values are to be string templated before use
@@ -43,7 +43,7 @@ export const SDNA = `
         flux_message(Source, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages), isNotPopular(Message).  
 
     flux_post(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies):- 
-        link(Source, "${EntryType.SimplePost}", Id, Timestamp, Author),
+        link(Source, "${EntryType.ImagePost}", Id, Timestamp, Author),
         findall((Title, TitleTimestamp, TitleAuthor), link(Id, "${TITLE}", Title, TitleTimestamp, TitleAuthor), Title),
         findall((Body, BodyTimestamp, BodyAuthor), link(Id, "${BODY}", Body, BodyTimestamp, BodyAuthor), Body),
         findall((Reaction, ReactionTimestamp, ReactionAuthor), link(Id, "${REACTION}", Reaction, ReactionTimestamp, ReactionAuthor), Reactions),

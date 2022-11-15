@@ -324,7 +324,8 @@ export default defineComponent({
 }
 
 .channel-view-tab:hover {
-  background-color: var(--j-color-ui-50);
+  color: var(--j-color-primary-500);
+  background-color: hsla(var(--j-color-primary-hue), 100%, 50%, 0.05);
 }
 
 .channel-view-tab:has(input:checked) {

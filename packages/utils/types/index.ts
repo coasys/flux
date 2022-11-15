@@ -105,11 +105,12 @@ export interface Entry {
 }
 
 export interface Post extends Entry {
+  image: string;
   reactions: Reaction[];
   isPopular: boolean;
-  title: string[];
-  body: string[];
-  replies: Post[];
+  title: string;
+  body: string;
+  replies: Post;
 }
 
 export interface EntryInput {

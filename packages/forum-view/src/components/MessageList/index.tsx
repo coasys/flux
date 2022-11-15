@@ -5,6 +5,7 @@ import { checkUpdateSDNAVersion } from "utils/api/updateSDNA";
 import { EntryType } from "utils/types";
 import SimplePost from "../Posts/SimplePost";
 import ImagePost from "../Posts/ImagePost";
+import style from "./index.scss";
 
 export default function MessageList({ perspectiveUuid, channelId }) {
   const [posts, setPosts] = useState([]);
@@ -12,6 +13,7 @@ export default function MessageList({ perspectiveUuid, channelId }) {
   async function loadMoreMessages(source: string, fromDate?: Date) {
     try {
       const posts = await getPosts(perspectiveUuid, source, fromDate);
+      console.log({ posts });
       setPosts(posts);
       if (posts.length > 0) {
         await checkUpdateSDNAVersion(perspectiveUuid, posts[0].timestamp);
@@ -36,9 +38,9 @@ export default function MessageList({ perspectiveUuid, channelId }) {
   }, [channelId, perspectiveUuid]);
 
   return (
-    <div style={{ overflowY: "auto" }}>
+    <div className={style.messageList}>
       <Header></Header>
-      {posts.map(renderPosts)}
+      <div className={style.posts}>{posts.map(renderPosts)}</div>
       <j-flex a="center" j="center">
         <j-button variant="link" onClick={() => loadMoreMessages(channelId)}>
           Load more

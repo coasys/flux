@@ -22,44 +22,22 @@ export default function SimplePost({ post }) {
   const popularStyle: string = post.isPopular ? styles.popularMessage : "";
 
   return (
-    <div class={[styles.message, popularStyle].join(" ")}>
-      <div class={styles.messageItemWrapper}>
-        <div class={styles.messageItemContentWrapper}>
-          <header class={styles.messageItemHeader}>
-            <div
-              onClick={() => onProfileClick(author?.did)}
-              class={styles.messageUsername}
-            >
-              {author?.username || (
-                <j-skeleton width="xl" height="text"></j-skeleton>
-              )}
-            </div>
-            <small
-              class={styles.timestamp}
-              data-rh
-              data-timestamp={format(
-                new Date(post.timestamp),
-                "EEEE, MMMM d, yyyy, hh:mm b"
-              )}
-            >
-              {formatRelative(new Date(post.timestamp), new Date())}
-            </small>
-          </header>
-
-          <div
-            className={styles.messageTitle}
-            dangerouslySetInnerHTML={{
-              __html: post.title,
-            }}
-          ></div>
-          <div
-            ref={messageRef}
-            class={styles.messageItemContent}
-            style={{ display: "inline-flex" }}
-            dangerouslySetInnerHTML={{
-              __html: post.body,
-            }}
-          ></div>
+    <div class={[styles.post, popularStyle].join(" ")}>
+      <div class={styles.postImageWrapper}>
+        <j-icon name="post"></j-icon>
+      </div>
+      <div class={styles.postContentWrapper}>
+        <div className={styles.postTitle}>{post.title}</div>
+        <div className={styles.postDetails}>
+          Posted by
+          <div class={styles.messageUsername}>
+            {author?.username || (
+              <j-skeleton width="xl" height="text"></j-skeleton>
+            )}
+          </div>
+          <small class={styles.timestamp}>
+            {formatRelative(new Date(post.timestamp), new Date())}
+          </small>
         </div>
       </div>
     </div>
