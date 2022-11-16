@@ -384,7 +384,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
     setState((oldState) => ({
       ...oldState,
-      showLoadMore: expressionLinkLength === DEFAULT_LIMIT,
+      showLoadMore: expressionLinkLength === DEFAULT_LIMIT || backwards,
       isFetchingMessages: false,
       keyedMessages: {
         ...oldState.keyedMessages,
