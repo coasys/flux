@@ -1,6 +1,5 @@
 .messageList {
   width: 100%;
-  max-width:  900px;
   margin: 0 auto;
   padding: var(--j-space-400) var(--j-space-500) var(--j-space-600) var(--j-space-500)
 }
@@ -13,5 +12,6 @@
 
 .posts.grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--j-space-600);
 }

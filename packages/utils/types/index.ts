@@ -110,6 +110,8 @@ export interface Post extends Entry {
   url: string;
   reactions: Reaction[];
   isPopular: boolean;
+  startDate: string;
+  endDate: string;
   title: string;
   body: string;
   replies: Post;

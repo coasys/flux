@@ -6,6 +6,7 @@ import { EntryType } from "utils/types";
 import SimplePost from "../Posts/SimplePost";
 import ImagePost from "../Posts/ImagePost";
 import LinkPost from "../Posts/LinkPost";
+import CalendarPost from "../Posts/CalendarPost";
 import style from "./index.scss";
 import {
   DisplayView,
@@ -130,5 +131,8 @@ function renderPosts({ post, displayView }) {
   }
   if (post.types.includes(EntryType.LinkPost)) {
     return <LinkPost displayView={displayView} post={post}></LinkPost>;
+  }
+  if (post.types.includes(EntryType.CalendarEvent)) {
+    return <CalendarPost displayView={displayView} post={post}></CalendarPost>;
   }
 }

@@ -67,6 +67,13 @@ async function createPostData({
           NOTE_IPFS_EXPRESSION_OFFICIAL
         ),
       };
+    case EntryType.CalendarEvent:
+      return {
+        [TITLE]: await expression.create(data.title, "literal"),
+        [BODY]: await expression.create(data.body, "literal"),
+        [START_DATE]: await expression.create(data.startDate, "literal"),
+        [END_DATE]: await expression.create(data.endDate, "literal"),
+      };
     case EntryType.LinkPost:
       return {
         [TITLE]: await expression.create(data.title, "literal"),
