@@ -5,10 +5,10 @@ export default function MessageReply({
   onProfileClick,
   replyAuthor,
   replyMessage,
-  onClick
+  onMessageClick,
 }) {
   return (
-    <div onClick={onClick} style={{display: 'contents'}}>
+    <div style={{ display: "contents" }}>
       <div class={styles.replyLineWrapper}>
         <div class={styles.replyLine} />
       </div>
@@ -27,8 +27,9 @@ export default function MessageReply({
           </div>
         </div>
         <div
+          onClick={onMessageClick}
           class={styles.replyContent}
-          dangerouslySetInnerHTML={{ __html: replyMessage.content }}
+          dangerouslySetInnerHTML={{ __html: replyMessage.content.trim() }}
         />
       </div>
     </div>

@@ -59,9 +59,10 @@
     opacity: 1;
   }
 
-  & .messageItemContent p:first-of-type {
+  & .messageItemContent *:first-of-type {
     user-select: text !important;
     margin-top: 0;
+    padding-top: 0;
   }
 
   & .messageItemContent span {
@@ -90,7 +91,7 @@
     color: var(--j-color-primary-500);
   }
 
-  & .messageItemContent p:last-of-type {
+  & .messageItemContent *:last-of-type {
     user-select: text !important;
     margin-bottom: 0;
   }
@@ -163,8 +164,9 @@
   color: var(--j-color-ui-400);
 }
 
-.replyContent p:first-of-type {
-  margin-top: 0;
+.replyContent *:first-of-type {
+  margin: 0;
+  padding: 0;
 }
 
 .messageToolbar {
