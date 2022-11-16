@@ -1,3 +1,4 @@
+import Link from "@tiptap/extension-link";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useEffect } from "preact/hooks";
@@ -89,7 +90,7 @@ const MenuBar = ({ editor }) => {
 
 export default ({ onChange }) => {
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [StarterKit, Link.configure({ autolink: true })],
     content: "",
   });
 

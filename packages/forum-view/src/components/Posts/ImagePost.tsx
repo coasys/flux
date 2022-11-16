@@ -18,6 +18,14 @@ export default function ImagePost({ post, displayView }) {
     setBase64(image);
   }
 
+  function onProfileClick(event: any, did: string) {
+    const e = new CustomEvent("agent-click", {
+      detail: { did },
+      bubbles: true,
+    });
+    event.target.dispatchEvent(e);
+  }
+
   useEffect(() => {
     if (post.image) {
       fetchImage(post.image);
@@ -38,7 +46,10 @@ export default function ImagePost({ post, displayView }) {
         <div className={styles.postTitle}>{post.title}</div>
         <div className={styles.postDetails}>
           Posted by
-          <span>
+          <span
+            className={styles.authorName}
+            onClick={(e) => onProfileClick(e, author?.did)}
+          >
             {author?.username || (
               <j-skeleton width="lg" height="text"></j-skeleton>
             )}

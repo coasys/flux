@@ -11,6 +11,14 @@ export default function ImagePost({ post, displayView }) {
     state: { members },
   } = useContext(PerspectiveContext);
 
+  function onProfileClick(event: any, did: string) {
+    const e = new CustomEvent("agent-click", {
+      detail: { did },
+      bubbles: true,
+    });
+    event.target.dispatchEvent(e);
+  }
+
   const author: Profile = members[post.author] || {};
   const popularStyle: string = post.isPopular ? styles.popularMessage : "";
   const displayStyle: DisplayView =
@@ -29,7 +37,10 @@ export default function ImagePost({ post, displayView }) {
         <div className={styles.postTitle}>{post.title}</div>
         <div className={styles.postDetails}>
           Posted by
-          <span class={styles.messageUsername}>
+          <span
+            onClick={(e) => onProfileClick(e, author?.did)}
+            className={styles.authorName}
+          >
             {author?.username || (
               <j-skeleton width="lg" height="text"></j-skeleton>
             )}

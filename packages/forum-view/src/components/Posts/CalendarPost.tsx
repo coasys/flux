@@ -12,11 +12,12 @@ export default function SimplePost({ post, displayView }) {
     state: { members },
   } = useContext(PerspectiveContext);
 
-  function onProfileClick(did: string) {
-    const event = new CustomEvent("agent-click", {
+  function onProfileClick(event: any, did: string) {
+    const e = new CustomEvent("agent-click", {
       detail: { did },
       bubbles: true,
     });
+    event.target.dispatchEvent(e);
   }
 
   const author: Profile = members[post.author] || {};
@@ -40,7 +41,10 @@ export default function SimplePost({ post, displayView }) {
         <div className={styles.postTitle}>{post.title}</div>
         <div className={styles.postDetails}>
           Posted by
-          <span class={styles.messageUsername}>
+          <span
+            onClick={(e: any) => onProfileClick(e, author?.did)}
+            className={styles.authorName}
+          >
             {author?.username || (
               <j-skeleton width="lg" height="text"></j-skeleton>
             )}
