@@ -1,4 +1,4 @@
-import { useState, useContext, useRef, useEffect, useMemo } from "preact/hooks";
+import { useState, useContext, useRef, useEffect, useMemo, useCallback } from "preact/hooks";
 import { ChatContext } from "utils/react";
 import MessageItem from "../MessageItem";
 import getMe from "utils/api/getMe";
@@ -90,15 +90,15 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
     }
   }
 
-  function loadMoreMessages(timestamp: any, backwards = false) {
-    loadMore(timestamp, backwards).then((fetchedMessageCount) => {
-      if (fetchedMessageCount > 0) {
-        scroller?.current?.scrollToIndex({
-          index: fetchedMessageCount - 1,
-          align: "end",
-        });
-      }
-    });
+  async function loadMoreMessages(timestamp: any, backwards = false) {
+    const fetchedMessageCount = await loadMore(timestamp, backwards);
+
+    if (fetchedMessageCount > 0) {
+      scroller?.current?.scrollToIndex({
+        index: fetchedMessageCount - 1,
+        align: "end",
+      });
+    }
   }
 
   const onReplyNavClick = (message: Message) => {
@@ -106,7 +106,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
     setShowModal(true);
   };
 
-  const onReplyScroll = async (message: Message) => {
+  const onReplyScroll = useCallback(async (message: Message) => {
     const reply = message.replies[0];
 
     const isReplyFound = messages.findIndex((e) => e.id === reply.id);
@@ -126,23 +126,17 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
     } else {
       await loadMoreMessages(reply.timestamp, true);
 
-      setTimeout(() => {
-        setShowModal(false);
+      setShowModal(false);
 
-        const isReplyFound = messages.findIndex((e) => e.id === reply.id);
-
-        scroller?.current?.scrollToIndex({
-          index: isReplyFound,
-          align: "center",
-          behavior: "smooth",
-        });
-
-        setTimeout(() => {
-          setSelectedReplies(null);
-        }, 1000);
-      }, 500);
+      scroller?.current?.scrollToIndex({
+        index: 0,
+        align: "center",
+        behavior: "smooth",
+      });
     }
-  };
+  }, [messages])
+
+
 
   function showAvatar(index: number): boolean {
     const previousMessage = messages[index - 1];
