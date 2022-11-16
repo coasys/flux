@@ -65,27 +65,8 @@
                 () => handleChangeView(channel.id, channel.name, view.type)
               "
             >
-              <j-icon
-                :color="
-                  view.type === channel.currentView &&
-                  channel.name === $route.params.channelId
-                    ? 'black'
-                    : 'ui-500'
-                "
-                size="xs"
-                slot="start"
-                :name="view.icon"
-              ></j-icon>
-              <j-text
-                :color="
-                  view.type === channel.currentView &&
-                  channel.name === $route.params.channelId
-                    ? 'black'
-                    : 'ui-500'
-                "
-                nomargin
-                >{{ view.title }}
-              </j-text>
+              <j-icon size="xs" slot="start" :name="view.icon"></j-icon>
+              {{ view.title }}
             </j-menu-item>
           </div>
         </div>

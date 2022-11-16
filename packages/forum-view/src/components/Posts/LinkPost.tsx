@@ -11,6 +11,24 @@ export default function ImagePost({ post, displayView }) {
     state: { members },
   } = useContext(PerspectiveContext);
 
+  const [ogData, setOgData] = useState(null);
+
+  async function fetchOgData(url) {
+    try {
+      const data = await fetch(
+        "https://jsonlink.io/api/extract?url=" + url
+      ).then((res) => res.json());
+      console.log(data);
+      setOgData(data);
+    } catch (e) {}
+  }
+
+  useEffect(() => {
+    if (post.url) {
+      fetchOgData(post.url);
+    }
+  }, [post.url]);
+
   function onProfileClick(event: any, did: string) {
     const e = new CustomEvent("agent-click", {
       detail: { did },
@@ -31,7 +49,11 @@ export default function ImagePost({ post, displayView }) {
       class={[styles.post, displayStyle, popularStyle].join(" ")}
     >
       <div class={styles.postImageWrapper}>
-        <j-icon size="xl" name="link"></j-icon>
+        {ogData?.images[0] ? (
+          <img src={ogData.images[0]} class={styles.postImage} />
+        ) : (
+          <j-icon size="xl" name="link"></j-icon>
+        )}
       </div>
       <div class={styles.postContentWrapper}>
         <div className={styles.postTitle}>{post.title}</div>
