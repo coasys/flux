@@ -1,7 +1,7 @@
 import { UserState } from "./userprofile";
 import { LocalCommunityState } from "./community";
 import { ChannelState } from "./channel";
-import { NeighbourhoodState } from "./neighbourhood";
+import { Community } from "utils/types";
 import {
   WindowState,
   ModalsState,
@@ -20,7 +20,7 @@ export interface State {
 export interface DataState {
   communities: { [perspectiveUuid: string]: LocalCommunityState };
   channels: { [communityId: string]: ChannelState };
-  neighbourhoods: { [perspectiveUuid: string]: NeighbourhoodState };
+  neighbourhoods: { [perspectiveUuid: string]: Community };
 }
 
 export interface ApplicationState {

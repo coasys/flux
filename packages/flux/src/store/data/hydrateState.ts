@@ -1,23 +1,17 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { CHANNEL, SELF } from "utils/constants/communityPredicates";
-import { getMetaFromNeighbourhood } from "@/core/methods/getMetaFromNeighbourhood";
+import { getMetaFromLinks } from "utils/helpers/getNeighbourhoodMeta";
 import { LinkExpression, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useDataStore } from ".";
 import { CommunityState, LocalCommunityState } from "../types";
-import { getGroupMetadata } from "./actions/fetchNeighbourhoodMetadata";
+import getCommunityMetadata from "utils/api/getCommunityMetadata";
 import { useUserStore } from "../user";
 import getProfile from "utils/api/getProfile";
 import { LinkQuery } from "@perspect3vism/ad4m";
 
-export async function getMetaFromLinks(links: LinkExpression[]) {
-  const client = await getAd4mClient();
-  const langs = links.map((link) => client.languages.meta(link.data.target));
-  return Promise.all(langs);
-}
-
 export async function buildCommunity(perspective: PerspectiveProxy) {
   const dataStore = useDataStore();
-  const community = dataStore.getCommunity(perspective.uuid);
+  const communityState = dataStore.getLocalCommunityState(perspective.uuid);
 
   let state: LocalCommunityState = {
     perspectiveUuid: perspective.uuid,
@@ -38,35 +32,25 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
     },
   };
 
-  if (community && community.state) {
-    state = community.state;
+  if (communityState && communityState) {
+    state = communityState;
   }
 
-  const meta = getMetaFromNeighbourhood(
-    perspective.neighbourhood?.meta?.links!
-  );
+  const meta = getMetaFromLinks(perspective.neighbourhood?.meta?.links!);
 
-  const groupExp = await getGroupMetadata(perspective.uuid);
+  const groupExp = await getCommunityMetadata(perspective.uuid);
 
   return {
     neighbourhood: {
+      uuid: perspective.uuid,
+      author: meta.author,
+      timestamp: new Date().toISOString(),
       name: groupExp?.name || meta.name,
-      creatorDid: meta.creatorDid,
       description: groupExp?.description || meta.description,
       image: groupExp?.image || "",
       thumbnail: groupExp?.thumbnail || "",
-      perspective: {
-        uuid: perspective.uuid,
-        name: perspective.name,
-        sharedUrl: perspective.sharedUrl,
-        neighbourhood: perspective.neighbourhood,
-      },
       neighbourhoodUrl: perspective.sharedUrl,
-      linkedPerspectives: [perspective.uuid],
-      linkedNeighbourhoods: [perspective.uuid],
-      members: [meta.creatorDid],
-      membraneRoot: perspective.uuid,
-      createdAt: new Date().toISOString(),
+      members: [meta.author],
     },
     state,
   } as CommunityState;
@@ -152,10 +136,10 @@ export async function hydrateState() {
                 channel: {
                   id: channel,
                   name: channelData.data,
-                  creatorDid: channelData.author,
+                  author: channelData.author,
                   sourcePerspective: perspective.uuid,
                   hasNewMessages: false,
-                  createdAt: link.timestamp,
+                  timestamp: link.timestamp,
                   notifications: {
                     mute: false,
                   },

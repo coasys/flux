@@ -11,18 +11,14 @@
         ></j-icon>
       </div>
       <j-button variant="link" v-if="!value" size="sm">Upload image</j-button>
-      <j-button
-        variant="link"
-        v-if="value"
-        @click.prevent="$emit('change', null)"
-        size="sm"
-      >
+      <j-button variant="link" v-if="value" @click="removeImage" size="sm">
         Remove image
       </j-button>
     </j-flex>
   </div>
   <input
     :disabled="disabled"
+    ref="fileInput"
     id="fileInput"
     type="file"
     style="display: none"
@@ -74,7 +70,8 @@ export default defineComponent({
   },
   methods: {
     onFileClick() {
-      document.getElementById("fileInput")?.click();
+      // @ts-ignore
+      this.$refs.fileInput.click();
     },
     selectFile(e: any) {
       const files = e.target.files || e.dataTransfer.files;
@@ -89,14 +86,22 @@ export default defineComponent({
 
       reader.readAsDataURL(files[0]);
     },
+    removeImage(e: any) {
+      e.preventDefault();
+      e.stopPropagation();
+      // @ts-ignore
+      this.$refs.fileInput.value = "";
+      this.$emit("change", null);
+    },
     clearImage() {
+      // @ts-ignore
+      this.$refs.fileInput.value = "";
       this.tempProfileImage = null;
     },
     selectImage() {
       const result = (this.$refs.cropper as any).getResult();
       const data = result.canvas.toDataURL();
       this.tempProfileImage = null;
-      console.log({ data });
       this.$emit("change", data);
     },
   },
@@ -162,7 +167,7 @@ export default defineComponent({
 }
 
 /* Deep selector inside scoped styles */
-.cropper >>> .vue-simple-handler {
+.cropper:deep(.vue-simple-handler) {
   background: var(--j-color-primary-500) !important;
 }
 </style>

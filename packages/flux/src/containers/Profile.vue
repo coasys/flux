@@ -1,7 +1,11 @@
 <template>
   <j-box class="profile" v-if="profile" p="800">
     <j-box pb="500">
-      <Avatar size="xxl" :hash="did" :url="profile.thumbnailPicture"></Avatar>
+      <Avatar
+        size="xxl"
+        :hash="did"
+        :url="profile.profileThumbnailPicture"
+      ></Avatar>
     </j-box>
 
     <j-text

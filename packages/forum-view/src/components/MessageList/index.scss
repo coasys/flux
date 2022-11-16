@@ -1,0 +1,10 @@
+.messageList {
+  width: 100%;
+  padding: var(--j-space-400) var(--j-space-500) var(--j-space-600) var(--j-space-500)
+}
+
+.posts {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--j-space-500);
+}

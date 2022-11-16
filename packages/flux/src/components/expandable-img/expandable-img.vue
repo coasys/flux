@@ -30,7 +30,6 @@ export default defineComponent({
   },
   methods: {
     closeViewer() {
-      console.log("clicked");
       this.expanded = false;
     },
   },
@@ -41,7 +40,6 @@ export default defineComponent({
           this.clonedEl = this.$el.cloneNode(true);
 
           this.closeButtonRef = this.clonedEl.querySelector(".close-button");
-          console.log(this.clonedEl);
 
           this.closeButtonRef.addEventListener("click", this.closeViewer);
 

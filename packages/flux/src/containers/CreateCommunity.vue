@@ -44,7 +44,7 @@
             required
             autovalidate
             @keydown.enter="createCommunity"
-            @input="(e) => (newCommunityName = e.target.value)"
+            @input="(e: any) => (newCommunityName = e.target.value)"
             :value="newCommunityName"
           ></j-input>
           <j-input
@@ -52,7 +52,7 @@
             label="Description"
             :value="newCommunityDesc"
             @keydown.enter="createCommunity"
-            @input="(e) => (newCommunityDesc = e.target.value)"
+            @input="(e: any) => (newCommunityDesc = e.target.value)"
           ></j-input>
 
           <j-button
@@ -83,7 +83,7 @@
         <j-input
           :value="joiningLink"
           @keydown.enter="joinCommunity"
-          @input="(e) => (joiningLink = e.target.value)"
+          @input="(e: any) => (joiningLink = e.target.value)"
           size="lg"
           label="Invite link"
         ></j-input>
@@ -101,12 +101,14 @@
       </j-flex>
       <div v-if="tabView === 'Load'">
         <j-flex direction="column" gap="500" v-if="!isCreatingCommunity">
-          <j-text variant="body" v-if="nonFluxPerspectives.length === 0">No perspective found that is not a flux community</j-text>
-          <j-menu-item 
-            v-for="(perspective) of nonFluxPerspectives" 
+          <j-text variant="body" v-if="nonFluxPerspectives.length === 0"
+            >No perspective found that is not a flux community</j-text
+          >
+          <j-menu-item
+            v-for="perspective of nonFluxPerspectives"
             :key="perspective.uuid"
-            class="choice-button" 
-            size="xl" 
+            class="choice-button"
+            size="xl"
             @click="createCommunityFromPerspective(perspective)"
           >
             <j-text variant="heading-sm">{{ perspective.name }}</j-text>
@@ -135,7 +137,9 @@ import { isValid } from "@/utils/validation";
 import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useDataStore } from "@/store/data";
-import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/utils'
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { CommunityState } from "@/store/types";
+import { PerspectiveProxy } from "@perspect3vism/ad4m";
 
 export default defineComponent({
   components: { AvatarUpload },
@@ -156,7 +160,7 @@ export default defineComponent({
       newProfileImage: "",
       isJoiningCommunity: false,
       isCreatingCommunity: false,
-      nonFluxPerspectives: []
+      nonFluxPerspectives: [] as PerspectiveProxy[],
     };
   },
   mounted() {
@@ -189,7 +193,7 @@ export default defineComponent({
     },
     createCommunity() {
       this.isCreatingCommunity = true;
-      
+
       this.dataStore
         .createCommunity({
           perspectiveName: this.newCommunityName,
@@ -197,20 +201,20 @@ export default defineComponent({
           image: this.newProfileImage,
           thumbnail: this.newProfileImage,
         })
-        .then((community: any) => {
+        .then((community: CommunityState) => {
           this.$emit("submit");
           this.newCommunityName = "";
           this.newCommunityDesc = "";
           this.newProfileImage = "";
 
           const channels = this.dataStore.getChannelStates(
-            community.neighbourhood.perspective.uuid
+            community.neighbourhood.uuid
           );
 
           this.$router.push({
             name: "channel",
             params: {
-              communityId: community.neighbourhood.perspective.uuid,
+              communityId: community.neighbourhood.uuid,
               channelId: channels[0].id,
             },
           });
@@ -227,19 +231,19 @@ export default defineComponent({
           description: this.newCommunityDesc,
           image: this.newProfileImage,
           thumbnail: this.newProfileImage,
-          perspective
+          perspectiveUuid: perspective.uuid,
         })
         .then((community: any) => {
           this.$emit("submit");
-          const channels = this.dataStore.getChannelNeighbourhoods(
-            community.neighbourhood.perspective.uuid
+          const channels = this.dataStore.getChannelStates(
+            community.neighbourhood.uuid
           );
 
           this.$router.push({
             name: "channel",
             params: {
-              communityId: community.neighbourhood.perspective.uuid,
-              channelId: channels[0].perspective.uuid,
+              communityId: community.neighbourhood.uuid,
+              channelId: channels[0].id,
             },
           });
         })
@@ -248,15 +252,16 @@ export default defineComponent({
         });
     },
     async getPerspectives() {
-      const client = await getAd4mClient()
+      const client = await getAd4mClient();
       const keys = Object.keys(this.dataStore.neighbourhoods);
       const perspectives = await client.perspective.all();
 
       const nonFluxPerspectives = perspectives.filter(
-        (perspective) => !keys.includes(perspective.uuid) && perspective.name !== "Agent Profile"
+        (perspective) =>
+          !keys.includes(perspective.uuid)
       );
 
-      // @ts-ignore
+      //@ts-ignore
       this.nonFluxPerspectives = nonFluxPerspectives.map((perspective) => {
         return {
           name: perspective.name,
@@ -265,7 +270,7 @@ export default defineComponent({
           uuid: perspective.uuid,
         };
       });
-    }
+    },
   },
 });
 </script>

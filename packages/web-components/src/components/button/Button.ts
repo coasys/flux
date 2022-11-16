@@ -89,14 +89,14 @@ const styles = css`
   }
 
   :host([variant="subtle"]) {
-    --j-button-bg: var(--j-color-ui-50);
+    --j-button-bg: rgb(0 0 0 / 16%);
     --j-button-color: var(--j-color-ui-800);
     --j-button-border: 1px solid transparent;
   }
 
   :host([variant="subtle"]:hover) {
     --j-button-color: var(--j-color-black);
-    --j-button-bg: var(--j-color-ui-100);
+    --j-button-bg: rgb(0 0 0 / 20%);
   }
 
   :host([variant="ghost"]) {

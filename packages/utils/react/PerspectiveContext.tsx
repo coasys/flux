@@ -14,6 +14,7 @@ import getPerspectiveProfile from "../api/getProfile";
 import { Literal } from "@perspect3vism/ad4m";
 
 type State = {
+  uuid: string;
   name: string;
   description: string;
   languages: Array<any>;
@@ -32,6 +33,7 @@ type ContextProps = {
 
 const initialState: ContextProps = {
   state: {
+    uuid: "",
     name: "",
     description: "",
     url: "",
@@ -45,10 +47,13 @@ const initialState: ContextProps = {
   },
 };
 
-const PerspectiveContext = createContext(initialState);
+const PerspectiveContext = createContext<ContextProps>(initialState);
 
 export function PerspectiveProvider({ perspectiveUuid, children }: any) {
-  const [state, setState] = useState(initialState.state);
+  const [state, setState] = useState({
+    ...initialState.state,
+    uuid: perspectiveUuid,
+  });
   const linkSubscriberRef = useRef();
 
   useEffect(() => {
@@ -80,8 +85,6 @@ export function PerspectiveProvider({ perspectiveUuid, children }: any) {
   }
 
   async function handleLinkAdded(link) {
-    console.log("handle link added", link);
-
     if (linkIs.channel(link)) {
       const literal = Literal.fromUrl(link.data.target).get();
       const channelObj = {
@@ -142,9 +145,7 @@ export function PerspectiveProvider({ perspectiveUuid, children }: any) {
     if (state.url) {
       const channels = await getChannels({
         perspectiveUuid: perspectiveUuid,
-        neighbourhoodUrl: state.sourceUrl || state.url,
       });
-
       setState((prev, curr) => ({ ...prev, channels }));
     }
   };

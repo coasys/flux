@@ -10,7 +10,7 @@
     (100% - var(--j-color-subtractor)) * var(--j-color-multiplier)
   );
   --j-color-lightness-50: calc(
-    (95% - var(--j-color-subtractor)) * var(--j-color-multiplier)
+    (98% - var(--j-color-subtractor)) * var(--j-color-multiplier)
   );
   --j-color-lightness-100: calc(
     (90% - var(--j-color-subtractor)) * var(--j-color-multiplier)

@@ -18,7 +18,7 @@ export default async function updateCommunityTheme(payload: {
   const appStore = useAppStore();
   const isCurrentTheme = appStore.currentTheme === payload.communityId;
   const mergedTheme = {
-    ...dataStore.getCommunity(payload.communityId).state.theme,
+    ...dataStore.getLocalCommunityState(payload.communityId).theme,
     ...payload.theme,
   };
 

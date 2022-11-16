@@ -18,6 +18,10 @@ const styles = css`
     --j-input-height: var(--j-size-xl);
     --j-input-padding: var(--j-space-500);
   }
+  :host([full]) {
+    display: block;
+    width: 100%;
+  }
   [part="base"] {
     display: block;
   }
@@ -82,6 +86,7 @@ class Input extends LitElement {
     this.minlength = null;
     this.pattern = null;
     this.label = null;
+    this.name = null;
     this.size = null;
     this.placeholder = null;
     this.errorText = null;
@@ -95,6 +100,7 @@ class Input extends LitElement {
     this.required = false;
     this.readonly = false;
     this.type = "text";
+    this.focus = this.focus.bind(this);
     this.onFocus = this.onFocus.bind(this);
     this.onBlur = this.onBlur.bind(this);
   }
@@ -106,6 +112,7 @@ class Input extends LitElement {
       size: { type: String, reflect: true },
       placeholder: { type: String },
       label: { type: String },
+      name: { type: String },
       full: { type: Boolean, reflect: true },
       value: { type: String, reflect: true },
       error: { type: Boolean, reflect: true },
@@ -154,6 +161,10 @@ class Input extends LitElement {
 
   select() {
     this.renderRoot.querySelector("input").select();
+  }
+
+  focus() {
+    this.renderRoot.querySelector("input").focus();
   }
 
   onFocus(e) {

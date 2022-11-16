@@ -1,7 +1,10 @@
 import { Literal } from "@perspect3vism/ad4m";
+import { Message } from "../types";
+import extractPrologResults from "../helpers/extractPrologResults";
+import { DEFAULT_LIMIT, messageFilteredQuery, messageFilteredQueryBackwards, messageQuery } from "../constants/sdna";
+import format from "../helpers/formatString";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { MAX_MESSAGES } from "../constants/general";
-import { Message, Reaction } from "../types";
+import { checkUpdateSDNAVersion } from "./updateSDNA";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -10,145 +13,63 @@ export interface Payload {
   backwards?: boolean
 }
 
-export default async function ({
-  perspectiveUuid,
-  channelId,
-  from,
-  backwards
-}: Payload) {
-  try {
-    const client = await getAd4mClient();
-    
-    let expressionLinks;
-    if (from && backwards) {
-      console.log("Making time based query backwards", from);
-      let fromTime = from.getTime();
-      expressionLinks = await client.perspective.queryProlog(
-        perspectiveUuid, 
-        `(order_by([asc(Timestamp)], flux_message_query_popular("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp >= ${fromTime}).`
-      );
-    } else if (from) {
-      console.log("Making time based query");
-      let fromTime = from.getTime();
-      expressionLinks = await client.perspective.queryProlog(
-        perspectiveUuid, 
-        `limit(${MAX_MESSAGES}, (order_by([desc(Timestamp)], flux_message_query_popular("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp =< ${fromTime})).`
-      );
-    } else {
-      expressionLinks = await client.perspective.queryProlog(
-        perspectiveUuid,
-        `limit(${MAX_MESSAGES}, order_by([desc(Timestamp)], flux_message_query_popular("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular))).`
-      );
-    }
+export default async function ({ perspectiveUuid, channelId, from, backwards }: Payload) {
+  console.warn("Getting messages...");
+  const client = await getAd4mClient();
 
-
-    let cleanedLinks: Message[] = [];
-
-    //TODO; the below extracting of data from head & tail can likely happen in ad4m-executor, it currently gets returned like this since this is how the node.js swipl wrapper serializes results from swipl
-    if (expressionLinks) {
-      for (const message of expressionLinks) {
-        let reactions: Reaction[] = [];
-        if (typeof message.Reactions !== "string" && !message.Reactions.variable) {
-          if (message.Reactions.head) {
-            reactions.push({
-              content: message.Reactions.head.args[0].replace('emoji://', ''),
-              timestamp: new Date(message.Reactions.head.args[1].args[0]),
-              author: message.Reactions.head.args[1].args[1],
-            });
-          }
-          let tail = message.Reactions.tail;
-          while (typeof tail !== "string" && !message.Reactions.variable) {
-            reactions.push({
-              content: tail.head.args[0].replace('emoji://', ''),
-              timestamp: new Date(tail.head.args[1].args[0]),
-              author: tail.head.args[1].args[1],
-            });
-            tail = tail.tail;
-          }
-        }
-
-        let replies = [];
-        if (typeof message.Replies != "string" && !message.Replies.variable) {
-
-          if (message.Replies.head) {
-            const literal = Literal.fromUrl(message.Replies.head.args[0]).get();
-            console.log('wow', new Date(literal.timestamp), new Date(message.Replies.head.args[1].args[0]))
-            replies.push({
-              content: literal.data,
-              timestamp: new Date(literal.timestamp),
-              author: literal.author,
-              id: message.Replies.head.args[0]
-            });
-          }
-          let tail = message.Replies.tail;
-          while (typeof tail != "string") {
-            const literal = Literal.fromUrl(tail.head.args[0]).get();
-            replies.push({
-              content: literal.data,
-              timestamp: new Date(literal.timestamp),
-              author: literal.author,
-              id: tail.head.args[0]
-            });
-            tail = tail.tail;
-          }
-        }
-
-        let editMessages = [{
-          content: Literal.fromUrl(message.MessageExpr).get().data,
-          timestamp: new Date(message.Timestamp),
-          author: message.Author,
-        }];
-
-        if (typeof message.EditMessages != "string" && !message.EditMessages.variable) {
-          if (message.EditMessages.head) {
-            const literal = Literal.fromUrl(message.EditMessages.head.args[0]).get();
-            editMessages.push({
-              content: literal.data,
-              timestamp: new Date(message.EditMessages.head.args[1].args[0]),
-              author: literal.author,
-            });
-          }
-          let tail = message.EditMessages.tail;
-          while (typeof tail != "string") {
-            const literal = Literal.fromUrl(tail.head.args[0]).get();
-            editMessages.push({
-              content: literal.data,
-              timestamp: new Date(tail.head.args[1].args[0]),
-              author: literal.author,
-            });
-            tail = tail.tail;
-          }
-        }
-
-        let isNeighbourhoodCardHidden = typeof message.AllCardHidden != "string"  && !message.AllCardHidden.variable;
-
-        cleanedLinks.push({
-          id: message.MessageExpr,
-          author: message.Author,
-          content: Literal.fromUrl(message.MessageExpr).get().data,
-          timestamp: new Date(message.Timestamp),
-          reactions: reactions,
-          replies: replies,
-          isNeighbourhoodCardHidden,
-          isPopular: message.IsPopular,
-          editMessages: editMessages
-        });
-      }
-    }
-
-    const keyedMessages = cleanedLinks.reduce((acc, message) => {
-      //@ts-ignore
-      return { ...acc, [message.id]: message };
-    }, {});
-
-    console.log('expressionLinks', cleanedLinks)
-
-
-    return {
-      keyedMessages: keyedMessages,
-      expressionLinkLength: expressionLinks.length,
-    };
-  } catch (e: any) {
-    throw new Error(e);
+  let prologQuery;
+  if (from && backwards) {
+    prologQuery = messageFilteredQueryBackwards;
+    prologQuery = format(prologQuery, DEFAULT_LIMIT, channelId, from!.getTime());
+  } else if (from) {
+      prologQuery = messageFilteredQuery;
+      prologQuery = format(prologQuery, DEFAULT_LIMIT, channelId, from!.getTime());
+  } else {
+      prologQuery = messageQuery
+      prologQuery = format(prologQuery, DEFAULT_LIMIT, channelId);
   }
+
+  const expressionLinks = await client.perspective.queryProlog(perspectiveUuid, prologQuery);
+  const cleanedResults = extractPrologResults(expressionLinks, ["Reactions", "Replies", "EditMessages", "Message", "Author", "Timestamp", "AllCardHidden", "IsPopular"]);
+  const cleanedMessages: Message[] = [];
+
+  cleanedResults.forEach((result: any) => {
+    const expressionData = Literal.fromUrl(result.Message).get().data;
+    result.EditMessages.push({
+        content: expressionData,
+        timestamp: new Date(result.Timestamp),
+        author: result.Author,
+    });
+    result.Reactions.forEach(reaction => {
+      reaction.content = reaction.content.replace('emoji://', '');
+    });
+    result.Replies.forEach(reply => {
+      reply.content = Literal.fromUrl(reply.content).get().data;
+    });
+    cleanedMessages.push({
+      id: result.Message,
+      author: result.Author,
+      content: expressionData,
+      timestamp: new Date(result.Timestamp),
+      reactions: result.Reactions,
+      replies: result.Replies,
+      isNeighbourhoodCardHidden: result.AllCardHidden !== undefined,
+      isPopular: result.IsPopular,
+      editMessages: result.EditMessages
+    });
+  });
+  if (cleanedMessages.length > 0) {
+    //@ts-ignore
+    checkUpdateSDNAVersion(perspectiveUuid, cleanedMessages[0].timestamp);
+  }
+
+  const keyedMessages = cleanedMessages.reduce((acc, message) => {
+    //@ts-ignore
+    return { ...acc, [message.id]: message };
+  }, {});
+
+  return {
+    keyedMessages: keyedMessages,
+    expressionLinkLength: expressionLinks.length,
+  };
 }

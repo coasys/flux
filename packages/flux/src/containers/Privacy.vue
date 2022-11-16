@@ -9,7 +9,7 @@
           class="toggle"
           size="lg"
           :checked="appStore.notification.globalNotification"
-          @change="(e) => changeNotificationState()"
+          @change="(e: any) => changeNotificationState()"
         >
           <div>
             <j-text nomargin color="black" weight="600" size="500">

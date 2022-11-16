@@ -37,7 +37,7 @@ export default async ({
 
   // Getting the channel & community this message belongs to
   const community = dataStore.getCommunity(perspectiveUuid);
-  // TODO: @fayeed change this.
+  const communityState = dataStore.getLocalCommunityState(perspectiveUuid);
   const channel = dataStore.getChannel(perspectiveUuid, channelLiteral.data);
 
   const isMinimized = document.hasFocus();
@@ -46,26 +46,28 @@ export default async ({
 
   const currentDate = new Date();
 
-  const lastDate = parseISO(localStorage.getItem('lastNotificationDate') || currentDate.toISOString());
+  const lastDate = parseISO(
+    localStorage.getItem("lastNotificationDate") || currentDate.toISOString()
+  );
 
-  localStorage.setItem('lastNotificationDate', currentDate.toISOString())
+  localStorage.setItem("lastNotificationDate", currentDate.toISOString());
 
-  const slient = differenceInSeconds(currentDate, lastDate) <= 3
+  const slient = differenceInSeconds(currentDate, lastDate) <= 3;
 
   // Only show the notification when the the message is not from self & the active community & channel is different
   if (
     (!isMinimized &&
       !channel?.notifications.mute &&
-      !community?.state.notifications.mute && !slient &&
+      !communityState.notifications.mute &&
+      !slient &&
       user!.agent.did! !== authorDid) ||
     (user!.agent.did! !== authorDid &&
-      (community?.neighbourhood.perspective.uuid === communityId
-        ? channel?.name !== channelId
-        : true) &&
+      (community?.uuid === communityId ? channel?.name !== channelId : true) &&
       !channel?.notifications.mute &&
-      !community?.state.notifications.mute &&
+      !communityState.notifications.mute &&
       differenceInSeconds(new Date(), parseISO(timestamp)) <= 30 &&
-      appStore.notification.globalNotification && !slient)
+      appStore.notification.globalNotification &&
+      !slient)
   ) {
     const isMentioned = message.includes(
       user!.agent.did!.replace("did:key:", "")
@@ -80,7 +82,7 @@ export default async ({
       title = `${name} mentioned you`;
       body = `#${channel?.name}: ${escapedMessage}`;
     } else {
-      title = `@${name} (${community?.neighbourhood.name})`;
+      title = `@${name} (${community?.name})`;
       body = `#${channel?.name}: ${escapedMessage}`;
     }
 
@@ -101,7 +103,7 @@ export default async ({
         router.push({
           name: "channel",
           params: {
-            communityId: community!.neighbourhood.perspective!.uuid,
+            communityId: community!.uuid,
             channelId: channel!.name,
           },
         });

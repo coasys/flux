@@ -5,13 +5,13 @@ import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import {
   CARD_HIDDEN,
   CHANNEL,
-  DIRECTLY_SUCCEEDED_BY,
   MEMBER,
   REACTION,
   EDITED_TO,
   REPLY_TO,
   ZOME,
 } from "../constants/communityPredicates";
+import { EntryType } from "../types";
 
 export const findLink = {
   name: (link: LinkExpression) => link.data.predicate === "rdf://name",
@@ -24,7 +24,7 @@ export const findLink = {
 
 export const linkIs = {
   message: (link: LinkExpression) =>
-    link.data.predicate === DIRECTLY_SUCCEEDED_BY,
+    link.data.predicate === EntryType.Message,
   reply: (link: LinkExpression) => link.data.predicate === REPLY_TO,
   // TODO: SHould we check if the link is proof.valid?
   reaction: (link: LinkExpression) => link.data.predicate === REACTION,
@@ -56,7 +56,7 @@ type Map = {
 export function mapLiteralLinks(
   links: LinkExpression[] | undefined,
   map: PredicateMap
-): Map {
+) {
   return Object.keys(map).reduce((acc, key) => {
     const predicate = map[key];
     const link = links?.find((link) => link.data.predicate === predicate);
@@ -91,6 +91,22 @@ export async function createLiteralLinks(source: string, map: TargetMap) {
   return Promise.all(promises);
 }
 
+//function to create links from a map of predicates to targets
+export async function createLinks(source: string, map: TargetMap) {
+  const targets = Object.keys(map);
+
+  const promises = targets
+    .filter((predicate: any) => {
+      return typeof map[predicate] === "string" && map[predicate] !== "";
+    })
+    .map(async (predicate: string) => {
+      const target = map[predicate];
+      return new Link({ source, predicate, target });
+    });
+
+  return Promise.all(promises);
+}
+
 export async function createLiteralObject({
   parent,
   children,
@@ -117,7 +133,6 @@ export async function getLiteralObjectLinks(
   links: LinkExpression[]
 ) {
   const parentLink = links.find((l) => l.data.target === targetExp);
-  console.log({ parentLink, targetExp, links });
   if (parentLink) {
     const associatedLinks = links.filter(
       (link) => link.data.source === targetExp

@@ -11,7 +11,6 @@
         @input="handleInput"
         type="url"
         required
-        @blur="getMeta"
       >
         <j-box pr="300" v-if="loadingMeta" slot="end">
           <j-spinner size="xxs"></j-spinner>
@@ -35,7 +34,7 @@
         type="textarea"
         label="Description"
         :value="description"
-        @input="(e) => (description = e.target.value)"
+        @input="(e: any) => (description = e.target.value)"
       ></j-input>
 
       <j-flex gap="400">
@@ -97,8 +96,6 @@ export default defineComponent({
         this.title = data.title || "";
         this.description = data.description || "";
         this.imageUrl = data.images[0] || "";
-      } catch (e) {
-        console.log(e);
       } finally {
         this.loadingMeta = false;
         this.$refs.titleEl?.focus();
@@ -108,6 +105,7 @@ export default defineComponent({
       try {
         this.link = e.target.value;
         await new URL(e.target.value);
+        this.getMeta();
         this.isValidLink = true;
       } catch (e) {
         this.isValidLink = false;

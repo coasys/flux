@@ -29,7 +29,7 @@
       </j-box>
       <j-tabs
         :value="theme.name"
-        @change="(e) => updateTheme({ name: e.target.value })"
+        @change="(e: any) => updateTheme({ name: e.target.value })"
       >
         <j-tab-item variant="button" value="default">Default</j-tab-item>
         <j-tab-item variant="button" value="light">Light</j-tab-item>
@@ -45,7 +45,7 @@
       </j-box>
       <j-tabs
         :value="theme.fontFamily"
-        @change="(e) => updateTheme({ fontFamily: e.target.value })"
+        @change="(e: any) => updateTheme({ fontFamily: e.target.value })"
       >
         <j-tab-item variant="button" value="DM Sans">DM Sans</j-tab-item>
         <j-tab-item variant="button" value="Poppins">Poppins</j-tab-item>
@@ -70,7 +70,7 @@
       </j-box>
       <j-tabs
         :value="theme.saturation.toString()"
-        @change="(e) => updateTheme({ saturation: e.target.value })"
+        @change="(e: any) => updateTheme({ saturation: e.target.value })"
       >
         <j-tab-item variant="button" value="30">Weak</j-tab-item>
         <j-tab-item variant="button" value="60">Normal</j-tab-item>
@@ -93,7 +93,7 @@
         min="11"
         max="19"
         step="1"
-        @change="(e) => updateTheme({ fontSize: e.target.value + 'px' })"
+        @change="(e: any) => updateTheme({ fontSize: e.target.value + 'px' })"
       />
     </j-box>
   </div>

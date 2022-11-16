@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useRef,
 } from "react";
-import { Messages, Message } from "../types";
+import { Messages, Message, EntryType } from "../types";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import getMessages from "../api/getMessages";
 import createMessage from "../api/createMessage";
@@ -17,17 +17,16 @@ import createMessageReaction from "../api/createMessageReaction";
 import createReply from "../api/createReply";
 import { sortExpressionsByTimestamp } from "../helpers/expressionHelpers";
 import getMe from "../api/getMe";
-import { DexieMessages, DexieUI } from "../helpers/storageHelpers";
-import {
-  DIRECTLY_SUCCEEDED_BY,
-  REACTION,
-} from "../constants/communityPredicates";
+import { REACTION } from "../constants/communityPredicates";
 import hideEmbeds from "../api/hideEmbeds";
-import { MAX_MESSAGES } from "../constants/general";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import editCurrentMessage from "../api/editCurrentMessage";
+import { DEFAULT_LIMIT } from "../constants/sdna";
+import { checkUpdateSDNAVersion } from "../api/updateSDNA";
 
 type State = {
+  communityId: string;
+  channelId: string;
   isFetchingMessages: boolean;
   keyedMessages: Messages;
   hasNewMessage: boolean;
@@ -52,6 +51,8 @@ type ContextProps = {
 
 const initialState: ContextProps = {
   state: {
+    communityId: "",
+    channelId: "",
     isFetchingMessages: false,
     keyedMessages: {},
     hasNewMessage: false,
@@ -73,27 +74,16 @@ const initialState: ContextProps = {
 
 const ChatContext = createContext(initialState);
 
-let dexieUI: DexieUI;
-let dexieMessages: DexieMessages;
-
 export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   const linkSubscriberRef = useRef();
 
   const [state, setState] = useState(initialState.state);
+
   const [agent, setAgent] = useState();
 
   useEffect(() => {
     fetchAgent();
   }, []);
-
-  useEffect(() => {
-    if (channelId) {
-      dexieUI = new DexieUI(`${perspectiveUuid}://${channelId}`);
-      dexieMessages = new DexieMessages(`${perspectiveUuid}://${channelId}`);
-      // Set messages to cached messages
-      // so we have something before we load more
-    }
-  }, [channelId]);
 
   async function fetchAgent() {
     const agent = await getMe();
@@ -107,7 +97,9 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   );
 
   useEffect(() => {
-    fetchMessages();
+    if (perspectiveUuid && channelId && agent) {
+      fetchMessages();
+    }
   }, [perspectiveUuid, channelId, agent]);
 
   useEffect(() => {
@@ -131,10 +123,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       removed: handleLinkRemoved,
     });
   }
-
-  useEffect(() => {
-    dexieMessages.saveAll(Object.values(state.keyedMessages));
-  }, [JSON.stringify(state.keyedMessages)]);
 
   function addMessage(oldState, message) {
     const newState = {
@@ -280,25 +268,23 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
     const isMessageFromSelf = link.author === agent.did;
 
-    const hasFocus = document.hasFocus();
+    //const hasFocus = document.hasFocus();
 
-    if (!isMessageFromSelf || !hasFocus) {
-      if (linkIs.message(link)) {
-        const isSameChannel = await client.perspective.queryProlog(
-          perspectiveUuid,
-          `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.target}").`
-        );
-        if (isSameChannel) {
-          const message = getMessage(link);
+    if (linkIs.message(link)) {
+      const isSameChannel = await client.perspective.queryProlog(
+        perspectiveUuid,
+        `triple("${channelId}", "${EntryType.Message}", "${link.data.target}").`
+      );
+      if (isSameChannel) {
+        const message = getMessage(link);
 
-          if (message) {
-            setState((oldState) => addMessage(oldState, message));
+        if (message) {
+          setState((oldState) => addMessage(oldState, message));
 
-            setState((oldState) => ({
-              ...oldState,
-              isMessageFromSelf: false,
-            }));
-          }
+          setState((oldState) => ({
+            ...oldState,
+            isMessageFromSelf: isMessageFromSelf,
+          }));
         }
       }
 
@@ -320,7 +306,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       if (linkIs.reply(link)) {
         const isSameChannel = await client.perspective.queryProlog(
           perspectiveUuid,
-          `triple("${channelId}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.source}").`
+          `triple("${channelId}", "${EntryType.Message}", "${link.data.source}").`
         );
 
         if (isSameChannel) {
@@ -342,6 +328,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       }
     }
     if (linkIs.socialDNA(link)) {
+      console.warn("got new social dna fetching messages again");
       fetchMessages();
     }
     if (linkIs.reaction(link)) {
@@ -381,17 +368,30 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       isFetchingMessages: true,
     }));
 
-    const { keyedMessages: newMessages, expressionLinkLength } =
-      await getMessages({
-        perspectiveUuid,
-        channelId,
-        from: from,
-        backwards
-      });
+    let newMessages;
+    let expressionLinkLength;
+    try {
+        const data = await getMessages({
+          perspectiveUuid,
+          channelId,
+          from: from,
+          backwards
+        });
+        newMessages = data.keyedMessages;
+        expressionLinkLength = data.expressionLinkLength;
+    } catch (e) {
+      if (e.message.includes("existence_error")) {
+        console.error("We dont have the SDNA to make this query, please wait for community to sync");
+        await checkUpdateSDNAVersion(perspectiveUuid, new Date());
+        throw(e);
+      } else {
+        throw (e)
+      }
+    }
 
     setState((oldState) => ({
       ...oldState,
-      showLoadMore: expressionLinkLength === MAX_MESSAGES,
+      showLoadMore: expressionLinkLength === DEFAULT_LIMIT,
       isFetchingMessages: false,
       keyedMessages: {
         ...oldState.keyedMessages,
@@ -501,7 +501,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   return (
     <ChatContext.Provider
       value={{
-        state: { ...state, messages },
+        state: { ...state, messages, communityId: perspectiveUuid, channelId },
         methods: {
           loadMore,
           sendMessage,

@@ -18,7 +18,7 @@ export default async function updateGlobalTheme(
     setTheme(appStore.globalTheme);
     appStore.setCurrentTheme("global");
   } else {
-    const theme = dataStore.getCommunity(payload).state.theme;
+    const theme = dataStore.getLocalCommunityState(payload).theme;
     setTheme(theme!);
     appStore.setCurrentTheme(payload);
   }

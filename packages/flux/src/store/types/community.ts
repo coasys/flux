@@ -1,8 +1,8 @@
-import { NeighbourhoodState } from "./neighbourhood";
+import { Community } from "utils/types";
 import { ThemeState } from "./ui";
 
 export interface CommunityState {
-  neighbourhood: NeighbourhoodState;
+  neighbourhood: Community;
   state: LocalCommunityState;
 }
 

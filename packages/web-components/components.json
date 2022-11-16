@@ -708,6 +708,10 @@
           "type": "string"
         },
         {
+          "name": "name",
+          "type": "string"
+        },
+        {
           "name": "size",
           "type": "string"
         },
@@ -806,6 +810,11 @@
           "type": "string"
         },
         {
+          "name": "name",
+          "attribute": "name",
+          "type": "string"
+        },
+        {
           "name": "size",
           "attribute": "size",
           "type": "string"
@@ -878,6 +887,9 @@
           "attribute": "type",
           "type": "string",
           "default": "\"text\""
+        },
+        {
+          "name": "focus"
         },
         {
           "name": "onFocus"
