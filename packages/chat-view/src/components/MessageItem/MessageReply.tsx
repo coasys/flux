@@ -5,9 +5,10 @@ export default function MessageReply({
   onProfileClick,
   replyAuthor,
   replyMessage,
+  onClick
 }) {
   return (
-    <>
+    <div onClick={onClick} style={{display: 'contents'}}>
       <div class={styles.replyLineWrapper}>
         <div class={styles.replyLine} />
       </div>
@@ -30,6 +31,6 @@ export default function MessageReply({
           dangerouslySetInnerHTML={{ __html: replyMessage.content }}
         />
       </div>
-    </>
+    </div>
   );
 }

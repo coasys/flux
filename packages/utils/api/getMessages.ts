@@ -7,18 +7,27 @@ export interface Payload {
   perspectiveUuid: string;
   channelId: string;
   from?: Date;
+  backwards?: boolean
 }
 
 export default async function ({
   perspectiveUuid,
   channelId,
   from,
+  backwards
 }: Payload) {
   try {
     const client = await getAd4mClient();
     
     let expressionLinks;
-    if (from) {
+    if (from && backwards) {
+      console.log("Making time based query backwards", from);
+      let fromTime = from.getTime();
+      expressionLinks = await client.perspective.queryProlog(
+        perspectiveUuid, 
+        `(order_by([asc(Timestamp)], flux_message_query_popular("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp >= ${fromTime}).`
+      );
+    } else if (from) {
       console.log("Making time based query");
       let fromTime = from.getTime();
       expressionLinks = await client.perspective.queryProlog(
@@ -31,6 +40,7 @@ export default async function ({
         `limit(${MAX_MESSAGES}, order_by([desc(Timestamp)], flux_message_query_popular("${channelId}", MessageExpr, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular))).`
       );
     }
+
 
     let cleanedLinks: Message[] = [];
 
@@ -59,12 +69,15 @@ export default async function ({
 
         let replies = [];
         if (typeof message.Replies != "string" && !message.Replies.variable) {
+
           if (message.Replies.head) {
             const literal = Literal.fromUrl(message.Replies.head.args[0]).get();
+            console.log('wow', new Date(literal.timestamp), new Date(message.Replies.head.args[1].args[0]))
             replies.push({
               content: literal.data,
-              timestamp: new Date(message.Replies.head.args[1].args[0]),
+              timestamp: new Date(literal.timestamp),
               author: literal.author,
+              id: message.Replies.head.args[0]
             });
           }
           let tail = message.Replies.tail;
@@ -72,8 +85,9 @@ export default async function ({
             const literal = Literal.fromUrl(tail.head.args[0]).get();
             replies.push({
               content: literal.data,
-              timestamp: new Date(tail.head.args[1].args[0]),
+              timestamp: new Date(literal.timestamp),
               author: literal.author,
+              id: tail.head.args[0]
             });
             tail = tail.tail;
           }
@@ -126,6 +140,9 @@ export default async function ({
       //@ts-ignore
       return { ...acc, [message.id]: message };
     }, {});
+
+    console.log('expressionLinks', cleanedLinks)
+
 
     return {
       keyedMessages: keyedMessages,

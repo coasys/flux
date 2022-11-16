@@ -375,7 +375,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     }
   }
 
-  async function fetchMessages(from?: Date) {
+  async function fetchMessages(from?: Date, backwards?: boolean) {
     setState((oldState) => ({
       ...oldState,
       isFetchingMessages: true,
@@ -386,6 +386,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
         perspectiveUuid,
         channelId,
         from: from,
+        backwards
       });
 
     setState((oldState) => ({
@@ -475,12 +476,19 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     removeReactionFromState(linkExpression);
   }
 
-  async function loadMore() {
-    const oldestMessage = messages[0];
+  async function loadMore(timestamp: Date, backwards: boolean) {
+    if (backwards) {
+      return await fetchMessages(
+        new Date(timestamp),
+        backwards
+      );
+    } else {
+      const oldestMessage = messages[0];
 
-    return await fetchMessages(
-      oldestMessage ? new Date(oldestMessage.timestamp) : new Date()
-    );
+      return await fetchMessages(
+        oldestMessage ? new Date(oldestMessage.timestamp) : new Date()
+      );
+    }
   }
 
   function setHasNewMessage(value: boolean) {

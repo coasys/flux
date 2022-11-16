@@ -17,7 +17,7 @@ import ReactHintFactory from "react-hint";
 const ReactHint = ReactHintFactory({ createElement: h, Component, createRef });
 import "react-hint/css/index.css";
 import styles from "./index.scss";
-import { Reaction } from "utils/types";
+import { Message, Reaction } from "utils/types";
 import EditorContext from "../../context/EditorContext";
 
 import { REACTION } from "utils/constants/communityPredicates";
@@ -30,11 +30,13 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
   }, []);
 
   const [atBottom, setAtBottom] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [initialScroll, setinitialScroll] = useState(false);
   const scroller = useRef();
   const {
     state: { editor },
   } = useContext(EditorContext);
+  const [selectedReplies, setSelectedReplies] = useState<any>(null);
 
   const {
     state: {
@@ -94,8 +96,8 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
     }
   }
 
-  function loadMoreMessages() {
-    loadMore().then((fetchedMessageCount) => {
+  function loadMoreMessages(timestamp: any, backwards = false) {
+    loadMore(timestamp, backwards).then((fetchedMessageCount) => {
       if (fetchedMessageCount > 0) {
         scroller?.current?.scrollToIndex({
           index: fetchedMessageCount - 1,
@@ -103,6 +105,52 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
         });
       }
     });
+  }
+
+  const onReplyNavClick = (message: Message) => {
+    setSelectedReplies(message)
+    setShowModal(true)
+  }
+
+  const onReplyScroll = async (message: Message) => {
+    const reply = message.replies[0];
+
+    const isReplyFound = messages.findIndex(e => e.id === reply.id);
+
+    if (isReplyFound !== -1) {
+      setShowModal(false);
+
+
+      setTimeout(() => {
+        setSelectedReplies(null)
+      }, 1000)
+
+
+      scroller?.current?.scrollToIndex({
+        index: isReplyFound,
+        align: "center",
+        behavior: 'smooth'
+      });
+    } else {
+      await loadMoreMessages(reply.timestamp, true);
+
+      setTimeout(() => {
+        setShowModal(false)
+
+        const isReplyFound = messages.findIndex(e => e.id === reply.id);
+  
+        scroller?.current?.scrollToIndex({
+          index: isReplyFound,
+          align: "center",
+          behavior: 'smooth'
+        });
+
+        setTimeout(() => {
+          setSelectedReplies(null)
+        }, 1000)
+      }, 500)
+
+    }
   }
 
   function showAvatar(index: number): boolean {
@@ -195,12 +243,6 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
     setAtBottom(bool);
   }
 
-  function handleLoadMore() {
-    if (showLoadMore && !isFetchingMessages) {
-      loadMoreMessages();
-    }
-  }
-
 
   return (
     <main class={styles.main}>
@@ -213,17 +255,25 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
           New messages
         </j-button>
       )}
-      <Virtuoso
+            <Virtuoso
         components={{
           Header: () =>
             showLoadMore ? (
               <j-box py="500">
                 <j-flex a="center" j="center">
-                  {!isFetchingMessages && (
+                  {isFetchingMessages ? (
                     <j-flex a="center" gap="300">
                       <span>Loading</span>
                       <j-spinner size="xxs"></j-spinner>
                     </j-flex>
+                  ) : (
+                    <j-button
+                      size="sm"
+                      onClick={loadMoreMessages}
+                      variant="subtle"
+                    >
+                      Load more
+                    </j-button>
                   )}
                 </j-flex>
               </j-box>
@@ -241,9 +291,8 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
         overscan={{main: 1000, reverse: 1000}}
         atBottomThreshold={10}
         computeItemKey={(index, message) => message.id}
-        endReached={(index) => handleAtBottom(true)}
+        endReached={() => handleAtBottom(true)}
         atBottomStateChange={handleAtBottom}
-        atTopStateChange={()=> handleLoadMore()}
         data={messages}
         rangeChanged={rangeChanged}
         initialTopMostItemIndex={messages.length - 1}
@@ -254,9 +303,45 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
             showAvatar={showAvatar(index)}
             mainRef={mainRef}
             perspectiveUuid={perspectiveUuid}
+            onReplyNavClick={() => onReplyNavClick(message)}
+            highlight={selectedReplies?.replies[0]?.id === message.id}
           />
         )}
       />
+      {showModal && <j-modal
+        size="xs"
+        open={showModal}
+        onToggle={(e) => setShowModal(e.target.open)}
+      >
+        <j-box p="800">
+          <j-flex gap="500" direction="column">
+            <j-text nomargin variant="heading-sm">
+              Reply
+            </j-text>
+            <MessageItem
+              message={{
+                ...selectedReplies.replies[0],
+                editMessages: [{content: selectedReplies.replies[0].content}],
+                replies: [],
+                reactions: [],
+              }}
+              showAvatar={true}
+              mainRef={mainRef}
+              perspectiveUuid={perspectiveUuid}
+              hideToolbar={true}
+              noPadding
+            />
+            <j-button
+              onClick={() => onReplyScroll(selectedReplies)}
+              size="sm"
+              variant="subtle"
+            >
+              <j-icon size="xs" name="arrow-up"></j-icon>
+              Go there
+            </j-button>
+            </j-flex>
+          </j-box>
+      </j-modal>}
       <ReactHint
         position="right"
         className={styles.reactHintWrapper}

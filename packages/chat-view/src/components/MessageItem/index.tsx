@@ -20,6 +20,10 @@ export default function MessageItem({
   onOpenEmojiPicker,
   mainRef,
   perspectiveUuid,
+  hideToolbar = false,
+  noPadding = false,
+  highlight = false,
+  onReplyNavClick = () => null
 }) {
   const messageContent =
     message.editMessages[message.editMessages.length - 1].content;
@@ -150,6 +154,8 @@ export default function MessageItem({
   const replyAuthor: Profile = members[message?.replies[0]?.author] || {};
   const replyMessage: Message = message?.replies[0];
   const popularStyle: string = message.isPopular ? styles.popularMessage : "";
+  const highlightStyle: string = highlight ? styles.highlightMessage : "";
+  const noPaddingStyle: string = noPadding ? styles.noPaddingStyle : "";
   const isReplying: boolean = currentReply === message.id;
   const isEdited: boolean = message.editMessages.length > 1;
   const hasReactions: boolean = message.reactions.length > 0;
@@ -157,7 +163,7 @@ export default function MessageItem({
 
   return (
     <div
-      class={[styles.message, popularStyle].join(" ")}
+      class={[styles.message, popularStyle, noPaddingStyle, highlightStyle].join(" ")}
       isReplying={isReplying}
       onMouseEnter={() => setShowToolbar(true)}
       onMouseLeave={() => setShowToolbar(false)}
@@ -168,6 +174,7 @@ export default function MessageItem({
             onProfileClick={onProfileClick}
             replyAuthor={replyAuthor}
             replyMessage={replyMessage}
+            onClick={onReplyNavClick}
           ></MessageReply>
         )}
         <div>
@@ -261,7 +268,7 @@ export default function MessageItem({
           ))}
         </div>
 
-        {showToolbar && (
+        {!hideToolbar && showToolbar && (
           <div class={styles.toolbarWrapper}>
             <MessageToolbar
               onReplyClick={onReplyClick}

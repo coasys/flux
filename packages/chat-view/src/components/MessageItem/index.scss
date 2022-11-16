@@ -278,7 +278,14 @@ j-tooltip::part(base) {
   background-color: rgba(246, 206, 2, 0.1);
 }
 
+.highlightMessage {
+  background-color: rgba(7, 186, 218, 0.1);
+}
+
 .popularMessage:hover {
   background-color: rgba(246, 206, 2, 0.15);
 }
 
+.noPaddingStyle {
+  padding: 0;
+}
