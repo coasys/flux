@@ -1,10 +1,4 @@
-import {
-  useState,
-  useContext,
-  useRef,
-  useEffect,
-  useMemo
-} from "preact/hooks";
+import { useState, useContext, useRef, useEffect, useMemo } from "preact/hooks";
 import { ChatContext } from "utils/react";
 import MessageItem from "../MessageItem";
 import getMe from "utils/api/getMe";
@@ -108,50 +102,47 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
   }
 
   const onReplyNavClick = (message: Message) => {
-    setSelectedReplies(message)
-    setShowModal(true)
-  }
+    setSelectedReplies(message);
+    setShowModal(true);
+  };
 
   const onReplyScroll = async (message: Message) => {
     const reply = message.replies[0];
 
-    const isReplyFound = messages.findIndex(e => e.id === reply.id);
+    const isReplyFound = messages.findIndex((e) => e.id === reply.id);
 
     if (isReplyFound !== -1) {
       setShowModal(false);
 
-
       setTimeout(() => {
-        setSelectedReplies(null)
-      }, 1000)
-
+        setSelectedReplies(null);
+      }, 1000);
 
       scroller?.current?.scrollToIndex({
         index: isReplyFound,
         align: "center",
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     } else {
       await loadMoreMessages(reply.timestamp, true);
 
       setTimeout(() => {
-        setShowModal(false)
+        setShowModal(false);
 
-        const isReplyFound = messages.findIndex(e => e.id === reply.id);
-  
+        const isReplyFound = messages.findIndex((e) => e.id === reply.id);
+
         scroller?.current?.scrollToIndex({
           index: isReplyFound,
           align: "center",
-          behavior: 'smooth'
+          behavior: "smooth",
         });
 
         setTimeout(() => {
-          setSelectedReplies(null)
-        }, 1000)
-      }, 500)
-
+          setSelectedReplies(null);
+        }, 1000);
+      }, 500);
     }
-  }
+  };
 
   function showAvatar(index: number): boolean {
     const previousMessage = messages[index - 1];
@@ -243,7 +234,6 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
     setAtBottom(bool);
   }
 
-
   return (
     <main class={styles.main}>
       {hasNewMessage && !atBottom && (
@@ -255,7 +245,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
           New messages
         </j-button>
       )}
-            <Virtuoso
+      <Virtuoso
         components={{
           Header: () =>
             showLoadMore ? (
@@ -288,7 +278,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
         style={{ height: "100%", overflowX: "hidden" }}
         ref={scroller}
         alignToBottom
-        overscan={{main: 1000, reverse: 1000}}
+        overscan={{ main: 1000, reverse: 1000 }}
         atBottomThreshold={10}
         computeItemKey={(index, message) => message.id}
         endReached={() => handleAtBottom(true)}
@@ -308,40 +298,44 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
           />
         )}
       />
-      {showModal && <j-modal
-        size="xs"
-        open={showModal}
-        onToggle={(e) => setShowModal(e.target.open)}
-      >
-        <j-box p="800">
-          <j-flex gap="500" direction="column">
-            <j-text nomargin variant="heading-sm">
-              Reply
-            </j-text>
-            <MessageItem
-              message={{
-                ...selectedReplies.replies[0],
-                editMessages: [{content: selectedReplies.replies[0].content}],
-                replies: [],
-                reactions: [],
-              }}
-              showAvatar={true}
-              mainRef={mainRef}
-              perspectiveUuid={perspectiveUuid}
-              hideToolbar={true}
-              noPadding
-            />
-            <j-button
-              onClick={() => onReplyScroll(selectedReplies)}
-              size="sm"
-              variant="subtle"
-            >
-              <j-icon size="xs" name="arrow-up"></j-icon>
-              Go there
-            </j-button>
+      {showModal && (
+        <j-modal
+          size="xs"
+          open={showModal}
+          onToggle={(e) => setShowModal(e.target.open)}
+        >
+          <j-box p="800">
+            <j-flex gap="500" direction="column">
+              <j-text nomargin variant="heading-sm">
+                Reply
+              </j-text>
+              <MessageItem
+                message={{
+                  ...selectedReplies.replies[0],
+                  editMessages: [
+                    { content: selectedReplies.replies[0].content },
+                  ],
+                  replies: [],
+                  reactions: [],
+                }}
+                showAvatar={true}
+                mainRef={mainRef}
+                perspectiveUuid={perspectiveUuid}
+                hideToolbar={true}
+                noPadding
+              />
+              <j-button
+                onClick={() => onReplyScroll(selectedReplies)}
+                size="sm"
+                variant="subtle"
+              >
+                <j-icon size="xs" name="arrow-up"></j-icon>
+                Go there
+              </j-button>
             </j-flex>
           </j-box>
-      </j-modal>}
+        </j-modal>
+      )}
       <ReactHint
         position="right"
         className={styles.reactHintWrapper}
