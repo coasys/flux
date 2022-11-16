@@ -23,7 +23,7 @@ export default function MessageItem({
   hideToolbar = false,
   noPadding = false,
   highlight = false,
-  onReplyNavClick = () => null
+  onReplyNavClick = () => null,
 }) {
   const messageContent =
     message.editMessages[message.editMessages.length - 1].content;
@@ -163,7 +163,12 @@ export default function MessageItem({
 
   return (
     <div
-      class={[styles.message, popularStyle, noPaddingStyle, highlightStyle].join(" ")}
+      class={[
+        styles.message,
+        popularStyle,
+        noPaddingStyle,
+        highlightStyle,
+      ].join(" ")}
       isReplying={isReplying}
       onMouseEnter={() => setShowToolbar(true)}
       onMouseLeave={() => setShowToolbar(false)}
@@ -174,7 +179,7 @@ export default function MessageItem({
             onProfileClick={onProfileClick}
             replyAuthor={replyAuthor}
             replyMessage={replyMessage}
-            onClick={onReplyNavClick}
+            onMessageClick={onReplyNavClick}
           ></MessageReply>
         )}
         <div>
