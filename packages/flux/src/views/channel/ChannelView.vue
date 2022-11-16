@@ -50,7 +50,7 @@
       v-if="currentView === ChannelView.Chat"
       class="perspective-view"
       :port="port"
-      :channel="channelId"
+      :channel="channel.id"
       :perspective-uuid="communityId"
       @agent-click="onAgentClick"
       @channel-click="onChannelClick"

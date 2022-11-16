@@ -11,6 +11,7 @@ import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
 import { EntryType } from "utils/types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { createEntry } from "utils/api/createEntry";
+import Editor from "./Editor";
 
 async function createEntryData({ entryType, data }) {
   const client = await getAd4mClient();
@@ -158,16 +159,7 @@ export default function MakeEntry({
             name="title"
           ></j-input>
 
-          {showBody && (
-            <j-input
-              required
-              label="Body"
-              name="body"
-              onInput={handleChange}
-              value={state.body}
-              size="xl"
-            ></j-input>
-          )}
+          {showBody && <Editor></Editor>}
           {showUrl && (
             <j-input
               label="Url"

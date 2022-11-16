@@ -35,7 +35,7 @@ export default function ImagePost({ post }) {
         <div className={styles.postTitle}>{post.title}</div>
         <div className={styles.postDetails}>
           Posted by
-          <span class={styles.messageUsername}>
+          <span>
             {author?.username || (
               <j-skeleton width="lg" height="text"></j-skeleton>
             )}
