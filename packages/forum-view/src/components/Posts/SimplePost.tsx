@@ -3,8 +3,9 @@ import { PerspectiveContext } from "utils/react";
 import styles from "./index.scss";
 import { format, formatRelative } from "date-fns/esm";
 import { Profile } from "utils/types";
+import { DisplayView } from "../../constants/options";
 
-export default function SimplePost({ post }) {
+export default function SimplePost({ post, displayView }) {
   const messageRef = useRef<any>(null);
 
   const {
@@ -20,9 +21,11 @@ export default function SimplePost({ post }) {
 
   const author: Profile = members[post.author] || {};
   const popularStyle: string = post.isPopular ? styles.popularMessage : "";
+  const displayStyle: DisplayView =
+    displayView === DisplayView.Compact ? styles.compact : styles.grid;
 
   return (
-    <div class={[styles.post, popularStyle].join(" ")}>
+    <div class={[styles.post, displayStyle, popularStyle].join(" ")}>
       <div class={styles.postImageWrapper}>
         <j-icon size="xl" name="body-text"></j-icon>
       </div>

@@ -1,8 +1,8 @@
 import { EntryType } from "utils/types";
 export enum DisplayView {
+  Compact = "COMPACT",
   Grid = "GRID",
   Card = "CARD",
-  Compact = "COMPACT",
 }
 
 export const postOptions = [
@@ -30,6 +30,11 @@ export const postOptions = [
 
 export const displayOptions = [
   {
+    label: "Compact",
+    value: DisplayView.Compact,
+    icon: "list",
+  },
+  {
     label: "Grid",
     value: DisplayView.Grid,
     icon: "grid",
@@ -38,10 +43,5 @@ export const displayOptions = [
     label: "Card",
     value: DisplayView.Card,
     icon: "card-heading",
-  },
-  {
-    label: "Compact",
-    value: DisplayView.Compact,
-    icon: "list",
   },
 ];

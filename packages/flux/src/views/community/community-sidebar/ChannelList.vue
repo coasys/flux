@@ -63,7 +63,7 @@
                 :color="
                   view.type === channel.currentView &&
                   channel.name === $route.params.channelId
-                    ? 'primary-500'
+                    ? 'black'
                     : 'ui-500'
                 "
                 size="xs"
@@ -74,7 +74,7 @@
                 :color="
                   view.type === channel.currentView &&
                   channel.name === $route.params.channelId
-                    ? 'primary-500'
+                    ? 'black'
                     : 'ui-500'
                 "
                 nomargin

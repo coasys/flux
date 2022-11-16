@@ -4,20 +4,23 @@ import styles from "./index.scss";
 import { formatRelative } from "date-fns/esm";
 import { Profile } from "utils/types";
 import { getImage } from "utils/helpers/getImage";
+import { DisplayView } from "../../constants/options";
 
-export default function ImagePost({ post }) {
+export default function ImagePost({ post, displayView }) {
   const {
     state: { members },
   } = useContext(PerspectiveContext);
 
   const author: Profile = members[post.author] || {};
   const popularStyle: string = post.isPopular ? styles.popularMessage : "";
+  const displayStyle: DisplayView =
+    displayView === DisplayView.Compact ? styles.compact : styles.grid;
 
   return (
     <a
       href={post.url}
       target="_blank"
-      class={[styles.post, popularStyle].join(" ")}
+      class={[styles.post, displayStyle, popularStyle].join(" ")}
     >
       <div class={styles.postImageWrapper}>
         <j-icon size="xl" name="link"></j-icon>

@@ -16,7 +16,7 @@ import {
 export default function MessageList({ perspectiveUuid, channelId }) {
   const [posts, setPosts] = useState([]);
   const [sortBy, setSortBy] = useState("");
-  const [view, setView] = useState(DisplayView.Card);
+  const [view, setView] = useState(DisplayView.Compact);
 
   const sortedPosts = sortBy
     ? posts.filter((post) => post.types.includes(sortBy))
@@ -110,7 +110,7 @@ export default function MessageList({ perspectiveUuid, channelId }) {
         </j-flex>
       </j-box>
       <div className={[style.posts, gridClass].join(" ")}>
-        {sortedPosts.map(renderPosts)}
+        {sortedPosts.map((post) => renderPosts({ post, displayView: view }))}
       </div>
       <j-flex a="center" j="center">
         <j-button variant="link" onClick={() => loadMoreMessages(channelId)}>
@@ -121,14 +121,14 @@ export default function MessageList({ perspectiveUuid, channelId }) {
   );
 }
 
-function renderPosts(post) {
+function renderPosts({ post, displayView }) {
   if (post.types.includes(EntryType.SimplePost)) {
-    return <SimplePost post={post}></SimplePost>;
+    return <SimplePost displayView={displayView} post={post}></SimplePost>;
   }
   if (post.types.includes(EntryType.ImagePost)) {
-    return <ImagePost post={post}></ImagePost>;
+    return <ImagePost displayView={displayView} post={post}></ImagePost>;
   }
   if (post.types.includes(EntryType.LinkPost)) {
-    return <LinkPost post={post}></LinkPost>;
+    return <LinkPost displayView={displayView} post={post}></LinkPost>;
   }
 }
