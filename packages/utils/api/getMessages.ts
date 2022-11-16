@@ -20,7 +20,7 @@ export default async function ({ perspectiveUuid, channelId, from, backwards }: 
   let prologQuery;
   if (from && backwards) {
     prologQuery = messageFilteredQueryBackwards;
-    prologQuery = format(prologQuery, DEFAULT_LIMIT, channelId, from!.getTime());
+    prologQuery = format(prologQuery, channelId, from!.getTime());
   } else if (from) {
       prologQuery = messageFilteredQuery;
       prologQuery = format(prologQuery, DEFAULT_LIMIT, channelId, from!.getTime());
@@ -45,6 +45,7 @@ export default async function ({ perspectiveUuid, channelId, from, backwards }: 
     });
     result.Replies.forEach(reply => {
       reply.id = reply.content;
+      reply.timestamp = Literal.fromUrl(reply.content).get().timestamp;
       reply.content = Literal.fromUrl(reply.content).get().data;
     });
     cleanedMessages.push({
