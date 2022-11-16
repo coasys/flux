@@ -1,50 +1,8 @@
 import { useRef, useState, useEffect } from "preact/hooks";
-import {
-  BODY,
-  TITLE,
-  IMAGE,
-  START_DATE,
-  END_DATE,
-  URL,
-} from "utils/constants/communityPredicates";
-import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
 import { EntryType } from "utils/types";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { createEntry } from "utils/api/createEntry";
 import Editor from "./Editor";
-
-async function createEntryData({ entryType, data }) {
-  const client = await getAd4mClient();
-  const expression = client.expression;
-
-  switch (entryType) {
-    case EntryType.SimplePost:
-      return {
-        [TITLE]: await expression.create(data.title, "literal"),
-        [BODY]: await expression.create(data.body, "literal"),
-      };
-    case EntryType.ImagePost:
-      return {
-        [TITLE]: await expression.create(data.title, "literal"),
-        [IMAGE]: await expression.create(
-          data.image,
-          NOTE_IPFS_EXPRESSION_OFFICIAL
-        ),
-      };
-    case EntryType.LinkPost:
-      return {
-        [TITLE]: await expression.create(data.title, "literal"),
-        [URL]: await expression.create(data.url, "literal"),
-      };
-    case EntryType.CalendarEvent:
-      return {
-        [TITLE]: await expression.create(data.title, "literal"),
-        [BODY]: await expression.create(data.body, "literal"),
-        [START_DATE]: await expression.create(data.startDate, "literal"),
-        [END_DATE]: await expression.create(data.endDate, "literal"),
-      };
-  }
-}
+import createPost from "utils/api/createPost";
+import { postOptions } from "../../constants/options";
 
 export default function MakeEntry({
   channelId,
@@ -75,13 +33,13 @@ export default function MakeEntry({
   async function publish() {
     setIsCreating(true);
     try {
-      const data = await createEntryData({ entryType, data: state });
-      await createEntry({
-        perspectiveUuid: communityId,
-        source: channelId,
-        types: [entryType],
-        data,
-      }).then(onPublished);
+      await createPost({
+        channelId,
+        communityId,
+        type: entryType,
+        data: state,
+      });
+      onPublished(true);
     } catch (e) {
       console.log(e);
     } finally {
@@ -109,7 +67,8 @@ export default function MakeEntry({
     FR.readAsDataURL(target.files[0]);
   }
 
-  const showBody = entryType === EntryType.SimplePost;
+  const showBody =
+    entryType === EntryType.SimplePost || entryType === EntryType.CalendarEvent;
   const showUrl = entryType === EntryType.LinkPost;
   const showStartDate = entryType === EntryType.CalendarEvent;
   const showEndDate = entryType === EntryType.CalendarEvent;
@@ -125,26 +84,14 @@ export default function MakeEntry({
           value={entryType}
           onChange={(e) => setEntryType(e.target.value)}
         >
-          <j-tab-item size="sm" value={EntryType.SimplePost} variant="button">
-            <j-icon slot="start" name="card-heading"></j-icon>
-            Post
-          </j-tab-item>
-          <j-tab-item size="sm" value={EntryType.ImagePost} variant="button">
-            <j-icon slot="start" name="card-image"></j-icon>
-            Image
-          </j-tab-item>
-          <j-tab-item size="sm" value={EntryType.LinkPost} variant="button">
-            <j-icon slot="start" name="link"></j-icon>
-            Url
-          </j-tab-item>
-          <j-tab-item
-            size="sm"
-            value={EntryType.CalendarEvent}
-            variant="button"
-          >
-            <j-icon slot="start" name="calendar-date"></j-icon>
-            Event
-          </j-tab-item>
+          {postOptions.map((option) => {
+            return (
+              <j-tab-item size="sm" value={option.value} variant="button">
+                <j-icon slot="start" name={option.icon}></j-icon>
+                {option.label}
+              </j-tab-item>
+            );
+          })}
         </j-tabs>
       </j-box>
       <j-box mt="500">
@@ -159,7 +106,13 @@ export default function MakeEntry({
             name="title"
           ></j-input>
 
-          {showBody && <Editor></Editor>}
+          {showBody && (
+            <Editor
+              onChange={(e) =>
+                setState((oldState) => ({ ...oldState, body: e }))
+              }
+            ></Editor>
+          )}
           {showUrl && (
             <j-input
               label="Url"

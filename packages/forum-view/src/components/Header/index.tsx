@@ -4,6 +4,7 @@ import { AgentContext, ChatContext } from "utils/react";
 import Avatar from "../Avatar";
 import CreatePost from "../CreatePost";
 import { EntryType } from "utils/types";
+import { postOptions } from "../../constants/options";
 
 export default function Header() {
   const [initialType, setInitialType] = useState(EntryType.SimplePost);
@@ -35,35 +36,18 @@ export default function Header() {
           ></j-input>
           <j-box pt="300" pb="400">
             <j-flex gap="200">
-              <j-button
-                onClick={() => handlePostClick(EntryType.SimplePost)}
-                value="post"
-                variant="ghost"
-              >
-                <j-icon slot="start" name="card-heading"></j-icon>
-                Post
-              </j-button>
-              <j-button
-                onClick={() => handlePostClick(EntryType.ImagePost)}
-                variant="ghost"
-              >
-                <j-icon slot="start" name="card-image"></j-icon>
-                Image
-              </j-button>
-              <j-button
-                onClick={() => handlePostClick(EntryType.LinkPost)}
-                variant="ghost"
-              >
-                <j-icon slot="start" name="link"></j-icon>
-                Url
-              </j-button>
-              <j-button
-                onClick={() => handlePostClick(EntryType.CalendarEvent)}
-                variant="ghost"
-              >
-                <j-icon slot="start" name="calendar-date"></j-icon>
-                Event
-              </j-button>
+              {postOptions.map((option) => {
+                return (
+                  <j-button
+                    onClick={() => handlePostClick(option.value)}
+                    value="post"
+                    variant="ghost"
+                  >
+                    <j-icon slot="start" name={option.icon}></j-icon>
+                    {option.label}
+                  </j-button>
+                );
+              })}
             </j-flex>
           </j-box>
         </div>

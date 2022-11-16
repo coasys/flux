@@ -30,15 +30,19 @@ export default function SimplePost({ post }) {
         <div className={styles.postTitle}>{post.title}</div>
         <div className={styles.postDetails}>
           Posted by
-          <div class={styles.messageUsername}>
+          <span class={styles.messageUsername}>
             {author?.username || (
               <j-skeleton width="lg" height="text"></j-skeleton>
             )}
-          </div>
-          <small class={styles.timestamp}>
+          </span>
+          <span class={styles.timestamp}>
             {formatRelative(new Date(post.timestamp), new Date())}
-          </small>
+          </span>
         </div>
+        <div
+          className={styles.postBody}
+          dangerouslySetInnerHTML={{ __html: post.body }}
+        />
       </div>
     </div>
   );
