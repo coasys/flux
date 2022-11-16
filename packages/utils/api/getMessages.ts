@@ -44,6 +44,7 @@ export default async function ({ perspectiveUuid, channelId, from, backwards }: 
       reaction.content = reaction.content.replace('emoji://', '');
     });
     result.Replies.forEach(reply => {
+      reply.id = reply.content;
       reply.content = Literal.fromUrl(reply.content).get().data;
     });
     cleanedMessages.push({
