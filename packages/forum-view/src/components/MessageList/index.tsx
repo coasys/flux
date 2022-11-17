@@ -2,11 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import Header from "../Header";
 import getPosts from "utils/api/getPosts";
 import { checkUpdateSDNAVersion } from "utils/api/updateSDNA";
-import { EntryType } from "utils/types";
-import SimplePost from "../Posts/SimplePost";
-import ImagePost from "../Posts/ImagePost";
-import LinkPost from "../Posts/LinkPost";
-import CalendarPost from "../Posts/CalendarPost";
+import Post from "../Post";
 import style from "./index.scss";
 import {
   DisplayView,
@@ -111,7 +107,11 @@ export default function MessageList({ perspectiveUuid, channelId }) {
         </j-flex>
       </j-box>
       <div className={[style.posts, gridClass].join(" ")}>
-        {sortedPosts.map((post) => renderPosts({ post, displayView: view }))}
+        {sortedPosts
+          .filter((post) => post.id.startsWith("flux_entry://"))
+          .map((post) => (
+            <Post post={post} displayView={view}></Post>
+          ))}
       </div>
       <j-flex a="center" j="center">
         <j-button variant="link" onClick={() => loadMoreMessages(channelId)}>
@@ -120,19 +120,4 @@ export default function MessageList({ perspectiveUuid, channelId }) {
       </j-flex>
     </div>
   );
-}
-
-function renderPosts({ post, displayView }) {
-  if (post.types.includes(EntryType.SimplePost)) {
-    return <SimplePost displayView={displayView} post={post}></SimplePost>;
-  }
-  if (post.types.includes(EntryType.ImagePost)) {
-    return <ImagePost displayView={displayView} post={post}></ImagePost>;
-  }
-  if (post.types.includes(EntryType.LinkPost)) {
-    return <LinkPost displayView={displayView} post={post}></LinkPost>;
-  }
-  if (post.types.includes(EntryType.CalendarEvent)) {
-    return <CalendarPost displayView={displayView} post={post}></CalendarPost>;
-  }
 }
