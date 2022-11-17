@@ -1,69 +1,86 @@
 <template>
-  <div class="community-sidebar__header">
-    <j-button
-      variant="ghost"
-      size="sm"
-      @click="() => appStore.toggleMainSidebar()"
-    >
-      <j-icon
+  <div class="sidebar-header">
+    <div class="sidebar-header__top">
+      <j-button
+        variant="ghost"
         size="sm"
-        :name="appStore.showMainSidebar ? 'arrow-bar-left' : 'arrow-bar-right'"
-      ></j-icon>
-    </j-button>
-    <div class="community-info">
-      {{ community.neighbourhood.name }}
-    </div>
-    <j-popover
-      :open="showCommunityMenu"
-      @toggle="(e: any) => (showCommunityMenu = e.target.open)"
-      :class="{ 'is-creator': isCreator }"
-      event="click"
-      placement="bottom-end"
-    >
-      <button slot="trigger" class="community-sidebar__header-button">
-        <j-icon size="xs" name="three-dots"></j-icon>
-      </button>
-      <j-menu slot="content">
-        <j-menu-item v-if="isCreator" @click="() => setShowEditCommunity(true)">
-          <j-icon size="xs" slot="start" name="pencil" />
-          Edit community
-        </j-menu-item>
-        <j-menu-item @click="goToSettings">
-          <j-icon size="xs" slot="start" name="gear" />
-          Settings
-        </j-menu-item>
-        <j-menu-item @click="goToTweaks">
-          <j-icon size="xs" slot="start" name="wrench" />
-          Community Tweaks
-        </j-menu-item>
-        <j-menu-item @click="() => setShowInviteCode(true)">
-          <j-icon size="xs" slot="start" name="person-plus" />
-          Invite people
-        </j-menu-item>
-        <j-divider />
-        <j-menu-item @click="() => setShowCreateChannel(true)">
-          <j-icon size="xs" slot="start" name="plus" />
-          Create channel
-        </j-menu-item>
-        <j-menu-item
-          @click="
-            () =>
-              toggleHideMutedChannels({
-                communityId: community.neighbourhood.uuid,
-              })
-          "
-        >
-          <j-icon
-            size="xs"
-            slot="start"
-            :name="
-              community.state.hideMutedChannels ? 'toggle-on' : 'toggle-off'
+        @click="() => appStore.toggleMainSidebar()"
+      >
+        <j-icon
+          size="sm"
+          :name="appStore.showMainSidebar ? 'layout-sidebar' : 'layout-sidebar'"
+        ></j-icon>
+      </j-button>
+      <j-popover
+        :open="showCommunityMenu"
+        @toggle="(e: any) => (showCommunityMenu = e.target.open)"
+        :class="{ 'is-creator': isCreator }"
+        event="click"
+        placement="bottom-end"
+      >
+        <j-button square slot="trigger" variant="ghost">
+          <j-icon size="xs" name="gear"></j-icon>
+        </j-button>
+        <j-menu slot="content">
+          <j-menu-item
+            v-if="isCreator"
+            @click="() => setShowEditCommunity(true)"
+          >
+            <j-icon size="xs" slot="start" name="pencil" />
+            Edit community
+          </j-menu-item>
+          <j-menu-item @click="goToSettings">
+            <j-icon size="xs" slot="start" name="gear" />
+            Settings
+          </j-menu-item>
+          <j-menu-item @click="goToTweaks">
+            <j-icon size="xs" slot="start" name="wrench" />
+            Community Tweaks
+          </j-menu-item>
+          <j-menu-item @click="() => setShowInviteCode(true)">
+            <j-icon size="xs" slot="start" name="person-plus" />
+            Invite people
+          </j-menu-item>
+          <j-divider />
+          <j-menu-item @click="() => setShowCreateChannel(true)">
+            <j-icon size="xs" slot="start" name="plus" />
+            Create channel
+          </j-menu-item>
+          <j-menu-item
+            @click="
+              () =>
+                toggleHideMutedChannels({
+                  communityId: community.neighbourhood.uuid,
+                })
             "
-          />
-          Hide muted channels
-        </j-menu-item>
-      </j-menu>
-    </j-popover>
+          >
+            <j-icon
+              size="xs"
+              slot="start"
+              :name="
+                community.state.hideMutedChannels ? 'toggle-on' : 'toggle-off'
+              "
+            />
+            Hide muted channels
+          </j-menu-item>
+        </j-menu>
+      </j-popover>
+    </div>
+    <div class="community-info">
+      <Avatar
+        class="masked"
+        size="xl"
+        :url="community.neighbourhood.image"
+      ></Avatar>
+      <div>
+        <j-text size="600" nomargin color="black">
+          {{ community.neighbourhood.name }}
+        </j-text>
+        <j-text nomargin color="ui-500">
+          {{ community.neighbourhood.description }}
+        </j-text>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -77,8 +94,10 @@ import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { DexieIPFS } from "utils/helpers/storageHelpers";
 import { getImage } from "utils/helpers/getImage";
+import Avatar from "@/components/avatar/Avatar.vue";
 
 export default defineComponent({
+  components: { Avatar },
   setup() {
     return {
       userProfileImage: ref<null | string>(null),
@@ -190,38 +209,33 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.community-sidebar__header {
+.sidebar-header {
   background: var(--app-drawer-bg-color);
   border-bottom: 1px solid var(--j-color-white);
   z-index: 1;
-  display: flex;
-  height: var(--app-header-height);
-  align-items: center;
+  display: block;
   padding-left: var(--j-space-400);
-  position: sticky;
   gap: var(--j-space-300);
-  top: 0;
-  left: 0;
 }
 
-.community-sidebar__header-button {
-  color: inherit;
-  width: 100%;
-  height: 74px;
+.sidebar-header__top {
+  height: var(--app-header-height);
   display: flex;
   align-items: center;
-  gap: var(--j-space-400);
-  border: 0;
-  outline: 0;
-  font-family: inherit;
-  text-align: left;
-  background: none;
-  cursor: pointer;
-  padding: 0 var(--j-space-500);
-  border-bottom: 1px solid var(--app-drawer-border-color);
+  justify-content: space-between;
+}
+
+.masked {
+  display: block;
+  -webkit-clip-path: url("#svgClip");
+  clip-path: url("#svgClip");
 }
 
 .community-info {
+  margin-top: var(--j-space-400);
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-500);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
