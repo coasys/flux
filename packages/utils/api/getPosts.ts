@@ -45,7 +45,11 @@ export default async function getPosts(
     queries: [
       {
         query: fromDate ? forumFilteredQuery : forumQuery,
-        arguments: [DEFAULT_LIMIT, source, fromDate?.getTime()],
+        variables: {
+          limit: DEFAULT_LIMIT,
+          source,
+          fromDate: fromDate?.getTime(),
+        },
         resultKeys: [
           "Id",
           "Types",

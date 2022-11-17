@@ -1,13 +1,13 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import extractPrologResults from "../helpers/extractPrologResults";
 import { GetEntries, Entry } from "../types";
-import format from "../helpers/formatString";
+import format, { getPrologQuery } from "../helpers/formatString";
 
 export default async function getEntries(input: GetEntries): Promise<Entry[]> {
   const client = await getAd4mClient();
   const entries = [] as Entry[];
   for (const query of input.queries) {
-    const prologQuery = format(query.query, ...query.arguments);
+    const prologQuery = getPrologQuery(query.query, query.variables);
     const prologResult = await client.perspective.queryProlog(
       input.perspectiveUuid,
       prologQuery

@@ -143,8 +143,10 @@ export interface GetEntries {
 
 export interface PrologQuery {
   query: string;
+  variables: {
+    [x: string]: any;
+  };
   resultKeys: string[];
-  arguments: any[];
 }
 
 export enum PrologQueries {
