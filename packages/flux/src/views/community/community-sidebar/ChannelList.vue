@@ -21,7 +21,9 @@
             tag="j-menu-item"
             class="channel"
             :class="{ 'channel--muted': channel.notifications?.mute }"
-            :selected="channel.name === $route.params.channelId"
+            :selected="
+              channel.name === $route.params.channelId && !channel.collapsed
+            "
             @click="() => navigateToChannel(channel.name)"
           >
             {{ channel.name }}
@@ -39,47 +41,32 @@
 
             <j-icon
               @click.stop="handleToggleClick(channel.id)"
-              slot="end"
+              slot="start"
               style="--j-icon-size: 13px"
               v-if="channel.views.length > 1"
               :name="channel.collapsed ? 'chevron-down' : 'chevron-right'"
             />
             <j-icon
-              slot="end"
+              slot="start"
               size="xs"
               v-else
               :name="getIcon(channel.views[0])"
             ></j-icon>
           </j-menu-item>
-          <div v-if="channel.collapsed">
+          <div class="channel-views" v-if="channel.collapsed">
             <j-menu-item
+              :selected="
+                view.type === channel.currentView &&
+                channel.name === $route.params.channelId
+              "
               size="sm"
               v-for="view in getViewOptions(channel.views)"
               @click="
                 () => handleChangeView(channel.id, channel.name, view.type)
               "
             >
-              <j-icon
-                :color="
-                  view.type === channel.currentView &&
-                  channel.name === $route.params.channelId
-                    ? 'primary-500'
-                    : 'ui-500'
-                "
-                size="xs"
-                slot="end"
-                :name="view.icon"
-              ></j-icon>
-              <j-text
-                :color="
-                  view.type === channel.currentView &&
-                  channel.name === $route.params.channelId
-                    ? 'primary-500'
-                    : 'ui-500'
-                "
-                nomargin
-                >{{ view.title }}
-              </j-text>
+              <j-icon size="xs" slot="start" :name="view.icon"></j-icon>
+              {{ view.title }}
             </j-menu-item>
           </div>
         </div>
@@ -242,6 +229,10 @@ export default defineComponent({
 
 .channel--muted {
   opacity: 0.6;
+}
+
+.channel-views {
+  margin-left: var(--j-space-400);
 }
 
 .channel__notification {

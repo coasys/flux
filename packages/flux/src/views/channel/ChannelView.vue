@@ -50,7 +50,7 @@
       v-if="currentView === ChannelView.Chat"
       class="perspective-view"
       :port="port"
-      :channel="channelId"
+      :channel="channel.id"
       :perspective-uuid="communityId"
       @agent-click="onAgentClick"
       @channel-click="onChannelClick"
@@ -318,6 +318,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   gap: var(--j-space-300);
+  color: var(--j-color-ui-500);
   cursor: pointer;
   position: relative;
   padding: var(--j-space-200) var(--j-space-400);
@@ -325,13 +326,13 @@ export default defineComponent({
 }
 
 .channel-view-tab:hover {
-  color: var(--j-color-primary-500);
-  background-color: hsla(var(--j-color-primary-hue), 100%, 50%, 0.05);
+  color: var(--j-color-black);
+  background-color: hsla(var(--j-color-primary-hue), 100%, 0%, 0.05);
 }
 
 .channel-view-tab:has(input:checked) {
   position: relative;
-  color: var(--j-color-primary-500);
+  color: var(--j-color-black);
 }
 
 .channel-view-tab input {

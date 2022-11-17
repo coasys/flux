@@ -24,6 +24,8 @@ function cleanPostData(entry: Entry): Post {
     author: entry.author,
     timestamp: entry.timestamp,
     image: data?.Image?.reduce(getContent, null)?.content,
+    startDate: data?.StartDate?.reduce(getContent, null)?.data,
+    endDate: data?.EndDate?.reduce(getContent, null)?.data,
     url: data?.Url?.reduce(getContent, null)?.data,
     title: data?.Title?.reduce(getContent, null)?.data,
     body: data?.Body?.reduce(getContent, null)?.data,
@@ -43,12 +45,18 @@ export default async function getPosts(
     queries: [
       {
         query: fromDate ? forumFilteredQuery : forumQuery,
-        arguments: [DEFAULT_LIMIT, source, fromDate?.getTime()],
+        variables: {
+          limit: DEFAULT_LIMIT,
+          source,
+          fromDate: fromDate?.getTime(),
+        },
         resultKeys: [
           "Id",
           "Types",
           "Timestamp",
           "Author",
+          "StartDate",
+          "EndDate",
           "Title",
           "Url",
           "Image",

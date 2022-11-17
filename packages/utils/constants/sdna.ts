@@ -24,10 +24,10 @@ export const SDNA_CREATION_DATE = new Date("2022-11-13T23:51:33Z");
 
 export const SDNA = `
     emojiCount(Message, Count):- 
-        aggregate_all(count, link(Message, "${REACTION}", "emoji://%%", _, _), Count).
+        aggregate_all(count, link(Message, "${REACTION}", "emoji://$emoji", _, _), Count).
 
-    isPopular(Message) :- emojiCount(Message, Count), Count >= %%.
-    isNotPopular(Message) :- emojiCount(Message, Count), Count < %%.
+    isPopular(Message) :- emojiCount(Message, Count), Count >= $emojiCount.
+    isNotPopular(Message) :- emojiCount(Message, Count), Count < $emojiCount.
 
     flux_message(Source, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages):-
         link(Source, "${EntryType.Message}", Message, Timestamp, Author),
@@ -60,9 +60,9 @@ export const SDNA = `
     flux_post_query_popular(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies, false) :-
         flux_post(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies), isNotPopular(Id).`;
 
-export const messageFilteredQuery = `limit(%%, (order_by([desc(Timestamp)], flux_message_query_popular("%%", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp =< %%)).`;
-export const messageFilteredQueryBackwards = `(order_by([asc(Timestamp)], flux_message_query_popular("%%", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp >= %%).`;
-export const messageQuery = `limit(%%, order_by([desc(Timestamp)], flux_message_query_popular("%%", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular))).`;
+export const messageFilteredQuery = `limit($limit, (order_by([desc(Timestamp)], flux_message_query_popular("$source", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp =< $fromDate)).`;
+export const messageFilteredQueryBackwards = `(order_by([asc(Timestamp)], flux_message_query_popular("$source", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp >= $fromDate).`;
+export const messageQuery = `limit($limit, order_by([desc(Timestamp)], flux_message_query_popular("$source", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular))).`;
 
-export const forumFilteredQuery = `limit(%%, (order_by([desc(Timestamp)], flux_post_query_popular("%%", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies, IsPopular)), Timestamp =< %%)).`;
-export const forumQuery = `limit(%%, order_by([desc(Timestamp)], flux_post_query_popular("%%", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies, IsPopular))).`;
+export const forumFilteredQuery = `limit($limit, (order_by([desc(Timestamp)], flux_post_query_popular("$source", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies, IsPopular)), Timestamp =< $fromDate)).`;
+export const forumQuery = `limit($limit, order_by([desc(Timestamp)], flux_post_query_popular("$source", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies, IsPopular))).`;

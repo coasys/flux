@@ -1,0 +1,28 @@
+.editor {
+  background-color: hsl(var(--j-color-ui-hue), 18%, 23%);
+  border-radius: var(--j-border-radius);
+  border: 1px solid transparent;
+}
+
+.editor:hover:not(:focus-within) {
+  border: 1px solid var(--j-color-ui-200);
+}
+
+.editor:focus-within {
+border: 1px solid var(--j-color-focus);
+}
+
+.editor div {
+  outline: 0;
+  padding: var(--j-space-400);
+  min-height: 150px;
+}
+
+.editor div *:first-of-type {
+  margin-top: 0;
+}
+
+.editor div pre {
+  background-color: rgba(0,0,0,0.1);
+  padding: var(--j-space-200);
+}
