@@ -5,8 +5,9 @@ import {
   DEFAULT_LIMIT,
   messageFilteredQuery,
   messageQuery,
+  messageFilteredQueryBackwards
 } from "../constants/sdna";
-import format, { getPrologQuery } from "../helpers/formatString";
+import { getPrologQuery } from "../helpers/formatString";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { checkUpdateSDNAVersion } from "./updateSDNA";
 
@@ -14,20 +15,41 @@ export interface Payload {
   perspectiveUuid: string;
   channelId: string;
   from?: Date;
+  backwards?: boolean
 }
 
-export default async function ({ perspectiveUuid, channelId, from }: Payload) {
+export default async function ({ perspectiveUuid, channelId, from, backwards }: Payload) {
   console.warn("Getting messages...");
   const client = await getAd4mClient();
 
-  const prologQuery = getPrologQuery(
-    from ? messageFilteredQuery : messageQuery,
-    {
-      limit: DEFAULT_LIMIT,
-      source: channelId,
-      fromDate: from ? from.getTime() : null,
-    }
-  );
+  let prologQuery;
+  if (from && backwards) {
+    prologQuery = getPrologQuery(
+      messageFilteredQueryBackwards,
+      {
+        source: channelId,
+        fromDate: from ? from.getTime() : null,
+      }
+    );
+  } else if (from) {
+    prologQuery = getPrologQuery(
+      messageFilteredQuery,
+      {
+        limit: DEFAULT_LIMIT,
+        source: channelId,
+        fromDate: from ? from.getTime() : null,
+      }
+    );
+  } else {
+    prologQuery = getPrologQuery(
+      messageQuery,
+      {
+        limit: DEFAULT_LIMIT,
+        source: channelId,
+        fromDate: from ? from.getTime() : null,
+      }
+    );
+  }
 
   const expressionLinks = await client.perspective.queryProlog(
     perspectiveUuid,
@@ -55,8 +77,11 @@ export default async function ({ perspectiveUuid, channelId, from }: Payload) {
     result.Reactions.forEach((reaction) => {
       reaction.content = reaction.content.replace("emoji://", "");
     });
-    result.Replies.forEach((reply) => {
-      reply.content = Literal.fromUrl(reply.content).get().data;
+    result.Replies.forEach(reply => {
+      const literal = Literal.fromUrl(reply.content).get();
+      reply.id = reply.content;
+      reply.timestamp = literal.timestamp;
+      reply.content = literal.data;
     });
     cleanedMessages.push({
       id: result.Message,

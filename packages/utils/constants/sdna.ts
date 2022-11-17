@@ -61,6 +61,7 @@ export const SDNA = `
         flux_post(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies), isNotPopular(Id).`;
 
 export const messageFilteredQuery = `limit($limit, (order_by([desc(Timestamp)], flux_message_query_popular("$source", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp =< $fromDate)).`;
+export const messageFilteredQueryBackwards = `(order_by([asc(Timestamp)], flux_message_query_popular("$source", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp >= $fromDate).`;
 export const messageQuery = `limit($limit, order_by([desc(Timestamp)], flux_message_query_popular("$source", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular))).`;
 
 export const forumFilteredQuery = `limit($limit, (order_by([desc(Timestamp)], flux_post_query_popular("$source", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies, IsPopular)), Timestamp =< $fromDate)).`;

@@ -270,63 +270,56 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
     //const hasFocus = document.hasFocus();
 
-    if (linkIs.message(link)) {
-      const isSameChannel = await client.perspective.queryProlog(
-        perspectiveUuid,
-        `triple("${channelId}", "${EntryType.Message}", "${link.data.target}").`
-      );
-      if (isSameChannel) {
-        const message = getMessage(link);
+    const isSameChannel = await client.perspective.queryProlog(
+      perspectiveUuid,
+      `triple("${channelId}", "${EntryType.Message}", "${link.data.target}").`
+    );
 
-        if (message) {
-          setState((oldState) => addMessage(oldState, message));
+    if (linkIs.message(link) && isSameChannel) {
+      const message = getMessage(link);
 
-          setState((oldState) => ({
-            ...oldState,
-            isMessageFromSelf: isMessageFromSelf,
-          }));
-        }
-      }
+      if (message) {
+        setState((oldState) => addMessage(oldState, message));
 
-      if (linkIs.reaction(link)) {
-        addReactionToState(link);
-      }
-
-      if (linkIs.editedMessage(link)) {
-        const message = Literal.fromUrl(link.data.target).get();
-        setState((oldState) =>
-          addEditMessage(oldState, link.data.source, {
-            author: link.author,
-            content: message.data,
-            timestamp: link.timestamp,
-          })
-        );
-      }
-
-      if (linkIs.reply(link)) {
-        const isSameChannel = await client.perspective.queryProlog(
-          perspectiveUuid,
-          `triple("${channelId}", "${EntryType.Message}", "${link.data.source}").`
-        );
-
-        if (isSameChannel) {
-          const message = getMessage(link);
-
-          setState((oldState) => addMessage(oldState, message));
-
-          setState((oldState) => ({
-            ...oldState,
-            isMessageFromSelf: false,
-          }));
-        }
-      }
-
-      if (linkIs.hideNeighbourhoodCard(link)) {
-        const id = link.data.source;
-
-        setState((oldState) => addHiddenToMessageToState(oldState, id, true));
+        setState((oldState) => ({
+          ...oldState,
+          isMessageFromSelf: isMessageFromSelf,
+        }));
       }
     }
+
+    if (linkIs.reaction(link) && isSameChannel) {
+      addReactionToState(link);
+    }
+
+    if (linkIs.editedMessage(link) && isSameChannel) {
+      const message = Literal.fromUrl(link.data.target).get();
+      setState((oldState) =>
+        addEditMessage(oldState, link.data.source, {
+          author: link.author,
+          content: message.data,
+          timestamp: link.timestamp,
+        })
+      );
+    }
+
+    if (linkIs.reply(link) && isSameChannel) {
+      const message = getMessage(link);
+
+      setState((oldState) => addMessage(oldState, message));
+
+      setState((oldState) => ({
+        ...oldState,
+        isMessageFromSelf: false,
+      }));
+    }
+
+    if (linkIs.hideNeighbourhoodCard(link) && isSameChannel) {
+      const id = link.data.source;
+
+      setState((oldState) => addHiddenToMessageToState(oldState, id, true));
+    }
+
     if (linkIs.socialDNA(link)) {
       console.warn("got new social dna fetching messages again");
       fetchMessages();
@@ -362,7 +355,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     }
   }
 
-  async function fetchMessages(from?: Date) {
+  async function fetchMessages(from?: Date, backwards?: boolean) {
     setState((oldState) => ({
       ...oldState,
       isFetchingMessages: true,
@@ -375,6 +368,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
           perspectiveUuid,
           channelId,
           from: from,
+          backwards
         });
         newMessages = data.keyedMessages;
         expressionLinkLength = data.expressionLinkLength;
@@ -390,7 +384,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
     setState((oldState) => ({
       ...oldState,
-      showLoadMore: expressionLinkLength === DEFAULT_LIMIT,
+      showLoadMore: expressionLinkLength === DEFAULT_LIMIT || backwards,
       isFetchingMessages: false,
       keyedMessages: {
         ...oldState.keyedMessages,
@@ -475,12 +469,19 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     removeReactionFromState(linkExpression);
   }
 
-  async function loadMore() {
-    const oldestMessage = messages[0];
+  async function loadMore(timestamp: Date, backwards: boolean) {
+    if (backwards) {
+      return await fetchMessages(
+        new Date(timestamp),
+        backwards
+      );
+    } else {
+      const oldestMessage = messages[0];
 
-    return await fetchMessages(
-      oldestMessage ? new Date(oldestMessage.timestamp) : new Date()
-    );
+      return await fetchMessages(
+        oldestMessage ? new Date(oldestMessage.timestamp) : new Date()
+      );
+    }
   }
 
   function setHasNewMessage(value: boolean) {
