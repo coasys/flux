@@ -149,10 +149,6 @@ export default defineComponent({
     ...mapActions(useDataStore, ["setChannelNotificationState"]),
     ...mapState(useDataStore, ["getChannelStates"]),
     ...mapActions(useAppStore, ["setSidebar", "setShowCreateChannel"]),
-    navigateTo(navigate: any) {
-      this.setSidebar(false);
-      navigate();
-    },
     handleToggleClick(channelId: string) {
       this.dataStore.toggleChannelCollapse(channelId);
     },
@@ -165,6 +161,7 @@ export default defineComponent({
       this.navigateToChannel(channelName);
     },
     navigateToChannel(channelName: string) {
+      this.setSidebar(false);
       this.$router.push({
         name: "channel",
         params: {
