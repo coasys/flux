@@ -73,6 +73,9 @@ export default function Post({ post, displayView }) {
             </span>
           </div>
         )}
+        {!hasUrl && !hasDates && !hasImage && (
+          <j-icon name="card-heading"></j-icon>
+        )}
       </div>
       <div class={styles.postContentWrapper}>
         {hasTitle && <div className={styles.postTitle}>{post.title}</div>}
