@@ -121,7 +121,6 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
       scroller?.current?.scrollToIndex({
         index: isReplyFound,
         align: "center",
-        behavior: "smooth",
       });
     } else {
       await loadMoreMessages(reply.timestamp, true);
@@ -131,7 +130,6 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
       scroller?.current?.scrollToIndex({
         index: 0,
         align: "start",
-        behavior: "smooth",
       });
 
       setTimeout(() => {
