@@ -364,7 +364,11 @@
   --j-scrollbar-corner-background: #dfdfdf;
   --j-scrollbar-thumb-box-shadow: none;
   --j-scrollbar-thumb-border-radius: var(--j-border-radius);
-  --j-scrollbar-thumb-background: rgba(180, 180, 180, 0.5);
+  --j-scrollbar-thumb-background: hsl(
+    var(--j-color-ui-hue),
+    5%,
+    var(--j-color-lightness-100)
+  );
 
   /* DEPTH */
   --j-depth-none: none;

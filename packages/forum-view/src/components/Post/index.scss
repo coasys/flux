@@ -33,13 +33,20 @@
   place-items: center;
 }
 
+.postUrl {
+  margin-top: var(--j-space-200);
+  display: flex;
+  gap: var(--j-space-200);
+}
 
+.postUrl a {
+  color: var(--j-color-primary-500);
+}
 
 .postImage {
   object-fit: cover;
   max-width: 100%;
   height: 100%;
-  width: 100%;
 }
 
 .postTitle {
