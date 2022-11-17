@@ -130,9 +130,13 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
 
       scroller?.current?.scrollToIndex({
         index: 0,
-        align: "center",
+        align: "start",
         behavior: "smooth",
       });
+
+      setTimeout(() => {
+        setSelectedReplies(null);
+      }, 1000);
     }
   }, [messages])
 
