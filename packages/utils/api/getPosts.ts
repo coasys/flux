@@ -1,5 +1,4 @@
 import { Post, Entry } from "../types";
-import { GetEntries } from "../types";
 import getEntries from "./getEntries";
 import {
   DEFAULT_LIMIT,
