@@ -106,7 +106,7 @@ export default defineComponent({
             name: "channel",
             params: {
               communityId: communityId.toString(),
-              channelId: channel.name,
+              channelId: channel.id,
             },
           });
         })

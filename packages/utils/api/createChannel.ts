@@ -44,7 +44,7 @@ export async function createChannel({
     });
 
     return {
-      id: entry.id,
+      id: entry.id.replace('flux_entry://', ''),
       name: channelName,
       description: "",
       author: entry.author,
