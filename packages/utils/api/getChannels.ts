@@ -1,7 +1,9 @@
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { CHANNEL, CHANNEL_VIEW, SELF } from "../constants/communityPredicates";
-import { Channel } from "../types";
+import { channelQuery, DEFAULT_LIMIT } from "../constants/sdna";
+import { Channel, Entry } from "../types";
+import getEntries from "./getEntries";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -9,37 +11,45 @@ export interface Payload {
 
 export default async function ({ perspectiveUuid }: Payload) {
   try {
-    const client = await getAd4mClient();
-
-    const expressionLinks = await client.perspective.queryProlog(
+    const entries = await getEntries({
       perspectiveUuid,
-      `link("${SELF}", "${CHANNEL}", Target, Timestamp, Author).`
-    );
+      queries: [
+        {
+          query: channelQuery,
+          variables: {
+            limit: DEFAULT_LIMIT,
+            source: SELF,
+          },
+          resultKeys: [
+            "Id",
+            "Timestamp",
+            "Author",
+            "ChannelName",
+            "ChannelViews"
+          ],
+        },
+      ],
+    })
 
     const channels: Channel[] = [];
 
-    if (expressionLinks) {
-      for (const channel of expressionLinks as LinkExpression[]) {
-        const channelViews = await client.perspective.queryProlog(
-          perspectiveUuid,
-          `link("${channel.Target}", "${CHANNEL_VIEW}", Target, Timestamp, Author).`
-        );
+    if (entries.length > 0) {
+      for (const channel of entries as Entry[]) {
+        const channelName = Literal.fromUrl(channel.data!["ChannelName"][0]['content']).get().data;
 
-        const views = channelViews
-          ? channelViews.map(
-              (view: LinkExpression) => Literal.fromUrl(view.Target).get().data
+        const views = channel.data!["ChannelViews"]
+          ? channel.data!["ChannelViews"].map(
+              (view: LinkExpression) => Literal.fromUrl(view.content).get().data
             )
           : [];
 
-        const literal = Literal.fromUrl(channel.Target).get();
-
         channels.push({
-          id: channel.Target,
+          id: channel.id.replace("flux_entry://", ""),
           perspectiveUuid: perspectiveUuid,
-          name: literal.data,
+          name: channelName,
           description: "",
-          timestamp: literal.timestamp,
-          author: channel.Author,
+          timestamp: channel.timestamp,
+          author: channel.author,
           views: views,
         });
       }
