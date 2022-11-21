@@ -94,11 +94,12 @@ export enum EntryType {
   PollPost = "flux://poll_post",
   CalendarEvent = "flux://calendar_event",
   LinkPost = "flux://link_post",
+  Channel = "flux://has_channel"
 }
 
 export interface Entry {
   id: string;
-  author: String;
+  author: string;
   timestamp: Date;
   types: EntryType[];
   source?: string;
