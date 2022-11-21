@@ -158,7 +158,7 @@ export default defineComponent({
       view: ChannelView
     ) {
       this.dataStore.setCurrentChannelView({ channelId, view });
-      this.navigateToChannel(channelName);
+      this.navigateToChannel(channelId);
     },
     navigateToChannel(channelName: string) {
       this.setSidebar(false);
