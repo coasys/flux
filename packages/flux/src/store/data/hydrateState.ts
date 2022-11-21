@@ -1,13 +1,12 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { CHANNEL, SELF } from "utils/constants/communityPredicates";
 import { getMetaFromLinks } from "utils/helpers/getNeighbourhoodMeta";
-import { LinkExpression, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
+import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useDataStore } from ".";
 import { CommunityState, LocalCommunityState } from "../types";
 import getCommunityMetadata from "utils/api/getCommunityMetadata";
 import { useUserStore } from "../user";
 import getProfile from "utils/api/getProfile";
-import { LinkQuery } from "@perspect3vism/ad4m";
+import getChannels from "utils/api/getChannels";
 
 export async function buildCommunity(perspective: PerspectiveProxy) {
   const dataStore = useDataStore();
@@ -93,13 +92,7 @@ export async function hydrateState() {
 
     if (hasCommunityAlready) return;
 
-    const channelLinks = await client.perspective.queryLinks(
-      perspective.uuid,
-      new LinkQuery({
-        source: SELF,
-        predicate: CHANNEL,
-      })
-    );
+    const channelLinks = await getChannels({perspectiveUuid: perspective.uuid})
 
     if (perspective.sharedUrl !== undefined && perspective.neighbourhood) {
       const newCommunity = await buildCommunity(perspective);
@@ -112,7 +105,7 @@ export async function hydrateState() {
         .getChannelStates(perspective.uuid)
         .filter(
           (channel) =>
-            !channelLinks.map((e) => e.data.target).includes(channel.id)
+            !channelLinks.map((e) => e.id).includes(channel.id)
         );
 
       for (const c of filteredChannels) {
@@ -124,26 +117,14 @@ export async function hydrateState() {
       if (channelLinks) {
         for (const link of channelLinks) {
           try {
-            const channel = link.data.target;
-            const channelData = await Literal.fromUrl(channel).get();
             const exist = channels.find(
               (c: any) =>
-                c.id === channel && c.sourcePerspective === perspective.uuid
+                c.id === link.id && c.sourcePerspective === perspective.uuid
             );
             if (!exist) {
               dataStore.addChannel({
                 communityId: perspective.uuid,
-                channel: {
-                  id: channel,
-                  name: channelData.data,
-                  author: channelData.author,
-                  sourcePerspective: perspective.uuid,
-                  hasNewMessages: false,
-                  timestamp: link.timestamp,
-                  notifications: {
-                    mute: false,
-                  },
-                },
+                channel: link
               });
             }
           } catch (e) {
