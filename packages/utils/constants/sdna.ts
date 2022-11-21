@@ -10,6 +10,8 @@ import {
   START_DATE,
   END_DATE,
   ENTRY_TYPE,
+  CHANNEL_NAME,
+  CHANNEL_VIEW,
 } from "../constants/communityPredicates";
 import { EntryType } from "../types";
 
@@ -28,6 +30,11 @@ export const SDNA = `
 
     isPopular(Message) :- emojiCount(Message, Count), Count >= $emojiCount.
     isNotPopular(Message) :- emojiCount(Message, Count), Count < $emojiCount.
+
+    flux_channel(Source, Target, Timestamp, Author, ChannelNames, ChannelViews):-
+        link(Source, "${EntryType.Channel}", Target, Timestamp, Author),
+        findall((ChannelName, ChannelNameTimestamp, ChannelNameAuthor), link(Target, "${CHANNEL_NAME}", ChannelName, ChannelNameTimestamp, ChannelNameAuthor), ChannelNames),
+        findall((ChannelView, ChannelViewTimestamp, ChannelViewAuthor), link(Target, "${CHANNEL_VIEW}", ChannelView, ChannelViewTimestamp, ChannelViewAuthor), ChannelViews).
 
     flux_message(Source, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages):-
         link(Source, "${EntryType.Message}", Message, Timestamp, Author),
@@ -66,6 +73,7 @@ export const SDNA = `
 
 export const messageFilteredQuery = `limit($limit, (order_by([desc(Timestamp)], flux_message_query_popular("$source", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp =< $fromDate)).`;
 export const messageFilteredQueryBackwards = `(order_by([asc(Timestamp)], flux_message_query_popular("$source", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp >= $fromDate).`;
+export const channelQuery = `order_by([asc(Timestamp)], flux_channel("$source", Target, Timestamp, Author, ChannelNames, ChannelViews)).`;
 export const messageQuery = `limit($limit, order_by([desc(Timestamp)], flux_message_query_popular("$source", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular))).`;
 
 export const forumFilteredQuery = `limit($limit, (order_by([desc(Timestamp)], flux_post_query_popular("$source", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies, IsPopular)), Timestamp =< $fromDate)).`;
