@@ -71,9 +71,9 @@ export default {
 
   getChannel:
     (state: DataState) =>
-    (communityId: string, channelId: string): ChannelState | undefined => {
+    (channelId: string): ChannelState | undefined => {
       const channel = Object.values(state.channels).find(
-        (c) => c.sourcePerspective === communityId && c.name === channelId
+        (c) => c.id === channelId
       );
 
       return channel;

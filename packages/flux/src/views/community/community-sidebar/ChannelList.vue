@@ -22,9 +22,9 @@
             class="channel"
             :class="{ 'channel--muted': channel.notifications?.mute }"
             :selected="
-              channel.name === $route.params.channelId && !channel.collapsed
+              channel.id === $route.params.channelId && !channel.collapsed
             "
-            @click="() => navigateToChannel(channel.name)"
+            @click="() => navigateToChannel(channel.id)"
           >
             {{ channel.name }}
             <j-icon
@@ -57,7 +57,7 @@
             <j-menu-item
               :selected="
                 view.type === channel.currentView &&
-                channel.name === $route.params.channelId
+                channel.id === $route.params.channelId
               "
               size="sm"
               v-for="view in getViewOptions(channel.views)"

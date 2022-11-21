@@ -13,8 +13,7 @@
       :key="channel.id"
       :style="{
         height:
-          channel.name === channelId &&
-          channel.sourcePerspective === communityId
+          channel.id === channelId 
             ? '100%'
             : '0',
       }"
@@ -22,8 +21,7 @@
       <channel-view
         v-if="loadedChannels[channel.id]"
         v-show="
-          channel.name === channelId &&
-          channel.sourcePerspective === communityId
+          channel.id === channelId
         "
         :channelId="channel.id"
         :communityId="communityId"
@@ -182,7 +180,8 @@ export default defineComponent({
             channelId: id,
           });
 
-          const channel = this.dataStore.getChannel(this.communityId, id);
+          const channel = this.dataStore.getChannel(id);
+
 
           if (channel) {
             this.notSynced = false;
@@ -212,7 +211,7 @@ export default defineComponent({
       if (channels.length > 0) {
         this.notSynced = false;
         const firstChannel =
-          this.dataStore.getChannelStates(communityId)[0].name;
+          this.dataStore.getChannelStates(communityId)[0].id;
         const currentChannelId =
           this.community.state.currentChannelId || firstChannel;
 

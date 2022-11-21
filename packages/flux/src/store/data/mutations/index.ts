@@ -220,7 +220,7 @@ export default {
     value: boolean;
   }): void {
     const state = useDataStore();
-    const channel = state.getChannel(payload.communityId, payload.channelId);
+    const channel = state.getChannel(payload.channelId);
     const tempCommunity = state.getCommunity(payload.communityId);
     const community = state.communities[tempCommunity.uuid];
     channel!.hasNewMessages = payload.value;
