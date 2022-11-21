@@ -1,29 +1,28 @@
 import React, { createContext, useState } from "react";
 import { EntryType, Post } from "../types";
+import getPosts from "../api/getPosts";
 
-type State = {
+export type State = {
   communityId: string;
   channelId: string;
-  posts: {
-    [x: EntryType]: {
-      [x: string]: Post;
-    };
+  keyedPosts: {
+    [x: string]: Post;
   };
 };
 
-type ContextProps = {
+export interface ContextProps {
   state: State;
   methods: {
-    loadPost: (id: string, type: EntryType) => void;
-    loadPosts: (type: EntryType) => void;
+    loadPost: (id: string) => void;
+    loadPosts: (types: EntryType[], fromDate?: Date) => void;
   };
-};
+}
 
 const initialState: ContextProps = {
   state: {
     communityId: "",
     channelId: "",
-    posts: {},
+    keyedPosts: {},
   },
   methods: {
     loadPost: () => null,
@@ -31,23 +30,50 @@ const initialState: ContextProps = {
   },
 };
 
-const ChannelContext = createContext(initialState);
+const ChannelContext = createContext(initialState as ContextProps);
 
 export function ChannelProvider({ channelId, communityId, children }: any) {
-  const [state, setState] = useState(initialState.state);
+  const [state, setState] = useState<State>(initialState.state);
 
-  function loadPosts() {}
+  const posts = Object.values(state.keyedPosts)
+    .map((i: Post) => i)
+    .sort((a, b) => b.timestamp - a.timestamp);
+
+  function loadPosts(types: EntryType[], fromDate?: Date) {
+    getPosts(communityId, channelId, fromDate).then((posts) => {
+      console.log("load posts", posts);
+      setState((oldState) => addPosts(oldState, posts));
+    });
+  }
 
   return (
     <ChannelContext.Provider
       value={{
-        state: { ...state, channelId, communityId },
-        methods: {},
+        state: { ...state, channelId, communityId, posts },
+        methods: {
+          loadPosts,
+        },
       }}
     >
       {children}
     </ChannelContext.Provider>
   );
+}
+
+function toKeyedObject(array: any[], key: string) {
+  return array.reduce((acc, item) => {
+    return {
+      ...acc,
+      [item[key]]: item,
+    };
+  }, {});
+}
+
+function addPosts(oldState, posts) {
+  return {
+    ...oldState,
+    keyedPosts: { ...oldState.keyedPosts, ...toKeyedObject(posts, "id") },
+  };
 }
 
 export default ChannelContext;

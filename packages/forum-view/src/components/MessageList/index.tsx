@@ -1,50 +1,28 @@
-import { useEffect, useState } from "preact/hooks";
-import Header from "../Header";
-import getPosts from "utils/api/getPosts";
-import { checkUpdateSDNAVersion } from "utils/api/updateSDNA";
-import Post from "../Post";
+import { useContext, useEffect, useState } from "preact/hooks";
+import PostItem from "../PostItem";
 import style from "./index.scss";
 import {
   DisplayView,
   displayOptions,
   postOptions,
 } from "../../constants/options";
+import ChannelContext from "utils/react/ChannelContext";
 
-export default function MessageList({ perspectiveUuid, channelId }) {
-  const [posts, setPosts] = useState([]);
+export default function MessageList() {
   const [sortBy, setSortBy] = useState("");
   const [view, setView] = useState(DisplayView.Compact);
 
-  const sortedPosts = sortBy
-    ? posts.filter((post) => post.types.includes(sortBy))
-    : posts;
+  const { state, methods } = useContext(ChannelContext);
 
-  async function loadMoreMessages(source: string, fromDate?: Date) {
-    try {
-      const posts = await getPosts(perspectiveUuid, source, fromDate);
-      console.log({ posts });
-      setPosts(posts);
-      if (posts.length > 0) {
-        await checkUpdateSDNAVersion(perspectiveUuid, posts[0].timestamp);
-      }
-    } catch (e) {
-      if (e.message.includes("existence_error")) {
-        console.error(
-          "We dont have the SDNA to make this query, please wait for community to sync"
-        );
-        await checkUpdateSDNAVersion(perspectiveUuid, new Date());
-        throw e;
-      } else {
-        throw e;
-      }
-    }
-  }
+  const sortedPosts = sortBy
+    ? state.posts.filter((post) => post.types.includes(sortBy))
+    : state.posts;
 
   useEffect(() => {
-    if (channelId && perspectiveUuid) {
-      loadMoreMessages(channelId);
+    if (state.channelId && state.communityId) {
+      methods.loadPosts([]);
     }
-  }, [channelId, perspectiveUuid]);
+  }, [state.channelId, state.communityId]);
 
   const gridClass = view === DisplayView.Grid ? style.grid : "";
   const currentOption = displayOptions.find((o) => o.value === view);
@@ -56,7 +34,6 @@ export default function MessageList({ perspectiveUuid, channelId }) {
 
   return (
     <div className={style.messageList}>
-      <Header></Header>
       <j-box pb="500">
         <j-flex a="center" j="between">
           <j-popover>
@@ -110,11 +87,11 @@ export default function MessageList({ perspectiveUuid, channelId }) {
         {sortedPosts
           .filter((post) => post.id.startsWith("flux_entry://"))
           .map((post) => (
-            <Post post={post} displayView={view}></Post>
+            <PostItem post={post} displayView={view}></PostItem>
           ))}
       </div>
       <j-flex a="center" j="center">
-        <j-button variant="link" onClick={() => loadMoreMessages(channelId)}>
+        <j-button variant="link" onClick={() => methods.loadPosts([])}>
           Load more
         </j-button>
       </j-flex>
