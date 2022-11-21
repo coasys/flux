@@ -34,7 +34,6 @@ export default async function ({
   data,
 }: Payload) {
   const postData = await createPostData({ entryType: type, data });
-
   return createEntry({
     perspectiveUuid: communityId,
     source: channelId,

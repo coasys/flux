@@ -1,27 +1,32 @@
 import { useState } from "preact/hooks";
 import { createContext } from "preact";
 
+export enum View {
+  Feed = "FEED",
+  Post = "POST",
+}
+
 type State = {
-  currentReply: string;
-  currentMessageEdit: string;
+  view: View;
+  currentPost: string;
 };
 
 type ContextProps = {
   state: State;
   methods: {
-    setCurrentReply: (id: string) => void;
-    setCurrentEditMessage: (id: string) => void;
+    goToPost: (id: string) => void;
+    goToFeed: () => void;
   };
 };
 
 const initialState: ContextProps = {
   state: {
-    currentReply: "",
-    currentMessageEdit: null
+    view: View.Feed,
+    currentPost: null,
   },
   methods: {
-    setCurrentReply: (id: string) => null,
-    setCurrentEditMessage: (id: string) => null,
+    goToPost: (id: string) => null,
+    goToFeed: () => null,
   },
 };
 
@@ -30,17 +35,21 @@ const UIContext = createContext(initialState);
 export function UIProvider({ children }: any) {
   const [state, setState] = useState(initialState.state);
 
+  function goToPost(id: string) {
+    setState({ ...state, view: View.Post, currentPost: id });
+  }
+
+  function goToFeed() {
+    setState({ ...state, view: View.Feed, currentPost: null });
+  }
+
   return (
     <UIContext.Provider
       value={{
         state,
         methods: {
-          setCurrentReply(id: string) {
-            setState({ ...state, currentReply: id });
-          },
-          setCurrentEditMessage(id: string) {
-            setState({ ...state, currentMessageEdit: id });
-          },
+          goToFeed,
+          goToPost,
         },
       }}
     >

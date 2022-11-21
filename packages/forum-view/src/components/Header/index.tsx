@@ -1,20 +1,26 @@
 import { useContext, useState } from "preact/hooks";
 import styles from "./index.scss";
-import { AgentContext, ChatContext } from "utils/react";
+import { AgentContext } from "utils/react";
 import Avatar from "../Avatar";
 import CreatePost from "../CreatePost";
 import { EntryType } from "utils/types";
 import { postOptions } from "../../constants/options";
+import ChannelContext from "utils/react/ChannelContext";
 
 export default function Header() {
   const [initialType, setInitialType] = useState(EntryType.SimplePost);
   const { state: agentState } = useContext(AgentContext);
-  const { state } = useContext(ChatContext);
+  const { state, methods } = useContext(ChannelContext);
   const [open, setOpen] = useState(false);
 
   function handlePostClick(type) {
     setInitialType(type);
     setOpen(true);
+  }
+
+  function onPublished() {
+    methods.loadPosts([]);
+    setOpen(false);
   }
 
   return (
@@ -58,7 +64,7 @@ export default function Header() {
             communityId={state.communityId}
             channelId={state.channelId}
             initialType={initialType}
-            onPublished={() => setOpen(false)}
+            onPublished={onPublished}
           ></CreatePost>
         )}
       </j-modal>

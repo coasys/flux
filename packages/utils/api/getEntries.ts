@@ -12,6 +12,7 @@ export default async function getEntries(input: GetEntries): Promise<Entry[]> {
       input.perspectiveUuid,
       prologQuery
     );
+
     const cleanedPrologResult = await extractPrologResults(
       prologResult,
       query.resultKeys

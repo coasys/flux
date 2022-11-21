@@ -1,27 +1,44 @@
 import MessageList from "./components/MessageList";
 import { ChatProvider, PerspectiveProvider, AgentProvider } from "utils/react";
-import { UIProvider } from "./context/UIContext";
+import UIContext, { UIProvider, View } from "./context/UIContext";
 import styles from "./index.scss";
+import { ChannelProvider } from "utils/react/ChannelContext";
+import Header from "./components/Header";
+import { useContext } from "preact/hooks";
+import Post from "./components/Post";
 
-const MainComponent = ({ perspectiveUuid, channel }) => {
+function Feed() {
   return (
-    <div class={styles.container}>
-      <MessageList perspectiveUuid={perspectiveUuid} channelId={channel} />
-    </div>
+    <>
+      <Header></Header>
+      <MessageList />
+    </>
   );
-};
+}
 
-export default ({ perspectiveUuid = "", port = "", channel = "" }) => {
+function Main() {
+  const { state } = useContext(UIContext);
+
+  switch (state.view) {
+    case View.Feed:
+      return <Feed></Feed>;
+    case View.Post:
+      return <Post></Post>;
+  }
+}
+
+export default ({ perspectiveUuid, channel }) => {
   return (
     <UIProvider>
       <AgentProvider>
         <PerspectiveProvider perspectiveUuid={perspectiveUuid}>
-          <ChatProvider perspectiveUuid={perspectiveUuid} channelId={channel}>
-            <MainComponent
-              perspectiveUuid={perspectiveUuid}
-              channel={channel}
-            ></MainComponent>
-          </ChatProvider>
+          <ChannelProvider communityId={perspectiveUuid} channelId={channel}>
+            <ChatProvider perspectiveUuid={perspectiveUuid} channelId={channel}>
+              <div class={styles.container}>
+                <Main></Main>
+              </div>
+            </ChatProvider>
+          </ChannelProvider>
         </PerspectiveProvider>
       </AgentProvider>
     </UIProvider>
