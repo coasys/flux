@@ -22,7 +22,7 @@ export const DEFAULT_LIMIT = 50;
 export const LATEST_SDNA_VERSION = 8;
 export const SDNA_CREATION_DATE = new Date("2022-11-18T17:22:56Z");
 
-//Note: in the prolog queries below, the %% values are to be string templated before use
+//Note: in the prolog queries below, the $ values are to be string templated before use
 
 export const SDNA = `
     emojiCount(Message, Count):- 
@@ -31,10 +31,10 @@ export const SDNA = `
     isPopular(Message) :- emojiCount(Message, Count), Count >= $emojiCount.
     isNotPopular(Message) :- emojiCount(Message, Count), Count < $emojiCount.
 
-    flux_channel(Source, Target, Timestamp, Author, ChannelNames, ChannelViews):-
+    flux_channel(Source, Target, Timestamp, Author, Name, Views):-
         link(Source, "${EntryType.Channel}", Target, Timestamp, Author),
-        findall((ChannelName, ChannelNameTimestamp, ChannelNameAuthor), link(Target, "${CHANNEL_NAME}", ChannelName, ChannelNameTimestamp, ChannelNameAuthor), ChannelNames),
-        findall((ChannelView, ChannelViewTimestamp, ChannelViewAuthor), link(Target, "${CHANNEL_VIEW}", ChannelView, ChannelViewTimestamp, ChannelViewAuthor), ChannelViews).
+        findall((Name, NameTimestamp, NameAuthor), link(Target, "${CHANNEL_NAME}", Name, NameTimestamp, NameAuthor), Name),
+        findall((View, ViewTimestamp, ViewAuthor), link(Target, "${CHANNEL_VIEW}", View, ViewTimestamp, ViewAuthor), Views).
 
     flux_message(Source, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages):-
         link(Source, "${EntryType.Message}", Message, Timestamp, Author),
@@ -54,7 +54,8 @@ export const SDNA = `
         link(Source, "${EntryType.ImagePost}", Id, Timestamp, Author);
         link(Source, "${EntryType.LinkPost}", Id, Timestamp, Author);
         link(Source, "${EntryType.PollPost}", Id, Timestamp, Author);
-        link(Source, "${EntryType.SimplePost}", Id, Timestamp, Author),
+        link(Source, "${EntryType.SimplePost}", Id, Timestamp, Author);
+        link(Source, "${EntryType.Message}", Id, Timestamp, Author),
         findall((Title, TitleTimestamp, TitleAuthor), link(Id, "${TITLE}", Title, TitleTimestamp, TitleAuthor), Title),
         findall((Body, BodyTimestamp, BodyAuthor), link(Id, "${BODY}", Body, BodyTimestamp, BodyAuthor), Body),
         findall((Reaction, ReactionTimestamp, ReactionAuthor), link(Id, "${REACTION}", Reaction, ReactionTimestamp, ReactionAuthor), Reactions),
@@ -73,7 +74,7 @@ export const SDNA = `
 
 export const messageFilteredQuery = `limit($limit, (order_by([desc(Timestamp)], flux_message_query_popular("$source", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp =< $fromDate)).`;
 export const messageFilteredQueryBackwards = `(order_by([asc(Timestamp)], flux_message_query_popular("$source", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp >= $fromDate).`;
-export const channelQuery = `order_by([asc(Timestamp)], flux_channel("$source", Target, Timestamp, Author, ChannelNames, ChannelViews)).`;
+export const channelQuery = `order_by([asc(Timestamp)], flux_channel("$source", Id, Timestamp, Author, Name, Views)).`;
 export const messageQuery = `limit($limit, order_by([desc(Timestamp)], flux_message_query_popular("$source", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular))).`;
 
 export const forumFilteredQuery = `limit($limit, (order_by([desc(Timestamp)], flux_post_query_popular("$source", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies, IsPopular)), Timestamp =< $fromDate)).`;

@@ -32,19 +32,19 @@ export async function createChannel({
     const entry = await createEntry({
       perspectiveUuid,
       types: [EntryType.Channel],
-      data
-    })
+      data,
+    });
 
     views.forEach(async (view) => {
       await client.perspective.addLink(perspectiveUuid, {
         source: entry.id,
-        target: await client.expression.create(view, "literal"),
+        target: view,
         predicate: CHANNEL_VIEW,
       });
     });
 
     return {
-      id: entry.id.replace('flux_entry://', ''),
+      id: entry.id.replace("flux_entry://", ""),
       name: channelName,
       description: "",
       author: entry.author,
