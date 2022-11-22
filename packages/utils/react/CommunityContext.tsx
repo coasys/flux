@@ -47,9 +47,9 @@ const initialState: ContextProps = {
   },
 };
 
-const PerspectiveContext = createContext<ContextProps>(initialState);
+const CommunityContext = createContext<ContextProps>(initialState);
 
-export function PerspectiveProvider({ perspectiveUuid, children }: any) {
+export function CommunityProvider({ perspectiveUuid, children }: any) {
   const [state, setState] = useState(initialState.state);
   const linkSubscriberRef = useRef();
 
@@ -177,7 +177,7 @@ export function PerspectiveProvider({ perspectiveUuid, children }: any) {
   }
 
   return (
-    <PerspectiveContext.Provider
+    <CommunityContext.Provider
       value={{
         state: { ...state, uuid: perspectiveUuid },
         methods: {
@@ -186,8 +186,8 @@ export function PerspectiveProvider({ perspectiveUuid, children }: any) {
       }}
     >
       {children}
-    </PerspectiveContext.Provider>
+    </CommunityContext.Provider>
   );
 }
 
-export default PerspectiveContext;
+export default CommunityContext;

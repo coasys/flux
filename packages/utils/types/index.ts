@@ -83,8 +83,8 @@ export interface Profiles {
 }
 
 export enum ChannelView {
-  Chat = "CHAT",
-  Forum = "FORUM",
+  Chat = "flux://has_chat_view",
+  Forum = "flux://has_post_view",
 }
 
 export enum EntryType {
@@ -94,7 +94,7 @@ export enum EntryType {
   PollPost = "flux://poll_post",
   CalendarEvent = "flux://calendar_event",
   LinkPost = "flux://link_post",
-  Channel = "flux://has_channel"
+  Channel = "flux://has_channel",
 }
 
 export interface Entry {

@@ -12,9 +12,14 @@
           </j-text>
         </j-box>
         <j-box py="500">
-          <j-button size="xl" @click="currentIndex = 1" variant="primary">
-            Get Started
-          </j-button>
+          <j-flex direction="column" gap="200">
+            <j-button size="xl" @click="currentIndex = 1" variant="primary">
+              Get Started
+            </j-button>
+            <j-button size="lg" variant="link" @click="$emit('connectToAd4m')">
+              Sign in
+            </j-button>
+          </j-flex>
         </j-box>
       </div>
     </div>

@@ -1,5 +1,10 @@
 import MessageList from "./components/MessageList";
-import { ChatProvider, PerspectiveProvider, AgentProvider } from "utils/react";
+import {
+  ChatProvider,
+  PerspectiveProvider,
+  AgentProvider,
+  CommunityProvider,
+} from "utils/react";
 import UIContext, { UIProvider, View } from "./context/UIContext";
 import styles from "./index.scss";
 import { ChannelProvider } from "utils/react/ChannelContext";
@@ -31,15 +36,20 @@ export default ({ perspectiveUuid, channel }) => {
   return (
     <UIProvider>
       <AgentProvider>
-        <PerspectiveProvider perspectiveUuid={perspectiveUuid}>
-          <ChannelProvider communityId={perspectiveUuid} channelId={channel}>
-            <ChatProvider perspectiveUuid={perspectiveUuid} channelId={channel}>
-              <div class={styles.container}>
-                <Main></Main>
-              </div>
-            </ChatProvider>
-          </ChannelProvider>
-        </PerspectiveProvider>
+        <CommunityProvider perspectiveUuid={perspectiveUuid}>
+          <PerspectiveProvider perspectiveUuid={perspectiveUuid}>
+            <ChannelProvider communityId={perspectiveUuid} channelId={channel}>
+              <ChatProvider
+                perspectiveUuid={perspectiveUuid}
+                channelId={channel}
+              >
+                <div class={styles.container}>
+                  <Main></Main>
+                </div>
+              </ChatProvider>
+            </ChannelProvider>
+          </PerspectiveProvider>
+        </CommunityProvider>
       </AgentProvider>
     </UIProvider>
   );

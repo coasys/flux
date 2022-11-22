@@ -73,11 +73,11 @@
         :url="community.neighbourhood.image"
       ></Avatar>
       <div>
-        <j-text size="600" nomargin color="black">
+        <j-text size="500" nomargin color="black">
           {{ community.neighbourhood.name }}
         </j-text>
-        <j-text nomargin color="ui-500">
-          {{ community.neighbourhood.description }}
+        <j-text nomargin size="400" color="ui-500">
+          {{ community.neighbourhood.description || "No description" }}
         </j-text>
       </div>
     </div>
