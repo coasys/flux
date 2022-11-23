@@ -35,7 +35,7 @@ export default async function getProfile(did: string): Promise<Profile> {
     did: "",
   };
 
-  const dexie = new DexieProfile(`flux://profile`, 1);
+  const dexie = new DexieProfile(`flux://profile`);
   let cachedProfile = await dexie.get(cleanedDid);
 
   if (cachedProfile) {

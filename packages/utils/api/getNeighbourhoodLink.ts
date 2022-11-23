@@ -7,6 +7,7 @@ import {
   NAME,
 } from "../constants/communityPredicates";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { cacheLinks, getCacheLinks } from "../helpers/cacheLinks";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -74,9 +75,16 @@ export default async function ({ message, isHidden }: Payload) {
       }
 
       for (const url of urls) {
-        const data = await fetch(
-          "https://jsonlink.io/api/extract?url=" + url
-        ).then((res) => res.json());
+        let data = undefined;
+        data = await getCacheLinks(url);
+
+        if (!data) {
+          data = await fetch(
+            "https://jsonlink.io/api/extract?url=" + url
+          ).then((res) => res.json());
+          
+          cacheLinks(url, data);
+        } 
 
         hoods.push({
           type: 'link',
