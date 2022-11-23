@@ -28,7 +28,7 @@ export function findNeighbourhood(str: string) {
   const urlRex =
     /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/;
   for (const match of uritokens) {
-    if (!urlRex.test(match[0])) {
+    if (!urlRex.test(match[0]) && match[0].trim().length > 0) {
       urifiltered.push(match[0]);
     }
   }
@@ -45,7 +45,7 @@ export default async function ({ message, isHidden }: Payload) {
     const client = await getAd4mClient();
 
     // @ts-ignore
-    const [neighbourhoods] = findNeighbourhood(message);
+    const [neighbourhoods, urls] = findNeighbourhood(message);
 
     const hoods = [];
 
@@ -71,6 +71,19 @@ export default async function ({ message, isHidden }: Payload) {
           url: neighbourhood || "",
           perspectiveUuid,
         });
+      }
+
+      for (const url of urls) {
+        const data = await fetch(
+          "https://jsonlink.io/api/extract?url=" + url
+        ).then((res) => res.json());
+
+        hoods.push({
+          type: 'url',
+          name: data.title || "", 
+          description: data.description || "",
+          image: data.images[0] || ""
+        })
       }
     }
 

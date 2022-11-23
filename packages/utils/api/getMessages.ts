@@ -90,7 +90,7 @@ export default async function ({ perspectiveUuid, channelId, from, backwards }: 
       timestamp: new Date(result.Timestamp),
       reactions: result.Reactions,
       replies: result.Replies,
-      isNeighbourhoodCardHidden: result.AllCardHidden !== undefined,
+      isNeighbourhoodCardHidden: result.AllCardHidden.length > 0,
       isPopular: result.IsPopular,
       editMessages: result.EditMessages,
     });
