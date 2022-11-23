@@ -1,6 +1,7 @@
 import { Mark, markPasteRule, mergeAttributes } from "@tiptap/core";
 import { find } from "linkifyjs";
 import { autolink } from "./helpers/autoLink";
+import styles from "../index.scss";
 
 export interface LinkOptions {
   /**
@@ -54,7 +55,9 @@ export const NeighbourhoodLink = Mark.create<LinkOptions>({
       openOnClick: true,
       linkOnPaste: true,
       autolink: true,
-      HTMLAttributes: {},
+      HTMLAttributes: {
+        class: styles.linkStyles,
+      },
     };
   },
 

@@ -131,7 +131,11 @@ export default ({
             class: styles.editorParagraph,
           },
         }),
-        Link,
+        Link.configure({
+          HTMLAttributes: {
+            class: styles.linkStyles,
+          },
+        }),
         NeighbourhoodLink,
         Bold,
         Strike,
