@@ -41,6 +41,7 @@
     "emoji-short-name": "^2.0.0",
     "node-emoji": "^1.11.0",
     "preact": "^10.5.14",
+    "react-dropzone": "^14.2.3",
     "react-hint": "^3.2.1",
     "react-virtuoso": "^3.1.1",
     "tippy.js": "^6.3.1",

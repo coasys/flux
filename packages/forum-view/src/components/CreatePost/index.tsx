@@ -3,6 +3,21 @@ import { EntryType } from "utils/types";
 import Editor from "./Editor";
 import createPost from "utils/api/createPost";
 import { postOptions } from "../../constants/options";
+import FileUpload from "../../components/FileUpload";
+import { format, set } from "date-fns";
+import { parse } from "date-fns/esm";
+
+const initialState = {
+  title: "",
+  body: "",
+  url: "",
+  image: "",
+  startDate: format(new Date(), "yyyy-MM-dd"),
+  startTime: "",
+  endDate: "",
+  endTime: "",
+  options: [],
+};
 
 export default function MakeEntry({
   channelId,
@@ -10,34 +25,66 @@ export default function MakeEntry({
   onPublished,
   initialType,
 }) {
-  const inputRef = useRef(null);
+  const inputRefs = useRef<{ [x: string]: { isValid: boolean; el: any } }>({});
   const [isCreating, setIsCreating] = useState(false);
-  const [entryType, setEntryType] = useState(initialType);
-  const [state, setState] = useState({
-    title: "",
-    body: "",
-    url: "",
-    imagePath: "",
-    image: "",
-    startDate: "",
-    endDate: "",
-    options: [],
-  });
+  const [entryType, setEntryType] = useState<EntryType>(initialType);
+  const [state, setState] = useState(initialState);
 
   useEffect(() => {
     setTimeout(() => {
-      inputRef.current?.focus();
+      inputRefs.current.title?.el.focus();
     }, 100);
   }, []);
 
+  // We set dynamic refs based on the input name
+  // When an inputfield is hidden we remove it
+  // Save info about the validity so we can validate the whole form
+  function setInputRef(ref, name) {
+    if (ref) {
+      inputRefs.current = {
+        ...inputRefs.current,
+        [name]: { el: ref, isValid: false },
+      };
+    } else {
+      delete inputRefs.current[name];
+    }
+  }
+
+  function validateAllInputs() {
+    return Object.values(inputRefs.current).every((ref) => {
+      return ref.el.validate();
+    });
+  }
+
+  function parseDateTime(date: string, time: string) {
+    if (date && time) {
+      return parse(`${date}-${time}`, "yyyy-MM-dd-HH:mm", new Date());
+    } else {
+      return new Date();
+    }
+  }
+
   async function publish() {
+    const canSubmit = validateAllInputs();
+    if (!canSubmit) return;
+
     setIsCreating(true);
+
+    const startDate = parseDateTime(state.startDate, state.startTime);
+    const endDate = parseDateTime(state.endDate, state.endTime);
+
+    console.log({ startDate, endDate });
+
     try {
       await createPost({
         channelId,
         communityId,
         type: entryType,
-        data: state,
+        data: {
+          ...state,
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+        },
       });
       onPublished(true);
     } catch (e) {
@@ -51,27 +98,26 @@ export default function MakeEntry({
     setState({ ...state, [e.target.name]: e.target.value });
   }
 
-  function handleImage(e: any) {
-    const target = e.target;
-    if (!target.files || !target.files[0]) return;
+  function handleImage(files: any) {
+    if (!files || !files[0]) return;
+    console.log(files[0]);
     const FR = new FileReader();
     FR.addEventListener("load", function (evt) {
-      const img = document.createElement("img");
-      img.src = evt.target.result;
+      console.log(evt.target.result);
       setState({
         ...state,
-        imagePath: e.target.value,
         image: evt.target.result,
       });
     });
-    FR.readAsDataURL(target.files[0]);
+    FR.readAsDataURL(files[0]);
   }
 
   const showBody =
     entryType === EntryType.SimplePost || entryType === EntryType.CalendarEvent;
   const showUrl = entryType === EntryType.LinkPost;
   const showStartDate = entryType === EntryType.CalendarEvent;
-  const showEndDate = entryType === EntryType.CalendarEvent;
+  const showEndDate =
+    entryType === EntryType.CalendarEvent && state.startDate && state.startTime;
   const showImage = entryType === EntryType.ImagePost;
 
   return (
@@ -98,10 +144,11 @@ export default function MakeEntry({
         <j-flex direction="column" gap="300">
           <j-input
             required
+            autovalidate
+            ref={(ref) => setInputRef(ref, "title")}
             label="Title"
             onInput={handleChange}
             value={state.title}
-            ref={inputRef}
             size="xl"
             name="title"
           ></j-input>
@@ -115,6 +162,7 @@ export default function MakeEntry({
           )}
           {showUrl && (
             <j-input
+              ref={(ref) => setInputRef(ref, "url")}
               label="Url"
               autovalidate
               size="xl"
@@ -126,34 +174,66 @@ export default function MakeEntry({
             ></j-input>
           )}
           {showStartDate && (
-            <j-input
-              required
-              name="startDate"
-              onInput={handleChange}
-              label="Start"
-              type="datetime-local"
-            ></j-input>
+            <j-flex a="end" gap="400">
+              <j-input
+                full
+                autovalidate
+                ref={(ref) => setInputRef(ref, "startDate")}
+                required
+                name="startDate"
+                value={state.startDate}
+                onInput={handleChange}
+                label="Start"
+                type="date"
+              ></j-input>
+              <j-input
+                full
+                autovalidate
+                required
+                ref={(ref) => setInputRef(ref, "startTime")}
+                name="startTime"
+                value={state.startTime}
+                onInput={handleChange}
+                label=""
+                type="time"
+              ></j-input>
+            </j-flex>
           )}
           {showEndDate && (
-            <j-input
-              required
-              name="endDate"
-              onInput={handleChange}
-              label="End"
-              type="datetime-local"
-            ></j-input>
+            <j-flex a="end" gap="400">
+              <j-input
+                full
+                autovalidate
+                required
+                name="endDate"
+                ref={(ref) => setInputRef(ref, "endDate")}
+                min={state.startDate}
+                value={state.endDate}
+                onInput={handleChange}
+                label="End"
+                type="date"
+              ></j-input>
+              <j-input
+                full
+                autovalidate
+                required
+                name="endTime"
+                ref={(ref) => setInputRef(ref, "endTime")}
+                list="time_list"
+                min={state.startDate === state.endDate ? state.startTime : ""}
+                max={state.startDate === state.endDate ? "23:59" : ""}
+                value={state.endTime}
+                onInput={handleChange}
+                label=""
+                type="time"
+              ></j-input>
+            </j-flex>
           )}
           {showImage && (
-            <>
+            <j-box pt="300">
               <j-text variant="label">Image</j-text>
-              <input
-                required
-                value={state.image}
-                name="image"
-                onChange={handleImage}
-                type="file"
-              />
-            </>
+              <FileUpload onChange={handleImage}></FileUpload>
+            </j-box>
           )}
         </j-flex>
       </j-box>
