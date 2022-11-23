@@ -1,18 +1,17 @@
 import styles from "./index.scss";
 
-export default function NeighbourhoodCard({ name, description, onClick, perspectiveUuid }) {
+export default function LinkCard({ name, description, onClick }) {
   return (
     <div class={styles.neighbourhoodCard} size="300" onClick={onClick}>
       <div>
-        <small class={styles.neighbourhoodCardTitle}>Neighbourhood</small>
+        <small class={styles.neighbourhoodCardTitle}>Link</small>
         <div class={styles.neighbourhoodCardName}>
-          {name || "Unknown Community"}
+          {name || "No title"}
         </div>
         <div class={styles.neighbourhoodCardDescription}>
           {description || "No descriptioon"}
         </div>
       </div>
-      {!perspectiveUuid && <j-button variant="primary">Join</j-button>}
     </div>
   );
 }

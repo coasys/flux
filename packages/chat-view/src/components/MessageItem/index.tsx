@@ -13,6 +13,36 @@ import Avatar from "../../components/Avatar";
 import EditorContext from "../../context/EditorContext";
 import { Message, Profile } from "utils/types";
 import NeighbourhoodCard from "./NeighbourhoodCard";
+import LinkCard from "./LinkCard";
+
+function Card({type, image, url, mainRef, name, description, onClick, perspectiveUuid}) {
+  function onNeighbourhoodClick(url: string) {
+    const event = new CustomEvent("neighbourhood-click", {
+      detail: { url, channel: "Home" },
+      bubbles: true,
+    });
+    mainRef?.dispatchEvent(event);
+  }
+
+  function onLinkClick(url: string) {
+    window.open(url, '_blank');
+  }
+  
+  if (type === 'neighbourhood') {
+    return <NeighbourhoodCard 
+      onClick={() => onNeighbourhoodClick(url)}
+      name={name}
+      description={description}
+      perspectiveUuid={perspectiveUuid}
+    />
+  } else if (type === 'link') {
+    return <LinkCard 
+      onClick={() => onLinkClick(url)}
+      name={name}
+      description={description}
+    />
+  }
+}
 
 export default function MessageItem({
   message,
@@ -265,11 +295,15 @@ export default function MessageItem({
           )}
 
           {neighbourhoodCards.map((e) => (
-            <NeighbourhoodCard
+            <Card
+              type={e.type}
+              mainRef
               onClick={() => onNeighbourhoodClick(e.url)}
               name={e.name}
               description={e.description}
-            ></NeighbourhoodCard>
+              perspectiveUuid={e.perspectiveUuid}
+              url={e.url}
+            ></Card>
           ))}
         </div>
 
