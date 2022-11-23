@@ -79,10 +79,11 @@ export default async function ({ message, isHidden }: Payload) {
         ).then((res) => res.json());
 
         hoods.push({
-          type: 'url',
+          type: 'link',
           name: data.title || "", 
           description: data.description || "",
-          image: data.images[0] || ""
+          image: data.images[0] || "",
+          url
         })
       }
     }
