@@ -685,11 +685,11 @@
         },
         {
           "name": "max",
-          "type": "number"
+          "type": "string"
         },
         {
           "name": "min",
-          "type": "number"
+          "type": "string"
         },
         {
           "name": "maxlength",
@@ -713,6 +713,14 @@
         },
         {
           "name": "size",
+          "type": "string"
+        },
+        {
+          "name": "list",
+          "type": "string"
+        },
+        {
+          "name": "step",
           "type": "string"
         },
         {
@@ -782,12 +790,12 @@
         {
           "name": "max",
           "attribute": "max",
-          "type": "number"
+          "type": "string"
         },
         {
           "name": "min",
           "attribute": "min",
-          "type": "number"
+          "type": "string"
         },
         {
           "name": "maxlength",
@@ -817,6 +825,16 @@
         {
           "name": "size",
           "attribute": "size",
+          "type": "string"
+        },
+        {
+          "name": "list",
+          "attribute": "list",
+          "type": "string"
+        },
+        {
+          "name": "step",
+          "attribute": "step",
           "type": "string"
         },
         {
@@ -896,6 +914,9 @@
         },
         {
           "name": "onBlur"
+        },
+        {
+          "name": "validate"
         }
       ],
       "events": [

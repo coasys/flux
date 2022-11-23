@@ -2,4 +2,36 @@
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
+  padding-left: var(--j-space-500);
+  padding-right: var(--j-space-500);
+}
+
+.postImage {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  max-height: 700px;
+}
+
+.postDetails {
+  display: flex;
+  gap: var(--j-space-100);
+  font-size: var(--j-font-size-400);
+  color: var(--j-color-ui-500);
+}
+
+.authorName:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.postUrl {
+  margin-top: var(--j-space-200);
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-200);
+}
+
+.postUrl a {
+  color: var(--j-color-primary-500);
 }

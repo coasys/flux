@@ -30,7 +30,7 @@ export default async function ({ perspectiveUuid, postId, message }: Payload) {
       new Link({
         source: postId,
         predicate: REPLY_TO,
-        target: postId,
+        target: entry.id,
       })
     );
 

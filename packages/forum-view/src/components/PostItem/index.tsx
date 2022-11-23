@@ -40,6 +40,7 @@ export default function Post({ post, displayView }) {
   }, [post.image, post.url]);
 
   function onProfileClick(event: any, did: string) {
+    event.stopPropagation();
     const e = new CustomEvent("agent-click", {
       detail: { did },
       bubbles: true,
@@ -50,7 +51,11 @@ export default function Post({ post, displayView }) {
   const author: Profile = members[post.author] || {};
   const popularStyle: string = post.isPopular ? styles.popularMessage : "";
   const displayStyle: DisplayView =
-    displayView === DisplayView.Compact ? styles.compact : styles.grid;
+    displayView === DisplayView.Compact
+      ? styles.compact
+      : displayView === DisplayView.Grid
+      ? styles.grid
+      : styles.card;
   const hasTitle = post.title;
   const hasImage = post.image;
   const hasBody = post.body;
@@ -97,6 +102,20 @@ export default function Post({ post, displayView }) {
             {formatRelative(new Date(post.timestamp), new Date())}
           </span>
         </div>
+        {hasUrl && (
+          <j-box pt="200">
+            <div class={styles.postUrl}>
+              <j-icon size="xs" name="link"></j-icon>
+              <a
+                onClick={(e) => e.stopPropagation()}
+                href={post.url}
+                target="_blank"
+              >
+                {new URL(post.url).hostname}
+              </a>
+            </div>
+          </j-box>
+        )}
         {hasDates && (
           <div class={styles.postDates}>
             <div class={styles.postDate}>

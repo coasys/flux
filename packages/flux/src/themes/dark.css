@@ -32,7 +32,3 @@
   margin-right: var(--j-space-300);
   border-radius: 6px;
 }
-
-:root[theme="dark"] j-input::part(input-wrapper) {
-  background-color: hsl(var(--j-color-ui-hue), 18%, 23%);
-}

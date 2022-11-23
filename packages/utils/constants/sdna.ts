@@ -59,7 +59,7 @@ export const SDNA = `
         findall((StartDate, StartDateTimestamp, StartDateAuthor), link(Id, "${START_DATE}", StartDate, StartDateTimestamp, StartDateAuthor), StartDate),
         findall((EndDate, EndDateTimestamp, EndDateAuthor), link(Id, "${END_DATE}", EndDate, EndDateTimestamp, EndDateAuthor), EndDate),
         findall((Type, TypeTimestamp, TypeAuthor), link(Id, "${ENTRY_TYPE}", Type, TypeTimestamp, TypeAuthor), Types),
-        findall((flux_post(Source, Reply, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies)), link(Reply, "${REPLY_TO}", Id, ReplyTimestamp, ReplyAuthor), Replies).
+        findall((flux_post(Id, ReplyId, ReplyTimestamp, ReplyAuthor, ReplyTitle, ReplyBody, ReplyReactions, ReplyUrl, ReplyImage, ReplyStartDate, ReplyEndDate, ReplyTypes, ReplyReplies)), link(Id, "${REPLY_TO}", ReplyId, ReplyTimestamp, ReplyAuthor), Replies).
 
     flux_post(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies):- 
         flux_post_query(Source, "${EntryType.SimplePost}", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies);
@@ -67,8 +67,7 @@ export const SDNA = `
         flux_post_query(Source, "${EntryType.CalendarEvent}", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies);
         flux_post_query(Source, "${EntryType.ImagePost}", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies);
         flux_post_query(Source, "${EntryType.PollPost}", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies);
-        flux_post_query(Source, "${EntryType.Message}", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies);
-        flux_post_query(Source, "${EntryType.LinkPost}", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies).
+        flux_post_query(Source, "${EntryType.Message}", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies).
     
     flux_post_query_popular(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies, true) :-
         flux_post(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies), isPopular(Id).

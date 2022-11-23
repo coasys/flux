@@ -26,10 +26,6 @@
   color: var(--j-color-black);
 }
 
-:root[theme="default"] j-input::part(input-wrapper) {
-  background-color: hsl(var(--j-color-ui-hue), 18%, 23%);
-}
-
 :root[theme="default"] j-menu-item::part(base) {
   margin-top: var(--j-space-100);
   margin-left: var(--j-space-400);

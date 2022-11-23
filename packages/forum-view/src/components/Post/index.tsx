@@ -1,21 +1,31 @@
 import UIContext from "../../context/UIContext";
 import ChannelContext from "utils/react/ChannelContext";
 import CommunityContext from "utils/react/CommunityContext";
-import { useContext, useState } from "preact/hooks";
+import { useContext, useEffect, useState } from "preact/hooks";
 import { formatRelative, format, formatDistance } from "date-fns";
 import styles from "./index.scss";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { EntryType } from "utils/types";
-import { createEntry } from "utils/api/createEntry";
-import { BODY } from "utils/constants/communityPredicates";
 import createPostReply from "utils/api/createPostReply";
+import { getImage } from "utils/helpers/getImage";
+import Editor from "../CreatePost/Editor";
 
 export default function Post() {
+  const [base64, setBase64] = useState("");
   const [comment, setComment] = useState("");
   const { state: UIState, methods: UIMethods } = useContext(UIContext);
   const { state: communityState } = useContext(CommunityContext);
   const { state } = useContext(ChannelContext);
   const post = state.keyedPosts[UIState.currentPost];
+
+  async function fetchImage(url) {
+    const image = await getImage(url);
+    setBase64(image);
+  }
+
+  useEffect(() => {
+    if (post.image) {
+      fetchImage(post.image);
+    }
+  }, [post.image, post.url]);
 
   async function submitComment() {
     createPostReply({
@@ -39,8 +49,15 @@ export default function Post() {
         Back
       </j-button>
 
-      {hasTitle && <j-text variant="heading">{post.title}</j-text>}
-      <j-box pt="500">
+      {hasTitle && (
+        <j-box pt="900">
+          <j-text nomargin variant="heading">
+            {post.title}
+          </j-text>
+        </j-box>
+      )}
+
+      <div className={styles.postDetails}>
         Posted by
         <span className={styles.authorName}>
           {author?.username || (
@@ -50,7 +67,29 @@ export default function Post() {
         <span class={styles.timestamp}>
           {formatRelative(new Date(post.timestamp), new Date())}
         </span>
-      </j-box>
+      </div>
+
+      {hasImage && base64 && (
+        <j-box bg="white" mt="500">
+          <img class={styles.postImage} src={base64} />
+        </j-box>
+      )}
+
+      {hasUrl && (
+        <j-box pt="200">
+          <div class={styles.postUrl}>
+            <j-icon size="xs" name="link"></j-icon>
+            <a
+              onClick={(e) => e.stopPropagation()}
+              href={post.url}
+              target="_blank"
+            >
+              {new URL(post.url).hostname}
+            </a>
+          </div>
+        </j-box>
+      )}
+
       {hasDates && (
         <div class={styles.postDates}>
           <div class={styles.postDate}>
@@ -74,17 +113,17 @@ export default function Post() {
       <j-box pt="500">
         <j-flex a="center" gap="200">
           <j-icon size="xs" name="chat-left-text"></j-icon>
-          <span>{post.replies.length}</span>
+          <span>{post.replies.length} Comments</span>
         </j-flex>
       </j-box>
-      <div>
-        <j-text variant="label">Comment</j-text>
-        <div
-          contenteditable
-          onInput={(e: any) => setComment(e.target.value)}
-        ></div>
-        <j-button onClick={submitComment}>Submit</j-button>
-      </div>
+      <j-box pt="500">
+        <Editor onChange={() => null}></Editor>
+        <j-box pt="300">
+          <j-button variant="primary" onClick={submitComment}>
+            Make a comment
+          </j-button>
+        </j-box>
+      </j-box>
     </div>
   );
 }
