@@ -279,11 +279,11 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       const message = getMessage(link);
 
       if (message) {
-        setState((oldState) => addMessage(oldState, message));
+        setState((oldState) => addMessage(oldState, {...message, synced: true}));
 
         setState((oldState) => ({
           ...oldState,
-          isMessageFromSelf: isMessageFromSelf,
+          isMessageFromSelf,
         }));
       }
     }
@@ -306,11 +306,11 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     if (linkIs.reply(link) && isSameChannel) {
       const message = getMessage(link);
 
-      setState((oldState) => addMessage(oldState, message));
+      setState((oldState) => addMessage(oldState, {...message, synced: true}));
 
       setState((oldState) => ({
         ...oldState,
-        isMessageFromSelf: false,
+        isMessageFromSelf,
       }));
     }
 

@@ -198,6 +198,7 @@ export default function MessageItem({
         popularStyle,
         noPaddingStyle,
         highlightStyle,
+        !message.synced ? styles.messageNotSynced : ''
       ].join(" ")}
       isReplying={isReplying}
       onMouseEnter={() => setShowToolbar(true)}

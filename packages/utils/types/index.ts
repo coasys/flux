@@ -61,6 +61,7 @@ export interface Message {
     author: string;
     timestamp: Date | string;
   }[];
+  synced: boolean
 }
 
 export interface Messages {

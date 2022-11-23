@@ -38,7 +38,8 @@ export default function (link: LinkExpression): Message {
         author: link.author,
         content: expression.data,
         imestamp: expression.timestamp,
-      }]
+      }],
+      synced: false
     };
 
     return message as Message;

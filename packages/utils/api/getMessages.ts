@@ -93,6 +93,7 @@ export default async function ({ perspectiveUuid, channelId, from, backwards }: 
       isNeighbourhoodCardHidden: result.AllCardHidden.length > 0,
       isPopular: result.IsPopular,
       editMessages: result.EditMessages,
+      synced: true
     });
   });
   if (cleanedMessages.length > 0) {
