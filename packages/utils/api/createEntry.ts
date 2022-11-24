@@ -1,5 +1,5 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import {v4 as uuidv4} from "uuid";
+import { v4 as uuidv4 } from "uuid";
 import { Link } from "@perspect3vism/ad4m";
 import { Entry, EntryInput } from "../types";
 import { createLinks } from "../helpers/linkHelpers";
@@ -14,15 +14,15 @@ export async function createEntry(entry: EntryInput): Promise<Entry> {
   const typeLinks = [] as Link[];
   for (const entryType of entry.types) {
     const entryLink = new Link({
-        source: source,
-        predicate: entryType,
-        target: id,
+      source: source,
+      predicate: entryType,
+      target: id,
     });
     const typeLink = new Link({
-        source: id,
-        predicate: ENTRY_TYPE,
-        target: entryType,
-    })
+      source: id,
+      predicate: ENTRY_TYPE,
+      target: entryType,
+    });
     typeLinks.push(entryLink);
     typeLinks.push(typeLink);
   }
@@ -31,7 +31,9 @@ export async function createEntry(entry: EntryInput): Promise<Entry> {
 
   const allLinks = [...typeLinks, ...propertyLinks];
 
-  const linkPromises = allLinks.map((link) => client.perspective.addLink(entry.perspectiveUuid, link));
+  const linkPromises = allLinks.map((link) =>
+    client.perspective.addLink(entry.perspectiveUuid, link)
+  );
 
   const createdLinks = await Promise.all(linkPromises);
 
