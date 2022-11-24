@@ -57,6 +57,7 @@ const styles = css`
 
   :host([loading]) j-spinner {
     display: block;
+    --j-spinner-size: calc(var(--j-button-height) - 10px);
     --j-spinner-color: var(--j-button-color);
   }
 
@@ -214,7 +215,7 @@ export default class Button extends LitElement {
   render() {
     return html`
       <button @click=${this.handleClick} part="base">
-        <j-spinner size="sm"></j-spinner>
+        <j-spinner></j-spinner>
         <slot name="start"></slot>
         <slot></slot>
         <slot name="end"></slot>

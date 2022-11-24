@@ -73,7 +73,7 @@ export default defineComponent({
 
 @media (min-width: 800px) {
   .link-card {
-    grid-template-columns: 1fr 4fr;
+    grid-template-columns: 1fr 5fr;
   }
 }
 

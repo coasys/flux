@@ -1,0 +1,40 @@
+.post {
+  display: flex;
+  gap: var(--j-space-400);
+  text-decoration: none;
+  color: currentColor;
+  position: relative;
+  overflow: hidden;
+}
+
+.postBody {
+  color: var(--j-color-ui-800);
+}
+
+.postBody *:first-of-type {
+  margin-top: 0;
+}
+
+.postBody pre {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: var(--j-space-200);
+}
+
+.postDetails {
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-100);
+  font-size: var(--j-font-size-400);
+  color: var(--j-color-ui-500);
+  padding-top: var(--j-space-200);
+  padding-bottom: var(--j-space-300);
+}
+
+.authorName {
+  color: var(--j-color-ui-800);
+}
+
+.authorName:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}

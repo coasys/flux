@@ -6,15 +6,37 @@ import { formatRelative, format, formatDistance } from "date-fns";
 import styles from "./index.scss";
 import createPostReply from "utils/api/createPostReply";
 import { getImage } from "utils/helpers/getImage";
-import Editor from "../CreatePost/Editor";
+import Editor from "../Editor";
+import CommentItem from "../CommentItem";
+import getPosts from "utils/api/getPosts";
 
 export default function Post() {
   const [base64, setBase64] = useState("");
+  const [comments, setComments] = useState([]);
   const [comment, setComment] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
   const { state: UIState, methods: UIMethods } = useContext(UIContext);
   const { state: communityState } = useContext(CommunityContext);
   const { state } = useContext(ChannelContext);
   const post = state.keyedPosts[UIState.currentPost];
+
+  function onProfileClick(event: any, did: string) {
+    event.stopPropagation();
+    const e = new CustomEvent("agent-click", {
+      detail: { did },
+      bubbles: true,
+    });
+    event.target.dispatchEvent(e);
+  }
+
+  async function fetchComments() {
+    const comments = await getPosts(state.communityId, post.id);
+    setComments(comments);
+  }
+
+  useEffect(() => {
+    fetchComments();
+  }, []);
 
   async function fetchImage(url) {
     const image = await getImage(url);
@@ -28,11 +50,19 @@ export default function Post() {
   }, [post.image, post.url]);
 
   async function submitComment() {
-    createPostReply({
-      perspectiveUuid: state.communityId,
-      postId: post.id,
-      message: "Hello",
-    });
+    try {
+      setIsCreating(true);
+      await createPostReply({
+        perspectiveUuid: state.communityId,
+        postId: post.id,
+        message: comment,
+      });
+      await fetchComments();
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setIsCreating(false);
+    }
   }
 
   const author = communityState.members[post.author] || {};
@@ -41,25 +71,23 @@ export default function Post() {
   const hasBody = post.body;
   const hasUrl = post.url;
   const hasDates = post.startDate && post.endDate;
+  const hasComments = comments.length > 0;
 
   return (
     <div class={styles.post}>
-      <j-button variant="link" onClick={() => UIMethods.goToFeed()}>
-        <j-icon name="arrow-left" slot="start"></j-icon>
-        Back
-      </j-button>
-
-      {hasTitle && (
-        <j-box pt="900">
-          <j-text nomargin variant="heading">
-            {post.title}
-          </j-text>
-        </j-box>
-      )}
+      <j-box pb="500">
+        <j-button size="sm" variant="link" onClick={() => UIMethods.goToFeed()}>
+          <j-icon name="arrow-left-short" slot="start"></j-icon>
+          Back
+        </j-button>
+      </j-box>
 
       <div className={styles.postDetails}>
         Posted by
-        <span className={styles.authorName}>
+        <span
+          className={styles.authorName}
+          onClick={(e) => onProfileClick(e, author.did)}
+        >
           {author?.username || (
             <j-skeleton width="lg" height="text"></j-skeleton>
           )}
@@ -68,6 +96,14 @@ export default function Post() {
           {formatRelative(new Date(post.timestamp), new Date())}
         </span>
       </div>
+
+      {hasTitle && (
+        <j-box pt="300">
+          <j-text nomargin variant="heading">
+            {post.title}
+          </j-text>
+        </j-box>
+      )}
 
       {hasImage && base64 && (
         <j-box bg="white" mt="500">
@@ -110,20 +146,36 @@ export default function Post() {
           dangerouslySetInnerHTML={{ __html: post.body }}
         />
       )}
-      <j-box pt="500">
-        <j-flex a="center" gap="200">
-          <j-icon size="xs" name="chat-left-text"></j-icon>
-          <span>{post.replies.length} Comments</span>
-        </j-flex>
-      </j-box>
-      <j-box pt="500">
-        <Editor onChange={() => null}></Editor>
+
+      <j-box pt="900">
+        <Editor onChange={(e) => setComment(e)}></Editor>
         <j-box pt="300">
-          <j-button variant="primary" onClick={submitComment}>
+          <j-button
+            disabled={isCreating}
+            loading={isCreating}
+            size="sm"
+            variant="primary"
+            onClick={submitComment}
+          >
             Make a comment
           </j-button>
         </j-box>
       </j-box>
+
+      {hasComments && (
+        <j-box pt="900">
+          <j-text variant="label">Comments ({comments.length})</j-text>
+          <j-box>
+            {comments.map((post) => {
+              return (
+                <j-box mt="400">
+                  <CommentItem post={post}></CommentItem>
+                </j-box>
+              );
+            })}
+          </j-box>
+        </j-box>
+      )}
     </div>
   );
 }

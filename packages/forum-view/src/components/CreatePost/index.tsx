@@ -1,10 +1,10 @@
 import { useRef, useState, useEffect } from "preact/hooks";
 import { EntryType } from "utils/types";
-import Editor from "./Editor";
+import Editor from "../Editor";
 import createPost from "utils/api/createPost";
 import { postOptions } from "../../constants/options";
 import FileUpload from "../../components/FileUpload";
-import { format, set } from "date-fns";
+import { format } from "date-fns";
 import { parse } from "date-fns/esm";
 
 const initialState = {

@@ -4,6 +4,8 @@
   margin: 0 auto;
   padding-left: var(--j-space-500);
   padding-right: var(--j-space-500);
+  padding-bottom: var(--j-space-900);
+  padding-top: var(--j-space-500);
 }
 
 .postImage {
@@ -22,6 +24,7 @@
 
 .authorName:hover {
   cursor: pointer;
+  color: var(--j-color-ui-800);
   text-decoration: underline;
 }
 

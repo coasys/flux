@@ -1,15 +1,15 @@
-.editor {
-  background-color: var(--j-color-white);
+.editorWrapper {
+  background-color: rgba(0,0,0,0.1);
   border: 1px solid var(--j-border-color);
   border-radius: var(--j-border-radius);
 }
 
-.editor:hover:not(:focus-within) {
+.editorWrapper:hover:not(:focus-within) {
   border: 1px solid var(--j-border-color-strong);
 }
 
-.editor:focus-within {
-border: 1px solid var(--j-color-focus);
+.editorWrapper:focus-within {
+  border: 1px solid var(--j-color-focus);
 }
 
 .editor div {
@@ -23,6 +23,10 @@ border: 1px solid var(--j-color-focus);
 }
 
 .editor div pre {
-  background-color: rgba(0,0,0,0.1);
+  background-color: rgba(0, 0, 0, 0.1);
   padding: var(--j-space-200);
+}
+
+.menuBar {
+  border-bottom: 1px solid var(--j-color-ui-100);
 }

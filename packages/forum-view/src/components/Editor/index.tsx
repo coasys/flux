@@ -10,7 +10,7 @@ const MenuBar = ({ editor }) => {
   }
 
   return (
-    <>
+    <div class={styles.menuBar}>
       <j-button
         square
         variant="ghost"
@@ -84,7 +84,7 @@ const MenuBar = ({ editor }) => {
           color={editor.isActive("blockquote") ? "primary-500" : "ui-500"}
         ></j-icon>
       </j-button>
-    </>
+    </div>
   );
 };
 
@@ -104,7 +104,7 @@ export default ({ onChange }) => {
   }, [editor]);
 
   return (
-    <div>
+    <div class={styles.editorWrapper}>
       <MenuBar editor={editor} />
       <EditorContent className={styles.editor} editor={editor} />
     </div>

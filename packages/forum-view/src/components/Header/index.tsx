@@ -40,8 +40,8 @@ export default function Header() {
             size="lg"
             placeholder="Create a post"
           ></j-input>
-          <j-box pt="300" pb="400">
-            <j-flex gap="200">
+          <j-box pb="400">
+            <j-flex wrap gap="200">
               {postOptions.map((option) => {
                 return (
                   <j-button
@@ -49,7 +49,7 @@ export default function Header() {
                     value="post"
                     variant="ghost"
                   >
-                    <j-icon slot="start" name={option.icon}></j-icon>
+                    <j-icon slot="start" size="sm" name={option.icon}></j-icon>
                     {option.label}
                   </j-button>
                 );
