@@ -73,8 +73,6 @@ export default function MakeEntry({
     const startDate = parseDateTime(state.startDate, state.startTime);
     const endDate = parseDateTime(state.endDate, state.endTime);
 
-    console.log({ startDate, endDate });
-
     try {
       await createPost({
         channelId,

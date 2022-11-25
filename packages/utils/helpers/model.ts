@@ -4,8 +4,7 @@ import { createEntry } from "../api/createEntry";
 
 type ModelProperty = {
   predicate: string;
-  name: string;
-  type: "String" | "Number";
+  type: StringConstructor | NumberConstructor;
   languageAddress: string;
 };
 
@@ -26,7 +25,6 @@ export default class Model {
   source = "adm4://self";
   perspectiveUuid = "";
   type = "" as EntryType;
-  createEx;
   properties = {} as {
     [x: string]: ModelProperty;
   };
@@ -36,6 +34,7 @@ export default class Model {
     this.source = props.source || this.source;
     this.properties = props.properties || this.properties;
     this.type = props.type || this.type;
+    this.create = this.create.bind(this);
     this.createExpressions = this.createExpressions.bind(this);
   }
 
@@ -43,6 +42,7 @@ export default class Model {
     const expressions = await this.createExpressions(data);
     return createEntry({
       perspectiveUuid: this.perspectiveUuid,
+      source: this.source,
       types: [type || this.type],
       data: expressions,
     });
@@ -68,4 +68,56 @@ export default class Model {
       };
     }, {});
   }
+
+  async get(id: string) {
+    const client = await getAd4mClient();
+    console.log(
+      generatePrologQuery(id, this.type, this.source, this.properties)
+    );
+    const links = await client.perspective.queryProlog(
+      this.perspectiveUuid,
+      generatePrologQuery(id, this.type, this.source, this.properties)
+    );
+    console.log(links);
+  }
+}
+
+function generatePrologQuery(
+  id: string,
+  type: EntryType,
+  source: string,
+  properties: {
+    [x: string]: ModelProperty;
+  }
+) {
+  const propertyNames = Object.keys(properties).reduce((acc, name) => {
+    const concatVal = acc === "" ? "" : ", ";
+    return acc.concat(concatVal, capitalizeFirstLetter(name));
+  }, "");
+
+  const findProperties = Object.keys(properties).reduce((acc, name) => {
+    const property = properties[name];
+    const concatVal = acc === "" ? "" : ", ";
+    return acc.concat(concatVal, generateFindAll(name, property.predicate));
+  }, "");
+
+  return `
+  assert(entry_query(Source, Type, Id, Timestamp, ${propertyNames}):- 
+    link(Source, Type, Id, Timestamp, Author),
+    ${findProperties}.)
+
+  assert(entry(Source, Id, Timestamp, Author, ${propertyNames}):- 
+    entry_query(Source, "${type}", Id, Timestamp, ${propertyNames}).)
+
+  limit(50, (order_by([desc(Timestamp)], flux_post_query_popular("${source}", "${id}", Timestamp, Author, ${propertyNames})))).
+  `;
+}
+
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function generateFindAll(propertyName, predicate) {
+  const name = capitalizeFirstLetter(propertyName);
+  return `findall(${name}, ${name}Timestamp, ${name}Author), link(Id, "${predicate}", ${name}, ${name}Timestamp, ${name}Author), ${name})`;
 }
