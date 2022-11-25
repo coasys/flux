@@ -9,6 +9,8 @@ import { getImage } from "utils/helpers/getImage";
 import Editor from "../Editor";
 import CommentItem from "../CommentItem";
 import getPosts from "utils/api/getPosts";
+import PostModel from "utils/api/post";
+import { EntryType } from "utils/types";
 
 export default function Post() {
   const [base64, setBase64] = useState("");
@@ -28,6 +30,17 @@ export default function Post() {
     });
     event.target.dispatchEvent(e);
   }
+
+  useEffect(() => {
+    if (post.id) {
+      const Post = new PostModel({
+        perspectiveUuid: state.communityId,
+        source: state.channelId,
+        type: EntryType.SimplePost,
+      });
+      Post.get(post.id);
+    }
+  }, [post.id]);
 
   async function fetchComments() {
     const comments = await getPosts(state.communityId, post.id);

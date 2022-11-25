@@ -102,11 +102,11 @@ function generatePrologQuery(
   }, "");
 
   return `
-  assert(entry_query(Source, Type, Id, Timestamp, ${propertyNames}):- 
+  assertz(entry_query(Source, Type, Id, Timestamp, ${propertyNames}):- 
     link(Source, Type, Id, Timestamp, Author),
     ${findProperties}.)
 
-  assert(entry(Source, Id, Timestamp, Author, ${propertyNames}):- 
+  assertz(entry(Source, Id, Timestamp, Author, ${propertyNames}):- 
     entry_query(Source, "${type}", Id, Timestamp, ${propertyNames}).)
 
   limit(50, (order_by([desc(Timestamp)], flux_post_query_popular("${source}", "${id}", Timestamp, Author, ${propertyNames})))).
