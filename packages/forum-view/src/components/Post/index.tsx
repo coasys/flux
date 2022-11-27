@@ -189,7 +189,7 @@ export default function Post() {
           <j-box>
             {comments.map((post) => {
               return (
-                <j-box mt="400">
+                <j-box key={post.id} mt="400">
                   <CommentItem post={post}></CommentItem>
                 </j-box>
               );

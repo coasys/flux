@@ -123,7 +123,7 @@ export default function MakeEntry({
       <j-text variant="heading-sm" nomargin>
         Create a New Post
       </j-text>
-      <j-box pt="500" pb="500">
+      <j-box pt="800" pb="200">
         <j-tabs
           value={entryType}
           onChange={(e) => setEntryType(e.target.value)}
@@ -131,7 +131,7 @@ export default function MakeEntry({
           {postOptions.map((option) => {
             return (
               <j-tab-item size="sm" value={option.value} variant="button">
-                <j-icon slot="start" name={option.icon}></j-icon>
+                <j-icon slot="start" size="sm" name={option.icon}></j-icon>
                 {option.label}
               </j-tab-item>
             );
