@@ -11,6 +11,7 @@ import CommentItem from "../CommentItem";
 import getPosts from "utils/api/getPosts";
 import PostModel from "utils/api/post";
 import { EntryType } from "utils/types";
+import Avatar from "../Avatar";
 
 export default function Post() {
   const [base64, setBase64] = useState("");
@@ -30,17 +31,6 @@ export default function Post() {
     });
     event.target.dispatchEvent(e);
   }
-
-  useEffect(() => {
-    if (post.id) {
-      const Post = new PostModel({
-        perspectiveUuid: state.communityId,
-        source: state.channelId,
-        type: EntryType.SimplePost,
-      });
-      Post.get(post.id);
-    }
-  }, [post.id]);
 
   async function fetchComments() {
     const comments = await getPosts(state.communityId, post.id);
@@ -95,37 +85,45 @@ export default function Post() {
         </j-button>
       </j-box>
 
-      <div className={styles.postDetails}>
-        Posted by
-        <span
-          className={styles.authorName}
-          onClick={(e) => onProfileClick(e, author.did)}
-        >
-          {author?.username || (
-            <j-skeleton width="lg" height="text"></j-skeleton>
-          )}
-        </span>
-        <span class={styles.timestamp}>
-          {formatRelative(new Date(post.timestamp), new Date())}
-        </span>
-      </div>
-
       {hasTitle && (
         <j-box pt="300">
-          <j-text nomargin variant="heading">
+          <j-text nomargin variant="heading-lg">
             {post.title}
           </j-text>
         </j-box>
       )}
 
+      <j-box pt="600">
+        <j-flex a="center" gap="400">
+          <Avatar
+            size="sm"
+            did={author.did}
+            url={author.profileThumbnailPicture}
+          ></Avatar>
+          <div>
+            <div
+              className={styles.authorName}
+              onClick={(e) => onProfileClick(e, author.did)}
+            >
+              {author?.username || (
+                <j-skeleton width="lg" height="text"></j-skeleton>
+              )}
+            </div>
+            <div class={styles.timestamp}>
+              {formatRelative(new Date(post.timestamp), new Date())}
+            </div>
+          </div>
+        </j-flex>
+      </j-box>
+
       {hasImage && base64 && (
-        <j-box bg="white" mt="500">
+        <j-box bg="white" mt="600">
           <img class={styles.postImage} src={base64} />
         </j-box>
       )}
 
       {hasUrl && (
-        <j-box pt="200">
+        <j-box pt="400">
           <div class={styles.postUrl}>
             <j-icon size="xs" name="link"></j-icon>
             <a
@@ -140,24 +138,34 @@ export default function Post() {
       )}
 
       {hasDates && (
-        <div class={styles.postDates}>
-          <div class={styles.postDate}>
-            <j-icon size="xs" name="calendar-event"></j-icon>
-            {format(new Date(post.startDate), "dd.MMMM HH:HH")}
-          </div>
-          <div class={styles.postDate}>
-            <j-icon size="xs" name="clock"></j-icon>
-            <j-tooltip title={format(new Date(post.endDate), "dd.MMMM HH:HH")}>
-              {formatDistance(new Date(post.startDate), new Date(post.endDate))}
-            </j-tooltip>
-          </div>
-        </div>
+        <j-box pt="500">
+          <j-flex gap="300" direction="column">
+            <div class={styles.postDate}>
+              <j-icon size="xs" name="calendar-event"></j-icon>
+              {format(new Date(post.startDate), "dd.MMMM HH:HH")}
+            </div>
+            <div class={styles.postDate}>
+              <j-icon size="xs" name="clock"></j-icon>
+              <j-tooltip
+                title={format(new Date(post.endDate), "dd.MMMM HH:HH")}
+              >
+                {formatDistance(
+                  new Date(post.startDate),
+                  new Date(post.endDate)
+                )}
+              </j-tooltip>
+            </div>
+          </j-flex>
+        </j-box>
       )}
+
       {hasBody && (
-        <div
-          className={styles.postBody}
-          dangerouslySetInnerHTML={{ __html: post.body }}
-        />
+        <j-box pt="500">
+          <div
+            className={styles.postBody}
+            dangerouslySetInnerHTML={{ __html: post.body }}
+          />
+        </j-box>
       )}
 
       <j-box pt="900">

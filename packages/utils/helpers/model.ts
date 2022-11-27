@@ -102,14 +102,18 @@ function generatePrologQuery(
   }, "");
 
   return `
-  assertz(entry_query(Source, Type, Id, Timestamp, ${propertyNames}):- 
+  assertz((
+    entry_query(Source, Type, Id, Timestamp, Author, ${propertyNames}):- 
     link(Source, Type, Id, Timestamp, Author),
-    ${findProperties}.)
+    ${findProperties}
+  )).
 
-  assertz(entry(Source, Id, Timestamp, Author, ${propertyNames}):- 
-    entry_query(Source, "${type}", Id, Timestamp, ${propertyNames}).)
+  assertz((
+    entry(Source, Id, Timestamp, Author, ${propertyNames}):- 
+    entry_query(Source, Type, Id, Timestamp, Author, ${propertyNames})
+  )).
 
-  limit(50, (order_by([desc(Timestamp)], flux_post_query_popular("${source}", "${id}", Timestamp, Author, ${propertyNames})))).
+  entry("${source}", "${id}", Timestamp, Author, ${propertyNames}).
   `;
 }
 
@@ -119,5 +123,5 @@ function capitalizeFirstLetter(string) {
 
 function generateFindAll(propertyName, predicate) {
   const name = capitalizeFirstLetter(propertyName);
-  return `findall(${name}, ${name}Timestamp, ${name}Author), link(Id, "${predicate}", ${name}, ${name}Timestamp, ${name}Author), ${name})`;
+  return `findall((${name}, ${name}Timestamp, ${name}Author), link(Id, "${predicate}", ${name}, ${name}Timestamp, ${name}Author), ${name})`;
 }

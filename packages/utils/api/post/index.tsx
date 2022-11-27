@@ -1,4 +1,4 @@
-import { TITLE } from "../../constants/communityPredicates";
+import { IMAGE, TITLE } from "../../constants/communityPredicates";
 import EntryModel from "../../helpers/model";
 import { EntryType, Entry } from "../../types";
 
@@ -22,3 +22,5 @@ export default class PostModel extends EntryModel {
     return super.create(data, type);
   }
 }
+
+const Post = new PostModel({ perspectiveUuid: "123", sourc: "channelI" });
