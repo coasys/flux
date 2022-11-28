@@ -74,9 +74,26 @@ export default class Model {
     console.log(
       generatePrologQuery(id, this.type, this.source, this.properties)
     );
+    const queiries = generatePrologQuery(id, this.type, this.source, this.properties);
+    await client.perspective.queryProlog(
+      this.perspectiveUuid,
+      queiries[0]
+    );
+    await client.perspective.queryProlog(
+      this.perspectiveUuid,
+      queiries[1]
+    );
     const links = await client.perspective.queryProlog(
       this.perspectiveUuid,
-      generatePrologQuery(id, this.type, this.source, this.properties)
+      queiries[2]
+    );
+    await client.perspective.queryProlog(
+      this.perspectiveUuid,
+      queiries[3]
+    );
+    await client.perspective.queryProlog(
+      this.perspectiveUuid,
+      queiries[4]
     );
     console.log(links);
   }
@@ -101,20 +118,24 @@ function generatePrologQuery(
     return acc.concat(concatVal, generateFindAll(name, property.predicate));
   }, "");
 
-  return `
-  assertz((
-    entry_query(Source, Type, Id, Timestamp, Author, ${propertyNames}):- 
-    link(Source, Type, Id, Timestamp, Author),
-    ${findProperties}
-  )).
+  const entryQuery = `
+    entry_query(Source, Type, Id, Timestamp, Author, ${propertyNames}):-
+      link(Source, Type, Id, Timestamp, Author),
+      ${findProperties}
+  `
 
-  assertz((
+  const entry = `
     entry(Source, Id, Timestamp, Author, ${propertyNames}):- 
-    entry_query(Source, Type, Id, Timestamp, Author, ${propertyNames})
-  )).
+      entry_query(Source, "${EntryType.Message}", Id, Timestamp, Author, ${propertyNames})
+  `
 
-  entry("${source}", "${id}", Timestamp, Author, ${propertyNames}).
-  `;
+  return [
+    `assertz((${entryQuery})).`,
+    `assertz((${entry})).`,
+    `entry("${source}", Id, Timestamp, Author, ${propertyNames}).`,
+    `retract((${entryQuery})).`,
+    `retract((${entry})).`
+  ]
 }
 
 function capitalizeFirstLetter(string) {
@@ -123,5 +144,5 @@ function capitalizeFirstLetter(string) {
 
 function generateFindAll(propertyName, predicate) {
   const name = capitalizeFirstLetter(propertyName);
-  return `findall((${name}, ${name}Timestamp, ${name}Author), link(Id, "${predicate}", ${name}, ${name}Timestamp, ${name}Author), ${name})`;
+  return `findall((${name}, ${name}Timestamp, ${name}Author), link(Source, "${predicate}", ${name}, ${name}Timestamp, ${name}Author), ${name})`;
 }

@@ -39,6 +39,8 @@ export default function Post() {
 
   useEffect(() => {
     fetchComments();
+    const Post = new PostModel({ perspectiveUuid: state.communityId, source: post.id });
+    Post.get(post.id).then((e) => console.log('commentys', e));
   }, []);
 
   async function fetchImage(url) {
