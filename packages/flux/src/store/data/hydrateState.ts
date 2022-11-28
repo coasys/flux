@@ -80,61 +80,16 @@ export async function hydrateState() {
   }
 
   for (const perspective of perspectives) {
-    // ! Replaced this with querylinks because this returns the string literal and not the link itself
-    // ! so deleting the link becomes difficult because the timestamp difference between the channel link & literal link
-    // const channelLinks = await client.perspective.queryProlog(
-    //   perspective.uuid,
-    //   `triple("${SELF}", "${CHANNEL}", C).`
-    // );
     const hasCommunityAlready = dataStore.getCommunities.find(
       (c) => c.state.perspectiveUuid === perspective.uuid
     );
 
     if (hasCommunityAlready) return;
 
-    const channelLinks = await getChannels({perspectiveUuid: perspective.uuid})
-
     if (perspective.sharedUrl !== undefined && perspective.neighbourhood) {
       const newCommunity = await buildCommunity(perspective);
 
       dataStore.addCommunity(newCommunity);
-
-      const channels = [...Object.values(dataStore.channels)];
-
-      const filteredChannels = dataStore
-        .getChannelStates(perspective.uuid)
-        .filter(
-          (channel) =>
-            !channelLinks.map((e) => e.id).includes(channel.id)
-        );
-
-      for (const c of filteredChannels) {
-        dataStore.removeChannel({
-          channelId: c.id,
-        });
-      }
-
-      if (channelLinks) {
-        for (const link of channelLinks) {
-          try {
-            const exist = channels.find(
-              (c: any) =>
-                c.id === link.id && c.sourcePerspective === perspective.uuid
-            );
-            if (!exist) {
-              dataStore.addChannel({
-                communityId: perspective.uuid,
-                channel: link
-              });
-            }
-          } catch (e) {
-            console.error(
-              "Got error when trying to hydrate community channel state",
-              e
-            );
-          }
-        }
-      }
     }
   }
 }

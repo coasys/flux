@@ -87,7 +87,7 @@ export default defineComponent({
         if (!this.watcherStarted) {
           this.startWatcher();
           this.watcherStarted = true;
-          await hydrateState();
+          hydrateState();
         }
       }
     });
