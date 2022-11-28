@@ -1,6 +1,7 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useState, useEffect } from "react";
 import { EntryType, Post } from "../types";
 import getPosts from "../api/getPosts";
+import PostModel from "../api/post";
 
 export type State = {
   communityId: string;
@@ -35,13 +36,24 @@ const ChannelContext = createContext(initialState as ContextProps);
 export function ChannelProvider({ channelId, communityId, children }: any) {
   const [state, setState] = useState<State>(initialState.state);
 
-  const posts = Object.values(state.keyedPosts)
-    .map((i: Post) => i)
-    .sort((a, b) => b.timestamp - a.timestamp);
+  useEffect(() => {
+    if (communityId && channelId) {
+      const Post = new PostModel({
+        perspectiveUuid: communityId,
+        source: channelId,
+        type: EntryType.SimplePost,
+      });
+
+      Post.onAdded(EntryType.SimplePost, (post) => {
+        console.log({ post });
+      });
+    }
+  }, [communityId, channelId]);
+
+  const posts = sortPosts(state.keyedPosts);
 
   function loadPosts(types: EntryType[], fromDate?: Date) {
     getPosts(communityId, channelId, fromDate).then((posts) => {
-      console.log("load posts", posts);
       setState((oldState) => addPosts(oldState, posts));
     });
   }
@@ -58,6 +70,12 @@ export function ChannelProvider({ channelId, communityId, children }: any) {
       {children}
     </ChannelContext.Provider>
   );
+}
+
+function sortPosts(keyedPosts: { [x: string]: Post }) {
+  return Object.values(keyedPosts)
+    .map((i: Post) => i)
+    .sort((a, b) => b.timestamp - a.timestamp);
 }
 
 function toKeyedObject(array: any[], key: string) {

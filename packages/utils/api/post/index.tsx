@@ -22,5 +22,3 @@ export default class PostModel extends EntryModel {
     return super.create(data, type);
   }
 }
-
-const Post = new PostModel({ perspectiveUuid: "123", sourc: "channelI" });

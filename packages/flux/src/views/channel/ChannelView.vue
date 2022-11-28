@@ -36,7 +36,7 @@
     </div>
 
     <forum-view
-      v-if="currentView === ChannelView.Forum"
+      v-show="currentView === ChannelView.Forum"
       class="perspective-view"
       :port="port"
       :source="`flux_entry://${channel.id}`"
@@ -47,7 +47,7 @@
       @hide-notification-indicator="onHideNotificationIndicator"
     ></forum-view>
     <chat-view
-      v-if="currentView === ChannelView.Chat"
+      v-show="currentView === ChannelView.Chat"
       class="perspective-view"
       :port="port"
       :source="`flux_entry://${channel.id}`"
