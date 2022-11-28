@@ -62,11 +62,21 @@ export function mapLiteralLinks(
     const link = links?.find((link) => link.data.predicate === predicate);
 
     if (link) {
+      let data;
+
+      if(link.data.target.startsWith("literal://string:")) {
+        data = Literal.fromUrl(link.data.target).get()
+      } else if(link.data.target.startsWith("literal://number:")) {
+        data = Literal.fromUrl(link.data.target).get()
+      } else if(link.data.target.startsWith("literal://json:")) {
+        data = Literal.fromUrl(link.data.target).get().data
+      } else {
+        data = link.data.target
+      }
+
       return {
         ...acc,
-        [key]: link.data.target.startsWith("literal://")
-          ? Literal.fromUrl(link.data.target).get().data
-          : link.data.target,
+        [key]: data,
       };
     }
     return acc;
