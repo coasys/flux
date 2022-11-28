@@ -57,7 +57,7 @@ const styles = css`
 
   :host([loading]) j-spinner {
     display: block;
-    --j-spinner-size: calc(var(--j-button-height) - 10px);
+    --j-spinner-size: calc(var(--j-button-height) / 2);
     --j-spinner-color: var(--j-button-color);
   }
 
@@ -101,7 +101,7 @@ const styles = css`
   }
 
   :host([variant="ghost"]) {
-    --j-button-opacity: 0.75;
+    --j-button-opacity: 0.5;
     --j-button-bg: transparent;
     --j-button-color: currentColor;
     --j-button-border: 1px solid transparent;

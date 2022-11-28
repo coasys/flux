@@ -32,17 +32,14 @@ function Main() {
   }
 }
 
-export default ({ perspectiveUuid, channel }) => {
+export default ({ perspective, source }) => {
   return (
     <UIProvider>
       <AgentProvider>
-        <CommunityProvider perspectiveUuid={perspectiveUuid}>
-          <PerspectiveProvider perspectiveUuid={perspectiveUuid}>
-            <ChannelProvider communityId={perspectiveUuid} channelId={channel}>
-              <ChatProvider
-                perspectiveUuid={perspectiveUuid}
-                channelId={channel}
-              >
+        <CommunityProvider perspectiveUuid={perspective}>
+          <PerspectiveProvider perspectiveUuid={perspective}>
+            <ChannelProvider communityId={perspective} channelId={source}>
+              <ChatProvider perspectiveUuid={perspective} channelId={source}>
                 <div class={styles.container}>
                   <Main></Main>
                 </div>

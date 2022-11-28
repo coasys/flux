@@ -52,7 +52,6 @@ const PerspectiveContext = createContext<ContextProps>(initialState);
 export function PerspectiveProvider({ perspectiveUuid, children }: any) {
   const [state, setState] = useState({
     ...initialState.state,
-    uuid: perspectiveUuid,
   });
   const linkSubscriberRef = useRef();
 
@@ -187,7 +186,7 @@ export function PerspectiveProvider({ perspectiveUuid, children }: any) {
   return (
     <PerspectiveContext.Provider
       value={{
-        state,
+        state: { ...state, uuid: perspectiveUuid },
         methods: {
           getProfile,
         },

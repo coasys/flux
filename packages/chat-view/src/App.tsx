@@ -1,42 +1,38 @@
 import Footer from "./components/Footer";
 import MessageList from "./components/MessageList";
 
-import {
-  ChatProvider,
-  PerspectiveProvider,
-  AgentProvider,
-} from "utils/react";
+import { ChatProvider, PerspectiveProvider, AgentProvider } from "utils/react";
 import { UIProvider } from "./context/UIContext";
 import { useState } from "preact/hooks";
 import styles from "./index.scss";
 import { EditorProvider } from "./context/EditorContext";
 
-const MainComponent = ({ perspectiveUuid, channel }) => {
+const MainComponent = ({ perspective, source }) => {
   const [ref, setRef] = useState(null);
 
   return (
-    <EditorProvider perspectiveUuid={perspectiveUuid} channelId={channel}>
+    <EditorProvider perspectiveUuid={perspective} channelId={source}>
       <div class={styles.container} ref={setRef}>
         <MessageList
-          perspectiveUuid={perspectiveUuid}
-          channelId={channel}
+          perspectiveUuid={perspective}
+          channelId={source}
           mainRef={ref}
         />
-        <Footer perspectiveUuid={perspectiveUuid} channelId={channel} />
+        <Footer perspectiveUuid={perspective} channelId={source} />
       </div>
     </EditorProvider>
   );
 };
 
-export default ({ perspectiveUuid = "", port = "", channel = "" }) => {
+export default ({ perspective = "", source = "" }) => {
   return (
     <UIProvider>
       <AgentProvider>
-        <PerspectiveProvider perspectiveUuid={perspectiveUuid}>
-          <ChatProvider perspectiveUuid={perspectiveUuid} channelId={channel}>
+        <PerspectiveProvider perspectiveUuid={perspective}>
+          <ChatProvider perspectiveUuid={perspective} channelId={source}>
             <MainComponent
-              perspectiveUuid={perspectiveUuid}
-              channel={channel}
+              perspective={perspective}
+              source={source}
             ></MainComponent>
           </ChatProvider>
         </PerspectiveProvider>
