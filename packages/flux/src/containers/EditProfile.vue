@@ -3,8 +3,8 @@
     <j-flex direction="column" gap="700">
       <j-text variant="heading-sm">Edit profile</j-text>
       <img-upload
-        :value="profileBg"
-        @change="(url) => (profileBg = url)"
+        :value="profileBackground"
+        @change="(url) => (profileBackground = url)"
         @hide="(val) => (hideContainer = val)"
       ></img-upload>
       <avatar-upload
@@ -17,14 +17,14 @@
         label="Username"
         @keydown.enter="updateProfile"
         :value="userProfile?.username"
-        @input="(e) => (username = e.target.value)"
+        @input="(e: any) => (username = e.target.value)"
       ></j-input>
       <j-input
         size="lg"
         label="Bio"
         @keydown.enter="updateProfile"
         :value="bio"
-        @input="(e) => (bio = e.target.value)"
+        @input="(e: any) => (bio = e.target.value)"
       ></j-input>
       <div>
         <j-button size="lg" @click="$emit('cancel')"> Cancel </j-button>
@@ -49,7 +49,7 @@ import { Profile } from "utils/types";
 import { useUserStore } from "@/store/user";
 import { useAppStore } from "@/store/app";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
-import { getImage } from "utils/api/getProfile";
+import { getImage } from "utils/helpers/getImage";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -67,7 +67,7 @@ export default defineComponent({
       isUpdatingProfile: false,
       username: "",
       bio: "",
-      profileBg: "",
+      profileBackground: "",
       profilePicture: "",
       hideContainer: false,
     };
@@ -75,8 +75,8 @@ export default defineComponent({
   async mounted() {
     this.username = this.userProfile.username || "";
     this.bio = this.userProfile.bio || "";
-    this.profilePicture = await getImage(this.userProfile?.profilePicture);
-    this.profileBg = await getImage(this.userProfile.profileBg);
+    this.profilePicture = await getImage(this.userProfile.profilePicture);
+    this.profileBackground = await getImage(this.userProfile.profileBackground);
   },
   computed: {
     userProfile(): Profile {
@@ -95,7 +95,7 @@ export default defineComponent({
           username: this.username,
           profilePicture: this.profilePicture,
           bio: this.bio,
-          profileBg: this.profileBg,
+          profileBackground: this.profileBackground
         })
         .then(() => {
           this.$emit("submit");

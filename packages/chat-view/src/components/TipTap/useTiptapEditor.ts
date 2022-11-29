@@ -131,7 +131,11 @@ export default ({
             class: styles.editorParagraph,
           },
         }),
-        Link,
+        Link.configure({
+          HTMLAttributes: {
+            class: styles.linkStyles,
+          },
+        }),
         NeighbourhoodLink,
         Bold,
         Strike,
@@ -213,7 +217,6 @@ export default ({
       ],
       onUpdate: (props) => {
         const value = props.editor.getJSON() as any;
-        console.log("wwwweeee", value);
         onChange(value);
       },
     },

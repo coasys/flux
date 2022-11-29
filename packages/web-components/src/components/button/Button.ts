@@ -57,6 +57,7 @@ const styles = css`
 
   :host([loading]) j-spinner {
     display: block;
+    --j-spinner-size: calc(var(--j-button-height) / 2);
     --j-spinner-color: var(--j-button-color);
   }
 
@@ -89,18 +90,18 @@ const styles = css`
   }
 
   :host([variant="subtle"]) {
-    --j-button-bg: var(--j-color-ui-50);
+    --j-button-bg: rgb(0 0 0 / 16%);
     --j-button-color: var(--j-color-ui-800);
     --j-button-border: 1px solid transparent;
   }
 
   :host([variant="subtle"]:hover) {
     --j-button-color: var(--j-color-black);
-    --j-button-bg: var(--j-color-ui-100);
+    --j-button-bg: rgb(0 0 0 / 20%);
   }
 
   :host([variant="ghost"]) {
-    --j-button-opacity: 0.75;
+    --j-button-opacity: 0.5;
     --j-button-bg: transparent;
     --j-button-color: currentColor;
     --j-button-border: 1px solid transparent;
@@ -214,7 +215,7 @@ export default class Button extends LitElement {
   render() {
     return html`
       <button @click=${this.handleClick} part="base">
-        <j-spinner size="sm"></j-spinner>
+        <j-spinner></j-spinner>
         <slot name="start"></slot>
         <slot></slot>
         <slot name="end"></slot>

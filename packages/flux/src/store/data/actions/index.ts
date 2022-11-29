@@ -7,8 +7,10 @@ import fetchNeighbourhoodMembers from "./fetchNeighbourhoodMembers";
 import fetchNeighbourhoodMetadata from "./fetchNeighbourhoodMetadata";
 import fetchNeighbourhoodChannels from "./fetchNeighbourhoodChannels";
 import removeCommunity from "./removeCommunity";
+import updateChannelViews from "./updateChannelViews";
 
 export default {
+  updateChannelViews,
   createChannel,
   createCommunity,
   joinCommunity,
@@ -17,5 +19,5 @@ export default {
   fetchNeighbourhoodMembers,
   fetchNeighbourhoodMetadata,
   fetchNeighbourhoodChannels,
-  removeCommunity
+  removeCommunity,
 };

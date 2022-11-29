@@ -7,6 +7,7 @@ import {
   NAME,
 } from "../constants/communityPredicates";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { cacheLinks, getCacheLinks } from "../helpers/cacheLinks";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -28,7 +29,7 @@ export function findNeighbourhood(str: string) {
   const urlRex =
     /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/;
   for (const match of uritokens) {
-    if (!urlRex.test(match[0])) {
+    if (!urlRex.test(match[0]) && match[0].trim().length > 0) {
       urifiltered.push(match[0]);
     }
   }
@@ -45,7 +46,7 @@ export default async function ({ message, isHidden }: Payload) {
     const client = await getAd4mClient();
 
     // @ts-ignore
-    const [neighbourhoods] = findNeighbourhood(message);
+    const [neighbourhoods, urls] = findNeighbourhood(message);
 
     const hoods = [];
 
@@ -71,6 +72,27 @@ export default async function ({ message, isHidden }: Payload) {
           url: neighbourhood || "",
           perspectiveUuid,
         });
+      }
+
+      for (const url of urls) {
+        let data = undefined;
+        data = await getCacheLinks(url);
+
+        if (!data) {
+          data = await fetch(
+            "https://jsonlink.io/api/extract?url=" + url
+          ).then((res) => res.json());
+          
+          cacheLinks(url, data);
+        } 
+
+        hoods.push({
+          type: 'link',
+          name: data.title || "", 
+          description: data.description || "",
+          image: data.images[0] || "",
+          url
+        })
       }
     }
 

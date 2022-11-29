@@ -18,6 +18,7 @@ const styles = css`
     --j-modal-translateX: 0px;
     --j-modal-justify: center;
     --j-modal-align: flex-end;
+    --j-modal-max-height: 90vh;
   }
 
   :host([size="xs"]) {
@@ -38,6 +39,13 @@ const styles = css`
   :host([size="xl"]) {
     --j-modal-width-mobile: 95vw;
     --j-modal-width: clamp(350px, 60vw, 1200px);
+  }
+
+  :host([size="fullscreen"]) {
+    --j-modal-width-mobile: 100vw;
+    --j-modal-width: 100vw;
+    --j-modal-height: 100vh;
+    --j-modal-max-height: 100vh;
   }
 
   :host {
@@ -75,7 +83,7 @@ const styles = css`
     border-radius: var(--j-border-radius);
     width: var(--j-modal-width-mobile);
     height: var(--j-modal-height);
-    max-height: 90vh;
+    max-height: var(--j-modal-max-height);
     background: var(--j-color-white);
     border: 1px solid var(--j-border-color);
   }
@@ -115,7 +123,7 @@ const styles = css`
 
   [part="backdrop"] {
     opacity: 0;
-    transition: opacity 0.5s cubic-bezier(0.785, 0.135, 0.15, 0.86);
+    transition: opacity 0.2s cubic-bezier(0.785, 0.135, 0.15, 0.86);
     overflow: visible;
     z-index: 400;
     position: absolute;
@@ -123,7 +131,7 @@ const styles = css`
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.6);
   }
 
   :host([open]) [part="backdrop"] {
@@ -137,7 +145,7 @@ export default class Menu extends LitElement {
 
   /**
    * Size
-   * @type {""|"xs"|"sm"|"lg"|"xl"|}
+   * @type {""|"xs"|"sm"|"lg"|"xl"|"fullscreen"}
    * @attr
    */
   @property({ type: String, reflect: true })

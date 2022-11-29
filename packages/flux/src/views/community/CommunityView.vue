@@ -13,8 +13,7 @@
       :key="channel.id"
       :style="{
         height:
-          channel.name === channelId &&
-          channel.sourcePerspective === communityId
+          channel.id === channelId 
             ? '100%'
             : '0',
       }"
@@ -22,11 +21,10 @@
       <channel-view
         v-if="loadedChannels[channel.id]"
         v-show="
-          channel.name === channelId &&
-          channel.sourcePerspective === communityId
+          channel.id === channelId
         "
-        :channelId="channel.name"
-        :communityId="channel.sourcePerspective"
+        :channelId="channel.id"
+        :communityId="communityId"
       ></channel-view>
     </div>
     <div v-if="notSynced" class="center">
@@ -40,7 +38,7 @@
   <j-modal
     size="sm"
     :open="modals.showCommunityMembers"
-    @toggle="(e) => setShowCommunityMembers(e.target.open)"
+    @toggle="(e: any) => setShowCommunityMembers(e.target.open)"
   >
     <community-members
       @close="() => setShowCommunityMembers(false)"
@@ -51,7 +49,7 @@
   <j-modal
     size="sm"
     :open="modals.showEditCommunity"
-    @toggle="(e) => setShowEditCommunity(e.target.open)"
+    @toggle="(e: any) => setShowEditCommunity(e.target.open)"
   >
     <edit-community
       v-if="modals.showEditCommunity"
@@ -61,9 +59,8 @@
   </j-modal>
 
   <j-modal
-    size="sm"
     :open="modals.showCreateChannel"
-    @toggle="(e) => setShowCreateChannel(e.target.open)"
+    @toggle="(e: any) => setShowCreateChannel(e.target.open)"
   >
     <create-channel
       v-if="modals.showCreateChannel"
@@ -75,7 +72,7 @@
   <j-modal
     size="sm"
     :open="modals.showInviteCode"
-    @toggle="(e) => setShowInviteCode(e.target.open)"
+    @toggle="(e: any) => setShowInviteCode(e.target.open)"
   >
     <j-box p="800">
       <j-text variant="heading">Invite people</j-text>
@@ -83,7 +80,7 @@
         Copy and send this code to the people you want to join your community
       </j-text>
       <j-input
-        @click="(e) => e.target.select()"
+        @click="(e: any) => e.target.select()"
         size="lg"
         readonly
         :value="community.neighbourhood.neighbourhoodUrl"
@@ -97,14 +94,14 @@
 
   <j-modal
     :open="modals.showCommunitySettings"
-    @toggle="(e) => setShowCommunitySettings(e.target.open)"
+    @toggle="(e: any) => setShowCommunitySettings(e.target.open)"
   >
     <community-settings />
   </j-modal>
 
   <j-modal
     :open="modals.showCommunityTweaks"
-    @toggle="(e) => setShowCommunityTweaks(e.target.open)"
+    @toggle="(e: any) => setShowCommunityTweaks(e.target.open)"
   >
     <community-tweaks v-if="modals.showCommunityTweaks" />
   </j-modal>
@@ -183,7 +180,8 @@ export default defineComponent({
             channelId: id,
           });
 
-          const channel = this.dataStore.getChannel(this.communityId, id);
+          const channel = this.dataStore.getChannel(id);
+
 
           if (channel) {
             this.notSynced = false;
@@ -213,7 +211,7 @@ export default defineComponent({
       if (channels.length > 0) {
         this.notSynced = false;
         const firstChannel =
-          this.dataStore.getChannelStates(communityId)[0].name;
+          this.dataStore.getChannelStates(communityId)[0].id;
         const currentChannelId =
           this.community.state.currentChannelId || firstChannel;
 
@@ -268,7 +266,7 @@ export default defineComponent({
     },
     community(): CommunityState {
       const communityId = this.communityId;
-      return this.dataStore.getCommunity(communityId);
+      return this.dataStore.getCommunityState(communityId);
     },
     channels(): ChannelState[] {
       const channels = this.dataStore.getChannels;

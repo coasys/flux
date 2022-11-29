@@ -1,0 +1,34 @@
+.editorWrapper {
+  display: block;
+  width: 100%;
+  background-color: rgba(0,0,0,0.1);
+  border: 1px solid var(--j-border-color);
+  border-radius: var(--j-border-radius);
+}
+
+.editorWrapper:hover:not(:focus-within) {
+  border: 1px solid var(--j-border-color-strong);
+}
+
+.editorWrapper:focus-within {
+  border: 1px solid var(--j-color-focus);
+}
+
+.editor div {
+  outline: 0;
+  padding: var(--j-space-400);
+  min-height: 100px;
+}
+
+.editor div *:first-of-type {
+  margin-top: 0;
+}
+
+.editor div pre {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: var(--j-space-200);
+}
+
+.menuBar {
+  border-bottom: 1px solid var(--j-color-ui-100);
+}

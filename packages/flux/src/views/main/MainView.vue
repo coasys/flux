@@ -9,7 +9,7 @@
   <j-modal
     size="sm"
     :open="modals.showCreateCommunity"
-    @toggle="(e) => setShowCreateCommunity(e.target.open)"
+    @toggle="(e: any) => setShowCreateCommunity(e.target.open)"
   >
     <create-community
       v-if="modals.showCreateCommunity"
@@ -20,7 +20,7 @@
 
   <j-modal
     :open="modals.showDisclaimer"
-    @toggle="(e) => setShowDisclaimer(e.target.open)"
+    @toggle="(e: any) => setShowDisclaimer(e.target.open)"
   >
     <j-box p="800">
       <j-box pb="500">

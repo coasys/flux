@@ -23,7 +23,7 @@
     autohide="10"
     :variant="ui.toast.variant"
     :open="ui.toast.open"
-    @toggle="(e) => appStore.setToast({ open: e.target.open })"
+    @toggle="(e: any) => appStore.setToast({ open: e.target.open })"
   >
     <j-text>{{ ui.toast.message }}</j-text>
   </j-toast>
@@ -31,13 +31,8 @@
 
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
-import { mapActions } from "pinia";
 import { useAppStore } from "./store/app";
-import {
-  ApplicationState,
-  ModalsState,
-  NeighbourhoodState,
-} from "@/store/types";
+import { ApplicationState, ModalsState } from "@/store/types";
 import { useRoute, useRouter } from "vue-router";
 import { useDataStore } from "./store/data";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
@@ -48,21 +43,19 @@ import {
   FLUX_GROUP_NAME,
   FLUX_GROUP_THUMBNAIL,
   MEMBER,
-  DIRECTLY_SUCCEEDED_BY,
 } from "utils/constants/communityPredicates";
 import { useUserStore } from "./store/user";
 import { buildCommunity, hydrateState } from "./store/data/hydrateState";
-import { getGroupMetadata } from "./store/data/actions/fetchNeighbourhoodMetadata";
+import getCommunityMetadata from "utils/api/getCommunityMetadata";
 import {
   getAd4mClient,
-  isConnected,
   onAuthStateChanged,
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import "@perspect3vism/ad4m-connect/dist/web";
+import { Community, EntryType } from "utils/types";
 
 export default defineComponent({
   name: "App",
-
   setup() {
     const appStore = useAppStore();
     const router = useRouter();
@@ -94,7 +87,7 @@ export default defineComponent({
         if (!this.watcherStarted) {
           this.startWatcher();
           this.watcherStarted = true;
-          await hydrateState();
+          hydrateState();
         }
       }
     });
@@ -123,14 +116,14 @@ export default defineComponent({
         link: LinkExpression,
         perspective: string
       ) => {
-        if (link.data!.predicate! === DIRECTLY_SUCCEEDED_BY) {
+        if (link.data!.predicate! === EntryType.Message) {
           try {
             const channels = this.dataStore.getChannelStates(perspective);
 
             for (const channel of channels) {
               const isSameChannel = await client.perspective.queryProlog(
                 perspective,
-                `triple("${channel.id}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.target}").`
+                `triple("${channel.id}", "${EntryType.Message}", "${link.data.target}").`
               );
 
               if (isSameChannel) {
@@ -190,10 +183,10 @@ export default defineComponent({
               channel: {
                 id: channel,
                 name: channelExpression.data,
-                creatorDid: link.author,
+                author: link.author,
                 sourcePerspective: perspective,
                 hasNewMessages: false,
-                createdAt: link.timestamp,
+                timestamp: link.timestamp,
                 notifications: {
                   mute: false,
                 },
@@ -223,7 +216,7 @@ export default defineComponent({
           //If the link has predicate which is for group metadata, it's a group metadata update
           console.log("Community update via link signal");
 
-          const groupExp = await getGroupMetadata(perspective);
+          const groupExp = await getCommunityMetadata(perspective);
 
           this.dataStore.updateCommunityMetadata({
             communityId: perspective,
@@ -236,7 +229,7 @@ export default defineComponent({
       };
       watch(
         this.dataStore.neighbourhoods,
-        async (newValue: { [perspectiveUuid: string]: NeighbourhoodState }) => {
+        async (newValue: { [perspectiveUuid: string]: Community }) => {
           for (const [k, v] of Object.entries(newValue)) {
             if (watching.filter((val) => val == k).length == 0) {
               console.log("Starting watcher on perspective", k);
@@ -252,7 +245,7 @@ export default defineComponent({
                     "and channel",
                     v
                   );
-                  newLinkHandler(result, v.perspective.uuid);
+                  newLinkHandler(result, v.uuid);
                 });
 
                 perspective.addListener("link-removed", (link) => {
@@ -272,6 +265,7 @@ export default defineComponent({
                       channelId: channel.id,
                     });
                   }
+                  return null;
                 });
               }
             }
@@ -300,10 +294,10 @@ export default defineComponent({
                   channel: {
                     id: channel,
                     name: channelName,
-                    creatorDid: link.author,
+                    author: link.author,
                     sourcePerspective: perspective.uuid,
                     hasNewMessages: false,
-                    createdAt: link.timestamp,
+                    timestamp: link.timestamp,
                     notifications: {
                       mute: false,
                     },
@@ -316,10 +310,10 @@ export default defineComponent({
                 channel: {
                   id: channel,
                   name: channelName,
-                  creatorDid: link.author,
+                  author: link.author,
                   sourcePerspective: perspective.uuid,
                   hasNewMessages: false,
-                  createdAt: link.timestamp,
+                  timestamp: link.timestamp,
                   notifications: {
                     mute: false,
                   },
@@ -327,13 +321,14 @@ export default defineComponent({
               });
             }
           }
+          return null;
         });
       });
 
       // @ts-ignore
       client!.perspective.addPerspectiveRemovedListener((perspective) => {
         const isCommunity = this.dataStore.getCommunity(perspective);
-        if (isCommunity && isCommunity.neighbourhood) {
+        if (isCommunity) {
           this.dataStore.removeCommunity({ communityId: perspective });
         }
       });
@@ -355,10 +350,10 @@ export default defineComponent({
                   channel: {
                     id: channel,
                     name: channelName,
-                    creatorDid: link.author,
+                    author: link.author,
                     sourcePerspective: perspective.uuid,
                     hasNewMessages: false,
-                    createdAt: link.timestamp,
+                    timestamp: link.timestamp,
                     notifications: {
                       mute: false,
                     },
@@ -367,6 +362,7 @@ export default defineComponent({
               });
             }
           }
+          return null;
         });
       }
     },

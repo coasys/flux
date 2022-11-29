@@ -3,17 +3,13 @@ import {
   ThemeState,
   LocalCommunityState,
   ChannelState,
-  Profile,
 } from "@/store/types";
-
-import { useDataStore } from "..";
+import { ChannelView, CommunityMetaData } from "utils/types";
+import { useDataStore } from "@/store/data";
 
 interface UpdatePayload {
   communityId: string;
-  name: string;
-  description: string;
-  image: string | null;
-  thumbnail: string | null;
+  metadata: CommunityMetaData;
 }
 
 interface AddChannel {
@@ -24,9 +20,8 @@ interface AddChannel {
 export default {
   addCommunity(payload: CommunityState): void {
     const state = useDataStore();
-    state.neighbourhoods[payload.neighbourhood.perspective.uuid] =
-      payload.neighbourhood;
-    state.communities[payload.neighbourhood.perspective.uuid] = payload.state;
+    state.neighbourhoods[payload.neighbourhood.uuid] = payload.neighbourhood;
+    state.communities[payload.neighbourhood.uuid] = payload.state;
   },
 
   addCommunityState(payload: LocalCommunityState): void {
@@ -100,24 +95,22 @@ export default {
     };
   },
 
-  updateCommunityMetadata({
-    communityId,
-    name,
-    description,
-    image,
-    thumbnail,
-  }: UpdatePayload): void {
+  updateCommunityMetadata({ communityId, metadata }: UpdatePayload): void {
     const state = useDataStore();
     const community = state.neighbourhoods[communityId];
 
     if (community) {
-      community.name = name;
-      community.description = description;
-      if (image) {
-        community.image = image;
+      if (metadata?.name) {
+        community.name = metadata.name;
       }
-      if (thumbnail) {
-        community.thumbnail = thumbnail;
+      if (metadata?.description) {
+        community.description = metadata.description;
+      }
+      if (metadata?.image) {
+        community.image = metadata.image;
+      }
+      if (metadata?.thumbnail) {
+        community.thumbnail = metadata.thumbnail;
       }
     }
 
@@ -138,13 +131,49 @@ export default {
     });
   },
 
+  putChannelView(payload: { channelId: string; view: ChannelView }) {
+    const state = useDataStore();
+    const channel = state.channels[payload.channelId];
+    if (channel) {
+      const alreadyHasView = channel.views?.includes(payload.view);
+      if (!alreadyHasView) {
+        channel.views =
+          channel.views?.length > 0
+            ? [...channel.views, payload.view]
+            : [payload.view];
+      }
+    }
+  },
+
+  putChannelViews(payload: { channelId: string; views: ChannelView[] }) {
+    const state = useDataStore();
+    state.channels[payload.channelId].views = payload.views;
+  },
+
+  setChannels(payload: { communityId: string; channels: ChannelState[] }) {
+    const state = useDataStore();
+    payload.channels.forEach((channel) => {
+      state.channels[channel.id] = channel;
+    });
+  },
+
+  toggleChannelCollapse(channelId: string) {
+    const state = useDataStore();
+    state.channels[channelId].collapsed = !state.channels[channelId].collapsed;
+  },
+
+  setCurrentChannelView(payload: { channelId: string; view: ChannelView }) {
+    const state = useDataStore();
+    state.channels[payload.channelId].currentView = payload.view;
+  },
+
   addChannel(payload: AddChannel): void {
     const state = useDataStore();
     const parentNeighbourhood = state.neighbourhoods[payload.communityId];
 
-    if (parentNeighbourhood !== undefined) {
+    if (parentNeighbourhood) {
       const exists = Object.values(state.channels).find(
-        (c) =>
+        (c: ChannelState) =>
           c.name === payload.channel.name &&
           c.sourcePerspective === payload.communityId
       );
@@ -154,9 +183,9 @@ export default {
       }
     }
   },
+
   removeChannel(payload: { channelId: string }): void {
     const state = useDataStore();
-
     delete state.channels[payload.channelId];
   },
 
@@ -191,12 +220,12 @@ export default {
     value: boolean;
   }): void {
     const state = useDataStore();
-    const channel = state.getChannel(payload.communityId, payload.channelId);
+    const channel = state.getChannel(payload.channelId);
     const tempCommunity = state.getCommunity(payload.communityId);
-    const community = state.communities[tempCommunity.state.perspectiveUuid];
+    const community = state.communities[tempCommunity.uuid];
     channel!.hasNewMessages = payload.value;
     community.hasNewMessages = state
-      .getChannelStates(tempCommunity.state.perspectiveUuid)
+      .getChannelStates(tempCommunity.uuid)
       .reduce((acc: boolean, channel) => {
         if (!acc) return channel.hasNewMessages;
         return true;

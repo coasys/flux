@@ -1,6 +1,8 @@
 import ChatContext, { ChatProvider } from "./ChatContext";
 import PerspectiveContext, { PerspectiveProvider } from "./PerspectiveContext";
 import AgentContext, { AgentProvider } from "./AgentContext";
+import ChannelContext, { ChannelProvider } from "./ChannelContext";
+import CommunityContext, { CommunityProvider } from "./CommunityContext";
 
 export {
   ChatContext,
@@ -9,4 +11,8 @@ export {
   PerspectiveProvider,
   AgentProvider,
   AgentContext,
+  ChannelContext,
+  ChannelProvider,
+  CommunityContext,
+  CommunityProvider,
 };

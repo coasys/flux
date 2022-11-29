@@ -1,0 +1,11 @@
+.header {
+  position: relative;
+  padding: var(--j-space-400) var(--j-space-500) var(--j-space-600) var(--j-space-500);
+}
+
+.addButton {
+  position: fixed;
+  bottom: var(--j-space-800);
+  right: var(--j-space-800);
+  z-index: 999;
+}

@@ -102,12 +102,12 @@ export default defineComponent({
   .sidebar-layout .sidebar-layout__drawer {
     height: 100%;
     width: 100% !important;
-    max-width: 100%;
+    max-width: calc(100% - var(--app-main-sidebar-width));
     background: var(--app-drawer-bg-color);
     overflow-y: auto;
     opacity: 1;
     position: absolute;
-    left: 0;
+    left: var(--app-main-sidebar-width);
     top: 0;
   }
   .sidebar-layout--closed .sidebar-layout__drawer {
@@ -156,7 +156,7 @@ export default defineComponent({
   right: 0;
   top: 0;
   width: 3px;
-  border-right: 1px solid var(--app-drawer-border-color);
+  border-right: 1px solid var(--app-drawer-border-color, var(--j-border-color));
   background: transparent;
   cursor: col-resize;
   height: 100%;

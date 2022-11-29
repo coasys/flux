@@ -10,8 +10,8 @@
   --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 13%);
   --app-drawer-border-color: transparent;
   --app-main-content-bg-color: hsl(var(--j-color-ui-hue), 0%, 17%);
-  --app-channel-bg-color: hsl(var(--j-color-ui-hue), 0%, 30%);
-  --app-channel-header-bg-color: hsl(var(--j-color-ui-hue), 0%, 13%);
+  --app-channel-bg-color: hsl(var(--j-color-ui-hue), 0%, 15%);
+  --app-channel-header-bg-color: hsl(var(--j-color-ui-hue), 0%, 15%);
   --app-channel-footer-bg-color: hsl(var(--j-color-ui-hue), 0%, 13%);
   --app-channel-border-color: transparent;
 }
@@ -26,10 +26,6 @@
   color: var(--j-color-black);
 }
 
-:root[theme="default"] j-input::part(input-wrapper) {
-  background-color: hsl(var(--j-color-ui-hue), 18%, 23%);
-}
-
 :root[theme="default"] j-menu-item::part(base) {
   margin-top: var(--j-space-100);
   margin-left: var(--j-space-400);
@@ -42,11 +38,11 @@
 }
 
 :root[theme="default"] j-menu-item:hover {
-  --j-menu-item-bg: hsl(var(--j-color-ui-hue), 0%, 20%);
+  --j-menu-item-bg: hsl(var(--j-color-ui-hue), 0%, 15%);
   --j-menu-item-color: hsl(var(--j-color-ui-hue), 0%, 70%);
 }
 
 :root[theme="default"] j-menu-item[selected] {
-  --j-menu-item-bg: hsl(var(--j-color-ui-hue), 0%, 26%);
+  --j-menu-item-bg: hsl(var(--j-color-ui-hue), 0%, 15%);
   --j-menu-item-color: var(--j-color-black);
 }

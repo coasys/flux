@@ -18,8 +18,13 @@ const styles = css`
     --j-input-height: var(--j-size-xl);
     --j-input-padding: var(--j-space-500);
   }
+  :host([full]) {
+    display: block;
+    width: 100%;
+  }
   [part="base"] {
     display: block;
+    position: relative;
   }
   [part="input-wrapper"] {
     display: flex;
@@ -34,6 +39,7 @@ const styles = css`
     width: 100%;
     min-width: 200px;
     padding: 0px;
+    margin-bottom: var(--j-space-500);
   }
   [part="input-wrapper"]:hover {
     border: 1px solid var(--j-border-color-strong);
@@ -46,6 +52,7 @@ const styles = css`
     flex: 1;
     background: none;
     outline: 0;
+    font-family: inherit;
     color: var(--j-color-black);
     font-size: inherit;
     height: 100%;
@@ -57,8 +64,10 @@ const styles = css`
   }
   [part="help-text"],
   [part="error-text"] {
-    margin-top: var(--j-space-300);
-    font-size: var(--j-font-size-400);
+    left: 0;
+    bottom: -20px;
+    position: absolute;
+    font-size: var(--j-font-size-300);
   }
   [part="error-text"] {
     color: var(--j-color-danger-500);
@@ -82,7 +91,10 @@ class Input extends LitElement {
     this.minlength = null;
     this.pattern = null;
     this.label = null;
+    this.name = null;
     this.size = null;
+    this.list = null;
+    this.step = null;
     this.placeholder = null;
     this.errorText = null;
     this.helpText = null;
@@ -95,8 +107,10 @@ class Input extends LitElement {
     this.required = false;
     this.readonly = false;
     this.type = "text";
+    this.focus = this.focus.bind(this);
     this.onFocus = this.onFocus.bind(this);
     this.onBlur = this.onBlur.bind(this);
+    this.validate = this.validate.bind(this);
   }
 
   static get properties() {
@@ -106,11 +120,14 @@ class Input extends LitElement {
       size: { type: String, reflect: true },
       placeholder: { type: String },
       label: { type: String },
+      name: { type: String },
       full: { type: Boolean, reflect: true },
       value: { type: String, reflect: true },
       error: { type: Boolean, reflect: true },
-      max: { type: Number },
-      min: { type: Number },
+      max: { type: String, reflect: true },
+      min: { type: String, reflect: true },
+      list: { type: String, reflect: true },
+      step: { type: String, reflect: true },
       maxlength: { type: Number },
       minlength: { type: Number },
       pattern: { type: String },
@@ -156,30 +173,37 @@ class Input extends LitElement {
     this.renderRoot.querySelector("input").select();
   }
 
+  focus() {
+    this.renderRoot.querySelector("input").focus();
+  }
+
   onFocus(e) {
     e.stopPropagation();
     this.value = e.target.value;
     this.dispatchEvent(new CustomEvent("change", e));
   }
 
+  validate() {
+    const valid = this.renderRoot.querySelector("input").checkValidity();
+    const message = this.renderRoot.querySelector("input").validationMessage;
+
+    if (!valid) {
+      this.error = true;
+      this.errorText = message;
+    } else {
+      this.error = false;
+    }
+
+    this.dispatchEvent(new CustomEvent("validate"));
+
+    return valid;
+  }
+
   onBlur(e) {
     e.stopPropagation();
 
     if (this.autovalidate) {
-      const valid = this.renderRoot.querySelector("input").checkValidity();
-
-      const message = this.renderRoot.querySelector("input").validationMessage;
-
-      if (!this.errorText) {
-        this.errorText = message;
-      }
-
-      if (!valid) {
-        this.error = true;
-      } else {
-        this.error = false;
-      }
-      this.dispatchEvent(new CustomEvent("validate", e));
+      this.validate();
     }
 
     this.dispatchEvent(new CustomEvent("blur", e));
@@ -201,6 +225,8 @@ class Input extends LitElement {
             .value=${this.value}
             max=${ifDefined(this.max)}
             min=${ifDefined(this.min)}
+            list=${ifDefined(this.list)}
+            step=${ifDefined(this.step)}
             maxlength=${ifDefined(this.maxlength)}
             minlength=${ifDefined(this.minlength)}
             pattern="${ifDefined(this.pattern)}"

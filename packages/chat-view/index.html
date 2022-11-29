@@ -53,7 +53,7 @@
       button.addEventListener("click", () => {
         const id = perspectiveId.value;
         const channel = channelId.value;
-        console.log({ channel, id });
+
         el.setAttribute("perspective-uuid", id);
         el.setAttribute("channel", channel);
         customElements.define("perspective-view", MiniChatView);

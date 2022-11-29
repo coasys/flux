@@ -8,24 +8,72 @@
       >
         <j-icon color="ui-800" size="md" name="arrow-left-short" />
       </j-button>
-      <j-text color="black" variant="heading-md"># {{ channel.name }}</j-text>
+
+      <div class="channel-view__header-left">
+        <div class="channel-view__tabs">
+          <label class="channel-view-tab" v-for="view in filteredViewOptions">
+            <input
+              :name="channel.id"
+              type="radio"
+              :checked.prop="view.type === currentView"
+              :value.prop="view.type"
+              @change="changeCurrentView"
+            />
+            <j-icon size="xs" :name="view.icon"></j-icon>
+            <span>{{ view.title }}</span>
+          </label>
+        </div>
+
+        <j-button
+          @click="() => (showUpdateChannelViews = true)"
+          size="sm"
+          variant="ghost"
+        >
+          <j-icon name="plus"></j-icon>
+        </j-button>
+      </div>
+      <div class="channel-view__header-right"></div>
     </div>
 
-    <perspective-view
+    <forum-view
+      v-show="currentView === ChannelView.Forum"
       class="perspective-view"
       :port="port"
-      :channel="channel.id"
-      :perspective-uuid="communityId"
+      :source="`flux_entry://${channel.id}`"
+      :perspective="communityId"
       @agent-click="onAgentClick"
       @channel-click="onChannelClick"
       @neighbourhood-click="onNeighbourhoodClick"
       @hide-notification-indicator="onHideNotificationIndicator"
-    ></perspective-view>
+    ></forum-view>
+    <chat-view
+      v-show="currentView === ChannelView.Chat"
+      class="perspective-view"
+      :port="port"
+      :source="`flux_entry://${channel.id}`"
+      :perspective="communityId"
+      @agent-click="onAgentClick"
+      @channel-click="onChannelClick"
+      @neighbourhood-click="onNeighbourhoodClick"
+      @hide-notification-indicator="onHideNotificationIndicator"
+    ></chat-view>
+    <j-modal
+      :open="showUpdateChannelViews"
+      @toggle="(e: any) => (showUpdateChannelViews = e.target.open)"
+    >
+      <UpdateChannelViews
+        v-if="showUpdateChannelViews"
+        @cancel="() => (showUpdateChannelViews = false)"
+        @submit="() => (showUpdateChannelViews = false)"
+        :channelId="channelId"
+        :communityId="communityId"
+      ></UpdateChannelViews>
+    </j-modal>
     <j-modal
       size="xs"
       v-if="activeProfile"
       :open="showProfile"
-      @toggle="(e) => toggleProfile(e.target.open, activeProfile)"
+      @toggle="(e: any) => toggleProfile(e.target.open, activeProfile)"
     >
       <Profile
         :did="activeProfile"
@@ -36,13 +84,13 @@
       size="xs"
       v-if="activeCommunity"
       :open="showJoinCommuinityModal"
-      @toggle="(e) => toggleJoinCommunityModal(e.target.open, activeCommunity)"
+      @toggle="(e: any) => toggleJoinCommunityModal(e.target.open, activeCommunity)"
     >
       <j-box v-if="activeCommunity" p="800">
         <j-flex a="center" direction="column" gap="500">
-          <j-text v-if="activeCommunity.name">{{
-            activeCommunity.name
-          }}</j-text>
+          <j-text v-if="activeCommunity.name">
+            {{ activeCommunity.name }}
+          </j-text>
           <j-text
             v-if="activeCommunity.description"
             variant="heading-sm"
@@ -67,13 +115,17 @@
 </template>
 
 <script lang="ts">
+import ForumView from "@junto-foundation/forum-view";
 import ChatView from "@junto-foundation/chat-view";
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import Profile from "@/containers/Profile.vue";
+import UpdateChannelViews from "@/containers/UpdateChannelViews.vue";
 import { useAppStore } from "@/store/app";
+import { ChannelView } from "utils/types";
+import viewOptions from "utils/constants/viewOptions";
 
 interface MentionTrigger {
   label: string;
@@ -86,52 +138,60 @@ export default defineComponent({
   props: ["channelId", "communityId"],
   components: {
     Profile,
+    UpdateChannelViews,
   },
   setup() {
-    const appStore = useAppStore();
-    const dataStore = useDataStore();
-    const memberMentions = ref<MentionTrigger[]>([]);
-    const activeProfile = ref<any>({});
-    const showProfile = ref(false);
-    const activeCommunity = ref<any>({});
-    const showJoinCommuinityModal = ref(false);
-    const isJoiningCommunity = ref(false);
-
     return {
-      appStore,
-      dataStore,
+      ChannelView: ChannelView,
+      selectedViews: ref<ChannelView[]>([]),
+      showUpdateChannelViews: ref(false),
+      selectedChannelView: ref("chat"),
+      appStore: useAppStore(),
+      dataStore: useDataStore(),
       script: null as HTMLElement | null,
-      memberMentions,
-      activeProfile,
-      showProfile,
-      showJoinCommuinityModal,
-      activeCommunity,
-      isJoiningCommunity,
+      memberMentions: ref<MentionTrigger[]>([]),
+      activeProfile: ref<string>(""),
+      showProfile: ref(false),
+      showJoinCommuinityModal: ref(false),
+      activeCommunity: ref<any>({}),
+      isJoiningCommunity: ref(false),
     };
   },
   mounted() {
-    if (customElements.get("perspective-view") === undefined)
-      customElements.define("perspective-view", ChatView);
+    if (!customElements.get("chat-view"))
+      customElements.define("chat-view", ChatView);
+    if (!customElements.get("forum-view"))
+      customElements.define("forum-view", ForumView);
   },
   computed: {
+    currentView(): string {
+      return this.channel.currentView || this.channel.views[0] || "";
+    },
+    filteredViewOptions() {
+      return viewOptions.filter((view) =>
+        this.channel.views.includes(view.type)
+      );
+    },
     port(): number {
       // TODO: This needs to be reactive, probaly not now as we using a normal class
       return parseInt(localStorage.getItem("ad4minPort") || "") || 12000;
     },
     community(): CommunityState {
       const communityId = this.communityId;
-      return this.dataStore.getCommunity(communityId as string);
+      return this.dataStore.getCommunityState(communityId as string);
     },
     channel(): ChannelState {
-      const communityId = this.communityId;
-      const channelId = this.channelId;
-      return this.dataStore.getChannel(
-        communityId as string,
-        channelId as string
-      )!;
+      return this.dataStore.channels[this.channelId];
     },
   },
   methods: {
+    changeCurrentView(e: any) {
+      const value = e.target.value;
+      this.dataStore.setCurrentChannelView({
+        channelId: this.channel.id,
+        view: value,
+      });
+    },
     toggleSidebar() {
       this.appStore.toggleSidebar();
     },
@@ -143,8 +203,7 @@ export default defineComponent({
         name: "channel",
         params: {
           channelId: detail.channel,
-          communityId:
-            detail.uuid || this.community.neighbourhood.perspective.uuid,
+          communityId: detail.uuid || this.community.neighbourhood.uuid,
         },
       });
     },
@@ -159,7 +218,7 @@ export default defineComponent({
         this.$router.push({
           name: "community",
           params: {
-            communityId: community.neighbourhood.perspective.uuid,
+            communityId: community.neighbourhood.uuid,
           },
         });
       }
@@ -189,7 +248,7 @@ export default defineComponent({
 
       if (channelId) {
         this.dataStore.setHasNewMessages({
-          communityId: this.community.neighbourhood.perspective.uuid,
+          communityId: this.community.neighbourhood.uuid,
           channelId: channelId as string,
           value: false,
         });
@@ -197,7 +256,7 @@ export default defineComponent({
     },
     toggleProfile(open: boolean, did?: any): void {
       if (!open) {
-        this.activeProfile = undefined;
+        this.activeProfile = "";
       } else {
         this.activeProfile = did;
       }
@@ -216,7 +275,7 @@ export default defineComponent({
           name: "profile",
           params: {
             did,
-            communityId: this.community.neighbourhood.perspective.uuid,
+            communityId: this.community.neighbourhood.uuid,
           },
         });
       }
@@ -226,18 +285,70 @@ export default defineComponent({
 </script>
 
 <style>
+.channel-view {
+  background-color: var(--app-channel-bg-color, transparent);
+}
+
 .channel-view__header {
   display: flex;
-  align-items: center;
+  align-items: end;
+  justify-content: space-between;
   padding: 0 var(--j-space-200);
   position: sticky;
-  border-bottom: 1px solid var(--j-color-white);
+  background-color: var(--app-channel-header-bg-color, transparent);
+  border-bottom: 1px solid
+    var(--app-channel-header-border-color, var(--j-border-color));
   height: var(--app-header-height);
+}
+
+.channel-view__header-left {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: var(--j-space-300);
 }
 
 .perspective-view {
   height: calc(100% - var(--app-header-height));
+  overflow-y: auto;
   display: block;
+}
+
+.channel-view__tabs {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  gap: var(--j-space-300);
+}
+
+.channel-view-tab {
+  height: 100%;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-300);
+  color: var(--j-color-ui-500);
+  cursor: pointer;
+  position: relative;
+  padding: var(--j-space-200) var(--j-space-400);
+  border-bottom: 1px solid transparent;
+}
+
+.channel-view-tab:hover {
+  color: var(--j-color-black);
+}
+
+.channel-view-tab:has(input:checked) {
+  position: relative;
+  border-bottom: 1px solid var(--j-color-primary-500);
+  color: var(--j-color-black);
+}
+
+.channel-view-tab input {
+  position: absolute;
+  clip: rect(1px 1px 1px 1px);
+  clip: rect(1px, 1px, 1px, 1px);
+  vertical-align: middle;
 }
 
 @media (min-width: 800px) {

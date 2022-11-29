@@ -1,26 +1,20 @@
-import {
-  useState,
-  useContext,
-  useRef,
-  useEffect,
-  useMemo,
-  useCallback,
-} from "preact/hooks";
+import { useState, useContext, useRef, useEffect, useMemo, useCallback } from "preact/hooks";
 import { ChatContext } from "utils/react";
 import MessageItem from "../MessageItem";
 import getMe from "utils/api/getMe";
-import { differenceInMinutes, parseISO } from "date-fns";
+import { differenceInMinutes } from "date-fns";
 import tippy from "tippy.js";
 import { Virtuoso } from "react-virtuoso";
 import { h, Component, createRef } from "preact";
 import ReactHintFactory from "react-hint";
-const ReactHint = ReactHintFactory({ createElement: h, Component, createRef });
 import "react-hint/css/index.css";
 import styles from "./index.scss";
-import { Reaction } from "utils/types";
+import { Message, Reaction } from "utils/types";
 import EditorContext from "../../context/EditorContext";
 
 import { REACTION } from "utils/constants/communityPredicates";
+
+const ReactHint = ReactHintFactory({ createElement: h, Component, createRef });
 
 export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
   const emojiPicker = useMemo(() => {
@@ -30,11 +24,13 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
   }, []);
 
   const [atBottom, setAtBottom] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [initialScroll, setinitialScroll] = useState(false);
   const scroller = useRef();
   const {
     state: { editor },
   } = useContext(EditorContext);
+  const [selectedReplies, setSelectedReplies] = useState<any>(null);
 
   const {
     state: {
@@ -94,16 +90,55 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
     }
   }
 
-  function loadMoreMessages() {
-    loadMore().then((fetchedMessageCount) => {
-      if (fetchedMessageCount > 0) {
-        scroller?.current?.scrollToIndex({
-          index: fetchedMessageCount - 1,
-          align: "end",
-        });
-      }
-    });
+  async function loadMoreMessages(timestamp: any, backwards = false) {
+    const fetchedMessageCount = await loadMore(timestamp, backwards);
+
+    if (fetchedMessageCount > 0) {
+      scroller?.current?.scrollToIndex({
+        index: fetchedMessageCount - 1,
+        align: "end",
+      });
+    }
   }
+
+  const onReplyNavClick = (message: Message) => {
+    setSelectedReplies(message);
+    setShowModal(true);
+  };
+
+  const onReplyScroll = useCallback(async (message: Message) => {
+    const reply = message.replies[0];
+
+    const isReplyFound = messages.findIndex((e) => e.id === reply.id);
+
+    if (isReplyFound !== -1) {
+      setShowModal(false);
+
+      setTimeout(() => {
+        setSelectedReplies(null);
+      }, 1000);
+
+      scroller?.current?.scrollToIndex({
+        index: isReplyFound,
+        align: "center",
+      });
+    } else {
+      await loadMoreMessages(reply.timestamp, true);
+
+      setShowModal(false);
+
+      scroller?.current?.scrollToIndex({
+        index: 0,
+        align: "start",
+      });
+
+      setTimeout(() => {
+        setSelectedReplies(null);
+      }, 1000);
+    }
+  }, [messages])
+
+
 
   function showAvatar(index: number): boolean {
     const previousMessage = messages[index - 1];
@@ -239,7 +274,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
         style={{ height: "100%", overflowX: "hidden" }}
         ref={scroller}
         alignToBottom
-        overscan={{main: 1000, reverse: 1000}}
+        overscan={{ main: 1000, reverse: 1000 }}
         atBottomThreshold={10}
         computeItemKey={(index, message) => message.id}
         endReached={() => handleAtBottom(true)}
@@ -254,9 +289,49 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
             showAvatar={showAvatar(index)}
             mainRef={mainRef}
             perspectiveUuid={perspectiveUuid}
+            onReplyNavClick={() => onReplyNavClick(message)}
+            highlight={selectedReplies?.replies[0]?.id === message.id}
           />
         )}
       />
+      {showModal && (
+        <j-modal
+          size="xs"
+          open={showModal}
+          onToggle={(e) => setShowModal(e.target.open)}
+        >
+          <j-box p="800">
+            <j-flex gap="500" direction="column">
+              <j-text nomargin variant="heading-sm">
+                Reply
+              </j-text>
+              <MessageItem
+                message={{
+                  ...selectedReplies.replies[0],
+                  editMessages: [
+                    { content: selectedReplies.replies[0].content },
+                  ],
+                  replies: [],
+                  reactions: [],
+                }}
+                showAvatar={true}
+                mainRef={mainRef}
+                perspectiveUuid={perspectiveUuid}
+                hideToolbar={true}
+                noPadding
+              />
+              <j-button
+                onClick={() => onReplyScroll(selectedReplies)}
+                size="sm"
+                variant="subtle"
+              >
+                <j-icon size="xs" name="arrow-up"></j-icon>
+                Go there
+              </j-button>
+            </j-flex>
+          </j-box>
+        </j-modal>
+      )}
       <ReactHint
         position="right"
         className={styles.reactHintWrapper}

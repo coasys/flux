@@ -1,18 +1,17 @@
 import { Link, LinkExpression } from "@perspect3vism/ad4m";
-
 import {
   CREATOR,
   DESCRIPTION,
   NAME,
   SELF,
   CREATED_AT,
-} from "utils/constants/communityPredicates";
+} from "../constants/communityPredicates";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 export async function createNeighbourhoodMeta(
   name: string,
   description: string,
-  creatorDid: string
+  author: string
 ): Promise<LinkExpression[]> {
   const client = await getAd4mClient();
   //Create the perspective to hold our meta
@@ -33,7 +32,7 @@ export async function createNeighbourhoodMeta(
   expressionLinks.push(
     new Link({
       source: SELF,
-      target: creatorDid,
+      target: author,
       predicate: CREATOR,
     })
   );

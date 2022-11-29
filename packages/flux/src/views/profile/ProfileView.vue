@@ -1,7 +1,7 @@
 <template>
   <div v-if="profile" class="profile__container">
     <div
-      :style="{ backgroundImage: `url(${profileBg})` }"
+      :style="{ backgroundImage: `url(${profileBackground})` }"
       class="profile__bg"
     />
 
@@ -60,6 +60,7 @@
                 :image="link.image"
                 :sameAgent="sameAgent"
                 @edit="() => setEditLinkModal(true, link)"
+                @delete="() => deleteWebLink(link)"
               />
             </div>
           </j-box>
@@ -95,7 +96,7 @@
                   :name="community.neighbourhood.name"
                   :description="community.neighbourhood.description"
                   :url="community.neighbourhood.image"
-                  :uuid="community.neighbourhood.perspective.uuid"
+                  :uuid="community.neighbourhood.uuid"
                 ></CommunityCard>
               </div>
             </div>
@@ -120,6 +121,7 @@
                   :image="link.image"
                   :sameAgent="sameAgent"
                   @edit="() => setEditLinkModal(true, link)"
+                  @delete="() => deleteWebLink(link)"
                 />
               </div>
             </div>
@@ -173,7 +175,7 @@
 import { useDataStore } from "@/store/data";
 import { Profile } from "utils/types";
 import { ModalsState } from "@/store/types";
-import { Literal } from "@perspect3vism/ad4m";
+import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
 import WebLinkCard from "./WebLinkCard.vue";
 import CommunityCard from "./CommunityCard.vue";
@@ -190,7 +192,8 @@ import {
   OG_IMAGE,
   OG_TITLE,
 } from "utils/constants/profile";
-import getProfile, { getImage } from "utils/api/getProfile";
+import getProfile from "utils/api/getProfile";
+import { getImage } from "utils/helpers/getImage";
 import { mapLiteralLinks } from "utils/helpers/linkHelpers";
 import WebLinkAdd from "./WebLinkAdd.vue";
 
@@ -221,7 +224,7 @@ export default defineComponent({
       showEditlinkModal: false,
       showJoinCommunityModal: false,
       weblinks: [] as any,
-      profileBg: "",
+      profileBackground: "",
       profile: null as Profile | null,
       joiningLink: "",
       editArea: null as any,
@@ -247,6 +250,9 @@ export default defineComponent({
     },
     setShowJoinCommunityModal(value: boolean): void {
       this.showJoinCommunityModal = value;
+    },
+    async deleteWebLink(link: LinkExpression) {
+      this.weblinks = this.weblinks.filter((l: any) => l.id !== link.id);
     },
     async getAgentAreas() {
       const client = await getAd4mClient();
@@ -313,7 +319,7 @@ export default defineComponent({
     profile: {
       handler: async function (val) {
         if (val) {
-          this.profileBg = await getImage(val.profileBg);
+          this.profileBackground = await getImage(val.profileBackground);
         }
       },
       immediate: true,

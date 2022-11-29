@@ -16,7 +16,7 @@
           :key="index"
           :hash="user.did"
           :size="size"
-          :url="user.thumbnailPicture"
+          :url="user.profileThumbnailPicture"
         ></Avatar>
 
         <span v-if="users.length >= 5" class="avatar-group__see-all">

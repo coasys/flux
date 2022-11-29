@@ -36,10 +36,10 @@ export function UIProvider({ children }: any) {
         state,
         methods: {
           setCurrentReply(id: string) {
-            setState({ ...state, currentReply: id });
+            setState((oldState) => ({ ...oldState, currentReply: id }));
           },
           setCurrentEditMessage(id: string) {
-            setState({ ...state, currentMessageEdit: id });
+            setState((oldState) => ({ ...oldState, currentMessageEdit: id }));
           },
         },
       }}
