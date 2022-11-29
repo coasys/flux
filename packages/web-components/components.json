@@ -1049,7 +1049,7 @@
         {
           "name": "size",
           "description": "Size",
-          "type": "\"\"|\"xs\"|\"sm\"|\"lg\"|\"xl\"|"
+          "type": "\"\"|\"xs\"|\"sm\"|\"lg\"|\"xl\"|\"fullscreen\""
         },
         {
           "name": "open",
@@ -1068,7 +1068,7 @@
           "name": "size",
           "attribute": "size",
           "description": "Size",
-          "type": "\"\"|\"xs\"|\"sm\"|\"lg\"|\"xl\"|"
+          "type": "\"\"|\"xs\"|\"sm\"|\"lg\"|\"xl\"|\"fullscreen\""
         },
         {
           "name": "open",

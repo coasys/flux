@@ -39,8 +39,11 @@ export default function Post() {
 
   useEffect(() => {
     fetchComments();
-    const Post = new PostModel({ perspectiveUuid: state.communityId, source: post.id });
-    Post.get(post.id).then((e) => console.log('commentys', e));
+    const Post = new PostModel({
+      perspectiveUuid: state.communityId,
+      source: post.id,
+    });
+    Post.get(post.id).then((e) => console.log("commentys", e));
   }, []);
 
   async function fetchImage(url) {
@@ -87,15 +90,7 @@ export default function Post() {
         </j-button>
       </j-box>
 
-      {hasTitle && (
-        <j-box pt="300">
-          <j-text nomargin variant="heading-lg">
-            {post.title}
-          </j-text>
-        </j-box>
-      )}
-
-      <j-box pt="600">
+      <j-box pt="200">
         <j-flex a="center" gap="400">
           <Avatar
             size="sm"
@@ -117,6 +112,14 @@ export default function Post() {
           </div>
         </j-flex>
       </j-box>
+
+      {hasTitle && (
+        <j-box pt="500">
+          <j-text nomargin variant="heading-lg">
+            {post.title}
+          </j-text>
+        </j-box>
+      )}
 
       {hasImage && base64 && (
         <j-box bg="white" mt="600">

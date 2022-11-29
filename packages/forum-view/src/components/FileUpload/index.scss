@@ -9,6 +9,10 @@
   border-radius: var(--j-border-radius);
   border: 1px dashed var(--j-color-ui-300);
   text-align: center;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .dropZone:hover {
@@ -28,16 +32,20 @@
 
 .file {
   display: grid;
-  grid-template-columns: 1fr 5fr;
+  grid-template-columns: 1fr;
+  place-items: center;
   gap: var(--j-space-300);
 }
 
-.fileImage {
-  width: 100%;
+.filePreview {
+  border-radius: var(--j-border-radius);
+  height: 100%;
+  max-width:100%;
+  max-height: 350px;
+  object-fit: cover;
 }
 
-.fileImage img {
-  border-radius: var(--j-border-radius);
-  width: 100%;
-  max-width: 100%;
-}
+
+
+
+

@@ -6,8 +6,9 @@ import { Profile } from "utils/types";
 import { DisplayView } from "../../constants/options";
 import { getImage } from "utils/helpers/getImage";
 import UIContext from "../../context/UIContext";
+import Avatar from "../Avatar";
 
-export default function Post({ post, displayView }) {
+export default function PostItem({ post, displayView }) {
   const {
     state: { members },
   } = useContext(PerspectiveContext);
@@ -68,7 +69,7 @@ export default function Post({ post, displayView }) {
       class={[styles.post, displayStyle, popularStyle].join(" ")}
     >
       <div class={styles.postImageWrapper}>
-        {hasUrl && ogData?.images[0] && (
+        {hasUrl && ogData?.images?.length > 0 && (
           <img src={ogData.images[0]} class={styles.postImage} />
         )}
         {hasImage && base64 && <img class={styles.postImage} src={base64} />}
@@ -83,25 +84,36 @@ export default function Post({ post, displayView }) {
           </div>
         )}
         {!hasUrl && !hasDates && !hasImage && (
-          <j-icon name="card-heading"></j-icon>
+          <j-icon size="xl" name="card-heading"></j-icon>
         )}
       </div>
       <div class={styles.postContentWrapper}>
         {hasTitle && <div className={styles.postTitle}>{post.title}</div>}
-        <div className={styles.postDetails}>
-          Posted by
-          <span
-            onClick={(e: any) => onProfileClick(e, author?.did)}
-            className={styles.authorName}
-          >
-            {author?.username || (
-              <j-skeleton width="lg" height="text"></j-skeleton>
-            )}
-          </span>
-          <span class={styles.timestamp}>
-            {formatRelative(new Date(post.timestamp), new Date())}
-          </span>
-        </div>
+
+        <j-box pt="200">
+          <j-flex a="center" gap="300">
+            <Avatar
+              size="xxs"
+              onClick={(e) => onProfileClick(e, author.did)}
+              did={author.did}
+              url={author.profileThumbnailPicture}
+            ></Avatar>
+            <j-flex a="center" gap="200">
+              <div
+                className={styles.authorName}
+                onClick={(e) => onProfileClick(e, author.did)}
+              >
+                {author?.username || (
+                  <j-skeleton width="lg" height="text"></j-skeleton>
+                )}
+              </div>
+              <div class={styles.timestamp}>
+                {formatRelative(new Date(post.timestamp), new Date())}
+              </div>
+            </j-flex>
+          </j-flex>
+        </j-box>
+
         {hasUrl && (
           <j-box pt="200">
             <div class={styles.postUrl}>

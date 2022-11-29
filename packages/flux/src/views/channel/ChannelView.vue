@@ -285,19 +285,26 @@ export default defineComponent({
 </script>
 
 <style>
+.channel-view {
+  background-color: var(--app-channel-bg-color, transparent);
+}
+
 .channel-view__header {
   display: flex;
-  align-items: center;
+  align-items: end;
   justify-content: space-between;
   padding: 0 var(--j-space-200);
   position: sticky;
-  border-bottom: 1px solid var(--j-color-white);
+  background-color: var(--app-channel-header-bg-color, transparent);
+  border-bottom: 1px solid
+    var(--app-channel-header-border-color, var(--j-border-color));
   height: var(--app-header-height);
 }
 
 .channel-view__header-left {
   display: flex;
   align-items: center;
+  height: 100%;
   gap: var(--j-space-300);
 }
 
@@ -309,11 +316,13 @@ export default defineComponent({
 
 .channel-view__tabs {
   display: flex;
+  height: 100%;
   align-items: center;
   gap: var(--j-space-300);
 }
 
 .channel-view-tab {
+  height: 100%;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -322,16 +331,16 @@ export default defineComponent({
   cursor: pointer;
   position: relative;
   padding: var(--j-space-200) var(--j-space-400);
-  border-radius: var(--j-border-radius);
+  border-bottom: 1px solid transparent;
 }
 
 .channel-view-tab:hover {
   color: var(--j-color-black);
-  background-color: hsla(var(--j-color-primary-hue), 100%, 0%, 0.05);
 }
 
 .channel-view-tab:has(input:checked) {
   position: relative;
+  border-bottom: 1px solid var(--j-color-primary-500);
   color: var(--j-color-black);
 }
 

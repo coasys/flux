@@ -58,7 +58,11 @@ export default function Header() {
           </j-box>
         </div>
       </j-flex>
-      <j-modal open={open} onToggle={(e) => setOpen(e.target.open)}>
+      <j-modal
+        size="fullscreen"
+        open={open}
+        onToggle={(e) => setOpen(e.target.open)}
+      >
         {open && (
           <CreatePost
             communityId={state.communityId}

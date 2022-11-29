@@ -57,23 +57,23 @@ export default function Previews({ onChange }) {
 
   const thumbs = files.map((file) => (
     <div className={styles.file} key={file.name}>
-      <div className={styles.fileImage}>
-        <img
-          src={file.preview}
-          // Revoke data uri after image is loaded
-          onLoad={() => {
-            URL.revokeObjectURL(file.preview);
-          }}
-        />
-      </div>
-      <div>
-        <j-flex j="between">
-          <div>{file.name}</div>
-          <j-button square variant="ghost" onClick={() => setFiles([])}>
-            Remove
-          </j-button>
-        </j-flex>
-      </div>
+      <img
+        class={styles.filePreview}
+        src={file.preview}
+        // Revoke data uri after image is loaded
+        onLoad={() => {
+          URL.revokeObjectURL(file.preview);
+        }}
+      />
+
+      <j-button
+        class={styles.removeButton}
+        square
+        variant="ghost"
+        onClick={() => setFiles([])}
+      >
+        Remove
+      </j-button>
     </div>
   ));
 
@@ -96,8 +96,10 @@ export default function Previews({ onChange }) {
           })}
         >
           <input {...getInputProps()} />
-          <j-button variant="primary">Select image</j-button>
-          <p>Drag 'n' drop an image here</p>
+          <j-button>
+            <j-icon name="upload"></j-icon>
+            Choose or drag and drop an image
+          </j-button>
         </div>
       ) : (
         <div className={styles.files}>{thumbs}</div>

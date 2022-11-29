@@ -83,7 +83,8 @@ export default defineComponent({
   background: var(--app-main-sidebar-bg-color);
   height: 100%;
   z-index: 10;
-  border-right: 1px var(--app-main-sidebar-border-color) solid;
+  border-right: 1px solid
+    var(--app-main-sidebar-border-color, var(--j-border-color));
   transition: all 0.3s ease;
   transform: translateX(calc(var(--app-main-sidebar-width) * -1));
 }

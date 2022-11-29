@@ -10,8 +10,8 @@
   --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 13%);
   --app-drawer-border-color: transparent;
   --app-main-content-bg-color: hsl(var(--j-color-ui-hue), 0%, 17%);
-  --app-channel-bg-color: hsl(var(--j-color-ui-hue), 0%, 30%);
-  --app-channel-header-bg-color: hsl(var(--j-color-ui-hue), 0%, 13%);
+  --app-channel-bg-color: hsl(var(--j-color-ui-hue), 0%, 15%);
+  --app-channel-header-bg-color: hsl(var(--j-color-ui-hue), 0%, 15%);
   --app-channel-footer-bg-color: hsl(var(--j-color-ui-hue), 0%, 13%);
   --app-channel-border-color: transparent;
 }

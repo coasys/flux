@@ -6,6 +6,7 @@ import { postOptions } from "../../constants/options";
 import FileUpload from "../../components/FileUpload";
 import { format } from "date-fns";
 import { parse } from "date-fns/esm";
+import styles from "./index.scss";
 
 const initialState = {
   title: "",
@@ -111,7 +112,9 @@ export default function MakeEntry({
   }
 
   const showBody =
-    entryType === EntryType.SimplePost || entryType === EntryType.CalendarEvent;
+    entryType === EntryType.SimplePost ||
+    entryType === EntryType.CalendarEvent ||
+    entryType === EntryType.ImagePost;
   const showUrl = entryType === EntryType.LinkPost;
   const showStartDate = entryType === EntryType.CalendarEvent;
   const showEndDate =
@@ -119,138 +122,136 @@ export default function MakeEntry({
   const showImage = entryType === EntryType.ImagePost;
 
   return (
-    <j-box p="800">
-      <j-text variant="heading-sm" nomargin>
-        Create a New Post
-      </j-text>
-      <j-box pt="800" pb="200">
-        <j-tabs
-          value={entryType}
-          onChange={(e) => setEntryType(e.target.value)}
-        >
-          {postOptions.map((option) => {
-            return (
-              <j-tab-item size="sm" value={option.value} variant="button">
-                <j-icon slot="start" size="sm" name={option.icon}></j-icon>
-                {option.label}
-              </j-tab-item>
-            );
-          })}
-        </j-tabs>
-      </j-box>
-      <j-box mt="500">
-        <j-flex direction="column" gap="300">
-          <j-input
-            required
-            autovalidate
-            ref={(ref) => setInputRef(ref, "title")}
-            label="Title"
-            onInput={handleChange}
-            value={state.title}
-            size="xl"
-            name="title"
-          ></j-input>
-
-          {showBody && (
-            <Editor
-              onChange={(e) =>
-                setState((oldState) => ({ ...oldState, body: e }))
-              }
-            ></Editor>
-          )}
-          {showUrl && (
-            <j-input
-              ref={(ref) => setInputRef(ref, "url")}
-              label="Url"
-              autovalidate
-              size="xl"
-              name="url"
-              onInput={handleChange}
-              value={state.url}
-              required
-              type="url"
-            ></j-input>
-          )}
-          {showStartDate && (
-            <j-flex a="end" gap="400">
-              <j-input
-                full
-                autovalidate
-                ref={(ref) => setInputRef(ref, "startDate")}
-                required
-                name="startDate"
-                value={state.startDate}
-                onInput={handleChange}
-                label="Start"
-                type="date"
-              ></j-input>
-              <j-input
-                full
-                autovalidate
-                required
-                ref={(ref) => setInputRef(ref, "startTime")}
-                name="startTime"
-                value={state.startTime}
-                onInput={handleChange}
-                label=""
-                type="time"
-              ></j-input>
-            </j-flex>
-          )}
-          {showEndDate && (
-            <j-flex a="end" gap="400">
-              <j-input
-                full
-                autovalidate
-                required
-                name="endDate"
-                ref={(ref) => setInputRef(ref, "endDate")}
-                min={state.startDate}
-                value={state.endDate}
-                onInput={handleChange}
-                label="End"
-                type="date"
-              ></j-input>
-              <j-input
-                full
-                autovalidate
-                required
-                name="endTime"
-                ref={(ref) => setInputRef(ref, "endTime")}
-                list="time_list"
-                min={state.startDate === state.endDate ? state.startTime : ""}
-                max={state.startDate === state.endDate ? "23:59" : ""}
-                value={state.endTime}
-                onInput={handleChange}
-                label=""
-                type="time"
-              ></j-input>
-            </j-flex>
-          )}
-          {showImage && (
-            <j-box pt="300">
-              <j-text variant="label">Image</j-text>
-              <FileUpload onChange={handleImage}></FileUpload>
-            </j-box>
-          )}
-        </j-flex>
-      </j-box>
-      <j-box mt="500">
-        <j-flex direction="row" j="end" gap="300">
-          <j-button size="lg" variant="link">
-            Cancel
-          </j-button>
-          <j-button
-            loading={isCreating}
-            disabled={isCreating}
-            onClick={() => publish()}
-            size="lg"
-            variant="primary"
+    <div class={styles.createPost}>
+      <j-box p="800">
+        <j-box pt="800" pb="200">
+          <j-tabs
+            value={entryType}
+            onChange={(e) => setEntryType(e.target.value)}
           >
-            Post
-          </j-button>
-        </j-flex>
+            {postOptions.map((option) => {
+              return (
+                <j-tab-item size="sm" value={option.value}>
+                  <j-icon slot="start" size="sm" name={option.icon}></j-icon>
+                  {option.label}
+                </j-tab-item>
+              );
+            })}
+          </j-tabs>
+        </j-box>
+        <j-box mt="500">
+          <j-flex direction="column" gap="400">
+            <j-input
+              class={styles.titleInput}
+              required
+              autovalidate
+              ref={(ref) => setInputRef(ref, "title")}
+              placeholder="Add a Title"
+              onInput={handleChange}
+              value={state.title}
+              size="xl"
+              name="title"
+            ></j-input>
+            {showImage && (
+              <j-box pt="300">
+                <FileUpload onChange={handleImage}></FileUpload>
+              </j-box>
+            )}
+            {showBody && (
+              <Editor
+                onChange={(e) =>
+                  setState((oldState) => ({ ...oldState, body: e }))
+                }
+              ></Editor>
+            )}
+            {showUrl && (
+              <j-input
+                ref={(ref) => setInputRef(ref, "url")}
+                autovalidate
+                size="xl"
+                name="url"
+                placeholder="Url"
+                onInput={handleChange}
+                value={state.url}
+                required
+                type="url"
+              ></j-input>
+            )}
+            {showStartDate && (
+              <j-flex a="end" gap="400">
+                <j-input
+                  full
+                  autovalidate
+                  ref={(ref) => setInputRef(ref, "startDate")}
+                  required
+                  name="startDate"
+                  value={state.startDate}
+                  onInput={handleChange}
+                  label="Start"
+                  type="date"
+                ></j-input>
+                <j-input
+                  full
+                  autovalidate
+                  required
+                  ref={(ref) => setInputRef(ref, "startTime")}
+                  name="startTime"
+                  value={state.startTime}
+                  onInput={handleChange}
+                  label=""
+                  type="time"
+                ></j-input>
+              </j-flex>
+            )}
+            {showEndDate && (
+              <j-flex a="end" gap="400">
+                <j-input
+                  full
+                  autovalidate
+                  required
+                  name="endDate"
+                  ref={(ref) => setInputRef(ref, "endDate")}
+                  min={state.startDate}
+                  value={state.endDate}
+                  onInput={handleChange}
+                  label="End"
+                  type="date"
+                ></j-input>
+                <j-input
+                  full
+                  autovalidate
+                  required
+                  name="endTime"
+                  ref={(ref) => setInputRef(ref, "endTime")}
+                  list="time_list"
+                  min={state.startDate === state.endDate ? state.startTime : ""}
+                  max={state.startDate === state.endDate ? "23:59" : ""}
+                  value={state.endTime}
+                  onInput={handleChange}
+                  label=""
+                  type="time"
+                ></j-input>
+              </j-flex>
+            )}
+          </j-flex>
+        </j-box>
+        <j-box mt="500">
+          <j-flex direction="row" j="end" gap="300">
+            <j-button size="lg" variant="link">
+              Cancel
+            </j-button>
+            <j-button
+              loading={isCreating}
+              disabled={isCreating}
+              onClick={() => publish()}
+              size="lg"
+              variant="primary"
+            >
+              Post
+            </j-button>
+          </j-flex>
+        </j-box>
       </j-box>
-    </j-box>
+    </div>
   );
 }

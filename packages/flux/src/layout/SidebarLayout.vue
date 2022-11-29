@@ -156,7 +156,7 @@ export default defineComponent({
   right: 0;
   top: 0;
   width: 3px;
-  border-right: 1px solid var(--app-drawer-border-color);
+  border-right: 1px solid var(--app-drawer-border-color, var(--j-border-color));
   background: transparent;
   cursor: col-resize;
   height: 100%;

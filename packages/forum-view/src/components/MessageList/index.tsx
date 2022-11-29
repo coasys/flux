@@ -7,6 +7,7 @@ import {
   postOptions,
 } from "../../constants/options";
 import ChannelContext from "utils/react/ChannelContext";
+import PostModel from "utils/api/post";
 
 export default function MessageList() {
   const [sortBy, setSortBy] = useState("");
@@ -20,6 +21,11 @@ export default function MessageList() {
 
   useEffect(() => {
     if (state.channelId && state.communityId) {
+      const Post = new PostModel({
+        perspectiveUuid: state.communityId,
+        source: state.channelId,
+      });
+      Post.getAll().then(() => console.log("loaded"));
       methods.loadPosts([]);
     }
   }, [state.channelId, state.communityId]);

@@ -18,6 +18,7 @@ const styles = css`
     --j-modal-translateX: 0px;
     --j-modal-justify: center;
     --j-modal-align: flex-end;
+    --j-modal-max-height: 90vh;
   }
 
   :host([size="xs"]) {
@@ -38,6 +39,13 @@ const styles = css`
   :host([size="xl"]) {
     --j-modal-width-mobile: 95vw;
     --j-modal-width: clamp(350px, 60vw, 1200px);
+  }
+
+  :host([size="fullscreen"]) {
+    --j-modal-width-mobile: 100vw;
+    --j-modal-width: 100vw;
+    --j-modal-height: 100vh;
+    --j-modal-max-height: 100vh;
   }
 
   :host {
@@ -75,7 +83,7 @@ const styles = css`
     border-radius: var(--j-border-radius);
     width: var(--j-modal-width-mobile);
     height: var(--j-modal-height);
-    max-height: 90vh;
+    max-height: var(--j-modal-max-height);
     background: var(--j-color-white);
     border: 1px solid var(--j-border-color);
   }
@@ -137,7 +145,7 @@ export default class Menu extends LitElement {
 
   /**
    * Size
-   * @type {""|"xs"|"sm"|"lg"|"xl"|}
+   * @type {""|"xs"|"sm"|"lg"|"xl"|"fullscreen"}
    * @attr
    */
   @property({ type: String, reflect: true })
