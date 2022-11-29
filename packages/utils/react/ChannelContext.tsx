@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useRef, useEffect } from "react";
 import { EntryType, Post } from "../types";
 import getPosts from "../api/getPosts";
 import PostModel from "../api/post";
@@ -38,15 +38,7 @@ export function ChannelProvider({ channelId, communityId, children }: any) {
 
   useEffect(() => {
     if (communityId && channelId) {
-      const Post = new PostModel({
-        perspectiveUuid: communityId,
-        source: channelId,
-        type: EntryType.SimplePost,
-      });
-
-      Post.onAdded(EntryType.SimplePost, (post) => {
-        console.log({ post });
-      });
+      loadPosts([]);
     }
   }, [communityId, channelId]);
 
