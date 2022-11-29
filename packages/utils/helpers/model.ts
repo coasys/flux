@@ -9,11 +9,7 @@ import { queryProlog } from "./prologHelpers";
 
 type ModelProps = {
   perspectiveUuid: string;
-  type?: EntryType;
   source?: string;
-  properties?: {
-    [x: string]: ModelProperty;
-  };
 };
 
 type DataInput = {
@@ -28,21 +24,15 @@ type Listeners = {
 export default class Model {
   source = "adm4://self";
   perspectiveUuid = "";
-  type = "" as EntryType;
   listeners = { add: {}, remove: {} } as Listeners;
-  properties = {} as {
+  static type: EntryType;
+  static properties: {
     [x: string]: ModelProperty;
   };
 
   constructor(props: ModelProps) {
     this.perspectiveUuid = props.perspectiveUuid;
     this.source = props.source || this.source;
-    this.properties = props.properties || this.properties;
-    this.type = props.type || this.type;
-    this.get = this.get.bind(this);
-    this.create = this.create.bind(this);
-    this.createExpressions = this.createExpressions.bind(this);
-    this.onLink = this.onLink.bind(this);
 
     subscribeToLinks({
       perspectiveUuid: this.perspectiveUuid,
@@ -56,7 +46,7 @@ export default class Model {
     return createEntry({
       perspectiveUuid: this.perspectiveUuid,
       source: this.source,
-      types: [type || this.type],
+      types: [this.constructor.type],
       data: expressions,
     });
   }
@@ -65,9 +55,9 @@ export default class Model {
     const client = await getAd4mClient();
 
     const expPromises = Object.entries(data)
-      .filter(([key]) => this.properties[key])
+      .filter(([key]) => this.constructor.properties[key])
       .map(async ([key, value]) => {
-        const { predicate, languageAddress } = this.properties[key];
+        const { predicate, languageAddress } = this.constructor.properties[key];
         const expUrl = await client.expression.create(value, languageAddress);
         return { predicate, expUrl };
       });
@@ -86,19 +76,20 @@ export default class Model {
     const result = await queryProlog({
       perspectiveUuid: this.perspectiveUuid,
       id,
-      type: this.type,
+      type: this.constructor.type,
       source: source || this.source,
-      properties: this.properties,
+      properties: this.constructor.properties,
     });
     console.log(result);
   }
 
   async getAll(source?: string) {
+    console.log({ type: this.constructor.type });
     const result = await queryProlog({
       perspectiveUuid: this.perspectiveUuid,
-      type: this.type,
+      type: this.constructor.type,
       source: source || this.source,
-      properties: this.properties,
+      properties: this.constructor.properties,
     });
     console.log(result);
   }

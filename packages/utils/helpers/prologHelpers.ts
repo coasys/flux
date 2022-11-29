@@ -6,8 +6,9 @@ export function capitalizeFirstLetter(string) {
 }
 
 export function generateFindAll(propertyName, predicate) {
+  console.log({ propertyName, predicate });
   const name = capitalizeFirstLetter(propertyName);
-  return `findall((${name}, ${name}Timestamp, ${name}Author), link(Source, "${predicate}", ${name}, ${name}Timestamp, ${name}Author), ${name})`;
+  return `findall((${name}, ${name}Timestamp, ${name}Author), link(Id, "${predicate}", ${name}, ${name}Timestamp, ${name}Author), ${name})`;
 }
 
 export function generatePrologQuery({
@@ -85,15 +86,46 @@ export async function queryProlog({
   await client.perspective.queryProlog(perspectiveUuid, assertQuery);
   await client.perspective.queryProlog(perspectiveUuid, assertEntry);
 
-  const links = await client.perspective.queryProlog(perspectiveUuid, query);
+  const prologResult = await client.perspective.queryProlog(
+    perspectiveUuid,
+    query
+  );
 
   await client.perspective.queryProlog(perspectiveUuid, retractQuery);
   await client.perspective.queryProlog(perspectiveUuid, retractEntry);
 
-  return extractPrologResults(
-    links,
-    Object.keys(properties).map((name) => capitalizeFirstLetter(name))
-  );
+  const entries = extractPrologResults(prologResult, [
+    "Id",
+    "Timestamp",
+    "Author",
+    ...Object.keys(properties).map((name) => capitalizeFirstLetter(name)),
+  ]);
+
+  return Promise.all(entries.map(resolveEntryWithLatesProperties));
+}
+
+export async function resolveEntryWithLatesProperties(entry) {
+  const client = await getAd4mClient();
+  const propertyNames = Object.keys(entry);
+  let cleanedEntry = { ...entry };
+
+  propertyNames.forEach(async (name) => {
+    const val = entry[name];
+    const isArray = Array.isArray(val);
+
+    if (isArray) {
+      const length = val.length;
+      if (length > 0) {
+        const expUrl = val[length - 1].content;
+        const value = await client.expression.get(expUrl);
+        cleanedEntry[name] = value.data;
+      } else {
+        cleanedEntry[name] = null;
+      }
+    }
+  });
+
+  return cleanedEntry;
 }
 
 export function extractPrologResults(
