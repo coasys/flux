@@ -61,6 +61,7 @@ async function createPostData({
     case EntryType.ImagePost:
       return {
         [TITLE]: await expression.create(data.title, "literal"),
+        [BODY]: await expression.create(data.body, "literal"),
         [IMAGE]: await expression.create(
           data.image,
           NOTE_IPFS_EXPRESSION_OFFICIAL

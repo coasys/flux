@@ -61,7 +61,7 @@ export interface Message {
     author: string;
     timestamp: Date | string;
   }[];
-  synced: boolean
+  synced: boolean;
 }
 
 export interface Messages {
@@ -161,4 +161,10 @@ export enum PrologQueries {
 export interface SdnaVersion {
   version: number;
   timestamp: Date;
+}
+
+export interface ModelProperty {
+  predicate: string;
+  type: StringConstructor | NumberConstructor;
+  languageAddress: string;
 }

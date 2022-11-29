@@ -1,6 +1,6 @@
 import { Literal } from "@perspect3vism/ad4m";
 import { Message } from "../types";
-import extractPrologResults from "../helpers/extractPrologResults";
+import { extractPrologResults } from "../helpers/prologHelpers";
 import {
   DEFAULT_LIMIT,
   messageFilteredQuery,

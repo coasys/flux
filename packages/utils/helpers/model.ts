@@ -4,12 +4,8 @@ import { createEntry } from "../api/createEntry";
 import subscribeToLinks from "../api/subscribeToLinks";
 import { LinkExpression } from "@perspect3vism/ad4m";
 import { ENTRY_TYPE } from "../constants/communityPredicates";
-
-type ModelProperty = {
-  predicate: string;
-  type: StringConstructor | NumberConstructor;
-  languageAddress: string;
-};
+import { ModelProperty } from "../types";
+import { queryProlog } from "./prologHelpers";
 
 type ModelProps = {
   perspectiveUuid: string;
@@ -86,26 +82,25 @@ export default class Model {
     }, {});
   }
 
-  async get(id: string) {
-    const client = await getAd4mClient();
-    console.log(
-      generatePrologQuery(id, this.type, this.source, this.properties)
-    );
-    const queiries = generatePrologQuery(
+  async get(id: string, source?: string) {
+    const result = await queryProlog({
+      perspectiveUuid: this.perspectiveUuid,
       id,
-      this.type,
-      this.source,
-      this.properties
-    );
-    await client.perspective.queryProlog(this.perspectiveUuid, queiries[0]);
-    await client.perspective.queryProlog(this.perspectiveUuid, queiries[1]);
-    const links = await client.perspective.queryProlog(
-      this.perspectiveUuid,
-      queiries[2]
-    );
-    await client.perspective.queryProlog(this.perspectiveUuid, queiries[3]);
-    await client.perspective.queryProlog(this.perspectiveUuid, queiries[4]);
-    console.log(links);
+      type: this.type,
+      source: source || this.source,
+      properties: this.properties,
+    });
+    console.log(result);
+  }
+
+  async getAll(source?: string) {
+    const result = await queryProlog({
+      perspectiveUuid: this.perspectiveUuid,
+      type: this.type,
+      source: source || this.source,
+      properties: this.properties,
+    });
+    console.log(result);
   }
 
   onLink(type: "added" | "removed", link: LinkExpression) {
@@ -115,15 +110,17 @@ export default class Model {
 
     const entryId = link.data.source;
     const entryType = link.data.target;
+    const addedListeners = this.listeners.add[entryType];
+    const removedListeners = this.listeners.remove[entryType];
 
-    if (type === "added") {
-      this.listeners.add[entryType].forEach(async (cb) => {
+    if (type === "added" && addedListeners) {
+      addedListeners.forEach(async (cb) => {
         const entry = await this.get(entryId);
         cb(entry);
       });
     }
-    if (type === "removed") {
-      this.listeners.add[entryType].forEach(async (cb) => {
+    if (type === "removed" && removedListeners) {
+      removedListeners.forEach(async (cb) => {
         const entry = await this.get(entryId);
         cb(entry);
       });
@@ -147,52 +144,4 @@ export default class Model {
       this.listeners.remove[type] = [callback];
     }
   }
-}
-
-function generatePrologQuery(
-  id: string,
-  type: EntryType,
-  source: string,
-  properties: {
-    [x: string]: ModelProperty;
-  }
-) {
-  const propertyNames = Object.keys(properties).reduce((acc, name) => {
-    const concatVal = acc === "" ? "" : ", ";
-    return acc.concat(concatVal, capitalizeFirstLetter(name));
-  }, "");
-
-  const findProperties = Object.keys(properties).reduce((acc, name) => {
-    const property = properties[name];
-    const concatVal = acc === "" ? "" : ", ";
-    return acc.concat(concatVal, generateFindAll(name, property.predicate));
-  }, "");
-
-  const entryQuery = `
-    entry_query(Source, Type, Id, Timestamp, Author, ${propertyNames}):-
-      link(Source, Type, Id, Timestamp, Author),
-      ${findProperties}
-  `;
-
-  const entry = `
-    entry(Source, Id, Timestamp, Author, ${propertyNames}):- 
-      entry_query(Source, "${EntryType.Message}", Id, Timestamp, Author, ${propertyNames})
-  `;
-
-  return [
-    `assertz((${entryQuery})).`,
-    `assertz((${entry})).`,
-    `entry("${source}", Id, Timestamp, Author, ${propertyNames}).`,
-    `retract((${entryQuery})).`,
-    `retract((${entry})).`,
-  ];
-}
-
-function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
-function generateFindAll(propertyName, predicate) {
-  const name = capitalizeFirstLetter(propertyName);
-  return `findall((${name}, ${name}Timestamp, ${name}Author), link(Source, "${predicate}", ${name}, ${name}Timestamp, ${name}Author), ${name})`;
 }

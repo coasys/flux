@@ -1,5 +1,5 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import extractPrologResults from "../helpers/extractPrologResults";
+import { extractPrologResults } from "../helpers/prologHelpers";
 import { GetEntries, Entry } from "../types";
 import { getPrologQuery } from "../helpers/formatString";
 

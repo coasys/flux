@@ -9,6 +9,7 @@ export default class PostModel extends EntryModel {
     type?: EntryType;
   }) {
     super(props);
+    this.type = EntryType.SimplePost;
     this.properties = {
       title: {
         predicate: TITLE,
