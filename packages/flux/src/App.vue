@@ -51,7 +51,7 @@ import {
   getAd4mClient,
   onAuthStateChanged,
 } from "@perspect3vism/ad4m-connect/dist/utils";
-import "@perspect3vism/ad4m-connect/dist/web";
+import "@perspect3vism/ad4m-connect/dist/web.js";
 import { Community, EntryType } from "utils/types";
 
 export default defineComponent({

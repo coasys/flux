@@ -20,7 +20,7 @@
     "utils": "*",
     "@junto-foundation/junto-elements": "*",
     "@perspect3vism/ad4m": "0.2.0",
-    "@perspect3vism/ad4m-connect": "0.2.0",
+    "@perspect3vism/ad4m-connect": "0.2.3",
     "date-fns": "^2.29.3",
     "dexie": "^3.2.2",
     "level": "^7.0.1",
