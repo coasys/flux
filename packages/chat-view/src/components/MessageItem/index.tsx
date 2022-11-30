@@ -40,6 +40,7 @@ function Card({type, image, url, mainRef, name, description, onClick, perspectiv
       onClick={() => onLinkClick(url)}
       name={name}
       description={description}
+      image={image}
     />
   }
 }
@@ -304,6 +305,7 @@ export default function MessageItem({
               description={e.description}
               perspectiveUuid={e.perspectiveUuid}
               url={e.url}
+              image={e.image}
             ></Card>
           ))}
         </div>
