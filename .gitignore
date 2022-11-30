@@ -14,5 +14,6 @@ package-lock.json
 *.sln
 *.sw?
 *.turbo
+dev-dist
 
 cachedb

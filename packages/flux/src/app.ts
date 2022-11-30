@@ -2,10 +2,6 @@ import { createApp, h, watch } from "vue";
 import App from "./App.vue";
 import router from "./router";
 
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./serviceworker.js");
-}
-
 import "@junto-foundation/junto-elements";
 import "@junto-foundation/junto-elements/dist/main.css";
 
