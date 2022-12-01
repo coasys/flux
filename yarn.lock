@@ -1411,10 +1411,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@perspect3vism/ad4m-connect@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.2.0.tgz#ac6b7acad84199ad88f96f04d00cf559775fb6d7"
-  integrity sha512-ls6TrbfVvwUvst91PHZ7tqcpb/5ZhccIbgmS6YqRzYqbToQozYTUq9zODPfKBUH6d3k6/X8Sj3BT5LrffQv5Tw==
+"@perspect3vism/ad4m-connect@0.2.3":
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.2.3.tgz#0f0ab7ee6cdc34f33752bc8fa35ad9594b41c39e"
+  integrity sha512-jgJXRcnc076vbknmNbh/2WJDadBNS1PpjK9foPYiFacMTHqp6/WrYKzkJWUuszB2hbOY205RKmF5K+VWcblPYQ==
   dependencies:
     auto-bind "^5.0.1"
     electron "^20.0.3"
@@ -2194,9 +2194,9 @@
   integrity sha512-Ewzq5Yhimg7pSztDV+RH1UDKBzmtqieXQlpTVm2AwraoRL/Rks96mvd8Vgi7Lj+h+TH8dv7mXD3FRZR3TUvbSg==
 
 "@vue/test-utils@^2.0.0":
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/@vue/test-utils/-/test-utils-2.2.4.tgz#2aa8159cc1f55e5e14d9c1642818e28d6f9d636b"
-  integrity sha512-1JjLduJ84bFcuCt/1YLTNyktYeUHS/zA0u8iTmF6w6ul1K/nSvyKu/MC47YjdpZ4lI/hn7FH31B22kfz62e9wA==
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@vue/test-utils/-/test-utils-2.2.0.tgz#3d8fc020802db9b726e2d91b6e3fb5b21aa0bf0c"
+  integrity sha512-EKp5/N7ieNZdoLTkD16j/irUjIEDN63QUIc41vLUMqGvSsTQN0QxbFiQqh5v49RPfS5vZH+DhjNUEkijCMOCSg==
 
 "@wry/context@^0.6.0":
   version "0.6.1"
@@ -6881,9 +6881,9 @@ lit-html@^2.2.0, lit-html@^2.4.0:
     "@types/trusted-types" "^2.0.2"
 
 lit@^2.0.0-rc.2, lit@^2.3.1:
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/lit/-/lit-2.4.1.tgz#21251ac14eb1ec8ca7cd15c9ac3564359809f7b5"
-  integrity sha512-qohSgLiyN1cFnJG26dIiY03S4F49857A0AHQfnS0zYtnUVnD2MFvx+UT52rtXsIuNFQrnUupX+zyGSATlk1f/A==
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/lit/-/lit-2.4.0.tgz#e33a0f463e17408f6e7f71464e6a266e60a5bb77"
+  integrity sha512-fdgzxEtLrZFQU/BqTtxFQCLwlZd9bdat+ltzSFjvWkZrs7eBmeX0L5MHUMb3kYIkuS8Xlfnii/iI5klirF8/Xg==
   dependencies:
     "@lit/reactive-element" "^1.4.0"
     lit-element "^3.2.0"
