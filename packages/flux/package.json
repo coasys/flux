@@ -17,7 +17,6 @@
   "main": "background.js",
   "dependencies": {
     "@junto-foundation/chat-view": "*",
-    "utils": "*",
     "@junto-foundation/junto-elements": "*",
     "@perspect3vism/ad4m": "0.2.0",
     "@perspect3vism/ad4m-connect": "0.2.3",
@@ -27,6 +26,7 @@
     "nanoid": "^3.1.30",
     "pinia": "^2.0.2",
     "sass": "^1.55.0",
+    "utils": "*",
     "uuid": "^8.3.2",
     "vue": "^3.0.0",
     "vue-advanced-cropper": "^2.3.1",
@@ -52,7 +52,8 @@
     "react": "^17.0.2",
     "ts-jest": "^26.0.0",
     "typescript": "^4.4.2",
-    "vite": "^2.9.9",
+    "vite": "^3.2.4",
+    "vite-plugin-pwa": "^0.13.3",
     "vue-devtools": "^5.1.4",
     "vue-jest": "^5.0.0-alpha.10"
   },
