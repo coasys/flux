@@ -260,6 +260,15 @@ j-tooltip::part(base) {
   background: var(--j-color-ui-100);
 }
 
+.neighbourhoodCardFlex {
+  display: flex;
+  margin-top: var(--j-space-500);
+}
+
+.neighbourhoodCardFlex > img {
+  margin-right: var(--j-space-500);
+}
+
 .neighbourhoodCardTitle {
   font-weight: 600;
   font-size: var(--j-font-size-300);
@@ -267,7 +276,6 @@ j-tooltip::part(base) {
 }
 
 .neighbourhoodCardName {
-  margin-top: var(--j-space-300);
   font-weight: 800;
   font-size: var(--j-font-size-500);
   color: var(--j-color-black);
