@@ -8,7 +8,7 @@ import { PostOption, postOptions } from "../../constants/options";
 import ChannelContext from "utils/react/ChannelContext";
 
 export default function Header() {
-  const [initialType, setInitialType] = useState(PostOption.Text);
+  const [initialType, setInitialType] = useState<PostOption>(PostOption.Text);
   const { state: agentState } = useContext(AgentContext);
   const { state, methods } = useContext(ChannelContext);
   const [open, setOpen] = useState(false);
@@ -34,7 +34,7 @@ export default function Header() {
         </div>
         <div style="display: block; width: 100%;">
           <j-input
-            onFocus={() => handlePostClick("post")}
+            onFocus={() => handlePostClick(PostOption.Text)}
             full
             size="lg"
             placeholder="Create a post"
@@ -45,7 +45,7 @@ export default function Header() {
                 return (
                   <j-button
                     onClick={() => handlePostClick(option.value)}
-                    value="post"
+                    value={PostOption.Text}
                     variant="ghost"
                   >
                     <j-icon slot="start" size="sm" name={option.icon}></j-icon>

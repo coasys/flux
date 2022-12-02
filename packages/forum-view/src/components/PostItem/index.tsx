@@ -57,11 +57,12 @@ export default function PostItem({ post, displayView }) {
       : displayView === DisplayView.Grid
       ? styles.grid
       : styles.card;
-  const hasTitle = post.title;
-  const hasImage = post.image;
-  const hasBody = post.body;
-  const hasUrl = post.url;
-  const hasDates = post.startDate && post.endDate;
+
+  const showTite = post.title;
+  const showImage = post.image && base64;
+  const showBody = post.body;
+  const showUrl = post.url;
+  const showDates = post.startDate && post.endDate;
 
   return (
     <div
@@ -69,11 +70,11 @@ export default function PostItem({ post, displayView }) {
       class={[styles.post, displayStyle, popularStyle].join(" ")}
     >
       <div class={styles.postImageWrapper}>
-        {hasUrl && ogData?.images?.length > 0 && (
+        {showUrl && ogData?.images?.length > 0 && (
           <img src={ogData.images[0]} class={styles.postImage} />
         )}
-        {hasImage && base64 && <img class={styles.postImage} src={base64} />}
-        {hasDates && (
+        {showImage && <img class={styles.postImage} src={base64} />}
+        {showDates && (
           <div class={styles.calendar}>
             <span class={styles.calendarMonth}>
               {format(new Date(post.startDate), "MMM")}
@@ -83,12 +84,12 @@ export default function PostItem({ post, displayView }) {
             </span>
           </div>
         )}
-        {!hasUrl && !hasDates && !hasImage && (
+        {!showUrl && !showDates && !showImage && (
           <j-icon size="xl" name="card-heading"></j-icon>
         )}
       </div>
       <div class={styles.postContentWrapper}>
-        {hasTitle && <div className={styles.postTitle}>{post.title}</div>}
+        {showTite && <div className={styles.postTitle}>{post.title}</div>}
 
         <j-box pt="200">
           <j-flex a="center" gap="300">
@@ -114,7 +115,7 @@ export default function PostItem({ post, displayView }) {
           </j-flex>
         </j-box>
 
-        {hasUrl && (
+        {showUrl && (
           <j-box pt="200">
             <div class={styles.postUrl}>
               <j-icon size="xs" name="link"></j-icon>
@@ -128,7 +129,7 @@ export default function PostItem({ post, displayView }) {
             </div>
           </j-box>
         )}
-        {hasDates && (
+        {showDates && (
           <div class={styles.postDates}>
             <div class={styles.postDate}>
               <j-icon size="xs" name="calendar-event"></j-icon>
@@ -147,7 +148,7 @@ export default function PostItem({ post, displayView }) {
             </div>
           </div>
         )}
-        {hasBody && (
+        {showBody && (
           <div
             className={styles.postBody}
             dangerouslySetInnerHTML={{ __html: post.body }}
