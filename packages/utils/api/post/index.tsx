@@ -1,7 +1,9 @@
 import {
   BODY,
+  END_DATE,
   IMAGE,
   REPLY_TO,
+  START_DATE,
   TITLE,
   URL,
 } from "../../constants/communityPredicates";
@@ -31,6 +33,18 @@ class PostModel extends EntryModel {
       resolve: false,
       languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
     },
+    startDate: {
+      predicate: START_DATE,
+      type: String,
+      resolve: true,
+      languageAddress: "literal",
+    },
+    endDate: {
+      predicate: END_DATE,
+      type: String,
+      resolve: true,
+      languageAddress: "literal",
+    },
     url: {
       predicate: URL,
       type: String,
@@ -45,7 +59,14 @@ class PostModel extends EntryModel {
     },
   };
 
-  create(data: { title: string; image?: string }): Promise<Entry> {
+  create(data: {
+    title: string;
+    image?: string;
+    body?: string;
+    startDate?: string;
+    endDate?: string;
+    url?: string;
+  }): Promise<Entry> {
     return super.create(data);
   }
 

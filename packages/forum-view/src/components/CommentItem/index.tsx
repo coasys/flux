@@ -1,27 +1,30 @@
-import { useContext, useEffect, useState } from "preact/hooks";
-import { PerspectiveContext } from "utils/react";
+import { useContext, useEffect, useState, useMemo } from "preact/hooks";
+import { PerspectiveContext, useEntries } from "utils/react";
 import styles from "./index.scss";
 import { formatRelative } from "date-fns/esm";
 import { Profile } from "utils/types";
-import UIContext from "../../context/UIContext";
 import Avatar from "../Avatar";
 import Editor from "../Editor";
-import createPostReply from "utils/api/createPostReply";
-import getPosts from "utils/api/getPosts";
+import MessageModel from "utils/api/message";
 
-export default function CommentItem({ post }) {
+export default function CommentItem({ comment, perspectiveUuid }) {
   const [showComments, setShowComments] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
-  const [comments, setComments] = useState([]);
-  const [comment, setComment] = useState("");
+  const [commentContent, setComment] = useState("");
   const [showEditor, setShowEditor] = useState(false);
+
   const {
-    state: { uuid, members },
+    state: { members },
   } = useContext(PerspectiveContext);
 
-  useEffect(() => {
-    fetchComments();
-  }, []);
+  const {
+    entries: comments,
+    model: Message,
+  }: { entries: any[]; model: MessageModel } = useEntries({
+    perspectiveUuid,
+    source: comment.id,
+    model: MessageModel,
+  });
 
   function onProfileClick(event: any, did: string) {
     event.stopPropagation();
@@ -32,30 +35,21 @@ export default function CommentItem({ post }) {
     event.target.dispatchEvent(e);
   }
 
-  async function fetchComments() {
-    const comments = await getPosts(uuid, post.id);
-    setComments(comments);
-  }
-
   async function submitComment() {
     try {
       setIsCreating(true);
-      await createPostReply({
-        perspectiveUuid: uuid,
-        postId: post.id,
-        message: comment,
-      });
-      await fetchComments();
+      await Message.create({ body: commentContent });
     } catch (e) {
       console.log(e);
     } finally {
       setIsCreating(false);
+      setShowEditor(false);
     }
   }
 
-  const author: Profile = members[post.author] || {};
-  const popularStyle: string = post.isPopular ? styles.popularMessage : "";
-  const hasBody = post.body;
+  const author: Profile = members[comment.author] || {};
+  const popularStyle: string = comment.isPopular ? styles.popularMessage : "";
+  const hasBody = comment.body;
   const hasComments = comments.length > 0 && showComments;
 
   return (
@@ -94,13 +88,13 @@ export default function CommentItem({ post }) {
             )}
           </span>
           <span class={styles.timestamp}>
-            {formatRelative(new Date(post.timestamp), new Date())}
+            {formatRelative(new Date(comment.timestamp), new Date())}
           </span>
         </div>
         {hasBody && showComments && (
           <div
             className={styles.postBody}
-            dangerouslySetInnerHTML={{ __html: post.body }}
+            dangerouslySetInnerHTML={{ __html: comment.body }}
           />
         )}
         {showComments && (
@@ -114,26 +108,31 @@ export default function CommentItem({ post }) {
           </j-button>
         )}
         {showEditor && showComments && (
-          <div>
+          <j-box pt="300" pb="500">
             <Editor onChange={(content) => setComment(content)} />
-            <j-button
-              loading={isCreating}
-              disabled={isCreating}
-              onClick={submitComment}
-              size="sm"
-              variant="primary"
-            >
-              Comment
-            </j-button>
-          </div>
+            <j-box pt="200">
+              <j-button
+                loading={isCreating}
+                disabled={isCreating}
+                onClick={submitComment}
+                size="sm"
+                variant="primary"
+              >
+                Comment
+              </j-button>
+            </j-box>
+          </j-box>
         )}
 
         {hasComments && showComments && (
           <j-box pt="300">
-            {comments.map((post) => {
+            {comments.map((comment) => {
               return (
-                <j-box key={post.id} mt="300">
-                  <CommentItem post={post}></CommentItem>
+                <j-box key={comment.id} mt="300">
+                  <CommentItem
+                    perspectiveUuid={perspectiveUuid}
+                    comment={comment}
+                  ></CommentItem>
                 </j-box>
               );
             })}

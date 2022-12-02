@@ -1,13 +1,12 @@
-import MessageList from "./components/MessageList";
+import PostList from "./components/PostList";
 import {
-  ChatProvider,
   PerspectiveProvider,
   AgentProvider,
   CommunityProvider,
 } from "utils/react";
 import UIContext, { UIProvider, View } from "./context/UIContext";
 import styles from "./index.scss";
-import { ChannelProvider } from "utils/react/ChannelContext";
+import { ChannelProvider } from "utils/react";
 import Header from "./components/Header";
 import { useContext } from "preact/hooks";
 import Post from "./components/Post";
@@ -16,38 +15,58 @@ function Feed() {
   return (
     <>
       <Header></Header>
-      <MessageList />
+      <PostList />
     </>
   );
 }
 
-function Main() {
-  const { state } = useContext(UIContext);
+function Main({
+  perspective,
+  source,
+}: {
+  perspective: string;
+  source: string;
+}) {
+  const { state: UIState } = useContext(UIContext);
 
-  switch (state.view) {
-    case View.Feed:
-      return <Feed></Feed>;
-    case View.Post:
-      return <Post></Post>;
-  }
+  return (
+    <>
+      <div style={{ display: UIState.view === View.Feed ? "block" : "none" }}>
+        <Feed></Feed>
+      </div>
+      {UIState.currentPost && (
+        <div style={{ display: UIState.view === View.Post ? "block" : "none" }}>
+          <Post
+            perspectiveUuid={perspective}
+            source={source}
+            id={UIState.currentPost}
+          ></Post>
+        </div>
+      )}
+    </>
+  );
 }
 
-export default ({ perspective, source }) => {
+export default function App({
+  perspective,
+  source,
+}: {
+  perspective: string;
+  source: string;
+}) {
   return (
     <UIProvider>
       <AgentProvider>
         <CommunityProvider perspectiveUuid={perspective}>
           <PerspectiveProvider perspectiveUuid={perspective}>
             <ChannelProvider communityId={perspective} channelId={source}>
-              <ChatProvider perspectiveUuid={perspective} channelId={source}>
-                <div class={styles.container}>
-                  <Main></Main>
-                </div>
-              </ChatProvider>
+              <div class={styles.container}>
+                <Main perspective={perspective} source={source}></Main>
+              </div>
             </ChannelProvider>
           </PerspectiveProvider>
         </CommunityProvider>
       </AgentProvider>
     </UIProvider>
   );
-};
+}

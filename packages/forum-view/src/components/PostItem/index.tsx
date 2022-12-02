@@ -156,7 +156,7 @@ export default function PostItem({ post, displayView }) {
         <j-box pt="500">
           <j-flex a="center" gap="200">
             <j-icon size="xs" name="chat-left-text"></j-icon>
-            <span>{post.replies.length}</span>
+            <span>{post.comments.length}</span>
           </j-flex>
         </j-box>
       </div>

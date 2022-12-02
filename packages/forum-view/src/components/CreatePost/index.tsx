@@ -1,26 +1,25 @@
-import { useRef, useState, useEffect } from "preact/hooks";
-import { EntryType } from "utils/types";
+import { useRef, useState, useEffect, useMemo } from "preact/hooks";
 import Editor from "../Editor";
-import createPost from "utils/api/createPost";
-import { postOptions } from "../../constants/options";
+import { PostOption, postOptions } from "../../constants/options";
 import FileUpload from "../../components/FileUpload";
 import { format } from "date-fns";
 import { parse } from "date-fns/esm";
 import styles from "./index.scss";
+import PostModel from "utils/api/post";
 
 const initialState = {
   title: "",
   body: "",
   url: "",
   image: "",
-  startDate: format(new Date(), "yyyy-MM-dd"),
+  startDate: "",
   startTime: "",
   endDate: "",
   endTime: "",
   options: [],
 };
 
-export default function MakeEntry({
+export default function CreatePost({
   channelId,
   communityId,
   onPublished,
@@ -28,8 +27,12 @@ export default function MakeEntry({
 }) {
   const inputRefs = useRef<{ [x: string]: { isValid: boolean; el: any } }>({});
   const [isCreating, setIsCreating] = useState(false);
-  const [entryType, setEntryType] = useState<EntryType>(initialType);
+  const [entryType, setEntryType] = useState<PostOption>(initialType);
   const [state, setState] = useState(initialState);
+
+  const Post = useMemo(() => {
+    return new PostModel({ perspectiveUuid: communityId, source: channelId });
+  }, [communityId, channelId]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -71,20 +74,23 @@ export default function MakeEntry({
 
     setIsCreating(true);
 
-    const startDate = parseDateTime(state.startDate, state.startTime);
-    const endDate = parseDateTime(state.endDate, state.endTime);
+    let data = state;
+
+    if (entryType === PostOption.Event) {
+      const startDate = parseDateTime(
+        state.startDate,
+        state.startTime
+      ).toISOString();
+      const endDate = parseDateTime(state.endDate, state.endTime).toISOString();
+      data = {
+        ...state,
+        startDate,
+        endDate,
+      };
+    }
 
     try {
-      await createPost({
-        channelId,
-        communityId,
-        type: entryType,
-        data: {
-          ...state,
-          startDate: startDate.toISOString(),
-          endDate: endDate.toISOString(),
-        },
-      });
+      await Post.create(data);
       onPublished(true);
     } catch (e) {
       console.log(e);
@@ -99,10 +105,9 @@ export default function MakeEntry({
 
   function handleImage(files: any) {
     if (!files || !files[0]) return;
-    console.log(files[0]);
+
     const FR = new FileReader();
     FR.addEventListener("load", function (evt) {
-      console.log(evt.target.result);
       setState({
         ...state,
         image: evt.target.result,
@@ -112,14 +117,14 @@ export default function MakeEntry({
   }
 
   const showBody =
-    entryType === EntryType.SimplePost ||
-    entryType === EntryType.CalendarEvent ||
-    entryType === EntryType.ImagePost;
-  const showUrl = entryType === EntryType.LinkPost;
-  const showStartDate = entryType === EntryType.CalendarEvent;
+    entryType === PostOption.Text ||
+    entryType === PostOption.Event ||
+    entryType === PostOption.Image;
+  const showUrl = entryType === PostOption.Link;
+  const showStartDate = entryType === PostOption.Event;
   const showEndDate =
-    entryType === EntryType.CalendarEvent && state.startDate && state.startTime;
-  const showImage = entryType === EntryType.ImagePost;
+    entryType === PostOption.Event && state.startDate && state.startTime;
+  const showImage = entryType === PostOption.Image;
 
   return (
     <div class={styles.createPost}>

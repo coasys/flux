@@ -4,11 +4,11 @@ import { AgentContext } from "utils/react";
 import Avatar from "../Avatar";
 import CreatePost from "../CreatePost";
 import { EntryType } from "utils/types";
-import { postOptions } from "../../constants/options";
+import { PostOption, postOptions } from "../../constants/options";
 import ChannelContext from "utils/react/ChannelContext";
 
 export default function Header() {
-  const [initialType, setInitialType] = useState(EntryType.SimplePost);
+  const [initialType, setInitialType] = useState(PostOption.Text);
   const { state: agentState } = useContext(AgentContext);
   const { state, methods } = useContext(ChannelContext);
   const [open, setOpen] = useState(false);
@@ -19,7 +19,6 @@ export default function Header() {
   }
 
   function onPublished() {
-    methods.loadPosts([]);
     setOpen(false);
   }
 
@@ -35,7 +34,7 @@ export default function Header() {
         </div>
         <div style="display: block; width: 100%;">
           <j-input
-            onFocus={() => handlePostClick(EntryType.SimplePost)}
+            onFocus={() => handlePostClick("post")}
             full
             size="lg"
             placeholder="Create a post"

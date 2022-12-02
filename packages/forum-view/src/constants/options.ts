@@ -1,29 +1,35 @@
-import { EntryType } from "utils/types";
 export enum DisplayView {
   Compact = "COMPACT",
   Grid = "GRID",
   Card = "CARD",
 }
 
+export enum PostOption {
+  Text = "TEXT",
+  Image = "IMAGE",
+  Link = "LINK",
+  Event = "EVENT",
+}
+
 export const postOptions = [
   {
     label: "Post",
-    value: EntryType.SimplePost,
+    value: PostOption.Text,
     icon: "card-heading",
   },
   {
     label: "Image",
-    value: EntryType.ImagePost,
+    value: PostOption.Image,
     icon: "card-image",
   },
   {
     label: "Link",
-    value: EntryType.LinkPost,
+    value: PostOption.Link,
     icon: "link",
   },
   {
     label: "Event",
-    value: EntryType.CalendarEvent,
+    value: PostOption.Event,
     icon: "calendar-date",
   },
 ];
