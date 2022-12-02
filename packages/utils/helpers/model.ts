@@ -17,14 +17,16 @@ type DataInput = {
 };
 
 type Listeners = {
-  add: { [x: EntryType]: Function[] };
-  remove: { [x: EntryType]: Function[] };
+  add: { [source: string]: Function[] };
+  remove: { [source: string]: Function[] };
 };
 
 export default class Model {
+  client = null;
   source = "adm4://self";
   perspectiveUuid = "";
-  listeners = { add: {}, remove: {} } as Listeners;
+  private isSubcribing = false;
+  private listeners = { add: {}, remove: {} } as Listeners;
   static type: EntryType;
   static properties: {
     [x: string]: ModelProperty;
@@ -33,15 +35,9 @@ export default class Model {
   constructor(props: ModelProps) {
     this.perspectiveUuid = props.perspectiveUuid;
     this.source = props.source || this.source;
-
-    subscribeToLinks({
-      perspectiveUuid: this.perspectiveUuid,
-      added: (link) => this.onLink("added", link),
-      removed: (link) => this.onLink("removed", link),
-    });
   }
 
-  async create(data: DataInput, type?: EntryType) {
+  async create(data: DataInput) {
     const expressions = await this.createExpressions(data);
     return createEntry({
       perspectiveUuid: this.perspectiveUuid,
@@ -51,14 +47,16 @@ export default class Model {
     });
   }
 
-  async createExpressions(data: DataInput) {
+  private async createExpressions(data: DataInput) {
     const client = await getAd4mClient();
 
     const expPromises = Object.entries(data)
       .filter(([key]) => this.constructor.properties[key])
       .map(async ([key, value]) => {
         const { predicate, languageAddress } = this.constructor.properties[key];
-        const expUrl = await client.expression.create(value, languageAddress);
+        const expUrl = languageAddress
+          ? await client.expression.create(value, languageAddress)
+          : value;
         return { predicate, expUrl };
       });
 
@@ -80,59 +78,77 @@ export default class Model {
       source: source || this.source,
       properties: this.constructor.properties,
     });
-    console.log(result);
+    return result.length === 0 ? {} : result[0];
   }
 
   async getAll(source?: string) {
-    console.log({ type: this.constructor.type });
     const result = await queryProlog({
       perspectiveUuid: this.perspectiveUuid,
       type: this.constructor.type,
       source: source || this.source,
       properties: this.constructor.properties,
     });
-    console.log(result);
+    return result;
   }
 
-  onLink(type: "added" | "removed", link: LinkExpression) {
-    const linkIsType = link.data.predicate === ENTRY_TYPE;
+  private subscribe() {
+    subscribeToLinks({
+      perspectiveUuid: this.perspectiveUuid,
+      added: (link) => this.onLink("added", link),
+      removed: (link) => this.onLink("removed", link),
+    });
+  }
+
+  private async onLink(type: "added" | "removed", link: LinkExpression) {
+    const linkIsType = link.data.predicate === this.constructor.type;
 
     if (!linkIsType) return;
 
-    const entryId = link.data.source;
-    const entryType = link.data.target;
-    const addedListeners = this.listeners.add[entryType];
-    const removedListeners = this.listeners.remove[entryType];
+    const source = link.data.source;
+    const entryId = link.data.target;
+    const addedListeners = this.listeners.add[source];
+    const removedListeners = this.listeners.remove[source];
 
     if (type === "added" && addedListeners) {
+      const entry = await this.get(entryId);
       addedListeners.forEach(async (cb) => {
-        const entry = await this.get(entryId);
         cb(entry);
       });
     }
     if (type === "removed" && removedListeners) {
+      const entry = await this.get(entryId);
       removedListeners.forEach(async (cb) => {
-        const entry = await this.get(entryId);
         cb(entry);
       });
     }
   }
 
-  onAdded(type: EntryType, callback: Function) {
-    const hasCallbacks = this.listeners.add[type];
+  onAdded(callback: Function, source?: string) {
+    if (!this.isSubcribing) {
+      this.subscribe();
+    }
+
+    const src = source || this.source;
+    const hasCallbacks = this.listeners.add[src];
+
     if (hasCallbacks) {
-      this.listeners.add[type].push(callback);
+      this.listeners.add[src].push(callback);
     } else {
-      this.listeners.add[type] = [callback];
+      this.listeners.add[src] = [callback];
     }
   }
 
-  onRemoved(type: EntryType, callback: Function) {
-    const hasCallbacks = this.listeners.add[type];
+  onRemoved(callback: Function, source?: string) {
+    if (!this.isSubcribing) {
+      this.subscribe();
+    }
+
+    const src = source || this.source;
+    const hasCallbacks = this.listeners.add[src];
     if (hasCallbacks) {
-      this.listeners.remove[type].push(callback);
+      this.listeners.remove[src].push(callback);
     } else {
-      this.listeners.remove[type] = [callback];
+      this.listeners.remove[src] = [callback];
     }
   }
 }

@@ -1,12 +1,16 @@
 import { EntryType, ModelProperty } from "../types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { Literal } from "@perspect3vism/ad4m";
 
 export function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+export function lowerCaseFirstLetter(string) {
+  return string.charAt(0).toLowerCase() + string.slice(1);
+}
+
 export function generateFindAll(propertyName, predicate) {
-  console.log({ propertyName, predicate });
   const name = capitalizeFirstLetter(propertyName);
   return `findall((${name}, ${name}Timestamp, ${name}Author), link(Id, "${predicate}", ${name}, ${name}Timestamp, ${name}Author), ${name})`;
 }
@@ -52,7 +56,7 @@ export function generatePrologQuery({
   return {
     assertQuery: `assertz((${entryQuery})).`,
     assertEntry: `assertz((${entry})).`,
-    query: `entry(${sourceParam}, ${idParam}, Timestamp, Author, ${propertyNames}).`,
+    query: `entry(Source, Id, Timestamp, Author, ${propertyNames}), (Source = ${sourceParam}, Id = ${idParam}).`,
     retractQuery: `retract((${entryQuery})).`,
     retractEntry: `retract((${entry})).`,
   };
@@ -95,33 +99,70 @@ export async function queryProlog({
   await client.perspective.queryProlog(perspectiveUuid, retractEntry);
 
   const entries = extractPrologResults(prologResult, [
+    "Source",
     "Id",
     "Timestamp",
     "Author",
     ...Object.keys(properties).map((name) => capitalizeFirstLetter(name)),
   ]);
 
-  return Promise.all(entries.map(resolveEntryWithLatesProperties));
+  const result = await Promise.all(
+    entries.map((entry) => resolveEntryWithLatestProperties(entry, properties))
+  );
+
+  return result;
 }
 
-export async function resolveEntryWithLatesProperties(entry) {
+export async function resolveEntryWithLatestProperties(
+  entry,
+  properties: {
+    [x: string]: ModelProperty;
+  }
+) {
   const client = await getAd4mClient();
   const propertyNames = Object.keys(entry);
-  let cleanedEntry = { ...entry };
+  let cleanedEntry = {};
 
   propertyNames.forEach(async (name) => {
+    const lowerCaseName = lowerCaseFirstLetter(name);
+    const prop = properties[lowerCaseName];
     const val = entry[name];
     const isArray = Array.isArray(val);
 
-    if (isArray) {
+    async function resolveExp(url) {
+      return url.startsWith("literal://")
+        ? Literal.fromUrl(url).get().data
+        : (await client.expression.get(url)).data.replace(/['"]+/g, "");
+    }
+
+    if (!prop) {
+      cleanedEntry[lowerCaseName] = val;
+      return;
+    }
+
+    const { collection } = prop;
+
+    if (!collection && isArray) {
       const length = val.length;
       if (length > 0) {
         const expUrl = val[length - 1].content;
-        const value = await client.expression.get(expUrl);
-        cleanedEntry[name] = value.data;
+        const value = prop.resolve ? await resolveExp(expUrl) : expUrl;
+        cleanedEntry[lowerCaseName] = value;
       } else {
-        cleanedEntry[name] = null;
+        cleanedEntry[lowerCaseName] = null;
       }
+    }
+
+    if (collection && isArray) {
+      cleanedEntry[lowerCaseName] = val.map((v) => v.content);
+    }
+
+    if (collection && !isArray) {
+      cleanedEntry[lowerCaseName] = [];
+    }
+
+    if (!isArray && !collection) {
+      cleanedEntry[lowerCaseName] = val;
     }
   });
 
@@ -145,6 +186,7 @@ export function extractPrologResults(
     const result = {};
     for (const value of values) {
       const prologResultValue = prologResult[value];
+
       if (!prologResultValue.head) {
         if (prologResultValue !== "[]" && !prologResultValue.variable) {
           result[value] = prologResultValue;

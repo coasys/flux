@@ -90,11 +90,7 @@ export enum ChannelView {
 
 export enum EntryType {
   Message = "flux://message",
-  SimplePost = "flux://simple_post",
-  ImagePost = "flux://image_post",
-  PollPost = "flux://poll_post",
-  CalendarEvent = "flux://calendar_event",
-  LinkPost = "flux://link_post",
+  Post = "flux://post",
   Channel = "flux://has_channel",
 }
 
@@ -166,5 +162,7 @@ export interface SdnaVersion {
 export interface ModelProperty {
   predicate: string;
   type: StringConstructor | NumberConstructor;
-  languageAddress: string;
+  collection?: boolean;
+  languageAddress?: string;
+  resolve: boolean;
 }

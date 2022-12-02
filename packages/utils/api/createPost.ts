@@ -33,58 +33,21 @@ export default async function ({
   type,
   data,
 }: Payload) {
-  const postData = await createPostData({ entryType: type, data });
+  const postData = await createPostData({ data });
   return createEntry({
     perspectiveUuid: communityId,
     source: channelId,
-    types: [type],
+    types: [EntryType.Post],
     data: postData,
   });
 }
 
-async function createPostData({
-  entryType,
-  data,
-}: {
-  entryType: EntryType;
-  data: PostData;
-}) {
+async function createPostData({ data }: { data: PostData }) {
   const client = await getAd4mClient();
   const expression = client.expression;
 
-  switch (entryType) {
-    case EntryType.SimplePost:
-      return {
-        [TITLE]: await expression.create(data.title, "literal"),
-        [BODY]: await expression.create(data.body, "literal"),
-      };
-    case EntryType.ImagePost:
-      return {
-        [TITLE]: await expression.create(data.title, "literal"),
-        [BODY]: await expression.create(data.body, "literal"),
-        [IMAGE]: await expression.create(
-          data.image,
-          NOTE_IPFS_EXPRESSION_OFFICIAL
-        ),
-      };
-    case EntryType.CalendarEvent:
-      return {
-        [TITLE]: await expression.create(data.title, "literal"),
-        [BODY]: await expression.create(data.body, "literal"),
-        [START_DATE]: await expression.create(data.startDate, "literal"),
-        [END_DATE]: await expression.create(data.endDate, "literal"),
-      };
-    case EntryType.LinkPost:
-      return {
-        [TITLE]: await expression.create(data.title, "literal"),
-        [URL]: await expression.create(data.url, "literal"),
-      };
-    case EntryType.CalendarEvent:
-      return {
-        [TITLE]: await expression.create(data.title, "literal"),
-        [BODY]: await expression.create(data.body, "literal"),
-        [START_DATE]: await expression.create(data.startDate, "literal"),
-        [END_DATE]: await expression.create(data.endDate, "literal"),
-      };
-  }
+  return {
+    [TITLE]: await expression.create(data.title, "literal"),
+    [BODY]: await expression.create(data.body, "literal"),
+  };
 }
