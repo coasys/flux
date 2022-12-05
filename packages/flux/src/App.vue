@@ -53,6 +53,7 @@ import {
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import "@perspect3vism/ad4m-connect/dist/web.js";
 import { Community, EntryType } from "utils/types";
+import ChannelModel from "utils/api/channel";
 
 export default defineComponent({
   name: "App",
@@ -168,46 +169,6 @@ export default defineComponent({
             });
           }
         } else if (
-          link.data!.predicate! === CHANNEL &&
-          link.author != this.userStore.getUser?.agent.did
-        ) {
-          //If the link is a channel, it's a new channel in a community
-          console.log("Found a new channel via signal");
-
-          try {
-            const channel = link.data.target;
-            const channelExpression = Literal.fromUrl(channel).get();
-
-            this.dataStore.addChannel({
-              communityId: perspective,
-              channel: {
-                id: channel,
-                name: channelExpression.data,
-                author: link.author,
-                sourcePerspective: perspective,
-                hasNewMessages: false,
-                timestamp: link.timestamp,
-                notifications: {
-                  mute: false,
-                },
-              },
-            });
-            const channels = this.dataStore.getChannels.filter(
-              (channel) => channel.sourcePerspective === perspective
-            );
-            if (channels.length === 1) {
-              this.$router.push({
-                name: "channel",
-                params: {
-                  communityId: perspective,
-                  channelId: channelExpression.data,
-                },
-              });
-            }
-          } catch (e) {
-            console.log("Error parsing channel link signal", e);
-          }
-        } else if (
           link.data!.predicate! === FLUX_GROUP_NAME ||
           link.data!.predicate! === FLUX_GROUP_DESCRIPTION ||
           link.data!.predicate! === FLUX_GROUP_IMAGE ||
@@ -232,40 +193,44 @@ export default defineComponent({
         async (newValue: { [perspectiveUuid: string]: Community }) => {
           for (const [k, v] of Object.entries(newValue)) {
             if (watching.filter((val) => val == k).length == 0) {
-              console.log("Starting watcher on perspective", k);
               watching.push(k);
               const perspective = await client!.perspective.byUUID(k);
 
               if (perspective) {
-                // @ts-ignore
-                perspective.addListener("link-added", (result) => {
-                  console.debug(
-                    "Got new link with data",
-                    result.data,
-                    "and channel",
-                    v
-                  );
-                  newLinkHandler(result, v.uuid);
+                const Channel = new ChannelModel({
+                  perspectiveUuid: perspective.uuid,
                 });
 
-                perspective.addListener("link-removed", (link) => {
-                  console.log(
-                    "Got new link with data",
-                    link.data,
-                    "and channel",
-                    v
-                  );
-                  if (
-                    link.data!.predicate! === CHANNEL &&
-                    link.author !== this.userStore.getUser?.agent.did
-                  ) {
-                    const channel = Literal.fromUrl(link.data.target).get();
+                Channel.onAdded((channel: any) => {
+                  this.dataStore.addChannel({
+                    communityId: perspective.uuid,
+                    channel: {
+                      id: channel.id,
+                      name: channel.name,
+                      author: channel.author,
+                      description: "",
+                      sourcePerspective: k,
+                      hasNewMessages: false,
+                      timestamp: new Date(channel.timestamp),
+                      collapsed: false,
+                      currentView: channel.views[0],
+                      views: channel.views,
+                      notifications: {
+                        mute: false,
+                      },
+                    },
+                  });
+                });
 
-                    this.dataStore.removeChannel({
-                      channelId: channel.id,
-                    });
-                  }
-                  return null;
+                Channel.onRemoved((channel: any) => {
+                  this.dataStore.removeChannel({
+                    channelId: channel.id,
+                  });
+                });
+
+                // @ts-ignore
+                perspective.addListener("link-added", (result) => {
+                  newLinkHandler(result, v.uuid);
                 });
               }
             }
@@ -275,96 +240,12 @@ export default defineComponent({
       );
 
       // @ts-ignore
-      client!.perspective.addPerspectiveAddedListener(async (perspective) => {
-        const proxy = await client!.perspective.byUUID(perspective.uuid);
-        proxy!.addListener("link-added", (link) => {
-          if (
-            link.data!.predicate! === CHANNEL &&
-            link.author != this.userStore.getUser?.agent.did
-          ) {
-            const channel = link.data.target;
-            const channelExpression = Literal.fromUrl(channel).get();
-            const channelName = channelExpression.name;
-            if (channelName === "Home") {
-              buildCommunity(proxy!).then((community) => {
-                this.dataStore.addCommunity(community);
-
-                this.dataStore.addChannel({
-                  communityId: perspective.uuid,
-                  channel: {
-                    id: channel,
-                    name: channelName,
-                    author: link.author,
-                    sourcePerspective: perspective.uuid,
-                    hasNewMessages: false,
-                    timestamp: link.timestamp,
-                    notifications: {
-                      mute: false,
-                    },
-                  },
-                });
-              });
-            } else {
-              this.dataStore.addChannel({
-                communityId: perspective.uuid,
-                channel: {
-                  id: channel,
-                  name: channelName,
-                  author: link.author,
-                  sourcePerspective: perspective.uuid,
-                  hasNewMessages: false,
-                  timestamp: link.timestamp,
-                  notifications: {
-                    mute: false,
-                  },
-                },
-              });
-            }
-          }
-          return null;
-        });
-      });
-
-      // @ts-ignore
       client!.perspective.addPerspectiveRemovedListener((perspective) => {
         const isCommunity = this.dataStore.getCommunity(perspective);
         if (isCommunity) {
           this.dataStore.removeCommunity({ communityId: perspective });
         }
       });
-
-      const allPerspectives = await client!.perspective.all();
-
-      for (const perspective of allPerspectives) {
-        perspective.addListener("link-added", (link) => {
-          if (link.data!.predicate! === CHANNEL) {
-            const channel = link.data.target;
-            const channelExpression = Literal.fromUrl(channel).get();
-            const channelName = channelExpression.name;
-            if (channelName == "Home") {
-              buildCommunity(perspective).then((community) => {
-                this.dataStore.addCommunity(community);
-
-                this.dataStore.addChannel({
-                  communityId: perspective.uuid,
-                  channel: {
-                    id: channel,
-                    name: channelName,
-                    author: link.author,
-                    sourcePerspective: perspective.uuid,
-                    hasNewMessages: false,
-                    timestamp: link.timestamp,
-                    notifications: {
-                      mute: false,
-                    },
-                  },
-                });
-              });
-            }
-          }
-          return null;
-        });
-      }
     },
   },
 });
