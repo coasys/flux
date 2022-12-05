@@ -2,16 +2,16 @@ import React, {
   createContext,
   useState,
   useEffect,
-  useContext,
+  useMemo,
   useRef,
 } from "react";
 import getMembers from "../api/getMembers";
-import getChannels from "../api/getChannels";
 import getPerspectiveMeta from "../api/getPerspectiveMeta";
 import subscribeToLinks from "../api/subscribeToLinks";
 import { linkIs } from "../helpers/linkHelpers";
 import getPerspectiveProfile from "../api/getProfile";
-import { Literal } from "@perspect3vism/ad4m";
+import ChannelModel from "utils/api/channel";
+import useEntries from "./useEntries";
 
 type State = {
   uuid: string;
@@ -53,6 +53,17 @@ export function CommunityProvider({ perspectiveUuid, children }: any) {
   const [state, setState] = useState(initialState.state);
   const linkSubscriberRef = useRef();
 
+  const { entries } = useEntries({
+    perspectiveUuid,
+    model: ChannelModel,
+  });
+
+  const channels = useMemo(() => {
+    return entries.reduce((acc, channel) => {
+      return { ...acc, [channel.id]: channel };
+    }, {});
+  }, [entries]);
+
   useEffect(() => {
     if (perspectiveUuid) {
       fetchMeta();
@@ -65,7 +76,6 @@ export function CommunityProvider({ perspectiveUuid, children }: any) {
   }, [perspectiveUuid]);
 
   useEffect(() => {
-    fetchChannels();
     fetchMembers();
   }, [state.url, state.sourceUrl]);
 
@@ -77,33 +87,6 @@ export function CommunityProvider({ perspectiveUuid, children }: any) {
   }
 
   async function handleLinkAdded(link) {
-    if (linkIs.channel(link)) {
-      const literal = Literal.fromUrl(link.data.target).get();
-      const channelObj = {
-        name: literal.data,
-        description: "",
-        id: link.data.target,
-      };
-
-      setState((oldState) => {
-        const isAlreadyPartOf = Object.values(oldState.channels).find(
-          (c: any) => c.name === link.data.target
-        );
-
-        if (isAlreadyPartOf) {
-          return oldState;
-        }
-
-        return {
-          ...oldState,
-          channels: {
-            ...oldState.channels,
-            [channelObj.id]: channelObj,
-          },
-        };
-      });
-    }
-
     if (linkIs.member(link)) {
       const profile = await getProfile(link.data.target);
       setState((prev) => ({
@@ -130,15 +113,6 @@ export function CommunityProvider({ perspectiveUuid, children }: any) {
         ...prev,
         members: keyedMembers,
       }));
-    }
-  };
-
-  const fetchChannels = async () => {
-    if (state.url) {
-      const channels = await getChannels({
-        perspectiveUuid: perspectiveUuid,
-      });
-      setState((prev, curr) => ({ ...prev, channels }));
     }
   };
 
@@ -179,7 +153,7 @@ export function CommunityProvider({ perspectiveUuid, children }: any) {
   return (
     <CommunityContext.Provider
       value={{
-        state: { ...state, uuid: perspectiveUuid },
+        state: { ...state, channels, uuid: perspectiveUuid },
         methods: {
           getProfile,
         },
