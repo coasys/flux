@@ -3,6 +3,7 @@ import { useAppStore } from "@/store/app";
 import { ChannelState } from "@/store/types";
 import { useDataStore } from "..";
 import { ChannelView } from "utils/types";
+import ChannelModel from "utils/api/channel";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -25,21 +26,28 @@ export default async (payload: Payload): Promise<ChannelState> => {
       throw Error(message);
     }
 
-    const channel = await createChannel({
-      channelName: payload.name,
-      views: payload.views,
+    const Channel = new ChannelModel({
       perspectiveUuid: payload.perspectiveUuid,
     });
 
+    console.log("channel before create");
+
+    const channel: any = await Channel.create({
+      name: payload.name,
+      views: payload.views,
+    });
+
+    console.log({ channel });
+
     const channelState = {
       id: channel.id,
-      name: channel.name,
+      name: payload.name,
       timestamp: channel.timestamp,
       author: channel.author,
       collapsed: false,
-      sourcePerspective: channel.perspectiveUuid,
-      currentView: channel.views[0],
-      views: channel.views,
+      sourcePerspective: payload.perspectiveUuid,
+      currentView: payload.views[0],
+      views: payload.views,
       hasNewMessages: false,
       notifications: {
         mute: false,
