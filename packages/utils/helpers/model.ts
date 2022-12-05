@@ -47,17 +47,39 @@ export default class Model {
     });
   }
 
+  async update(id: string, data: DataInput) {
+    const expressions = await this.createExpressions(data);
+    return updateEntry({
+      perspectiveUuid: this.perspectiveUuid,
+      id,
+      data: expressions,
+    });
+  }
+
   private async createExpressions(data: DataInput) {
     const client = await getAd4mClient();
 
     const expPromises = Object.entries(data)
       .filter(([key]) => this.constructor.properties[key])
-      .map(async ([key, value]) => {
-        const { predicate, languageAddress } = this.constructor.properties[key];
-        const expUrl = languageAddress
-          ? await client.expression.create(value, languageAddress)
-          : value;
-        return { predicate, expUrl };
+      .map(async ([key, val]) => {
+        const { predicate, languageAddress, collection } =
+          this.constructor.properties[key];
+
+        if (collection) {
+          const value = val.map(async (v) => {
+            return languageAddress
+              ? await client.expression.create(v, languageAddress)
+              : v;
+          });
+          const v = await Promise.all(value);
+          return { predicate, value: v };
+        }
+
+        const value = languageAddress
+          ? await client.expression.create(val, languageAddress)
+          : val;
+
+        return { predicate, value };
       });
 
     const expressions = await Promise.all(expPromises);
@@ -65,7 +87,7 @@ export default class Model {
     return expressions.reduce((acc, exp) => {
       return {
         ...acc,
-        [exp.predicate]: exp.expUrl,
+        [exp.predicate]: exp.value,
       };
     }, {});
   }
@@ -144,7 +166,8 @@ export default class Model {
     }
 
     const src = source || this.source;
-    const hasCallbacks = this.listeners.add[src];
+    const hasCallbacks = this.listeners.remove[src];
+
     if (hasCallbacks) {
       this.listeners.remove[src].push(callback);
     } else {
