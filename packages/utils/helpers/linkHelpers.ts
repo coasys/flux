@@ -23,8 +23,7 @@ export const findLink = {
 };
 
 export const linkIs = {
-  message: (link: LinkExpression) =>
-    link.data.predicate === EntryType.Message,
+  message: (link: LinkExpression) => link.data.predicate === EntryType.Message,
   reply: (link: LinkExpression) => link.data.predicate === REPLY_TO,
   // TODO: SHould we check if the link is proof.valid?
   reaction: (link: LinkExpression) => link.data.predicate === REACTION,
@@ -46,7 +45,7 @@ type PredicateMap = {
 };
 
 type TargetMap = {
-  [predicate: string]: Target | undefined | null;
+  [predicate: string]: Target | Target[] | undefined | null;
 };
 
 type Map = {
@@ -64,14 +63,14 @@ export function mapLiteralLinks(
     if (link) {
       let data;
 
-      if(link.data.target.startsWith("literal://string:")) {
-        data = Literal.fromUrl(link.data.target).get()
-      } else if(link.data.target.startsWith("literal://number:")) {
-        data = Literal.fromUrl(link.data.target).get()
-      } else if(link.data.target.startsWith("literal://json:")) {
-        data = Literal.fromUrl(link.data.target).get().data
+      if (link.data.target.startsWith("literal://string:")) {
+        data = Literal.fromUrl(link.data.target).get();
+      } else if (link.data.target.startsWith("literal://number:")) {
+        data = Literal.fromUrl(link.data.target).get();
+      } else if (link.data.target.startsWith("literal://json:")) {
+        data = Literal.fromUrl(link.data.target).get().data;
       } else {
-        data = link.data.target
+        data = link.data.target;
       }
 
       return {
@@ -107,14 +106,22 @@ export async function createLinks(source: string, map: TargetMap) {
 
   const promises = targets
     .filter((predicate: any) => {
-      return typeof map[predicate] === "string" && map[predicate] !== "";
+      const isString =
+        typeof map[predicate] === "string" && map[predicate] !== "";
+      const isArray = Array.isArray(map[predicate]);
+      return isString || isArray;
     })
     .map(async (predicate: string) => {
-      const target = map[predicate];
-      return new Link({ source, predicate, target });
+      const value = map[predicate];
+
+      return Array.isArray(value)
+        ? value.map((v) => new Link({ source, predicate, target: v }))
+        : new Link({ source, predicate, target: value });
     });
 
-  return Promise.all(promises);
+  const resolved = await Promise.all(promises);
+
+  return resolved.flat();
 }
 
 export async function createLiteralObject({
