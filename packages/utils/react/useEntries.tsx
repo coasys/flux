@@ -7,7 +7,7 @@ export default function useEntries({
   model,
 }: {
   perspectiveUuid: string;
-  source: string;
+  source?: string;
   model: typeof EntryModel;
 }) {
   const [loading, setLoading] = useState(false);
