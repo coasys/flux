@@ -156,9 +156,9 @@ export default defineComponent({
     "$route.params.communityId": {
       handler: function (id: string) {
         if (id) {
-          this.dataStore.fetchNeighbourhoodMembers(id);
-          this.dataStore.fetchNeighbourhoodMetadata(id);
-          this.dataStore.fetchNeighbourhoodChannels(id);
+          this.dataStore.fetchCommunityMembers(id);
+          this.dataStore.fetchCommunityMetadata(id);
+          this.dataStore.fetchCommunityChannels(id);
           this.handleThemeChange(id);
           this.goToActiveChannel(id);
         } else {
