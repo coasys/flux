@@ -87,15 +87,20 @@ export async function queryProlog({
       properties,
     });
 
+  //This queryProlog call is used to assert the entry_query() rule
   await client.perspective.queryProlog(perspectiveUuid, assertQuery);
+  //This queryProlog call is used to assert the entry() rule
   await client.perspective.queryProlog(perspectiveUuid, assertEntry);
 
+  //This query is the one which actually fetches the results from the rules declared above
   const prologResult = await client.perspective.queryProlog(
     perspectiveUuid,
     query
   );
 
+  //This queryProlog call is used to retract the entry_query() rule, so that we dont get duplicate rules/results in the prolog engine
   await client.perspective.queryProlog(perspectiveUuid, retractQuery);
+  //This queryProlog call is used to retract the entry() rule, so that we dont get duplicate rules/results in the prolog engine
   await client.perspective.queryProlog(perspectiveUuid, retractEntry);
 
   const entries = extractPrologResults(prologResult, [
