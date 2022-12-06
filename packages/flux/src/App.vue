@@ -35,26 +35,14 @@ import { useAppStore } from "./store/app";
 import { ApplicationState, ModalsState } from "@/store/types";
 import { useRoute, useRouter } from "vue-router";
 import { useDataStore } from "./store/data";
-import { LinkExpression, Literal } from "@perspect3vism/ad4m";
-import {
-  CHANNEL,
-  FLUX_GROUP_DESCRIPTION,
-  FLUX_GROUP_IMAGE,
-  FLUX_GROUP_NAME,
-  FLUX_GROUP_THUMBNAIL,
-  MEMBER,
-} from "utils/constants/communityPredicates";
 import { useUserStore } from "./store/user";
-import { buildCommunity, hydrateState } from "./store/data/hydrateState";
-import getCommunityMetadata from "utils/api/getCommunityMetadata";
+import { hydrateState } from "./store/data/hydrateState";
 import {
   getAd4mClient,
   onAuthStateChanged,
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import "@perspect3vism/ad4m-connect/dist/web.js";
-import { Community, EntryType } from "utils/types";
-import ChannelModel from "utils/api/channel";
-import MessageModel from "utils/api/message";
+import { Community } from "utils/types";
 import subscribeToLinks from "utils/api/subscribeToLinks";
 
 export default defineComponent({
