@@ -6,7 +6,7 @@ https://app.fluxsocial.io
 
 ## Project setup
 
-This project requires AD4M! The easiest way to have an AD4M runtime operating, is to [download AD4MIN](https://github.com/perspect3vism/ad4min).
+This project requires AD4M! The easiest way to have an AD4M runtime operating, is to [download AD4MIN](https://github.com/perspect3vism/ad4m).
 
 ### Compiles and hot-reloads for development
 
