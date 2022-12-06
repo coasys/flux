@@ -1,7 +1,6 @@
 import Footer from "./components/Footer";
 import MessageList from "./components/MessageList";
-
-import { ChatProvider, PerspectiveProvider, AgentProvider } from "utils/react";
+import { ChatProvider, CommunityProvider, AgentProvider } from "utils/react";
 import { UIProvider } from "./context/UIContext";
 import { useState } from "preact/hooks";
 import styles from "./index.scss";
@@ -28,14 +27,14 @@ export default ({ perspective = "", source = "" }) => {
   return (
     <UIProvider>
       <AgentProvider>
-        <PerspectiveProvider perspectiveUuid={perspective}>
+        <CommunityProvider perspectiveUuid={perspective}>
           <ChatProvider perspectiveUuid={perspective} channelId={source}>
             <MainComponent
               perspective={perspective}
               source={source}
             ></MainComponent>
           </ChatProvider>
-        </PerspectiveProvider>
+        </CommunityProvider>
       </AgentProvider>
     </UIProvider>
   );

@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from "preact/hooks";
-import { PerspectiveContext } from "utils/react";
+import { CommunityContext } from "utils/react";
 import styles from "./index.scss";
 import { format, formatDistance, formatRelative } from "date-fns/esm";
 import { Profile } from "utils/types";
@@ -11,7 +11,7 @@ import Avatar from "../Avatar";
 export default function PostItem({ post, displayView }) {
   const {
     state: { members },
-  } = useContext(PerspectiveContext);
+  } = useContext(CommunityContext);
   const { methods: UIMehthods } = useContext(UIContext);
 
   const [base64, setBase64] = useState("");

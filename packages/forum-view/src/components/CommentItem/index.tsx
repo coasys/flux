@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, useMemo } from "preact/hooks";
-import { PerspectiveContext, useEntries } from "utils/react";
+import { CommunityContext, useEntries } from "utils/react";
 import styles from "./index.scss";
 import { formatRelative } from "date-fns/esm";
 import { Profile } from "utils/types";
@@ -15,7 +15,7 @@ export default function CommentItem({ comment, perspectiveUuid }) {
 
   const {
     state: { members },
-  } = useContext(PerspectiveContext);
+  } = useContext(CommunityContext);
 
   const {
     entries: comments,

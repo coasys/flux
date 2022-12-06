@@ -1,6 +1,4 @@
 import React, { createContext, useState, useEffect, useMemo } from "react";
-import getPerspectiveMeta from "../api/getPerspectiveMeta";
-import getPerspectiveProfile from "../api/getProfile";
 import useEntries from "./useEntries";
 import useEntry from "./useEntry";
 import ChannelModel from "../api/channel";
@@ -35,9 +33,9 @@ const initialState: ContextProps = {
   },
 };
 
-const PerspectiveContext = createContext<ContextProps>(initialState);
+const CommunityContext = createContext<ContextProps>(initialState);
 
-export function PerspectiveProvider({ perspectiveUuid, children }: any) {
+export function CommunityProvider({ perspectiveUuid, children }: any) {
   const [state, setState] = useState({
     ...initialState.state,
   });
@@ -85,7 +83,7 @@ export function PerspectiveProvider({ perspectiveUuid, children }: any) {
   }, [channelEntries]);
 
   return (
-    <PerspectiveContext.Provider
+    <CommunityContext.Provider
       value={{
         state: {
           ...state,
@@ -99,8 +97,8 @@ export function PerspectiveProvider({ perspectiveUuid, children }: any) {
       }}
     >
       {children}
-    </PerspectiveContext.Provider>
+    </CommunityContext.Provider>
   );
 }
 
-export default PerspectiveContext;
+export default CommunityContext;

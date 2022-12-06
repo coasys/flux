@@ -6,7 +6,7 @@ import {
   useState,
 } from "preact/hooks";
 import { createContext } from "preact";
-import { AgentContext, ChatContext, PerspectiveContext } from "utils/react";
+import { AgentContext, ChatContext, CommunityContext } from "utils/react";
 import UIContext from "./UIContext";
 import useTiptapEditor from "../components/TipTap/useTiptapEditor";
 import { Editor } from "@tiptap/core";
@@ -41,7 +41,7 @@ export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
   const [state, setState] = useState(initialState.state);
   const {
     state: { members, channels },
-  } = useContext(PerspectiveContext);
+  } = useContext(CommunityContext);
 
   const {
     state: { keyedMessages, messages },

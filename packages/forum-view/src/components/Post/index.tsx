@@ -6,7 +6,7 @@ import { getImage } from "utils/helpers/getImage";
 import Avatar from "../Avatar";
 import CommentSection from "../CommentSection";
 import PostModel from "utils/api/post";
-import { PerspectiveContext, useEntry } from "utils/react";
+import { CommunityContext, useEntry } from "utils/react";
 
 export default function Post({
   perspectiveUuid,
@@ -20,7 +20,7 @@ export default function Post({
   const { methods: UIMethods } = useContext(UIContext);
   const {
     state: { members },
-  } = useContext(PerspectiveContext);
+  } = useContext(CommunityContext);
 
   const { entry: post } = useEntry({
     perspectiveUuid,
