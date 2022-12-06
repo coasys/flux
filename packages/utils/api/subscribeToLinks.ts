@@ -25,3 +25,27 @@ export default async function ({ perspectiveUuid, added, removed }: Payload) {
     throw new Error(e);
   }
 }
+
+export async function removedListeners({
+  perspectiveUuid,
+  added,
+  removed,
+}: Payload) {
+  try {
+    const client = await getAd4mClient();
+
+    const perspective = await client.perspective.byUUID(perspectiveUuid);
+
+    if (added) {
+      perspective?.removeListener("link-added", added);
+    }
+
+    if (removed) {
+      perspective?.removeListener("link-removed", removed);
+    }
+
+    return perspective;
+  } catch (e) {
+    throw new Error(e);
+  }
+}

@@ -4,6 +4,8 @@ import { Link } from "@perspect3vism/ad4m";
 import { Community } from "../types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import getCommunityMetadata from "./getCommunityMetadata";
+import MemberModel from "./member";
+import CommunityModel from "./community";
 
 export interface Payload {
   joiningLink: string;
@@ -25,29 +27,22 @@ export default async ({ joiningLink }: Payload): Promise<Community> => {
 
     const perspective = await client.neighbourhood.joinFromUrl(joiningLink);
 
-    await client.perspective.addLink(perspective.uuid, {
-      source: SELF,
-      target: `did://${agent.did}`,
-      predicate: MEMBER,
-    } as Link);
+    const Community = new CommunityModel({ perspectiveUuid: perspective.uuid });
 
-    const neighbourhoodMeta = getMetaFromLinks(
-      perspective.neighbourhood!.meta.links
-    );
+    await Community.addMember({ did: agent.did });
 
-    const communityMeta = await getCommunityMetadata(perspective.uuid);
+    const community = await Community.get();
 
     return {
       uuid: perspective!.uuid,
-      author: neighbourhoodMeta.author!,
-      timestamp: neighbourhoodMeta.timestamp!,
-      name: communityMeta.name || neighbourhoodMeta.name,
-      description:
-        communityMeta.description || neighbourhoodMeta.description || "",
+      author: community.author!,
+      timestamp: new Date(community.timestamp),
+      name: communityMeta.name || community.name,
+      description: communityMeta.description || community.description || "",
       image: communityMeta.image || "",
       thumbnail: communityMeta.thumbnail || "",
       neighbourhoodUrl: perspective.sharedUrl!,
-      members: [agent.did, neighbourhoodMeta.author!],
+      members: [agent.did, community.author!],
     };
   } catch (e) {
     throw new Error(e);

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import EntryModel from "../helpers/model";
+import { Entry } from "utils/types";
 
 export default function useEntries({
   perspectiveUuid,
@@ -11,14 +12,14 @@ export default function useEntries({
   model: typeof EntryModel;
 }) {
   const [loading, setLoading] = useState(false);
-  const [entries, setEntries] = useState([]);
+  const [entries, setEntries] = useState<Entry[]>([]);
 
   const Model = useMemo(() => {
     return new model({ perspectiveUuid, source });
   }, [perspectiveUuid, source]);
 
   useEffect(() => {
-    if (perspectiveUuid && source) {
+    if (perspectiveUuid) {
       getAll();
       subscribe();
     }

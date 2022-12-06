@@ -89,18 +89,19 @@ export enum ChannelView {
 }
 
 export enum EntryType {
-  Message = "flux://message",
-  Post = "flux://post",
+  Community = "flux://has_community",
   Channel = "flux://has_channel",
+  Message = "flux://has_message",
+  Post = "flux://has_post",
+  Member = "flux://has_member",
 }
 
 export interface Entry {
   id: string;
   author: string;
-  timestamp: Date;
-  types: EntryType[];
-  source?: string;
-  data?: PredicateAnyMap;
+  timestamp: number;
+  type: EntryType;
+  source: string;
 }
 
 export interface Post extends Entry {
@@ -116,9 +117,10 @@ export interface Post extends Entry {
 }
 
 export interface EntryInput {
+  id?: string;
   perspectiveUuid: string;
   source?: string;
-  types: EntryType[];
+  type: EntryType;
   data: PredicateMap;
 }
 

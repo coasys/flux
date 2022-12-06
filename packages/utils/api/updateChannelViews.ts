@@ -14,7 +14,7 @@ export default async function ({ perspectiveUuid, channelId, views }: Payload) {
     const client = await getAd4mClient();
 
     const viewLinks = await client.perspective.queryLinks(perspectiveUuid, {
-      source: `flux_entry://${channelId}`,
+      source: channelId,
       predicate: CHANNEL_VIEW,
     } as LinkQuery);
 
@@ -26,7 +26,7 @@ export default async function ({ perspectiveUuid, channelId, views }: Payload) {
       await client.perspective.addLink(
         perspectiveUuid,
         new Link({
-          source: `flux_entry://${channelId}`,
+          source: channelId,
           predicate: CHANNEL_VIEW,
           target: view,
         })

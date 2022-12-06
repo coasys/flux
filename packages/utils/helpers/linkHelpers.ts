@@ -104,14 +104,14 @@ export async function createLiteralLinks(source: string, map: TargetMap) {
 export async function createLinks(source: string, map: TargetMap) {
   const targets = Object.keys(map);
 
-  const promises = targets
+  const links = targets
     .filter((predicate: any) => {
       const isString =
         typeof map[predicate] === "string" && map[predicate] !== "";
       const isArray = Array.isArray(map[predicate]);
       return isString || isArray;
     })
-    .map(async (predicate: string) => {
+    .map((predicate: string) => {
       const value = map[predicate];
 
       return Array.isArray(value)
@@ -119,9 +119,7 @@ export async function createLinks(source: string, map: TargetMap) {
         : new Link({ source, predicate, target: value });
     });
 
-  const resolved = await Promise.all(promises);
-
-  return resolved.flat();
+  return links.flat();
 }
 
 export async function createLiteralObject({

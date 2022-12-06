@@ -7,7 +7,6 @@ export type State = {
 
 export interface ContextProps {
   state: State;
-  methods: {};
 }
 
 const initialState: ContextProps = {
@@ -15,7 +14,6 @@ const initialState: ContextProps = {
     communityId: "",
     channelId: "",
   },
-  methods: {},
 };
 
 const ChannelContext = createContext(initialState as ContextProps);
@@ -25,7 +23,6 @@ export function ChannelProvider({ channelId, communityId, children }: any) {
     <ChannelContext.Provider
       value={{
         state: { channelId, communityId },
-        methods: {},
       }}
     >
       {children}

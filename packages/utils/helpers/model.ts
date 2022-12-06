@@ -1,7 +1,7 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { EntryType } from "../types";
 import { createEntry } from "../api/createEntry";
-import subscribeToLinks from "../api/subscribeToLinks";
+import subscribeToLinks, { removedListeners } from "../api/subscribeToLinks";
 import { LinkExpression } from "@perspect3vism/ad4m";
 import { ENTRY_TYPE } from "../constants/communityPredicates";
 import { ModelProperty } from "../types";
@@ -37,16 +37,19 @@ export default class Model {
     this.source = props.source || this.source;
   }
 
-  async create(data: DataInput) {
+  async create(data: DataInput, id?: string) {
     const expressions = await this.createExpressions(data);
+
     return createEntry({
       perspectiveUuid: this.perspectiveUuid,
       source: this.source,
-      types: [this.constructor.type],
+      id: id,
+      type: this.constructor.type,
       data: expressions,
     });
   }
 
+  /*
   async update(id: string, data: DataInput) {
     const expressions = await this.createExpressions(data);
     return updateEntry({
@@ -55,6 +58,7 @@ export default class Model {
       data: expressions,
     });
   }
+  */
 
   private async createExpressions(data: DataInput) {
     const client = await getAd4mClient();

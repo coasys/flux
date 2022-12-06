@@ -2,6 +2,11 @@ import { CHANNEL_VIEW, NAME } from "../../constants/communityPredicates";
 import EntryModel from "../../helpers/model";
 import { EntryType, Entry, ChannelView } from "../../types";
 
+export interface Channel extends Entry {
+  name: string;
+  views: ChannelView[];
+}
+
 class ChannelModel extends EntryModel {
   static type = EntryType.Channel;
   static properties = {
@@ -21,6 +26,10 @@ class ChannelModel extends EntryModel {
 
   async create(data: { name: string; views: ChannelView[] }): Promise<Entry> {
     return super.create(data);
+  }
+
+  async getAll() {
+    return super.getAll() as Promise<Channel[]>;
   }
 }
 

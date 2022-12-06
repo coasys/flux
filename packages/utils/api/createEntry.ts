@@ -8,28 +8,23 @@ import { ENTRY_TYPE, SELF } from "../constants/communityPredicates";
 export async function createEntry(entry: EntryInput): Promise<Entry> {
   const client = await getAd4mClient();
 
-  const id = `flux_entry://${uuidv4()}`;
+  const id = entry.id || `flux_entry://${uuidv4()}`;
   const source = entry.source || SELF;
 
-  const typeLinks = [] as Link[];
-  for (const entryType of entry.types) {
-    const entryLink = new Link({
-      source: source,
-      predicate: entryType,
-      target: id,
-    });
-    const typeLink = new Link({
-      source: id,
-      predicate: ENTRY_TYPE,
-      target: entryType,
-    });
-    typeLinks.push(entryLink);
-    typeLinks.push(typeLink);
-  }
+  const entryLink = new Link({
+    source: source,
+    predicate: entry.type,
+    target: id,
+  });
+  const typeLink = new Link({
+    source: id,
+    predicate: ENTRY_TYPE,
+    target: entry.type,
+  });
 
   const propertyLinks = await createLinks(id, entry.data);
 
-  const allLinks = [...typeLinks, ...propertyLinks];
+  const allLinks = [...propertyLinks, entryLink, typeLink];
 
   const linkPromises = allLinks.map(async (link) => {
     try {
