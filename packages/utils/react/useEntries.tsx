@@ -11,7 +11,7 @@ export default function useEntries({
   source?: string;
   model: typeof EntryModel;
 }) {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [entries, setEntries] = useState<Entry[]>([]);
 
   const Model = useMemo(() => {

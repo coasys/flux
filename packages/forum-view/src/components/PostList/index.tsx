@@ -56,6 +56,21 @@ export default function PostList() {
           </j-flex>
         </j-box>
       )}
+      {!loading && sortedPosts.length === 0 && (
+        <j-box py="800">
+          <j-flex gap="400" direction="column" a="center" j="center">
+            <j-icon color="ui-500" size="xl" name="binoculars"></j-icon>
+            <j-flex direction="column" a="center">
+              <j-text nomargin color="black" size="700" weight="800">
+                No posts yet
+              </j-text>
+              <j-text size="400" weight="400">
+                Be the first to make one!
+              </j-text>
+            </j-flex>
+          </j-flex>
+        </j-box>
+      )}
       <div className={[style.posts, gridClass].join(" ")}>
         {sortedPosts.map((post) => (
           <PostItem post={post} displayView={view}></PostItem>
