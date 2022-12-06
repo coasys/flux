@@ -1,6 +1,4 @@
 import UIContext from "../../context/UIContext";
-import PostContext from "utils/react/PostContext";
-import CommunityContext from "utils/react/CommunityContext";
 import { useContext, useEffect, useMemo, useState } from "preact/hooks";
 import { formatRelative, format, formatDistance } from "date-fns";
 import styles from "./index.scss";
@@ -8,7 +6,7 @@ import { getImage } from "utils/helpers/getImage";
 import Avatar from "../Avatar";
 import CommentSection from "../CommentSection";
 import PostModel from "utils/api/post";
-import { useEntry } from "utils/react";
+import { PerspectiveContext, useEntry } from "utils/react";
 
 export default function Post({
   perspectiveUuid,
@@ -22,7 +20,7 @@ export default function Post({
   const { methods: UIMethods } = useContext(UIContext);
   const {
     state: { members },
-  } = useContext(CommunityContext);
+  } = useContext(PerspectiveContext);
 
   const { entry: post } = useEntry({
     perspectiveUuid,

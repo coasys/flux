@@ -54,6 +54,8 @@ import {
 import "@perspect3vism/ad4m-connect/dist/web.js";
 import { Community, EntryType } from "utils/types";
 import ChannelModel from "utils/api/channel";
+import MessageModel from "utils/api/message";
+import subscribeToLinks from "utils/api/subscribeToLinks";
 
 export default defineComponent({
   name: "App",
@@ -108,133 +110,22 @@ export default defineComponent({
     },
     async startWatcher() {
       const client = await getAd4mClient();
-      const router = this.router;
-      const route = this.route;
       const watching: string[] = [];
 
-      //Watch for incoming signals from holochain - an incoming signal should mean a DM is inbound
-      const newLinkHandler = async (
-        link: LinkExpression,
-        perspective: string
-      ) => {
-        if (link.data!.predicate! === EntryType.Message) {
-          try {
-            const channels = this.dataStore.getChannelStates(perspective);
-
-            for (const channel of channels) {
-              const isSameChannel = await client.perspective.queryProlog(
-                perspective,
-                `triple("${channel.id}", "${EntryType.Message}", "${link.data.target}").`
-              );
-
-              if (isSameChannel) {
-                const expression = Literal.fromUrl(link.data.target).get();
-                const expressionDate = new Date(expression.timestamp);
-                let minuteAgo = new Date();
-                minuteAgo.setSeconds(minuteAgo.getSeconds() - 30);
-                if (expressionDate > minuteAgo) {
-                  this.dataStore.showMessageNotification({
-                    router,
-                    route,
-                    perspectiveUuid: perspective,
-                    notificationChannelId: channel.id,
-                    authorDid: (expression as any)!.author,
-                    message: (expression as any).data,
-                    timestamp: (expression as any).timestamp,
-                  });
-                }
-
-                const { channelId } = this.$route.params;
-                if (channelId !== channel.name) {
-                  //Add UI notification on the channel to notify that there is a new message there
-                  this.dataStore.setHasNewMessages({
-                    communityId: perspective,
-                    channelId: channel.name,
-                    value: true,
-                  });
-                }
-              }
-            }
-          } catch (e: any) {
-            throw new Error(e);
-          }
-        } else if (link.data!.predicate! === MEMBER) {
-          //If the link is a member, it's a new member in a community
-          const did = link.data!.target!;
-          const rawDid = did.includes("://") ? did.split("://")[1] : did;
-          if (rawDid) {
-            this.dataStore.setNeighbourhoodMember({
-              member: rawDid,
-              perspectiveUuid: perspective,
-            });
-          }
-        } else if (
-          link.data!.predicate! === FLUX_GROUP_NAME ||
-          link.data!.predicate! === FLUX_GROUP_DESCRIPTION ||
-          link.data!.predicate! === FLUX_GROUP_IMAGE ||
-          link.data!.predicate! === FLUX_GROUP_THUMBNAIL
-        ) {
-          //If the link has predicate which is for group metadata, it's a group metadata update
-          console.log("Community update via link signal");
-
-          const groupExp = await getCommunityMetadata(perspective);
-
-          this.dataStore.updateCommunityMetadata({
-            communityId: perspective,
-            name: groupExp?.name,
-            description: groupExp?.description,
-            image: groupExp?.image || "",
-            thumbnail: groupExp?.thumbnail || "",
-          });
-        }
-      };
       watch(
         this.dataStore.neighbourhoods,
         async (newValue: { [perspectiveUuid: string]: Community }) => {
-          for (const [k, v] of Object.entries(newValue)) {
-            if (watching.filter((val) => val == k).length == 0) {
-              watching.push(k);
-              const perspective = await client!.perspective.byUUID(k);
-
-              if (perspective) {
-                const Channel = new ChannelModel({
-                  perspectiveUuid: perspective.uuid,
-                });
-
-                Channel.onAdded((channel: any) => {
-                  this.dataStore.addChannel({
-                    communityId: perspective.uuid,
-                    channel: {
-                      id: channel.id,
-                      name: channel.name,
-                      author: channel.author,
-                      description: "",
-                      sourcePerspective: k,
-                      hasNewMessages: false,
-                      timestamp: new Date(channel.timestamp),
-                      collapsed: false,
-                      currentView: channel.views[0],
-                      views: channel.views,
-                      notifications: {
-                        mute: false,
-                      },
-                    },
-                  });
-                });
-
-                Channel.onRemoved((channel: any) => {
-                  this.dataStore.removeChannel({
-                    channelId: channel.id,
-                  });
-                });
-
-                // @ts-ignore
-                perspective.addListener("link-added", (result) => {
-                  newLinkHandler(result, v.uuid);
-                });
-              }
+          Object.entries(newValue).forEach(([perspectiveUuid, community]) => {
+            const alreadyListening = watching.includes(perspectiveUuid);
+            if (!alreadyListening) {
+              subscribeToLinks({
+                perspectiveUuid,
+                added: (link) => {
+                  console.log(link);
+                },
+              });
             }
-          }
+          });
         },
         { immediate: true, deep: true }
       );

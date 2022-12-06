@@ -1,33 +1,36 @@
 import { useDataStore } from "..";
 import getChannels from "utils/api/getChannels";
 import { ChannelState } from "@/store/types";
+import ChannelModel from "utils/api/channel";
+import { ChannelView } from "utils/types";
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async (communityId: string): Promise<void> => {
   const dataStore = useDataStore();
 
   try {
-    const channels = await getChannels({ perspectiveUuid: communityId });
+    const Channel = new ChannelModel({ perspectiveUuid: communityId });
+    const channels = await Channel.getAll();
 
-    const channelStates: ChannelState[] = channels.map((channel) => {
-      return {
+    dataStore.setChannels({
+      communityId,
+      channels: channels.map((channel) => ({
         id: channel.id,
         name: channel.name,
         author: channel.author,
-        sourcePerspective: channel.perspectiveUuid,
+        sourcePerspective: communityId,
         hasNewMessages: false,
         collapsed: false,
-        currentView: channel.views[0] || "chat",
+        currentView: channel.views[0] || ChannelView.Chat,
         views: channel.views,
-        timestamp: channel.timestamp,
+        timestamp: new Date(channel.timestamp),
         notifications: {
           mute: false,
         },
-      };
+      })),
     });
-
-    dataStore.setChannels({ communityId, channels: channelStates });
-  } catch (error) {
-    throw new Error(error);
+  } catch (e) {
+    console.log(e);
+    throw new Error(e);
   }
 };

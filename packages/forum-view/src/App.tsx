@@ -1,9 +1,5 @@
 import PostList from "./components/PostList";
-import {
-  PerspectiveProvider,
-  AgentProvider,
-  CommunityProvider,
-} from "utils/react";
+import { PerspectiveProvider, AgentProvider } from "utils/react";
 import UIContext, { UIProvider, View } from "./context/UIContext";
 import styles from "./index.scss";
 import { ChannelProvider } from "utils/react";
@@ -57,15 +53,13 @@ export default function App({
   return (
     <UIProvider>
       <AgentProvider>
-        <CommunityProvider perspectiveUuid={perspective}>
-          <PerspectiveProvider perspectiveUuid={perspective}>
-            <ChannelProvider communityId={perspective} channelId={source}>
-              <div class={styles.container}>
-                <Main perspective={perspective} source={source}></Main>
-              </div>
-            </ChannelProvider>
-          </PerspectiveProvider>
-        </CommunityProvider>
+        <PerspectiveProvider perspectiveUuid={perspective}>
+          <ChannelProvider communityId={perspective} channelId={source}>
+            <div class={styles.container}>
+              <Main perspective={perspective} source={source}></Main>
+            </div>
+          </ChannelProvider>
+        </PerspectiveProvider>
       </AgentProvider>
     </UIProvider>
   );

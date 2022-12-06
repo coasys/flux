@@ -38,8 +38,7 @@
     <forum-view
       v-show="currentView === ChannelView.Forum"
       class="perspective-view"
-      :port="port"
-      :source="`flux_entry://${channel.id}`"
+      :source="`${channel.id}`"
       :perspective="communityId"
       @agent-click="onAgentClick"
       @channel-click="onChannelClick"
@@ -49,8 +48,7 @@
     <chat-view
       v-show="currentView === ChannelView.Chat"
       class="perspective-view"
-      :port="port"
-      :source="`flux_entry://${channel.id}`"
+      :source="`${channel.id}`"
       :perspective="communityId"
       @agent-click="onAgentClick"
       @channel-click="onChannelClick"
@@ -171,10 +169,6 @@ export default defineComponent({
       return viewOptions.filter((view) =>
         this.channel.views.includes(view.type)
       );
-    },
-    port(): number {
-      // TODO: This needs to be reactive, probaly not now as we using a normal class
-      return parseInt(localStorage.getItem("ad4minPort") || "") || 12000;
     },
     community(): CommunityState {
       const communityId = this.communityId;

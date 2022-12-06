@@ -15,10 +15,7 @@ export default function CommentSection({
   const [isCreating, setIsCreating] = useState(false);
   const [comment, setComment] = useState("");
 
-  const {
-    entries: comments,
-    model: Message,
-  }: { entries: any[]; model: MessageModel } = useEntries({
+  const { entries: comments, model: Message } = useEntries({
     perspectiveUuid,
     source,
     model: MessageModel,

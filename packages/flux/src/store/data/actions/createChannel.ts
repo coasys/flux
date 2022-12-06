@@ -30,14 +30,10 @@ export default async (payload: Payload): Promise<ChannelState> => {
       perspectiveUuid: payload.perspectiveUuid,
     });
 
-    console.log("channel before create");
-
     const channel: any = await Channel.create({
       name: payload.name,
       views: payload.views,
     });
-
-    console.log({ channel });
 
     const channelState = {
       id: channel.id,

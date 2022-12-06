@@ -20,8 +20,6 @@ export default function PostList() {
     [posts.length]
   );
 
-  console.log(sortedPosts);
-
   const gridClass = view === DisplayView.Grid ? style.grid : "";
   const currentOption = displayOptions.find((o) => o.value === view);
 
