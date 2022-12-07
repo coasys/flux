@@ -18,6 +18,9 @@
     "fetch-opengraph": "^1.0.35",
     "graphql-ws": "^5.9.1"
   },
+  "devDependencies": {
+    "@types/react": "^17.0.2"
+  },
   "peerDependencies": {
     "react": "^17.0.2",
     "vue": "^3.2.12",
