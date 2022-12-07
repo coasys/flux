@@ -30,8 +30,8 @@ class MessageModel extends EntryModel {
     },
   };
 
-  async create(data: { body: string }): Promise<Entry> {
-    return super.create(data);
+  async create(data: { body: string }): Promise<Message> {
+    return super.create(data) as Promise<Message>;
   }
 
   async get(id: string) {

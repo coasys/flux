@@ -39,9 +39,9 @@ export async function createEntry(entry: EntryInput): Promise<Entry> {
   return {
     id,
     source,
-    types: entry.types,
-    timestamp: createdLinks[0].timestamp,
-    author: createdLinks[0].author,
-    data: entry.data,
+    //TODO: this should be types not type?
+    type: entry.type,
+    timestamp: createdLinks[0]!.timestamp,
+    author: createdLinks[0]!.author
   };
 }

@@ -24,11 +24,11 @@ class ChannelModel extends EntryModel {
     },
   };
 
-  async create(data: { name: string; views: ChannelView[] }): Promise<Entry> {
-    return super.create(data);
+  async create(data: { name: string; views: ChannelView[] }): Promise<Channel> {
+    return super.create(data) as Promise<Channel>;
   }
 
-  async getAll() {
+  async getAll(): Promise<Channel[]> {
     return super.getAll() as Promise<Channel[]>;
   }
 }

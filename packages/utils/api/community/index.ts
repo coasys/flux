@@ -56,8 +56,8 @@ class CommunityModel extends EntryModel {
     description: string;
     image?: string;
     thumbnail?: string;
-  }): Promise<Entry> {
-    return super.create(data, SELF);
+  }): Promise<Community> {
+    return super.create(data, SELF) as Promise<Community>;
   }
 
   addMember({ did }: { did: string }) {

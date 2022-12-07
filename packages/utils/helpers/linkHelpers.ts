@@ -11,7 +11,7 @@ import {
   REPLY_TO,
   ZOME,
 } from "../constants/communityPredicates";
-import { EntryType } from "../types";
+import { EntryType, PropertyMap, PredicateMap } from "../types";
 
 export const findLink = {
   name: (link: LinkExpression) => link.data.predicate === "rdf://name",
@@ -37,24 +37,9 @@ export const linkIs = {
   // TODO: SHould we check if the link is proof.valid?
 };
 
-type Target = string;
-type Predicate = string;
-
-type PredicateMap = {
-  [property: string]: Predicate;
-};
-
-type TargetMap = {
-  [predicate: string]: Target | Target[] | undefined | null;
-};
-
-type Map = {
-  [x: string]: string;
-};
-
 export function mapLiteralLinks(
   links: LinkExpression[] | undefined,
-  map: PredicateMap
+  map: PropertyMap
 ) {
   return Object.keys(map).reduce((acc, key) => {
     const predicate = map[key];
@@ -82,7 +67,7 @@ export function mapLiteralLinks(
   }, {});
 }
 
-export async function createLiteralLinks(source: string, map: TargetMap) {
+export async function createLiteralLinks(source: string, map: PredicateMap) {
   const client = await getAd4mClient();
 
   const targets = Object.keys(map);
@@ -101,7 +86,7 @@ export async function createLiteralLinks(source: string, map: TargetMap) {
 }
 
 //function to create links from a map of predicates to targets
-export async function createLinks(source: string, map: TargetMap) {
+export async function createLinks(source: string, map: PredicateMap) {
   const targets = Object.keys(map);
 
   const links = targets
@@ -127,7 +112,7 @@ export async function createLiteralObject({
   children,
 }: {
   parent: LinkInput;
-  children: TargetMap;
+  children: PredicateMap;
 }) {
   const client = await getAd4mClient();
   const expUrl = await client.expression.create(parent.target, "literal");

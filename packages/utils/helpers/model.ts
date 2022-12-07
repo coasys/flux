@@ -1,19 +1,15 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { EntryType } from "../types";
+import { Entry, EntryType, PredicateMap, PropertyMap, PropertyValueMap } from "../types";
 import { createEntry } from "../api/createEntry";
-import subscribeToLinks, { removedListeners } from "../api/subscribeToLinks";
+import subscribeToLinks from "../api/subscribeToLinks";
 import { LinkExpression } from "@perspect3vism/ad4m";
-import { ENTRY_TYPE } from "../constants/communityPredicates";
 import { ModelProperty } from "../types";
 import { queryProlog } from "./prologHelpers";
+import { updateEntry } from "../api/updateEntry";
 
 type ModelProps = {
   perspectiveUuid: string;
   source?: string;
-};
-
-type DataInput = {
-  [x: string]: any;
 };
 
 type Listeners = {
@@ -23,7 +19,7 @@ type Listeners = {
 
 export default class Model {
   client = null;
-  source = "adm4://self";
+  source = "ad4m://self";
   perspectiveUuid = "";
   private isSubcribing = false;
   private listeners = { add: {}, remove: {} } as Listeners;
@@ -37,66 +33,88 @@ export default class Model {
     this.source = props.source || this.source;
   }
 
-  async create(data: DataInput, id?: string) {
-    const expressions = await this.createExpressions(data);
+  async create(data: PropertyMap, id?: string): Promise<Entry> {
+    const {predicateMap, propertyMap} = await this.createExpressions(data);
 
     return createEntry({
       perspectiveUuid: this.perspectiveUuid,
       source: this.source,
       id: id,
       type: this.constructor.type,
-      data: expressions,
+      data: predicateMap,
+    }).then((entry) => {
+      //Each add key value of the propertyMap to the entry and return
+      Object.entries(propertyMap).forEach(([key, val]) => {
+        //@ts-ignore
+        entry[key] = val;
+      });
+      return entry;
     });
   }
 
-  /*
-  async update(id: string, data: DataInput) {
-    const expressions = await this.createExpressions(data);
-    return updateEntry({
-      perspectiveUuid: this.perspectiveUuid,
+  async update(id: string, entry: Entry, updateData: PropertyMap): Promise<Entry> {
+    const updates = {} as PropertyMap;
+    //Iterate key, value of data and if not found in Model properties then add to updates array
+    Object.entries(updateData).forEach(([key, val]) => {
+      //@ts-ignore
+      if (entry.key != val) {
+        updates.push({ predicate: key, value: val });
+      }
+    });
+
+    const {predicateMap, propertyMap} = await this.createExpressions(updates);
+    await updateEntry(
+      this.perspectiveUuid,
       id,
-      data: expressions,
+      predicateMap
+    );
+    //Each add key value of the propertyMap to the entry and return
+    Object.entries(propertyMap).forEach(([key, val]) => {
+      //@ts-ignore
+      entry[key] = val;
     });
+    return entry;
   }
-  */
 
-  private async createExpressions(data: DataInput) {
+  private async createExpressions(data: PropertyMap): Promise<{predicateMap: PredicateMap, propertyMap: PropertyValueMap}> {
     const client = await getAd4mClient();
+    const propertyValues = {} as PropertyValueMap;
 
     const expPromises = Object.entries(data)
-      .filter(([key]) => this.constructor.properties[key])
+      .filter(([key]) => this.constructor.properties[key] as ModelProperty)
       .map(async ([key, val]) => {
         const { predicate, languageAddress, collection } =
-          this.constructor.properties[key];
+          this.constructor.properties[key] as ModelProperty;
 
         if (collection) {
           const value = val.map(async (v) => {
             return languageAddress
-              ? await client.expression.create(v, languageAddress)
-              : v;
-          });
+              ? await client.expression.create(v, languageAddress) as string
+              : v as string;
+          }) as Promise<string>[];
           const v = await Promise.all(value);
+          propertyValues[key] = v;
           return { predicate, value: v };
         }
 
         const value = languageAddress
-          ? await client.expression.create(val, languageAddress)
-          : val;
-
+          ? await client.expression.create(val, languageAddress) as string
+          : val as string;
+        propertyValues[key] = value;
         return { predicate, value };
       });
 
     const expressions = await Promise.all(expPromises);
 
-    return expressions.reduce((acc, exp) => {
+    return {predicateMap: expressions.reduce((acc, exp) => {
       return {
         ...acc,
         [exp.predicate]: exp.value,
       };
-    }, {});
+    }, {}), propertyMap: propertyValues};
   }
 
-  async get(id: string, source?: string) {
+  async get(id: string, source?: string): Promise<Entry | null> {
     const result = await queryProlog({
       perspectiveUuid: this.perspectiveUuid,
       id,
@@ -104,10 +122,10 @@ export default class Model {
       source: source || this.source,
       properties: this.constructor.properties,
     });
-    return result.length === 0 ? {} : result[0];
+    return result.length === 0 ? null: result[0];
   }
 
-  async getAll(source?: string) {
+  async getAll(source?: string): Promise<Entry[]> {
     const result = await queryProlog({
       perspectiveUuid: this.perspectiveUuid,
       type: this.constructor.type,

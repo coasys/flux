@@ -9,7 +9,7 @@ import {
 } from "../../constants/communityPredicates";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "../../constants/languages";
 import EntryModel from "../../helpers/model";
-import { EntryType, Entry } from "../../types";
+import { EntryType, Post } from "../../types";
 import MessageModel from "../message";
 
 class PostModel extends EntryModel {
@@ -66,8 +66,8 @@ class PostModel extends EntryModel {
     startDate?: string;
     endDate?: string;
     url?: string;
-  }): Promise<Entry> {
-    return super.create(data);
+  }): Promise<Post> {
+    return super.create(data) as Promise<Post>;
   }
 
   createComment(replyTo: string, body: string) {

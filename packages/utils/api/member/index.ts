@@ -21,8 +21,8 @@ class MemberModel extends EntryModel {
     },
   };
 
-  async create(data: { did: string }): Promise<Entry> {
-    return super.create(data);
+  async create(data: { did: string }): Promise<Member> {
+    return super.create(data) as Promise<Member>;
   }
 
   async getAll() {

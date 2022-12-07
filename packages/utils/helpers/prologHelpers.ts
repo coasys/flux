@@ -1,4 +1,4 @@
-import { EntryType, ModelProperty } from "../types";
+import { EntryType, ModelProperty, Entry } from "../types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { Literal } from "@perspect3vism/ad4m";
 
@@ -76,7 +76,7 @@ export async function queryProlog({
   properties: {
     [x: string]: ModelProperty;
   };
-}) {
+}): Promise<Entry[]> {
   const client = await getAd4mClient();
 
   const { query, assertQuery, assertEntry, retractQuery, retractEntry } =
@@ -123,10 +123,10 @@ export async function resolveEntryWithLatestProperties(
   properties: {
     [x: string]: ModelProperty;
   }
-) {
+): Promise<Entry> {
   const client = await getAd4mClient();
   const propertyNames = Object.keys(entry);
-  let cleanedEntry = {};
+  let cleanedEntry = {} as Entry;
 
   propertyNames.forEach(async (name) => {
     const lowerCaseName = lowerCaseFirstLetter(name);

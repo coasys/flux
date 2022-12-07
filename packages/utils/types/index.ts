@@ -96,6 +96,9 @@ export enum EntryType {
   Member = "flux://has_member",
 }
 
+
+//This represents an entry itself, which contains the default fields seen below 
+//and is then extended to include other fields depending on the type of entry
 export interface Entry {
   id: string;
   author: string;
@@ -124,13 +127,29 @@ export interface EntryInput {
   data: PredicateMap;
 }
 
+type Target = String;
+
+//Represents the relationship between given predicate to a given expression url
 export type PredicateMap = {
-  [predicate: string]: string;
+  [predicate: string]: Target;
 };
 
+//Represents the relationship between given predicate to any data type, 
+//this is usually used for data which has not being created as an expression yet
 export type PredicateAnyMap = {
   [predicate: string]: any;
 };
+
+//Represents the relationship between a given property and its associated value
+//This property is expected to be resolved in the Model to find the associated predicate 
+export type PropertyMap = {
+  [property: string]: any;
+};
+
+//Represents the relationship between a given property to a given expression url
+export type PropertyValueMap = {
+  [property: string]: Target | Target[];
+}
 
 export interface GetEntry {
   id: string;
@@ -147,13 +166,6 @@ export interface PrologQuery {
     [x: string]: any;
   };
   resultKeys: string[];
-}
-
-export enum PrologQueries {
-  GetMessages,
-  GetForumPosts,
-  GetChannel,
-  GetNeighbourhood,
 }
 
 export interface SdnaVersion {

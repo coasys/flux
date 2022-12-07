@@ -7,7 +7,7 @@ type State = {
   did: string;
   isInitialized: boolean;
   isUnlocked: boolean;
-  profile: Profile;
+  profile: Profile | null;
 };
 
 type ContextProps = {

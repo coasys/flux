@@ -6,7 +6,7 @@ import React, {
   useRef,
 } from "react";
 import { Messages, Message, EntryType } from "../types";
-import { LinkExpression, Literal } from "@perspect3vism/ad4m";
+import { LinkExpression, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
 import getMessages from "../api/getMessages";
 import createMessage from "../api/createMessage";
 import subscribeToLinks from "../api/subscribeToLinks";
@@ -16,13 +16,14 @@ import deleteMessageReaction from "../api/deleteMessageReaction";
 import createMessageReaction from "../api/createMessageReaction";
 import createReply from "../api/createReply";
 import { sortExpressionsByTimestamp } from "../helpers/expressionHelpers";
-import getMe from "../api/getMe";
+import getMe, { Me } from "../api/getMe";
 import { REACTION } from "../constants/communityPredicates";
 import hideEmbeds from "../api/hideEmbeds";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import editCurrentMessage from "../api/editCurrentMessage";
 import { DEFAULT_LIMIT } from "../constants/sdna";
 import { checkUpdateSDNAVersion } from "../api/updateSDNA";
+import { LinkCallback } from "@perspect3vism/ad4m/lib/src/perspectives/PerspectiveClient";
 
 type State = {
   communityId: string;
@@ -75,11 +76,11 @@ const initialState: ContextProps = {
 const ChatContext = createContext(initialState);
 
 export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
-  const linkSubscriberRef = useRef();
+  const linkSubscriberRef = useRef<PerspectiveProxy | null>();
 
   const [state, setState] = useState(initialState.state);
 
-  const [agent, setAgent] = useState();
+  const [agent, setAgent] = useState<Me>();
 
   useEffect(() => {
     fetchAgent();
