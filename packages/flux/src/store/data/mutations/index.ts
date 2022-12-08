@@ -57,10 +57,10 @@ export default {
   },
 
   setNeighbourhoodMember({
-    member,
+    did,
     perspectiveUuid,
   }: {
-    member: string;
+    did: string;
     perspectiveUuid: string;
   }): void {
     const state = useDataStore();
@@ -68,9 +68,9 @@ export default {
 
     if (
       neighbourhood &&
-      !neighbourhood.members.find((existingMember) => existingMember === member)
+      !neighbourhood.members.find((existingMember) => existingMember === did)
     ) {
-      neighbourhood.members.push(member);
+      neighbourhood.members.push(did);
     }
   },
 

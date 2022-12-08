@@ -115,6 +115,7 @@ import ChannelView from "@/views/channel/ChannelView.vue";
 import CommunityTweaks from "@/containers/CommunityTweaks.vue";
 
 import ChannelModel from "utils/api/channel";
+import MemberModel from "utils/api/member";
 import { CommunityState, ModalsState, ChannelState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
@@ -203,6 +204,15 @@ export default defineComponent({
     ]),
     startWatching(id: string) {
       const Channel = new ChannelModel({ perspectiveUuid: id });
+      const Member = new MemberModel({ perspectiveUuid: id });
+
+      Member.onAdded((member: any) => {
+        this.dataStore.setNeighbourhoodMember({
+          did: member.did,
+          perspectiveUuid: id,
+        });
+      });
+
       Channel.onAdded((channel: any) => {
         console.log("on added channel", channel);
         this.dataStore.addChannel({
