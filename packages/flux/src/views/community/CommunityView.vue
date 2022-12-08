@@ -114,6 +114,7 @@ import CommunitySettings from "@/containers/CommunitySettings.vue";
 import ChannelView from "@/views/channel/ChannelView.vue";
 import CommunityTweaks from "@/containers/CommunityTweaks.vue";
 
+import ChannelModel from "utils/api/channel";
 import { CommunityState, ModalsState, ChannelState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
@@ -159,6 +160,7 @@ export default defineComponent({
           this.dataStore.fetchCommunityMembers(id);
           this.dataStore.fetchCommunityMetadata(id);
           this.dataStore.fetchCommunityChannels(id);
+          this.startWatching(id);
           this.handleThemeChange(id);
           this.goToActiveChannel(id);
         } else {
@@ -199,6 +201,29 @@ export default defineComponent({
       "setShowCommunitySettings",
       "setShowCommunityTweaks",
     ]),
+    startWatching(id: string) {
+      const Channel = new ChannelModel({ perspectiveUuid: id });
+      Channel.onAdded((channel: any) => {
+        console.log("on added channel", channel);
+        this.dataStore.addChannel({
+          communityId: id,
+          channel: {
+            id: channel.id,
+            name: channel.name,
+            timestamp: channel.timestamp,
+            author: channel.author,
+            collapsed: false,
+            sourcePerspective: id,
+            currentView: channel.views[0],
+            views: channel.views,
+            hasNewMessages: false,
+            notifications: {
+              mute: false,
+            },
+          },
+        });
+      });
+    },
     goToActiveChannel(communityId: string) {
       if (!communityId) return;
       const channels = this.dataStore.getChannelStates(communityId);

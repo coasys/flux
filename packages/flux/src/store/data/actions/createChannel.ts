@@ -30,7 +30,7 @@ export default async (payload: Payload): Promise<ChannelState> => {
       perspectiveUuid: payload.perspectiveUuid,
     });
 
-    const channel: any = await Channel.create({
+    const channel = await Channel.create({
       name: payload.name,
       views: payload.views,
     });
@@ -38,7 +38,7 @@ export default async (payload: Payload): Promise<ChannelState> => {
     const channelState = {
       id: channel.id,
       name: payload.name,
-      timestamp: channel.timestamp,
+      timestamp: channel.timestamp.toString(),
       author: channel.author,
       collapsed: false,
       sourcePerspective: payload.perspectiveUuid,

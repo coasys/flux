@@ -39,28 +39,22 @@ export default class Model {
     this.source = props.source || this.source;
   }
 
-  async create(data: PropertyMap, id?: string): Promise<Entry> {
-    const { predicateMap, propertyMap } = await this.createExpressions(data);
-
-    return createEntry({
+  async create(data: PropertyMap, id?: string) {
+    const { predicateMap } = await this.createExpressions(data);
+    const entry = await createEntry({
       perspectiveUuid: this.perspectiveUuid,
       source: this.source,
       id: id,
       type: this.constructor.type,
       data: predicateMap,
-    }).then((entry) => {
-      //Each add key value of the propertyMap to the entry and return
-      Object.entries(propertyMap).forEach(([key, val]) => {
-        //@ts-ignore
-        entry[key] = val;
-      });
-      return entry;
     });
+    return this.get(entry.id);
   }
 
-  async update(id: string, data: PropertyMap): Promise<void> {
+  async update(id: string, data: PropertyMap) {
     const { predicateMap } = await this.createExpressions(data);
-    return updateEntry(this.perspectiveUuid, id, predicateMap);
+    await updateEntry(this.perspectiveUuid, id, predicateMap);
+    return this.get(id);
   }
 
   private async createExpressions(

@@ -81,7 +81,7 @@ class CommunityModel extends EntryModel {
       thumbnail?: string;
     }
   ) {
-    return super.update(SELF, data);
+    return super.update(SELF, data) as Promise<Community>;
   }
 }
 

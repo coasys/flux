@@ -30,9 +30,10 @@ export default async function updateCommunityData(
       thumb = await blobToDataURL(resizedImage);
     }
 
-    await Community.update("", { ...update, thumbnail: thumb });
-
-    const { name, description, image, thumbnail } = await Community.get();
+    const { name, description, image, thumbnail } = await Community.update("", {
+      ...update,
+      thumbnail: thumb,
+    });
 
     dataStore.updateCommunityMetadata({
       communityId,
