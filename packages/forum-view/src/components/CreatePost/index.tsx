@@ -8,14 +8,14 @@ import styles from "./index.scss";
 import PostModel from "utils/api/post";
 
 const initialState = {
-  title: "",
-  body: "",
-  url: "",
-  image: "",
-  startDate: "",
-  startTime: "",
-  endDate: "",
-  endTime: "",
+  title: null,
+  body: null,
+  url: null,
+  image: null,
+  startDate: null,
+  startTime: null,
+  endDate: null,
+  endTime: null,
   options: [],
 };
 
@@ -100,6 +100,7 @@ export default function CreatePost({
   }
 
   function handleChange(e: any) {
+    console.log({ [e.target.name]: e.target.value });
     setState({ ...state, [e.target.name]: e.target.value });
   }
 

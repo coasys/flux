@@ -35,7 +35,7 @@ class CommunityModel extends EntryModel {
     image: {
       predicate: IMAGE,
       type: String,
-      resolve: true,
+      resolve: false,
       languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
     },
     thumbnail: {
@@ -47,6 +47,7 @@ class CommunityModel extends EntryModel {
     channels: {
       predicate: EntryType.Channel,
       type: String,
+      collection: true,
       resolve: false,
     },
   };
@@ -67,6 +68,20 @@ class CommunityModel extends EntryModel {
 
   async get() {
     return super.get(SELF) as Promise<Community>;
+  }
+
+  // TODO: We don't need to send in id here
+  // but ts complains if we extend the function without inncluding id as param
+  async update(
+    id: string,
+    data: {
+      name?: string;
+      description?: string;
+      image?: string;
+      thumbnail?: string;
+    }
+  ) {
+    return super.update(SELF, data);
   }
 }
 

@@ -91,14 +91,12 @@ export async function createLinks(source: string, map: PredicateMap) {
 
   const links = targets
     .filter((predicate: any) => {
-      const isString =
-        typeof map[predicate] === "string" && map[predicate] !== "";
+      const isString = typeof map[predicate] === "string";
       const isArray = Array.isArray(map[predicate]);
       return isString || isArray;
     })
     .map((predicate: string) => {
       const value = map[predicate];
-
       return Array.isArray(value)
         ? value.map((v) => new Link({ source, predicate, target: v }))
         : new Link({ source, predicate, target: value });

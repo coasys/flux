@@ -2,6 +2,7 @@ import updateChannelViews from "utils/api/updateChannelViews";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "..";
 import { ChannelView } from "utils/types";
+import ChannelModel from "utils/api/channel";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -22,11 +23,11 @@ export default async (payload: Payload): Promise<any> => {
   }
 
   try {
-    await updateChannelViews({
+    const Channel = new ChannelModel({
       perspectiveUuid: payload.perspectiveUuid,
-      channelId: channel.id,
-      views: payload.views,
     });
+
+    await Channel.update(channel.id, { views: payload.views });
 
     dataStore.putChannelViews({
       channelId: channel.id,

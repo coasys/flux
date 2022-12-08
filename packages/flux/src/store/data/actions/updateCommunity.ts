@@ -1,31 +1,43 @@
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "..";
-import { updateCommunity } from "utils/api/updateCommunity";
+import CommunityModel from "utils/api/community";
+import {
+  blobToDataURL,
+  dataURItoBlob,
+  resizeImage,
+} from "utils/helpers/profileHelpers";
 
 export interface Payload {
-  communityId: string;
   name?: string;
   description?: string;
   image?: string;
-  thumbnail?: string;
 }
 
 export default async function updateCommunityData(
+  communityId: string,
   update: Payload
 ): Promise<void> {
   const dataStore = useDataStore();
   const appStore = useAppStore();
-  const { communityId } = update;
 
   try {
-    const { name, description, image, thumbnail } = await updateCommunity(
-      update
-    );
+    const Community = new CommunityModel({ perspectiveUuid: communityId });
+
+    let thumb = undefined;
+
+    if (update.image) {
+      const resizedImage = await resizeImage(dataURItoBlob(update.image), 100);
+      thumb = await blobToDataURL(resizedImage);
+    }
+
+    await Community.update("", { ...update, thumbnail: thumb });
+
+    const { name, description, image, thumbnail } = await Community.get();
 
     dataStore.updateCommunityMetadata({
       communityId,
       metadata: {
-        name: name!,
+        name,
         description,
         image,
         thumbnail,

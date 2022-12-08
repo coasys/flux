@@ -15,7 +15,8 @@
             Cancel
           </j-button>
           <j-button
-            :disabled="!canSave"
+            :loading="isSaving"
+            :disabled="!canSave || isSaving"
             @click="updateChannelViews"
             size="lg"
             variant="primary"
@@ -42,6 +43,7 @@ export default defineComponent({
   components: { ChannnelViewOptions },
   setup() {
     return {
+      isSaving: ref(false),
       selectedViews: ref<ChannelView[]>([]),
       appStore: useAppStore(),
       dataStore: useDataStore(),
@@ -63,6 +65,7 @@ export default defineComponent({
   },
   methods: {
     updateChannelViews() {
+      this.isSaving = true;
       this.dataStore
         .updateChannelViews({
           perspectiveUuid: this.communityId,
@@ -71,6 +74,9 @@ export default defineComponent({
         })
         .then(() => {
           this.$emit("submit", true);
+        })
+        .finally(() => {
+          this.isSaving = false;
         });
     },
   },

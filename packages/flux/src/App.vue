@@ -106,6 +106,8 @@ export default defineComponent({
           Object.entries(newValue).forEach(([perspectiveUuid, community]) => {
             const alreadyListening = watching.includes(perspectiveUuid);
             if (!alreadyListening) {
+              watching.push(perspectiveUuid);
+              console.log("subribe to", perspectiveUuid);
               subscribeToLinks({
                 perspectiveUuid,
                 added: (link) => {

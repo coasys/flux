@@ -15,7 +15,6 @@ export interface Payload {
 export default async ({
   perspectiveName,
   description,
-  thumbnail = "",
   image = "",
   perspectiveUuid,
 }: Payload): Promise<CommunityState> => {
@@ -28,7 +27,6 @@ export default async ({
       name: perspectiveName,
       description,
       image,
-      thumbnail,
     });
 
     const newCommunity = {

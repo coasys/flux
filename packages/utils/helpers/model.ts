@@ -1,5 +1,11 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { Entry, EntryType, PredicateMap, PropertyMap, PropertyValueMap } from "../types";
+import {
+  Entry,
+  EntryType,
+  PredicateMap,
+  PropertyMap,
+  PropertyValueMap,
+} from "../types";
 import { createEntry } from "../api/createEntry";
 import subscribeToLinks from "../api/subscribeToLinks";
 import { LinkExpression } from "@perspect3vism/ad4m";
@@ -34,7 +40,7 @@ export default class Model {
   }
 
   async create(data: PropertyMap, id?: string): Promise<Entry> {
-    const {predicateMap, propertyMap} = await this.createExpressions(data);
+    const { predicateMap, propertyMap } = await this.createExpressions(data);
 
     return createEntry({
       perspectiveUuid: this.perspectiveUuid,
@@ -52,66 +58,62 @@ export default class Model {
     });
   }
 
-  async update(id: string, entry: Entry, updateData: PropertyMap): Promise<Entry> {
-    const updates = {} as PropertyMap;
-    //Iterate key, value of data and if not found in Model properties then add to updates array
-    Object.entries(updateData).forEach(([key, val]) => {
-      //@ts-ignore
-      if (entry.key != val) {
-        updates.push({ predicate: key, value: val });
-      }
-    });
-
-    const {predicateMap, propertyMap} = await this.createExpressions(updates);
-    await updateEntry(
-      this.perspectiveUuid,
-      id,
-      predicateMap
-    );
-    //Each add key value of the propertyMap to the entry and return
-    Object.entries(propertyMap).forEach(([key, val]) => {
-      //@ts-ignore
-      entry[key] = val;
-    });
-    return entry;
+  async update(id: string, data: PropertyMap): Promise<void> {
+    const { predicateMap } = await this.createExpressions(data);
+    return updateEntry(this.perspectiveUuid, id, predicateMap);
   }
 
-  private async createExpressions(data: PropertyMap): Promise<{predicateMap: PredicateMap, propertyMap: PropertyValueMap}> {
+  private async createExpressions(
+    data: PropertyMap
+  ): Promise<{ predicateMap: PredicateMap; propertyMap: PropertyValueMap }> {
     const client = await getAd4mClient();
     const propertyValues = {} as PropertyValueMap;
 
     const expPromises = Object.entries(data)
-      .filter(([key]) => this.constructor.properties[key] as ModelProperty)
+      .filter(([key]) => {
+        const isValidProperty = this.constructor.properties[
+          key
+        ] as ModelProperty;
+        return isValidProperty;
+      })
       .map(async ([key, val]) => {
-        const { predicate, languageAddress, collection } =
-          this.constructor.properties[key] as ModelProperty;
+        const { predicate, languageAddress, collection } = this.constructor
+          .properties[key] as ModelProperty;
 
         if (collection) {
           const value = val.map(async (v) => {
+            const expression = v || "";
             return languageAddress
-              ? await client.expression.create(v, languageAddress) as string
-              : v as string;
+              ? await client.expression.create(expression, languageAddress)
+              : expression;
           }) as Promise<string>[];
           const v = await Promise.all(value);
           propertyValues[key] = v;
           return { predicate, value: v };
         }
 
+        const expression = val || "";
+
         const value = languageAddress
-          ? await client.expression.create(val, languageAddress) as string
-          : val as string;
+          ? await client.expression.create(expression, languageAddress)
+          : expression;
+
         propertyValues[key] = value;
+
         return { predicate, value };
       });
 
     const expressions = await Promise.all(expPromises);
 
-    return {predicateMap: expressions.reduce((acc, exp) => {
-      return {
-        ...acc,
-        [exp.predicate]: exp.value,
-      };
-    }, {}), propertyMap: propertyValues};
+    return {
+      predicateMap: expressions.reduce((acc, exp) => {
+        return {
+          ...acc,
+          [exp.predicate]: exp.value,
+        };
+      }, {}),
+      propertyMap: propertyValues,
+    };
   }
 
   async get(id: string, source?: string): Promise<Entry | null> {
@@ -122,7 +124,7 @@ export default class Model {
       source: source || this.source,
       properties: this.constructor.properties,
     });
-    return result.length === 0 ? null: result[0];
+    return result.length === 0 ? null : result[0];
   }
 
   async getAll(source?: string): Promise<Entry[]> {

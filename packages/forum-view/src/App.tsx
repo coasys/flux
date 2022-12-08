@@ -25,22 +25,20 @@ function Main({
 }) {
   const { state: UIState } = useContext(UIContext);
 
-  return (
-    <>
-      <div style={{ display: UIState.view === View.Feed ? "block" : "none" }}>
-        <Feed></Feed>
-      </div>
-      {UIState.currentPost && (
-        <div style={{ display: UIState.view === View.Post ? "block" : "none" }}>
+  switch (UIState.view) {
+    case View.Feed:
+      return <Feed></Feed>;
+    case View.Post:
+      return (
+        UIState.currentPost && (
           <Post
             perspectiveUuid={perspective}
             source={source}
             id={UIState.currentPost}
           ></Post>
-        </div>
-      )}
-    </>
-  );
+        )
+      );
+  }
 }
 
 export default function App({

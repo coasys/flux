@@ -1,6 +1,4 @@
 import { useDataStore } from "..";
-import getChannels from "utils/api/getChannels";
-import { ChannelState } from "@/store/types";
 import ChannelModel from "utils/api/channel";
 import { ChannelView } from "utils/types";
 
