@@ -50,22 +50,16 @@ export default async function createCommunity({
     //Publish perspective
     const metaLinks = await createNeighbourhoodMeta(name, description, author);
 
-    const meta = new Perspective(metaLinks);
     let sharedUrl = perspective!.sharedUrl;
 
     if (!sharedUrl) {
-      const neighbourhood = await client.neighbourhood.publishFromPerspective(
+      sharedUrl = await client.neighbourhood.publishFromPerspective(
         perspective!.uuid,
         linkLanguage.address,
-        meta
+        new Perspective(metaLinks)
       );
-
-      sharedUrl = neighbourhood;
-
-      console.log("Created neighbourhood with result", neighbourhood);
     }
 
-    let tempImage = image;
     let thumbnail = "";
 
     if (image) {
@@ -77,23 +71,27 @@ export default async function createCommunity({
       perspectiveUuid: perspective!.uuid,
     });
 
-    await Community.create({ name, description, image, thumbnail });
+    const community = await Community.create({
+      name,
+      description,
+      image,
+      thumbnail,
+    });
 
     await Community.addMember({ did: author });
 
     //Default popular setting is 3 upvotes on thumbsup emoji
     const socialDnaLink = await createSDNA(perspective!.uuid);
-    console.log("Created social dna link", socialDnaLink);
 
     // @ts-ignore
     return {
       uuid: perspective!.uuid,
       author: author,
       timestamp: socialDnaLink.timestamp,
-      name: name,
-      description: description || "",
-      image: tempImage,
-      thumbnail: thumbnail,
+      name: community.name,
+      description: community.description || "",
+      image: community.image,
+      thumbnail: community.thumbnail,
       neighbourhoodUrl: sharedUrl,
       members: [author],
     };

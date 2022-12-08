@@ -17,7 +17,7 @@
               Get Started
             </j-button>
             <j-button size="lg" variant="link" @click="$emit('connectToAd4m')">
-              Sign in
+              Log in
             </j-button>
           </j-flex>
         </j-box>
@@ -90,7 +90,7 @@
               variant="primary"
               size="xl"
             >
-              Sign in
+              Log in
             </j-button>
           </j-flex>
         </j-box>

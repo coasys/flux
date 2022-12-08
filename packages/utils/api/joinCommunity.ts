@@ -1,10 +1,5 @@
-import { getMetaFromLinks } from "../helpers/getNeighbourhoodMeta";
-import { MEMBER, SELF } from "utils/constants/communityPredicates";
-import { Link } from "@perspect3vism/ad4m";
 import { Community } from "../types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import getCommunityMetadata from "./getCommunityMetadata";
-import MemberModel from "./member";
 import CommunityModel from "./community";
 
 export interface Payload {
@@ -36,11 +31,11 @@ export default async ({ joiningLink }: Payload): Promise<Community> => {
     return {
       uuid: perspective!.uuid,
       author: community.author!,
-      timestamp: new Date(community.timestamp),
-      name: communityMeta.name || community.name,
-      description: communityMeta.description || community.description || "",
-      image: communityMeta.image || "",
-      thumbnail: communityMeta.thumbnail || "",
+      timestamp: community.timestamp.toString(),
+      name: community.name,
+      description: community.description || "",
+      image: community.image || "",
+      thumbnail: community.thumbnail || "",
       neighbourhoodUrl: perspective.sharedUrl!,
       members: [agent.did, community.author!],
     };
