@@ -1,5 +1,5 @@
 import { useDataStore } from "@/store/data/index";
-import getCommunityMetaData from "utils/api/getCommunityMetadata";
+import CommunityModel from "utils/api/community";
 
 export interface Payload {
   communityId: string;
@@ -8,9 +8,17 @@ export interface Payload {
 export default async (communityId: string): Promise<void> => {
   const dataStore = useDataStore();
 
-  const metadata = await getCommunityMetaData(communityId);
+  const Community = new CommunityModel({ perspectiveUuid: communityId });
 
-  if (metadata) {
-    dataStore.updateCommunityMetadata({ communityId, metadata });
-  }
+  const { name, description, image, thumbnail } = await Community.get();
+
+  dataStore.updateCommunityMetadata({
+    communityId,
+    metadata: {
+      name,
+      description,
+      image,
+      thumbnail,
+    },
+  });
 };
