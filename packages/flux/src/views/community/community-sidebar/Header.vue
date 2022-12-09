@@ -70,6 +70,7 @@
       <Avatar
         class="masked"
         size="xl"
+        :initials="community.neighbourhood.name.charAt(0).toUpperCase()"
         :url="community.neighbourhood.image"
       ></Avatar>
       <div>
