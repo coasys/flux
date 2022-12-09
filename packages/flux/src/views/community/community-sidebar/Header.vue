@@ -243,6 +243,7 @@ export default defineComponent({
   color: var(--j-color-ui-800);
   font-size: var(--j-font-size-500);
   text-overflow: ellipsis;
+  min-height: 68px;
 }
 
 j-divider {

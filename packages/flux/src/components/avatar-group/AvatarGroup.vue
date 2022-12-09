@@ -2,15 +2,7 @@
   <button @click="$emit('click')" class="avatar-group">
     <j-tooltip title="See all members">
       <div class="avatar-group__avatars">
-        <j-skeleton
-          v-if="loading"
-          v-for="i in 4"
-          variant="circle"
-          :height="size"
-          :width="size"
-        ></j-skeleton>
         <Avatar
-          v-else
           v-for="(user, index) in firstUsers"
           :data-testid="`avatar-group__avatar__${user.did}`"
           :key="index"
@@ -76,6 +68,7 @@ export default defineComponent({
   background: none;
   cursor: pointer;
   display: flex;
+  min-height: var(--j-size-md);
 }
 
 .avatar-group__avatars {
