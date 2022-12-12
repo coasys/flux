@@ -1,6 +1,7 @@
 import { Community } from "../types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import CommunityModel from "./community";
+import { getMetaFromLinks } from "utils/helpers/getNeighbourhoodMeta";
 
 export interface Payload {
   joiningLink: string;
@@ -22,22 +23,31 @@ export default async ({ joiningLink }: Payload): Promise<Community> => {
 
     const perspective = await client.neighbourhood.joinFromUrl(joiningLink);
 
+    const neighbourhoodMeta = getMetaFromLinks(
+      perspective.neighbourhood!.meta.links
+    );
+
+    console.log({ perspective: perspective.uuid });
+
     const Community = new CommunityModel({ perspectiveUuid: perspective.uuid });
 
     await Community.addMember({ did: agent.did });
 
     const community = await Community.get();
 
+    console.log(community);
+
     return {
       uuid: perspective!.uuid,
-      author: community.author!,
-      timestamp: community.timestamp.toString(),
-      name: community.name,
-      description: community.description || "",
-      image: community.image || "",
-      thumbnail: community.thumbnail || "",
+      author: neighbourhoodMeta.author!,
+      timestamp: neighbourhoodMeta.timestamp!,
+      name: community?.name || neighbourhoodMeta.name,
+      description:
+        community?.description || neighbourhoodMeta.description || "",
+      image: community?.image || "",
+      thumbnail: community?.thumbnail || "",
       neighbourhoodUrl: perspective.sharedUrl!,
-      members: [agent.did, community.author!],
+      members: [agent.did, neighbourhoodMeta.author!],
     };
   } catch (e) {
     throw new Error(e);
