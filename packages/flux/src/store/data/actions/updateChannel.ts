@@ -1,13 +1,11 @@
-import updateChannelViews from "utils/api/updateChannelViews";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "..";
-import { ChannelView } from "utils/types";
-import ChannelModel from "utils/api/channel";
+import ChannelModel, { UpdateChannel } from "utils/api/channel";
 
 export interface Payload {
   perspectiveUuid: string;
   channelId: string;
-  views: ChannelView[];
+  data: UpdateChannel;
 }
 
 export default async (payload: Payload): Promise<any> => {
@@ -27,11 +25,14 @@ export default async (payload: Payload): Promise<any> => {
       perspectiveUuid: payload.perspectiveUuid,
     });
 
-    await Channel.update(channel.id, { views: payload.views });
+    await Channel.update(channel.id, payload.data);
 
-    dataStore.putChannelViews({
-      channelId: channel.id,
-      views: payload.views,
+    dataStore.setChannel({
+      communityId: channel.id,
+      channel: {
+        ...channel,
+        ...payload.data,
+      },
     });
   } catch (e) {
     appStore.showDangerToast({

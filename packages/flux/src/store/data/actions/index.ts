@@ -7,10 +7,10 @@ import fetchCommunityMembers from "./fetchCommunityMembers";
 import fetchCommunityMetadata from "./fetchCommunityMetadata";
 import fetchCommunityChannels from "./fetchCommunityChannels";
 import removeCommunity from "./removeCommunity";
-import updateChannelViews from "./updateChannelViews";
+import updateChannel from "./updateChannel";
 
 export default {
-  updateChannelViews,
+  updateChannel,
   createChannel,
   createCommunity,
   joinCommunity,

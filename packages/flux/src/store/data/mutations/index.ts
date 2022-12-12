@@ -6,6 +6,7 @@ import {
 } from "@/store/types";
 import { ChannelView, CommunityMetaData } from "utils/types";
 import { useDataStore } from "@/store/data";
+import { Channel } from "utils/api/channel";
 
 interface UpdatePayload {
   communityId: string;
@@ -145,9 +146,9 @@ export default {
     }
   },
 
-  putChannelViews(payload: { channelId: string; views: ChannelView[] }) {
+  setChannel(payload: { communityId: string; channel: ChannelState }) {
     const state = useDataStore();
-    state.channels[payload.channelId].views = payload.views;
+    state.channels[payload.channel.id] = payload.channel;
   },
 
   setChannels(payload: { communityId: string; channels: ChannelState[] }) {

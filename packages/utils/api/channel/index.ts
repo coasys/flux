@@ -7,6 +7,11 @@ export interface Channel extends Entry {
   views: ChannelView[];
 }
 
+export interface UpdateChannel {
+  name?: string;
+  views?: ChannelView[];
+}
+
 class ChannelModel extends EntryModel {
   static type = EntryType.Channel;
   static properties = {
@@ -28,7 +33,7 @@ class ChannelModel extends EntryModel {
     return super.create(data) as Promise<Channel>;
   }
 
-  async update(id: string, data: { name: string; views: ChannelView[] }) {
+  async update(id: string, data: UpdateChannel) {
     return super.update(id, data) as Promise<Channel>;
   }
 

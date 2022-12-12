@@ -23,16 +23,16 @@
             <span>{{ view.title }}</span>
           </label>
         </div>
-
+      </div>
+      <div class="channel-view__header-right">
         <j-button
-          @click="() => (showUpdateChannelViews = true)"
+          @click="() => (showEditChannel = true)"
           size="sm"
           variant="ghost"
         >
-          <j-icon name="plus"></j-icon>
+          <j-icon size="sm" name="gear"></j-icon>
         </j-button>
       </div>
-      <div class="channel-view__header-right"></div>
     </div>
 
     <forum-view
@@ -56,16 +56,16 @@
       @hide-notification-indicator="onHideNotificationIndicator"
     ></chat-view>
     <j-modal
-      :open="showUpdateChannelViews"
-      @toggle="(e: any) => (showUpdateChannelViews = e.target.open)"
+      :open="showEditChannel"
+      @toggle="(e: any) => (showEditChannel = e.target.open)"
     >
-      <UpdateChannelViews
-        v-if="showUpdateChannelViews"
-        @cancel="() => (showUpdateChannelViews = false)"
-        @submit="() => (showUpdateChannelViews = false)"
+      <EditChannel
+        v-if="showEditChannel"
+        @cancel="() => (showEditChannel = false)"
+        @submit="() => (showEditChannel = false)"
         :channelId="channelId"
         :communityId="communityId"
-      ></UpdateChannelViews>
+      ></EditChannel>
     </j-modal>
     <j-modal
       size="xs"
@@ -120,7 +120,7 @@ import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import Profile from "@/containers/Profile.vue";
-import UpdateChannelViews from "@/containers/UpdateChannelViews.vue";
+import EditChannel from "@/containers/EditChannel.vue";
 import { useAppStore } from "@/store/app";
 import { ChannelView } from "utils/types";
 import viewOptions from "utils/constants/viewOptions";
@@ -136,13 +136,13 @@ export default defineComponent({
   props: ["channelId", "communityId"],
   components: {
     Profile,
-    UpdateChannelViews,
+    EditChannel,
   },
   setup() {
     return {
       ChannelView: ChannelView,
       selectedViews: ref<ChannelView[]>([]),
-      showUpdateChannelViews: ref(false),
+      showEditChannel: ref(false),
       selectedChannelView: ref("chat"),
       appStore: useAppStore(),
       dataStore: useDataStore(),
@@ -300,6 +300,10 @@ export default defineComponent({
   align-items: center;
   height: 100%;
   gap: var(--j-space-300);
+}
+
+.channel-view__header-right {
+  align-self: center;
 }
 
 .perspective-view {
