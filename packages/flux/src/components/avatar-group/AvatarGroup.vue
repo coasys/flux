@@ -79,7 +79,7 @@ export default defineComponent({
 
 .avatar-group__avatars > *:not(:first-child) {
   margin-left: -15px;
-  display: block;
+  display: flex;
 }
 
 .avatar-group__see-all {
@@ -94,8 +94,8 @@ export default defineComponent({
   border-radius: 50%;
   height: var(--j-size-md);
   width: var(--j-size-md);
-  font-size: var(--j-font-size-300);
-  font-weight: 500;
+  font-size: var(--j-font-size-400);
+  font-weight: 600;
   color: var(--j-color-ui-400);
   white-space: nowrap;
   padding: 14px;

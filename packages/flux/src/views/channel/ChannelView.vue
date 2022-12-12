@@ -10,6 +10,14 @@
       </j-button>
 
       <div class="channel-view__header-left">
+        <j-box pr="500">
+          <j-flex a="center" gap="200">
+            <j-icon name="hash" size="md" color="ui-300"></j-icon>
+            <j-text color="black" weight="700" size="500" nomargin>
+              {{ channel.name }}
+            </j-text>
+          </j-flex>
+        </j-box>
         <div class="channel-view__tabs">
           <label class="channel-view-tab" v-for="view in filteredViewOptions">
             <input
@@ -25,14 +33,16 @@
         </div>
       </div>
       <div class="channel-view__header-right">
-        <j-button
-          v-if="sameAgent"
-          @click="() => (showEditChannel = true)"
-          size="sm"
-          variant="ghost"
-        >
-          <j-icon size="sm" name="gear"></j-icon>
-        </j-button>
+        <j-tooltip placement="auto" title="Edit Channel">
+          <j-button
+            v-if="sameAgent"
+            @click="() => (showEditChannel = true)"
+            size="sm"
+            variant="ghost"
+          >
+            <j-icon size="sm" name="gear"></j-icon>
+          </j-button>
+        </j-tooltip>
       </div>
     </div>
 
@@ -322,19 +332,20 @@ export default defineComponent({
   display: flex;
   height: 100%;
   align-items: center;
-  gap: var(--j-space-300);
+  gap: var(--j-space-500);
 }
 
 .channel-view-tab {
   height: 100%;
-  font-weight: 600;
+  font-weight: 500;
   display: flex;
   align-items: center;
   gap: var(--j-space-300);
   color: var(--j-color-ui-500);
+  font-size: var(--j-font-size-500);
   cursor: pointer;
   position: relative;
-  padding: var(--j-space-200) var(--j-space-400);
+  padding: var(--j-space-200) 0;
   border-bottom: 1px solid transparent;
 }
 
