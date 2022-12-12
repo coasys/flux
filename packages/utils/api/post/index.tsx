@@ -49,7 +49,7 @@ class PostModel extends EntryModel {
       predicate: URL,
       type: String,
       resolve: true,
-      languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
+      languageAddress: "literal",
     },
     comments: {
       predicate: EntryType.Message,
