@@ -28,7 +28,7 @@ export default {
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "masked-icon.svg"],
       manifest: {
         name: "Flux",
-        short_name: "flux",
+        short_name: "Flux",
         description: "A social media toolkit",
         display_override: ["window-controls-overlay"],
         theme_color: "#222",

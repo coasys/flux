@@ -88,14 +88,22 @@ export default async (payload: Payload): Promise<void> => {
     );
 
     const links = await createLiteralLinks(FLUX_PROFILE, {
-      [HAS_BIO]: payload.bio,
-      [HAS_USERNAME]: payload.username,
+      ...(payload.bio !== undefined && { [HAS_BIO]: payload.bio }),
+      ...(payload.username !== undefined && {
+        [HAS_USERNAME]: payload.username,
+      }),
     });
 
     const imageLinks = await createLinks(FLUX_PROFILE, {
-      [HAS_BG_IMAGE]: profileBackgroundUrl,
-      [HAS_PROFILE_IMAGE]: profilePictureUrl,
-      [HAS_THUMBNAIL_IMAGE]: profileThumbnailUrl,
+      ...(profileBackgroundUrl && {
+        [HAS_BG_IMAGE]: profileBackgroundUrl,
+      }),
+      ...(profilePictureUrl && {
+        [HAS_PROFILE_IMAGE]: profilePictureUrl,
+      }),
+      ...(profileThumbnailUrl && {
+        [HAS_THUMBNAIL_IMAGE]: profileThumbnailUrl,
+      }),
     });
 
     const newLinks = [...links, ...imageLinks];
