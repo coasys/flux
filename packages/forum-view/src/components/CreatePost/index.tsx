@@ -2,7 +2,6 @@ import { useRef, useState, useEffect, useMemo } from "preact/hooks";
 import Editor from "../Editor";
 import { PostOption, postOptions } from "../../constants/options";
 import FileUpload from "../../components/FileUpload";
-import { format } from "date-fns";
 import { parse } from "date-fns/esm";
 import styles from "./index.scss";
 import PostModel from "utils/api/post";
@@ -117,10 +116,7 @@ export default function CreatePost({
     FR.readAsDataURL(files[0]);
   }
 
-  const showBody =
-    entryType === PostOption.Text ||
-    entryType === PostOption.Event ||
-    entryType === PostOption.Image;
+  const showBody = true;
   const showUrl = entryType === PostOption.Link;
   const showStartDate = entryType === PostOption.Event;
   const showEndDate =

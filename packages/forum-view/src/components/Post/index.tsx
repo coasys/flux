@@ -30,6 +30,7 @@ export default function Post({
   });
 
   const [base64, setBase64] = useState("");
+  const [ogData, setOgData] = useState<any>({});
 
   function onProfileClick(event: any, did: string) {
     event.stopPropagation();
@@ -45,11 +46,23 @@ export default function Post({
     setBase64(image);
   }
 
+  async function fetchOgData(url) {
+    try {
+      const data = await fetch(
+        "https://jsonlink.io/api/extract?url=" + url
+      ).then((res) => res.json());
+      setOgData(data);
+    } catch (e) {}
+  }
+
   useEffect(() => {
     if (post?.image) {
       fetchImage(post.image);
     }
-  }, [post?.image]);
+    if (post?.url) {
+      fetchOgData(post.url);
+    }
+  }, [post?.image, post?.url]);
 
   if (!post) return;
 
@@ -59,6 +72,8 @@ export default function Post({
   const hasBody = post.body;
   const hasUrl = post.url;
   const hasDates = post.startDate && post.endDate;
+
+  console.log({ post: { ...post }, url: post.url, title: post.title });
 
   return (
     <div class={styles.post}>
@@ -106,16 +121,24 @@ export default function Post({
         </j-box>
       )}
 
+      {hasUrl && ogData?.images?.length > 0 && (
+        <j-box pt="500">
+          <a href={post.url} target="_blank">
+            <img src={ogData?.images[0]} class={styles.postImage} />
+          </a>
+        </j-box>
+      )}
+
       {hasUrl && (
         <j-box pt="400">
           <div class={styles.postUrl}>
-            <j-icon size="xs" name="link"></j-icon>
+            <j-icon size="md" name="link"></j-icon>
             <a
               onClick={(e) => e.stopPropagation()}
               href={post.url}
               target="_blank"
             >
-              {new URL(post.url).hostname}
+              {new URL(post.url).origin}
             </a>
           </div>
         </j-box>
