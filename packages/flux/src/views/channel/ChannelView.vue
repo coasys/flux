@@ -26,6 +26,7 @@
       </div>
       <div class="channel-view__header-right">
         <j-button
+          v-if="sameAgent"
           @click="() => (showEditChannel = true)"
           size="sm"
           variant="ghost"
@@ -122,6 +123,7 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import Profile from "@/containers/Profile.vue";
 import EditChannel from "@/containers/EditChannel.vue";
 import { useAppStore } from "@/store/app";
+import { useUserStore } from "@/store/user";
 import { ChannelView } from "utils/types";
 import viewOptions from "utils/constants/viewOptions";
 
@@ -146,6 +148,7 @@ export default defineComponent({
       selectedChannelView: ref("chat"),
       appStore: useAppStore(),
       dataStore: useDataStore(),
+      userStore: useUserStore(),
       script: null as HTMLElement | null,
       memberMentions: ref<MentionTrigger[]>([]),
       activeProfile: ref<string>(""),
@@ -162,6 +165,9 @@ export default defineComponent({
       customElements.define("forum-view", ForumView);
   },
   computed: {
+    sameAgent() {
+      return this.channel.author === this.userStore.agent.did;
+    },
     currentView(): string {
       return this.channel.currentView || this.channel.views[0] || "";
     },
