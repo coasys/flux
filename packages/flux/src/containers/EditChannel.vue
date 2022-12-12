@@ -1,7 +1,7 @@
 <template>
   <j-box p="800">
     <j-flex direction="column" gap="500">
-      <j-text variant="heading-sm">Update views</j-text>
+      <j-text variant="heading-sm">Edit Channel</j-text>
 
       <j-input
         size="lg"
