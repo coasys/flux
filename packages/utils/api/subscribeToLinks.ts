@@ -26,7 +26,7 @@ export default async function ({ perspectiveUuid, added, removed }: Payload) {
   }
 }
 
-export async function removedListeners({
+export async function unsubscribeFromLinks({
   perspectiveUuid,
   added,
   removed,

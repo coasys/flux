@@ -7,7 +7,9 @@ import {
   PropertyValueMap,
 } from "../types";
 import { createEntry } from "../api/createEntry";
-import subscribeToLinks from "../api/subscribeToLinks";
+import subscribeToLinks, {
+  unsubscribeFromLinks,
+} from "../api/subscribeToLinks";
 import { LinkExpression } from "@perspect3vism/ad4m";
 import { ModelProperty } from "../types";
 import { queryProlog } from "./prologHelpers";
@@ -27,6 +29,8 @@ export default class Model {
   client = null;
   source = "ad4m://self";
   perspectiveUuid = "";
+  private onLinkAdded = (link) => this.onLink("added", link);
+  private onLinkRemoved = (link) => this.onLink("removed", link);
   private isSubcribing = false;
   private listeners = { add: {}, remove: {} } as Listeners;
   static type: EntryType;
@@ -134,8 +138,16 @@ export default class Model {
   private subscribe() {
     subscribeToLinks({
       perspectiveUuid: this.perspectiveUuid,
-      added: (link) => this.onLink("added", link),
-      removed: (link) => this.onLink("removed", link),
+      added: this.onLinkAdded,
+      removed: this.onLinkRemoved,
+    });
+  }
+
+  unsubsribe() {
+    unsubscribeFromLinks({
+      perspectiveUuid: this.perspectiveUuid,
+      added: this.onLinkAdded,
+      removed: this.onLinkRemoved,
     });
   }
 
@@ -151,19 +163,20 @@ export default class Model {
 
     if (type === "added" && addedListeners) {
       const entry = await this.get(entryId);
-      addedListeners.forEach(async (cb) => {
+      addedListeners.forEach((cb) => {
         cb(entry);
       });
     }
+
     if (type === "removed" && removedListeners) {
-      const entry = await this.get(entryId);
-      removedListeners.forEach(async (cb) => {
-        cb(entry);
+      //const entry = await this.get(entryId);
+      removedListeners.forEach((cb) => {
+        cb(entryId);
       });
     }
   }
 
-  onAdded(callback: Function, source?: string) {
+  onAdded(callback: (entry: any) => void, source?: string) {
     if (!this.isSubcribing) {
       this.subscribe();
     }
@@ -178,7 +191,7 @@ export default class Model {
     }
   }
 
-  onRemoved(callback: Function, source?: string) {
+  onRemoved(callback: (id: string) => void, source?: string) {
     if (!this.isSubcribing) {
       this.subscribe();
     }
