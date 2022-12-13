@@ -13,9 +13,9 @@ export enum PostOption {
 
 export const postOptions = [
   {
-    label: "Post",
+    label: "Text",
     value: PostOption.Text,
-    icon: "card-heading",
+    icon: "justify-left",
   },
   {
     label: "Image",

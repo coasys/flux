@@ -18,6 +18,7 @@
   "dependencies": {
     "@junto-foundation/chat-view": "*",
     "@junto-foundation/junto-elements": "*",
+    "@junto-foundation/forum-view": "*",
     "@perspect3vism/ad4m": "0.2.0",
     "@perspect3vism/ad4m-connect": "0.2.3",
     "construct-style-sheets-polyfill": "^3.1.0",

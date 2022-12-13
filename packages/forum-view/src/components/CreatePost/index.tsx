@@ -99,7 +99,6 @@ export default function CreatePost({
   }
 
   function handleChange(e: any) {
-    console.log({ [e.target.name]: e.target.value });
     setState({ ...state, [e.target.name]: e.target.value });
   }
 

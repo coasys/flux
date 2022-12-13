@@ -1,10 +1,7 @@
 <template>
   <sidebar-layout>
     <template v-slot:sidebar>
-      <community-sidebar
-        :community="community"
-        :notSynced="notSynced"
-      ></community-sidebar>
+      <community-sidebar></community-sidebar>
     </template>
 
     <div
@@ -22,11 +19,45 @@
         :communityId="channel.sourcePerspective"
       ></channel-view>
     </div>
-    <div v-if="notSynced" class="center">
-      <j-spinner size="lg"> </j-spinner>
-      <j-box pt="700"></j-box>
-      <j-text size="700">Community not synced yet. </j-text>
-      <j-text size="700">please wait... </j-text>
+    <div v-if="!isSynced" class="center">
+      <j-box py="800">
+        <j-flex gap="400" direction="column" a="center" j="center">
+          <j-box pb="500">
+            <j-spinner></j-spinner>
+          </j-box>
+          <j-flex direction="column" a="center">
+            <j-text color="black" size="700" weight="800">
+              Syncing community
+            </j-text>
+            <j-text size="400" weight="400">Please wait...</j-text>
+          </j-flex>
+        </j-flex>
+      </j-box>
+    </div>
+    <div
+      class="center"
+      v-if="
+        isSynced &&
+        channels.filter((c) => c.sourcePerspective === communityId).length === 0
+      "
+    >
+      <j-box py="800">
+        <j-flex gap="400" direction="column" a="center" j="center">
+          <j-icon color="ui-500" size="xl" name="balloon"></j-icon>
+          <j-flex direction="column" a="center">
+            <j-text nomargin color="black" size="700" weight="800">
+              No channels yet
+            </j-text>
+            <j-text size="400" weight="400">Be the first to make one!</j-text>
+            <j-button
+              variant="primary"
+              @click="() => setShowCreateChannel(true)"
+            >
+              Create a new channel
+            </j-button>
+          </j-flex>
+        </j-flex>
+      </j-box>
     </div>
   </sidebar-layout>
 
@@ -114,8 +145,8 @@ import CommunitySettings from "@/containers/CommunitySettings.vue";
 import ChannelView from "@/views/channel/ChannelView.vue";
 import CommunityTweaks from "@/containers/CommunityTweaks.vue";
 
-import ChannelModel from "utils/api/channel";
-import MemberModel from "utils/api/member";
+import ChannelModel, { Channel } from "utils/api/channel";
+import MemberModel, { Member } from "utils/api/member";
 import { CommunityState, ModalsState, ChannelState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
@@ -138,15 +169,13 @@ export default defineComponent({
     CommunityTweaks,
   },
   setup() {
-    const appStore = useAppStore();
-    const dataStore = useDataStore();
-    const notSynced = ref(false);
-
     return {
+      memberModel: ref<MemberModel | null>(null),
+      channelModel: ref<ChannelModel | null>(null),
       loadedChannels: ref<LoadedChannels>({}),
-      appStore,
-      dataStore,
-      notSynced,
+      appStore: useAppStore(),
+      dataStore: useDataStore(),
+      isSynced: ref(true),
     };
   },
   data() {
@@ -181,10 +210,10 @@ export default defineComponent({
           const channel = this.dataStore.getChannel(id);
 
           if (channel) {
-            this.notSynced = false;
+            this.isSynced = true;
             this.loadedChannels = {
               ...this.loadedChannels,
-              [channel.id]: this.communityId.toString(),
+              [channel.id]: true,
             };
           }
         }
@@ -203,24 +232,30 @@ export default defineComponent({
       "setShowCommunityTweaks",
     ]),
     startWatching(id: string) {
-      const Channel = new ChannelModel({ perspectiveUuid: id });
-      const Member = new MemberModel({ perspectiveUuid: id });
+      this.channelModel && this.channelModel.unsubsribe();
+      this.memberModel && this.memberModel.unsubsribe();
 
-      Member.onAdded((member: any) => {
+      this.channelModel = new ChannelModel({ perspectiveUuid: id });
+      this.memberModel = new MemberModel({ perspectiveUuid: id });
+
+      this.memberModel.onAdded((member: Member) => {
         this.dataStore.setNeighbourhoodMember({
           did: member.did,
           perspectiveUuid: id,
         });
       });
 
-      Channel.onAdded((channel: any) => {
-        console.log("on added channel", channel);
+      this.channelModel.onRemoved((id) => {
+        this.dataStore.removeChannel({ channelId: id });
+      });
+
+      this.channelModel.onAdded((channel: Channel) => {
         this.dataStore.addChannel({
           communityId: id,
           channel: {
             id: channel.id,
             name: channel.name,
-            timestamp: channel.timestamp,
+            timestamp: new Date(channel.timestamp),
             author: channel.author,
             collapsed: false,
             sourcePerspective: id,
@@ -235,10 +270,9 @@ export default defineComponent({
       });
     },
     goToActiveChannel(communityId: string) {
-      if (!communityId) return;
       const channels = this.dataStore.getChannelStates(communityId);
       if (channels.length > 0) {
-        this.notSynced = false;
+        this.isSynced = true;
         const firstChannel = this.dataStore.getChannelStates(communityId)[0].id;
         const currentChannelId =
           this.community.state.currentChannelId || firstChannel;
@@ -253,7 +287,7 @@ export default defineComponent({
           });
         }
       } else {
-        this.notSynced = true;
+        this.isSynced = false;
       }
     },
     handleThemeChange(id?: string) {
