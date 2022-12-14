@@ -76,7 +76,7 @@ const initialState: ContextProps = {
 const ChatContext = createContext(initialState);
 
 export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
-  const linkSubscriberRef = useRef<PerspectiveProxy | null>();
+  const linkSubscriberRef = useRef<Function | null>();
 
   const [state, setState] = useState(initialState.state);
 
@@ -109,11 +109,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     }
 
     return () => {
-      linkSubscriberRef.current?.removeListener("link-added", handleLinkAdded);
-      linkSubscriberRef.current?.removeListener(
-        "link-removed",
-        handleLinkAdded
-      );
+      linkSubscriberRef.current && linkSubscriberRef.current();
     };
   }, [perspectiveUuid]);
 
@@ -280,7 +276,9 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       const message = getMessage(link);
 
       if (message) {
-        setState((oldState) => addMessage(oldState, {...message, synced: true}));
+        setState((oldState) =>
+          addMessage(oldState, { ...message, synced: true })
+        );
 
         setState((oldState) => ({
           ...oldState,
@@ -307,7 +305,9 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     if (linkIs.reply(link) && isSameChannel) {
       const message = getMessage(link);
 
-      setState((oldState) => addMessage(oldState, {...message, synced: true}));
+      setState((oldState) =>
+        addMessage(oldState, { ...message, synced: true })
+      );
 
       setState((oldState) => ({
         ...oldState,
@@ -365,21 +365,23 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     let newMessages;
     let expressionLinkLength;
     try {
-        const data = await getMessages({
-          perspectiveUuid,
-          channelId,
-          from: from,
-          backwards
-        });
-        newMessages = data.keyedMessages;
-        expressionLinkLength = data.expressionLinkLength;
+      const data = await getMessages({
+        perspectiveUuid,
+        channelId,
+        from: from,
+        backwards,
+      });
+      newMessages = data.keyedMessages;
+      expressionLinkLength = data.expressionLinkLength;
     } catch (e) {
       if (e.message.includes("existence_error")) {
-        console.error("We dont have the SDNA to make this query, please wait for community to sync");
+        console.error(
+          "We dont have the SDNA to make this query, please wait for community to sync"
+        );
         await checkUpdateSDNAVersion(perspectiveUuid, new Date());
-        throw(e);
+        throw e;
       } else {
-        throw (e)
+        throw e;
       }
     }
 
@@ -472,10 +474,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
   async function loadMore(timestamp: Date, backwards: boolean) {
     if (backwards) {
-      return await fetchMessages(
-        new Date(timestamp),
-        backwards
-      );
+      return await fetchMessages(new Date(timestamp), backwards);
     } else {
       const oldestMessage = messages[0];
 

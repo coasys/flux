@@ -203,9 +203,9 @@ export default defineComponent({
           name: AD4M_PREDICATE_FIRSTNAME,
           familyName: AD4M_PREDICATE_LASTNAME,
         });
-        this.username = profile.username || "";
-        this.name = profile.name || "";
-        this.familyName = profile.familyName || "";
+        this.username = profile?.username || "";
+        this.name = profile?.name || "";
+        this.familyName = profile?.familyName || "";
       } catch (e) {
         console.log(e);
       }

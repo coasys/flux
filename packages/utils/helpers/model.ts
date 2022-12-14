@@ -7,9 +7,7 @@ import {
   PropertyValueMap,
 } from "../types";
 import { createEntry } from "../api/createEntry";
-import subscribeToLinks, {
-  unsubscribeFromLinks,
-} from "../api/subscribeToLinks";
+import subscribeToLinks from "../api/subscribeToLinks";
 import { LinkExpression } from "@perspect3vism/ad4m";
 import { ModelProperty } from "../types";
 import { queryProlog } from "./prologHelpers";
@@ -29,8 +27,7 @@ export default class Model {
   client = null;
   source = "ad4m://self";
   perspectiveUuid = "";
-  private onLinkAdded = (link) => this.onLink("added", link);
-  private onLinkRemoved = (link) => this.onLink("removed", link);
+  private unsubscribeCb = null;
   private isSubcribing = false;
   private listeners = { add: {}, remove: {} } as Listeners;
   static type: EntryType;
@@ -135,20 +132,20 @@ export default class Model {
     return result;
   }
 
-  private subscribe() {
-    subscribeToLinks({
+  private async subscribe() {
+    this.unsubscribeCb = await subscribeToLinks({
       perspectiveUuid: this.perspectiveUuid,
-      added: this.onLinkAdded,
-      removed: this.onLinkRemoved,
+      added: (link) => this.onLink("added", link),
+      removed: (link) => this.onLink("removed", link),
     });
   }
 
-  unsubsribe() {
-    unsubscribeFromLinks({
-      perspectiveUuid: this.perspectiveUuid,
-      added: this.onLinkAdded,
-      removed: this.onLinkRemoved,
-    });
+  unsubscribe() {
+    if (this.unsubscribeCb) {
+      this.unsubscribeCb();
+      this.listeners = { add: {}, remove: {} };
+      this.isSubcribing = false;
+    }
   }
 
   private async onLink(type: "added" | "removed", link: LinkExpression) {

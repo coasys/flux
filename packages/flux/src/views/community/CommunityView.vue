@@ -194,6 +194,8 @@ export default defineComponent({
           this.handleThemeChange(id);
           this.goToActiveChannel(id);
         } else {
+          this.channelModel && this.channelModel.unsubscribe();
+          this.memberModel && this.memberModel.unsubscribe();
           this.handleThemeChange();
         }
       },
@@ -232,8 +234,8 @@ export default defineComponent({
       "setShowCommunityTweaks",
     ]),
     startWatching(id: string) {
-      this.channelModel && this.channelModel.unsubsribe();
-      this.memberModel && this.memberModel.unsubsribe();
+      this.channelModel && this.channelModel.unsubscribe();
+      this.memberModel && this.memberModel.unsubscribe();
 
       this.channelModel = new ChannelModel({ perspectiveUuid: id });
       this.memberModel = new MemberModel({ perspectiveUuid: id });
@@ -250,6 +252,7 @@ export default defineComponent({
       });
 
       this.channelModel.onAdded((channel: Channel) => {
+        console.log("on channel add");
         this.dataStore.addChannel({
           communityId: id,
           channel: {
