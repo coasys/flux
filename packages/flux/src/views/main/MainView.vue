@@ -4,41 +4,40 @@
       <main-sidebar></main-sidebar>
     </template>
     <router-view></router-view>
-  </app-layout>
+    <j-modal
+      size="sm"
+      :open="modals.showCreateCommunity"
+      @toggle="(e: any) => setShowCreateCommunity(e.target.open)"
+    >
+      <create-community
+        v-if="modals.showCreateCommunity"
+        @submit="() => setShowCreateCommunity(false)"
+        @cancel="() => setShowCreateCommunity(false)"
+      />
+    </j-modal>
 
-  <j-modal
-    size="sm"
-    :open="modals.showCreateCommunity"
-    @toggle="(e: any) => setShowCreateCommunity(e.target.open)"
-  >
-    <create-community
-      v-if="modals.showCreateCommunity"
-      @submit="() => setShowCreateCommunity(false)"
-      @cancel="() => setShowCreateCommunity(false)"
-    />
-  </j-modal>
-
-  <j-modal
-    :open="modals.showDisclaimer"
-    @toggle="(e: any) => setShowDisclaimer(e.target.open)"
-  >
-    <j-box p="800">
-      <j-box pb="500">
-        <j-flex gap="400" a="center">
-          <j-icon name="exclamation-diamond" size="xl" />
-          <j-text nomargin variant="heading-lg">Disclaimer</j-text>
-        </j-flex>
+    <j-modal
+      :open="modals.showDisclaimer"
+      @toggle="(e: any) => setShowDisclaimer(e.target.open)"
+    >
+      <j-box p="800">
+        <j-box pb="500">
+          <j-flex gap="400" a="center">
+            <j-icon name="exclamation-diamond" size="xl" />
+            <j-text nomargin variant="heading-lg">Disclaimer</j-text>
+          </j-flex>
+        </j-box>
+        <j-text variant="ingress">
+          This is an early version of Flux. Don't use this for essential
+          communication.
+        </j-text>
+        <ul>
+          <li>You might loose your communities and chat messages</li>
+          <li>Messages might not always be delivered reliably</li>
+        </ul>
       </j-box>
-      <j-text variant="ingress">
-        This is an early version of Flux. Don't use this for essential
-        communication.
-      </j-text>
-      <ul>
-        <li>You might loose your communities and chat messages</li>
-        <li>Messages might not always be delivered reliably</li>
-      </ul>
-    </j-box>
-  </j-modal>
+    </j-modal>
+  </app-layout>
 </template>
 
 <script lang="ts">
