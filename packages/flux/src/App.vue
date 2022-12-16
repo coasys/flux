@@ -103,6 +103,9 @@ export default defineComponent({
     },
     async startWatcher() {
       const client = await getAd4mClient();
+      console.log("Running AD4M version:", (await client.runtime.info()).ad4mExecutorVersion);
+      //TODO: here we can add a check against a const, and if we dont get a valid ad4m version we can show an error
+      //and block further ui actions
       const watching: string[] = [];
 
       watch(
