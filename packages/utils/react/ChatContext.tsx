@@ -267,6 +267,29 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
     //const hasFocus = document.hasFocus();
 
+    if (linkIs.socialDNA(link)) {
+      console.warn("got new social dna fetching messages again");
+      fetchMessages();
+    }
+    if (linkIs.reaction(link)) {
+      //TODO; this could read if the message is already popular and if so skip this check
+      const isPopularPost = await client.perspective.queryProlog(
+        perspectiveUuid,
+        `isPopular("${link.data.source}").`
+      );
+
+      if (isPopularPost) {
+        updateMessagePopularStatus(link, true);
+      }
+    }
+
+    if (!isMessageFromSelf && linkIs.reaction(link) && await client.perspective.queryProlog(
+      perspectiveUuid,
+      `triple("${channelId}", "${EntryType.Message}", "${link.data.source}").`
+    )) {
+      addReactionToState(link);
+    }
+
     const isSameChannel = await client.perspective.queryProlog(
       perspectiveUuid,
       `triple("${channelId}", "${EntryType.Message}", "${link.data.target}").`
@@ -285,10 +308,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
           isMessageFromSelf,
         }));
       }
-    }
-
-    if (linkIs.reaction(link) && isSameChannel) {
-      addReactionToState(link);
     }
 
     if (linkIs.editedMessage(link) && isSameChannel) {
@@ -319,22 +338,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       const id = link.data.source;
 
       setState((oldState) => addHiddenToMessageToState(oldState, id, true));
-    }
-
-    if (linkIs.socialDNA(link)) {
-      console.warn("got new social dna fetching messages again");
-      fetchMessages();
-    }
-    if (linkIs.reaction(link)) {
-      //TODO; this could read if the message is already popular and if so skip this check
-      const isPopularPost = await client.perspective.queryProlog(
-        perspectiveUuid,
-        `isPopular("${link.data.source}").`
-      );
-
-      if (isPopularPost) {
-        updateMessagePopularStatus(link, true);
-      }
     }
   }
 
