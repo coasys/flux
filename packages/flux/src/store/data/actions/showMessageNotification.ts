@@ -36,15 +36,7 @@ export default async ({
 
   const user = userStore.getUser;
 
-  const currentDate = new Date();
-
-  const lastDate = parseISO(
-    localStorage.getItem("lastNotificationDate") || currentDate.toISOString()
-  );
-
-  localStorage.setItem("lastNotificationDate", currentDate.toISOString());
-
-  const isFromSelf = user!.agent.did !== authorDid;
+  const isFromSelf = user!.agent.did === authorDid;
   const isMinimized = document.hasFocus();
   const isMuted =
     channel?.notifications.mute &&
@@ -83,8 +75,6 @@ export default async ({
         icon: iconPath,
         renotify: true,
       });
-
-      console.log(notification);
 
       notification.onclick = () => {
         window.focus();
