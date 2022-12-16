@@ -6,7 +6,6 @@ import {
 } from "@/store/types";
 import { ChannelView, CommunityMetaData } from "utils/types";
 import { useDataStore } from "@/store/data";
-import { Channel } from "utils/api/channel";
 
 interface UpdatePayload {
   communityId: string;
@@ -116,11 +115,6 @@ export default {
     }
 
     state.neighbourhoods[communityId] = community;
-  },
-
-  setChannelScrollTop(payload: { channelId: string; value: number }): void {
-    const state = useDataStore();
-    state.channels[payload.channelId].scrollTop = payload.value;
   },
 
   clearChannels({ communityId }: { communityId: string }): void {

@@ -157,6 +157,22 @@ export default class Model {
     const entryId = link.data.target;
     const addedListeners = this.listeners.add[source];
     const removedListeners = this.listeners.remove[source];
+    const allAddListeners = this.listeners.add?.all;
+    const allRemoveListeners = this.listeners.remove?.all;
+
+    if (type === "added" && allAddListeners) {
+      const entry = await this.get(entryId);
+      allAddListeners.forEach((cb) => {
+        cb(entry);
+      });
+    }
+
+    if (type === "removed" && allRemoveListeners) {
+      const entry = await this.get(entryId);
+      allRemoveListeners.forEach((cb) => {
+        cb(entry);
+      });
+    }
 
     if (type === "added" && addedListeners) {
       const entry = await this.get(entryId);
@@ -173,7 +189,7 @@ export default class Model {
     }
   }
 
-  onAdded(callback: (entry: any) => void, source?: string) {
+  onAdded(callback: (entry: any) => void, source?: string | "all") {
     if (!this.isSubcribing) {
       this.subscribe();
     }
@@ -188,7 +204,7 @@ export default class Model {
     }
   }
 
-  onRemoved(callback: (id: string) => void, source?: string) {
+  onRemoved(callback: (id: string) => void, source?: string | "all") {
     if (!this.isSubcribing) {
       this.subscribe();
     }

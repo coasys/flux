@@ -42,8 +42,10 @@ import {
   onAuthStateChanged,
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import "@perspect3vism/ad4m-connect/dist/web.js";
-import { Community } from "utils/types";
+import { Community, EntryType } from "utils/types";
+import MessageModel from "utils/api/message";
 import subscribeToLinks from "utils/api/subscribeToLinks";
+import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 
 export default defineComponent({
   name: "App",
@@ -102,16 +104,49 @@ export default defineComponent({
 
       watch(
         this.dataStore.neighbourhoods,
-        async (newValue: { [perspectiveUuid: string]: Community }) => {
-          Object.entries(newValue).forEach(([perspectiveUuid, community]) => {
+        async (newValue) => {
+          Object.entries(newValue).forEach(([perspectiveUuid]) => {
             const alreadyListening = watching.includes(perspectiveUuid);
             if (!alreadyListening) {
               watching.push(perspectiveUuid);
-              console.log("subribe to", perspectiveUuid);
               subscribeToLinks({
                 perspectiveUuid,
-                added: (link) => {
-                  console.log(link);
+                added: async (link: LinkExpression) => {
+                  if (link.data.predicate === EntryType.Message) {
+                    try {
+                      const routeChannelId = this.$route.params.channelId;
+                      const channelId = link.data.source;
+                      const isCurrentChannel = routeChannelId === channelId;
+
+                      if (!isCurrentChannel) {
+                        this.dataStore.setHasNewMessages({
+                          communityId: perspectiveUuid,
+                          channelId,
+                          value: true,
+                        });
+
+                        const expression = Literal.fromUrl(
+                          link.data.target
+                        ).get();
+
+                        const expressionDate = new Date(expression.timestamp);
+                        let minuteAgo = new Date();
+                        minuteAgo.setSeconds(minuteAgo.getSeconds() - 30);
+                        if (expressionDate > minuteAgo) {
+                          this.dataStore.showMessageNotification({
+                            router: this.$router,
+                            communityId: perspectiveUuid,
+                            channelId,
+                            authorDid: expression.author,
+                            message: expression.data,
+                            timestamp: expression.timestamp,
+                          });
+                        }
+                      }
+                    } catch (e: any) {
+                      throw new Error(e);
+                    }
+                  }
                 },
               });
             }
