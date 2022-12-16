@@ -13,8 +13,8 @@
     theme="dark"
     ref="ad4mConnect"
     appName="Flux"
-    appDesc="Flux - A SOCIAL TOOLKIT FOR THE NEW INTERNET"
-    appDomain="https://www.fluxsocial.io/"
+    appDesc="A Social Toolkit for the New Internet"
+    :appDomain="appDomain"
     capabilities='[{"with":{"domain":"*","pointers":["*"]},"can": ["*"]}]'
     appiconpath="https://i.ibb.co/GnqjPJP/icon.png"
     openonshortcut
@@ -91,6 +91,9 @@ export default defineComponent({
     },
     ui(): ApplicationState {
       return this.appStore.$state;
+    },
+    appDomain() {
+      return window.location.origin;
     },
   },
   methods: {
