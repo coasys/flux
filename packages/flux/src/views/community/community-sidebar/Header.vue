@@ -86,31 +86,23 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent, ref } from "vue";
 import { Profile } from "utils/types";
 import { ChannelState } from "@/store/types";
 import { mapActions, mapState } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
-import { DexieIPFS } from "utils/helpers/storageHelpers";
-import { getImage } from "utils/helpers/getImage";
 import Avatar from "@/components/avatar/Avatar.vue";
 
 export default defineComponent({
   components: { Avatar },
   setup() {
     return {
-      userProfileImage: ref<null | string>(null),
+      showCommunityMenu: ref(false),
       appStore: useAppStore(),
       userStore: useUserStore(),
       dataStore: useDataStore(),
-    };
-  },
-  data: function () {
-    return {
-      showCommunityMenu: false,
-      communityImage: null,
     };
   },
   computed: {
@@ -140,49 +132,6 @@ export default defineComponent({
     },
     userDid(): string {
       return this.userStore.agent.did!;
-    },
-  },
-  async mounted() {
-    watch(this.dataStore.neighbourhoods, async () => {
-      setTimeout(async () => {
-        const communityId = this.$route.params.communityId as string;
-        const community = this.dataStore.getCommunity(communityId);
-        const dexie = new DexieIPFS(communityId);
-
-        const image = await dexie.get(community.image!);
-        // @ts-ignore
-        this.communityImage = image;
-      }, 500);
-    });
-  },
-  watch: {
-    userProfile: {
-      async handler() {
-        if (this.userStore.profile?.profilePicture) {
-          this.userProfileImage = await getImage(
-            this.userStore.profile?.profilePicture
-          );
-        } else {
-          this.userProfileImage = null;
-        }
-      },
-      immediate: true,
-    },
-    "$route.params.communityId": {
-      handler: async function (id: string) {
-        if (id) {
-          this.communityImage = null;
-          setTimeout(async () => {
-            const community = this.dataStore.getCommunity(id);
-            const dexie = new DexieIPFS(id);
-
-            const image = await dexie.get(community.image!);
-            // @ts-ignore
-            this.communityImage = image;
-          }, 500);
-        }
-      },
-      immediate: true,
     },
   },
   methods: {
