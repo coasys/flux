@@ -23,6 +23,7 @@ export default function useEntries({
       getAll();
       subscribe();
     }
+    return () => Model?.unsubscribe();
   }, [perspectiveUuid, source]);
 
   async function getAll() {

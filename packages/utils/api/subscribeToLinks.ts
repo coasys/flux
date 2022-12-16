@@ -1,5 +1,4 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { LinkCallback } from "@perspect3vism/ad4m/lib/src/perspectives/PerspectiveClient";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -8,8 +7,6 @@ export interface Payload {
 }
 
 function removeListeners({ perspective, added, removed }) {
-  console.log("trying to remove", { perspective, added, removed });
-
   if (added) {
     perspective?.removeListener("link-added", added);
   }
