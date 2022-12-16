@@ -44,7 +44,6 @@ export default async ({
     !appStore.notification.globalNotification;
 
   if (isFromSelf || isMinimized || isMuted) {
-    console.log({ isFromSelf, isMinimized, isMuted });
     return;
   }
 
