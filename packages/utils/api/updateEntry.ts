@@ -26,14 +26,6 @@ export async function updateEntry(
   }
 
   const propertyLinks = await createLinks(id, updates);
-
-  const linkPromises = propertyLinks.map(async (link) => {
-    try {
-      return client.perspective.addLink(perspectiveUuid, link);
-    } catch (e) {
-      console.log(e);
-    }
-  });
-
-  await Promise.all(linkPromises);
+  const createdLinks = await client.perspective.addLinks(perspectiveUuid, propertyLinks);
+  return createdLinks;
 }

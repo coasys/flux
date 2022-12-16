@@ -1,4 +1,4 @@
-import { LinkExpression, Literal } from "@perspect3vism/ad4m";
+import { Link, LinkExpression, Literal } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { CREATED_AT, SDNA_VERSION, SELF, ZOME } from "../constants/communityPredicates";
 import { LATEST_SDNA_VERSION, SDNA_CREATION_DATE } from "../constants/sdna";
@@ -8,30 +8,25 @@ import { SDNAValues } from "./generateSDNALiteral";
 export async function createSDNALink(perspectiveUuid: string, sdnaLiteral: Literal): Promise<LinkExpression> {
     const ad4mClient = await getAd4mClient();
     const sdnaUrl = sdnaLiteral.toUrl();
-    const sdnaLink = await ad4mClient.perspective.addLink(
-        perspectiveUuid,
-        {
+    const links = [
+        new Link({
             source: SELF,
             predicate: ZOME,
             target: sdnaUrl
-        }
-    );
-    await ad4mClient.perspective.addLink(
-        perspectiveUuid,
-        {
+        }),
+        new Link({
             source: sdnaUrl,
             predicate: SDNA_VERSION,
             target: `int://${LATEST_SDNA_VERSION}`
-        }
-    );
-    await ad4mClient.perspective.addLink(
-        perspectiveUuid,
-        {
+        }),
+        new Link({
             source: sdnaUrl,
             predicate: CREATED_AT,
             target: SDNA_CREATION_DATE.toString()
-        }
-    )
+        })
+    ];
+    const createdLinks = await ad4mClient.perspective.addLinks(perspectiveUuid, links);
+    const sdnaLink = createdLinks[0];
     return sdnaLink;
 }
 
