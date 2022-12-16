@@ -10,15 +10,18 @@ export default async (communityId: string): Promise<void> => {
 
   const Community = new CommunityModel({ perspectiveUuid: communityId });
 
-  const { name, description, image, thumbnail } = await Community.get();
+  const community = await Community.get();
 
-  dataStore.updateCommunityMetadata({
-    communityId,
-    metadata: {
-      name,
-      description,
-      image,
-      thumbnail,
-    },
-  });
+  if (community) {
+    const { name, description, image, thumbnail } = community;
+    dataStore.updateCommunityMetadata({
+      communityId,
+      metadata: {
+        name,
+        description,
+        image,
+        thumbnail,
+      },
+    });
+  }
 };
