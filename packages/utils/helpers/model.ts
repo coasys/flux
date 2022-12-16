@@ -12,6 +12,7 @@ import { LinkExpression } from "@perspect3vism/ad4m";
 import { ModelProperty } from "../types";
 import { queryProlog } from "./prologHelpers";
 import { updateEntry } from "../api/updateEntry";
+import { AsyncQueue } from "./queue";
 
 type ModelProps = {
   perspectiveUuid: string;
@@ -22,6 +23,8 @@ type Listeners = {
   add: { [source: string]: Function[] };
   remove: { [source: string]: Function[] };
 };
+
+const queue = new AsyncQueue();
 
 export default class Model {
   client = null;
@@ -112,24 +115,30 @@ export default class Model {
   }
 
   async get(id: string, source?: string): Promise<Entry | null> {
-    const result = await queryProlog({
-      perspectiveUuid: this.perspectiveUuid,
-      id,
-      type: this.constructor.type,
-      source: source || this.source,
-      properties: this.constructor.properties,
-    });
-    return result.length === 0 ? null : result[0];
+    //@ts-ignore
+    return await queue.add(async () => {
+      const result = await queryProlog({
+        perspectiveUuid: this.perspectiveUuid,
+        id,
+        type: this.constructor.type,
+        source: source || this.source,
+        properties: this.constructor.properties,
+      });
+      return result.length === 0 ? null : result[0];
+    })
   }
 
   async getAll(source?: string): Promise<Entry[]> {
-    const result = await queryProlog({
-      perspectiveUuid: this.perspectiveUuid,
-      type: this.constructor.type,
-      source: source || this.source,
-      properties: this.constructor.properties,
+    //@ts-ignore
+    return await queue.add(async () => {
+      const result = await queryProlog({
+        perspectiveUuid: this.perspectiveUuid,
+        type: this.constructor.type,
+        source: source || this.source,
+        properties: this.constructor.properties,
+      });
+      return result;
     });
-    return result;
   }
 
   private async subscribe() {

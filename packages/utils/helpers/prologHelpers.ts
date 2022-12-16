@@ -114,7 +114,6 @@ export async function queryProlog({
   const result = await Promise.all(
     entries.map((entry) => resolveEntryWithLatestProperties(entry, properties))
   );
-
   return result;
 }
 
