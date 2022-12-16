@@ -37,7 +37,7 @@
     "@tiptap/suggestion": "^2.0.0-beta.199",
     "classnames": "^2.3.2",
     "date-fns": "^2.24.0",
-    "emoji-picker-element": "^1.8.2",
+    "emoji-picker-element": "^1.14.0",
     "emoji-short-name": "^2.0.0",
     "node-emoji": "^1.11.0",
     "preact": "^10.5.14",

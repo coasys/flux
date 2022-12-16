@@ -3746,7 +3746,7 @@ emittery@^0.7.1:
   resolved "https://registry.yarnpkg.com/emittery/-/emittery-0.7.2.tgz#25595908e13af0f5674ab419396e2fb394cdfa82"
   integrity sha512-A8OG5SR/ij3SsJdWDJdkkSYUjQdCUx6APQXem0SaEePBSRg4eymGYwBkKo1Y6DU+af/Jn2dBQqDBvjnr9Vi8nQ==
 
-emoji-picker-element@^1.8.2:
+emoji-picker-element@^1.14.0:
   version "1.14.0"
   resolved "https://registry.yarnpkg.com/emoji-picker-element/-/emoji-picker-element-1.14.0.tgz#6e4c23585533b994f07cecb1b8be3f1115ea4ffd"
   integrity sha512-YNQD2KcszotweW3KYsZw/yRU5M80RM7xdev7L6mhRuI6W5dRJ9FTEPsn5mAG3idN02AqQh0LqZvuaXkdyahr/g==
