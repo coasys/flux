@@ -13,6 +13,7 @@ import { ModelProperty } from "../types";
 import { queryProlog } from "./prologHelpers";
 import { updateEntry } from "../api/updateEntry";
 import { AsyncQueue } from "./queue";
+import { SELF } from "../constants/communityPredicates";
 
 type ModelProps = {
   perspectiveUuid: string;
@@ -28,7 +29,7 @@ const queue = new AsyncQueue();
 
 export default class Model {
   client = null;
-  source = "ad4m://self";
+  source = SELF;
   perspectiveUuid = "";
   private unsubscribeCb = null;
   private isSubcribing = false;
