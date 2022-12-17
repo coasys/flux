@@ -9,6 +9,14 @@
       </j-flex>
     </div>
   </div>
+  <div class="global-loading" v-if="ui.globalError.show">
+    <div class="global-loading__backdrop"></div>
+    <div class="global-loading__content">
+      <j-flex a="center" direction="column" gap="1000">
+        <j-text size="700">{{ui.globalError.message}}</j-text>
+      </j-flex>
+    </div>
+  </div>
   <ad4m-connect
     theme="dark"
     ref="ad4mConnect"
@@ -46,6 +54,8 @@ import { Community, EntryType } from "utils/types";
 import MessageModel from "utils/api/message";
 import subscribeToLinks from "utils/api/subscribeToLinks";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
+import semver from "semver";
+import { EXPECTED_AD4M_VERSION } from "utils/constants/sdna";
 
 export default defineComponent({
   name: "App",
@@ -103,9 +113,20 @@ export default defineComponent({
     },
     async startWatcher() {
       const client = await getAd4mClient();
-      console.log("Running AD4M version:", (await client.runtime.info()).ad4mExecutorVersion);
-      //TODO: here we can add a check against a const, and if we dont get a valid ad4m version we can show an error
-      //and block further ui actions
+      const version = (await client.runtime.info()).ad4mExecutorVersion;
+      console.log("Running AD4M version:", version);
+      if (semver.gt(EXPECTED_AD4M_VERSION, version)) {
+        console.error("AD4M version is not supported");
+        this.appStore.setGlobalError({
+          show: true,
+          message: "AD4M version is not supported",
+        });
+      } else {
+        this.appStore.setGlobalError({
+          show: false,
+          message: "",
+        });
+      }
       const watching: string[] = [];
 
       watch(
