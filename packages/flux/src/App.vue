@@ -1,19 +1,26 @@
 <template>
   <router-view :key="componentKey" @connectToAd4m="connectToAd4m"></router-view>
-  <div class="global-loading" v-if="ui.showGlobalLoading">
-    <div class="global-loading__backdrop"></div>
-    <div class="global-loading__content">
+  <div class="global-modal" v-if="ui.showGlobalLoading">
+    <div class="global-modal__backdrop"></div>
+    <div class="global-modal__content">
       <j-flex a="center" direction="column" gap="1000">
         <j-spinner size="lg"> </j-spinner>
         <j-text size="700">Please wait...</j-text>
       </j-flex>
     </div>
   </div>
-  <div class="global-loading" v-if="ui.globalError.show">
-    <div class="global-loading__backdrop"></div>
-    <div class="global-loading__content">
+  <div class="global-modal" v-if="ui.globalError.show">
+    <div class="global-modal__backdrop"></div>
+    <div class="global-modal__content">
       <j-flex a="center" direction="column" gap="1000">
-        <j-text size="700">{{ui.globalError.message}}</j-text>
+        <j-icon
+          name="exclamation-triangle"
+          size="xl"
+          color="danger-500"
+        ></j-icon>
+        <j-text color="danger-500" weight="600" size="700">
+          {{ ui.globalError.message }}
+        </j-text>
       </j-flex>
     </div>
   </div>
@@ -37,11 +44,13 @@
   </j-toast>
   <j-modal :open="showPrompt">
     <header slot="header">
-      <j-text variant="heading">Join the default Flux Alpha Community</j-text>
-      <j-button @click="joinTestingCommunity()">
-        Join
-      </j-button>
+      <j-text size="500" weight="500" ui="black">
+        Join the default Flux Alpha Community
+      </j-text>
     </header>
+    <div>
+      <j-button @click="joinTestingCommunity()"> Join </j-button>
+    </div>
   </j-modal>
 </template>
 
@@ -62,7 +71,11 @@ import { EntryType } from "utils/types";
 import subscribeToLinks from "utils/api/subscribeToLinks";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import semver from "semver";
-import { EXPECTED_AD4M_VERSION, COMMUNITY_TEST_VERSION, DEFAULT_TESTING_NEIGHBOURHOOD } from "utils/constants/general";
+import {
+  EXPECTED_AD4M_VERSION,
+  COMMUNITY_TEST_VERSION,
+  DEFAULT_TESTING_NEIGHBOURHOOD,
+} from "utils/constants/general";
 
 export default defineComponent({
   name: "App",
@@ -87,7 +100,7 @@ export default defineComponent({
       dataStore,
       userStore,
       watcherStarted,
-      showPrompt
+      showPrompt,
     };
   },
   created() {
@@ -126,12 +139,18 @@ export default defineComponent({
 
           //Check that user already has joined default testing community, if not then show prompt allowing user to join
           //With a button click
-          if (!this.appStore.hasShownDefaultJoinPrompt && !defaultTestingCommunity) {
+          if (
+            !this.appStore.hasShownDefaultJoinPrompt &&
+            !defaultTestingCommunity
+          ) {
             this.appStore.hasShownDefaultJoinPrompt = true;
             this.showPrompt = true;
           }
 
-          if (COMMUNITY_TEST_VERSION > this.appStore.seenCommunityTestVersion && !defaultTestingCommunity) {
+          if (
+            COMMUNITY_TEST_VERSION > this.appStore.seenCommunityTestVersion &&
+            !defaultTestingCommunity
+          ) {
             this.showPrompt = true;
           }
         }
@@ -264,7 +283,8 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-.global-loading {
+.global-modal {
+  z-index: 999;
   width: 100vw;
   height: 100vh;
   position: absolute;
@@ -274,22 +294,22 @@ body {
   place-items: center;
 }
 
-.global-loading__backdrop {
+.global-modal__backdrop {
   position: absolute;
   left: 0;
   height: 0;
   width: 100%;
   height: 100%;
   background: var(--j-color-white);
-  opacity: 0.8;
+  opacity: 0.9;
   backdrop-filter: blur(15px);
 }
 
-.global-loading__content {
+.global-modal__content {
   position: relative;
 }
 
-.global-loading j-spinner {
+.global-modal j-spinner {
   --j-spinner-size: 80px;
 }
 </style>
