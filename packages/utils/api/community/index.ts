@@ -18,39 +18,43 @@ export interface Community extends Entry {
 }
 
 class CommunityModel extends EntryModel {
-  static type = EntryType.Community;
-  static properties = {
-    name: {
-      predicate: NAME,
-      type: String,
-      resolve: true,
-      languageAddress: "literal",
-    },
-    description: {
-      predicate: DESCRIPTION,
-      type: String,
-      resolve: true,
-      languageAddress: "literal",
-    },
-    image: {
-      predicate: IMAGE,
-      type: String,
-      resolve: false,
-      languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
-    },
-    thumbnail: {
-      predicate: THUMBNAIL,
-      type: String,
-      resolve: false,
-      languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
-    },
-    channels: {
-      predicate: EntryType.Channel,
-      type: String,
-      collection: true,
-      resolve: false,
-    },
-  };
+  static get type() {
+    return EntryType.Community;
+  }
+  static get properties() {
+    return {
+      name: {
+        predicate: NAME,
+        type: String,
+        resolve: true,
+        languageAddress: "literal",
+      },
+      description: {
+        predicate: DESCRIPTION,
+        type: String,
+        resolve: true,
+        languageAddress: "literal",
+      },
+      image: {
+        predicate: IMAGE,
+        type: String,
+        resolve: false,
+        languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
+      },
+      thumbnail: {
+        predicate: THUMBNAIL,
+        type: String,
+        resolve: false,
+        languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
+      },
+      channels: {
+        predicate: EntryType.Channel,
+        type: String,
+        collection: true,
+        resolve: false,
+      },
+    };
+  }
 
   async create(data: {
     name: string;

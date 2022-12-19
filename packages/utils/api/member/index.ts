@@ -12,14 +12,19 @@ export interface Member extends Entry {
 }
 
 class MemberModel extends EntryModel {
-  static type = EntryType.Member;
-  static properties = {
-    did: {
-      predicate: DID,
-      type: String,
-      resolve: false,
-    },
-  };
+  static get type() {
+    return EntryType.Member;
+  }
+
+  static get properties() {
+    return {
+      did: {
+        predicate: DID,
+        type: String,
+        resolve: false,
+      },
+    };
+  }
 
   async create(data: { did: string }): Promise<Member> {
     return super.create(data) as Promise<Member>;

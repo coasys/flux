@@ -34,10 +34,12 @@ export default class Model {
   private unsubscribeCb = null;
   private isSubcribing = false;
   private listeners = { add: {}, remove: {} } as Listeners;
-  static type: EntryType;
-  static properties: {
-    [x: string]: ModelProperty;
-  };
+  static get type(): EntryType | null {
+    return null;
+  }
+  static get properties(): { [x: string]: ModelProperty } {
+    return {};
+  }
 
   constructor(props: ModelProps) {
     this.perspectiveUuid = props.perspectiveUuid;
@@ -126,7 +128,7 @@ export default class Model {
         properties: this.constructor.properties,
       });
       return result.length === 0 ? null : result[0];
-    })
+    });
   }
 
   async getAll(source?: string): Promise<Entry[]> {

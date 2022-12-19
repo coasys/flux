@@ -14,21 +14,25 @@ export interface Message extends Entry {
 }
 
 class MessageModel extends EntryModel {
-  static type = EntryType.Message;
-  static properties = {
-    body: {
-      predicate: BODY,
-      type: String,
-      resolve: true,
-      languageAddress: "literal",
-    },
-    replies: {
-      predicate: REPLY_TO,
-      type: String,
-      collection: true,
-      resolve: false,
-    },
-  };
+  static get type() {
+    return EntryType.Message;
+  }
+  static get properties() {
+    return {
+      body: {
+        predicate: BODY,
+        type: String,
+        resolve: true,
+        languageAddress: "literal",
+      },
+      replies: {
+        predicate: REPLY_TO,
+        type: String,
+        collection: true,
+        resolve: false,
+      },
+    };
+  }
 
   async create(data: { body: string }): Promise<Message> {
     return super.create(data) as Promise<Message>;

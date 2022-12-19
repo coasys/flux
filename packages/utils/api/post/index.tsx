@@ -13,51 +13,55 @@ import { EntryType, Post } from "../../types";
 import MessageModel from "../message";
 
 class PostModel extends EntryModel {
-  static type = EntryType.Post;
-  static properties = {
-    title: {
-      predicate: TITLE,
-      type: String,
-      resolve: true,
-      languageAddress: "literal",
-    },
-    body: {
-      predicate: BODY,
-      type: String,
-      resolve: true,
-      languageAddress: "literal",
-    },
-    image: {
-      predicate: IMAGE,
-      type: String,
-      resolve: false,
-      languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
-    },
-    startDate: {
-      predicate: START_DATE,
-      type: String,
-      resolve: true,
-      languageAddress: "literal",
-    },
-    endDate: {
-      predicate: END_DATE,
-      type: String,
-      resolve: true,
-      languageAddress: "literal",
-    },
-    url: {
-      predicate: URL,
-      type: String,
-      resolve: true,
-      languageAddress: "literal",
-    },
-    comments: {
-      predicate: EntryType.Message,
-      type: String,
-      resolve: false,
-      collection: true,
-    },
-  };
+  static get type() {
+    return EntryType.Post;
+  }
+  static get properties() {
+    return {
+      title: {
+        predicate: TITLE,
+        type: String,
+        resolve: true,
+        languageAddress: "literal",
+      },
+      body: {
+        predicate: BODY,
+        type: String,
+        resolve: true,
+        languageAddress: "literal",
+      },
+      image: {
+        predicate: IMAGE,
+        type: String,
+        resolve: false,
+        languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
+      },
+      startDate: {
+        predicate: START_DATE,
+        type: String,
+        resolve: true,
+        languageAddress: "literal",
+      },
+      endDate: {
+        predicate: END_DATE,
+        type: String,
+        resolve: true,
+        languageAddress: "literal",
+      },
+      url: {
+        predicate: URL,
+        type: String,
+        resolve: true,
+        languageAddress: "literal",
+      },
+      comments: {
+        predicate: EntryType.Message,
+        type: String,
+        resolve: false,
+        collection: true,
+      },
+    };
+  }
 
   create(data: {
     title: string;
