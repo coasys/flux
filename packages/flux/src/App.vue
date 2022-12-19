@@ -35,6 +35,14 @@
   >
     <j-text>{{ ui.toast.message }}</j-text>
   </j-toast>
+  <j-modal :open="showPrompt">
+    <header slot="header">
+      <j-text variant="heading">Join the default Flux Alpha Community</j-text>
+      <j-button @click="joinTestingCommunity()">
+        Join
+      </j-button>
+    </header>
+  </j-modal>
 </template>
 
 <script lang="ts">
@@ -50,12 +58,11 @@ import {
   onAuthStateChanged,
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import "@perspect3vism/ad4m-connect/dist/web.js";
-import { Community, EntryType } from "utils/types";
-import MessageModel from "utils/api/message";
+import { EntryType } from "utils/types";
 import subscribeToLinks from "utils/api/subscribeToLinks";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import semver from "semver";
-import { EXPECTED_AD4M_VERSION } from "utils/constants/sdna";
+import { EXPECTED_AD4M_VERSION, COMMUNITY_TEST_VERSION, DEFAULT_TESTING_NEIGHBOURHOOD } from "utils/constants/general";
 
 export default defineComponent({
   name: "App",
@@ -67,6 +74,7 @@ export default defineComponent({
     const dataStore = useDataStore();
     const userStore = useUserStore();
     const watcherStarted = ref(false);
+    const showPrompt = ref(false);
 
     const ad4mConnect = ref(null);
 
@@ -79,6 +87,7 @@ export default defineComponent({
       dataStore,
       userStore,
       watcherStarted,
+      showPrompt
     };
   },
   created() {
@@ -88,6 +97,35 @@ export default defineComponent({
     onAuthStateChanged(async (event: string) => {
       if (event === "connected_with_capabilities") {
         if (!this.watcherStarted) {
+          const client = await getAd4mClient();
+
+          //Do version checking for ad4m / flux compatibility
+          const version = (await client.runtime.info()).ad4mExecutorVersion;
+          console.log("Running AD4M version:", version);
+          if (semver.gt(EXPECTED_AD4M_VERSION, version)) {
+            console.error("AD4M version is not supported");
+            this.appStore.setGlobalError({
+              show: true,
+              message: "AD4M version is not supported",
+            });
+          } else {
+            this.appStore.setGlobalError({
+              show: false,
+              message: "",
+            });
+          }
+
+          //Check that user already has joined default testing community, if not then show prompt allowing user to join
+          //With a button click
+          if (!this.appStore.hasShownDefaultJoinPrompt) {
+            this.appStore.hasShownDefaultJoinPrompt = true;
+            this.showPrompt = true;
+          }
+
+          if (COMMUNITY_TEST_VERSION > this.appStore.seenCommunityTestVersion) {
+            this.showPrompt = true;
+          }
+
           this.startWatcher();
           this.watcherStarted = true;
           hydrateState();
@@ -107,26 +145,27 @@ export default defineComponent({
     },
   },
   methods: {
+    async joinTestingCommunity() {
+      const client = await getAd4mClient();
+      const existingPerspectives = await client.perspective.all();
+      if (
+        existingPerspectives
+          .filter(perspective => perspective.neighbourhood!.linkLanguage === DEFAULT_TESTING_NEIGHBOURHOOD)
+      ) {
+        console.warn("This user has already joined the testing community... aborting");
+        return;
+      } 
+
+      await client.neighbourhood.joinFromUrl(DEFAULT_TESTING_NEIGHBOURHOOD);
+      this.appStore.seenCommunityTestVersion = COMMUNITY_TEST_VERSION;
+      this.appStore.hasShownDefaultJoinPrompt = true;
+    },
     connectToAd4m() {
       // @ts-ignore
       this.ad4mConnect?.connect();
     },
     async startWatcher() {
       const client = await getAd4mClient();
-      const version = (await client.runtime.info()).ad4mExecutorVersion;
-      console.log("Running AD4M version:", version);
-      if (semver.gt(EXPECTED_AD4M_VERSION, version)) {
-        console.error("AD4M version is not supported");
-        this.appStore.setGlobalError({
-          show: true,
-          message: "AD4M version is not supported",
-        });
-      } else {
-        this.appStore.setGlobalError({
-          show: false,
-          message: "",
-        });
-      }
       const watching: string[] = [];
 
       watch(

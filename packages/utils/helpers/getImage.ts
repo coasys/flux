@@ -25,7 +25,7 @@ export async function getImage(expUrl: string): Promise<string> {
           const image = await fetchFromPublicGateway(expUrl);
           dexie.save(expUrl, image);
           resolve(image);
-        }, 1000);
+        }, 5000);
 
         const dexie = new DexieIPFS("ipfs");
         const cachedImage = await dexie.get(expUrl);

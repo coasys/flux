@@ -7,10 +7,6 @@ import {
 import { useAppStore } from "..";
 
 export default {
-  setApplicationStartTime(payload: Date): void {
-    const state = useAppStore();
-    state.applicationStartTime = payload;
-  },
   toggleSidebar(): void {
     const state = useAppStore();
     state.showSidebar = !state.showSidebar;
