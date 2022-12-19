@@ -121,7 +121,7 @@ export default defineComponent({
 
           const existingPerspectives = await client.perspective.all();
           const defaultTestingCommunity = existingPerspectives.find(
-            (p) => p.neighbourhood!.linkLanguage === DEFAULT_TESTING_NEIGHBOURHOOD
+            (p) => p.sharedUrl === DEFAULT_TESTING_NEIGHBOURHOOD
           );
 
           //Check that user already has joined default testing community, if not then show prompt allowing user to join
