@@ -17,10 +17,9 @@ export interface Payload {
 }
 
 export function findNeighbourhood(str: string) {
-  const URIregexp =
-    /(?<=\<span data-mention="neighbourhood"\>)(.|\n)*?(?=<\/span\>)/gm;
+  const URIregexp = '/(<span data-mention="neighbourhood"\>.*?<\/span\>)/';
   const URLregexp = /<a[^>]+href=\"(.*?)\"[^>]*>(.*)?<\/a>/gm;
-  const uritokens = Array.from(str.matchAll(URIregexp));
+  const uritokens = Array.from(str.split(URIregexp).filter(Boolean));
   const urlTokens = Array.from(str.matchAll(URLregexp));
 
   const urifiltered = [];
