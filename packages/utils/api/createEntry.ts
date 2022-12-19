@@ -26,15 +26,7 @@ export async function createEntry(entry: EntryInput): Promise<Entry> {
 
   const allLinks = [...propertyLinks, entryLink, typeLink];
 
-  const linkPromises = allLinks.map(async (link) => {
-    try {
-      return client.perspective.addLink(entry.perspectiveUuid, link);
-    } catch (e) {
-      console.log(e);
-    }
-  });
-
-  const createdLinks = await Promise.all(linkPromises);
+  const createdLinks = await client.perspective.addLinks(entry.perspectiveUuid, allLinks);
 
   return {
     id,

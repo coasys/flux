@@ -22,22 +22,20 @@ export default async function ({
     
     const expUrl = await client.expression.create(message, 'literal');
 
-    await client.perspective.addLink(
-      perspectiveUuid,
+    const links = [
       new Link({
         source: channelId,
         target: expUrl,
         predicate: EntryType.Message,
-      })
-    );
-    const link = await client.perspective.addLink(
-      perspectiveUuid,
+      }),
       new Link({
         source: replyUrl,
         target: expUrl,
         predicate: REPLY_TO,
       })
-    );
+    ];
+    const createdLinks = await client.perspective.addLinks(perspectiveUuid, links);
+    const link = createdLinks[1];
 
     const messageParsed = getMessage(link);
 

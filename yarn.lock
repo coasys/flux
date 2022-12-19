@@ -1411,10 +1411,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@perspect3vism/ad4m-connect@0.2.3":
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.2.3.tgz#0f0ab7ee6cdc34f33752bc8fa35ad9594b41c39e"
-  integrity sha512-jgJXRcnc076vbknmNbh/2WJDadBNS1PpjK9foPYiFacMTHqp6/WrYKzkJWUuszB2hbOY205RKmF5K+VWcblPYQ==
+"@perspect3vism/ad4m-connect@0.2.5":
+  version "0.2.5"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.2.5.tgz#41e9decc84949c35391e38658d9b2db1dc8423bf"
+  integrity sha512-7bYgs5qwDHwWdQozNGxHWbDBFwS+ZYhVPzC8DZMCnWQYET5ngGfLSaPMf9+64NaIGaRNsWBbWVkwKRoGE46FGQ==
   dependencies:
     auto-bind "^5.0.1"
     electron "^20.0.3"
@@ -1422,10 +1422,10 @@
     html5-qrcode "^2.2.1"
     lit "^2.3.1"
 
-"@perspect3vism/ad4m@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.2.0.tgz#4d10afe2a4e2b1bd697394009cfd675e42256813"
-  integrity sha512-F4a1q8stazNXsVRVSjV3YXPykMGKib6SZ68+hhAh4P9SAkPKbMfwgC8fQQy3GZkGwiKEsRBvHb+fGhLKVqjkug==
+"@perspect3vism/ad4m@0.2.5":
+  version "0.2.5"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.2.5.tgz#a723936cd630d899cc73d4e46fe1537509b2c2d6"
+  integrity sha512-NkLziKaZmNQ/MCsaCS3BpwubIdF7QU7BwbcUwp+loxiT5GniU1gcqcewrFRRd0ZU18aHcLTZHmTHo3N9x3OKkg==
   dependencies:
     "@apollo/client" "3.6.9"
     "@holochain/client" "0.3.2"
