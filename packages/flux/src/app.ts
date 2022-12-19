@@ -2,7 +2,6 @@ import { createApp, h, watch } from "vue";
 import App from "./App.vue";
 import router from "./router";
 
-import "construct-style-sheets-polyfill";
 import "@junto-foundation/junto-elements";
 import "@junto-foundation/junto-elements/dist/main.css";
 
