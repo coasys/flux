@@ -97,6 +97,10 @@ export default defineComponent({
     onAuthStateChanged(async (event: string) => {
       if (event === "connected_with_capabilities") {
         if (!this.watcherStarted) {
+          this.startWatcher();
+          this.watcherStarted = true;
+          hydrateState();
+
           const client = await getAd4mClient();
 
           //Do version checking for ad4m / flux compatibility
@@ -115,20 +119,21 @@ export default defineComponent({
             });
           }
 
+          const existingPerspectives = await client.perspective.all();
+          const defaultTestingCommunity = existingPerspectives.find(
+            (p) => p.neighbourhood!.linkLanguage === DEFAULT_TESTING_NEIGHBOURHOOD
+          );
+
           //Check that user already has joined default testing community, if not then show prompt allowing user to join
           //With a button click
-          if (!this.appStore.hasShownDefaultJoinPrompt) {
+          if (!this.appStore.hasShownDefaultJoinPrompt && !defaultTestingCommunity) {
             this.appStore.hasShownDefaultJoinPrompt = true;
             this.showPrompt = true;
           }
 
-          if (COMMUNITY_TEST_VERSION > this.appStore.seenCommunityTestVersion) {
+          if (COMMUNITY_TEST_VERSION > this.appStore.seenCommunityTestVersion && !defaultTestingCommunity) {
             this.showPrompt = true;
           }
-
-          this.startWatcher();
-          this.watcherStarted = true;
-          hydrateState();
         }
       }
     });
@@ -147,14 +152,6 @@ export default defineComponent({
   methods: {
     async joinTestingCommunity() {
       const client = await getAd4mClient();
-      const existingPerspectives = await client.perspective.all();
-      if (
-        existingPerspectives
-          .filter(perspective => perspective.neighbourhood!.linkLanguage === DEFAULT_TESTING_NEIGHBOURHOOD)
-      ) {
-        console.warn("This user has already joined the testing community... aborting");
-        return;
-      } 
 
       await client.neighbourhood.joinFromUrl(DEFAULT_TESTING_NEIGHBOURHOOD);
       this.appStore.seenCommunityTestVersion = COMMUNITY_TEST_VERSION;
