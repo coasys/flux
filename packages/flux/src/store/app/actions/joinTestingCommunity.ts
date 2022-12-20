@@ -3,13 +3,12 @@ import {
   getAd4mClient
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import { useAppStore } from "..";
+import joinCommunity from "utils/api/joinCommunity";
 
 export async function joinTestingCommunity() {
     const store = useAppStore();
     try {
-        const client = await getAd4mClient();
-
-        await client.neighbourhood.joinFromUrl(DEFAULT_TESTING_NEIGHBOURHOOD);
+        await joinCommunity({joiningLink: DEFAULT_TESTING_NEIGHBOURHOOD});
         store.setHasSeenTestCommunity(COMMUNITY_TEST_VERSION);
         //Stop showing the disclaimer
         store.setShowDisclaimer(false);
