@@ -252,7 +252,6 @@ export default defineComponent({
       });
 
       this.channelModel.onAdded((channel: Channel) => {
-        console.log("on channel add");
         this.dataStore.addChannel({
           communityId: id,
           channel: {

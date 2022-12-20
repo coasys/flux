@@ -15,8 +15,6 @@ import {
 } from "../constants/communityPredicates";
 import { EntryType } from "../types";
 
-export const EXPECTED_AD4M_VERSION = "0.2.5";
-
 export const emojiCount = 3;
 export const emoji = "1f44d";
 export const DEFAULT_LIMIT = 50;

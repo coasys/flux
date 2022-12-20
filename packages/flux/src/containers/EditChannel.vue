@@ -83,7 +83,6 @@ export default defineComponent({
   },
   methods: {
     async updateChannel() {
-      console.log({ views: this.views });
       this.isSaving = true;
       this.dataStore
         .updateChannel({

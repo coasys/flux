@@ -1,19 +1,26 @@
 <template>
   <router-view :key="componentKey" @connectToAd4m="connectToAd4m"></router-view>
-  <div class="global-loading" v-if="ui.showGlobalLoading">
-    <div class="global-loading__backdrop"></div>
-    <div class="global-loading__content">
+  <div class="global-modal" v-if="ui.showGlobalLoading">
+    <div class="global-modal__backdrop"></div>
+    <div class="global-modal__content">
       <j-flex a="center" direction="column" gap="1000">
         <j-spinner size="lg"> </j-spinner>
         <j-text size="700">Please wait...</j-text>
       </j-flex>
     </div>
   </div>
-  <div class="global-loading" v-if="ui.globalError.show">
-    <div class="global-loading__backdrop"></div>
-    <div class="global-loading__content">
+  <div class="global-modal" v-if="ui.globalError.show">
+    <div class="global-modal__backdrop"></div>
+    <div class="global-modal__content">
       <j-flex a="center" direction="column" gap="1000">
-        <j-text size="700">{{ui.globalError.message}}</j-text>
+        <j-icon
+          name="exclamation-triangle"
+          size="xl"
+          color="danger-500"
+        ></j-icon>
+        <j-text color="danger-500" weight="600" size="700">
+          {{ ui.globalError.message }}
+        </j-text>
       </j-flex>
     </div>
   </div>
@@ -50,12 +57,11 @@ import {
   onAuthStateChanged,
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import "@perspect3vism/ad4m-connect/dist/web.js";
-import { Community, EntryType } from "utils/types";
-import MessageModel from "utils/api/message";
+import { EntryType } from "utils/types";
 import subscribeToLinks from "utils/api/subscribeToLinks";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import semver from "semver";
-import { EXPECTED_AD4M_VERSION } from "utils/constants/sdna";
+import { EXPECTED_AD4M_VERSION } from "utils/constants/general";
 
 export default defineComponent({
   name: "App",
@@ -78,7 +84,7 @@ export default defineComponent({
       route,
       dataStore,
       userStore,
-      watcherStarted,
+      watcherStarted
     };
   },
   created() {
@@ -91,6 +97,26 @@ export default defineComponent({
           this.startWatcher();
           this.watcherStarted = true;
           hydrateState();
+
+          const client = await getAd4mClient();
+
+          //Do version checking for ad4m / flux compatibility
+          const version = (await client.runtime.info()).ad4mExecutorVersion;
+          console.log("Running AD4M version:", version);
+          if (semver.gt(EXPECTED_AD4M_VERSION, version)) {
+            //TODO: here we need to provide a link to download the latest version of ad4m with correct OS version
+            //from github
+            console.error("AD4M version is not supported... Please update AD4MIN before continuing.");
+            this.appStore.setGlobalError({
+              show: true,
+              message: "AD4M version is not supported... Please update AD4MIN before continuing.",
+            });
+          } else {
+            this.appStore.setGlobalError({
+              show: false,
+              message: "",
+            });
+          }
         }
       }
     });
@@ -113,20 +139,6 @@ export default defineComponent({
     },
     async startWatcher() {
       const client = await getAd4mClient();
-      const version = (await client.runtime.info()).ad4mExecutorVersion;
-      console.log("Running AD4M version:", version);
-      if (semver.gt(EXPECTED_AD4M_VERSION, version)) {
-        console.error("AD4M version is not supported");
-        this.appStore.setGlobalError({
-          show: true,
-          message: "AD4M version is not supported",
-        });
-      } else {
-        this.appStore.setGlobalError({
-          show: false,
-          message: "",
-        });
-      }
       const watching: string[] = [];
 
       watch(
@@ -228,7 +240,8 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-.global-loading {
+.global-modal {
+  z-index: 999;
   width: 100vw;
   height: 100vh;
   position: absolute;
@@ -238,22 +251,22 @@ body {
   place-items: center;
 }
 
-.global-loading__backdrop {
+.global-modal__backdrop {
   position: absolute;
   left: 0;
   height: 0;
   width: 100%;
   height: 100%;
   background: var(--j-color-white);
-  opacity: 0.8;
+  opacity: 0.9;
   backdrop-filter: blur(15px);
 }
 
-.global-loading__content {
+.global-modal__content {
   position: relative;
 }
 
-.global-loading j-spinner {
+.global-modal j-spinner {
   --j-spinner-size: 80px;
 }
 </style>

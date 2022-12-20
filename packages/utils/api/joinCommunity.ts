@@ -27,15 +27,11 @@ export default async ({ joiningLink }: Payload): Promise<Community> => {
       perspective.neighbourhood!.meta.links
     );
 
-    console.log({ perspective: perspective.uuid });
-
     const Community = new CommunityModel({ perspectiveUuid: perspective.uuid });
 
     await Community.addMember({ did: agent.did });
 
     const community = await Community.get();
-
-    console.log(community);
 
     return {
       uuid: perspective!.uuid,

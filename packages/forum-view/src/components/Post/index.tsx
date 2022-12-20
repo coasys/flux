@@ -73,8 +73,6 @@ export default function Post({
   const hasUrl = post.url;
   const hasDates = post.startDate && post.endDate;
 
-  console.log({ post: { ...post }, url: post.url, title: post.title });
-
   return (
     <div class={styles.post}>
       <j-box pb="500">

@@ -13,16 +13,6 @@ describe("App Mutations", () => {
     setActivePinia(store);
   });
 
-  test("setApplicationStartTime", () => {
-    const appStore = useAppStore();
-
-    const currentDate = new Date();
-
-    appStore.setApplicationStartTime(currentDate);
-
-    expect(appStore.applicationStartTime).toStrictEqual(currentDate);
-  });
-
   test("toggleSidebar", () => {
     const appStore = useAppStore();
 
