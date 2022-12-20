@@ -16,25 +16,38 @@ export interface Payload {
   isHidden: boolean;
 }
 
+function isValidUrl(urlString) {
+  var urlPattern = new RegExp(
+    "^(https?:\\/\\/)?" + // validate protocol
+      "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // validate domain name
+      "((\\d{1,3}\\.){3}\\d{1,3}))" + // validate OR ip (v4) address
+      "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // validate port and path
+      "(\\?[;&a-z\\d%_.~+=-]*)?" + // validate query string
+      "(\\#[-a-z\\d_]*)?$",
+    "i"
+  ); // validate fragment locator
+  return !!urlPattern.test(urlString);
+}
+
 export function findNeighbourhood(str: string) {
-  const URIregexp = '/(<span data-mention="neighbourhood"\>.*?<\/span\>)/';
+  const URIregexp = /<span data-mention="neighbourhood"[^>]*>([^<]*)<\/span>/g;
   const URLregexp = /<a[^>]+href=\"(.*?)\"[^>]*>(.*)?<\/a>/gm;
-  const uritokens = Array.from(str.split(URIregexp).filter(Boolean));
+  const uritokens = Array.from(str.matchAll(URIregexp));
   const urlTokens = Array.from(str.matchAll(URLregexp));
 
   const urifiltered = [];
   const urlfiltered = [];
 
-  const urlRex =
-    /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/;
   for (const match of uritokens) {
-    if (!urlRex.test(match[0]) && match[0].trim().length > 0) {
-      urifiltered.push(match[0]);
+    if (!isValidUrl(match[1])) {
+      urifiltered.push(match[1]);
     }
   }
 
   for (const match of urlTokens) {
-    urlfiltered.push(match[1]);
+    if (isValidUrl(match[1])) {
+      urlfiltered.push(match[1]);
+    }
   }
 
   return [urifiltered, urlfiltered];
@@ -78,20 +91,20 @@ export default async function ({ message, isHidden }: Payload) {
         data = await getCacheLinks(url);
 
         if (!data) {
-          data = await fetch(
-            "https://jsonlink.io/api/extract?url=" + url
-          ).then((res) => res.json());
-          
+          data = await fetch("https://jsonlink.io/api/extract?url=" + url).then(
+            (res) => res.json()
+          );
+
           cacheLinks(url, data);
-        } 
+        }
 
         hoods.push({
-          type: 'link',
-          name: data.title || "", 
+          type: "link",
+          name: data.title || "",
           description: data.description || "",
           image: data.images[0] || "",
-          url
-        })
+          url,
+        });
       }
     }
 
