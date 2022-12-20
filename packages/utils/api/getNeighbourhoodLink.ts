@@ -87,8 +87,7 @@ export default async function ({ message, isHidden }: Payload) {
       }
 
       for (const url of urls) {
-        let data = undefined;
-        data = await getCacheLinks(url);
+        let data = await getCacheLinks(url);
 
         if (!data) {
           data = await fetch("https://jsonlink.io/api/extract?url=" + url).then(
@@ -98,13 +97,15 @@ export default async function ({ message, isHidden }: Payload) {
           cacheLinks(url, data);
         }
 
-        hoods.push({
-          type: "link",
-          name: data.title || "",
-          description: data.description || "",
-          image: data.images[0] || "",
-          url,
-        });
+        if (data.title) {
+          hoods.push({
+            type: "link",
+            name: data.title || "",
+            description: data.description || "",
+            image: data.images[0] || "",
+            url,
+          });
+        }
       }
     }
 
