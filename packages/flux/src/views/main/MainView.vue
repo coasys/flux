@@ -126,6 +126,7 @@ export default defineComponent({
     ...mapActions(useAppStore, [
       "setShowEditProfile",
       "setShowSettings",
+      "setShowWarningDisclaimer",
       "setShowCreateCommunity",
       "setShowDisclaimer",
       "joinTestingCommunity",
