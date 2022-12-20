@@ -162,6 +162,21 @@ export default function CreatePost({
                 name="title"
               ></j-input>
             </j-box>
+            {showUrl && (
+              <j-box pb="500">
+                <j-input
+                  ref={(ref) => setInputRef(ref, "url")}
+                  autovalidate
+                  size="xl"
+                  name="url"
+                  placeholder="Url"
+                  onInput={handleChange}
+                  value={state.url}
+                  required
+                  type="url"
+                ></j-input>
+              </j-box>
+            )}
             {showImage && (
               <j-box pt="300">
                 <FileUpload onChange={handleImage}></FileUpload>
@@ -174,19 +189,6 @@ export default function CreatePost({
                   setState((oldState) => ({ ...oldState, body: e }))
                 }
               ></Editor>
-            )}
-            {showUrl && (
-              <j-input
-                ref={(ref) => setInputRef(ref, "url")}
-                autovalidate
-                size="xl"
-                name="url"
-                placeholder="Url"
-                onInput={handleChange}
-                value={state.url}
-                required
-                type="url"
-              ></j-input>
             )}
             {showStartDate && (
               <j-flex a="end" gap="400">
