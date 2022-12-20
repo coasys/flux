@@ -4,6 +4,7 @@ import {
   ThemeState,
   CurrentThemeState,
 } from "@/store/types";
+import { COMMUNITY_TEST_VERSION } from "utils/constants/general";
 import { useAppStore } from "..";
 
 export default {
@@ -87,6 +88,14 @@ export default {
     const state = useAppStore();
     state.modals.showDisclaimer = payload;
   },
+  setShowWarningDisclaimer(payload: boolean): void {
+    const state = useAppStore();
+    state.modals.showWarningDisclaimer = payload;
+  },
+  setHasShownDefaultJoinPrompt(payload: boolean): void {
+    const state = useAppStore();
+    state.hasShownDefaultJoinPrompt = payload;
+  },
   setShowSettings(payload: boolean): void {
     const state = useAppStore();
     state.modals.showSettings = payload;
@@ -107,4 +116,10 @@ export default {
     const state = useAppStore();
     state.notification.globalNotification = payload;
   },
+  setHasSeenTestCommunity(seenCommunityVersion: number): void {
+    const state = useAppStore();
+    state.seenCommunityTestVersion = seenCommunityVersion;
+    state.hasShownDefaultJoinPrompt = true;
+    state.seenCommunityTestVersion = COMMUNITY_TEST_VERSION;
+  }
 };

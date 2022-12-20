@@ -35,14 +35,6 @@
   >
     <j-text>{{ ui.toast.message }}</j-text>
   </j-toast>
-  <j-modal :open="showPrompt">
-    <header slot="header">
-      <j-text variant="heading">Join the default Flux Alpha Community</j-text>
-      <j-button @click="joinTestingCommunity()">
-        Join
-      </j-button>
-    </header>
-  </j-modal>
 </template>
 
 <script lang="ts">
@@ -62,7 +54,7 @@ import { EntryType } from "utils/types";
 import subscribeToLinks from "utils/api/subscribeToLinks";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import semver from "semver";
-import { EXPECTED_AD4M_VERSION, COMMUNITY_TEST_VERSION, DEFAULT_TESTING_NEIGHBOURHOOD } from "utils/constants/general";
+import { EXPECTED_AD4M_VERSION } from "utils/constants/general";
 
 export default defineComponent({
   name: "App",
@@ -74,7 +66,6 @@ export default defineComponent({
     const dataStore = useDataStore();
     const userStore = useUserStore();
     const watcherStarted = ref(false);
-    const showPrompt = ref(false);
 
     const ad4mConnect = ref(null);
 
@@ -86,8 +77,7 @@ export default defineComponent({
       route,
       dataStore,
       userStore,
-      watcherStarted,
-      showPrompt
+      watcherStarted
     };
   },
   created() {
@@ -118,22 +108,6 @@ export default defineComponent({
               message: "",
             });
           }
-
-          const existingPerspectives = await client.perspective.all();
-          const defaultTestingCommunity = existingPerspectives.find(
-            (p) => p.sharedUrl === DEFAULT_TESTING_NEIGHBOURHOOD
-          );
-
-          //Check that user already has joined default testing community, if not then show prompt allowing user to join
-          //With a button click
-          if (!this.appStore.hasShownDefaultJoinPrompt && !defaultTestingCommunity) {
-            this.appStore.hasShownDefaultJoinPrompt = true;
-            this.showPrompt = true;
-          }
-
-          if (COMMUNITY_TEST_VERSION > this.appStore.seenCommunityTestVersion && !defaultTestingCommunity) {
-            this.showPrompt = true;
-          }
         }
       }
     });
@@ -150,13 +124,6 @@ export default defineComponent({
     },
   },
   methods: {
-    async joinTestingCommunity() {
-      const client = await getAd4mClient();
-
-      await client.neighbourhood.joinFromUrl(DEFAULT_TESTING_NEIGHBOURHOOD);
-      this.appStore.seenCommunityTestVersion = COMMUNITY_TEST_VERSION;
-      this.appStore.hasShownDefaultJoinPrompt = true;
-    },
     connectToAd4m() {
       // @ts-ignore
       this.ad4mConnect?.connect();
