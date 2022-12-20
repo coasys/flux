@@ -17,7 +17,10 @@
     </j-modal>
 
     <j-modal
-      :open="(modals.showDisclaimer && (modals.showWarningDisclaimer || showJoinCommunity))"
+      :open="
+        modals.showDisclaimer &&
+        (modals.showWarningDisclaimer || showJoinCommunity)
+      "
       @toggle="(e: any) => {
         setShowDisclaimer(e.target.open)
         setShowWarningDisclaimer(e.target.open)
@@ -40,19 +43,19 @@
             <li>Messages might not always be delivered reliably</li>
           </ul>
         </div>
-        <br v-if="(modals.showWarningDisclaimer && showJoinCommunity)">
-        <hr v-if="(modals.showWarningDisclaimer && showJoinCommunity)">
-        <br v-if="(modals.showWarningDisclaimer && showJoinCommunity)">
+        <br v-if="modals.showWarningDisclaimer && showJoinCommunity" />
+        <hr v-if="modals.showWarningDisclaimer && showJoinCommunity" />
+        <br v-if="modals.showWarningDisclaimer && showJoinCommunity" />
         <j-box pb="500" v-if="showJoinCommunity">
           <j-flex gap="400" a="center">
             <j-icon name="arrow-down-circle" size="xl" />
             <j-text nomargin variant="heading-lg">Testing Community</j-text>
           </j-flex>
-          <br>
+          <br />
           <j-text variant="ingress">
             Join the Flux Alpha testing community.
           </j-text>
-          <j-button @click="joinTestingCommunity()">
+          <j-button variant="primary" @click="joinTestingCommunity()">
             Join
           </j-button>
         </j-box>
@@ -64,34 +67,31 @@
 <script lang="ts">
 import AppLayout from "@/layout/AppLayout.vue";
 import MainSidebar from "./main-sidebar/MainSidebar.vue";
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 
 import CreateCommunity from "@/containers/CreateCommunity.vue";
 import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { COMMUNITY_TEST_VERSION, DEFAULT_TESTING_NEIGHBOURHOOD } from "utils/constants/general";
+import {
+  COMMUNITY_TEST_VERSION,
+  DEFAULT_TESTING_NEIGHBOURHOOD,
+} from "utils/constants/general";
 
 export default defineComponent({
   name: "MainAppView",
   setup() {
-    const appStore = useAppStore();
-
     return {
-      appStore,
+      appStore: useAppStore(),
+      isInit: ref(false),
+      showJoinCommunity: ref(false),
     };
   },
   components: {
     MainSidebar,
     AppLayout,
     CreateCommunity,
-  },
-  data() {
-    return {
-      isInit: false,
-      showJoinCommunity: false
-    };
   },
   async created() {
     const client = await getAd4mClient();
@@ -100,15 +100,18 @@ export default defineComponent({
       (p) => p.sharedUrl === DEFAULT_TESTING_NEIGHBOURHOOD
     );
 
-    const appStore = useAppStore();
+    const appStore = this.appStore;
     //Check that user already has joined default testing community
-    if (!this.appStore.hasShownDefaultJoinPrompt && !defaultTestingCommunity) {
+    if (!appStore.hasShownDefaultJoinPrompt && !defaultTestingCommunity) {
       appStore.setShowDisclaimer(true);
       appStore.setHasShownDefaultJoinPrompt(true);
       this.showJoinCommunity = true;
     }
 
-    if (COMMUNITY_TEST_VERSION > this.appStore.seenCommunityTestVersion && !defaultTestingCommunity) {
+    if (
+      COMMUNITY_TEST_VERSION > appStore.seenCommunityTestVersion &&
+      !defaultTestingCommunity
+    ) {
       appStore.setShowDisclaimer(true);
       appStore.setHasShownDefaultJoinPrompt(true);
       this.showJoinCommunity = true;
@@ -117,7 +120,7 @@ export default defineComponent({
   computed: {
     modals(): ModalsState {
       return this.appStore.modals;
-    }
+    },
   },
   methods: {
     ...mapActions(useAppStore, [
@@ -125,7 +128,7 @@ export default defineComponent({
       "setShowSettings",
       "setShowCreateCommunity",
       "setShowDisclaimer",
-      "joinTestingCommunity"
+      "joinTestingCommunity",
     ]),
   },
 });
