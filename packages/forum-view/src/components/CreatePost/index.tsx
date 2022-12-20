@@ -22,6 +22,7 @@ export default function CreatePost({
   channelId,
   communityId,
   onPublished,
+  onCancel,
   initialType,
 }) {
   const inputRefs = useRef<{ [x: string]: { isValid: boolean; el: any } }>({});
@@ -124,35 +125,43 @@ export default function CreatePost({
 
   return (
     <div class={styles.createPost}>
-      <j-box p="800">
-        <j-box pt="800" pb="200">
+      <j-box px="400" py="600">
+        <j-box pb="600">
+          <j-text color="black" size="600" weight="600">
+            Create a Post
+          </j-text>
+        </j-box>
+        <j-box pt="500" pb="200">
           <j-tabs
+            full
             value={entryType}
             onChange={(e) => setEntryType(e.target.value)}
           >
             {postOptions.map((option) => {
               return (
-                <j-tab-item size="sm" value={option.value}>
-                  <j-icon slot="start" size="sm" name={option.icon}></j-icon>
+                <j-tab-item variant="button" size="sm" value={option.value}>
+                  <j-icon slot="start" size="md" name={option.icon}></j-icon>
                   {option.label}
                 </j-tab-item>
               );
             })}
           </j-tabs>
         </j-box>
-        <j-box mt="500">
+        <j-box mt="800">
           <j-flex direction="column" gap="400">
-            <j-input
-              class={styles.titleInput}
-              required
-              autovalidate
-              ref={(ref) => setInputRef(ref, "title")}
-              placeholder="Add a Title"
-              onInput={handleChange}
-              value={state.title}
-              size="xl"
-              name="title"
-            ></j-input>
+            <j-box pb="500">
+              <j-input
+                class={styles.titleInput}
+                required
+                autovalidate
+                ref={(ref) => setInputRef(ref, "title")}
+                placeholder="Add a Title"
+                onInput={handleChange}
+                value={state.title}
+                size="xl"
+                name="title"
+              ></j-input>
+            </j-box>
             {showImage && (
               <j-box pt="300">
                 <FileUpload onChange={handleImage}></FileUpload>
@@ -160,6 +169,7 @@ export default function CreatePost({
             )}
             {showBody && (
               <Editor
+                style={{ minHeight: "200px" }}
                 onChange={(e) =>
                   setState((oldState) => ({ ...oldState, body: e }))
                 }
@@ -236,9 +246,9 @@ export default function CreatePost({
             )}
           </j-flex>
         </j-box>
-        <j-box mt="500">
+        <j-box mt="700">
           <j-flex direction="row" j="end" gap="300">
-            <j-button size="lg" variant="link">
+            <j-button onClick={() => onCancel()} size="lg" variant="link">
               Cancel
             </j-button>
             <j-button
@@ -248,7 +258,7 @@ export default function CreatePost({
               size="lg"
               variant="primary"
             >
-              Post
+              Publish
             </j-button>
           </j-flex>
         </j-box>

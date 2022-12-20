@@ -20,14 +20,18 @@ export default function PostList() {
     [posts.length]
   );
 
-  const gridClass = view === DisplayView.Grid ? style.grid : "";
+  const displayStyle: DisplayView =
+    view === DisplayView.Compact
+      ? style.compact
+      : view === DisplayView.Grid
+      ? style.grid
+      : style.card;
   const currentOption = displayOptions.find((o) => o.value === view);
 
   return (
     <div className={style.messageList}>
       <j-box pb="500">
-        <j-flex a="center" j="between">
-          <div></div>
+        <j-flex a="center">
           <j-popover>
             <j-button variant="ghost" slot="trigger">
               <j-icon size="sm" name={currentOption.icon}></j-icon>
@@ -71,7 +75,7 @@ export default function PostList() {
           </j-flex>
         </j-box>
       )}
-      <div className={[style.posts, gridClass].join(" ")}>
+      <div className={[style.posts, displayStyle].join(" ")}>
         {sortedPosts.map((post) => (
           <PostItem post={post} displayView={view}></PostItem>
         ))}

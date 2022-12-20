@@ -20,6 +20,10 @@
   grid-template-columns: 1fr;
 }
 
+.card .postImageWrapper:has(j-icon) {
+  display: none;
+}
+
 .compact {
   grid-template-columns: 1fr 3fr;
 }
@@ -34,7 +38,6 @@
 
 .postImageWrapper {
   background-color: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--j-border-radius);
   overflow: hidden;
   display: grid;
@@ -99,6 +102,15 @@
 .postDate {
   display: flex;
   gap: var(--j-space-200);
+}
+
+.postIcon {
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  display: grid;
+  place-items: center;
+  background-color: var(--j-color-ui-100);
 }
 
 .calendar {

@@ -53,7 +53,7 @@ export default function App({
       <AgentProvider>
         <CommunityProvider perspectiveUuid={perspective}>
           <ChannelProvider communityId={perspective} channelId={source}>
-            <div class={styles.container}>
+            <div className={styles.container}>
               <Main perspective={perspective} source={source}></Main>
             </div>
           </ChannelProvider>

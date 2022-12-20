@@ -85,7 +85,12 @@ export default function PostItem({ post, displayView }) {
           </div>
         )}
         {!showUrl && !showDates && !showImage && (
-          <j-icon size="xl" name="card-heading"></j-icon>
+          <j-icon
+            className={styles.postIcon}
+            size="xl"
+            color="ui-600"
+            name="card-heading"
+          ></j-icon>
         )}
       </div>
       <div class={styles.postContentWrapper}>

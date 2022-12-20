@@ -8,7 +8,6 @@ export enum PostOption {
   Text = "TEXT",
   Image = "IMAGE",
   Link = "LINK",
-  Event = "EVENT",
 }
 
 export const postOptions = [
@@ -26,11 +25,6 @@ export const postOptions = [
     label: "Link",
     value: PostOption.Link,
     icon: "link",
-  },
-  {
-    label: "Event",
-    value: PostOption.Event,
-    icon: "calendar-date",
   },
 ];
 

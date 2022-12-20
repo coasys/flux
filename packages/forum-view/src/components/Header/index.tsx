@@ -3,14 +3,13 @@ import styles from "./index.scss";
 import { AgentContext } from "utils/react";
 import Avatar from "../Avatar";
 import CreatePost from "../CreatePost";
-import { EntryType } from "utils/types";
 import { PostOption, postOptions } from "../../constants/options";
 import ChannelContext from "utils/react/ChannelContext";
 
 export default function Header() {
   const [initialType, setInitialType] = useState<PostOption>(PostOption.Text);
   const { state: agentState } = useContext(AgentContext);
-  const { state, methods } = useContext(ChannelContext);
+  const { state } = useContext(ChannelContext);
   const [open, setOpen] = useState(false);
 
   function handlePostClick(type) {
@@ -24,38 +23,37 @@ export default function Header() {
 
   return (
     <header class={styles.header}>
-      <j-flex a="start" gap="500">
-        <div>
-          <Avatar
-            size="lg"
-            did={agentState.did}
-            url={agentState.profile?.profileThumbnailPicture}
-          ></Avatar>
-        </div>
-        <div style="display: block; width: 100%;">
+      <j-flex a="center" gap="500">
+        <Avatar
+          size="lg"
+          did={agentState.did}
+          url={agentState.profile?.profileThumbnailPicture}
+        ></Avatar>
+        <j-flex a="center" gap="200" style="width: 100%">
           <j-input
             onFocus={() => handlePostClick(PostOption.Text)}
             full
             size="lg"
             placeholder="Create a post"
           ></j-input>
-          <j-box pb="400">
-            <j-flex wrap gap="200">
-              {postOptions.map((option) => {
+          <j-flex a="center" gap="200">
+            {postOptions
+              .filter((o) => o.value !== PostOption.Text)
+              .map((option) => {
                 return (
                   <j-button
+                    size="lg"
+                    square
                     onClick={() => handlePostClick(option.value)}
                     value={PostOption.Text}
                     variant="ghost"
                   >
-                    <j-icon slot="start" size="sm" name={option.icon}></j-icon>
-                    {option.label}
+                    <j-icon slot="start" size="md" name={option.icon}></j-icon>
                   </j-button>
                 );
               })}
-            </j-flex>
-          </j-box>
-        </div>
+          </j-flex>
+        </j-flex>
       </j-flex>
       <j-modal
         size="fullscreen"
@@ -64,6 +62,7 @@ export default function Header() {
       >
         {open && (
           <CreatePost
+            onCancel={() => setOpen(false)}
             communityId={state.communityId}
             channelId={state.channelId}
             initialType={initialType}

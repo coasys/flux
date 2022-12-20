@@ -88,7 +88,7 @@ const MenuBar = ({ editor }) => {
   );
 };
 
-export default ({ onChange }) => {
+export default ({ onChange, style = {} }) => {
   const editor = useEditor({
     extensions: [StarterKit, Link.configure({ autolink: true })],
     content: "",
@@ -104,9 +104,9 @@ export default ({ onChange }) => {
   }, [editor]);
 
   return (
-    <div class={styles.editorWrapper}>
+    <div className={styles.editorWrapper}>
       <MenuBar editor={editor} />
-      <EditorContent className={styles.editor} editor={editor} />
+      <EditorContent style={style} className={styles.editor} editor={editor} />
     </div>
   );
 };
