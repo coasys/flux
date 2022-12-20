@@ -61,10 +61,11 @@ export default async function createCommunity({
     }
 
     let thumbnail = "";
+    let compressedImage = "";
 
     if (image) {
-      const resizedImage = await resizeImage(dataURItoBlob(image), 100);
-      thumbnail = await blobToDataURL(resizedImage);
+      compressedImage = await blobToDataURL(await resizeImage(dataURItoBlob(image as string), 0.6));
+      thumbnail = await blobToDataURL(await resizeImage(dataURItoBlob(image as string), 0.3));
     }
 
     const Community = new CommunityModel({
@@ -74,7 +75,7 @@ export default async function createCommunity({
     const community = await Community.create({
       name,
       description,
-      image,
+      image: compressedImage,
       thumbnail,
     });
 

@@ -24,14 +24,16 @@ export default async function updateCommunityData(
     const Community = new CommunityModel({ perspectiveUuid: communityId });
 
     let thumb = undefined;
+    let compressedImage = undefined;
 
     if (update.image) {
-      const resizedImage = await resizeImage(dataURItoBlob(update.image), 100);
-      thumb = await blobToDataURL(resizedImage);
+      compressedImage = await blobToDataURL(await resizeImage(dataURItoBlob(update.image as string), 0.6));
+      thumb = await blobToDataURL(await resizeImage(dataURItoBlob(update.image as string), 0.3));
     }
 
     const { name, description, image, thumbnail } = await Community.update("", {
       ...update,
+      image: compressedImage,
       thumbnail: thumb,
     });
 
