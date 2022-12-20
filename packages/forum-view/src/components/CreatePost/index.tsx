@@ -5,6 +5,7 @@ import FileUpload from "../../components/FileUpload";
 import { parse } from "date-fns/esm";
 import styles from "./index.scss";
 import PostModel from "utils/api/post";
+import { blobToDataURL, dataURItoBlob, resizeImage } from "utils/helpers/profileHelpers";
 
 const initialState = {
   title: null,
@@ -107,12 +108,15 @@ export default function CreatePost({
     if (!files || !files[0]) return;
 
     const FR = new FileReader();
-    FR.addEventListener("load", function (evt) {
+    FR.addEventListener("load", async function (evt) {
+      const compressedImage = await blobToDataURL(await resizeImage(dataURItoBlob(evt.target.result as string), 0.6));
+
       setState({
         ...state,
-        image: evt.target.result,
+        image: compressedImage,
       });
     });
+    
     FR.readAsDataURL(files[0]);
   }
 
