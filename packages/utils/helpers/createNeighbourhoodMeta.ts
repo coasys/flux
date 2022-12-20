@@ -60,8 +60,7 @@ export async function createNeighbourhoodMeta(
   }
 
   //Create the links on the perspective
-  console.log(client.perspective);
-  await client.perspective.addLinks(perspective.uuid, expressionLinks)
+  await client.perspective.addLinks(perspective.uuid, expressionLinks);
 
   //Get the signed links back
   const perspectiveSnapshot = await client.perspective.snapshotByUUID(

@@ -135,7 +135,6 @@ export default async ({
       additions,
       removals,
     } as LinkMutations);
-    console.log("Mutated public perspective with result", mutateResult);
 
     userStore.setUserProfile({
       username: username,
