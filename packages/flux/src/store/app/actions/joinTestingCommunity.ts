@@ -3,7 +3,6 @@ import {
   DEFAULT_TESTING_NEIGHBOURHOOD,
 } from "utils/constants/general";
 import { useAppStore } from "..";
-import joinCommunity from "utils/api/joinCommunity";
 import { useDataStore } from "@/store/data";
 
 export async function joinTestingCommunity() {

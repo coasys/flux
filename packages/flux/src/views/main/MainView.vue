@@ -56,7 +56,7 @@
             Join the Flux Alpha testing community.
           </j-text>
           <j-button
-            :loading="isJoiningCommunity"
+            :loading="isJoining"
             variant="primary"
             @click="() => joinTestingCommunity()"
           >
@@ -87,7 +87,7 @@ export default defineComponent({
   name: "MainAppView",
   setup() {
     return {
-      isJoiningCommunity: ref(false),
+      isJoining: ref(false),
       appStore: useAppStore(),
       isInit: ref(false),
       showJoinCommunity: ref(false),
@@ -107,9 +107,9 @@ export default defineComponent({
 
     const appStore = this.appStore;
     //Check that user already has joined default testing community
-    if (!appStore.hasShownDefaultJoinPrompt && !defaultTestingCommunity) {
+    if (!defaultTestingCommunity) {
       appStore.setShowDisclaimer(true);
-      appStore.setHasShownDefaultJoinPrompt(true);
+
       this.showJoinCommunity = true;
     }
 
@@ -118,7 +118,6 @@ export default defineComponent({
       !defaultTestingCommunity
     ) {
       appStore.setShowDisclaimer(true);
-      appStore.setHasShownDefaultJoinPrompt(true);
       this.showJoinCommunity = true;
     }
   },
@@ -137,11 +136,12 @@ export default defineComponent({
     ]),
     async joinTestingCommunity() {
       try {
-        this.isJoiningCommunity = true;
-        this.appStore.joinTestingCommunity();
+        this.isJoining = true;
+        await this.appStore.joinTestingCommunity();
       } catch (e) {
+        console.log(e);
       } finally {
-        this.isJoiningCommunity = false;
+        this.isJoining = false;
       }
     },
   },
