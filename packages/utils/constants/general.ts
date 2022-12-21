@@ -1,6 +1,6 @@
 export const EXPECTED_AD4M_VERSION = "0.2.5";
 
 export const DEFAULT_TESTING_NEIGHBOURHOOD =
-  "neighbourhood://QmY667koiPUuTQbPmDP4BMQEgrESFZA8LpYdg5n42h7Kap";
+  "neighbourhood://QmeujoNhLrNGWVkV7Zg4c8HXjSzSQboD2Lh68ycbrguUPt";
 
 export const COMMUNITY_TEST_VERSION = 1;
