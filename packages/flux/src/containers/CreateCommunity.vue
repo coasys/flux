@@ -1,7 +1,7 @@
 <template>
   <j-box pt="600" pb="800" px="400" v-if="!tabView">
     <j-box pb="500">
-      <j-text variant="heading-sm">Add a Channel</j-text>
+      <j-text variant="heading-sm">Add a Community</j-text>
     </j-box>
     <div class="options">
       <div class="option" size="xl" @click="tabView = 'Create'">
