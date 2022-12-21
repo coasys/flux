@@ -101,10 +101,12 @@
     @toggle="(e: any) => setShowInviteCode(e.target.open)"
   >
     <j-box p="800">
-      <j-text variant="heading">Invite people</j-text>
-      <j-text variant="ingress">
-        Copy and send this code to the people you want to join your community
-      </j-text>
+      <j-box pb="500">
+        <j-text variant="heading">Invite people</j-text>
+        <j-text variant="body">
+          Copy and send this code to the people you want to join your community
+        </j-text>
+      </j-box>
       <j-input
         @click="(e: any) => e.target.select()"
         size="lg"

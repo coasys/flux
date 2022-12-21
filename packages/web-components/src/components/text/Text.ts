@@ -38,7 +38,7 @@ const styles = css`
 
   :host([variant="heading"]) {
     --j-text-color: var(--j-color-black);
-    --j-text-font-size: var(--j-font-size-800);
+    --j-text-font-size: var(--j-font-size-700);
     --j-text-weight: 600;
     --j-text-margin-bottom: var(--j-space-400);
     --j-text-family: var(--j-text-heading-family);
@@ -47,7 +47,7 @@ const styles = css`
 
   :host([variant="heading-sm"]) {
     --j-text-color: var(--j-color-black);
-    --j-text-font-size: var(--j-font-size-700);
+    --j-text-font-size: var(--j-font-size-600);
     --j-text-weight: 600;
     --j-text-margin-bottom: var(--j-space-300);
     --j-text-family: var(--j-text-heading-family);
@@ -56,7 +56,7 @@ const styles = css`
 
   :host([variant="heading-lg"]) {
     --j-text-color: var(--j-color-black);
-    --j-text-font-size: var(--j-font-size-900);
+    --j-text-font-size: var(--j-font-size-800);
     --j-text-weight: 600;
     --j-text-margin-bottom: var(--j-space-600);
     --j-text-family: var(--j-text-heading-family);
