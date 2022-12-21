@@ -185,14 +185,11 @@ export default defineComponent({
   display: flex;
   align-items: center;
   gap: var(--j-space-500);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  padding-right: var(--j-space-200);
   flex: 1;
   font-weight: 500;
   color: var(--j-color-ui-800);
   font-size: var(--j-font-size-500);
-  text-overflow: ellipsis;
   min-height: 68px;
 }
 
