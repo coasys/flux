@@ -1,23 +1,27 @@
-import { COMMUNITY_TEST_VERSION, DEFAULT_TESTING_NEIGHBOURHOOD } from "utils/constants/general";
 import {
-  getAd4mClient
-} from "@perspect3vism/ad4m-connect/dist/utils";
+  COMMUNITY_TEST_VERSION,
+  DEFAULT_TESTING_NEIGHBOURHOOD,
+} from "utils/constants/general";
 import { useAppStore } from "..";
 import joinCommunity from "utils/api/joinCommunity";
+import { useDataStore } from "@/store/data";
 
 export async function joinTestingCommunity() {
-    const store = useAppStore();
-    try {
-        await joinCommunity({joiningLink: DEFAULT_TESTING_NEIGHBOURHOOD});
-        store.setHasSeenTestCommunity(COMMUNITY_TEST_VERSION);
-        //Stop showing the disclaimer
-        store.setShowDisclaimer(false);
-        //And dont show the warning disclaimer, since if it is present, clicking join on this modal is the same as clicking close
-        store.setShowWarningDisclaimer(false);
-    } catch (e) {
-        //Stop showing the disclaimer
-        store.setShowDisclaimer(false);
-        //And dont show the warning disclaimer, since if it is present, clicking join on this modal is the same as clicking close
-        store.setShowWarningDisclaimer(false);
-    }
+  const appStore = useAppStore();
+  const dataStore = useDataStore();
+  try {
+    await dataStore.joinCommunity({
+      joiningLink: DEFAULT_TESTING_NEIGHBOURHOOD,
+    });
+    appStore.setHasSeenTestCommunity(COMMUNITY_TEST_VERSION);
+    //Stop showing the disclaimer
+    appStore.setShowDisclaimer(false);
+    //And dont show the warning disclaimer, since if it is present, clicking join on this modal is the same as clicking close
+    appStore.setShowWarningDisclaimer(false);
+  } catch (e) {
+    //Stop showing the disclaimer
+    appStore.setShowDisclaimer(false);
+    //And dont show the warning disclaimer, since if it is present, clicking join on this modal is the same as clicking close
+    appStore.setShowWarningDisclaimer(false);
+  }
 }

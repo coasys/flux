@@ -55,7 +55,11 @@
           <j-text variant="ingress">
             Join the Flux Alpha testing community.
           </j-text>
-          <j-button variant="primary" @click="joinTestingCommunity()">
+          <j-button
+            :loading="isJoiningCommunity"
+            variant="primary"
+            @click="() => joinTestingCommunity()"
+          >
             Join
           </j-button>
         </j-box>
@@ -83,6 +87,7 @@ export default defineComponent({
   name: "MainAppView",
   setup() {
     return {
+      isJoiningCommunity: ref(false),
       appStore: useAppStore(),
       isInit: ref(false),
       showJoinCommunity: ref(false),
@@ -129,8 +134,16 @@ export default defineComponent({
       "setShowWarningDisclaimer",
       "setShowCreateCommunity",
       "setShowDisclaimer",
-      "joinTestingCommunity",
     ]),
+    async joinTestingCommunity() {
+      try {
+        this.isJoiningCommunity = true;
+        this.appStore.joinTestingCommunity();
+      } catch (e) {
+      } finally {
+        this.isJoiningCommunity = false;
+      }
+    },
   },
 });
 </script>
