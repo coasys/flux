@@ -26,10 +26,10 @@ require("esbuild")
     format: "esm",
     minify: true,
     sourcemap: true,
+    target: ["safari11"],
     outfile: "dist/main.js",
     watch: process.env.NODE_ENV === "dev" ? true : false,
     inject: ["./preact-shim.js"],
-
     plugins: [
       preactCompatPlugin,
       sassPlugin({

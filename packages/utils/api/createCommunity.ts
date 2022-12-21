@@ -1,17 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
-import {
-  PERSPECTIVE_DIFF_SYNC,
-  NOTE_IPFS_EXPRESSION_OFFICIAL,
-} from "../constants/languages";
-import {
-  MEMBER,
-  SELF,
-  FLUX_GROUP_NAME,
-  FLUX_GROUP_IMAGE,
-  FLUX_GROUP_DESCRIPTION,
-  FLUX_GROUP_THUMBNAIL,
-  ZOME,
-} from "../constants/communityPredicates";
+import { PERSPECTIVE_DIFF_SYNC } from "../constants/languages";
+import { MEMBER, SELF } from "../constants/communityPredicates";
 import { createNeighbourhoodMeta } from "../helpers/createNeighbourhoodMeta";
 import { Community } from "../types";
 import { Perspective } from "@perspect3vism/ad4m";
@@ -22,11 +11,11 @@ import {
   resizeImage,
 } from "utils/helpers/profileHelpers";
 import { createSDNA } from "./createSDNA";
+import CommunityModel from "utils/api/community";
 
 export interface Payload {
   name: string;
   image?: string;
-  thumbnail?: string;
   description?: string;
   perspectiveUuid?: string;
 }
@@ -34,7 +23,6 @@ export interface Payload {
 export default async function createCommunity({
   name,
   description = "",
-  thumbnail = "",
   image = "",
   perspectiveUuid,
 }: Payload): Promise<Community> {
@@ -62,97 +50,49 @@ export default async function createCommunity({
     //Publish perspective
     const metaLinks = await createNeighbourhoodMeta(name, description, author);
 
-    const meta = new Perspective(metaLinks);
     let sharedUrl = perspective!.sharedUrl;
 
     if (!sharedUrl) {
-      const neighbourhood = await client.neighbourhood.publishFromPerspective(
+      sharedUrl = await client.neighbourhood.publishFromPerspective(
         perspective!.uuid,
         linkLanguage.address,
-        meta
+        new Perspective(metaLinks)
       );
-
-      sharedUrl = neighbourhood;
-
-      console.log("Created neighbourhood with result", neighbourhood);
     }
 
-    let tempImage = image;
-    let tempThumbnail = thumbnail;
+    let thumbnail = "";
+    let compressedImage = "";
 
     if (image) {
-      const resizedImage = await resizeImage(
-        dataURItoBlob(image as string),
-        100
-      );
-
-      const thumbnail = await blobToDataURL(resizedImage);
-
-      tempImage = await client.expression.create(
-        image,
-        NOTE_IPFS_EXPRESSION_OFFICIAL
-      );
-
-      tempThumbnail = await client.expression.create(
-        thumbnail,
-        NOTE_IPFS_EXPRESSION_OFFICIAL
-      );
-
-      await client.perspective.addLink(perspective!.uuid, {
-        source: SELF,
-        target: tempImage,
-        predicate: FLUX_GROUP_IMAGE,
-      });
-
-      await client.perspective.addLink(perspective!.uuid, {
-        source: SELF,
-        target: tempThumbnail,
-        predicate: FLUX_GROUP_THUMBNAIL,
-      });
+      compressedImage = await blobToDataURL(await resizeImage(dataURItoBlob(image as string), 0.6));
+      thumbnail = await blobToDataURL(await resizeImage(dataURItoBlob(image as string), 0.3));
     }
 
-    //Create link between perspective and group expression
-    const groupNameExpr = await client.expression.create(name, "literal");
-
-    await client.perspective.addLink(perspective!.uuid, {
-      source: SELF,
-      target: groupNameExpr,
-      predicate: FLUX_GROUP_NAME,
+    const Community = new CommunityModel({
+      perspectiveUuid: perspective!.uuid,
     });
 
-    if (description) {
-      const descriptionExpr = await client.expression.create(
-        description,
-        "literal"
-      );
-      await client.perspective.addLink(perspective!.uuid, {
-        source: SELF,
-        target: descriptionExpr,
-        predicate: FLUX_GROUP_DESCRIPTION,
-      });
-    }
-
-    //Create link between perspective and group expression
-    const addProfileLink = await client.perspective.addLink(perspective!.uuid, {
-      source: SELF,
-      target: `did://${author}`,
-      predicate: MEMBER,
+    const community = await Community.create({
+      name,
+      description,
+      image: compressedImage,
+      thumbnail,
     });
-    console.log("Created profile expression link", addProfileLink);
+
+    await Community.addMember({ did: author });
 
     //Default popular setting is 3 upvotes on thumbsup emoji
     const socialDnaLink = await createSDNA(perspective!.uuid);
-    console.log("Created social dna link", socialDnaLink);
 
     // @ts-ignore
     return {
       uuid: perspective!.uuid,
       author: author,
       timestamp: socialDnaLink.timestamp,
-      name: name,
-      description: description || "",
-      image: tempImage,
-      thumbnail: tempThumbnail,
+      name: community.name,
+      description: community.description || "",
+      image: community.image,
+      thumbnail: community.thumbnail,
       neighbourhoodUrl: sharedUrl,
       members: [author],
     };

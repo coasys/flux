@@ -63,15 +63,24 @@ export default async function ({
   const cleanedMessages: Message[] = [];
 
   cleanedResults.forEach((result: any) => {
+    console.log(result);
+    //Parse out the message content
+    result.EditMessages.forEach(message => {
+      message.content = Literal.fromUrl(message.content).get().data;
+    })
+    result.Message.replace("%3A", ":");
+    //Parse the original message data and add it to the edit messages
     const expressionData = Literal.fromUrl(result.Message).get().data;
-    result.EditMessages.push({
+    result.EditMessages.unshift({
       content: expressionData,
       timestamp: new Date(result.Timestamp),
       author: result.Author,
     });
+    //Parse out the emojis
     result.Reactions.forEach((reaction) => {
       reaction.content = reaction.content.replace("emoji://", "");
     });
+    //Parse out the replies
     result.Replies.forEach((reply) => {
       const literal = Literal.fromUrl(reply.content).get();
       reply.id = reply.content;

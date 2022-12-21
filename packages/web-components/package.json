@@ -1,6 +1,6 @@
 {
   "name": "@junto-foundation/junto-elements",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "",
   "homepage": "https://junto-elements.netlify.com",
   "main": "dist/main.js",
@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.9.2",
+    "construct-style-sheets-polyfill": "^3.1.0",
     "jdenticon": "^3.1.0",
     "lit": "^2.0.0-rc.2"
   },

@@ -2,15 +2,7 @@
   <button @click="$emit('click')" class="avatar-group">
     <j-tooltip title="See all members">
       <div class="avatar-group__avatars">
-        <j-skeleton
-          v-if="loading"
-          v-for="i in 4"
-          variant="circle"
-          :height="size"
-          :width="size"
-        ></j-skeleton>
         <Avatar
-          v-else
           v-for="(user, index) in firstUsers"
           :data-testid="`avatar-group__avatar__${user.did}`"
           :key="index"
@@ -50,11 +42,12 @@ export default defineComponent({
         let firstUsers = {} as any;
         this.loading = true;
 
-        for (let [i, user] of users.entries()) {
+        for (let i = 0; i < users.length; i++) {
+          const did = users[i];
           if (i <= 4) {
-            const profile = await getProfile(user);
+            const profile = await getProfile(did);
             if (profile) {
-              firstUsers[user] = profile;
+              firstUsers[did] = profile;
             }
           }
         }
@@ -76,6 +69,7 @@ export default defineComponent({
   background: none;
   cursor: pointer;
   display: flex;
+  min-height: var(--j-size-md);
 }
 
 .avatar-group__avatars {
@@ -86,7 +80,7 @@ export default defineComponent({
 
 .avatar-group__avatars > *:not(:first-child) {
   margin-left: -15px;
-  display: block;
+  display: flex;
 }
 
 .avatar-group__see-all {
@@ -101,8 +95,8 @@ export default defineComponent({
   border-radius: 50%;
   height: var(--j-size-md);
   width: var(--j-size-md);
-  font-size: var(--j-font-size-300);
-  font-weight: 500;
+  font-size: var(--j-font-size-400);
+  font-weight: 600;
   color: var(--j-color-ui-400);
   white-space: nowrap;
   padding: 14px;

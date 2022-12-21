@@ -57,10 +57,10 @@ export default {
   },
 
   setNeighbourhoodMember({
-    member,
+    did,
     perspectiveUuid,
   }: {
-    member: string;
+    did: string;
     perspectiveUuid: string;
   }): void {
     const state = useDataStore();
@@ -68,9 +68,9 @@ export default {
 
     if (
       neighbourhood &&
-      !neighbourhood.members.find((existingMember) => existingMember === member)
+      !neighbourhood.members.find((existingMember) => existingMember === did)
     ) {
-      neighbourhood.members.push(member);
+      neighbourhood.members.push(did);
     }
   },
 
@@ -117,11 +117,6 @@ export default {
     state.neighbourhoods[communityId] = community;
   },
 
-  setChannelScrollTop(payload: { channelId: string; value: number }): void {
-    const state = useDataStore();
-    state.channels[payload.channelId].scrollTop = payload.value;
-  },
-
   clearChannels({ communityId }: { communityId: string }): void {
     const state = useDataStore();
     Object.values(state.channels).forEach((c) => {
@@ -145,9 +140,9 @@ export default {
     }
   },
 
-  putChannelViews(payload: { channelId: string; views: ChannelView[] }) {
+  setChannel(payload: { communityId: string; channel: ChannelState }) {
     const state = useDataStore();
-    state.channels[payload.channelId].views = payload.views;
+    state.channels[payload.channel.id] = payload.channel;
   },
 
   setChannels(payload: { communityId: string; channels: ChannelState[] }) {

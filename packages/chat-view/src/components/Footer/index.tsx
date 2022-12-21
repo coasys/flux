@@ -1,4 +1,4 @@
-import { ChatContext, PerspectiveContext } from "utils/react";
+import { ChatContext, CommunityContext } from "utils/react";
 import { useContext } from "preact/hooks";
 import UIContext from "../../context/UIContext";
 import TipTap from "../TipTap";
@@ -7,7 +7,7 @@ import styles from "./index.scss";
 export default function Footer({ perspectiveUuid, channelId }) {
   const {
     state: { members },
-  } = useContext(PerspectiveContext);
+  } = useContext(CommunityContext);
 
   const {
     state: { keyedMessages },
@@ -27,7 +27,16 @@ export default function Footer({ perspectiveUuid, channelId }) {
       {currentMessageEditMessage && (
         <div class={styles.currentReply}>
           <j-text size="400" nomargin>
-            Editing: <span style={{display: 'inline-flex'}} dangerouslySetInnerHTML={{ __html: currentMessageEditMessage.editMessages[currentMessageEditMessage.editMessages.length-1].content }}></span>
+            Editing:{" "}
+            <span
+              style={{ display: "inline-flex" }}
+              dangerouslySetInnerHTML={{
+                __html:
+                  currentMessageEditMessage.editMessages[
+                    currentMessageEditMessage.editMessages.length - 1
+                  ].content,
+              }}
+            ></span>
           </j-text>
           <j-button
             onClick={() => setCurrentEditMessage("")}

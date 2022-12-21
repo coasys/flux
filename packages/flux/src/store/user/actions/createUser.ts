@@ -49,14 +49,6 @@ export default async ({
     ]);
     await client.languages.byAddress(NOTE_IPFS_EXPRESSION_OFFICIAL);
 
-    const resizedImage = profilePicture
-      ? await resizeImage(dataURItoBlob(profilePicture as string), 100)
-      : undefined;
-
-    const thumbnail = profilePicture
-      ? await blobToDataURL(resizedImage!)
-      : undefined;
-
     const additions = [] as Link[];
     const removals = [] as LinkExpression[];
 
@@ -64,13 +56,17 @@ export default async ({
     let thumbnailImage = null;
 
     if (profilePicture) {
-      thumbnailImage = await client.expression.create(
-        thumbnail,
+      const compressedProfileImage = await blobToDataURL(await resizeImage(dataURItoBlob(profilePicture as string), 0.6));
+
+      profileImage = await client.expression.create(
+        compressedProfileImage,
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
 
-      profileImage = await client.expression.create(
-        profilePicture,
+      const compressedpThumbnailImage = await blobToDataURL(await resizeImage(dataURItoBlob(profilePicture as string), 0.3));
+
+      thumbnailImage = await client.expression.create(
+        compressedpThumbnailImage,
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
 
@@ -135,7 +131,6 @@ export default async ({
       additions,
       removals,
     } as LinkMutations);
-    console.log("Mutated public perspective with result", mutateResult);
 
     userStore.setUserProfile({
       username: username,

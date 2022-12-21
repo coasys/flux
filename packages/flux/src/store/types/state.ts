@@ -25,8 +25,9 @@ export interface DataState {
 
 export interface ApplicationState {
   windowState: WindowState;
+  hasShownDefaultJoinPrompt: boolean;
+  seenCommunityTestVersion: number; 
   toast: ToastState;
-  applicationStartTime: Date;
   updateState: UpdateState;
   globalTheme: ThemeState;
   currentTheme: CurrentThemeState;

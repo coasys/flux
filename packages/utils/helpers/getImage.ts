@@ -6,7 +6,7 @@ export function fetchFromPublicGateway(url: string): Promise<string> {
     const timeout = setTimeout(() => {
       resolve("");
     }, 1000);
-    const response = await fetch(`https://ipfs.io/ipfs/${url.split("://")[1]}`);
+    const response = await fetch(`https://cloudflare-ipfs.com/ipfs/${url.split("://")[1]}`);
     const json = await response.json();
     const image = json.data;
     clearTimeout(timeout);
@@ -25,7 +25,7 @@ export async function getImage(expUrl: string): Promise<string> {
           const image = await fetchFromPublicGateway(expUrl);
           dexie.save(expUrl, image);
           resolve(image);
-        }, 1000);
+        }, 5000);
 
         const dexie = new DexieIPFS("ipfs");
         const cachedImage = await dexie.get(expUrl);

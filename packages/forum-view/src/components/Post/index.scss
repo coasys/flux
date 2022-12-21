@@ -18,6 +18,7 @@
   margin: 0 auto;
   max-width: 100%;
   max-height: 700px;
+  border-radius: var(--j-border-radius);
 }
 
 .postDate {
@@ -45,5 +46,6 @@
 }
 
 .postUrl a {
+  font-size: var(--j-font-size-600);
   color: var(--j-color-primary-500);
 }

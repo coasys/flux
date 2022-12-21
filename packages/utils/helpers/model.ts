@@ -1,138 +1,233 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { EntryType } from "../types";
+import {
+  Entry,
+  EntryType,
+  PredicateMap,
+  PropertyMap,
+  PropertyValueMap,
+} from "../types";
 import { createEntry } from "../api/createEntry";
 import subscribeToLinks from "../api/subscribeToLinks";
 import { LinkExpression } from "@perspect3vism/ad4m";
-import { ENTRY_TYPE } from "../constants/communityPredicates";
 import { ModelProperty } from "../types";
 import { queryProlog } from "./prologHelpers";
+import { updateEntry } from "../api/updateEntry";
+import { AsyncQueue } from "./queue";
+import { SELF } from "../constants/communityPredicates";
 
 type ModelProps = {
   perspectiveUuid: string;
   source?: string;
 };
 
-type DataInput = {
-  [x: string]: any;
+type Listeners = {
+  add: { [source: string]: Function[] };
+  remove: { [source: string]: Function[] };
 };
 
-type Listeners = {
-  add: { [x: EntryType]: Function[] };
-  remove: { [x: EntryType]: Function[] };
-};
+const queue = new AsyncQueue();
 
 export default class Model {
-  source = "adm4://self";
+  client = null;
+  source = SELF;
   perspectiveUuid = "";
-  listeners = { add: {}, remove: {} } as Listeners;
-  static type: EntryType;
-  static properties: {
-    [x: string]: ModelProperty;
-  };
+  private unsubscribeCb = null;
+  private isSubcribing = false;
+  private listeners = { add: {}, remove: {} } as Listeners;
+  static get type(): EntryType | null {
+    return null;
+  }
+  static get properties(): { [x: string]: ModelProperty } {
+    return {};
+  }
 
   constructor(props: ModelProps) {
     this.perspectiveUuid = props.perspectiveUuid;
     this.source = props.source || this.source;
+  }
 
-    subscribeToLinks({
+  async create(data: PropertyMap, id?: string) {
+    const { predicateMap } = await this.createExpressions(data);
+    const entry = await createEntry({
+      perspectiveUuid: this.perspectiveUuid,
+      source: this.source,
+      id: id,
+      type: this.constructor.type,
+      data: predicateMap,
+    });
+    return this.get(entry.id);
+  }
+
+  async update(id: string, data: PropertyMap) {
+    const { predicateMap } = await this.createExpressions(data);
+    await updateEntry(this.perspectiveUuid, id, predicateMap);
+    return this.get(id);
+  }
+
+  private async createExpressions(
+    data: PropertyMap
+  ): Promise<{ predicateMap: PredicateMap; propertyMap: PropertyValueMap }> {
+    const client = await getAd4mClient();
+    const propertyValues = {} as PropertyValueMap;
+
+    const expPromises = Object.entries(data)
+      .filter(([key]) => {
+        const isValidProperty = this.constructor.properties[
+          key
+        ] as ModelProperty;
+        return isValidProperty;
+      })
+      .map(async ([key, val]) => {
+        const { predicate, languageAddress, collection } = this.constructor
+          .properties[key] as ModelProperty;
+
+        if (collection) {
+          const value = val.map(async (v) => {
+            const expression = v || "";
+            return languageAddress
+              ? await client.expression.create(expression, languageAddress)
+              : expression;
+          }) as Promise<string>[];
+          const v = await Promise.all(value);
+          propertyValues[key] = v;
+          return { predicate, value: v };
+        }
+
+        const expression = val || "";
+
+        const value = languageAddress
+          ? await client.expression.create(expression, languageAddress)
+          : expression;
+
+        propertyValues[key] = value;
+
+        return { predicate, value };
+      });
+
+    const expressions = await Promise.all(expPromises);
+
+    return {
+      predicateMap: expressions.reduce((acc, exp) => {
+        return {
+          ...acc,
+          [exp.predicate]: exp.value,
+        };
+      }, {}),
+      propertyMap: propertyValues,
+    };
+  }
+
+  async get(id: string, source?: string): Promise<Entry | null> {
+    //@ts-ignore
+    return await queue.add(async () => {
+      const result = await queryProlog({
+        perspectiveUuid: this.perspectiveUuid,
+        id,
+        type: this.constructor.type,
+        source: source || this.source,
+        properties: this.constructor.properties,
+      });
+      return result.length === 0 ? null : result[0];
+    });
+  }
+
+  async getAll(source?: string): Promise<Entry[]> {
+    //@ts-ignore
+    return await queue.add(async () => {
+      const result = await queryProlog({
+        perspectiveUuid: this.perspectiveUuid,
+        type: this.constructor.type,
+        source: source || this.source,
+        properties: this.constructor.properties,
+      });
+      return result;
+    });
+  }
+
+  private async subscribe() {
+    this.unsubscribeCb = await subscribeToLinks({
       perspectiveUuid: this.perspectiveUuid,
       added: (link) => this.onLink("added", link),
       removed: (link) => this.onLink("removed", link),
     });
   }
 
-  async create(data: DataInput, type?: EntryType) {
-    const expressions = await this.createExpressions(data);
-    return createEntry({
-      perspectiveUuid: this.perspectiveUuid,
-      source: this.source,
-      types: [this.constructor.type],
-      data: expressions,
-    });
+  unsubscribe() {
+    if (this.unsubscribeCb) {
+      this.unsubscribeCb();
+      this.listeners = { add: {}, remove: {} };
+      this.isSubcribing = false;
+    }
   }
 
-  async createExpressions(data: DataInput) {
-    const client = await getAd4mClient();
-
-    const expPromises = Object.entries(data)
-      .filter(([key]) => this.constructor.properties[key])
-      .map(async ([key, value]) => {
-        const { predicate, languageAddress } = this.constructor.properties[key];
-        const expUrl = await client.expression.create(value, languageAddress);
-        return { predicate, expUrl };
-      });
-
-    const expressions = await Promise.all(expPromises);
-
-    return expressions.reduce((acc, exp) => {
-      return {
-        ...acc,
-        [exp.predicate]: exp.expUrl,
-      };
-    }, {});
-  }
-
-  async get(id: string, source?: string) {
-    const result = await queryProlog({
-      perspectiveUuid: this.perspectiveUuid,
-      id,
-      type: this.constructor.type,
-      source: source || this.source,
-      properties: this.constructor.properties,
-    });
-    console.log(result);
-  }
-
-  async getAll(source?: string) {
-    console.log({ type: this.constructor.type });
-    const result = await queryProlog({
-      perspectiveUuid: this.perspectiveUuid,
-      type: this.constructor.type,
-      source: source || this.source,
-      properties: this.constructor.properties,
-    });
-    console.log(result);
-  }
-
-  onLink(type: "added" | "removed", link: LinkExpression) {
-    const linkIsType = link.data.predicate === ENTRY_TYPE;
+  private async onLink(type: "added" | "removed", link: LinkExpression) {
+    const linkIsType = link.data.predicate === this.constructor.type;
 
     if (!linkIsType) return;
 
-    const entryId = link.data.source;
-    const entryType = link.data.target;
-    const addedListeners = this.listeners.add[entryType];
-    const removedListeners = this.listeners.remove[entryType];
+    const source = link.data.source;
+    const entryId = link.data.target;
+    const addedListeners = this.listeners.add[source];
+    const removedListeners = this.listeners.remove[source];
+    const allAddListeners = this.listeners.add?.all;
+    const allRemoveListeners = this.listeners.remove?.all;
+
+    if (type === "added" && allAddListeners) {
+      const entry = await this.get(entryId);
+      allAddListeners.forEach((cb) => {
+        cb(entry);
+      });
+    }
+
+    if (type === "removed" && allRemoveListeners) {
+      const entry = await this.get(entryId);
+      allRemoveListeners.forEach((cb) => {
+        cb(entry);
+      });
+    }
 
     if (type === "added" && addedListeners) {
-      addedListeners.forEach(async (cb) => {
-        const entry = await this.get(entryId);
+      const entry = await this.get(entryId);
+      addedListeners.forEach((cb) => {
         cb(entry);
       });
     }
+
     if (type === "removed" && removedListeners) {
-      removedListeners.forEach(async (cb) => {
-        const entry = await this.get(entryId);
-        cb(entry);
+      //const entry = await this.get(entryId);
+      removedListeners.forEach((cb) => {
+        cb(entryId);
       });
     }
   }
 
-  onAdded(type: EntryType, callback: Function) {
-    const hasCallbacks = this.listeners.add[type];
+  onAdded(callback: (entry: any) => void, source?: string | "all") {
+    if (!this.isSubcribing) {
+      this.subscribe();
+    }
+
+    const src = source || this.source;
+    const hasCallbacks = this.listeners.add[src];
+
     if (hasCallbacks) {
-      this.listeners.add[type].push(callback);
+      this.listeners.add[src].push(callback);
     } else {
-      this.listeners.add[type] = [callback];
+      this.listeners.add[src] = [callback];
     }
   }
 
-  onRemoved(type: EntryType, callback: Function) {
-    const hasCallbacks = this.listeners.add[type];
+  onRemoved(callback: (id: string) => void, source?: string | "all") {
+    if (!this.isSubcribing) {
+      this.subscribe();
+    }
+
+    const src = source || this.source;
+    const hasCallbacks = this.listeners.remove[src];
+
     if (hasCallbacks) {
-      this.listeners.remove[type].push(callback);
+      this.listeners.remove[src].push(callback);
     } else {
-      this.listeners.remove[type] = [callback];
+      this.listeners.remove[src] = [callback];
     }
   }
 }

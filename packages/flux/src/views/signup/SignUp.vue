@@ -196,16 +196,16 @@ export default defineComponent({
 
         const client = await getAd4mClient();
 
-        const agentLinks = (await client.agent.me()).perspective!.links;
+        const agentLinks = await client.agent.me().perspective!.links;
 
         const profile = mapLiteralLinks(agentLinks, {
           username: AD4M_PREDICATE_USERNAME,
           name: AD4M_PREDICATE_FIRSTNAME,
           familyName: AD4M_PREDICATE_LASTNAME,
         });
-        this.username = profile.username || "";
-        this.name = profile.name || "";
-        this.familyName = profile.familyName || "";
+        this.username = profile?.username || "";
+        this.name = profile?.name || "";
+        this.familyName = profile?.familyName || "";
       } catch (e) {
         console.log(e);
       }

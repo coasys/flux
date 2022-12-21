@@ -1,11 +1,19 @@
 <template>
   <j-box p="800">
     <j-flex direction="column" gap="500">
-      <j-text variant="heading-sm">Update views</j-text>
+      <j-text variant="heading-sm">Edit Channel</j-text>
+
+      <j-input
+        size="lg"
+        label="Name"
+        :value="name"
+        @keydown.enter="updateChannel"
+        @input="(e) => (name = e.target.value)"
+      ></j-input>
 
       <ChannnelViewOptions
-        :views="selectedViews"
-        @change="(views: ChannelView[]) => (selectedViews = views)"
+        :views="views"
+        @change="(v: ChannelView[]) => (views = v)"
         :channelId="channelId"
       ></ChannnelViewOptions>
 
@@ -15,8 +23,9 @@
             Cancel
           </j-button>
           <j-button
-            :disabled="!canSave"
-            @click="updateChannelViews"
+            :loading="isSaving"
+            :disabled="!canSave || isSaving"
+            @click="updateChannel"
             size="lg"
             variant="primary"
           >
@@ -42,17 +51,17 @@ export default defineComponent({
   components: { ChannnelViewOptions },
   setup() {
     return {
-      selectedViews: ref<ChannelView[]>([]),
+      name: ref(""),
+      description: ref(""),
+      views: ref<ChannelView[]>([]),
+      isSaving: ref(false),
       appStore: useAppStore(),
       dataStore: useDataStore(),
     };
   },
-  created() {
-    this.selectedViews = this.channel?.views || [];
-  },
   computed: {
     canSave() {
-      return this.selectedViews.length >= 1;
+      return this.views.length >= 1;
     },
     channel() {
       return this.dataStore.channels[this.channelId];
@@ -61,16 +70,34 @@ export default defineComponent({
       return viewOptions;
     },
   },
+  watch: {
+    channel: {
+      handler: async function ({ name, description, views }) {
+        this.name = name;
+        this.description = description;
+        this.views = views;
+      },
+      deep: true,
+      immediate: true,
+    },
+  },
   methods: {
-    updateChannelViews() {
+    async updateChannel() {
+      this.isSaving = true;
       this.dataStore
-        .updateChannelViews({
-          perspectiveUuid: this.communityId,
-          channelId: this.channelId,
-          views: this.selectedViews,
+        .updateChannel({
+          perspectiveUuid: this.$route.params.communityId as string,
+          channelId: this.$route.params.channelId as string,
+          data: {
+            name: this.name,
+            views: this.views,
+          },
         })
         .then(() => {
-          this.$emit("submit", true);
+          this.$emit("submit");
+        })
+        .finally(() => {
+          this.isSaving = false;
         });
     },
   },

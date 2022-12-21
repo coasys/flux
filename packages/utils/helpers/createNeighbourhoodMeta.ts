@@ -20,7 +20,7 @@ export async function createNeighbourhoodMeta(
   const nameExpression = await client.expression.create(name, "literal");
 
   //Create the links we want on meta
-  const expressionLinks = [];
+  const expressionLinks = [] as Link[];
   expressionLinks.push(
     new Link({
       source: SELF,
@@ -60,16 +60,14 @@ export async function createNeighbourhoodMeta(
   }
 
   //Create the links on the perspective
-  for (const exp of expressionLinks) {
-    await client.perspective.addLink(perspective.uuid, exp);
-  }
+  await client.perspective.addLinks(perspective.uuid, expressionLinks);
 
   //Get the signed links back
   const perspectiveSnapshot = await client.perspective.snapshotByUUID(
     perspective.uuid
   );
   await client.perspective.remove(perspective.uuid);
-  const links = [];
+  const links = [] as LinkExpression[];
   for (const link in perspectiveSnapshot!.links) {
     //Deep copy the object... so we can delete __typename fields inject by apollo client
     const newLink = JSON.parse(

@@ -39,7 +39,6 @@ const styles = css`
     width: 100%;
     min-width: 200px;
     padding: 0px;
-    margin-bottom: var(--j-space-500);
   }
   [part="input-wrapper"]:hover {
     border: 1px solid var(--j-border-color-strong);

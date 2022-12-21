@@ -11,7 +11,7 @@ import {
   REPLY_TO,
   ZOME,
 } from "../constants/communityPredicates";
-import { EntryType } from "../types";
+import { EntryType, PropertyMap, PredicateMap } from "../types";
 
 export const findLink = {
   name: (link: LinkExpression) => link.data.predicate === "rdf://name",
@@ -23,8 +23,7 @@ export const findLink = {
 };
 
 export const linkIs = {
-  message: (link: LinkExpression) =>
-    link.data.predicate === EntryType.Message,
+  message: (link: LinkExpression) => link.data.predicate === EntryType.Message,
   reply: (link: LinkExpression) => link.data.predicate === REPLY_TO,
   // TODO: SHould we check if the link is proof.valid?
   reaction: (link: LinkExpression) => link.data.predicate === REACTION,
@@ -38,24 +37,9 @@ export const linkIs = {
   // TODO: SHould we check if the link is proof.valid?
 };
 
-type Target = string;
-type Predicate = string;
-
-type PredicateMap = {
-  [property: string]: Predicate;
-};
-
-type TargetMap = {
-  [predicate: string]: Target | undefined | null;
-};
-
-type Map = {
-  [x: string]: string;
-};
-
 export function mapLiteralLinks(
   links: LinkExpression[] | undefined,
-  map: PredicateMap
+  map: PropertyMap
 ) {
   return Object.keys(map).reduce((acc, key) => {
     const predicate = map[key];
@@ -64,14 +48,14 @@ export function mapLiteralLinks(
     if (link) {
       let data;
 
-      if(link.data.target.startsWith("literal://string:")) {
-        data = Literal.fromUrl(link.data.target).get()
-      } else if(link.data.target.startsWith("literal://number:")) {
-        data = Literal.fromUrl(link.data.target).get()
-      } else if(link.data.target.startsWith("literal://json:")) {
-        data = Literal.fromUrl(link.data.target).get().data
+      if (link.data.target.startsWith("literal://string:")) {
+        data = Literal.fromUrl(link.data.target).get();
+      } else if (link.data.target.startsWith("literal://number:")) {
+        data = Literal.fromUrl(link.data.target).get();
+      } else if (link.data.target.startsWith("literal://json:")) {
+        data = Literal.fromUrl(link.data.target).get().data;
       } else {
-        data = link.data.target
+        data = link.data.target;
       }
 
       return {
@@ -83,7 +67,7 @@ export function mapLiteralLinks(
   }, {});
 }
 
-export async function createLiteralLinks(source: string, map: TargetMap) {
+export async function createLiteralLinks(source: string, map: PredicateMap) {
   const client = await getAd4mClient();
 
   const targets = Object.keys(map);
@@ -102,19 +86,23 @@ export async function createLiteralLinks(source: string, map: TargetMap) {
 }
 
 //function to create links from a map of predicates to targets
-export async function createLinks(source: string, map: TargetMap) {
+export async function createLinks(source: string, map: PredicateMap) {
   const targets = Object.keys(map);
 
-  const promises = targets
+  const links = targets
     .filter((predicate: any) => {
-      return typeof map[predicate] === "string" && map[predicate] !== "";
+      const isString = typeof map[predicate] === "string";
+      const isArray = Array.isArray(map[predicate]);
+      return isString || isArray;
     })
-    .map(async (predicate: string) => {
-      const target = map[predicate];
-      return new Link({ source, predicate, target });
+    .map((predicate: string) => {
+      const value = map[predicate];
+      return Array.isArray(value)
+        ? value.map((v) => new Link({ source, predicate, target: v }))
+        : new Link({ source, predicate, target: value });
     });
 
-  return Promise.all(promises);
+  return links.flat();
 }
 
 export async function createLiteralObject({
@@ -122,7 +110,7 @@ export async function createLiteralObject({
   children,
 }: {
   parent: LinkInput;
-  children: TargetMap;
+  children: PredicateMap;
 }) {
   const client = await getAd4mClient();
   const expUrl = await client.expression.create(parent.target, "literal");

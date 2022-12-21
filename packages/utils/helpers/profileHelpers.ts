@@ -21,7 +21,7 @@ export const blobToDataURL = (blob: Blob): Promise<string> => {
 };
 
 // Resizes the image by creating a canvas and resizing it to the resized image
-export const resizeImage = (file: any, maxSize: number): Promise<Blob> => {
+export const resizeImage = (file: any, percentage: number, maxSize = 80): Promise<Blob> => {
   const reader = new FileReader();
   const image = new Image();
   const canvas = document.createElement("canvas");
@@ -29,14 +29,19 @@ export const resizeImage = (file: any, maxSize: number): Promise<Blob> => {
   const resize = () => {
     let { width, height } = image;
 
-    if (width > height) {
-      if (width > maxSize) {
-        height *= maxSize / width;
-        width = maxSize;
+    if (width <= maxSize || height <= maxSize) {
+      if (width > height) {
+        if (width > maxSize) {
+          height *= maxSize / width;
+          width = maxSize;
+        }
+      } else if (height > maxSize) {
+        width *= maxSize / height;
+        height = maxSize;
       }
-    } else if (height > maxSize) {
-      width *= maxSize / height;
-      height = maxSize;
+    } else {
+      height = height * percentage;
+      width = width * percentage;
     }
 
     canvas.width = width;

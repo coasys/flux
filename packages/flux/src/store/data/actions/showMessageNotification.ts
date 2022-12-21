@@ -1,81 +1,60 @@
 import { useUserStore } from "@/store/user";
-import { RouteLocationNormalizedLoaded, Router } from "vue-router";
+import { Router } from "vue-router";
 import { useDataStore } from "..";
 import getProfile from "utils/api/getProfile";
-import { differenceInSeconds, parseISO, parse } from "date-fns";
+import { differenceInSeconds, parseISO } from "date-fns";
 import { useAppStore } from "@/store/app";
-import { Literal } from "@perspect3vism/ad4m";
 import iconPath from "@/assets/images/icon.png";
 
 type Payload = {
   router: Router;
-  route: RouteLocationNormalizedLoaded;
-  perspectiveUuid: string;
-  notificationChannelId: string;
+  communityId: string;
+  channelId: string;
   authorDid: string;
   message: string;
   timestamp: string;
 };
 
 export default async ({
-  router,
-  route,
-  perspectiveUuid,
-  notificationChannelId,
+  communityId,
+  channelId,
   authorDid,
   message,
   timestamp,
+  router,
 }: Payload) => {
   const dataStore = useDataStore();
   const userStore = useUserStore();
   const appStore = useAppStore();
-  const { channelId, communityId } = route.params;
 
   const escapedMessage = message.replace(/(\s*<.*?>\s*)+/g, " ");
 
-  const channelLiteral = Literal.fromUrl(notificationChannelId).get();
-
   // Getting the channel & community this message belongs to
-  const community = dataStore.getCommunity(perspectiveUuid);
-  const communityState = dataStore.getLocalCommunityState(perspectiveUuid);
-  const channel = dataStore.getChannel(channelLiteral.data);
-
-  const isMinimized = document.hasFocus();
+  const community = dataStore.getCommunity(communityId);
+  const communityState = dataStore.getLocalCommunityState(communityId);
+  const channel = dataStore.getChannel(channelId);
 
   const user = userStore.getUser;
 
-  const currentDate = new Date();
+  const isFromSelf = user!.agent.did === authorDid;
+  const isMinimized = document.hasFocus();
+  const isMuted =
+    channel?.notifications.mute &&
+    communityState.notifications.mute &&
+    !appStore.notification.globalNotification;
 
-  const lastDate = parseISO(
-    localStorage.getItem("lastNotificationDate") || currentDate.toISOString()
+  if (isFromSelf || isMinimized || isMuted) {
+    return;
+  }
+
+  const isMentioned = message.includes(
+    user!.agent.did!.replace("did:key:", "")
   );
 
-  localStorage.setItem("lastNotificationDate", currentDate.toISOString());
+  let title = "";
+  let body = "";
 
-  const slient = differenceInSeconds(currentDate, lastDate) <= 3;
-
-  // Only show the notification when the the message is not from self & the active community & channel is different
-  if (
-    (!isMinimized &&
-      !channel?.notifications.mute &&
-      !communityState.notifications.mute &&
-      !slient &&
-      user!.agent.did! !== authorDid) ||
-    (user!.agent.did! !== authorDid &&
-      (community?.uuid === communityId ? channel?.name !== channelId : true) &&
-      !channel?.notifications.mute &&
-      !communityState.notifications.mute &&
-      differenceInSeconds(new Date(), parseISO(timestamp)) <= 30 &&
-      appStore.notification.globalNotification &&
-      !slient)
-  ) {
-    const isMentioned = message.includes(
-      user!.agent.did!.replace("did:key:", "")
-    );
-
-    let title = "";
-    let body = "";
-
+  try {
     const profile = await getProfile(authorDid);
     const name = profile ? profile.username : "Someone";
     if (isMentioned) {
@@ -91,10 +70,9 @@ export default async ({
     if (permission === "granted") {
       const notification = new Notification(title, {
         body,
-        tag: `flux_${authorDid}`,
-        silent: false,
-        renotify: true,
+        tag: authorDid,
         icon: iconPath,
+        renotify: true,
       });
 
       notification.onclick = () => {
@@ -113,7 +91,7 @@ export default async ({
 
       return notification;
     }
+  } catch (e) {
+    console.log(e);
   }
-
-  return undefined;
 };

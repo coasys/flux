@@ -1,24 +1,35 @@
 <template>
-  <j-box pt="1000" pb="800" px="700" v-if="!tabView">
-    <j-flex direction="column">
-      <j-menu-item class="choice-button" size="xl" @click="tabView = 'Create'">
-        <j-text variant="heading-sm">Create community</j-text>
-        <j-text variant="body">
-          Make a community and start inviting people
-        </j-text>
+  <j-box pt="600" pb="800" px="400" v-if="!tabView">
+    <j-box pb="500">
+      <j-text variant="heading-sm">Add a Community</j-text>
+    </j-box>
+    <div class="options">
+      <div class="option" size="xl" @click="tabView = 'Create'">
+        <div>
+          <j-text variant="heading-sm">Create a community</j-text>
+          <j-text variant="body">
+            Make a community and start inviting people
+          </j-text>
+        </div>
         <j-icon slot="end" name="chevron-right"></j-icon>
-      </j-menu-item>
-      <j-menu-item class="choice-button" size="xl" @click="tabView = 'Join'">
-        <j-text variant="heading-sm">Join a community</j-text>
-        <j-text variant="body"> Join an already existing community </j-text>
+      </div>
+      <div class="option" size="xl" @click="tabView = 'Join'">
+        <div>
+          <j-text variant="heading-sm">Join a community</j-text>
+          <j-text variant="body"> Join an already existing community </j-text>
+        </div>
         <j-icon slot="end" name="chevron-right"></j-icon>
-      </j-menu-item>
-      <j-menu-item class="choice-button" size="xl" @click="tabView = 'Load'">
-        <j-text variant="heading-sm">Load community</j-text>
-        <j-text variant="body">Load a existing perspective as community</j-text>
+      </div>
+      <div class="option" size="xl" @click="tabView = 'Load'">
+        <div>
+          <j-text variant="heading-sm">Load a community</j-text>
+          <j-text variant="body"
+            >Load a existing perspective as community</j-text
+          >
+        </div>
         <j-icon slot="end" name="chevron-right"></j-icon>
-      </j-menu-item>
-    </j-flex>
+      </div>
+    </div>
   </j-box>
 
   <j-box p="800" v-if="tabView">
@@ -257,8 +268,7 @@ export default defineComponent({
       const perspectives = await client.perspective.all();
 
       const nonFluxPerspectives = perspectives.filter(
-        (perspective) =>
-          !keys.includes(perspective.uuid)
+        (perspective) => !keys.includes(perspective.uuid)
       );
 
       //@ts-ignore
@@ -276,8 +286,29 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.choice-button {
-  --j-menu-item-height: auto;
-  --j-menu-item-padding: var(--j-space-500) var(--j-space-600);
+.options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--j-space-500);
+}
+
+.option {
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 2px solid transparent;
+  background-color: var(--j-color-ui-50);
+  border-radius: var(--j-border-radius);
+  padding: var(--j-space-500);
+}
+
+.option:hover {
+  border: 2px solid var(--j-color-ui-100);
+}
+
+.option:active {
+  border: 2px solid var(--j-color-primary-500);
 }
 </style>

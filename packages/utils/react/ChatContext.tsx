@@ -6,7 +6,7 @@ import React, {
   useRef,
 } from "react";
 import { Messages, Message, EntryType } from "../types";
-import { LinkExpression, Literal } from "@perspect3vism/ad4m";
+import { LinkExpression, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
 import getMessages from "../api/getMessages";
 import createMessage from "../api/createMessage";
 import subscribeToLinks from "../api/subscribeToLinks";
@@ -16,13 +16,14 @@ import deleteMessageReaction from "../api/deleteMessageReaction";
 import createMessageReaction from "../api/createMessageReaction";
 import createReply from "../api/createReply";
 import { sortExpressionsByTimestamp } from "../helpers/expressionHelpers";
-import getMe from "../api/getMe";
+import getMe, { Me } from "../api/getMe";
 import { REACTION } from "../constants/communityPredicates";
 import hideEmbeds from "../api/hideEmbeds";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import editCurrentMessage from "../api/editCurrentMessage";
 import { DEFAULT_LIMIT } from "../constants/sdna";
 import { checkUpdateSDNAVersion } from "../api/updateSDNA";
+import { LinkCallback } from "@perspect3vism/ad4m/lib/src/perspectives/PerspectiveClient";
 
 type State = {
   communityId: string;
@@ -75,11 +76,11 @@ const initialState: ContextProps = {
 const ChatContext = createContext(initialState);
 
 export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
-  const linkSubscriberRef = useRef();
+  const linkSubscriberRef = useRef<Function | null>();
 
   const [state, setState] = useState(initialState.state);
 
-  const [agent, setAgent] = useState();
+  const [agent, setAgent] = useState<Me>();
 
   useEffect(() => {
     fetchAgent();
@@ -108,11 +109,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     }
 
     return () => {
-      linkSubscriberRef.current?.removeListener("link-added", handleLinkAdded);
-      linkSubscriberRef.current?.removeListener(
-        "link-removed",
-        handleLinkAdded
-      );
+      linkSubscriberRef.current && linkSubscriberRef.current();
     };
   }, [perspectiveUuid]);
 
@@ -270,6 +267,29 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
     //const hasFocus = document.hasFocus();
 
+    if (linkIs.socialDNA(link)) {
+      console.warn("got new social dna fetching messages again");
+      fetchMessages();
+    }
+    if (linkIs.reaction(link)) {
+      //TODO; this could read if the message is already popular and if so skip this check
+      const isPopularPost = await client.perspective.queryProlog(
+        perspectiveUuid,
+        `isPopular("${link.data.source}").`
+      );
+
+      if (isPopularPost) {
+        updateMessagePopularStatus(link, true);
+      }
+    }
+
+    if (!isMessageFromSelf && linkIs.reaction(link) && await client.perspective.queryProlog(
+      perspectiveUuid,
+      `triple("${channelId}", "${EntryType.Message}", "${link.data.source}").`
+    )) {
+      addReactionToState(link);
+    }
+
     const isSameChannel = await client.perspective.queryProlog(
       perspectiveUuid,
       `triple("${channelId}", "${EntryType.Message}", "${link.data.target}").`
@@ -279,17 +299,15 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       const message = getMessage(link);
 
       if (message) {
-        setState((oldState) => addMessage(oldState, {...message, synced: true}));
+        setState((oldState) =>
+          addMessage(oldState, { ...message, synced: true })
+        );
 
         setState((oldState) => ({
           ...oldState,
           isMessageFromSelf,
         }));
       }
-    }
-
-    if (linkIs.reaction(link) && isSameChannel) {
-      addReactionToState(link);
     }
 
     if (linkIs.editedMessage(link) && isSameChannel) {
@@ -306,7 +324,9 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     if (linkIs.reply(link) && isSameChannel) {
       const message = getMessage(link);
 
-      setState((oldState) => addMessage(oldState, {...message, synced: true}));
+      setState((oldState) =>
+        addMessage(oldState, { ...message, synced: true })
+      );
 
       setState((oldState) => ({
         ...oldState,
@@ -318,22 +338,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       const id = link.data.source;
 
       setState((oldState) => addHiddenToMessageToState(oldState, id, true));
-    }
-
-    if (linkIs.socialDNA(link)) {
-      console.warn("got new social dna fetching messages again");
-      fetchMessages();
-    }
-    if (linkIs.reaction(link)) {
-      //TODO; this could read if the message is already popular and if so skip this check
-      const isPopularPost = await client.perspective.queryProlog(
-        perspectiveUuid,
-        `isPopular("${link.data.source}").`
-      );
-
-      if (isPopularPost) {
-        updateMessagePopularStatus(link, true);
-      }
     }
   }
 
@@ -364,21 +368,23 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     let newMessages;
     let expressionLinkLength;
     try {
-        const data = await getMessages({
-          perspectiveUuid,
-          channelId,
-          from: from,
-          backwards
-        });
-        newMessages = data.keyedMessages;
-        expressionLinkLength = data.expressionLinkLength;
+      const data = await getMessages({
+        perspectiveUuid,
+        channelId,
+        from: from,
+        backwards,
+      });
+      newMessages = data.keyedMessages;
+      expressionLinkLength = data.expressionLinkLength;
     } catch (e) {
       if (e.message.includes("existence_error")) {
-        console.error("We dont have the SDNA to make this query, please wait for community to sync");
+        console.error(
+          "We dont have the SDNA to make this query, please wait for community to sync"
+        );
         await checkUpdateSDNAVersion(perspectiveUuid, new Date());
-        throw(e);
+        throw e;
       } else {
-        throw (e)
+        throw e;
       }
     }
 
@@ -471,10 +477,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
   async function loadMore(timestamp: Date, backwards: boolean) {
     if (backwards) {
-      return await fetchMessages(
-        new Date(timestamp),
-        backwards
-      );
+      return await fetchMessages(new Date(timestamp), backwards);
     } else {
       const oldestMessage = messages[0];
 

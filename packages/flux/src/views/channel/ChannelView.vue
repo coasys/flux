@@ -10,6 +10,14 @@
       </j-button>
 
       <div class="channel-view__header-left">
+        <j-box pr="500">
+          <j-flex a="center" gap="200">
+            <j-icon name="hash" size="md" color="ui-300"></j-icon>
+            <j-text color="black" weight="700" size="500" nomargin>
+              {{ channel.name }}
+            </j-text>
+          </j-flex>
+        </j-box>
         <div class="channel-view__tabs">
           <label class="channel-view-tab" v-for="view in filteredViewOptions">
             <input
@@ -23,23 +31,25 @@
             <span>{{ view.title }}</span>
           </label>
         </div>
-
-        <j-button
-          @click="() => (showUpdateChannelViews = true)"
-          size="sm"
-          variant="ghost"
-        >
-          <j-icon name="plus"></j-icon>
-        </j-button>
       </div>
-      <div class="channel-view__header-right"></div>
+      <div class="channel-view__header-right">
+        <j-tooltip placement="auto" title="Edit Channel">
+          <j-button
+            v-if="sameAgent"
+            @click="() => (showEditChannel = true)"
+            size="sm"
+            variant="ghost"
+          >
+            <j-icon size="sm" name="gear"></j-icon>
+          </j-button>
+        </j-tooltip>
+      </div>
     </div>
 
     <forum-view
       v-show="currentView === ChannelView.Forum"
       class="perspective-view"
-      :port="port"
-      :source="`flux_entry://${channel.id}`"
+      :source="`${channel.id}`"
       :perspective="communityId"
       @agent-click="onAgentClick"
       @channel-click="onChannelClick"
@@ -49,8 +59,7 @@
     <chat-view
       v-show="currentView === ChannelView.Chat"
       class="perspective-view"
-      :port="port"
-      :source="`flux_entry://${channel.id}`"
+      :source="`${channel.id}`"
       :perspective="communityId"
       @agent-click="onAgentClick"
       @channel-click="onChannelClick"
@@ -58,16 +67,16 @@
       @hide-notification-indicator="onHideNotificationIndicator"
     ></chat-view>
     <j-modal
-      :open="showUpdateChannelViews"
-      @toggle="(e: any) => (showUpdateChannelViews = e.target.open)"
+      :open="showEditChannel"
+      @toggle="(e: any) => (showEditChannel = e.target.open)"
     >
-      <UpdateChannelViews
-        v-if="showUpdateChannelViews"
-        @cancel="() => (showUpdateChannelViews = false)"
-        @submit="() => (showUpdateChannelViews = false)"
+      <EditChannel
+        v-if="showEditChannel"
+        @cancel="() => (showEditChannel = false)"
+        @submit="() => (showEditChannel = false)"
         :channelId="channelId"
         :communityId="communityId"
-      ></UpdateChannelViews>
+      ></EditChannel>
     </j-modal>
     <j-modal
       size="xs"
@@ -122,8 +131,9 @@ import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import Profile from "@/containers/Profile.vue";
-import UpdateChannelViews from "@/containers/UpdateChannelViews.vue";
+import EditChannel from "@/containers/EditChannel.vue";
 import { useAppStore } from "@/store/app";
+import { useUserStore } from "@/store/user";
 import { ChannelView } from "utils/types";
 import viewOptions from "utils/constants/viewOptions";
 
@@ -138,16 +148,17 @@ export default defineComponent({
   props: ["channelId", "communityId"],
   components: {
     Profile,
-    UpdateChannelViews,
+    EditChannel,
   },
   setup() {
     return {
       ChannelView: ChannelView,
       selectedViews: ref<ChannelView[]>([]),
-      showUpdateChannelViews: ref(false),
+      showEditChannel: ref(false),
       selectedChannelView: ref("chat"),
       appStore: useAppStore(),
       dataStore: useDataStore(),
+      userStore: useUserStore(),
       script: null as HTMLElement | null,
       memberMentions: ref<MentionTrigger[]>([]),
       activeProfile: ref<string>(""),
@@ -164,6 +175,9 @@ export default defineComponent({
       customElements.define("forum-view", ForumView);
   },
   computed: {
+    sameAgent() {
+      return this.channel.author === this.userStore.agent.did;
+    },
     currentView(): string {
       return this.channel.currentView || this.channel.views[0] || "";
     },
@@ -171,10 +185,6 @@ export default defineComponent({
       return viewOptions.filter((view) =>
         this.channel.views.includes(view.type)
       );
-    },
-    port(): number {
-      // TODO: This needs to be reactive, probaly not now as we using a normal class
-      return parseInt(localStorage.getItem("ad4minPort") || "") || 12000;
     },
     community(): CommunityState {
       const communityId = this.communityId;
@@ -308,6 +318,10 @@ export default defineComponent({
   gap: var(--j-space-300);
 }
 
+.channel-view__header-right {
+  align-self: center;
+}
+
 .perspective-view {
   height: calc(100% - var(--app-header-height));
   overflow-y: auto;
@@ -318,19 +332,20 @@ export default defineComponent({
   display: flex;
   height: 100%;
   align-items: center;
-  gap: var(--j-space-300);
+  gap: var(--j-space-500);
 }
 
 .channel-view-tab {
   height: 100%;
-  font-weight: 600;
+  font-weight: 500;
   display: flex;
   align-items: center;
   gap: var(--j-space-300);
   color: var(--j-color-ui-500);
+  font-size: var(--j-font-size-500);
   cursor: pointer;
   position: relative;
-  padding: var(--j-space-200) var(--j-space-400);
+  padding: var(--j-space-200) 0;
   border-bottom: 1px solid transparent;
 }
 

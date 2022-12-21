@@ -1,5 +1,5 @@
 import { useContext, useMemo, useEffect, useRef, useState } from "preact/hooks";
-import { AgentContext, ChatContext, PerspectiveContext } from "utils/react";
+import { AgentContext, ChatContext, CommunityContext } from "utils/react";
 import getMe from "utils/api/getMe";
 import getNeighbourhoodLink from "utils/api/getNeighbourhoodLink";
 import MessageToolbar from "./MessageToolbar";
@@ -15,7 +15,16 @@ import { Message, Profile } from "utils/types";
 import NeighbourhoodCard from "./NeighbourhoodCard";
 import LinkCard from "./LinkCard";
 
-function Card({type, image, url, mainRef, name, description, onClick, perspectiveUuid}) {
+function Card({
+  type,
+  image,
+  url,
+  mainRef,
+  name,
+  description,
+  onClick,
+  perspectiveUuid,
+}) {
   function onNeighbourhoodClick(url: string) {
     const event = new CustomEvent("neighbourhood-click", {
       detail: { url, channel: "Home" },
@@ -25,23 +34,27 @@ function Card({type, image, url, mainRef, name, description, onClick, perspectiv
   }
 
   function onLinkClick(url: string) {
-    window.open(url, '_blank');
+    window.open(url, "_blank");
   }
-  
-  if (type === 'neighbourhood') {
-    return <NeighbourhoodCard 
-      onClick={() => onNeighbourhoodClick(url)}
-      name={name}
-      description={description}
-      perspectiveUuid={perspectiveUuid}
-    />
-  } else if (type === 'link') {
-    return <LinkCard 
-      onClick={() => onLinkClick(url)}
-      name={name}
-      description={description}
-      image={image}
-    />
+
+  if (type === "neighbourhood") {
+    return (
+      <NeighbourhoodCard
+        onClick={() => onNeighbourhoodClick(url)}
+        name={name}
+        description={description}
+        perspectiveUuid={perspectiveUuid}
+      />
+    );
+  } else if (type === "link") {
+    return (
+      <LinkCard
+        onClick={() => onLinkClick(url)}
+        name={name}
+        description={description}
+        image={image}
+      />
+    );
   }
 }
 
@@ -65,7 +78,7 @@ export default function MessageItem({
 
   const {
     state: { members },
-  } = useContext(PerspectiveContext);
+  } = useContext(CommunityContext);
 
   const {
     methods: { addReaction, removeReaction },
@@ -199,7 +212,7 @@ export default function MessageItem({
         popularStyle,
         noPaddingStyle,
         highlightStyle,
-        !message.synced ? styles.messageNotSynced : ''
+        !message.synced ? styles.messageNotSynced : "",
       ].join(" ")}
       isReplying={isReplying}
       onMouseEnter={() => setShowToolbar(true)}

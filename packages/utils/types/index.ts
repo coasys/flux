@@ -89,22 +89,21 @@ export enum ChannelView {
 }
 
 export enum EntryType {
-  Message = "flux://message",
-  SimplePost = "flux://simple_post",
-  ImagePost = "flux://image_post",
-  PollPost = "flux://poll_post",
-  CalendarEvent = "flux://calendar_event",
-  LinkPost = "flux://link_post",
+  Community = "flux://has_community",
   Channel = "flux://has_channel",
+  Message = "flux://has_message",
+  Post = "flux://has_post",
+  Member = "flux://has_member",
 }
 
+//This represents an entry itself, which contains the default fields seen below
+//and is then extended to include other fields depending on the type of entry
 export interface Entry {
   id: string;
   author: string;
-  timestamp: Date;
-  types: EntryType[];
-  source?: string;
-  data?: PredicateAnyMap;
+  timestamp: number;
+  type: EntryType;
+  source: string;
 }
 
 export interface Post extends Entry {
@@ -120,18 +119,35 @@ export interface Post extends Entry {
 }
 
 export interface EntryInput {
+  id?: string;
   perspectiveUuid: string;
   source?: string;
-  types: EntryType[];
+  type: EntryType;
   data: PredicateMap;
 }
 
+type Target = String;
+
+//Represents the relationship between given predicate to a given expression url
 export type PredicateMap = {
-  [predicate: string]: string;
+  [predicate: string]: Target | Target[];
 };
 
+//Represents the relationship between given predicate to any data type,
+//this is usually used for data which has not being created as an expression yet
 export type PredicateAnyMap = {
   [predicate: string]: any;
+};
+
+//Represents the relationship between a given property and its associated value
+//This property is expected to be resolved in the Model to find the associated predicate
+export type PropertyMap = {
+  [property: string]: any;
+};
+
+//Represents the relationship between a given property to a given expression url
+export type PropertyValueMap = {
+  [property: string]: Target | Target[];
 };
 
 export interface GetEntry {
@@ -151,13 +167,6 @@ export interface PrologQuery {
   resultKeys: string[];
 }
 
-export enum PrologQueries {
-  GetMessages,
-  GetForumPosts,
-  GetChannel,
-  GetNeighbourhood,
-}
-
 export interface SdnaVersion {
   version: number;
   timestamp: Date;
@@ -166,5 +175,7 @@ export interface SdnaVersion {
 export interface ModelProperty {
   predicate: string;
   type: StringConstructor | NumberConstructor;
-  languageAddress: string;
+  collection?: boolean;
+  languageAddress?: string;
+  resolve: boolean;
 }

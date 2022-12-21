@@ -1,27 +1,36 @@
 import UIContext from "../../context/UIContext";
-import ChannelContext from "utils/react/ChannelContext";
-import CommunityContext from "utils/react/CommunityContext";
-import { useContext, useEffect, useState } from "preact/hooks";
+import { useContext, useEffect, useMemo, useState } from "preact/hooks";
 import { formatRelative, format, formatDistance } from "date-fns";
 import styles from "./index.scss";
-import createPostReply from "utils/api/createPostReply";
 import { getImage } from "utils/helpers/getImage";
-import Editor from "../Editor";
-import CommentItem from "../CommentItem";
-import getPosts from "utils/api/getPosts";
-import PostModel from "utils/api/post";
-import { EntryType } from "utils/types";
 import Avatar from "../Avatar";
+import CommentSection from "../CommentSection";
+import PostModel from "utils/api/post";
+import { CommunityContext, useEntry } from "utils/react";
 
-export default function Post() {
+export default function Post({
+  perspectiveUuid,
+  id,
+  source,
+}: {
+  perspectiveUuid: string;
+  id: string;
+  source: string;
+}) {
+  const { methods: UIMethods } = useContext(UIContext);
+  const {
+    state: { members },
+  } = useContext(CommunityContext);
+
+  const { entry: post } = useEntry({
+    perspectiveUuid,
+    source,
+    id,
+    model: PostModel,
+  });
+
   const [base64, setBase64] = useState("");
-  const [comments, setComments] = useState([]);
-  const [comment, setComment] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
-  const { state: UIState, methods: UIMethods } = useContext(UIContext);
-  const { state: communityState } = useContext(CommunityContext);
-  const { state } = useContext(ChannelContext);
-  const post = state.keyedPosts[UIState.currentPost];
+  const [ogData, setOgData] = useState<any>({});
 
   function onProfileClick(event: any, did: string) {
     event.stopPropagation();
@@ -32,54 +41,37 @@ export default function Post() {
     event.target.dispatchEvent(e);
   }
 
-  async function fetchComments() {
-    const comments = await getPosts(state.communityId, post.id);
-    setComments(comments);
-  }
-
-  useEffect(() => {
-    fetchComments();
-    const Post = new PostModel({
-      perspectiveUuid: state.communityId,
-      source: post.id,
-    });
-    Post.get(post.id).then((e) => console.log("commentys", e));
-  }, []);
-
   async function fetchImage(url) {
     const image = await getImage(url);
     setBase64(image);
   }
 
-  useEffect(() => {
-    if (post.image) {
-      fetchImage(post.image);
-    }
-  }, [post.image, post.url]);
-
-  async function submitComment() {
+  async function fetchOgData(url) {
     try {
-      setIsCreating(true);
-      await createPostReply({
-        perspectiveUuid: state.communityId,
-        postId: post.id,
-        message: comment,
-      });
-      await fetchComments();
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setIsCreating(false);
-    }
+      const data = await fetch(
+        "https://jsonlink.io/api/extract?url=" + url
+      ).then((res) => res.json());
+      setOgData(data);
+    } catch (e) {}
   }
 
-  const author = communityState.members[post.author] || {};
+  useEffect(() => {
+    if (post?.image) {
+      fetchImage(post.image);
+    }
+    if (post?.url) {
+      fetchOgData(post.url);
+    }
+  }, [post?.image, post?.url]);
+
+  if (!post) return;
+
+  const author = members[post.author] || {};
   const hasTitle = post.title;
   const hasImage = post.image;
   const hasBody = post.body;
   const hasUrl = post.url;
   const hasDates = post.startDate && post.endDate;
-  const hasComments = comments.length > 0;
 
   return (
     <div class={styles.post}>
@@ -127,16 +119,24 @@ export default function Post() {
         </j-box>
       )}
 
+      {hasUrl && ogData?.images?.length > 0 && (
+        <j-box pt="500">
+          <a href={post.url} target="_blank">
+            <img src={ogData?.images[0]} class={styles.postImage} />
+          </a>
+        </j-box>
+      )}
+
       {hasUrl && (
         <j-box pt="400">
           <div class={styles.postUrl}>
-            <j-icon size="xs" name="link"></j-icon>
+            <j-icon size="md" name="link"></j-icon>
             <a
               onClick={(e) => e.stopPropagation()}
               href={post.url}
               target="_blank"
             >
-              {new URL(post.url).hostname}
+              {new URL(post.url).origin}
             </a>
           </div>
         </j-box>
@@ -173,35 +173,10 @@ export default function Post() {
         </j-box>
       )}
 
-      <j-box pt="900">
-        <Editor onChange={(e) => setComment(e)}></Editor>
-        <j-box pt="300">
-          <j-button
-            disabled={isCreating}
-            loading={isCreating}
-            size="sm"
-            variant="primary"
-            onClick={submitComment}
-          >
-            Make a comment
-          </j-button>
-        </j-box>
-      </j-box>
-
-      {hasComments && (
-        <j-box pt="900">
-          <j-text variant="label">Comments ({comments.length})</j-text>
-          <j-box>
-            {comments.map((post) => {
-              return (
-                <j-box key={post.id} mt="400">
-                  <CommentItem post={post}></CommentItem>
-                </j-box>
-              );
-            })}
-          </j-box>
-        </j-box>
-      )}
+      <CommentSection
+        perspectiveUuid={perspectiveUuid}
+        source={post.id}
+      ></CommentSection>
     </div>
   );
 }
