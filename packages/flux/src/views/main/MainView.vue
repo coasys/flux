@@ -30,8 +30,8 @@
         <div v-if="modals.showWarningDisclaimer">
           <j-box pb="500">
             <j-flex gap="400" a="center">
-              <j-icon name="exclamation-diamond" size="xl" />
-              <j-text nomargin variant="heading-lg">Disclaimer</j-text>
+              <j-icon name="exclamation-diamond" size="lg" />
+              <j-text nomargin variant="heading">Disclaimer</j-text>
             </j-flex>
           </j-box>
           <j-text variant="ingress">
@@ -48,8 +48,8 @@
         <br v-if="modals.showWarningDisclaimer && showJoinCommunity" />
         <j-box pb="500" v-if="showJoinCommunity">
           <j-flex gap="400" a="center">
-            <j-icon name="arrow-down-circle" size="xl" />
-            <j-text nomargin variant="heading-lg">Testing Community</j-text>
+            <j-icon name="arrow-down-circle" size="lg" />
+            <j-text nomargin variant="heading">Testing Community</j-text>
           </j-flex>
           <br />
           <j-text variant="ingress">
@@ -60,7 +60,7 @@
             variant="primary"
             @click="() => joinTestingCommunity()"
           >
-            Join
+            Join Official Testing Community
           </j-button>
         </j-box>
       </j-box>
