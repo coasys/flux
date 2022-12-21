@@ -42,11 +42,12 @@ export default defineComponent({
         let firstUsers = {} as any;
         this.loading = true;
 
-        for (let [i, user] of users.entries()) {
+        for (let i = 0; i < users.length; i++) {
+          const did = users[i];
           if (i <= 4) {
-            const profile = await getProfile(user);
+            const profile = await getProfile(did);
             if (profile) {
-              firstUsers[user] = profile;
+              firstUsers[did] = profile;
             }
           }
         }
