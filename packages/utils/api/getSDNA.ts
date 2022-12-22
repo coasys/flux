@@ -46,6 +46,13 @@ export async function getSDNALinks(perspectiveUuid: string): Promise<LinkExpress
     return existingSDNALinks;
 }
 
+export async function getFluxSDNALinks(perspectiveUuid: string) {
+  const existingSDNALinks = await getSDNALinks(perspectiveUuid);
+  const fluxSDNALinks = existingSDNALinks.filter((link) => link.data.target.includes("flux_message") || link.data.target.includes("flux_post"));
+  return fluxSDNALinks;
+}
+
+
 export async function getSDNAValues(perspectiveUuid: string): Promise<SDNAValues| null> {
     const existingSDNA = await getSDNALinkLiteral(perspectiveUuid);
 
