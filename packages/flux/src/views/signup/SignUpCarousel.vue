@@ -5,12 +5,14 @@
         <j-box pt="500" pb="800">
           <Orb3 height="30vh"></Orb3>
         </j-box>
-        <Logo height="7vh" />
-        <j-box pt="500">
-          <j-text size="800" color="black">
-            A Toolkit for the New Internet
-          </j-text>
-        </j-box>
+        <div>
+          <Logo height="7vh" />
+          <j-box pt="500">
+            <j-text size="800" color="black">
+              A Toolkit for the New Internet
+            </j-text>
+          </j-box>
+        </div>
         <j-box py="500">
           <j-flex direction="column" gap="200">
             <j-button size="xl" @click="currentIndex = 1" variant="primary">
@@ -143,13 +145,12 @@ export default defineComponent({
 
 .slider__slide-content {
   height: 100%;
-  max-height: 700px;
+  max-height: 800px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   max-width: 750px;
   margin: 0 auto;
-  padding-left: var(--j-space-500);
-  padding-right: var(--j-space-500);
+  padding: var(--j-space-500);
 }
 </style>

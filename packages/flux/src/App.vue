@@ -84,7 +84,7 @@ export default defineComponent({
       route,
       dataStore,
       userStore,
-      watcherStarted
+      watcherStarted,
     };
   },
   created() {
@@ -106,10 +106,13 @@ export default defineComponent({
           if (semver.gt(EXPECTED_AD4M_VERSION, version)) {
             //TODO: here we need to provide a link to download the latest version of ad4m with correct OS version
             //from github
-            console.error("AD4M version is not supported... Please update AD4MIN before continuing.");
+            console.error(
+              "AD4M version is not supported... Please update AD4MIN before continuing."
+            );
             this.appStore.setGlobalError({
               show: true,
-              message: "AD4M version is not supported... Please update AD4MIN before continuing.",
+              message:
+                "AD4M version is not supported... Please update AD4MIN before continuing.",
             });
           } else {
             this.appStore.setGlobalError({
@@ -231,7 +234,6 @@ body {
   margin: 0;
   padding: 0;
   background-color: var(--app-main-sidebar-bg-color);
-  overflow: hidden;
 }
 
 #app {

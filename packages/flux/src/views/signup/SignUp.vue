@@ -240,7 +240,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .signup-view {
   margin: 0 auto;
-  height: 100vh;
+  height: 100%;
 }
 
 .signup-view__flow {
@@ -260,7 +260,6 @@ export default defineComponent({
   max-width: 800px;
   margin: 0 auto;
   align-items: center;
-  overflow-y: auto;
 }
 
 .signup-view__intro-content {

@@ -301,7 +301,7 @@ export default defineComponent({
 
 .channel-view__header {
   display: flex;
-  align-items: end;
+  align-items: center;
   justify-content: space-between;
   padding: 0 var(--j-space-200);
   position: sticky;
