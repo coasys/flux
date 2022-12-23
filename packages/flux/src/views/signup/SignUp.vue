@@ -241,7 +241,6 @@ export default defineComponent({
 .signup-view {
   margin: 0 auto;
   height: 100vh;
-  overflow-y: auto;
 }
 
 .signup-view__flow {
@@ -261,7 +260,7 @@ export default defineComponent({
   max-width: 800px;
   margin: 0 auto;
   align-items: center;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .signup-view__intro-content {
