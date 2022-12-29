@@ -1513,7 +1513,7 @@
       ]
     },
     "src/components/input/Input.js": {
-      "bytes": 6979,
+      "bytes": 6940,
       "imports": [
         {
           "path": "../../node_modules/lit/index.js",
@@ -2071,7 +2071,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 516588
+      "bytes": 516547
     },
     "dist/main.js": {
       "imports": [],
@@ -2352,7 +2352,7 @@
           "bytesInOutput": 22
         },
         "src/components/input/Input.js": {
-          "bytesInOutput": 5381
+          "bytesInOutput": 5342
         },
         "src/components/checkbox/Checkbox.js": {
           "bytesInOutput": 2299
@@ -2409,7 +2409,7 @@
           "bytesInOutput": 0
         }
       },
-      "bytes": 120726
+      "bytes": 120687
     },
     "dist/main.css.map": {
       "imports": [],

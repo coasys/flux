@@ -15,6 +15,5 @@ package-lock.json
 *.sw?
 *.turbo
 dev-dist
-.DS_Store
 
 cachedb
