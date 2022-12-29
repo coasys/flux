@@ -4,6 +4,7 @@
   "main": "main.js",
   "scripts": {
     "start": "vite",
+    "dev": "vite",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,7 +12,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "preact": "^10.11.3"
+    "preact": "^10.11.3",
+    "utils": "*"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.5.0",

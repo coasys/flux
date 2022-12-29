@@ -12,7 +12,7 @@ export default function useEntries({
   model: typeof EntryModel;
 }) {
   const [loading, setLoading] = useState(true);
-  const [entries, setEntries] = useState<Entry[]>([]);
+  const [entries, setEntries] = useState<any[]>([]);
 
   const Model = useMemo(() => {
     return new model({ perspectiveUuid, source });
