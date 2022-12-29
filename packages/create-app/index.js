@@ -17,7 +17,7 @@ fs.mkdirSync(projectDir, { recursive: true });
 // A common approach to building a starter template is to
 // create a `template` folder which will house the template
 // and the files we want to create.
-const templateDir = path.resolve(__dirname, 'template');
+const templateDir = path.resolve(__dirname, '../create-app-template-react');
 fs.cpSync(templateDir, projectDir, { recursive: true });
 
 // It is good practice to have dotfiles stored in the
