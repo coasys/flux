@@ -89,7 +89,7 @@ export default function PostItem({ post, displayView }) {
             className={styles.postIcon}
             size="xl"
             color="ui-600"
-            name="card-heading"
+            name="body-text"
           ></j-icon>
         )}
       </div>
