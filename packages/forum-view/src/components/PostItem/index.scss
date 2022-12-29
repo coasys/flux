@@ -4,10 +4,18 @@
   grid-template-columns: 1fr;
   grid-template-rows: max-content;
   gap: var(--j-space-500);
+  padding: var(--j-space-500);
+  background-color: rgba(0,0,0,0.05);
   text-decoration: none;
   color: currentColor;
   position: relative;
   overflow: hidden;
+  border: 1px solid var(--j-color-ui-50);
+  border-radius: var(--j-border-radius);
+}
+
+.post:hover {
+  background-color: rgba(0, 0, 0, 0.08);
 }
 
 .grid {
@@ -29,7 +37,7 @@
 }
 
 .grid .postImageWrapper {
-  aspect-ratio: 1/1;
+  aspect-ratio: 9/6;
 }
 
 .grid .postImage {
@@ -37,7 +45,7 @@
 }
 
 .postImageWrapper {
-  background-color: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255, 255, 255, 0.0);
   border-radius: var(--j-border-radius);
   overflow: hidden;
   display: grid;
@@ -110,7 +118,6 @@
   height: 100px;
   display: grid;
   place-items: center;
-  background-color: var(--j-color-ui-100);
 }
 
 .calendar {
