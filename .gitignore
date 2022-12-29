@@ -16,6 +16,5 @@ package-lock.json
 *.turbo
 dev-dist
 .DS_Store
-.netlify
 
 cachedb

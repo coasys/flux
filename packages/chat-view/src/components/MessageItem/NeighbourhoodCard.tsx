@@ -4,7 +4,6 @@ export default function NeighbourhoodCard({ name, description, onClick, perspect
   return (
     <div class={styles.neighbourhoodCard} size="300" onClick={onClick}>
       <div>
-        <small class={styles.neighbourhoodCardTitle}>Neighbourhood</small>
         <div class={styles.neighbourhoodCardName}>
           {name || "Unknown Community"}
         </div>
