@@ -5,6 +5,7 @@
   "homepage": "https://junto-elements.netlify.com",
   "main": "dist/main.js",
   "browser": "dist/main.js",
+  "types": "dist/global.d.ts",
   "files": [
     "dist"
   ],

@@ -37,6 +37,8 @@ type ${snakeToPascal(tag.name)}Props = {
 }
 
 const finalString = `
+import "construct-style-sheets-polyfill";
+
 declare module 'preact' {
   namespace JSX {
       interface IntrinsicElements {
@@ -56,4 +58,4 @@ declare module global {
 ${finalList.join('\n')}
 `
 
-fs.writeFileSync('./src/types/index.ts', finalString)
+fs.writeFileSync('./dist/main.d.ts', finalString)
