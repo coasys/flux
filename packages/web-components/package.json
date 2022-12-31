@@ -22,6 +22,7 @@
     "dev:analyze": "web-component-analyzer src --outFile components.json",
     "dev:watch": "NODE_ENV=dev node esbuild.js",
     "dev:docs": "npx reload",
+    "build:types": "node buildTypes.js",
     "build:analyze": "web-component-analyzer src --outFile components.json",
     "build:package": "esbuild src/main.ts --metafile=meta.json --bundle --minify --sourcemap --outfile=dist/main.js --target=es2016"
   },
