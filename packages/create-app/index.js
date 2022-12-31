@@ -5,9 +5,20 @@
 const spawn = require('cross-spawn');
 const fs = require('fs');
 const path = require('path');
+const yargs = require('yargs/yargs')
+const { hideBin } = require('yargs/helpers')
+
+const argv = yargs(hideBin(process.argv))
+  .option('template', {
+    alias: 't',
+    type: 'string',
+    default: '../create-app-template-preact',
+    description: 'Template to use'
+  })
+  .parse()
 
 // The first argument will be the project name.
-const projectName = process.argv[2];
+const projectName = argv._[0];
 
 // Create a project directory with the project name.
 const currentDir = process.cwd();
@@ -17,7 +28,7 @@ fs.mkdirSync(projectDir, { recursive: true });
 // A common approach to building a starter template is to
 // create a `template` folder which will house the template
 // and the files we want to create.
-const templateDir = path.resolve(__dirname, '../create-app-template-react');
+const templateDir = path.resolve(__dirname, argv.template);
 fs.cpSync(templateDir, projectDir, { recursive: true });
 
 // It is good practice to have dotfiles stored in the

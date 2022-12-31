@@ -9,6 +9,9 @@
   "bin": {
     "create-flux-app": "index.js"
   },
+  "dependencies": {
+    "yargs": "^17.6.2"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
