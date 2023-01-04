@@ -14,10 +14,6 @@
       </aside>
       <div class="settings__content">
         <j-box pb="500">
-          <j-text variant="subheading" size="300">DNA VERSION</j-text>
-          <j-text variant="subheading" size="300">{{ sdnaVersion }}</j-text>
-        </j-box>
-        <j-box pb="500">
           <j-input
             label="Trigger Emoji"
             :value="emoji"
@@ -87,6 +83,7 @@ export default defineComponent({
       this.emojiCount = emojiCount;
     }
     const sdnaVersionData = await getSDNAVersion(perspectiveUuid);
+    console.log("Found SDNA Version: ", sdnaVersionData);
     this.sdnaVersion = sdnaVersionData? sdnaVersionData.version : 0;
   },
   methods: {
