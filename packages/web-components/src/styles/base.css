@@ -393,6 +393,7 @@
 
 html {
   font-size: var(--j-font-base-size);
+  box-sizing: border-box;
 }
 
 body {
@@ -400,6 +401,12 @@ body {
   color: var(--j-color-ui-800);
   font-family: var(--j-font-family);
   background-color: var(--j-color-white);
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
 }
 
 ::-webkit-scrollbar {
