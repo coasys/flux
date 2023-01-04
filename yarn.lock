@@ -1573,9 +1573,9 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@perspect3vism/ad4m-connect@0.2.7":
+"@perspect3vism/ad4m-connect@0.2.7", "@perspect3vism/ad4m-connect@^0.2.7":
   version "0.2.7"
-  resolved "https://registry.npmjs.org/@perspect3vism/ad4m-connect/-/ad4m-connect-0.2.7.tgz"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.2.7.tgz#7f0f8f85541094bc13b3d9edb69c8423f25f5f82"
   integrity sha512-8jwi+EjHhiRHagBZ8AkHcyjwSO6f5pG8nj3AXeJJlCdkbEn4V7M7YOo1CC0T1ihuyG63pdWA6etrtUqo/k5pIw==
   dependencies:
     auto-bind "^5.0.1"
@@ -2120,6 +2120,11 @@
   version "18.11.17"
   resolved "https://registry.npmjs.org/@types/node/-/node-18.11.17.tgz"
   integrity sha512-HJSUJmni4BeDHhfzn6nF0sVmd1SMezP7/4F0Lq+aXzmp2xm9O7WXrUtHW/CHlYVtZUbByEvWidHqRtcJXGF2Ng==
+
+"@types/node@^14.11.2":
+  version "14.18.36"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.18.36.tgz#c414052cb9d43fab67d679d5f3c641be911f5835"
+  integrity sha512-FXKWbsJ6a1hIrRxv+FoukuHnGTgEzKYGi7kilfMae96AL9UNkPFNWJEEYWzdRI9ooIkbr4AKldyuSTLql06vLQ==
 
 "@types/node@^16.11.26":
   version "16.18.10"

@@ -6,19 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Flux App</title>
     <style>
-      body {
-        padding: 0;
-        margin: 0;
-      }
-      html {
-        box-sizing: border-box;
-      }
-      *,
-      *:before,
-      *:after {
-        box-sizing: inherit;
-      }
-      perspective-view {
+      flux-app {
         height: 100vh;
         display: block;
       }
@@ -35,21 +23,26 @@
       openonshortcut
     ></ad4m-connect>
 
-    <perspective-view></perspective-view>
+    <flux-app></flux-app>
 
     <script type="module">
-      import "https://unpkg.com/@perspect3vism/ad4m-connect@0.0.11-11/dist/web.js";
-      import PerspectiveView from "./src/main.ts";
+      import "@perspect3vism/ad4m-connect/dist/web.js";
+      import App from "./src/main.ts";
 
-      const el = document.querySelector("perspective-view");
+      // Register the app as a web component
+      customElements.define("flux-app", App);
+
+      // Connect Ad4m
+      const ad4m = document.querySelector("ad4m-connect");
+      ad4m.connect();
+
+      // Extract perspectiveUuid and source from the URL path
       const [_, uuid, source] = document.location.pathname.split("/");
 
-      el.setAttribute("perspective", decodeURIComponent(uuid));
-      el.setAttribute("source", decodeURIComponent(source));
-      customElements.define("perspective-view", PerspectiveView);
-
-      const ad4mConnect = document.querySelector("ad4m-connect");
-      ad4mConnect.connect();
+      // Set perspective and source on the app
+      const app = document.querySelector("flux-app");
+      app.setAttribute("perspective", decodeURIComponent(uuid));
+      app.setAttribute("source", decodeURIComponent(source));
     </script>
   </body>
 </html>

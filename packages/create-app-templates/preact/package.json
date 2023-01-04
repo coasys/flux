@@ -12,8 +12,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "preact": "^10.11.3",
-    "utils": "*"
+    "utils": "*",
+    "@junto-foundation/junto-elements": "*",
+    "@perspect3vism/ad4m-connect": "^0.2.7",
+    "preact": "^10.11.3"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.5.0",
