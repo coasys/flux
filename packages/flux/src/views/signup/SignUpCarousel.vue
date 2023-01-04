@@ -3,14 +3,16 @@
     <div class="slider__slide" v-if="currentIndex === 0">
       <div class="slider__slide-content">
         <j-box pt="500" pb="800">
-          <Orb3 height="40vh"></Orb3>
+          <Orb3 height="30vh"></Orb3>
         </j-box>
-        <Logo height="7vh" />
-        <j-box pt="500">
-          <j-text size="800" color="black">
-            A Toolkit for the New Internet
-          </j-text>
-        </j-box>
+        <div>
+          <Logo height="7vh" />
+          <j-box pt="500">
+            <j-text size="800" color="black">
+              A Toolkit for the New Internet
+            </j-text>
+          </j-box>
+        </div>
         <j-box py="500">
           <j-flex direction="column" gap="200">
             <j-button size="xl" @click="currentIndex = 1" variant="primary">
@@ -26,14 +28,17 @@
     <div class="slider__slide" v-if="currentIndex === 1">
       <div class="slider__slide-content">
         <j-box pt="500" pb="800">
-          <Orb height="40vh"></Orb>
+          <Orb height="30vh"></Orb>
         </j-box>
-        <j-text variant="heading">
-          Each person that uses Flux also hosts and serves its application data
-        </j-text>
-        <j-text variant="ingress">
-          There are no centralized servers involved.
-        </j-text>
+        <div>
+          <j-text variant="heading-lg">
+            Each person that uses Flux also hosts and serves its application
+            data
+          </j-text>
+          <j-text variant="ingress">
+            There are no centralized servers involved.
+          </j-text>
+        </div>
         <j-box py="600">
           <j-flex j="center" a="center" gap="500">
             <j-button variant="link" size="xl" @click="currentIndex = 0">
@@ -49,16 +54,18 @@
     <div class="slider__slide" v-if="currentIndex === 2">
       <div class="slider__slide-content">
         <j-box pt="500" pb="800">
-          <Orb2 height="40vh"></Orb2>
+          <Orb2 height="30vh"></Orb2>
         </j-box>
-        <j-text variant="heading">
-          Each community in Flux manages its own distributed database
-        </j-text>
-        <j-text variant="ingress">
-          You retain custody of all communications and content you create on
-          Flux, sharing the hosting and serving of data only with those who have
-          permission to view it.
-        </j-text>
+        <div>
+          <j-text variant="heading-lg">
+            Each community in Flux manages its own distributed database
+          </j-text>
+          <j-text variant="ingress">
+            You retain custody of all communications and content you create on
+            Flux, sharing the hosting and serving of data only with those who
+            have permission to view it.
+          </j-text>
+        </div>
         <j-box py="600">
           <j-flex j="center" a="center" gap="500">
             <j-button variant="link" size="xl" @click="currentIndex = 1">
@@ -74,12 +81,14 @@
     <div class="slider__slide" v-if="currentIndex === 3">
       <div class="slider__slide-content">
         <j-box pt="500" pb="800">
-          <Orb2 height="40vh"></Orb2>
+          <Orb2 height="30vh"></Orb2>
         </j-box>
-        <j-text variant="heading">Greater privacy and control </j-text>
-        <j-text variant="ingress">
-          To host and use Flux, download AD4M and run your own agent node
-        </j-text>
+        <div>
+          <j-text variant="heading-lg">Greater privacy and control </j-text>
+          <j-text variant="ingress">
+            To host and use Flux, download AD4M and run your own agent node
+          </j-text>
+        </div>
         <j-box py="600">
           <j-flex j="center" a="center" gap="500">
             <j-button variant="link" size="xl" @click="currentIndex = 2">
@@ -124,13 +133,24 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.slider {
+  height: 100%;
+}
 .slider__slide {
+  height: 100%;
+  display: grid;
+  place-items: center;
   text-align: center;
 }
 
 .slider__slide-content {
+  height: 100%;
+  max-height: 800px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   max-width: 750px;
   margin: 0 auto;
-  padding: var(--j-space-900);
+  padding: var(--j-space-500);
 }
 </style>
