@@ -1,13 +1,16 @@
-const components = require('./components.json');
-const fs = require('fs')
+const components = require("./components.json");
+const fs = require("fs");
+var getDirName = require("path").dirname;
 
 const snakeToPascal = (string) => {
-  return string.split("/")
-    .map(snake => snake.split("-")
-      .map(substr => substr.charAt(0)
-        .toUpperCase() +
-        substr.slice(1))
-      .join(""))
+  return string
+    .split("/")
+    .map((snake) =>
+      snake
+        .split("-")
+        .map((substr) => substr.charAt(0).toUpperCase() + substr.slice(1))
+        .join("")
+    )
     .join("/");
 };
 
@@ -17,23 +20,22 @@ const componentList = [];
 for (const tag of components.tags) {
   const list = [];
 
-  componentList.push(`"${tag.name}": ${snakeToPascal(tag.name)}Props;\n`)
+  componentList.push(`"${tag.name}": ${snakeToPascal(tag.name)}Props;\n`);
 
   if (tag.attributes) {
     for (const attribute of tag.attributes) {
-      list.push(`${attribute.name}?: string;\n\t`);  
+      list.push(`${attribute.name}?: string;\n\t`);
     }
   }
-  list.push('children?: any')
-
+  list.push("children?: any");
 
   const newType = `
 type ${snakeToPascal(tag.name)}Props = {
-  ${list.join('')}
+  ${list.join("")}
 }
-  `
+  `;
 
-  finalList.push(newType)
+  finalList.push(newType);
 }
 
 const finalString = `
@@ -42,7 +44,7 @@ import "construct-style-sheets-polyfill";
 declare module 'preact' {
   namespace JSX {
       interface IntrinsicElements {
-        ${componentList.join('\t\t\t\t')}
+        ${componentList.join("\t\t\t\t")}
       }
   }
 }
@@ -50,12 +52,20 @@ declare module 'preact' {
 declare module global {
   namespace JSX {
       interface IntrinsicElements {
-        ${componentList.join('\t\t\t\t')}
+        ${componentList.join("\t\t\t\t")}
       }
   }
 }
 
-${finalList.join('\n')}
-`
+${finalList.join("\n")}
+`;
 
-fs.writeFileSync('./dist/main.d.ts', finalString)
+function writeFile(path, contents, cb) {
+  fs.mkdir(getDirName(path), { recursive: true }, function (err) {
+    if (err) return cb(err);
+
+    fs.writeFile(path, contents, cb);
+  });
+}
+
+writeFile("./dist/main.d.ts", finalString, () => {});

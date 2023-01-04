@@ -5,7 +5,7 @@
       "imports": []
     },
     "src/styles/base.css": {
-      "bytes": 11080,
+      "bytes": 11155,
       "imports": []
     },
     "../../node_modules/@lit/reactive-element/css-tag.js": {
@@ -2415,16 +2415,16 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 12498
+      "bytes": 12598
     },
     "dist/main.css": {
       "imports": [],
       "inputs": {
         "src/styles/base.css": {
-          "bytesInOutput": 9495
+          "bytesInOutput": 9555
         }
       },
-      "bytes": 9618
+      "bytes": 9678
     }
   }
 }
