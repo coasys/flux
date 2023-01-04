@@ -1953,7 +1953,7 @@
       ]
     },
     "src/main.ts": {
-      "bytes": 836,
+      "bytes": 835,
       "imports": [
         {
           "path": "../../node_modules/construct-style-sheets-polyfill/dist/adoptedStyleSheets.js",
