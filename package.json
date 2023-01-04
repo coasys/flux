@@ -2,7 +2,7 @@
   "name": "flux-monorepo",
   "version": "0.3.1",
   "workspaces": [
-    "packages/*"
+    "packages/**/*"
   ],
   "private": true,
   "scripts": {

@@ -14,6 +14,17 @@ export default function App({ perspective, source }) {
     model: MemberModel,
   });
 
+  if (!perspective) {
+    return (
+      <>
+        <h1>No perspective provided</h1>
+        <p>
+          Try to load a perspective by pasting a perspective uuid into the url
+        </p>
+      </>
+    );
+  }
+
   return (
     <h1>
       This perspective has:
