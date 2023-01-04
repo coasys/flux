@@ -19,3 +19,5 @@ dev-dist
 .netlify
 
 cachedb
+# Local Netlify folder
+.netlify
