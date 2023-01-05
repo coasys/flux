@@ -1499,10 +1499,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@perspect3vism/ad4m-connect@0.2.7":
-  version "0.2.7"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.2.7.tgz#7f0f8f85541094bc13b3d9edb69c8423f25f5f82"
-  integrity sha512-8jwi+EjHhiRHagBZ8AkHcyjwSO6f5pG8nj3AXeJJlCdkbEn4V7M7YOo1CC0T1ihuyG63pdWA6etrtUqo/k5pIw==
+"@perspect3vism/ad4m-connect@0.2.8":
+  version "0.2.8"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.2.8.tgz#2e4dcc1889a0e5e2cffe8fe2008c42f4f0d07156"
+  integrity sha512-xtz1xmyJvhUauLDoA4gqN708Bv7xLUddPXa5TzT5CDIH7KvkdGxKE/PbJwSoH1ehCU2NXx9SKt0GHxPTId9l9g==
   dependencies:
     auto-bind "^5.0.1"
     electron "^20.0.3"
