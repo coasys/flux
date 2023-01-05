@@ -38,6 +38,12 @@ const styles = css`
   :host([j="center"]) {
     --j-flex-justify-content: center;
   }
+  :host([j="end"]) {
+    --j-flex-justify-content: flex-end;
+  }
+  :host([j="start"]) {
+    --j-flex-justify-content: flex-start;
+  }
   :host([direction="row"]) {
     --j-flex-direction: row;
   }

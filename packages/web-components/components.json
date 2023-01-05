@@ -685,11 +685,11 @@
         },
         {
           "name": "max",
-          "type": "number"
+          "type": "string"
         },
         {
           "name": "min",
-          "type": "number"
+          "type": "string"
         },
         {
           "name": "maxlength",
@@ -708,7 +708,19 @@
           "type": "string"
         },
         {
+          "name": "name",
+          "type": "string"
+        },
+        {
           "name": "size",
+          "type": "string"
+        },
+        {
+          "name": "list",
+          "type": "string"
+        },
+        {
+          "name": "step",
           "type": "string"
         },
         {
@@ -778,12 +790,12 @@
         {
           "name": "max",
           "attribute": "max",
-          "type": "number"
+          "type": "string"
         },
         {
           "name": "min",
           "attribute": "min",
-          "type": "number"
+          "type": "string"
         },
         {
           "name": "maxlength",
@@ -806,8 +818,23 @@
           "type": "string"
         },
         {
+          "name": "name",
+          "attribute": "name",
+          "type": "string"
+        },
+        {
           "name": "size",
           "attribute": "size",
+          "type": "string"
+        },
+        {
+          "name": "list",
+          "attribute": "list",
+          "type": "string"
+        },
+        {
+          "name": "step",
+          "attribute": "step",
           "type": "string"
         },
         {
@@ -880,10 +907,16 @@
           "default": "\"text\""
         },
         {
+          "name": "focus"
+        },
+        {
           "name": "onFocus"
         },
         {
           "name": "onBlur"
+        },
+        {
+          "name": "validate"
         }
       ],
       "events": [
@@ -1016,7 +1049,7 @@
         {
           "name": "size",
           "description": "Size",
-          "type": "\"\"|\"xs\"|\"sm\"|\"lg\"|\"xl\"|"
+          "type": "\"\"|\"xs\"|\"sm\"|\"lg\"|\"xl\"|\"fullscreen\""
         },
         {
           "name": "open",
@@ -1035,7 +1068,7 @@
           "name": "size",
           "attribute": "size",
           "description": "Size",
-          "type": "\"\"|\"xs\"|\"sm\"|\"lg\"|\"xl\"|"
+          "type": "\"\"|\"xs\"|\"sm\"|\"lg\"|\"xl\"|\"fullscreen\""
         },
         {
           "name": "open",

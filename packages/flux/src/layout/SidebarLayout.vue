@@ -77,6 +77,7 @@ export default defineComponent({
   display: flex;
   transition: all 0.2s ease;
   overflow: hidden;
+  position: relative;
 }
 .sidebar-layout__toggle-button {
   position: absolute;
@@ -125,7 +126,7 @@ export default defineComponent({
   }
   .sidebar-layout--closed .sidebar-layout__main {
     transform: translate3d(0, 0, 0);
-    position: absolute;
+    position: fixed;
     opacity: 1;
     left: 0;
     top: 0;
@@ -156,7 +157,7 @@ export default defineComponent({
   right: 0;
   top: 0;
   width: 3px;
-  border-right: 1px solid var(--app-drawer-border-color);
+  border-right: 1px solid var(--app-drawer-border-color, var(--j-border-color));
   background: transparent;
   cursor: col-resize;
   height: 100%;

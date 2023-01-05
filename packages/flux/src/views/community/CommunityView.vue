@@ -1,10 +1,7 @@
 <template>
   <sidebar-layout>
     <template v-slot:sidebar>
-      <community-sidebar
-        :community="community"
-        :notSynced="notSynced"
-      ></community-sidebar>
+      <community-sidebar></community-sidebar>
     </template>
 
     <div
@@ -12,35 +9,62 @@
       v-for="channel in channels"
       :key="channel.id"
       :style="{
-        height:
-          channel.name === channelId &&
-          channel.sourcePerspective === communityId
-            ? '100%'
-            : '0',
+        height: channel.id === channelId ? '100%' : '0',
       }"
     >
       <channel-view
         v-if="loadedChannels[channel.id]"
-        v-show="
-          channel.name === channelId &&
-          channel.sourcePerspective === communityId
-        "
-        :channelId="channel.name"
+        v-show="channel.id === channelId"
+        :channelId="channel.id"
         :communityId="channel.sourcePerspective"
       ></channel-view>
     </div>
-    <div v-if="notSynced" class="center">
-      <j-spinner size="lg"> </j-spinner>
-      <j-box pt="700"></j-box>
-      <j-text size="700">Community not synced yet. </j-text>
-      <j-text size="700">please wait... </j-text>
+    <div v-if="!isSynced" class="center">
+      <j-box py="800">
+        <j-flex gap="400" direction="column" a="center" j="center">
+          <j-box pb="500">
+            <j-spinner></j-spinner>
+          </j-box>
+          <j-flex direction="column" a="center">
+            <j-text color="black" size="700" weight="800">
+              Syncing community
+            </j-text>
+            <j-text size="400" weight="400">Please wait...</j-text>
+          </j-flex>
+        </j-flex>
+      </j-box>
+    </div>
+    <div
+      class="center"
+      v-if="
+        isSynced &&
+        channels.filter((c) => c.sourcePerspective === communityId).length === 0
+      "
+    >
+      <j-box py="800">
+        <j-flex gap="400" direction="column" a="center" j="center">
+          <j-icon color="ui-500" size="xl" name="balloon"></j-icon>
+          <j-flex direction="column" a="center">
+            <j-text nomargin color="black" size="700" weight="800">
+              No channels yet
+            </j-text>
+            <j-text size="400" weight="400">Be the first to make one!</j-text>
+            <j-button
+              variant="primary"
+              @click="() => setShowCreateChannel(true)"
+            >
+              Create a new channel
+            </j-button>
+          </j-flex>
+        </j-flex>
+      </j-box>
     </div>
   </sidebar-layout>
 
   <j-modal
     size="sm"
     :open="modals.showCommunityMembers"
-    @toggle="(e) => setShowCommunityMembers(e.target.open)"
+    @toggle="(e: any) => setShowCommunityMembers(e.target.open)"
   >
     <community-members
       @close="() => setShowCommunityMembers(false)"
@@ -51,7 +75,7 @@
   <j-modal
     size="sm"
     :open="modals.showEditCommunity"
-    @toggle="(e) => setShowEditCommunity(e.target.open)"
+    @toggle="(e: any) => setShowEditCommunity(e.target.open)"
   >
     <edit-community
       v-if="modals.showEditCommunity"
@@ -61,9 +85,8 @@
   </j-modal>
 
   <j-modal
-    size="sm"
     :open="modals.showCreateChannel"
-    @toggle="(e) => setShowCreateChannel(e.target.open)"
+    @toggle="(e: any) => setShowCreateChannel(e.target.open)"
   >
     <create-channel
       v-if="modals.showCreateChannel"
@@ -75,15 +98,17 @@
   <j-modal
     size="sm"
     :open="modals.showInviteCode"
-    @toggle="(e) => setShowInviteCode(e.target.open)"
+    @toggle="(e: any) => setShowInviteCode(e.target.open)"
   >
     <j-box p="800">
-      <j-text variant="heading">Invite people</j-text>
-      <j-text variant="ingress">
-        Copy and send this code to the people you want to join your community
-      </j-text>
+      <j-box pb="500">
+        <j-text variant="heading">Invite people</j-text>
+        <j-text variant="body">
+          Copy and send this code to the people you want to join your community
+        </j-text>
+      </j-box>
       <j-input
-        @click="(e) => e.target.select()"
+        @click="(e: any) => e.target.select()"
         size="lg"
         readonly
         :value="community.neighbourhood.neighbourhoodUrl"
@@ -97,14 +122,14 @@
 
   <j-modal
     :open="modals.showCommunitySettings"
-    @toggle="(e) => setShowCommunitySettings(e.target.open)"
+    @toggle="(e: any) => setShowCommunitySettings(e.target.open)"
   >
     <community-settings />
   </j-modal>
 
   <j-modal
     :open="modals.showCommunityTweaks"
-    @toggle="(e) => setShowCommunityTweaks(e.target.open)"
+    @toggle="(e: any) => setShowCommunityTweaks(e.target.open)"
   >
     <community-tweaks v-if="modals.showCommunityTweaks" />
   </j-modal>
@@ -122,6 +147,8 @@ import CommunitySettings from "@/containers/CommunitySettings.vue";
 import ChannelView from "@/views/channel/ChannelView.vue";
 import CommunityTweaks from "@/containers/CommunityTweaks.vue";
 
+import ChannelModel, { Channel } from "utils/api/channel";
+import MemberModel, { Member } from "utils/api/member";
 import { CommunityState, ModalsState, ChannelState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
@@ -144,15 +171,13 @@ export default defineComponent({
     CommunityTweaks,
   },
   setup() {
-    const appStore = useAppStore();
-    const dataStore = useDataStore();
-    const notSynced = ref(false);
-
     return {
+      memberModel: ref<MemberModel | null>(null),
+      channelModel: ref<ChannelModel | null>(null),
       loadedChannels: ref<LoadedChannels>({}),
-      appStore,
-      dataStore,
-      notSynced,
+      appStore: useAppStore(),
+      dataStore: useDataStore(),
+      isSynced: ref(true),
     };
   },
   data() {
@@ -164,12 +189,15 @@ export default defineComponent({
     "$route.params.communityId": {
       handler: function (id: string) {
         if (id) {
-          this.dataStore.fetchNeighbourhoodMembers(id);
-          this.dataStore.fetchNeighbourhoodMetadata(id);
-          this.dataStore.fetchNeighbourhoodChannels(id);
+          this.dataStore.fetchCommunityMembers(id);
+          this.dataStore.fetchCommunityMetadata(id);
+          this.dataStore.fetchCommunityChannels(id);
+          this.startWatching(id);
           this.handleThemeChange(id);
           this.goToActiveChannel(id);
         } else {
+          this.channelModel && this.channelModel.unsubscribe();
+          this.memberModel && this.memberModel.unsubscribe();
           this.handleThemeChange();
         }
       },
@@ -183,10 +211,10 @@ export default defineComponent({
             channelId: id,
           });
 
-          const channel = this.dataStore.getChannel(this.communityId, id);
+          const channel = this.dataStore.getChannel(id);
 
           if (channel) {
-            this.notSynced = false;
+            this.isSynced = true;
             this.loadedChannels = {
               ...this.loadedChannels,
               [channel.id]: true,
@@ -207,13 +235,49 @@ export default defineComponent({
       "setShowCommunitySettings",
       "setShowCommunityTweaks",
     ]),
+    startWatching(id: string) {
+      this.channelModel && this.channelModel.unsubscribe();
+      this.memberModel && this.memberModel.unsubscribe();
+
+      this.channelModel = new ChannelModel({ perspectiveUuid: id });
+      this.memberModel = new MemberModel({ perspectiveUuid: id });
+
+      this.memberModel.onAdded((member: Member) => {
+        this.dataStore.setNeighbourhoodMember({
+          did: member.did,
+          perspectiveUuid: id,
+        });
+      });
+
+      this.channelModel.onRemoved((id) => {
+        this.dataStore.removeChannel({ channelId: id });
+      });
+
+      this.channelModel.onAdded((channel: Channel) => {
+        this.dataStore.addChannel({
+          communityId: id,
+          channel: {
+            id: channel.id,
+            name: channel.name,
+            timestamp: new Date(channel.timestamp),
+            author: channel.author,
+            collapsed: false,
+            sourcePerspective: id,
+            currentView: channel.views[0],
+            views: channel.views,
+            hasNewMessages: false,
+            notifications: {
+              mute: false,
+            },
+          },
+        });
+      });
+    },
     goToActiveChannel(communityId: string) {
-      if (!communityId) return;
       const channels = this.dataStore.getChannelStates(communityId);
       if (channels.length > 0) {
-        this.notSynced = false;
-        const firstChannel =
-          this.dataStore.getChannelStates(communityId)[0].name;
+        this.isSynced = true;
+        const firstChannel = this.dataStore.getChannelStates(communityId)[0].id;
         const currentChannelId =
           this.community.state.currentChannelId || firstChannel;
 
@@ -227,7 +291,7 @@ export default defineComponent({
           });
         }
       } else {
-        this.notSynced = true;
+        this.isSynced = false;
       }
     },
     handleThemeChange(id?: string) {
@@ -268,7 +332,7 @@ export default defineComponent({
     },
     community(): CommunityState {
       const communityId = this.communityId;
-      return this.dataStore.getCommunity(communityId);
+      return this.dataStore.getCommunityState(communityId);
     },
     channels(): ChannelState[] {
       const channels = this.dataStore.getChannels;

@@ -1,0 +1,51 @@
+.fileUpload {
+  width: 100%;
+}
+
+.dropZone {
+  width: 100%;
+  outline: 0;
+  padding: var(--j-space-500);
+  border-radius: var(--j-border-radius);
+  border: 1px dashed var(--j-color-ui-300);
+  text-align: center;
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropZone:hover {
+  border: 1px dashed var(--j-color-ui-500);
+}
+
+.isFocused {
+  border: 1px dashed var(--j-color-primary-500);
+}
+
+.files {
+  margin-top: var(--j-space-400);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--j-space-300);
+}
+
+.file {
+  display: grid;
+  grid-template-columns: 1fr;
+  place-items: center;
+  gap: var(--j-space-300);
+}
+
+.filePreview {
+  border-radius: var(--j-border-radius);
+  height: 100%;
+  max-width:100%;
+  max-height: 350px;
+  object-fit: cover;
+}
+
+
+
+
+

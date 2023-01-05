@@ -10,7 +10,7 @@
     (100% - var(--j-color-subtractor)) * var(--j-color-multiplier)
   );
   --j-color-lightness-50: calc(
-    (95% - var(--j-color-subtractor)) * var(--j-color-multiplier)
+    (98% - var(--j-color-subtractor)) * var(--j-color-multiplier)
   );
   --j-color-lightness-100: calc(
     (90% - var(--j-color-subtractor)) * var(--j-color-multiplier)
@@ -364,7 +364,11 @@
   --j-scrollbar-corner-background: #dfdfdf;
   --j-scrollbar-thumb-box-shadow: none;
   --j-scrollbar-thumb-border-radius: var(--j-border-radius);
-  --j-scrollbar-thumb-background: rgba(180, 180, 180, 0.5);
+  --j-scrollbar-thumb-background: hsl(
+    var(--j-color-ui-hue),
+    5%,
+    var(--j-color-lightness-100)
+  );
 
   /* DEPTH */
   --j-depth-none: none;
@@ -389,6 +393,7 @@
 
 html {
   font-size: var(--j-font-base-size);
+  box-sizing: border-box;
 }
 
 body {
@@ -396,6 +401,12 @@ body {
   color: var(--j-color-ui-800);
   font-family: var(--j-font-family);
   background-color: var(--j-color-white);
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
 }
 
 ::-webkit-scrollbar {

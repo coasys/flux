@@ -1,32 +1,11 @@
 <template>
   <div class="signup-view">
     <div class="signup-view__intro" v-if="!showSignup">
-      <div>
-        <j-box pb="700">
-          <Logo class="signup-view__intro-logo" width="150px"></Logo>
-        </j-box>
-
-        <div class="signup-view__intro-extension">
-          <j-box align="center">
-            <j-text variant="heading">Get started with Flux</j-text>
-          </j-box>
-          <j-text>
-            You need the AD4M extension to use Flux. By connecting to AD4M you
-            are able to surf the internet completely decentralized.
-          </j-text>
-          <j-box class="signup-view__intro-button" pt="900">
-            <j-button
-              @click="() => $emit('connectToAd4m')"
-              variant="primary"
-              size="lg"
-            >
-              <Ad4mLogo width="25px" slot="start" />
-              Connect with AD4M
-            </j-button>
-          </j-box>
-        </div>
-      </div>
+      <SignUpCarousel
+        @connectToAd4m="() => $emit('connectToAd4m')"
+      ></SignUpCarousel>
     </div>
+
     <div class="signup-view__flow" v-else>
       <j-flex direction="column" gap="400">
         <j-box class="signup-view__flow-back" pb="500">
@@ -52,10 +31,10 @@
           label="Username"
           size="xl"
           :value="username"
-          @input="(e) => (username = e.target.value)"
+          @input="(e: any) => (username = e.target.value)"
           :error="usernameError"
           :errortext="usernameErrorMessage"
-          @blur="(e) => validateUsername()"
+          @blur="(e: any) => validateUsername()"
         ></j-input>
         <j-toggle
           style="width: 100%"
@@ -104,6 +83,7 @@ import Logo from "@/components/logo/Logo.vue";
 import { mapLiteralLinks } from "utils/helpers/linkHelpers";
 import { useAppStore } from "@/store/app";
 import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";
+import SignUpCarousel from "./SignUpCarousel.vue";
 
 export default defineComponent({
   name: "SignUp",
@@ -113,6 +93,7 @@ export default defineComponent({
     Carousel,
     Logo,
     Ad4mLogo,
+    SignUpCarousel,
   },
   setup() {
     const showSignup = ref(false);
@@ -175,7 +156,7 @@ export default defineComponent({
     };
   },
   async mounted() {
-    isConnected().then((connected) => {
+    isConnected().then((connected: any) => {
       if (connected) {
         this.autoFillUser();
       }
@@ -215,16 +196,16 @@ export default defineComponent({
 
         const client = await getAd4mClient();
 
-        const agentLinks = (await client.agent.me()).perspective.links;
+        const agentLinks = await client.agent.me().perspective!.links;
 
         const profile = mapLiteralLinks(agentLinks, {
           username: AD4M_PREDICATE_USERNAME,
           name: AD4M_PREDICATE_FIRSTNAME,
           familyName: AD4M_PREDICATE_LASTNAME,
         });
-        this.username = profile.username || "";
-        this.name = profile.name || "";
-        this.familyName = profile.familyName || "";
+        this.username = profile?.username || "";
+        this.name = profile?.name || "";
+        this.familyName = profile?.familyName || "";
       } catch (e) {
         console.log(e);
       }
@@ -246,6 +227,7 @@ export default defineComponent({
           this.appStore.changeNotificationState(true);
         });
     },
+    //@ts-ignore
     async allowNotifications(value) {
       this.appStore.changeNotificationState(
         !this.appStore.notification.globalNotification
@@ -258,8 +240,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .signup-view {
   margin: 0 auto;
-  height: 100vh;
-  overflow-y: auto;
+  height: 100%;
 }
 
 .signup-view__flow {
@@ -279,7 +260,6 @@ export default defineComponent({
   max-width: 800px;
   margin: 0 auto;
   align-items: center;
-  overflow: hidden;
 }
 
 .signup-view__intro-content {

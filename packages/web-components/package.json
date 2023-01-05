@@ -1,10 +1,11 @@
 {
   "name": "@junto-foundation/junto-elements",
-  "version": "0.4.3",
+  "version": "0.4.5",
   "description": "",
   "homepage": "https://junto-elements.netlify.com",
   "main": "dist/main.js",
   "browser": "dist/main.js",
+  "types": "dist/global.d.ts",
   "files": [
     "dist"
   ],
@@ -22,11 +23,13 @@
     "dev:analyze": "web-component-analyzer src --outFile components.json",
     "dev:watch": "NODE_ENV=dev node esbuild.js",
     "dev:docs": "npx reload",
+    "build:types": "node buildTypes.js",
     "build:analyze": "web-component-analyzer src --outFile components.json",
     "build:package": "esbuild src/main.ts --metafile=meta.json --bundle --minify --sourcemap --outfile=dist/main.js --target=es2016"
   },
   "dependencies": {
     "@popperjs/core": "^2.9.2",
+    "construct-style-sheets-polyfill": "^3.1.0",
     "jdenticon": "^3.1.0",
     "lit": "^2.0.0-rc.2"
   },

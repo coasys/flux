@@ -1,11 +1,26 @@
 <template>
   <router-view :key="componentKey" @connectToAd4m="connectToAd4m"></router-view>
-  <div class="global-loading" v-if="ui.showGlobalLoading">
-    <div class="global-loading__backdrop"></div>
-    <div class="global-loading__content">
+  <div class="global-modal" v-if="ui.showGlobalLoading">
+    <div class="global-modal__backdrop"></div>
+    <div class="global-modal__content">
       <j-flex a="center" direction="column" gap="1000">
         <j-spinner size="lg"> </j-spinner>
         <j-text size="700">Please wait...</j-text>
+      </j-flex>
+    </div>
+  </div>
+  <div class="global-modal" v-if="ui.globalError.show">
+    <div class="global-modal__backdrop"></div>
+    <div class="global-modal__content">
+      <j-flex a="center" direction="column" gap="1000">
+        <j-icon
+          name="exclamation-triangle"
+          size="xl"
+          color="danger-500"
+        ></j-icon>
+        <j-text color="danger-500" weight="600" size="700">
+          {{ ui.globalError.message }}
+        </j-text>
       </j-flex>
     </div>
   </div>
@@ -13,8 +28,8 @@
     theme="dark"
     ref="ad4mConnect"
     appName="Flux"
-    appDesc="Flux - A SOCIAL TOOLKIT FOR THE NEW INTERNET"
-    appDomain="https://www.fluxsocial.io/"
+    appDesc="A Social Toolkit for the New Internet"
+    :appDomain="appDomain"
     capabilities='[{"with":{"domain":"*","pointers":["*"]},"can": ["*"]}]'
     appiconpath="https://i.ibb.co/GnqjPJP/icon.png"
     openonshortcut
@@ -23,7 +38,7 @@
     autohide="10"
     :variant="ui.toast.variant"
     :open="ui.toast.open"
-    @toggle="(e) => appStore.setToast({ open: e.target.open })"
+    @toggle="(e: any) => appStore.setToast({ open: e.target.open })"
   >
     <j-text>{{ ui.toast.message }}</j-text>
   </j-toast>
@@ -31,38 +46,25 @@
 
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
-import { mapActions } from "pinia";
 import { useAppStore } from "./store/app";
-import {
-  ApplicationState,
-  ModalsState,
-  NeighbourhoodState,
-} from "@/store/types";
+import { ApplicationState, ModalsState } from "@/store/types";
 import { useRoute, useRouter } from "vue-router";
 import { useDataStore } from "./store/data";
-import { LinkExpression, Literal } from "@perspect3vism/ad4m";
-import {
-  CHANNEL,
-  FLUX_GROUP_DESCRIPTION,
-  FLUX_GROUP_IMAGE,
-  FLUX_GROUP_NAME,
-  FLUX_GROUP_THUMBNAIL,
-  MEMBER,
-  DIRECTLY_SUCCEEDED_BY,
-} from "utils/constants/communityPredicates";
 import { useUserStore } from "./store/user";
-import { buildCommunity, hydrateState } from "./store/data/hydrateState";
-import { getGroupMetadata } from "./store/data/actions/fetchNeighbourhoodMetadata";
+import { hydrateState } from "./store/data/hydrateState";
 import {
   getAd4mClient,
-  isConnected,
   onAuthStateChanged,
 } from "@perspect3vism/ad4m-connect/dist/utils";
-import "@perspect3vism/ad4m-connect/dist/web";
+import "@perspect3vism/ad4m-connect/dist/web.js";
+import { EntryType } from "utils/types";
+import subscribeToLinks from "utils/api/subscribeToLinks";
+import { LinkExpression, Literal } from "@perspect3vism/ad4m";
+import semver from "semver";
+import { EXPECTED_AD4M_VERSION } from "utils/constants/general";
 
 export default defineComponent({
   name: "App",
-
   setup() {
     const appStore = useAppStore();
     const router = useRouter();
@@ -94,7 +96,30 @@ export default defineComponent({
         if (!this.watcherStarted) {
           this.startWatcher();
           this.watcherStarted = true;
-          await hydrateState();
+          hydrateState();
+
+          const client = await getAd4mClient();
+
+          //Do version checking for ad4m / flux compatibility
+          const version = (await client.runtime.info()).ad4mExecutorVersion;
+          console.log("Running AD4M version:", version);
+          if (semver.gt(EXPECTED_AD4M_VERSION, version)) {
+            //TODO: here we need to provide a link to download the latest version of ad4m with correct OS version
+            //from github
+            console.error(
+              "AD4M version is not supported... Please update AD4MIN before continuing."
+            );
+            this.appStore.setGlobalError({
+              show: true,
+              message:
+                "AD4M version is not supported... Please update AD4MIN before continuing.",
+            });
+          } else {
+            this.appStore.setGlobalError({
+              show: false,
+              message: "",
+            });
+          }
         }
       }
     });
@@ -106,6 +131,9 @@ export default defineComponent({
     ui(): ApplicationState {
       return this.appStore.$state;
     },
+    appDomain() {
+      return window.location.origin;
+    },
   },
   methods: {
     connectToAd4m() {
@@ -114,261 +142,68 @@ export default defineComponent({
     },
     async startWatcher() {
       const client = await getAd4mClient();
-      const router = this.router;
-      const route = this.route;
       const watching: string[] = [];
 
-      //Watch for incoming signals from holochain - an incoming signal should mean a DM is inbound
-      const newLinkHandler = async (
-        link: LinkExpression,
-        perspective: string
-      ) => {
-        if (link.data!.predicate! === DIRECTLY_SUCCEEDED_BY) {
-          try {
-            const channels = this.dataStore.getChannelStates(perspective);
+      watch(
+        this.dataStore.neighbourhoods,
+        async (newValue) => {
+          Object.entries(newValue).forEach(([perspectiveUuid]) => {
+            const alreadyListening = watching.includes(perspectiveUuid);
+            if (!alreadyListening) {
+              watching.push(perspectiveUuid);
+              subscribeToLinks({
+                perspectiveUuid,
+                added: async (link: LinkExpression) => {
+                  if (link.data.predicate === EntryType.Message) {
+                    try {
+                      const routeChannelId = this.$route.params.channelId;
+                      const channelId = link.data.source;
+                      const isCurrentChannel = routeChannelId === channelId;
 
-            for (const channel of channels) {
-              const isSameChannel = await client.perspective.queryProlog(
-                perspective,
-                `triple("${channel.id}", "${DIRECTLY_SUCCEEDED_BY}", "${link.data.target}").`
-              );
+                      if (!isCurrentChannel) {
+                        this.dataStore.setHasNewMessages({
+                          communityId: perspectiveUuid,
+                          channelId,
+                          value: true,
+                        });
 
-              if (isSameChannel) {
-                const expression = Literal.fromUrl(link.data.target).get();
-                const expressionDate = new Date(expression.timestamp);
-                let minuteAgo = new Date();
-                minuteAgo.setSeconds(minuteAgo.getSeconds() - 30);
-                if (expressionDate > minuteAgo) {
-                  this.dataStore.showMessageNotification({
-                    router,
-                    route,
-                    perspectiveUuid: perspective,
-                    notificationChannelId: channel.id,
-                    authorDid: (expression as any)!.author,
-                    message: (expression as any).data,
-                    timestamp: (expression as any).timestamp,
-                  });
-                }
+                        const expression = Literal.fromUrl(
+                          link.data.target
+                        ).get();
 
-                const { channelId } = this.$route.params;
-                if (channelId !== channel.name) {
-                  //Add UI notification on the channel to notify that there is a new message there
-                  this.dataStore.setHasNewMessages({
-                    communityId: perspective,
-                    channelId: channel.name,
-                    value: true,
-                  });
-                }
-              }
-            }
-          } catch (e: any) {
-            throw new Error(e);
-          }
-        } else if (link.data!.predicate! === MEMBER) {
-          //If the link is a member, it's a new member in a community
-          const did = link.data!.target!;
-          const rawDid = did.includes("://") ? did.split("://")[1] : did;
-          if (rawDid) {
-            this.dataStore.setNeighbourhoodMember({
-              member: rawDid,
-              perspectiveUuid: perspective,
-            });
-          }
-        } else if (
-          link.data!.predicate! === CHANNEL &&
-          link.author != this.userStore.getUser?.agent.did
-        ) {
-          //If the link is a channel, it's a new channel in a community
-          console.log("Found a new channel via signal");
-
-          try {
-            const channel = link.data.target;
-            const channelExpression = Literal.fromUrl(channel).get();
-
-            this.dataStore.addChannel({
-              communityId: perspective,
-              channel: {
-                id: channel,
-                name: channelExpression.data,
-                creatorDid: link.author,
-                sourcePerspective: perspective,
-                hasNewMessages: false,
-                createdAt: link.timestamp,
-                notifications: {
-                  mute: false,
-                },
-              },
-            });
-            const channels = this.dataStore.getChannels.filter(
-              (channel) => channel.sourcePerspective === perspective
-            );
-            if (channels.length === 1) {
-              this.$router.push({
-                name: "channel",
-                params: {
-                  communityId: perspective,
-                  channelId: channelExpression.data,
+                        const expressionDate = new Date(expression.timestamp);
+                        let minuteAgo = new Date();
+                        minuteAgo.setSeconds(minuteAgo.getSeconds() - 30);
+                        if (expressionDate > minuteAgo) {
+                          this.dataStore.showMessageNotification({
+                            router: this.$router,
+                            communityId: perspectiveUuid,
+                            channelId,
+                            authorDid: expression.author,
+                            message: expression.data,
+                            timestamp: expression.timestamp,
+                          });
+                        }
+                      }
+                    } catch (e: any) {
+                      throw new Error(e);
+                    }
+                  }
                 },
               });
             }
-          } catch (e) {
-            console.log("Error parsing channel link signal", e);
-          }
-        } else if (
-          link.data!.predicate! === FLUX_GROUP_NAME ||
-          link.data!.predicate! === FLUX_GROUP_DESCRIPTION ||
-          link.data!.predicate! === FLUX_GROUP_IMAGE ||
-          link.data!.predicate! === FLUX_GROUP_THUMBNAIL
-        ) {
-          //If the link has predicate which is for group metadata, it's a group metadata update
-          console.log("Community update via link signal");
-
-          const groupExp = await getGroupMetadata(perspective);
-
-          this.dataStore.updateCommunityMetadata({
-            communityId: perspective,
-            name: groupExp?.name,
-            description: groupExp?.description,
-            image: groupExp?.image || "",
-            thumbnail: groupExp?.thumbnail || "",
           });
-        }
-      };
-      watch(
-        this.dataStore.neighbourhoods,
-        async (newValue: { [perspectiveUuid: string]: NeighbourhoodState }) => {
-          for (const [k, v] of Object.entries(newValue)) {
-            if (watching.filter((val) => val == k).length == 0) {
-              console.log("Starting watcher on perspective", k);
-              watching.push(k);
-              const perspective = await client!.perspective.byUUID(k);
-
-              if (perspective) {
-                // @ts-ignore
-                perspective.addListener("link-added", (result) => {
-                  console.debug(
-                    "Got new link with data",
-                    result.data,
-                    "and channel",
-                    v
-                  );
-                  newLinkHandler(result, v.perspective.uuid);
-                });
-
-                perspective.addListener("link-removed", (link) => {
-                  console.log(
-                    "Got new link with data",
-                    link.data,
-                    "and channel",
-                    v
-                  );
-                  if (
-                    link.data!.predicate! === CHANNEL &&
-                    link.author !== this.userStore.getUser?.agent.did
-                  ) {
-                    const channel = Literal.fromUrl(link.data.target).get();
-
-                    this.dataStore.removeChannel({
-                      channelId: channel.id,
-                    });
-                  }
-                });
-              }
-            }
-          }
         },
         { immediate: true, deep: true }
       );
 
       // @ts-ignore
-      client!.perspective.addPerspectiveAddedListener(async (perspective) => {
-        const proxy = await client!.perspective.byUUID(perspective.uuid);
-        proxy!.addListener("link-added", (link) => {
-          if (
-            link.data!.predicate! === CHANNEL &&
-            link.author != this.userStore.getUser?.agent.did
-          ) {
-            const channel = link.data.target;
-            const channelExpression = Literal.fromUrl(channel).get();
-            const channelName = channelExpression.name;
-            if (channelName === "Home") {
-              buildCommunity(proxy!).then((community) => {
-                this.dataStore.addCommunity(community);
-
-                this.dataStore.addChannel({
-                  communityId: perspective.uuid,
-                  channel: {
-                    id: channel,
-                    name: channelName,
-                    creatorDid: link.author,
-                    sourcePerspective: perspective.uuid,
-                    hasNewMessages: false,
-                    createdAt: link.timestamp,
-                    notifications: {
-                      mute: false,
-                    },
-                  },
-                });
-              });
-            } else {
-              this.dataStore.addChannel({
-                communityId: perspective.uuid,
-                channel: {
-                  id: channel,
-                  name: channelName,
-                  creatorDid: link.author,
-                  sourcePerspective: perspective.uuid,
-                  hasNewMessages: false,
-                  createdAt: link.timestamp,
-                  notifications: {
-                    mute: false,
-                  },
-                },
-              });
-            }
-          }
-        });
-      });
-
-      // @ts-ignore
       client!.perspective.addPerspectiveRemovedListener((perspective) => {
         const isCommunity = this.dataStore.getCommunity(perspective);
-        if (isCommunity && isCommunity.neighbourhood) {
+        if (isCommunity) {
           this.dataStore.removeCommunity({ communityId: perspective });
         }
       });
-
-      const allPerspectives = await client!.perspective.all();
-
-      for (const perspective of allPerspectives) {
-        perspective.addListener("link-added", (link) => {
-          if (link.data!.predicate! === CHANNEL) {
-            const channel = link.data.target;
-            const channelExpression = Literal.fromUrl(channel).get();
-            const channelName = channelExpression.name;
-            if (channelName == "Home") {
-              buildCommunity(perspective).then((community) => {
-                this.dataStore.addCommunity(community);
-
-                this.dataStore.addChannel({
-                  communityId: perspective.uuid,
-                  channel: {
-                    id: channel,
-                    name: channelName,
-                    creatorDid: link.author,
-                    sourcePerspective: perspective.uuid,
-                    hasNewMessages: false,
-                    createdAt: link.timestamp,
-                    notifications: {
-                      mute: false,
-                    },
-                  },
-                });
-              });
-            }
-          }
-        });
-      }
     },
   },
 });
@@ -399,7 +234,6 @@ body {
   margin: 0;
   padding: 0;
   background-color: var(--app-main-sidebar-bg-color);
-  overflow: hidden;
 }
 
 #app {
@@ -408,7 +242,8 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-.global-loading {
+.global-modal {
+  z-index: 999;
   width: 100vw;
   height: 100vh;
   position: absolute;
@@ -418,22 +253,22 @@ body {
   place-items: center;
 }
 
-.global-loading__backdrop {
+.global-modal__backdrop {
   position: absolute;
   left: 0;
   height: 0;
   width: 100%;
   height: 100%;
   background: var(--j-color-white);
-  opacity: 0.8;
+  opacity: 0.9;
   backdrop-filter: blur(15px);
 }
 
-.global-loading__content {
+.global-modal__content {
   position: relative;
 }
 
-.global-loading j-spinner {
+.global-modal j-spinner {
   --j-spinner-size: 80px;
 }
 </style>

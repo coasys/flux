@@ -46,6 +46,7 @@ export default defineComponent({
       const { perspective } = await client.agent.me();
       if (perspective) {
         const links = await getLiteralObjectLinks(this.id, perspective.links);
+        this.$emit("delete", links[0]);
 
         await client.agent.mutatePublicPerspective({
           removals: links,
@@ -72,7 +73,7 @@ export default defineComponent({
 
 @media (min-width: 800px) {
   .link-card {
-    grid-template-columns: 1fr 4fr;
+    grid-template-columns: 1fr 5fr;
   }
 }
 

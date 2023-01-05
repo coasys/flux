@@ -1,12 +1,15 @@
+import { ChannelView } from "utils/types";
 export interface ChannelState {
   id: string;
   name: string;
-  creatorDid: string;
+  author: string;
   description?: string;
   sourcePerspective: string;
   hasNewMessages: boolean;
-  createdAt: string;
-  scrollTop?: number;
+  timestamp: Date | string;
+  collapsed: boolean;
+  currentView: ChannelView;
+  views: ChannelView[];
   notifications: {
     mute: boolean;
   };

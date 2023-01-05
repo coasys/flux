@@ -1,12 +1,14 @@
-import { createChannel } from "@/core/methods/createChannel";
+import { createChannel } from "utils/api/createChannel";
 import { useAppStore } from "@/store/app";
 import { ChannelState } from "@/store/types";
 import { useDataStore } from "..";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { ChannelView } from "utils/types";
+import ChannelModel from "utils/api/channel";
 
 export interface Payload {
-  communityId: string;
+  perspectiveUuid: string;
   name: string;
+  views: ChannelView[];
 }
 
 export default async (payload: Payload): Promise<ChannelState> => {
@@ -14,34 +16,46 @@ export default async (payload: Payload): Promise<ChannelState> => {
   const appStore = useAppStore();
 
   try {
-    const client = await getAd4mClient();
+    const community = dataStore.getCommunity(payload.perspectiveUuid);
 
-    const community = dataStore.getCommunity(payload.communityId);
-
-    const agent = await client.agent.me()
-
-    const creatorDid = agent.did;
-
-    if (community.neighbourhood !== undefined) {
-      const channel = await createChannel({
-        channelName: payload.name,
-        creatorDid,
-        sourcePerspective: community.neighbourhood.perspective,
-      });
-
-      dataStore.addChannel({
-        communityId: community.neighbourhood.perspective.uuid,
-        channel,
-      });
-
-      return channel;
-    } else {
+    if (!community) {
       const message = "Community does not exists";
       appStore.showDangerToast({
         message,
       });
       throw Error(message);
     }
+
+    const Channel = new ChannelModel({
+      perspectiveUuid: payload.perspectiveUuid,
+    });
+
+    const channel = await Channel.create({
+      name: payload.name,
+      views: payload.views,
+    });
+
+    const channelState = {
+      id: channel.id,
+      name: payload.name,
+      timestamp: channel.timestamp.toString(),
+      author: channel.author,
+      collapsed: false,
+      sourcePerspective: payload.perspectiveUuid,
+      currentView: payload.views[0],
+      views: payload.views,
+      hasNewMessages: false,
+      notifications: {
+        mute: false,
+      },
+    };
+
+    dataStore.addChannel({
+      communityId: payload.perspectiveUuid,
+      channel: channelState,
+    });
+
+    return channelState;
   } catch (e) {
     appStore.showDangerToast({
       message: e.message,

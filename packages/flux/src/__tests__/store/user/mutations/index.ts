@@ -56,7 +56,7 @@ describe("User Mutations", () => {
       email: "jhon@test.com",
       username: "jhon",
       profilePicture: "test",
-      thumbnailPicture: "test",
+      profileThumbnailPicture: "test",
     };
 
     userStore.setUserProfile(profile);

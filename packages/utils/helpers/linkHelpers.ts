@@ -5,13 +5,13 @@ import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import {
   CARD_HIDDEN,
   CHANNEL,
-  DIRECTLY_SUCCEEDED_BY,
   MEMBER,
   REACTION,
   EDITED_TO,
   REPLY_TO,
   ZOME,
 } from "../constants/communityPredicates";
+import { EntryType, PropertyMap, PredicateMap } from "../types";
 
 export const findLink = {
   name: (link: LinkExpression) => link.data.predicate === "rdf://name",
@@ -23,8 +23,7 @@ export const findLink = {
 };
 
 export const linkIs = {
-  message: (link: LinkExpression) =>
-    link.data.predicate === DIRECTLY_SUCCEEDED_BY,
+  message: (link: LinkExpression) => link.data.predicate === EntryType.Message,
   reply: (link: LinkExpression) => link.data.predicate === REPLY_TO,
   // TODO: SHould we check if the link is proof.valid?
   reaction: (link: LinkExpression) => link.data.predicate === REACTION,
@@ -38,42 +37,37 @@ export const linkIs = {
   // TODO: SHould we check if the link is proof.valid?
 };
 
-type Target = string;
-type Predicate = string;
-
-type PredicateMap = {
-  [property: string]: Predicate;
-};
-
-type TargetMap = {
-  [predicate: string]: Target | undefined | null;
-};
-
-type Map = {
-  [x: string]: string;
-};
-
 export function mapLiteralLinks(
   links: LinkExpression[] | undefined,
-  map: PredicateMap
-): Map {
+  map: PropertyMap
+) {
   return Object.keys(map).reduce((acc, key) => {
     const predicate = map[key];
     const link = links?.find((link) => link.data.predicate === predicate);
 
     if (link) {
+      let data;
+
+      if (link.data.target.startsWith("literal://string:")) {
+        data = Literal.fromUrl(link.data.target).get();
+      } else if (link.data.target.startsWith("literal://number:")) {
+        data = Literal.fromUrl(link.data.target).get();
+      } else if (link.data.target.startsWith("literal://json:")) {
+        data = Literal.fromUrl(link.data.target).get().data;
+      } else {
+        data = link.data.target;
+      }
+
       return {
         ...acc,
-        [key]: link.data.target.startsWith("literal://")
-          ? Literal.fromUrl(link.data.target).get().data
-          : link.data.target,
+        [key]: data,
       };
     }
     return acc;
   }, {});
 }
 
-export async function createLiteralLinks(source: string, map: TargetMap) {
+export async function createLiteralLinks(source: string, map: PredicateMap) {
   const client = await getAd4mClient();
 
   const targets = Object.keys(map);
@@ -91,12 +85,32 @@ export async function createLiteralLinks(source: string, map: TargetMap) {
   return Promise.all(promises);
 }
 
+//function to create links from a map of predicates to targets
+export async function createLinks(source: string, map: PredicateMap) {
+  const targets = Object.keys(map);
+
+  const links = targets
+    .filter((predicate: any) => {
+      const isString = typeof map[predicate] === "string";
+      const isArray = Array.isArray(map[predicate]);
+      return isString || isArray;
+    })
+    .map((predicate: string) => {
+      const value = map[predicate];
+      return Array.isArray(value)
+        ? value.map((v) => new Link({ source, predicate, target: v }))
+        : new Link({ source, predicate, target: value });
+    });
+
+  return links.flat();
+}
+
 export async function createLiteralObject({
   parent,
   children,
 }: {
   parent: LinkInput;
-  children: TargetMap;
+  children: PredicateMap;
 }) {
   const client = await getAd4mClient();
   const expUrl = await client.expression.create(parent.target, "literal");
@@ -117,7 +131,6 @@ export async function getLiteralObjectLinks(
   links: LinkExpression[]
 ) {
   const parentLink = links.find((l) => l.data.target === targetExp);
-  console.log({ parentLink, targetExp, links });
   if (parentLink) {
     const associatedLinks = links.filter(
       (link) => link.data.source === targetExp

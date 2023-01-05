@@ -1,7 +1,7 @@
 import { html, css, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import sharedStyles from "../../shared/styles";
-import { getRelativeTime } from "../../utils/relativeTime";
+import { getRelativeTime } from "utils/helpers/timeHelpers";
 
 @customElement("j-timestamp")
 export default class Component extends LitElement {

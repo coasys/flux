@@ -1,7 +1,11 @@
 {
   "inputs": {
+    "../../node_modules/construct-style-sheets-polyfill/dist/adoptedStyleSheets.js": {
+      "bytes": 13105,
+      "imports": []
+    },
     "src/styles/base.css": {
-      "bytes": 11030,
+      "bytes": 11155,
       "imports": []
     },
     "../../node_modules/@lit/reactive-element/css-tag.js": {
@@ -9,7 +13,7 @@
       "imports": []
     },
     "../../node_modules/@lit/reactive-element/reactive-element.js": {
-      "bytes": 6006,
+      "bytes": 6048,
       "imports": [
         {
           "path": "../../node_modules/@lit/reactive-element/css-tag.js",
@@ -201,7 +205,7 @@
       ]
     },
     "src/components/button/Button.ts": {
-      "bytes": 5327,
+      "bytes": 5363,
       "imports": [
         {
           "path": "../../node_modules/lit/index.js",
@@ -1466,7 +1470,7 @@
       "imports": []
     },
     "src/components/avatar/Avatar.ts": {
-      "bytes": 3417,
+      "bytes": 3565,
       "imports": [
         {
           "path": "../../node_modules/lit/index.js",
@@ -1509,7 +1513,7 @@
       ]
     },
     "src/components/input/Input.js": {
-      "bytes": 6355,
+      "bytes": 6940,
       "imports": [
         {
           "path": "../../node_modules/lit/index.js",
@@ -1583,7 +1587,7 @@
       ]
     },
     "src/components/modal/Modal.ts": {
-      "bytes": 4948,
+      "bytes": 5214,
       "imports": [
         {
           "path": "../../node_modules/lit/index.js",
@@ -1721,7 +1725,7 @@
       ]
     },
     "src/components/flex/Flex.ts": {
-      "bytes": 2819,
+      "bytes": 2953,
       "imports": [
         {
           "path": "../../node_modules/lit/index.js",
@@ -1828,12 +1832,12 @@
         }
       ]
     },
-    "src/utils/relativeTime.js": {
+    "../utils/helpers/timeHelpers.ts": {
       "bytes": 505,
       "imports": []
     },
     "src/components/timestamp/Timestamp.ts": {
-      "bytes": 3876,
+      "bytes": 3877,
       "imports": [
         {
           "path": "../../node_modules/lit/index.js",
@@ -1848,7 +1852,7 @@
           "kind": "import-statement"
         },
         {
-          "path": "src/utils/relativeTime.js",
+          "path": "../utils/helpers/timeHelpers.ts",
           "kind": "import-statement"
         }
       ]
@@ -1922,9 +1926,39 @@
         }
       ]
     },
-    "src/main.ts": {
-      "bytes": 762,
+    "src/components/skeleton/Skeleton.ts": {
+      "bytes": 2960,
       "imports": [
+        {
+          "path": "../../node_modules/lit/index.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "../../node_modules/lit/decorators.js",
+          "kind": "import-statement"
+        },
+        {
+          "path": "src/shared/styles.js",
+          "kind": "import-statement"
+        }
+      ]
+    },
+    "src/components/skeleton/index.ts": {
+      "bytes": 62,
+      "imports": [
+        {
+          "path": "src/components/skeleton/Skeleton.ts",
+          "kind": "import-statement"
+        }
+      ]
+    },
+    "src/main.ts": {
+      "bytes": 835,
+      "imports": [
+        {
+          "path": "../../node_modules/construct-style-sheets-polyfill/dist/adoptedStyleSheets.js",
+          "kind": "import-statement"
+        },
         {
           "path": "src/styles/base.css",
           "kind": "import-statement"
@@ -2024,6 +2058,10 @@
         {
           "path": "src/components/toggle/index.ts",
           "kind": "import-statement"
+        },
+        {
+          "path": "src/components/skeleton/index.ts",
+          "kind": "import-statement"
         }
       ]
     }
@@ -2033,13 +2071,16 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 491862
+      "bytes": 516547
     },
     "dist/main.js": {
       "imports": [],
       "exports": [],
       "entryPoint": "src/main.ts",
       "inputs": {
+        "../../node_modules/construct-style-sheets-polyfill/dist/adoptedStyleSheets.js": {
+          "bytesInOutput": 5329
+        },
         "src/styles/base.css": {
           "bytesInOutput": 0
         },
@@ -2047,7 +2088,7 @@
           "bytesInOutput": 1324
         },
         "../../node_modules/@lit/reactive-element/reactive-element.js": {
-          "bytesInOutput": 5628
+          "bytesInOutput": 5670
         },
         "../../node_modules/lit-html/lit-html.js": {
           "bytesInOutput": 7833
@@ -2098,16 +2139,16 @@
           "bytesInOutput": 720
         },
         "src/components/button/Button.ts": {
-          "bytesInOutput": 4673
+          "bytesInOutput": 4709
         },
         "src/components/text/Text.ts": {
-          "bytesInOutput": 4984
+          "bytesInOutput": 4996
         },
         "src/utils/stylesheets.js": {
-          "bytesInOutput": 141
+          "bytesInOutput": 142
         },
         "src/components/box/Box.ts": {
-          "bytesInOutput": 2214
+          "bytesInOutput": 2222
         },
         "../../node_modules/@popperjs/core/lib/enums.js": {
           "bytesInOutput": 461
@@ -2149,19 +2190,19 @@
           "bytesInOutput": 176
         },
         "../../node_modules/@popperjs/core/lib/dom-utils/getComputedStyle.js": {
-          "bytesInOutput": 46
+          "bytesInOutput": 47
         },
         "../../node_modules/@popperjs/core/lib/dom-utils/isTableElement.js": {
           "bytesInOutput": 58
         },
         "../../node_modules/@popperjs/core/lib/dom-utils/getDocumentElement.js": {
-          "bytesInOutput": 90
+          "bytesInOutput": 91
         },
         "../../node_modules/@popperjs/core/lib/dom-utils/getParentNode.js": {
-          "bytesInOutput": 94
+          "bytesInOutput": 95
         },
         "../../node_modules/@popperjs/core/lib/dom-utils/getOffsetParent.js": {
-          "bytesInOutput": 667
+          "bytesInOutput": 672
         },
         "../../node_modules/@popperjs/core/lib/utils/getMainAxisFromPlacement.js": {
           "bytesInOutput": 60
@@ -2185,7 +2226,7 @@
           "bytesInOutput": 38
         },
         "../../node_modules/@popperjs/core/lib/modifiers/computeStyles.js": {
-          "bytesInOutput": 2126
+          "bytesInOutput": 2128
         },
         "../../node_modules/@popperjs/core/lib/modifiers/eventListeners.js": {
           "bytesInOutput": 556
@@ -2200,16 +2241,16 @@
           "bytesInOutput": 91
         },
         "../../node_modules/@popperjs/core/lib/dom-utils/getWindowScrollBarX.js": {
-          "bytesInOutput": 53
+          "bytesInOutput": 54
         },
         "../../node_modules/@popperjs/core/lib/dom-utils/getViewportRect.js": {
-          "bytesInOutput": 225
+          "bytesInOutput": 226
         },
         "../../node_modules/@popperjs/core/lib/dom-utils/getDocumentRect.js": {
-          "bytesInOutput": 363
+          "bytesInOutput": 365
         },
         "../../node_modules/@popperjs/core/lib/dom-utils/isScrollParent.js": {
-          "bytesInOutput": 114
+          "bytesInOutput": 115
         },
         "../../node_modules/@popperjs/core/lib/dom-utils/getScrollParent.js": {
           "bytesInOutput": 111
@@ -2221,19 +2262,19 @@
           "bytesInOutput": 99
         },
         "../../node_modules/@popperjs/core/lib/dom-utils/getClippingRect.js": {
-          "bytesInOutput": 815
+          "bytesInOutput": 817
         },
         "../../node_modules/@popperjs/core/lib/utils/computeOffsets.js": {
           "bytesInOutput": 491
         },
         "../../node_modules/@popperjs/core/lib/utils/detectOverflow.js": {
-          "bytesInOutput": 857
+          "bytesInOutput": 858
         },
         "../../node_modules/@popperjs/core/lib/utils/computeAutoPlacement.js": {
           "bytesInOutput": 462
         },
         "../../node_modules/@popperjs/core/lib/modifiers/flip.js": {
-          "bytesInOutput": 1399
+          "bytesInOutput": 1398
         },
         "../../node_modules/@popperjs/core/lib/modifiers/hide.js": {
           "bytesInOutput": 744
@@ -2248,7 +2289,7 @@
           "bytesInOutput": 38
         },
         "../../node_modules/@popperjs/core/lib/modifiers/preventOverflow.js": {
-          "bytesInOutput": 1742
+          "bytesInOutput": 1736
         },
         "../../node_modules/@popperjs/core/lib/dom-utils/getHTMLElementScroll.js": {
           "bytesInOutput": 69
@@ -2257,7 +2298,7 @@
           "bytesInOutput": 50
         },
         "../../node_modules/@popperjs/core/lib/dom-utils/getCompositeRect.js": {
-          "bytesInOutput": 459
+          "bytesInOutput": 460
         },
         "../../node_modules/@popperjs/core/lib/utils/orderModifiers.js": {
           "bytesInOutput": 414
@@ -2305,13 +2346,13 @@
           "bytesInOutput": 5652
         },
         "src/components/avatar/Avatar.ts": {
-          "bytesInOutput": 2531
+          "bytesInOutput": 2667
         },
         "../../node_modules/lit-html/directives/if-defined.js": {
           "bytesInOutput": 22
         },
         "src/components/input/Input.js": {
-          "bytesInOutput": 4857
+          "bytesInOutput": 5342
         },
         "src/components/checkbox/Checkbox.js": {
           "bytesInOutput": 2299
@@ -2320,13 +2361,13 @@
           "bytesInOutput": 4178
         },
         "src/components/modal/Modal.ts": {
-          "bytesInOutput": 4439
+          "bytesInOutput": 4693
         },
         "src/components/tooltip/Tooltip.ts": {
           "bytesInOutput": 2824
         },
         "src/components/icon/Icon.ts": {
-          "bytesInOutput": 1283
+          "bytesInOutput": 1284
         },
         "src/components/tabs/Tabs.ts": {
           "bytesInOutput": 1738
@@ -2335,7 +2376,7 @@
           "bytesInOutput": 2826
         },
         "src/components/flex/Flex.ts": {
-          "bytesInOutput": 1906
+          "bytesInOutput": 2041
         },
         "src/components/badge/Badge.ts": {
           "bytesInOutput": 1675
@@ -2346,7 +2387,7 @@
         "src/components/toast/Toast.ts": {
           "bytesInOutput": 2197
         },
-        "src/utils/relativeTime.js": {
+        "../utils/helpers/timeHelpers.ts": {
           "bytesInOutput": 241
         },
         "src/components/timestamp/Timestamp.ts": {
@@ -2356,31 +2397,34 @@
           "bytesInOutput": 356
         },
         "src/components/carousel/Carousel.ts": {
-          "bytesInOutput": 2365
+          "bytesInOutput": 2366
         },
         "src/components/toggle/Toggle.js": {
           "bytesInOutput": 2553
+        },
+        "src/components/skeleton/Skeleton.ts": {
+          "bytesInOutput": 2540
         },
         "src/main.ts": {
           "bytesInOutput": 0
         }
       },
-      "bytes": 111695
+      "bytes": 120687
     },
     "dist/main.css.map": {
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 12444
+      "bytes": 12598
     },
     "dist/main.css": {
       "imports": [],
       "inputs": {
         "src/styles/base.css": {
-          "bytesInOutput": 9458
+          "bytesInOutput": 9555
         }
       },
-      "bytes": 9581
+      "bytes": 9678
     }
   }
 }

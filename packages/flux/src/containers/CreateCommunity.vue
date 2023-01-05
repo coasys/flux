@@ -1,24 +1,35 @@
 <template>
-  <j-box pt="1000" pb="800" px="700" v-if="!tabView">
-    <j-flex direction="column">
-      <j-menu-item class="choice-button" size="xl" @click="tabView = 'Create'">
-        <j-text variant="heading-sm">Create community</j-text>
-        <j-text variant="body">
-          Make a community and start inviting people
-        </j-text>
+  <j-box pt="600" pb="800" px="400" v-if="!tabView">
+    <j-box pb="500">
+      <j-text variant="heading-sm">Add a Community</j-text>
+    </j-box>
+    <div class="options">
+      <div class="option" size="xl" @click="tabView = 'Create'">
+        <div>
+          <j-text variant="heading-sm">Create a community</j-text>
+          <j-text variant="body">
+            Make a community and start inviting people
+          </j-text>
+        </div>
         <j-icon slot="end" name="chevron-right"></j-icon>
-      </j-menu-item>
-      <j-menu-item class="choice-button" size="xl" @click="tabView = 'Join'">
-        <j-text variant="heading-sm">Join a community</j-text>
-        <j-text variant="body"> Join an already existing community </j-text>
+      </div>
+      <div class="option" size="xl" @click="tabView = 'Join'">
+        <div>
+          <j-text variant="heading-sm">Join a community</j-text>
+          <j-text variant="body"> Join an already existing community </j-text>
+        </div>
         <j-icon slot="end" name="chevron-right"></j-icon>
-      </j-menu-item>
-      <j-menu-item class="choice-button" size="xl" @click="tabView = 'Load'">
-        <j-text variant="heading-sm">Load community</j-text>
-        <j-text variant="body">Load a existing perspective as community</j-text>
+      </div>
+      <div class="option" size="xl" @click="tabView = 'Load'">
+        <div>
+          <j-text variant="heading-sm">Load a community</j-text>
+          <j-text variant="body"
+            >Load a existing perspective as community</j-text
+          >
+        </div>
         <j-icon slot="end" name="chevron-right"></j-icon>
-      </j-menu-item>
-    </j-flex>
+      </div>
+    </div>
   </j-box>
 
   <j-box p="800" v-if="tabView">
@@ -44,7 +55,7 @@
             required
             autovalidate
             @keydown.enter="createCommunity"
-            @input="(e) => (newCommunityName = e.target.value)"
+            @input="(e: any) => (newCommunityName = e.target.value)"
             :value="newCommunityName"
           ></j-input>
           <j-input
@@ -52,7 +63,7 @@
             label="Description"
             :value="newCommunityDesc"
             @keydown.enter="createCommunity"
-            @input="(e) => (newCommunityDesc = e.target.value)"
+            @input="(e: any) => (newCommunityDesc = e.target.value)"
           ></j-input>
 
           <j-button
@@ -83,7 +94,7 @@
         <j-input
           :value="joiningLink"
           @keydown.enter="joinCommunity"
-          @input="(e) => (joiningLink = e.target.value)"
+          @input="(e: any) => (joiningLink = e.target.value)"
           size="lg"
           label="Invite link"
         ></j-input>
@@ -101,12 +112,14 @@
       </j-flex>
       <div v-if="tabView === 'Load'">
         <j-flex direction="column" gap="500" v-if="!isCreatingCommunity">
-          <j-text variant="body" v-if="nonFluxPerspectives.length === 0">No perspective found that is not a flux community</j-text>
-          <j-menu-item 
-            v-for="(perspective) of nonFluxPerspectives" 
+          <j-text variant="body" v-if="nonFluxPerspectives.length === 0"
+            >No perspective found that is not a flux community</j-text
+          >
+          <j-menu-item
+            v-for="perspective of nonFluxPerspectives"
             :key="perspective.uuid"
-            class="choice-button" 
-            size="xl" 
+            class="choice-button"
+            size="xl"
             @click="createCommunityFromPerspective(perspective)"
           >
             <j-text variant="heading-sm">{{ perspective.name }}</j-text>
@@ -135,7 +148,9 @@ import { isValid } from "@/utils/validation";
 import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useDataStore } from "@/store/data";
-import { getAd4mClient } from '@perspect3vism/ad4m-connect/dist/utils'
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { CommunityState } from "@/store/types";
+import { PerspectiveProxy } from "@perspect3vism/ad4m";
 
 export default defineComponent({
   components: { AvatarUpload },
@@ -156,7 +171,7 @@ export default defineComponent({
       newProfileImage: "",
       isJoiningCommunity: false,
       isCreatingCommunity: false,
-      nonFluxPerspectives: []
+      nonFluxPerspectives: [] as PerspectiveProxy[],
     };
   },
   mounted() {
@@ -189,7 +204,7 @@ export default defineComponent({
     },
     createCommunity() {
       this.isCreatingCommunity = true;
-      
+
       this.dataStore
         .createCommunity({
           perspectiveName: this.newCommunityName,
@@ -197,20 +212,20 @@ export default defineComponent({
           image: this.newProfileImage,
           thumbnail: this.newProfileImage,
         })
-        .then((community: any) => {
+        .then((community: CommunityState) => {
           this.$emit("submit");
           this.newCommunityName = "";
           this.newCommunityDesc = "";
           this.newProfileImage = "";
 
           const channels = this.dataStore.getChannelStates(
-            community.neighbourhood.perspective.uuid
+            community.neighbourhood.uuid
           );
 
           this.$router.push({
             name: "channel",
             params: {
-              communityId: community.neighbourhood.perspective.uuid,
+              communityId: community.neighbourhood.uuid,
               channelId: channels[0].id,
             },
           });
@@ -227,19 +242,19 @@ export default defineComponent({
           description: this.newCommunityDesc,
           image: this.newProfileImage,
           thumbnail: this.newProfileImage,
-          perspective
+          perspectiveUuid: perspective.uuid,
         })
         .then((community: any) => {
           this.$emit("submit");
-          const channels = this.dataStore.getChannelNeighbourhoods(
-            community.neighbourhood.perspective.uuid
+          const channels = this.dataStore.getChannelStates(
+            community.neighbourhood.uuid
           );
 
           this.$router.push({
             name: "channel",
             params: {
-              communityId: community.neighbourhood.perspective.uuid,
-              channelId: channels[0].perspective.uuid,
+              communityId: community.neighbourhood.uuid,
+              channelId: channels[0].id,
             },
           });
         })
@@ -248,15 +263,15 @@ export default defineComponent({
         });
     },
     async getPerspectives() {
-      const client = await getAd4mClient()
+      const client = await getAd4mClient();
       const keys = Object.keys(this.dataStore.neighbourhoods);
       const perspectives = await client.perspective.all();
 
       const nonFluxPerspectives = perspectives.filter(
-        (perspective) => !keys.includes(perspective.uuid) && perspective.name !== "Agent Profile"
+        (perspective) => !keys.includes(perspective.uuid)
       );
 
-      // @ts-ignore
+      //@ts-ignore
       this.nonFluxPerspectives = nonFluxPerspectives.map((perspective) => {
         return {
           name: perspective.name,
@@ -265,14 +280,35 @@ export default defineComponent({
           uuid: perspective.uuid,
         };
       });
-    }
+    },
   },
 });
 </script>
 
 <style scoped>
-.choice-button {
-  --j-menu-item-height: auto;
-  --j-menu-item-padding: var(--j-space-500) var(--j-space-600);
+.options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--j-space-500);
+}
+
+.option {
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 2px solid transparent;
+  background-color: var(--j-color-ui-50);
+  border-radius: var(--j-border-radius);
+  padding: var(--j-space-500);
+}
+
+.option:hover {
+  border: 2px solid var(--j-color-ui-100);
+}
+
+.option:active {
+  border: 2px solid var(--j-color-primary-500);
 }
 </style>

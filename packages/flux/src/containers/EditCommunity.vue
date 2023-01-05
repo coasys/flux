@@ -37,11 +37,12 @@
 </template>
 
 <script lang="ts">
-import { NeighbourhoodState } from "@/store/types";
+import { Community } from "utils/types";
 import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useDataStore } from "@/store/data";
-import { DexieIPFS } from "@/utils/storageHelpers";
+import { DexieIPFS } from "utils/helpers/storageHelpers";
+import { getImage } from "utils/helpers/getImage";
 
 export default defineComponent({
   components: { AvatarUpload },
@@ -66,17 +67,16 @@ export default defineComponent({
       handler: async function ({ id, name, description, image }) {
         this.communityName = name;
         this.communityDescription = description;
-        const dexie = new DexieIPFS(id);
-        this.communityImage = (await dexie.get(image!)) as any;
+        this.communityImage = await getImage(image);
       },
       deep: true,
       immediate: true,
     },
   },
   computed: {
-    community(): NeighbourhoodState {
+    community(): Community {
       const id = this.$route.params.communityId as string;
-      return this.dataStore.getNeighbourhood(id);
+      return this.dataStore.getCommunity(id);
     },
   },
   methods: {
@@ -84,22 +84,17 @@ export default defineComponent({
       const communityId = this.$route.params.communityId as string;
       this.isUpdatingCommunity = true;
       this.dataStore
-        .updateCommunity({
-          communityId: communityId,
+        .updateCommunity(communityId, {
           name:
-            this.communityName != this.community.name
+            this.communityName !== this.community.name
               ? this.communityName
               : undefined,
           description:
-            this.communityDescription != this.community.description
+            this.communityDescription !== this.community.description
               ? this.communityDescription
               : undefined,
           image:
-            this.communityImage != this.community.image
-              ? this.communityImage
-              : undefined,
-          thumbnail:
-            this.communityImage != this.community.image
+            this.communityImage !== this.community.image
               ? this.communityImage
               : undefined,
         })

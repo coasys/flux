@@ -1,10 +1,13 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import getMe from "../api/getMe";
+import getProfile from "../api/getProfile";
+import { Profile } from "../types";
 
 type State = {
   did: string;
   isInitialized: boolean;
   isUnlocked: boolean;
+  profile: Profile | null;
 };
 
 type ContextProps = {
@@ -17,6 +20,7 @@ const initialState: ContextProps = {
     did: "",
     isInitialized: false,
     isUnlocked: false,
+    profile: null,
   },
   methods: {},
 };
@@ -30,9 +34,14 @@ export function AgentProvider({ children }: any) {
     fetchAgent();
   }, []);
 
+  useEffect(() => {
+    if (state.did) {
+      getProfile(state.did).then((profile) => setState({ ...state, profile }));
+    }
+  }, [state.did]);
+
   async function fetchAgent() {
     const agent = await getMe();
-
     setState({ ...state, ...agent });
   }
 

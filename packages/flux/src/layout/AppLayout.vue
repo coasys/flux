@@ -25,11 +25,9 @@ export default defineComponent({
   methods: {
     handleTouchStart(e: any) {
       this.touchstartX = e.changedTouches[0].screenX;
-      console.log("start", this.touchstartX);
     },
     handleTouchEnd(e: any) {
       this.touchendX = e.changedTouches[0].screenX;
-      console.log("end", this.touchendX);
       this.checkDirection();
     },
     checkDirection() {
@@ -85,7 +83,8 @@ export default defineComponent({
   background: var(--app-main-sidebar-bg-color);
   height: 100%;
   z-index: 10;
-  border-right: 1px var(--app-main-sidebar-border-color) solid;
+  border-right: 1px solid
+    var(--app-main-sidebar-border-color, var(--j-border-color));
   transition: all 0.3s ease;
   transform: translateX(calc(var(--app-main-sidebar-width) * -1));
 }
@@ -95,6 +94,5 @@ export default defineComponent({
   overflow-x: hidden;
   transition: all 0.3s ease;
   margin-left: 0;
-  position: relative;
 }
 </style>

@@ -19,7 +19,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { getImage } from "utils/api/getProfile";
+import { getImage } from "utils/helpers/getImage";
 export default defineComponent({
   props: {
     did: String,

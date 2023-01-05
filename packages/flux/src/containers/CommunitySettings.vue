@@ -8,7 +8,7 @@
         <j-tabs
           full
           :value="currentView"
-          @change="(e) => (currentView = e.target.value)"
+          @change="(e: any) => (currentView = e.target.value)"
         >
           <j-tab-item variant="button" value="theme-editor">
             <j-icon size="sm" name="eye" slot="start" />
@@ -20,7 +20,7 @@
         <j-box pb="500">
           <j-toggle
             :checked="community.useLocalTheme"
-            @change="(e) => setuseLocalTheme(e.target.checked)"
+            @change="(e: any) => setuseLocalTheme(e.target.checked)"
           >
             Use local theme
           </j-toggle>
@@ -82,7 +82,7 @@ export default defineComponent({
     },
     community(): LocalCommunityState {
       const id = this.$route.params.communityId as string;
-      return this.dataStore.getCommunityState(id);
+      return this.dataStore.getLocalCommunityState(id);
     },
   },
 });

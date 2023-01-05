@@ -1,6 +1,12 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from "preact/hooks";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "preact/hooks";
 import { createContext } from "preact";
-import { AgentContext, ChatContext, PerspectiveContext } from "utils/react";
+import { AgentContext, ChatContext, CommunityContext } from "utils/react";
 import UIContext from "./UIContext";
 import useTiptapEditor from "../components/TipTap/useTiptapEditor";
 import { Editor } from "@tiptap/core";
@@ -21,11 +27,11 @@ type ContextProps = {
 const initialState: ContextProps = {
   state: {
     editor: null,
-    value: ""
+    value: "",
   },
   methods: {
     onSend: (message: string) => null,
-    setInputValue: (value: string) => null
+    setInputValue: (value: string) => null,
   },
 };
 
@@ -34,12 +40,12 @@ const EditorContext = createContext(initialState);
 export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
   const [state, setState] = useState(initialState.state);
   const {
-    state: { members, channels, url, sourceUrl },
-  } = useContext(PerspectiveContext);
+    state: { members, channels },
+  } = useContext(CommunityContext);
 
   const {
     state: { keyedMessages, messages },
-    methods: { sendMessage, sendReply, editMessage},
+    methods: { sendMessage, sendReply, editMessage },
   } = useContext(ChatContext);
 
   const {
@@ -54,9 +60,9 @@ export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
   const setInputValue = (value: string) => {
     setState((oldState) => ({
       ...oldState,
-      value
-    }))
-  } 
+      value,
+    }));
+  };
 
   async function handleSendMessage(value) {
     const escapedMessage = value.replace(/( |<([^>]+)>)/gi, "");
@@ -81,7 +87,7 @@ export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
       editor.chain().focus();
     }
   }
-  
+
   const mentionMembers = useMemo(() => {
     return Object.values(members).map((user: any) => {
       return {
@@ -102,35 +108,38 @@ export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
     });
   }, [channels]);
 
-
   const onMessageEdit = useCallback(() => {
     if (messages.length) {
-      const message = messages.findLast(message => message.author === agentState.did);
+      const message = messages.findLast(
+        (message) => message.author === agentState.did
+      );
       if (message) {
         setCurrentEditMessage(message.id);
-        setInputValue(message.editMessages[message.editMessages.length-1].content);
+        setInputValue(
+          message.editMessages[message.editMessages.length - 1].content
+        );
       }
     }
-  }, [setCurrentEditMessage, messages])
+  }, [setCurrentEditMessage, messages]);
 
-  const editor = useTiptapEditor({ 
-    value: state.value, 
-    onChange: setInputValue, 
-    onSend: handleSendMessage, 
-    members: mentionMembers, 
+  const editor = useTiptapEditor({
+    value: state.value,
+    onChange: setInputValue,
+    onSend: handleSendMessage,
+    members: mentionMembers,
     channels: mentionChannels,
     channelId,
     perspectiveUuid,
     currentMessageEdit,
-    onMessageEdit
-  })
+    onMessageEdit,
+  });
 
   useEffect(() => {
     setState((oldState) => ({
       ...oldState,
-      editor
-    }))
-  }, [editor])
+      editor,
+    }));
+  }, [editor]);
 
   return (
     <EditorContext.Provider
@@ -138,7 +147,7 @@ export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
         state,
         methods: {
           onSend: handleSendMessage,
-          setInputValue: setInputValue
+          setInputValue: setInputValue,
         },
       }}
     >

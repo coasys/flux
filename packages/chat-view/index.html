@@ -26,9 +26,6 @@
     <script src="https://unpkg.com/@junto-foundation/junto-elements@latest"></script>
   </head>
   <body>
-    <j-input id="perspectiveId" label="Perspective id"></j-input>
-    <j-input id="channelId" label="Channel id"></j-input>
-    <j-button>Load</j-button>
     <ad4m-connect
       theme="dark"
       appName="Flux"
@@ -42,22 +39,16 @@
     <script type="module">
       import "https://unpkg.com/@perspect3vism/ad4m-connect@0.0.11-11/dist/web.js";
       import MiniChatView from "./dist/main.js";
+
       const el = document.querySelector("perspective-view");
-      const button = document.querySelector("j-button");
-      const perspectiveId = document.getElementById("perspectiveId");
-      const channelId = document.getElementById("channelId");
+      const [_, uuid, source] = document.location.pathname.split("/");
+
+      el.setAttribute("perspective", decodeURIComponent(uuid));
+      el.setAttribute("source", decodeURIComponent(source));
+      customElements.define("perspective-view", MiniChatView);
 
       const ad4mConnect = document.querySelector("ad4m-connect");
       ad4mConnect.connect();
-
-      button.addEventListener("click", () => {
-        const id = perspectiveId.value;
-        const channel = channelId.value;
-        console.log({ channel, id });
-        el.setAttribute("perspective-uuid", id);
-        el.setAttribute("channel", channel);
-        customElements.define("perspective-view", MiniChatView);
-      });
     </script>
   </body>
 </html>

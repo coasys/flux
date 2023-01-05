@@ -106,7 +106,7 @@ function ReactionButton({ reaction, onEmojiClick }) {
 
   return (
     <button
-      onMouseOver={() => getProfiles()}
+      onMouseEnter={() => getProfiles()}
       class={`${styles.emojiButton} ${activeClass}`}
       onClick={() => onEmojiClick(reaction.content)}
     >

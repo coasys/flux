@@ -1,3 +1,4 @@
+import "construct-style-sheets-polyfill";
 import "./styles/base.css";
 
 import "./components/button";
