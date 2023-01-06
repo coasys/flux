@@ -98,7 +98,11 @@ export default function Post({
             Back
           </j-button>
           {isAuthor && (
-            <j-button size="xs" variant="subtle">
+            <j-button
+              size="xs"
+              variant="subtle"
+              onClick={() => UIMethods.toggleOverlay(true)}
+            >
               <j-icon name="pencil" size="xs" slot="start"></j-icon>
               Edit post
             </j-button>
