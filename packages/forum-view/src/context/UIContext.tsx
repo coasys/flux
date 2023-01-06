@@ -51,10 +51,8 @@ export function UIProvider({ children }: any) {
   }
 
   function toggleOverlay(visible: boolean, postType?: PostOption) {
-    console.log("toggleOverlay!", visible);
     setState({
       ...state,
-      view: View.Feed,
       initialPostType: postType || PostOption.Text,
       showOverlay: visible,
     });
