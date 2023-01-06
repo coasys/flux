@@ -1,5 +1,6 @@
 import { useState } from "preact/hooks";
 import { createContext } from "preact";
+import { PostOption } from "../constants/options";
 
 export enum View {
   Feed = "FEED",
@@ -9,6 +10,8 @@ export enum View {
 type State = {
   view: View;
   currentPost: string;
+  initialPostType: PostOption;
+  showOverlay: boolean;
 };
 
 type ContextProps = {
@@ -16,6 +19,7 @@ type ContextProps = {
   methods: {
     goToPost: (id: string) => void;
     goToFeed: () => void;
+    toggleOverlay: (visible: boolean, postType?: PostOption) => void;
   };
 };
 
@@ -23,10 +27,13 @@ const initialState: ContextProps = {
   state: {
     view: View.Feed,
     currentPost: null,
+    initialPostType: PostOption.Text,
+    showOverlay: false,
   },
   methods: {
     goToPost: (id: string) => null,
     goToFeed: () => null,
+    toggleOverlay: (visible: boolean, postType?: PostOption) => null,
   },
 };
 
@@ -43,6 +50,16 @@ export function UIProvider({ children }: any) {
     setState({ ...state, view: View.Feed, currentPost: null });
   }
 
+  function toggleOverlay(visible: boolean, postType?: PostOption) {
+    console.log("toggleOverlay!", visible);
+    setState({
+      ...state,
+      view: View.Feed,
+      initialPostType: postType || PostOption.Text,
+      showOverlay: visible,
+    });
+  }
+
   return (
     <UIContext.Provider
       value={{
@@ -50,6 +67,7 @@ export function UIProvider({ children }: any) {
         methods: {
           goToFeed,
           goToPost,
+          toggleOverlay,
         },
       }}
     >
