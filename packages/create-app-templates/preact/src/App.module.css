@@ -1,0 +1,41 @@
+.appContainer {
+    margin: 0 auto;
+    margin-top: var(--j-space-900);
+    width: 100%;
+    max-width: 800px;;
+}
+
+.card {
+    display: flex;
+    align-items: center;
+    gap: var(--j-space-500);
+    text-decoration: none;
+    padding: var(--j-space-500);
+    border-radius: var(--j-border-radius);
+    border: 2px solid var(--j-color-ui-100);
+    overflow: hidden;
+    word-wrap: break-word;
+}
+
+.card:hover {
+    border: 2px solid var(--j-color-primary-500);
+}
+
+.grid {
+    display: grid;
+    gap: var(--j-space-500);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.backButton {
+    display: flex;
+    gap: var(--j-space-200);
+    text-decoration: none;
+    color: var(--j-color-primary-500);
+    font-weight: 600;
+    padding-bottom: var(--j-space-500);
+}
+
+.backButton:hover {
+    text-decoration: underline;
+}

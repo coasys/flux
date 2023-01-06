@@ -16,8 +16,8 @@
     <ad4m-connect
       theme="dark"
       appName="Flux"
-      appDesc="Flux - A SOCIAL TOOLKIT FOR THE NEW INTERNET"
-      appDomain="https://www.test.io/"
+      appDesc="A social toolkit for the new internet"
+      appDomain="https://www.flux.io/"
       capabilities='[{"with":{"domain":"*","pointers":["*"]},"can": ["*"]}]'
       appiconpath="https://i.ibb.co/GnqjPJP/icon.png"
       openonshortcut
@@ -36,13 +36,21 @@
       const ad4m = document.querySelector("ad4m-connect");
       ad4m.connect();
 
-      // Extract perspectiveUuid and source from the URL path
-      const [_, uuid, source] = document.location.pathname.split("/");
+      initApp();
 
-      // Set perspective and source on the app
-      const app = document.querySelector("flux-app");
-      app.setAttribute("perspective", decodeURIComponent(uuid));
-      app.setAttribute("source", decodeURIComponent(source));
+      window.addEventListener("popstate", initApp);
+
+      function initApp() {
+        // Extract perspectiveUuid and source from the URL path
+        const [_, uuid, source] = document.location.pathname.split("/");
+
+        console.log({ _, uuid, source });
+
+        // Set perspective and source on the app
+        const app = document.querySelector("flux-app");
+        app.setAttribute("perspective", decodeURIComponent(uuid));
+        app.setAttribute("source", decodeURIComponent(source));
+      }
     </script>
   </body>
 </html>
