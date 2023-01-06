@@ -6,7 +6,7 @@ export function fetchFromPublicGateway(url: string): Promise<string> {
     const timeout = setTimeout(() => {
       resolve("");
     }, 1000);
-    const response = await fetch(`https://cloudflare-ipfs.com/ipfs/${url.split("://")[1]}`, {mode: "no-cors"});
+    const response = await fetch(`https://gateway.ipfs.io/ipfs/${url.split("://")[1]}`);
     const json = await response.json();
     const image = json.data;
     clearTimeout(timeout);
