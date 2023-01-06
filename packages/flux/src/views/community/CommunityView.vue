@@ -29,7 +29,7 @@
             <j-text color="black" size="700" weight="800">
               Syncing community
             </j-text>
-            <j-text size="400" weight="400">Please wait...</j-text>
+            <j-text size="400" weight="400">Please wait... Note: Flux is P2P, you will not receive any data until another user is online</j-text>
           </j-flex>
         </j-flex>
       </j-box>
