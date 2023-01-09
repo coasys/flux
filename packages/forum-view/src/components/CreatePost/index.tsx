@@ -10,6 +10,7 @@ import {
   dataURItoBlob,
   resizeImage,
 } from "utils/helpers/profileHelpers";
+import PostImagePreview from "../PostImagePreview";
 
 const initialState = {
   title: null,
@@ -221,12 +222,20 @@ export default function CreatePost({
             )}
             {showImage && (
               <j-box pt="300">
-                <FileUpload onChange={handleImage}></FileUpload>
+                {isEditing && state.image ? (
+                  <PostImagePreview
+                    imageUrl={state.image}
+                    onRemove={() => setState({ ...state, image: undefined })}
+                  />
+                ) : (
+                  <FileUpload onChange={handleImage}></FileUpload>
+                )}
               </j-box>
             )}
             {showBody && (
               <Editor
                 style={{ minHeight: "200px" }}
+                initialContent={state.body}
                 onChange={(e) =>
                   setState((oldState) => ({ ...oldState, body: e }))
                 }
