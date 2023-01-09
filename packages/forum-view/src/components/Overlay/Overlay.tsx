@@ -1,5 +1,4 @@
-import { getImage } from "utils/helpers/getImage";
-import { useContext, useEffect, useState } from "preact/hooks";
+import { useContext } from "preact/hooks";
 import UIContext from "../../context/UIContext";
 import CreatePost from "../CreatePost";
 import { ChannelContext } from "utils/react";
@@ -7,23 +6,6 @@ import { ChannelContext } from "utils/react";
 export default function Overlay() {
   const { state: channelState } = useContext(ChannelContext);
   const { state: uiState, methods: UIMethods } = useContext(UIContext);
-  // const [img, setImage] = useState(null);
-
-  // async function fetchImage(imageUrl) {
-  //   try {
-  //     setLoading(true);
-  //     const image = await getImage(imageUrl);
-  //     setImage(image);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   if (url) {
-  //     fetchImage(url);
-  //   }
-  // }, [did, url]);
 
   return (
     <j-modal
@@ -33,6 +15,7 @@ export default function Overlay() {
     >
       {uiState.showOverlay && (
         <CreatePost
+          postId={uiState.currentPost}
           onCancel={() => UIMethods.toggleOverlay(false)}
           communityId={channelState.communityId}
           channelId={channelState.channelId}

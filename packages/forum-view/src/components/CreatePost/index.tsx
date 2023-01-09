@@ -5,7 +5,11 @@ import FileUpload from "../../components/FileUpload";
 import { parse } from "date-fns/esm";
 import styles from "./index.scss";
 import PostModel from "utils/api/post";
-import { blobToDataURL, dataURItoBlob, resizeImage } from "utils/helpers/profileHelpers";
+import {
+  blobToDataURL,
+  dataURItoBlob,
+  resizeImage,
+} from "utils/helpers/profileHelpers";
 
 const initialState = {
   title: null,
@@ -20,6 +24,7 @@ const initialState = {
 };
 
 export default function CreatePost({
+  postId,
   channelId,
   communityId,
   onPublished,
@@ -28,8 +33,10 @@ export default function CreatePost({
 }) {
   const inputRefs = useRef<{ [x: string]: { isValid: boolean; el: any } }>({});
   const [isCreating, setIsCreating] = useState(false);
+  const [isLoading, setIsLoading] = useState(!!postId);
   const [entryType, setEntryType] = useState<PostOption>(initialType);
   const [state, setState] = useState(initialState);
+  const isEditing = !!postId;
 
   const Post = useMemo(() => {
     return new PostModel({ perspectiveUuid: communityId, source: channelId });
@@ -40,6 +47,30 @@ export default function CreatePost({
       inputRefs.current.title?.el.focus();
     }, 100);
   }, []);
+
+  // Fetch post if editing
+  useEffect(() => {
+    if (postId) {
+      const Model = new PostModel({
+        perspectiveUuid: communityId,
+        source: channelId,
+      });
+      Model.get(postId).then((entry: any) => {
+        setState(entry);
+        setIsLoading(false);
+
+        // FIX - Better post type detection
+        if (entry?.image) {
+          setEntryType(PostOption.Image);
+        }
+        if (entry?.url) {
+          setEntryType(PostOption.Link);
+        }
+
+        console.log("entry: ", entry);
+      });
+    }
+  }, [postId]);
 
   // We set dynamic refs based on the input name
   // When an inputfield is hidden we remove it
@@ -109,14 +140,16 @@ export default function CreatePost({
 
     const FR = new FileReader();
     FR.addEventListener("load", async function (evt) {
-      const compressedImage = await blobToDataURL(await resizeImage(dataURItoBlob(evt.target.result as string), 0.6));
+      const compressedImage = await blobToDataURL(
+        await resizeImage(dataURItoBlob(evt.target.result as string), 0.6)
+      );
 
       setState({
         ...state,
         image: compressedImage,
       });
     });
-    
+
     FR.readAsDataURL(files[0]);
   }
 
@@ -132,7 +165,7 @@ export default function CreatePost({
       <j-box px="400" py="600">
         <j-box pb="600">
           <j-text color="black" size="600" weight="600">
-            Create a Post
+            {isEditing ? "Edit post" : "Create a Post"}
           </j-text>
         </j-box>
         <j-box pt="500" pb="200">
@@ -143,7 +176,12 @@ export default function CreatePost({
           >
             {postOptions.map((option) => {
               return (
-                <j-tab-item variant="button" size="sm" value={option.value}>
+                <j-tab-item
+                  variant="button"
+                  size="sm"
+                  value={option.value}
+                  disabled={isEditing}
+                >
                   <j-icon slot="start" size="md" name={option.icon}></j-icon>
                   {option.label}
                 </j-tab-item>
@@ -259,12 +297,12 @@ export default function CreatePost({
             </j-button>
             <j-button
               loading={isCreating}
-              disabled={isCreating}
+              disabled={isCreating || isLoading}
               onClick={() => publish()}
               size="lg"
               variant="primary"
             >
-              Publish
+              {isEditing ? "Update" : "Publish"}
             </j-button>
           </j-flex>
         </j-box>
