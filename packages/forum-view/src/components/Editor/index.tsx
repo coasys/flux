@@ -91,8 +91,15 @@ const MenuBar = ({ editor }) => {
 export default ({ onChange, initialContent, style = {} }) => {
   const editor = useEditor({
     extensions: [StarterKit, Link.configure({ autolink: true })],
-    content: initialContent || "",
+    content: "",
   });
+
+  // Populate with initial content
+  useEffect(() => {
+    if (editor && initialContent) {
+      editor.commands.setContent(initialContent);
+    }
+  }, [initialContent]);
 
   useEffect(() => {
     if (editor) {
