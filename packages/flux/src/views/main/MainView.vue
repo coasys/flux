@@ -108,7 +108,7 @@ export default defineComponent({
     const appStore = this.appStore;
     //Check that user already has joined default testing community
     if (!defaultTestingCommunity) {
-      // appStore.setShowDisclaimer(true);
+      appStore.setShowDisclaimer(true);
 
       this.showJoinCommunity = true;
     }
@@ -117,7 +117,7 @@ export default defineComponent({
       COMMUNITY_TEST_VERSION > appStore.seenCommunityTestVersion &&
       !defaultTestingCommunity
     ) {
-      // appStore.setShowDisclaimer(true);
+      appStore.setShowDisclaimer(true);
       this.showJoinCommunity = true;
     }
   },
