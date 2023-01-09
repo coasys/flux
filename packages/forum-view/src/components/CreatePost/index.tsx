@@ -123,7 +123,11 @@ export default function CreatePost({
     }
 
     try {
-      await Post.create(data);
+      if (isEditing) {
+        await Post.update(postId, data);
+      } else {
+        await Post.create(data);
+      }
       onPublished(true);
     } catch (e) {
       console.log(e);
