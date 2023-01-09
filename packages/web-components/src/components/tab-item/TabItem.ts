@@ -62,6 +62,13 @@ const styles = css`
     background: var(--j-color-primary-100);
     color: var(--j-color-primary-700);
   }
+  :host([disabled]) [part="base"] {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  :host([disabled][checked]) [part="base"] {
+    opacity: 1;
+  }
 `;
 
 @customElement("j-tab-item")
@@ -147,6 +154,7 @@ class TabItem extends LitElement {
       <button
         aria-selected=${this.checked}
         aria-controls=${this.value}
+        disabled=${this.disabled}
         @click=${this._handleChange}
         part="base"
         role="tab"
