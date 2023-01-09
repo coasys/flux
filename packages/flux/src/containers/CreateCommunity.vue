@@ -151,15 +151,18 @@ import { useDataStore } from "@/store/data";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { CommunityState } from "@/store/types";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { useAppStore } from "@/store/app";
 
 export default defineComponent({
   components: { AvatarUpload },
   emits: ["cancel", "submit"],
   setup() {
     const dataStore = useDataStore();
+    const appStore = useAppStore();
 
     return {
       dataStore,
+      appStore
     };
   },
   data() {
@@ -191,15 +194,66 @@ export default defineComponent({
     },
   },
   methods: {
-    joinCommunity() {
+    async joinCommunity() {
+      const client = await getAd4mClient();
       this.isJoiningCommunity = true;
+
+      const regex = /neighbourhood:\/\/[^\s]*/;
+      const neighbourhoodUrlMatch = this.joiningLink.match(regex);
+      if (!neighbourhoodUrlMatch) {
+        this.appStore.setToast({variant: "error", message: "We were not able to parse this invite link", open: true});
+        this.isJoiningCommunity = false;
+        return;
+      }
+      const neighbourhoodUrl = neighbourhoodUrlMatch[0];
+      console.log(neighbourhoodUrl);
+
+      const existingPerspective = (await client.perspective.all()).filter((perspective) => {
+        return perspective.sharedUrl === neighbourhoodUrl;
+      });
+
+      if (existingPerspective.length != 0) {
+        this.appStore.setToast({variant: "error", message: "You are already a member of this community", open: true});
+        this.isJoiningCommunity = false;
+        this.appStore.setShowCreateCommunity(false);
+
+        const community = await this.dataStore.getCommunityByNeighbourhoodUrl(neighbourhoodUrl);
+
+        if (!community) {
+          console.error("Did not find community when trying to redirect after join");
+          return;
+        }
+
+        this.$router.push({
+          name: "community",
+          params: {
+            communityId: community.neighbourhood.uuid
+          },
+        });
+        return;
+      }
+
       this.dataStore
-        .joinCommunity({ joiningLink: this.joiningLink })
+        .joinCommunity({ joiningLink: neighbourhoodUrl })
         .then(() => {
           this.$emit("submit");
         })
-        .finally(() => {
+        .finally(async () => {
           this.isJoiningCommunity = false;
+
+          const community = await this.dataStore.getCommunityByNeighbourhoodUrl(neighbourhoodUrl);
+
+          if (!community) {
+            console.error("Did not find community when trying to redirect after join");
+            return;
+          }
+
+          this.$router.push({
+            name: "community",
+            params: {
+              communityId: community.neighbourhood.uuid
+            },
+          });
         });
     },
     createCommunity() {
