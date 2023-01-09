@@ -88,10 +88,10 @@ const MenuBar = ({ editor }) => {
   );
 };
 
-export default ({ onChange, style = {} }) => {
+export default ({ onChange, initialContent, style = {} }) => {
   const editor = useEditor({
     extensions: [StarterKit, Link.configure({ autolink: true })],
-    content: "",
+    content: initialContent || "",
   });
 
   useEffect(() => {
