@@ -88,7 +88,7 @@ export default function Post({
   return (
     <div class={styles.post}>
       <j-box pb="500">
-        <div class={styles.actions}>
+        <div class={styles.header}>
           <j-button
             size="sm"
             variant="link"
@@ -98,14 +98,24 @@ export default function Post({
             Back
           </j-button>
           {isAuthor && (
-            <j-button
-              size="xs"
-              variant="subtle"
-              onClick={() => UIMethods.toggleOverlay(true)}
-            >
-              <j-icon name="pencil" size="xs" slot="start"></j-icon>
-              Edit post
-            </j-button>
+            <div class={styles.actions}>
+              <j-button
+                size="xs"
+                variant="subtle"
+                onClick={() => UIMethods.toggleOverlay(true)}
+              >
+                <j-icon name="pencil" size="xs" slot="start"></j-icon>
+                Edit
+              </j-button>
+              <j-button
+                size="xs"
+                variant="subtle"
+                onClick={() => UIMethods.toggleOverlay(true)}
+              >
+                <j-icon name="trash" size="xs" slot="start"></j-icon>
+                Delete
+              </j-button>
+            </div>
           )}
         </div>
       </j-box>
