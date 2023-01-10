@@ -302,7 +302,7 @@ export default defineComponent({
 .channel-view__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: var(--j-space-400);
   padding: 0 var(--j-space-200);
   position: sticky;
   background-color: var(--app-channel-header-bg-color, transparent);
@@ -372,6 +372,8 @@ export default defineComponent({
   }
   .channel-view__header {
     padding: 0 var(--j-space-500);
+    justify-content: space-between;
+    gap: 0;
   }
 }
 </style>
