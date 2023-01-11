@@ -37,13 +37,32 @@
         </j-flex>
       </j-box>
     </div>
-    <div
-      class="center"
-      v-if="
-        isSynced &&
-        channels.filter((c) => c.sourcePerspective === communityId).length === 0
-      "
-    >
+    <div class="center" v-if="isSynced && communityChannels.length > 0">
+      <j-box py="800">
+        <j-flex gap="600" direction="column" a="center" j="center">
+          
+         
+          <Avatar size="xxl" :url="community.neighbourhood.thumbnail"></Avatar>
+          <j-box align="center" pb="300">
+          <j-text variant="heading"
+            >Welcome to {{ community.neighbourhood.name }}</j-text
+          >
+          <j-text variant="ingress">Pick a channel</j-text>
+          </j-box>
+         
+          <j-flex direction="row" gap="500" a="center">
+            <button
+              class="channel-card"
+              @click="() => navigateToChannel(channel.id)"
+              v-for="channel in communityChannels"
+            >
+              {{ channel.name }}
+            </button>
+          </j-flex>
+        </j-flex>
+      </j-box>
+    </div>
+    <div class="center" v-if="isSynced && communityChannels.length === 0">
       <j-box py="800">
         <j-flex gap="400" direction="column" a="center" j="center">
           <j-icon color="ui-500" size="xl" name="balloon"></j-icon>
@@ -149,6 +168,7 @@ import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunitySettings from "@/containers/CommunitySettings.vue";
 import ChannelView from "@/views/channel/ChannelView.vue";
 import CommunityTweaks from "@/containers/CommunityTweaks.vue";
+import Avatar from "@/components/avatar/Avatar.vue";
 
 import ChannelModel, { Channel } from "utils/api/channel";
 import MemberModel, { Member } from "utils/api/member";
@@ -173,6 +193,7 @@ export default defineComponent({
     CommunitySettings,
     SidebarLayout,
     CommunityTweaks,
+    Avatar,
   },
   setup() {
     return {
@@ -276,6 +297,15 @@ export default defineComponent({
         });
       });
     },
+    navigateToChannel(channelId: string) {
+      this.$router.push({
+        name: "channel",
+        params: {
+          communityId: this.communityId,
+          channelId: channelId,
+        },
+      });
+    },
     goToActiveChannel(communityId: string) {
       const channels = this.dataStore.getChannelStates(communityId);
       if (channels.length > 0) {
@@ -324,7 +354,10 @@ export default defineComponent({
     isSynced(): boolean {
       const community = this.dataStore.getCommunity(this.communityId);
       const isMadeByMe = community.author === this.userStore.profile?.did;
-      return isMadeByMe ? community.members.length >= 1 : community.members.length >= 2;
+    
+      return isMadeByMe
+        ? community.members.length >= 1
+        : community.members.length >= 2;
     },
     communityId() {
       return this.$route.params.communityId as string;
@@ -338,6 +371,11 @@ export default defineComponent({
     community(): CommunityState {
       const communityId = this.communityId;
       return this.dataStore.getCommunityState(communityId);
+    },
+    communityChannels(): ChannelState[] {
+      return this.channels.filter(
+        (c) => c.sourcePerspective === this.communityId
+      );
     },
     channels(): ChannelState[] {
       const channels = this.dataStore.getChannels;
@@ -356,5 +394,22 @@ export default defineComponent({
   justify-content: center;
   flex-direction: column;
   display: flex;
+}
+
+.channel-card {
+  cursor: pointer;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+  display: block;
+  width: 100%;
+  font-weight: 600;
+  padding: var(--j-space-500);
+  border: 1px solid var(--j-color-ui-100);
+  border-radius: var(--j-border-radius);
+}
+
+.channel-card:hover {
+  border: 1px solid var(--j-color-primary-500);
 }
 </style>
