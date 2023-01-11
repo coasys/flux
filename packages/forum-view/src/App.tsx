@@ -50,7 +50,7 @@ export default function App({
   source: string;
 }) {
   return (
-    <UIProvider>
+    <UIProvider communityId={perspective} channelId={source}>
       <AgentProvider>
         <CommunityProvider perspectiveUuid={perspective}>
           <ChannelProvider communityId={perspective} channelId={source}>
