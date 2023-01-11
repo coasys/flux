@@ -28,14 +28,20 @@
 }
 
 .backButton {
-    display: flex;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     gap: var(--j-space-200);
     text-decoration: none;
-    color: var(--j-color-primary-500);
+    color: var(--j-color-black);
     font-weight: 600;
-    padding-bottom: var(--j-space-500);
+    width: var(--j-size-md);
+    height: var(--j-size-md);
+    padding: var(--j-space-200);
+    border-radius: 50%;
+    margin-bottom: var(--j-space-500);
 }
 
 .backButton:hover {
-    text-decoration: underline;
+    background-color: var(--j-color-ui-50);
 }

@@ -25,8 +25,7 @@ export default function CommunityOverview({ uuid }) {
   return (
     <div>
       <a href="/" className={styles.backButton}>
-        <j-icon slot="start" name="chevron-left" size="xs"></j-icon>
-        Back
+        <j-icon slot="start" name="arrow-left-short" size="lg"></j-icon>
       </a>
       <j-box pt="600" pb="400">
         <j-text nomargin variant="heading-lg">
