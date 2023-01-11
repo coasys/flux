@@ -43,7 +43,7 @@ export function UIProvider({ children }: any) {
   const [state, setState] = useState(initialState.state);
 
   function goToPost(id: string) {
-    setState({ ...state, view: View.Post, currentPost: id });
+    setState({ ...state, view: View.Post, currentPost: id, showOverlay: null });
   }
 
   function goToFeed() {
