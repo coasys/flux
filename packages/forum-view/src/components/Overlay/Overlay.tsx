@@ -7,6 +7,10 @@ export default function Overlay() {
   const { state: channelState } = useContext(ChannelContext);
   const { state: uiState, methods: UIMethods } = useContext(UIContext);
 
+  const onPublished = (postId: string) => {
+    UIMethods.goToPost(postId);
+  };
+
   return (
     <j-modal
       size="fullscreen"
@@ -20,7 +24,7 @@ export default function Overlay() {
           communityId={channelState.communityId}
           channelId={channelState.channelId}
           initialType={uiState.initialPostType}
-          onPublished={() => UIMethods.toggleOverlay(false)}
+          onPublished={onPublished}
         ></CreatePost>
       )}
     </j-modal>

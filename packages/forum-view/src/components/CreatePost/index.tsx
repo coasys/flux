@@ -108,6 +108,7 @@ export default function CreatePost({
     setIsCreating(true);
 
     let data = state;
+    let newPost = undefined;
 
     if (entryType === PostOption.Event) {
       const startDate = parseDateTime(
@@ -126,9 +127,9 @@ export default function CreatePost({
       if (isEditing) {
         await Post.update(postId, data);
       } else {
-        await Post.create(data);
+        newPost = await Post.create(data);
       }
-      onPublished(true);
+      onPublished(isEditing ? postId : newPost?.id);
     } catch (e) {
       console.log(e);
     } finally {
