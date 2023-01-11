@@ -91,16 +91,18 @@
         </div>
       </div>
       <j-flex direction="column" gap="500" v-if="tabView === 'Join'">
+       
         <j-input
           :value="joiningLink"
           @keydown.enter="joinCommunity"
-          @input="(e: any) => (joiningLink = e.target.value)"
+          @input="(e: any) => joiningLink = e.target.value"
+          @change="(e: any) => cleanInviteLink(e.target.value)"
           size="lg"
           label="Invite link"
         ></j-input>
 
         <j-button
-          :disabled="isJoiningCommunity || !joiningLink"
+          :disabled="isJoiningCommunity || !canJoin"
           :loading="isJoiningCommunity"
           @click="joinCommunity"
           size="lg"
@@ -181,6 +183,20 @@ export default defineComponent({
     this.getPerspectives();
   },
   computed: {
+    canJoin(): boolean {
+      return isValid(
+        [
+          {
+            check: (val: string) => {
+              const regex = /neighbourhood:\/\/[^\s]*/;
+              return !regex.test(val); 
+            },
+            message: "This is not a valid neighbourhood link",
+          },
+        ],
+        this.joiningLink
+      );
+    },
     canSubmit(): boolean {
       return isValid(
         [
@@ -194,19 +210,20 @@ export default defineComponent({
     },
   },
   methods: {
+    cleanInviteLink(text: string) {
+      const regex = /neighbourhood:\/\/[^\s]*/;
+      const neighbourhoodUrlMatch = text.match(regex) || [""];
+      const match = neighbourhoodUrlMatch[0];
+      this.joiningLink = match;
+      if(text && !match) {
+        this.appStore.setToast({ variant: "error", message: "We were not able to parse this invite link", open: true });
+      }
+    },
     async joinCommunity() {
       const client = await getAd4mClient();
       this.isJoiningCommunity = true;
 
-      const regex = /neighbourhood:\/\/[^\s]*/;
-      const neighbourhoodUrlMatch = this.joiningLink.match(regex);
-      if (!neighbourhoodUrlMatch) {
-        this.appStore.setToast({variant: "error", message: "We were not able to parse this invite link", open: true});
-        this.isJoiningCommunity = false;
-        return;
-      }
-      const neighbourhoodUrl = neighbourhoodUrlMatch[0];
-      console.log(neighbourhoodUrl);
+      const neighbourhoodUrl = this.joiningLink;
 
       const existingPerspective = (await client.perspective.all()).filter((perspective) => {
         return perspective.sharedUrl === neighbourhoodUrl;
