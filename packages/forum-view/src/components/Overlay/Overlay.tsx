@@ -9,6 +9,11 @@ export default function Overlay() {
 
   const onPublished = (postId: string) => {
     UIMethods.goToPost(postId);
+
+    // TEMP: Reload to fetch updated post
+    if (postId === uiState.currentPost) {
+      location.reload();
+    }
   };
 
   return (
