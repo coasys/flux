@@ -29,7 +29,10 @@
             <j-text color="black" size="700" weight="800">
               Syncing community
             </j-text>
-            <j-text size="400" weight="400">Note: Flux is P2P, you will not receive any data until another user is online</j-text>
+            <j-text size="400" weight="400"
+              >Note: Flux is P2P, you will not receive any data until another
+              user is online</j-text
+            >
           </j-flex>
         </j-flex>
       </j-box>
@@ -151,6 +154,7 @@ import ChannelModel, { Channel } from "utils/api/channel";
 import MemberModel, { Member } from "utils/api/member";
 import { CommunityState, ModalsState, ChannelState } from "@/store/types";
 import { useAppStore } from "@/store/app";
+import { useUserStore } from "@/store/user";
 import { useDataStore } from "@/store/data";
 import { mapActions, mapState } from "pinia";
 
@@ -177,7 +181,7 @@ export default defineComponent({
       loadedChannels: ref<LoadedChannels>({}),
       appStore: useAppStore(),
       dataStore: useDataStore(),
-      isSynced: ref(true),
+      userStore: useUserStore(),
     };
   },
   data() {
@@ -214,7 +218,6 @@ export default defineComponent({
           const channel = this.dataStore.getChannel(id);
 
           if (channel) {
-            this.isSynced = true;
             this.loadedChannels = {
               ...this.loadedChannels,
               [channel.id]: true,
@@ -276,7 +279,6 @@ export default defineComponent({
     goToActiveChannel(communityId: string) {
       const channels = this.dataStore.getChannelStates(communityId);
       if (channels.length > 0) {
-        this.isSynced = true;
         const firstChannel = this.dataStore.getChannelStates(communityId)[0].id;
         const currentChannelId =
           this.community.state.currentChannelId || firstChannel;
@@ -290,8 +292,6 @@ export default defineComponent({
             },
           });
         }
-      } else {
-        this.isSynced = false;
       }
     },
     handleThemeChange(id?: string) {
@@ -321,6 +321,11 @@ export default defineComponent({
     },
   },
   computed: {
+    isSynced(): boolean {
+      const community = this.dataStore.getCommunity(this.communityId);
+      const isMadeByMe = community.author === this.userStore.profile?.did;
+      return isMadeByMe ? community.members.length >= 1 : community.members.length >= 2;
+    },
     communityId() {
       return this.$route.params.communityId as string;
     },
