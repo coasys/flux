@@ -31,8 +31,6 @@ export default function Post({
     model: PostModel,
   });
 
-  console.log({ post });
-
   const [base64, setBase64] = useState("");
   const [ogData, setOgData] = useState<any>({});
   const [agent, setAgent] = useState<Me>();
