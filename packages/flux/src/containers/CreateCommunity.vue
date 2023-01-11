@@ -91,16 +91,18 @@
         </div>
       </div>
       <j-flex direction="column" gap="500" v-if="tabView === 'Join'">
+       
         <j-input
           :value="joiningLink"
           @keydown.enter="joinCommunity"
-          @input="(e: any) => (joiningLink = e.target.value)"
+          @input="(e: any) => joiningLink = e.target.value"
+          @change="(e: any) => cleanInviteLink(e.target.value)"
           size="lg"
           label="Invite link"
         ></j-input>
 
         <j-button
-          :disabled="isJoiningCommunity || !joiningLink"
+          :disabled="isJoiningCommunity || !canJoin"
           :loading="isJoiningCommunity"
           @click="joinCommunity"
           size="lg"
@@ -151,15 +153,18 @@ import { useDataStore } from "@/store/data";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { CommunityState } from "@/store/types";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { useAppStore } from "@/store/app";
 
 export default defineComponent({
   components: { AvatarUpload },
   emits: ["cancel", "submit"],
   setup() {
     const dataStore = useDataStore();
+    const appStore = useAppStore();
 
     return {
       dataStore,
+      appStore
     };
   },
   data() {
@@ -178,6 +183,20 @@ export default defineComponent({
     this.getPerspectives();
   },
   computed: {
+    canJoin(): boolean {
+      return isValid(
+        [
+          {
+            check: (val: string) => {
+              const regex = /neighbourhood:\/\/[^\s]*/;
+              return !regex.test(val); 
+            },
+            message: "This is not a valid neighbourhood link",
+          },
+        ],
+        this.joiningLink
+      );
+    },
     canSubmit(): boolean {
       return isValid(
         [
@@ -191,15 +210,67 @@ export default defineComponent({
     },
   },
   methods: {
-    joinCommunity() {
+    cleanInviteLink(text: string) {
+      const regex = /neighbourhood:\/\/[^\s]*/;
+      const neighbourhoodUrlMatch = text.match(regex) || [""];
+      const match = neighbourhoodUrlMatch[0];
+      this.joiningLink = match;
+      if(text && !match) {
+        this.appStore.setToast({ variant: "error", message: "We were not able to parse this invite link", open: true });
+      }
+    },
+    async joinCommunity() {
+      const client = await getAd4mClient();
       this.isJoiningCommunity = true;
+
+      const neighbourhoodUrl = this.joiningLink;
+
+      const existingPerspective = (await client.perspective.all()).filter((perspective) => {
+        return perspective.sharedUrl === neighbourhoodUrl;
+      });
+
+      if (existingPerspective.length != 0) {
+        this.appStore.setToast({variant: "error", message: "You are already a member of this community", open: true});
+        this.isJoiningCommunity = false;
+        this.appStore.setShowCreateCommunity(false);
+
+        const community = await this.dataStore.getCommunityByNeighbourhoodUrl(neighbourhoodUrl);
+
+        if (!community) {
+          console.error("Did not find community when trying to redirect after join");
+          return;
+        }
+
+        this.$router.push({
+          name: "community",
+          params: {
+            communityId: community.neighbourhood.uuid
+          },
+        });
+        return;
+      }
+
       this.dataStore
-        .joinCommunity({ joiningLink: this.joiningLink })
+        .joinCommunity({ joiningLink: neighbourhoodUrl })
         .then(() => {
           this.$emit("submit");
         })
-        .finally(() => {
+        .finally(async () => {
           this.isJoiningCommunity = false;
+
+          const community = await this.dataStore.getCommunityByNeighbourhoodUrl(neighbourhoodUrl);
+
+          if (!community) {
+            console.error("Did not find community when trying to redirect after join");
+            return;
+          }
+
+          this.$router.push({
+            name: "community",
+            params: {
+              communityId: community.neighbourhood.uuid
+            },
+          });
         });
     },
     createCommunity() {
