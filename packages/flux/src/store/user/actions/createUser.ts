@@ -16,7 +16,12 @@ import {
   dataURItoBlob,
   blobToDataURL,
 } from "utils/helpers/profileHelpers";
-import { Link, LinkExpression, LinkMutations } from "@perspect3vism/ad4m";
+import {
+  Ad4mClient,
+  Link,
+  LinkExpression,
+  LinkMutations,
+} from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { useUserStore } from "..";
 
@@ -38,7 +43,7 @@ export default async ({
 }: Payload): Promise<void> => {
   const appStore = useAppStore();
   const userStore = useUserStore();
-  const client = await getAd4mClient();
+  const client: Ad4mClient = await getAd4mClient();
 
   try {
     //Install the noteipfs language
@@ -56,14 +61,18 @@ export default async ({
     let thumbnailImage = null;
 
     if (profilePicture) {
-      const compressedProfileImage = await blobToDataURL(await resizeImage(dataURItoBlob(profilePicture as string), 0.6));
+      const compressedProfileImage = await blobToDataURL(
+        await resizeImage(dataURItoBlob(profilePicture as string), 0.6)
+      );
 
       profileImage = await client.expression.create(
         compressedProfileImage,
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
 
-      const compressedpThumbnailImage = await blobToDataURL(await resizeImage(dataURItoBlob(profilePicture as string), 0.3));
+      const compressedpThumbnailImage = await blobToDataURL(
+        await resizeImage(dataURItoBlob(profilePicture as string), 0.3)
+      );
 
       thumbnailImage = await client.expression.create(
         compressedpThumbnailImage,
@@ -127,12 +136,15 @@ export default async ({
       );
     }
 
+    const agent = await client.agent.me();
+
     const mutateResult = await client.agent.mutatePublicPerspective({
       additions,
       removals,
     } as LinkMutations);
 
     userStore.setUserProfile({
+      did: agent.did,
       username: username,
       email: email,
       givenName: givenName,
