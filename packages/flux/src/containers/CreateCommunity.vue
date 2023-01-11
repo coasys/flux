@@ -91,7 +91,6 @@
         </div>
       </div>
       <j-flex direction="column" gap="500" v-if="tabView === 'Join'">
-       
         <j-input
           :value="joiningLink"
           @keydown.enter="joinCommunity"
@@ -164,7 +163,7 @@ export default defineComponent({
 
     return {
       dataStore,
-      appStore
+      appStore,
     };
   },
   data() {
@@ -189,7 +188,7 @@ export default defineComponent({
           {
             check: (val: string) => {
               const regex = /neighbourhood:\/\/[^\s]*/;
-              return !regex.test(val); 
+              return !regex.test(val);
             },
             message: "This is not a valid neighbourhood link",
           },
@@ -215,8 +214,12 @@ export default defineComponent({
       const neighbourhoodUrlMatch = text.match(regex) || [""];
       const match = neighbourhoodUrlMatch[0];
       this.joiningLink = match;
-      if(text && !match) {
-        this.appStore.setToast({ variant: "error", message: "We were not able to parse this invite link", open: true });
+      if (text && !match) {
+        this.appStore.setToast({
+          variant: "error",
+          message: "We were not able to parse this invite link",
+          open: true,
+        });
       }
     },
     async joinCommunity() {
@@ -225,26 +228,36 @@ export default defineComponent({
 
       const neighbourhoodUrl = this.joiningLink;
 
-      const existingPerspective = (await client.perspective.all()).filter((perspective) => {
-        return perspective.sharedUrl === neighbourhoodUrl;
-      });
+      const existingPerspective = (await client.perspective.all()).find(
+        (perspective) => {
+          return perspective.sharedUrl === neighbourhoodUrl;
+        }
+      );
 
-      if (existingPerspective.length != 0) {
-        this.appStore.setToast({variant: "error", message: "You are already a member of this community", open: true});
+      if (existingPerspective) {
+        this.appStore.setToast({
+          variant: "error",
+          message: "You are already a member of this community",
+          open: true,
+        });
         this.isJoiningCommunity = false;
         this.appStore.setShowCreateCommunity(false);
 
-        const community = await this.dataStore.getCommunityByNeighbourhoodUrl(neighbourhoodUrl);
+        const community = await this.dataStore.getCommunityByNeighbourhoodUrl(
+          neighbourhoodUrl
+        );
 
         if (!community) {
-          console.error("Did not find community when trying to redirect after join");
+          console.error(
+            "Did not find community when trying to redirect after join"
+          );
           return;
         }
 
         this.$router.push({
           name: "community",
           params: {
-            communityId: community.neighbourhood.uuid
+            communityId: community.neighbourhood.uuid,
           },
         });
         return;
@@ -252,25 +265,17 @@ export default defineComponent({
 
       this.dataStore
         .joinCommunity({ joiningLink: neighbourhoodUrl })
-        .then(() => {
+        .then((community) => {
           this.$emit("submit");
-        })
-        .finally(async () => {
-          this.isJoiningCommunity = false;
-
-          const community = await this.dataStore.getCommunityByNeighbourhoodUrl(neighbourhoodUrl);
-
-          if (!community) {
-            console.error("Did not find community when trying to redirect after join");
-            return;
-          }
-
           this.$router.push({
             name: "community",
             params: {
-              communityId: community.neighbourhood.uuid
+              communityId: community.neighbourhood.uuid,
             },
           });
+        })
+        .finally(async () => {
+          this.isJoiningCommunity = false;
         });
     },
     createCommunity() {
@@ -289,15 +294,10 @@ export default defineComponent({
           this.newCommunityDesc = "";
           this.newProfileImage = "";
 
-          const channels = this.dataStore.getChannelStates(
-            community.neighbourhood.uuid
-          );
-
           this.$router.push({
-            name: "channel",
+            name: "community",
             params: {
               communityId: community.neighbourhood.uuid,
-              channelId: channels[0].id,
             },
           });
         })
