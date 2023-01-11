@@ -1,5 +1,6 @@
 import { LitElement, html, css } from "lit";
 import { state, customElement, property } from "lit/decorators.js";
+import { ifDefined } from "lit-html/directives/if-defined.js";
 import sharedStyles from "../../shared/styles";
 
 const styles = css`
@@ -154,7 +155,7 @@ class TabItem extends LitElement {
       <button
         aria-selected=${this.checked}
         aria-controls=${this.value}
-        disabled=${this.disabled}
+        ?disabled=${this.disabled}
         @click=${this._handleChange}
         part="base"
         role="tab"
