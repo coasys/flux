@@ -77,6 +77,7 @@ export default class Model {
         ] as ModelProperty;
         return isValidProperty;
       })
+      .filter(([key, val]) => val !== null)
       .map(async ([key, val]) => {
         const { predicate, languageAddress, collection } = this.constructor
           .properties[key] as ModelProperty;
