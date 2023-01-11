@@ -2,7 +2,7 @@ import Link from "@tiptap/extension-link";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useEffect } from "preact/hooks";
-import styles from "./index.scss";
+import styles from "./index.module.css";
 
 const MenuBar = ({ editor }) => {
   if (!editor) {
@@ -88,11 +88,18 @@ const MenuBar = ({ editor }) => {
   );
 };
 
-export default ({ onChange, style = {} }) => {
+export default ({ onChange, initialContent, style = {} }) => {
   const editor = useEditor({
     extensions: [StarterKit, Link.configure({ autolink: true })],
     content: "",
   });
+
+  // Populate with initial content
+  useEffect(() => {
+    if (editor && initialContent) {
+      editor.commands.setContent(initialContent);
+    }
+  }, [initialContent]);
 
   useEffect(() => {
     if (editor) {

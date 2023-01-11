@@ -1,11 +1,12 @@
 import PostList from "./components/PostList";
 import { CommunityProvider, AgentProvider } from "utils/react";
 import UIContext, { UIProvider, View } from "./context/UIContext";
-import styles from "./index.scss";
+import styles from "./index.module.css";
 import { ChannelProvider } from "utils/react";
 import Header from "./components/Header";
 import { useContext } from "preact/hooks";
 import Post from "./components/Post";
+import Overlay from "./components/Overlay/Overlay";
 
 function Feed() {
   return (
@@ -56,6 +57,7 @@ export default function App({
             <div className={styles.container}>
               <Main perspective={perspective} source={source}></Main>
             </div>
+            <Overlay />
           </ChannelProvider>
         </CommunityProvider>
       </AgentProvider>

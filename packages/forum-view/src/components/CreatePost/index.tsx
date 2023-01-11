@@ -3,9 +3,14 @@ import Editor from "../Editor";
 import { PostOption, postOptions } from "../../constants/options";
 import FileUpload from "../../components/FileUpload";
 import { parse } from "date-fns/esm";
-import styles from "./index.scss";
+import styles from "./index.module.css";
 import PostModel from "utils/api/post";
-import { blobToDataURL, dataURItoBlob, resizeImage } from "utils/helpers/profileHelpers";
+import {
+  blobToDataURL,
+  dataURItoBlob,
+  resizeImage,
+} from "utils/helpers/profileHelpers";
+import PostImagePreview from "../PostImagePreview";
 
 const initialState = {
   title: null,
@@ -20,6 +25,7 @@ const initialState = {
 };
 
 export default function CreatePost({
+  postId,
   channelId,
   communityId,
   onPublished,
@@ -28,8 +34,10 @@ export default function CreatePost({
 }) {
   const inputRefs = useRef<{ [x: string]: { isValid: boolean; el: any } }>({});
   const [isCreating, setIsCreating] = useState(false);
+  const [isLoading, setIsLoading] = useState(!!postId);
   const [entryType, setEntryType] = useState<PostOption>(initialType);
   const [state, setState] = useState(initialState);
+  const isEditing = !!postId;
 
   const Post = useMemo(() => {
     return new PostModel({ perspectiveUuid: communityId, source: channelId });
@@ -40,6 +48,28 @@ export default function CreatePost({
       inputRefs.current.title?.el.focus();
     }, 100);
   }, []);
+
+  // Fetch post if editing
+  useEffect(() => {
+    if (postId) {
+      const Model = new PostModel({
+        perspectiveUuid: communityId,
+        source: channelId,
+      });
+      Model.get(postId).then((entry: any) => {
+        setState(entry);
+        setIsLoading(false);
+
+        // FIX - Better post type detection
+        if (entry?.image) {
+          setEntryType(PostOption.Image);
+        }
+        if (entry?.url) {
+          setEntryType(PostOption.Link);
+        }
+      });
+    }
+  }, [postId]);
 
   // We set dynamic refs based on the input name
   // When an inputfield is hidden we remove it
@@ -76,6 +106,7 @@ export default function CreatePost({
     setIsCreating(true);
 
     let data = state;
+    let newPost = undefined;
 
     if (entryType === PostOption.Event) {
       const startDate = parseDateTime(
@@ -91,8 +122,12 @@ export default function CreatePost({
     }
 
     try {
-      await Post.create(data);
-      onPublished(true);
+      if (isEditing) {
+        await Post.update(postId, data);
+      } else {
+        newPost = await Post.create(data);
+      }
+      onPublished(isEditing ? postId : newPost?.id);
     } catch (e) {
       console.log(e);
     } finally {
@@ -109,14 +144,16 @@ export default function CreatePost({
 
     const FR = new FileReader();
     FR.addEventListener("load", async function (evt) {
-      const compressedImage = await blobToDataURL(await resizeImage(dataURItoBlob(evt.target.result as string), 0.6));
+      const compressedImage = await blobToDataURL(
+        await resizeImage(dataURItoBlob(evt.target.result as string), 0.6)
+      );
 
       setState({
         ...state,
         image: compressedImage,
       });
     });
-    
+
     FR.readAsDataURL(files[0]);
   }
 
@@ -132,7 +169,7 @@ export default function CreatePost({
       <j-box px="400" py="600">
         <j-box pb="600">
           <j-text color="black" size="600" weight="600">
-            Create a Post
+            {isEditing ? "Edit post" : "Create a Post"}
           </j-text>
         </j-box>
         <j-box pt="500" pb="200">
@@ -143,7 +180,12 @@ export default function CreatePost({
           >
             {postOptions.map((option) => {
               return (
-                <j-tab-item variant="button" size="sm" value={option.value}>
+                <j-tab-item
+                  variant="button"
+                  size="sm"
+                  value={option.value}
+                  disabled={isEditing}
+                >
                   <j-icon slot="start" size="md" name={option.icon}></j-icon>
                   {option.label}
                 </j-tab-item>
@@ -183,12 +225,20 @@ export default function CreatePost({
             )}
             {showImage && (
               <j-box pt="300">
-                <FileUpload onChange={handleImage}></FileUpload>
+                {isEditing && state.image ? (
+                  <PostImagePreview
+                    imageUrl={state.image}
+                    onRemove={() => setState({ ...state, image: undefined })}
+                  />
+                ) : (
+                  <FileUpload onChange={handleImage}></FileUpload>
+                )}
               </j-box>
             )}
             {showBody && (
               <Editor
                 style={{ minHeight: "200px" }}
+                initialContent={state.body}
                 onChange={(e) =>
                   setState((oldState) => ({ ...oldState, body: e }))
                 }
@@ -259,12 +309,12 @@ export default function CreatePost({
             </j-button>
             <j-button
               loading={isCreating}
-              disabled={isCreating}
+              disabled={isCreating || isLoading}
               onClick={() => publish()}
               size="lg"
               variant="primary"
             >
-              Publish
+              {isEditing ? "Update" : "Publish"}
             </j-button>
           </j-flex>
         </j-box>

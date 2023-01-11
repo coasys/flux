@@ -1,5 +1,7 @@
 import { useState } from "preact/hooks";
 import { createContext } from "preact";
+import { PostOption } from "../constants/options";
+import * as localstorage from "utils/helpers/localStorage";
 
 export enum View {
   Feed = "FEED",
@@ -9,6 +11,8 @@ export enum View {
 type State = {
   view: View;
   currentPost: string;
+  initialPostType: PostOption;
+  showOverlay: boolean;
 };
 
 type ContextProps = {
@@ -16,17 +20,23 @@ type ContextProps = {
   methods: {
     goToPost: (id: string) => void;
     goToFeed: () => void;
+    toggleOverlay: (visible: boolean, postType?: PostOption) => void;
   };
 };
 
+const initialCurrentPost = localstorage.get("currentPost");
+
 const initialState: ContextProps = {
   state: {
-    view: View.Feed,
-    currentPost: null,
+    view: initialCurrentPost ? View.Post : View.Feed,
+    currentPost: initialCurrentPost || null,
+    initialPostType: PostOption.Text,
+    showOverlay: false,
   },
   methods: {
     goToPost: (id: string) => null,
     goToFeed: () => null,
+    toggleOverlay: (visible: boolean, postType?: PostOption) => null,
   },
 };
 
@@ -36,11 +46,21 @@ export function UIProvider({ children }: any) {
   const [state, setState] = useState(initialState.state);
 
   function goToPost(id: string) {
-    setState({ ...state, view: View.Post, currentPost: id });
+    localstorage.set("currentPost", id);
+    setState({ ...state, view: View.Post, currentPost: id, showOverlay: null });
   }
 
   function goToFeed() {
+    localstorage.remove("currentPost");
     setState({ ...state, view: View.Feed, currentPost: null });
+  }
+
+  function toggleOverlay(visible: boolean, postType?: PostOption) {
+    setState({
+      ...state,
+      initialPostType: postType || PostOption.Text,
+      showOverlay: visible,
+    });
   }
 
   return (
@@ -50,6 +70,7 @@ export function UIProvider({ children }: any) {
         methods: {
           goToFeed,
           goToPost,
+          toggleOverlay,
         },
       }}
     >
