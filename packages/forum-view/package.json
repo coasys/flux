@@ -2,22 +2,32 @@
   "name": "@junto-foundation/forum-view",
   "version": "0.0.0",
   "description": "",
-  "main": "./dist/main.js",
-  "module": "./dist/main.js",
+  "type": "module",
   "files": [
     "dist"
   ],
+  "main": "./dist/main.umd.cjs",
+  "module": "./dist/main.js",
+  "exports": {
+    ".": {
+      "import": "./dist/main.js",
+      "require": "./dist/main.umd.cjs"
+    }
+  },
   "scripts": {
     "prepare": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node esbuild.js",
-    "dev": "vite",
+    "build": "vite build",
+    "dev": "npm-run-all --parallel dev:**",
+    "dev:server": "vite",
+    "dev:dist": "vite build --watch",
     "release": "np --no-tests"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@preact/preset-vite": "^2.5.0",
     "@tiptap/core": "^2.0.0-beta.66",
     "@tiptap/extension-bold": "^2.0.0-beta.13",
     "@tiptap/extension-bullet-list": "^2.0.0-beta.14",
@@ -55,12 +65,9 @@
     "vite": "^4.0.4"
   },
   "devDependencies": {
+    "vite-plugin-css-injected-by-js": "^2.3.1",
     "@types/react": "^17.0.2",
-    "esbuild": "^0.13.1",
-    "esbuild-sass-plugin": "^2.0.0",
     "np": "^7.5.0",
-    "npm-run-all": "^4.1.5",
-    "postcss": "^8.4.5",
-    "postcss-modules": "^4.3.0"
+    "npm-run-all": "^4.1.5"
   }
 }

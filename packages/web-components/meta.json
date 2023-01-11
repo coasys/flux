@@ -1699,7 +1699,7 @@
       ]
     },
     "src/components/tab-item/TabItem.ts": {
-      "bytes": 3398,
+      "bytes": 3580,
       "imports": [
         {
           "path": "../../node_modules/lit/index.js",
@@ -2071,7 +2071,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 516547
+      "bytes": 516792
     },
     "dist/main.js": {
       "imports": [],
@@ -2373,7 +2373,7 @@
           "bytesInOutput": 1738
         },
         "src/components/tab-item/TabItem.ts": {
-          "bytesInOutput": 2826
+          "bytesInOutput": 3008
         },
         "src/components/flex/Flex.ts": {
           "bytesInOutput": 2041
@@ -2409,7 +2409,7 @@
           "bytesInOutput": 0
         }
       },
-      "bytes": 120687
+      "bytes": 120869
     },
     "dist/main.css.map": {
       "imports": [],

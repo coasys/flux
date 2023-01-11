@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { useDropzone } from "react-dropzone";
-import styles from "./index.scss";
+import styles from "./index.module.css";
 
 type FluxFile = File & {
   preview: string;

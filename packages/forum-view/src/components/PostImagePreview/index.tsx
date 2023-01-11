@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { getImage } from "utils/helpers/getImage";
-import styles from "./index.scss";
+import styles from "./index.module.css";
 
 type Props = {
   imageUrl?: string;

@@ -3,7 +3,7 @@ import Editor from "../Editor";
 import { PostOption, postOptions } from "../../constants/options";
 import FileUpload from "../../components/FileUpload";
 import { parse } from "date-fns/esm";
-import styles from "./index.scss";
+import styles from "./index.module.css";
 import PostModel from "utils/api/post";
 import {
   blobToDataURL,
