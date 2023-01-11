@@ -49,8 +49,6 @@ export default function App({
   perspective: string;
   source: string;
 }) {
-  console.log("hello worlddddddd");
-
   return (
     <UIProvider>
       <AgentProvider>
