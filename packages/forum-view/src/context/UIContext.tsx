@@ -1,4 +1,4 @@
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { createContext } from "preact";
 import { PostOption } from "../constants/options";
 import * as localstorage from "utils/helpers/localStorage";
@@ -24,12 +24,10 @@ type ContextProps = {
   };
 };
 
-const initialCurrentPost = localstorage.get("currentPost");
-
 const initialState: ContextProps = {
   state: {
-    view: initialCurrentPost ? View.Post : View.Feed,
-    currentPost: initialCurrentPost || null,
+    view: View.Feed,
+    currentPost: null,
     initialPostType: PostOption.Text,
     showOverlay: false,
   },
@@ -42,11 +40,21 @@ const initialState: ContextProps = {
 
 const UIContext = createContext(initialState);
 
-export function UIProvider({ children }: any) {
+export function UIProvider({ children, channelId }: any) {
   const [state, setState] = useState(initialState.state);
 
+  // First load - Set current post from localstorage IF channel === currentChannel
+  useEffect(() => {
+    const initialCurrentPost = localstorage.get("currentPost") || "";
+    const [initialChannelId, initialPostId] = initialCurrentPost.split("@@@");
+
+    if (initialPostId && channelId === initialChannelId) {
+      setState({ ...state, view: View.Post, currentPost: initialPostId });
+    }
+  }, []);
+
   function goToPost(id: string) {
-    localstorage.set("currentPost", id);
+    localstorage.set("currentPost", `${channelId}@@@${id}`);
     setState({ ...state, view: View.Post, currentPost: id, showOverlay: null });
   }
 
