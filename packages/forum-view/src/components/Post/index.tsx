@@ -107,14 +107,14 @@ export default function Post({
                 <j-icon name="pencil" size="xs" slot="start"></j-icon>
                 Edit
               </j-button>
-              <j-button
+              {/* <j-button
                 size="xs"
                 variant="subtle"
                 onClick={() => UIMethods.toggleOverlay(true)}
               >
                 <j-icon name="trash" size="xs" slot="start"></j-icon>
                 Delete
-              </j-button>
+              </j-button> */}
             </div>
           )}
         </div>
