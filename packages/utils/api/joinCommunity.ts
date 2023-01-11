@@ -43,7 +43,7 @@ export default async ({ joiningLink }: Payload): Promise<Community> => {
       image: community?.image || "",
       thumbnail: community?.thumbnail || "",
       neighbourhoodUrl: perspective.sharedUrl!,
-      members: [agent.did, neighbourhoodMeta.author!],
+      members: [agent.did],
     };
   } catch (e) {
     throw new Error(e);
