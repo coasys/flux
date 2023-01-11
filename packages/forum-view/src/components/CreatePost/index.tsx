@@ -67,8 +67,6 @@ export default function CreatePost({
         if (entry?.url) {
           setEntryType(PostOption.Link);
         }
-
-        console.log("entry: ", entry);
       });
     }
   }, [postId]);
