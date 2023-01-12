@@ -19,6 +19,7 @@
         :communityId="channel.sourcePerspective"
       ></channel-view>
     </div>
+
     <div v-if="!isSynced" class="center">
       <j-box py="800">
         <j-flex gap="400" direction="column" a="center" j="center">
@@ -37,20 +38,26 @@
         </j-flex>
       </j-box>
     </div>
-    <div class="center" v-if="isSynced && communityChannels.length > 0">
-      <j-box py="800">
+
+    <div
+      class="center"
+      v-if="isSynced && communityChannels.length > 0 && !channelId"
+    >
+      <div class="center-inner">
         <j-flex gap="600" direction="column" a="center" j="center">
-          
-         
-          <Avatar size="xxl" :url="community.neighbourhood.thumbnail"></Avatar>
+          <Avatar
+            :initials="community.neighbourhood.name.charAt(0)"
+            size="xxl"
+            :url="community.neighbourhood.thumbnail"
+          ></Avatar>
           <j-box align="center" pb="300">
-          <j-text variant="heading"
-            >Welcome to {{ community.neighbourhood.name }}</j-text
-          >
-          <j-text variant="ingress">Pick a channel</j-text>
+            <j-text variant="heading">
+              Welcome to {{ community.neighbourhood.name }}
+            </j-text>
+            <j-text variant="ingress">Pick a channel</j-text>
           </j-box>
-         
-          <j-flex direction="row" gap="500" a="center">
+
+          <div class="channel-card-grid">
             <button
               class="channel-card"
               @click="() => navigateToChannel(channel.id)"
@@ -58,12 +65,13 @@
             >
               {{ channel.name }}
             </button>
-          </j-flex>
+          </div>
         </j-flex>
-      </j-box>
+      </div>
     </div>
+
     <div class="center" v-if="isSynced && communityChannels.length === 0">
-      <j-box py="800">
+      <div class="center-inner">
         <j-flex gap="400" direction="column" a="center" j="center">
           <j-icon color="ui-500" size="xl" name="balloon"></j-icon>
           <j-flex direction="column" a="center">
@@ -79,7 +87,7 @@
             </j-button>
           </j-flex>
         </j-flex>
-      </j-box>
+      </div>
     </div>
   </sidebar-layout>
 
@@ -354,7 +362,7 @@ export default defineComponent({
     isSynced(): boolean {
       const community = this.dataStore.getCommunity(this.communityId);
       const isMadeByMe = community.author === this.userStore.profile?.did;
-    
+
       return isMadeByMe
         ? community.members.length >= 1
         : community.members.length >= 2;
@@ -390,15 +398,32 @@ export default defineComponent({
 .center {
   height: 100%;
   width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
-  display: flex;
+}
+
+.center-inner {
+  display: block;
+  width: 100%;
+  max-height: 100%;
+  padding: var(--j-space-500);
+}
+
+.channel-card-grid {
+  display: grid;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--j-space-500);
 }
 
 .channel-card {
+  background-color: rgba(255, 255, 255, 0.03);
   cursor: pointer;
-  background: none;
   color: inherit;
   font-size: inherit;
   display: block;
