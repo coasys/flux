@@ -222,7 +222,6 @@ export default defineComponent({
       const community = this.dataStore.getCommunityByNeighbourhoodUrl(
         DEFAULT_TESTING_NEIGHBOURHOOD
       );
-      console.log({ community });
       return community ? true : false;
     },
     canJoin(): boolean {
