@@ -88,10 +88,6 @@ export default {
     const state = useAppStore();
     state.modals.showDisclaimer = payload;
   },
-  setShowWarningDisclaimer(payload: boolean): void {
-    const state = useAppStore();
-    state.modals.showWarningDisclaimer = payload;
-  },
   setHasShownDefaultJoinPrompt(payload: boolean): void {
     const state = useAppStore();
     state.hasShownDefaultJoinPrompt = payload;
@@ -121,5 +117,5 @@ export default {
     state.seenCommunityTestVersion = seenCommunityVersion;
     state.hasShownDefaultJoinPrompt = true;
     state.seenCommunityTestVersion = COMMUNITY_TEST_VERSION;
-  }
+  },
 };
