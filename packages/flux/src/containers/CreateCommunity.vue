@@ -7,7 +7,7 @@
       <button class="option" size="xl" @click="tabView = 'Create'">
         <j-icon slot="start" name="file-plus" size="xl"></j-icon>
         <div class="option-body">
-          <j-text variant="heading-sm">Create a community</j-text>
+          <j-text variant="heading-sm">Create a Community</j-text>
           <j-text variant="body" nomargin>
             Make a community and start inviting people
           </j-text>
@@ -17,7 +17,7 @@
       <button class="option" size="xl" @click="tabView = 'Join'">
         <j-icon slot="start" name="files" size="xl"></j-icon>
         <div class="option-body">
-          <j-text variant="heading-sm">Join a community</j-text>
+          <j-text variant="heading-sm">Join a Community</j-text>
           <j-text variant="body" nomargin>
             Join an already existing community
           </j-text>
@@ -27,7 +27,7 @@
       <button class="option" size="xl" @click="tabView = 'Load'">
         <j-icon slot="start" name="file-arrow-up" size="xl"></j-icon>
         <div class="option-body">
-          <j-text variant="heading-sm">Load a community</j-text>
+          <j-text variant="heading-sm">Load a Community</j-text>
           <j-text variant="body" nomargin
             >Load a existing perspective as community</j-text
           >
@@ -35,7 +35,7 @@
         <j-icon slot="end" name="chevron-right"></j-icon>
       </button>
       <button
-        v-if="showJoinCommunity"
+        v-if="!hasAlreadyJoinedTestingCommunity"
         class="option"
         size="xl"
         variant="secondary"
@@ -43,7 +43,7 @@
       >
         <j-icon slot="start" name="stars" size="xl"></j-icon>
         <div class="option-body">
-          <j-text variant="heading-sm">Testing Community</j-text>
+          <j-text variant="heading-sm">Latest Testing Community</j-text>
           <j-text variant="body" nomargin
             >Join the Flux Alpha testing community</j-text
           >
@@ -188,34 +188,11 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { CommunityState } from "@/store/types";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useAppStore } from "@/store/app";
-import {
-  COMMUNITY_TEST_VERSION,
-  DEFAULT_TESTING_NEIGHBOURHOOD,
-} from "utils/constants/general";
+import { DEFAULT_TESTING_NEIGHBOURHOOD } from "utils/constants/general";
 
 export default defineComponent({
   components: { AvatarUpload },
   emits: ["cancel", "submit"],
-  async created() {
-    const client = await getAd4mClient();
-    const existingPerspectives = await client.perspective.all();
-    const defaultTestingCommunity = existingPerspectives.find(
-      (p) => p.sharedUrl === DEFAULT_TESTING_NEIGHBOURHOOD
-    );
-
-    const appStore = this.appStore;
-    //Check that user already has joined default testing community
-    if (!defaultTestingCommunity) {
-      this.showJoinCommunity = true;
-    }
-
-    if (
-      COMMUNITY_TEST_VERSION > appStore.seenCommunityTestVersion &&
-      !defaultTestingCommunity
-    ) {
-      this.showJoinCommunity = true;
-    }
-  },
   setup() {
     const dataStore = useDataStore();
     const appStore = useAppStore();
@@ -223,7 +200,6 @@ export default defineComponent({
     return {
       dataStore,
       appStore,
-      showJoinCommunity: ref(false),
     };
   },
   data() {
@@ -242,6 +218,13 @@ export default defineComponent({
     this.getPerspectives();
   },
   computed: {
+    hasAlreadyJoinedTestingCommunity(): boolean {
+      const community = this.dataStore.getCommunityByNeighbourhoodUrl(
+        DEFAULT_TESTING_NEIGHBOURHOOD
+      );
+      console.log({ community });
+      return community ? true : false;
+    },
     canJoin(): boolean {
       return isValid(
         [

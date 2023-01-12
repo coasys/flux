@@ -39,13 +39,15 @@ export default {
   getCommunityByNeighbourhoodUrl:
     (state: DataState) =>
     (url: string): CommunityState | undefined => {
-      for (const community of Object.values(state.communities)) {
-        return {
-          neighbourhood: state.neighbourhoods[community.perspectiveUuid],
-          state: community,
-        } as CommunityState;
+      for (const neighbourhood of Object.values(state.neighbourhoods)) {
+        if (neighbourhood.neighbourhoodUrl === url) {
+          return {
+            neighbourhood: state.neighbourhoods[neighbourhood.uuid],
+            state: state.communities[neighbourhood.uuid],
+          } as CommunityState;
+        }
       }
-  },
+    },
 
   getChannels(state: DataState): ChannelState[] {
     const out = [];
