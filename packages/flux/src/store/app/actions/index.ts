@@ -9,5 +9,5 @@ export default {
   updateCommunityTheme,
   updateGlobalTheme,
   changeNotificationState,
-  joinTestingCommunity
+  joinTestingCommunity,
 };

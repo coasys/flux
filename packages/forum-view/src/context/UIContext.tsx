@@ -45,7 +45,7 @@ export function UIProvider({ children, channelId }: any) {
 
   // First load - Set current post from localstorage IF channel === currentChannel
   useEffect(() => {
-    const initialCurrentPost = localstorage.get("currentPost") || "";
+    const initialCurrentPost = localstorage.getForVersion("currentPost") || "";
     const [initialChannelId, initialPostId] = initialCurrentPost.split("@@@");
 
     if (initialPostId && channelId === initialChannelId) {
@@ -54,12 +54,12 @@ export function UIProvider({ children, channelId }: any) {
   }, []);
 
   function goToPost(id: string) {
-    localstorage.set("currentPost", `${channelId}@@@${id}`);
+    localstorage.setForVersion("currentPost", `${channelId}@@@${id}`);
     setState({ ...state, view: View.Post, currentPost: id, showOverlay: null });
   }
 
   function goToFeed() {
-    localstorage.remove("currentPost");
+    localstorage.removeForVersion("currentPost");
     setState({ ...state, view: View.Feed, currentPost: null });
   }
 
