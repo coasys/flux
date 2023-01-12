@@ -17,17 +17,13 @@
     </j-modal>
 
     <j-modal
-      :open="
-        modals.showDisclaimer &&
-        (modals.showWarningDisclaimer || showJoinCommunity)
-      "
+      :open="modals.showDisclaimer"
       @toggle="(e: any) => {
-        setShowDisclaimer(e.target.open)
-        setShowWarningDisclaimer(e.target.open)
+        setShowDisclaimer(e.target.open);
       }"
     >
       <j-box p="800">
-        <div v-if="modals.showWarningDisclaimer">
+        <div v-if="modals.showDisclaimer">
           <j-box pb="500">
             <j-flex gap="400" a="center">
               <j-icon name="exclamation-diamond" size="lg" />
@@ -43,9 +39,9 @@
             <li>Messages might not always be delivered reliably</li>
           </ul>
         </div>
-        <br v-if="modals.showWarningDisclaimer && showJoinCommunity" />
-        <hr v-if="modals.showWarningDisclaimer && showJoinCommunity" />
-        <br v-if="modals.showWarningDisclaimer && showJoinCommunity" />
+        <br v-if="modals.showDisclaimer && showJoinCommunity" />
+        <hr v-if="modals.showDisclaimer && showJoinCommunity" />
+        <br v-if="modals.showDisclaimer && showJoinCommunity" />
         <j-box pb="500" v-if="showJoinCommunity">
           <j-flex gap="400" a="center">
             <j-icon name="arrow-down-circle" size="lg" />
@@ -108,8 +104,6 @@ export default defineComponent({
     const appStore = this.appStore;
     //Check that user already has joined default testing community
     if (!defaultTestingCommunity) {
-      appStore.setShowDisclaimer(true);
-
       this.showJoinCommunity = true;
     }
 
@@ -117,7 +111,6 @@ export default defineComponent({
       COMMUNITY_TEST_VERSION > appStore.seenCommunityTestVersion &&
       !defaultTestingCommunity
     ) {
-      appStore.setShowDisclaimer(true);
       this.showJoinCommunity = true;
     }
   },
@@ -130,9 +123,8 @@ export default defineComponent({
     ...mapActions(useAppStore, [
       "setShowEditProfile",
       "setShowSettings",
-      "setShowWarningDisclaimer",
       "setShowCreateCommunity",
-      "setShowDisclaimer",
+      "setShowDisclaimer"
     ]),
     async joinTestingCommunity() {
       try {
