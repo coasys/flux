@@ -4,31 +4,44 @@
       <j-text variant="heading-sm">Add a Community</j-text>
     </j-box>
     <div class="options">
-      <div class="option" size="xl" @click="tabView = 'Create'">
-        <div>
+      <button class="option" size="xl" @click="tabView = 'Create'">
+        <j-icon slot="start" name="file-plus" size="xl"></j-icon>
+        <div class="option-body">
           <j-text variant="heading-sm">Create a community</j-text>
-          <j-text variant="body">
+          <j-text variant="body" nomargin>
             Make a community and start inviting people
           </j-text>
         </div>
         <j-icon slot="end" name="chevron-right"></j-icon>
-      </div>
-      <div class="option" size="xl" @click="tabView = 'Join'">
-        <div>
+      </button>
+      <button class="option" size="xl" @click="tabView = 'Join'">
+        <j-icon slot="start" name="files" size="xl"></j-icon>
+        <div class="option-body">
           <j-text variant="heading-sm">Join a community</j-text>
-          <j-text variant="body"> Join an already existing community </j-text>
+          <j-text variant="body" nomargin> Join an already existing community </j-text>
         </div>
         <j-icon slot="end" name="chevron-right"></j-icon>
-      </div>
-      <div class="option" size="xl" @click="tabView = 'Load'">
-        <div>
+      </button>
+      <button class="option" size="xl" @click="tabView = 'Load'">
+        <j-icon slot="start" name="file-arrow-up" size="xl"></j-icon>
+        <div class="option-body">
           <j-text variant="heading-sm">Load a community</j-text>
-          <j-text variant="body"
+          <j-text variant="body" nomargin
             >Load a existing perspective as community</j-text
           >
         </div>
         <j-icon slot="end" name="chevron-right"></j-icon>
-      </div>
+      </button>
+      <button v-if="showJoinCommunity" class="option" size="xl" variant="secondary" @click="joinTestingCommunity">
+        <j-icon slot="start" name="stars" size="xl"></j-icon>
+        <div class="option-body">
+          <j-text variant="heading-sm">Testing Community</j-text>
+          <j-text variant="body" nomargin
+            >Join the Flux Alpha testing community</j-text
+          >
+        </div>
+        <j-icon slot="end" name="plus-lg"></j-icon>
+      </button>
     </div>
   </j-box>
 
@@ -141,30 +154,69 @@
           </j-flex>
         </div>
       </div>
+      <div v-if="tabView === 'Test'">
+        <div style="text-align: center">
+          <j-text variant="heading-sm">
+            Please wait while you join the testing community
+          </j-text>
+          <j-text variant="body">
+            Right now this proccess might take a couple of minutes, so please be
+            patient
+          </j-text>
+          <j-flex j="center">
+            <j-spinner size="lg"></j-spinner>
+          </j-flex>
+        </div>
+      </div>
     </j-flex>
   </j-box>
 </template>
 
 <script lang="ts">
 import { isValid } from "@/utils/validation";
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useDataStore } from "@/store/data";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { CommunityState } from "@/store/types";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useAppStore } from "@/store/app";
+import {
+  COMMUNITY_TEST_VERSION,
+  DEFAULT_TESTING_NEIGHBOURHOOD,
+} from "utils/constants/general";
 
 export default defineComponent({
   components: { AvatarUpload },
   emits: ["cancel", "submit"],
+  async created() {
+    const client = await getAd4mClient();
+    const existingPerspectives = await client.perspective.all();
+    const defaultTestingCommunity = existingPerspectives.find(
+      (p) => p.sharedUrl === DEFAULT_TESTING_NEIGHBOURHOOD
+    );
+
+    const appStore = this.appStore;
+    //Check that user already has joined default testing community
+    if (!defaultTestingCommunity) {
+      this.showJoinCommunity = true;
+    }
+
+    if (
+      COMMUNITY_TEST_VERSION > appStore.seenCommunityTestVersion &&
+      !defaultTestingCommunity
+    ) {
+      this.showJoinCommunity = true;
+    }
+  },
   setup() {
     const dataStore = useDataStore();
     const appStore = useAppStore();
 
     return {
       dataStore,
-      appStore
+      appStore,
+      showJoinCommunity: ref(false),
     };
   },
   data() {
@@ -352,6 +404,16 @@ export default defineComponent({
         };
       });
     },
+    async joinTestingCommunity() {
+      try {
+        this.tabView = "Test";
+        await this.appStore.joinTestingCommunity();
+      } catch (e) {
+        console.log(e);
+      } finally {
+        this.$emit("cancel");
+      }
+    },
   },
 });
 </script>
@@ -368,11 +430,24 @@ export default defineComponent({
   position: relative;
   display: flex;
   align-items: center;
+  text-align: left;
+  color: currentColor;
   justify-content: space-between;
   border: 2px solid transparent;
   background-color: var(--j-color-ui-50);
   border-radius: var(--j-border-radius);
   padding: var(--j-space-500);
+  gap: var(--j-space-500);
+}
+
+.option[variant="secondary"] {
+  background: transparent;
+  border: 2px solid var(--j-color-ui-50);
+}
+
+.option-body {
+  flex: 1;
+  line-height: 1.4;
 }
 
 .option:hover {
