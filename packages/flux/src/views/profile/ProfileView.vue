@@ -11,11 +11,6 @@
           <div class="profile__avatar">
             <Avatar
               class="avatar"
-              :style="{
-                '--j-avatar-size': '100px',
-                '--j-skeleton-height': '100px',
-                '--j-skeleton-width': '100px',
-              }"
               :hash="did"
               :url="profile?.profilePicture"
             ></Avatar>
@@ -354,6 +349,12 @@ export default defineComponent({
   margin: auto;
   padding-left: var(--j-space-500);
   padding-right: var(--j-space-500);
+}
+
+.avatar {
+  --j-avatar-size: 100px;
+  --j-skeleton-height: 100px;
+  --j-skeleton-width: 100px;
 }
 
 .profile__layout {
