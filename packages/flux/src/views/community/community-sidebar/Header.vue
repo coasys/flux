@@ -68,11 +68,13 @@
     </div>
     <div class="community-info">
       <Avatar
+        v-if="isSynced"
         class="masked"
         size="xl"
         :initials="community.neighbourhood.name.charAt(0).toUpperCase()"
         :url="community.neighbourhood.image"
       ></Avatar>
+      <j-spinner v-else size="xl"></j-spinner>
       <div>
         <j-text size="500" nomargin color="black">
           {{ community.neighbourhood.name }}
@@ -97,6 +99,7 @@ import Avatar from "@/components/avatar/Avatar.vue";
 
 export default defineComponent({
   components: { Avatar },
+  props: { isSynced: Boolean },
   setup() {
     return {
       showCommunityMenu: ref(false),
