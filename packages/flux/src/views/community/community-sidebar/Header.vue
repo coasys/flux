@@ -68,20 +68,25 @@
     </div>
     <div class="community-info">
       <Avatar
-        v-if="isSynced"
         class="masked"
         size="xl"
         :initials="community.neighbourhood.name.charAt(0).toUpperCase()"
         :url="community.neighbourhood.image"
       ></Avatar>
-      <j-spinner v-else size="xl"></j-spinner>
-      <div>
+      <div class="community-info-content">
         <j-text size="500" nomargin color="black">
           {{ community.neighbourhood.name }}
         </j-text>
         <j-text nomargin size="400" color="ui-500">
-          {{ community.neighbourhood.description || "No description" }}
+          {{
+            isSynced
+              ? community.neighbourhood.description || "No description"
+              : "syncing community..."
+          }}
         </j-text>
+        <j-box pt="400">
+          <LoadingBar></LoadingBar>
+        </j-box>
       </div>
     </div>
   </div>
@@ -96,9 +101,10 @@ import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import Avatar from "@/components/avatar/Avatar.vue";
+import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
 
 export default defineComponent({
-  components: { Avatar },
+  components: { Avatar, LoadingBar },
   props: { isSynced: Boolean },
   setup() {
     return {
@@ -167,6 +173,7 @@ export default defineComponent({
   z-index: 1;
   display: block;
   padding-left: var(--j-space-400);
+  padding-right: var(--j-space-400);
   gap: var(--j-space-300);
 }
 
@@ -184,6 +191,7 @@ export default defineComponent({
 }
 
 .community-info {
+  width: 100%;
   margin-top: var(--j-space-400);
   display: flex;
   align-items: center;
@@ -194,6 +202,10 @@ export default defineComponent({
   color: var(--j-color-ui-800);
   font-size: var(--j-font-size-500);
   min-height: 68px;
+}
+
+.community-info-content {
+  width: 100%;
 }
 
 j-divider {
