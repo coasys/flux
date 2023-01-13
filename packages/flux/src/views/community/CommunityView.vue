@@ -32,8 +32,8 @@
             </j-text>
             <j-text size="400" weight="400"
               >Note: Flux is P2P, you will not receive any data until another
-              user is online</j-text
-            >
+              user is online
+            </j-text>
           </j-flex>
         </j-flex>
       </j-box>
