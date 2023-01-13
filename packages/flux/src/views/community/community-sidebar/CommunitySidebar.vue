@@ -1,5 +1,5 @@
 <template>
-  <Header></Header>
+  <Header :isSynced="isSynced"></Header>
   <Members></Members>
   <ChannelList></ChannelList>
 </template>
@@ -12,5 +12,8 @@ import Header from "./Header.vue";
 
 export default defineComponent({
   components: { ChannelList, Members, Header },
+  props: {
+    isSynced: Boolean,
+  },
 });
 </script>
