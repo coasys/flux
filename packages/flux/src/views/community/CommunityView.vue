@@ -1,7 +1,7 @@
 <template>
   <sidebar-layout>
     <template v-slot:sidebar>
-      <community-sidebar></community-sidebar>
+      <community-sidebar :isSynced="isSynced"></community-sidebar>
     </template>
 
     <div
