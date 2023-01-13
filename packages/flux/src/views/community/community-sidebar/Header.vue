@@ -19,7 +19,7 @@
         placement="bottom-end"
       >
         <j-button square slot="trigger" variant="ghost">
-          <j-icon size="xs" name="gear"></j-icon>
+          <j-icon size="sm" name="sliders2"></j-icon>
         </j-button>
         <j-menu slot="content">
           <j-menu-item
