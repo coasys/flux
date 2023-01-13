@@ -252,57 +252,58 @@
   );
 
   --j-color-ui-hue: var(--j-color-primary-hue);
-  --j-color-ui-50: hsl(var(--j-color-ui-hue), 10%, var(--j-color-lightness-50));
+  --j-color-ui-saturation: 10%;
+  --j-color-ui-50: hsl(var(--j-color-ui-hue), var(--j-color-ui-saturation), var(--j-color-lightness-50));
   --j-color-ui-100: hsl(
     var(--j-color-ui-hue),
-    10%,
+    var(--j-color-ui-saturation),
     var(--j-color-lightness-100)
   );
   --j-color-ui-200: hsl(
     var(--j-color-ui-hue),
-    10%,
+    var(--j-color-ui-saturation),
     var(--j-color-lightness-200)
   );
   --j-color-ui-300: hsl(
     var(--j-color-ui-hue),
-    10%,
+    var(--j-color-ui-saturation),
     var(--j-color-lightness-300)
   );
   --j-color-ui-400: hsl(
     var(--j-color-ui-hue),
-    10%,
+    var(--j-color-ui-saturation),
     var(--j-color-lightness-400)
   );
   --j-color-ui-500: hsl(
     var(--j-color-ui-hue),
-    10%,
+    var(--j-color-ui-saturation),
     var(--j-color-lightness-500)
   );
   --j-color-ui-600: hsl(
     var(--j-color-ui-hue),
-    10%,
+    var(--j-color-ui-saturation),
     var(--j-color-lightness-600)
   );
   --j-color-ui-700: hsl(
     var(--j-color-ui-hue),
-    10%,
+    var(--j-color-ui-saturation),
     var(--j-color-lightness-700)
   );
   --j-color-ui-800: hsl(
     var(--j-color-ui-hue),
-    10%,
+    var(--j-color-ui-saturation),
     var(--j-color-lightness-800)
   );
   --j-color-ui-900: hsl(
     var(--j-color-ui-hue),
-    10%,
+    var(--j-color-ui-saturation),
     var(--j-color-lightness-900)
   );
 
-  --j-color-white: hsl(var(--j-color-ui-hue), 10%, var(--j-color-lightness-0));
+  --j-color-white: hsl(var(--j-color-ui-hue), var(--j-color-ui-saturation), var(--j-color-lightness-0));
   --j-color-black: hsl(
     var(--j-color-ui-hue),
-    10%,
+    var(--j-color-ui-saturation),
     var(--j-color-lightness-1000)
   );
 
