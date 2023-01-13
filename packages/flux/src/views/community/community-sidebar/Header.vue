@@ -84,7 +84,7 @@
               : "syncing community..."
           }}
         </j-text>
-        <j-box pt="400">
+        <j-box pt="400" v-if="!isSynced">
           <LoadingBar></LoadingBar>
         </j-box>
       </div>
