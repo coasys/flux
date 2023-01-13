@@ -20,7 +20,7 @@
       ></channel-view>
     </div>
 
-    <div v-if="!isSynced" class="center">
+    <div v-if="!isSynced && !channelId" class="center">
       <j-box py="800">
         <j-flex gap="400" direction="column" a="center" j="center">
           <j-box pb="500">
