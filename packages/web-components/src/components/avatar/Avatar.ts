@@ -49,7 +49,7 @@ const styles = css`
     --j-avatar-size: var(--j-size-xxl);
   }
   [part="base"] {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: inherit;
