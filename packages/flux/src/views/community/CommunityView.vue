@@ -24,7 +24,7 @@
       <j-box py="800">
         <j-flex gap="400" direction="column" a="center" j="center">
           <j-box pb="500">
-            <j-spinner></j-spinner>
+            <Hourglass></Hourglass>
           </j-box>
           <j-flex direction="column" a="center">
             <j-text color="black" size="700" weight="800">
@@ -177,6 +177,7 @@ import CommunitySettings from "@/containers/CommunitySettings.vue";
 import ChannelView from "@/views/channel/ChannelView.vue";
 import CommunityTweaks from "@/containers/CommunityTweaks.vue";
 import Avatar from "@/components/avatar/Avatar.vue";
+import Hourglass from "@/components/hourglass/Hourglass.vue";
 
 import ChannelModel, { Channel } from "utils/api/channel";
 import MemberModel, { Member } from "utils/api/member";
@@ -202,6 +203,7 @@ export default defineComponent({
     SidebarLayout,
     CommunityTweaks,
     Avatar,
+    Hourglass,
   },
   setup() {
     return {
