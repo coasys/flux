@@ -23,8 +23,10 @@ export default function CommentSection({
 
   async function submitComment() {
     try {
-      setIsCreating(true);
-      await Message.create({ body: comment });
+      if (comment.replace(/<[^>]*>?/gm, '').length > 0) {
+        setIsCreating(true);
+        await Message.create({ body: comment });
+      }
     } catch (e) {
       console.log(e);
     } finally {
