@@ -37,9 +37,11 @@ export default function (link: LinkExpression): Message {
       editMessages: [{
         author: link.author,
         content: expression.data,
-        imestamp: expression.timestamp,
+        timestamp: expression.timestamp,
       }],
-      synced: false
+      synced: false,
+      isPopular: false,
+      isNeighbourhoodCardHidden: false
     };
 
     return message as Message;
