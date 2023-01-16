@@ -1,50 +1,33 @@
 import {
   BODY,
-  IMAGE,
   REPLY_TO,
-  TITLE,
-  URL,
+  ENTRY_TYPE,
 } from "../../constants/communityPredicates";
-import EntryModel from "../../helpers/model";
-import { EntryType, Entry } from "../../types";
+import { EntryType } from "../../types";
+import { subjectProperty, subjectPropertySetter, subjectCollection } from "@perspect3vism/ad4m";
 
-export interface Message extends Entry {
+export class Message {
+  @subjectProperty({
+    through: ENTRY_TYPE, 
+    initial: EntryType.Message,
+    required: true,
+  })
+  type: string;
+
+  @subjectProperty({
+    through: BODY,
+    resolve: true,
+  })
   body: string;
+
+  @subjectPropertySetter({
+    resolveLanguage: 'literal'
+  })
+  setBody(body: string) {}
+  
+  @subjectCollection({
+    through: REPLY_TO,
+  })
   replies: string[];
+  addReply(reply: string) {}
 }
-
-class MessageModel extends EntryModel {
-  static get type() {
-    return EntryType.Message;
-  }
-  static get properties() {
-    return {
-      body: {
-        predicate: BODY,
-        type: String,
-        resolve: true,
-        languageAddress: "literal",
-      },
-      replies: {
-        predicate: REPLY_TO,
-        type: String,
-        collection: true,
-        resolve: false,
-      },
-    };
-  }
-
-  async create(data: { body: string }): Promise<Message> {
-    return super.create(data) as Promise<Message>;
-  }
-
-  async get(id: string) {
-    return super.get(id) as Promise<Message>;
-  }
-
-  async getAll() {
-    return super.getAll() as Promise<Message[]>;
-  }
-}
-
-export default MessageModel;
