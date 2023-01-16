@@ -7,7 +7,7 @@ export interface Payload {
   perspectiveUuid: string;
   source: string;
   message: Object;
-  literal?: Expression;
+  literal?: string;
 }
 
 export default async function ({
