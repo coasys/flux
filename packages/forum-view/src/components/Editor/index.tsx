@@ -4,7 +4,7 @@ import StarterKit from "@tiptap/starter-kit";
 import { useEffect, useState } from "preact/hooks";
 import styles from "./index.module.css";
 
-const MenuBar = ({ editor }) => {
+const MenuBar = ({ editor, allowFocus }) => {
   if (!editor) {
     return null;
   }
@@ -15,7 +15,8 @@ const MenuBar = ({ editor }) => {
         square
         variant="ghost"
         onClick={() => editor.chain().focus().toggleBold().run()}
-        disabled={!editor.can().chain().focus().toggleBold().run()}
+        disabled={true || !editor.can().chain().focus().toggleBold().run()}
+        tabIndex={allowFocus ? undefined : "-1"}
       >
         <j-icon
           name="type-bold"
@@ -27,6 +28,7 @@ const MenuBar = ({ editor }) => {
         variant="ghost"
         onClick={() => editor.chain().focus().toggleItalic().run()}
         disabled={!editor.can().chain().focus().toggleItalic().run()}
+        tabIndex={allowFocus ? undefined : "-1"}
       >
         <j-icon
           name="type-italic"
@@ -38,6 +40,7 @@ const MenuBar = ({ editor }) => {
         variant="ghost"
         onClick={() => editor.chain().focus().toggleStrike().run()}
         disabled={!editor.can().chain().focus().toggleStrike().run()}
+        tabIndex={allowFocus ? undefined : "-1"}
       >
         <j-icon
           name="type-strikethrough"
@@ -48,6 +51,7 @@ const MenuBar = ({ editor }) => {
         square
         variant="ghost"
         onClick={() => editor.chain().focus().toggleBulletList().run()}
+        tabIndex={allowFocus ? undefined : "-1"}
       >
         <j-icon
           name="list-ul"
@@ -58,6 +62,7 @@ const MenuBar = ({ editor }) => {
         square
         variant="ghost"
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        tabIndex={allowFocus ? undefined : "-1"}
       >
         <j-icon
           name="list-ol"
@@ -68,6 +73,7 @@ const MenuBar = ({ editor }) => {
         square
         variant="ghost"
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+        tabIndex={allowFocus ? undefined : "-1"}
       >
         <j-icon
           name="braces"
@@ -78,6 +84,7 @@ const MenuBar = ({ editor }) => {
         square
         variant="ghost"
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
+        tabIndex={allowFocus ? undefined : "-1"}
       >
         <j-icon
           name="quote"
@@ -89,6 +96,7 @@ const MenuBar = ({ editor }) => {
 };
 
 export default ({ onChange, initialContent, style = {} }) => {
+  const [isTouched, setIsTouched] = useState(false);
   const [hasLoadedInitialData, setHasLoadedInitialData] = useState(false);
   const editor = useEditor({
     extensions: [StarterKit, Link.configure({ autolink: true })],
@@ -108,13 +116,17 @@ export default ({ onChange, initialContent, style = {} }) => {
       editor.on("update", () => {
         const html = editor.getHTML();
         onChange(html);
+
+        if (!isTouched) {
+          setIsTouched(true);
+        }
       });
     }
-  }, [editor]);
+  }, [editor, isTouched]);
 
   return (
     <div className={styles.editorWrapper}>
-      <MenuBar editor={editor} />
+      <MenuBar editor={editor} allowFocus={isTouched} />
       <EditorContent style={style} className={styles.editor} editor={editor} />
     </div>
   );
