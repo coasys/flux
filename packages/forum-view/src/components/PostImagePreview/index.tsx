@@ -4,15 +4,20 @@ import styles from "./index.module.css";
 
 type Props = {
   imageUrl?: string;
+  base64?: string;
   onRemove: () => void;
 };
 
-export default function PostImagePreview({ imageUrl, onRemove }: Props) {
-  const [base64, setBase64] = useState("");
+export default function PostImagePreview({
+  imageUrl,
+  base64,
+  onRemove,
+}: Props) {
+  const [localBase64, setLocalBase64] = useState(base64);
 
   async function fetchImage(imageUrl) {
     const image = await getImage(imageUrl);
-    setBase64(image);
+    setLocalBase64(image);
   }
 
   useEffect(() => {
@@ -25,7 +30,7 @@ export default function PostImagePreview({ imageUrl, onRemove }: Props) {
     <section className={styles.preview}>
       <div className={styles.files}>
         <div className={styles.file}>
-          <img class={styles.filePreview} src={base64} />
+          <img class={styles.filePreview} src={localBase64} />
 
           <j-button
             class={styles.removeButton}
