@@ -24,6 +24,8 @@ import editCurrentMessage from "../api/editCurrentMessage";
 import { DEFAULT_LIMIT } from "../constants/sdna";
 import { checkUpdateSDNAVersion } from "../api/updateSDNA";
 import { LinkCallback } from "@perspect3vism/ad4m/lib/src/perspectives/PerspectiveClient";
+import generateMessage from "../api/generateMessage";
+import generateReply from "../api/generateReply";
 
 type State = {
   communityId: string;
@@ -290,12 +292,9 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       addReactionToState(link);
     }
 
-    const isSameChannel = await client.perspective.queryProlog(
-      perspectiveUuid,
-      `triple("${channelId}", "${EntryType.Message}", "${link.data.target}").`
-    );
+    const isSimpleChannelNaive = link.data.source === channelId;
 
-    if (linkIs.message(link) && isSameChannel) {
+    if (linkIs.message(link) && isSimpleChannelNaive) {
       const message = getMessage(link);
 
       if (message) {
@@ -310,7 +309,12 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       }
     }
 
-    if (linkIs.editedMessage(link) && isSameChannel) {
+    const isSameChannelExplicit = await client.perspective.queryProlog(
+      perspectiveUuid,
+      `triple("${channelId}", "${EntryType.Message}", "${link.data.target}").`
+    );
+
+    if (linkIs.editedMessage(link) && isSameChannelExplicit) {
       const message = Literal.fromUrl(link.data.target).get();
       setState((oldState) =>
         addEditMessage(oldState, link.data.source, {
@@ -321,7 +325,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       );
     }
 
-    if (linkIs.reply(link) && isSameChannel) {
+    if (linkIs.reply(link) && isSameChannelExplicit) {
       const message = getMessage(link);
 
       setState((oldState) =>
@@ -334,7 +338,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       }));
     }
 
-    if (linkIs.hideNeighbourhoodCard(link) && isSameChannel) {
+    if (linkIs.hideNeighbourhoodCard(link) && isSameChannelExplicit) {
       const id = link.data.source;
 
       setState((oldState) => addHiddenToMessageToState(oldState, id, true));
@@ -401,14 +405,17 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     return expressionLinkLength;
   }
 
-  async function sendMessage(value) {
-    const message = await createMessage({
-      perspectiveUuid,
-      lastMessage: channelId,
-      message: value,
+  function sendMessage(value) {
+    generateMessage(value).then((data) => {
+      const {message, literal} = data;
+      setState((oldState) => addMessage(oldState, message));
+      createMessage({
+        perspectiveUuid,
+        source: channelId,
+        message: value,
+        literal: literal
+      })
     });
-
-    setState((oldState) => addMessage(oldState, message));
   }
 
   async function editMessage(message, editedMessage) {
@@ -428,14 +435,17 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   }
 
   async function sendReply(message: string, replyUrl: string) {
-    const link = await createReply({
-      perspectiveUuid: perspectiveUuid,
-      message: message,
-      replyUrl,
-      channelId,
+    generateReply(message, replyUrl).then((data) => {
+      const {message, literal} = data;
+      setState((oldState) => addMessage(oldState, message));
+      createReply({
+        perspectiveUuid,
+        message: message,
+        replyUrl,
+        channelId,
+        literal
+      })
     });
-
-    setState((oldState) => addMessage(oldState, link));
   }
 
   async function hideMessageEmbeds(messageUrl: string) {
