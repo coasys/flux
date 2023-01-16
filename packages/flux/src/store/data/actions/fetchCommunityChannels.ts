@@ -21,7 +21,7 @@ export default async (communityId: string): Promise<void> => {
         hasNewMessages: false,
         collapsed: false,
         currentView:
-          keyedChannels[channel.id].currentView ||
+          keyedChannels[channel.id]?.currentView ||
           channel.views[0] ||
           ChannelView.Chat,
         views: channel.views,
