@@ -2,91 +2,45 @@ import {
   DESCRIPTION,
   IMAGE,
   NAME,
-  SELF,
   THUMBNAIL,
+  ENTRY_TYPE,
 } from "../../constants/communityPredicates";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "../../constants/languages";
-import EntryModel from "../../helpers/model";
 import { EntryType, Entry } from "../../types";
-import MemberModel from "../member";
 
-export interface Community extends Entry {
+import { subjectProperty, subjectPropertySetter, subjectCollection } from "@perspect3vism/ad4m";
+
+export class Community {
+  @subjectProperty({
+    through: ENTRY_TYPE, 
+    initial: EntryType.Community,
+    required: true,
+  })
+  type: string;
+
+  @subjectProperty({through: NAME, resolve: true})
   name: string;
+  @subjectPropertySetter({resolveLanguage: 'literal'})
+  setName(name: string) {}
+
+  @subjectProperty({through: DESCRIPTION, resolve: true})
   description: string;
+  @subjectPropertySetter({resolveLanguage: 'literal'})
+  setDescription(description: string) {}
+
+  @subjectProperty({through: IMAGE})
   image: string;
+  @subjectPropertySetter({resolveLanguage: NOTE_IPFS_EXPRESSION_OFFICIAL})
+  setImage(image: string) {}
+
+  @subjectProperty({through: THUMBNAIL})
   thumbnail: string;
+  @subjectPropertySetter({resolveLanguage: NOTE_IPFS_EXPRESSION_OFFICIAL})
+  setThumbnail(thumbnail: string) {}
+  
+  @subjectCollection({through: EntryType.Channel})
+  channels: string[];
+  addChannel(channel: string) {}
 }
 
-class CommunityModel extends EntryModel {
-  static get type() {
-    return EntryType.Community;
-  }
-  static get properties() {
-    return {
-      name: {
-        predicate: NAME,
-        type: String,
-        resolve: true,
-        languageAddress: "literal",
-      },
-      description: {
-        predicate: DESCRIPTION,
-        type: String,
-        resolve: true,
-        languageAddress: "literal",
-      },
-      image: {
-        predicate: IMAGE,
-        type: String,
-        resolve: false,
-        languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
-      },
-      thumbnail: {
-        predicate: THUMBNAIL,
-        type: String,
-        resolve: false,
-        languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
-      },
-      channels: {
-        predicate: EntryType.Channel,
-        type: String,
-        collection: true,
-        resolve: false,
-      },
-    };
-  }
-
-  async create(data: {
-    name: string;
-    description: string;
-    image?: string;
-    thumbnail?: string;
-  }): Promise<Community> {
-    return super.create(data, SELF) as Promise<Community>;
-  }
-
-  addMember({ did }: { did: string }) {
-    const Member = new MemberModel({ perspectiveUuid: this.perspectiveUuid });
-    Member.create({ did });
-  }
-
-  async get() {
-    return super.get(SELF) as Promise<Community>;
-  }
-
-  // TODO: We don't need to send in id here
-  // but ts complains if we extend the function without inncluding id as param
-  async update(
-    id: string,
-    data: {
-      name?: string;
-      description?: string;
-      image?: string;
-      thumbnail?: string;
-    }
-  ) {
-    return super.update(SELF, data) as Promise<Community>;
-  }
-}
-
-export default CommunityModel;
+export default Community;
