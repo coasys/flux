@@ -37,6 +37,7 @@ export default function CreatePost({
   const [isLoading, setIsLoading] = useState(!!postId);
   const [entryType, setEntryType] = useState<PostOption>(initialType);
   const [state, setState] = useState(initialState);
+  const [initState, setInitState] = useState(initialState);
   const isEditing = !!postId;
 
   const Post = useMemo(() => {
@@ -58,6 +59,7 @@ export default function CreatePost({
       });
       Model.get(postId).then((entry: any) => {
         setState(entry);
+        setInitState(entry);
         setIsLoading(false);
 
         // FIX - Better post type detection
@@ -238,9 +240,9 @@ export default function CreatePost({
             {showBody && (
               <Editor
                 style={{ minHeight: "200px" }}
-                initialContent={state.body}
+                initialContent={initState.body}
                 onChange={(e) =>
-                  setState((oldState) => ({ ...oldState, body: e }))
+                    setState((oldState) => ({ ...oldState, body: e }))
                 }
               ></Editor>
             )}
