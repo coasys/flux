@@ -1,49 +1,34 @@
-import { CHANNEL_VIEW, NAME } from "../../constants/communityPredicates";
-import EntryModel from "../../helpers/model";
+import { CHANNEL_VIEW, NAME, ENTRY_TYPE } from "../../constants/communityPredicates";
 import { EntryType, Entry, ChannelView } from "../../types";
+import { subjectProperty, subjectPropertySetter, subjectCollection } from "@perspect3vism/ad4m";
 
-export interface Channel extends Entry {
+export class Channel {
+  @subjectProperty({
+    through: ENTRY_TYPE, 
+    initial: EntryType.Channel,
+    required: true,
+  })
+  type: string;
+
+  @subjectProperty({
+    through: NAME,
+    resolve: true,
+  })
   name: string;
-  views: ChannelView[];
+
+  @subjectPropertySetter({
+    resolveLanguage: 'literal'
+  })
+  setName(name: string) {}
+
+  @subjectCollection({
+    through: CHANNEL_VIEW,
+  })
+  views: string[];
+  addView(view: string) {}
 }
 
 export interface UpdateChannel {
   name?: string;
   views?: ChannelView[];
 }
-
-class ChannelModel extends EntryModel {
-  static get type() {
-    return EntryType.Channel;
-  }
-  static get properties() {
-    return {
-      name: {
-        predicate: NAME,
-        type: String,
-        resolve: true,
-        languageAddress: "literal",
-      },
-      views: {
-        predicate: CHANNEL_VIEW,
-        type: String,
-        collection: true,
-        resolve: false,
-      },
-    };
-  }
-
-  async create(data: { name: string; views: ChannelView[] }) {
-    return super.create(data) as Promise<Channel>;
-  }
-
-  async update(id: string, data: UpdateChannel) {
-    return super.update(id, data) as Promise<Channel>;
-  }
-
-  async getAll(): Promise<Channel[]> {
-    return super.getAll() as Promise<Channel[]>;
-  }
-}
-
-export default ChannelModel;
