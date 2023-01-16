@@ -8,6 +8,18 @@
   padding-top: var(--j-space-500);
 }
 
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-400);
+}
+
 .timestamp {
   color: var(--j-color-ui-300);
   font-size: var(--j-font-size-400);

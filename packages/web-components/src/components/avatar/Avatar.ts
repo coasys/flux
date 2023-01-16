@@ -10,8 +10,8 @@ const styles = css`
     --j-avatar-size: var(--j-size-md);
     --j-avatar-box-shadow: none;
     --j-avatar-border: none;
-    --j-avatar-color: var(--j-color-white);
-    --j-avatar-bg: var(--j-color-ui-200);
+    --j-avatar-color: var(--j-color-black);
+    --j-avatar-bg: var(--j-color-ui-100);
   }
   :host([src]) {
     --j-avatar-bg: transparent;
@@ -49,6 +49,9 @@ const styles = css`
     --j-avatar-size: var(--j-size-xxl);
   }
   [part="base"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: inherit;
     box-shadow: var(--j-avatar-box-shadow);
     color: var(--j-avatar-color);
@@ -61,8 +64,8 @@ const styles = css`
   }
 
   svg {
-    width: var(--j-avatar-size);
-    height: var(--j-avatar-size);
+    width: calc(var(--j-avatar-size) - 30%);
+    height: calc(var(--j-avatar-size) - 30%);
   }
 
   [part="icon"] {
@@ -153,7 +156,9 @@ export default class Component extends LitElement {
     }
 
     if (this.hash) {
-      return unsafeSVG(toSvg(this.hash || "", 100));
+      return html`
+        <button part="base">${unsafeSVG(toSvg(this.hash || "", 100))}</button>
+      `;
     }
 
     if (this.initials) {

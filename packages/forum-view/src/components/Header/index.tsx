@@ -1,24 +1,16 @@
 import { useContext, useState } from "preact/hooks";
-import styles from "./index.scss";
+import styles from "./index.module.css";
 import { AgentContext } from "utils/react";
 import Avatar from "../Avatar";
-import CreatePost from "../CreatePost";
 import { PostOption, postOptions } from "../../constants/options";
-import ChannelContext from "utils/react/ChannelContext";
+import UIContext from "../../context/UIContext";
 
 export default function Header() {
-  const [initialType, setInitialType] = useState<PostOption>(PostOption.Text);
   const { state: agentState } = useContext(AgentContext);
-  const { state } = useContext(ChannelContext);
-  const [open, setOpen] = useState(false);
+  const { methods } = useContext(UIContext);
 
   function handlePostClick(type) {
-    setInitialType(type);
-    setOpen(true);
-  }
-
-  function onPublished() {
-    setOpen(false);
+    methods.toggleOverlay(true, type);
   }
 
   return (
@@ -55,24 +47,9 @@ export default function Header() {
           </j-flex>
         </j-flex>
       </j-flex>
-      <j-modal
-        size="fullscreen"
-        open={open}
-        onToggle={(e) => setOpen(e.target.open)}
-      >
-        {open && (
-          <CreatePost
-            onCancel={() => setOpen(false)}
-            communityId={state.communityId}
-            channelId={state.channelId}
-            initialType={initialType}
-            onPublished={onPublished}
-          ></CreatePost>
-        )}
-      </j-modal>
 
       <j-button
-        onClick={() => setOpen(true)}
+        onClick={() => handlePostClick()}
         class={styles.addButton}
         size="lg"
         icon="plus"

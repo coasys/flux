@@ -1,18 +1,20 @@
 import joinCommunity from "utils/api/joinCommunity";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
+import { CommunityState } from "@/store/types";
 
 export interface Payload {
   joiningLink: string;
 }
 
-export default async ({ joiningLink }: Payload): Promise<void> => {
+export default async ({ joiningLink }: Payload): Promise<CommunityState> => {
   const dataStore = useDataStore();
   const appStore = useAppStore();
 
   try {
     const community = await joinCommunity({ joiningLink });
-    dataStore.addCommunity({
+
+    const newCommunity = {
       neighbourhood: community,
       state: {
         perspectiveUuid: community.uuid,
@@ -32,7 +34,11 @@ export default async ({ joiningLink }: Payload): Promise<void> => {
           mute: false,
         },
       },
-    });
+    };
+
+    dataStore.addCommunity(newCommunity);
+
+    return newCommunity;
   } catch (e) {
     appStore.showDangerToast({
       message: e.message,

@@ -1,12 +1,14 @@
 import UIContext from "../../context/UIContext";
 import { useContext, useEffect, useMemo, useState } from "preact/hooks";
 import { formatRelative, format, formatDistance } from "date-fns";
-import styles from "./index.scss";
 import { getImage } from "utils/helpers/getImage";
 import Avatar from "../Avatar";
 import CommentSection from "../CommentSection";
 import PostModel from "utils/api/post";
 import { CommunityContext, useEntry } from "utils/react";
+import getMe, { Me } from "utils/api/getMe";
+
+import styles from "./index.module.css";
 
 export default function Post({
   perspectiveUuid,
@@ -31,6 +33,7 @@ export default function Post({
 
   const [base64, setBase64] = useState("");
   const [ogData, setOgData] = useState<any>({});
+  const [agent, setAgent] = useState<Me>();
 
   function onProfileClick(event: any, did: string) {
     event.stopPropagation();
@@ -39,6 +42,11 @@ export default function Post({
       bubbles: true,
     });
     event.target.dispatchEvent(e);
+  }
+
+  async function fetchAgent() {
+    const agent = await getMe();
+    setAgent(agent);
   }
 
   async function fetchImage(url) {
@@ -56,6 +64,8 @@ export default function Post({
   }
 
   useEffect(() => {
+    fetchAgent();
+
     if (post?.image) {
       fetchImage(post.image);
     }
@@ -67,6 +77,8 @@ export default function Post({
   if (!post) return;
 
   const author = members[post.author] || {};
+  const isAuthor = author.did === agent.did;
+
   const hasTitle = post.title;
   const hasImage = post.image;
   const hasBody = post.body;
@@ -76,10 +88,36 @@ export default function Post({
   return (
     <div class={styles.post}>
       <j-box pb="500">
-        <j-button size="sm" variant="link" onClick={() => UIMethods.goToFeed()}>
-          <j-icon name="arrow-left-short" slot="start"></j-icon>
-          Back
-        </j-button>
+        <div class={styles.header}>
+          <j-button
+            size="sm"
+            variant="link"
+            onClick={() => UIMethods.goToFeed()}
+          >
+            <j-icon name="arrow-left-short" slot="start"></j-icon>
+            Back
+          </j-button>
+          {isAuthor && (
+            <div class={styles.actions}>
+              <j-button
+                size="xs"
+                variant="subtle"
+                onClick={() => UIMethods.toggleOverlay(true)}
+              >
+                <j-icon name="pencil" size="xs" slot="start"></j-icon>
+                Edit
+              </j-button>
+              {/* <j-button
+                size="xs"
+                variant="subtle"
+                onClick={() => UIMethods.toggleOverlay(true)}
+              >
+                <j-icon name="trash" size="xs" slot="start"></j-icon>
+                Delete
+              </j-button> */}
+            </div>
+          )}
+        </div>
       </j-box>
 
       <j-box pt="200">

@@ -15,12 +15,8 @@ export async function joinTestingCommunity() {
     appStore.setHasSeenTestCommunity(COMMUNITY_TEST_VERSION);
     //Stop showing the disclaimer
     appStore.setShowDisclaimer(false);
-    //And dont show the warning disclaimer, since if it is present, clicking join on this modal is the same as clicking close
-    appStore.setShowWarningDisclaimer(false);
   } catch (e) {
     //Stop showing the disclaimer
     appStore.setShowDisclaimer(false);
-    //And dont show the warning disclaimer, since if it is present, clicking join on this modal is the same as clicking close
-    appStore.setShowWarningDisclaimer(false);
   }
 }
