@@ -99,7 +99,7 @@
         @openCompleteProfile="() => handleProfileClick(activeProfile)"
       />
     </j-modal>
-    <j-modal size="xs" v-if="true" :open="true">
+    <j-modal size="xs" v-if="isJoiningCommunity" :open="isJoiningCommunity">
       <j-box p="500" align="center">
         <Hourglass width="30px"></Hourglass>
         <j-text variant="heading">Joining community</j-text>
