@@ -27,9 +27,10 @@ function Card({
 }) {
   function onNeighbourhoodClick(url: string) {
     const event = new CustomEvent("neighbourhood-click", {
-      detail: { url, channel: "Home" },
+      detail: { url },
       bubbles: true,
     });
+    console.log("whaat", mainRef);
     mainRef?.dispatchEvent(event);
   }
 
@@ -312,7 +313,7 @@ export default function MessageItem({
           {neighbourhoodCards.map((e) => (
             <Card
               type={e.type}
-              mainRef
+              mainRef={mainRef}
               onClick={() => onNeighbourhoodClick(e.url)}
               name={e.name}
               description={e.description}
