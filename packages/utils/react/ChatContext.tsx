@@ -272,6 +272,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     if (linkIs.socialDNA(link)) {
       console.warn("got new social dna fetching messages again");
       fetchMessages();
+      return;
     }
     if (linkIs.reaction(link)) {
       //TODO; this could read if the message is already popular and if so skip this check
@@ -283,13 +284,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       if (isPopularPost) {
         updateMessagePopularStatus(link, true);
       }
-    }
-
-    if (!isMessageFromSelf && linkIs.reaction(link) && await client.perspective.queryProlog(
-      perspectiveUuid,
-      `triple("${channelId}", "${EntryType.Message}", "${link.data.source}").`
-    )) {
-      addReactionToState(link);
+      return;
     }
 
     const isSimpleChannelNaive = link.data.source === channelId;
@@ -306,7 +301,16 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
           ...oldState,
           isMessageFromSelf,
         }));
+        return;
       }
+    }
+
+    if (!isMessageFromSelf && linkIs.reaction(link) && await client.perspective.queryProlog(
+      perspectiveUuid,
+      `triple("${channelId}", "${EntryType.Message}", "${link.data.source}").`
+    )) {
+      addReactionToState(link);
+      return;
     }
 
     const isSameChannelExplicit = await client.perspective.queryProlog(
@@ -323,6 +327,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
           timestamp: link.timestamp,
         })
       );
+      return;
     }
 
     if (linkIs.reply(link) && isSameChannelExplicit) {
@@ -336,12 +341,14 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
         ...oldState,
         isMessageFromSelf,
       }));
+      return;
     }
 
     if (linkIs.hideNeighbourhoodCard(link) && isSameChannelExplicit) {
       const id = link.data.source;
 
       setState((oldState) => addHiddenToMessageToState(oldState, id, true));
+      return;
     }
   }
 
@@ -486,6 +493,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   }
 
   async function loadMore(timestamp: Date, backwards: boolean) {
+    console.log("Calling load more");
     if (backwards) {
       return await fetchMessages(new Date(timestamp), backwards);
     } else {
