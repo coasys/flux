@@ -15,8 +15,8 @@ const MenuBar = ({ editor, allowFocus }) => {
         square
         variant="ghost"
         onClick={() => editor.chain().focus().toggleBold().run()}
-        disabled={!editor.can().chain().focus().toggleBold().run()}
-        tabIndex={allowFocus ? "0" : "-1"}
+        disabled={true || !editor.can().chain().focus().toggleBold().run()}
+        tabIndex={allowFocus ? undefined : "-1"}
       >
         <j-icon
           name="type-bold"
@@ -28,7 +28,7 @@ const MenuBar = ({ editor, allowFocus }) => {
         variant="ghost"
         onClick={() => editor.chain().focus().toggleItalic().run()}
         disabled={!editor.can().chain().focus().toggleItalic().run()}
-        tabIndex={allowFocus ? "0" : "-1"}
+        tabIndex={allowFocus ? undefined : "-1"}
       >
         <j-icon
           name="type-italic"
@@ -40,7 +40,7 @@ const MenuBar = ({ editor, allowFocus }) => {
         variant="ghost"
         onClick={() => editor.chain().focus().toggleStrike().run()}
         disabled={!editor.can().chain().focus().toggleStrike().run()}
-        tabIndex={allowFocus ? "0" : "-1"}
+        tabIndex={allowFocus ? undefined : "-1"}
       >
         <j-icon
           name="type-strikethrough"
@@ -51,7 +51,7 @@ const MenuBar = ({ editor, allowFocus }) => {
         square
         variant="ghost"
         onClick={() => editor.chain().focus().toggleBulletList().run()}
-        tabIndex={allowFocus ? "0" : "-1"}
+        tabIndex={allowFocus ? undefined : "-1"}
       >
         <j-icon
           name="list-ul"
@@ -62,7 +62,7 @@ const MenuBar = ({ editor, allowFocus }) => {
         square
         variant="ghost"
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        tabIndex={allowFocus ? "0" : "-1"}
+        tabIndex={allowFocus ? undefined : "-1"}
       >
         <j-icon
           name="list-ol"
@@ -73,7 +73,7 @@ const MenuBar = ({ editor, allowFocus }) => {
         square
         variant="ghost"
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-        tabIndex={allowFocus ? "0" : "-1"}
+        tabIndex={allowFocus ? undefined : "-1"}
       >
         <j-icon
           name="braces"
@@ -84,7 +84,7 @@ const MenuBar = ({ editor, allowFocus }) => {
         square
         variant="ghost"
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        tabIndex={allowFocus ? "0" : "-1"}
+        tabIndex={allowFocus ? undefined : "-1"}
       >
         <j-icon
           name="quote"
