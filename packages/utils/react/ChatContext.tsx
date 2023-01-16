@@ -25,6 +25,7 @@ import { DEFAULT_LIMIT } from "../constants/sdna";
 import { checkUpdateSDNAVersion } from "../api/updateSDNA";
 import { LinkCallback } from "@perspect3vism/ad4m/lib/src/perspectives/PerspectiveClient";
 import generateMessage from "../api/generateMessage";
+import generateReply from "../api/generateReply";
 
 type State = {
   communityId: string;
@@ -432,14 +433,17 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   }
 
   async function sendReply(message: string, replyUrl: string) {
-    const link = await createReply({
-      perspectiveUuid: perspectiveUuid,
-      message: message,
-      replyUrl,
-      channelId,
+    generateReply(message, replyUrl).then((data) => {
+      const {message, literal} = data;
+      setState((oldState) => addMessage(oldState, message));
+      createReply({
+        perspectiveUuid,
+        message: message,
+        replyUrl,
+        channelId,
+        literal
+      })
     });
-
-    setState((oldState) => addMessage(oldState, link));
   }
 
   async function hideMessageEmbeds(messageUrl: string) {
