@@ -99,35 +99,11 @@
         @openCompleteProfile="() => handleProfileClick(activeProfile)"
       />
     </j-modal>
-    <j-modal
-      size="xs"
-      v-if="activeCommunity"
-      :open="showJoinCommuinityModal"
-      @toggle="(e: any) => toggleJoinCommunityModal(e.target.open, activeCommunity)"
-    >
-      <j-box v-if="activeCommunity" p="800">
-        <j-flex a="center" direction="column" gap="500">
-          <j-text v-if="activeCommunity.name">
-            {{ activeCommunity.name }}
-          </j-text>
-          <j-text
-            v-if="activeCommunity.description"
-            variant="heading-sm"
-            nomargin
-          >
-            {{ activeCommunity.description }}
-          </j-text>
-          <j-button
-            :disabled="isJoiningCommunity"
-            :loading="isJoiningCommunity"
-            @click="joinCommunity"
-            size="lg"
-            full
-            variant="primary"
-          >
-            Join Community
-          </j-button>
-        </j-flex>
+    <j-modal size="xs" v-if="true" :open="true">
+      <j-box p="500" align="center">
+        <Hourglass width="30px"></Hourglass>
+        <j-text variant="heading">Joining community</j-text>
+        <j-text>Please wait...</j-text>
       </j-box>
     </j-modal>
   </div>
@@ -147,6 +123,7 @@ import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { ChannelView } from "utils/types";
 import viewOptions from "utils/constants/viewOptions";
+import Hourglass from "@/components/hourglass/Hourglass.vue";
 
 interface MentionTrigger {
   label: string;
@@ -160,6 +137,7 @@ export default defineComponent({
   components: {
     Profile,
     EditChannel,
+    Hourglass,
   },
   setup() {
     return {
@@ -174,8 +152,6 @@ export default defineComponent({
       memberMentions: ref<MentionTrigger[]>([]),
       activeProfile: ref<string>(""),
       showProfile: ref(false),
-      showJoinCommuinityModal: ref(false),
-      activeCommunity: ref<any>({}),
       isJoiningCommunity: ref(false),
     };
   },
@@ -236,7 +212,7 @@ export default defineComponent({
       );
 
       if (!community) {
-        this.toggleJoinCommunityModal(true, detail.link);
+        this.joinCommunity(detail.url);
       } else {
         this.$router.push({
           name: "community",
@@ -246,24 +222,15 @@ export default defineComponent({
         });
       }
     },
-    toggleJoinCommunityModal(open: boolean, community?: any): void {
-      if (!open) {
-        this.activeCommunity = undefined;
-      } else {
-        this.activeCommunity = community;
-      }
-      this.showJoinCommuinityModal = open;
-    },
-    joinCommunity() {
+    joinCommunity(url: string) {
       this.isJoiningCommunity = true;
       this.dataStore
-        .joinCommunity({ joiningLink: this.activeCommunity.url })
+        .joinCommunity({ joiningLink: url })
         .then(() => {
           this.$emit("submit");
         })
         .finally(() => {
           this.isJoiningCommunity = false;
-          this.showJoinCommuinityModal = false;
         });
     },
     onHideNotificationIndicator({ detail }: any) {
