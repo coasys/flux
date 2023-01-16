@@ -126,11 +126,6 @@ export default function CreatePost({
 
     try {
       if (isEditing) {
-        // IF we haven't changed the photo, clear old ref to avoid creating new link
-        if (data.image && !imageReplaced) {
-          delete data.image;
-        }
-
         await Post.update(postId, data);
       } else {
         newPost = await Post.create(data);
