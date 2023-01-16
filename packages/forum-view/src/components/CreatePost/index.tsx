@@ -17,11 +17,6 @@ const initialState = {
   body: null,
   url: null,
   image: null,
-  startDate: null,
-  startTime: null,
-  endDate: null,
-  endTime: null,
-  options: [],
 };
 
 export default function CreatePost({
@@ -94,14 +89,6 @@ export default function CreatePost({
     });
   }
 
-  function parseDateTime(date: string, time: string) {
-    if (date && time) {
-      return parse(`${date}-${time}`, "yyyy-MM-dd-HH:mm", new Date());
-    } else {
-      return new Date();
-    }
-  }
-
   async function publish() {
     const canSubmit = validateAllInputs();
     if (!canSubmit) return;
@@ -111,22 +98,13 @@ export default function CreatePost({
     let data = state;
     let newPost = undefined;
 
-    if (entryType === PostOption.Event) {
-      const startDate = parseDateTime(
-        state.startDate,
-        state.startTime
-      ).toISOString();
-      const endDate = parseDateTime(state.endDate, state.endTime).toISOString();
-      data = {
-        ...state,
-        startDate,
-        endDate,
-      };
-    }
-
     try {
       if (isEditing) {
-        await Post.update(postId, data);
+        await Post.update(postId, {
+          ...data,
+          // if we send in null the property does not get updated
+          image: imageReplaced ? data.image : null,
+        });
       } else {
         newPost = await Post.create(data);
       }
@@ -164,9 +142,6 @@ export default function CreatePost({
 
   const showBody = true;
   const showUrl = entryType === PostOption.Link;
-  const showStartDate = entryType === PostOption.Event;
-  const showEndDate =
-    entryType === PostOption.Event && state.startDate && state.startTime;
   const showImage = entryType === PostOption.Image;
 
   return (
@@ -249,62 +224,6 @@ export default function CreatePost({
                   setState((oldState) => ({ ...oldState, body: e }))
                 }
               ></Editor>
-            )}
-            {showStartDate && (
-              <j-flex a="end" gap="400">
-                <j-input
-                  full
-                  autovalidate
-                  ref={(ref) => setInputRef(ref, "startDate")}
-                  required
-                  name="startDate"
-                  value={state.startDate}
-                  onInput={handleChange}
-                  label="Start"
-                  type="date"
-                ></j-input>
-                <j-input
-                  full
-                  autovalidate
-                  required
-                  ref={(ref) => setInputRef(ref, "startTime")}
-                  name="startTime"
-                  value={state.startTime}
-                  onInput={handleChange}
-                  label=""
-                  type="time"
-                ></j-input>
-              </j-flex>
-            )}
-            {showEndDate && (
-              <j-flex a="end" gap="400">
-                <j-input
-                  full
-                  autovalidate
-                  required
-                  name="endDate"
-                  ref={(ref) => setInputRef(ref, "endDate")}
-                  min={state.startDate}
-                  value={state.endDate}
-                  onInput={handleChange}
-                  label="End"
-                  type="date"
-                ></j-input>
-                <j-input
-                  full
-                  autovalidate
-                  required
-                  name="endTime"
-                  ref={(ref) => setInputRef(ref, "endTime")}
-                  list="time_list"
-                  min={state.startDate === state.endDate ? state.startTime : ""}
-                  max={state.startDate === state.endDate ? "23:59" : ""}
-                  value={state.endTime}
-                  onInput={handleChange}
-                  label=""
-                  type="time"
-                ></j-input>
-              </j-flex>
             )}
           </j-flex>
         </j-box>
