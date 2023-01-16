@@ -34,6 +34,7 @@ export default function CreatePost({
 }) {
   const inputRefs = useRef<{ [x: string]: { isValid: boolean; el: any } }>({});
   const [isCreating, setIsCreating] = useState(false);
+  const [imageReplaced, setImageReplaced] = useState(false);
   const [isLoading, setIsLoading] = useState(!!postId);
   const [entryType, setEntryType] = useState<PostOption>(initialType);
   const [state, setState] = useState(initialState);
@@ -150,6 +151,8 @@ export default function CreatePost({
         await resizeImage(dataURItoBlob(evt.target.result as string), 0.6)
       );
 
+      setImageReplaced(isEditing);
+
       setState({
         ...state,
         image: compressedImage,
@@ -229,7 +232,8 @@ export default function CreatePost({
               <j-box pt="300">
                 {isEditing && state.image ? (
                   <PostImagePreview
-                    imageUrl={state.image}
+                    imageUrl={!imageReplaced && state.image}
+                    base64={imageReplaced && state.image}
                     onRemove={() => setState({ ...state, image: undefined })}
                   />
                 ) : (
@@ -242,7 +246,7 @@ export default function CreatePost({
                 style={{ minHeight: "200px" }}
                 initialContent={initState.body}
                 onChange={(e) =>
-                    setState((oldState) => ({ ...oldState, body: e }))
+                  setState((oldState) => ({ ...oldState, body: e }))
                 }
               ></Editor>
             )}
