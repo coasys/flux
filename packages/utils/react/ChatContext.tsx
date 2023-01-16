@@ -24,6 +24,7 @@ import editCurrentMessage from "../api/editCurrentMessage";
 import { DEFAULT_LIMIT } from "../constants/sdna";
 import { checkUpdateSDNAVersion } from "../api/updateSDNA";
 import { LinkCallback } from "@perspect3vism/ad4m/lib/src/perspectives/PerspectiveClient";
+import generateMessage from "../api/generateMessage";
 
 type State = {
   communityId: string;
@@ -401,14 +402,17 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     return expressionLinkLength;
   }
 
-  async function sendMessage(value) {
-    const message = await createMessage({
-      perspectiveUuid,
-      lastMessage: channelId,
-      message: value,
+  function sendMessage(value) {
+    generateMessage(value).then((data) => {
+      const {message, literal} = data;
+      setState((oldState) => addMessage(oldState, message));
+      createMessage({
+        perspectiveUuid,
+        source: channelId,
+        message: value,
+        literal: literal
+      })
     });
-
-    setState((oldState) => addMessage(oldState, message));
   }
 
   async function editMessage(message, editedMessage) {
