@@ -292,12 +292,9 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       addReactionToState(link);
     }
 
-    const isSameChannel = await client.perspective.queryProlog(
-      perspectiveUuid,
-      `triple("${channelId}", "${EntryType.Message}", "${link.data.target}").`
-    );
+    const isSimpleChannelNaive = link.data.source === channelId;
 
-    if (linkIs.message(link) && isSameChannel) {
+    if (linkIs.message(link) && isSimpleChannelNaive) {
       const message = getMessage(link);
 
       if (message) {
@@ -312,7 +309,12 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       }
     }
 
-    if (linkIs.editedMessage(link) && isSameChannel) {
+    const isSameChannelExplicit = await client.perspective.queryProlog(
+      perspectiveUuid,
+      `triple("${channelId}", "${EntryType.Message}", "${link.data.target}").`
+    );
+
+    if (linkIs.editedMessage(link) && isSameChannelExplicit) {
       const message = Literal.fromUrl(link.data.target).get();
       setState((oldState) =>
         addEditMessage(oldState, link.data.source, {
@@ -323,7 +325,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       );
     }
 
-    if (linkIs.reply(link) && isSameChannel) {
+    if (linkIs.reply(link) && isSameChannelExplicit) {
       const message = getMessage(link);
 
       setState((oldState) =>
@@ -336,7 +338,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       }));
     }
 
-    if (linkIs.hideNeighbourhoodCard(link) && isSameChannel) {
+    if (linkIs.hideNeighbourhoodCard(link) && isSameChannelExplicit) {
       const id = link.data.source;
 
       setState((oldState) => addHiddenToMessageToState(oldState, id, true));
