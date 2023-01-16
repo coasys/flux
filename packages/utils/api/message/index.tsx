@@ -4,7 +4,7 @@ import {
   ENTRY_TYPE,
 } from "../../constants/communityPredicates";
 import { EntryType } from "../../types";
-import { subjectProperty, subjectPropertySetter, subjectCollection } from "@perspect3vism/ad4m";
+import { sdnaOutput, subjectProperty, subjectPropertySetter, subjectCollection } from "@perspect3vism/ad4m";
 
 export class Message {
   @subjectProperty({
@@ -30,4 +30,7 @@ export class Message {
   })
   replies: string[];
   addReply(reply: string) {}
+
+  @sdnaOutput
+  static generateSdna(): string { return "" }
 }

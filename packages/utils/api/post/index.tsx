@@ -9,7 +9,7 @@ import {
 } from "../../constants/communityPredicates";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "../../constants/languages";
 import { EntryType } from "../../types";
-import { subjectProperty, subjectPropertySetter, subjectCollection } from "@perspect3vism/ad4m";
+import { sdnaOutput, subjectProperty, subjectPropertySetter, subjectCollection } from "@perspect3vism/ad4m";
 
 export class Post {
   @subjectProperty({
@@ -51,6 +51,9 @@ export class Post {
   @subjectCollection({through: EntryType.Message})
   comments: string[];
   addComment(comment: string) {}
+
+  @sdnaOutput
+  static generateSdna(): string { return "" }
 }
 
 export default Post;

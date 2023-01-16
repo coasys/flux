@@ -8,7 +8,7 @@ import {
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "../../constants/languages";
 import { EntryType, Entry } from "../../types";
 
-import { subjectProperty, subjectPropertySetter, subjectCollection } from "@perspect3vism/ad4m";
+import { sdnaOutput, subjectProperty, subjectPropertySetter, subjectCollection } from "@perspect3vism/ad4m";
 
 export class Community {
   @subjectProperty({
@@ -41,6 +41,9 @@ export class Community {
   @subjectCollection({through: EntryType.Channel})
   channels: string[];
   addChannel(channel: string) {}
+
+  @sdnaOutput
+  static generateSdna(): string { return "" }
 }
 
 export default Community;
