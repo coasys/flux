@@ -69,11 +69,11 @@ export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
 
     if (escapedMessage) {
       if (currentReplyMessage) {
-        await sendReply(value, currentReplyMessage.id);
+        sendReply(value, currentReplyMessage.id);
       } else if (currentMessageEdit) {
-        await editMessage(currentMessageEdit, value);
+        editMessage(currentMessageEdit, value);
       } else {
-        await sendMessage(value);
+        sendMessage(value);
       }
 
       // editor.chain().clearContent(true);
