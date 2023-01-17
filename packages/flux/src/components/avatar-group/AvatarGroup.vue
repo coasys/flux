@@ -44,7 +44,7 @@ export default defineComponent({
 
         for (let i = 0; i < users.length; i++) {
           const did = users[i];
-          if (i <= 4) {
+          if (i <= 3) {
             const profile = await getProfile(did);
             if (profile) {
               firstUsers[did] = profile;
