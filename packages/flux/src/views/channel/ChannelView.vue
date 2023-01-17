@@ -213,8 +213,13 @@ export default defineComponent({
       this.isJoiningCommunity = true;
       this.dataStore
         .joinCommunity({ joiningLink: url })
-        .then(() => {
-          this.$emit("submit");
+        .then((community) => {
+          this.$router.push({
+            name: "community",
+            params: {
+              communityId: community.neighbourhood.uuid,
+            },
+          });
         })
         .finally(() => {
           this.isJoiningCommunity = false;
