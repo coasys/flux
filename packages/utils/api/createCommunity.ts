@@ -12,6 +12,7 @@ import {
 } from "utils/helpers/profileHelpers";
 import { createSDNA } from "./createSDNA";
 import CommunityModel from "utils/api/community";
+import getLinkLanguage from "./getLinkLanguage";
 
 export interface Payload {
   name: string;
@@ -38,9 +39,11 @@ export default async function createCommunity({
 
     const uid = uuidv4().toString();
 
+    const linkLanguageAddress = await getLinkLanguage();
+
     //Create unique social-context
     const linkLanguage = await client.languages.applyTemplateAndPublish(
-      PERSPECTIVE_DIFF_SYNC,
+      linkLanguageAddress,
       JSON.stringify({
         uid: uid,
         name: `${name}-link-language`,
