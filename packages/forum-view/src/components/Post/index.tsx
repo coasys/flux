@@ -8,7 +8,7 @@ import PostModel from "utils/api/post";
 import { CommunityContext, useEntry } from "utils/react";
 import getMe, { Me } from "utils/api/getMe";
 
-import styles from "./index.scss";
+import styles from "./index.module.css";
 
 export default function Post({
   perspectiveUuid,

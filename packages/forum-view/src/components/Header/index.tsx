@@ -1,5 +1,5 @@
 import { useContext, useState } from "preact/hooks";
-import styles from "./index.scss";
+import styles from "./index.module.css";
 import { AgentContext } from "utils/react";
 import Avatar from "../Avatar";
 import { PostOption, postOptions } from "../../constants/options";
