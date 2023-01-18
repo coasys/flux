@@ -1,0 +1,47 @@
+.appContainer {
+    margin: 0 auto;
+    margin-top: var(--j-space-900);
+    width: 100%;
+    max-width: 800px;;
+}
+
+.card {
+    display: flex;
+    align-items: center;
+    gap: var(--j-space-500);
+    text-decoration: none;
+    padding: var(--j-space-500);
+    border-radius: var(--j-border-radius);
+    border: 2px solid var(--j-color-ui-100);
+    overflow: hidden;
+    word-wrap: break-word;
+}
+
+.card:hover {
+    border: 2px solid var(--j-color-primary-500);
+}
+
+.grid {
+    display: grid;
+    gap: var(--j-space-500);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.backButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--j-space-200);
+    text-decoration: none;
+    color: var(--j-color-black);
+    font-weight: 600;
+    width: var(--j-size-md);
+    height: var(--j-size-md);
+    padding: var(--j-space-200);
+    border-radius: 50%;
+    margin-bottom: var(--j-space-500);
+}
+
+.backButton:hover {
+    background-color: var(--j-color-ui-50);
+}
