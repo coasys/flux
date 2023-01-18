@@ -57,6 +57,16 @@
       @hide-notification-indicator="onHideNotificationIndicator"
     ></forum-view>
     <chat-view
+      v-show="currentView === ChannelView.Graph"
+      class="perspective-view"
+      :source="`${channel.id}`"
+      :perspective="communityId"
+      @agent-click="onAgentClick"
+      @channel-click="onChannelClick"
+      @neighbourhood-click="onNeighbourhoodClick"
+      @hide-notification-indicator="onHideNotificationIndicator"
+    ></chat-view>
+    <chat-view
       v-show="currentView === ChannelView.Chat"
       class="perspective-view"
       :source="`${channel.id}`"
@@ -126,6 +136,7 @@
 <script lang="ts">
 import ForumView from "@junto-foundation/forum-view";
 import ChatView from "@junto-foundation/chat-view";
+import GraphView from "@junto-foundation/graph-view";
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
@@ -173,6 +184,8 @@ export default defineComponent({
       customElements.define("chat-view", ChatView);
     if (!customElements.get("forum-view"))
       customElements.define("forum-view", ForumView);
+    if (!customElements.get("graph-view"))
+      customElements.define("graph-view", GraphView);
   },
   computed: {
     sameAgent() {

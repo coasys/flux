@@ -86,6 +86,7 @@ export interface Profiles {
 export enum ChannelView {
   Chat = "flux://has_chat_view",
   Forum = "flux://has_post_view",
+  Graph = "flux://has_graph_view",
 }
 
 export enum EntryType {
