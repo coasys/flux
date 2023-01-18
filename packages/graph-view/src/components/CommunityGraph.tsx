@@ -4,14 +4,17 @@ import {
   getAd4mClient,
   LinkExpression,
 } from "@perspect3vism/ad4m-connect/dist/utils";
-import { Ad4mClient } from "@perspect3vism/ad4m";
+import { Ad4mClient, Literal } from "@perspect3vism/ad4m";
 
 export default function CommunityOverview({ uuid }) {
   const graph = useRef<ForceGraph3DInstance>(undefined);
+  const graphEl = useRef<HTMLDivElement | null>(null);
   const [ad4mInitialised, setAd4mInitialised] = useState(false);
   const [graphInitialised, setGraphInitialised] = useState(false);
   const [nodes, setNodes] = useState<{ id: string; group: string }[]>([]);
   const [links, setLinks] = useState<{ source: string; target: string }[]>([]);
+
+  console.log("loaded", uuid, nodes, links);
 
   // Fetch initial snapshot
   useEffect(() => {
@@ -50,8 +53,13 @@ export default function CommunityOverview({ uuid }) {
   useEffect(() => {
     const setupGraph = async () => {
       graph.current = ForceGraph3D()
-        .nodeLabel("id")
+        .nodeLabel((node) =>
+          node.id.startsWith("literal://")
+            ? Literal.fromUrl(node.id).get().data
+            : node.id
+        )
         .nodeAutoColorBy("group")
+        .backgroundColor("rgba(0,0,0,0)")
         .onNodeClick((node: { x; y; z }) => {
           // Aim at node from outside it
           const distance = 40;
@@ -73,9 +81,7 @@ export default function CommunityOverview({ uuid }) {
           );
         });
 
-      graph
-        .current(document.getElementById("graph"))
-        .graphData({ nodes, links });
+      graph.current(graphEl.current).graphData({ nodes, links });
 
       setGraphInitialised(true);
     };
@@ -113,7 +119,7 @@ export default function CommunityOverview({ uuid }) {
 
   return (
     <div>
-      <div id="graph" />
+      <div ref={graphEl} id="graph" />
     </div>
   );
 }
