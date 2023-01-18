@@ -44,6 +44,7 @@ export interface Reaction {
   author: string;
   content: string;
   timestamp: Date;
+  synced: boolean;
 }
 
 export interface Message {

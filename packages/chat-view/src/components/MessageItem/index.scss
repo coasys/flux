@@ -236,6 +236,10 @@
   border: 1px solid var(--j-color-primary-500);
 }
 
+.emojiButtonNotSynced {
+  opacity: 0.7;
+}
+
 j-tooltip::part(base) {
   display: inline;
 }

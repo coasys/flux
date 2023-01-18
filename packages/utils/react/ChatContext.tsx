@@ -174,7 +174,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
     });
   }
 
-  function addReactionToState(link) {
+  function addReactionToState(link, synced = false) {
     const id = link.data.source;
 
     setState((oldState) => {
@@ -199,6 +199,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
                   author: link.author,
                   content: link.data.target.replace("emoji://", ""),
                   timestamp: link.timestamp,
+                  synced
                 },
               ],
             },
@@ -234,6 +235,41 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
             ...message,
             reactions: message.reactions.filter((e) =>
               filterReactions(e, link)
+            ),
+          },
+        },
+      };
+    });
+  }
+
+  function findReactionAndSync(link) {
+    const id = link.data.source;
+
+    setState((oldState) => {
+      const message: Message = oldState.keyedMessages[id];
+
+      if (!message) return oldState;
+
+      function updateReactions(reaction, link) {
+        const isSameAuthor = reaction.author === link.author;
+        const isSameAuthorAndContent =
+          isSameAuthor &&
+          reaction.content === link.data.target.replace("emoji://", "");
+          console.log('ggggg', isSameAuthorAndContent)
+        return isSameAuthorAndContent ? ({
+          ...reaction,
+          synced: true
+        }) : reaction;
+      }
+
+      return {
+        ...oldState,
+        keyedMessages: {
+          ...oldState.keyedMessages,
+          [id]: {
+            ...message,
+            reactions: message.reactions.map((e) =>
+              updateReactions(e, link)
             ),
           },
         },
@@ -284,6 +320,19 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
       if (isPopularPost) {
         updateMessagePopularStatus(link, true);
       }
+
+      if (await client.perspective.queryProlog(
+        perspectiveUuid,
+        `triple("${channelId}", "${EntryType.Message}", "${link.data.source}").`
+      )) {
+        console.log('arrr', isMessageFromSelf)
+        if (!isMessageFromSelf) {
+          addReactionToState(link);
+        } else {
+          findReactionAndSync(link)
+        }
+      }
+
       return;
     }
 
@@ -303,14 +352,6 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
         }));
         return;
       }
-    }
-
-    if (!isMessageFromSelf && linkIs.reaction(link) && await client.perspective.queryProlog(
-      perspectiveUuid,
-      `triple("${channelId}", "${EntryType.Message}", "${link.data.source}").`
-    )) {
-      addReactionToState(link);
-      return;
     }
 
     const isSameChannelExplicit = await client.perspective.queryProlog(
@@ -467,13 +508,21 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
   }
 
   async function addReaction(messageUrl: string, reaction: string) {
-    const link = await createMessageReaction({
+    addReactionToState({
+      author: agent.did,
+      data: {
+        source: messageUrl,
+        target: `emoji://${reaction}`,
+        predicate: REACTION,
+      },
+      timestamp: new Date()
+    })
+
+    await createMessageReaction({
       perspectiveUuid,
       messageUrl,
       reaction,
     });
-
-    addReactionToState(link);
   }
 
   function setIsMessageFromSelf(isMessageFromSelf: boolean) {
