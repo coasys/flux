@@ -22,13 +22,17 @@ export default function CommunityOverview({ uuid }) {
       const client: Ad4mClient = await getAd4mClient();
       const snapshot = await client.perspective.snapshotByUUID(uuid);
 
-      const initialNodes = snapshot.links.map((l) => ({
+      const connectedLinks = snapshot.links.filter((link) =>
+        snapshot.links.some((l) => link.source === l.target)
+      );
+
+      const initialNodes = connectedLinks.map((l) => ({
         id: l.data.target,
         group: l.data.predicate,
       }));
       setNodes(initialNodes);
 
-      const initialLinks = snapshot.links.map((l) => ({
+      const initialLinks = connectedLinks.map((l) => ({
         source: l.data.target,
         target: l.data.source,
       }));
