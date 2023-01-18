@@ -78,6 +78,7 @@ export default async function ({
     //Parse out the emojis
     result.Reactions.forEach((reaction) => {
       reaction.content = reaction.content.replace("emoji://", "");
+      reaction.synced = true;
     });
     //Parse out the replies
     result.Replies.forEach((reply) => {
