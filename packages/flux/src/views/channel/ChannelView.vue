@@ -56,7 +56,7 @@
       @neighbourhood-click="onNeighbourhoodClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></forum-view>
-    <chat-view
+    <graph-view
       v-show="currentView === ChannelView.Graph"
       class="perspective-view"
       :source="`${channel.id}`"
@@ -65,7 +65,7 @@
       @channel-click="onChannelClick"
       @neighbourhood-click="onNeighbourhoodClick"
       @hide-notification-indicator="onHideNotificationIndicator"
-    ></chat-view>
+    ></graph-view>
     <chat-view
       v-show="currentView === ChannelView.Chat"
       class="perspective-view"

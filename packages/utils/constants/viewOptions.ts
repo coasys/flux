@@ -15,4 +15,11 @@ export default [
     type: ChannelView.Forum,
     component: "forum-view",
   },
+  {
+    title: "Graph",
+    description: "A graph view of your data",
+    icon: "search",
+    type: ChannelView.Graph,
+    component: "graph-view",
+  },
 ];

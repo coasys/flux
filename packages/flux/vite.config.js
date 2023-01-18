@@ -13,6 +13,7 @@ export default {
               tag === "perspective-view" ||
               tag === "ad4m-connect" ||
               tag === "chat-view" ||
+              tag === "graph-view" ||
               tag === "forum-view"
             );
           },
