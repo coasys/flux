@@ -18,7 +18,7 @@ export default [
   {
     title: "Graph",
     description: "A graph view of your data",
-    icon: "search",
+    icon: "share",
     type: ChannelView.Graph,
     component: "graph-view",
   },
