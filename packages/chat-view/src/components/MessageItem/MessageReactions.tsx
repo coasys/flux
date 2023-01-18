@@ -20,7 +20,7 @@ function sortReactions(reactions: Reaction[]): ReactionType[] {
         authors: [...previous.authors, reaction.author],
         content: reaction.content,
         count: previous.count + 1,
-        synced: reaction.synced
+        synced: reaction.synced,
       },
     } as ReactionType;
   }, {});
@@ -91,9 +91,12 @@ function ReactionButton({ reaction, onEmojiClick }) {
   const { state: agentState } = useContext(AgentContext);
 
   const activeClass = useMemo(() => {
-    return [reaction.authors.find((did) => did === agentState.did)
-      ? styles.emojiButtonActive
-      : "", !reaction.synced ? styles.emojiButtonNotSynced : ""].join(" ");
+    return [
+      reaction.authors.find((did) => did === agentState.did)
+        ? styles.emojiButtonActive
+        : "",
+      !reaction.synced ? styles.emojiButtonNotSynced : "",
+    ].join(" ");
   }, [reaction]);
 
   const [profiles, setProfiles] = useState([]);
