@@ -35,17 +35,6 @@ export default function Avatar({
     }
   }, [did, url]);
 
-  if (loading)
-    return (
-      <j-skeleton
-        variant="circle"
-        style={style}
-        onClick={(e: any) => onClick && onClick(e)}
-        height={size}
-        width={size}
-      ></j-skeleton>
-    );
-
   return (
     <j-avatar
       style={{ ...style, cursor: onClick ? "pointer" : "default" }}

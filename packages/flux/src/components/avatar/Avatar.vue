@@ -1,13 +1,5 @@
 <template>
-  <j-skeleton
-    :slot="slot"
-    variant="circle"
-    :height="size"
-    :width="size"
-    v-if="loading"
-  ></j-skeleton>
   <j-avatar
-    v-else
     :slot="slot"
     :initials="initials"
     :hash="did"

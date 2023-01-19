@@ -128,7 +128,7 @@ export default class Component extends LitElement {
    * @type {String}
    * @attr
    */
-  @property({ type: String }) icon = "person-fill";
+  @property({ type: String }) icon = "";
 
   /**
    * Sizes
