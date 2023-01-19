@@ -6,7 +6,21 @@ import {
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import { Ad4mClient, Literal } from "@perspect3vism/ad4m";
 
-export default function CommunityOverview({ uuid }) {
+function findNodes(links, source) {
+  return links.reduce((acc, link) => {
+    const hasSource = link.data.source === source;
+    const alreadyIn = acc.some((l) => l === link.data.source);
+    console.log({ hasSource, link, acc, alreadyIn });
+    if (alreadyIn) return acc;
+    if (hasSource) {
+      const newLinks = findNodes(links, link.data.target);
+      return [...acc, ...newLinks, link];
+    }
+    return acc;
+  }, []);
+}
+
+export default function CommunityOverview({ uuid, source }) {
   const graph = useRef<ForceGraph3DInstance>(undefined);
   const graphEl = useRef<HTMLDivElement | null>(null);
   const [ad4mInitialised, setAd4mInitialised] = useState(false);
@@ -14,28 +28,30 @@ export default function CommunityOverview({ uuid }) {
   const [nodes, setNodes] = useState<{ id: string; group: string }[]>([]);
   const [links, setLinks] = useState<{ source: string; target: string }[]>([]);
 
-  console.log("loaded", uuid, nodes, links);
-
   // Fetch initial snapshot
   useEffect(() => {
     const fetchsnapshot = async () => {
       const client: Ad4mClient = await getAd4mClient();
       const snapshot = await client.perspective.snapshotByUUID(uuid);
 
-      const connectedLinks = snapshot.links.filter((link) =>
-        snapshot.links.some((l) => link.source === l.target)
-      );
+      const subLinks = findNodes(snapshot.links, source);
 
-      const initialNodes = connectedLinks.map((l) => ({
-        id: l.data.target,
-        group: l.data.predicate,
-      }));
+      const initialNodes = subLinks
+        .map((l) => {
+          return [
+            { id: l.data.source, group: l.data.predicate },
+            { id: l.data.target, group: l.data.predicate },
+          ];
+        })
+        .flat();
+
       setNodes(initialNodes);
 
-      const initialLinks = connectedLinks.map((l) => ({
+      const initialLinks = subLinks.map((l) => ({
         source: l.data.target,
         target: l.data.source,
       }));
+
       setLinks(initialLinks);
 
       setAd4mInitialised(true);
@@ -48,10 +64,10 @@ export default function CommunityOverview({ uuid }) {
       ]);
     };
 
-    if (!ad4mInitialised && uuid) {
+    if (!ad4mInitialised && uuid && source) {
       fetchsnapshot();
     }
-  }, [ad4mInitialised, uuid]);
+  }, [ad4mInitialised, uuid, source]);
 
   // Setup graph
   useEffect(() => {

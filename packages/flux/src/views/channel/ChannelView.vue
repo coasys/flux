@@ -49,7 +49,7 @@
     <forum-view
       v-show="currentView === ChannelView.Forum"
       class="perspective-view"
-      :source="`${channel.id}`"
+      :source="channel.id"
       :perspective="communityId"
       @agent-click="onAgentClick"
       @channel-click="onChannelClick"
@@ -59,7 +59,7 @@
     <graph-view
       v-show="currentView === ChannelView.Graph"
       class="perspective-view"
-      :source="`${channel.id}`"
+      :source="channel.id"
       :perspective="communityId"
       @agent-click="onAgentClick"
       @channel-click="onChannelClick"
@@ -69,7 +69,7 @@
     <chat-view
       v-show="currentView === ChannelView.Chat"
       class="perspective-view"
-      :source="`${channel.id}`"
+      :source="channel.id"
       :perspective="communityId"
       @agent-click="onAgentClick"
       @channel-click="onChannelClick"
