@@ -3,6 +3,31 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.4.2] - 20/01/2023
+
+### Added
+ - New cli tool for building flux perspective views
+ - Graph view perspective view type
+ - Emoji reactions are now optimistic
+ - Subtle animation for emoji and chat message loading
+
+### Changed
+ - Tweak styling slightly
+ - Use new perspective diff sync with improved logic
+
+### Deprecated
+
+### Removed
+ - Loading indicator for profile images
+
+### Fixed
+ - Async routing
+ - Joining a neighbourhood from click
+ - Member count in group
+ - Edit cursor fixed in chat view
+
+### Security
+
 ## [0.4.1] - 16/01/2023
 
 ### Added

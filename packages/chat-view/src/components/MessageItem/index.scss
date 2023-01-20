@@ -109,7 +109,7 @@
 }
 
 .messageNotSynced {
-  opacity: 0.7;
+  animation: message-syncing 1.4s linear infinite;
 }
 
 .messageItemHeader {
@@ -236,6 +236,10 @@
   border: 1px solid var(--j-color-primary-500);
 }
 
+.emojiButtonNotSynced {
+  animation: message-syncing 1.4s linear infinite;
+}
+
 j-tooltip::part(base) {
   display: inline;
 }
@@ -303,4 +307,10 @@ j-tooltip::part(base) {
 
 .noPaddingStyle {
   padding: 0;
+}
+
+@keyframes message-syncing {
+  50% {
+    opacity: 0.6;
+  }
 }

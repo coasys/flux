@@ -1,6 +1,6 @@
 {
   "name": "flux",
-  "version": "0.4.0",
+  "version": "0.4.2",
   "description": "A social web3 tool kit for communities",
   "author": "josh@junto.foundation",
   "repository": {
@@ -18,6 +18,7 @@
   "dependencies": {
     "@junto-foundation/chat-view": "*",
     "@junto-foundation/forum-view": "*",
+    "@junto-foundation/graph-view": "*",
     "@junto-foundation/junto-elements": "*",
     "@perspect3vism/ad4m": "0.2.10",
     "@perspect3vism/ad4m-connect": "0.2.10",

@@ -5,7 +5,7 @@
       "imports": []
     },
     "src/styles/base.css": {
-      "bytes": 11155,
+      "bytes": 11488,
       "imports": []
     },
     "../../node_modules/@lit/reactive-element/css-tag.js": {
@@ -1297,7 +1297,7 @@
       ]
     },
     "src/components/popover/Popover.ts": {
-      "bytes": 4649,
+      "bytes": 4779,
       "imports": [
         {
           "path": "../../node_modules/lit/index.js",
@@ -1470,7 +1470,7 @@
       "imports": []
     },
     "src/components/avatar/Avatar.ts": {
-      "bytes": 3565,
+      "bytes": 3712,
       "imports": [
         {
           "path": "../../node_modules/lit/index.js",
@@ -1643,7 +1643,7 @@
       ]
     },
     "src/components/icon/Icon.ts": {
-      "bytes": 1956,
+      "bytes": 1957,
       "imports": [
         {
           "path": "../../node_modules/lit/index.js",
@@ -1699,7 +1699,7 @@
       ]
     },
     "src/components/tab-item/TabItem.ts": {
-      "bytes": 3580,
+      "bytes": 3644,
       "imports": [
         {
           "path": "../../node_modules/lit/index.js",
@@ -1807,7 +1807,7 @@
       ]
     },
     "src/components/toast/Toast.ts": {
-      "bytes": 2747,
+      "bytes": 2768,
       "imports": [
         {
           "path": "../../node_modules/lit/index.js",
@@ -2071,7 +2071,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 516792
+      "bytes": 517264
     },
     "dist/main.js": {
       "imports": [],
@@ -2316,7 +2316,7 @@
           "bytesInOutput": 65
         },
         "src/components/popover/Popover.ts": {
-          "bytesInOutput": 2362
+          "bytesInOutput": 2492
         },
         "src/components/menu/Menu.ts": {
           "bytesInOutput": 369
@@ -2346,7 +2346,7 @@
           "bytesInOutput": 5652
         },
         "src/components/avatar/Avatar.ts": {
-          "bytesInOutput": 2667
+          "bytesInOutput": 2811
         },
         "../../node_modules/lit-html/directives/if-defined.js": {
           "bytesInOutput": 22
@@ -2367,13 +2367,13 @@
           "bytesInOutput": 2824
         },
         "src/components/icon/Icon.ts": {
-          "bytesInOutput": 1284
+          "bytesInOutput": 1285
         },
         "src/components/tabs/Tabs.ts": {
           "bytesInOutput": 1738
         },
         "src/components/tab-item/TabItem.ts": {
-          "bytesInOutput": 3008
+          "bytesInOutput": 3009
         },
         "src/components/flex/Flex.ts": {
           "bytesInOutput": 2041
@@ -2385,7 +2385,7 @@
           "bytesInOutput": 1946
         },
         "src/components/toast/Toast.ts": {
-          "bytesInOutput": 2197
+          "bytesInOutput": 2218
         },
         "../utils/helpers/timeHelpers.ts": {
           "bytesInOutput": 241
@@ -2409,22 +2409,22 @@
           "bytesInOutput": 0
         }
       },
-      "bytes": 120869
+      "bytes": 121166
     },
     "dist/main.css.map": {
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 12598
+      "bytes": 12938
     },
     "dist/main.css": {
       "imports": [],
       "inputs": {
         "src/styles/base.css": {
-          "bytesInOutput": 9555
+          "bytesInOutput": 9884
         }
       },
-      "bytes": 9678
+      "bytes": 10008
     }
   }
 }

@@ -44,7 +44,7 @@ export default defineComponent({
 
         for (let i = 0; i < users.length; i++) {
           const did = users[i];
-          if (i <= 4) {
+          if (i <= 3) {
             const profile = await getProfile(did);
             if (profile) {
               firstUsers[did] = profile;
@@ -90,14 +90,14 @@ export default defineComponent({
   justify-content: center;
   outline: 0;
   cursor: pointer;
-  background: var(--j-color-white);
-  border: 0.25px solid var(--j-border-color);
+  background: var(--j-color-ui-100);
+  border: 1px solid transparent;
   border-radius: 50%;
   height: var(--j-size-md);
   width: var(--j-size-md);
   font-size: var(--j-font-size-400);
-  font-weight: 600;
-  color: var(--j-color-ui-400);
+  font-weight: 400;
+  color: var(--j-color-ui-600);
   white-space: nowrap;
   padding: 14px;
 }
