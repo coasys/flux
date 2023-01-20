@@ -21,12 +21,41 @@ function findNodes(links, source) {
 }
 
 export default function CommunityOverview({ uuid, source }) {
+  const containerRef = useRef<HTMLDivElement>();
   const graph = useRef<ForceGraph3DInstance>(undefined);
   const graphEl = useRef<HTMLDivElement | null>(null);
+  const [containerSize, setContainerSize] = useState([0, 0]);
   const [ad4mInitialised, setAd4mInitialised] = useState(false);
   const [graphInitialised, setGraphInitialised] = useState(false);
   const [nodes, setNodes] = useState<{ id: string; group: string }[]>([]);
   const [links, setLinks] = useState<{ source: string; target: string }[]>([]);
+
+  // Listen to resize events
+  useEffect(() => {
+    function handleResize() {
+      if (containerRef.current) {
+        setContainerSize([
+          containerRef.current.clientWidth,
+          containerRef.current.clientHeight,
+        ]);
+      }
+    }
+
+    window.addEventListener("resize", handleResize);
+    handleResize();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  });
+
+  // Resize graph on resize
+  useEffect(() => {
+    if (graph.current) {
+      graph.current.width(containerSize[0]);
+      graph.current.height(containerSize[1]);
+    }
+  }, [containerSize[0], containerSize[1]]);
 
   // Fetch initial snapshot
   useEffect(() => {
@@ -79,6 +108,8 @@ export default function CommunityOverview({ uuid, source }) {
             : node.id
         )
         .nodeAutoColorBy("group")
+        .width(containerSize[0] || window.innerWidth)
+        .height(containerSize[1] || window.innerHeight)
         .backgroundColor("rgba(0,0,0,0)")
         .onNodeClick((node: { x; y; z }) => {
           // Aim at node from outside it
@@ -138,7 +169,7 @@ export default function CommunityOverview({ uuid, source }) {
   };
 
   return (
-    <div>
+    <div ref={containerRef}>
       <div ref={graphEl} id="graph" />
     </div>
   );
