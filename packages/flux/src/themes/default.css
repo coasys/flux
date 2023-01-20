@@ -14,6 +14,7 @@
   --app-channel-header-bg-color: hsl(var(--j-color-ui-hue), 0%, 15%);
   --app-channel-footer-bg-color: hsl(var(--j-color-ui-hue), 0%, 13%);
   --app-channel-border-color: transparent;
+  --j-color-ui-saturation: 0%;
 }
 
 :root[theme="default"] j-modal::part(modal) {

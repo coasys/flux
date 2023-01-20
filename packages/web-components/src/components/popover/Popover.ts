@@ -38,6 +38,16 @@ const styles = css`
   }
   :host([open]) [part="content"] {
     display: inline-block;
+    animation: fade-in 0.2s ease;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 `;
 

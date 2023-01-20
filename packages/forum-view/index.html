@@ -37,8 +37,8 @@
     ></ad4m-connect>
     <perspective-view style="height: 100vh; display: block"></perspective-view>
     <script type="module">
-      import "https://unpkg.com/@perspect3vism/ad4m-connect@0.0.11-11/dist/web.js";
-      import ForumView from "./dist/main.js";
+      import "https://cdn.jsdelivr.net/npm/@perspect3vism/ad4m-connect/dist/web.js";
+      import ForumView from "./src/main.ts";
 
       const el = document.querySelector("perspective-view");
       const [_, uuid, source] = document.location.pathname.split("/");

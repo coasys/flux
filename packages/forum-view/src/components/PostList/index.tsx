@@ -1,6 +1,6 @@
 import { useContext, useMemo, useState } from "preact/hooks";
 import PostItem from "../PostItem";
-import style from "./index.scss";
+import style from "./index.module.css";
 import { DisplayView, displayOptions } from "../../constants/options";
 import { ChannelContext, useEntries } from "utils/react";
 import PostModel from "utils/api/post";

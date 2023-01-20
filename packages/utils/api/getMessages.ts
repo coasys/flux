@@ -63,11 +63,10 @@ export default async function ({
   const cleanedMessages: Message[] = [];
 
   cleanedResults.forEach((result: any) => {
-    console.log(result);
     //Parse out the message content
-    result.EditMessages.forEach(message => {
+    result.EditMessages.forEach((message) => {
       message.content = Literal.fromUrl(message.content).get().data;
-    })
+    });
     result.Message.replace("%3A", ":");
     //Parse the original message data and add it to the edit messages
     const expressionData = Literal.fromUrl(result.Message).get().data;
@@ -79,6 +78,7 @@ export default async function ({
     //Parse out the emojis
     result.Reactions.forEach((reaction) => {
       reaction.content = reaction.content.replace("emoji://", "");
+      reaction.synced = true;
     });
     //Parse out the replies
     result.Replies.forEach((reply) => {

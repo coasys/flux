@@ -52,16 +52,7 @@ export default async ({
     } as CommunityState;
 
     dataStore.addCommunity(newCommunity);
-    // We add a default channel that is a reference to
-    // the community itself. This way we can utilize the fractal nature of
-    // neighbourhoods. Remember that this also need to happen in join community.
-    await dataStore.createChannel({
-      name: "Home",
-      views: [ChannelView.Chat],
-      perspectiveUuid: community.uuid,
-    });
 
-    // @ts-ignore
     return newCommunity;
   } catch (e) {
     appStore.showDangerToast({
