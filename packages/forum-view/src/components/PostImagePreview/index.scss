@@ -1,0 +1,30 @@
+.preview {
+  width: 100%;
+}
+
+.files {
+  margin-top: var(--j-space-400);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--j-space-300);
+}
+
+.file {
+  display: grid;
+  grid-template-columns: 1fr;
+  place-items: center;
+  gap: var(--j-space-300);
+}
+
+.filePreview {
+  border-radius: var(--j-border-radius);
+  height: 100%;
+  max-width:100%;
+  max-height: 350px;
+  object-fit: cover;
+}
+
+
+
+
+

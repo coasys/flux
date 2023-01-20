@@ -49,17 +49,27 @@
     <forum-view
       v-show="currentView === ChannelView.Forum"
       class="perspective-view"
-      :source="`${channel.id}`"
+      :source="channel.id"
       :perspective="communityId"
       @agent-click="onAgentClick"
       @channel-click="onChannelClick"
       @neighbourhood-click="onNeighbourhoodClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></forum-view>
+    <graph-view
+      v-show="currentView === ChannelView.Graph"
+      class="perspective-view"
+      :source="channel.id"
+      :perspective="communityId"
+      @agent-click="onAgentClick"
+      @channel-click="onChannelClick"
+      @neighbourhood-click="onNeighbourhoodClick"
+      @hide-notification-indicator="onHideNotificationIndicator"
+    ></graph-view>
     <chat-view
       v-show="currentView === ChannelView.Chat"
       class="perspective-view"
-      :source="`${channel.id}`"
+      :source="channel.id"
       :perspective="communityId"
       @agent-click="onAgentClick"
       @channel-click="onChannelClick"
@@ -102,6 +112,7 @@
 <script lang="ts">
 import ForumView from "@junto-foundation/forum-view";
 import ChatView from "@junto-foundation/chat-view";
+import GraphView from "@junto-foundation/graph-view";
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
@@ -144,11 +155,19 @@ export default defineComponent({
       isJoiningCommunity: ref(false),
     };
   },
-  mounted() {
-    if (!customElements.get("chat-view"))
-      customElements.define("chat-view", ChatView);
-    if (!customElements.get("forum-view"))
-      customElements.define("forum-view", ForumView);
+  async mounted() {
+    if (!customElements.get("chat-view")) {
+      const module = await import(`@junto-foundation/chat-view`);
+      customElements.define("chat-view", module.default);
+    }
+    if (!customElements.get("forum-view")) {
+      const module = await import(`@junto-foundation/forum-view`);
+      customElements.define("forum-view", module.default);
+    }
+    if (!customElements.get("graph-view")) {
+      const module = await import(`@junto-foundation/graph-view`);
+      customElements.define("graph-view", module.default);
+    }
   },
   computed: {
     sameAgent() {
