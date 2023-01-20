@@ -216,14 +216,16 @@ export default {
   }): void {
     const state = useDataStore();
     const channel = state.getChannel(payload.channelId);
-    const tempCommunity = state.getCommunity(payload.communityId);
-    const community = state.communities[tempCommunity.uuid];
-    channel!.hasNewMessages = payload.value;
-    community.hasNewMessages = state
-      .getChannelStates(tempCommunity.uuid)
-      .reduce((acc: boolean, channel) => {
-        if (!acc) return channel.hasNewMessages;
-        return true;
-      }, false);
+    const community = state.communities[payload.communityId];
+
+    if (channel) {
+      channel.hasNewMessages = payload.value;
+    }
+
+    if (community) {
+      community.hasNewMessages = state
+        .getChannelStates(payload.communityId)
+        .some((channel) => channel.hasNewMessages);
+    }
   },
 };
