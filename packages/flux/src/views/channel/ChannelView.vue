@@ -155,13 +155,19 @@ export default defineComponent({
       isJoiningCommunity: ref(false),
     };
   },
-  mounted() {
-    if (!customElements.get("chat-view"))
-      customElements.define("chat-view", ChatView);
-    if (!customElements.get("forum-view"))
-      customElements.define("forum-view", ForumView);
-    if (!customElements.get("graph-view"))
-      customElements.define("graph-view", GraphView);
+  async mounted() {
+    if (!customElements.get("chat-view")) {
+      const module = await import(`@junto-foundation/chat-view`);
+      customElements.define("chat-view", module.default);
+    }
+    if (!customElements.get("forum-view")) {
+      const module = await import(`@junto-foundation/forum-view`);
+      customElements.define("forum-view", module.default);
+    }
+    if (!customElements.get("graph-view")) {
+      const module = await import(`@junto-foundation/graph-view`);
+      customElements.define("graph-view", module.default);
+    }
   },
   computed: {
     sameAgent() {
