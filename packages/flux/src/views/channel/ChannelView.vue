@@ -34,7 +34,9 @@
       </div>
       <div class="channel-view__header-right">
         <j-tooltip placement="auto" title="Expand">
-          <j-icon size="sm" name="arrows-angle-expand" @click="isExpanded = !isExpanded"></j-icon>
+          <j-button size="sm" variant="ghost">
+            <j-icon size="sm" name="arrows-angle-expand" @click="isExpanded = !isExpanded"></j-icon>
+          </j-button>
         </j-tooltip>
         <j-tooltip placement="auto" title="Edit Channel">
           <j-button
