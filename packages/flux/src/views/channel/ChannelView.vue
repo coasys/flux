@@ -1,5 +1,5 @@
 <template>
-  <div class="channel-view" style="height: 100%">
+  <div class="channel-view" style="height: 100%" :class="{expanded: isExpanded}">
     <div class="channel-view__header">
       <j-button
         class="channel-view__sidebar-toggle"
@@ -33,6 +33,9 @@
         </div>
       </div>
       <div class="channel-view__header-right">
+        <j-tooltip placement="auto" title="Expand">
+          <j-icon size="sm" name="arrows-angle-expand" @click="isExpanded = !isExpanded"></j-icon>
+        </j-tooltip>
         <j-tooltip placement="auto" title="Edit Channel">
           <j-button
             v-if="sameAgent"
@@ -153,6 +156,7 @@ export default defineComponent({
       activeProfile: ref<string>(""),
       showProfile: ref(false),
       isJoiningCommunity: ref(false),
+      isExpanded: ref(false)
     };
   },
   async mounted() {
@@ -286,6 +290,15 @@ export default defineComponent({
 </script>
 
 <style>
+.expanded {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 999999;
+}
+
 .channel-view {
   background-color: var(--app-channel-bg-color, transparent);
 }
