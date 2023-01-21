@@ -45,3 +45,12 @@
 .backButton:hover {
     background-color: var(--j-color-ui-50);
 }
+
+.node {
+   display: none;
+}
+
+.node:hover {
+    display: block;
+}
+

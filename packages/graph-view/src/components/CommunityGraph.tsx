@@ -5,12 +5,15 @@ import {
   LinkExpression,
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import { Ad4mClient, Literal } from "@perspect3vism/ad4m";
+import SpriteText from 'three-spritetext';
+import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+import styles from "../App.module.css";
 
 function findNodes(links, source) {
   return links.reduce((acc, link) => {
     const hasSource = link.data.source === source;
     const alreadyIn = acc.some((l) => l === link.data.source);
-    console.log({ hasSource, link, acc, alreadyIn });
+   
     if (alreadyIn) return acc;
     if (hasSource) {
       const newLinks = findNodes(links, link.data.target);
@@ -98,22 +101,43 @@ export default function CommunityOverview({ uuid, source }) {
     }
   }, [ad4mInitialised, uuid, source]);
 
+  function getCard(content) {
+    return `<j-box bg="ui-500" p="500">
+    ${content} <j-checkbox></j-checkbox>
+    </j-box>`
+  }
+
   // Setup graph
   useEffect(() => {
-    const setupGraph = async () => {
-      graph.current = ForceGraph3D()
-        .nodeLabel((node) =>
-          node.id.startsWith("literal://")
+
+
+    const nodeEls = nodes.map((node) => {
+      const content = node.id.startsWith("literal://")
             ? Literal.fromUrl(node.id).get().data
-            : node.id
-        )
+            : node.id; 
+      const nodeEl = document.createElement('div');
+      nodeEl.setAttribute("id", node.id);
+      nodeEl.classList.add(styles.node);
+      nodeEl.innerHTML = `${content}`;
+      return nodeEl;
+    })
+
+    const setupGraph = async () => {
+      graph.current = ForceGraph3D({ extraRenderers: [new CSS2DRenderer()]})
         .nodeAutoColorBy("group")
         .width(containerSize[0] || window.innerWidth)
         .height(containerSize[1] || window.innerHeight)
         .backgroundColor("rgba(0,0,0,0)")
-        .onNodeClick((node: { x; y; z }) => {
+        .nodeThreeObjectExtend(true)
+        .nodeThreeObject(node => {
+          const n = nodeEls.find(n => n.id === node.id);
+          return new CSS2DObject(n);
+        })
+        .onNodeClick((node: {x, y, z}) => {
+          //const nodeEl = nodeEls.find(nodeEl => nodeEl.id === node.id);
+          //nodeEl.classList.toggle(styles.visible);
           // Aim at node from outside it
-          const distance = 40;
+          const distance = 100;
           const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
 
           const newPos =

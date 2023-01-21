@@ -31,6 +31,8 @@
     "@perspect3vism/ad4m": "^0.2.10",
     "@perspect3vism/ad4m-connect": "^0.2.7",
     "preact": "^10.11.3",
+    "three": "^0.148.0",
+    "three-spritetext": "^1.6.5",
     "utils": "*"
   },
   "devDependencies": {
