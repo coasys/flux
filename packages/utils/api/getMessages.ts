@@ -86,6 +86,7 @@ export default async function ({
       reply.id = reply.content;
       reply.timestamp = literal.timestamp;
       reply.content = literal.data;
+      reply.author = literal.author;
     });
     cleanedMessages.push({
       id: result.Message,
