@@ -3,6 +3,88 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.4.1] - 16/01/2023
+
+### Added
+ - Forum post editing
+ - Delete posts
+ - New UI after joining a community to allow for navigation to channels without using sidebar
+ - New UI and loading animations when you join a community and are waiting for data to sync
+ - If a user joins a community; navigate to it by default
+
+### Changed
+ - Use ipfs public gateway instead of cloudflare
+ - Member links now used to determine if we are sync'd with a community
+ - Use new link language with more effecient active agent fetching & reduce ad4m logging
+ - Improved rendering of avatars
+
+### Deprecated
+
+### Removed
+
+### Fixed
+ - Neighbourhood links are now parsed out of pasted joining code
+ - You can no longer post empty comments on posts
+ - Username should now prepopulate from ad4m on signup
+ - Fix disclaimer model showing too often
+ - Messages are now added to the UI optimistically with indication of when they sync to the network
+ - Fixed creating null image expressions if we do not provide images for a community
+ - Not being able to press space in forum post body
+ - Not being able to press tab to move between title and body when making a forum post
+ - Show correct image when editing/removing an image 
+ - Community image trying to resolve on IPFS even if it does not exist
+ - Already sync'd community will not incorrectly show sync screen on reload
+ - Refresh when looking at a post will correctly maintain view on that post
+
+### Security
+
+## [0.4.0] - 04/01/2023
+
+### Added
+ - Fallback to public IPFS gateway if images not resolved by local node
+ - Forum view, with ability to post; links, long form text and images
+ - Ability to add multiple views to a channel
+ - Side bar folders for different views on channels
+ - Mechanism for updating & managing social dna versions
+ - Signup flow greatly improved with intro experience explaining Flux
+ - Scrolling to a very old reply will now work correctly and move to that area of that chat
+ - Posts have a comment section
+ - Messages which have not been sync'd with the DHT will not appear grey until sync'd
+ - Generic model class structure to allow easy iteration of features & abstracting of link management
+ - AD4M connect will now always download the latest version for your OS
+ - Prompt to join a testing community when opening Flux
+ - All images are now compressed before being uploaded to IPFS
+ - Loading indicator when joining a community
+
+### Changed
+ - Community, channel & forum structures now use new Entry API models
+ - Holochain now using version 0.1.0-beta-rc.1
+ - IPFS now using version 0.65.0
+ - All API / AD4M methods now exist in their own utils package, and no longer in app logic
+ - AD4MIN UI refreshed & rebuilt
+ - Adding and or removing multiple links will now happen in one ad4m / holochain operation
+
+### Deprecated
+ - Signup flow no longer asks for first or last name
+
+### Removed
+
+### Fixed
+ - Many reloads of profiles when hovering over an emoji
+ - Community tweaks editing now happens with atomic operations
+ - Links will now load metadata right after pasting into link box
+ - Inconsistent updating of profile when changing any text or images
+ - Neighbourhood link cards in chat will only be joinable if not already joined
+ - Image loading across the app is more consistent and makes better use of caching logic
+ - Switching between communities is now smoother
+ - Literals are now encoded correctly
+ - Lookbehind regex breaking flux UI in safari
+ - Web components now have correct typescript typing
+ - Netlify build script fixed
+
+### Security
+
+
 ## [0.3.1] - 08/11/2022
 
 ### Added

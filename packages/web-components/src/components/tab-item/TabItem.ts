@@ -1,5 +1,6 @@
 import { LitElement, html, css } from "lit";
 import { state, customElement, property } from "lit/decorators.js";
+import { ifDefined } from "lit-html/directives/if-defined.js";
 import sharedStyles from "../../shared/styles";
 
 const styles = css`
@@ -61,6 +62,13 @@ const styles = css`
   :host([variant="button"][checked]) [part="base"] {
     background: var(--j-color-primary-100);
     color: var(--j-color-primary-700);
+  }
+  :host([disabled]) [part="base"] {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  :host([disabled][checked]) [part="base"] {
+    opacity: 1;
   }
 `;
 
@@ -147,6 +155,7 @@ class TabItem extends LitElement {
       <button
         aria-selected=${this.checked}
         aria-controls=${this.value}
+        ?disabled=${this.disabled}
         @click=${this._handleChange}
         part="base"
         role="tab"

@@ -1,8 +1,5 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import {
-  PropertyMap,
-  PropertyValueMap,
-} from "../types";
+import { PropertyMap, PropertyValueMap } from "../types";
 import subscribeToLinks from "../api/subscribeToLinks";
 import { LinkExpression, PerspectiveProxy, Subject } from "@perspect3vism/ad4m";
 import { AsyncQueue } from "./queue";
@@ -25,7 +22,7 @@ function capitalize(str: string) {
 
 // e.g. "name" -> "setName"
 function propertyNameToSetterName(property: string): string {
-  return `set${capitalize(property)}`
+  return `set${capitalize(property)}`;
 }
 
 function setProperties(subject: any, properties: PropertyValueMap) {
@@ -40,15 +37,15 @@ function setProperties(subject: any, properties: PropertyValueMap) {
   });
 }
 
-export default class Factory<SubjectClass extends {type: string}> {
+export default class Factory<SubjectClass extends { type: string }> {
   client = null;
   source = SELF;
   perspectiveUuid = "";
-  private unsubscribeCb: Function|null = null;
+  private unsubscribeCb: Function | null = null;
   private isSubcribing = false;
   private listeners = { add: {}, remove: {} } as Listeners;
   private subject: SubjectClass;
-  private perspective: PerspectiveProxy|null = null;
+  private perspective: PerspectiveProxy | null = null;
 
   constructor(subject: SubjectClass, props: ModelProps) {
     this.perspectiveUuid = props.perspectiveUuid;
@@ -59,14 +56,16 @@ export default class Factory<SubjectClass extends {type: string}> {
   async ensurePerspective() {
     if (!this.perspective) {
       const ad4mClient = await getAd4mClient();
-      this.perspective = await ad4mClient.perspective.byUUID(this.perspectiveUuid);
+      this.perspective = await ad4mClient.perspective.byUUID(
+        this.perspectiveUuid
+      );
     }
   }
 
   async create(data: PropertyMap, id?: string): Promise<SubjectClass> {
     const base = id || `flux_entry://${uuidv4()}`;
-    await this.ensurePerspective()
-    let newInstance = await this.perspective?.createSubject(this.subject, base)
+    await this.ensurePerspective();
+    let newInstance = await this.perspective?.createSubject(this.subject, base);
     if (!newInstance) {
       throw "Failed to create new instance of " + this.subject.type;
     }
@@ -76,27 +75,36 @@ export default class Factory<SubjectClass extends {type: string}> {
   }
 
   async update(id: string, data: PropertyMap) {
-    const instance = await this.get(id)
+    const instance = await this.get(id);
     if (!instance) {
-      throw "Failed to find instance of " + this.subject.type + " with id " + id;
+      throw (
+        "Failed to find instance of " + this.subject.type + " with id " + id
+      );
     }
     setProperties(instance, data);
     return instance;
   }
 
   async get(id: string): Promise<SubjectClass | null> {
-    await this.ensurePerspective()
-    return await this.perspective?.getSubjectProxy(id, this.subject) || null;
+    await this.ensurePerspective();
+    return (await this.perspective?.getSubjectProxy(id, this.subject)) || null;
   }
 
   async getAll(source?: string): Promise<SubjectClass[]> {
-    await this.ensurePerspective()
-    const subjectClass = await this.perspective!.stringOrTemplateObjectToSubjectClass(this.subject)
-    const results = await this.perspective?.infer(`triple(${source}, _, X), instance(Class, X), subject_class(${subjectClass}, Class)`)
-    return await Promise.all(results.map(async (result) => {
-      let subject = new Subject(this.perspective!, result.X, subjectClass)
-      await subject.init()
-    }))
+    await this.ensurePerspective();
+    const subjectClass =
+      await this.perspective!.stringOrTemplateObjectToSubjectClass(
+        this.subject
+      );
+    const results = await this.perspective?.infer(
+      `triple(${source}, _, X), instance(Class, X), subject_class(${subjectClass}, Class)`
+    );
+    return await Promise.all(
+      results.map(async (result) => {
+        let subject = new Subject(this.perspective!, result.X, subjectClass);
+        await subject.init();
+      })
+    );
   }
 
   private async subscribe() {

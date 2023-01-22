@@ -19,7 +19,7 @@
         placement="bottom-end"
       >
         <j-button square slot="trigger" variant="ghost">
-          <j-icon size="xs" name="gear"></j-icon>
+          <j-icon size="sm" name="sliders2"></j-icon>
         </j-button>
         <j-menu slot="content">
           <j-menu-item
@@ -73,14 +73,39 @@
         :initials="community.neighbourhood.name.charAt(0).toUpperCase()"
         :url="community.neighbourhood.image"
       ></Avatar>
-      <div>
+      <div class="community-info-content">
         <j-text size="500" nomargin color="black">
           {{ community.neighbourhood.name }}
         </j-text>
         <j-text nomargin size="400" color="ui-500">
-          {{ community.neighbourhood.description || "No description" }}
+          {{
+            isSynced
+              ? community.neighbourhood.description || "No description"
+              : "syncing community..."
+          }}
         </j-text>
+        <j-box pt="400" v-if="!isSynced">
+          <LoadingBar></LoadingBar>
+        </j-box>
       </div>
+    </div>
+    <div class="warning-box">
+      <j-flex a="center" gap="300">
+        <j-icon
+          name="exclamation-circle"
+          size="xs"
+          color="warning-500"
+        ></j-icon>
+        <j-text nomargin weight="700" size="400" color="warning-500"
+          >Warning</j-text
+        >
+      </j-flex>
+      <j-text nomargin size="300" color="warning-500">
+        Flux is still in the alpha phase, things may break.
+        <a href="https://github.com/fluxsocial/flux/issues" target="_blank">
+          Report bugs here
+        </a>
+      </j-text>
     </div>
   </div>
 </template>
@@ -94,9 +119,11 @@ import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import Avatar from "@/components/avatar/Avatar.vue";
+import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
 
 export default defineComponent({
-  components: { Avatar },
+  components: { Avatar, LoadingBar },
+  props: { isSynced: Boolean },
   setup() {
     return {
       showCommunityMenu: ref(false),
@@ -164,6 +191,7 @@ export default defineComponent({
   z-index: 1;
   display: block;
   padding-left: var(--j-space-400);
+  padding-right: var(--j-space-400);
   gap: var(--j-space-300);
 }
 
@@ -181,6 +209,7 @@ export default defineComponent({
 }
 
 .community-info {
+  width: 100%;
   margin-top: var(--j-space-400);
   display: flex;
   align-items: center;
@@ -193,11 +222,27 @@ export default defineComponent({
   min-height: 68px;
 }
 
+.community-info-content {
+  width: 100%;
+}
+
 j-divider {
   display: block;
   width: 100%;
   border-bottom: 1px solid var(--j-color-ui-100);
   margin-top: var(--j-space-300);
   margin-bottom: var(--j-space-300);
+}
+
+.warning-box {
+  margin-top: var(--j-space-500);
+  background-color: var(--j-color-warning-50);
+  border: 1px solid var(--j-color-warning-500);
+  border-radius: var(--j-border-radius);
+  padding: var(--j-space-300);
+}
+
+.warning-box a {
+  color: inherit;
 }
 </style>

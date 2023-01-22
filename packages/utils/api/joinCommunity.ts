@@ -2,6 +2,7 @@ import { Community } from "../types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import CommunityModel from "./community";
 import { getMetaFromLinks } from "utils/helpers/getNeighbourhoodMeta";
+import { Ad4mClient } from "@perspect3vism/ad4m";
 
 export interface Payload {
   joiningLink: string;
@@ -9,7 +10,7 @@ export interface Payload {
 
 export default async ({ joiningLink }: Payload): Promise<Community> => {
   try {
-    const client = await getAd4mClient();
+    const client: Ad4mClient = await getAd4mClient();
     const agent = await client.agent.me();
     const allPerspectives = await client.perspective.all();
 
@@ -43,7 +44,7 @@ export default async ({ joiningLink }: Payload): Promise<Community> => {
       image: community?.image || "",
       thumbnail: community?.thumbnail || "",
       neighbourhoodUrl: perspective.sharedUrl!,
-      members: [agent.did, neighbourhoodMeta.author!],
+      members: [agent.did],
     };
   } catch (e) {
     throw new Error(e);

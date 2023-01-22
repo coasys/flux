@@ -34,9 +34,6 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
   const [showModal, setShowModal] = useState(false);
   const [initialScroll, setinitialScroll] = useState(false);
   const scroller = useRef();
-  const {
-    state: { editor },
-  } = useContext(EditorContext);
   const [selectedReplies, setSelectedReplies] = useState<any>(null);
 
   const {
@@ -101,10 +98,12 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
     const fetchedMessageCount = await loadMore(timestamp, backwards);
 
     if (fetchedMessageCount > 0) {
-      scroller?.current?.scrollToIndex({
-        index: fetchedMessageCount - 1,
-        align: "end",
-      });
+      setTimeout(() => {
+        scroller?.current?.scrollToIndex({
+          index: fetchedMessageCount - 2,
+          align: "start",
+        });
+      }, 0)
     }
   }
 

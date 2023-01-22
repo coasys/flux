@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState, useMemo } from "preact/hooks";
 import { CommunityContext, useEntries } from "utils/react";
-import styles from "./index.scss";
+import styles from "./index.module.css";
 import { formatRelative } from "date-fns/esm";
 import { Profile } from "utils/types";
 import Avatar from "../Avatar";

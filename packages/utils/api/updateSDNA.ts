@@ -1,20 +1,19 @@
 import { SDNAValues } from "./generateSDNALiteral";
-import { createSDNA } from "./createSDNA";
-import { LinkExpression } from "@perspect3vism/ad4m";
-import { deleteSDNALinks } from "./deleteSDNALinks";
-import { getSDNAVersion } from "./getSDNA";
+import { getSDNACreationLinks } from "./createSDNA";
+import { getSDNAVersion, getFluxSDNALinks } from "./getSDNA";
 import { LATEST_SDNA_VERSION } from "../constants/sdna";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
-export async function updateSDNA(perspectiveUuid: string, values?: SDNAValues): Promise<LinkExpression> {
-    let sdnaLink;
-    await deleteSDNALinks(perspectiveUuid);
+export async function updateSDNA(perspectiveUuid: string, values?: SDNAValues): Promise<void> {
+    const removals = await getFluxSDNALinks(perspectiveUuid);
+    let additions;
     try {
-        sdnaLink = await createSDNA(perspectiveUuid, values);
+        additions = await getSDNACreationLinks(perspectiveUuid, values);
     } catch (e) {
-        sdnaLink = await createSDNA(perspectiveUuid);
-    } finally {
-        return sdnaLink;
+        additions = await getSDNACreationLinks(perspectiveUuid);
     }
+    const ad4mClient = await getAd4mClient();
+    await ad4mClient.perspective.linkMutations(perspectiveUuid, {removals, additions});
 }
 
 export async function checkUpdateSDNAVersion(perspectiveUuid: string, lastSeenTimestamp: Date, values?: SDNAValues): Promise<boolean> {

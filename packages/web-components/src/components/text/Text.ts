@@ -12,7 +12,7 @@ const styles = css`
     --j-text-display: block;
     --j-text-family: inherit;
     --j-text-letter-spacing: normal;
-    --j-text-heading-letter-spacing: 2px;
+    --j-text-heading-letter-spacing: 1px;
     --j-text-heading-family: inherit;
   }
 

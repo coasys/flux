@@ -9,6 +9,7 @@ export interface Payload {
   replyUrl: string;
   message: Object;
   channelId: string;
+  literal?: string;
 }
 
 export default async function ({
@@ -16,11 +17,12 @@ export default async function ({
   replyUrl,
   message,
   channelId,
+  literal
 }: Payload) {
   try {
     const client = await getAd4mClient();
     
-    const expUrl = await client.expression.create(message, 'literal');
+    const expUrl = literal ? literal : await client.expression.create(message, 'literal');
 
     const links = [
       new Link({

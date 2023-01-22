@@ -5,9 +5,7 @@ export default function LinkCard({ name, description, onClick, image }) {
   return (
     <div class={styles.neighbourhoodCard} size="300" onClick={onClick}>
       <div>
-        <small class={styles.neighbourhoodCardTitle}>Link</small>
         <div class={styles.neighbourhoodCardFlex}>
-          {image && <img src={image} width={100} height={100} />}
           <div>
             <div class={styles.neighbourhoodCardName}>
               {name || "No title"}
@@ -16,6 +14,7 @@ export default function LinkCard({ name, description, onClick, image }) {
               {truncatedDescription || "No descriptioon"}
             </div>
           </div>
+          {image && <img class={styles.neighbourhoodCardImage} src={image} width={140} />}
         </div>
       </div>
     </div>

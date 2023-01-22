@@ -1,5 +1,5 @@
 <template>
-  <div class="channel-view" style="height: 100%">
+  <div class="channel-view" style="height: 100%" :class="{expanded: isExpanded}">
     <div class="channel-view__header">
       <j-button
         class="channel-view__sidebar-toggle"
@@ -33,6 +33,11 @@
         </div>
       </div>
       <div class="channel-view__header-right">
+        <j-tooltip placement="auto" :title="isExpanded ? 'Minimize' : 'Fullsize'">
+          <j-button size="sm" variant="ghost">
+            <j-icon size="sm" :name="isExpanded ? 'arrows-angle-contract' : 'arrows-angle-expand'" @click="isExpanded = !isExpanded"></j-icon>
+          </j-button>
+        </j-tooltip>
         <j-tooltip placement="auto" title="Edit Channel">
           <j-button
             v-if="sameAgent"
@@ -49,17 +54,27 @@
     <forum-view
       v-show="currentView === ChannelView.Forum"
       class="perspective-view"
-      :source="`${channel.id}`"
+      :source="channel.id"
       :perspective="communityId"
       @agent-click="onAgentClick"
       @channel-click="onChannelClick"
       @neighbourhood-click="onNeighbourhoodClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></forum-view>
+    <graph-view
+      v-show="currentView === ChannelView.Graph"
+      class="perspective-view"
+      :source="channel.id"
+      :perspective="communityId"
+      @agent-click="onAgentClick"
+      @channel-click="onChannelClick"
+      @neighbourhood-click="onNeighbourhoodClick"
+      @hide-notification-indicator="onHideNotificationIndicator"
+    ></graph-view>
     <chat-view
       v-show="currentView === ChannelView.Chat"
       class="perspective-view"
-      :source="`${channel.id}`"
+      :source="channel.id"
       :perspective="communityId"
       @agent-click="onAgentClick"
       @channel-click="onChannelClick"
@@ -89,35 +104,11 @@
         @openCompleteProfile="() => handleProfileClick(activeProfile)"
       />
     </j-modal>
-    <j-modal
-      size="xs"
-      v-if="activeCommunity"
-      :open="showJoinCommuinityModal"
-      @toggle="(e: any) => toggleJoinCommunityModal(e.target.open, activeCommunity)"
-    >
-      <j-box v-if="activeCommunity" p="800">
-        <j-flex a="center" direction="column" gap="500">
-          <j-text v-if="activeCommunity.name">
-            {{ activeCommunity.name }}
-          </j-text>
-          <j-text
-            v-if="activeCommunity.description"
-            variant="heading-sm"
-            nomargin
-          >
-            {{ activeCommunity.description }}
-          </j-text>
-          <j-button
-            :disabled="isJoiningCommunity"
-            :loading="isJoiningCommunity"
-            @click="joinCommunity"
-            size="lg"
-            full
-            variant="primary"
-          >
-            Join Community
-          </j-button>
-        </j-flex>
+    <j-modal size="xs" v-if="isJoiningCommunity" :open="isJoiningCommunity">
+      <j-box p="500" align="center">
+        <Hourglass width="30px"></Hourglass>
+        <j-text variant="heading">Joining community</j-text>
+        <j-text>Please wait...</j-text>
       </j-box>
     </j-modal>
   </div>
@@ -126,6 +117,7 @@
 <script lang="ts">
 import ForumView from "@junto-foundation/forum-view";
 import ChatView from "@junto-foundation/chat-view";
+import GraphView from "@junto-foundation/graph-view";
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
@@ -136,6 +128,7 @@ import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { ChannelView } from "utils/types";
 import viewOptions from "utils/constants/viewOptions";
+import Hourglass from "@/components/hourglass/Hourglass.vue";
 
 interface MentionTrigger {
   label: string;
@@ -149,6 +142,7 @@ export default defineComponent({
   components: {
     Profile,
     EditChannel,
+    Hourglass,
   },
   setup() {
     return {
@@ -163,16 +157,23 @@ export default defineComponent({
       memberMentions: ref<MentionTrigger[]>([]),
       activeProfile: ref<string>(""),
       showProfile: ref(false),
-      showJoinCommuinityModal: ref(false),
-      activeCommunity: ref<any>({}),
       isJoiningCommunity: ref(false),
+      isExpanded: ref(false)
     };
   },
-  mounted() {
-    if (!customElements.get("chat-view"))
-      customElements.define("chat-view", ChatView);
-    if (!customElements.get("forum-view"))
-      customElements.define("forum-view", ForumView);
+  async mounted() {
+    if (!customElements.get("chat-view")) {
+      const module = await import(`@junto-foundation/chat-view`);
+      customElements.define("chat-view", module.default);
+    }
+    if (!customElements.get("forum-view")) {
+      const module = await import(`@junto-foundation/forum-view`);
+      customElements.define("forum-view", module.default);
+    }
+    if (!customElements.get("graph-view")) {
+      const module = await import(`@junto-foundation/graph-view`);
+      customElements.define("graph-view", module.default);
+    }
   },
   computed: {
     sameAgent() {
@@ -223,7 +224,7 @@ export default defineComponent({
       );
 
       if (!community) {
-        this.toggleJoinCommunityModal(true, detail.link);
+        this.joinCommunity(detail.url);
       } else {
         this.$router.push({
           name: "community",
@@ -233,24 +234,20 @@ export default defineComponent({
         });
       }
     },
-    toggleJoinCommunityModal(open: boolean, community?: any): void {
-      if (!open) {
-        this.activeCommunity = undefined;
-      } else {
-        this.activeCommunity = community;
-      }
-      this.showJoinCommuinityModal = open;
-    },
-    joinCommunity() {
+    joinCommunity(url: string) {
       this.isJoiningCommunity = true;
       this.dataStore
-        .joinCommunity({ joiningLink: this.activeCommunity.url })
-        .then(() => {
-          this.$emit("submit");
+        .joinCommunity({ joiningLink: url })
+        .then((community) => {
+          this.$router.push({
+            name: "community",
+            params: {
+              communityId: community.neighbourhood.uuid,
+            },
+          });
         })
         .finally(() => {
           this.isJoiningCommunity = false;
-          this.showJoinCommuinityModal = false;
         });
     },
     onHideNotificationIndicator({ detail }: any) {
@@ -295,6 +292,15 @@ export default defineComponent({
 </script>
 
 <style>
+.expanded {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 999999;
+}
+
 .channel-view {
   background-color: var(--app-channel-bg-color, transparent);
 }

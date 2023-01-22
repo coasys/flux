@@ -5,8 +5,7 @@ import { LATEST_SDNA_VERSION, SDNA_CREATION_DATE } from "../constants/sdna";
 import { generateSDNALiteral } from "./generateSDNALiteral";
 import { SDNAValues } from "./generateSDNALiteral";
 
-export async function createSDNALink(perspectiveUuid: string, sdnaLiteral: Literal): Promise<LinkExpression> {
-    const ad4mClient = await getAd4mClient();
+export function generateSDNALinks(sdnaLiteral: Literal): Link[] {
     const sdnaUrl = sdnaLiteral.toUrl();
     const links = [
         new Link({
@@ -25,6 +24,12 @@ export async function createSDNALink(perspectiveUuid: string, sdnaLiteral: Liter
             target: SDNA_CREATION_DATE.toString()
         })
     ];
+    return links;
+}
+
+export async function createSDNALink(perspectiveUuid: string, sdnaLiteral: Literal): Promise<LinkExpression> {
+    const ad4mClient = await getAd4mClient();
+    const links = generateSDNALinks(sdnaLiteral);
     const createdLinks = await ad4mClient.perspective.addLinks(perspectiveUuid, links);
     const sdnaLink = createdLinks[0];
     return sdnaLink;
@@ -34,4 +39,10 @@ export async function createSDNA(perspectiveUuid: string, values?: SDNAValues): 
     const sdnaLiteral = await generateSDNALiteral(values);
     const sdnaLink = await createSDNALink(perspectiveUuid, sdnaLiteral);
     return sdnaLink;
+}
+
+export async function getSDNACreationLinks(perspectiveUuid: string, values?: SDNAValues): Promise<Link[]> {
+    const sdnaLiteral = await generateSDNALiteral(values);
+    const links = generateSDNALinks(sdnaLiteral);
+    return links
 }

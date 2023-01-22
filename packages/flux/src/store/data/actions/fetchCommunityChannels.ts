@@ -5,6 +5,7 @@ import { ChannelView } from "utils/types";
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async (communityId: string): Promise<void> => {
   const dataStore = useDataStore();
+  const keyedChannels = dataStore.channels;
 
   try {
     const Channel = new ChannelModel({ perspectiveUuid: communityId });
@@ -19,11 +20,14 @@ export default async (communityId: string): Promise<void> => {
         sourcePerspective: communityId,
         hasNewMessages: false,
         collapsed: false,
-        currentView: channel.views[0] || ChannelView.Chat,
+        currentView:
+          keyedChannels[channel.id]?.currentView ||
+          channel.views[0] ||
+          ChannelView.Chat,
         views: channel.views,
         timestamp: new Date(channel.timestamp),
         notifications: {
-          mute: false,
+          mute: keyedChannels[channel.id]?.notifications.mute || false,
         },
       })),
     });

@@ -109,7 +109,7 @@
 }
 
 .messageNotSynced {
-  opacity: 0.7;
+  animation: message-syncing 1.4s linear infinite;
 }
 
 .messageItemHeader {
@@ -236,6 +236,10 @@
   border: 1px solid var(--j-color-primary-500);
 }
 
+.emojiButtonNotSynced {
+  animation: message-syncing 1.4s linear infinite;
+}
+
 j-tooltip::part(base) {
   display: inline;
 }
@@ -250,7 +254,7 @@ j-tooltip::part(base) {
   border: 1px solid var(--j-color-ui-200);
   padding: 20px;
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
   margin: var(--j-space-500) 0 var(--j-space-500) 0px;
   border-radius: var(--j-border-radius); 
   position: relative;
@@ -262,11 +266,12 @@ j-tooltip::part(base) {
 
 .neighbourhoodCardFlex {
   display: flex;
-  margin-top: var(--j-space-500);
+  gap: var(--j-space-500);
 }
 
-.neighbourhoodCardFlex > img {
-  margin-right: var(--j-space-500);
+.neighbourhoodCardImage {
+  object-fit: cover;
+  border-radius: var(--j-border-radius);
 }
 
 .neighbourhoodCardTitle {
@@ -302,4 +307,10 @@ j-tooltip::part(base) {
 
 .noPaddingStyle {
   padding: 0;
+}
+
+@keyframes message-syncing {
+  50% {
+    opacity: 0.6;
+  }
 }
