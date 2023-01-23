@@ -325,9 +325,8 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
         perspectiveUuid,
         `triple("${channelId}", "${EntryType.Message}", "${link.data.source}").`
       )) {
-        console.log('arrr', isMessageFromSelf)
         if (!isMessageFromSelf) {
-          addReactionToState(link);
+          addReactionToState(link, true);
         } else {
           findReactionAndSync(link)
         }
