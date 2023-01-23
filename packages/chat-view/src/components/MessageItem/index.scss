@@ -260,6 +260,10 @@ j-tooltip::part(base) {
   position: relative;
 }
 
+.neighbourhoodCardLoading {
+  animation: message-syncing 1.4s linear infinite;
+}
+
 .neighbourhoodCard:hover {
   background: var(--j-color-ui-100);
 }

@@ -1,20 +1,52 @@
+import { useMemo } from "preact/hooks";
 import styles from "./index.scss";
 
-export default function LinkCard({ name, description, onClick, image }) {
-  const truncatedDescription = description.length > 80 ? `${description.substring(0, 79)}...` : description;
+export default function LinkCard({
+  isLoading,
+  name,
+  description,
+  onClick,
+  image,
+}) {
+  const activeClass = useMemo(() => {
+    return [
+      styles.neighbourhoodCard,
+      isLoading ? styles.neighbourhoodCardLoading : "",
+    ].join(" ");
+  }, [isLoading]);
+
+  const truncatedDescription =
+    description.length > 80
+      ? `${description.substring(0, 79)}...`
+      : description;
+
   return (
-    <div class={styles.neighbourhoodCard} size="300" onClick={onClick}>
+    <div class={activeClass} size="300" onClick={onClick}>
       <div>
         <div class={styles.neighbourhoodCardFlex}>
           <div>
             <div class={styles.neighbourhoodCardName}>
-              {name || "No title"}
+              {isLoading ? (
+                <j-skeleton width="lg" height="text"></j-skeleton>
+              ) : (
+                name || "No title"
+              )}
             </div>
             <div class={styles.neighbourhoodCardDescription}>
-              {truncatedDescription || "No descriptioon"}
+              {isLoading ? (
+                <j-skeleton width="xxl" height="text"></j-skeleton>
+              ) : (
+                truncatedDescription || "No descriptioon"
+              )}
             </div>
           </div>
-          {image && <img class={styles.neighbourhoodCardImage} src={image} width={140} />}
+          {image && (
+            <img
+              class={styles.neighbourhoodCardImage}
+              src={image}
+              width={140}
+            />
+          )}
         </div>
       </div>
     </div>
