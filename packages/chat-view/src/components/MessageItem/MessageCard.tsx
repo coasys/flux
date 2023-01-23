@@ -1,12 +1,13 @@
 import { useMemo } from "preact/hooks";
 import styles from "./index.scss";
 
-export default function LinkCard({
-  isLoading,
+export default function MessageCard({
   name,
   description,
-  onClick,
   image,
+  isLoading,
+  showJoinButton,
+  onClick,
 }) {
   const activeClass = useMemo(() => {
     return [
@@ -49,6 +50,9 @@ export default function LinkCard({
           )}
         </div>
       </div>
+      {showJoinButton && !isLoading && (
+        <j-button variant="primary">Join</j-button>
+      )}
     </div>
   );
 }

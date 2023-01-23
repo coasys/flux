@@ -2,60 +2,9 @@ import { useEffect, useState } from "preact/hooks";
 import getNeighbourhoodLink, {
   findNeighbourhood,
 } from "utils/api/getNeighbourhoodLink";
-import NeighbourhoodCard from "./NeighbourhoodCard";
-import LinkCard from "./LinkCard";
+import LinkCard from "./MessageCard";
 
 import styles from "./index.scss";
-
-function Card({
-  isLoading,
-  type,
-  image,
-  url,
-  mainRef,
-  name,
-  description,
-  onClick,
-  perspectiveUuid,
-}) {
-  function onNeighbourhoodClick(url: string) {
-    const event = new CustomEvent("neighbourhood-click", {
-      detail: { url },
-      bubbles: true,
-    });
-    mainRef?.dispatchEvent(event);
-  }
-
-  function onLinkClick(url: string) {
-    window.open(url, "_blank");
-  }
-
-  if (type === "neighbourhood" || type === "neighbourhood-loading") {
-    return (
-      <NeighbourhoodCard
-        isLoading={isLoading}
-        onClick={() => onNeighbourhoodClick(url)}
-        name={name}
-        description={description}
-        perspectiveUuid={perspectiveUuid}
-      />
-    );
-  }
-
-  if (type === "link") {
-    return (
-      <LinkCard
-        isLoading={isLoading}
-        onClick={() => onLinkClick(url)}
-        name={name}
-        description={description}
-        image={image}
-      />
-    );
-  }
-
-  return null;
-}
 
 export default function MessageCards({ message, perspectiveUuid, mainRef }) {
   const messageContent =
@@ -66,14 +15,6 @@ export default function MessageCards({ message, perspectiveUuid, mainRef }) {
   useEffect(() => {
     getNeighbourhoodCards();
   }, [message.id, message.isNeighbourhoodCardHidden]);
-
-  function onNeighbourhoodClick(url: string) {
-    const event = new CustomEvent("neighbourhood-click", {
-      detail: { url, channel: "Home" },
-      bubbles: true,
-    });
-    mainRef?.dispatchEvent(event);
-  }
 
   const getNeighbourhoodCards = async () => {
     const [messageCards] = findNeighbourhood(messageContent);
@@ -101,20 +42,29 @@ export default function MessageCards({ message, perspectiveUuid, mainRef }) {
     }
   };
 
+  function onClick(url: string, type: string) {
+    if (type === "link") {
+      window.open(url, "_blank");
+    } else {
+      const event = new CustomEvent("neighbourhood-click", {
+        detail: { url, channel: "Home" },
+        bubbles: true,
+      });
+      mainRef?.dispatchEvent(event);
+    }
+  }
+
   return (
     <div class={styles.MessageCardsContentWrapper}>
       {neighbourhoodCards.map((e) => (
-        <Card
+        <LinkCard
           isLoading={e.isLoading}
-          type={e.type}
-          mainRef={mainRef}
-          onClick={() => onNeighbourhoodClick(e.url)}
           name={e.name}
           description={e.description}
-          perspectiveUuid={e.perspectiveUuid}
-          url={e.url}
           image={e.image}
-        ></Card>
+          showJoinButton={e.type !== "link"}
+          onClick={() => onClick(e.url, e.type)}
+        ></LinkCard>
       ))}
     </div>
   );
