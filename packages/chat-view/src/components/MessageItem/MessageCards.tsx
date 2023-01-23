@@ -45,6 +45,7 @@ function Card({
   if (type === "link") {
     return (
       <LinkCard
+        isLoading={isLoading}
         onClick={() => onLinkClick(url)}
         name={name}
         description={description}
