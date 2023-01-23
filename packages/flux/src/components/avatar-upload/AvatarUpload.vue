@@ -21,6 +21,7 @@
     ref="fileInput"
     id="fileInput"
     type="file"
+    accept="image/*"
     style="display: none"
     @change="selectFile"
   />
