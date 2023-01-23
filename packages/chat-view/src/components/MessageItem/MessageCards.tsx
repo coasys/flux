@@ -23,7 +23,6 @@ function Card({
       detail: { url },
       bubbles: true,
     });
-    console.log("whaat", mainRef);
     mainRef?.dispatchEvent(event);
   }
 
