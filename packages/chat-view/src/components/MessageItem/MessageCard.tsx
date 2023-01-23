@@ -17,7 +17,7 @@ export default function MessageCard({
   }, [isLoading]);
 
   const truncatedDescription =
-    description.length > 80
+    description?.length > 80
       ? `${description.substring(0, 79)}...`
       : description;
 
