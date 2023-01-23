@@ -171,15 +171,17 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
       trigger: "click",
       appendTo: document.body,
       interactive: true,
-      onShow: () => {
-        emojiPicker.addEventListener("emoji-click", onEmojiClick);
-      },
-      onHide: () => {
-        emojiPicker.removeEventListener("emoji-click", onEmojiClick);
-      },
     });
     instance.show();
   }
+
+  useEffect(() => {
+    emojiPicker.addEventListener("emoji-click", onEmojiClick);
+
+    return () => {
+      emojiPicker.removeEventListener("emoji-click", onEmojiClick);
+    }
+  }, [messages, emojiPicker])
 
   async function onEmojiClick(e: any) {
     const unicode = e.detail.unicode;
