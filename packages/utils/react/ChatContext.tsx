@@ -255,9 +255,9 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
         const isSameAuthorAndContent =
           isSameAuthor &&
           reaction.content === link.data.target.replace("emoji://", "");
-          console.log('ggggg', isSameAuthorAndContent)
         return isSameAuthorAndContent ? ({
           ...reaction,
+          timestamp: link.timestamp,
           synced: true
         }) : reaction;
       }
@@ -325,9 +325,8 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
         perspectiveUuid,
         `triple("${channelId}", "${EntryType.Message}", "${link.data.source}").`
       )) {
-        console.log('arrr', isMessageFromSelf)
         if (!isMessageFromSelf) {
-          addReactionToState(link);
+          addReactionToState(link, true);
         } else {
           findReactionAndSync(link)
         }
