@@ -98,7 +98,7 @@ export default class MentionList extends Component<
           {profiles.map((profile, index) => (
             <j-menu-item
               active={index === selectedIndex}
-              key={index}
+              key={profile.did}
               onClick={() => this.selectItem(index)}
               onMouseOver={() => this.setState({ selectedIndex: index })}
             >
