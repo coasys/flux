@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flux App</title>
+    <style>
+      flux-app {
+        height: 100vh;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <ad4m-connect
+      theme="dark"
+      appName="Flux"
+      appDesc="A social toolkit for the new internet"
+      appDomain="https://www.flux.io/"
+      capabilities='[{"with":{"domain":"*","pointers":["*"]},"can": ["*"]}]'
+      appiconpath="https://i.ibb.co/GnqjPJP/icon.png"
+      openonshortcut
+    ></ad4m-connect>
+
+    <flux-app></flux-app>
+
+    <script type="module">
+      import "@perspect3vism/ad4m-connect/dist/web.js";
+      import App from "./src/main.ts";
+
+      // Connect Ad4m
+      const ad4m = document.querySelector("ad4m-connect");
+      ad4m.connect();
+
+      ad4m.addEventListener("authStateChange", (status) => {
+        if (status.detail === "connected_with_capabilities") {
+          // Register the app when we are connected
+          customElements.define("flux-app", App);
+          initApp();
+        }
+      });
+
+      window.addEventListener("popstate", initApp);
+
+      function initApp() {
+        // Extract perspectiveUuid and source from the URL path
+        const [_, uuid, source] = document.location.pathname.split("/");
+
+        // Set perspective and source on the app
+        const app = document.querySelector("flux-app");
+        app.setAttribute("perspective", decodeURIComponent(uuid));
+        app.setAttribute("source", decodeURIComponent(source));
+      }
+    </script>
+  </body>
+</html>

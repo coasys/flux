@@ -19,6 +19,7 @@
     "@junto-foundation/chat-view": "*",
     "@junto-foundation/forum-view": "*",
     "@junto-foundation/graph-view": "*",
+    "@junto-foundation/sketch-view": "*",
     "@junto-foundation/junto-elements": "*",
     "@perspect3vism/ad4m": "0.2.10",
     "@perspect3vism/ad4m-connect": "0.2.10",

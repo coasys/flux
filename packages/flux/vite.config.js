@@ -14,6 +14,7 @@ export default {
               tag === "ad4m-connect" ||
               tag === "chat-view" ||
               tag === "graph-view" ||
+              tag === "sketch-view" ||
               tag === "forum-view"
             );
           },

@@ -88,6 +88,7 @@ export enum ChannelView {
   Chat = "flux://has_chat_view",
   Forum = "flux://has_post_view",
   Graph = "flux://has_graph_view",
+  Sketch = "flux://has_sketch_view",
 }
 
 export enum EntryType {

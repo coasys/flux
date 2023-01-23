@@ -22,4 +22,11 @@ export default [
     type: ChannelView.Graph,
     component: "graph-view",
   },
+  {
+    title: "Sketch",
+    description: "Sketch with your friends",
+    icon: "pen",
+    type: ChannelView.Sketch,
+    component: "sketch-view",
+  },
 ];

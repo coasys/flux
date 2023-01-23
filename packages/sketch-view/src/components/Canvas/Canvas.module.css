@@ -1,0 +1,11 @@
+.canvas {
+    cursor: url("../../assets/cursor.svg"), auto;
+  }
+  
+.path {
+    fill: none;
+    stroke-width: 10px;
+    stroke: black;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }

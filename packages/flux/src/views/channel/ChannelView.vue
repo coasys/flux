@@ -66,6 +66,16 @@
       @neighbourhood-click="onNeighbourhoodClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></graph-view>
+    <sketch-view
+      v-show="currentView === ChannelView.Sketch"
+      class="perspective-view"
+      :source="channel.id"
+      :perspective="communityId"
+      @agent-click="onAgentClick"
+      @channel-click="onChannelClick"
+      @neighbourhood-click="onNeighbourhoodClick"
+      @hide-notification-indicator="onHideNotificationIndicator"
+    ></sketch-view>
     <chat-view
       v-show="currentView === ChannelView.Chat"
       class="perspective-view"
@@ -167,6 +177,10 @@ export default defineComponent({
     if (!customElements.get("graph-view")) {
       const module = await import(`@junto-foundation/graph-view`);
       customElements.define("graph-view", module.default);
+    }
+    if (!customElements.get("sketch-view")) {
+      const module = await import(`@junto-foundation/sketch-view`);
+      customElements.define("sketch-view", module.default);
     }
   },
   computed: {
