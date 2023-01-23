@@ -62,7 +62,7 @@ export default function MessageCards({ message, perspectiveUuid, mainRef }) {
           name={e.name}
           description={e.description}
           image={e.image}
-          showJoinButton={e.type !== "link"}
+          showJoinButton={e.type !== "link" && !e.perspectiveUuid}
           onClick={() => onClick(e.url, e.type)}
         ></LinkCard>
       ))}
