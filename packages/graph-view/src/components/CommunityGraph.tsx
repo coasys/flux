@@ -10,7 +10,7 @@ function findNodes(links, source) {
   return links.reduce((acc, link) => {
     const hasSource = link.data.source === source;
     const alreadyIn = acc.some((l) => l === link.data.source);
-    console.log({ hasSource, link, acc, alreadyIn });
+
     if (alreadyIn) return acc;
     if (hasSource) {
       const newLinks = findNodes(links, link.data.target);
@@ -144,8 +144,6 @@ export default function CommunityOverview({ uuid, source }) {
 
   // listen for changes
   const newLinkAdded = (l: LinkExpression) => {
-    console.log("New link added: ", l);
-
     if (graph.current) {
       const { nodes, links } = graph.current.graphData();
 
