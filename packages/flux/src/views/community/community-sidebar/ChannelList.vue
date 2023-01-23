@@ -110,9 +110,9 @@ import { mapActions, mapState } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
-import { deleteChannel } from "utils/api/deleteChannel";
+import { deleteChannel } from "utils/api";
 import { ChannelView } from "utils/types";
-import channelViewOptions from "utils/constants/viewOptions";
+import { viewOptions as channelViewOptions } from "utils/constants";
 
 export default defineComponent({
   setup() {

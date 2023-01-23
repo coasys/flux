@@ -41,8 +41,7 @@ import { Community } from "utils/types";
 import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useDataStore } from "@/store/data";
-import { DexieIPFS } from "utils/helpers/storageHelpers";
-import { getImage } from "utils/helpers/getImage";
+import { getImage } from "utils/helpers";
 
 export default defineComponent({
   components: { AvatarUpload },

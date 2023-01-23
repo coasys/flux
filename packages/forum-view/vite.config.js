@@ -6,6 +6,7 @@ import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
 export default defineConfig({
   plugins: [preact(), cssInjectedByJsPlugin()],
   build: {
+    emptyOutDir: false,
     lib: {
       // Could also be a dictionary or array of multiple entry points
       entry: resolve(__dirname, "src/main.ts"),

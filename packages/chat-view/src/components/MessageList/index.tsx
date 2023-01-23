@@ -6,9 +6,9 @@ import {
   useMemo,
   useCallback,
 } from "preact/hooks";
-import { ChatContext } from "utils/react";
+import { ChatContext } from "utils/frameworks/react";
 import MessageItem from "../MessageItem";
-import getMe from "utils/api/getMe";
+import { getMe } from "utils/api";
 import { differenceInMinutes } from "date-fns";
 import tippy from "tippy.js";
 import { Virtuoso } from "react-virtuoso";
@@ -17,9 +17,7 @@ import ReactHintFactory from "react-hint";
 import "react-hint/css/index.css";
 import styles from "./index.scss";
 import { Message, Reaction } from "utils/types";
-import EditorContext from "../../context/EditorContext";
-
-import { REACTION } from "utils/constants/communityPredicates";
+import { REACTION } from "utils/constants";
 
 const ReactHint = ReactHintFactory({ createElement: h, Component, createRef });
 
@@ -103,7 +101,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
           index: fetchedMessageCount - 2,
           align: "start",
         });
-      }, 0)
+      }, 0);
     }
   }
 

@@ -179,8 +179,9 @@ import CommunityTweaks from "@/containers/CommunityTweaks.vue";
 import Avatar from "@/components/avatar/Avatar.vue";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 
-import ChannelModel, { Channel } from "utils/api/channel";
-import MemberModel, { Member } from "utils/api/member";
+import { Factory } from "utils/helpers";
+import { Channel } from "utils/api";
+import { Member } from "utils/api";
 import { CommunityState, ModalsState, ChannelState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
@@ -207,8 +208,8 @@ export default defineComponent({
   },
   setup() {
     return {
-      memberModel: ref<MemberModel | null>(null),
-      channelModel: ref<ChannelModel | null>(null),
+      memberModel: ref<Factory<Member> | null>(null),
+      channelModel: ref<Factory<Channel> | null>(null),
       loadedChannels: ref<LoadedChannels>({}),
       appStore: useAppStore(),
       dataStore: useDataStore(),
@@ -273,8 +274,8 @@ export default defineComponent({
       this.channelModel && this.channelModel.unsubscribe();
       this.memberModel && this.memberModel.unsubscribe();
 
-      this.channelModel = new ChannelModel({ perspectiveUuid: id });
-      this.memberModel = new MemberModel({ perspectiveUuid: id });
+      this.channelModel = new Factory(new Channel(), { perspectiveUuid: id });
+      this.memberModel = new Factory(new Member(), { perspectiveUuid: id });
 
       this.memberModel.onAdded((member: Member) => {
         this.dataStore.setNeighbourhoodMember({

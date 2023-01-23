@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { getImage } from "utils/helpers/getImage";
+import { getImage } from "utils/helpers";
 export default defineComponent({
   props: {
     did: String,

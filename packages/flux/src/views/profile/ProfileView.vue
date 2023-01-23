@@ -186,10 +186,9 @@ import {
   OG_DESCRIPTION,
   OG_IMAGE,
   OG_TITLE,
-} from "utils/constants/profile";
-import getProfile from "utils/api/getProfile";
-import { getImage } from "utils/helpers/getImage";
-import { mapLiteralLinks } from "utils/helpers/linkHelpers";
+} from "utils/constants";
+import { getProfile } from "utils/api";
+import { getImage, mapLiteralLinks } from "utils/helpers";
 import WebLinkAdd from "./WebLinkAdd.vue";
 
 export default defineComponent({

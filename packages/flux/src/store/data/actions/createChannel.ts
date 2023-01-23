@@ -1,9 +1,9 @@
-import { createChannel } from "utils/api/createChannel";
 import { useAppStore } from "@/store/app";
 import { ChannelState } from "@/store/types";
 import { useDataStore } from "..";
 import { ChannelView } from "utils/types";
-import ChannelModel from "utils/api/channel";
+import { Channel as ChannelModel } from "utils/api";
+import { Factory } from "utils/helpers";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -26,7 +26,7 @@ export default async (payload: Payload): Promise<ChannelState> => {
       throw Error(message);
     }
 
-    const Channel = new ChannelModel({
+    const Channel = new Factory(new ChannelModel(), {
       perspectiveUuid: payload.perspectiveUuid,
     });
 

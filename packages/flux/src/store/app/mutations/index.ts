@@ -4,7 +4,7 @@ import {
   ThemeState,
   CurrentThemeState,
 } from "@/store/types";
-import { COMMUNITY_TEST_VERSION } from "utils/constants/general";
+import { COMMUNITY_TEST_VERSION } from "utils/constants";
 import { useAppStore } from "..";
 
 export default {

@@ -1,5 +1,6 @@
 import { useDataStore } from "@/store/data/index";
-import CommunityModel from "utils/api/community";
+import { Community as CommunityModel } from "utils/api";
+import { Factory } from "utils/helpers";
 
 export interface Payload {
   communityId: string;
@@ -8,7 +9,9 @@ export interface Payload {
 export default async (communityId: string): Promise<void> => {
   const dataStore = useDataStore();
 
-  const Community = new CommunityModel({ perspectiveUuid: communityId });
+  const Community = new Factory(new CommunityModel(), {
+    perspectiveUuid: communityId,
+  });
 
   const community = await Community.get();
 

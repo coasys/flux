@@ -2,8 +2,8 @@ import { useContext, useMemo, useState } from "preact/hooks";
 import PostItem from "../PostItem";
 import style from "./index.module.css";
 import { DisplayView, displayOptions } from "../../constants/options";
-import { ChannelContext, useEntries } from "utils/react";
-import PostModel from "utils/api/post";
+import { ChannelContext, useEntries } from "utils/frameworks/react";
+import { Post } from "utils/api";
 
 export default function PostList() {
   const { state } = useContext(ChannelContext);
@@ -12,7 +12,7 @@ export default function PostList() {
   const { entries: posts, loading } = useEntries({
     perspectiveUuid: state.communityId,
     source: state.channelId,
-    model: PostModel,
+    model: new Post(),
   });
 
   const sortedPosts = useMemo(

@@ -1,6 +1,10 @@
 import Footer from "./components/Footer";
 import MessageList from "./components/MessageList";
-import { ChatProvider, CommunityProvider, AgentProvider } from "utils/react";
+import {
+  ChatProvider,
+  CommunityProvider,
+  AgentProvider,
+} from "utils/frameworks/react";
 import { UIProvider } from "./context/UIContext";
 import { useState } from "preact/hooks";
 import styles from "./index.scss";

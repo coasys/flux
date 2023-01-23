@@ -1,6 +1,6 @@
 import { ChannelView } from "../types";
 
-export default [
+export const viewOptions = [
   {
     title: "Chat",
     description: "Real time message with your community members",

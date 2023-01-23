@@ -1,14 +1,18 @@
 import { useDataStore } from "..";
-import MemberModel from "utils/api/member";
+import { Factory } from "utils/helpers";
+import { Member as MemberModel } from "utils/api";
 import { useUserStore } from "@/store/user";
 
 export default async function (id: string): Promise<void> {
   const dataStore = useDataStore();
   const userStore = useUserStore();
-  
-  const Member = new MemberModel({ perspectiveUuid: id });
+
+  const Member = new Factory(new MemberModel(), { perspectiveUuid: id });
   const members = await Member.getAll();
   const dids = members.map((m) => m.did);
 
-  dataStore.setNeighbourhoodMembers({ members: dids.length === 0 ? [userStore.agent.did!] : dids, perspectiveUuid: id });
+  dataStore.setNeighbourhoodMembers({
+    members: dids.length === 0 ? [userStore.agent.did!] : dids,
+    perspectiveUuid: id,
+  });
 }

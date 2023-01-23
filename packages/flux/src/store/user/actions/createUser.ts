@@ -1,5 +1,5 @@
-import { AD4M_AGENT, KAICHAO_AGENT, JUNTO_AGENT } from "utils/constants/agents";
-import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
+import { AD4M_AGENT, KAICHAO_AGENT, JUNTO_AGENT } from "utils/constants";
+import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants";
 import {
   FLUX_PROFILE,
   HAS_EMAIL,
@@ -8,14 +8,10 @@ import {
   HAS_PROFILE_IMAGE,
   HAS_THUMBNAIL_IMAGE,
   HAS_USERNAME,
-} from "utils/constants/profile";
+} from "utils/constants";
 
 import { useAppStore } from "@/store/app";
-import {
-  resizeImage,
-  dataURItoBlob,
-  blobToDataURL,
-} from "utils/helpers/profileHelpers";
+import { resizeImage, dataURItoBlob, blobToDataURL } from "utils/helpers";
 import {
   Ad4mClient,
   Link,

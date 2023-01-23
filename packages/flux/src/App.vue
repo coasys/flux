@@ -58,10 +58,10 @@ import {
 } from "@perspect3vism/ad4m-connect/dist/utils";
 import "@perspect3vism/ad4m-connect/dist/web.js";
 import { EntryType } from "utils/types";
-import subscribeToLinks from "utils/api/subscribeToLinks";
+import { subscribeToLinks } from "utils/api";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import semver from "semver";
-import { EXPECTED_AD4M_VERSION } from "utils/constants/general";
+import { EXPECTED_AD4M_VERSION } from "utils/constants";
 
 export default defineComponent({
   name: "App",

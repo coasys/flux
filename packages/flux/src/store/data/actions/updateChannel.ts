@@ -1,11 +1,12 @@
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "..";
-import ChannelModel, { UpdateChannel } from "utils/api/channel";
+import { Channel as ChannelModel } from "utils/api";
+import { Factory } from "utils/helpers";
 
 export interface Payload {
   perspectiveUuid: string;
   channelId: string;
-  data: UpdateChannel;
+  data: any;
 }
 
 export default async (payload: Payload): Promise<any> => {
@@ -21,7 +22,7 @@ export default async (payload: Payload): Promise<any> => {
   }
 
   try {
-    const Channel = new ChannelModel({
+    const Channel = new Factory(new ChannelModel(), {
       perspectiveUuid: payload.perspectiveUuid,
     });
 

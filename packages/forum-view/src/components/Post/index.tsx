@@ -1,12 +1,12 @@
 import UIContext from "../../context/UIContext";
 import { useContext, useEffect, useMemo, useState } from "preact/hooks";
 import { formatRelative, format, formatDistance } from "date-fns";
-import { getImage } from "utils/helpers/getImage";
+import { getImage } from "utils/helpers";
 import Avatar from "../Avatar";
 import CommentSection from "../CommentSection";
-import PostModel from "utils/api/post";
-import { CommunityContext, useEntry } from "utils/react";
-import getMe, { Me } from "utils/api/getMe";
+import { Post as PostSubject } from "utils/api";
+import { CommunityContext, useEntry } from "utils/frameworks/react";
+import { getMe } from "utils/api";
 
 import styles from "./index.module.css";
 
@@ -28,7 +28,7 @@ export default function Post({
     perspectiveUuid,
     source,
     id,
-    model: PostModel,
+    model: new PostSubject(),
   });
 
   const [base64, setBase64] = useState("");

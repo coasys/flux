@@ -15,28 +15,18 @@
     "useUnknownInCatchVariables": false,
     "experimentalDecorators": true,
     "baseUrl": ".",
-    "types": [
-      "jest", "mocha"
-    ],
+    "types": ["jest", "mocha"],
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": ["src/*"]
     },
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost"
-    ]
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "src/__tests__/**/*.ts"
+    "api/**/*.ts",
+    "constants/**/*.ts",
+    "helpers/**/*.ts",
+    "react/**/*.ts",
+    "types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules", "__sapper__/*", "public/*", "ad4m/languages"
-  ]
+  "exclude": ["node_modules"]
 }

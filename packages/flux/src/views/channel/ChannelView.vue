@@ -1,5 +1,9 @@
 <template>
-  <div class="channel-view" style="height: 100%" :class="{expanded: isExpanded}">
+  <div
+    class="channel-view"
+    style="height: 100%"
+    :class="{ expanded: isExpanded }"
+  >
     <div class="channel-view__header">
       <j-button
         class="channel-view__sidebar-toggle"
@@ -33,9 +37,18 @@
         </div>
       </div>
       <div class="channel-view__header-right">
-        <j-tooltip placement="auto" :title="isExpanded ? 'Minimize' : 'Fullsize'">
+        <j-tooltip
+          placement="auto"
+          :title="isExpanded ? 'Minimize' : 'Fullsize'"
+        >
           <j-button size="sm" variant="ghost">
-            <j-icon size="sm" :name="isExpanded ? 'arrows-angle-contract' : 'arrows-angle-expand'" @click="isExpanded = !isExpanded"></j-icon>
+            <j-icon
+              size="sm"
+              :name="
+                isExpanded ? 'arrows-angle-contract' : 'arrows-angle-expand'
+              "
+              @click="isExpanded = !isExpanded"
+            ></j-icon>
           </j-button>
         </j-tooltip>
         <j-tooltip placement="auto" title="Edit Channel">
@@ -127,7 +140,7 @@ import EditChannel from "@/containers/EditChannel.vue";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { ChannelView } from "utils/types";
-import viewOptions from "utils/constants/viewOptions";
+import { viewOptions } from "utils/constants";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 
 interface MentionTrigger {
@@ -158,7 +171,7 @@ export default defineComponent({
       activeProfile: ref<string>(""),
       showProfile: ref(false),
       isJoiningCommunity: ref(false),
-      isExpanded: ref(false)
+      isExpanded: ref(false),
     };
   },
   async mounted() {

@@ -1,21 +1,20 @@
 import React, { useEffect, useState, useMemo } from "react";
-import EntryModel from "../helpers/model";
-import { Entry } from "utils/types";
+import { Factory } from "../helpers/model";
 
-export default function useEntries({
+export default function useEntries<SubjectClass>({
   perspectiveUuid,
   source,
   model,
 }: {
   perspectiveUuid: string;
   source?: string;
-  model: typeof EntryModel;
+  model: SubjectClass;
 }) {
   const [loading, setLoading] = useState(true);
-  const [entries, setEntries] = useState<any[]>([]);
+  const [entries, setEntries] = useState<SubjectClass[]>([]);
 
   const Model = useMemo(() => {
-    return new model({ perspectiveUuid, source });
+    return new Factory(model, { perspectiveUuid, source });
   }, [perspectiveUuid, source]);
 
   useEffect(() => {

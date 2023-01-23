@@ -1,7 +1,7 @@
 import {
   COMMUNITY_TEST_VERSION,
   DEFAULT_TESTING_NEIGHBOURHOOD,
-} from "utils/constants/general";
+} from "utils/constants";
 import { useAppStore } from "..";
 import { useDataStore } from "@/store/data";
 

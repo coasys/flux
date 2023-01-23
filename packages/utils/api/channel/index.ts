@@ -1,10 +1,19 @@
-import { CHANNEL_VIEW, NAME, ENTRY_TYPE } from "../../constants/communityPredicates";
+import {
+  CHANNEL_VIEW,
+  NAME,
+  ENTRY_TYPE,
+} from "../../constants/communityPredicates";
 import { EntryType, Entry, ChannelView } from "../../types";
-import { sdnaOutput, subjectProperty, subjectPropertySetter, subjectCollection } from "@perspect3vism/ad4m";
+import {
+  sdnaOutput,
+  subjectProperty,
+  subjectPropertySetter,
+  subjectCollection,
+} from "@perspect3vism/ad4m";
 
 export class Channel {
   @subjectProperty({
-    through: ENTRY_TYPE, 
+    through: ENTRY_TYPE,
     initial: EntryType.Channel,
     required: true,
   })
@@ -17,7 +26,7 @@ export class Channel {
   name: string;
 
   @subjectPropertySetter({
-    resolveLanguage: 'literal'
+    resolveLanguage: "literal",
   })
   setName(name: string) {}
 
@@ -28,7 +37,9 @@ export class Channel {
   addView(view: string) {}
 
   @sdnaOutput
-  static generateSdna(): string { return "" }
+  static generateSDNA(): string {
+    return "";
+  }
 }
 
 export interface UpdateChannel {
@@ -36,4 +47,4 @@ export interface UpdateChannel {
   views?: ChannelView[];
 }
 
-export default SubjectEntry<Channel>;
+export default Channel;

@@ -188,7 +188,7 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { CommunityState } from "@/store/types";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useAppStore } from "@/store/app";
-import { DEFAULT_TESTING_NEIGHBOURHOOD } from "utils/constants/general";
+import { DEFAULT_TESTING_NEIGHBOURHOOD } from "utils/constants";
 
 export default defineComponent({
   components: { AvatarUpload },

@@ -1,10 +1,5 @@
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
-import {
-  DESCRIPTION,
-  NAME,
-  CREATOR,
-  CREATED_AT,
-} from "utils/constants/communityPredicates";
+import { DESCRIPTION, NAME, CREATOR, CREATED_AT } from "../constants";
 import { NeighbourhoodMetaData } from "../types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
@@ -34,7 +29,7 @@ export function getMetaFromLinks(
   );
 }
 
-export default async function getMetaFromNeighbourhood(
+export async function getMetaFromNeighbourhood(
   neighbourhoodUrl: string
 ): Promise<NeighbourhoodMetaData> {
   const client = await getAd4mClient();

@@ -77,10 +77,10 @@ import {
   AD4M_PREDICATE_USERNAME,
   AD4M_PREDICATE_FIRSTNAME,
   AD4M_PREDICATE_LASTNAME,
-} from "utils/constants/profile";
+} from "utils/constants";
 
 import Logo from "@/components/logo/Logo.vue";
-import { mapLiteralLinks } from "utils/helpers/linkHelpers";
+import { mapLiteralLinks } from "utils/helpers";
 import { useAppStore } from "@/store/app";
 import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";
 import SignUpCarousel from "./SignUpCarousel.vue";

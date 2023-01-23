@@ -1,7 +1,7 @@
 import { Community } from "../types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import CommunityModel from "./community";
-import { getMetaFromLinks } from "utils/helpers/getNeighbourhoodMeta";
+import { getMetaFromLinks } from "../helpers";
 import { Ad4mClient } from "@perspect3vism/ad4m";
 
 export interface Payload {

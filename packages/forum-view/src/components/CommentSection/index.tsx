@@ -2,8 +2,8 @@ import CommentItem from "../CommentItem";
 import Editor from "../Editor";
 
 import { useEffect, useMemo, useState } from "preact/hooks";
-import MessageModel from "utils/api/message";
-import { useEntries } from "utils/react";
+import { Message as MessageModel } from "utils/api";
+import { useEntries } from "utils/frameworks/react";
 
 export default function CommentSection({
   perspectiveUuid,
@@ -18,12 +18,12 @@ export default function CommentSection({
   const { entries: comments, model: Message } = useEntries({
     perspectiveUuid,
     source,
-    model: MessageModel,
+    model: new MessageModel(),
   });
 
   async function submitComment() {
     try {
-      if (comment.replace(/<[^>]*>?/gm, '').length > 0) {
+      if (comment.replace(/<[^>]*>?/gm, "").length > 0) {
         setIsCreating(true);
         await Message.create({ body: comment });
       }

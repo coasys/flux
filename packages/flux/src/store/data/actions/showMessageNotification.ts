@@ -1,7 +1,7 @@
 import { useUserStore } from "@/store/user";
 import { Router } from "vue-router";
 import { useDataStore } from "..";
-import getProfile from "utils/api/getProfile";
+import { getProfile } from "utils/api";
 import { differenceInSeconds, parseISO } from "date-fns";
 import { useAppStore } from "@/store/app";
 import iconPath from "@/assets/images/icon.png";

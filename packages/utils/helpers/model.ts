@@ -2,7 +2,6 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { PropertyMap, PropertyValueMap } from "../types";
 import subscribeToLinks from "../api/subscribeToLinks";
 import { LinkExpression, PerspectiveProxy, Subject } from "@perspect3vism/ad4m";
-import { AsyncQueue } from "./queue";
 import { SELF } from "../constants/communityPredicates";
 import { v4 as uuidv4 } from "uuid";
 
@@ -37,7 +36,7 @@ function setProperties(subject: any, properties: PropertyValueMap) {
   });
 }
 
-export default class Factory<SubjectClass extends { type: string }> {
+export class Factory<SubjectClass extends { type: string }> {
   client = null;
   source = SELF;
   perspectiveUuid = "";
@@ -99,6 +98,9 @@ export default class Factory<SubjectClass extends { type: string }> {
     const results = await this.perspective?.infer(
       `triple(${source}, _, X), instance(Class, X), subject_class(${subjectClass}, Class)`
     );
+
+    if (!results) return [];
+
     return await Promise.all(
       results.map(async (result) => {
         let subject = new Subject(this.perspective!, result.X, subjectClass);

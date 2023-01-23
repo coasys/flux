@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
-import EntryModel from "../helpers/model";
+import { Factory } from "../helpers/model";
 
-export default function useEntry({
+export default function useEntry<SubjectClass>({
   perspectiveUuid,
   source,
   id,
@@ -10,12 +10,12 @@ export default function useEntry({
   perspectiveUuid: string;
   source?: string;
   id: string;
-  model: typeof EntryModel;
+  model: SubjectClass;
 }) {
-  const [entry, setEntry] = useState(null);
+  const [entry, setEntry] = useState<SubjectClass | null>(null);
 
   const Model = useMemo(() => {
-    return new model({ perspectiveUuid, source });
+    return new Factory(model, { perspectiveUuid, source });
   }, [perspectiveUuid, source]);
 
   useEffect(() => {

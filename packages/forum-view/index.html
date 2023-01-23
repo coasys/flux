@@ -43,6 +43,8 @@
       const el = document.querySelector("perspective-view");
       const [_, uuid, source] = document.location.pathname.split("/");
 
+      console.log({ uuid, source });
+
       el.setAttribute("perspective", decodeURIComponent(uuid));
       el.setAttribute("source", decodeURIComponent(source));
       customElements.define("perspective-view", ForumView);

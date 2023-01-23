@@ -1,11 +1,11 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { getMetaFromLinks } from "utils/helpers/getNeighbourhoodMeta";
+import { Factory, getMetaFromLinks } from "utils/helpers";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useDataStore } from ".";
 import { CommunityState, LocalCommunityState } from "../types";
 import { useUserStore } from "../user";
-import getProfile from "utils/api/getProfile";
-import CommunityModel from "utils/api/community";
+import { getProfile } from "utils/api";
+import { Community as CommunityModel } from "utils/api";
 
 export async function buildCommunity(perspective: PerspectiveProxy) {
   const dataStore = useDataStore();
@@ -35,8 +35,20 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
   }
 
   const meta = getMetaFromLinks(perspective.neighbourhood?.meta?.links!);
-  const Community = new CommunityModel({ perspectiveUuid: perspective.uuid });
-  const community = await Community.get();
+
+  console.log("test");
+
+  await perspective.ensureSDNASubjectClass(CommunityModel);
+
+  console.log("ensured");
+
+  const Community = new Factory(new CommunityModel(), {
+    perspectiveUuid: perspective.uuid,
+  });
+
+  const community = await Community.get("ad4m://self");
+
+  console.log("test", { community });
 
   return {
     neighbourhood: {
@@ -86,6 +98,7 @@ export async function hydrateState() {
     if (hasCommunityAlready) return;
 
     if (perspective.sharedUrl !== undefined && perspective.neighbourhood) {
+      console.log("build com");
       const newCommunity = await buildCommunity(perspective);
 
       dataStore.addCommunity(newCommunity);

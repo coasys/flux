@@ -4,12 +4,9 @@ import { PostOption, postOptions } from "../../constants/options";
 import FileUpload from "../../components/FileUpload";
 import { parse } from "date-fns/esm";
 import styles from "./index.module.css";
-import PostModel from "utils/api/post";
-import {
-  blobToDataURL,
-  dataURItoBlob,
-  resizeImage,
-} from "utils/helpers/profileHelpers";
+import { Post } from "utils/api";
+import { Factory } from "utils/helpers";
+import { blobToDataURL, dataURItoBlob, resizeImage } from "utils/helpers";
 import PostImagePreview from "../PostImagePreview";
 
 const initialState = {
@@ -37,7 +34,10 @@ export default function CreatePost({
   const isEditing = !!postId;
 
   const Post = useMemo(() => {
-    return new PostModel({ perspectiveUuid: communityId, source: channelId });
+    return new Factory(new Post(), {
+      perspectiveUuid: communityId,
+      source: channelId,
+    });
   }, [communityId, channelId]);
 
   useEffect(() => {
@@ -49,11 +49,7 @@ export default function CreatePost({
   // Fetch post if editing
   useEffect(() => {
     if (postId) {
-      const Model = new PostModel({
-        perspectiveUuid: communityId,
-        source: channelId,
-      });
-      Model.get(postId).then((entry: any) => {
+      Post.get(postId).then((entry: any) => {
         setState(entry);
         setInitState(entry);
         setIsLoading(false);

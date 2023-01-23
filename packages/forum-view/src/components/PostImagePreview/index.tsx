@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import { getImage } from "utils/helpers/getImage";
+import { getImage } from "utils/helpers";
 import styles from "./index.module.css";
 
 type Props = {

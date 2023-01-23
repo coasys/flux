@@ -67,8 +67,8 @@ import {
   OG_DESCRIPTION,
   OG_TITLE,
   OG_IMAGE,
-} from "utils/constants/profile";
-import { createLiteralObject } from "utils/helpers/linkHelpers";
+} from "utils/constants";
+import { createLiteralObject } from "utils/helpers";
 
 export default defineComponent({
   props: ["step"],

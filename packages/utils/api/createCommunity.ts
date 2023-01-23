@@ -1,17 +1,14 @@
 import { v4 as uuidv4 } from "uuid";
 import { PERSPECTIVE_DIFF_SYNC } from "../constants/languages";
 import { MEMBER, SELF } from "../constants/communityPredicates";
+import { Community as FluxCommunity } from "../types";
 import { createNeighbourhoodMeta } from "../helpers/createNeighbourhoodMeta";
-import { Community } from "../types";
 import { Perspective } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import {
-  blobToDataURL,
-  dataURItoBlob,
-  resizeImage,
-} from "utils/helpers/profileHelpers";
+import { blobToDataURL, dataURItoBlob, Factory, resizeImage } from "../helpers";
 import { createSDNA } from "./createSDNA";
-import CommunityModel from "utils/api/community";
+import { Community } from "./community";
+import { Member } from "./member";
 
 export interface Payload {
   name: string;
@@ -25,7 +22,7 @@ export default async function createCommunity({
   description = "",
   image = "",
   perspectiveUuid,
-}: Payload): Promise<Community> {
+}: Payload): Promise<FluxCommunity> {
   try {
     const client = await getAd4mClient();
     const agent = await client.agent.me();
@@ -72,25 +69,29 @@ export default async function createCommunity({
       );
     }
 
-    const Community = new CommunityModel({
-      perspectiveUuid: perspective!.uuid,
+    const CommunityModel = new Factory(new Community(), {
+      perspectiveUuid: perspective.uuid,
     });
 
-    const community = await Community.create({
+    const community = await CommunityModel.create({
       name,
       description,
       image: compressedImage,
       thumbnail,
     });
 
-    await Community.addMember({ did: author });
+    const MemberFactory = new Factory(new Member(), {
+      perspectiveUuid: perspective.uuid,
+    });
+
+    await MemberFactory.create({ did: author });
 
     //Default popular setting is 3 upvotes on thumbsup emoji
     const socialDnaLink = await createSDNA(perspective!.uuid);
 
     // @ts-ignore
     return {
-      uuid: perspective!.uuid,
+      uuid: perspective.uuid,
       author: author,
       timestamp: socialDnaLink.timestamp,
       name: community.name,

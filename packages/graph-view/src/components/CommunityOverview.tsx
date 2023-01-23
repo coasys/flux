@@ -1,8 +1,7 @@
-import ChannelModel, { Channel } from "utils/api/channel";
-import CommunityModel, { Community } from "utils/api/community";
-import MemberModel, { Member } from "utils/api/member";
-import useEntries from "utils/react/useEntries";
-import useEntry from "utils/react/useEntry";
+import { Channel } from "utils/api";
+import { Community } from "utils/api";
+import { Member } from "utils/api";
+import { useEntries, useEntry } from "utils/frameworks/react";
 import styles from "../App.module.css";
 
 export default function CommunityOverview({ uuid }) {

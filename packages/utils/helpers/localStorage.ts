@@ -1,4 +1,4 @@
-const isSupported = (): boolean => {
+export const isSupported = (): boolean => {
   try {
     localStorage.setItem("test", "");
     localStorage.removeItem("test");
@@ -8,50 +8,40 @@ const isSupported = (): boolean => {
   return true;
 };
 
-const set = (key: string, value: string): void => {
+export const set = (key: string, value: string): void => {
   if (isSupported()) {
     localStorage.setItem(`flux/${key}`, value);
   }
 };
 
-const get = (key: string): string | null => {
+export const get = (key: string): string | null => {
   if (isSupported()) {
     return localStorage.getItem(`flux/${key}`);
   }
   return null;
 };
 
-const remove = (key: string): void => {
+export const remove = (key: string): void => {
   if (isSupported()) {
     localStorage.removeItem(`flux/${key}`);
   }
 };
 
-const setForVersion = (key: string, value: string): void => {
+export const setForVersion = (key: string, value: string): void => {
   if (isSupported()) {
     localStorage.setItem(`${__APP_VERSION__}/${key}`, value);
   }
 };
 
-const getForVersion = (key: string): string | null => {
+export const getForVersion = (key: string): string | null => {
   if (isSupported()) {
     return localStorage.getItem(`${__APP_VERSION__}/${key}`);
   }
   return null;
 };
 
-const removeForVersion = (key: string): void => {
+export const removeForVersion = (key: string): void => {
   if (isSupported()) {
     localStorage.removeItem(`${__APP_VERSION__}/${key}`);
   }
-};
-
-export {
-  isSupported,
-  set,
-  get,
-  remove,
-  setForVersion,
-  getForVersion,
-  removeForVersion,
 };

@@ -1,7 +1,7 @@
 import { Profile } from "utils/types";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "..";
-import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
+import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants";
 import {
   FLUX_PROFILE,
   HAS_BG_IMAGE,
@@ -9,15 +9,16 @@ import {
   HAS_PROFILE_IMAGE,
   HAS_THUMBNAIL_IMAGE,
   HAS_USERNAME,
-} from "utils/constants/profile";
+} from "utils/constants";
 import {
   resizeImage,
   dataURItoBlob,
   blobToDataURL,
-} from "utils/helpers/profileHelpers";
+  createLinks,
+  createLiteralLinks,
+  cacheImage,
+} from "utils/helpers";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { createLinks, createLiteralLinks } from "utils/helpers/linkHelpers";
-import { cacheImage } from "utils/helpers/cacheImage";
 
 export interface Payload {
   username?: string;
@@ -54,7 +55,12 @@ export default async (payload: Payload): Promise<void> => {
     let profileBackgroundUrl = "";
 
     if (payload.profileBackground) {
-      const compressedImage = await blobToDataURL(await resizeImage(dataURItoBlob(payload.profileBackground as string), 0.6));
+      const compressedImage = await blobToDataURL(
+        await resizeImage(
+          dataURItoBlob(payload.profileBackground as string),
+          0.6
+        )
+      );
 
       profileBackgroundUrl = await client.expression.create(
         compressedImage,
@@ -64,7 +70,9 @@ export default async (payload: Payload): Promise<void> => {
     }
 
     if (payload.profilePicture) {
-      const compressedImage = await blobToDataURL(await resizeImage(dataURItoBlob(payload.profilePicture as string), 0.6));
+      const compressedImage = await blobToDataURL(
+        await resizeImage(dataURItoBlob(payload.profilePicture as string), 0.6)
+      );
 
       profilePictureUrl = await client.expression.create(
         compressedImage,
@@ -74,7 +82,9 @@ export default async (payload: Payload): Promise<void> => {
     }
 
     if (payload.profilePicture) {
-      const compressedImage = await blobToDataURL(await resizeImage(dataURItoBlob(payload.profilePicture as string), 0.3));
+      const compressedImage = await blobToDataURL(
+        await resizeImage(dataURItoBlob(payload.profilePicture as string), 0.3)
+      );
 
       profileThumbnailUrl = await client.expression.create(
         compressedImage,

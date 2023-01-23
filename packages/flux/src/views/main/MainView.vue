@@ -71,10 +71,7 @@ import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
 import { mapActions } from "pinia";
-import {
-  COMMUNITY_TEST_VERSION,
-  DEFAULT_TESTING_NEIGHBOURHOOD,
-} from "utils/constants/general";
+import { DEFAULT_TESTING_NEIGHBOURHOOD } from "utils/constants";
 
 export default defineComponent({
   name: "MainAppView",
