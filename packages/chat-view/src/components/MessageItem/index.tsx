@@ -115,21 +115,23 @@ export default function MessageItem({
     });
 
     if (alreadyMadeReaction) {
-      removeReaction({
-        author: alreadyMadeReaction.author,
-        data: {
-          predicate: REACTION,
-          target: `emoji://${alreadyMadeReaction.content}`,
-          source: message.id,
-        },
-        proof: {
-          invalid: false,
-          key: "",
-          signature: "",
-          valid: true,
-        },
-        timestamp: alreadyMadeReaction.timestamp,
-      });
+      if (alreadyMadeReaction?.synced) {
+        removeReaction({
+          author: alreadyMadeReaction.author,
+          data: {
+            predicate: REACTION,
+            target: `emoji://${alreadyMadeReaction.content}`,
+            source: message.id,
+          },
+          proof: {
+            invalid: false,
+            key: "",
+            signature: "",
+            valid: true,
+          },
+          timestamp: alreadyMadeReaction.timestamp,
+        });
+      }
     } else {
       addReaction(message.id, utf);
     }
