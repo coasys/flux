@@ -36,25 +36,26 @@ export async function getImage(expUrl: string): Promise<string> {
         const dexie = new DexieIPFS("ipfs");
         const cachedImage = await dexie.get(expUrl);
 
-        if (cachedImage) {
-          timeout && clearTimeout(timeout);
-          resolve(cachedImage);
-        } else {
+        if (cachedImage === null || cachedImage === undefined) {
           startTimeout();
           const expression = await client.expression.get(expUrl);
+          console.log({ expression });
           if (expression) {
             const image = expression.data.slice(1, -1);
             dexie.save(expUrl, image);
             timeout && clearTimeout(timeout);
             resolve(image);
           }
+        } else {
+          timeout && clearTimeout(timeout);
+          resolve(cachedImage);
         }
-        resolve("");
+        resolve(undefined);
       } catch (e) {
-        resolve("");
+        resolve(undefined);
       }
     } else {
-      resolve("");
+      resolve(undefined);
     }
   });
 }
