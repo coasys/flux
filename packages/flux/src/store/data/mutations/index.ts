@@ -154,7 +154,7 @@ export default {
 
   toggleChannelCollapse(channelId: string) {
     const state = useDataStore();
-    state.channels[channelId].collapsed = !state.channels[channelId].collapsed;
+    state.channels[channelId].expanded = !state.channels[channelId].expanded;
   },
 
   setCurrentChannelView(payload: { channelId: string; view: ChannelView }) {

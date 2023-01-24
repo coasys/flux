@@ -22,7 +22,7 @@
             class="channel"
             :class="{ 'channel--muted': channel.notifications?.mute }"
             :selected="
-              channel.id === $route.params.channelId && !channel.collapsed
+              channel.id === $route.params.channelId && !channel.expanded
             "
             @click="() => navigateToChannel(channel.id)"
           >
@@ -44,7 +44,7 @@
               slot="start"
               style="--j-icon-size: 13px"
               v-if="channel.views.length > 1"
-              :name="channel.collapsed ? 'chevron-down' : 'chevron-right'"
+              :name="channel.expanded ? 'chevron-down' : 'chevron-right'"
             />
             <j-icon
               slot="start"
@@ -53,7 +53,7 @@
               :name="getIcon(channel.views[0])"
             ></j-icon>
           </j-menu-item>
-          <div class="channel-views" v-if="channel.collapsed">
+          <div class="channel-views" v-if="channel.expanded">
             <j-menu-item
               :selected="
                 view.type === channel.currentView &&

@@ -7,7 +7,7 @@ export interface ChannelState {
   sourcePerspective: string;
   hasNewMessages: boolean;
   timestamp: Date | string;
-  collapsed: boolean;
+  expanded: boolean;
   currentView: ChannelView;
   views: ChannelView[];
   notifications: {

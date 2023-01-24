@@ -295,7 +295,7 @@ export default defineComponent({
             name: channel.name,
             timestamp: new Date(channel.timestamp),
             author: channel.author,
-            collapsed: false,
+            expanded: false,
             sourcePerspective: id,
             currentView: channel.views[0],
             views: channel.views,

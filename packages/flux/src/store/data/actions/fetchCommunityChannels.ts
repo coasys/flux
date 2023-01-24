@@ -19,7 +19,7 @@ export default async (communityId: string): Promise<void> => {
         author: channel.author,
         sourcePerspective: communityId,
         hasNewMessages: false,
-        collapsed: false,
+        expanded: keyedChannels[channel.id]?.expanded || false,
         currentView:
           keyedChannels[channel.id]?.currentView ||
           channel.views[0] ||
