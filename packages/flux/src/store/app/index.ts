@@ -9,8 +9,6 @@ export const useAppStore = defineStore("app", {
     return {
       updateState: "not-available",
       windowState: "visible",
-      hasShownDefaultJoinPrompt: false,
-      seenCommunityTestVersion: 1,
       modals: {
         showCreateCommunity: false,
         showEditCommunity: false,

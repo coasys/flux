@@ -61,7 +61,7 @@ import { EntryType } from "utils/types";
 import subscribeToLinks from "utils/api/subscribeToLinks";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import semver from "semver";
-import { EXPECTED_AD4M_VERSION } from "utils/constants/general";
+import { dependencies } from "../package.json";
 
 export default defineComponent({
   name: "App",
@@ -101,24 +101,14 @@ export default defineComponent({
           const client = await getAd4mClient();
 
           //Do version checking for ad4m / flux compatibility
-          const version = (await client.runtime.info()).ad4mExecutorVersion;
-          console.log("Running AD4M version:", version);
-          if (semver.gt(EXPECTED_AD4M_VERSION, version)) {
-            //TODO: here we need to provide a link to download the latest version of ad4m with correct OS version
-            //from github
-            console.error(
-              "AD4M version is not supported... Please update AD4MIN before continuing."
-            );
-            this.appStore.setGlobalError({
-              show: true,
-              message:
-                "AD4M version is not supported... Please update AD4MIN before continuing.",
-            });
-          } else {
-            this.appStore.setGlobalError({
-              show: false,
-              message: "",
-            });
+          const { ad4mExecutorVersion } = await client.runtime.info();
+          const isIncompatible = semver.gt(
+            dependencies["@perspect3vism/ad4m"],
+            ad4mExecutorVersion
+          );
+
+          if (isIncompatible) {
+            this.$router.push({ name: "update-ad4m" });
           }
         }
       }
