@@ -1,7 +1,4 @@
-import {
-  COMMUNITY_TEST_VERSION,
-  DEFAULT_TESTING_NEIGHBOURHOOD,
-} from "utils/constants/general";
+import { DEFAULT_TESTING_NEIGHBOURHOOD } from "utils/constants/general";
 import { useAppStore } from "..";
 import { useDataStore } from "@/store/data";
 
@@ -12,11 +9,10 @@ export async function joinTestingCommunity() {
     await dataStore.joinCommunity({
       joiningLink: DEFAULT_TESTING_NEIGHBOURHOOD,
     });
-    appStore.setHasSeenTestCommunity(COMMUNITY_TEST_VERSION);
-    //Stop showing the disclaimer
-    appStore.setShowDisclaimer(false);
   } catch (e) {
-    //Stop showing the disclaimer
-    appStore.setShowDisclaimer(false);
+    appStore.showDangerToast({
+      message: e.message,
+    });
+    throw new Error(e);
   }
 }

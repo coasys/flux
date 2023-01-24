@@ -12,6 +12,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import(`@/views/signup/SignUp.vue`),
   },
   {
+    path: "/update-ad4m",
+    name: "update-ad4m",
+    component: () => import(`@/views/update/UpdateAd4m.vue`),
+  },
+  {
     path: "/",
     name: "main",
     component: () => import(`@/views/main/MainView.vue`),

@@ -71,10 +71,7 @@ import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
 import { mapActions } from "pinia";
-import {
-  COMMUNITY_TEST_VERSION,
-  DEFAULT_TESTING_NEIGHBOURHOOD,
-} from "utils/constants/general";
+import { DEFAULT_TESTING_NEIGHBOURHOOD } from "utils/constants/general";
 
 export default defineComponent({
   name: "MainAppView",
@@ -113,6 +110,7 @@ export default defineComponent({
       try {
         this.isJoining = true;
         await this.appStore.joinTestingCommunity();
+        this.setShowDisclaimer(false);
       } catch (e) {
         console.log(e);
       } finally {
