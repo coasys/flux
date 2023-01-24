@@ -8,10 +8,14 @@ import { Ad4mClient, Literal } from "@perspect3vism/ad4m";
 
 function findNodes(links, source) {
   return links.reduce((acc, link) => {
+    const isSource = link.data.target === source;
     const hasSource = link.data.source === source;
-    const alreadyIn = acc.some((l) => l === link.data.source);
+    const alreadyIn = acc.some(
+      (l) => l.proof.signature === link.proof.signature
+    );
 
     if (alreadyIn) return acc;
+
     if (hasSource) {
       const newLinks = findNodes(links, link.data.target);
       return [...acc, ...newLinks, link];
@@ -65,21 +69,26 @@ export default function CommunityOverview({ uuid, source }) {
 
       const subLinks = findNodes(snapshot.links, source);
 
+      console.log({ subLinks });
+
       const initialNodes = subLinks
         .map((l) => {
-          return [
-            { id: l.data.source, group: l.data.predicate },
-            { id: l.data.target, group: l.data.predicate },
-          ];
+          return [{ id: l.data.target, group: l.data.predicate }];
         })
         .flat();
 
-      setNodes(initialNodes);
+      setNodes([...initialNodes, { id: source, group: "self" }]);
 
-      const initialLinks = subLinks.map((l) => ({
-        source: l.data.target,
-        target: l.data.source,
-      }));
+      const initialLinks = subLinks
+        .map((l) => [
+          {
+            source: l.data.target,
+            target: l.data.source,
+          },
+        ])
+        .flat();
+
+      console.log({ initialLinks, initialNodes });
 
       setLinks(initialLinks);
 
@@ -102,11 +111,11 @@ export default function CommunityOverview({ uuid, source }) {
   useEffect(() => {
     const setupGraph = async () => {
       graph.current = ForceGraph3D()
-        .nodeLabel((node) =>
-          node.id.startsWith("literal://")
+        .nodeLabel((node) => {
+          return node.id.startsWith("literal://")
             ? Literal.fromUrl(node.id).get().data
-            : node.id
-        )
+            : node.id;
+        })
         .nodeAutoColorBy("group")
         .width(containerSize[0] || window.innerWidth)
         .height(containerSize[1] || window.innerHeight)
