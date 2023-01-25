@@ -62,13 +62,7 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { useAppStore } from "@/store/app";
 import { defineComponent, ref } from "vue";
-import {
-  AREA_WEBLINK,
-  OG_DESCRIPTION,
-  OG_TITLE,
-  OG_IMAGE,
-} from "utils/constants/profile";
-import { createLiteralObject } from "utils/helpers/linkHelpers";
+import createAgentWebLink from "utils/api/createAgentWebLink";
 
 export default defineComponent({
   props: ["step"],
@@ -117,23 +111,11 @@ export default defineComponent({
 
       const appStore = useAppStore();
 
-      const links = await createLiteralObject({
-        parent: {
-          source: `self`,
-          predicate: AREA_WEBLINK,
-          target: this.link || "",
-        },
-        children: {
-          [OG_TITLE]: this.title || "",
-          [OG_DESCRIPTION]: this.link || "",
-          [OG_DESCRIPTION]: this.description || "",
-          [OG_IMAGE]: this.imageUrl || "",
-        },
-      });
-
-      await client.agent.mutatePublicPerspective({
-        additions: links,
-        removals: [],
+      await createAgentWebLink({
+        title: this.title,
+        description: this.description,
+        imageUrl: this.imageUrl,
+        url: this.link,
       });
 
       appStore.showSuccessToast({

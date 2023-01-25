@@ -179,18 +179,11 @@ import EditProfile from "@/containers/EditProfile.vue";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { mapActions } from "pinia";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import Avatar from "@/components/avatar/Avatar.vue";
-import {
-  AREA_WEBLINK,
-  OG_DESCRIPTION,
-  OG_IMAGE,
-  OG_TITLE,
-} from "utils/constants/profile";
 import getProfile from "utils/api/getProfile";
 import { getImage } from "utils/helpers/getImage";
-import { mapLiteralLinks } from "utils/helpers/linkHelpers";
 import WebLinkAdd from "./WebLinkAdd.vue";
+import getAgentWebLinks from "utils/api/getAgentWebLinks";
 
 export default defineComponent({
   name: "ProfileView",
@@ -250,34 +243,7 @@ export default defineComponent({
       this.weblinks = this.weblinks.filter((l: any) => l.id !== link.id);
     },
     async getAgentAreas() {
-      const client = await getAd4mClient();
-
-      const { perspective } = await client.agent.byDID(this.did);
-
-      if (!perspective) return;
-
-      const webLinkAreas = perspective.links.filter(
-        (l) => l.data.predicate === AREA_WEBLINK
-      );
-
-      const webLinks = webLinkAreas.map((parentLink) => {
-        const associatedLinks = perspective.links.filter(
-          (link) => link.data.source === parentLink.data.target
-        );
-
-        const ogData = mapLiteralLinks(associatedLinks, {
-          title: OG_TITLE,
-          description: OG_DESCRIPTION,
-          image: OG_IMAGE,
-        });
-
-        return {
-          ...ogData,
-          url: Literal.fromUrl(parentLink.data.target).get().data,
-          id: parentLink.data.target,
-        };
-      });
-
+      const webLinks = await getAgentWebLinks(this.did);
       this.weblinks = webLinks;
     },
     ...mapActions(useAppStore, [

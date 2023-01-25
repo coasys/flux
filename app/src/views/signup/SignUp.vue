@@ -73,17 +73,11 @@ import {
   isConnected,
   onAuthStateChanged,
 } from "@perspect3vism/ad4m-connect/dist/utils";
-import {
-  AD4M_PREDICATE_USERNAME,
-  AD4M_PREDICATE_FIRSTNAME,
-  AD4M_PREDICATE_LASTNAME,
-} from "utils/constants/profile";
-
 import Logo from "@/components/logo/Logo.vue";
-import { mapLiteralLinks } from "utils/helpers/linkHelpers";
 import { useAppStore } from "@/store/app";
 import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";
 import SignUpCarousel from "./SignUpCarousel.vue";
+import getAd4mProfile from "utils/api/getAd4mProfile";
 
 export default defineComponent({
   name: "SignUp",
@@ -194,18 +188,11 @@ export default defineComponent({
 
         this.showSignup = true;
 
-        const client = await getAd4mClient();
+        const ad4mProfile = await getAd4mProfile();
 
-        const agentLinks = (await client.agent.me()).perspective!.links;
-
-        const profile = mapLiteralLinks(agentLinks, {
-          username: AD4M_PREDICATE_USERNAME,
-          name: AD4M_PREDICATE_FIRSTNAME,
-          familyName: AD4M_PREDICATE_LASTNAME,
-        });
-        this.username = profile?.username || "";
-        this.name = profile?.name || "";
-        this.familyName = profile?.familyName || "";
+        this.username = ad4mProfile.username || "";
+        this.name = ad4mProfile.name || "";
+        this.familyName = ad4mProfile.familyName || "";
       } catch (e) {
         console.log(e);
       }
