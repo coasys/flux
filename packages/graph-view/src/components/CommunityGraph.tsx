@@ -69,26 +69,17 @@ export default function CommunityOverview({ uuid, source }) {
 
       const subLinks = findNodes(snapshot.links, source);
 
-      console.log({ subLinks });
-
-      const initialNodes = subLinks
-        .map((l) => {
-          return [{ id: l.data.target, group: l.data.predicate }];
-        })
-        .flat();
+      const initialNodes = subLinks.map((l) => ({
+        id: l.data.target,
+        group: l.data.predicate,
+      }));
 
       setNodes([...initialNodes, { id: source, group: "self" }]);
 
-      const initialLinks = subLinks
-        .map((l) => [
-          {
-            source: l.data.target,
-            target: l.data.source,
-          },
-        ])
-        .flat();
-
-      console.log({ initialLinks, initialNodes });
+      const initialLinks = subLinks.map((l) => ({
+        source: l.data.target,
+        target: l.data.source,
+      }));
 
       setLinks(initialLinks);
 
