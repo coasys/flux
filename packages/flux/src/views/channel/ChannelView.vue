@@ -1,5 +1,9 @@
 <template>
-  <div class="channel-view" style="height: 100%" :class="{expanded: isExpanded}">
+  <div
+    class="channel-view"
+    style="height: 100%"
+    :class="{ expanded: isExpanded }"
+  >
     <div class="channel-view__header">
       <j-button
         class="channel-view__sidebar-toggle"
@@ -9,45 +13,42 @@
         <j-icon color="ui-800" size="md" name="arrow-left-short" />
       </j-button>
 
-      <div class="channel-view__header-left">
-        <j-box pr="500">
-          <j-flex a="center" gap="200">
-            <j-icon name="hash" size="md" color="ui-300"></j-icon>
-            <j-text color="black" weight="700" size="500" nomargin>
-              {{ channel.name }}
-            </j-text>
-          </j-flex>
-        </j-box>
-        <div class="channel-view__tabs">
-          <label class="channel-view-tab" v-for="view in filteredViewOptions">
-            <input
-              :name="channel.id"
-              type="radio"
-              :checked.prop="view.type === currentView"
-              :value.prop="view.type"
-              @change="changeCurrentView"
-            />
-            <j-icon size="xs" :name="view.icon"></j-icon>
-            <span>{{ view.title }}</span>
-          </label>
+      <div class="channel-view__header-actions">
+        <div class="channel-view__header-left">
+          <j-box pr="500">
+            <j-flex a="center" gap="200">
+              <j-icon name="hash" size="md" color="ui-300"></j-icon>
+              <j-text color="black" weight="700" size="500" nomargin>
+                {{ channel.name }}
+              </j-text>
+            </j-flex>
+          </j-box>
+          <div class="channel-view__tabs">
+            <label class="channel-view-tab" v-for="view in filteredViewOptions">
+              <input
+                :name="channel.id"
+                type="radio"
+                :checked.prop="view.type === currentView"
+                :value.prop="view.type"
+                @change="changeCurrentView"
+              />
+              <j-icon size="xs" :name="view.icon"></j-icon>
+              <span>{{ view.title }}</span>
+            </label>
+          </div>
         </div>
-      </div>
-      <div class="channel-view__header-right">
-        <j-tooltip placement="auto" :title="isExpanded ? 'Minimize' : 'Fullsize'">
-          <j-button size="sm" variant="ghost">
-            <j-icon size="sm" :name="isExpanded ? 'arrows-angle-contract' : 'arrows-angle-expand'" @click="isExpanded = !isExpanded"></j-icon>
-          </j-button>
-        </j-tooltip>
-        <j-tooltip placement="auto" title="Edit Channel">
-          <j-button
-            v-if="sameAgent"
-            @click="() => (showEditChannel = true)"
-            size="sm"
-            variant="ghost"
-          >
-            <j-icon size="sm" name="gear"></j-icon>
-          </j-button>
-        </j-tooltip>
+        <div class="channel-view__header-right">
+          <j-tooltip placement="auto" title="Edit Channel">
+            <j-button
+              v-if="sameAgent"
+              @click="() => (showEditChannel = true)"
+              size="sm"
+              variant="ghost"
+            >
+              <j-icon size="sm" name="gear"></j-icon>
+            </j-button>
+          </j-tooltip>
+        </div>
       </div>
     </div>
 
@@ -158,7 +159,7 @@ export default defineComponent({
       activeProfile: ref<string>(""),
       showProfile: ref(false),
       isJoiningCommunity: ref(false),
-      isExpanded: ref(false)
+      isExpanded: ref(false),
     };
   },
   async mounted() {
@@ -308,13 +309,21 @@ export default defineComponent({
 .channel-view__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: var(--j-space-400);
   padding: 0 var(--j-space-200);
   position: sticky;
   background-color: var(--app-channel-header-bg-color, transparent);
   border-bottom: 1px solid
     var(--app-channel-header-border-color, var(--j-border-color));
   height: var(--app-header-height);
+}
+
+.channel-view__header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  height: 100%;
 }
 
 .channel-view__header-left {
@@ -378,6 +387,8 @@ export default defineComponent({
   }
   .channel-view__header {
     padding: 0 var(--j-space-500);
+    justify-content: space-between;
+    gap: 0;
   }
 }
 </style>
