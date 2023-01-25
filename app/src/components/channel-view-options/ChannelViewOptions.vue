@@ -23,7 +23,7 @@ import { defineComponent, ref } from "vue";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
 import { ChannelView } from "utils/types";
-import viewOptions from "utils/constants/viewOptions";
+import { viewOptions } from "@/constants";
 
 export default defineComponent({
   props: {

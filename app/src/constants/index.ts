@@ -1,6 +1,6 @@
-import { ChannelView } from "../types";
+import { ChannelView } from "utils/types";
 
-export default [
+export const viewOptions = [
   {
     title: "Chat",
     description: "Real time message with your community members",
@@ -23,3 +23,6 @@ export default [
     component: "graph-view",
   },
 ];
+
+export const DEFAULT_TESTING_NEIGHBOURHOOD =
+  "neighbourhood://QmbNH3q35YzNJBQBFRHwap68dyZ8LfzafqDKWLCdLvDnqU";

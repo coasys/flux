@@ -112,7 +112,7 @@ import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { deleteChannel } from "utils/api/deleteChannel";
 import { ChannelView } from "utils/types";
-import channelViewOptions from "utils/constants/viewOptions";
+import { viewOptions as channelViewOptions } from "@/constants";
 
 export default defineComponent({
   setup() {

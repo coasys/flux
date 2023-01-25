@@ -1,4 +1,4 @@
-import { DEFAULT_TESTING_NEIGHBOURHOOD } from "utils/constants/general";
+import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 import { useAppStore } from "..";
 import { useDataStore } from "@/store/data";
 
