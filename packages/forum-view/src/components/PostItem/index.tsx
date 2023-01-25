@@ -1,6 +1,6 @@
 import { useContext, useState, useEffect } from "preact/hooks";
 import { CommunityContext } from "utils/react";
-import styles from "./index.scss";
+import styles from "./index.module.css";
 import { format, formatDistance, formatRelative } from "date-fns/esm";
 import { Profile } from "utils/types";
 import { DisplayView } from "../../constants/options";

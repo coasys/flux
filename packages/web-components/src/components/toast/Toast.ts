@@ -31,6 +31,7 @@ const styles = css`
     animation: fade-up 0.2s ease;
   }
   [part="base"] {
+    z-index: 999999;
     box-shadow: var(--j-depth-100);
     display: flex;
     align-items: center;

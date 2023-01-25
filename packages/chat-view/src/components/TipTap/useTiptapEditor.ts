@@ -230,5 +230,15 @@ export default ({
     ]
   );
 
+  useEffect(() => {
+    if (value && currentMessageEdit) {
+      const text = editor.getText()
+      
+      setTimeout(() => {
+        editor.chain().focus().setTextSelection(text.length+1).run()
+      }, 0);
+    }
+  }, [value, currentMessageEdit, editor])
+
   return editor;
 };

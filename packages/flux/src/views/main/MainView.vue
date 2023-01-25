@@ -17,17 +17,13 @@
     </j-modal>
 
     <j-modal
-      :open="
-        modals.showDisclaimer &&
-        (modals.showWarningDisclaimer || showJoinCommunity)
-      "
+      :open="modals.showDisclaimer"
       @toggle="(e: any) => {
-        setShowDisclaimer(e.target.open)
-        setShowWarningDisclaimer(e.target.open)
+        setShowDisclaimer(e.target.open);
       }"
     >
       <j-box p="800">
-        <div v-if="modals.showWarningDisclaimer">
+        <div v-if="modals.showDisclaimer">
           <j-box pb="500">
             <j-flex gap="400" a="center">
               <j-icon name="exclamation-diamond" size="lg" />
@@ -43,10 +39,7 @@
             <li>Messages might not always be delivered reliably</li>
           </ul>
         </div>
-        <br v-if="modals.showWarningDisclaimer && showJoinCommunity" />
-        <hr v-if="modals.showWarningDisclaimer && showJoinCommunity" />
-        <br v-if="modals.showWarningDisclaimer && showJoinCommunity" />
-        <j-box pb="500" v-if="showJoinCommunity">
+        <j-box pt="500" pb="500" v-if="!hasAlreadyJoinedTestingCommunity">
           <j-flex gap="400" a="center">
             <j-icon name="arrow-down-circle" size="lg" />
             <j-text nomargin variant="heading">Testing Community</j-text>
@@ -76,21 +69,18 @@ import { defineComponent, ref } from "vue";
 import CreateCommunity from "@/containers/CreateCommunity.vue";
 import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
+import { useDataStore } from "@/store/data";
 import { mapActions } from "pinia";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import {
-  COMMUNITY_TEST_VERSION,
-  DEFAULT_TESTING_NEIGHBOURHOOD,
-} from "utils/constants/general";
+import { DEFAULT_TESTING_NEIGHBOURHOOD } from "utils/constants/general";
 
 export default defineComponent({
   name: "MainAppView",
   setup() {
     return {
+      dataStore: useDataStore(),
       isJoining: ref(false),
       appStore: useAppStore(),
       isInit: ref(false),
-      showJoinCommunity: ref(false),
     };
   },
   components: {
@@ -98,30 +88,13 @@ export default defineComponent({
     AppLayout,
     CreateCommunity,
   },
-  async created() {
-    const client = await getAd4mClient();
-    const existingPerspectives = await client.perspective.all();
-    const defaultTestingCommunity = existingPerspectives.find(
-      (p) => p.sharedUrl === DEFAULT_TESTING_NEIGHBOURHOOD
-    );
-
-    const appStore = this.appStore;
-    //Check that user already has joined default testing community
-    if (!defaultTestingCommunity) {
-      appStore.setShowDisclaimer(true);
-
-      this.showJoinCommunity = true;
-    }
-
-    if (
-      COMMUNITY_TEST_VERSION > appStore.seenCommunityTestVersion &&
-      !defaultTestingCommunity
-    ) {
-      appStore.setShowDisclaimer(true);
-      this.showJoinCommunity = true;
-    }
-  },
   computed: {
+    hasAlreadyJoinedTestingCommunity(): boolean {
+      const community = this.dataStore.getCommunityByNeighbourhoodUrl(
+        DEFAULT_TESTING_NEIGHBOURHOOD
+      );
+      return community ? true : false;
+    },
     modals(): ModalsState {
       return this.appStore.modals;
     },
@@ -130,7 +103,6 @@ export default defineComponent({
     ...mapActions(useAppStore, [
       "setShowEditProfile",
       "setShowSettings",
-      "setShowWarningDisclaimer",
       "setShowCreateCommunity",
       "setShowDisclaimer",
     ]),
@@ -138,6 +110,7 @@ export default defineComponent({
       try {
         this.isJoining = true;
         await this.appStore.joinTestingCommunity();
+        this.setShowDisclaimer(false);
       } catch (e) {
         console.log(e);
       } finally {

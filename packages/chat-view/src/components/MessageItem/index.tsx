@@ -1,62 +1,18 @@
-import { useContext, useMemo, useEffect, useRef, useState } from "preact/hooks";
+import { useContext, useRef, useState } from "preact/hooks";
 import { AgentContext, ChatContext, CommunityContext } from "utils/react";
 import getMe from "utils/api/getMe";
-import getNeighbourhoodLink from "utils/api/getNeighbourhoodLink";
 import MessageToolbar from "./MessageToolbar";
 import MessageReactions from "./MessageReactions";
 import MessageReply from "./MessageReply";
 import UIContext from "../../context/UIContext";
-import styles from "./index.scss";
 import { format, formatRelative } from "date-fns/esm";
 import { REACTION } from "utils/constants/communityPredicates";
 import Avatar from "../../components/Avatar";
 import EditorContext from "../../context/EditorContext";
 import { Message, Profile } from "utils/types";
-import NeighbourhoodCard from "./NeighbourhoodCard";
-import LinkCard from "./LinkCard";
+import MessageCards from "./MessageCards";
 
-function Card({
-  type,
-  image,
-  url,
-  mainRef,
-  name,
-  description,
-  onClick,
-  perspectiveUuid,
-}) {
-  function onNeighbourhoodClick(url: string) {
-    const event = new CustomEvent("neighbourhood-click", {
-      detail: { url, channel: "Home" },
-      bubbles: true,
-    });
-    mainRef?.dispatchEvent(event);
-  }
-
-  function onLinkClick(url: string) {
-    window.open(url, "_blank");
-  }
-
-  if (type === "neighbourhood") {
-    return (
-      <NeighbourhoodCard
-        onClick={() => onNeighbourhoodClick(url)}
-        name={name}
-        description={description}
-        perspectiveUuid={perspectiveUuid}
-      />
-    );
-  } else if (type === "link") {
-    return (
-      <LinkCard
-        onClick={() => onLinkClick(url)}
-        name={name}
-        description={description}
-        image={image}
-      />
-    );
-  }
-}
+import styles from "./index.scss";
 
 export default function MessageItem({
   message,
@@ -83,8 +39,6 @@ export default function MessageItem({
   const {
     methods: { addReaction, removeReaction },
   } = useContext(ChatContext);
-
-  const [neighbourhoodCards, setNeighbourhoodCards] = useState<any[]>([]);
 
   const {
     state: { currentReply, currentMessageEdit },
@@ -114,21 +68,23 @@ export default function MessageItem({
     });
 
     if (alreadyMadeReaction) {
-      removeReaction({
-        author: alreadyMadeReaction.author,
-        data: {
-          predicate: REACTION,
-          target: `emoji://${alreadyMadeReaction.content}`,
-          source: message.id,
-        },
-        proof: {
-          invalid: false,
-          key: "",
-          signature: "",
-          valid: true,
-        },
-        timestamp: alreadyMadeReaction.timestamp,
-      });
+      if (alreadyMadeReaction?.synced) {
+        removeReaction({
+          author: alreadyMadeReaction.author,
+          data: {
+            predicate: REACTION,
+            target: `emoji://${alreadyMadeReaction.content}`,
+            source: message.id,
+          },
+          proof: {
+            invalid: false,
+            key: "",
+            signature: "",
+            valid: true,
+          },
+          timestamp: alreadyMadeReaction.timestamp,
+        });
+      }
     } else {
       addReaction(message.id, utf);
     }
@@ -174,25 +130,6 @@ export default function MessageItem({
     });
     mainRef?.dispatchEvent(event);
   }
-
-  useEffect(() => {
-    getNeighbourhoodCards();
-  }, [message.id]);
-
-  useEffect(() => {
-    getNeighbourhoodCards();
-  }, [message.isNeighbourhoodCardHidden]);
-
-  const getNeighbourhoodCards = async () => {
-    const links = await getNeighbourhoodLink({
-      perspectiveUuid,
-      messageUrl: message.id,
-      message: messageContent,
-      isHidden: message.isNeighbourhoodCardHidden,
-    });
-
-    setNeighbourhoodCards(links);
-  };
 
   const author: Profile = members[message.author] || {};
   const replyAuthor: Profile = members[message?.replies[0]?.author] || {};
@@ -309,18 +246,11 @@ export default function MessageItem({
             />
           )}
 
-          {neighbourhoodCards.map((e) => (
-            <Card
-              type={e.type}
-              mainRef
-              onClick={() => onNeighbourhoodClick(e.url)}
-              name={e.name}
-              description={e.description}
-              perspectiveUuid={e.perspectiveUuid}
-              url={e.url}
-              image={e.image}
-            ></Card>
-          ))}
+          <MessageCards
+            message={message}
+            perspectiveUuid={perspectiveUuid}
+            mainRef={mainRef}
+          />
         </div>
 
         {!hideToolbar && showToolbar && (

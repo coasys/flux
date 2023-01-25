@@ -6,7 +6,9 @@ export function fetchFromPublicGateway(url: string): Promise<string> {
     const timeout = setTimeout(() => {
       resolve("");
     }, 1000);
-    const response = await fetch(`https://cloudflare-ipfs.com/ipfs/${url.split("://")[1]}`, {mode: "no-cors"});
+    const response = await fetch(
+      `https://gateway.ipfs.io/ipfs/${url.split("://")[1]}`
+    );
     const json = await response.json();
     const image = json.data;
     clearTimeout(timeout);
@@ -21,32 +23,39 @@ export async function getImage(expUrl: string): Promise<string> {
 
     if (expUrl && expUrl !== "") {
       try {
-        const timeout = setTimeout(async () => {
-          const image = await fetchFromPublicGateway(expUrl);
-          dexie.save(expUrl, image);
-          resolve(image);
-        }, 5000);
+        let timeout = null;
+
+        function startTimeout() {
+          timeout = setTimeout(async () => {
+            const image = await fetchFromPublicGateway(expUrl);
+            dexie.save(expUrl, image);
+            resolve(image);
+          }, 5000);
+        }
 
         const dexie = new DexieIPFS("ipfs");
         const cachedImage = await dexie.get(expUrl);
-        if (cachedImage) {
-          clearTimeout(timeout);
-          resolve(cachedImage);
-        } else {
+
+        if (cachedImage === null || cachedImage === undefined) {
+          startTimeout();
           const expression = await client.expression.get(expUrl);
+          console.log({ expression });
           if (expression) {
             const image = expression.data.slice(1, -1);
             dexie.save(expUrl, image);
-            clearTimeout(timeout);
+            timeout && clearTimeout(timeout);
             resolve(image);
           }
+        } else {
+          timeout && clearTimeout(timeout);
+          resolve(cachedImage);
         }
-        resolve("");
+        resolve(undefined);
       } catch (e) {
-        resolve("");
+        resolve(undefined);
       }
     } else {
-      resolve("");
+      resolve(undefined);
     }
   });
 }

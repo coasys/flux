@@ -103,7 +103,7 @@ export default defineComponent({
   computed: {
     filteredCommunityMemberList() {
       return this.memberList.filter((member) => {
-        return member.username.includes(this.searchValue);
+        return member.username?.includes(this.searchValue);
       });
     },
     community(): Community {

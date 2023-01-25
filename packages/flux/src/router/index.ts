@@ -1,10 +1,5 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
-import MainView from "@/views/main/MainView.vue";
-import SignUp from "@/views/signup/SignUp.vue";
-import CommunityView from "@/views/community/CommunityView.vue";
-import ChannelView from "@/views/channel/ChannelView.vue";
-import Settings from "@/containers/Settings.vue";
-import ProfileView from "@/views/profile/ProfileView.vue";
+
 import {
   getAd4mClient,
   isConnected,
@@ -14,40 +9,45 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/signup",
     name: "signup",
-    component: SignUp,
+    component: () => import(`@/views/signup/SignUp.vue`),
+  },
+  {
+    path: "/update-ad4m",
+    name: "update-ad4m",
+    component: () => import(`@/views/update/UpdateAd4m.vue`),
   },
   {
     path: "/",
     name: "main",
-    component: MainView,
+    component: () => import(`@/views/main/MainView.vue`),
     redirect: { name: "home" },
     children: [
       {
         path: "home",
         name: "home",
-        component: ProfileView,
+        component: () => import(`@/views/profile/ProfileView.vue`),
       },
       {
         path: "communities/:communityId",
         name: "community",
-        component: CommunityView,
+        component: () => import(`@/views/community/CommunityView.vue`),
         children: [
           {
             path: ":channelId",
             name: "channel",
-            component: ChannelView,
+            component: () => import(`@/views/channel/ChannelView.vue`),
           },
         ],
       },
       {
         path: "profile/:did",
         name: "profile",
-        component: ProfileView,
+        component: () => import(`@/views/profile/ProfileView.vue`),
       },
       {
         path: "settings",
         name: "settings",
-        component: Settings,
+        component: () => import(`@/containers/Settings.vue`),
       },
     ],
   },

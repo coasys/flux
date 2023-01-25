@@ -34,9 +34,6 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
   const [showModal, setShowModal] = useState(false);
   const [initialScroll, setinitialScroll] = useState(false);
   const scroller = useRef();
-  const {
-    state: { editor },
-  } = useContext(EditorContext);
   const [selectedReplies, setSelectedReplies] = useState<any>(null);
 
   const {
@@ -101,10 +98,12 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
     const fetchedMessageCount = await loadMore(timestamp, backwards);
 
     if (fetchedMessageCount > 0) {
-      scroller?.current?.scrollToIndex({
-        index: fetchedMessageCount - 1,
-        align: "end",
-      });
+      setTimeout(() => {
+        scroller?.current?.scrollToIndex({
+          index: fetchedMessageCount - 2,
+          align: "start",
+        });
+      }, 0)
     }
   }
 
@@ -172,15 +171,17 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
       trigger: "click",
       appendTo: document.body,
       interactive: true,
-      onShow: () => {
-        emojiPicker.addEventListener("emoji-click", onEmojiClick);
-      },
-      onHide: () => {
-        emojiPicker.removeEventListener("emoji-click", onEmojiClick);
-      },
     });
     instance.show();
   }
+
+  useEffect(() => {
+    emojiPicker.addEventListener("emoji-click", onEmojiClick);
+
+    return () => {
+      emojiPicker.removeEventListener("emoji-click", onEmojiClick);
+    }
+  }, [messages, emojiPicker])
 
   async function onEmojiClick(e: any) {
     const unicode = e.detail.unicode;
@@ -196,21 +197,23 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
     });
 
     if (alreadyMadeReaction) {
-      removeReaction({
-        author: alreadyMadeReaction.author,
-        data: {
-          predicate: REACTION,
-          target: `emoji://${alreadyMadeReaction.content}`,
-          source: message.id,
-        },
-        proof: {
-          invalid: false,
-          key: "",
-          signature: "",
-          valid: true,
-        },
-        timestamp: alreadyMadeReaction.timestamp,
-      });
+      if (alreadyMadeReaction?.synced) {
+        removeReaction({
+          author: alreadyMadeReaction.author,
+          data: {
+            predicate: REACTION,
+            target: `emoji://${alreadyMadeReaction.content}`,
+            source: message.id,
+          },
+          proof: {
+            invalid: false,
+            key: "",
+            signature: "",
+            valid: true,
+          },
+          timestamp: alreadyMadeReaction.timestamp,
+        });
+      }
     } else {
       addReaction(message.id, utf);
     }

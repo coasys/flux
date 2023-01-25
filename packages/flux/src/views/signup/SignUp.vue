@@ -196,7 +196,7 @@ export default defineComponent({
 
         const client = await getAd4mClient();
 
-        const agentLinks = await client.agent.me().perspective!.links;
+        const agentLinks = (await client.agent.me()).perspective!.links;
 
         const profile = mapLiteralLinks(agentLinks, {
           username: AD4M_PREDICATE_USERNAME,

@@ -14,6 +14,7 @@
     :disabled="disabled"
     id="bannerFileInput"
     ref="fileInput"
+    accept="image/*"
     style="display: none"
     type="file"
     @change.prevent="selectFile"

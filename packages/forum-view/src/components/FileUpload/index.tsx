@@ -1,40 +1,17 @@
 import { useEffect, useState } from "preact/hooks";
 import { useDropzone } from "react-dropzone";
-import styles from "./index.scss";
+import styles from "./index.module.css";
 
-const thumbsContainer = {
-  display: "flex",
-  flexDirection: "row",
-  flexWrap: "wrap",
-  marginTop: 16,
+type FluxFile = File & {
+  preview: string;
 };
 
-const thumb = {
-  display: "inline-flex",
-  borderRadius: 2,
-  border: "1px solid #eaeaea",
-  marginBottom: 8,
-  marginRight: 8,
-  width: 100,
-  height: 100,
-  padding: 4,
-  boxSizing: "border-box",
+type Props = {
+  onChange: (files: FluxFile[]) => void;
 };
 
-const thumbInner = {
-  display: "flex",
-  minWidth: 0,
-  overflow: "hidden",
-};
-
-const img = {
-  display: "block",
-  width: "auto",
-  height: "100%",
-};
-
-export default function Previews({ onChange }) {
-  const [files, setFiles] = useState([]);
+export default function FileUpload({ onChange }: Props) {
+  const [files, setFiles] = useState<FluxFile[]>([]);
   const { getRootProps, getInputProps, isFocused } = useDropzone({
     maxFiles: 1,
     accept: {

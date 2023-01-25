@@ -60,12 +60,16 @@ export default async function createCommunity({
       );
     }
 
-    let thumbnail = "";
-    let compressedImage = "";
+    let thumbnail = null;
+    let compressedImage = null;
 
     if (image) {
-      compressedImage = await blobToDataURL(await resizeImage(dataURItoBlob(image as string), 0.6));
-      thumbnail = await blobToDataURL(await resizeImage(dataURItoBlob(image as string), 0.3));
+      compressedImage = await blobToDataURL(
+        await resizeImage(dataURItoBlob(image as string), 0.6)
+      );
+      thumbnail = await blobToDataURL(
+        await resizeImage(dataURItoBlob(image as string), 0.3)
+      );
     }
 
     const Community = new CommunityModel({

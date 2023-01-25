@@ -58,7 +58,7 @@
           "name": "icon",
           "description": "Icon",
           "type": "String",
-          "default": "\"person-fill\""
+          "default": "\"\""
         },
         {
           "name": "size",
@@ -109,7 +109,7 @@
           "attribute": "icon",
           "description": "Icon",
           "type": "String",
-          "default": "\"person-fill\""
+          "default": "\"\""
         },
         {
           "name": "size",

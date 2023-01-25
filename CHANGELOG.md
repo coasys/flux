@@ -3,6 +3,41 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.4.1] - 16/01/2023
+
+### Added
+ - Forum post editing
+ - Delete posts
+ - New UI after joining a community to allow for navigation to channels without using sidebar
+ - New UI and loading animations when you join a community and are waiting for data to sync
+ - If a user joins a community; navigate to it by default
+
+### Changed
+ - Use ipfs public gateway instead of cloudflare
+ - Member links now used to determine if we are sync'd with a community
+ - Use new link language with more effecient active agent fetching & reduce ad4m logging
+ - Improved rendering of avatars
+
+### Deprecated
+
+### Removed
+
+### Fixed
+ - Neighbourhood links are now parsed out of pasted joining code
+ - You can no longer post empty comments on posts
+ - Username should now prepopulate from ad4m on signup
+ - Fix disclaimer model showing too often
+ - Messages are now added to the UI optimistically with indication of when they sync to the network
+ - Fixed creating null image expressions if we do not provide images for a community
+ - Not being able to press space in forum post body
+ - Not being able to press tab to move between title and body when making a forum post
+ - Show correct image when editing/removing an image 
+ - Community image trying to resolve on IPFS even if it does not exist
+ - Already sync'd community will not incorrectly show sync screen on reload
+ - Refresh when looking at a post will correctly maintain view on that post
+
+### Security
+
 ## [0.4.0] - 04/01/2023
 
 ### Added

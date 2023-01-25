@@ -1,7 +1,7 @@
 <template>
   <sidebar-layout>
     <template v-slot:sidebar>
-      <community-sidebar></community-sidebar>
+      <community-sidebar :isSynced="isSynced"></community-sidebar>
     </template>
 
     <div
@@ -19,29 +19,59 @@
         :communityId="channel.sourcePerspective"
       ></channel-view>
     </div>
-    <div v-if="!isSynced" class="center">
+
+    <div v-if="!isSynced && !channelId" class="center">
       <j-box py="800">
         <j-flex gap="400" direction="column" a="center" j="center">
           <j-box pb="500">
-            <j-spinner></j-spinner>
+            <Hourglass></Hourglass>
           </j-box>
           <j-flex direction="column" a="center">
             <j-text color="black" size="700" weight="800">
               Syncing community
             </j-text>
-            <j-text size="400" weight="400">Please wait...</j-text>
+            <j-text size="400" weight="400"
+              >Note: Flux is P2P, you will not receive any data until another
+              user is online
+            </j-text>
           </j-flex>
         </j-flex>
       </j-box>
     </div>
+
     <div
       class="center"
-      v-if="
-        isSynced &&
-        channels.filter((c) => c.sourcePerspective === communityId).length === 0
-      "
+      v-if="isSynced && communityChannels.length > 0 && !channelId"
     >
-      <j-box py="800">
+      <div class="center-inner">
+        <j-flex gap="600" direction="column" a="center" j="center">
+          <Avatar
+            :initials="community.neighbourhood.name.charAt(0)"
+            size="xxl"
+            :url="community.neighbourhood.thumbnail"
+          ></Avatar>
+          <j-box align="center" pb="300">
+            <j-text variant="heading">
+              Welcome to {{ community.neighbourhood.name }}
+            </j-text>
+            <j-text variant="ingress">Pick a channel</j-text>
+          </j-box>
+
+          <div class="channel-card-grid">
+            <button
+              class="channel-card"
+              @click="() => navigateToChannel(channel.id)"
+              v-for="channel in communityChannels"
+            >
+              {{ channel.name }}
+            </button>
+          </div>
+        </j-flex>
+      </div>
+    </div>
+
+    <div class="center" v-if="isSynced && communityChannels.length === 0">
+      <div class="center-inner">
         <j-flex gap="400" direction="column" a="center" j="center">
           <j-icon color="ui-500" size="xl" name="balloon"></j-icon>
           <j-flex direction="column" a="center">
@@ -57,7 +87,7 @@
             </j-button>
           </j-flex>
         </j-flex>
-      </j-box>
+      </div>
     </div>
   </sidebar-layout>
 
@@ -146,11 +176,14 @@ import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunitySettings from "@/containers/CommunitySettings.vue";
 import ChannelView from "@/views/channel/ChannelView.vue";
 import CommunityTweaks from "@/containers/CommunityTweaks.vue";
+import Avatar from "@/components/avatar/Avatar.vue";
+import Hourglass from "@/components/hourglass/Hourglass.vue";
 
 import ChannelModel, { Channel } from "utils/api/channel";
 import MemberModel, { Member } from "utils/api/member";
 import { CommunityState, ModalsState, ChannelState } from "@/store/types";
 import { useAppStore } from "@/store/app";
+import { useUserStore } from "@/store/user";
 import { useDataStore } from "@/store/data";
 import { mapActions, mapState } from "pinia";
 
@@ -169,6 +202,8 @@ export default defineComponent({
     CommunitySettings,
     SidebarLayout,
     CommunityTweaks,
+    Avatar,
+    Hourglass,
   },
   setup() {
     return {
@@ -177,7 +212,7 @@ export default defineComponent({
       loadedChannels: ref<LoadedChannels>({}),
       appStore: useAppStore(),
       dataStore: useDataStore(),
-      isSynced: ref(true),
+      userStore: useUserStore(),
     };
   },
   data() {
@@ -214,7 +249,6 @@ export default defineComponent({
           const channel = this.dataStore.getChannel(id);
 
           if (channel) {
-            this.isSynced = true;
             this.loadedChannels = {
               ...this.loadedChannels,
               [channel.id]: true,
@@ -261,7 +295,7 @@ export default defineComponent({
             name: channel.name,
             timestamp: new Date(channel.timestamp),
             author: channel.author,
-            collapsed: false,
+            expanded: false,
             sourcePerspective: id,
             currentView: channel.views[0],
             views: channel.views,
@@ -273,10 +307,18 @@ export default defineComponent({
         });
       });
     },
+    navigateToChannel(channelId: string) {
+      this.$router.push({
+        name: "channel",
+        params: {
+          communityId: this.communityId,
+          channelId: channelId,
+        },
+      });
+    },
     goToActiveChannel(communityId: string) {
       const channels = this.dataStore.getChannelStates(communityId);
       if (channels.length > 0) {
-        this.isSynced = true;
         const firstChannel = this.dataStore.getChannelStates(communityId)[0].id;
         const currentChannelId =
           this.community.state.currentChannelId || firstChannel;
@@ -290,8 +332,6 @@ export default defineComponent({
             },
           });
         }
-      } else {
-        this.isSynced = false;
       }
     },
     handleThemeChange(id?: string) {
@@ -321,6 +361,14 @@ export default defineComponent({
     },
   },
   computed: {
+    isSynced(): boolean {
+      const community = this.dataStore.getCommunity(this.communityId);
+      const isMadeByMe = community.author === this.userStore.profile?.did;
+
+      return isMadeByMe
+        ? community.members.length >= 1
+        : community.members.length >= 2;
+    },
     communityId() {
       return this.$route.params.communityId as string;
     },
@@ -333,6 +381,11 @@ export default defineComponent({
     community(): CommunityState {
       const communityId = this.communityId;
       return this.dataStore.getCommunityState(communityId);
+    },
+    communityChannels(): ChannelState[] {
+      return this.channels.filter(
+        (c) => c.sourcePerspective === this.communityId
+      );
     },
     channels(): ChannelState[] {
       const channels = this.dataStore.getChannels;
@@ -347,9 +400,43 @@ export default defineComponent({
 .center {
   height: 100%;
   width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
-  display: flex;
+}
+
+.center-inner {
+  display: block;
+  width: 100%;
+  max-height: 100%;
+  padding: var(--j-space-500);
+}
+
+.channel-card-grid {
+  display: grid;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--j-space-500);
+}
+
+.channel-card {
+  background-color: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  color: inherit;
+  font-size: inherit;
+  display: block;
+  width: 100%;
+  font-weight: 600;
+  padding: var(--j-space-500);
+  border: 1px solid var(--j-color-ui-100);
+  border-radius: var(--j-border-radius);
+}
+
+.channel-card:hover {
+  border: 1px solid var(--j-color-primary-500);
 }
 </style>

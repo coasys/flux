@@ -67,10 +67,11 @@ export async function hydrateState() {
 
   userStore.updateAgentStatus(status);
 
-  const communities = dataStore.getCommunities.filter(
-    (community) =>
-      !perspectives.map((e) => e.uuid).includes(community.state.perspectiveUuid)
-  );
+  const communities = dataStore.getCommunities.filter((community) => {
+    return !perspectives
+      .map((e) => e.uuid)
+      .includes(community.state.perspectiveUuid);
+  });
 
   for (const community of communities) {
     dataStore.removeCommunity({ communityId: community.state.perspectiveUuid });
@@ -83,9 +84,9 @@ export async function hydrateState() {
       (c) => c.state.perspectiveUuid === perspective.uuid
     );
 
-    if (hasCommunityAlready) return;
+    if (hasCommunityAlready) continue;
 
-    if (perspective.sharedUrl !== undefined && perspective.neighbourhood) {
+    if (perspective.sharedUrl && perspective.neighbourhood) {
       const newCommunity = await buildCommunity(perspective);
 
       dataStore.addCommunity(newCommunity);
