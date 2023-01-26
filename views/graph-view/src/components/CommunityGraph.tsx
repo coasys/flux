@@ -120,7 +120,6 @@ export default function CommunityOverview({ uuid, source }) {
         .nodeAutoColorBy("group")
         .linkDirectionalArrowLength(3.5)
         .linkDirectionalArrowRelPos(1)
-        .linkCurvature(0.1)
         .width(containerSize[0] || window.innerWidth)
         .height(containerSize[1] || window.innerHeight)
         .backgroundColor("rgba(0,0,0,0)")
