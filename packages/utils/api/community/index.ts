@@ -44,7 +44,7 @@ export class Community {
   setThumbnail(thumbnail: string) {}
 
   @subjectCollection({ through: EntryType.Channel })
-  channels: string[];
+  channels: string[] = [];
   addChannel(channel: string) {}
 
   @sdnaOutput
