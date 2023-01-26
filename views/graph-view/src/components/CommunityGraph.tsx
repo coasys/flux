@@ -78,8 +78,8 @@ export default function CommunityOverview({ uuid, source }) {
       const initialNodes = uniqueNodes(
         subLinks
           .map((link) => [
-            { id: link.data.target, group: link.data.predicate },
             { id: link.data.source, group: link.data.predicate },
+            { id: link.data.target, group: link.data.predicate },
           ])
           .flat()
       );

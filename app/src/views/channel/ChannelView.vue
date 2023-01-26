@@ -37,18 +37,6 @@
             </label>
           </div>
         </div>
-        <div class="channel-view__header-right">
-          <j-tooltip placement="auto" title="Edit Channel">
-            <j-button
-              v-if="sameAgent"
-              @click="() => (showEditChannel = true)"
-              size="sm"
-              variant="ghost"
-            >
-              <j-icon size="sm" name="gear"></j-icon>
-            </j-button>
-          </j-tooltip>
-        </div>
       </div>
       <div class="channel-view__header-right">
         <j-tooltip
