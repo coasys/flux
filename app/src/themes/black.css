@@ -1,6 +1,7 @@
 :root[theme="black"] {
   --j-color-subtractor: 100%;
   --j-color-multiplier: -1;
+  --app-channel-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
 }
 
 :root[theme="black"] j-tooltip::part(tooltip) {
