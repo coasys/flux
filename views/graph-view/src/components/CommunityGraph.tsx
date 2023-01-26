@@ -4,7 +4,7 @@ import {
   getAd4mClient,
   LinkExpression,
 } from "@perspect3vism/ad4m-connect/dist/utils";
-import { Ad4mClient, Literal } from "@perspect3vism/ad4m";
+import { Ad4mClient, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
 
 function findNodes(links, source) {
   return links.reduce((acc, link) => {
@@ -117,32 +117,12 @@ export default function CommunityOverview({ uuid, source }) {
             ? Literal.fromUrl(node.id).get().data
             : node.id;
         })
+        .zoomToFit(100)
         .nodeAutoColorBy("group")
         .linkDirectionalArrowLength(3.5)
-        .linkDirectionalArrowRelPos(1)
         .width(containerSize[0] || window.innerWidth)
         .height(containerSize[1] || window.innerHeight)
-        .backgroundColor("rgba(0,0,0,0)")
-        .onNodeClick((node: { x; y; z }) => {
-          // Aim at node from outside it
-          const distance = 40;
-          const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
-
-          const newPos =
-            node.x || node.y || node.z
-              ? {
-                  x: node.x * distRatio,
-                  y: node.y * distRatio,
-                  z: node.z * distRatio,
-                }
-              : { x: 0, y: 0, z: distance }; // special case if node is in (0,0,0)
-
-          graph.current.cameraPosition(
-            newPos, // new position
-            node, // lookAt ({ x, y, z })
-            3000 // ms transition duration
-          );
-        });
+        .backgroundColor("rgba(0,0,0,0)");
 
       graph.current(graphEl.current).graphData({ nodes, links });
 
