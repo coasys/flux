@@ -88,7 +88,7 @@ export default async function createCommunity({
       perspectiveUuid: perspective.uuid,
     });
 
-    await MemberFactory.create({ did: author });
+    await MemberFactory.create({}, author);
 
     //Default popular setting is 3 upvotes on thumbsup emoji
     const socialDnaLink = await createSDNA(perspective!.uuid);

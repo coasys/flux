@@ -3,11 +3,11 @@ import { EntryType } from "../../types";
 import { ENTRY_TYPE } from "../../constants";
 
 export class Member {
-  isSubjectInstance = ['languageName(this, "did")'];
+  isSubjectInstance = ['languageName(Base, "agent-expression-store")'];
 
   @subjectProperty({
     through: ENTRY_TYPE,
-    initial: EntryType.Community,
+    initial: EntryType.Member,
     required: true,
   })
   type: string;
