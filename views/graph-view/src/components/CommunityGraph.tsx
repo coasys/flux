@@ -24,6 +24,12 @@ function findNodes(links, source) {
   }, []);
 }
 
+function uniqueNodes(array) {
+  return array.filter(
+    (item, index, self) => index === self.findIndex((t) => t.id === item.id)
+  );
+}
+
 export default function CommunityOverview({ uuid, source }) {
   const containerRef = useRef<HTMLDivElement>();
   const graph = useRef<ForceGraph3DInstance>(undefined);
@@ -69,12 +75,16 @@ export default function CommunityOverview({ uuid, source }) {
 
       const subLinks = findNodes(snapshot.links, source);
 
-      const initialNodes = subLinks.map((l) => ({
-        id: l.data.target,
-        group: l.data.predicate,
-      }));
+      const initialNodes = uniqueNodes(
+        subLinks
+          .map((link) => [
+            { id: link.data.target, group: link.data.predicate },
+            { id: link.data.source, group: link.data.predicate },
+          ])
+          .flat()
+      );
 
-      setNodes([...initialNodes, { id: source, group: "self" }]);
+      setNodes(initialNodes);
 
       const initialLinks = subLinks.map((l) => ({
         source: l.data.target,
@@ -108,6 +118,9 @@ export default function CommunityOverview({ uuid, source }) {
             : node.id;
         })
         .nodeAutoColorBy("group")
+        .linkDirectionalArrowLength(3.5)
+        .linkDirectionalArrowRelPos(1)
+        .linkCurvature(0.1)
         .width(containerSize[0] || window.innerWidth)
         .height(containerSize[1] || window.innerHeight)
         .backgroundColor("rgba(0,0,0,0)")
