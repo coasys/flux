@@ -1,10 +1,12 @@
 # Flux
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/819366d6-adfb-480c-bad9-2a6b9f85b58e/deploy-status)](https://app.netlify.com/sites/fluxsocial-main/deploys)
+
 https://app.fluxsocial.io
 
 ## Project setup
 
-This project requires AD4M! The easiest way to have an AD4M runtime operating, is to [download AD4MIN](https://github.com/perspect3vism/ad4min).
+This project requires AD4M! The easiest way to have an AD4M runtime operating, is to [download AD4MIN](https://github.com/perspect3vism/ad4m).
 
 ### Compiles and hot-reloads for development
 
