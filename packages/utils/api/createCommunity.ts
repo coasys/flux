@@ -69,6 +69,10 @@ export default async function createCommunity({
       );
     }
 
+    console.log("Ensuring classes..")
+    
+    await perspective.ensureSDNASubjectClass(Community);
+    await perspective.ensureSDNASubjectClass(Member);
     const CommunityModel = new Factory(new Community(), {
       perspectiveUuid: perspective.uuid,
     });
