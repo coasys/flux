@@ -3,7 +3,8 @@ import { ChannelState } from "@/store/types";
 import { useDataStore } from "..";
 import { ChannelView } from "utils/types";
 import { Channel as ChannelModel } from "utils/api";
-import { Factory } from "utils/helpers";
+import { Factory, SubjectEntry } from "utils/helpers";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -26,6 +27,10 @@ export default async (payload: Payload): Promise<ChannelState> => {
       throw Error(message);
     }
 
+    let ad4m = await getAd4mClient()
+    let perspective = await ad4m.perspective.byUUID(payload.perspectiveUuid)
+    await perspective!.ensureSDNASubjectClass(ChannelModel)
+
     const Channel = new Factory(new ChannelModel(), {
       perspectiveUuid: payload.perspectiveUuid,
     });
@@ -35,11 +40,15 @@ export default async (payload: Payload): Promise<ChannelState> => {
       views: payload.views,
     });
 
+    //@ts-ignore
+    const channelEntry = new SubjectEntry(channel, perspective)
+    await channelEntry.load()
+
     const channelState = {
-      id: channel.id,
+      id: channelEntry.id,
       name: payload.name,
-      timestamp: channel.timestamp.toString(),
-      author: channel.author,
+      timestamp: channelEntry.timestamp.toString(),
+      author: channelEntry.author,
       collapsed: false,
       sourcePerspective: payload.perspectiveUuid,
       currentView: payload.views[0],

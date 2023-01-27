@@ -1,7 +1,7 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { PropertyMap, PropertyValueMap } from "../types";
+import { Entry, EntryType, PropertyMap, PropertyValueMap } from "../types";
 import subscribeToLinks from "../api/subscribeToLinks";
-import { Link, LinkExpression, PerspectiveProxy, Subject } from "@perspect3vism/ad4m";
+import { Link, LinkExpression, LinkQuery, PerspectiveProxy, Subject } from "@perspect3vism/ad4m";
 import { SELF } from "../constants/communityPredicates";
 import { v4 as uuidv4 } from "uuid";
 
@@ -24,14 +24,41 @@ function propertyNameToSetterName(property: string): string {
   return `set${capitalize(property)}`;
 }
 
+export function pluralToSingular(plural: string): string {
+  if(plural.endsWith("ies")) {
+      return plural.slice(0, -3) + "y"
+  } else if(plural.endsWith("s")) {
+      return plural.slice(0, -1)
+  } else {
+      return plural
+  }
+}
+
+// e.g. "comments" -> "addComment"
+export function collectionToAdderName(collection: string): string {
+  return `add${capitalize(pluralToSingular(collection))}`
+}
+
 function setProperties(subject: any, properties: PropertyValueMap) {
   Object.keys(properties).forEach((key) => {
-    const setterName = propertyNameToSetterName(key);
-    const setterFunction = subject[setterName];
-    if (setterFunction) {
-      setterFunction(properties[key]);
+    if(Array.isArray(properties[key])) {
+      // it's a collection
+      const adderName = collectionToAdderName(key);
+      const adderFunction = subject[adderName];
+      if(adderFunction) {
+        adderFunction(properties[key]);
+      } else {
+        throw "No adder function found for collection: " + key;
+      }
     } else {
-      throw "No setter function found for property: " + key;
+      // it's a property
+      const setterName = propertyNameToSetterName(key);
+      const setterFunction = subject[setterName];
+      if (setterFunction) {
+        setterFunction(properties[key]);
+      } else {
+        throw "No setter function found for property: " + key;
+      }
     }
   });
 }
@@ -206,5 +233,48 @@ export class Factory<SubjectClass extends { type: string }> {
     } else {
       this.listeners.remove[src] = [callback];
     }
+  }
+}
+
+
+export class SubjectEntry<EntryClass> implements Entry {
+  #subject: Subject
+  #perspective: PerspectiveProxy
+
+  id: string
+  author: string
+  timestamp: number
+  type: EntryType
+  data: EntryClass
+  source: string;
+
+  constructor(subject: Subject, perspective: PerspectiveProxy) {
+    this.#subject = subject
+    this.#perspective = perspective
+    this.id = subject.baseExpression
+  }
+
+  async load() {
+    let exp = await this.#perspective.getExpression(this.#subject.baseExpression)
+    if(!exp) {
+      let links = await this.#perspective.get(new LinkQuery({source: this.#subject.baseExpression}))
+      //@ts-ignore
+      exp = links[0] || null
+    }
+
+    if(!exp) {
+      throw "Failed to load entry"
+    }
+    
+    this.author = exp.author
+    this.timestamp = exp.timestamp
+    try{
+      //@ts-ignore
+      this.type = await this.#subject.type
+    } catch(e) {
+      console.error("Failed to get type of subject: ", e)
+    }
+    
+    this.data = exp.data
   }
 }
