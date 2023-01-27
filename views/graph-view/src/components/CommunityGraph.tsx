@@ -1,5 +1,6 @@
 import ForceGraph3D, { ForceGraph3DInstance } from "3d-force-graph";
 import { useEffect, useState, useRef } from "preact/hooks";
+import SpriteText from "three-spritetext";
 import {
   getAd4mClient,
   LinkExpression,
@@ -30,6 +31,17 @@ function uniqueNodes(array) {
   );
 }
 
+function extractProtocol(string: string) {
+  var match = string.match(/^[^:]+:\/\//);
+  if (match) {
+    return match[0];
+  } else if (string.startsWith("did:")) {
+    return "did";
+  } else {
+    return "unknown";
+  }
+}
+
 export default function CommunityOverview({ uuid, source }) {
   const containerRef = useRef<HTMLDivElement>();
   const graph = useRef<ForceGraph3DInstance>(undefined);
@@ -38,7 +50,9 @@ export default function CommunityOverview({ uuid, source }) {
   const [ad4mInitialised, setAd4mInitialised] = useState(false);
   const [graphInitialised, setGraphInitialised] = useState(false);
   const [nodes, setNodes] = useState<{ id: string; group: string }[]>([]);
-  const [links, setLinks] = useState<{ source: string; target: string }[]>([]);
+  const [links, setLinks] = useState<
+    { source: string; target: string; predicate: string }[]
+  >([]);
 
   // Listen to resize events
   useEffect(() => {
@@ -73,13 +87,13 @@ export default function CommunityOverview({ uuid, source }) {
       const client: Ad4mClient = await getAd4mClient();
       const snapshot = await client.perspective.snapshotByUUID(uuid);
 
-      const subLinks = findNodes(snapshot.links, source);
+      const subLinks = findNodes(snapshot?.links || [], source);
 
       const initialNodes = uniqueNodes(
         subLinks
           .map((link) => [
-            { id: link.data.source, group: link.data.predicate },
-            { id: link.data.target, group: link.data.predicate },
+            { id: link.data.source, group: extractProtocol(link.data.source) },
+            { id: link.data.target, group: extractProtocol(link.data.target) },
           ])
           .flat()
       );
@@ -89,6 +103,7 @@ export default function CommunityOverview({ uuid, source }) {
       const initialLinks = subLinks.map((l) => ({
         source: l.data.target,
         target: l.data.source,
+        predicate: l.data.predicate,
       }));
 
       setLinks(initialLinks);
@@ -117,12 +132,30 @@ export default function CommunityOverview({ uuid, source }) {
             ? Literal.fromUrl(node.id).get().data
             : node.id;
         })
-        .zoomToFit(100)
+        .backgroundColor("rgba(0,0,0,0)")
         .nodeAutoColorBy("group")
+        .linkDirectionalArrowRelPos(0.9)
         .linkDirectionalArrowLength(3.5)
+        .linkThreeObjectExtend(true)
+        .linkThreeObject((link: any) => {
+          // extend link with text sprite
+          const sprite = new SpriteText(`${link.predicate}`);
+          sprite.color = "lightgrey";
+          sprite.textHeight = 1.5;
+          return sprite;
+        })
+        .linkPositionUpdate((sprite: any, { start, end }: any) => {
+          const middlePos = Object.assign(
+            ...["x", "y", "z"].map((c) => ({
+              [c]: start[c] + (end[c] - start[c]) / 2, // calc middle point
+            }))
+          );
+
+          // Position sprite
+          Object.assign(sprite.position, middlePos);
+        })
         .width(containerSize[0] || window.innerWidth)
-        .height(containerSize[1] || window.innerHeight)
-        .backgroundColor("rgba(0,0,0,0)");
+        .height(containerSize[1] || window.innerHeight);
 
       graph.current(graphEl.current).graphData({ nodes, links });
 
@@ -152,6 +185,7 @@ export default function CommunityOverview({ uuid, source }) {
           {
             source: l.data.target,
             target: l.data.source,
+            predicate: l.data.predicate,
           },
         ],
       });
