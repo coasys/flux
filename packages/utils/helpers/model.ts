@@ -1,7 +1,7 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { PropertyMap, PropertyValueMap } from "../types";
 import subscribeToLinks from "../api/subscribeToLinks";
-import { LinkExpression, PerspectiveProxy, Subject } from "@perspect3vism/ad4m";
+import { Link, LinkExpression, PerspectiveProxy, Subject } from "@perspect3vism/ad4m";
 import { SELF } from "../constants/communityPredicates";
 import { v4 as uuidv4 } from "uuid";
 
@@ -68,6 +68,13 @@ export class Factory<SubjectClass extends { type: string }> {
     if (!newInstance) {
       throw "Failed to create new instance of " + this.subject.type;
     }
+
+    // Connect new instance to source
+    await this.perspective?.add(new Link({
+      source: this.source, 
+      predicate: this.subject.type, 
+      target: base
+    }))
 
     setProperties(newInstance, data);
     return newInstance;
