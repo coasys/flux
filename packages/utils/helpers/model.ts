@@ -91,9 +91,14 @@ export class Factory<SubjectClass extends { type: string }> {
     return instance;
   }
 
-  async get(id: string): Promise<SubjectClass | null> {
-    await this.ensurePerspective();
-    return (await this.perspective?.getSubjectProxy(id, this.subject)) || null;
+  async get(id?: string): Promise<SubjectClass | null> {
+    if(id) {
+      await this.ensurePerspective();
+      return (await this.perspective?.getSubjectProxy(id, this.subject)) || null;
+    } else {
+      const all = await this.getAll()
+      return all[0] || null
+    }
   }
 
   async getAll(source?: string): Promise<SubjectClass[]> {

@@ -46,9 +46,7 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
     perspectiveUuid: perspective.uuid,
   });
 
-  const community = await Community.get("ad4m://self");
-
-  console.log("test", { community });
+  const community = await Community.get();
 
   return {
     neighbourhood: {
