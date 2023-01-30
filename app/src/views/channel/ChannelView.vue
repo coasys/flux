@@ -35,6 +35,16 @@
               <j-icon size="xs" :name="view.icon"></j-icon>
               <span>{{ view.title }}</span>
             </label>
+             <j-tooltip placement="auto" title="Manage views">
+          <j-button
+            v-if="sameAgent"
+            @click="() => goToEditChannel(channel.id)"
+            size="sm"
+            variant="ghost"
+          >
+            <j-icon size="md" name="plus"></j-icon>
+          </j-button>
+        </j-tooltip>
           </div>
         </div>
       </div>
@@ -51,16 +61,6 @@
               "
               @click="isExpanded = !isExpanded"
             ></j-icon>
-          </j-button>
-        </j-tooltip>
-        <j-tooltip placement="auto" title="Edit Channel">
-          <j-button
-            v-if="sameAgent"
-            @click="() => goToEditChannel(channel.id)"
-            size="sm"
-            variant="ghost"
-          >
-            <j-icon size="sm" name="gear"></j-icon>
           </j-button>
         </j-tooltip>
       </div>
