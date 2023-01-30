@@ -3,7 +3,6 @@ import { useDataStore } from "..";
 import ChannelModel, { UpdateChannel } from "utils/api/channel";
 
 export interface Payload {
-  perspectiveUuid: string;
   channelId: string;
   data: UpdateChannel;
 }
@@ -22,13 +21,12 @@ export default async (payload: Payload): Promise<any> => {
 
   try {
     const Channel = new ChannelModel({
-      perspectiveUuid: payload.perspectiveUuid,
+      perspectiveUuid: channel.sourcePerspective,
     });
 
     await Channel.update(channel.id, payload.data);
 
     dataStore.setChannel({
-      communityId: channel.id,
       channel: {
         ...channel,
         ...payload.data,

@@ -94,7 +94,7 @@
   <j-modal
     size="sm"
     :open="modals.showCommunityMembers"
-    @toggle="(e: any) => setShowCommunityMembers(e.target.open)"
+    @toggle="(e) => setShowCommunityMembers(e.target.open)"
   >
     <community-members
       @close="() => setShowCommunityMembers(false)"
@@ -105,7 +105,7 @@
   <j-modal
     size="sm"
     :open="modals.showEditCommunity"
-    @toggle="(e: any) => setShowEditCommunity(e.target.open)"
+    @toggle="(e) => setShowEditCommunity(e.target.open)"
   >
     <edit-community
       v-if="modals.showEditCommunity"
@@ -116,7 +116,7 @@
 
   <j-modal
     :open="modals.showCreateChannel"
-    @toggle="(e: any) => setShowCreateChannel(e.target.open)"
+    @toggle="(e) => setShowCreateChannel(e.target.open)"
   >
     <create-channel
       v-if="modals.showCreateChannel"
@@ -128,7 +128,7 @@
   <j-modal
     size="sm"
     :open="modals.showInviteCode"
-    @toggle="(e: any) => setShowInviteCode(e.target.open)"
+    @toggle="(e) => setShowInviteCode(e.target.open)"
   >
     <j-box p="800">
       <j-box pb="500">
@@ -138,7 +138,7 @@
         </j-text>
       </j-box>
       <j-input
-        @click="(e: any) => e.target.select()"
+        @click="(e) => e.target.select()"
         size="lg"
         readonly
         :value="community.neighbourhood.neighbourhoodUrl"
@@ -151,15 +151,28 @@
   </j-modal>
 
   <j-modal
+    v-if="modals.showEditChannel && appStore.activeChannel"
+    :open="modals.showEditChannel"
+    @toggle="(e) => setShowEditChannel(e.target.open)"
+  >
+    <EditChannel
+      v-if="modals.showEditChannel"
+      @cancel="() => setShowEditChannel(false)"
+      @submit="() => setShowEditChannel(false)"
+      :channelId="appStore.activeChannel"
+    ></EditChannel>
+  </j-modal>
+
+  <j-modal
     :open="modals.showCommunitySettings"
-    @toggle="(e: any) => setShowCommunitySettings(e.target.open)"
+    @toggle="(e) => setShowCommunitySettings(e.target.open)"
   >
     <community-settings />
   </j-modal>
 
   <j-modal
     :open="modals.showCommunityTweaks"
-    @toggle="(e: any) => setShowCommunityTweaks(e.target.open)"
+    @toggle="(e) => setShowCommunityTweaks(e.target.open)"
   >
     <community-tweaks v-if="modals.showCommunityTweaks" />
   </j-modal>
@@ -171,6 +184,7 @@ import SidebarLayout from "@/layout/SidebarLayout.vue";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
 
 import EditCommunity from "@/containers/EditCommunity.vue";
+import EditChannel from "@/containers/EditChannel.vue";
 import CreateChannel from "@/containers/CreateChannel.vue";
 import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunitySettings from "@/containers/CommunitySettings.vue";
@@ -195,6 +209,7 @@ export default defineComponent({
   name: "CommunityView",
   components: {
     EditCommunity,
+    EditChannel,
     CreateChannel,
     ChannelView,
     CommunityMembers,
@@ -264,6 +279,7 @@ export default defineComponent({
     ...mapActions(useAppStore, [
       "setShowCreateChannel",
       "setShowEditCommunity",
+      "setShowEditChannel",
       "setShowCommunityMembers",
       "setShowInviteCode",
       "setShowCommunitySettings",

@@ -29,6 +29,8 @@ export interface ApplicationState {
   updateState: UpdateState;
   globalTheme: ThemeState;
   currentTheme: CurrentThemeState;
+  activeCommunity: string;
+  activeChannel: string;
   modals: ModalsState;
   showSidebar: boolean;
   showMainSidebar: boolean;

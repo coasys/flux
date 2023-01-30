@@ -61,9 +61,7 @@
               "
               size="sm"
               v-for="view in getViewOptions(channel.views)"
-              @click="
-                () => handleChangeView(channel.id, channel.name, view.type)
-              "
+              @click="() => handleChangeView(channel.id, view.type)"
             >
               <j-icon size="xs" slot="start" :name="view.icon"></j-icon>
               {{ view.title }}
@@ -71,6 +69,13 @@
           </div>
         </div>
         <j-menu slot="content">
+          <j-menu-item
+            v-if="isChannelCreator(channel.id)"
+            @click="() => goToEditChannel(channel.id)"
+          >
+            <j-icon size="xs" slot="start" name="pencil" />
+            Edit Channel
+          </j-menu-item>
           <j-menu-item
             @click="
               () =>
@@ -91,7 +96,7 @@
             @click="() => deleteChannel(channel.id)"
           >
             <j-icon size="xs" slot="start" name="trash" />
-            {{ `Delete Channel` }}
+            Delete Channel
           </j-menu-item>
         </j-menu>
       </j-popover>
@@ -152,11 +157,11 @@ export default defineComponent({
     handleToggleClick(channelId: string) {
       this.dataStore.toggleChannelCollapse(channelId);
     },
-    handleChangeView(
-      channelId: string,
-      channelName: string,
-      view: ChannelView
-    ) {
+    goToEditChannel(id: string) {
+      this.appStore.setActiveChannel(id);
+      this.appStore.setShowEditChannel(true);
+    },
+    handleChangeView(channelId: string, view: ChannelView) {
       this.dataStore.setCurrentChannelView({ channelId, view });
       this.navigateToChannel(channelId);
     },

@@ -17,9 +17,12 @@
         ></Avatar>
         <j-menu slot="content">
           <j-menu-item
-            @click="() => removeCommunity(community.state.perspectiveUuid)"
+            @click="
+              () => setShowLeaveCommunity(true, community.state.perspectiveUuid)
+            "
           >
-            Remove community
+            <j-icon slot="start" size="xs" name="box-arrow-left"></j-icon>
+            Leave community
           </j-menu-item>
 
           <j-menu-item
@@ -77,6 +80,7 @@
 </template>
 
 <script lang="ts">
+import { ref } from "vue";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
 import { defineComponent } from "vue";
@@ -91,6 +95,7 @@ export default defineComponent({
     const dataStore = useDataStore();
 
     return {
+      showLeaveCommunity: ref(false),
       appStore,
       dataStore,
     };
@@ -102,10 +107,9 @@ export default defineComponent({
     muteCommunity(id: string) {
       this.dataStore.toggleCommunityMute({ communityId: id });
     },
-    removeCommunity(id: string) {
-      this.$router.push({ name: "home" }).then(() => {
-        this.dataStore.removeCommunity({ communityId: id });
-      });
+    setShowLeaveCommunity(show: boolean, uuid: string) {
+      this.appStore.setActiveCommunity(uuid);
+      this.appStore.setShowLeaveCommunity(show);
     },
     handleCommunityClick(communityId: string) {
       if (this.communityIsActive(communityId)) {

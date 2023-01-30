@@ -7,7 +7,7 @@
     <j-modal
       size="sm"
       :open="modals.showCreateCommunity"
-      @toggle="(e: any) => setShowCreateCommunity(e.target.open)"
+      @toggle="(e) => setShowCreateCommunity(e.target.open)"
     >
       <create-community
         v-if="modals.showCreateCommunity"
@@ -17,10 +17,41 @@
     </j-modal>
 
     <j-modal
-      :open="modals.showDisclaimer"
-      @toggle="(e: any) => {
-        setShowDisclaimer(e.target.open);
-      }"
+      v-if="modals.showLeaveCommunity && appStore.activeCommunity"
+      size="sm"
+      :open="modals.showLeaveCommunity"
+      @toggle="(e) => setShowLeaveCommunity(e.target.open)"
+    >
+      <j-box p="800">
+        <j-box pb="900">
+          <j-text variant="heading">
+            Leave community '{{
+              dataStore.getCommunity(appStore.activeCommunity).name
+            }}'
+          </j-text>
+          <j-text nomargin>
+            Are you sure you want to leave this community?
+          </j-text>
+        </j-box>
+        <j-flex j="end" gap="300">
+          <j-button @click="() => setShowLeaveCommunity(false)" variant="link">
+            Cancel
+          </j-button>
+          <j-button variant="primary" @click="leaveCommunity">
+            Leave community
+          </j-button>
+        </j-flex>
+      </j-box>
+    </j-modal>
+
+    <j-modal
+      v-if="modals.showDisclaimer && appStore.activeCommunity"
+      :open="modals.showDisclaimer && appStore.activeCommunity"
+      @toggle="
+        (e) => {
+          setShowDisclaimer(e.target.open);
+        }
+      "
     >
       <j-box p="800">
         <div v-if="modals.showDisclaimer">
@@ -105,7 +136,19 @@ export default defineComponent({
       "setShowSettings",
       "setShowCreateCommunity",
       "setShowDisclaimer",
+      "setShowLeaveCommunity",
     ]),
+    leaveCommunity() {
+      const activeCommunity = this.appStore.activeCommunity;
+
+      this.$router.push({ name: "home" }).then(() => {
+        this.dataStore
+          .removeCommunity({ communityId: activeCommunity })
+          .then(() => {
+            this.appStore.setShowLeaveCommunity(false);
+          });
+      });
+    },
     async joinTestingCommunity() {
       try {
         this.isJoining = true;

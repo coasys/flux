@@ -56,7 +56,7 @@
         <j-tooltip placement="auto" title="Edit Channel">
           <j-button
             v-if="sameAgent"
-            @click="() => (showEditChannel = true)"
+            @click="() => goToEditChannel(channel.id)"
             size="sm"
             variant="ghost"
           >
@@ -96,18 +96,7 @@
       @neighbourhood-click="onNeighbourhoodClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></chat-view>
-    <j-modal
-      :open="showEditChannel"
-      @toggle="(e: any) => (showEditChannel = e.target.open)"
-    >
-      <EditChannel
-        v-if="showEditChannel"
-        @cancel="() => (showEditChannel = false)"
-        @submit="() => (showEditChannel = false)"
-        :channelId="channelId"
-        :communityId="communityId"
-      ></EditChannel>
-    </j-modal>
+    
     <j-modal
       size="xs"
       v-if="activeProfile"
@@ -138,7 +127,6 @@ import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import Profile from "@/containers/Profile.vue";
-import EditChannel from "@/containers/EditChannel.vue";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { ChannelView } from "utils/types";
@@ -156,7 +144,6 @@ export default defineComponent({
   props: ["channelId", "communityId"],
   components: {
     Profile,
-    EditChannel,
     Hourglass,
   },
   setup() {
@@ -211,6 +198,10 @@ export default defineComponent({
     },
   },
   methods: {
+    goToEditChannel(id: string) {
+      this.appStore.setActiveChannel(id);
+      this.appStore.setShowEditChannel(true)
+    },
     changeCurrentView(e: any) {
       const value = e.target.value;
       this.dataStore.setCurrentChannelView({
