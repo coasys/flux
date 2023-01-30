@@ -10,6 +10,14 @@ export const CREATED_AT = "rdf://dateCreated";
 
 export const NAME = "rdf://name";
 
+export const FONT_FAMILY = "ad4m://font_family";
+
+export const HUE = "ad4m://hue";
+
+export const SATURATION = "ad4m://saturation";
+
+export const FONT_SIZE = "ad4m://font_size";
+
 export const MEMBER = "sioc://has_member";
 
 export const EXPRESSION = "sioc://content_of";

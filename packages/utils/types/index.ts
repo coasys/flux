@@ -14,6 +14,7 @@ export interface Community {
   thumbnail: string;
   neighbourhoodUrl: string;
   members: string[];
+  themes: string[];
 }
 
 export interface CommunityMetaData {
@@ -96,6 +97,7 @@ export enum EntryType {
   Message = "flux://has_message",
   Post = "flux://has_post",
   Member = "flux://has_member",
+  Theme = "flux://has_theme",
 }
 
 //This represents an entry itself, which contains the default fields seen below

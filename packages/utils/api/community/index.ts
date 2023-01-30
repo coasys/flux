@@ -3,7 +3,7 @@ import {
   IMAGE,
   NAME,
   SELF,
-  THUMBNAIL,
+  THUMBNAIL
 } from "../../constants/communityPredicates";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "../../constants/languages";
 import EntryModel from "../../helpers/model";
@@ -52,7 +52,7 @@ class CommunityModel extends EntryModel {
         type: String,
         collection: true,
         resolve: false,
-      },
+      }
     };
   }
 

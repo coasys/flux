@@ -10,6 +10,7 @@ export interface LocalCommunityState {
   perspectiveUuid: string;
   theme: ThemeState;
   useLocalTheme: boolean;
+  useCommunityTheme: boolean;
   currentChannelId: string | undefined | null;
   hasNewMessages: boolean;
   collapseChannelList: boolean;

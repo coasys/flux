@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
 import { PERSPECTIVE_DIFF_SYNC } from "../constants/languages";
-import { MEMBER, SELF } from "../constants/communityPredicates";
 import { createNeighbourhoodMeta } from "../helpers/createNeighbourhoodMeta";
 import { Community } from "../types";
 import { Perspective } from "@perspect3vism/ad4m";
@@ -79,8 +78,8 @@ export default async function createCommunity({
     const community = await Community.create({
       name,
       description,
-      image: compressedImage,
-      thumbnail,
+      image: compressedImage || undefined,
+      thumbnail : thumbnail || undefined
     });
 
     await Community.addMember({ did: author });

@@ -203,10 +203,16 @@ export default {
     state.channels[payload.id] = payload;
   },
 
-  setuseLocalTheme(payload: { communityId: string; value: boolean }): void {
+  setUseLocalTheme(payload: { communityId: string; value: boolean }): void {
     const state = useDataStore();
     const community = state.communities[payload.communityId];
     community.useLocalTheme = payload.value;
+  },
+
+  setUseCommunityTheme(payload: { communityId: string; value: boolean }): void {
+    const state = useDataStore();
+    const community = state.communities[payload.communityId];
+    community.useCommunityTheme = payload.value;
   },
 
   setHasNewMessages(payload: {

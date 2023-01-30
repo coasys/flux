@@ -19,8 +19,9 @@
       <div class="settings__content">
         <j-box pb="500">
           <j-toggle
-            :checked="community.useLocalTheme"
-            @change="(e: any) => setuseLocalTheme(e.target.checked)"
+            name="local-theme-toggle"
+            :checked="communityLocal.useLocalTheme"
+            @change="(e: any) => setUseLocalTheme(e.target.checked)"
           >
             Use local theme
           </j-toggle>
@@ -28,8 +29,17 @@
         <theme-editor
           v-if="showEditor"
           @update="updateCommunityTheme"
-          :theme="community.theme"
+          :theme="communityLocal.theme"
         />
+        <j-box pb="500">
+          <j-toggle
+            name="community-theme-toggle"
+            :checked="communityLocal.useCommunityTheme"
+            @change="(e: any) => setUseCommunityTheme(e.target.checked)"
+          >
+            Use community theme
+          </j-toggle>
+        </j-box>
       </div>
     </div>
   </j-box>
@@ -41,6 +51,8 @@ import { useDataStore } from "@/store/data";
 import { LocalCommunityState, ThemeState } from "@/store/types";
 import { defineComponent } from "vue";
 import ThemeEditor from "./ThemeEditor.vue";
+import { CommunityState } from "@/store/types";
+import ThemeModel from "utils/api/theme";
 
 export default defineComponent({
   components: { ThemeEditor },
@@ -59,13 +71,35 @@ export default defineComponent({
     };
   },
   methods: {
-    setuseLocalTheme(val: boolean) {
-      const id = this.$route.params.communityId as string;
-      this.dataStore.setuseLocalTheme({ communityId: id, value: val });
+    setUseLocalTheme(val: boolean) {
+      const id = this.communityId;
+      //this.dataStore.setUseCommunityTheme({ communityId: id, value: !val });
+      this.dataStore.setUseLocalTheme({ communityId: id, value: val });
       this.appStore.changeCurrentTheme(val ? id : "global");
     },
+    async setUseCommunityTheme(val: boolean) {
+      const id = this.communityId;
+      //this.dataStore.setUseLocalTheme({ communityId: id, value: !val });
+      this.dataStore.setUseCommunityTheme({ communityId: id, value: val });
+
+      const perspectiveUuid = this.communityLocal.perspectiveUuid;
+      const Theme = new ThemeModel({ perspectiveUuid });
+      const themes = await Theme.getAll();
+
+      if (themes.length > 0) {
+        const theme = themes[0];
+        this.appStore.updateCommunityTheme({
+          communityId: id,
+          theme: { ...theme },
+        });
+      } else {
+        this.appStore.showDangerToast({
+          message: "Community theme is not set",
+        });
+      }
+    },
     updateCommunityTheme(val: ThemeState) {
-      const id = this.$route.params.communityId as string;
+      const id = this.communityId;
       this.appStore.updateCommunityTheme({
         communityId: id,
         theme: { ...val },
@@ -76,13 +110,16 @@ export default defineComponent({
     showEditor(): boolean {
       return (
         this.currentView === "theme-editor" &&
-        this.community.theme &&
-        this.community.useLocalTheme
+        this.communityLocal.theme &&
+        this.communityLocal.useLocalTheme
       );
     },
-    community(): LocalCommunityState {
-      const id = this.$route.params.communityId as string;
-      return this.dataStore.getLocalCommunityState(id);
+    communityLocal(): LocalCommunityState {
+      const communityId = this.communityId;
+      return this.dataStore.getLocalCommunityState(communityId);
+    },
+    communityId() {
+      return this.$route.params.communityId as string;
     },
   },
 });
