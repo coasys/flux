@@ -73,10 +73,10 @@ export class Factory<SubjectClass extends { type: string }> {
   private subject: SubjectClass;
   private perspective: PerspectiveProxy | null = null;
 
-  constructor(subject: SubjectClass, props: ModelProps) {
+  constructor(subject: { new(): SubjectClass }, props: ModelProps) {
     this.perspectiveUuid = props.perspectiveUuid;
     this.source = props.source || this.source;
-    this.subject = subject;
+    this.subject = new subject();
   }
 
   async ensurePerspective() {
