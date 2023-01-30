@@ -22,7 +22,7 @@ export default async (payload: Payload): Promise<any> => {
   }
 
   try {
-    const Channel = new Factory(new ChannelModel(), {
+    const Channel = new Factory(ChannelModel, {
       perspectiveUuid: payload.perspectiveUuid,
     });
 

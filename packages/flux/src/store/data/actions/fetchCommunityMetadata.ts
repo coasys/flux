@@ -9,7 +9,7 @@ export interface Payload {
 export default async (communityId: string): Promise<void> => {
   const dataStore = useDataStore();
 
-  const Community = new Factory(new CommunityModel(), {
+  const Community = new Factory(CommunityModel, {
     perspectiveUuid: communityId,
   });
 

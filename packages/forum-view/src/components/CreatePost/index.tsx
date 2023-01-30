@@ -34,7 +34,7 @@ export default function CreatePost({
   const isEditing = !!postId;
 
   const Post = useMemo(() => {
-    return new Factory(new Post(), {
+    return new Factory(Post, {
       perspectiveUuid: communityId,
       source: channelId,
     });

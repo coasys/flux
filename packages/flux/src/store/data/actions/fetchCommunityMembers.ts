@@ -7,7 +7,7 @@ export default async function (id: string): Promise<void> {
   const dataStore = useDataStore();
   const userStore = useUserStore();
 
-  const Member = new Factory(new MemberModel(), { perspectiveUuid: id });
+  const Member = new Factory(MemberModel, { perspectiveUuid: id });
   const members = await Member.getAll();
   const dids = members.map((m) => m.did);
 

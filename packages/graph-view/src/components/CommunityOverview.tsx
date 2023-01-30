@@ -8,17 +8,17 @@ export default function CommunityOverview({ uuid }) {
   const { entry: community } = useEntry({
     perspectiveUuid: uuid,
     id: "",
-    model: CommunityModel,
+    model: Community,
   });
 
   const { entries: channels } = useEntries({
     perspectiveUuid: uuid,
-    model: ChannelModel,
+    model: Channel,
   });
 
   const { entries: members } = useEntries({
     perspectiveUuid: uuid,
-    model: MemberModel,
+    model: Member,
   });
 
   return (

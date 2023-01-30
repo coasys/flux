@@ -274,8 +274,8 @@ export default defineComponent({
       this.channelModel && this.channelModel.unsubscribe();
       this.memberModel && this.memberModel.unsubscribe();
 
-      this.channelModel = new Factory(new Channel(), { perspectiveUuid: id });
-      this.memberModel = new Factory(new Member(), { perspectiveUuid: id });
+      this.channelModel = new Factory(Channel, { perspectiveUuid: id });
+      this.memberModel = new Factory(Member, { perspectiveUuid: id });
 
       this.memberModel.onAdded((member: Member) => {
         this.dataStore.setNeighbourhoodMember({

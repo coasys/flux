@@ -9,7 +9,7 @@ export default async (communityId: string): Promise<void> => {
   const keyedChannels = dataStore.channels;
 
   try {
-    const Channel = new Factory(new ChannelModel(), {
+    const Channel = new Factory(ChannelModel, {
       perspectiveUuid: communityId,
     });
     const channels = await Channel.getAll();

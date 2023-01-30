@@ -31,7 +31,7 @@ export default async (payload: Payload): Promise<ChannelState> => {
     let perspective = await ad4m.perspective.byUUID(payload.perspectiveUuid)
     await perspective!.ensureSDNASubjectClass(ChannelModel)
 
-    const Channel = new Factory(new ChannelModel(), {
+    const Channel = new Factory(ChannelModel, {
       perspectiveUuid: payload.perspectiveUuid,
     });
 

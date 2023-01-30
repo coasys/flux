@@ -6,7 +6,7 @@ export default function CommunityCard({ uuid }) {
   const { entry: community } = useEntry({
     perspectiveUuid: uuid,
     id: uuid,
-    model: CommunityModel,
+    model: Community,
   });
 
   if (community) {

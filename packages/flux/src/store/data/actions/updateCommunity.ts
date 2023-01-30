@@ -18,7 +18,7 @@ export default async function updateCommunityData(
   const appStore = useAppStore();
 
   try {
-    const Community = new Factory(new CommunityModel(), {
+    const Community = new Factory(CommunityModel, {
       perspectiveUuid: communityId,
     });
 

@@ -42,7 +42,7 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
 
   console.log("ensured");
 
-  const Community = new Factory(new CommunityModel(), {
+  const Community = new Factory(CommunityModel, {
     perspectiveUuid: perspective.uuid,
   });
 

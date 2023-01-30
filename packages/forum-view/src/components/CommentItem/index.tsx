@@ -20,7 +20,7 @@ export default function CommentItem({ comment, perspectiveUuid }) {
   const { entries: comments, model: Message } = useEntries({
     perspectiveUuid,
     source: comment.id,
-    model: new MessageModel(),
+    model: MessageModel,
   });
 
   function onProfileClick(event: any, did: string) {

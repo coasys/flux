@@ -12,7 +12,7 @@ export default function PostList() {
   const { entries: posts, loading } = useEntries({
     perspectiveUuid: state.communityId,
     source: state.channelId,
-    model: new Post(),
+    model: Post,
   });
 
   const sortedPosts = useMemo(

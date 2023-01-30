@@ -73,7 +73,7 @@ export default async function createCommunity({
     
     await perspective.ensureSDNASubjectClass(Community);
     await perspective.ensureSDNASubjectClass(Member);
-    const CommunityModel = new Factory(new Community(), {
+    const CommunityModel = new Factory(Community, {
       perspectiveUuid: perspective.uuid,
     });
 
@@ -84,7 +84,7 @@ export default async function createCommunity({
       thumbnail,
     });
 
-    const MemberFactory = new Factory(new Member(), {
+    const MemberFactory = new Factory(Member, {
       perspectiveUuid: perspective.uuid,
     });
 

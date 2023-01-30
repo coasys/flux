@@ -28,7 +28,7 @@ export default function Post({
     perspectiveUuid,
     source,
     id,
-    model: new PostSubject(),
+    model: PostSubject,
   });
 
   const [base64, setBase64] = useState("");
