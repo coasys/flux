@@ -25,9 +25,7 @@
       <j-box p="800">
         <j-box pb="900">
           <j-text variant="heading">
-            Leave community '{{
-              activeCommunity.name || 'Unknown'
-            }}'
+            Leave community '{{ activeCommunity.name || "Unknown" }}'
           </j-text>
           <j-text nomargin>
             Are you sure you want to leave this community?
@@ -45,8 +43,8 @@
     </j-modal>
 
     <j-modal
-      v-if="modals.showDisclaimer && appStore.activeCommunity"
-      :open="modals.showDisclaimer && appStore.activeCommunity"
+      v-if="modals.showDisclaimer"
+      :open="modals.showDisclaimer"
       @toggle="
         (e) => {
           setShowDisclaimer(e.target.open);

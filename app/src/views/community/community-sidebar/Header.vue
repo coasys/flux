@@ -64,7 +64,7 @@
             Hide muted channels
           </j-menu-item>
            <j-menu-item @click="() => goToLeaveChannel()">
-            <j-icon size="xs" slot="start" name="plus" />
+            <j-icon size="xs" slot="start" name="box-arrow-left" />
             Leave community
           </j-menu-item>
         </j-menu>
