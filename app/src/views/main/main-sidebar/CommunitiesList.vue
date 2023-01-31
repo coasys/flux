@@ -3,7 +3,7 @@
     <j-tooltip
       v-for="community in communities"
       :key="community.state.perspectiveUuid"
-      :title="community.neighbourhood.name || 'Uknown Communit'"
+      :title="community.neighbourhood.name || 'Unknown Community'"
     >
       <j-popover event="contextmenu">
         <Avatar
