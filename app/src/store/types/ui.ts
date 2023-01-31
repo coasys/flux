@@ -19,6 +19,7 @@ export interface ThemeState {
 export interface ModalsState {
   showCreateCommunity: boolean;
   showEditCommunity: boolean;
+  showEditChannel: boolean;
   showCommunityMembers: boolean;
   showCreateChannel: boolean;
   showEditProfile: boolean;
@@ -27,6 +28,7 @@ export interface ModalsState {
   showCommunityTweaks: boolean;
   showInviteCode: boolean;
   showDisclaimer: boolean;
+  showLeaveCommunity: boolean;
 }
 
 export type UpdateState =

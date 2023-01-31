@@ -140,7 +140,7 @@ export default {
     }
   },
 
-  setChannel(payload: { communityId: string; channel: ChannelState }) {
+  setChannel(payload: { channel: ChannelState }) {
     const state = useDataStore();
     state.channels[payload.channel.id] = payload.channel;
   },

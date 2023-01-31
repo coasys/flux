@@ -99,6 +99,22 @@ export default {
     const state = useAppStore();
     state.modals.showCommunityTweaks = payload;
   },
+  setActiveChannel(id: string) {
+    const state = useAppStore();
+    state.activeChannel = id;
+  },
+  setShowEditChannel(show: boolean) {
+    const state = useAppStore();
+    state.modals.showEditChannel = show;
+  },
+  setActiveCommunity(uuid: string) {
+    const state = useAppStore();
+    state.activeCommunity = uuid;
+  },
+  setShowLeaveCommunity(show: boolean) {
+    const state = useAppStore();
+    state.modals.showLeaveCommunity = show;
+  },
   setShowInviteCode(payload: boolean): void {
     const state = useAppStore();
     state.modals.showInviteCode = payload;

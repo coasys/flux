@@ -63,6 +63,10 @@
             />
             Hide muted channels
           </j-menu-item>
+           <j-menu-item @click="() => goToLeaveChannel()">
+            <j-icon size="xs" slot="start" name="box-arrow-left" />
+            Leave community
+          </j-menu-item>
         </j-menu>
       </j-popover>
     </div>
@@ -173,6 +177,10 @@ export default defineComponent({
       "setShowCommunitySettings",
       "setShowCommunityTweaks",
     ]),
+    goToLeaveChannel() {
+      this.appStore.setActiveCommunity(this.community.neighbourhood.uuid)
+      this.appStore.setShowLeaveCommunity(true)
+    },
     goToSettings() {
       this.setShowCommunitySettings(true);
       this.showCommunityMenu = false;

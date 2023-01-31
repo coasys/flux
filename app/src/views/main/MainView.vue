@@ -7,7 +7,7 @@
     <j-modal
       size="sm"
       :open="modals.showCreateCommunity"
-      @toggle="(e: any) => setShowCreateCommunity(e.target.open)"
+      @toggle="(e) => setShowCreateCommunity(e.target.open)"
     >
       <create-community
         v-if="modals.showCreateCommunity"
@@ -17,10 +17,39 @@
     </j-modal>
 
     <j-modal
+      v-if="modals.showLeaveCommunity && activeCommunity"
+      size="sm"
+      :open="modals.showLeaveCommunity"
+      @toggle="(e) => setShowLeaveCommunity(e.target.open)"
+    >
+      <j-box p="800">
+        <j-box pb="900">
+          <j-text variant="heading">
+            Leave community '{{ activeCommunity.name || "Unknown" }}'
+          </j-text>
+          <j-text nomargin>
+            Are you sure you want to leave this community?
+          </j-text>
+        </j-box>
+        <j-flex j="end" gap="300">
+          <j-button @click="() => setShowLeaveCommunity(false)" variant="link">
+            Cancel
+          </j-button>
+          <j-button variant="primary" @click="leaveCommunity">
+            Leave community
+          </j-button>
+        </j-flex>
+      </j-box>
+    </j-modal>
+
+    <j-modal
+      v-if="modals.showDisclaimer"
       :open="modals.showDisclaimer"
-      @toggle="(e: any) => {
-        setShowDisclaimer(e.target.open);
-      }"
+      @toggle="
+        (e) => {
+          setShowDisclaimer(e.target.open);
+        }
+      "
     >
       <j-box p="800">
         <div v-if="modals.showDisclaimer">
@@ -67,11 +96,12 @@ import MainSidebar from "./main-sidebar/MainSidebar.vue";
 import { defineComponent, ref } from "vue";
 
 import CreateCommunity from "@/containers/CreateCommunity.vue";
-import { ModalsState } from "@/store/types";
+import { CommunityState, ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
 import { mapActions } from "pinia";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
+import { Community } from "utils/types";
 
 export default defineComponent({
   name: "MainAppView",
@@ -95,6 +125,10 @@ export default defineComponent({
       );
       return community ? true : false;
     },
+    activeCommunity(): Community {
+      const activeCommunity = this.appStore.activeCommunity;
+      return this.dataStore.getCommunity(activeCommunity);
+    },
     modals(): ModalsState {
       return this.appStore.modals;
     },
@@ -105,7 +139,19 @@ export default defineComponent({
       "setShowSettings",
       "setShowCreateCommunity",
       "setShowDisclaimer",
+      "setShowLeaveCommunity",
     ]),
+    leaveCommunity() {
+      const activeCommunity = this.appStore.activeCommunity;
+
+      this.$router.push({ name: "home" }).then(() => {
+        this.dataStore
+          .removeCommunity({ communityId: activeCommunity })
+          .then(() => {
+            this.appStore.setShowLeaveCommunity(false);
+          });
+      });
+    },
     async joinTestingCommunity() {
       try {
         this.isJoining = true;

@@ -85,6 +85,8 @@ export default function CommunityOverview({ uuid, source }) {
   useEffect(() => {
     const fetchsnapshot = async () => {
       const client: Ad4mClient = await getAd4mClient();
+      const perspective = await client.perspective.byUUID(uuid);
+
       const snapshot = await client.perspective.snapshotByUUID(uuid);
 
       const subLinks = findNodes(snapshot?.links || [], source);
@@ -110,12 +112,10 @@ export default function CommunityOverview({ uuid, source }) {
 
       setAd4mInitialised(true);
 
-      client.perspective.addPerspectiveLinkAddedListener(uuid, [
-        (link) => {
-          newLinkAdded(link);
-          return null;
-        },
-      ]);
+      perspective?.addListener("link-added", (link) => {
+        newLinkAdded(link);
+        return null;
+      });
     };
 
     if (!ad4mInitialised && uuid && source) {
@@ -127,7 +127,7 @@ export default function CommunityOverview({ uuid, source }) {
   useEffect(() => {
     const setupGraph = async () => {
       graph.current = ForceGraph3D()
-        .nodeLabel((node) => {
+        .nodeLabel((node: any) => {
           return node.id.startsWith("literal://")
             ? Literal.fromUrl(node.id).get().data
             : node.id;
@@ -177,7 +177,11 @@ export default function CommunityOverview({ uuid, source }) {
           ...nodes,
           {
             id: l.data.target,
-            group: l.data.predicate,
+            group: extractProtocol(l.data.target),
+          },
+          {
+            id: l.data.source,
+            group: extractProtocol(l.data.source),
           },
         ],
         links: [

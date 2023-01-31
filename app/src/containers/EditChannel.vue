@@ -46,7 +46,7 @@ import ChannnelViewOptions from "@/components/channel-view-options/ChannelViewOp
 import { viewOptions } from "@/constants";
 
 export default defineComponent({
-  props: ["communityId", "channelId"],
+  props: ["channelId"],
   emits: ["cancel", "submit"],
   components: { ChannnelViewOptions },
   setup() {
@@ -86,7 +86,6 @@ export default defineComponent({
       this.isSaving = true;
       this.dataStore
         .updateChannel({
-          perspectiveUuid: this.$route.params.communityId as string,
           channelId: this.$route.params.channelId as string,
           data: {
             name: this.name,
