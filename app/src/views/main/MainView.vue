@@ -17,7 +17,7 @@
     </j-modal>
 
     <j-modal
-      v-if="modals.showLeaveCommunity && appStore.activeCommunity"
+      v-if="modals.showLeaveCommunity && activeCommunity"
       size="sm"
       :open="modals.showLeaveCommunity"
       @toggle="(e) => setShowLeaveCommunity(e.target.open)"
@@ -26,7 +26,7 @@
         <j-box pb="900">
           <j-text variant="heading">
             Leave community '{{
-              dataStore.getCommunity(appStore.activeCommunity).name
+              activeCommunity.name || 'Unknown'
             }}'
           </j-text>
           <j-text nomargin>
@@ -98,11 +98,12 @@ import MainSidebar from "./main-sidebar/MainSidebar.vue";
 import { defineComponent, ref } from "vue";
 
 import CreateCommunity from "@/containers/CreateCommunity.vue";
-import { ModalsState } from "@/store/types";
+import { CommunityState, ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
 import { mapActions } from "pinia";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
+import { Community } from "utils/types";
 
 export default defineComponent({
   name: "MainAppView",
@@ -125,6 +126,10 @@ export default defineComponent({
         DEFAULT_TESTING_NEIGHBOURHOOD
       );
       return community ? true : false;
+    },
+    activeCommunity(): Community {
+      const activeCommunity = this.appStore.activeCommunity;
+      return this.dataStore.getCommunity(activeCommunity);
     },
     modals(): ModalsState {
       return this.appStore.modals;
