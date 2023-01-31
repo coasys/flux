@@ -73,6 +73,8 @@ export default function AudioRoom() {
     // });
   };
 
+  // To-do: Get list of people/offers from Ad4m
+  // { name, etc, currentOffer }
   const people = [] as string[];
 
   return (
