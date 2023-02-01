@@ -1,0 +1,17 @@
+.wrapper {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--j-space-400) var(--j-space-500) var(--j-space-600) var(--j-space-500);
+}
+
+.inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--j-space-400);
+    background: var(--j-color-ui-800);
+    font-family: var(--j-font-family);
+    border-radius: var(--j-border-radius);
+}

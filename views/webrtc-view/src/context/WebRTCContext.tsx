@@ -5,6 +5,11 @@ type StreamUser = {
   id: string;
   name: string;
   candidate: string;
+  prefrences?: {
+    audio: boolean;
+    video: boolean;
+    screen: boolean;
+  };
 };
 
 type State = {
