@@ -1,0 +1,17 @@
+:root[theme="black"] {
+  --j-color-subtractor: 100%;
+  --j-color-multiplier: -1;
+  --app-channel-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
+}
+
+:root[theme="black"] j-tooltip::part(tooltip) {
+  background: var(--j-color-ui-100);
+  color: var(--j-color-black);
+}
+
+:root[theme="black"] j-menu-item::part(base) {
+  margin-top: var(--j-space-100);
+  margin-left: var(--j-space-400);
+  margin-right: var(--j-space-400);
+  border-radius: 6px;
+}

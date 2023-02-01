@@ -6,7 +6,7 @@ import React, {
   useRef,
 } from "react";
 import { Messages, Message, EntryType } from "../types";
-import { LinkExpression, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
+import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import getMessages from "../api/getMessages";
 import createMessage from "../api/createMessage";
 import subscribeToLinks from "../api/subscribeToLinks";
@@ -23,7 +23,6 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import editCurrentMessage from "../api/editCurrentMessage";
 import { DEFAULT_LIMIT } from "../constants/sdna";
 import { checkUpdateSDNAVersion } from "../api/updateSDNA";
-import { LinkCallback } from "@perspect3vism/ad4m/lib/src/perspectives/PerspectiveClient";
 import generateMessage from "../api/generateMessage";
 import generateReply from "../api/generateReply";
 
@@ -199,7 +198,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
                   author: link.author,
                   content: link.data.target.replace("emoji://", ""),
                   timestamp: link.timestamp,
-                  synced
+                  synced,
                 },
               ],
             },
@@ -255,11 +254,13 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
         const isSameAuthorAndContent =
           isSameAuthor &&
           reaction.content === link.data.target.replace("emoji://", "");
-          console.log('ggggg', isSameAuthorAndContent)
-        return isSameAuthorAndContent ? ({
-          ...reaction,
-          synced: true
-        }) : reaction;
+        return isSameAuthorAndContent
+          ? {
+              ...reaction,
+              timestamp: link.timestamp,
+              synced: true,
+            }
+          : reaction;
       }
 
       return {
@@ -268,9 +269,7 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
           ...oldState.keyedMessages,
           [id]: {
             ...message,
-            reactions: message.reactions.map((e) =>
-              updateReactions(e, link)
-            ),
+            reactions: message.reactions.map((e) => updateReactions(e, link)),
           },
         },
       };
@@ -321,15 +320,16 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
         updateMessagePopularStatus(link, true);
       }
 
-      if (await client.perspective.queryProlog(
-        perspectiveUuid,
-        `triple("${channelId}", "${EntryType.Message}", "${link.data.source}").`
-      )) {
-        console.log('arrr', isMessageFromSelf)
+      if (
+        await client.perspective.queryProlog(
+          perspectiveUuid,
+          `triple("${channelId}", "${EntryType.Message}", "${link.data.source}").`
+        )
+      ) {
         if (!isMessageFromSelf) {
-          addReactionToState(link);
+          addReactionToState(link, true);
         } else {
-          findReactionAndSync(link)
+          findReactionAndSync(link);
         }
       }
 
@@ -455,14 +455,14 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
   function sendMessage(value) {
     generateMessage(value).then((data) => {
-      const {message, literal} = data;
+      const { message, literal } = data;
       setState((oldState) => addMessage(oldState, message));
       createMessage({
         perspectiveUuid,
         source: channelId,
         message: value,
-        literal: literal
-      })
+        literal: literal,
+      });
     });
   }
 
@@ -484,15 +484,15 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
 
   async function sendReply(message: string, replyUrl: string) {
     generateReply(message, replyUrl).then((data) => {
-      const {message, literal} = data;
+      const { message, literal } = data;
       setState((oldState) => addMessage(oldState, message));
       createReply({
         perspectiveUuid,
         message: message,
         replyUrl,
         channelId,
-        literal
-      })
+        literal,
+      });
     });
   }
 
@@ -515,8 +515,8 @@ export function ChatProvider({ perspectiveUuid, children, channelId }: any) {
         target: `emoji://${reaction}`,
         predicate: REACTION,
       },
-      timestamp: new Date()
-    })
+      timestamp: new Date(),
+    });
 
     await createMessageReaction({
       perspectiveUuid,

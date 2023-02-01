@@ -1,0 +1,43 @@
+{
+  "name": "@junto-foundation/graph-view",
+  "version": "0.5.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/main.umd.cjs",
+  "module": "./dist/main.js",
+  "exports": {
+    ".": {
+      "import": "./dist/main.js",
+      "require": "./dist/main.umd.cjs"
+    }
+  },
+  "scripts": {
+    "start": "vite",
+    "dev": "run-p dev:**",
+    "dev:serve": "vite",
+    "dev:watch": "vite build --watch",
+    "build": "vite build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "3d-force-graph": "^1.70.19",
+    "@junto-foundation/junto-elements": "*",
+    "@perspect3vism/ad4m": "^0.2.10",
+    "@perspect3vism/ad4m-connect": "^0.2.7",
+    "preact": "^10.11.3",
+    "three-spritetext": "^1.6.5",
+    "utils": "*"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.5.0",
+    "npm-run-all": "^4.1.5",
+    "vite": "^4.0.3",
+    "vite-plugin-css-injected-by-js": "^2.3.1"
+  }
+}
