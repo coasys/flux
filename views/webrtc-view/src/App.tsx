@@ -1,6 +1,7 @@
 import { CommunityProvider, AgentProvider } from "utils/react";
 import AllCommunities from "./components/AllCommunities";
-import AudioRoom from "./components/AudioRoom";
+import { WebRTCProvider } from "./context/WebRTCContext";
+import Channel from "./components/Channel";
 
 import styles from "./App.module.css";
 
@@ -10,7 +11,9 @@ export default function App({ perspective, source }) {
       {perspective ? (
         <AgentProvider>
           <CommunityProvider perspectiveUuid={perspective}>
-            <AudioRoom />
+            <WebRTCProvider>
+              <Channel source={source} uuid={perspective} />
+            </WebRTCProvider>
           </CommunityProvider>
         </AgentProvider>
       ) : (

@@ -2,7 +2,7 @@ import { useState } from "preact/hooks";
 import CommunityModel, { Community } from "utils/api/community";
 import styles from "../App.module.css";
 
-export default function AudioRoom() {
+export default function Channel({ uuid, source }) {
   const [currentOffer, setCurrentOffer] = useState<
     RTCSessionDescriptionInit | undefined
   >(undefined);
