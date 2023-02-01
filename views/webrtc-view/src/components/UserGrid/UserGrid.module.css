@@ -1,8 +1,7 @@
 .grid {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: var(--j-space-600);
+    display: grid;
+    grid-template-columns: repeat(var(--grid-size), 1fr);
+    grid-gap: var(--j-space-500);
     width: 100%;
+    padding: var(--j-space-500);
 }
