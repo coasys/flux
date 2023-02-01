@@ -5,8 +5,11 @@ import styles from "./Footer.module.css";
 
 export default function Footer() {
   const {
-    methods: { addParticipant },
+    state: { stream, currentUser },
+    methods: { addParticipant, setUserPrefrences },
   } = useContext(WebRTCContext);
+
+  const cameraEnabled = currentUser && currentUser.prefrences.video;
 
   const onAddParticipant = () => {
     const newUser = {
@@ -18,9 +21,20 @@ export default function Footer() {
     addParticipant(newUser);
   };
 
+  const onToggleCamera = () => {
+    if (stream) {
+      const newCameraSetting = !currentUser.prefrences?.video;
+      stream.getVideoTracks()[0].enabled = newCameraSetting;
+      setUserPrefrences({ ...currentUser.prefrences, video: newCameraSetting });
+    }
+  };
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.inner}>
+        <j-button variant="primary" onClick={onToggleCamera} disabled={!stream}>
+          {cameraEnabled ? "Disable camera" : "Enable camera"}
+        </j-button>
         <j-button variant="primary" onClick={onAddParticipant}>
           Add fake user
         </j-button>

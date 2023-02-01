@@ -1,12 +1,50 @@
 .item {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
     gap: 1rem;
     min-width: 20vw;
-    background: var(--j-color-ui-800);
     font-family: var(--j-font-family);
     border-radius: var(--j-border-radius);
+    background: var(--j-color-ui-800);
+    overflow: hidden;
+    cursor: pointer;
     aspect-ratio: 16/9;
+}
+
+.video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+}
+
+.details {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: var(--j-space-300);
+    background: var(--j-color-ui-800);
+    transition: all 0.3s ease;
+}
+
+.item[data-camera-enabled="true"] .video {
+    opacity: 1;
+}
+
+.item[data-camera-enabled="true"] .details {
+    opacity: 0;
+}
+
+.item[data-camera-enabled="true"]:hover .details {
+    opacity: 1;
 }
