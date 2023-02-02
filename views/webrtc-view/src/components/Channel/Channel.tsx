@@ -53,7 +53,10 @@ export default function Channel({ uuid, source }) {
     }
 
     return () => {
+      // Remove listeners
       linkSubscriberRef.current && linkSubscriberRef.current();
+
+      // TO-DO: Leave channel
     };
   }, [uuid, agent, initialized]);
 
@@ -177,7 +180,7 @@ export default function Channel({ uuid, source }) {
         did: agent.did,
         prefrences: {
           audio: true,
-          video: false,
+          video: true,
           screen: false,
         },
       };

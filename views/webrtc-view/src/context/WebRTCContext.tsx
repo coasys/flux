@@ -55,6 +55,7 @@ type ContextProps = {
     addIceCandidate: (candidate: RTCIceCandidateInit) => void;
     addOffer: (offer: RTCLocalSessionDescriptionInit, senderId: string) => void;
     addAnswer: (answer: RTCLocalSessionDescriptionInit) => void;
+    leave: () => void;
   };
 };
 
@@ -74,6 +75,7 @@ const initialState: ContextProps = {
     addIceCandidate: (candidate: RTCIceCandidateInit) => null,
     addOffer: (offer: RTCLocalSessionDescriptionInit, senderId: string) => null,
     addAnswer: (answer: RTCLocalSessionDescriptionInit) => null,
+    leave: () => null,
   },
 };
 
@@ -93,6 +95,19 @@ export function WebRTCProvider({ children, uuid, source }: any) {
       predicate: "join",
       target: source,
     });
+  };
+
+  const announceMyDeparture = async () => {
+    console.log("announceDeparture");
+
+    const client: Ad4mClient = await getAd4mClient();
+    const perspective = await client.perspective.byUUID(uuid);
+
+    // perspective.remove({
+    //   source,
+    //   predicate: "leave",
+    //   target: source,
+    // });
   };
 
   const sendCandidateToParticipant = async (
@@ -362,6 +377,9 @@ export function WebRTCProvider({ children, uuid, source }: any) {
                 (p) => p.did === oldState.currentUser.did
               )?.peerConnection;
 
+              console.log("adding answer: ", answer);
+              console.log("myPeerConnection: ", myPeerConnection);
+
               // Add answer to my connection
               myPeerConnection.setRemoteDescription(
                 new RTCSessionDescription(answer as RTCSessionDescriptionInit)
@@ -369,6 +387,9 @@ export function WebRTCProvider({ children, uuid, source }: any) {
 
               return oldState;
             });
+          },
+          leave() {
+            announceMyDeparture();
           },
         },
       }}
