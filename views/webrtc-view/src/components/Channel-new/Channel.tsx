@@ -93,8 +93,8 @@ class Channel extends Component<Props, State> {
     // Setup subscriptions
     this.linkSubscriberRef = await subscribeToLinks({
       perspectiveUuid: this.props.uuid,
-      added: this.handleLinkAdded,
-      removed: this.handleLinkRemoved,
+      added: (link) => this.handleLinkAdded(link),
+      removed: (link) => this.handleLinkRemoved(link),
     });
   }
 
@@ -109,7 +109,13 @@ class Channel extends Component<Props, State> {
 
     const isMessageFromSelf = link.author === this.state.agent.did;
 
-    if (isMessageFromSelf || !this.state.initialized) {
+    if (isMessageFromSelf) {
+      console.log("🚫 Link is from me, skipping!");
+      return;
+    }
+
+    if (!this.state.initialized) {
+      console.log("🚫 Not yet joined, skipping!");
       return;
     }
 
@@ -143,7 +149,7 @@ class Channel extends Component<Props, State> {
 
         // Check if the candidate us for us
         if (parsedData.receiverId === this.state.agent.did) {
-          console.info("New candidate received", link.data);
+          console.info("New candidate received", parsedData.candidate);
           this.addIceCandidate(parsedData.candidate);
         }
       } catch (e) {
@@ -161,7 +167,7 @@ class Channel extends Component<Props, State> {
 
         // Check if the candidate us for us
         if (parsedData.receiverId === this.state.agent.did) {
-          console.info("New answer-candidate received", link.data);
+          console.info("New answer-candidate received", parsedData.candidate);
           this.addIceCandidate(parsedData.candidate);
         }
       } catch (e) {
@@ -206,11 +212,11 @@ class Channel extends Component<Props, State> {
     }
   }
 
-  async addIceCandidate(candidate: RTCIceCandidateInit) {
+  async addIceCandidate(candidate: RTCIceCandidate) {
     const myPeerConnection = this.state.participants.find(
       (p) => p.did === this.state.currentUser.did
     )?.peerConnection;
-    myPeerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+    myPeerConnection.addIceCandidate(new RTCIceCandidate(candidate.toJSON()));
   }
 
   async handleLinkRemoved(link) {
@@ -235,7 +241,7 @@ class Channel extends Component<Props, State> {
     console.log("sendCandidateToParticipant");
 
     const offerCandidateData = {
-      ...candidate.toJSON(),
+      candidate,
       receiverId,
       userId: createdById,
     };
@@ -454,10 +460,78 @@ class Channel extends Component<Props, State> {
     }));
   }
 
+  onJoin = async () => {
+    this.setState((oldState) => ({
+      ...oldState,
+      initialized: true,
+      isJoining: true,
+    }));
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+
+    // Disable video by default
+    stream.getVideoTracks()[0].enabled = false;
+
+    // Create user object
+    const me = {
+      did: this.state.agent.did,
+      prefrences: {
+        audio: true,
+        video: false,
+        screen: false,
+      },
+    };
+
+    // Announce my arrival
+    const client: Ad4mClient = await getAd4mClient();
+    const perspective = await client.perspective.byUUID(this.props.uuid);
+
+    perspective.add({
+      source: this.props.source,
+      predicate: "join",
+      target: this.props.source,
+    });
+
+    this.setState(
+      (oldState) => ({
+        ...oldState,
+        localStream: stream,
+        currentUser: me,
+      }),
+      () => {
+        this.addParticipant(this.state.currentUser);
+      }
+    );
+  };
+
+  onToggleCamera() {
+    if (this.state.localStream) {
+      const newCameraSetting = !this.state.currentUser.prefrences?.video;
+      this.state.localStream.getVideoTracks()[0].enabled = newCameraSetting;
+
+      const newPrefrences = {
+        ...this.state.currentUser.prefrences,
+        video: newCameraSetting,
+      };
+      this.setState((oldState) => ({
+        ...oldState,
+        currentUser: { ...this.state.currentUser, prefrences: newPrefrences },
+      }));
+    }
+  }
+
   render() {
     return (
       <section className={styles.outer}>
-        <UserGrid />
+        <UserGrid
+          currentUser={this.state.currentUser}
+          participants={this.state.participants}
+          localStream={this.state.localStream}
+        />
+
         {!this.state.localStream && (
           <div className={styles.join}>
             <h1>You haven't joined this room</h1>
@@ -465,8 +539,8 @@ class Channel extends Component<Props, State> {
             <j-button
               variant="primary"
               size="lg"
-              loading={isJoining}
-              onClick={() => this.setState({ ...this.state, isJoining: true })}
+              loading={this.state.isJoining}
+              onClick={this.onJoin}
             >
               Join room!
             </j-button>
@@ -483,7 +557,11 @@ class Channel extends Component<Props, State> {
           </div>
         )}
 
-        <Footer />
+        <Footer
+          localStream={this.state.localStream}
+          currentUser={this.state.currentUser}
+          onToggleCamera={() => this.onToggleCamera()}
+        />
       </section>
     );
   }

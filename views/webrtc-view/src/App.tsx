@@ -12,7 +12,6 @@ export default function App({ perspective, source }) {
         <AgentProvider>
           <CommunityProvider perspectiveUuid={perspective}>
             <WebRTCProvider source={source} uuid={perspective}>
-              {/* @ts-ignore compatible */}
               <Channel source={source} uuid={perspective} />
             </WebRTCProvider>
           </CommunityProvider>

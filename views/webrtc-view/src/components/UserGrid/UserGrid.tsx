@@ -4,12 +4,8 @@ import Item from "./Item";
 
 import styles from "./UserGrid.module.css";
 
-export default function UserGrid() {
+export default function UserGrid({ currentUser, participants, localStream }) {
   const videoRef = useRef(null);
-
-  const {
-    state: { currentUser, participants, localStream },
-  } = useContext(WebRTCContext);
 
   const participantsWithoutMe = participants.filter((p) => !p.isCurrentUser);
   const cameraEnabled = currentUser && currentUser.prefrences.video;
