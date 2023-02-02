@@ -44,6 +44,7 @@
 
 <script lang="ts">
 import "vue-advanced-cropper";
+import "vue-advanced-cropper/dist/style.css";
 import "vue-advanced-cropper/dist/theme.bubble.css";
 import { defineComponent } from "vue";
 import { Cropper } from "vue-advanced-cropper";

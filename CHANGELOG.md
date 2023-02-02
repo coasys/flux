@@ -3,6 +3,55 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.5.1] - 02/02/2023
+
+### Added
+
+### Changed
+ - Update all ad4m deps to 0.2.11
+ - Use new link language hash
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.5.0] - 01/02/2023
+
+### Added
+ - Expand icon for channel views
+ - Cards will now load before we receive the data to avoid the text jumping around once card data loads
+ - Confirmation modal when leaving a community
+
+### Changed
+ - Limit avatar img to accept image/*
+ - If we have incompatible AD4M versions we will now point the user toward a new ad4m download
+ - Code now refactored to live in app, packages and views directories
+ - No link constants exist inside of Flux app anymore but instead in utils package
+ - Rename delete community to leave community
+ - New link language hash with simplified latest revision handling
+ - All packages now use consistent version numbers
+
+### Deprecated
+
+### Removed
+
+### Fixed
+ - Channel header layout on mobile
+ - Author of replied posts being incorrectly returned as the author of the reply post itself
+ - Reaction being added twice through emoji picker
+ - But where it was possible to remove a reaction before it was sync'd
+ - Bug causing hydrate state not to complete fully
+ - Incorrect image being shown in mention list
+ - Join button now hidden on neighbourhood cards if already joined
+ - Predicates are now grouping more effectively in the graph
+ - Image cropper not appearing correctly on first load
+
+### Security
+
 ## [0.4.2] - 20/01/2023
 
 ### Added
