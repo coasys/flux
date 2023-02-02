@@ -1,5 +1,10 @@
-import { useEffect, useContext, useState } from "preact/hooks";
-import CommunityModel, { Community } from "utils/api/community";
+import { useEffect, useContext, useState, useRef } from "preact/hooks";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { Ad4mClient } from "@perspect3vism/ad4m";
+import subscribeToLinks from "utils/api/subscribeToLinks";
+import getMe, { Me } from "utils/api/getMe";
+import { createOffer, createPeerConnection } from "../../../utils/webrtc";
+
 import WebRTCContext from "../../context/WebRTCContext";
 import Footer from "../Footer";
 import UserGrid from "../UserGrid";
@@ -7,14 +12,67 @@ import UserGrid from "../UserGrid";
 import styles from "./Channel.module.css";
 
 export default function Channel({ uuid, source }) {
+  const linkSubscriberRef = useRef<Function | null>(null);
+  const [agent, setAgent] = useState<Me | null>(null);
+
   const [joinClicked, setJoinClicked] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
 
   const {
     state: { stream },
-    methods: { setStream, setUser },
+    methods: { setStream, setUser, addParticipant },
   } = useContext(WebRTCContext);
 
+  // Get agent/me
+  useEffect(() => {
+    async function fetchAgent() {
+      const agent = await getMe();
+      setAgent(agent);
+    }
+
+    fetchAgent();
+  }, []);
+
+  // Setup subscriptions
+  useEffect(() => {
+    async function setupSubscribers() {
+      linkSubscriberRef.current = await subscribeToLinks({
+        perspectiveUuid: uuid,
+        added: handleLinkAdded,
+        removed: handleLinkRemoved,
+      });
+    }
+
+    if (uuid && agent) {
+      setupSubscribers();
+    }
+
+    return () => {
+      linkSubscriberRef.current && linkSubscriberRef.current();
+    };
+  }, [uuid, agent]);
+
+  async function handleLinkAdded(link) {
+    const isMessageFromSelf = link.author === agent.did;
+
+    console.log("handleLinkAdded: ", link);
+
+    if (link.predicate === "offer" && link.source === source) {
+      // Do something
+    }
+  }
+
+  async function handleLinkRemoved(link) {
+    const isMessageFromSelf = link.author === agent.did;
+
+    console.log("handleLinkRemoved: ", link);
+
+    if (link.predicate === "offer" && link.source === source) {
+      // Do something
+    }
+  }
+
+  // Start local stream
   useEffect(() => {
     const getUserStream = async () => {
       setIsJoining(true);
@@ -28,19 +86,29 @@ export default function Channel({ uuid, source }) {
       localStream.getVideoTracks()[0].enabled = false;
       setStream(localStream);
 
-      // WIP: Add user to Ad4m
-
-      // Add user to local state
-      setUser({
-        id: "123",
-        name: "You",
-        candidate: "123",
+      // Create user object
+      const currentUser = {
+        did: agent.did,
         prefrences: {
           audio: true,
           video: false,
           screen: false,
         },
-      });
+      };
+
+      // Add user to local state
+      setUser(currentUser);
+
+      // Add user to local state
+      addParticipant(currentUser);
+
+      // WIP: Add user to Ad4m
+      // const offer = "123";
+
+      // const client: Ad4mClient = await getAd4mClient();
+      // const perspective = await client.perspective.byUUID(uuid);
+
+      // perspective.add({ source, predicate: "offer", target: offer });
     };
 
     if (joinClicked && !stream) {
@@ -75,6 +143,7 @@ export default function Channel({ uuid, source }) {
           <h3>Stream status:</h3>
           <p>ID: {stream.id}</p>
           <p>active: {stream.active ? "YES" : "NO"}</p>
+          <ul></ul>
         </div>
       )}
 

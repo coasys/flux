@@ -22,6 +22,13 @@ export const viewOptions = [
     type: ChannelView.Graph,
     component: "graph-view",
   },
+  {
+    title: "Voice",
+    description: "Audio/Video channel",
+    icon: "microphone",
+    type: ChannelView.Voice,
+    component: "webrtc-view",
+  },
 ];
 
 export const DEFAULT_TESTING_NEIGHBOURHOOD =

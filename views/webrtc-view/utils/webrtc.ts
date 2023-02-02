@@ -1,6 +1,6 @@
 let peerConnection;
 
-function createPeerConnection(lasticecandidate) {
+export function createPeerConnection(lasticecandidate) {
   const configuration = {
     iceServers: [
       {
@@ -61,8 +61,8 @@ function datachannelmessage(message) {
 //   textelement.value = "";
 // }
 
-export function clickcreateoffer() {
-  console.log("clickcreateoffer");
+export function createOffer() {
+  console.log("createOffer");
 
   peerConnection = createPeerConnection(lasticecandidate);
 

@@ -1,5 +1,5 @@
 {
-  "name": "webrtc",
+  "name": "@junto-foundation/webrtc-view",
   "version": "1.0.0",
   "type": "module",
   "files": [

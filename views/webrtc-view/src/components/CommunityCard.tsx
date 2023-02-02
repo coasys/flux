@@ -11,7 +11,7 @@ export default function CommunityCard({ uuid }) {
 
   if (community) {
     return (
-      <a className={styles.card} href={`/${uuid}`}>
+      <a className={styles.card} href={`/${uuid}/general`}>
         <j-avatar initials={community.name.charAt(0)}></j-avatar>
         <div>
           <j-text nomargin variant="heading">
