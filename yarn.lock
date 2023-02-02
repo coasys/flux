@@ -1490,7 +1490,7 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@perspect3vism/ad4m-connect@0.2.10", "@perspect3vism/ad4m-connect@^0.2.7":
+"@perspect3vism/ad4m-connect@0.2.10", "@perspect3vism/ad4m-connect@^0.2.10", "@perspect3vism/ad4m-connect@^0.2.7":
   version "0.2.10"
   resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.2.10.tgz#9bab86cd93c5c81f92ba74a2487ed81cd8c7efb7"
   integrity sha512-GEmeKzu6n0jGEdOhL0Djvk+xZOscC7aBGMgUnisBbMDtBRJngKAn/vmkMS2kUZSzex2JHqcuONo2cb63YVDhnQ==

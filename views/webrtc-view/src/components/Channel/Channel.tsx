@@ -1,4 +1,10 @@
-import { useEffect, useContext, useState, useRef } from "preact/hooks";
+import {
+  useEffect,
+  useContext,
+  useState,
+  useRef,
+  useCallback,
+} from "preact/hooks";
 import subscribeToLinks from "utils/api/subscribeToLinks";
 import getMe, { Me } from "utils/api/getMe";
 
@@ -17,7 +23,7 @@ export default function Channel({ uuid, source }) {
   const [initialized, setInitialized] = useState(false);
 
   const {
-    state: { currentUser, localStream },
+    state: { currentUser, localStream, participants },
     methods: {
       setLocalStream,
       setUser,
@@ -35,12 +41,16 @@ export default function Channel({ uuid, source }) {
       setAgent(agent);
     }
 
-    fetchAgent();
-  }, []);
+    if (!agent) {
+      fetchAgent();
+    }
+  }, [agent]);
 
   // Setup subscriptions
   useEffect(() => {
     async function setupSubscribers() {
+      console.log("Setting up subscriptions");
+
       linkSubscriberRef.current = await subscribeToLinks({
         perspectiveUuid: uuid,
         added: handleLinkAdded,
@@ -48,7 +58,7 @@ export default function Channel({ uuid, source }) {
       });
     }
 
-    if (uuid && agent && initialized) {
+    if (uuid && agent && initialized && !linkSubscriberRef.current) {
       setupSubscribers();
     }
 
@@ -58,85 +68,101 @@ export default function Channel({ uuid, source }) {
 
       // TO-DO: Leave channel
     };
-  }, [uuid, agent, initialized]);
+  }, [uuid, agent, initialized, participants]);
 
-  async function handleLinkAdded(link) {
-    const isMessageFromSelf = link.author === agent.did;
+  const handleLinkAdded = useCallback(
+    async (link) => {
+      console.log("!!! --- HandleLinkAdded --- !!!", link);
+      console.log("!!! --- current part. --- !!!", participants);
 
-    if (isMessageFromSelf || !initialized) {
-      return;
-    }
+      const isMessageFromSelf = link.author === agent.did;
 
-    // New user has joined the room
-    if (link.data.predicate === "join" && link.data.source === source) {
-      console.info("New user has joined");
-
-      addParticipant({ did: link.author });
-    }
-
-    // A user has provided a candidate
-    if (link.data.predicate === "candidate" && link.data.source === source) {
-      try {
-        const parsedData = JSON.parse(link.data.target);
-
-        // Check if the candidate us for us
-        if (parsedData.receiverId === agent.did) {
-          console.info("New candidate received", link.data);
-          addIceCandidate(parsedData.candidate);
-        }
-      } catch (e) {
-        // Oh well
+      if (isMessageFromSelf || !initialized) {
+        return;
       }
-    }
 
-    // A user has provided an answer candidate
-    if (
-      link.data.predicate === "answer-candidate" &&
-      link.data.source === source
-    ) {
-      try {
-        const parsedData = JSON.parse(link.data.target);
+      // Check if user doesn't exist in participants (user joined before us)
+      if (
+        link.data.predicate !== "join" &&
+        !participants.some((p) => p.did === link.author)
+      ) {
+        console.info("🧍🏽 Adding existing user");
 
-        // Check if the candidate us for us
-        if (parsedData.receiverId === agent.did) {
-          console.info("New answer-candidate received", link.data);
-          addIceCandidate(parsedData.candidate);
-        }
-      } catch (e) {
-        // Oh well
+        addParticipant({ did: link.author });
       }
-    }
 
-    // A user has provided an offer
-    if (link.data.predicate === "offer" && link.data.source === source) {
-      try {
-        const parsedData = JSON.parse(link.data.target);
+      // New user has joined the room
+      if (link.data.predicate === "join" && link.data.source === source) {
+        console.info("🧍🏽 New user has joined");
 
-        // Check if the candidate us for us
-        if (parsedData.receiverId === agent.did) {
-          console.info("New offer received", link.data);
-          addOffer(parsedData.offer, parsedData.userId);
-        }
-      } catch (e) {
-        // Oh well
+        addParticipant({ did: link.author });
       }
-    }
 
-    // A user has provided an answer
-    if (link.data.predicate === "answer" && link.data.source === source) {
-      try {
-        const parsedData = JSON.parse(link.data.target);
+      // A user has provided a candidate
+      if (link.data.predicate === "candidate" && link.data.source === source) {
+        try {
+          const parsedData = JSON.parse(link.data.target);
 
-        // Check if the candidate us for us
-        if (parsedData.receiverId === agent.did) {
-          console.info("New answer received", link.data);
-          addAnswer(parsedData.answer);
+          // Check if the candidate us for us
+          if (parsedData.receiverId === agent.did) {
+            console.info("New candidate received", link.data);
+            addIceCandidate(parsedData.candidate);
+          }
+        } catch (e) {
+          // Oh well
         }
-      } catch (e) {
-        // Oh well
       }
-    }
-  }
+
+      // A user has provided an answer candidate
+      if (
+        link.data.predicate === "answer-candidate" &&
+        link.data.source === source
+      ) {
+        try {
+          const parsedData = JSON.parse(link.data.target);
+
+          // Check if the candidate us for us
+          if (parsedData.receiverId === agent.did) {
+            console.info("New answer-candidate received", link.data);
+            addIceCandidate(parsedData.candidate);
+          }
+        } catch (e) {
+          // Oh well
+        }
+      }
+
+      // A user has provided an offer
+      if (link.data.predicate === "offer" && link.data.source === source) {
+        try {
+          const parsedData = JSON.parse(link.data.target);
+
+          // Check if the candidate us for us
+          if (parsedData.receiverId === agent.did) {
+            console.info("New offer received", link.data);
+            addOffer(parsedData.offer, parsedData.userId);
+          }
+        } catch (e) {
+          // Oh well
+        }
+      }
+
+      // A user has provided an answer
+      if (link.data.predicate === "answer" && link.data.source === source) {
+        try {
+          const parsedData = JSON.parse(link.data.target);
+
+          // Check if the candidate us for us
+          if (parsedData.receiverId === agent.did) {
+            console.info("New answer received", link.data);
+            addAnswer(parsedData.answer);
+          }
+        } catch (e) {
+          // Oh well
+        }
+      }
+    },
+    [currentUser, localStream, participants]
+  );
 
   async function handleLinkRemoved(link) {
     const isMessageFromSelf = link.author === agent.did;
@@ -180,7 +206,7 @@ export default function Channel({ uuid, source }) {
         did: agent.did,
         prefrences: {
           audio: true,
-          video: true,
+          video: false,
           screen: false,
         },
       };
@@ -200,23 +226,12 @@ export default function Channel({ uuid, source }) {
       addParticipant(currentUser);
 
       setInitialized(true);
-      // WIP: Add user to Ad4m
-      // const offer = "123";
-
-      // const client: Ad4mClient = await getAd4mClient();
-      // const perspective = await client.perspective.byUUID(uuid);
-
-      // perspective.add({ source, predicate: "offer", target: offer });
     };
 
     if (joinClicked && localStream && currentUser && !initialized) {
       joinStream();
     }
   }, [joinClicked, localStream, currentUser, initialized]);
-
-  // To-do: Get list of people/offers from Ad4m
-  // { name, etc, currentOffer }
-  const people = [] as string[];
 
   return (
     <section className={styles.outer}>
@@ -240,6 +255,7 @@ export default function Channel({ uuid, source }) {
         <div className={styles.debug}>
           <h3>LocalStream status:</h3>
           <p>ID: {localStream.id}</p>
+          <p>User count: {participants.length}</p>
           <p>active: {localStream.active ? "YES" : "NO"}</p>
           <ul></ul>
         </div>

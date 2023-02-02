@@ -25,9 +25,6 @@ export default function UserGrid() {
   //   gridRowSize = 2;
   // }
 
-  console.log("local stream:", localStream);
-  console.log("participants:", participants);
-
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.srcObject = localStream;
