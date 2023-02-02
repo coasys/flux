@@ -3,6 +3,22 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.5.1] - 02/02/2023
+
+### Added
+
+### Changed
+ - Update all ad4m deps to 0.2.11
+ - Use new link language hash
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## [0.5.0] - 01/02/2023
 
 ### Added

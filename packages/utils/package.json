@@ -1,6 +1,6 @@
 {
   "name": "utils",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@perspect3vism/ad4m": "0.2.10",
+    "@perspect3vism/ad4m": "0.2.11",
     "date-fns": "^2.28.0",
     "dexie": "^3.2.0",
     "dexie-react-hooks": "^1.1.1"
