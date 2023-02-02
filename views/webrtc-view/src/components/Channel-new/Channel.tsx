@@ -103,10 +103,7 @@ class Channel extends Component<Props, State> {
     this.linkSubscriberRef();
   }
 
-  handleLinkAdded(link) {
-    console.log("!!! --- HandleLinkAdded --- !!!", link);
-    console.log("!!! --- participants --- !!!", this.state.participants.length);
-
+  async handleLinkAdded(link) {
     const isMessageFromSelf = link.author === this.state.agent.did;
 
     if (isMessageFromSelf) {
@@ -149,8 +146,8 @@ class Channel extends Component<Props, State> {
 
         // Check if the candidate us for us
         if (parsedData.receiverId === this.state.agent.did) {
-          console.info("New candidate received", parsedData.candidate);
-          this.addIceCandidate(parsedData.candidate);
+          console.info("📚 New candidate received", parsedData.candidate);
+          await this.addIceCandidate(parsedData.candidate);
         }
       } catch (e) {
         // Oh well
@@ -167,7 +164,10 @@ class Channel extends Component<Props, State> {
 
         // Check if the candidate us for us
         if (parsedData.receiverId === this.state.agent.did) {
-          console.info("New answer-candidate received", parsedData.candidate);
+          console.info(
+            "📚 New answer-candidate received",
+            parsedData.candidate
+          );
           this.addIceCandidate(parsedData.candidate);
         }
       } catch (e) {
@@ -185,7 +185,7 @@ class Channel extends Component<Props, State> {
 
         // Check if the candidate us for us
         if (parsedData.receiverId === this.state.agent.did) {
-          console.info("New offer received", link.data);
+          console.info("📚 New offer received", link.data);
           this.addOffer(parsedData.offer, parsedData.userId);
         }
       } catch (e) {
@@ -203,7 +203,7 @@ class Channel extends Component<Props, State> {
 
         // Check if the candidate us for us
         if (parsedData.receiverId === this.state.agent.did) {
-          console.info("New answer received", link.data);
+          console.info("📚 New answer received", link.data);
           this.addAnswer(parsedData.answer);
         }
       } catch (e) {
@@ -216,7 +216,8 @@ class Channel extends Component<Props, State> {
     const myPeerConnection = this.state.participants.find(
       (p) => p.did === this.state.currentUser.did
     )?.peerConnection;
-    myPeerConnection.addIceCandidate(new RTCIceCandidate(candidate.toJSON()));
+
+    await myPeerConnection.addIceCandidate(new RTCIceCandidate(candidate));
   }
 
   async handleLinkRemoved(link) {
@@ -233,13 +234,11 @@ class Channel extends Component<Props, State> {
     }
   }
 
-  sendCandidateToParticipant = async (
+  async sendCandidateToParticipant(
     receiverId: string,
     createdById: string,
     candidate: RTCIceCandidate
-  ) => {
-    console.log("sendCandidateToParticipant");
-
+  ) {
     const offerCandidateData = {
       candidate,
       receiverId,
@@ -248,20 +247,19 @@ class Channel extends Component<Props, State> {
     const client: Ad4mClient = await getAd4mClient();
     const perspective = await client.perspective.byUUID(this.props.uuid);
 
-    perspective.add({
+    console.log("⚡️ sendCandidateToParticipant");
+    await perspective.add({
       source: this.props.source,
       predicate: "candidate",
       target: JSON.stringify(offerCandidateData),
     });
-  };
+  }
 
-  sendOfferToParticipant = async (
+  async sendOfferToParticipant(
     receiverId: string,
     createdById: string,
     offer: RTCLocalSessionDescriptionInit
-  ) => {
-    console.log("sendOfferToParticipant");
-
+  ) {
     const offerData = {
       receiverId,
       userId: createdById,
@@ -270,42 +268,40 @@ class Channel extends Component<Props, State> {
     const client: Ad4mClient = await getAd4mClient();
     const perspective = await client.perspective.byUUID(this.props.uuid);
 
-    perspective.add({
+    console.log("⚡️ sendOfferToParticipant");
+    await perspective.add({
       source: this.props.source,
       predicate: "offer",
       target: JSON.stringify(offerData),
     });
-  };
+  }
 
-  sendAnswerCandidateToParticipant = async (
+  async sendAnswerCandidateToParticipant(
     receiverId: string,
     createdById: string,
     candidate: RTCIceCandidate
-  ) => {
-    console.log("sendAnswerCandidateToParticipant");
-
+  ) {
     const answerCandidateData = {
-      ...candidate.toJSON(),
+      candidate,
       receiverId,
       userId: createdById,
     };
     const client: Ad4mClient = await getAd4mClient();
     const perspective = await client.perspective.byUUID(this.props.uuid);
 
-    perspective.add({
+    console.log("⚡️ sendAnswerCandidateToParticipant");
+    await perspective.add({
       source: this.props.source,
       predicate: "answer-candidate",
       target: JSON.stringify(answerCandidateData),
     });
-  };
+  }
 
-  sendAnswerToCandidate = async (
+  async sendAnswerToCandidate(
     receiverId: string,
     createdById: string,
     answer: RTCLocalSessionDescriptionInit
-  ) => {
-    console.log("sendAnswerToCandidate");
-
+  ) {
     const answerData = {
       receiverId,
       userId: createdById,
@@ -314,12 +310,13 @@ class Channel extends Component<Props, State> {
     const client: Ad4mClient = await getAd4mClient();
     const perspective = await client.perspective.byUUID(this.props.uuid);
 
-    perspective.add({
+    console.log("⚡️ sendAnswerToCandidate");
+    await perspective.add({
       source: this.props.source,
       predicate: "answer",
       target: JSON.stringify(answerData),
     });
-  };
+  }
 
   async createOffer(
     peerConnection: RTCPeerConnection,
@@ -327,9 +324,10 @@ class Channel extends Component<Props, State> {
     createdID: string
   ) {
     // Send offer candidate
-    peerConnection.onicecandidate = (event) => {
+    peerConnection.onicecandidate = async (event) => {
       if (event.candidate) {
-        this.sendCandidateToParticipant(receiverId, createdID, event.candidate);
+        const json = event.candidate.toJSON() as RTCIceCandidate;
+        await this.sendCandidateToParticipant(receiverId, createdID, json);
       }
     };
 
@@ -345,11 +343,11 @@ class Channel extends Component<Props, State> {
     await this.sendOfferToParticipant(receiverId, createdID, offer);
   }
 
-  createAnswer = async (
+  async createAnswer(
     peerConnection: RTCPeerConnection,
     createdID: string,
     receiverId: string
-  ) => {
+  ) {
     // Send answer candidate
     peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
@@ -371,18 +369,19 @@ class Channel extends Component<Props, State> {
 
     // Send answer
     await this.sendAnswerToCandidate(receiverId, createdID, answer);
-  };
+  }
 
-  addOffer(offer: RTCLocalSessionDescriptionInit, senderId: string) {
+  async addOffer(offer: RTCLocalSessionDescriptionInit, senderId: string) {
     const myPeerConnection = this.state.participants.find(
       (p) => p.did === this.state.currentUser.did
     )?.peerConnection;
+
     const otherUserPeerConnection = this.state.participants.find(
       (p) => p.did === senderId
     )?.peerConnection;
 
     // Add offer to my connection
-    myPeerConnection.setRemoteDescription(
+    await myPeerConnection.setRemoteDescription(
       new RTCSessionDescription(offer as RTCSessionDescriptionInit)
     );
 
@@ -407,7 +406,7 @@ class Channel extends Component<Props, State> {
     );
   }
 
-  addConnectionToUser(
+  async addConnectionToUser(
     newUser: StreamUser,
     currentUser: StreamUser,
     stream: MediaStream
@@ -427,13 +426,13 @@ class Channel extends Component<Props, State> {
 
     newUser.peerConnection = newPeerConnection;
     if (offerIds[0] !== currentUserId) {
-      this.createOffer(newPeerConnection, offerIds[0], offerIds[1]);
+      await this.createOffer(newPeerConnection, offerIds[0], offerIds[1]);
     }
 
     return newUser;
   }
 
-  addParticipant(user: StreamUser) {
+  async addParticipant(user: StreamUser) {
     const alreadyJoined = this.state.participants.find(
       (p) => p.did === user.did
     );
@@ -443,7 +442,7 @@ class Channel extends Component<Props, State> {
       return;
     }
 
-    const newUserWithConnection = this.addConnectionToUser(
+    const newUserWithConnection = await this.addConnectionToUser(
       user,
       this.state.currentUser,
       this.state.localStream
@@ -460,10 +459,9 @@ class Channel extends Component<Props, State> {
     }));
   }
 
-  onJoin = async () => {
+  async onJoin() {
     this.setState((oldState) => ({
       ...oldState,
-      initialized: true,
       isJoining: true,
     }));
 
@@ -489,6 +487,7 @@ class Channel extends Component<Props, State> {
     const client: Ad4mClient = await getAd4mClient();
     const perspective = await client.perspective.byUUID(this.props.uuid);
 
+    console.log("⚡️ Sending join!");
     perspective.add({
       source: this.props.source,
       predicate: "join",
@@ -499,13 +498,14 @@ class Channel extends Component<Props, State> {
       (oldState) => ({
         ...oldState,
         localStream: stream,
+        initialized: true,
         currentUser: me,
       }),
       () => {
         this.addParticipant(this.state.currentUser);
       }
     );
-  };
+  }
 
   onToggleCamera() {
     if (this.state.localStream) {
@@ -524,6 +524,7 @@ class Channel extends Component<Props, State> {
   }
 
   render() {
+    1;
     return (
       <section className={styles.outer}>
         <UserGrid
@@ -540,7 +541,7 @@ class Channel extends Component<Props, State> {
               variant="primary"
               size="lg"
               loading={this.state.isJoining}
-              onClick={this.onJoin}
+              onClick={() => this.onJoin()}
             >
               Join room!
             </j-button>
