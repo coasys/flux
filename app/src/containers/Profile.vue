@@ -19,23 +19,19 @@
     </j-text>
     <j-text color="ui-500"> @{{ profile.username }}</j-text>
     <j-text v-if="profile.bio" size="400"> {{ profile.bio }}</j-text>
-    <j-button variant="link" @click="() => $emit('openCompleteProfile')">
+    <j-box>
+      <j-button size="sm" variant="primary" v-if="!sameAgent">
+        <j-icon
+          slot="start"
+          size="sm"
+          :name="isFriend ? 'person-dash-fill' : 'person-plus-fill'"
+        ></j-icon>
+        {{ isFriend ? "Remove friend" : "Hello" }}
+      </j-button>
+    </j-box>
+    <j-button full variant="link" @click="() => $emit('openCompleteProfile')">
       View full profile
     </j-button>
-  </j-box>
-  <j-box p="800" v-else>
-    <j-flex a="center" direction="column" gap="500">
-      <j-skeleton variant="circle" width="xxl" height="xxl" />
-      <j-skeleton width="xxl" height="text" />
-      <j-skeleton width="xxl" height="text" />
-      <j-button
-        disabled
-        variant="link"
-        @click="() => $emit('openCompleteProfile')"
-      >
-        View full profile
-      </j-button>
-    </j-flex>
   </j-box>
 </template>
 
@@ -44,11 +40,17 @@ import { defineComponent } from "vue";
 import { Profile } from "utils/types";
 import getProfile from "utils/api/getProfile";
 import Avatar from "@/components/avatar/Avatar.vue";
+import { useUserStore } from "@/store/user";
 
 export default defineComponent({
   components: { Avatar },
   props: ["did", "langAddress"],
   emits: ["openCompleteProfile"],
+  setup() {
+    return {
+      userStore: useUserStore(),
+    };
+  },
   data() {
     return {
       profile: null as null | Profile,
@@ -64,6 +66,14 @@ export default defineComponent({
         }
       },
       immediate: true,
+    },
+  },
+  computed: {
+    sameAgent() {
+      return this.userStore.agent.did === this.did;
+    },
+    isFriend() {
+      return this.userStore.friends.includes(this.did);
     },
   },
 });

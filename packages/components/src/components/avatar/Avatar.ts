@@ -69,7 +69,7 @@ const styles = css`
   }
 
   [part="icon"] {
-    --j-icon-size: calc(var(--j-avatar-size) * 0.6);
+    --j-icon-size: calc(var(--j-avatar-size) * 0.4);
   }
 
   [part="img"] {
