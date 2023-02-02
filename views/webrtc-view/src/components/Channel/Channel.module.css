@@ -1,7 +1,7 @@
 .outer {
     position: relative;
     display: flex;
-    min-height: 100vh;
+    min-height: calc(100vh - var(--app-header-height));
     width: 100%;
     align-items: center;
     justify-content: center;
