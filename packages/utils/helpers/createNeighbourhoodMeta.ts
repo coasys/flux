@@ -5,6 +5,7 @@ import {
   NAME,
   SELF,
   CREATED_AT,
+  AD4M_VERSION,
 } from "../constants/communityPredicates";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
@@ -19,6 +20,8 @@ export async function createNeighbourhoodMeta(
 
   const nameExpression = await client.expression.create(name, "literal");
 
+  const { ad4mExecutorVersion } = await client.runtime.info();
+
   //Create the links we want on meta
   const expressionLinks = [] as Link[];
   expressionLinks.push(
@@ -26,6 +29,14 @@ export async function createNeighbourhoodMeta(
       source: SELF,
       target: nameExpression,
       predicate: NAME,
+    })
+  );
+
+  expressionLinks.push(
+    new Link({
+      source: SELF,
+      target: ad4mExecutorVersion,
+      predicate: AD4M_VERSION,
     })
   );
 

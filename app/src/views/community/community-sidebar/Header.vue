@@ -63,7 +63,7 @@
             />
             Hide muted channels
           </j-menu-item>
-           <j-menu-item @click="() => goToLeaveChannel()">
+          <j-menu-item @click="() => goToLeaveChannel()">
             <j-icon size="xs" slot="start" name="box-arrow-left" />
             Leave community
           </j-menu-item>
@@ -92,6 +92,19 @@
           <LoadingBar></LoadingBar>
         </j-box>
       </div>
+    </div>
+    <div class="danger-box" v-if="isOldCommunity">
+      <j-flex a="center" gap="300">
+        <j-icon name="exclamation-circle" size="xs" color="danger-500"></j-icon>
+        <j-text nomargin weight="700" size="400" color="danger-500"
+          >Update Error</j-text
+        >
+      </j-flex>
+      <j-text nomargin size="300" color="danger-500">
+        This community was created on an old AD4M version, you may have problems
+        using this community going forward. Proper community updates will be
+        available soon.
+      </j-text>
     </div>
     <div class="warning-box">
       <j-flex a="center" gap="300">
@@ -124,6 +137,9 @@ import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import Avatar from "@/components/avatar/Avatar.vue";
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
+import getNeighbourhoodAd4mVersion from "utils/api/getNeighbourhoodAd4mVersion";
+import semver from "semver";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 export default defineComponent({
   components: { Avatar, LoadingBar },
@@ -134,7 +150,13 @@ export default defineComponent({
       appStore: useAppStore(),
       userStore: useUserStore(),
       dataStore: useDataStore(),
+      isOldCommunity: ref(false),
     };
+  },
+  watch: {
+    $route(to, from) {
+      this.checkCommunityVersion();
+    },
   },
   computed: {
     community() {
@@ -178,8 +200,8 @@ export default defineComponent({
       "setShowCommunityTweaks",
     ]),
     goToLeaveChannel() {
-      this.appStore.setActiveCommunity(this.community.neighbourhood.uuid)
-      this.appStore.setShowLeaveCommunity(true)
+      this.appStore.setActiveCommunity(this.community.neighbourhood.uuid);
+      this.appStore.setShowLeaveCommunity(true);
     },
     goToSettings() {
       this.setShowCommunitySettings(true);
@@ -188,6 +210,23 @@ export default defineComponent({
     goToTweaks() {
       this.setShowCommunityTweaks(true);
       this.showCommunityMenu = false;
+    },
+    async checkCommunityVersion() {
+      const version = await getNeighbourhoodAd4mVersion(
+        this.community.neighbourhood.neighbourhoodUrl
+      );
+      if (!version) {
+        this.isOldCommunity = true;
+      } else {
+        const client = await getAd4mClient();
+        const { ad4mExecutorVersion } = await client.runtime.info();
+        console.log(ad4mExecutorVersion, version);
+        const isIncompatible = semver.gte(
+          version as string,
+          ad4mExecutorVersion
+        );
+        this.isOldCommunity = !isIncompatible;
+      }
     },
   },
 });
@@ -246,6 +285,14 @@ j-divider {
   margin-top: var(--j-space-500);
   background-color: var(--j-color-warning-50);
   border: 1px solid var(--j-color-warning-500);
+  border-radius: var(--j-border-radius);
+  padding: var(--j-space-300);
+}
+
+.danger-box {
+  margin-top: var(--j-space-500);
+  background-color: var(--j-color-danger-50);
+  border: 1px solid var(--j-color-danger-500);
   border-radius: var(--j-border-radius);
   padding: var(--j-space-300);
 }

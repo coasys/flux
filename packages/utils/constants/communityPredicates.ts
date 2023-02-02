@@ -63,3 +63,5 @@ export const END_DATE = "flux://end_date";
 export const SDNA_VERSION = "ad4m://sdna_version";
 
 export const DID = "ad4m://did";
+
+export const AD4M_VERSION = "ad4m://version";
