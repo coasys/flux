@@ -46,34 +46,10 @@ export default function Channel({ uuid, source }) {
     }
   }, [agent]);
 
-  // Setup subscriptions
-  useEffect(() => {
-    async function setupSubscribers() {
-      console.log("Setting up subscriptions");
-
-      linkSubscriberRef.current = await subscribeToLinks({
-        perspectiveUuid: uuid,
-        added: handleLinkAdded,
-        removed: handleLinkRemoved,
-      });
-    }
-
-    if (uuid && agent && initialized && !linkSubscriberRef.current) {
-      setupSubscribers();
-    }
-
-    return () => {
-      // Remove listeners
-      linkSubscriberRef.current && linkSubscriberRef.current();
-
-      // TO-DO: Leave channel
-    };
-  }, [uuid, agent, initialized, participants]);
-
   const handleLinkAdded = useCallback(
     async (link) => {
       console.log("!!! --- HandleLinkAdded --- !!!", link);
-      console.log("!!! --- current part. --- !!!", participants);
+      console.log("!!! --- participants --- !!!", participants.length);
 
       const isMessageFromSelf = link.author === agent.did;
 
@@ -163,6 +139,30 @@ export default function Channel({ uuid, source }) {
     },
     [currentUser, localStream, participants]
   );
+
+  // Setup subscriptions
+  useEffect(() => {
+    async function setupSubscribers() {
+      console.log("Setting up subscriptions");
+
+      linkSubscriberRef.current = await subscribeToLinks({
+        perspectiveUuid: uuid,
+        added: handleLinkAdded,
+        removed: handleLinkRemoved,
+      });
+    }
+
+    if (uuid && agent && initialized && !linkSubscriberRef.current) {
+      setupSubscribers();
+    }
+
+    return () => {
+      // Remove listeners
+      linkSubscriberRef.current && linkSubscriberRef.current();
+
+      // TO-DO: Leave channel
+    };
+  }, [uuid, agent, initialized, handleLinkAdded]);
 
   async function handleLinkRemoved(link) {
     const isMessageFromSelf = link.author === agent.did;
