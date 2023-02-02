@@ -5,7 +5,7 @@ import styles from "./Footer.module.css";
 
 export default function Footer() {
   const {
-    state: { stream, currentUser },
+    state: { localStream, currentUser },
     methods: { addParticipant, setUserPrefrences },
   } = useContext(WebRTCContext);
 
@@ -22,9 +22,9 @@ export default function Footer() {
   };
 
   const onToggleCamera = () => {
-    if (stream) {
+    if (localStream) {
       const newCameraSetting = !currentUser.prefrences?.video;
-      stream.getVideoTracks()[0].enabled = newCameraSetting;
+      localStream.getVideoTracks()[0].enabled = newCameraSetting;
       setUserPrefrences({ ...currentUser.prefrences, video: newCameraSetting });
     }
   };
@@ -32,7 +32,11 @@ export default function Footer() {
   return (
     <div className={styles.wrapper}>
       <div className={styles.inner}>
-        <j-button variant="primary" onClick={onToggleCamera} disabled={!stream}>
+        <j-button
+          variant="primary"
+          onClick={onToggleCamera}
+          disabled={!localStream}
+        >
           {cameraEnabled ? "Disable camera" : "Enable camera"}
         </j-button>
         <j-button variant="primary" onClick={onAddParticipant}>

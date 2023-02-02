@@ -11,7 +11,7 @@ export default function App({ perspective, source }) {
       {perspective ? (
         <AgentProvider>
           <CommunityProvider perspectiveUuid={perspective}>
-            <WebRTCProvider>
+            <WebRTCProvider source={source} uuid={perspective}>
               <Channel source={source} uuid={perspective} />
             </WebRTCProvider>
           </CommunityProvider>

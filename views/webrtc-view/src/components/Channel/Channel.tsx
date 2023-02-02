@@ -1,9 +1,6 @@
 import { useEffect, useContext, useState, useRef } from "preact/hooks";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { Ad4mClient } from "@perspect3vism/ad4m";
 import subscribeToLinks from "utils/api/subscribeToLinks";
 import getMe, { Me } from "utils/api/getMe";
-import { createOffer, createPeerConnection } from "../../../utils/webrtc";
 
 import WebRTCContext from "../../context/WebRTCContext";
 import Footer from "../Footer";
@@ -17,10 +14,18 @@ export default function Channel({ uuid, source }) {
 
   const [joinClicked, setJoinClicked] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   const {
-    state: { stream },
-    methods: { setStream, setUser, addParticipant },
+    state: { currentUser, localStream },
+    methods: {
+      setLocalStream,
+      setUser,
+      addParticipant,
+      addIceCandidate,
+      addOffer,
+      addAnswer,
+    },
   } = useContext(WebRTCContext);
 
   // Get agent/me
@@ -43,27 +48,99 @@ export default function Channel({ uuid, source }) {
       });
     }
 
-    if (uuid && agent) {
+    if (uuid && agent && initialized) {
       setupSubscribers();
     }
 
     return () => {
       linkSubscriberRef.current && linkSubscriberRef.current();
     };
-  }, [uuid, agent]);
+  }, [uuid, agent, initialized]);
 
   async function handleLinkAdded(link) {
     const isMessageFromSelf = link.author === agent.did;
 
-    console.log("handleLinkAdded: ", link);
+    if (isMessageFromSelf || !initialized) {
+      return;
+    }
 
-    if (link.predicate === "offer" && link.source === source) {
-      // Do something
+    // New user has joined the room
+    if (link.data.predicate === "join" && link.data.source === source) {
+      console.info("New user has joined");
+
+      addParticipant({ did: link.author });
+    }
+
+    // A user has provided a candidate
+    if (link.data.predicate === "candidate" && link.data.source === source) {
+      try {
+        const parsedData = JSON.parse(link.data.target);
+
+        // Check if the candidate us for us
+        if (parsedData.receiverId === agent.did) {
+          console.info("New candidate received", link.data);
+          addIceCandidate(parsedData.candidate);
+        }
+      } catch (e) {
+        // Oh well
+      }
+    }
+
+    // A user has provided an answer candidate
+    if (
+      link.data.predicate === "answer-candidate" &&
+      link.data.source === source
+    ) {
+      try {
+        const parsedData = JSON.parse(link.data.target);
+
+        // Check if the candidate us for us
+        if (parsedData.receiverId === agent.did) {
+          console.info("New answer-candidate received", link.data);
+          addIceCandidate(parsedData.candidate);
+        }
+      } catch (e) {
+        // Oh well
+      }
+    }
+
+    // A user has provided an offer
+    if (link.data.predicate === "offer" && link.data.source === source) {
+      try {
+        const parsedData = JSON.parse(link.data.target);
+
+        // Check if the candidate us for us
+        if (parsedData.receiverId === agent.did) {
+          console.info("New offer received", link.data);
+          addOffer(parsedData.offer, parsedData.userId);
+        }
+      } catch (e) {
+        // Oh well
+      }
+    }
+
+    // A user has provided an answer
+    if (link.data.predicate === "answer" && link.data.source === source) {
+      try {
+        const parsedData = JSON.parse(link.data.target);
+
+        // Check if the candidate us for us
+        if (parsedData.receiverId === agent.did) {
+          console.info("New answer received", link.data);
+          addAnswer(parsedData.answer);
+        }
+      } catch (e) {
+        // Oh well
+      }
     }
   }
 
   async function handleLinkRemoved(link) {
     const isMessageFromSelf = link.author === agent.did;
+
+    if (isMessageFromSelf) {
+      return;
+    }
 
     console.log("handleLinkRemoved: ", link);
 
@@ -77,17 +154,26 @@ export default function Channel({ uuid, source }) {
     const getUserStream = async () => {
       setIsJoining(true);
 
-      const localStream = await navigator.mediaDevices.getUserMedia({
+      const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: true,
       });
 
       // Disable video by default
-      localStream.getVideoTracks()[0].enabled = false;
-      setStream(localStream);
+      stream.getVideoTracks()[0].enabled = false;
+      setLocalStream(stream);
+    };
 
+    if (joinClicked && !localStream) {
+      getUserStream();
+    }
+  }, [joinClicked, localStream]);
+
+  // Add user to local stream once started
+  useEffect(() => {
+    const addMeAsUser = async () => {
       // Create user object
-      const currentUser = {
+      const me = {
         did: agent.did,
         prefrences: {
           audio: true,
@@ -96,12 +182,21 @@ export default function Channel({ uuid, source }) {
         },
       };
 
-      // Add user to local state
-      setUser(currentUser);
+      setUser(me);
+    };
 
-      // Add user to local state
+    if (joinClicked && localStream && !currentUser) {
+      addMeAsUser();
+    }
+  }, [agent, joinClicked, localStream]);
+
+  // Add user to local stream once started
+  useEffect(() => {
+    const joinStream = async () => {
+      // Add user to participants
       addParticipant(currentUser);
 
+      setInitialized(true);
       // WIP: Add user to Ad4m
       // const offer = "123";
 
@@ -111,10 +206,10 @@ export default function Channel({ uuid, source }) {
       // perspective.add({ source, predicate: "offer", target: offer });
     };
 
-    if (joinClicked && !stream) {
-      getUserStream();
+    if (joinClicked && localStream && currentUser && !initialized) {
+      joinStream();
     }
-  }, [joinClicked, stream]);
+  }, [joinClicked, localStream, currentUser, initialized]);
 
   // To-do: Get list of people/offers from Ad4m
   // { name, etc, currentOffer }
@@ -123,7 +218,7 @@ export default function Channel({ uuid, source }) {
   return (
     <section className={styles.outer}>
       <UserGrid />
-      {!stream && (
+      {!localStream && (
         <div className={styles.join}>
           <h1>You haven't joined this room</h1>
           <p>Your video will be off by default.</p>
@@ -138,11 +233,11 @@ export default function Channel({ uuid, source }) {
         </div>
       )}
 
-      {stream && (
+      {localStream && (
         <div className={styles.debug}>
-          <h3>Stream status:</h3>
-          <p>ID: {stream.id}</p>
-          <p>active: {stream.active ? "YES" : "NO"}</p>
+          <h3>LocalStream status:</h3>
+          <p>ID: {localStream.id}</p>
+          <p>active: {localStream.active ? "YES" : "NO"}</p>
           <ul></ul>
         </div>
       )}

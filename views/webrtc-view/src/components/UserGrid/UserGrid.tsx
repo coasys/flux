@@ -8,11 +8,12 @@ export default function UserGrid() {
   const videoRef = useRef(null);
 
   const {
-    state: { currentUser, participants, stream },
+    state: { currentUser, participants, localStream },
   } = useContext(WebRTCContext);
 
+  const participantsWithoutMe = participants.filter((p) => !p.isCurrentUser);
   const cameraEnabled = currentUser && currentUser.prefrences.video;
-  const userCount = participants.length + (currentUser ? 1 : 0);
+  const userCount = participantsWithoutMe.length + (currentUser ? 1 : 0);
 
   // Grid sizing
   let gridCol = userCount === 1 ? 1 : userCount <= 4 ? 2 : 4;
@@ -24,12 +25,39 @@ export default function UserGrid() {
   //   gridRowSize = 2;
   // }
 
+  console.log("local stream:", localStream);
+  console.log("participants:", participants);
+
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.srcObject = stream;
+      videoRef.current.srcObject = localStream;
       videoRef.current.muted = true;
     }
-  }, [videoRef, currentUser, stream]);
+  }, [videoRef, currentUser, localStream]);
+
+  // Build participant elements
+  const participantsItems = participantsWithoutMe.map((participant, index) => {
+    const remoteStream = new MediaStream();
+
+    if (participant.peerConnection) {
+      participant.peerConnection.ontrack = (event) => {
+        event.streams[0].getTracks().forEach((track) => {
+          remoteStream.addTrack(track);
+        });
+        const videElement = document.getElementById(
+          `user-video-${participant.did}`
+        ) as HTMLVideoElement;
+
+        if (videElement) {
+          videElement.srcObject = remoteStream;
+        }
+      };
+    }
+
+    return (
+      <Item key={participant.did} data={participant} cameraEnabled={true} />
+    );
+  });
 
   return (
     <section
@@ -47,9 +75,7 @@ export default function UserGrid() {
           cameraEnabled={cameraEnabled}
         />
       )}
-      {participants.map((p) => (
-        <Item key={p.id} data={p} />
-      ))}
+      {participantsItems}
     </section>
   );
 }
