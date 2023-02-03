@@ -10,7 +10,7 @@ import subscribeToLinks from "utils/api/subscribeToLinks";
 import getMe, { Me } from "utils/api/getMe";
 
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { Ad4mClient } from "@perspect3vism/ad4m";
+import { Ad4mClient, Literal } from "@perspect3vism/ad4m";
 
 import Footer from "../Footer";
 import UserGrid from "../UserGrid";
@@ -149,7 +149,7 @@ class Channel extends Component<Props, State> {
     // A user has provided an offer
     if (link.data.predicate === "offer") {
       try {
-        const parsedData = JSON.parse(link.data.target);
+        const parsedData = Literal.fromUrl(link.data.target).get();
 
         if (parsedData.receiverId !== this.agent.did) {
           return; // Offer is not for us!
@@ -200,7 +200,7 @@ class Channel extends Component<Props, State> {
     // A user has provided a candidate
     if (link.data.predicate === "offer-candidate") {
       try {
-        const parsedData = JSON.parse(link.data.target);
+        const parsedData = Literal.fromUrl(link.data.target).get();
 
         if (parsedData.receiverId !== this.agent.did) {
           return; // Offer is not for us!
@@ -220,7 +220,7 @@ class Channel extends Component<Props, State> {
     // A user has provided an answer
     if (link.data.predicate === "answer") {
       try {
-        const parsedData = JSON.parse(link.data.target);
+        const parsedData = Literal.fromUrl(link.data.target).get();
 
         if (parsedData.receiverId !== this.agent.did) {
           return; // Offer is not for us!
@@ -242,7 +242,7 @@ class Channel extends Component<Props, State> {
     // A user has provided an answer candidate
     if (link.data.predicate === "answer-candidate") {
       try {
-        const parsedData = JSON.parse(link.data.target);
+        const parsedData = Literal.fromUrl(link.data.target).get();
 
         if (parsedData.receiverId !== this.agent.did) {
           return; // Offer is not for us!
@@ -289,12 +289,13 @@ class Channel extends Component<Props, State> {
     };
     const client: Ad4mClient = await getAd4mClient();
     const perspective = await client.perspective.byUUID(this.props.uuid);
+    const expressionUrl = Literal.from(offerCandidateData).toUrl();
 
     console.log("🟠 [OUTGOING] sendCandidateToParticipant");
     await perspective.add({
       source: this.props.source,
       predicate: "offer-candidate",
-      target: JSON.stringify(offerCandidateData),
+      target: expressionUrl,
     });
   }
 
@@ -310,12 +311,13 @@ class Channel extends Component<Props, State> {
     };
     const client: Ad4mClient = await getAd4mClient();
     const perspective = await client.perspective.byUUID(this.props.uuid);
+    const expressionUrl = Literal.from(offerData).toUrl();
 
     console.log("🟠 [OUTGOING] sendOfferToParticipant");
     await perspective.add({
       source: this.props.source,
       predicate: "offer",
-      target: JSON.stringify(offerData),
+      target: expressionUrl,
     });
   }
 
@@ -331,12 +333,13 @@ class Channel extends Component<Props, State> {
     };
     const client: Ad4mClient = await getAd4mClient();
     const perspective = await client.perspective.byUUID(this.props.uuid);
+    const expressionUrl = Literal.from(answerCandidateData).toUrl();
 
     console.log("🟠 [OUTGOING] sendAnswerCandidateToParticipant");
     await perspective.add({
       source: this.props.source,
       predicate: "answer-candidate",
-      target: JSON.stringify(answerCandidateData),
+      target: expressionUrl,
     });
   }
 
@@ -352,12 +355,13 @@ class Channel extends Component<Props, State> {
     };
     const client: Ad4mClient = await getAd4mClient();
     const perspective = await client.perspective.byUUID(this.props.uuid);
+    const expressionUrl = Literal.from(answerData).toUrl();
 
     console.log("🟠 [OUTGOING] sendAnswerToCandidate");
     await perspective.add({
       source: this.props.source,
       predicate: "answer",
-      target: JSON.stringify(answerData),
+      target: expressionUrl,
     });
   }
 
