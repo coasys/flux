@@ -143,7 +143,7 @@ class Channel extends Component<Props, State> {
           return; // Offer is not for us!
         }
 
-        console.info("📚 New offer received");
+        console.info("🔵 [INCOMING] New offer received");
 
         const offerCreator = this.state.participants.find(
           (p) => p.did === parsedData.creatorId
@@ -194,7 +194,7 @@ class Channel extends Component<Props, State> {
           return; // Offer is not for us!
         }
 
-        console.info("📚 New candidate received");
+        console.info("🔵 [INCOMING] New candidate received");
 
         const targetUser = this.state.participants.find(
           (p) => p.did === parsedData.userId
@@ -214,10 +214,10 @@ class Channel extends Component<Props, State> {
           return; // Offer is not for us!
         }
 
-        console.info("📚 New answer received");
+        console.info("🔵 [INCOMING] New answer received");
 
         const targetUser = this.state.participants.find(
-          (p) => p.did === parsedData.receiverId
+          (p) => p.did === parsedData.userId
         );
 
         const answerDescription = new RTCSessionDescription(parsedData.answer);
@@ -236,10 +236,10 @@ class Channel extends Component<Props, State> {
           return; // Offer is not for us!
         }
 
-        console.info("📚 New answer-candidate received");
+        console.info("🔵 [INCOMING] New answer-candidate received");
 
         const targetUser = this.state.participants.find(
-          (p) => p.did === parsedData.receiverId
+          (p) => p.did === parsedData.userId
         );
 
         targetUser.peerConnection.addIceCandidate(
@@ -278,7 +278,7 @@ class Channel extends Component<Props, State> {
     const client: Ad4mClient = await getAd4mClient();
     const perspective = await client.perspective.byUUID(this.props.uuid);
 
-    console.log("⚡️ sendCandidateToParticipant");
+    console.log("🟠 [OUTGOING] sendCandidateToParticipant");
     await perspective.add({
       source: this.props.source,
       predicate: "offer-candidate",
@@ -299,7 +299,7 @@ class Channel extends Component<Props, State> {
     const client: Ad4mClient = await getAd4mClient();
     const perspective = await client.perspective.byUUID(this.props.uuid);
 
-    console.log("⚡️ sendOfferToParticipant");
+    console.log("🟠 [OUTGOING] sendOfferToParticipant");
     await perspective.add({
       source: this.props.source,
       predicate: "offer",
@@ -320,7 +320,7 @@ class Channel extends Component<Props, State> {
     const client: Ad4mClient = await getAd4mClient();
     const perspective = await client.perspective.byUUID(this.props.uuid);
 
-    console.log("⚡️ sendAnswerCandidateToParticipant");
+    console.log("🟠 [OUTGOING] sendAnswerCandidateToParticipant");
     await perspective.add({
       source: this.props.source,
       predicate: "answer-candidate",
@@ -341,7 +341,7 @@ class Channel extends Component<Props, State> {
     const client: Ad4mClient = await getAd4mClient();
     const perspective = await client.perspective.byUUID(this.props.uuid);
 
-    console.log("⚡️ sendAnswerToCandidate");
+    console.log("🟠 [OUTGOING] sendAnswerToCandidate");
     await perspective.add({
       source: this.props.source,
       predicate: "answer",
@@ -460,7 +460,7 @@ class Channel extends Component<Props, State> {
     const client: Ad4mClient = await getAd4mClient();
     const perspective = await client.perspective.byUUID(this.props.uuid);
 
-    console.log("⚡️ Sending join!");
+    console.log("🟠 [OUTGOING] Sending join!");
     perspective.add({
       source: this.props.source,
       predicate: "join",
@@ -468,32 +468,6 @@ class Channel extends Component<Props, State> {
     });
 
     await this.addParticipant(me);
-
-    const myPeerConnection = this.state.participants.find(
-      (p) => p.did === this.state.currentUser.did
-    )?.peerConnection;
-
-    myPeerConnection.addEventListener("icegatheringstatechange", () => {
-      console.log(
-        `ICE gathering state changed: ${myPeerConnection.iceGatheringState}`
-      );
-    });
-
-    myPeerConnection.addEventListener("connectionstatechange", () => {
-      console.log(
-        `Connection state change: ${myPeerConnection.connectionState}`
-      );
-    });
-
-    myPeerConnection.addEventListener("signalingstatechange", () => {
-      console.log(`Signaling state change: ${myPeerConnection.signalingState}`);
-    });
-
-    myPeerConnection.addEventListener("iceconnectionstatechange ", () => {
-      console.log(
-        `ICE connection state change: ${myPeerConnection.iceConnectionState}`
-      );
-    });
 
     this.setState((oldState) => ({
       ...oldState,
