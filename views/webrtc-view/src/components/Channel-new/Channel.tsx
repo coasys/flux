@@ -134,6 +134,18 @@ class Channel extends Component<Props, State> {
       this.addParticipant({ did: link.author });
     }
 
+    // New user has joined the room
+    if (link.data.predicate === "leave") {
+      console.info("🚶🏻‍♀️ User has left");
+
+      this.setState((oldState) => ({
+        ...oldState,
+        participants: [
+          ...oldState.participants.filter((p) => p.did !== link.data.target),
+        ],
+      }));
+    }
+
     // A user has provided an offer
     if (link.data.predicate === "offer") {
       try {
@@ -491,6 +503,28 @@ class Channel extends Component<Props, State> {
     }
   }
 
+  async onLeave() {
+    const client: Ad4mClient = await getAd4mClient();
+    const perspective = await client.perspective.byUUID(this.props.uuid);
+
+    perspective.remove({
+      source: this.props.source,
+      predicate: "leave",
+      target: this.agent.did,
+    });
+
+    this.localStream = null;
+
+    this.setState((oldState) => ({
+      ...oldState,
+      joinClicked: false,
+      isJoining: false,
+      initialized: false,
+      currentUser: null,
+      participants: [],
+    }));
+  }
+
   render() {
     1;
     return (
@@ -530,6 +564,7 @@ class Channel extends Component<Props, State> {
           localStream={this.localStream}
           currentUser={this.state.currentUser}
           onToggleCamera={() => this.onToggleCamera()}
+          onLeave={() => this.onLeave()}
         />
       </section>
     );
