@@ -411,8 +411,7 @@ class Channel extends Component<Props, State> {
     );
 
     newPeerConnection.addEventListener("signalingstatechange", (ev) => {
-      console.log(ev.currentTarget.iceConnectionState);
-      if (ev.currentTarget.iceConnectionState === "disconnected") {
+      if (newPeerConnection.signalingState === "closed") {
         // TODO: Remove peer from participants;
         this.setState((oldState) => {
           return {
@@ -426,7 +425,10 @@ class Channel extends Component<Props, State> {
     });
 
     newPeerConnection.addEventListener("iceconnectionstatechange", (ev) => {
-      console.log("connection state change", { ev });
+      if (newPeerConnection.iceConnectionState === "disconnected") {
+        // TODO: Remove peer from participants;
+        console.log("ice connection failed");
+      }
     });
 
     newUser.peerConnection = newPeerConnection;
