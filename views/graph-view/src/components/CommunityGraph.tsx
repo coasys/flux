@@ -9,7 +9,6 @@ import { Ad4mClient, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
 
 function findNodes(links, source) {
   return links.reduce((acc, link) => {
-    const isSource = link.data.target === source;
     const hasSource = link.data.source === source;
     const alreadyIn = acc.some(
       (l) => l.proof.signature === link.proof.signature
@@ -83,50 +82,32 @@ export default function CommunityOverview({ uuid, source }) {
 
   // Fetch initial snapshot
   useEffect(() => {
-    const fetchsnapshot = async () => {
+    const init = async () => {
+      setAd4mInitialised(true);
+
       const client: Ad4mClient = await getAd4mClient();
       const perspective = await client.perspective.byUUID(uuid);
 
-      const snapshot = await client.perspective.snapshotByUUID(uuid);
-
-      const subLinks = findNodes(snapshot?.links || [], source);
-
-      const initialNodes = uniqueNodes(
-        subLinks
-          .map((link) => [
-            { id: link.data.source, group: extractProtocol(link.data.source) },
-            { id: link.data.target, group: extractProtocol(link.data.target) },
-          ])
-          .flat()
-      );
-
-      setNodes(initialNodes);
-
-      const initialLinks = subLinks.map((l) => ({
-        source: l.data.target,
-        target: l.data.source,
-        predicate: l.data.predicate,
-      }));
-
-      setLinks(initialLinks);
-
-      setAd4mInitialised(true);
+      fetchSnapShot();
 
       perspective?.addListener("link-added", (link) => {
-        newLinkAdded(link);
+        if (link.data.source === source || link.data.target === source) {
+          fetchSnapShot();
+        }
         return null;
       });
     };
 
     if (!ad4mInitialised && uuid && source) {
-      fetchsnapshot();
+      init();
     }
   }, [ad4mInitialised, uuid, source]);
 
   // Setup graph
   useEffect(() => {
     const setupGraph = async () => {
-      graph.current = ForceGraph3D()
+      graph.current = ForceGraph3D()(graphEl.current)
+        .graphData({ nodes, links })
         .nodeLabel((node: any) => {
           return node.id.startsWith("literal://")
             ? Literal.fromUrl(node.id).get().data
@@ -150,51 +131,51 @@ export default function CommunityOverview({ uuid, source }) {
               [c]: start[c] + (end[c] - start[c]) / 2, // calc middle point
             }))
           );
-
           // Position sprite
           Object.assign(sprite.position, middlePos);
         })
         .width(containerSize[0] || window.innerWidth)
         .height(containerSize[1] || window.innerHeight);
 
-      graph.current(graphEl.current).graphData({ nodes, links });
-
       setGraphInitialised(true);
     };
 
-    if (!graphInitialised && nodes.length > 0 && links.length > 0) {
+    if (!graphInitialised) {
       setupGraph();
     }
   }, [graphInitialised, nodes, links]);
 
-  // listen for changes
-  const newLinkAdded = (l: LinkExpression) => {
-    if (graph.current) {
-      const { nodes, links } = graph.current.graphData();
-
-      graph.current.graphData({
-        nodes: [
-          ...nodes,
-          {
-            id: l.data.target,
-            group: extractProtocol(l.data.target),
-          },
-          {
-            id: l.data.source,
-            group: extractProtocol(l.data.source),
-          },
-        ],
-        links: [
-          ...links,
-          {
-            source: l.data.target,
-            target: l.data.source,
-            predicate: l.data.predicate,
-          },
-        ],
-      });
+  useEffect(() => {
+    if (graphInitialised && graph.current) {
+      graph.current.graphData({ nodes, links });
     }
-  };
+  }, [graphInitialised, nodes, links]);
+
+  async function fetchSnapShot() {
+    const client: Ad4mClient = await getAd4mClient();
+    const snapshot = await client.perspective.snapshotByUUID(uuid);
+
+    const subLinks = findNodes(snapshot?.links || [], source);
+
+    const initialNodes = uniqueNodes(
+      subLinks
+        .map((link) => [
+          { id: link.data.source, group: extractProtocol(link.data.source) },
+          { id: link.data.target, group: extractProtocol(link.data.target) },
+        ])
+        .flat()
+    );
+
+    setNodes(initialNodes);
+
+    const initialLinks = subLinks.map((l) => ({
+      source: l.data.target,
+      target: l.data.source,
+      predicate: l.data.predicate,
+    }));
+
+    setLinks(initialLinks);
+  }
 
   return (
     <div ref={containerRef}>
