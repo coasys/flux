@@ -130,9 +130,15 @@ class Channel extends Component<Props, State> {
       this.addParticipant({ did: link.author });
     }
 
-    // New user has left the room
+    // User has left the room
     if (link.data.predicate === "leave") {
       console.info("🚶🏻‍♀️ User has left");
+
+      const peer = this.state.participants.find(
+        (p) => p.did === link.data.target
+      );
+
+      peer?.peerConnection?.close();
 
       this.setState((oldState) => ({
         ...oldState,
@@ -594,6 +600,8 @@ class Channel extends Component<Props, State> {
     });
 
     this.localStream = null;
+
+    this.state.currentUser.peerConnection?.close();
 
     this.setState((oldState) => ({
       ...oldState,
