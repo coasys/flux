@@ -1440,6 +1440,16 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
+"@junto-foundation/junto-elements@^0.4.5":
+  version "0.4.5"
+  resolved "https://registry.yarnpkg.com/@junto-foundation/junto-elements/-/junto-elements-0.4.5.tgz#88c4a3a0786b96acee047781863199810ac45226"
+  integrity sha512-lCbCrqbmOfA3/6zQ4Xil93iA9Pifw87K+nHHHOoSyygsBcYGNqz//euDz4rtp2JMjQzF5nBfMyszJs0L5BeuiQ==
+  dependencies:
+    "@popperjs/core" "^2.9.2"
+    construct-style-sheets-polyfill "^3.1.0"
+    jdenticon "^3.1.0"
+    lit "^2.0.0-rc.2"
+
 "@lit-labs/ssr-dom-shim@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@lit-labs/ssr-dom-shim/-/ssr-dom-shim-1.0.0.tgz#427e19a2765681fd83411cd72c55ba80a01e0523"
@@ -1490,7 +1500,7 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@perspect3vism/ad4m-connect@0.2.11", "@perspect3vism/ad4m-connect@^0.2.11":
+"@perspect3vism/ad4m-connect@0.2.11", "@perspect3vism/ad4m-connect@^0.2.10", "@perspect3vism/ad4m-connect@^0.2.11":
   version "0.2.11"
   resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.2.11.tgz#5c0cd79e5b6ba1221c95cbf9859d72afd56ad521"
   integrity sha512-LtyLiW3yvD6ROZ1hhL82M70lu7CqzkXmlEXnseav7peQovyhz5UCyFRHSUr6ttO6x8Sk0ETXD35nBmG6h5ZsIQ==
@@ -1501,7 +1511,7 @@
     html5-qrcode "^2.2.1"
     lit "^2.3.1"
 
-"@perspect3vism/ad4m@0.2.11", "@perspect3vism/ad4m@^0.2.11":
+"@perspect3vism/ad4m@0.2.11", "@perspect3vism/ad4m@^0.2.10", "@perspect3vism/ad4m@^0.2.11":
   version "0.2.11"
   resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.2.11.tgz#ec04cbde5acf2b43cb02bf047d2ddd3a17955b27"
   integrity sha512-DDUSj1Nuapl1U0BW6ORVegh1e+XuR3cgFnOK4Jm23U1FgB60YgZLhJXFfuQ2VUMOD1S9TJ8UiH2anmm9A+jVMQ==
@@ -7949,7 +7959,7 @@ npm-name@^6.0.1:
 
 npm-run-all@^4.1.5:
   version "4.1.5"
-  resolved "https://registry.npmjs.org/npm-run-all/-/npm-run-all-4.1.5.tgz"
+  resolved "https://registry.yarnpkg.com/npm-run-all/-/npm-run-all-4.1.5.tgz#04476202a15ee0e2e214080861bff12a51d98fba"
   integrity sha512-Oo82gJDAVcaMdi3nuoKFavkIHBRVqQ1qvMb+9LHk/cF4P6B2m8aP04hGf7oL6wZ9BuGwX1onlLhpuoofSyoQDQ==
   dependencies:
     ansi-styles "^3.2.1"

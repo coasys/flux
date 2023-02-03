@@ -134,7 +134,7 @@ class Channel extends Component<Props, State> {
       this.addParticipant({ did: link.author });
     }
 
-    // New user has joined the room
+    // New user has left the room
     if (link.data.predicate === "leave") {
       console.info("🚶🏻‍♀️ User has left");
 
@@ -407,6 +407,25 @@ class Channel extends Component<Props, State> {
     const offerIds = [newUserId, currentUserId].sort((a, b) =>
       a.localeCompare(b)
     );
+
+    newPeerConnection.addEventListener("signalingstatechange", (ev) => {
+      console.log(ev.currentTarget.iceConnectionState);
+      if (ev.currentTarget.iceConnectionState === "disconnected") {
+        // TODO: Remove peer from participants;
+        this.setState((oldState) => {
+          return {
+            ...oldState,
+            participants: oldState.participants.filter(
+              (p) => p.did !== newUser.did
+            ),
+          };
+        });
+      }
+    });
+
+    newPeerConnection.addEventListener("iceconnectionstatechange", (ev) => {
+      console.log("connection state change", { ev });
+    });
 
     newUser.peerConnection = newPeerConnection;
     if (offerIds[0] !== currentUserId) {
