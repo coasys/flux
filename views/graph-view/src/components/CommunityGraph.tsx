@@ -16,6 +16,10 @@ function findNodes(links, source) {
 
     if (alreadyIn) return acc;
 
+    if (hasSource && link.data.source === link.data.target) {
+      return [...acc, link];
+    }
+
     if (hasSource) {
       const newLinks = findNodes(links, link.data.target);
       return [...acc, ...newLinks, link];
