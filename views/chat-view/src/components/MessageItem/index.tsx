@@ -99,7 +99,9 @@ export default function MessageItem({
 
     if (mention === "neighbourhood") {
       const url = e.target.innerText;
-      onNeighbourhoodClick(url);
+      if (url.startsWith("neighbourhood://")) {
+        onNeighbourhoodClick(url);
+      }
     }
 
     if (mention === "channel") {
