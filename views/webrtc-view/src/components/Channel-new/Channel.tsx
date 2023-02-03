@@ -1,11 +1,4 @@
 import { Component } from "preact";
-import {
-  useEffect,
-  useContext,
-  useState,
-  useRef,
-  useCallback,
-} from "preact/hooks";
 import subscribeToLinks from "utils/api/subscribeToLinks";
 import getMe, { Me } from "utils/api/getMe";
 
