@@ -428,6 +428,14 @@ class Channel extends Component<Props, State> {
       if (newPeerConnection.iceConnectionState === "disconnected") {
         // TODO: Remove peer from participants;
         console.log("ice connection failed");
+        this.setState((oldState) => {
+          return {
+            ...oldState,
+            participants: oldState.participants.filter(
+              (p) => p.did !== newUser.did
+            ),
+          };
+        });
       }
     });
 
