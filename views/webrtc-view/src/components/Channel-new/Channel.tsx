@@ -12,7 +12,6 @@ import getMe, { Me } from "utils/api/getMe";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { Ad4mClient } from "@perspect3vism/ad4m";
 
-import WebRTCContext from "../../context/WebRTCContext";
 import Footer from "../Footer";
 import UserGrid from "../UserGrid";
 
@@ -58,37 +57,36 @@ type Props = {
 };
 
 type State = {
-  agent: Me;
   joinClicked: boolean;
   isJoining: boolean;
   initialized: boolean;
   currentUser: StreamUser;
-  localStream: MediaStream | null;
   participants: StreamUser[];
 };
 
 class Channel extends Component<Props, State> {
-  linkSubscriberRef: Function;
+  linkSubscriberRef: Function | null;
+  localStream: MediaStream | null;
+  agent: Me | null;
 
   constructor(props) {
     super(props);
 
     this.linkSubscriberRef = null;
+    this.localStream = null;
+    this.agent = null;
 
     this.state = {
-      agent: null,
       joinClicked: false,
       isJoining: false,
       initialized: false,
       currentUser: null,
-      localStream: null,
       participants: [],
     };
   }
 
   async componentDidMount() {
-    const agent = await getMe();
-    this.setState({ ...this.state, agent });
+    this.agent = await getMe();
 
     // Setup subscriptions
     this.linkSubscriberRef = await subscribeToLinks({
@@ -104,9 +102,12 @@ class Channel extends Component<Props, State> {
   }
 
   async handleLinkAdded(link) {
-    const isMessageFromSelf = link.author === this.state.agent.did;
+    if (link.data.source !== this.props.source) {
+      console.log("🚫 Wrong link source, skipping!");
+      return;
+    }
 
-    if (isMessageFromSelf) {
+    if (link.author === this.agent.did) {
       console.log("🚫 Link is from me, skipping!");
       return;
     }
@@ -127,101 +128,131 @@ class Channel extends Component<Props, State> {
     }
 
     // New user has joined the room
-    if (
-      link.data.predicate === "join" &&
-      link.data.source === this.props.source
-    ) {
+    if (link.data.predicate === "join") {
       console.info("🧍🏽 New user has joined");
 
       this.addParticipant({ did: link.author });
     }
 
-    // A user has provided a candidate
-    if (
-      link.data.predicate === "candidate" &&
-      link.data.source === this.props.source
-    ) {
-      try {
-        const parsedData = JSON.parse(link.data.target);
-
-        // Check if the candidate us for us
-        if (parsedData.receiverId === this.state.agent.did) {
-          console.info("📚 New candidate received", parsedData.candidate);
-          await this.addIceCandidate(parsedData.candidate);
-        }
-      } catch (e) {
-        // Oh well
-      }
-    }
-
-    // A user has provided an answer candidate
-    if (
-      link.data.predicate === "answer-candidate" &&
-      link.data.source === this.props.source
-    ) {
-      try {
-        const parsedData = JSON.parse(link.data.target);
-
-        // Check if the candidate us for us
-        if (parsedData.receiverId === this.state.agent.did) {
-          console.info(
-            "📚 New answer-candidate received",
-            parsedData.candidate
-          );
-          this.addIceCandidate(parsedData.candidate);
-        }
-      } catch (e) {
-        // Oh well
-      }
-    }
-
     // A user has provided an offer
-    if (
-      link.data.predicate === "offer" &&
-      link.data.source === this.props.source
-    ) {
+    if (link.data.predicate === "offer") {
       try {
         const parsedData = JSON.parse(link.data.target);
 
-        // Check if the candidate us for us
-        if (parsedData.receiverId === this.state.agent.did) {
-          console.info("📚 New offer received", link.data);
-          this.addOffer(parsedData.offer, parsedData.userId);
+        if (parsedData.receiverId !== this.agent.did) {
+          return; // Offer is not for us!
         }
+
+        console.info("📚 New offer received");
+
+        const offerCreator = this.state.participants.find(
+          (p) => p.did === parsedData.creatorId
+        );
+
+        await offerCreator.peerConnection.setRemoteDescription(
+          new RTCSessionDescription(parsedData.offer)
+        );
+
+        offerCreator.peerConnection.onicecandidate = (event) => {
+          if (event.candidate) {
+            this.sendAnswerCandidateToParticipant(
+              offerCreator.did,
+              this.agent.did,
+              event.candidate
+            );
+          }
+        };
+
+        const answerDescription =
+          await offerCreator.peerConnection.createAnswer();
+        await offerCreator.peerConnection.setLocalDescription(
+          answerDescription
+        );
+
+        const answer = {
+          sdp: answerDescription.sdp,
+          type: answerDescription.type,
+        };
+
+        // Send answer
+        await this.sendAnswerToCandidate(
+          offerCreator.did,
+          this.agent.did,
+          answer
+        );
+      } catch (e) {
+        // Oh well
+      }
+    }
+
+    // A user has provided a candidate
+    if (link.data.predicate === "offer-candidate") {
+      try {
+        const parsedData = JSON.parse(link.data.target);
+
+        if (parsedData.receiverId !== this.agent.did) {
+          return; // Offer is not for us!
+        }
+
+        console.info("📚 New candidate received");
+
+        const targetUser = this.state.participants.find(
+          (p) => p.did === parsedData.userId
+        );
+        targetUser.peerConnection.addIceCandidate(parsedData.candidate);
       } catch (e) {
         // Oh well
       }
     }
 
     // A user has provided an answer
-    if (
-      link.data.predicate === "answer" &&
-      link.data.source === this.props.source
-    ) {
+    if (link.data.predicate === "answer") {
       try {
         const parsedData = JSON.parse(link.data.target);
 
-        // Check if the candidate us for us
-        if (parsedData.receiverId === this.state.agent.did) {
-          console.info("📚 New answer received", link.data);
-          this.addAnswer(parsedData.answer);
+        if (parsedData.receiverId !== this.agent.did) {
+          return; // Offer is not for us!
         }
+
+        console.info("📚 New answer received");
+
+        const targetUser = this.state.participants.find(
+          (p) => p.did === parsedData.receiverId
+        );
+
+        const answerDescription = new RTCSessionDescription(parsedData.answer);
+        targetUser.peerConnection.setRemoteDescription(answerDescription);
+      } catch (e) {
+        // Oh well
+      }
+    }
+
+    // A user has provided an answer candidate
+    if (link.data.predicate === "answer-candidate") {
+      try {
+        const parsedData = JSON.parse(link.data.target);
+
+        if (parsedData.receiverId !== this.agent.did) {
+          return; // Offer is not for us!
+        }
+
+        console.info("📚 New answer-candidate received");
+
+        const targetUser = this.state.participants.find(
+          (p) => p.did === parsedData.receiverId
+        );
+
+        targetUser.peerConnection.addIceCandidate(
+          new RTCIceCandidate(parsedData.candidate)
+        );
       } catch (e) {
         // Oh well
       }
     }
   }
 
-  async addIceCandidate(candidate: RTCIceCandidate) {
-    const myPeerConnection = this.state.participants.find(
-      (p) => p.did === this.state.currentUser.did
-    )?.peerConnection;
-
-    await myPeerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-  }
-
   async handleLinkRemoved(link) {
-    const isMessageFromSelf = link.author === this.state.agent.did;
+    const isMessageFromSelf = link.author === this.agent.did;
 
     if (isMessageFromSelf) {
       return;
@@ -250,7 +281,7 @@ class Channel extends Component<Props, State> {
     console.log("⚡️ sendCandidateToParticipant");
     await perspective.add({
       source: this.props.source,
-      predicate: "candidate",
+      predicate: "offer-candidate",
       target: JSON.stringify(offerCandidateData),
     });
   }
@@ -262,7 +293,7 @@ class Channel extends Component<Props, State> {
   ) {
     const offerData = {
       receiverId,
-      userId: createdById,
+      creatorId: createdById,
       offer,
     };
     const client: Ad4mClient = await getAd4mClient();
@@ -343,69 +374,6 @@ class Channel extends Component<Props, State> {
     await this.sendOfferToParticipant(receiverId, createdID, offer);
   }
 
-  async createAnswer(
-    peerConnection: RTCPeerConnection,
-    createdID: string,
-    receiverId: string
-  ) {
-    // Send answer candidate
-    peerConnection.onicecandidate = (event) => {
-      if (event.candidate) {
-        this.sendAnswerCandidateToParticipant(
-          receiverId,
-          createdID,
-          event.candidate
-        );
-      }
-    };
-
-    const answerDescription = await peerConnection.createOffer();
-    await peerConnection.setLocalDescription(answerDescription);
-
-    const answer = {
-      sdp: answerDescription.sdp,
-      type: answerDescription.type,
-    };
-
-    // Send answer
-    await this.sendAnswerToCandidate(receiverId, createdID, answer);
-  }
-
-  async addOffer(offer: RTCLocalSessionDescriptionInit, senderId: string) {
-    const myPeerConnection = this.state.participants.find(
-      (p) => p.did === this.state.currentUser.did
-    )?.peerConnection;
-
-    const otherUserPeerConnection = this.state.participants.find(
-      (p) => p.did === senderId
-    )?.peerConnection;
-
-    // Add offer to my connection
-    await myPeerConnection.setRemoteDescription(
-      new RTCSessionDescription(offer as RTCSessionDescriptionInit)
-    );
-
-    this.createAnswer(
-      otherUserPeerConnection,
-      this.state.currentUser.did,
-      senderId
-    );
-  }
-
-  addAnswer(answer: RTCLocalSessionDescriptionInit) {
-    const myPeerConnection = this.state.participants.find(
-      (p) => p.did === this.state.currentUser.did
-    )?.peerConnection;
-
-    console.log("adding answer: ", answer);
-    console.log("myPeerConnection: ", myPeerConnection);
-
-    // Add answer to my connection
-    myPeerConnection.setRemoteDescription(
-      new RTCSessionDescription(answer as RTCSessionDescriptionInit)
-    );
-  }
-
   async addConnectionToUser(
     newUser: StreamUser,
     currentUser: StreamUser,
@@ -445,7 +413,7 @@ class Channel extends Component<Props, State> {
     const newUserWithConnection = await this.addConnectionToUser(
       user,
       this.state.currentUser,
-      this.state.localStream
+      this.localStream
     );
 
     const isCurrentUser = user.did === this.state.currentUser.did;
@@ -465,23 +433,28 @@ class Channel extends Component<Props, State> {
       isJoining: true,
     }));
 
-    const stream = await navigator.mediaDevices.getUserMedia({
+    this.localStream = await navigator.mediaDevices.getUserMedia({
       audio: true,
       video: true,
     });
 
     // Disable video by default
-    stream.getVideoTracks()[0].enabled = false;
+    this.localStream.getVideoTracks()[0].enabled = false;
 
     // Create user object
     const me = {
-      did: this.state.agent.did,
+      did: this.agent.did,
       prefrences: {
         audio: true,
         video: false,
         screen: false,
       },
     };
+
+    this.setState((oldState) => ({
+      ...oldState,
+      currentUser: me,
+    }));
 
     // Announce my arrival
     const client: Ad4mClient = await getAd4mClient();
@@ -494,23 +467,44 @@ class Channel extends Component<Props, State> {
       target: this.props.source,
     });
 
-    this.setState(
-      (oldState) => ({
-        ...oldState,
-        localStream: stream,
-        initialized: true,
-        currentUser: me,
-      }),
-      () => {
-        this.addParticipant(this.state.currentUser);
-      }
-    );
+    await this.addParticipant(me);
+
+    const myPeerConnection = this.state.participants.find(
+      (p) => p.did === this.state.currentUser.did
+    )?.peerConnection;
+
+    myPeerConnection.addEventListener("icegatheringstatechange", () => {
+      console.log(
+        `ICE gathering state changed: ${myPeerConnection.iceGatheringState}`
+      );
+    });
+
+    myPeerConnection.addEventListener("connectionstatechange", () => {
+      console.log(
+        `Connection state change: ${myPeerConnection.connectionState}`
+      );
+    });
+
+    myPeerConnection.addEventListener("signalingstatechange", () => {
+      console.log(`Signaling state change: ${myPeerConnection.signalingState}`);
+    });
+
+    myPeerConnection.addEventListener("iceconnectionstatechange ", () => {
+      console.log(
+        `ICE connection state change: ${myPeerConnection.iceConnectionState}`
+      );
+    });
+
+    this.setState((oldState) => ({
+      ...oldState,
+      initialized: true,
+    }));
   }
 
   onToggleCamera() {
-    if (this.state.localStream) {
+    if (this.localStream) {
       const newCameraSetting = !this.state.currentUser.prefrences?.video;
-      this.state.localStream.getVideoTracks()[0].enabled = newCameraSetting;
+      this.localStream.getVideoTracks()[0].enabled = newCameraSetting;
 
       const newPrefrences = {
         ...this.state.currentUser.prefrences,
@@ -530,10 +524,10 @@ class Channel extends Component<Props, State> {
         <UserGrid
           currentUser={this.state.currentUser}
           participants={this.state.participants}
-          localStream={this.state.localStream}
+          localStream={this.localStream}
         />
 
-        {!this.state.localStream && (
+        {!this.localStream && (
           <div className={styles.join}>
             <h1>You haven't joined this room</h1>
             <p>Your video will be off by default.</p>
@@ -548,18 +542,18 @@ class Channel extends Component<Props, State> {
           </div>
         )}
 
-        {this.state.localStream && (
+        {this.localStream && (
           <div className={styles.debug}>
             <h3>LocalStream status:</h3>
-            <p>ID: {this.state.localStream.id}</p>
+            <p>ID: {this.localStream.id}</p>
             <p>User count: {this.state.participants.length}</p>
-            <p>active: {this.state.localStream.active ? "YES" : "NO"}</p>
+            <p>active: {this.localStream.active ? "YES" : "NO"}</p>
             <ul></ul>
           </div>
         )}
 
         <Footer
-          localStream={this.state.localStream}
+          localStream={this.localStream}
           currentUser={this.state.currentUser}
           onToggleCamera={() => this.onToggleCamera()}
         />
