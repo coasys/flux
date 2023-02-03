@@ -527,6 +527,7 @@ class Channel extends Component<Props, State> {
 
     localStream.getVideoTracks()[0].enabled =
       this.state.currentUser.prefrences.video;
+
     this.updateStream(localStream);
 
     this.setState((oldState) => ({
@@ -550,7 +551,7 @@ class Channel extends Component<Props, State> {
         });
       }
 
-      mediaStream.getVideoTracks()[0].onended = this.onScreenShareEnd;
+      mediaStream.getVideoTracks()[0].onended = () => this.onScreenShareEnd();
 
       this.updateStream(mediaStream);
 
