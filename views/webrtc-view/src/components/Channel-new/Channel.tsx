@@ -507,11 +507,71 @@ class Channel extends Component<Props, State> {
     }
   }
 
+  updateStream(stream: MediaStream) {
+    for (let user of this.state.participants) {
+      if (user.isCurrentUser) continue;
+      const peerConnection = user.peerConnection
+        .getSenders()
+        .find((s) => (s.track ? s.track.kind === "video" : false));
+      peerConnection.replaceTrack(stream.getVideoTracks()[0]);
+    }
+
+    this.localStream = stream;
+  }
+
+  async onScreenShareEnd() {
+    const localStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+
+    localStream.getVideoTracks()[0].enabled =
+      this.state.currentUser.prefrences.video;
+    this.updateStream(localStream);
+
+    this.setState((oldState) => ({
+      ...oldState,
+      currentUser: {
+        ...this.state.currentUser,
+        prefrences: {
+          ...this.state.currentUser.prefrences,
+          screen: false,
+        },
+      },
+    }));
+  }
+
+  async onToggleScreen() {
+    if (this.localStream) {
+      let mediaStream;
+      if (navigator.mediaDevices.getDisplayMedia) {
+        mediaStream = await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+        });
+      }
+
+      mediaStream.getVideoTracks()[0].onended = this.onScreenShareEnd;
+
+      this.updateStream(mediaStream);
+
+      this.setState((oldState) => ({
+        ...oldState,
+        currentUser: {
+          ...this.state.currentUser,
+          prefrences: {
+            ...this.state.currentUser.prefrences,
+            screen: true,
+          },
+        },
+      }));
+    }
+  }
+
   async onLeave() {
     const client: Ad4mClient = await getAd4mClient();
     const perspective = await client.perspective.byUUID(this.props.uuid);
 
-    perspective.remove({
+    perspective.add({
       source: this.props.source,
       predicate: "leave",
       target: this.agent.did,
@@ -568,6 +628,7 @@ class Channel extends Component<Props, State> {
           localStream={this.localStream}
           currentUser={this.state.currentUser}
           onToggleCamera={() => this.onToggleCamera()}
+          onToggleScreen={() => this.onToggleScreen()}
           onLeave={() => this.onLeave()}
         />
       </section>

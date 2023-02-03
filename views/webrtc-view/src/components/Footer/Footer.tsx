@@ -7,6 +7,7 @@ export default function Footer({
   localStream,
   currentUser,
   onToggleCamera,
+  onToggleScreen,
   onLeave,
 }) {
   const cameraEnabled = currentUser && currentUser.prefrences.video;
@@ -20,6 +21,13 @@ export default function Footer({
           disabled={!localStream}
         >
           {cameraEnabled ? "Disable camera" : "Enable camera"}
+        </j-button>
+        <j-button
+          variant="secondary"
+          onClick={onToggleScreen}
+          disabled={!localStream}
+        >
+          Share screen
         </j-button>
         <j-button variant="secondary" onClick={onLeave} disabled={!localStream}>
           Leave
