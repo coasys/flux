@@ -8,6 +8,7 @@ export default function Footer({
   currentUser,
   onToggleCamera,
   onToggleScreen,
+  onToggleDebug,
   onLeave,
 }) {
   const cameraEnabled = currentUser && currentUser.prefrences.video;
@@ -56,6 +57,18 @@ export default function Footer({
             disabled={!localStream}
           >
             <j-icon name="door-closed"></j-icon>
+          </j-button>
+        </j-tooltip>
+
+        <j-tooltip placement="top" title="Debug">
+          <j-button
+            variant="transparent"
+            onClick={onToggleDebug}
+            square
+            circle
+            size="lg"
+          >
+            <j-icon name="info"></j-icon>
           </j-button>
         </j-tooltip>
       </div>

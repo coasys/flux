@@ -9,6 +9,7 @@ import Footer from "../Footer";
 import UserGrid from "../UserGrid";
 
 import styles from "./Channel.module.css";
+import Debug from "../Debug";
 
 const servers = {
   iceServers: [
@@ -53,6 +54,7 @@ type State = {
   joinClicked: boolean;
   isJoining: boolean;
   initialized: boolean;
+  debug: boolean;
   currentUser: StreamUser;
   participants: StreamUser[];
 };
@@ -73,6 +75,7 @@ class Channel extends Component<Props, State> {
       joinClicked: false,
       isJoining: false,
       initialized: false,
+      debug: false,
       currentUser: null,
       participants: [],
     };
@@ -602,6 +605,13 @@ class Channel extends Component<Props, State> {
     }));
   }
 
+  async onToggleDebug() {
+    this.setState((oldState) => ({
+      ...oldState,
+      debug: !oldState.debug,
+    }));
+  }
+
   render() {
     1;
     return (
@@ -627,14 +637,8 @@ class Channel extends Component<Props, State> {
           </div>
         )}
 
-        {this.localStream && (
-          <div className={styles.debug}>
-            <h3>LocalStream status:</h3>
-            <p>ID: {this.localStream.id}</p>
-            <p>User count: {this.state.participants.length}</p>
-            <p>active: {this.localStream.active ? "YES" : "NO"}</p>
-            <ul></ul>
-          </div>
+        {this.state.debug && (
+          <Debug state={this.state} localStream={this.localStream} />
         )}
 
         <Footer
@@ -642,6 +646,7 @@ class Channel extends Component<Props, State> {
           currentUser={this.state.currentUser}
           onToggleCamera={() => this.onToggleCamera()}
           onToggleScreen={() => this.onToggleScreen()}
+          onToggleDebug={() => this.onToggleDebug()}
           onLeave={() => this.onLeave()}
         />
       </section>

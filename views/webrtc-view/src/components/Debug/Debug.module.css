@@ -1,0 +1,19 @@
+.wrapper {
+    position: absolute;
+    top: 10vw;
+    right: 10vw;
+    bottom: 10vw;
+    left: 10vw;
+    padding: var(--j-space-600);
+}
+
+.inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    font-family: var(--j-font-family);
+    border-radius: var(--j-border-radius);
+    background-color: var(--j-color-primary-50);
+    padding: var(--j-space-400);
+    overflow-x: hidden;
+}

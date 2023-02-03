@@ -12,15 +12,3 @@
 .join {
     text-align: center;
 }
-
-.debug {
-    position: fixed;
-    top: 0;
-    right: 0;
-    margin: 2rem;
-    background: var(--j-color-primary-200);
-    padding: 0 1rem;
-    border-radius: 0.5rem;
-    line-height: 1;
-    font-size: 14px;
-}
