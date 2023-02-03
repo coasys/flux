@@ -15,23 +15,49 @@ export default function Footer({
   return (
     <div className={styles.wrapper}>
       <div className={styles.inner}>
-        <j-button
-          variant="primary"
-          onClick={onToggleCamera}
-          disabled={!localStream}
+        <j-tooltip
+          placement="auto"
+          title={cameraEnabled ? "Disable camera" : "Enable camera"}
         >
-          {cameraEnabled ? "Disable camera" : "Enable camera"}
-        </j-button>
-        <j-button
-          variant="secondary"
-          onClick={onToggleScreen}
-          disabled={!localStream}
-        >
-          Share screen
-        </j-button>
-        <j-button variant="secondary" onClick={onLeave} disabled={!localStream}>
-          Leave
-        </j-button>
+          <j-button
+            variant={cameraEnabled ? "primary" : "secondary"}
+            onClick={onToggleCamera}
+            square
+            circle
+            size="lg"
+            disabled={!localStream}
+          >
+            <j-icon
+              name={cameraEnabled ? "camera-video-off" : "camera-video"}
+            ></j-icon>
+          </j-button>
+        </j-tooltip>
+
+        <j-tooltip placement="auto" title="Share screen">
+          <j-button
+            variant="secondary"
+            onClick={onToggleScreen}
+            square
+            circle
+            size="lg"
+            disabled={!localStream}
+          >
+            <j-icon name="display"></j-icon>
+          </j-button>
+        </j-tooltip>
+
+        <j-tooltip placement="auto" title="Leave">
+          <j-button
+            variant="secondary"
+            onClick={onLeave}
+            square
+            circle
+            size="lg"
+            disabled={!localStream}
+          >
+            <j-icon name="door-closed"></j-icon>
+          </j-button>
+        </j-tooltip>
       </div>
     </div>
   );

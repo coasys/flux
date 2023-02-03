@@ -1,4 +1,7 @@
 .wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: absolute;
     bottom: 0;
     left: 0;
@@ -12,7 +15,7 @@
     justify-content: center;
     gap: var(--j-space-400);
     padding: var(--j-space-400);
-    background: var(--j-color-ui-800);
     font-family: var(--j-font-family);
     border-radius: var(--j-border-radius);
+    background-color: #ffffff08;
 }

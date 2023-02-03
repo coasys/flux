@@ -25,7 +25,7 @@ export const viewOptions = [
   {
     title: "Voice",
     description: "Audio/Video channel",
-    icon: "microphone",
+    icon: "mic",
     type: ChannelView.Voice,
     component: "webrtc-view",
   },
