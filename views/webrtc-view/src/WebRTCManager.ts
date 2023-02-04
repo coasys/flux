@@ -189,19 +189,12 @@ export default class WebRTCManager {
   async handleOffer(fromDid: string, offer: RTCSessionDescriptionInit) {
     const connection = await this.addConnection(fromDid);
 
-    this.connections.set(fromDid, connection);
-
     connection.setRemoteDescription(
       new RTCSessionDescription({
         type: "offer",
         sdp: offer.sdp,
       })
     );
-
-    // Connect the stream to the remoteConnection
-    this.localStream.getTracks().forEach((track) => {
-      connection.addTrack(track, this.localStream);
-    });
 
     const answer = await connection.createAnswer();
     connection.setLocalDescription(answer);
