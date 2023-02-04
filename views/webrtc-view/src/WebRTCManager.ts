@@ -42,7 +42,7 @@ export default class WebRTCManager {
   private client: Ad4mClient;
   private perspective: PerspectiveProxy;
   private roomId: string;
-  private callbacks: Record<Event, any> = {
+  private callbacks: Record<Event, any[]> = {
     [Event.PEER_ADDED]: [],
     [Event.PEER_REMOVED]: [],
   };
@@ -68,7 +68,7 @@ export default class WebRTCManager {
     this.connections.set = function (key: string, value: RTCPeerConnection) {
       console.log(`Added key: ${key} value: ${value} to the map`);
 
-      that[Event.PEER_ADDED].forEach((cb) => {
+      that.callbacks[Event.PEER_ADDED].forEach((cb) => {
         cb(key, value);
       });
 
@@ -79,7 +79,7 @@ export default class WebRTCManager {
     this.connections.delete = function (key: string) {
       console.log(`Deleted key: ${key} from the map`);
 
-      that[Event.PEER_REMOVED].forEach((cb) => {
+      that.callbacks[Event.PEER_REMOVED].forEach((cb) => {
         cb(key);
       });
 
