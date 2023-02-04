@@ -163,19 +163,19 @@ class Channel extends Component<Props, State> {
           (p) => p.did === parsedData.creatorId
         );
 
-        await offerCreator.peerConnection.setRemoteDescription(
-          new RTCSessionDescription(parsedData.offer)
-        );
-
         offerCreator.peerConnection.onicecandidate = (event) => {
           if (event.candidate) {
-            this.sendAnswerCandidateToParticipant(
+            this.broadcastAnswer(
               offerCreator.did,
               this.agent.did,
               event.candidate
             );
           }
         };
+
+        await offerCreator.peerConnection.setRemoteDescription(
+          new RTCSessionDescription(parsedData.offer)
+        );
 
         const answerDescription =
           await offerCreator.peerConnection.createAnswer();
@@ -301,7 +301,7 @@ class Channel extends Component<Props, State> {
     });
   }
 
-  async sendOfferToParticipant(
+  async broadcastOffer(
     receiverId: string,
     createdById: string,
     offer: RTCLocalSessionDescriptionInit
@@ -315,7 +315,7 @@ class Channel extends Component<Props, State> {
     const perspective = await client.perspective.byUUID(this.props.uuid);
     const expressionUrl = Literal.from(offerData).toUrl();
 
-    console.log("🟠 [OUTGOING] sendOfferToParticipant");
+    console.log("🟠 [OUTGOING] broadcastOffer");
     await perspective.add({
       source: this.props.source,
       predicate: "offer",
@@ -323,7 +323,7 @@ class Channel extends Component<Props, State> {
     });
   }
 
-  async sendAnswerCandidateToParticipant(
+  async broadcastAnswer(
     receiverId: string,
     createdById: string,
     candidate: RTCIceCandidate
@@ -337,7 +337,7 @@ class Channel extends Component<Props, State> {
     const perspective = await client.perspective.byUUID(this.props.uuid);
     const expressionUrl = Literal.from(answerCandidateData).toUrl();
 
-    console.log("🟠 [OUTGOING] sendAnswerCandidateToParticipant");
+    console.log("🟠 [OUTGOING] broadcastAnswer");
     await perspective.add({
       source: this.props.source,
       predicate: "answer-candidate",
@@ -389,7 +389,7 @@ class Channel extends Component<Props, State> {
     };
 
     // Send offer
-    await this.sendOfferToParticipant(receiverId, createdID, offer);
+    await this.broadcastOffer(receiverId, createdID, offer);
   }
 
   async addConnectionToUser(
@@ -398,17 +398,6 @@ class Channel extends Component<Props, State> {
     stream: MediaStream
   ) {
     const newPeerConnection = new RTCPeerConnection(servers);
-
-    stream.getTracks().forEach((track) => {
-      newPeerConnection.addTrack(track, stream);
-    });
-
-    const newUserId = newUser.did;
-    const currentUserId = currentUser.did;
-
-    const offerIds = [newUserId, currentUserId].sort((a, b) =>
-      a.localeCompare(b)
-    );
 
     newPeerConnection.addEventListener("signalingstatechange", (ev) => {
       if (newPeerConnection.signalingState === "closed") {
@@ -439,9 +428,20 @@ class Channel extends Component<Props, State> {
       }
     });
 
+    stream.getTracks().forEach((track) => {
+      newPeerConnection.addTrack(track, stream);
+    });
+
+    const newUserId = newUser.did;
+    const currentUserId = currentUser.did;
+
+    const offerIds = [newUserId, currentUserId].sort((a, b) =>
+      a.localeCompare(b)
+    );
+
     newUser.peerConnection = newPeerConnection;
-    if (offerIds[0] !== currentUserId) {
-      await this.createOffer(newPeerConnection, offerIds[0], offerIds[1]);
+    if (newUserId !== currentUserId) {
+      await this.createOffer(newPeerConnection, newUserId, currentUserId);
     }
 
     return newUser;
@@ -511,7 +511,7 @@ class Channel extends Component<Props, State> {
     perspective.add({
       source: this.props.source,
       predicate: "join",
-      target: this.props.source,
+      target: me.did,
     });
 
     await this.addParticipant(me);
