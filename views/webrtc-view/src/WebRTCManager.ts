@@ -38,7 +38,6 @@ export enum Event {
 export default class WebRTCManager {
   private agentAskedToJoin: boolean;
   private agent: Agent;
-  private localStream: any;
   private client: Ad4mClient;
   private perspective: PerspectiveProxy;
   private roomId: string;
@@ -47,6 +46,7 @@ export default class WebRTCManager {
     [Event.PEER_REMOVED]: [],
   };
 
+  localStream: MediaStream;
   connections = new Map<string, RTCPeerConnection>();
 
   constructor(props: Props) {
