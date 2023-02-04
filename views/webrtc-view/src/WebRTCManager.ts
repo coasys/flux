@@ -54,6 +54,7 @@ export default class WebRTCManager {
   }
 
   async init(props: Props) {
+    console.log("init constructor");
     this.roomId = props.source;
     this.client = await getAd4mClient();
     this.agent = await this.client.agent.me();
@@ -213,6 +214,7 @@ export default class WebRTCManager {
   }
 
   async join() {
+    console.log("Start joining");
     this.localStream = await navigator.mediaDevices.getUserMedia({
       audio: true,
       video: true,

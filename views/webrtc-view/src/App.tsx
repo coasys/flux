@@ -12,7 +12,7 @@ function useWebRTC({ source, uuid }) {
   const [connections, setConnections] = useState([]);
 
   useEffect(() => {
-    if (source && uuid) {
+    if (source && uuid && !manager.current) {
       manager.current = new WebRTCManager({ source, uuid });
 
       const remoteStream = new MediaStream();
