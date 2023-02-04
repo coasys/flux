@@ -125,7 +125,9 @@ export default class WebRTCManager {
 
   async handleIceCandidate(fromDid: string, candidate: RTCIceCandidate) {
     const connection = this.connections.get(fromDid);
-    connection.addIceCandidate(candidate);
+    if (connection) {
+      connection.addIceCandidate(candidate);
+    }
   }
 
   async createOffer(recieverDid: string) {
@@ -141,14 +143,16 @@ export default class WebRTCManager {
       newConnection.addTrack(track, this.localStream);
     });
 
-    const offer = await newConnection.createOffer();
-    await newConnection.setLocalDescription(offer);
+    newConnection.onnegotiationneeded = async (event) => {
+      const offer = await newConnection.createOffer();
+      await newConnection.setLocalDescription(offer);
 
-    this.perspective.add({
-      source: recieverDid,
-      predicate: OFFER,
-      target: Literal.from(offer).toUrl(),
-    });
+      this.perspective.add({
+        source: recieverDid,
+        predicate: OFFER,
+        target: Literal.from(offer).toUrl(),
+      });
+    };
 
     newConnection.onicecandidate = (event) => {
       if (event.candidate) {
