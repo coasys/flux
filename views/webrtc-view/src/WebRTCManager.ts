@@ -130,63 +130,67 @@ export default class WebRTCManager {
     }
   }
 
-  async createOffer(recieverDid: string) {
-    // Return if we already have a connection
-    // TODO: Check is connection is dead
-    if (this.connections.get(recieverDid)) return;
+  async addConnection(did: string) {
+    if (this.connections.get(did)) {
+      return this.connections.get(did);
+    }
 
     const newConnection = new RTCPeerConnection(servers);
-    this.connections.set(recieverDid, newConnection);
+    this.connections.set(did, newConnection);
+
+    newConnection.addEventListener("negotiationneeded", async (event) => {
+      const offer = await newConnection.createOffer();
+      await newConnection.setLocalDescription(offer);
+
+      this.perspective.add({
+        source: did,
+        predicate: OFFER,
+        target: Literal.from(offer).toUrl(),
+      });
+    });
+
+    newConnection.addEventListener("icecandidate", (event) => {
+      if (event.candidate) {
+        this.perspective.add({
+          source: did,
+          predicate: ICE_CANDIDATE,
+          target: Literal.from(event.candidate.toJSON()).toUrl(),
+        });
+      }
+    });
+
+    newConnection.addEventListener("iceconnectionstatechange", (ev) => {
+      if (newConnection.iceConnectionState === "disconnected") {
+        // TODO: Remove peer from participants;
+        newConnection.close();
+        this.connections.delete(did);
+      }
+    });
 
     // Connect the stream to the connection
     this.localStream.getTracks().forEach((track) => {
       newConnection.addTrack(track, this.localStream);
     });
 
-    newConnection.onnegotiationneeded = async (event) => {
-      const offer = await newConnection.createOffer();
-      await newConnection.setLocalDescription(offer);
+    return newConnection;
+  }
 
-      this.perspective.add({
-        source: recieverDid,
-        predicate: OFFER,
-        target: Literal.from(offer).toUrl(),
-      });
-    };
-
-    newConnection.onicecandidate = (event) => {
-      if (event.candidate) {
-        this.perspective.add({
-          source: recieverDid,
-          predicate: ICE_CANDIDATE,
-          target: Literal.from(event.candidate.toJSON()).toUrl(),
-        });
-      }
-    };
-
-    newConnection.addEventListener("iceconnectionstatechange", (ev) => {
-      if (newConnection.iceConnectionState === "disconnected") {
-        // TODO: Remove peer from participants;
-        newConnection.close();
-        this.connections.delete(recieverDid);
-      }
-    });
+  async createOffer(recieverDid: string) {
+    this.addConnection(recieverDid);
   }
 
   async handleAnswer(fromDid: string, answer: RTCSessionDescriptionInit) {
-    const remoteConnection =
-      this.connections.get(fromDid) || new RTCPeerConnection(servers);
+    const connection = await this.addConnection(fromDid);
     const answerDescription = new RTCSessionDescription(answer);
-    remoteConnection.setRemoteDescription(answerDescription);
+    connection.setRemoteDescription(answerDescription);
   }
 
   async handleOffer(fromDid: string, offer: RTCSessionDescriptionInit) {
-    const remoteConnection =
-      this.connections.get(fromDid) || new RTCPeerConnection(servers);
+    const connection = await this.addConnection(fromDid);
 
-    this.connections.set(fromDid, remoteConnection);
+    this.connections.set(fromDid, connection);
 
-    remoteConnection.setRemoteDescription(
+    connection.setRemoteDescription(
       new RTCSessionDescription({
         type: "offer",
         sdp: offer.sdp,
@@ -195,11 +199,11 @@ export default class WebRTCManager {
 
     // Connect the stream to the remoteConnection
     this.localStream.getTracks().forEach((track) => {
-      remoteConnection.addTrack(track, this.localStream);
+      connection.addTrack(track, this.localStream);
     });
 
-    const answer = await remoteConnection.createAnswer();
-    remoteConnection.setLocalDescription(answer);
+    const answer = await connection.createAnswer();
+    connection.setLocalDescription(answer);
 
     this.perspective.add({
       source: fromDid,
