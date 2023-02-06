@@ -29,25 +29,6 @@ function useWebRTC({ source, uuid }) {
       manager.current.on(
         Event.PEER_ADDED,
         (did, connection: RTCPeerConnection) => {
-          console.log("adding", did);
-          const remoteStream = new MediaStream();
-
-          const videElement = document.getElementById(
-            `user-video-${did}`
-          ) as HTMLVideoElement;
-
-          if (videElement) {
-            videElement.srcObject = remoteStream;
-          }
-
-          connection.ontrack = (event) => {
-            console.log("ontrack", event.streams);
-            event.streams[0].getTracks().forEach((track) => {
-              console.log("added track", { track });
-              remoteStream.addTrack(track);
-            });
-          };
-
           setConnections([...connections, { did, connection }]);
         }
       );
@@ -77,6 +58,41 @@ function useWebRTC({ source, uuid }) {
     join,
     toggleCamera,
   };
+}
+
+function Peer({ did, connection }) {
+  useEffect(() => {
+    const remoteStream = new MediaStream();
+
+    connection.ontrack = (event) => {
+      console.log("ontrack", event.streams);
+      event.streams[0].getTracks().forEach((track) => {
+        console.log("added track", { track });
+        remoteStream.addTrack(track);
+        const videElement = document.getElementById(
+          `user-video-${did}`
+        ) as HTMLVideoElement;
+
+        if (videElement) {
+          videElement.srcObject = remoteStream;
+        }
+      });
+    };
+  }, [did, connection]);
+
+  return (
+    <div className={item} data-camera-enabled={true}>
+      <video
+        id={`user-video-${did}`}
+        className={video}
+        autoPlay
+        playsInline
+      ></video>
+      <div className={details}>
+        <j-text>{did}</j-text>
+      </div>
+    </div>
+  );
 }
 
 function Channel({ source, uuid }) {
@@ -117,17 +133,11 @@ function Channel({ source, uuid }) {
           </div>
         )}
         {connections.map((peer, i) => (
-          <div className={item} data-camera-enabled={true}>
-            <video
-              id={`user-video-${peer.did}`}
-              className={video}
-              autoPlay
-              playsInline
-            ></video>
-            <div className={details}>
-              <j-text>{peer.did}</j-text>
-            </div>
-          </div>
+          <Peer
+            key={peer.did}
+            did={peer.did}
+            connection={peer.connection}
+          ></Peer>
         ))}
       </div>
     </div>
