@@ -1,7 +1,7 @@
 import { useDataStore } from "..";
 import { Factory } from "utils/helpers";
 import { Channel as ChannelModel } from "utils/api";
-import { AdamRepository } from "utils/factory";
+import { SubjectRepository } from "utils/factory";
 import { ChannelView } from "utils/types";
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
@@ -10,7 +10,7 @@ export default async (communityId: string): Promise<void> => {
   const keyedChannels = dataStore.channels;
 
   try {
-    const channelRepository = new AdamRepository(ChannelModel, {
+    const channelRepository = new SubjectRepository(ChannelModel, {
       perspectiveUuid: communityId
     })
 

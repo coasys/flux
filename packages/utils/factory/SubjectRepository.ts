@@ -59,7 +59,7 @@ function setProperties(subject: any, properties: QueryPartialEntity<{[x: string]
   });
 }
 
-export class AdamRepository<SubjectClass extends {[x: string]: any}> {
+export class SubjectRepository<SubjectClass extends {[x: string]: any}> {
   client = null;
   source = SELF;
   perspectiveUuid = "";

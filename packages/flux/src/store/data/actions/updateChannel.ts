@@ -2,7 +2,7 @@ import { useAppStore } from "@/store/app";
 import { useDataStore } from "..";
 import { Channel as ChannelModel } from "utils/api";
 import { Factory } from "utils/helpers";
-import { AdamRepository } from "utils/factory";
+import { SubjectRepository } from "utils/factory";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -23,7 +23,7 @@ export default async (payload: Payload): Promise<any> => {
   }
 
   try {
-    const channelRepository = new AdamRepository(ChannelModel, {
+    const channelRepository = new SubjectRepository(ChannelModel, {
       perspectiveUuid: payload.perspectiveUuid
     })
 

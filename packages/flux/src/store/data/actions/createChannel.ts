@@ -5,7 +5,7 @@ import { ChannelView } from "utils/types";
 import { Channel as ChannelModel } from "utils/api";
 import { Factory, SubjectEntry } from "utils/helpers";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { AdamRepository } from "utils/factory";
+import { SubjectRepository } from "utils/factory";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -31,7 +31,7 @@ export default async (payload: Payload): Promise<ChannelState> => {
     let ad4m = await getAd4mClient()
     let perspective = await ad4m.perspective.byUUID(payload.perspectiveUuid)
 
-    const channelRepository = new AdamRepository(ChannelModel, {
+    const channelRepository = new SubjectRepository(ChannelModel, {
       perspectiveUuid: payload.perspectiveUuid
     })
 
