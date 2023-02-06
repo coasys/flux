@@ -14,6 +14,7 @@ export default defineConfig({
         react: resolve(__dirname, "react/index.ts"),
         constants: resolve(__dirname, "constants/index.ts"),
         helpers: resolve(__dirname, "helpers/index.ts"),
+        factory: resolve(__dirname, "factory/index.ts"),
         types: resolve(__dirname, "types/index.ts"),
       },
       fileName: "[name]",

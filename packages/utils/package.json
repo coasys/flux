@@ -25,6 +25,10 @@
       "import": "./dist/helpers.js",
       "require": "./dist/helpers.umd.cjs"
     },
+    "./factory": {
+      "import": "./dist/factory.js",
+      "require": "./dist/factory.umd.cjs"
+    },
     "./frameworks/react": {
       "import": "./dist/react.js",
       "require": "./dist/react.umd.cjs"

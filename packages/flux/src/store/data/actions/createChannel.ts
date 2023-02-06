@@ -5,6 +5,7 @@ import { ChannelView } from "utils/types";
 import { Channel as ChannelModel } from "utils/api";
 import { Factory, SubjectEntry } from "utils/helpers";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { AdamRepository } from "utils/factory";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -29,16 +30,16 @@ export default async (payload: Payload): Promise<ChannelState> => {
 
     let ad4m = await getAd4mClient()
     let perspective = await ad4m.perspective.byUUID(payload.perspectiveUuid)
-    await perspective!.ensureSDNASubjectClass(ChannelModel)
 
-    const Channel = new Factory(ChannelModel, {
-      perspectiveUuid: payload.perspectiveUuid,
-    });
+    const channelRepository = new AdamRepository(ChannelModel, {
+      perspectiveUuid: payload.perspectiveUuid
+    })
 
-    const channel = await Channel.create({
-      name: payload.name,
-      views: payload.views,
-    });
+    const Channel = new ChannelModel()
+    Channel.name = payload.name;
+    Channel.views = payload.views;
+
+    const channel = await channelRepository.create(Channel);
 
     //@ts-ignore
     const channelEntry = new SubjectEntry(channel, perspective)

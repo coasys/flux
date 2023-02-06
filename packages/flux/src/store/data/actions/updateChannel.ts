@@ -2,6 +2,7 @@ import { useAppStore } from "@/store/app";
 import { useDataStore } from "..";
 import { Channel as ChannelModel } from "utils/api";
 import { Factory } from "utils/helpers";
+import { AdamRepository } from "utils/factory";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -22,11 +23,11 @@ export default async (payload: Payload): Promise<any> => {
   }
 
   try {
-    const Channel = new Factory(ChannelModel, {
-      perspectiveUuid: payload.perspectiveUuid,
-    });
+    const channelRepository = new AdamRepository(ChannelModel, {
+      perspectiveUuid: payload.perspectiveUuid
+    })
 
-    await Channel.update(channel.id, payload.data);
+    await channelRepository.update(channel.id, payload.data)
 
     dataStore.setChannel({
       communityId: channel.id,
