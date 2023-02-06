@@ -29,6 +29,7 @@ function useWebRTC({ source, uuid }) {
       manager.current.on(
         Event.PEER_ADDED,
         (did, connection: RTCPeerConnection) => {
+          console.log("adding", did);
           const remoteStream = new MediaStream();
 
           const videElement = document.getElementById(

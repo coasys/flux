@@ -189,7 +189,7 @@ export default class WebRTCManager {
   }
 
   async handleOffer(fromDid: string, offer: RTCSessionDescriptionInit) {
-    const connection = await this.addConnection(fromDid, true);
+    const connection = await this.addConnection(fromDid);
 
     connection.setRemoteDescription(
       new RTCSessionDescription({
