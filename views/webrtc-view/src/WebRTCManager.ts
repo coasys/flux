@@ -203,9 +203,13 @@ export default class WebRTCManager {
   }
 
   async handleAnswer(fromDid: string, answer: RTCSessionDescriptionInit) {
-    const connection = await this.addConnection(fromDid, false);
-    const answerDescription = new RTCSessionDescription(answer);
-    connection.setRemoteDescription(answerDescription);
+    const connection = this.connections.get(fromDid);
+    if (connection) {
+      const answerDescription = new RTCSessionDescription(answer);
+      connection.setRemoteDescription(answerDescription);
+    } else {
+      console.warn("Couldn't handle answer from ", fromDid);
+    }
   }
 
   async join() {
