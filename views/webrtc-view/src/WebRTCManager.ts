@@ -121,7 +121,7 @@ export default class WebRTCManager {
   async handleIceCandidate(fromDid: string, candidate: RTCIceCandidate) {
     const connection = this.connections.get(fromDid);
     if (connection) {
-      connection.addIceCandidate(candidate);
+      connection.addIceCandidate(new RTCIceCandidate(candidate));
     }
   }
 
@@ -173,12 +173,7 @@ export default class WebRTCManager {
 
     const connection = await this.addConnection(fromDid);
 
-    connection.setRemoteDescription(
-      new RTCSessionDescription({
-        type: "offer",
-        sdp: offer.sdp,
-      })
-    );
+    connection.setRemoteDescription(new RTCSessionDescription(offer));
 
     // Create Answer to offer
     const answer = await connection.createAnswer();
