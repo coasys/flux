@@ -137,15 +137,13 @@ export default class WebRTCManager {
     this.connections.set(did, newConnection);
 
     if (makeOffer) {
-      newConnection.addEventListener("negotiationneeded", async (event) => {
-        const offer = await newConnection.createOffer();
-        await newConnection.setLocalDescription(offer);
+      const offer = await newConnection.createOffer();
+      await newConnection.setLocalDescription(offer);
 
-        this.perspective.add({
-          source: did,
-          predicate: OFFER,
-          target: Literal.from(offer).toUrl(),
-        });
+      this.perspective.add({
+        source: did,
+        predicate: OFFER,
+        target: Literal.from(offer).toUrl(),
       });
     }
 
