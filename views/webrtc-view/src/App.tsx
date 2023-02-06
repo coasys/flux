@@ -26,14 +26,15 @@ function useWebRTC({ source, uuid }) {
     if (source && uuid && !manager.current) {
       manager.current = new WebRTCManager({ source, uuid });
 
-      const remoteStream = new MediaStream();
-
       manager.current.on(
         Event.PEER_ADDED,
         (did, connection: RTCPeerConnection) => {
+          const remoteStream = new MediaStream();
+
           connection.ontrack = (event) => {
-            console.log("ontrack");
+            console.log("ontrack", event.streams);
             event.streams[0].getTracks().forEach((track) => {
+              console.log("added track", { track });
               remoteStream.addTrack(track);
             });
 
@@ -41,12 +42,14 @@ function useWebRTC({ source, uuid }) {
               `user-video-${did}`
             ) as HTMLVideoElement;
 
-            console.log({ videElement });
+            console.log({ videElement, remoteStream });
 
             if (videElement) {
               videElement.srcObject = remoteStream;
             }
           };
+
+          console.log({ connection });
 
           setConnections([...connections, { did, connection }]);
         }
