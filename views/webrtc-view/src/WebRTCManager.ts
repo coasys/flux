@@ -128,7 +128,7 @@ export default class WebRTCManager {
     }
   }
 
-  async addConnection(did: string, remote = false) {
+  async addConnection(did: string, addMyStream = false) {
     if (this.connections.get(did)) {
       return this.connections.get(did);
     }
@@ -168,7 +168,7 @@ export default class WebRTCManager {
     */
 
     // Connect the stream to the connection
-    if (!remote) {
+    if (addMyStream) {
       this.localStream.getTracks().forEach((track) => {
         console.log("adding track", track);
         newConnection.addTrack(track, this.localStream);
@@ -179,17 +179,11 @@ export default class WebRTCManager {
   }
 
   async createOffer(recieverDid: string) {
-    this.addConnection(recieverDid);
-  }
-
-  async handleAnswer(fromDid: string, answer: RTCSessionDescriptionInit) {
-    const connection = await this.addConnection(fromDid, true);
-    const answerDescription = new RTCSessionDescription(answer);
-    connection.setRemoteDescription(answerDescription);
+    this.addConnection(recieverDid, true);
   }
 
   async handleOffer(fromDid: string, offer: RTCSessionDescriptionInit) {
-    const connection = await this.addConnection(fromDid);
+    const connection = await this.addConnection(fromDid, true);
 
     connection.setRemoteDescription(
       new RTCSessionDescription({
@@ -206,6 +200,12 @@ export default class WebRTCManager {
       predicate: ANSWER,
       target: Literal.from(answer).toUrl(),
     });
+  }
+
+  async handleAnswer(fromDid: string, answer: RTCSessionDescriptionInit) {
+    const connection = await this.addConnection(fromDid, false);
+    const answerDescription = new RTCSessionDescription(answer);
+    connection.setRemoteDescription(answerDescription);
   }
 
   async join() {
