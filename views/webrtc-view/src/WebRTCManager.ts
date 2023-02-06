@@ -51,6 +51,7 @@ export default class WebRTCManager {
 
   async init(props: Props) {
     console.log("init constructor");
+    this.localStream = new MediaStream();
     this.roomId = props.source;
     this.client = await getAd4mClient();
     this.agent = await this.client.agent.me();

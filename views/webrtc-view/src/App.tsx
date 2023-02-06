@@ -17,7 +17,6 @@ type Peer = {
 };
 
 function useWebRTC({ source, uuid }) {
-  const [localStream, setLocalStream] = useState<MediaStream>();
   const [isInitialised, setIsInitialised] = useState(false);
   const manager = useRef<WebRTCManager>();
   const [connections, setConnections] = useState<Peer[]>([]);
@@ -25,8 +24,6 @@ function useWebRTC({ source, uuid }) {
   useEffect(() => {
     if (source && uuid && !manager.current) {
       manager.current = new WebRTCManager({ source, uuid });
-
-      setLocalStream(manager.current.localStream);
 
       const remoteStream = new MediaStream();
 
@@ -65,7 +62,6 @@ function useWebRTC({ source, uuid }) {
 
   async function join() {
     await manager.current?.join();
-    setLocalStream(manager.current.localStream);
   }
 
   function toggleCamera() {
@@ -73,11 +69,11 @@ function useWebRTC({ source, uuid }) {
   }
 
   return {
+    localStream: manager.current?.localStream,
     connections,
     isInitialised,
     join,
     toggleCamera,
-    localStream,
   };
 }
 
@@ -95,7 +91,7 @@ function Channel({ source, uuid }) {
       <j-button onClick={() => join()}>Join</j-button>
       <j-button onClick={() => toggleCamera()}>Toggle</j-button>
       <div className={grid}>
-        {localStream && (
+        {!!localStream && (
           <div className={item}>
             <video
               className={video}
