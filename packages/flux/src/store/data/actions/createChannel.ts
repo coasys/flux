@@ -32,7 +32,8 @@ export default async (payload: Payload): Promise<ChannelState> => {
     let perspective = await ad4m.perspective.byUUID(payload.perspectiveUuid)
 
     const channelRepository = new SubjectRepository(ChannelModel, {
-      perspectiveUuid: payload.perspectiveUuid
+      perspectiveUuid: payload.perspectiveUuid,
+      source: community.id
     })
 
     const Channel = new ChannelModel()
