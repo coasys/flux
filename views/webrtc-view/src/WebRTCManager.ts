@@ -147,6 +147,9 @@ export default class WebRTCManager {
   }
 
   async createOffer(recieverDid: string) {
+    // Don't create an offer if we alread have a connection
+    if (this.connections.get(recieverDid)) return;
+
     const connection = await this.addConnection(recieverDid);
 
     const offer = await connection.createOffer();
@@ -165,6 +168,9 @@ export default class WebRTCManager {
   }
 
   async handleOffer(fromDid: string, offer: RTCSessionDescriptionInit) {
+    // Don't create an answer if we alread have a connection
+    if (this.connections.get(fromDid)) return;
+
     const connection = await this.addConnection(fromDid);
 
     connection.setRemoteDescription(
