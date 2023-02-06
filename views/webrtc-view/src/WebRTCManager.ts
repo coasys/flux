@@ -4,17 +4,13 @@ import {
   PerspectiveProxy,
   Agent,
   Literal,
+  LinkExpression,
 } from "@perspect3vism/ad4m";
 
 const servers = {
   iceServers: [
     {
-      urls: [
-        "stun:stun.l.google.com:19302",
-        "stun:stun1.l.google.com:19302",
-        "stun:stun2.l.google.com:19302",
-        "stun:stun.services.mozilla.com",
-      ],
+      urls: ["stun:stun.services.mozilla.com"],
     },
   ],
   iceCandidatePoolSize: 10,
@@ -41,7 +37,7 @@ export default class WebRTCManager {
   private client: Ad4mClient;
   private perspective: PerspectiveProxy;
   private roomId: string;
-  private callbacks: Record<Event, any[]> = {
+  private callbacks: Record<Event, Array<(...args: any[]) => void>> = {
     [Event.PEER_ADDED]: [],
     [Event.PEER_REMOVED]: [],
   };
@@ -92,7 +88,7 @@ export default class WebRTCManager {
     this.callbacks[event].push(cb);
   }
 
-  async onLink(link): Promise<void> {
+  async onLink(link: LinkExpression): Promise<void> {
     console.log({ link, agentAskedToJoin: this.agentAskedToJoin });
 
     if (!this.agentAskedToJoin) return;
@@ -112,7 +108,7 @@ export default class WebRTCManager {
     // Only handle the answer if it's for me
     if (link.data.predicate === ANSWER && link.data.source === this.agent.did) {
       const answer = Literal.fromUrl(link.data.target).get();
-      this.handleAnswer(link.autor, answer);
+      this.handleAnswer(link.author, answer);
     }
     // Only handle the answer if it's for me
     if (
@@ -120,7 +116,7 @@ export default class WebRTCManager {
       link.data.source === this.agent.did
     ) {
       const candidate = Literal.fromUrl(link.data.target).get();
-      this.handleIceCandidate(link.autor, candidate);
+      this.handleIceCandidate(link.author, candidate);
     }
   }
 
@@ -170,6 +166,7 @@ export default class WebRTCManager {
 
     // Connect the stream to the connection
     this.localStream.getTracks().forEach((track) => {
+      console.log("adding track", track);
       newConnection.addTrack(track, this.localStream);
     });
 
@@ -208,6 +205,7 @@ export default class WebRTCManager {
 
   async join() {
     console.log("Start joining");
+
     this.localStream = await navigator.mediaDevices.getUserMedia({
       audio: true,
       video: true,
