@@ -97,6 +97,7 @@ export default async function createCommunity({
     return {
       uuid: perspective.uuid,
       author: author,
+      id: await community.baseExpression,
       timestamp: socialDnaLink.timestamp,
       name: await community.name,
       description: await community.description || "",
