@@ -156,6 +156,7 @@ export default class WebRTCManager {
       }
     });
 
+    /*
     newConnection.addEventListener("iceconnectionstatechange", (ev) => {
       if (newConnection.iceConnectionState === "disconnected") {
         // TODO: Remove peer from participants;
@@ -163,6 +164,7 @@ export default class WebRTCManager {
         this.connections.delete(did);
       }
     });
+    */
 
     // Connect the stream to the connection
     this.localStream.getTracks().forEach((track) => {

@@ -68,32 +68,41 @@ function useWebRTC({ source, uuid }) {
     setLocalStream(manager.current.localStream);
   }
 
+  function toggleCamera() {
+    manager.current.localStream.getVideoTracks()[0].enabled = true;
+  }
+
   return {
     connections,
     isInitialised,
     join,
+    toggleCamera,
     localStream,
   };
 }
 
 function Channel({ source, uuid }) {
-  const { connections, join, isInitialised, localStream } = useWebRTC({
-    source,
-    uuid,
-  });
+  const { connections, join, isInitialised, localStream, toggleCamera } =
+    useWebRTC({
+      source,
+      uuid,
+    });
 
   if (!isInitialised) return null;
 
   return (
     <div>
       <j-button onClick={() => join()}>Join</j-button>
+      <j-button onClick={() => toggleCamera()}>Toggle</j-button>
       <div className={grid}>
         {localStream && (
           <div className={item}>
             <video
               className={video}
               ref={(video) => {
-                video.srcObject = localStream;
+                if (video) {
+                  video.srcObject = localStream;
+                }
               }}
               autoPlay
               playsInline
