@@ -6,22 +6,22 @@ import { collectionToAdderName } from "../helpers";
 import { PropertyMap, PropertyValueMap } from "../types";
 import { v4 as uuidv4 } from "uuid";
 
-type ModelProps = {
+export type ModelProps = {
   perspectiveUuid: string;
   source?: string;
 };
 
-type Listeners = {
+export type Listeners = {
   add: { [source: string]: Function[] };
   remove: { [source: string]: Function[] };
 };
 
-function capitalize(str: string) {
+export function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 // e.g. "name" -> "setName"
-function propertyNameToSetterName(property: string): string {
+export function propertyNameToSetterName(property: string): string {
   return `set${capitalize(property)}`;
 }
 
@@ -35,7 +35,7 @@ export function pluralToSingular(plural: string): string {
   }
 }
 
-function setProperties(subject: any, properties: QueryPartialEntity<{[x: string]: any}>) {
+export function setProperties(subject: any, properties: QueryPartialEntity<{[x: string]: any}>) {
   Object.keys(properties).forEach((key) => {
     if(Array.isArray(properties[key])) {
       // it's a collection
@@ -103,7 +103,7 @@ export class SubjectRepository<SubjectClass extends {[x: string]: any}> {
       target: base
     }))
 
-    // setProperties(newInstance, data);
+    setProperties(newInstance, data);
     return newInstance;
   }
 
