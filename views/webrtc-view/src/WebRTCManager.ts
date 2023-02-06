@@ -128,7 +128,7 @@ export default class WebRTCManager {
     }
   }
 
-  async addConnection(did: string, addMyStream = false) {
+  async addConnection(did: string, addMyStream = false, makeOffer = false) {
     if (this.connections.get(did)) {
       return this.connections.get(did);
     }
@@ -136,16 +136,18 @@ export default class WebRTCManager {
     const newConnection = new RTCPeerConnection(servers);
     this.connections.set(did, newConnection);
 
-    newConnection.addEventListener("negotiationneeded", async (event) => {
-      const offer = await newConnection.createOffer();
-      await newConnection.setLocalDescription(offer);
+    if (makeOffer) {
+      newConnection.addEventListener("negotiationneeded", async (event) => {
+        const offer = await newConnection.createOffer();
+        await newConnection.setLocalDescription(offer);
 
-      this.perspective.add({
-        source: did,
-        predicate: OFFER,
-        target: Literal.from(offer).toUrl(),
+        this.perspective.add({
+          source: did,
+          predicate: OFFER,
+          target: Literal.from(offer).toUrl(),
+        });
       });
-    });
+    }
 
     newConnection.addEventListener("icecandidate", (event) => {
       if (event.candidate) {
@@ -179,7 +181,7 @@ export default class WebRTCManager {
   }
 
   async createOffer(recieverDid: string) {
-    this.addConnection(recieverDid, true);
+    this.addConnection(recieverDid, true, true);
   }
 
   async handleOffer(fromDid: string, offer: RTCSessionDescriptionInit) {
