@@ -17,6 +17,7 @@ type Peer = {
 };
 
 function useWebRTC({ source, uuid }) {
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [isInitialised, setIsInitialised] = useState(false);
   const manager = useRef<WebRTCManager>();
   const [connections, setConnections] = useState<Peer[]>([]);
@@ -62,6 +63,7 @@ function useWebRTC({ source, uuid }) {
 
   async function join() {
     await manager.current?.join();
+    setLocalStream(manager.current.localStream);
   }
 
   function toggleCamera() {
@@ -69,7 +71,7 @@ function useWebRTC({ source, uuid }) {
   }
 
   return {
-    localStream: manager.current?.localStream,
+    localStream,
     connections,
     isInitialised,
     join,
@@ -78,11 +80,19 @@ function useWebRTC({ source, uuid }) {
 }
 
 function Channel({ source, uuid }) {
+  const videoRef = useRef(null);
   const { connections, join, isInitialised, localStream, toggleCamera } =
     useWebRTC({
       source,
       uuid,
     });
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.srcObject = localStream;
+      videoRef.current.muted = true;
+    }
+  }, [videoRef, localStream]);
 
   if (!isInitialised) return null;
 
@@ -91,15 +101,11 @@ function Channel({ source, uuid }) {
       <j-button onClick={() => join()}>Join</j-button>
       <j-button onClick={() => toggleCamera()}>Toggle</j-button>
       <div className={grid}>
-        {!!localStream && (
-          <div className={item}>
+        {localStream && (
+          <div className={item} data-camera-enabled={true}>
             <video
               className={video}
-              ref={(video) => {
-                if (video) {
-                  video.srcObject = localStream;
-                }
-              }}
+              ref={videoRef}
               autoPlay
               playsInline
             ></video>
@@ -109,7 +115,7 @@ function Channel({ source, uuid }) {
           </div>
         )}
         {connections.map((peer, i) => (
-          <div className={item}>
+          <div className={item} data-camera-enabled={true}>
             <video
               id={`user-video-${peer.did}`}
               className={video}
