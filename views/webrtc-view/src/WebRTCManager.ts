@@ -152,13 +152,13 @@ export default class WebRTCManager {
 
     const connection = await this.addConnection(recieverDid);
 
-    const offer = await connection.createOffer();
-    await connection.setLocalDescription(offer);
-
     this.localStream.getTracks().forEach((track) => {
       console.log("adding track", track);
       connection.addTrack(track, this.localStream);
     });
+
+    const offer = await connection.createOffer();
+    await connection.setLocalDescription(offer);
 
     await this.perspective.add({
       source: recieverDid,
@@ -174,14 +174,14 @@ export default class WebRTCManager {
     const connection = await this.addConnection(fromDid);
     await connection.setRemoteDescription(new RTCSessionDescription(offer));
 
-    // Create Answer to offer
-    const answer = await connection.createAnswer();
-    await connection.setLocalDescription(answer);
-
     this.localStream.getTracks().forEach((track) => {
       console.log("adding track", track);
       connection.addTrack(track, this.localStream);
     });
+
+    // Create Answer to offer
+    const answer = await connection.createAnswer();
+    await connection.setLocalDescription(answer);
 
     await this.perspective.add({
       source: fromDid,
