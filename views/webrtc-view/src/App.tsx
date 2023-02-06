@@ -23,7 +23,7 @@ function useWebRTC({ source, uuid }) {
   const [connections, setConnections] = useState<Peer[]>([]);
 
   useEffect(() => {
-    if (source && uuid && !manager.current) {
+    if (source && uuid && !isInitialised) {
       manager.current = new WebRTCManager({ source, uuid });
 
       manager.current.on(
@@ -40,15 +40,18 @@ function useWebRTC({ source, uuid }) {
 
       setIsInitialised(true);
     }
-  }, [source, uuid]);
+  }, [source, uuid, isInitialised]);
 
   async function join() {
-    await manager.current?.join();
-    setLocalStream(manager.current.localStream);
+    const stream = await manager.current?.join();
+    setLocalStream(stream);
   }
 
   function toggleCamera() {
-    manager.current.localStream.getVideoTracks()[0].enabled = true;
+    if (localStream) {
+      const enabled = localStream.getVideoTracks()[0].enabled;
+      localStream.getVideoTracks()[0].enabled = !enabled;
+    }
   }
 
   return {

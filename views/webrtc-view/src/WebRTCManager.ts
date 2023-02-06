@@ -17,7 +17,7 @@ const servers = {
 };
 
 const ICE_CANDIDATE = "ice-candidate";
-const MAKE_OFFER_TO_AGENT = "make-offer-please";
+const OFFER_REQUEST = "offer-request";
 const OFFER = "offer";
 const ANSWER = "answer";
 
@@ -32,7 +32,6 @@ export enum Event {
 }
 
 export default class WebRTCManager {
-  private agentAskedToJoin: boolean;
   private agent: Agent;
   private client: Ad4mClient;
   private perspective: PerspectiveProxy;
@@ -56,7 +55,6 @@ export default class WebRTCManager {
     this.client = await getAd4mClient();
     this.agent = await this.client.agent.me();
     this.perspective = await this.client.perspective.byUUID(props.uuid);
-    this.perspective.addListener("link-added", (link) => this.onLink(link));
     this.emitPeerEvents();
   }
 
@@ -90,16 +88,15 @@ export default class WebRTCManager {
   }
 
   async onLink(link: LinkExpression): Promise<void> {
-    console.log({ link, agentAskedToJoin: this.agentAskedToJoin });
-
-    if (!this.agentAskedToJoin) return;
     if (link.author === this.agent.did) return;
 
+    console.log({ link });
+
     if (
-      link.data.predicate === MAKE_OFFER_TO_AGENT &&
+      link.data.predicate === OFFER_REQUEST &&
       link.data.source === this.roomId
     ) {
-      this.createOffer(link.data.target);
+      this.createOffer(link.author);
     }
     // Only handle the offer if it's for me
     if (link.data.predicate === OFFER && link.data.source === this.agent.did) {
@@ -128,24 +125,13 @@ export default class WebRTCManager {
     }
   }
 
-  async addConnection(did: string, addMyStream = false, makeOffer = false) {
+  async addConnection(did: string) {
     if (this.connections.get(did)) {
       return this.connections.get(did);
     }
 
     const newConnection = new RTCPeerConnection(servers);
     this.connections.set(did, newConnection);
-
-    if (makeOffer) {
-      const offer = await newConnection.createOffer();
-      await newConnection.setLocalDescription(offer);
-
-      this.perspective.add({
-        source: did,
-        predicate: OFFER,
-        target: Literal.from(offer).toUrl(),
-      });
-    }
 
     newConnection.addEventListener("icecandidate", (event) => {
       if (event.candidate) {
@@ -157,33 +143,29 @@ export default class WebRTCManager {
       }
     });
 
-    /*
-    newConnection.addEventListener("iceconnectionstatechange", (ev) => {
-      if (newConnection.iceConnectionState === "disconnected") {
-        // TODO: Remove peer from participants;
-        newConnection.close();
-        this.connections.delete(did);
-      }
-    });
-    */
-
-    // Connect the stream to the connection
-    if (addMyStream) {
-      this.localStream.getTracks().forEach((track) => {
-        console.log("adding track", track);
-        newConnection.addTrack(track, this.localStream);
-      });
-    }
-
     return newConnection;
   }
 
   async createOffer(recieverDid: string) {
-    this.addConnection(recieverDid, true, true);
+    const connection = await this.addConnection(recieverDid);
+
+    const offer = await connection.createOffer();
+    await connection.setLocalDescription(offer);
+
+    this.perspective.add({
+      source: recieverDid,
+      predicate: OFFER,
+      target: Literal.from(offer).toUrl(),
+    });
+
+    this.localStream.getTracks().forEach((track) => {
+      console.log("adding track", track);
+      connection.addTrack(track, this.localStream);
+    });
   }
 
   async handleOffer(fromDid: string, offer: RTCSessionDescriptionInit) {
-    const connection = await this.addConnection(fromDid, true);
+    const connection = await this.addConnection(fromDid);
 
     connection.setRemoteDescription(
       new RTCSessionDescription({
@@ -192,8 +174,14 @@ export default class WebRTCManager {
       })
     );
 
+    // Create Answer to offer
     const answer = await connection.createAnswer();
     connection.setLocalDescription(answer);
+
+    this.localStream.getTracks().forEach((track) => {
+      console.log("adding track", track);
+      connection.addTrack(track, this.localStream);
+    });
 
     this.perspective.add({
       source: fromDid,
@@ -222,11 +210,13 @@ export default class WebRTCManager {
 
     await this.perspective.add({
       source: this.roomId,
-      predicate: MAKE_OFFER_TO_AGENT,
+      predicate: OFFER_REQUEST,
       target: this.agent.did,
     });
 
-    this.agentAskedToJoin = true;
+    this.perspective.addListener("link-added", (link) => this.onLink(link));
+
+    return this.localStream;
   }
 
   async leave() {
