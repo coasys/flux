@@ -6,6 +6,7 @@ import { ENTRY_TYPE } from "../../constants";
   through: ENTRY_TYPE,
   initial: EntryType.Member,
   required: true,
+  name: 'Member'
 })
 export class Member {
   isSubjectInstance = ['languageName(Base, "agent-expression-store")'];

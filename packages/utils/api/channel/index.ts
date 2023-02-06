@@ -14,6 +14,7 @@ import {
   through: ENTRY_TYPE,
   initial: EntryType.Channel,
   required: true,
+  name: 'Channel'
 })
 export class Channel {
   @subjectProperty({

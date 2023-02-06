@@ -19,6 +19,7 @@ import {
   through: ENTRY_TYPE,
   initial: EntryType.Post,
   required: true,
+  name: 'Post'
 })
 export class Post {
   @subjectProperty({ through: TITLE, resolve: true, resolveLanguage: "literal" })

@@ -14,6 +14,7 @@ import {
   through: ENTRY_TYPE,
   initial: EntryType.Message,
   required: true,
+  name: 'Message'
 })
 export class Message {
   @subjectProperty({

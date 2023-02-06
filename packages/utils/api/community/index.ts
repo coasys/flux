@@ -18,6 +18,7 @@ import {
   through: ENTRY_TYPE,
   initial: EntryType.Community,
   required: true,
+  name: 'Community'
 })
 export class Community {
   @subjectProperty({ through: NAME, resolve: true, resolveLanguage: "literal" })
