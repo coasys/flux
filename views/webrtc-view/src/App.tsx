@@ -31,25 +31,21 @@ function useWebRTC({ source, uuid }) {
         (did, connection: RTCPeerConnection) => {
           const remoteStream = new MediaStream();
 
+          const videElement = document.getElementById(
+            `user-video-${did}`
+          ) as HTMLVideoElement;
+
+          if (videElement) {
+            videElement.srcObject = remoteStream;
+          }
+
           connection.ontrack = (event) => {
             console.log("ontrack", event.streams);
             event.streams[0].getTracks().forEach((track) => {
               console.log("added track", { track });
               remoteStream.addTrack(track);
             });
-
-            const videElement = document.getElementById(
-              `user-video-${did}`
-            ) as HTMLVideoElement;
-
-            console.log({ videElement, remoteStream });
-
-            if (videElement) {
-              videElement.srcObject = remoteStream;
-            }
           };
-
-          console.log({ connection });
 
           setConnections([...connections, { did, connection }]);
         }
@@ -89,6 +85,8 @@ function Channel({ source, uuid }) {
       source,
       uuid,
     });
+
+  console.log({ connections });
 
   useEffect(() => {
     if (videoRef.current) {
