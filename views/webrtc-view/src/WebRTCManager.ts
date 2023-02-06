@@ -172,12 +172,11 @@ export default class WebRTCManager {
     if (this.connections.get(fromDid)) return;
 
     const connection = await this.addConnection(fromDid);
-
-    connection.setRemoteDescription(new RTCSessionDescription(offer));
+    await connection.setRemoteDescription(new RTCSessionDescription(offer));
 
     // Create Answer to offer
     const answer = await connection.createAnswer();
-    connection.setLocalDescription(answer);
+    await connection.setLocalDescription(answer);
 
     this.localStream.getTracks().forEach((track) => {
       console.log("adding track", track);
@@ -193,9 +192,9 @@ export default class WebRTCManager {
 
   async handleAnswer(fromDid: string, answer: RTCSessionDescriptionInit) {
     const connection = this.connections.get(fromDid);
-    if (connection) {
+    if (connection && !connection.currentRemoteDescription) {
       const answerDescription = new RTCSessionDescription(answer);
-      connection.setRemoteDescription(answerDescription);
+      await connection.setRemoteDescription(answerDescription);
     } else {
       console.warn("Couldn't handle answer from ", fromDid);
     }
