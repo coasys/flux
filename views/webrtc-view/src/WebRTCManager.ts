@@ -155,15 +155,15 @@ export default class WebRTCManager {
     const offer = await connection.createOffer();
     await connection.setLocalDescription(offer);
 
-    this.perspective.add({
-      source: recieverDid,
-      predicate: OFFER,
-      target: Literal.from(offer).toUrl(),
-    });
-
     this.localStream.getTracks().forEach((track) => {
       console.log("adding track", track);
       connection.addTrack(track, this.localStream);
+    });
+
+    await this.perspective.add({
+      source: recieverDid,
+      predicate: OFFER,
+      target: Literal.from(offer).toUrl(),
     });
   }
 
@@ -183,7 +183,7 @@ export default class WebRTCManager {
       connection.addTrack(track, this.localStream);
     });
 
-    this.perspective.add({
+    await this.perspective.add({
       source: fromDid,
       predicate: ANSWER,
       target: Literal.from(answer).toUrl(),
