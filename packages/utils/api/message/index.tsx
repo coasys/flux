@@ -5,41 +5,29 @@ import {
 } from "../../constants/communityPredicates";
 import { EntryType } from "../../types";
 import {
-  sdnaOutput,
+  SDNAClass,
   subjectProperty,
-  subjectPropertySetter,
   subjectCollection,
 } from "@perspect3vism/ad4m";
 
+@SDNAClass({
+  through: ENTRY_TYPE,
+  initial: EntryType.Message,
+  required: true,
+})
 export class Message {
-  @subjectProperty({
-    through: ENTRY_TYPE,
-    initial: EntryType.Message,
-    required: true,
-  })
-  type: string;
-
   @subjectProperty({
     through: BODY,
     resolve: true,
-  })
-  body: string;
-
-  @subjectPropertySetter({
     resolveLanguage: "literal",
   })
-  setBody(body: string) {}
+  body: string;
 
   @subjectCollection({
     through: REPLY_TO,
   })
   replies: string[];
   addReply(reply: string) {}
-
-  @sdnaOutput
-  static generateSDNA(): string {
-    return "";
-  }
 }
 
 export default Message;

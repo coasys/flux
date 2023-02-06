@@ -9,48 +9,31 @@ import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "../../constants/languages";
 import { EntryType, Entry } from "../../types";
 
 import {
-  sdnaOutput,
+  SDNAClass,
   subjectProperty,
-  subjectPropertySetter,
   subjectCollection,
 } from "@perspect3vism/ad4m";
 
+@SDNAClass({
+  through: ENTRY_TYPE,
+  initial: EntryType.Community,
+  required: true,
+})
 export class Community {
-  @subjectProperty({
-    through: ENTRY_TYPE,
-    initial: EntryType.Community,
-    required: true,
-  })
-  type: string;
-
-  @subjectProperty({ through: NAME, resolve: true })
+  @subjectProperty({ through: NAME, resolve: true, resolveLanguage: "literal" })
   name: string;
-  @subjectPropertySetter({ resolveLanguage: "literal" })
-  setName(name: string) {}
 
-  @subjectProperty({ through: DESCRIPTION, resolve: true })
+  @subjectProperty({ through: DESCRIPTION, resolve: true, resolveLanguage: "literal" })
   description: string;
-  @subjectPropertySetter({ resolveLanguage: "literal" })
-  setDescription(description: string) {}
 
-  @subjectProperty({ through: IMAGE })
+  @subjectProperty({ through: IMAGE, resolveLanguage: NOTE_IPFS_EXPRESSION_OFFICIAL })
   image: string;
-  @subjectPropertySetter({ resolveLanguage: NOTE_IPFS_EXPRESSION_OFFICIAL })
-  setImage(image: string) {}
 
-  @subjectProperty({ through: THUMBNAIL })
+  @subjectProperty({ through: THUMBNAIL, resolveLanguage: NOTE_IPFS_EXPRESSION_OFFICIAL })
   thumbnail: string;
-  @subjectPropertySetter({ resolveLanguage: NOTE_IPFS_EXPRESSION_OFFICIAL })
-  setThumbnail(thumbnail: string) {}
 
   @subjectCollection({ through: EntryType.Channel })
   channels: string[] = [];
-  addChannel(channel: string) {}
-
-  @sdnaOutput
-  static generateSDNA(): string {
-    return "";
-  }
 }
 
 export default Community;

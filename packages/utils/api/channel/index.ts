@@ -5,41 +5,28 @@ import {
 } from "../../constants/communityPredicates";
 import { EntryType, Entry, ChannelView } from "../../types";
 import {
-  sdnaOutput,
   subjectProperty,
-  subjectPropertySetter,
   subjectCollection,
+  SDNAClass
 } from "@perspect3vism/ad4m";
 
+@SDNAClass({
+  through: ENTRY_TYPE,
+  initial: EntryType.Channel,
+  required: true,
+})
 export class Channel {
-  @subjectProperty({
-    through: ENTRY_TYPE,
-    initial: EntryType.Channel,
-    required: true,
-  })
-  type: string;
-
   @subjectProperty({
     through: NAME,
     resolve: true,
-  })
-  name: string;
-
-  @subjectPropertySetter({
     resolveLanguage: "literal",
   })
-  setName(name: string) {}
+  name: string;
 
   @subjectCollection({
     through: CHANNEL_VIEW,
   })
   views: string[] = [];
-  addView(view: string) {}
-
-  @sdnaOutput
-  static generateSDNA(): string {
-    return "";
-  }
 }
 
 export interface UpdateChannel {
