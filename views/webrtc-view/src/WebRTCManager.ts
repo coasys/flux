@@ -6,6 +6,8 @@ import {
   Literal,
   LinkExpression,
 } from "@perspect3vism/ad4m";
+import { Connection } from "./types";
+import { defaultSettings } from "./constants";
 
 const servers = {
   iceServers: [
@@ -29,6 +31,7 @@ type Props = {
 export enum Event {
   PEER_ADDED = "peer-added",
   PEER_REMOVED = "peer-removed",
+  MESSAGE = "message",
 }
 
 export default class WebRTCManager {
@@ -39,10 +42,11 @@ export default class WebRTCManager {
   private callbacks: Record<Event, Array<(...args: any[]) => void>> = {
     [Event.PEER_ADDED]: [],
     [Event.PEER_REMOVED]: [],
+    [Event.MESSAGE]: [],
   };
 
   localStream: MediaStream;
-  connections = new Map<string, RTCPeerConnection>();
+  connections = new Map<string, Connection>();
 
   constructor(props: Props) {
     this.init(props);
@@ -61,7 +65,7 @@ export default class WebRTCManager {
   emitPeerEvents() {
     const that = this;
 
-    this.connections.set = function (key: string, value: RTCPeerConnection) {
+    this.connections.set = function (key: string, value: Connection) {
       console.log(`Added key: ${key} value: ${value} to the map`);
 
       that.callbacks[Event.PEER_ADDED].forEach((cb) => {
@@ -121,7 +125,7 @@ export default class WebRTCManager {
   async handleIceCandidate(fromDid: string, candidate: RTCIceCandidate) {
     const connection = this.connections.get(fromDid);
     if (connection) {
-      connection.addIceCandidate(new RTCIceCandidate(candidate));
+      connection.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
     }
   }
 
@@ -130,15 +134,31 @@ export default class WebRTCManager {
       return this.connections.get(did);
     }
 
-    const newConnection = new RTCPeerConnection(servers);
+    const peerConnection = new RTCPeerConnection(servers);
+    const dataChannel = peerConnection.createDataChannel("DataChannel");
+
+    const newConnection = {
+      peerConnection,
+      dataChannel,
+      settings: defaultSettings,
+    };
+
     this.connections.set(did, newConnection);
 
-    newConnection.addEventListener("icecandidate", (event) => {
+    peerConnection.addEventListener("icecandidate", (event) => {
       if (event.candidate) {
         this.perspective.add({
           source: did,
           predicate: ICE_CANDIDATE,
           target: Literal.from(event.candidate.toJSON()).toUrl(),
+        });
+      }
+    });
+
+    dataChannel.addEventListener("message", (event) => {
+      if (event.data) {
+        this.callbacks[Event.MESSAGE].forEach((cb) => {
+          cb(did, event.data);
         });
       }
     });
@@ -154,11 +174,11 @@ export default class WebRTCManager {
 
     this.localStream.getTracks().forEach((track) => {
       console.log("adding track", track);
-      connection.addTrack(track, this.localStream);
+      connection.peerConnection.addTrack(track, this.localStream);
     });
 
-    const offer = await connection.createOffer();
-    await connection.setLocalDescription(offer);
+    const offer = await connection.peerConnection.createOffer();
+    await connection.peerConnection.setLocalDescription(offer);
 
     await this.perspective.add({
       source: recieverDid,
@@ -172,16 +192,18 @@ export default class WebRTCManager {
     if (this.connections.get(fromDid)) return;
 
     const connection = await this.addConnection(fromDid);
-    await connection.setRemoteDescription(new RTCSessionDescription(offer));
+    await connection.peerConnection.setRemoteDescription(
+      new RTCSessionDescription(offer)
+    );
 
     this.localStream.getTracks().forEach((track) => {
       console.log("adding track", track);
-      connection.addTrack(track, this.localStream);
+      connection.peerConnection.addTrack(track, this.localStream);
     });
 
     // Create Answer to offer
-    const answer = await connection.createAnswer();
-    await connection.setLocalDescription(answer);
+    const answer = await connection.peerConnection.createAnswer();
+    await connection.peerConnection.setLocalDescription(answer);
 
     await this.perspective.add({
       source: fromDid,
@@ -192,9 +214,9 @@ export default class WebRTCManager {
 
   async handleAnswer(fromDid: string, answer: RTCSessionDescriptionInit) {
     const connection = this.connections.get(fromDid);
-    if (connection && !connection.currentRemoteDescription) {
+    if (connection && !connection.peerConnection.currentRemoteDescription) {
       const answerDescription = new RTCSessionDescription(answer);
-      await connection.setRemoteDescription(answerDescription);
+      await connection.peerConnection.setRemoteDescription(answerDescription);
     } else {
       console.warn("Couldn't handle answer from ", fromDid);
     }
@@ -204,8 +226,8 @@ export default class WebRTCManager {
     console.log("Start joining");
 
     this.localStream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: true,
+      audio: defaultSettings.audio,
+      video: defaultSettings.video,
     });
 
     await this.perspective.add({
@@ -221,7 +243,8 @@ export default class WebRTCManager {
 
   async leave() {
     this.connections.forEach((c) => {
-      c.close();
+      c.peerConnection.close();
+      c.dataChannel.close();
     });
   }
 }
