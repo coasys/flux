@@ -41,6 +41,7 @@ export function setProperties(subject: any, properties: QueryPartialEntity<{[x: 
       // it's a collection
       const adderName = collectionToAdderName(key);
       const adderFunction = subject[adderName];
+      console.log('llll 5', key, adderName, subject,adderFunction, properties[key])
       if(adderFunction) {
         adderFunction(properties[key]);
       } else {
@@ -96,10 +97,12 @@ export class SubjectRepository<SubjectClass extends {[x: string]: any}> {
       throw "Failed to create new instance of " + this.subject.type;
     }
 
+    console.log('wow', newInstance)
+
     // Connect new instance to source
     await this.perspective?.add(new Link({
       source: this.source, 
-      predicate: this.subject.type, 
+      predicate: await newInstance.type, 
       target: base
     }))
 
@@ -136,7 +139,7 @@ export class SubjectRepository<SubjectClass extends {[x: string]: any}> {
       );
 
     const results = await this.perspective?.infer(
-      `triple(${source}, _, X), instance(Class, X), subject_class(${subjectClass}, Class)`
+      `triple("${source || this.source}", _, X), instance(Class, X), subject_class("${subjectClass}", Class)`
     );
 
     if (!results) return [];
@@ -145,6 +148,8 @@ export class SubjectRepository<SubjectClass extends {[x: string]: any}> {
       results.map(async (result) => {
         let subject = new Subject(this.perspective!, result.X, subjectClass);
         await subject.init();
+
+        return subject;
       })
     );
   }
