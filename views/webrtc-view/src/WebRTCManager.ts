@@ -121,7 +121,7 @@ export default class WebRTCManager {
   async handleIceCandidate(fromDid: string, candidate: RTCIceCandidate) {
     const connection = this.connections.get(fromDid);
     if (connection) {
-      connection.addIceCandidate(new RTCIceCandidate(candidate));
+      connection.addIceCandidate(candidate);
     }
   }
 
@@ -133,7 +133,9 @@ export default class WebRTCManager {
     const newConnection = new RTCPeerConnection(servers);
     this.connections.set(did, newConnection);
 
+    console.log("🔵 Adding listener to: ", newConnection);
     newConnection.addEventListener("icecandidate", (event) => {
+      console.log("🔵 icecandidate triggered!");
       if (event.candidate) {
         this.perspective.add({
           source: did,
