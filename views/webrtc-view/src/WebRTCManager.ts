@@ -128,7 +128,7 @@ export default class WebRTCManager {
     }
   }
 
-  async addConnection(did: string) {
+  async addConnection(did: string, remote = false) {
     if (this.connections.get(did)) {
       return this.connections.get(did);
     }
@@ -168,10 +168,12 @@ export default class WebRTCManager {
     */
 
     // Connect the stream to the connection
-    this.localStream.getTracks().forEach((track) => {
-      console.log("adding track", track);
-      newConnection.addTrack(track, this.localStream);
-    });
+    if (!remote) {
+      this.localStream.getTracks().forEach((track) => {
+        console.log("adding track", track);
+        newConnection.addTrack(track, this.localStream);
+      });
+    }
 
     return newConnection;
   }
@@ -181,7 +183,7 @@ export default class WebRTCManager {
   }
 
   async handleAnswer(fromDid: string, answer: RTCSessionDescriptionInit) {
-    const connection = await this.addConnection(fromDid);
+    const connection = await this.addConnection(fromDid, true);
     const answerDescription = new RTCSessionDescription(answer);
     connection.setRemoteDescription(answerDescription);
   }
