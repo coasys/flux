@@ -10,10 +10,21 @@ type Props = {
   userId: string;
   settings?: Settings;
   reaction?: Reaction;
+  focused?: boolean;
+  minimised?: boolean;
   videoRef?: React.MutableRefObject<null>;
+  onToggleFocus: () => void;
 };
 
-export default function Item({ userId, settings, reaction, videoRef }: Props) {
+export default function Item({
+  userId,
+  settings,
+  focused,
+  minimised,
+  reaction,
+  videoRef,
+  onToggleFocus,
+}: Props) {
   const [profile, setProfile] = useState<Profile>();
 
   // Get user details
@@ -29,7 +40,11 @@ export default function Item({ userId, settings, reaction, videoRef }: Props) {
   }, [profile, userId]);
 
   return (
-    <div className={styles.item} data-camera-enabled={settings.video}>
+    <div
+      className={styles.item}
+      data-camera-enabled={settings.video}
+      data-focused={focused}
+    >
       <video
         ref={videoRef}
         className={styles.video}
@@ -38,7 +53,7 @@ export default function Item({ userId, settings, reaction, videoRef }: Props) {
         playsInline
       ></video>
 
-      <div className={styles.details}>
+      <div className={styles.details} onClick={onToggleFocus}>
         {profile?.username && (
           <>
             <j-avatar initials={profile.username?.charAt(0)}></j-avatar>

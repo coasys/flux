@@ -23,6 +23,7 @@ export default function UserGrid({
 }: Props) {
   const videoRef = useRef(null);
   const [currentReaction, setCurrentReaction] = useState<Reaction>(null);
+  const [focusedPeerId, setFocusedPeerId] = useState(null);
 
   const userCount = peers.length + (localStream ? 1 : 0);
   const myReaction =
@@ -35,10 +36,10 @@ export default function UserGrid({
   const gridColSize = userCount <= 4 ? 1 : 2;
   let gridRowSize = userCount <= 4 ? userCount : Math.ceil(userCount / 2);
 
-  // if (screenPresenter) {
-  //   gridCol = 1;
-  //   gridRowSize = 2;
-  // }
+  if (focusedPeerId) {
+    gridCol = 1;
+    gridRowSize = 2;
+  }
 
   useEffect(() => {
     if (videoRef.current) {
@@ -86,6 +87,11 @@ export default function UserGrid({
         userId={peer.did}
         settings={peer.settings}
         reaction={peerReaction}
+        focused={focusedPeerId === peer.did}
+        minimised={focusedPeerId && focusedPeerId !== peer.did}
+        onToggleFocus={() =>
+          setFocusedPeerId(focusedPeerId === peer.did ? null : peer.did)
+        }
       />
     );
   });
@@ -105,6 +111,13 @@ export default function UserGrid({
           videoRef={videoRef}
           settings={settings}
           reaction={myReaction}
+          focused={focusedPeerId === currentUser.did}
+          minimised={focusedPeerId && focusedPeerId !== currentUser.did}
+          onToggleFocus={() =>
+            setFocusedPeerId(
+              focusedPeerId === currentUser.did ? null : currentUser.did
+            )
+          }
         />
       )}
       {peerItems}

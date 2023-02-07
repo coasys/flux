@@ -61,6 +61,14 @@
     animation: appear-inner 0.6s cubic-bezier(0.77,-0.02, 0.27, 1.55) both 0.4s;
 }
 
+.item[data-focused="true"] {
+    max-width: 100%;
+}
+
+.item[data-focused="true"]:hover .details {
+    opacity: 0 !important;
+}
+
 .item[data-camera-enabled="true"] .video {
     opacity: 1;
 }
