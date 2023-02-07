@@ -1,6 +1,6 @@
 import { SDNAClass, subjectProperty } from "@perspect3vism/ad4m";
 import { EntryType } from "../../types";
-import { ENTRY_TYPE } from "../../constants";
+import { DID, ENTRY_TYPE } from "../../constants";
 
 @SDNAClass({
   through: ENTRY_TYPE,
@@ -10,6 +10,13 @@ import { ENTRY_TYPE } from "../../constants";
 })
 export class Member {
   isSubjectInstance = ['languageName(Base, "agent-expression-store")'];
+
+  @subjectProperty({
+    through: DID,
+    resolve: true,
+    resolveLanguage: "literal",
+  })
+  did: string;
 }
 
 export default Member;
