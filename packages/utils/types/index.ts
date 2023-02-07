@@ -182,3 +182,11 @@ export interface ModelProperty {
   languageAddress?: string;
   resolve: boolean;
 }
+
+export interface WebLink {
+  title: string;
+  description: string;
+  image: string;
+  url: string;
+  id: string;
+}
