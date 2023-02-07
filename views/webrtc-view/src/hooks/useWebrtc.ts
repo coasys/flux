@@ -11,6 +11,7 @@ export default function useWebRTC({ source, uuid }) {
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [isInitialised, setIsInitialised] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [connections, setConnections] = useState<Peer[]>([]);
   const [reactions, setReactions] = useState<Reaction[]>([]);
 
@@ -41,13 +42,18 @@ export default function useWebRTC({ source, uuid }) {
       );
 
       manager.current.on(Event.PEER_REMOVED, (did) => {
-        console.log("peer removed");
         setConnections((oldConnections) => {
           return oldConnections.filter((c) => c.did !== did);
         });
       });
 
       manager.current.on(Event.CONNECTION_STATE, (did, state) => {
+        if (state === "connected") {
+          setIsLoading(false);
+        }
+      });
+
+      manager.current.on(Event.CONNECTION_STATE_DATA, (did, state) => {
         if (state === "connected") {
           manager.current.sendMessage("request-settings", did);
         }
@@ -63,18 +69,19 @@ export default function useWebRTC({ source, uuid }) {
         }
 
         if (type === "settings" && did !== agent.did) {
-          const match = connections.find((c) => c.did === did);
-          if (!match) return;
+          setConnections((oldConnections) => {
+            const match = oldConnections.find((c) => c.did === did);
+            if (!match) {
+              return oldConnections;
+            }
 
-          const newPeer = {
-            ...match,
-            settings: message,
-          };
+            const newPeer = {
+              ...match,
+              settings: message,
+            };
 
-          setConnections((oldConnections) => [
-            ...oldConnections.filter((c) => c.did !== did),
-            newPeer,
-          ]);
+            return [...oldConnections.filter((c) => c.did !== did), newPeer];
+          });
         }
       });
 
@@ -87,6 +94,7 @@ export default function useWebRTC({ source, uuid }) {
   }, [source, uuid, isInitialised, agent]);
 
   async function onJoin() {
+    setIsLoading(true);
     const stream = await manager.current?.join(settings);
     setLocalStream(stream);
     setHasJoined(true);
@@ -111,11 +119,13 @@ export default function useWebRTC({ source, uuid }) {
     if (videoChanged) {
       onToggleCamera(newSettings.video);
       setSettings(newSettings);
+      manager.current?.sendMessage("settings", newSettings);
     }
 
     if (audioChanged) {
-      onToggleAudio(newSettings.video);
+      onToggleAudio(newSettings.audio);
       setSettings(newSettings);
+      manager.current?.sendMessage("settings", newSettings);
     }
 
     if (screenChanged) {
@@ -163,6 +173,7 @@ export default function useWebRTC({ source, uuid }) {
       mediaStream.getVideoTracks()[0].onended = () => onEndScreenShare();
 
       setSettings({ ...settings, screen: true });
+      manager.current?.sendMessage("settings", { ...settings, screen: true });
       updateStream(mediaStream);
     }
   }
@@ -181,6 +192,7 @@ export default function useWebRTC({ source, uuid }) {
     newLocalStream.getAudioTracks()[0].enabled = settings.audio;
 
     setSettings({ ...settings, screen: false });
+    manager.current?.sendMessage("settings", { ...settings, screen: false });
     updateStream(newLocalStream);
   }
 
@@ -202,6 +214,7 @@ export default function useWebRTC({ source, uuid }) {
     reactions,
     isInitialised,
     hasJoined,
+    isLoading,
     onJoin,
     onLeave,
     onChangeSettings,

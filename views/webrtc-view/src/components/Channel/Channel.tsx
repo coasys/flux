@@ -17,6 +17,7 @@ export default function Channel({ source, uuid }) {
     reactions,
     settings,
     hasJoined,
+    isLoading,
     localStream,
     onChangeSettings,
     onJoin,
@@ -51,6 +52,7 @@ export default function Channel({ source, uuid }) {
             <j-box pt="200">
               <j-toggle
                 checked={settings.video}
+                disabled={isLoading}
                 onChange={() =>
                   onChangeSettings({ ...settings, video: !settings.video })
                 }
@@ -60,7 +62,12 @@ export default function Channel({ source, uuid }) {
             </j-box>
 
             <j-box pt="500">
-              <j-button variant="primary" size="lg" onClick={onJoin}>
+              <j-button
+                variant="primary"
+                size="lg"
+                loading={isLoading}
+                onClick={onJoin}
+              >
                 Join room!
               </j-button>
             </j-box>

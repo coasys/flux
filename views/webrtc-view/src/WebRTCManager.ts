@@ -46,6 +46,7 @@ export enum Event {
   PEER_ADDED = "peer-added",
   PEER_REMOVED = "peer-removed",
   CONNECTION_STATE = "connectionstate",
+  CONNECTION_STATE_DATA = "connectionstateData",
   MESSAGE = "message",
 }
 
@@ -59,6 +60,7 @@ export default class WebRTCManager {
     [Event.PEER_REMOVED]: [],
     [Event.MESSAGE]: [],
     [Event.CONNECTION_STATE]: [],
+    [Event.CONNECTION_STATE_DATA]: [],
   };
 
   localStream: MediaStream;
@@ -165,6 +167,11 @@ export default class WebRTCManager {
     peerConnection.ondatachannel = ({ channel }) => {
       console.log("Datachannel established");
       dataChannel = channel;
+
+      this.callbacks[Event.CONNECTION_STATE_DATA].forEach((cb) => {
+        cb(did, "connected");
+      });
+
       dataChannel.addEventListener("message", (event) => {
         if (event.data) {
           console.log("📩 Received message -> ", event.data);
@@ -308,7 +315,9 @@ export default class WebRTCManager {
   }
 
   async leave() {
-    this.perspective.removeListener("link-added", this.onLink);
+    if (this.perspective) {
+      this.perspective.removeListener("link-added", this.onLink);
+    }
 
     this.connections.forEach((c, key) => {
       // Closing connection will not trigger iceconnectionstatechange
