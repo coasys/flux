@@ -34,17 +34,17 @@ function useWebRTC({ source, uuid }) {
       manager.current = new WebRTCManager({ source, uuid });
 
       manager.current.on(Event.PEER_ADDED, (did, connection: Connection) => {
-        const newPeer = {
-          did,
-          connection,
-          settings: defaultSettings,
-        };
-        setConnections([...connections, newPeer]);
+        setConnections((oldConnections) => [
+          ...oldConnections,
+          { did, connection, settings: defaultSettings },
+        ]);
       });
 
       manager.current.on(Event.PEER_REMOVED, (did) => {
         const filter = connections.filter((c) => c.did !== did);
-        setConnections(filter);
+        setConnections((oldConnections) => {
+          return oldConnections.filter((c) => c.did !== did);
+        });
       });
 
       manager.current.on(Event.MESSAGE, (did, event: MessageEvent<any>) => {
