@@ -9,21 +9,25 @@ export interface Payload {
 export default async (communityId: string): Promise<void> => {
   const dataStore = useDataStore();
 
+  const community = dataStore.getCommunity(communityId)
+
   const Community = new Factory(CommunityModel, {
     perspectiveUuid: communityId,
   });
 
-  const community = await Community.get();
+  const loadedCommunity = await Community.get(community.id);
 
-  if (community) {
-    const { name, description, image, thumbnail } = community;
+  console.log('mem load', loadedCommunity)
+
+  if (loadedCommunity) {
+    const { name, description, image, thumbnail } = loadedCommunity;
     dataStore.updateCommunityMetadata({
       communityId,
       metadata: {
-        name,
-        description,
-        image,
-        thumbnail,
+        name: await name,
+        description: await description,
+        image: await image,
+        thumbnail: await thumbnail,
       },
     });
   }
