@@ -26,8 +26,6 @@ export default function Channel({ source, uuid }) {
     uuid,
   });
 
-  console.log(reactions);
-
   // Get agent/me
   useEffect(() => {
     async function fetchAgent() {

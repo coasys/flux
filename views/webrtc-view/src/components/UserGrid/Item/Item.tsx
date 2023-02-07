@@ -32,8 +32,6 @@ export default function Item({
     }
   }, [profile, userId]);
 
-  console.log("Internal reaction : ", reaction);
-
   return (
     <div className={styles.item} data-camera-enabled={cameraEnabled}>
       <video
