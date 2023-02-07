@@ -106,7 +106,7 @@ export default class WebRTCManager {
   async onLink(link: LinkExpression): Promise<void> {
     if (link.author === this.agent.did) return;
 
-    console.log({ link });
+    console.log(`🔵 ${link?.data?.predicate}`, { link });
 
     if (
       link.data.predicate === OFFER_REQUEST &&
@@ -169,7 +169,7 @@ export default class WebRTCManager {
     });
 
     peerConnection.addEventListener("iceconnectionstatechange", (event) => {
-      console.log("connection state", peerConnection.connectionState);
+      console.log("🟠 connection state", peerConnection.connectionState);
       if (peerConnection.connectionState === "closed") {
         this.connections.delete(did);
       }
