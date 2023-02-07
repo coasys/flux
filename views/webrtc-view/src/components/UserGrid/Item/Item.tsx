@@ -63,8 +63,7 @@ export default function Item({ userId, settings, reaction, videoRef }: Props) {
         {reaction && (
           <div className={styles.reaction}>
             <div className={styles["reaction-inner"]}>
-              <>{reaction.reaction === "like" && <span>👍</span>}</>
-              <>{reaction.reaction === "dislike" && <span>👎</span>}</>
+              <span>{reaction.reaction}</span>
             </div>
           </div>
         )}

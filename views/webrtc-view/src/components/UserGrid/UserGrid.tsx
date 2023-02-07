@@ -48,13 +48,13 @@ export default function UserGrid({
   }, [videoRef, localStream]);
 
   useEffect(() => {
-    if (reactions.length > 0) {
-      setCurrentReaction(reactions[reactions.length - 1]);
-
-      setTimeout(() => {
-        setCurrentReaction(null);
-      }, 3500);
+    if (reactions.length < 0) {
+      return;
     }
+
+    setCurrentReaction(reactions[reactions.length - 1]);
+    const timeOutId = setTimeout(() => setCurrentReaction(null), 3500);
+    return () => clearTimeout(timeOutId);
   }, [reactions]);
 
   // Build participant elements

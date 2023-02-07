@@ -1,5 +1,4 @@
-import { useContext } from "preact/hooks";
-import WebRTCContext from "../../context/WebRTCContext";
+import { useEffect, useRef } from "preact/hooks";
 import { Settings } from "../../WebRTCManager";
 
 import styles from "./Footer.module.css";
@@ -21,6 +20,27 @@ export default function Footer({
   onReaction,
   onLeave,
 }: Props) {
+  const emojiPicker = useRef();
+
+  useEffect(() => {
+    if (emojiPicker.current) {
+      emojiPicker.current.addEventListener("emoji-click", onEmojiClick);
+    }
+
+    return () => {
+      if (emojiPicker.current) {
+        emojiPicker.current.removeEventListener("emoji-click", onEmojiClick);
+      }
+    };
+  }, [emojiPicker.current]);
+
+  const onEmojiClick = (event) => {
+    onReaction(event.detail.unicode);
+    if (emojiPicker.current) {
+      // emojiPicker.current.close();
+    }
+  };
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.inner}>
@@ -80,31 +100,22 @@ export default function Footer({
           </j-button>
         </j-tooltip>
 
-        <j-tooltip placement="top" title="Send like">
-          <j-button
-            variant="transparent"
-            onClick={() => onReaction("like")}
-            square
-            circle
-            disabled={!hasJoined}
-            size="lg"
-          >
-            <j-icon name="hand-thumbs-up"></j-icon>
-          </j-button>
-        </j-tooltip>
-
-        <j-tooltip placement="top" title="Send dislike">
-          <j-button
-            variant="transparent"
-            onClick={() => onReaction("dislike")}
-            square
-            circle
-            disabled={!hasJoined}
-            size="lg"
-          >
-            <j-icon name="hand-thumbs-down"></j-icon>
-          </j-button>
-        </j-tooltip>
+        <j-popover placement="top">
+          <j-tooltip slot="trigger" placement="top" title="Send reaction">
+            <j-button
+              variant="transparent"
+              square
+              circle
+              disabled={!hasJoined}
+              size="lg"
+            >
+              <j-icon name="emoji-neutral"></j-icon>
+            </j-button>
+          </j-tooltip>
+          <div slot="content">
+            <emoji-picker class={styles.picker} ref={emojiPicker} />
+          </div>
+        </j-popover>
 
         <j-tooltip placement="auto" title="Leave">
           <j-button
