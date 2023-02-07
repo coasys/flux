@@ -157,9 +157,16 @@ export default class WebRTCManager {
 
     dataChannel.addEventListener("message", (event) => {
       if (event.data) {
-        this.callbacks[Event.MESSAGE].forEach((cb) => {
-          cb(did, event.data);
-        });
+        let parsedData;
+        try {
+          parsedData = JSON.parse(event.data);
+        } catch (e) {
+          parsedData = event.data;
+        } finally {
+          this.callbacks[Event.MESSAGE].forEach((cb) => {
+            cb(did, parsedData);
+          });
+        }
       }
     });
 
@@ -220,6 +227,14 @@ export default class WebRTCManager {
     } else {
       console.warn("Couldn't handle answer from ", fromDid);
     }
+  }
+
+  async sendMessage(message: string, recepients?: string[]) {
+    this.connections.forEach((e, key) => {
+      if (!recepients || recepients.includes(key)) {
+        e.dataChannel.send(message);
+      }
+    });
   }
 
   async join() {
