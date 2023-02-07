@@ -151,7 +151,12 @@ export default class WebRTCManager {
     }
 
     const peerConnection = new RTCPeerConnection(servers);
-    const dataChannel = peerConnection.createDataChannel("DataChannel");
+    let dataChannel = peerConnection.createDataChannel("DataChannel");
+
+    peerConnection.ondatachannel = ({ channel }) => {
+      console.log("Datachannel established");
+      dataChannel = channel;
+    };
 
     const newConnection = {
       peerConnection,
@@ -257,13 +262,13 @@ export default class WebRTCManager {
   }
 
   async sendMessage(type: string, message: any, recepients?: string[]) {
-    console.log("✉️ Sending message -> ", type, message);
     const data = JSON.stringify({
       type,
       message,
     });
     this.connections.forEach((e, key) => {
       if (!recepients || recepients.includes(key)) {
+        console.log(`✉️ Sending message to ${key} -> `, type, message);
         e.dataChannel.send(data);
       }
     });
