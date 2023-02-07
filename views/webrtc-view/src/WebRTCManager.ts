@@ -136,7 +136,8 @@ export default class WebRTCManager {
 
   async handleIceCandidate(fromDid: string, candidate: RTCIceCandidate) {
     const connection = this.connections.get(fromDid);
-    if (connection) {
+    // Make sure we have a remote description;
+    if (connection && connection.peerConnection.remoteDescription) {
       connection.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
     }
   }
@@ -168,6 +169,7 @@ export default class WebRTCManager {
     });
 
     peerConnection.addEventListener("iceconnectionstatechange", (event) => {
+      console.log("connection state", peerConnection.connectionState);
       if (peerConnection.connectionState === "closed") {
         peerConnection.close();
         this.connections.delete(did);

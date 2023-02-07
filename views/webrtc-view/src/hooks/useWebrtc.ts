@@ -22,7 +22,7 @@ export default function useWebRTC({ source, uuid }) {
       });
 
       manager.current.on(Event.PEER_REMOVED, (did) => {
-        const filter = connections.filter((c) => c.did !== did);
+        console.log("peer removed");
         setConnections((oldConnections) => {
           return oldConnections.filter((c) => c.did !== did);
         });
