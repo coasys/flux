@@ -169,11 +169,12 @@ export default class WebRTCManager {
     });
 
     peerConnection.addEventListener("iceconnectionstatechange", (event) => {
-      console.log("🟠 connection state", peerConnection.connectionState);
-      if (peerConnection.connectionState === "closed") {
+      const c = event.target as RTCPeerConnection;
+      console.log("connection state is", c.iceConnectionState);
+      if (c.iceConnectionState === "closed") {
         this.connections.delete(did);
       }
-      if (peerConnection.connectionState === "connected") {
+      if (c.iceConnectionState === "connected") {
         this.callbacks[Event.PEER_CONNECTED].forEach((cb) => {
           cb(did);
         });
