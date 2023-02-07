@@ -29,13 +29,18 @@ function useWebRTC({ source, uuid }) {
       manager.current.on(
         Event.PEER_ADDED,
         (did, connection: RTCPeerConnection) => {
-          setConnections([...connections, { did, connection }]);
+          setConnections((oldConnections) => [
+            ...oldConnections,
+            { did, connection },
+          ]);
         }
       );
 
       manager.current.on(Event.PEER_REMOVED, (did) => {
         const filter = connections.filter((c) => c.did !== did);
-        setConnections(filter);
+        setConnections((oldConnections) => {
+          return oldConnections.filter((c) => c.did !== did);
+        });
       });
 
       setIsInitialised(true);
