@@ -6,8 +6,6 @@ import {
   Literal,
   LinkExpression,
 } from "@perspect3vism/ad4m";
-import { Connection } from "./types";
-import { defaultSettings } from "./constants";
 
 const servers = {
   iceServers: [
@@ -23,12 +21,23 @@ const servers = {
   iceCandidatePoolSize: 10,
 };
 
-const ICE_CANDIDATE = "ice-candidate";
-const OFFER_REQUEST = "offer-request";
-const OFFER = "offer";
-const ANSWER = "answer";
+export const ICE_CANDIDATE = "ice-candidate";
+export const OFFER_REQUEST = "offer-request";
+export const OFFER = "offer";
+export const ANSWER = "answer";
 
-type Props = {
+export type Connection = {
+  peerConnection: RTCPeerConnection;
+  dataChannel: RTCDataChannel;
+};
+
+export type Settings = {
+  video: boolean;
+  audio: boolean;
+  screen: boolean;
+};
+
+export type Props = {
   uuid: string;
   source: string;
 };
@@ -176,7 +185,6 @@ export default class WebRTCManager {
     const newConnection = {
       peerConnection,
       dataChannel,
-      settings: defaultSettings,
     };
 
     this.connections.set(did, newConnection);
@@ -278,12 +286,14 @@ export default class WebRTCManager {
     });
   }
 
-  async join() {
+  async join(initialSettings?: Settings) {
     console.log("Start joining");
 
+    let settings = { audio: true, video: false, ...initialSettings };
+
     this.localStream = await navigator.mediaDevices.getUserMedia({
-      audio: defaultSettings.audio,
-      video: defaultSettings.video,
+      audio: settings.audio,
+      video: settings.video,
     });
 
     await this.perspective.add({

@@ -81,7 +81,7 @@ export default function UserGrid({
       <Item
         key={peer.did}
         userId={peer.did}
-        cameraEnabled={true}
+        cameraEnabled={peer.settings.video}
         reaction={peerReaction}
       />
     );

@@ -1,11 +1,9 @@
-export type Connection = {
-  peerConnection: RTCPeerConnection;
-  dataChannel: RTCDataChannel;
-};
-
 export type Peer = {
   did: string;
-  connection: Connection;
+  connection: {
+    peerConnection: RTCPeerConnection;
+    dataChannel: RTCDataChannel;
+  };
   settings: {
     video: boolean;
     audio: boolean;
