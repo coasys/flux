@@ -139,7 +139,7 @@ export class SubjectRepository<SubjectClass extends {[x: string]: any}> {
       );
 
     const results = await this.perspective?.infer(
-      `triple("${source || this.source}", _, X), instance(Class, X), subject_class("${subjectClass}", Class)`
+      `triple("${source || this.source}", "${this.tempSubject.prototype.type}", X), instance(Class, X), subject_class("${subjectClass}", Class)`
     );
 
     if (!results) return [];
