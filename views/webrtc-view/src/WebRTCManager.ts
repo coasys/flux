@@ -36,6 +36,7 @@ type Props = {
 export enum Event {
   PEER_ADDED = "peer-added",
   PEER_REMOVED = "peer-removed",
+  PEER_CONNECTED = "peer-connected",
   MESSAGE = "message",
 }
 
@@ -48,6 +49,7 @@ export default class WebRTCManager {
     [Event.PEER_ADDED]: [],
     [Event.PEER_REMOVED]: [],
     [Event.MESSAGE]: [],
+    [Event.PEER_CONNECTED]: [],
   };
 
   localStream: MediaStream;
@@ -161,6 +163,18 @@ export default class WebRTCManager {
           source: did,
           predicate: ICE_CANDIDATE,
           target: Literal.from(event.candidate.toJSON()).toUrl(),
+        });
+      }
+    });
+
+    peerConnection.addEventListener("iceconnectionstatechange", (event) => {
+      if (peerConnection.connectionState === "closed") {
+        peerConnection.close();
+        this.connections.delete(did);
+      }
+      if (peerConnection.connectionState === "connected") {
+        this.callbacks[Event.PEER_CONNECTED].forEach((cb) => {
+          cb(did);
         });
       }
     });
