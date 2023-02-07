@@ -43,8 +43,12 @@ export default function Item({
       ></video>
 
       <div className={styles.details}>
-        <j-avatar initials={profile?.username.charAt(0)}></j-avatar>
-        <j-text>{profile?.username}</j-text>
+        {profile.username && (
+          <>
+            <j-avatar initials={profile.username?.charAt(0)}></j-avatar>
+            <j-text>{profile.username}</j-text>
+          </>
+        )}
       </div>
       <>
         {reaction && (
