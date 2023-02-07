@@ -3,8 +3,8 @@ import {
   AD4M_PREDICATE_USERNAME,
   AD4M_PREDICATE_FIRSTNAME,
   AD4M_PREDICATE_LASTNAME,
-} from "utils/constants/profile";
-import { mapLiteralLinks } from "utils/helpers/linkHelpers";
+} from "utils/constants";
+import { mapLiteralLinks } from "utils/helpers";
 
 type Ad4mProfile = {
   username: string;

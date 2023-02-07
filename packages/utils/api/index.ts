@@ -40,6 +40,10 @@ import Community from "./community";
 import Member from "./member";
 import Message from "./message";
 import Post from "./post";
+import updateProfile from "./updateProfile";
+import createProfile from "./createProfile";
+import createAgentWebLink from "./createAgentWebLink";
+import getAgentWebLinks from './getAgentWebLinks'
 
 export {
   Channel,
@@ -78,4 +82,8 @@ export {
   subscribeToLinks,
   updateEntry,
   updateSDNA,
+  updateProfile,
+  createProfile,
+  createAgentWebLink,
+  getAgentWebLinks
 };

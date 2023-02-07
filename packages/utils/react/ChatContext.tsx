@@ -11,7 +11,7 @@ import getMessages from "../api/getMessages";
 import createMessage from "../api/createMessage";
 import subscribeToLinks from "../api/subscribeToLinks";
 import getMessage from "../api/getMessage";
-import { linkIs } from "../helpers/linkHelpers";
+import { linkIs } from "../helpers";
 import deleteMessageReaction from "../api/deleteMessageReaction";
 import createMessageReaction from "../api/createMessageReaction";
 import createReply from "../api/createReply";

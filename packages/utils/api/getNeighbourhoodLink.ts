@@ -1,6 +1,6 @@
 import retry from "../helpers/retry";
 import { LinkQuery, Literal } from "@perspect3vism/ad4m";
-import { findLink, mapLiteralLinks } from "../helpers/linkHelpers";
+import { findLink, mapLiteralLinks } from "../helpers";
 import {
   CARD_HIDDEN,
   DESCRIPTION,

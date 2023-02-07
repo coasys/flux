@@ -5,7 +5,7 @@ import ChannelModel from "../api/channel";
 import MemberModel from "../api/member";
 import CommunityModel from "../api/community";
 import { SELF } from "../constants/communityPredicates";
-import getProfile from "../api/getProfile";
+import { getProfile } from "../api";
 
 type State = {
   uuid: string;

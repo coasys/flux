@@ -1,5 +1,5 @@
 import { Profile } from "utils/types";
-import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
+import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants";
 import {
   FLUX_PROFILE,
   HAS_BG_IMAGE,
@@ -14,9 +14,9 @@ import {
   blobToDataURL,
 } from "utils/helpers";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import { createLinks, createLiteralLinks } from "utils/helpers/linkHelpers";
-import { cacheImage } from "utils/helpers/cacheImage";
-import getProfile from "utils/api/getProfile";
+import { createLinks, createLiteralLinks } from "utils/helpers";
+import { cacheImage } from "utils/helpers";
+import { getProfile } from "utils/api";
 
 export interface Payload {
   username?: string;

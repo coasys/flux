@@ -7,7 +7,7 @@ import {
   URL,
   ENTRY_TYPE,
 } from "../../constants/communityPredicates";
-import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "../../constants/languages";
+import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "../../constants";
 import { EntryType } from "../../types";
 import {
   SDNAClass,

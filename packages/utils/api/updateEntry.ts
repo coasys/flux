@@ -1,6 +1,6 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { PredicateMap } from "../types";
-import { createLinks } from "../helpers/linkHelpers";
+import { createLinks } from "../helpers";
 import { LinkQuery } from "@perspect3vism/ad4m";
 
 export async function updateEntry(

@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { PERSPECTIVE_DIFF_SYNC } from "../constants/languages";
+import { PERSPECTIVE_DIFF_SYNC } from "../constants";
 import { MEMBER, SELF } from "../constants/communityPredicates";
 import { Community as FluxCommunity } from "../types";
 import { createNeighbourhoodMeta } from "../helpers/createNeighbourhoodMeta";

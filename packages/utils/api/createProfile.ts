@@ -14,7 +14,7 @@ import {
   resizeImage,
   dataURItoBlob,
   blobToDataURL,
-} from "utils/helpers/profileHelpers";
+} from "utils/helpers";
 import {
   Ad4mClient,
   Link,

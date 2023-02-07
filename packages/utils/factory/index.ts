@@ -1,1 +1,1 @@
-export * from './BaseAdamFactory'
+export * from './SubjectRepository'

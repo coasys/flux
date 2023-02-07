@@ -1,4 +1,4 @@
-import { findLink } from "../helpers/linkHelpers";
+import { findLink } from "../helpers";
 import { getMetaFromLinks } from "../helpers";
 import { keyedLanguages } from "../helpers/languageHelpers";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";

@@ -2,7 +2,7 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { v4 as uuidv4 } from "uuid";
 import { Link } from "@perspect3vism/ad4m";
 import { Entry, EntryInput } from "../types";
-import { createLinks } from "../helpers/linkHelpers";
+import { createLinks } from "../helpers";
 import { ENTRY_TYPE, SELF } from "../constants/communityPredicates";
 
 export async function createEntry(entry: EntryInput): Promise<Entry> {
