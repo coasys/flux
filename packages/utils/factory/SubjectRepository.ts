@@ -2,7 +2,7 @@ import { PerspectiveProxy, Link, Subject, LinkExpression, Ad4mClient } from "@pe
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { subscribeToLinks } from "../api";
 import { SELF } from "../constants/communityPredicates";
-import { collectionToAdderName } from "../helpers";
+import { collectionToAdderName, collectionToSetterName } from "../helpers";
 import { PropertyMap, PropertyValueMap } from "../types";
 import { v4 as uuidv4 } from "uuid";
 
@@ -36,17 +36,47 @@ export function pluralToSingular(plural: string): string {
 }
 
 export function setProperties(subject: any, properties: QueryPartialEntity<{[x: string]: any}>) {
+  const adder = (key: string,  value: any) => {
+    // it's a collection
+    const adderName = collectionToAdderName(key);
+    const adderFunction = subject[adderName];
+    if(adderFunction) {
+      adderFunction(value);
+    } else {
+      throw "No adder function found for collection: " + key;
+    }
+  }
+
+  const setter = (key: string, value: any) => {
+    // it's a collection
+    const setterName = collectionToSetterName(key);
+    const setterFunction = subject[setterName];
+    if(setterFunction) {
+      setterFunction(value);
+    } else {
+      throw "No adder function found for collection: " + key;
+    }
+  }
+
   Object.keys(properties).forEach((key) => {
-    if(Array.isArray(properties[key])) {
-      // it's a collection
-      const adderName = collectionToAdderName(key);
-      const adderFunction = subject[adderName];
-      console.log('llll 5', key, adderName, subject,adderFunction, properties[key])
-      if(adderFunction) {
-        adderFunction(properties[key]);
+    if(Array.isArray(properties[key]) || Array.isArray(properties[key]?.value)) {
+      if (properties[key].action) {
+        switch (properties[key].action) {
+          case 'setter':
+            setter(key, properties[key].value)
+            break;
+          case 'adder':
+            adder(key, properties[key].value);
+            break
+          default:
+            adder(key, properties[key].value);
+            break;
+        }
       } else {
-        throw "No adder function found for collection: " + key;
+        // it's a collection
+        adder(key, properties[key]);
       }
+      // console.log('llll 5', key, adderName, subject,adderFunction, properties[key])
     } else {
       // it's a property
       const setterName = propertyNameToSetterName(key);
