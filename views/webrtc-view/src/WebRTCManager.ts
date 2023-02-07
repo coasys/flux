@@ -156,6 +156,21 @@ export default class WebRTCManager {
     peerConnection.ondatachannel = ({ channel }) => {
       console.log("Datachannel established");
       dataChannel = channel;
+      dataChannel.addEventListener("message", (event) => {
+        if (event.data) {
+          console.log("📩 Received message -> ", event.data);
+          let parsedData;
+          try {
+            parsedData = JSON.parse(event.data);
+          } catch (e) {
+            parsedData = event.data;
+          } finally {
+            this.callbacks[Event.MESSAGE].forEach((cb) => {
+              cb(did, parsedData.type || "unknown", parsedData.message);
+            });
+          }
+        }
+      });
     };
 
     const newConnection = {
@@ -186,22 +201,6 @@ export default class WebRTCManager {
       this.callbacks[Event.CONNECTION_STATE].forEach((cb) => {
         cb(did, c.iceConnectionState);
       });
-    });
-
-    dataChannel.addEventListener("message", (event) => {
-      if (event.data) {
-        console.log("📩 Received message -> ", event.data);
-        let parsedData;
-        try {
-          parsedData = JSON.parse(event.data);
-        } catch (e) {
-          parsedData = event.data;
-        } finally {
-          this.callbacks[Event.MESSAGE].forEach((cb) => {
-            cb(did, parsedData.type || "unknown", parsedData.message);
-          });
-        }
-      }
     });
 
     return newConnection;
