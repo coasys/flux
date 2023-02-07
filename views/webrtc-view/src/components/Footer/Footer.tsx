@@ -9,6 +9,7 @@ export default function Footer({
   onToggleCamera,
   // onToggleScreen,
   onToggleDebug,
+  onReaction,
   onLeave,
 }) {
   // const cameraEnabled = currentUser && currentUser.prefrences.video;
@@ -59,6 +60,30 @@ export default function Footer({
             disabled={!hasJoined}
           >
             <j-icon name="door-closed"></j-icon>
+          </j-button>
+        </j-tooltip>
+
+        <j-tooltip placement="top" title="Send reaction">
+          <j-button
+            variant="transparent"
+            onClick={() => onReaction("smile")}
+            square
+            circle
+            size="lg"
+          >
+            <j-icon name="emoji-smile"></j-icon>
+          </j-button>
+        </j-tooltip>
+
+        <j-tooltip placement="top" title="Experiments">
+          <j-button
+            variant="transparent"
+            onClick={onToggleDebug}
+            square
+            circle
+            size="lg"
+          >
+            <j-icon name="stars"></j-icon>
           </j-button>
         </j-tooltip>
 

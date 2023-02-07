@@ -79,7 +79,7 @@ export default class WebRTCManager {
     const that = this;
 
     this.connections.set = function (key: string, value: Connection) {
-      console.log(`Added key: ${key} value: ${value} to the map`);
+      console.log(`✅ Added key: ${key} value: ${value} to the map`);
 
       that.callbacks[Event.PEER_ADDED].forEach((cb) => {
         cb(key, value);
@@ -90,7 +90,7 @@ export default class WebRTCManager {
 
     // Listen for deletions from the map
     this.connections.delete = function (key: string) {
-      console.log(`Deleted key: ${key} from the map`);
+      console.log(`🚫 Deleted key: ${key} from the map`);
 
       that.callbacks[Event.PEER_REMOVED].forEach((cb) => {
         cb(key);
@@ -173,8 +173,7 @@ export default class WebRTCManager {
 
     peerConnection.addEventListener("iceconnectionstatechange", (event) => {
       const c = event.target as RTCPeerConnection;
-      console.log("connection state is", c.iceConnectionState);
-
+      console.log("🔄 connection state is", c.iceConnectionState);
       if (c.iceConnectionState === "disconnected") {
         this.connections.delete(did);
       }
@@ -209,7 +208,6 @@ export default class WebRTCManager {
     const connection = await this.addConnection(recieverDid);
 
     this.localStream.getTracks().forEach((track) => {
-      console.log("adding track", track);
       connection.peerConnection.addTrack(track, this.localStream);
     });
 
@@ -233,7 +231,6 @@ export default class WebRTCManager {
     );
 
     this.localStream.getTracks().forEach((track) => {
-      console.log("adding track", track);
       connection.peerConnection.addTrack(track, this.localStream);
     });
 

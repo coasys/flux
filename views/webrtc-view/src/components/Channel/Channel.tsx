@@ -19,6 +19,7 @@ export default function Channel({ source, uuid }) {
     onToggleCamera,
     onJoin,
     onLeave,
+    onReaction,
   } = useWebRTC({
     source,
     uuid,
@@ -60,6 +61,7 @@ export default function Channel({ source, uuid }) {
         hasJoined={hasJoined}
         onToggleCamera={onToggleCamera}
         onToggleDebug={() => setShowDebug(!showDebug)}
+        onReaction={onReaction}
         onLeave={onLeave}
       />
     </section>

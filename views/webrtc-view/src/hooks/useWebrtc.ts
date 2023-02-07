@@ -29,6 +29,12 @@ export default function useWebRTC({ source, uuid }) {
       });
 
       manager.current.on(Event.MESSAGE, (did, event: MessageEvent<any>) => {
+        const [type = "", data = ""] = event.data.split("-");
+
+        if (type === "reaction") {
+          // WIP
+        }
+
         // const match = connections.find((c) => c.did === did);
         // if (!match) {
         //   return;
@@ -73,8 +79,13 @@ export default function useWebRTC({ source, uuid }) {
 
   async function onLeave() {
     await manager.current?.leave();
+    setConnections([]);
     setLocalStream(null);
     setHasJoined(false);
+  }
+
+  async function onReaction(reaction: string) {
+    await manager.current?.sendMessage(`reaction-${reaction}`);
   }
 
   function onToggleCamera() {
@@ -92,5 +103,6 @@ export default function useWebRTC({ source, uuid }) {
     onJoin,
     onLeave,
     onToggleCamera,
+    onReaction,
   };
 }
