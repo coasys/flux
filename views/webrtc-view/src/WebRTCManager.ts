@@ -65,6 +65,11 @@ export default class WebRTCManager {
     this.agent = await this.client.agent.me();
     this.perspective = await this.client.perspective.byUUID(props.uuid);
     this.emitPeerEvents();
+
+    // Close connections if we refresh
+    window.addEventListener("beforeunload", () => {
+      this.leave();
+    });
   }
 
   emitPeerEvents() {

@@ -58,6 +58,10 @@ export default function useWebRTC({ source, uuid }) {
       });
 
       setIsInitialised(true);
+
+      return () => {
+        manager.current.leave();
+      };
     }
   }, [source, uuid, isInitialised]);
 
