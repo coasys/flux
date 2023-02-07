@@ -43,7 +43,7 @@ export default function Item({
       ></video>
 
       <div className={styles.details}>
-        {profile.username && (
+        {profile?.username && (
           <>
             <j-avatar initials={profile.username?.charAt(0)}></j-avatar>
             <j-text>{profile.username}</j-text>
