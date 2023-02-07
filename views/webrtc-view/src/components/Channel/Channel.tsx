@@ -60,7 +60,7 @@ export default function Channel({ source, uuid }) {
         hasJoined={hasJoined}
         onToggleCamera={onToggleCamera}
         onToggleDebug={() => setShowDebug(!showDebug)}
-        onLeave={onToggleCamera}
+        onLeave={onLeave}
       />
     </section>
   );
