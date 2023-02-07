@@ -25,7 +25,7 @@
   "scripts": {
     "start": "vite",
     "dev": "run-p dev:**",
-    "dev:serve": "vite",
+    "dev:serve": "vite --host",
     "dev:watch": "vite build --watch",
     "build": "vite build",
     "test": "echo \"Error: no test specified\" && exit 1"

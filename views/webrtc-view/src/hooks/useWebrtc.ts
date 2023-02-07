@@ -123,17 +123,31 @@ export default function useWebRTC({ source, uuid }) {
     }
   }
 
-  function onToggleCamera(enabled: boolean) {
+  async function onToggleCamera(enabled: boolean) {
     if (localStream) {
-      const enabled = localStream.getVideoTracks()[0].enabled;
-      localStream.getVideoTracks()[0].enabled = !enabled;
+      if (localStream.getVideoTracks()[0]) {
+        localStream.getVideoTracks()[0].enabled = enabled;
+      } else {
+        const newLocalStream = await navigator.mediaDevices.getUserMedia({
+          audio: settings.audio,
+          video: enabled,
+        });
+        setLocalStream(newLocalStream);
+      }
     }
   }
 
-  function onToggleAudio(enabled: boolean) {
+  async function onToggleAudio(enabled: boolean) {
     if (localStream) {
-      const enabled = localStream.getAudioTracks()[0].enabled;
-      localStream.getAudioTracks()[0].enabled = !enabled;
+      if (localStream.getAudioTracks()[0]) {
+        localStream.getAudioTracks()[0].enabled = enabled;
+      } else {
+        const newLocalStream = await navigator.mediaDevices.getUserMedia({
+          audio: enabled,
+          video: settings.video,
+        });
+        setLocalStream(newLocalStream);
+      }
     }
   }
 
