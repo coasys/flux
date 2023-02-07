@@ -40,7 +40,6 @@ export default function Footer({
           <j-button
             variant="secondary"
             // onClick={onToggleScreen}
-            disabled
             square
             circle
             size="lg"
