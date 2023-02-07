@@ -43,10 +43,10 @@ export default async function updateCommunityData(
     dataStore.updateCommunityMetadata({
       communityId,
       metadata: {
-        name,
-        description,
-        image,
-        thumbnail,
+        name: await name,
+        description: await description,
+        image: await image,
+        thumbnail: await thumbnail,
       },
     });
   } catch (e) {
