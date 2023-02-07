@@ -1,5 +1,5 @@
 import { useState, useEffect } from "preact/hooks";
-import { Peer } from "../../../types";
+import { Peer, Reaction } from "../../../types";
 import { Profile } from "utils/types";
 import getProfile from "utils/api/getProfile";
 
@@ -8,10 +8,16 @@ import styles from "./Item.module.css";
 type Props = {
   userId: string;
   cameraEnabled?: boolean;
+  reaction?: Reaction;
   videoRef?: React.MutableRefObject<null>;
 };
 
-export default function Item({ userId, cameraEnabled, videoRef }: Props) {
+export default function Item({
+  userId,
+  cameraEnabled,
+  reaction,
+  videoRef,
+}: Props) {
   const [profile, setProfile] = useState<Profile>();
 
   // Get user details
@@ -25,6 +31,8 @@ export default function Item({ userId, cameraEnabled, videoRef }: Props) {
       fetchAgent();
     }
   }, [profile, userId]);
+
+  console.log("Internal reaction : ", reaction);
 
   return (
     <div className={styles.item} data-camera-enabled={cameraEnabled}>
@@ -40,6 +48,16 @@ export default function Item({ userId, cameraEnabled, videoRef }: Props) {
         <j-avatar initials={profile?.username.charAt(0)}></j-avatar>
         <j-text>{profile?.username}</j-text>
       </div>
+      <>
+        {reaction && (
+          <div className={styles.reaction}>
+            <div className={styles["reaction-inner"]}>
+              <>{reaction.reaction === "like" && <span>👍</span>}</>
+              <>{reaction.reaction === "dislike" && <span>👎</span>}</>
+            </div>
+          </div>
+        )}
+      </>
     </div>
   );
 }

@@ -63,15 +63,29 @@ export default function Footer({
           </j-button>
         </j-tooltip>
 
-        <j-tooltip placement="top" title="Send reaction">
+        <j-tooltip placement="top" title="Send like">
           <j-button
             variant="transparent"
-            onClick={() => onReaction("smile")}
+            onClick={() => onReaction("like")}
             square
             circle
+            disabled={!hasJoined}
             size="lg"
           >
-            <j-icon name="emoji-smile"></j-icon>
+            <j-icon name="hand-thumbs-up"></j-icon>
+          </j-button>
+        </j-tooltip>
+
+        <j-tooltip placement="top" title="Send dislike">
+          <j-button
+            variant="transparent"
+            onClick={() => onReaction("dislike")}
+            square
+            circle
+            disabled={!hasJoined}
+            size="lg"
+          >
+            <j-icon name="hand-thumbs-down"></j-icon>
           </j-button>
         </j-tooltip>
 
@@ -81,6 +95,7 @@ export default function Footer({
             onClick={onToggleDebug}
             square
             circle
+            disabled={!hasJoined}
             size="lg"
           >
             <j-icon name="stars"></j-icon>

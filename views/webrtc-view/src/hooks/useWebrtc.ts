@@ -1,6 +1,6 @@
 import WebRTCManager, { Event } from "../WebRTCManager";
 import { useEffect, useState, useRef } from "preact/hooks";
-import { Connection, Peer } from "../types";
+import { Connection, Peer, Reaction } from "../types";
 import { defaultSettings } from "../constants";
 
 export default function useWebRTC({ source, uuid }) {
@@ -9,6 +9,7 @@ export default function useWebRTC({ source, uuid }) {
   const [isInitialised, setIsInitialised] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
   const [connections, setConnections] = useState<Peer[]>([]);
+  const [reactions, setReactions] = useState<Reaction[]>([]);
 
   useEffect(() => {
     if (source && uuid && !isInitialised) {
@@ -28,11 +29,10 @@ export default function useWebRTC({ source, uuid }) {
         });
       });
 
-      manager.current.on(Event.MESSAGE, (did, event: MessageEvent<any>) => {
-        const [type = "", data = ""] = event.data.split("-");
-
+      manager.current.on(Event.MESSAGE, (did, type: string, message: any) => {
         if (type === "reaction") {
-          // WIP
+          console.log("message: ", message);
+          setReactions([...reactions, { did, reaction: message }]);
         }
 
         // const match = connections.find((c) => c.did === did);
@@ -85,7 +85,7 @@ export default function useWebRTC({ source, uuid }) {
   }
 
   async function onReaction(reaction: string) {
-    await manager.current?.sendMessage(`reaction-${reaction}`);
+    await manager.current?.sendMessage("reaction", reaction);
   }
 
   function onToggleCamera() {
@@ -98,6 +98,7 @@ export default function useWebRTC({ source, uuid }) {
   return {
     localStream,
     connections,
+    reactions,
     isInitialised,
     hasJoined,
     onJoin,

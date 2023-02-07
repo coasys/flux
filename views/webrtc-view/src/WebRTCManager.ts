@@ -185,6 +185,7 @@ export default class WebRTCManager {
 
     dataChannel.addEventListener("message", (event) => {
       if (event.data) {
+        console.log("📩 Received message -> ", event.data);
         let parsedData;
         try {
           parsedData = JSON.parse(event.data);
@@ -192,7 +193,7 @@ export default class WebRTCManager {
           parsedData = event.data;
         } finally {
           this.callbacks[Event.MESSAGE].forEach((cb) => {
-            cb(did, parsedData);
+            cb(did, parsedData.type || "unknown", parsedData.message);
           });
         }
       }
@@ -255,11 +256,21 @@ export default class WebRTCManager {
     }
   }
 
-  async sendMessage(message: string, recepients?: string[]) {
+  async sendMessage(type: string, message: any, recepients?: string[]) {
+    console.log("✉️ Sending message -> ", type, message);
+    const data = JSON.stringify({
+      type,
+      message,
+    });
     this.connections.forEach((e, key) => {
       if (!recepients || recepients.includes(key)) {
-        e.dataChannel.send(message);
+        e.dataChannel.send(data);
       }
+    });
+
+    // Notify self of message
+    this.callbacks[Event.MESSAGE].forEach((cb) => {
+      cb(this.agent.did, type || "unknown", message);
     });
   }
 

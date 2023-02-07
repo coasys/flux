@@ -1,6 +1,6 @@
-import { useRef, useEffect } from "preact/hooks";
+import { useRef, useEffect, useState } from "preact/hooks";
 import { Me } from "utils/api/getMe";
-import { Peer } from "../../types";
+import { Peer, Reaction } from "../../types";
 import Item from "./Item";
 
 import styles from "./UserGrid.module.css";
@@ -9,12 +9,23 @@ type Props = {
   currentUser?: Me;
   localStream: MediaStream;
   peers: Peer[];
+  reactions: Reaction[];
 };
 
-export default function UserGrid({ currentUser, localStream, peers }: Props) {
+export default function UserGrid({
+  currentUser,
+  localStream,
+  peers,
+  reactions,
+}: Props) {
   const videoRef = useRef(null);
+  const [currentReaction, setCurrentReaction] = useState<Reaction>(null);
 
   const userCount = peers.length + (localStream ? 1 : 0);
+  const myReaction =
+    currentReaction && currentReaction.did === currentUser.did
+      ? currentReaction
+      : null;
 
   // Grid sizing
   let gridCol = userCount === 1 ? 1 : userCount <= 4 ? 2 : 4;
@@ -33,9 +44,23 @@ export default function UserGrid({ currentUser, localStream, peers }: Props) {
     }
   }, [videoRef, localStream]);
 
+  useEffect(() => {
+    if (reactions.length > 0) {
+      setCurrentReaction(reactions[reactions.length - 1]);
+
+      setTimeout(() => {
+        setCurrentReaction(null);
+      }, 3500);
+    }
+  }, [reactions]);
+
   // Build participant elements
   const peerItems = peers.map((peer, index) => {
     const remoteStream = new MediaStream();
+    const peerReaction =
+      currentReaction && currentReaction.did === peer.did
+        ? currentReaction
+        : null;
 
     if (peer.connection.peerConnection) {
       peer.connection.peerConnection.ontrack = (event) => {
@@ -52,7 +77,14 @@ export default function UserGrid({ currentUser, localStream, peers }: Props) {
       };
     }
 
-    return <Item key={peer.did} userId={peer.did} cameraEnabled={true} />;
+    return (
+      <Item
+        key={peer.did}
+        userId={peer.did}
+        cameraEnabled={true}
+        reaction={peerReaction}
+      />
+    );
   });
 
   return (
@@ -69,6 +101,7 @@ export default function UserGrid({ currentUser, localStream, peers }: Props) {
           userId={currentUser.did}
           videoRef={videoRef}
           cameraEnabled={true}
+          reaction={myReaction}
         />
       )}
       {peerItems}

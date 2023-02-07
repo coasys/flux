@@ -26,7 +26,8 @@
     opacity: 0;
 }
 
-.details {
+.details,
+.reaction {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -41,6 +42,25 @@
     transition: all 0.3s ease;
 }
 
+.reaction {
+    background: transparent;
+}
+
+.reaction-inner {
+    aspect-ratio: 1/1;
+    background: white;
+    padding: 3rem;
+    border-radius: 50%;
+    text-align: center;
+    animation: appear 0.7s cubic-bezier(0.78, 0.06, 0.37, 0.72) both;
+}
+
+.reaction-inner span {
+    display: block;
+    font-size: 6rem;
+    animation: appear-inner 0.6s cubic-bezier(0.77,-0.02, 0.27, 1.55) both 0.4s;
+}
+
 .item[data-camera-enabled="true"] .video {
     opacity: 1;
 }
@@ -52,3 +72,16 @@
 .item[data-camera-enabled="true"]:hover .details {
     opacity: 1;
 }
+
+@keyframes appear {
+    0% {
+        transform: scale(8);
+        opacity: 0;
+    }
+  }
+
+  @keyframes appear-inner {
+    0% {
+        transform: scale(0);
+    }
+  }

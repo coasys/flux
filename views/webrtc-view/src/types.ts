@@ -12,3 +12,8 @@ export type Peer = {
     screen: boolean;
   };
 };
+
+export type Reaction = {
+  did: string;
+  reaction: string;
+};

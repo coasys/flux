@@ -14,6 +14,7 @@ export default function Channel({ source, uuid }) {
 
   const {
     connections,
+    reactions,
     hasJoined,
     localStream,
     onToggleCamera,
@@ -24,6 +25,8 @@ export default function Channel({ source, uuid }) {
     source,
     uuid,
   });
+
+  console.log(reactions);
 
   // Get agent/me
   useEffect(() => {
@@ -53,6 +56,7 @@ export default function Channel({ source, uuid }) {
         currentUser={agent}
         localStream={localStream}
         peers={connections}
+        reactions={reactions}
       />
 
       <>{showDebug && <Debug connections={connections} />}</>
