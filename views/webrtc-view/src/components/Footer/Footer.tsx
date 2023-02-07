@@ -1,64 +1,79 @@
 import { useContext } from "preact/hooks";
 import WebRTCContext from "../../context/WebRTCContext";
+import { Settings } from "../../WebRTCManager";
 
 import styles from "./Footer.module.css";
 
+type Props = {
+  settings: Settings;
+  hasJoined: boolean;
+  onChangeSettings: (newSettings: Settings) => void;
+  onToggleDebug: () => void;
+  onReaction: (reaction: string) => void;
+  onLeave: () => void;
+};
+
 export default function Footer({
+  settings,
   hasJoined,
-  // currentUser,
-  onToggleCamera,
-  // onToggleScreen,
+  onChangeSettings,
   onToggleDebug,
   onReaction,
   onLeave,
-}) {
-  // const cameraEnabled = currentUser && currentUser.prefrences.video;
-  const cameraEnabled = true;
-
+}: Props) {
   return (
     <div className={styles.wrapper}>
       <div className={styles.inner}>
         <j-tooltip
           placement="auto"
-          title={cameraEnabled ? "Disable camera" : "Enable camera"}
+          title={settings.video ? "Disable camera" : "Enable camera"}
         >
           <j-button
-            variant={cameraEnabled ? "primary" : "secondary"}
-            onClick={onToggleCamera}
+            variant={settings.video ? "primary" : "secondary"}
+            onClick={() =>
+              onChangeSettings({ ...settings, video: !settings.video })
+            }
             square
             circle
             size="lg"
             disabled={!hasJoined}
           >
             <j-icon
-              name={cameraEnabled ? "camera-video-off" : "camera-video"}
+              name={settings.video ? "camera-video-off" : "camera-video"}
             ></j-icon>
+          </j-button>
+        </j-tooltip>
+
+        <j-tooltip
+          placement="auto"
+          title={settings.audio ? "Mute microphone" : "unmute microphone"}
+        >
+          <j-button
+            variant={settings.audio ? "primary" : "secondary"}
+            onClick={() =>
+              onChangeSettings({ ...settings, audio: !settings.audio })
+            }
+            square
+            circle
+            size="lg"
+            disabled={!hasJoined}
+          >
+            <j-icon name={settings.audio ? "mic-mute" : "mic"}></j-icon>
           </j-button>
         </j-tooltip>
 
         <j-tooltip placement="auto" title="Share screen">
           <j-button
-            variant="secondary"
-            // onClick={onToggleScreen}
+            variant={settings.screen ? "primary" : "secondary"}
+            onClick={() =>
+              onChangeSettings({ ...settings, screen: !settings.screen })
+            }
             square
             circle
             size="lg"
             disabled={!hasJoined}
           >
             <j-icon name="display"></j-icon>
-          </j-button>
-        </j-tooltip>
-
-        <j-tooltip placement="auto" title="Leave">
-          <j-button
-            variant="secondary"
-            onClick={onLeave}
-            square
-            circle
-            size="lg"
-            disabled={!hasJoined}
-          >
-            <j-icon name="door-closed"></j-icon>
           </j-button>
         </j-tooltip>
 
@@ -88,6 +103,19 @@ export default function Footer({
           </j-button>
         </j-tooltip>
 
+        <j-tooltip placement="auto" title="Leave">
+          <j-button
+            variant="secondary"
+            onClick={onLeave}
+            square
+            circle
+            size="lg"
+            disabled={!hasJoined}
+          >
+            <j-icon name="door-closed"></j-icon>
+          </j-button>
+        </j-tooltip>
+        {/* 
         <j-tooltip placement="top" title="Experiments">
           <j-button
             variant="transparent"
@@ -99,7 +127,7 @@ export default function Footer({
           >
             <j-icon name="stars"></j-icon>
           </j-button>
-        </j-tooltip>
+        </j-tooltip> */}
 
         <j-tooltip placement="top" title="Debug">
           <j-button

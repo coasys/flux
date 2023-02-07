@@ -1,5 +1,6 @@
 import { useState, useEffect } from "preact/hooks";
-import { Peer, Reaction } from "../../../types";
+import { Reaction } from "../../../types";
+import { Settings } from "../../../WebRTCManager";
 import { Profile } from "utils/types";
 import getProfile from "utils/api/getProfile";
 
@@ -7,17 +8,12 @@ import styles from "./Item.module.css";
 
 type Props = {
   userId: string;
-  cameraEnabled?: boolean;
+  settings?: Settings;
   reaction?: Reaction;
   videoRef?: React.MutableRefObject<null>;
 };
 
-export default function Item({
-  userId,
-  cameraEnabled,
-  reaction,
-  videoRef,
-}: Props) {
+export default function Item({ userId, settings, reaction, videoRef }: Props) {
   const [profile, setProfile] = useState<Profile>();
 
   // Get user details
@@ -33,7 +29,7 @@ export default function Item({
   }, [profile, userId]);
 
   return (
-    <div className={styles.item} data-camera-enabled={cameraEnabled}>
+    <div className={styles.item} data-camera-enabled={settings.video}>
       <video
         ref={videoRef}
         className={styles.video}
@@ -50,6 +46,19 @@ export default function Item({
           </>
         )}
       </div>
+
+      <ul className={styles.settings}>
+        {!settings.audio && (
+          <li>
+            <j-icon name="mic-mute"></j-icon>
+          </li>
+        )}
+        {settings.screen && (
+          <li>
+            <j-icon name="display"></j-icon>
+          </li>
+        )}
+      </ul>
       <>
         {reaction && (
           <div className={styles.reaction}>

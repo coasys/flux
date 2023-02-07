@@ -103,23 +103,46 @@ export default function useWebRTC({ source, uuid }) {
     await manager.current?.sendMessage("reaction", reaction);
   }
 
-  function onToggleCamera() {
+  function onChangeSettings(newSettings: Settings) {
+    const videoChanged = newSettings.video !== settings.video;
+    const audioChanged = newSettings.audio !== settings.audio;
+    const screenChanged = newSettings.screen !== settings.screen;
+
+    if (videoChanged) {
+      onToggleCamera(newSettings.video);
+    }
+
+    if (audioChanged) {
+      onToggleAudio(newSettings.video);
+    }
+
+    setSettings(newSettings);
+  }
+
+  function onToggleCamera(enabled: boolean) {
     if (localStream) {
       const enabled = localStream.getVideoTracks()[0].enabled;
       localStream.getVideoTracks()[0].enabled = !enabled;
     }
   }
 
+  function onToggleAudio(enabled: boolean) {
+    if (localStream) {
+      const enabled = localStream.getAudioTracks()[0].enabled;
+      localStream.getAudioTracks()[0].enabled = !enabled;
+    }
+  }
+
   return {
     localStream,
     connections,
+    settings,
     reactions,
     isInitialised,
     hasJoined,
-    setSettings,
     onJoin,
     onLeave,
-    onToggleCamera,
+    onChangeSettings,
     onReaction,
   };
 }

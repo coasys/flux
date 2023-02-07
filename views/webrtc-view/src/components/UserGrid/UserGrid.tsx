@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from "preact/hooks";
 import { Me } from "utils/api/getMe";
 import { Peer, Reaction } from "../../types";
+import { Settings } from "../../WebRTCManager";
 import Item from "./Item";
 
 import styles from "./UserGrid.module.css";
@@ -8,6 +9,7 @@ import styles from "./UserGrid.module.css";
 type Props = {
   currentUser?: Me;
   localStream: MediaStream;
+  settings: Settings;
   peers: Peer[];
   reactions: Reaction[];
 };
@@ -15,6 +17,7 @@ type Props = {
 export default function UserGrid({
   currentUser,
   localStream,
+  settings,
   peers,
   reactions,
 }: Props) {
@@ -81,7 +84,7 @@ export default function UserGrid({
       <Item
         key={peer.did}
         userId={peer.did}
-        cameraEnabled={peer.settings.video}
+        settings={peer.settings}
         reaction={peerReaction}
       />
     );
@@ -100,7 +103,7 @@ export default function UserGrid({
         <Item
           userId={currentUser.did}
           videoRef={videoRef}
-          cameraEnabled={true}
+          settings={settings}
           reaction={myReaction}
         />
       )}

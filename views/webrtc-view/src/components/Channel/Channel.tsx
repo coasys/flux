@@ -15,9 +15,10 @@ export default function Channel({ source, uuid }) {
   const {
     connections,
     reactions,
+    settings,
     hasJoined,
     localStream,
-    onToggleCamera,
+    onChangeSettings,
     onJoin,
     onLeave,
     onReaction,
@@ -52,6 +53,7 @@ export default function Channel({ source, uuid }) {
 
       <UserGrid
         currentUser={agent}
+        settings={settings}
         localStream={localStream}
         peers={connections}
         reactions={reactions}
@@ -60,8 +62,9 @@ export default function Channel({ source, uuid }) {
       <>{showDebug && <Debug connections={connections} />}</>
 
       <Footer
+        settings={settings}
         hasJoined={hasJoined}
-        onToggleCamera={onToggleCamera}
+        onChangeSettings={onChangeSettings}
         onToggleDebug={() => setShowDebug(!showDebug)}
         onReaction={onReaction}
         onLeave={onLeave}
