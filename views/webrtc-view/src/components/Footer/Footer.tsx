@@ -4,14 +4,15 @@ import WebRTCContext from "../../context/WebRTCContext";
 import styles from "./Footer.module.css";
 
 export default function Footer({
-  localStream,
-  currentUser,
+  hasJoined,
+  // currentUser,
   onToggleCamera,
-  onToggleScreen,
+  // onToggleScreen,
   onToggleDebug,
   onLeave,
 }) {
-  const cameraEnabled = currentUser && currentUser.prefrences.video;
+  // const cameraEnabled = currentUser && currentUser.prefrences.video;
+  const cameraEnabled = true;
 
   return (
     <div className={styles.wrapper}>
@@ -26,7 +27,7 @@ export default function Footer({
             square
             circle
             size="lg"
-            disabled={!localStream}
+            disabled={!hasJoined}
           >
             <j-icon
               name={cameraEnabled ? "camera-video-off" : "camera-video"}
@@ -37,11 +38,12 @@ export default function Footer({
         <j-tooltip placement="auto" title="Share screen">
           <j-button
             variant="secondary"
-            onClick={onToggleScreen}
+            // onClick={onToggleScreen}
+            disabled
             square
             circle
             size="lg"
-            disabled={!localStream}
+            disabled={!hasJoined}
           >
             <j-icon name="display"></j-icon>
           </j-button>
@@ -54,7 +56,7 @@ export default function Footer({
             square
             circle
             size="lg"
-            disabled={!localStream}
+            disabled={!hasJoined}
           >
             <j-icon name="door-closed"></j-icon>
           </j-button>

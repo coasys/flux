@@ -3,14 +3,14 @@ import WebRTCContext from "../../context/WebRTCContext";
 
 import styles from "./Debug.module.css";
 
-export default function Debug({ state, localStream }) {
+export default function Debug({ connections }) {
   return (
     <div className={styles.wrapper}>
       <div className={styles.inner}>
         <h2>Debug</h2>
-        <h4>Participants:</h4>
+        <h4>Connections:</h4>
         <ul>
-          {state.participants.map((p) => (
+          {connections.map((p) => (
             <li key={p.did}>
               <p>{JSON.stringify(p, null, 2)}</p>
             </li>

@@ -1,244 +1,92 @@
-import { useState, useEffect, useCallback } from "preact/hooks";
+import WebRTCManager, { Event } from "../WebRTCManager";
+import { useEffect, useState, useRef } from "preact/hooks";
+import { Connection, Peer } from "../types";
+import { defaultSettings } from "../constants";
 
-export default function useWebRTC({
-  iceServers,
-  signalingMessage,
-  sendSignalingMessage,
-  mediaConstraints,
-}) {
-  const [pc, setPc] = useState(null);
-  const [error, setError] = useState(null);
-  const [localMediaStream, setLocalMediaStream] = useState(null);
-  const [remoteIceCandidates, setRemoteIceCandidates] = useState([]);
-  const [isCaller, setCaller] = useState(false);
-  const [remoteOffer, setRemoteOffer] = useState(null);
-  const [signalingState, setSignalingState] = useState(null);
-  const [connectionState, setConnectionState] = useState(null);
-  const [iceConnectionState, setIceConnectionState] = useState(null);
-  const [iceGatheringState, setIceGatheringState] = useState(null);
-  const [remoteMediaStream, setRemoteMediaStream] = useState(null);
+export default function useWebRTC({ source, uuid }) {
+  const manager = useRef<WebRTCManager>();
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [isInitialised, setIsInitialised] = useState(false);
+  const [hasJoined, setHasJoined] = useState(false);
+  const [connections, setConnections] = useState<Peer[]>([]);
 
   useEffect(() => {
-    if (signalingState === "closed") {
-      resetState();
-      debugger;
-    }
-  }, [signalingState]);
+    if (source && uuid && !isInitialised) {
+      manager.current = new WebRTCManager({ source, uuid });
 
-  useEffect(() => {
-    if (iceConnectionState === "disconnected") {
-      resetState();
-    }
-  }, [iceConnectionState]);
-  useEffect(() => {
-    if (connectionState === "failed") {
-      resetState();
-    }
-  }, [connectionState]);
-
-  useEffect(() => {
-    if (isCaller && pc) {
-      createSDP("offer");
-    }
-  }, [isCaller, pc]);
-
-  useEffect(() => {
-    function messageRecived() {
-      switch (signalingMessage.type) {
-        case "answer":
-          setRemoteSdp(signalingMessage.sdp.sdp, "answer");
-          break;
-        case "ice":
-          setRemoteIce(signalingMessage.sdp);
-          break;
-        case "end":
-          pc.close();
-          break;
-        case "decline":
-          pc.close();
-          break;
-        case "ignore":
-          pc.close();
-          break;
-        case "cancel":
-          pc.close();
-          debugger;
-          break;
-        default:
-      }
-    }
-    if (signalingMessage && pc) {
-      messageRecived();
-    }
-  }, [signalingMessage, pc]);
-
-  useEffect(() => {
-    if (signalingMessage && signalingMessage.type === "offer") {
-      createRTCPeerConnection();
-      setRemoteOffer(signalingMessage.sdp.sdp);
-    }
-  }, [iceServers, signalingMessage]);
-
-  useEffect(() => {
-    if (remoteOffer && pc) {
-      setRemoteSdp(remoteOffer, "offer");
-    }
-  }, [remoteOffer, pc]);
-
-  const setRemoteSdp = useCallback((sdp, type) => {
-    if ((type === "answer" && pc.localDescription) || type === "offer") {
-      pc.setRemoteDescription(sdp)
-        .then(() => {
-          if (remoteIceCandidates.length > 0) {
-            for (let ice in remoteIceCandidates) {
-              if (ice) {
-                pc.addIceCandidate(remoteIceCandidates[ice]);
-              }
-            }
-          }
-        })
-        .catch((err) => {
-          setError(err);
-        });
-    }
-  }, []);
-
-  function setRemoteIce(sdp) {
-    if (pc.remoteDescription) {
-      pc.addIceCandidate(sdp);
-    } else {
-      setRemoteIceCandidates((prev) => [...prev, signalingMessage.sdp]);
-    }
-  }
-  function createAnswer() {
-    createSDP("answer");
-  }
-  function createOffer() {
-    createRTCPeerConnection();
-    setCaller(true);
-  }
-
-  function createRTCPeerConnection() {
-    const peerCon = new RTCPeerConnection(iceServers);
-    peerCon.onicecandidate = function (e) {
-      if (e.candidate) {
-        sendSignalingMessage({ sdp: e.candidate, type: "ice" });
-      }
-    };
-    peerCon.onconnectionstatechange = () => {
-      setConnectionState(peerCon.connectionState);
-    };
-    peerCon.onsignalingstatechange = () => {
-      setSignalingState(peerCon.signalingState);
-    };
-    peerCon.oniceconnectionstatechange = () => {
-      setIceConnectionState(peerCon.iceConnectionState);
-    };
-    peerCon.onicegatheringstatechange = () => {
-      setIceGatheringState(peerCon.iceGatheringState);
-    };
-    peerCon.ontrack = (e) => {
-      setRemoteMediaStream(e.streams[0]);
-    };
-
-    setPc(peerCon);
-  }
-  const createSDP = useCallback((type) => {
-    navigator.mediaDevices
-      .getUserMedia(mediaConstraints)
-      .then((stream) => {
-        stream.getVideoTracks().forEach((t) => pc.addTrack(t, stream));
-        setLocalMediaStream(stream);
-      })
-      .then(() => (type === "answer" ? pc.createAnswer() : pc.createOffer()))
-      .then((sdp) => {
-        pc.setLocalDescription(sdp);
-      })
-      .then(() => {
-        sendSignalingMessage({ sdp: pc.localDescription, type });
-      })
-      .catch((err) => {
-        // eslint-disable-next-line no-debugger
-        debugger;
+      manager.current.on(Event.PEER_ADDED, (did, connection: Connection) => {
+        setConnections((oldConnections) => [
+          ...oldConnections,
+          { did, connection, settings: defaultSettings },
+        ]);
       });
-  }, []);
 
-  function closeConnection(type) {
-    switch (type) {
-      case "decline":
-        sendSignalingMessage({ type: "decline" });
-        pc.close();
-        resetState();
-        break;
-      case "end":
-        sendSignalingMessage({ type: "end" });
-        pc.close();
+      manager.current.on(Event.PEER_REMOVED, (did) => {
+        const filter = connections.filter((c) => c.did !== did);
+        setConnections((oldConnections) => {
+          return oldConnections.filter((c) => c.did !== did);
+        });
+      });
 
-        break;
-      case "ignore":
-        pc.close();
-        resetState();
-        break;
-      case "cancel":
-        sendSignalingMessage({ type: "cancel" });
-        pc.close();
+      manager.current.on(Event.MESSAGE, (did, event: MessageEvent<any>) => {
+        // const match = connections.find((c) => c.did === did);
+        // if (!match) {
+        //   return;
+        // }
+        // const newAudioSettings =
+        //   event.data === "mute"
+        //     ? false
+        //     : event.data === "unmute"
+        //     ? true
+        //     : match.settings.audio;
+        // const newVideoSettings =
+        //   event.data === "video-off"
+        //     ? false
+        //     : event.data === "video-on"
+        //     ? true
+        //     : match.settings.video;
+        // const newSettings = {
+        //   audio: newAudioSettings,
+        //   video: newVideoSettings,
+        //   screen: match.settings.screen,
+        // };
+        // const newPeer = {
+        //   ...match,
+        //   settings: newSettings,
+        // };
+        // setConnections([...connections.filter((c) => c.did !== did), newPeer]);
+      });
 
-        break;
-      default:
+      setIsInitialised(true);
     }
+  }, [source, uuid, isInitialised]);
+
+  async function onJoin() {
+    const stream = await manager.current?.join();
+    setLocalStream(stream);
+    setHasJoined(true);
   }
 
-  const resetState = useCallback(() => {
-    if (pc) {
-      pc.onicecandidate = null;
-      pc.onconnectionstatechange = null;
-      pc.onsignalingstatechange = null;
-      pc.oniceconnectionstatechange = null;
-      pc.onicegatheringstatechange = null;
-      pc.ontrack = null;
-      setError(null);
-      setRemoteOffer(null);
-      setCaller(false);
-      setRemoteIceCandidates([]);
+  async function onLeave() {
+    await manager.current?.leave();
+    setLocalStream(null);
+    setHasJoined(false);
+  }
 
-      setPc(null);
-    }
-  }, []);
-
-  function handleSendMessage(type) {
-    switch (type) {
-      case "offer":
-        createOffer();
-        break;
-      case "answer":
-        createAnswer();
-        break;
-      case "decline":
-        closeConnection("decline");
-        break;
-      case "end":
-        closeConnection("end");
-        break;
-      case "ignore":
-        closeConnection("ignore");
-        break;
-      case "cancel":
-        closeConnection("cancel");
-        break;
-      default:
+  function onToggleCamera() {
+    if (localStream) {
+      const enabled = localStream.getVideoTracks()[0].enabled;
+      localStream.getVideoTracks()[0].enabled = !enabled;
     }
   }
 
   return {
-    webRTCError: error,
-    state: {
-      connectionState,
-      signalingState,
-      iceGatheringState,
-      iceConnectionState,
-    },
-    localMediaStream,
-    remoteMediaStream,
-    handleSendMessage,
+    localStream,
+    connections,
+    isInitialised,
+    hasJoined,
+    onJoin,
+    onLeave,
+    onToggleCamera,
   };
 }

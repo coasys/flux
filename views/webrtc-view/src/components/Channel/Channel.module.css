@@ -2,25 +2,12 @@
     position: relative;
     display: flex;
     height: 100%;
-    width: 100%;
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    padding-bottom: 10rem;
+    padding: 0 var(--j-space-500);
 }
 
 .join {
     text-align: center;
-}
-
-.debug {
-    position: fixed;
-    top: 0;
-    right: 0;
-    margin: 2rem;
-    background: var(--j-color-primary-200);
-    padding: 0 1rem;
-    border-radius: 0.5rem;
-    line-height: 1;
-    font-size: 14px;
 }

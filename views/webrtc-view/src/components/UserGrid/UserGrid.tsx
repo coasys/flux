@@ -1,15 +1,20 @@
-import { useRef, useContext, useEffect } from "preact/hooks";
-import WebRTCContext from "../../context/WebRTCContext";
+import { useRef, useEffect } from "preact/hooks";
+import { Me } from "utils/api/getMe";
+import { Peer } from "../../types";
 import Item from "./Item";
 
 import styles from "./UserGrid.module.css";
 
-export default function UserGrid({ currentUser, participants, localStream }) {
+type Props = {
+  currentUser?: Me;
+  localStream: MediaStream;
+  peers: Peer[];
+};
+
+export default function UserGrid({ currentUser, localStream, peers }: Props) {
   const videoRef = useRef(null);
 
-  const participantsWithoutMe = participants.filter((p) => !p.isCurrentUser);
-  const cameraEnabled = currentUser && currentUser.prefrences.video;
-  const userCount = participantsWithoutMe.length + (currentUser ? 1 : 0);
+  const userCount = peers.length + (localStream ? 1 : 0);
 
   // Grid sizing
   let gridCol = userCount === 1 ? 1 : userCount <= 4 ? 2 : 4;
@@ -26,19 +31,19 @@ export default function UserGrid({ currentUser, participants, localStream }) {
       videoRef.current.srcObject = localStream;
       videoRef.current.muted = true;
     }
-  }, [videoRef, currentUser, localStream]);
+  }, [videoRef, localStream]);
 
   // Build participant elements
-  const participantsItems = participantsWithoutMe.map((participant, index) => {
+  const peerItems = peers.map((peer, index) => {
     const remoteStream = new MediaStream();
 
-    if (participant.peerConnection) {
-      participant.peerConnection.ontrack = (event) => {
+    if (peer.connection.peerConnection) {
+      peer.connection.peerConnection.ontrack = (event) => {
         event.streams[0].getTracks().forEach((track) => {
           remoteStream.addTrack(track);
         });
         const videElement = document.getElementById(
-          `user-video-${participant.did}`
+          `user-video-${peer.did}`
         ) as HTMLVideoElement;
 
         if (videElement) {
@@ -47,13 +52,11 @@ export default function UserGrid({ currentUser, participants, localStream }) {
       };
     }
 
-    return (
-      <Item key={participant.did} data={participant} cameraEnabled={true} />
-    );
+    return <Item key={peer.did} userId={peer.did} cameraEnabled={true} />;
   });
 
   return (
-    <section
+    <div
       className={styles.grid}
       style={{
         "--grid-size": gridCol,
@@ -61,14 +64,14 @@ export default function UserGrid({ currentUser, participants, localStream }) {
         "--grid-row-size": gridRowSize,
       }}
     >
-      {currentUser && (
+      {localStream && (
         <Item
-          data={currentUser}
+          userId={currentUser.did}
           videoRef={videoRef}
-          cameraEnabled={cameraEnabled}
+          cameraEnabled={true}
         />
       )}
-      {participantsItems}
-    </section>
+      {peerItems}
+    </div>
   );
 }
