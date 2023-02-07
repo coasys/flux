@@ -2,7 +2,7 @@ import { useAppStore } from "@/store/app";
 import { useDataStore } from "..";
 import { Community as CommunityModel } from "utils/api";
 import { blobToDataURL, dataURItoBlob, resizeImage } from "utils/helpers";
-import { Factory } from "utils/helpers";
+import { SubjectRepository } from "utils/factory";
 
 export interface Payload {
   name?: string;
@@ -18,7 +18,7 @@ export default async function updateCommunityData(
   const appStore = useAppStore();
 
   try {
-    const Community = new Factory(CommunityModel, {
+    const Community = new SubjectRepository(CommunityModel, {
       perspectiveUuid: communityId,
     });
 

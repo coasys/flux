@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { SubjectRepository } from "../factory";
 import { Factory } from "../helpers/model";
 
 export default function useEntries<SubjectClass>({
@@ -14,7 +15,7 @@ export default function useEntries<SubjectClass>({
   const [entries, setEntries] = useState<SubjectClass[]>([]);
 
   const Model = useMemo(() => {
-    return new Factory(model, { perspectiveUuid, source });
+    return new SubjectRepository(model, { perspectiveUuid, source });
   }, [perspectiveUuid, source]);
 
   useEffect(() => {

@@ -6,6 +6,7 @@ import { createNeighbourhoodMeta } from "../helpers/createNeighbourhoodMeta";
 import { Perspective } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { blobToDataURL, dataURItoBlob, Factory, resizeImage } from "../helpers";
+import { SubjectRepository } from "../factory";
 import { createSDNA } from "./createSDNA";
 import { Community } from "./community";
 import { Member } from "./member";
@@ -71,9 +72,7 @@ export default async function createCommunity({
 
     console.log("Ensuring classes..")
     
-    await perspective.ensureSDNASubjectClass(Community);
-    await perspective.ensureSDNASubjectClass(Member);
-    const CommunityModel = new Factory(Community, {
+    const CommunityModel = new SubjectRepository(Community, {
       perspectiveUuid: perspective.uuid,
     });
 
@@ -84,10 +83,11 @@ export default async function createCommunity({
       thumbnail,
     });
 
-    const MemberFactory = new Factory(Member, {
+    
+    const MemberFactory = new SubjectRepository(Member, {
       perspectiveUuid: perspective.uuid,
     });
-
+    
     await MemberFactory.create({}, author);
 
     //Default popular setting is 3 upvotes on thumbsup emoji

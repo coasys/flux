@@ -187,6 +187,7 @@ import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { useDataStore } from "@/store/data";
 import { mapActions, mapState } from "pinia";
+import { SubjectRepository } from "utils/factory";
 
 type LoadedChannels = {
   [channelId: string]: boolean;
@@ -274,8 +275,8 @@ export default defineComponent({
       this.channelModel && this.channelModel.unsubscribe();
       this.memberModel && this.memberModel.unsubscribe();
 
-      this.channelModel = new Factory(Channel, { perspectiveUuid: id });
-      this.memberModel = new Factory(Member, { perspectiveUuid: id });
+      this.channelModel = new SubjectRepository(Channel, { perspectiveUuid: id });
+      this.memberModel = new SubjectRepository(Member, { perspectiveUuid: id });
 
       this.memberModel.onAdded((member: Member) => {
         this.dataStore.setNeighbourhoodMember({

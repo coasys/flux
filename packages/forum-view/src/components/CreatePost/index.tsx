@@ -8,6 +8,7 @@ import { Post } from "utils/api";
 import { Factory } from "utils/helpers";
 import { blobToDataURL, dataURItoBlob, resizeImage } from "utils/helpers";
 import PostImagePreview from "../PostImagePreview";
+import { SubjectRepository } from "utils/factory";
 
 const initialState = {
   title: null,
@@ -34,7 +35,7 @@ export default function CreatePost({
   const isEditing = !!postId;
 
   const Post = useMemo(() => {
-    return new Factory(Post, {
+    return new SubjectRepository(Post, {
       perspectiveUuid: communityId,
       source: channelId,
     });

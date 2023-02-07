@@ -6,6 +6,7 @@ import { CommunityState, LocalCommunityState } from "../types";
 import { useUserStore } from "../user";
 import { getProfile } from "utils/api";
 import { Community as CommunityModel } from "utils/api";
+import { SubjectRepository } from "utils/factory";
 
 export async function buildCommunity(perspective: PerspectiveProxy) {
   const dataStore = useDataStore();
@@ -38,11 +39,9 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
 
   console.log("test");
 
-  await perspective.ensureSDNASubjectClass(CommunityModel);
-
   console.log("ensured");
 
-  const Community = new Factory(CommunityModel, {
+  const Community = new SubjectRepository(CommunityModel, {
     perspectiveUuid: perspective.uuid,
   });
 
