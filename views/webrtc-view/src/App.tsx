@@ -10,10 +10,17 @@ import {
 } from "./components/UserGrid/Item/Item.module.css";
 
 import styles from "./App.module.css";
+import { Connection } from "./types";
+import { defaultSettings } from "./constants";
 
 type Peer = {
   did: string;
-  connection: RTCPeerConnection;
+  connection: Connection;
+  settings: {
+    video: boolean;
+    audio: boolean;
+    screen: boolean;
+  };
 };
 
 function useWebRTC({ source, uuid }) {
@@ -26,21 +33,51 @@ function useWebRTC({ source, uuid }) {
     if (source && uuid && !isInitialised) {
       manager.current = new WebRTCManager({ source, uuid });
 
-      manager.current.on(
-        Event.PEER_ADDED,
-        (did, connection: RTCPeerConnection) => {
-          setConnections((oldConnections) => [
-            ...oldConnections,
-            { did, connection },
-          ]);
-        }
-      );
+      manager.current.on(Event.PEER_ADDED, (did, connection: Connection) => {
+        setConnections((oldConnections) => [
+          ...oldConnections,
+          { did, connection, settings: defaultSettings },
+        ]);
+      });
 
       manager.current.on(Event.PEER_REMOVED, (did) => {
         const filter = connections.filter((c) => c.did !== did);
         setConnections((oldConnections) => {
           return oldConnections.filter((c) => c.did !== did);
         });
+      });
+
+      manager.current.on(Event.MESSAGE, (did, event: MessageEvent<any>) => {
+        const match = connections.find((c) => c.did === did);
+
+        if (!match) {
+          return;
+        }
+
+        const newAudioSettings =
+          event.data === "mute"
+            ? false
+            : event.data === "unmute"
+            ? true
+            : match.settings.audio;
+        const newVideoSettings =
+          event.data === "video-off"
+            ? false
+            : event.data === "video-on"
+            ? true
+            : match.settings.video;
+
+        const newSettings = {
+          audio: newAudioSettings,
+          video: newVideoSettings,
+          screen: match.settings.screen,
+        };
+
+        const newPeer = {
+          ...match,
+          settings: newSettings,
+        };
+        setConnections([...connections.filter((c) => c.did !== did), newPeer]);
       });
 
       setIsInitialised(true);
@@ -72,7 +109,7 @@ function Peer({ did, connection }) {
   useEffect(() => {
     const remoteStream = new MediaStream();
 
-    connection.ontrack = (event) => {
+    connection.peerConnection.ontrack = (event) => {
       console.log("ontrack", event.streams);
       event.streams[0].getTracks().forEach((track) => {
         console.log("added track", { track });
@@ -89,7 +126,7 @@ function Peer({ did, connection }) {
   }, [did, connection]);
 
   return (
-    <div className={item} data-camera-enabled={true}>
+    <div className={item} data-camera-enabled={connection.settings.video}>
       <video
         id={`user-video-${did}`}
         className={video}
@@ -98,6 +135,8 @@ function Peer({ did, connection }) {
       ></video>
       <div className={details}>
         <j-text>{did}</j-text>
+        {!connection.settings.audio && <span>(muted)</span>}
+        {!connection.settings.screen && <span>(sharing screen)</span>}
       </div>
     </div>
   );
