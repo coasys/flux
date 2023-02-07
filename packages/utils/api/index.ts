@@ -44,6 +44,7 @@ import updateProfile from "./updateProfile";
 import createProfile from "./createProfile";
 import createAgentWebLink from "./createAgentWebLink";
 import getAgentWebLinks from './getAgentWebLinks'
+import getAd4mProfile from "./getAd4mProfile";
 
 export {
   Channel,
@@ -85,5 +86,6 @@ export {
   updateProfile,
   createProfile,
   createAgentWebLink,
-  getAgentWebLinks
+  getAgentWebLinks,
+  getAd4mProfile
 };
