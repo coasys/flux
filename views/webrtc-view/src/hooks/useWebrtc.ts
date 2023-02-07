@@ -110,13 +110,17 @@ export default function useWebRTC({ source, uuid }) {
 
     if (videoChanged) {
       onToggleCamera(newSettings.video);
+      setSettings(newSettings);
     }
 
     if (audioChanged) {
       onToggleAudio(newSettings.video);
+      setSettings(newSettings);
     }
 
-    setSettings(newSettings);
+    if (screenChanged) {
+      newSettings.screen ? onStartScreenShare() : onEndScreenShare();
+    }
   }
 
   function onToggleCamera(enabled: boolean) {
@@ -131,6 +135,50 @@ export default function useWebRTC({ source, uuid }) {
       const enabled = localStream.getAudioTracks()[0].enabled;
       localStream.getAudioTracks()[0].enabled = !enabled;
     }
+  }
+
+  async function onStartScreenShare() {
+    if (localStream) {
+      let mediaStream;
+      if (navigator.mediaDevices.getDisplayMedia) {
+        mediaStream = await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+        });
+      }
+
+      mediaStream.getVideoTracks()[0].onended = () => onEndScreenShare();
+
+      setSettings({ ...settings, screen: true });
+      updateStream(mediaStream);
+    }
+  }
+
+  async function onEndScreenShare() {
+    const newLocalStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+
+    // Ensure screen sharing has stopped
+    const allTracks = localStream.getTracks();
+    for (var i = 0; i < allTracks.length; i++) allTracks[i].stop();
+
+    newLocalStream.getVideoTracks()[0].enabled = settings.video;
+    newLocalStream.getAudioTracks()[0].enabled = settings.audio;
+
+    setSettings({ ...settings, screen: false });
+    updateStream(newLocalStream);
+  }
+
+  function updateStream(stream: MediaStream) {
+    for (let peer of connections) {
+      const peerConnection = peer.connection.peerConnection
+        .getSenders()
+        .find((s) => (s.track ? s.track.kind === "video" : false));
+      peerConnection.replaceTrack(stream.getVideoTracks()[0]);
+    }
+
+    setLocalStream(stream);
   }
 
   return {

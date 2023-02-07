@@ -46,7 +46,7 @@ export default function Footer({
 
         <j-tooltip
           placement="auto"
-          title={settings.audio ? "Mute microphone" : "unmute microphone"}
+          title={settings.audio ? "Mute microphone" : "Unmute microphone"}
         >
           <j-button
             variant={settings.audio ? "primary" : "secondary"}
@@ -62,7 +62,10 @@ export default function Footer({
           </j-button>
         </j-tooltip>
 
-        <j-tooltip placement="auto" title="Share screen">
+        <j-tooltip
+          placement="auto"
+          title={settings.screen ? "Stop sharing" : "Share screen"}
+        >
           <j-button
             variant={settings.screen ? "primary" : "secondary"}
             onClick={() =>
