@@ -36,7 +36,7 @@ type Props = {
 export enum Event {
   PEER_ADDED = "peer-added",
   PEER_REMOVED = "peer-removed",
-  PEER_CONNECTED = "peer-connected",
+  CONNECTION_STATE = "connectionstate",
   MESSAGE = "message",
 }
 
@@ -49,7 +49,7 @@ export default class WebRTCManager {
     [Event.PEER_ADDED]: [],
     [Event.PEER_REMOVED]: [],
     [Event.MESSAGE]: [],
-    [Event.PEER_CONNECTED]: [],
+    [Event.CONNECTION_STATE]: [],
   };
 
   localStream: MediaStream;
@@ -103,8 +103,8 @@ export default class WebRTCManager {
     this.callbacks[event].push(cb);
   }
 
-  async onLink(link: LinkExpression): Promise<void> {
-    if (link.author === this.agent.did) return;
+  onLink(link: LinkExpression) {
+    if (link.author === this.agent.did) return null;
 
     console.log(`🔵 ${link?.data?.predicate}`, { link });
 
@@ -132,6 +132,8 @@ export default class WebRTCManager {
       const candidate = Literal.fromUrl(link.data.target).get();
       this.handleIceCandidate(link.author, candidate);
     }
+
+    return null;
   }
 
   async handleIceCandidate(fromDid: string, candidate: RTCIceCandidate) {
@@ -171,14 +173,14 @@ export default class WebRTCManager {
     peerConnection.addEventListener("iceconnectionstatechange", (event) => {
       const c = event.target as RTCPeerConnection;
       console.log("connection state is", c.iceConnectionState);
+
       if (c.iceConnectionState === "disconnected") {
         this.connections.delete(did);
       }
-      if (c.iceConnectionState === "connected") {
-        this.callbacks[Event.PEER_CONNECTED].forEach((cb) => {
-          cb(did);
-        });
-      }
+
+      this.callbacks[Event.CONNECTION_STATE].forEach((cb) => {
+        cb(did, c.iceConnectionState);
+      });
     });
 
     dataChannel.addEventListener("message", (event) => {
@@ -277,15 +279,19 @@ export default class WebRTCManager {
       target: this.agent.did,
     });
 
-    this.perspective.addListener("link-added", (link) => this.onLink(link));
+    this.perspective.addListener("link-added", this.onLink);
 
     return this.localStream;
   }
 
   async leave() {
-    this.connections.forEach((c) => {
+    this.perspective.removeListener("link-added", this.onLink);
+
+    this.connections.forEach((c, key) => {
+      // Closing connection will not trigger iceconnectionstatechange
       c.peerConnection.close();
       c.dataChannel.close();
+      this.connections.delete(key);
     });
   }
 }
