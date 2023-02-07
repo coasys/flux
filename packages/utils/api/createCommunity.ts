@@ -71,6 +71,8 @@ export default async function createCommunity({
     }
 
     console.log("Ensuring classes..")
+    await perspective.ensureSDNASubjectClass(Community);
+    await perspective.ensureSDNASubjectClass(Member);
     
     const CommunityModel = new SubjectRepository(Community, {
       perspectiveUuid: perspective.uuid,

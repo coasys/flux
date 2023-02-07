@@ -36,7 +36,11 @@ export function pluralToSingular(plural: string): string {
 
 // e.g. "comments" -> "addComment"
 export function collectionToAdderName(collection: string): string {
-  return `add${capitalize(pluralToSingular(collection))}`
+  return `add${capitalize(collection)}`
+}
+
+export function collectionToSetterName(collection: string): string {
+  return `setCollection${capitalize(collection)}`
 }
 
 function setProperties(subject: any, properties: PropertyValueMap) {

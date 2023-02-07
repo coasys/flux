@@ -27,7 +27,13 @@ export default async (payload: Payload): Promise<any> => {
       perspectiveUuid: payload.perspectiveUuid
     })
 
-    await channelRepository.update(channel.id, payload.data)
+    await channelRepository.update(channel.id, {
+      ...payload.data,
+      views: {
+        action: 'setter',
+        value: payload.data.views
+      }
+    })
 
     dataStore.setChannel({
       communityId: channel.id,
