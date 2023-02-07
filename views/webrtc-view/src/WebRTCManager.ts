@@ -66,6 +66,7 @@ export default class WebRTCManager {
     this.client = await getAd4mClient();
     this.agent = await this.client.agent.me();
     this.perspective = await this.client.perspective.byUUID(props.uuid);
+    this.onLink = this.onLink.bind(this);
     this.emitPeerEvents();
 
     // Close connections if we refresh
