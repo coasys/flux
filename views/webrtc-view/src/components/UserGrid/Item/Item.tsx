@@ -1,5 +1,5 @@
 import { useState, useEffect } from "preact/hooks";
-import { Reaction } from "../../../types";
+import { Peer, Reaction } from "../../../types";
 import { Settings } from "../../../WebRTCManager";
 import { Profile } from "utils/types";
 import getProfile from "utils/api/getProfile";
@@ -12,6 +12,7 @@ type Props = {
   reaction?: Reaction;
   focused?: boolean;
   minimised?: boolean;
+  peer?: Peer;
   videoRef?: React.MutableRefObject<null>;
   onToggleFocus: () => void;
 };
@@ -22,10 +23,12 @@ export default function Item({
   focused,
   minimised,
   reaction,
+  peer,
   videoRef,
   onToggleFocus,
 }: Props) {
   const [profile, setProfile] = useState<Profile>();
+  const [isConnecting, setIsConnecting] = useState(false);
 
   // Get user details
   useEffect(() => {
@@ -39,12 +42,39 @@ export default function Item({
     }
   }, [profile, userId]);
 
+  // Get loading state
+  useEffect(() => {
+    function updateLoadingState(event) {
+      if (event.target.iceConnectionState === "completed") {
+        setIsConnecting(false);
+      }
+    }
+
+    if (peer) {
+      setIsConnecting(true);
+      peer.connection.peerConnection.addEventListener(
+        "iceconnectionstatechange",
+        updateLoadingState
+      );
+    }
+
+    return () => {
+      if (peer) {
+        peer.connection.peerConnection.removeEventListener(
+          "iceconnectionstatechange",
+          updateLoadingState
+        );
+      }
+    };
+  }, []);
+
   return (
     <div
       className={styles.item}
       data-camera-enabled={settings.video}
       data-focused={focused}
       data-minimised={minimised}
+      data-connecting={isConnecting}
     >
       <video
         ref={videoRef}
@@ -64,6 +94,11 @@ export default function Item({
             <j-text>{profile.username}</j-text>
           </>
         )}
+      </div>
+
+      <div className={styles.loading}>
+        <j-spinner size="lg"></j-spinner>
+        <j-text>{profile?.username} connecting...</j-text>
       </div>
 
       <ul className={styles.settings}>

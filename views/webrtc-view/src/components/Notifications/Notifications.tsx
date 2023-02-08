@@ -14,7 +14,7 @@ export default function Notifications() {
     <div className={styles.wrapper}>
       <ul className={styles.list}>
         {notifications.map((n) => (
-          <li key={n.userId} className={styles.item}>
+          <li key={n.id} className={styles.item}>
             <Item data={n} />
           </li>
         ))}

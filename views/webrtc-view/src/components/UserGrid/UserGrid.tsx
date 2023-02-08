@@ -108,6 +108,7 @@ export default function UserGrid({
     return (
       <Item
         key={peer.did}
+        peer={peer}
         userId={peer.did}
         settings={peer.settings}
         reaction={peerReaction}
