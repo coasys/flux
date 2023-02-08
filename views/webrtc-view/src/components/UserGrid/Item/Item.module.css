@@ -65,6 +65,10 @@
     max-width: 100%;
 }
 
+.item[data-minimised="true"] {
+    display: none;
+}
+
 .item[data-focused="true"]:hover .details {
     opacity: 0 !important;
 }

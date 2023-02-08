@@ -45,7 +45,7 @@ export default function Footer({
     <div className={styles.wrapper}>
       <div className={styles.inner}>
         <j-tooltip
-          placement="auto"
+          placement="top"
           title={settings.video ? "Disable camera" : "Enable camera"}
         >
           <j-button
@@ -65,7 +65,7 @@ export default function Footer({
         </j-tooltip>
 
         <j-tooltip
-          placement="auto"
+          placement="top"
           title={settings.audio ? "Mute microphone" : "Unmute microphone"}
         >
           <j-button
@@ -83,7 +83,7 @@ export default function Footer({
         </j-tooltip>
 
         <j-tooltip
-          placement="auto"
+          placement="top"
           title={settings.screen ? "Stop sharing" : "Share screen"}
         >
           <j-button
@@ -117,7 +117,7 @@ export default function Footer({
           </div>
         </j-popover>
 
-        <j-tooltip placement="auto" title="Leave">
+        <j-tooltip placement="top" title="Leave">
           <j-button
             variant="secondary"
             onClick={onLeave}

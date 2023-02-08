@@ -4,7 +4,16 @@ import { Peer, Reaction } from "../types";
 import { defaultSettings } from "../constants";
 import getMe, { Me } from "utils/api/getMe";
 
-export default function useWebRTC({ source, uuid }) {
+type Props = {
+  source: string;
+  uuid: string;
+  events?: {
+    onPeerJoin?: (uuid: string) => void;
+    onPeerLeave?: (uuid: string) => void;
+  };
+};
+
+export default function useWebRTC({ source, uuid, events }: Props) {
   const manager = useRef<WebRTCManager>();
   const [agent, setAgent] = useState<Me>();
   const [settings, setSettings] = useState<Settings>(defaultSettings);
@@ -38,6 +47,8 @@ export default function useWebRTC({ source, uuid }) {
             ...oldConnections,
             { did, connection, settings: defaultSettings },
           ]);
+
+          events?.onPeerJoin && events.onPeerJoin(did);
         }
       );
 
@@ -45,11 +56,14 @@ export default function useWebRTC({ source, uuid }) {
         setConnections((oldConnections) => {
           return oldConnections.filter((c) => c.did !== did);
         });
+
+        events?.onPeerLeave && events.onPeerLeave(did);
       });
 
       manager.current.on(Event.CONNECTION_STATE, (did, state) => {
         if (state === "connected") {
           setIsLoading(false);
+          events?.onPeerJoin && events.onPeerJoin(did);
         }
       });
 

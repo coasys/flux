@@ -1,5 +1,5 @@
 import { useContext } from "preact/hooks";
-import WebRTCContext from "../../context/WebRTCContext";
+import WebRTCContext from "../../context/UiContext";
 
 import styles from "./Debug.module.css";
 

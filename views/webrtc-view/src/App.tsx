@@ -3,6 +3,7 @@ import AllCommunities from "./components/AllCommunities";
 import Channel from "./components/Channel";
 
 import styles from "./App.module.css";
+import { UiProvider } from "./context/UiContext";
 
 export default function App({ perspective, source }) {
   return (
@@ -10,7 +11,9 @@ export default function App({ perspective, source }) {
       {perspective ? (
         <AgentProvider>
           <CommunityProvider perspectiveUuid={perspective}>
-            <Channel source={source} uuid={perspective} />
+            <UiProvider>
+              <Channel source={source} uuid={perspective} />
+            </UiProvider>
           </CommunityProvider>
         </AgentProvider>
       ) : (

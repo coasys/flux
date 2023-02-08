@@ -44,6 +44,7 @@ export default function Item({
       className={styles.item}
       data-camera-enabled={settings.video}
       data-focused={focused}
+      data-minimised={minimised}
     >
       <video
         ref={videoRef}
@@ -56,7 +57,10 @@ export default function Item({
       <div className={styles.details} onClick={onToggleFocus}>
         {profile?.username && (
           <>
-            <j-avatar initials={profile.username?.charAt(0)}></j-avatar>
+            <j-avatar
+              initials={profile.username?.charAt(0)}
+              hash={userId}
+            ></j-avatar>
             <j-text>{profile.username}</j-text>
           </>
         )}

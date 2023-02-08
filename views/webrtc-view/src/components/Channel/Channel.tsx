@@ -1,16 +1,22 @@
-import { useEffect, useState } from "preact/hooks";
+import { useContext, useEffect, useState } from "preact/hooks";
 import useWebRTC from "../../hooks/useWebrtc";
 import getMe, { Me } from "utils/api/getMe";
 
 import UserGrid from "../UserGrid";
 import Footer from "../Footer";
+import Debug from "../Debug";
 
 import styles from "./Channel.module.css";
-import Debug from "../Debug";
+import Notifications from "../Notifications";
+import UiContext from "../../context/UiContext";
 
 export default function Channel({ source, uuid }) {
   const [showDebug, setShowDebug] = useState(false);
   const [agent, setAgent] = useState<Me | null>(null);
+
+  const {
+    methods: { addNotification },
+  } = useContext(UiContext);
 
   const {
     connections,
@@ -26,6 +32,10 @@ export default function Channel({ source, uuid }) {
   } = useWebRTC({
     source,
     uuid,
+    events: {
+      onPeerJoin: (userId) => addNotification({ userId, type: "join" }),
+      onPeerLeave: (userId) => addNotification({ userId, type: "leave" }),
+    },
   });
 
   // Get agent/me
@@ -93,6 +103,8 @@ export default function Channel({ source, uuid }) {
         onReaction={onReaction}
         onLeave={onLeave}
       />
+
+      <Notifications />
     </section>
   );
 }
