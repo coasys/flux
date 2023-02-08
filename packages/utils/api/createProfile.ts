@@ -1,4 +1,3 @@
-import { AD4M_AGENT, KAICHAO_AGENT, JUNTO_AGENT } from "utils/constants/agents";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
 import {
   FLUX_PROFILE,
@@ -49,11 +48,6 @@ export default async ({
 
   try {
     //Install the noteipfs language
-    await client.runtime.addTrustedAgents([
-      AD4M_AGENT,
-      KAICHAO_AGENT,
-      JUNTO_AGENT,
-    ]);
     await client.languages.byAddress(NOTE_IPFS_EXPRESSION_OFFICIAL);
 
     const additions = [] as Link[];
