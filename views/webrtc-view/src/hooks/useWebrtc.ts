@@ -74,12 +74,6 @@ export default function useWebRTC({ source, uuid, events }: Props) {
       });
 
       manager.current.on(Event.MESSAGE, (did, type: string, message: any) => {
-        if (type === "leave" && did !== agent.did) {
-          setConnections((oldConnections) => {
-            return oldConnections.filter((c) => c.did !== message);
-          });
-        }
-
         if (type === "reaction") {
           setReactions([...reactions, { did, reaction: message }]);
         }

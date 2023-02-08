@@ -184,6 +184,10 @@ export default class WebRTCManager {
             this.callbacks[Event.MESSAGE].forEach((cb) => {
               cb(did, parsedData.type || "unknown", parsedData.message);
             });
+
+            if (parsedData.type === "leave") {
+              this.connections.delete(parsedData.message);
+            }
           }
         }
       });
