@@ -39,6 +39,7 @@
     "@perspect3vism/ad4m": "^0.2.10",
     "@perspect3vism/ad4m-connect": "^0.2.10",
     "emoji-picker-element": "^1.14.0",
+    "howler": "^2.2.3",
     "npm-run-all": "^4.1.5",
     "preact": "^10.11.3"
   },

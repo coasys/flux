@@ -1,8 +1,12 @@
 import { useRef, useEffect, useState } from "preact/hooks";
+import { Howl } from "howler";
 import { Me } from "utils/api/getMe";
 import { Peer, Reaction } from "../../types";
 import { Settings } from "../../WebRTCManager";
 import Item from "./Item";
+import popWav from "../../assets/pop.wav";
+import guitarWav from "../../assets/guitar.wav";
+import kissWav from "../../assets/kiss.wav";
 
 import styles from "./UserGrid.module.css";
 
@@ -24,6 +28,16 @@ export default function UserGrid({
   const videoRef = useRef(null);
   const [currentReaction, setCurrentReaction] = useState<Reaction>(null);
   const [focusedPeerId, setFocusedPeerId] = useState(null);
+
+  const popSound = new Howl({
+    src: [popWav],
+  });
+  const guitarSound = new Howl({
+    src: [guitarWav],
+  });
+  const kissSound = new Howl({
+    src: [kissWav],
+  });
 
   const userCount = peers.length + (localStream ? 1 : 0);
   const myReaction =
@@ -53,7 +67,17 @@ export default function UserGrid({
       return;
     }
 
-    setCurrentReaction(reactions[reactions.length - 1]);
+    const newReaction = reactions[reactions.length - 1];
+
+    if (newReaction.reaction === "💋" || newReaction.reaction === "😘") {
+      kissSound.play();
+    } else if (newReaction.reaction === "🎸") {
+      guitarSound.play();
+    } else {
+      popSound.play();
+    }
+
+    setCurrentReaction(newReaction);
     const timeOutId = setTimeout(() => setCurrentReaction(null), 3500);
     return () => clearTimeout(timeOutId);
   }, [reactions]);

@@ -204,12 +204,12 @@ export default class WebRTCManager {
       dataChannel,
     };
 
-    this.connections.set(did, newConnection);
+    this.connections.set(remoteDid, newConnection);
 
     peerConnection.addEventListener("icecandidate", (event) => {
       if (event.candidate) {
         this.perspective.add({
-          source: did,
+          source: remoteDid,
           predicate: ICE_CANDIDATE,
           target: Literal.from(event.candidate.toJSON()).toUrl(),
         });
@@ -220,11 +220,11 @@ export default class WebRTCManager {
       const c = event.target as RTCPeerConnection;
       console.log("🔄 connection state is", c.iceConnectionState);
       if (c.iceConnectionState === "disconnected") {
-        this.connections.delete(did);
+        this.connections.delete(remoteDid);
       }
 
       this.callbacks[Event.CONNECTION_STATE].forEach((cb) => {
-        cb(did, c.iceConnectionState);
+        cb(remoteDid, c.iceConnectionState);
       });
     });
 
@@ -329,7 +329,9 @@ export default class WebRTCManager {
       this.perspective.removeListener("link-added", this.onLink);
     }
 
-    this.sendMessage("leave", this.agent.did);
+    if (this.agent) {
+      await this.sendMessage("leave", this.agent.did);
+    }
 
     this.connections.forEach((c, key) => {
       // Closing connection will not trigger iceconnectionstatechange
