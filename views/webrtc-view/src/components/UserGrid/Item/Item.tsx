@@ -45,7 +45,7 @@ export default function Item({
   // Get loading state
   useEffect(() => {
     function updateLoadingState(event) {
-      if (event.target.iceConnectionState === "completed") {
+      if (event.target.iceConnectionState === "connected") {
         setIsConnecting(false);
       }
     }
