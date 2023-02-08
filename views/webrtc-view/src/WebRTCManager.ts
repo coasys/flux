@@ -319,6 +319,8 @@ export default class WebRTCManager {
       this.perspective.removeListener("link-added", this.onLink);
     }
 
+    this.sendMessage("leave", this.agent.did);
+
     this.connections.forEach((c, key) => {
       // Closing connection will not trigger iceconnectionstatechange
       c.peerConnection.close();
