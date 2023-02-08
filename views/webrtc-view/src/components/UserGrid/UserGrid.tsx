@@ -63,7 +63,7 @@ export default function UserGrid({
   }, [videoRef, localStream]);
 
   useEffect(() => {
-    if (reactions.length < 0) {
+    if (reactions.length < 1) {
       return;
     }
 
