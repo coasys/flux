@@ -142,16 +142,18 @@ export default function Footer({
             <j-icon name="stars"></j-icon>
           </j-button>
         </j-tooltip> */}
+      </div>
 
+      <div className={styles.debug}>
         <j-tooltip placement="top" title="Debug">
           <j-button
-            variant="transparent"
+            variant="secondary"
             onClick={onToggleDebug}
             square
             circle
             size="lg"
           >
-            <j-icon name="info"></j-icon>
+            <j-icon name="gear"></j-icon>
           </j-button>
         </j-tooltip>
       </div>

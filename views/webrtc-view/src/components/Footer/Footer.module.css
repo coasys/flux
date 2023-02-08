@@ -20,6 +20,20 @@
     background-color: #ffffff08;
 }
 
+.debug {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    padding: 3rem;
+}
+
+@media (min-width: 800px) {
+    .debug {
+        display: block;
+    }
+  }
+
 .picker {
     --background: var(--j-color-ui-50);
     --border-color: var(--j-color-ui-50);
