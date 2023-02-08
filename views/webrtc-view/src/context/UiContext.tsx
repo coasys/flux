@@ -2,6 +2,7 @@ import { useState } from "preact/hooks";
 import { createContext } from "preact";
 
 export type Notification = {
+  id: string;
   type: "connect" | "join" | "leave";
   userId: string;
 };
@@ -37,13 +38,22 @@ export function UiProvider({ children }: any) {
         state,
         methods: {
           addNotification(notification: Notification) {
+            const id = String(Date.now());
             setState((oldState) => ({
               ...oldState,
-              notifications: [...oldState.notifications, notification],
+              notifications: [
+                ...oldState.notifications,
+                { id, ...notification },
+              ],
             }));
-            // setTimeout(() => {
-            //   this.setState({ success: false });
-            // }, 3000);
+            setTimeout(() => {
+              setState((oldState) => ({
+                ...oldState,
+                notifications: oldState.notifications.filter(
+                  (n) => n.id !== id
+                ),
+              }));
+            }, 3000);
           },
         },
       }}
