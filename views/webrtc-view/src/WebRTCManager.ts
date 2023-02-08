@@ -167,6 +167,16 @@ export default class WebRTCManager {
     }
   }
 
+  async closeConnection(did: string) {
+    const connection = this.connections.get(did);
+
+    if (connection) {
+      connection.peerConnection.close();
+      connection.dataChannel.close();
+      this.connections.delete(did);
+    }
+  }
+
   async addConnection(remoteDid: string) {
     if (this.connections.get(remoteDid)) {
       return this.connections.get(remoteDid);
@@ -189,7 +199,7 @@ export default class WebRTCManager {
           const parsedData = getData(event.data);
 
           if (parsedData.type === "leave") {
-            return this.connections.delete(parsedData.message);
+            return this.closeConnection(parsedData.message);
           }
 
           this.callbacks[Event.MESSAGE].forEach((cb) => {
@@ -334,10 +344,7 @@ export default class WebRTCManager {
     }
 
     this.connections.forEach((c, key) => {
-      // Closing connection will not trigger iceconnectionstatechange
-      c.peerConnection.close();
-      c.dataChannel.close();
-      this.connections.delete(key);
+      this.closeConnection(key);
     });
   }
 }
