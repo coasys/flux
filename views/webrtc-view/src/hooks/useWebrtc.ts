@@ -73,31 +73,37 @@ export default function useWebRTC({ source, uuid, events }: Props) {
         }
       });
 
-      manager.current.on(Event.MESSAGE, (did, type: string, message: any) => {
-        if (type === "reaction") {
-          setReactions([...reactions, { did, reaction: message }]);
+      manager.current.on(
+        Event.MESSAGE,
+        (senderDid: string, type: string, message: any) => {
+          if (type === "reaction") {
+            setReactions([...reactions, { did: senderDid, reaction: message }]);
+          }
+
+          if (type === "request-settings" && senderDid !== agent.did) {
+            manager.current.sendMessage("settings", settings);
+          }
+
+          if (type === "settings" && senderDid !== agent.did) {
+            setConnections((oldConnections) => {
+              const match = oldConnections.find((c) => c.did === senderDid);
+              if (!match) {
+                return oldConnections;
+              }
+
+              const newPeer = {
+                ...match,
+                settings: message,
+              };
+
+              return [
+                ...oldConnections.filter((c) => c.did !== senderDid),
+                newPeer,
+              ];
+            });
+          }
         }
-
-        if (type === "request-settings" && did !== agent.did) {
-          manager.current.sendMessage("settings", settings);
-        }
-
-        if (type === "settings" && did !== agent.did) {
-          setConnections((oldConnections) => {
-            const match = oldConnections.find((c) => c.did === did);
-            if (!match) {
-              return oldConnections;
-            }
-
-            const newPeer = {
-              ...match,
-              settings: message,
-            };
-
-            return [...oldConnections.filter((c) => c.did !== did), newPeer];
-          });
-        }
-      });
+      );
 
       setIsInitialised(true);
 

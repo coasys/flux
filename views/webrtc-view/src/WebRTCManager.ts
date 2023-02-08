@@ -21,6 +21,17 @@ const servers = {
   iceCandidatePoolSize: 10,
 };
 
+function getData(data: any) {
+  let parsedData;
+  try {
+    parsedData = JSON.parse(data);
+  } catch (e) {
+    parsedData = data;
+  } finally {
+    return parsedData;
+  }
+}
+
 export const ICE_CANDIDATE = "ice-candidate";
 export const OFFER_REQUEST = "offer-request";
 export const OFFER = "offer";
@@ -156,9 +167,9 @@ export default class WebRTCManager {
     }
   }
 
-  async addConnection(did: string) {
-    if (this.connections.get(did)) {
-      return this.connections.get(did);
+  async addConnection(remoteDid: string) {
+    if (this.connections.get(remoteDid)) {
+      return this.connections.get(remoteDid);
     }
 
     const peerConnection = new RTCPeerConnection(servers);
@@ -169,26 +180,21 @@ export default class WebRTCManager {
       dataChannel = channel;
 
       this.callbacks[Event.CONNECTION_STATE_DATA].forEach((cb) => {
-        cb(did, "connected");
+        cb(remoteDid, "connected");
       });
 
       dataChannel.addEventListener("message", (event) => {
         if (event.data) {
           console.log("📩 Received message -> ", event.data);
-          let parsedData;
-          try {
-            parsedData = JSON.parse(event.data);
-          } catch (e) {
-            parsedData = event.data;
-          } finally {
-            this.callbacks[Event.MESSAGE].forEach((cb) => {
-              cb(did, parsedData.type || "unknown", parsedData.message);
-            });
+          const parsedData = getData(event.data);
 
-            if (parsedData.type === "leave") {
-              this.connections.delete(parsedData.message);
-            }
+          if (parsedData.type === "leave") {
+            return this.connections.delete(parsedData.message);
           }
+
+          this.callbacks[Event.MESSAGE].forEach((cb) => {
+            cb(remoteDid, parsedData.type || "unknown", parsedData.message);
+          });
         }
       });
     };
