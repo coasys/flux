@@ -12,7 +12,7 @@ export interface Payload {
 export default async (payload: Payload): Promise<any> => {
   const dataStore = useDataStore();
   const appStore = useAppStore();
-
+  
   const channel = dataStore.channels[payload.channelId];
 
   if (!channel) {
@@ -23,7 +23,7 @@ export default async (payload: Payload): Promise<any> => {
 
   try {
     const channelRepository = new SubjectRepository(ChannelModel, {
-      perspectiveUuid: payload.perspectiveUuid
+      perspectiveUuid: channel.sourcePerspective
     })
 
     await channelRepository.update(channel.id, {
