@@ -1,5 +1,5 @@
-import { AD4M_AGENT, KAICHAO_AGENT, JUNTO_AGENT } from "utils/constants";
-import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants";
+import { AD4M_AGENT, KAICHAO_AGENT, JUNTO_AGENT } from "../constants";
+import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "../constants";
 import {
   FLUX_PROFILE,
   HAS_EMAIL,
@@ -8,13 +8,13 @@ import {
   HAS_PROFILE_IMAGE,
   HAS_THUMBNAIL_IMAGE,
   HAS_USERNAME,
-} from "utils/constants";
+} from "../constants";
 
 import {
   resizeImage,
   dataURItoBlob,
   blobToDataURL,
-} from "utils/helpers";
+} from "../helpers";
 import {
   Ad4mClient,
   Link,
@@ -22,7 +22,7 @@ import {
   LinkMutations,
 } from "@perspect3vism/ad4m";
 
-import { Profile } from "utils/types";
+import { Profile } from "../types";
 
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 

@@ -19,7 +19,7 @@ import getAgentLinks from "./getAgentLinks";
 import getMe from "./getMe";
 import getMessage from "./getMessage";
 import getMessages from "./getMessages";
-import getNeighbourhoodLink from "./getNeighbourhoodLink";
+import { findNeighbourhood, getNeighbourhoodLink} from "./getNeighbourhoodLink";
 import getPerspectiveMeta from "./getPerspectiveMeta";
 import getProfile from "./getProfile";
 import {
@@ -87,5 +87,6 @@ export {
   createProfile,
   createAgentWebLink,
   getAgentWebLinks,
-  getAd4mProfile
+  getAd4mProfile,
+  findNeighbourhood
 };

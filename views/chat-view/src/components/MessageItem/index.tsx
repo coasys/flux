@@ -1,6 +1,6 @@
 import { useContext, useRef, useState } from "preact/hooks";
-import { AgentContext, ChatContext, CommunityContext } from "utils/react";
-import getMe from "utils/api/getMe";
+import { AgentContext, ChatContext, CommunityContext } from "utils/frameworks/react";
+import { getMe } from "utils/api";
 import MessageToolbar from "./MessageToolbar";
 import MessageReactions from "./MessageReactions";
 import MessageReply from "./MessageReply";

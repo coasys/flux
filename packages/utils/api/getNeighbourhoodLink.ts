@@ -53,7 +53,7 @@ export function findNeighbourhood(str: string) {
   return [urifiltered, urlfiltered];
 }
 
-export default async function ({ message, isHidden }: Payload) {
+export async function getNeighbourhoodLink({ message, isHidden }: Payload) {
   try {
     const client = await getAd4mClient();
 

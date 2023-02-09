@@ -1,7 +1,8 @@
 import { useEffect, useState } from "preact/hooks";
-import getNeighbourhoodLink, {
+import {
   findNeighbourhood,
-} from "utils/api/getNeighbourhoodLink";
+  getNeighbourhoodLink
+} from "utils/api";
 import LinkCard from "./MessageCard";
 
 import styles from "./index.scss";
