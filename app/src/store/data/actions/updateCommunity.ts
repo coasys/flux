@@ -22,6 +22,9 @@ export default async function updateCommunityData(
       perspectiveUuid: communityId,
     });
 
+    // @ts-ignore
+    Object.keys(update).forEach(key => update[key] === undefined ? delete update[key] : {});
+
     let thumb = undefined;
     let compressedImage = undefined;
 
@@ -34,7 +37,7 @@ export default async function updateCommunityData(
       );
     }
 
-    const { name, description, image, thumbnail } = await Community.update("", {
+    await Community.update("", {
       ...update,
       image: compressedImage,
       thumbnail: thumb,
@@ -43,11 +46,8 @@ export default async function updateCommunityData(
     dataStore.updateCommunityMetadata({
       communityId,
       metadata: {
-        name: await name,
-        description: await description,
-        image: await image,
-        thumbnail: await thumbnail,
-      },
+        ...update
+      }
     });
   } catch (e) {
     appStore.showDangerToast({
