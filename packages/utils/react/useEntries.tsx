@@ -8,7 +8,7 @@ export default function useEntries<SubjectClass>({
   model,
 }: {
   perspectiveUuid: string;
-  source?: string;
+  source: string | null | undefined;
   model: SubjectClass;
 }) {
   const [loading, setLoading] = useState(true);
@@ -19,7 +19,7 @@ export default function useEntries<SubjectClass>({
   }, [perspectiveUuid, source]);
 
   useEffect(() => {
-    if (perspectiveUuid) {
+    if (perspectiveUuid && source !== null) {
       getAll();
       subscribe();
     }

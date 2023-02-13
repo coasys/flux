@@ -10,7 +10,7 @@ export default function useEntry<SubjectClass>({
 }: {
   perspectiveUuid: string;
   source?: string;
-  id: string;
+  id?: string;
   model: SubjectClass;
 }) {
   const [entry, setEntry] = useState<SubjectClass | null>(null);
