@@ -165,6 +165,7 @@ export class SubjectRepository<SubjectClass extends {[x: string]: any}> {
   }
 
   async getAll(source?: string): Promise<SubjectClass[]> {
+    const tempSource = source || this.source;
     await this.ensurePerspective();
     const subjectClass =
       await this.perspective!.stringOrTemplateObjectToSubjectClass(
@@ -172,7 +173,7 @@ export class SubjectRepository<SubjectClass extends {[x: string]: any}> {
       );
 
     const results = await this.perspective?.infer(
-      `triple("${source || this.source}", "${this.tempSubject.prototype.type}", X), instance(Class, X), subject_class("${subjectClass}", Class)`
+      `triple("${tempSource}", ${tempSource !== SELF ? `"${this.tempSubject.prototype.type}"` : "_"}, X), instance(Class, X), subject_class("${subjectClass}", Class)`
     );
 
     if (!results) return [];
