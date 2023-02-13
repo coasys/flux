@@ -49,7 +49,7 @@ export function CommunityProvider({ perspectiveUuid, children }: any) {
   const { entries: channelEntries } = useEntries({
     perspectiveUuid,
     model: ChannelModel,
-    source: community?.baseExpression || null
+    source: community?.id || null
   });
 
   const { entries: memberEntries } = useEntries({
@@ -84,20 +84,7 @@ export function CommunityProvider({ perspectiveUuid, children }: any) {
   }
 
   async function fetchChannels() {
-    const promiseList = [];
-    for (const channel of channelEntries) {
-      const awaitedChannel = {
-        name: await channel.name,
-        id: await channel.baseExpression,
-        views: await channel.views,
-      }
-
-      promiseList.push(awaitedChannel)
-    }
-
-    const awaitedList = await Promise.all(promiseList);
-
-    const channels = awaitedList.reduce((acc, channel) => ({
+    const channels = channelEntries.reduce((acc, channel) => ({
       ...acc,
       [channel.id]: channel
     }), {})

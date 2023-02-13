@@ -25,35 +25,7 @@ export default function PostList() {
   }, [posts.length])
 
   const finalPosts = async () => {
-    const promiseList = []
-
-    
-  let ad4m = await getAd4mClient()
-  let perspective = await ad4m.perspective.byUUID(state.communityId)
-    
-    for (const post of posts) {
-      const channelEntry = new SubjectEntry(post, perspective);
-      await channelEntry.load();
-      
-      promiseList.push({
-        body: await post.body,
-        title: await post.title,
-        type: await post.type,
-        url: await post.url,
-        comments: await post.comments,
-        image: await post.image,
-        endDate: await post.endDate,
-        startDate: await post.startDate,
-        timestamp: await channelEntry.timestamp,
-        author: await channelEntry.author,
-        id: await post.baseExpression
-      })
-    }
-
-    const awaitedList = await Promise.all(promiseList);
-
-
-    return awaitedList.sort((a, b) => b.timestamp - a.timestamp)
+    return posts.sort((a, b) => b.timestamp - a.timestamp)
   }
 
   const displayStyle: DisplayView =

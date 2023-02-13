@@ -38,7 +38,8 @@ export default function useEntry<SubjectClass>({
         }
 
         setEntry({
-          ...entry,
+          ...tempModel,
+          id: await entry.baseExpression,
           timestamp: channelEntry.timestamp,
           author: channelEntry.author
         });

@@ -1,6 +1,7 @@
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import React, { useEffect, useState, useMemo } from "react";
 import { SubjectRepository } from "../factory";
-import { Factory } from "../helpers/model";
+import { Factory, SubjectEntry } from "../helpers/model";
 
 export default function useEntries<SubjectClass>({
   perspectiveUuid,
@@ -31,13 +32,37 @@ export default function useEntries<SubjectClass>({
   async function getAll() {
     try {
       setLoading(true);
+      let ad4m = await getAd4mClient()
+      let perspective = await ad4m.perspective.byUUID(perspectiveUuid)
+
       const entries = await Model.getAll();
-      console.log('posts 44442', source, entries)
-      setEntries(entries);
+
+      const promiseList = [];
+      for (const entry of entries) {
+        const channelEntry = new SubjectEntry(entry, perspective!)
+        await channelEntry.load()
+
+        // @ts-ignore
+        const tempModel = new model();
+
+        for (const [key] of Object.entries(tempModel)) {
+          tempModel[key] = await entry[key]
+        }
+
+        promiseList.push({
+          ...tempModel,
+          id: await entry.baseExpression,
+          timestamp: channelEntry.timestamp,
+          author: channelEntry.author
+        })
+      }
+
+      const awaitedList = await Promise.all(promiseList);
+
+
+      setEntries(awaitedList);
     } catch (e) {
-      console.log('posts 44444 4444', e)
     } finally {
-      console.log('posts 44444 4444 1')
       setLoading(false);
     }
   }

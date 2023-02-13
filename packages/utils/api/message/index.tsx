@@ -31,8 +31,7 @@ export class Message {
   @subjectCollection({
     through: REPLY_TO,
   })
-  replies: string[];
-  addReply(reply: string) {}
+  replies: string[] = [];
 }
 
 export default Message;
