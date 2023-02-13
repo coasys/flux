@@ -11,7 +11,6 @@ export default defineConfig({
     lib: {
       entry: {
         api: resolve(__dirname, "api/index.ts"),
-        react: resolve(__dirname, "react/index.ts"),
         constants: resolve(__dirname, "constants/index.ts"),
         helpers: resolve(__dirname, "helpers/index.ts"),
         factory: resolve(__dirname, "factory/index.ts"),

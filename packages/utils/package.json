@@ -30,8 +30,7 @@
       "require": "./dist/factory.umd.cjs"
     },
     "./frameworks/react": {
-      "import": "./dist/react.js",
-      "require": "./dist/react.umd.cjs"
+      "import": "./react/index.ts"
     },
     "./types": {
       "import": "./dist/types.js",
