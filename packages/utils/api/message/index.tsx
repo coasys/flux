@@ -8,18 +8,22 @@ import {
   SDNAClass,
   subjectProperty,
   subjectCollection,
+  subjectFlag,
 } from "@perspect3vism/ad4m";
 
 @SDNAClass({
-  through: ENTRY_TYPE,
-  initial: EntryType.Message,
-  required: true,
   name: 'Message'
 })
 export class Message {
+  @subjectFlag({
+    through: ENTRY_TYPE,
+    value: EntryType.Message,
+  })
+  type: string;
+  
   @subjectProperty({
     through: BODY,
-    resolve: true,
+    writable: true,
     resolveLanguage: "literal",
   })
   body: string;

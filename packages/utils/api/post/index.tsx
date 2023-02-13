@@ -13,31 +13,35 @@ import {
   SDNAClass,
   subjectProperty,
   subjectCollection,
+  subjectFlag,
 } from "@perspect3vism/ad4m";
 
 @SDNAClass({
-  through: ENTRY_TYPE,
-  initial: EntryType.Post,
-  required: true,
   name: 'Post'
 })
 export class Post {
-  @subjectProperty({ through: TITLE, resolve: true, resolveLanguage: "literal" })
+  @subjectFlag({
+    through: ENTRY_TYPE,
+    value: EntryType.Post,
+  })
+  type: string;
+  
+  @subjectProperty({ through: TITLE, writable: true, resolveLanguage: "literal" })
   title: string;
 
-  @subjectProperty({ through: BODY, resolve: true, resolveLanguage: "literal" })
+  @subjectProperty({ through: BODY, writable: true, resolveLanguage: "literal" })
   body: string;
 
-  @subjectProperty({ through: IMAGE, resolveLanguage: NOTE_IPFS_EXPRESSION_OFFICIAL })
+  @subjectProperty({ through: IMAGE, writable: true, resolveLanguage: NOTE_IPFS_EXPRESSION_OFFICIAL })
   image: string;
 
-  @subjectProperty({ through: START_DATE, resolve: true, resolveLanguage: "literal" })
+  @subjectProperty({ through: START_DATE, writable: true, resolveLanguage: "literal" })
   startDate: string;
 
-  @subjectProperty({ through: END_DATE, resolve: true, resolveLanguage: "literal" })
+  @subjectProperty({ through: END_DATE, writable: true, resolveLanguage: "literal" })
   endDate: string;
 
-  @subjectProperty({ through: URL, resolve: true, resolveLanguage: "literal" })
+  @subjectProperty({ through: URL, writable: true, resolveLanguage: "literal" })
   url: string;
 
   @subjectCollection({ through: EntryType.Message })

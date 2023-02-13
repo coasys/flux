@@ -12,25 +12,26 @@ import {
   SDNAClass,
   subjectProperty,
   subjectCollection,
+  subjectFlag,
 } from "@perspect3vism/ad4m";
 
 @SDNAClass({
-  through: ENTRY_TYPE,
-  initial: EntryType.Community,
-  required: true,
   name: 'Community'
 })
 export class Community {
-  @subjectProperty({ through: NAME, resolve: true, resolveLanguage: "literal" })
+  @subjectFlag({ through: ENTRY_TYPE, value: EntryType.Community })
+  type: string;
+  
+  @subjectProperty({ through: NAME, writable: true, resolveLanguage: "literal" })
   name: string;
 
-  @subjectProperty({ through: DESCRIPTION, resolve: true, resolveLanguage: "literal" })
+  @subjectProperty({ through: DESCRIPTION, writable: true, resolveLanguage: "literal" })
   description: string;
 
-  @subjectProperty({ through: IMAGE, resolveLanguage: NOTE_IPFS_EXPRESSION_OFFICIAL })
+  @subjectProperty({ through: IMAGE, writable: true, resolveLanguage: NOTE_IPFS_EXPRESSION_OFFICIAL })
   image: string;
 
-  @subjectProperty({ through: THUMBNAIL, resolveLanguage: NOTE_IPFS_EXPRESSION_OFFICIAL })
+  @subjectProperty({ through: THUMBNAIL, writable: true, resolveLanguage: NOTE_IPFS_EXPRESSION_OFFICIAL })
   thumbnail: string;
 
   @subjectCollection({ through: EntryType.Channel })

@@ -7,19 +7,23 @@ import { EntryType, Entry, ChannelView } from "../../types";
 import {
   subjectProperty,
   subjectCollection,
-  SDNAClass
+  SDNAClass,
+  subjectFlag
 } from "@perspect3vism/ad4m";
 
 @SDNAClass({
-  through: ENTRY_TYPE,
-  initial: EntryType.Channel,
-  required: true,
   name: 'Channel'
 })
 export class Channel {
+  @subjectFlag({
+    through: ENTRY_TYPE,
+    value: EntryType.Channel,
+  })
+  type: string;
+
   @subjectProperty({
     through: NAME,
-    resolve: true,
+    writable: true,
     resolveLanguage: "literal",
   })
   name: string;

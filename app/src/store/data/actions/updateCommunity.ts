@@ -17,27 +17,28 @@ export default async function updateCommunityData(
   const dataStore = useDataStore();
   const appStore = useAppStore();
 
+  const community = dataStore.getCommunity(communityId);
+
   try {
     const Community = new SubjectRepository(CommunityModel, {
       perspectiveUuid: communityId,
     });
 
-    // @ts-ignore
-    Object.keys(update).forEach(key => update[key] === undefined ? delete update[key] : {});
-
     let thumb = undefined;
     let compressedImage = undefined;
 
     if (update.image) {
-      compressedImage = await blobToDataURL(
+      update.image = await blobToDataURL(
         await resizeImage(dataURItoBlob(update.image as string), 0.6)
       );
-      thumb = await blobToDataURL(
+
+      // @ts-ignore
+      update.thumbnail = await blobToDataURL(
         await resizeImage(dataURItoBlob(update.image as string), 0.3)
       );
     }
 
-    await Community.update("", {
+    await Community.update(community.id, {
       ...update,
       image: compressedImage,
       thumbnail: thumb,

@@ -69,12 +69,12 @@ export function setProperties(subject: any, properties: QueryPartialEntity<{[x: 
             adder(key, properties[key].value);
             break
           default:
-            adder(key, properties[key].value);
+            setter(key, properties[key].value);
             break;
         }
       } else {
         // it's a collection
-        adder(key, properties[key]);
+        setter(key, properties[key]);
       }
       // console.log('llll 5', key, adderName, subject,adderFunction, properties[key])
     } else {
@@ -127,14 +127,14 @@ export class SubjectRepository<SubjectClass extends {[x: string]: any}> {
       throw "Failed to create new instance of " + this.subject.type;
     }
 
-    console.log('wow', newInstance)
-
     // Connect new instance to source
     await this.perspective?.add(new Link({
       source: this.source, 
       predicate: await newInstance.type, 
       target: base
     }))
+
+    Object.keys(data).forEach(key => data[key] === undefined ? delete data[key] : {});
 
     setProperties(newInstance, data);
     return newInstance;
@@ -147,6 +147,9 @@ export class SubjectRepository<SubjectClass extends {[x: string]: any}> {
         "Failed to find instance of " + this.subject.type + " with id " + id
       );
     }
+
+    Object.keys(data).forEach(key => data[key] === undefined ? delete data[key] : {});
+
     setProperties(instance, data);
     return instance;
   }
