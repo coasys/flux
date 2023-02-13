@@ -8,7 +8,7 @@ export default function useEntries<SubjectClass>({
   model,
 }: {
   perspectiveUuid: string;
-  source: string | null | undefined;
+  source?: string | null | undefined;
   model: SubjectClass;
 }) {
   const [loading, setLoading] = useState(true);
