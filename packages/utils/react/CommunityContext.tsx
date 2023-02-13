@@ -5,8 +5,8 @@ import ChannelModel from "../api/channel";
 import MemberModel from "../api/member";
 import CommunityModel from "../api/community";
 import { getProfile } from "../api";
-import { EntryType } from "types";
-import { asyncFilter } from "helpers";
+import { EntryType } from "../types";
+import { asyncFilter } from "../helpers";
 
 type State = {
   uuid: string;

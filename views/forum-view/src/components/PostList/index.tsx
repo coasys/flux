@@ -3,22 +3,58 @@ import PostItem from "../PostItem";
 import style from "./index.module.css";
 import { DisplayView, displayOptions } from "../../constants/options";
 import { ChannelContext, useEntries } from "utils/frameworks/react";
-import { Post } from "utils/api";
+import { Post, } from "utils/api";
+import { useEffect } from "react";
+import { SubjectEntry } from "utils/helpers";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 export default function PostList() {
+  const [sortedPosts, setSortedPosts] = useState([]);
   const { state } = useContext(ChannelContext);
   const [view, setView] = useState(DisplayView.Compact);
-
   const { entries: posts, loading } = useEntries({
     perspectiveUuid: state.communityId,
-    source: state.channelId,
+    source: state?.channelId  || null,
     model: Post,
   });
 
-  const sortedPosts = useMemo(
-    () => posts.sort((a, b) => b.timestamp - a.timestamp),
-    [posts.length]
-  );
+  useEffect(() => {
+    finalPosts().then(data => {
+      setSortedPosts(data)
+    })
+  }, [posts.length])
+
+  const finalPosts = async () => {
+    const promiseList = []
+
+    
+  let ad4m = await getAd4mClient()
+  let perspective = await ad4m.perspective.byUUID(state.communityId)
+    
+    for (const post of posts) {
+      const channelEntry = new SubjectEntry(post, perspective);
+      await channelEntry.load();
+      
+      promiseList.push({
+        body: await post.body,
+        title: await post.title,
+        type: await post.type,
+        url: await post.url,
+        comments: await post.comments,
+        image: await post.image,
+        endDate: await post.endDate,
+        startDate: await post.startDate,
+        timestamp: await channelEntry.timestamp,
+        author: await channelEntry.author,
+        id: await post.baseExpression
+      })
+    }
+
+    const awaitedList = await Promise.all(promiseList);
+
+
+    return awaitedList.sort((a, b) => b.timestamp - a.timestamp)
+  }
 
   const displayStyle: DisplayView =
     view === DisplayView.Compact

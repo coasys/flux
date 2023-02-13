@@ -19,7 +19,7 @@ export default function CommentItem({ comment, perspectiveUuid }) {
 
   const { entries: comments, model: Message } = useEntries({
     perspectiveUuid,
-    source: comment.id,
+    source: comment.id || null,
     model: MessageModel,
   });
 

@@ -17,7 +17,7 @@ export default function CommentSection({
 
   const { entries: comments, model: Message } = useEntries({
     perspectiveUuid,
-    source,
+    source: source || null,
     model: MessageModel,
   });
 

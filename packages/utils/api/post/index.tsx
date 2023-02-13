@@ -45,7 +45,7 @@ export class Post {
   url: string;
 
   @subjectCollection({ through: EntryType.Message })
-  comments: string[];
+  comments: string[] = [];
 }
 
 export default Post;
