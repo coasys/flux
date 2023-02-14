@@ -105,7 +105,10 @@ export default class WebRTCManager {
     this.client = await getAd4mClient();
     this.agent = await this.client.agent.me();
     this.perspective = await this.client.perspective.byUUID(props.uuid);
-    this.neighbourhood = this.perspective.getNeighbourhoodProxy();
+    this.neighbourhood = new NeighbourhoodProxy(
+      this.client.neighbourhood,
+      this.perspective.uuid
+    );
     this.onSignal = this.onSignal.bind(this);
     this.emitPeerEvents();
 
