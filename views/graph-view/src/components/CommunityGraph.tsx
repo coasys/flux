@@ -1,11 +1,9 @@
 import ForceGraph3D, { ForceGraph3DInstance } from "3d-force-graph";
 import { useEffect, useState, useRef } from "preact/hooks";
 import SpriteText from "three-spritetext";
-import {
-  getAd4mClient,
-  LinkExpression,
-} from "@perspect3vism/ad4m-connect/dist/utils";
-import { Ad4mClient, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { Ad4mClient, Literal } from "@perspect3vism/ad4m";
+import useIntersectionObserver from "../hooks/useIntersectionObserver";
 
 function findNodes(links, source) {
   return links.reduce((acc, link) => {
@@ -49,6 +47,7 @@ export default function CommunityOverview({ uuid, source }) {
   const containerRef = useRef<HTMLDivElement>();
   const graph = useRef<ForceGraph3DInstance>(undefined);
   const graphEl = useRef<HTMLDivElement | null>(null);
+
   const [containerSize, setContainerSize] = useState([0, 0]);
   const [ad4mInitialised, setAd4mInitialised] = useState(false);
   const [graphInitialised, setGraphInitialised] = useState(false);
@@ -56,6 +55,20 @@ export default function CommunityOverview({ uuid, source }) {
   const [links, setLinks] = useState<
     { source: string; target: string; predicate: string }[]
   >([]);
+
+  const entry = useIntersectionObserver(graphEl, {});
+  const isGraphVisible = !!entry?.isIntersecting;
+
+  // Pause animations when graph hidden
+  useEffect(() => {
+    if (graphInitialised) {
+      if (!isGraphVisible) {
+        graph.current.pauseAnimation();
+      } else {
+        graph.current.resumeAnimation();
+      }
+    }
+  }, [graphInitialised, isGraphVisible]);
 
   // Listen to resize events
   useEffect(() => {
@@ -149,6 +162,7 @@ export default function CommunityOverview({ uuid, source }) {
     }
   }, [graphInitialised, nodes, links]);
 
+  // Add data on change
   useEffect(() => {
     if (graphInitialised && graph.current) {
       graph.current.graphData({ nodes, links });
