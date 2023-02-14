@@ -5,6 +5,9 @@ import {
   Agent,
   Literal,
   LinkExpression,
+  NeighbourhoodProxy,
+  Link,
+  PerspectiveExpression,
 } from "@perspect3vism/ad4m";
 
 const servers = {
@@ -20,6 +23,19 @@ const servers = {
   ],
   iceCandidatePoolSize: 10,
 };
+
+async function createSignalLink(client: Ad4mClient, link: Link) {
+  const perspective = await client.perspective.add("temp");
+  perspective.add(link);
+  const snapshot = perspective.snapshot();
+
+  await client.perspective.remove(perspective.uuid);
+  return snapshot;
+}
+
+async function getLinkFromPerspective(expression: PerspectiveExpression) {
+  return expression.data.links[0];
+}
 
 function getData(data: any) {
   let parsedData;
@@ -65,6 +81,7 @@ export default class WebRTCManager {
   private agent: Agent;
   private client: Ad4mClient;
   private perspective: PerspectiveProxy;
+  private neighbourhood: NeighbourhoodProxy;
   private roomId: string;
   private callbacks: Record<Event, Array<(...args: any[]) => void>> = {
     [Event.PEER_ADDED]: [],
@@ -88,7 +105,8 @@ export default class WebRTCManager {
     this.client = await getAd4mClient();
     this.agent = await this.client.agent.me();
     this.perspective = await this.client.perspective.byUUID(props.uuid);
-    this.onLink = this.onLink.bind(this);
+    this.neighbourhood = this.perspective.getNeighbourhoodProxy();
+    this.onSignal = this.onSignal.bind(this);
     this.emitPeerEvents();
 
     // Close connections if we refresh
@@ -126,8 +144,10 @@ export default class WebRTCManager {
     this.callbacks[event].push(cb);
   }
 
-  onLink(link: LinkExpression) {
-    if (link.author === this.agent.did) return null;
+  async onSignal(expression: PerspectiveExpression) {
+    if (expression.author === this.agent.did) return null;
+
+    const link = await getLinkFromPerspective(expression);
 
     console.log(`🔵 ${link?.data?.predicate}`, { link });
 
@@ -216,13 +236,15 @@ export default class WebRTCManager {
 
     this.connections.set(remoteDid, newConnection);
 
-    peerConnection.addEventListener("icecandidate", (event) => {
+    peerConnection.addEventListener("icecandidate", async (event) => {
       if (event.candidate) {
-        this.perspective.add({
+        const signalLink = await createSignalLink(this.client, {
           source: remoteDid,
           predicate: ICE_CANDIDATE,
           target: Literal.from(event.candidate.toJSON()).toUrl(),
         });
+
+        this.neighbourhood.sendSignal(remoteDid, signalLink);
       }
     });
 
@@ -254,11 +276,13 @@ export default class WebRTCManager {
     const offer = await connection.peerConnection.createOffer();
     await connection.peerConnection.setLocalDescription(offer);
 
-    await this.perspective.add({
+    const signalLink = await createSignalLink(this.client, {
       source: recieverDid,
       predicate: OFFER,
       target: Literal.from(offer).toUrl(),
     });
+
+    this.neighbourhood.sendSignal(recieverDid, signalLink);
   }
 
   async handleOffer(fromDid: string, offer: RTCSessionDescriptionInit) {
@@ -278,11 +302,13 @@ export default class WebRTCManager {
     const answer = await connection.peerConnection.createAnswer();
     await connection.peerConnection.setLocalDescription(answer);
 
-    await this.perspective.add({
+    const signalLink = await createSignalLink(this.client, {
       source: fromDid,
       predicate: ANSWER,
       target: Literal.from(answer).toUrl(),
     });
+
+    this.neighbourhood.sendSignal(fromDid, signalLink);
   }
 
   async handleAnswer(fromDid: string, answer: RTCSessionDescriptionInit) {
@@ -323,20 +349,22 @@ export default class WebRTCManager {
       video: settings.video,
     });
 
-    await this.perspective.add({
+    const signalLink = await createSignalLink(this.client, {
       source: this.roomId,
       predicate: OFFER_REQUEST,
       target: this.agent.did,
     });
 
-    this.perspective.addListener("link-added", this.onLink);
+    this.neighbourhood.sendBroadcast(signalLink);
+    this.neighbourhood.addSignalHandler(this.onSignal);
 
     return this.localStream;
   }
 
   async leave() {
     if (this.perspective) {
-      this.perspective.removeListener("link-added", this.onLink);
+      // Todo: Nico, nico, nico!
+      // this.neighbourhood.removeSignalHandler
     }
 
     if (this.agent) {
