@@ -7,6 +7,7 @@ import Item from "./Item";
 import popWav from "../../assets/pop.wav";
 import guitarWav from "../../assets/guitar.wav";
 import kissWav from "../../assets/kiss.wav";
+import pigWav from "../../assets/pig.wav";
 
 import styles from "./UserGrid.module.css";
 
@@ -37,6 +38,9 @@ export default function UserGrid({
   });
   const kissSound = new Howl({
     src: [kissWav],
+  });
+  const pigSound = new Howl({
+    src: [pigWav],
   });
 
   const userCount = peers.length + (localStream ? 1 : 0);
@@ -73,6 +77,8 @@ export default function UserGrid({
       kissSound.play();
     } else if (newReaction.reaction === "🎸") {
       guitarSound.play();
+    } else if (newReaction.reaction === "🐷" || newReaction.reaction === "🐖") {
+      pigSound.play();
     } else {
       popSound.play();
     }

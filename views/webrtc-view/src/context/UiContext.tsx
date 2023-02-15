@@ -8,6 +8,9 @@ export type Notification = {
 };
 
 type State = {
+  settings: {
+    sounds: boolean;
+  };
   notifications: Notification[];
 };
 
@@ -21,6 +24,9 @@ type ContextProps = {
 const initialState: ContextProps = {
   state: {
     notifications: [],
+    settings: {
+      sounds: true,
+    },
   },
   methods: {
     addNotification: () => null,
