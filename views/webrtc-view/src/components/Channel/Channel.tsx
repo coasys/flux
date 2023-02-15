@@ -9,6 +9,7 @@ import Debug from "../Debug";
 import styles from "./Channel.module.css";
 import Notifications from "../Notifications";
 import UiContext from "../../context/UiContext";
+import Disclaimer from "../Disclaimer";
 
 export default function Channel({ source, uuid }) {
   const [showDebug, setShowDebug] = useState(false);
@@ -60,6 +61,10 @@ export default function Channel({ source, uuid }) {
             <j-text variant="body">Your microphone will be enabled.</j-text>
 
             <j-box pt="200">
+              <Disclaimer />
+            </j-box>
+
+            <j-box pt="400">
               <j-toggle
                 checked={settings.video}
                 disabled={isLoading}
