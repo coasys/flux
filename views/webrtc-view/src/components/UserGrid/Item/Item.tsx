@@ -10,6 +10,7 @@ type Props = {
   userId: string;
   settings?: Settings;
   reaction?: Reaction;
+  mirrored?: boolean;
   focused?: boolean;
   minimised?: boolean;
   peer?: Peer;
@@ -23,6 +24,7 @@ export default function Item({
   focused,
   minimised,
   reaction,
+  mirrored,
   peer,
   videoRef,
   onToggleFocus,
@@ -74,6 +76,7 @@ export default function Item({
       data-camera-enabled={settings.video}
       data-focused={focused}
       data-minimised={minimised}
+      data-mirrored={mirrored}
       data-connecting={isConnecting}
     >
       <video

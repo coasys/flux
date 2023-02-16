@@ -138,6 +138,7 @@ export default function UserGrid({
     >
       {localStream && (
         <Item
+          mirrored={settings.video && !settings.screen}
           userId={currentUser.did}
           videoRef={videoRef}
           settings={settings}
