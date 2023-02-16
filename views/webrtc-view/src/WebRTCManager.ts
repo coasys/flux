@@ -154,6 +154,8 @@ export default class WebRTCManager {
 
     console.log(`🔵 ${link?.data?.predicate}`, { link });
 
+    if (!link.data) return null;
+
     if (
       link.data.predicate === OFFER_REQUEST &&
       link.data.source === this.roomId
