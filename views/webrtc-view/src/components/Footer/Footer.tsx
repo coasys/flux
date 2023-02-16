@@ -49,7 +49,7 @@ export default function Footer({
           title={settings.video ? "Disable camera" : "Enable camera"}
         >
           <j-button
-            variant={settings.video ? "primary" : "secondary"}
+            variant={settings.video ? "secondary" : "primary"}
             onClick={() =>
               onChangeSettings({ ...settings, video: !settings.video })
             }
@@ -59,7 +59,7 @@ export default function Footer({
             disabled={!hasJoined}
           >
             <j-icon
-              name={settings.video ? "camera-video-off" : "camera-video"}
+              name={settings.video ? "camera-video" : "camera-video-off"}
             ></j-icon>
           </j-button>
         </j-tooltip>
@@ -69,7 +69,7 @@ export default function Footer({
           title={settings.audio ? "Mute microphone" : "Unmute microphone"}
         >
           <j-button
-            variant={settings.audio ? "primary" : "secondary"}
+            variant={settings.audio ? "secondary" : "primary"}
             onClick={() =>
               onChangeSettings({ ...settings, audio: !settings.audio })
             }
@@ -78,7 +78,7 @@ export default function Footer({
             size="lg"
             disabled={!hasJoined}
           >
-            <j-icon name={settings.audio ? "mic-mute" : "mic"}></j-icon>
+            <j-icon name={settings.audio ? "mic" : "mic-mute"}></j-icon>
           </j-button>
         </j-tooltip>
 
@@ -144,7 +144,7 @@ export default function Footer({
         </j-tooltip> */}
       </div>
 
-      <div className={styles.debug}>
+      {/* <div className={styles.debug}>
         <j-tooltip placement="top" title="Debug">
           <j-button
             variant="secondary"
@@ -156,7 +156,7 @@ export default function Footer({
             <j-icon name="gear"></j-icon>
           </j-button>
         </j-tooltip>
-      </div>
+      </div> */}
     </div>
   );
 }
