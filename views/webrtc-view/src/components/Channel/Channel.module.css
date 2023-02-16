@@ -1,0 +1,13 @@
+.outer {
+    position: relative;
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 var(--j-space-500);
+}
+
+.join {
+    text-align: center;
+}

@@ -86,6 +86,16 @@
       @neighbourhood-click="onNeighbourhoodClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></graph-view>
+    <webrtc-view
+      v-show="currentView === ChannelView.Voice"
+      class="perspective-view"
+      :source="channel.id"
+      :perspective="communityId"
+      @agent-click="onAgentClick"
+      @channel-click="onChannelClick"
+      @neighbourhood-click="onNeighbourhoodClick"
+      @hide-notification-indicator="onHideNotificationIndicator"
+    ></webrtc-view>
     <chat-view
       v-show="currentView === ChannelView.Chat"
       class="perspective-view"
@@ -122,6 +132,7 @@
 import ForumView from "@junto-foundation/forum-view";
 import ChatView from "@junto-foundation/chat-view";
 import GraphView from "@junto-foundation/graph-view";
+import VoiceView from "@junto-foundation/webrtc-view";
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
@@ -175,6 +186,10 @@ export default defineComponent({
     if (!customElements.get("graph-view")) {
       const module = await import(`@junto-foundation/graph-view`);
       customElements.define("graph-view", module.default);
+    }
+    if (!customElements.get("webrtc-view")) {
+      const module = await import(`@junto-foundation/webrtc-view`);
+      customElements.define("webrtc-view", module.default);
     }
   },
   computed: {

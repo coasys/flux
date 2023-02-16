@@ -1,6 +1,4 @@
 import { v4 as uuidv4 } from "uuid";
-import { PERSPECTIVE_DIFF_SYNC } from "../constants";
-import { MEMBER, SELF } from "../constants/communityPredicates";
 import { Community as FluxCommunity } from "../types";
 import { createNeighbourhoodMeta } from "../helpers/createNeighbourhoodMeta";
 import { Perspective } from "@perspect3vism/ad4m";
@@ -36,9 +34,11 @@ export default async function createCommunity({
 
     const uid = uuidv4().toString();
 
+    const langs = await client.runtime.knownLinkLanguageTemplates();
+
     //Create unique social-context
     const linkLanguage = await client.languages.applyTemplateAndPublish(
-      PERSPECTIVE_DIFF_SYNC,
+      langs[0],
       JSON.stringify({
         uid: uid,
         name: `${name}-link-language`,

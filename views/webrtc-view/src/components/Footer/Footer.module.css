@@ -1,0 +1,51 @@
+.wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--j-space-400) var(--j-space-500) var(--j-space-600) var(--j-space-500);
+}
+
+.inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--j-space-400);
+    padding: var(--j-space-400);
+    font-family: var(--j-font-family);
+    border-radius: var(--j-border-radius);
+    background-color: #ffffff08;
+}
+
+.debug {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    padding: 3rem;
+}
+
+@media (min-width: 800px) {
+    .debug {
+        display: block;
+    }
+  }
+
+.picker {
+    --background: var(--j-color-ui-50);
+    --border-color: var(--j-color-ui-50);
+    --indicator-color: var(--j-color-primary-500);
+    --button-active-background: var(--j-color-ui-100);
+    --button-hover-background: var(--j-color-ui-200);
+    --input-border-radius: var(--j-border-radius);
+    --input-border-color: var(--j-color-ui-200);
+    --input-padding: var(--j-space-200);
+    --outline-size: 1px;
+    --outline-color: var(--j-color-ui-300);
+    --input-font-color: var(--j-color-ui-800);
+    --input-placeholder-color: varr(--j-color-ui-400);;
+  }
+  
