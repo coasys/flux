@@ -6,3 +6,6 @@ export const AD4M_AGENT =
 
 export const KAICHAO_AGENT =
   "did:key:zQ3shfhvaHzE81hZqLorVNDmq971EpGPXq3nhyLF1JRP18LM3";
+
+export const NOTE_IPFS_AUTHOR = 
+  "did:key:zQ3shmm1adTSjzyVqWthFkJ4yby8zCdH5uvwxWaQDEuJLUPfq";

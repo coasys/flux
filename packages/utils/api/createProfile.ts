@@ -1,4 +1,4 @@
-import { AD4M_AGENT, KAICHAO_AGENT, JUNTO_AGENT } from "utils/constants/agents";
+import { AD4M_AGENT, KAICHAO_AGENT, JUNTO_AGENT, NOTE_IPFS_AUTHOR } from "utils/constants/agents";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
 import {
   FLUX_PROFILE,
@@ -53,6 +53,7 @@ export default async ({
       AD4M_AGENT,
       KAICHAO_AGENT,
       JUNTO_AGENT,
+      NOTE_IPFS_AUTHOR,
     ]);
     await client.languages.byAddress(NOTE_IPFS_EXPRESSION_OFFICIAL);
 
