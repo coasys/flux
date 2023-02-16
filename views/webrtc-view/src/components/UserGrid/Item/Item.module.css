@@ -1,0 +1,139 @@
+.item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    margin: 0 auto;
+    font-family: var(--j-font-family);
+    border-radius: var(--j-border-radius);
+    background: var(--j-color-ui-800);
+    overflow: hidden;
+    cursor: pointer;
+    aspect-ratio: 16/9;
+}
+
+@media (min-width: 800px) {
+    .item {
+        max-width: 50vw;
+    }
+  }
+
+.video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+}
+
+.details,
+.reaction,
+.loading {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: var(--j-space-300);
+    background: var(--j-color-ui-800);
+    transition: all 0.3s ease;
+}
+
+.loading {
+    display: none;
+    gap: var(--j-space-500);
+}
+
+.reaction {
+    background: transparent;
+}
+
+.reaction-inner {
+    aspect-ratio: 1/1;
+    background: white;
+    padding: 3rem;
+    border-radius: 50%;
+    text-align: center;
+    animation: appear 0.7s cubic-bezier(0.78, 0.06, 0.37, 0.72) both;
+}
+
+.reaction-inner span {
+    display: block;
+    font-size: 6rem;
+    animation: appear-inner 0.6s cubic-bezier(0.77,-0.02, 0.27, 1.55) both 0.4s;
+}
+
+.item[data-mirrored="true"] video {
+    transform: scaleX(-1);
+}
+
+.item[data-focused="true"] {
+    max-width: 100%;
+}
+.item[data-focused="true"]:hover .details {
+    opacity: 0 !important;
+}
+
+.item[data-minimised="true"] {
+    display: none;
+}
+
+.item[data-connecting="true"] .details {
+    display: none;
+}
+.item[data-connecting="true"] .loading {
+    display: flex;
+}
+
+.item[data-camera-enabled="true"] .video {
+    opacity: 1;
+}
+.item[data-camera-enabled="true"] .details {
+    opacity: 0;
+}
+.item[data-camera-enabled="true"]:hover .details {
+    opacity: 1;
+}
+
+.settings {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    padding: 0 var(--j-space-400);
+    gap: var(--j-space-400);
+    list-style: none;
+}
+
+.settings > li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--j-color-ui-100);
+    width: 3.4rem;
+    border-radius: 50%;
+    list-style: none;
+    aspect-ratio: 1/1;
+}
+
+@keyframes appear {
+    0% {
+        transform: scale(8);
+        opacity: 0;
+    }
+  }
+
+  @keyframes appear-inner {
+    0% {
+        transform: scale(0);
+    }
+  }
