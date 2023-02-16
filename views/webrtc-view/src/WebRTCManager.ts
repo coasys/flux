@@ -34,7 +34,11 @@ async function createSignalLink(client: Ad4mClient, link: Link) {
 }
 
 async function getLinkFromPerspective(expression: PerspectiveExpression) {
-  return expression.data.links[0];
+  try {
+    return expression.data.links[0];
+  } catch (e) {
+    return null;
+  }
 }
 
 function getData(data: any) {
@@ -154,7 +158,7 @@ export default class WebRTCManager {
 
     console.log(`🔵 ${link?.data?.predicate}`, { link });
 
-    if (!link.data) return null;
+    if (!link) return;
 
     if (
       link.data.predicate === OFFER_REQUEST &&
