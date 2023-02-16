@@ -1490,7 +1490,7 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@perspect3vism/ad4m-connect@0.2.12", "@perspect3vism/ad4m-connect@^0.2.10":
+"@perspect3vism/ad4m-connect@0.2.12":
   version "0.2.12"
   resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.2.12.tgz#2cc0fa37b93e1d49dd147e00a2ad038712a91a24"
   integrity sha512-0dPNFfZZLFadmosXLlYj09ghP7YXx2CJoINT8WgsUkEgeVqbxrzEnZHz2+lqfDRWWkO3GYdb66uDugCEZyNrtA==
@@ -1501,7 +1501,7 @@
     html5-qrcode "^2.2.1"
     lit "^2.3.1"
 
-"@perspect3vism/ad4m@0.2.12", "@perspect3vism/ad4m@^0.2.10":
+"@perspect3vism/ad4m@0.2.12":
   version "0.2.12"
   resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.2.12.tgz#9227552e6194595f8708472552ea733656518175"
   integrity sha512-bj8AAaN9yx7n606P18n5kCrhacUywCHN6HFUrJgW+8N1J573+3dUAbFd3PzLHAh+wS0HsTsx+eX78mz2UKawbg==
