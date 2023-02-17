@@ -253,6 +253,7 @@ export default class WebRTCManager {
           target: Literal.from(event.candidate.toJSON()).toUrl(),
         });
 
+        console.log("🟠 Sending ICE_CANDIDATE signal to ", remoteDid);
         this.neighbourhood.sendSignal(remoteDid, signalLink);
       }
     });
@@ -293,6 +294,7 @@ export default class WebRTCManager {
       target: Literal.from(offer).toUrl(),
     });
 
+    console.log("🟠 Sending OFFER signal to ", recieverDid);
     this.neighbourhood.sendSignal(recieverDid, signalLink);
   }
 
@@ -319,6 +321,7 @@ export default class WebRTCManager {
       target: Literal.from(answer).toUrl(),
     });
 
+    console.log("🟠 Sending ANSWER signal to ", fromDid);
     this.neighbourhood.sendSignal(fromDid, signalLink);
   }
 
@@ -340,7 +343,11 @@ export default class WebRTCManager {
     this.connections.forEach((e, key) => {
       if (!recepients || recepients.includes(key)) {
         if (e.dataChannel.readyState === "open") {
-          console.log(`✉️ Sending message to ${key} -> `, type, message);
+          console.log(
+            `🟠 Sending DATACHANNEL message to ${key} -> `,
+            type,
+            message
+          );
           e.dataChannel.send(data);
         } else {
           console.log(
@@ -374,6 +381,7 @@ export default class WebRTCManager {
       target: this.agent.did,
     });
 
+    console.log("🟠 Sending JOIN broadcast");
     this.neighbourhood.sendBroadcast(signalLink);
     this.neighbourhood.addSignalHandler(this.onSignal);
 
