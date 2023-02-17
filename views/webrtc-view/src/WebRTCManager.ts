@@ -274,7 +274,9 @@ export default class WebRTCManager {
 
   async createOffer(recieverDid: string) {
     // Don't create an offer if we alread have a connection
-    if (this.connections.get(recieverDid)) return;
+    if (this.connections.get(recieverDid)) {
+      this.closeConnection(recieverDid);
+    }
 
     const connection = await this.addConnection(recieverDid);
 
@@ -337,8 +339,16 @@ export default class WebRTCManager {
     });
     this.connections.forEach((e, key) => {
       if (!recepients || recepients.includes(key)) {
-        console.log(`✉️ Sending message to ${key} -> `, type, message);
-        e.dataChannel.send(data);
+        if (e.dataChannel.readyState === "open") {
+          console.log(`✉️ Sending message to ${key} -> `, type, message);
+          e.dataChannel.send(data);
+        } else {
+          console.log(
+            `Couldn't send message to ${key} as connection is not open -> `,
+            type,
+            message
+          );
+        }
       }
     });
 
