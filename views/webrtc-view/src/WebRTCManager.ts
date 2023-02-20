@@ -56,6 +56,8 @@ export const ICE_CANDIDATE = "ice-candidate";
 export const OFFER_REQUEST = "offer-request";
 export const OFFER = "offer";
 export const ANSWER = "answer";
+export const TEST_SIGNAL = "test-signal";
+export const TEST_BROADCAST = "test-broadcast";
 
 export type Connection = {
   peerConnection: RTCPeerConnection;
@@ -386,6 +388,28 @@ export default class WebRTCManager {
     this.neighbourhood.addSignalHandler(this.onSignal);
 
     return this.localStream;
+  }
+
+  async sendTestSignal(recipientDid: string) {
+    const signalLink = await createSignalLink(this.client, {
+      source: this.roomId,
+      predicate: TEST_SIGNAL,
+      target: Literal.from("test signal").toUrl(),
+    });
+
+    console.log("⚙️ Sending TEST_SIGNAL to ", recipientDid);
+    this.neighbourhood.sendSignal(recipientDid, signalLink);
+  }
+
+  async sendTestBroadcast() {
+    const signalLink = await createSignalLink(this.client, {
+      source: this.roomId,
+      predicate: TEST_BROADCAST,
+      target: Literal.from("test broadcast").toUrl(),
+    });
+
+    console.log("⚙️ Sending TEST_BROADCAST to room");
+    this.neighbourhood.sendBroadcast(signalLink);
   }
 
   async leave() {

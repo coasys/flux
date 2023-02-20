@@ -1,9 +1,24 @@
 import { useContext } from "preact/hooks";
 import WebRTCContext from "../../context/UiContext";
+import { Peer } from "../../types";
+import { Ad4mClient, Link, Literal } from "@perspect3vism/ad4m";
+import { Me } from "utils/api/getMe";
+
+import DebugItem from "./DebugItem";
 
 import styles from "./Debug.module.css";
 
-export default function Debug({ connections }) {
+type Props = {
+  connections: Peer[];
+  onSendTestSignal: (recipientId: string) => void;
+  onSendTestBroadcast: () => void;
+};
+
+export default function Debug({
+  connections,
+  onSendTestSignal,
+  onSendTestBroadcast,
+}: Props) {
   return (
     <div className={styles.wrapper}>
       <div className={styles.inner}>
@@ -16,6 +31,23 @@ export default function Debug({ connections }) {
             </li>
           ))}
         </ul>
+        <div className={styles.box}>
+          <j-button variant="primary" onClick={onSendTestBroadcast}>
+            Send broadcast to everyone
+          </j-button>
+        </div>
+        <div className={styles.box}>
+          <ul>
+            {connections.map((c) => (
+              <li key={c.did}>
+                <DebugItem
+                  userId={c.did}
+                  onClick={() => onSendTestSignal(c.did)}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

@@ -20,6 +20,10 @@
     animation: appear 0.3s ease both;
 }
 
+.box {
+    padding: var(--j-space-400) 0;
+}
+
 @keyframes appear {
     0% {
         transform: translateY(-4rem);
