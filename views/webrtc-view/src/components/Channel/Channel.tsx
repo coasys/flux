@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "preact/hooks";
 import useWebRTC from "../../hooks/useWebrtc";
-import getMe, { Me } from "utils/api/getMe";
+import { getMe, Me } from "utils/api";
 
 import UserGrid from "../UserGrid";
 import Footer from "../Footer";

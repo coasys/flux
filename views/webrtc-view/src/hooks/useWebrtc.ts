@@ -2,7 +2,7 @@ import WebRTCManager, { Event, Settings } from "../WebRTCManager";
 import { useEffect, useState, useRef } from "preact/hooks";
 import { Peer, Reaction } from "../types";
 import { defaultSettings } from "../constants";
-import getMe, { Me } from "utils/api/getMe";
+import { getMe, Me } from "utils/api";
 
 type Props = {
   source: string;

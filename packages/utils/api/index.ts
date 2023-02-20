@@ -17,9 +17,13 @@ import generateReply from "./generateReply";
 import { generateSDNALiteral } from "./generateSDNALiteral";
 import getAgentLinks from "./getAgentLinks";
 import getMe from "./getMe";
+import type { Me } from "./getMe";
 import getMessage from "./getMessage";
 import getMessages from "./getMessages";
-import { findNeighbourhood, getNeighbourhoodLink} from "./getNeighbourhoodLink";
+import {
+  findNeighbourhood,
+  getNeighbourhoodLink,
+} from "./getNeighbourhoodLink";
 import getPerspectiveMeta from "./getPerspectiveMeta";
 import getProfile from "./getProfile";
 import {
@@ -43,10 +47,11 @@ import Post from "./post";
 import updateProfile from "./updateProfile";
 import createProfile from "./createProfile";
 import createAgentWebLink from "./createAgentWebLink";
-import getAgentWebLinks from './getAgentWebLinks'
+import getAgentWebLinks from "./getAgentWebLinks";
 import getAd4mProfile from "./getAd4mProfile";
 
 export {
+  Me,
   Channel,
   Community,
   Member,
@@ -88,5 +93,5 @@ export {
   createAgentWebLink,
   getAgentWebLinks,
   getAd4mProfile,
-  findNeighbourhood
+  findNeighbourhood,
 };

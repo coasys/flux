@@ -2,7 +2,7 @@ import { useState, useEffect } from "preact/hooks";
 import { Peer, Reaction } from "../../../types";
 import { Settings } from "../../../WebRTCManager";
 import { Profile } from "utils/types";
-import getProfile from "utils/api/getProfile";
+import { getProfile } from "utils/api";
 
 import styles from "./Item.module.css";
 

@@ -4,7 +4,6 @@ import {
   PerspectiveProxy,
   Agent,
   Literal,
-  LinkExpression,
   NeighbourhoodProxy,
   Link,
   PerspectiveExpression,

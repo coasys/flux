@@ -35,16 +35,16 @@
               <j-icon size="xs" :name="view.icon"></j-icon>
               <span>{{ view.title }}</span>
             </label>
-             <j-tooltip placement="auto" title="Manage views">
-          <j-button
-            v-if="sameAgent"
-            @click="() => goToEditChannel(channel.id)"
-            size="sm"
-            variant="ghost"
-          >
-            <j-icon size="md" name="plus"></j-icon>
-          </j-button>
-        </j-tooltip>
+            <j-tooltip placement="auto" title="Manage views">
+              <j-button
+                v-if="sameAgent"
+                @click="() => goToEditChannel(channel.id)"
+                size="sm"
+                variant="ghost"
+              >
+                <j-icon size="md" name="plus"></j-icon>
+              </j-button>
+            </j-tooltip>
           </div>
         </div>
       </div>
@@ -106,7 +106,7 @@
       @neighbourhood-click="onNeighbourhoodClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></chat-view>
-    
+
     <j-modal
       size="xs"
       v-if="activeProfile"
@@ -129,10 +129,6 @@
 </template>
 
 <script lang="ts">
-import ForumView from "@junto-foundation/forum-view";
-import ChatView from "@junto-foundation/chat-view";
-import GraphView from "@junto-foundation/graph-view";
-import VoiceView from "@junto-foundation/webrtc-view";
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
@@ -215,7 +211,7 @@ export default defineComponent({
   methods: {
     goToEditChannel(id: string) {
       this.appStore.setActiveChannel(id);
-      this.appStore.setShowEditChannel(true)
+      this.appStore.setShowEditChannel(true);
     },
     changeCurrentView(e: any) {
       const value = e.target.value;

@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "preact/hooks";
 import { Howl } from "howler";
-import { Me } from "utils/api/getMe";
+import { Me } from "utils/api";
 import { Peer, Reaction } from "../../types";
 import { Settings } from "../../WebRTCManager";
 import Item from "./Item";
