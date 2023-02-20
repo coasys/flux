@@ -37,7 +37,7 @@ export default function Debug({
           </j-button>
         </div>
         <div className={styles.box}>
-          <ul>
+          <ul className={styles.list}>
             {connections.map((c) => (
               <li key={c.did}>
                 <DebugItem

@@ -24,6 +24,10 @@
     padding: var(--j-space-400) 0;
 }
 
+.list {
+    list-style-type: none;
+}
+
 @keyframes appear {
     0% {
         transform: translateY(-4rem);
