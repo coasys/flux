@@ -110,7 +110,6 @@ function isConnected() {
     });
   
     ui.addEventListener("connectionstatechange", async (e) => {
-      console.log('gggggg 1', ui.connectionState, ui.authState, e)
 
       if (ui.connectionState === 'connected' && ui.authState === 'unauthenticated') {
         resolve(false)
@@ -120,8 +119,6 @@ function isConnected() {
     })
 
     ui.addEventListener("authstatechange", async (e) => {
-      console.log('gggggg', ui.connectionState, ui.authState, e)
-    
       if (ui.authState === 'authenticated') {
         resolve(true)
       } else {
