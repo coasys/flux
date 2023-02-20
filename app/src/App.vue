@@ -24,16 +24,7 @@
       </j-flex>
     </div>
   </div>
-  <ad4m-connect
-    theme="dark"
-    ref="ad4mConnect"
-    appName="Flux"
-    appDesc="A Social Toolkit for the New Internet"
-    :appDomain="appDomain"
-    capabilities='[{"with":{"domain":"*","pointers":["*"]},"can": ["*"]}]'
-    appiconpath="https://i.ibb.co/GnqjPJP/icon.png"
-    openonshortcut
-  ></ad4m-connect>
+
   <j-toast
     autohide="10"
     :variant="ui.toast.variant"
@@ -62,6 +53,8 @@ import subscribeToLinks from "utils/api/subscribeToLinks";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import semver from "semver";
 import { dependencies } from "../package.json";
+import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
+
 
 export default defineComponent({
   name: "App",
@@ -73,6 +66,7 @@ export default defineComponent({
     const dataStore = useDataStore();
     const userStore = useUserStore();
     const watcherStarted = ref(false);
+    const connect = ref();
 
     const ad4mConnect = ref(null);
 
@@ -85,34 +79,50 @@ export default defineComponent({
       dataStore,
       userStore,
       watcherStarted,
+      connect
     };
   },
   created() {
     this.appStore.changeCurrentTheme("global");
   },
   mounted() {
-    onAuthStateChanged(async (event: string) => {
-      if (event === "connected_with_capabilities") {
-        if (!this.watcherStarted) {
-          this.startWatcher();
-          this.watcherStarted = true;
-          hydrateState();
+    const ui = Ad4mConnectUI({
+      appName: "Flux",
+      appDesc: "A Social Toolkit for the New Internet",
+      appDomain: this.appDomain,
+      appIconPath: "https://i.ibb.co/GnqjPJP/icon.png",
+      capabilities: [{"with":{"domain":"*","pointers":["*"]},"can": ["*"]}],
+    });
 
-          const client = await getAd4mClient();
 
-          //Do version checking for ad4m / flux compatibility
-          const { ad4mExecutorVersion } = await client.runtime.info();
-          const isIncompatible = semver.gt(
-            dependencies["@perspect3vism/ad4m"],
-            ad4mExecutorVersion
-          );
+    this.connect = ui;
 
-          if (isIncompatible) {
-            this.$router.push({ name: "update-ad4m" });
+    ui.addEventListener("authstatechange", async (e) => {
+      if (ui.authState === 'authenticated') {
+          this.router.push('home')
+          
+          if (!this.watcherStarted) {
+            this.startWatcher();
+            this.watcherStarted = true;
+            hydrateState();
+
+            const client = await getAd4mClient();
+
+            //Do version checking for ad4m / flux compatibility
+            const { ad4mExecutorVersion } = await client.runtime.info();
+
+            const isIncompatible = semver.gt(
+              dependencies["@perspect3vism/ad4m"],
+              ad4mExecutorVersion
+            );
+
+            if (isIncompatible) {
+              this.$router.push({ name: "update-ad4m" });
+            }
           }
         }
-      }
     });
+
   },
   computed: {
     modals(): ModalsState {
@@ -127,8 +137,7 @@ export default defineComponent({
   },
   methods: {
     connectToAd4m() {
-      // @ts-ignore
-      this.ad4mConnect?.connect();
+      this.connect.connect()
     },
     async startWatcher() {
       const client = await getAd4mClient();
