@@ -438,7 +438,7 @@ export default class WebRTCManager {
     const signalLink = await createSignalLink(this.client, {
       source: this.roomId,
       predicate: LEAVE,
-      target: this.agent.did, // could be empty
+      target: "", // could be empty
     });
 
     this.neighbourhood.sendBroadcast(signalLink);
