@@ -84,6 +84,7 @@ export enum Event {
 }
 
 export default class WebRTCManager {
+  private isListening: boolean = false;
   private agent: Agent;
   private client: Ad4mClient;
   private perspective: PerspectiveProxy;
@@ -154,6 +155,8 @@ export default class WebRTCManager {
   }
 
   async onSignal(expression: PerspectiveExpression) {
+    if (!this.isListening) return;
+
     if (expression.author === this.agent.did) {
       console.log("Received signal from self, ignoring!");
       return null;
@@ -391,6 +394,7 @@ export default class WebRTCManager {
     console.log("🟠 Sending JOIN broadcast");
     this.neighbourhood.sendBroadcast(signalLink);
     this.neighbourhood.addSignalHandler(this.onSignal);
+    this.isListening = true;
 
     return this.localStream;
   }
@@ -418,6 +422,8 @@ export default class WebRTCManager {
   }
 
   async leave() {
+    this.isListening = false;
+
     if (this.perspective) {
       // Todo: Nico, nico, nico!
       // this.neighbourhood.
