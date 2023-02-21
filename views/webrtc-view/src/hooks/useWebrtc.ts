@@ -124,6 +124,7 @@ export default function useWebRTC({ source, uuid, events }: Props) {
     await manager.current?.leave();
     setConnections([]);
     setLocalStream(null);
+    setIsLoading(false);
     setHasJoined(false);
   }
 

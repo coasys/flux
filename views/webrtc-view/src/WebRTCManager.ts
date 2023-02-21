@@ -118,8 +118,23 @@ export default class WebRTCManager {
       this.client.neighbourhood,
       this.perspective.uuid
     );
-    this.onSignal = this.onSignal.bind(this);
     this.emitPeerEvents();
+
+    // Bind methods
+    this.on = this.on.bind(this);
+    this.join = this.join.bind(this);
+    this.onSignal = this.onSignal.bind(this);
+    this.emitPeerEvents = this.emitPeerEvents.bind(this);
+    this.handleIceCandidate = this.handleIceCandidate.bind(this);
+    this.closeConnection = this.closeConnection.bind(this);
+    this.addConnection = this.addConnection.bind(this);
+    this.createOffer = this.createOffer.bind(this);
+    this.handleOffer = this.handleOffer.bind(this);
+    this.handleAnswer = this.handleAnswer.bind(this);
+    this.sendMessage = this.sendMessage.bind(this);
+    this.sendTestSignal = this.sendTestSignal.bind(this);
+    this.sendTestBroadcast = this.sendTestBroadcast.bind(this);
+    this.leave = this.leave.bind(this);
 
     // Close connections if we refresh
     window.addEventListener("beforeunload", () => {
