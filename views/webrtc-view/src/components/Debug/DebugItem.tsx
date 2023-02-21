@@ -5,11 +5,17 @@ import getProfile from "utils/api/getProfile";
 
 type Props = {
   userId: string;
+  isSelf?: boolean;
   disabled: boolean;
   onClick: () => void;
 };
 
-export default function DebugItem({ userId, disabled, onClick }: Props) {
+export default function DebugItem({
+  userId,
+  isSelf,
+  disabled,
+  onClick,
+}: Props) {
   const [profile, setProfile] = useState<Profile>();
 
   // Get user details
@@ -26,7 +32,7 @@ export default function DebugItem({ userId, disabled, onClick }: Props) {
 
   return (
     <j-button onClick={onClick} disabled={disabled}>
-      Send signal to {profile?.username || userId}
+      Send signal to {isSelf ? "myself" : profile?.username || userId}
     </j-button>
   );
 }

@@ -9,6 +9,7 @@ import DebugItem from "./DebugItem";
 import styles from "./Debug.module.css";
 
 type Props = {
+  currentUser?: Me;
   hasJoined: boolean;
   connections: Peer[];
   onSendTestSignal: (recipientId: string) => void;
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export default function Debug({
+  currentUser,
   hasJoined,
   connections,
   onSendTestSignal,
@@ -34,6 +36,7 @@ export default function Debug({
             </li>
           ))}
         </ul>
+        <h4>Send test broadcast:</h4>
         <div className={styles.box}>
           <j-button
             variant="primary"
@@ -43,8 +46,17 @@ export default function Debug({
             Send broadcast to everyone
           </j-button>
         </div>
+        <h4>Send test signals:</h4>
         <div className={styles.box}>
           <ul className={styles.list}>
+            <li>
+              <DebugItem
+                userId={currentUser.did}
+                isSelf
+                disabled={!hasJoined}
+                onClick={() => onSendTestSignal(currentUser.did)}
+              />
+            </li>
             {connections.map((c) => (
               <li key={c.did}>
                 <DebugItem
