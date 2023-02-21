@@ -292,7 +292,7 @@ export default class WebRTCManager {
         });
 
         console.log("🟠 Sending ICE_CANDIDATE signal to ", remoteDid);
-        this.neighbourhood.sendSignal(remoteDid, signalLink);
+        this.neighbourhood.sendBroadcast(signalLink);
       }
     });
 
@@ -333,7 +333,7 @@ export default class WebRTCManager {
     });
 
     console.log("🟠 Sending OFFER signal to ", recieverDid);
-    this.neighbourhood.sendSignal(recieverDid, signalLink);
+    this.neighbourhood.sendBroadcast(signalLink);
   }
 
   async handleOffer(fromDid: string, offer: RTCSessionDescriptionInit) {
@@ -360,7 +360,7 @@ export default class WebRTCManager {
     });
 
     console.log("🟠 Sending ANSWER signal to ", fromDid);
-    this.neighbourhood.sendSignal(fromDid, signalLink);
+    this.neighbourhood.sendBroadcast(signalLink);
   }
 
   async handleAnswer(fromDid: string, answer: RTCSessionDescriptionInit) {
@@ -435,11 +435,11 @@ export default class WebRTCManager {
     const signalLink = await createSignalLink(this.client, {
       source: this.roomId,
       predicate: TEST_SIGNAL,
-      target: Literal.from("test signal").toUrl(),
+      target: recipientDid,
     });
 
     console.log("⚙️ Sending TEST_SIGNAL to ", recipientDid);
-    this.neighbourhood.sendSignal(recipientDid, signalLink);
+    this.neighbourhood.sendBroadcast(signalLink);
   }
 
   async sendTestBroadcast() {
