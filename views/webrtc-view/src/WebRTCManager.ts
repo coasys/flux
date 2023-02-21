@@ -154,11 +154,16 @@ export default class WebRTCManager {
   }
 
   async onSignal(expression: PerspectiveExpression) {
-    if (expression.author === this.agent.did) return null;
+    if (expression.author === this.agent.did) {
+      console.log("Received signal from self, ignoring!");
+      return null;
+    }
 
     const link = await getLinkFromPerspective(expression);
-
-    console.log(`🔵 ${link?.data?.predicate}`, { link });
+    console.log(`🔵 ${link?.data?.predicate}`, {
+      link,
+      author: expression.author,
+    });
 
     if (!link) return;
 
@@ -415,7 +420,7 @@ export default class WebRTCManager {
   async leave() {
     if (this.perspective) {
       // Todo: Nico, nico, nico!
-      // this.neighbourhood.removeSignalHandler
+      // this.neighbourhood.
     }
 
     if (this.agent) {

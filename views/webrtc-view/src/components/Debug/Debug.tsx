@@ -9,12 +9,14 @@ import DebugItem from "./DebugItem";
 import styles from "./Debug.module.css";
 
 type Props = {
+  hasJoined: boolean;
   connections: Peer[];
   onSendTestSignal: (recipientId: string) => void;
   onSendTestBroadcast: () => void;
 };
 
 export default function Debug({
+  hasJoined,
   connections,
   onSendTestSignal,
   onSendTestBroadcast,
@@ -24,6 +26,7 @@ export default function Debug({
       <div className={styles.inner}>
         <h2>Debug</h2>
         <h4>Connections:</h4>
+        <>{!hasJoined && "Not yet joined"}</>
         <ul>
           {connections.map((p) => (
             <li key={p.did}>
@@ -32,7 +35,11 @@ export default function Debug({
           ))}
         </ul>
         <div className={styles.box}>
-          <j-button variant="primary" onClick={onSendTestBroadcast}>
+          <j-button
+            variant="primary"
+            onClick={onSendTestBroadcast}
+            disabled={!hasJoined}
+          >
             Send broadcast to everyone
           </j-button>
         </div>
@@ -42,6 +49,7 @@ export default function Debug({
               <li key={c.did}>
                 <DebugItem
                   userId={c.did}
+                  disabled={!hasJoined}
                   onClick={() => onSendTestSignal(c.did)}
                 />
               </li>
