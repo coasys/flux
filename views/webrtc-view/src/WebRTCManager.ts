@@ -84,6 +84,7 @@ export enum Event {
 }
 
 export default class WebRTCManager {
+  private addedListener: boolean = false;
   private isListening: boolean = false;
   private agent: Agent;
   private client: Ad4mClient;
@@ -393,7 +394,11 @@ export default class WebRTCManager {
 
     console.log("🟠 Sending JOIN broadcast");
     this.neighbourhood.sendBroadcast(signalLink);
-    this.neighbourhood.addSignalHandler(this.onSignal);
+    if (!this.addedListener) {
+      this.neighbourhood.addSignalHandler(this.onSignal);
+      this.addedListener = true;
+    }
+
     this.isListening = true;
 
     return this.localStream;
