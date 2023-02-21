@@ -1,4 +1,5 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import stunServers from "./stun-servers";
 import {
   Ad4mClient,
   PerspectiveProxy,
@@ -13,12 +14,7 @@ import {
 const servers = {
   iceServers: [
     {
-      urls: [
-        "stun:stun.l.google.com:19302",
-        "stun:stun1.l.google.com:19302",
-        "stun:stun2.l.google.com:19302",
-        "stun:stun.services.mozilla.com",
-      ],
+      urls: stunServers,
     },
   ],
   iceCandidatePoolSize: 10,
