@@ -103,6 +103,7 @@ export default function Channel({ source, uuid }) {
       <>
         {showDebug && (
           <Debug
+            currentUser={agent}
             hasJoined={hasJoined}
             connections={connections}
             onSendTestSignal={onSendTestSignal}
