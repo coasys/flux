@@ -1,8 +1,4 @@
 export default [
-  "iphone-stun.strato-iphone.de:3478",
-  "numb.viagenie.ca:3478",
-  "s1.taraba.net:3478",
-  "s2.taraba.net:3478",
   "stun.12connect.com:3478",
   "stun.12voip.com:3478",
   "stun.1und1.de:3478",
@@ -258,11 +254,4 @@ export default [
   "stun.zadarma.com:3478",
   "stun.zadv.com:3478",
   "stun.zoiper.com:3478",
-  "stun1.faktortel.com.au:3478",
-  "stun1.l.google.com:19302",
-  "stun1.voiceeclipse.net:3478",
-  "stun2.l.google.com:19302",
-  "stun3.l.google.com:19302",
-  "stun4.l.google.com:19302",
-  "stunserver.org:3478",
 ];
