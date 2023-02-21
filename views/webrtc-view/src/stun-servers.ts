@@ -1,5 +1,4 @@
 export default [
-  "23.21.150.121:3478",
   "iphone-stun.strato-iphone.de:3478",
   "numb.viagenie.ca:3478",
   "s1.taraba.net:3478",
