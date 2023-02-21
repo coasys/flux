@@ -14,7 +14,22 @@ import {
 const servers = {
   iceServers: [
     {
-      urls: stunServers,
+      urls: "stun:relay.metered.ca:80",
+    },
+    {
+      urls: "turn:relay.metered.ca:80",
+      username: "a4e91cb22b9d5c79f5667efa",
+      credential: "4GrjTbmMVeTz89Vn",
+    },
+    {
+      urls: "turn:relay.metered.ca:443",
+      username: "a4e91cb22b9d5c79f5667efa",
+      credential: "4GrjTbmMVeTz89Vn",
+    },
+    {
+      urls: "turn:relay.metered.ca:443?transport=tcp",
+      username: "a4e91cb22b9d5c79f5667efa",
+      credential: "4GrjTbmMVeTz89Vn",
     },
   ],
   iceCandidatePoolSize: 10,
