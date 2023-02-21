@@ -56,6 +56,7 @@ export const ICE_CANDIDATE = "ice-candidate";
 export const OFFER_REQUEST = "offer-request";
 export const OFFER = "offer";
 export const ANSWER = "answer";
+export const LEAVE = "leave";
 export const TEST_SIGNAL = "test-signal";
 export const TEST_BROADCAST = "test-broadcast";
 
@@ -171,6 +172,10 @@ export default class WebRTCManager {
 
     if (!link) return;
 
+    if (link.data.predicate === LEAVE && link.data.source === this.roomId) {
+      this.closeConnection(link.author);
+    }
+
     if (
       link.data.predicate === OFFER_REQUEST &&
       link.data.source === this.roomId
@@ -237,10 +242,6 @@ export default class WebRTCManager {
         if (event.data) {
           console.log("📩 Received message -> ", event.data);
           const parsedData = getData(event.data);
-
-          if (parsedData.type === "leave") {
-            return this.closeConnection(parsedData.message);
-          }
 
           this.callbacks[Event.MESSAGE].forEach((cb) => {
             cb(remoteDid, parsedData.type || "unknown", parsedData.message);
@@ -434,9 +435,13 @@ export default class WebRTCManager {
       // this.neighbourhood.
     }
 
-    if (this.agent) {
-      await this.sendMessage("leave", this.agent.did);
-    }
+    const signalLink = await createSignalLink(this.client, {
+      source: this.roomId,
+      predicate: LEAVE,
+      target: this.agent.did, // could be empty
+    });
+
+    this.neighbourhood.sendBroadcast(signalLink);
 
     this.connections.forEach((c, key) => {
       this.closeConnection(key);
