@@ -1,5 +1,5 @@
 import { Link } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
 import { EDITED_TO } from "../constants/communityPredicates";
 import getMessage from "./getMessage";
 
@@ -16,7 +16,7 @@ export default async function ({
 }: Payload) {
   try {
     const client = await getAd4mClient();
-    const exp = await client.expression.create(message, 'literal');
+    const exp = await client.expression.create(message, "literal");
 
     const result = await client.perspective.addLink(
       perspectiveUuid,

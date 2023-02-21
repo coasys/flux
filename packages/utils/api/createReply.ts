@@ -1,5 +1,5 @@
 import { Link } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
 import { REPLY_TO } from "../constants/communityPredicates";
 import { EntryType } from "../types";
 import getMessage from "./getMessage";
@@ -17,12 +17,14 @@ export default async function ({
   replyUrl,
   message,
   channelId,
-  literal
+  literal,
 }: Payload) {
   try {
     const client = await getAd4mClient();
-    
-    const expUrl = literal ? literal : await client.expression.create(message, 'literal');
+
+    const expUrl = literal
+      ? literal
+      : await client.expression.create(message, "literal");
 
     const links = [
       new Link({
@@ -34,14 +36,17 @@ export default async function ({
         source: replyUrl,
         target: expUrl,
         predicate: REPLY_TO,
-      })
+      }),
     ];
-    const createdLinks = await client.perspective.addLinks(perspectiveUuid, links);
+    const createdLinks = await client.perspective.addLinks(
+      perspectiveUuid,
+      links
+    );
     const link = createdLinks[1];
 
     const messageParsed = getMessage(link);
 
-    return messageParsed; 
+    return messageParsed;
   } catch (e: any) {
     throw new Error(e);
   }

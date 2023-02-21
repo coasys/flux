@@ -1,4 +1,4 @@
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
 import { createLiteralObject } from "utils/helpers/linkHelpers";
 import {
   AREA_WEBLINK,

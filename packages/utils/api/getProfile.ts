@@ -10,7 +10,7 @@ import {
   HAS_BIO,
 } from "../constants/profile";
 import { Profile } from "../types";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
 import { mapLiteralLinks } from "../helpers/linkHelpers";
 import { DexieProfile } from "../helpers/storageHelpers";
 

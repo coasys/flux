@@ -1,5 +1,5 @@
 import { EntryType, ModelProperty, Entry } from "../types";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
 import { Literal } from "@perspect3vism/ad4m";
 
 export function capitalizeFirstLetter(string) {

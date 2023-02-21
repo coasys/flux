@@ -19,7 +19,7 @@ import { sortExpressionsByTimestamp } from "../helpers/expressionHelpers";
 import getMe, { Me } from "../api/getMe";
 import { REACTION } from "../constants/communityPredicates";
 import hideEmbeds from "../api/hideEmbeds";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
 import editCurrentMessage from "../api/editCurrentMessage";
 import { DEFAULT_LIMIT } from "../constants/sdna";
 import { checkUpdateSDNAVersion } from "../api/updateSDNA";

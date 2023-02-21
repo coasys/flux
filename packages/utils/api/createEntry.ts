@@ -1,4 +1,4 @@
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
 import { v4 as uuidv4 } from "uuid";
 import { Link } from "@perspect3vism/ad4m";
 import { Entry, EntryInput } from "../types";
@@ -26,7 +26,10 @@ export async function createEntry(entry: EntryInput): Promise<Entry> {
 
   const allLinks = [...propertyLinks, entryLink, typeLink];
 
-  const createdLinks = await client.perspective.addLinks(entry.perspectiveUuid, allLinks);
+  const createdLinks = await client.perspective.addLinks(
+    entry.perspectiveUuid,
+    allLinks
+  );
 
   return {
     id,
@@ -34,6 +37,6 @@ export async function createEntry(entry: EntryInput): Promise<Entry> {
     //TODO: this should be types not type?
     type: entry.type,
     timestamp: createdLinks[0]!.timestamp,
-    author: createdLinks[0]!.author
+    author: createdLinks[0]!.author,
   };
 }

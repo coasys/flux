@@ -1,5 +1,5 @@
 import { LinkExpression } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
 import { useUserStore } from "@/store/user";
 
 export default async function getAgentLinks(

@@ -1,4 +1,4 @@
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
 import { getMetaFromLinks } from "utils/helpers/getNeighbourhoodMeta";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useDataStore } from ".";

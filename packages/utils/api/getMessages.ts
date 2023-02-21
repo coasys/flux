@@ -8,7 +8,7 @@ import {
   messageFilteredQueryBackwards,
 } from "../constants/sdna";
 import { getPrologQuery } from "../helpers/formatString";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
 import { checkUpdateSDNAVersion } from "./updateSDNA";
 
 export interface Payload {

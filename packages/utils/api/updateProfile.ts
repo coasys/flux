@@ -13,7 +13,7 @@ import {
   dataURItoBlob,
   blobToDataURL,
 } from "utils/helpers/profileHelpers";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
 import { createLinks, createLiteralLinks } from "utils/helpers/linkHelpers";
 import { cacheImage } from "utils/helpers/cacheImage";
 import getProfile from "utils/api/getProfile";

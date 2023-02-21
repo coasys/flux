@@ -1,8 +1,6 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 
-import {
-  getAd4mClient,
-} from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
 import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
 
 const routes: Array<RouteRecordRaw> = [
@@ -98,7 +96,6 @@ router.beforeEach(async (to, from, next) => {
   }
 });
 
-
 function isConnected() {
   return new Promise((resolve, reject) => {
     const ui = Ad4mConnectUI({
@@ -106,23 +103,25 @@ function isConnected() {
       appDesc: "A Social Toolkit for the New Internet",
       appDomain: "",
       appIconPath: "https://i.ibb.co/GnqjPJP/icon.png",
-      capabilities: [{"with":{"domain":"*","pointers":["*"]},"can": ["*"]}],
+      capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
     });
-  
-    ui.addEventListener("connectionstatechange", async (e) => {
 
-      if (ui.connectionState === 'connected' && ui.authState === 'unauthenticated') {
-        resolve(false)
+    ui.addEventListener("connectionstatechange", async (e) => {
+      if (
+        ui.connectionState === "connected" &&
+        ui.authState === "unauthenticated"
+      ) {
+        resolve(false);
       } else {
-        resolve(true)
+        resolve(true);
       }
-    })
+    });
 
     ui.addEventListener("authstatechange", async (e) => {
-      if (ui.authState === 'authenticated') {
-        resolve(true)
+      if (ui.authState === "authenticated") {
+        resolve(true);
       } else {
-        resolve(false)
+        resolve(false);
       }
     });
   });

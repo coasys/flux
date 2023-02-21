@@ -6,7 +6,7 @@ import {
   DESCRIPTION,
   NAME,
 } from "../constants/communityPredicates";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
 import { cacheLinks, getCacheLinks } from "../helpers/cacheLinks";
 
 export interface Payload {
