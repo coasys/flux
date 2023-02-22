@@ -1,5 +1,5 @@
 import { DexieIPFS } from "../helpers/storageHelpers";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export function fetchFromPublicGateway(url: string): Promise<string> {
   return new Promise(async (resolve, reject) => {

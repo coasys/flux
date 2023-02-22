@@ -1,5 +1,5 @@
 import { Link } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { REPLY_TO } from "../constants/communityPredicates";
 import { EntryType } from "../types";
 import getMessage from "./getMessage";

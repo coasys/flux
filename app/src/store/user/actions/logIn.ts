@@ -1,6 +1,6 @@
 import { useAppStore } from "@/store/app";
 import { AgentStatus } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { useUserStore } from "..";
 
 export interface Payload {

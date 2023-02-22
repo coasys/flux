@@ -184,7 +184,7 @@ import { isValid } from "@/utils/validation";
 import { defineComponent, ref } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useDataStore } from "@/store/data";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { CommunityState } from "@/store/types";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useAppStore } from "@/store/app";

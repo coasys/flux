@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import { createNeighbourhoodMeta } from "../helpers/createNeighbourhoodMeta";
 import { Community } from "../types";
 import { Perspective } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import {
   blobToDataURL,
   dataURItoBlob,

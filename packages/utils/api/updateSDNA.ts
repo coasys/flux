@@ -2,7 +2,7 @@ import { SDNAValues } from "./generateSDNALiteral";
 import { getSDNACreationLinks } from "./createSDNA";
 import { getSDNAVersion, getFluxSDNALinks } from "./getSDNA";
 import { LATEST_SDNA_VERSION } from "../constants/sdna";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export async function updateSDNA(
   perspectiveUuid: string,

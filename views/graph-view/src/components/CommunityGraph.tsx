@@ -1,7 +1,7 @@
 import ForceGraph3D, { ForceGraph3DInstance } from "3d-force-graph";
 import { useEffect, useState, useRef } from "preact/hooks";
 import SpriteText from "three-spritetext";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { Ad4mClient, Literal } from "@perspect3vism/ad4m";
 import useIntersectionObserver from "../hooks/useIntersectionObserver";
 

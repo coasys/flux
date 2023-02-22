@@ -1,5 +1,5 @@
 import { Message } from "../types";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { Expression, Literal } from "@perspect3vism/ad4m";
 
 export default async function (

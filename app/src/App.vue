@@ -43,17 +43,13 @@ import { useRoute, useRouter } from "vue-router";
 import { useDataStore } from "./store/data";
 import { useUserStore } from "./store/user";
 import { hydrateState } from "./store/data/hydrateState";
-import {
-  getAd4mClient,
-  onAuthStateChanged,
-} from "@perspect3vism/ad4m-connect/dist/utils.js";
-import "@perspect3vism/ad4m-connect/dist/web.js";
+import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { EntryType } from "utils/types";
 import subscribeToLinks from "utils/api/subscribeToLinks";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import semver from "semver";
 import { dependencies } from "../package.json";
-import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
 
 export default defineComponent({
   name: "App",

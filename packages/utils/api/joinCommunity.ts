@@ -1,5 +1,5 @@
 import { Community } from "../types";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import CommunityModel from "./community";
 import { getMetaFromLinks } from "utils/helpers/getNeighbourhoodMeta";
 import { Ad4mClient } from "@perspect3vism/ad4m";

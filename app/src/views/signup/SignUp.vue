@@ -72,7 +72,7 @@ import {
   getAd4mClient,
   isConnected,
   onAuthStateChanged,
-} from "@perspect3vism/ad4m-connect/dist/utils.js";
+} from "@perspect3vism/ad4m-connect/utils";
 import Logo from "@/components/logo/Logo.vue";
 import { useAppStore } from "@/store/app";
 import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";

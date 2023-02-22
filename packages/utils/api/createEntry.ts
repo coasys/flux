@@ -1,4 +1,4 @@
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils.js";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { v4 as uuidv4 } from "uuid";
 import { Link } from "@perspect3vism/ad4m";
 import { Entry, EntryInput } from "../types";
