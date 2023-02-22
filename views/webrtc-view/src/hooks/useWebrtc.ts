@@ -124,6 +124,7 @@ export default function useWebRTC({ source, uuid, events }: Props) {
     await manager.current?.leave();
     setConnections([]);
     setLocalStream(null);
+    setIsLoading(false);
     setHasJoined(false);
   }
 
@@ -227,6 +228,18 @@ export default function useWebRTC({ source, uuid, events }: Props) {
     setLocalStream(stream);
   }
 
+  async function onSendTestSignal(recipientId: string) {
+    if (manager.current) {
+      manager.current.sendTestSignal(recipientId);
+    }
+  }
+
+  async function onSendTestBroadcast() {
+    if (manager.current) {
+      manager.current.sendTestBroadcast();
+    }
+  }
+
   return {
     localStream,
     connections,
@@ -239,5 +252,7 @@ export default function useWebRTC({ source, uuid, events }: Props) {
     onLeave,
     onChangeSettings,
     onReaction,
+    onSendTestSignal,
+    onSendTestBroadcast,
   };
 }

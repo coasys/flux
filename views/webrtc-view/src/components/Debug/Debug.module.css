@@ -20,6 +20,18 @@
     animation: appear 0.3s ease both;
 }
 
+.box {
+    padding: var(--j-space-400) 0;
+}
+
+.list {
+    display: flex;
+    gap: var(--j-space-400);
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+}
+
 @keyframes appear {
     0% {
         transform: translateY(-4rem);

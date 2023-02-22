@@ -1,4 +1,6 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import stunServers from "./stun-servers";
+
 import {
   Ad4mClient,
   PerspectiveProxy,
@@ -13,12 +15,22 @@ import {
 const servers = {
   iceServers: [
     {
-      urls: [
-        "stun:stun.l.google.com:19302",
-        "stun:stun1.l.google.com:19302",
-        "stun:stun2.l.google.com:19302",
-        "stun:stun.services.mozilla.com",
-      ],
+      urls: "stun:relay.metered.ca:80",
+    },
+    {
+      urls: "turn:relay.metered.ca:80",
+      username: "a4e91cb22b9d5c79f5667efa",
+      credential: "4GrjTbmMVeTz89Vn",
+    },
+    {
+      urls: "turn:relay.metered.ca:443",
+      username: "a4e91cb22b9d5c79f5667efa",
+      credential: "4GrjTbmMVeTz89Vn",
+    },
+    {
+      urls: "turn:relay.metered.ca:443?transport=tcp",
+      username: "a4e91cb22b9d5c79f5667efa",
+      credential: "4GrjTbmMVeTz89Vn",
     },
   ],
   iceCandidatePoolSize: 10,
@@ -56,6 +68,9 @@ export const ICE_CANDIDATE = "ice-candidate";
 export const OFFER_REQUEST = "offer-request";
 export const OFFER = "offer";
 export const ANSWER = "answer";
+export const LEAVE = "leave";
+export const TEST_SIGNAL = "test-signal";
+export const TEST_BROADCAST = "test-broadcast";
 
 export type Connection = {
   peerConnection: RTCPeerConnection;
@@ -82,6 +97,8 @@ export enum Event {
 }
 
 export default class WebRTCManager {
+  private addedListener: boolean = false;
+  private isListening: boolean = false;
   private agent: Agent;
   private client: Ad4mClient;
   private perspective: PerspectiveProxy;
@@ -113,8 +130,23 @@ export default class WebRTCManager {
       this.client.neighbourhood,
       this.perspective.uuid
     );
-    this.onSignal = this.onSignal.bind(this);
     this.emitPeerEvents();
+
+    // Bind methods
+    this.on = this.on.bind(this);
+    this.join = this.join.bind(this);
+    this.onSignal = this.onSignal.bind(this);
+    this.emitPeerEvents = this.emitPeerEvents.bind(this);
+    this.handleIceCandidate = this.handleIceCandidate.bind(this);
+    this.closeConnection = this.closeConnection.bind(this);
+    this.addConnection = this.addConnection.bind(this);
+    this.createOffer = this.createOffer.bind(this);
+    this.handleOffer = this.handleOffer.bind(this);
+    this.handleAnswer = this.handleAnswer.bind(this);
+    this.sendMessage = this.sendMessage.bind(this);
+    this.sendTestSignal = this.sendTestSignal.bind(this);
+    this.sendTestBroadcast = this.sendTestBroadcast.bind(this);
+    this.leave = this.leave.bind(this);
 
     // Close connections if we refresh
     window.addEventListener("beforeunload", () => {
@@ -152,13 +184,24 @@ export default class WebRTCManager {
   }
 
   async onSignal(expression: PerspectiveExpression) {
-    if (expression.author === this.agent.did) return null;
+    if (!this.isListening) return;
+
+    if (expression.author === this.agent.did) {
+      console.log("Received signal from self, ignoring!");
+      return null;
+    }
 
     const link = await getLinkFromPerspective(expression);
-
-    console.log(`🔵 ${link?.data?.predicate}`, { link });
+    console.log(`🔵 ${link?.data?.predicate}`, {
+      link,
+      author: expression.author,
+    });
 
     if (!link) return;
+
+    if (link.data.predicate === LEAVE && link.data.source === this.roomId) {
+      this.closeConnection(link.author);
+    }
 
     if (
       link.data.predicate === OFFER_REQUEST &&
@@ -227,10 +270,6 @@ export default class WebRTCManager {
           console.log("📩 Received message -> ", event.data);
           const parsedData = getData(event.data);
 
-          if (parsedData.type === "leave") {
-            return this.closeConnection(parsedData.message);
-          }
-
           this.callbacks[Event.MESSAGE].forEach((cb) => {
             cb(remoteDid, parsedData.type || "unknown", parsedData.message);
           });
@@ -254,7 +293,7 @@ export default class WebRTCManager {
         });
 
         console.log("🟠 Sending ICE_CANDIDATE signal to ", remoteDid);
-        this.neighbourhood.sendSignal(remoteDid, signalLink);
+        this.neighbourhood.sendBroadcast(signalLink);
       }
     });
 
@@ -295,7 +334,7 @@ export default class WebRTCManager {
     });
 
     console.log("🟠 Sending OFFER signal to ", recieverDid);
-    this.neighbourhood.sendSignal(recieverDid, signalLink);
+    this.neighbourhood.sendBroadcast(signalLink);
   }
 
   async handleOffer(fromDid: string, offer: RTCSessionDescriptionInit) {
@@ -322,7 +361,7 @@ export default class WebRTCManager {
     });
 
     console.log("🟠 Sending ANSWER signal to ", fromDid);
-    this.neighbourhood.sendSignal(fromDid, signalLink);
+    this.neighbourhood.sendBroadcast(signalLink);
   }
 
   async handleAnswer(fromDid: string, answer: RTCSessionDescriptionInit) {
@@ -383,20 +422,53 @@ export default class WebRTCManager {
 
     console.log("🟠 Sending JOIN broadcast");
     this.neighbourhood.sendBroadcast(signalLink);
-    this.neighbourhood.addSignalHandler(this.onSignal);
+    if (!this.addedListener) {
+      this.neighbourhood.addSignalHandler(this.onSignal);
+      this.addedListener = true;
+    }
+
+    this.isListening = true;
 
     return this.localStream;
   }
 
+  async sendTestSignal(recipientDid: string) {
+    const signalLink = await createSignalLink(this.client, {
+      source: this.roomId,
+      predicate: TEST_SIGNAL,
+      target: recipientDid,
+    });
+
+    console.log("⚙️ Sending TEST_SIGNAL to ", recipientDid);
+    this.neighbourhood.sendBroadcast(signalLink);
+  }
+
+  async sendTestBroadcast() {
+    const signalLink = await createSignalLink(this.client, {
+      source: this.roomId,
+      predicate: TEST_BROADCAST,
+      target: Literal.from("test broadcast").toUrl(),
+    });
+
+    console.log("⚙️ Sending TEST_BROADCAST to room");
+    this.neighbourhood.sendBroadcast(signalLink);
+  }
+
   async leave() {
+    this.isListening = false;
+
     if (this.perspective) {
       // Todo: Nico, nico, nico!
-      // this.neighbourhood.removeSignalHandler
+      // this.neighbourhood.
     }
 
-    if (this.agent) {
-      await this.sendMessage("leave", this.agent.did);
-    }
+    const signalLink = await createSignalLink(this.client, {
+      source: this.roomId,
+      predicate: LEAVE,
+      target: "goodbye!", // could be empty
+    });
+
+    this.neighbourhood.sendBroadcast(signalLink);
 
     this.connections.forEach((c, key) => {
       this.closeConnection(key);

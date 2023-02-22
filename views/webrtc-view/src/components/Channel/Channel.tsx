@@ -30,6 +30,8 @@ export default function Channel({ source, uuid }) {
     onJoin,
     onLeave,
     onReaction,
+    onSendTestSignal,
+    onSendTestBroadcast,
   } = useWebRTC({
     source,
     uuid,
@@ -98,7 +100,17 @@ export default function Channel({ source, uuid }) {
         reactions={reactions}
       />
 
-      <>{showDebug && <Debug connections={connections} />}</>
+      <>
+        {showDebug && (
+          <Debug
+            currentUser={agent}
+            hasJoined={hasJoined}
+            connections={connections}
+            onSendTestSignal={onSendTestSignal}
+            onSendTestBroadcast={onSendTestBroadcast}
+          />
+        )}
+      </>
 
       <Footer
         settings={settings}
