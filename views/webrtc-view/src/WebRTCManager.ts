@@ -18,20 +18,10 @@ const servers = {
       urls: "stun:relay.metered.ca:80",
     },
     {
-      urls: "turn:relay.metered.ca:80",
-      username: "a4e91cb22b9d5c79f5667efa",
-      credential: "4GrjTbmMVeTz89Vn",
-    },
-    {
-      urls: "turn:relay.metered.ca:443",
-      username: "a4e91cb22b9d5c79f5667efa",
-      credential: "4GrjTbmMVeTz89Vn",
-    },
-    {
-      urls: "turn:relay.metered.ca:443?transport=tcp",
-      username: "a4e91cb22b9d5c79f5667efa",
-      credential: "4GrjTbmMVeTz89Vn",
-    },
+      urls: "turn:turn.ad4m.dev:443",
+      username: "openturn",
+      credential: "openturn",
+    }
   ],
   iceCandidatePoolSize: 10,
 };
