@@ -1,5 +1,5 @@
 import { LinkExpression } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export interface Payload {
   perspectiveUuid: string;
@@ -9,7 +9,7 @@ export interface Payload {
 export default async function ({ perspectiveUuid, linkExpression }: Payload) {
   try {
     const client = await getAd4mClient();
-    
+
     await client.perspective.removeLink(perspectiveUuid, linkExpression);
   } catch (e: any) {
     throw new Error(e);

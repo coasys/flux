@@ -72,12 +72,13 @@ import {
   getAd4mClient,
   isConnected,
   onAuthStateChanged,
-} from "@perspect3vism/ad4m-connect/dist/utils";
+} from "@perspect3vism/ad4m-connect/utils";
 import Logo from "@/components/logo/Logo.vue";
 import { useAppStore } from "@/store/app";
 import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";
 import SignUpCarousel from "./SignUpCarousel.vue";
 import getAd4mProfile from "utils/api/getAd4mProfile";
+import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
 
 export default defineComponent({
   name: "SignUp",
@@ -150,13 +151,16 @@ export default defineComponent({
     };
   },
   async mounted() {
-    isConnected().then((connected: any) => {
-      if (connected) {
-        this.autoFillUser();
-      }
+    const ui = Ad4mConnectUI({
+      appName: "Flux",
+      appDesc: "A Social Toolkit for the New Internet",
+      appDomain: this.appDomain,
+      appIconPath: "https://i.ibb.co/GnqjPJP/icon.png",
+      capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
     });
-    onAuthStateChanged((status: string) => {
-      if (status === "connected_with_capabilities") {
+
+    ui.addEventListener("authstatechange", async (e) => {
+      if (ui.authState === "authenticated") {
         this.autoFillUser();
       }
     });

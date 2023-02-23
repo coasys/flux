@@ -1,4 +1,9 @@
-import { AD4M_AGENT, KAICHAO_AGENT, JUNTO_AGENT, NOTE_IPFS_AUTHOR } from "utils/constants/agents";
+import {
+  AD4M_AGENT,
+  KAICHAO_AGENT,
+  JUNTO_AGENT,
+  NOTE_IPFS_AUTHOR,
+} from "utils/constants/agents";
 import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
 import {
   FLUX_PROFILE,
@@ -24,7 +29,7 @@ import {
 
 import { Profile } from "utils/types";
 
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export interface Payload {
   givenName?: string;
