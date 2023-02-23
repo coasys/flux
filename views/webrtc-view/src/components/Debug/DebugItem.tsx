@@ -1,7 +1,7 @@
 import { useState, useEffect } from "preact/hooks";
 
 import { Profile } from "utils/types";
-import getProfile from "utils/api/getProfile";
+import { getProfile } from "utils/api";
 
 type Props = {
   userId: string;
