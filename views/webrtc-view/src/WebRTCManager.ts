@@ -15,7 +15,7 @@ import {
 const servers = {
   iceServers: [
     {
-      urls: "turn:relay.ad4m.dev:3478",
+      urls: "stun:relay.ad4m.dev:3478",
       username: "openrelay",
       credential: "openrelay",
     },
