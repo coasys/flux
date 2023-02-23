@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Community as FluxCommunity } from "../types";
 import { createNeighbourhoodMeta } from "../helpers/createNeighbourhoodMeta";
 import { Perspective } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { blobToDataURL, dataURItoBlob, Factory, resizeImage } from "../helpers";
 import { SubjectRepository } from "../factory";
 import { createSDNA } from "./createSDNA";
@@ -70,10 +70,10 @@ export default async function createCommunity({
       );
     }
 
-    console.log("Ensuring classes..")
+    console.log("Ensuring classes..");
     await perspective.ensureSDNASubjectClass(Community);
     await perspective.ensureSDNASubjectClass(Member);
-    
+
     const CommunityModel = new SubjectRepository(Community, {
       perspectiveUuid: perspective.uuid,
     });
@@ -85,11 +85,10 @@ export default async function createCommunity({
       thumbnail,
     });
 
-    
     const MemberFactory = new SubjectRepository(Member, {
       perspectiveUuid: perspective.uuid,
     });
-    
+
     await MemberFactory.create({ did: author }, author);
 
     //Default popular setting is 3 upvotes on thumbsup emoji
@@ -102,7 +101,7 @@ export default async function createCommunity({
       id: await community.baseExpression,
       timestamp: socialDnaLink.timestamp,
       name: await community.name,
-      description: await community.description || "",
+      description: (await community.description) || "",
       image: await community.image,
       thumbnail: await community.thumbnail,
       neighbourhoodUrl: sharedUrl,

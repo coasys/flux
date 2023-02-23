@@ -10,8 +10,8 @@ import {
   HAS_BIO,
 } from "../constants";
 import { Profile } from "../types";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { mapLiteralLinks } from "../helpers";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { DexieProfile } from "../helpers/storageHelpers";
 
 export interface Payload {

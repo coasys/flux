@@ -86,16 +86,6 @@
       @neighbourhood-click="onNeighbourhoodClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></graph-view>
-    <webrtc-view
-      v-show="currentView === ChannelView.Voice"
-      class="perspective-view"
-      :source="channel.id"
-      :perspective="communityId"
-      @agent-click="onAgentClick"
-      @channel-click="onChannelClick"
-      @neighbourhood-click="onNeighbourhoodClick"
-      @hide-notification-indicator="onHideNotificationIndicator"
-    ></webrtc-view>
     <chat-view
       v-show="currentView === ChannelView.Chat"
       class="perspective-view"
@@ -132,7 +122,7 @@
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Profile from "@/containers/Profile.vue";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";

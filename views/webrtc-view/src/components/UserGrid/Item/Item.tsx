@@ -7,6 +7,7 @@ import { getProfile } from "utils/api";
 import styles from "./Item.module.css";
 
 type Props = {
+  isMe?: boolean;
   userId: string;
   settings?: Settings;
   reaction?: Reaction;
@@ -19,6 +20,7 @@ type Props = {
 };
 
 export default function Item({
+  isMe,
   userId,
   settings,
   focused,
@@ -46,19 +48,25 @@ export default function Item({
 
   // Get loading state
   useEffect(() => {
+    if (isMe) return;
+
+    if (peer?.connection.peerConnection.iceConnectionState === "connected") {
+      setIsConnecting(false);
+    } else {
+      setIsConnecting(true);
+    }
+
     function updateLoadingState(event) {
       if (event.target.iceConnectionState === "connected") {
+        console.log("connection is", event.target.iceConnectionState);
         setIsConnecting(false);
       }
     }
 
-    if (peer) {
-      setIsConnecting(true);
-      peer.connection.peerConnection.addEventListener(
-        "iceconnectionstatechange",
-        updateLoadingState
-      );
-    }
+    peer?.connection.peerConnection.addEventListener(
+      "iceconnectionstatechange",
+      updateLoadingState
+    );
 
     return () => {
       if (peer) {
@@ -68,7 +76,7 @@ export default function Item({
         );
       }
     };
-  }, []);
+  }, [peer]);
 
   return (
     <div

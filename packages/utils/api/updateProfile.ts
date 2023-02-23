@@ -8,15 +8,12 @@ import {
   HAS_THUMBNAIL_IMAGE,
   HAS_USERNAME,
 } from "../constants";
-import {
-  resizeImage,
-  dataURItoBlob,
-  blobToDataURL,
-} from "../helpers";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { resizeImage, dataURItoBlob, blobToDataURL } from "../helpers";
 import { createLinks, createLiteralLinks } from "../helpers";
 import { cacheImage } from "../helpers";
 import { getProfile } from "../api";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { LinkExpression } from "@perspect3vism/ad4m";
 
 export interface Payload {
   username?: string;
@@ -93,7 +90,7 @@ export default async function updateProfile(
     }
 
     const removals = perspective.links.filter(
-      (l) => l.data.source === FLUX_PROFILE
+      (l: LinkExpression) => l.data.source === FLUX_PROFILE
     );
 
     const links = await createLiteralLinks(FLUX_PROFILE, {

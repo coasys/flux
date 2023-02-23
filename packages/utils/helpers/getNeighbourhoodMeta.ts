@@ -1,7 +1,7 @@
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import { DESCRIPTION, NAME, CREATOR, CREATED_AT } from "../constants";
 import { NeighbourhoodMetaData } from "../types";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export function getMetaFromLinks(
   links: LinkExpression[]

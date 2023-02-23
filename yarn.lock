@@ -1522,21 +1522,22 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@perspect3vism/ad4m-connect@0.2.12":
-  version "0.2.12"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.2.12.tgz#2cc0fa37b93e1d49dd147e00a2ad038712a91a24"
-  integrity sha512-0dPNFfZZLFadmosXLlYj09ghP7YXx2CJoINT8WgsUkEgeVqbxrzEnZHz2+lqfDRWWkO3GYdb66uDugCEZyNrtA==
+"@perspect3vism/ad4m-connect@0.2.15-alpha.1":
+  version "0.2.15-alpha.1"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.2.15-alpha.1.tgz#1d3a73100289c7687815ae766a4e794eb46ac162"
+  integrity sha512-j0lHnul3pzvB9sBjv7eTRSNo9wj2oJoAnFERD1qtJ4S+d3f2Cg2wNg6qiz0/xXnjhhTW2vqEAQhILz27S+CYkw==
   dependencies:
     auto-bind "^5.0.1"
     electron "^20.0.3"
     esbuild-plugin-inline-image "^0.0.8"
     html5-qrcode "^2.2.1"
     lit "^2.3.1"
+    vite "^4.1.1"
 
-"@perspect3vism/ad4m@0.2.12":
-  version "0.2.12"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.2.12.tgz#9227552e6194595f8708472552ea733656518175"
-  integrity sha512-bj8AAaN9yx7n606P18n5kCrhacUywCHN6HFUrJgW+8N1J573+3dUAbFd3PzLHAh+wS0HsTsx+eX78mz2UKawbg==
+"@perspect3vism/ad4m@0.2.14":
+  version "0.2.14"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.2.14.tgz#72767f2fea074c6db25847ea29d6fd139e89017d"
+  integrity sha512-ZVT99RQRNWXk0n8aoP25GQyR45OKOWlRxYKw0Emw17Ai5geVs+RvDUtUFEvmEGOOnheOxJyZChso29k/szL5AQ==
   dependencies:
     "@apollo/client" "3.6.9"
     "@holochain/client" "0.12.0"
@@ -10925,6 +10926,18 @@ vite@^4.0.4:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/vite/-/vite-4.1.1.tgz#3b18b81a4e85ce3df5cbdbf4c687d93ebf402e6b"
   integrity sha512-LM9WWea8vsxhr782r9ntg+bhSFS06FJgCvvB0+8hf8UWtvaiDagKYWXndjfX6kGl74keHJUcpzrQliDXZlF5yg==
+  dependencies:
+    esbuild "^0.16.14"
+    postcss "^8.4.21"
+    resolve "^1.22.1"
+    rollup "^3.10.0"
+  optionalDependencies:
+    fsevents "~2.3.2"
+
+vite@^4.1.1:
+  version "4.1.4"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-4.1.4.tgz#170d93bcff97e0ebc09764c053eebe130bfe6ca0"
+  integrity sha512-3knk/HsbSTKEin43zHu7jTwYWv81f8kgAL99G5NWBcA1LKvtvcVAC4JjBH1arBunO9kQka+1oGbrMKOjk4ZrBg==
   dependencies:
     esbuild "^0.16.14"
     postcss "^8.4.21"

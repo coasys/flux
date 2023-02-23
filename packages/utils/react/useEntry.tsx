@@ -1,7 +1,7 @@
 import { SubjectRepository } from "../factory";
 import React, { useEffect, useState, useMemo } from "react";
 import { Factory, SubjectEntry } from "../helpers/model";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export default function useEntry<SubjectClass>({
   perspectiveUuid,
@@ -22,26 +22,25 @@ export default function useEntry<SubjectClass>({
 
   useEffect(() => {
     if (perspectiveUuid) {
-      
       Model.get(id).then(async (entry) => {
-        let ad4m = await getAd4mClient()
-        let perspective = await ad4m.perspective.byUUID(perspectiveUuid)
-        
-        const channelEntry = new SubjectEntry(entry, perspective!)
-        await channelEntry.load()
+        let ad4m = await getAd4mClient();
+        let perspective = await ad4m.perspective.byUUID(perspectiveUuid);
+
+        const channelEntry = new SubjectEntry(entry, perspective!);
+        await channelEntry.load();
 
         // @ts-ignore
         const tempModel = new model();
 
         for (const [key] of Object.entries(tempModel)) {
-          tempModel[key] = await entry[key]
+          tempModel[key] = await entry[key];
         }
 
         setEntry({
           ...tempModel,
           id: await entry.baseExpression,
           timestamp: channelEntry.timestamp,
-          author: channelEntry.author
+          author: channelEntry.author,
         });
       });
     }

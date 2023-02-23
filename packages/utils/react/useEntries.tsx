@@ -1,4 +1,4 @@
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import React, { useEffect, useState, useMemo } from "react";
 import { SubjectRepository } from "../factory";
 import { Factory, SubjectEntry } from "../helpers/model";
@@ -32,33 +32,32 @@ export default function useEntries<SubjectClass>({
   async function getAll() {
     try {
       setLoading(true);
-      let ad4m = await getAd4mClient()
-      let perspective = await ad4m.perspective.byUUID(perspectiveUuid)
+      let ad4m = await getAd4mClient();
+      let perspective = await ad4m.perspective.byUUID(perspectiveUuid);
 
       const entries = await Model.getAll();
 
       const promiseList = [];
       for (const entry of entries) {
-        const channelEntry = new SubjectEntry(entry, perspective!)
-        await channelEntry.load()
+        const channelEntry = new SubjectEntry(entry, perspective!);
+        await channelEntry.load();
 
         // @ts-ignore
         const tempModel = new model();
 
         for (const [key] of Object.entries(tempModel)) {
-          tempModel[key] = await entry[key]
+          tempModel[key] = await entry[key];
         }
 
         promiseList.push({
           ...tempModel,
           id: await entry.baseExpression,
           timestamp: channelEntry.timestamp,
-          author: channelEntry.author
-        })
+          author: channelEntry.author,
+        });
       }
 
       const awaitedList = await Promise.all(promiseList);
-
 
       setEntries(awaitedList);
     } catch (e) {

@@ -1,4 +1,4 @@
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { Ad4mClient, Perspective } from "@perspect3vism/ad4m";
 
 export type Me = {

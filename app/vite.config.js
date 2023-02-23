@@ -35,6 +35,10 @@ export default {
     }),
     VitePWA({
       registerType: "autoUpdate",
+      devOptions: {
+        enabled: true,
+        /* other options */
+      },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
         maximumFileSizeToCacheInBytes: 5000000, // cache files upto 5mb since our index.js is around 3.4mb

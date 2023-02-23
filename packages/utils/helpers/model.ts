@@ -1,7 +1,13 @@
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 import { Entry, EntryType, PropertyMap, PropertyValueMap } from "../types";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import subscribeToLinks from "../api/subscribeToLinks";
-import { Link, LinkExpression, LinkQuery, PerspectiveProxy, Subject } from "@perspect3vism/ad4m";
+import {
+  Link,
+  LinkExpression,
+  LinkQuery,
+  PerspectiveProxy,
+  Subject,
+} from "@perspect3vism/ad4m";
 import { SELF } from "../constants/communityPredicates";
 import { v4 as uuidv4 } from "uuid";
 
@@ -25,31 +31,31 @@ function propertyNameToSetterName(property: string): string {
 }
 
 export function pluralToSingular(plural: string): string {
-  if(plural.endsWith("ies")) {
-      return plural.slice(0, -3) + "y"
-  } else if(plural.endsWith("s")) {
-      return plural.slice(0, -1)
+  if (plural.endsWith("ies")) {
+    return plural.slice(0, -3) + "y";
+  } else if (plural.endsWith("s")) {
+    return plural.slice(0, -1);
   } else {
-      return plural
+    return plural;
   }
 }
 
 // e.g. "comments" -> "addComment"
 export function collectionToAdderName(collection: string): string {
-  return `add${capitalize(collection)}`
+  return `add${capitalize(collection)}`;
 }
 
 export function collectionToSetterName(collection: string): string {
-  return `setCollection${capitalize(collection)}`
+  return `setCollection${capitalize(collection)}`;
 }
 
 function setProperties(subject: any, properties: PropertyValueMap) {
   Object.keys(properties).forEach((key) => {
-    if(Array.isArray(properties[key])) {
+    if (Array.isArray(properties[key])) {
       // it's a collection
       const adderName = collectionToAdderName(key);
       const adderFunction = subject[adderName];
-      if(adderFunction) {
+      if (adderFunction) {
         adderFunction(properties[key]);
       } else {
         throw "No adder function found for collection: " + key;
@@ -77,7 +83,7 @@ export class Factory<SubjectClass extends { type: string }> {
   private subject: SubjectClass;
   private perspective: PerspectiveProxy | null = null;
 
-  constructor(subject: { new(): SubjectClass }, props: ModelProps) {
+  constructor(subject: { new (): SubjectClass }, props: ModelProps) {
     this.perspectiveUuid = props.perspectiveUuid;
     this.source = props.source || this.source;
     this.subject = new subject();
@@ -101,11 +107,13 @@ export class Factory<SubjectClass extends { type: string }> {
     }
 
     // Connect new instance to source
-    await this.perspective?.add(new Link({
-      source: this.source, 
-      predicate: this.subject.type, 
-      target: base
-    }))
+    await this.perspective?.add(
+      new Link({
+        source: this.source,
+        predicate: this.subject.type,
+        target: base,
+      })
+    );
 
     setProperties(newInstance, data);
     return newInstance;
@@ -123,12 +131,14 @@ export class Factory<SubjectClass extends { type: string }> {
   }
 
   async get(id?: string): Promise<SubjectClass | null> {
-    if(id) {
+    if (id) {
       await this.ensurePerspective();
-      return (await this.perspective?.getSubjectProxy(id, this.subject)) || null;
+      return (
+        (await this.perspective?.getSubjectProxy(id, this.subject)) || null
+      );
     } else {
-      const all = await this.getAll()
-      return all[0] || null
+      const all = await this.getAll();
+      return all[0] || null;
     }
   }
 
@@ -240,45 +250,48 @@ export class Factory<SubjectClass extends { type: string }> {
   }
 }
 
-
 export class SubjectEntry<EntryClass> implements Entry {
-  #subject: Subject
-  #perspective: PerspectiveProxy
+  #subject: Subject;
+  #perspective: PerspectiveProxy;
 
-  id: string
-  author: string
-  timestamp: number
-  type: EntryType
-  data: EntryClass
+  id: string;
+  author: string;
+  timestamp: number;
+  type: EntryType;
+  data: EntryClass;
   source: string;
 
   constructor(subject: Subject, perspective: PerspectiveProxy) {
-    this.#subject = subject
-    this.#perspective = perspective
-    this.id = subject.baseExpression
+    this.#subject = subject;
+    this.#perspective = perspective;
+    this.id = subject.baseExpression;
   }
 
   async load() {
-    let exp = await this.#perspective.getExpression(this.#subject.baseExpression)
-    if(!exp) {
-      let links = await this.#perspective.get(new LinkQuery({source: this.#subject.baseExpression}))
+    let exp = await this.#perspective.getExpression(
+      this.#subject.baseExpression
+    );
+    if (!exp) {
+      let links = await this.#perspective.get(
+        new LinkQuery({ source: this.#subject.baseExpression })
+      );
       //@ts-ignore
-      exp = links[0] || null
+      exp = links[0] || null;
     }
 
-    if(!exp) {
-      throw "Failed to load entry"
+    if (!exp) {
+      throw "Failed to load entry";
     }
-    
-    this.author = exp.author
-    this.timestamp = exp.timestamp
-    try{
+
+    this.author = exp.author;
+    this.timestamp = exp.timestamp;
+    try {
       //@ts-ignore
-      this.type = await this.#subject.type
-    } catch(e) {
-      console.error("Failed to get type of subject: ", e)
+      this.type = await this.#subject.type;
+    } catch (e) {
+      console.error("Failed to get type of subject: ", e);
     }
-    
-    this.data = exp.data
+
+    this.data = exp.data;
   }
 }

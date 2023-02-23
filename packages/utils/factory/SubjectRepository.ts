@@ -1,5 +1,11 @@
-import { PerspectiveProxy, Link, Subject, LinkExpression, Ad4mClient } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import {
+  PerspectiveProxy,
+  Link,
+  Subject,
+  LinkExpression,
+  Ad4mClient,
+} from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { subscribeToLinks } from "../api";
 import { SELF } from "../constants/communityPredicates";
 import { collectionToAdderName, collectionToSetterName } from "../helpers";
@@ -26,48 +32,54 @@ export function propertyNameToSetterName(property: string): string {
 }
 
 export function pluralToSingular(plural: string): string {
-  if(plural.endsWith("ies")) {
-      return plural.slice(0, -3) + "y"
-  } else if(plural.endsWith("s")) {
-      return plural.slice(0, -1)
+  if (plural.endsWith("ies")) {
+    return plural.slice(0, -3) + "y";
+  } else if (plural.endsWith("s")) {
+    return plural.slice(0, -1);
   } else {
-      return plural
+    return plural;
   }
 }
 
-export function setProperties(subject: any, properties: QueryPartialEntity<{[x: string]: any}>) {
-  const adder = (key: string,  value: any) => {
+export function setProperties(
+  subject: any,
+  properties: QueryPartialEntity<{ [x: string]: any }>
+) {
+  const adder = (key: string, value: any) => {
     // it's a collection
     const adderName = collectionToAdderName(key);
     const adderFunction = subject[adderName];
-    if(adderFunction) {
+    if (adderFunction) {
       adderFunction(value);
     } else {
       throw "No adder function found for collection: " + key;
     }
-  }
+  };
 
   const setter = (key: string, value: any) => {
     // it's a collection
     const setterName = collectionToSetterName(key);
     const setterFunction = subject[setterName];
-    if(setterFunction) {
+    if (setterFunction) {
       setterFunction(value);
     } else {
       throw "No adder function found for collection: " + key;
     }
-  }
+  };
 
   Object.keys(properties).forEach((key) => {
-    if(Array.isArray(properties[key]) || Array.isArray(properties[key]?.value)) {
+    if (
+      Array.isArray(properties[key]) ||
+      Array.isArray(properties[key]?.value)
+    ) {
       if (properties[key].action) {
         switch (properties[key].action) {
-          case 'setter':
-            setter(key, properties[key].value)
+          case "setter":
+            setter(key, properties[key].value);
             break;
-          case 'adder':
+          case "adder":
             adder(key, properties[key].value);
-            break
+            break;
           default:
             setter(key, properties[key].value);
             break;
@@ -90,7 +102,7 @@ export function setProperties(subject: any, properties: QueryPartialEntity<{[x: 
   });
 }
 
-export class SubjectRepository<SubjectClass extends {[x: string]: any}> {
+export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   client = null;
   source = SELF;
   perspectiveUuid = "";
@@ -101,7 +113,7 @@ export class SubjectRepository<SubjectClass extends {[x: string]: any}> {
   private perspective: PerspectiveProxy | null = null;
   private tempSubject: any;
 
-  constructor(subject: { new(): SubjectClass }, props: ModelProps) {
+  constructor(subject: { new (): SubjectClass }, props: ModelProps) {
     this.perspectiveUuid = props.perspectiveUuid;
     this.source = props.source || this.source;
     this.subject = new subject();
@@ -128,13 +140,17 @@ export class SubjectRepository<SubjectClass extends {[x: string]: any}> {
     }
 
     // Connect new instance to source
-    await this.perspective?.add(new Link({
-      source: this.source, 
-      predicate: await newInstance.type, 
-      target: base
-    }))
+    await this.perspective?.add(
+      new Link({
+        source: this.source,
+        predicate: await newInstance.type,
+        target: base,
+      })
+    );
 
-    Object.keys(data).forEach(key => data[key] === undefined ? delete data[key] : {});
+    Object.keys(data).forEach((key) =>
+      data[key] === undefined ? delete data[key] : {}
+    );
 
     setProperties(newInstance, data);
     return newInstance;
@@ -148,19 +164,23 @@ export class SubjectRepository<SubjectClass extends {[x: string]: any}> {
       );
     }
 
-    Object.keys(data).forEach(key => data[key] === undefined ? delete data[key] : {});
+    Object.keys(data).forEach((key) =>
+      data[key] === undefined ? delete data[key] : {}
+    );
 
     setProperties(instance, data);
     return instance;
   }
 
   async get(id?: string): Promise<SubjectClass | null> {
-    if(id) {
+    if (id) {
       await this.ensurePerspective();
-      return (await this.perspective?.getSubjectProxy(id, this.subject)) || null;
+      return (
+        (await this.perspective?.getSubjectProxy(id, this.subject)) || null
+      );
     } else {
-      const all = await this.getAll()
-      return all[0] || null
+      const all = await this.getAll();
+      return all[0] || null;
     }
   }
 
@@ -173,7 +193,9 @@ export class SubjectRepository<SubjectClass extends {[x: string]: any}> {
       );
 
     const results = await this.perspective?.infer(
-      `triple("${tempSource}", ${tempSource !== SELF ? `"${this.tempSubject.prototype.type}"` : "_"}, X), instance(Class, X), subject_class("${subjectClass}", Class)`
+      `triple("${tempSource}", ${
+        tempSource !== SELF ? `"${this.tempSubject.prototype.type}"` : "_"
+      }, X), instance(Class, X), subject_class("${subjectClass}", Class)`
     );
 
     if (!results) return [];
@@ -277,5 +299,5 @@ export class SubjectRepository<SubjectClass extends {[x: string]: any}> {
 }
 
 export type QueryPartialEntity<T> = {
-  [P in keyof T]?: T[P] | (() => string)
-}
+  [P in keyof T]?: T[P] | (() => string);
+};

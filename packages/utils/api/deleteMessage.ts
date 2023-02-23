@@ -1,5 +1,5 @@
 import { Link } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { DELETED, EDITED_TO } from "../constants/communityPredicates";
 import getMessage from "./getMessage";
 
@@ -8,10 +8,7 @@ export interface Payload {
   message: string;
 }
 
-export default async function ({
-  perspectiveUuid,
-  message,
-}: Payload) {
+export default async function ({ perspectiveUuid, message }: Payload) {
   try {
     const client = await getAd4mClient();
 

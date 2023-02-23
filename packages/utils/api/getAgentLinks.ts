@@ -1,6 +1,5 @@
 import { LinkExpression } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
-import getMe from "./getMe";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export default async function getAgentLinks(
   did: string
