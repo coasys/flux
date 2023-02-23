@@ -86,6 +86,16 @@
       @neighbourhood-click="onNeighbourhoodClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></graph-view>
+    <webrtc-view
+      v-show="currentView === ChannelView.Voice"
+      class="perspective-view"
+      :source="channel.id"
+      :perspective="communityId"
+      @agent-click="onAgentClick"
+      @channel-click="onChannelClick"
+      @neighbourhood-click="onNeighbourhoodClick"
+      @hide-notification-indicator="onHideNotificationIndicator"
+    ></webrtc-view>
     <chat-view
       v-show="currentView === ChannelView.Chat"
       class="perspective-view"
