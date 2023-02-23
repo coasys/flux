@@ -15,7 +15,9 @@ import {
 const servers = {
   iceServers: [
     {
-      urls: "stun:relay.metered.ca:80",
+      urls: "stun:turn.ad4m.dev:3478",
+      username: "openturn",
+      credential: "openturn",
     },
     {
       urls: "turn:turn.ad4m.dev:443",
