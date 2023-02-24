@@ -84,7 +84,7 @@
             <j-button
               :size="deferredPrompt ? 'md' : 'xl'"
               variant="link"
-              @click="$emit('connectToAd4m')"
+              @click="connect"
             >
               Sign in
             </j-button>
@@ -183,6 +183,7 @@
 </template>
 
 <script lang="ts">
+import { ad4mConnect } from "@/ad4mConnect";
 import { defineComponent } from "vue";
 import Logo from "@/components/logo/Logo.vue";
 import Orb from "@/components/orb/Orb.vue";
@@ -196,7 +197,6 @@ export default defineComponent({
     Orb2,
     Orb3,
   },
-  emits: ["connectToAd4m"],
   data() {
     return {
       deferredPrompt: null as any,
@@ -211,6 +211,9 @@ export default defineComponent({
     });
   },
   methods: {
+    connect() {
+      ad4mConnect.connect();
+    },
     async downloadPWA() {
       if (this.deferredPrompt) {
         // deferredPrompt is a global variable we've been using in the sample to capture the `beforeinstallevent`

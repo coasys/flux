@@ -1,14 +1,14 @@
 import { createApp, h, watch } from "vue";
 import { version } from "../package.json";
+import "./ad4mConnect";
 import App from "./App.vue";
 import router from "./router";
+import { createPinia } from "pinia";
 
 import "@junto-foundation/junto-elements";
 import "@junto-foundation/junto-elements/dist/main.css";
 
-import { createPinia } from "pinia";
-
-const pinia = createPinia();
+export const pinia = createPinia();
 
 pinia.use(({ store }) => {
   const key = `${store.$id}-${version}`;

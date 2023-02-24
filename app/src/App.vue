@@ -1,5 +1,5 @@
 <template>
-  <router-view :key="componentKey" @connectToAd4m="connectToAd4m"></router-view>
+  <router-view :key="componentKey"></router-view>
   <div class="global-modal" v-if="ui.showGlobalLoading">
     <div class="global-modal__backdrop"></div>
     <div class="global-modal__content">
@@ -43,7 +43,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useDataStore } from "./store/data";
 import { useUserStore } from "./store/user";
 import { hydrateState } from "./store/data/hydrateState";
-import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
+import { ad4mConnect } from "./ad4mConnect";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { EntryType } from "utils/types";
 import subscribeToLinks from "utils/api/subscribeToLinks";
@@ -61,9 +61,6 @@ export default defineComponent({
     const dataStore = useDataStore();
     const userStore = useUserStore();
     const watcherStarted = ref(false);
-    const connect = ref();
-
-    const ad4mConnect = ref(null);
 
     return {
       ad4mConnect,
@@ -74,27 +71,12 @@ export default defineComponent({
       dataStore,
       userStore,
       watcherStarted,
-      connect,
     };
   },
   created() {
     this.appStore.changeCurrentTheme("global");
-  },
-  mounted() {
-    const ui = Ad4mConnectUI({
-      appName: "Flux",
-      appDesc: "A Social Toolkit for the New Internet",
-      appDomain: this.appDomain,
-      appIconPath: "https://i.ibb.co/GnqjPJP/icon.png",
-      capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
-    });
-
-    this.connect = ui;
-
-    ui.addEventListener("authstatechange", async (e) => {
-      if (ui.authState === "authenticated") {
-        this.router.push("home");
-
+    ad4mConnect.addEventListener("authstatechange", async (e) => {
+      if (ad4mConnect.authState === "authenticated") {
         if (!this.watcherStarted) {
           this.startWatcher();
           this.watcherStarted = true;
@@ -129,9 +111,6 @@ export default defineComponent({
     },
   },
   methods: {
-    connectToAd4m() {
-      this.connect.connect();
-    },
     async startWatcher() {
       const client = await getAd4mClient();
       const watching: string[] = [];
