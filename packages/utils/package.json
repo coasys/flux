@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@perspect3vism/ad4m": "0.2.14",
+    "@perspect3vism/ad4m": "0.2.16",
     "date-fns": "^2.28.0",
     "dexie": "^3.2.0",
     "dexie-react-hooks": "^1.1.1"
