@@ -1,0 +1,51 @@
+{
+  "name": "@junto-foundation/webrtc-view",
+  "version": "1.0.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/main.umd.cjs",
+  "module": "./dist/main.js",
+  "exports": {
+    ".": {
+      "import": "./dist/main.js",
+      "require": "./dist/main.umd.cjs"
+    }
+  },
+  "baseUrl": "./",
+  "paths": {
+    "react": [
+      "./node_modules/preact/compat/"
+    ],
+    "react-dom": [
+      "./node_modules/preact/compat/"
+    ]
+  },
+  "scripts": {
+    "start": "vite",
+    "dev": "run-p dev:**",
+    "dev:serve": "vite --host",
+    "dev:watch": "vite build --watch",
+    "build": "vite build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@junto-foundation/junto-elements": "^0.4.5",
+    "@perspect3vism/ad4m": "0.2.16",
+    "@perspect3vism/ad4m-connect": "0.2.15-alpha.2",
+    "emoji-picker-element": "^1.14.0",
+    "howler": "^2.2.3",
+    "npm-run-all": "^4.1.5",
+    "preact": "^10.11.3"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.5.0",
+    "vite": "^4.0.3",
+    "vite-plugin-css-injected-by-js": "^2.3.1"
+  }
+}

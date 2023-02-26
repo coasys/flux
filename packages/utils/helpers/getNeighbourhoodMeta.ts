@@ -6,7 +6,7 @@ import {
   CREATED_AT,
 } from "utils/constants/communityPredicates";
 import { NeighbourhoodMetaData } from "../types";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export function getMetaFromLinks(
   links: LinkExpression[]

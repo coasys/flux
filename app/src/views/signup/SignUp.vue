@@ -1,9 +1,7 @@
 <template>
   <div class="signup-view">
     <div class="signup-view__intro" v-if="!showSignup">
-      <SignUpCarousel
-        @connectToAd4m="() => $emit('connectToAd4m')"
-      ></SignUpCarousel>
+      <SignUpCarousel></SignUpCarousel>
     </div>
 
     <div class="signup-view__flow" v-else>
@@ -62,26 +60,23 @@
 </template>
 
 <script lang="ts">
+import { ad4mConnect } from "@/ad4mConnect";
 import { defineComponent, ref } from "vue";
 import Carousel from "./SignUpCarousel.vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useValidation } from "@/utils/validation";
 import { useUserStore } from "@/store/user";
 import ad4mLogo from "@/assets/images/ad4mLogo.svg";
-import {
-  getAd4mClient,
-  isConnected,
-  onAuthStateChanged,
-} from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Logo from "@/components/logo/Logo.vue";
 import { useAppStore } from "@/store/app";
 import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";
 import SignUpCarousel from "./SignUpCarousel.vue";
 import getAd4mProfile from "utils/api/getAd4mProfile";
+import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
 
 export default defineComponent({
   name: "SignUp",
-  emits: ["connectToAd4m"],
   components: {
     AvatarUpload,
     Carousel,
@@ -150,13 +145,8 @@ export default defineComponent({
     };
   },
   async mounted() {
-    isConnected().then((connected: any) => {
-      if (connected) {
-        this.autoFillUser();
-      }
-    });
-    onAuthStateChanged((status: string) => {
-      if (status === "connected_with_capabilities") {
+    ad4mConnect.addEventListener("authstatechange", async (e) => {
+      if (ad4mConnect.authState === "authenticated") {
         this.autoFillUser();
       }
     });

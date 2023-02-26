@@ -1,0 +1,29 @@
+.wrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--j-space-300);
+    height: 100%;
+    font-family: var(--j-font-family);
+    margin: var(--j-space-400);
+    padding: 0;
+    overflow-x: hidden;
+    list-style: none;
+}
+
+.item {
+    animation: appear 0.3s ease both;
+}
+
+@keyframes appear {
+    0% {
+        transform: translateY(-4rem);
+        opacity: 0;
+    }
+  }

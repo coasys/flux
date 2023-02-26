@@ -1,21 +1,22 @@
 import ForceGraph3D, { ForceGraph3DInstance } from "3d-force-graph";
 import { useEffect, useState, useRef } from "preact/hooks";
 import SpriteText from "three-spritetext";
-import {
-  getAd4mClient,
-  LinkExpression,
-} from "@perspect3vism/ad4m-connect/dist/utils";
-import { Ad4mClient, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { Ad4mClient, Literal } from "@perspect3vism/ad4m";
+import useIntersectionObserver from "../hooks/useIntersectionObserver";
 
 function findNodes(links, source) {
   return links.reduce((acc, link) => {
-    const isSource = link.data.target === source;
     const hasSource = link.data.source === source;
     const alreadyIn = acc.some(
       (l) => l.proof.signature === link.proof.signature
     );
 
     if (alreadyIn) return acc;
+
+    if (hasSource && link.data.source === link.data.target) {
+      return [...acc, link];
+    }
 
     if (hasSource) {
       const newLinks = findNodes(links, link.data.target);
@@ -46,6 +47,7 @@ export default function CommunityOverview({ uuid, source }) {
   const containerRef = useRef<HTMLDivElement>();
   const graph = useRef<ForceGraph3DInstance>(undefined);
   const graphEl = useRef<HTMLDivElement | null>(null);
+
   const [containerSize, setContainerSize] = useState([0, 0]);
   const [ad4mInitialised, setAd4mInitialised] = useState(false);
   const [graphInitialised, setGraphInitialised] = useState(false);
@@ -53,6 +55,20 @@ export default function CommunityOverview({ uuid, source }) {
   const [links, setLinks] = useState<
     { source: string; target: string; predicate: string }[]
   >([]);
+
+  const entry = useIntersectionObserver(graphEl, {});
+  const isGraphVisible = !!entry?.isIntersecting;
+
+  // Pause animations when graph hidden
+  useEffect(() => {
+    if (graphInitialised) {
+      if (!isGraphVisible) {
+        graph.current.pauseAnimation();
+      } else {
+        graph.current.resumeAnimation();
+      }
+    }
+  }, [graphInitialised, isGraphVisible]);
 
   // Listen to resize events
   useEffect(() => {
@@ -83,50 +99,32 @@ export default function CommunityOverview({ uuid, source }) {
 
   // Fetch initial snapshot
   useEffect(() => {
-    const fetchsnapshot = async () => {
+    const init = async () => {
+      setAd4mInitialised(true);
+
       const client: Ad4mClient = await getAd4mClient();
       const perspective = await client.perspective.byUUID(uuid);
 
-      const snapshot = await client.perspective.snapshotByUUID(uuid);
-
-      const subLinks = findNodes(snapshot?.links || [], source);
-
-      const initialNodes = uniqueNodes(
-        subLinks
-          .map((link) => [
-            { id: link.data.source, group: extractProtocol(link.data.source) },
-            { id: link.data.target, group: extractProtocol(link.data.target) },
-          ])
-          .flat()
-      );
-
-      setNodes(initialNodes);
-
-      const initialLinks = subLinks.map((l) => ({
-        source: l.data.target,
-        target: l.data.source,
-        predicate: l.data.predicate,
-      }));
-
-      setLinks(initialLinks);
-
-      setAd4mInitialised(true);
+      fetchSnapShot();
 
       perspective?.addListener("link-added", (link) => {
-        newLinkAdded(link);
+        if (link.data.source === source || link.data.target === source) {
+          fetchSnapShot();
+        }
         return null;
       });
     };
 
     if (!ad4mInitialised && uuid && source) {
-      fetchsnapshot();
+      init();
     }
   }, [ad4mInitialised, uuid, source]);
 
   // Setup graph
   useEffect(() => {
     const setupGraph = async () => {
-      graph.current = ForceGraph3D()
+      graph.current = ForceGraph3D()(graphEl.current)
+        .graphData({ nodes, links })
         .nodeLabel((node: any) => {
           return node.id.startsWith("literal://")
             ? Literal.fromUrl(node.id).get().data
@@ -150,51 +148,52 @@ export default function CommunityOverview({ uuid, source }) {
               [c]: start[c] + (end[c] - start[c]) / 2, // calc middle point
             }))
           );
-
           // Position sprite
           Object.assign(sprite.position, middlePos);
         })
         .width(containerSize[0] || window.innerWidth)
         .height(containerSize[1] || window.innerHeight);
 
-      graph.current(graphEl.current).graphData({ nodes, links });
-
       setGraphInitialised(true);
     };
 
-    if (!graphInitialised && nodes.length > 0 && links.length > 0) {
+    if (!graphInitialised) {
       setupGraph();
     }
   }, [graphInitialised, nodes, links]);
 
-  // listen for changes
-  const newLinkAdded = (l: LinkExpression) => {
-    if (graph.current) {
-      const { nodes, links } = graph.current.graphData();
-
-      graph.current.graphData({
-        nodes: [
-          ...nodes,
-          {
-            id: l.data.target,
-            group: extractProtocol(l.data.target),
-          },
-          {
-            id: l.data.source,
-            group: extractProtocol(l.data.source),
-          },
-        ],
-        links: [
-          ...links,
-          {
-            source: l.data.target,
-            target: l.data.source,
-            predicate: l.data.predicate,
-          },
-        ],
-      });
+  // Add data on change
+  useEffect(() => {
+    if (graphInitialised && graph.current) {
+      graph.current.graphData({ nodes, links });
     }
-  };
+  }, [graphInitialised, nodes, links]);
+
+  async function fetchSnapShot() {
+    const client: Ad4mClient = await getAd4mClient();
+    const snapshot = await client.perspective.snapshotByUUID(uuid);
+
+    const subLinks = findNodes(snapshot?.links || [], source);
+
+    const initialNodes = uniqueNodes(
+      subLinks
+        .map((link) => [
+          { id: link.data.source, group: extractProtocol(link.data.source) },
+          { id: link.data.target, group: extractProtocol(link.data.target) },
+        ])
+        .flat()
+    );
+
+    setNodes(initialNodes);
+
+    const initialLinks = subLinks.map((l) => ({
+      source: l.data.target,
+      target: l.data.source,
+      predicate: l.data.predicate,
+    }));
+
+    setLinks(initialLinks);
+  }
 
   return (
     <div ref={containerRef}>

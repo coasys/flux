@@ -39,27 +39,27 @@ function generateReactionText(
     if (reaction.authors.find((author) => author === me)) {
       const authors = reaction.authors.filter((author) => author !== me);
       if (authors.length > 2) {
-        return `You, ${profiles[0].username}, ${profiles[1].username}, and ${
+        return `You, ${profiles[0]?.username}, ${profiles[1]?.username}, and ${
           authors.length - 3
         } others reacted with ${shortName}`;
       } else if (authors.length == 2) {
-        return `You, ${profiles[0].username} and ${profiles[1].username} reacted with ${shortName}`;
+        return `You, ${profiles[0]?.username} and ${profiles[1]?.username} reacted with ${shortName}`;
       } else if (authors.length == 1) {
-        return `You and ${profiles[0].username} reacted with ${shortName}`;
+        return `You and ${profiles[0]?.username} reacted with ${shortName}`;
       } else {
         return `You reacted with ${shortName}`;
       }
     } else {
       if (reaction.authors.length > 3) {
-        return `${profiles[0].username}, ${profiles[1].username}, ${
-          profiles[2].username
+        return `${profiles[0]?.username}, ${profiles[1]?.username}, ${
+          profiles[2]?.username
         }, and ${reaction.authors.length - 3} others reacted with ${emoji}`;
       } else if (reaction.authors.length == 3) {
-        return `${profiles[0].username}, ${profiles[1].username} and ${profiles[2].username} reacted with ${emoji}`;
+        return `${profiles[0]?.username}, ${profiles[1]?.username} and ${profiles[2]?.username} reacted with ${emoji}`;
       } else if (reaction.authors.length == 2) {
-        return `${profiles[0].username} and ${profiles[1].username} reacted with ${emoji}`;
+        return `${profiles[0]?.username} and ${profiles[1]?.username} reacted with ${emoji}`;
       } else if (reaction.authors.length == 1) {
-        return `${profiles[0].username} reacted with ${emoji}`;
+        return `${profiles[0]?.username} reacted with ${emoji}`;
       }
     }
   } else {

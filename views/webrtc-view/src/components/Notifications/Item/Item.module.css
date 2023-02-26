@@ -1,0 +1,15 @@
+.item {
+    position: relative;
+    display: flex;
+    gap: var(--j-space-100);
+    background: var(--j-color-ui-50);
+    padding: var(--j-space-400) var(--j-space-500);
+    border-radius: var(--j-border-radius);
+}
+
+.item > span {
+    display: block;
+    color: var(--j-color-ui-600);
+    font-size: var(--j-font-size-500);
+    font-weight: 400;
+}

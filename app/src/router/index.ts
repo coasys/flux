@@ -1,9 +1,5 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
-
-import {
-  getAd4mClient,
-  isConnected,
-} from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -58,26 +54,28 @@ const router = createRouter({
   routes,
 });
 
-export default router;
-
 router.beforeEach(async (to, from, next) => {
   try {
-    const connected = await isConnected();
+    const client = await getAd4mClient();
 
-    if (connected) {
-      const client = await getAd4mClient();
+    const isLocked = await client.agent.isLocked();
 
-      const { perspective } = await client.agent.me();
+    if (!isLocked) {
+      const me = await client.agent.me();
 
-      const fluxLinksFound = perspective?.links.find((e) =>
+      const fluxLinksFound = me?.perspective?.links.find((e) =>
         e.data.source.startsWith("flux://")
       );
 
-      if (fluxLinksFound && to.name === "signup") {
+      const isOnSignupOrMain = to.name === "signup" || to.name === "main";
+
+      console.log({ isLocked, to, from, isOnSignupOrMain, fluxLinksFound });
+
+      if (fluxLinksFound && isOnSignupOrMain) {
         next("/home");
       }
 
-      if (!fluxLinksFound && to.name !== "signup") {
+      if (!fluxLinksFound && !isOnSignupOrMain) {
         next("/signup");
       }
 
@@ -90,6 +88,7 @@ router.beforeEach(async (to, from, next) => {
       next();
     }
   } catch (e) {
+    console.log("error in route", e);
     if (to.name !== "signup") {
       next("/signup");
     } else {
@@ -97,3 +96,5 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 });
+
+export default router;

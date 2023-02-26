@@ -35,16 +35,16 @@
               <j-icon size="xs" :name="view.icon"></j-icon>
               <span>{{ view.title }}</span>
             </label>
-             <j-tooltip placement="auto" title="Manage views">
-          <j-button
-            v-if="sameAgent"
-            @click="() => goToEditChannel(channel.id)"
-            size="sm"
-            variant="ghost"
-          >
-            <j-icon size="md" name="plus"></j-icon>
-          </j-button>
-        </j-tooltip>
+            <j-tooltip placement="auto" title="Manage views">
+              <j-button
+                v-if="sameAgent"
+                @click="() => goToEditChannel(channel.id)"
+                size="sm"
+                variant="ghost"
+              >
+                <j-icon size="md" name="plus"></j-icon>
+              </j-button>
+            </j-tooltip>
           </div>
         </div>
       </div>
@@ -86,6 +86,16 @@
       @neighbourhood-click="onNeighbourhoodClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></graph-view>
+    <webrtc-view
+      v-show="currentView === ChannelView.Voice"
+      class="perspective-view"
+      :source="channel.id"
+      :perspective="communityId"
+      @agent-click="onAgentClick"
+      @channel-click="onChannelClick"
+      @neighbourhood-click="onNeighbourhoodClick"
+      @hide-notification-indicator="onHideNotificationIndicator"
+    ></webrtc-view>
     <chat-view
       v-show="currentView === ChannelView.Chat"
       class="perspective-view"
@@ -96,7 +106,7 @@
       @neighbourhood-click="onNeighbourhoodClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></chat-view>
-    
+
     <j-modal
       size="xs"
       v-if="activeProfile"
@@ -122,10 +132,11 @@
 import ForumView from "@junto-foundation/forum-view";
 import ChatView from "@junto-foundation/chat-view";
 import GraphView from "@junto-foundation/graph-view";
+import VoiceView from "@junto-foundation/webrtc-view";
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Profile from "@/containers/Profile.vue";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
@@ -176,6 +187,10 @@ export default defineComponent({
       const module = await import(`@junto-foundation/graph-view`);
       customElements.define("graph-view", module.default);
     }
+    if (!customElements.get("webrtc-view")) {
+      const module = await import(`@junto-foundation/webrtc-view`);
+      customElements.define("webrtc-view", module.default);
+    }
   },
   computed: {
     sameAgent() {
@@ -200,7 +215,7 @@ export default defineComponent({
   methods: {
     goToEditChannel(id: string) {
       this.appStore.setActiveChannel(id);
-      this.appStore.setShowEditChannel(true)
+      this.appStore.setShowEditChannel(true);
     },
     changeCurrentView(e: any) {
       const value = e.target.value;

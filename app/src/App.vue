@@ -1,5 +1,5 @@
 <template>
-  <router-view :key="componentKey" @connectToAd4m="connectToAd4m"></router-view>
+  <router-view :key="componentKey"></router-view>
   <div class="global-modal" v-if="ui.showGlobalLoading">
     <div class="global-modal__backdrop"></div>
     <div class="global-modal__content">
@@ -24,16 +24,7 @@
       </j-flex>
     </div>
   </div>
-  <ad4m-connect
-    theme="dark"
-    ref="ad4mConnect"
-    appName="Flux"
-    appDesc="A Social Toolkit for the New Internet"
-    :appDomain="appDomain"
-    capabilities='[{"with":{"domain":"*","pointers":["*"]},"can": ["*"]}]'
-    appiconpath="https://i.ibb.co/GnqjPJP/icon.png"
-    openonshortcut
-  ></ad4m-connect>
+
   <j-toast
     autohide="10"
     :variant="ui.toast.variant"
@@ -52,11 +43,8 @@ import { useRoute, useRouter } from "vue-router";
 import { useDataStore } from "./store/data";
 import { useUserStore } from "./store/user";
 import { hydrateState } from "./store/data/hydrateState";
-import {
-  getAd4mClient,
-  onAuthStateChanged,
-} from "@perspect3vism/ad4m-connect/dist/utils";
-import "@perspect3vism/ad4m-connect/dist/web.js";
+import { ad4mConnect } from "./ad4mConnect";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { EntryType } from "utils/types";
 import subscribeToLinks from "utils/api/subscribeToLinks";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
@@ -74,8 +62,6 @@ export default defineComponent({
     const userStore = useUserStore();
     const watcherStarted = ref(false);
 
-    const ad4mConnect = ref(null);
-
     return {
       ad4mConnect,
       appStore,
@@ -89,10 +75,8 @@ export default defineComponent({
   },
   created() {
     this.appStore.changeCurrentTheme("global");
-  },
-  mounted() {
-    onAuthStateChanged(async (event: string) => {
-      if (event === "connected_with_capabilities") {
+    ad4mConnect.addEventListener("authstatechange", async (e) => {
+      if (ad4mConnect.authState === "authenticated") {
         if (!this.watcherStarted) {
           this.startWatcher();
           this.watcherStarted = true;
@@ -102,6 +86,7 @@ export default defineComponent({
 
           //Do version checking for ad4m / flux compatibility
           const { ad4mExecutorVersion } = await client.runtime.info();
+
           const isIncompatible = semver.gt(
             dependencies["@perspect3vism/ad4m"],
             ad4mExecutorVersion
@@ -126,10 +111,6 @@ export default defineComponent({
     },
   },
   methods: {
-    connectToAd4m() {
-      // @ts-ignore
-      this.ad4mConnect?.connect();
-    },
     async startWatcher() {
       const client = await getAd4mClient();
       const watching: string[] = [];

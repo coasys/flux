@@ -1,4 +1,4 @@
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { PredicateMap } from "../types";
 import { createLinks } from "../helpers/linkHelpers";
 import { LinkQuery } from "@perspect3vism/ad4m";
@@ -26,6 +26,9 @@ export async function updateEntry(
   }
 
   const propertyLinks = await createLinks(id, updates);
-  const createdLinks = await client.perspective.addLinks(perspectiveUuid, propertyLinks);
+  const createdLinks = await client.perspective.addLinks(
+    perspectiveUuid,
+    propertyLinks
+  );
   return createdLinks;
 }

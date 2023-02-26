@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { getLiteralObjectLinks } from "utils/helpers/linkHelpers";
 import { defineComponent } from "vue";
 export default defineComponent({

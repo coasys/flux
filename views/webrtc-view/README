@@ -1,0 +1,11 @@
+# WebRTC view
+
+## About
+
+Audio/Video chat for Flux
+
+## TLDR
+
+- Create local stream
+  - Add user media to local stream
+- Create remote stream

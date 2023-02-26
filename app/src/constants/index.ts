@@ -22,7 +22,14 @@ export const viewOptions = [
     type: ChannelView.Graph,
     component: "graph-view",
   },
+  {
+    title: "Voice",
+    description: "Audio/Video channel",
+    icon: "mic",
+    type: ChannelView.Voice,
+    component: "webrtc-view",
+  },
 ];
 
 export const DEFAULT_TESTING_NEIGHBOURHOOD =
-  "neighbourhood://QmbNH3q35YzNJBQBFRHwap68dyZ8LfzafqDKWLCdLvDnqU";
+  "neighbourhood://QmQ3WH8HoHCsqPRKoH2its6a43PNhhm9XRpjFX1EdWGVKj";

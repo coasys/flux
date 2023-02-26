@@ -1,4 +1,4 @@
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import { mapLiteralLinks } from "utils/helpers/linkHelpers";
 import { AREA_WEBLINK, OG_LINK } from "../constants/profile";

@@ -14,6 +14,7 @@ export default {
               tag === "ad4m-connect" ||
               tag === "chat-view" ||
               tag === "graph-view" ||
+              tag === "webrtc-view" ||
               tag === "forum-view"
             );
           },
@@ -22,6 +23,10 @@ export default {
     }),
     VitePWA({
       registerType: "autoUpdate",
+      devOptions: {
+        enabled: true,
+        /* other options */
+      },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
         maximumFileSizeToCacheInBytes: 5000000, // cache files upto 5mb since our index.js is around 3.4mb

@@ -1,4 +1,4 @@
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { Perspective } from "@perspect3vism/ad4m";
 
 export interface Me {
@@ -12,7 +12,7 @@ export interface Me {
 export default async function getMe(): Promise<Me> {
   try {
     const client = await getAd4mClient();
-    
+
     const me = await client.agent.me();
     const status = await client.agent.status();
     return { ...me, ...status } as Me;
