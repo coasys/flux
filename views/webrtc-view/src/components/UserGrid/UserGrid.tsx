@@ -80,43 +80,45 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
   }, [webRTC.reactions]);
 
   // Build participant elements
-  const peerItems = webRTC.connections.map((peer, index) => {
-    const remoteStream = new MediaStream();
-    const peerReaction =
-      currentReaction && currentReaction.did === peer.did
-        ? currentReaction
-        : null;
+  const peerItems = webRTC.connections
+    .sort((a, b) => a.did.localeCompare(b.did))
+    .map((peer, index) => {
+      const remoteStream = new MediaStream();
+      const peerReaction =
+        currentReaction && currentReaction.did === peer.did
+          ? currentReaction
+          : null;
 
-    if (peer.connection.peerConnection) {
-      peer.connection.peerConnection.ontrack = (event) => {
-        event.streams[0].getTracks().forEach((track) => {
-          remoteStream.addTrack(track);
-        });
-        const videElement = document.getElementById(
-          `user-video-${peer.did}`
-        ) as HTMLVideoElement;
+      if (peer.connection.peerConnection) {
+        peer.connection.peerConnection.ontrack = (event) => {
+          event.streams[0].getTracks().forEach((track) => {
+            remoteStream.addTrack(track);
+          });
+          const videElement = document.getElementById(
+            `user-video-${peer.did}`
+          ) as HTMLVideoElement;
 
-        if (videElement) {
-          videElement.srcObject = remoteStream;
-        }
-      };
-    }
+          if (videElement) {
+            videElement.srcObject = remoteStream;
+          }
+        };
+      }
 
-    return (
-      <Item
-        key={peer.did}
-        peer={peer}
-        userId={peer.did}
-        settings={peer.settings}
-        reaction={peerReaction}
-        focused={focusedPeerId === peer.did}
-        minimised={focusedPeerId && focusedPeerId !== peer.did}
-        onToggleFocus={() =>
-          setFocusedPeerId(focusedPeerId === peer.did ? null : peer.did)
-        }
-      />
-    );
-  });
+      return (
+        <Item
+          key={peer.did}
+          peer={peer}
+          userId={peer.did}
+          settings={peer.settings}
+          reaction={peerReaction}
+          focused={focusedPeerId === peer.did}
+          minimised={focusedPeerId && focusedPeerId !== peer.did}
+          onToggleFocus={() =>
+            setFocusedPeerId(focusedPeerId === peer.did ? null : peer.did)
+          }
+        />
+      );
+    });
 
   return (
     <div
