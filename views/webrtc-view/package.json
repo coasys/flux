@@ -36,7 +36,7 @@
   "description": "",
   "dependencies": {
     "@junto-foundation/junto-elements": "^0.4.5",
-    "@perspect3vism/ad4m": "0.2.14",
+    "@perspect3vism/ad4m": "0.2.16",
     "@perspect3vism/ad4m-connect": "0.2.15-alpha.2",
     "emoji-picker-element": "^1.14.0",
     "howler": "^2.2.3",
