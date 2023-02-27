@@ -1,9 +1,7 @@
 <template>
   <div class="signup-view">
     <div class="signup-view__intro" v-if="!showSignup">
-      <SignUpCarousel
-        @connectToAd4m="() => $emit('connectToAd4m')"
-      ></SignUpCarousel>
+      <SignUpCarousel></SignUpCarousel>
     </div>
 
     <div class="signup-view__flow" v-else>
@@ -62,13 +60,13 @@
 </template>
 
 <script lang="ts">
+import { ad4mConnect } from "@/ad4mConnect";
 import { defineComponent, ref } from "vue";
 import Carousel from "./SignUpCarousel.vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useValidation } from "@/utils/validation";
 import { useUserStore } from "@/store/user";
 import ad4mLogo from "@/assets/images/ad4mLogo.svg";
-import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Logo from "@/components/logo/Logo.vue";
 import { useAppStore } from "@/store/app";
@@ -78,7 +76,6 @@ import { getAd4mProfile } from "utils/api";
 
 export default defineComponent({
   name: "SignUp",
-  emits: ["connectToAd4m"],
   components: {
     AvatarUpload,
     Carousel,
@@ -147,16 +144,8 @@ export default defineComponent({
     };
   },
   async mounted() {
-    const ui = Ad4mConnectUI({
-      appName: "Flux",
-      appDesc: "A Social Toolkit for the New Internet",
-      appDomain: this.appDomain,
-      appIconPath: "https://i.ibb.co/GnqjPJP/icon.png",
-      capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
-    });
-
-    ui.addEventListener("authstatechange", async (e) => {
-      if (ui.authState === "authenticated") {
+    ad4mConnect.addEventListener("authstatechange", async (e) => {
+      if (ad4mConnect.authState === "authenticated") {
         this.autoFillUser();
       }
     });
