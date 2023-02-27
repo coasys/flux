@@ -96,15 +96,17 @@ export default function Item({
       ></video>
 
       <div className={styles.details} onClick={onToggleFocus}>
-        {profile?.username && (
-          <>
-            <j-avatar
-              initials={profile.username?.charAt(0)}
-              hash={userId}
-            ></j-avatar>
-            <j-text>{profile.username}</j-text>
-          </>
-        )}
+        <div className={styles.avatar}>
+          <j-avatar
+            initials={profile?.username ? profile.username?.charAt(0) : "?"}
+            hash={userId}
+            size="xl"
+          ></j-avatar>
+        </div>
+      </div>
+
+      <div className={styles.username}>
+        <span>{profile?.username || "Unknown user"}</span>
       </div>
 
       <div className={styles.loading}>

@@ -9,7 +9,7 @@
     margin: 0 auto;
     font-family: var(--j-font-family);
     border-radius: var(--j-border-radius);
-    background: var(--j-color-ui-800);
+    background: var(--j-color-ui-50);
     overflow: hidden;
     cursor: pointer;
     aspect-ratio: 16/9;
@@ -31,6 +31,21 @@
     opacity: 0;
 }
 
+.username {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin: var(--j-space-400);
+    padding: var(--j-space-200) var(--j-space-400);
+    color: white;
+    background: #0000002e;
+    border-radius: 10rem;
+}
+
+.avatar {
+    display: none;
+}
+
 .details,
 .reaction,
 .loading {
@@ -44,7 +59,6 @@
     justify-content: center;
     flex-direction: column;
     gap: var(--j-space-300);
-    background: var(--j-color-ui-800);
     transition: all 0.3s ease;
 }
 
@@ -82,6 +96,12 @@
 .item[data-focused="true"]:hover .details {
     opacity: 0 !important;
 }
+.item[data-focused="true"] .username {
+    opacity: 0;
+}
+.item[data-focused="true"]:hover .username {
+    opacity: 1;
+}
 
 .item[data-minimised="true"] {
     display: none;
@@ -93,15 +113,17 @@
 .item[data-connecting="true"] .loading {
     display: flex;
 }
-
 .item[data-camera-enabled="true"] .video {
     opacity: 1;
 }
-.item[data-camera-enabled="true"] .details {
-    opacity: 0;
-}
 .item[data-camera-enabled="true"]:hover .details {
     opacity: 1;
+}
+.item[data-camera-enabled="false"] .details {
+    background: var(--j-color-ui-50);
+}
+.item[data-camera-enabled="false"] .avatar {
+    display: block;
 }
 
 .settings {
