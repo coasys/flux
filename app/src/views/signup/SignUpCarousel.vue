@@ -168,11 +168,7 @@
             <j-button variant="link" size="xl" @click="currentIndex = 2">
               Previous
             </j-button>
-            <j-button
-              @click="$emit('connectToAd4m')"
-              variant="primary"
-              size="xl"
-            >
+            <j-button variant="primary" size="xl" @click="connect">
               Log in
             </j-button>
           </j-flex>
