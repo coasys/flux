@@ -10,29 +10,17 @@ import styles from "./Channel.module.css";
 import Notifications from "../Notifications";
 import UiContext from "../../context/UiContext";
 import Disclaimer from "../Disclaimer";
+import Overlay from "../Overlay/Overlay";
 
 export default function Channel({ source, uuid }) {
-  const [showDebug, setShowDebug] = useState(false);
   const [agent, setAgent] = useState<Me | null>(null);
 
   const {
-    methods: { addNotification },
+    state: { showSettings },
+    methods: { addNotification, toggleShowSettings },
   } = useContext(UiContext);
 
-  const {
-    connections,
-    reactions,
-    settings,
-    hasJoined,
-    isLoading,
-    localStream,
-    onChangeSettings,
-    onJoin,
-    onLeave,
-    onReaction,
-    onSendTestSignal,
-    onSendTestBroadcast,
-  } = useWebRTC({
+  const webRTC = useWebRTC({
     source,
     uuid,
     events: {
@@ -55,7 +43,7 @@ export default function Channel({ source, uuid }) {
 
   return (
     <section className={styles.outer}>
-      {!hasJoined && (
+      {!webRTC.hasJoined && (
         <div className={styles.join}>
           <j-flex a="center" direction="column">
             <h1>You haven't joined this room</h1>
@@ -68,13 +56,16 @@ export default function Channel({ source, uuid }) {
 
             <j-box pt="400">
               <j-toggle
-                checked={settings.video}
-                disabled={isLoading}
+                checked={webRTC.settings.video}
+                disabled={webRTC.isLoading}
                 onChange={() =>
-                  onChangeSettings({ ...settings, video: !settings.video })
+                  webRTC.onChangeSettings({
+                    ...settings,
+                    video: !webRTC.settings.video,
+                  })
                 }
               >
-                Join with camera
+                Join with camera!
               </j-toggle>
             </j-box>
 
@@ -82,8 +73,8 @@ export default function Channel({ source, uuid }) {
               <j-button
                 variant="primary"
                 size="lg"
-                loading={isLoading}
-                onClick={onJoin}
+                loading={webRTC.isLoading}
+                onClick={webRTC.onJoin}
               >
                 Join room!
               </j-button>
@@ -92,34 +83,14 @@ export default function Channel({ source, uuid }) {
         </div>
       )}
 
-      <UserGrid
-        currentUser={agent}
-        settings={settings}
-        localStream={localStream}
-        peers={connections}
-        reactions={reactions}
-      />
-
-      <>
-        {showDebug && (
-          <Debug
-            currentUser={agent}
-            hasJoined={hasJoined}
-            connections={connections}
-            onSendTestSignal={onSendTestSignal}
-            onSendTestBroadcast={onSendTestBroadcast}
-          />
-        )}
-      </>
+      <UserGrid webRTC={webRTC} currentUser={agent} />
 
       <Footer
-        settings={settings}
-        hasJoined={hasJoined}
-        onChangeSettings={onChangeSettings}
-        onToggleDebug={() => setShowDebug(!showDebug)}
-        onReaction={onReaction}
-        onLeave={onLeave}
+        webRTC={webRTC}
+        onToggleSettings={() => toggleShowSettings(!showSettings)}
       />
+
+      <Overlay webRTC={webRTC} currentUser={agent} />
 
       <Notifications />
     </section>

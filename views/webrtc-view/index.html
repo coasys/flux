@@ -11,6 +11,11 @@
         display: block;
       }
     </style>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@junto-foundation/junto-elements@latest/dist/main.css"
+    />
+    <script src="https://unpkg.com/@junto-foundation/junto-elements@latest"></script>
   </head>
   <body style="margin: 0">
     <flux-app></flux-app>
@@ -26,10 +31,11 @@
         capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
       });
 
-      ui.connect();
-
-      // Register the app as a web component
-      customElements.define("flux-app", App);
+      setTimeout(() => {
+        // Register the app as a web component
+        customElements.define("flux-app", App);
+        ui.connect();
+      }, 500);
 
       initApp();
 

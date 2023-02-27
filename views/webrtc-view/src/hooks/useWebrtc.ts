@@ -13,7 +13,23 @@ type Props = {
   };
 };
 
-export default function useWebRTC({ source, uuid, events }: Props) {
+export type WebRTC = {
+  localStream: MediaStream;
+  connections: Peer[];
+  settings: Settings;
+  reactions: Reaction[];
+  isInitialised: boolean;
+  hasJoined: boolean;
+  isLoading: boolean;
+  onJoin: () => Promise<void>;
+  onLeave: () => Promise<void>;
+  onChangeSettings: (newSettings: Settings) => void;
+  onReaction: (reaction: string) => Promise<void>;
+  onSendTestSignal: (recipientId: string) => Promise<void>;
+  onSendTestBroadcast: () => Promise<void>;
+};
+
+export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
   const manager = useRef<WebRTCManager>();
   const [agent, setAgent] = useState<Me>();
   const [settings, setSettings] = useState<Settings>(defaultSettings);

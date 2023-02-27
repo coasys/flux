@@ -1,25 +1,20 @@
-import { useEffect, useRef } from "preact/hooks";
-import { Settings } from "../../WebRTCManager";
+import { useContext, useEffect, useRef } from "preact/hooks";
+import UiContext from "../../context/UiContext";
+import { WebRTC } from "../../hooks/useWebrtc";
 
 import styles from "./Footer.module.css";
 
 type Props = {
-  settings: Settings;
-  hasJoined: boolean;
-  onChangeSettings: (newSettings: Settings) => void;
-  onToggleDebug: () => void;
-  onReaction: (reaction: string) => void;
-  onLeave: () => void;
+  webRTC: WebRTC;
+  onToggleSettings: () => void;
 };
 
-export default function Footer({
-  settings,
-  hasJoined,
-  onChangeSettings,
-  onToggleDebug,
-  onReaction,
-  onLeave,
-}: Props) {
+export default function Footer({ webRTC, onToggleSettings }: Props) {
+  const {
+    state: { showSettings },
+    methods: { toggleShowSettings },
+  } = useContext(UiContext);
+
   const emojiPicker = useRef();
 
   useEffect(() => {
@@ -35,7 +30,7 @@ export default function Footer({
   }, [emojiPicker.current]);
 
   const onEmojiClick = (event) => {
-    onReaction(event.detail.unicode);
+    webRTC.onReaction(event.detail.unicode);
     if (emojiPicker.current) {
       // emojiPicker.current.close();
     }
@@ -46,55 +41,66 @@ export default function Footer({
       <div className={styles.inner}>
         <j-tooltip
           placement="top"
-          title={settings.video ? "Disable camera" : "Enable camera"}
+          title={webRTC.settings.video ? "Disable camera" : "Enable camera"}
         >
           <j-button
-            variant={settings.video ? "secondary" : "primary"}
+            variant={webRTC.settings.video ? "secondary" : "primary"}
             onClick={() =>
-              onChangeSettings({ ...settings, video: !settings.video })
+              webRTC.onChangeSettings({
+                ...webRTC.settings,
+                video: !webRTC.settings.video,
+              })
             }
             square
             circle
             size="lg"
-            disabled={!hasJoined}
+            disabled={!webRTC.hasJoined}
           >
             <j-icon
-              name={settings.video ? "camera-video" : "camera-video-off"}
+              name={webRTC.settings.video ? "camera-video" : "camera-video-off"}
             ></j-icon>
           </j-button>
         </j-tooltip>
 
         <j-tooltip
           placement="top"
-          title={settings.audio ? "Mute microphone" : "Unmute microphone"}
+          title={
+            webRTC.settings.audio ? "Mute microphone" : "Unmute microphone"
+          }
         >
           <j-button
-            variant={settings.audio ? "secondary" : "primary"}
+            variant={webRTC.settings.audio ? "secondary" : "primary"}
             onClick={() =>
-              onChangeSettings({ ...settings, audio: !settings.audio })
+              webRTC.onChangeSettings({
+                ...webRTC.settings,
+                audio: !webRTC.settings.audio,
+              })
             }
             square
             circle
             size="lg"
-            disabled={!hasJoined}
+            disabled={!webRTC.hasJoined}
           >
-            <j-icon name={settings.audio ? "mic" : "mic-mute"}></j-icon>
+            <j-icon name={webRTC.settings.audio ? "mic" : "mic-mute"}></j-icon>
           </j-button>
         </j-tooltip>
 
         <j-tooltip
           placement="top"
-          title={settings.screen ? "Stop sharing" : "Share screen"}
+          title={webRTC.settings.screen ? "Stop sharing" : "Share screen"}
         >
           <j-button
-            variant={settings.screen ? "primary" : "secondary"}
+            variant={webRTC.settings.screen ? "primary" : "secondary"}
             onClick={() =>
-              onChangeSettings({ ...settings, screen: !settings.screen })
+              webRTC.onChangeSettings({
+                ...webRTC.settings,
+                screen: !webRTC.settings.screen,
+              })
             }
             square
             circle
             size="lg"
-            disabled={!hasJoined}
+            disabled={!webRTC.hasJoined}
           >
             <j-icon name="display"></j-icon>
           </j-button>
@@ -106,7 +112,7 @@ export default function Footer({
               variant="transparent"
               square
               circle
-              disabled={!hasJoined}
+              disabled={!webRTC.hasJoined}
               size="lg"
             >
               <j-icon name="emoji-neutral"></j-icon>
@@ -120,11 +126,11 @@ export default function Footer({
         <j-tooltip placement="top" title="Leave">
           <j-button
             variant="secondary"
-            onClick={onLeave}
+            onClick={webRTC.onLeave}
             square
             circle
             size="lg"
-            disabled={!hasJoined}
+            disabled={!webRTC.hasJoined}
           >
             <j-icon name="door-closed"></j-icon>
           </j-button>
@@ -136,7 +142,7 @@ export default function Footer({
             onClick={onToggleDebug}
             square
             circle
-            disabled={!hasJoined}
+            disabled={!webRTC.hasJoined}
             size="lg"
           >
             <j-icon name="stars"></j-icon>
@@ -148,7 +154,7 @@ export default function Footer({
         <j-tooltip placement="top" title="Debug">
           <j-button
             variant="secondary"
-            onClick={onToggleDebug}
+            onClick={() => onToggleSettings(!showSettings)}
             square
             circle
             size="lg"

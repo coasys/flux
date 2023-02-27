@@ -1,9 +1,9 @@
 import { CommunityProvider, AgentProvider } from "utils/react";
+import { UiProvider } from "./context/UiContext";
 import AllCommunities from "./components/AllCommunities";
 import Channel from "./components/Channel";
 
 import styles from "./App.module.css";
-import { UiProvider } from "./context/UiContext";
 
 export default function App({ perspective, source }) {
   return (

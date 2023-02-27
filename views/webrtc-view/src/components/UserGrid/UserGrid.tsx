@@ -1,31 +1,22 @@
 import { useRef, useEffect, useState } from "preact/hooks";
 import { Howl } from "howler";
 import { Me } from "utils/api/getMe";
-import { Peer, Reaction } from "../../types";
-import { Settings } from "../../WebRTCManager";
-import Item from "./Item";
+import { Reaction } from "../../types";
+import { WebRTC } from "../../hooks/useWebrtc";
 import popWav from "../../assets/pop.wav";
 import guitarWav from "../../assets/guitar.wav";
 import kissWav from "../../assets/kiss.wav";
 import pigWav from "../../assets/pig.wav";
+import Item from "./Item";
 
 import styles from "./UserGrid.module.css";
 
 type Props = {
+  webRTC: WebRTC;
   currentUser?: Me;
-  localStream: MediaStream;
-  settings: Settings;
-  peers: Peer[];
-  reactions: Reaction[];
 };
 
-export default function UserGrid({
-  currentUser,
-  localStream,
-  settings,
-  peers,
-  reactions,
-}: Props) {
+export default function UserGrid({ webRTC, currentUser }: Props) {
   const videoRef = useRef(null);
   const [currentReaction, setCurrentReaction] = useState<Reaction>(null);
   const [focusedPeerId, setFocusedPeerId] = useState(null);
@@ -43,7 +34,7 @@ export default function UserGrid({
     src: [pigWav],
   });
 
-  const userCount = peers.length + (localStream ? 1 : 0);
+  const userCount = webRTC.connections.length + (webRTC.localStream ? 1 : 0);
   const myReaction =
     currentReaction && currentReaction.did === currentUser.did
       ? currentReaction
@@ -61,17 +52,17 @@ export default function UserGrid({
 
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.srcObject = localStream;
+      videoRef.current.srcObject = webRTC.localStream;
       videoRef.current.muted = true;
     }
-  }, [videoRef, localStream]);
+  }, [videoRef, webRTC.localStream]);
 
   useEffect(() => {
-    if (reactions.length < 1) {
+    if (webRTC.reactions.length < 1) {
       return;
     }
 
-    const newReaction = reactions[reactions.length - 1];
+    const newReaction = webRTC.reactions[webRTC.reactions.length - 1];
 
     if (newReaction.reaction === "💋" || newReaction.reaction === "😘") {
       kissSound.play();
@@ -86,10 +77,10 @@ export default function UserGrid({
     setCurrentReaction(newReaction);
     const timeOutId = setTimeout(() => setCurrentReaction(null), 3500);
     return () => clearTimeout(timeOutId);
-  }, [reactions]);
+  }, [webRTC.reactions]);
 
   // Build participant elements
-  const peerItems = peers.map((peer, index) => {
+  const peerItems = webRTC.connections.map((peer, index) => {
     const remoteStream = new MediaStream();
     const peerReaction =
       currentReaction && currentReaction.did === peer.did
@@ -136,13 +127,13 @@ export default function UserGrid({
         "--grid-row-size": gridRowSize,
       }}
     >
-      {localStream && (
+      {webRTC.localStream && (
         <Item
           isMe
-          mirrored={settings.video && !settings.screen}
+          mirrored={webRTC.settings.video && !webRTC.settings.screen}
           userId={currentUser.did}
           videoRef={videoRef}
-          settings={settings}
+          settings={webRTC.settings}
           reaction={myReaction}
           focused={focusedPeerId === currentUser.did}
           minimised={focusedPeerId && focusedPeerId !== currentUser.did}
