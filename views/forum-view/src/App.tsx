@@ -49,8 +49,6 @@ export default function App({
   perspective: string;
   source: string;
 }) {
-  console.log("test", { perspective, source });
-
   return (
     <UIProvider communityId={perspective} channelId={source}>
       <AgentProvider>

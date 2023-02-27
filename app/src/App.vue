@@ -73,8 +73,7 @@ export default defineComponent({
       watcherStarted,
     };
   },
-  created() {
-    this.appStore.changeCurrentTheme("global");
+  beforeCreate() {
     ad4mConnect.addEventListener("authstatechange", async (e) => {
       if (ad4mConnect.authState === "authenticated") {
         if (!this.watcherStarted) {
@@ -98,6 +97,7 @@ export default defineComponent({
         }
       }
     });
+    this.appStore.changeCurrentTheme("global");
   },
   computed: {
     modals(): ModalsState {

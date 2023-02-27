@@ -37,10 +37,6 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
 
   const meta = getMetaFromLinks(perspective.neighbourhood?.meta?.links!);
 
-  console.log("test");
-
-  console.log("ensured");
-
   const Community = new SubjectRepository(CommunityModel, {
     perspectiveUuid: perspective.uuid,
   });
@@ -52,10 +48,10 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
       uuid: perspective.uuid,
       author: meta.author,
       timestamp: new Date().toISOString(),
-      name: community?.name || meta.name,
-      description: community?.description || meta.description,
-      image: community?.image || "",
-      thumbnail: community?.thumbnail || "",
+      name: (await community?.name) || meta.name,
+      description: (await community?.description) || meta.description,
+      image: (await community?.image) || "",
+      thumbnail: (await community?.thumbnail) || "",
       neighbourhoodUrl: perspective.sharedUrl,
       members: [meta.author],
     },
