@@ -22,7 +22,7 @@
     "@junto-foundation/webrtc-view": "*",
     "@junto-foundation/junto-elements": "*",
     "@perspect3vism/ad4m": "0.2.16",
-    "@perspect3vism/ad4m-connect": "0.2.15-alpha.2",
+    "@perspect3vism/ad4m-connect": "0.2.15-alpha.4",
     "construct-style-sheets-polyfill": "^3.1.0",
     "date-fns": "^2.29.3",
     "dexie": "^3.2.2",

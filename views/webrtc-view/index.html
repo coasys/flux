@@ -13,44 +13,33 @@
     </style>
   </head>
   <body style="margin: 0">
-    <ad4m-connect
-      theme="dark"
-      appName="Flux"
-      appDesc="A social toolkit for the new internet"
-      appDomain="https://www.flux.io/"
-      capabilities='[{"with":{"domain":"*","pointers":["*"]},"can": ["*"]}]'
-      appiconpath="https://i.ibb.co/GnqjPJP/icon.png"
-      openonshortcut
-    ></ad4m-connect>
-
     <flux-app></flux-app>
 
     <script type="module">
-      import "@perspect3vism/ad4m-connect/dist/web.js";
+      import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
       import App from "./src/main.ts";
 
-      import "@junto-foundation/junto-elements/dist/main.css";
-      import "@junto-foundation/junto-elements";
-
-      import "emoji-picker-element";
-
-      // Connect Ad4m
-      const ad4m = document.querySelector("ad4m-connect");
-      ad4m.connect();
-
-      ad4m.addEventListener("authStateChange", (status) => {
-        if (status.detail === "connected_with_capabilities") {
-          // Register the app when we are connected
-          customElements.define("flux-app", App);
-          initApp();
-        }
+      const ui = Ad4mConnectUI({
+        appName: "Webrtc App",
+        appDesc: "A webrtc app",
+        appDomain: "webrtc.forum.io",
+        capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
       });
+
+      ui.connect();
+
+      // Register the app as a web component
+      customElements.define("flux-app", App);
+
+      initApp();
 
       window.addEventListener("popstate", initApp);
 
       function initApp() {
         // Extract perspectiveUuid and source from the URL path
         const [_, uuid, source] = document.location.pathname.split("/");
+
+        console.log({ _, uuid, source });
 
         // Set perspective and source on the app
         const app = document.querySelector("flux-app");
