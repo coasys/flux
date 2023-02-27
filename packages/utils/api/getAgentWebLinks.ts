@@ -10,16 +10,16 @@ export default async function getAgentWebLinks(
 ): Promise<WebLink[]> {
   const client = await getAd4mClient();
 
-  const { perspective } = await client.agent.byDID(did);
+  const agent = await client.agent.byDID(did);
 
-  if (!perspective) return [];
+  if (!agent?.perspective) return [];
 
-  const webLinkAreas = perspective.links.filter(
+  const webLinkAreas = agent.perspective.links.filter(
     (l: LinkExpression) => l.data.predicate === AREA_WEBLINK
   );
 
   const webLinks = webLinkAreas.map((parentLink: any) => {
-    const associatedLinks = perspective.links.filter(
+    const associatedLinks = agent.perspective.links.filter(
       (link: LinkExpression) => link.data.source === parentLink.data.target
     );
 
