@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "preact/hooks";
 import { Peer, Reaction } from "../types";
 import { defaultSettings } from "../constants";
 import getMe, { Me } from "utils/api/getMe";
+import * as localstorage from "utils/helpers/localStorage";
 
 type Props = {
   source: string;
@@ -167,21 +168,6 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
     }
   }, [source, uuid, isInitialised, agent]);
 
-  async function onJoin() {
-    setIsLoading(true);
-    const stream = await manager.current?.join(settings);
-    setLocalStream(stream);
-    setHasJoined(true);
-  }
-
-  async function onLeave() {
-    await manager.current?.leave();
-    setConnections([]);
-    setLocalStream(null);
-    setIsLoading(false);
-    setHasJoined(false);
-  }
-
   async function onReaction(reaction: string) {
     await manager.current?.sendMessage("reaction", reaction);
   }
@@ -229,6 +215,9 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
       console.log("newSettings: ", newSettings);
       updateStream(newLocalStream);
     }
+
+    // Persist settings
+    localstorage.setForVersion("cameraDeviceId", `${deviceId}`);
   }
 
   async function onChangeAudio(deviceId: string) {
@@ -250,6 +239,9 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
       );
       updateStream(newLocalStream);
     }
+
+    // Persist settings
+    localstorage.setForVersion("audioDeviceId", `${deviceId}`);
   }
 
   async function onToggleCamera(newSettings: Settings["video"]) {
@@ -343,6 +335,45 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
     if (manager.current) {
       manager.current.sendTestBroadcast();
     }
+  }
+
+  async function onJoin() {
+    setIsLoading(true);
+
+    const videoDeviceId =
+      typeof settings.video !== "boolean" && settings.video.deviceId
+        ? settings.video.deviceId
+        : localstorage.getForVersion("cameraDeviceId");
+
+    const audioDeviceId =
+      typeof settings.audio !== "boolean" && settings.audio.deviceId
+        ? settings.audio.deviceId
+        : localstorage.getForVersion("audioDeviceId");
+
+    const joinSettings = { ...defaultSettings };
+    if (videoDeviceId && typeof joinSettings.video !== "boolean") {
+      joinSettings.video.deviceId = videoDeviceId;
+    }
+    if (audioDeviceId) {
+      joinSettings.audio = {
+        deviceId: audioDeviceId,
+      };
+    }
+
+    console.log("videoDeviceId: ", videoDeviceId);
+    console.log(joinSettings);
+
+    const stream = await manager.current?.join(joinSettings);
+    setLocalStream(stream);
+    setHasJoined(true);
+  }
+
+  async function onLeave() {
+    await manager.current?.leave();
+    setConnections([]);
+    setLocalStream(null);
+    setIsLoading(false);
+    setHasJoined(false);
   }
 
   return {
