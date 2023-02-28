@@ -311,15 +311,19 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
     const [audioTrack] = stream.getAudioTracks();
 
     for (let peer of connections) {
-      const videoSender = peer.connection.peerConnection
-        .getSenders()
-        .find((s) => s.track.kind === videoTrack.kind);
-      videoSender.replaceTrack(videoTrack);
+      if (videoTrack) {
+        const videoSender = peer.connection.peerConnection
+          .getSenders()
+          .find((s) => s.track.kind === videoTrack?.kind);
+        videoSender.replaceTrack(videoTrack);
+      }
 
-      const audioSender = peer.connection.peerConnection
-        .getSenders()
-        .find((s) => s.track.kind === audioTrack.kind);
-      audioSender.replaceTrack(audioTrack);
+      if (audioTrack) {
+        const audioSender = peer.connection.peerConnection
+          .getSenders()
+          .find((s) => s.track.kind === audioTrack?.kind);
+        audioSender.replaceTrack(audioTrack);
+      }
     }
 
     setLocalStream(stream);

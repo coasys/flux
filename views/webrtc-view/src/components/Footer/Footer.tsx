@@ -125,7 +125,7 @@ export default function Footer({ webRTC, onToggleSettings }: Props) {
 
         <j-tooltip placement="top" title="Leave">
           <j-button
-            variant="secondary"
+            variant="danger"
             onClick={webRTC.onLeave}
             square
             circle
