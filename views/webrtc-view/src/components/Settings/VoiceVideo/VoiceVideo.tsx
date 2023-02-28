@@ -1,6 +1,7 @@
 import { WebRTC } from "../../../hooks/useWebrtc";
 import { Me } from "utils/api/getMe";
 import { useEffect, useState } from "preact/hooks";
+import Select from "../../Select";
 
 type Props = {
   webRTC: WebRTC;
@@ -8,43 +9,60 @@ type Props = {
 };
 
 export default function VoiceVideo({ webRTC }: Props) {
-  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const videoTrack = webRTC.localStream
+    ?.getTracks()
+    ?.find((track) => track.kind === "video");
 
-  useEffect(() => {
-    async function fetchAgent() {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      setDevices(devices);
-    }
+  const audioTrack = webRTC.localStream
+    ?.getTracks()
+    ?.find((track) => track.kind === "audio");
 
-    fetchAgent();
-  }, []);
+  const selectedVideoDeviceId =
+    typeof webRTC.settings.video !== "boolean"
+      ? webRTC.settings.video?.deviceId
+      : videoTrack?.getSettings().deviceId || "";
 
-  const videoDevices = devices.filter((d) => d.kind === "videoinput");
-  const audioDevices = devices.filter((d) => d.kind === "audioinput");
+  const selectedAudioDeviceId =
+    typeof webRTC.settings.audio !== "boolean"
+      ? webRTC.settings.audio?.deviceId
+      : audioTrack?.getSettings().deviceId || "";
+
+  const videoDevices = webRTC?.devices?.filter((d) => d.kind === "videoinput");
+  const audioDevices = webRTC?.devices?.filter((d) => d.kind === "audioinput");
 
   return (
     <div>
       <h3>Voice & Video settings</h3>
       <j-box pt={300}>
-        <j-text>Video input device:</j-text>
-        <j-select>
-          {videoDevices.map((v) => (
-            <j-menu-item value={v.deviceId} key={v.deviceId}>
-              {v.label}
-            </j-menu-item>
-          ))}
-        </j-select>
+        <Select
+          name="video-device"
+          label="Video input device"
+          placeholder="Select device"
+          selected={selectedVideoDeviceId}
+          options={videoDevices.map((v) => ({
+            text: v.label,
+            value: v.deviceId,
+          }))}
+          onChange={(e) => {
+            webRTC.onChangeCamera(e.target.value);
+          }}
+        />
       </j-box>
 
       <j-box pt={500}>
-        <j-text>Audio input device:</j-text>
-        <j-select>
-          {audioDevices.map((v) => (
-            <j-menu-item value={v.deviceId} key={v.deviceId}>
-              {v.label}
-            </j-menu-item>
-          ))}
-        </j-select>
+        <Select
+          name="audio-device"
+          label="Audio input device"
+          placeholder="Select device"
+          selected={selectedAudioDeviceId}
+          options={audioDevices.map((v) => ({
+            text: v.label,
+            value: v.deviceId,
+          }))}
+          onChange={(e) => {
+            webRTC.onChangeAudio(e.target.value);
+          }}
+        />
       </j-box>
     </div>
   );

@@ -23,7 +23,7 @@ export default function Overlay({ webRTC, currentUser }: Props) {
 
   return (
     <j-modal
-      size="xl"
+      size="l"
       open={uiState.showSettings}
       onToggle={(e) => UIMethods.toggleShowSettings(e.target.open)}
     >

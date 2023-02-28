@@ -16,6 +16,7 @@ type Props = {
 export type WebRTC = {
   localStream: MediaStream;
   connections: Peer[];
+  devices: MediaDeviceInfo[];
   settings: Settings;
   reactions: Reaction[];
   isInitialised: boolean;
@@ -27,11 +28,14 @@ export type WebRTC = {
   onReaction: (reaction: string) => Promise<void>;
   onSendTestSignal: (recipientId: string) => Promise<void>;
   onSendTestBroadcast: () => Promise<void>;
+  onChangeCamera: (deviceId: string) => void;
+  onChangeAudio: (deviceId: string) => void;
 };
 
 export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
   const manager = useRef<WebRTCManager>();
   const [agent, setAgent] = useState<Me>();
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [isInitialised, setIsInitialised] = useState(false);
@@ -51,6 +55,15 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
       fetchAgent();
     }
   }, [agent]);
+
+  // Get devices
+  useEffect(() => {
+    async function getDevices() {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      setDevices(devices);
+    }
+    getDevices();
+  }, []);
 
   useEffect(() => {
     if (source && uuid && agent && !isInitialised) {
@@ -170,27 +183,71 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
     }
   }
 
-  async function onToggleCamera(enabled: boolean) {
+  async function onChangeCamera(deviceId: string) {
+    const newSettings = {
+      audio: settings.audio,
+      screen: settings.screen,
+      video: { deviceId: deviceId },
+    };
+
+    setSettings(newSettings);
+
+    if (localStream) {
+      this.localStream.getTracks().forEach((track) => {
+        track.stop();
+      });
+
+      const newLocalStream = await navigator.mediaDevices.getUserMedia(
+        newSettings
+      );
+
+      console.log("newSettings: ", newSettings);
+      updateStream(newLocalStream);
+    }
+  }
+
+  async function onChangeAudio(deviceId: string) {
+    const newSettings = {
+      audio: { deviceId: deviceId },
+      screen: settings.screen,
+      video: settings.video,
+    };
+
+    setSettings(newSettings);
+
+    if (localStream) {
+      this.localStream.getTracks().forEach((track) => {
+        track.stop();
+      });
+
+      const newLocalStream = await navigator.mediaDevices.getUserMedia(
+        newSettings
+      );
+      updateStream(newLocalStream);
+    }
+  }
+
+  async function onToggleCamera(newSettings: Settings["video"]) {
     if (localStream) {
       if (localStream.getVideoTracks()[0]) {
-        localStream.getVideoTracks()[0].enabled = enabled;
+        localStream.getVideoTracks()[0].enabled = !!newSettings;
       } else {
         const newLocalStream = await navigator.mediaDevices.getUserMedia({
           audio: settings.audio,
-          video: enabled,
+          video: newSettings,
         });
         setLocalStream(newLocalStream);
       }
     }
   }
 
-  async function onToggleAudio(enabled: boolean) {
+  async function onToggleAudio(newSettings: Settings["audio"]) {
     if (localStream) {
       if (localStream.getAudioTracks()[0]) {
-        localStream.getAudioTracks()[0].enabled = enabled;
+        localStream.getAudioTracks()[0].enabled = !!newSettings;
       } else {
         const newLocalStream = await navigator.mediaDevices.getUserMedia({
-          audio: enabled,
+          audio: newSettings,
           video: settings.video,
         });
         setLocalStream(newLocalStream);
@@ -225,8 +282,8 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
     const allTracks = localStream.getTracks();
     for (var i = 0; i < allTracks.length; i++) allTracks[i].stop();
 
-    newLocalStream.getVideoTracks()[0].enabled = settings.video;
-    newLocalStream.getAudioTracks()[0].enabled = settings.audio;
+    newLocalStream.getVideoTracks()[0].enabled = !!settings.video;
+    newLocalStream.getAudioTracks()[0].enabled = !!settings.audio;
 
     setSettings({ ...settings, screen: false });
     manager.current?.sendMessage("settings", { ...settings, screen: false });
@@ -259,6 +316,7 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
   return {
     localStream,
     connections,
+    devices,
     settings,
     reactions,
     isInitialised,
@@ -270,5 +328,7 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
     onReaction,
     onSendTestSignal,
     onSendTestBroadcast,
+    onChangeCamera,
+    onChangeAudio,
   };
 }

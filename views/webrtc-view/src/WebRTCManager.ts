@@ -78,8 +78,8 @@ export type Connection = {
 };
 
 export type Settings = {
-  video: boolean;
-  audio: boolean;
+  video: boolean | MediaTrackConstraints;
+  audio: boolean | MediaTrackConstraints;
   screen: boolean;
 };
 
@@ -430,23 +430,6 @@ export default class WebRTCManager {
     this.isListening = true;
 
     return this.localStream;
-  }
-
-  async changeCamera(deviceId) {
-    if (this.localStream) {
-      this.localStream.getTracks().forEach((track) => {
-        track.stop();
-      });
-    }
-
-    navigator.mediaDevices
-      .getUserMedia({ video: { deviceId: deviceId } })
-      .then((targetStream) => {
-        this.localStream = targetStream;
-      })
-      .catch((err) => {
-        console.error("[Error] changeCamera", err);
-      });
   }
 
   async sendTestSignal(recipientDid: string) {

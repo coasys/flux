@@ -81,7 +81,7 @@ export default function Item({
   return (
     <div
       className={styles.item}
-      data-camera-enabled={settings.video}
+      data-camera-enabled={!!settings.video}
       data-focused={focused}
       data-minimised={minimised}
       data-mirrored={mirrored}

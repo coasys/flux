@@ -60,7 +60,7 @@ export default function Channel({ source, uuid }) {
                 disabled={webRTC.isLoading}
                 onChange={() =>
                   webRTC.onChangeSettings({
-                    ...settings,
+                    ...webRTC.settings,
                     video: !webRTC.settings.video,
                   })
                 }
