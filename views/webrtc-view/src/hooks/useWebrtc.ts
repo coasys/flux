@@ -23,7 +23,6 @@ export type WebRTC = {
   hasJoined: boolean;
   isLoading: boolean;
   permissionGranted: boolean;
-  onRequestPermissions: () => void;
   onJoin: () => Promise<void>;
   onLeave: () => Promise<void>;
   onChangeSettings: (newSettings: Settings) => void;
@@ -63,11 +62,12 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
   // Ask for permission
   useEffect(() => {
     async function askForPermission() {
-      navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(
+      navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(
         () => {
           setPermissionGranted(true);
         },
         (e) => {
+          console.error(e);
           setPermissionGranted(false);
         }
       );
@@ -80,7 +80,7 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
   // Get user devices
   useEffect(() => {
     async function getDevices() {
-      await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
       const devices = await navigator.mediaDevices.enumerateDevices();
       setDevices(devices);
     }
@@ -186,19 +186,6 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
     await manager.current?.sendMessage("reaction", reaction);
   }
 
-  function onRequestPermissions() {
-    console.log("Damn!");
-    navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(
-      () => {
-        setPermissionGranted(true);
-      },
-      (e) => {
-        console.log("e", e);
-        setPermissionGranted(false);
-      }
-    );
-  }
-
   function onChangeSettings(newSettings: Settings) {
     const videoChanged = newSettings.video !== settings.video;
     const audioChanged = newSettings.audio !== settings.audio;
@@ -296,6 +283,7 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
   async function onStartScreenShare() {
     if (localStream) {
       let mediaStream;
+
       if (navigator.mediaDevices.getDisplayMedia) {
         mediaStream = await navigator.mediaDevices.getDisplayMedia({
           video: true,
@@ -312,16 +300,14 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
 
   async function onEndScreenShare() {
     const newLocalStream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: true,
+      audio: settings.audio,
+      video: settings.video,
     });
 
     // Ensure screen sharing has stopped
-    const allTracks = localStream.getTracks();
-    for (var i = 0; i < allTracks.length; i++) allTracks[i].stop();
-
-    newLocalStream.getVideoTracks()[0].enabled = !!settings.video;
-    newLocalStream.getAudioTracks()[0].enabled = !!settings.audio;
+    localStream.getTracks().forEach((track) => {
+      track.stop();
+    });
 
     setSettings({ ...settings, screen: false });
     manager.current?.sendMessage("settings", { ...settings, screen: false });
@@ -375,7 +361,6 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
     onReaction,
     onSendTestSignal,
     onSendTestBroadcast,
-    onRequestPermissions,
     onChangeCamera,
     onChangeAudio,
   };
