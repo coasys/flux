@@ -13,16 +13,27 @@
 
 .menu {
     display: block;
-    padding: var(--j-space-400) 0;
+    padding: var(--j-space-800) 0 var(--j-space-400) 0;
     background: var(--j-color-ui-50);
+}
+@media (min-width: 800px) {
+    .menu {
+        padding: var(--j-space-400) 0;
+    }
 }
 
 .contents {
     display: flex;
     flex-direction: column;
     min-height: 30rem;
-    padding: var(--j-space-300) var(--j-space-500) var(--j-space-500) 0;
+    padding: var(--j-space-300) var(--j-space-400) var(--j-space-400) var(--j-space-400);
 }
+@media (min-width: 800px) {
+    .contents {
+        padding: var(--j-space-300) var(--j-space-500) var(--j-space-500) 0;
+    }
+}
+
 
 
   
