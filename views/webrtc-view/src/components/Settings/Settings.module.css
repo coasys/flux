@@ -1,8 +1,15 @@
 .wrapper {
     display: grid;
-    gap: var(--j-space-1000);
-    grid-template-columns: 1fr 3fr;
+    gap: var(--j-space-200);
 }
+
+@media (min-width: 800px) {
+    .wrapper {
+        grid-template-columns: 1fr 3fr;
+        gap: var(--j-space-1000);
+    }
+}
+
 
 .menu {
     display: block;
@@ -11,8 +18,10 @@
 }
 
 .contents {
+    display: flex;
+    flex-direction: column;
     min-height: 30rem;
-    padding: var(--j-space-300) var(--j-space-500) var(--j-space-300) 0;
+    padding: var(--j-space-300) var(--j-space-500) var(--j-space-500) 0;
 }
 
 

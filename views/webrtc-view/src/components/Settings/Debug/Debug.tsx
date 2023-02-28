@@ -4,6 +4,8 @@ import { Me } from "utils/api/getMe";
 import Item from "./Item";
 
 import styles from "./Debug.module.css";
+import { defaultSettings } from "../../../constants";
+import { Peer } from "../../../types";
 
 type Props = {
   webRTC: WebRTC;
@@ -11,49 +13,48 @@ type Props = {
 };
 
 export default function VoiceVideo({ webRTC, currentUser }: Props) {
+  const mePeer = {
+    did: currentUser.did,
+    connection: {
+      peerConnection: new RTCPeerConnection(),
+      dataChannel: null,
+    },
+    settings: defaultSettings,
+  } as Peer;
+
   return (
     <>
       <h3>Debug</h3>
       <h4>Connections:</h4>
       <>{!webRTC.hasJoined && "Not yet joined"}</>
-      <ul>
+      <>
+        {webRTC.hasJoined && webRTC.connections.length < 1 && "No connections"}
+      </>
+      <ul className={styles.list}>
         {webRTC.connections.map((p) => (
           <li key={p.did}>
-            <p>{JSON.stringify(p, null, 2)}</p>
+            <Item peer={p} onSendSignal={webRTC.onSendTestSignal} />
           </li>
         ))}
       </ul>
-      <h4>Send test broadcast:</h4>
-      <div className={styles.box}>
+      <div className={styles.footer}>
         <j-button
-          variant="primary"
+          variant="secondary"
+          size="xs"
           onClick={webRTC.onSendTestBroadcast}
           disabled={!webRTC.hasJoined}
         >
-          Send broadcast to everyone
+          Send broadcast to room
         </j-button>
-      </div>
-      <h4>Send test signals:</h4>
-      <div className={styles.box}>
-        <ul className={styles.list}>
-          <li>
-            <Item
-              userId={currentUser.did}
-              isSelf
-              disabled={!webRTC.hasJoined}
-              onClick={() => onSendTestSignal(currentUser.did)}
-            />
-          </li>
-          {webRTC.connections.map((c) => (
-            <li key={c.did}>
-              <Item
-                userId={c.did}
-                disabled={!webRTC.hasJoined}
-                onClick={() => onSendTestSignal(c.did)}
-              />
-            </li>
-          ))}
-        </ul>
+        <j-button
+          variant="secondary"
+          size="xs"
+          onClick={() => {
+            console.log(webRTC);
+          }}
+        >
+          Log state to console
+        </j-button>
       </div>
     </>
   );
