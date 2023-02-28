@@ -22,6 +22,8 @@ export type WebRTC = {
   isInitialised: boolean;
   hasJoined: boolean;
   isLoading: boolean;
+  permissionGranted: boolean;
+  onRequestPermissions: () => void;
   onJoin: () => Promise<void>;
   onLeave: () => Promise<void>;
   onChangeSettings: (newSettings: Settings) => void;
@@ -34,6 +36,8 @@ export type WebRTC = {
 
 export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
   const manager = useRef<WebRTCManager>();
+  const [permissionGranted, setPermissionGranted] = useState(false);
+  const [devicesEnumerated, setDevicesEnumerated] = useState(false);
   const [agent, setAgent] = useState<Me>();
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [settings, setSettings] = useState<Settings>(defaultSettings);
@@ -56,14 +60,35 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
     }
   }, [agent]);
 
-  // Get devices
+  // Ask for permission
+  useEffect(() => {
+    async function askForPermission() {
+      navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(
+        () => {
+          setPermissionGranted(true);
+        },
+        (e) => {
+          setPermissionGranted(false);
+        }
+      );
+    }
+    if (!permissionGranted) {
+      askForPermission();
+    }
+  }, [permissionGranted]);
+
+  // Get user devices
   useEffect(() => {
     async function getDevices() {
+      await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
       const devices = await navigator.mediaDevices.enumerateDevices();
       setDevices(devices);
     }
-    getDevices();
-  }, []);
+    if (permissionGranted && !devicesEnumerated) {
+      getDevices();
+      setDevicesEnumerated(true);
+    }
+  }, [permissionGranted, devicesEnumerated]);
 
   useEffect(() => {
     if (source && uuid && agent && !isInitialised) {
@@ -159,6 +184,19 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
 
   async function onReaction(reaction: string) {
     await manager.current?.sendMessage("reaction", reaction);
+  }
+
+  function onRequestPermissions() {
+    console.log("Damn!");
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(
+      () => {
+        setPermissionGranted(true);
+      },
+      (e) => {
+        console.log("e", e);
+        setPermissionGranted(false);
+      }
+    );
   }
 
   function onChangeSettings(newSettings: Settings) {
@@ -322,12 +360,14 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
     isInitialised,
     hasJoined,
     isLoading,
+    permissionGranted,
     onJoin,
     onLeave,
     onChangeSettings,
     onReaction,
     onSendTestSignal,
     onSendTestBroadcast,
+    onRequestPermissions,
     onChangeCamera,
     onChangeAudio,
   };

@@ -57,7 +57,7 @@ export default function Channel({ source, uuid }) {
             <j-box pt="400">
               <j-toggle
                 checked={webRTC.settings.video}
-                disabled={webRTC.isLoading}
+                disabled={webRTC.isLoading || !webRTC.permissionGranted}
                 onChange={() =>
                   webRTC.onChangeSettings({
                     ...webRTC.settings,
@@ -74,11 +74,22 @@ export default function Channel({ source, uuid }) {
                 variant="primary"
                 size="lg"
                 loading={webRTC.isLoading}
+                disabled={!webRTC.permissionGranted}
                 onClick={webRTC.onJoin}
               >
                 Join room!
               </j-button>
             </j-box>
+
+            <>
+              {!webRTC.permissionGranted && (
+                <j-box pt="400">
+                  <j-text variant="warning">
+                    Please allow camera/microphone access to join.
+                  </j-text>
+                </j-box>
+              )}
+            </>
           </j-flex>
         </div>
       )}
