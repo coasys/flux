@@ -432,6 +432,23 @@ export default class WebRTCManager {
     return this.localStream;
   }
 
+  async changeCamera(deviceId) {
+    if (this.localStream) {
+      this.localStream.getTracks().forEach((track) => {
+        track.stop();
+      });
+    }
+
+    navigator.mediaDevices
+      .getUserMedia({ video: { deviceId: deviceId } })
+      .then((targetStream) => {
+        this.localStream = targetStream;
+      })
+      .catch((err) => {
+        console.error("[Error] changeCamera", err);
+      });
+  }
+
   async sendTestSignal(recipientDid: string) {
     const signalLink = await createSignalLink(this.client, {
       source: this.roomId,
@@ -462,6 +479,7 @@ export default class WebRTCManager {
       // this.neighbourhood.
     }
 
+    // Announce departure
     const signalLink = await createSignalLink(this.client, {
       source: this.roomId,
       predicate: LEAVE,
@@ -470,8 +488,12 @@ export default class WebRTCManager {
 
     this.neighbourhood.sendBroadcast(signalLink);
 
+    // Close webrtc connections
     this.connections.forEach((c, key) => {
       this.closeConnection(key);
     });
+
+    // Kill media recording
+    this.localStream.getTracks().forEach((track) => track.stop());
   }
 }
