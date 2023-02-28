@@ -329,11 +329,19 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
   }
 
   function updateStream(stream: MediaStream) {
+    const [videoTrack] = stream.getVideoTracks();
+    const [audioTrack] = stream.getAudioTracks();
+
     for (let peer of connections) {
-      const peerConnection = peer.connection.peerConnection
+      const videoSender = peer.connection.peerConnection
         .getSenders()
-        .find((s) => (s.track ? s.track.kind === "video" : false));
-      peerConnection.replaceTrack(stream.getVideoTracks()[0]);
+        .find((s) => s.track.kind === videoTrack.kind);
+      videoSender.replaceTrack(videoTrack);
+
+      const audioSender = peer.connection.peerConnection
+        .getSenders()
+        .find((s) => s.track.kind === audioTrack.kind);
+      audioSender.replaceTrack(audioTrack);
     }
 
     setLocalStream(stream);
