@@ -227,10 +227,10 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   }
 
   private async onLink(type: "added" | "removed", link: LinkExpression) {
-    const linkIsType = link.data.predicate === this.subject.type;
-
+    const linkIsType = link.data.predicate === this.tempSubject.prototype.type;
+    
     if (!linkIsType) return;
-
+    
     const source = link.data.source;
     const entryId = link.data.target;
     const addedListeners = this.listeners.add[source];
