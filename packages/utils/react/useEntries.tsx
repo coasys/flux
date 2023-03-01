@@ -1,7 +1,5 @@
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import React, { useEffect, useState, useMemo } from "react";
 import { SubjectRepository } from "../factory";
-import { Factory, SubjectEntry } from "../helpers/model";
 
 export default function useEntries<SubjectClass>({
   perspectiveUuid,
@@ -12,7 +10,7 @@ export default function useEntries<SubjectClass>({
   source?: string | null | undefined;
   model: SubjectClass;
 }) {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState();
   const [entries, setEntries] = useState<SubjectClass[]>([]);
 
   const Model = useMemo(() => {

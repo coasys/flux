@@ -3,13 +3,11 @@ import {
   Link,
   Subject,
   LinkExpression,
-  Ad4mClient,
 } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { subscribeToLinks } from "../api";
 import { SELF } from "../constants/communityPredicates";
 import { collectionToAdderName, collectionToSetterName, SubjectEntry } from "../helpers";
-import { PropertyMap, PropertyValueMap } from "../types";
 import { v4 as uuidv4 } from "uuid";
 
 export type ModelProps = {
