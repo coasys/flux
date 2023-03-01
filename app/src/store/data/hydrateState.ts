@@ -1,5 +1,5 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { Factory, getMetaFromLinks } from "utils/helpers";
+import { getMetaFromLinks } from "utils/helpers";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useDataStore } from ".";
 import { CommunityState, LocalCommunityState } from "../types";
@@ -41,17 +41,17 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
     perspectiveUuid: perspective.uuid,
   });
 
-  const community = await Community.get();
+  const community = await Community.getData();
 
   return {
     neighbourhood: {
       uuid: perspective.uuid,
       author: meta.author,
       timestamp: new Date().toISOString(),
-      name: (await community?.name) || meta.name,
-      description: (await community?.description) || meta.description,
-      image: (await community?.image) || "",
-      thumbnail: (await community?.thumbnail) || "",
+      name: community?.name || meta.name,
+      description: community?.description || meta.description,
+      image: community?.image || "",
+      thumbnail: community?.thumbnail || "",
       neighbourhoodUrl: perspective.sharedUrl,
       members: [meta.author],
     },

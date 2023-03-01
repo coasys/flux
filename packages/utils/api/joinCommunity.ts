@@ -3,6 +3,8 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import CommunityModel from "./community";
 import { getMetaFromLinks } from "../helpers";
 import { Ad4mClient } from "@perspect3vism/ad4m";
+import { SubjectRepository } from "factory";
+import { Member } from "./member";
 
 export interface Payload {
   joiningLink: string;
@@ -28,11 +30,17 @@ export default async ({ joiningLink }: Payload): Promise<Community> => {
       perspective.neighbourhood!.meta.links
     );
 
-    const Community = new CommunityModel({ perspectiveUuid: perspective.uuid });
+    const Community = new SubjectRepository(CommunityModel, {
+      perspectiveUuid: perspective.uuid,
+    });
 
-    await Community.addMember({ did: agent.did });
+    const MemberFactory = new SubjectRepository(Member, {
+      perspectiveUuid: perspective.uuid,
+    });
 
-    const community = await Community.get();
+    await MemberFactory.create({ did: agent.did }, agent.did);
+
+    const community = await Community.getData();
 
     return {
       uuid: perspective!.uuid,
