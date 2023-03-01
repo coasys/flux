@@ -32,34 +32,9 @@ export default function useEntries<SubjectClass>({
   async function getAll() {
     try {
       setLoading(true);
-      let ad4m = await getAd4mClient();
-      let perspective = await ad4m.perspective.byUUID(perspectiveUuid);
+      const entries = await Model.getAllData();
 
-      const entries = await Model.getAll();
-
-      const promiseList = [];
-      for (const entry of entries) {
-        const channelEntry = new SubjectEntry(entry, perspective!);
-        await channelEntry.load();
-
-        // @ts-ignore
-        const tempModel = new model();
-
-        for (const [key] of Object.entries(tempModel)) {
-          tempModel[key] = await entry[key];
-        }
-
-        promiseList.push({
-          ...tempModel,
-          id: await entry.baseExpression,
-          timestamp: channelEntry.timestamp,
-          author: channelEntry.author,
-        });
-      }
-
-      const awaitedList = await Promise.all(promiseList);
-
-      setEntries(awaitedList);
+      setEntries(entries);
     } catch (e) {
     } finally {
       setLoading(false);
@@ -67,7 +42,7 @@ export default function useEntries<SubjectClass>({
   }
 
   function subscribe() {
-    Model.onAdded((entry) => {
+    Model.onAdded(async (entry) => {
       setEntries((oldEntries) => {
         const hasEntry = oldEntries.find((e) => e.id === entry.id);
         return hasEntry ? oldEntries : [entry, ...oldEntries];
