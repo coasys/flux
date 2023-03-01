@@ -8,7 +8,7 @@ import {
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { subscribeToLinks } from "../api";
 import { SELF } from "../constants/communityPredicates";
-import { collectionToAdderName, collectionToSetterName } from "../helpers";
+import { collectionToAdderName, collectionToSetterName, SubjectEntry } from "../helpers";
 import { PropertyMap, PropertyValueMap } from "../types";
 import { v4 as uuidv4 } from "uuid";
 
@@ -184,6 +184,31 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     }
   }
 
+  async getData(id?: string): Promise<SubjectClass | null> {
+    const entry = await this.get(id);
+
+    return await this.getSubjectData(entry);
+  }
+
+  private async getSubjectData(entry: any) {
+    const dataEntry = new SubjectEntry(entry, this.perspective!);
+    await dataEntry.load();
+
+    // @ts-ignore
+    const tempModel = new this.tempSubject();
+
+    for (const [key] of Object.entries(this.subject)) {
+      tempModel[key] = await entry[key];
+    }
+
+    return {
+      ...tempModel,
+      id: await entry.baseExpression,
+      timestamp: dataEntry.timestamp,
+      author: dataEntry.author,
+    }
+  }
+
   async getAll(source?: string): Promise<SubjectClass[]> {
     const tempSource = source || this.source;
     await this.ensurePerspective();
@@ -208,6 +233,18 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
         return subject;
       })
     );
+  }
+
+  async getAllData(source?: string): Promise<SubjectClass[]> {
+    const entries = await this.getAll(source);
+
+    const promiseList = [];
+
+    for (const entry of entries) {
+      promiseList.push(this.getSubjectData(entry))
+    }
+
+    return await Promise.all(promiseList)
   }
 
   private async subscribe() {
@@ -239,28 +276,28 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     const allRemoveListeners = this.listeners.remove?.all;
 
     if (type === "added" && allAddListeners) {
-      const entry = await this.get(entryId);
+      const entry = await this.getData(entryId);
       allAddListeners.forEach((cb) => {
         cb(entry);
       });
     }
 
     if (type === "removed" && allRemoveListeners) {
-      const entry = await this.get(entryId);
+      const entry = await this.getData(entryId);
       allRemoveListeners.forEach((cb) => {
         cb(entry);
       });
     }
 
     if (type === "added" && addedListeners) {
-      const entry = await this.get(entryId);
+      const entry = await this.getData(entryId);
       addedListeners.forEach((cb) => {
         cb(entry);
       });
     }
 
     if (type === "removed" && removedListeners) {
-      //const entry = await this.get(entryId);
+      const entry = await this.getData(entryId);
       removedListeners.forEach((cb) => {
         cb(entryId);
       });
