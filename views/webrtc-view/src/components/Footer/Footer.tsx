@@ -132,7 +132,7 @@ export default function Footer({ webRTC, onToggleSettings }: Props) {
             size="lg"
             disabled={!webRTC.hasJoined}
           >
-            <j-icon name="door-closed"></j-icon>
+            <j-icon name="telephone-x"></j-icon>
           </j-button>
         </j-tooltip>
         {/* 

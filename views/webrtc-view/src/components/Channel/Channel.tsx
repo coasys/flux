@@ -96,10 +96,12 @@ export default function Channel({ source, uuid }) {
 
       <UserGrid webRTC={webRTC} currentUser={agent} />
 
-      <Footer
-        webRTC={webRTC}
-        onToggleSettings={() => toggleShowSettings(!showSettings)}
-      />
+      {webRTC.hasJoined && (
+        <Footer
+          webRTC={webRTC}
+          onToggleSettings={() => toggleShowSettings(!showSettings)}
+        />
+      )}
 
       <Overlay webRTC={webRTC} currentUser={agent} />
 
