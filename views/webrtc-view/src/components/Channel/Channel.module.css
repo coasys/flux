@@ -1,7 +1,7 @@
 .outer {
   position: relative;
   display: grid;
-  place-items: center;
+  place-content: center;
   width: 100%;
   max-width: 100%;
   grid-template-columns: 1fr;
