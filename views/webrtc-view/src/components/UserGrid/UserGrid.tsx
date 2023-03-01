@@ -41,14 +41,16 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
       : null;
 
   // Grid sizing
-  let gridCol = userCount === 1 ? 1 : userCount <= 4 ? 2 : 4;
-  const gridColSize = userCount <= 4 ? 1 : 2;
-  let gridRowSize = userCount <= 4 ? userCount : Math.ceil(userCount / 2);
 
-  if (focusedPeerId) {
-    gridCol = 1;
-    gridRowSize = 2;
-  }
+  const gridColSize = focusedPeerId
+    ? 1
+    : userCount === 1
+    ? 1
+    : userCount > 1 && userCount <= 4
+    ? 2
+    : userCount > 4 && userCount <= 9
+    ? 3
+    : 4;
 
   useEffect(() => {
     if (videoRef.current) {
@@ -124,9 +126,7 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
     <div
       className={styles.grid}
       style={{
-        "--grid-size": gridCol,
         "--grid-col-size": gridColSize,
-        "--grid-row-size": gridRowSize,
       }}
     >
       {webRTC.localStream && (

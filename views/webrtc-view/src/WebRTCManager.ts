@@ -1,12 +1,10 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import stunServers from "./stun-servers";
 
 import {
   Ad4mClient,
   PerspectiveProxy,
   Agent,
   Literal,
-  LinkExpression,
   NeighbourhoodProxy,
   Link,
   PerspectiveExpression,

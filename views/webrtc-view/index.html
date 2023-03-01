@@ -6,6 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Flux App</title>
     <style>
+      html {
+        box-sizing: border-box;
+      }
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
       flux-app {
         height: 100vh;
         display: block;
@@ -33,13 +41,10 @@
         capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
       });
 
-      setTimeout(() => {
-        // Register the app as a web component
+      ui.connect().then(() => {
+        initApp();
         customElements.define("flux-app", App);
-        ui.connect();
-      }, 500);
-
-      initApp();
+      });
 
       window.addEventListener("popstate", initApp);
 
