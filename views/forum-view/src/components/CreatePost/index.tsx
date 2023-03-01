@@ -107,7 +107,7 @@ export default function CreatePost({
         newPost = await Post.create(data);
       }
 
-      onPublished(isEditing ? postId : await newPost?.baseExpression);
+      onPublished(isEditing ? postId : newPost?.id);
     } catch (e) {
       console.log(e);
     } finally {

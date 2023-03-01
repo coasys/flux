@@ -153,7 +153,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     );
 
     setProperties(newInstance, data);
-    return newInstance;
+    return this.getSubjectData(newInstance);
   }
 
   async update(id: string, data: QueryPartialEntity<SubjectClass>) {

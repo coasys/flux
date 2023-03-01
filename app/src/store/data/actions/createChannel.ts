@@ -3,8 +3,6 @@ import { ChannelState } from "@/store/types";
 import { useDataStore } from "..";
 import { ChannelView } from "utils/types";
 import { Channel as ChannelModel } from "utils/api";
-import { Factory, SubjectEntry } from "utils/helpers";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { SubjectRepository } from "utils/factory";
 
 export interface Payload {
@@ -28,9 +26,6 @@ export default async (payload: Payload): Promise<ChannelState> => {
       throw Error(message);
     }
 
-    let ad4m = await getAd4mClient();
-    let perspective = await ad4m.perspective.byUUID(payload.perspectiveUuid);
-
     const channelRepository = new SubjectRepository(ChannelModel, {
       perspectiveUuid: payload.perspectiveUuid,
       source: community.id,
@@ -42,15 +37,11 @@ export default async (payload: Payload): Promise<ChannelState> => {
 
     const channel = await channelRepository.create(Channel);
 
-    //@ts-ignore
-    const channelEntry = new SubjectEntry(channel, perspective);
-    await channelEntry.load();
-
     const channelState = {
-      id: channelEntry.id,
+      id: channel.id,
       name: payload.name,
-      timestamp: channelEntry.timestamp.toString(),
-      author: channelEntry.author,
+      timestamp: channel.timestamp.toString(),
+      author: channel.author,
       expanded: false,
       sourcePerspective: payload.perspectiveUuid,
       currentView: payload.views[0],

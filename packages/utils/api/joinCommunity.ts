@@ -3,7 +3,7 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import CommunityModel from "./community";
 import { getMetaFromLinks } from "../helpers";
 import { Ad4mClient } from "@perspect3vism/ad4m";
-import { SubjectRepository } from "factory";
+import { SubjectRepository } from "../factory";
 import { Member } from "./member";
 
 export interface Payload {

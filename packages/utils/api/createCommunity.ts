@@ -98,12 +98,12 @@ export default async function createCommunity({
     return {
       uuid: perspective.uuid,
       author: author,
-      id: await community.baseExpression,
+      id: community.id,
       timestamp: socialDnaLink.timestamp,
-      name: await community.name,
-      description: (await community.description) || "",
-      image: await community.image,
-      thumbnail: await community.thumbnail,
+      name: community.name,
+      description: (community.description) || "",
+      image: community.image,
+      thumbnail: community.thumbnail,
       neighbourhoodUrl: sharedUrl,
       members: [author],
     };
