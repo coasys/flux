@@ -434,7 +434,7 @@ export default class WebRTCManager {
 
     this.isListening = true;
 
-    this.heartbeatId = setTimeout(this.heartbeat, 10000);
+    this.heartbeatId = setInterval(this.heartbeat, 10000);
 
     return this.localStream;
   }
@@ -476,7 +476,7 @@ export default class WebRTCManager {
     this.isListening = false;
 
     // Stop heartbeat
-    clearTimeout(this.heartbeatId);
+    clearInterval(this.heartbeatId);
 
     if (this.perspective) {
       // Todo: Nico, nico, nico!
