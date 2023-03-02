@@ -449,7 +449,7 @@ export default class WebRTCManager {
       target: this.agent.did,
     });
 
-    console.log("💚 Sending HEARBEAT");
+    console.log("💚 Sending HEARTBEAT");
     this.neighbourhood.sendBroadcast(signalLink);
   }
 

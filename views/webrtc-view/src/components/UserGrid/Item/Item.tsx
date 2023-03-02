@@ -86,15 +86,19 @@ export default function Item({
   useEffect(() => {
     async function listenForVoice() {
       var options = {};
-      var speechEvents = hark(stream, options);
+      try {
+        var speechEvents = hark(stream, options);
 
-      speechEvents.on("speaking", function () {
-        setVoiceInputVolume(1);
-      });
+        speechEvents.on("speaking", function () {
+          setVoiceInputVolume(1);
+        });
 
-      speechEvents.on("stopped_speaking", function () {
-        setVoiceInputVolume(0);
-      });
+        speechEvents.on("stopped_speaking", function () {
+          setVoiceInputVolume(0);
+        });
+      } catch (e) {
+        console.log("Failed to create hark instance");
+      }
     }
 
     if (stream && !isConnecting) {
