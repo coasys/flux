@@ -118,6 +118,7 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
           userId={peer.did}
           settings={peer.settings}
           reaction={peerReaction}
+          stream={remoteAudioStream}
           focused={focusedPeerId === peer.did}
           minimised={focusedPeerId && focusedPeerId !== peer.did}
           onToggleFocus={() =>

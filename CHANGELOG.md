@@ -3,6 +3,43 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## unreleased
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.5.3] - 02/03/2023
+
+### Added
+ - Ability to switch mic / video source in voice view
+ - Heartbeat function to WebRTC connections to try and repair broken connections
+ - Border around videos when someone is talking
+
+### Changed
+ - Use new Flux blob icon
+ - Bump ad4m connect to 0.2.15-alpha.4
+ - Default theme is now dark
+
+### Deprecated
+
+### Removed
+
+### Fixed
+ - Sending incorrect app url to ad4m-connect
+ - Bug where certain URL's would cause the whole UI to crash
+ - Potential bug where profiles with no links would be saved to cache
+
+### Security
+
 ## [0.5.2] - 26/02/2023
 
 ### Added

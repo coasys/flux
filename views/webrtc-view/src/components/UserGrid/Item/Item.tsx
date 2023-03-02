@@ -37,7 +37,6 @@ export default function Item({
   const [profile, setProfile] = useState<Profile>();
   const [isConnecting, setIsConnecting] = useState(false);
   const [voiceInputVolume, setVoiceInputVolume] = useState(0);
-  const [audioStream, setAudioStream] = useState<MediaStream>(stream);
 
   // Get user details
   useEffect(() => {
@@ -83,29 +82,12 @@ export default function Item({
     };
   }, [peer]);
 
-  // Get remote audio track
-  useEffect(() => {
-    async function getAudioTrack() {
-      if (peer.connection.peerConnection) {
-        peer.connection.peerConnection.ontrack = (event) => {
-          event.streams[0].getAudioTracks().forEach((track) => {
-            setAudioStream(stream);
-          });
-        };
-      }
-    }
-
-    if (peer && !isMe) {
-      getAudioTrack();
-    }
-  }, [peer, isMe]);
-
   // Detect speaking
   useEffect(() => {
     async function listenForVoice() {
       var options = {};
       try {
-        var speechEvents = hark(audioStream, options);
+        var speechEvents = hark(stream, options);
 
         speechEvents.on("speaking", function () {
           setVoiceInputVolume(1);
@@ -119,10 +101,10 @@ export default function Item({
       }
     }
 
-    if (audioStream) {
+    if (stream.getAudioTracks().length > 0) {
       listenForVoice();
     }
-  }, [audioStream]);
+  }, [stream]);
 
   return (
     <div
