@@ -10310,9 +10310,9 @@ three-spritetext@^1.6.5:
   resolved "https://registry.npmjs.org/three-spritetext/-/three-spritetext-1.7.1.tgz"
   integrity sha512-iht/VGqEsDHgRIctA177wOW6x4IFiINihUxOen1U3lNVTrBdlJLCoA+DcnjMqi25vHu2P99asNGwtvG+iq3s2Q==
 
-"three@>=0.118 <1":
+"three@>=0.118 <1", three@^0.150.1:
   version "0.150.1"
-  resolved "https://registry.npmjs.org/three/-/three-0.150.1.tgz"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.150.1.tgz#870d324a4d2daf1c7d55be97f3f73d83783e28be"
   integrity sha512-5C1MqKUWaHYo13BX0Q64qcdwImgnnjSOFgBscOzAo8MYCzEtqfQqorEKMcajnA3FHy1yVlIe9AmaMQ0OQracNA==
 
 throat@^5.0.0:
