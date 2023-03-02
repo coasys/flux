@@ -97,10 +97,10 @@ export default function Item({
       });
     }
 
-    if (stream) {
+    if (stream && !isConnecting) {
       listenForVoice();
     }
-  }, [stream]);
+  }, [stream, isConnecting]);
 
   return (
     <div

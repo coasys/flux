@@ -211,8 +211,11 @@ export default class WebRTCManager {
       this.createOffer(link.author);
     }
 
+    // If we get heartbeat from new user, action!
     if (link.data.predicate === HEARTBEAT && link.data.source === this.roomId) {
-      this.createOffer(link.author);
+      if (!this.connections.get(link.author)) {
+        this.createOffer(link.author);
+      }
     }
     // Only handle the offer if it's for me
     if (link.data.predicate === OFFER && link.data.source === this.agent.did) {
