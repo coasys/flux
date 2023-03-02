@@ -67,7 +67,7 @@ export const OFFER_REQUEST = "offer-request";
 export const OFFER = "offer";
 export const ANSWER = "answer";
 export const LEAVE = "leave";
-export const HEARTBEAT = "i-am-here";
+export const HEARTBEAT = "heartbeat";
 export const TEST_SIGNAL = "test-signal";
 export const TEST_BROADCAST = "test-broadcast";
 

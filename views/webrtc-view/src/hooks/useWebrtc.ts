@@ -364,9 +364,6 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
       };
     }
 
-    console.log("videoDeviceId: ", videoDeviceId);
-    console.log(joinSettings);
-
     const stream = await manager.current?.join(joinSettings);
     setLocalStream(stream);
     setHasJoined(true);
