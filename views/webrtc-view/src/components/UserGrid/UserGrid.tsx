@@ -1,31 +1,22 @@
 import { useRef, useEffect, useState } from "preact/hooks";
 import { Howl } from "howler";
 import { Me } from "utils/api/getMe";
-import { Peer, Reaction } from "../../types";
-import { Settings } from "../../WebRTCManager";
-import Item from "./Item";
+import { Reaction } from "../../types";
+import { WebRTC } from "../../hooks/useWebrtc";
 import popWav from "../../assets/pop.wav";
 import guitarWav from "../../assets/guitar.wav";
 import kissWav from "../../assets/kiss.wav";
 import pigWav from "../../assets/pig.wav";
+import Item from "./Item";
 
 import styles from "./UserGrid.module.css";
 
 type Props = {
+  webRTC: WebRTC;
   currentUser?: Me;
-  localStream: MediaStream;
-  settings: Settings;
-  peers: Peer[];
-  reactions: Reaction[];
 };
 
-export default function UserGrid({
-  currentUser,
-  localStream,
-  settings,
-  peers,
-  reactions,
-}: Props) {
+export default function UserGrid({ webRTC, currentUser }: Props) {
   const videoRef = useRef(null);
   const [currentReaction, setCurrentReaction] = useState<Reaction>(null);
   const [focusedPeerId, setFocusedPeerId] = useState(null);
@@ -43,35 +34,37 @@ export default function UserGrid({
     src: [pigWav],
   });
 
-  const userCount = peers.length + (localStream ? 1 : 0);
+  const userCount = webRTC.connections.length + (webRTC.localStream ? 1 : 0);
   const myReaction =
     currentReaction && currentReaction.did === currentUser.did
       ? currentReaction
       : null;
 
   // Grid sizing
-  let gridCol = userCount === 1 ? 1 : userCount <= 4 ? 2 : 4;
-  const gridColSize = userCount <= 4 ? 1 : 2;
-  let gridRowSize = userCount <= 4 ? userCount : Math.ceil(userCount / 2);
 
-  if (focusedPeerId) {
-    gridCol = 1;
-    gridRowSize = 2;
-  }
+  const gridColSize = focusedPeerId
+    ? 1
+    : userCount === 1
+    ? 1
+    : userCount > 1 && userCount <= 4
+    ? 2
+    : userCount > 4 && userCount <= 9
+    ? 3
+    : 4;
 
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.srcObject = localStream;
+      videoRef.current.srcObject = webRTC.localStream;
       videoRef.current.muted = true;
     }
-  }, [videoRef, localStream]);
+  }, [videoRef, webRTC.localStream]);
 
   useEffect(() => {
-    if (reactions.length < 1) {
+    if (webRTC.reactions.length < 1) {
       return;
     }
 
-    const newReaction = reactions[reactions.length - 1];
+    const newReaction = webRTC.reactions[webRTC.reactions.length - 1];
 
     if (newReaction.reaction === "💋" || newReaction.reaction === "😘") {
       kissSound.play();
@@ -86,63 +79,63 @@ export default function UserGrid({
     setCurrentReaction(newReaction);
     const timeOutId = setTimeout(() => setCurrentReaction(null), 3500);
     return () => clearTimeout(timeOutId);
-  }, [reactions]);
+  }, [webRTC.reactions]);
 
   // Build participant elements
-  const peerItems = peers.map((peer, index) => {
-    const remoteStream = new MediaStream();
-    const peerReaction =
-      currentReaction && currentReaction.did === peer.did
-        ? currentReaction
-        : null;
+  const peerItems = webRTC.connections
+    .sort((a, b) => a.did.localeCompare(b.did))
+    .map((peer, index) => {
+      const remoteStream = new MediaStream();
+      const peerReaction =
+        currentReaction && currentReaction.did === peer.did
+          ? currentReaction
+          : null;
 
-    if (peer.connection.peerConnection) {
-      peer.connection.peerConnection.ontrack = (event) => {
-        event.streams[0].getTracks().forEach((track) => {
-          remoteStream.addTrack(track);
-        });
-        const videElement = document.getElementById(
-          `user-video-${peer.did}`
-        ) as HTMLVideoElement;
+      if (peer.connection.peerConnection) {
+        peer.connection.peerConnection.ontrack = (event) => {
+          event.streams[0].getTracks().forEach((track) => {
+            remoteStream.addTrack(track);
+          });
+          const videElement = document.getElementById(
+            `user-video-${peer.did}`
+          ) as HTMLVideoElement;
 
-        if (videElement) {
-          videElement.srcObject = remoteStream;
-        }
-      };
-    }
+          if (videElement) {
+            videElement.srcObject = remoteStream;
+          }
+        };
+      }
 
-    return (
-      <Item
-        key={peer.did}
-        peer={peer}
-        userId={peer.did}
-        settings={peer.settings}
-        reaction={peerReaction}
-        focused={focusedPeerId === peer.did}
-        minimised={focusedPeerId && focusedPeerId !== peer.did}
-        onToggleFocus={() =>
-          setFocusedPeerId(focusedPeerId === peer.did ? null : peer.did)
-        }
-      />
-    );
-  });
+      return (
+        <Item
+          key={peer.did}
+          peer={peer}
+          userId={peer.did}
+          settings={peer.settings}
+          reaction={peerReaction}
+          focused={focusedPeerId === peer.did}
+          minimised={focusedPeerId && focusedPeerId !== peer.did}
+          onToggleFocus={() =>
+            setFocusedPeerId(focusedPeerId === peer.did ? null : peer.did)
+          }
+        />
+      );
+    });
 
   return (
     <div
       className={styles.grid}
       style={{
-        "--grid-size": gridCol,
         "--grid-col-size": gridColSize,
-        "--grid-row-size": gridRowSize,
       }}
     >
-      {localStream && (
+      {webRTC.localStream && (
         <Item
           isMe
-          mirrored={settings.video && !settings.screen}
+          mirrored={webRTC.settings.video && !webRTC.settings.screen}
           userId={currentUser.did}
           videoRef={videoRef}
-          settings={settings}
+          settings={webRTC.settings}
           reaction={myReaction}
           focused={focusedPeerId === currentUser.did}
           minimised={focusedPeerId && focusedPeerId !== currentUser.did}
