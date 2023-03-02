@@ -67,6 +67,7 @@ export const OFFER_REQUEST = "offer-request";
 export const OFFER = "offer";
 export const ANSWER = "answer";
 export const LEAVE = "leave";
+export const HEARTBEAT = "i-am-here";
 export const TEST_SIGNAL = "test-signal";
 export const TEST_BROADCAST = "test-broadcast";
 
@@ -102,6 +103,7 @@ export default class WebRTCManager {
   private perspective: PerspectiveProxy;
   private neighbourhood: NeighbourhoodProxy;
   private roomId: string;
+  private heartbeatId: NodeJS.Timeout;
   private callbacks: Record<Event, Array<(...args: any[]) => void>> = {
     [Event.PEER_ADDED]: [],
     [Event.PEER_REMOVED]: [],
@@ -205,6 +207,10 @@ export default class WebRTCManager {
       link.data.predicate === OFFER_REQUEST &&
       link.data.source === this.roomId
     ) {
+      this.createOffer(link.author);
+    }
+
+    if (link.data.predicate === HEARTBEAT && link.data.source === this.roomId) {
       this.createOffer(link.author);
     }
     // Only handle the offer if it's for me
@@ -427,7 +433,20 @@ export default class WebRTCManager {
 
     this.isListening = true;
 
+    this.heartbeatId = setTimeout(this.heatbeat, 10000);
+
     return this.localStream;
+  }
+
+  async heatbeat() {
+    const signalLink = await createSignalLink(this.client, {
+      source: this.roomId,
+      predicate: HEARTBEAT,
+      target: this.agent.did,
+    });
+
+    console.log("💚 Sending HEARBEAT");
+    this.neighbourhood.sendBroadcast(signalLink);
   }
 
   async sendTestSignal(recipientDid: string) {
@@ -454,6 +473,9 @@ export default class WebRTCManager {
 
   async leave() {
     this.isListening = false;
+
+    // Stop heartbeat
+    clearTimeout(this.heartbeatId);
 
     if (this.perspective) {
       // Todo: Nico, nico, nico!
