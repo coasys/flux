@@ -1,4 +1,5 @@
 import { useState, useEffect } from "preact/hooks";
+import hark from "hark";
 import { Peer, Reaction } from "../../../types";
 import { Settings } from "../../../WebRTCManager";
 import { Profile } from "utils/types";
@@ -14,6 +15,7 @@ type Props = {
   mirrored?: boolean;
   focused?: boolean;
   minimised?: boolean;
+  stream?: MediaStream;
   peer?: Peer;
   videoRef?: React.MutableRefObject<null>;
   onToggleFocus: () => void;
@@ -27,12 +29,15 @@ export default function Item({
   minimised,
   reaction,
   mirrored,
+  stream,
   peer,
   videoRef,
   onToggleFocus,
 }: Props) {
   const [profile, setProfile] = useState<Profile>();
   const [isConnecting, setIsConnecting] = useState(false);
+  const [voiceInputVolume, setVoiceInputVolume] = useState(0);
+  const [audioStream, setAudioStream] = useState<MediaStream>(stream);
 
   // Get user details
   useEffect(() => {
@@ -78,13 +83,55 @@ export default function Item({
     };
   }, [peer]);
 
+  // Get remote audio track
+  useEffect(() => {
+    async function getAudioTrack() {
+      if (peer.connection.peerConnection) {
+        peer.connection.peerConnection.ontrack = (event) => {
+          event.streams[0].getAudioTracks().forEach((track) => {
+            setAudioStream(stream);
+          });
+        };
+      }
+    }
+
+    if (peer && !isMe) {
+      getAudioTrack();
+    }
+  }, [peer, isMe]);
+
+  // Detect speaking
+  useEffect(() => {
+    async function listenForVoice() {
+      var options = {};
+      try {
+        var speechEvents = hark(audioStream, options);
+
+        speechEvents.on("speaking", function () {
+          setVoiceInputVolume(1);
+        });
+
+        speechEvents.on("stopped_speaking", function () {
+          setVoiceInputVolume(0);
+        });
+      } catch (e) {
+        console.log("Failed to create hark instance");
+      }
+    }
+
+    if (audioStream) {
+      listenForVoice();
+    }
+  }, [audioStream]);
+
   return (
     <div
       className={styles.item}
-      data-camera-enabled={settings.video}
+      data-camera-enabled={!!settings.video}
       data-focused={focused}
       data-minimised={minimised}
       data-mirrored={mirrored}
+      data-talking={voiceInputVolume > 0}
       data-connecting={isConnecting}
     >
       <video

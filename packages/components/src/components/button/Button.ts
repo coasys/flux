@@ -111,6 +111,16 @@ const styles = css`
     --j-button-opacity: 1;
   }
 
+  :host([variant="danger"]) {
+    --j-button-bg: var(--j-color-danger-200);
+    --j-button-color: currentColor;
+    --j-button-border: 1px solid transparent;
+  }
+
+  :host([variant="danger"]:hover) {
+    --j-button-opacity: 1;
+  }
+
   :host([size="xs"]) {
     --j-button-font-size: var(--j-font-size-400);
     --j-button-padding: 0 var(--j-space-200);
