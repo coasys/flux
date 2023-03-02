@@ -256,7 +256,7 @@ export default function MessageItem({
         </div>
 
         {!hideToolbar && showToolbar && (
-          <div class={styles.toolbarWrapper}>
+          <div className={styles.toolbarWrapper}>
             <MessageToolbar
               onReplyClick={onReplyClick}
               onOpenEmojiPicker={onOpenEmojiPicker}

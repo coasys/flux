@@ -32,7 +32,7 @@ export const useAppStore = defineStore("app", {
       globalTheme: {
         fontSize: "md",
         fontFamily: "DM Sans",
-        name: "default",
+        name: "dark",
         hue: 270,
         saturation: 60,
       },

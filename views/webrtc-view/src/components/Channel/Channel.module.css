@@ -1,13 +1,14 @@
 .outer {
-    position: relative;
-    display: flex;
-    height: 100%;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 0 var(--j-space-500);
+  position: relative;
+  display: grid;
+  place-content: center;
+  width: 100%;
+  max-width: 100%;
+  grid-template-columns: 1fr;
+  height: 100%;
+  padding: 0 var(--j-space-500);
 }
 
 .join {
-    text-align: center;
+  text-align: center;
 }

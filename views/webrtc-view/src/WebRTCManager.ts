@@ -1,12 +1,10 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import stunServers from "./stun-servers";
 
 import {
   Ad4mClient,
   PerspectiveProxy,
   Agent,
   Literal,
-  LinkExpression,
   NeighbourhoodProxy,
   Link,
   PerspectiveExpression,
@@ -69,6 +67,7 @@ export const OFFER_REQUEST = "offer-request";
 export const OFFER = "offer";
 export const ANSWER = "answer";
 export const LEAVE = "leave";
+export const HEARTBEAT = "heartbeat";
 export const TEST_SIGNAL = "test-signal";
 export const TEST_BROADCAST = "test-broadcast";
 
@@ -78,8 +77,8 @@ export type Connection = {
 };
 
 export type Settings = {
-  video: boolean;
-  audio: boolean;
+  video: boolean | MediaTrackConstraints;
+  audio: boolean | MediaTrackConstraints;
   screen: boolean;
 };
 
@@ -104,6 +103,7 @@ export default class WebRTCManager {
   private perspective: PerspectiveProxy;
   private neighbourhood: NeighbourhoodProxy;
   private roomId: string;
+  private heartbeatId: NodeJS.Timeout;
   private callbacks: Record<Event, Array<(...args: any[]) => void>> = {
     [Event.PEER_ADDED]: [],
     [Event.PEER_REMOVED]: [],
@@ -146,6 +146,7 @@ export default class WebRTCManager {
     this.sendMessage = this.sendMessage.bind(this);
     this.sendTestSignal = this.sendTestSignal.bind(this);
     this.sendTestBroadcast = this.sendTestBroadcast.bind(this);
+    this.heartbeat = this.heartbeat.bind(this);
     this.leave = this.leave.bind(this);
 
     // Close connections if we refresh
@@ -208,6 +209,13 @@ export default class WebRTCManager {
       link.data.source === this.roomId
     ) {
       this.createOffer(link.author);
+    }
+
+    // If we get heartbeat from new user, action!
+    if (link.data.predicate === HEARTBEAT && link.data.source === this.roomId) {
+      if (!this.connections.get(link.author)) {
+        this.createOffer(link.author);
+      }
     }
     // Only handle the offer if it's for me
     if (link.data.predicate === OFFER && link.data.source === this.agent.did) {
@@ -429,7 +437,20 @@ export default class WebRTCManager {
 
     this.isListening = true;
 
+    this.heartbeatId = setInterval(this.heartbeat, 10000);
+
     return this.localStream;
+  }
+
+  async heartbeat() {
+    const signalLink = await createSignalLink(this.client, {
+      source: this.roomId,
+      predicate: HEARTBEAT,
+      target: this.agent.did,
+    });
+
+    console.log("💚 Sending HEARTBEAT");
+    this.neighbourhood.sendBroadcast(signalLink);
   }
 
   async sendTestSignal(recipientDid: string) {
@@ -457,11 +478,15 @@ export default class WebRTCManager {
   async leave() {
     this.isListening = false;
 
+    // Stop heartbeat
+    clearInterval(this.heartbeatId);
+
     if (this.perspective) {
       // Todo: Nico, nico, nico!
       // this.neighbourhood.
     }
 
+    // Announce departure
     const signalLink = await createSignalLink(this.client, {
       source: this.roomId,
       predicate: LEAVE,
@@ -470,8 +495,12 @@ export default class WebRTCManager {
 
     this.neighbourhood.sendBroadcast(signalLink);
 
+    // Close webrtc connections
     this.connections.forEach((c, key) => {
       this.closeConnection(key);
     });
+
+    // Kill media recording
+    this.localStream.getTracks().forEach((track) => track.stop());
   }
 }
