@@ -1,4 +1,5 @@
 import { useState, useEffect } from "preact/hooks";
+import Sibilant from "sibilant-webaudio";
 import { Peer, Reaction } from "../../../types";
 import { Settings } from "../../../WebRTCManager";
 import { Profile } from "utils/types";
@@ -33,6 +34,7 @@ export default function Item({
 }: Props) {
   const [profile, setProfile] = useState<Profile>();
   const [isConnecting, setIsConnecting] = useState(false);
+  const [voiceInputVolume, setVoiceInputVolume] = useState(0);
 
   // Get user details
   useEffect(() => {
@@ -78,6 +80,25 @@ export default function Item({
     };
   }, [peer]);
 
+  // Detect speaking
+  useEffect(() => {
+    async function listenForVoice() {
+      const speakingEvents = new Sibilant(peer.connection.peerConnection);
+
+      speakingEvents.bind("speaking", function () {
+        setVoiceInputVolume(1);
+      });
+      speakingEvents.bind("stoppedSpeaking", function (data) {
+        setVoiceInputVolume(0);
+      });
+      speakingEvents.bind("volumeChanged", function (data) {
+        setVoiceInputVolume(data);
+      });
+    }
+
+    listenForVoice();
+  }, []);
+
   return (
     <div
       className={styles.item}
@@ -85,6 +106,7 @@ export default function Item({
       data-focused={focused}
       data-minimised={minimised}
       data-mirrored={mirrored}
+      data-talking={voiceInputVolume > 0}
       data-connecting={isConnecting}
     >
       <video
