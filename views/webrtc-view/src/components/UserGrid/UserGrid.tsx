@@ -86,6 +86,7 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
     .sort((a, b) => a.did.localeCompare(b.did))
     .map((peer, index) => {
       const remoteStream = new MediaStream();
+      const remoteAudioStream = new MediaStream();
       const peerReaction =
         currentReaction && currentReaction.did === peer.did
           ? currentReaction
@@ -96,6 +97,10 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
           event.streams[0].getTracks().forEach((track) => {
             remoteStream.addTrack(track);
           });
+          event.streams[0].getAudioTracks().forEach((track) => {
+            remoteAudioStream.addTrack(track);
+          });
+
           const videElement = document.getElementById(
             `user-video-${peer.did}`
           ) as HTMLVideoElement;
@@ -113,7 +118,7 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
           userId={peer.did}
           settings={peer.settings}
           reaction={peerReaction}
-          stream={remoteStream}
+          stream={remoteAudioStream}
           focused={focusedPeerId === peer.did}
           minimised={focusedPeerId && focusedPeerId !== peer.did}
           onToggleFocus={() =>
