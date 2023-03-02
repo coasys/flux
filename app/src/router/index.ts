@@ -69,8 +69,6 @@ router.beforeEach(async (to, from, next) => {
 
       const isOnSignupOrMain = to.name === "signup" || to.name === "main";
 
-      console.log({ isLocked, to, from, isOnSignupOrMain, fluxLinksFound });
-
       if (fluxLinksFound && isOnSignupOrMain) {
         next("/home");
       }
