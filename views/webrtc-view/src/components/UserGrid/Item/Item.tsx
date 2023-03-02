@@ -1,5 +1,5 @@
 import { useState, useEffect } from "preact/hooks";
-import Sibilant from "sibilant-webaudio";
+import hark from "hark";
 import { Peer, Reaction } from "../../../types";
 import { Settings } from "../../../WebRTCManager";
 import { Profile } from "utils/types";
@@ -15,6 +15,7 @@ type Props = {
   mirrored?: boolean;
   focused?: boolean;
   minimised?: boolean;
+  stream?: MediaStream;
   peer?: Peer;
   videoRef?: React.MutableRefObject<null>;
   onToggleFocus: () => void;
@@ -28,6 +29,7 @@ export default function Item({
   minimised,
   reaction,
   mirrored,
+  stream,
   peer,
   videoRef,
   onToggleFocus,
@@ -83,21 +85,22 @@ export default function Item({
   // Detect speaking
   useEffect(() => {
     async function listenForVoice() {
-      const speakingEvents = new Sibilant(peer.connection.peerConnection);
+      var options = {};
+      var speechEvents = hark(stream, options);
 
-      speakingEvents.bind("speaking", function () {
+      speechEvents.on("speaking", function () {
         setVoiceInputVolume(1);
       });
-      speakingEvents.bind("stoppedSpeaking", function (data) {
+
+      speechEvents.on("stopped_speaking", function () {
         setVoiceInputVolume(0);
-      });
-      speakingEvents.bind("volumeChanged", function (data) {
-        setVoiceInputVolume(data);
       });
     }
 
-    listenForVoice();
-  }, []);
+    if (stream) {
+      listenForVoice();
+    }
+  }, [stream]);
 
   return (
     <div

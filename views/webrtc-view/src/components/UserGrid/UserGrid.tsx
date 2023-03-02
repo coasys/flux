@@ -113,6 +113,7 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
           userId={peer.did}
           settings={peer.settings}
           reaction={peerReaction}
+          stream={remoteStream}
           focused={focusedPeerId === peer.did}
           minimised={focusedPeerId && focusedPeerId !== peer.did}
           onToggleFocus={() =>
@@ -136,6 +137,7 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
           userId={currentUser.did}
           videoRef={videoRef}
           settings={webRTC.settings}
+          stream={webRTC.localStream}
           reaction={myReaction}
           focused={focusedPeerId === currentUser.did}
           minimised={focusedPeerId && focusedPeerId !== currentUser.did}
