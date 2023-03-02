@@ -146,6 +146,7 @@ export default class WebRTCManager {
     this.sendMessage = this.sendMessage.bind(this);
     this.sendTestSignal = this.sendTestSignal.bind(this);
     this.sendTestBroadcast = this.sendTestBroadcast.bind(this);
+    this.heartbeat = this.heartbeat.bind(this);
     this.leave = this.leave.bind(this);
 
     // Close connections if we refresh
@@ -433,12 +434,12 @@ export default class WebRTCManager {
 
     this.isListening = true;
 
-    this.heartbeatId = setTimeout(this.heatbeat, 10000);
+    this.heartbeatId = setTimeout(this.heartbeat, 10000);
 
     return this.localStream;
   }
 
-  async heatbeat() {
+  async heartbeat() {
     const signalLink = await createSignalLink(this.client, {
       source: this.roomId,
       predicate: HEARTBEAT,
