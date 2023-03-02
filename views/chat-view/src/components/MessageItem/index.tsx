@@ -248,11 +248,11 @@ export default function MessageItem({
             />
           )}
 
-          <MessageCards
+          {/* <MessageCards
             message={message}
             perspectiveUuid={perspectiveUuid}
             mainRef={mainRef}
-          />
+          /> */}
         </div>
 
         {!hideToolbar && showToolbar && (
