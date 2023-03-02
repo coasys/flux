@@ -248,15 +248,15 @@ export default function MessageItem({
             />
           )}
 
-          {/* <MessageCards
+          <MessageCards
             message={message}
             perspectiveUuid={perspectiveUuid}
             mainRef={mainRef}
-          /> */}
+          />
         </div>
 
         {!hideToolbar && showToolbar && (
-          <div class={styles.toolbarWrapper}>
+          <div className={styles.toolbarWrapper}>
             <MessageToolbar
               onReplyClick={onReplyClick}
               onOpenEmojiPicker={onOpenEmojiPicker}
