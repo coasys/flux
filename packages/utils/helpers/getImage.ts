@@ -39,7 +39,6 @@ export async function getImage(expUrl: string): Promise<string> {
         if (cachedImage === null || cachedImage === undefined) {
           startTimeout();
           const expression = await client.expression.get(expUrl);
-          console.log({ expression });
           if (expression) {
             const image = expression.data.slice(1, -1);
             dexie.save(expUrl, image);

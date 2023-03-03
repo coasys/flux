@@ -71,20 +71,7 @@ export default defineComponent({
       watcherStarted,
     };
   },
-  async mounted() {
-    const isAuthenticated = await ad4mConnect.isAuthenticated();
-
-    if (isAuthenticated) {
-      this.onAuthenticated();
-    }
-
-    // TODO: Authstatechange is not firing
-    ad4mConnect.addEventListener("authstatechange", async (e) => {
-      if (ad4mConnect.authState === "authenticated") {
-        this.onAuthenticated();
-      }
-    });
-
+  async created() {
     this.appStore.changeCurrentTheme("global");
   },
   computed: {
@@ -96,94 +83,6 @@ export default defineComponent({
     },
     appDomain() {
       return window.location.origin;
-    },
-  },
-  methods: {
-    async onAuthenticated() {
-      if (!this.watcherStarted) {
-        this.startWatcher();
-        hydrateState();
-
-        const client = await getAd4mClient();
-
-        //Do version checking for ad4m / flux compatibility
-        const { ad4mExecutorVersion } = await client.runtime.info();
-
-        const isIncompatible = semver.gt(
-          dependencies["@perspect3vism/ad4m"],
-          ad4mExecutorVersion
-        );
-
-        if (isIncompatible) {
-          this.$router.push({ name: "update-ad4m" });
-        }
-      }
-    },
-    async startWatcher() {
-      this.watcherStarted = true;
-      const client = await getAd4mClient();
-      const watching: string[] = [];
-
-      watch(
-        this.dataStore.neighbourhoods,
-        async (newValue) => {
-          Object.entries(newValue).forEach(([perspectiveUuid]) => {
-            const alreadyListening = watching.includes(perspectiveUuid);
-            if (!alreadyListening) {
-              watching.push(perspectiveUuid);
-              subscribeToLinks({
-                perspectiveUuid,
-                added: async (link: LinkExpression) => {
-                  if (link.data.predicate === EntryType.Message) {
-                    try {
-                      const routeChannelId = this.$route.params.channelId;
-                      const channelId = link.data.source;
-                      const isCurrentChannel = routeChannelId === channelId;
-
-                      if (!isCurrentChannel) {
-                        this.dataStore.setHasNewMessages({
-                          communityId: perspectiveUuid,
-                          channelId,
-                          value: true,
-                        });
-
-                        const expression = Literal.fromUrl(
-                          link.data.target
-                        ).get();
-
-                        const expressionDate = new Date(expression.timestamp);
-                        let minuteAgo = new Date();
-                        minuteAgo.setSeconds(minuteAgo.getSeconds() - 30);
-                        if (expressionDate > minuteAgo) {
-                          this.dataStore.showMessageNotification({
-                            router: this.$router,
-                            communityId: perspectiveUuid,
-                            channelId,
-                            authorDid: expression.author,
-                            message: expression.data,
-                            timestamp: expression.timestamp,
-                          });
-                        }
-                      }
-                    } catch (e: any) {
-                      throw new Error(e);
-                    }
-                  }
-                },
-              });
-            }
-          });
-        },
-        { immediate: true, deep: true }
-      );
-
-      // @ts-ignore
-      client!.perspective.addPerspectiveRemovedListener((perspective) => {
-        const isCommunity = this.dataStore.getCommunity(perspective);
-        if (isCommunity) {
-          this.dataStore.removeCommunity({ communityId: perspective });
-        }
-      });
     },
   },
 });
