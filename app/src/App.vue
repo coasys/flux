@@ -36,20 +36,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent, ref } from "vue";
 import { useAppStore } from "./store/app";
 import { ApplicationState, ModalsState } from "@/store/types";
 import { useRoute, useRouter } from "vue-router";
 import { useDataStore } from "./store/data";
 import { useUserStore } from "./store/user";
-import { hydrateState } from "./store/data/hydrateState";
 import { ad4mConnect } from "./ad4mConnect";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { EntryType } from "utils/types";
-import subscribeToLinks from "utils/api/subscribeToLinks";
-import { LinkExpression, Literal } from "@perspect3vism/ad4m";
-import semver from "semver";
-import { dependencies } from "../package.json";
 
 export default defineComponent({
   name: "App",

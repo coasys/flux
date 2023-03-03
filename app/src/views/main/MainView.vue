@@ -126,8 +126,10 @@ export default defineComponent({
     CreateCommunity,
   },
   async mounted() {
-    this.startWatcher();
-    console.log("hydrate state");
+    if (!this.watcherStarted) {
+      this.startWatcher();
+    }
+
     hydrateState();
 
     const client = await getAd4mClient();
