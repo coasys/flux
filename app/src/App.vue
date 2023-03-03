@@ -1,5 +1,5 @@
 <template>
-  <router-view :key="componentKey"></router-view>
+  <router-view></router-view>
   <div class="global-modal" v-if="ui.showGlobalLoading">
     <div class="global-modal__backdrop"></div>
     <div class="global-modal__content">
@@ -57,7 +57,6 @@ export default defineComponent({
     const appStore = useAppStore();
     const router = useRouter();
     const route = useRoute();
-    const componentKey = ref(0);
     const dataStore = useDataStore();
     const userStore = useUserStore();
     const watcherStarted = ref(false);
@@ -65,7 +64,6 @@ export default defineComponent({
     return {
       ad4mConnect,
       appStore,
-      componentKey,
       router,
       route,
       dataStore,
@@ -73,28 +71,17 @@ export default defineComponent({
       watcherStarted,
     };
   },
-  beforeCreate() {
+  async mounted() {
+    const isAuthenticated = await ad4mConnect.isAuthenticated();
+
+    if (isAuthenticated) {
+      this.onAuthenticated();
+    }
+
+    // TODO: Authstatechange is not firing
     ad4mConnect.addEventListener("authstatechange", async (e) => {
       if (ad4mConnect.authState === "authenticated") {
-        if (!this.watcherStarted) {
-          this.startWatcher();
-          this.watcherStarted = true;
-          hydrateState();
-
-          const client = await getAd4mClient();
-
-          //Do version checking for ad4m / flux compatibility
-          const { ad4mExecutorVersion } = await client.runtime.info();
-
-          const isIncompatible = semver.gt(
-            dependencies["@perspect3vism/ad4m"],
-            ad4mExecutorVersion
-          );
-
-          if (isIncompatible) {
-            this.$router.push({ name: "update-ad4m" });
-          }
-        }
+        this.onAuthenticated();
       }
     });
 
@@ -112,7 +99,28 @@ export default defineComponent({
     },
   },
   methods: {
+    async onAuthenticated() {
+      if (!this.watcherStarted) {
+        this.startWatcher();
+        hydrateState();
+
+        const client = await getAd4mClient();
+
+        //Do version checking for ad4m / flux compatibility
+        const { ad4mExecutorVersion } = await client.runtime.info();
+
+        const isIncompatible = semver.gt(
+          dependencies["@perspect3vism/ad4m"],
+          ad4mExecutorVersion
+        );
+
+        if (isIncompatible) {
+          this.$router.push({ name: "update-ad4m" });
+        }
+      }
+    },
     async startWatcher() {
+      this.watcherStarted = true;
       const client = await getAd4mClient();
       const watching: string[] = [];
 
