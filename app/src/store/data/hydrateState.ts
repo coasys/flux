@@ -1,6 +1,6 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { getMetaFromLinks } from "utils/helpers/getNeighbourhoodMeta";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useDataStore } from ".";
 import { CommunityState, LocalCommunityState } from "../types";
 import { useUserStore } from "../user";
@@ -8,9 +8,6 @@ import getProfile from "utils/api/getProfile";
 import CommunityModel from "utils/api/community";
 
 export async function buildCommunity(perspective: PerspectiveProxy) {
-  const dataStore = useDataStore();
-  const communityState = dataStore.getLocalCommunityState(perspective.uuid);
-
   let state: LocalCommunityState = {
     perspectiveUuid: perspective.uuid,
     theme: {
@@ -29,10 +26,6 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
       mute: false,
     },
   };
-
-  if (communityState && communityState) {
-    state = communityState;
-  }
 
   const meta = getMetaFromLinks(perspective.neighbourhood?.meta?.links!);
   const Community = new CommunityModel({ perspectiveUuid: perspective.uuid });
@@ -55,10 +48,11 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
 }
 
 export async function hydrateState() {
-  const client = await getAd4mClient();
+  const client: Ad4mClient = await getAd4mClient();
   const dataStore = useDataStore();
   const userStore = useUserStore();
   const perspectives = await client.perspective.all();
+  const neighbourhoods = perspectives.filter((p) => p.sharedUrl);
   const status = await client.agent.status();
 
   const profile = await getProfile(status.did!);
@@ -67,29 +61,28 @@ export async function hydrateState() {
 
   userStore.updateAgentStatus(status);
 
-  const communities = dataStore.getCommunities.filter((community) => {
-    return !perspectives
-      .map((e) => e.uuid)
-      .includes(community.state.perspectiveUuid);
+  const deletedCommunities = dataStore.getCommunities.filter((community) => {
+    const stillExist = neighbourhoods.some(
+      (n) => n.uuid === community.state.perspectiveUuid
+    );
+    return !stillExist;
   });
 
-  for (const community of communities) {
+  for (const community of deletedCommunities) {
     dataStore.removeCommunity({ communityId: community.state.perspectiveUuid });
-
     dataStore.clearChannels({ communityId: community.state.perspectiveUuid });
   }
 
-  for (const perspective of perspectives) {
-    const hasCommunityAlready = dataStore.getCommunities.find(
-      (c) => c.state.perspectiveUuid === perspective.uuid
+  const newNeighbourhoods = neighbourhoods.filter((n) => {
+    const found = dataStore.getCommunities.some(
+      (c) => c.state.perspectiveUuid === n.uuid
     );
+    return !found;
+  });
 
-    if (hasCommunityAlready) continue;
+  const newCommunities = await Promise.all(
+    newNeighbourhoods.map((p) => buildCommunity(p))
+  );
 
-    if (perspective.sharedUrl && perspective.neighbourhood) {
-      const newCommunity = await buildCommunity(perspective);
-
-      dataStore.addCommunity(newCommunity);
-    }
-  }
+  newCommunities.forEach((c) => dataStore.addCommunity(c));
 }

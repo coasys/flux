@@ -17,6 +17,23 @@ This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/
 
 ### Security
 
+## [0.5.4] - 03/03/2023
+
+### Added
+ - New signup page with added orbs and changed flow
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+ - Hydrate state is fixed
+ - Notifications are now working
+
+### Security
+
 ## [0.5.3] - 02/03/2023
 
 ### Added

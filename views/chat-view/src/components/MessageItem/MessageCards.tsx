@@ -3,13 +3,6 @@ import styles from "./index.scss";
 import getMetaFromNeighbourhood from "utils/helpers/getNeighbourhoodMeta";
 import { NeighbourhoodMetaData } from "utils/types";
 
-type Card = {
-  type: "url" | "neighbourhood";
-  name: string;
-  desc: string;
-  url: string;
-};
-
 async function isValidUrl(urlString) {
   try {
     await new URL(urlString);
@@ -41,7 +34,6 @@ export default function MessageCards({ message, perspectiveUuid, mainRef }) {
 
   const getUrls = async () => {
     const urls = await findURLs(messageContent);
-    console.log({ urls });
     setUrls(urls);
   };
 

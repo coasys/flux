@@ -1,5 +1,5 @@
 <template>
-  <router-view :key="componentKey"></router-view>
+  <router-view></router-view>
   <div class="global-modal" v-if="ui.showGlobalLoading">
     <div class="global-modal__backdrop"></div>
     <div class="global-modal__content">
@@ -36,20 +36,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent, ref } from "vue";
 import { useAppStore } from "./store/app";
 import { ApplicationState, ModalsState } from "@/store/types";
 import { useRoute, useRouter } from "vue-router";
 import { useDataStore } from "./store/data";
 import { useUserStore } from "./store/user";
-import { hydrateState } from "./store/data/hydrateState";
 import { ad4mConnect } from "./ad4mConnect";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { EntryType } from "utils/types";
-import subscribeToLinks from "utils/api/subscribeToLinks";
-import { LinkExpression, Literal } from "@perspect3vism/ad4m";
-import semver from "semver";
-import { dependencies } from "../package.json";
 
 export default defineComponent({
   name: "App",
@@ -57,7 +50,6 @@ export default defineComponent({
     const appStore = useAppStore();
     const router = useRouter();
     const route = useRoute();
-    const componentKey = ref(0);
     const dataStore = useDataStore();
     const userStore = useUserStore();
     const watcherStarted = ref(false);
@@ -65,7 +57,6 @@ export default defineComponent({
     return {
       ad4mConnect,
       appStore,
-      componentKey,
       router,
       route,
       dataStore,
@@ -73,31 +64,7 @@ export default defineComponent({
       watcherStarted,
     };
   },
-  beforeCreate() {
-    ad4mConnect.addEventListener("authstatechange", async (e) => {
-      if (ad4mConnect.authState === "authenticated") {
-        if (!this.watcherStarted) {
-          this.startWatcher();
-          this.watcherStarted = true;
-          hydrateState();
-
-          const client = await getAd4mClient();
-
-          //Do version checking for ad4m / flux compatibility
-          const { ad4mExecutorVersion } = await client.runtime.info();
-
-          const isIncompatible = semver.gt(
-            dependencies["@perspect3vism/ad4m"],
-            ad4mExecutorVersion
-          );
-
-          if (isIncompatible) {
-            this.$router.push({ name: "update-ad4m" });
-          }
-        }
-      }
-    });
-
+  async created() {
     this.appStore.changeCurrentTheme("global");
   },
   computed: {
@@ -109,73 +76,6 @@ export default defineComponent({
     },
     appDomain() {
       return window.location.origin;
-    },
-  },
-  methods: {
-    async startWatcher() {
-      const client = await getAd4mClient();
-      const watching: string[] = [];
-
-      watch(
-        this.dataStore.neighbourhoods,
-        async (newValue) => {
-          Object.entries(newValue).forEach(([perspectiveUuid]) => {
-            const alreadyListening = watching.includes(perspectiveUuid);
-            if (!alreadyListening) {
-              watching.push(perspectiveUuid);
-              subscribeToLinks({
-                perspectiveUuid,
-                added: async (link: LinkExpression) => {
-                  if (link.data.predicate === EntryType.Message) {
-                    try {
-                      const routeChannelId = this.$route.params.channelId;
-                      const channelId = link.data.source;
-                      const isCurrentChannel = routeChannelId === channelId;
-
-                      if (!isCurrentChannel) {
-                        this.dataStore.setHasNewMessages({
-                          communityId: perspectiveUuid,
-                          channelId,
-                          value: true,
-                        });
-
-                        const expression = Literal.fromUrl(
-                          link.data.target
-                        ).get();
-
-                        const expressionDate = new Date(expression.timestamp);
-                        let minuteAgo = new Date();
-                        minuteAgo.setSeconds(minuteAgo.getSeconds() - 30);
-                        if (expressionDate > minuteAgo) {
-                          this.dataStore.showMessageNotification({
-                            router: this.$router,
-                            communityId: perspectiveUuid,
-                            channelId,
-                            authorDid: expression.author,
-                            message: expression.data,
-                            timestamp: expression.timestamp,
-                          });
-                        }
-                      }
-                    } catch (e: any) {
-                      throw new Error(e);
-                    }
-                  }
-                },
-              });
-            }
-          });
-        },
-        { immediate: true, deep: true }
-      );
-
-      // @ts-ignore
-      client!.perspective.addPerspectiveRemovedListener((perspective) => {
-        const isCommunity = this.dataStore.getCommunity(perspective);
-        if (isCommunity) {
-          this.dataStore.removeCommunity({ communityId: perspective });
-        }
-      });
     },
   },
 });
