@@ -59,8 +59,16 @@ class CommunityModel extends EntryModel {
   async create(data: {
     name: string;
     description: string;
-    image?: string;
-    thumbnail?: string;
+    image?: {
+      data_base64: string,
+      name: string,
+      file_type: string,
+    };
+    thumbnail?: {
+      data_base64: string,
+      name: string,
+      file_type: string,
+    };
   }): Promise<Community> {
     return super.create(data, SELF) as Promise<Community>;
   }
@@ -81,8 +89,16 @@ class CommunityModel extends EntryModel {
     data: {
       name?: string;
       description?: string;
-      image?: string;
-      thumbnail?: string;
+        image?: {
+        data_base64: string,
+        name: string,
+        file_type: string,
+      };
+      thumbnail?: {
+        data_base64: string,
+        name: string,
+        file_type: string,
+      };
     }
   ) {
     return super.update(SELF, data) as Promise<Community>;

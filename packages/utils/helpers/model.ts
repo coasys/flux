@@ -69,6 +69,7 @@ export default class Model {
   ): Promise<{ predicateMap: PredicateMap; propertyMap: PropertyValueMap }> {
     const client = await getAd4mClient();
     const propertyValues = {} as PropertyValueMap;
+    console.log(data);
 
     const expPromises = Object.entries(data)
       .filter(([key]) => {
@@ -77,7 +78,7 @@ export default class Model {
         ] as ModelProperty;
         return isValidProperty;
       })
-      .filter(([key, val]) => val !== null)
+      .filter(([key, val]) => val !== null || val !== undefined)
       .map(async ([key, val]) => {
         const { predicate, languageAddress, collection } = this.constructor
           .properties[key] as ModelProperty;
@@ -95,20 +96,21 @@ export default class Model {
         }
 
         const expression = val || "";
+        if (expression) {
+          const value = languageAddress
+            ? await client.expression.create(expression, languageAddress)
+            : expression;
 
-        const value = languageAddress
-          ? await client.expression.create(expression, languageAddress)
-          : expression;
+          propertyValues[key] = value;
 
-        propertyValues[key] = value;
-
-        return { predicate, value };
+          return { predicate, value };
+        }
       });
 
     const expressions = await Promise.all(expPromises);
 
     return {
-      predicateMap: expressions.reduce((acc, exp) => {
+      predicateMap: expressions.filter(exp => exp).reduce((acc, exp) => {
         return {
           ...acc,
           [exp.predicate]: exp.value,
