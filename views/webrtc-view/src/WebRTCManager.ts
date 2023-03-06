@@ -33,15 +33,6 @@ const servers = {
   iceCandidatePoolSize: 10,
 };
 
-async function createSignalLink(client: Ad4mClient, link: Link) {
-  const perspective = await client.perspective.add("temp");
-  perspective.add(link);
-  const snapshot = perspective.snapshot();
-
-  await client.perspective.remove(perspective.uuid);
-  return snapshot;
-}
-
 async function getLinkFromPerspective(expression: PerspectiveExpression) {
   try {
     return expression.data.links[0];
@@ -293,14 +284,16 @@ export default class WebRTCManager {
 
     peerConnection.addEventListener("icecandidate", async (event) => {
       if (event.candidate) {
-        const signalLink = await createSignalLink(this.client, {
-          source: remoteDid,
-          predicate: ICE_CANDIDATE,
-          target: Literal.from(event.candidate.toJSON()).toUrl(),
-        });
-
         console.log("🟠 Sending ICE_CANDIDATE signal to ", remoteDid);
-        this.neighbourhood.sendBroadcast(signalLink);
+        this.neighbourhood.sendBroadcastU({
+          links: [
+            {
+              source: remoteDid,
+              predicate: ICE_CANDIDATE,
+              target: Literal.from(event.candidate.toJSON()).toUrl(),
+            },
+          ],
+        });
       }
     });
 
@@ -334,14 +327,16 @@ export default class WebRTCManager {
     const offer = await connection.peerConnection.createOffer();
     await connection.peerConnection.setLocalDescription(offer);
 
-    const signalLink = await createSignalLink(this.client, {
-      source: recieverDid,
-      predicate: OFFER,
-      target: Literal.from(offer).toUrl(),
-    });
-
     console.log("🟠 Sending OFFER signal to ", recieverDid);
-    this.neighbourhood.sendBroadcast(signalLink);
+    this.neighbourhood.sendBroadcastU({
+      links: [
+        {
+          source: recieverDid,
+          predicate: OFFER,
+          target: Literal.from(offer).toUrl(),
+        },
+      ],
+    });
   }
 
   async handleOffer(fromDid: string, offer: RTCSessionDescriptionInit) {
@@ -361,14 +356,16 @@ export default class WebRTCManager {
     const answer = await connection.peerConnection.createAnswer();
     await connection.peerConnection.setLocalDescription(answer);
 
-    const signalLink = await createSignalLink(this.client, {
-      source: fromDid,
-      predicate: ANSWER,
-      target: Literal.from(answer).toUrl(),
-    });
-
     console.log("🟠 Sending ANSWER signal to ", fromDid);
-    this.neighbourhood.sendBroadcast(signalLink);
+    this.neighbourhood.sendBroadcastU({
+      links: [
+        {
+          source: fromDid,
+          predicate: ANSWER,
+          target: Literal.from(answer).toUrl(),
+        },
+      ],
+    });
   }
 
   async handleAnswer(fromDid: string, answer: RTCSessionDescriptionInit) {
@@ -421,14 +418,17 @@ export default class WebRTCManager {
       video: settings.video,
     });
 
-    const signalLink = await createSignalLink(this.client, {
-      source: this.roomId,
-      predicate: OFFER_REQUEST,
-      target: this.agent.did,
+    console.log("🟠 Sending JOIN broadcast");
+    this.neighbourhood.sendBroadcastU({
+      links: [
+        {
+          source: this.roomId,
+          predicate: OFFER_REQUEST,
+          target: this.agent.did,
+        },
+      ],
     });
 
-    console.log("🟠 Sending JOIN broadcast");
-    this.neighbourhood.sendBroadcast(signalLink);
     if (!this.addedListener) {
       this.neighbourhood.addSignalHandler(this.onSignal);
       this.addedListener = true;
@@ -442,36 +442,42 @@ export default class WebRTCManager {
   }
 
   async heartbeat() {
-    const signalLink = await createSignalLink(this.client, {
-      source: this.roomId,
-      predicate: HEARTBEAT,
-      target: this.agent.did,
-    });
-
     console.log("💚 Sending HEARTBEAT");
-    this.neighbourhood.sendBroadcast(signalLink);
+    this.neighbourhood.sendBroadcastU({
+      links: [
+        {
+          source: this.roomId,
+          predicate: HEARTBEAT,
+          target: this.agent.did,
+        },
+      ],
+    });
   }
 
   async sendTestSignal(recipientDid: string) {
-    const signalLink = await createSignalLink(this.client, {
-      source: this.roomId,
-      predicate: TEST_SIGNAL,
-      target: recipientDid,
-    });
-
     console.log("⚙️ Sending TEST_SIGNAL to ", recipientDid);
-    this.neighbourhood.sendBroadcast(signalLink);
+    this.neighbourhood.sendBroadcastU({
+      links: [
+        {
+          source: this.roomId,
+          predicate: TEST_SIGNAL,
+          target: recipientDid,
+        },
+      ],
+    });
   }
 
   async sendTestBroadcast() {
-    const signalLink = await createSignalLink(this.client, {
-      source: this.roomId,
-      predicate: TEST_BROADCAST,
-      target: Literal.from("test broadcast").toUrl(),
-    });
-
     console.log("⚙️ Sending TEST_BROADCAST to room");
-    this.neighbourhood.sendBroadcast(signalLink);
+    this.neighbourhood.sendBroadcastU({
+      links: [
+        {
+          source: this.roomId,
+          predicate: TEST_BROADCAST,
+          target: Literal.from("test broadcast").toUrl(),
+        },
+      ],
+    });
   }
 
   async leave() {
@@ -486,13 +492,15 @@ export default class WebRTCManager {
     }
 
     // Announce departure
-    const signalLink = await createSignalLink(this.client, {
-      source: this.roomId,
-      predicate: LEAVE,
-      target: "goodbye!", // could be empty
+    this.neighbourhood.sendBroadcastU({
+      links: [
+        {
+          source: this.roomId,
+          predicate: LEAVE,
+          target: "goodbye!", // could be empty
+        },
+      ],
     });
-
-    this.neighbourhood.sendBroadcast(signalLink);
 
     // Close webrtc connections
     this.connections.forEach((c, key) => {

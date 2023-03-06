@@ -74,7 +74,11 @@ export default async ({
       );
 
       profileImage = await client.expression.create(
-        compressedProfileImage,
+        {
+          data_base64: compressedProfileImage,
+          name: "profile-image",
+          file_type: "image/png",
+        },
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
 
@@ -83,7 +87,11 @@ export default async ({
       );
 
       thumbnailImage = await client.expression.create(
-        compressedpThumbnailImage,
+        {
+          data_base64: compressedpThumbnailImage,
+          name: "thumbnail-image",
+          file_type: "image/png",
+        },
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
 

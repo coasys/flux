@@ -37,13 +37,13 @@ class CommunityModel extends EntryModel {
       },
       image: {
         predicate: IMAGE,
-        type: String,
+        type: Object,
         resolve: false,
         languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
       },
       thumbnail: {
         predicate: THUMBNAIL,
-        type: String,
+        type: Object,
         resolve: false,
         languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
       },

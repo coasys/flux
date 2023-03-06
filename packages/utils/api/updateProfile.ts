@@ -62,7 +62,11 @@ export default async function updateProfile(
       );
 
       profileBackgroundUrl = await client.expression.create(
-        compressedImage,
+        {
+          data_base64: compressedImage,
+          name: "profile-background",
+          file_type: "image/png",
+        },
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
       cacheImage(profileBackgroundUrl, compressedImage);
@@ -74,7 +78,11 @@ export default async function updateProfile(
       );
 
       profilePictureUrl = await client.expression.create(
-        compressedImage,
+        {
+          data_base64: compressedImage,
+          name: "profile-picture",
+          file_type: "image/png",
+        },
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
       cacheImage(profilePictureUrl, compressedImage);
@@ -86,7 +94,11 @@ export default async function updateProfile(
       );
 
       profileThumbnailUrl = await client.expression.create(
-        compressedImage,
+        {
+          data_base64: compressedImage,
+          name: "profile-thumbnail",
+          file_type: "image/png",
+        },
         NOTE_IPFS_EXPRESSION_OFFICIAL
       );
       cacheImage(profileThumbnailUrl, compressedImage);

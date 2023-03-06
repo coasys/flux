@@ -32,7 +32,7 @@ class PostModel extends EntryModel {
       },
       image: {
         predicate: IMAGE,
-        type: String,
+        type: Object,
         resolve: false,
         languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
       },
