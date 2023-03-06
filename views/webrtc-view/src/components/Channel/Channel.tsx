@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "preact/hooks";
+import { useContext, useEffect, useRef, useState } from "preact/hooks";
 import useWebRTC from "../../hooks/useWebrtc";
 import getMe, { Me } from "utils/api/getMe";
 
@@ -11,9 +11,14 @@ import Notifications from "../Notifications";
 import UiContext from "../../context/UiContext";
 import Disclaimer from "../Disclaimer";
 import Overlay from "../Overlay/Overlay";
+import useIntersectionObserver from "../../hooks/useIntersectionObserver";
 
 export default function Channel({ source, uuid }) {
   const [agent, setAgent] = useState<Me | null>(null);
+  const wrapperEl = useRef<HTMLDivElement | null>(null);
+
+  const wrapperObserver = useIntersectionObserver(wrapperEl, {});
+  const isPageActive = !!wrapperObserver?.isIntersecting;
 
   const {
     state: { showSettings },
@@ -21,6 +26,7 @@ export default function Channel({ source, uuid }) {
   } = useContext(UiContext);
 
   const webRTC = useWebRTC({
+    enabled: isPageActive,
     source,
     uuid,
     events: {
@@ -42,7 +48,7 @@ export default function Channel({ source, uuid }) {
   }, [agent]);
 
   return (
-    <section className={styles.outer}>
+    <section className={styles.outer} ref={wrapperEl}>
       {!webRTC.hasJoined && (
         <div className={styles.join}>
           <j-flex a="center" direction="column">

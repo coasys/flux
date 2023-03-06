@@ -6,6 +6,7 @@ import getMe, { Me } from "utils/api/getMe";
 import * as localstorage from "utils/helpers/localStorage";
 
 type Props = {
+  enabled: boolean;
   source: string;
   uuid: string;
   events?: {
@@ -34,7 +35,12 @@ export type WebRTC = {
   onChangeAudio: (deviceId: string) => void;
 };
 
-export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
+export default function useWebRTC({
+  enabled,
+  source,
+  uuid,
+  events,
+}: Props): WebRTC {
   const manager = useRef<WebRTCManager>();
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [devicesEnumerated, setDevicesEnumerated] = useState(false);
@@ -73,10 +79,10 @@ export default function useWebRTC({ source, uuid, events }: Props): WebRTC {
         }
       );
     }
-    if (!permissionGranted) {
+    if (enabled && !permissionGranted) {
       askForPermission();
     }
-  }, [permissionGranted]);
+  }, [enabled, permissionGranted]);
 
   // Get user devices
   useEffect(() => {
