@@ -79,8 +79,16 @@ export default async function createCommunity({
     const community = await Community.create({
       name,
       description,
-      image: compressedImage,
-      thumbnail,
+      image: {
+        data_base64: compressedImage,
+        name: "profile-image",
+        file_type: "image/png",
+      },
+      thumbnail: {
+        data_base64: thumbnail,
+        name: "profile-image",
+        file_type: "image/png",
+      },
     });
 
     await Community.addMember({ did: author });
