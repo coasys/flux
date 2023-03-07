@@ -81,12 +81,12 @@ export default async function createCommunity({
       description,
       image: compressedImage ? {
         data_base64: compressedImage,
-        name: "profile-image",
+        name: "community-image",
         file_type: "image/png",
       } : undefined,
       thumbnail: thumbnail ? {
         data_base64: thumbnail,
-        name: "profile-image",
+        name: "community-image",
         file_type: "image/png",
       } : undefined,
     };
