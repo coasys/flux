@@ -20,10 +20,6 @@ import getMe from "./getMe";
 import type { Me } from "./getMe";
 import getMessage from "./getMessage";
 import getMessages from "./getMessages";
-import {
-  findNeighbourhood,
-  getNeighbourhoodLink,
-} from "./getNeighbourhoodLink";
 import getPerspectiveMeta from "./getPerspectiveMeta";
 import getProfile from "./getProfile";
 import {
@@ -75,7 +71,6 @@ export {
   getMe,
   getMessage,
   getMessages,
-  getNeighbourhoodLink,
   getPerspectiveMeta,
   getProfile,
   getSDNALinkLiteral,
@@ -93,5 +88,4 @@ export {
   createAgentWebLink,
   getAgentWebLinks,
   getAd4mProfile,
-  findNeighbourhood,
 };

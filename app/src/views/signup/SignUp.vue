@@ -232,7 +232,7 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   display: grid;
-  place-items: center;
+  place-content: center;
   max-width: 800px;
   margin: 0 auto;
   align-items: center;

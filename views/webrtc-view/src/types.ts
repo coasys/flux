@@ -1,14 +1,12 @@
+import { Settings } from "./WebRTCManager";
+
 export type Peer = {
   did: string;
   connection: {
     peerConnection: RTCPeerConnection;
     dataChannel: RTCDataChannel;
   };
-  settings: {
-    video: boolean;
-    audio: boolean;
-    screen: boolean;
-  };
+  settings: Settings;
 };
 
 export type Reaction = {

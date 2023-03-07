@@ -1,6 +1,6 @@
 import { Entry, EntryType, PropertyMap, PropertyValueMap } from "../types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import subscribeToLinks from "../api/subscribeToLinks";
+import { subscribeToLinks } from "../api";
 import {
   Link,
   LinkExpression,

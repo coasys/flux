@@ -63,7 +63,7 @@
             />
             Hide muted channels
           </j-menu-item>
-           <j-menu-item @click="() => goToLeaveChannel()">
+          <j-menu-item @click="() => goToLeaveChannel()">
             <j-icon size="xs" slot="start" name="box-arrow-left" />
             Leave community
           </j-menu-item>
@@ -72,7 +72,6 @@
     </div>
     <div class="community-info">
       <Avatar
-        class="masked"
         size="xl"
         :initials="community.neighbourhood.name.charAt(0).toUpperCase()"
         :url="community.neighbourhood.image"
@@ -178,8 +177,8 @@ export default defineComponent({
       "setShowCommunityTweaks",
     ]),
     goToLeaveChannel() {
-      this.appStore.setActiveCommunity(this.community.neighbourhood.uuid)
-      this.appStore.setShowLeaveCommunity(true)
+      this.appStore.setActiveCommunity(this.community.neighbourhood.uuid);
+      this.appStore.setShowLeaveCommunity(true);
     },
     goToSettings() {
       this.setShowCommunitySettings(true);
@@ -208,12 +207,6 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.masked {
-  display: block;
-  -webkit-clip-path: url("#svgClip");
-  clip-path: url("#svgClip");
 }
 
 .community-info {

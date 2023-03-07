@@ -93,7 +93,7 @@
 <script lang="ts">
 import AppLayout from "@/layout/AppLayout.vue";
 import MainSidebar from "./main-sidebar/MainSidebar.vue";
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch } from "vue";
 
 import CreateCommunity from "@/containers/CreateCommunity.vue";
 import { CommunityState, ModalsState } from "@/store/types";
@@ -101,7 +101,13 @@ import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
 import { mapActions } from "pinia";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
-import { Community } from "utils/types";
+import { Community, EntryType } from "utils/types";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect";
+import { hydrateState } from "@/store/data/hydrateState";
+import semver from "semver";
+import { dependencies } from "../../../package.json";
+import { subscribeToLinks } from "utils/api";
+import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 
 export default defineComponent({
   name: "MainAppView",
@@ -109,6 +115,7 @@ export default defineComponent({
     return {
       dataStore: useDataStore(),
       isJoining: ref(false),
+      watcherStarted: ref(false),
       appStore: useAppStore(),
       isInit: ref(false),
     };
@@ -117,6 +124,27 @@ export default defineComponent({
     MainSidebar,
     AppLayout,
     CreateCommunity,
+  },
+  async mounted() {
+    if (!this.watcherStarted) {
+      this.startWatcher();
+    }
+
+    hydrateState();
+
+    const client = await getAd4mClient();
+
+    //Do version checking for ad4m / flux compatibility
+    const { ad4mExecutorVersion } = await client.runtime.info();
+
+    const isIncompatible = semver.gt(
+      dependencies["@perspect3vism/ad4m"],
+      ad4mExecutorVersion
+    );
+
+    if (isIncompatible) {
+      this.$router.push({ name: "update-ad4m" });
+    }
   },
   computed: {
     hasAlreadyJoinedTestingCommunity(): boolean {
@@ -162,6 +190,72 @@ export default defineComponent({
       } finally {
         this.isJoining = false;
       }
+    },
+    async startWatcher() {
+      this.watcherStarted = true;
+      const client = await getAd4mClient();
+      const watching: string[] = [];
+
+      watch(
+        this.dataStore.neighbourhoods,
+        async (newValue) => {
+          Object.entries(newValue).forEach(([perspectiveUuid]) => {
+            const alreadyListening = watching.includes(perspectiveUuid);
+            if (!alreadyListening) {
+              watching.push(perspectiveUuid);
+              subscribeToLinks({
+                perspectiveUuid,
+                added: async (link: LinkExpression) => {
+                  if (link.data.predicate === EntryType.Message) {
+                    try {
+                      const routeChannelId = this.$route.params.channelId;
+                      const channelId = link.data.source;
+                      const isCurrentChannel = routeChannelId === channelId;
+
+                      if (!isCurrentChannel) {
+                        this.dataStore.setHasNewMessages({
+                          communityId: perspectiveUuid,
+                          channelId,
+                          value: true,
+                        });
+
+                        const expression = Literal.fromUrl(
+                          link.data.target
+                        ).get();
+
+                        const expressionDate = new Date(expression.timestamp);
+                        let minuteAgo = new Date();
+                        minuteAgo.setSeconds(minuteAgo.getSeconds() - 30);
+                        if (expressionDate > minuteAgo) {
+                          this.dataStore.showMessageNotification({
+                            router: this.$router,
+                            communityId: perspectiveUuid,
+                            channelId,
+                            authorDid: expression.author,
+                            message: expression.data,
+                            timestamp: expression.timestamp,
+                          });
+                        }
+                      }
+                    } catch (e: any) {
+                      throw new Error(e);
+                    }
+                  }
+                },
+              });
+            }
+          });
+        },
+        { immediate: true, deep: true }
+      );
+
+      // @ts-ignore
+      client!.perspective.addPerspectiveRemovedListener((perspective) => {
+        const isCommunity = this.dataStore.getCommunity(perspective);
+        if (isCommunity) {
+          this.dataStore.removeCommunity({ communityId: perspective });
+        }
+      });
     },
   },
 });

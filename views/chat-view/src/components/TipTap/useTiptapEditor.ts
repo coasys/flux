@@ -20,7 +20,6 @@ import renderMention from "./renderMention";
 import emojiList from "node-emoji/lib/emoji";
 
 import styles from "./index.scss";
-import { NeighbourhoodLink } from "./NeighourhoodPlugin";
 import HardBreak from "@tiptap/extension-hard-break";
 import { useEffect, useRef } from "preact/hooks";
 
@@ -132,11 +131,11 @@ export default ({
           },
         }),
         Link.configure({
+          protocols: ["neighbourhood"],
           HTMLAttributes: {
             class: styles.linkStyles,
           },
         }),
-        NeighbourhoodLink,
         Bold,
         Strike,
         Italic,
@@ -232,13 +231,17 @@ export default ({
 
   useEffect(() => {
     if (value && currentMessageEdit) {
-      const text = editor.getText()
-      
+      const text = editor.getText();
+
       setTimeout(() => {
-        editor.chain().focus().setTextSelection(text.length+1).run()
+        editor
+          .chain()
+          .focus()
+          .setTextSelection(text.length + 1)
+          .run();
       }, 0);
     }
-  }, [value, currentMessageEdit, editor])
+  }, [value, currentMessageEdit, editor]);
 
   return editor;
 };

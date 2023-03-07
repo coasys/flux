@@ -6,20 +6,24 @@
     flex-direction: column;
     gap: 1rem;
     width: 100%;
-    margin: 0 auto;
+    max-width: calc(100vw - var(--j-space-500) * 2);
+    max-height: 80vh;
     font-family: var(--j-font-family);
     border-radius: var(--j-border-radius);
-    background: var(--j-color-ui-800);
+    background: var(--j-color-ui-50);
     overflow: hidden;
     cursor: pointer;
+    box-shadow: 0;
+    transition: max-width 0.3s ease-out, box-shadow 0.2s ease;
     aspect-ratio: 16/9;
 }
 
 @media (min-width: 800px) {
     .item {
         max-width: 50vw;
+        margin: 0 auto;
     }
-  }
+}
 
 .video {
     position: absolute;
@@ -27,8 +31,23 @@
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     opacity: 0;
+}
+
+.username {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin: var(--j-space-400);
+    padding: var(--j-space-200) var(--j-space-400);
+    color: white;
+    background: #0000002e;
+    border-radius: 10rem;
+}
+
+.avatar {
+    display: none;
 }
 
 .details,
@@ -44,7 +63,6 @@
     justify-content: center;
     flex-direction: column;
     gap: var(--j-space-300);
-    background: var(--j-color-ui-800);
     transition: all 0.3s ease;
 }
 
@@ -82,6 +100,12 @@
 .item[data-focused="true"]:hover .details {
     opacity: 0 !important;
 }
+.item[data-focused="true"] .username {
+    opacity: 0;
+}
+.item[data-focused="true"]:hover .username {
+    opacity: 1;
+}
 
 .item[data-minimised="true"] {
     display: none;
@@ -93,15 +117,20 @@
 .item[data-connecting="true"] .loading {
     display: flex;
 }
-
 .item[data-camera-enabled="true"] .video {
     opacity: 1;
 }
-.item[data-camera-enabled="true"] .details {
-    opacity: 0;
-}
 .item[data-camera-enabled="true"]:hover .details {
     opacity: 1;
+}
+.item[data-camera-enabled="false"] .details {
+    background: var(--j-color-ui-50);
+}
+.item[data-camera-enabled="false"] .avatar {
+    display: block;
+}
+.item[data-talking="true"] {
+    box-shadow: var(--j-color-focus) 0px 1px 4px, var(--j-color-focus) 0px 0px 0px 3px;
 }
 
 .settings {

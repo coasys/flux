@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect";
+import { ad4mConnect } from "@/ad4mConnect";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -56,11 +57,10 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   try {
-    const client = await getAd4mClient();
+    const isAuthenticated = await ad4mConnect.isAuthenticated();
 
-    const isLocked = await client.agent.isLocked();
-
-    if (!isLocked) {
+    if (isAuthenticated) {
+      const client = await ad4mConnect.getAd4mClient();
       const me = await client.agent.me();
 
       const fluxLinksFound = me?.perspective?.links.find((e) =>
@@ -68,8 +68,6 @@ router.beforeEach(async (to, from, next) => {
       );
 
       const isOnSignupOrMain = to.name === "signup" || to.name === "main";
-
-      console.log({ isLocked, to, from, isOnSignupOrMain, fluxLinksFound });
 
       if (fluxLinksFound && isOnSignupOrMain) {
         next("/home");

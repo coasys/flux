@@ -21,29 +21,25 @@
     />
   </head>
   <body>
-    <ad4m-connect
-      theme="dark"
-      appName="Flux"
-      appDesc="A social toolkit for the new internet"
-      appDomain="https://www.flux.io/"
-      capabilities='[{"with":{"domain":"*","pointers":["*"]},"can": ["*"]}]'
-      appiconpath="https://i.ibb.co/GnqjPJP/icon.png"
-      openonshortcut
-    ></ad4m-connect>
-
     <flux-app></flux-app>
 
     <script src="https://unpkg.com/@junto-foundation/junto-elements"></script>
+
     <script type="module">
-      import "@perspect3vism/ad4m-connect/dist/web.js";
+      import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
       import App from "./src/main.ts";
+
+      const ui = Ad4mConnectUI({
+        appName: "Graph App",
+        appDesc: "A graph app",
+        appDomain: "graph.forum.io",
+        capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
+      });
+
+      ui.connect();
 
       // Register the app as a web component
       customElements.define("flux-app", App);
-
-      // Connect Ad4m
-      const ad4m = document.querySelector("ad4m-connect");
-      ad4m.connect();
 
       initApp();
 

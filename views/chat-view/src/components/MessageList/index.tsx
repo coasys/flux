@@ -178,8 +178,8 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
 
     return () => {
       emojiPicker.removeEventListener("emoji-click", onEmojiClick);
-    }
-  }, [messages, emojiPicker])
+    };
+  }, [messages, emojiPicker]);
 
   async function onEmojiClick(e: any) {
     const unicode = e.detail.unicode;

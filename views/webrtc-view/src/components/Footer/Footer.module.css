@@ -21,16 +21,18 @@
 }
 
 .debug {
-    display: none;
+    display: block;
     position: fixed;
-    bottom: 0;
+    top: 4rem;
     right: 0;
-    padding: 3rem;
+    padding: var(--j-space-400)
 }
 
 @media (min-width: 800px) {
     .debug {
-        display: block;
+        bottom: 0;
+        top: initial;
+        padding: 3rem;
     }
   }
 

@@ -67,7 +67,9 @@ export default async function getProfile(did: string): Promise<Profile> {
       did: cleanedDid,
     };
 
-    dexie.save(cleanedDid, profile as Profile);
+    if (links.length != 0) {
+      dexie.save(cleanedDid, profile as Profile);
+    }
   }
 
   return profile;

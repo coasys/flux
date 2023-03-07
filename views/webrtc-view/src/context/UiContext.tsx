@@ -8,28 +8,32 @@ export type Notification = {
 };
 
 type State = {
-  settings: {
-    sounds: boolean;
-  };
+  showSettings: boolean;
   notifications: Notification[];
+  settings: {
+    muteSounds: boolean;
+  };
 };
 
 type ContextProps = {
   state: State;
   methods: {
     addNotification: (Notification: Notification) => void;
+    toggleShowSettings: (visible: boolean) => void;
   };
 };
 
 const initialState: ContextProps = {
   state: {
+    showSettings: false,
     notifications: [],
     settings: {
-      sounds: true,
+      muteSounds: true,
     },
   },
   methods: {
     addNotification: () => null,
+    toggleShowSettings: () => null,
   },
 };
 
@@ -60,6 +64,12 @@ export function UiProvider({ children }: any) {
                 ),
               }));
             }, 3000);
+          },
+          toggleShowSettings(visible: boolean) {
+            setState((oldState) => ({
+              ...oldState,
+              showSettings: visible,
+            }));
           },
         },
       }}
