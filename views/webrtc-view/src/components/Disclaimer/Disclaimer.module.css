@@ -9,3 +9,13 @@
     max-width: 350px;
     text-align: left;
 }
+
+@media (min-width: 800px) {
+    .wrapper {
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: var(--j-space-400);
+        margin: var(--j-space-400);
+    }
+}
