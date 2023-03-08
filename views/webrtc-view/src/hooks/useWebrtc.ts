@@ -120,6 +120,7 @@ export default function useWebRTC({
 
   useEffect(() => {
     if (source && uuid && agent && !isInitialised) {
+      console.log("BONANZA!");
       manager.current = new WebRTCManager({ source, uuid });
 
       manager.current.on(
@@ -190,10 +191,12 @@ export default function useWebRTC({
       setIsInitialised(true);
 
       return () => {
-        manager.current.leave();
+        if (hasJoined) {
+          manager.current.leave();
+        }
       };
     }
-  }, [source, uuid, isInitialised, agent]);
+  }, [source, uuid, isInitialised, hasJoined, agent]);
 
   async function onReaction(reaction: string) {
     await manager.current?.sendMessage("reaction", reaction);
