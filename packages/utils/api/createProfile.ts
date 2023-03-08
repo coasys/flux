@@ -4,7 +4,7 @@ import {
   JUNTO_AGENT,
   NOTE_IPFS_AUTHOR,
 } from "utils/constants/agents";
-import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
+import { FILE_STORAGE_LANGUAGE } from "utils/constants/languages";
 import {
   FLUX_PROFILE,
   HAS_EMAIL,
@@ -60,7 +60,7 @@ export default async ({
       JUNTO_AGENT,
       NOTE_IPFS_AUTHOR,
     ]);
-    await client.languages.byAddress(NOTE_IPFS_EXPRESSION_OFFICIAL);
+    await client.languages.byAddress(FILE_STORAGE_LANGUAGE);
 
     const additions = [] as Link[];
     const removals = [] as LinkExpression[];
@@ -79,7 +79,7 @@ export default async ({
           name: "profile-image",
           file_type: "image/png",
         },
-        NOTE_IPFS_EXPRESSION_OFFICIAL
+        FILE_STORAGE_LANGUAGE
       );
 
       const compressedpThumbnailImage = await blobToDataURL(
@@ -92,7 +92,7 @@ export default async ({
           name: "thumbnail-image",
           file_type: "image/png",
         },
-        NOTE_IPFS_EXPRESSION_OFFICIAL
+        FILE_STORAGE_LANGUAGE
       );
 
       additions.push(

@@ -1,5 +1,5 @@
 import { Profile } from "utils/types";
-import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "utils/constants/languages";
+import { FILE_STORAGE_LANGUAGE } from "utils/constants/languages";
 import {
   FLUX_PROFILE,
   HAS_BG_IMAGE,
@@ -67,7 +67,7 @@ export default async function updateProfile(
           name: "profile-background",
           file_type: "image/png",
         },
-        NOTE_IPFS_EXPRESSION_OFFICIAL
+        FILE_STORAGE_LANGUAGE
       );
       cacheImage(profileBackgroundUrl, compressedImage);
     }
@@ -83,7 +83,7 @@ export default async function updateProfile(
           name: "profile-picture",
           file_type: "image/png",
         },
-        NOTE_IPFS_EXPRESSION_OFFICIAL
+        FILE_STORAGE_LANGUAGE
       );
       cacheImage(profilePictureUrl, compressedImage);
     }
@@ -99,7 +99,7 @@ export default async function updateProfile(
           name: "profile-thumbnail",
           file_type: "image/png",
         },
-        NOTE_IPFS_EXPRESSION_OFFICIAL
+        FILE_STORAGE_LANGUAGE
       );
       cacheImage(profileThumbnailUrl, compressedImage);
     }

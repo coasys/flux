@@ -1,2 +1,2 @@
-export const NOTE_IPFS_EXPRESSION_OFFICIAL =
-  "QmTRdJ5p9nNRPw1yiJYrkZYu5LyqU7fAYxVFL85kmkW5g8";
+export const FILE_STORAGE_LANGUAGE =
+  "QmcnQU29z8DhfCrzEVEQ43okojB5AGMwqyG1gad8gojfZn";

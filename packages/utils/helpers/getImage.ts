@@ -1,7 +1,7 @@
 import { DexieIPFS } from "../helpers/storageHelpers";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { cacheImage } from "./cacheImage";
-import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "../constants/languages";
+import { FILE_STORAGE_LANGUAGE } from "../constants/languages";
 
 //Uses the dexie store to check for cached ipfs images and if it doesn't find it, it fetches it from ad4m and saves it to the dexie store
 export async function getImage(expUrl: string): Promise<string> {
@@ -19,7 +19,7 @@ export async function getImage(expUrl: string): Promise<string> {
 
           if (
             expression &&
-            expression.language.address === NOTE_IPFS_EXPRESSION_OFFICIAL
+            expression.language.address === FILE_STORAGE_LANGUAGE
           ) {
             try {
               const base64 = JSON.parse(expression.data).data_base64;

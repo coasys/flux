@@ -5,7 +5,7 @@ import {
   SELF,
   THUMBNAIL,
 } from "../../constants/communityPredicates";
-import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "../../constants/languages";
+import { FILE_STORAGE_LANGUAGE } from "../../constants/languages";
 import EntryModel from "../../helpers/model";
 import { EntryType, Entry } from "../../types";
 import MemberModel from "../member";
@@ -39,13 +39,13 @@ class CommunityModel extends EntryModel {
         predicate: IMAGE,
         type: Object,
         resolve: false,
-        languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
+        languageAddress: FILE_STORAGE_LANGUAGE,
       },
       thumbnail: {
         predicate: THUMBNAIL,
         type: Object,
         resolve: false,
-        languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
+        languageAddress: FILE_STORAGE_LANGUAGE,
       },
       channels: {
         predicate: EntryType.Channel,
