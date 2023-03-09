@@ -225,6 +225,12 @@ export default class WebRTCManager {
   async handleIceCandidate(fromDid: string, candidate: RTCIceCandidate) {
     const connection = this.connections.get(fromDid);
     // Make sure we have a remote description;
+    if (connection && !connection.peerConnection.currentRemoteDescription) {
+      console.log(
+        "🔴 Skipping ICE candidate adding as currentRemoteDescription is ",
+        connection.peerConnection.currentRemoteDescription
+      );
+    }
     if (connection && connection.peerConnection.currentRemoteDescription) {
       connection.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
     }
