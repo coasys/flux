@@ -13,7 +13,11 @@ export const dataURItoBlob = (dataURI: string) => {
 export const blobToDataURL = (blob: Blob): Promise<string> => {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
+    reader.onload = () => {
+      const result = reader.result as string;
+      const base64 = result.split(",")[1];
+      resolve(base64 as string);
+    };
     reader.onerror = () => reject(reader.error);
     reader.onabort = () => reject(new Error("Read aborted"));
     reader.readAsDataURL(blob);
@@ -21,7 +25,11 @@ export const blobToDataURL = (blob: Blob): Promise<string> => {
 };
 
 // Resizes the image by creating a canvas and resizing it to the resized image
-export const resizeImage = (file: any, percentage: number, maxSize = 80): Promise<Blob> => {
+export const resizeImage = (
+  file: any,
+  percentage: number,
+  maxSize = 80
+): Promise<Blob> => {
   const reader = new FileReader();
   const image = new Image();
   const canvas = document.createElement("canvas");
