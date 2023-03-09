@@ -1,7 +1,7 @@
 {
   "name": "@junto-foundation/chat-view",
-  "version": "0.5.4",
-  "description": "",
+  "version": "0.5.5",
+  "description": "Chat with your friends real time",
   "main": "./dist/main.js",
   "module": "./dist/main.js",
   "files": [
@@ -14,7 +14,9 @@
     "dev": "NODE_ENV=dev node esbuild.js",
     "release": "np --no-tests"
   },
-  "keywords": [],
+  "keywords": [
+    "flux-app"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {

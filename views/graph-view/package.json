@@ -1,6 +1,7 @@
 {
   "name": "@junto-foundation/graph-view",
   "version": "0.5.4",
+  "description": "A interactive graph to see your community data",
   "type": "module",
   "files": [
     "dist"
@@ -21,10 +22,11 @@
     "build": "vite build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "flux-app"
+  ],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "3d-force-graph": "^1.70.19",
     "@junto-foundation/junto-elements": "*",

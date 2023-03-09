@@ -46,12 +46,7 @@
               v-if="channel.views.length > 1"
               :name="channel.expanded ? 'chevron-down' : 'chevron-right'"
             />
-            <j-icon
-              slot="start"
-              size="xs"
-              v-else
-              :name="getIcon(channel.views[0])"
-            ></j-icon>
+            <j-icon slot="start" size="xs" v-else></j-icon>
           </j-menu-item>
           <div class="channel-views" v-if="channel.expanded">
             <j-menu-item
@@ -60,11 +55,10 @@
                 channel.id === $route.params.channelId
               "
               size="sm"
-              v-for="view in getViewOptions(channel.views)"
-              @click="() => handleChangeView(channel.id, view.type)"
+              v-for="view in channel.views"
+              @click="() => handleChangeView(channel.id, view)"
             >
-              <j-icon size="xs" slot="start" :name="view.icon"></j-icon>
-              {{ view.title }}
+              {{ view }}
             </j-menu-item>
           </div>
         </div>
@@ -116,8 +110,6 @@ import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { deleteChannel } from "utils/api/deleteChannel";
-import { ChannelView } from "utils/types";
-import { viewOptions as channelViewOptions } from "@/constants";
 
 export default defineComponent({
   setup() {
@@ -161,7 +153,7 @@ export default defineComponent({
       this.appStore.setActiveChannel(id);
       this.appStore.setShowEditChannel(true);
     },
-    handleChangeView(channelId: string, view: ChannelView) {
+    handleChangeView(channelId: string, view: string) {
       this.dataStore.setCurrentChannelView({ channelId, view });
       this.navigateToChannel(channelId);
     },
@@ -183,12 +175,6 @@ export default defineComponent({
       } else {
         throw new Error("Did not find channel");
       }
-    },
-    getViewOptions(views: ChannelView[]) {
-      return channelViewOptions.filter((o) => views.includes(o.type));
-    },
-    getIcon(view: ChannelView) {
-      return channelViewOptions.find((o) => o.type === view)?.icon || "hash";
     },
     async deleteChannel(channelId: string) {
       const channel = this.channels.find((e) => e.id === channelId);

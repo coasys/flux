@@ -41,19 +41,15 @@
 import { defineComponent, ref } from "vue";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
-import { ChannelView } from "utils/types";
-import ChannnelViewOptions from "@/components/channel-view-options/ChannelViewOptions.vue";
-import { viewOptions } from "@/constants";
 
 export default defineComponent({
   props: ["channelId"],
   emits: ["cancel", "submit"],
-  components: { ChannnelViewOptions },
   setup() {
     return {
       name: ref(""),
       description: ref(""),
-      views: ref<ChannelView[]>([]),
+      views: ref<string[]>([]),
       isSaving: ref(false),
       appStore: useAppStore(),
       dataStore: useDataStore(),
@@ -67,7 +63,7 @@ export default defineComponent({
       return this.dataStore.channels[this.channelId];
     },
     viewOptions() {
-      return viewOptions;
+      return [];
     },
   },
   watch: {

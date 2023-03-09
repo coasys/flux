@@ -24,16 +24,15 @@
             </j-flex>
           </j-box>
           <div class="channel-view__tabs">
-            <label class="channel-view-tab" v-for="view in filteredViewOptions">
+            <label class="channel-view-tab" v-for="view in channel.views">
               <input
-                :name="channel.id"
+                :name="view"
                 type="radio"
-                :checked.prop="view.type === currentView"
-                :value.prop="view.type"
+                :checked.prop="view === currentView"
+                :value.prop="view"
                 @change="changeCurrentView"
               />
-              <j-icon size="xs" :name="view.icon"></j-icon>
-              <span>{{ view.title }}</span>
+              <span>{{ view }}</span>
             </label>
             <j-tooltip placement="auto" title="Manage views">
               <j-button
@@ -66,50 +65,19 @@
       </div>
     </div>
 
-    <forum-view
-      v-show="currentView === ChannelView.Forum"
-      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Forum)"
-      class="perspective-view"
-      :source="channel.id"
-      :perspective="communityId"
-      @agent-click="onAgentClick"
-      @channel-click="onChannelClick"
-      @neighbourhood-click="onNeighbourhoodClick"
-      @hide-notification-indicator="onHideNotificationIndicator"
-    ></forum-view>
-    <graph-view
-      v-show="currentView === ChannelView.Graph"
-      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Graph)"
-      class="perspective-view"
-      :source="channel.id"
-      :perspective="communityId"
-      @agent-click="onAgentClick"
-      @channel-click="onChannelClick"
-      @neighbourhood-click="onNeighbourhoodClick"
-      @hide-notification-indicator="onHideNotificationIndicator"
-    ></graph-view>
-    <webrtc-view
-      v-show="currentView === ChannelView.Voice"
-      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Voice)"
-      class="perspective-view"
-      :source="channel.id"
-      :perspective="communityId"
-      @agent-click="onAgentClick"
-      @channel-click="onChannelClick"
-      @neighbourhood-click="onNeighbourhoodClick"
-      @hide-notification-indicator="onHideNotificationIndicator"
-    ></webrtc-view>
-    <chat-view
-      v-show="currentView === ChannelView.Chat"
-      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Chat)"
-      class="perspective-view"
-      :source="channel.id"
-      :perspective="communityId"
-      @agent-click="onAgentClick"
-      @channel-click="onChannelClick"
-      @neighbourhood-click="onNeighbourhoodClick"
-      @hide-notification-indicator="onHideNotificationIndicator"
-    ></chat-view>
+    <div style="height: 100%" v-for="(value, key) in wcNames">
+      <component
+        v-if=""
+        :is="key"
+        :source="channel.id"
+        :perspective="communityId"
+        @agent-click="onAgentClick"
+        @channel-click="onChannelClick"
+        @neighbourhood-click="onNeighbourhoodClick"
+        @hide-notification-indicator="onHideNotificationIndicator"
+      >
+      </component>
+    </div>
 
     <j-modal
       size="xs"
@@ -133,10 +101,6 @@
 </template>
 
 <script lang="ts">
-import ForumView from "@junto-foundation/forum-view";
-import ChatView from "@junto-foundation/chat-view";
-import GraphView from "@junto-foundation/graph-view";
-import VoiceView from "@junto-foundation/webrtc-view";
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
@@ -144,8 +108,7 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Profile from "@/containers/Profile.vue";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
-import { ChannelView } from "utils/types";
-import { viewOptions } from "@/constants";
+import { generateWCName } from "@/utils/wcName";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 
 interface MentionTrigger {
@@ -163,8 +126,8 @@ export default defineComponent({
   },
   setup() {
     return {
-      ChannelView: ChannelView,
-      selectedViews: ref<ChannelView[]>([]),
+      wcNames: ref({}) as any,
+      selectedViews: ref<string[]>([]),
       showEditChannel: ref(false),
       selectedChannelView: ref("chat"),
       appStore: useAppStore(),
@@ -178,35 +141,13 @@ export default defineComponent({
       isExpanded: ref(false),
     };
   },
-  async mounted() {
-    if (!customElements.get("chat-view")) {
-      const module = await import(`@junto-foundation/chat-view`);
-      customElements.define("chat-view", module.default);
-    }
-    if (!customElements.get("forum-view")) {
-      const module = await import(`@junto-foundation/forum-view`);
-      customElements.define("forum-view", module.default);
-    }
-    if (!customElements.get("graph-view")) {
-      const module = await import(`@junto-foundation/graph-view`);
-      customElements.define("graph-view", module.default);
-    }
-    if (!customElements.get("webrtc-view")) {
-      const module = await import(`@junto-foundation/webrtc-view`);
-      customElements.define("webrtc-view", module.default);
-    }
-  },
+
   computed: {
     sameAgent() {
       return this.channel.author === this.userStore.agent.did;
     },
     currentView(): string {
       return this.channel.currentView || this.channel.views[0] || "";
-    },
-    filteredViewOptions() {
-      return viewOptions.filter((view) =>
-        this.channel.views.includes(view.type)
-      );
     },
     community(): CommunityState {
       const communityId = this.communityId;
@@ -216,7 +157,28 @@ export default defineComponent({
       return this.dataStore.channels[this.channelId];
     },
   },
+  watch: {
+    ["channel.views"]: {
+      handler: function (val) {
+        val.forEach(async (name: string) => {
+          const wcName = await generateWCName(name);
+          this.wcNames[wcName] = true;
+          console.log({ wcName });
+          if (!customElements.get(wcName)) {
+            const module = await import(
+              `https://cdn.jsdelivr.net/npm/${name}/+esm`
+            );
+            customElements.define(wcName, module.default);
+          }
+        });
+      },
+      immediate: true,
+    },
+  },
   methods: {
+    generateWCName(str: string) {
+      return generateWCName(str);
+    },
     goToEditChannel(id: string) {
       this.appStore.setActiveChannel(id);
       this.appStore.setShowEditChannel(true);

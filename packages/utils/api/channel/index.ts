@@ -1,15 +1,15 @@
 import { CHANNEL_VIEW, NAME } from "../../constants/communityPredicates";
 import EntryModel from "../../helpers/model";
-import { EntryType, Entry, ChannelView } from "../../types";
+import { EntryType, Entry } from "../../types";
 
 export interface Channel extends Entry {
   name: string;
-  views: ChannelView[];
+  views: string[];
 }
 
 export interface UpdateChannel {
   name?: string;
-  views?: ChannelView[];
+  views?: string[];
 }
 
 class ChannelModel extends EntryModel {
@@ -33,7 +33,7 @@ class ChannelModel extends EntryModel {
     };
   }
 
-  async create(data: { name: string; views: ChannelView[] }) {
+  async create(data: { name: string; views: string[] }) {
     return super.create(data) as Promise<Channel>;
   }
 

@@ -25,10 +25,25 @@
           <j-box pb="300">
             <j-text variant="label">Select at least one view</j-text>
           </j-box>
-          <ChannelViewOptions
-            :views="selectedViews"
-            @change="(views: ChannelView[]) => (selectedViews = views)"
-          ></ChannelViewOptions>
+
+          <j-flex direction="column" gap="500">
+            <j-box p="500" bg="ui-100" v-for="pkg in packages" :key="pkg.name">
+              <j-flex a="center" j="between">
+                <div>
+                  <j-text variant="heading-sm">{{ pkg.name }}</j-text>
+                  <j-text>{{ pkg.description }}</j-text>
+                </div>
+                <div>
+                  <j-button
+                    :variant="isSelected(pkg) ? 'subtle' : 'primary'"
+                    @click="() => toggleView(pkg)"
+                  >
+                    {{ isSelected(pkg) ? "Remove" : "Add" }}
+                  </j-button>
+                </div>
+              </j-flex>
+            </j-box>
+          </j-flex>
         </j-box>
 
         <j-box mt="500">
@@ -54,14 +69,15 @@
 
 <script lang="ts">
 import { useDataStore } from "@/store/data";
-import { isValid } from "@/utils/validation";
-import { ChannelView } from "utils/types";
 import { defineComponent } from "vue";
-import ChannelViewOptions from "@/components/channel-view-options/ChannelViewOptions.vue";
+import { getPerspectiveViews } from "@/utils/npmApi";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
-  components: { ChannelViewOptions },
+  async created() {
+    const res = await getPerspectiveViews();
+    this.packages = res.map((r: any) => r.package);
+  },
   setup() {
     const dataStore = useDataStore();
 
@@ -71,7 +87,8 @@ export default defineComponent({
   },
   data() {
     return {
-      selectedViews: [] as ChannelView[],
+      packages: [] as any,
+      selectedViews: [] as string[],
       channelView: "chat",
       channelName: "",
       isCreatingChannel: false,
@@ -89,6 +106,15 @@ export default defineComponent({
     },
   },
   methods: {
+    isSelected(pkg: any) {
+      return this.selectedViews.includes(pkg.name);
+    },
+    toggleView(pkg: any) {
+      const isSelected = this.selectedViews.includes(pkg.name);
+      this.selectedViews = isSelected
+        ? this.selectedViews.filter((n) => n !== pkg.name)
+        : [...this.selectedViews, pkg.name];
+    },
     async createChannel() {
       const communityId = this.$route.params.communityId as string;
       const name = this.channelName;

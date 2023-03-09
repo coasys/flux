@@ -1,6 +1,7 @@
 {
   "name": "@junto-foundation/webrtc-view",
-  "version": "1.0.0",
+  "description": "Chat over audio & video with your community",
+  "version": "0.0.1",
   "type": "module",
   "files": [
     "dist"
@@ -30,10 +31,11 @@
     "build": "vite build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "flux-app"
+  ],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "@junto-foundation/junto-elements": "^0.4.5",
     "@perspect3vism/ad4m": "0.2.16",

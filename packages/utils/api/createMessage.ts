@@ -18,9 +18,12 @@ export default async function ({
 }: Payload) {
   try {
     const client = await getAd4mClient();
+
     const exp = literal
       ? literal
       : await client.expression.create(message, "literal");
+
+    console.log({ persp: client.perspective });
 
     const result = await client.perspective.addLink(
       perspectiveUuid,

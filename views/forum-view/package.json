@@ -1,7 +1,7 @@
 {
   "name": "@junto-foundation/forum-view",
   "version": "0.5.4",
-  "description": "",
+  "description": "Create posts and share with your community",
   "type": "module",
   "files": [
     "dist"
@@ -23,7 +23,9 @@
     "dev:dist": "vite build --watch",
     "release": "np --no-tests"
   },
-  "keywords": [],
+  "keywords": [
+    "flux-app"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
