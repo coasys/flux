@@ -23,7 +23,7 @@ const rtcConfig = {
       credential: "openrelay",
     },
   ],
-  iceTransportPolicy: "relay" as RTCIceTransportPolicy,
+  iceCandidatePoolSize: 10,
 };
 
 async function getLinkFromPerspective(expression: PerspectiveExpression) {
