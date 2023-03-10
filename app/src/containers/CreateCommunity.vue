@@ -208,7 +208,7 @@ export default defineComponent({
       joiningLink: "",
       newCommunityName: "",
       newCommunityDesc: "",
-      newProfileImage: "",
+      newProfileImage: undefined,
       isJoiningCommunity: false,
       isCreatingCommunity: false,
       nonFluxPerspectives: [] as PerspectiveProxy[],

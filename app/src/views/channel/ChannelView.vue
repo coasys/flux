@@ -68,6 +68,7 @@
 
     <forum-view
       v-show="currentView === ChannelView.Forum"
+      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Forum)"
       class="perspective-view"
       :source="channel.id"
       :perspective="communityId"
@@ -78,6 +79,7 @@
     ></forum-view>
     <graph-view
       v-show="currentView === ChannelView.Graph"
+      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Graph)"
       class="perspective-view"
       :source="channel.id"
       :perspective="communityId"
@@ -88,6 +90,7 @@
     ></graph-view>
     <webrtc-view
       v-show="currentView === ChannelView.Voice"
+      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Voice)"
       class="perspective-view"
       :source="channel.id"
       :perspective="communityId"
@@ -98,6 +101,7 @@
     ></webrtc-view>
     <chat-view
       v-show="currentView === ChannelView.Chat"
+      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Chat)"
       class="perspective-view"
       :source="channel.id"
       :perspective="communityId"
