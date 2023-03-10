@@ -32,7 +32,11 @@ export default defineComponent({
     url: {
       handler(url: string) {
         if (url) {
-          this.getProfileImage(url);
+          if (url.includes('base64')) {
+            this.realSrc = url
+          } else {
+            this.getProfileImage(url);
+          }
         } else {
           this.realSrc = null;
         }
