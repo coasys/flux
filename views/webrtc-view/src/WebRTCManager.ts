@@ -331,6 +331,14 @@ export default class WebRTCManager {
         this.connections.delete(remoteDid);
       }
 
+      if (c.iceConnectionState === "failed") {
+        this.connections.delete(remoteDid);
+      }
+
+      if (c.iceConnectionState === "closed") {
+        this.connections.delete(remoteDid);
+      }
+
       this.callbacks[Event.CONNECTION_STATE].forEach((cb) => {
         cb(remoteDid, c.iceConnectionState);
       });
