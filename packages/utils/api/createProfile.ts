@@ -4,7 +4,7 @@ import {
   JUNTO_AGENT,
   NOTE_IPFS_AUTHOR,
 } from "../constants";
-import { FILE_STORAGE_LANGUAGE } from "utils/constants/languages";
+import { FILE_STORAGE_LANGUAGE } from "../constants/languages";
 import {
   FLUX_PROFILE,
   HAS_EMAIL,
