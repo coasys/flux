@@ -185,18 +185,29 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   async getData(id?: string): Promise<SubjectClass | null> {
     const entry = await this.get(id);
 
-    return await this.getSubjectData(entry);
+    if (entry) {
+      return await this.getSubjectData(entry);
+    }
+
+    return null
   }
 
   private async getSubjectData(entry: any) {
     const dataEntry = new SubjectEntry(entry, this.perspective!);
     await dataEntry.load();
-
+    
     // @ts-ignore
     const tempModel = new this.tempSubject();
 
     for (const [key] of Object.entries(this.subject)) {
-      tempModel[key] = await entry[key];
+      const value = await entry[key];
+
+      if (this.tempSubject.prototype.__properties[key]?.transform) {
+        const transform = this.tempSubject.prototype.__properties[key].transform;
+        tempModel[key] = transform(value)
+      } else {
+        tempModel[key] = value;
+      }
     }
 
     return {
