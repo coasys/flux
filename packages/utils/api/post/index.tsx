@@ -65,7 +65,11 @@ class PostModel extends EntryModel {
 
   create(data: {
     title: string;
-    image?: string;
+    image?: {
+      data_base64: string,
+      name: string,
+      file_type: string,
+    };
     body?: string;
     startDate?: string;
     endDate?: string;
