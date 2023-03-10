@@ -65,19 +65,19 @@
       </div>
     </div>
 
-    <div style="height: 100%" v-for="(value, key) in wcNames">
+    <template v-for="(name, wcName) in wcNames">
       <component
-        v-if=""
-        :is="key"
+        style="display: block; height: calc(100% - var(--app-header-height))"
+        v-show="channel.currentView === name"
+        :is="wcName"
         :source="channel.id"
         :perspective="communityId"
         @agent-click="onAgentClick"
         @channel-click="onChannelClick"
         @neighbourhood-click="onNeighbourhoodClick"
         @hide-notification-indicator="onHideNotificationIndicator"
-      >
-      </component>
-    </div>
+      />
+    </template>
 
     <j-modal
       size="xs"
@@ -159,15 +159,30 @@ export default defineComponent({
   },
   watch: {
     ["channel.views"]: {
-      handler: function (val) {
+      handler: function (val, oldVal) {
+        // Remove old views
+        oldVal?.forEach(async (v: string) => {
+          const wcName = await generateWCName(v);
+
+          if (!val.includes(v)) {
+            delete this.wcNames[wcName];
+          }
+        });
+
+        // Add new views
         val.forEach(async (name: string) => {
           const wcName = await generateWCName(name);
-          this.wcNames[wcName] = true;
-          console.log({ wcName });
+          this.wcNames[wcName] = name;
+
           if (!customElements.get(wcName)) {
             const module = await import(
               `https://cdn.jsdelivr.net/npm/${name}/+esm`
             );
+
+            const el = module.default;
+
+            console.log(el instanceof HTMLElement);
+
             customElements.define(wcName, module.default);
           }
         });

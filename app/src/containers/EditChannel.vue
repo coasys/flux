@@ -11,11 +11,24 @@
         @input="(e) => (name = e.target.value)"
       ></j-input>
 
-      <ChannnelViewOptions
-        :views="views"
-        @change="(v: ChannelView[]) => (views = v)"
-        :channelId="channelId"
-      ></ChannnelViewOptions>
+      <j-flex direction="column" gap="500">
+        <j-box p="500" bg="ui-100" v-for="pkg in packages" :key="pkg.name">
+          <j-flex a="center" j="between">
+            <div>
+              <j-text variant="heading-sm">{{ pkg.name }}</j-text>
+              <j-text>{{ pkg.description }}</j-text>
+            </div>
+            <div>
+              <j-button
+                :variant="isSelected(pkg) ? 'subtle' : 'primary'"
+                @click="() => toggleView(pkg)"
+              >
+                {{ isSelected(pkg) ? "Remove" : "Add" }}
+              </j-button>
+            </div>
+          </j-flex>
+        </j-box>
+      </j-flex>
 
       <j-box mt="500">
         <j-flex direction="row" j="end" gap="300">
@@ -41,12 +54,18 @@
 import { defineComponent, ref } from "vue";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
+import { getPerspectiveViews } from "@/utils/npmApi";
 
 export default defineComponent({
   props: ["channelId"],
   emits: ["cancel", "submit"],
+  async created() {
+    const res = await getPerspectiveViews();
+    this.packages = res.map((r: any) => r.package);
+  },
   setup() {
     return {
+      packages: ref([]) as any,
       name: ref(""),
       description: ref(""),
       views: ref<string[]>([]),
@@ -62,9 +81,6 @@ export default defineComponent({
     channel() {
       return this.dataStore.channels[this.channelId];
     },
-    viewOptions() {
-      return [];
-    },
   },
   watch: {
     channel: {
@@ -78,6 +94,15 @@ export default defineComponent({
     },
   },
   methods: {
+    toggleView(pkg: any) {
+      const isSelected = this.views.includes(pkg.name);
+      this.views = isSelected
+        ? this.views.filter((n) => n !== pkg.name)
+        : [...this.views, pkg.name];
+    },
+    isSelected(pkg: any) {
+      return this.views.includes(pkg.name);
+    },
     async updateChannel() {
       this.isSaving = true;
       this.dataStore
