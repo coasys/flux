@@ -5,7 +5,7 @@ import {
   THUMBNAIL,
   ENTRY_TYPE,
 } from "../../constants/communityPredicates";
-import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "../../constants";
+import { FILE_STORAGE_LANGUAGE } from "../../constants/languages";
 import { EntryType, Entry } from "../../types";
 
 import {
@@ -28,10 +28,12 @@ export class Community {
   @subjectProperty({ through: DESCRIPTION, writable: true, resolveLanguage: "literal" })
   description: string;
 
-  @subjectProperty({ through: IMAGE, writable: true, resolveLanguage: NOTE_IPFS_EXPRESSION_OFFICIAL })
+  // @ts-ignore
+  @subjectProperty({ through: IMAGE, writable: true, resolveLanguage: FILE_STORAGE_LANGUAGE, transform: (data) => `data:image/png;base64,${data.data_base64}`})
   image: string;
 
-  @subjectProperty({ through: THUMBNAIL, writable: true, resolveLanguage: NOTE_IPFS_EXPRESSION_OFFICIAL })
+  // @ts-ignore
+  @subjectProperty({ through: THUMBNAIL, writable: true, resolveLanguage: FILE_STORAGE_LANGUAGE, transform: (data) => `data:image/png;base64,${data.data_base64}` })
   thumbnail: string;
 
   @subjectCollection({ through: EntryType.Channel })

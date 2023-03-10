@@ -1,6 +1,6 @@
 {
   "name": "utils",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "",
   "type": "module",
   "files": [
@@ -46,7 +46,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@perspect3vism/ad4m": "0.2.16",
+    "@perspect3vism/ad4m": "0.3.0",
     "date-fns": "^2.28.0",
     "dexie": "^3.2.0",
     "dexie-react-hooks": "^1.1.1",
@@ -61,6 +61,6 @@
   "peerDependencies": {
     "react": "^17.0.2",
     "vue": "^3.2.12",
-    "@perspect3vism/ad4m-connect": "0.2.15-alpha.4"
+    "@perspect3vism/ad4m-connect": "0.3.0"
   }
 }

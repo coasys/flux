@@ -19,7 +19,7 @@ export interface Payload {
 export default async function createCommunity({
   name,
   description = "",
-  image = "",
+  image = undefined,
   perspectiveUuid,
 }: Payload): Promise<FluxCommunity> {
   try {
@@ -58,8 +58,8 @@ export default async function createCommunity({
       );
     }
 
-    let thumbnail = null;
-    let compressedImage = null;
+    let thumbnail: string | null = null;
+    let compressedImage: string | null = null;
 
     if (image) {
       compressedImage = await blobToDataURL(
@@ -78,12 +78,22 @@ export default async function createCommunity({
       perspectiveUuid: perspective.uuid,
     });
 
-    const community = await CommunityModel.create({
+    const metaData = {
       name,
       description,
-      image: compressedImage,
-      thumbnail,
-    });
+      image: compressedImage ? {
+        data_base64: compressedImage,
+        name: "community-image",
+        file_type: "image/png",
+      } : undefined,
+      thumbnail: thumbnail ? {
+        data_base64: thumbnail,
+        name: "community-image",
+        file_type: "image/png",
+      } : undefined,
+    };
+
+    const community = await CommunityModel.create(metaData);
 
     const MemberFactory = new SubjectRepository(Member, {
       perspectiveUuid: perspective.uuid,

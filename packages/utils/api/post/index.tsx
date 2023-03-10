@@ -7,7 +7,7 @@ import {
   URL,
   ENTRY_TYPE,
 } from "../../constants/communityPredicates";
-import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "../../constants";
+import { FILE_STORAGE_LANGUAGE } from "../../constants/languages";
 import { EntryType } from "../../types";
 import {
   SDNAClass,
@@ -32,7 +32,7 @@ export class Post {
   @subjectProperty({ through: BODY, writable: true, resolveLanguage: "literal" })
   body: string;
 
-  @subjectProperty({ through: IMAGE, writable: true, resolveLanguage: NOTE_IPFS_EXPRESSION_OFFICIAL })
+  @subjectProperty({ through: IMAGE, writable: true, resolveLanguage: FILE_STORAGE_LANGUAGE })
   image: string;
 
   @subjectProperty({ through: START_DATE, writable: true, resolveLanguage: "literal" })

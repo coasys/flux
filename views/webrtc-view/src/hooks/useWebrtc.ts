@@ -69,9 +69,30 @@ export default function useWebRTC({
   // Ask for permission
   useEffect(() => {
     async function askForPermission() {
-      navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(
-        () => {
+      const videoDeviceId =
+        typeof settings.video !== "boolean" && settings.video.deviceId
+          ? settings.video.deviceId
+          : localstorage.getForVersion("cameraDeviceId");
+
+      const audioDeviceId =
+        typeof settings.audio !== "boolean" && settings.audio.deviceId
+          ? settings.audio.deviceId
+          : localstorage.getForVersion("audioDeviceId");
+
+      const joinSettings = { ...defaultSettings };
+      if (videoDeviceId && typeof joinSettings.video !== "boolean") {
+        joinSettings.video.deviceId = videoDeviceId;
+      }
+      if (audioDeviceId) {
+        joinSettings.audio = {
+          deviceId: audioDeviceId,
+        };
+      }
+
+      navigator.mediaDevices.getUserMedia(joinSettings).then(
+        (stream) => {
           setPermissionGranted(true);
+          setLocalStream(stream);
         },
         (e) => {
           console.error(e);
@@ -169,10 +190,12 @@ export default function useWebRTC({
       setIsInitialised(true);
 
       return () => {
-        manager.current.leave();
+        if (hasJoined) {
+          manager.current.leave();
+        }
       };
     }
-  }, [source, uuid, isInitialised, agent]);
+  }, [source, uuid, isInitialised, hasJoined, agent]);
 
   async function onReaction(reaction: string) {
     await manager.current?.sendMessage("reaction", reaction);

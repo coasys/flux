@@ -40,8 +40,16 @@ export default async function updateCommunityData(
 
     await Community.update(community.id, {
       ...update,
-      image: compressedImage,
-      thumbnail: thumb,
+      image: compressedImage ? {
+        data_base64: compressedImage,
+        name: "community-image",
+        file_type: "image/png",
+      } : undefined,
+      thumbnail: thumb ? {
+        data_base64: thumb,
+        name: "community-image",
+        file_type: "image/png",
+      } : undefined
     });
 
     dataStore.updateCommunityMetadata({
