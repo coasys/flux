@@ -187,7 +187,7 @@ export default class WebRTCManager {
     if (!link) return;
 
     if (link.data.predicate === LEAVE && link.data.source === this.roomId) {
-      await this.closeConnection(link.author);
+      this.closeConnection(link.author);
     }
 
     if (
@@ -234,9 +234,20 @@ export default class WebRTCManager {
    * 5: Broadcast offer to remote peer
    */
   async createOffer(recieverDid: string) {
-    // Don't create an offer if we alread have a connection
-    if (this.connections.get(recieverDid)) {
-      this.closeConnection(recieverDid);
+    const currentConnection = this.connections.get(recieverDid);
+    if (currentConnection) {
+      const status = currentConnection.peerConnection.iceConnectionState;
+      const inProgress = status === "new" || status === "checking";
+      const isStale =
+        status === "failed" || status === "disconnected" || status === "closed";
+
+      if (inProgress) {
+        return;
+      }
+
+      if (isStale) {
+        this.closeConnection(recieverDid);
+      }
     }
 
     const connection = await this.addConnection(recieverDid);
@@ -246,7 +257,6 @@ export default class WebRTCManager {
     });
 
     const offer = await connection.peerConnection.createOffer();
-    await connection.peerConnection.setLocalDescription(offer);
 
     console.log("🟠 Sending OFFER signal to ", recieverDid);
     this.neighbourhood.sendBroadcastU({
@@ -258,6 +268,8 @@ export default class WebRTCManager {
         },
       ],
     });
+
+    await connection.peerConnection.setLocalDescription(offer);
   }
 
   /**
@@ -344,8 +356,10 @@ export default class WebRTCManager {
    * 5: Broadcast answer to remote peer
    */
   async handleOffer(fromDid: string, offer: RTCSessionDescriptionInit) {
-    // Don't create an answer if we alread have a connection
-    if (this.connections.get(fromDid)) return;
+    // Start over if we alread have a connection
+    if (this.connections.get(fromDid)) {
+      this.closeConnection(fromDid);
+    }
 
     const connection = await this.addConnection(fromDid);
     await connection.peerConnection.setRemoteDescription(
@@ -358,7 +372,6 @@ export default class WebRTCManager {
 
     // Create Answer to offer
     const answer = await connection.peerConnection.createAnswer();
-    await connection.peerConnection.setLocalDescription(answer);
 
     console.log("🟠 Sending ANSWER signal to ", fromDid);
     this.neighbourhood.sendBroadcastU({
@@ -370,6 +383,8 @@ export default class WebRTCManager {
         },
       ],
     });
+
+    await connection.peerConnection.setLocalDescription(answer);
   }
 
   /**
@@ -444,7 +459,7 @@ export default class WebRTCManager {
   /**
    * Close connection/datachannel and remove from connections array
    */
-  async closeConnection(did: string) {
+  closeConnection(did: string) {
     const connection = this.connections.get(did);
 
     if (connection) {
