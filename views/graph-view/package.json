@@ -1,7 +1,12 @@
 {
   "name": "@junto-foundation/graph-view",
-  "version": "0.5.4",
-  "description": "A interactive graph to see your community data",
+  "version": "0.5.5",
+  "description": "An interactive graph to see your community data",
+  "fluxapp": {
+    "name": "Graph",
+    "description": "An interactive graph to see your community data",
+    "icon": "share"
+  },
   "type": "module",
   "files": [
     "dist"

@@ -28,6 +28,15 @@
 
           <j-flex direction="column" gap="500">
             <div class="app-card" v-for="pkg in packages" :key="pkg.name">
+              <j-box pb="500">
+                <j-badge
+                  size="sm"
+                  v-if="pkg.packageName.startsWith('@junto-foundation')"
+                  variant="success"
+                >
+                  Official App
+                </j-badge>
+              </j-box>
               <j-flex a="center" j="between">
                 <j-flex gap="500" a="center" j="center">
                   <j-icon size="lg" v-if="pkg.icon" :name="pkg.icon"></j-icon>

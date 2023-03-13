@@ -12,17 +12,28 @@
       ></j-input>
 
       <j-flex direction="column" gap="500">
-        <j-box
-          p="500"
-          bg="ui-100"
-          v-for="pkg in packages"
-          :key="pkg.packageName"
-        >
+        <div class="app-card" v-for="pkg in packages" :key="pkg.packageName">
+          <j-box pb="500">
+            <j-badge
+              size="sm"
+              v-if="pkg.packageName.startsWith('@junto-foundation')"
+              variant="success"
+            >
+              Official App
+            </j-badge>
+          </j-box>
           <j-flex a="center" j="between">
-            <div>
-              <j-text variant="heading-sm">{{ pkg.name }}</j-text>
-              <j-text>{{ pkg.description }}</j-text>
-            </div>
+            <j-flex gap="500" a="center" j="center">
+              <j-icon size="lg" v-if="pkg.icon" :name="pkg.icon"></j-icon>
+              <div>
+                <j-text variant="heading-sm">
+                  {{ pkg.name }}
+                </j-text>
+                <j-text nomargin>
+                  {{ pkg.description }}
+                </j-text>
+              </div>
+            </j-flex>
             <div>
               <j-button
                 :variant="isSelected(pkg) ? 'subtle' : 'primary'"
@@ -32,7 +43,7 @@
               </j-button>
             </div>
           </j-flex>
-        </j-box>
+        </div>
       </j-flex>
 
       <j-box mt="500">
@@ -130,3 +141,12 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.app-card {
+  padding: var(--j-space-500);
+  border-radius: var(--j-border-radius);
+  background: var(--j-color-ui-50);
+  border: 1px solid var(--j-color-ui-100);
+}
+</style>

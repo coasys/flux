@@ -1,7 +1,12 @@
 {
   "name": "@junto-foundation/forum-view",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "Create posts and share with your community",
+  "fluxapp": {
+    "name": "Forum",
+    "description": "Create posts and share with your community",
+    "icon": "card-list"
+  },
   "type": "module",
   "files": [
     "dist"

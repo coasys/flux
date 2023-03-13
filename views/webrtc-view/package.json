@@ -1,7 +1,12 @@
 {
   "name": "@junto-foundation/webrtc-view",
   "description": "Chat over audio & video with your community",
-  "version": "0.0.1",
+  "fluxapp": {
+    "name": "Video & Audio",
+    "description": "Chat over audio & video with your community",
+    "icon": "mic"
+  },
+  "version": "0.0.2",
   "type": "module",
   "files": [
     "dist"
