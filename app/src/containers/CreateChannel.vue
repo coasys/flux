@@ -118,18 +118,22 @@ export default defineComponent({
       return this.hasName && this.validSelectedViews;
     },
     selectedApps(): FluxApp[] {
-      return this.packages.filter((p) => p.packageName === p.name);
+      return this.packages.filter((p) =>
+        this.selectedViews.includes(p.packageName)
+      );
     },
     validSelectedViews() {
       return this.selectedViews.length >= 1;
     },
   },
   methods: {
-    isSelected(pkg: any) {
-      return this.selectedViews.includes(pkg.name);
+    isSelected(pkg: FluxApp) {
+      return this.selectedViews.some((view) => view === pkg.packageName);
     },
-    toggleView(pkg: any) {
-      const isSelected = this.selectedViews.includes(pkg.packageName);
+    toggleView(pkg: FluxApp) {
+      const isSelected = this.selectedViews.some(
+        (view) => view === pkg.packageName
+      );
       this.selectedViews = isSelected
         ? this.selectedViews.filter((n) => n !== pkg.packageName)
         : [...this.selectedViews, pkg.packageName];
