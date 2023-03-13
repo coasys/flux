@@ -177,6 +177,10 @@ export default class Menu extends LitElement {
     return true;
   }
 
+  disconnectedCallback() {
+    document.body.style.overflow = "visible";
+  }
+
   render() {
     return html` <div part="base">
       <div part="backdrop" @click=${() => (this.open = false)}></div>

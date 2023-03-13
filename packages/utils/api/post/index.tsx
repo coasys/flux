@@ -7,7 +7,7 @@ import {
   TITLE,
   URL,
 } from "../../constants/communityPredicates";
-import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "../../constants/languages";
+import { FILE_STORAGE_LANGUAGE } from "../../constants/languages";
 import EntryModel from "../../helpers/model";
 import { EntryType, Post } from "../../types";
 import MessageModel from "../message";
@@ -32,9 +32,9 @@ class PostModel extends EntryModel {
       },
       image: {
         predicate: IMAGE,
-        type: String,
+        type: Object,
         resolve: false,
-        languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
+        languageAddress: FILE_STORAGE_LANGUAGE,
       },
       startDate: {
         predicate: START_DATE,
@@ -65,7 +65,11 @@ class PostModel extends EntryModel {
 
   create(data: {
     title: string;
-    image?: string;
+    image?: {
+      data_base64: string,
+      name: string,
+      file_type: string,
+    };
     body?: string;
     startDate?: string;
     endDate?: string;

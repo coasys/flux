@@ -5,7 +5,7 @@ import {
   SELF,
   THUMBNAIL,
 } from "../../constants/communityPredicates";
-import { NOTE_IPFS_EXPRESSION_OFFICIAL } from "../../constants/languages";
+import { FILE_STORAGE_LANGUAGE } from "../../constants/languages";
 import EntryModel from "../../helpers/model";
 import { EntryType, Entry } from "../../types";
 import MemberModel from "../member";
@@ -37,15 +37,15 @@ class CommunityModel extends EntryModel {
       },
       image: {
         predicate: IMAGE,
-        type: String,
+        type: Object,
         resolve: false,
-        languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
+        languageAddress: FILE_STORAGE_LANGUAGE,
       },
       thumbnail: {
         predicate: THUMBNAIL,
-        type: String,
+        type: Object,
         resolve: false,
-        languageAddress: NOTE_IPFS_EXPRESSION_OFFICIAL,
+        languageAddress: FILE_STORAGE_LANGUAGE,
       },
       channels: {
         predicate: EntryType.Channel,
@@ -59,8 +59,16 @@ class CommunityModel extends EntryModel {
   async create(data: {
     name: string;
     description: string;
-    image?: string;
-    thumbnail?: string;
+    image?: {
+      data_base64: string,
+      name: string,
+      file_type: string,
+    };
+    thumbnail?: {
+      data_base64: string,
+      name: string,
+      file_type: string,
+    };
   }): Promise<Community> {
     return super.create(data, SELF) as Promise<Community>;
   }
@@ -81,8 +89,16 @@ class CommunityModel extends EntryModel {
     data: {
       name?: string;
       description?: string;
-      image?: string;
-      thumbnail?: string;
+        image?: {
+        data_base64: string,
+        name: string,
+        file_type: string,
+      };
+      thumbnail?: {
+        data_base64: string,
+        name: string,
+        file_type: string,
+      };
     }
   ) {
     return super.update(SELF, data) as Promise<Community>;
