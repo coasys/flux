@@ -11,8 +11,8 @@
         @input="(e) => (name = e.target.value)"
       ></j-input>
 
-      <j-box align="center" p="500">
-        <j-spinner v-if="isLoading"></j-spinner>
+      <j-box v-if="isLoading" align="center" p="500">
+        <j-spinner></j-spinner>
       </j-box>
 
       <j-flex v-if="!isLoading" direction="column" gap="500">

@@ -26,8 +26,8 @@
             <j-text variant="label">Select at least one view</j-text>
           </j-box>
 
-          <j-box align="center" p="500">
-            <j-spinner v-if="isLoading"></j-spinner>
+          <j-box v-if="isLoading" align="center" p="500">
+            <j-spinner></j-spinner>
           </j-box>
 
           <j-flex v-if="!isLoading" direction="column" gap="500">
