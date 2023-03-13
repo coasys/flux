@@ -11,7 +11,11 @@
         @input="(e) => (name = e.target.value)"
       ></j-input>
 
-      <j-flex direction="column" gap="500">
+      <j-box align="center" p="500">
+        <j-spinner v-if="isLoading"></j-spinner>
+      </j-box>
+
+      <j-flex v-if="!isLoading" direction="column" gap="500">
         <div class="app-card" v-for="pkg in packages" :key="pkg.packageName">
           <j-box pb="500">
             <j-badge
@@ -76,11 +80,14 @@ export default defineComponent({
   props: ["channelId"],
   emits: ["cancel", "submit"],
   async created() {
+    this.isLoading = true;
     const res = await getAllFluxApps();
+    this.isLoading = false;
     this.packages = res;
   },
   setup() {
     return {
+      isLoading: ref(false),
       packages: ref<FluxApp[]>([]),
       name: ref(""),
       description: ref(""),
