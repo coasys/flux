@@ -1,4 +1,4 @@
-import { ChannelView } from "utils/types";
+import { FluxApp } from "@/utils/npmApi";
 export interface ChannelState {
   id: string;
   name: string;
@@ -8,8 +8,8 @@ export interface ChannelState {
   hasNewMessages: boolean;
   timestamp: Date | string;
   expanded: boolean;
-  currentView: ChannelView;
-  views: ChannelView[];
+  currentView: string;
+  views: FluxApp[];
   notifications: {
     mute: boolean;
   };

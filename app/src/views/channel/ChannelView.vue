@@ -24,15 +24,15 @@
             </j-flex>
           </j-box>
           <div class="channel-view__tabs">
-            <label class="channel-view-tab" v-for="view in channel.views">
+            <label class="channel-view-tab" v-for="app in channel.views">
               <input
-                :name="view"
+                name="apps"
                 type="radio"
-                :checked.prop="view === currentView"
-                :value.prop="view"
+                :checked.prop="app.packageName === currentView"
+                :value.prop="app.packageName"
                 @change="changeCurrentView"
               />
-              <span>{{ view }}</span>
+              <span>{{ app.name }}</span>
             </label>
             <j-tooltip placement="auto" title="Manage views">
               <j-button
@@ -65,11 +65,11 @@
       </div>
     </div>
 
-    <template v-for="(name, wcName) in wcNames">
+    <template v-for="app in channel.views">
       <component
         style="display: block; height: calc(100% - var(--app-header-height))"
-        v-show="channel.currentView === name"
-        :is="wcName"
+        v-show="channel.currentView === app.packageName"
+        :is="app.wcName"
         :source="channel.id"
         :perspective="communityId"
         @agent-click="onAgentClick"
@@ -109,6 +109,7 @@ import Profile from "@/containers/Profile.vue";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { generateWCName } from "@/utils/wcName";
+import { FluxApp } from "@/utils/npmApi";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 
 interface MentionTrigger {
@@ -126,7 +127,6 @@ export default defineComponent({
   },
   setup() {
     return {
-      wcNames: ref({}) as any,
       selectedViews: ref<string[]>([]),
       showEditChannel: ref(false),
       selectedChannelView: ref("chat"),
@@ -160,30 +160,13 @@ export default defineComponent({
   watch: {
     ["channel.views"]: {
       handler: function (val, oldVal) {
-        // Remove old views
-        oldVal?.forEach(async (v: string) => {
-          const wcName = await generateWCName(v);
-
-          if (!val.includes(v)) {
-            delete this.wcNames[wcName];
-          }
-        });
-
         // Add new views
-        val.forEach(async (name: string) => {
-          const wcName = await generateWCName(name);
-          this.wcNames[wcName] = name;
-
-          if (!customElements.get(wcName)) {
+        val.forEach(async (app: FluxApp) => {
+          if (!customElements.get(app.wcName)) {
             const module = await import(
-              `https://cdn.jsdelivr.net/npm/${name}/+esm`
+              `https://cdn.jsdelivr.net/npm/${app.packageName}/+esm`
             );
-
-            const el = module.default;
-
-            console.log(el instanceof HTMLElement);
-
-            customElements.define(wcName, module.default);
+            customElements.define(app.wcName, module.default);
           }
         });
       },

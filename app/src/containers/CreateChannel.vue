@@ -27,12 +27,19 @@
           </j-box>
 
           <j-flex direction="column" gap="500">
-            <j-box p="500" bg="ui-100" v-for="pkg in packages" :key="pkg.name">
+            <div class="app-card" v-for="pkg in packages" :key="pkg.name">
               <j-flex a="center" j="between">
-                <div>
-                  <j-text variant="heading-sm">{{ pkg.name }}</j-text>
-                  <j-text>{{ pkg.description }}</j-text>
-                </div>
+                <j-flex gap="500" a="center" j="center">
+                  <j-icon size="lg" v-if="pkg.icon" :name="pkg.icon"></j-icon>
+                  <div>
+                    <j-text variant="heading-sm">
+                      {{ pkg.name }}
+                    </j-text>
+                    <j-text nomargin>
+                      {{ pkg.description }}
+                    </j-text>
+                  </div>
+                </j-flex>
                 <div>
                   <j-button
                     :variant="isSelected(pkg) ? 'subtle' : 'primary'"
@@ -42,7 +49,7 @@
                   </j-button>
                 </div>
               </j-flex>
-            </j-box>
+            </div>
           </j-flex>
         </j-box>
 
@@ -70,13 +77,13 @@
 <script lang="ts">
 import { useDataStore } from "@/store/data";
 import { defineComponent } from "vue";
-import { getPerspectiveViews } from "@/utils/npmApi";
+import { getAllFluxApps, FluxApp } from "@/utils/npmApi";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
   async created() {
-    const res = await getPerspectiveViews();
-    this.packages = res.map((r: any) => r.package);
+    const res = await getAllFluxApps();
+    this.packages = res;
   },
   setup() {
     const dataStore = useDataStore();
@@ -87,7 +94,7 @@ export default defineComponent({
   },
   data() {
     return {
-      packages: [] as any,
+      packages: [] as FluxApp[],
       selectedViews: [] as string[],
       channelView: "chat",
       channelName: "",
@@ -101,6 +108,9 @@ export default defineComponent({
     canSubmit(): boolean {
       return this.hasName && this.validSelectedViews;
     },
+    selectedApps(): FluxApp[] {
+      return this.packages.filter((p) => p.packageName === p.name);
+    },
     validSelectedViews() {
       return this.selectedViews.length >= 1;
     },
@@ -110,10 +120,10 @@ export default defineComponent({
       return this.selectedViews.includes(pkg.name);
     },
     toggleView(pkg: any) {
-      const isSelected = this.selectedViews.includes(pkg.name);
+      const isSelected = this.selectedViews.includes(pkg.packageName);
       this.selectedViews = isSelected
-        ? this.selectedViews.filter((n) => n !== pkg.name)
-        : [...this.selectedViews, pkg.name];
+        ? this.selectedViews.filter((n) => n !== pkg.packageName)
+        : [...this.selectedViews, pkg.packageName];
     },
     async createChannel() {
       const communityId = this.$route.params.communityId as string;
@@ -123,7 +133,7 @@ export default defineComponent({
         .createChannel({
           perspectiveUuid: communityId,
           name,
-          views: this.selectedViews,
+          views: this.selectedApps,
         })
         .then((channel: any) => {
           this.$emit("submit");
@@ -143,3 +153,12 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.app-card {
+  padding: var(--j-space-500);
+  border-radius: var(--j-border-radius);
+  background: var(--j-color-ui-50);
+  border: 1px solid var(--j-color-ui-100);
+}
+</style>

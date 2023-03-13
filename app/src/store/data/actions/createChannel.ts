@@ -2,13 +2,13 @@ import { createChannel } from "utils/api/createChannel";
 import { useAppStore } from "@/store/app";
 import { ChannelState } from "@/store/types";
 import { useDataStore } from "..";
-import { ChannelView } from "utils/types";
 import ChannelModel from "utils/api/channel";
+import { FluxApp } from "@/utils/npmApi";
 
 export interface Payload {
   perspectiveUuid: string;
   name: string;
-  views: ChannelView[];
+  views: FluxApp[];
 }
 
 export default async (payload: Payload): Promise<ChannelState> => {
@@ -32,7 +32,7 @@ export default async (payload: Payload): Promise<ChannelState> => {
 
     const channel = await Channel.create({
       name: payload.name,
-      views: payload.views,
+      views: payload.views.map((v) => v.packageName),
     });
 
     const channelState = {
@@ -42,7 +42,7 @@ export default async (payload: Payload): Promise<ChannelState> => {
       author: channel.author,
       expanded: false,
       sourcePerspective: payload.perspectiveUuid,
-      currentView: payload.views[0],
+      currentView: payload.views[0].packageName,
       views: payload.views,
       hasNewMessages: false,
       notifications: {

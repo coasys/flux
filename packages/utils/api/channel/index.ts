@@ -1,3 +1,4 @@
+import { FluxApp } from "@/utils/npmApi";
 import { CHANNEL_VIEW, NAME } from "../../constants/communityPredicates";
 import EntryModel from "../../helpers/model";
 import { EntryType, Entry } from "../../types";
@@ -9,7 +10,7 @@ export interface Channel extends Entry {
 
 export interface UpdateChannel {
   name?: string;
-  views?: string[];
+  views?: FluxApp[];
 }
 
 class ChannelModel extends EntryModel {

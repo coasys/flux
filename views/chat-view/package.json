@@ -1,9 +1,14 @@
 {
   "name": "@junto-foundation/chat-view",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "Chat with your friends real time",
   "main": "./dist/main.js",
   "module": "./dist/main.js",
+  "fluxapp": {
+    "name": "Chat",
+    "description": "Chat with your friends real time",
+    "icon": "chat"
+  },
   "files": [
     "dist"
   ],

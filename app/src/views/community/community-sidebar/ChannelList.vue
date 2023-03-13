@@ -51,14 +51,14 @@
           <div class="channel-views" v-if="channel.expanded">
             <j-menu-item
               :selected="
-                view.type === channel.currentView &&
+                view.packageName === channel.currentView &&
                 channel.id === $route.params.channelId
               "
               size="sm"
               v-for="view in channel.views"
-              @click="() => handleChangeView(channel.id, view)"
+              @click="() => handleChangeView(channel.id, view.packageName)"
             >
-              {{ view }}
+              {{ view.name }}
             </j-menu-item>
           </div>
         </div>

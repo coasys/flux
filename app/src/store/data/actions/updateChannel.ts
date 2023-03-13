@@ -24,7 +24,12 @@ export default async (payload: Payload): Promise<any> => {
       perspectiveUuid: channel.sourcePerspective,
     });
 
-    await Channel.update(channel.id, payload.data);
+    await Channel.update(channel.id, {
+      ...payload.data,
+      views: payload.data.views
+        ? payload.data.views.map((v) => v.packageName)
+        : undefined,
+    });
 
     dataStore.setChannel({
       channel: {

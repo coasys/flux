@@ -12,7 +12,12 @@
       ></j-input>
 
       <j-flex direction="column" gap="500">
-        <j-box p="500" bg="ui-100" v-for="pkg in packages" :key="pkg.name">
+        <j-box
+          p="500"
+          bg="ui-100"
+          v-for="pkg in packages"
+          :key="pkg.packageName"
+        >
           <j-flex a="center" j="between">
             <div>
               <j-text variant="heading-sm">{{ pkg.name }}</j-text>
@@ -54,21 +59,21 @@
 import { defineComponent, ref } from "vue";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
-import { getPerspectiveViews } from "@/utils/npmApi";
+import { FluxApp, getAllFluxApps } from "@/utils/npmApi";
 
 export default defineComponent({
   props: ["channelId"],
   emits: ["cancel", "submit"],
   async created() {
-    const res = await getPerspectiveViews();
-    this.packages = res.map((r: any) => r.package);
+    const res = await getAllFluxApps();
+    this.packages = res;
   },
   setup() {
     return {
-      packages: ref([]) as any,
+      packages: ref<FluxApp[]>([]),
       name: ref(""),
       description: ref(""),
-      views: ref<string[]>([]),
+      views: ref<FluxApp[]>([]),
       isSaving: ref(false),
       appStore: useAppStore(),
       dataStore: useDataStore(),
@@ -94,14 +99,16 @@ export default defineComponent({
     },
   },
   methods: {
-    toggleView(pkg: any) {
-      const isSelected = this.views.includes(pkg.name);
+    toggleView(pkg: FluxApp) {
+      const isSelected = this.views.some(
+        (app) => app.packageName === pkg.packageName
+      );
       this.views = isSelected
-        ? this.views.filter((n) => n !== pkg.name)
-        : [...this.views, pkg.name];
+        ? this.views.filter((app) => app.packageName !== pkg.packageName)
+        : [...this.views, pkg];
     },
     isSelected(pkg: any) {
-      return this.views.includes(pkg.name);
+      return this.views.some((app) => app.packageName === pkg.packageName);
     },
     async updateChannel() {
       this.isSaving = true;
