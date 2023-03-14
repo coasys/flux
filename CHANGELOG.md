@@ -17,6 +17,21 @@ This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/
 
 ### Security
 
+## [0.5.5] - 10/03/2023
+
+### Added
+
+### Changed
+- Use new holochain based file storage language
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## [0.5.4] - 03/03/2023
 
 ### Added

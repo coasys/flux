@@ -1544,20 +1544,20 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@perspect3vism/ad4m-connect@0.2.16-alpha.1":
-  version "0.2.16-alpha.1"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.2.16-alpha.1.tgz#5ec9af03b641f4ccaee9091164278e567679e525"
-  integrity sha512-xcV4TzMmzIlXjAzSBr8IJqG5geGN8HdmWGGjX89hcA0clNQ5A+o7NX9AMxZxKLDsUTqSWytucyp2EjEkovDYqw==
+"@perspect3vism/ad4m-connect@0.3.1":
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.3.1.tgz#39d4e06288f5fd5e89bc57fa11faa4545cb88c77"
+  integrity sha512-UPwIbOeA7xNSmix1qmSWlXSM8QOU+AvLDrqsuPqP5LGzEuGmj16Ra5G8Uf9+7em/iqQQ/CcDq3xj0GLfPQGscg==
   dependencies:
     "@undecaf/barcode-detector-polyfill" "^0.9.15"
     auto-bind "^5.0.1"
     electron "^20.0.3"
     lit "^2.3.1"
 
-"@perspect3vism/ad4m@0.2.16.alpha-1":
-  version "0.2.1-6.alpha-1"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.2.1-6.alpha-1.tgz#d864117cb4e5fbb63c39161287b4ffffba19ddc5"
-  integrity sha512-G7QFXa9E7HB05wxOo3nas53UGjAN7Jj0ssn16p00ixemjgGwnBo+gdEN8uWxUNwzoI/K3u6+h25CyxXBgxdDAg==
+"@perspect3vism/ad4m@0.3.1":
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.3.1.tgz#032131e06ceb8e4956ae82d9dd44774911a59e98"
+  integrity sha512-c74d6vhK72UgMT1l1cc3Io5GaG3jSxyeuWBd+pm0RynWmelgULOWzycizjtqFwG1w5aEbJ5ui+t+7jFb4J5DOQ==
   dependencies:
     "@apollo/client" "3.6.9"
     "@holochain/client" "0.12.0"

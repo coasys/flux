@@ -132,7 +132,11 @@ export default function CreatePost({
 
       setState({
         ...state,
-        image: compressedImage,
+        image: {
+          data_base64: compressedImage,
+          name: "form-image",
+          file_type: "image/png"
+        }
       });
     });
 

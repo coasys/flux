@@ -17,7 +17,7 @@ import {
 } from "@perspect3vism/ad4m";
 
 @SDNAClass({
-  name: 'Post'
+  name: "Post",
 })
 export class Post {
   @subjectFlag({
@@ -25,20 +25,40 @@ export class Post {
     value: EntryType.Post,
   })
   type: string;
-  
-  @subjectProperty({ through: TITLE, writable: true, resolveLanguage: "literal" })
+
+  @subjectProperty({
+    through: TITLE,
+    writable: true,
+    resolveLanguage: "literal",
+  })
   title: string;
 
-  @subjectProperty({ through: BODY, writable: true, resolveLanguage: "literal" })
+  @subjectProperty({
+    through: BODY,
+    writable: true,
+    resolveLanguage: "literal",
+  })
   body: string;
 
-  @subjectProperty({ through: IMAGE, writable: true, resolveLanguage: FILE_STORAGE_LANGUAGE })
+  @subjectProperty({
+    through: IMAGE,
+    writable: true,
+    resolveLanguage: FILE_STORAGE_LANGUAGE,
+  })
   image: string;
 
-  @subjectProperty({ through: START_DATE, writable: true, resolveLanguage: "literal" })
+  @subjectProperty({
+    through: START_DATE,
+    writable: true,
+    resolveLanguage: "literal",
+  })
   startDate: string;
 
-  @subjectProperty({ through: END_DATE, writable: true, resolveLanguage: "literal" })
+  @subjectProperty({
+    through: END_DATE,
+    writable: true,
+    resolveLanguage: "literal",
+  })
   endDate: string;
 
   @subjectProperty({ through: URL, writable: true, resolveLanguage: "literal" })
