@@ -1,5 +1,5 @@
 {
-  "name": "@junto-foundation/webrtc-view",
+  "name": "flux-webrtc-debug-view",
   "description": "WebRTC-debugger for flux",
   "fluxapp": {
     "name": "DebugRTC",
