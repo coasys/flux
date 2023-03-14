@@ -14,3 +14,23 @@
 .user[data-me="false"] {
   transition: all 0.1s linear;
 }
+
+.item {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.item[data-item="tree"] {
+  bottom: 10%;
+  right: 10%;
+  height: 300px;
+  width: 300px;
+}
+
+.item[data-item="barrel"] {
+  bottom: 20%;
+  left: 10%;
+}

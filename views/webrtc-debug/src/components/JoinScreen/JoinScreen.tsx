@@ -3,7 +3,7 @@ import { Profile } from "utils/types";
 import getProfile from "utils/api/getProfile";
 import { Me } from "utils/api/getMe";
 import { WebRTC } from "../../hooks/useWebrtc";
-import sprites from "../../sprites";
+import characters from "../../sprites/characters";
 
 import User from "../User";
 
@@ -20,14 +20,14 @@ export default function JoinScreen({ webRTC, currentUser }: Props) {
   const [selectedSpriteIndex, setSelectedSpriteIndex] = useState(0);
 
   const onNextSprite = () => {
-    const isLast = selectedSpriteIndex === sprites.frames.length - 1;
+    const isLast = selectedSpriteIndex === characters.frames.length - 1;
     setSelectedSpriteIndex(isLast ? 0 : selectedSpriteIndex + 1);
   };
 
   const onPrevSprite = () => {
     const isFirst = selectedSpriteIndex === 0;
     setSelectedSpriteIndex(
-      isFirst ? sprites.frames.length - 1 : selectedSpriteIndex - 1
+      isFirst ? characters.frames.length - 1 : selectedSpriteIndex - 1
     );
   };
 

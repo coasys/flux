@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { Profile } from "utils/types";
 import getProfile from "utils/api/getProfile";
 import { WebRTC } from "../../hooks/useWebrtc";
-import sprites from "../../sprites";
+import characters from "../../sprites/characters";
 
 import Sprite from "../Sprite/Sprite";
 
@@ -25,8 +25,8 @@ export default function User({
   const [profile, setProfile] = useState<Profile>();
   const [hasStream, setHasStream] = useState(false);
 
-  const palette = sprites.palette as string[];
-  const spriteData = sprites.frames[spriteIndex] as string;
+  const palette = characters.palette as string[];
+  const spriteData = characters.frames[spriteIndex] as string;
 
   // Get user details
   useEffect(() => {

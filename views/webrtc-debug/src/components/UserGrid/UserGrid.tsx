@@ -1,6 +1,8 @@
 import { useRef, useEffect, useState } from "preact/hooks";
 import { Me } from "utils/api/getMe";
 import { WebRTC } from "../../hooks/useWebrtc";
+import items from "../../sprites/items";
+import Sprite from "../Sprite/Sprite";
 import User from "../User/User";
 
 import styles from "./UserGrid.module.css";
@@ -59,6 +61,15 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
         />
       </div>
       {peerItems}
+      <div className={styles.item} data-item="bush">
+        <Sprite hash={items.frames[0]} palette={items.palette} />
+      </div>
+      <div className={styles.item} data-item="tree">
+        <Sprite hash={items.frames[1]} palette={items.palette} />
+      </div>
+      <div className={styles.item} data-item="barrel">
+        <Sprite hash={items.frames[2]} palette={items.palette} />
+      </div>
     </div>
   );
 }
