@@ -202,7 +202,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     for (const [key] of Object.entries(this.subject)) {
       const value = await entry[key];
 
-      if (this.tempSubject.prototype.__properties[key]?.transform) {
+      if (this.tempSubject.prototype.__properties[key]?.transform && value) {
         const transform = this.tempSubject.prototype.__properties[key].transform;
         tempModel[key] = transform(value)
       } else {
