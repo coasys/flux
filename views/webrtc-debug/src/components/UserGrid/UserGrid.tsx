@@ -17,14 +17,8 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
     // 👇️ Get the mouse position relative to the element
     webRTC.onChangeState({
       spriteIndex: webRTC.localState.spriteIndex,
-      x:
-        ((event.clientX - event.currentTarget.offsetLeft) /
-          event.currentTarget.clientWidth) *
-        100,
-      y:
-        ((event.clientY - event.currentTarget.offsetTop) /
-          event.currentTarget.clientHeight) *
-        100,
+      x: (event.offsetX / event.target.clientWidth) * 100,
+      y: (event.offsetY / event.target.clientHeight) * 100,
     });
   };
 

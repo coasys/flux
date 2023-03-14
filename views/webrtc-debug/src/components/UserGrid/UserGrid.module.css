@@ -1,15 +1,14 @@
 .map {
   position: relative;
   width: 100%;
-  height: 100%;
-  background-color: bisque;
-  aspect-ratio: 16/9;
+  height: 90vh;
   overflow: hidden;
   cursor: none;
 }
 
 .user {
   position: absolute;
+  pointer-events: none;
 }
 
 .user[data-me="false"] {
