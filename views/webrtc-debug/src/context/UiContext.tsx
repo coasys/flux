@@ -28,7 +28,7 @@ type ContextProps = {
 const initialState: ContextProps = {
   state: {
     showSettings: false,
-    showDebug: true,
+    showDebug: false,
     notifications: [],
     settings: {
       muteSounds: true,
