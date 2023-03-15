@@ -84,6 +84,7 @@ export enum Event {
   CONNECTION_STATE = "connectionstate",
   CONNECTION_STATE_DATA = "connectionstateData",
   MESSAGE = "message",
+  EVENT = "event",
 }
 
 export default class WebRTCManager {
@@ -99,11 +100,13 @@ export default class WebRTCManager {
     [Event.PEER_ADDED]: [],
     [Event.PEER_REMOVED]: [],
     [Event.MESSAGE]: [],
+    [Event.EVENT]: [],
     [Event.CONNECTION_STATE]: [],
     [Event.CONNECTION_STATE_DATA]: [],
   };
 
   localStream: MediaStream;
+  localEventLog: EventLogItem[];
   connections = new Map<string, Connection>();
 
   constructor(props: Props) {
@@ -113,6 +116,7 @@ export default class WebRTCManager {
   async init(props: Props) {
     console.log("init constructor");
     this.localStream = new MediaStream();
+    this.localEventLog = [];
     this.roomId = props.source;
     this.client = await getAd4mClient();
     this.agent = await this.client.agent.me();
@@ -193,11 +197,17 @@ export default class WebRTCManager {
       author: expression.author,
     });
 
-    if (!link) return;
-
-    this.addToEventLog(expression.author, link?.data?.predicate || "unknown");
+    if (!link) {
+      this.addToEventLog(
+        expression.author,
+        link?.data?.predicate || "unknown",
+        "Missing link!"
+      );
+      return;
+    }
 
     if (link.data.predicate === LEAVE && link.data.source === this.roomId) {
+      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
       this.closeConnection(link.author);
     }
 
@@ -205,22 +215,27 @@ export default class WebRTCManager {
       link.data.predicate === OFFER_REQUEST &&
       link.data.source === this.roomId
     ) {
+      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
       await this.createOffer(link.author);
     }
 
     // If we get heartbeat from new user, action!
     if (link.data.predicate === HEARTBEAT && link.data.source === this.roomId) {
+      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
+
       if (!this.connections.get(link.author)) {
         await this.createOffer(link.author);
       }
     }
     // Only handle the offer if it's for me
     if (link.data.predicate === OFFER && link.data.source === this.agent.did) {
+      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
       const offer = Literal.fromUrl(link.data.target).get();
       await this.handleOffer(link.author, offer);
     }
     // Only handle the answer if it's for me
     if (link.data.predicate === ANSWER && link.data.source === this.agent.did) {
+      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
       const answer = Literal.fromUrl(link.data.target).get();
       await this.handleAnswer(link.author, answer);
     }
@@ -229,6 +244,7 @@ export default class WebRTCManager {
       link.data.predicate === ICE_CANDIDATE &&
       link.data.source === this.agent.did
     ) {
+      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
       const candidate = Literal.fromUrl(link.data.target).get();
       await this.handleIceCandidate(link.author, candidate);
     }
@@ -270,6 +286,8 @@ export default class WebRTCManager {
     const offer = await connection.peerConnection.createOffer();
 
     console.log("🟠 Sending OFFER signal to ", recieverDid);
+    this.addToEventLog(this.agent.did, OFFER, recieverDid);
+
     this.neighbourhood.sendBroadcastU({
       links: [
         {
@@ -323,6 +341,8 @@ export default class WebRTCManager {
     peerConnection.addEventListener("icecandidate", async (event) => {
       if (event.candidate) {
         console.log("🟠 Sending ICE_CANDIDATE signal to ", remoteDid);
+        this.addToEventLog(this.agent.did, ICE_CANDIDATE, remoteDid);
+
         this.neighbourhood.sendBroadcastU({
           links: [
             {
@@ -406,6 +426,8 @@ export default class WebRTCManager {
     const answer = await connection.peerConnection.createAnswer();
 
     console.log("🟠 Sending ANSWER signal to ", fromDid);
+    this.addToEventLog(this.agent.did, ANSWER, fromDid);
+
     this.neighbourhood.sendBroadcastU({
       links: [
         {
@@ -505,17 +527,29 @@ export default class WebRTCManager {
    * Add event to peer log
    */
   async addToEventLog(did: string, type: string, value?: string) {
+    const event = {
+      type,
+      value,
+      timeStamp: new Date().toISOString(),
+    };
+
+    // Check if this is a local event
+    if (did === this.agent.did) {
+      this.callbacks[Event.EVENT].forEach((cb) => {
+        cb(this.agent.did, event);
+      });
+
+      this.localEventLog.push(event);
+      return;
+    }
+
     const connection = this.connections.get(did);
     if (!connection) {
       console.log("🔴 Failed to add log entry, no connection found!");
       return;
     }
 
-    connection.eventLog.push({
-      type,
-      value,
-      timeStamp: new Date().toISOString(),
-    });
+    connection.eventLog.push(event);
   }
 
   /**
@@ -532,6 +566,8 @@ export default class WebRTCManager {
     });
 
     console.log("🟠 Sending JOIN broadcast");
+    this.addToEventLog(this.agent.did, OFFER_REQUEST);
+
     this.neighbourhood.sendBroadcastU({
       links: [
         {
@@ -569,6 +605,7 @@ export default class WebRTCManager {
     }
 
     // Announce departure
+    this.addToEventLog(this.agent.did, LEAVE);
     this.neighbourhood.sendBroadcastU({
       links: [
         {
@@ -590,6 +627,8 @@ export default class WebRTCManager {
 
   async heartbeat() {
     console.log("💚 Sending HEARTBEAT");
+    this.addToEventLog(this.agent.did, HEARTBEAT);
+
     this.neighbourhood.sendBroadcastU({
       links: [
         {

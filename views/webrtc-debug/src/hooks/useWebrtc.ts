@@ -1,4 +1,8 @@
-import WebRTCManager, { Event, Settings } from "utils/helpers/WebRTCManager";
+import WebRTCManager, {
+  Event,
+  EventLogItem,
+  Settings,
+} from "utils/helpers/WebRTCManager";
 import { useEffect, useState, useRef, useCallback } from "preact/hooks";
 import { Peer } from "../types";
 import { defaultSettings } from "../constants";
@@ -27,6 +31,7 @@ type Props = {
 export type WebRTC = {
   localStream: MediaStream;
   localState: Peer["state"];
+  localEventLog: EventLogItem[];
   connections: Peer[];
   devices: MediaDeviceInfo[];
   settings: Settings;
@@ -60,6 +65,7 @@ export default function useWebRTC({
   const [hasJoined, setHasJoined] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [connections, setConnections] = useState<Peer[]>([]);
+  const [localEventLog, setLocalEventLog] = useState<EventLogItem[]>([]);
 
   // Get agent/me
   useEffect(() => {
@@ -170,6 +176,10 @@ export default function useWebRTC({
         if (state === "connected") {
           manager.current.sendMessage("request-position", did);
         }
+      });
+
+      manager.current.on(Event.EVENT, (did, event) => {
+        setLocalEventLog((oldEvents) => [...oldEvents, event]);
       });
 
       manager.current.on(
@@ -381,6 +391,7 @@ export default function useWebRTC({
   return {
     localStream,
     localState,
+    localEventLog,
     connections,
     devices,
     settings,

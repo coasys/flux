@@ -3,7 +3,6 @@ import { Peer } from "../../../types";
 import { Profile } from "utils/types";
 import getProfile from "utils/api/getProfile";
 import { format, formatDistanceStrict } from "date-fns";
-import { EventLogItem } from "../../../hooks/useWebrtc";
 
 import styles from "./Item.module.css";
 
