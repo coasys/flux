@@ -215,38 +215,38 @@ export default class WebRTCManager {
       link.data.predicate === OFFER_REQUEST &&
       link.data.source === this.roomId
     ) {
-      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
       await this.createOffer(link.author);
+      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
     }
 
     // If we get heartbeat from new user, action!
     if (link.data.predicate === HEARTBEAT && link.data.source === this.roomId) {
-      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
-
       if (!this.connections.get(link.author)) {
         await this.createOffer(link.author);
       }
+
+      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
     }
     // Only handle the offer if it's for me
     if (link.data.predicate === OFFER && link.data.source === this.agent.did) {
-      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
       const offer = Literal.fromUrl(link.data.target).get();
       await this.handleOffer(link.author, offer);
+      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
     }
     // Only handle the answer if it's for me
     if (link.data.predicate === ANSWER && link.data.source === this.agent.did) {
-      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
       const answer = Literal.fromUrl(link.data.target).get();
       await this.handleAnswer(link.author, answer);
+      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
     }
     // Only handle the answer if it's for me
     if (
       link.data.predicate === ICE_CANDIDATE &&
       link.data.source === this.agent.did
     ) {
-      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
       const candidate = Literal.fromUrl(link.data.target).get();
       await this.handleIceCandidate(link.author, candidate);
+      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
     }
 
     return null;
@@ -565,6 +565,13 @@ export default class WebRTCManager {
       video: settings.video,
     });
 
+    if (!this.addedListener) {
+      await this.neighbourhood.addSignalHandler(this.onSignal);
+      this.addedListener = true;
+    }
+
+    this.isListening = true;
+
     console.log("🟠 Sending JOIN broadcast");
     this.addToEventLog(this.agent.did, OFFER_REQUEST);
 
@@ -577,13 +584,6 @@ export default class WebRTCManager {
         },
       ],
     });
-
-    if (!this.addedListener) {
-      this.neighbourhood.addSignalHandler(this.onSignal);
-      this.addedListener = true;
-    }
-
-    this.isListening = true;
 
     this.heartbeatId = setInterval(this.heartbeat, 10000);
 
