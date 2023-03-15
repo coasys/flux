@@ -76,9 +76,6 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
         <j-badge>
           <span className={styles.key}>D</span> toggle debug
         </j-badge>
-        <j-badge>
-          <span className={styles.key}>R</span> reload
-        </j-badge>
       </div>
     </div>
   );

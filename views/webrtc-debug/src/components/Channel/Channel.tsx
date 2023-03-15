@@ -28,10 +28,6 @@ export default function Channel({ source, uuid }) {
     enabled: isPageActive,
     source,
     uuid,
-    events: {
-      onPeerJoin: (userId) => addNotification({ userId, type: "join" }),
-      onPeerLeave: (userId) => addNotification({ userId, type: "leave" }),
-    },
   });
 
   useKeyEvent("KeyD", () => {
