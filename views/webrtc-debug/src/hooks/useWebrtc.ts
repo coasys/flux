@@ -20,6 +20,7 @@ type Props = {
   events?: {
     onPeerJoin?: (uuid: string) => void;
     onPeerLeave?: (uuid: string) => void;
+    onDrawLine?: (from: [number, number], to: [number, number]) => void;
   };
 };
 
@@ -139,6 +140,7 @@ export default function useWebRTC({
               settings: defaultSettings,
               state: {
                 spriteIndex: 1,
+                isDrawing: false,
                 x: 0,
                 y: 0,
               },
