@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { WebRTC } from "../../hooks/useWebrtc";
 
 interface CanvasProps {
-  webRTC: WebRTC;
   width: number;
   height: number;
 }
@@ -12,7 +11,7 @@ type Coordinate = {
   y: number;
 };
 
-const Canvas = ({ webRTC, width, height }: CanvasProps) => {
+const Canvas = ({ width, height }: CanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isPainting, setIsPainting] = useState(false);
   const [mousePosition, setMousePosition] = useState<Coordinate | undefined>(
