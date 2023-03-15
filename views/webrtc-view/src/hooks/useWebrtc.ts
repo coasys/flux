@@ -1,4 +1,4 @@
-import WebRTCManager, { Event, Settings } from "../WebRTCManager";
+import WebRTCManager, { Event, Settings } from "utils/helpers/WebRTCManager";
 import { useEffect, useState, useRef } from "preact/hooks";
 import { Peer, Reaction } from "../types";
 import { defaultSettings } from "../constants";

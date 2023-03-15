@@ -6,6 +6,10 @@
   cursor: none;
 }
 
+.map[data-context-menu-open="true"] {
+  cursor: initial;
+}
+
 .user {
   position: absolute;
   pointer-events: none;
@@ -33,4 +37,9 @@
 .item[data-item="barrel"] {
   bottom: 20%;
   left: 10%;
+}
+
+.menu {
+  position: absolute;
+  width: 220px;
 }

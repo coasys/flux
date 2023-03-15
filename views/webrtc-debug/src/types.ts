@@ -1,4 +1,4 @@
-import { Settings } from "./WebRTCManager";
+import { Settings } from "utils/helpers/WebRTCManager";
 
 export type peerState = {
   spriteIndex: number;

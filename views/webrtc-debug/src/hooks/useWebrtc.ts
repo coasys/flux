@@ -1,4 +1,4 @@
-import WebRTCManager, { Event, Settings } from "../WebRTCManager";
+import WebRTCManager, { Event, Settings } from "utils/helpers/WebRTCManager";
 import { useEffect, useState, useRef, useCallback } from "preact/hooks";
 import { Peer } from "../types";
 import { defaultSettings } from "../constants";
@@ -35,6 +35,8 @@ export type WebRTC = {
   permissionGranted: boolean;
   onJoin: (initialState: Peer["state"]) => Promise<void>;
   onLeave: () => Promise<void>;
+  onChangeCamera: (deviceId: string) => void;
+  onChangeAudio: (deviceId: string) => void;
   onChangeSettings: (newSettings: Settings) => void;
   onChangeState: (newState: Peer["state"]) => void;
 };
@@ -263,6 +265,79 @@ export default function useWebRTC({
     }
   }
 
+  async function onChangeCamera(deviceId: string) {
+    const newSettings = {
+      audio: settings.audio,
+      screen: settings.screen,
+      video: { deviceId: deviceId },
+    };
+
+    setSettings(newSettings);
+
+    if (localStream) {
+      this.localStream.getTracks().forEach((track) => {
+        track.stop();
+      });
+
+      const newLocalStream = await navigator.mediaDevices.getUserMedia(
+        newSettings
+      );
+
+      console.log("newSettings: ", newSettings);
+      updateStream(newLocalStream);
+    }
+
+    // Persist settings
+    localstorage.setForVersion("cameraDeviceId", `${deviceId}`);
+  }
+
+  async function onChangeAudio(deviceId: string) {
+    const newSettings = {
+      audio: { deviceId: deviceId },
+      screen: settings.screen,
+      video: settings.video,
+    };
+
+    setSettings(newSettings);
+
+    if (localStream) {
+      this.localStream.getTracks().forEach((track) => {
+        track.stop();
+      });
+
+      const newLocalStream = await navigator.mediaDevices.getUserMedia(
+        newSettings
+      );
+      updateStream(newLocalStream);
+    }
+
+    // Persist settings
+    localstorage.setForVersion("audioDeviceId", `${deviceId}`);
+  }
+
+  function updateStream(stream: MediaStream) {
+    const [videoTrack] = stream.getVideoTracks();
+    const [audioTrack] = stream.getAudioTracks();
+
+    for (let peer of connections) {
+      if (videoTrack) {
+        const videoSender = peer.connection.peerConnection
+          .getSenders()
+          .find((s) => s.track.kind === videoTrack?.kind);
+        videoSender.replaceTrack(videoTrack);
+      }
+
+      if (audioTrack) {
+        const audioSender = peer.connection.peerConnection
+          .getSenders()
+          .find((s) => s.track.kind === audioTrack?.kind);
+        audioSender.replaceTrack(audioTrack);
+      }
+    }
+
+    setLocalStream(stream);
+  }
+
   async function onJoin(initialState: Peer["state"]) {
     setIsLoading(true);
 
@@ -312,6 +387,8 @@ export default function useWebRTC({
     permissionGranted,
     onJoin,
     onLeave,
+    onChangeCamera,
+    onChangeAudio,
     onChangeSettings,
     onChangeState,
   };

@@ -8,6 +8,7 @@ import UiContext from "../../context/UiContext";
 import JoinScreen from "../JoinScreen";
 
 import styles from "./Channel.module.css";
+import Overlay from "../Overlay/Overlay";
 
 export default function Channel({ source, uuid }) {
   const [agent, setAgent] = useState<Me | null>(null);
@@ -58,6 +59,8 @@ export default function Channel({ source, uuid }) {
           <UserGrid webRTC={webRTC} currentUser={agent} />
         </>
       )}
+
+      <Overlay webRTC={webRTC} currentUser={agent} />
     </section>
   );
 }

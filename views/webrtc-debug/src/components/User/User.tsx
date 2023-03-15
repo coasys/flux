@@ -42,13 +42,12 @@ export default function User({
 
   // Get video stream
   useEffect(() => {
-    if (!hasStream && videoRef.current && webRTC?.localStream && isLocalUser) {
+    if (videoRef.current && webRTC?.localStream && isLocalUser) {
       videoRef.current.srcObject = webRTC.localStream;
       videoRef.current.muted = true;
-      setHasStream(true);
     }
 
-    if (!hasStream && videoRef.current && !isLocalUser) {
+    if (videoRef.current && !isLocalUser) {
       const remoteStream = new MediaStream();
       const peer = webRTC.connections.find((p) => p.did === userId);
 
@@ -63,7 +62,7 @@ export default function User({
         };
       }
     }
-  }, [hasStream, videoRef, webRTC, isLocalUser]);
+  }, [videoRef, webRTC.connections, webRTC.localStream, isLocalUser]);
 
   return (
     <div className={styles.wrapper}>

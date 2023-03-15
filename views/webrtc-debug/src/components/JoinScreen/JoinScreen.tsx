@@ -12,9 +12,14 @@ import styles from "./JoinScreen.module.css";
 type Props = {
   webRTC: WebRTC;
   currentUser?: Me;
+  onToggleSettings: () => void;
 };
 
-export default function JoinScreen({ webRTC, currentUser }: Props) {
+export default function JoinScreen({
+  webRTC,
+  currentUser,
+  onToggleSettings,
+}: Props) {
   const videoRef = useRef(null);
   const [profile, setProfile] = useState<Profile>();
   const [selectedSpriteIndex, setSelectedSpriteIndex] = useState(0);
@@ -103,6 +108,17 @@ export default function JoinScreen({ webRTC, currentUser }: Props) {
         </j-toggle>
       </j-box>
 
+      <j-box pt="100">
+        <j-button
+          variant="ghost"
+          size="sm"
+          loading={webRTC.isLoading}
+          disabled={!webRTC.permissionGranted}
+          onClick={() => onToggleSettings()}
+        >
+          Audio/Video Settings
+        </j-button>
+      </j-box>
       <j-box pt="500">
         <j-button
           variant="primary"
