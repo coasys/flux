@@ -16,9 +16,23 @@ type Props = {
 export default function UserGrid({ webRTC, currentUser }: Props) {
   const handleMouseMove = (event) => {
     webRTC.onChangeState({
-      spriteIndex: webRTC.localState.spriteIndex,
+      ...webRTC.localState,
       x: (event.offsetX / event.target.clientWidth) * 100,
       y: (event.offsetY / event.target.clientHeight) * 100,
+    });
+  };
+
+  const handleMouseDown = () => {
+    webRTC.onChangeState({
+      ...webRTC.localState,
+      isDrawing: true,
+    });
+  };
+
+  const handleMouseUp = () => {
+    webRTC.onChangeState({
+      ...webRTC.localState,
+      isDrawing: false,
     });
   };
 
@@ -36,6 +50,7 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
           <User
             webRTC={webRTC}
             userId={peer.did}
+            isDrawing={peer.state.isDrawing}
             spriteIndex={peer.state.spriteIndex}
           />
         </div>
@@ -43,7 +58,12 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
     });
 
   return (
-    <div className={styles.map} onMouseMove={handleMouseMove}>
+    <div
+      className={styles.map}
+      onMouseMove={handleMouseMove}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+    >
       <div
         className={styles.user}
         style={{
@@ -54,11 +74,14 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
         <User
           webRTC={webRTC}
           userId={currentUser?.did}
+          isDrawing={webRTC.localState.isDrawing}
           spriteIndex={webRTC.localState.spriteIndex}
           isLocalUser
         />
       </div>
+
       {peerItems}
+
       <div className={styles.item} data-item="bush">
         <Sprite hash={items.frames[0]} palette={items.palette} />
       </div>

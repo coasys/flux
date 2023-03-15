@@ -22,6 +22,16 @@
   width: 220px;
 }
 
+.pencil {
+  display: none;
+  position: absolute;
+  transform: translate(-42px, 59px);
+  top: 0;
+  left: 0;
+  width: 100px;
+  height: 100px;
+}
+
 .video {
   position: absolute;
   top: -60px;
@@ -30,5 +40,9 @@
   height: 220px;
   clip: rect(80px, 140px, 140px, 80px);
   transform: translateX(-50%);
+}
+
+.wrapper[data-drawing="true"] .pencil {
+  display: block;
 }
 

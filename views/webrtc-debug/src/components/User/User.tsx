@@ -12,6 +12,7 @@ type Props = {
   webRTC: WebRTC;
   userId: string;
   spriteIndex: number;
+  isDrawing?: boolean;
   isLocalUser?: boolean;
 };
 
@@ -19,6 +20,7 @@ export default function User({
   webRTC,
   spriteIndex,
   userId,
+  isDrawing,
   isLocalUser,
 }: Props) {
   const videoRef = useRef(null);
@@ -59,7 +61,7 @@ export default function User({
   ]);
 
   return (
-    <div className={styles.wrapper}>
+    <div className={styles.wrapper} data-drawing={isDrawing}>
       <div className={styles.header}>
         <div className={styles.username}>
           <span>{profile?.username || "Unknown user"}</span>
@@ -68,6 +70,26 @@ export default function User({
 
       <div className={styles.sprite}>
         <Sprite hash={spriteData} palette={palette} />
+
+        <div className={styles.pencil}>
+          <Sprite
+            hash={
+              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaadbbbbbbaaaebccccccaaaadbbbbbbaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+            palette={[
+              "fff0",
+              "fcd473",
+              "F2994A",
+              "FCE288",
+              "000",
+              "b4a4a3",
+              "fff",
+              "f0d37a",
+              "fcd684",
+              "fc9467",
+            ]}
+          />
+        </div>
 
         <video
           ref={videoRef}

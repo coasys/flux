@@ -8,6 +8,7 @@ import throttle from "../utils/throttle";
 
 const defaultState = {
   spriteIndex: 0,
+  isDrawing: false,
   x: 0,
   y: 0,
 };

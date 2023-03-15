@@ -2,6 +2,7 @@ import { Settings, EventLogItem } from "utils/helpers/WebRTCManager";
 
 export type peerState = {
   spriteIndex: number;
+  isDrawing: boolean;
   x: number;
   y: number;
 };
