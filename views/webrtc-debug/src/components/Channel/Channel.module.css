@@ -1,10 +1,9 @@
 .outer {
   position: relative;
-  display: grid;
-  place-content: center;
+  display: flex;
+  align-items: center;
   width: 100%;
   max-width: 100%;
-  grid-template-columns: 1fr;
+  justify-content: center;
   height: 100%;
-  padding: 0 var(--j-space-500);
 }

@@ -14,13 +14,7 @@ type Props = {
 };
 
 export default function UserGrid({ webRTC, currentUser }: Props) {
-  const { isOpen, setIsOpen, position, setPosition } = useContextMenu();
-
   const handleMouseMove = (event) => {
-    if (isOpen) {
-      return;
-    }
-
     webRTC.onChangeState({
       spriteIndex: webRTC.localState.spriteIndex,
       x: (event.offsetX / event.target.clientWidth) * 100,
@@ -49,21 +43,7 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
     });
 
   return (
-    <div
-      className={styles.map}
-      data-context-menu-open={isOpen}
-      onMouseMove={handleMouseMove}
-      onContextMenu={(e) => {
-        e.preventDefault();
-
-        console.log(e);
-        setIsOpen(true);
-        setPosition({
-          x: e.pageX,
-          y: e.pageY,
-        });
-      }}
-    >
+    <div className={styles.map} onMouseMove={handleMouseMove}>
       <div
         className={styles.user}
         style={{
@@ -89,17 +69,17 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
         <Sprite hash={items.frames[2]} palette={items.palette} />
       </div>
 
-      {isOpen && (
-        <div
-          className={styles.menu}
-          style={{ top: position.y, left: position.x }}
-        >
-          <j-menu>
-            <j-menu-item>Menu item</j-menu-item>
-            <j-menu-item>Menu item</j-menu-item>
-          </j-menu>
-        </div>
-      )}
+      <div className={styles.footer}>
+        <j-text variant="body" nomargin>
+          Keyboard shortcuts:
+        </j-text>
+        <j-badge>
+          <span className={styles.key}>D</span> toggle debug
+        </j-badge>
+        <j-badge>
+          <span className={styles.key}>R</span> reload
+        </j-badge>
+      </div>
     </div>
   );
 }

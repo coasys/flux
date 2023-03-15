@@ -473,6 +473,11 @@ export default class WebRTCManager {
     if (connection) {
       connection.peerConnection.close();
       connection.dataChannel.close();
+
+      // https://stackoverflow.com/questions/54282358/how-to-fully-clear-webrtc-connection
+      connection.peerConnection = null;
+      connection.dataChannel = null;
+
       this.connections.delete(did);
     }
   }

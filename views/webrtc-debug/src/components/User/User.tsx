@@ -23,8 +23,9 @@ export default function User({
 }: Props) {
   const videoRef = useRef(null);
   const [profile, setProfile] = useState<Profile>();
-  const [hasStream, setHasStream] = useState(false);
+  const [stream, setStream] = useState<MediaStream>();
 
+  const peer = webRTC.connections.find((p) => p.did === userId);
   const palette = characters.palette as string[];
   const spriteData = characters.frames[spriteIndex] as string;
 
@@ -40,6 +41,23 @@ export default function User({
     }
   }, [profile, userId]);
 
+  // Listen to changes in remote stream
+  useEffect(() => {
+    if (!isLocalUser) {
+      const remoteStream = new MediaStream();
+
+      if (peer.connection.peerConnection) {
+        peer.connection.peerConnection.ontrack = (event) => {
+          event.streams[0].getTracks().forEach((track) => {
+            remoteStream.addTrack(track);
+          });
+        };
+      }
+
+      setStream(remoteStream);
+    }
+  }, [peer, isLocalUser]);
+
   // Get video stream
   useEffect(() => {
     if (videoRef.current && webRTC?.localStream && isLocalUser) {
@@ -48,21 +66,10 @@ export default function User({
     }
 
     if (videoRef.current && !isLocalUser) {
-      const remoteStream = new MediaStream();
-      const peer = webRTC.connections.find((p) => p.did === userId);
-
-      if (peer.connection.peerConnection) {
-        peer.connection.peerConnection.ontrack = (event) => {
-          event.streams[0].getTracks().forEach((track) => {
-            remoteStream.addTrack(track);
-            videoRef.current.srcObject = remoteStream;
-            videoRef.current.muted = true;
-            setHasStream(true);
-          });
-        };
-      }
+      videoRef.current.srcObject = stream;
+      videoRef.current.muted = true;
     }
-  }, [videoRef, webRTC.connections, webRTC.localStream, isLocalUser]);
+  }, [videoRef, stream, webRTC.localStream, isLocalUser]);
 
   return (
     <div className={styles.wrapper}>

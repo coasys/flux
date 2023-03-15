@@ -1,14 +1,16 @@
 import { useContext, useEffect, useRef, useState } from "preact/hooks";
 import useWebRTC from "../../hooks/useWebrtc";
+import useKeyEvent from "../../hooks/useKeyEvent";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
 import getMe, { Me } from "utils/api/getMe";
 
 import UserGrid from "../UserGrid";
 import UiContext from "../../context/UiContext";
 import JoinScreen from "../JoinScreen";
+import Overlay from "../Overlay/Overlay";
+import Debug from "../Debug";
 
 import styles from "./Channel.module.css";
-import Overlay from "../Overlay/Overlay";
 
 export default function Channel({ source, uuid }) {
   const [agent, setAgent] = useState<Me | null>(null);
@@ -18,8 +20,8 @@ export default function Channel({ source, uuid }) {
   const isPageActive = !!wrapperObserver?.isIntersecting;
 
   const {
-    state: { showSettings },
-    methods: { addNotification, toggleShowSettings },
+    state: { showSettings, showDebug },
+    methods: { addNotification, toggleShowSettings, toggleShowDebug },
   } = useContext(UiContext);
 
   const webRTC = useWebRTC({
@@ -30,6 +32,10 @@ export default function Channel({ source, uuid }) {
       onPeerJoin: (userId) => addNotification({ userId, type: "join" }),
       onPeerLeave: (userId) => addNotification({ userId, type: "leave" }),
     },
+  });
+
+  useKeyEvent("KeyD", () => {
+    toggleShowDebug(!showDebug);
   });
 
   // Get agent/me
@@ -57,6 +63,12 @@ export default function Channel({ source, uuid }) {
       {webRTC.hasJoined && (
         <>
           <UserGrid webRTC={webRTC} currentUser={agent} />
+        </>
+      )}
+
+      {showDebug && webRTC.hasJoined && (
+        <>
+          <Debug webRTC={webRTC} currentUser={agent} />
         </>
       )}
 
