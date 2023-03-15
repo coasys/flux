@@ -2,6 +2,7 @@ import { WebRTC } from "../../hooks/useWebrtc";
 import { Me } from "utils/api/getMe";
 
 import Item from "./Item";
+import ItemMe from "./ItemMe";
 
 import styles from "./Debug.module.css";
 
@@ -16,8 +17,7 @@ export default function VoiceVideo({ webRTC, currentUser }: Props) {
       <div className={styles.inner}>
         <ul className={styles.list}>
           <li>
-            <j-text variant="heading">Connection #1 (me)</j-text>
-            <j-text variant="body">{currentUser?.did}</j-text>
+            <ItemMe currentUser={currentUser} webRTC={webRTC} />
           </li>
           {webRTC.connections.map((p, i) => (
             <li key={p.did}>

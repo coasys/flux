@@ -1,4 +1,4 @@
-import { Settings } from "utils/helpers/WebRTCManager";
+import { Settings, EventLogItem } from "utils/helpers/WebRTCManager";
 
 export type peerState = {
   spriteIndex: number;
@@ -12,6 +12,7 @@ export type Peer = {
     peerConnection: RTCPeerConnection;
     dataChannel: RTCDataChannel;
     mediaStream: MediaStream;
+    eventLog: EventLogItem[];
   };
   settings: Settings;
   state: peerState;

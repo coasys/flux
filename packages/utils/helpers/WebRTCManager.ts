@@ -54,10 +54,17 @@ export const HEARTBEAT = "heartbeat";
 export const TEST_SIGNAL = "test-signal";
 export const TEST_BROADCAST = "test-broadcast";
 
+export type EventLogItem = {
+  timeStamp: string;
+  type: string;
+  value?: string;
+};
+
 export type Connection = {
   peerConnection: RTCPeerConnection;
   dataChannel: RTCDataChannel;
   mediaStream: MediaStream;
+  eventLog: EventLogItem[];
 };
 
 export type Settings = {
@@ -130,6 +137,7 @@ export default class WebRTCManager {
     this.sendMessage = this.sendMessage.bind(this);
     this.sendTestSignal = this.sendTestSignal.bind(this);
     this.sendTestBroadcast = this.sendTestBroadcast.bind(this);
+    this.addToEventLog = this.addToEventLog.bind(this);
     this.heartbeat = this.heartbeat.bind(this);
     this.leave = this.leave.bind(this);
 
@@ -186,6 +194,8 @@ export default class WebRTCManager {
     });
 
     if (!link) return;
+
+    this.addToEventLog(expression.author, link?.data?.predicate || "unknown");
 
     if (link.data.predicate === LEAVE && link.data.source === this.roomId) {
       this.closeConnection(link.author);
@@ -328,6 +338,9 @@ export default class WebRTCManager {
     peerConnection.addEventListener("iceconnectionstatechange", (event) => {
       const c = event.target as RTCPeerConnection;
       console.log("🔄 connection state is", c.iceConnectionState);
+
+      this.addToEventLog(remoteDid, "connection state", c.connectionState);
+
       if (c.iceConnectionState === "disconnected") {
         this.connections.delete(remoteDid);
       }
@@ -357,6 +370,7 @@ export default class WebRTCManager {
       peerConnection,
       dataChannel,
       mediaStream,
+      eventLog: [],
     };
 
     this.connections.set(remoteDid, newConnection);
@@ -485,6 +499,23 @@ export default class WebRTCManager {
 
       this.connections.delete(did);
     }
+  }
+
+  /**
+   * Add event to peer log
+   */
+  async addToEventLog(did: string, type: string, value?: string) {
+    const connection = this.connections.get(did);
+    if (!connection) {
+      console.log("🔴 Failed to add log entry, no connection found!");
+      return;
+    }
+
+    connection.eventLog.push({
+      type,
+      value,
+      timeStamp: new Date().toISOString(),
+    });
   }
 
   /**

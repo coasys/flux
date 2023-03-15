@@ -31,10 +31,13 @@
     overflow: auto;
 }
 
-.list li {
+.list > li {
+    position: relative;
+    display: block;
     border: 1px solid white;
     min-width: 20%;
     padding: var(--j-space-400);
+    overflow: scroll;
 }
 
 .footer {

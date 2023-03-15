@@ -189,9 +189,10 @@ export default function useWebRTC({
 
       setIsInitialised(true);
 
-      return () => {
+      return async () => {
         if (hasJoined) {
-          manager.current.leave();
+          await manager.current.leave();
+          manager.current = null;
         }
       };
     }

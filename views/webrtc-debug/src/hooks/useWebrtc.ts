@@ -4,7 +4,6 @@ import { Peer } from "../types";
 import { defaultSettings } from "../constants";
 import getMe, { Me } from "utils/api/getMe";
 import * as localstorage from "utils/helpers/localStorage";
-import debounce from "../utils/debounce";
 import throttle from "../utils/throttle";
 
 const defaultState = {
@@ -219,9 +218,10 @@ export default function useWebRTC({
 
       setIsInitialised(true);
 
-      return () => {
+      return async () => {
         if (hasJoined) {
-          manager.current.leave();
+          await manager.current.leave();
+          manager.current = null;
         }
       };
     }
