@@ -1,8 +1,9 @@
-import { useRef, useEffect, useState } from "preact/hooks";
+import { useRef, useEffect, useState, useLayoutEffect } from "preact/hooks";
 import { Me } from "utils/api/getMe";
 import useContextMenu from "../../hooks/useContextMenu";
 import { WebRTC } from "../../hooks/useWebrtc";
 import items from "../../sprites/items";
+import Canvas from "../Canvas";
 import Sprite from "../Sprite/Sprite";
 import User from "../User/User";
 
@@ -14,6 +15,21 @@ type Props = {
 };
 
 export default function UserGrid({ webRTC, currentUser }: Props) {
+  const [canvasSize, setCanvasSize] = useState([0, 0]);
+
+  useLayoutEffect(() => {
+    function updateSize() {
+      const el = document.getElementById("map");
+
+      if (el) {
+        setCanvasSize([el.clientWidth, el.clientHeight]);
+      }
+    }
+    window.addEventListener("resize", updateSize);
+    updateSize();
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
+
   const handleMouseMove = (event) => {
     webRTC.onChangeState({
       ...webRTC.localState,
@@ -59,6 +75,7 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
 
   return (
     <div
+      id="map"
       className={styles.map}
       onMouseMove={handleMouseMove}
       onMouseDown={handleMouseDown}
@@ -78,6 +95,10 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
           spriteIndex={webRTC.localState.spriteIndex}
           isLocalUser
         />
+      </div>
+
+      <div className={styles.canvas}>
+        <Canvas width={canvasSize[0]} height={canvasSize[1]} />
       </div>
 
       {peerItems}
