@@ -11,6 +11,7 @@ export type Peer = {
   connection: {
     peerConnection: RTCPeerConnection;
     dataChannel: RTCDataChannel;
+    mediaStream: MediaStream;
   };
   settings: Settings;
   state: peerState;

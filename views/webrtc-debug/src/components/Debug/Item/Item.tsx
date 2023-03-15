@@ -41,7 +41,7 @@ export default function Item({ peer, index }: Props) {
 
     return () => {
       if (peer) {
-        peer.connection.peerConnection.removeEventListener(
+        peer?.connection?.peerConnection?.removeEventListener(
           "iceconnectionstatechange",
           updateLoadingState
         );

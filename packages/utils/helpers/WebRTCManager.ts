@@ -57,6 +57,7 @@ export const TEST_BROADCAST = "test-broadcast";
 export type Connection = {
   peerConnection: RTCPeerConnection;
   dataChannel: RTCDataChannel;
+  mediaStream: MediaStream;
 };
 
 export type Settings = {
@@ -344,9 +345,18 @@ export default class WebRTCManager {
       });
     });
 
+    const mediaStream = new MediaStream();
+
+    peerConnection.addEventListener("track", async (event) => {
+      event.streams[0].getTracks().forEach((track) => {
+        mediaStream.addTrack(track);
+      });
+    });
+
     const newConnection = {
       peerConnection,
       dataChannel,
+      mediaStream,
     };
 
     this.connections.set(remoteDid, newConnection);
@@ -442,11 +452,6 @@ export default class WebRTCManager {
     this.connections.forEach((e, key) => {
       if (!recepients || recepients.includes(key)) {
         if (e.dataChannel.readyState === "open") {
-          console.log(
-            `🟠 Sending DATACHANNEL message to ${key} -> `,
-            type,
-            message
-          );
           e.dataChannel.send(data);
         } else {
           console.log(

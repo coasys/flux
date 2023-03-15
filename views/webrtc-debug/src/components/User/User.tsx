@@ -23,7 +23,6 @@ export default function User({
 }: Props) {
   const videoRef = useRef(null);
   const [profile, setProfile] = useState<Profile>();
-  const [stream, setStream] = useState<MediaStream>();
 
   const peer = webRTC.connections.find((p) => p.did === userId);
   const palette = characters.palette as string[];
@@ -41,23 +40,6 @@ export default function User({
     }
   }, [profile, userId]);
 
-  // Listen to changes in remote stream
-  useEffect(() => {
-    if (!isLocalUser) {
-      const remoteStream = new MediaStream();
-
-      if (peer.connection.peerConnection) {
-        peer.connection.peerConnection.ontrack = (event) => {
-          event.streams[0].getTracks().forEach((track) => {
-            remoteStream.addTrack(track);
-          });
-        };
-      }
-
-      setStream(remoteStream);
-    }
-  }, [peer, isLocalUser]);
-
   // Get video stream
   useEffect(() => {
     if (videoRef.current && webRTC?.localStream && isLocalUser) {
@@ -66,10 +48,15 @@ export default function User({
     }
 
     if (videoRef.current && !isLocalUser) {
-      videoRef.current.srcObject = stream;
+      videoRef.current.srcObject = peer.connection.mediaStream;
       videoRef.current.muted = true;
     }
-  }, [videoRef, stream, webRTC.localStream, isLocalUser]);
+  }, [
+    videoRef,
+    peer?.connection?.mediaStream,
+    webRTC.localStream,
+    isLocalUser,
+  ]);
 
   return (
     <div className={styles.wrapper}>
