@@ -10,13 +10,13 @@ Button component is used to trigger an action or event, such as submitting a for
 
 ### Variant <Badge type="info" text="string" />
 
-Use the variant property to change the visual style of the button. You can set the value to primary, secondary, link, solid or ghost.
+Use the variant property to change the visual style of the button. You can set the value to `primary`, `secondary`, `link`, `subtle` or `ghost`.
 
 <j-button variant="primary">Primary</j-button>
 <j-button variant="secondary">Secondary</j-button>
 <j-button variant="link">Link</j-button>
-<j-button variant="ghost">Ghost</j-button>
 <j-button variant="subtle">Subtle</j-button>
+<j-button variant="ghost">Ghost</j-button>
 
 ```html
 <j-button variant="primary">Primary</j-button>
@@ -28,7 +28,7 @@ Use the variant property to change the visual style of the button. You can set t
 
 ### Size <Badge type="info" text="boolean" />
 
-Use the size property to change the size of the button. You can set the value to xs, sm, md, or lg.
+Use the size property to change the size of the button. You can set the value to `xs`, `sm`, `md`, or `lg`.
 
 <j-button size="xs">Extra small</j-button>
 <j-button size="sm">Small</j-button>
@@ -46,7 +46,7 @@ Use the size property to change the size of the button. You can set the value to
 
 ### Disabled <Badge type="info" text="boolean" />
 
-Use the disabled property to disable the button. When the button is disabled, it cannot be clicked or focused.
+Use the `disabled` property to disable the button. When the button is disabled, it cannot be clicked or focused.
 
 <j-button disabled>Disabled</j-button>
 
@@ -56,7 +56,7 @@ Use the disabled property to disable the button. When the button is disabled, it
 
 ### Loading <Badge type="info" text="boolean" />
 
-Use the loading property to indicate that the button is in a loading state. This is often used when the button triggers an action that takes some time to complete, such as submitting a form or performing an AJAX request.
+Use the `loading` property to indicate that the button is in a loading state. This is often used when the button triggers an action that takes some time to complete, such as submitting a form or performing an AJAX request.
 
 <j-button loading>Loading</j-button>
 
@@ -66,7 +66,7 @@ Use the loading property to indicate that the button is in a loading state. This
 
 ### Full <Badge type="info" text="boolean" />
 
-Use the full property to make the button take up the full width of its container.
+Use the `full` property to make the button take up the full width of its container.
 
 <j-button full>Full</j-button>
 
@@ -76,7 +76,7 @@ Use the full property to make the button take up the full width of its container
 
 ### Square <Badge type="info" text="boolean" />
 
-Use the squared property to make the button have be equal in height and width.
+Use the `square` property to make the button have be equal in height and width.
 
 <j-button square><j-icon name="trash"></j-icon></j-button>
 
@@ -86,7 +86,7 @@ Use the squared property to make the button have be equal in height and width.
 
 ### Circle <Badge type="info" text="boolean" />
 
-Use the circle property to make the button circular. When the circle property is used, the button's width and height will be set to the same value, and the border-radius will be set to 50%.
+Use the `circle` property to make the button circular. When the circle property is used, the button's width and height will be set to the same value, and the border-radius will be set to 50%.
 
 <j-button circle><j-icon name="trash"></j-icon></j-button>
 
@@ -98,7 +98,7 @@ Use the circle property to make the button circular. When the circle property is
 
 ### Click
 
-The click event is fired when the button is clicked. You can add an event listener to the button element to handle this event, like so:
+The `click` event is fired when the button is clicked. You can add an event listener to the button element to handle this event, like so:
 
 ```js
 const button = document.querySelector("j-button");
@@ -111,7 +111,7 @@ button.addEventListener("click", () => {
 
 ### Start
 
-Use the start slot to add content to the start of the button. You can use this slot to add an icon, text, or any other content you want to appear at the start of the button.
+Use the `start` slot to add content to the start of the button. You can use this slot to add an icon, text, or any other content you want to appear at the start of the button.
 
 <j-button>
     <j-icon slot="start" size="xs" name="chevron-left"></j-icon>
@@ -127,7 +127,7 @@ Use the start slot to add content to the start of the button. You can use this s
 
 ### End
 
-Use the end slot to add content to the end of the button. You can use this slot to add an icon, text, or any other content you want to appear at the end of the button.
+Use the `end` slot to add content to the end of the button. You can use this slot to add an icon, text, or any other content you want to appear at the end of the button.
 
 <j-button>
     <j-icon slot="end" size="xs" name="chevron-left"></j-icon>

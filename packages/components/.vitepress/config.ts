@@ -35,8 +35,11 @@ export default defineConfig({
           text: "Components",
           items: [
             { text: "Avatar", link: "/components/avatar" },
+            { text: "Badge", link: "/components/badge" },
             { text: "Button", link: "/components/button" },
+            { text: "Checkbox", link: "/components/checkbox" },
             { text: "Input", link: "/components/input" },
+            { text: "Menu", link: "/components/menu" },
           ],
         },
       ],

@@ -6,11 +6,20 @@ outline: deep
 
 Avatar component is used to display a profile picture, an icon, or an initial letter of a user's name.
 
+## Usage
+
+<j-avatar src="https://i.pravatar.cc/300"></j-avatar>
+
+```html
+<j-avatar src="https://i.pravatar.cc/300"></j-avatar>
+```
+
 ## Properties
 
 ### Src <Badge type="info" text="string" />
 
-Use the src property to set the source of the avatar image. This property takes priority over the hash property.
+Use the src property to set the source of the avatar image. This property takes
+priority over the hash property.
 
 <j-avatar src="https://i.pravatar.cc/300"></j-avatar>
 

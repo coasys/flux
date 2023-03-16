@@ -184,7 +184,10 @@ class Input extends LitElement {
 
   validate() {
     const valid = this.renderRoot.querySelector("input").checkValidity();
-    const message = this.renderRoot.querySelector("input").validationMessage;
+
+    const message =
+      this.errorText ||
+      this.renderRoot.querySelector("input").validationMessage;
 
     if (!valid) {
       this.error = true;

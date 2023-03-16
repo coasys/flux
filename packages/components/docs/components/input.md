@@ -6,6 +6,52 @@ outline: deep
 
 Input component is used to get user input in forms. It can be used to get text, numbers, dates, and other types of input from the user.
 
+## Usage
+
+::: code-group
+
+```html [html]
+<j-input label="Name"></j-input>
+
+<script>
+  const input = document.querySelector("j-input");
+  input.addEventListener("input", (e) => {
+    console.log(e.target.value);
+  });
+</script>
+```
+
+```js [preact]
+export default function Checkbox() {
+  const [value, setValue] = useState("");
+
+  return (
+    <j-input
+      label="Name"
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+    ></j-input>
+  );
+}
+```
+
+```vue [vue]
+<template>
+  <j-input
+    label="Name"
+    :value="value"
+    @change="(e) => (value = e.target.value)"
+  ></j-input>
+</template>
+
+<script setup>
+import { ref } from "vue";
+const value = ref("");
+</script>
+```
+
+:::
+
 ## Properties
 
 ### Value <Badge type="info" text="string" />
@@ -22,7 +68,7 @@ Use the value property to set or get the current value of the input. You can use
 
 Use the pattern property to set a regular expression that the input's value must match. You can use this property to validate the user's input and display an error message if the input does not match the specified pattern.
 
-<j-input pattern="[A-Za-z]+" autovalidate error-text="Please enter only letters"></j-input>
+<j-input pattern="[A-Za-z]+" autovalidate errortext="Please enter only letters"></j-input>
 
 ```html
 <j-input
@@ -75,10 +121,14 @@ Use the placeholder property to set the placeholder text for the input. The plac
 
 Use the error-text property to set the error message that should be displayed if the user's input is not valid.
 
-<j-input pattern="[A-Za-z]+" errortext="Please enter only letters"></j-input>
+<j-input pattern="[A-Za-z]+" autvalidate errortext="Only alphabetic characters allowed"></j-input>
 
 ```html
-<j-input pattern="[A-Za-z]+" errortext="Please enter only letters"></j-input>
+<j-input
+  pattern="[A-Za-z]+"
+  autovalidate
+  errortext="Only alphabetic characters allowed"
+></j-input>
 ```
 
 ### HelpText <Badge type="info" text="string" />
@@ -103,12 +153,12 @@ Use the autocomplete property to enable or disable autocomplete for the input. Y
 
 ### Autovalidate <Badge type="info" text="boolean" />
 
-Use the autovalidate property to enable or disable automatic validation of the input. If this property is set to true, the input will be validated automatically whenever the user types or pastes something into it.
+Use the autovalidate property to enable or disable automatic validation of the input. If this property is set to true, the input will be validated automatically whenever the input looses focus after writing inside. If no `errortext` property is added, the default validation message will appear.
 
-<j-input autovalidate></j-input>
+<j-input autovalidate required></j-input>
 
 ```html
-<j-input autovalidate></j-input>
+<j-input autovalidate required></j-input>
 ```
 
 ### Autofocus <Badge type="info" text="boolean" />
@@ -179,4 +229,104 @@ Use the type property to specify the type of input field. This can be `text`, `p
 
 ```html
 <j-input type="number"></j-input>
+```
+
+## Slots
+
+### Start
+
+Use the start slot to add content to the start of the input. You can use this slot to add an icon or any other content you want to appear at the start of the input.
+
+<j-input>
+  <j-icon color="ui-400" slot="start" size="sm" name="search"></j-icon>
+</j-input>
+
+```html
+<j-input>
+  <j-icon color="ui-400" slot="start" size="sm" name="search"></j-icon>
+</j-input>
+```
+
+### End
+
+Use the end slot to add content to the end of the input. You can use this slot to add an icon or any other content you want to appear at the end of the input.
+
+<j-input size="lg">
+  <j-button slot="end" variant="primary" size="xs" circle>
+    <j-icon size="sm" name="x"></j-icon>
+  </j-button>
+</j-input>
+
+```html
+<j-input size="lg">
+  <j-button slot="end" variant="primary" size="xs" circle>
+    <j-icon size="sm" name="x"></j-icon>
+  </j-button>
+</j-input>
+```
+
+## Events
+
+### Change
+
+The change event is fired when the value of the input is changed by the user. You can add an event listener to the input element to handle this event, like so:
+
+```js
+const input = document.querySelector("j-input");
+input.addEventListener("change", (event) => {
+  console.log("Input value changed:", event.target.value);
+});
+```
+
+### Input
+
+The input event is fired when the value of the input is changed, either by the user or programmatically. You can add an event listener to the input element to handle this event, like so:
+
+```js
+const input = document.querySelector("j-input");
+input.addEventListener("input", (event) => {
+  console.log("Input value changed:", event.target.value);
+});
+```
+
+### Validate
+
+The validate event is fired when the input is validated. You can add an event listener to the input element to handle this event, like so:
+
+```js
+const input = document.querySelector("j-input");
+input.addEventListener("validate", () => {
+  // Do something when the input is validated
+});
+```
+
+### Blur
+
+The blur event is fired when the input loses focus. You can add an event listener to the input element to handle this event, like so:
+
+```js
+const input = document.querySelector("j-input");
+input.addEventListener("blur", () => {
+  // Do something when the input loses focus
+});
+```
+
+## Methods
+
+### Validate
+
+The validate() method is used to validate the input. It returns a boolean value indicating whether the input is valid or not.
+
+```js
+const input = document.querySelector("j-input");
+const isValid = input.validate();
+```
+
+### Focus
+
+The focus() method is used to give focus to the input.
+
+```js
+const input = document.querySelector("j-input");
+input.focus();
 ```
