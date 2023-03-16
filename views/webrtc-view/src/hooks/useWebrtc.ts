@@ -1,7 +1,7 @@
 import WebRTCManager, { Event, Settings } from "../WebRTCManager";
 import { useEffect, useState, useRef } from "preact/hooks";
 import { Peer, Reaction } from "../types";
-import { defaultSettings } from "../constants";
+import { defaultSettings, videoDimensions } from "../constants";
 import getMe, { Me } from "utils/api/getMe";
 import * as localstorage from "utils/helpers/localStorage";
 
@@ -81,7 +81,10 @@ export default function useWebRTC({
 
       const joinSettings = { ...defaultSettings };
       if (videoDeviceId && typeof joinSettings.video !== "boolean") {
-        joinSettings.video.deviceId = videoDeviceId;
+        joinSettings.video = {
+          ...videoDimensions,
+          deviceId: videoDeviceId
+        };
       }
       if (audioDeviceId) {
         joinSettings.audio = {
