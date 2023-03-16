@@ -91,18 +91,40 @@ menuItem.addEventListener("click", () => {
 
 ### Start
 
-Use the icon slot to customize the icon displayed in the menu item. You can use this slot to replace the default icon with a custom icon or text.
+Use the `start` slot to add content to the start of the menu item. You can use this slot to add an icon, text, or any other content you want to appear at the start of the element.
 
-<j-menu-item>
-  <j-icon slot="icon" name="menu"></j-icon>
-  Icon slot
-</j-menu-item>
+<j-menu>
+  <j-menu-item>
+    <j-icon slot="start" name="person"></j-icon>
+    Icon slot
+  </j-menu-item>
+</j-menu>
 
 ```html
-<j-menu-item>
-  <j-icon slot="icon" name="menu"></j-icon>
-  Icon slot
-</j-menu-item>
+<j-menu>
+  <j-menu-item>
+    <j-icon slot="start" name="person"></j-icon>
+    Icon slot
+  </j-menu-item>
+</j-menu>
 ```
 
 ### End
+
+Use the `end` slot to add content to the end of the menu item. You can use this slot to add an icon, text, or any other content you want to appear at the end of the element.
+
+<j-menu>
+<j-menu-item>
+  <j-icon slot="end" name="person"></j-icon>
+  Icon slot
+</j-menu-item>
+</j-menu>
+
+```html
+<j-menu>
+  <j-menu-item>
+    <j-icon slot="end" name="person"></j-icon>
+    Icon slot
+  </j-menu-item>
+</j-menu>
+```

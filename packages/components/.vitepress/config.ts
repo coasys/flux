@@ -40,6 +40,7 @@ export default defineConfig({
             { text: "Checkbox", link: "/components/checkbox" },
             { text: "Input", link: "/components/input" },
             { text: "Menu", link: "/components/menu" },
+            { text: "Modal", link: "/components/modal" },
           ],
         },
       ],
