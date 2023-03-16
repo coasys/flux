@@ -39,6 +39,17 @@
   left: 10%;
 }
 
+.item[data-item="chair"] {
+  bottom: 10%;
+  left: 40%;
+  z-index: -1;
+}
+
+.item[data-item="rat"] {
+  bottom: 40%;
+  right: 5%;
+}
+
 .footer {
   position: absolute;
   bottom: 0;

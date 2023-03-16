@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import { WebRTC } from "../../hooks/useWebrtc";
+import { Peer } from "../../types";
 
 interface CanvasProps {
+  peers: Peer[];
   width: number;
   height: number;
 }
@@ -11,9 +12,12 @@ type Coordinate = {
   y: number;
 };
 
-const Canvas = ({ width, height }: CanvasProps) => {
+const Canvas = ({ peers, width, height }: CanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isPainting, setIsPainting] = useState(false);
+  const [peerPositions, setPeerPositions] = useState<{
+    [key: string]: { x: number; y: number };
+  }>({});
   const [mousePosition, setMousePosition] = useState<Coordinate | undefined>(
     undefined
   );
@@ -36,6 +40,43 @@ const Canvas = ({ width, height }: CanvasProps) => {
       canvas.removeEventListener("mousedown", startPaint);
     };
   }, [startPaint]);
+
+  // This is the dirtiest code I've written!
+  useEffect(() => {
+    if (!canvasRef.current) {
+      return;
+    }
+    // Loop through and paint if any peers are currently painting
+    for (let i = 0; i < peers.length; i++) {
+      const peer = peers[i];
+      if (peer.state.isDrawing) {
+        // Check if we have old position in array
+        if (peerPositions[peer.did]) {
+          // Draw and update
+          drawLine(
+            {
+              x: (peer.state.x / 100) * width - 34,
+              y: (peer.state.y / 100) * height + 180,
+            },
+            peerPositions[peer.did]
+          );
+        }
+        // Update position
+        setPeerPositions({
+          ...peerPositions,
+          [peer.did]: {
+            x: (peer.state.x / 100) * width - 34,
+            y: (peer.state.y / 100) * height + 180,
+          },
+        });
+      } else if (peerPositions[peer.did]) {
+        // Wipe old position if no longer drawing
+        const newPeerPositions = { ...peerPositions };
+        delete newPeerPositions[peer.did];
+        setPeerPositions(newPeerPositions);
+      }
+    }
+  }, [peers]);
 
   const paint = useCallback(
     (event: MouseEvent) => {

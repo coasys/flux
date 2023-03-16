@@ -98,7 +98,11 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
       </div>
 
       <div className={styles.canvas}>
-        <Canvas width={canvasSize[0]} height={canvasSize[1]} />
+        <Canvas
+          peers={webRTC.connections}
+          width={canvasSize[0]}
+          height={canvasSize[1]}
+        />
       </div>
 
       {peerItems}
@@ -111,6 +115,12 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
       </div>
       <div className={styles.item} data-item="barrel">
         <Sprite hash={items.frames[2]} palette={items.palette} />
+      </div>
+      <div className={styles.item} data-item="chair">
+        <Sprite hash={items.frames[3]} palette={items.palette} />
+      </div>
+      <div className={styles.item} data-item="rat">
+        <Sprite hash={items.frames[4]} palette={items.palette} />
       </div>
 
       <div className={styles.footer}>

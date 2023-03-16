@@ -21,7 +21,7 @@ export default function Channel({ source, uuid }) {
 
   const {
     state: { showSettings, showDebug },
-    methods: { addNotification, toggleShowSettings, toggleShowDebug },
+    methods: { toggleShowSettings, toggleShowDebug },
   } = useContext(UiContext);
 
   const webRTC = useWebRTC({
