@@ -27,7 +27,7 @@ export default function ItemMe({ currentUser, webRTC }: Props) {
       </div>
 
       <j-box pt={600}>
-        <j-text variant="heading-sm">Event log</j-text>
+        <j-text variant="heading-sm">Outgoing signals</j-text>
       </j-box>
 
       <ul className={styles.events}>

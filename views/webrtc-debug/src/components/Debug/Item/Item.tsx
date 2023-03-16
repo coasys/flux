@@ -98,7 +98,7 @@ export default function Item({ peer, index }: Props) {
       </div>
 
       <j-box pt={600}>
-        <j-text variant="heading-sm">Event log</j-text>
+        <j-text variant="heading-sm">Incoming signals</j-text>
       </j-box>
 
       <ul className={styles.events}>
