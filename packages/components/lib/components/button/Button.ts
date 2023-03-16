@@ -151,6 +151,7 @@ const styles = css`
     --j-button-width: var(--j-button-height);
   }
   :host([circle]) {
+    --j-button-width: var(--j-button-height);
     --j-button-border-radius: 50%;
   }
 `;

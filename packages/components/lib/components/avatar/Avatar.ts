@@ -19,7 +19,7 @@ const styles = css`
   :host([selected]) {
     --j-avatar-box-shadow: 0px 0px 0px 2px var(--j-color-primary-500);
   }
-  :host([online]):before {
+  :host([online]) [part="base"]:before {
     position: absolute;
     right: 0;
     bottom: 0;
@@ -49,6 +49,7 @@ const styles = css`
     --j-avatar-size: var(--j-size-xxl);
   }
   [part="base"] {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;

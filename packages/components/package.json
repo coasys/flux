@@ -20,9 +20,10 @@
     "start": "run-p dev:*",
     "build": "run-s build:*",
     "dev": "run-p dev:*",
-    "dev:analyze": "web-component-analyzer src --outFile components.json",
-    "dev:watch": "NODE_ENV=dev node esbuild.js",
-    "dev:docs": "npx reload",
+    "dev:docs": "vitepress dev ./",
+    "docs:dev": "vitepress dev ./",
+    "docs:build": "vitepress build ./",
+    "docs:preview": "vitepress preview ./",
     "build:types": "node buildTypes.js",
     "build:analyze": "web-component-analyzer src --outFile components.json",
     "build:package": "NODE_ENV=production node esbuild.js"
@@ -30,8 +31,11 @@
   "dependencies": {
     "@popperjs/core": "^2.9.2",
     "construct-style-sheets-polyfill": "^3.1.0",
+    "hast-to-hyperscript": "^10.0.3",
     "jdenticon": "^3.1.0",
-    "lit": "^2.0.0-rc.2"
+    "lit": "^2.0.0-rc.2",
+    "vite": "^4.1.4",
+    "vitepress": "^1.0.0-alpha.59"
   },
   "devDependencies": {
     "esbuild": "^0.12.0",

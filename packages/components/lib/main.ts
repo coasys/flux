@@ -1,6 +1,4 @@
 import "construct-style-sheets-polyfill";
-import "./styles/base.css";
-
 import "./components/button";
 import "./components/text";
 import "./components/box";
