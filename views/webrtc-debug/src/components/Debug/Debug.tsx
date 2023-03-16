@@ -11,7 +11,7 @@ type Props = {
   currentUser?: Me;
 };
 
-export default function VoiceVideo({ webRTC, currentUser }: Props) {
+export default function Debugger({ webRTC, currentUser }: Props) {
   return (
     <div className={styles.wrapper}>
       <div className={styles.inner}>

@@ -89,7 +89,7 @@ export default function useWebRTC({
         };
       }
 
-      navigator.mediaDevices.getUserMedia(joinSettings).then(
+      navigator.mediaDevices?.getUserMedia(joinSettings).then(
         (stream) => {
           setPermissionGranted(true);
           setLocalStream(stream);

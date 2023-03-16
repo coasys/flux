@@ -13,7 +13,6 @@ type Props = {
 
 export default function Item({ peer, index }: Props) {
   const [profile, setProfile] = useState<Profile>();
-  const [loadingState, setLoadingState] = useState("");
   const [time, setTime] = useState(Date.now());
 
   // Rerender each second
@@ -36,29 +35,6 @@ export default function Item({ peer, index }: Props) {
     }
   }, [profile, peer.did]);
 
-  // Get loading state
-  useEffect(() => {
-    setLoadingState(peer?.connection.peerConnection.iceConnectionState);
-
-    function updateLoadingState(event) {
-      setLoadingState(peer?.connection.peerConnection.iceConnectionState);
-    }
-
-    peer?.connection.peerConnection.addEventListener(
-      "iceconnectionstatechange",
-      updateLoadingState
-    );
-
-    return () => {
-      if (peer) {
-        peer?.connection?.peerConnection?.removeEventListener(
-          "iceconnectionstatechange",
-          updateLoadingState
-        );
-      }
-    };
-  }, [peer]);
-
   const sortedEvents = peer.connection.eventLog.sort((a, b) =>
     b.timeStamp.localeCompare(a.timeStamp)
   );
@@ -79,7 +55,7 @@ export default function Item({ peer, index }: Props) {
           <j-text variant="label" nomargin>
             Connection state:
           </j-text>
-          <span>{loadingState}</span>
+          <span>{peer?.connection?.peerConnection?.connectionState}</span>
         </div>
 
         <div className={styles.row}>
