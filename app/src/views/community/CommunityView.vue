@@ -193,7 +193,6 @@ import CommunityTweaks from "@/containers/CommunityTweaks.vue";
 import Avatar from "@/components/avatar/Avatar.vue";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 
-import { Factory } from "utils/helpers";
 import { Channel } from "utils/api";
 import { Member } from "utils/api";
 import { CommunityState, ModalsState, ChannelState } from "@/store/types";
@@ -224,8 +223,8 @@ export default defineComponent({
   },
   setup() {
     return {
-      memberModel: ref<Factory<Member> | null>(null),
-      channelModel: ref<Factory<Channel> | null>(null),
+      memberModel: ref<SubjectRepository<Member> | null>(null),
+      channelModel: ref<SubjectRepository<Channel> | null>(null),
       loadedChannels: ref<LoadedChannels>({}),
       appStore: useAppStore(),
       dataStore: useDataStore(),
@@ -323,7 +322,7 @@ export default defineComponent({
             },
           },
         });
-      });
+      }, 'all');
     },
     navigateToChannel(channelId: string) {
       this.$router.push({
