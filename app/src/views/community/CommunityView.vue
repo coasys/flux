@@ -193,8 +193,8 @@ import CommunityTweaks from "@/containers/CommunityTweaks.vue";
 import Avatar from "@/components/avatar/Avatar.vue";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 
-import { Channel } from "utils/api";
-import { Member } from "utils/api";
+import { Channel as ChannelModel } from "utils/api";
+import { Member as MemberModel } from "utils/api";
 import { CommunityState, ModalsState, ChannelState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
@@ -223,8 +223,8 @@ export default defineComponent({
   },
   setup() {
     return {
-      memberModel: ref<SubjectRepository<Member> | null>(null),
-      channelModel: ref<SubjectRepository<Channel> | null>(null),
+      memberModel: ref<SubjectRepository<MemberModel> | null>(null),
+      channelModel: ref<SubjectRepository<ChannelModel> | null>(null),
       loadedChannels: ref<LoadedChannels>({}),
       appStore: useAppStore(),
       dataStore: useDataStore(),
@@ -290,21 +290,23 @@ export default defineComponent({
       this.channelModel && this.channelModel.unsubscribe();
       this.memberModel && this.memberModel.unsubscribe();
 
-      this.channelModel = new SubjectRepository(Channel, { perspectiveUuid: id });
-      this.memberModel = new SubjectRepository(Member, { perspectiveUuid: id });
-
-      this.memberModel.onAdded((member: Member) => {
+      const channelModel = new SubjectRepository(ChannelModel, { perspectiveUuid: id, source: this.community.neighbourhood.id });
+      const memberModel = new SubjectRepository(MemberModel, { perspectiveUuid: id, source: this.community.neighbourhood.id });
+      this.channelModel = channelModel;
+      this.memberModel = memberModel;
+      
+      memberModel.onAdded((member: MemberModel) => {
         this.dataStore.setNeighbourhoodMember({
           did: member.did,
           perspectiveUuid: id,
         });
       });
 
-      this.channelModel.onRemoved((id) => {
+      channelModel.onRemoved((id) => {
         this.dataStore.removeChannel({ channelId: id });
       });
 
-      this.channelModel.onAdded((channel: Channel) => {
+      channelModel.onAdded((channel: ChannelModel) => {
         this.dataStore.addChannel({
           communityId: id,
           channel: {
@@ -341,7 +343,7 @@ export default defineComponent({
           this.community.state.currentChannelId || firstChannel;
 
         if (currentChannelId) {
-          this.$router.push({
+          this.$router.push({ 
             name: "channel",
             params: {
               communityId,

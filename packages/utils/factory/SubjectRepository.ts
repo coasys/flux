@@ -285,31 +285,39 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     const allRemoveListeners = this.listeners.remove?.all;
 
     if (type === "added" && allAddListeners) {
-      const entry = await this.getData(entryId);
-      allAddListeners.forEach((cb) => {
-        cb(entry);
-      });
+      setTimeout(async () => {
+        const entry = await this.getData(entryId);
+        allAddListeners.forEach((cb) => {
+          cb(entry);
+        });
+      }, 3000)
     }
 
     if (type === "removed" && allRemoveListeners) {
-      const entry = await this.getData(entryId);
-      allRemoveListeners.forEach((cb) => {
-        cb(entry);
-      });
+      setTimeout(async () => {
+        const entry = await this.getData(entryId);
+        allRemoveListeners.forEach((cb) => {
+          cb(entry);
+        });
+      }, 3000)
     }
 
     if (type === "added" && addedListeners) {
-      const entry = await this.getData(entryId);
-      addedListeners.forEach((cb) => {
-        cb(entry);
-      });
+      setTimeout(async () => {
+        const entry = await this.getData(entryId);
+        addedListeners.forEach((cb) => {
+          cb(entry);
+        });
+      }, 3000)
     }
 
     if (type === "removed" && removedListeners) {
-      const entry = await this.getData(entryId);
-      removedListeners.forEach((cb) => {
-        cb(entryId);
-      });
+      setTimeout(async () => {
+        const entry = await this.getData(entryId);
+        removedListeners.forEach((cb) => {
+          cb(entryId);
+        });
+      }, 3000)
     }
   }
 
