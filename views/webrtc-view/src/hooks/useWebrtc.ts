@@ -65,7 +65,14 @@ export default function useWebRTC({
     }
   }, [agent]);
 
-  // Get user devices
+  /**
+   * getDevices - Enumerate user devices
+   *
+   * 1: Run this on mount to determine if user has any video devices,
+   * NB: This will only return the 'devicetype', not labels or id's.
+   * 2: Run again AFTER permission has been granted as we need the
+   * names of the devices for the "device selector" modal.
+   */
   useEffect(() => {
     async function getDevices() {
       try {
@@ -77,7 +84,14 @@ export default function useWebRTC({
     getDevices();
   }, [permissionGranted]);
 
-  // Ask for permission
+  /**
+   * askForPermission - Ask for user permission to access audio/video
+   *
+   * 1: Check if user has videodevices, if not, set video: false to
+   * prevent crash.
+   * 2: Check if user has previously selected audio/video device, if so
+   * use this device when creating stream.
+   */
   useEffect(() => {
     async function askForPermission() {
       const videoDeviceIdFromLocalStorage =
