@@ -1,6 +1,4 @@
 import { useState, useEffect } from "preact/hooks";
-import { Reaction } from "../../../types";
-import { Settings } from "../../../WebRTCManager";
 import { Profile } from "utils/types";
 import getProfile from "utils/api/getProfile";
 import { Notification } from "../../../context/UiContext";

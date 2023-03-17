@@ -29,6 +29,13 @@ export const viewOptions = [
     type: ChannelView.Voice,
     component: "webrtc-view",
   },
+  {
+    title: "Debug",
+    description: "WebRTC debugger",
+    icon: "bug",
+    type: ChannelView.Debug,
+    component: "webrtc-debug-view",
+  },
 ];
 
 export const DEFAULT_TESTING_NEIGHBOURHOOD =
