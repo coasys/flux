@@ -18,7 +18,7 @@ The j-badge component is used to display a small notification badge.
 
 ### Variant <Badge type="info" text="string" />
 
-Use the variant property to set the color of the badge. Available options include primary, secondary, success, warning, danger, and info.
+Use the `variant` property to set the color of the badge. Available options include `primary`, `secondary`, `success`, `warning`, and `danger`.
 
 <j-badge variant="primary">Primary</j-badge>
 <j-badge variant="secondary">Secondary</j-badge>
@@ -36,7 +36,7 @@ Use the variant property to set the color of the badge. Available options includ
 
 ### Size <Badge type="info" text="string" />
 
-Use the size property to set the size of the badge. Available options include `sm`, `md`, and `lg`.
+Use the `size` property to set the size of the badge. Available options include `sm`, `md`, and `lg`.
 
 <j-badge variant="primary" size="sm">Small</j-badge>
 <j-badge variant="primary" size="md">Medium</j-badge>

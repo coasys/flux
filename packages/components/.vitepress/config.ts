@@ -5,6 +5,7 @@ export default defineConfig({
   title: "Flux Components",
   description: "Just playing around.",
   srcDir: "./docs",
+  appearance: "dark",
   themeConfig: {
     nav: [
       { text: "UI Library", link: "/ui-library" },
@@ -15,35 +16,36 @@ export default defineConfig({
         {
           text: "Gettings started",
           items: [
-            { text: "Installation", link: "/ui-library/installation" },
+            {
+              text: "Installation",
+              link: "/ui-library/getting-started/installation",
+            },
             {
               text: "Design principles",
-              link: "/ui-library/design-principles",
+              link: "/ui-library/getting-started/design-principles",
             },
           ],
         },
         {
-          text: "Variables",
+          text: "Theming",
           items: [
-            { text: "Typography", link: "/ui-library/avatar" },
-            { text: "Spacing", link: "/ui-library/button" },
-            { text: "Colors", link: "/ui-library/button" },
-            { text: "Depth", link: "/ui-library/button" },
+            { text: "Basics", link: "/ui-library/theming/basics" },
+            { text: "Variables", link: "/ui-library/theming/variables" },
           ],
         },
         {
           text: "Components",
           items: [
-            { text: "Avatar", link: "/ui-library/avatar" },
-            { text: "Badge", link: "/ui-library/badge" },
-            { text: "Button", link: "/ui-library/button" },
-            { text: "Checkbox", link: "/ui-library/checkbox" },
-            { text: "Input", link: "/ui-library/input" },
-            { text: "Menu", link: "/ui-library/menu" },
-            { text: "Menu Group", link: "/ui-library/menu-group" },
-            { text: "Modal", link: "/ui-library/modal" },
-            { text: "Tabs", link: "/ui-library/tabs" },
-            { text: "Tooltip", link: "/ui-library/tooltip" },
+            { text: "Avatar", link: "/ui-library/components/avatar" },
+            { text: "Badge", link: "/ui-library/components/badge" },
+            { text: "Button", link: "/ui-library/components/button" },
+            { text: "Checkbox", link: "/ui-library/components/checkbox" },
+            { text: "Input", link: "/ui-library/components/input" },
+            { text: "Menu", link: "/ui-library/components/menu" },
+            { text: "Menu Group", link: "/ui-library/components/menu-group" },
+            { text: "Modal", link: "/ui-library/components/modal" },
+            { text: "Tabs", link: "/ui-library/components/tabs" },
+            { text: "Tooltip", link: "/ui-library/components/tooltip" },
           ],
         },
       ],

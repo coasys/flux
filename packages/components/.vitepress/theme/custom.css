@@ -7,7 +7,90 @@
 }
 
 html.dark {
-  --j-color-saturation: 50%;
   --j-color-subtractor: 110%;
   --j-color-multiplier: -1;
+}
+
+/**
+ * Colors Base
+ *
+ * These are the pure base color presets. Most of the time, you should not be
+ * using these colors directly in the theme but rather use "Colors Theme"
+ * instead because those are "Theme (light or dark)" dependant.
+ * -------------------------------------------------------------------------- */
+
+:root {
+  --vp-c-white: var(--j-color-white);
+  --vp-c-black: var(--j-color-black);
+
+  --vp-c-gray: var(--j-color-ui-300);
+
+  --vp-c-text-light-1: var(--j-color-black);
+  --vp-c-text-light-2: var(--j-color-ui-500);
+  --vp-c-text-light-3: var(--j-color-ui-300);
+
+  --vp-c-text-dark-1: var(--j-color-black);
+  --vp-c-text-dark-2: var(--j-color-ui-500);
+  --vp-c-text-dark-3: var(--j-color-ui-300);
+
+  --vp-c-green: #10b981;
+  --vp-c-green-light: #34d399;
+  --vp-c-green-lighter: #6ee7b7;
+  --vp-c-green-dark: #059669;
+  --vp-c-green-darker: #047857;
+  --vp-c-green-dimm-1: rgba(16, 185, 129, 0.05);
+  --vp-c-green-dimm-2: rgba(16, 185, 129, 0.2);
+  --vp-c-green-dimm-3: rgba(16, 185, 129, 0.5);
+
+  --vp-c-yellow: #d97706;
+  --vp-c-yellow-light: #f59e0b;
+  --vp-c-yellow-lighter: #fbbf24;
+  --vp-c-yellow-dark: #b45309;
+  --vp-c-yellow-darker: #92400e;
+  --vp-c-yellow-dimm-1: rgba(234, 179, 8, 0.05);
+  --vp-c-yellow-dimm-2: rgba(234, 179, 8, 0.2);
+  --vp-c-yellow-dimm-3: rgba(234, 179, 8, 0.5);
+
+  --vp-c-red: #f43f5e;
+  --vp-c-red-light: #fb7185;
+  --vp-c-red-lighter: #fda4af;
+  --vp-c-red-dark: #e11d48;
+  --vp-c-red-darker: #be123c;
+  --vp-c-red-dimm-1: rgba(244, 63, 94, 0.05);
+  --vp-c-red-dimm-2: rgba(244, 63, 94, 0.2);
+  --vp-c-red-dimm-3: rgba(244, 63, 94, 0.5);
+
+  --vp-c-sponsor: #db2777;
+}
+
+/**
+ * Colors Theme
+ * -------------------------------------------------------------------------- */
+
+:root {
+  --vp-c-bg: var(--j-color-ui-50);
+
+  --vp-c-bg-elv: var(--j-color-ui-100);
+  --vp-c-bg-elv-up: var(--j-color-ui-100);
+  --vp-c-bg-elv-down: var(--j-color-ui-100);
+  --vp-c-bg-elv-mute: var(--j-color-ui-100);
+
+  --vp-c-bg-soft: var(--j-color-ui-100);
+  --vp-c-bg-soft-up: var(--j-color-ui-100);
+  --vp-c-bg-soft-down: var(--j-color-ui-100);
+  --vp-c-bg-soft-mute: var(--j-color-ui-100);
+
+  --vp-c-bg-alt: var(--j-color-ui-50);
+
+  --vp-c-border: rgba(60, 60, 67, 0.29);
+  --vp-c-divider: rgba(60, 60, 67, 0.12);
+  --vp-c-gutter: rgba(60, 60, 67, 0.12);
+
+  --vp-c-text-code: var(--j-color-ui-800);
+
+  --vp-c-mute: var(--j-color-ui-200);
+  --vp-c-mute-light: #f9f9fc;
+  --vp-c-mute-lighter: #ffffff;
+  --vp-c-mute-dark: #e3e3e5;
+  --vp-c-mute-darker: #d7d7d9;
 }
