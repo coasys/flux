@@ -132,6 +132,7 @@ export default function useWebRTC({
         (stream) => {
           setPermissionGranted(true);
           setLocalStream(stream);
+          setSettings(joinSettings);
         },
         (e) => {
           console.error(e);
