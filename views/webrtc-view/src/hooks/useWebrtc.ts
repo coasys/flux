@@ -412,6 +412,12 @@ export default function useWebRTC({
       };
     }
 
+    // Check if the user has no video devices
+    const hasVideoDevices = devices.some((d) => d.kind === "videoinput");
+    if (!hasVideoDevices) {
+      joinSettings.video = false;
+    }
+
     const stream = await manager.current?.join(joinSettings);
     setLocalStream(stream);
     setHasJoined(true);
