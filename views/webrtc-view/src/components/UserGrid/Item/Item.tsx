@@ -50,7 +50,7 @@ export default function Item({
   useEffect(() => {
     if (isMe) return;
 
-    if (peer?.connection.peerConnection.iceConnectionState === "connected") {
+    if (peer?.connection?.peerConnection?.iceConnectionState === "connected") {
       setIsConnecting(false);
     } else {
       setIsConnecting(true);
