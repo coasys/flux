@@ -60,14 +60,12 @@ export default function Item({
   // Get video stream
   useEffect(() => {
     if (videoRef.current && webRTC?.localStream && isMe) {
-      console.log("AWDWAD");
       videoRef.current.srcObject = webRTC.localStream;
       videoRef.current.muted = true;
     }
 
     if (videoRef.current && !isMe) {
       videoRef.current.srcObject = peer.connection.mediaStream;
-      videoRef.current.muted = true;
     }
   }, [videoRef, peer?.connection?.mediaStream, webRTC.localStream, isMe]);
 
