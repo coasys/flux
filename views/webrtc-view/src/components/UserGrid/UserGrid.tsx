@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { Howl } from "howler";
 import { Me } from "utils/api/getMe";
 import { Reaction } from "../../types";
@@ -17,7 +17,6 @@ type Props = {
 };
 
 export default function UserGrid({ webRTC, currentUser }: Props) {
-  const videoRef = useRef(null);
   const [currentReaction, setCurrentReaction] = useState<Reaction>(null);
   const [focusedPeerId, setFocusedPeerId] = useState(null);
 
@@ -53,13 +52,6 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
     : 4;
 
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.srcObject = webRTC.localStream;
-      videoRef.current.muted = true;
-    }
-  }, [videoRef, webRTC.localStream]);
-
-  useEffect(() => {
     if (webRTC.reactions.length < 1) {
       return;
     }
@@ -85,40 +77,17 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
   const peerItems = webRTC.connections
     .sort((a, b) => a.did.localeCompare(b.did))
     .map((peer, index) => {
-      const remoteStream = new MediaStream();
-      const remoteAudioStream = new MediaStream();
       const peerReaction =
         currentReaction && currentReaction.did === peer.did
           ? currentReaction
           : null;
 
-      if (peer.connection.peerConnection) {
-        peer.connection.peerConnection.ontrack = (event) => {
-          event.streams[0].getTracks().forEach((track) => {
-            remoteStream.addTrack(track);
-          });
-          event.streams[0].getAudioTracks().forEach((track) => {
-            remoteAudioStream.addTrack(track);
-          });
-
-          const videElement = document.getElementById(
-            `user-video-${peer.did}`
-          ) as HTMLVideoElement;
-
-          if (videElement) {
-            videElement.srcObject = remoteStream;
-          }
-        };
-      }
-
       return (
         <Item
           key={peer.did}
-          peer={peer}
+          webRTC={webRTC}
           userId={peer.did}
-          settings={peer.settings}
           reaction={peerReaction}
-          stream={remoteAudioStream}
           focused={focusedPeerId === peer.did}
           minimised={focusedPeerId && focusedPeerId !== peer.did}
           onToggleFocus={() =>
@@ -137,12 +106,10 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
     >
       {webRTC.localStream && (
         <Item
+          webRTC={webRTC}
           isMe
           mirrored={webRTC.settings.video && !webRTC.settings.screen}
           userId={currentUser.did}
-          videoRef={videoRef}
-          settings={webRTC.settings}
-          stream={webRTC.localStream}
           reaction={myReaction}
           focused={focusedPeerId === currentUser.did}
           minimised={focusedPeerId && focusedPeerId !== currentUser.did}
