@@ -24,6 +24,9 @@ const styles = css`
   :host([open]) [part="tooltip"] {
     display: inline-block;
   }
+  [part="base"] {
+    display: inline-block;
+  }
   [part="tooltip"] {
     white-space: nowrap;
     z-index: 999;
@@ -95,7 +98,7 @@ export default class Tooltip extends LitElement {
 
   /**
    * Placement
-   * @type {"auto"|"auto-start"|"auto-end"|"top"|"top-start"|"top-end"|"bottom"|"bottom-start"|"bottom-end"|"right"|"right-start"|"right-end"|"left"|"left-start"|"left-end}
+   * @type {"auto"|"auto-start"|"auto-end"|"top"|"top-start"|"top-end"|"bottom"|"bottom-start"|"bottom-end"|"right"|"right-start"|"right-end"|"left"|"left-start"|"left-end"}
    * @attr
    */
   @property({ type: String, reflect: true })

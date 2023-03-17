@@ -5,19 +5,20 @@ import sharedStyles from "../../shared/styles";
 const styles = css`
   :host {
     --j-menu-group-item-cursor: default;
-    --j-menu-group-item-title-padding-left: var(--j-space-500);
+    --j-menu-group-item-title-padding: 0 var(--j-space-500);
   }
   :host([collapsible]) {
     --j-menu-group-item-cursor: pointer;
-    --j-menu-group-item-title-padding-left: var(--j-space-800);
+    --j-menu-group-item-title-padding: 0 var(--j-space-800);
   }
   [part="summary"] {
     position: relative;
     cursor: var(--j-menu-group-item-cursor);
     list-style: none;
     display: flex;
+    gap: var(--j-space-400);
     align-items: center;
-    padding-left: var(--j-menu-group-item-title-padding-left);
+    padding: var(--j-menu-group-item-title-padding);
     margin-bottom: var(--j-space-200);
     -webkit-appearance: none;
   }
@@ -46,12 +47,6 @@ const styles = css`
   :host([open][collapsible]) [part="summary"]:after {
     transform: rotate(45deg) translateX(-50%);
   }
-  [name="start"]::slotted(*) {
-    margin-left: var(--j-space-400);
-  }
-  [name="end"]::slotted(*) {
-    margin-right: var(--j-space-400);
-  }
   [part="title"] {
     text-transform: uppercase;
     font-size: var(--j-font-size-400);
@@ -66,7 +61,7 @@ const styles = css`
   }
 `;
 
-@customElement("j-menu-group-item")
+@customElement("j-menu-group")
 export default class MenuItem extends LitElement {
   static styles = [styles, sharedStyles];
 

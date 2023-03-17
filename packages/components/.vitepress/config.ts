@@ -7,40 +7,42 @@ export default defineConfig({
   srcDir: "./docs",
   themeConfig: {
     nav: [
-      { text: "UI Kit", link: "/components" },
+      { text: "UI Library", link: "/ui-library" },
       { text: "Plugin API", link: "/plugins" },
     ],
     sidebar: {
-      "/components": [
+      "/ui-library": [
         {
           text: "Gettings started",
           items: [
-            { text: "Installation", link: "/components/installation" },
+            { text: "Installation", link: "/ui-library/installation" },
             {
               text: "Design principles",
-              link: "/components/design-principles",
+              link: "/ui-library/design-principles",
             },
           ],
         },
         {
           text: "Tokens",
           items: [
-            { text: "Typography", link: "/components/avatar" },
-            { text: "Spacing", link: "/components/button" },
-            { text: "Colors", link: "/components/button" },
-            { text: "Depth", link: "/components/button" },
+            { text: "Typography", link: "/ui-library/avatar" },
+            { text: "Spacing", link: "/ui-library/button" },
+            { text: "Colors", link: "/ui-library/button" },
+            { text: "Depth", link: "/ui-library/button" },
           ],
         },
         {
           text: "Components",
           items: [
-            { text: "Avatar", link: "/components/avatar" },
-            { text: "Badge", link: "/components/badge" },
-            { text: "Button", link: "/components/button" },
-            { text: "Checkbox", link: "/components/checkbox" },
-            { text: "Input", link: "/components/input" },
-            { text: "Menu", link: "/components/menu" },
-            { text: "Modal", link: "/components/modal" },
+            { text: "Avatar", link: "/ui-library/avatar" },
+            { text: "Badge", link: "/ui-library/badge" },
+            { text: "Button", link: "/ui-library/button" },
+            { text: "Checkbox", link: "/ui-library/checkbox" },
+            { text: "Input", link: "/ui-library/input" },
+            { text: "Menu", link: "/ui-library/menu" },
+            { text: "Menu Group", link: "/ui-library/menu-group" },
+            { text: "Modal", link: "/ui-library/modal" },
+            { text: "Tooltip", link: "/ui-library/tooltip" },
           ],
         },
       ],

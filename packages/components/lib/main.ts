@@ -4,7 +4,7 @@ import "./components/text";
 import "./components/box";
 import "./components/popover";
 import "./components/menu";
-import "./components/menu-group-item";
+import "./components/menu-group";
 import "./components/menu-item";
 import "./components/radio-button";
 import "./components/avatar";
