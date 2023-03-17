@@ -25,7 +25,6 @@ const styles = css`
     --j-tab-item-width: 100%;
   }
   :host([vertical]) ::slotted(*[checked]) {
-    --j-tab-item-color: var(--j-color-primary-500);
     --j-tab-item-box-shadow: 2px 0px 0px 0px var(--j-color-primary-500);
   }
   :host([full]) [part="base"] {
@@ -44,10 +43,10 @@ const styles = css`
     --j-tab-item-font-size: var(--j-font-size-600);
   }
   :host ::slotted(*:hover) {
-    --j-tab-item-color: var(--j-color-ui-700);
+    --j-tab-item-color: var(--j-color-black);
   }
   :host ::slotted(*[checked]) {
-    --j-tab-item-color: var(--j-color-primary-500);
+    --j-tab-item-color: var(--j-color-black);
     --j-tab-item-box-shadow: 0px 2px 0px 0px var(--j-color-primary-500);
   }
   :host([variant="button"]) ::slotted(*) {
@@ -56,14 +55,13 @@ const styles = css`
     --j-tab-item-color: var(--j-color-ui-600);
   }
   :host([variant="button"]) ::slotted(*:hover) {
-    --j-tab-item-background: var(--j-color-ui-50);
     --j-tab-item-box-shadow: none;
     --j-tab-item-color: var(--j-color-ui-700);
   }
   :host([variant="button"]) ::slotted(*[checked]) {
     --j-tab-item-background: var(--j-color-primary-100);
     --j-tab-item-box-shadow: none;
-    --j-tab-item-color: var(--j-color-primary-700);
+    --j-tab-item-color: var(--j-color-black);
   }
 `;
 
