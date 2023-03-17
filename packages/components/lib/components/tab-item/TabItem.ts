@@ -5,7 +5,15 @@ import sharedStyles from "../../shared/styles";
 
 const styles = css`
   :host {
+    --j-tab-item-width: inherit;
+    --j-tab-item-background: none;
+    --j-tab-item-border-radius: none;
+    --j-tab-item-border: none;
+    --j-tab-item-color: var(--j-color-ui-600);
+    --j-tab-item-box-shadow: none;
+    --j-tab-item-padding: 0 var(--j-space-500);
     --j-tab-item-height: var(--j-size-md);
+    --j-tab-item-font-size: var(--j-font-size-500);
   }
   :host([size="sm"]) {
     --j-tab-item-height: var(--j-size-sm);
@@ -19,49 +27,25 @@ const styles = css`
     gap: var(--j-space-400);
     justify-content: space-between;
     white-space: nowrap;
-    width: inherit;
+    width: var(--j-tab-item-width);
     outline: 0;
+    border: var(--j-tab-item-border);
+    border-radius: var(--j-tab-item-border-radius);
+    box-shadow: var(--j-tab-item-box-shadow);
     font-family: var(--j-font-family);
-    color: var(--j-color-ui-600);
+    color: var(--j-tab-item-color);
     cursor: pointer;
     z-index: 1;
     border: none;
     text-align: var(--j-tab-item-text-align, center);
     height: var(--j-tab-item-height);
     font-weight: 600;
-    font-size: var(--j-font-size-500);
-    background: 0;
-    padding: 0 var(--j-space-500);
-  }
-  [part="base"]:hover {
-    box-shadow: var(
-      --j-tab-item-border-hover,
-      0px 4px 0px -2px var(--j-color-ui-700)
-    );
-    color: var(--j-color-ui-700);
+    font-size: var(--j-tab-item-font-size);
+    background: var(--j-tab-item-background);
+    padding: var(--j-tab-item-padding);
   }
   [part="content"] {
     flex: 1;
-  }
-  :host([checked]) [part="base"] {
-    color: var(--j-color-primary-600);
-    box-shadow: var(
-      --j-tab-item-border-selected,
-      0px 4px 0px -2px var(--j-color-primary-600)
-    );
-  }
-  :host([variant="button"]) [part="base"] {
-    border-radius: var(--j-border-radius);
-    box-shadow: none;
-    color: var(--j-color-ui-600);
-  }
-  :host([variant="button"]) [part="base"]:hover {
-    background: var(--j-color-ui-50);
-    color: var(--j-color-ui-700);
-  }
-  :host([variant="button"][checked]) [part="base"] {
-    background: var(--j-color-primary-100);
-    color: var(--j-color-primary-700);
   }
   :host([disabled]) [part="base"] {
     cursor: not-allowed;
@@ -89,22 +73,6 @@ class TabItem extends LitElement {
    */
   @property({ type: Boolean, reflect: true })
   disabled = false;
-
-  /**
-   * Size
-   * @type {"sm"|"lg"}
-   * @attr
-   */
-  @property({ type: Boolean, reflect: true })
-  size = null;
-
-  /**
-   * Variant
-   * @type {""|"button"}
-   * @attr
-   */
-  @property({ type: String, reflect: true })
-  variant = null;
 
   @state()
   _label = null;

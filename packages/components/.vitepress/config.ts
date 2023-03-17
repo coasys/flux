@@ -23,7 +23,7 @@ export default defineConfig({
           ],
         },
         {
-          text: "Tokens",
+          text: "Variables",
           items: [
             { text: "Typography", link: "/ui-library/avatar" },
             { text: "Spacing", link: "/ui-library/button" },
@@ -42,6 +42,7 @@ export default defineConfig({
             { text: "Menu", link: "/ui-library/menu" },
             { text: "Menu Group", link: "/ui-library/menu-group" },
             { text: "Modal", link: "/ui-library/modal" },
+            { text: "Tabs", link: "/ui-library/tabs" },
             { text: "Tooltip", link: "/ui-library/tooltip" },
           ],
         },
