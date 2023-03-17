@@ -43,7 +43,6 @@ export default function useWebRTC({
 }: Props): WebRTC {
   const manager = useRef<WebRTCManager>();
   const [permissionGranted, setPermissionGranted] = useState(false);
-  const [devicesEnumerated, setDevicesEnumerated] = useState(false);
   const [agent, setAgent] = useState<Me>();
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [settings, setSettings] = useState<Settings>(defaultSettings);
@@ -74,11 +73,9 @@ export default function useWebRTC({
         setDevices(devices);
       } catch (e) {}
     }
-    if (!devicesEnumerated) {
-      getDevices();
-      setDevicesEnumerated(true);
-    }
-  }, [devicesEnumerated]);
+
+    getDevices();
+  }, [permissionGranted]);
 
   // Ask for permission
   useEffect(() => {
@@ -128,10 +125,10 @@ export default function useWebRTC({
         }
       );
     }
-    if (enabled && !permissionGranted && devicesEnumerated) {
+    if (enabled && !permissionGranted && devices.length > 0) {
       askForPermission();
     }
-  }, [enabled, permissionGranted, devices, devicesEnumerated]);
+  }, [enabled, permissionGranted, devices]);
 
   useEffect(() => {
     if (source && uuid && agent && !isInitialised) {
