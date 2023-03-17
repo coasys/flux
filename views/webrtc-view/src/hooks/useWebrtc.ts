@@ -66,30 +66,55 @@ export default function useWebRTC({
     }
   }, [agent]);
 
+  // Get user devices
+  useEffect(() => {
+    async function getDevices() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        setDevices(devices);
+      } catch (e) {}
+    }
+    if (!devicesEnumerated) {
+      getDevices();
+      setDevicesEnumerated(true);
+    }
+  }, [devicesEnumerated]);
+
   // Ask for permission
   useEffect(() => {
     async function askForPermission() {
-      const videoDeviceId =
+      const videoDeviceIdFromLocalStorage =
         typeof settings.video !== "boolean" && settings.video.deviceId
           ? settings.video.deviceId
           : localstorage.getForVersion("cameraDeviceId");
 
-      const audioDeviceId =
+      const audioDeviceIdFromLocalStorage =
         typeof settings.audio !== "boolean" && settings.audio.deviceId
           ? settings.audio.deviceId
           : localstorage.getForVersion("audioDeviceId");
 
       const joinSettings = { ...defaultSettings };
-      if (videoDeviceId && typeof joinSettings.video !== "boolean") {
+
+      // Check if user has previously specified webcam or audio device
+      if (
+        videoDeviceIdFromLocalStorage &&
+        typeof joinSettings.video !== "boolean"
+      ) {
         joinSettings.video = {
           ...videoDimensions,
-          deviceId: videoDeviceId
+          deviceId: videoDeviceIdFromLocalStorage,
         };
       }
-      if (audioDeviceId) {
+      if (audioDeviceIdFromLocalStorage) {
         joinSettings.audio = {
-          deviceId: audioDeviceId,
+          deviceId: audioDeviceIdFromLocalStorage,
         };
+      }
+
+      // Check if the user has no video devices
+      const hasVideoDevices = devices.some((d) => d.kind === "videoinput");
+      if (!hasVideoDevices) {
+        joinSettings.video = false;
       }
 
       navigator.mediaDevices.getUserMedia(joinSettings).then(
@@ -103,23 +128,10 @@ export default function useWebRTC({
         }
       );
     }
-    if (enabled && !permissionGranted) {
+    if (enabled && !permissionGranted && devicesEnumerated) {
       askForPermission();
     }
-  }, [enabled, permissionGranted]);
-
-  // Get user devices
-  useEffect(() => {
-    async function getDevices() {
-      await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      setDevices(devices);
-    }
-    if (permissionGranted && !devicesEnumerated) {
-      getDevices();
-      setDevicesEnumerated(true);
-    }
-  }, [permissionGranted, devicesEnumerated]);
+  }, [enabled, permissionGranted, devices, devicesEnumerated]);
 
   useEffect(() => {
     if (source && uuid && agent && !isInitialised) {
@@ -376,23 +388,26 @@ export default function useWebRTC({
   async function onJoin() {
     setIsLoading(true);
 
-    const videoDeviceId =
+    const videoDeviceIdFromLocalStorage =
       typeof settings.video !== "boolean" && settings.video.deviceId
         ? settings.video.deviceId
         : localstorage.getForVersion("cameraDeviceId");
 
-    const audioDeviceId =
+    const audioDeviceIdFromLocalStorage =
       typeof settings.audio !== "boolean" && settings.audio.deviceId
         ? settings.audio.deviceId
         : localstorage.getForVersion("audioDeviceId");
 
     const joinSettings = { ...defaultSettings };
-    if (videoDeviceId && typeof joinSettings.video !== "boolean") {
-      joinSettings.video.deviceId = videoDeviceId;
+    if (
+      videoDeviceIdFromLocalStorage &&
+      typeof joinSettings.video !== "boolean"
+    ) {
+      joinSettings.video.deviceId = videoDeviceIdFromLocalStorage;
     }
-    if (audioDeviceId) {
+    if (audioDeviceIdFromLocalStorage) {
       joinSettings.audio = {
-        deviceId: audioDeviceId,
+        deviceId: audioDeviceIdFromLocalStorage,
       };
     }
 
