@@ -6,6 +6,8 @@ import Item from "./Item";
 import styles from "./Debug.module.css";
 import { defaultSettings } from "../../../constants";
 import { Peer } from "../../../types";
+import { useContext } from "preact/hooks";
+import UiContext from "../../../context/UiContext";
 
 type Props = {
   webRTC: WebRTC;
@@ -13,14 +15,9 @@ type Props = {
 };
 
 export default function VoiceVideo({ webRTC, currentUser }: Props) {
-  const mePeer = {
-    did: currentUser.did,
-    connection: {
-      peerConnection: new RTCPeerConnection(),
-      dataChannel: null,
-    },
-    settings: defaultSettings,
-  } as Peer;
+  const {
+    methods: { toggleShowDebug },
+  } = useContext(UiContext);
 
   return (
     <>
@@ -41,13 +38,20 @@ export default function VoiceVideo({ webRTC, currentUser }: Props) {
         <j-button
           variant="secondary"
           size="xs"
+          onClick={() => toggleShowDebug(true)}
+        >
+          Full debugger
+        </j-button>
+        <j-button
+          variant="secondary"
+          size="xs"
           onClick={webRTC.onSendTestBroadcast}
           disabled={!webRTC.hasJoined}
         >
-          Send broadcast to room
+          Send broadcast
         </j-button>
         <j-button variant="secondary" size="xs" onClick={webRTC.onGetStats}>
-          Log RTC stats to console
+          Log RTC stats
         </j-button>
         <j-button
           variant="secondary"
@@ -56,7 +60,7 @@ export default function VoiceVideo({ webRTC, currentUser }: Props) {
             console.log(webRTC);
           }}
         >
-          Log state to console
+          Log state
         </j-button>
       </div>
     </>

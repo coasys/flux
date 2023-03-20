@@ -9,6 +9,7 @@ export type Notification = {
 
 type State = {
   showSettings: boolean;
+  showDebug: boolean;
   notifications: Notification[];
   settings: {
     muteSounds: boolean;
@@ -20,12 +21,14 @@ type ContextProps = {
   methods: {
     addNotification: (Notification: Notification) => void;
     toggleShowSettings: (visible: boolean) => void;
+    toggleShowDebug: (visible: boolean) => void;
   };
 };
 
 const initialState: ContextProps = {
   state: {
     showSettings: false,
+    showDebug: false,
     notifications: [],
     settings: {
       muteSounds: true,
@@ -34,6 +37,7 @@ const initialState: ContextProps = {
   methods: {
     addNotification: () => null,
     toggleShowSettings: () => null,
+    toggleShowDebug: () => null,
   },
 };
 
@@ -69,6 +73,13 @@ export function UiProvider({ children }: any) {
             setState((oldState) => ({
               ...oldState,
               showSettings: visible,
+            }));
+          },
+          toggleShowDebug(visible: boolean) {
+            setState((oldState) => ({
+              ...oldState,
+              showSettings: false,
+              showDebug: visible,
             }));
           },
         },
