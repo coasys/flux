@@ -10,6 +10,8 @@ export default async function (id: string): Promise<void> {
   const userStore = useUserStore();
 
   let ad4m = await getAd4mClient();
+  const agent = await ad4m.agent.me();
+
   let perspective = await ad4m.perspective.byUUID(id);
   const Member = new SubjectRepository(MemberModel, {
     perspectiveUuid: id,
@@ -24,7 +26,12 @@ export default async function (id: string): Promise<void> {
 
       return await channelEntry.author;
     })
-  );
+    );
+    
+  if(members.length === 1 && dids[0] !== agent.did) {
+    await Member.create({ did: agent.did }, agent.did);
+  }
+
 
   dataStore.setNeighbourhoodMembers({
     members: dids.length === 0 ? [userStore.agent.did!] : dids,

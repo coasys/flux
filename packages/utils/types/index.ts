@@ -22,6 +22,7 @@ export interface CommunityMetaData {
   description?: string;
   image?: string;
   thumbnail?: string;
+  id?: string;
 }
 
 export interface NeighbourhoodMetaData {

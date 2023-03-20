@@ -26,6 +26,7 @@ export default async (communityId: string): Promise<void> => {
         description,
         image,
         thumbnail,
+        id: community.id
       },
     });
   }

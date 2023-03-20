@@ -201,6 +201,7 @@ import { useUserStore } from "@/store/user";
 import { useDataStore } from "@/store/data";
 import { mapActions, mapState } from "pinia";
 import { SubjectRepository } from "utils/factory";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect";
 
 type LoadedChannels = {
   [channelId: string]: boolean;
@@ -240,9 +241,6 @@ export default defineComponent({
     "$route.params.communityId": {
       handler: function (id: string) {
         if (id) {
-          this.dataStore.fetchCommunityMembers(id);
-          this.dataStore.fetchCommunityMetadata(id);
-          this.dataStore.fetchCommunityChannels(id);
           this.startWatching(id);
           this.handleThemeChange(id);
           this.goToActiveChannel(id);
@@ -287,44 +285,65 @@ export default defineComponent({
       "setShowCommunityTweaks",
     ]),
     startWatching(id: string) {
+
       this.channelModel && this.channelModel.unsubscribe();
       this.memberModel && this.memberModel.unsubscribe();
 
-      const channelModel = new SubjectRepository(ChannelModel, { perspectiveUuid: id, source: this.community.neighbourhood.id });
-      const memberModel = new SubjectRepository(MemberModel, { perspectiveUuid: id, source: this.community.neighbourhood.id });
-      this.channelModel = channelModel;
-      this.memberModel = memberModel;
-      
-      memberModel.onAdded((member: MemberModel) => {
-        this.dataStore.setNeighbourhoodMember({
-          did: member.did,
-          perspectiveUuid: id,
+      const retry = () => {
+        return new Promise((resolve, reject) => {
+          const interval = setInterval(async () => {  
+            const client = await getAd4mClient();
+
+            const links = await client.perspective.queryLinks(id, {});
+            if (links.length > 0) {
+              clearInterval(interval)
+              resolve(null)
+            }
+          }, 5000);
+        })
+      }
+
+      retry().then(() => {
+        this.dataStore.fetchCommunityMembers(id);
+        this.dataStore.fetchCommunityMetadata(id);
+        this.dataStore.fetchCommunityChannels(id);
+  
+        const channelModel = new SubjectRepository(ChannelModel, { perspectiveUuid: id, source: this.community.neighbourhood.id });
+        const memberModel = new SubjectRepository(MemberModel, { perspectiveUuid: id, source: this.community.neighbourhood.id });
+        this.channelModel = channelModel;
+        this.memberModel = memberModel;
+        
+        memberModel.onAdded((member: MemberModel) => {
+          this.dataStore.setNeighbourhoodMember({
+            did: member.did,
+            perspectiveUuid: id,
+          });
+        }, 'all');
+  
+        channelModel.onRemoved((id) => {
+          this.dataStore.removeChannel({ channelId: id });
         });
-      }, 'all');
-
-      channelModel.onRemoved((id) => {
-        this.dataStore.removeChannel({ channelId: id });
-      });
-
-      channelModel.onAdded((channel: ChannelModel) => {
-        this.dataStore.addChannel({
-          communityId: id,
-          channel: {
-            id: channel.id,
-            name: channel.name,
-            timestamp: new Date(channel.timestamp),
-            author: channel.author,
-            expanded: false,
-            sourcePerspective: id,
-            currentView: channel.views[0],
-            views: channel.views,
-            hasNewMessages: false,
-            notifications: {
-              mute: false,
+  
+        channelModel.onAdded((channel: ChannelModel) => {
+          this.dataStore.addChannel({
+            communityId: id,
+            channel: {
+              id: channel.id,
+              name: channel.name,
+              timestamp: new Date(channel.timestamp),
+              author: channel.author,
+              expanded: false,
+              sourcePerspective: id,
+              currentView: channel.views[0],
+              views: channel.views,
+              hasNewMessages: false,
+              notifications: {
+                mute: false,
+              },
             },
-          },
-        });
-      }, 'all');
+          });
+        }, 'all');
+      }).catch((e) => console.error(e))
     },
     navigateToChannel(channelId: string) {
       this.$router.push({

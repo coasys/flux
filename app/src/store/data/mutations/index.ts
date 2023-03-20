@@ -112,6 +112,9 @@ export default {
       if (metadata?.thumbnail) {
         community.thumbnail = metadata.thumbnail;
       }
+      if (metadata?.id) {
+        community.id = metadata.id;
+      }
     }
 
     state.neighbourhoods[communityId] = community;
