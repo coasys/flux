@@ -300,7 +300,7 @@ export default defineComponent({
           did: member.did,
           perspectiveUuid: id,
         });
-      });
+      }, 'all');
 
       channelModel.onRemoved((id) => {
         this.dataStore.removeChannel({ channelId: id });
