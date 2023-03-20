@@ -290,7 +290,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
         allAddListeners.forEach((cb) => {
           cb(entry);
         });
-      }, 3000)
+      }, 6000)
     }
 
     if (type === "removed" && allRemoveListeners) {
@@ -299,7 +299,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
         allRemoveListeners.forEach((cb) => {
           cb(entry);
         });
-      }, 3000)
+      }, 6000)
     }
 
     if (type === "added" && addedListeners) {
@@ -308,7 +308,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
         addedListeners.forEach((cb) => {
           cb(entry);
         });
-      }, 3000)
+      }, 6000)
     }
 
     if (type === "removed" && removedListeners) {
@@ -317,7 +317,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
         removedListeners.forEach((cb) => {
           cb(entryId);
         });
-      }, 3000)
+      }, 6000)
     }
   }
 
