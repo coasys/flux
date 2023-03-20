@@ -10,14 +10,19 @@ const styles = css`
     --j-tab-item-border-hover: 0px 4px 0px -2px var(--j-color-ui-200);
     --j-tab-item-box-shadow: none;
     --j-tab-item-color: var(--j-color-ui-600);
-  }
-  [part="base"] {
+    display: block;
     overflow-x: auto;
+  }
+
+  [part="base"] {
     display: inline-flex;
     align-items: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     border-radius: var(--j-tabs-border-radius);
     padding: var(--j-tabs-padding);
+  }
+  :host([wrap]) [part="base"] {
+    flex-wrap: wrap;
   }
   :host([vertical]) [part="base"] {
     flex-direction: column;
@@ -100,6 +105,14 @@ export default class Menu extends LitElement {
    */
   @property({ type: Boolean, reflect: true })
   vertical = false;
+
+  /**
+   * Wrap
+   * @type {Boolean}
+   * @attr
+   */
+  @property({ type: Boolean, reflect: true })
+  wrap = false;
 
   /**
    * Full

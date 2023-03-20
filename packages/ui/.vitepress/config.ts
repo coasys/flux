@@ -2,34 +2,33 @@ import { defineConfig } from "vitepress";
 
 export default defineConfig({
   // site-level options
-  title: "Flux Components",
+  title: "Flux Dev Kit",
   description: "Just playing around.",
   srcDir: "./docs",
-  appearance: "dark",
+  appearance: false,
   themeConfig: {
     nav: [
       { text: "UI Library", link: "/ui-library" },
-      { text: "Plugin API", link: "/plugins" },
+      { text: "Create Flux App", link: "/plugins" },
     ],
     sidebar: {
       "/ui-library": [
         {
-          text: "Gettings started",
+          text: "Getting started",
           items: [
             {
               text: "Installation",
               link: "/ui-library/getting-started/installation",
             },
             {
-              text: "Design principles",
-              link: "/ui-library/getting-started/design-principles",
+              text: "Introduction",
+              link: "/ui-library/getting-started/introduction",
             },
-          ],
-        },
-        {
-          text: "Theming",
-          items: [
-            { text: "Basics", link: "/ui-library/theming/basics" },
+            { text: "Theming", link: "/ui-library/getting-started/theming" },
+            {
+              text: "Composition",
+              link: "/ui-library/getting-started/composition",
+            },
             { text: "Variables", link: "/ui-library/theming/variables" },
           ],
         },

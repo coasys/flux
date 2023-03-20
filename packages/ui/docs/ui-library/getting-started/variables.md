@@ -1,8 +1,6 @@
 # Variables
 
-<code lang="css">
-
-</code>
+{{variables}}
 
 <script setup>
 
