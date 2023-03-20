@@ -10,7 +10,7 @@ Button component is used to trigger an action or event, such as submitting a for
 
 ### Variant <Badge type="info" text="string" />
 
-Use the variant property to change the visual style of the button. You can set the value to `primary`, `secondary`, `link`, `subtle` or `ghost`.
+Use the `variant` property to change the visual style of the button. You can set the value to `primary`, `secondary`, `link`, `subtle` or `ghost`.
 
 <j-button variant="primary">Primary</j-button>
 <j-button variant="secondary">Secondary</j-button>
@@ -28,7 +28,7 @@ Use the variant property to change the visual style of the button. You can set t
 
 ### Size <Badge type="info" text="boolean" />
 
-Use the size property to change the size of the button. You can set the value to `xs`, `sm`, `md`, or `lg`.
+Use the `size` property to change the size of the button. You can set the value to `xs`, `sm`, `md`, or `lg`.
 
 <j-button size="xs">Extra small</j-button>
 <j-button size="sm">Small</j-button>

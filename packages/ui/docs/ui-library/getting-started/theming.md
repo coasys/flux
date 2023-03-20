@@ -1,7 +1,7 @@
 <script setup>
 import {ref, watch} from 'vue'
 
-const theme = ref("default");
+const theme = ref(document.documentElement.className);
 
 watch(theme, val => {
    document.documentElement.className = "";
@@ -17,7 +17,7 @@ Flux UI's theming system is built using standard web APIs, which means you don't
 
 To customize Flux UI's theme, you'll need to define values for the various CSS Variables that are used throughout the library's styles. These variables control things like colors, font sizes, and spacing, among other things. By changing the values of these variables, you can customize the look and feel of Flux UI to suit your needs.
 
-## Using a theme
+## Built in themes
 
 Flux already comes with a couple of themes that you can try out:
 

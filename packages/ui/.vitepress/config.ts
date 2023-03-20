@@ -17,19 +17,23 @@ export default defineConfig({
           text: "Getting started",
           items: [
             {
-              text: "Installation",
-              link: "/ui-library/getting-started/installation",
-            },
-            {
               text: "Introduction",
               link: "/ui-library/getting-started/introduction",
             },
+            {
+              text: "Installation",
+              link: "/ui-library/getting-started/installation",
+            },
+
             { text: "Theming", link: "/ui-library/getting-started/theming" },
             {
               text: "Composition",
               link: "/ui-library/getting-started/composition",
             },
-            { text: "Variables", link: "/ui-library/theming/variables" },
+            {
+              text: "Variables",
+              link: "/ui-library/getting-started/variables",
+            },
           ],
         },
         {

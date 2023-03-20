@@ -5,7 +5,7 @@ import sharedStyles from "../../shared/styles";
 const styles = css`
   :host {
     --j-badge-border-radius: var(--j-border-radius);
-    --j-badge-bg: var(--j-color-ui-50);
+    --j-badge-bg: var(--j-color-ui-100);
     --j-badge-color: var(--j-color-ui-500);
     --j-badge-font-size: var(--j-font-size-400);
     --j-badge-padding: var(--j-space-200) var(--j-space-300);
@@ -19,7 +19,7 @@ const styles = css`
     --j-badge-padding: var(--j-space-300) var(--j-space-500);
   }
   :host([variant="primary"]) {
-    --j-badge-bg: var(--j-color-primary-50);
+    --j-badge-bg: var(--j-color-primary-100);
     --j-badge-color: var(--j-color-primary-600);
   }
   :host([variant="success"]) {
