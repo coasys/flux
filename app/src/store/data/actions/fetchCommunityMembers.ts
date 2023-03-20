@@ -9,6 +9,8 @@ export default async function (id: string): Promise<void> {
   const dataStore = useDataStore();
   const userStore = useUserStore();
 
+  const community = dataStore.getCommunity(id);
+
   let ad4m = await getAd4mClient();
   const agent = await ad4m.agent.me();
 
@@ -28,7 +30,7 @@ export default async function (id: string): Promise<void> {
     })
     );
     
-  if(members.length === 1 && dids[0] !== agent.did) {
+  if(community.members.length === 1 && dids[0] !== agent.did) {
     await Member.create({ did: agent.did }, agent.did);
   }
 
