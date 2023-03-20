@@ -81,6 +81,6 @@ const retry = (run: any, maxRetires = 100) => {
       if (currRetry === maxRetires) {
         reject("Max Retries exceeded when trying to sync agent.")
       }
-    }, 10000);
+    }, 5000);
  })
 }
