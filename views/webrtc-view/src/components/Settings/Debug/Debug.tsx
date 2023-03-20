@@ -46,6 +46,9 @@ export default function VoiceVideo({ webRTC, currentUser }: Props) {
         >
           Send broadcast to room
         </j-button>
+        <j-button variant="secondary" size="xs" onClick={webRTC.onGetStats}>
+          Log RTC stats to console
+        </j-button>
         <j-button
           variant="secondary"
           size="xs"

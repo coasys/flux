@@ -33,6 +33,7 @@ export type WebRTC = {
   onSendTestBroadcast: () => Promise<void>;
   onChangeCamera: (deviceId: string) => void;
   onChangeAudio: (deviceId: string) => void;
+  onGetStats: () => void;
 };
 
 export default function useWebRTC({
@@ -398,6 +399,12 @@ export default function useWebRTC({
     }
   }
 
+  async function onGetStats() {
+    if (manager.current) {
+      manager.current.getStats();
+    }
+  }
+
   async function onJoin() {
     setIsLoading(true);
 
@@ -461,5 +468,6 @@ export default function useWebRTC({
     onSendTestBroadcast,
     onChangeCamera,
     onChangeAudio,
+    onGetStats,
   };
 }

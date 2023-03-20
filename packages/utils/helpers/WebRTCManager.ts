@@ -640,6 +640,32 @@ export default class WebRTCManager {
     });
   }
 
+  async getStats() {
+    for (const c of this.connections) {
+      const connection = this.connections.get(c[0]);
+      const stats = await connection.peerConnection.getStats();
+
+      let statsOutput = `⭐️ Stats for connection: ${c[0]}\n`;
+
+      stats.forEach((report) => {
+        statsOutput += `Report: ${report.type} - ${report.id} (${report.timestamp})\n`;
+        statsOutput += `---------------------------------\n`;
+
+        Object.keys(report).forEach((statName) => {
+          if (
+            statName !== "id" &&
+            statName !== "timestamp" &&
+            statName !== "type"
+          ) {
+            statsOutput += `${statName}: ${report[statName]}\n`;
+          }
+        });
+      });
+
+      console.log(statsOutput);
+    }
+  }
+
   async sendTestSignal(recipientDid: string) {
     console.log("⚙️ Sending TEST_SIGNAL to ", recipientDid);
     this.neighbourhood.sendBroadcastU({
