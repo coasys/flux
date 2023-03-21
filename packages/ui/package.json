@@ -25,6 +25,7 @@
     "docs:build": "vitepress build ./",
     "docs:preview": "vitepress preview ./",
     "build:types": "node buildTypes.js",
+    "build:docs": "vitepress build ./",
     "build:analyze": "web-component-analyzer src --outFile components.json",
     "build:package": "NODE_ENV=production node esbuild.js"
   },

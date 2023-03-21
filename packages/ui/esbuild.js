@@ -8,7 +8,7 @@
 
   let result = await esbuild
     .build({
-      entryPoints: ["./src/main.ts"],
+      entryPoints: ["./lib/main.ts"],
       metafile: !isDev,
       bundle: true,
       format: "esm",

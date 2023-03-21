@@ -8,7 +8,10 @@ export default defineConfig({
   appearance: "dark",
   themeConfig: {
     nav: [
-      { text: "UI Library", link: "/ui-library/installation" },
+      {
+        text: "UI Library",
+        link: "/ui-library/getting-started/installation",
+      },
       { text: "Create Flux App", link: "/create-flux-app" },
     ],
     sidebar: {
@@ -97,6 +100,7 @@ export default defineConfig({
             { text: "Tabs", link: "/ui-library/components/tabs" },
             { text: "Text", link: "/ui-library/components/text" },
             { text: "Popover", link: "/ui-library/components/popover" },
+            { text: "Radio", link: "/ui-library/components/radio" },
             { text: "Tooltip", link: "/ui-library/components/tooltip" },
             { text: "Toggle", link: "/ui-library/components/toggle" },
             { text: "Spinner", link: "/ui-library/components/spinner" },
