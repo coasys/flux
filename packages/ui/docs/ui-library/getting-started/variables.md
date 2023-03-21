@@ -1,5 +1,7 @@
 # Variables
 
+<div v-html="variableHighligthed"></div>
+
 ## Colors
 
 <div class="grid" v-for="token in variables.Colors">
@@ -48,7 +50,24 @@
 </div>
 
 <script setup>
+ import {ref, onMounted} from 'vue'
 import variables from './variables'
+import vars from '../../../lib/variables.css?raw'
+import * as shiki from 'shiki';
+import theme from 'shiki/themes/nord.json'
+
+const variableHighligthed = ref("");
+
+
+
+shiki.getHighlighter({
+      theme: theme
+    })
+    .then(highlighter => {
+        console.log(highlighter)
+      const code = highlighter.codeToHtml(`console.log('shiki');`, { lang: 'js' })
+      variableHighligthed.value = code
+    }).catch(e => console.log(e))
 
 </script>
 
