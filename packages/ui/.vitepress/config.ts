@@ -31,19 +31,19 @@ export default defineConfig({
           items: [
             {
               text: "Your first perspective",
-              link: "/create-flux-app/tutorial",
+              link: "/create-flux-app/building-your-app/",
             },
             {
               text: "Displaying data from AD4M",
-              link: "/create-flux-app/tutorial",
+              link: "/create-flux-app/building-your-app/",
             },
             {
               text: "Using Flux-UI",
-              link: "/create-flux-app/tutorial",
+              link: "/create-flux-app/building-your-app/",
             },
             {
               text: "Custom components",
-              link: "/create-flux-app/tutorial",
+              link: "/create-flux-app/building-your-app/",
             },
           ],
         },
