@@ -9,14 +9,53 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: "UI Library", link: "/ui-library" },
-      { text: "Create Flux App", link: "/create-flux-app/" },
+      { text: "Create Flux App", link: "/create-flux-app" },
     ],
     sidebar: {
       "/create-flux-app": [
         {
-          text: "Quick Start",
+          text: "Getting started",
           items: [
-            { text: "Introduction", link: "/create-flux-app/" },
+            { text: "Introduction", link: "/create-flux-app/getting-started/" },
+            {
+              text: "Installation",
+              link: "/create-flux-app/getting-started/installation",
+            },
+          ],
+        },
+        {
+          text: "Building your app",
+          items: [
+            {
+              text: "Your first perspective",
+              link: "/create-flux-app/tutorial",
+            },
+            {
+              text: "Displaying data from AD4M",
+              link: "/create-flux-app/tutorial",
+            },
+            {
+              text: "Using Flux-UI",
+              link: "/create-flux-app/tutorial",
+            },
+            {
+              text: "Custom components",
+              link: "/create-flux-app/tutorial",
+            },
+          ],
+        },
+        {
+          text: "Publishing",
+          items: [
+            {
+              text: "Publish on npm",
+              link: "/create-flux-app/publishing/",
+            },
+          ],
+        },
+        {
+          text: "Examples",
+          items: [
             {
               text: "Tutorial: Tic Tac Toe",
               link: "/create-flux-app/tutorial",
