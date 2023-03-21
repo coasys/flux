@@ -8,7 +8,7 @@ export default defineConfig({
   appearance: "dark",
   themeConfig: {
     nav: [
-      { text: "UI Library", link: "/ui-library" },
+      { text: "UI Library", link: "/ui-library/installation" },
       { text: "Create Flux App", link: "/create-flux-app" },
     ],
     sidebar: {
@@ -67,10 +67,6 @@ export default defineConfig({
         {
           text: "Getting started",
           items: [
-            {
-              text: "Introduction",
-              link: "/ui-library/getting-started/introduction",
-            },
             {
               text: "Installation",
               link: "/ui-library/getting-started/installation",

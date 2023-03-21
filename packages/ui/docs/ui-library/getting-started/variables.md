@@ -11,7 +11,7 @@
   <div class="flex">
     <div v-if="token.values" v-for="value in token.values">
         <div class="color" :style="`background-color: var(--j-color-${token.prefix}-${value})`" ></div>
-        <div>{{value}}</div>
+         <j-text nomargin size="300" color="ui-500">{{value}}</j-text>
     </div>
     <div v-else class="color" :style="`background-color: var(--j-color-${token.prefix})`"></div>
   </div>
@@ -27,7 +27,7 @@
   <div class="flex">
     <div v-for="value in token.values">
         <div class="spacing" :style="`padding: var(--j-space-${value})`"></div>
-        <div>{{value}}</div>
+         <j-text nomargin size="300" color="ui-500">{{value}}</j-text>
     </div>
   </div>
 </div>
@@ -42,7 +42,7 @@
   <div class="flex">
     <div v-for="value in token.values">
         <div class="font" :style="`font-size: var(--j-font-size-${value})`">Ab</div>
-        <div>{{value}}</div>
+        <j-text nomargin size="300" color="ui-500">{{value}}</j-text>
     </div>
   </div>
 </div>
@@ -62,6 +62,7 @@ import variables from './variables'
 
 .flex {
  display: flex;
+ flex-direction: row;
  gap: var(--j-space-200);
 }
 
