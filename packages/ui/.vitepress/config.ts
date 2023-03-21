@@ -62,6 +62,7 @@ export default defineConfig({
             { text: "Tabs", link: "/ui-library/components/tabs" },
             { text: "Popover", link: "/ui-library/components/popover" },
             { text: "Tooltip", link: "/ui-library/components/tooltip" },
+            { text: "Toggle", link: "/ui-library/components/toggle" },
             { text: "Spinner", link: "/ui-library/components/spinner" },
           ],
         },
