@@ -5,8 +5,24 @@ const theme = ref(document.documentElement.className);
 
 watch(theme, val => {
    document.documentElement.className = "";
-   document.documentElement.classList.add(val)
+   if(val) {
+    document.documentElement.classList.add(val)
+   } else {
+    document.documentElement.className = "";
+   }
 })
+
+
+const attrObserver = new MutationObserver((mutations) => {
+  mutations.forEach(mu => {
+    if (mu.type !== "attributes" && mu.attributeName !== "class") return;
+    theme.value = mu.target.className;
+    console.log("class was modified!", mu.target.classList.contains('dark'));
+  });
+});
+
+attrObserver.observe(document.documentElement, {attributes: true})
+
 </script>
 
 # Theme basics

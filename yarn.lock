@@ -1577,6 +1577,16 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
+"@junto-foundation/junto-elements@*":
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/@junto-foundation/junto-elements/-/junto-elements-0.5.5.tgz#525b254faee09fed9fdb4a89c2dc38285e913672"
+  integrity sha512-t1B2m8Yg+s92Q/W/Q3qxBcLwtzxMzVRfqovLagrWHqEVwmfFx0zJQm25qFnfkzBxeZonVjibCG6mUoexZ2cjUQ==
+  dependencies:
+    "@popperjs/core" "^2.9.2"
+    construct-style-sheets-polyfill "^3.1.0"
+    jdenticon "^3.1.0"
+    lit "^2.0.0-rc.2"
+
 "@junto-foundation/junto-elements@^0.4.5":
   version "0.4.5"
   resolved "https://registry.yarnpkg.com/@junto-foundation/junto-elements/-/junto-elements-0.4.5.tgz#88c4a3a0786b96acee047781863199810ac45226"
