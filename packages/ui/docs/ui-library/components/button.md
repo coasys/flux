@@ -6,6 +6,14 @@ outline: deep
 
 Button component is used to trigger an action or event, such as submitting a form, opening a Dialog, canceling an action, or performing a delete operation.
 
+## Usage
+
+<j-button variant="primary">Button</j-button>
+
+```html
+<j-button variant="primary">Button</j-button>
+```
+
 ## Properties
 
 ### Variant <Badge type="info" text="string" />

@@ -8,12 +8,26 @@ Modal component is used to display content in a layered window that appears abov
 
 ## Usage
 
+<j-button @click="() => isOpen = true">Open modal</j-button>
+
+<j-modal size="sm" :open="isOpen" @toggle="e => isOpen = e.target.open">
+<j-box p="500">
+<j-text variant="heading-sm">Modal header</j-text>
+<j-text variant="body">Modal content</j-text>
+</j-box>
+</j-modal>
+
 ::: code-group
 
 ```html [html]
 <j-button>Open modal</j-button>
 
-<j-modal>Hello</j-modal>
+<j-modal>
+  <j-box p="500">
+    <j-text variant="heading-sm">Modal header</j-text>
+    <j-text variant="body">Modal content</j-text>
+  </j-box>
+</j-modal>
 
 <script>
   const button = document.querySelector("j-button");
@@ -36,7 +50,10 @@ export default function Checkbox() {
         open={open}
         onToggle={(e) => setOpen(e.target.open)}
       >
-        Hello
+        <j-box p="500">
+          <j-text variant="heading-sm">Modal header</j-text>
+          <j-text variant="body">Modal content</j-text>
+        </j-box>
       </j-modal>
     </>
   );
@@ -45,7 +62,7 @@ export default function Checkbox() {
 
 ```vue [vue]
 <template>
-  <j-button @click="() => (isOpen = true)">Open</j-button>
+  <j-button @click="() => (isOpen = true)">Open modal</j-button>
 
   <j-modal size="sm" :open="isOpen" @toggle="(e) => (isOpen = e.target.open)">
     <j-box p="500">
@@ -68,15 +85,6 @@ const isOpen = ref(false);
 ### Size <Badge type="info" text="string" />
 
 Use the size property to change the size of the modal. You can set the value to xs, sm, md, lg, xl, or fullscreen.
-
-<j-button @click="() => isOpen = true">Open</j-button>
-
-<j-modal size="sm" :open="isOpen" @toggle="e => isOpen = e.target.open">
-<j-box p="500">
-<j-text variant="heading-sm">Modal header</j-text>
-<j-text variant="body">Modal content</j-text>
-</j-box>
-</j-modal>
 
 ```html
 <j-modal size="sm">

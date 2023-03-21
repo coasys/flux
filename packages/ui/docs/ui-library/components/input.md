@@ -8,6 +8,8 @@ Input component is used to get user input in forms. It can be used to get text, 
 
 ## Usage
 
+<j-input label="Name"></j-input>
+
 ::: code-group
 
 ```html [html]

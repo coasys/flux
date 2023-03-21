@@ -8,6 +8,8 @@ Checkbox component is used to enable users to select one or more items from a gr
 
 ## Usage
 
+<j-checkbox>Checked</j-checkbox>
+
 ::: code-group
 
 ```html [html]

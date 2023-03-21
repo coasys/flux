@@ -99,6 +99,7 @@ export default defineConfig({
             { text: "Menu Group", link: "/ui-library/components/menu-group" },
             { text: "Modal", link: "/ui-library/components/modal" },
             { text: "Tabs", link: "/ui-library/components/tabs" },
+            { text: "Text", link: "/ui-library/components/text" },
             { text: "Popover", link: "/ui-library/components/popover" },
             { text: "Tooltip", link: "/ui-library/components/tooltip" },
             { text: "Toggle", link: "/ui-library/components/toggle" },

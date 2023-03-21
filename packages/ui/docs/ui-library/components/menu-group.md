@@ -8,6 +8,14 @@ Menu Group component is used to group a set of menu items in a dropdown or popup
 
 ## Usage
 
+<j-menu>
+  <j-menu-group collapsible title="Menu Group Title">
+    <j-menu-item>Menu Item 1</j-menu-item>
+    <j-menu-item>Menu Item 2</j-menu-item>
+    <j-menu-item>Menu Item 3</j-menu-item>
+  </j-menu-group>
+</j-menu>
+
 ::: code-group
 
 ```html [html]
