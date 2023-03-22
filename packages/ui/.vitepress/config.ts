@@ -12,14 +12,16 @@ export default defineConfig({
         text: "UI Library",
         link: "/ui-library/getting-started/installation",
       },
-      { text: "Create Flux App", link: "/create-flux-app" },
+      {
+        text: "Create Flux App",
+        link: "/create-flux-app/getting-started/installation",
+      },
     ],
     sidebar: {
       "/create-flux-app": [
         {
           text: "Getting started",
           items: [
-            { text: "Introduction", link: "/create-flux-app/getting-started/" },
             {
               text: "Installation",
               link: "/create-flux-app/getting-started/installation",
@@ -30,20 +32,20 @@ export default defineConfig({
           text: "Building your app",
           items: [
             {
-              text: "Your first perspective",
+              text: "Connecting to AD4M",
               link: "/create-flux-app/building-your-app/",
             },
             {
-              text: "Displaying data from AD4M",
-              link: "/create-flux-app/building-your-app/",
+              text: "Creating data",
+              link: "/create-flux-app/building-your-app/creating-data",
             },
             {
               text: "Using Flux-UI",
-              link: "/create-flux-app/building-your-app/",
+              link: "/create-flux-app/building-your-app/flux-ui",
             },
             {
               text: "Custom components",
-              link: "/create-flux-app/building-your-app/",
+              link: "/create-flux-app/building-your-app/components",
             },
           ],
         },
