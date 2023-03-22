@@ -289,61 +289,60 @@ export default defineComponent({
       this.channelModel && this.channelModel.unsubscribe();
       this.memberModel && this.memberModel.unsubscribe();
 
-      const retry = () => {
-        return new Promise((resolve, reject) => {
-          const interval = setInterval(async () => {  
-            const client = await getAd4mClient();
+      const stateSub = async () => {
+        const client = await getAd4mClient();
 
-            const links = await client.perspective.queryLinks(id, {});
-            if (links.length > 0) {
-              clearInterval(interval)
-              resolve(null)
-            }
-          }, 5000);
+        const perspective = await client.perspective.byUUID(id)
+        console.log('state 100', perspective);
+       
+        perspective?.addSyncStateChangeListener((state) => {
+          console.log('state 101', state);
+
+          if (state === 'Synced') {
+            this.dataStore.fetchCommunityMembers(id);
+            this.dataStore.fetchCommunityMetadata(id);
+            this.dataStore.fetchCommunityChannels(id);
+      
+            const channelModel = new SubjectRepository(ChannelModel, { perspectiveUuid: id, source: this.community.neighbourhood.id });
+            const memberModel = new SubjectRepository(MemberModel, { perspectiveUuid: id, source: this.community.neighbourhood.id });
+            this.channelModel = channelModel;
+            this.memberModel = memberModel;
+            
+            memberModel.onAdded((member: MemberModel) => {
+              this.dataStore.setNeighbourhoodMember({
+                did: member.did,
+                perspectiveUuid: id,
+              });
+            }, 'all');
+      
+            channelModel.onRemoved((id) => {
+              this.dataStore.removeChannel({ channelId: id });
+            });
+      
+            channelModel.onAdded((channel: ChannelModel) => {
+              this.dataStore.addChannel({
+                communityId: id,
+                channel: {
+                  id: channel.id,
+                  name: channel.name,
+                  timestamp: new Date(channel.timestamp),
+                  author: channel.author,
+                  expanded: false,
+                  sourcePerspective: id,
+                  currentView: channel.views[0],
+                  views: channel.views,
+                  hasNewMessages: false,
+                  notifications: {
+                    mute: false,
+                  },
+                },
+              });
+            }, 'all');
+          }
         })
       }
 
-      retry().then(() => {
-        this.dataStore.fetchCommunityMembers(id);
-        this.dataStore.fetchCommunityMetadata(id);
-        this.dataStore.fetchCommunityChannels(id);
-  
-        const channelModel = new SubjectRepository(ChannelModel, { perspectiveUuid: id, source: this.community.neighbourhood.id });
-        const memberModel = new SubjectRepository(MemberModel, { perspectiveUuid: id, source: this.community.neighbourhood.id });
-        this.channelModel = channelModel;
-        this.memberModel = memberModel;
-        
-        memberModel.onAdded((member: MemberModel) => {
-          this.dataStore.setNeighbourhoodMember({
-            did: member.did,
-            perspectiveUuid: id,
-          });
-        }, 'all');
-  
-        channelModel.onRemoved((id) => {
-          this.dataStore.removeChannel({ channelId: id });
-        });
-  
-        channelModel.onAdded((channel: ChannelModel) => {
-          this.dataStore.addChannel({
-            communityId: id,
-            channel: {
-              id: channel.id,
-              name: channel.name,
-              timestamp: new Date(channel.timestamp),
-              author: channel.author,
-              expanded: false,
-              sourcePerspective: id,
-              currentView: channel.views[0],
-              views: channel.views,
-              hasNewMessages: false,
-              notifications: {
-                mute: false,
-              },
-            },
-          });
-        }, 'all');
-      }).catch((e) => console.error(e))
+      stateSub()
     },
     navigateToChannel(channelId: string) {
       this.$router.push({
