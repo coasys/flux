@@ -20,6 +20,8 @@ export default async function (id: string): Promise<void> {
   });
   const members = await Member.getAll();
 
+  console.log('test', members)
+
   const dids = await Promise.all(
     members.map(async (m) => {
       //@ts-ignore
@@ -30,7 +32,7 @@ export default async function (id: string): Promise<void> {
     })
     );
     
-  if(community.members.length === 1 && dids[0] !== agent.did) {
+  if(!dids.includes(agent.did)) {
     await Member.create({ did: agent.did }, agent.did);
   }
 

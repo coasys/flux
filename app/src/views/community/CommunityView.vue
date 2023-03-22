@@ -289,16 +289,7 @@ export default defineComponent({
       this.channelModel && this.channelModel.unsubscribe();
       this.memberModel && this.memberModel.unsubscribe();
 
-      const stateSub = async () => {
-        const client = await getAd4mClient();
-
-        const perspective = await client.perspective.byUUID(id)
-        console.log('state 100', perspective);
-       
-        perspective?.addSyncStateChangeListener((state) => {
-          console.log('state 101', state);
-
-          if (state === 'Synced') {
+      const synced = () => {
             this.dataStore.fetchCommunityMembers(id);
             this.dataStore.fetchCommunityMetadata(id);
             this.dataStore.fetchCommunityChannels(id);
@@ -338,6 +329,23 @@ export default defineComponent({
                 },
               });
             }, 'all');
+      }
+
+      const stateSub = async () => {
+        const client = await getAd4mClient();
+
+        const perspective = await client.perspective.byUUID(id)
+        console.log('state 100', perspective);
+
+        if (perspective?.state === 'Synced') {
+          synced()
+        }
+       
+        perspective?.addSyncStateChangeListener((state) => {
+          console.log('state 101', state);
+
+          if (state === 'Synced') {
+            synced()
           }
         })
       }
