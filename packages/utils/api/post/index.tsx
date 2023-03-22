@@ -44,6 +44,8 @@ export class Post {
     through: IMAGE,
     writable: true,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
+    // @ts-ignore
+    transform: (data) => `data:image/png;base64,${data?.data_base64}`
   })
   image: string;
 

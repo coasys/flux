@@ -152,9 +152,9 @@ export default function Post({
         </j-box>
       )}
 
-      {hasImage && base64 && (
+      {hasImage  && (
         <j-box bg="white" mt="600">
-          <img class={styles.postImage} src={base64} />
+          <img class={styles.postImage} src={hasImage} />
         </j-box>
       )}
 
