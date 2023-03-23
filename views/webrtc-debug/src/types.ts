@@ -1,4 +1,4 @@
-import { Settings, EventLogItem } from "utils/helpers/WebRTCManager";
+import { Settings, EventLogItem } from "utils/helpers";
 
 export type peerState = {
   spriteIndex: number;

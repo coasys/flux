@@ -1,13 +1,14 @@
-import WebRTCManager, {
+import {
+  WebRTCManager,
   Event,
   EventLogItem,
   Settings,
-} from "utils/helpers/WebRTCManager";
+} from "utils/helpers";
 import { useEffect, useState, useRef, useCallback } from "preact/hooks";
 import { Peer } from "../types";
 import { defaultSettings } from "../constants";
 import getMe, { Me } from "utils/api/getMe";
-import * as localstorage from "utils/helpers/localStorage";
+import { getForVersion, setForVersion } from "utils/helpers";
 import throttle from "../utils/throttle";
 
 const defaultState = {
@@ -85,12 +86,12 @@ export default function useWebRTC({
       const videoDeviceId =
         typeof settings.video !== "boolean" && settings.video.deviceId
           ? settings.video.deviceId
-          : localstorage.getForVersion("cameraDeviceId");
+          : getForVersion("cameraDeviceId");
 
       const audioDeviceId =
         typeof settings.audio !== "boolean" && settings.audio.deviceId
           ? settings.audio.deviceId
-          : localstorage.getForVersion("audioDeviceId");
+          : getForVersion("audioDeviceId");
 
       const joinSettings = { ...defaultSettings };
       if (videoDeviceId && typeof joinSettings.video !== "boolean") {
@@ -301,7 +302,7 @@ export default function useWebRTC({
     }
 
     // Persist settings
-    localstorage.setForVersion("cameraDeviceId", `${deviceId}`);
+    setForVersion("cameraDeviceId", `${deviceId}`);
   }
 
   async function onChangeAudio(deviceId: string) {
@@ -325,7 +326,7 @@ export default function useWebRTC({
     }
 
     // Persist settings
-    localstorage.setForVersion("audioDeviceId", `${deviceId}`);
+    setForVersion("audioDeviceId", `${deviceId}`);
   }
 
   function updateStream(stream: MediaStream) {
@@ -357,12 +358,12 @@ export default function useWebRTC({
     const videoDeviceId =
       typeof settings.video !== "boolean" && settings.video.deviceId
         ? settings.video.deviceId
-        : localstorage.getForVersion("cameraDeviceId");
+        : getForVersion("cameraDeviceId");
 
     const audioDeviceId =
       typeof settings.audio !== "boolean" && settings.audio.deviceId
         ? settings.audio.deviceId
-        : localstorage.getForVersion("audioDeviceId");
+        : getForVersion("audioDeviceId");
 
     const joinSettings = { ...defaultSettings };
     if (videoDeviceId && typeof joinSettings.video !== "boolean") {

@@ -1,6 +1,6 @@
 import { WebRTC } from "../../../hooks/useWebrtc";
 import { Me } from "utils/api/getMe";
-import * as localstorage from "utils/helpers/localStorage";
+import { getForVersion } from "utils/helpers";
 import Select from "../../Select";
 
 type Props = {
@@ -22,14 +22,14 @@ export default function VoiceVideo({ webRTC }: Props) {
     webRTC.settings.video?.deviceId
       ? webRTC.settings.video?.deviceId
       : videoTrack?.getSettings().deviceId ||
-        localstorage.getForVersion("cameraDeviceId");
+        getForVersion("cameraDeviceId");
 
   const selectedAudioDeviceId =
     typeof webRTC.settings.audio !== "boolean" &&
     webRTC.settings.audio?.deviceId
       ? webRTC.settings.audio?.deviceId
       : audioTrack?.getSettings().deviceId ||
-        localstorage.getForVersion("audioDeviceId");
+        getForVersion("audioDeviceId");
 
   const videoDevices = webRTC?.devices?.filter((d) => d.kind === "videoinput");
   const audioDevices = webRTC?.devices?.filter((d) => d.kind === "audioinput");

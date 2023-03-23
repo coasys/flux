@@ -1,14 +1,14 @@
-import WebRTCManager, {
+import {
+  WebRTCManager,
   Event,
   Settings,
   EventLogItem,
-} from "utils/helpers/WebRTCManager";
+} from "utils/helpers";
 import { useEffect, useState, useRef } from "preact/hooks";
 import { Peer, Reaction } from "../types";
 import { getMe, Me } from "utils/api";
 import { getForVersion, setForVersion } from "utils/helpers";
 import { defaultSettings, videoDimensions } from "../constants";
-import * as localstorage from "utils/helpers/localStorage";
 
 type Props = {
   enabled: boolean;
@@ -105,12 +105,12 @@ export default function useWebRTC({
       const videoDeviceIdFromLocalStorage =
         typeof settings.video !== "boolean" && settings.video.deviceId
           ? settings.video.deviceId
-          : localstorage.getForVersion("cameraDeviceId");
+          : getForVersion("cameraDeviceId");
 
       const audioDeviceIdFromLocalStorage =
         typeof settings.audio !== "boolean" && settings.audio.deviceId
           ? settings.audio.deviceId
-          : localstorage.getForVersion("audioDeviceId");
+          : getForVersion("audioDeviceId");
 
       const joinSettings = { ...defaultSettings };
 

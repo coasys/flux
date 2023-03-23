@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { Profile } from "utils/types";
-import getProfile from "utils/api/getProfile";
+import { getProfile } from "utils/api";
 import { WebRTC } from "../../hooks/useWebrtc";
 import characters from "../../sprites/characters";
 
