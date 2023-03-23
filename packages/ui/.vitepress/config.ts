@@ -20,7 +20,7 @@ export default defineConfig({
     sidebar: {
       "/create-flux-app": [
         {
-          text: "Getting started",
+          text: "Create Flux App",
           items: [
             {
               text: "Installation",
@@ -36,16 +36,33 @@ export default defineConfig({
               link: "/create-flux-app/building-your-app/",
             },
             {
-              text: "Creating data",
+              text: "Getting data",
               link: "/create-flux-app/building-your-app/creating-data",
             },
             {
-              text: "Using Flux-UI",
+              text: "Building UI",
               link: "/create-flux-app/building-your-app/flux-ui",
             },
+          ],
+        },
+        {
+          text: "Working with data",
+          items: [
             {
-              text: "Custom components",
-              link: "/create-flux-app/building-your-app/components",
+              text: "Creating models",
+              link: "/create-flux-app/working-with-data/",
+            },
+            {
+              text: "Writing to the network",
+              link: "/create-flux-app/working-with-data/writing-to-the-network",
+            },
+            {
+              text: "Real-time signals",
+              link: "/create-flux-app/working-with-data/creating-data",
+            },
+            {
+              text: "Validation",
+              link: "/create-flux-app/working-with-data/flux-ui",
             },
           ],
         },
@@ -53,8 +70,12 @@ export default defineConfig({
           text: "Publishing",
           items: [
             {
+              text: "Creating app-store assets",
+              link: "/create-flux-app/publishing/creating-assets",
+            },
+            {
               text: "Publish on npm",
-              link: "/create-flux-app/publishing/",
+              link: "/create-flux-app/publishing/npm",
             },
           ],
         },
@@ -62,7 +83,11 @@ export default defineConfig({
           text: "Examples",
           items: [
             {
-              text: "Tutorial: Tic Tac Toe",
+              text: "Tutorial: Whiteboard",
+              link: "/create-flux-app/tutorial",
+            },
+            {
+              text: "Tutorial: Minecraft clone",
               link: "/create-flux-app/tutorial",
             },
           ],
