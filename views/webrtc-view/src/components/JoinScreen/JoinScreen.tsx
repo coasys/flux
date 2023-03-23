@@ -103,7 +103,11 @@ export default function JoinScreen({
       <j-box pt="400">
         <j-toggle
           checked={webRTC.settings.video}
-          disabled={webRTC.isLoading || !webRTC.permissionGranted}
+          disabled={
+            webRTC.isLoading ||
+            !webRTC.permissionGranted ||
+            webRTC.devices.every((d) => d.kind !== "videoinput")
+          }
           onChange={() =>
             webRTC.onChangeSettings({
               ...webRTC.settings,

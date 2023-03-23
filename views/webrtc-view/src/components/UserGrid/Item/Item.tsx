@@ -1,42 +1,38 @@
-import { useState, useEffect } from "preact/hooks";
-import hark from "hark";
-import { Peer, Reaction } from "../../../types";
-import { Settings } from "../../../WebRTCManager";
+import { useState, useEffect, useRef } from "preact/hooks";
+import { Reaction } from "../../../types";
 import { Profile } from "utils/types";
 import { getProfile } from "utils/api";
+import { WebRTC } from "../../../hooks/useWebrtc";
 
 import styles from "./Item.module.css";
 
 type Props = {
+  webRTC: WebRTC;
   isMe?: boolean;
   userId: string;
-  settings?: Settings;
   reaction?: Reaction;
   mirrored?: boolean;
   focused?: boolean;
   minimised?: boolean;
-  stream?: MediaStream;
-  peer?: Peer;
-  videoRef?: React.MutableRefObject<null>;
   onToggleFocus: () => void;
 };
 
 export default function Item({
+  webRTC,
   isMe,
   userId,
-  settings,
   focused,
   minimised,
   reaction,
   mirrored,
-  stream,
-  peer,
-  videoRef,
   onToggleFocus,
 }: Props) {
+  const videoRef = useRef(null);
   const [profile, setProfile] = useState<Profile>();
   const [isConnecting, setIsConnecting] = useState(false);
-  const [voiceInputVolume, setVoiceInputVolume] = useState(0);
+
+  const peer = webRTC.connections.find((p) => p.did === userId);
+  const settings = isMe ? webRTC.settings : peer?.settings;
 
   // Get user details
   useEffect(() => {
@@ -54,66 +50,33 @@ export default function Item({
   useEffect(() => {
     if (isMe) return;
 
-    if (peer?.connection.peerConnection.iceConnectionState === "connected") {
+    if (peer?.connection?.peerConnection?.iceConnectionState === "connected") {
       setIsConnecting(false);
     } else {
       setIsConnecting(true);
     }
-
-    function updateLoadingState(event) {
-      if (event.target.iceConnectionState === "connected") {
-        console.log("connection is", event.target.iceConnectionState);
-        setIsConnecting(false);
-      }
-    }
-
-    peer?.connection.peerConnection.addEventListener(
-      "iceconnectionstatechange",
-      updateLoadingState
-    );
-
-    return () => {
-      if (peer) {
-        peer.connection.peerConnection.removeEventListener(
-          "iceconnectionstatechange",
-          updateLoadingState
-        );
-      }
-    };
   }, [peer]);
 
-  // Detect speaking
+  // Get video stream
   useEffect(() => {
-    async function listenForVoice() {
-      var options = {};
-      try {
-        var speechEvents = hark(stream, options);
-
-        speechEvents.on("speaking", function () {
-          setVoiceInputVolume(1);
-        });
-
-        speechEvents.on("stopped_speaking", function () {
-          setVoiceInputVolume(0);
-        });
-      } catch (e) {
-        console.log("Failed to create hark instance");
-      }
+    if (videoRef.current && webRTC?.localStream && isMe) {
+      videoRef.current.srcObject = webRTC.localStream;
+      videoRef.current.muted = true;
     }
 
-    if (stream.getAudioTracks().length > 0) {
-      listenForVoice();
+    if (videoRef.current && !isMe) {
+      videoRef.current.srcObject = peer.connection.mediaStream;
     }
-  }, [stream]);
+  }, [videoRef, peer?.connection?.mediaStream, webRTC.localStream, isMe]);
 
   return (
     <div
       className={styles.item}
-      data-camera-enabled={!!settings.video}
+      data-camera-enabled={!!settings?.video}
       data-focused={focused}
       data-minimised={minimised}
       data-mirrored={mirrored}
-      data-talking={voiceInputVolume > 0}
+      // data-talking={voiceInputVolume > 0}
       data-connecting={isConnecting}
     >
       <video

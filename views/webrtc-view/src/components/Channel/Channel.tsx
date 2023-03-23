@@ -11,6 +11,7 @@ import Overlay from "../Overlay/Overlay";
 import JoinScreen from "../JoinScreen";
 
 import styles from "./Channel.module.css";
+import Debug from "../Debug";
 
 export default function Channel({ source, uuid }) {
   const [agent, setAgent] = useState<Me | null>(null);
@@ -20,7 +21,7 @@ export default function Channel({ source, uuid }) {
   const isPageActive = !!wrapperObserver?.isIntersecting;
 
   const {
-    state: { showSettings },
+    state: { showSettings, showDebug },
     methods: { addNotification, toggleShowSettings },
   } = useContext(UiContext);
 
@@ -67,6 +68,8 @@ export default function Channel({ source, uuid }) {
       )}
 
       <Overlay webRTC={webRTC} currentUser={agent} />
+
+      <>{showDebug && <Debug webRTC={webRTC} currentUser={agent} />}</>
 
       <Notifications />
     </section>
