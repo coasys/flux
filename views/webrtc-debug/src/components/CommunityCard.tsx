@@ -1,5 +1,5 @@
 import CommunityModel, { Community } from "utils/api/community";
-import useEntry from "utils/react/useEntry";
+import useEntry from "utils/frameworks/react/useEntry";
 import styles from "../App.module.css";
 
 export default function CommunityCard({ uuid }) {

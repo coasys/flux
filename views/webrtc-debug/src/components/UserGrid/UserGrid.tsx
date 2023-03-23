@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useLayoutEffect } from "preact/hooks";
-import { Me } from "utils/api/getMe";
+import { Me } from "utils/api";
 import useContextMenu from "../../hooks/useContextMenu";
 import { WebRTC } from "../../hooks/useWebrtc";
 import items from "../../sprites/items";

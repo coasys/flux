@@ -16,7 +16,7 @@ import deleteMessageReaction from "../api/deleteMessageReaction";
 import createMessageReaction from "../api/createMessageReaction";
 import createReply from "../api/createReply";
 import { sortExpressionsByTimestamp } from "../helpers/expressionHelpers";
-import getMe, { Me } from "../api/getMe";
+import { getMe, Me } from "../api";
 import { REACTION } from "../constants/communityPredicates";
 import hideEmbeds from "../api/hideEmbeds";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";

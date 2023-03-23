@@ -1,5 +1,5 @@
 import { WebRTC } from "../../../hooks/useWebrtc";
-import { Me } from "utils/api/getMe";
+import { Me } from "utils/api";
 
 type Props = {
   webRTC: WebRTC;

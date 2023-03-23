@@ -1,4 +1,4 @@
-import { Me } from "utils/api/getMe";
+import { Me } from "utils/api";
 import { WebRTC } from "../../../hooks/useWebrtc";
 import { format } from "date-fns";
 

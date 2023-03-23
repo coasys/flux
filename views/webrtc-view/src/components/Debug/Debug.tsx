@@ -1,5 +1,5 @@
 import { WebRTC } from "../../hooks/useWebrtc";
-import { Me } from "utils/api/getMe";
+import { Me } from "utils/api";
 import UiContext from "../../context/UiContext";
 import { useContext } from "preact/hooks";
 

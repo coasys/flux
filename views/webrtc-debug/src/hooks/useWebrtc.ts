@@ -1,13 +1,8 @@
-import {
-  WebRTCManager,
-  Event,
-  EventLogItem,
-  Settings,
-} from "utils/helpers";
+import { WebRTCManager, Event, EventLogItem, Settings } from "utils/helpers";
 import { useEffect, useState, useRef, useCallback } from "preact/hooks";
 import { Peer } from "../types";
 import { defaultSettings } from "../constants";
-import getMe, { Me } from "utils/api/getMe";
+import { getMe, Me } from "utils/api";
 import { getForVersion, setForVersion } from "utils/helpers";
 import throttle from "../utils/throttle";
 
