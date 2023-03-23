@@ -3,7 +3,7 @@ import useEntries from "./useEntries";
 import useEntry from "./useEntry";
 import ChannelModel from "../api/channel";
 import MemberModel from "../api/member";
-import CommunityModel from "../api/community";
+import { Community as CommunityModel } from "utils/api";
 import { getProfile } from "../api";
 import { EntryType } from "../types";
 import { asyncFilter } from "../helpers";
@@ -49,7 +49,7 @@ export function CommunityProvider({ perspectiveUuid, children }: any) {
   const { entries: channelEntries } = useEntries({
     perspectiveUuid,
     model: ChannelModel,
-    source: community?.id || null
+    source: community?.id || null,
   });
 
   const { entries: memberEntries } = useEntries({
@@ -63,14 +63,20 @@ export function CommunityProvider({ perspectiveUuid, children }: any) {
   }, [memberEntries.length, channelEntries.length]);
 
   async function fetchProfiles() {
-    const filteredProfiles = await asyncFilter(memberEntries, async (member: any) => {
-      const type = await member.type;
-      const did = await member.did;
-      return type === EntryType.Member && (did !== undefined && !state.members[did])
-    });
+    const filteredProfiles = await asyncFilter(
+      memberEntries,
+      async (member: any) => {
+        const type = await member.type;
+        const did = await member.did;
+        return (
+          type === EntryType.Member && did !== undefined && !state.members[did]
+        );
+      }
+    );
 
-    const profilePromises = filteredProfiles
-      .map(async (member) => getProfile(await member.did));
+    const profilePromises = filteredProfiles.map(async (member) =>
+      getProfile(await member.did)
+    );
 
     const newProfiles = await Promise.all(profilePromises);
 
@@ -84,17 +90,19 @@ export function CommunityProvider({ perspectiveUuid, children }: any) {
   }
 
   async function fetchChannels() {
-    const channels = channelEntries.reduce((acc, channel) => ({
-      ...acc,
-      [channel.id]: channel
-    }), {})
+    const channels = channelEntries.reduce(
+      (acc, channel) => ({
+        ...acc,
+        [channel.id]: channel,
+      }),
+      {}
+    );
 
     setState((oldState) => ({
       ...oldState,
       channels,
-    }))
-  } 
-
+    }));
+  }
 
   return (
     <CommunityContext.Provider

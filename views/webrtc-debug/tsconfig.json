@@ -4,6 +4,7 @@
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment",
     "downlevelIteration": true,
+    "experimentalDecorators": true,
     "skipLibCheck": true,
     "baseUrl": "/",
     "paths": {
@@ -11,8 +12,5 @@
       "react-dom": ["node_modules/preact/compat"]
     }
   },
-  "include": [
-    "src/**/*.tsx",
-    "src/**/*.ts"
-  ]
+  "include": ["src/**/*.tsx", "src/**/*.ts"]
 }
