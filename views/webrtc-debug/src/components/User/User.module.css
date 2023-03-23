@@ -1,0 +1,48 @@
+.wrapper {
+  display: block;
+  width: 220px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--j-space-500) var(--j-space-500) var(--j-space-500);
+}
+
+.username {
+  padding: var(--j-space-200) var(--j-space-400);
+  color: white;
+  background: #0000002e;
+  border-radius: 10rem;
+}
+
+.sprite {
+  position: relative;
+  width: 220px;
+}
+
+.pencil {
+  display: none;
+  position: absolute;
+  transform: translate(-42px, 59px);
+  top: 0;
+  left: 0;
+  width: 100px;
+  height: 100px;
+}
+
+.video {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  width: 220px;
+  height: 220px;
+  clip: rect(80px, 140px, 140px, 80px);
+  transform: translateX(-50%);
+}
+
+.wrapper[data-drawing="true"] .pencil {
+  display: block;
+}
+

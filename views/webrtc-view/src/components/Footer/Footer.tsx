@@ -54,7 +54,10 @@ export default function Footer({ webRTC, onToggleSettings }: Props) {
             square
             circle
             size="lg"
-            disabled={!webRTC.hasJoined}
+            disabled={
+              !webRTC.hasJoined ||
+              webRTC.devices.every((d) => d.kind !== "videoinput")
+            }
           >
             <j-icon
               name={webRTC.settings.video ? "camera-video" : "camera-video-off"}

@@ -99,6 +99,17 @@
       @neighbourhood-click="onNeighbourhoodClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></webrtc-view>
+    <webrtc-debug-view
+      v-show="currentView === ChannelView.Debug"
+      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Debug)"
+      class="perspective-view"
+      :source="channel.id"
+      :perspective="communityId"
+      @agent-click="onAgentClick"
+      @channel-click="onChannelClick"
+      @neighbourhood-click="onNeighbourhoodClick"
+      @hide-notification-indicator="onHideNotificationIndicator"
+    ></webrtc-debug-view>
     <chat-view
       v-show="currentView === ChannelView.Chat"
       v-if="filteredViewOptions.find((v) => v.type === ChannelView.Chat)"
@@ -137,6 +148,7 @@ import ForumView from "@junto-foundation/forum-view";
 import ChatView from "@junto-foundation/chat-view";
 import GraphView from "@junto-foundation/graph-view";
 import VoiceView from "@junto-foundation/webrtc-view";
+import DebugView from "flux-webrtc-debug-view";
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
@@ -194,6 +206,10 @@ export default defineComponent({
     if (!customElements.get("webrtc-view")) {
       const module = await import(`@junto-foundation/webrtc-view`);
       customElements.define("webrtc-view", module.default);
+    }
+    if (!customElements.get("webrtc-debug-view")) {
+      const module = await import(`flux-webrtc-debug-view`);
+      customElements.define("webrtc-debug-view", module.default);
     }
   },
   computed: {

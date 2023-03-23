@@ -1,4 +1,4 @@
-import { Settings } from "./WebRTCManager";
+import { Settings } from "utils/helpers/WebRTCManager";
 
 const frameRate = {
   min: 5,
@@ -24,6 +24,6 @@ export const videoDimensions = {
 
 export const defaultSettings = {
   audio: true,
-  screen: false,
   video: videoDimensions,
+  screen: false,
 } as Settings;

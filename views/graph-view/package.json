@@ -1,6 +1,6 @@
 {
   "name": "@junto-foundation/graph-view",
-  "version": "0.5.6",
+  "version": "0.5.7",
   "type": "module",
   "files": [
     "dist"
@@ -28,8 +28,8 @@
   "dependencies": {
     "3d-force-graph": "^1.70.19",
     "@junto-foundation/junto-elements": "*",
-    "@perspect3vism/ad4m": "0.3.1",
-    "@perspect3vism/ad4m-connect": "0.3.1",
+    "@perspect3vism/ad4m": "0.3.2",
+    "@perspect3vism/ad4m-connect": "0.3.2",
     "preact": "^10.11.3",
     "three-spritetext": "^1.6.5",
     "utils": "*"

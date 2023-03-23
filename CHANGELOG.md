@@ -3,9 +3,10 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
-## unreleased
+## [0.5.7] - 23/03/2023
 
 ### Added
+ - New WebRTC debugger channel view
 
 ### Changed
 
@@ -14,6 +15,8 @@ This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/
 ### Removed
 
 ### Fixed
+ - Voice channel will work even if you dont have a webcam
+ - Various improvements to WebRTC stability and connects for voice channel
 
 ### Security
 
