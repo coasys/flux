@@ -328,6 +328,25 @@ export default defineComponent({
             },
           });
         }, 'all');
+
+        channelModel.onUpdated((channel: ChannelModel) => {
+          this.dataStore.setChannel({
+            channel: {
+              id: channel.id,
+              name: channel.name,
+              timestamp: new Date(channel.timestamp),
+              author: channel.author,
+              expanded: false,
+              sourcePerspective: id,
+              currentView: channel.views[0],
+              views: channel.views,
+              hasNewMessages: false,
+              notifications: {
+                mute: false,
+              },
+            },
+          });
+        }, 'all');
       }
 
       const stateSub = async () => {

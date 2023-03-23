@@ -18,6 +18,7 @@ export type ModelProps = {
 export type Listeners = {
   add: { [source: string]: Function[] };
   remove: { [source: string]: Function[] };
+  update: { [source: string]: Function[] };
 };
 
 export function capitalize(str: string) {
@@ -106,10 +107,11 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   perspectiveUuid = "";
   private unsubscribeCb: Function | null = null;
   private isSubcribing = false;
-  private listeners = { add: {}, remove: {} } as Listeners;
+  private listeners = { add: {}, remove: {}, update: {} } as Listeners;
   private subject: SubjectClass;
   private perspective: PerspectiveProxy | null = null;
   private tempSubject: any;
+  private linkRemoved: LinkExpression[] = []
 
   constructor(subject: { new (): SubjectClass }, props: ModelProps) {
     this.perspectiveUuid = props.perspectiveUuid;
@@ -267,16 +269,46 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   unsubscribe() {
     if (this.unsubscribeCb) {
       this.unsubscribeCb();
-      this.listeners = { add: {}, remove: {} };
+      this.listeners = { add: {}, remove: {}, update: {} };
       this.isSubcribing = false;
     }
   }
 
-  private async onLink(type: "added" | "removed", link: LinkExpression) {
+  private async onLink(type: "added" | "removed" | "updated", link: LinkExpression) {
+    if (type === 'removed') {
+      this.linkRemoved.push(link)
+    }
+    if (type === 'added') {
+      const found = this.linkRemoved.find(l => l.data.source === link.data.source && l.data.predicate === link.data.predicate)
+
+      if (found) {
+        const updatedListeners = this.listeners.update[found.data.source];
+        const allUpdateListeners = this.listeners.update?.all;
+  
+        if (allUpdateListeners) {
+          setTimeout(async () => {
+            const entry = await this.getData(found.data.source);
+            allUpdateListeners.forEach((cb) => {
+              cb(entry);
+            });
+          }, 6000)
+        }
+  
+        if (updatedListeners) {
+          setTimeout(async () => {
+            const entry = await this.getData(found.data.source);
+            updatedListeners.forEach((cb) => {
+              cb(entry);
+            });
+          }, 6000)
+        }
+      }
+
+    }
     const linkIsType = link.data.predicate === this.tempSubject.prototype.type;
-    
+
     if (!linkIsType) return;
-    
+
     const source = link.data.source;
     const entryId = link.data.target;
     const addedListeners = this.listeners.add[source];
@@ -348,6 +380,21 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
       this.listeners.remove[src].push(callback);
     } else {
       this.listeners.remove[src] = [callback];
+    }
+  }
+
+  onUpdated(callback: (id: string) => void, source?: string | "all") {
+    if (!this.isSubcribing) {
+      this.subscribe();
+    }
+
+    const src = source || this.source;
+    const hasCallbacks = this.listeners.update[src];
+
+    if (hasCallbacks) {
+      this.listeners.update[src].push(callback);
+    } else {
+      this.listeners.update[src] = [callback];
     }
   }
 }
