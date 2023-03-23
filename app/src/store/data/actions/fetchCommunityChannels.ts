@@ -12,48 +12,34 @@ export default async (communityId: string): Promise<void> => {
   const community = dataStore.getCommunity(communityId);
 
   try {
-    let ad4m = await getAd4mClient();
-    let perspective = await ad4m.perspective.byUUID(communityId);
-
     const channelRepository = new SubjectRepository(ChannelModel, {
       perspectiveUuid: communityId,
       source: community.id,
     });
 
-    const channels = await channelRepository.getAll();
-
-    const awaitedChannels = await Promise.all(
-      channels.map(async (channel) => {
-        //@ts-ignore
-        const channelEntry = new SubjectEntry<ChannelModel>(
-          channel,
-          perspective
-        );
-        await channelEntry.load();
-
-        return {
-          id: channelEntry.id,
-          name: await channel.name,
-          author: channelEntry.author,
-          sourcePerspective: communityId,
-          hasNewMessages: false,
-          expanded: keyedChannels[channel.id]?.expanded || false,
-          currentView:
-            keyedChannels[channelEntry.id]?.currentView ||
-            channel.views[0] ||
-            ChannelView.Chat,
-          views: await channel.views,
-          timestamp: channelEntry.timestamp.toString(),
-          notifications: {
-            mute: keyedChannels[channelEntry.id]?.notifications.mute || false,
-          },
-        };
-      })
-    );
+    const channels = await channelRepository.getAllData();
+    
+    const mappedChannels = channels.map((channel: any) => ({
+      id: channel?.id,
+      name: channel?.name,
+      author: channel?.author,
+      sourcePerspective: communityId,
+      hasNewMessages: false,
+      expanded: keyedChannels[channel.id]?.expanded || false,
+      currentView:
+        keyedChannels[channel.id]?.currentView ||
+        channel.views[0] ||
+        ChannelView.Chat,
+      views: channel.views,
+      timestamp: channel.timestamp.toString(),
+      notifications: {
+        mute: keyedChannels[channel.id]?.notifications.mute || false,
+    }}))
+    console.log('chan', mappedChannels)
 
     dataStore.setChannels({
       communityId,
-      channels: awaitedChannels,
+      channels: mappedChannels,
     });
   } catch (e) {
     console.log(e);

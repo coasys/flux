@@ -285,50 +285,49 @@ export default defineComponent({
       "setShowCommunityTweaks",
     ]),
     startWatching(id: string) {
-
-      this.channelModel && this.channelModel.unsubscribe();
-      this.memberModel && this.memberModel.unsubscribe();
-
       const synced = () => {
-            this.dataStore.fetchCommunityMembers(id);
-            this.dataStore.fetchCommunityMetadata(id);
-            this.dataStore.fetchCommunityChannels(id);
-      
-            const channelModel = new SubjectRepository(ChannelModel, { perspectiveUuid: id, source: this.community.neighbourhood.id });
-            const memberModel = new SubjectRepository(MemberModel, { perspectiveUuid: id, source: this.community.neighbourhood.id });
-            this.channelModel = channelModel;
-            this.memberModel = memberModel;
-            
-            memberModel.onAdded((member: MemberModel) => {
-              this.dataStore.setNeighbourhoodMember({
-                did: member.did,
-                perspectiveUuid: id,
-              });
-            }, 'all');
-      
-            channelModel.onRemoved((id) => {
-              this.dataStore.removeChannel({ channelId: id });
-            });
-      
-            channelModel.onAdded((channel: ChannelModel) => {
-              this.dataStore.addChannel({
-                communityId: id,
-                channel: {
-                  id: channel.id,
-                  name: channel.name,
-                  timestamp: new Date(channel.timestamp),
-                  author: channel.author,
-                  expanded: false,
-                  sourcePerspective: id,
-                  currentView: channel.views[0],
-                  views: channel.views,
-                  hasNewMessages: false,
-                  notifications: {
-                    mute: false,
-                  },
-                },
-              });
-            }, 'all');
+        this.channelModel && this.channelModel.unsubscribe();
+        this.memberModel && this.memberModel.unsubscribe();
+        
+        this.dataStore.fetchCommunityMembers(id);
+        this.dataStore.fetchCommunityMetadata(id);
+        this.dataStore.fetchCommunityChannels(id);
+  
+        const channelModel = new SubjectRepository(ChannelModel, { perspectiveUuid: id, source: this.community.neighbourhood.id });
+        const memberModel = new SubjectRepository(MemberModel, { perspectiveUuid: id, source: this.community.neighbourhood.id });
+        this.channelModel = channelModel;
+        this.memberModel = memberModel;
+        
+        memberModel.onAdded((member: MemberModel) => {
+          this.dataStore.setNeighbourhoodMember({
+            did: member.did,
+            perspectiveUuid: id,
+          });
+        }, 'all');
+  
+        channelModel.onRemoved((id) => {
+          this.dataStore.removeChannel({ channelId: id });
+        });
+  
+        channelModel.onAdded((channel: ChannelModel) => {
+          this.dataStore.addChannel({
+            communityId: id,
+            channel: {
+              id: channel.id,
+              name: channel.name,
+              timestamp: new Date(channel.timestamp),
+              author: channel.author,
+              expanded: false,
+              sourcePerspective: id,
+              currentView: channel.views[0],
+              views: channel.views,
+              hasNewMessages: false,
+              notifications: {
+                mute: false,
+              },
+            },
+          });
+        }, 'all');
       }
 
       const stateSub = async () => {
