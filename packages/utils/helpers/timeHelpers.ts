@@ -22,10 +22,10 @@ export function getRelativeTime(d1, d2 = new Date(), rtf) {
 }
 
 export function getTimeSince(d1: Date, d2: Date = new Date()) {
-  const dateString = formatRelative(d1, d2);
+  const dateString = formatRelative(d1, d2, { weekStartsOn: 1 });
 
   // Remove "last" prefix from date if we're in the same week
-  if (isSameWeek(d1, d2)) {
+  if (isSameWeek(d1, d2, { weekStartsOn: 1 })) {
     return dateString.replace("last ", "");
   }
 
