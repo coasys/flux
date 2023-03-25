@@ -145,8 +145,6 @@ export default defineComponent({
       const communityId = this.$route.params.communityId as string;
       const localCommunity = this.dataStore.getLocalCommunityState(communityId);
 
-      console.log("localCommunity.syncState: ", localCommunity.syncState);
-
       if (
         localCommunity.syncState ===
           PerspectiveState.LinkLanguageInstalledButNotSynced ||
