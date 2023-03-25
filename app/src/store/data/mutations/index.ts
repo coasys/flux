@@ -6,6 +6,7 @@ import {
 } from "@/store/types";
 import { ChannelView, CommunityMetaData } from "utils/types";
 import { useDataStore } from "@/store/data";
+import { PerspectiveState } from "@perspect3vism/ad4m";
 
 interface UpdatePayload {
   communityId: string;
@@ -53,6 +54,21 @@ export default {
       community.notifications.mute = !community.notifications.mute;
     } else {
       community.notifications = { mute: true };
+    }
+  },
+
+  setCommunitySyncState({
+    communityId,
+    syncState,
+  }: {
+    communityId: string;
+    syncState: PerspectiveState;
+  }): void {
+    const state = useDataStore();
+    const community = state.communities[communityId];
+
+    if (community.syncState !== syncState) {
+      community.syncState = syncState;
     }
   },
 

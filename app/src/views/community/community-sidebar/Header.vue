@@ -82,12 +82,12 @@
         </j-text>
         <j-text nomargin size="400" color="ui-500">
           {{
-            isSynced
+            isSynced && isPerspectiveSynced
               ? community.neighbourhood.description || "No description"
               : "syncing community..."
           }}
         </j-text>
-        <j-box pt="400" v-if="!isSynced">
+        <j-box pt="400" v-if="!isSynced || !isPerspectiveSynced">
           <LoadingBar></LoadingBar>
         </j-box>
       </div>
@@ -123,6 +123,7 @@ import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import Avatar from "@/components/avatar/Avatar.vue";
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
+import { PerspectiveState } from "@perspect3vism/ad4m";
 
 export default defineComponent({
   components: { Avatar, LoadingBar },
@@ -139,6 +140,22 @@ export default defineComponent({
     community() {
       const communityId = this.$route.params.communityId as string;
       return this.dataStore.getCommunityState(communityId);
+    },
+    isPerspectiveSynced() {
+      const communityId = this.$route.params.communityId as string;
+      const localCommunity = this.dataStore.getLocalCommunityState(communityId);
+
+      console.log("localCommunity.syncState: ", localCommunity.syncState);
+
+      if (
+        localCommunity.syncState ===
+          PerspectiveState.LinkLanguageInstalledButNotSynced ||
+        localCommunity.syncState === PerspectiveState.NeighbourhoodJoinInitiated
+      ) {
+        return false;
+      }
+
+      return true;
     },
     channels(): ChannelState[] {
       const communityId = this.$route.params.communityId as string;
