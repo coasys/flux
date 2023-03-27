@@ -43,8 +43,8 @@
   "license": "ISC",
   "dependencies": {
     "@junto-foundation/junto-elements": "^0.4.5",
-    "@perspect3vism/ad4m": "0.3.2",
-    "@perspect3vism/ad4m-connect": "0.3.2",
+    "@perspect3vism/ad4m": "0.3.3",
+    "@perspect3vism/ad4m-connect": "0.3.3",
     "classnames": "^2.3.2",
     "date-fns": "^2.29.3",
     "emoji-picker-element": "^1.14.0",
