@@ -1,6 +1,6 @@
 {
   "name": "@junto-foundation/graph-view",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "type": "module",
   "files": [
     "dist"
