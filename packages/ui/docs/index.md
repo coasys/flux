@@ -41,4 +41,12 @@ layout: home
   text-align: center;
 }
 
+.card {
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+    filter: brightness(1.3);
+}
+
 </style>
