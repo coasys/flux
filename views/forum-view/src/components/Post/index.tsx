@@ -1,7 +1,8 @@
 import UIContext from "../../context/UIContext";
 import { useContext, useEffect, useMemo, useState } from "preact/hooks";
-import { formatRelative, format, formatDistance } from "date-fns";
+import { format, formatDistance } from "date-fns";
 import { getImage } from "utils/helpers/getImage";
+import { getTimeSince } from "utils/helpers/timeHelpers";
 import Avatar from "../Avatar";
 import CommentSection from "../CommentSection";
 import PostModel from "utils/api/post";
@@ -138,7 +139,7 @@ export default function Post({
               )}
             </div>
             <div class={styles.timestamp}>
-              {formatRelative(new Date(post.timestamp), new Date())}
+              {getTimeSince(new Date(post.timestamp), new Date())}
             </div>
           </div>
         </j-flex>

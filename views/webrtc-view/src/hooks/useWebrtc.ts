@@ -49,6 +49,7 @@ export default function useWebRTC({
 }: Props): WebRTC {
   const manager = useRef<WebRTCManager>();
   const [permissionGranted, setPermissionGranted] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
   const [agent, setAgent] = useState<Me>();
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [settings, setSettings] = useState<Settings>(defaultSettings);
@@ -151,6 +152,37 @@ export default function useWebRTC({
       askForPermission();
     }
   }, [enabled, permissionGranted, devices]);
+
+  /**
+   * TogglePreRecording
+   *
+   * Stop recording user input if user hasn't joined yet and goes to another view
+   */
+  useEffect(() => {
+    async function TogglePreRecording() {
+      // Return if permission denied
+      if (!permissionGranted) {
+        return;
+      }
+
+      if (enabled && !showPreview) {
+        const newLocalStream = await navigator.mediaDevices.getUserMedia({
+          audio: settings.audio,
+          video: settings.video,
+        });
+        updateStream(newLocalStream);
+        setShowPreview(true);
+      }
+
+      if (!enabled && showPreview && localStream) {
+        localStream.getTracks().forEach((track) => track.stop());
+        setShowPreview(false);
+      }
+    }
+    if (!hasJoined) {
+      TogglePreRecording();
+    }
+  }, [enabled, showPreview, permissionGranted, hasJoined]);
 
   useEffect(() => {
     if (source && uuid && agent && !isInitialised) {
@@ -272,15 +304,13 @@ export default function useWebRTC({
     setSettings(newSettings);
 
     if (localStream) {
-      this.localStream.getTracks().forEach((track) => {
+      localStream.getTracks().forEach((track) => {
         track.stop();
       });
 
       const newLocalStream = await navigator.mediaDevices.getUserMedia(
         newSettings
       );
-
-      console.log("newSettings: ", newSettings);
       updateStream(newLocalStream);
     }
 
@@ -298,7 +328,7 @@ export default function useWebRTC({
     setSettings(newSettings);
 
     if (localStream) {
-      this.localStream.getTracks().forEach((track) => {
+      localStream.getTracks().forEach((track) => {
         track.stop();
       });
 
