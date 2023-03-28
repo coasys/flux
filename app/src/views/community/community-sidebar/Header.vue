@@ -100,7 +100,7 @@
           color="warning-500"
         ></j-icon>
         <j-text nomargin weight="700" size="400" color="warning-500"
-          >Warning</j-text
+          >Warning!</j-text
         >
       </j-flex>
       <j-text nomargin size="300" color="warning-500">
