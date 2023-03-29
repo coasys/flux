@@ -2,7 +2,9 @@ import { useContext, useEffect, useRef, useState } from "preact/hooks";
 import useWebRTC from "../../hooks/useWebrtc";
 import { getMe, Me } from "utils/api";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
-
+import { Howl } from "howler";
+import joinMp3 from "../../assets/join.mp3";
+import leaveMp3 from "../../assets/leave.mp3";
 import UserGrid from "../UserGrid";
 import Footer from "../Footer";
 import Notifications from "../Notifications";
@@ -16,6 +18,7 @@ import Debug from "../Debug";
 export default function Channel({ source, uuid }) {
   const [agent, setAgent] = useState<Me | null>(null);
   const wrapperEl = useRef<HTMLDivElement | null>(null);
+  const [soundPlaying, setSoundPlaying] = useState(false);
 
   const wrapperObserver = useIntersectionObserver(wrapperEl, {});
   const isPageActive = !!wrapperObserver?.isIntersecting;
@@ -30,8 +33,36 @@ export default function Channel({ source, uuid }) {
     source,
     uuid,
     events: {
-      onPeerJoin: (userId) => addNotification({ userId, type: "join" }),
-      onPeerLeave: (userId) => addNotification({ userId, type: "leave" }),
+      onPeerJoin: (userId) => {
+        addNotification({ userId, type: "join" });
+
+        if (!soundPlaying) {
+          const joinSound = new Howl({
+            src: [joinMp3],
+            volume: 0.5,
+          });
+
+          setSoundPlaying(true);
+          joinSound.play();
+          joinSound.on("end", function () {
+            setSoundPlaying(false);
+          });
+        }
+      },
+      onPeerLeave: (userId) => {
+        addNotification({ userId, type: "leave" });
+
+        if (!soundPlaying) {
+          const leaveSound = new Howl({
+            src: [leaveMp3],
+            volume: 0.5,
+          });
+          leaveSound.play();
+          leaveSound.on("end", function () {
+            setSoundPlaying(false);
+          });
+        }
+      },
     },
   });
 

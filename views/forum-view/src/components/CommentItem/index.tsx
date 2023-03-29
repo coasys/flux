@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState, useMemo } from "preact/hooks";
 import { CommunityContext, useEntries } from "utils/frameworks/react";
 import styles from "./index.module.css";
-import { formatRelative } from "date-fns/esm";
+import { getTimeSince } from "utils/helpers/timeHelpers";
 import { Profile } from "utils/types";
 import Avatar from "../Avatar";
 import Editor from "../Editor";
@@ -85,7 +85,7 @@ export default function CommentItem({ comment, perspectiveUuid }) {
             )}
           </span>
           <span class={styles.timestamp}>
-            {formatRelative(new Date(comment.timestamp), new Date())}
+            {getTimeSince(new Date(comment.timestamp), new Date())}
           </span>
         </div>
         {hasBody && showComments && (

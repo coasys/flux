@@ -107,7 +107,8 @@ import { hydrateState } from "@/store/data/hydrateState";
 import semver from "semver";
 import { dependencies } from "../../../package.json";
 import { subscribeToLinks } from "utils/api";
-import { LinkExpression, Literal } from "@perspect3vism/ad4m";
+import { LinkExpression, Literal, PerspectiveState } from "@perspect3vism/ad4m";
+import { subscribeToSyncState } from "utils/api";
 
 export default defineComponent({
   name: "MainAppView",
@@ -203,6 +204,7 @@ export default defineComponent({
             const alreadyListening = watching.includes(perspectiveUuid);
             if (!alreadyListening) {
               watching.push(perspectiveUuid);
+
               subscribeToLinks({
                 perspectiveUuid,
                 added: async (link: LinkExpression) => {
@@ -241,6 +243,17 @@ export default defineComponent({
                       throw new Error(e);
                     }
                   }
+                },
+              });
+
+              subscribeToSyncState({
+                perspectiveUuid,
+                callback: (syncState: PerspectiveState) => {
+                  this.dataStore.setCommunitySyncState({
+                    communityId: perspectiveUuid,
+                    syncState,
+                  });
+                  return null;
                 },
               });
             }

@@ -1,8 +1,9 @@
 import { useContext, useState, useEffect } from "preact/hooks";
 import { CommunityContext } from "utils/frameworks/react";
 import styles from "./index.module.css";
-import { format, formatDistance, formatRelative } from "date-fns/esm";
+import { format, formatDistance } from "date-fns/esm";
 import { Profile } from "utils/types";
+import { getTimeSince } from "utils/helpers/timeHelpers";
 import { DisplayView } from "../../constants/options";
 import { getImage } from "utils/helpers";
 import UIContext from "../../context/UIContext";
@@ -114,7 +115,7 @@ export default function PostItem({ post, displayView }) {
                 )}
               </div>
               <div class={styles.timestamp}>
-                {formatRelative(new Date(post.timestamp), new Date())}
+                {getTimeSince(new Date(post.timestamp), new Date())}
               </div>
             </j-flex>
           </j-flex>

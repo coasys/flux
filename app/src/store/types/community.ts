@@ -1,3 +1,4 @@
+import { PerspectiveState } from "@perspect3vism/ad4m";
 import { Community } from "utils/types";
 import { ThemeState } from "./ui";
 
@@ -14,6 +15,7 @@ export interface LocalCommunityState {
   hasNewMessages: boolean;
   collapseChannelList: boolean;
   hideMutedChannels: boolean;
+  syncState: PerspectiveState | undefined;
   notifications: {
     mute: boolean;
   };

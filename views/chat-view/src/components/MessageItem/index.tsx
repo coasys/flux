@@ -5,8 +5,9 @@ import MessageToolbar from "./MessageToolbar";
 import MessageReactions from "./MessageReactions";
 import MessageReply from "./MessageReply";
 import UIContext from "../../context/UIContext";
-import { format, formatRelative } from "date-fns/esm";
 import { REACTION } from "utils/constants";
+import { format } from "date-fns/esm";
+import { getTimeSince } from "utils/helpers";
 import Avatar from "../../components/Avatar";
 import EditorContext from "../../context/EditorContext";
 import { Message, Profile } from "utils/types";
@@ -208,7 +209,7 @@ export default function MessageItem({
                   "EEEE, MMMM d, yyyy, hh:mm b"
                 )}
               >
-                {formatRelative(new Date(message.timestamp), new Date())}
+                {getTimeSince(new Date(message.timestamp), new Date())}
               </small>
             </header>
           )}
