@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState, useMemo } from "preact/hooks";
 import { CommunityContext, useEntries } from "utils/frameworks/react";
 import styles from "./index.module.css";
-import { getTimeSince } from "utils/helpers/timeHelpers";
+import { getTimeSince } from "utils/helpers";
 import { Profile } from "utils/types";
 import Avatar from "../Avatar";
 import Editor from "../Editor";
