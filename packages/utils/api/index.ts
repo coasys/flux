@@ -45,6 +45,7 @@ import createProfile from "./createProfile";
 import createAgentWebLink from "./createAgentWebLink";
 import getAgentWebLinks from "./getAgentWebLinks";
 import getAd4mProfile from "./getAd4mProfile";
+import subscribeToSyncState from "./subscribeToSyncState";
 
 export {
   Me,
@@ -88,4 +89,5 @@ export {
   createAgentWebLink,
   getAgentWebLinks,
   getAd4mProfile,
+  subscribeToSyncState
 };
