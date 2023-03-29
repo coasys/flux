@@ -18,18 +18,10 @@ import Debug from "../Debug";
 export default function Channel({ source, uuid }) {
   const [agent, setAgent] = useState<Me | null>(null);
   const wrapperEl = useRef<HTMLDivElement | null>(null);
+  const [soundPlaying, setSoundPlaying] = useState(false);
 
   const wrapperObserver = useIntersectionObserver(wrapperEl, {});
   const isPageActive = !!wrapperObserver?.isIntersecting;
-
-  const joinSound = new Howl({
-    src: [joinMp3],
-    volume: 0.5,
-  });
-  const leaveSound = new Howl({
-    src: [leaveMp3],
-    volume: 0.5,
-  });
 
   const {
     state: { showSettings, showDebug },
@@ -43,11 +35,33 @@ export default function Channel({ source, uuid }) {
     events: {
       onPeerJoin: (userId) => {
         addNotification({ userId, type: "join" });
-        joinSound.play();
+
+        if (!soundPlaying) {
+          const joinSound = new Howl({
+            src: [joinMp3],
+            volume: 0.5,
+          });
+
+          setSoundPlaying(true);
+          joinSound.play();
+          joinSound.on("end", function () {
+            setSoundPlaying(false);
+          });
+        }
       },
       onPeerLeave: (userId) => {
         addNotification({ userId, type: "leave" });
-        leaveSound.play();
+
+        if (!soundPlaying) {
+          const leaveSound = new Howl({
+            src: [leaveMp3],
+            volume: 0.5,
+          });
+          leaveSound.play();
+          leaveSound.on("end", function () {
+            setSoundPlaying(false);
+          });
+        }
       },
     },
   });
