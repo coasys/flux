@@ -3,7 +3,7 @@ import useWebRTC from "../../hooks/useWebrtc";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
 import getMe, { Me } from "utils/api/getMe";
 import { Howl } from "howler";
-import joinMp3 from "../../assets/join.mp3";
+import joinMp3 from "../../assets/pop.wav";
 import leaveMp3 from "../../assets/leave.mp3";
 import UserGrid from "../UserGrid";
 import Footer from "../Footer";
