@@ -9,11 +9,11 @@ const frameRate = {
 export const videoDimensions = {
   width: {
     min: 640,
-    ideal: 1080,
+    ideal: 1280,
     max: 1920,
   },
   height: {
-    min: 480,
+    min: 360,
     ideal: 720,
     max: 1080,
   },
