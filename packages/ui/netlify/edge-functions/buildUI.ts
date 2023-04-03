@@ -22,14 +22,13 @@ const handler = async (req: Request, context: Context): Promise<Response> => {
       {
         role: "user",
         content: `
-Given the following sections from the documentation, answer the question using only that information and by using normal CSS and HTML, 
-outputted in pure HTML. Use j-text as much as possible when using text in a component.
+Given the following sections from the documentation, answer the question using only that information and by using the web components.
 
 Context sections:
 ---
 ${data.docs}
 
-Example response:
+Reponse example:
 
 <style>
 .grid {
@@ -94,7 +93,7 @@ Example response:
 
 
 Question: "${data.question}"
-Answer (only answer using HTML and CSS):
+Answer in raw HTML using Flux UI and custom CSS: 
     `,
       },
     ],
@@ -128,7 +127,7 @@ async function OpenAIStream(payload) {
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${API_KEY ?? ""}`,
+      Authorization: `Bearer ${API_KEY || ""}`,
     },
     method: "POST",
     body: JSON.stringify(payload),

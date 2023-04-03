@@ -2,24 +2,43 @@
 layout: home
 ---
 
-<div class="container vp-doc">
+<div class="container">
+<j-box pb="700">
+<j-text variant="heading-lg">UI Playground</j-text>
+
+<j-text size="600" color="ui-600">
+Describe what kind of UI you would like to create with the Flux UI library and have AI help you get started:
+</j-text>
+</j-box>
+
 <div class="grid">
 <div>
-<j-flex a="center" gap="500">
-  <j-input size="xl" full placeholder="Make a Todo component" :value="question" @input="e => question = e.target.value"></j-input>
-  <j-button size="xl" variant="primary" @click="generate">Generate</j-button>
-</j-flex>
-<div v-if="uiText">
+<div contenteditable placeholder="Make a Todo component" @keydown="e => question = e.target.innerText">
+</div>
+<j-button :loading="isGenerating" full :disabled="isGenerating" size="xl" variant="primary" @click="generate">
+ Generate
+</j-button>
+</div>
+<div>
+
+<j-tabs :value="tab" @change="e => tab = e.target.value">
+<j-tab-item value="code">Code</j-tab-item>
+<j-tab-item value="preview">Preview</j-tab-item>
+</j-tabs>
+
+<div class="vp-doc" v-if="tab === 'code'">
 
 ```html-vue
 {{uiText}}
 ```
 
 </div>
-</div>
-<div>
-  <j-text variant="heading">Result</j-text>
-  <div v-html="uiText"></div>
+
+<j-box pt="400" v-if="tab === 'preview'">
+<j-text v-if="isGenerating">Please wait until the AI is done generating the code to see the UI preview.</j-text>
+<div v-html="uiText"></div>
+</j-box>
+
 </div>
 </div>
 </div>
@@ -30,6 +49,14 @@ code {
   font-size: 12px;
 }
 
+.result {
+  padding: var(--j-space-500);
+  border-radius: var(--j-border-radius);
+  background: var(--j-color-white);
+  min-height: 50px;
+  width: 100%;
+}
+
 .container {
   padding-top: var(--j-space-900);
   width: 100%;
@@ -38,18 +65,23 @@ code {
 }
 
 .grid {
-  height: 100vh;
-  overflow-y: auto;
   display: grid;
   gap: var(--j-space-500);
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
+}
+
+@media(min-width: 800px) {
+  .grid {
+    gap: var(--j-space-700);
+    grid-template-columns: 2fr 3fr;
+  }
 }
 
 
 div[contenteditable] {
-    margin-top: var(--j-space-500);
     margin-bottom: var(--j-space-500);
     width: 100%;
+    min-height: 150px;
     background: var(--j-color-ui-100);
     border-radius: var(--j-border-radius);
     padding: var(--j-space-500);
@@ -65,9 +97,9 @@ div[contenteditable]:focus {
     outline: 2px solid var(--j-color-primary-500);
 }
 
-[placeholder]:empty::before {
-    content: attr(placeholder);
-    color: var(--j-color-ui-400);
+div[placeholder]:empty::before {
+  content: attr(placeholder);
+  color: var(--j-color-ui-400);
 }
 </style>
 
@@ -76,13 +108,11 @@ div[contenteditable]:focus {
 //import { highlight } from 'vitepress/dist/node/index.js';
 import { ref, onMounted } from 'vue'
 
-onMounted(() => {
-  console.log('hello')
-})
-
 const stopStream = ref(false);
 const uiText = ref("");
 const question = ref("");
+const tab = ref("code");
+const isGenerating = ref(false);
 
 async function generate() {
   uiText.value = "";
@@ -93,6 +123,7 @@ async function generate() {
 
 async function getUI(docs) {
   try {
+    isGenerating.value = true;
     stopStream.value = false;
 
     const response = await fetch("/buildUI", {
@@ -122,6 +153,7 @@ async function getUI(docs) {
       const { value, done } = await reader.read();
       console.log({value})
       if (done) {
+        isGenerating.value = false;
         console.log("Done reading!");
         break;
       }

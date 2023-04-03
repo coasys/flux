@@ -26,19 +26,6 @@ const handler: any = async (event, context) => {
 
   const shorterOutput = output.substring(0, 8000);
 
-  /*
-  const dataArray = ["test", "yes", "hello"];
-
-  const stream = new Readable({
-    objectMode: true,
-    read(size) {
-      for (const chunk of dataArray as any) {
-        this.push(chunk);
-      }
-    },
-  });
-  */
-
   return {
     statusCode: 200,
     body: JSON.stringify(shorterOutput),

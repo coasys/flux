@@ -33,19 +33,14 @@
     "@popperjs/core": "^2.9.2",
     "construct-style-sheets-polyfill": "^3.1.0",
     "eventsource-parser": "^1.0.0",
-    "hast-to-hyperscript": "^10.0.3",
     "jdenticon": "^3.1.0",
     "lit": "^2.0.0-rc.2",
-    "node-fetch": "^3.3.1",
-    "openai": "^3.2.1",
-    "shiki": "^0.14.1",
     "vite": "^4.1.4",
     "vitepress": "^1.0.0-alpha.64"
   },
   "devDependencies": {
     "esbuild": "^0.12.0",
     "esbuild-plugin-minify-html-literals": "^1.0.2",
-    "live-server": "^1.2.1",
     "np": "^7.5.0",
     "npm-run-all": "^4.1.5",
     "web-component-analyzer": "^1.1.6"
