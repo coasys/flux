@@ -32,12 +32,15 @@
   "dependencies": {
     "@popperjs/core": "^2.9.2",
     "construct-style-sheets-polyfill": "^3.1.0",
+    "eventsource-parser": "^1.0.0",
     "hast-to-hyperscript": "^10.0.3",
     "jdenticon": "^3.1.0",
     "lit": "^2.0.0-rc.2",
+    "node-fetch": "^3.3.1",
+    "openai": "^3.2.1",
     "shiki": "^0.14.1",
     "vite": "^4.1.4",
-    "vitepress": "^1.0.0-alpha.59"
+    "vitepress": "^1.0.0-alpha.64"
   },
   "devDependencies": {
     "esbuild": "^0.12.0",

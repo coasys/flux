@@ -13,6 +13,10 @@ export default defineConfig({
         link: "/ui-library/getting-started/installation",
       },
       {
+        text: "Playground",
+        link: "/playground",
+      },
+      {
         text: "Create Flux App",
         link: "/create-flux-app/getting-started/installation",
       },
@@ -119,7 +123,9 @@ export default defineConfig({
             { text: "Avatar", link: "/ui-library/components/avatar" },
             { text: "Badge", link: "/ui-library/components/badge" },
             { text: "Button", link: "/ui-library/components/button" },
+            { text: "Box", link: "/ui-library/components/box" },
             { text: "Checkbox", link: "/ui-library/components/checkbox" },
+            { text: "Flex", link: "/ui-library/components/flex" },
             { text: "Input", link: "/ui-library/components/input" },
             { text: "Menu", link: "/ui-library/components/menu" },
             { text: "Menu Group", link: "/ui-library/components/menu-group" },

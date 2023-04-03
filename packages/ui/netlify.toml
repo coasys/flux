@@ -1,0 +1,3 @@
+[functions]
+  included_files = ["docs/ui-library/**"]
+  node_bundler = "esbuild"

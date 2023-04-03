@@ -1,6 +1,19 @@
 # Variables
 
-<div v-html="variableHighligthed"></div>
+Flux UI comes with a lot of CSS variables you can change to make your own theme, but also use when composing your own UI components.
+
+<!--
+<details>
+<summary>
+All variables
+</summary>
+
+```css-vue
+{{vars}}
+```
+
+</details>
+-->
 
 ## Colors
 
@@ -54,20 +67,6 @@
 import variables from './variables'
 import vars from '../../../lib/variables.css?raw'
 import * as shiki from 'shiki';
-import theme from 'shiki/themes/nord.json'
-
-const variableHighligthed = ref("");
-
-
-
-shiki.getHighlighter({
-      theme: theme
-    })
-    .then(highlighter => {
-        console.log(highlighter)
-      const code = highlighter.codeToHtml(`console.log('shiki');`, { lang: 'js' })
-      variableHighligthed.value = code
-    }).catch(e => console.log(e))
 
 </script>
 
