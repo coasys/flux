@@ -50,7 +50,7 @@ export default defineConfig({
           items: [
             {
               text: "Creating models",
-              link: "/create-flux-app/working-with-data/",
+              link: "/create-flux-app/working-with-data/creating-models",
             },
             {
               text: "Writing to the network",
@@ -58,11 +58,11 @@ export default defineConfig({
             },
             {
               text: "Real-time signals",
-              link: "/create-flux-app/working-with-data/creating-data",
+              link: "/create-flux-app/working-with-data/real-time-signals",
             },
             {
               text: "Validation",
-              link: "/create-flux-app/working-with-data/flux-ui",
+              link: "/create-flux-app/working-with-data/validation",
             },
           ],
         },
