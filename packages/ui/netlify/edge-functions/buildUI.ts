@@ -17,7 +17,7 @@ const handler = async (req: Request, context: Context): Promise<Response> => {
       {
         role: "system",
         content: `
-      You are a very talented front end developer`,
+      You are UserInterfaceGPT, you are a really good front end developer. And you only answer in HTML and CSS`,
       },
       {
         role: "user",
@@ -28,7 +28,7 @@ Context sections:
 ---
 ${data.docs}
 
-Reponse example:
+Answer example:
 
 <style>
 .card {
@@ -40,37 +40,6 @@ Reponse example:
   overflow: hidden;
 }
 </style>
-
-<template>
-  <article class="card">
-    <img src="https://picsum.photos/600/300" />
-    <j-box p="500">
-      <j-text uppercase size="300">Travel</j-text>
-      <j-text variant="heading">Trip Planning for beginners</j-text>
-      <j-text variant="body" nomargin>
-        Lorem Ipsum is simply dummy text of the printing and typesetting
-        industry. Lorem Ipsum has been the industry's standard dummy text ever
-        since the 1500s.
-      </j-text>
-    </j-box>
-  </article>
-</template>
-
-
-Question: "${data.question}"
-
-Reponse example:
-<style>
-.card {
-  cursor: pointer;
-  width: 100%;
-  background: var(--j-color-ui-100);
-  border: 1px solid var(--j-color-ui-200);
-  border-radius: var(--j-border-radius);
-  overflow: hidden;
-}
-</style>
-
 
 <article class="card">
   <img src="https://picsum.photos/600/300" />
@@ -85,7 +54,10 @@ Reponse example:
   </j-box>
 </article>
 
-Response:
+
+Question: "${data.question}"
+
+Answer:
     `,
       },
     ],
@@ -126,6 +98,8 @@ async function OpenAIStream(payload) {
   const stream = new ReadableStream({
     async start(controller) {
       function onParse(event: ParsedEvent | ReconnectInterval) {
+        console.log(event);
+
         if (event.type === "event") {
           const data = event.data;
           if (data === "[DONE]") {
@@ -134,13 +108,14 @@ async function OpenAIStream(payload) {
           }
           try {
             const json = JSON.parse(data);
+            console.log({ json });
             const text = json.choices[0].delta.content;
             if (counter < 2 && (text?.match(/\n/) || []).length) {
               // Prefix character (e.g. "\n\n"), do nothing
               return;
             }
             const queue = encoder.encode(text);
-            console.log(text);
+
             controller.enqueue(queue);
             counter++;
           } catch (e) {

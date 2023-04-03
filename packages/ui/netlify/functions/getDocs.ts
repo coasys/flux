@@ -24,11 +24,9 @@ const handler: any = async (event, context) => {
   const allMarkdownFiles = getAllMarkdownFiles("./docs/ui-library");
   const output = allMarkdownFiles.join("");
 
-  const shorterOutput = output.substring(0, 8000);
-
   return {
     statusCode: 200,
-    body: JSON.stringify(shorterOutput),
+    body: JSON.stringify(output),
   };
 };
 

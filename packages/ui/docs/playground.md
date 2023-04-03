@@ -118,7 +118,8 @@ async function generate() {
   uiText.value = "";
   const res = await fetch("/.netlify/functions/getDocs");
   const test = await res.json();
-  getUI(test);
+  const shorten = test.substring(0, 8000);
+  getUI(shorten);
 }
 
 async function getUI(docs) {
