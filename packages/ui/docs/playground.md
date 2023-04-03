@@ -47,6 +47,7 @@ Describe what kind of UI you would like to create with the Flux UI library and h
 
 code {
   font-size: 12px;
+  white-space: break-spaces;
 }
 
 .result {

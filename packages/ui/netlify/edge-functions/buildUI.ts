@@ -17,7 +17,7 @@ const handler = async (req: Request, context: Context): Promise<Response> => {
       {
         role: "system",
         content: `
-      You are UserInterfaceGPT, you are a really good front end developer. And you only answer in HTML and CSS`,
+      You are FluxGPT, a really good Flux UI front end developer. And you only answer in HTML and CSS`,
       },
       {
         role: "user",
