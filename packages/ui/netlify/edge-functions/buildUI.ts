@@ -17,12 +17,12 @@ const handler = async (req: Request, context: Context): Promise<Response> => {
       {
         role: "system",
         content: `
-      You are a very enthusiastic company representative who loves to help people!`,
+      You are a very talented front end developer`,
       },
       {
         role: "user",
         content: `
-Given the following sections from the documentation, answer the question using only that information and by using the web components.
+Given the following sections from the documentation, use the documentation to build UI using custom CSS and the Flux UI library.
 
 Context sections:
 ---
@@ -31,12 +31,6 @@ ${data.docs}
 Reponse example:
 
 <style>
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--j-space-500);
-}
-
 .card {
   cursor: pointer;
   width: 100%;
@@ -45,13 +39,9 @@ Reponse example:
   border-radius: var(--j-border-radius);
   overflow: hidden;
 }
-
-.card:hover {
-  background: var(--j-color-ui-200);
-}
 </style>
 
-<div class="grid">
+<template>
   <article class="card">
     <img src="https://picsum.photos/600/300" />
     <j-box p="500">
@@ -64,36 +54,38 @@ Reponse example:
       </j-text>
     </j-box>
   </article>
-  <article class="card">
-    <img src="https://picsum.photos/600/300" />
-    <j-box p="500">
-      <j-text uppercase size="300">Travel</j-text>
-      <j-text variant="heading">Trip Planning for beginners</j-text>
-      <j-text variant="body" nomargin>
-        Lorem Ipsum is simply dummy text of the printing and typesetting
-        industry. Lorem Ipsum has been the industry's standard dummy text ever
-        since the 1500s.
-      </j-text>
-    </j-box>
-  </article>
-  <article class="card">
-    <img src="https://picsum.photos/600/300" />
-    <j-box p="500">
-      <j-text uppercase size="300">Travel</j-text>
-      <j-text variant="heading">Trip Planning for beginners</j-text>
-      <j-text variant="body" nomargin>
-        Lorem Ipsum is simply dummy text of the printing and typesetting
-        industry. Lorem Ipsum has been the industry's standard dummy text ever
-        since the 1500s.
-      </j-text>
-    </j-box>
-  </article>
-</div>
-
+</template>
 
 
 Question: "${data.question}"
-Answer in raw HTML using Flux UI and custom CSS: 
+
+Reponse example:
+<style>
+.card {
+  cursor: pointer;
+  width: 100%;
+  background: var(--j-color-ui-100);
+  border: 1px solid var(--j-color-ui-200);
+  border-radius: var(--j-border-radius);
+  overflow: hidden;
+}
+</style>
+
+
+<article class="card">
+  <img src="https://picsum.photos/600/300" />
+  <j-box p="500">
+    <j-text uppercase size="300">Travel</j-text>
+    <j-text variant="heading">Trip Planning for beginners</j-text>
+    <j-text variant="body" nomargin>
+    Lorem Ipsum is simply dummy text of the printing and typesetting
+    industry. Lorem Ipsum has been the industry's standard dummy text ever
+    since the 1500s.
+    </j-text>
+  </j-box>
+</article>
+
+Response:
     `,
       },
     ],
@@ -105,8 +97,6 @@ Answer in raw HTML using Flux UI and custom CSS:
     stream: true,
     n: 1,
   });
-
-  console.log(stream);
 
   return new Response(stream, {
     status: 200,
