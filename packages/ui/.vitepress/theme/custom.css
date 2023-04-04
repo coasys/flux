@@ -1,3 +1,22 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap");
+
+@font-face {
+  font-family: "Mattone";
+  src: url("./assets/fonts/mattone/mattone-regular.otf") format("woff2");
+}
+
+@font-face {
+  font-family: "Pilowlava";
+  src: url("./assets/fonts/pilowlava/pilowlava-regular.woff2") format("woff2");
+}
+
+:root {
+  --j-font-family-heading: "Mattone";
+  --j-font-family-funky: "Pilowlava";
+  --j-font-family: "DM Sans";
+  --j-color-ui-saturation: 20%;
+}
+
 :root {
   --vp-c-brand: var(--j-color-primary-500);
   --vp-c-brand-light: var(--j-color-primary-600);

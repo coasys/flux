@@ -2,7 +2,7 @@ import { defineConfig } from "vitepress";
 
 export default defineConfig({
   // site-level options
-  title: "Flux Dev Kit",
+  title: "Flux Developer",
   description: "Just playing around.",
   srcDir: "./docs",
   appearance: "dark",
