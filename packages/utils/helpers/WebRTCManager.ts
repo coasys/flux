@@ -215,7 +215,21 @@ export default class WebRTCManager {
       link.data.predicate === OFFER_REQUEST &&
       link.data.source === this.roomId
     ) {
-      await this.createOffer(link.author);
+      // Check if we should create the offer or not
+      if (link.author.localeCompare(this.agent.did) > 0) {
+        await this.createOffer(link.author);
+      } else {
+        this.neighbourhood.sendBroadcastU({
+          links: [
+            {
+              source: this.roomId,
+              predicate: OFFER_REQUEST,
+              target: this.agent.did,
+            },
+          ],
+        });
+      }
+
       this.addToEventLog(link.author, link?.data?.predicate || "unknown");
     }
 
