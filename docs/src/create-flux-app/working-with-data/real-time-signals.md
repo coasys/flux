@@ -10,9 +10,7 @@ An AD4M neighbourhood exposes `sendBroadcast` and `sendSignal` functions. A broa
 
 To send a real-time signal to the neighbourhood:
 
-::: code-group
-
-```typescript
+```typescript [example]
 import { NeighbourhoodProxy } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
@@ -26,8 +24,6 @@ neighbourhood.sendBroadcastU({ links: [] });
 ### Receiving
 
 To listen for incoming signals, add a handler to the neighbourhood.
-
-::: code-group
 
 ```typescript
 import { NeighbourhoodProxy, PerspectiveExpression } from "@perspect3vism/ad4m";
@@ -49,8 +45,6 @@ neighbourhood.addSignalHandler(handleSignal);
 
 To send a real-time signal to a recipient:
 
-::: code-group
-
 ```typescript
 import { NeighbourhoodProxy } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
@@ -65,8 +59,6 @@ neighbourhood.sendSignalU("recipientDID", { links: [] });
 ### Receiving
 
 The broadcast handler will also receive signals. If you need to determine if the signal was sent as a broadcast or a signal to a single peer you can check the expression.
-
-::: code-group
 
 ```typescript
 import { NeighbourhoodProxy, PerspectiveExpression } from "@perspect3vism/ad4m";
