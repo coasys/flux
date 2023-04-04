@@ -33,55 +33,55 @@ Let's say you want to make a list of cards. First of all, Flux UI doesn't have a
 
 ## Example
 
-Toggle the themes to see that the cards always look right with the current theming:
+First let's have a look at the markup we need to create our grid of cards:
 
-<j-box pb="500">
-<j-radio-button :checked="theme === ''" name="theme" @change="e => theme = e.target.value" value="">Default</j-radio-button>
-<j-radio-button :checked="theme === 'dark'" name="theme" @change="e => theme = e.target.value" value="dark">Dark</j-radio-button>
-<j-radio-button :checked="theme === 'cyberpunk'" name="theme" @change="e => theme = e.target.value" value="cyberpunk">
-Cyberpunk
-</j-radio-button>
-<j-radio-button :checked="theme === 'retro'" name="theme" @change="e => theme = e.target.value" value="retro">Retro</j-radio-button>
-</j-box>
-
+```html
 <div class="grid">
   <article class="card">
     <img src="https://picsum.photos/600/300" />
-    <j-box p="500">
+    <j-box pt="500">
       <j-text uppercase size="300">Travel</j-text>
       <j-text variant="heading">Trip Planning for beginners</j-text>
-      <j-text variant="body" nomargin>
+      <j-text variant="body">
         Lorem Ipsum is simply dummy text of the printing and typesetting
         industry. Lorem Ipsum has been the industry's standard dummy text ever
         since the 1500s.
       </j-text>
+      <j-button variant="primary">Read more</j-button>
     </j-box>
   </article>
   <article class="card">
     <img src="https://picsum.photos/600/300" />
-    <j-box p="500">
+    <j-box pt="500">
       <j-text uppercase size="300">Travel</j-text>
       <j-text variant="heading">Trip Planning for beginners</j-text>
-      <j-text variant="body" nomargin>
+      <j-text variant="body">
         Lorem Ipsum is simply dummy text of the printing and typesetting
         industry. Lorem Ipsum has been the industry's standard dummy text ever
         since the 1500s.
       </j-text>
+      <j-button variant="primary">Read more</j-button>
     </j-box>
   </article>
   <article class="card">
     <img src="https://picsum.photos/600/300" />
-    <j-box p="500">
+    <j-box pt="500">
       <j-text uppercase size="300">Travel</j-text>
       <j-text variant="heading">Trip Planning for beginners</j-text>
-      <j-text variant="body" nomargin>
+      <j-text variant="body">
         Lorem Ipsum is simply dummy text of the printing and typesetting
         industry. Lorem Ipsum has been the industry's standard dummy text ever
         since the 1500s.
       </j-text>
+      <j-button variant="primary">Read more</j-button>
     </j-box>
   </article>
 </div>
+```
+
+As you can see we use Flux components wherever we can, but we also add some HTML tags like `article` and `div` and give them classes so we can style them accordingly.
+
+Now let's have a look at our custom CSS
 
 ```css
 .grid {
@@ -104,46 +104,60 @@ Cyberpunk
 }
 ```
 
-```html
+In our CSS we try to use the variables that come out of the box with Flux UI to make sure colors, spacing and other design tokens are following the Flux design system, and that theming works seamslessly.
+
+Toggle the themes to see that the cards always look right with the current theming:
+
+<j-box pb="500">
+<j-radio-button :checked="theme === ''" name="theme" @change="e => theme = e.target.value" value="">Default</j-radio-button>
+<j-radio-button :checked="theme === 'dark'" name="theme" @change="e => theme = e.target.value" value="dark">Dark</j-radio-button>
+<j-radio-button :checked="theme === 'cyberpunk'" name="theme" @change="e => theme = e.target.value" value="cyberpunk">
+Cyberpunk
+</j-radio-button>
+<j-radio-button :checked="theme === 'retro'" name="theme" @change="e => theme = e.target.value" value="retro">Retro</j-radio-button>
+</j-box>
+
 <div class="grid">
   <article class="card">
     <img src="https://picsum.photos/600/300" />
-    <j-box p="500">
+    <j-box pt="500">
       <j-text uppercase size="300">Travel</j-text>
       <j-text variant="heading">Trip Planning for beginners</j-text>
-      <j-text variant="body" nomargin>
+      <j-text variant="body">
         Lorem Ipsum is simply dummy text of the printing and typesetting
         industry. Lorem Ipsum has been the industry's standard dummy text ever
         since the 1500s.
       </j-text>
+      <j-button variant="primary">Read more</j-button>
     </j-box>
   </article>
   <article class="card">
     <img src="https://picsum.photos/600/300" />
-    <j-box p="500">
+    <j-box pt="500">
       <j-text uppercase size="300">Travel</j-text>
       <j-text variant="heading">Trip Planning for beginners</j-text>
-      <j-text variant="body" nomargin>
+      <j-text variant="body">
         Lorem Ipsum is simply dummy text of the printing and typesetting
         industry. Lorem Ipsum has been the industry's standard dummy text ever
         since the 1500s.
       </j-text>
+      <j-button variant="primary">Read more</j-button>
     </j-box>
   </article>
   <article class="card">
     <img src="https://picsum.photos/600/300" />
-    <j-box p="500">
+    <j-box pt="500">
       <j-text uppercase size="300">Travel</j-text>
       <j-text variant="heading">Trip Planning for beginners</j-text>
-      <j-text variant="body" nomargin>
+      <j-text variant="body">
         Lorem Ipsum is simply dummy text of the printing and typesetting
         industry. Lorem Ipsum has been the industry's standard dummy text ever
         since the 1500s.
       </j-text>
+      <j-button variant="primary">Read more</j-button>
     </j-box>
   </article>
 </div>
-```
 
 <style scoped>
 

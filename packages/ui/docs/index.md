@@ -48,7 +48,7 @@ import UISvg from './assets/group.svg?raw';
 
 </script>
 
-<style>
+<style scoped>
 
 .hero__orb {
   position: absolute;
@@ -65,24 +65,26 @@ import UISvg from './assets/group.svg?raw';
 .container {
   width: 100%;
   margin: 0 auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
   max-width: calc(var(--vp-layout-max-width) - 64px)
 }
 
 .hero {
-  padding-top: 10rem;
+  padding-top: clamp(5rem, 10vw, 10rem);;
   text-align: center;
 }
 
 .hero-title {
   text-transform: uppercase;
-  font-size: 4.2rem;
+  font-size: clamp(25px, 5.6vw, 4.2rem);
   max-width: 1100px;
   margin: 0 auto;
   font-family: var(--j-font-family-heading);
   color: var(--j-color-black);
   line-height: 1;
   font-weight: 800;
-  margin-bottom: 3rem;
+  margin-bottom: clamp(1rem, 4.6vw, 2rem);
 }
 
 .funky {
@@ -92,10 +94,10 @@ import UISvg from './assets/group.svg?raw';
 
 .hero-lead {
   margin: 0;
-  font-size: 3rem;
+  font-size: clamp(18px, 4.6vw, 3rem);
 }
 
-.hero-img svg {
+.hero-img:deep svg {
   position: fixed;
   top: 0;
   left: 50vw;
@@ -114,9 +116,15 @@ import UISvg from './assets/group.svg?raw';
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr;
   justify-content: center;
   gap: 2rem;
+}
+
+@media(min-width: 800px) {
+  .cards {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
 }
 
 .card {
