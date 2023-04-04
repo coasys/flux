@@ -129,9 +129,6 @@ import UISvg from './assets/group.svg?raw';
 
 .card {
   color: var(--j-color-black);
-  border: 1px solid var(--j-color-black);
-  border-radius: var(--j-border-radius);
-  background: rgba(255,255,255,0.02);
   min-height: 200px;
   text-align: left;
   padding: var(--j-space-700);
@@ -139,7 +136,6 @@ import UISvg from './assets/group.svg?raw';
 }
 
 .card:hover {
-  background: rgba(255,255,255,0.04);
   filter: brightness(1.3);
 }
 
@@ -150,11 +146,17 @@ import UISvg from './assets/group.svg?raw';
 }
 
 .card-title {
+  display: inline-block;
   font-family: var(--j-font-family-heading);
-  font-size: 1.2rem;
+  font-size: 1.6rem;
   line-height: 2.8rem;
   font-weight: 800;
   margin-bottom: 0.5rem;
+  border-bottom: 2px solid transparent;
+}
+
+.card:hover .card-title {
+  color: var(--j-color-primary-600);
 }
 
 .card-desc {
@@ -166,7 +168,7 @@ import UISvg from './assets/group.svg?raw';
   font-family: inherit;
   cursor: pointer;
   display: inline-block;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 500;
   padding: 0.7rem 1.3rem;
   color: var(--j-color-black);
