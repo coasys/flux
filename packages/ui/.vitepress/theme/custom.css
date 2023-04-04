@@ -14,7 +14,6 @@
   --j-font-family-heading: "Mattone";
   --j-font-family-funky: "Pilowlava";
   --j-font-family: "DM Sans";
-  --j-color-ui-saturation: 20%;
 }
 
 :root {
@@ -106,6 +105,8 @@
   --vp-c-gutter: rgba(60, 60, 67, 0.12);
 
   --vp-c-text-code: var(--j-color-ui-800);
+
+  --vp-code-block-bg: hsl(var(--j-color-ui-hue), 20%, 15%);
 
   --vp-c-mute: var(--j-color-ui-200);
   --vp-c-mute-light: #f9f9fc;

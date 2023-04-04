@@ -1,7 +1,8 @@
 html.dark {
   --j-color-saturation: 50%;
-  --j-color-subtractor: 110%;
+  --j-color-subtractor: 108%;
   --j-color-multiplier: -1;
+  --j-color-ui-saturation: 20%;
 }
 
 html.dark j-modal::part(modal) {
