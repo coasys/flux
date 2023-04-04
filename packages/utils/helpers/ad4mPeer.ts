@@ -1,4 +1,4 @@
-import SimplePeer from "simple-peer";
+import SimplePeer from "simple-peer/simplepeer.min.js";
 import { EventEmitter } from "events";
 import {
   Ad4mClient,
@@ -85,8 +85,7 @@ export class AD4MPeer extends EventEmitter {
   constructor(props: Props) {
     super();
     this.client = props.client;
-    this.did = props.options.did;
-    this.spOpts = props.options.spOpts ? props.options.spOpts : {};
+    this.spOpts = props.options?.spOpts ? props.options.spOpts : {};
 
     this.init(props);
   }
@@ -103,11 +102,11 @@ export class AD4MPeer extends EventEmitter {
   /**
    * Connect to a peer identified by a user did and peer did. Returns a promise that resolves to a [[AD4MPeerInstance]].
    */
-  public connect(did: string): Promise<AD4MPeerInstance> {
+  public connect(did: string, initiator: boolean): Promise<AD4MPeerInstance> {
     return new Promise((resolve, reject) => {
       console.log("connecting to %s", did);
 
-      const peer = this.createPeer(did, true);
+      const peer = this.createPeer(did, initiator);
 
       peer.on("connect", () => {
         resolve(peer);
@@ -138,7 +137,7 @@ export class AD4MPeer extends EventEmitter {
       this.neighbourhood.sendBroadcastU({
         links: [
           {
-            source: did,
+            source: this.perspective?.uuid || "",
             predicate: "signal",
             target: Literal.from(signal).toUrl(),
           },
@@ -150,11 +149,6 @@ export class AD4MPeer extends EventEmitter {
     await this.neighbourhood.addSignalHandler(async (expression) => {
       if (expression.author === this.agent.did) {
         console.log("Received signal from self, ignoring!");
-        return null;
-      }
-
-      if (expression.author !== this.did) {
-        console.log("Signal not from current peer, ignoring");
         return null;
       }
 
@@ -188,8 +182,8 @@ export class AD4MPeer extends EventEmitter {
 
       cleanup();
 
-      peer.initiatorId = initiatorId;
-      peer.receiverId = receiverId;
+      // peer.initiatorId = initiatorId;
+      // peer.receiverId = receiverId;
 
       this.emit("connection", peer);
     });
