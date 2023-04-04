@@ -10,7 +10,7 @@ export default defineConfig({
     nav: [
       {
         text: "UI Components",
-        link: "/ui-library/getting-started/installation",
+        link: "/ui-library/getting-started/introduction",
       },
       {
         text: "Playground",
@@ -102,10 +102,13 @@ export default defineConfig({
           text: "Getting started",
           items: [
             {
+              text: "Introduction",
+              link: "/ui-library/getting-started/introduction",
+            },
+            {
               text: "Installation",
               link: "/ui-library/getting-started/installation",
             },
-
             { text: "Theming", link: "/ui-library/getting-started/theming" },
             {
               text: "Composition",

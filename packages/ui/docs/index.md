@@ -17,7 +17,7 @@ layout: home
 </div>
 
 <div class="cards">
-  <a href="/ui-library/getting-started/installation.html" class="card">
+  <a href="/ui-library/getting-started/introduction.html" class="card">
     <h2 class="card-title">UI Components</h2>
     <p class="card-desc">
     A comprehensive collection of user interface components designed specifically for Flux.
