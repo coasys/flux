@@ -219,7 +219,7 @@ export default class WebRTCManager {
       // Check if we should create the offer or not
       if (link.author.localeCompare(this.agent.did) > 0) {
         await this.createOffer(link.author);
-      } else {
+      } else if (!this.connections.get(link.author)) {
         this.broadcastOfferRequest();
       }
 
