@@ -18,7 +18,7 @@ layout: home
 
 <div class="cards">
   <a href="/ui-library/getting-started/installation.html" class="card">
-    <h2 class="card-title">UI Library</h2>
+    <h2 class="card-title">UI Components</h2>
     <p class="card-desc">
     A comprehensive collection of user interface components designed specifically for Flux.
     </p> 
@@ -27,7 +27,7 @@ layout: home
   <a href="/playground.html" class="card">
     <h2 class="card-title">Playground</h2>
     <p class="card-desc">
-    Generate UI components for Flux using AI. Build your app in no time.
+    Compose UI components for Flux using AI. Build your app in no time.
     </p>
     <button class="card-button">Try the playground</button>
   </a>

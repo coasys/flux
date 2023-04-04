@@ -89,7 +89,7 @@ async function OpenAIStream(payload) {
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${API_KEY || ""}`,
+      Authorization: `Bearer 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`,
     },
     method: "POST",
     body: JSON.stringify(payload),

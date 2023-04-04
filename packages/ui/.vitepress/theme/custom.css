@@ -108,6 +108,12 @@
 
   --vp-code-block-bg: hsl(var(--j-color-ui-hue), 20%, 15%);
 
+  --vp-sidebar-bg-color: hsl(
+    var(--j-color-ui-hue),
+    20%,
+    calc((96% - var(--j-color-subtractor)) * var(--j-color-multiplier))
+  );
+
   --vp-c-mute: var(--j-color-ui-200);
   --vp-c-mute-light: #f9f9fc;
   --vp-c-mute-lighter: #ffffff;

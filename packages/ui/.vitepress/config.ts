@@ -9,7 +9,7 @@ export default defineConfig({
   themeConfig: {
     nav: [
       {
-        text: "UI Library",
+        text: "UI Components",
         link: "/ui-library/getting-started/installation",
       },
       {
