@@ -140,6 +140,7 @@ export default class WebRTCManager {
     this.handleAnswer = this.handleAnswer.bind(this);
     this.sendMessage = this.sendMessage.bind(this);
     this.sendTestSignal = this.sendTestSignal.bind(this);
+    this.broadcastOfferRequest = this.broadcastOfferRequest.bind(this);
     this.sendTestBroadcast = this.sendTestBroadcast.bind(this);
     this.addToEventLog = this.addToEventLog.bind(this);
     this.heartbeat = this.heartbeat.bind(this);
@@ -219,15 +220,7 @@ export default class WebRTCManager {
       if (link.author.localeCompare(this.agent.did) > 0) {
         await this.createOffer(link.author);
       } else {
-        this.neighbourhood.sendBroadcastU({
-          links: [
-            {
-              source: this.roomId,
-              predicate: OFFER_REQUEST,
-              target: this.agent.did,
-            },
-          ],
-        });
+        this.broadcastOfferRequest();
       }
 
       this.addToEventLog(link.author, link?.data?.predicate || "unknown");
@@ -236,7 +229,12 @@ export default class WebRTCManager {
     // If we get heartbeat from new user, action!
     if (link.data.predicate === HEARTBEAT && link.data.source === this.roomId) {
       if (!this.connections.get(link.author)) {
-        await this.createOffer(link.author);
+        // Check if we should create the offer or not
+        if (link.author.localeCompare(this.agent.did) > 0) {
+          await this.createOffer(link.author);
+        }
+      } else {
+        this.broadcastOfferRequest();
       }
 
       this.addToEventLog(link.author, link?.data?.predicate || "unknown");
@@ -570,9 +568,9 @@ export default class WebRTCManager {
    * Join the chat room, listen for signals and begin heartbeat
    */
   async join(initialSettings?: Settings) {
-    console.log("Start joining");
-
     let settings = { audio: true, video: false, ...initialSettings };
+
+    console.log("Start joining with settings: ", settings);
 
     this.localStream = await navigator.mediaDevices.getUserMedia({
       audio: settings.audio,
@@ -589,6 +587,17 @@ export default class WebRTCManager {
     console.log("🟠 Sending JOIN broadcast");
     this.addToEventLog(this.agent.did, OFFER_REQUEST);
 
+    this.broadcastOfferRequest();
+
+    this.heartbeatId = setInterval(this.heartbeat, 10000);
+
+    return this.localStream;
+  }
+
+  /**
+   * Ask room for offer
+   */
+  async broadcastOfferRequest() {
     this.neighbourhood.sendBroadcastU({
       links: [
         {
@@ -598,10 +607,6 @@ export default class WebRTCManager {
         },
       ],
     });
-
-    this.heartbeatId = setInterval(this.heartbeat, 10000);
-
-    return this.localStream;
   }
 
   /**
