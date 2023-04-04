@@ -39,7 +39,7 @@ First let's have a look at the markup we need to create our grid of cards:
 <div class="grid">
   <article class="card">
     <img src="https://picsum.photos/600/300" />
-    <j-box pt="500">
+    <j-box p="500">
       <j-text uppercase size="300">Travel</j-text>
       <j-text variant="heading">Trip Planning for beginners</j-text>
       <j-text variant="body">
@@ -52,7 +52,7 @@ First let's have a look at the markup we need to create our grid of cards:
   </article>
   <article class="card">
     <img src="https://picsum.photos/600/300" />
-    <j-box pt="500">
+    <j-box p="500">
       <j-text uppercase size="300">Travel</j-text>
       <j-text variant="heading">Trip Planning for beginners</j-text>
       <j-text variant="body">
@@ -65,7 +65,7 @@ First let's have a look at the markup we need to create our grid of cards:
   </article>
   <article class="card">
     <img src="https://picsum.photos/600/300" />
-    <j-box pt="500">
+    <j-box p="500">
       <j-text uppercase size="300">Travel</j-text>
       <j-text variant="heading">Trip Planning for beginners</j-text>
       <j-text variant="body">
@@ -120,7 +120,7 @@ Cyberpunk
 <div class="grid">
   <article class="card">
     <img src="https://picsum.photos/600/300" />
-    <j-box pt="500">
+    <j-box p="500">
       <j-text uppercase size="300">Travel</j-text>
       <j-text variant="heading">Trip Planning for beginners</j-text>
       <j-text variant="body">
@@ -133,7 +133,7 @@ Cyberpunk
   </article>
   <article class="card">
     <img src="https://picsum.photos/600/300" />
-    <j-box pt="500">
+    <j-box p="500">
       <j-text uppercase size="300">Travel</j-text>
       <j-text variant="heading">Trip Planning for beginners</j-text>
       <j-text variant="body">
@@ -146,7 +146,7 @@ Cyberpunk
   </article>
   <article class="card">
     <img src="https://picsum.photos/600/300" />
-    <j-box pt="500">
+    <j-box p="500">
       <j-text uppercase size="300">Travel</j-text>
       <j-text variant="heading">Trip Planning for beginners</j-text>
       <j-text variant="body">
