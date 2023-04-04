@@ -3,6 +3,10 @@ layout: home
 ---
 
 <div class="container">
+
+<div class="grid">
+<div>
+
 <j-box pb="700">
 <j-text variant="heading-lg">UI Playground</j-text>
 
@@ -11,8 +15,6 @@ Describe what kind of UI you would like to create with the Flux UI library and h
 </j-text>
 </j-box>
 
-<div class="grid">
-<div>
 <div contenteditable placeholder="Make a Todo component" @keydown="e => question = e.target.innerText">
 </div>
 <j-button :loading="isGenerating" full :disabled="isGenerating" size="xl" variant="primary" @click="generate">

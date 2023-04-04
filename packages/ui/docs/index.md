@@ -10,7 +10,7 @@ layout: home
 
 <div class="hero">
 <div class="hero-content">
-<h1 class="hero-title">Build the future of group collaboration</h1>
+<h1 class="hero-title">Build the <span class="funky">future</span> of group collaboration</h1>
 
 <p class="hero-lead">Create custom apps for your community</p>
 </div>
@@ -22,14 +22,21 @@ layout: home
     <p class="card-desc">
     A comprehensive collection of user interface components designed specifically for Flux.
     </p> 
-    <button class="card-button">Read the docs</button>
+    
+  </a>
+  <a href="/playground.html" class="card">
+    <h2 class="card-title">Playground</h2>
+    <p class="card-desc">
+    Generate UI components for Flux using AI. Build your app in no time.
+    </p>
+    
   </a>
   <a href="/create-flux-app/getting-started/installation.html" class="card">
     <h2 class="card-title">Create Flux App</h2>
     <p class="card-desc">
     Get started building custom components and integrating with Flux in just a few clicks.
     </p>
-    <button class="card-button">Build an app</button>
+   
   </a>
 </div>
 
@@ -67,8 +74,9 @@ import UISvg from './assets/group.svg?raw';
 }
 
 .hero-title {
-  font-size: 5rem;
-  max-width: 1000px;
+  text-transform: uppercase;
+  font-size: 4.2rem;
+  max-width: 1100px;
   margin: 0 auto;
   font-family: var(--j-font-family-heading);
   color: var(--j-color-black);
@@ -82,8 +90,8 @@ import UISvg from './assets/group.svg?raw';
 }
 
 .hero-lead {
-  margin: 2rem auto 0 auto;
-  font-size: 2.4rem;
+  margin: 0;
+  font-size: 3rem;
 }
 
 .hero-img svg {
@@ -93,7 +101,7 @@ import UISvg from './assets/group.svg?raw';
   max-height: 100vh;
   transform: translateX(-52%);
   z-index: -2;
-  opacity: 0.7;
+  opacity: 0.8;
   margin: 0 auto;
   width: 100%;
   color: var(--j-color-ui-100);
@@ -101,27 +109,30 @@ import UISvg from './assets/group.svg?raw';
 }
 
 .cards {
-  padding-top: 4rem;
-  max-width: 1000px;
+  padding-top: 5rem;
+  max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   justify-content: center;
-  gap: 4rem;
+  gap: 2rem;
 }
 
 .card {
   color: var(--j-color-black);
   border-radius: var(--j-border-radius);
+  border: 1px solid var(--j-color-black);
   min-height: 200px;
   text-align: left;
   padding: var(--j-space-700);
   background: transparent;
   transition: all 0.2s ease;
+  background: var(--j-color-ui-50);
 }
 
 .card:hover {
-  filter: brightness(1.1);
+  background: var(--j-color-ui-50);
+  filter: brightness(1.3);
 }
 
 .card-img * {
@@ -131,7 +142,8 @@ import UISvg from './assets/group.svg?raw';
 }
 
 .card-title {
-  font-size: 1.8rem;
+  font-family: var(--j-font-family-heading);
+  font-size: 1.2rem;
   line-height: 2.8rem;
   font-weight: 800;
   margin-bottom: 0.5rem;
@@ -139,7 +151,7 @@ import UISvg from './assets/group.svg?raw';
 
 .card-desc {
   font-size: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 0rem;
 }
 
 .card-button {
