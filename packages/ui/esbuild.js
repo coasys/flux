@@ -1,5 +1,8 @@
 (async () => {
   let esbuild = require("esbuild");
+
+  let { copy } = require("esbuild-plugin-copy");
+
   let {
     minifyHTMLLiteralsPlugin,
   } = require("esbuild-plugin-minify-html-literals");
@@ -17,7 +20,19 @@
       target: isDev ? "safari11" : "es2016",
       outfile: "dist/main.js",
       watch: !!isDev,
-      plugins: isDev ? [] : [minifyHTMLLiteralsPlugin()],
+      plugins: isDev
+        ? []
+        : [
+            minifyHTMLLiteralsPlugin(),
+            copy({
+              assets: [
+                {
+                  from: ["./lib/themes/**/*"],
+                  to: ["./themes"],
+                },
+              ],
+            }),
+          ],
     })
     .catch(() => process.exit(1));
 
