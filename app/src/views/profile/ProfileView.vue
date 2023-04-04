@@ -14,6 +14,7 @@
               :hash="did"
               :url="profile?.profilePicture"
             ></Avatar>
+
             <j-button
               v-if="sameAgent"
               variant="ghost"
@@ -39,6 +40,16 @@
               {{ profile.bio || "No bio yet" }}
             </j-text>
           </j-box>
+          <j-box pt="400" v-if="!sameAgent">
+            <j-button size="sm" variant="primary" @click="toggleFriend">
+              <j-icon
+                slot="start"
+                size="sm"
+                :name="isFriend ? 'person-dash-fill' : 'person-plus-fill'"
+              ></j-icon>
+              {{ isFriend ? "Remove friend" : "Add friend" }}
+            </j-button>
+          </j-box>
         </div>
 
         <div class="profile__content">
@@ -62,7 +73,7 @@
 
           <j-box my="500" v-if="sameAgent">
             <j-tabs
-              @change="(e: any) => (currentTab = e.target.value)"
+              @change="(e) => (currentTab = e.target.value)"
               :value="currentTab"
             >
               <j-tab-item value="communities">
@@ -133,7 +144,7 @@
     v-if="showAddlinkModal"
     size="sm"
     :open="showAddlinkModal"
-    @toggle="(e: any) => setAddLinkModal(e.target.open)"
+    @toggle="(e) => setAddLinkModal(e.target.open)"
   >
     <WebLinkAdd
       @cancel="() => setAddLinkModal(false)"
@@ -145,7 +156,7 @@
     v-if="showJoinCommunityModal"
     size="lg"
     :open="showJoinCommunityModal"
-    @toggle="(e: any) => setShowJoinCommunityModal(e.target.open)"
+    @toggle="(e) => setShowJoinCommunityModal(e.target.open)"
   >
     <ProfileJoinLink
       @submit="() => setShowJoinCommunityModal(false)"
@@ -156,7 +167,7 @@
   <j-modal
     v-if="modals.showEditProfile"
     :open="modals.showEditProfile"
-    @toggle="(e: any) => setShowEditProfile(e.target.open)"
+    @toggle="(e) => setShowEditProfile(e.target.open)"
   >
     <edit-profile
       @submit="() => setShowEditProfile(false)"
@@ -196,13 +207,10 @@ export default defineComponent({
     Avatar,
   },
   setup() {
-    const appStore = useAppStore();
-    const dataStore = useDataStore();
-    const userStore = useUserStore();
     return {
-      appStore,
-      dataStore,
-      userStore,
+      appStore: useAppStore(),
+      dataStore: useDataStore(),
+      userStore: useUserStore(),
     };
   },
   data() {
@@ -218,6 +226,9 @@ export default defineComponent({
       editArea: null as any,
     };
   },
+  async created() {
+    this.userStore.getFriends();
+  },
   beforeCreate() {
     this.appStore.changeCurrentTheme("global");
   },
@@ -227,6 +238,13 @@ export default defineComponent({
         this.profile = this.userStore.profile;
       } else {
         this.profile = await getProfile(this.did);
+      }
+    },
+    async toggleFriend() {
+      if (this.isFriend) {
+        await this.userStore.removeFriend({ did: this.did });
+      } else {
+        await this.userStore.addFriend({ did: this.did });
       }
     },
     setAddLinkModal(value: boolean): void {
@@ -287,6 +305,12 @@ export default defineComponent({
     },
   },
   computed: {
+    isFriend(): boolean {
+      return !!this.friends.find((did) => this.did === did);
+    },
+    friends() {
+      return this.userStore.friends;
+    },
     hasHistory() {
       return this.$router.options.history.state.back;
     },

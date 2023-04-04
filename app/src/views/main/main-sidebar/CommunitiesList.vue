@@ -1,5 +1,13 @@
 <template>
   <div class="left-nav__communities-list">
+    <Avatar
+      slot="trigger"
+      class="left-nav__community-item"
+      :selected="$route.name === 'dm'"
+      icon="chat"
+      @click="() => $router.push({ name: 'dm' })"
+    ></Avatar>
+
     <j-tooltip
       v-for="community in communities"
       :key="community.state.perspectiveUuid"

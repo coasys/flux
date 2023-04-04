@@ -16,5 +16,10 @@ export default {
   setUserProfile(payload: Profile): void {
     const store = useUserStore();
     store.profile = payload;
-  }
+  },
+
+  setFriends(payload: string[]) {
+    const store = useUserStore();
+    store.friends = payload;
+  },
 };
