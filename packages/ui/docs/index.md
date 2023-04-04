@@ -10,7 +10,7 @@ layout: home
 
 <div class="hero">
 <div class="hero-content">
-<h1 class="hero-title">Build the <span class="funky">future</span> of group collaboration</h1>
+<h1 class="hero-title">The <span class="funky">future</span> of collaboration</h1>
 
 <p class="hero-lead">Create custom apps for your community</p>
 </div>
@@ -77,14 +77,14 @@ import UISvg from './assets/group.svg?raw';
 
 .hero-title {
   text-transform: uppercase;
-  font-size: clamp(25px, 5.6vw, 4.2rem);
+  font-size: clamp(38px, 5.6vw, 5.2rem);
   max-width: 1100px;
   margin: 0 auto;
   font-family: var(--j-font-family-heading);
   color: var(--j-color-black);
   line-height: 1;
   font-weight: 800;
-  margin-bottom: clamp(1rem, 4.6vw, 2rem);
+  margin-bottom: clamp(1rem, 4.6vw, 2.4rem);
 }
 
 .funky {
@@ -94,7 +94,7 @@ import UISvg from './assets/group.svg?raw';
 
 .hero-lead {
   margin: 0;
-  font-size: clamp(18px, 4.6vw, 3rem);
+  font-size: clamp(18px, 4vw, 3rem);
 }
 
 .hero-img:deep svg {
