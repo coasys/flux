@@ -22,21 +22,21 @@ layout: home
     <p class="card-desc">
     A comprehensive collection of user interface components designed specifically for Flux.
     </p> 
-    
+    <button class="card-button">View docs</button>
   </a>
   <a href="/playground.html" class="card">
     <h2 class="card-title">Playground</h2>
     <p class="card-desc">
     Generate UI components for Flux using AI. Build your app in no time.
     </p>
-    
+    <button class="card-button">Try the playground</button>
   </a>
   <a href="/create-flux-app/getting-started/installation.html" class="card">
     <h2 class="card-title">Create Flux App</h2>
     <p class="card-desc">
     Get started building custom components and integrating with Flux in just a few clicks.
     </p>
-   
+   <button class="card-button">Build an app</button>
   </a>
 </div>
 
@@ -86,6 +86,7 @@ import UISvg from './assets/group.svg?raw';
 }
 
 .funky {
+  color: var(--j-color-primary-500);
   font-family: var(--j-font-family-funky);
 }
 
@@ -120,17 +121,17 @@ import UISvg from './assets/group.svg?raw';
 
 .card {
   color: var(--j-color-black);
-  border-radius: var(--j-border-radius);
   border: 1px solid var(--j-color-black);
+  border-radius: var(--j-border-radius);
+  background: var(--j-color-ui-50);
   min-height: 200px;
   text-align: left;
   padding: var(--j-space-700);
-  background: transparent;
   transition: all 0.2s ease;
-  background: var(--j-color-ui-50);
 }
 
 .card:hover {
+  border: 1px solid var(--j-color-black);
   background: var(--j-color-ui-50);
   filter: brightness(1.3);
 }
@@ -151,7 +152,7 @@ import UISvg from './assets/group.svg?raw';
 
 .card-desc {
   font-size: 1rem;
-  margin-bottom: 0rem;
+  margin-bottom: 2rem;
 }
 
 .card-button {
@@ -160,15 +161,17 @@ import UISvg from './assets/group.svg?raw';
   display: inline-block;
   font-size: 1rem;
   font-weight: 500;
-  padding: 1rem 1.5rem;
+  padding: 0.8rem 1.5rem;
   color: var(--j-color-black);
   border: 1px solid var(--j-color-black);
   border-radius: 300px;
   background: transparent;
 }
 
-.card-button:hover {
-  background: var(--j-color-black);
+.card-button:hover,
+.card:hover .card-button {
+  background: var(--j-color-primary-600);
+  border: 1px solid var(--j-primary-600);
   color: var(--j-color-white);
 }
 
