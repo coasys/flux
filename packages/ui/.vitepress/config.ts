@@ -17,7 +17,7 @@ export default defineConfig({
         link: "/playground",
       },
       {
-        text: "Create Flux App",
+        text: "App development",
         link: "/create-flux-app/getting-started/installation",
       },
     ],
