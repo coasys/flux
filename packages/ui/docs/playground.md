@@ -17,9 +17,15 @@ Describe what kind of UI you would like to create with the Flux UI library and h
 
 <div contenteditable placeholder="Make a Todo component" @keydown="e => question = e.target.innerText">
 </div>
+
+<j-box pb="500">
+<j-input size="lg" label="OpenAI API Key" @change="setKey" :value="apiKey" @input="e => apiKey = e.target.value"></j-input>
+</j-box>
+
 <j-button :loading="isGenerating" full :disabled="isGenerating" size="xl" variant="primary" @click="generate">
- Generate
+Generate
 </j-button>
+
 </div>
 <div>
 
@@ -115,7 +121,13 @@ const stopStream = ref(false);
 const uiText = ref("");
 const question = ref("");
 const tab = ref("code");
+const apiKey = ref(localStorage.getItem('openaikey') || "");
 const isGenerating = ref(false);
+
+
+function setKey(e) {
+  localStorage.setItem('openaikey', e.target.value);
+}
 
 async function generate() {
   uiText.value = "";
@@ -135,7 +147,7 @@ async function getUI(docs) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ docs, question: question.value }),
+      body: JSON.stringify({ docs, question: question.value, apiKey: apiKey.value }),
     });
 
     console.log(response);

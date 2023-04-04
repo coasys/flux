@@ -6,22 +6,21 @@ import {
 } from "https://esm.sh/eventsource-parser@0.1.0";
 import type { Context } from "https://edge.netlify.com/";
 
-const API_KEY = Deno.env.get("OPENAI_API_KEY");
-
 const handler = async (req: Request, context: Context): Promise<Response> => {
   const data = await req.json();
 
-  const stream = await OpenAIStream({
-    model: "gpt-4",
-    messages: [
-      {
-        role: "system",
-        content: `
+  const stream = await OpenAIStream(
+    {
+      model: "gpt-4",
+      messages: [
+        {
+          role: "system",
+          content: `
       You are FluxGPT, a really good Flux UI front end developer. And you only answer in HTML and CSS`,
-      },
-      {
-        role: "user",
-        content: `
+        },
+        {
+          role: "user",
+          content: `
 Given the following sections from the documentation, use the documentation to build UI using custom CSS and the Flux UI library.
 
 Context sections:
@@ -59,16 +58,18 @@ Question: "${data.question}"
 
 Answer:
     `,
-      },
-    ],
-    temperature: 0.1,
-    top_p: 1,
-    frequency_penalty: 0,
-    presence_penalty: 0,
-    max_tokens: 500,
-    stream: true,
-    n: 1,
-  });
+        },
+      ],
+      temperature: 0.1,
+      top_p: 1,
+      frequency_penalty: 0,
+      presence_penalty: 0,
+      max_tokens: 500,
+      stream: true,
+      n: 1,
+    },
+    data.apiKey
+  );
 
   return new Response(stream, {
     status: 200,
@@ -80,7 +81,7 @@ export default handler;
 
 export const config = { path: "/buildUI" };
 
-async function OpenAIStream(payload) {
+async function OpenAIStream(payload, apiKey) {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
 
@@ -89,7 +90,7 @@ async function OpenAIStream(payload) {
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer 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`,
+      Authorization: `Bearer ${apiKey}`,
     },
     method: "POST",
     body: JSON.stringify(payload),
