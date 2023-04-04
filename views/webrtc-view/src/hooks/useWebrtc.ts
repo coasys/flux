@@ -458,7 +458,8 @@ export default function useWebRTC({
         ? settings.audio.deviceId
         : localstorage.getForVersion("audioDeviceId");
 
-    const joinSettings = { ...defaultSettings };
+    const joinSettings = { ...settings };
+
     if (
       videoDeviceIdFromLocalStorage &&
       typeof joinSettings.video !== "boolean"
