@@ -36,7 +36,7 @@ layout: home
     <p class="card-desc">
     Get started building custom components and integrating with Flux in just a few clicks.
     </p>
-   <button class="card-button">Build an app</button>
+   <button class="card-button">Start building</button>
   </a>
 </div>
 
@@ -131,7 +131,7 @@ import UISvg from './assets/group.svg?raw';
   color: var(--j-color-black);
   border: 1px solid var(--j-color-black);
   border-radius: var(--j-border-radius);
-  background: var(--j-color-ui-50);
+  background: rgba(255,255,255,0.02);
   min-height: 200px;
   text-align: left;
   padding: var(--j-space-700);
@@ -139,8 +139,7 @@ import UISvg from './assets/group.svg?raw';
 }
 
 .card:hover {
-  border: 1px solid var(--j-color-black);
-  background: var(--j-color-ui-50);
+  background: rgba(255,255,255,0.04);
   filter: brightness(1.3);
 }
 
@@ -167,9 +166,9 @@ import UISvg from './assets/group.svg?raw';
   font-family: inherit;
   cursor: pointer;
   display: inline-block;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 500;
-  padding: 0.8rem 1.5rem;
+  padding: 0.7rem 1.3rem;
   color: var(--j-color-black);
   border: 1px solid var(--j-color-black);
   border-radius: 300px;
