@@ -228,6 +228,10 @@ export default class WebRTCManager {
 
     // If we get heartbeat from new user, action!
     if (link.data.predicate === HEARTBEAT && link.data.source === this.roomId) {
+      console.log("🐷🐷🐷 Checking heartbeat");
+      console.log("🐷🐷🐷 Should action: ", !this.connections.get(link.author));
+      console.log("🐷🐷🐷 link.author: ", link.author);
+
       if (!this.connections.get(link.author)) {
         // Check if we should create the offer or not
         if (link.author.localeCompare(this.agent.did) > 0) {
@@ -598,6 +602,8 @@ export default class WebRTCManager {
    * Ask room for offer
    */
   async broadcastOfferRequest() {
+    this.addToEventLog(this.agent.did, OFFER_REQUEST);
+
     this.neighbourhood.sendBroadcastU({
       links: [
         {
