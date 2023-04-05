@@ -9,6 +9,19 @@ import {
   PerspectiveExpression,
 } from "@perspect3vism/ad4m";
 
+const iceServers = [
+  {
+    urls: "stun:relay.ad4m.dev:3478",
+    username: "openrelay",
+    credential: "openrelay",
+  },
+  {
+    urls: "turn:relay.ad4m.dev:443",
+    username: "openrelay",
+    credential: "openrelay",
+  },
+];
+
 async function getLinkFromPerspective(expression: PerspectiveExpression) {
   try {
     return expression.data.links[0];
@@ -85,7 +98,11 @@ export class AD4MPeer extends EventEmitter {
   constructor(props: Props) {
     super();
     this.client = props.client;
-    this.spOpts = props.options?.spOpts ? props.options.spOpts : {};
+    this.spOpts = props.options?.spOpts
+      ? props.options.spOpts
+      : {
+          config: { iceServers },
+        };
 
     this.init(props);
   }
