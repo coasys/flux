@@ -50,11 +50,9 @@ export default function Item({
   useEffect(() => {
     if (isMe) return;
 
-    if (peer?.connection?.peerConnection?.iceConnectionState === "connected") {
+    peer?.connection?.peer?.on("connect", () => {
       setIsConnecting(false);
-    } else {
-      setIsConnecting(true);
-    }
+    });
   }, [peer]);
 
   // Get video stream
@@ -65,9 +63,11 @@ export default function Item({
     }
 
     if (videoRef.current && !isMe) {
-      videoRef.current.srcObject = peer.connection.mediaStream;
+      peer.connection.peer.on("stream", (stream) => {
+        videoRef.current.srcObject = stream;
+      });
     }
-  }, [videoRef, peer?.connection?.mediaStream, webRTC.localStream, isMe]);
+  }, [videoRef, peer?.connection?.peer, webRTC.localStream, isMe]);
 
   return (
     <div

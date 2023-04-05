@@ -1,4 +1,5 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import SimplePeer from "simple-peer/simplepeer.min.js";
 
 import {
   Ad4mClient,
@@ -30,7 +31,7 @@ const rtcConfig = {
 function getData(data: any) {
   let parsedData;
   try {
-    parsedData = JSON.parse(data);
+    parsedData = Literal.fromUrl(data).get();
   } catch (e) {
     parsedData = data;
   } finally {
@@ -62,7 +63,7 @@ export type EventLogItem = {
 };
 
 export type Connection = {
-  peer: AD4MPeer;
+  peer: SimplePeer.Instance;
   eventLog: EventLogItem[];
 };
 
@@ -242,8 +243,12 @@ export default class WebRTCManager {
       link.data.source === this.source
     ) {
       const data = getData(link.data.target);
-      console.log("link.data.target: ", link.data.target);
-      console.log("data: ", data);
+
+      // Check if the signal is for us
+      if (data.targetPeer === this.agent.did) {
+        const remotePeer = this.connections.get(link.author);
+        remotePeer.peer.signal(data.signalData);
+      }
     }
 
     if (link.data.predicate === LEAVE && link.data.source === this.source) {
@@ -261,14 +266,19 @@ export default class WebRTCManager {
       return this.connections.get(remoteDid);
     }
 
-    console.log("Creating ", initiator ? "active" : "passive", " connection");
+    console.log(
+      "⚡️ Creating ",
+      initiator ? "active" : "passive",
+      " connection"
+    );
 
-    const peer = new AD4MPeer({
-      did: this.agent.did,
+    const ad4mPeer = new AD4MPeer({
       neighbourhood: this.neighbourhood,
       source: this.source,
       initiator: initiator,
     });
+
+    const peer = ad4mPeer.connect(remoteDid, initiator, this.localStream);
 
     const newConnection = {
       peer,

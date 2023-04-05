@@ -9,18 +9,35 @@ import {
 } from "@perspect3vism/ad4m";
 
 export type Props = {
-  did: string;
   source: string;
   neighbourhood: NeighbourhoodProxy;
   initiator: boolean;
   options?: SimplePeer.Options;
 };
 
+export interface AD4MInstance extends SimplePeer.Instance {
+  /**
+   * The uid of the initiator of the connection
+   */
+  initiatorUid: string | null;
+  /**
+   * The peer id of the initiator of the connection
+   */
+  initiatorId: string | null;
+  /**
+   * The uid of the receiver of the connection
+   */
+  receiverUid: string | null;
+  /**
+   * The peer id of the receiver of the connection
+   */
+  receiverId: string | null;
+}
+
 export class AD4MPeer {
   /**
    * A unique string identifying this peer from other peers. Used as the `id` parameter in [[FirePeer.connect]].
    */
-  public did: string;
   public source: string;
   private neighbourhood: NeighbourhoodProxy;
   private options?: SimplePeer.Options;
@@ -29,15 +46,22 @@ export class AD4MPeer {
     this.source = props.source;
     this.neighbourhood = props.neighbourhood;
     this.options = props.options ? props.options : {};
-
-    return this.createPeer(props.did, props.initiator);
   }
 
-  private createPeer(did: string, initiator: boolean) {
+  public connect(
+    did: string,
+    initiator: boolean,
+    stream: MediaStream
+  ): SimplePeer.Instance {
+    return this.createPeer(did, initiator, stream);
+  }
+
+  private createPeer(did: string, initiator: boolean, stream: MediaStream) {
     console.log("createPeer(): initiator: %s, %s", initiator, did);
 
     const peer = new SimplePeer({
       initiator,
+      stream,
       ...this.options,
       trickle: false,
     });
@@ -77,11 +101,6 @@ export class AD4MPeer {
       console.log("connection established");
 
       cleanup();
-
-      // peer.initiatorId = initiatorId;
-      // peer.receiverId = receiverId;
-
-      this.emit("connection", peer);
     });
 
     return peer;

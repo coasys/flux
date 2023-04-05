@@ -410,14 +410,14 @@ export default function useWebRTC({
 
     for (let peer of connections) {
       if (videoTrack) {
-        const videoSender = peer.connection.peerConnection
+        const videoSender = peer.connection.peer
           .getSenders()
           .find((s) => s.track.kind === videoTrack?.kind);
         videoSender.replaceTrack(videoTrack);
       }
 
       if (audioTrack) {
-        const audioSender = peer.connection.peerConnection
+        const audioSender = peer.connection.peer
           .getSenders()
           .find((s) => s.track.kind === audioTrack?.kind);
         audioSender.replaceTrack(audioTrack);
@@ -440,9 +440,9 @@ export default function useWebRTC({
   }
 
   async function onGetStats() {
-    if (manager.current) {
-      manager.current.getStats();
-    }
+    // if (manager.current) {
+    //   manager.current.getStats();
+    // }
   }
 
   async function onJoin() {
