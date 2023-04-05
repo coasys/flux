@@ -10,6 +10,7 @@ import {
 
 export type Props = {
   did: string;
+  source: string;
   neighbourhood: NeighbourhoodProxy;
   initiator: boolean;
   options?: SimplePeer.Options;
@@ -20,14 +21,16 @@ export class AD4MPeer {
    * A unique string identifying this peer from other peers. Used as the `id` parameter in [[FirePeer.connect]].
    */
   public did: string;
+  public source: string;
   private neighbourhood: NeighbourhoodProxy;
   private options?: SimplePeer.Options;
 
   constructor(props: Props) {
+    this.source = props.source;
     this.neighbourhood = props.neighbourhood;
     this.options = props.options ? props.options : {};
 
-    const peer = this.createPeer(props.did, props.initiator);
+    return this.createPeer(props.did, props.initiator);
   }
 
   private createPeer(did: string, initiator: boolean) {
@@ -43,12 +46,17 @@ export class AD4MPeer {
     peer.on("signal", (signal) => {
       console.log("🔵 sending ", signal.type, " to ", did);
 
+      const data = {
+        signalData: signal,
+        targetPeer: did,
+      };
+
       this.neighbourhood.sendBroadcastU({
         links: [
           {
-            source: this.perspective?.uuid || "",
-            predicate: "signal",
-            target: Literal.from(signal).toUrl(),
+            source: this.source,
+            predicate: "peer-signal",
+            target: Literal.from(data).toUrl(),
           },
         ],
       });

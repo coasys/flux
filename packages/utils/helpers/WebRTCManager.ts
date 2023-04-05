@@ -9,7 +9,7 @@ import {
   PerspectiveExpression,
 } from "@perspect3vism/ad4m";
 
-import { AD4MPeer, AD4MPeerInstance } from "./ad4mPeer";
+import { AD4MPeer } from "./ad4mPeerv2";
 
 const rtcConfig = {
   iceServers: [
@@ -27,6 +27,17 @@ const rtcConfig = {
   iceCandidatePoolSize: 10,
 };
 
+function getData(data: any) {
+  let parsedData;
+  try {
+    parsedData = JSON.parse(data);
+  } catch (e) {
+    parsedData = data;
+  } finally {
+    return parsedData;
+  }
+}
+
 async function getLinkFromPerspective(expression: PerspectiveExpression) {
   try {
     return expression.data.links[0];
@@ -35,8 +46,10 @@ async function getLinkFromPerspective(expression: PerspectiveExpression) {
   }
 }
 
-export const JOIN = "join";
-export const JOIN_ACCEPTED = "join-accepted";
+export const IS_ANYONE_HERE = "is-anyone-here";
+export const I_AM_HERE = "i-am-here";
+
+export const PEER_SIGNAL = "peer-signal";
 export const LEAVE = "leave";
 export const HEARTBEAT = "heartbeat";
 export const TEST_SIGNAL = "test-signal";
@@ -49,7 +62,7 @@ export type EventLogItem = {
 };
 
 export type Connection = {
-  peer: AD4MPeerInstance;
+  peer: AD4MPeer;
   eventLog: EventLogItem[];
 };
 
@@ -120,6 +133,8 @@ export default class WebRTCManager {
     this.emitPeerEvents = this.emitPeerEvents.bind(this);
     this.closeConnection = this.closeConnection.bind(this);
     this.addConnection = this.addConnection.bind(this);
+    this.broadcastArrival = this.broadcastArrival.bind(this);
+    this.broadcastArrivalResponse = this.broadcastArrivalResponse.bind(this);
 
     this.sendMessage = this.sendMessage.bind(this);
     this.sendTestSignal = this.sendTestSignal.bind(this);
@@ -194,15 +209,41 @@ export default class WebRTCManager {
     //   return null;
     // }
 
-    if (link.data.predicate === JOIN && link.data.source === this.source) {
-      this.addConnection(link.author, true);
+    if (
+      link.data.predicate === IS_ANYONE_HERE &&
+      link.data.source === this.source
+    ) {
+      // Check if the remote host should create the offer
+      // -> If so, create passive connection
+      if (link.author.localeCompare(this.agent.did) < 1) {
+        this.addConnection(link.author, false);
+      }
+
+      this.broadcastArrivalResponse(link.author);
     }
 
     if (
-      link.data.predicate === JOIN_ACCEPTED &&
+      link.data.predicate === I_AM_HERE &&
+      link.data.source === this.source &&
+      link.data.target === this.agent.did
+    ) {
+      // Check if we should create the offer
+      // -> If so, create active connection
+      if (link.author.localeCompare(this.agent.did) > 0) {
+        this.addConnection(link.author, true);
+      } else {
+        this.addConnection(link.author, false);
+        this.broadcastArrivalResponse(link.author);
+      }
+    }
+
+    if (
+      link.data.predicate === PEER_SIGNAL &&
       link.data.source === this.source
     ) {
-      this.addConnection(link.author, false);
+      const data = getData(link.data.target);
+      console.log("link.data.target: ", link.data.target);
+      console.log("data: ", data);
     }
 
     if (link.data.predicate === LEAVE && link.data.source === this.source) {
@@ -220,25 +261,14 @@ export default class WebRTCManager {
       return this.connections.get(remoteDid);
     }
 
-    if (initiator) {
-      this.neighbourhood.sendBroadcastU({
-        links: [
-          {
-            source: this.source,
-            predicate: JOIN_ACCEPTED,
-            target: this.agent.did,
-          },
-        ],
-      });
-    }
+    console.log("Creating ", initiator ? "active" : "passive", " connection");
 
-    const ad4mPeer = new AD4MPeer({
-      client: this.client,
-      uuid: this.perspective.uuid,
+    const peer = new AD4MPeer({
+      did: this.agent.did,
+      neighbourhood: this.neighbourhood,
       source: this.source,
+      initiator: initiator,
     });
-
-    const peer = await ad4mPeer.connect(remoteDid, initiator);
 
     const newConnection = {
       peer,
@@ -248,6 +278,40 @@ export default class WebRTCManager {
     this.connections.set(remoteDid, newConnection);
 
     return newConnection;
+  }
+
+  /**
+   * Broadcast my arrival
+   */
+  async broadcastArrival() {
+    this.addToEventLog(this.agent.did, IS_ANYONE_HERE);
+
+    this.neighbourhood.sendBroadcastU({
+      links: [
+        {
+          source: this.source,
+          predicate: IS_ANYONE_HERE,
+          target: this.agent.did,
+        },
+      ],
+    });
+  }
+
+  /**
+   * Broadcast arrival response
+   */
+  async broadcastArrivalResponse(target: string) {
+    this.addToEventLog(this.agent.did, I_AM_HERE);
+
+    this.neighbourhood.sendBroadcastU({
+      links: [
+        {
+          source: this.source,
+          predicate: I_AM_HERE,
+          target,
+        },
+      ],
+    });
   }
 
   /**
@@ -338,18 +402,7 @@ export default class WebRTCManager {
     }
 
     this.isListening = true;
-
-    console.log("🟠 Sending JOIN broadcast");
-
-    this.neighbourhood.sendBroadcastU({
-      links: [
-        {
-          source: this.source,
-          predicate: JOIN,
-          target: this.agent.did,
-        },
-      ],
-    });
+    this.broadcastArrival();
 
     // this.heartbeatId = setInterval(this.heartbeat, 10000);
 
