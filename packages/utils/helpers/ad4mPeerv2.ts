@@ -8,6 +8,19 @@ import {
   PerspectiveExpression,
 } from "@perspect3vism/ad4m";
 
+const iceServers = [
+  {
+    urls: "stun:relay.ad4m.dev:3478",
+    username: "openrelay",
+    credential: "openrelay",
+  },
+  {
+    urls: "turn:relay.ad4m.dev:443",
+    username: "openrelay",
+    credential: "openrelay",
+  },
+];
+
 export type Props = {
   source: string;
   neighbourhood: NeighbourhoodProxy;
@@ -45,7 +58,11 @@ export class AD4MPeer {
   constructor(props: Props) {
     this.source = props.source;
     this.neighbourhood = props.neighbourhood;
-    this.options = props.options ? props.options : {};
+    this.options = props.options
+      ? props.options
+      : {
+          config: { iceServers },
+        };
   }
 
   public connect(
@@ -58,6 +75,8 @@ export class AD4MPeer {
 
   private createPeer(did: string, initiator: boolean, stream: MediaStream) {
     console.log("createPeer(): initiator: %s, %s", initiator, did);
+
+    console.log("⚙️ Simplepeer options: ", this.options);
 
     const peer = new SimplePeer({
       initiator,
