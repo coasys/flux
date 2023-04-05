@@ -43,7 +43,27 @@ Generate
 </div>
 
 <j-box pt="400" v-if="tab === 'preview'">
-<j-text v-if="isGenerating">Please wait until the AI is done generating the code to see the UI preview.</j-text>
+<j-text v-if="isGenerating">
+Just a moment, the AI is currently working on generating the code. Once it's complete, you'll be able to see the UI preview. Thank you for your patience!
+</j-text>
+
+<j-box v-if="!isGenerating && uiText" pt="300" pb="500">
+<j-text variant="label">Choose a theme</j-text>
+<j-flex gap="400">
+<j-radio-button :checked="theme === ''" name="theme" @change="e => theme = e.target.value" value="">Default</j-radio-button>
+<j-radio-button :checked="theme === 'dark'" name="theme" @change="e => theme = e.target.value" value="dark">Dark</j-radio-button>
+<j-radio-button :checked="theme === 'cyberpunk'" name="theme" @change="e => theme = e.target.value" value="cyberpunk">
+Cyberpunk
+</j-radio-button>
+<j-radio-button :checked="theme === 'retro'" name="theme" @change="e => theme = e.target.value" value="retro">
+Retro
+</j-radio-button>
+<j-radio-button :checked="theme === 'black'" name="theme" @change="e => theme = e.target.value" value="black">
+Black
+</j-radio-button>
+</j-flex>
+</j-box>
+
 <div v-html="uiText"></div>
 </j-box>
 
@@ -115,7 +135,7 @@ div[placeholder]:empty::before {
 <script setup>
 
 //import { highlight } from 'vitepress/dist/node/index.js';
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 
 const stopStream = ref(false);
 const uiText = ref("");
@@ -124,23 +144,44 @@ const tab = ref("code");
 const apiKey = ref(localStorage.getItem('openaikey') || "");
 const isGenerating = ref(false);
 
+const theme = ref(document.documentElement.className);
+
+watch(theme, val => {
+   document.documentElement.className = "";
+   if(val) {
+    document.documentElement.classList.add(val)
+   } else {
+    document.documentElement.className = "";
+   }
+})
+
+
+const attrObserver = new MutationObserver((mutations) => {
+  mutations.forEach(mu => {
+    if (mu.type !== "attributes" && mu.attributeName !== "class") return;
+    theme.value = mu.target.className;
+    console.log("class was modified!", mu.target.classList.contains('dark'));
+  });
+});
+
+attrObserver.observe(document.documentElement, {attributes: true})
 
 function setKey(e) {
-  localStorage.setItem('openaikey', e.target.value);
+localStorage.setItem('openaikey', e.target.value);
 }
 
 async function generate() {
-  uiText.value = "";
-  const res = await fetch("/.netlify/functions/getDocs");
-  const test = await res.json();
-  const shorten = test.substring(0, 8000);
-  getUI(shorten);
+uiText.value = "";
+const res = await fetch("/.netlify/functions/getDocs");
+const test = await res.json();
+const shorten = test.substring(0, 8000);
+getUI(shorten);
 }
 
 async function getUI(docs) {
-  try {
-    isGenerating.value = true;
-    stopStream.value = false;
+try {
+isGenerating.value = true;
+stopStream.value = false;
 
     const response = await fetch("/buildUI", {
       method: "POST",
@@ -178,8 +219,9 @@ async function getUI(docs) {
       uiText.value = uiText.value + chunkValue;
       console.log(`Read: ${value}`);
     }
-  } catch (e) {
-    console.log(e);
-  }
+
+} catch (e) {
+console.log(e);
+}
 }
 </script>

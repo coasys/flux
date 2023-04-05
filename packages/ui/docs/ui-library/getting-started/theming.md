@@ -37,13 +37,21 @@ To customize Flux UI's theme, you'll need to define values for the various CSS V
 
 Flux already comes with a couple of themes that you can try out:
 
-<j-tabs wrap variant="button" :value="theme" @change="e => theme = e.target.value">
-<j-tab-item value="default">default (light)</j-tab-item>
-<j-tab-item value="dark">dark.css</j-tab-item>
-<j-tab-item value="cyberpunk">cyperpunk.css</j-tab-item>
-<j-tab-item value="retro">retro.css</j-tab-item>
-<j-tab-item value="black">black.css</j-tab-item>
-</j-tabs>
+<j-flex gap="400">
+<j-radio-button :checked="theme === ''" name="theme" @change="e => theme = e.target.value" value="">Default</j-radio-button>
+<j-radio-button :checked="theme === 'dark'" name="theme" @change="e => theme = e.target.value" value="dark">
+dark.css
+</j-radio-button>
+<j-radio-button :checked="theme === 'cyberpunk'" name="theme" @change="e => theme = e.target.value" value="cyberpunk">
+cyberpunk.css
+</j-radio-button>
+<j-radio-button :checked="theme === 'retro'" name="theme" @change="e => theme = e.target.value" value="retro">
+retro.css
+</j-radio-button>
+<j-radio-button :checked="theme === 'black'" name="theme" @change="e => theme = e.target.value" value="black">
+black.css
+</j-radio-button>
+</j-flex>
 
 ::: tip
 When using `create-flux-app`, you should not need to do this. Theming is controlled by the user, and you should not hard code that.

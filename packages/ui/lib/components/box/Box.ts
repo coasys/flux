@@ -11,6 +11,7 @@ const styles = css`
     --j-box-bg-color-hover: none;
     --j-box-border-color: none;
     --j-box-border-color-hover: none;
+    --j-box-border-radius: none;
     --j-box-display: block;
     --j-box-padding: 0px;
     --j-box-margin: 0px;
@@ -19,6 +20,7 @@ const styles = css`
     --j-box-display: inline-block;
   }
   [part="base"] {
+    border-radius: var(--j-box-border-radius);
     background-color: var(--j-box-bg-color);
     padding: var(--j-box-padding);
     margin: var(--j-box-margin);
@@ -149,11 +151,20 @@ export default class Box extends LitElement {
   @property({ type: String, reflect: true })
   bg = null;
 
+  /**
+   * Border radius
+   * @type {""|"sm"|"md"|"lg"}
+   * @attr
+   */
+  @property({ type: String, reflect: true })
+  radius = null;
+
   shouldUpdate() {
     const sheet = new CSSStyleSheet() as any;
     sheet.replaceSync(`
       :host {
         --j-box-bg-color: var(--j-color-${this.bg});
+        --j-box-border-radius: var(--j-border-radius-${this.radius});
         --j-box-padding: 
           ${generateVariable("j-space", this.pt || this.py || this.p)}
           ${generateVariable("j-space", this.pr || this.px || this.p)}

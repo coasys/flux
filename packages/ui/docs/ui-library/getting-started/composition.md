@@ -31,6 +31,10 @@ When creating a Flux app you might not always find the component you are looking
 
 Let's say you want to make a list of cards. First of all, Flux UI doesn't have a `j-card` component, and it also doesn't provide any `j-grid` component. So how do we make this but still make sure we adhere to the theming?
 
+::: tip
+[Try our Playground](/playground.html) to use AI to compose components like this for your application.
+:::
+
 ## Example
 
 First let's have a look at the markup we need to create our grid of cards:
@@ -104,7 +108,7 @@ Now let's have a look at our custom CSS
 }
 ```
 
-In our CSS we try to use the variables that come out of the box with Flux UI to make sure colors, spacing and other design tokens are following the Flux design system, and that theming works seamslessly.
+In your CSS we recommend to use the variables that come out of the box with Flux UI to make sure colors, spacing and other design tokens are following the Flux design system, and that theming works seamslessly.
 
 Toggle the themes to see that the cards always look right with the current theming:
 
@@ -115,6 +119,9 @@ Toggle the themes to see that the cards always look right with the current themi
 Cyberpunk
 </j-radio-button>
 <j-radio-button :checked="theme === 'retro'" name="theme" @change="e => theme = e.target.value" value="retro">Retro</j-radio-button>
+<j-radio-button :checked="theme === 'black'" name="theme" @change="e => theme = e.target.value" value="black">
+Black
+</j-radio-button>
 </j-box>
 
 <div class="grid">

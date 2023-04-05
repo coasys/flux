@@ -18,22 +18,26 @@ export default defineConfig({
       },
       {
         text: "App development",
-        link: "/create-flux-app/getting-started/installation",
+        link: "/create-flux-app/getting-started/introduction",
       },
     ],
     sidebar: {
       "/create-flux-app": [
         {
-          text: "Create Flux App",
+          text: "Getting Started",
           items: [
             {
-              text: "Installation",
+              text: "Introduction",
+              link: "/create-flux-app/getting-started/introduction",
+            },
+            {
+              text: "Quick Start",
               link: "/create-flux-app/getting-started/installation",
             },
           ],
         },
         {
-          text: "Building your app",
+          text: "Building your App",
           items: [
             {
               text: "Connecting to AD4M",
@@ -50,18 +54,18 @@ export default defineConfig({
           ],
         },
         {
-          text: "Working with data",
+          text: "Working with Data",
           items: [
             {
-              text: "Creating models",
+              text: "Creating Models",
               link: "/create-flux-app/working-with-data/creating-models",
             },
             {
-              text: "Writing to the network",
+              text: "Writing to the Network",
               link: "/create-flux-app/working-with-data/writing-to-the-network",
             },
             {
-              text: "Real-time signals",
+              text: "Real-time Signals",
               link: "/create-flux-app/working-with-data/real-time-signals",
             },
             {
@@ -91,7 +95,7 @@ export default defineConfig({
               link: "/create-flux-app/tutorial",
             },
             {
-              text: "Tutorial: Minecraft clone",
+              text: "Tutorial: Minecraft Clone",
               link: "/create-flux-app/tutorial",
             },
           ],
@@ -99,7 +103,7 @@ export default defineConfig({
       ],
       "/ui-library": [
         {
-          text: "Getting started",
+          text: "Getting Started",
           items: [
             {
               text: "Introduction",

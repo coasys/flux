@@ -1,4 +1,4 @@
-# Installation
+# Quick Start
 
 To create a new Flux app, run the following:
 

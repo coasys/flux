@@ -8,8 +8,8 @@ The `j-box` component is a general purpose element with properties to control sp
 
 ## Usage
 
-<j-box p="500" bg="ui-400">Box content</j-box>
+<j-box p="500" radius="md" bg="ui-400">Box content</j-box>
 
 ```html
-<j-box p="500" bg="ui-400">Box content</j-box>
+<j-box p="500" radius="md" bg="ui-400">Box content</j-box>
 ```

@@ -31,7 +31,7 @@ layout: home
     </p>
     <button class="card-button">Try the playground</button>
   </a>
-  <a href="/create-flux-app/getting-started/installation.html" class="card">
+  <a href="/create-flux-app/getting-started/introduction.html" class="card">
     <h2 class="card-title">Create Flux App</h2>
     <p class="card-desc">
     Get started building custom components and integrating with Flux in just a few clicks.

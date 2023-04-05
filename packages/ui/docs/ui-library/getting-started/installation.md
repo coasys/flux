@@ -1,6 +1,6 @@
 # Installation
 
-Start by installing the package
+You can install the Flux UI components like this:
 
 ::: code-group
 
@@ -18,7 +18,7 @@ yarn add @fluxsocial/ui
 
 :::
 
-Then import it in your app like this:
+Then import it in your app:
 
 ::: code-group
 

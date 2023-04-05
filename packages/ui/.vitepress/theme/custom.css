@@ -2,12 +2,12 @@
 
 @font-face {
   font-family: "Mattone";
-  src: url("./assets/fonts/mattone/mattone-regular.otf") format("woff2");
+  src: url("/assets/fonts/mattone/mattone-regular.otf") format("woff2");
 }
 
 @font-face {
   font-family: "Pilowlava";
-  src: url("./assets/fonts/pilowlava/pilowlava-regular.woff2") format("woff2");
+  src: url("/assets/fonts/pilowlava/pilowlava-regular.woff2") format("woff2");
 }
 
 :root {

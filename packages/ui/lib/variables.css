@@ -354,6 +354,9 @@
   /* BORDERS  */
   --j-border-width: 1px;
   --j-border-radius: 8px;
+  --j-border-radius-sm: 4px;
+  --j-border-radius-md: 8px;
+  --j-border-radius-lg: 16px;
   --j-border-color: var(--j-color-ui-100);
   --j-border-color-strong: var(--j-color-ui-200);
 
