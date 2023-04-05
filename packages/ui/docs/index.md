@@ -97,7 +97,6 @@ import UISvg from './assets/group.svg?raw';
   font-size: clamp(18px, 4vw, 3rem);
 }
 
-
 .hero-img:deep svg {
   position: fixed;
   top: 0;
@@ -105,10 +104,10 @@ import UISvg from './assets/group.svg?raw';
   max-height: 100vh;
   transform: translateX(-52%);
   z-index: -2;
-  opacity: 0.8;
+  opacity: 0.15;
   margin: 0 auto;
   width: 100%;
-  color: var(--j-color-ui-100);
+  color: var(--j-color-primary-500);
   max-width: 2000px;
 }
 
