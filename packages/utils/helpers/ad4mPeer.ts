@@ -141,6 +141,8 @@ export class AD4MPeer extends EventEmitter {
   ): Promise<AD4MPeerInstance> {
     console.log("createPeer(): initiator: %s, %s", initiator, did);
 
+    console.log("⚙️ Simplepeer options: ", this.spOpts);
+
     const peer = new SimplePeer({
       initiator,
       ...this.spOpts,
