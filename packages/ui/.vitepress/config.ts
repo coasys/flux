@@ -142,6 +142,7 @@ export default defineConfig({
             { text: "Timestamp", link: "/ui-library/components/timestamp" },
             { text: "Popover", link: "/ui-library/components/popover" },
             { text: "Radio", link: "/ui-library/components/radio" },
+            { text: "Skeleton", link: "/ui-library/components/skeleton" },
             { text: "Tooltip", link: "/ui-library/components/tooltip" },
             { text: "Toggle", link: "/ui-library/components/toggle" },
             { text: "Spinner", link: "/ui-library/components/spinner" },

@@ -130,14 +130,14 @@ export default class Skeleton extends LitElement {
    * @type {""|"xxs"|"xs"|"sm"|"md"|"lg"|"xl"|"xxl"|"text"}
    * @attr
    */
-  @property({ type: String, reflect: true }) height = null;
+  @property({ type: String, reflect: true }) height = "md";
 
   /**
    * Width
    * @type {""|"xxs"|"xs"|"sm"|"md"|"lg"|"xl"|"xxl"|"text"}
    * @attr
    */
-  @property({ type: String, reflect: true }) width = null;
+  @property({ type: String, reflect: true }) width = "md";
 
   render() {
     return html`<div part="base"></div>`;
