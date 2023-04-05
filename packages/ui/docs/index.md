@@ -97,6 +97,7 @@ import UISvg from './assets/group.svg?raw';
   font-size: clamp(18px, 4vw, 3rem);
 }
 
+
 .hero-img:deep svg {
   position: fixed;
   top: 0;

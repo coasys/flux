@@ -124,11 +124,13 @@ export default class Component extends LitElement {
       return {
         dateStyle: this.dateStyle,
         ...(this.timeStyle && { timeStyle: this.timeStyle }),
+        ...(this.timeZone && { timeZone: this.timeZone }),
       };
     }
 
     return {
       ...(this.dayPeriod && { dayPeriod: this.dayPeriod }),
+      ...(this.timeStyle && { timeStyle: this.timeStyle }),
       ...(this.timeZone && { timeZone: this.timeZone }),
       ...(this.weekday && { weekday: this.weekday }),
       ...(this.era && { era: this.era }),
