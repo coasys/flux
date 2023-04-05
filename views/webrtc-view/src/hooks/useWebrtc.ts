@@ -208,17 +208,10 @@ export default function useWebRTC({
         events?.onPeerLeave && events.onPeerLeave(did);
       });
 
-      manager.current.on(Event.CONNECTION_STATE, (did, state) => {
-        if (state === "connected") {
-          setIsLoading(false);
-          events?.onPeerJoin && events.onPeerJoin(did);
-        }
-      });
-
-      manager.current.on(Event.CONNECTION_STATE_DATA, (did, state) => {
-        if (state === "connected") {
-          manager.current.sendMessage("request-settings", did);
-        }
+      manager.current.on(Event.CONNECTION_ESTABLISHED, (did) => {
+        setIsLoading(false);
+        events?.onPeerJoin && events.onPeerJoin(did);
+        manager.current.sendMessage("request-settings", did);
       });
 
       manager.current.on(Event.EVENT, (did, event) => {
@@ -266,7 +259,7 @@ export default function useWebRTC({
         }
       };
     }
-  }, [source, uuid, isInitialised, hasJoined, agent]);
+  }, [source, uuid, isInitialised, hasJoined, agent, settings]);
 
   async function onReaction(reaction: string) {
     await manager.current?.sendMessage("reaction", reaction);
@@ -410,17 +403,19 @@ export default function useWebRTC({
 
     for (let peer of connections) {
       if (videoTrack) {
-        const videoSender = peer.connection.peer
-          .getSenders()
-          .find((s) => s.track.kind === videoTrack?.kind);
-        videoSender.replaceTrack(videoTrack);
+        peer.connection.peer.replaceTrack(
+          peer.connection.peer.streams[0].getVideoTracks()[0],
+          videoTrack,
+          peer.connection.peer.streams[0]
+        );
       }
 
       if (audioTrack) {
-        const audioSender = peer.connection.peer
-          .getSenders()
-          .find((s) => s.track.kind === audioTrack?.kind);
-        audioSender.replaceTrack(audioTrack);
+        peer.connection.peer.replaceTrack(
+          peer.connection.peer.streams[0].getAudioTracks()[0],
+          audioTrack,
+          peer.connection.peer.streams[0]
+        );
       }
     }
 

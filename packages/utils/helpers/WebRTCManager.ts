@@ -1,5 +1,4 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import SimplePeer from "simple-peer/simplepeer.min.js";
 
 import {
   Ad4mClient,
@@ -10,7 +9,7 @@ import {
   PerspectiveExpression,
 } from "@perspect3vism/ad4m";
 
-import { AD4MPeer } from "./ad4mPeerv2";
+import { AD4MPeer, AD4MPeerInstance } from "./ad4mPeerv2";
 
 const rtcConfig = {
   iceServers: [
@@ -28,10 +27,21 @@ const rtcConfig = {
   iceCandidatePoolSize: 10,
 };
 
-function getData(data: any) {
+function getExpressionData(data: any) {
   let parsedData;
   try {
     parsedData = Literal.fromUrl(data).get();
+  } catch (e) {
+    parsedData = data;
+  } finally {
+    return parsedData;
+  }
+}
+
+function getMessageData(data: any) {
+  let parsedData;
+  try {
+    parsedData = JSON.parse(data);
   } catch (e) {
     parsedData = data;
   } finally {
@@ -63,7 +73,7 @@ export type EventLogItem = {
 };
 
 export type Connection = {
-  peer: SimplePeer.Instance;
+  peer: AD4MPeerInstance;
   eventLog: EventLogItem[];
 };
 
@@ -81,6 +91,7 @@ export type Props = {
 export enum Event {
   PEER_ADDED = "peer-added",
   PEER_REMOVED = "peer-removed",
+  CONNECTION_ESTABLISHED = "connectionEstablished",
   CONNECTION_STATE = "connectionstate",
   CONNECTION_STATE_DATA = "connectionstateData",
   MESSAGE = "message",
@@ -101,6 +112,7 @@ export default class WebRTCManager {
     [Event.PEER_REMOVED]: [],
     [Event.MESSAGE]: [],
     [Event.EVENT]: [],
+    [Event.CONNECTION_ESTABLISHED]: [],
     [Event.CONNECTION_STATE]: [],
     [Event.CONNECTION_STATE_DATA]: [],
   };
@@ -242,7 +254,7 @@ export default class WebRTCManager {
       link.data.predicate === PEER_SIGNAL &&
       link.data.source === this.source
     ) {
-      const data = getData(link.data.target);
+      const data = getExpressionData(link.data.target);
 
       // Check if the signal is for us
       if (data.targetPeer === this.agent.did) {
@@ -272,12 +284,32 @@ export default class WebRTCManager {
       " connection"
     );
 
-    const peer = new AD4MPeer({
+    const ad4mPeer = new AD4MPeer({
       did: remoteDid,
       source: this.source,
       neighbourhood: this.neighbourhood,
       stream: this.localStream,
       initiator: initiator,
+    });
+
+    const peer = ad4mPeer.connect();
+
+    // Attach eventlisteners
+
+    // got a data channel message
+    peer.on("data", (data) => {
+      const parsed = getMessageData(data);
+
+      this.callbacks[Event.MESSAGE].forEach((cb) => {
+        cb(remoteDid, parsed.type || "unknown", parsed.message);
+      });
+    });
+
+    // Connection established
+    peer.on("connect", () => {
+      this.callbacks[Event.CONNECTION_ESTABLISHED].forEach((cb) => {
+        cb(remoteDid);
+      });
     });
 
     const newConnection = {
@@ -332,12 +364,14 @@ export default class WebRTCManager {
       type,
       message,
     });
+
     this.connections.forEach((e, key) => {
       if (!recepients || recepients.includes(key)) {
         try {
-          e.peer.send({ type, message });
+          e.peer.send(data);
+          console.log(`Sending message to ${key} -> `, type, message);
         } catch (e) {
-          console.log(`Couldn't send message to ${key} -> `, type, message);
+          console.log(`Couldn't send message to ${key} -> `, type, message, e);
         }
       }
     });
