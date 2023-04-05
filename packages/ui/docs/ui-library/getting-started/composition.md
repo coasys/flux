@@ -35,8 +35,6 @@ Let's say you want to make a list of cards. First of all, Flux UI doesn't have a
 [Try our Playground](/playground.html) to use AI to compose components like this for your application.
 :::
 
-## Example
-
 First let's have a look at the markup we need to create our grid of cards:
 
 ```html
@@ -85,7 +83,7 @@ First let's have a look at the markup we need to create our grid of cards:
 
 As you can see we use Flux components wherever we can, but we also add some HTML tags like `article` and `div` and give them classes so we can style them accordingly.
 
-Now let's have a look at our custom CSS
+Now let's have a look at our custom CSS:
 
 ```css
 .grid {
