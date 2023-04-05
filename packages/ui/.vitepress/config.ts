@@ -140,6 +140,7 @@ export default defineConfig({
             { text: "Tabs", link: "/ui-library/components/tabs" },
             { text: "Text", link: "/ui-library/components/text" },
             { text: "Timestamp", link: "/ui-library/components/timestamp" },
+            { text: "Toast", link: "/ui-library/components/toast" },
             { text: "Popover", link: "/ui-library/components/popover" },
             { text: "Radio", link: "/ui-library/components/radio" },
             { text: "Skeleton", link: "/ui-library/components/skeleton" },

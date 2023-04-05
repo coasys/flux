@@ -4,58 +4,68 @@ import sharedStyles from "../../shared/styles";
 
 const styles = css`
   :host {
-    --j-toast-border: 1px solid var(--j-color-ui-100);
-    --j-toast-background: var(--j-color-white);
-    --j-toast-color: var(--j-color-ui-500);
+    --j-toast-border: 1px solid var(--j-color-primary-400);
+    --j-toast-background: var(--j-color-primary-500);
+    --j-toast-color: var(--j-color-white);
   }
   :host([variant="success"]) {
-    --j-toast-border: 1px solid var(--j-color-success-300);
-    --j-toast-background: var(--j-color-white);
-    --j-toast-color: var(--j-color-success-500);
+    --j-toast-border: 1px solid var(--j-color-success-400);
+    --j-toast-background: var(--j-color-success-500);
+    --j-toast-color: var(--j-color-white);
   }
   :host([variant="danger"]) {
-    --j-toast-border: 1px solid var(--j-color-danger-300);
-    --j-toast-background: var(--j-color-white);
-    --j-toast-color: var(--j-color-danger-500);
+    --j-toast-border: 1px solid var(--j-color-danger-400);
+    --j-toast-background: var(--j-color-danger-500);
+    --j-toast-color: var(--j-color-white);
   }
   :host([variant="warning"]) {
-    --j-toast-border: 1px solid var(--j-color-warning-300);
-    --j-toast-background: var(--j-color-white);
-    --j-toast-color: var(--j-color-warning-500);
+    --j-toast-border: 1px solid var(--j-color-warning-400);
+    --j-toast-background: var(--j-color-warning-500);
+    --j-toast-color: var(--j-color-white);
   }
   :host {
-    display: none;
+    visibility: hidden;
+    position: absolute;
   }
   :host([open]) {
+    position: relative;
+    visibility: visible;
     display: block;
-    animation: fade-up 0.2s ease;
-  }
-  [part="base"] {
-    z-index: 999999;
-    box-shadow: var(--j-depth-100);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-radius: var(--j-border-radius);
-    position: absolute;
+    position: fixed;
     bottom: var(--j-space-400);
     left: 50%;
     transform: translateX(-50%);
+    z-index: 999999;
+  }
+
+  :host([open]) [part="base"] {
+    opacity: 1;
+    transform: translateY(0px);
+    transition: all 0.2s ease;
+  }
+
+  [part="base"] {
+    opacity: 0;
+    transform: translateY(10px);
+    position: relative;
+    box-shadow: var(--j-depth-100);
+    display: block;
+    border-radius: var(--j-border-radius);
     background: var(--j-toast-background);
     border: var(--j-toast-border);
     color: var(--j-toast-color);
     max-width: 900px;
     min-width: 150px;
-    padding: var(--j-space-500);
+    padding-top: var(--j-space-400);
+    padding-bottom: var(--j-space-400);
+    padding-left: var(--j-space-500);
+    padding-right: var(--j-space-900);
   }
 
-  @keyframes fade-up {
-    from {
-      transform: translateY(20px);
-    }
-    to {
-      transform: translateY(0px);
-    }
+  [part="base"] j-button {
+    position: absolute;
+    top: var(--j-space-300);
+    right: var(--j-space-300);
   }
 `;
 
@@ -84,17 +94,23 @@ export default class Component extends LitElement {
    */
   @property({ type: Number, reflect: true }) autohide = 5;
 
+  #timeout = null;
+
   autoClose() {
     if (this.autohide > 0) {
-      setTimeout(() => {
+      this.#timeout = setTimeout(() => {
         this.open = false;
       }, this.autohide * 1000);
     }
   }
 
-  shouldUpdate(changedProperties) {
-    if (changedProperties.has("open")) {
+  shouldUpdate() {
+    if (this.open) {
+      clearTimeout(this.#timeout);
       this.autoClose();
+      this.dispatchEvent(new CustomEvent("toggle", { bubbles: true }));
+    } else {
+      clearTimeout(this.#timeout);
       this.dispatchEvent(new CustomEvent("toggle", { bubbles: true }));
     }
     return true;

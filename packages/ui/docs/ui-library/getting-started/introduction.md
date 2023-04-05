@@ -8,7 +8,7 @@ Here is a minimal example of how you could compose a simple chat message with Fl
 
 <j-flex gap="300">
   <j-box>
-    <j-avatar size="sm" src="https://i.pravatar.cc/100"></j-avatar>
+    <j-avatar size="sm" hash="did:1234"></j-avatar>
   </j-box>
   <j-box>
     <j-box bg="primary-200" px="400" py="300" radius="md">
