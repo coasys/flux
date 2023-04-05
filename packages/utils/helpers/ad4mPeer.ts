@@ -53,17 +53,6 @@ export type SignalInterceptor = (
   signal: Signal
 ) => Promise<Signal> | Signal | null;
 
-export interface Adm4PeerOptions {
-  /**
-   * The peer did to be used. Should be unique. If not specified, then a generated one will be used.
-   */
-  did: string;
-  /**
-   * Simple-peer [constructor options](https://github.com/feross/simple-peer#api).
-   */
-  spOpts?: SimplePeer.Options;
-}
-
 export declare interface AD4MPeer {
   /**
    * Triggered when a new connection is established either initiated by you through [[FirePeer.connect]]
@@ -81,7 +70,7 @@ export type Props = {
   client: Ad4mClient;
   uuid: string;
   source: string;
-  options?: Adm4PeerOptions;
+  options?: SimplePeer.Options;
 };
 
 export class AD4MPeer extends EventEmitter {
@@ -93,13 +82,13 @@ export class AD4MPeer extends EventEmitter {
   private agent: Agent;
   private perspective: PerspectiveProxy | null;
   private neighbourhood: NeighbourhoodProxy;
-  private spOpts?: SimplePeer.Options;
+  private options: SimplePeer.Options;
 
   constructor(props: Props) {
     super();
     this.client = props.client;
-    this.spOpts = props.options?.spOpts
-      ? props.options.spOpts
+    this.options = props.options
+      ? props.options
       : {
           config: { iceServers },
         };
@@ -141,11 +130,11 @@ export class AD4MPeer extends EventEmitter {
   ): Promise<AD4MPeerInstance> {
     console.log("createPeer(): initiator: %s, %s", initiator, did);
 
-    console.log("⚙️ Simplepeer options: ", this.spOpts);
+    console.log("⚙️ Simplepeer options: ", this.options);
 
     const peer = new SimplePeer({
       initiator,
-      ...this.spOpts,
+      ...this.options,
       trickle: false,
     }) as AD4MPeerInstance;
 
