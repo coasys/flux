@@ -1,12 +1,5 @@
 import SimplePeer from "simple-peer/simplepeer.min.js";
-import {
-  Ad4mClient,
-  PerspectiveProxy,
-  Agent,
-  Literal,
-  NeighbourhoodProxy,
-  PerspectiveExpression,
-} from "@perspect3vism/ad4m";
+import { Literal, NeighbourhoodProxy } from "@perspect3vism/ad4m";
 
 const iceServers = [
   {
@@ -21,77 +14,62 @@ const iceServers = [
   },
 ];
 
+export interface AD4MPeerInstance extends SimplePeer.Instance {
+  // WIP
+}
+
 export type Props = {
+  did: string;
   source: string;
   neighbourhood: NeighbourhoodProxy;
   initiator: boolean;
+  stream: MediaStream;
   options?: SimplePeer.Options;
 };
 
-export interface AD4MInstance extends SimplePeer.Instance {
-  /**
-   * The uid of the initiator of the connection
-   */
-  initiatorUid: string | null;
-  /**
-   * The peer id of the initiator of the connection
-   */
-  initiatorId: string | null;
-  /**
-   * The uid of the receiver of the connection
-   */
-  receiverUid: string | null;
-  /**
-   * The peer id of the receiver of the connection
-   */
-  receiverId: string | null;
-}
-
 export class AD4MPeer {
-  /**
-   * A unique string identifying this peer from other peers. Used as the `id` parameter in [[FirePeer.connect]].
-   */
-  public source: string;
+  public peer: SimplePeer.Instance;
+  private did: string;
+  private initiator: boolean;
+  private source: string;
+  private stream: MediaStream;
   private neighbourhood: NeighbourhoodProxy;
   private options?: SimplePeer.Options;
 
   constructor(props: Props) {
+    this.did = props.did;
+    this.initiator = props.initiator;
     this.source = props.source;
+    this.stream = props.stream;
     this.neighbourhood = props.neighbourhood;
     this.options = props.options
       ? props.options
       : {
           config: { iceServers },
         };
+
+    this.peer = this.createPeer();
+
+    return this.peer;
   }
 
-  public connect(
-    did: string,
-    initiator: boolean,
-    stream: MediaStream
-  ): SimplePeer.Instance {
-    return this.createPeer(did, initiator, stream);
-  }
-
-  private createPeer(did: string, initiator: boolean, stream: MediaStream) {
-    console.log("createPeer(): initiator: %s, %s", initiator, did);
-
-    console.log("⚙️ Simplepeer options: ", this.options);
+  private createPeer() {
+    console.log("createPeer(): initiator: %s, %s", this.initiator, this.did);
 
     const peer = new SimplePeer({
-      initiator,
-      stream,
+      initiator: this.initiator,
+      stream: this.stream,
       ...this.options,
       trickle: false,
     });
 
     // Local peerjs instance has data it wants to send to remote peer
     peer.on("signal", (signal) => {
-      console.log("🔵 sending ", signal.type, " to ", did);
+      console.log("🔵 sending ", signal.type, " to ", this.did);
 
       const data = {
         signalData: signal,
-        targetPeer: did,
+        targetPeer: this.did,
       };
 
       this.neighbourhood.sendBroadcastU({

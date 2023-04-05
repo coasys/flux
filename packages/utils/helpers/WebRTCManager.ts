@@ -272,13 +272,13 @@ export default class WebRTCManager {
       " connection"
     );
 
-    const ad4mPeer = new AD4MPeer({
-      neighbourhood: this.neighbourhood,
+    const peer = new AD4MPeer({
+      did: remoteDid,
       source: this.source,
+      neighbourhood: this.neighbourhood,
+      stream: this.localStream,
       initiator: initiator,
     });
-
-    const peer = ad4mPeer.connect(remoteDid, initiator, this.localStream);
 
     const newConnection = {
       peer,
@@ -334,15 +334,11 @@ export default class WebRTCManager {
     });
     this.connections.forEach((e, key) => {
       if (!recepients || recepients.includes(key)) {
-        // if (e.dataChannel.readyState === "open") {
-        //   e.dataChannel.send(data);
-        // } else {
-        //   console.log(
-        //     `Couldn't send message to ${key} as connection is not open -> `,
-        //     type,
-        //     message
-        //   );
-        // }
+        try {
+          e.peer.send({ type, message });
+        } catch (e) {
+          console.log(`Couldn't send message to ${key} -> `, type, message);
+        }
       }
     });
 
