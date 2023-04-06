@@ -9,23 +9,20 @@ import {
   PerspectiveExpression,
 } from "@perspect3vism/ad4m";
 
-import { AD4MPeer, AD4MPeerInstance } from "./ad4mPeerv2";
+import { AD4MPeer, AD4MPeerInstance } from "./ad4mPeer";
 
-const rtcConfig = {
-  iceServers: [
-    {
-      urls: "stun:relay.ad4m.dev:3478",
-      username: "openrelay",
-      credential: "openrelay",
-    },
-    {
-      urls: "turn:relay.ad4m.dev:443",
-      username: "openrelay",
-      credential: "openrelay",
-    },
-  ],
-  iceCandidatePoolSize: 10,
-};
+const iceServers: [
+  {
+    urls: "stun:relay.ad4m.dev:3478";
+    username: "openrelay";
+    credential: "openrelay";
+  },
+  {
+    urls: "turn:relay.ad4m.dev:443";
+    username: "openrelay";
+    credential: "openrelay";
+  }
+];
 
 function getExpressionData(data: any) {
   let parsedData;
@@ -290,11 +287,10 @@ export default class WebRTCManager {
       neighbourhood: this.neighbourhood,
       stream: this.localStream,
       initiator: initiator,
+      options: { config: { iceServers } },
     });
 
     const peer = ad4mPeer.connect();
-
-    // Attach eventlisteners
 
     // got a data channel message
     peer.on("data", (data) => {
