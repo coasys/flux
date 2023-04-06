@@ -11,17 +11,17 @@ import {
 
 import { AD4MPeer, AD4MPeerInstance } from "./ad4mPeer";
 
-const iceServers: [
+const iceServers = [
   {
-    urls: "stun:relay.ad4m.dev:3478";
-    username: "openrelay";
-    credential: "openrelay";
+    urls: "stun:relay.ad4m.dev:3478",
+    username: "openrelay",
+    credential: "openrelay",
   },
   {
-    urls: "turn:relay.ad4m.dev:443";
-    username: "openrelay";
-    credential: "openrelay";
-  }
+    urls: "turn:relay.ad4m.dev:443",
+    username: "openrelay",
+    credential: "openrelay",
+  },
 ];
 
 function getExpressionData(data: any) {
@@ -100,7 +100,7 @@ export default class WebRTCManager {
   private isListening: boolean = false;
   private agent: Agent;
   private client: Ad4mClient;
-  private perspective: PerspectiveProxy;
+  private perspective: PerspectiveProxy | null;
   private neighbourhood: NeighbourhoodProxy;
   private source: string;
   private heartbeatId: NodeJS.Timeout;
@@ -132,7 +132,7 @@ export default class WebRTCManager {
     this.perspective = await this.client.perspective.byUUID(props.uuid);
     this.neighbourhood = new NeighbourhoodProxy(
       this.client.neighbourhood,
-      this.perspective.uuid
+      this.perspective?.uuid || ""
     );
     this.emitPeerEvents();
 
@@ -256,7 +256,9 @@ export default class WebRTCManager {
       // Check if the signal is for us
       if (data.targetPeer === this.agent.did) {
         const remotePeer = this.connections.get(link.author);
-        remotePeer.peer.signal(data.signalData);
+        if (remotePeer) {
+          remotePeer.peer.signal(data.signalData);
+        }
       }
     }
 
@@ -385,7 +387,7 @@ export default class WebRTCManager {
     const connection = this.connections.get(did);
 
     if (connection) {
-      // connection.peer.close();
+      connection.peer.destroy();
       this.connections.delete(did);
     }
   }
@@ -423,9 +425,9 @@ export default class WebRTCManager {
    * Join the chat room, listen for signals and begin heartbeat
    */
   async join(initialSettings?: Settings) {
-    console.log("Start joining");
-
     let settings = { audio: true, video: false, ...initialSettings };
+
+    console.log("Start joining with settings: ", settings);
 
     this.localStream = await navigator.mediaDevices.getUserMedia({
       audio: settings.audio,
