@@ -26,34 +26,11 @@ export default function Item({ peer, onSendSignal }: Props) {
     }
   }, [profile, peer.did]);
 
-  // Get loading state
-  useEffect(() => {
-    setLoadingState(peer?.connection.peerConnection.iceConnectionState);
-
-    function updateLoadingState(event) {
-      setLoadingState(peer?.connection.peerConnection.iceConnectionState);
-    }
-
-    peer?.connection.peerConnection.addEventListener(
-      "iceconnectionstatechange",
-      updateLoadingState
-    );
-
-    return () => {
-      if (peer) {
-        peer.connection.peerConnection.removeEventListener(
-          "iceconnectionstatechange",
-          updateLoadingState
-        );
-      }
-    };
-  }, [peer]);
-
   return (
     <div className={styles.item}>
       <div className={styles.details}>
         <span>{profile?.username || peer.did || "Unknown user"}</span>
-        <span>({loadingState})</span>
+        <span>({peer?.connection?.peerConnection?.iceConnectionState})</span>
       </div>
       <div>
         <j-button

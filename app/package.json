@@ -1,6 +1,6 @@
 {
   "name": "flux",
-  "version": "0.5.6",
+  "version": "0.5.8",
   "description": "A social web3 tool kit for communities",
   "author": "josh@junto.foundation",
   "repository": {
@@ -59,7 +59,7 @@
     "ts-jest": "^26.0.0",
     "typescript": "^4.4.2",
     "vite": "^3.2.4",
-    "vite-plugin-pwa": "^0.13.3",
+    "vite-plugin-pwa": "^0.14.7",
     "vue-devtools": "^5.1.4",
     "vue-jest": "^5.0.0-alpha.10"
   },

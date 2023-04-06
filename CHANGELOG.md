@@ -3,9 +3,10 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
-## unreleased
+## [0.5.8] - 27/03/2023
 
 ### Added
+ - Perspective sync state indicator
 
 ### Changed
 
@@ -14,6 +15,25 @@ This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/
 ### Removed
 
 ### Fixed
+ - Incorrect dates & weird formatting for messages in chat view
+ - Stop webcam input if in another tab and not joined yet
+
+### Security
+
+## [0.5.7] - 23/03/2023
+
+### Added
+ - New WebRTC debugger channel view
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+ - Voice channel will work even if you dont have a webcam
+ - Various improvements to WebRTC stability and connects for voice channel
 
 ### Security
 

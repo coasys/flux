@@ -1,0 +1,128 @@
+.select {
+  display: inline-block;
+  width: 100%
+}
+
+/* Elements */
+
+.wrapper {
+  position: relative;
+  display: inline-block;
+  user-select: none;
+  width: 100%;
+  max-width: 100%;
+  z-index: 0;
+}
+
+.wrapper option {
+  color: #303030;
+}
+
+.label {
+  display: block;
+  font-size: 1.4rem;
+  margin-bottom: var(--spacing-1);
+}
+
+.arrow {
+  position: absolute;
+  right: var(--j-space-400);
+  top: 52%;
+  transform: translateY(-50%);
+  line-height: 1;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.field {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  color: transparent;
+  background: transparent;
+  z-index: 1;
+  font-size: var(--j-font-size-400);
+  border-radius: var(--j-border-radius);
+  border: 1px solid var(--j-border-color);
+  background-image: none !important;
+  appearance: none;
+}
+
+.field:focus {
+  border: 1px solid var(--j-border-color-strong);
+  outline: none;
+}
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  position: relative;
+  height: var(--j-size-md);
+  font-family: inherit;
+  font-size: var(--j-font-size-400);
+  color: var(--j-color-black);
+  background: var(--j-color-white);
+  border-radius: var(--j-border-radius);
+  border: 1px solid var(--j-border-color);
+  min-width: 200px;
+  outline: 0px;
+  padding: 0px var(--j-space-400);
+  cursor: pointer;
+  appearance: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all var(--transition);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.message {
+  display: block;
+  font-size: 1.4rem;
+  text-align: left;
+}
+
+@media (max-width: 32em) {
+  .select {
+    display: block;
+    width: 100%;
+  }
+}
+
+/* Modifiers */
+
+.-full {
+  display: block;
+}
+
+.-disabled {
+  cursor: not-allowed;
+}
+
+.-disabled .wrapper {
+  background-color: var(--col-light);
+  opacity: 0.5;
+}
+
+.-disabled .field {
+  border: 1px solid var(--col-dark);
+}
+
+.-error .field {
+  border-color: var(--col-alert);
+}
+
+.-error .field:focus {
+  border-color: var(--col-focus-border);
+}
+
+.-error .message {
+  color: var(--col-alert);
+}
+
+.-monochrome .field:focus {
+  background: var(--col-white);
+}

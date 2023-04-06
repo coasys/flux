@@ -153,19 +153,20 @@
     jsonpointer "^5.0.0"
     leven "^3.1.0"
 
-"@apollo/client@3.6.9":
-  version "3.6.9"
-  resolved "https://registry.yarnpkg.com/@apollo/client/-/client-3.6.9.tgz#ad0ee2e3a3c92dbed4acd6917b6158a492739d94"
-  integrity sha512-Y1yu8qa2YeaCUBVuw08x8NHenFi0sw2I3KCu7Kw9mDSu86HmmtHJkCAifKVrN2iPgDTW/BbP3EpSV8/EQCcxZA==
+"@apollo/client@3.7.10":
+  version "3.7.10"
+  resolved "https://registry.yarnpkg.com/@apollo/client/-/client-3.7.10.tgz#addc5fcebaf016981d9476268a06d529be83f568"
+  integrity sha512-/k1MfrqPKYiPNdHcOzdxg9cEx96vhAGxAcSorzfBvV29XtFQcYW2cPNQOTjK/fpSMtqVo8UNmu5vwQAWD1gfCg==
   dependencies:
     "@graphql-typed-document-node/core" "^3.1.1"
-    "@wry/context" "^0.6.0"
+    "@wry/context" "^0.7.0"
     "@wry/equality" "^0.5.0"
     "@wry/trie" "^0.3.0"
     graphql-tag "^2.12.6"
     hoist-non-react-statics "^3.3.2"
     optimism "^0.16.1"
     prop-types "^15.7.2"
+    response-iterator "^0.2.6"
     symbol-observable "^4.0.0"
     ts-invariant "^0.10.3"
     tslib "^2.3.0"
@@ -1309,10 +1310,10 @@
   resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.2.0.tgz#5f3d96ec6b2354ad6d8a28bf216a1d97b5426861"
   integrity sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==
 
-"@holochain/client@0.12.0":
-  version "0.12.0"
-  resolved "https://registry.yarnpkg.com/@holochain/client/-/client-0.12.0.tgz#1c9bdc082160badd1439962e8d5f30da6c4089a3"
-  integrity sha512-pvrB6Gdc6488iR3VZXoq5QKzoAPTGi0y69Ktrtgr/IZEvtSSHBqHeMhyEjXCa7iS8b1gXsL/HAvq47rs8mu50A==
+"@holochain/client@0.12.5":
+  version "0.12.5"
+  resolved "https://registry.yarnpkg.com/@holochain/client/-/client-0.12.5.tgz#6cbfe32c33f94fb0689d986adeb43f2b43813303"
+  integrity sha512-9Q1G8sKEGsqnCl067CaRbzwPZZ5zeDCJdvQ8TJpb+psP2kLJBbHZ2qulMXAlNUz7Pg0l4B1Eh/BFJByJHRLlow==
   dependencies:
     "@holochain/serialization" "^0.1.0-beta-rc.3"
     "@msgpack/msgpack" "^2.7.2"
@@ -1647,29 +1648,29 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@perspect3vism/ad4m-connect@0.3.1":
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.3.1.tgz#39d4e06288f5fd5e89bc57fa11faa4545cb88c77"
-  integrity sha512-UPwIbOeA7xNSmix1qmSWlXSM8QOU+AvLDrqsuPqP5LGzEuGmj16Ra5G8Uf9+7em/iqQQ/CcDq3xj0GLfPQGscg==
+"@perspect3vism/ad4m-connect@0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.3.2.tgz#ad2d2be1bae3062a381db2428a7825d6e8bb6634"
+  integrity sha512-9EkUFIVFYdTpzPXeg07DA85QfxUQ7qmZH8SR9okEYG3lEF6jHini+teGR920HHXg/7WIQ8iiXV6cYcT0ls4diw==
   dependencies:
     "@undecaf/barcode-detector-polyfill" "^0.9.15"
     auto-bind "^5.0.1"
     electron "^20.0.3"
     lit "^2.3.1"
 
-"@perspect3vism/ad4m@0.3.1":
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.3.1.tgz#032131e06ceb8e4956ae82d9dd44774911a59e98"
-  integrity sha512-c74d6vhK72UgMT1l1cc3Io5GaG3jSxyeuWBd+pm0RynWmelgULOWzycizjtqFwG1w5aEbJ5ui+t+7jFb4J5DOQ==
+"@perspect3vism/ad4m@0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.3.2.tgz#ecebc05a7f5eaea6e66da1e0480293402a411414"
+  integrity sha512-VBw0LZtcgn2SL3gDT2bDx6H7JD9xwMyhdzav8d9i/MAxULnxZg5T131iElovdT4Fnw2tYr3A8NuiKCIQPQVCxg==
   dependencies:
-    "@apollo/client" "3.6.9"
-    "@holochain/client" "0.12.0"
+    "@apollo/client" "3.7.10"
+    "@holochain/client" "0.12.5"
     "@types/jest" "^26.0.14"
     class-validator "^0.13.1"
-    express "^4.18.1"
-    graphql "^15.7.2"
+    express "4.18.2"
+    graphql "15.7.2"
     reflect-metadata "^0.1.13"
-    type-graphql "^1.1.1"
+    type-graphql "1.1.1"
 
 "@popperjs/core@^2.9.0", "@popperjs/core@^2.9.2":
   version "2.11.7"
@@ -5192,7 +5193,7 @@ expect@^26.6.2:
     jest-message-util "^26.6.2"
     jest-regex-util "^26.0.0"
 
-express@^4.18.1:
+express@4.18.2:
   version "4.18.2"
   resolved "https://registry.yarnpkg.com/express/-/express-4.18.2.tgz#3fabe08296e930c796c19e3c516979386ba9fd59"
   integrity sha512-5/PsL6iGPdfQ/lKM1UuielYgv3BUoJfz1aUwU9vHZ+J7gyvwdQXFEBIEIaxeGf0GIcreATNyBExtalisDbuMqQ==
@@ -5798,10 +5799,10 @@ graphql-tag@^2.12.6:
   dependencies:
     tslib "^2.1.0"
 
-graphql@^15.7.2:
-  version "15.8.0"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.8.0.tgz#33410e96b012fa3bdb1091cc99a94769db212b38"
-  integrity sha512-5gghUc24tP9HRznNpV2+FIoq3xKkj5dTQqf4v0CpdPbFVwFkWoxOM+o+2OC9ZSvjEMTjfmG9QT+gcvggTwW1zw==
+graphql@15.7.2:
+  version "15.7.2"
+  resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.7.2.tgz#85ab0eeb83722977151b3feb4d631b5f2ab287ef"
+  integrity sha512-AnnKk7hFQFmU/2I9YSQf3xw44ctnSFCfp3zE0N6W174gqe9fWG/2rKaKxROK7CcI3XtERpjEKFqts8o319Kf7A==
 
 growly@^1.3.0:
   version "1.3.0"
@@ -9375,6 +9376,11 @@ resolve@^2.0.0-next.3, resolve@^2.0.0-next.4:
     path-parse "^1.0.7"
     supports-preserve-symlinks-flag "^1.0.0"
 
+response-iterator@^0.2.6:
+  version "0.2.6"
+  resolved "https://registry.yarnpkg.com/response-iterator/-/response-iterator-0.2.6.tgz#249005fb14d2e4eeb478a3f735a28fd8b4c9f3da"
+  integrity sha512-pVzEEzrsg23Sh053rmDUvLSkGXluZio0qu8VT6ukrYuvtjVfCbDZH9d6PGXb8HZfzdNZt8feXv/jvUzlhRgLnw==
+
 responselike@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/responselike/-/responselike-1.0.2.tgz#918720ef3b631c5642be068f15ade5a46f4ba1e7"
@@ -10542,7 +10548,7 @@ type-fest@^2.0.0:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.19.0.tgz#88068015bb33036a598b952e55e9311a60fd3a9b"
   integrity sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==
 
-type-graphql@^1.1.1:
+type-graphql@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/type-graphql/-/type-graphql-1.1.1.tgz#dc0710d961713b92d3fee927981fa43bf71667a4"
   integrity sha512-iOOWVn0ehCYMukmnXStbkRwFE9dcjt7/oDcBS1JyQZo9CbhlIll4lHHps54HMEk4A4c8bUPd+DjK8w1/ZrxB4A==

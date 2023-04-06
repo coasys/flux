@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flux App</title>
+    <style>
+      html {
+        box-sizing: border-box;
+      }
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
+      flux-app {
+        height: 100vh;
+        display: block;
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@junto-foundation/junto-elements@latest/dist/main.css"
+    />
+    <script src="https://unpkg.com/@junto-foundation/junto-elements@latest"></script>
+  </head>
+  <body style="margin: 0">
+    <flux-app></flux-app>
+
+    <script type="module">
+      import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
+      import App from "./src/main.ts";
+
+      window.__APP_VERSION__ = "test";
+
+      const ui = Ad4mConnectUI({
+        appName: "Webrtc Debugger",
+        appDesc: "A webrtc debugger",
+        appDomain: "webrtc-debugger.forum.io",
+        capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
+      });
+
+      ui.connect().then(() => {
+        initApp();
+        customElements.define("flux-app", App);
+      });
+
+      window.addEventListener("popstate", initApp);
+
+      function initApp() {
+        // Extract perspectiveUuid and source from the URL path
+        const [_, uuid, source] = document.location.pathname.split("/");
+
+        console.log({ _, uuid, source });
+
+        // Set perspective and source on the app
+        const app = document.querySelector("flux-app");
+        app.setAttribute("perspective", decodeURIComponent(uuid));
+        app.setAttribute("source", decodeURIComponent(source));
+      }
+    </script>
+  </body>
+</html>

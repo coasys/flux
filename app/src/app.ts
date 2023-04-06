@@ -1,4 +1,5 @@
 import { createApp, h, watch } from "vue";
+import { useRegisterSW } from "virtual:pwa-register/vue";
 import { version } from "../package.json";
 import "./ad4mConnect";
 import App from "./App.vue";
@@ -33,3 +34,14 @@ createApp({
   .use(pinia)
   .use(router)
   .mount("#app");
+
+// Check for service worker updates every 10 minutes and reload
+const intervalMS = 60 * 10 * 1000;
+const updateServiceWorker = useRegisterSW({
+  onRegistered(r) {
+    r &&
+      setInterval(() => {
+        r.update();
+      }, intervalMS);
+  },
+});

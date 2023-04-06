@@ -99,6 +99,17 @@
       @neighbourhood-click="onNeighbourhoodClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></webrtc-view>
+    <webrtc-debug-view
+      v-show="currentView === ChannelView.Debug"
+      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Debug)"
+      class="perspective-view"
+      :source="channel.id"
+      :perspective="communityId"
+      @agent-click="onAgentClick"
+      @channel-click="onChannelClick"
+      @neighbourhood-click="onNeighbourhoodClick"
+      @hide-notification-indicator="onHideNotificationIndicator"
+    ></webrtc-debug-view>
     <chat-view
       v-show="currentView === ChannelView.Chat"
       v-if="filteredViewOptions.find((v) => v.type === ChannelView.Chat)"
@@ -194,6 +205,10 @@ export default defineComponent({
     if (!customElements.get("webrtc-view")) {
       const module = await import(`@fluxapp/webrtc-view`);
       customElements.define("webrtc-view", module.default);
+    }
+    if (!customElements.get("webrtc-debug-view")) {
+      const module = await import(`flux-webrtc-debug-view`);
+      customElements.define("webrtc-debug-view", module.default);
     }
   },
   computed: {
