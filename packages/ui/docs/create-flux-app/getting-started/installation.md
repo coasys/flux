@@ -1,5 +1,11 @@
 # Quick Start
 
+## Prerequisites
+
+Flux runs on top of [AD4M](https://ad4m.dev), a p2p framework where all data is stored and shared. In order to build a new Flux app you need to [download](https://ad4m.dev/download) and install AD4M.
+
+## Get Started
+
 To create a new Flux app, run the following:
 
 ::: code-group
@@ -25,7 +31,3 @@ npm run dev
 ```
 
 :::
-
-## Prerequisites
-
-Flux runs on top of [AD4M](https://ad4m.dev), a p2p framework where all data is stored and shared. In order to build a new Flux app you need to [download](https://ad4m.dev/download) and install AD4M.
