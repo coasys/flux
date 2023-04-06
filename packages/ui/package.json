@@ -20,7 +20,7 @@
     "start": "run-p dev:*",
     "build": "run-s build:*",
     "dev": "run-p dev:*",
-    "dev:docs": "vitepress dev ./",
+    "dev:docs": "vitepress dev ./ --force",
     "dev:lib": "NODE_ENV=dev node esbuild.js",
     "build:types": "node buildTypes.js",
     "build:docs": "vitepress build ./",

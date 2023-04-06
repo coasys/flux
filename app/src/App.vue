@@ -97,6 +97,7 @@ export default defineComponent({
 html {
   height: 100%;
   width: 100%;
+  font-size: var(--j-font-base-size);
 }
 
 body {

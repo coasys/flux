@@ -9,7 +9,7 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev --parallel",
+    "dev": "turbo run dev --parallel --ignore='./packages/ui/.vitepress/cache/**/*'",
     "lint": "turbo run lint"
   },
   "devDependencies": {
