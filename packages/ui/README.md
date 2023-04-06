@@ -1,10 +1,10 @@
 <h1 align="center">
-  Flux Elements
+  Flux UI
 </h1>
 
-> Flux Elements provides front-end developers & engineers a collection of reusable web components to build Flux applications. Adopting the library enables developers to use consistent markup, styles, and behavior in prototype and production work.
+> Flux UI provides front-end developers & engineers a collection of reusable web components to build Flux applications. Adopting the library enables developers to use consistent markup, styles, and behavior in prototype and production work.
 
-📚 [Flux Elements documentation is available here](https://junto-elements.netlify.com/)
+📚 [Flux UI documentation is available here](https://docs.fluxsocial.io/)
 
 ### ⏩ tl;dr
 
@@ -64,7 +64,7 @@ _To publish to production:_
 
 The documentation is hosted on [Netlify](https://netlify.com). Each time code is pushed to the `master` branch, a new build of the documentation will be deployed. Netlify also creates a unique build per pull request so it's easy for other people to review and see the changes live.
 
-Flux Elements is published on NPM and can be installed simply by running `npm install --save @junto-foundation/junto-elements`. If you want to use a CDN, we reccommend that you use [JSDeliver](https://www.jsdelivr.com/).
+Flux Elements is published on NPM and can be installed simply by running `npm install --save @fluxapp/junto-elements`. If you want to use a CDN, we reccommend that you use [JSDeliver](https://www.jsdelivr.com/).
 
 ## ⭐ Adding icons
 

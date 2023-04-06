@@ -1,6 +1,6 @@
 {
-  "name": "@junto-foundation/chat-view",
-  "version": "0.5.6",
+  "name": "@fluxapp/chat-view",
+  "version": "0.0.1",
   "description": "",
   "main": "./dist/main.js",
   "module": "./dist/main.js",

@@ -133,10 +133,10 @@
 </template>
 
 <script lang="ts">
-import ForumView from "@junto-foundation/forum-view";
-import ChatView from "@junto-foundation/chat-view";
-import GraphView from "@junto-foundation/graph-view";
-import VoiceView from "@junto-foundation/webrtc-view";
+import ForumView from "@fluxapp/forum-view";
+import ChatView from "@fluxapp/chat-view";
+import GraphView from "@fluxapp/graph-view";
+import VoiceView from "@fluxapp/webrtc-view";
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
@@ -180,19 +180,19 @@ export default defineComponent({
   },
   async mounted() {
     if (!customElements.get("chat-view")) {
-      const module = await import(`@junto-foundation/chat-view`);
+      const module = await import(`@fluxapp/chat-view`);
       customElements.define("chat-view", module.default);
     }
     if (!customElements.get("forum-view")) {
-      const module = await import(`@junto-foundation/forum-view`);
+      const module = await import(`@fluxapp/forum-view`);
       customElements.define("forum-view", module.default);
     }
     if (!customElements.get("graph-view")) {
-      const module = await import(`@junto-foundation/graph-view`);
+      const module = await import(`@fluxapp/graph-view`);
       customElements.define("graph-view", module.default);
     }
     if (!customElements.get("webrtc-view")) {
-      const module = await import(`@junto-foundation/webrtc-view`);
+      const module = await import(`@fluxapp/webrtc-view`);
       customElements.define("webrtc-view", module.default);
     }
   },

@@ -5,8 +5,8 @@ import App from "./App.vue";
 import router from "./router";
 import { createPinia } from "pinia";
 
-import "@junto-foundation/junto-elements";
-import "@junto-foundation/junto-elements/dist/main.css";
+import "@fluxapp/junto-elements";
+import "@fluxapp/junto-elements/dist/main.css";
 
 export const pinia = createPinia();
 
