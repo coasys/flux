@@ -1,5 +1,5 @@
 {
-  "name": "@fluxsocial/ui",
+  "name": "@fluxapp/ui",
   "version": "0.0.1",
   "description": "",
   "homepage": "https://docs.fluxsocial.io",
@@ -21,13 +21,11 @@
     "build": "run-s build:*",
     "dev": "run-p dev:*",
     "dev:docs": "vitepress dev ./",
-    "docs:dev": "vitepress dev ./",
-    "docs:build": "vitepress build ./",
-    "docs:preview": "vitepress preview ./",
+    "dev:lib": "NODE_ENV=dev node esbuild.js",
     "build:types": "node buildTypes.js",
     "build:docs": "vitepress build ./",
     "build:analyze": "web-component-analyzer src --outFile components.json",
-    "build:package": "NODE_ENV=production node esbuild.js"
+    "build:lib": "NODE_ENV=production node esbuild.js"
   },
   "dependencies": {
     "@popperjs/core": "^2.9.2",

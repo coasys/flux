@@ -105,7 +105,10 @@ body {
   width: 100%;
   margin: 0;
   padding: 0;
-  background-color: var(--app-main-sidebar-bg-color);
+  text-rendering: optimizeLegibility;
+  color: var(--j-color-ui-800);
+  font-family: var(--j-font-family);
+  background-color: var(--j-color-white);
 }
 
 #app {

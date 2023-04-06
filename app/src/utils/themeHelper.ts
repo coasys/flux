@@ -15,13 +15,14 @@ export function setTheme(theme: ThemeState): void {
     theme.fontSize
   );
 
-  import(`../themes/${theme.name}.css`);
-  document.documentElement.setAttribute("theme", theme.name);
+  document.documentElement.setAttribute("class", theme.name);
 
   const head = document.getElementsByTagName("head")[0];
   let link = null;
 
   link = head.querySelector("link[href^='https://fonts.googleapis.com']");
+
+  console.log(theme.fontFamily);
 
   if (link) {
     link.setAttribute(

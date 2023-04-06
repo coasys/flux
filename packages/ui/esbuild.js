@@ -19,9 +19,18 @@
       sourcemap: true,
       target: isDev ? "safari11" : "es2016",
       outfile: "dist/main.js",
-      watch: !!isDev,
+      watch: isDev,
       plugins: isDev
-        ? []
+        ? [
+            copy({
+              assets: [
+                {
+                  from: ["./lib/themes/**/*"],
+                  to: ["./themes"],
+                },
+              ],
+            }),
+          ]
         : [
             minifyHTMLLiteralsPlugin(),
             copy({
