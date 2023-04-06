@@ -132,7 +132,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   }
 
   async create(data: SubjectClass, id?: string): Promise<SubjectClass> {
-    const base = id || `flux_entry://${uuidv4()}`;
+    const base = id || `literal://${uuidv4()}`;
     await this.ensurePerspective();
     let newInstance = await this.perspective?.createSubject(this.subject, base);
     if (!newInstance) {
