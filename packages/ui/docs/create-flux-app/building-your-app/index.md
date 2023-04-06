@@ -12,6 +12,6 @@ To learn more about perspective, check out the [AD4M docs](https://docs.ad4m.dev
 
 When developing the app in isolation it doesn't live in a parent Flux context, so we'll have to manually set the perspective prop. You can either do this manually or you can use the utility-view that comes with create-flux-app.
 
-After picking a local AD4m perspective from the floating select element you'll see an output of the data in the perspective.
+After picking a local AD4M perspective from the floating select element you'll see an output of the data in the perspective.
 
 ![The first screen](../../assets/blank-app.png)
