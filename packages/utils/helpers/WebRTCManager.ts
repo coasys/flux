@@ -278,7 +278,7 @@ export default class WebRTCManager {
     }
 
     console.log(
-      "⚡️ Creating ",
+      "🟠 Creating ",
       initiator ? "active" : "passive",
       " connection"
     );
@@ -367,9 +367,9 @@ export default class WebRTCManager {
       if (!recepients || recepients.includes(key)) {
         try {
           e.peer.send(data);
-          console.log(`Sending message to ${key} -> `, type, message);
+          console.log(`📩 Sending message to ${key} -> `, type);
         } catch (e) {
-          console.log(`Couldn't send message to ${key} -> `, type, message, e);
+          console.log(`📩 Couldn't send message to ${key} -> `, type, e);
         }
       }
     });
