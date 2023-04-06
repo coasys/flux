@@ -64,7 +64,7 @@ _To publish to production:_
 
 The documentation is hosted on [Netlify](https://netlify.com). Each time code is pushed to the `master` branch, a new build of the documentation will be deployed. Netlify also creates a unique build per pull request so it's easy for other people to review and see the changes live.
 
-Flux Elements is published on NPM and can be installed simply by running `npm install --save @fluxapp/junto-elements`. If you want to use a CDN, we reccommend that you use [JSDeliver](https://www.jsdelivr.com/).
+Flux Elements is published on NPM and can be installed simply by running `npm install --save @fluxapp/ui`. If you want to use a CDN, we reccommend that you use [JSDeliver](https://www.jsdelivr.com/).
 
 ## ⭐ Adding icons
 
@@ -74,7 +74,7 @@ Flux Elements is published on NPM and can be installed simply by running `npm in
 
 ## Found a bug?
 
-- If you've found a bug, you can create a new [issue](https://github.com/junto/junto-elements/issues) via github.
+- If you've found a bug, you can create a new [issue](https://github.com/junto/ui/issues) via github.
 - If you want to fix this issue yourself, do so and then follow the development guide above.
 
 ## 📦 Dependencies

@@ -19,7 +19,7 @@
     "@fluxapp/chat-view": "*",
     "@fluxapp/forum-view": "*",
     "@fluxapp/graph-view": "*",
-    "@fluxapp/junto-elements": "*",
+    "@fluxapp/ui": "*",
     "@fluxapp/webrtc-view": "*",
     "@perspect3vism/ad4m": "0.3.1",
     "@perspect3vism/ad4m-connect": "0.3.1",

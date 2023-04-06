@@ -27,7 +27,7 @@
   "description": "",
   "dependencies": {
     "3d-force-graph": "^1.70.19",
-    "@fluxapp/junto-elements": "*",
+    "@fluxapp/ui": "*",
     "@perspect3vism/ad4m": "0.3.1",
     "@perspect3vism/ad4m-connect": "0.3.1",
     "preact": "^10.11.3",
