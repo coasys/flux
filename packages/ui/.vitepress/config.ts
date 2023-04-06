@@ -6,6 +6,7 @@ export default defineConfig({
   description: "Just playing around.",
   srcDir: "./docs",
   appearance: "dark",
+  head: [["link", { rel: "shortcut icon", href: "/assets/favicon.ico" }]],
   themeConfig: {
     nav: [
       {
