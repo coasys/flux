@@ -268,9 +268,7 @@ export class SubjectEntry<EntryClass> implements Entry {
   }
 
   async load() {
-    let exp = await this.#perspective.getExpression(
-      this.#subject.baseExpression
-    );
+    let exp = undefined
     if (!exp) {
       let links = await this.#perspective.get(
         new LinkQuery({ source: this.#subject.baseExpression })

@@ -3,6 +3,7 @@ import {
   Link,
   Subject,
   LinkExpression,
+  Literal,
 } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { subscribeToLinks } from "../api";
@@ -132,7 +133,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   }
 
   async create(data: SubjectClass, id?: string): Promise<SubjectClass> {
-    const base = id || `literal://${uuidv4()}`;
+    const base = id || Literal.from(uuidv4()).toUrl();
     await this.ensurePerspective();
     let newInstance = await this.perspective?.createSubject(this.subject, base);
     if (!newInstance) {

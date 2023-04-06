@@ -18,7 +18,7 @@ export default async (communityId: string): Promise<void> => {
     });
 
     const channels = await channelRepository.getAllData();
-    
+
     const mappedChannels = channels.map((channel: any) => ({
       id: channel?.id,
       name: channel?.name,

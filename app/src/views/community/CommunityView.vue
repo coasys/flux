@@ -358,13 +358,15 @@ export default defineComponent({
         if (perspective?.state === 'Synced') {
           synced()
         }
-       
+        
         perspective?.addSyncStateChangeListener((state) => {
           console.log('state 101', state);
 
           if (state === 'Synced') {
             synced()
           }
+
+          return null;
         })
       }
 
