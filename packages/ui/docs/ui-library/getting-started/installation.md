@@ -5,15 +5,15 @@ You can install the Flux UI components like this:
 ::: code-group
 
 ```bash [npm]
-npm install @fluxsocial/ui
+npm install @fluxapp/ui
 ```
 
 ```bash [yarn]
-yarn add @fluxsocial/ui
+yarn add @fluxapp/ui
 ```
 
 ```html [cdn]
-<script src="unpkg.com/@fluxsocial/ui"></script>
+<script src="unpkg.com/@fluxapp/ui"></script>
 ```
 
 :::
@@ -23,15 +23,15 @@ Then import it in your app:
 ::: code-group
 
 ```js [bundler]
-import "@fluxsocial/ui/variables.css";
-import "@fluxsocial/ui";
+import "@fluxapp/ui/dist/main.css";
+import "@fluxapp/ui";
 ```
 
 ```html [cdn]
 <html>
   <head>
-    <link href="unpkg.com/@fluxsocial/ui/variables.css" />
-    <script src="unpkg.com/@fluxsocial/ui"></script>
+    <link href="unpkg.com/@fluxapp/ui/dist/main.css" />
+    <script src="unpkg.com/@fluxapp/ui"></script>
   </head>
   <body>
     <div id="app"></div>
