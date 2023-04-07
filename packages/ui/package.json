@@ -28,7 +28,6 @@
   "dependencies": {
     "@popperjs/core": "^2.9.2",
     "construct-style-sheets-polyfill": "^3.1.0",
-    "eventsource-parser": "^1.0.0",
     "jdenticon": "^3.1.0",
     "lit": "^2.0.0-rc.2"
   },
