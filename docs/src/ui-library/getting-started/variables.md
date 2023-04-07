@@ -65,7 +65,7 @@ All variables
 <script setup>
  import {ref, onMounted} from 'vue'
 import variables from './variables'
-import vars from '../../../lib/variables.css?raw'
+import vars from '@fluxapp/ui/dist/main.css?raw'
 import * as shiki from 'shiki';
 
 </script>

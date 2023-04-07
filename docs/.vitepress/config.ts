@@ -4,7 +4,7 @@ export default defineConfig({
   // site-level options
   title: "Flux Developer",
   description: "Just playing around.",
-  srcDir: "./docs",
+  srcDir: "./src",
   appearance: "dark",
   head: [["link", { rel: "shortcut icon", href: "/assets/favicon.ico" }]],
   themeConfig: {
