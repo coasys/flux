@@ -291,7 +291,7 @@ export default function useWebRTC({
     const newSettings = {
       audio: settings.audio,
       screen: settings.screen,
-      video: { deviceId: deviceId },
+      video: { ...videoDimensions, deviceId: deviceId },
     };
 
     setSettings(newSettings);
@@ -340,6 +340,8 @@ export default function useWebRTC({
       if (localStream.getVideoTracks()[0]) {
         localStream.getVideoTracks()[0].enabled = !!newSettings;
       } else {
+        console.log("newSettings!", newSettings);
+
         const newLocalStream = await navigator.mediaDevices.getUserMedia({
           audio: settings.audio,
           video: newSettings,
