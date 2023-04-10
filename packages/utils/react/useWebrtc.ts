@@ -48,7 +48,7 @@ export type WebRTC = {
   hasJoined: boolean;
   isLoading: boolean;
   permissionGranted: boolean;
-  onJoin: () => Promise<void>;
+  onJoin: (initialState?: Peer["state"]) => Promise<void>;
   onLeave: () => Promise<void>;
   onChangeSettings: (newSettings: Settings) => void;
   onReaction: (reaction: string) => Promise<void>;
