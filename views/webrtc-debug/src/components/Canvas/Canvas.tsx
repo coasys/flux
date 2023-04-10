@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import { Peer } from "../../types";
+import { Peer } from "utils/react/useWebrtc";
 
 interface CanvasProps {
   peers: Peer[];

@@ -1,4 +1,4 @@
-import { WebRTC } from "../../../hooks/useWebrtc";
+import { WebRTC } from "utils/react/useWebrtc";
 import { Me } from "utils/api/getMe";
 import * as localstorage from "utils/helpers/localStorage";
 import Select from "../../Select";

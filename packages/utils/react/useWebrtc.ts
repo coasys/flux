@@ -1,18 +1,35 @@
+import { useEffect, useState, useRef, useCallback } from "preact/hooks";
 import WebRTCManager, {
+  Connection,
   Event,
   Settings,
   EventLogItem,
 } from "utils/helpers/WebRTCManager";
-import { useEffect, useState, useRef } from "preact/hooks";
-import { Peer, Reaction } from "../types";
-import { defaultSettings, videoDimensions } from "../constants";
+import {
+  defaultSettings,
+  videoDimensions,
+} from "utils/constants/videoSettings";
 import getMe, { Me } from "utils/api/getMe";
+import throttle from "utils/helpers/throttle";
 import * as localstorage from "utils/helpers/localStorage";
+
+export type Peer = {
+  did: string;
+  connection: Connection;
+  settings: Settings;
+  state?: any;
+};
+
+export type Reaction = {
+  did: string;
+  reaction: string;
+};
 
 type Props = {
   enabled: boolean;
   source: string;
   uuid: string;
+  defaultState: any;
   events?: {
     onPeerJoin?: (uuid: string) => void;
     onPeerLeave?: (uuid: string) => void;
@@ -20,7 +37,8 @@ type Props = {
 };
 
 export type WebRTC = {
-  localStream: MediaStream;
+  localStream: MediaStream | null;
+  localState: Peer["state"];
   connections: Peer[];
   localEventLog: EventLogItem[];
   devices: MediaDeviceInfo[];
@@ -38,6 +56,7 @@ export type WebRTC = {
   onSendTestBroadcast: () => Promise<void>;
   onChangeCamera: (deviceId: string) => void;
   onChangeAudio: (deviceId: string) => void;
+  onChangeState: (newState: Peer["state"]) => void;
   onGetStats: () => void;
 };
 
@@ -47,7 +66,8 @@ export default function useWebRTC({
   uuid,
   events,
 }: Props): WebRTC {
-  const manager = useRef<WebRTCManager>();
+  const manager = useRef<WebRTCManager | null>();
+  const [localState, setLocalState] = useState<Peer["state"]>();
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
   const [agent, setAgent] = useState<Me>();
@@ -211,7 +231,7 @@ export default function useWebRTC({
       manager.current.on(Event.CONNECTION_ESTABLISHED, (did) => {
         setIsLoading(false);
         events?.onPeerJoin && events.onPeerJoin(did);
-        manager.current.sendMessage("request-settings", did);
+        manager.current?.sendMessage("request-settings", did);
       });
 
       manager.current.on(Event.EVENT, (did, event) => {
@@ -226,7 +246,7 @@ export default function useWebRTC({
           }
 
           if (type === "request-settings" && senderDid !== agent.did) {
-            manager.current.sendMessage("settings", settings);
+            manager.current?.sendMessage("settings", settings);
           }
 
           if (type === "settings" && senderDid !== agent.did) {
@@ -247,6 +267,25 @@ export default function useWebRTC({
               ];
             });
           }
+
+          if (type === "state" && senderDid !== agent.did) {
+            setConnections((oldConnections) => {
+              const match = oldConnections.find((c) => c.did === senderDid);
+              if (!match) {
+                return oldConnections;
+              }
+
+              const newPeer = {
+                ...match,
+                state: message,
+              };
+
+              return [
+                ...oldConnections.filter((c) => c.did !== senderDid),
+                newPeer,
+              ];
+            });
+          }
         }
       );
 
@@ -254,7 +293,7 @@ export default function useWebRTC({
 
       return async () => {
         if (hasJoined) {
-          await manager.current.leave();
+          await manager.current?.leave();
           manager.current = null;
         }
       };
@@ -390,9 +429,11 @@ export default function useWebRTC({
     });
 
     // Ensure screen sharing has stopped
-    localStream.getTracks().forEach((track) => {
-      track.stop();
-    });
+    if (localStream) {
+      localStream.getTracks().forEach((track) => {
+        track.stop();
+      });
+    }
 
     setSettings({ ...settings, screen: false });
     manager.current?.sendMessage("settings", { ...settings, screen: false });
@@ -436,13 +477,27 @@ export default function useWebRTC({
     }
   }
 
+  const broadcastStateChange = (newState: Peer["state"]) => {
+    manager.current?.sendMessage("state", newState);
+  };
+
+  const throttledStateBroadcast = useCallback(
+    throttle(broadcastStateChange, 100),
+    []
+  );
+
+  function onChangeState(newState: Peer["state"]) {
+    setLocalState(newState);
+    throttledStateBroadcast(newState);
+  }
+
   async function onGetStats() {
     // if (manager.current) {
     //   manager.current.getStats();
     // }
   }
 
-  async function onJoin() {
+  async function onJoin(initialState?: Peer["state"]) {
     setIsLoading(true);
 
     const videoDeviceIdFromLocalStorage =
@@ -475,9 +530,15 @@ export default function useWebRTC({
       joinSettings.video = false;
     }
 
-    const stream = await manager.current?.join(joinSettings);
-    setLocalStream(stream);
-    setHasJoined(true);
+    if (manager.current) {
+      const stream = await manager.current.join(joinSettings);
+      setLocalStream(stream);
+      setHasJoined(true);
+    }
+
+    if (initialState) {
+      setLocalState(initialState);
+    }
   }
 
   async function onLeave() {
@@ -490,6 +551,7 @@ export default function useWebRTC({
 
   return {
     localStream,
+    localState,
     localEventLog,
     connections,
     devices,
@@ -507,6 +569,7 @@ export default function useWebRTC({
     onSendTestBroadcast,
     onChangeCamera,
     onChangeAudio,
+    onChangeState,
     onGetStats,
   };
 }
