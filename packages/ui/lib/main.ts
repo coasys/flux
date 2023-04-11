@@ -24,5 +24,4 @@ import "./components/timestamp";
 import "./components/carousel";
 import "./components/toggle";
 import "./components/skeleton";
-
 import "./variables.css";

@@ -17,7 +17,7 @@
       format: "esm",
       minify: true,
       sourcemap: true,
-      target: isDev ? "safari11" : "es2016",
+      target: ["es2020", "edge88", "firefox78", "chrome87", "safari14"],
       outfile: "dist/main.js",
       watch: isDev,
       plugins: isDev

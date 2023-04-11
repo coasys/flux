@@ -5,8 +5,16 @@ export default defineConfig({
   title: "Flux Developer",
   description: "Just playing around.",
   srcDir: "./src",
+  outDir: "./dist",
   appearance: "dark",
   head: [["link", { rel: "shortcut icon", href: "/assets/favicon.ico" }]],
+  vue: {
+    template: {
+      compilerOptions: {
+        isCustomElement: (tag) => tag.startsWith("j-"),
+      },
+    },
+  },
   themeConfig: {
     nav: [
       {

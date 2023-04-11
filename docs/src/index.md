@@ -42,7 +42,6 @@ layout: home
 
 <script setup>
 import UISvg from './assets/group.svg?raw';
-
 </script>
 
 <style scoped>
