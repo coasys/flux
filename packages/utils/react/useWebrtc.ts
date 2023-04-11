@@ -38,6 +38,10 @@ type Props = {
   };
 };
 
+type JoinProps = {
+  initialState?: Peer["state"];
+};
+
 export type WebRTC = {
   localStream: MediaStream | null;
   localState: Peer["state"];
@@ -49,7 +53,7 @@ export type WebRTC = {
   hasJoined: boolean;
   isLoading: boolean;
   permissionGranted: boolean;
-  onJoin: (initialState?: Peer["state"]) => Promise<void>;
+  onJoin: (props: JoinProps) => Promise<void>;
   onLeave: () => Promise<void>;
   onReaction: (reaction: string) => Promise<void>;
   onToggleCamera: (enabled: boolean) => void;
@@ -396,7 +400,6 @@ export default function useWebRTC({
    * Enable/disable video input
    */
   async function onToggleCamera(enabled: boolean) {
-    console.log("onToggleCamera: ", enabled);
     const videoDeviceIdFromLocalStorage =
       localstorage.getForVersion("cameraDeviceId");
 
@@ -558,7 +561,7 @@ export default function useWebRTC({
     throttledStateBroadcast(newState);
   }
 
-  async function onJoin(initialState?: Peer["state"]) {
+  async function onJoin({ initialState }) {
     setIsLoading(true);
 
     const videoDeviceIdFromLocalStorage =
