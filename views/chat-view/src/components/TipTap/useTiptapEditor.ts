@@ -19,7 +19,7 @@ import renderMention from "./renderMention";
 
 import emojiList from "node-emoji/lib/emoji";
 
-import styles from "./index.scss";
+import styles from "./index.module.css";
 import HardBreak from "@tiptap/extension-hard-break";
 import { useEffect, useRef } from "preact/hooks";
 

@@ -1,6 +1,6 @@
 <template>
   <j-box pt="500">
-    <j-menu-group-item
+    <j-menu-group
       open
       :title="`Members (${community.neighbourhood.members.length})`"
     >
@@ -18,7 +18,7 @@
           :users="community.neighbourhood.members"
         />
       </j-box>
-    </j-menu-group-item>
+    </j-menu-group>
   </j-box>
 </template>
 

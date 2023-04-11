@@ -1,0 +1,64 @@
+.editor {
+  position: relative;
+}
+
+.mentionWrapper {
+  position: absolute;
+  bottom: calc(100% + var(--j-space-200));
+  width: 100%;
+}
+
+.editorWrapper {
+  padding-left: var(--j-space-400);
+  padding-right: var(--j-space-400);
+  padding-top: var(--j-space-300);
+  padding-bottom: var(--j-space-300);
+  border-radius: var(--j-border-radius);
+  border: 1px solid var(--j-color-ui-200);
+  background-color: var(--j-color-white);
+  display: flex;
+  box-sizing: border-box;
+}
+
+.picker {
+  --background: var(--j-color-ui-50);
+  --border-color: var(--j-color-ui-50);
+  --indicator-color: var(--j-color-primary-500);
+  --button-active-background: var(--j-color-ui-100);
+  --button-hover-background: var(--j-color-ui-200);
+  --input-border-radius: var(--j-border-radius);
+  --input-border-color: var(--j-color-ui-200);
+  --input-padding: var(--j-space-200);
+  --outline-size: 1px;
+  --outline-color: var(--j-color-ui-300);
+  --input-font-color: var(--j-color-ui-800);
+  --input-placeholder-color: varr(--j-color-ui-400);
+}
+
+.editorContent {
+  width: 100%;
+  padding-top: var(--j-space-200);
+}
+
+.editorParagraph:first-of-type {
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.editorParagraph:last-of-type {
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.editorMentions {
+  cursor: pointer;
+  padding: 2px var(--j-space-200);
+  border-radius: var(--j-border-radius);
+  background: var(--j-color-primary-100);
+  color: var(--j-color-primary-700);
+}
+
+.linkStyles {
+  color: var(--j-color-primary-500);
+  text-decoration: underline;
+}
