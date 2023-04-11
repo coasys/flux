@@ -31,7 +31,7 @@ type Props = {
   enabled: boolean;
   source: string;
   uuid: string;
-  defaultState: Peer["state"];
+  defaultState?: Peer["state"];
   events?: {
     onPeerJoin?: (uuid: string) => void;
     onPeerLeave?: (uuid: string) => void;

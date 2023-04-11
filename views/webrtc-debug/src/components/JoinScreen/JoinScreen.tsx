@@ -95,13 +95,10 @@ export default function JoinScreen({
 
       <j-box pt="400">
         <j-toggle
-          checked={webRTC.settings.video}
+          checked={webRTC.localState.settings.video}
           disabled={webRTC.isLoading || !webRTC.permissionGranted}
           onChange={() =>
-            webRTC.onChangeSettings({
-              ...webRTC.settings,
-              video: !webRTC.settings.video,
-            })
+            webRTC.onToggleCamera(!webRTC.localState.settings.video)
           }
         >
           Join with camera!
@@ -126,7 +123,9 @@ export default function JoinScreen({
           loading={webRTC.isLoading}
           disabled={!webRTC.permissionGranted}
           onClick={() =>
-            webRTC.onJoin({ spriteIndex: selectedSpriteIndex, x: 0, y: 0 })
+            webRTC.onJoin({
+              initialState: { spriteIndex: selectedSpriteIndex, x: 0, y: 0 },
+            })
           }
         >
           Join room!
