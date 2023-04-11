@@ -10,10 +10,7 @@ export default {
   extends: Theme,
   async enhanceApp({ app }) {
     if (!import.meta.env.SSR) {
-      import("@fluxapp/ui").then((module) => {
-        // use code
-        // app.use(module);
-      });
+      import("@fluxapp/ui/dist/main").then((module) => {});
     }
   },
 };
