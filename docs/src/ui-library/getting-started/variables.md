@@ -1,7 +1,6 @@
 <script setup>
  import {ref, onMounted} from 'vue'
 import variables from './variables'
-import vars from '@fluxapp/ui/dist/main.css?raw'
 </script>
 
 <style scoped>
@@ -39,19 +38,6 @@ import vars from '@fluxapp/ui/dist/main.css?raw'
 # Variables
 
 Flux UI comes with a lot of CSS variables you can change to make your own theme, but also use when composing your own UI components.
-
-<!--
-<details>
-<summary>
-All variables
-</summary>
-
-```css-vue
-{{vars}}
-```
-
-</details>
--->
 
 ## Colors
 
