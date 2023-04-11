@@ -8,7 +8,12 @@ import "./custom.css";
 
 export default {
   extends: Theme,
-  async enhanceApp() {
-    await import("@fluxapp/ui");
+  async enhanceApp({ app }) {
+    if (!import.meta.env.SSR) {
+      import("@fluxapp/ui").then((module) => {
+        // use code
+        // app.use(module);
+      });
+    }
   },
 };
