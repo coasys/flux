@@ -7,8 +7,8 @@ import "@fluxapp/ui/dist/themes/retro.css";
 import "./custom.css";
 
 export default {
-  ...Theme,
+  extends: Theme,
   async enhanceApp() {
-    import("@fluxapp/ui");
+    await import("@fluxapp/ui");
   },
 };
