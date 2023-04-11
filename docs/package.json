@@ -5,7 +5,7 @@
   "homepage": "https://docs.fluxsocial.io",
   "scripts": {
     "start": "yarn dev",
-    "build": "vitepress build --debug",
+    "build": "vitepress build",
     "dev": "vitepress dev"
   },
   "dependencies": {
