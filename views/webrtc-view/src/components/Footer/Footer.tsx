@@ -44,13 +44,8 @@ export default function Footer({ webRTC, onToggleSettings }: Props) {
           title={webRTC.settings.video ? "Disable camera" : "Enable camera"}
         >
           <j-button
-            variant={webRTC.settings.video ? "secondary" : "primary"}
-            onClick={() =>
-              webRTC.onChangeSettings({
-                ...webRTC.settings,
-                video: !webRTC.settings.video,
-              })
-            }
+            variant={webRTC.localState.settings.video ? "secondary" : "primary"}
+            onClick={() => webRTC.onToggleCamera(!webRTC.settings.video)}
             square
             circle
             size="lg"
@@ -60,7 +55,11 @@ export default function Footer({ webRTC, onToggleSettings }: Props) {
             }
           >
             <j-icon
-              name={webRTC.settings.video ? "camera-video" : "camera-video-off"}
+              name={
+                webRTC.localState.settings.video
+                  ? "camera-video"
+                  : "camera-video-off"
+              }
             ></j-icon>
           </j-button>
         </j-tooltip>
@@ -68,37 +67,39 @@ export default function Footer({ webRTC, onToggleSettings }: Props) {
         <j-tooltip
           placement="top"
           title={
-            webRTC.settings.audio ? "Mute microphone" : "Unmute microphone"
+            webRTC.localState.settings.audio
+              ? "Mute microphone"
+              : "Unmute microphone"
           }
         >
           <j-button
-            variant={webRTC.settings.audio ? "secondary" : "primary"}
+            variant={webRTC.localState.settings.audio ? "secondary" : "primary"}
             onClick={() =>
-              webRTC.onChangeSettings({
-                ...webRTC.settings,
-                audio: !webRTC.settings.audio,
-              })
+              webRTC.onToggleAudio(!webRTC.localState.settings.audio)
             }
             square
             circle
             size="lg"
             disabled={!webRTC.hasJoined}
           >
-            <j-icon name={webRTC.settings.audio ? "mic" : "mic-mute"}></j-icon>
+            <j-icon
+              name={webRTC.localState.settings.audio ? "mic" : "mic-mute"}
+            ></j-icon>
           </j-button>
         </j-tooltip>
 
         <j-tooltip
           placement="top"
-          title={webRTC.settings.screen ? "Stop sharing" : "Share screen"}
+          title={
+            webRTC.localState.settings.screen ? "Stop sharing" : "Share screen"
+          }
         >
           <j-button
-            variant={webRTC.settings.screen ? "primary" : "secondary"}
+            variant={
+              webRTC.localState.settings.screen ? "primary" : "secondary"
+            }
             onClick={() =>
-              webRTC.onChangeSettings({
-                ...webRTC.settings,
-                screen: !webRTC.settings.screen,
-              })
+              webRTC.onToggleScreenShare!webRTC.localState.settings.screen)
             }
             square
             circle

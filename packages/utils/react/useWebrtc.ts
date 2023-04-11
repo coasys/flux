@@ -56,6 +56,7 @@ export type WebRTC = {
   onChangeCamera: (deviceId: string) => void;
   onToggleAudio: (enabled: boolean) => void;
   onChangeAudio: (deviceId: string) => void;
+  onToggleScreenShare: (enabled: boolean) => void;
   onChangeState: (newState: Peer["state"]) => void;
 };
 
@@ -209,6 +210,9 @@ export default function useWebRTC({
     }
   }, [enabled, showPreview, permissionGranted, hasJoined, localState]);
 
+  /**
+   * Attach signal listeners
+   */
   useEffect(() => {
     if (source && uuid && agent && !isInitialised) {
       manager.current = new WebRTCManager({ source, uuid });
@@ -303,40 +307,44 @@ export default function useWebRTC({
     }
   }, [source, uuid, isInitialised, hasJoined, agent, localState]);
 
+  /**
+   * Handle reactions
+   */
   async function onReaction(reaction: string) {
     await manager.current?.sendMessage("reaction", reaction);
   }
 
-  function onChangeSettings(newSettings: Settings) {
-    const videoChanged = newSettings.video !== settings.video;
-    const audioChanged = newSettings.audio !== settings.audio;
-    const screenChanged = newSettings.screen !== settings.screen;
+  // function onChangeSettings(newSettings: Settings) {
+  //   const videoChanged = newSettings.video !== settings.video;
+  //   const audioChanged = newSettings.audio !== settings.audio;
+  //   const screenChanged = newSettings.screen !== settings.screen;
 
-    if (videoChanged) {
-      onToggleCamera(newSettings.video);
-      setSettings(newSettings);
-      manager.current?.sendMessage("settings", newSettings);
-    }
+  //   if (videoChanged) {
+  //     onToggleCamera(newSettings.video);
+  //     setSettings(newSettings);
+  //     manager.current?.sendMessage("settings", newSettings);
+  //   }
 
-    if (audioChanged) {
-      onToggleAudio(newSettings.audio);
-      setSettings(newSettings);
-      manager.current?.sendMessage("settings", newSettings);
-    }
+  //   if (audioChanged) {
+  //     onToggleAudio(newSettings.audio);
+  //     setSettings(newSettings);
+  //     manager.current?.sendMessage("settings", newSettings);
+  //   }
 
-    if (screenChanged) {
-      newSettings.screen ? onStartScreenShare() : onEndScreenShare();
-    }
-  }
+  //   if (screenChanged) {
+  //     newSettings.screen ? onStartScreenShare() : onEndScreenShare();
+  //   }
+  // }
 
+  /**
+   * Change video input source
+   */
   async function onChangeCamera(deviceId: string) {
     const newSettings = {
       audio: localState.settings.audio,
       screen: localState.settings.screen,
       video: { ...videoDimensions, deviceId: deviceId },
     };
-
-    setLocalState((oldState) => ({ ...oldState, settings: newSettings }));
 
     if (localStream) {
       localStream.getTracks().forEach((track) => {
@@ -351,16 +359,20 @@ export default function useWebRTC({
 
     // Persist settings
     localstorage.setForVersion("cameraDeviceId", `${deviceId}`);
+
+    // Notify others of state change
+    onChangeState({ ...localState, settings: newSettings });
   }
 
+  /**
+   * Change audio input source
+   */
   async function onChangeAudio(deviceId: string) {
     const newSettings = {
       audio: { deviceId: deviceId },
-      screen: settings.screen,
-      video: settings.video,
+      screen: localState.settings.screen,
+      video: localState.settings.video,
     };
-
-    setSettings(newSettings);
 
     if (localStream) {
       localStream.getTracks().forEach((track) => {
@@ -375,36 +387,106 @@ export default function useWebRTC({
 
     // Persist settings
     localstorage.setForVersion("audioDeviceId", `${deviceId}`);
+
+    // Notify others of state change
+    onChangeState({ ...localState, settings: newSettings });
   }
 
-  async function onToggleCamera(newSettings: Settings["video"]) {
-    if (localStream) {
-      if (localStream.getVideoTracks()[0]) {
-        localStream.getVideoTracks()[0].enabled = !!newSettings;
-      } else {
-        const newLocalStream = await navigator.mediaDevices.getUserMedia({
-          audio: settings.audio,
-          video: newSettings,
-        });
-        setLocalStream(newLocalStream);
+  /**
+   * Enable/disable video input
+   */
+  async function onToggleCamera(enabled: boolean) {
+    const videoDeviceIdFromLocalStorage =
+      localstorage.getForVersion("cameraDeviceId");
+
+    const newSettings = {
+      audio: localState.settings.audio,
+      screen: localState.settings.screen,
+      video: enabled
+        ? {
+            ...videoDimensions,
+            deviceId: videoDeviceIdFromLocalStorage || undefined,
+          }
+        : false,
+    };
+
+    if (enabled) {
+      const newLocalStream = await navigator.mediaDevices.getUserMedia({
+        audio: localState.settings.audio,
+        video: newSettings.video,
+      });
+      setLocalStream(newLocalStream);
+    } else {
+      if (localStream) {
+        if (localStream.getVideoTracks()[0]) {
+          localStream.getVideoTracks()[0].enabled = false;
+        }
       }
     }
+
+    // Notify others of state change
+    onChangeState({ ...localState, settings: newSettings });
   }
 
-  async function onToggleAudio(newSettings: Settings["audio"]) {
-    if (localStream) {
-      if (localStream.getAudioTracks()[0]) {
-        localStream.getAudioTracks()[0].enabled = !!newSettings;
-      } else {
-        const newLocalStream = await navigator.mediaDevices.getUserMedia({
-          audio: newSettings,
-          video: settings.video,
-        });
-        setLocalStream(newLocalStream);
+  /**
+   * Enable/disable audio input
+   */
+  async function onToggleAudio(enabled: boolean) {
+    const videoDeviceIdFromLocalStorage =
+      localstorage.getForVersion("cameraDeviceId");
+
+    const newSettings = {
+      audio: localState.settings.audio,
+      screen: localState.settings.screen,
+      video: enabled
+        ? {
+            ...videoDimensions,
+            deviceId: videoDeviceIdFromLocalStorage || undefined,
+          }
+        : false,
+    };
+
+    if (enabled) {
+      const newLocalStream = await navigator.mediaDevices.getUserMedia({
+        audio: localState.settings.audio,
+        video: localState.settings.video,
+      });
+      setLocalStream(newLocalStream);
+    } else {
+      if (localStream) {
+        if (localStream.getAudioTracks()[0]) {
+          localStream.getAudioTracks()[0].enabled = false;
+        }
       }
     }
+
+    // Notify others of state change
+    onChangeState({ ...localState, settings: newSettings });
   }
 
+  /**
+   * Enable/disable screen share
+   */
+  async function onToggleScreenShare(enabled: boolean) {
+    const newSettings = {
+      audio: localState.settings.audio,
+      video: localState.settings.video,
+      screen: enabled,
+    };
+
+    if (enabled) {
+      onStartScreenShare();
+    } else {
+      onEndScreenShare();
+    }
+
+    // Notify others of state change
+    onChangeState({ ...localState, settings: newSettings });
+  }
+
+  /**
+   * Start screenshare
+   */
   async function onStartScreenShare() {
     if (localStream) {
       let mediaStream;
@@ -416,17 +498,14 @@ export default function useWebRTC({
       }
 
       mediaStream.getVideoTracks()[0].onended = () => onEndScreenShare();
-
-      setSettings({ ...settings, screen: true });
-      manager.current?.sendMessage("settings", { ...settings, screen: true });
       updateStream(mediaStream);
     }
   }
 
   async function onEndScreenShare() {
     const newLocalStream = await navigator.mediaDevices.getUserMedia({
-      audio: settings.audio,
-      video: settings.video,
+      audio: localState.settings.audio,
+      video: localState.settings.video,
     });
 
     // Ensure screen sharing has stopped
@@ -436,8 +515,6 @@ export default function useWebRTC({
       });
     }
 
-    setSettings({ ...settings, screen: false });
-    manager.current?.sendMessage("settings", { ...settings, screen: false });
     updateStream(newLocalStream);
   }
 
@@ -484,16 +561,18 @@ export default function useWebRTC({
     setIsLoading(true);
 
     const videoDeviceIdFromLocalStorage =
-      typeof settings.video !== "boolean" && settings.video.deviceId
-        ? settings.video.deviceId
+      typeof localState.settings.video !== "boolean" &&
+      localState.settings.video.deviceId
+        ? localState.settings.video.deviceId
         : localstorage.getForVersion("cameraDeviceId");
 
     const audioDeviceIdFromLocalStorage =
-      typeof settings.audio !== "boolean" && settings.audio.deviceId
-        ? settings.audio.deviceId
+      typeof localState.settings.audio !== "boolean" &&
+      localState.settings.audio.deviceId
+        ? localState.settings.audio.deviceId
         : localstorage.getForVersion("audioDeviceId");
 
-    const joinSettings = { ...settings };
+    const joinSettings = { ...localState.settings };
 
     if (
       videoDeviceIdFromLocalStorage &&
@@ -550,6 +629,7 @@ export default function useWebRTC({
     onChangeCamera,
     onToggleAudio,
     onChangeAudio,
+    onToggleScreenShare,
     onChangeState,
   };
 }
