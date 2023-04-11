@@ -1,3 +1,0 @@
-[functions]
-  included_files = ["src/ui-library/**"]
-  node_bundler = "esbuild"
