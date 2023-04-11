@@ -6,6 +6,7 @@
   "scripts": {
     "start": "yarn dev",
     "build": "vitepress build",
+    "build:all": "yarn workspace @fluxapp/ui build && yarn build",
     "dev": "vitepress dev"
   },
   "dependencies": {

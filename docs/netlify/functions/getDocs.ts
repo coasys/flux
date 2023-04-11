@@ -21,7 +21,7 @@ function getAllMarkdownFiles(dirPath, fileArr?) {
 }
 
 const handler: any = async (event, context) => {
-  const allMarkdownFiles = getAllMarkdownFiles("./docs/ui-library");
+  const allMarkdownFiles = getAllMarkdownFiles("./src/ui-library");
   const output = allMarkdownFiles.join("");
 
   return {

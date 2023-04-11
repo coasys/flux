@@ -5,7 +5,7 @@
   "homepage": "https://docs.fluxsocial.io",
   "main": "dist/main.js",
   "browser": "dist/main.js",
-  "types": "dist/global.d.ts",
+  "types": "dist/main.d.ts",
   "files": [
     "dist"
   ],
