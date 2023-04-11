@@ -29,7 +29,7 @@ export default function Item({
 }: Props) {
   const videoRef = useRef(null);
   const [profile, setProfile] = useState<Profile>();
-  const [isConnecting, setIsConnecting] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(isMe ? false : true);
 
   const peer = webRTC.connections.find((p) => p.did === userId);
   const settings = isMe ? webRTC.localState.settings : peer?.state?.settings;

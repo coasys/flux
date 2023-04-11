@@ -316,6 +316,15 @@ export default class WebRTCManager {
       });
     });
 
+    // Connection broken
+    peer.on("close", () => {
+      this.closeConnection(remoteDid);
+
+      this.callbacks[Event.PEER_REMOVED].forEach((cb) => {
+        cb(remoteDid);
+      });
+    });
+
     const newConnection = {
       peer,
       eventLog: [],
@@ -433,8 +442,6 @@ export default class WebRTCManager {
   async join(initialSettings?: Settings) {
     let settings = { audio: true, video: false, ...initialSettings };
 
-    console.log("Start joining with settings: ", settings);
-
     this.localStream = await navigator.mediaDevices.getUserMedia({
       audio: settings.audio,
       video: settings.video,
@@ -448,6 +455,7 @@ export default class WebRTCManager {
     this.isListening = true;
     this.broadcastArrival();
 
+    // TEMP: Heartbeat disabled for now
     // this.heartbeatId = setInterval(this.heartbeat, 10000);
 
     return this.localStream;
@@ -463,7 +471,7 @@ export default class WebRTCManager {
     clearInterval(this.heartbeatId);
 
     if (this.perspective) {
-      // Todo: Nico, nico, nico!
+      // Todo: Detach listeners
       // this.neighbourhood.
     }
 
