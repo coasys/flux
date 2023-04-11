@@ -26,6 +26,8 @@ const styles = css`
   :host {
     visibility: hidden;
     position: absolute;
+    left: 0;
+    top: 0;
   }
   :host([open]) {
     position: relative;
