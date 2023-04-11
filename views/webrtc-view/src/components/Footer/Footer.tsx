@@ -41,11 +41,17 @@ export default function Footer({ webRTC, onToggleSettings }: Props) {
       <div className={styles.inner}>
         <j-tooltip
           placement="top"
-          title={webRTC.settings.video ? "Disable camera" : "Enable camera"}
+          title={
+            webRTC.localState.settings.video
+              ? "Disable camera"
+              : "Enable camera"
+          }
         >
           <j-button
             variant={webRTC.localState.settings.video ? "secondary" : "primary"}
-            onClick={() => webRTC.onToggleCamera(!webRTC.settings.video)}
+            onClick={() =>
+              webRTC.onToggleCamera(!webRTC.localState.settings.video)
+            }
             square
             circle
             size="lg"
@@ -99,7 +105,7 @@ export default function Footer({ webRTC, onToggleSettings }: Props) {
               webRTC.localState.settings.screen ? "primary" : "secondary"
             }
             onClick={() =>
-              webRTC.onToggleScreenShare!webRTC.localState.settings.screen)
+              webRTC.onToggleScreenShare(!webRTC.localState.settings.screen)
             }
             square
             circle

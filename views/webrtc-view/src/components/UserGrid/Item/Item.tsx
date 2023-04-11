@@ -32,7 +32,7 @@ export default function Item({
   const [isConnecting, setIsConnecting] = useState(false);
 
   const peer = webRTC.connections.find((p) => p.did === userId);
-  const settings = isMe ? webRTC.settings : peer?.settings;
+  const settings = isMe ? webRTC.localState.settings : peer?.state?.settings;
 
   // Get user details
   useEffect(() => {

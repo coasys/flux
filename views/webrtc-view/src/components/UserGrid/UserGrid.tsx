@@ -108,7 +108,10 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
         <Item
           webRTC={webRTC}
           isMe
-          mirrored={webRTC.settings.video && !webRTC.settings.screen}
+          mirrored={
+            webRTC.localState.settings.video &&
+            !webRTC.localState.settings.screen
+          }
           userId={currentUser.did}
           reaction={myReaction}
           focused={focusedPeerId === currentUser.did}

@@ -396,6 +396,7 @@ export default function useWebRTC({
    * Enable/disable video input
    */
   async function onToggleCamera(enabled: boolean) {
+    console.log("onToggleCamera: ", enabled);
     const videoDeviceIdFromLocalStorage =
       localstorage.getForVersion("cameraDeviceId");
 
@@ -432,23 +433,23 @@ export default function useWebRTC({
    * Enable/disable audio input
    */
   async function onToggleAudio(enabled: boolean) {
-    const videoDeviceIdFromLocalStorage =
-      localstorage.getForVersion("cameraDeviceId");
+    const audioDeviceIdFromLocalStorage =
+      localstorage.getForVersion("audioDeviceId");
 
     const newSettings = {
-      audio: localState.settings.audio,
-      screen: localState.settings.screen,
-      video: enabled
+      audio: enabled
         ? {
             ...videoDimensions,
-            deviceId: videoDeviceIdFromLocalStorage || undefined,
+            deviceId: audioDeviceIdFromLocalStorage || undefined,
           }
         : false,
+      video: localState.settings.video,
+      screen: localState.settings.screen,
     };
 
     if (enabled) {
       const newLocalStream = await navigator.mediaDevices.getUserMedia({
-        audio: localState.settings.audio,
+        audio: newSettings.audio,
         video: localState.settings.video,
       });
       setLocalStream(newLocalStream);
@@ -592,14 +593,13 @@ export default function useWebRTC({
       joinSettings.video = false;
     }
 
+    // Set local state
+    setLocalState({ ...initialState, settings: joinSettings });
+
     if (manager.current) {
       const stream = await manager.current.join(joinSettings);
       setLocalStream(stream);
       setHasJoined(true);
-    }
-
-    if (initialState) {
-      setLocalState(initialState);
     }
   }
 
@@ -609,6 +609,7 @@ export default function useWebRTC({
     setLocalStream(null);
     setIsLoading(false);
     setHasJoined(false);
+    setShowPreview(false);
   }
 
   return {
