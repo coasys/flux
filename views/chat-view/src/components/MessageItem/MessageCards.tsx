@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import styles from "./index.scss";
+import styles from "./index.module.css";
 import getMetaFromNeighbourhood from "utils/helpers/getNeighbourhoodMeta";
 import { NeighbourhoodMetaData } from "utils/types";
 

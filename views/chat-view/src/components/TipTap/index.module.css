@@ -40,16 +40,14 @@
   padding-top: var(--j-space-200);
 }
 
-.editorParagraph {
-  &:first-of-type {
-    padding-top: 0;
-    margin-top: 0;
-  }
+.editorParagraph:first-of-type {
+  padding-top: 0;
+  margin-top: 0;
+}
 
-  &:last-of-type {
-    padding-bottom: 0;
-    margin-bottom: 0;
-  }
+.editorParagraph:last-of-type {
+  padding-bottom: 0;
+  margin-bottom: 0;
 }
 
 .editorMentions {

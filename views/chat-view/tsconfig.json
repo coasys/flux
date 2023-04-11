@@ -5,10 +5,7 @@
     "jsxFragmentFactory": "Fragment",
     "downlevelIteration": true
   },
-  "include": [
-    "**/*",
-    "../utils/**/*"
-  ],
+  "include": ["**/*", "../utils/**/*"],
   "exclude": [
     "node_modules",
     "../utils/node_modules",
