@@ -18,6 +18,12 @@ const iceServers = [
     credential: "openrelay",
   },
   {
+    urls: "stun:stun.l.google.com:19302",
+  },
+  {
+    urls: "stun:global.stun.twilio.com:3478",
+  },
+  {
     urls: "turn:relay.ad4m.dev:443",
     username: "openrelay",
     credential: "openrelay",

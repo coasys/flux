@@ -16,8 +16,10 @@ import * as localstorage from "utils/helpers/localStorage";
 export type Peer = {
   did: string;
   connection: Connection;
-  settings: Settings;
-  state?: any;
+  state: {
+    settings: Settings;
+    [key: string]: any;
+  };
 };
 
 export type Reaction = {
@@ -29,7 +31,7 @@ type Props = {
   enabled: boolean;
   source: string;
   uuid: string;
-  defaultState: any;
+  defaultState: Peer["state"];
   events?: {
     onPeerJoin?: (uuid: string) => void;
     onPeerLeave?: (uuid: string) => void;
@@ -40,24 +42,21 @@ export type WebRTC = {
   localStream: MediaStream | null;
   localState: Peer["state"];
   connections: Peer[];
-  localEventLog: EventLogItem[];
   devices: MediaDeviceInfo[];
-  settings: Settings;
   reactions: Reaction[];
+  localEventLog: EventLogItem[];
   isInitialised: boolean;
   hasJoined: boolean;
   isLoading: boolean;
   permissionGranted: boolean;
   onJoin: (initialState?: Peer["state"]) => Promise<void>;
   onLeave: () => Promise<void>;
-  onChangeSettings: (newSettings: Settings) => void;
   onReaction: (reaction: string) => Promise<void>;
-  onSendTestSignal: (recipientId: string) => Promise<void>;
-  onSendTestBroadcast: () => Promise<void>;
+  onToggleCamera: (enabled: boolean) => void;
   onChangeCamera: (deviceId: string) => void;
+  onToggleAudio: (enabled: boolean) => void;
   onChangeAudio: (deviceId: string) => void;
   onChangeState: (newState: Peer["state"]) => void;
-  onGetStats: () => void;
 };
 
 export default function useWebRTC({
@@ -66,13 +65,14 @@ export default function useWebRTC({
   uuid,
   events,
 }: Props): WebRTC {
+  const defaultState = { settings: defaultSettings };
+
   const manager = useRef<WebRTCManager | null>();
-  const [localState, setLocalState] = useState<Peer["state"]>();
+  const [localState, setLocalState] = useState<Peer["state"]>(defaultState);
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
   const [agent, setAgent] = useState<Me>();
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
-  const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [isInitialised, setIsInitialised] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
@@ -123,13 +123,15 @@ export default function useWebRTC({
   useEffect(() => {
     async function askForPermission() {
       const videoDeviceIdFromLocalStorage =
-        typeof settings.video !== "boolean" && settings.video.deviceId
-          ? settings.video.deviceId
+        typeof localState.settings.video !== "boolean" &&
+        localState.settings.video.deviceId
+          ? localState.settings.video.deviceId
           : localstorage.getForVersion("cameraDeviceId");
 
       const audioDeviceIdFromLocalStorage =
-        typeof settings.audio !== "boolean" && settings.audio.deviceId
-          ? settings.audio.deviceId
+        typeof localState.settings.audio !== "boolean" &&
+        localState.settings.audio.deviceId
+          ? localState.settings.audio.deviceId
           : localstorage.getForVersion("audioDeviceId");
 
       const joinSettings = { ...defaultSettings };
@@ -160,7 +162,10 @@ export default function useWebRTC({
         (stream) => {
           setPermissionGranted(true);
           setLocalStream(stream);
-          setSettings(joinSettings);
+          setLocalState((oldState) => ({
+            ...oldState,
+            settings: joinSettings,
+          }));
         },
         (e) => {
           console.error(e);
@@ -171,7 +176,7 @@ export default function useWebRTC({
     if (enabled && !permissionGranted && devices.length > 0) {
       askForPermission();
     }
-  }, [enabled, permissionGranted, devices]);
+  }, [enabled, localState, permissionGranted, devices]);
 
   /**
    * TogglePreRecording
@@ -187,8 +192,8 @@ export default function useWebRTC({
 
       if (enabled && !showPreview) {
         const newLocalStream = await navigator.mediaDevices.getUserMedia({
-          audio: settings.audio,
-          video: settings.video,
+          audio: localState.settings.audio,
+          video: localState.settings.video,
         });
         updateStream(newLocalStream);
         setShowPreview(true);
@@ -202,7 +207,7 @@ export default function useWebRTC({
     if (!hasJoined) {
       TogglePreRecording();
     }
-  }, [enabled, showPreview, permissionGranted, hasJoined]);
+  }, [enabled, showPreview, permissionGranted, hasJoined, localState]);
 
   useEffect(() => {
     if (source && uuid && agent && !isInitialised) {
@@ -213,10 +218,8 @@ export default function useWebRTC({
         (did, connection: Peer["connection"]) => {
           setConnections((oldConnections) => [
             ...oldConnections,
-            { did, connection, settings: defaultSettings },
+            { did, connection, state: defaultState },
           ]);
-
-          events?.onPeerJoin && events.onPeerJoin(did);
         }
       );
 
@@ -231,7 +234,7 @@ export default function useWebRTC({
       manager.current.on(Event.CONNECTION_ESTABLISHED, (did) => {
         setIsLoading(false);
         events?.onPeerJoin && events.onPeerJoin(did);
-        manager.current?.sendMessage("request-settings", did);
+        manager.current?.sendMessage("request-state", did);
       });
 
       manager.current.on(Event.EVENT, (did, event) => {
@@ -245,11 +248,11 @@ export default function useWebRTC({
             setReactions([...reactions, { did: senderDid, reaction: message }]);
           }
 
-          if (type === "request-settings" && senderDid !== agent.did) {
-            manager.current?.sendMessage("settings", settings);
+          if (type === "request-state" && senderDid !== agent.did) {
+            manager.current?.sendMessage("state", localState);
           }
 
-          if (type === "settings" && senderDid !== agent.did) {
+          if (type === "state" && senderDid !== agent.did) {
             setConnections((oldConnections) => {
               const match = oldConnections.find((c) => c.did === senderDid);
               if (!match) {
@@ -258,7 +261,7 @@ export default function useWebRTC({
 
               const newPeer = {
                 ...match,
-                settings: message,
+                state: message,
               };
 
               return [
@@ -298,7 +301,7 @@ export default function useWebRTC({
         }
       };
     }
-  }, [source, uuid, isInitialised, hasJoined, agent, settings]);
+  }, [source, uuid, isInitialised, hasJoined, agent, localState]);
 
   async function onReaction(reaction: string) {
     await manager.current?.sendMessage("reaction", reaction);
@@ -328,12 +331,12 @@ export default function useWebRTC({
 
   async function onChangeCamera(deviceId: string) {
     const newSettings = {
-      audio: settings.audio,
-      screen: settings.screen,
+      audio: localState.settings.audio,
+      screen: localState.settings.screen,
       video: { ...videoDimensions, deviceId: deviceId },
     };
 
-    setSettings(newSettings);
+    setLocalState((oldState) => ({ ...oldState, settings: newSettings }));
 
     if (localStream) {
       localStream.getTracks().forEach((track) => {
@@ -379,8 +382,6 @@ export default function useWebRTC({
       if (localStream.getVideoTracks()[0]) {
         localStream.getVideoTracks()[0].enabled = !!newSettings;
       } else {
-        console.log("newSettings!", newSettings);
-
         const newLocalStream = await navigator.mediaDevices.getUserMedia({
           audio: settings.audio,
           video: newSettings,
@@ -465,18 +466,6 @@ export default function useWebRTC({
     setLocalStream(stream);
   }
 
-  async function onSendTestSignal(recipientId: string) {
-    if (manager.current) {
-      manager.current.sendTestSignal(recipientId);
-    }
-  }
-
-  async function onSendTestBroadcast() {
-    if (manager.current) {
-      manager.current.sendTestBroadcast();
-    }
-  }
-
   const broadcastStateChange = (newState: Peer["state"]) => {
     manager.current?.sendMessage("state", newState);
   };
@@ -489,12 +478,6 @@ export default function useWebRTC({
   function onChangeState(newState: Peer["state"]) {
     setLocalState(newState);
     throttledStateBroadcast(newState);
-  }
-
-  async function onGetStats() {
-    // if (manager.current) {
-    //   manager.current.getStats();
-    // }
   }
 
   async function onJoin(initialState?: Peer["state"]) {
@@ -555,7 +538,6 @@ export default function useWebRTC({
     localEventLog,
     connections,
     devices,
-    settings,
     reactions,
     isInitialised,
     hasJoined,
@@ -563,13 +545,11 @@ export default function useWebRTC({
     permissionGranted,
     onJoin,
     onLeave,
-    onChangeSettings,
     onReaction,
-    onSendTestSignal,
-    onSendTestBroadcast,
+    onToggleCamera,
     onChangeCamera,
+    onToggleAudio,
     onChangeAudio,
     onChangeState,
-    onGetStats,
   };
 }
