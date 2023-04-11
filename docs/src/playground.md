@@ -141,10 +141,14 @@ const stopStream = ref(false);
 const uiText = ref("");
 const question = ref("");
 const tab = ref("code");
-const apiKey = ref(localStorage.getItem('openaikey') || "");
+const apiKey = ref("");
 const isGenerating = ref(false);
 
 const theme = ref(document.documentElement.className);
+
+onMounted(() => {
+  apiKey.value = localStorage.getItem('openaikey') || ""
+})
 
 watch(theme, val => {
    document.documentElement.className = "";

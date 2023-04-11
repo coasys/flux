@@ -4,8 +4,6 @@ layout: home
 
 <div class="hero-img" v-html="UISvg"></div>
 
-<ThreeOrb class="hero__orb"></ThreeOrb>
-
 <div class="container">
 
 <div class="hero">
@@ -44,7 +42,6 @@ layout: home
 
 <script setup>
 import UISvg from './assets/group.svg?raw';
-//import ThreeOrb from "./ThreeOrb.vue";
 
 </script>
 
@@ -97,7 +94,7 @@ import UISvg from './assets/group.svg?raw';
   font-size: clamp(18px, 4vw, 3rem);
 }
 
-.hero-img:deep svg {
+.hero-img:deep(svg) {
   position: fixed;
   top: 0;
   left: 50vw;

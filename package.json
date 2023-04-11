@@ -4,12 +4,13 @@
   "workspaces": [
     "packages/**/*",
     "views/**/*",
-    "app"
+    "app",
+    "docs"
   ],
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev --parallel --ignore='./docs'",
+    "dev": "turbo run dev --parallel",
     "lint": "turbo run lint"
   },
   "devDependencies": {

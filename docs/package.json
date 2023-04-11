@@ -4,11 +4,9 @@
   "description": "",
   "homepage": "https://docs.fluxsocial.io",
   "scripts": {
-    "start": "run-p dev:*",
-    "build": "run-s build:*",
-    "dev": "run-p dev:*",
-    "dev:docs": "vitepress dev ./ --force",
-    "build:docs": "vitepress build ./"
+    "start": "yarn dev",
+    "build": "vitepress build",
+    "dev": "vitepress dev"
   },
   "dependencies": {
     "vitepress": "^1.0.0-alpha.64",
