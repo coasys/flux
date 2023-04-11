@@ -133,8 +133,6 @@ div[placeholder]:empty::before {
 </style>
 
 <script setup>
-
-//import { highlight } from 'vitepress/dist/node/index.js';
 import { ref, onMounted, watch } from 'vue'
 
 const stopStream = ref(false);
@@ -143,11 +141,22 @@ const question = ref("");
 const tab = ref("code");
 const apiKey = ref("");
 const isGenerating = ref(false);
-
-const theme = ref(document.documentElement.className);
+const theme = ref("");
 
 onMounted(() => {
   apiKey.value = localStorage.getItem('openaikey') || ""
+
+
+  const attrObserver = new MutationObserver((mutations) => {
+    mutations.forEach(mu => {
+      if (mu.type !== "attributes" && mu.attributeName !== "class") return;
+      theme.value = mu.target.className;
+      console.log("class was modified!", mu.target.classList.contains('dark'));
+    });
+  });
+
+  attrObserver.observe(document.documentElement, {attributes: true})
+
 })
 
 watch(theme, val => {
@@ -159,27 +168,16 @@ watch(theme, val => {
    }
 })
 
-
-const attrObserver = new MutationObserver((mutations) => {
-  mutations.forEach(mu => {
-    if (mu.type !== "attributes" && mu.attributeName !== "class") return;
-    theme.value = mu.target.className;
-    console.log("class was modified!", mu.target.classList.contains('dark'));
-  });
-});
-
-attrObserver.observe(document.documentElement, {attributes: true})
-
 function setKey(e) {
-localStorage.setItem('openaikey', e.target.value);
+  localStorage.setItem('openaikey', e.target.value);
 }
 
 async function generate() {
-uiText.value = "";
-const res = await fetch("/.netlify/functions/getDocs");
-const test = await res.json();
-const shorten = test.substring(0, 8000);
-getUI(shorten);
+  uiText.value = "";
+  const res = await fetch("/.netlify/functions/getDocs");
+  const test = await res.json();
+  const shorten = test.substring(0, 8000);
+  getUI(shorten);
 }
 
 async function getUI(docs) {

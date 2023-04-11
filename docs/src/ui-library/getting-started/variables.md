@@ -1,3 +1,41 @@
+<script setup>
+ import {ref, onMounted} from 'vue'
+import variables from './variables'
+import vars from '@fluxapp/ui/dist/main.css?raw'
+</script>
+
+<style scoped>
+
+.grid {
+ display: grid;
+ margin-bottom: var(--j-space-500);
+ grid-template-columns: 1fr 3fr;
+}
+
+.flex {
+ display: flex;
+ flex-direction: row;
+ gap: var(--j-space-200);
+}
+
+.color {
+ border-radius: var(--j-border-radius);
+ width: var(--j-size-md);
+ height: var(--j-size-md);
+}
+
+.spacing {
+ display: inline-block;
+  background-color: var(--j-color-primary-500);
+}
+
+.font {
+  display: inline-block;
+  font-weight: 700;
+}
+
+</style>
+
 # Variables
 
 Flux UI comes with a lot of CSS variables you can change to make your own theme, but also use when composing your own UI components.
@@ -61,43 +99,3 @@ All variables
     </div>
   </div>
 </div>
-
-<script setup>
- import {ref, onMounted} from 'vue'
-import variables from './variables'
-import vars from '@fluxapp/ui/dist/main.css?raw'
-import * as shiki from 'shiki';
-
-</script>
-
-<style scoped>
-
-.grid {
- display: grid;
- margin-bottom: var(--j-space-500);
- grid-template-columns: 1fr 3fr;
-}
-
-.flex {
- display: flex;
- flex-direction: row;
- gap: var(--j-space-200);
-}
-
-.color {
- border-radius: var(--j-border-radius);
- width: var(--j-size-md);
- height: var(--j-size-md);
-}
-
-.spacing {
- display: inline-block;
-  background-color: var(--j-color-primary-500);
-}
-
-.font {
-  display: inline-block;
-  font-weight: 700;
-}
-
-</style>

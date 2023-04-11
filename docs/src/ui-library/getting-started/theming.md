@@ -1,7 +1,7 @@
 <script setup>
-import {ref, watch} from 'vue'
+import {ref, watch, onMounted} from 'vue'
 
-const theme = ref(document.documentElement.className);
+const theme = ref("");
 
 watch(theme, val => {
    document.documentElement.className = "";
@@ -12,8 +12,8 @@ watch(theme, val => {
    }
 })
 
-
-const attrObserver = new MutationObserver((mutations) => {
+onMounted(() => {
+  const attrObserver = new MutationObserver((mutations) => {
   mutations.forEach(mu => {
     if (mu.type !== "attributes" && mu.attributeName !== "class") return;
     theme.value = mu.target.className;
@@ -21,9 +21,21 @@ const attrObserver = new MutationObserver((mutations) => {
   });
 });
 
-attrObserver.observe(document.documentElement, {attributes: true})
+  attrObserver.observe(document.documentElement, {attributes: true})
+});
+
 
 </script>
+
+<style>
+html.color {
+  --j-color-primary-hue: 10; 
+}
+html.dark-mode {
+  --j-color-subtractor: 100%;
+  --j-color-multiplier: -1;
+}
+</style>
 
 # Theme basics
 
@@ -100,13 +112,3 @@ html.dark-mode {
   --j-color-multiplier: -1;
 }
 ```
-
-<style>
-html.color {
-  --j-color-primary-hue: 10; 
-}
-html.dark-mode {
-  --j-color-subtractor: 100%;
-  --j-color-multiplier: -1;
-}
-</style>

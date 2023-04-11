@@ -1,7 +1,7 @@
 <script setup>
-import {ref, watch} from 'vue'
+import {ref, watch, onMounted} from 'vue'
 
-const theme = ref(document.documentElement.className);
+const theme = ref("");
 
 watch(theme, val => {
    document.documentElement.className = "";
@@ -13,15 +13,17 @@ watch(theme, val => {
 })
 
 
-const attrObserver = new MutationObserver((mutations) => {
+onMounted(() => {
+  const attrObserver = new MutationObserver((mutations) => {
   mutations.forEach(mu => {
-    if (mu.type !== "attributes" && mu.attributeName !== "class") return;
-    theme.value = mu.target.className;
-    console.log("class was modified!", mu.target.classList.contains('dark'));
+      if (mu.type !== "attributes" && mu.attributeName !== "class") return;
+      theme.value = mu.target.className;
+      console.log("class was modified!", mu.target.classList.contains('dark'));
+    });
   });
-});
 
-attrObserver.observe(document.documentElement, {attributes: true})
+  attrObserver.observe(document.documentElement, {attributes: true})
+});
 
 </script>
 
