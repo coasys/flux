@@ -318,28 +318,6 @@ export default function useWebRTC({
     await manager.current?.sendMessage("reaction", reaction);
   }
 
-  // function onChangeSettings(newSettings: Settings) {
-  //   const videoChanged = newSettings.video !== settings.video;
-  //   const audioChanged = newSettings.audio !== settings.audio;
-  //   const screenChanged = newSettings.screen !== settings.screen;
-
-  //   if (videoChanged) {
-  //     onToggleCamera(newSettings.video);
-  //     setSettings(newSettings);
-  //     manager.current?.sendMessage("settings", newSettings);
-  //   }
-
-  //   if (audioChanged) {
-  //     onToggleAudio(newSettings.audio);
-  //     setSettings(newSettings);
-  //     manager.current?.sendMessage("settings", newSettings);
-  //   }
-
-  //   if (screenChanged) {
-  //     newSettings.screen ? onStartScreenShare() : onEndScreenShare();
-  //   }
-  // }
-
   /**
    * Change video input source
    */
