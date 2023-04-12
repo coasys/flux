@@ -1,5 +1,5 @@
 import { Me } from "utils/api/getMe";
-import { WebRTC } from "../../../hooks/useWebrtc";
+import { WebRTC } from "utils/react/useWebrtc";
 import { format } from "date-fns";
 
 import styles from "./ItemMe.module.css";

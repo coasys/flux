@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { Profile } from "utils/types";
 import getProfile from "utils/api/getProfile";
 import { Me } from "utils/api/getMe";
-import { WebRTC } from "../../hooks/useWebrtc";
+import { WebRTC } from "utils/react/useWebrtc";
 import characters from "../../sprites/characters";
 
 import User from "../User";
@@ -95,13 +95,10 @@ export default function JoinScreen({
 
       <j-box pt="400">
         <j-toggle
-          checked={webRTC.settings.video}
+          checked={webRTC.localState.settings.video}
           disabled={webRTC.isLoading || !webRTC.permissionGranted}
           onChange={() =>
-            webRTC.onChangeSettings({
-              ...webRTC.settings,
-              video: !webRTC.settings.video,
-            })
+            webRTC.onToggleCamera(!webRTC.localState.settings.video)
           }
         >
           Join with camera!
@@ -126,7 +123,9 @@ export default function JoinScreen({
           loading={webRTC.isLoading}
           disabled={!webRTC.permissionGranted}
           onClick={() =>
-            webRTC.onJoin({ spriteIndex: selectedSpriteIndex, x: 0, y: 0 })
+            webRTC.onJoin({
+              initialState: { spriteIndex: selectedSpriteIndex, x: 0, y: 0 },
+            })
           }
         >
           Join room!
