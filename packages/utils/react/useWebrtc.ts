@@ -419,7 +419,7 @@ export default function useWebRTC({
         audio: localState.settings.audio,
         video: newSettings.video,
       });
-      setLocalStream(newLocalStream);
+      updateStream(newLocalStream);
     } else {
       if (localStream) {
         if (localStream.getVideoTracks()[0]) {
@@ -455,7 +455,7 @@ export default function useWebRTC({
         audio: newSettings.audio,
         video: localState.settings.video,
       });
-      setLocalStream(newLocalStream);
+      updateStream(newLocalStream);
     } else {
       if (localStream) {
         if (localStream.getAudioTracks()[0]) {
