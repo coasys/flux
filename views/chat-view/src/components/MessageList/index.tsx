@@ -15,7 +15,7 @@ import { Virtuoso } from "react-virtuoso";
 import { h, Component, createRef } from "preact";
 import ReactHintFactory from "react-hint";
 import "react-hint/css/index.css";
-import styles from "./index.scss";
+import styles from "./index.module.css";
 import { Message, Reaction } from "utils/types";
 import { REACTION } from "utils/constants";
 

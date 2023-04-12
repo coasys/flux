@@ -1,7 +1,7 @@
 import { AgentContext } from "utils/frameworks/react";
 import { Reaction } from "utils/types";
 import { useContext, useMemo, useState } from "preact/hooks";
-import styles from "./index.scss";
+import styles from "./index.module.css";
 import { getProfile } from "utils/api";
 import emojiShortName from "emoji-short-name";
 

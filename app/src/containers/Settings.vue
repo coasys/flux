@@ -6,15 +6,16 @@
     <div class="settings">
       <aside class="settings__sidebar">
         <j-tabs
-          full
+          variant="button"
+          wrap
           :value="currentView"
           @change="(e: any) => (currentView = e.target.value)"
         >
-          <j-tab-item variant="button" value="theme-editor">
+          <j-tab-item value="theme-editor">
             <j-icon size="sm" name="eye" slot="start" />
             Appearance
           </j-tab-item>
-          <j-tab-item variant="button" value="privacy">
+          <j-tab-item value="privacy">
             <j-icon size="sm" name="bell" slot="start" />
             Notifications
           </j-tab-item>
@@ -68,6 +69,7 @@ export default defineComponent({
 
 <style scoped>
 .settings {
+  max-width: 1000px;
   display: grid;
   gap: var(--j-space-1000);
   grid-template-columns: 1fr;

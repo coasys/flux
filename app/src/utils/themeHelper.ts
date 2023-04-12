@@ -15,8 +15,9 @@ export function setTheme(theme: ThemeState): void {
     theme.fontSize
   );
 
-  import(`../themes/${theme.name}.css`);
-  document.documentElement.setAttribute("theme", theme.name);
+  console.log({ theme });
+
+  document.documentElement.setAttribute("class", theme.name);
 
   const head = document.getElementsByTagName("head")[0];
   let link = null;

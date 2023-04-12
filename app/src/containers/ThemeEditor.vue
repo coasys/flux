@@ -28,15 +28,15 @@
         <j-text variant="label">Theme</j-text>
       </j-box>
       <j-tabs
+        variant="button"
         :value="theme.name"
         @change="(e: any) => updateTheme({ name: e.target.value })"
       >
-        <j-tab-item variant="button" value="default">Default</j-tab-item>
-        <j-tab-item variant="button" value="light">Light</j-tab-item>
-        <j-tab-item variant="button" value="dark">Dark</j-tab-item>
-        <j-tab-item variant="button" value="black">Black</j-tab-item>
-        <j-tab-item variant="button" value="cyberpunk">Cyberpunk</j-tab-item>
-        <j-tab-item variant="button" value="90s">90s</j-tab-item>
+        <j-tab-item value="light">Light</j-tab-item>
+        <j-tab-item value="dark">Dark</j-tab-item>
+        <j-tab-item value="black">Black</j-tab-item>
+        <j-tab-item value="cyberpunk">Cyberpunk</j-tab-item>
+        <j-tab-item value="90s">90s</j-tab-item>
       </j-tabs>
     </j-box>
     <j-box pb="800">
@@ -44,24 +44,19 @@
         <j-text variant="label">Font family</j-text>
       </j-box>
       <j-tabs
+        variant="button"
         :value="theme.fontFamily"
         @change="(e: any) => updateTheme({ fontFamily: e.target.value })"
       >
-        <j-tab-item variant="button" value="DM Sans">DM Sans</j-tab-item>
-        <j-tab-item variant="button" value="Poppins">Poppins</j-tab-item>
-        <j-tab-item variant="button" value="Roboto">Roboto</j-tab-item>
-        <j-tab-item variant="button" value="Inter">Inter</j-tab-item>
-        <j-tab-item variant="button" value="Fira Code">Fira Code</j-tab-item>
-        <j-tab-item variant="button" value="IBM Plex Mono">
-          IBM Plex Mono
-        </j-tab-item>
-        <j-tab-item variant="button" value="IBM Plex Sans">
-          IBM Plex Sans
-        </j-tab-item>
-        <j-tab-item variant="button" value="Rubik"> Rubik </j-tab-item>
-        <j-tab-item variant="button" value="Space Grotesk">
-          Space Grotesk
-        </j-tab-item>
+        <j-tab-item value="DM Sans">DM Sans</j-tab-item>
+        <j-tab-item value="Poppins">Poppins</j-tab-item>
+        <j-tab-item value="Roboto">Roboto</j-tab-item>
+        <j-tab-item value="Inter">Inter</j-tab-item>
+        <j-tab-item value="Fira Code">Fira Code</j-tab-item>
+        <j-tab-item value="IBM Plex Mono"> IBM Plex Mono </j-tab-item>
+        <j-tab-item value="IBM Plex Sans"> IBM Plex Sans </j-tab-item>
+        <j-tab-item value="Rubik"> Rubik </j-tab-item>
+        <j-tab-item value="Space Grotesk"> Space Grotesk </j-tab-item>
       </j-tabs>
     </j-box>
     <j-box pb="800">
@@ -69,32 +64,28 @@
         <j-text variant="label">Saturation</j-text>
       </j-box>
       <j-tabs
+        variant="button"
         :value="theme.saturation.toString()"
         @change="(e: any) => updateTheme({ saturation: e.target.value })"
       >
-        <j-tab-item variant="button" value="30">Weak</j-tab-item>
-        <j-tab-item variant="button" value="60">Normal</j-tab-item>
-        <j-tab-item variant="button" value="100">Vibrant</j-tab-item>
+        <j-tab-item value="30">Weak</j-tab-item>
+        <j-tab-item value="60">Normal</j-tab-item>
+        <j-tab-item value="100">Vibrant</j-tab-item>
       </j-tabs>
     </j-box>
     <j-box pb="800">
       <j-box pb="300">
         <j-text variant="label">Font size</j-text>
       </j-box>
-      <j-flex a="center" j="between">
-        <j-text>Small</j-text>
-        <j-text>Medium</j-text>
-        <j-text>Large</j-text>
-      </j-flex>
-      <input
-        class="range-slider"
-        type="range"
+      <j-tabs
+        variant="button"
         :value="theme.fontSize.replace('px', '')"
-        min="11"
-        max="19"
-        step="1"
         @change="(e: any) => updateTheme({ fontSize: e.target.value + 'px' })"
-      />
+      >
+        <j-tab-item value="15">Small</j-tab-item>
+        <j-tab-item value="16">Medium</j-tab-item>
+        <j-tab-item value="17">Large</j-tab-item>
+      </j-tabs>
     </j-box>
   </div>
 </template>

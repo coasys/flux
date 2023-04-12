@@ -17,6 +17,7 @@ export default async function getMe(): Promise<Me> {
     const status = await client.agent.status();
     return { ...me, ...status } as Me;
   } catch (e: any) {
+    console.log(e);
     throw new Error(e);
   }
 }

@@ -1,6 +1,6 @@
 <template>
   <j-box pt="500" pb="800">
-    <j-menu-group-item open title="Channels">
+    <j-menu-group open title="Channels">
       <j-button
         @click.prevent="() => setShowCreateChannel(true)"
         size="sm"
@@ -100,7 +100,7 @@
           </j-menu-item>
         </j-menu>
       </j-popover>
-    </j-menu-group-item>
+    </j-menu-group>
     <j-menu-item @click="() => setShowCreateChannel(true)">
       <j-icon size="xs" slot="start" name="plus" />
       Add channel

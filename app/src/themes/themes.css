@@ -1,0 +1,50 @@
+html.retro {
+  --app-main-sidebar-bg-color: white;
+  --app-drawer-bg-color: white;
+  --app-main-content-bg-color: white;
+  --app-channel-bg-color: white;
+}
+
+.html.light {
+  --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+  --app-main-sidebar-border-color: hsl(var(--j-color-ui-hue), 0%, 95%);
+
+  --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+  --app-drawer-border-color: hsl(var(--j-color-ui-hue), 0%, 95%);
+
+  --app-main-content-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+
+  --app-channel-bg-color: hsl(var(--j-color-ui-hue), 0%, 99%);
+  --app-channel-header-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+  --app-channel-footer-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+  --app-channel-border-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+}
+
+.html.default {
+  --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 0%, 8%);
+  --app-main-sidebar-border-color: transparent;
+  --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 13%);
+  --app-drawer-border-color: transparent;
+  --app-main-content-bg-color: hsl(var(--j-color-ui-hue), 0%, 17%);
+  --app-channel-bg-color: hsl(var(--j-color-ui-hue), 0%, 15%);
+  --app-channel-header-bg-color: hsl(var(--j-color-ui-hue), 0%, 15%);
+  --app-channel-footer-bg-color: hsl(var(--j-color-ui-hue), 0%, 13%);
+  --app-channel-border-color: transparent;
+  --j-color-ui-saturation: 0%;
+}
+
+html.dark {
+  --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 10%, 8%);
+  --app-main-sidebar-border-color: transparent;
+  --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 10%, 10%);
+  --app-drawer-border-color: transparent;
+  --app-main-content-bg-color: hsl(var(--j-color-ui-hue), 10%, 13%);
+  --app-channel-bg-color: hsl(var(--j-color-ui-hue), 10%, 13%);
+  --app-channel-header-bg-color: hsl(var(--j-color-ui-hue), 10%, 13%);
+  --app-channel-footer-bg-color: hsl(var(--j-color-ui-hue), 10%, 13%);
+  --app-channel-border-color: transparent;
+}
+
+html.black {
+  --app-channel-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
+}

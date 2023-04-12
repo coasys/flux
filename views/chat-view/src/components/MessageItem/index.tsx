@@ -13,7 +13,7 @@ import EditorContext from "../../context/EditorContext";
 import { Message, Profile } from "utils/types";
 import MessageCards from "./MessageCards";
 
-import styles from "./index.scss";
+import styles from "./index.module.css";
 
 export default function MessageItem({
   message,

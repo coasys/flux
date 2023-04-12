@@ -1,0 +1,24 @@
+{
+  "name": "@fluxapp/docs",
+  "version": "0.0.1",
+  "description": "",
+  "homepage": "https://docs.fluxsocial.io",
+  "scripts": {
+    "start": "yarn dev",
+    "build": "vitepress build",
+    "build:all": "yarn workspace @fluxapp/ui build && yarn build",
+    "dev": "vitepress dev"
+  },
+  "dependencies": {
+    "@fluxapp/ui": "*",
+    "vitepress": "^1.0.0-alpha.65",
+    "three": "^0.151.3",
+    "eventsource-parser": "^1.0.0"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

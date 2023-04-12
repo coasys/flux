@@ -4,11 +4,18 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mini Chat View</title>
+    <title>Forum View</title>
     <style>
       body {
-        padding: 0;
+        -webkit-font-smoothing: antialiased;
+        height: 100%;
+        width: 100%;
         margin: 0;
+        padding: 0;
+        text-rendering: optimizeLegibility;
+        color: var(--j-color-ui-800);
+        font-family: var(--j-font-family);
+        background-color: var(--j-color-white);
       }
       html {
         box-sizing: border-box;
@@ -21,34 +28,32 @@
     </style>
     <link
       rel="stylesheet"
-      href="https://unpkg.com/@junto-foundation/junto-elements@latest/dist/main.css"
+      href="https://unpkg.com/@fluxapp/ui@latest/dist/main.css"
     />
-    <script src="https://unpkg.com/@junto-foundation/junto-elements@latest"></script>
+    <script src="https://unpkg.com/@fluxapp/ui@latest"></script>
   </head>
   <body>
-    <ad4m-connect
-      theme="dark"
-      appName="Flux"
-      appDesc="Flux - A SOCIAL TOOLKIT FOR THE NEW INTERNET"
-      appDomain="https://www.test.io/"
-      capabilities='[{"with":{"domain":"*","pointers":["*"]},"can": ["*"]}]'
-      appiconpath="https://i.ibb.co/GnqjPJP/icon.png"
-      openonshortcut
-    ></ad4m-connect>
     <perspective-view style="height: 100vh; display: block"></perspective-view>
     <script type="module">
-      import "https://unpkg.com/@perspect3vism/ad4m-connect@0.0.11-11/dist/web.js";
-      import MiniChatView from "./dist/main.js";
+      import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
+      import ForumView from "./src/main.ts";
+
+      const ui = Ad4mConnectUI({
+        appName: "Chat App",
+        appDesc: "A chat app",
+        appDomain: "flux.forum.io",
+        appIconPath: "https://i.ibb.co/GnqjPJP/icon.png",
+        capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
+      });
+
+      ui.connect();
 
       const el = document.querySelector("perspective-view");
       const [_, uuid, source] = document.location.pathname.split("/");
 
       el.setAttribute("perspective", decodeURIComponent(uuid));
       el.setAttribute("source", decodeURIComponent(source));
-      customElements.define("perspective-view", MiniChatView);
-
-      const ad4mConnect = document.querySelector("ad4m-connect");
-      ad4mConnect.connect();
+      customElements.define("perspective-view", ForumView);
     </script>
   </body>
 </html>

@@ -3,19 +3,19 @@ import { Settings } from "utils/helpers";
 const frameRate = {
   min: 5,
   ideal: 15,
-  max: 30,
+  max: 20,
 };
 
 export const videoDimensions = {
   width: {
     min: 640,
-    ideal: 1920,
-    max: 3840,
+    ideal: 1280,
+    max: 1920,
   },
   height: {
-    min: 480,
-    ideal: 1080,
-    max: 2160,
+    min: 360,
+    ideal: 720,
+    max: 1080,
   },
   aspectRatio: 1.777, // 16:9
   frameRate: frameRate,

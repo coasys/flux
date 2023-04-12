@@ -7,7 +7,7 @@ import {
 } from "utils/frameworks/react";
 import { UIProvider } from "./context/UIContext";
 import { useState } from "preact/hooks";
-import styles from "./index.scss";
+import styles from "./index.module.css";
 import { EditorProvider } from "./context/EditorContext";
 
 const MainComponent = ({ perspective, source }) => {
