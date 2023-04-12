@@ -587,6 +587,7 @@ export default function useWebRTC({
   async function onLeave() {
     await manager.current?.leave();
     setConnections([]);
+    setReactions([]);
     setLocalStream(null);
     setIsLoading(false);
     setHasJoined(false);
