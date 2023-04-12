@@ -86,6 +86,13 @@ export default function useWebRTC({
   const [reactions, setReactions] = useState<Reaction[]>([]);
   const [localEventLog, setLocalEventLog] = useState<EventLogItem[]>([]);
 
+  // Leave on unmount
+  useEffect(() => {
+    return () => {
+      onLeave();
+    };
+  }, []);
+
   // Get agent/me
   useEffect(() => {
     async function fetchAgent() {
