@@ -22,8 +22,8 @@ Describe what kind of UI you would like to create with the Flux UI library and h
 <j-input size="lg" label="OpenAI API Key" @change="setKey" :value="apiKey" @input="e => apiKey = e.target.value"></j-input>
 </j-box>
 
-<j-button :loading="isGenerating" full :disabled="isGenerating" size="xl" variant="primary" @click="generate">
-Generate
+<j-button full :disabled="isGenerating" size="xl" variant="primary" @click="generate">
+{{isGenerating ? 'Generating...' : 'Generate'}}
 </j-button>
 
 </div>
@@ -135,7 +135,6 @@ div[placeholder]:empty::before {
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 
-const stopStream = ref(false);
 const uiText = ref("");
 const question = ref("");
 const tab = ref("code");
@@ -182,8 +181,8 @@ async function generate() {
 
 async function getUI(docs) {
 try {
+  console.log('get ui?')
 isGenerating.value = true;
-stopStream.value = false;
 
     const response = await fetch("/buildUI", {
       method: "POST",
