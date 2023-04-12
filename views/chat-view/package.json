@@ -1,23 +1,33 @@
 {
-  "name": "@junto-foundation/chat-view",
-  "version": "0.5.8",
+  "name": "@fluxapp/chat-view",
+  "version": "0.0.1",
   "description": "",
-  "main": "./dist/main.js",
-  "module": "./dist/main.js",
+  "type": "module",
   "files": [
     "dist"
   ],
+  "main": "./dist/main.umd.cjs",
+  "module": "./dist/main.js",
+  "exports": {
+    ".": {
+      "import": "./dist/main.js",
+      "require": "./dist/main.umd.cjs"
+    }
+  },
   "scripts": {
     "prepare": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node esbuild.js",
-    "dev": "NODE_ENV=dev node esbuild.js",
+    "build": "vite build",
+    "dev": "npm-run-all --parallel dev:**",
+    "dev:server": "vite",
+    "dev:dist": "vite build --watch",
     "release": "np --no-tests"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@preact/preset-vite": "^2.5.0",
     "@tiptap/core": "2.0.0-beta.217",
     "@tiptap/extension-bold": "2.0.0-beta.217",
     "@tiptap/extension-bullet-list": "2.0.0-beta.217",
@@ -49,7 +59,9 @@
     "react-hint": "^3.2.1",
     "react-virtuoso": "^3.1.1",
     "tippy.js": "^6.3.1",
-    "utils": "*"
+    "utils": "*",
+    "vite": "^4.2.1",
+    "vite-plugin-css-injected-by-js": "^3.1.0"
   },
   "devDependencies": {
     "@types/react": "^17.0.2",

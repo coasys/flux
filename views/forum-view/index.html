@@ -7,8 +7,15 @@
     <title>Forum View</title>
     <style>
       body {
-        padding: 0;
+        -webkit-font-smoothing: antialiased;
+        height: 100%;
+        width: 100%;
         margin: 0;
+        padding: 0;
+        text-rendering: optimizeLegibility;
+        color: var(--j-color-ui-800);
+        font-family: var(--j-font-family);
+        background-color: var(--j-color-white);
       }
       html {
         box-sizing: border-box;
@@ -21,9 +28,9 @@
     </style>
     <link
       rel="stylesheet"
-      href="https://unpkg.com/@junto-foundation/junto-elements@latest/dist/main.css"
+      href="https://unpkg.com/@fluxapp/ui@latest/dist/main.css"
     />
-    <script src="https://unpkg.com/@junto-foundation/junto-elements@latest"></script>
+    <script src="https://unpkg.com/@fluxapp/ui@latest"></script>
   </head>
   <body>
     <perspective-view style="height: 100vh; display: block"></perspective-view>
