@@ -1,6 +1,7 @@
 import { WebRTC } from "utils/react/useWebrtc";
 import { Me } from "utils/api/getMe";
 import * as localstorage from "utils/helpers/localStorage";
+import { defaultSettings } from "utils/constants/videoSettings";
 import Select from "../../Select";
 
 type Props = {
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export default function VoiceVideo({ webRTC }: Props) {
+  console.log(webRTC.devices);
   const videoTrack = webRTC.localStream
     ?.getTracks()
     ?.find((track) => track.kind === "video");
@@ -31,26 +33,40 @@ export default function VoiceVideo({ webRTC }: Props) {
       : audioTrack?.getSettings().deviceId ||
         localstorage.getForVersion("audioDeviceId");
 
-  const videoDevices = webRTC?.devices?.filter((d) => d.kind === "videoinput");
-  const audioDevices = webRTC?.devices?.filter((d) => d.kind === "audioinput");
+  const videoDevices = webRTC?.devices
+    ?.filter((d) => d.kind === "videoinput")
+    .filter((d) => !!d.deviceId);
+  const audioDevices = webRTC?.devices
+    ?.filter((d) => d.kind === "audioinput")
+    .filter((d) => !!d.deviceId);
 
   return (
     <div>
       <h3>Voice & Video settings</h3>
       <j-box pt={300}>
-        <Select
-          name="video-device"
-          label="Video input device"
-          placeholder="Select device"
-          selected={selectedVideoDeviceId}
-          options={videoDevices.map((v) => ({
-            text: v.label,
-            value: v.deviceId,
-          }))}
-          onChange={(e) => {
-            webRTC.onChangeCamera(e.target.value);
-          }}
-        />
+        <j-flex j="end" a="center" gap="200" direction="row">
+          <Select
+            name="video-device"
+            label="Video input device"
+            placeholder="Select device"
+            selected={selectedVideoDeviceId}
+            options={videoDevices.map((v) => ({
+              text: v.label,
+              value: v.deviceId,
+            }))}
+            onChange={(e) => {
+              webRTC.onChangeCamera(e.target.value);
+            }}
+          />
+
+          {!webRTC.videoPermissionGranted && (
+            <j-box pt={600}>
+              <j-button onClick={() => webRTC.onToggleCamera(true)} size="sm">
+                Allow permission
+              </j-button>
+            </j-box>
+          )}
+        </j-flex>
       </j-box>
 
       <j-box pt={500}>

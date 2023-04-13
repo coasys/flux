@@ -96,7 +96,7 @@ export default function JoinScreen({
       <j-box pt="400">
         <j-toggle
           checked={webRTC.localState.settings.video}
-          disabled={webRTC.isLoading || !webRTC.permissionGranted}
+          disabled={webRTC.isLoading || !webRTC.audioPermissionGranted}
           onChange={() =>
             webRTC.onToggleCamera(!webRTC.localState.settings.video)
           }
@@ -110,7 +110,7 @@ export default function JoinScreen({
           variant="ghost"
           size="sm"
           loading={webRTC.isLoading}
-          disabled={!webRTC.permissionGranted}
+          disabled={!webRTC.audioPermissionGranted}
           onClick={() => onToggleSettings()}
         >
           Audio/Video Settings
@@ -121,7 +121,7 @@ export default function JoinScreen({
           variant="primary"
           size="lg"
           loading={webRTC.isLoading}
-          disabled={!webRTC.permissionGranted}
+          disabled={!webRTC.audioPermissionGranted}
           onClick={() =>
             webRTC.onJoin({
               initialState: { spriteIndex: selectedSpriteIndex, x: 0, y: 0 },
@@ -133,7 +133,7 @@ export default function JoinScreen({
       </j-box>
 
       <>
-        {!webRTC.permissionGranted && (
+        {!webRTC.audioPermissionGranted && (
           <j-box pt="400">
             <j-text variant="warning">
               Please allow camera/microphone access to join.

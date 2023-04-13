@@ -52,7 +52,8 @@ export type WebRTC = {
   isInitialised: boolean;
   hasJoined: boolean;
   isLoading: boolean;
-  permissionGranted: boolean;
+  audioPermissionGranted: boolean;
+  videoPermissionGranted: boolean;
   onJoin: (props: JoinProps) => Promise<void>;
   onLeave: () => Promise<void>;
   onReaction: (reaction: string) => Promise<void>;
@@ -74,7 +75,8 @@ export default function useWebRTC({
 
   const manager = useRef<WebRTCManager | null>();
   const [localState, setLocalState] = useState<Peer["state"]>(defaultState);
-  const [permissionGranted, setPermissionGranted] = useState(false);
+  const [audioPermissionGranted, setAudioPermissionGranted] = useState(false);
+  const [videoPermissionGranted, setVideoPermissionGranted] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
   const [agent, setAgent] = useState<Me>();
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
@@ -122,7 +124,7 @@ export default function useWebRTC({
     }
 
     getDevices();
-  }, [permissionGranted]);
+  }, [audioPermissionGranted, videoPermissionGranted]);
 
   /**
    * askForPermission - Ask for user permission to access audio/video
@@ -142,9 +144,23 @@ export default function useWebRTC({
         joinSettings.video = false;
       }
 
+      // Check if access has already been given
+      const allowedAudioDevices = devices.some(
+        (d) => d.kind === "audioinput" && d.label !== ""
+      );
+      const allowedVideoDevices = devices.some(
+        (d) => d.kind === "videoinput" && d.label !== ""
+      );
+
+      if (allowedAudioDevices || allowedVideoDevices) {
+        setAudioPermissionGranted(allowedAudioDevices);
+        setVideoPermissionGranted(allowedVideoDevices);
+        return;
+      }
+
       navigator.mediaDevices?.getUserMedia(joinSettings).then(
         (stream) => {
-          setPermissionGranted(true);
+          setAudioPermissionGranted(true);
           setLocalStream(stream);
           setLocalState((oldState) => ({
             ...oldState,
@@ -153,14 +169,15 @@ export default function useWebRTC({
         },
         (e) => {
           console.error(e);
-          setPermissionGranted(false);
+          setAudioPermissionGranted(false);
         }
       );
     }
-    if (enabled && !permissionGranted && devices.length > 0) {
+
+    if (enabled && !audioPermissionGranted && devices.length > 0) {
       askForPermission();
     }
-  }, [enabled, localState, permissionGranted, devices]);
+  }, [enabled, localState, audioPermissionGranted, devices]);
 
   /**
    * TogglePreRecording
@@ -170,7 +187,7 @@ export default function useWebRTC({
   useEffect(() => {
     async function TogglePreRecording() {
       // Return if permission denied
-      if (!permissionGranted) {
+      if (!audioPermissionGranted) {
         return;
       }
 
@@ -191,7 +208,7 @@ export default function useWebRTC({
     if (!hasJoined) {
       TogglePreRecording();
     }
-  }, [enabled, showPreview, permissionGranted, hasJoined, localState]);
+  }, [enabled, showPreview, audioPermissionGranted, hasJoined, localState]);
 
   /**
    * Attach signal listeners
@@ -385,6 +402,11 @@ export default function useWebRTC({
       }
     }
 
+    // If first time, set setVideoPermissionGranted
+    if (!videoPermissionGranted) {
+      setVideoPermissionGranted(true);
+    }
+
     updateStream(newLocalStream);
 
     // Notify others of state change
@@ -575,7 +597,8 @@ export default function useWebRTC({
     isInitialised,
     hasJoined,
     isLoading,
-    permissionGranted,
+    audioPermissionGranted,
+    videoPermissionGranted,
     onJoin,
     onLeave,
     onReaction,

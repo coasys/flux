@@ -105,7 +105,7 @@ export default function JoinScreen({
           checked={webRTC.localState.settings.video}
           disabled={
             webRTC.isLoading ||
-            !webRTC.permissionGranted ||
+            !webRTC.audioPermissionGranted ||
             webRTC.devices.every((d) => d.kind !== "videoinput")
           }
           onChange={() =>
@@ -121,7 +121,7 @@ export default function JoinScreen({
           variant="primary"
           size="lg"
           loading={webRTC.isLoading}
-          disabled={!webRTC.permissionGranted}
+          disabled={!webRTC.audioPermissionGranted}
           onClick={webRTC.onJoin}
         >
           Join room!
@@ -133,7 +133,7 @@ export default function JoinScreen({
       </j-box>
 
       <>
-        {!webRTC.permissionGranted && (
+        {!webRTC.audioPermissionGranted && (
           <j-box pt="400">
             <j-text variant="warning">
               Please allow camera/microphone access to join.
