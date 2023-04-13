@@ -5,7 +5,7 @@
   grid-template-rows: max-content;
   gap: var(--j-space-500);
   padding: var(--j-space-500);
-  background-color: rgba(0,0,0,0.05);
+  background-color: rgba(0, 0, 0, 0.05);
   text-decoration: none;
   color: currentColor;
   position: relative;
@@ -45,7 +45,7 @@
 }
 
 .postImageWrapper {
-  border: 1px solid rgba(255, 255, 255, 0.0);
+  border: 1px solid rgba(255, 255, 255, 0);
   border-radius: var(--j-border-radius);
   overflow: hidden;
   display: grid;
@@ -93,6 +93,11 @@
 .timestamp {
   color: var(--j-color-ui-300);
   font-size: var(--j-font-size-400);
+}
+
+.authorName {
+  color: currentColor;
+  text-decoration: none;
 }
 
 .authorName:hover {

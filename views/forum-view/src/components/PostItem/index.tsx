@@ -41,15 +41,6 @@ export default function PostItem({ post, displayView }) {
     }
   }, [post.image, post.url]);
 
-  function onProfileClick(event: any, did: string) {
-    event.stopPropagation();
-    const e = new CustomEvent("agent-click", {
-      detail: { did },
-      bubbles: true,
-    });
-    event.target.dispatchEvent(e);
-  }
-
   const author: Profile = members[post.author] || {};
   const popularStyle: string = post.isPopular ? styles.popularMessage : "";
   const displayStyle: DisplayView =
@@ -99,21 +90,19 @@ export default function PostItem({ post, displayView }) {
 
         <j-box pt="200">
           <j-flex a="center" gap="300">
-            <Avatar
-              size="xxs"
-              onClick={(e) => onProfileClick(e, author.did)}
-              did={author.did}
-              url={author.profileThumbnailPicture}
-            ></Avatar>
+            <a href={author.did}>
+              <Avatar
+                size="xxs"
+                did={author.did}
+                url={author.profileThumbnailPicture}
+              ></Avatar>
+            </a>
             <j-flex a="center" gap="200">
-              <div
-                className={styles.authorName}
-                onClick={(e) => onProfileClick(e, author.did)}
-              >
+              <a className={styles.authorName} href={author.did}>
                 {author?.username || (
                   <j-skeleton width="lg" height="text"></j-skeleton>
                 )}
-              </div>
+              </a>
               <div class={styles.timestamp}>
                 {getTimeSince(new Date(post.timestamp), new Date())}
               </div>

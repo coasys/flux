@@ -26,15 +26,6 @@ export default function CommentItem({ comment, perspectiveUuid }) {
     model: MessageModel,
   });
 
-  function onProfileClick(event: any, did: string) {
-    event.stopPropagation();
-    const e = new CustomEvent("agent-click", {
-      detail: { did },
-      bubbles: true,
-    });
-    event.target.dispatchEvent(e);
-  }
-
   async function submitComment() {
     try {
       setIsCreating(true);
@@ -64,12 +55,13 @@ export default function CommentItem({ comment, perspectiveUuid }) {
             ></j-icon>
           )}
         </div>
-        <Avatar
-          size="xs"
-          onClick={(e: any) => onProfileClick(e, author?.did)}
-          did={author.did}
-          url={author.profileThumbnailPicture}
-        ></Avatar>
+        <a href={author.did}>
+          <Avatar
+            size="xs"
+            did={author.did}
+            url={author.profileThumbnailPicture}
+          ></Avatar>
+        </a>
         {showComments && (
           <div
             onClick={() => setShowComments(false)}
@@ -79,14 +71,11 @@ export default function CommentItem({ comment, perspectiveUuid }) {
       </div>
       <div class={styles.postContentWrapper}>
         <div class={styles.postDetails}>
-          <span
-            onClick={(e: any) => onProfileClick(e, author?.did)}
-            className={styles.authorName}
-          >
+          <a href={author.did} className={styles.authorName}>
             {author?.username || (
               <j-skeleton width="lg" height="text"></j-skeleton>
             )}
-          </span>
+          </a>
           <span class={styles.timestamp}>
             {getTimeSince(new Date(comment.timestamp), new Date())}
           </span>
