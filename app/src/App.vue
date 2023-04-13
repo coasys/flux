@@ -31,7 +31,7 @@
     :open="ui.toast.open"
     @toggle="(e: any) => appStore.setToast({ open: e.target.open })"
   >
-    <j-text>{{ ui.toast.message }}</j-text>
+    {{ ui.toast.message }}
   </j-toast>
 </template>
 
