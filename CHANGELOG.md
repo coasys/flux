@@ -3,10 +3,26 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.5.9] - 13/04/2023
+
+### Added
+
+- AI tool to make UI components using the `@flux/ui` package
+
+### Changed
+
+- Complete revamp of documentation for UI elements
+- Move themes into `@fluxapp/ui` package, making it easy for people to style their apps in different themes
+- npm package names are renamed from `@junto-foundation` to `@fluxapp`
+- `j-tabs` takes `variant` prop instead of each `j-tab-item` element
+- WebRTC Video chat is now using SimplePeer and should be more stable
+- Video disabled by default
+
 ## [0.5.8] - 27/03/2023
 
 ### Added
- - Perspective sync state indicator
+
+- Perspective sync state indicator
 
 ### Changed
 
@@ -15,15 +31,17 @@ This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/
 ### Removed
 
 ### Fixed
- - Incorrect dates & weird formatting for messages in chat view
- - Stop webcam input if in another tab and not joined yet
+
+- Incorrect dates & weird formatting for messages in chat view
+- Stop webcam input if in another tab and not joined yet
 
 ### Security
 
 ## [0.5.7] - 23/03/2023
 
 ### Added
- - New WebRTC debugger channel view
+
+- New WebRTC debugger channel view
 
 ### Changed
 
@@ -32,8 +50,9 @@ This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/
 ### Removed
 
 ### Fixed
- - Voice channel will work even if you dont have a webcam
- - Various improvements to WebRTC stability and connects for voice channel
+
+- Voice channel will work even if you dont have a webcam
+- Various improvements to WebRTC stability and connects for voice channel
 
 ### Security
 
@@ -42,6 +61,7 @@ This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/
 ### Added
 
 ### Changed
+
 - Use new holochain based file storage language
 
 ### Deprecated
@@ -55,7 +75,8 @@ This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/
 ## [0.5.4] - 03/03/2023
 
 ### Added
- - New signup page with added orbs and changed flow
+
+- New signup page with added orbs and changed flow
 
 ### Changed
 
@@ -64,42 +85,48 @@ This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/
 ### Removed
 
 ### Fixed
- - Hydrate state is fixed
- - Notifications are now working
+
+- Hydrate state is fixed
+- Notifications are now working
 
 ### Security
 
 ## [0.5.3] - 02/03/2023
 
 ### Added
- - Ability to switch mic / video source in voice view
- - Heartbeat function to WebRTC connections to try and repair broken connections
- - Border around videos when someone is talking
+
+- Ability to switch mic / video source in voice view
+- Heartbeat function to WebRTC connections to try and repair broken connections
+- Border around videos when someone is talking
 
 ### Changed
- - Use new Flux blob icon
- - Bump ad4m connect to 0.2.15-alpha.4
- - Default theme is now dark
+
+- Use new Flux blob icon
+- Bump ad4m connect to 0.2.15-alpha.4
+- Default theme is now dark
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
- - Sending incorrect app url to ad4m-connect
- - Bug where certain URL's would cause the whole UI to crash
- - Potential bug where profiles with no links would be saved to cache
+
+- Sending incorrect app url to ad4m-connect
+- Bug where certain URL's would cause the whole UI to crash
+- Potential bug where profiles with no links would be saved to cache
 
 ### Security
 
 ## [0.5.2] - 26/02/2023
 
 ### Added
- - New voice/video chat channel type!
- - Chrome PWA download
+
+- New voice/video chat channel type!
+- Chrome PWA download
 
 ### Changed
- - Upgrade to AD4M version v0.2.16
+
+- Upgrade to AD4M version v0.2.16
 
 ### Deprecated
 
@@ -114,8 +141,9 @@ This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/
 ### Added
 
 ### Changed
- - Update all ad4m deps to 0.2.11
- - Use new link language hash
+
+- Update all ad4m deps to 0.2.11
+- Use new link language hash
 
 ### Deprecated
 
@@ -128,142 +156,155 @@ This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/
 ## [0.5.0] - 01/02/2023
 
 ### Added
- - Expand icon for channel views
- - Cards will now load before we receive the data to avoid the text jumping around once card data loads
- - Confirmation modal when leaving a community
+
+- Expand icon for channel views
+- Cards will now load before we receive the data to avoid the text jumping around once card data loads
+- Confirmation modal when leaving a community
 
 ### Changed
- - Limit avatar img to accept image/*
- - If we have incompatible AD4M versions we will now point the user toward a new ad4m download
- - Code now refactored to live in app, packages and views directories
- - No link constants exist inside of Flux app anymore but instead in utils package
- - Rename delete community to leave community
- - New link language hash with simplified latest revision handling
- - All packages now use consistent version numbers
+
+- Limit avatar img to accept image/\*
+- If we have incompatible AD4M versions we will now point the user toward a new ad4m download
+- Code now refactored to live in app, packages and views directories
+- No link constants exist inside of Flux app anymore but instead in utils package
+- Rename delete community to leave community
+- New link language hash with simplified latest revision handling
+- All packages now use consistent version numbers
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
- - Channel header layout on mobile
- - Author of replied posts being incorrectly returned as the author of the reply post itself
- - Reaction being added twice through emoji picker
- - But where it was possible to remove a reaction before it was sync'd
- - Bug causing hydrate state not to complete fully
- - Incorrect image being shown in mention list
- - Join button now hidden on neighbourhood cards if already joined
- - Predicates are now grouping more effectively in the graph
- - Image cropper not appearing correctly on first load
+
+- Channel header layout on mobile
+- Author of replied posts being incorrectly returned as the author of the reply post itself
+- Reaction being added twice through emoji picker
+- But where it was possible to remove a reaction before it was sync'd
+- Bug causing hydrate state not to complete fully
+- Incorrect image being shown in mention list
+- Join button now hidden on neighbourhood cards if already joined
+- Predicates are now grouping more effectively in the graph
+- Image cropper not appearing correctly on first load
 
 ### Security
 
 ## [0.4.2] - 20/01/2023
 
 ### Added
- - New cli tool for building flux perspective views
- - Graph view perspective view type
- - Emoji reactions are now optimistic
- - Subtle animation for emoji and chat message loading
+
+- New cli tool for building flux perspective views
+- Graph view perspective view type
+- Emoji reactions are now optimistic
+- Subtle animation for emoji and chat message loading
 
 ### Changed
- - Tweak styling slightly
- - Use new perspective diff sync with improved logic
+
+- Tweak styling slightly
+- Use new perspective diff sync with improved logic
 
 ### Deprecated
 
 ### Removed
- - Loading indicator for profile images
+
+- Loading indicator for profile images
 
 ### Fixed
- - Async routing
- - Joining a neighbourhood from click
- - Member count in group
- - Edit cursor fixed in chat view
+
+- Async routing
+- Joining a neighbourhood from click
+- Member count in group
+- Edit cursor fixed in chat view
 
 ### Security
 
 ## [0.4.1] - 16/01/2023
 
 ### Added
- - Forum post editing
- - Delete posts
- - New UI after joining a community to allow for navigation to channels without using sidebar
- - New UI and loading animations when you join a community and are waiting for data to sync
- - If a user joins a community; navigate to it by default
+
+- Forum post editing
+- Delete posts
+- New UI after joining a community to allow for navigation to channels without using sidebar
+- New UI and loading animations when you join a community and are waiting for data to sync
+- If a user joins a community; navigate to it by default
 
 ### Changed
- - Use ipfs public gateway instead of cloudflare
- - Member links now used to determine if we are sync'd with a community
- - Use new link language with more effecient active agent fetching & reduce ad4m logging
- - Improved rendering of avatars
+
+- Use ipfs public gateway instead of cloudflare
+- Member links now used to determine if we are sync'd with a community
+- Use new link language with more effecient active agent fetching & reduce ad4m logging
+- Improved rendering of avatars
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
- - Neighbourhood links are now parsed out of pasted joining code
- - You can no longer post empty comments on posts
- - Username should now prepopulate from ad4m on signup
- - Fix disclaimer model showing too often
- - Messages are now added to the UI optimistically with indication of when they sync to the network
- - Fixed creating null image expressions if we do not provide images for a community
- - Not being able to press space in forum post body
- - Not being able to press tab to move between title and body when making a forum post
- - Show correct image when editing/removing an image 
- - Community image trying to resolve on IPFS even if it does not exist
- - Already sync'd community will not incorrectly show sync screen on reload
- - Refresh when looking at a post will correctly maintain view on that post
+
+- Neighbourhood links are now parsed out of pasted joining code
+- You can no longer post empty comments on posts
+- Username should now prepopulate from ad4m on signup
+- Fix disclaimer model showing too often
+- Messages are now added to the UI optimistically with indication of when they sync to the network
+- Fixed creating null image expressions if we do not provide images for a community
+- Not being able to press space in forum post body
+- Not being able to press tab to move between title and body when making a forum post
+- Show correct image when editing/removing an image
+- Community image trying to resolve on IPFS even if it does not exist
+- Already sync'd community will not incorrectly show sync screen on reload
+- Refresh when looking at a post will correctly maintain view on that post
 
 ### Security
 
 ## [0.4.0] - 04/01/2023
 
 ### Added
- - Fallback to public IPFS gateway if images not resolved by local node
- - Forum view, with ability to post; links, long form text and images
- - Ability to add multiple views to a channel
- - Side bar folders for different views on channels
- - Mechanism for updating & managing social dna versions
- - Signup flow greatly improved with intro experience explaining Flux
- - Scrolling to a very old reply will now work correctly and move to that area of that chat
- - Posts have a comment section
- - Messages which have not been sync'd with the DHT will not appear grey until sync'd
- - Generic model class structure to allow easy iteration of features & abstracting of link management
- - AD4M connect will now always download the latest version for your OS
- - Prompt to join a testing community when opening Flux
- - All images are now compressed before being uploaded to IPFS
- - Loading indicator when joining a community
+
+- Fallback to public IPFS gateway if images not resolved by local node
+- Forum view, with ability to post; links, long form text and images
+- Ability to add multiple views to a channel
+- Side bar folders for different views on channels
+- Mechanism for updating & managing social dna versions
+- Signup flow greatly improved with intro experience explaining Flux
+- Scrolling to a very old reply will now work correctly and move to that area of that chat
+- Posts have a comment section
+- Messages which have not been sync'd with the DHT will not appear grey until sync'd
+- Generic model class structure to allow easy iteration of features & abstracting of link management
+- AD4M connect will now always download the latest version for your OS
+- Prompt to join a testing community when opening Flux
+- All images are now compressed before being uploaded to IPFS
+- Loading indicator when joining a community
 
 ### Changed
- - Community, channel & forum structures now use new Entry API models
- - Holochain now using version 0.1.0-beta-rc.1
- - IPFS now using version 0.65.0
- - All API / AD4M methods now exist in their own utils package, and no longer in app logic
- - AD4MIN UI refreshed & rebuilt
- - Adding and or removing multiple links will now happen in one ad4m / holochain operation
+
+- Community, channel & forum structures now use new Entry API models
+- Holochain now using version 0.1.0-beta-rc.1
+- IPFS now using version 0.65.0
+- All API / AD4M methods now exist in their own utils package, and no longer in app logic
+- AD4MIN UI refreshed & rebuilt
+- Adding and or removing multiple links will now happen in one ad4m / holochain operation
 
 ### Deprecated
- - Signup flow no longer asks for first or last name
+
+- Signup flow no longer asks for first or last name
 
 ### Removed
 
 ### Fixed
- - Many reloads of profiles when hovering over an emoji
- - Community tweaks editing now happens with atomic operations
- - Links will now load metadata right after pasting into link box
- - Inconsistent updating of profile when changing any text or images
- - Neighbourhood link cards in chat will only be joinable if not already joined
- - Image loading across the app is more consistent and makes better use of caching logic
- - Switching between communities is now smoother
- - Literals are now encoded correctly
- - Lookbehind regex breaking flux UI in safari
- - Web components now have correct typescript typing
- - Netlify build script fixed
+
+- Many reloads of profiles when hovering over an emoji
+- Community tweaks editing now happens with atomic operations
+- Links will now load metadata right after pasting into link box
+- Inconsistent updating of profile when changing any text or images
+- Neighbourhood link cards in chat will only be joinable if not already joined
+- Image loading across the app is more consistent and makes better use of caching logic
+- Switching between communities is now smoother
+- Literals are now encoded correctly
+- Lookbehind regex breaking flux UI in safari
+- Web components now have correct typescript typing
+- Netlify build script fixed
 
 ### Security
-
 
 ## [0.3.1] - 08/11/2022
 
