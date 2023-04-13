@@ -293,12 +293,12 @@ export default class WebRTCManager {
       did: remoteDid,
       source: this.source,
       neighbourhood: this.neighbourhood,
-      stream: this.localStream,
       initiator: initiator,
       options: { config: { iceServers } },
     });
 
     const peer = ad4mPeer.connect();
+    peer.addStream(this.localStream);
 
     // got a data channel message
     peer.on("data", (data) => {

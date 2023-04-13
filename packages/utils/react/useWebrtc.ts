@@ -504,38 +504,14 @@ export default function useWebRTC({
   }
 
   function updateStream(stream: MediaStream) {
-    const [videoTrack] = stream.getVideoTracks();
-    const [audioTrack] = stream.getAudioTracks();
-
-    console.log("Runing updateStream", stream);
-
     for (let peer of connections) {
-      if (videoTrack) {
-        const currentVideoTrack =
-          peer.connection.peer.streams[0].getVideoTracks()[0];
+      const currentStream = peer.connection.peer.streams[0];
 
-        console.log(peer.connection.peer.streams[0].getVideoTracks()[0]); // undefined
-
-        if (currentVideoTrack) {
-          peer.connection.peer.replaceTrack(
-            currentVideoTrack,
-            videoTrack,
-            peer.connection.peer.streams[0]
-          );
-        } else {
-          peer.connection.peer.addTrack(
-            videoTrack,
-            peer.connection.peer.streams[0]
-          );
-        }
-      }
-
-      if (audioTrack) {
-        peer.connection.peer.replaceTrack(
-          peer.connection.peer.streams[0].getAudioTracks()[0],
-          audioTrack,
-          peer.connection.peer.streams[0]
-        );
+      if (!currentStream) {
+        peer.connection.peer.addStream(stream);
+      } else {
+        peer.connection.peer.removeStream(stream);
+        peer.connection.peer.addStream(stream);
       }
     }
 
