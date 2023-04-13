@@ -61,34 +61,14 @@ export default function PostItem({ post, displayView }) {
       onClick={() => UIMehthods.goToPost(post.id)}
       class={[styles.post, displayStyle, popularStyle].join(" ")}
     >
-      <div class={styles.postImageWrapper}>
-        {showUrl && ogData?.images?.length > 0 && (
-          <img src={ogData.images[0]} class={styles.postImage} />
-        )}
-        {showImage && <img class={styles.postImage} src={base64} />}
-        {showDates && (
-          <div class={styles.calendar}>
-            <span class={styles.calendarMonth}>
-              {format(new Date(post.startDate), "MMM")}
-            </span>
-            <span class={styles.calendarDate}>
-              {format(new Date(post.startDate), "dd")}th
-            </span>
-          </div>
-        )}
-        {!showUrl && !showDates && !showImage && (
-          <j-icon
-            className={styles.postIcon}
-            size="xl"
-            color="ui-600"
-            name="body-text"
-          ></j-icon>
-        )}
-      </div>
       <div class={styles.postContentWrapper}>
-        {showTite && <div className={styles.postTitle}>{post.title}</div>}
+        {showTite && (
+          <j-text nomargin className={styles.postTitle} variant="heading">
+            {post.title}
+          </j-text>
+        )}
 
-        <j-box pt="200">
+        <j-box pt="400">
           <j-flex a="center" gap="300">
             <a href={author.did}>
               <Avatar
@@ -104,7 +84,7 @@ export default function PostItem({ post, displayView }) {
                 )}
               </a>
               <div class={styles.timestamp}>
-                {getTimeSince(new Date(post.timestamp), new Date())}
+                <j-timestamp relative value={post.timestamp}></j-timestamp>
               </div>
             </j-flex>
           </j-flex>
@@ -143,18 +123,28 @@ export default function PostItem({ post, displayView }) {
             </div>
           </div>
         )}
-        {showBody && (
-          <div
-            className={styles.postBody}
-            dangerouslySetInnerHTML={{ __html: post.body }}
-          />
-        )}
         <j-box pt="500">
           <j-flex a="center" gap="200">
             <j-icon size="xs" name="chat-left-text"></j-icon>
             <span>{post.comments.length}</span>
           </j-flex>
         </j-box>
+      </div>
+      <div class={styles.postImageWrapper}>
+        {showUrl && ogData?.images?.length > 0 && (
+          <img src={ogData.images[0]} class={styles.postImage} />
+        )}
+        {showImage && <img class={styles.postImage} src={base64} />}
+        {showDates && (
+          <div class={styles.calendar}>
+            <span class={styles.calendarMonth}>
+              {format(new Date(post.startDate), "MMM")}
+            </span>
+            <span class={styles.calendarDate}>
+              {format(new Date(post.startDate), "dd")}th
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
