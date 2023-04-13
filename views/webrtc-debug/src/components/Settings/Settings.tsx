@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { WebRTC } from "../../hooks/useWebrtc";
 import { Me } from "utils/api";
+import { WebRTC } from "utils/frameworks/react";
 
 import VoiceVideo from "./VoiceVideo";
 

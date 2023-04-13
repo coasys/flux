@@ -6,35 +6,42 @@ import {
   Agent,
   Literal,
   NeighbourhoodProxy,
-  Link,
   PerspectiveExpression,
 } from "@perspect3vism/ad4m";
 
-const rtcConfig = {
-  iceServers: [
-    {
-      urls: "stun:relay.ad4m.dev:3478",
-      username: "openrelay",
-      credential: "openrelay",
-    },
-    {
-      urls: "turn:relay.ad4m.dev:443",
-      username: "openrelay",
-      credential: "openrelay",
-    },
-  ],
-  iceCandidatePoolSize: 10,
-};
+import { AD4MPeer, AD4MPeerInstance } from "./ad4mPeer";
 
-async function getLinkFromPerspective(expression: PerspectiveExpression) {
+const iceServers = [
+  {
+    urls: "stun:relay.ad4m.dev:3478",
+    username: "openrelay",
+    credential: "openrelay",
+  },
+  {
+    urls: "stun:stun.l.google.com:19302",
+  },
+  {
+    urls: "stun:global.stun.twilio.com:3478",
+  },
+  {
+    urls: "turn:relay.ad4m.dev:443",
+    username: "openrelay",
+    credential: "openrelay",
+  },
+];
+
+function getExpressionData(data: any) {
+  let parsedData;
   try {
-    return expression.data.links[0];
+    parsedData = Literal.fromUrl(data).get();
   } catch (e) {
-    return null;
+    parsedData = data;
+  } finally {
+    return parsedData;
   }
 }
 
-function getData(data: any) {
+function getMessageData(data: any) {
   let parsedData;
   try {
     parsedData = JSON.parse(data);
@@ -45,10 +52,18 @@ function getData(data: any) {
   }
 }
 
-export const ICE_CANDIDATE = "ice-candidate";
-export const OFFER_REQUEST = "offer-request";
-export const OFFER = "offer";
-export const ANSWER = "answer";
+async function getLinkFromPerspective(expression: PerspectiveExpression) {
+  try {
+    return expression.data.links[0];
+  } catch (e) {
+    return null;
+  }
+}
+
+export const IS_ANYONE_HERE = "is-anyone-here";
+export const I_AM_HERE = "i-am-here";
+
+export const PEER_SIGNAL = "peer-signal";
 export const LEAVE = "leave";
 export const HEARTBEAT = "heartbeat";
 export const TEST_SIGNAL = "test-signal";
@@ -61,9 +76,7 @@ export type EventLogItem = {
 };
 
 export type Connection = {
-  peerConnection: RTCPeerConnection;
-  dataChannel: RTCDataChannel;
-  mediaStream: MediaStream;
+  peer: AD4MPeerInstance;
   eventLog: EventLogItem[];
 };
 
@@ -81,6 +94,7 @@ export type Props = {
 export enum Event {
   PEER_ADDED = "peer-added",
   PEER_REMOVED = "peer-removed",
+  CONNECTION_ESTABLISHED = "connectionEstablished",
   CONNECTION_STATE = "connectionstate",
   CONNECTION_STATE_DATA = "connectionstateData",
   MESSAGE = "message",
@@ -92,15 +106,16 @@ export class WebRTCManager {
   private isListening: boolean = false;
   private agent: Agent;
   private client: Ad4mClient;
-  private perspective: PerspectiveProxy;
+  private perspective: PerspectiveProxy | null;
   private neighbourhood: NeighbourhoodProxy;
-  private roomId: string;
+  private source: string;
   private heartbeatId: NodeJS.Timeout;
   private callbacks: Record<Event, Array<(...args: any[]) => void>> = {
     [Event.PEER_ADDED]: [],
     [Event.PEER_REMOVED]: [],
     [Event.MESSAGE]: [],
     [Event.EVENT]: [],
+    [Event.CONNECTION_ESTABLISHED]: [],
     [Event.CONNECTION_STATE]: [],
     [Event.CONNECTION_STATE_DATA]: [],
   };
@@ -117,30 +132,28 @@ export class WebRTCManager {
     console.log("init constructor");
     this.localStream = new MediaStream();
     this.localEventLog = [];
-    this.roomId = props.source;
+    this.source = props.source;
     this.client = await getAd4mClient();
     this.agent = await this.client.agent.me();
     this.perspective = await this.client.perspective.byUUID(props.uuid);
     this.neighbourhood = new NeighbourhoodProxy(
       this.client.neighbourhood,
-      this.perspective.uuid
+      this.perspective?.uuid || ""
     );
     this.emitPeerEvents();
 
     // Bind methods
     this.on = this.on.bind(this);
     this.join = this.join.bind(this);
-    this.onSignal = this.onSignal.bind(this);
+    this.onBroadcastReceived = this.onBroadcastReceived.bind(this);
     this.emitPeerEvents = this.emitPeerEvents.bind(this);
-    this.handleIceCandidate = this.handleIceCandidate.bind(this);
     this.closeConnection = this.closeConnection.bind(this);
     this.addConnection = this.addConnection.bind(this);
-    this.createOffer = this.createOffer.bind(this);
-    this.handleOffer = this.handleOffer.bind(this);
-    this.handleAnswer = this.handleAnswer.bind(this);
+    this.broadcastArrival = this.broadcastArrival.bind(this);
+    this.broadcastArrivalResponse = this.broadcastArrivalResponse.bind(this);
+
     this.sendMessage = this.sendMessage.bind(this);
     this.sendTestSignal = this.sendTestSignal.bind(this);
-    this.broadcastOfferRequest = this.broadcastOfferRequest.bind(this);
     this.sendTestBroadcast = this.sendTestBroadcast.bind(this);
     this.addToEventLog = this.addToEventLog.bind(this);
     this.heartbeat = this.heartbeat.bind(this);
@@ -184,7 +197,7 @@ export class WebRTCManager {
   /**
    * Handle incoming signals
    */
-  async onSignal(expression: PerspectiveExpression) {
+  async onBroadcastReceived(expression: PerspectiveExpression) {
     if (!this.isListening) return;
 
     if (expression.author === this.agent.did) {
@@ -207,201 +220,113 @@ export class WebRTCManager {
       return;
     }
 
-    if (link.data.predicate === LEAVE && link.data.source === this.roomId) {
-      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
-      this.closeConnection(link.author);
+    // if (link.source !== this.agent.did) {
+    //   console.log("Signal not adressed to current peer, ignoring");
+    //   return null;
+    // }
+
+    if (
+      link.data.predicate === IS_ANYONE_HERE &&
+      link.data.source === this.source
+    ) {
+      // Check if the remote host should create the offer
+      // -> If so, create passive connection
+      if (link.author.localeCompare(this.agent.did) < 1) {
+        this.addConnection(link.author, false);
+      }
+
+      this.broadcastArrivalResponse(link.author);
     }
 
     if (
-      link.data.predicate === OFFER_REQUEST &&
-      link.data.source === this.roomId
+      link.data.predicate === I_AM_HERE &&
+      link.data.source === this.source &&
+      link.data.target === this.agent.did
     ) {
-      // Check if we should create the offer or not
+      // Check if we should create the offer
+      // -> If so, create active connection
       if (link.author.localeCompare(this.agent.did) > 0) {
-        await this.createOffer(link.author);
-      } else if (!this.connections.get(link.author)) {
-        this.broadcastOfferRequest();
+        this.addConnection(link.author, true);
+      } else {
+        this.addConnection(link.author, false);
+        this.broadcastArrivalResponse(link.author);
       }
-
-      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
     }
 
-    // If we get heartbeat from new user, action!
-    if (link.data.predicate === HEARTBEAT && link.data.source === this.roomId) {
-      if (!this.connections.get(link.author)) {
-        // Check if we should create the offer or not
-        if (link.author.localeCompare(this.agent.did) > 0) {
-          await this.createOffer(link.author);
-        } else {
-          this.broadcastOfferRequest();
+    if (
+      link.data.predicate === PEER_SIGNAL &&
+      link.data.source === this.source
+    ) {
+      const data = getExpressionData(link.data.target);
+
+      // Check if the signal is for us
+      if (data.targetPeer === this.agent.did) {
+        const remotePeer = this.connections.get(link.author);
+        if (remotePeer) {
+          remotePeer.peer.signal(data.signalData);
         }
       }
+    }
 
-      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
-    }
-    // Only handle the offer if it's for me
-    if (link.data.predicate === OFFER && link.data.source === this.agent.did) {
-      const offer = Literal.fromUrl(link.data.target).get();
-      await this.handleOffer(link.author, offer);
-      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
-    }
-    // Only handle the answer if it's for me
-    if (link.data.predicate === ANSWER && link.data.source === this.agent.did) {
-      const answer = Literal.fromUrl(link.data.target).get();
-      await this.handleAnswer(link.author, answer);
-      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
-    }
-    // Only handle the answer if it's for me
-    if (
-      link.data.predicate === ICE_CANDIDATE &&
-      link.data.source === this.agent.did
-    ) {
-      const candidate = Literal.fromUrl(link.data.target).get();
-      await this.handleIceCandidate(link.author, candidate);
-      this.addToEventLog(link.author, link?.data?.predicate || "unknown");
+    if (link.data.predicate === LEAVE && link.data.source === this.source) {
+      this.closeConnection(link.author);
     }
 
     return null;
   }
 
   /**
-   * Create Offer - Entry point for new connections
-   *
-   * 1: Create new connection, add to connections
-   * 2: Add local audio/video tracks to peerconnection
-   * 3: Create offer and set local description
-   * 5: Broadcast offer to remote peer
-   */
-  async createOffer(recieverDid: string) {
-    const currentConnection = this.connections.get(recieverDid);
-    if (currentConnection) {
-      const status = currentConnection.peerConnection.iceConnectionState;
-      const inProgress = status === "new" || status === "checking";
-      const isStale =
-        status === "failed" || status === "disconnected" || status === "closed";
-
-      if (inProgress) {
-        return;
-      }
-
-      if (isStale) {
-        this.closeConnection(recieverDid);
-      }
-    }
-
-    const connection = await this.addConnection(recieverDid);
-
-    this.localStream.getTracks().forEach((track) => {
-      connection.peerConnection.addTrack(track, this.localStream);
-    });
-
-    const offer = await connection.peerConnection.createOffer();
-
-    console.log("🟠 Sending OFFER signal to ", recieverDid);
-    this.addToEventLog(this.agent.did, OFFER, recieverDid);
-
-    this.neighbourhood.sendBroadcastU({
-      links: [
-        {
-          source: recieverDid,
-          predicate: OFFER,
-          target: Literal.from(offer).toUrl(),
-        },
-      ],
-    });
-
-    await connection.peerConnection.setLocalDescription(offer);
-  }
-
-  /**
    * Create connection and add to connections array
-   *
-   * 1: Establish new RTC connection and datachannel
-   * 2: Listen for ICE candidates on peer connection
-   *    - Pass these to the remote peer via broadcast
-   * 3: Listen for connection state change
-   *    - If disconnected, delete connection
    */
-  async addConnection(remoteDid: string) {
+  async addConnection(remoteDid: string, initiator: boolean) {
     if (this.connections.get(remoteDid)) {
       return this.connections.get(remoteDid);
     }
 
-    const peerConnection = new RTCPeerConnection(rtcConfig);
-    let dataChannel = peerConnection.createDataChannel("DataChannel");
+    console.log(
+      "🟠 Creating ",
+      initiator ? "active" : "passive",
+      " connection"
+    );
 
-    peerConnection.ondatachannel = ({ channel }) => {
-      console.log("Datachannel established");
-      dataChannel = channel;
-
-      this.callbacks[Event.CONNECTION_STATE_DATA].forEach((cb) => {
-        cb(remoteDid, "connected");
-      });
-
-      dataChannel.addEventListener("message", (event) => {
-        if (event.data) {
-          console.log("📩 Received message -> ", event.data);
-          const parsedData = getData(event.data);
-
-          this.callbacks[Event.MESSAGE].forEach((cb) => {
-            cb(remoteDid, parsedData.type || "unknown", parsedData.message);
-          });
-        }
-      });
-    };
-
-    peerConnection.addEventListener("icecandidate", async (event) => {
-      if (event.candidate) {
-        console.log("🟠 Sending ICE_CANDIDATE signal to ", remoteDid);
-        this.addToEventLog(this.agent.did, ICE_CANDIDATE, remoteDid);
-
-        this.neighbourhood.sendBroadcastU({
-          links: [
-            {
-              source: remoteDid,
-              predicate: ICE_CANDIDATE,
-              target: Literal.from(event.candidate.toJSON()).toUrl(),
-            },
-          ],
-        });
-      }
+    const ad4mPeer = new AD4MPeer({
+      did: remoteDid,
+      source: this.source,
+      neighbourhood: this.neighbourhood,
+      stream: this.localStream,
+      initiator: initiator,
+      options: { config: { iceServers } },
     });
 
-    peerConnection.addEventListener("iceconnectionstatechange", (event) => {
-      const c = event.target as RTCPeerConnection;
-      console.log("🔄 connection state is", c.iceConnectionState);
+    const peer = ad4mPeer.connect();
 
-      this.addToEventLog(remoteDid, "connection state", c.connectionState);
+    // got a data channel message
+    peer.on("data", (data) => {
+      const parsed = getMessageData(data);
 
-      if (c.iceConnectionState === "disconnected") {
-        this.connections.delete(remoteDid);
-      }
-
-      if (c.iceConnectionState === "failed") {
-        this.connections.delete(remoteDid);
-      }
-
-      if (c.iceConnectionState === "closed") {
-        this.connections.delete(remoteDid);
-      }
-
-      this.callbacks[Event.CONNECTION_STATE].forEach((cb) => {
-        cb(remoteDid, c.iceConnectionState);
+      this.callbacks[Event.MESSAGE].forEach((cb) => {
+        cb(remoteDid, parsed.type || "unknown", parsed.message);
       });
     });
 
-    const mediaStream = new MediaStream();
+    // Connection established
+    peer.on("connect", () => {
+      this.callbacks[Event.CONNECTION_ESTABLISHED].forEach((cb) => {
+        cb(remoteDid);
+      });
+    });
 
-    peerConnection.addEventListener("track", async (event) => {
-      event.streams[0].getTracks().forEach((track) => {
-        mediaStream.addTrack(track);
+    // Connection broken
+    peer.on("close", () => {
+      this.closeConnection(remoteDid);
+
+      this.callbacks[Event.PEER_REMOVED].forEach((cb) => {
+        cb(remoteDid);
       });
     });
 
     const newConnection = {
-      peerConnection,
-      dataChannel,
-      mediaStream,
+      peer,
       eventLog: [],
     };
 
@@ -411,82 +336,37 @@ export class WebRTCManager {
   }
 
   /**
-   * Process offer from peer, create answer
-   *
-   * 1: Add peer to local connections
-   * 2: Add offer to remote description
-   * 3: Add local audio/video tracks to peerconnection
-   * 4: Create answer and add to local description
-   * 5: Broadcast answer to remote peer
+   * Broadcast my arrival
    */
-  async handleOffer(fromDid: string, offer: RTCSessionDescriptionInit) {
-    // Start over if we alread have a connection
-    if (this.connections.get(fromDid)) {
-      this.closeConnection(fromDid);
-    }
-
-    const connection = await this.addConnection(fromDid);
-    await connection.peerConnection.setRemoteDescription(
-      new RTCSessionDescription(offer)
-    );
-
-    this.localStream.getTracks().forEach((track) => {
-      connection.peerConnection.addTrack(track, this.localStream);
-    });
-
-    // Create Answer to offer
-    const answer = await connection.peerConnection.createAnswer();
-
-    console.log("🟠 Sending ANSWER signal to ", fromDid);
-    this.addToEventLog(this.agent.did, ANSWER, fromDid);
+  async broadcastArrival() {
+    this.addToEventLog(this.agent.did, IS_ANYONE_HERE);
 
     this.neighbourhood.sendBroadcastU({
       links: [
         {
-          source: fromDid,
-          predicate: ANSWER,
-          target: Literal.from(answer).toUrl(),
+          source: this.source,
+          predicate: IS_ANYONE_HERE,
+          target: this.agent.did,
         },
       ],
     });
-
-    await connection.peerConnection.setLocalDescription(answer);
   }
 
   /**
-   * Process answer from peer
-   *
-   * 1: Check that peerConnection has remote description
-   * 2: Set remote description to answer
+   * Broadcast arrival response
    */
-  async handleAnswer(fromDid: string, answer: RTCSessionDescriptionInit) {
-    const connection = this.connections.get(fromDid);
-    if (connection && !connection.peerConnection.currentRemoteDescription) {
-      const answerDescription = new RTCSessionDescription(answer);
-      await connection.peerConnection.setRemoteDescription(answerDescription);
-    } else {
-      console.warn("Couldn't handle answer from ", fromDid);
-    }
-  }
+  async broadcastArrivalResponse(target: string) {
+    this.addToEventLog(this.agent.did, I_AM_HERE);
 
-  /**
-   * Process ICE candidate from peer
-   *
-   * 1: Check that peerConnection does not have a remote description
-   * 2: Add ice candidate to peer connection
-   */
-  async handleIceCandidate(fromDid: string, candidate: RTCIceCandidate) {
-    const connection = this.connections.get(fromDid);
-    // Make sure we have a remote description;
-    if (connection && !connection.peerConnection.currentRemoteDescription) {
-      console.log(
-        "🔴 Skipping ICE candidate adding as currentRemoteDescription is ",
-        connection.peerConnection.currentRemoteDescription
-      );
-    }
-    if (connection && connection.peerConnection.currentRemoteDescription) {
-      connection.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-    }
+    this.neighbourhood.sendBroadcastU({
+      links: [
+        {
+          source: this.source,
+          predicate: I_AM_HERE,
+          target,
+        },
+      ],
+    });
   }
 
   /**
@@ -497,16 +377,14 @@ export class WebRTCManager {
       type,
       message,
     });
+
     this.connections.forEach((e, key) => {
       if (!recepients || recepients.includes(key)) {
-        if (e.dataChannel.readyState === "open") {
-          e.dataChannel.send(data);
-        } else {
-          console.log(
-            `Couldn't send message to ${key} as connection is not open -> `,
-            type,
-            message
-          );
+        try {
+          e.peer.send(data);
+          console.log(`📩 Sending message to ${key} -> `, type);
+        } catch (e) {
+          console.log(`📩 Couldn't send message to ${key} -> `, type, e);
         }
       }
     });
@@ -524,13 +402,7 @@ export class WebRTCManager {
     const connection = this.connections.get(did);
 
     if (connection) {
-      connection.peerConnection.close();
-      connection.dataChannel.close();
-
-      // https://stackoverflow.com/questions/54282358/how-to-fully-clear-webrtc-connection
-      connection.peerConnection = null;
-      connection.dataChannel = null;
-
+      connection.peer.destroy();
       this.connections.delete(did);
     }
   }
@@ -570,45 +442,23 @@ export class WebRTCManager {
   async join(initialSettings?: Settings) {
     let settings = { audio: true, video: false, ...initialSettings };
 
-    console.log("Start joining with settings: ", settings);
-
     this.localStream = await navigator.mediaDevices.getUserMedia({
       audio: settings.audio,
       video: settings.video,
     });
 
     if (!this.addedListener) {
-      await this.neighbourhood.addSignalHandler(this.onSignal);
+      await this.neighbourhood.addSignalHandler(this.onBroadcastReceived);
       this.addedListener = true;
     }
 
     this.isListening = true;
+    this.broadcastArrival();
 
-    console.log("🟠 Sending JOIN broadcast");
-    this.addToEventLog(this.agent.did, OFFER_REQUEST);
-
-    this.broadcastOfferRequest();
-
-    this.heartbeatId = setInterval(this.heartbeat, 10000);
+    // TEMP: Heartbeat disabled for now
+    // this.heartbeatId = setInterval(this.heartbeat, 10000);
 
     return this.localStream;
-  }
-
-  /**
-   * Ask room for offer
-   */
-  async broadcastOfferRequest() {
-    this.addToEventLog(this.agent.did, OFFER_REQUEST);
-
-    this.neighbourhood.sendBroadcastU({
-      links: [
-        {
-          source: this.roomId,
-          predicate: OFFER_REQUEST,
-          target: this.agent.did,
-        },
-      ],
-    });
   }
 
   /**
@@ -621,7 +471,7 @@ export class WebRTCManager {
     clearInterval(this.heartbeatId);
 
     if (this.perspective) {
-      // Todo: Nico, nico, nico!
+      // Todo: Detach listeners
       // this.neighbourhood.
     }
 
@@ -630,7 +480,7 @@ export class WebRTCManager {
     this.neighbourhood.sendBroadcastU({
       links: [
         {
-          source: this.roomId,
+          source: this.source,
           predicate: LEAVE,
           target: "goodbye!", // could be empty
         },
@@ -653,7 +503,7 @@ export class WebRTCManager {
     this.neighbourhood.sendBroadcastU({
       links: [
         {
-          source: this.roomId,
+          source: this.source,
           predicate: HEARTBEAT,
           target: this.agent.did,
         },
@@ -661,38 +511,12 @@ export class WebRTCManager {
     });
   }
 
-  async getStats() {
-    for (const c of this.connections) {
-      const connection = this.connections.get(c[0]);
-      const stats = await connection.peerConnection.getStats();
-
-      let statsOutput = `⭐️ Stats for connection: ${c[0]}\n`;
-
-      stats.forEach((report) => {
-        statsOutput += `Report: ${report.type} - ${report.id} (${report.timestamp})\n`;
-        statsOutput += `---------------------------------\n`;
-
-        Object.keys(report).forEach((statName) => {
-          if (
-            statName !== "id" &&
-            statName !== "timestamp" &&
-            statName !== "type"
-          ) {
-            statsOutput += `${statName}: ${report[statName]}\n`;
-          }
-        });
-      });
-
-      console.log(statsOutput);
-    }
-  }
-
   async sendTestSignal(recipientDid: string) {
     console.log("⚙️ Sending TEST_SIGNAL to ", recipientDid);
     this.neighbourhood.sendBroadcastU({
       links: [
         {
-          source: this.roomId,
+          source: this.source,
           predicate: TEST_SIGNAL,
           target: recipientDid,
         },
@@ -705,7 +529,7 @@ export class WebRTCManager {
     this.neighbourhood.sendBroadcastU({
       links: [
         {
-          source: this.roomId,
+          source: this.source,
           predicate: TEST_BROADCAST,
           target: Literal.from("test broadcast").toUrl(),
         },

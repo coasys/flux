@@ -2,7 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import { Howl } from "howler";
 import { Me } from "utils/api";
 import { Reaction } from "../../types";
-import { WebRTC } from "../../hooks/useWebrtc";
+import { WebRTC } from "utils/react/useWebrtc";
 import popWav from "../../assets/pop.wav";
 import guitarWav from "../../assets/guitar.wav";
 import kissWav from "../../assets/kiss.wav";
@@ -108,7 +108,10 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
         <Item
           webRTC={webRTC}
           isMe
-          mirrored={webRTC.settings.video && !webRTC.settings.screen}
+          mirrored={
+            webRTC.localState.settings.video &&
+            !webRTC.localState.settings.screen
+          }
           userId={currentUser.did}
           reaction={myReaction}
           focused={focusedPeerId === currentUser.did}

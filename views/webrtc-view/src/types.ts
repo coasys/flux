@@ -1,13 +1,8 @@
-import { Settings, EventLogItem } from "utils/helpers";
+import { Settings, Connection } from "utils/helpers/WebRTCManager";
 
 export type Peer = {
   did: string;
-  connection: {
-    peerConnection: RTCPeerConnection;
-    dataChannel: RTCDataChannel;
-    mediaStream: MediaStream;
-    eventLog: EventLogItem[];
-  };
+  connection: Connection;
   settings: Settings;
 };
 

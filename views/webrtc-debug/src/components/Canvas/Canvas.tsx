@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import { Peer } from "../../types";
+import { Peer } from "utils/react/useWebrtc";
 
 interface CanvasProps {
   peers: Peer[];
@@ -49,14 +49,14 @@ const Canvas = ({ peers, width, height }: CanvasProps) => {
     // Loop through and paint if any peers are currently painting
     for (let i = 0; i < peers.length; i++) {
       const peer = peers[i];
-      if (peer.state.isDrawing) {
+      if (peer.state?.isDrawing) {
         // Check if we have old position in array
         if (peerPositions[peer.did]) {
           // Draw and update
           drawLine(
             {
-              x: (peer.state.x / 100) * width - 34,
-              y: (peer.state.y / 100) * height + 180,
+              x: (peer.state?.x / 100) * width - 34,
+              y: (peer.state?.y / 100) * height + 180,
             },
             peerPositions[peer.did]
           );
@@ -65,8 +65,8 @@ const Canvas = ({ peers, width, height }: CanvasProps) => {
         setPeerPositions({
           ...peerPositions,
           [peer.did]: {
-            x: (peer.state.x / 100) * width - 34,
-            y: (peer.state.y / 100) * height + 180,
+            x: (peer.state?.x / 100) * width - 34,
+            y: (peer.state?.y / 100) * height + 180,
           },
         });
       } else if (peerPositions[peer.did]) {

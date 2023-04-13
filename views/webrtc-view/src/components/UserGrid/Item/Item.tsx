@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "preact/hooks";
 import { Reaction } from "../../../types";
 import { Profile } from "utils/types";
 import { getProfile } from "utils/api";
-import { WebRTC } from "../../../hooks/useWebrtc";
+import { WebRTC } from "utils/frameworks/react";
 
 import styles from "./Item.module.css";
 
@@ -29,10 +29,10 @@ export default function Item({
 }: Props) {
   const videoRef = useRef(null);
   const [profile, setProfile] = useState<Profile>();
-  const [isConnecting, setIsConnecting] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(isMe ? false : true);
 
   const peer = webRTC.connections.find((p) => p.did === userId);
-  const settings = isMe ? webRTC.settings : peer?.settings;
+  const settings = isMe ? webRTC.localState.settings : peer?.state?.settings;
 
   // Get user details
   useEffect(() => {
@@ -50,11 +50,9 @@ export default function Item({
   useEffect(() => {
     if (isMe) return;
 
-    if (peer?.connection?.peerConnection?.iceConnectionState === "connected") {
+    peer?.connection?.peer?.on("connect", () => {
       setIsConnecting(false);
-    } else {
-      setIsConnecting(true);
-    }
+    });
   }, [peer]);
 
   // Get video stream
@@ -65,9 +63,11 @@ export default function Item({
     }
 
     if (videoRef.current && !isMe) {
-      videoRef.current.srcObject = peer.connection.mediaStream;
+      peer.connection.peer.on("stream", (stream) => {
+        videoRef.current.srcObject = stream;
+      });
     }
-  }, [videoRef, peer?.connection?.mediaStream, webRTC.localStream, isMe]);
+  }, [videoRef, peer?.connection?.peer, webRTC.localStream, isMe]);
 
   return (
     <div

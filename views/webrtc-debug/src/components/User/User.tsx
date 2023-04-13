@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { Profile } from "utils/types";
 import { getProfile } from "utils/api";
-import { WebRTC } from "../../hooks/useWebrtc";
+import { WebRTC } from "utils/frameworks/react";
 import characters from "../../sprites/characters";
 
 import Sprite from "../Sprite/Sprite";
@@ -50,15 +50,11 @@ export default function User({
     }
 
     if (videoRef.current && !isLocalUser) {
-      videoRef.current.srcObject = peer.connection.mediaStream;
-      videoRef.current.muted = true;
+      peer.connection.peer.on("stream", (stream) => {
+        videoRef.current.srcObject = stream;
+      });
     }
-  }, [
-    videoRef,
-    peer?.connection?.mediaStream,
-    webRTC.localStream,
-    isLocalUser,
-  ]);
+  }, [videoRef, peer?.connection?.peer, webRTC.localStream, isLocalUser]);
 
   return (
     <div className={styles.wrapper} data-drawing={isDrawing}>
