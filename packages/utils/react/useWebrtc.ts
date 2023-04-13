@@ -136,7 +136,7 @@ export default function useWebRTC({
    */
   useEffect(() => {
     async function askForPermission() {
-      const joinSettings = { ...defaultSettings };
+      const joinSettings = { ...localState.settings };
 
       // Check if the user has no video devices
       const hasVideoDevices = devices.some((d) => d.kind === "videoinput");
@@ -159,13 +159,8 @@ export default function useWebRTC({
       }
 
       navigator.mediaDevices?.getUserMedia(joinSettings).then(
-        (stream) => {
+        () => {
           setAudioPermissionGranted(true);
-          setLocalStream(stream);
-          setLocalState((oldState) => ({
-            ...oldState,
-            settings: joinSettings,
-          }));
         },
         (e) => {
           console.error(e);
@@ -187,7 +182,7 @@ export default function useWebRTC({
   useEffect(() => {
     async function TogglePreRecording() {
       // Return if permission denied
-      if (!audioPermissionGranted) {
+      if (!videoPermissionGranted) {
         return;
       }
 
@@ -196,7 +191,7 @@ export default function useWebRTC({
           audio: localState.settings.audio,
           video: localState.settings.video,
         });
-        updateStream(newLocalStream);
+        setLocalStream(newLocalStream);
         setShowPreview(true);
       }
 
@@ -208,7 +203,7 @@ export default function useWebRTC({
     if (!hasJoined) {
       TogglePreRecording();
     }
-  }, [enabled, showPreview, audioPermissionGranted, hasJoined, localState]);
+  }, [enabled, showPreview, videoPermissionGranted, hasJoined, localState]);
 
   /**
    * Attach signal listeners
@@ -324,22 +319,25 @@ export default function useWebRTC({
       video: { ...videoDimensions, deviceId: deviceId },
     };
 
+    const newLocalStream = await navigator.mediaDevices.getUserMedia(
+      newSettings
+    );
+
     if (localStream) {
       localStream.getTracks().forEach((track) => {
         track.stop();
       });
 
-      const newLocalStream = await navigator.mediaDevices.getUserMedia(
-        newSettings
-      );
       updateStream(newLocalStream);
+
+      // Notify others of state change
+      onChangeState({ ...localState, settings: newSettings });
+    } else {
+      setLocalStream(newLocalStream);
     }
 
     // Persist settings
     localstorage.setForVersion("cameraDeviceId", `${deviceId}`);
-
-    // Notify others of state change
-    onChangeState({ ...localState, settings: newSettings });
   }
 
   /**
@@ -396,9 +394,10 @@ export default function useWebRTC({
       },
     });
 
+    // If not yet joined the room, simply disable video track
     if (!enabled) {
-      if (localStream.getVideoTracks()[0]) {
-        localStream.getVideoTracks()[0].enabled = false;
+      if (newLocalStream.getVideoTracks()[0]) {
+        newLocalStream.getVideoTracks()[0].enabled = false;
       }
     }
 
@@ -407,7 +406,12 @@ export default function useWebRTC({
       setVideoPermissionGranted(true);
     }
 
-    updateStream(newLocalStream);
+    // If no localstream
+    if (!localStream) {
+      setLocalStream(newLocalStream);
+    } else {
+      updateStream(newLocalStream);
+    }
 
     // Notify others of state change
     onChangeState({ ...localState, settings: newSettings });
@@ -460,9 +464,9 @@ export default function useWebRTC({
     };
 
     if (enabled) {
-      onStartScreenShare();
+      await onStartScreenShare();
     } else {
-      onEndScreenShare();
+      await onEndScreenShare();
     }
 
     // Notify others of state change
@@ -482,7 +486,8 @@ export default function useWebRTC({
         });
       }
 
-      mediaStream.getVideoTracks()[0].onended = () => onEndScreenShare();
+      mediaStream.getVideoTracks()[0].onended = () =>
+        onToggleScreenShare(false);
       updateStream(mediaStream);
     }
   }
@@ -504,18 +509,61 @@ export default function useWebRTC({
   }
 
   function updateStream(stream: MediaStream) {
-    for (let peer of connections) {
-      const currentStream = peer.connection.peer.streams[0];
+    const [videoTrack] = stream.getVideoTracks();
+    const [audioTrack] = stream.getAudioTracks();
 
-      if (!currentStream) {
-        peer.connection.peer.addStream(stream);
-      } else {
-        peer.connection.peer.removeStream(stream);
-        peer.connection.peer.addStream(stream);
+    // Update all peers (Important, as peer expects the same stream)
+    // -> https://github.com/feross/simple-peer/issues/634#issuecomment-621761586
+    for (let peer of connections) {
+      if (videoTrack) {
+        const oldVideoTrack = localStream.getVideoTracks()[0];
+
+        if (oldVideoTrack) {
+          peer.connection.peer.replaceTrack(
+            oldVideoTrack,
+            videoTrack,
+            localStream
+          );
+        } else {
+          peer.connection.peer.addTrack(videoTrack, localStream);
+        }
+      }
+
+      if (audioTrack) {
+        const oldAudioTrack = localStream.getAudioTracks()[0];
+
+        if (oldAudioTrack) {
+          peer.connection.peer.replaceTrack(
+            localStream.getAudioTracks()[0],
+            audioTrack,
+            localStream
+          );
+        } else {
+          peer.connection.peer.addTrack(audioTrack, localStream);
+        }
       }
     }
 
-    setLocalStream(stream);
+    // Update local state
+    if (videoTrack) {
+      const oldVideoTrack = localStream.getVideoTracks()[0];
+      if (oldVideoTrack) {
+        localStream?.removeTrack(oldVideoTrack);
+        localStream?.addTrack(videoTrack);
+      } else {
+        localStream?.addTrack(videoTrack);
+      }
+    }
+
+    if (audioTrack) {
+      const oldAudioTrack = localStream.getAudioTracks()[0];
+      if (oldAudioTrack) {
+        localStream?.removeTrack(oldAudioTrack);
+        localStream?.addTrack(audioTrack);
+      } else {
+        localStream?.addTrack(audioTrack);
+      }
+    }
   }
 
   const broadcastStateChange = (newState: Peer["state"]) => {

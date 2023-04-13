@@ -11,6 +11,7 @@ export type Props = {
   source: string;
   neighbourhood: NeighbourhoodProxy;
   initiator: boolean;
+  stream: MediaStream;
   options?: SimplePeer.Options;
 };
 
@@ -19,6 +20,7 @@ export class AD4MPeer {
   private did: string;
   private initiator: boolean;
   private source: string;
+  private stream: MediaStream;
   private neighbourhood: NeighbourhoodProxy;
   private options?: SimplePeer.Options;
 
@@ -26,6 +28,7 @@ export class AD4MPeer {
     this.did = props.did;
     this.initiator = props.initiator;
     this.source = props.source;
+    this.stream = props.stream;
     this.neighbourhood = props.neighbourhood;
     this.options = props.options ? props.options : {};
   }
@@ -40,6 +43,7 @@ export class AD4MPeer {
 
     const peer = new SimplePeer({
       initiator: this.initiator,
+      stream: this.stream,
       ...this.options,
       trickle: false,
     }) as SimplePeerInstance;
