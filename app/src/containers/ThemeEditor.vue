@@ -37,7 +37,7 @@
         <j-tab-item value="gradient">Gradient</j-tab-item>
         <j-tab-item value="black">Black</j-tab-item>
         <j-tab-item value="cyberpunk">Cyberpunk</j-tab-item>
-        <j-tab-item value="90s">90s</j-tab-item>
+        <j-tab-item value="retro">Retro</j-tab-item>
       </j-tabs>
     </j-box>
     <j-box pb="800">
