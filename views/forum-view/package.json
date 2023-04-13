@@ -1,6 +1,6 @@
 {
-  "name": "@junto-foundation/forum-view",
-  "version": "0.5.8",
+  "name": "@fluxapp/forum-view",
+  "version": "0.5.9",
   "description": "",
   "type": "module",
   "files": [

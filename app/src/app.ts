@@ -1,12 +1,18 @@
 import { createApp, h, watch } from "vue";
+import { useRegisterSW } from "virtual:pwa-register/vue";
 import { version } from "../package.json";
 import "./ad4mConnect";
 import App from "./App.vue";
 import router from "./router";
 import { createPinia } from "pinia";
 
-import "@junto-foundation/junto-elements";
-import "@junto-foundation/junto-elements/dist/main.css";
+import "@fluxapp/ui";
+import "./themes/themes.css";
+import "@fluxapp/ui/dist/main.css";
+import "@fluxapp/ui/dist/themes/dark.css";
+import "@fluxapp/ui/dist/themes/retro.css";
+import "@fluxapp/ui/dist/themes/black.css";
+import "@fluxapp/ui/dist/themes/cyberpunk.css";
 
 export const pinia = createPinia();
 
@@ -33,3 +39,14 @@ createApp({
   .use(pinia)
   .use(router)
   .mount("#app");
+
+// Check for service worker updates every 10 minutes and reload
+const intervalMS = 60 * 10 * 1000;
+const updateServiceWorker = useRegisterSW({
+  onRegistered(r) {
+    r &&
+      setInterval(() => {
+        r.update();
+      }, intervalMS);
+  },
+});

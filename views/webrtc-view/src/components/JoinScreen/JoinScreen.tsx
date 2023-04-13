@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { Profile } from "utils/types";
 import getProfile from "utils/api/getProfile";
 import { Me } from "utils/api/getMe";
-import { WebRTC } from "../../hooks/useWebrtc";
+import { WebRTC } from "utils/react/useWebrtc";
 
 import styles from "./JoinScreen.module.css";
 import Disclaimer from "../Disclaimer";
@@ -49,7 +49,7 @@ export default function JoinScreen({
       <j-box pt="200">
         <div
           className={styles.preview}
-          data-camera-enabled={!!webRTC.settings.video}
+          data-camera-enabled={!!webRTC.localState.settings.video}
           data-mirrored={true}
         >
           <video
@@ -102,17 +102,14 @@ export default function JoinScreen({
 
       <j-box pt="400">
         <j-toggle
-          checked={webRTC.settings.video}
+          checked={webRTC.localState.settings.video}
           disabled={
             webRTC.isLoading ||
-            !webRTC.permissionGranted ||
+            !webRTC.audioPermissionGranted ||
             webRTC.devices.every((d) => d.kind !== "videoinput")
           }
           onChange={() =>
-            webRTC.onChangeSettings({
-              ...webRTC.settings,
-              video: !webRTC.settings.video,
-            })
+            webRTC.onToggleCamera(!webRTC.localState.settings.video)
           }
         >
           Join with camera!
@@ -124,7 +121,7 @@ export default function JoinScreen({
           variant="primary"
           size="lg"
           loading={webRTC.isLoading}
-          disabled={!webRTC.permissionGranted}
+          disabled={!webRTC.audioPermissionGranted}
           onClick={webRTC.onJoin}
         >
           Join room!
@@ -136,7 +133,7 @@ export default function JoinScreen({
       </j-box>
 
       <>
-        {!webRTC.permissionGranted && (
+        {!webRTC.audioPermissionGranted && (
           <j-box pt="400">
             <j-text variant="warning">
               Please allow camera/microphone access to join.

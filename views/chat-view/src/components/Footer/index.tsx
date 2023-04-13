@@ -2,7 +2,7 @@ import { ChatContext, CommunityContext } from "utils/react";
 import { useContext } from "preact/hooks";
 import UIContext from "../../context/UIContext";
 import TipTap from "../TipTap";
-import styles from "./index.scss";
+import styles from "./index.module.css";
 
 export default function Footer({ perspectiveUuid, channelId }) {
   const {

@@ -1,0 +1,155 @@
+@import url("https://fonts.googleapis.com/css2?family=VT323&display=swap");
+
+html.retro {
+  --j-color-primary-hue: 230 !important;
+  --j-border-radius: 0px;
+  --j-border-color: silver;
+  --j-font-family: monospace !important;
+  --j-size-sm: 30px;
+  --j-size-md: 40px;
+  --j-size-lg: 50px;
+  --j-scrollbar-thumb-box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff,
+    inset -2px -2px grey, inset 2px 2px #dfdfdf;
+  --j-scrollbar-thumb-background: #dfdfdf;
+  --j-scrollbar-background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='2' height='2' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M1 0H0v1h1v1h1V1H1V0z' fill='silver'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M2 0H1v1H0v1h1V1h1V0z' fill='%23fff'/%3E%3C/svg%3E");
+  --j-scrollbar-width: 16px;
+  --j-scrollbar-thumb-border-radius: 0;
+}
+
+html.retro j-modal::part(modal) {
+  position: relative;
+  background: silver;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+  padding: 0;
+}
+
+html.retro j-modal::part(close-button) {
+  top: 10px;
+  right: 10px;
+  padding: var(--j-space-200);
+  width: var(--j-size-sm);
+  height: var(--j-size-sm);
+  background: silver;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+html.retro j-modal::part(header) {
+  display: block;
+  height: 50px;
+  background: linear-gradient(90deg, navy, #1084d0);
+}
+
+html.retro j-toggle::part(indicator) {
+  border-radius: 0;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+}
+
+html.retro j-toggle::part(toggle) {
+  border-radius: 0;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+}
+
+html.retro j-avatar::part(base) {
+  border-radius: 0;
+  border: 0;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+}
+
+html.retro j-avatar[selected]::part(base) {
+  border-radius: 0;
+  box-shadow: 0px 0px 0px 2px var(--j-color-primary-500);
+}
+
+html.retro j-avatar::part(img) {
+  border-radius: 0;
+}
+
+html.retro j-button::part(base) {
+  background: silver !important;
+  color: #222 !important;
+  font-weight: 400;
+  border: 0 !important;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+}
+
+html.retro j-button[disabled]::part(base) {
+  text-shadow: 1px 1px 0 #fff;
+}
+
+html.retro j-button::part(base):active {
+  box-shadow: inset -1px -1px #fff, inset 1px 1px #0a0a0a,
+    inset -2px -2px #dfdfdf, inset 2px 2px grey;
+}
+
+html.retro j-button[variant="primary"]::part(base) {
+  border: 0;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+}
+
+html.retro j-button[circle]::part(base) {
+  border-radius: 0;
+}
+
+html.retro j-tabs::part(base) {
+  background: none;
+  border: 0;
+}
+
+html.retro j-tabs::part(base)::before {
+  content: none;
+}
+
+html.retro j-menu::part(base) {
+  background: var(--j-color-ui-100);
+}
+
+html.retro j-menu-group-item::part(summary) {
+  padding-left: var(--j-space-300);
+}
+
+html.retro j-menu-group-item::part(content) {
+  border-left: 1px dotted grey;
+  margin-left: var(--j-space-500);
+}
+
+html.retro j-menu-item::part(base) {
+  position: relative;
+}
+
+html.retro j-menu-item::part(base):after {
+  position: absolute;
+  content: "";
+  display: block;
+  left: 0;
+  width: 15px;
+  height: 1px;
+  border-top: 1px dotted grey;
+}
+
+html.retro j-tab-item::part(base) {
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+}
+
+html.retro j-input::part(input-wrapper) {
+  background: white;
+  border: 0;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+}
+
+html.retro j-input::part(input-wrapper):focus-within {
+  border: 0;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey,
+    inset 2px 2px #dfdfdf;
+}

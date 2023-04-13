@@ -1,5 +1,6 @@
 {
   "name": "flux-webrtc-debug-view",
+  "version": "1.0.0",
   "description": "WebRTC-debugger for flux",
   "fluxapp": {
     "name": "DebugRTC",
@@ -9,7 +10,6 @@
   "keywords": [
     "flux-app"
   ],
-  "version": "1.0.0",
   "type": "module",
   "files": [
     "dist"
@@ -42,7 +42,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@junto-foundation/junto-elements": "^0.4.5",
     "@perspect3vism/ad4m": "0.3.3",
     "@perspect3vism/ad4m-connect": "0.3.3",
     "classnames": "^2.3.2",

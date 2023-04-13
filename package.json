@@ -1,10 +1,11 @@
 {
   "name": "flux-monorepo",
-  "version": "5",
+  "version": "0.5.9",
   "workspaces": [
     "packages/**/*",
     "views/**/*",
-    "app"
+    "app",
+    "docs"
   ],
   "private": true,
   "scripts": {

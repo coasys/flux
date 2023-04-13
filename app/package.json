@@ -1,6 +1,6 @@
 {
   "name": "flux",
-  "version": "0.5.8",
+  "version": "0.5.9",
   "description": "A social web3 tool kit for communities",
   "author": "josh@junto.foundation",
   "repository": {
@@ -16,14 +16,13 @@
   },
   "main": "background.js",
   "dependencies": {
-    "@junto-foundation/chat-view": "*",
-    "@junto-foundation/forum-view": "*",
-    "@junto-foundation/graph-view": "*",
-    "@junto-foundation/junto-elements": "*",
-    "@junto-foundation/webrtc-view": "*",
-    "flux-webrtc-debug-view": "*",
-    "@perspect3vism/ad4m": "0.3.3",
-    "@perspect3vism/ad4m-connect": "0.3.3",
+    "@fluxapp/chat-view": "*",
+    "@fluxapp/forum-view": "*",
+    "@fluxapp/graph-view": "*",
+    "@fluxapp/ui": "*",
+    "@fluxapp/webrtc-view": "*",
+    "@perspect3vism/ad4m": "0.3.1",
+    "@perspect3vism/ad4m-connect": "0.3.1",
     "construct-style-sheets-polyfill": "^3.1.0",
     "date-fns": "^2.29.3",
     "dexie": "^3.2.2",
@@ -60,7 +59,7 @@
     "ts-jest": "^26.0.0",
     "typescript": "^4.4.2",
     "vite": "^3.2.4",
-    "vite-plugin-pwa": "^0.13.3",
+    "vite-plugin-pwa": "^0.14.7",
     "vue-devtools": "^5.1.4",
     "vue-jest": "^5.0.0-alpha.10"
   },

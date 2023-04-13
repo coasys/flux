@@ -1,7 +1,7 @@
 import { useState, useRef, useContext } from "preact/hooks";
 import { EditorContent } from "@tiptap/react";
 import { useEffect } from "preact/hooks";
-import styles from "./index.scss";
+import styles from "./index.module.css";
 import UIContext from "../../context/UIContext";
 import EditorContext from "../../context/EditorContext";
 

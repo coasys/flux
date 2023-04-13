@@ -7,23 +7,27 @@
     <title>Flux App</title>
     <style>
       body {
-        padding: 0;
+        -webkit-font-smoothing: antialiased;
+        height: 100%;
+        width: 100%;
         margin: 0;
+        padding: 0;
+        text-rendering: optimizeLegibility;
+        color: var(--j-color-ui-800);
+        font-family: var(--j-font-family);
+        background-color: var(--j-color-white);
       }
       flux-app {
         height: 100vh;
         display: block;
       }
     </style>
-    <link
-      href="https://unpkg.com/@junto-foundation/junto-elements/dist/main.css"
-      rel="stylesheet"
-    />
+    <link href="https://unpkg.com/@fluxapp/ui/dist/main.css" rel="stylesheet" />
   </head>
   <body>
     <flux-app></flux-app>
 
-    <script src="https://unpkg.com/@junto-foundation/junto-elements"></script>
+    <script src="https://unpkg.com/@fluxapp/ui"></script>
 
     <script type="module">
       import Ad4mConnectUI from "@perspect3vism/ad4m-connect";

@@ -29,16 +29,16 @@
 }
 
 .loader {
-  left: -100%;
+  transform: translateX(-100%);
   animation: load 2.2s linear infinite;
 }
 
 @keyframes load {
   0% {
-    left: -100%;
+    transform: translateX(-100%);
   }
   100% {
-    left: 100%;
+    transform: translateX(100%);
   }
 }
 </style>

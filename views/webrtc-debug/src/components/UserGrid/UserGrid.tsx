@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState, useLayoutEffect } from "preact/hooks";
 import { Me } from "utils/api/getMe";
 import useContextMenu from "../../hooks/useContextMenu";
-import { WebRTC } from "../../hooks/useWebrtc";
+import { WebRTC } from "utils/react/useWebrtc";
 import items from "../../sprites/items";
 import Canvas from "../Canvas";
 import Sprite from "../Sprite/Sprite";
@@ -61,13 +61,13 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
           key={peer.did}
           className={styles.user}
           data-me={false}
-          style={{ top: `${peer.state.y}%`, left: `${peer.state.x}%` }}
+          style={{ top: `${peer?.state?.y}%`, left: `${peer?.state?.x}%` }}
         >
           <User
             webRTC={webRTC}
             userId={peer.did}
-            isDrawing={peer.state.isDrawing}
-            spriteIndex={peer.state.spriteIndex}
+            isDrawing={peer?.state?.isDrawing}
+            spriteIndex={peer?.state?.spriteIndex || 0}
           />
         </div>
       );
@@ -92,7 +92,7 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
           webRTC={webRTC}
           userId={currentUser?.did}
           isDrawing={webRTC.localState.isDrawing}
-          spriteIndex={webRTC.localState.spriteIndex}
+          spriteIndex={webRTC.localState.spriteIndex || 0}
           isLocalUser
         />
       </div>

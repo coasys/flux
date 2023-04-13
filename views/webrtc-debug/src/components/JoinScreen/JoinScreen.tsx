@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { Profile } from "utils/types";
 import getProfile from "utils/api/getProfile";
 import { Me } from "utils/api/getMe";
-import { WebRTC } from "../../hooks/useWebrtc";
+import { WebRTC } from "utils/react/useWebrtc";
 import characters from "../../sprites/characters";
 
 import User from "../User";
@@ -95,13 +95,10 @@ export default function JoinScreen({
 
       <j-box pt="400">
         <j-toggle
-          checked={webRTC.settings.video}
-          disabled={webRTC.isLoading || !webRTC.permissionGranted}
+          checked={webRTC.localState.settings.video}
+          disabled={webRTC.isLoading || !webRTC.audioPermissionGranted}
           onChange={() =>
-            webRTC.onChangeSettings({
-              ...webRTC.settings,
-              video: !webRTC.settings.video,
-            })
+            webRTC.onToggleCamera(!webRTC.localState.settings.video)
           }
         >
           Join with camera!
@@ -113,7 +110,7 @@ export default function JoinScreen({
           variant="ghost"
           size="sm"
           loading={webRTC.isLoading}
-          disabled={!webRTC.permissionGranted}
+          disabled={!webRTC.audioPermissionGranted}
           onClick={() => onToggleSettings()}
         >
           Audio/Video Settings
@@ -124,9 +121,11 @@ export default function JoinScreen({
           variant="primary"
           size="lg"
           loading={webRTC.isLoading}
-          disabled={!webRTC.permissionGranted}
+          disabled={!webRTC.audioPermissionGranted}
           onClick={() =>
-            webRTC.onJoin({ spriteIndex: selectedSpriteIndex, x: 0, y: 0 })
+            webRTC.onJoin({
+              initialState: { spriteIndex: selectedSpriteIndex, x: 0, y: 0 },
+            })
           }
         >
           Join room!
@@ -134,7 +133,7 @@ export default function JoinScreen({
       </j-box>
 
       <>
-        {!webRTC.permissionGranted && (
+        {!webRTC.audioPermissionGranted && (
           <j-box pt="400">
             <j-text variant="warning">
               Please allow camera/microphone access to join.

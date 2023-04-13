@@ -1,4 +1,4 @@
-import styles from "./index.scss";
+import styles from "./index.module.css";
 import Avatar from "../../components/Avatar";
 
 export default function MessageReply({
