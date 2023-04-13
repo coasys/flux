@@ -161,6 +161,15 @@ export default function MessageItem({
               >
                 {getTimeSince(new Date(message.timestamp), new Date())}
               </small>
+              {message.isPopular && (
+                <j-tooltip title="Popular message">
+                  <j-icon
+                    className={styles.popularIcon}
+                    size="xs"
+                    name="magic"
+                  ></j-icon>
+                </j-tooltip>
+              )}
             </header>
           )}
 

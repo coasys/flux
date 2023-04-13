@@ -1,4 +1,5 @@
 .message {
+  position: relative;
   padding-top: var(--j-space-300);
   padding-bottom: var(--j-space-300);
   padding-left: var(--j-space-500);
@@ -114,7 +115,7 @@
 .messageItemHeader {
   display: flex;
   align-items: center;
-  gap: var(--j-space-200);
+  gap: var(--j-space-300);
   margin-bottom: var(--j-space-200);
 }
 
@@ -300,6 +301,12 @@ j-tooltip::part(base) {
 
 .popularMessage {
   background-color: rgba(246, 206, 2, 0.1);
+}
+
+.popularIcon {
+  display: inline-block;
+  margin-left: var(--j-space-200);
+  --j-icon-color: rgba(246, 206, 2, 0.7);
 }
 
 .highlightMessage {
