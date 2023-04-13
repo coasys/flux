@@ -5,3 +5,4 @@ export * from "./profile";
 export * from "./languages";
 export * from "./profile";
 export * from "./sdna";
+export * from './videoSettings';
