@@ -6,7 +6,7 @@ html.retro {
 }
 
 .html.light {
-  --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
+  --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 0%, 98%);
   --app-main-sidebar-border-color: hsl(var(--j-color-ui-hue), 0%, 95%);
 
   --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
@@ -47,4 +47,97 @@ html.dark {
 
 html.black {
   --app-channel-bg-color: hsl(var(--j-color-ui-hue), 0%, 0%);
+}
+
+html.gradient {
+  --j-color-saturation: 50%;
+  --j-color-subtractor: 108%;
+  --j-color-multiplier: -1;
+  --j-color-ui-saturation: 20%;
+
+  --app-gradient-1: var(--j-color-ui-hue);
+  --app-gradient-2: calc(var(--j-color-ui-hue) + 80);
+
+  --app-main-sidebar-bg-color: linear-gradient(
+    160deg,
+    hsl(var(--app-gradient-1), 30%, 8%),
+    hsl(var(--app-gradient-2), 30%, 15%)
+  );
+  --app-main-bg-color: linear-gradient(
+    160deg,
+    hsl(var(--app-gradient-1), 20%, 8%),
+    hsl(var(--app-gradient-2), 20%, 12%)
+  );
+  --app-main-sidebar-border-color: transparent;
+  --app-drawer-bg-color: linear-gradient(
+    160deg,
+    hsl(var(--app-gradient-1), 30%, 5%),
+    hsl(var(--app-gradient-2), 30%, 10%)
+  );
+  --app-drawer-border-color: transparent;
+  --app-main-content-bg-color: linear-gradient(
+    160deg,
+    hsl(var(--app-gradient-1), 20%, 5%),
+    hsl(var(--app-gradient-2), 20%, 10%)
+  );
+  --app-channel-bg-color: linear-gradient(
+    160deg,
+    hsl(var(--app-gradient-1), 20%, 8%),
+    hsl(var(--app-gradient-2), 20%, 15%)
+  );
+  --app-channel-header-bg-color: linear-gradient(
+    160deg,
+    hsl(var(--app-gradient-1), 20%, 8%),
+    hsl(var(--app-gradient-2), 20%, 10%)
+  );
+  --app-channel-footer-bg-color: linear-gradient(
+    160deg,
+    hsl(var(--app-gradient-1), 20%, 5%),
+    hsl(var(--app-gradient-2), 20%, 10%)
+  );
+  --app-channel-border-color: transparent;
+}
+
+html.gradient j-menu-item::part(base):hover {
+  background: transparent;
+}
+
+html.gradient j-menu-item[selected]::part(base) {
+  background: linear-gradient(
+    45deg,
+    hsl(var(--app-gradient-1), 50%, 10%),
+    hsl(var(--app-gradient-2), 50%, 20%)
+  );
+}
+
+html.gradient j-menu-item::part(base) {
+  margin-top: var(--j-space-100);
+  margin-left: var(--j-space-300);
+  margin-right: var(--j-space-300);
+  border-radius: 6px;
+}
+
+html.gradient j-modal::part(modal) {
+  background: linear-gradient(
+    45deg,
+    hsl(var(--app-gradient-1), 20%, 5%),
+    hsl(var(--app-gradient-2), 20%, 9%)
+  );
+}
+
+html.gradient j-button[variant="primary"]::part(base) {
+  background: linear-gradient(
+    45deg,
+    hsl(var(--app-gradient-1), 70%, 60%),
+    hsl(var(--app-gradient-2), 70%, 60%)
+  );
+}
+
+html.gradient j-tabs[variant="button"] j-tab-item[checked]::part(base) {
+  background: linear-gradient(
+    45deg,
+    hsl(var(--app-gradient-2), 50%, 40%),
+    hsl(var(--app-gradient-1), 50%, 50%)
+  );
+  color: var(--j-color-white);
 }

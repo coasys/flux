@@ -34,6 +34,7 @@
       >
         <j-tab-item value="light">Light</j-tab-item>
         <j-tab-item value="dark">Dark</j-tab-item>
+        <j-tab-item value="gradient">Gradient</j-tab-item>
         <j-tab-item value="black">Black</j-tab-item>
         <j-tab-item value="cyberpunk">Cyberpunk</j-tab-item>
         <j-tab-item value="90s">90s</j-tab-item>

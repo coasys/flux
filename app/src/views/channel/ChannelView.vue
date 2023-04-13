@@ -359,7 +359,7 @@ export default defineComponent({
 }
 
 .channel-view {
-  background-color: var(--app-channel-bg-color, transparent);
+  background: var(--app-channel-bg-color, transparent);
 }
 
 .channel-view__header {
@@ -368,7 +368,7 @@ export default defineComponent({
   gap: var(--j-space-400);
   padding: 0 var(--j-space-200);
   position: sticky;
-  background-color: var(--app-channel-header-bg-color, transparent);
+  background: var(--app-channel-header-bg-color, transparent);
   border-bottom: 1px solid
     var(--app-channel-header-border-color, var(--j-border-color));
   height: var(--app-header-height);
