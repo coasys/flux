@@ -1,6 +1,6 @@
 {
   "name": "@fluxapp/webrtc-view",
-  "version": "0.0.1",
+  "version": "0.5.9",
   "type": "module",
   "files": [
     "dist"

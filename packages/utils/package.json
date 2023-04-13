@@ -1,6 +1,6 @@
 {
   "name": "utils",
-  "version": "0.0.1",
+  "version": "0.5.9",
   "description": "",
   "main": "index.js",
   "scripts": {
