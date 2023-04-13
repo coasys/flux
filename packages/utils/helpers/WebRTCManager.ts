@@ -437,7 +437,7 @@ export default class WebRTCManager {
   }
 
   /**
-   * Join the chat room, listen for signals and begin heartbeat
+   * Join the chat room, listen for signals
    */
   async join(initialSettings?: Settings) {
     let settings = { audio: true, video: false, ...initialSettings };

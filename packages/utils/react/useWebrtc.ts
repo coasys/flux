@@ -399,19 +399,21 @@ export default function useWebRTC({
         : false,
     };
 
-    if (enabled) {
-      const newLocalStream = await navigator.mediaDevices.getUserMedia({
-        audio: localState.settings.audio,
-        video: newSettings.video,
-      });
-      updateStream(newLocalStream);
-    } else {
-      if (localStream) {
-        if (localStream.getVideoTracks()[0]) {
-          localStream.getVideoTracks()[0].enabled = false;
-        }
+    const newLocalStream = await navigator.mediaDevices.getUserMedia({
+      audio: localState.settings.audio,
+      video: {
+        ...videoDimensions,
+        deviceId: videoDeviceIdFromLocalStorage || undefined,
+      },
+    });
+
+    if (!enabled) {
+      if (localStream.getVideoTracks()[0]) {
+        localStream.getVideoTracks()[0].enabled = false;
       }
     }
+
+    updateStream(newLocalStream);
 
     // Notify others of state change
     onChangeState({ ...localState, settings: newSettings });
@@ -511,13 +513,27 @@ export default function useWebRTC({
     const [videoTrack] = stream.getVideoTracks();
     const [audioTrack] = stream.getAudioTracks();
 
+    console.log("Runing updateStream", stream);
+
     for (let peer of connections) {
       if (videoTrack) {
-        peer.connection.peer.replaceTrack(
-          peer.connection.peer.streams[0].getVideoTracks()[0],
-          videoTrack,
-          peer.connection.peer.streams[0]
-        );
+        const currentVideoTrack =
+          peer.connection.peer.streams[0].getVideoTracks()[0];
+
+        console.log(peer.connection.peer.streams[0].getVideoTracks()[0]); // undefined
+
+        if (currentVideoTrack) {
+          peer.connection.peer.replaceTrack(
+            currentVideoTrack,
+            videoTrack,
+            peer.connection.peer.streams[0]
+          );
+        } else {
+          peer.connection.peer.addTrack(
+            videoTrack,
+            peer.connection.peer.streams[0]
+          );
+        }
       }
 
       if (audioTrack) {
@@ -549,31 +565,7 @@ export default function useWebRTC({
   async function onJoin({ initialState }) {
     setIsLoading(true);
 
-    const videoDeviceIdFromLocalStorage =
-      typeof localState.settings.video !== "boolean" &&
-      localState.settings.video.deviceId
-        ? localState.settings.video.deviceId
-        : localstorage.getForVersion("cameraDeviceId");
-
-    const audioDeviceIdFromLocalStorage =
-      typeof localState.settings.audio !== "boolean" &&
-      localState.settings.audio.deviceId
-        ? localState.settings.audio.deviceId
-        : localstorage.getForVersion("audioDeviceId");
-
     const joinSettings = { ...localState.settings };
-
-    if (
-      videoDeviceIdFromLocalStorage &&
-      typeof joinSettings.video !== "boolean"
-    ) {
-      joinSettings.video.deviceId = videoDeviceIdFromLocalStorage;
-    }
-    if (audioDeviceIdFromLocalStorage) {
-      joinSettings.audio = {
-        deviceId: audioDeviceIdFromLocalStorage,
-      };
-    }
 
     // Check if the user has no video devices
     const hasVideoDevices = devices.some((d) => d.kind === "videoinput");
