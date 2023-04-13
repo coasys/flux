@@ -96,6 +96,7 @@
 }
 
 .message .messageUsername {
+  text-decoration: none;
   cursor: pointer;
   color: var(--j-color-black);
   font-size: var(--j-font-size-500);

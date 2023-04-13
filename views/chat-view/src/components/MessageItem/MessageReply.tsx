@@ -6,25 +6,31 @@ export default function MessageReply({
   replyMessage,
   onMessageClick,
 }) {
+  function onMsClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    onMessageClick(e);
+  }
+
   return (
     <div style={{ display: "contents" }}>
-      <div class={styles.replyLineWrapper}>
-        <div class={styles.replyLine} />
+      <div className={styles.replyLineWrapper}>
+        <div className={styles.replyLine} />
       </div>
-      <div class={styles.replyMessage}>
-        <a class={styles.replyAuthor} href={replyAuthor?.did}>
+      <div className={styles.replyMessage}>
+        <a className={styles.replyAuthor} href={replyAuthor?.did}>
           <Avatar
             did={replyAuthor.did}
             url={replyAuthor.profileThumbnailPicture}
             size="xxs"
           ></Avatar>
-          <div class={styles.replyUsername}>
+          <div className={styles.replyUsername}>
             {replyAuthor.username || <j-skeleton width="xl" height="text" />}
           </div>
         </a>
         <div
-          onClick={onMessageClick}
-          class={styles.replyContent}
+          onClick={onMsClick}
+          className={styles.replyContent}
           dangerouslySetInnerHTML={{ __html: replyMessage.content.trim() }}
         />
       </div>
