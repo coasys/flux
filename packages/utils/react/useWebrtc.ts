@@ -134,35 +134,7 @@ export default function useWebRTC({
    */
   useEffect(() => {
     async function askForPermission() {
-      const videoDeviceIdFromLocalStorage =
-        typeof localState.settings.video !== "boolean" &&
-        localState.settings.video.deviceId
-          ? localState.settings.video.deviceId
-          : localstorage.getForVersion("cameraDeviceId");
-
-      const audioDeviceIdFromLocalStorage =
-        typeof localState.settings.audio !== "boolean" &&
-        localState.settings.audio.deviceId
-          ? localState.settings.audio.deviceId
-          : localstorage.getForVersion("audioDeviceId");
-
       const joinSettings = { ...defaultSettings };
-
-      // Check if user has previously specified webcam or audio device
-      if (
-        videoDeviceIdFromLocalStorage &&
-        typeof joinSettings.video !== "boolean"
-      ) {
-        joinSettings.video = {
-          ...videoDimensions,
-          deviceId: videoDeviceIdFromLocalStorage,
-        };
-      }
-      if (audioDeviceIdFromLocalStorage) {
-        joinSettings.audio = {
-          deviceId: audioDeviceIdFromLocalStorage,
-        };
-      }
 
       // Check if the user has no video devices
       const hasVideoDevices = devices.some((d) => d.kind === "videoinput");

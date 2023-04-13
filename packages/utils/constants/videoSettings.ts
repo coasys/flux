@@ -24,6 +24,6 @@ export const videoDimensions = {
 
 export const defaultSettings = {
   audio: true,
-  video: videoDimensions,
+  video: false,
   screen: false,
 } as Settings;
