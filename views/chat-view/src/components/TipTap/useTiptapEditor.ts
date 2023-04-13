@@ -170,9 +170,6 @@ export default ({
           },
         }),
         Mention("channel").configure({
-          HTMLAttributes: {
-            class: styles.editorMentions,
-          },
           renderLabel({ options, node }) {
             return `${options.suggestion.char}${
               node.attrs.label ?? node.attrs.id
@@ -192,9 +189,6 @@ export default ({
           },
         }),
         Mention("agent").configure({
-          HTMLAttributes: {
-            class: styles.editorMentions,
-          },
           renderLabel({ options, node }) {
             return `${options.suggestion.char}${
               node.attrs.label ?? node.attrs.id

@@ -68,14 +68,14 @@ export default (name: string) =>
       return {
         id: {
           default: null,
-          parseHTML: (element) => element.getAttribute("data-id"),
+          parseHTML: (element) => element.getAttribute("href"),
           renderHTML: (attributes) => {
             if (!attributes.id) {
               return {};
             }
 
             return {
-              "data-id": attributes.id,
+              href: attributes.id,
             };
           },
         },
@@ -106,9 +106,9 @@ export default (name: string) =>
 
     renderHTML({ node, HTMLAttributes }) {
       return [
-        "span",
+        "a",
         mergeAttributes(
-          { "data-mention": name },
+          { href: node.id },
           this.options.HTMLAttributes,
           HTMLAttributes
         ),

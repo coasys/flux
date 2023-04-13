@@ -39,13 +39,12 @@ export default function MessageCards({ message, perspectiveUuid, mainRef }) {
 
   return (
     <div className={styles.MessageCardsContentWrapper}>
-      {urls.map((url) =>
-        url.startsWith("neighbourhood://") ? (
-          <NeighbourhoodCard url={url} />
-        ) : (
-          <LinkCard url={url} />
-        )
-      )}
+      {urls.map((url) => {
+        if (url.startsWith("neighbourhood://"))
+          return <NeighbourhoodCard url={url} />;
+        if (url.startsWith("http")) return <LinkCard url={url} />;
+        return null;
+      })}
     </div>
   );
 }
@@ -57,10 +56,6 @@ function LinkCard({ url }) {
     description: string;
     image: string;
   }>(null);
-
-  function onClick() {
-    window.open(url, "_blank");
-  }
 
   useEffect(() => {
     fetch("https://jsonlink.io/api/extract?url=" + url)
@@ -79,18 +74,18 @@ function LinkCard({ url }) {
   }, [url]);
 
   return (
-    <div className={styles.neighbourhoodCard} onClick={onClick}>
+    <a className={styles.card} target="_blank" href={url}>
       <div>
-        <div className={styles.neighbourhoodCardFlex}>
+        <div className={styles.cardFlex}>
           <div>
-            <div className={styles.neighbourhoodCardName}>
+            <div className={styles.cardName}>
               {isLoading ? (
                 <j-skeleton width="lg" height="text"></j-skeleton>
               ) : (
                 meta?.name || "No title"
               )}
             </div>
-            <div className={styles.neighbourhoodCardDescription}>
+            <div className={styles.cardDescription}>
               {isLoading ? (
                 <j-skeleton width="xxl" height="text"></j-skeleton>
               ) : (
@@ -99,15 +94,11 @@ function LinkCard({ url }) {
             </div>
           </div>
           {meta?.image && (
-            <img
-              className={styles.neighbourhoodCardImage}
-              src={meta?.image}
-              width={140}
-            />
+            <img className={styles.cardImage} src={meta?.image} width={140} />
           )}
         </div>
       </div>
-    </div>
+    </a>
   );
 }
 
@@ -125,27 +116,19 @@ function NeighbourhoodCard({ url }) {
       });
   }, [url]);
 
-  function onClick(e: Event) {
-    const event = new CustomEvent("neighbourhood-click", {
-      detail: { url, channel: "Home" },
-      bubbles: true,
-    });
-    e.target.dispatchEvent(event);
-  }
-
   return (
-    <div className={styles.neighbourhoodCard} size="300" onClick={onClick}>
+    <a className={styles.card} href={url}>
       <div>
-        <div className={styles.neighbourhoodCardFlex}>
+        <div className={styles.cardFlex}>
           <div>
-            <div className={styles.neighbourhoodCardName}>
+            <div className={styles.cardName}>
               {isLoading ? (
                 <j-skeleton width="lg" height="text"></j-skeleton>
               ) : (
                 meta.name || "No title"
               )}
             </div>
-            <div className={styles.neighbourhoodCardDescription}>
+            <div className={styles.cardDescription}>
               {isLoading ? (
                 <j-skeleton width="xxl" height="text"></j-skeleton>
               ) : (
@@ -156,6 +139,6 @@ function NeighbourhoodCard({ url }) {
         </div>
       </div>
       <j-button variant="primary">Join</j-button>
-    </div>
+    </a>
   );
 }

@@ -8,7 +8,7 @@ import { ENTRY_TYPE, SELF } from "../constants/communityPredicates";
 export async function createEntry(entry: EntryInput): Promise<Entry> {
   const client = await getAd4mClient();
 
-  const id = entry.id || `flux_entry://${uuidv4()}`;
+  const id = entry.id || `flux.entry://${uuidv4()}`;
   const source = entry.source || SELF;
 
   const entryLink = new Link({

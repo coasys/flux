@@ -50,7 +50,11 @@
   margin-bottom: 0;
 }
 
-.editorMentions {
+.editor a[href^="did:"],
+.editor a[href^="neighbourhood://"],
+.editor a[href^="flux.entry://"]
+{
+  text-decoration: none;
   cursor: pointer;
   padding: 2px var(--j-space-200);
   border-radius: var(--j-border-radius);

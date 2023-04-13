@@ -48,12 +48,16 @@
 
       ui.connect();
 
-      const el = document.querySelector("perspective-view");
-      const [_, uuid, source] = document.location.pathname.split("/");
+      ui.addEventListener("authstatechange", () => {
+        if (ui.authState === "authenticated") {
+          const el = document.querySelector("perspective-view");
+          const [_, uuid, source] = document.location.pathname.split("/");
 
-      el.setAttribute("perspective", decodeURIComponent(uuid));
-      el.setAttribute("source", decodeURIComponent(source));
-      customElements.define("perspective-view", ForumView);
+          el.setAttribute("perspective", decodeURIComponent(uuid));
+          el.setAttribute("source", decodeURIComponent(source));
+          customElements.define("perspective-view", ForumView);
+        }
+      });
     </script>
   </body>
 </html>

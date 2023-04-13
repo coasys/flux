@@ -72,6 +72,7 @@
       class="perspective-view"
       :source="channel.id"
       :perspective="communityId"
+      @click="onViewClick"
       @agent-click="onAgentClick"
       @channel-click="onChannelClick"
       @neighbourhood-click="onNeighbourhoodClick"
@@ -83,9 +84,7 @@
       class="perspective-view"
       :source="channel.id"
       :perspective="communityId"
-      @agent-click="onAgentClick"
-      @channel-click="onChannelClick"
-      @neighbourhood-click="onNeighbourhoodClick"
+      @click="onViewClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></graph-view>
     <webrtc-view
@@ -94,9 +93,7 @@
       class="perspective-view"
       :source="channel.id"
       :perspective="communityId"
-      @agent-click="onAgentClick"
-      @channel-click="onChannelClick"
-      @neighbourhood-click="onNeighbourhoodClick"
+      @click="onViewClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></webrtc-view>
     <webrtc-debug-view
@@ -105,9 +102,7 @@
       class="perspective-view"
       :source="channel.id"
       :perspective="communityId"
-      @agent-click="onAgentClick"
-      @channel-click="onChannelClick"
-      @neighbourhood-click="onNeighbourhoodClick"
+      @click="onViewClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></webrtc-debug-view>
     <chat-view
@@ -116,9 +111,7 @@
       class="perspective-view"
       :source="channel.id"
       :perspective="communityId"
-      @agent-click="onAgentClick"
-      @channel-click="onChannelClick"
-      @neighbourhood-click="onNeighbourhoodClick"
+      @click="onViewClick"
       @hide-notification-indicator="onHideNotificationIndicator"
     ></chat-view>
 
@@ -232,6 +225,30 @@ export default defineComponent({
     },
   },
   methods: {
+    onViewClick(e: any) {
+      const parentLink = e.target.closest("a");
+      if (parentLink) {
+        const url = parentLink.href;
+
+        if (url.startsWith("neighbourhood://")) {
+          this.onNeighbourhoodClick(url);
+        }
+
+        if (url.startsWith("did:")) {
+          this.onAgentClick(url);
+        }
+
+        if (url.startsWith("flux.entry")) {
+          this.onChannelClick(url);
+        }
+
+        if (!url.startsWith("http")) {
+          console.log("test");
+          e.preventDefault();
+        }
+      }
+    },
+
     goToEditChannel(id: string) {
       this.appStore.setActiveChannel(id);
       this.appStore.setShowEditChannel(true);
@@ -246,25 +263,25 @@ export default defineComponent({
     toggleSidebar() {
       this.appStore.toggleSidebar();
     },
-    onAgentClick({ detail }: any) {
-      this.toggleProfile(true, detail.did);
+    onAgentClick(did: string) {
+      this.toggleProfile(true, did);
     },
-    onChannelClick({ detail }: any) {
+    onChannelClick(channel: string) {
       this.$router.push({
         name: "channel",
         params: {
-          channelId: detail.channel,
-          communityId: detail.uuid || this.community.neighbourhood.uuid,
+          channelId: channel,
+          communityId: this.community.neighbourhood.uuid,
         },
       });
     },
-    onNeighbourhoodClick({ detail }: any) {
+    onNeighbourhoodClick(url: any) {
       let community = this.dataStore.getCommunities.find(
-        (e) => e.neighbourhood.neighbourhoodUrl === detail.url
+        (e) => e.neighbourhood.neighbourhoodUrl === url
       );
 
       if (!community) {
-        this.joinCommunity(detail.url);
+        this.joinCommunity(url);
       } else {
         this.$router.push({
           name: "community",
