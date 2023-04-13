@@ -125,16 +125,9 @@ export default ({
           },
         }),
         Text,
-        Paragraph.configure({
-          HTMLAttributes: {
-            class: styles.editorParagraph,
-          },
-        }),
+        Paragraph,
         Link.configure({
           protocols: ["neighbourhood"],
-          HTMLAttributes: {
-            class: styles.linkStyles,
-          },
         }),
         Bold,
         Strike,
