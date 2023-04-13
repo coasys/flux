@@ -248,25 +248,9 @@ export default function useWebRTC({
           }
 
           if (type === "request-state" && senderDid !== agent.did) {
-            manager.current?.sendMessage("state", localState);
-          }
-
-          if (type === "state" && senderDid !== agent.did) {
-            setConnections((oldConnections) => {
-              const match = oldConnections.find((c) => c.did === senderDid);
-              if (!match) {
-                return oldConnections;
-              }
-
-              const newPeer = {
-                ...match,
-                state: message,
-              };
-
-              return [
-                ...oldConnections.filter((c) => c.did !== senderDid),
-                newPeer,
-              ];
+            setLocalState((oldState) => {
+              manager.current?.sendMessage("state", oldState);
+              return oldState;
             });
           }
 

@@ -10,7 +10,6 @@ type Props = {
 };
 
 export default function VoiceVideo({ webRTC }: Props) {
-  console.log(webRTC.devices);
   const videoTrack = webRTC.localStream
     ?.getTracks()
     ?.find((track) => track.kind === "video");
