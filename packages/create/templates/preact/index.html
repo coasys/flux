@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flux App</title>
+    <style>
+      html {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--j-color-white);
+      }
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
+      flux-app {
+        height: calc(100vh - var(--j-size-xl));
+        display: block;
+      }
+      .header {
+        display: grid;
+        place-content: center;
+        height: var(--j-size-xl);
+        padding: var(--j-space-200);
+        position: sticky;
+        top: 0;
+        left: 0;
+        background: var(--j-color-ui-100);
+        border-radius: var(--j-border-radius);
+      }
+      select {
+        background: var(--j-color-ui-200);
+        color: var(--j-color-black);
+        font-size: var(--j-font-size-500);
+        border-radius: var(--j-border-radius);
+        border-color: var(--j-border-color-strong);
+        padding: var(--j-space-200);
+      }
+      select:focus {
+        outline: 1px solid var(--j-color-primary-500);
+      }
+    </style>
+  </head>
+  <body>
+    <div v-scope @vue:mounted="mounted">
+      <header class="header">
+        <j-flex gap="200" a="center" j="center">
+          <select
+            @change="getPerspective($event)"
+            v-model="perspectiveUuid"
+            v-for="{name, uuid} in perspectives"
+          >
+            <option value="" selected disabled>Select a perspective</option>
+            <option :value="uuid">{{name}}</option>
+          </select>
+          <j-text nomargin>or</j-text>
+          <j-button size="sm" id="create-perspective">Create new</j-button>
+        </j-flex>
+      </header>
+      <flux-app :source="source"></flux-app>
+    </div>
+
+    <script type="module">
+      import "@fluxapp/ui";
+      import "@fluxapp/ui/dist/main.css";
+      import "@fluxapp/ui/dist/themes/dark.css";
+      import Ad4mConnectUI, {
+        getAd4mClient,
+      } from "@perspect3vism/ad4m-connect";
+      import App from "./src/main.ts";
+
+      import { createApp } from "https://unpkg.com/petite-vue?module";
+
+      const ui = Ad4mConnectUI({
+        appName: "Flux App",
+        appDesc: "A flux app",
+        appDomain: "app.flux.io",
+        capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
+      });
+
+      createApp({
+        perspectiveUuid: "",
+        source: "test",
+        perspectives: [],
+        async getPerspective(e) {
+          const client = await getAd4mClient();
+          const perspective = await client.perspective.byUUID(e.target.value);
+          const el = document.querySelector("flux-app");
+          el.perspective = perspective;
+        },
+        mounted() {
+          ui.connect();
+          ui.addEventListener("authstatechange", async () => {
+            if (ui.authState === "authenticated") {
+              const client = await getAd4mClient();
+              this.client = client;
+              this.fluxApp = App;
+              customElements.define("flux-app", App);
+              const perspectives = await client.perspective.all();
+
+              this.perspectives = perspectives.map((p) => ({
+                uuid: p.uuid,
+                name: p.name,
+              }));
+            }
+          });
+        },
+      }).mount();
+
+      window.__APP_VERSION__ = "test";
+    </script>
+  </body>
+</html>

@@ -1,0 +1,38 @@
+{
+  "name": "flux-app",
+  "version": "1.0.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/main.umd.cjs",
+  "module": "./dist/main.js",
+  "exports": {
+    ".": {
+      "import": "./dist/main.js",
+      "require": "./dist/main.umd.cjs"
+    }
+  },
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "utils": "*",
+    "@fluxapp/ui": "*",
+    "@perspect3vism/ad4m-connect": "^0.3.1",
+    "@perspect3vism/ad4m": "^0.3.1",
+    "preact": "^10.13.1"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.5.0",
+    "vite": "^4.2.1",
+    "vite-plugin-css-injected-by-js": "^3.1.0"
+  }
+}
