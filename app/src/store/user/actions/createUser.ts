@@ -1,5 +1,5 @@
 import { useAppStore } from "@/store/app";
-import createProfile from "utils/api/createProfile";
+import { createProfile } from "utils/api";
 import { Ad4mClient } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { useUserStore } from "..";

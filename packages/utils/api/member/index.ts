@@ -1,42 +1,25 @@
-import {
-  CHANNEL_VIEW,
-  DID,
-  MEMBER,
-  NAME,
-} from "../../constants/communityPredicates";
-import EntryModel from "../../helpers/model";
-import { EntryType, Entry, ChannelView } from "../../types";
+import { SDNAClass, subjectFlag, subjectProperty } from "@perspect3vism/ad4m";
+import { EntryType } from "../../types";
+import { DID, ENTRY_TYPE } from "../../constants";
 
-export interface Member extends Entry {
+@SDNAClass({
+  name: 'Member'
+})
+export class Member {
+  isSubjectInstance = ['languageName(Base, "agent-expression-store")'];
+
+  @subjectFlag({
+    through: ENTRY_TYPE,
+    value: EntryType.Member,
+  })
+  type: string;
+
+  @subjectProperty({
+    through: DID,
+    writable: true,
+    resolveLanguage: "literal",
+  })
   did: string;
 }
 
-class MemberModel extends EntryModel {
-  static get type() {
-    return EntryType.Member;
-  }
-
-  static get properties() {
-    return {
-      did: {
-        predicate: DID,
-        type: String,
-        resolve: false,
-      },
-    };
-  }
-
-  async create(data: { did: string }): Promise<Member> {
-    return super.create(data) as Promise<Member>;
-  }
-
-  async getAll() {
-    return super.getAll() as Promise<Member[]>;
-  }
-
-  async get(id: string) {
-    return super.get(id) as Promise<Member>;
-  }
-}
-
-export default MemberModel;
+export default Member;

@@ -1,12 +1,12 @@
-import CommunityModel, { Community } from "utils/api/community";
-import useEntry from "utils/react/useEntry";
+import { Community } from "utils/api";
+import { useEntry } from "utils/frameworks/react";
 import styles from "../App.module.css";
 
 export default function CommunityCard({ uuid }) {
   const { entry: community } = useEntry({
     perspectiveUuid: uuid,
     id: uuid,
-    model: CommunityModel,
+    model: Community,
   });
 
   if (community) {

@@ -1,11 +1,11 @@
 import { useContext, useState, useEffect } from "preact/hooks";
-import { CommunityContext } from "utils/react";
+import { CommunityContext } from "utils/frameworks/react";
 import styles from "./index.module.css";
 import { format, formatDistance } from "date-fns/esm";
 import { Profile } from "utils/types";
-import { getTimeSince } from "utils/helpers/timeHelpers";
+import { getTimeSince } from "utils/helpers";
 import { DisplayView } from "../../constants/options";
-import { getImage } from "utils/helpers/getImage";
+import { getImage } from "utils/helpers";
 import UIContext from "../../context/UIContext";
 import Avatar from "../Avatar";
 

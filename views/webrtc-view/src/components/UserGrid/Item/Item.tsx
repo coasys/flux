@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "preact/hooks";
 import { Reaction } from "../../../types";
 import { Profile } from "utils/types";
-import { WebRTC } from "utils/react/useWebrtc";
-import getProfile from "utils/api/getProfile";
+import { getProfile } from "utils/api";
+import { WebRTC } from "utils/frameworks/react";
 
 import styles from "./Item.module.css";
 

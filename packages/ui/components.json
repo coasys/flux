@@ -3,7 +3,7 @@
   "tags": [
     {
       "name": "j-component",
-      "path": "./src/components/_template/Component.ts",
+      "path": "./src\\components\\_template\\Component.ts",
       "attributes": [
         {
           "name": "variant",
@@ -25,7 +25,7 @@
     },
     {
       "name": "j-avatar",
-      "path": "./src/components/avatar/Avatar.ts",
+      "path": "./src\\components\\avatar\\Avatar.ts",
       "attributes": [
         {
           "name": "src",
@@ -121,7 +121,7 @@
     },
     {
       "name": "j-badge",
-      "path": "./src/components/badge/Badge.ts",
+      "path": "./src\\components\\badge\\Badge.ts",
       "attributes": [
         {
           "name": "variant",
@@ -156,7 +156,7 @@
     },
     {
       "name": "j-box",
-      "path": "./src/components/box/Box.ts",
+      "path": "./src\\components\\box\\Box.ts",
       "attributes": [
         {
           "name": "p",
@@ -334,7 +334,7 @@
     },
     {
       "name": "j-button",
-      "path": "./src/components/button/Button.ts",
+      "path": "./src\\components\\button\\Button.ts",
       "attributes": [
         {
           "name": "variant",
@@ -434,7 +434,7 @@
     },
     {
       "name": "j-carousel",
-      "path": "./src/components/carousel/Carousel.ts",
+      "path": "./src\\components\\carousel\\Carousel.ts",
       "attributes": [
         {
           "name": "gap",
@@ -482,7 +482,7 @@
     },
     {
       "name": "j-checkbox",
-      "path": "./src/components/checkbox/Checkbox.js",
+      "path": "./src\\components\\checkbox\\Checkbox.js",
       "attributes": [
         {
           "name": "checked",
@@ -556,7 +556,7 @@
     },
     {
       "name": "j-flex",
-      "path": "./src/components/flex/Flex.ts",
+      "path": "./src\\components\\flex\\Flex.ts",
       "attributes": [
         {
           "name": "j",
@@ -626,7 +626,7 @@
     },
     {
       "name": "j-icon",
-      "path": "./src/components/icon/Icon.ts",
+      "path": "./src\\components\\icon\\Icon.ts",
       "attributes": [
         {
           "name": "name",
@@ -677,7 +677,7 @@
     },
     {
       "name": "j-input",
-      "path": "./src/components/input/Input.js",
+      "path": "./src\\components\\input\\Input.js",
       "attributes": [
         {
           "name": "value",
@@ -936,7 +936,7 @@
     },
     {
       "name": "j-menu-group-item",
-      "path": "./src/components/menu-group-item/MenuGroupItem.ts",
+      "path": "./src\\components\\menu-group-item\\MenuGroupItem.ts",
       "attributes": [
         {
           "name": "collapsible",
@@ -986,7 +986,7 @@
     },
     {
       "name": "j-menu-item",
-      "path": "./src/components/menu-item/MenuItem.ts",
+      "path": "./src\\components\\menu-item\\MenuItem.ts",
       "attributes": [
         {
           "name": "selected",
@@ -1033,7 +1033,7 @@
     },
     {
       "name": "j-menu",
-      "path": "./src/components/menu/Menu.ts",
+      "path": "./src\\components\\menu\\Menu.ts",
       "properties": [
         {
           "name": "styles",
@@ -1044,7 +1044,7 @@
     },
     {
       "name": "j-modal",
-      "path": "./src/components/modal/Modal.ts",
+      "path": "./src\\components\\modal\\Modal.ts",
       "attributes": [
         {
           "name": "size",
@@ -1086,7 +1086,7 @@
     },
     {
       "name": "j-popover",
-      "path": "./src/components/popover/Popover.ts",
+      "path": "./src\\components\\popover\\Popover.ts",
       "attributes": [
         {
           "name": "open",
@@ -1169,7 +1169,7 @@
     },
     {
       "name": "j-radio-button",
-      "path": "./src/components/radio-button/RadioButton.js",
+      "path": "./src\\components\\radio-button\\RadioButton.js",
       "attributes": [
         {
           "name": "checked",
@@ -1263,7 +1263,7 @@
     },
     {
       "name": "j-select",
-      "path": "./src/components/select/Select.ts",
+      "path": "./src\\components\\select\\Select.ts",
       "attributes": [
         {
           "name": "value",
@@ -1338,7 +1338,7 @@
     },
     {
       "name": "j-skeleton",
-      "path": "./src/components/skeleton/Skeleton.ts",
+      "path": "./src\\components\\skeleton\\Skeleton.ts",
       "attributes": [
         {
           "name": "variant",
@@ -1384,7 +1384,7 @@
     },
     {
       "name": "j-spinner",
-      "path": "./src/components/spinner/Spinner.ts",
+      "path": "./src\\components\\spinner\\Spinner.ts",
       "attributes": [
         {
           "name": "size",
@@ -1408,7 +1408,7 @@
     },
     {
       "name": "j-tab-item",
-      "path": "./src/components/tab-item/TabItem.ts",
+      "path": "./src\\components\\tab-item\\TabItem.ts",
       "attributes": [
         {
           "name": "checked",
@@ -1477,7 +1477,7 @@
     },
     {
       "name": "j-tabs",
-      "path": "./src/components/tabs/Tabs.ts",
+      "path": "./src\\components\\tabs\\Tabs.ts",
       "attributes": [
         {
           "name": "value",
@@ -1539,7 +1539,7 @@
     },
     {
       "name": "j-text",
-      "path": "./src/components/text/Text.ts",
+      "path": "./src\\components\\text\\Text.ts",
       "attributes": [
         {
           "name": "size",
@@ -1648,7 +1648,7 @@
     },
     {
       "name": "j-timestamp",
-      "path": "./src/components/timestamp/Timestamp.ts",
+      "path": "./src\\components\\timestamp\\Timestamp.ts",
       "attributes": [
         {
           "name": "value",
@@ -1849,7 +1849,7 @@
     },
     {
       "name": "j-toast",
-      "path": "./src/components/toast/Toast.ts",
+      "path": "./src\\components\\toast\\Toast.ts",
       "attributes": [
         {
           "name": "variant",
@@ -1904,7 +1904,7 @@
     },
     {
       "name": "j-toggle",
-      "path": "./src/components/toggle/Toggle.js",
+      "path": "./src\\components\\toggle\\Toggle.js",
       "attributes": [
         {
           "name": "checked",
@@ -1978,7 +1978,7 @@
     },
     {
       "name": "j-tooltip",
-      "path": "./src/components/tooltip/Tooltip.ts",
+      "path": "./src\\components\\tooltip\\Tooltip.ts",
       "attributes": [
         {
           "name": "open",

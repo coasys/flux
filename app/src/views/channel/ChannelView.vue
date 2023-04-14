@@ -144,10 +144,6 @@
 </template>
 
 <script lang="ts">
-import ForumView from "@fluxapp/forum-view";
-import ChatView from "@fluxapp/chat-view";
-import GraphView from "@fluxapp/graph-view";
-import VoiceView from "@fluxapp/webrtc-view";
 import { defineComponent, ref } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";

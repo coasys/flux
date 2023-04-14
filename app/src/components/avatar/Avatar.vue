@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { getImage } from "utils/helpers/getImage";
+import { getImage } from "utils/helpers";
 export default defineComponent({
   props: {
     did: String,
@@ -32,7 +32,11 @@ export default defineComponent({
     url: {
       handler(url: string) {
         if (url) {
-          this.getProfileImage(url);
+          if (url.includes('base64')) {
+            this.realSrc = url
+          } else {
+            this.getProfileImage(url);
+          }
         } else {
           this.realSrc = null;
         }

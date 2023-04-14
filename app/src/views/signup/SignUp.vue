@@ -72,8 +72,7 @@ import Logo from "@/components/logo/Logo.vue";
 import { useAppStore } from "@/store/app";
 import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";
 import SignUpCarousel from "./SignUpCarousel.vue";
-import getAd4mProfile from "utils/api/getAd4mProfile";
-import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
+import { getAd4mProfile } from "utils/api";
 
 export default defineComponent({
   name: "SignUp",

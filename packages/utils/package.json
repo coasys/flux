@@ -2,9 +2,45 @@
   "name": "utils",
   "version": "0.5.9",
   "description": "",
-  "main": "index.js",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/main.umd.cjs",
+  "module": "./dist/main.js",
+  "exports": {
+    ".": {
+      "import": "./dist/main.js",
+      "require": "./dist/main.umd.cjs"
+    },
+    "./api": {
+      "import": "./dist/api.js",
+      "require": "./dist/api.umd.cjs"
+    },
+    "./constants": {
+      "import": "./dist/constants.js",
+      "require": "./dist/constants.umd.cjs"
+    },
+    "./helpers": {
+      "import": "./dist/helpers.js",
+      "require": "./dist/helpers.umd.cjs"
+    },
+    "./factory": {
+      "import": "./dist/factory.js",
+      "require": "./dist/factory.umd.cjs"
+    },
+    "./frameworks/react": {
+      "import": "./react/index.ts"
+    },
+    "./types": {
+      "import": "./dist/types.js",
+      "require": "./dist/types.umd.cjs"
+    }
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite build --watch",
+    "build": "vite build"
   },
   "keywords": [],
   "author": "",
@@ -14,10 +50,14 @@
     "date-fns": "^2.28.0",
     "dexie": "^3.2.0",
     "dexie-react-hooks": "^1.1.1",
-    "events": "^3.3.0",
+    "html-entities": "^2.3.3",
     "simple-peer": "^9.11.1"
   },
   "devDependencies": {
+    "events": "^3.3.0",
+    "vite": "^4.0.4",
+    "typescript": "^4.9.4",
+    "@vitejs/plugin-react": "^3.0.1",
     "@types/simple-peer": "^9.11.5",
     "@types/react": "^17.0.2"
   },

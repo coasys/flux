@@ -1,11 +1,8 @@
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "..";
-import CommunityModel from "utils/api/community";
-import {
-  blobToDataURL,
-  dataURItoBlob,
-  resizeImage,
-} from "utils/helpers/profileHelpers";
+import { Community as CommunityModel } from "utils/api";
+import { blobToDataURL, dataURItoBlob, resizeImage } from "utils/helpers";
+import { SubjectRepository } from "utils/factory";
 
 export interface Payload {
   name?: string;
@@ -20,18 +17,28 @@ export default async function updateCommunityData(
   const dataStore = useDataStore();
   const appStore = useAppStore();
 
+  const community = dataStore.getCommunity(communityId);
+
   try {
-    const Community = new CommunityModel({ perspectiveUuid: communityId });
+    const Community = new SubjectRepository(CommunityModel, {
+      perspectiveUuid: communityId,
+    });
 
     let thumb = undefined;
     let compressedImage = undefined;
 
     if (update.image) {
-      compressedImage = await blobToDataURL(await resizeImage(dataURItoBlob(update.image as string), 0.6));
-      thumb = await blobToDataURL(await resizeImage(dataURItoBlob(update.image as string), 0.3));
+      update.image = await blobToDataURL(
+        await resizeImage(dataURItoBlob(update.image as string), 0.6)
+      );
+
+      // @ts-ignore
+      update.thumbnail = await blobToDataURL(
+        await resizeImage(dataURItoBlob(update.image as string), 0.3)
+      );
     }
 
-    const { name, description, image, thumbnail } = await Community.update("", {
+    await Community.update(community.id, {
       ...update,
       image: compressedImage ? {
         data_base64: compressedImage,
@@ -48,11 +55,8 @@ export default async function updateCommunityData(
     dataStore.updateCommunityMetadata({
       communityId,
       metadata: {
-        name,
-        description,
-        image,
-        thumbnail,
-      },
+        ...update
+      }
     });
   } catch (e) {
     appStore.showDangerToast({

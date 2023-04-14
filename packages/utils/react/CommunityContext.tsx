@@ -3,9 +3,10 @@ import useEntries from "./useEntries";
 import useEntry from "./useEntry";
 import ChannelModel from "../api/channel";
 import MemberModel from "../api/member";
-import CommunityModel from "../api/community";
-import { SELF } from "../constants/communityPredicates";
-import getProfile from "../api/getProfile";
+import { Community as CommunityModel } from "utils/api";
+import { getProfile } from "../api";
+import { EntryType } from "../types";
+import { asyncFilter } from "../helpers";
 
 type State = {
   uuid: string;
@@ -43,12 +44,12 @@ export function CommunityProvider({ perspectiveUuid, children }: any) {
   const { entry: community } = useEntry({
     perspectiveUuid,
     model: CommunityModel,
-    id: SELF,
   });
 
   const { entries: channelEntries } = useEntries({
     perspectiveUuid,
     model: ChannelModel,
+    source: community?.id || null,
   });
 
   const { entries: memberEntries } = useEntries({
@@ -58,12 +59,24 @@ export function CommunityProvider({ perspectiveUuid, children }: any) {
 
   useEffect(() => {
     fetchProfiles();
-  }, [memberEntries.length]);
+    fetchChannels();
+  }, [memberEntries.length, channelEntries.length]);
 
   async function fetchProfiles() {
-    const profilePromises = memberEntries
-      .filter((member) => !state.members[member.did])
-      .map((member) => getProfile(member.did));
+    const filteredProfiles = await asyncFilter(
+      memberEntries,
+      async (member: any) => {
+        const type = await member.type;
+        const did = await member.did;
+        return (
+          type === EntryType.Member && did !== undefined && !state.members[did]
+        );
+      }
+    );
+
+    const profilePromises = filteredProfiles.map(async (member) =>
+      getProfile(await member.did)
+    );
 
     const newProfiles = await Promise.all(profilePromises);
 
@@ -76,11 +89,20 @@ export function CommunityProvider({ perspectiveUuid, children }: any) {
     });
   }
 
-  const channels = useMemo(() => {
-    return channelEntries.reduce((acc, channel) => {
-      return { ...acc, [channel.id]: channel };
-    }, {});
-  }, [channelEntries]);
+  async function fetchChannels() {
+    const channels = channelEntries.reduce(
+      (acc, channel) => ({
+        ...acc,
+        [channel.id]: channel,
+      }),
+      {}
+    );
+
+    setState((oldState) => ({
+      ...oldState,
+      channels,
+    }));
+  }
 
   return (
     <CommunityContext.Provider
@@ -92,7 +114,6 @@ export function CommunityProvider({ perspectiveUuid, children }: any) {
           description: community?.description || "",
           image: community?.image || "",
           thumbnail: community?.thumbnail || "",
-          channels,
         },
       }}
     >

@@ -1,4 +1,5 @@
 // Forked from here: https://github.com/purphoros/fetch-opengraph
+// @ts-ignore
 import { decode } from "html-entities";
 
 export const metaTags: any = {
@@ -190,5 +191,3 @@ export const fetchData = async (url): Promise<any> => {
     }
   });
 };
-
-export default fetchData;

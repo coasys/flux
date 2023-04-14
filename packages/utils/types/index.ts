@@ -5,6 +5,7 @@ export interface NeighbourhoodMeta {
 }
 
 export interface Community {
+  id: string;
   uuid: string;
   author: string;
   timestamp: string;
@@ -21,6 +22,7 @@ export interface CommunityMetaData {
   description?: string;
   image?: string;
   thumbnail?: string;
+  id?: string;
 }
 
 export interface NeighbourhoodMetaData {

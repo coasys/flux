@@ -101,7 +101,7 @@ export enum Event {
   EVENT = "event",
 }
 
-export default class WebRTCManager {
+export class WebRTCManager {
   private addedListener: boolean = false;
   private isListening: boolean = false;
   private agent: Agent;

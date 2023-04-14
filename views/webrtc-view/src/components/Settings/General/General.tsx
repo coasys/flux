@@ -1,5 +1,5 @@
-import { WebRTC } from "utils/react/useWebrtc";
-import { Me } from "utils/api/getMe";
+import { Me } from "utils/api";
+import { WebRTC } from "utils/frameworks/react";
 
 type Props = {
   webRTC: WebRTC;

@@ -1,4 +1,4 @@
-import createCommunity from "utils/api/createCommunity";
+import { createCommunity } from "utils/api";
 import { CommunityState } from "@/store/types";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";

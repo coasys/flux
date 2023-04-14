@@ -1,7 +1,7 @@
 import { useContext } from "preact/hooks";
 import UIContext from "../../context/UIContext";
 import CreatePost from "../CreatePost";
-import { ChannelContext } from "utils/react";
+import { ChannelContext } from "utils/frameworks/react";
 
 export default function Overlay() {
   const { state: channelState } = useContext(ChannelContext);

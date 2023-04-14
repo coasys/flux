@@ -62,7 +62,7 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { useAppStore } from "@/store/app";
 import { defineComponent, ref } from "vue";
-import createAgentWebLink from "utils/api/createAgentWebLink";
+import { createAgentWebLink } from "utils/api";
 
 export default defineComponent({
   props: ["step"],

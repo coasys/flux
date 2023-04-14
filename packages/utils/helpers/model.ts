@@ -1,19 +1,15 @@
+import { Entry, EntryType, PropertyMap, PropertyValueMap } from "../types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { subscribeToLinks } from "../api";
 import {
-  Entry,
-  EntryType,
-  PredicateMap,
-  PropertyMap,
-  PropertyValueMap,
-} from "../types";
-import { createEntry } from "../api/createEntry";
-import subscribeToLinks from "../api/subscribeToLinks";
-import { LinkExpression } from "@perspect3vism/ad4m";
-import { ModelProperty } from "../types";
-import { queryProlog } from "./prologHelpers";
-import { updateEntry } from "../api/updateEntry";
-import { AsyncQueue } from "./queue";
+  Link,
+  LinkExpression,
+  LinkQuery,
+  PerspectiveProxy,
+  Subject,
+} from "@perspect3vism/ad4m";
 import { SELF } from "../constants/communityPredicates";
+import { v4 as uuidv4 } from "uuid";
 
 type ModelProps = {
   perspectiveUuid: string;
@@ -25,126 +21,145 @@ type Listeners = {
   remove: { [source: string]: Function[] };
 };
 
-const queue = new AsyncQueue();
+function capitalize(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
-export default class Model {
+// e.g. "name" -> "setName"
+function propertyNameToSetterName(property: string): string {
+  return `set${capitalize(property)}`;
+}
+
+export function pluralToSingular(plural: string): string {
+  if (plural.endsWith("ies")) {
+    return plural.slice(0, -3) + "y";
+  } else if (plural.endsWith("s")) {
+    return plural.slice(0, -1);
+  } else {
+    return plural;
+  }
+}
+
+// e.g. "comments" -> "addComment"
+export function collectionToAdderName(collection: string): string {
+  return `add${capitalize(collection)}`;
+}
+
+export function collectionToSetterName(collection: string): string {
+  return `setCollection${capitalize(collection)}`;
+}
+
+function setProperties(subject: any, properties: PropertyValueMap) {
+  Object.keys(properties).forEach((key) => {
+    if (Array.isArray(properties[key])) {
+      // it's a collection
+      const adderName = collectionToAdderName(key);
+      const adderFunction = subject[adderName];
+      if (adderFunction) {
+        adderFunction(properties[key]);
+      } else {
+        throw "No adder function found for collection: " + key;
+      }
+    } else {
+      // it's a property
+      const setterName = propertyNameToSetterName(key);
+      const setterFunction = subject[setterName];
+      if (setterFunction) {
+        setterFunction(properties[key]);
+      } else {
+        throw "No setter function found for property: " + key;
+      }
+    }
+  });
+}
+
+export class Factory<SubjectClass extends { type: string }> {
   client = null;
   source = SELF;
   perspectiveUuid = "";
-  private unsubscribeCb = null;
+  private unsubscribeCb: Function | null = null;
   private isSubcribing = false;
   private listeners = { add: {}, remove: {} } as Listeners;
-  static get type(): EntryType | null {
-    return null;
-  }
-  static get properties(): { [x: string]: ModelProperty } {
-    return {};
-  }
+  private subject: SubjectClass;
+  private perspective: PerspectiveProxy | null = null;
 
-  constructor(props: ModelProps) {
+  constructor(subject: { new (): SubjectClass }, props: ModelProps) {
     this.perspectiveUuid = props.perspectiveUuid;
     this.source = props.source || this.source;
+    this.subject = new subject();
   }
 
-  async create(data: PropertyMap, id?: string) {
-    const { predicateMap } = await this.createExpressions(data);
-    const entry = await createEntry({
-      perspectiveUuid: this.perspectiveUuid,
-      source: this.source,
-      id: id,
-      type: this.constructor.type,
-      data: predicateMap,
-    });
-    return this.get(entry.id);
+  async ensurePerspective() {
+    if (!this.perspective) {
+      const ad4mClient = await getAd4mClient();
+      this.perspective = await ad4mClient.perspective.byUUID(
+        this.perspectiveUuid
+      );
+    }
+  }
+
+  async create(data: PropertyMap, id?: string): Promise<SubjectClass> {
+    const base = id || `flux_entry://${uuidv4()}`;
+    await this.ensurePerspective();
+    let newInstance = await this.perspective?.createSubject(this.subject, base);
+    if (!newInstance) {
+      throw "Failed to create new instance of " + this.subject.type;
+    }
+
+    // Connect new instance to source
+    await this.perspective?.add(
+      new Link({
+        source: this.source,
+        predicate: this.subject.type,
+        target: base,
+      })
+    );
+
+    setProperties(newInstance, data);
+    return newInstance;
   }
 
   async update(id: string, data: PropertyMap) {
-    const { predicateMap } = await this.createExpressions(data);
-    await updateEntry(this.perspectiveUuid, id, predicateMap);
-    return this.get(id);
+    const instance = await this.get(id);
+    if (!instance) {
+      throw (
+        "Failed to find instance of " + this.subject.type + " with id " + id
+      );
+    }
+    setProperties(instance, data);
+    return instance;
   }
 
-  private async createExpressions(
-    data: PropertyMap
-  ): Promise<{ predicateMap: PredicateMap; propertyMap: PropertyValueMap }> {
-    const client = await getAd4mClient();
-    const propertyValues = {} as PropertyValueMap;
-    console.log(data);
+  async get(id?: string): Promise<SubjectClass | null> {
+    if (id) {
+      await this.ensurePerspective();
+      return (
+        (await this.perspective?.getSubjectProxy(id, this.subject)) || null
+      );
+    } else {
+      const all = await this.getAll();
+      return all[0] || null;
+    }
+  }
 
-    const expPromises = Object.entries(data)
-      .filter(([key]) => {
-        const isValidProperty = this.constructor.properties[
-          key
-        ] as ModelProperty;
-        return isValidProperty;
+  async getAll(source?: string): Promise<SubjectClass[]> {
+    await this.ensurePerspective();
+    const subjectClass =
+      await this.perspective!.stringOrTemplateObjectToSubjectClass(
+        this.subject
+      );
+    const results = await this.perspective?.infer(
+      `triple(${source}, _, X), instance(Class, X), subject_class(${subjectClass}, Class)`
+    );
+
+    if (!results) return [];
+
+    return await Promise.all(
+      results.map(async (result) => {
+        let subject = new Subject(this.perspective!, result.X, subjectClass);
+        await subject.init();
       })
-      .filter(([key, val]) => val !== null || val !== undefined)
-      .map(async ([key, val]) => {
-        const { predicate, languageAddress, collection } = this.constructor
-          .properties[key] as ModelProperty;
-
-        if (collection) {
-          const value = val.map(async (v) => {
-            const expression = v || "";
-            return languageAddress
-              ? await client.expression.create(expression, languageAddress)
-              : expression;
-          }) as Promise<string>[];
-          const v = await Promise.all(value);
-          propertyValues[key] = v;
-          return { predicate, value: v };
-        }
-
-        const expression = val || "";
-        if (expression) {
-          const value = languageAddress
-            ? await client.expression.create(expression, languageAddress)
-            : expression;
-
-          propertyValues[key] = value;
-
-          return { predicate, value };
-        }
-      });
-
-    const expressions = await Promise.all(expPromises);
-
-    return {
-      predicateMap: expressions.filter(exp => exp).reduce((acc, exp) => {
-        return {
-          ...acc,
-          [exp.predicate]: exp.value,
-        };
-      }, {}),
-      propertyMap: propertyValues,
-    };
-  }
-
-  async get(id: string, source?: string): Promise<Entry | null> {
-    //@ts-ignore
-    return await queue.add(async () => {
-      const result = await queryProlog({
-        perspectiveUuid: this.perspectiveUuid,
-        id,
-        type: this.constructor.type,
-        source: source || this.source,
-        properties: this.constructor.properties,
-      });
-      return result.length === 0 ? null : result[0];
-    });
-  }
-
-  async getAll(source?: string): Promise<Entry[]> {
-    //@ts-ignore
-    return await queue.add(async () => {
-      const result = await queryProlog({
-        perspectiveUuid: this.perspectiveUuid,
-        type: this.constructor.type,
-        source: source || this.source,
-        properties: this.constructor.properties,
-      });
-      return result;
-    });
+    );
   }
 
   private async subscribe() {
@@ -164,7 +179,7 @@ export default class Model {
   }
 
   private async onLink(type: "added" | "removed", link: LinkExpression) {
-    const linkIsType = link.data.predicate === this.constructor.type;
+    const linkIsType = link.data.predicate === this.subject.type;
 
     if (!linkIsType) return;
 
@@ -232,5 +247,49 @@ export default class Model {
     } else {
       this.listeners.remove[src] = [callback];
     }
+  }
+}
+
+export class SubjectEntry<EntryClass> implements Entry {
+  #subject: Subject;
+  #perspective: PerspectiveProxy;
+
+  id: string;
+  author: string;
+  timestamp: number;
+  type: EntryType;
+  data: EntryClass;
+  source: string;
+
+  constructor(subject: Subject, perspective: PerspectiveProxy) {
+    this.#subject = subject;
+    this.#perspective = perspective;
+    this.id = subject.baseExpression;
+  }
+
+  async load() {
+    let exp = undefined
+    if (!exp) {
+      let links = await this.#perspective.get(
+        new LinkQuery({ source: this.#subject.baseExpression })
+      );
+      //@ts-ignore
+      exp = links[0] || null;
+    }
+
+    if (!exp) {
+      throw "Failed to load entry";
+    }
+
+    this.author = exp.author;
+    this.timestamp = exp.timestamp;
+    try {
+      //@ts-ignore
+      this.type = await this.#subject.type;
+    } catch (e) {
+      console.error("Failed to get type of subject: ", e);
+    }
+
+    this.data = exp.data;
   }
 }

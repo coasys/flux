@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState, useMemo } from "preact/hooks";
-import { CommunityContext, useEntries } from "utils/react";
+import { CommunityContext, useEntries } from "utils/frameworks/react";
 import styles from "./index.module.css";
-import { getTimeSince } from "utils/helpers/timeHelpers";
+import { getTimeSince } from "utils/helpers";
 import { Profile } from "utils/types";
 import Avatar from "../Avatar";
 import Editor from "../Editor";
-import MessageModel from "utils/api/message";
+import { Message as MessageModel } from "utils/api";
 
 export default function CommentItem({ comment, perspectiveUuid }) {
   const [showComments, setShowComments] = useState(true);
@@ -17,12 +17,9 @@ export default function CommentItem({ comment, perspectiveUuid }) {
     state: { members },
   } = useContext(CommunityContext);
 
-  const {
-    entries: comments,
-    model: Message,
-  }: { entries: any[]; model: MessageModel } = useEntries({
+  const { entries: comments, model: Message } = useEntries({
     perspectiveUuid,
-    source: comment.id,
+    source: comment.id || null,
     model: MessageModel,
   });
 

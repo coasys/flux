@@ -1,35 +1,37 @@
 import React, { useEffect, useState, useMemo } from "react";
-import EntryModel from "../helpers/model";
-import { Entry } from "utils/types";
+import { SubjectRepository } from "../factory";
 
-export default function useEntries({
+export default function useEntries<SubjectClass>({
   perspectiveUuid,
   source,
   model,
 }: {
   perspectiveUuid: string;
-  source?: string;
-  model: typeof EntryModel;
+  source?: string | null | undefined;
+  model: SubjectClass;
 }) {
-  const [loading, setLoading] = useState(true);
-  const [entries, setEntries] = useState<any[]>([]);
+  const [loading, setLoading] = useState();
+  const [entries, setEntries] = useState<SubjectClass[]>([]);
 
   const Model = useMemo(() => {
-    return new model({ perspectiveUuid, source });
+    const subject = new SubjectRepository(model, { perspectiveUuid, source });
+
+    return subject;
   }, [perspectiveUuid, source]);
 
   useEffect(() => {
-    if (perspectiveUuid) {
+    if (perspectiveUuid && source !== null) {
       getAll();
       subscribe();
     }
     return () => Model?.unsubscribe();
-  }, [perspectiveUuid, source]);
+  }, [source]);
 
   async function getAll() {
     try {
       setLoading(true);
-      const entries = await Model.getAll();
+      const entries = await Model.getAllData();
+
       setEntries(entries);
     } catch (e) {
     } finally {
@@ -38,7 +40,7 @@ export default function useEntries({
   }
 
   function subscribe() {
-    Model.onAdded((entry) => {
+    Model.onAdded(async (entry) => {
       setEntries((oldEntries) => {
         const hasEntry = oldEntries.find((e) => e.id === entry.id);
         return hasEntry ? oldEntries : [entry, ...oldEntries];

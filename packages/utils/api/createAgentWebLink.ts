@@ -1,12 +1,12 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { createLiteralObject } from "utils/helpers/linkHelpers";
+import { createLiteralObject } from "../helpers";
 import {
   AREA_WEBLINK,
   OG_DESCRIPTION,
   OG_IMAGE,
   OG_LINK,
   OG_TITLE,
-} from "utils/constants/profile";
+} from "../constants";
 import { WebLink } from "../types";
 
 export default async function createAgentWebLink(payload: {

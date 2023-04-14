@@ -1,8 +1,8 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
-import { mapLiteralLinks } from "utils/helpers/linkHelpers";
-import { AREA_WEBLINK, OG_LINK } from "../constants/profile";
-import { OG_DESCRIPTION, OG_TITLE, OG_IMAGE } from "../constants/profile";
+import { mapLiteralLinks } from "../helpers";
+import { AREA_WEBLINK, OG_LINK } from "../constants";
+import { OG_DESCRIPTION, OG_TITLE, OG_IMAGE } from "../constants";
 import { WebLink } from "../types";
 
 export default async function getAgentWebLinks(

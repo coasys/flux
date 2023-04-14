@@ -1,8 +1,10 @@
 import { Community } from "../types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import CommunityModel from "./community";
-import { getMetaFromLinks } from "utils/helpers/getNeighbourhoodMeta";
+import { getMetaFromLinks } from "../helpers";
 import { Ad4mClient } from "@perspect3vism/ad4m";
+import { SubjectRepository } from "../factory";
+import { Member } from "./member";
 
 export interface Payload {
   joiningLink: string;
@@ -28,25 +30,22 @@ export default async ({ joiningLink }: Payload): Promise<Community> => {
       perspective.neighbourhood!.meta.links
     );
 
-    const Community = new CommunityModel({ perspectiveUuid: perspective.uuid });
-
-    await Community.addMember({ did: agent.did });
-
-    const community = await Community.get();
 
     return {
       uuid: perspective!.uuid,
       author: neighbourhoodMeta.author!,
       timestamp: neighbourhoodMeta.timestamp!,
-      name: community?.name || neighbourhoodMeta.name,
+      name: neighbourhoodMeta.name,
       description:
-        community?.description || neighbourhoodMeta.description || "",
-      image: community?.image || "",
-      thumbnail: community?.thumbnail || "",
+        neighbourhoodMeta.description || "",
+      image: "",
+      thumbnail: "",
       neighbourhoodUrl: perspective.sharedUrl!,
       members: [agent.did],
+      id: ""
     };
   } catch (e) {
     throw new Error(e);
   }
 };
+

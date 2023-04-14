@@ -1,5 +1,5 @@
 import { Component } from "preact";
-import getProfile from "utils/api/getProfile";
+import { getProfile } from "utils/api";
 import { Profile } from "utils/types";
 import Avatar from "../Avatar";
 

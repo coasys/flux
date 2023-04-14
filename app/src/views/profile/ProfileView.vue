@@ -180,10 +180,10 @@ import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { mapActions } from "pinia";
 import Avatar from "@/components/avatar/Avatar.vue";
-import getProfile from "utils/api/getProfile";
-import { getImage } from "utils/helpers/getImage";
+import { getProfile } from "utils/api";
+import { getImage } from "utils/helpers";
 import WebLinkAdd from "./WebLinkAdd.vue";
-import getAgentWebLinks from "utils/api/getAgentWebLinks";
+import { getAgentWebLinks } from "utils/api";
 
 export default defineComponent({
   name: "ProfileView",

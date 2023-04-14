@@ -106,9 +106,9 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect";
 import { hydrateState } from "@/store/data/hydrateState";
 import semver from "semver";
 import { dependencies } from "../../../package.json";
-import subscribeToLinks from "utils/api/subscribeToLinks";
-import subscribeToSyncState from "utils/api/subscribeToSyncState";
+import { subscribeToLinks } from "utils/api";
 import { LinkExpression, Literal, PerspectiveState } from "@perspect3vism/ad4m";
+import { subscribeToSyncState } from "utils/api";
 
 export default defineComponent({
   name: "MainAppView",

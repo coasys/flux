@@ -1,4 +1,4 @@
-import { ChatContext, CommunityContext } from "utils/react";
+import { ChatContext, CommunityContext } from "utils/frameworks/react";
 import { useContext } from "preact/hooks";
 import UIContext from "../../context/UIContext";
 import TipTap from "../TipTap";

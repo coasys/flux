@@ -45,9 +45,9 @@ import { LocalCommunityState } from "@/store/types";
 import { defineComponent, ref } from "vue";
 import { mapActions } from "pinia";
 import ThemeEditor from "./ThemeEditor.vue";
-import { getSDNAValues, getSDNAVersion } from "utils/api/getSDNA";
-import { updateSDNA } from "utils/api/updateSDNA";
-import { emoji, emojiCount } from "utils/constants/sdna";
+import { getSDNAValues, getSDNAVersion } from "utils/api";
+import { updateSDNA } from "utils/api";
+import { emoji, emojiCount } from "utils/constants";
 
 export default defineComponent({
   components: { ThemeEditor },

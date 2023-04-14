@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "preact/hooks";
-import useWebRTC from "utils/react/useWebrtc";
+import { getMe, Me } from "utils/api";
+import { useWebRTC } from "utils/frameworks/react";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
-import getMe, { Me } from "utils/api/getMe";
 
 import UserGrid from "../UserGrid";
 import Footer from "../Footer";

@@ -1,8 +1,8 @@
 import PostList from "./components/PostList";
-import { CommunityProvider, AgentProvider } from "utils/react";
+import { CommunityProvider, AgentProvider } from "utils/frameworks/react";
 import UIContext, { UIProvider, View } from "./context/UIContext";
 import styles from "./index.module.css";
-import { ChannelProvider } from "utils/react";
+import { ChannelProvider } from "utils/frameworks/react";
 import Header from "./components/Header";
 import { useContext } from "preact/hooks";
 import Post from "./components/Post";

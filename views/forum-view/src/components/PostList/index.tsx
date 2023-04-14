@@ -2,23 +2,31 @@ import { useContext, useMemo, useState } from "preact/hooks";
 import PostItem from "../PostItem";
 import style from "./index.module.css";
 import { DisplayView, displayOptions } from "../../constants/options";
-import { ChannelContext, useEntries } from "utils/react";
-import PostModel from "utils/api/post";
+import { ChannelContext, useEntries } from "utils/frameworks/react";
+import { Post, } from "utils/api";
+import { useEffect } from "react";
+import { SubjectEntry } from "utils/helpers";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
 
 export default function PostList() {
+  const [sortedPosts, setSortedPosts] = useState([]);
   const { state } = useContext(ChannelContext);
   const [view, setView] = useState(DisplayView.Compact);
-
   const { entries: posts, loading } = useEntries({
     perspectiveUuid: state.communityId,
-    source: state.channelId,
-    model: PostModel,
+    source: state?.channelId  || null,
+    model: Post,
   });
 
-  const sortedPosts = useMemo(
-    () => posts.sort((a, b) => b.timestamp - a.timestamp),
-    [posts.length]
-  );
+  useEffect(() => {
+    finalPosts().then(data => {
+      setSortedPosts(data)
+    })
+  }, [posts.length])
+
+  const finalPosts = async () => {
+    return posts.sort((a, b) => b.timestamp - a.timestamp)
+  }
 
   const displayStyle: DisplayView =
     view === DisplayView.Compact

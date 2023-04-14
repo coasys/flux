@@ -1,9 +1,21 @@
 import vue from "@vitejs/plugin-vue";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
+import babel from "vite-plugin-babel-compiler";
 
 export default {
   plugins: [
+    babel({
+      babel: {
+        plugins: [
+          [
+            "@babel/plugin-proposal-decorators",
+            { decoratorsBeforeExport: true },
+          ],
+        ],
+      },
+    }),
+
     vue({
       template: {
         compilerOptions: {

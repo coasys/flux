@@ -1,26 +1,14 @@
-import { CommunityProvider, AgentProvider } from "utils/react";
 import { UiProvider } from "./context/UiContext";
-import AllCommunities from "./components/AllCommunities";
 import Channel from "./components/Channel";
 
 import styles from "./App.module.css";
 
 export default function App({ perspective, source }) {
+  if (!perspective) return "No perspective";
+
   return (
-    <>
-      {perspective ? (
-        <AgentProvider>
-          <CommunityProvider perspectiveUuid={perspective}>
-            <UiProvider>
-              <Channel source={source} uuid={perspective} />
-            </UiProvider>
-          </CommunityProvider>
-        </AgentProvider>
-      ) : (
-        <div className={styles.appContainer}>
-          <AllCommunities />
-        </div>
-      )}
-    </>
+    <UiProvider>
+      <Channel source={source} uuid={perspective} />
+    </UiProvider>
   );
 }

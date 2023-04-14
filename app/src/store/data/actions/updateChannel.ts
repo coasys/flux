@@ -1,16 +1,18 @@
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "..";
-import ChannelModel, { UpdateChannel } from "utils/api/channel";
+import { Channel as ChannelModel } from "utils/api";
+import { Factory } from "utils/helpers";
+import { SubjectRepository } from "utils/factory";
 
 export interface Payload {
   channelId: string;
-  data: UpdateChannel;
+  data: any;
 }
 
 export default async (payload: Payload): Promise<any> => {
   const dataStore = useDataStore();
   const appStore = useAppStore();
-
+  
   const channel = dataStore.channels[payload.channelId];
 
   if (!channel) {
@@ -20,11 +22,17 @@ export default async (payload: Payload): Promise<any> => {
   }
 
   try {
-    const Channel = new ChannelModel({
-      perspectiveUuid: channel.sourcePerspective,
-    });
+    const channelRepository = new SubjectRepository(ChannelModel, {
+      perspectiveUuid: channel.sourcePerspective
+    })
 
-    await Channel.update(channel.id, payload.data);
+    await channelRepository.update(channel.id, {
+      ...payload.data,
+      views: {
+        action: 'setter',
+        value: payload.data.views
+      }
+    })
 
     dataStore.setChannel({
       channel: {

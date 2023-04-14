@@ -1,5 +1,6 @@
 import { useDataStore } from "@/store/data/index";
-import CommunityModel from "utils/api/community";
+import { Community as CommunityModel } from "utils/api";
+import { SubjectRepository } from "utils/factory";
 
 export interface Payload {
   communityId: string;
@@ -8,12 +9,16 @@ export interface Payload {
 export default async (communityId: string): Promise<void> => {
   const dataStore = useDataStore();
 
-  const Community = new CommunityModel({ perspectiveUuid: communityId });
+  const community = dataStore.getCommunity(communityId);
 
-  const community = await Community.get();
+  const Community = new SubjectRepository(CommunityModel, {
+    perspectiveUuid: communityId,
+  });
 
-  if (community) {
-    const { name, description, image, thumbnail } = community;
+  const loadedCommunity = await Community.getData(community.id);
+
+  if (loadedCommunity) {
+    const { name, description, image, thumbnail } = loadedCommunity;
     dataStore.updateCommunityMetadata({
       communityId,
       metadata: {
@@ -21,6 +26,8 @@ export default async (communityId: string): Promise<void> => {
         description,
         image,
         thumbnail,
+        // @ts-ignore
+        id: loadedCommunity?.id
       },
     });
   }

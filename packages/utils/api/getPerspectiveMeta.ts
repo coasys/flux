@@ -1,5 +1,6 @@
-import { findLink } from "../helpers/linkHelpers";
-import { getMetaFromLinks, keyedLanguages } from "../helpers/languageHelpers";
+import { findLink } from "../helpers";
+import { getMetaFromLinks } from "../helpers";
+import { keyedLanguages } from "../helpers/languageHelpers";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export default async function getPerspectiveMeta(uuid: string) {

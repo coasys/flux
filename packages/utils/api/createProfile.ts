@@ -3,8 +3,8 @@ import {
   KAICHAO_AGENT,
   JUNTO_AGENT,
   NOTE_IPFS_AUTHOR,
-} from "utils/constants/agents";
-import { FILE_STORAGE_LANGUAGE } from "utils/constants/languages";
+} from "../constants";
+import { FILE_STORAGE_LANGUAGE } from "../constants/languages";
 import {
   FLUX_PROFILE,
   HAS_EMAIL,
@@ -13,13 +13,9 @@ import {
   HAS_PROFILE_IMAGE,
   HAS_THUMBNAIL_IMAGE,
   HAS_USERNAME,
-} from "utils/constants/profile";
+} from "../constants";
 
-import {
-  resizeImage,
-  dataURItoBlob,
-  blobToDataURL,
-} from "utils/helpers/profileHelpers";
+import { resizeImage, dataURItoBlob, blobToDataURL } from "../helpers";
 import {
   Ad4mClient,
   Link,
@@ -27,7 +23,7 @@ import {
   LinkMutations,
 } from "@perspect3vism/ad4m";
 
-import { Profile } from "utils/types";
+import { Profile } from "../types";
 
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 

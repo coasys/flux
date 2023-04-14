@@ -1,6 +1,6 @@
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "..";
-import updateProfile from "utils/api/updateProfile";
+import { updateProfile } from "utils/api";
 
 export interface Payload {
   username?: string;

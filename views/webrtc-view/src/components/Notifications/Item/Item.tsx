@@ -1,6 +1,6 @@
 import { useState, useEffect } from "preact/hooks";
 import { Profile } from "utils/types";
-import getProfile from "utils/api/getProfile";
+import { getProfile } from "utils/api";
 import { Notification } from "../../../context/UiContext";
 
 import styles from "./Item.module.css";

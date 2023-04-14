@@ -2,99 +2,72 @@ import {
   BODY,
   END_DATE,
   IMAGE,
-  REPLY_TO,
   START_DATE,
   TITLE,
   URL,
+  ENTRY_TYPE,
 } from "../../constants/communityPredicates";
 import { FILE_STORAGE_LANGUAGE } from "../../constants/languages";
-import EntryModel from "../../helpers/model";
-import { EntryType, Post } from "../../types";
-import MessageModel from "../message";
+import { EntryType } from "../../types";
+import {
+  SDNAClass,
+  subjectProperty,
+  subjectCollection,
+  subjectFlag,
+} from "@perspect3vism/ad4m";
 
-class PostModel extends EntryModel {
-  static get type() {
-    return EntryType.Post;
-  }
-  static get properties() {
-    return {
-      title: {
-        predicate: TITLE,
-        type: String,
-        resolve: true,
-        languageAddress: "literal",
-      },
-      body: {
-        predicate: BODY,
-        type: String,
-        resolve: true,
-        languageAddress: "literal",
-      },
-      image: {
-        predicate: IMAGE,
-        type: Object,
-        resolve: false,
-        languageAddress: FILE_STORAGE_LANGUAGE,
-      },
-      startDate: {
-        predicate: START_DATE,
-        type: String,
-        resolve: true,
-        languageAddress: "literal",
-      },
-      endDate: {
-        predicate: END_DATE,
-        type: String,
-        resolve: true,
-        languageAddress: "literal",
-      },
-      url: {
-        predicate: URL,
-        type: String,
-        resolve: true,
-        languageAddress: "literal",
-      },
-      comments: {
-        predicate: EntryType.Message,
-        type: String,
-        resolve: false,
-        collection: true,
-      },
-    };
-  }
+@SDNAClass({
+  name: "Post",
+})
+export class Post {
+  @subjectFlag({
+    through: ENTRY_TYPE,
+    value: EntryType.Post,
+  })
+  type: string;
 
-  create(data: {
-    title: string;
-    image?: {
-      data_base64: string,
-      name: string,
-      file_type: string,
-    };
-    body?: string;
-    startDate?: string;
-    endDate?: string;
-    url?: string;
-  }): Promise<Post> {
-    return super.create(data) as Promise<Post>;
-  }
+  @subjectProperty({
+    through: TITLE,
+    writable: true,
+    resolveLanguage: "literal",
+  })
+  title: string;
 
-  createComment(replyTo: string, body: string) {
-    // TODO: Add a link from replyTo with Predicate
-    // REPLY_TO and the new message.id as target
-    const Message = new MessageModel({
-      perspectiveUuid: this.perspectiveUuid,
-      source: replyTo,
-    });
-    return Message.create({ body });
-  }
+  @subjectProperty({
+    through: BODY,
+    writable: true,
+    resolveLanguage: "literal",
+  })
+  body: string;
 
-  getComments(id: string) {
-    const Message = new MessageModel({
-      perspectiveUuid: this.perspectiveUuid,
-      source: id,
-    });
-    return Message.getAll();
-  }
+  @subjectProperty({
+    through: IMAGE,
+    writable: true,
+    resolveLanguage: FILE_STORAGE_LANGUAGE,
+    // @ts-ignore
+    transform: (data) => `data:image/png;base64,${data?.data_base64}`
+  })
+  image: string;
+
+  @subjectProperty({
+    through: START_DATE,
+    writable: true,
+    resolveLanguage: "literal",
+  })
+  startDate: string;
+
+  @subjectProperty({
+    through: END_DATE,
+    writable: true,
+    resolveLanguage: "literal",
+  })
+  endDate: string;
+
+  @subjectProperty({ through: URL, writable: true, resolveLanguage: "literal" })
+  url: string;
+
+  @subjectCollection({ through: EntryType.Message })
+  comments: string[] = [];
 }
 
-export default PostModel;
+export default Post;

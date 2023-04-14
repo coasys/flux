@@ -1,13 +1,13 @@
 import { useContext, useRef, useState } from "preact/hooks";
-import { AgentContext, ChatContext, CommunityContext } from "utils/react";
-import getMe from "utils/api/getMe";
+import { AgentContext, ChatContext, CommunityContext } from "utils/frameworks/react";
+import { getMe } from "utils/api";
 import MessageToolbar from "./MessageToolbar";
 import MessageReactions from "./MessageReactions";
 import MessageReply from "./MessageReply";
 import UIContext from "../../context/UIContext";
+import { REACTION } from "utils/constants";
 import { format } from "date-fns/esm";
-import { getTimeSince } from "utils/helpers/timeHelpers";
-import { REACTION } from "utils/constants/communityPredicates";
+import { getTimeSince } from "utils/helpers";
 import Avatar from "../../components/Avatar";
 import EditorContext from "../../context/EditorContext";
 import { Message, Profile } from "utils/types";

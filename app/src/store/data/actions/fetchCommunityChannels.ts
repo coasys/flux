@@ -1,35 +1,45 @@
 import { useDataStore } from "..";
-import ChannelModel from "utils/api/channel";
+import { Factory, SubjectEntry } from "utils/helpers";
+import { Channel as ChannelModel } from "utils/api";
+import { SubjectRepository } from "utils/factory";
 import { ChannelView } from "utils/types";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async (communityId: string): Promise<void> => {
   const dataStore = useDataStore();
   const keyedChannels = dataStore.channels;
+  const community = dataStore.getCommunity(communityId);
 
   try {
-    const Channel = new ChannelModel({ perspectiveUuid: communityId });
-    const channels = await Channel.getAll();
+    const channelRepository = new SubjectRepository(ChannelModel, {
+      perspectiveUuid: communityId,
+      source: community.id,
+    });
+
+    const channels = await channelRepository.getAllData();
+
+    const mappedChannels = channels.map((channel: any) => ({
+      id: channel?.id,
+      name: channel?.name,
+      author: channel?.author,
+      sourcePerspective: communityId,
+      hasNewMessages: false,
+      expanded: keyedChannels[channel.id]?.expanded || false,
+      currentView:
+        keyedChannels[channel.id]?.currentView ||
+        channel.views[0] ||
+        ChannelView.Chat,
+      views: channel.views,
+      timestamp: channel.timestamp.toString(),
+      notifications: {
+        mute: keyedChannels[channel.id]?.notifications.mute || false,
+    }}))
+    console.log('chan', mappedChannels)
 
     dataStore.setChannels({
       communityId,
-      channels: channels.map((channel) => ({
-        id: channel.id,
-        name: channel.name,
-        author: channel.author,
-        sourcePerspective: communityId,
-        hasNewMessages: false,
-        expanded: keyedChannels[channel.id]?.expanded || false,
-        currentView:
-          keyedChannels[channel.id]?.currentView ||
-          channel.views[0] ||
-          ChannelView.Chat,
-        views: channel.views,
-        timestamp: new Date(channel.timestamp),
-        notifications: {
-          mute: keyedChannels[channel.id]?.notifications.mute || false,
-        },
-      })),
+      channels: mappedChannels,
     });
   } catch (e) {
     console.log(e);

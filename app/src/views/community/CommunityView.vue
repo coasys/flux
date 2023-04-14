@@ -192,13 +192,15 @@ import CommunityTweaks from "@/containers/CommunityTweaks.vue";
 import Avatar from "@/components/avatar/Avatar.vue";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 
-import ChannelModel, { Channel } from "utils/api/channel";
-import MemberModel, { Member } from "utils/api/member";
+import { Channel as ChannelModel } from "utils/api";
+import { Member as MemberModel } from "utils/api";
 import { CommunityState, ModalsState, ChannelState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { useDataStore } from "@/store/data";
 import { mapActions, mapState } from "pinia";
+import { SubjectRepository } from "utils/factory";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect";
 
 type LoadedChannels = {
   [channelId: string]: boolean;
@@ -221,8 +223,8 @@ export default defineComponent({
   },
   setup() {
     return {
-      memberModel: ref<MemberModel | null>(null),
-      channelModel: ref<ChannelModel | null>(null),
+      memberModel: ref<SubjectRepository<MemberModel> | null>(null),
+      channelModel: ref<SubjectRepository<ChannelModel> | null>(null),
       loadedChannels: ref<LoadedChannels>({}),
       appStore: useAppStore(),
       dataStore: useDataStore(),
@@ -238,9 +240,6 @@ export default defineComponent({
     "$route.params.communityId": {
       handler: function (id: string) {
         if (id) {
-          this.dataStore.fetchCommunityMembers(id);
-          this.dataStore.fetchCommunityMetadata(id);
-          this.dataStore.fetchCommunityChannels(id);
           this.startWatching(id);
           this.handleThemeChange(id);
           this.goToActiveChannel(id);
@@ -285,42 +284,92 @@ export default defineComponent({
       "setShowCommunityTweaks",
     ]),
     startWatching(id: string) {
-      this.channelModel && this.channelModel.unsubscribe();
-      this.memberModel && this.memberModel.unsubscribe();
-
-      this.channelModel = new ChannelModel({ perspectiveUuid: id });
-      this.memberModel = new MemberModel({ perspectiveUuid: id });
-
-      this.memberModel.onAdded((member: Member) => {
-        this.dataStore.setNeighbourhoodMember({
-          did: member.did,
-          perspectiveUuid: id,
+      const synced = () => {
+        this.channelModel && this.channelModel.unsubscribe();
+        this.memberModel && this.memberModel.unsubscribe();
+        
+        this.dataStore.fetchCommunityMembers(id);
+        this.dataStore.fetchCommunityMetadata(id);
+        this.dataStore.fetchCommunityChannels(id);
+  
+        const channelModel = new SubjectRepository(ChannelModel, { perspectiveUuid: id, source: this.community.neighbourhood.id });
+        const memberModel = new SubjectRepository(MemberModel, { perspectiveUuid: id, source: this.community.neighbourhood.id });
+        this.channelModel = channelModel;
+        this.memberModel = memberModel;
+        
+        memberModel.onAdded((member: MemberModel) => {
+          this.dataStore.setNeighbourhoodMember({
+            did: member.did,
+            perspectiveUuid: id,
+          });
+        }, 'all');
+  
+        channelModel.onRemoved((id) => {
+          this.dataStore.removeChannel({ channelId: id });
         });
-      });
-
-      this.channelModel.onRemoved((id) => {
-        this.dataStore.removeChannel({ channelId: id });
-      });
-
-      this.channelModel.onAdded((channel: Channel) => {
-        this.dataStore.addChannel({
-          communityId: id,
-          channel: {
-            id: channel.id,
-            name: channel.name,
-            timestamp: new Date(channel.timestamp),
-            author: channel.author,
-            expanded: false,
-            sourcePerspective: id,
-            currentView: channel.views[0],
-            views: channel.views,
-            hasNewMessages: false,
-            notifications: {
-              mute: false,
+  
+        channelModel.onAdded((channel: ChannelModel) => {
+          this.dataStore.addChannel({
+            communityId: id,
+            channel: {
+              id: channel.id,
+              name: channel.name,
+              timestamp: new Date(channel.timestamp),
+              author: channel.author,
+              expanded: false,
+              sourcePerspective: id,
+              currentView: channel.views[0],
+              views: channel.views,
+              hasNewMessages: false,
+              notifications: {
+                mute: false,
+              },
             },
-          },
-        });
-      });
+          });
+        }, 'all');
+
+        channelModel.onUpdated((channel: ChannelModel) => {
+          this.dataStore.setChannel({
+            channel: {
+              id: channel.id,
+              name: channel.name,
+              timestamp: new Date(channel.timestamp),
+              author: channel.author,
+              expanded: false,
+              sourcePerspective: id,
+              currentView: channel.views[0],
+              views: channel.views,
+              hasNewMessages: false,
+              notifications: {
+                mute: false,
+              },
+            },
+          });
+        }, 'all');
+      }
+
+      const stateSub = async () => {
+        const client = await getAd4mClient();
+
+        const perspective = await client.perspective.byUUID(id)
+        console.log('state 100', perspective);
+
+        if (perspective?.state === 'Synced') {
+          synced()
+        }
+        
+        perspective?.addSyncStateChangeListener((state) => {
+          console.log('state 101', state);
+
+          if (state === 'Synced') {
+            synced()
+          }
+
+          return null;
+        })
+      }
+
+      stateSub()
     },
     navigateToChannel(channelId: string) {
       this.$router.push({
@@ -339,7 +388,7 @@ export default defineComponent({
           this.community.state.currentChannelId || firstChannel;
 
         if (currentChannelId) {
-          this.$router.push({
+          this.$router.push({ 
             name: "channel",
             params: {
               communityId,

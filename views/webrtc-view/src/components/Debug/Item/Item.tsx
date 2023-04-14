@@ -1,7 +1,7 @@
 import { useState, useEffect } from "preact/hooks";
 import { Peer } from "../../../types";
 import { Profile } from "utils/types";
-import getProfile from "utils/api/getProfile";
+import { getProfile } from "utils/api";
 import { format, formatDistanceStrict } from "date-fns";
 
 import styles from "./Item.module.css";

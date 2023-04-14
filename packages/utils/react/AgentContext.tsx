@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import getMe from "../api/getMe";
-import getProfile from "../api/getProfile";
+import { getMe } from "../api";
+import { getProfile } from "../api";
 import { Profile } from "../types";
 
 type State = {

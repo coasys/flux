@@ -1,13 +1,13 @@
 import UIContext from "../../context/UIContext";
 import { useContext, useEffect, useMemo, useState } from "preact/hooks";
+import { getImage } from "utils/helpers";
 import { format, formatDistance } from "date-fns";
-import { getImage } from "utils/helpers/getImage";
-import { getTimeSince } from "utils/helpers/timeHelpers";
+import { getTimeSince } from "utils/helpers";
 import Avatar from "../Avatar";
 import CommentSection from "../CommentSection";
-import PostModel from "utils/api/post";
-import { CommunityContext, useEntry } from "utils/react";
-import getMe, { Me } from "utils/api/getMe";
+import { Post as PostSubject } from "utils/api";
+import { CommunityContext, useEntry } from "utils/frameworks/react";
+import { getMe } from "utils/api";
 
 import styles from "./index.module.css";
 import { FILE_STORAGE_LANGUAGE } from "utils/constants/languages";
@@ -30,7 +30,7 @@ export default function Post({
     perspectiveUuid,
     source,
     id,
-    model: PostModel,
+    model: PostSubject,
   });
 
   const [base64, setBase64] = useState("");
@@ -153,9 +153,9 @@ export default function Post({
         </j-box>
       )}
 
-      {hasImage && base64 && (
+      {hasImage  && (
         <j-box bg="white" mt="600">
-          <img class={styles.postImage} src={base64} />
+          <img class={styles.postImage} src={hasImage} />
         </j-box>
       )}
 

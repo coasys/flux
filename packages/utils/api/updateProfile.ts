@@ -1,5 +1,5 @@
-import { Profile } from "utils/types";
-import { FILE_STORAGE_LANGUAGE } from "utils/constants/languages";
+import { Profile } from "../types";
+import { FILE_STORAGE_LANGUAGE } from "../constants/languages";
 import {
   FLUX_PROFILE,
   HAS_BG_IMAGE,
@@ -7,16 +7,13 @@ import {
   HAS_PROFILE_IMAGE,
   HAS_THUMBNAIL_IMAGE,
   HAS_USERNAME,
-} from "utils/constants/profile";
-import {
-  resizeImage,
-  dataURItoBlob,
-  blobToDataURL,
-} from "utils/helpers/profileHelpers";
+} from "../constants";
+import { resizeImage, dataURItoBlob, blobToDataURL } from "../helpers";
+import { createLinks, createLiteralLinks } from "../helpers";
+import { cacheImage } from "../helpers";
+import { getProfile } from "../api";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { createLinks, createLiteralLinks } from "utils/helpers/linkHelpers";
-import { cacheImage } from "utils/helpers/cacheImage";
-import getProfile from "utils/api/getProfile";
+import { LinkExpression } from "@perspect3vism/ad4m";
 
 export interface Payload {
   username?: string;
@@ -105,7 +102,7 @@ export default async function updateProfile(
     }
 
     const removals = perspective.links.filter(
-      (l) => l.data.source === FLUX_PROFILE
+      (l: LinkExpression) => l.data.source === FLUX_PROFILE
     );
 
     const links = await createLiteralLinks(FLUX_PROFILE, {

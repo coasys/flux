@@ -1,3 +1,3 @@
-export default function sleep(ms: number): Promise<any> {
+export function sleep(ms: number): Promise<any> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }

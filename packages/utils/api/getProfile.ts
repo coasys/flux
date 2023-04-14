@@ -8,10 +8,10 @@ import {
   FLUX_PROFILE,
   HAS_BG_IMAGE,
   HAS_BIO,
-} from "../constants/profile";
+} from "../constants";
 import { Profile } from "../types";
+import { mapLiteralLinks } from "../helpers";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { mapLiteralLinks } from "../helpers/linkHelpers";
 import { DexieProfile } from "../helpers/storageHelpers";
 
 export interface Payload {

@@ -1,8 +1,8 @@
 import { useContext } from "preact/hooks";
 import UiContext from "../../context/UiContext";
 import Settings from "../Settings";
-import { Me } from "utils/api/getMe";
-import { WebRTC } from "utils/react/useWebrtc";
+import { Me } from "utils/api";
+import { WebRTC } from "utils/frameworks/react";
 
 type Props = {
   webRTC: WebRTC;

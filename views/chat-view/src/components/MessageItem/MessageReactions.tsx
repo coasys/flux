@@ -1,8 +1,8 @@
-import { AgentContext } from "utils/react";
+import { AgentContext } from "utils/frameworks/react";
 import { Reaction } from "utils/types";
 import { useContext, useMemo, useState } from "preact/hooks";
 import styles from "./index.module.css";
-import getProfile from "utils/api/getProfile";
+import { getProfile } from "utils/api";
 import emojiShortName from "emoji-short-name";
 
 interface ReactionType {

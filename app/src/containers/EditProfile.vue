@@ -49,7 +49,7 @@ import { Profile } from "utils/types";
 import { useUserStore } from "@/store/user";
 import { useAppStore } from "@/store/app";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
-import { getImage } from "utils/helpers/getImage";
+import { getImage } from "utils/helpers";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -95,7 +95,7 @@ export default defineComponent({
           username: this.username,
           profilePicture: this.profilePicture,
           bio: this.bio,
-          profileBackground: this.profileBackground
+          profileBackground: this.profileBackground,
         })
         .then(() => {
           this.$emit("submit");
