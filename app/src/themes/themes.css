@@ -5,12 +5,12 @@ html.retro {
   --app-channel-bg-color: white;
 }
 
-.html.light {
-  --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 0%, 98%);
-  --app-main-sidebar-border-color: hsl(var(--j-color-ui-hue), 0%, 95%);
+html.light {
+  --app-main-sidebar-bg-color: hsl(var(--j-color-ui-hue), 45%, 98%);
+  --app-main-sidebar-border-color: hsl(var(--j-color-ui-hue), 45%, 93%);
 
-  --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
-  --app-drawer-border-color: hsl(var(--j-color-ui-hue), 0%, 95%);
+  --app-drawer-bg-color: hsl(var(--j-color-ui-hue), 45%, 98%);
+  --app-drawer-border-color: hsl(var(--j-color-ui-hue), 45%, 93%);
 
   --app-main-content-bg-color: hsl(var(--j-color-ui-hue), 0%, 100%);
 
@@ -108,13 +108,17 @@ html.gradient j-menu-item[selected]::part(base) {
     hsl(var(--app-gradient-1), 50%, 10%),
     hsl(var(--app-gradient-2), 50%, 20%)
   );
+  color: var(--j-color-black);
+  font-weight: 800;
 }
 
-html.gradient j-menu-item::part(base) {
-  margin-top: var(--j-space-100);
-  margin-left: var(--j-space-300);
-  margin-right: var(--j-space-300);
-  border-radius: 6px;
+html.gradient j-tabs[variant="button"] j-tab-item[checked]::part(base) {
+  background: linear-gradient(
+    45deg,
+    hsl(var(--app-gradient-1), 50%, 10%),
+    hsl(var(--app-gradient-2), 50%, 20%)
+  );
+  color: var(--j-color-black);
 }
 
 html.gradient j-modal::part(modal) {
@@ -133,11 +137,11 @@ html.gradient j-button[variant="primary"]::part(base) {
   );
 }
 
-html.gradient j-tabs[variant="button"] j-tab-item[checked]::part(base) {
-  background: linear-gradient(
-    45deg,
-    hsl(var(--app-gradient-2), 50%, 40%),
-    hsl(var(--app-gradient-1), 50%, 50%)
-  );
-  color: var(--j-color-white);
+html.light j-menu-item::part(base),
+html.dark j-menu-item::part(base),
+html.gradient j-menu-item::part(base) {
+  margin-top: var(--j-space-100);
+  margin-left: var(--j-space-300);
+  margin-right: var(--j-space-300);
+  border-radius: 6px;
 }
