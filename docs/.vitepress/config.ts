@@ -26,7 +26,7 @@ export default defineConfig({
         link: "/playground",
       },
       {
-        text: "App development",
+        text: "Create an App",
         link: "/create-flux-app/getting-started/introduction",
       },
     ],
@@ -46,19 +46,23 @@ export default defineConfig({
           ],
         },
         {
-          text: "Building your App",
+          text: "Bascis",
           items: [
             {
               text: "Connecting to AD4M",
-              link: "/create-flux-app/building-your-app/",
+              link: "/create-flux-app/basics/",
+            },
+            {
+              text: "Creating data",
+              link: "/create-flux-app/basics/creating-data",
             },
             {
               text: "Getting data",
-              link: "/create-flux-app/building-your-app/creating-data",
+              link: "/create-flux-app/basics/getting-data",
             },
             {
               text: "Building UI",
-              link: "/create-flux-app/building-your-app/flux-ui",
+              link: "/create-flux-app/basics/flux-ui",
             },
           ],
         },

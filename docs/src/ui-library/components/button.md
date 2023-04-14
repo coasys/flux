@@ -72,6 +72,16 @@ Use the `loading` property to indicate that the button is in a loading state. Th
 <j-button loading>Loading</j-button>
 ```
 
+### Href <Badge type="info" text="string" />
+
+Use the `href` property to make the button act as a link element.
+
+<j-button href="https://fluxsocial.io">Click here</j-button>
+
+```html
+<j-button href="https://fluxsocial.io">Click here</j-button>
+```
+
 ### Full <Badge type="info" text="boolean" />
 
 Use the `full` property to make the button take up the full width of its container.

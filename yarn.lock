@@ -1667,7 +1667,7 @@
     electron "^20.0.3"
     lit "^2.3.1"
 
-"@perspect3vism/ad4m-connect@0.3.4":
+"@perspect3vism/ad4m-connect@0.3.4", "@perspect3vism/ad4m-connect@^0.3.1":
   version "0.3.4"
   resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.3.4.tgz#7a5543a680eacb63721f864f1e48ce3ada820997"
   integrity sha512-6HtpLkTHRNBgeeFo6rdaAKtjWOsSKGszOstpJhtNypO0Ro6RODUUFxjzQMHvegYTtK/jj8C35YdSei9tFY1YHw==
@@ -1691,7 +1691,7 @@
     reflect-metadata "^0.1.13"
     type-graphql "1.1.1"
 
-"@perspect3vism/ad4m@0.3.4":
+"@perspect3vism/ad4m@0.3.4", "@perspect3vism/ad4m@^0.3.1":
   version "0.3.4"
   resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.3.4.tgz#2b879a0761288980706f0fff98959ce39cbff428"
   integrity sha512-3GZF4j18ynPAeAkI3N1D/aKwSk78tsfC7P0V0Zmv3Rz2fbksWdDy0V+OGkyaPyTm9+W/DxDtexd/BBxzl2DzOg==
@@ -8870,7 +8870,7 @@ postcss@^8.1.10, postcss@^8.4.18, postcss@^8.4.21, postcss@^8.4.5:
     picocolors "^1.0.0"
     source-map-js "^1.0.2"
 
-preact@^10.0.0, preact@^10.11.3, preact@^10.5.14:
+preact@^10.0.0, preact@^10.11.3, preact@^10.13.1, preact@^10.5.14:
   version "10.13.2"
   resolved "https://registry.yarnpkg.com/preact/-/preact-10.13.2.tgz#2c40c73d57248b57234c4ae6cd9ab9d8186ebc0a"
   integrity sha512-q44QFLhOhty2Bd0Y46fnYW0gD/cbVM9dUVtNTDKPcdXSMA7jfY+Jpd6rk3GB0lcQss0z5s/6CmVP0Z/hV+g6pw==
@@ -8936,7 +8936,7 @@ progress@^2.0.0, progress@^2.0.3:
   resolved "https://registry.yarnpkg.com/progress/-/progress-2.0.3.tgz#7e8cf8d8f5b8f239c1bc68beb4eb78567d572ef8"
   integrity sha512-7PiHtLll5LdnKIMw100I+8xJXR5gW2QwWYkT6iJva0bXitZKa/XMrSbdmg3r2Xnaidz9Qumd0VPaMrZlF9V9sA==
 
-prompts@^2.0.1:
+prompts@^2.0.1, prompts@^2.4.2:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/prompts/-/prompts-2.4.2.tgz#7b57e73b3a48029ad10ebd44f74b01722a4cb069"
   integrity sha512-NxNv/kLguCA7p3jE8oL2aEBsrJWgAakBpgmgK6lpPWV+WuOmY6r2/zbAVnP+T8bQlA0nzHXSJSJW0Hq7ylaD2Q==

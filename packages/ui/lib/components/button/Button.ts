@@ -170,6 +170,14 @@ export default class Button extends LitElement {
   variant = null;
 
   /**
+   * Href
+   * @type {string}
+   * @attr
+   */
+  @property({ type: String, reflect: true })
+  href = null;
+
+  /**
    * Sizes
    * @type {""|"xs"|"sm"|"lg"|"xl"}
    * @attr
@@ -225,13 +233,31 @@ export default class Button extends LitElement {
   }
 
   render() {
-    return html`
-      <button @click=${this.handleClick} part="base">
-        <j-spinner></j-spinner>
-        <slot name="start"></slot>
-        <slot></slot>
-        <slot name="end"></slot>
-      </button>
-    `;
+    return this.href
+      ? html`
+          <a
+            href=${this.href}
+            @click=${this.handleClick}
+            target="_blank"
+            part="base"
+          >
+            <j-spinner></j-spinner>
+            <slot name="start"></slot>
+            <slot></slot>
+            <slot name="end"></slot>
+          </a>
+        `
+      : html`
+          <button
+            ?disabled=${this.disabled || this.loading}
+            @click=${this.handleClick}
+            part="base"
+          >
+            <j-spinner></j-spinner>
+            <slot name="start"></slot>
+            <slot></slot>
+            <slot name="end"></slot>
+          </button>
+        `;
   }
 }
