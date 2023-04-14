@@ -287,27 +287,33 @@ export default defineComponent({
       const synced = () => {
         this.channelModel && this.channelModel.unsubscribe();
         this.memberModel && this.memberModel.unsubscribe();
-        
+
         this.dataStore.fetchCommunityMembers(id);
         this.dataStore.fetchCommunityMetadata(id);
         this.dataStore.fetchCommunityChannels(id);
-  
-        const channelModel = new SubjectRepository(ChannelModel, { perspectiveUuid: id, source: this.community.neighbourhood.id });
-        const memberModel = new SubjectRepository(MemberModel, { perspectiveUuid: id, source: this.community.neighbourhood.id });
+
+        const channelModel = new SubjectRepository(ChannelModel, {
+          perspectiveUuid: id,
+          source: this.community.neighbourhood.id,
+        });
+        const memberModel = new SubjectRepository(MemberModel, {
+          perspectiveUuid: id,
+          source: this.community.neighbourhood.id,
+        });
         this.channelModel = channelModel;
         this.memberModel = memberModel;
-        
+
         memberModel.onAdded((member: MemberModel) => {
           this.dataStore.setNeighbourhoodMember({
             did: member.did,
             perspectiveUuid: id,
           });
-        }, 'all');
-  
+        }, "all");
+
         channelModel.onRemoved((id) => {
           this.dataStore.removeChannel({ channelId: id });
         });
-  
+
         channelModel.onAdded((channel: ChannelModel) => {
           this.dataStore.addChannel({
             communityId: id,
@@ -326,7 +332,7 @@ export default defineComponent({
               },
             },
           });
-        }, 'all');
+        }, "all");
 
         channelModel.onUpdated((channel: ChannelModel) => {
           this.dataStore.setChannel({
@@ -345,31 +351,31 @@ export default defineComponent({
               },
             },
           });
-        }, 'all');
-      }
+        }, "all");
+      };
 
       const stateSub = async () => {
         const client = await getAd4mClient();
 
-        const perspective = await client.perspective.byUUID(id)
-        console.log('state 100', perspective);
+        const perspective = await client.perspective.byUUID(id);
+        console.log("state 100", perspective);
 
-        if (perspective?.state === 'Synced') {
-          synced()
+        if (perspective?.state === "Synced") {
+          synced();
         }
-        
-        perspective?.addSyncStateChangeListener((state) => {
-          console.log('state 101', state);
 
-          if (state === 'Synced') {
-            synced()
+        perspective?.addSyncStateChangeListener((state) => {
+          console.log("state 101", state);
+
+          if (state === "Synced") {
+            synced();
           }
 
           return null;
-        })
-      }
+        });
+      };
 
-      stateSub()
+      stateSub();
     },
     navigateToChannel(channelId: string) {
       this.$router.push({
@@ -388,7 +394,7 @@ export default defineComponent({
           this.community.state.currentChannelId || firstChannel;
 
         if (currentChannelId) {
-          this.$router.push({ 
+          this.$router.push({
             name: "channel",
             params: {
               communityId,

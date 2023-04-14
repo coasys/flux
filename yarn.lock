@@ -153,24 +153,6 @@
     jsonpointer "^5.0.0"
     leven "^3.1.0"
 
-"@apollo/client@3.6.9":
-  version "3.6.9"
-  resolved "https://registry.yarnpkg.com/@apollo/client/-/client-3.6.9.tgz#ad0ee2e3a3c92dbed4acd6917b6158a492739d94"
-  integrity sha512-Y1yu8qa2YeaCUBVuw08x8NHenFi0sw2I3KCu7Kw9mDSu86HmmtHJkCAifKVrN2iPgDTW/BbP3EpSV8/EQCcxZA==
-  dependencies:
-    "@graphql-typed-document-node/core" "^3.1.1"
-    "@wry/context" "^0.6.0"
-    "@wry/equality" "^0.5.0"
-    "@wry/trie" "^0.3.0"
-    graphql-tag "^2.12.6"
-    hoist-non-react-statics "^3.3.2"
-    optimism "^0.16.1"
-    prop-types "^15.7.2"
-    symbol-observable "^4.0.0"
-    ts-invariant "^0.10.3"
-    tslib "^2.3.0"
-    zen-observable-ts "^1.2.5"
-
 "@apollo/client@3.7.10":
   version "3.7.10"
   resolved "https://registry.yarnpkg.com/@apollo/client/-/client-3.7.10.tgz#addc5fcebaf016981d9476268a06d529be83f568"
@@ -1360,20 +1342,6 @@
   resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.2.0.tgz#5f3d96ec6b2354ad6d8a28bf216a1d97b5426861"
   integrity sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==
 
-"@holochain/client@0.12.0":
-  version "0.12.0"
-  resolved "https://registry.yarnpkg.com/@holochain/client/-/client-0.12.0.tgz#1c9bdc082160badd1439962e8d5f30da6c4089a3"
-  integrity sha512-pvrB6Gdc6488iR3VZXoq5QKzoAPTGi0y69Ktrtgr/IZEvtSSHBqHeMhyEjXCa7iS8b1gXsL/HAvq47rs8mu50A==
-  dependencies:
-    "@holochain/serialization" "^0.1.0-beta-rc.3"
-    "@msgpack/msgpack" "^2.7.2"
-    "@tauri-apps/api" "^1.2.0"
-    emittery "^1.0.1"
-    isomorphic-ws "^5.0.0"
-    js-base64 "^3.7.3"
-    lodash-es "^4.17.21"
-    tweetnacl "^1.0.3"
-
 "@holochain/client@0.12.5":
   version "0.12.5"
   resolved "https://registry.yarnpkg.com/@holochain/client/-/client-0.12.5.tgz#6cbfe32c33f94fb0689d986adeb43f2b43813303"
@@ -1689,16 +1657,6 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@perspect3vism/ad4m-connect@0.3.1":
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.3.1.tgz#39d4e06288f5fd5e89bc57fa11faa4545cb88c77"
-  integrity sha512-UPwIbOeA7xNSmix1qmSWlXSM8QOU+AvLDrqsuPqP5LGzEuGmj16Ra5G8Uf9+7em/iqQQ/CcDq3xj0GLfPQGscg==
-  dependencies:
-    "@undecaf/barcode-detector-polyfill" "^0.9.15"
-    auto-bind "^5.0.1"
-    electron "^20.0.3"
-    lit "^2.3.1"
-
 "@perspect3vism/ad4m-connect@0.3.2":
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.3.2.tgz#ad2d2be1bae3062a381db2428a7825d6e8bb6634"
@@ -1709,34 +1667,34 @@
     electron "^20.0.3"
     lit "^2.3.1"
 
-"@perspect3vism/ad4m-connect@0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.3.3.tgz#faa562cda0ff5e54005f6ac26e82eb532c18c104"
-  integrity sha512-6OtAWctVf11MBFeF+0Bj/2WybbmWmGBrul8YabhFdCN4E1hh6loC0eQfEb7gxoFRtquNX5FAjsJtlEYYtJjKkQ==
+"@perspect3vism/ad4m-connect@0.3.4":
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.3.4.tgz#7a5543a680eacb63721f864f1e48ce3ada820997"
+  integrity sha512-6HtpLkTHRNBgeeFo6rdaAKtjWOsSKGszOstpJhtNypO0Ro6RODUUFxjzQMHvegYTtK/jj8C35YdSei9tFY1YHw==
   dependencies:
     "@undecaf/barcode-detector-polyfill" "^0.9.15"
     auto-bind "^5.0.1"
     electron "^20.0.3"
     lit "^2.3.1"
 
-"@perspect3vism/ad4m@0.3.1":
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.3.1.tgz#032131e06ceb8e4956ae82d9dd44774911a59e98"
-  integrity sha512-c74d6vhK72UgMT1l1cc3Io5GaG3jSxyeuWBd+pm0RynWmelgULOWzycizjtqFwG1w5aEbJ5ui+t+7jFb4J5DOQ==
-  dependencies:
-    "@apollo/client" "3.6.9"
-    "@holochain/client" "0.12.0"
-    "@types/jest" "^26.0.14"
-    class-validator "^0.13.1"
-    express "^4.18.1"
-    graphql "^15.7.2"
-    reflect-metadata "^0.1.13"
-    type-graphql "^1.1.1"
-
 "@perspect3vism/ad4m@0.3.3":
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.3.3.tgz#0c373379717ea3f2d4eeac7b3597878f3d86ea5e"
   integrity sha512-hLFoYhUOHyfwGqmMEgijKXXfe3KMfEip3QKVccEPjbQqVzunluApmR7xluq6h4fMXEB3kVb9PEeXDkzPuqSM5Q==
+  dependencies:
+    "@apollo/client" "3.7.10"
+    "@holochain/client" "0.12.5"
+    "@types/jest" "^26.0.14"
+    class-validator "^0.13.1"
+    express "4.18.2"
+    graphql "15.7.2"
+    reflect-metadata "^0.1.13"
+    type-graphql "1.1.1"
+
+"@perspect3vism/ad4m@0.3.4":
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.3.4.tgz#2b879a0761288980706f0fff98959ce39cbff428"
+  integrity sha512-3GZF4j18ynPAeAkI3N1D/aKwSk78tsfC7P0V0Zmv3Rz2fbksWdDy0V+OGkyaPyTm9+W/DxDtexd/BBxzl2DzOg==
   dependencies:
     "@apollo/client" "3.7.10"
     "@holochain/client" "0.12.5"
@@ -2805,13 +2763,6 @@
   integrity sha512-UrnhU+Cnufu4S6JLCPZnkWh0WwZGUp72ktOF2DFptMlOs3TOdVv8xJN53zhHGARmVOsz5KqOls09+J1NR6sBKw==
   dependencies:
     vue-demi "*"
-
-"@wry/context@^0.6.0":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@wry/context/-/context-0.6.1.tgz#c3c29c0ad622adb00f6a53303c4f965ee06ebeb2"
-  integrity sha512-LOmVnY1iTU2D8tv4Xf6MVMZZ+juIJ87Kt/plMijjN20NMAXGmH4u8bS1t0uT74cZ5gwpocYueV58YwyI8y+GKw==
-  dependencies:
-    tslib "^2.3.0"
 
 "@wry/context@^0.7.0":
   version "0.7.0"
@@ -5309,7 +5260,7 @@ expect@^26.6.2:
     jest-message-util "^26.6.2"
     jest-regex-util "^26.0.0"
 
-express@4.18.2, express@^4.18.1:
+express@4.18.2:
   version "4.18.2"
   resolved "https://registry.yarnpkg.com/express/-/express-4.18.2.tgz#3fabe08296e930c796c19e3c516979386ba9fd59"
   integrity sha512-5/PsL6iGPdfQ/lKM1UuielYgv3BUoJfz1aUwU9vHZ+J7gyvwdQXFEBIEIaxeGf0GIcreATNyBExtalisDbuMqQ==
@@ -5924,11 +5875,6 @@ graphql@15.7.2:
   version "15.7.2"
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.7.2.tgz#85ab0eeb83722977151b3feb4d631b5f2ab287ef"
   integrity sha512-AnnKk7hFQFmU/2I9YSQf3xw44ctnSFCfp3zE0N6W174gqe9fWG/2rKaKxROK7CcI3XtERpjEKFqts8o319Kf7A==
-
-graphql@^15.7.2:
-  version "15.8.0"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.8.0.tgz#33410e96b012fa3bdb1091cc99a94769db212b38"
-  integrity sha512-5gghUc24tP9HRznNpV2+FIoq3xKkj5dTQqf4v0CpdPbFVwFkWoxOM+o+2OC9ZSvjEMTjfmG9QT+gcvggTwW1zw==
 
 growly@^1.3.0:
   version "1.3.0"
@@ -10704,7 +10650,7 @@ type-fest@^2.0.0:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.19.0.tgz#88068015bb33036a598b952e55e9311a60fd3a9b"
   integrity sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==
 
-type-graphql@1.1.1, type-graphql@^1.1.1:
+type-graphql@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/type-graphql/-/type-graphql-1.1.1.tgz#dc0710d961713b92d3fee927981fa43bf71667a4"
   integrity sha512-iOOWVn0ehCYMukmnXStbkRwFE9dcjt7/oDcBS1JyQZo9CbhlIll4lHHps54HMEk4A4c8bUPd+DjK8w1/ZrxB4A==

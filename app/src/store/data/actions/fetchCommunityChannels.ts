@@ -1,9 +1,7 @@
 import { useDataStore } from "..";
-import { Factory, SubjectEntry } from "utils/helpers";
 import { Channel as ChannelModel } from "utils/api";
 import { SubjectRepository } from "utils/factory";
 import { ChannelView } from "utils/types";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 /// Function that uses web workers to poll for channels and new group expressions on a community
 export default async (communityId: string): Promise<void> => {
@@ -18,6 +16,8 @@ export default async (communityId: string): Promise<void> => {
     });
 
     const channels = await channelRepository.getAllData();
+
+    console.log({ channels });
 
     const mappedChannels = channels.map((channel: any) => ({
       id: channel?.id,
@@ -34,8 +34,9 @@ export default async (communityId: string): Promise<void> => {
       timestamp: channel.timestamp.toString(),
       notifications: {
         mute: keyedChannels[channel.id]?.notifications.mute || false,
-    }}))
-    console.log('chan', mappedChannels)
+      },
+    }));
+    console.log("chan", mappedChannels);
 
     dataStore.setChannels({
       communityId,
