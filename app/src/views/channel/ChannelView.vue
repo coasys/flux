@@ -234,7 +234,7 @@ export default defineComponent({
           this.onAgentClick(url);
         }
 
-        if (url.startsWith("flux.entry")) {
+        if (url.startsWith("literal://")) {
           this.onChannelClick(url);
         }
 

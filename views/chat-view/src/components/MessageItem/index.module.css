@@ -73,9 +73,9 @@
 
 .message .messageItemContent a[href^="did:"],
 .message .messageItemContent a[href^="neighbourhood://"],
-.message .messageItemContent a[href^="flux.entry://"],
+.message .messageItemContent a[href^="literal://"],
 .message .replyMessage a[href^="neighbourhood://"],
-.message .replyMessage a[href^="flux.entry://"]
+.message .replyMessage a[href^="literal://"]
 {
   word-break: break-word;
   text-decoration: none;

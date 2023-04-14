@@ -52,7 +52,7 @@
 
 .editor a[href^="did:"],
 .editor a[href^="neighbourhood://"],
-.editor a[href^="flux.entry://"]
+.editor a[href^="literal://"]
 {
   text-decoration: none;
   cursor: pointer;
