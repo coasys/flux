@@ -26,6 +26,7 @@
     "build:lib": "NODE_ENV=production node esbuild.js"
   },
   "dependencies": {
+    "utils": "*",
     "@popperjs/core": "^2.9.2",
     "construct-style-sheets-polyfill": "^3.1.0",
     "jdenticon": "^3.1.0",
