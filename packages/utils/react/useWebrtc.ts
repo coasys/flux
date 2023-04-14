@@ -6,12 +6,9 @@ import {
   EventLogItem,
   WebRTCManager,
   getForVersion,
-  setForVersion
+  setForVersion,
 } from "utils/helpers";
-import {
-  defaultSettings,
-  videoDimensions,
-} from "utils/constants";
+import { defaultSettings, videoDimensions } from "utils/constants";
 import { getMe, Me } from "utils/api";
 import { throttle } from "utils/helpers";
 
@@ -54,7 +51,8 @@ export type WebRTC = {
   isInitialised: boolean;
   hasJoined: boolean;
   isLoading: boolean;
-  permissionGranted: boolean;
+  audioPermissionGranted: boolean;
+  videoPermissionGranted: boolean;
   onJoin: (props: JoinProps) => Promise<void>;
   onLeave: () => Promise<void>;
   onReaction: (reaction: string) => Promise<void>;
@@ -76,7 +74,8 @@ export default function useWebRTC({
 
   const manager = useRef<WebRTCManager | null>();
   const [localState, setLocalState] = useState<Peer["state"]>(defaultState);
-  const [permissionGranted, setPermissionGranted] = useState(false);
+  const [audioPermissionGranted, setAudioPermissionGranted] = useState(false);
+  const [videoPermissionGranted, setVideoPermissionGranted] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
   const [agent, setAgent] = useState<Me>();
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
@@ -124,7 +123,7 @@ export default function useWebRTC({
     }
 
     getDevices();
-  }, [permissionGranted]);
+  }, [audioPermissionGranted, videoPermissionGranted]);
 
   /**
    * askForPermission - Ask for user permission to access audio/video
@@ -136,35 +135,7 @@ export default function useWebRTC({
    */
   useEffect(() => {
     async function askForPermission() {
-      const videoDeviceIdFromLocalStorage =
-        typeof localState.settings.video !== "boolean" &&
-        localState.settings.video.deviceId
-          ? localState.settings.video.deviceId
-          : getForVersion("cameraDeviceId");
-
-      const audioDeviceIdFromLocalStorage =
-        typeof localState.settings.audio !== "boolean" &&
-        localState.settings.audio.deviceId
-          ? localState.settings.audio.deviceId
-          : getForVersion("audioDeviceId");
-
-      const joinSettings = { ...defaultSettings };
-
-      // Check if user has previously specified webcam or audio device
-      if (
-        videoDeviceIdFromLocalStorage &&
-        typeof joinSettings.video !== "boolean"
-      ) {
-        joinSettings.video = {
-          ...videoDimensions,
-          deviceId: videoDeviceIdFromLocalStorage,
-        };
-      }
-      if (audioDeviceIdFromLocalStorage) {
-        joinSettings.audio = {
-          deviceId: audioDeviceIdFromLocalStorage,
-        };
-      }
+      const joinSettings = { ...localState.settings };
 
       // Check if the user has no video devices
       const hasVideoDevices = devices.some((d) => d.kind === "videoinput");
@@ -172,25 +143,35 @@ export default function useWebRTC({
         joinSettings.video = false;
       }
 
+      // Check if access has already been given
+      const allowedAudioDevices = devices.some(
+        (d) => d.kind === "audioinput" && d.label !== ""
+      );
+      const allowedVideoDevices = devices.some(
+        (d) => d.kind === "videoinput" && d.label !== ""
+      );
+
+      if (allowedAudioDevices || allowedVideoDevices) {
+        setAudioPermissionGranted(allowedAudioDevices);
+        setVideoPermissionGranted(allowedVideoDevices);
+        return;
+      }
+
       navigator.mediaDevices?.getUserMedia(joinSettings).then(
-        (stream) => {
-          setPermissionGranted(true);
-          setLocalStream(stream);
-          setLocalState((oldState) => ({
-            ...oldState,
-            settings: joinSettings,
-          }));
+        () => {
+          setAudioPermissionGranted(true);
         },
         (e) => {
           console.error(e);
-          setPermissionGranted(false);
+          setAudioPermissionGranted(false);
         }
       );
     }
-    if (enabled && !permissionGranted && devices.length > 0) {
+
+    if (enabled && !audioPermissionGranted && devices.length > 0) {
       askForPermission();
     }
-  }, [enabled, localState, permissionGranted, devices]);
+  }, [enabled, localState, audioPermissionGranted, devices]);
 
   /**
    * TogglePreRecording
@@ -200,7 +181,7 @@ export default function useWebRTC({
   useEffect(() => {
     async function TogglePreRecording() {
       // Return if permission denied
-      if (!permissionGranted) {
+      if (!videoPermissionGranted) {
         return;
       }
 
@@ -209,7 +190,7 @@ export default function useWebRTC({
           audio: localState.settings.audio,
           video: localState.settings.video,
         });
-        updateStream(newLocalStream);
+        setLocalStream(newLocalStream);
         setShowPreview(true);
       }
 
@@ -221,7 +202,7 @@ export default function useWebRTC({
     if (!hasJoined) {
       TogglePreRecording();
     }
-  }, [enabled, showPreview, permissionGranted, hasJoined, localState]);
+  }, [enabled, showPreview, videoPermissionGranted, hasJoined, localState]);
 
   /**
    * Attach signal listeners
@@ -266,25 +247,9 @@ export default function useWebRTC({
           }
 
           if (type === "request-state" && senderDid !== agent.did) {
-            manager.current?.sendMessage("state", localState);
-          }
-
-          if (type === "state" && senderDid !== agent.did) {
-            setConnections((oldConnections) => {
-              const match = oldConnections.find((c) => c.did === senderDid);
-              if (!match) {
-                return oldConnections;
-              }
-
-              const newPeer = {
-                ...match,
-                state: message,
-              };
-
-              return [
-                ...oldConnections.filter((c) => c.did !== senderDid),
-                newPeer,
-              ];
+            setLocalState((oldState) => {
+              manager.current?.sendMessage("state", oldState);
+              return oldState;
             });
           }
 
@@ -337,22 +302,25 @@ export default function useWebRTC({
       video: { ...videoDimensions, deviceId: deviceId },
     };
 
+    const newLocalStream = await navigator.mediaDevices.getUserMedia(
+      newSettings
+    );
+
     if (localStream) {
       localStream.getTracks().forEach((track) => {
         track.stop();
       });
 
-      const newLocalStream = await navigator.mediaDevices.getUserMedia(
-        newSettings
-      );
       updateStream(newLocalStream);
+
+      // Notify others of state change
+      onChangeState({ ...localState, settings: newSettings });
+    } else {
+      setLocalStream(newLocalStream);
     }
 
     // Persist settings
     setForVersion("cameraDeviceId", `${deviceId}`);
-
-    // Notify others of state change
-    onChangeState({ ...localState, settings: newSettings });
   }
 
   /**
@@ -387,8 +355,7 @@ export default function useWebRTC({
    * Enable/disable video input
    */
   async function onToggleCamera(enabled: boolean) {
-    const videoDeviceIdFromLocalStorage =
-      getForVersion("cameraDeviceId");
+    const videoDeviceIdFromLocalStorage = getForVersion("cameraDeviceId");
 
     const newSettings = {
       audio: localState.settings.audio,
@@ -401,18 +368,31 @@ export default function useWebRTC({
         : false,
     };
 
-    if (enabled) {
-      const newLocalStream = await navigator.mediaDevices.getUserMedia({
-        audio: localState.settings.audio,
-        video: newSettings.video,
-      });
-      updateStream(newLocalStream);
-    } else {
-      if (localStream) {
-        if (localStream.getVideoTracks()[0]) {
-          localStream.getVideoTracks()[0].enabled = false;
-        }
+    const newLocalStream = await navigator.mediaDevices.getUserMedia({
+      audio: localState.settings.audio,
+      video: {
+        ...videoDimensions,
+        deviceId: videoDeviceIdFromLocalStorage || undefined,
+      },
+    });
+
+    // If not yet joined the room, simply disable video track
+    if (!enabled) {
+      if (newLocalStream.getVideoTracks()[0]) {
+        newLocalStream.getVideoTracks()[0].enabled = false;
       }
+    }
+
+    // If first time, set setVideoPermissionGranted
+    if (!videoPermissionGranted) {
+      setVideoPermissionGranted(true);
+    }
+
+    // If no localstream
+    if (!localStream) {
+      setLocalStream(newLocalStream);
+    } else {
+      updateStream(newLocalStream);
     }
 
     // Notify others of state change
@@ -423,8 +403,7 @@ export default function useWebRTC({
    * Enable/disable audio input
    */
   async function onToggleAudio(enabled: boolean) {
-    const audioDeviceIdFromLocalStorage =
-      localstorage.getForVersion("audioDeviceId");
+    const audioDeviceIdFromLocalStorage = getForVersion("audioDeviceId");
 
     const newSettings = {
       audio: enabled
@@ -466,9 +445,9 @@ export default function useWebRTC({
     };
 
     if (enabled) {
-      onStartScreenShare();
+      await onStartScreenShare();
     } else {
-      onEndScreenShare();
+      await onEndScreenShare();
     }
 
     // Notify others of state change
@@ -488,7 +467,8 @@ export default function useWebRTC({
         });
       }
 
-      mediaStream.getVideoTracks()[0].onended = () => onEndScreenShare();
+      mediaStream.getVideoTracks()[0].onended = () =>
+        onToggleScreenShare(false);
       updateStream(mediaStream);
     }
   }
@@ -513,25 +493,58 @@ export default function useWebRTC({
     const [videoTrack] = stream.getVideoTracks();
     const [audioTrack] = stream.getAudioTracks();
 
+    // Update all peers (Important, as peer expects the same stream)
+    // -> https://github.com/feross/simple-peer/issues/634#issuecomment-621761586
     for (let peer of connections) {
       if (videoTrack) {
-        peer.connection.peer.replaceTrack(
-          peer.connection.peer.streams[0].getVideoTracks()[0],
-          videoTrack,
-          peer.connection.peer.streams[0]
-        );
+        const oldVideoTrack = localStream.getVideoTracks()[0];
+
+        if (oldVideoTrack) {
+          peer.connection.peer.replaceTrack(
+            oldVideoTrack,
+            videoTrack,
+            localStream
+          );
+        } else {
+          peer.connection.peer.addTrack(videoTrack, localStream);
+        }
       }
 
       if (audioTrack) {
-        peer.connection.peer.replaceTrack(
-          peer.connection.peer.streams[0].getAudioTracks()[0],
-          audioTrack,
-          peer.connection.peer.streams[0]
-        );
+        const oldAudioTrack = localStream.getAudioTracks()[0];
+
+        if (oldAudioTrack) {
+          peer.connection.peer.replaceTrack(
+            localStream.getAudioTracks()[0],
+            audioTrack,
+            localStream
+          );
+        } else {
+          peer.connection.peer.addTrack(audioTrack, localStream);
+        }
       }
     }
 
-    setLocalStream(stream);
+    // Update local state
+    if (videoTrack) {
+      const oldVideoTrack = localStream.getVideoTracks()[0];
+      if (oldVideoTrack) {
+        localStream?.removeTrack(oldVideoTrack);
+        localStream?.addTrack(videoTrack);
+      } else {
+        localStream?.addTrack(videoTrack);
+      }
+    }
+
+    if (audioTrack) {
+      const oldAudioTrack = localStream.getAudioTracks()[0];
+      if (oldAudioTrack) {
+        localStream?.removeTrack(oldAudioTrack);
+        localStream?.addTrack(audioTrack);
+      } else {
+        localStream?.addTrack(audioTrack);
+      }
+    }
   }
 
   const broadcastStateChange = (newState: Peer["state"]) => {
@@ -551,31 +564,7 @@ export default function useWebRTC({
   async function onJoin({ initialState }) {
     setIsLoading(true);
 
-    const videoDeviceIdFromLocalStorage =
-      typeof localState.settings.video !== "boolean" &&
-      localState.settings.video.deviceId
-        ? localState.settings.video.deviceId
-        : getForVersion("cameraDeviceId");
-
-    const audioDeviceIdFromLocalStorage =
-      typeof localState.settings.audio !== "boolean" &&
-      localState.settings.audio.deviceId
-        ? localState.settings.audio.deviceId
-        : getForVersion("audioDeviceId");
-
     const joinSettings = { ...localState.settings };
-
-    if (
-      videoDeviceIdFromLocalStorage &&
-      typeof joinSettings.video !== "boolean"
-    ) {
-      joinSettings.video.deviceId = videoDeviceIdFromLocalStorage;
-    }
-    if (audioDeviceIdFromLocalStorage) {
-      joinSettings.audio = {
-        deviceId: audioDeviceIdFromLocalStorage,
-      };
-    }
 
     // Check if the user has no video devices
     const hasVideoDevices = devices.some((d) => d.kind === "videoinput");
@@ -613,7 +602,8 @@ export default function useWebRTC({
     isInitialised,
     hasJoined,
     isLoading,
-    permissionGranted,
+    audioPermissionGranted,
+    videoPermissionGranted,
     onJoin,
     onLeave,
     onReaction,

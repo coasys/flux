@@ -30,11 +30,6 @@
         display: block;
       }
     </style>
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/@fluxapp/ui@latest/dist/main.css"
-    />
-    <script src="https://unpkg.com/@fluxapp/ui@latest"></script>
   </head>
   <body style="margin: 0">
     <flux-app></flux-app>
@@ -42,6 +37,9 @@
     <script type="module">
       import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
       import App from "./src/main.ts";
+
+      import "@fluxapp/ui";
+      import "@fluxapp/ui/dist/main.css";
 
       window.__APP_VERSION__ = "test";
 

@@ -1,5 +1,6 @@
 {
   "name": "flux-webrtc-debug-view",
+  "version": "1.0.0",
   "description": "WebRTC-debugger for flux",
   "fluxapp": {
     "name": "DebugRTC",
@@ -9,7 +10,6 @@
   "keywords": [
     "flux-app"
   ],
-  "version": "1.0.0",
   "type": "module",
   "files": [
     "dist"

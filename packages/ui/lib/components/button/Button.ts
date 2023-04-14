@@ -40,6 +40,7 @@ const styles = css`
     font-weight: 600;
     border: var(--j-button-border);
     position: relative;
+    white-space: nowrap;
   }
 
   :host([disabled]) [part="base"] {

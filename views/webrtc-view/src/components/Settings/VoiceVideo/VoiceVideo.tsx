@@ -1,6 +1,7 @@
 import { Me } from "utils/api";
 import { getForVersion } from "utils/helpers";
 import { WebRTC } from "utils/frameworks/react";
+
 import Select from "../../Select";
 
 type Props = {
@@ -21,36 +22,48 @@ export default function VoiceVideo({ webRTC }: Props) {
     typeof webRTC.localState.settings.video !== "boolean" &&
     webRTC.localState.settings.video?.deviceId
       ? webRTC.localState.settings.video?.deviceId
-      : videoTrack?.getSettings().deviceId ||
-        getForVersion("cameraDeviceId");
+      : videoTrack?.getSettings().deviceId || getForVersion("cameraDeviceId");
 
   const selectedAudioDeviceId =
     typeof webRTC.localState.settings.audio !== "boolean" &&
     webRTC.localState.settings.audio?.deviceId
       ? webRTC.localState.settings.audio?.deviceId
-      : audioTrack?.getSettings().deviceId ||
-        getForVersion("audioDeviceId");
+      : audioTrack?.getSettings().deviceId || getForVersion("audioDeviceId");
 
-  const videoDevices = webRTC?.devices?.filter((d) => d.kind === "videoinput");
-  const audioDevices = webRTC?.devices?.filter((d) => d.kind === "audioinput");
+  const videoDevices = webRTC?.devices
+    ?.filter((d) => d.kind === "videoinput")
+    .filter((d) => !!d.deviceId);
+  const audioDevices = webRTC?.devices
+    ?.filter((d) => d.kind === "audioinput")
+    .filter((d) => !!d.deviceId);
 
   return (
     <div>
       <h3>Voice & Video settings</h3>
       <j-box pt={300}>
-        <Select
-          name="video-device"
-          label="Video input device"
-          placeholder="Select device"
-          selected={selectedVideoDeviceId}
-          options={videoDevices.map((v) => ({
-            text: v.label,
-            value: v.deviceId,
-          }))}
-          onChange={(e) => {
-            webRTC.onChangeCamera(e.target.value);
-          }}
-        />
+        <j-flex j="end" a="center" gap="200" direction="row">
+          <Select
+            name="video-device"
+            label="Video input device"
+            placeholder="Select device"
+            selected={selectedVideoDeviceId}
+            options={videoDevices.map((v) => ({
+              text: v.label,
+              value: v.deviceId,
+            }))}
+            onChange={(e) => {
+              webRTC.onChangeCamera(e.target.value);
+            }}
+          />
+
+          {!webRTC.videoPermissionGranted && (
+            <j-box pt={600}>
+              <j-button onClick={() => webRTC.onToggleCamera(true)} size="sm">
+                Allow permission
+              </j-button>
+            </j-box>
+          )}
+        </j-flex>
       </j-box>
 
       <j-box pt={500}>
