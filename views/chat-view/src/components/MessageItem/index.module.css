@@ -1,4 +1,5 @@
 .message {
+  position: relative;
   padding-top: var(--j-space-300);
   padding-bottom: var(--j-space-300);
   padding-left: var(--j-space-500);
@@ -70,15 +71,14 @@
   user-select: text !important;
 }
 
-.message .messageItemContent [data-mention="neighbourhood"] {
-  cursor: pointer;
-  color: var(--j-color-primary-500);
-  text-decoration: underline;
-}
-
-.message .messageItemContent [data-mention="channel"],
-.message .messageItemContent [data-mention="agent"] {
+.message .messageItemContent a[href^="did:"],
+.message .messageItemContent a[href^="neighbourhood://"],
+.message .messageItemContent a[href^="flux.entry://"],
+.message .replyMessage a[href^="neighbourhood://"],
+.message .replyMessage a[href^="flux.entry://"]
+{
   word-break: break-word;
+  text-decoration: none;
   cursor: pointer;
   padding: 2px var(--j-space-200);
   border-radius: var(--j-border-radius);
@@ -97,6 +97,7 @@
 }
 
 .message .messageUsername {
+  text-decoration: none;
   cursor: pointer;
   color: var(--j-color-black);
   font-size: var(--j-font-size-500);
@@ -114,7 +115,7 @@
 .messageItemHeader {
   display: flex;
   align-items: center;
-  gap: var(--j-space-200);
+  gap: var(--j-space-300);
   margin-bottom: var(--j-space-200);
 }
 
@@ -142,6 +143,7 @@
 }
 
 .replyAuthor {
+  text-decoration: none;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -243,7 +245,8 @@ j-tooltip::part(base) {
   display: inline;
 }
 
-.neighbourhoodCard {
+.card {
+  text-decoration: none;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -251,7 +254,7 @@ j-tooltip::part(base) {
   gap: var(--j-space-300);
   background: var(--j-color-ui-50);
   border: 1px solid var(--j-color-ui-200);
-  padding: 20px;
+  padding: var(--j-space-500);
   width: 100%;
   max-width: 500px;
   margin: var(--j-space-500) 0 var(--j-space-500) 0px;
@@ -259,37 +262,37 @@ j-tooltip::part(base) {
   position: relative;
 }
 
-.neighbourhoodCardLoading {
+.cardLoading {
   animation: message-syncing 1.4s linear infinite;
 }
 
-.neighbourhoodCard:hover {
+.card:hover {
   background: var(--j-color-ui-100);
 }
 
-.neighbourhoodCardFlex {
+.cardFlex {
   display: flex;
   gap: var(--j-space-500);
 }
 
-.neighbourhoodCardImage {
+.cardImage {
   object-fit: cover;
   border-radius: var(--j-border-radius);
 }
 
-.neighbourhoodCardTitle {
+.cardTitle {
   font-weight: 600;
   font-size: var(--j-font-size-300);
   text-transform: uppercase;
 }
 
-.neighbourhoodCardName {
+.cardName {
   font-weight: 800;
   font-size: var(--j-font-size-500);
   color: var(--j-color-black);
 }
 
-.neighbourhoodCardDescription {
+.cardDescription {
   margin-top: var(--j-space-200);
   font-size: var(--j-font-size-500);
   font-weight: 400;
@@ -298,6 +301,12 @@ j-tooltip::part(base) {
 
 .popularMessage {
   background-color: rgba(246, 206, 2, 0.1);
+}
+
+.popularIcon {
+  display: inline-block;
+  margin-left: var(--j-space-200);
+  --j-icon-color: rgba(246, 206, 2, 0.7);
 }
 
 .highlightMessage {

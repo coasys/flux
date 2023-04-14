@@ -91,49 +91,6 @@ export default function MessageItem({
     }
   }
 
-  function onMessageClick(e) {
-    const { mention, id } = e.target.dataset;
-
-    if (mention === "agent") {
-      onProfileClick(id);
-    }
-
-    if (mention === "neighbourhood") {
-      const url = e.target.innerText;
-      if (url.startsWith("neighbourhood://")) {
-        onNeighbourhoodClick(url);
-      }
-    }
-
-    if (mention === "channel") {
-      onChannnelClick(id);
-    }
-  }
-
-  function onChannnelClick(channel: string) {
-    const event = new CustomEvent("channel-click", {
-      detail: { channel },
-      bubbles: true,
-    });
-    mainRef?.dispatchEvent(event);
-  }
-
-  function onProfileClick(did: string) {
-    const event = new CustomEvent("agent-click", {
-      detail: { did },
-      bubbles: true,
-    });
-    mainRef?.dispatchEvent(event);
-  }
-
-  function onNeighbourhoodClick(url: string) {
-    const event = new CustomEvent("neighbourhood-click", {
-      detail: { url, channel: "Home" },
-      bubbles: true,
-    });
-    mainRef?.dispatchEvent(event);
-  }
-
   const author: Profile = members[message.author] || {};
   const replyAuthor: Profile = members[message?.replies[0]?.author] || {};
   const replyMessage: Message = message?.replies[0];
@@ -147,21 +104,19 @@ export default function MessageItem({
 
   return (
     <div
-      class={[
+      className={[
         styles.message,
         popularStyle,
         noPaddingStyle,
         highlightStyle,
         !message.synced ? styles.messageNotSynced : "",
       ].join(" ")}
-      isReplying={isReplying}
       onMouseEnter={() => setShowToolbar(true)}
       onMouseLeave={() => setShowToolbar(false)}
     >
-      <div class={styles.messageItemWrapper}>
+      <div className={styles.messageItemWrapper}>
         {replyMessage && (
           <MessageReply
-            onProfileClick={onProfileClick}
             replyAuthor={replyAuthor}
             replyMessage={replyMessage}
             onMessageClick={onReplyNavClick}
@@ -169,15 +124,13 @@ export default function MessageItem({
         )}
         <div>
           {showAuthor ? (
-            <Avatar
-              onClick={() => onProfileClick(author?.did)}
-              did={author?.did}
-              url={author?.profileThumbnailPicture}
-            />
+            <a href={author?.did}>
+              <Avatar did={author?.did} url={author?.profileThumbnailPicture} />
+            </a>
           ) : (
             showToolbar && (
               <small
-                class={styles.timestampLeft}
+                className={styles.timestampLeft}
                 data-rh
                 data-timestamp={format(
                   new Date(message.timestamp),
@@ -190,19 +143,16 @@ export default function MessageItem({
           )}
         </div>
 
-        <div class={styles.messageItemContentWrapper}>
+        <div className={styles.messageItemContentWrapper}>
           {showAuthor && (
-            <header class={styles.messageItemHeader}>
-              <div
-                onClick={() => onProfileClick(author?.did)}
-                class={styles.messageUsername}
-              >
+            <header className={styles.messageItemHeader}>
+              <a href={author?.did} className={styles.messageUsername}>
                 {author?.username || (
                   <j-skeleton width="xl" height="text"></j-skeleton>
                 )}
-              </div>
+              </a>
               <small
-                class={styles.timestamp}
+                className={styles.timestamp}
                 data-rh
                 data-timestamp={format(
                   new Date(message.timestamp),
@@ -211,13 +161,21 @@ export default function MessageItem({
               >
                 {getTimeSince(new Date(message.timestamp), new Date())}
               </small>
+              {message.isPopular && (
+                <j-tooltip title="Popular message">
+                  <j-icon
+                    className={styles.popularIcon}
+                    size="xs"
+                    name="magic"
+                  ></j-icon>
+                </j-tooltip>
+              )}
             </header>
           )}
 
           <div
-            onClick={onMessageClick}
             ref={messageRef}
-            class={styles.messageItemContent}
+            className={styles.messageItemContent}
             style={{ display: "inline-flex" }}
             dangerouslySetInnerHTML={{
               __html: messageContent,
@@ -235,7 +193,7 @@ export default function MessageItem({
                 ),
                 "EEEE, MMMM d, yyyy, hh:mm b"
               )}
-              class={styles.timestamp}
+              className={styles.timestamp}
               style={{ display: "inline-flex" }}
             >
               &nbsp;(edited)

@@ -26,12 +26,12 @@
   </div>
 
   <j-toast
-    autohide="10"
+    autohide="5"
     :variant="ui.toast.variant"
     :open="ui.toast.open"
     @toggle="(e: any) => appStore.setToast({ open: e.target.open })"
   >
-    <j-text>{{ ui.toast.message }}</j-text>
+    {{ ui.toast.message }}
   </j-toast>
 </template>
 

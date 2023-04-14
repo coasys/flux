@@ -34,9 +34,9 @@ const styles = css`
     visibility: visible;
     display: block;
     position: fixed;
-    bottom: var(--j-space-400);
+    top: calc(100% - var(--j-space-500));
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(-100%);
     z-index: 999999;
   }
 

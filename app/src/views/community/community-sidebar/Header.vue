@@ -209,7 +209,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .sidebar-header {
-  background: var(--app-drawer-bg-color);
   z-index: 1;
   display: block;
   padding-left: var(--j-space-400);

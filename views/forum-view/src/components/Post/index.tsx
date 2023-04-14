@@ -37,15 +37,6 @@ export default function Post({
   const [ogData, setOgData] = useState<any>({});
   const [agent, setAgent] = useState<Me>();
 
-  function onProfileClick(event: any, did: string) {
-    event.stopPropagation();
-    const e = new CustomEvent("agent-click", {
-      detail: { did },
-      bubbles: true,
-    });
-    event.target.dispatchEvent(e);
-  }
-
   async function fetchAgent() {
     const agent = await getMe();
     setAgent(agent);
@@ -124,20 +115,19 @@ export default function Post({
 
       <j-box pt="200">
         <j-flex a="center" gap="400">
-          <Avatar
-            size="sm"
-            did={author.did}
-            url={author.profileThumbnailPicture}
-          ></Avatar>
+          <a href={author.did}>
+            <Avatar
+              size="sm"
+              did={author.did}
+              url={author.profileThumbnailPicture}
+            ></Avatar>
+          </a>
           <div>
-            <div
-              className={styles.authorName}
-              onClick={(e) => onProfileClick(e, author.did)}
-            >
+            <a className={styles.authorName} href={author.did}>
               {author?.username || (
                 <j-skeleton width="lg" height="text"></j-skeleton>
               )}
-            </div>
+            </a>
             <div class={styles.timestamp}>
               {getTimeSince(new Date(post.timestamp), new Date())}
             </div>

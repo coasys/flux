@@ -16,11 +16,13 @@ export default function Header() {
   return (
     <header class={styles.header}>
       <j-flex a="center" gap="500">
-        <Avatar
-          size="lg"
-          did={agentState.did}
-          url={agentState.profile?.profileThumbnailPicture}
-        ></Avatar>
+        <a href={agentState.did}>
+          <Avatar
+            size="lg"
+            did={agentState.did}
+            url={agentState.profile?.profileThumbnailPicture}
+          ></Avatar>
+        </a>
         <j-flex a="center" gap="200" style="width: 100%">
           <j-input
             onFocus={() => handlePostClick(PostOption.Text)}

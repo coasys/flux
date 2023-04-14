@@ -40,17 +40,21 @@
   padding-top: var(--j-space-200);
 }
 
-.editorParagraph:first-of-type {
-  padding-top: 0;
-  margin-top: 0;
-}
-
-.editorParagraph:last-of-type {
+.editorContent p:last-of-type {
   padding-bottom: 0;
   margin-bottom: 0;
 }
 
-.editorMentions {
+.editorContent p:first-of-type {
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.editor a[href^="did:"],
+.editor a[href^="neighbourhood://"],
+.editor a[href^="flux.entry://"]
+{
+  text-decoration: none;
   cursor: pointer;
   padding: 2px var(--j-space-200);
   border-radius: var(--j-border-radius);
