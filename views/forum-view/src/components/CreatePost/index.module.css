@@ -3,8 +3,14 @@
   margin: 0 auto;
 }
 
-.titleInput::part(input-wrapper) {
+.titleInput {
   border: 0;
+  outline: 0;
+  width: 100%;
+  display: block;
+  background: transparent;
+  height: var(--j-size-xl);
+  color: var(--j-color-black);
   font-size: var(--j-font-size-800);
 }
 

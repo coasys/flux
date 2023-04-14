@@ -135,8 +135,8 @@ export default function CreatePost({
         image: {
           data_base64: compressedImage,
           name: "form-image",
-          file_type: "image/png"
-        }
+          file_type: "image/png",
+        },
       });
     });
 
@@ -179,17 +179,14 @@ export default function CreatePost({
         <j-box mt="800">
           <j-flex direction="column" gap="400">
             <j-box pb="500">
-              <j-input
-                class={styles.titleInput}
+              <input
+                className={styles.titleInput}
                 required
-                autovalidate
-                ref={(ref) => setInputRef(ref, "title")}
                 placeholder="Add a Title"
-                onInput={handleChange}
+                onChange={handleChange}
                 value={state.title}
-                size="xl"
                 name="title"
-              ></j-input>
+              ></input>
             </j-box>
             {showUrl && (
               <j-box pb="500">

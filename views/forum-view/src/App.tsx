@@ -49,6 +49,10 @@ export default function App({
   perspective: string;
   source: string;
 }) {
+  if (!perspective || !source) {
+    return null;
+  }
+
   return (
     <UIProvider communityId={perspective} channelId={source}>
       <AgentProvider>
