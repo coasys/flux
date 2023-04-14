@@ -12,6 +12,7 @@
       body {
         margin: 0;
         font-family: Arial, Helvetica, sans-serif;
+        color: var(--j-color-ui-800);
         background: var(--j-color-white);
       }
       *,
@@ -23,18 +24,19 @@
         height: calc(100vh - var(--j-size-xl));
         display: block;
       }
-      .header {
+      .sidebar-layout {
         display: grid;
-        place-content: center;
-        height: var(--j-size-xl);
-        padding: var(--j-space-200);
-        position: sticky;
-        top: 0;
-        left: 0;
+        grid-template-columns: 1fr 5fr;
+      }
+      .sidebar {
+        padding: var(--j-space-500);
+        height: 100vh;
         background: var(--j-color-ui-100);
         border-radius: var(--j-border-radius);
       }
       select {
+        width: 100%;
+        height: var(--j-size-md);
         background: var(--j-color-ui-200);
         color: var(--j-color-black);
         font-size: var(--j-font-size-500);
@@ -48,21 +50,25 @@
     </style>
   </head>
   <body>
-    <div v-scope @vue:mounted="mounted">
-      <header class="header">
-        <j-flex gap="200" a="center" j="center">
-          <select
-            @change="getPerspective($event)"
-            v-model="perspectiveUuid"
-            v-for="{name, uuid} in perspectives"
-          >
-            <option value="" selected disabled>Select a perspective</option>
-            <option :value="uuid">{{name}}</option>
-          </select>
-          <j-text nomargin>or</j-text>
-          <j-button size="sm" id="create-perspective">Create new</j-button>
+    <div class="sidebar-layout" v-scope @vue:mounted="mounted">
+      <aside class="sidebar">
+        <j-flex direction="column" gap="500">
+          <div>
+            <j-text variant="label">Current perspective:</j-text>
+            <select
+              @change="getPerspective($event)"
+              v-model="perspectiveUuid"
+              v-for="{name, uuid} in perspectives"
+            >
+              <option value="" selected disabled>Select a perspective</option>
+              <option :value="uuid">{{name}}</option>
+            </select>
+          </div>
+          <j-button full size="sm" id="create-perspective">
+            Create new perspective
+          </j-button>
         </j-flex>
-      </header>
+      </aside>
       <flux-app :source="source"></flux-app>
     </div>
 

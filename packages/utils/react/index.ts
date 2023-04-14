@@ -4,7 +4,8 @@ import AgentContext, { AgentProvider } from "./AgentContext";
 import ChannelContext, { ChannelProvider } from "./ChannelContext";
 import useEntries from "./useEntries";
 import useEntry from "./useEntry";
-import useWebRTC, {WebRTC, Reaction, Peer} from "./useWebrtc";
+import useWebRTC from "./useWebrtc";
+import type { Reaction, Peer, WebRTC } from "./useWebrtc";
 
 export {
   useEntries,
@@ -20,5 +21,5 @@ export {
   useWebRTC,
   WebRTC,
   Reaction,
-  Peer
+  Peer,
 };

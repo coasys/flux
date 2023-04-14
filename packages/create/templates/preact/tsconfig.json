@@ -4,6 +4,7 @@
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment",
     "downlevelIteration": true,
+    "experimentalDecorators": true,
     "skipLibCheck": true,
     "baseUrl": "/",
     "paths": {

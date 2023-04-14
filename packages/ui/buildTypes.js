@@ -30,7 +30,7 @@ for (const tag of components.tags) {
   list.push("children?: any");
 
   const newType = `
-type ${snakeToPascal(tag.name)}Props = {
+type ${snakeToPascal(tag.name)}Props = HTMLElement & {
   ${list.join("")}
 }
   `;
@@ -49,7 +49,7 @@ declare module 'preact' {
   }
 }
 
-declare module global {
+declare global {
   namespace JSX {
       interface IntrinsicElements {
         ${componentList.join("\t\t\t\t")}

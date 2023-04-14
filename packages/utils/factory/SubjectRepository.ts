@@ -8,7 +8,11 @@ import {
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { subscribeToLinks } from "../api";
 import { SELF } from "../constants/communityPredicates";
-import { collectionToAdderName, collectionToSetterName, SubjectEntry } from "../helpers";
+import {
+  collectionToAdderName,
+  collectionToSetterName,
+  SubjectEntry,
+} from "../helpers";
 import { v4 as uuidv4 } from "uuid";
 
 export type ModelProps = {
@@ -112,7 +116,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   private subject: SubjectClass;
   private perspective: PerspectiveProxy | null = null;
   private tempSubject: any;
-  private linkRemoved: LinkExpression[] = []
+  private linkRemoved: LinkExpression[] = [];
 
   constructor(subject: { new (): SubjectClass }, props: ModelProps) {
     this.perspectiveUuid = props.perspectiveUuid;
@@ -136,6 +140,9 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     const base = id || Literal.from(uuidv4()).toUrl();
     await this.ensurePerspective();
     let newInstance = await this.perspective?.createSubject(this.subject, base);
+
+    console.log({ newInstance, subject: this.subject });
+
     if (!newInstance) {
       throw "Failed to create new instance of " + this.subject.type;
     }
@@ -192,13 +199,13 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
       return await this.getSubjectData(entry);
     }
 
-    return null
+    return null;
   }
 
   private async getSubjectData(entry: any) {
     const dataEntry = new SubjectEntry(entry, this.perspective!);
     await dataEntry.load();
-    
+
     // @ts-ignore
     const tempModel = new this.tempSubject();
 
@@ -206,8 +213,9 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
       const value = await entry[key];
 
       if (this.tempSubject.prototype.__properties[key]?.transform && value) {
-        const transform = this.tempSubject.prototype.__properties[key].transform;
-        tempModel[key] = transform(value)
+        const transform =
+          this.tempSubject.prototype.__properties[key].transform;
+        tempModel[key] = transform(value);
       } else {
         tempModel[key] = value;
       }
@@ -218,7 +226,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
       id: await entry.baseExpression,
       timestamp: dataEntry.timestamp,
       author: dataEntry.author,
-    }
+    };
   }
 
   async getAll(source?: string): Promise<SubjectClass[]> {
@@ -253,10 +261,10 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     const promiseList = [];
 
     for (const entry of entries) {
-      promiseList.push(this.getSubjectData(entry))
+      promiseList.push(this.getSubjectData(entry));
     }
 
-    return await Promise.all(promiseList)
+    return await Promise.all(promiseList);
   }
 
   private async subscribe() {
@@ -275,36 +283,42 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     }
   }
 
-  private async onLink(type: "added" | "removed" | "updated", link: LinkExpression) {
-    if (type === 'removed') {
-      this.linkRemoved.push(link)
+  private async onLink(
+    type: "added" | "removed" | "updated",
+    link: LinkExpression
+  ) {
+    if (type === "removed") {
+      this.linkRemoved.push(link);
     }
-    if (type === 'added') {
-      const found = this.linkRemoved.find(l => l.data.source === link.data.source && l.data.predicate === link.data.predicate)
+    if (type === "added") {
+      const found = this.linkRemoved.find(
+        (l) =>
+          l.data.source === link.data.source &&
+          l.data.predicate === link.data.predicate
+      );
 
       if (found) {
         const updatedListeners = this.listeners.update[found.data.source];
         const allUpdateListeners = this.listeners.update?.all;
-  
+
         if (allUpdateListeners) {
           setTimeout(async () => {
             const entry = await this.getData(found.data.source);
             allUpdateListeners.forEach((cb) => {
               cb(entry);
             });
-          }, 6000)
+          }, 6000);
         }
-  
+
         if (updatedListeners) {
           setTimeout(async () => {
             const entry = await this.getData(found.data.source);
             updatedListeners.forEach((cb) => {
               cb(entry);
             });
-          }, 6000)
+          }, 6000);
         }
       }
-
     }
     const linkIsType = link.data.predicate === this.tempSubject.prototype.type;
 
@@ -323,7 +337,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
         allAddListeners.forEach((cb) => {
           cb(entry);
         });
-      }, 6000)
+      }, 6000);
     }
 
     if (type === "removed" && allRemoveListeners) {
@@ -332,7 +346,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
         allRemoveListeners.forEach((cb) => {
           cb(entry);
         });
-      }, 6000)
+      }, 6000);
     }
 
     if (type === "added" && addedListeners) {
@@ -341,7 +355,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
         addedListeners.forEach((cb) => {
           cb(entry);
         });
-      }, 6000)
+      }, 6000);
     }
 
     if (type === "removed" && removedListeners) {
@@ -350,7 +364,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
         removedListeners.forEach((cb) => {
           cb(entryId);
         });
-      }, 6000)
+      }, 6000);
     }
   }
 

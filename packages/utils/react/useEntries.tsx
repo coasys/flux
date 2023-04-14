@@ -14,7 +14,11 @@ export default function useEntries<SubjectClass>({
   const [entries, setEntries] = useState<SubjectClass[]>([]);
 
   const Model = useMemo(() => {
-    const subject = new SubjectRepository(model, { perspectiveUuid, source });
+    if (!perspectiveUuid) return null;
+    const subject = new SubjectRepository(model as any, {
+      perspectiveUuid,
+      source: source || undefined,
+    });
     return subject;
   }, [perspectiveUuid, source]);
 
@@ -30,7 +34,7 @@ export default function useEntries<SubjectClass>({
     try {
       setLoading(true);
 
-      const entries = await Model.getAllData();
+      const entries = await Model?.getAllData();
 
       setEntries(entries);
     } catch (e) {
@@ -40,7 +44,7 @@ export default function useEntries<SubjectClass>({
   }
 
   function subscribe() {
-    Model.onAdded(async (entry) => {
+    Model?.onAdded(async (entry) => {
       setEntries((oldEntries) => {
         const hasEntry = oldEntries.find((e) => e.id === entry.id);
         return hasEntry ? oldEntries : [entry, ...oldEntries];
