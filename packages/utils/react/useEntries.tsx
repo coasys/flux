@@ -10,12 +10,11 @@ export default function useEntries<SubjectClass>({
   source?: string | null | undefined;
   model: SubjectClass;
 }) {
-  const [loading, setLoading] = useState();
+  const [loading, setLoading] = useState(false);
   const [entries, setEntries] = useState<SubjectClass[]>([]);
 
   const Model = useMemo(() => {
     const subject = new SubjectRepository(model, { perspectiveUuid, source });
-
     return subject;
   }, [perspectiveUuid, source]);
 
@@ -30,6 +29,7 @@ export default function useEntries<SubjectClass>({
   async function getAll() {
     try {
       setLoading(true);
+
       const entries = await Model.getAllData();
 
       setEntries(entries);

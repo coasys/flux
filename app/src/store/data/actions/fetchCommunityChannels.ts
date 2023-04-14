@@ -17,8 +17,6 @@ export default async (communityId: string): Promise<void> => {
 
     const channels = await channelRepository.getAllData();
 
-    console.log({ channels });
-
     const mappedChannels = channels.map((channel: any) => ({
       id: channel?.id,
       name: channel?.name,
@@ -36,7 +34,6 @@ export default async (communityId: string): Promise<void> => {
         mute: keyedChannels[channel.id]?.notifications.mute || false,
       },
     }));
-    console.log("chan", mappedChannels);
 
     dataStore.setChannels({
       communityId,

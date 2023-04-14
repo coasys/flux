@@ -31,11 +31,6 @@ export const SDNA = `
     isPopular(Message) :- emojiCount(Message, Count), Count >= $emojiCount.
     isNotPopular(Message) :- emojiCount(Message, Count), Count < $emojiCount.
 
-    flux_channel(Source, Target, Timestamp, Author, Name, Views):-
-        link(Source, "${EntryType.Channel}", Target, Timestamp, Author),
-        findall((Name, NameTimestamp, NameAuthor), link(Target, "${CHANNEL_NAME}", Name, NameTimestamp, NameAuthor), Name),
-        findall((View, ViewTimestamp, ViewAuthor), link(Target, "${CHANNEL_VIEW}", View, ViewTimestamp, ViewAuthor), Views).
-
     flux_message(Source, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages):-
         link(Source, "${EntryType.Message}", Message, Timestamp, Author),
         findall((EditMessage, EditMessageTimestamp, EditMessageAuthor), link(Message, "${EDITED_TO}", EditMessage, EditMessageTimestamp, EditMessageAuthor), EditMessages),
@@ -49,36 +44,8 @@ export const SDNA = `
     flux_message_query_popular(Source, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, false):- 
         flux_message(Source, Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages), isNotPopular(Message). 
 
-    flux_post_query(Source, Type, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies):- 
-        link(Source, Type, Id, Timestamp, Author),
-        findall((Title, TitleTimestamp, TitleAuthor), link(Id, "${TITLE}", Title, TitleTimestamp, TitleAuthor), Title),
-        findall((Body, BodyTimestamp, BodyAuthor), link(Id, "${BODY}", Body, BodyTimestamp, BodyAuthor), Body),
-        findall((Reaction, ReactionTimestamp, ReactionAuthor), link(Id, "${REACTION}", Reaction, ReactionTimestamp, ReactionAuthor), Reactions),
-        findall((Url, UrlTimestamp, UrlAuthor), link(Id, "${URL}", Url, UrlTimestamp, UrlAuthor), Url),
-        findall((Image, ImageTimestamp, ImageAuthor), link(Id, "${IMAGE}", Image, ImageTimestamp, ImageAuthor), Image),
-        findall((StartDate, StartDateTimestamp, StartDateAuthor), link(Id, "${START_DATE}", StartDate, StartDateTimestamp, StartDateAuthor), StartDate),
-        findall((EndDate, EndDateTimestamp, EndDateAuthor), link(Id, "${END_DATE}", EndDate, EndDateTimestamp, EndDateAuthor), EndDate),
-        findall((Type, TypeTimestamp, TypeAuthor), link(Id, "${ENTRY_TYPE}", Type, TypeTimestamp, TypeAuthor), Types),
-        findall((Reply, ReplyTimestamp, ReplyAuthor), link(Id, "${REPLY_TO}", ReplyId, ReplyTimestamp, ReplyAuthor), Replies).
-
-    flux_post(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies):- 
-        flux_post_query(Source, "${EntryType.SimplePost}", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies);
-        flux_post_query(Source, "${EntryType.LinkPost}", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies);
-        flux_post_query(Source, "${EntryType.CalendarEvent}", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies);
-        flux_post_query(Source, "${EntryType.ImagePost}", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies);
-        flux_post_query(Source, "${EntryType.PollPost}", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies);
-        flux_post_query(Source, "${EntryType.Message}", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies).
-    
-    flux_post_query_popular(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies, true) :-
-        flux_post(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies), isPopular(Id).
-
-    flux_post_query_popular(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies, false) :-
-        flux_post(Source, Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies), isNotPopular(Id).`;
+`;
 
 export const messageFilteredQuery = `limit($limit, (order_by([desc(Timestamp)], flux_message_query_popular("$source", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp =< $fromDate)).`;
 export const messageFilteredQueryBackwards = `(order_by([asc(Timestamp)], flux_message_query_popular("$source", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular)), Timestamp >= $fromDate).`;
-export const channelQuery = `order_by([asc(Timestamp)], flux_channel("$source", Id, Timestamp, Author, Name, Views)).`;
 export const messageQuery = `limit($limit, order_by([desc(Timestamp)], flux_message_query_popular("$source", Message, Timestamp, Author, Reactions, Replies, AllCardHidden, EditMessages, IsPopular))).`;
-
-export const forumFilteredQuery = `limit($limit, (order_by([desc(Timestamp)], flux_post_query_popular("$source", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies, IsPopular)), Timestamp =< $fromDate)).`;
-export const forumQuery = `limit($limit, order_by([desc(Timestamp)], flux_post_query_popular("$source", Id, Timestamp, Author, Title, Body, Reactions, Url, Image, StartDate, EndDate, Types, Replies, IsPopular))).`;

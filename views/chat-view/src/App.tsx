@@ -15,7 +15,7 @@ const MainComponent = ({ perspective, source }) => {
 
   return (
     <EditorProvider perspectiveUuid={perspective} channelId={source}>
-      <div class={styles.container} ref={setRef}>
+      <div className={styles.container} ref={setRef}>
         <MessageList
           perspectiveUuid={perspective}
           channelId={source}
@@ -28,6 +28,10 @@ const MainComponent = ({ perspective, source }) => {
 };
 
 export default ({ perspective = "", source = "" }) => {
+  if (!perspective || !source) {
+    return null;
+  }
+
   return (
     <UIProvider>
       <AgentProvider>

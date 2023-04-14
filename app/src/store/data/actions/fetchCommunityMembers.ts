@@ -20,8 +20,6 @@ export default async function (id: string): Promise<void> {
   });
   const members = await Member.getAll();
 
-  console.log('test', members)
-
   const dids = await Promise.all(
     members.map(async (m) => {
       //@ts-ignore
@@ -30,12 +28,11 @@ export default async function (id: string): Promise<void> {
 
       return await channelEntry.author;
     })
-    );
-    
-  if(!dids.includes(agent.did)) {
+  );
+
+  if (!dids.includes(agent.did)) {
     await Member.create({ did: agent.did }, agent.did);
   }
-
 
   dataStore.setNeighbourhoodMembers({
     members: dids.length === 0 ? [userStore.agent.did!] : dids,

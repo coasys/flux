@@ -358,15 +358,12 @@ export default defineComponent({
         const client = await getAd4mClient();
 
         const perspective = await client.perspective.byUUID(id);
-        console.log("state 100", perspective);
 
         if (perspective?.state === "Synced") {
           synced();
         }
 
         perspective?.addSyncStateChangeListener((state) => {
-          console.log("state 101", state);
-
           if (state === "Synced") {
             synced();
           }

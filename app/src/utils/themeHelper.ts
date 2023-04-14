@@ -15,8 +15,6 @@ export function setTheme(theme: ThemeState): void {
     theme.fontSize
   );
 
-  console.log({ theme });
-
   document.documentElement.setAttribute("class", theme.name);
 
   const head = document.getElementsByTagName("head")[0];
