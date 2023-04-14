@@ -51,7 +51,7 @@ export default function PostItem({ post, displayView }) {
       : styles.card;
 
   const showTite = post.title;
-  const showImage = post.image && base64;
+  const showImage = post.image;
   const showBody = post.body;
   const showUrl = post.url;
   const showDates = post.startDate && post.endDate;
@@ -134,7 +134,7 @@ export default function PostItem({ post, displayView }) {
         {showUrl && ogData?.images?.length > 0 && (
           <img src={ogData.images[0]} class={styles.postImage} />
         )}
-        {showImage && <img class={styles.postImage} src={base64} />}
+        {showImage && <img class={styles.postImage} src={post.image} />}
         {showDates && (
           <div class={styles.calendar}>
             <span class={styles.calendarMonth}>

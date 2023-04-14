@@ -9,11 +9,11 @@
   color: currentColor;
   position: relative;
   overflow: hidden;
-  border-radius: var(--j-border-radius);
+  border-bottom: 1px solid var(--j-color-ui-100);
 }
 
 .post:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .grid {
@@ -26,12 +26,17 @@
   grid-template-columns: 1fr;
 }
 
-.card .postImageWrapper:has(j-icon) {
-  display: none;
+.compact {
+  display: flex;
 }
 
-.compact {
-  grid-template-columns: 3fr 2fr;
+.compact .postContentWrapper {
+  flex: 1;
+  width: 100%;
+}
+
+.compact .postImageWrapper {
+  max-width: 200px;
 }
 
 .grid .postImageWrapper {

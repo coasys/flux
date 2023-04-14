@@ -2,7 +2,8 @@
   position: relative;
   max-width: 800px;
   width: 100%;
-  padding: var(--j-space-600) var(--j-space-500) var(--j-space-600) var(--j-space-500);
+  padding-left: var(--j-space-400);
+  padding-bottom: var(--j-space-800);
 }
 
 .addButton {

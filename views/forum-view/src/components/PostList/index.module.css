@@ -1,14 +1,16 @@
 .messageList {
   width: 100%;
-  max-width: 1100px;
-  padding: var(--j-space-400) var(--j-space-500) var(--j-space-600)
-    var(--j-space-500);
+  padding: 0;
 }
 
 .posts {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--j-space-500);
+}
+
+.posts.compact {
+  gap: 0;
 }
 
 .posts.card {
