@@ -30,6 +30,9 @@ function PostView({ perspective, source }) {
 
   return (
     <div>
+      <j-box pb="400">
+        <j-badge variant="success">{perspective.name}</j-badge>
+      </j-box>
       <j-text variant="heading-lg">A Simple Todo App</j-text>
       <j-flex gap="300" a="center">
         <j-input

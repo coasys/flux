@@ -270,12 +270,14 @@ j-tooltip::part(base) {
   background: var(--j-color-ui-100);
 }
 
-.cardFlex {
-  display: flex;
-  gap: var(--j-space-500);
+.cardContent {
+  width: 100%;
+  flex: 1;
 }
 
 .cardImage {
+  width: 100%;
+  max-width: 140px;
   object-fit: cover;
   border-radius: var(--j-border-radius);
 }

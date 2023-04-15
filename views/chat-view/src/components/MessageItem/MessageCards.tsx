@@ -75,29 +75,27 @@ function LinkCard({ url }) {
 
   return (
     <a className={styles.card} target="_blank" href={url}>
-      <div>
-        <div className={styles.cardFlex}>
-          <div>
-            <div className={styles.cardName}>
-              {isLoading ? (
-                <j-skeleton width="lg" height="text"></j-skeleton>
-              ) : (
-                meta?.name || "No title"
-              )}
-            </div>
-            <div className={styles.cardDescription}>
-              {isLoading ? (
-                <j-skeleton width="xxl" height="text"></j-skeleton>
-              ) : (
-                meta?.description || "No descriptioon"
-              )}
-            </div>
-          </div>
-          {meta?.image && (
-            <img className={styles.cardImage} src={meta?.image} width={140} />
+      <div className={styles.cardContent}>
+        <div className={styles.cardName}>
+          {isLoading ? (
+            <j-skeleton width="lg" height="text"></j-skeleton>
+          ) : (
+            meta?.name || "No title"
+          )}
+        </div>
+        <div className={styles.cardDescription}>
+          {isLoading ? (
+            <j-skeleton width="xxl" height="text"></j-skeleton>
+          ) : (
+            meta?.description || "No descriptioon"
           )}
         </div>
       </div>
+      {meta?.image && (
+        <div>
+          <img className={styles.cardImage} src={meta?.image} />
+        </div>
+      )}
     </a>
   );
 }
@@ -118,24 +116,20 @@ function NeighbourhoodCard({ url }) {
 
   return (
     <a className={styles.card} href={url}>
-      <div>
-        <div className={styles.cardFlex}>
-          <div>
-            <div className={styles.cardName}>
-              {isLoading ? (
-                <j-skeleton width="lg" height="text"></j-skeleton>
-              ) : (
-                meta.name || "No title"
-              )}
-            </div>
-            <div className={styles.cardDescription}>
-              {isLoading ? (
-                <j-skeleton width="xxl" height="text"></j-skeleton>
-              ) : (
-                meta.description || "No descriptioon"
-              )}
-            </div>
-          </div>
+      <div className={styles.cardContent}>
+        <div className={styles.cardName}>
+          {isLoading ? (
+            <j-skeleton width="lg" height="text"></j-skeleton>
+          ) : (
+            meta.name || "No title"
+          )}
+        </div>
+        <div className={styles.cardDescription}>
+          {isLoading ? (
+            <j-skeleton width="xxl" height="text"></j-skeleton>
+          ) : (
+            meta.description || "No descriptioon"
+          )}
         </div>
       </div>
       <j-button variant="primary">Join</j-button>

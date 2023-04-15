@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -31,21 +31,27 @@
       .sidebar {
         padding: var(--j-space-500);
         height: 100vh;
-        background: var(--j-color-ui-100);
+        background: var(--j-color-ui-50);
         border-radius: var(--j-border-radius);
       }
       select {
         width: 100%;
         height: var(--j-size-md);
-        background: var(--j-color-ui-200);
+        padding: var(--j-space-300);
+        background: var(--j-color-white);
         color: var(--j-color-black);
         font-size: var(--j-font-size-500);
         border-radius: var(--j-border-radius);
-        border-color: var(--j-border-color-strong);
+        outline: 1px solid var(--j-color-ui-200);
+        border: 0;
+        border-right: 8px solid transparent;
         padding: var(--j-space-200);
       }
+      select:hover {
+        background: var(--j-color-ui-50);
+      }
       select:focus {
-        outline: 1px solid var(--j-color-primary-500);
+        outline: 2px solid var(--j-color-primary-500);
       }
     </style>
   </head>
@@ -53,6 +59,13 @@
     <div class="sidebar-layout" v-scope @vue:mounted="mounted">
       <aside class="sidebar">
         <j-flex direction="column" gap="500">
+          <div>
+            <j-text variant="label">Current theme:</j-text>
+            <select @change="setTheme($event)" v-model="theme">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
           <div>
             <j-text variant="label">Current perspective:</j-text>
             <select @change="getPerspective($event)" v-model="perspectiveUuid">
@@ -89,6 +102,7 @@
       });
 
       createApp({
+        theme: "light",
         perspectiveUuid: "",
         source: "test",
         perspectives: [],
@@ -97,6 +111,10 @@
           const perspective = await client.perspective.byUUID(e.target.value);
           const el = document.querySelector("flux-app");
           el.perspective = perspective;
+        },
+        setTheme(e) {
+          const theme = e.target.value;
+          document.documentElement.className = theme;
         },
         mounted() {
           ui.connect();
