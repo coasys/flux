@@ -33,7 +33,7 @@ export default class Box extends LitElement {
 
   /**
    * Padding
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -41,7 +41,7 @@ export default class Box extends LitElement {
 
   /**
    * Padding left
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -49,7 +49,7 @@ export default class Box extends LitElement {
 
   /**
    * Padding right
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -57,7 +57,7 @@ export default class Box extends LitElement {
 
   /**
    * Padding top
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -65,7 +65,7 @@ export default class Box extends LitElement {
 
   /**
    * Padding bottom
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -73,7 +73,7 @@ export default class Box extends LitElement {
 
   /**
    * Padding horistonal
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -81,7 +81,7 @@ export default class Box extends LitElement {
 
   /**
    * Padding vertical
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -89,7 +89,7 @@ export default class Box extends LitElement {
 
   /**
    * Margin
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -97,7 +97,7 @@ export default class Box extends LitElement {
 
   /**
    * Margin left
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -105,7 +105,7 @@ export default class Box extends LitElement {
 
   /**
    * Margin right
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -113,7 +113,7 @@ export default class Box extends LitElement {
 
   /**
    * Margin top
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -121,7 +121,7 @@ export default class Box extends LitElement {
 
   /**
    * Margin bottom
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -129,7 +129,7 @@ export default class Box extends LitElement {
 
   /**
    * Margin horistonal
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -137,7 +137,7 @@ export default class Box extends LitElement {
 
   /**
    * Margin vertical
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -145,7 +145,7 @@ export default class Box extends LitElement {
 
   /**
    * Background color
-   * @type {""|"ui-100"|"ui-200"|"ui-300"|"ui-400"|"ui-500"|"ui-600"|"ui-700"|"ui-800"|"ui-900}
+   * @type {""|"ui-100"|"ui-200"|"ui-300"|"ui-400"|"ui-500"|"ui-600"|"ui-700"|"ui-800"|"ui-900"}
    * @attr
    */
   @property({ type: String, reflect: true })

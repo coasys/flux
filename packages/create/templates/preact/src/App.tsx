@@ -1,34 +1,14 @@
 import styles from "./App.module.css";
+import Todo from "./models/Todo";
+
 import { useState } from "preact/hooks";
+import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useEntries } from "utils/frameworks/react";
-import {
-  SDNAClass,
-  subjectProperty,
-  subjectFlag,
-  PerspectiveProxy,
-} from "@perspect3vism/ad4m";
 
 type Props = {
   perspective: PerspectiveProxy;
   source: string;
 };
-
-@SDNAClass({
-  name: "Todo",
-})
-export class Todo {
-  @subjectFlag({
-    through: "flux://entry_type",
-    value: "flux://has_todo",
-  })
-  type: string;
-  @subjectProperty({
-    through: "rdf://title",
-    writable: true,
-    resolveLanguage: "literal",
-  })
-  todoTitle: string;
-}
 
 function PostView({ perspective, source }) {
   const [title, setTitle] = useState("");
@@ -70,6 +50,7 @@ function PostView({ perspective, source }) {
       </j-flex>
       <j-box pt="900">
         <j-flex gap="500" direction="column">
+          {!entries.length && "No todos yet"}
           {entries.map((todo) => (
             <j-box bg="ui-50" p="500" radius="md">
               <j-flex j="between">

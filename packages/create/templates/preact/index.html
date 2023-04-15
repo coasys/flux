@@ -55,13 +55,11 @@
         <j-flex direction="column" gap="500">
           <div>
             <j-text variant="label">Current perspective:</j-text>
-            <select
-              @change="getPerspective($event)"
-              v-model="perspectiveUuid"
-              v-for="{name, uuid} in perspectives"
-            >
+            <select @change="getPerspective($event)" v-model="perspectiveUuid">
               <option value="" selected disabled>Select a perspective</option>
-              <option :value="uuid">{{name}}</option>
+              <option v-for="{name, uuid} in perspectives" :value="uuid">
+                {{name}}
+              </option>
             </select>
           </div>
           <j-button full size="sm" id="create-perspective">
