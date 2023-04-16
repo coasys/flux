@@ -288,9 +288,12 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     link: LinkExpression
   ) {
     if (type === "removed") {
+      console.log("removed");
       this.linkRemoved.push(link);
     }
     if (type === "added") {
+      console.log("added");
+
       const found = this.linkRemoved.find(
         (l) =>
           l.data.source === link.data.source &&
@@ -307,7 +310,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
             allUpdateListeners.forEach((cb) => {
               cb(entry);
             });
-          }, 6000);
+          }, 3000);
         }
 
         if (updatedListeners) {
@@ -316,7 +319,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
             updatedListeners.forEach((cb) => {
               cb(entry);
             });
-          }, 6000);
+          }, 3000);
         }
       }
     }

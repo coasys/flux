@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -67,10 +67,20 @@
             </select>
           </div>
           <div>
-            <j-text variant="label">Current perspective:</j-text>
-            <select @change="getPerspective($event)" v-model="perspectiveUuid">
+            <j-text variant="label">Select perspective:</j-text>
+            <select @change="setPerspective($event)" v-model="perspectiveUuid">
               <option value="" selected disabled>Select a perspective</option>
               <option v-for="{name, uuid} in perspectives" :value="uuid">
+                {{name}}
+              </option>
+            </select>
+          </div>
+          <div v-if="perspectiveUuid">
+            <j-text variant="label">Current channel:</j-text>
+            <select v-model="source">
+              <option value="" selected disabled>Select a perspective</option>
+              <option value="flux://testing">Testing</option>
+              <option v-for="{name, id} in channels" :value="id">
                 {{name}}
               </option>
             </select>
@@ -91,7 +101,8 @@
         getAd4mClient,
       } from "@perspect3vism/ad4m-connect";
       import App from "./src/main.ts";
-
+      import { Channel, Community } from "utils/api";
+      import { SubjectRepository } from "utils/factory";
       import { createApp } from "https://unpkg.com/petite-vue?module";
 
       const ui = Ad4mConnectUI({
@@ -102,15 +113,27 @@
       });
 
       createApp({
-        theme: "light",
+        theme: "dark",
         perspectiveUuid: "",
-        source: "test",
+        source: "flux://testing",
+        community: {},
+        channels: [],
         perspectives: [],
-        async getPerspective(e) {
+        async setPerspective(e) {
           const client = await getAd4mClient();
           const perspective = await client.perspective.byUUID(e.target.value);
           const el = document.querySelector("flux-app");
           el.perspective = perspective;
+          const communityModel = new SubjectRepository(Community, {
+            perspectiveUuid: perspective.uuid,
+          });
+          const community = await communityModel.getData();
+          const channelModel = new SubjectRepository(Channel, {
+            perspectiveUuid: perspective.uuid,
+            source: community.id,
+          });
+          const channels = await channelModel.getAllData();
+          this.channels = channels.map((c) => ({ id: c.id, name: c.name }));
         },
         setTheme(e) {
           const theme = e.target.value;

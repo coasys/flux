@@ -13,8 +13,9 @@ export default function useEntries<SubjectClass>({
   const [loading, setLoading] = useState(false);
   const [entries, setEntries] = useState<SubjectClass[]>([]);
 
-  const Model = useMemo(() => {
-    if (!perspectiveUuid) return null;
+  const Model: SubjectRepository<{
+    [x: string]: any;
+  }> = useMemo(() => {
     const subject = new SubjectRepository(model as any, {
       perspectiveUuid,
       source: source || undefined,
@@ -28,7 +29,7 @@ export default function useEntries<SubjectClass>({
       subscribe();
     }
     return () => Model?.unsubscribe();
-  }, [source]);
+  }, [perspectiveUuid, source]);
 
   async function getAll() {
     try {
@@ -44,12 +45,26 @@ export default function useEntries<SubjectClass>({
   }
 
   function subscribe() {
+    Model?.onUpdated(async (id) => {
+      const updatedEntry = await Model?.getData(id);
+
+      console.log(updatedEntry);
+
+      if (updatedEntry) {
+        setEntries((oldEntries) => {
+          return oldEntries.map((e) => {
+            e.id === id ? updatedEntry : e;
+          });
+        });
+      }
+    }, "all");
+
     Model?.onAdded(async (entry) => {
       setEntries((oldEntries) => {
         const hasEntry = oldEntries.find((e) => e.id === entry.id);
         return hasEntry ? oldEntries : [entry, ...oldEntries];
       });
-    });
+    }, "all");
   }
 
   return { entries, model: Model, loading };

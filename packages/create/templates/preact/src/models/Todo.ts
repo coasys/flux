@@ -9,10 +9,18 @@ export default class Todo {
     value: "flux://has_todo",
   })
   type: string;
+
   @subjectProperty({
     through: "rdf://title",
     writable: true,
     resolveLanguage: "literal",
   })
-  todoTitle: string;
+  title: string;
+
+  @subjectProperty({
+    through: "rdf://status",
+    writable: true,
+    resolveLanguage: "literal",
+  })
+  done: boolean;
 }
