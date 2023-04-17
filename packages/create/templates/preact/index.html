@@ -80,7 +80,7 @@
           </div>
           <div v-if="perspectiveUuid">
             <j-text variant="label">Current channel:</j-text>
-            <select v-model="source">
+            <select v-model="source" @change="setChannel($event.target.value)">
               <option value="" selected disabled>Select a perspective</option>
               <option value="flux://testing">Testing</option>
               <option v-for="{name, id} in channels" :value="id">
@@ -118,7 +118,7 @@
       createApp({
         theme: document.documentElement.className,
         perspectiveUuid: localStorage.getItem("perspectiveUuid") || "",
-        source: "flux://testing",
+        source: localStorage.getItem("source") || "flux://testing",
         community: {},
         channels: [],
         perspectives: [],
@@ -126,7 +126,7 @@
           const client = await getAd4mClient();
           const perspective = await client.perspective.byUUID(uuid);
           localStorage.setItem("perspectiveUuid", uuid);
-          console.log("set localstorage");
+          console.log("set localstorage", uuid);
           const app = document.querySelector("flux-app");
           app.perspective = perspective;
 
@@ -140,6 +140,9 @@
           }).getAllData();
 
           this.channels = channels.map((c) => ({ id: c.id, name: c.name }));
+        },
+        setChannel(source) {
+          localStorage.setItem("source", source);
         },
         setTheme(e) {
           const theme = e.target.value;

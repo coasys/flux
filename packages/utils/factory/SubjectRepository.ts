@@ -4,6 +4,7 @@ import {
   Subject,
   LinkExpression,
   Literal,
+  LinkQuery,
 } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { subscribeToLinks } from "../api";
@@ -141,8 +142,6 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     await this.ensurePerspective();
     let newInstance = await this.perspective?.createSubject(this.subject, base);
 
-    console.log({ newInstance, subject: this.subject });
-
     if (!newInstance) {
       throw "Failed to create new instance of " + this.subject.type;
     }
@@ -178,6 +177,15 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
 
     setProperties(instance, data);
     return instance;
+  }
+
+  async remove(id: string) {
+    if (this.perspective) {
+      const links = await this.perspective.get(
+        new LinkQuery({ source: this.source, target: id })
+      );
+      this.perspective.removeLinks(links);
+    }
   }
 
   async get(id?: string): Promise<SubjectClass | null> {
@@ -288,12 +296,9 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     link: LinkExpression
   ) {
     if (type === "removed") {
-      console.log("removed");
       this.linkRemoved.push(link);
     }
     if (type === "added") {
-      console.log("added");
-
       const found = this.linkRemoved.find(
         (l) =>
           l.data.source === link.data.source &&
@@ -323,9 +328,6 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
         }
       }
     }
-    const linkIsType = link.data.predicate === this.tempSubject.prototype.type;
-
-    if (!linkIsType) return;
 
     const source = link.data.source;
     const entryId = link.data.target;

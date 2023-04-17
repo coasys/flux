@@ -16,12 +16,12 @@ export default function PostView({ perspective, source }: Props) {
   const [title, setTitle] = useState("");
 
   const { entry: community } = useEntry({
-    perspectiveUuid: perspective.uuid,
+    perspective,
     model: Community,
   });
 
   const { entries: todos, model } = useEntries({
-    perspectiveUuid: perspective.uuid,
+    perspective,
     source,
     model: Todo,
   });
@@ -45,6 +45,12 @@ export default function PostView({ perspective, source }: Props) {
       .catch(console.log);
   }
 
+  function deleteTodo(id: string) {
+    model.remove(id).catch(console.log);
+  }
+
+  console.log("render");
+
   return (
     <div>
       <j-box pt="900" pb="400">
@@ -62,7 +68,7 @@ export default function PostView({ perspective, source }: Props) {
       <input
         autoFocus
         className={styles.titleInput}
-        placeholder="Write a todo, and press enter"
+        placeholder="Write a title"
         value={title}
         onKeyDown={createTodo}
         onChange={(e) => setTitle(e.target.value)}
@@ -86,8 +92,12 @@ export default function PostView({ perspective, source }: Props) {
                     <j-text size="500" nomargin>
                       {todo.title}
                     </j-text>
+                    <j-text size="500" nomargin>
+                      {todo.desc}
+                    </j-text>
                   </j-checkbox>
                 </div>
+                <j-button onClick={() => deleteTodo(todo.id)}>Delete</j-button>
               </j-flex>
             </j-box>
           ))}

@@ -1,35 +1,39 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { SubjectRepository } from "../factory";
+import { LinkExpression, PerspectiveProxy } from "@perspect3vism/ad4m";
 
 export default function useEntries<SubjectClass>({
-  perspectiveUuid,
+  perspective,
   source,
   model,
 }: {
-  perspectiveUuid: string;
+  perspective: PerspectiveProxy;
   source?: string | null | undefined;
   model: SubjectClass;
 }) {
   const [loading, setLoading] = useState(false);
-  const [entries, setEntries] = useState<SubjectClass[]>([]);
+  const [entries, setEntries] = useState<[{ [x: string]: any }]>([]);
 
   const Model: SubjectRepository<{
     [x: string]: any;
   }> = useMemo(() => {
     const subject = new SubjectRepository(model as any, {
-      perspectiveUuid,
+      perspectiveUuid: perspective.uuid,
       source: source || undefined,
     });
     return subject;
-  }, [perspectiveUuid, source]);
+  }, [perspective.uuid, source]);
 
   useEffect(() => {
-    if (perspectiveUuid && source !== null) {
+    if (perspective.uuid && source !== null) {
       getAll();
-      subscribe();
+      const { added, removed } = subscribe();
+      return () => {
+        perspective.removeListener("link-added", added);
+        perspective.removeListener("link-removed", removed);
+      };
     }
-    return () => Model?.unsubscribe();
-  }, [perspectiveUuid, source]);
+  }, [perspective.uuid, source]);
 
   async function getAll() {
     try {
@@ -44,25 +48,54 @@ export default function useEntries<SubjectClass>({
     }
   }
 
-  function subscribe() {
-    Model?.onUpdated(async (id) => {
-      const updatedEntry = await Model?.getData(id);
+  async function fetchEntry(id) {
+    const entry = await Model.getData(id);
 
-      if (updatedEntry) {
+    setEntries((oldEntries) => {
+      const isUpdatedEntry = oldEntries.find((e) => e.id === entry.id);
+      return isUpdatedEntry
+        ? oldEntries.map((e) => {
+            const isTheUpdatedOne = e.id === isUpdatedEntry.id;
+            return isTheUpdatedOne ? entry : e;
+          })
+        : [...oldEntries, entry];
+    });
+  }
+
+  function subscribe() {
+    const added = (link: LinkExpression) => {
+      const isNewEntry = link.data.source === source;
+
+      setEntries((oldEntries) => {
+        const isUpdated = oldEntries.find((e) => e.id === link.data.source);
+        if (isUpdated) {
+          fetchEntry(link.data.source);
+        }
+
+        if (isNewEntry) {
+          fetchEntry(link.data.target);
+        }
+
+        return oldEntries;
+      });
+
+      return null;
+    };
+
+    const removed = (link: LinkExpression) => {
+      if (link.data.source === source) {
         setEntries((oldEntries) => {
-          return oldEntries.map((e) => {
-            e.id === id ? updatedEntry : e;
-          });
+          return oldEntries.filter((e) => e.id !== link.data.target);
         });
       }
-    });
+      return null;
+    };
 
-    Model?.onAdded(async (entry) => {
-      setEntries((oldEntries) => {
-        const hasEntry = oldEntries.find((e) => e.id === entry.id);
-        return hasEntry ? oldEntries : [entry, ...oldEntries];
-      });
-    });
+    perspective.addListener("link-removed", removed);
+
+    perspective.addListener("link-added", added);
+
+    return { added, removed };
   }
 
   return { entries, model: Model, loading };
