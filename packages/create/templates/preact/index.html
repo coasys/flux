@@ -68,7 +68,10 @@
           </div>
           <div>
             <j-text variant="label">Select perspective:</j-text>
-            <select @change="setPerspective($event)" v-model="perspectiveUuid">
+            <select
+              v-model="perspectiveUuid"
+              @change="setPerspective($event.target.value)"
+            >
               <option value="" selected disabled>Select a perspective</option>
               <option v-for="{name, uuid} in perspectives" :value="uuid">
                 {{name}}
@@ -94,8 +97,8 @@
     </div>
 
     <script type="module">
-      import "@fluxapp/ui";
       import "@fluxapp/ui/dist/main.css";
+      import "@fluxapp/ui";
       import "@fluxapp/ui/dist/themes/dark.css";
       import Ad4mConnectUI, {
         getAd4mClient,
@@ -113,26 +116,29 @@
       });
 
       createApp({
-        theme: "dark",
-        perspectiveUuid: "",
+        theme: document.documentElement.className,
+        perspectiveUuid: localStorage.getItem("perspectiveUuid") || "",
         source: "flux://testing",
         community: {},
         channels: [],
         perspectives: [],
-        async setPerspective(e) {
+        async setPerspective(uuid) {
           const client = await getAd4mClient();
-          const perspective = await client.perspective.byUUID(e.target.value);
-          const el = document.querySelector("flux-app");
-          el.perspective = perspective;
-          const communityModel = new SubjectRepository(Community, {
+          const perspective = await client.perspective.byUUID(uuid);
+          localStorage.setItem("perspectiveUuid", uuid);
+          console.log("set localstorage");
+          const app = document.querySelector("flux-app");
+          app.perspective = perspective;
+
+          const community = await new SubjectRepository(Community, {
             perspectiveUuid: perspective.uuid,
-          });
-          const community = await communityModel.getData();
-          const channelModel = new SubjectRepository(Channel, {
+          }).getData();
+
+          const channels = await new SubjectRepository(Channel, {
             perspectiveUuid: perspective.uuid,
             source: community.id,
-          });
-          const channels = await channelModel.getAllData();
+          }).getAllData();
+
           this.channels = channels.map((c) => ({ id: c.id, name: c.name }));
         },
         setTheme(e) {
@@ -147,6 +153,12 @@
               this.client = client;
               this.fluxApp = App;
               customElements.define("flux-app", App);
+
+              if (this.perspectiveUuid) {
+                console.log("in mounted", this.perspectiveUuid);
+                this.setPerspective(this.perspectiveUuid);
+              }
+
               const perspectives = await client.perspective.all();
 
               this.perspectives = perspectives.map((p) => ({

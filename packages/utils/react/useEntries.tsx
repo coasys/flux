@@ -48,8 +48,6 @@ export default function useEntries<SubjectClass>({
     Model?.onUpdated(async (id) => {
       const updatedEntry = await Model?.getData(id);
 
-      console.log(updatedEntry);
-
       if (updatedEntry) {
         setEntries((oldEntries) => {
           return oldEntries.map((e) => {
@@ -57,14 +55,14 @@ export default function useEntries<SubjectClass>({
           });
         });
       }
-    }, "all");
+    });
 
     Model?.onAdded(async (entry) => {
       setEntries((oldEntries) => {
         const hasEntry = oldEntries.find((e) => e.id === entry.id);
         return hasEntry ? oldEntries : [entry, ...oldEntries];
       });
-    }, "all");
+    });
   }
 
   return { entries, model: Model, loading };
