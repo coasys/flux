@@ -1,20 +1,24 @@
-import { useContext, useMemo, useState } from "preact/hooks";
+import { useState } from "preact/hooks";
 import PostItem from "../PostItem";
 import style from "./index.module.css";
 import { DisplayView, displayOptions } from "../../constants/options";
-import { ChannelContext, useEntries } from "utils/frameworks/react";
+import { useEntries } from "utils/frameworks/react";
 import { Post } from "utils/api";
 import { useEffect } from "react";
-import { SubjectEntry } from "utils/helpers";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/dist/utils";
+import { PerspectiveProxy } from "@perspect3vism/ad4m";
 
-export default function PostList() {
+export default function PostList({
+  perspective,
+  source,
+}: {
+  perspective: PerspectiveProxy;
+  source: string;
+}) {
   const [sortedPosts, setSortedPosts] = useState([]);
-  const { state } = useContext(ChannelContext);
   const [view, setView] = useState(DisplayView.Compact);
   const { entries: posts, loading } = useEntries({
-    perspectiveUuid: state.communityId,
-    source: state?.channelId || null,
+    perspective: perspective,
+    source: source,
     model: Post,
   });
 

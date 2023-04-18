@@ -30,10 +30,10 @@ export default function PostImagePreview({
     <section className={styles.preview}>
       <div className={styles.files}>
         <div className={styles.file}>
-          <img class={styles.filePreview} src={localBase64} />
+          <img className={styles.filePreview} src={localBase64} />
 
           <j-button
-            class={styles.removeButton}
+            className={styles.removeButton}
             square
             variant="ghost"
             onClick={() => onRemove()}

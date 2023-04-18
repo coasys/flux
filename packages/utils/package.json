@@ -32,6 +32,9 @@
     "./frameworks/react": {
       "import": "./react/index.ts"
     },
+    "./frameworks/vue": {
+      "import": "./react/index.ts"
+    },
     "./types": {
       "import": "./dist/types.js",
       "require": "./dist/types.umd.cjs"

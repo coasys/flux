@@ -7,17 +7,17 @@ import Avatar from "../Avatar";
 import CommentSection from "../CommentSection";
 import { Post as PostSubject } from "utils/api";
 import { CommunityContext, useEntry } from "utils/frameworks/react";
-import { getMe } from "utils/api";
+import { getMe, Me } from "utils/api";
 
 import styles from "./index.module.css";
-import { FILE_STORAGE_LANGUAGE } from "utils/constants/languages";
+import { PerspectiveProxy } from "@perspect3vism/ad4m";
 
 export default function Post({
-  perspectiveUuid,
+  perspective,
   id,
   source,
 }: {
-  perspectiveUuid: string;
+  perspective: PerspectiveProxy;
   id: string;
   source: string;
 }) {
@@ -27,24 +27,18 @@ export default function Post({
   } = useContext(CommunityContext);
 
   const { entry: post } = useEntry({
-    perspectiveUuid,
+    perspective: perspective,
     source,
     id,
     model: PostSubject,
   });
 
-  const [base64, setBase64] = useState("");
   const [ogData, setOgData] = useState<any>({});
   const [agent, setAgent] = useState<Me>();
 
   async function fetchAgent() {
     const agent = await getMe();
     setAgent(agent);
-  }
-
-  async function fetchImage(url) {
-    const image = await getImage(url);
-    setBase64(image);
   }
 
   async function fetchOgData(url) {
@@ -59,9 +53,6 @@ export default function Post({
   useEffect(() => {
     fetchAgent();
 
-    if (post?.image) {
-      fetchImage(post.image);
-    }
     if (post?.url) {
       fetchOgData(post.url);
     }
@@ -79,9 +70,9 @@ export default function Post({
   const hasDates = post.startDate && post.endDate;
 
   return (
-    <div class={styles.post}>
+    <div className={styles.post}>
       <j-box pb="500">
-        <div class={styles.header}>
+        <div className={styles.header}>
           <j-button
             size="sm"
             variant="link"
@@ -91,7 +82,7 @@ export default function Post({
             Back
           </j-button>
           {isAuthor && (
-            <div class={styles.actions}>
+            <div className={styles.actions}>
               <j-button
                 size="xs"
                 variant="subtle"
@@ -128,7 +119,7 @@ export default function Post({
                 <j-skeleton width="lg" height="text"></j-skeleton>
               )}
             </a>
-            <div class={styles.timestamp}>
+            <div className={styles.timestamp}>
               {getTimeSince(new Date(post.timestamp), new Date())}
             </div>
           </div>
@@ -143,23 +134,23 @@ export default function Post({
         </j-box>
       )}
 
-      {hasImage  && (
+      {hasImage && (
         <j-box bg="white" mt="600">
-          <img class={styles.postImage} src={hasImage} />
+          <img className={styles.postImage} src={hasImage} />
         </j-box>
       )}
 
       {hasUrl && ogData?.images?.length > 0 && (
         <j-box pt="500">
           <a href={post.url} target="_blank">
-            <img src={ogData?.images[0]} class={styles.postImage} />
+            <img src={ogData?.images[0]} className={styles.postImage} />
           </a>
         </j-box>
       )}
 
       {hasUrl && (
         <j-box pt="400">
-          <div class={styles.postUrl}>
+          <div className={styles.postUrl}>
             <j-icon size="md" name="link"></j-icon>
             <a
               onClick={(e) => e.stopPropagation()}
@@ -175,11 +166,11 @@ export default function Post({
       {hasDates && (
         <j-box pt="500">
           <j-flex gap="300" direction="column">
-            <div class={styles.postDate}>
+            <div className={styles.postDate}>
               <j-icon size="xs" name="calendar-event"></j-icon>
               {format(new Date(post.startDate), "dd.MMMM HH:HH")}
             </div>
-            <div class={styles.postDate}>
+            <div className={styles.postDate}>
               <j-icon size="xs" name="clock"></j-icon>
               <j-tooltip
                 title={format(new Date(post.endDate), "dd.MMMM HH:HH")}
@@ -204,7 +195,7 @@ export default function Post({
       )}
 
       <CommentSection
-        perspectiveUuid={perspectiveUuid}
+        perspective={perspective}
         source={post.id}
       ></CommentSection>
     </div>

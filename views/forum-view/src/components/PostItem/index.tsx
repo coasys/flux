@@ -59,9 +59,9 @@ export default function PostItem({ post, displayView }) {
   return (
     <div
       onClick={() => UIMehthods.goToPost(post.id)}
-      class={[styles.post, displayStyle, popularStyle].join(" ")}
+      className={[styles.post, displayStyle, popularStyle].join(" ")}
     >
-      <div class={styles.postContentWrapper}>
+      <div className={styles.postContentWrapper}>
         {showTite && (
           <j-text nomargin className={styles.postTitle} variant="heading">
             {post.title}
@@ -83,7 +83,7 @@ export default function PostItem({ post, displayView }) {
                   <j-skeleton width="lg" height="text"></j-skeleton>
                 )}
               </a>
-              <div class={styles.timestamp}>
+              <div className={styles.timestamp}>
                 <j-timestamp relative value={post.timestamp}></j-timestamp>
               </div>
             </j-flex>
@@ -92,7 +92,7 @@ export default function PostItem({ post, displayView }) {
 
         {showUrl && (
           <j-box pt="200">
-            <div class={styles.postUrl}>
+            <div className={styles.postUrl}>
               <j-icon size="xs" name="link"></j-icon>
               <a
                 onClick={(e) => e.stopPropagation()}
@@ -105,12 +105,12 @@ export default function PostItem({ post, displayView }) {
           </j-box>
         )}
         {showDates && (
-          <div class={styles.postDates}>
-            <div class={styles.postDate}>
+          <div className={styles.postDates}>
+            <div className={styles.postDate}>
               <j-icon size="xs" name="calendar-event"></j-icon>
               {format(new Date(post.startDate), "dd.MMMM HH:HH")}
             </div>
-            <div class={styles.postDate}>
+            <div className={styles.postDate}>
               <j-icon size="xs" name="clock"></j-icon>
               <j-tooltip
                 title={format(new Date(post.endDate), "dd.MMMM HH:HH")}
@@ -130,17 +130,17 @@ export default function PostItem({ post, displayView }) {
           </j-flex>
         </j-box>
       </div>
-      <div class={styles.postImageWrapper}>
+      <div className={styles.postImageWrapper}>
         {showUrl && ogData?.images?.length > 0 && (
-          <img src={ogData.images[0]} class={styles.postImage} />
+          <img src={ogData.images[0]} className={styles.postImage} />
         )}
-        {showImage && <img class={styles.postImage} src={post.image} />}
+        {showImage && <img className={styles.postImage} src={post.image} />}
         {showDates && (
-          <div class={styles.calendar}>
-            <span class={styles.calendarMonth}>
+          <div className={styles.calendar}>
+            <span className={styles.calendarMonth}>
               {format(new Date(post.startDate), "MMM")}
             </span>
-            <span class={styles.calendarDate}>
+            <span className={styles.calendarDate}>
               {format(new Date(post.startDate), "dd")}th
             </span>
           </div>

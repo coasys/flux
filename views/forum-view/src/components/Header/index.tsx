@@ -14,7 +14,7 @@ export default function Header() {
   }
 
   return (
-    <header class={styles.header}>
+    <header className={styles.header}>
       <j-flex a="center" gap="500">
         <a href={agentState.did}>
           <Avatar
@@ -52,7 +52,7 @@ export default function Header() {
 
       <j-button
         onClick={() => handlePostClick()}
-        class={styles.addButton}
+        className={styles.addButton}
         size="lg"
         icon="plus"
         variant="primary"

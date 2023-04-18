@@ -66,54 +66,60 @@
       </div>
     </div>
 
-    <forum-view
-      v-show="currentView === ChannelView.Forum"
-      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Forum)"
-      class="perspective-view"
-      :source="channel.id"
-      :perspective="communityId"
-      @click="onViewClick"
-      @agent-click="onAgentClick"
-      @channel-click="onChannelClick"
-      @neighbourhood-click="onNeighbourhoodClick"
-      @hide-notification-indicator="onHideNotificationIndicator"
-    ></forum-view>
-    <graph-view
-      v-show="currentView === ChannelView.Graph"
-      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Graph)"
-      class="perspective-view"
-      :source="channel.id"
-      :perspective="communityId"
-      @click="onViewClick"
-      @hide-notification-indicator="onHideNotificationIndicator"
-    ></graph-view>
-    <webrtc-view
-      v-show="currentView === ChannelView.Voice"
-      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Voice)"
-      class="perspective-view"
-      :source="channel.id"
-      :perspective="communityId"
-      @click="onViewClick"
-      @hide-notification-indicator="onHideNotificationIndicator"
-    ></webrtc-view>
-    <webrtc-debug-view
-      v-show="currentView === ChannelView.Debug"
-      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Debug)"
-      class="perspective-view"
-      :source="channel.id"
-      :perspective="communityId"
-      @click="onViewClick"
-      @hide-notification-indicator="onHideNotificationIndicator"
-    ></webrtc-debug-view>
-    <chat-view
-      v-show="currentView === ChannelView.Chat"
-      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Chat)"
-      class="perspective-view"
-      :source="channel.id"
-      :perspective="communityId"
-      @click="onViewClick"
-      @hide-notification-indicator="onHideNotificationIndicator"
-    ></chat-view>
+    <template v-if="allDefined && perspective.uuid && channel.id">
+      <chat-view
+        v-show="currentView === ChannelView.Chat"
+        v-if="filteredViewOptions.find((v) => v.type === ChannelView.Chat)"
+        class="perspective-view"
+        :source="channel.id"
+        :perspective.prop="perspective"
+        @click="onViewClick"
+        @hide-notification-indicator="onHideNotificationIndicator"
+      ></chat-view>
+      <forum-view
+        v-show="currentView === ChannelView.Forum"
+        v-if="filteredViewOptions.find((v) => v.type === ChannelView.Forum)"
+        class="perspective-view"
+        :perspective.prop="perspective"
+        :source="channel.id"
+        @click="onViewClick"
+        @agent-click="onAgentClick"
+        @channel-click="onChannelClick"
+        @neighbourhood-click="onNeighbourhoodClick"
+        @hide-notification-indicator="onHideNotificationIndicator"
+      ></forum-view>
+      <graph-view
+        v-show="currentView === ChannelView.Graph"
+        v-if="filteredViewOptions.find((v) => v.type === ChannelView.Graph)"
+        class="perspective-view"
+        :source="channel.id"
+        :perspective.prop="perspective"
+        @click="onViewClick"
+        @hide-notification-indicator="onHideNotificationIndicator"
+      ></graph-view>
+      <webrtc-view
+        v-show="currentView === ChannelView.Voice"
+        v-if="filteredViewOptions.find((v) => v.type === ChannelView.Voice)"
+        class="perspective-view"
+        :source="channel.id"
+        :perspective.prop="perspective"
+        @click="onViewClick"
+        @hide-notification-indicator="onHideNotificationIndicator"
+      ></webrtc-view>
+      <webrtc-debug-view
+        v-show="currentView === ChannelView.Debug"
+        v-if="filteredViewOptions.find((v) => v.type === ChannelView.Debug)"
+        class="perspective-view"
+        :source="channel.id"
+        :perspective.prop="perspective"
+        @click="onViewClick"
+        @hide-notification-indicator="onHideNotificationIndicator"
+      ></webrtc-debug-view>
+    </template>
+
+    <template v-else>
+      <j-spinner></j-spinner>
+    </template>
 
     <j-modal
       size="xs"
@@ -137,7 +143,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, PropType } from "vue";
 import { ChannelState, CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
@@ -147,6 +153,7 @@ import { useUserStore } from "@/store/user";
 import { ChannelView } from "utils/types";
 import { viewOptions } from "@/constants";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
+import { PerspectiveProxy } from "@perspect3vism/ad4m";
 
 interface MentionTrigger {
   label: string;
@@ -156,13 +163,21 @@ interface MentionTrigger {
 
 export default defineComponent({
   name: "ChannelView",
-  props: ["channelId", "communityId"],
+  props: {
+    communityId: String,
+    channelId: String,
+    perspective: {
+      type: Object,
+      required: true,
+    },
+  },
   components: {
     Profile,
     Hourglass,
   },
   setup() {
     return {
+      allDefined: ref(false),
       ChannelView: ChannelView,
       selectedViews: ref<ChannelView[]>([]),
       showEditChannel: ref(false),
@@ -180,9 +195,10 @@ export default defineComponent({
   },
   async mounted() {
     try {
+      this.allDefined = false;
+      console.log("before define");
       if (!customElements.get("chat-view")) {
         const module = await import(`@fluxapp/chat-view`);
-        console.log("loaded channel view");
         customElements.define("chat-view", module.default);
       }
       if (!customElements.get("forum-view")) {
@@ -201,6 +217,8 @@ export default defineComponent({
         const module = await import(`flux-webrtc-debug-view`);
         customElements.define("webrtc-debug-view", module.default);
       }
+      console.log("after define");
+      this.allDefined = true;
     } catch (e) {
       console.log(e);
     }

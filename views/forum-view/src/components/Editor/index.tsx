@@ -10,7 +10,7 @@ const MenuBar = ({ editor, allowFocus }) => {
   }
 
   return (
-    <div class={styles.menuBar}>
+    <div className={styles.menuBar}>
       <j-button
         square
         variant="ghost"

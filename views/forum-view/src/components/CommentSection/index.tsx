@@ -4,19 +4,20 @@ import Editor from "../Editor";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import { Message as MessageModel } from "utils/api";
 import { useEntries } from "utils/frameworks/react";
+import { PerspectiveProxy } from "@perspect3vism/ad4m";
 
 export default function CommentSection({
-  perspectiveUuid,
+  perspective,
   source,
 }: {
-  perspectiveUuid: string;
+  perspective: PerspectiveProxy;
   source: string;
 }) {
   const [isCreating, setIsCreating] = useState(false);
   const [comment, setComment] = useState("");
 
   const { entries: comments, model: Message } = useEntries({
-    perspectiveUuid,
+    perspective,
     source: source || null,
     model: MessageModel,
   });
@@ -57,7 +58,7 @@ export default function CommentSection({
             return (
               <j-box key={comment.id} mt="400">
                 <CommentItem
-                  perspectiveUuid={perspectiveUuid}
+                  perspective={perspective}
                   comment={comment}
                 ></CommentItem>
               </j-box>

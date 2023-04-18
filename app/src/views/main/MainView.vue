@@ -102,7 +102,7 @@ import { useDataStore } from "@/store/data";
 import { mapActions } from "pinia";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 import { Community, EntryType } from "utils/types";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { hydrateState } from "@/store/data/hydrateState";
 import semver from "semver";
 import { dependencies } from "../../../package.json";

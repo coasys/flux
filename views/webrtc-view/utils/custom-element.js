@@ -28,6 +28,7 @@ function toCustomElement(Component, propNames, options) {
       },
       set(v) {
         if (this._vdom) {
+          this._props[name] = v;
           this.attributeChangedCallback(name, null, v);
         } else {
           if (!this._props) this._props = {};

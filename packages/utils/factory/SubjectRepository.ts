@@ -156,7 +156,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     );
 
     Object.keys(data).forEach((key) =>
-      data[key] === undefined ? delete data[key] : {}
+      data[key] === undefined || data[key] === null ? delete data[key] : {}
     );
 
     setProperties(newInstance, data);

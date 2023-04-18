@@ -9,6 +9,12 @@ import { UIProvider } from "./context/UIContext";
 import { useState } from "preact/hooks";
 import styles from "./index.module.css";
 import { EditorProvider } from "./context/EditorContext";
+import { PerspectiveProxy } from "@perspect3vism/ad4m";
+
+// dynamic import of emoji picker only if it's not defined already
+if (customElements.get("emoji-picker") === undefined) {
+  import("emoji-picker-element");
+}
 
 const MainComponent = ({ perspective, source }) => {
   const [ref, setRef] = useState(null);
@@ -27,18 +33,26 @@ const MainComponent = ({ perspective, source }) => {
   );
 };
 
-export default ({ perspective = "", source = "" }) => {
-  if (!perspective || !source) {
+export default function App({
+  perspective,
+  source,
+}: {
+  perspective: PerspectiveProxy;
+  source: string;
+}) {
+  console.log("in chat view", { perspective, source });
+
+  if (!perspective?.uuid || !source) {
     return null;
   }
 
   return (
     <UIProvider>
       <AgentProvider>
-        <CommunityProvider perspectiveUuid={perspective}>
-          <ChatProvider perspectiveUuid={perspective} channelId={source}>
+        <CommunityProvider perspective={perspective}>
+          <ChatProvider perspectiveUuid={perspective.uuid} channelId={source}>
             <MainComponent
-              perspective={perspective}
+              perspective={perspective.uuid}
               source={source}
             ></MainComponent>
           </ChatProvider>
@@ -46,4 +60,4 @@ export default ({ perspective = "", source = "" }) => {
       </AgentProvider>
     </UIProvider>
   );
-};
+}

@@ -13,8 +13,13 @@
       }"
     >
       <channel-view
-        v-if="loadedChannels[channel.id] && channel.id === channelId"
+        v-if="
+          loadedChannels[channel.id] &&
+          channel.id === channelId &&
+          perspective.p?.uuid
+        "
         :channelId="channel.id"
+        :perspective="perspective.p"
         :communityId="channel.sourcePerspective"
       ></channel-view>
     </div>
@@ -178,7 +183,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, shallowReactive } from "vue";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
 
@@ -200,7 +205,8 @@ import { useUserStore } from "@/store/user";
 import { useDataStore } from "@/store/data";
 import { mapActions, mapState } from "pinia";
 import { SubjectRepository } from "utils/factory";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { PerspectiveProxy } from "@perspect3vism/ad4m";
 
 type LoadedChannels = {
   [channelId: string]: boolean;
@@ -223,6 +229,7 @@ export default defineComponent({
   },
   setup() {
     return {
+      perspective: shallowReactive<any>({ p: null }),
       memberModel: ref<SubjectRepository<MemberModel> | null>(null),
       channelModel: ref<SubjectRepository<ChannelModel> | null>(null),
       loadedChannels: ref<LoadedChannels>({}),
@@ -240,6 +247,7 @@ export default defineComponent({
     "$route.params.communityId": {
       handler: function (id: string) {
         if (id) {
+          this.getPerspective(id);
           this.startWatching(id);
           this.handleThemeChange(id);
           this.goToActiveChannel(id);
@@ -283,6 +291,13 @@ export default defineComponent({
       "setShowCommunitySettings",
       "setShowCommunityTweaks",
     ]),
+    async getPerspective(id: string) {
+      const client = await getAd4mClient();
+      const perspective: PerspectiveProxy = await client.perspective.byUUID(id);
+      if (perspective) {
+        this.perspective.p = perspective;
+      }
+    },
     startWatching(id: string) {
       const synced = () => {
         this.channelModel && this.channelModel.unsubscribe();

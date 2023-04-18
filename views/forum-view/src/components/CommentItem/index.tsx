@@ -7,7 +7,7 @@ import Avatar from "../Avatar";
 import Editor from "../Editor";
 import { Message as MessageModel } from "utils/api";
 
-export default function CommentItem({ comment, perspectiveUuid }) {
+export default function CommentItem({ comment, perspective }) {
   const [showComments, setShowComments] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [commentContent, setComment] = useState("");
@@ -18,7 +18,7 @@ export default function CommentItem({ comment, perspectiveUuid }) {
   } = useContext(CommunityContext);
 
   const { entries: comments, model: Message } = useEntries({
-    perspectiveUuid,
+    perspective,
     source: comment.id || null,
     model: MessageModel,
   });
@@ -41,8 +41,8 @@ export default function CommentItem({ comment, perspectiveUuid }) {
   const hasComments = comments.length > 0 && showComments;
 
   return (
-    <div class={[styles.post, popularStyle].join(" ")}>
-      <div class={styles.postLeft}>
+    <div className={[styles.post, popularStyle].join(" ")}>
+      <div className={styles.postLeft}>
         <div>
           {!showComments && (
             <j-icon
@@ -62,18 +62,18 @@ export default function CommentItem({ comment, perspectiveUuid }) {
         {showComments && (
           <div
             onClick={() => setShowComments(false)}
-            class={styles.collapseIndicator}
+            className={styles.collapseIndicator}
           ></div>
         )}
       </div>
-      <div class={styles.postContentWrapper}>
-        <div class={styles.postDetails}>
+      <div className={styles.postContentWrapper}>
+        <div className={styles.postDetails}>
           <a href={author.did} className={styles.authorName}>
             {author?.username || (
               <j-skeleton width="lg" height="text"></j-skeleton>
             )}
           </a>
-          <span class={styles.timestamp}>
+          <span className={styles.timestamp}>
             {getTimeSince(new Date(comment.timestamp), new Date())}
           </span>
         </div>
@@ -116,7 +116,7 @@ export default function CommentItem({ comment, perspectiveUuid }) {
               return (
                 <j-box key={comment.id} mt="300">
                   <CommentItem
-                    perspectiveUuid={perspectiveUuid}
+                    perspective={perspective}
                     comment={comment}
                   ></CommentItem>
                 </j-box>

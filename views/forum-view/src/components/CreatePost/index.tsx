@@ -2,10 +2,7 @@ import { useRef, useState, useEffect, useMemo } from "preact/hooks";
 import Editor from "../Editor";
 import { PostOption, postOptions } from "../../constants/options";
 import FileUpload from "../../components/FileUpload";
-import { parse } from "date-fns/esm";
 import styles from "./index.module.css";
-import { Post } from "utils/api";
-import { Factory } from "utils/helpers";
 import { blobToDataURL, dataURItoBlob, resizeImage } from "utils/helpers";
 import PostImagePreview from "../PostImagePreview";
 import { SubjectRepository } from "utils/factory";
@@ -20,8 +17,8 @@ const initialState = {
 
 export default function CreatePost({
   postId,
-  channelId,
-  communityId,
+  source,
+  perspective,
   onPublished,
   onCancel,
   initialType,
@@ -37,10 +34,10 @@ export default function CreatePost({
 
   const Post = useMemo(() => {
     return new SubjectRepository(PostSubject, {
-      perspectiveUuid: communityId,
-      source: channelId,
+      perspectiveUuid: perspective.uuid,
+      source: source,
     });
-  }, [communityId, channelId]);
+  }, [perspective.uuid, source]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -51,7 +48,7 @@ export default function CreatePost({
   // Fetch post if editing
   useEffect(() => {
     if (postId) {
-      Post.get(postId).then((entry: any) => {
+      Post.getData(postId).then((entry: any) => {
         setState(entry);
         setInitState(entry);
         setIsLoading(false);
@@ -105,6 +102,7 @@ export default function CreatePost({
         });
       } else {
         newPost = await Post.create(data);
+        console.log({ newPost, data });
       }
 
       onPublished(isEditing ? postId : newPost?.id);
@@ -148,7 +146,7 @@ export default function CreatePost({
   const showImage = entryType === PostOption.Image;
 
   return (
-    <div class={styles.createPost}>
+    <div className={styles.createPost}>
       <j-box px="400" py="600">
         <j-box pb="600">
           <j-text color="black" size="600" weight="600">

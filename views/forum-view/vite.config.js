@@ -16,12 +16,9 @@ export default defineConfig({
     cssInjectedByJsPlugin(),
   ],
   build: {
-    emptyOutDir: false,
     lib: {
-      // Could also be a dictionary or array of multiple entry points
       entry: resolve(__dirname, "src/main.ts"),
       name: "ForumView",
-      // the proper extensions will be added
       fileName: "main",
     },
   },

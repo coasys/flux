@@ -1,5 +1,4 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect";
 import { ad4mConnect } from "@/ad4mConnect";
 
 const routes: Array<RouteRecordRaw> = [

@@ -35,7 +35,7 @@ export default function FileUpload({ onChange }: Props) {
   const thumbs = files.map((file) => (
     <div className={styles.file} key={file.name}>
       <img
-        class={styles.filePreview}
+        className={styles.filePreview}
         src={file.preview}
         // Revoke data uri after image is loaded
         onLoad={() => {
@@ -44,7 +44,7 @@ export default function FileUpload({ onChange }: Props) {
       />
 
       <j-button
-        class={styles.removeButton}
+        className={styles.removeButton}
         square
         variant="ghost"
         onClick={() => setFiles([])}

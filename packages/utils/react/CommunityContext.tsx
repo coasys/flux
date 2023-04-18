@@ -36,24 +36,24 @@ const initialState: ContextProps = {
 
 const CommunityContext = createContext<ContextProps>(initialState);
 
-export function CommunityProvider({ perspectiveUuid, children }: any) {
+export function CommunityProvider({ perspective, children }: any) {
   const [state, setState] = useState({
     ...initialState.state,
   });
 
   const { entry: community } = useEntry({
-    perspectiveUuid,
+    perspective,
     model: CommunityModel,
   });
 
   const { entries: channelEntries } = useEntries({
-    perspectiveUuid,
+    perspective,
     model: ChannelModel,
     source: community?.id || null,
   });
 
   const { entries: memberEntries } = useEntries({
-    perspectiveUuid,
+    perspective,
     model: MemberModel,
   });
 
@@ -109,7 +109,7 @@ export function CommunityProvider({ perspectiveUuid, children }: any) {
       value={{
         state: {
           ...state,
-          uuid: perspectiveUuid,
+          uuid: perspective.uuid,
           name: community?.name || "",
           description: community?.description || "",
           image: community?.image || "",
