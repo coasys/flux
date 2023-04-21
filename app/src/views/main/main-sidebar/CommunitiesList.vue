@@ -30,7 +30,7 @@
               size="xs"
               slot="start"
               :name="
-                getCommunityState(uuid as string).notifications
+                getCommunityState(uuid as string)?.notifications
                   ?.mute
                   ? 'bell-slash'
                   : 'bell'
@@ -38,7 +38,7 @@
             />
             {{
               `${
-                getCommunityState(uuid as string).notifications?.mute
+                getCommunityState(uuid as string)?.notifications?.mute
                   ? "Unmute"
                   : "Mute"
               } Community`
@@ -54,7 +54,7 @@
               slot="start"
               :name="
                 getCommunityState(uuid as string)
-                  .hideMutedChannels
+                  ?.hideMutedChannels
                   ? 'toggle-on'
                   : 'toggle-off'
               "
@@ -96,8 +96,8 @@ export default defineComponent({
 
     const client = await getAd4mClient();
 
-    const { perspectives } = usePerspectives(client);
-    const { communities } = useCommunities(perspectives);
+    const { neighbourhoods } = usePerspectives(client);
+    const { communities } = useCommunities(neighbourhoods);
 
     return {
       communities,

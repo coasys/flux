@@ -17,7 +17,7 @@ export function useEntries<SubjectClass>({
     typeof perspective === "function" ? (perspective as any) : ref(perspective);
 
   let entries = ref<{ [x: string]: any }[]>([]);
-  let repo = ref<SubjectRepository<any> | null>(null);
+  let repo: SubjectRepository<any> | null = null;
 
   watch(
     [perspectiveRef, sourceRef],
@@ -28,12 +28,11 @@ export function useEntries<SubjectClass>({
           source: s,
         });
 
-        rep.getAllData().then((res) => {
-          console.log({ res });
+        rep.getAllData(s).then((res) => {
           entries.value = res;
         });
 
-        repo.value = rep;
+        repo = rep;
         subscribe(p, s);
       }
     },
@@ -41,7 +40,7 @@ export function useEntries<SubjectClass>({
   );
 
   async function fetchEntry(id: string) {
-    const entry = await repo.value?.getData(id);
+    const entry = await repo?.getData(id);
 
     if (!entry) return;
 

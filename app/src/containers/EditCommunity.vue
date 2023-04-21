@@ -45,9 +45,12 @@ import { getImage } from "utils/helpers";
 
 export default defineComponent({
   components: { AvatarUpload },
+  props: ["communityId"],
   emits: ["cancel", "submit"],
-  setup() {
+  setup(props) {
     const dataStore = useDataStore();
+
+    console.log("communityId", props.communityId);
 
     return {
       dataStore,

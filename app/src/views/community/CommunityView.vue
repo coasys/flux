@@ -2,8 +2,8 @@
   <sidebar-layout>
     <template v-slot:sidebar>
       <community-sidebar
-        v-if="community?.id && perspective?.uuid"
-        :perspective="perspective"
+        v-if="community?.id && data.perspective?.uuid"
+        :perspective="data.perspective"
         :community="community"
         :isSynced="isSynced"
       ></community-sidebar>
@@ -20,7 +20,7 @@
       <channel-view
         v-if="loadedChannels[channel.id] && channel?.id === channelId"
         :channelId="channel.id"
-        :communityId="perspective?.uuid"
+        :communityId="data.perspective?.uuid"
       ></channel-view>
     </div>
 
@@ -113,6 +113,7 @@
     @toggle="(e) => setShowEditCommunity(e.target.open)"
   >
     <edit-community
+      :communityId="communityId"
       v-if="modals.showEditCommunity"
       @submit="() => setShowEditCommunity(false)"
       @cancel="() => setShowEditCommunity(false)"
@@ -146,7 +147,7 @@
         @click="(e) => e.target.select()"
         size="lg"
         readonly
-        :value="perspective?.sharedUrl"
+        :value="data.perspective?.sharedUrl"
       >
         <j-button @click.stop="getInviteCode" variant="ghost" slot="end"
           ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
@@ -184,8 +185,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { defineComponent, ref, computed } from "vue";
+import { useRoute } from "vue-router";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
 
@@ -207,7 +208,7 @@ import { useDataStore } from "@/store/data";
 import { mapActions, mapState } from "pinia";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { useEntries, useEntry } from "utils/vue";
-import { usePerspectives } from "utils/vue";
+import { usePerspective } from "utils/vue";
 
 type LoadedChannels = {
   [channelId: string]: boolean;
@@ -230,22 +231,16 @@ export default defineComponent({
   },
   async setup() {
     const route = useRoute();
-    const uuid = route.params.communityId as string;
     const client = await getAd4mClient();
-
-    const { perspectives } = usePerspectives(client);
-
-    const perspective = computed(
-      () => perspectives.value[route.params.communityId as string]
-    );
+    const { data } = usePerspective(client, () => route.params.communityId);
 
     const { entry: community } = useEntry({
-      perspective: () => perspective.value,
+      perspective: () => data.value.perspective,
       model: Community,
     });
 
     const { entries: channels } = useEntries({
-      perspective: () => perspective.value,
+      perspective: () => data.value.perspective,
       source: () => community.value && community.value.id,
       model: Channel,
     });
@@ -253,7 +248,7 @@ export default defineComponent({
     return {
       community,
       channels,
-      perspective: perspective,
+      data,
       loadedChannels: ref<LoadedChannels>({}),
       appStore: useAppStore(),
       dataStore: useDataStore(),
@@ -346,7 +341,7 @@ export default defineComponent({
     },
     getInviteCode() {
       // Get the invite code to join community and copy to clipboard
-      const url = this.perspective.sharedUrl;
+      const url = this.data.perspective?.sharedUrl;
       const el = document.createElement("textarea");
       el.value = `Hey! Here is an invite code to join my private community on Flux: ${url}`;
       document.body.appendChild(el);

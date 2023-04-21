@@ -25,11 +25,13 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: "communities/:communityId",
+        props: true,
         name: "community",
         component: () => import(`@/views/community/CommunityView.vue`),
         children: [
           {
             path: ":channelId",
+            props: true,
             name: "channel",
             component: () => import(`@/views/channel/ChannelView.vue`),
           },
@@ -37,6 +39,7 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: "profile/:did",
+        props: true,
         name: "profile",
         component: () => import(`@/views/profile/ProfileView.vue`),
       },

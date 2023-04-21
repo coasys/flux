@@ -117,9 +117,10 @@ import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { Channel, deleteChannel } from "utils/api";
-import { useEntries, usePerspectives } from "utils/vue";
+import { useEntries, usePerspective, usePerspectives } from "utils/vue";
 import { ChannelView } from "utils/types";
 import { viewOptions as channelViewOptions } from "@/constants";
+import { Ad4mClient } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect";
 
 export default defineComponent({
@@ -136,14 +137,12 @@ export default defineComponent({
   async setup(props) {
     const route = useRoute();
 
-    const client = await getAd4mClient();
+    const client: Ad4mClient = await getAd4mClient();
 
-    const { perspectives } = usePerspectives(client);
+    const { data } = usePerspective(client, () => route.params.communityId);
 
     const { entries: channels, repo: channelRepo } = useEntries({
-      perspective: () => {
-        return perspectives.value[route.params.communityId as string];
-      },
+      perspective: () => data.value.perspective,
       source: () => props.community.id,
       model: Channel,
     });
@@ -205,18 +204,12 @@ export default defineComponent({
     },
     async deleteChannel(channelId: string) {
       await this.channelRepo?.remove(channelId);
-
-      const isSameChannel = this.$route.params.channelId === channelId;
-
-      if (isSameChannel) {
-        this.$router.push({
-          name: "channel",
-          params: {
-            communityId: this.$route.params.communityId,
-            channelId: "",
-          },
-        });
-      }
+      this.$router.push({
+        name: "community",
+        params: {
+          communityId: this.perspective.uuid,
+        },
+      });
     },
   },
 });

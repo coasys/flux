@@ -182,7 +182,7 @@ export default defineComponent({
       model: Community,
     });
 
-    const { entry: channel } = useEntry({
+    const { entry: channel, repo: channelRepo } = useEntry({
       perspective: () => data.value.perspective,
       id: () => props.channelId,
       source: () => community && community?.id,
@@ -193,6 +193,7 @@ export default defineComponent({
       data: data,
       community,
       channel,
+      channelRepo,
       allDefined: ref(false),
       ChannelView: ChannelView,
       selectedViews: ref<ChannelView[]>([]),

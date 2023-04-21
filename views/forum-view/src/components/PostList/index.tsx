@@ -16,6 +16,7 @@ export default function PostList({
 }) {
   const [sortedPosts, setSortedPosts] = useState([]);
   const [view, setView] = useState(DisplayView.Compact);
+
   const { entries: posts, loading } = useEntries({
     perspective: perspective,
     source: source,

@@ -199,13 +199,14 @@ export default defineComponent({
   },
   async setup() {
     const client = await getAd4mClient();
-    const { perspectives } = usePerspectives(client);
-    const { communities } = useCommunities(perspectives);
+    const { neighbourhoods } = usePerspectives(client);
+    const { communities } = useCommunities(neighbourhoods);
     const appStore = useAppStore();
     const dataStore = useDataStore();
     const userStore = useUserStore();
 
     return {
+      neighbourhoods,
       communities,
       appStore,
       dataStore,

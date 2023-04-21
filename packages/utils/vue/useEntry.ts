@@ -29,19 +29,19 @@ export function useEntry<SubjectClass>({
     typeof perspective === "function" ? (perspective as any) : perspective;
 
   let entry = ref<Record<string, any> | null>(null);
-  let subject = ref<SubjectRepository<any> | null>(null);
+  let repo: SubjectRepository<any> | null = null;
 
   watch(
     [perspectiveRef, sourceRef, idRef],
     async ([p, s, id]) => {
       if (p?.uuid) {
-        const subject = new SubjectRepository(model, {
+        const r = new SubjectRepository(model, {
           perspectiveUuid: p?.uuid,
           source: s,
         });
 
-        const res = await subject.getData(id);
-        console.log("in response", { entry: res, id, model, s, p });
+        const res = await r.getData(id);
+        repo = r;
         if (res) {
           entry.value = res;
         }
@@ -50,5 +50,5 @@ export function useEntry<SubjectClass>({
     { immediate: true }
   );
 
-  return { entry, subject };
+  return { entry, repo };
 }

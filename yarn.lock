@@ -1695,20 +1695,6 @@
     electron "^20.0.3"
     lit "^2.3.1"
 
-"@perspect3vism/ad4m@0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.3.3.tgz#0c373379717ea3f2d4eeac7b3597878f3d86ea5e"
-  integrity sha512-hLFoYhUOHyfwGqmMEgijKXXfe3KMfEip3QKVccEPjbQqVzunluApmR7xluq6h4fMXEB3kVb9PEeXDkzPuqSM5Q==
-  dependencies:
-    "@apollo/client" "3.7.10"
-    "@holochain/client" "0.12.5"
-    "@types/jest" "^26.0.14"
-    class-validator "^0.13.1"
-    express "4.18.2"
-    graphql "15.7.2"
-    reflect-metadata "^0.1.13"
-    type-graphql "1.1.1"
-
 "@perspect3vism/ad4m@0.3.4", "@perspect3vism/ad4m@^0.3.1":
   version "0.3.4"
   resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.3.4.tgz#2b879a0761288980706f0fff98959ce39cbff428"

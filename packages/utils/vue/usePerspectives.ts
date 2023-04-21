@@ -1,16 +1,27 @@
-import { ref, effect, shallowRef, triggerRef } from "vue";
-import {
-  Ad4mClient,
-  LinkExpression,
-  PerspectiveProxy,
-} from "@perspect3vism/ad4m";
+import { ref, effect, shallowRef, triggerRef, watch } from "vue";
+import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
 
 type UUID = string;
 
 const perspectives = shallowRef<{ [x: UUID]: PerspectiveProxy }>({});
+const neighbourhoods = shallowRef<{ [x: UUID]: PerspectiveProxy }>({});
 const onAddedLinkCbs = ref<Function[]>([]);
 const onRemovedLinkCbs = ref<Function[]>([]);
 const hasFetched = ref(false);
+
+watch(
+  () => perspectives.value,
+  (newPers) => {
+    neighbourhoods.value = Object.keys(newPers).reduce((acc, key) => {
+      const p = newPers[key];
+      return {
+        ...acc,
+        [key]: p,
+      };
+    }, {});
+  },
+  { immediate: true }
+);
 
 function addListeners(p: PerspectiveProxy) {
   p.addListener("link-added", (link) => {
@@ -30,16 +41,25 @@ function addListeners(p: PerspectiveProxy) {
 export function usePerspectives(client: Ad4mClient) {
   effect(async () => {
     if (hasFetched.value) return;
+    // First component that uses this hook will set this to true,
+    // so the next components will not fetch and add listeners
+    hasFetched.value = true;
+
     // Get all perspectives
     const allPerspectives = await client.perspective.all();
 
-    hasFetched.value = true;
+    perspectives.value = allPerspectives.reduce((acc, p) => {
+      return { ...acc, [p.uuid]: p };
+    }, {});
 
     // Add each perspective to our state
     allPerspectives.forEach((p) => {
-      perspectives.value[p.uuid] = p;
-      triggerRef(perspectives);
       addListeners(p);
+    });
+
+    client.perspective.addPerspectiveUpdatedListener(async (handle) => {
+      triggerRef(perspectives);
+      return null;
     });
 
     // Add new incoming perspectives
@@ -47,14 +67,23 @@ export function usePerspectives(client: Ad4mClient) {
     client.perspective.addPerspectiveAddedListener(async (handle) => {
       const perspective = await client.perspective.byUUID(handle.uuid);
       if (perspective) {
-        perspectives.value[handle.uuid] = perspective;
+        perspectives.value = {
+          ...perspectives.value,
+          [handle.uuid]: perspective,
+        };
         addListeners(perspective);
       }
     });
 
-    // Remove new incoming perspectives
+    // Remove new deleted perspectives
     client.perspective.addPerspectiveRemovedListener((uuid) => {
-      delete perspectives.value[uuid];
+      perspectives.value = Object.keys(perspectives.value).reduce(
+        (acc, key) => {
+          const p = perspectives.value[key];
+          return key === uuid ? acc : { ...acc, [key]: p };
+        },
+        {}
+      );
       return null;
     });
   }, {});
@@ -67,5 +96,5 @@ export function usePerspectives(client: Ad4mClient) {
     onRemovedLinkCbs.value.push(cb);
   }
 
-  return { perspectives, onLinkAdded, onLinkRemoved };
+  return { perspectives, neighbourhoods, onLinkAdded, onLinkRemoved };
 }
