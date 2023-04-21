@@ -1,7 +1,12 @@
 <template>
   <sidebar-layout>
     <template v-slot:sidebar>
-      <community-sidebar :isSynced="isSynced"></community-sidebar>
+      <community-sidebar
+        v-if="community?.id && perspective?.uuid"
+        :perspective="perspective"
+        :community="community"
+        :isSynced="isSynced"
+      ></community-sidebar>
     </template>
 
     <div
@@ -13,14 +18,9 @@
       }"
     >
       <channel-view
-        v-if="
-          loadedChannels[channel.id] &&
-          channel.id === channelId &&
-          perspective.p?.uuid
-        "
+        v-if="loadedChannels[channel.id] && channel?.id === channelId"
         :channelId="channel.id"
-        :perspective="perspective.p"
-        :communityId="channel.sourcePerspective"
+        :communityId="perspective?.uuid"
       ></channel-view>
     </div>
 
@@ -45,19 +45,17 @@
 
     <div
       class="center"
-      v-if="isSynced && communityChannels.length > 0 && !channelId"
+      v-if="isSynced && !channelId && community && channels.length"
     >
       <div class="center-inner">
         <j-flex gap="600" direction="column" a="center" j="center">
           <Avatar
-            :initials="community.neighbourhood.name.charAt(0)"
+            :initials="community.name?.charAt(0)"
             size="xxl"
-            :url="community.neighbourhood.thumbnail"
+            :url="community.thumbnail || null"
           ></Avatar>
           <j-box align="center" pb="300">
-            <j-text variant="heading">
-              Welcome to {{ community.neighbourhood.name }}
-            </j-text>
+            <j-text variant="heading"> Welcome to {{ community.name }} </j-text>
             <j-text variant="ingress">Pick a channel</j-text>
           </j-box>
 
@@ -65,32 +63,35 @@
             <button
               class="channel-card"
               @click="() => navigateToChannel(channel.id)"
-              v-for="channel in communityChannels"
+              v-for="channel in channels"
             >
               {{ channel.name }}
             </button>
           </div>
         </j-flex>
       </div>
-    </div>
 
-    <div class="center" v-if="isSynced && communityChannels.length === 0">
-      <div class="center-inner">
-        <j-flex gap="400" direction="column" a="center" j="center">
-          <j-icon color="ui-500" size="xl" name="balloon"></j-icon>
-          <j-flex direction="column" a="center">
-            <j-text nomargin color="black" size="700" weight="800">
-              No channels yet
-            </j-text>
-            <j-text size="400" weight="400">Be the first to make one!</j-text>
-            <j-button
-              variant="primary"
-              @click="() => setShowCreateChannel(true)"
-            >
-              Create a new channel
-            </j-button>
+      <div
+        class="center"
+        v-if="isSynced && !channelId && channels.length === 0"
+      >
+        <div class="center-inner">
+          <j-flex gap="400" direction="column" a="center" j="center">
+            <j-icon color="ui-500" size="xl" name="balloon"></j-icon>
+            <j-flex direction="column" a="center">
+              <j-text nomargin color="black" size="700" weight="800">
+                No channels yet
+              </j-text>
+              <j-text size="400" weight="400">Be the first to make one!</j-text>
+              <j-button
+                variant="primary"
+                @click="() => setShowCreateChannel(true)"
+              >
+                Create a new channel
+              </j-button>
+            </j-flex>
           </j-flex>
-        </j-flex>
+        </div>
       </div>
     </div>
   </sidebar-layout>
@@ -145,7 +146,7 @@
         @click="(e) => e.target.select()"
         size="lg"
         readonly
-        :value="community.neighbourhood.neighbourhoodUrl"
+        :value="perspective?.sharedUrl"
       >
         <j-button @click.stop="getInviteCode" variant="ghost" slot="end"
           ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
@@ -183,7 +184,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, shallowReactive } from "vue";
+import { defineComponent, ref, computed, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
 
@@ -197,16 +199,15 @@ import CommunityTweaks from "@/containers/CommunityTweaks.vue";
 import Avatar from "@/components/avatar/Avatar.vue";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 
-import { Channel as ChannelModel } from "utils/api";
-import { Member as MemberModel } from "utils/api";
-import { CommunityState, ModalsState, ChannelState } from "@/store/types";
+import { Channel, Community } from "utils/api";
+import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { useDataStore } from "@/store/data";
 import { mapActions, mapState } from "pinia";
-import { SubjectRepository } from "utils/factory";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { useEntries, useEntry } from "utils/vue";
+import { usePerspectives } from "utils/vue";
 
 type LoadedChannels = {
   [channelId: string]: boolean;
@@ -227,11 +228,32 @@ export default defineComponent({
     Avatar,
     Hourglass,
   },
-  setup() {
+  async setup() {
+    const route = useRoute();
+    const uuid = route.params.communityId as string;
+    const client = await getAd4mClient();
+
+    const { perspectives } = usePerspectives(client);
+
+    const perspective = computed(
+      () => perspectives.value[route.params.communityId as string]
+    );
+
+    const { entry: community } = useEntry({
+      perspective: () => perspective.value,
+      model: Community,
+    });
+
+    const { entries: channels } = useEntries({
+      perspective: () => perspective.value,
+      source: () => community.value && community.value.id,
+      model: Channel,
+    });
+
     return {
-      perspective: shallowReactive<any>({ p: null }),
-      memberModel: ref<SubjectRepository<MemberModel> | null>(null),
-      channelModel: ref<SubjectRepository<ChannelModel> | null>(null),
+      community,
+      channels,
+      perspective: perspective,
       loadedChannels: ref<LoadedChannels>({}),
       appStore: useAppStore(),
       dataStore: useDataStore(),
@@ -247,13 +269,9 @@ export default defineComponent({
     "$route.params.communityId": {
       handler: function (id: string) {
         if (id) {
-          this.getPerspective(id);
-          this.startWatching(id);
           this.handleThemeChange(id);
           this.goToActiveChannel(id);
         } else {
-          this.channelModel && this.channelModel.unsubscribe();
-          this.memberModel && this.memberModel.unsubscribe();
           this.handleThemeChange();
         }
       },
@@ -267,12 +285,10 @@ export default defineComponent({
             channelId: id,
           });
 
-          const channel = this.dataStore.getChannel(id);
-
-          if (channel) {
+          if (id) {
             this.loadedChannels = {
               ...this.loadedChannels,
-              [channel.id]: true,
+              [id]: true,
             };
           }
         }
@@ -291,104 +307,6 @@ export default defineComponent({
       "setShowCommunitySettings",
       "setShowCommunityTweaks",
     ]),
-    async getPerspective(id: string) {
-      const client = await getAd4mClient();
-      const perspective: PerspectiveProxy = await client.perspective.byUUID(id);
-      if (perspective) {
-        this.perspective.p = perspective;
-      }
-    },
-    startWatching(id: string) {
-      const synced = () => {
-        this.channelModel && this.channelModel.unsubscribe();
-        this.memberModel && this.memberModel.unsubscribe();
-
-        this.dataStore.fetchCommunityMembers(id);
-        this.dataStore.fetchCommunityMetadata(id);
-        this.dataStore.fetchCommunityChannels(id);
-
-        const channelModel = new SubjectRepository(ChannelModel, {
-          perspectiveUuid: id,
-          source: this.community.neighbourhood.id,
-        });
-        const memberModel = new SubjectRepository(MemberModel, {
-          perspectiveUuid: id,
-          source: this.community.neighbourhood.id,
-        });
-        this.channelModel = channelModel;
-        this.memberModel = memberModel;
-
-        memberModel.onAdded((member: MemberModel) => {
-          this.dataStore.setNeighbourhoodMember({
-            did: member.did,
-            perspectiveUuid: id,
-          });
-        }, "all");
-
-        channelModel.onRemoved((id) => {
-          this.dataStore.removeChannel({ channelId: id });
-        });
-
-        channelModel.onAdded((channel: ChannelModel) => {
-          this.dataStore.addChannel({
-            communityId: id,
-            channel: {
-              id: channel.id,
-              name: channel.name,
-              timestamp: new Date(channel.timestamp),
-              author: channel.author,
-              expanded: false,
-              sourcePerspective: id,
-              currentView: channel.views[0],
-              views: channel.views,
-              hasNewMessages: false,
-              notifications: {
-                mute: false,
-              },
-            },
-          });
-        }, "all");
-
-        channelModel.onUpdated((channel: ChannelModel) => {
-          this.dataStore.setChannel({
-            channel: {
-              id: channel.id,
-              name: channel.name,
-              timestamp: new Date(channel.timestamp),
-              author: channel.author,
-              expanded: false,
-              sourcePerspective: id,
-              currentView: channel.views[0],
-              views: channel.views,
-              hasNewMessages: false,
-              notifications: {
-                mute: false,
-              },
-            },
-          });
-        }, "all");
-      };
-
-      const stateSub = async () => {
-        const client = await getAd4mClient();
-
-        const perspective = await client.perspective.byUUID(id);
-
-        if (perspective?.state === "Synced") {
-          synced();
-        }
-
-        perspective?.addSyncStateChangeListener((state) => {
-          if (state === "Synced") {
-            synced();
-          }
-
-          return null;
-        });
-      };
-
-      stateSub();
-    },
     navigateToChannel(channelId: string) {
       this.$router.push({
         name: "channel",
@@ -403,7 +321,7 @@ export default defineComponent({
       if (channels.length > 0) {
         const firstChannel = this.dataStore.getChannelStates(communityId)[0].id;
         const currentChannelId =
-          this.community.state.currentChannelId || firstChannel;
+          this.communityState.state.currentChannelId || firstChannel;
 
         if (currentChannelId) {
           this.$router.push({
@@ -422,13 +340,13 @@ export default defineComponent({
         return;
       } else {
         this.appStore.changeCurrentTheme(
-          this.community.state?.useLocalTheme ? id : "global"
+          this.communityState.state?.useLocalTheme ? id : "global"
         );
       }
     },
     getInviteCode() {
       // Get the invite code to join community and copy to clipboard
-      const url = this.community.neighbourhood.neighbourhoodUrl;
+      const url = this.perspective.sharedUrl;
       const el = document.createElement("textarea");
       el.value = `Hey! Here is an invite code to join my private community on Flux: ${url}`;
       document.body.appendChild(el);
@@ -443,13 +361,13 @@ export default defineComponent({
     },
   },
   computed: {
+    communityState() {
+      return this.dataStore.getCommunityState(
+        this.$route.params.communityId as string
+      );
+    },
     isSynced(): boolean {
-      const community = this.dataStore.getCommunity(this.communityId);
-      const isMadeByMe = community.author === this.userStore.profile?.did;
-
-      return isMadeByMe
-        ? community.members.length >= 1
-        : community.members.length >= 2;
+      return true;
     },
     communityId() {
       return this.$route.params.communityId as string;
@@ -459,20 +377,6 @@ export default defineComponent({
     },
     modals(): ModalsState {
       return this.appStore.modals;
-    },
-    community(): CommunityState {
-      const communityId = this.communityId;
-      return this.dataStore.getCommunityState(communityId);
-    },
-    communityChannels(): ChannelState[] {
-      return this.channels.filter(
-        (c) => c.sourcePerspective === this.communityId
-      );
-    },
-    channels(): ChannelState[] {
-      const channels = this.dataStore.getChannels;
-
-      return channels;
     },
   },
 });

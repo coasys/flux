@@ -191,6 +191,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   async get(id?: string): Promise<SubjectClass | null> {
     if (id) {
       await this.ensurePerspective();
+
       return (
         (await this.perspective?.getSubjectProxy(id, this.subject)) || null
       );

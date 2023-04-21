@@ -19,14 +19,14 @@
             <j-flex a="center" gap="200">
               <j-icon name="hash" size="md" color="ui-300"></j-icon>
               <j-text color="black" weight="700" size="500" nomargin>
-                {{ channel.name }}
+                {{ channel?.name }}
               </j-text>
             </j-flex>
           </j-box>
           <div class="channel-view__tabs">
             <label class="channel-view-tab" v-for="view in filteredViewOptions">
               <input
-                :name="channel.id"
+                :name="channel?.id"
                 type="radio"
                 :checked.prop="view.type === currentView"
                 :value.prop="view.type"
@@ -38,7 +38,7 @@
             <j-tooltip placement="auto" title="Manage views">
               <j-button
                 v-if="sameAgent"
-                @click="() => goToEditChannel(channel.id)"
+                @click="() => goToEditChannel(channel?.id)"
                 size="sm"
                 variant="ghost"
               >
@@ -66,13 +66,13 @@
       </div>
     </div>
 
-    <template v-if="allDefined && perspective.uuid && channel.id">
+    <template v-if="allDefined && data.perspective?.uuid && channel?.id">
       <chat-view
         v-show="currentView === ChannelView.Chat"
         v-if="filteredViewOptions.find((v) => v.type === ChannelView.Chat)"
         class="perspective-view"
         :source="channel.id"
-        :perspective.prop="perspective"
+        :perspective.prop="data.perspective"
         @click="onViewClick"
         @hide-notification-indicator="onHideNotificationIndicator"
       ></chat-view>
@@ -80,7 +80,7 @@
         v-show="currentView === ChannelView.Forum"
         v-if="filteredViewOptions.find((v) => v.type === ChannelView.Forum)"
         class="perspective-view"
-        :perspective.prop="perspective"
+        :perspective.prop="data.perspective"
         :source="channel.id"
         @click="onViewClick"
         @agent-click="onAgentClick"
@@ -93,7 +93,7 @@
         v-if="filteredViewOptions.find((v) => v.type === ChannelView.Graph)"
         class="perspective-view"
         :source="channel.id"
-        :perspective.prop="perspective"
+        :perspective.prop="data.perspective"
         @click="onViewClick"
         @hide-notification-indicator="onHideNotificationIndicator"
       ></graph-view>
@@ -102,7 +102,7 @@
         v-if="filteredViewOptions.find((v) => v.type === ChannelView.Voice)"
         class="perspective-view"
         :source="channel.id"
-        :perspective.prop="perspective"
+        :perspective.prop="data.perspective"
         @click="onViewClick"
         @hide-notification-indicator="onHideNotificationIndicator"
       ></webrtc-view>
@@ -111,7 +111,7 @@
         v-if="filteredViewOptions.find((v) => v.type === ChannelView.Debug)"
         class="perspective-view"
         :source="channel.id"
-        :perspective.prop="perspective"
+        :perspective.prop="data.perspective"
         @click="onViewClick"
         @hide-notification-indicator="onHideNotificationIndicator"
       ></webrtc-debug-view>
@@ -143,8 +143,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, PropType } from "vue";
-import { ChannelState, CommunityState } from "@/store/types";
+import { defineComponent, ref, watch } from "vue";
+import { CommunityState } from "@/store/types";
 import { useDataStore } from "@/store/data";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Profile from "@/containers/Profile.vue";
@@ -153,7 +153,8 @@ import { useUserStore } from "@/store/user";
 import { ChannelView } from "utils/types";
 import { viewOptions } from "@/constants";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { useEntry, usePerspective } from "utils/vue";
+import { Community, Channel } from "utils/api";
 
 interface MentionTrigger {
   label: string;
@@ -166,17 +167,32 @@ export default defineComponent({
   props: {
     communityId: String,
     channelId: String,
-    perspective: {
-      type: Object,
-      required: true,
-    },
   },
   components: {
     Profile,
     Hourglass,
   },
-  setup() {
+  async setup(props) {
+    const client = await getAd4mClient();
+
+    const { data } = usePerspective(client, () => props.communityId);
+
+    const { entry: community } = useEntry({
+      perspective: () => data.value.perspective,
+      model: Community,
+    });
+
+    const { entry: channel } = useEntry({
+      perspective: () => data.value.perspective,
+      id: () => props.channelId,
+      source: () => community && community?.id,
+      model: Channel,
+    });
+
     return {
+      data: data,
+      community,
+      channel,
       allDefined: ref(false),
       ChannelView: ChannelView,
       selectedViews: ref<ChannelView[]>([]),
@@ -225,22 +241,19 @@ export default defineComponent({
   },
   computed: {
     sameAgent() {
-      return this.channel.author === this.userStore.agent.did;
+      return this.channel?.author === this.userStore.agent.did;
     },
     currentView(): string {
-      return this.channel.currentView || this.channel.views[0] || "";
+      return this.channel?.currentView || this.channel?.views[0] || "";
     },
     filteredViewOptions() {
       return viewOptions.filter((view) =>
-        this.channel.views.includes(view.type)
+        this.channel?.views.includes(view.type)
       );
     },
-    community(): CommunityState {
+    communityState(): CommunityState {
       const communityId = this.communityId;
       return this.dataStore.getCommunityState(communityId as string);
-    },
-    channel(): ChannelState {
-      return this.dataStore.channels[this.channelId];
     },
   },
   methods: {
@@ -275,7 +288,7 @@ export default defineComponent({
     changeCurrentView(e: any) {
       const value = e.target.value;
       this.dataStore.setCurrentChannelView({
-        channelId: this.channel.id,
+        channelId: this.channel?.id,
         view: value,
       });
     },
@@ -290,7 +303,7 @@ export default defineComponent({
         name: "channel",
         params: {
           channelId: channel,
-          communityId: this.community.neighbourhood.uuid,
+          communityId: this.$route.params.communityId,
         },
       });
     },
@@ -318,7 +331,7 @@ export default defineComponent({
           this.$router.push({
             name: "community",
             params: {
-              communityId: community.neighbourhood.uuid,
+              communityId: this.$route.params.communityId,
             },
           });
         })
@@ -331,7 +344,7 @@ export default defineComponent({
 
       if (channelId) {
         this.dataStore.setHasNewMessages({
-          communityId: this.community.neighbourhood.uuid,
+          communityId: this.$route.params.communityId as string,
           channelId: channelId as string,
           value: false,
         });
@@ -358,7 +371,7 @@ export default defineComponent({
           name: "profile",
           params: {
             did,
-            communityId: this.community.neighbourhood.uuid,
+            communityId: this.$route.params.communityId,
           },
         });
       }

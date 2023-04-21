@@ -33,7 +33,7 @@ export default function useEntry<SubjectClass>({
     }
   }, [perspective.uuid, source]);
 
-  function getData(id: string) {
+  function getData(id?: string) {
     Model.getData(id)
       .then(async (entry) => {
         setEntry(entry);

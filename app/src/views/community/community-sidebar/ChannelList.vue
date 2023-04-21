@@ -109,19 +109,48 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import { ChannelState } from "@/store/types";
 import { mapActions, mapState } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
-import { deleteChannel } from "utils/api";
+import { Channel, deleteChannel } from "utils/api";
+import { useEntries, usePerspectives } from "utils/vue";
 import { ChannelView } from "utils/types";
 import { viewOptions as channelViewOptions } from "@/constants";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect";
 
 export default defineComponent({
-  setup() {
+  props: {
+    community: {
+      type: Object,
+      required: true,
+    },
+    perspective: {
+      type: Object,
+      required: true,
+    },
+  },
+  async setup(props) {
+    const route = useRoute();
+
+    const client = await getAd4mClient();
+
+    const { perspectives } = usePerspectives(client);
+
+    const { entries: channels, repo: channelRepo } = useEntries({
+      perspective: () => {
+        return perspectives.value[route.params.communityId as string];
+      },
+      source: () => props.community.id,
+      model: Channel,
+    });
+
     return {
+      channelRepo,
+      channels,
       userProfileImage: ref<null | string>(null),
       appStore: useAppStore(),
       userStore: useUserStore(),
@@ -133,22 +162,6 @@ export default defineComponent({
       showCommunityMenu: false,
       communityImage: null,
     };
-  },
-  computed: {
-    community() {
-      const communityId = this.$route.params.communityId as string;
-      return this.dataStore.getCommunityState(communityId);
-    },
-    channels(): ChannelState[] {
-      const communityId = this.$route.params.communityId as string;
-      const channels = this.getChannelStates()(communityId);
-
-      if (this.community.state.hideMutedChannels) {
-        return channels.filter((e) => !e.notifications.mute);
-      }
-
-      return channels;
-    },
   },
   methods: {
     ...mapActions(useDataStore, ["setChannelNotificationState"]),
@@ -170,7 +183,7 @@ export default defineComponent({
       this.$router.push({
         name: "channel",
         params: {
-          communityId: this.community.neighbourhood.uuid,
+          communityId: this.perspective.uuid,
           channelId: channelName,
         },
       });
@@ -191,32 +204,18 @@ export default defineComponent({
       return channelViewOptions.find((o) => o.type === view)?.icon || "hash";
     },
     async deleteChannel(channelId: string) {
-      const channel = this.channels.find((e) => e.id === channelId);
+      await this.channelRepo?.remove(channelId);
 
-      if (channel) {
-        await deleteChannel(channel.sourcePerspective, {
-          id: channelId,
-          timestamp: channel.timestamp,
-          author: channel.author,
+      const isSameChannel = this.$route.params.channelId === channelId;
+
+      if (isSameChannel) {
+        this.$router.push({
+          name: "channel",
+          params: {
+            communityId: this.$route.params.communityId,
+            channelId: "",
+          },
         });
-
-        this.dataStore.removeChannel({
-          channelId: channel.id,
-        });
-
-        const isSameChannel = this.$route.params.channelId === channel.name;
-
-        if (isSameChannel) {
-          this.$router.push({
-            name: "channel",
-            params: {
-              communityId: channel.sourcePerspective,
-              channelId: "Home",
-            },
-          });
-        }
-      } else {
-        throw new Error("Did not find channel");
       }
     },
   },

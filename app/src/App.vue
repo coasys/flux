@@ -1,5 +1,7 @@
 <template>
-  <router-view></router-view>
+  <Suspense>
+    <router-view></router-view>
+  </Suspense>
   <div class="global-modal" v-if="ui.showGlobalLoading">
     <div class="global-modal__backdrop"></div>
     <div class="global-modal__content">

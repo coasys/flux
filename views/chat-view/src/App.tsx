@@ -40,8 +40,6 @@ export default function App({
   perspective: PerspectiveProxy;
   source: string;
 }) {
-  console.log("in chat view", { perspective, source });
-
   if (!perspective?.uuid || !source) {
     return null;
   }

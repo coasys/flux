@@ -88,10 +88,10 @@
                 <CommunityCard
                   v-for="(community, key) in communities"
                   :key="key"
-                  :name="community.neighbourhood.name"
-                  :description="community.neighbourhood.description"
-                  :url="community.neighbourhood.image"
-                  :uuid="community.neighbourhood.uuid"
+                  :name="community.name"
+                  :description="community.description"
+                  :url="community.image || null"
+                  :uuid="key"
                 ></CommunityCard>
               </div>
             </div>
@@ -184,6 +184,8 @@ import { getProfile } from "utils/api";
 import { getImage } from "utils/helpers";
 import WebLinkAdd from "./WebLinkAdd.vue";
 import { getAgentWebLinks } from "utils/api";
+import { usePerspectives, useCommunities } from "utils/vue";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export default defineComponent({
   name: "ProfileView",
@@ -195,11 +197,16 @@ export default defineComponent({
     WebLinkAdd,
     Avatar,
   },
-  setup() {
+  async setup() {
+    const client = await getAd4mClient();
+    const { perspectives } = usePerspectives(client);
+    const { communities } = useCommunities(perspectives);
     const appStore = useAppStore();
     const dataStore = useDataStore();
     const userStore = useUserStore();
+
     return {
+      communities,
       appStore,
       dataStore,
       userStore,
@@ -297,9 +304,6 @@ export default defineComponent({
     },
     sameAgent() {
       return this.did === this.userStore.agent.did;
-    },
-    communities() {
-      return this.dataStore.getCommunities;
     },
     modals(): ModalsState {
       return this.appStore.modals;

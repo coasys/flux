@@ -50,7 +50,7 @@
             @click="
               () =>
                 toggleHideMutedChannels({
-                  communityId: community.neighbourhood.uuid,
+                  communityId: $route.params.communityId as string
                 })
             "
           >
@@ -58,7 +58,7 @@
               size="xs"
               slot="start"
               :name="
-                community.state.hideMutedChannels ? 'toggle-on' : 'toggle-off'
+                communityState.hideMutedChannels ? 'toggle-on' : 'toggle-off'
               "
             />
             Hide muted channels
@@ -73,17 +73,17 @@
     <div class="community-info">
       <Avatar
         size="xl"
-        :initials="community.neighbourhood.name.charAt(0).toUpperCase()"
-        :url="community.neighbourhood.image"
+        :initials="community.name.charAt(0).toUpperCase()"
+        :url="community.image || null"
       ></Avatar>
       <div class="community-info-content">
         <j-text size="500" nomargin color="black">
-          {{ community.neighbourhood.name }}
+          {{ community.name }}
         </j-text>
         <j-text nomargin size="400" color="ui-500">
           {{
             isSynced && isPerspectiveSynced
-              ? community.neighbourhood.description || "No description"
+              ? community.description || "No description"
               : "syncing community..."
           }}
         </j-text>
@@ -123,11 +123,16 @@ import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import Avatar from "@/components/avatar/Avatar.vue";
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
-import { PerspectiveState } from "@perspect3vism/ad4m";
 
 export default defineComponent({
   components: { Avatar, LoadingBar },
-  props: { isSynced: Boolean },
+  props: {
+    isSynced: Boolean,
+    community: {
+      type: Object,
+      required: true,
+    },
+  },
   setup() {
     return {
       showCommunityMenu: ref(false),
@@ -137,23 +142,13 @@ export default defineComponent({
     };
   },
   computed: {
-    community() {
-      const communityId = this.$route.params.communityId as string;
-      return this.dataStore.getCommunityState(communityId);
-    },
     isPerspectiveSynced() {
-      const communityId = this.$route.params.communityId as string;
-      const localCommunity = this.dataStore.getLocalCommunityState(communityId);
-
-      if (
-        localCommunity.syncState ===
-          PerspectiveState.LinkLanguageInstalledButNotSynced ||
-        localCommunity.syncState === PerspectiveState.NeighbourhoodJoinInitiated
-      ) {
-        return false;
-      }
-
       return true;
+    },
+    communityState() {
+      return this.dataStore.getCommunityState(
+        this.$route.params.communityId as string
+      );
     },
     channels(): ChannelState[] {
       const communityId = this.$route.params.communityId as string;
@@ -167,10 +162,7 @@ export default defineComponent({
       return channels;
     },
     isCreator(): boolean {
-      return (
-        this.community.neighbourhood.author ===
-        this.userStore.getUser?.agent.did
-      );
+      return this.community.author === this.userStore.getUser?.agent.did;
     },
     userProfile(): Profile | null {
       return this.userStore.profile;
