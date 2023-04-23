@@ -245,16 +245,18 @@ export default defineComponent({
       return this.channel?.author === this.userStore.agent.did;
     },
     currentView(): string {
-      return this.channel?.currentView || this.channel?.views[0] || "";
+      return this.channelState?.currentView || this.channel?.views[0] || "";
     },
     filteredViewOptions() {
       return viewOptions.filter((view) =>
         this.channel?.views.includes(view.type)
       );
     },
+    channelState() {
+      return this.dataStore.getChannel(this.channelId as string);
+    },
     communityState(): CommunityState {
-      const communityId = this.communityId;
-      return this.dataStore.getCommunityState(communityId as string);
+      return this.dataStore.getCommunityState(this.communityId as string);
     },
   },
   methods: {
