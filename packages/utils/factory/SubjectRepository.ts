@@ -246,11 +246,18 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
         this.subject
       );
 
-    const results = await this.perspective?.infer(
+    // TODO: This return too many
+    const res = await this.perspective?.infer(
       `triple("${tempSource}", ${
         tempSource !== SELF ? `"${this.tempSubject.prototype.type}"` : "_"
       }, X), instance(Class, X), subject_class("${subjectClass}", Class)`
     );
+
+    const results =
+      res &&
+      res.filter(
+        (obj, index, self) => index === self.findIndex((t) => t.X === obj.X)
+      );
 
     if (!results) return [];
 
@@ -274,149 +281,6 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     }
 
     return await Promise.all(promiseList);
-  }
-
-  private async subscribe() {
-    this.unsubscribeCb = await subscribeToLinks({
-      perspectiveUuid: this.perspectiveUuid,
-      added: (link) => this.onLink("added", link),
-      removed: (link) => this.onLink("removed", link),
-    });
-  }
-
-  unsubscribe() {
-    if (this.unsubscribeCb) {
-      this.unsubscribeCb();
-      this.listeners = { add: {}, remove: {}, update: {} };
-      this.isSubcribing = false;
-    }
-  }
-
-  private async onLink(
-    type: "added" | "removed" | "updated",
-    link: LinkExpression
-  ) {
-    if (type === "removed") {
-      this.linkRemoved.push(link);
-    }
-    if (type === "added") {
-      const found = this.linkRemoved.find(
-        (l) =>
-          l.data.source === link.data.source &&
-          l.data.predicate === link.data.predicate
-      );
-
-      if (found) {
-        const updatedListeners = this.listeners.update[found.data.source];
-        const allUpdateListeners = this.listeners.update?.all;
-
-        if (allUpdateListeners) {
-          setTimeout(async () => {
-            const entry = await this.getData(found.data.source);
-            allUpdateListeners.forEach((cb) => {
-              cb(entry);
-            });
-          }, 3000);
-        }
-
-        if (updatedListeners) {
-          setTimeout(async () => {
-            const entry = await this.getData(found.data.source);
-            updatedListeners.forEach((cb) => {
-              cb(entry);
-            });
-          }, 3000);
-        }
-      }
-    }
-
-    const source = link.data.source;
-    const entryId = link.data.target;
-    const addedListeners = this.listeners.add[source];
-    const removedListeners = this.listeners.remove[source];
-    const allAddListeners = this.listeners.add?.all;
-    const allRemoveListeners = this.listeners.remove?.all;
-
-    if (type === "added" && allAddListeners) {
-      setTimeout(async () => {
-        const entry = await this.getData(entryId);
-        allAddListeners.forEach((cb) => {
-          cb(entry);
-        });
-      }, 6000);
-    }
-
-    if (type === "removed" && allRemoveListeners) {
-      setTimeout(async () => {
-        const entry = await this.getData(entryId);
-        allRemoveListeners.forEach((cb) => {
-          cb(entry);
-        });
-      }, 6000);
-    }
-
-    if (type === "added" && addedListeners) {
-      setTimeout(async () => {
-        const entry = await this.getData(entryId);
-        addedListeners.forEach((cb) => {
-          cb(entry);
-        });
-      }, 6000);
-    }
-
-    if (type === "removed" && removedListeners) {
-      setTimeout(async () => {
-        const entry = await this.getData(entryId);
-        removedListeners.forEach((cb) => {
-          cb(entryId);
-        });
-      }, 6000);
-    }
-  }
-
-  onAdded(callback: (entry: any) => void, source?: string | "all") {
-    if (!this.isSubcribing) {
-      this.subscribe();
-    }
-
-    const src = source || this.source;
-    const hasCallbacks = this.listeners.add[src];
-
-    if (hasCallbacks) {
-      this.listeners.add[src].push(callback);
-    } else {
-      this.listeners.add[src] = [callback];
-    }
-  }
-
-  onRemoved(callback: (id: string) => void, source?: string | "all") {
-    if (!this.isSubcribing) {
-      this.subscribe();
-    }
-
-    const src = source || this.source;
-    const hasCallbacks = this.listeners.remove[src];
-
-    if (hasCallbacks) {
-      this.listeners.remove[src].push(callback);
-    } else {
-      this.listeners.remove[src] = [callback];
-    }
-  }
-
-  onUpdated(callback: (id: string) => void, source?: string | "all") {
-    if (!this.isSubcribing) {
-      this.subscribe();
-    }
-
-    const src = source || this.source;
-    const hasCallbacks = this.listeners.update[src];
-
-    if (hasCallbacks) {
-      this.listeners.update[src].push(callback);
-    } else {
-      this.listeners.update[src] = [callback];
-    }
   }
 }
 
