@@ -45,6 +45,12 @@ export function collectionToAdderName(collection: string): string {
   return `add${capitalize(collection)}`;
 }
 
+
+// e.g. "comments" -> "removeComment"
+export function collectionToRemoverName(collection: string): string {
+  return `remove${capitalize(collection)}`;
+}
+
 export function collectionToSetterName(collection: string): string {
   return `setCollection${capitalize(collection)}`;
 }

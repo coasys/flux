@@ -10,6 +10,7 @@ import { subscribeToLinks } from "../api";
 import { SELF } from "../constants/communityPredicates";
 import {
   collectionToAdderName,
+  collectionToRemoverName,
   collectionToSetterName,
   SubjectEntry,
 } from "../helpers";
@@ -71,6 +72,18 @@ export function setProperties(
     }
   };
 
+  const remover = (key: string, value: any) => {
+    // it's a collection
+    const removerName = collectionToRemoverName(key);
+    const removerFunction = subject[removerName];
+    console.log('aaaa', removerName, removerFunction)
+    if (removerFunction) {
+      removerFunction(value);
+    } else {
+      throw "No remover function found for collection: " + key;
+    }
+  };
+
   Object.keys(properties).forEach((key) => {
     if (
       Array.isArray(properties[key]) ||
@@ -83,6 +96,9 @@ export function setProperties(
             break;
           case "adder":
             adder(key, properties[key].value);
+            break;
+          case "remover":
+            remover(key, properties[key].value);
             break;
           default:
             setter(key, properties[key].value);
