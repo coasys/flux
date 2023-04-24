@@ -1,7 +1,6 @@
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "..";
 import { Channel as ChannelModel } from "utils/api";
-import { Factory } from "utils/helpers";
 import { SubjectRepository } from "utils/factory";
 
 export interface Payload {

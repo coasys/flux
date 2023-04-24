@@ -196,6 +196,12 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     return instance;
   }
 
+  async remove(id: string) {
+    await this.ensurePerspective();
+
+    await this.perspective?.removeSubject(this.subject, id);
+  }
+
   async get(id?: string): Promise<SubjectClass | null> {
     if (id) {
       await this.ensurePerspective();
