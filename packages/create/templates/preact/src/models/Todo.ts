@@ -1,9 +1,9 @@
 import { SDNAClass, subjectProperty, subjectFlag } from "@perspect3vism/ad4m";
 
 @SDNAClass({
-  name: "EnhancedTodo",
+  name: "Todo",
 })
-export default class EnhancedTodo {
+export default class Todo {
   @subjectFlag({
     through: "flux://entry_type",
     value: "flux://has_todo",

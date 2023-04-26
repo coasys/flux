@@ -68,28 +68,35 @@
           </div>
           <div>
             <j-text variant="label">Select perspective:</j-text>
-            <select
-              v-model="perspectiveUuid"
-              @change="setPerspective($event.target.value)"
-            >
-              <option value="" selected disabled>Select a perspective</option>
-              <option v-for="{name, uuid} in perspectives" :value="uuid">
+            <j-flex gap="200" wrap>
+              <j-avatar
+                :selected="perspectiveUuid === uuid"
+                :hash="uuid"
+                @click="setPerspective(uuid)"
+                v-for="{name, uuid} in perspectives"
+                :value="uuid"
+              >
                 {{name}}
-              </option>
-            </select>
+              </j-avatar>
+            </j-flex>
           </div>
           <div v-if="perspectiveUuid">
             <j-text variant="label">Current channel:</j-text>
             <select v-model="source" @change="setChannel($event.target.value)">
-              <option value="" selected disabled>Select a perspective</option>
-              <option value="flux://testing">Testing</option>
+              <option value="" selected disabled>Select a channel</option>
               <option v-for="{name, id} in channels" :value="id">
                 {{name}}
               </option>
             </select>
           </div>
-          <j-button full size="sm" id="create-perspective">
-            Create new perspective
+          <j-button
+            :loading="isCreatingCommunity"
+            @click="createCommunity"
+            full
+            size="sm"
+            id="create-perspective"
+          >
+            Create new Flux community
           </j-button>
         </j-flex>
       </aside>
@@ -104,6 +111,7 @@
         getAd4mClient,
       } from "@perspect3vism/ad4m-connect";
       import App from "./src/main.ts";
+      import { createCommunity } from "utils/api";
       import { Channel, Community } from "utils/api";
       import { SubjectRepository } from "utils/factory";
       import { createApp } from "https://unpkg.com/petite-vue?module";
@@ -116,6 +124,7 @@
       });
 
       createApp({
+        isCreatingCommunity: false,
         theme: document.documentElement.className,
         perspectiveUuid: localStorage.getItem("perspectiveUuid") || "",
         source: localStorage.getItem("source") || "flux://testing",
@@ -126,7 +135,9 @@
           const client = await getAd4mClient();
           const perspective = await client.perspective.byUUID(uuid);
           localStorage.setItem("perspectiveUuid", uuid);
-          console.log("set localstorage", uuid);
+
+          this.perspectiveUuid = uuid;
+
           const app = document.querySelector("flux-app");
           app.perspective = perspective;
 
@@ -140,6 +151,7 @@
           }).getAllData();
 
           this.channels = channels.map((c) => ({ id: c.id, name: c.name }));
+          this.source = channels[0]?.id;
         },
         setChannel(source) {
           localStorage.setItem("source", source);
@@ -147,6 +159,15 @@
         setTheme(e) {
           const theme = e.target.value;
           document.documentElement.className = theme;
+        },
+        async createCommunity() {
+          this.isCreatingCommunity = true;
+          try {
+            await createCommunity({ name: "Test" });
+            console.log("created community");
+          } finally {
+            this.isCreatingCommunity = false;
+          }
         },
         mounted() {
           ui.connect();

@@ -2,7 +2,7 @@ import { useState } from "preact/hooks";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useEntry, useEntries } from "utils/frameworks/react";
 
-import { Community } from "utils/api";
+import { Community, Post } from "utils/api";
 import Todo from "../models/Todo";
 
 import styles from "../App.module.css";
@@ -12,7 +12,7 @@ type Props = {
   source: string;
 };
 
-export default function PostView({ perspective, source }: Props) {
+export default function TodoView({ perspective, source }: Props) {
   const [title, setTitle] = useState("");
 
   const { entry: community } = useEntry({
@@ -37,19 +37,12 @@ export default function PostView({ perspective, source }: Props) {
   }
 
   function toggleTodo({ id, done }) {
-    model
-      .update(id, { done })
-      .then(() => {
-        setTitle("");
-      })
-      .catch(console.log);
+    model.update(id, { done }).catch(console.log);
   }
 
   function deleteTodo(id: string) {
     model.remove(id).catch(console.log);
   }
-
-  console.log("render");
 
   return (
     <div>

@@ -3,16 +3,16 @@ import {
   NAME,
   ENTRY_TYPE,
 } from "../../constants/communityPredicates";
-import { EntryType, Entry, ChannelView } from "../../types";
+import { EntryType, ChannelView } from "../../types";
 import {
   subjectProperty,
   subjectCollection,
   SDNAClass,
-  subjectFlag
+  subjectFlag,
 } from "@perspect3vism/ad4m";
 
 @SDNAClass({
-  name: 'Channel'
+  name: "Channel",
 })
 export class Channel {
   @subjectFlag({
