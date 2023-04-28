@@ -89,6 +89,12 @@
               </option>
             </select>
           </div>
+          <j-input
+            label="Give your perspective a name"
+            placeholder="Perspective name"
+            :value="title"
+            @change="(e) => title = e.target.value"
+          ></j-input>
           <j-button
             :loading="isCreatingCommunity"
             @click="createCommunity"
@@ -124,6 +130,7 @@
       });
 
       createApp({
+        title: "",
         isCreatingCommunity: false,
         theme: document.documentElement.className,
         perspectiveUuid: localStorage.getItem("perspectiveUuid") || "",
@@ -164,6 +171,7 @@
           this.isCreatingCommunity = true;
           try {
             await createCommunity({ name: "Test" });
+            this.title = "";
             console.log("created community");
           } finally {
             this.isCreatingCommunity = false;

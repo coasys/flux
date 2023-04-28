@@ -17,6 +17,7 @@
         </j-tabs>
       </aside>
       <div class="settings__content">
+        <!--
         <j-box pb="500">
           <j-toggle
             :checked="community.useLocalTheme"
@@ -30,6 +31,7 @@
           @update="updateCommunityTheme"
           :theme="community.theme"
         />
+        -->
       </div>
     </div>
   </j-box>

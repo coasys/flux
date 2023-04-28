@@ -1,9 +1,6 @@
 <template>
   <j-box pt="500">
-    <j-menu-group
-      open
-      :title="`Members (${community.neighbourhood.members.length})`"
-    >
+    <j-menu-group open :title="`Members (${dids?.length})`">
       <j-button
         @click.prevent="() => setShowInviteCode(true)"
         size="sm"
@@ -15,7 +12,7 @@
       <j-box px="500">
         <avatar-group
           @click="() => setShowCommunityMembers(true)"
-          :users="community.neighbourhood.members"
+          :users="dids || []"
         />
       </j-box>
     </j-menu-group>
@@ -28,19 +25,33 @@ import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { mapActions } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
+import { useEntries, useEntry, usePerspective } from "utils/vue";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect";
+import { Member } from "utils/api";
+import { useRoute } from "vue-router";
+import { computed } from "@vue/reactivity";
 
 export default defineComponent({
   components: { AvatarGroup },
-  setup() {
+  async setup() {
+    const { params } = useRoute();
+    const client = await getAd4mClient();
+
+    const { data } = usePerspective(client, () => params.communityId as string);
+
+    const { entries: members } = useEntries({
+      perspective: () => data.value.perspective,
+      source: "ad4m://self",
+      model: Member,
+    });
+
+    const dids = computed(() => members.value.map((m) => m.id));
+
     return {
+      data,
+      dids,
       dataStore: useDataStore(),
     };
-  },
-  computed: {
-    community() {
-      const communityId = this.$route.params.communityId as string;
-      return this.dataStore.getCommunityState(communityId);
-    },
   },
   methods: {
     ...mapActions(useAppStore, [
