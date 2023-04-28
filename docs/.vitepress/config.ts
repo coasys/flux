@@ -50,40 +50,28 @@ export default defineConfig({
           items: [
             {
               text: "Connecting to AD4M",
-              link: "/create-flux-app/basics/",
+              link: "/create-flux-app/basics/connecting-to-ad4m",
             },
             {
-              text: "Creating data",
-              link: "/create-flux-app/basics/creating-data",
+              text: "Models",
+              link: "/create-flux-app/basics/models",
             },
             {
-              text: "Getting data",
-              link: "/create-flux-app/basics/getting-data",
-            },
-            {
-              text: "Building UI",
-              link: "/create-flux-app/basics/flux-ui",
-            },
+              text: "Data",
+              link: "/create-flux-app/basics/data",
+            }
           ],
         },
         {
-          text: "Working with Data",
+          text: "Guides",
           items: [
             {
-              text: "Creating Models",
-              link: "/create-flux-app/working-with-data/creating-models",
-            },
-            {
-              text: "Writing to the Network",
-              link: "/create-flux-app/working-with-data/writing-to-the-network",
-            },
-            {
               text: "Real-time Signals",
-              link: "/create-flux-app/working-with-data/real-time-signals",
+              link: "/create-flux-app/guides/real-time-signals",
             },
             {
               text: "Validation",
-              link: "/create-flux-app/working-with-data/validation",
+              link: "/create-flux-app/guides/validation",
             },
           ],
         },
@@ -96,7 +84,7 @@ export default defineConfig({
             },
             {
               text: "Publish on npm",
-              link: "/create-flux-app/publishing/npm",
+              link: "/create-flux-app/publishing/publish-on-npm",
             },
           ],
         },
