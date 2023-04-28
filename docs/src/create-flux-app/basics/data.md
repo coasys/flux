@@ -9,9 +9,10 @@ This logic has been bundled into two hooks: `useEntry` and `useEntries`, for wor
 Let's look at the example Todo-app included in the `create-flux-app` setup. The first thing we do is fetch the community we're in using `useEntry` and the included `Community` Model:
 
 ```tsx
-import { useEntry } from "utils/frameworks/react";
+import { useEntry } from "@fluxapp/react";
+import { Community } from "@fluxapp/api";
 
-export default function TodoView({ perspective, source }) 
+export default function TodoView({ perspective, channelSource }) 
   const { entry: community } = useEntry({
     perspective,
     model: Community,
@@ -23,17 +24,18 @@ export default function TodoView({ perspective, source })
 };
 ```
 
-A flux app will always recieve two things. The `perspective` which is the `id` of the Flux community that is running your app, and also the `source`, which is the `id` of the channel your app is installed in.
+A flux app will always recieve two things. The `perspective` which is the `id` of the Flux community that is running your app, and also the `channelSource`, which is the `id` of the channel your app is installed in.
 
 ## Getting a list of items
 
 Now, let's get a list of Todo's, which is also part of the boilerplate. This assumes we've created a model called `Todo` with a given set of fields.
 
 ```jsx
-import { useEntry, useEntries } from "utils/frameworks/react";
+import { useEntry, useEntries } from "@fluxapp/react";
+import { Community } from "@fluxapp/api";
 import Todo from "../models/Todo";  // [!code ++]
 
-export default function TodoView({ perspective, source }) 
+export default function TodoView({ perspective, channelSource }) 
   const { entry: community } = useEntry({
     perspective,
     model: Community,
@@ -41,7 +43,7 @@ export default function TodoView({ perspective, source })
 
   const { entries: todos, model } = useEntries({  // [!code ++]
     perspective,  // [!code ++]
-    source,  // [!code ++]
+    source: channelSource,  // [!code ++]
     model: Todo,  // [!code ++]
   });  // [!code ++]
 
@@ -65,10 +67,11 @@ Since we're subscribed to all changes, the list of Todos will automatically upda
 
 
 ```jsx
-import { useEntry, useEntries } from "utils/frameworks/react";
+import { useEntry, useEntries } from "@fluxapp/react";
+import { Community } from "@fluxapp/api";
 import Todo from "../models/Todo";
 
-export default function TodoView({ perspective, source }) 
+export default function TodoView({ perspective, channelSource }) 
   const [title, setTitle] = useState(""); // [!code ++]
 
   const { entry: community } = useEntry({
@@ -78,7 +81,7 @@ export default function TodoView({ perspective, source })
 
   const { entries: todos, model } = useEntries({  
     perspective,  
-    source,  
+    source: channelSource,  
     model: Todo,  
   });
 
@@ -111,10 +114,11 @@ Next, let's add functionality to toggle a Todo's state using the `mode.update()`
 In this example we use the [j-checkbox](/ui-library/components/checkbox.html) web-component from Flux-UI:
 
 ```jsx
-import { useEntry, useEntries } from "utils/frameworks/react";
+import { useEntry, useEntries } from "@fluxapp/react";
+import { Community } from "@fluxapp/api";
 import Todo from "../models/Todo";
 
-export default function TodoView({ perspective, source }) 
+export default function TodoView({ perspective, channelSource }) 
   const [title, setTitle] = useState("");
 
   const { entry: community } = useEntry({
@@ -124,7 +128,7 @@ export default function TodoView({ perspective, source })
 
   const { entries: todos, model } = useEntries({  
     perspective,  
-    source,  
+    source: channelSource,  
     model: Todo,  
   });
 
@@ -169,10 +173,11 @@ export default function TodoView({ perspective, source })
 Deleting data, as you might guess, is done with `model.remove()`. Let's add a button for deleting Todo-items:
 
 ```jsx
-import { useEntry, useEntries } from "utils/frameworks/react";
+import { useEntry, useEntries } from "@fluxapp/react";
+import { Community } from "@fluxapp/api";
 import Todo from "../models/Todo";
 
-export default function TodoView({ perspective, source }) 
+export default function TodoView({ perspective, channelSource }) 
   const [title, setTitle] = useState("");
 
   const { entry: community } = useEntry({
@@ -182,7 +187,7 @@ export default function TodoView({ perspective, source })
 
   const { entries: todos, model } = useEntries({  
     perspective,  
-    source,  
+    source: channelSource,  
     model: Todo,  
   });
 

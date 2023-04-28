@@ -6,7 +6,7 @@ You are free to create any kind of model for your data, but let's start with the
 
 ## Built-in models
 
-Because Flux apps share a lot of functionality, it comes bundled with several commonly used models that can be imported from `utils/api`:
+Because Flux apps share a lot of functionality, it comes bundled with several commonly used models that can be imported from `@fluxapp/api`:
 
 - Me
 - Channel
@@ -17,7 +17,8 @@ Because Flux apps share a lot of functionality, it comes bundled with several co
 
 
 ```ts
-import { Community } from "utils/api";
+import { useEntry } from "@fluxapp/react";
+import { Community } from "@fluxapp/api";
 
 const { entry: community } = useEntry({
   perspective,
