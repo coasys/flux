@@ -4,72 +4,68 @@ For data that doesn't need to be stored on the DHT, signals can be used to send 
 
 An AD4M neighbourhood exposes `sendBroadcast` and `sendSignal` functions. A broadcast is sent to every listener in the neighbourhood, whilst a signal is sent to a single recipient.
 
-## Broadcasts
+Let's first create our own reusable React hook for neighbourhoods:
 
-### Sending
+```tsx
+function useNeighbourhood(perspective, { onSignal }) {
+  const neighbourhood = useMemo(
+    () => perspective.getNeighbourhoodProxy(),
+    [perspective.uuid]
+  );
 
-To send a real-time signal to the neighbourhood:
+  useEffect(() => {
+    neighbourhood.addSignalHandler(onSignal);
+    return neighbourhood.removeSignalHandler(onSignal);
+  }, [perspective.uuid]);
 
-```typescript [example]
-import { NeighbourhoodProxy } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-
-const client = await getAd4mClient();
-const neighbourhood = new NeighbourhoodProxy(client.neighbourhood, "1234");
-
-// Send a signal to the network
-neighbourhood.sendBroadcastU({ links: [] });
+  return neighbourhood;
+}
 ```
 
-### Receiving
+## Broadcasts
 
-To listen for incoming signals, add a handler to the neighbourhood.
+To send and recieve a real-time signal in the neighbourhood:
 
-```typescript
-import { NeighbourhoodProxy, PerspectiveExpression } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+```tsx [example]
+import useNeighbourhood from "./useNeighbourhood";
 
-const client = await getAd4mClient();
-const neighbourhood = new NeighbourhoodProxy(client.neighbourhood, "1234");
+export default function SignalApp({ perspective, source }) {
+  const neighbourhood = useNeighbourhood(perspective, {
+    onSignal: (expression: PerspectiveExpression) => {
+      // Handle the signal
+    },
+  });
 
-const handleSignal = async (expression: PerspectiveExpression) => {
-  // Do something
-};
+  function sendBroadcast() {
+    // Send a signal to the network
+    neighbourhood.sendBroadcastU({ links: [] });
+  }
 
-neighbourhood.addSignalHandler(handleSignal);
+  return <button onClick={sendBroadcast}>Broadcast to Neighbourhood</button>;
+}
 ```
 
 ## Signals
 
-### Sending
+To send and recieve a real-time signal to a recipient:
 
-To send a real-time signal to a recipient:
+```tsx [example]
+import useNeighbourhood from "./useNeighbourhood";
 
-```typescript
-import { NeighbourhoodProxy } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+export default function SignalApp({ perspective, source }) {
+  const neighbourhood = useNeighbourhood(perspective, {
+    onSignal: (expression: PerspectiveExpression) => {
+      // Handle the signal
+    },
+  });
 
-const client = await getAd4mClient();
-const neighbourhood = new NeighbourhoodProxy(client.neighbourhood, "1234");
+  function sendSignal() {
+    // Send a signal to the network
+    neighbourhood.sendSignalU("recipientDID", { links: [] });
+  }
 
-// Send a signal to the network
-neighbourhood.sendSignalU("recipientDID", { links: [] });
+  return <button onClick={sendSignal}>Send signal to an Agent</button>;
+}
 ```
-
-### Receiving
 
 The broadcast handler will also receive signals. If you need to determine if the signal was sent as a broadcast or a signal to a single peer you can check the expression.
-
-```typescript
-import { NeighbourhoodProxy, PerspectiveExpression } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-
-const client = await getAd4mClient();
-const neighbourhood = new NeighbourhoodProxy(client.neighbourhood, "1234");
-
-const handleSignal = async (expression: PerspectiveExpression) => {
-  // Do something
-};
-
-neighbourhood.addSignalHandler(handleSignal);
-```
