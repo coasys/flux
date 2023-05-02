@@ -108,10 +108,14 @@ export default defineComponent({
   },
   methods: {
     toggleHideMutedChannels(id: string) {
+      /*
       this.dataStore.toggleHideMutedChannels({ communityId: id });
+      */
     },
     muteCommunity(id: string) {
+      /*
       this.dataStore.toggleCommunityMute({ communityId: id });
+      */
     },
     setShowLeaveCommunity(show: boolean, uuid: string) {
       this.appStore.setActiveCommunity(uuid);

@@ -37,22 +37,30 @@
 </template>
 
 <script lang="ts">
-import { Community } from "utils/types";
 import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useDataStore } from "@/store/data";
 import { getImage } from "utils/helpers";
+import { useEntry, usePerspective } from "utils/vue";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { Community } from "utils/api";
 
 export default defineComponent({
   components: { AvatarUpload },
   props: ["communityId"],
   emits: ["cancel", "submit"],
-  setup(props) {
+  async setup(props) {
+    const client = getAd4mClient;
+    const { data } = usePerspective(client, () => props.communityId);
+    const { entry: community } = useEntry({
+      perspective: () => data.value.perspective,
+      model: Community,
+    });
+
     const dataStore = useDataStore();
 
-    console.log("communityId", props.communityId);
-
     return {
+      community,
       dataStore,
     };
   },
@@ -75,12 +83,6 @@ export default defineComponent({
       immediate: true,
     },
   },
-  computed: {
-    community(): Community {
-      const id = this.$route.params.communityId as string;
-      return this.dataStore.getCommunity(id);
-    },
-  },
   methods: {
     async updateCommunity() {
       const communityId = this.$route.params.communityId as string;
@@ -88,15 +90,15 @@ export default defineComponent({
       this.dataStore
         .updateCommunity(communityId, {
           name:
-            this.communityName !== this.community.name
+            this.communityName !== this.community?.name
               ? this.communityName
               : undefined,
           description:
-            this.communityDescription !== this.community.description
+            this.communityDescription !== this.community?.description
               ? this.communityDescription
               : undefined,
           image:
-            this.communityImage !== this.community.image
+            this.communityImage !== this.community?.image
               ? this.communityImage
               : undefined,
         })

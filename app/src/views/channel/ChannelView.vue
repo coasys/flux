@@ -194,6 +194,7 @@ export default defineComponent({
       community,
       channel,
       channelRepo,
+      currentView: ref(""),
       allDefined: ref(false),
       ChannelView: ChannelView,
       selectedViews: ref<ChannelView[]>([]),
@@ -244,9 +245,6 @@ export default defineComponent({
     sameAgent() {
       return this.channel?.author === this.userStore.agent.did;
     },
-    currentView(): string {
-      return this.channelState?.currentView || this.channel?.views[0] || "";
-    },
     filteredViewOptions() {
       return viewOptions.filter((view) =>
         this.channel?.views.includes(view.type)
@@ -290,10 +288,7 @@ export default defineComponent({
     },
     changeCurrentView(e: any) {
       const value = e.target.value;
-      this.dataStore.setCurrentChannelView({
-        channelId: this.channel?.id,
-        view: value,
-      });
+      this.currentView = value;
     },
     toggleSidebar() {
       this.appStore.toggleSidebar();

@@ -13,22 +13,12 @@ export interface Payload {
 export default async function removeCommunity({
   communityId,
 }: Payload): Promise<void> {
-  const dataStore = useDataStore();
   const appStore = useAppStore();
 
   try {
     const client = await getAd4mClient();
 
     await client.perspective.remove(communityId);
-
-    delete dataStore.communities[communityId];
-    delete dataStore.neighbourhoods[communityId];
-
-    for (const channel of Object.values(dataStore.channels)) {
-      if (channel.sourcePerspective === communityId) {
-        delete dataStore.channels[channel.id];
-      }
-    }
   } catch (e) {
     appStore.showDangerToast({
       message: e.message,

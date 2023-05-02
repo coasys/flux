@@ -275,17 +275,17 @@ export default defineComponent({
     "$route.params.channelId": {
       handler: function (id: string) {
         if (id) {
+          /*
           this.dataStore.setCurrentChannelId({
             communityId: this.communityId,
             channelId: id,
           });
+          */
 
-          if (id) {
-            this.loadedChannels = {
-              ...this.loadedChannels,
-              [id]: true,
-            };
-          }
+          this.loadedChannels = {
+            ...this.loadedChannels,
+            [id]: true,
+          };
         }
       },
       immediate: true,

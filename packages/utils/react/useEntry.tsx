@@ -24,16 +24,17 @@ export default function useEntry<SubjectClass>({
 
   useEffect(() => {
     if (perspective.uuid) {
-      getData();
+      getData(id);
       const { added, removed } = subscribe();
       return () => {
         perspective.removeListener("link-added", added);
         perspective.removeListener("link-removed", removed);
       };
     }
-  }, [perspective.uuid, source]);
+  }, [perspective.uuid, source, id]);
 
   function getData(id?: string) {
+    console.log("get data", { id });
     Model.getData(id)
       .then(async (entry) => {
         setEntry(entry);

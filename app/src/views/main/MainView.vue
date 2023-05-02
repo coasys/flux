@@ -101,27 +101,36 @@ import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
 import { mapActions } from "pinia";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
-import { Community, EntryType } from "utils/types";
+import { EntryType } from "utils/types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import semver from "semver";
 import { dependencies } from "../../../package.json";
 import { LinkExpression, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
-
-import { usePerspectives } from "utils/vue";
+import { useEntry, usePerspective, usePerspectives } from "utils/vue";
+import { Community } from "utils/api";
 
 export default defineComponent({
   name: "MainAppView",
   async setup() {
     const client = await getAd4mClient();
+    const appStore = useAppStore();
     const { perspectives, onLinkAdded } = usePerspectives(client);
+
+    const { data } = usePerspective(client, () => appStore.activeCommunity);
+
+    const { entry: community } = useEntry({
+      perspective: () => data.value.perspective,
+      model: Community,
+    });
 
     return {
       client,
+      activeCommunity: community,
       onLinkAdded,
       perspectives,
       dataStore: useDataStore(),
       isJoining: ref(false),
-      appStore: useAppStore(),
+      appStore,
       isInit: ref(false),
     };
   },
@@ -154,10 +163,6 @@ export default defineComponent({
         DEFAULT_TESTING_NEIGHBOURHOOD
       );
       return community ? true : false;
-    },
-    activeCommunity(): Community {
-      const activeCommunity = this.appStore.activeCommunity;
-      return this.dataStore.getCommunity(activeCommunity);
     },
     modals(): ModalsState {
       return this.appStore.modals;

@@ -63,7 +63,7 @@
             />
             Hide muted channels
           </j-menu-item>
-          <j-menu-item @click="() => goToLeaveChannel()">
+          <j-menu-item @click="() => goToLeaveCommunity()">
             <j-icon size="xs" slot="start" name="box-arrow-left" />
             Leave community
           </j-menu-item>
@@ -123,6 +123,8 @@ import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import Avatar from "@/components/avatar/Avatar.vue";
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { useAgent } from "utils/vue";
 
 export default defineComponent({
   components: { Avatar, LoadingBar },
@@ -133,8 +135,14 @@ export default defineComponent({
       required: true,
     },
   },
-  setup() {
+  async setup() {
+    const client = await getAd4mClient();
+
+    const { status, agent: me } = useAgent(client.agent);
+
     return {
+      status,
+      me,
       showCommunityMenu: ref(false),
       appStore: useAppStore(),
       userStore: useUserStore(),
@@ -162,13 +170,10 @@ export default defineComponent({
       return channels;
     },
     isCreator(): boolean {
-      return this.community.author === this.userStore.getUser?.agent.did;
+      return this.community.author === this.me?.did;
     },
     userProfile(): Profile | null {
       return this.userStore.profile;
-    },
-    userDid(): string {
-      return this.userStore.agent.did!;
     },
   },
   methods: {
@@ -183,8 +188,10 @@ export default defineComponent({
       "setShowCommunitySettings",
       "setShowCommunityTweaks",
     ]),
-    goToLeaveChannel() {
-      this.appStore.setActiveCommunity(this.community.neighbourhood.uuid);
+    goToLeaveCommunity() {
+      this.appStore.setActiveCommunity(
+        this.$route.params.communityId as string
+      );
       this.appStore.setShowLeaveCommunity(true);
     },
     goToSettings() {
