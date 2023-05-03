@@ -135,6 +135,19 @@ export class MyElement extends LitElement {
     document.documentElement.className = target.value;
   }
 
+  get appElement() {
+    const el = this.querySelector("slot");
+    return el?.assignedNodes()[0];
+  }
+
+  shouldUpdate(changedProperties) {
+    if (this.appElement) {
+      this.appElement.perspective = changedProperties.perspective;
+    }
+
+    return changedProperties;
+  }
+
   async onCreateCommunity() {
     this.isCreatingCommunity = true;
     try {
