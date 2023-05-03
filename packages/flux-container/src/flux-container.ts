@@ -137,15 +137,18 @@ export class MyElement extends LitElement {
 
   get appElement() {
     const el = this.querySelector("slot");
-    return el?.assignedNodes()[0];
+    return el?.assignedNodes()[0] as HTMLElement;
   }
 
-  shouldUpdate(changedProperties) {
-    if (this.appElement) {
-      this.appElement.perspective = changedProperties.perspective;
+  shouldUpdate(changedProperties: Map<string, unknown>) {
+    if (this.appElement && changedProperties.get("perspective")) {
+      this.appElement.setAttribute(
+        "perspective",
+        changedProperties.get("perspective") as string
+      );
     }
 
-    return changedProperties;
+    return !!changedProperties;
   }
 
   async onCreateCommunity() {
