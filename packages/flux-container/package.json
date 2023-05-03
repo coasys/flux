@@ -1,20 +1,20 @@
 {
   "name": "@fluxapp/flux-container",
   "version": "0.0.0",
-  "main": "dist/flux-container.es.js",
+  "main": "build/flux-container.es.js",
   "exports": {
-    ".": "./dist/flux-container.es.js"
+    ".": "./build/flux-container.es.js"
   },
   "types": "types/flux-container.d.ts",
   "files": [
-    "dist",
+    "build",
     "types"
   ],
   "scripts": {
     "start": "npm run dev",
     "dev": "vite",
-    "build": "tsc && vite build",
-    "serve": "tsc && vite preview"
+    "build": "vite build",
+    "serve": "vite preview"
   },
   "dependencies": {
     "@fluxapp/ui": "*",
