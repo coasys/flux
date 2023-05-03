@@ -24,183 +24,19 @@
         height: calc(100vh - var(--j-size-xl));
         display: block;
       }
-      .sidebar-layout {
-        display: grid;
-        grid-template-columns: 1fr 5fr;
-      }
-      .sidebar {
-        padding: var(--j-space-500);
-        height: 100vh;
-        background: var(--j-color-ui-50);
-        border-radius: var(--j-border-radius);
-      }
-      select {
-        width: 100%;
-        height: var(--j-size-md);
-        padding: var(--j-space-300);
-        background: var(--j-color-white);
-        color: var(--j-color-black);
-        font-size: var(--j-font-size-500);
-        border-radius: var(--j-border-radius);
-        outline: 1px solid var(--j-color-ui-200);
-        border: 0;
-        border-right: 8px solid transparent;
-        padding: var(--j-space-200);
-      }
-      select:hover {
-        background: var(--j-color-ui-50);
-      }
-      select:focus {
-        outline: 2px solid var(--j-color-primary-500);
-      }
     </style>
   </head>
   <body>
-    <div class="sidebar-layout" v-scope @vue:mounted="mounted">
-      <aside class="sidebar">
-        <j-flex direction="column" gap="500">
-          <div>
-            <j-text variant="label">Current theme:</j-text>
-            <select @change="setTheme($event)" v-model="theme">
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-            </select>
-          </div>
-          <div>
-            <j-text variant="label">Select perspective:</j-text>
-            <j-flex gap="200" wrap>
-              <j-avatar
-                :selected="perspectiveUuid === uuid"
-                :hash="uuid"
-                @click="setPerspective(uuid)"
-                v-for="{name, uuid} in perspectives"
-                :value="uuid"
-              >
-                {{name}}
-              </j-avatar>
-            </j-flex>
-          </div>
-          <div v-if="perspectiveUuid">
-            <j-text variant="label">Current channel:</j-text>
-            <select v-model="source" @change="setChannel($event.target.value)">
-              <option value="" selected disabled>Select a channel</option>
-              <option v-for="{name, id} in channels" :value="id">
-                {{name}}
-              </option>
-            </select>
-          </div>
-          <j-input
-            label="Give your perspective a name"
-            placeholder="Perspective name"
-            :value="title"
-            @change="(e) => title = e.target.value"
-          ></j-input>
-          <j-button
-            :loading="isCreatingCommunity"
-            @click="createCommunity"
-            full
-            size="sm"
-            id="create-perspective"
-          >
-            Create new Flux community
-          </j-button>
-        </j-flex>
-      </aside>
-      <flux-app :source="source"></flux-app>
-    </div>
+    <flux-container>
+      <flux-app></flux-app>
+    </flux-container>
 
     <script type="module">
-      import "@fluxapp/ui/dist/main.css";
-      import "@fluxapp/ui";
-      import "@fluxapp/ui/dist/themes/dark.css";
-      import Ad4mConnectUI, {
-        getAd4mClient,
-      } from "@perspect3vism/ad4m-connect";
       import App from "./src/main.ts";
-      import { createCommunity } from "utils/api";
-      import { Channel, Community } from "utils/api";
-      import { SubjectRepository } from "utils/factory";
-      import { createApp } from "https://unpkg.com/petite-vue?module";
+      import "../../../flux-container/build/flux-container.es.js";
+      import "../../../flux-container/build/style.css";
 
-      const ui = Ad4mConnectUI({
-        appName: "Flux App",
-        appDesc: "A flux app",
-        appDomain: "app.flux.io",
-        capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
-      });
-
-      createApp({
-        title: "",
-        isCreatingCommunity: false,
-        theme: document.documentElement.className,
-        perspectiveUuid: localStorage.getItem("perspectiveUuid") || "",
-        source: localStorage.getItem("source") || "flux://testing",
-        community: {},
-        channels: [],
-        perspectives: [],
-        async setPerspective(uuid) {
-          const client = await getAd4mClient();
-          const perspective = await client.perspective.byUUID(uuid);
-          localStorage.setItem("perspectiveUuid", uuid);
-
-          this.perspectiveUuid = uuid;
-
-          const app = document.querySelector("flux-app");
-          app.perspective = perspective;
-
-          const community = await new SubjectRepository(Community, {
-            perspectiveUuid: perspective.uuid,
-          }).getData();
-
-          const channels = await new SubjectRepository(Channel, {
-            perspectiveUuid: perspective.uuid,
-            source: community.id,
-          }).getAllData();
-
-          this.channels = channels.map((c) => ({ id: c.id, name: c.name }));
-          this.source = channels[0]?.id;
-        },
-        setChannel(source) {
-          localStorage.setItem("source", source);
-        },
-        setTheme(e) {
-          const theme = e.target.value;
-          document.documentElement.className = theme;
-        },
-        async createCommunity() {
-          this.isCreatingCommunity = true;
-          try {
-            await createCommunity({ name: "Test" });
-            this.title = "";
-            console.log("created community");
-          } finally {
-            this.isCreatingCommunity = false;
-          }
-        },
-        mounted() {
-          ui.connect();
-          ui.addEventListener("authstatechange", async () => {
-            if (ui.authState === "authenticated") {
-              const client = await getAd4mClient();
-              this.client = client;
-              this.fluxApp = App;
-              customElements.define("flux-app", App);
-
-              if (this.perspectiveUuid) {
-                console.log("in mounted", this.perspectiveUuid);
-                this.setPerspective(this.perspectiveUuid);
-              }
-
-              const perspectives = await client.perspective.all();
-
-              this.perspectives = perspectives.map((p) => ({
-                uuid: p.uuid,
-                name: p.name,
-              }));
-            }
-          });
-        },
-      }).mount();
+      customElements.define("flux-app", App);
 
       window.__APP_VERSION__ = "test";
     </script>
