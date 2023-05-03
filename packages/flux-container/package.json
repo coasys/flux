@@ -1,0 +1,27 @@
+{
+  "name": "flux-container",
+  "version": "0.0.0",
+  "main": "dist/flux-container.es.js",
+  "exports": {
+    ".": "./dist/flux-container.es.js"
+  },
+  "types": "types/flux-container.d.ts",
+  "files": [
+    "dist",
+    "types"
+  ],
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "serve": "tsc && vite preview"
+  },
+  "dependencies": {
+    "lit-element": "^2.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.37",
+    "typescript": "^4.1.3",
+    "vite": "^2.1.3"
+  }
+}
