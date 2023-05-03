@@ -5,9 +5,27 @@
     <link rel="icon" type="image/svg+xml" href="src/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Flux Container</title>
-    <script type="module" src="/src/flux-container.ts"></script>
+
+    <style>
+      html {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        color: var(--j-color-ui-800);
+        background: var(--j-color-white);
+      }
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
+    </style>
   </head>
   <body>
+    <script type="module" src="/src/flux-container.ts"></script>
+
     <flux-container>
       <p>This is child content</p>
     </flux-container>
