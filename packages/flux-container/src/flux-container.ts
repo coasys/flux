@@ -64,9 +64,27 @@ export class MyElement extends LitElement {
   @state()
   isCreatingCommunity = false;
 
+  @state()
   source = "";
+
+  @state()
+  theme = "";
+
   community = {};
   channels: { id: any; name: string }[] = [];
+
+  constructor() {
+    super();
+
+    this.perspectiveUuid = localStorage.getItem("perspectiveUuid") || "";
+    this.source = localStorage.getItem("source") || "flux://testing";
+    this.theme = localStorage.getItem("theme") || "dark";
+    this.community = {};
+    this.channels = [];
+    this.perspectives = [];
+
+    document.documentElement.className = this.theme;
+  }
 
   connectedCallback() {
     super.connectedCallback();
@@ -133,6 +151,7 @@ export class MyElement extends LitElement {
   setTheme(e: Event) {
     const target = e.target as HTMLInputElement;
     document.documentElement.className = target.value;
+    localStorage.setItem("theme", target.value);
   }
 
   get appElement() {
@@ -169,7 +188,10 @@ export class MyElement extends LitElement {
           <j-flex direction="column" gap="500">
             <div>
               <j-text variant="label">Current theme:</j-text>
-              <select @change=${(e: Event) => this.setTheme(e)}>
+              <select
+                @change=${(e: Event) => this.setTheme(e)}
+                value=${this.theme}
+              >
                 <option value="light">Light</option>
                 <option value="dark">Dark</option>
               </select>

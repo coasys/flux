@@ -1,5 +1,5 @@
 {
-  "name": "flux-container",
+  "name": "@fluxapp/flux-container",
   "version": "0.0.0",
   "main": "dist/flux-container.es.js",
   "exports": {
