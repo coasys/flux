@@ -1,5 +1,8 @@
 import { LitElement, html, customElement, state, css } from "lit-element";
 import { map } from "lit/directives/map.js";
+import "@fluxapp/ui";
+import "@fluxapp/ui/dist/main.css";
+import "@fluxapp/ui/dist/themes/dark.css";
 
 import Ad4mConnectUI, { getAd4mClient } from "@perspect3vism/ad4m-connect";
 import { createCommunity } from "utils/api";
