@@ -21,6 +21,9 @@ export default defineConfig({
     },
     rollupOptions: {
       external: ["react"],
+      output: {
+        preserveModules: true,
+      },
     },
   },
 });
