@@ -14,7 +14,7 @@ Once you have your app running you'll need to authorize your app to access your 
 
 ### Using create-flux-app
 
-With create-flux-app the AD4M Connect logic is included and resides in the `index.html` file. Just make sure you have AD4M running.
+With create-flux-app the AD4M Connect logic is included (through the `flux-container` web-component) and resides in the `index.html` file. Just make sure you have AD4M running.
 
 ### Manual setup
 
@@ -24,10 +24,10 @@ If you're not using `create-flux-app` you'll have to wire up Ad4m Connect yourse
 import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
 
 const ui = Ad4mConnectUI({
-    appName: "Flux App",
-    appDesc: "A flux app",
-    appDomain: "app.flux.io",
-    capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
+  appName: "Flux App",
+  appDesc: "A flux app",
+  appDomain: "app.flux.io",
+  capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
 });
 
 // Trigger connection on mount
