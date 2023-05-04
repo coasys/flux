@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="icon" type="image/svg+xml" href="src/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Flux App</title>
+    <title>Flux Container</title>
+
     <style>
       html {
         box-sizing: border-box;
@@ -20,25 +21,13 @@
       *:after {
         box-sizing: inherit;
       }
-      flux-app {
-        height: calc(100vh - var(--j-size-xl));
-        display: block;
-      }
     </style>
   </head>
   <body>
+    <script type="module" src="/src/flux-container.ts"></script>
+
     <flux-container>
-      <flux-app></flux-app>
+      <p>This is child content</p>
     </flux-container>
-
-    <script type="module">
-      import App from "./src/main.ts";
-      import "../../../flux-container/build/flux-container.es.js";
-      import "../../../flux-container/build/style.css";
-
-      customElements.define("flux-app", App);
-
-      window.__APP_VERSION__ = "test";
-    </script>
   </body>
 </html>
