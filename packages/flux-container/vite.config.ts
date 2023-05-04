@@ -18,13 +18,13 @@ export default defineConfig({
       },
     },
   },
-  plugins: [
-    visualizer({
-      template: "treemap", // or sunburst
-      open: true,
-      gzipSize: true,
-      brotliSize: true,
-      filename: "analice.html",
-    }) as PluginOption,
-  ],
+  // plugins: [
+  //   visualizer({
+  //     template: "treemap", // or sunburst
+  //     open: true,
+  //     gzipSize: true,
+  //     brotliSize: true,
+  //     filename: "analice.html",
+  //   }) as PluginOption,
+  // ],
 });

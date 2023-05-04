@@ -86,6 +86,14 @@ export class MyElement extends LitElement {
     document.documentElement.className = this.theme;
   }
 
+  get perspective() {
+    return this.perspectives.find((p) => p.uuid === this.perspectiveUuid);
+  }
+
+  get appElement() {
+    return this.children[0];
+  }
+
   connectedCallback() {
     super.connectedCallback();
 
@@ -142,6 +150,12 @@ export class MyElement extends LitElement {
 
     this.channels = channels.map((c) => ({ id: c.id, name: c.name }));
     this.source = channels[0]?.id;
+
+    // @ts-ignore
+    this.appElement.perspective = perspective;
+
+    // @ts-ignore
+    this.appElement.setAttribute("source", channels[0]?.id || "adam://self");
   }
 
   setChannel(source: string) {
@@ -154,26 +168,10 @@ export class MyElement extends LitElement {
     localStorage.setItem("theme", target.value);
   }
 
-  get appElement() {
-    const el = this.querySelector("slot");
-    return el?.assignedNodes()[0] as HTMLElement;
-  }
-
-  shouldUpdate(changedProperties: Map<string, unknown>) {
-    if (this.appElement && changedProperties.get("perspective")) {
-      this.appElement.setAttribute(
-        "perspective",
-        changedProperties.get("perspective") as string
-      );
-    }
-
-    return !!changedProperties;
-  }
-
   async onCreateCommunity() {
     this.isCreatingCommunity = true;
     try {
-      await createCommunity({ name: "Test" });
+      await createCommunity({ name: this.title });
       this.title = "";
       console.log("created community");
     } finally {
