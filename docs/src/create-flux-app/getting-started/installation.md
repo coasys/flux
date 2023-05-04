@@ -22,9 +22,16 @@ npm run dev
 
 If you'd rather use another framework, or just prefer to set everything up yourself you are free to do so.
 
-Initialize a new npm file and install the required packages:
+- 1: Initialize a new project and add the required packages:
 
 ```bash
-npx init
-npx install @perspect3vism/ad4m-connect @perspect3vism/ad4m
+npx install @perspect3vism/ad4m-connect @perspect3vism/ad4m @fluxapp/flux-container
+```
+
+- 2: Wrap your app in the flux-container web-component
+
+```
+<flux-container>
+    <your-app />
+</flux-container>
 ```
