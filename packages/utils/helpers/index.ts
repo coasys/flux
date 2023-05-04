@@ -5,7 +5,6 @@ export * from "./expressionHelpers";
 export * from "./formatString";
 export * from "./getImage";
 export * from "./getNeighbourhoodMeta";
-export * from "./getOGData";
 export * from "./languageHelpers";
 export * from "./linkHelpers";
 export * from "./localStorage";
