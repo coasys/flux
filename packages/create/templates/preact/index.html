@@ -33,8 +33,10 @@
 
     <script type="module">
       import App from "./src/main.ts";
-      import "../../../flux-container/build/flux-container.es.js";
-      import "../../../flux-container/build/style.css";
+      import "@fluxapp/ui";
+      import "@fluxapp/ui/dist/main.css";
+      import "@fluxapp/ui/dist/themes/dark.css";
+      import "@fluxapp/flux-container";
 
       customElements.define("flux-app", App);
 

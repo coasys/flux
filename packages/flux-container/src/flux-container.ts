@@ -1,7 +1,3 @@
-import "@fluxapp/ui/dist/main.css";
-import "@fluxapp/ui";
-import "@fluxapp/ui/dist/themes/dark.css";
-
 import { LitElement, html, customElement, state, css } from "lit-element";
 import { map } from "lit/directives/map.js";
 
@@ -136,7 +132,7 @@ export class MyElement extends LitElement {
     this.perspectiveUuid = uuid;
 
     const community = await new SubjectRepository(Community, {
-      perspectiveUuid: perspective.uuid,
+      perspective: perspective,
     }).getData();
 
     if (!community) {
@@ -144,7 +140,7 @@ export class MyElement extends LitElement {
     }
 
     const channels = await new SubjectRepository(Channel, {
-      perspectiveUuid: perspective.uuid,
+      perspective: perspective,
       source: community.id,
     }).getAllData();
 
