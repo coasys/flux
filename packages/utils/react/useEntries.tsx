@@ -18,7 +18,7 @@ export default function useEntries<SubjectClass>({
     [x: string]: any;
   }> = useMemo(() => {
     const subject = new SubjectRepository(model as any, {
-      perspectiveUuid: perspective.uuid,
+      perspective: perspective,
       source: source || undefined,
     });
     return subject;

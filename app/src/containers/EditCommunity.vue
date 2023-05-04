@@ -52,7 +52,7 @@ export default defineComponent({
   async setup(props) {
     const client = getAd4mClient;
     const { data } = usePerspective(client, () => props.communityId);
-    const { entry: community } = useEntry({
+    const { entry: community, repo } = useEntry({
       perspective: () => data.value.perspective,
       model: Community,
     });
@@ -60,6 +60,7 @@ export default defineComponent({
     const dataStore = useDataStore();
 
     return {
+      repo,
       community,
       dataStore,
     };
@@ -74,10 +75,10 @@ export default defineComponent({
   },
   watch: {
     community: {
-      handler: async function ({ id, name, description, image }) {
-        this.communityName = name;
-        this.communityDescription = description;
-        this.communityImage = await getImage(image);
+      handler: async function (community) {
+        this.communityName = community?.name;
+        this.communityDescription = community?.description;
+        this.communityImage = await getImage(community?.image);
       },
       deep: true,
       immediate: true,
@@ -85,29 +86,19 @@ export default defineComponent({
   },
   methods: {
     async updateCommunity() {
-      const communityId = this.$route.params.communityId as string;
-      this.isUpdatingCommunity = true;
-      this.dataStore
-        .updateCommunity(communityId, {
-          name:
-            this.communityName !== this.community?.name
-              ? this.communityName
-              : undefined,
-          description:
-            this.communityDescription !== this.community?.description
-              ? this.communityDescription
-              : undefined,
-          image:
-            this.communityImage !== this.community?.image
-              ? this.communityImage
-              : undefined,
-        })
-        .then(() => {
-          this.$emit("submit");
-        })
-        .finally(() => {
-          this.isUpdatingCommunity = false;
+      try {
+        this.isUpdatingCommunity = true;
+        await this.repo?.update(this.community.id, {
+          name: this.communityName || undefined,
+          description: this.communityDescription || undefined,
+          image: this.communityImage || undefined,
         });
+      } catch (e) {
+        console.log(e);
+      } finally {
+        this.$emit("submit");
+        this.isUpdatingCommunity = false;
+      }
     },
   },
 });

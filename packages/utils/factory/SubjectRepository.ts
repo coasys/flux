@@ -2,12 +2,9 @@ import {
   PerspectiveProxy,
   Link,
   Subject,
-  LinkExpression,
   Literal,
   LinkQuery,
 } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { subscribeToLinks } from "../api";
 import { SELF } from "../constants/communityPredicates";
 import {
   collectionToAdderName,
@@ -17,14 +14,8 @@ import {
 import { v4 as uuidv4 } from "uuid";
 
 export type ModelProps = {
-  perspectiveUuid: string;
+  perspective: PerspectiveProxy;
   source?: string;
-};
-
-export type Listeners = {
-  add: { [source: string]: Function[] };
-  remove: { [source: string]: Function[] };
-  update: { [source: string]: Function[] };
 };
 
 export function capitalize(str: string) {
@@ -108,46 +99,34 @@ export function setProperties(
 }
 
 export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
-  client = null;
   source = SELF;
-  perspectiveUuid = "";
-  private unsubscribeCb: Function | null = null;
-  private isSubcribing = false;
-  private listeners = { add: {}, remove: {}, update: {} } as Listeners;
-  private subject: SubjectClass;
-  private perspective: PerspectiveProxy | null = null;
-  private tempSubject: any;
-  private linkRemoved: LinkExpression[] = [];
+  subject: SubjectClass;
+  perspective: PerspectiveProxy;
+  tempSubject: any;
 
   constructor(subject: { new (): SubjectClass }, props: ModelProps) {
-    this.perspectiveUuid = props.perspectiveUuid;
+    this.perspective = props.perspective;
     this.source = props.source || this.source;
     this.subject = new subject();
     this.tempSubject = subject;
+    this.ensureSubject();
   }
 
-  async ensurePerspective() {
-    if (!this.perspective) {
-      const ad4mClient = await getAd4mClient();
-      this.perspective = await ad4mClient.perspective.byUUID(
-        this.perspectiveUuid
-      );
-    }
-
-    await this.perspective?.ensureSDNASubjectClass(this.tempSubject);
+  async ensureSubject() {
+    await this.perspective.ensureSDNASubjectClass(this.tempSubject);
   }
 
   async create(data: SubjectClass, id?: string): Promise<SubjectClass> {
     const base = id || Literal.from(uuidv4()).toUrl();
-    await this.ensurePerspective();
-    let newInstance = await this.perspective?.createSubject(this.subject, base);
+
+    let newInstance = await this.perspective.createSubject(this.subject, base);
 
     if (!newInstance) {
       throw "Failed to create new instance of " + this.subject.type;
     }
 
     // Connect new instance to source
-    await this.perspective?.add(
+    await this.perspective.add(
       new Link({
         source: this.source,
         predicate: await newInstance.type,
@@ -190,11 +169,11 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
 
   async get(id?: string): Promise<SubjectClass | null> {
     if (id) {
-      await this.ensurePerspective();
-
-      return (
-        (await this.perspective?.getSubjectProxy(id, this.subject)) || null
+      const subjectProxy = await this.perspective.getSubjectProxy(
+        id,
+        this.subject
       );
+      return subjectProxy || null;
     } else {
       const all = await this.getAll();
       return all[0] || null;
@@ -240,14 +219,12 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
 
   async getAll(source?: string): Promise<SubjectClass[]> {
     const tempSource = source || this.source;
-    await this.ensurePerspective();
+
     const subjectClass =
-      await this.perspective!.stringOrTemplateObjectToSubjectClass(
-        this.subject
-      );
+      await this.perspective.stringOrTemplateObjectToSubjectClass(this.subject);
 
     // TODO: This return too many
-    const res = await this.perspective?.infer(
+    const res = await this.perspective.infer(
       `triple("${tempSource}", ${
         tempSource !== SELF ? `"${this.tempSubject.prototype.type}"` : "_"
       }, X), instance(Class, X), subject_class("${subjectClass}", Class)`

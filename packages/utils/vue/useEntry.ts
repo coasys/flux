@@ -1,13 +1,4 @@
-import {
-  reactive,
-  watch,
-  ref,
-  computed,
-  watchEffect,
-  isReadonly,
-  WatchSource,
-  readonly,
-} from "vue";
+import { watch, ref, shallowRef } from "vue";
 import { SubjectRepository } from "utils/factory";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 
@@ -29,19 +20,19 @@ export function useEntry<SubjectClass>({
     typeof perspective === "function" ? (perspective as any) : perspective;
 
   let entry = ref<Record<string, any> | null>(null);
-  let repo: SubjectRepository<any> | null = null;
+  let repo = shallowRef<SubjectRepository<any> | null>(null);
 
   watch(
     [perspectiveRef, sourceRef, idRef],
     async ([p, s, id]) => {
       if (p?.uuid) {
         const r = new SubjectRepository(model, {
-          perspectiveUuid: p?.uuid,
+          perspective: p,
           source: s,
         });
 
         const res = await r.getData(id);
-        repo = r;
+        repo.value = r;
         if (res) {
           entry.value = res;
         }

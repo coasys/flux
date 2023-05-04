@@ -31,7 +31,7 @@ export async function buildCommunity(perspective: PerspectiveProxy) {
   const meta = getMetaFromLinks(perspective.neighbourhood?.meta?.links!);
 
   const Community = new SubjectRepository(CommunityModel, {
-    perspectiveUuid: perspective.uuid,
+    perspective: perspective,
   });
 
   const community = await Community.getData();

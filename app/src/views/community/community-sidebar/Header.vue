@@ -73,12 +73,12 @@
     <div class="community-info">
       <Avatar
         size="xl"
-        :initials="community.name.charAt(0).toUpperCase()"
+        :initials="community.name?.charAt(0).toUpperCase()"
         :url="community.image || null"
       ></Avatar>
       <div class="community-info-content">
         <j-text size="500" nomargin color="black">
-          {{ community.name }}
+          {{ community.name || "No name" }}
         </j-text>
         <j-text nomargin size="400" color="ui-500">
           {{

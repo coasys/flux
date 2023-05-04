@@ -54,18 +54,34 @@
 
 <script lang="ts">
 import { useDataStore } from "@/store/data";
+import { useEntry, usePerspective } from "utils/vue";
 import { isValid } from "@/utils/validation";
 import { ChannelView } from "utils/types";
 import { defineComponent } from "vue";
 import ChannelViewOptions from "@/components/channel-view-options/ChannelViewOptions.vue";
+import { useRoute } from "vue-router";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect";
+import { Channel } from "utils/api";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
   components: { ChannelViewOptions },
-  setup() {
+  async setup() {
     const dataStore = useDataStore();
 
+    const route = useRoute();
+
+    const client = await getAd4mClient();
+
+    const { data } = usePerspective(client, () => route.params.communityId);
+
+    const { repo } = useEntry({
+      perspective: () => data.value.perspective,
+      model: Channel,
+    });
+
     return {
+      repo,
       dataStore,
     };
   },
@@ -90,29 +106,29 @@ export default defineComponent({
   },
   methods: {
     async createChannel() {
-      const communityId = this.$route.params.communityId as string;
-      const name = this.channelName;
-      this.isCreatingChannel = true;
-      this.dataStore
-        .createChannel({
-          perspectiveUuid: communityId,
+      try {
+        const communityId = this.$route.params.communityId as string;
+        const name = this.channelName;
+        this.isCreatingChannel = true;
+
+        const channel = await this.repo?.create({
           name,
           views: this.selectedViews,
-        })
-        .then((channel: any) => {
-          this.$emit("submit");
-          this.channelName = "";
-          this.$router.push({
-            name: "channel",
-            params: {
-              communityId: communityId.toString(),
-              channelId: channel.id,
-            },
-          });
-        })
-        .finally(() => {
-          this.isCreatingChannel = false;
         });
+
+        this.$emit("submit");
+        this.channelName = "";
+        this.$router.push({
+          name: "channel",
+          params: {
+            communityId: communityId.toString(),
+            channelId: channel.id,
+          },
+        });
+      } catch (e) {
+      } finally {
+        this.isCreatingChannel = false;
+      }
     },
   },
 });

@@ -20,9 +20,9 @@ export function useCommunities(
         }
       });
 
-      Object.keys(newPers).forEach(async (uuid) => {
+      Object.entries(newPers).forEach(async ([uuid, p]) => {
         const subject = new SubjectRepository(Community, {
-          perspectiveUuid: uuid,
+          perspective: p,
         });
         const community = await subject.getData();
         if (community) {

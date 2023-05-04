@@ -94,94 +94,94 @@
         </div>
       </div>
     </div>
-  </sidebar-layout>
+    <j-modal
+      size="sm"
+      :open="modals.showCommunityMembers"
+      @toggle="(e) => setShowCommunityMembers(e.target.open)"
+    >
+      <community-members
+        @close="() => setShowCommunityMembers(false)"
+        v-if="modals.showCommunityMembers"
+      />
+    </j-modal>
 
-  <j-modal
-    size="sm"
-    :open="modals.showCommunityMembers"
-    @toggle="(e) => setShowCommunityMembers(e.target.open)"
-  >
-    <community-members
-      @close="() => setShowCommunityMembers(false)"
-      v-if="modals.showCommunityMembers"
-    />
-  </j-modal>
+    <j-modal
+      size="sm"
+      :open="modals.showEditCommunity"
+      @toggle="(e) => setShowEditCommunity(e.target.open)"
+    >
+      <edit-community
+        :communityId="communityId"
+        v-if="modals.showEditCommunity"
+        @submit="() => setShowEditCommunity(false)"
+        @cancel="() => setShowEditCommunity(false)"
+      />
+    </j-modal>
 
-  <j-modal
-    size="sm"
-    :open="modals.showEditCommunity"
-    @toggle="(e) => setShowEditCommunity(e.target.open)"
-  >
-    <edit-community
-      :communityId="communityId"
-      v-if="modals.showEditCommunity"
-      @submit="() => setShowEditCommunity(false)"
-      @cancel="() => setShowEditCommunity(false)"
-    />
-  </j-modal>
+    <j-modal
+      :open="modals.showCreateChannel"
+      @toggle="(e) => setShowCreateChannel(e.target.open)"
+    >
+      <create-channel
+        v-if="modals.showCreateChannel"
+        @submit="() => setShowCreateChannel(false)"
+        @cancel="() => setShowCreateChannel(false)"
+      />
+    </j-modal>
 
-  <j-modal
-    :open="modals.showCreateChannel"
-    @toggle="(e) => setShowCreateChannel(e.target.open)"
-  >
-    <create-channel
-      v-if="modals.showCreateChannel"
-      @submit="() => setShowCreateChannel(false)"
-      @cancel="() => setShowCreateChannel(false)"
-    />
-  </j-modal>
-
-  <j-modal
-    size="sm"
-    :open="modals.showInviteCode"
-    @toggle="(e) => setShowInviteCode(e.target.open)"
-  >
-    <j-box p="800">
-      <j-box pb="500">
-        <j-text variant="heading">Invite people</j-text>
-        <j-text variant="body">
-          Copy and send this code to the people you want to join your community
-        </j-text>
+    <j-modal
+      size="sm"
+      :open="modals.showInviteCode"
+      @toggle="(e) => setShowInviteCode(e.target.open)"
+    >
+      <j-box p="800">
+        <j-box pb="500">
+          <j-text variant="heading">Invite people</j-text>
+          <j-text variant="body">
+            Copy and send this code to the people you want to join your
+            community
+          </j-text>
+        </j-box>
+        <j-input
+          @click="(e) => e.target.select()"
+          size="lg"
+          readonly
+          :value="data.perspective?.sharedUrl"
+        >
+          <j-button @click.stop="getInviteCode" variant="ghost" slot="end"
+            ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
+          /></j-button>
+        </j-input>
       </j-box>
-      <j-input
-        @click="(e) => e.target.select()"
-        size="lg"
-        readonly
-        :value="data.perspective?.sharedUrl"
-      >
-        <j-button @click.stop="getInviteCode" variant="ghost" slot="end"
-          ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
-        /></j-button>
-      </j-input>
-    </j-box>
-  </j-modal>
+    </j-modal>
 
-  <j-modal
-    v-if="modals.showEditChannel && appStore.activeChannel"
-    :open="modals.showEditChannel"
-    @toggle="(e) => setShowEditChannel(e.target.open)"
-  >
-    <EditChannel
-      v-if="modals.showEditChannel"
-      @cancel="() => setShowEditChannel(false)"
-      @submit="() => setShowEditChannel(false)"
-      :channelId="appStore.activeChannel"
-    ></EditChannel>
-  </j-modal>
+    <j-modal
+      v-if="modals.showEditChannel && appStore.activeChannel"
+      :open="modals.showEditChannel"
+      @toggle="(e) => setShowEditChannel(e.target.open)"
+    >
+      <EditChannel
+        v-if="modals.showEditChannel"
+        @cancel="() => setShowEditChannel(false)"
+        @submit="() => setShowEditChannel(false)"
+        :channelId="appStore.activeChannel"
+      ></EditChannel>
+    </j-modal>
 
-  <j-modal
-    :open="modals.showCommunitySettings"
-    @toggle="(e) => setShowCommunitySettings(e.target.open)"
-  >
-    <community-settings />
-  </j-modal>
+    <j-modal
+      :open="modals.showCommunitySettings"
+      @toggle="(e) => setShowCommunitySettings(e.target.open)"
+    >
+      <community-settings />
+    </j-modal>
 
-  <j-modal
-    :open="modals.showCommunityTweaks"
-    @toggle="(e) => setShowCommunityTweaks(e.target.open)"
-  >
-    <community-tweaks v-if="modals.showCommunityTweaks" />
-  </j-modal>
+    <j-modal
+      :open="modals.showCommunityTweaks"
+      @toggle="(e) => setShowCommunityTweaks(e.target.open)"
+    >
+      <community-tweaks v-if="modals.showCommunityTweaks" />
+    </j-modal>
+  </sidebar-layout>
 </template>
 
 <script lang="ts">

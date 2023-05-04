@@ -17,7 +17,7 @@ export default function useEntry<SubjectClass>({
 
   const Model = useMemo(() => {
     return new SubjectRepository(model, {
-      perspectiveUuid: perspective.uuid,
+      perspective: perspective,
       source,
     });
   }, [perspective.uuid, source]);
@@ -34,7 +34,6 @@ export default function useEntry<SubjectClass>({
   }, [perspective.uuid, source, id]);
 
   function getData(id?: string) {
-    console.log("get data", { id });
     Model.getData(id)
       .then(async (entry) => {
         setEntry(entry);
