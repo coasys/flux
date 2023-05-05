@@ -1,9 +1,11 @@
 {
   "name": "@fluxapp/flux-container",
-  "version": "0.0.0",
-  "main": "build/flux-container.es.js",
+  "version": "0.0.1",
+  "type": "module",
+  "module": "build/flux-container.js",
+  "main": "build/flux-container.js",
   "exports": {
-    ".": "./build/flux-container.es.js"
+    ".": "./build/flux-container.js"
   },
   "types": "types/flux-container.d.ts",
   "files": [

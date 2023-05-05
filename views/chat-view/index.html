@@ -4,60 +4,40 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Forum View</title>
+    <title>Chat View</title>
     <style>
-      body {
-        -webkit-font-smoothing: antialiased;
-        height: 100%;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-        text-rendering: optimizeLegibility;
-        color: var(--j-color-ui-800);
-        font-family: var(--j-font-family);
-        background-color: var(--j-color-white);
-      }
       html {
         box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        color: var(--j-color-ui-800);
+        background: var(--j-color-white);
       }
       *,
       *:before,
       *:after {
         box-sizing: inherit;
       }
+      flux-app {
+        height: 100%;
+        display: block;
+      }
     </style>
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/@fluxapp/ui@latest/dist/main.css"
-    />
-    <script src="https://unpkg.com/@fluxapp/ui@latest"></script>
   </head>
   <body>
-    <perspective-view style="height: 100vh; display: block"></perspective-view>
+    <flux-container>
+      <flux-app></flux-app>
+    </flux-container>
+
     <script type="module">
-      import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
-      import ForumView from "./src/main.ts";
+      import App from "./src/main.ts";
+      import "@fluxapp/flux-container";
 
-      const ui = Ad4mConnectUI({
-        appName: "Chat App",
-        appDesc: "A chat app",
-        appDomain: "flux.forum.io",
-        appIconPath: "https://i.ibb.co/GnqjPJP/icon.png",
-        capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
-      });
+      customElements.define("flux-app", App);
 
-      ui.connect();
-
-      ui.addEventListener("authstatechange", () => {
-        if (ui.authState === "authenticated") {
-          const el = document.querySelector("perspective-view");
-          const [_, uuid, source] = document.location.pathname.split("/");
-
-          el.setAttribute("perspective", decodeURIComponent(uuid));
-          el.setAttribute("source", decodeURIComponent(source));
-          customElements.define("perspective-view", ForumView);
-        }
-      });
+      window.__APP_VERSION__ = "test";
     </script>
   </body>
 </html>

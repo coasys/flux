@@ -4,62 +4,40 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Flux App</title>
+    <title>Grahp View</title>
     <style>
+      html {
+        box-sizing: border-box;
+      }
       body {
-        -webkit-font-smoothing: antialiased;
-        height: 100%;
-        width: 100%;
         margin: 0;
-        padding: 0;
-        text-rendering: optimizeLegibility;
+        font-family: Arial, Helvetica, sans-serif;
         color: var(--j-color-ui-800);
-        font-family: var(--j-font-family);
-        background-color: var(--j-color-white);
+        background: var(--j-color-white);
+      }
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
       }
       flux-app {
-        height: 100vh;
+        height: 100%;
         display: block;
       }
     </style>
-    <link href="https://unpkg.com/@fluxapp/ui/dist/main.css" rel="stylesheet" />
   </head>
   <body>
-    <flux-app></flux-app>
-
-    <script src="https://unpkg.com/@fluxapp/ui"></script>
+    <flux-container>
+      <flux-app></flux-app>
+    </flux-container>
 
     <script type="module">
-      import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
       import App from "./src/main.ts";
+      import "@fluxapp/flux-container";
 
-      const ui = Ad4mConnectUI({
-        appName: "Graph App",
-        appDesc: "A graph app",
-        appDomain: "graph.forum.io",
-        capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
-      });
-
-      ui.connect();
-
-      // Register the app as a web component
       customElements.define("flux-app", App);
 
-      initApp();
-
-      window.addEventListener("popstate", initApp);
-
-      function initApp() {
-        // Extract perspectiveUuid and source from the URL path
-        const [_, uuid, source] = document.location.pathname.split("/");
-
-        console.log({ _, uuid, source });
-
-        // Set perspective and source on the app
-        const app = document.querySelector("flux-app");
-        app.setAttribute("perspective", decodeURIComponent(uuid));
-        app.setAttribute("source", decodeURIComponent(source));
-      }
+      window.__APP_VERSION__ = "test";
     </script>
   </body>
 </html>

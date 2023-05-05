@@ -61,6 +61,12 @@ export class MyElement extends LitElement {
   perspectiveUuid = "";
 
   @state()
+  isLoading = false;
+
+  @state()
+  perspectiveHasNoCommunity = false;
+
+  @state()
   isCreatingCommunity = false;
 
   @state()
@@ -69,8 +75,11 @@ export class MyElement extends LitElement {
   @state()
   theme = "";
 
-  community = {};
+  @state()
   channels: { id: any; name: string }[] = [];
+
+  @state()
+  community = {};
 
   constructor() {
     super();
@@ -124,6 +133,9 @@ export class MyElement extends LitElement {
   }
 
   async setPerspective(uuid: string) {
+    this.isLoading = true;
+    this.perspectiveHasNoCommunity = false;
+
     const client = await getAd4mClient();
     const perspective = await client.perspective.byUUID(uuid);
     localStorage.setItem("perspectiveUuid", uuid);
@@ -139,6 +151,8 @@ export class MyElement extends LitElement {
     }).getData();
 
     if (!community) {
+      this.isLoading = false;
+      this.perspectiveHasNoCommunity = true;
       return;
     }
 
@@ -148,13 +162,15 @@ export class MyElement extends LitElement {
     }).getAllData();
 
     this.channels = channels.map((c) => ({ id: c.id, name: c.name }));
-    this.source = channels[0]?.id;
+    this.source = channels[0]?.id || "adam://self";
 
     // @ts-ignore
     this.appElement.perspective = perspective;
 
     // @ts-ignore
     this.appElement.setAttribute("source", channels[0]?.id || "adam://self");
+
+    this.isLoading = false;
   }
 
   setChannel(source: string) {
@@ -204,6 +220,7 @@ export class MyElement extends LitElement {
                       hash=${i.uuid}
                       @click=${() => this.setPerspective(i.uuid)}
                       :value=${i.uuid}
+                      ?disabled=${this.isLoading}
                     >
                       ${i.name}
                     </j-avatar>
@@ -212,18 +229,23 @@ export class MyElement extends LitElement {
               </j-flex>
             </div>
 
-            <div v-if="perspectiveUuid">
-              <j-text variant="label">Current channel:</j-text>
-              <select
-                v-model="source"
-                @change="setChannel($event.target.value)"
+            <div>
+              <j-text variant="label"
+                >${this.perspectiveHasNoCommunity
+                  ? "No community!"
+                  : "Current channel:"}</j-text
               >
-                <option value="" selected disabled>Select a channel</option>
+              <select
+                value=${this.source}
+                @change="setChannel($event.target.value)"
+                ?disabled=${this.perspectiveHasNoCommunity}
+              >
+                <option value="adam://self" selected disabled>
+                  Select a channel
+                </option>
                 ${map(
                   this.channels,
-                  (i) => html`<div>
-                    <option value=${i.id}>${i.name}</option>
-                  </div>`
+                  (i) => html`<option value=${i.id}>${i.name}</option>`
                 )}
               </select>
             </div>
@@ -239,6 +261,7 @@ export class MyElement extends LitElement {
             ></j-input>
             <j-button
               ?loading=${this.isCreatingCommunity}
+              ?disabled=${this.isLoading}
               @click=${() => this.onCreateCommunity()}
               full
               size="sm"

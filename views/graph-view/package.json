@@ -27,11 +27,9 @@
   "description": "",
   "dependencies": {
     "3d-force-graph": "^1.70.19",
-    "@perspect3vism/ad4m": "0.3.4",
-    "@perspect3vism/ad4m-connect": "0.3.4",
+    "@fluxapp/flux-container": "*",
     "preact": "^10.11.3",
-    "three-spritetext": "^1.6.5",
-    "utils": "*"
+    "three-spritetext": "^1.6.5"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.5.0",
