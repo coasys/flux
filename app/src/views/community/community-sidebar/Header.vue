@@ -135,7 +135,7 @@ export default defineComponent({
       required: true,
     },
   },
-  async setup() {
+  async setup(props) {
     const client = await getAd4mClient();
 
     const { status, agent: me } = useAgent(client.agent);

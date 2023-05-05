@@ -4,7 +4,7 @@ import style from "./index.module.css";
 import { DisplayView, displayOptions } from "../../constants/options";
 import { useEntries } from "utils/frameworks/react";
 import { Post } from "utils/api";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 
 export default function PostList({
@@ -14,7 +14,6 @@ export default function PostList({
   perspective: PerspectiveProxy;
   source: string;
 }) {
-  const [sortedPosts, setSortedPosts] = useState([]);
   const [view, setView] = useState(DisplayView.Compact);
 
   const { entries: posts, loading } = useEntries({
@@ -23,15 +22,12 @@ export default function PostList({
     model: Post,
   });
 
-  useEffect(() => {
-    finalPosts().then((data) => {
-      setSortedPosts(data);
-    });
+  const sortedPosts = useMemo(() => {
+    return posts.sort(
+      // @ts-ignore
+      (a: any, b: any) => new Date(b.timestamp) - new Date(a.timestamp)
+    );
   }, [posts.length]);
-
-  const finalPosts = async () => {
-    return posts.sort((a, b) => b.timestamp - a.timestamp);
-  };
 
   const displayStyle: DisplayView =
     view === DisplayView.Compact

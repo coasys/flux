@@ -40,7 +40,12 @@
 import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useDataStore } from "@/store/data";
-import { getImage } from "utils/helpers";
+import {
+  blobToDataURL,
+  dataURItoBlob,
+  getImage,
+  resizeImage,
+} from "utils/helpers";
 import { useEntry, usePerspective } from "utils/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { Community } from "utils/api";
@@ -56,6 +61,8 @@ export default defineComponent({
       perspective: () => data.value.perspective,
       model: Community,
     });
+
+    console.log({ community });
 
     const dataStore = useDataStore();
 
@@ -89,18 +96,25 @@ export default defineComponent({
       try {
         this.isUpdatingCommunity = true;
 
-        const updated = await this.repo?.update(this.community.id, {
+        let compressedImage = undefined;
+
+        if (this.communityImage) {
+          // TODO: Compression should maybe happen on the language level?
+          compressedImage = await blobToDataURL(
+            await resizeImage(dataURItoBlob(this.communityImage as string), 0.6)
+          );
+        }
+
+        await this.repo?.update(this.community.id, {
           name: this.communityName || undefined,
           description: this.communityDescription || undefined,
-          image: this.communityImage || undefined,
-        });
-        console.log({
-          updated,
-          community: {
-            name: this.communityName || undefined,
-            description: this.communityDescription || undefined,
-            image: this.communityImage || undefined,
-          },
+          image: compressedImage
+            ? {
+                data_base64: compressedImage,
+                name: "form-image",
+                file_type: "image/png",
+              }
+            : undefined,
         });
       } catch (e) {
         console.log(e);

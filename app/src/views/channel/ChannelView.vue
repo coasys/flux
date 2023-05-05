@@ -150,7 +150,7 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Profile from "@/containers/Profile.vue";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
-import { ChannelView } from "utils/types";
+import { ChannelView, EntryType } from "utils/types";
 import { viewOptions } from "@/constants";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 import { useEntry, usePerspective } from "utils/vue";
@@ -193,7 +193,9 @@ export default defineComponent({
       community,
       channel,
       channelRepo,
-      currentView: ref(""),
+      currentView: channel.value?.views[0]
+        ? ref(channel.value?.views[0])
+        : ref(ChannelView.Chat),
       allDefined: ref(false),
       ChannelView: ChannelView,
       selectedViews: ref<ChannelView[]>([]),
