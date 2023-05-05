@@ -140,8 +140,6 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
 
     setProperties(newInstance, data);
 
-    console.log("wtf");
-
     return this.getSubjectData(newInstance);
   }
 

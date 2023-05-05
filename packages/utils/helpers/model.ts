@@ -270,13 +270,15 @@ export class SubjectEntry<EntryClass> implements Entry {
   async load() {
     let exp = undefined;
     if (!exp) {
-      console.log("links", this.subject.baseExpression);
-      let links = await this.perspective.get(
-        new LinkQuery({ source: this.subject.baseExpression })
-      );
-      console.log("after links");
-      //@ts-ignore
-      exp = links[0] || null;
+      try {
+        let links = await this.perspective.get(
+          new LinkQuery({ source: this.subject.baseExpression })
+        );
+        //@ts-ignore
+        exp = links[0] || null;
+      } catch (e) {
+        console.log(e);
+      }
     }
 
     if (!exp) {

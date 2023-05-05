@@ -29,6 +29,7 @@ export function useEntries<SubjectClass>({
         });
 
         rep.getAllData(s).then((res) => {
+          console.log({ res }, model.name, s, p);
           entries.value = res;
         });
 
@@ -58,20 +59,25 @@ export function useEntries<SubjectClass>({
   }
 
   async function subscribe(p: PerspectiveProxy, s: string) {
-    const added = (link: LinkExpression) => {
+    const added = async (link: LinkExpression) => {
       const isNewEntry = link.data.source === s;
       const isUpdated = entries.value.find((e) => e.id === link.data.source);
 
-      if (isUpdated) {
-        console.log("updated", link);
-        fetchEntry(link.data.source);
-      }
+      const id = isNewEntry
+        ? link.data.source
+        : isUpdated
+        ? link.data.source
+        : false;
 
-      if (isNewEntry) {
-        p.getSubjectProxy(link.data.target, model).then((res) => {
-          console.log("new entry", link, res);
-          fetchEntry(link.data.target);
-        });
+      console.log({ data: link.data });
+
+      if (id) {
+        const isInstance = await p.isSubjectInstance(id, new model());
+        console.log(model.name, s, p, isInstance, new model());
+        if (isInstance) {
+          console.log("updated", link);
+          fetchEntry(id);
+        }
       }
 
       return null;
