@@ -34,7 +34,7 @@ export default function CreatePost({
 
   const Post = useMemo(() => {
     return new SubjectRepository(PostSubject, {
-      perspectiveUuid: perspective.uuid,
+      perspective: perspective,
       source: source,
     });
   }, [perspective.uuid, source]);

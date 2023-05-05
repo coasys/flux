@@ -241,7 +241,6 @@ export default defineComponent({
 
     const { entries: channels } = useEntries({
       perspective: () => data.value.perspective,
-      source: () => community.value && community.value.id,
       model: Channel,
     });
 
@@ -275,13 +274,6 @@ export default defineComponent({
     "$route.params.channelId": {
       handler: function (id: string) {
         if (id) {
-          /*
-          this.dataStore.setCurrentChannelId({
-            communityId: this.communityId,
-            channelId: id,
-          });
-          */
-
           this.loadedChannels = {
             ...this.loadedChannels,
             [id]: true,

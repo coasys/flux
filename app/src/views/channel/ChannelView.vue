@@ -185,7 +185,6 @@ export default defineComponent({
     const { entry: channel, repo: channelRepo } = useEntry({
       perspective: () => data.value.perspective,
       id: () => props.channelId,
-      source: () => community && community?.id,
       model: Channel,
     });
 

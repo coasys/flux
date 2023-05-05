@@ -8,7 +8,7 @@ export function useEntries<SubjectClass>({
   model,
 }: {
   perspective: PerspectiveProxy | Function;
-  source: string | Function;
+  source?: string | Function;
   model: SubjectClass;
 }) {
   const sourceRef =
