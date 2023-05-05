@@ -59,9 +59,7 @@
     "react-hint": "^3.2.1",
     "react-virtuoso": "^3.1.1",
     "tippy.js": "^6.3.1",
-    "utils": "*",
-    "vite": "^4.2.1",
-    "vite-plugin-css-injected-by-js": "^3.1.0"
+    "utils": "*"
   },
   "devDependencies": {
     "@types/react": "^17.0.2",
@@ -70,6 +68,8 @@
     "np": "^7.5.0",
     "npm-run-all": "^4.1.5",
     "postcss": "^8.4.5",
-    "postcss-modules": "^4.3.0"
+    "postcss-modules": "^4.3.0",
+    "vite": "^4.3.5",
+    "vite-plugin-css-injected-by-js": "^3.1.0"
   }
 }
