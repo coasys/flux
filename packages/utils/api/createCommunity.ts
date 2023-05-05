@@ -75,28 +75,32 @@ export default async function createCommunity({
     await perspective.ensureSDNASubjectClass(Member);
 
     const CommunityModel = new SubjectRepository(Community, {
-      perspectiveUuid: perspective.uuid,
+      perspective: perspective,
     });
 
     const metaData = {
       name,
       description,
-      image: compressedImage ? {
-        data_base64: compressedImage,
-        name: "community-image",
-        file_type: "image/png",
-      } : undefined,
-      thumbnail: thumbnail ? {
-        data_base64: thumbnail,
-        name: "community-image",
-        file_type: "image/png",
-      } : undefined,
+      image: compressedImage
+        ? {
+            data_base64: compressedImage,
+            name: "community-image",
+            file_type: "image/png",
+          }
+        : undefined,
+      thumbnail: thumbnail
+        ? {
+            data_base64: thumbnail,
+            name: "community-image",
+            file_type: "image/png",
+          }
+        : undefined,
     };
 
     const community = await CommunityModel.create(metaData);
 
     const MemberFactory = new SubjectRepository(Member, {
-      perspectiveUuid: perspective.uuid,
+      perspective: perspective,
     });
 
     await MemberFactory.create({ did: author }, author);
@@ -111,7 +115,7 @@ export default async function createCommunity({
       id: community.id,
       timestamp: socialDnaLink.timestamp,
       name: community.name,
-      description: (community.description) || "",
+      description: community.description || "",
       image: community.image,
       thumbnail: community.thumbnail,
       neighbourhoodUrl: sharedUrl,

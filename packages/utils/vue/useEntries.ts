@@ -64,16 +64,14 @@ export function useEntries<SubjectClass>({
       const isUpdated = entries.value.find((e) => e.id === link.data.source);
 
       const id = isNewEntry
-        ? link.data.source
+        ? link.data.target
         : isUpdated
         ? link.data.source
         : false;
 
-      console.log({ data: link.data });
-
       if (id) {
         const isInstance = await p.isSubjectInstance(id, new model());
-        console.log(model.name, s, p, isInstance, new model());
+
         if (isInstance) {
           console.log("updated", link);
           fetchEntry(id);
