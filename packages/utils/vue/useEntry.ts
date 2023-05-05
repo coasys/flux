@@ -1,4 +1,11 @@
-import { watch, ref, shallowRef } from "vue";
+import {
+  watch,
+  ref,
+  shallowRef,
+  markRaw,
+  triggerRef,
+  shallowReactive,
+} from "vue";
 import { SubjectRepository } from "utils/factory";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 
@@ -33,6 +40,8 @@ export function useEntry<SubjectClass>({
 
         const res = await r.getData(id);
         repo.value = r;
+        triggerRef(repo);
+
         if (res) {
           entry.value = res;
         }

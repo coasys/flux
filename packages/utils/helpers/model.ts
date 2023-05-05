@@ -251,8 +251,8 @@ export class Factory<SubjectClass extends { type: string }> {
 }
 
 export class SubjectEntry<EntryClass> implements Entry {
-  #subject: Subject;
-  #perspective: PerspectiveProxy;
+  subject: Subject;
+  perspective: PerspectiveProxy;
 
   id: string;
   author: string;
@@ -262,17 +262,19 @@ export class SubjectEntry<EntryClass> implements Entry {
   source: string;
 
   constructor(subject: Subject, perspective: PerspectiveProxy) {
-    this.#subject = subject;
-    this.#perspective = perspective;
+    this.subject = subject;
+    this.perspective = perspective;
     this.id = subject.baseExpression;
   }
 
   async load() {
-    let exp = undefined
+    let exp = undefined;
     if (!exp) {
-      let links = await this.#perspective.get(
-        new LinkQuery({ source: this.#subject.baseExpression })
+      console.log("links", this.subject.baseExpression);
+      let links = await this.perspective.get(
+        new LinkQuery({ source: this.subject.baseExpression })
       );
+      console.log("after links");
       //@ts-ignore
       exp = links[0] || null;
     }
@@ -285,7 +287,7 @@ export class SubjectEntry<EntryClass> implements Entry {
     this.timestamp = exp.timestamp;
     try {
       //@ts-ignore
-      this.type = await this.#subject.type;
+      this.type = await this.subject.type;
     } catch (e) {
       console.error("Failed to get type of subject: ", e);
     }

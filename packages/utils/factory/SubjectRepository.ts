@@ -139,6 +139,9 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     );
 
     setProperties(newInstance, data);
+
+    console.log("wtf");
+
     return this.getSubjectData(newInstance);
   }
 
@@ -191,7 +194,8 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   }
 
   private async getSubjectData(entry: any) {
-    const dataEntry = new SubjectEntry(entry, this.perspective!);
+    const dataEntry = new SubjectEntry(entry, this.perspective);
+
     await dataEntry.load();
 
     // @ts-ignore

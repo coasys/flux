@@ -112,8 +112,7 @@ export default defineComponent({
         this.isCreatingChannel = true;
 
         const channel = await this.repo?.create({
-          name,
-          views: this.selectedViews,
+          name: name.toString(),
         });
 
         this.$emit("submit");
@@ -126,6 +125,7 @@ export default defineComponent({
           },
         });
       } catch (e) {
+        console.log(e);
       } finally {
         this.isCreatingChannel = false;
       }
