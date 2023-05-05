@@ -1,4 +1,4 @@
-import { ref, shallowRef, watch } from "vue";
+import { ref, shallowRef, triggerRef, watch } from "vue";
 import { SubjectRepository } from "utils/factory";
 import { PerspectiveProxy, LinkExpression } from "@perspect3vism/ad4m";
 
@@ -17,7 +17,7 @@ export function useEntries<SubjectClass>({
     typeof perspective === "function" ? (perspective as any) : ref(perspective);
 
   let entries = ref<{ [x: string]: any }[]>([]);
-  let repo: SubjectRepository<any> | null = null;
+  let repo = shallowRef<SubjectRepository<any> | null>(null);
 
   watch(
     [perspectiveRef, sourceRef],
@@ -29,11 +29,11 @@ export function useEntries<SubjectClass>({
         });
 
         rep.getAllData(s).then((res) => {
-          console.log({ res }, model.name, s, p);
           entries.value = res;
         });
 
-        repo = rep;
+        repo.value = rep;
+        triggerRef(repo);
 
         subscribe(p, s);
       }
@@ -42,7 +42,7 @@ export function useEntries<SubjectClass>({
   );
 
   async function fetchEntry(id: string) {
-    const entry = await repo?.getData(id);
+    const entry = await repo.value?.getData(id);
 
     if (!entry) return;
 
@@ -73,7 +73,6 @@ export function useEntries<SubjectClass>({
         const isInstance = await p.isSubjectInstance(id, new model());
 
         if (isInstance) {
-          console.log("updated", link);
           fetchEntry(id);
         }
       }

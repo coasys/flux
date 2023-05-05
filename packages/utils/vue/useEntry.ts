@@ -1,13 +1,6 @@
-import {
-  watch,
-  ref,
-  shallowRef,
-  markRaw,
-  triggerRef,
-  shallowReactive,
-} from "vue";
+import { watch, ref, shallowRef, triggerRef } from "vue";
 import { SubjectRepository } from "utils/factory";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { PerspectiveProxy, LinkExpression } from "@perspect3vism/ad4m";
 
 export function useEntry<SubjectClass>({
   perspective,
@@ -42,6 +35,8 @@ export function useEntry<SubjectClass>({
         repo.value = r;
         triggerRef(repo);
 
+        subscribe(p, s);
+
         if (res) {
           entry.value = res;
         }
@@ -49,6 +44,56 @@ export function useEntry<SubjectClass>({
     },
     { immediate: true }
   );
+
+  async function fetchEntry(id: string) {
+    const res = await repo.value?.getData(id);
+
+    if (!res) return;
+
+    entry.value = res;
+  }
+
+  async function subscribe(p: PerspectiveProxy, s: string) {
+    const added = async (link: LinkExpression) => {
+      const isNewEntry = link.data.source === s;
+      const isUpdated = entry.value?.id === link.data.source;
+
+      const id = isNewEntry
+        ? link.data.target
+        : isUpdated
+        ? link.data.source
+        : false;
+
+      if (id) {
+        const isInstance = await p.isSubjectInstance(id, new model());
+
+        if (isInstance) {
+          fetchEntry(id);
+        }
+      }
+
+      return null;
+    };
+
+    const removed = async (link: LinkExpression) => {
+      const removedEntry = link.data.source === s;
+      if (removedEntry) {
+        const isInstance = await p.isSubjectInstance(
+          link.data.source,
+          new model()
+        );
+        if (isInstance) {
+          entry.value = null;
+        }
+      }
+      return null;
+    };
+
+    p.addListener("link-added", added);
+    p.addListener("link-removed", removed);
+
+    return { added };
+  }
 
   return { entry, repo };
 }

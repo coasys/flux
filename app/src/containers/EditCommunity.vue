@@ -88,10 +88,19 @@ export default defineComponent({
     async updateCommunity() {
       try {
         this.isUpdatingCommunity = true;
-        await this.repo?.update(this.community.id, {
+
+        const updated = await this.repo?.update(this.community.id, {
           name: this.communityName || undefined,
           description: this.communityDescription || undefined,
           image: this.communityImage || undefined,
+        });
+        console.log({
+          updated,
+          community: {
+            name: this.communityName || undefined,
+            description: this.communityDescription || undefined,
+            image: this.communityImage || undefined,
+          },
         });
       } catch (e) {
         console.log(e);
