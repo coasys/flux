@@ -41,7 +41,7 @@ export default defineComponent({
 
     const { entries: members } = useEntries({
       perspective: () => data.value.perspective,
-      source: "ad4m://self",
+      source: () => "ad4m://self",
       model: Member,
     });
 
