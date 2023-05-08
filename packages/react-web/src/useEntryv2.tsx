@@ -11,12 +11,12 @@ type Props<SubjectClass> = {
 };
 
 export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
-  const { perspective, source = "ad4m://self", id, model } = props;
-  const [error, setError] = useState<string | undefined>(undefined);
   const forceUpdate = useForceUpdate();
-
+  const [error, setError] = useState<string | undefined>(undefined);
+  const { perspective, source = "ad4m://self", id, model } = props;
   const cacheKey = `${perspective.uuid}/${source || ""}/${id}`;
 
+  // Create model
   const Model = useMemo(() => {
     return new SubjectRepository(model, {
       perspective: perspective,
@@ -24,11 +24,13 @@ export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
     });
   }, [perspective.uuid, source]);
 
+  // Mutate shared/cached data for all subscribers
   const mutate = useCallback(
     (entry: SubjectClass | null) => setCache(cacheKey, entry),
     [cacheKey]
   );
 
+  // Fetch data from AD4M and save to cache
   const getData = useCallback(() => {
     Model.getData(id)
       .then(async (entry) => {
@@ -38,29 +40,35 @@ export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
       .catch((error) => setError(error.toString()));
   }, [Model, mutate]);
 
-  // function subscribe() {
-  //   const added = (link: LinkExpression) => {
-  //     // const isNewEntry = link.data.source === source;
-  //     return null;
-  //   };
-
-  //   const removed = (link: LinkExpression) => {
-  //     if (link.data.target === source) {
-  //       mutate(null);
-  //     }
-  //     return null;
-  //   };
-
-  //   perspective.addListener("link-removed", removed);
-  //   perspective.addListener("link-added", added);
-
-  //   return { added, removed };
-  // }
-
-  // Trigger first fetch
+  // Trigger initial fetch
   useEffect(getData, [getData]);
 
-  // Subscribe to changes
+  // Listen to remote changes
+  useEffect(() => {
+    if (perspective.uuid) {
+      const added = (link: LinkExpression) => {
+        // const isNewEntry = link.data.source === source;
+        return null;
+      };
+
+      const removed = (link: LinkExpression) => {
+        if (link.data.target === source) {
+          mutate(null);
+        }
+        return null;
+      };
+
+      perspective.addListener("link-added", added);
+      perspective.addListener("link-removed", removed);
+
+      return () => {
+        perspective.removeListener("link-added", added);
+        perspective.removeListener("link-removed", removed);
+      };
+    }
+  }, [perspective.uuid, source, id]);
+
+  // Subscribe to changes (re-render on data change)
   useEffect(() => {
     subscribe(cacheKey, forceUpdate);
     return () => unsubscribe(cacheKey, forceUpdate);
