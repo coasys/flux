@@ -16,6 +16,7 @@ export class MyElement extends LitElement {
     :host {
       height: calc(100vh - var(--j-size-xl));
       display: block;
+      box-sizing: border-box;
     }
     .sidebar-layout {
       display: grid;
@@ -26,6 +27,7 @@ export class MyElement extends LitElement {
       height: 100vh;
       background: var(--j-color-ui-50);
       border-radius: var(--j-border-radius);
+      box-sizing: border-box;
     }
     .content {
       margin-left: var(--j-space-500);
