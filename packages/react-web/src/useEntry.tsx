@@ -1,5 +1,5 @@
 import { PerspectiveProxy, LinkExpression } from "@perspect3vism/ad4m";
-import { SubjectRepository } from "../factory";
+import { SubjectRepository } from "@fluxapp/api";
 import React, { useEffect, useState, useMemo } from "react";
 
 export default function useEntry<SubjectClass>({

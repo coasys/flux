@@ -1,4 +1,4 @@
-import { Settings, Connection } from "utils/helpers/WebRTCManager";
+import { Settings, Connection } from "@fluxapp/webrtc";
 
 export type Peer = {
   did: string;

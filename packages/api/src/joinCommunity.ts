@@ -1,6 +1,6 @@
 import { Community } from "@fluxapp/types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { getMetaFromLinks } from "../helpers";
+import { getMetaFromLinks } from "@fluxapp/utils";
 import { Ad4mClient } from "@perspect3vism/ad4m";
 
 export interface Payload {

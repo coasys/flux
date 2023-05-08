@@ -1,12 +1,14 @@
-import React, { createContext, useState, useEffect, useMemo } from "react";
+import React, { createContext, useState, useEffect } from "react";
 import useEntries from "./useEntries";
 import useEntry from "./useEntry";
-import ChannelModel from "../api/channel";
-import MemberModel from "../api/member";
-import { Community as CommunityModel } from "@fluxapp/api";
-import { getProfile } from "../api";
-import { EntryType } from "../types";
-import { asyncFilter } from "../helpers";
+import {
+  Channel as ChannelModel,
+  Member as MemberModel,
+  Community as CommunityModel,
+  getProfile,
+} from "@fluxapp/api";
+import { EntryType } from "@fluxapp/types";
+import { asyncFilter } from "@fluxapp/utils";
 
 type State = {
   uuid: string;

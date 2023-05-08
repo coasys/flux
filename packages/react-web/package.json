@@ -16,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@fluxapp/webrtc": "*",
     "@fluxapp/api": "*",
     "@fluxapp/types": "*",
     "@fluxapp/utils": "*"

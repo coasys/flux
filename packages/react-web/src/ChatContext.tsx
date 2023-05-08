@@ -5,26 +5,32 @@ import React, {
   useEffect,
   useRef,
 } from "react";
-import { Messages, Message, EntryType } from "../types";
+import { Messages, Message, EntryType } from "@fluxapp/types";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
-import getMessages from "../api/getMessages";
-import createMessage from "../api/createMessage";
-import subscribeToLinks from "../api/subscribeToLinks";
-import getMessage from "../api/getMessage";
-import { linkIs } from "../helpers";
-import deleteMessageReaction from "../api/deleteMessageReaction";
-import createMessageReaction from "../api/createMessageReaction";
-import createReply from "../api/createReply";
-import { sortExpressionsByTimestamp } from "../helpers/expressionHelpers";
-import { getMe, Me } from "../api";
-import { REACTION } from "../constants/communityPredicates";
-import hideEmbeds from "../api/hideEmbeds";
+
+import {
+  getMessage,
+  getMessages,
+  createMessage,
+  subscribeToLinks,
+  deleteMessageReaction,
+  createMessageReaction,
+  createReply,
+  hideEmbeds,
+  generateReply,
+  generateMessage,
+  checkUpdateSDNAVersion,
+  editCurrentMessage,
+  getMe,
+  Me,
+  predicates,
+} from "@fluxapp/api";
+
+import { linkIs, sortExpressionsByTimestamp } from "@fluxapp/utils";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import editCurrentMessage from "../api/editCurrentMessage";
-import { DEFAULT_LIMIT } from "../constants/sdna";
-import { checkUpdateSDNAVersion } from "../api/updateSDNA";
-import generateMessage from "../api/generateMessage";
-import generateReply from "../api/generateReply";
+
+const { DEFAULT_LIMIT } = predicates.sdna;
+const { REACTION } = predicates.community;
 
 type State = {
   communityId: string;

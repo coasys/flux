@@ -1,6 +1,5 @@
-import React, { createContext, useState, useEffect, useContext } from "react";
-import { getMe } from "@fluxapp/api";
-import { getProfile } from "@fluxapp/api";
+import React, { createContext, useState, useEffect } from "react";
+import { getMe, getProfile } from "@fluxapp/api";
 import { Profile } from "@fluxapp/types";
 
 type State = {

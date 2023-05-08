@@ -1,16 +1,17 @@
 import { useEffect, useState, useRef, useCallback } from "preact/hooks";
+import { getForVersion, setForVersion, throttle } from "@fluxapp/utils";
+
 import {
   Connection,
   Event,
   Settings,
   EventLogItem,
   WebRTCManager,
-  getForVersion,
-  setForVersion,
-} from "utils/helpers";
-import { defaultSettings, videoDimensions } from "utils/constants";
-import { getMe, Me } from "@fluxapp/api";
-import { throttle } from "utils/helpers";
+} from "@fluxapp/webrtc";
+
+import { predicates, getMe, Me } from "@fluxapp/api";
+
+const { defaultSettings, videoDimensions } = predicates.videoSettings;
 
 export type Peer = {
   did: string;

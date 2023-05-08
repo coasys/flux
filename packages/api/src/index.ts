@@ -7,6 +7,7 @@ import {
   generateSDNALinks,
   getSDNACreationLinks,
 } from "./createSDNA";
+import { checkUpdateSDNAVersion } from "./updateSDNA";
 import { deleteChannel } from "./deleteChannel";
 import deleteMessageReaction from "./deleteMessageReaction";
 import { deleteSDNALinks } from "./deleteSDNALinks";
@@ -49,6 +50,7 @@ import { SubjectRepository } from "./factory";
 import * as predicates from "./constants";
 
 export {
+  checkUpdateSDNAVersion,
   predicates,
   SubjectRepository,
   Me,
