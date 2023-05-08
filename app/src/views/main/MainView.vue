@@ -101,12 +101,12 @@ import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
 import { mapActions } from "pinia";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
-import { EntryType } from "utils/types";
+import { EntryType } from "@fluxapp/types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import semver from "semver";
 import { dependencies } from "../../../package.json";
 import { LinkExpression, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
-import { useEntry, usePerspective, usePerspectives } from "utils/vue";
+import { useEntry, usePerspective, usePerspectives } from "@fluxapp/vue";
 import { Community } from "@fluxapp/api";
 
 export default defineComponent({

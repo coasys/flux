@@ -83,7 +83,7 @@ import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
 import { defineComponent } from "vue";
 import Avatar from "@/components/avatar/Avatar.vue";
-import { usePerspectives, useCommunities } from "utils/vue";
+import { usePerspectives, useCommunities } from "@fluxapp/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export default defineComponent({

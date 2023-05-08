@@ -45,7 +45,7 @@
 <script lang="ts">
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { defineComponent } from "vue";
-import { Profile } from "utils/types";
+import { Profile } from "@fluxapp/types";
 import { useUserStore } from "@/store/user";
 import { useAppStore } from "@/store/app";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";

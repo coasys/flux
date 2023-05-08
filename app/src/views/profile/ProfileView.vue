@@ -168,7 +168,7 @@
 
 <script lang="ts">
 import { useDataStore } from "@/store/data";
-import { Profile } from "utils/types";
+import { Profile } from "@fluxapp/types";
 import { ModalsState } from "@/store/types";
 import { LinkExpression } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
@@ -183,7 +183,7 @@ import Avatar from "@/components/avatar/Avatar.vue";
 import { getImage } from "@fluxapp/utils";
 import WebLinkAdd from "./WebLinkAdd.vue";
 import { getAgentWebLinks } from "@fluxapp/api";
-import { usePerspectives, useCommunities, useAgent, useMe } from "utils/vue";
+import { usePerspectives, useCommunities, useAgent, useMe } from "@fluxapp/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { useRoute } from "vue-router";
 

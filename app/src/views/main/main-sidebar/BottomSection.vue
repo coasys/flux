@@ -30,7 +30,7 @@ import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { mapActions, mapState } from "pinia";
 import Avatar from "@/components/avatar/Avatar.vue";
-import { useMe } from "utils/vue";
+import { useMe } from "@fluxapp/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export default defineComponent({

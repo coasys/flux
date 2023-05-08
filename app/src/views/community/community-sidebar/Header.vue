@@ -115,7 +115,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import { Profile } from "utils/types";
+import { Profile } from "@fluxapp/types";
 import { ChannelState } from "@/store/types";
 import { mapActions, mapState } from "pinia";
 import { useDataStore } from "@/store/data";
@@ -124,7 +124,7 @@ import { useUserStore } from "@/store/user";
 import Avatar from "@/components/avatar/Avatar.vue";
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { useMe } from "utils/vue";
+import { useMe } from "@fluxapp/vue";
 
 export default defineComponent({
   components: { Avatar, LoadingBar },

@@ -1,4 +1,4 @@
-import { Profile } from "utils/types";
+import { Profile } from "@fluxapp/types";
 import { AgentStatus } from "@perspect3vism/ad4m";
 import { useUserStore } from "..";
 
@@ -16,5 +16,5 @@ export default {
   setUserProfile(payload: Profile): void {
     const store = useUserStore();
     store.profile = payload;
-  }
+  },
 };

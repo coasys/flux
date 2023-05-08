@@ -41,7 +41,7 @@
 import { defineComponent, ref } from "vue";
 import { useAppStore } from "@/store/app";
 import { useDataStore } from "@/store/data";
-import { ChannelView } from "utils/types";
+import { ChannelView } from "@fluxapp/types";
 import ChannnelViewOptions from "@/components/channel-view-options/ChannelViewOptions.vue";
 import { viewOptions } from "@/constants";
 

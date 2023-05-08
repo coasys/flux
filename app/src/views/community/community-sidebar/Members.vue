@@ -25,7 +25,7 @@ import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { mapActions } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
-import { useEntries, useEntry, usePerspective } from "utils/vue";
+import { useEntries, useEntry, usePerspective } from "@fluxapp/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect";
 import { Member } from "@fluxapp/api";
 import { useRoute } from "vue-router";

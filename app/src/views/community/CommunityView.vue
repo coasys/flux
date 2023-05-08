@@ -207,8 +207,8 @@ import { useUserStore } from "@/store/user";
 import { useDataStore } from "@/store/data";
 import { mapActions, mapState } from "pinia";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { useEntries, useEntry } from "utils/vue";
-import { usePerspective } from "utils/vue";
+import { useEntries, useEntry } from "@fluxapp/vue";
+import { usePerspective } from "@fluxapp/vue";
 
 type LoadedChannels = {
   [channelId: string]: boolean;

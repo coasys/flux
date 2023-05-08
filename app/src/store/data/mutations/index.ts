@@ -4,7 +4,7 @@ import {
   LocalCommunityState,
   ChannelState,
 } from "@/store/types";
-import { ChannelView, CommunityMetaData } from "utils/types";
+import { ChannelView, CommunityMetaData } from "@fluxapp/types";
 import { useDataStore } from "@/store/data";
 import { PerspectiveState } from "@perspect3vism/ad4m";
 

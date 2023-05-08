@@ -46,7 +46,7 @@ import {
   getImage,
   resizeImage,
 } from "@fluxapp/utils";
-import { useEntry, usePerspective } from "utils/vue";
+import { useEntry, usePerspective } from "@fluxapp/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { Community } from "@fluxapp/api";
 

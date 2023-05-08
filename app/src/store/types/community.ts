@@ -1,5 +1,5 @@
 import { PerspectiveState } from "@perspect3vism/ad4m";
-import { Community } from "utils/types";
+import { Community } from "@fluxapp/types";
 import { ThemeState } from "./ui";
 
 export interface CommunityState {

@@ -4,7 +4,7 @@ import {
   ChannelState,
   LocalCommunityState,
 } from "@/store/types";
-import { Community } from "utils/types";
+import { Community } from "@fluxapp/types";
 
 export default {
   getCommunity:

@@ -54,9 +54,9 @@
 
 <script lang="ts">
 import { useDataStore } from "@/store/data";
-import { useEntry, usePerspective } from "utils/vue";
+import { useEntry, usePerspective } from "@fluxapp/vue";
 import { isValid } from "@/utils/validation";
-import { ChannelView } from "utils/types";
+import { ChannelView } from "@fluxapp/types";
 import { defineComponent } from "vue";
 import ChannelViewOptions from "@/components/channel-view-options/ChannelViewOptions.vue";
 import { useRoute } from "vue-router";

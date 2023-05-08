@@ -1,7 +1,7 @@
 import { UserState } from "./userprofile";
 import { LocalCommunityState } from "./community";
 import { ChannelState } from "./channel";
-import { Community } from "utils/types";
+import { Community } from "@fluxapp/types";
 import {
   WindowState,
   ModalsState,

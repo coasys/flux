@@ -150,10 +150,10 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Profile from "@/containers/Profile.vue";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
-import { ChannelView, EntryType } from "utils/types";
+import { ChannelView, EntryType } from "@fluxapp/types";
 import { viewOptions } from "@/constants";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
-import { useEntry, usePerspective } from "utils/vue";
+import { useEntry, usePerspective } from "@fluxapp/vue";
 import { Community, Channel } from "@fluxapp/api";
 
 interface MentionTrigger {

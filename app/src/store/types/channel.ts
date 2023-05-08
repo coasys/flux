@@ -1,4 +1,4 @@
-import { ChannelView } from "utils/types";
+import { ChannelView } from "@fluxapp/types";
 export interface ChannelState {
   id: string;
   name: string;

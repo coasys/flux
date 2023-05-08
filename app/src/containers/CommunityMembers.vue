@@ -55,13 +55,13 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { Profile } from "utils/types";
+import { Profile } from "@fluxapp/types";
 import { useDataStore } from "@/store/data";
 
 import { getProfile } from "@fluxapp/api";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Avatar from "@/components/avatar/Avatar.vue";
-import { Community } from "utils/types";
+import { Community } from "@fluxapp/types";
 
 export default defineComponent({
   emits: ["close", "submit"],

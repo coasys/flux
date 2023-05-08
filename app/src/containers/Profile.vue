@@ -41,7 +41,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { Profile } from "utils/types";
+import { Profile } from "@fluxapp/types";
 import { getProfile } from "@fluxapp/api";
 import Avatar from "@/components/avatar/Avatar.vue";
 

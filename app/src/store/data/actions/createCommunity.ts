@@ -2,7 +2,7 @@ import { createCommunity } from "@fluxapp/api";
 import { CommunityState } from "@/store/types";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";
-import { ChannelView } from "utils/types";
+import { ChannelView } from "@fluxapp/types";
 
 export interface Payload {
   perspectiveName: string;
