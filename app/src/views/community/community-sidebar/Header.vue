@@ -124,7 +124,7 @@ import { useUserStore } from "@/store/user";
 import Avatar from "@/components/avatar/Avatar.vue";
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { useAgent } from "utils/vue";
+import { useMe } from "utils/vue";
 
 export default defineComponent({
   components: { Avatar, LoadingBar },
@@ -138,7 +138,7 @@ export default defineComponent({
   async setup(props) {
     const client = await getAd4mClient();
 
-    const { status, agent: me } = useAgent(client.agent);
+    const { status, agent: me } = useMe(client.agent);
 
     return {
       status,
