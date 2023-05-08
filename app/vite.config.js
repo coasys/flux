@@ -28,7 +28,7 @@ export default {
               tag === "graph-view" ||
               tag === "webrtc-view" ||
               tag === "webrtc-debug-view" ||
-              tag === "forum-view"
+              tag === "post-view"
             );
           },
         },
