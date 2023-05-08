@@ -29,7 +29,7 @@ export class Channel {
   @subjectCollection({
     through: CHANNEL_VIEW,
   })
-  views: string[] = [];
+  views: string[];
 }
 
 export interface UpdateChannel {

@@ -12,7 +12,7 @@ export default function useEntries<SubjectClass>({
   model: SubjectClass;
 }) {
   const [loading, setLoading] = useState(false);
-  const [entries, setEntries] = useState<[{ [x: string]: any }]>([]);
+  const [entries, setEntries] = useState<SubjectClass[]>([]);
 
   const Model: SubjectRepository<{
     [x: string]: any;

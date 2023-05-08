@@ -6,11 +6,6 @@
     "downlevelIteration": true,
     "experimentalDecorators": true
   },
-  "include": ["**/*", "../utils/**/*"],
-  "exclude": [
-    "node_modules",
-    "../utils/node_modules",
-    "../../node_modules",
-    "**/*.spec.ts"
-  ]
+  "include": ["src**/*.ts"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
 }

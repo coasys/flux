@@ -78,10 +78,10 @@ export class MyElement extends LitElement {
   theme = "";
 
   @state()
-  channels = [];
+  channels: Channel[] = [];
 
   @state()
-  community = {};
+  community: Community | null = null;
 
   constructor() {
     super();
@@ -89,7 +89,7 @@ export class MyElement extends LitElement {
     this.perspectiveUuid = localStorage.getItem("perspectiveUuid") || "";
     this.source = localStorage.getItem("source") || "ad4m://self";
     this.theme = localStorage.getItem("theme") || "dark";
-    this.community = {};
+    this.community = null;
     this.channels = [];
     this.perspectives = [];
 
@@ -161,7 +161,9 @@ export class MyElement extends LitElement {
       perspective: perspective,
     }).getAllData();
 
-    this.channels = channels.map((c) => ({ id: c.id, name: c.name }));
+    console.log({ channels });
+
+    this.channels = channels;
     this.source = channels[0]?.id || "ad4m://self";
 
     // @ts-ignore
@@ -198,6 +200,8 @@ export class MyElement extends LitElement {
   }
 
   render() {
+    console.log(this.community);
+
     return html`
       <div class="sidebar-layout">
         <aside class="sidebar">
@@ -233,11 +237,11 @@ export class MyElement extends LitElement {
             </div>
 
             <div>
-              <j-text variant="label"
-                >${this.perspectiveHasNoCommunity
+              <j-text variant="label">
+                ${this.perspectiveHasNoCommunity
                   ? "No community!"
-                  : "Current channel:"}</j-text
-              >
+                  : "Current channel:"}
+              </j-text>
               <select
                 .value=${this.source}
                 @change=${(e: any) => this.setChannel(e.target.value)}
