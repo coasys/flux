@@ -26,7 +26,7 @@ export default function Post({
     state: { members },
   } = useContext(CommunityContext);
 
-  const { entry: post } = useEntry({
+  const { entry: post, error } = useEntry({
     perspective: perspective,
     source,
     id,
