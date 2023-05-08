@@ -76,9 +76,9 @@
         @click="onViewClick"
         @hide-notification-indicator="onHideNotificationIndicator"
       ></chat-view>
-      <forum-view
-        v-show="currentView === ChannelView.Forum"
-        v-if="filteredViewOptions.find((v) => v.type === ChannelView.Forum)"
+      <post-view
+        v-show="currentView === ChannelView.Post"
+        v-if="filteredViewOptions.find((v) => v.type === ChannelView.Post)"
         class="perspective-view"
         :perspective.prop="data.perspective"
         :source="channel.id"
@@ -87,7 +87,7 @@
         @channel-click="onChannelClick"
         @neighbourhood-click="onNeighbourhoodClick"
         @hide-notification-indicator="onHideNotificationIndicator"
-      ></forum-view>
+      ></post-view>
       <graph-view
         v-show="currentView === ChannelView.Graph"
         v-if="filteredViewOptions.find((v) => v.type === ChannelView.Graph)"
@@ -215,13 +215,13 @@ export default defineComponent({
   async mounted() {
     try {
       this.allDefined = false;
-      console.log("before define");
+
       if (!customElements.get("chat-view")) {
         const module = await import(`@fluxapp/chat-view`);
         customElements.define("chat-view", module.default);
       }
       if (!customElements.get("forum-view")) {
-        const module = await import(`@fluxapp/forum-view`);
+        const module = await import(`@fluxapp/post-view`);
         customElements.define("forum-view", module.default);
       }
       if (!customElements.get("graph-view")) {
@@ -236,7 +236,7 @@ export default defineComponent({
         const module = await import(`flux-webrtc-debug-view`);
         customElements.define("webrtc-debug-view", module.default);
       }
-      console.log("after define");
+
       this.allDefined = true;
     } catch (e) {
       console.log(e);

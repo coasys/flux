@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useMemo } from "preact/hooks";
 import Editor from "../Editor";
 import { PostOption, postOptions } from "../../constants/options";
-import FileUpload from "../../components/FileUpload";
+import FileUpload from "../FileUpload";
 import styles from "./index.module.css";
 import { blobToDataURL, dataURItoBlob, resizeImage } from "utils/helpers";
 import PostImagePreview from "../PostImagePreview";

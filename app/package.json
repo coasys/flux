@@ -17,10 +17,10 @@
   "main": "background.js",
   "dependencies": {
     "@fluxapp/chat-view": "*",
-    "@fluxapp/forum-view": "*",
+    "@fluxapp/post-view": "*",
     "@fluxapp/graph-view": "*",
-    "@fluxapp/ui": "*",
     "@fluxapp/webrtc-view": "*",
+    "@fluxapp/ui": "*",
     "@perspect3vism/ad4m": "0.3.4",
     "@perspect3vism/ad4m-connect": "0.3.4",
     "construct-style-sheets-polyfill": "^3.1.0",
