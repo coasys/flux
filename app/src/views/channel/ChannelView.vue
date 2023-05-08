@@ -220,9 +220,9 @@ export default defineComponent({
         const module = await import(`@fluxapp/chat-view`);
         customElements.define("chat-view", module.default);
       }
-      if (!customElements.get("forum-view")) {
+      if (!customElements.get("post-view")) {
         const module = await import(`@fluxapp/post-view`);
-        customElements.define("forum-view", module.default);
+        customElements.define("post-view", module.default);
       }
       if (!customElements.get("graph-view")) {
         const module = await import(`@fluxapp/graph-view`);
