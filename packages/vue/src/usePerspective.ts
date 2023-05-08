@@ -1,4 +1,4 @@
-import { ref, computed, watch, shallowRef } from "vue";
+import { ref, watch, shallowRef } from "vue";
 import { usePerspectives } from "./usePerspectives";
 import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
 

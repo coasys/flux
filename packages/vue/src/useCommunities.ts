@@ -1,7 +1,7 @@
-import { ref, effect, watch, ShallowRef } from "vue";
+import { ref, watch, ShallowRef } from "vue";
 import { SubjectRepository } from "@fluxapp/api";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
-import { Community } from "../api";
+import { Community } from "@fluxapp/api";
 
 export function useCommunities(
   perspectives: ShallowRef<{

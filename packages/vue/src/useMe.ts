@@ -1,8 +1,11 @@
 import { computed, ref, watch } from "vue";
 import { Agent, AgentStatus } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
-import { mapLiteralLinks } from "../helpers";
-import {
+import { mapLiteralLinks } from "@fluxapp/utils";
+import { profile } from "@fluxapp/constants";
+import { Profile } from "@fluxapp/types";
+
+const {
   FLUX_PROFILE,
   HAS_BG_IMAGE,
   HAS_BIO,
@@ -12,8 +15,7 @@ import {
   HAS_PROFILE_IMAGE,
   HAS_THUMBNAIL_IMAGE,
   HAS_USERNAME,
-} from "../constants";
-import { Profile } from "../types";
+} = profile;
 
 const status = ref<AgentStatus>({ isInitialized: false, isUnlocked: false });
 const agent = ref<Agent | undefined>();
