@@ -1,13 +1,9 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { createLiteralObject } from "@fluxapp/utils";
-import {
-  AREA_WEBLINK,
-  OG_DESCRIPTION,
-  OG_IMAGE,
-  OG_LINK,
-  OG_TITLE,
-} from "./constants/profile";
+import { profile } from "@fluxapp/constants";
 import { WebLink } from "@fluxapp/types";
+
+const { AREA_WEBLINK, OG_DESCRIPTION, OG_IMAGE, OG_LINK, OG_TITLE } = profile;
 
 export default async function createAgentWebLink(payload: {
   title: string;

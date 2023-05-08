@@ -1,6 +1,8 @@
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import { Message } from "@fluxapp/types";
-import { REPLY_TO } from "./constants/communityPredicates";
+import { community } from "@fluxapp/constants";
+
+const { REPLY_TO } = community;
 
 export interface Payload {
   perspectiveUuid: string;

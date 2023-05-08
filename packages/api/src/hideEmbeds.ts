@@ -1,6 +1,8 @@
 import { Link } from "@perspect3vism/ad4m";
-import { CARD_HIDDEN, OMIT } from "./constants/communityPredicates";
+import { community } from "@fluxapp/constants";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+
+const { CARD_HIDDEN, OMIT } = community;
 
 export interface Payload {
   perspectiveUuid: string;

@@ -1,4 +1,4 @@
-import { Message, Messages } from "../types";
+import { Message, Messages } from "@fluxapp/types";
 import { Expression, LinkExpression } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 

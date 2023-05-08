@@ -1,8 +1,8 @@
-import { DexieLinks } from "../helpers/storageHelpers";
+import { DexieLinks } from "./storageHelpers";
 
-export function cacheLinks(url: string, data: any): void {    
-    const dexie = new DexieLinks("links");
-    dexie.save(url, data);
+export function cacheLinks(url: string, data: any): void {
+  const dexie = new DexieLinks("links");
+  dexie.save(url, data);
 }
 
 export async function getCacheLinks(url: string) {

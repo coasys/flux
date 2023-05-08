@@ -1,17 +1,11 @@
 import { Link, LinkInput } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
+import { community } from "@fluxapp/constants";
+import { EntryType, PropertyMap, PredicateMap } from "@fluxapp/types";
 
-import {
-  CARD_HIDDEN,
-  CHANNEL,
-  MEMBER,
-  REACTION,
-  EDITED_TO,
-  REPLY_TO,
-  ZOME,
-} from "../constants/communityPredicates";
-import { EntryType, PropertyMap, PredicateMap } from "../types";
+const { CARD_HIDDEN, CHANNEL, MEMBER, REACTION, EDITED_TO, REPLY_TO, ZOME } =
+  community;
 
 export const findLink = {
   name: (link: LinkExpression) => link.data.predicate === "rdf://name",

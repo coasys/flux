@@ -5,7 +5,7 @@ import { getTimeSince } from "@fluxapp/utils";
 import { Profile } from "@fluxapp/types";
 import Avatar from "../Avatar";
 import Editor from "../Editor";
-import { Message as MessageModel } from "utils/api";
+import { Message as MessageModel } from "@fluxapp/api";
 
 export default function CommentItem({ comment, perspective }) {
   const [showComments, setShowComments] = useState(true);

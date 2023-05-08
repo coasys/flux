@@ -3,7 +3,7 @@ import PostItem from "../PostItem";
 import style from "./index.module.css";
 import { DisplayView, displayOptions } from "../../constants/options";
 import { useEntries } from "@fluxapp/react-web";
-import { Post } from "utils/api";
+import { Post } from "@fluxapp/api";
 import { useEffect, useMemo } from "react";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 

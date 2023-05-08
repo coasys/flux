@@ -1,4 +1,9 @@
-import {
+import { profile } from "@fluxapp/constants";
+import { Profile } from "@fluxapp/types";
+import { mapLiteralLinks, DexieProfile } from "@fluxapp/utils";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+
+const {
   HAS_USERNAME,
   HAS_GIVEN_NAME,
   HAS_FAMILY_NAME,
@@ -8,10 +13,7 @@ import {
   FLUX_PROFILE,
   HAS_BG_IMAGE,
   HAS_BIO,
-} from "./constants/profile";
-import { Profile } from "@fluxapp/types";
-import { mapLiteralLinks, DexieProfile } from "@fluxapp/utils";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+} = profile;
 
 export interface Payload {
   url: string;

@@ -1,12 +1,8 @@
-import {
-  DESCRIPTION,
-  IMAGE,
-  NAME,
-  THUMBNAIL,
-  ENTRY_TYPE,
-} from "../constants/communityPredicates";
-import { FILE_STORAGE_LANGUAGE } from "../constants/languages";
 import { EntryType } from "@fluxapp/types";
+import { community, languages } from "@fluxapp/constants";
+
+const { FILE_STORAGE_LANGUAGE } = languages;
+const { DESCRIPTION, IMAGE, NAME, THUMBNAIL, ENTRY_TYPE } = community;
 
 import {
   SDNAClass,

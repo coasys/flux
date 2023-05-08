@@ -1,14 +1,16 @@
 import { Literal } from "@perspect3vism/ad4m";
 import { Message } from "@fluxapp/types";
 import { extractPrologResults, getPrologQuery } from "@fluxapp/utils";
-import {
+import { sdna } from "@fluxapp/constants";
+import { checkUpdateSDNAVersion } from "./updateSDNA";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+
+const {
   DEFAULT_LIMIT,
   messageFilteredQuery,
   messageQuery,
   messageFilteredQueryBackwards,
-} from "./constants/sdna";
-import { checkUpdateSDNAVersion } from "./updateSDNA";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+} = sdna;
 
 export interface Payload {
   perspectiveUuid: string;

@@ -1,4 +1,4 @@
-import { BODY, REPLY_TO, ENTRY_TYPE } from "../constants/communityPredicates";
+import { community } from "@fluxapp/constants";
 import { EntryType } from "@fluxapp/types";
 import {
   SDNAClass,
@@ -6,6 +6,8 @@ import {
   subjectCollection,
   subjectFlag,
 } from "@perspect3vism/ad4m";
+
+const { BODY, REPLY_TO, ENTRY_TYPE } = community;
 
 @SDNAClass({
   name: "Message",

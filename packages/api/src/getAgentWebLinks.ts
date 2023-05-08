@@ -1,14 +1,10 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
 import { mapLiteralLinks } from "@fluxapp/utils";
-import {
-  OG_DESCRIPTION,
-  OG_TITLE,
-  OG_IMAGE,
-  AREA_WEBLINK,
-  OG_LINK,
-} from "./constants/profile";
+import { profile } from "@fluxapp/constants";
 import { WebLink } from "@fluxapp/types";
+
+const { OG_DESCRIPTION, OG_TITLE, OG_IMAGE, AREA_WEBLINK, OG_LINK } = profile;
 
 export default async function getAgentWebLinks(
   did: string

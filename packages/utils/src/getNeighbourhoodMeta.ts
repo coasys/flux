@@ -1,7 +1,9 @@
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
-import { DESCRIPTION, NAME, CREATOR, CREATED_AT } from "../constants";
-import { NeighbourhoodMetaData } from "../types";
+import { NeighbourhoodMetaData } from "@fluxapp/types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { community } from "@fluxapp/constants";
+
+const { DESCRIPTION, NAME, CREATOR, CREATED_AT } = community;
 
 export function getMetaFromLinks(
   links: LinkExpression[]

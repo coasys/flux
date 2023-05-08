@@ -17,7 +17,9 @@ import ReactHintFactory from "react-hint";
 import "react-hint/css/index.css";
 import styles from "./index.module.css";
 import { Message, Reaction } from "@fluxapp/types";
-import { REACTION } from "utils/constants";
+import { community } from "@fluxapp/constants";
+
+const { REACTION } = community;
 
 const ReactHint = ReactHintFactory({ createElement: h, Component, createRef });
 

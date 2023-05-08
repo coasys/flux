@@ -1,6 +1,7 @@
 import { Link } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { DELETED } from "./constants/communityPredicates";
+import { community } from "@fluxapp/constants";
+const { DELETED } = community;
 
 export interface Payload {
   perspectiveUuid: string;

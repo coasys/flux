@@ -47,11 +47,9 @@ import getAgentWebLinks from "./getAgentWebLinks";
 import getAd4mProfile from "./getAd4mProfile";
 import subscribeToSyncState from "./subscribeToSyncState";
 import { SubjectRepository } from "./factory";
-import * as predicates from "./constants";
 
 export {
   checkUpdateSDNAVersion,
-  predicates,
   SubjectRepository,
   Me,
   Channel,

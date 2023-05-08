@@ -1,5 +1,6 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { CHANNEL, SELF } from "./constants/communityPredicates";
+import { community } from "@fluxapp/constants";
+const { CHANNEL, SELF } = community;
 
 export interface LinkData {
   id: string;

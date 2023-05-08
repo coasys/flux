@@ -1,13 +1,10 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import {
-  SELF,
-  ZOME,
-  SDNA_VERSION,
-  CREATED_AT,
-} from "./constants/communityPredicates";
+import { community } from "@fluxapp/constants";
 import { LinkQuery, Literal, LinkExpression } from "@perspect3vism/ad4m";
 import { SDNAValues } from "./generateSDNALiteral";
 import { SdnaVersion } from "@fluxapp/types";
+
+const { SELF, ZOME, SDNA_VERSION, CREATED_AT } = community;
 
 export async function getSDNALinkLiteral(
   perspectiveUuid: string

@@ -5,8 +5,8 @@ import FileUpload from "../FileUpload";
 import styles from "./index.module.css";
 import { blobToDataURL, dataURItoBlob, resizeImage } from "@fluxapp/utils";
 import PostImagePreview from "../PostImagePreview";
-import { SubjectRepository } from "utils/factory";
-import { Post as PostSubject } from "utils/api";
+import { SubjectRepository } from "@fluxapp/api";
+import { Post as PostSubject } from "@fluxapp/api";
 
 const initialState = {
   title: null,

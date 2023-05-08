@@ -1,13 +1,4 @@
-import {
-  BODY,
-  END_DATE,
-  IMAGE,
-  START_DATE,
-  TITLE,
-  URL,
-  ENTRY_TYPE,
-} from "../constants/communityPredicates";
-import { FILE_STORAGE_LANGUAGE } from "../constants/languages";
+import { community, languages } from "@fluxapp/constants";
 import { EntryType } from "@fluxapp/types";
 import {
   SDNAClass,
@@ -15,6 +6,9 @@ import {
   subjectCollection,
   subjectFlag,
 } from "@perspect3vism/ad4m";
+
+const { BODY, END_DATE, IMAGE, START_DATE, TITLE, URL, ENTRY_TYPE } = community;
+const { FILE_STORAGE_LANGUAGE } = languages;
 
 @SDNAClass({
   name: "Post",

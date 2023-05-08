@@ -18,5 +18,4 @@ export * from "./sleep";
 export * from "./storageHelpers";
 export * from "./timeHelpers";
 export * from "./asyncFilter";
-export * from "./WebRTCManager";
 export * from "./throttle";

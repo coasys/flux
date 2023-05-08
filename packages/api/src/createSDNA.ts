@@ -1,14 +1,10 @@
 import { Link, LinkExpression, Literal } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import {
-  CREATED_AT,
-  SDNA_VERSION,
-  SELF,
-  ZOME,
-} from "./constants/communityPredicates";
-import { LATEST_SDNA_VERSION, SDNA_CREATION_DATE } from "./constants/sdna";
+import { community, sdna } from "@fluxapp/constants";
 import { generateSDNALiteral } from "./generateSDNALiteral";
 import { SDNAValues } from "./generateSDNALiteral";
+const { CREATED_AT, SDNA_VERSION, SELF, ZOME } = community;
+const { LATEST_SDNA_VERSION, SDNA_CREATION_DATE } = sdna;
 
 export function generateSDNALinks(sdnaLiteral: Literal): Link[] {
   const sdnaUrl = sdnaLiteral.toUrl();

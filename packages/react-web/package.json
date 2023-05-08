@@ -19,6 +19,7 @@
     "@fluxapp/webrtc": "*",
     "@fluxapp/api": "*",
     "@fluxapp/types": "*",
+    "@fluxapp/constants": "*",
     "@fluxapp/utils": "*"
   },
   "peerDependencies": {

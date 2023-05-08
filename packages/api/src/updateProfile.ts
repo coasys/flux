@@ -1,13 +1,5 @@
 import { Profile } from "@fluxapp/types";
-import { FILE_STORAGE_LANGUAGE } from "./constants/languages";
-import {
-  FLUX_PROFILE,
-  HAS_BG_IMAGE,
-  HAS_BIO,
-  HAS_PROFILE_IMAGE,
-  HAS_THUMBNAIL_IMAGE,
-  HAS_USERNAME,
-} from "./constants/profile";
+import { languages, profile } from "@fluxapp/constants";
 import {
   resizeImage,
   dataURItoBlob,
@@ -20,6 +12,16 @@ import {
 import getProfile from "./getProfile";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { LinkExpression } from "@perspect3vism/ad4m";
+
+const { FILE_STORAGE_LANGUAGE } = languages;
+const {
+  FLUX_PROFILE,
+  HAS_BG_IMAGE,
+  HAS_BIO,
+  HAS_PROFILE_IMAGE,
+  HAS_THUMBNAIL_IMAGE,
+  HAS_USERNAME,
+} = profile;
 
 export interface Payload {
   username?: string;

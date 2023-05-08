@@ -1,8 +1,10 @@
 import { SDNAValues } from "./generateSDNALiteral";
 import { getSDNACreationLinks } from "./createSDNA";
 import { getSDNAVersion, getFluxSDNALinks } from "./getSDNA";
-import { LATEST_SDNA_VERSION } from "./constants/sdna";
+import { sdna } from "@fluxapp/constants";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+
+const { LATEST_SDNA_VERSION } = sdna;
 
 export async function updateSDNA(
   perspectiveUuid: string,

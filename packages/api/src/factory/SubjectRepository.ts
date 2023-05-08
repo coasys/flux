@@ -5,13 +5,15 @@ import {
   Literal,
   LinkQuery,
 } from "@perspect3vism/ad4m";
-import { SELF } from "../constants/communityPredicates";
+import { community } from "@fluxapp/constants";
 import {
   collectionToAdderName,
   collectionToSetterName,
   SubjectEntry,
 } from "./model";
 import { v4 as uuidv4 } from "uuid";
+
+const { SELF } = community;
 
 export type ModelProps = {
   perspective: PerspectiveProxy;

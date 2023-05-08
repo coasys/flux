@@ -3,7 +3,9 @@ import { v4 as uuidv4 } from "uuid";
 import { Link } from "@perspect3vism/ad4m";
 import { Entry, EntryInput } from "@fluxapp/types";
 import { createLinks } from "@fluxapp/utils";
-import { ENTRY_TYPE, SELF } from "./constants/communityPredicates";
+import { community } from "@fluxapp/constants";
+
+const { ENTRY_TYPE, SELF } = community;
 
 export async function createEntry(entry: EntryInput): Promise<Entry> {
   const client = await getAd4mClient();

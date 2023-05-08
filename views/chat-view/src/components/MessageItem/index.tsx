@@ -9,15 +9,16 @@ import MessageToolbar from "./MessageToolbar";
 import MessageReactions from "./MessageReactions";
 import MessageReply from "./MessageReply";
 import UIContext from "../../context/UIContext";
-import { REACTION } from "utils/constants";
+import { community } from "@fluxapp/constants";
 import { format } from "date-fns/esm";
 import { getTimeSince } from "@fluxapp/utils";
 import Avatar from "../../components/Avatar";
 import EditorContext from "../../context/EditorContext";
 import { Message, Profile } from "@fluxapp/types";
 import MessageCards from "./MessageCards";
-
 import styles from "./index.module.css";
+
+const { REACTION } = community;
 
 export default function MessageItem({
   message,

@@ -1,6 +1,7 @@
 import { SDNAClass, subjectFlag, subjectProperty } from "@perspect3vism/ad4m";
 import { EntryType } from "@fluxapp/types";
-import { DID, ENTRY_TYPE } from "../constants/communityPredicates";
+import { community } from "@fluxapp/constants";
+const { DID, ENTRY_TYPE } = community;
 
 @SDNAClass({
   name: "Member",

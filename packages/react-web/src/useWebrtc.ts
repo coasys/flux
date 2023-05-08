@@ -9,9 +9,10 @@ import {
   WebRTCManager,
 } from "@fluxapp/webrtc";
 
-import { predicates, getMe, Me } from "@fluxapp/api";
+import { getMe, Me } from "@fluxapp/api";
+import { videoSettings } from "@fluxapp/constants";
 
-const { defaultSettings, videoDimensions } = predicates.videoSettings;
+const { defaultSettings, videoDimensions } = videoSettings;
 
 export type Peer = {
   did: string;

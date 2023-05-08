@@ -5,9 +5,9 @@ import { format, formatDistance } from "date-fns";
 import { getTimeSince } from "@fluxapp/utils";
 import Avatar from "../Avatar";
 import CommentSection from "../CommentSection";
-import { Post as PostSubject } from "utils/api";
+import { Post as PostSubject } from "@fluxapp/api";
 import { CommunityContext, useEntry } from "@fluxapp/react-web";
-import { getMe, Me } from "utils/api";
+import { getMe, Me } from "@fluxapp/api";
 
 import styles from "./index.module.css";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";

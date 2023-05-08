@@ -1,22 +1,4 @@
-import {
-  AD4M_AGENT,
-  KAICHAO_AGENT,
-  JUNTO_AGENT,
-  NOTE_IPFS_AUTHOR,
-} from "./constants/agents";
-
-import { FILE_STORAGE_LANGUAGE } from "./constants/languages";
-
-import {
-  FLUX_PROFILE,
-  HAS_EMAIL,
-  HAS_FAMILY_NAME,
-  HAS_GIVEN_NAME,
-  HAS_PROFILE_IMAGE,
-  HAS_THUMBNAIL_IMAGE,
-  HAS_USERNAME,
-} from "./constants/profile";
-
+import { agents, languages, profile } from "@fluxapp/constants";
 import { resizeImage, dataURItoBlob, blobToDataURL } from "@fluxapp/utils";
 import {
   Ad4mClient,
@@ -24,10 +6,20 @@ import {
   LinkExpression,
   LinkMutations,
 } from "@perspect3vism/ad4m";
-
 import { Profile } from "@fluxapp/types";
-
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+
+const { AD4M_AGENT, KAICHAO_AGENT, JUNTO_AGENT, NOTE_IPFS_AUTHOR } = agents;
+const { FILE_STORAGE_LANGUAGE } = languages;
+const {
+  FLUX_PROFILE,
+  HAS_EMAIL,
+  HAS_FAMILY_NAME,
+  HAS_GIVEN_NAME,
+  HAS_PROFILE_IMAGE,
+  HAS_THUMBNAIL_IMAGE,
+  HAS_USERNAME,
+} = profile;
 
 export interface Payload {
   givenName?: string;

@@ -13,8 +13,10 @@ import {
   PerspectiveProxy,
   Subject,
 } from "@perspect3vism/ad4m";
-import { SELF } from "../constants/communityPredicates";
 import { v4 as uuidv4 } from "uuid";
+import { community } from "@fluxapp/constants";
+
+const { SELF } = community;
 
 type ModelProps = {
   perspectiveUuid: string;

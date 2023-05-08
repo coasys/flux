@@ -1,6 +1,7 @@
 import { Literal } from "@perspect3vism/ad4m";
-import { emoji, emojiCount, SDNA } from "./constants/sdna";
+import { sdna } from "@fluxapp/constants";
 import { getPrologQuery } from "@fluxapp/utils";
+const { emoji, emojiCount, SDNA } = sdna;
 
 export interface SDNAValues {
   emoji: string;

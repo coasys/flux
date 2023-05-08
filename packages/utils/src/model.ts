@@ -1,6 +1,6 @@
 import { Entry, EntryType, PropertyMap, PropertyValueMap } from "../types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { subscribeToLinks } from "../api";
+import { subscribeToLinks } from "@fluxapp/api";
 import {
   Link,
   LinkExpression,
@@ -8,7 +8,9 @@ import {
   PerspectiveProxy,
   Subject,
 } from "@perspect3vism/ad4m";
-import { SELF } from "../constants/communityPredicates";
+import { community } from "@fluxapp/constants";
+const { SELF } = community;
+
 import { v4 as uuidv4 } from "uuid";
 
 type ModelProps = {

@@ -1,8 +1,4 @@
-import {
-  CHANNEL_VIEW,
-  NAME,
-  ENTRY_TYPE,
-} from "../constants/communityPredicates";
+import { community } from "@fluxapp/constants";
 import { EntryType, ChannelView } from "@fluxapp/types";
 import {
   subjectProperty,
@@ -10,6 +6,8 @@ import {
   SDNAClass,
   subjectFlag,
 } from "@perspect3vism/ad4m";
+
+const { CHANNEL_VIEW, NAME, ENTRY_TYPE } = community;
 
 @SDNAClass({
   name: "Channel",

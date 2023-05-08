@@ -23,14 +23,13 @@ import {
   editCurrentMessage,
   getMe,
   Me,
-  predicates,
 } from "@fluxapp/api";
-
+import { sdna, community } from "@fluxapp/constants";
 import { linkIs, sortExpressionsByTimestamp } from "@fluxapp/utils";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
-const { DEFAULT_LIMIT } = predicates.sdna;
-const { REACTION } = predicates.community;
+const { DEFAULT_LIMIT } = sdna;
+const { REACTION } = community;
 
 type State = {
   communityId: string;

@@ -1,4 +1,4 @@
-import { EntryType, ModelProperty, Entry } from "../types";
+import { EntryType, ModelProperty, Entry } from "@fluxapp/types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { Literal } from "@perspect3vism/ad4m";
 

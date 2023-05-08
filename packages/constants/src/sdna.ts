@@ -3,7 +3,7 @@ import {
   REPLY_TO,
   EDITED_TO,
   CARD_HIDDEN,
-} from "../constants/communityPredicates";
+} from "./communityPredicates";
 import { EntryType } from "@fluxapp/types";
 
 export const emojiCount = 3;

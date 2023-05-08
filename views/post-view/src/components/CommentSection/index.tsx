@@ -2,7 +2,7 @@ import CommentItem from "../CommentItem";
 import Editor from "../Editor";
 
 import { useEffect, useMemo, useState } from "preact/hooks";
-import { Message as MessageModel } from "utils/api";
+import { Message as MessageModel } from "@fluxapp/api";
 import { useEntries } from "@fluxapp/react-web";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 

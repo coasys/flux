@@ -1,10 +1,12 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import {
+import { profile } from "@fluxapp/constants";
+import { mapLiteralLinks } from "@fluxapp/utils";
+
+const {
   AD4M_PREDICATE_USERNAME,
   AD4M_PREDICATE_FIRSTNAME,
   AD4M_PREDICATE_LASTNAME,
-} from "./constants/profile";
-import { mapLiteralLinks } from "@fluxapp/utils";
+} = profile;
 
 type Ad4mProfile = {
   username: string;
@@ -17,11 +19,11 @@ export default async function getAd4mProfile(): Promise<Ad4mProfile> {
 
   const me = await client.agent.me();
 
-  const profile: Ad4mProfile = mapLiteralLinks(me.perspective!.links, {
+  const profile = mapLiteralLinks(me.perspective!.links, {
     username: AD4M_PREDICATE_USERNAME,
     name: AD4M_PREDICATE_FIRSTNAME,
     familyName: AD4M_PREDICATE_LASTNAME,
-  });
+  }) as Ad4mProfile;
 
   return profile;
 }

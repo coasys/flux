@@ -1,6 +1,6 @@
-import Dexie from 'dexie';
-import { differenceInMinutes } from 'date-fns'
-import { Message, Profile } from '../types';
+import Dexie from "dexie";
+import { differenceInMinutes } from "date-fns";
+import { Profile } from "@fluxapp/types";
 
 export const DEXIE_VERSION = 3;
 
@@ -46,15 +46,15 @@ export class DexieStorage extends Dexie {
   constructor(perspectiveId: string, version = 2) {
     super(perspectiveId);
     this.version(version).stores({
-      profile: 'id, expression, timestamp',
-      ipfs: 'id, data, timestamp',
-      links: 'id, data, timestamp'
+      profile: "id, expression, timestamp",
+      ipfs: "id, data, timestamp",
+      links: "id, data, timestamp",
     });
   }
 }
 
 export class DexieProfile {
-  db: DexieStorage
+  db: DexieStorage;
   constructor(databaseName: string, version = DEXIE_VERSION) {
     this.db = new DexieStorage(databaseName, version);
   }
@@ -63,7 +63,7 @@ export class DexieProfile {
     await this.db.profile.put({
       id: did,
       expression: profile,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -80,7 +80,7 @@ export class DexieProfile {
 }
 
 export class DexieLinks {
-  db: DexieStorage
+  db: DexieStorage;
   constructor(databaseName: string, version = DEXIE_VERSION) {
     this.db = new DexieStorage(databaseName, version);
   }
@@ -89,7 +89,7 @@ export class DexieLinks {
     await this.db.links.put({
       id: url,
       data,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -107,7 +107,7 @@ export class DexieLinks {
 
 export class DexieIPFS {
   db: DexieStorage;
-  
+
   constructor(databaseName: string, version = DEXIE_VERSION) {
     this.db = new DexieStorage(databaseName, version);
   }
@@ -116,7 +116,7 @@ export class DexieIPFS {
     await this.db.ipfs.put({
       id: url,
       data,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
