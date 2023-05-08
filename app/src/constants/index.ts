@@ -12,7 +12,7 @@ export const viewOptions = [
     title: "Posts",
     description: "A feed of posts that users can publish",
     icon: "card-heading",
-    type: ChannelView.Forum,
+    type: ChannelView.Post,
     component: "forum-view",
   },
   {
