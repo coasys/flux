@@ -78,7 +78,7 @@ export class MyElement extends LitElement {
   theme = "";
 
   @state()
-  channels: { id: any; name: string }[] = [];
+  channels = [];
 
   @state()
   community = {};
