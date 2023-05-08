@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { Me } from "utils/api";
-import { WebRTC } from "utils/react-web";
+import { Me } from "@fluxapp/api";
+import { WebRTC } from "@fluxapp/react-web";
 
 import General from "./General";
 import Debug from "./Debug";

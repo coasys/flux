@@ -1,5 +1,5 @@
 import { ProfileWithDID } from "@/store/types";
-import { getProfile } from "utils/api";
+import { getProfile } from "@fluxapp/api";
 import agentByDIDLinksFixture from "../fixtures/agentByDIDLinks.json";
 import { ad4mClient } from "@/app";
 

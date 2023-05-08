@@ -27,7 +27,7 @@ import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { useEntries, useEntry, usePerspective } from "utils/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect";
-import { Member } from "utils/api";
+import { Member } from "@fluxapp/api";
 import { useRoute } from "vue-router";
 import { computed } from "@vue/reactivity";
 

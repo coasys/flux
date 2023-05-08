@@ -1,4 +1,4 @@
-import { ChatContext, CommunityContext } from "utils/react-web";
+import { ChatContext, CommunityContext } from "@fluxapp/react-web";
 import { useContext } from "preact/hooks";
 import UIContext from "../../context/UIContext";
 import TipTap from "../TipTap";

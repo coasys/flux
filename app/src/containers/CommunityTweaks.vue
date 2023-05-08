@@ -45,9 +45,9 @@ import { LocalCommunityState } from "@/store/types";
 import { defineComponent, ref } from "vue";
 import { mapActions } from "pinia";
 import ThemeEditor from "./ThemeEditor.vue";
-import { getSDNAValues, getSDNAVersion } from "utils/api";
-import { updateSDNA } from "utils/api";
-import { emoji, emojiCount } from "utils/constants";
+import { getSDNAValues, getSDNAVersion } from "@fluxapp/api";
+import { updateSDNA } from "@fluxapp/api";
+import { predicates } from "@fluxapp/api";
 
 export default defineComponent({
   components: { ThemeEditor },
@@ -78,9 +78,11 @@ export default defineComponent({
       this.emoji = sdnaValues.emoji;
       this.emojiCount = sdnaValues.emojiCount;
     } else {
-      const emojiString = String.fromCodePoint(parseInt(`0x${emoji}`));
+      const emojiString = String.fromCodePoint(
+        parseInt(`0x${predicates.sdna.emoji}`)
+      );
       this.emoji = emojiString;
-      this.emojiCount = emojiCount;
+      this.emojiCount = predicates.sdna.emojiCount;
     }
     const sdnaVersionData = await getSDNAVersion(perspectiveUuid);
     console.log("Found SDNA Version: ", sdnaVersionData);

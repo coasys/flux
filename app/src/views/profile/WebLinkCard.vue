@@ -29,7 +29,7 @@
 
 <script lang="ts">
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { getLiteralObjectLinks } from "utils/helpers";
+import { getLiteralObjectLinks } from "@fluxapp/utils";
 import { defineComponent } from "vue";
 export default defineComponent({
   props: ["id", "title", "description", "url", "image", "sameAgent"],

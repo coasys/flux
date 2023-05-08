@@ -6,9 +6,9 @@ import {
   useMemo,
   useCallback,
 } from "preact/hooks";
-import { ChatContext } from "utils/react-web";
+import { ChatContext } from "@fluxapp/react-web";
 import MessageItem from "../MessageItem";
-import { getMe } from "utils/api";
+import { getMe } from "@fluxapp/api";
 import { differenceInMinutes } from "date-fns";
 import tippy from "tippy.js";
 import { Virtuoso } from "react-virtuoso";
@@ -16,7 +16,7 @@ import { h, Component, createRef } from "preact";
 import ReactHintFactory from "react-hint";
 import "react-hint/css/index.css";
 import styles from "./index.module.css";
-import { Message, Reaction } from "utils/types";
+import { Message, Reaction } from "@fluxapp/types";
 import { REACTION } from "utils/constants";
 
 const ReactHint = ReactHintFactory({ createElement: h, Component, createRef });

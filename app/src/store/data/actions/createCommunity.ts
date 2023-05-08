@@ -1,4 +1,4 @@
-import { createCommunity } from "utils/api";
+import { createCommunity } from "@fluxapp/api";
 import { CommunityState } from "@/store/types";
 import { useDataStore } from "..";
 import { useAppStore } from "@/store/app";

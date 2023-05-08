@@ -1,16 +1,20 @@
 import { useContext, useRef, useState } from "preact/hooks";
-import { AgentContext, ChatContext, CommunityContext } from "utils/react-web";
-import { getMe } from "utils/api";
+import {
+  AgentContext,
+  ChatContext,
+  CommunityContext,
+} from "@fluxapp/react-web";
+import { getMe } from "@fluxapp/api";
 import MessageToolbar from "./MessageToolbar";
 import MessageReactions from "./MessageReactions";
 import MessageReply from "./MessageReply";
 import UIContext from "../../context/UIContext";
 import { REACTION } from "utils/constants";
 import { format } from "date-fns/esm";
-import { getTimeSince } from "utils/helpers";
+import { getTimeSince } from "@fluxapp/utils";
 import Avatar from "../../components/Avatar";
 import EditorContext from "../../context/EditorContext";
-import { Message, Profile } from "utils/types";
+import { Message, Profile } from "@fluxapp/types";
 import MessageCards from "./MessageCards";
 
 import styles from "./index.module.css";

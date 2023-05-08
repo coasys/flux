@@ -1,11 +1,11 @@
 import { useContext, useState, useEffect } from "preact/hooks";
-import { CommunityContext } from "utils/react-web";
+import { CommunityContext } from "@fluxapp/react-web";
 import styles from "./index.module.css";
 import { format, formatDistance } from "date-fns/esm";
-import { Profile } from "utils/types";
-import { getTimeSince } from "utils/helpers";
+import { Profile } from "@fluxapp/types";
+import { getTimeSince } from "@fluxapp/utils";
 import { DisplayView } from "../../constants/options";
-import { getImage } from "utils/helpers";
+import { getImage } from "@fluxapp/utils";
 import UIContext from "../../context/UIContext";
 import Avatar from "../Avatar";
 

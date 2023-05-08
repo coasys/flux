@@ -1,7 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 import { createContext } from "preact";
 import { PostOption } from "../constants/options";
-import * as localstorage from "utils/helpers";
+import * as localstorage from "@fluxapp/utils";
 
 export enum View {
   Feed = "FEED",

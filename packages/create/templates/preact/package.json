@@ -27,7 +27,7 @@
     "@fluxapp/flux-container": "*",
     "@perspect3vism/ad4m": "^0.3.1",
     "preact": "^10.13.1",
-    "utils": "*"
+    "@fluxapp/api": "*"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.18.6",

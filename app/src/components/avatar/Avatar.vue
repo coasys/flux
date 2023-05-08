@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { getImage } from "utils/helpers";
+import { getImage } from "@fluxapp/utils";
 export default defineComponent({
   props: {
     did: String,
@@ -32,8 +32,8 @@ export default defineComponent({
     url: {
       handler(url: string) {
         if (url) {
-          if (url.includes('base64')) {
-            this.realSrc = url
+          if (url.includes("base64")) {
+            this.realSrc = url;
           } else {
             this.getProfileImage(url);
           }

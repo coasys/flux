@@ -1,8 +1,8 @@
-import { AgentContext } from "utils/react-web";
-import { Reaction } from "utils/types";
+import { AgentContext } from "@fluxapp/react-web";
+import { Reaction } from "@fluxapp/types";
 import { useContext, useMemo, useState } from "preact/hooks";
 import styles from "./index.module.css";
-import { getProfile } from "utils/api";
+import { getProfile } from "@fluxapp/api";
 import emojiShortName from "emoji-short-name";
 
 interface ReactionType {

@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState, useMemo } from "preact/hooks";
-import { CommunityContext, useEntries } from "utils/react-web";
+import { CommunityContext, useEntries } from "@fluxapp/react-web";
 import styles from "./index.module.css";
-import { getTimeSince } from "utils/helpers";
-import { Profile } from "utils/types";
+import { getTimeSince } from "@fluxapp/utils";
+import { Profile } from "@fluxapp/types";
 import Avatar from "../Avatar";
 import Editor from "../Editor";
 import { Message as MessageModel } from "utils/api";

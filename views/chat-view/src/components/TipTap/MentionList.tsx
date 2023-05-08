@@ -1,6 +1,6 @@
 import { Component } from "preact";
-import { getProfile } from "utils/api";
-import { Profile } from "utils/types";
+import { getProfile } from "@fluxapp/api";
+import { Profile } from "@fluxapp/types";
 import Avatar from "../Avatar";
 
 type MentionListProps = {

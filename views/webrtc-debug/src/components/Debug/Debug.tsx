@@ -1,4 +1,4 @@
-import { Me } from "utils/api";
+import { Me } from "@fluxapp/api";
 import { WebRTC } from "utils/react-web";
 
 import Item from "./Item";

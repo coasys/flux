@@ -5,9 +5,9 @@ import "@fluxapp/ui/dist/main.css";
 import "@fluxapp/ui/dist/themes/dark.css";
 
 import Ad4mConnectUI, { getAd4mClient } from "@perspect3vism/ad4m-connect";
-import { createCommunity } from "utils/api";
-import { Channel, Community } from "utils/api";
-import { SubjectRepository } from "utils/factory";
+import { createCommunity } from "@fluxapp/api";
+import { Channel, Community } from "@fluxapp/api";
+import { SubjectRepository } from "@fluxapp/api";
 import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
 
 @customElement("flux-container")

@@ -154,7 +154,7 @@ import { ChannelView, EntryType } from "utils/types";
 import { viewOptions } from "@/constants";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 import { useEntry, usePerspective } from "utils/vue";
-import { Community, Channel } from "utils/api";
+import { Community, Channel } from "@fluxapp/api";
 
 interface MentionTrigger {
   label: string;

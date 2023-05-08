@@ -58,7 +58,7 @@ import { defineComponent } from "vue";
 import { Profile } from "utils/types";
 import { useDataStore } from "@/store/data";
 
-import { getProfile } from "utils/api";
+import { getProfile } from "@fluxapp/api";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Avatar from "@/components/avatar/Avatar.vue";
 import { Community } from "utils/types";

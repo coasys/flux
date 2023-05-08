@@ -72,7 +72,7 @@ import Logo from "@/components/logo/Logo.vue";
 import { useAppStore } from "@/store/app";
 import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";
 import SignUpCarousel from "./SignUpCarousel.vue";
-import { getAd4mProfile } from "utils/api";
+import { getAd4mProfile } from "@fluxapp/api";
 
 export default defineComponent({
   name: "SignUp",

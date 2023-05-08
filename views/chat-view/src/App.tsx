@@ -4,7 +4,7 @@ import {
   ChatProvider,
   CommunityProvider,
   AgentProvider,
-} from "utils/react-web";
+} from "@fluxapp/react-web";
 import { UIProvider } from "./context/UIContext";
 import { useState } from "preact/hooks";
 import styles from "./index.module.css";

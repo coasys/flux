@@ -1,6 +1,6 @@
 import { useContext, useState } from "preact/hooks";
 import styles from "./index.module.css";
-import { AgentContext } from "utils/react-web";
+import { AgentContext } from "@fluxapp/react-web";
 import Avatar from "../Avatar";
 import { PostOption, postOptions } from "../../constants/options";
 import UIContext from "../../context/UIContext";

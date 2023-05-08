@@ -1,12 +1,12 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { getMetaFromLinks } from "utils/helpers";
+import { getMetaFromLinks } from "@fluxapp/utils";
 import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useDataStore } from ".";
 import { CommunityState, LocalCommunityState } from "../types";
 import { useUserStore } from "../user";
-import { getProfile } from "utils/api";
-import { Community as CommunityModel } from "utils/api";
-import { SubjectRepository } from "utils/factory";
+import { getProfile } from "@fluxapp/api";
+import { Community as CommunityModel } from "@fluxapp/api";
+import { SubjectRepository } from "@fluxapp/api";
 
 export async function buildCommunity(perspective: PerspectiveProxy) {
   let state: LocalCommunityState = {

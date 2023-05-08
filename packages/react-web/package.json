@@ -1,0 +1,27 @@
+{
+  "name": "@fluxapp/react-web",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "type": "module",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fluxapp/api": "*",
+    "@fluxapp/types": "*",
+    "@fluxapp/utils": "*"
+  },
+  "peerDependencies": {
+    "@perspect3vism/ad4m": "^0.3.4",
+    "react": "^18.2.0"
+  }
+}

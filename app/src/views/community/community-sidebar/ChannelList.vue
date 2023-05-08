@@ -116,7 +116,7 @@ import { mapActions, mapState } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
-import { Channel, deleteChannel } from "utils/api";
+import { Channel, deleteChannel } from "@fluxapp/api";
 import { useEntries, usePerspective, usePerspectives } from "utils/vue";
 import { ChannelView } from "utils/types";
 import { viewOptions as channelViewOptions } from "@/constants";

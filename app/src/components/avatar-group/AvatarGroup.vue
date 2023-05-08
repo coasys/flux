@@ -21,7 +21,7 @@
 
 <script lang="ts">
 import { Profile } from "utils/types";
-import { getProfile } from "utils/api";
+import { getProfile } from "@fluxapp/api";
 import { defineComponent } from "vue";
 import Avatar from "@/components/avatar/Avatar.vue";
 

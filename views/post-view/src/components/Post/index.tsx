@@ -1,12 +1,12 @@
 import UIContext from "../../context/UIContext";
 import { useContext, useEffect, useMemo, useState } from "preact/hooks";
-import { getImage } from "utils/helpers";
+import { getImage } from "@fluxapp/utils";
 import { format, formatDistance } from "date-fns";
-import { getTimeSince } from "utils/helpers";
+import { getTimeSince } from "@fluxapp/utils";
 import Avatar from "../Avatar";
 import CommentSection from "../CommentSection";
 import { Post as PostSubject } from "utils/api";
-import { CommunityContext, useEntry } from "utils/react-web";
+import { CommunityContext, useEntry } from "@fluxapp/react-web";
 import { getMe, Me } from "utils/api";
 
 import styles from "./index.module.css";

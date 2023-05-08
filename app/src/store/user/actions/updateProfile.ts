@@ -1,6 +1,6 @@
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "..";
-import { updateProfile } from "utils/api";
+import { updateProfile } from "@fluxapp/api";
 
 export interface Payload {
   username?: string;

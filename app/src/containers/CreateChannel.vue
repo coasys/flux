@@ -61,7 +61,7 @@ import { defineComponent } from "vue";
 import ChannelViewOptions from "@/components/channel-view-options/ChannelViewOptions.vue";
 import { useRoute } from "vue-router";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect";
-import { Channel } from "utils/api";
+import { Channel } from "@fluxapp/api";
 
 export default defineComponent({
   emits: ["cancel", "submit"],

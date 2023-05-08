@@ -1,8 +1,8 @@
 import { useState } from "preact/hooks";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
-import { useEntry, useEntries } from "utils/react-web";
+import { useEntry, useEntries } from "@fluxapp/react-web";
 
-import { Community, Post } from "utils/api";
+import { Community, Post } from "@fluxapp/api";
 import Todo from "../models/Todo";
 
 import styles from "../App.module.css";

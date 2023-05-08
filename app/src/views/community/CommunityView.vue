@@ -200,7 +200,7 @@ import CommunityTweaks from "@/containers/CommunityTweaks.vue";
 import Avatar from "@/components/avatar/Avatar.vue";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 
-import { Channel, Community } from "utils/api";
+import { Channel, Community } from "@fluxapp/api";
 import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";

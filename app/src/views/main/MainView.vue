@@ -107,7 +107,7 @@ import semver from "semver";
 import { dependencies } from "../../../package.json";
 import { LinkExpression, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useEntry, usePerspective, usePerspectives } from "utils/vue";
-import { Community } from "utils/api";
+import { Community } from "@fluxapp/api";
 
 export default defineComponent({
   name: "MainAppView",

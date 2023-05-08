@@ -3,7 +3,7 @@ import Editor from "../Editor";
 import { PostOption, postOptions } from "../../constants/options";
 import FileUpload from "../FileUpload";
 import styles from "./index.module.css";
-import { blobToDataURL, dataURItoBlob, resizeImage } from "utils/helpers";
+import { blobToDataURL, dataURItoBlob, resizeImage } from "@fluxapp/utils";
 import PostImagePreview from "../PostImagePreview";
 import { SubjectRepository } from "utils/factory";
 import { Post as PostSubject } from "utils/api";

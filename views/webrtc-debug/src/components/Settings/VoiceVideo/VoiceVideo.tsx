@@ -1,4 +1,4 @@
-import { Me } from "utils/api";
+import { Me } from "@fluxapp/api";
 import { getForVersion } from "utils/helpers";
 import { WebRTC } from "utils/react-web";
 import Select from "../../Select";

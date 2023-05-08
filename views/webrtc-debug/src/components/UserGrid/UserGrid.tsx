@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useLayoutEffect } from "preact/hooks";
-import { Me } from "utils/api";
+import { Me } from "@fluxapp/api";
 import useContextMenu from "../../hooks/useContextMenu";
 import { WebRTC } from "utils/react-web";
 import items from "../../sprites/items";
