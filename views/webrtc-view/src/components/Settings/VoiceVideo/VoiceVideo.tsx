@@ -1,6 +1,6 @@
 import { Me } from "utils/api";
 import { getForVersion } from "utils/helpers";
-import { WebRTC } from "utils/frameworks/react";
+import { WebRTC } from "utils/react-web";
 
 import Select from "../../Select";
 

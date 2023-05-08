@@ -6,11 +6,7 @@ import {
   useState,
 } from "preact/hooks";
 import { createContext } from "preact";
-import {
-  AgentContext,
-  ChatContext,
-  CommunityContext,
-} from "utils/frameworks/react";
+import { AgentContext, ChatContext, CommunityContext } from "utils/react-web";
 import UIContext from "./UIContext";
 import useTiptapEditor from "../components/TipTap/useTiptapEditor";
 import { Editor } from "@tiptap/core";

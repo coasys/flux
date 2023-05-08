@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import { Peer } from "utils/frameworks/react";
+import { Peer } from "utils/react-web";
 
 interface CanvasProps {
   peers: Peer[];

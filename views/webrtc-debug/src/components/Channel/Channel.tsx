@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "preact/hooks";
-import { useWebRTC } from "utils/frameworks/react";
+import { useWebRTC } from "utils/react-web";
 import useKeyEvent from "../../hooks/useKeyEvent";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
 import { getMe, Me } from "utils/api";

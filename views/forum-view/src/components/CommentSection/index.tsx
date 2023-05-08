@@ -3,7 +3,7 @@ import Editor from "../Editor";
 
 import { useEffect, useMemo, useState } from "preact/hooks";
 import { Message as MessageModel } from "utils/api";
-import { useEntries } from "utils/frameworks/react";
+import { useEntries } from "utils/react-web";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 
 export default function CommentSection({

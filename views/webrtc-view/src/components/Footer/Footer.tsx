@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef } from "preact/hooks";
 import UiContext from "../../context/UiContext";
-import { WebRTC } from "utils/frameworks/react";
+import { WebRTC } from "utils/react-web";
 
 import styles from "./Footer.module.css";
 

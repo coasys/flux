@@ -1,5 +1,5 @@
 import { Me } from "utils/api";
-import { WebRTC } from "utils/frameworks/react";
+import { WebRTC } from "utils/react-web";
 
 import Item from "./Item";
 import ItemMe from "./ItemMe";

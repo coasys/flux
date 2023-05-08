@@ -6,7 +6,7 @@ import { getTimeSince } from "utils/helpers";
 import Avatar from "../Avatar";
 import CommentSection from "../CommentSection";
 import { Post as PostSubject } from "utils/api";
-import { CommunityContext, useEntry } from "utils/frameworks/react";
+import { CommunityContext, useEntry } from "utils/react-web";
 import { getMe, Me } from "utils/api";
 
 import styles from "./index.module.css";

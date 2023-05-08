@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "preact/hooks";
 import { Reaction } from "../../../types";
 import { Profile } from "utils/types";
 import { getProfile } from "utils/api";
-import { WebRTC } from "utils/frameworks/react";
+import { WebRTC } from "utils/react-web";
 
 import styles from "./Item.module.css";
 

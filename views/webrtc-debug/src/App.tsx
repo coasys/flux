@@ -1,4 +1,4 @@
-import { CommunityProvider, AgentProvider } from "utils/frameworks/react";
+import { CommunityProvider, AgentProvider } from "utils/react-web";
 import { UiProvider } from "./context/UiContext";
 import Channel from "./components/Channel";
 

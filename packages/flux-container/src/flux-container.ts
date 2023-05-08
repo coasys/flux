@@ -8,7 +8,7 @@ import Ad4mConnectUI, { getAd4mClient } from "@perspect3vism/ad4m-connect";
 import { createCommunity } from "utils/api";
 import { Channel, Community } from "utils/api";
 import { SubjectRepository } from "utils/factory";
-import { Ad4mClient } from "@perspect3vism/ad4m";
+import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
 
 @customElement("flux-container")
 export class MyElement extends LitElement {
@@ -55,7 +55,7 @@ export class MyElement extends LitElement {
   client: Ad4mClient | null = null;
 
   @state()
-  perspectives: { uuid: string; name: string }[] = [];
+  perspectives: PerspectiveProxy[] = [];
 
   @state()
   perspectiveUuid = "";
@@ -118,16 +118,13 @@ export class MyElement extends LitElement {
         const client = await getAd4mClient();
         this.client = client;
 
+        const perspectives = await client.perspective.all();
+
+        this.perspectives = perspectives;
+
         if (this.perspectiveUuid) {
           this.setPerspective(this.perspectiveUuid);
         }
-
-        const perspectives = await client.perspective.all();
-
-        this.perspectives = perspectives.map((p) => ({
-          uuid: p.uuid,
-          name: p.name,
-        }));
       }
     });
   }
@@ -136,8 +133,7 @@ export class MyElement extends LitElement {
     this.isLoading = true;
     this.perspectiveHasNoCommunity = false;
 
-    const client = await getAd4mClient();
-    const perspective = await client.perspective.byUUID(uuid);
+    const perspective = this.perspectives.find((p) => p.uuid === uuid);
     localStorage.setItem("perspectiveUuid", uuid);
 
     if (!perspective) {
@@ -158,23 +154,24 @@ export class MyElement extends LitElement {
 
     const channels = await new SubjectRepository(Channel, {
       perspective: perspective,
-      source: community.id,
     }).getAllData();
 
     this.channels = channels.map((c) => ({ id: c.id, name: c.name }));
-    this.source = channels[0]?.id || "adam://self";
+    this.source = channels[0]?.id || "ad4m://self";
 
     // @ts-ignore
     this.appElement.perspective = perspective;
 
     // @ts-ignore
-    this.appElement.setAttribute("source", channels[0]?.id || "adam://self");
+    this.appElement.setAttribute("source", channels[0]?.id || "ad4m://self");
 
     this.isLoading = false;
   }
 
-  setChannel(source: string) {
-    localStorage.setItem("source", source);
+  setChannel(e: Event) {
+    const { value } = e.target as HTMLInputElement;
+    localStorage.setItem("source", value);
+    this.appElement.setAttribute("source", value);
   }
 
   setTheme(e: Event) {
@@ -214,17 +211,17 @@ export class MyElement extends LitElement {
               <j-flex gap="200" wrap>
                 ${map(
                   this.perspectives,
-                  (i) => html`<div>
+                  (p) => html`<j-tooltip title=${p.name}>
                     <j-avatar
-                      ?selected=${this.perspectiveUuid === i.uuid}
-                      hash=${i.uuid}
-                      @click=${() => this.setPerspective(i.uuid)}
-                      :value=${i.uuid}
+                      ?selected=${this.perspectiveUuid === p.uuid}
+                      hash=${p.uuid}
+                      @click=${() => this.setPerspective(p.uuid)}
+                      :value=${p.uuid}
                       ?disabled=${this.isLoading}
                     >
-                      ${i.name}
+                      ${p.name}
                     </j-avatar>
-                  </div>`
+                  </j-tooltip>`
                 )}
               </j-flex>
             </div>
@@ -237,10 +234,10 @@ export class MyElement extends LitElement {
               >
               <select
                 value=${this.source}
-                @change="setChannel($event.target.value)"
+                @change=${this.setChannel}
                 ?disabled=${this.perspectiveHasNoCommunity}
               >
-                <option value="adam://self" selected disabled>
+                <option value="ad4m://self" selected disabled>
                   Select a channel
                 </option>
                 ${map(

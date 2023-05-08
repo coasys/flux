@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { Profile } from "utils/types";
 import { getProfile } from "utils/api";
 import { Me } from "utils/api";
-import { WebRTC } from "utils/frameworks/react";
+import { WebRTC } from "utils/react-web";
 
 import styles from "./JoinScreen.module.css";
 import Disclaimer from "../Disclaimer";

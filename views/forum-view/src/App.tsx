@@ -1,9 +1,9 @@
 import PostList from "./components/PostList";
-import { CommunityProvider, AgentProvider } from "utils/frameworks/react";
+import { CommunityProvider, AgentProvider } from "utils/react-web";
 import UIContext, { UIProvider, View } from "./context/UIContext";
 import styles from "./index.module.css";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
-import { ChannelProvider } from "utils/frameworks/react";
+import { ChannelProvider } from "utils/react-web";
 import Header from "./components/Header";
 import { useContext } from "preact/hooks";
 import Post from "./components/Post";

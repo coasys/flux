@@ -2,7 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import { Howl } from "howler";
 import { Me } from "utils/api";
 import { Reaction } from "../../types";
-import { WebRTC } from "utils/frameworks/react";
+import { WebRTC } from "utils/react-web";
 import popWav from "../../assets/pop.wav";
 import guitarWav from "../../assets/guitar.wav";
 import kissWav from "../../assets/kiss.wav";

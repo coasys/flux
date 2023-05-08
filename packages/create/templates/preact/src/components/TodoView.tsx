@@ -1,6 +1,6 @@
 import { useState } from "preact/hooks";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
-import { useEntry, useEntries } from "utils/frameworks/react";
+import { useEntry, useEntries } from "utils/react-web";
 
 import { Community, Post } from "utils/api";
 import Todo from "../models/Todo";

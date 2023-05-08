@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "preact/hooks";
 import { getMe, Me } from "utils/api";
-import { useWebRTC } from "utils/frameworks/react";
+import { useWebRTC } from "utils/react-web";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
 
 import UserGrid from "../UserGrid";

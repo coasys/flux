@@ -1,4 +1,4 @@
-import { AgentContext } from "utils/frameworks/react";
+import { AgentContext } from "utils/react-web";
 import { Reaction } from "utils/types";
 import { useContext, useMemo, useState } from "preact/hooks";
 import styles from "./index.module.css";

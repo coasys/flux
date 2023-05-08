@@ -30,7 +30,7 @@
       "import": "./dist/factory.js",
       "require": "./dist/factory.umd.cjs"
     },
-    "./frameworks/react": {
+    "./react-web": {
       "import": "./react/index.ts"
     },
     "./vue": {

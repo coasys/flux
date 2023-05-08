@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, useMemo } from "preact/hooks";
-import { CommunityContext, useEntries } from "utils/frameworks/react";
+import { CommunityContext, useEntries } from "utils/react-web";
 import styles from "./index.module.css";
 import { getTimeSince } from "utils/helpers";
 import { Profile } from "utils/types";

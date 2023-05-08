@@ -6,7 +6,7 @@ import {
   useMemo,
   useCallback,
 } from "preact/hooks";
-import { ChatContext } from "utils/frameworks/react";
+import { ChatContext } from "utils/react-web";
 import MessageItem from "../MessageItem";
 import { getMe } from "utils/api";
 import { differenceInMinutes } from "date-fns";
