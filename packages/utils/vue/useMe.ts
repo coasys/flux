@@ -15,16 +15,27 @@ import {
 } from "../constants";
 import { Profile } from "../types";
 
-const agent = ref<Agent | null>(null);
+const status = ref<AgentStatus>({ isInitialized: false, isUnlocked: false });
+const agent = ref<Agent | undefined>();
+const isListening = ref(false);
 
-export function useAgent(client: AgentClient, did: string | Function) {
-  const didRef = typeof did === "function" ? (did as any) : ref(did);
-
+export function useMe(client: AgentClient) {
   watch(
-    [client, didRef],
-    async ([c, d]) => {
-      if (d) {
-        agent.value = await client.byDID(d);
+    () => client,
+    async () => {
+      if (!isListening.value) {
+        status.value = await client.status();
+        agent.value = await client.me();
+
+        isListening.value = true;
+
+        client.addAgentStatusChangedListener(async (s: AgentStatus) => {
+          status.value = s;
+        });
+
+        client.addUpdatedListener(async (a: Agent) => {
+          agent.value = a;
+        });
       }
     },
     { immediate: true }
@@ -51,5 +62,5 @@ export function useAgent(client: AgentClient, did: string | Function) {
     }
   });
 
-  return { agent, profile };
+  return { status, agent, profile };
 }

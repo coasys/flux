@@ -66,7 +66,7 @@
               :value="currentTab"
             >
               <j-tab-item value="communities">
-                Communities ({{ communities.length }})
+                Communities ({{ Object.keys(communities).length }})
               </j-tab-item>
               <j-tab-item value="weblinks">
                 Weblinks ({{ weblinks.length }})
@@ -170,7 +170,7 @@
 import { useDataStore } from "@/store/data";
 import { Profile } from "utils/types";
 import { ModalsState } from "@/store/types";
-import { LinkExpression, Literal } from "@perspect3vism/ad4m";
+import { LinkExpression } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
 import WebLinkCard from "./WebLinkCard.vue";
 import CommunityCard from "./CommunityCard.vue";
@@ -180,12 +180,12 @@ import { useAppStore } from "@/store/app";
 import { useUserStore } from "@/store/user";
 import { mapActions } from "pinia";
 import Avatar from "@/components/avatar/Avatar.vue";
-import { getProfile } from "utils/api";
 import { getImage } from "utils/helpers";
 import WebLinkAdd from "./WebLinkAdd.vue";
 import { getAgentWebLinks } from "utils/api";
-import { usePerspectives, useCommunities } from "utils/vue";
+import { usePerspectives, useCommunities, useAgent, useMe } from "utils/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { useRoute } from "vue-router";
 
 export default defineComponent({
   name: "ProfileView",
@@ -198,14 +198,25 @@ export default defineComponent({
     Avatar,
   },
   async setup() {
+    const route = useRoute();
+    console.log(route.params);
     const client = await getAd4mClient();
     const { neighbourhoods } = usePerspectives(client);
     const { communities } = useCommunities(neighbourhoods);
+
+    const { agent: me } = useMe(client.agent);
+
+    const { profile } = useAgent(
+      client.agent,
+      () => route.params.did || me.value?.did
+    );
     const appStore = useAppStore();
     const dataStore = useDataStore();
     const userStore = useUserStore();
 
     return {
+      me,
+      profile,
       neighbourhoods,
       communities,
       appStore,
@@ -230,13 +241,6 @@ export default defineComponent({
     this.appStore.changeCurrentTheme("global");
   },
   methods: {
-    async getProfile() {
-      if (this.sameAgent) {
-        this.profile = this.userStore.profile;
-      } else {
-        this.profile = await getProfile(this.did);
-      }
-    },
     setAddLinkModal(value: boolean): void {
       this.showAddlinkModal = value;
     },
@@ -263,24 +267,20 @@ export default defineComponent({
     showAddlinkModal() {
       if (!this.showAddlinkModal) {
         this.getAgentAreas();
-        this.getProfile();
       }
     },
     showEditlinkModal() {
       if (!this.showEditlinkModal) {
         this.getAgentAreas();
-        this.getProfile();
       }
     },
     "modals.showEditProfile"() {
       if (!this.modals.showEditProfile) {
         this.getAgentAreas();
-        this.getProfile();
       }
     },
     did: {
       handler: async function () {
-        this.getProfile();
         this.getAgentAreas();
       },
       immediate: true,
@@ -299,12 +299,10 @@ export default defineComponent({
       return this.$router.options.history.state.back;
     },
     did(): string {
-      return (
-        (this.$route.params.did as string) || this.userStore.agent.did || ""
-      );
+      return (this.$route.params.did as string) || this.me?.did || "";
     },
     sameAgent() {
-      return this.did === this.userStore.agent.did;
+      return this.did === this.me?.did;
     },
     modals(): ModalsState {
       return this.appStore.modals;
