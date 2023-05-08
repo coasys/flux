@@ -1,4 +1,4 @@
-import { Settings, EventLogItem } from "utils/helpers";
+import { Settings, EventLogItem } from "@fluxapp/utils";
 
 export type peerState = {
   spriteIndex: number;

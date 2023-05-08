@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "preact/hooks";
-import { useWebRTC } from "utils/react-web";
+import { useWebRTC } from "@fluxapp/react-web";
 import useKeyEvent from "../../hooks/useKeyEvent";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
 import { getMe, Me } from "@fluxapp/api";

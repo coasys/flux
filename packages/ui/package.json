@@ -27,11 +27,11 @@
     "visualize": "esbuild-visualizer --metadata ./meta.json"
   },
   "dependencies": {
+    "@fluxapp/utils": "*",
     "@popperjs/core": "^2.11.7",
     "construct-style-sheets-polyfill": "^3.1.0",
     "jdenticon": "^3.2.0",
-    "lit": "^2.7.3",
-    "utils": "*"
+    "lit": "^2.7.3"
   },
   "devDependencies": {
     "esbuild": "^0.17.18",

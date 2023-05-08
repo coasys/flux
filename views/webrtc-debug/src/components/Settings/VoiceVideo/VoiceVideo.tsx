@@ -1,6 +1,6 @@
 import { Me } from "@fluxapp/api";
-import { getForVersion } from "utils/helpers";
-import { WebRTC } from "utils/react-web";
+import { getForVersion } from "@fluxapp/utils";
+import { WebRTC } from "@fluxapp/react-web";
 import Select from "../../Select";
 
 type Props = {

@@ -1,7 +1,7 @@
 import { html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import sharedStyles from "../../shared/styles";
-import { getRelativeTime } from "utils/helpers";
+import { getRelativeTime } from "@fluxapp/utils";
 
 @customElement("j-timestamp")
 export default class Component extends LitElement {

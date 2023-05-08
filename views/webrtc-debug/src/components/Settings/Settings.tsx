@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { Me } from "@fluxapp/api";
-import { WebRTC } from "utils/react-web";
+import { WebRTC } from "@fluxapp/react-web";
 
 import VoiceVideo from "./VoiceVideo";
 

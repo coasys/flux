@@ -8,7 +8,6 @@ export * from "./getNeighbourhoodMeta";
 export * from "./languageHelpers";
 export * from "./linkHelpers";
 export * from "./localStorage";
-export * from "./model";
 export * from "./profileHelpers";
 export * from "./prologHelpers";
 export * from "./queue";
