@@ -9,20 +9,21 @@
       html {
         box-sizing: border-box;
       }
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
       body {
         margin: 0;
         font-family: Arial, Helvetica, sans-serif;
         color: var(--j-color-ui-800);
         background: var(--j-color-white);
       }
-      *,
-      *:before,
-      *:after {
-        box-sizing: inherit;
-      }
       flux-app {
         height: 100%;
         display: block;
+        box-sizing: border-box;
       }
     </style>
   </head>
