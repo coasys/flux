@@ -157,8 +157,6 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
       data[key] === undefined ? delete data[key] : {}
     );
 
-    console.log({ data });
-
     setProperties(instance, data);
     return this.getSubjectData(instance);
   }

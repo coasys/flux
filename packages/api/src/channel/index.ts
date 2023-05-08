@@ -32,9 +32,4 @@ export class Channel {
   views: string[];
 }
 
-export interface UpdateChannel {
-  name?: string;
-  views?: ChannelView[];
-}
-
 export default Channel;

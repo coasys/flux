@@ -32,7 +32,6 @@ import {
 import hideEmbeds from "./hideEmbeds";
 import joinCommunity from "./joinCommunity";
 import subscribeToLinks from "./subscribeToLinks";
-import { updateEntry } from "./updateEntry";
 import { updateSDNA } from "./updateSDNA";
 
 import Channel from "./channel";
@@ -85,7 +84,6 @@ export {
   hideEmbeds,
   joinCommunity,
   subscribeToLinks,
-  updateEntry,
   updateSDNA,
   updateProfile,
   createProfile,
