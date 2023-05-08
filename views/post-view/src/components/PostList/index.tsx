@@ -27,7 +27,7 @@ export default function PostList({
       // @ts-ignore
       (a: any, b: any) => new Date(b.timestamp) - new Date(a.timestamp)
     );
-  }, [posts.length]);
+  }, [posts, source]);
 
   const displayStyle: DisplayView =
     view === DisplayView.Compact
@@ -86,7 +86,7 @@ export default function PostList({
       )}
       <div className={[style.posts, displayStyle].join(" ")}>
         {sortedPosts.map((post) => (
-          <PostItem post={post} displayView={view}></PostItem>
+          <PostItem key={post.id} post={post} displayView={view}></PostItem>
         ))}
       </div>
     </div>

@@ -87,7 +87,7 @@ export class MyElement extends LitElement {
     super();
 
     this.perspectiveUuid = localStorage.getItem("perspectiveUuid") || "";
-    this.source = localStorage.getItem("source") || "flux://testing";
+    this.source = localStorage.getItem("source") || "ad4m://self";
     this.theme = localStorage.getItem("theme") || "dark";
     this.community = {};
     this.channels = [];
@@ -126,6 +126,9 @@ export class MyElement extends LitElement {
 
         if (this.perspectiveUuid) {
           this.setPerspective(this.perspectiveUuid);
+          if (this.source) {
+            this.setChannel(this.source);
+          }
         }
       }
     });
@@ -170,10 +173,11 @@ export class MyElement extends LitElement {
     this.isLoading = false;
   }
 
-  setChannel(e: Event) {
-    const { value } = e.target as HTMLInputElement;
-    localStorage.setItem("source", value);
-    this.appElement.setAttribute("source", value);
+  setChannel(source: string) {
+    console.log("setting", source);
+    this.source = source;
+    localStorage.setItem("source", source);
+    this.appElement.setAttribute("source", source);
   }
 
   setTheme(e: Event) {
@@ -235,8 +239,8 @@ export class MyElement extends LitElement {
                   : "Current channel:"}</j-text
               >
               <select
-                value=${this.source}
-                @change=${this.setChannel}
+                .value=${this.source}
+                @change=${(e: any) => this.setChannel(e.target.value)}
                 ?disabled=${this.perspectiveHasNoCommunity}
               >
                 <option value="ad4m://self" selected disabled>
@@ -252,7 +256,7 @@ export class MyElement extends LitElement {
             <j-input
               label="Give your perspective a name"
               placeholder="Perspective name"
-              :value="title"
+              .value=${this.title}
               @change=${(e: Event) => {
                 const target = e.target as HTMLInputElement;
                 this.title = target.value;
@@ -264,7 +268,6 @@ export class MyElement extends LitElement {
               @click=${() => this.onCreateCommunity()}
               full
               size="sm"
-              id="create-perspective"
             >
               Create new Flux community
             </j-button>
