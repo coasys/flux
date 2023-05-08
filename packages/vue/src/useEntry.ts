@@ -15,7 +15,9 @@ export function useEntry<SubjectClass>({
 }) {
   const idRef = typeof id === "function" ? (id as any) : ref(id);
   const sourceRef =
-    typeof source === "function" ? (source as any) : ref(source);
+    typeof source === "function"
+      ? (source as any)
+      : ref(source || "ad4m://self");
   const perspectiveRef =
     typeof perspective === "function" ? (perspective as any) : perspective;
 

@@ -241,8 +241,11 @@ export default defineComponent({
 
     const { entries: channels } = useEntries({
       perspective: () => data.value.perspective,
+      source: () => "ad4m://self",
       model: Channel,
     });
+
+    console.log("channels: ", channels);
 
     return {
       community,

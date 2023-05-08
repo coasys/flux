@@ -143,7 +143,7 @@ export default defineComponent({
 
     const { entries: channels, repo: channelRepo } = useEntries({
       perspective: () => data.value.perspective,
-      source: "ad4m://self",
+      source: () => "ad4m://self",
       model: Channel,
     });
 

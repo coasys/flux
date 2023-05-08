@@ -12,7 +12,9 @@ export function useEntries<SubjectClass>({
   model: SubjectClass;
 }) {
   const sourceRef =
-    typeof source === "function" ? (source as any) : ref(source);
+    typeof source === "function"
+      ? (source as any)
+      : ref(source || "ad4m://self");
   const perspectiveRef =
     typeof perspective === "function" ? (perspective as any) : ref(perspective);
 
