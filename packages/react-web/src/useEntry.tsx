@@ -14,7 +14,6 @@ export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
   const forceUpdate = useForceUpdate();
   const [error, setError] = useState<string | undefined>(undefined);
   const { perspective, source = "ad4m://self", id, model } = props;
-  const cacheKey = `${perspective.uuid}/${source || ""}/${id}`;
 
   // Create model
   const Model = useMemo(() => {
@@ -23,6 +22,9 @@ export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
       source,
     });
   }, [perspective.uuid, source]);
+
+  // Create cache key for entry
+  const cacheKey = `${perspective.uuid}/${source || ""}/${Model.name}/${id}`;
 
   // Mutate shared/cached data for all subscribers
   const mutate = useCallback(
@@ -47,7 +49,10 @@ export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
   useEffect(() => {
     if (perspective.uuid) {
       const added = (link: LinkExpression) => {
-        // const isNewEntry = link.data.source === source;
+        const isNewEntry = link.data.source === source;
+        if (isNewEntry) {
+          // WIP
+        }
         return null;
       };
 

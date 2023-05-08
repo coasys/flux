@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect } from "react";
-import useEntries from "./useEntries";
-import useEntry from "./useEntry";
+import { useEntries } from "./useEntries";
+import { useEntry } from "./useEntry";
 import {
   Channel as ChannelModel,
   Member as MemberModel,

@@ -16,7 +16,7 @@ export default function PostList({
 }) {
   const [view, setView] = useState(DisplayView.Compact);
 
-  const { entries: posts, loading } = useEntries({
+  const { entries: posts, isLoading } = useEntries({
     perspective: perspective,
     source: source,
     model: Post,
@@ -62,14 +62,14 @@ export default function PostList({
           </j-popover>
         </j-flex>
       </j-box>
-      {loading && (
+      {isLoading && (
         <j-box py="500">
           <j-flex a="center" j="center">
             <j-spinner size="lg"></j-spinner>
           </j-flex>
         </j-box>
       )}
-      {!loading && sortedPosts.length === 0 && (
+      {!isLoading && sortedPosts.length === 0 && (
         <j-box py="800">
           <j-flex gap="400" direction="column" a="center" j="center">
             <j-icon color="ui-500" size="xl" name="binoculars"></j-icon>

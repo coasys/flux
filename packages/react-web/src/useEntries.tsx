@@ -1,73 +1,78 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { getCache, setCache, subscribe, unsubscribe } from "./cache";
+import { PerspectiveProxy, LinkExpression } from "@perspect3vism/ad4m";
 import { SubjectRepository } from "@fluxapp/api";
-import { LinkExpression, PerspectiveProxy } from "@perspect3vism/ad4m";
 
-export default function useEntries<SubjectClass>({
-  perspective,
-  source,
-  model,
-}: {
+type Props<SubjectClass> = {
+  source?: string;
   perspective: PerspectiveProxy;
-  source?: string | null | undefined;
   model: SubjectClass;
-}) {
-  const [loading, setLoading] = useState(false);
-  const [entries, setEntries] = useState<SubjectClass[]>([]);
+};
 
-  const Model: SubjectRepository<{
-    [x: string]: any;
-  }> = useMemo(() => {
-    const subject = new SubjectRepository(model as any, {
+export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
+  const forceUpdate = useForceUpdate();
+  const [error, setError] = useState<string | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
+  const { perspective, source = "ad4m://self", model } = props;
+
+  // Create model
+  const Model = useMemo(() => {
+    return new SubjectRepository(model, {
       perspective: perspective,
-      source: source || undefined,
+      source,
     });
-    return subject;
   }, [perspective.uuid, source]);
 
-  useEffect(() => {
-    if (perspective.uuid && source !== null) {
-      getAll();
-      const { added, removed } = subscribe();
-      return () => {
-        perspective.removeListener("link-added", added);
-        perspective.removeListener("link-removed", removed);
-      };
-    }
-  }, [perspective.uuid, source]);
+  // Create cache key for entry
+  const cacheKey = `${perspective.uuid}/${source || ""}/${Model.name}/`;
 
-  async function getAll() {
-    try {
-      setLoading(true);
+  // Mutate shared/cached data for all subscribers
+  const mutate = useCallback(
+    (entry: SubjectClass[]) => setCache(cacheKey, entry),
+    [cacheKey]
+  );
 
-      const entries = await Model?.getAllData();
+  // Fetch data from AD4M and save to cache
+  const getData = useCallback(() => {
+    setIsLoading(true);
+    Model.getAllData()
+      .then(async (entries) => {
+        setError(undefined);
+        setIsLoading(false);
+        mutate(entries);
+      })
+      .catch((error) => {
+        setError(error.toString());
+        setIsLoading(false);
+      });
+  }, [Model, mutate]);
 
-      setEntries(entries);
-    } catch (e) {
-    } finally {
-      setLoading(false);
-    }
-  }
+  // Trigger initial fetch
+  useEffect(getData, [getData]);
 
+  // Get single entry
   async function fetchEntry(id) {
-    const entry = await Model.getData(id);
+    setIsLoading(true);
+    const entry = (await Model.getData(id)) as SubjectClass;
+    const oldEntries = getCache(cacheKey) as SubjectClass[] | undefined;
 
-    setEntries((oldEntries) => {
-      const isUpdatedEntry = oldEntries.find((e) => e.id === entry.id);
-      return isUpdatedEntry
-        ? oldEntries.map((e) => {
-            const isTheUpdatedOne = e.id === isUpdatedEntry.id;
-            return isTheUpdatedOne ? entry : e;
-          })
-        : [...oldEntries, entry];
-    });
+    const newEntries =
+      oldEntries?.map((oldEntry) => {
+        const isUpdatedEntry = entry.id === oldEntry.id;
+        return isUpdatedEntry ? entry : oldEntry;
+      }) || [];
+
+    mutate(newEntries);
+    setIsLoading(false);
   }
 
-  function subscribe() {
-    const added = (link: LinkExpression) => {
-      const isNewEntry = link.data.source === source;
+  // Listen to remote changes
+  useEffect(() => {
+    if (perspective.uuid) {
+      const added = (link: LinkExpression) => {
+        const isNewEntry = link.data.source === source;
+        const isUpdated = entries?.find((e) => e.id === link.data.source);
 
-      setEntries((oldEntries) => {
-        const isUpdated = oldEntries.find((e) => e.id === link.data.source);
         if (isUpdated) {
           fetchEntry(link.data.source);
         }
@@ -76,27 +81,39 @@ export default function useEntries<SubjectClass>({
           fetchEntry(link.data.target);
         }
 
-        return oldEntries;
-      });
+        return null;
+      };
 
-      return null;
-    };
+      const removed = (link: LinkExpression) => {
+        if (link.data.target === source) {
+          const newEntries = entries?.filter((e) => e.id !== link.data.target);
+          mutate(newEntries || []);
+        }
+        return null;
+      };
 
-    const removed = (link: LinkExpression) => {
-      if (link.data.source === source) {
-        setEntries((oldEntries) => {
-          return oldEntries.filter((e) => e.id !== link.data.target);
-        });
-      }
-      return null;
-    };
+      perspective.addListener("link-added", added);
+      perspective.addListener("link-removed", removed);
 
-    perspective.addListener("link-removed", removed);
+      return () => {
+        perspective.removeListener("link-added", added);
+        perspective.removeListener("link-removed", removed);
+      };
+    }
+  }, [perspective.uuid, source]);
 
-    perspective.addListener("link-added", added);
+  // Subscribe to changes (re-render on data change)
+  useEffect(() => {
+    subscribe(cacheKey, forceUpdate);
+    return () => unsubscribe(cacheKey, forceUpdate);
+  }, [cacheKey, forceUpdate]);
 
-    return { added, removed };
-  }
+  const entries = (getCache(cacheKey) || []) as SubjectClass[];
 
-  return { entries, model: Model, loading };
+  return { entries, error, mutate, model: Model, isLoading, reload: getData };
+}
+
+function useForceUpdate() {
+  const [, setState] = useState<number[]>([]);
+  return useCallback(() => setState([]), [setState]);
 }
