@@ -33,8 +33,6 @@ export default function Post({
     model: PostSubject,
   });
 
-  console.log({ post, id });
-
   const [ogData, setOgData] = useState<any>({});
   const [agent, setAgent] = useState<Me>();
 
