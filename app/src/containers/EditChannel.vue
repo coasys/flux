@@ -83,10 +83,12 @@ export default defineComponent({
   },
   watch: {
     channel: {
-      handler: async function ({ name, description, views }) {
-        this.name = name;
-        this.description = description;
-        this.views = views;
+      handler: async function (channel) {
+        if (channel) {
+          this.name = channel.name;
+          this.description = channel.description;
+          this.views = channel.views;
+        }
       },
       deep: true,
       immediate: true,

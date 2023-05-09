@@ -39,7 +39,8 @@ export class Post {
     writable: true,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
     // @ts-ignore
-    transform: (data) => `data:image/png;base64,${data?.data_base64}`,
+    transform: (data) =>
+      data ? `data:image/png;base64,${data?.data_base64}` : undefined,
   })
   image: string;
 

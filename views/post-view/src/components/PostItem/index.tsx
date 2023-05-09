@@ -8,20 +8,17 @@ import { DisplayView } from "../../constants/options";
 import { getImage } from "@fluxapp/utils";
 import UIContext from "../../context/UIContext";
 import Avatar from "../Avatar";
+import { Member } from "@fluxapp/api";
 
-export default function PostItem({ post, displayView }) {
+export default function PostItem({ perspective, post, displayView }) {
   const {
     state: { members },
   } = useContext(CommunityContext);
   const { methods: UIMehthods } = useContext(UIContext);
 
-  const [base64, setBase64] = useState("");
-  const [ogData, setOgData] = useState(null);
+  const { entry: author } = useEntry({ perspective, model: Member });
 
-  async function fetchImage(url) {
-    const image = await getImage(url);
-    setBase64(image);
-  }
+  const [ogData, setOgData] = useState(null);
 
   async function fetchOgData(url) {
     try {
@@ -33,15 +30,11 @@ export default function PostItem({ post, displayView }) {
   }
 
   useEffect(() => {
-    if (post.image) {
-      fetchImage(post.image);
-    }
     if (post.url) {
       fetchOgData(post.url);
     }
   }, [post.image, post.url]);
 
-  const author: Profile = members[post.author] || {};
   const popularStyle: string = post.isPopular ? styles.popularMessage : "";
   const displayStyle: DisplayView =
     displayView === DisplayView.Compact
@@ -70,15 +63,15 @@ export default function PostItem({ post, displayView }) {
 
         <j-box pt="400">
           <j-flex a="center" gap="300">
-            <a href={author.did}>
+            <a href={author?.did}>
               <Avatar
                 size="xxs"
-                did={author.did}
-                url={author.profileThumbnailPicture}
+                did={author?.did}
+                url={author?.profileThumbnailPicture}
               ></Avatar>
             </a>
             <j-flex a="center" gap="200">
-              <a className={styles.authorName} href={author.did}>
+              <a className={styles.authorName} href={author?.did}>
                 {author?.username || (
                   <j-skeleton width="lg" height="text"></j-skeleton>
                 )}

@@ -27,10 +27,16 @@ export default function Post({
   } = useContext(CommunityContext);
 
   const { entry: post, error } = useEntry({
-    perspective: perspective,
+    perspective,
     source,
     id,
     model: PostSubject,
+  });
+
+  const { entry: author } = useEntry({
+    perspective,
+    id: post?.author,
+    model: Member,
   });
 
   const [ogData, setOgData] = useState<any>({});
@@ -56,12 +62,13 @@ export default function Post({
     if (post?.url) {
       fetchOgData(post.url);
     }
-  }, [post?.image, post?.url]);
+  }, [post?.url]);
 
   if (!post) return;
 
-  const author = members[post.author] || {};
-  const isAuthor = author.did === agent.did;
+  const isAuthor = author?.did === agent?.did;
+
+  console.log({ author });
 
   const hasTitle = post.title;
   const hasImage = post.image;
@@ -114,7 +121,7 @@ export default function Post({
             ></Avatar>
           </a>
           <div>
-            <a className={styles.authorName} href={author.did}>
+            <a className={styles.authorName} href={author?.did}>
               {author?.username || (
                 <j-skeleton width="lg" height="text"></j-skeleton>
               )}

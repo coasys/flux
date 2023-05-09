@@ -35,6 +35,7 @@ export default function PostList({
       : view === DisplayView.Grid
       ? style.grid
       : style.card;
+
   const currentOption = displayOptions.find((o) => o.value === view);
 
   return (
@@ -86,7 +87,12 @@ export default function PostList({
       )}
       <div className={[style.posts, displayStyle].join(" ")}>
         {sortedPosts.map((post) => (
-          <PostItem key={post.id} post={post} displayView={view}></PostItem>
+          <PostItem
+            key={post.id}
+            perspective={perspective}
+            post={post}
+            displayView={view}
+          ></PostItem>
         ))}
       </div>
     </div>
