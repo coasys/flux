@@ -58,7 +58,7 @@ import { ChannelView } from "@fluxapp/types";
 import { defineComponent } from "vue";
 import ChannelViewOptions from "@/components/channel-view-options/ChannelViewOptions.vue";
 import { useRoute } from "vue-router";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { Channel } from "@fluxapp/api";
 
 export default defineComponent({

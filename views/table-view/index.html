@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flux App</title>
+    <style>
+      html {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        color: var(--j-color-ui-800);
+        background: var(--j-color-white);
+      }
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
+      flux-app {
+        height: 100%;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <flux-container>
+      <flux-app></flux-app>
+    </flux-container>
+
+    <script type="module">
+      import App from "./src/main.ts";
+      import "@fluxapp/flux-container";
+
+      customElements.define("flux-app", App);
+
+      window.__APP_VERSION__ = "test";
+    </script>
+  </body>
+</html>

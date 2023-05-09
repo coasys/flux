@@ -118,7 +118,7 @@ import { useEntries, usePerspective, useMe } from "@fluxapp/vue";
 import { ChannelView } from "@fluxapp/types";
 import { viewOptions as channelViewOptions } from "@/constants";
 import { Ad4mClient } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export default defineComponent({
   props: {

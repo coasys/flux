@@ -48,7 +48,7 @@ import { defineComponent } from "vue";
 import { useAppStore } from "@/store/app";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
 import { useMe } from "@fluxapp/vue";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export default defineComponent({
   emits: ["cancel", "submit"],

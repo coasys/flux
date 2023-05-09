@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { getCache, setCache, subscribe, unsubscribe } from "./cache";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { Ad4mClient } from "@perspect3vism/ad4m";
 
 export function useClient() {
