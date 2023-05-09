@@ -7,7 +7,7 @@ type Props<SubjectClass> = {
   id?: string;
   source?: string;
   perspective: PerspectiveProxy;
-  model: SubjectClass;
+  model: new () => SubjectClass;
 };
 
 export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
@@ -24,7 +24,7 @@ export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
   }, [perspective.uuid, source]);
 
   // Create cache key for entry
-  const cacheKey = `${perspective.uuid}/${source || ""}/${Model.name}/${id}`;
+  const cacheKey = `${perspective.uuid}/${source || ""}/${model.name}/${id}`;
 
   // Mutate shared/cached data for all subscribers
   const mutate = useCallback(
@@ -79,7 +79,13 @@ export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
     return () => unsubscribe(cacheKey, forceUpdate);
   }, [cacheKey, forceUpdate]);
 
-  const entry = getCache(cacheKey) as SubjectClass | undefined;
+  type ExtendedSubjectClass = SubjectClass & {
+    id: string;
+    timestamp: number;
+    author: string;
+  };
+
+  const entry = getCache(cacheKey) as ExtendedSubjectClass | undefined;
 
   return { entry, error, mutate, model: Model, reload: getData };
 }

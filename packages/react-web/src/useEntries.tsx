@@ -6,7 +6,7 @@ import { SubjectRepository } from "@fluxapp/api";
 type Props<SubjectClass> = {
   source?: string;
   perspective: PerspectiveProxy;
-  model: SubjectClass;
+  model: new () => SubjectClass;
 };
 
 export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
@@ -24,7 +24,7 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
   }, [perspective.uuid, source]);
 
   // Create cache key for entry
-  const cacheKey = `${perspective.uuid}/${source || ""}/${Model.name}/`;
+  const cacheKey = `${perspective.uuid}/${source || ""}/${model.name}/`;
 
   // Mutate shared/cached data for all subscribers
   const mutate = useCallback(
@@ -34,15 +34,16 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
 
   // Fetch data from AD4M and save to cache
   const getData = useCallback(() => {
-    setIsLoading(true);
+    // setIsLoading(true);
     Model.getAllData()
-      .then(async (entries) => {
+      .then((entries) => {
         setError(undefined);
-        setIsLoading(false);
         mutate(entries);
       })
       .catch((error) => {
         setError(error.toString());
+      })
+      .finally(() => {
         setIsLoading(false);
       });
   }, [Model, mutate]);
@@ -52,33 +53,41 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
 
   // Get single entry
   async function fetchEntry(id) {
-    setIsLoading(true);
     const entry = (await Model.getData(id)) as SubjectClass;
     const oldEntries = getCache(cacheKey) as SubjectClass[] | undefined;
+    const isOldEntry = oldEntries.some((i) => i.id === id);
 
-    const newEntries =
-      oldEntries?.map((oldEntry) => {
-        const isUpdatedEntry = entry.id === oldEntry.id;
-        return isUpdatedEntry ? entry : oldEntry;
-      }) || [];
+    const newEntries = isOldEntry
+      ? oldEntries?.map((oldEntry) => {
+          const isUpdatedEntry = id === oldEntry.id;
+          return isUpdatedEntry ? entry : oldEntry;
+        })
+      : [entry];
 
     mutate(newEntries);
-    setIsLoading(false);
   }
 
   // Listen to remote changes
   useEffect(() => {
     if (perspective.uuid) {
-      const added = (link: LinkExpression) => {
+      const added = async (link: LinkExpression) => {
         const isNewEntry = link.data.source === source;
         const isUpdated = entries?.find((e) => e.id === link.data.source);
+        const id = isNewEntry
+          ? link.data.target
+          : isUpdated
+          ? link.data.source
+          : false;
 
-        if (isUpdated) {
-          fetchEntry(link.data.source);
-        }
+        if (id) {
+          const isInstance = await perspective.isSubjectInstance(
+            id,
+            new model()
+          );
 
-        if (isNewEntry) {
-          fetchEntry(link.data.target);
+          if (isInstance) {
+            fetchEntry(id);
+          }
         }
 
         return null;
