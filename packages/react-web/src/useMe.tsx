@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { getCache, setCache, subscribe, unsubscribe } from "./cache";
-import { Agent } from "@perspect3vism/ad4m";
+import { Agent, AgentStatus } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import { mapLiteralLinks } from "@fluxapp/utils";
 import { profile } from "@fluxapp/constants";
@@ -18,32 +18,35 @@ const {
   HAS_USERNAME,
 } = profile;
 
-type Props = {
-  client: AgentClient;
-  did: string | (() => string);
+type MeData = {
+  agent?: Agent;
+  status?: AgentStatus;
 };
 
-export function useAgent(props: Props) {
+type Props = {
+  client: AgentClient;
+};
+
+export function useMe(props: Props) {
   const forceUpdate = useForceUpdate();
   const [error, setError] = useState<string | undefined>(undefined);
-  const didRef = typeof props.did === "function" ? props.did() : props.did;
 
   // Create cache key for entry
-  const cacheKey = `agents/${didRef}`;
+  const cacheKey = `agents/me`;
 
   // Mutate shared/cached data for all subscribers
   const mutate = useCallback(
-    (agent: Agent | null) => setCache(cacheKey, agent),
+    (data: MeData | null) => setCache(cacheKey, data),
     [cacheKey]
   );
 
   // Fetch data from AD4M and save to cache
   const getData = useCallback(() => {
-    props.client
-      .byDID(didRef)
-      .then(async (agent) => {
+    const promises = Promise.all([props.client.status(), props.client.me()]);
+    promises
+      .then(async ([status, agent]) => {
         setError(undefined);
-        mutate(agent);
+        mutate({ agent, status });
       })
       .catch((error) => setError(error.toString()));
   }, [mutate]);
@@ -57,9 +60,32 @@ export function useAgent(props: Props) {
     return () => unsubscribe(cacheKey, forceUpdate);
   }, [cacheKey, forceUpdate]);
 
-  const agent = getCache(cacheKey) as Agent | undefined;
+  // Listen to remote changes
+  useEffect(() => {
+    const changed = (status: AgentStatus) => {
+      const newMeData = { agent: data?.agent, status };
+      mutate(newMeData);
+      return null;
+    };
+
+    const updated = (agent: Agent) => {
+      const newMeData = { agent, status: data?.status };
+      mutate(newMeData);
+      return null;
+    };
+
+    props.client.addAgentStatusChangedListener(changed);
+    props.client.addUpdatedListener(updated);
+
+    return () => {
+      // props.client.removeListener(added);
+      // props.client.removeListener(removed);
+    };
+  }, []);
+
+  const data = getCache(cacheKey) as MeData | undefined;
   let profile = null as Profile | null;
-  const perspective = agent?.perspective;
+  const perspective = data?.agent?.perspective;
 
   if (perspective) {
     profile = mapLiteralLinks(
@@ -77,7 +103,14 @@ export function useAgent(props: Props) {
     ) as Profile;
   }
 
-  return { agent, profile, error, mutate, reload: getData };
+  return {
+    status: data?.status,
+    agent: data?.agent,
+    profile,
+    error,
+    mutate,
+    reload: getData,
+  };
 }
 
 function useForceUpdate() {
