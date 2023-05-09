@@ -4,12 +4,14 @@ import AgentContext, { AgentProvider } from "./AgentContext";
 import ChannelContext, { ChannelProvider } from "./ChannelContext";
 import { useEntries } from "./useEntries";
 import { useEntry } from "./useEntry";
+import { useAgent } from "./useAgent";
 import useWebRTC from "./useWebrtc";
 import type { Reaction, Peer, WebRTC } from "./useWebrtc";
 
 export {
   useEntries,
   useEntry,
+  useAgent,
   ChatContext,
   ChatProvider,
   CommunityContext,
