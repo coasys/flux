@@ -198,23 +198,32 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
 
     await dataEntry.load();
 
-    // @ts-ignore
-    const tempModel = new this.tempSubject();
-
-    for (const [key] of Object.entries(this.subject)) {
+    const obj: SubjectClass = {}
+    
+    for (const [key, opts] of Object.entries(this.tempSubject.prototype.__properties)) {
       const value = await entry[key];
 
-      if (this.tempSubject.prototype.__properties[key]?.transform && value) {
-        const transform =
-          this.tempSubject.prototype.__properties[key].transform;
-        tempModel[key] = transform(value);
+      if (opts?.transform && value) {
+        const transform = opts?.transform;
+        obj[key] = transform(value);
       } else {
-        tempModel[key] = value;
+        obj[key] = value;
+      }
+    }
+
+    for (const [key, opts] of Object.entries(this.tempSubject.prototype.__collections)) {
+      const value = await entry[key];
+
+      if (opts?.transform && value) {
+        const transform = opts?.transform;
+        obj[key] = transform(value);
+      } else {
+        obj[key] = value;
       }
     }
 
     return {
-      ...tempModel,
+      ...obj,
       id: await entry.baseExpression,
       timestamp: dataEntry.timestamp,
       author: dataEntry.author,
@@ -242,6 +251,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
 
     if (!results) return [];
 
+
     return await Promise.all(
       results.map(async (result) => {
         let subject = new Subject(this.perspective!, result.X, subjectClass);
@@ -255,11 +265,16 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   async getAllData(source?: string): Promise<SubjectClass[]> {
     const entries = await this.getAll(source);
 
+
+    console.log('arr 1', entries)
+
     const promiseList = [];
 
     for (const entry of entries) {
       promiseList.push(this.getSubjectData(entry));
     }
+
+    console.log('arr 3', await Promise.all(promiseList))
 
     return await Promise.all(promiseList);
   }
