@@ -23,7 +23,6 @@
 import { defineComponent } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { mapActions } from "pinia";
-import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
 import { useEntries, useEntry, usePerspective } from "@fluxapp/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect";
@@ -50,7 +49,6 @@ export default defineComponent({
     return {
       data,
       dids,
-      dataStore: useDataStore(),
     };
   },
   methods: {

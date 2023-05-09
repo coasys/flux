@@ -98,7 +98,6 @@ import { defineComponent, ref, watch } from "vue";
 import CreateCommunity from "@/containers/CreateCommunity.vue";
 import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
-import { useDataStore } from "@/store/data";
 import { mapActions } from "pinia";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 import { EntryType } from "@fluxapp/types";
@@ -128,7 +127,6 @@ export default defineComponent({
       activeCommunity: community,
       onLinkAdded,
       perspectives,
-      dataStore: useDataStore(),
       isJoining: ref(false),
       appStore,
       isInit: ref(false),
@@ -176,16 +174,12 @@ export default defineComponent({
       "setShowDisclaimer",
       "setShowLeaveCommunity",
     ]),
-    leaveCommunity() {
+    async leaveCommunity() {
+      const client = await getAd4mClient();
       const activeCommunity = this.appStore.activeCommunity;
-
-      this.$router.push({ name: "home" }).then(() => {
-        this.dataStore
-          .removeCommunity({ communityId: activeCommunity })
-          .then(() => {
-            this.appStore.setShowLeaveCommunity(false);
-          });
-      });
+      await this.$router.push({ name: "home" });
+      await client.perspective.remove(activeCommunity);
+      this.appStore.setShowLeaveCommunity(false);
     },
     async joinTestingCommunity() {
       try {
@@ -204,11 +198,7 @@ export default defineComponent({
       const isCurrentChannel = routeChannelId === channelId;
       if (isCurrentChannel) return;
 
-      this.dataStore.setHasNewMessages({
-        communityId: p.uuid,
-        channelId,
-        value: true,
-      });
+      // TODO: Update channel to say it has a new message
 
       const expression = Literal.fromUrl(link.data.target).get();
 
@@ -216,14 +206,7 @@ export default defineComponent({
       let minuteAgo = new Date();
       minuteAgo.setSeconds(minuteAgo.getSeconds() - 30);
       if (expressionDate > minuteAgo) {
-        this.dataStore.showMessageNotification({
-          router: this.$router,
-          communityId: p.uuid,
-          channelId,
-          authorDid: expression.author,
-          message: expression.data,
-          timestamp: expression.timestamp,
-        });
+        // TODO: Show message notification
       }
     },
   },

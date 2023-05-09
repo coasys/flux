@@ -167,7 +167,6 @@
 </template>
 
 <script lang="ts">
-import { useDataStore } from "@/store/data";
 import { Profile } from "@fluxapp/types";
 import { ModalsState } from "@/store/types";
 import { LinkExpression } from "@perspect3vism/ad4m";
@@ -177,7 +176,6 @@ import CommunityCard from "./CommunityCard.vue";
 import ProfileJoinLink from "./ProfileJoinLink.vue";
 import EditProfile from "@/containers/EditProfile.vue";
 import { useAppStore } from "@/store/app";
-import { useUserStore } from "@/store/user";
 import { mapActions } from "pinia";
 import Avatar from "@/components/avatar/Avatar.vue";
 import { getImage } from "@fluxapp/utils";
@@ -211,8 +209,6 @@ export default defineComponent({
       () => route.params.did || me.value?.did
     );
     const appStore = useAppStore();
-    const dataStore = useDataStore();
-    const userStore = useUserStore();
 
     return {
       me,
@@ -220,8 +216,6 @@ export default defineComponent({
       neighbourhoods,
       communities,
       appStore,
-      dataStore,
-      userStore,
     };
   },
   data() {

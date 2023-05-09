@@ -183,22 +183,21 @@
 import { isValid } from "@/utils/validation";
 import { defineComponent, ref } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
-import { useDataStore } from "@/store/data";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { CommunityState } from "@/store/types";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useAppStore } from "@/store/app";
+import { useCommunities, usePerspectives } from "@fluxapp/vue";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 
 export default defineComponent({
   components: { AvatarUpload },
   emits: ["cancel", "submit"],
-  setup() {
-    const dataStore = useDataStore();
+  async setup() {
     const appStore = useAppStore();
-
+    const client = await getAd4mClient();
+    const { perspectives } = usePerspectives(client);
     return {
-      dataStore,
+      perspectives,
       appStore,
     };
   },
@@ -219,10 +218,10 @@ export default defineComponent({
   },
   computed: {
     hasAlreadyJoinedTestingCommunity(): boolean {
-      const community = this.dataStore.getCommunityByNeighbourhoodUrl(
-        DEFAULT_TESTING_NEIGHBOURHOOD
+      const p = Object.values(this.perspectives).find(
+        (p) => p.uuid === DEFAULT_TESTING_NEIGHBOURHOOD
       );
-      return community ? true : false;
+      return p ? true : false;
     },
     canJoin(): boolean {
       return isValid(

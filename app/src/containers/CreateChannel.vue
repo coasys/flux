@@ -53,9 +53,7 @@
 </template>
 
 <script lang="ts">
-import { useDataStore } from "@/store/data";
 import { useEntry, usePerspective } from "@fluxapp/vue";
-import { isValid } from "@/utils/validation";
 import { ChannelView } from "@fluxapp/types";
 import { defineComponent } from "vue";
 import ChannelViewOptions from "@/components/channel-view-options/ChannelViewOptions.vue";
@@ -67,8 +65,6 @@ export default defineComponent({
   emits: ["cancel", "submit"],
   components: { ChannelViewOptions },
   async setup() {
-    const dataStore = useDataStore();
-
     const route = useRoute();
 
     const client = await getAd4mClient();
@@ -82,7 +78,6 @@ export default defineComponent({
 
     return {
       repo,
-      dataStore,
     };
   },
   data() {

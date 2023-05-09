@@ -8,7 +8,7 @@
         @hide="(val) => (hideContainer = val)"
       ></img-upload>
       <avatar-upload
-        :hash="userDid"
+        :hash="agent?.did"
         :value="profilePicture"
         @change="(url) => (profilePicture = url)"
       ></avatar-upload>
@@ -16,7 +16,7 @@
         size="lg"
         label="Username"
         @keydown.enter="updateProfile"
-        :value="userProfile?.username"
+        :value="profile?.username"
         @input="(e: any) => (username = e.target.value)"
       ></j-input>
       <j-input
@@ -45,20 +45,21 @@
 <script lang="ts">
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { defineComponent } from "vue";
-import { Profile } from "@fluxapp/types";
-import { useUserStore } from "@/store/user";
 import { useAppStore } from "@/store/app";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
-import { getImage } from "@fluxapp/utils";
+import { useMe } from "@fluxapp/vue";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
   components: { AvatarUpload, ImgUpload },
-  setup() {
-    const userStore = useUserStore();
+  async setup() {
     const appStore = useAppStore();
+    const client = await getAd4mClient();
+    const { profile, agent } = useMe(client.agent);
     return {
-      userStore,
+      agent,
+      profile,
       appStore,
     };
   },
@@ -73,36 +74,30 @@ export default defineComponent({
     };
   },
   async mounted() {
-    this.username = this.userProfile.username || "";
-    this.bio = this.userProfile.bio || "";
-    this.profilePicture = await getImage(this.userProfile.profilePicture);
-    this.profileBackground = await getImage(this.userProfile.profileBackground);
-  },
-  computed: {
-    userProfile(): Profile {
-      return this.userStore.profile!;
-    },
-    userDid(): string {
-      return this.userStore.agent.did!;
-    },
+    this.username = this.profile?.username || "";
+    this.bio = this.profile?.bio || "";
+    this.profilePicture = this.profile?.profilePicture || "";
+    this.profileBackground = this.profile?.profileBackground || "";
   },
   methods: {
     async updateProfile() {
       this.isUpdatingProfile = true;
 
-      this.userStore
-        .updateProfile({
-          username: this.username,
-          profilePicture: this.profilePicture,
-          bio: this.bio,
-          profileBackground: this.profileBackground,
-        })
-        .then(() => {
-          this.$emit("submit");
-        })
-        .finally(() => {
-          this.isUpdatingProfile = false;
-        });
+      // TODO: Update user profile
+
+      // this.userStore
+      //   .updateProfile({
+      //     username: this.username,
+      //     profilePicture: this.profilePicture,
+      //     bio: this.bio,
+      //     profileBackground: this.profileBackground,
+      //   })
+      //   .then(() => {
+      //     this.$emit("submit");
+      //   })
+      //   .finally(() => {
+      //     this.isUpdatingProfile = false;
+      //   });
     },
   },
 });

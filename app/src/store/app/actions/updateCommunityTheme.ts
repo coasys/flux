@@ -1,4 +1,3 @@
-import { useDataStore } from "@/store/data";
 import { ThemeState } from "@/store/types";
 import { setTheme } from "@/utils/themeHelper";
 
@@ -14,11 +13,10 @@ export default async function updateCommunityTheme(payload: {
   communityId: string;
   theme: ThemeState;
 }): Promise<void> {
-  const dataStore = useDataStore();
   const appStore = useAppStore();
   const isCurrentTheme = appStore.currentTheme === payload.communityId;
   const mergedTheme = {
-    ...dataStore.getLocalCommunityState(payload.communityId).theme,
+    // TODO: Merge community theme
     ...payload.theme,
   };
 
@@ -26,8 +24,5 @@ export default async function updateCommunityTheme(payload: {
     setTheme(mergedTheme);
   }
 
-  dataStore.setCommunityTheme({
-    communityId: payload.communityId,
-    theme: mergedTheme,
-  });
+  // TODO: Update community theme
 }

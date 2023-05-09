@@ -8,7 +8,6 @@ import {
   getSDNACreationLinks,
 } from "./createSDNA";
 import { checkUpdateSDNAVersion } from "./updateSDNA";
-import { deleteChannel } from "./deleteChannel";
 import deleteMessageReaction from "./deleteMessageReaction";
 import { deleteSDNALinks } from "./deleteSDNALinks";
 import editCurrentMessage from "./editCurrentMessage";
@@ -63,7 +62,6 @@ export {
   createSDNA,
   generateSDNALinks,
   getSDNACreationLinks,
-  deleteChannel,
   deleteMessageReaction,
   deleteSDNALinks,
   editCurrentMessage,

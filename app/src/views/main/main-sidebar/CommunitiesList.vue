@@ -10,7 +10,7 @@
           slot="trigger"
           class="left-nav__community-item"
           :selected="communityIsActive(uuid as string)"
-          :online="hasNotification(uuid as string)"
+          :online="false"
           :url="community.image || undefined"
           :initials="community.name?.charAt(0).toUpperCase()"
           @click="() => handleCommunityClick(uuid as string)"
@@ -26,39 +26,15 @@
           </j-menu-item>
 
           <j-menu-item @click="() => muteCommunity(uuid as string)"
-            ><j-icon
-              size="xs"
-              slot="start"
-              :name="
-                getCommunityState(uuid as string)?.notifications
-                  ?.mute
-                  ? 'bell-slash'
-                  : 'bell'
-              "
-            />
-            {{
-              `${
-                getCommunityState(uuid as string)?.notifications?.mute
-                  ? "Unmute"
-                  : "Mute"
-              } Community`
-            }}
+            ><j-icon size="xs" slot="start" name="bell" />
+            Mute Community
           </j-menu-item>
           <j-menu-item
             @click="
               () => toggleHideMutedChannels(uuid as string)
             "
           >
-            <j-icon
-              size="xs"
-              slot="start"
-              :name="
-                getCommunityState(uuid as string)
-                  ?.hideMutedChannels
-                  ? 'toggle-on'
-                  : 'toggle-off'
-              "
-            />
+            <j-icon size="xs" slot="start" name="toggle-on" />
             Hide muted channels
           </j-menu-item>
         </j-menu>
@@ -80,7 +56,6 @@
 <script lang="ts">
 import { ref } from "vue";
 import { useAppStore } from "@/store/app";
-import { useDataStore } from "@/store/data";
 import { defineComponent } from "vue";
 import Avatar from "@/components/avatar/Avatar.vue";
 import { usePerspectives, useCommunities } from "@fluxapp/vue";
@@ -92,7 +67,6 @@ export default defineComponent({
   },
   async setup() {
     const appStore = useAppStore();
-    const dataStore = useDataStore();
 
     const client = await getAd4mClient();
 
@@ -103,7 +77,6 @@ export default defineComponent({
       communities,
       showLeaveCommunity: ref(false),
       appStore,
-      dataStore,
     };
   },
   methods: {
@@ -133,14 +106,6 @@ export default defineComponent({
   computed: {
     communityIsActive() {
       return (id: string) => this.$route.params.communityId === id;
-    },
-    hasNotification() {
-      return (id: string) => {
-        return this.dataStore.getCommunityState(id)?.state?.hasNewMessages;
-      };
-    },
-    getCommunityState() {
-      return (id: string) => this.dataStore.getLocalCommunityState(id);
     },
   },
 });

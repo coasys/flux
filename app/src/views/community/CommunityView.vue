@@ -203,8 +203,6 @@ import Hourglass from "@/components/hourglass/Hourglass.vue";
 import { Channel, Community } from "@fluxapp/api";
 import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
-import { useUserStore } from "@/store/user";
-import { useDataStore } from "@/store/data";
 import { mapActions, mapState } from "pinia";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { useEntries, useEntry } from "@fluxapp/vue";
@@ -253,8 +251,6 @@ export default defineComponent({
       data,
       loadedChannels: ref<LoadedChannels>({}),
       appStore: useAppStore(),
-      dataStore: useDataStore(),
-      userStore: useUserStore(),
     };
   },
   data() {
@@ -287,7 +283,6 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapState(useDataStore, ["getChannelStates"]),
     ...mapActions(useAppStore, [
       "setShowCreateChannel",
       "setShowEditCommunity",
@@ -307,21 +302,16 @@ export default defineComponent({
       });
     },
     goToActiveChannel(communityId: string) {
-      const channels = this.dataStore.getChannelStates(communityId);
-      if (channels.length > 0) {
-        const firstChannel = this.dataStore.getChannelStates(communityId)[0].id;
-        const currentChannelId =
-          this.communityState.state.currentChannelId || firstChannel;
+      const firstChannel = this.community?.channels[0];
 
-        if (currentChannelId) {
-          this.$router.push({
-            name: "channel",
-            params: {
-              communityId,
-              channelId: currentChannelId,
-            },
-          });
-        }
+      if (firstChannel) {
+        this.$router.push({
+          name: "channel",
+          params: {
+            communityId,
+            channelId: firstChannel,
+          },
+        });
       }
     },
     handleThemeChange(id?: string) {
@@ -329,9 +319,10 @@ export default defineComponent({
         this.appStore.changeCurrentTheme("global");
         return;
       } else {
-        this.appStore.changeCurrentTheme(
-          this.communityState.state?.useLocalTheme ? id : "global"
-        );
+        // TODO: Change community theme
+        // this.appStore.changeCurrentTheme(
+        //   this.communityState.state?.useLocalTheme ? id : "global"
+        // );
       }
     },
     getInviteCode() {
@@ -351,11 +342,6 @@ export default defineComponent({
     },
   },
   computed: {
-    communityState() {
-      return this.dataStore.getCommunityState(
-        this.$route.params.communityId as string
-      );
-    },
     isSynced(): boolean {
       return true;
     },

@@ -111,13 +111,10 @@
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { ChannelState } from "@/store/types";
-import { mapActions, mapState } from "pinia";
-import { useDataStore } from "@/store/data";
+import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
-import { useUserStore } from "@/store/user";
-import { Channel, deleteChannel } from "@fluxapp/api";
-import { useEntries, usePerspective, usePerspectives } from "@fluxapp/vue";
+import { Channel } from "@fluxapp/api";
+import { useEntries, usePerspective, useMe } from "@fluxapp/vue";
 import { ChannelView } from "@fluxapp/types";
 import { viewOptions as channelViewOptions } from "@/constants";
 import { Ad4mClient } from "@perspect3vism/ad4m";
@@ -141,6 +138,8 @@ export default defineComponent({
 
     const { data } = usePerspective(client, () => route.params.communityId);
 
+    const { agent } = useMe(client.agent);
+
     const { entries: channels, repo: channelRepo } = useEntries({
       perspective: () => data.value.perspective,
       source: () => "ad4m://self",
@@ -148,12 +147,11 @@ export default defineComponent({
     });
 
     return {
+      agent,
       channelRepo,
       channels,
       userProfileImage: ref<null | string>(null),
       appStore: useAppStore(),
-      userStore: useUserStore(),
-      dataStore: useDataStore(),
     };
   },
   data: function () {
@@ -163,18 +161,17 @@ export default defineComponent({
     };
   },
   methods: {
-    ...mapActions(useDataStore, ["setChannelNotificationState"]),
-    ...mapState(useDataStore, ["getChannelStates"]),
     ...mapActions(useAppStore, ["setSidebar", "setShowCreateChannel"]),
     handleToggleClick(channelId: string) {
-      this.dataStore.toggleChannelCollapse(channelId);
+      // TODO: Toggle channel collapse
     },
     goToEditChannel(id: string) {
       this.appStore.setActiveChannel(id);
       this.appStore.setShowEditChannel(true);
     },
     handleChangeView(channelId: string, view: ChannelView) {
-      this.dataStore.setCurrentChannelView({ channelId, view });
+      // TODO: Set current channel view
+      //this.dataStore.setCurrentChannelView({ channelId, view });
       this.navigateToChannel(channelId);
     },
     navigateToChannel(channelName: string) {
@@ -191,7 +188,7 @@ export default defineComponent({
       const channel = this.channels.find((e) => e.id === channelId);
 
       if (channel) {
-        return channel.author === this.userStore.getUser?.agent.did;
+        return channel.author === this.agent?.did;
       } else {
         throw new Error("Did not find channel");
       }

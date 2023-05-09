@@ -27,7 +27,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { useAppStore } from "@/store/app";
-import { useUserStore } from "@/store/user";
 import { mapActions, mapState } from "pinia";
 import Avatar from "@/components/avatar/Avatar.vue";
 import { useMe } from "@fluxapp/vue";
@@ -39,7 +38,6 @@ export default defineComponent({
   },
   async setup() {
     const appStore = useAppStore();
-    const userStore = useUserStore();
 
     const client = await getAd4mClient();
 
@@ -49,7 +47,6 @@ export default defineComponent({
       agent,
       profile,
       appStore,
-      userStore,
     };
   },
   data() {

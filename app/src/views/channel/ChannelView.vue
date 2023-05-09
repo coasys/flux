@@ -144,17 +144,14 @@
 
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
-import { CommunityState } from "@/store/types";
-import { useDataStore } from "@/store/data";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Profile from "@/containers/Profile.vue";
 import { useAppStore } from "@/store/app";
-import { useUserStore } from "@/store/user";
 import { ChannelView, EntryType } from "@fluxapp/types";
 import { viewOptions } from "@/constants";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
-import { useEntry, usePerspective } from "@fluxapp/vue";
-import { Community, Channel } from "@fluxapp/api";
+import { useEntry, usePerspective, usePerspectives, useMe } from "@fluxapp/vue";
+import { Community, Channel, joinCommunity } from "@fluxapp/api";
 
 interface MentionTrigger {
   label: string;
@@ -175,6 +172,8 @@ export default defineComponent({
   async setup(props) {
     const client = await getAd4mClient();
 
+    const { perspectives } = usePerspectives(client);
+
     const { data } = usePerspective(client, () => props.communityId);
 
     const { entry: community } = useEntry({
@@ -188,8 +187,12 @@ export default defineComponent({
       model: Channel,
     });
 
+    const { agent } = useMe(client.agent);
+
     return {
-      data: data,
+      agent,
+      perspectives,
+      data,
       community,
       channel,
       channelRepo,
@@ -202,8 +205,6 @@ export default defineComponent({
       showEditChannel: ref(false),
       selectedChannelView: ref("chat"),
       appStore: useAppStore(),
-      dataStore: useDataStore(),
-      userStore: useUserStore(),
       script: null as HTMLElement | null,
       memberMentions: ref<MentionTrigger[]>([]),
       activeProfile: ref<string>(""),
@@ -244,18 +245,12 @@ export default defineComponent({
   },
   computed: {
     sameAgent() {
-      return this.channel?.author === this.userStore.agent.did;
+      return this.channel?.author === this.agent?.did;
     },
     filteredViewOptions() {
       return viewOptions.filter((view) =>
         this.channel?.views.includes(view.type)
       );
-    },
-    channelState() {
-      return this.dataStore.getChannel(this.channelId as string);
-    },
-    communityState(): CommunityState {
-      return this.dataStore.getCommunityState(this.communityId as string);
     },
   },
   methods: {
@@ -307,26 +302,25 @@ export default defineComponent({
       });
     },
     onNeighbourhoodClick(url: any) {
-      let community = this.dataStore.getCommunities.find(
-        (e) => e.neighbourhood.neighbourhoodUrl === url
+      let neighbourhood = Object.values(this.perspectives).find(
+        (e) => e.sharedUrl === url
       );
 
-      if (!community) {
+      if (!neighbourhood) {
         this.joinCommunity(url);
       } else {
         this.$router.push({
           name: "community",
           params: {
-            communityId: community.neighbourhood.uuid,
+            communityId: neighbourhood.uuid,
           },
         });
       }
     },
     joinCommunity(url: string) {
       this.isJoiningCommunity = true;
-      this.dataStore
-        .joinCommunity({ joiningLink: url })
-        .then((community) => {
+      joinCommunity({ joiningLink: url })
+        .then(() => {
           this.$router.push({
             name: "community",
             params: {
@@ -342,11 +336,12 @@ export default defineComponent({
       const { channelId } = this.$route.params;
 
       if (channelId) {
-        this.dataStore.setHasNewMessages({
-          communityId: this.$route.params.communityId as string,
-          channelId: channelId as string,
-          value: false,
-        });
+        // TODO: Set channel has new messages
+        // this.dataStore.setHasNewMessages({
+        //   communityId: this.$route.params.communityId as string,
+        //   channelId: channelId as string,
+        //   value: false,
+        // });
       }
     },
     toggleProfile(open: boolean, did?: any): void {

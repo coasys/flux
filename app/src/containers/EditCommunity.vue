@@ -39,7 +39,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
-import { useDataStore } from "@/store/data";
 import {
   blobToDataURL,
   dataURItoBlob,
@@ -62,14 +61,9 @@ export default defineComponent({
       model: Community,
     });
 
-    console.log({ community });
-
-    const dataStore = useDataStore();
-
     return {
       repo,
       community,
-      dataStore,
     };
   },
   data() {

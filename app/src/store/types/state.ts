@@ -1,7 +1,3 @@
-import { UserState } from "./userprofile";
-import { LocalCommunityState } from "./community";
-import { ChannelState } from "./channel";
-import { Community } from "@fluxapp/types";
 import {
   WindowState,
   ModalsState,
@@ -13,14 +9,6 @@ import {
 
 export interface State {
   app: ApplicationState;
-  data: DataState;
-  user: UserState;
-}
-
-export interface DataState {
-  communities: { [perspectiveUuid: string]: LocalCommunityState };
-  channels: { [communityId: string]: ChannelState };
-  neighbourhoods: { [perspectiveUuid: string]: Community };
 }
 
 export interface ApplicationState {

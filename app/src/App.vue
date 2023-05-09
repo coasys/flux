@@ -41,29 +41,14 @@
 import { defineComponent, ref } from "vue";
 import { useAppStore } from "./store/app";
 import { ApplicationState, ModalsState } from "@/store/types";
-import { useRoute, useRouter } from "vue-router";
-import { useDataStore } from "./store/data";
-import { useUserStore } from "./store/user";
-import { ad4mConnect } from "./ad4mConnect";
 
 export default defineComponent({
   name: "App",
   setup() {
     const appStore = useAppStore();
-    const router = useRouter();
-    const route = useRoute();
-    const dataStore = useDataStore();
-    const userStore = useUserStore();
-    const watcherStarted = ref(false);
 
     return {
-      ad4mConnect,
       appStore,
-      router,
-      route,
-      dataStore,
-      userStore,
-      watcherStarted,
     };
   },
   async created() {

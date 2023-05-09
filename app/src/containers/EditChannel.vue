@@ -40,31 +40,42 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { useAppStore } from "@/store/app";
-import { useDataStore } from "@/store/data";
 import { ChannelView } from "@fluxapp/types";
+import { Channel } from "@fluxapp/api";
 import ChannnelViewOptions from "@/components/channel-view-options/ChannelViewOptions.vue";
 import { viewOptions } from "@/constants";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { useEntry, usePerspective } from "@fluxapp/vue";
+import { useRoute } from "vue-router";
 
 export default defineComponent({
   props: ["channelId"],
   emits: ["cancel", "submit"],
   components: { ChannnelViewOptions },
-  setup() {
+  async setup(props) {
+    const route = useRoute();
+    const client = await getAd4mClient();
+    const { data } = usePerspective(client, () => route.params.communityId);
+
+    const { entry: channel, repo } = useEntry({
+      perspective: () => data.value.perspective,
+      id: props.channelId,
+      model: Channel,
+    });
+
     return {
+      repo,
+      channel,
       name: ref(""),
       description: ref(""),
       views: ref<ChannelView[]>([]),
       isSaving: ref(false),
       appStore: useAppStore(),
-      dataStore: useDataStore(),
     };
   },
   computed: {
     canSave() {
       return this.views.length >= 1;
-    },
-    channel() {
-      return this.dataStore.channels[this.channelId];
     },
     viewOptions() {
       return viewOptions;
@@ -84,13 +95,10 @@ export default defineComponent({
   methods: {
     async updateChannel() {
       this.isSaving = true;
-      this.dataStore
-        .updateChannel({
-          channelId: this.$route.params.channelId as string,
-          data: {
-            name: this.name,
-            views: this.views,
-          },
+      this.repo
+        ?.update(this.$route.params.channelId as string, {
+          name: this.name,
+          views: this.views,
         })
         .then(() => {
           this.$emit("submit");

@@ -46,21 +46,8 @@
             <j-icon size="xs" slot="start" name="plus" />
             Create channel
           </j-menu-item>
-          <j-menu-item
-            @click="
-              () =>
-                toggleHideMutedChannels({
-                  communityId: $route.params.communityId as string
-                })
-            "
-          >
-            <j-icon
-              size="xs"
-              slot="start"
-              :name="
-                communityState.hideMutedChannels ? 'toggle-on' : 'toggle-off'
-              "
-            />
+          <j-menu-item>
+            <j-icon size="xs" slot="start" name="toggle-on" />
             Hide muted channels
           </j-menu-item>
           <j-menu-item @click="() => goToLeaveCommunity()">
@@ -116,11 +103,8 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { Profile } from "@fluxapp/types";
-import { ChannelState } from "@/store/types";
 import { mapActions, mapState } from "pinia";
-import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
-import { useUserStore } from "@/store/user";
 import Avatar from "@/components/avatar/Avatar.vue";
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
@@ -138,47 +122,28 @@ export default defineComponent({
   async setup(props) {
     const client = await getAd4mClient();
 
-    const { status, agent: me } = useMe(client.agent);
+    const { status, agent: me, profile } = useMe(client.agent);
 
     return {
+      profile,
       status,
       me,
       showCommunityMenu: ref(false),
       appStore: useAppStore(),
-      userStore: useUserStore(),
-      dataStore: useDataStore(),
     };
   },
   computed: {
     isPerspectiveSynced() {
       return true;
     },
-    communityState() {
-      return this.dataStore.getCommunityState(
-        this.$route.params.communityId as string
-      );
-    },
-    channels(): ChannelState[] {
-      const communityId = this.$route.params.communityId as string;
-
-      const channels = this.getChannelStates()(communityId);
-
-      if (this.community.state.hideMutedChannels) {
-        return channels.filter((e) => !e.notifications.mute);
-      }
-
-      return channels;
-    },
     isCreator(): boolean {
       return this.community.author === this.me?.did;
     },
     userProfile(): Profile | null {
-      return this.userStore.profile;
+      return this.profile;
     },
   },
   methods: {
-    ...mapActions(useDataStore, ["toggleHideMutedChannels"]),
-    ...mapState(useDataStore, ["getChannelStates"]),
     ...mapActions(useAppStore, [
       "setSidebar",
       "setShowCreateChannel",

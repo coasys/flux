@@ -40,8 +40,6 @@
 
 <script lang="ts">
 import { useAppStore } from "@/store/app";
-import { useDataStore } from "@/store/data";
-import { LocalCommunityState } from "@/store/types";
 import { defineComponent, ref } from "vue";
 import { mapActions } from "pinia";
 import ThemeEditor from "./ThemeEditor.vue";
@@ -53,7 +51,7 @@ export default defineComponent({
   components: { ThemeEditor },
   setup() {
     const appStore = useAppStore();
-    const dataStore = useDataStore();
+
     const emoji = ref("");
     const emojiCount = ref(0);
     const emojiPicker = ref(false);
@@ -61,7 +59,6 @@ export default defineComponent({
 
     return {
       appStore,
-      dataStore,
       emoji,
       emojiCount,
       emojiPicker,
@@ -72,7 +69,7 @@ export default defineComponent({
     return {};
   },
   async mounted() {
-    const perspectiveUuid = this.community.perspectiveUuid;
+    const perspectiveUuid = this.$route.params.communityId as string;
     const sdnaValues = await getSDNAValues(perspectiveUuid);
     if (sdnaValues) {
       this.emoji = sdnaValues.emoji;
@@ -94,19 +91,13 @@ export default defineComponent({
       this.emojiPicker = false;
     },
     async updateSDNA() {
-      const perspectiveUuid = this.community.perspectiveUuid;
+      const perspectiveUuid = this.$route.params.communityId as string;
       updateSDNA(perspectiveUuid, {
         emoji: this.emoji,
         emojiCount: this.emojiCount,
       });
 
       this.setShowCommunityTweaks(false);
-    },
-  },
-  computed: {
-    community(): LocalCommunityState {
-      const id = this.$route.params.communityId as string;
-      return this.dataStore.getLocalCommunityState(id);
     },
   },
 });

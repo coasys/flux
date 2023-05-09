@@ -39,8 +39,7 @@
 
 <script lang="ts">
 import { useAppStore } from "@/store/app";
-import { useDataStore } from "@/store/data";
-import { LocalCommunityState, ThemeState } from "@/store/types";
+import { ThemeState } from "@/store/types";
 import { defineComponent } from "vue";
 import ThemeEditor from "./ThemeEditor.vue";
 
@@ -48,11 +47,9 @@ export default defineComponent({
   components: { ThemeEditor },
   setup() {
     const appStore = useAppStore();
-    const dataStore = useDataStore();
 
     return {
       appStore,
-      dataStore,
     };
   },
   data() {
@@ -63,7 +60,8 @@ export default defineComponent({
   methods: {
     setuseLocalTheme(val: boolean) {
       const id = this.$route.params.communityId as string;
-      this.dataStore.setuseLocalTheme({ communityId: id, value: val });
+      // TODO: Set local theme
+      // this.dataStore.setuseLocalTheme({ communityId: id, value: val });
       this.appStore.changeCurrentTheme(val ? id : "global");
     },
     updateCommunityTheme(val: ThemeState) {
@@ -76,15 +74,7 @@ export default defineComponent({
   },
   computed: {
     showEditor(): boolean {
-      return (
-        this.currentView === "theme-editor" &&
-        this.community.theme &&
-        this.community.useLocalTheme
-      );
-    },
-    community(): LocalCommunityState {
-      const id = this.$route.params.communityId as string;
-      return this.dataStore.getLocalCommunityState(id);
+      return this.currentView === "theme-editor";
     },
   },
 });
