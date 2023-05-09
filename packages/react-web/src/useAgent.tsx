@@ -77,7 +77,7 @@ export function useAgent(props: Props) {
     ) as Profile;
   }
 
-  return { agent, error, mutate, reload: getData };
+  return { agent, profile, error, mutate, reload: getData };
 }
 
 function useForceUpdate() {
