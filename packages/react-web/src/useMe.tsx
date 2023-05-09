@@ -23,11 +23,7 @@ type MeData = {
   status?: AgentStatus;
 };
 
-type Props = {
-  client: AgentClient;
-};
-
-export function useMe(props: Props) {
+export function useMe(agent: AgentClient) {
   const forceUpdate = useForceUpdate();
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -42,7 +38,7 @@ export function useMe(props: Props) {
 
   // Fetch data from AD4M and save to cache
   const getData = useCallback(() => {
-    const promises = Promise.all([props.client.status(), props.client.me()]);
+    const promises = Promise.all([agent.status(), agent.me()]);
     promises
       .then(async ([status, agent]) => {
         setError(undefined);
@@ -74,12 +70,12 @@ export function useMe(props: Props) {
       return null;
     };
 
-    props.client.addAgentStatusChangedListener(changed);
-    props.client.addUpdatedListener(updated);
+    agent.addAgentStatusChangedListener(changed);
+    agent.addUpdatedListener(updated);
 
     return () => {
-      // props.client.removeListener(added);
-      // props.client.removeListener(removed);
+      // agent.removeListener(added);
+      // agent.removeListener(removed);
     };
   }, []);
 
