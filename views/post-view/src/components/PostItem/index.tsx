@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from "preact/hooks";
-import { CommunityContext } from "@fluxapp/react-web";
+import { CommunityContext, useEntry } from "@fluxapp/react-web";
 import styles from "./index.module.css";
 import { format, formatDistance } from "date-fns/esm";
 import { Profile } from "@fluxapp/types";

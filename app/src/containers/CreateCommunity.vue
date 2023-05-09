@@ -181,12 +181,13 @@
 
 <script lang="ts">
 import { isValid } from "@/utils/validation";
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useAppStore } from "@/store/app";
-import { useCommunities, usePerspectives } from "@fluxapp/vue";
+import { joinCommunity, createCommunity } from "@fluxapp/api";
+import { usePerspectives } from "@fluxapp/vue";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 
 export default defineComponent({
@@ -212,9 +213,6 @@ export default defineComponent({
       isCreatingCommunity: false,
       nonFluxPerspectives: [] as PerspectiveProxy[],
     };
-  },
-  mounted() {
-    this.getPerspectives();
   },
   computed: {
     hasAlreadyJoinedTestingCommunity(): boolean {
@@ -269,10 +267,8 @@ export default defineComponent({
 
       const neighbourhoodUrl = this.joiningLink;
 
-      const existingPerspective = (await client.perspective.all()).find(
-        (perspective) => {
-          return perspective.sharedUrl === neighbourhoodUrl;
-        }
+      const existingPerspective = Object.values(this.perspectives).find(
+        (p) => p.sharedUrl === neighbourhoodUrl
       );
 
       if (existingPerspective) {
@@ -283,35 +279,16 @@ export default defineComponent({
         });
         this.isJoiningCommunity = false;
         this.appStore.setShowCreateCommunity(false);
-
-        const community = await this.dataStore.getCommunityByNeighbourhoodUrl(
-          neighbourhoodUrl
-        );
-
-        if (!community) {
-          console.error(
-            "Did not find community when trying to redirect after join"
-          );
-          return;
-        }
-
-        this.$router.push({
-          name: "community",
-          params: {
-            communityId: community.neighbourhood.uuid,
-          },
-        });
         return;
       }
 
-      this.dataStore
-        .joinCommunity({ joiningLink: neighbourhoodUrl })
+      joinCommunity({ joiningLink: neighbourhoodUrl })
         .then((community) => {
           this.$emit("submit");
           this.$router.push({
             name: "community",
             params: {
-              communityId: community.neighbourhood.uuid,
+              communityId: community.uuid,
             },
           });
         })
@@ -322,18 +299,38 @@ export default defineComponent({
     createCommunity() {
       this.isCreatingCommunity = true;
 
-      this.dataStore
-        .createCommunity({
-          perspectiveName: this.newCommunityName,
-          description: this.newCommunityDesc,
-          image: this.newProfileImage,
-          thumbnail: this.newProfileImage,
-        })
-        .then((community: CommunityState) => {
+      createCommunity({
+        name: this.newCommunityName,
+        description: this.newCommunityDesc,
+        image: this.newProfileImage,
+      })
+        .then((community) => {
           this.$emit("submit");
           this.newCommunityName = "";
           this.newCommunityDesc = "";
-          this.newProfileImage = "";
+          this.newProfileImage = undefined;
+
+          this.$router.push({
+            name: "community",
+            params: {
+              communityId: community.uuid,
+            },
+          });
+        })
+        .finally(() => {
+          this.isCreatingCommunity = false;
+        });
+    },
+    createCommunityFromPerspective(perspective: any) {
+      this.isCreatingCommunity = true;
+      createCommunity({
+        name: perspective.name,
+        description: this.newCommunityDesc,
+        image: this.newProfileImage,
+        perspectiveUuid: perspective.uuid,
+      })
+        .then((community: any) => {
+          this.$emit("submit");
 
           this.$router.push({
             name: "community",
@@ -345,53 +342,6 @@ export default defineComponent({
         .finally(() => {
           this.isCreatingCommunity = false;
         });
-    },
-    createCommunityFromPerspective(perspective: any) {
-      this.isCreatingCommunity = true;
-      this.dataStore
-        .createCommunity({
-          perspectiveName: perspective.name,
-          description: this.newCommunityDesc,
-          image: this.newProfileImage,
-          thumbnail: this.newProfileImage,
-          perspectiveUuid: perspective.uuid,
-        })
-        .then((community: any) => {
-          this.$emit("submit");
-          const channels = this.dataStore.getChannelStates(
-            community.neighbourhood.uuid
-          );
-
-          this.$router.push({
-            name: "channel",
-            params: {
-              communityId: community.neighbourhood.uuid,
-              channelId: channels[0].id,
-            },
-          });
-        })
-        .finally(() => {
-          this.isCreatingCommunity = false;
-        });
-    },
-    async getPerspectives() {
-      const client = await getAd4mClient();
-      const keys = Object.keys(this.dataStore.neighbourhoods);
-      const perspectives = await client.perspective.all();
-
-      const nonFluxPerspectives = perspectives.filter(
-        (perspective) => !keys.includes(perspective.uuid)
-      );
-
-      //@ts-ignore
-      this.nonFluxPerspectives = nonFluxPerspectives.map((perspective) => {
-        return {
-          name: perspective.name,
-          neighbourhood: perspective.neighbourhood,
-          sharedUrl: perspective.sharedUrl,
-          uuid: perspective.uuid,
-        };
-      });
     },
     async joinTestingCommunity() {
       try {

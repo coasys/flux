@@ -37,7 +37,8 @@ export class Community {
     through: IMAGE,
     writable: true,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
-    transform: (data) => `data:image/png;base64,${data?.data_base64}`,
+    transform: (data) =>
+      data ? `data:image/png;base64,${data?.data_base64}` : undefined,
   })
   image: string;
 
@@ -46,7 +47,8 @@ export class Community {
     through: THUMBNAIL,
     writable: true,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
-    transform: (data) => `data:image/png;base64,${data?.data_base64}`,
+    transform: (data) =>
+      data ? `data:image/png;base64,${data?.data_base64}` : undefined,
   })
   thumbnail: string;
 

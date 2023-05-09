@@ -65,14 +65,14 @@ import { defineComponent, ref } from "vue";
 import Carousel from "./SignUpCarousel.vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { useValidation } from "@/utils/validation";
-import { useUserStore } from "@/store/user";
 import ad4mLogo from "@/assets/images/ad4mLogo.svg";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Logo from "@/components/logo/Logo.vue";
 import { useAppStore } from "@/store/app";
 import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";
 import SignUpCarousel from "./SignUpCarousel.vue";
-import { getAd4mProfile } from "@fluxapp/api";
+import { createProfile, getAd4mProfile } from "@fluxapp/api";
+import { useMe } from "@fluxapp/vue";
 
 export default defineComponent({
   name: "SignUp",
@@ -83,15 +83,18 @@ export default defineComponent({
     Ad4mLogo,
     SignUpCarousel,
   },
-  setup() {
+  async setup() {
     const showSignup = ref(false);
     const profilePicture = ref();
     const modalOpen = ref(false);
     const isCreatingUser = ref(false);
     const isLoggingIn = ref(false);
     const showPassword = ref(false);
-    const userStore = useUserStore();
     const appStore = useAppStore();
+
+    const client = await getAd4mClient();
+
+    const { status } = useMe(client.agent);
 
     const {
       value: username,
@@ -126,7 +129,7 @@ export default defineComponent({
       showSignup,
       isLoggingIn,
       profilePicture,
-      hasUser: userStore.agent.isInitialized,
+      hasUser: status.value.isInitialized,
       modalOpen,
       isCreatingUser,
       name,
@@ -139,7 +142,6 @@ export default defineComponent({
       email,
       familyName,
       logInError,
-      userStore,
       appStore,
     };
   },
@@ -189,16 +191,15 @@ export default defineComponent({
     async createUser() {
       this.isCreatingUser = true;
 
-      this.userStore
-        .createUser({
-          givenName: this.name,
-          familyName: this.familyName,
-          email: this.email,
-          username: this.username,
-          profilePicture: this.profilePicture,
-        })
+      createProfile({
+        givenName: this.name,
+        familyName: this.familyName,
+        email: this.email,
+        username: this.username,
+        profilePicture: this.profilePicture,
+      })
         .then(() => this.$router.push("/"))
-        .finally(async () => {
+        .finally(() => {
           this.isCreatingUser = false;
           this.appStore.changeNotificationState(true);
         });

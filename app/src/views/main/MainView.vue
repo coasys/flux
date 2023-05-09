@@ -157,8 +157,8 @@ export default defineComponent({
   },
   computed: {
     hasAlreadyJoinedTestingCommunity(): boolean {
-      const community = this.dataStore.getCommunityByNeighbourhoodUrl(
-        DEFAULT_TESTING_NEIGHBOURHOOD
+      const community = Object.values(this.perspectives).find(
+        (p) => p.sharedUrl === DEFAULT_TESTING_NEIGHBOURHOOD
       );
       return community ? true : false;
     },

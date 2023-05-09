@@ -62,8 +62,8 @@ export default async function createCommunity({
       );
     }
 
-    let thumbnail: string | null = null;
-    let compressedImage: string | null = null;
+    let thumbnail: string | undefined = undefined;
+    let compressedImage: string | undefined = undefined;
 
     if (image) {
       compressedImage = await blobToDataURL(
@@ -73,10 +73,6 @@ export default async function createCommunity({
         await resizeImage(dataURItoBlob(image as string), 0.3)
       );
     }
-
-    console.log("Ensuring classes..");
-    await perspective.ensureSDNASubjectClass(Community);
-    await perspective.ensureSDNASubjectClass(Member);
 
     const CommunityModel = new SubjectRepository(Community, {
       perspective: perspective,

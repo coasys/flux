@@ -24,7 +24,9 @@ export function useCommunities(
         const subject = new SubjectRepository(Community, {
           perspective: p,
         });
+
         const community = await subject.getData();
+
         if (community) {
           communities.value = { ...communities.value, [uuid]: community };
         }

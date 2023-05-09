@@ -5,7 +5,7 @@ import { format, formatDistance } from "date-fns";
 import { getTimeSince } from "@fluxapp/utils";
 import Avatar from "../Avatar";
 import CommentSection from "../CommentSection";
-import { Post as PostSubject } from "@fluxapp/api";
+import { Member, Post as PostSubject } from "@fluxapp/api";
 import { CommunityContext, useEntry } from "@fluxapp/react-web";
 import { getMe, Me } from "@fluxapp/api";
 
@@ -32,8 +32,6 @@ export default function Post({
     id,
     model: PostSubject,
   });
-
-  console.log({ post, id });
 
   const [ogData, setOgData] = useState<any>({});
   const [agent, setAgent] = useState<Me>();
@@ -108,11 +106,11 @@ export default function Post({
 
       <j-box pt="200">
         <j-flex a="center" gap="400">
-          <a href={author.did}>
+          <a href={author?.did}>
             <Avatar
               size="sm"
-              did={author.did}
-              url={author.profileThumbnailPicture}
+              did={author?.did}
+              url={author?.profileThumbnailPicture}
             ></Avatar>
           </a>
           <div>

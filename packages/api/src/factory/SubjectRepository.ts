@@ -198,29 +198,24 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
 
     await dataEntry.load();
 
-    const obj: SubjectClass = {}
-    
-    for (const [key, opts] of Object.entries(this.tempSubject.prototype.__properties)) {
-      const value = await entry[key];
+    const properties = this.tempSubject.prototype.__properties || {};
+    const collections = this.tempSubject.prototype.__collections || {};
 
-      if (opts?.transform && value) {
-        const transform = opts?.transform;
-        obj[key] = transform(value);
-      } else {
-        obj[key] = value;
-      }
-    }
+    const obj: SubjectClass = {};
 
-    for (const [key, opts] of Object.entries(this.tempSubject.prototype.__collections)) {
-      const value = await entry[key];
+    await Promise.all(
+      Object.entries(properties).map(async ([key, opts]) => {
+        const value = await entry[key];
+        obj[key] = opts?.transform ? opts.transform(value) : value;
+      })
+    );
 
-      if (opts?.transform && value) {
-        const transform = opts?.transform;
-        obj[key] = transform(value);
-      } else {
-        obj[key] = value;
-      }
-    }
+    await Promise.all(
+      Object.entries(collections).map(async ([key, opts]) => {
+        const value = await entry[key];
+        obj[key] = opts?.transform ? opts.transform(value) : value;
+      })
+    );
 
     return {
       ...obj,
@@ -251,7 +246,6 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
 
     if (!results) return [];
 
-
     return await Promise.all(
       results.map(async (result) => {
         let subject = new Subject(this.perspective!, result.X, subjectClass);
@@ -264,19 +258,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
 
   async getAllData(source?: string): Promise<SubjectClass[]> {
     const entries = await this.getAll(source);
-
-
-    console.log('arr 1', entries)
-
-    const promiseList = [];
-
-    for (const entry of entries) {
-      promiseList.push(this.getSubjectData(entry));
-    }
-
-    console.log('arr 3', await Promise.all(promiseList))
-
-    return await Promise.all(promiseList);
+    return await Promise.all(entries.map((e) => this.getSubjectData(e)));
   }
 }
 

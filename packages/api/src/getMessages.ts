@@ -51,6 +51,7 @@ export default async function ({
     perspectiveUuid,
     prologQuery
   );
+
   const cleanedResults = extractPrologResults(expressionLinks, [
     "Reactions",
     "Replies",

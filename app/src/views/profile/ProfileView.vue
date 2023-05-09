@@ -197,7 +197,7 @@ export default defineComponent({
   },
   async setup() {
     const route = useRoute();
-    console.log(route.params);
+
     const client = await getAd4mClient();
     const { neighbourhoods } = usePerspectives(client);
     const { communities } = useCommunities(neighbourhoods);

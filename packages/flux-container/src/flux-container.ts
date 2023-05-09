@@ -247,9 +247,7 @@ export class MyElement extends LitElement {
                 @change=${(e: any) => this.setChannel(e.target.value)}
                 ?disabled=${this.perspectiveHasNoCommunity}
               >
-                <option value="ad4m://self" selected disabled>
-                  Select a channel
-                </option>
+                <option value="ad4m://self" selected>Self (ad4m://self)</option>
                 ${map(
                   this.channels,
                   (i) => html`<option value=${i.id}>${i.name}</option>`

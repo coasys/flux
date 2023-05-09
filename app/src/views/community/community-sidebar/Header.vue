@@ -61,7 +61,7 @@
       <Avatar
         size="xl"
         :initials="community.name?.charAt(0).toUpperCase()"
-        :url="community.image || null"
+        :src="community.image || null"
       ></Avatar>
       <div class="community-info-content">
         <j-text size="500" nomargin color="black">
