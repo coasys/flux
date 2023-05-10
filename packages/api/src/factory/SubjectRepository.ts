@@ -119,6 +119,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   }
 
   async create(data: SubjectClass, id?: string): Promise<SubjectClass> {
+    await this.ensureSubject();
     const base = id || Literal.from(uuidv4()).toUrl();
 
     let newInstance = await this.perspective.createSubject(this.subject, base);
@@ -146,6 +147,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   }
 
   async update(id: string, data: QueryPartialEntity<SubjectClass>) {
+    await this.ensureSubject();
     const instance = await this.get(id);
     if (!instance) {
       throw (
@@ -171,6 +173,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   }
 
   async get(id?: string): Promise<SubjectClass | null> {
+    await this.ensureSubject();
     if (id) {
       const subjectProxy = await this.perspective.getSubjectProxy(
         id,
@@ -184,8 +187,8 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   }
 
   async getData(id?: string): Promise<SubjectClass | null> {
+    await this.ensureSubject();
     const entry = await this.get(id);
-
     if (entry) {
       return await this.getSubjectData(entry);
     }
@@ -194,6 +197,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   }
 
   private async getSubjectData(entry: any) {
+    await this.ensureSubject();
     const dataEntry = new SubjectEntry(entry, this.perspective);
 
     await dataEntry.load();
@@ -226,6 +230,8 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   }
 
   async getAll(source?: string): Promise<SubjectClass[]> {
+    await this.ensureSubject();
+
     const tempSource = source || this.source;
 
     const subjectClass =
@@ -257,6 +263,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   }
 
   async getAllData(source?: string): Promise<SubjectClass[]> {
+    await this.ensureSubject();
     const entries = await this.getAll(source);
     return await Promise.all(entries.map((e) => this.getSubjectData(e)));
   }
