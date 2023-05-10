@@ -11,10 +11,10 @@ import Post from "./components/Post";
 import Overlay from "./components/Overlay/Overlay";
 import "@fluxapp/ui/dist/main.d.ts";
 
-function Feed({ perspective, source }) {
+function Feed({ agent, perspective, source }) {
   return (
     <>
-      <Header></Header>
+      <Header agent={agent}></Header>
       <PostList perspective={perspective} source={source} />
     </>
   );
@@ -33,7 +33,9 @@ function Main({
 
   switch (UIState.view) {
     case View.Feed:
-      return <Feed perspective={perspective} source={source}></Feed>;
+      return (
+        <Feed agent={agent} perspective={perspective} source={source}></Feed>
+      );
     case View.Post:
       return (
         UIState.currentPost && (

@@ -1,12 +1,14 @@
-import { useContext, useState } from "preact/hooks";
-import styles from "./index.module.css";
-import { AgentContext } from "@fluxapp/react-web";
+import { useContext } from "preact/hooks";
+import { useMe } from "@fluxapp/react-web";
 import Avatar from "../Avatar";
 import { PostOption, postOptions } from "../../constants/options";
 import UIContext from "../../context/UIContext";
+import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 
-export default function Header() {
-  const { state: agentState } = useContext(AgentContext);
+import styles from "./index.module.css";
+
+export default function Header({ agent }: { agent: AgentClient }) {
+  const { profile } = useMe(agent);
   const { methods } = useContext(UIContext);
 
   function handlePostClick(type) {
@@ -14,13 +16,13 @@ export default function Header() {
   }
 
   return (
-    <header className={styles.header}>
+    <header>
       <j-flex a="center" gap="500">
-        <a href={agentState.did}>
+        <a href={profile.did}>
           <Avatar
             size="lg"
-            did={agentState.did}
-            url={agentState.profile?.profileThumbnailPicture}
+            did={profile.did}
+            url={profile.profileThumbnailPicture}
           ></Avatar>
         </a>
         <j-flex a="center" gap="200" style="width: 100%">
@@ -51,7 +53,7 @@ export default function Header() {
       </j-flex>
 
       <j-button
-        onClick={() => handlePostClick()}
+        onClick={() => handlePostClick(PostOption.Text)}
         className={styles.addButton}
         size="lg"
         icon="plus"
