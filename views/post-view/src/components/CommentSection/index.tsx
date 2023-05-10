@@ -5,11 +5,14 @@ import { useEffect, useMemo, useState } from "preact/hooks";
 import { Message as MessageModel } from "@fluxapp/api";
 import { useEntries } from "@fluxapp/react-web";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 
 export default function CommentSection({
+  agent,
   perspective,
   source,
 }: {
+  agent: AgentClient;
   perspective: PerspectiveProxy;
   source: string;
 }) {
@@ -58,6 +61,7 @@ export default function CommentSection({
             return (
               <j-box key={comment.id} mt="400">
                 <CommentItem
+                  agent={agent}
                   perspective={perspective}
                   comment={comment}
                 ></CommentItem>

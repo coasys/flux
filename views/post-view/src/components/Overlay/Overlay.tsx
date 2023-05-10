@@ -1,7 +1,6 @@
 import { useContext } from "preact/hooks";
 import UIContext from "../../context/UIContext";
 import CreatePost from "../CreatePost";
-import { ChannelContext } from "@fluxapp/react-web";
 
 export default function Overlay({ perspective, source }) {
   const { state: uiState, methods: UIMethods } = useContext(UIContext);

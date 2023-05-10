@@ -5,12 +5,7 @@ import { getTimeSince } from "@fluxapp/utils";
 import Avatar from "../Avatar";
 import CommentSection from "../CommentSection";
 import { Member, Post as PostSubject } from "@fluxapp/api";
-import {
-  CommunityContext,
-  useAgent,
-  useEntry,
-  useMe,
-} from "@fluxapp/react-web";
+import { useAgent, useEntry, useMe } from "@fluxapp/react-web";
 import { getMe, Me } from "@fluxapp/api";
 import styles from "./index.module.css";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
@@ -192,6 +187,7 @@ export default function Post({
       )}
 
       <CommentSection
+        agent={agent}
         perspective={perspective}
         source={post.id}
       ></CommentSection>

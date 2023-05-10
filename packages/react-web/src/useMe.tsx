@@ -74,18 +74,16 @@ export function useMe(agent: AgentClient | undefined) {
       return null;
     };
 
-    if (agent) {
-      console.log("ADDING LISTERNER!");
+    console.log("ADDING LISTERNER!");
 
-      agent.addAgentStatusChangedListener(changed);
-      agent.addUpdatedListener(updated);
-    }
+    agent.addAgentStatusChangedListener(changed);
+    agent.addUpdatedListener(updated);
 
     return () => {
       // agent.removeListener(added);
       // agent.removeListener(removed);
     };
-  }, [agent]);
+  }, []);
 
   const data = getCache<MeData>(cacheKey);
   let profile = null as Profile | null;

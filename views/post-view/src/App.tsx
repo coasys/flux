@@ -1,15 +1,13 @@
+import "@fluxapp/ui/dist/main.d.ts";
 import PostList from "./components/PostList";
-import { CommunityProvider, AgentProvider } from "@fluxapp/react-web";
 import UIContext, { UIProvider, View } from "./context/UIContext";
-import styles from "./index.module.css";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
-import { ChannelProvider } from "@fluxapp/react-web";
 import Header from "./components/Header";
 import { useContext } from "preact/hooks";
 import Post from "./components/Post";
 import Overlay from "./components/Overlay/Overlay";
-import "@fluxapp/ui/dist/main.d.ts";
+import styles from "./index.module.css";
 
 function Feed({ agent, perspective, source }) {
   return (
@@ -59,26 +57,16 @@ export default function App({
   perspective: PerspectiveProxy;
   source: string;
 }) {
-  if (!perspective?.uuid || !source) {
+  if (!perspective?.uuid || !source || !agent) {
     return null;
   }
 
   return (
     <UIProvider communityId={perspective} channelId={source}>
-      <AgentProvider>
-        <CommunityProvider perspective={perspective}>
-          <ChannelProvider communityId={perspective} channelId={source}>
-            <div className={styles.container}>
-              <Main
-                agent={agent}
-                perspective={perspective}
-                source={source}
-              ></Main>
-            </div>
-            <Overlay perspective={perspective} source={source} />
-          </ChannelProvider>
-        </CommunityProvider>
-      </AgentProvider>
+      <div className={styles.container}>
+        <Main agent={agent} perspective={perspective} source={source}></Main>
+      </div>
+      <Overlay perspective={perspective} source={source} />
     </UIProvider>
   );
 }

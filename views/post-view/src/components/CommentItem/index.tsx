@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, useMemo } from "preact/hooks";
-import { CommunityContext, useEntries } from "@fluxapp/react-web";
+import { useAgent, useEntries } from "@fluxapp/react-web";
 import styles from "./index.module.css";
 import { getTimeSince } from "@fluxapp/utils";
 import { Profile } from "@fluxapp/types";
@@ -7,21 +7,19 @@ import Avatar from "../Avatar";
 import Editor from "../Editor";
 import { Message as MessageModel } from "@fluxapp/api";
 
-export default function CommentItem({ comment, perspective }) {
+export default function CommentItem({ agent, comment, perspective }) {
   const [showComments, setShowComments] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [commentContent, setComment] = useState("");
   const [showEditor, setShowEditor] = useState(false);
-
-  const {
-    state: { members },
-  } = useContext(CommunityContext);
 
   const { entries: comments, model: Message } = useEntries({
     perspective,
     source: comment.id || null,
     model: MessageModel,
   });
+
+  const { profile } = useAgent({ client: agent, did: comment.author });
 
   async function submitComment() {
     try {
@@ -35,7 +33,6 @@ export default function CommentItem({ comment, perspective }) {
     }
   }
 
-  const author: Profile = members[comment.author] || {};
   const popularStyle: string = comment.isPopular ? styles.popularMessage : "";
   const hasBody = comment.body;
   const hasComments = comments.length > 0 && showComments;
@@ -52,11 +49,11 @@ export default function CommentItem({ comment, perspective }) {
             ></j-icon>
           )}
         </div>
-        <a href={author.did}>
+        <a href={profile?.did}>
           <Avatar
             size="xs"
-            did={author.did}
-            url={author.profileThumbnailPicture}
+            did={profile?.did}
+            url={profile?.profileThumbnailPicture}
           ></Avatar>
         </a>
         {showComments && (
@@ -68,8 +65,8 @@ export default function CommentItem({ comment, perspective }) {
       </div>
       <div className={styles.postContentWrapper}>
         <div className={styles.postDetails}>
-          <a href={author.did} className={styles.authorName}>
-            {author?.username || (
+          <a href={profile?.did} className={styles.authorName}>
+            {profile?.username || (
               <j-skeleton width="lg" height="text"></j-skeleton>
             )}
           </a>

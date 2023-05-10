@@ -168,13 +168,19 @@ export class MyElement extends LitElement {
     this.source = channels[0]?.id || "ad4m://self";
 
     // @ts-ignore
-    this.appElement.agent = this.client.agent;
-
-    // @ts-ignore
     this.appElement.perspective = perspective;
 
     // @ts-ignore
-    this.appElement.setAttribute("source", channels[0]?.id || "ad4m://self");
+    if (!this.appElement.agent) {
+      // @ts-ignore
+      this.appElement.agent = this.client.agent;
+    }
+
+    // @ts-ignore
+    const defaultSource = channels[0]?.id || "ad4m://self";
+    if (this.appElement.getAttribute("source") !== defaultSource) {
+      this.appElement.setAttribute("source", defaultSource);
+    }
 
     this.isLoading = false;
   }
@@ -204,8 +210,6 @@ export class MyElement extends LitElement {
   }
 
   render() {
-    console.log(this.community);
-
     return html`
       <div class="sidebar-layout">
         <aside class="sidebar">
@@ -277,6 +281,7 @@ export class MyElement extends LitElement {
             >
               Create new Flux community
             </j-button>
+            ${this.isLoading && html`<j-spinner></j-spinner>`}
           </j-flex>
         </aside>
         <div class="content">

@@ -18,11 +18,11 @@ export default function Header({ agent }: { agent: AgentClient }) {
   return (
     <header>
       <j-flex a="center" gap="500">
-        <a href={profile.did}>
+        <a href={profile?.did}>
           <Avatar
             size="lg"
-            did={profile.did}
-            url={profile.profileThumbnailPicture}
+            did={profile?.did}
+            url={profile?.profileThumbnailPicture}
           ></Avatar>
         </a>
         <j-flex a="center" gap="200" style="width: 100%">

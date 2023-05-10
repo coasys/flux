@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from "preact/hooks";
-import { CommunityContext, useEntry } from "@fluxapp/react-web";
+import { useEntry } from "@fluxapp/react-web";
 import styles from "./index.module.css";
 import { format, formatDistance } from "date-fns/esm";
 import { Profile } from "@fluxapp/types";
@@ -11,9 +11,6 @@ import Avatar from "../Avatar";
 import { Member } from "@fluxapp/api";
 
 export default function PostItem({ perspective, post, displayView }) {
-  const {
-    state: { members },
-  } = useContext(CommunityContext);
   const { methods: UIMehthods } = useContext(UIContext);
 
   const { entry: author } = useEntry({ perspective, model: Member });
