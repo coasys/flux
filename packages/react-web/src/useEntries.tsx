@@ -62,7 +62,7 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
           const isUpdatedEntry = id === oldEntry.id;
           return isUpdatedEntry ? entry : oldEntry;
         })
-      : [entry];
+      : [...oldEntries, entry];
 
     mutate(newEntries);
   }
@@ -71,8 +71,10 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
   useEffect(() => {
     if (perspective.uuid) {
       const added = async (link: LinkExpression) => {
+        const allEntries = (getCache(cacheKey) || []) as SubjectClass[];
         const isNewEntry = link.data.source === source;
-        const isUpdated = entries?.find((e) => e.id === link.data.source);
+        const isUpdated = allEntries?.find((e) => e.id === link.data.source);
+
         const id = isNewEntry
           ? link.data.target
           : isUpdated
@@ -94,8 +96,12 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
       };
 
       const removed = (link: LinkExpression) => {
-        if (link.data.target === source) {
-          const newEntries = entries?.filter((e) => e.id !== link.data.target);
+        const allEntries = (getCache(cacheKey) || []) as SubjectClass[];
+
+        if (link.data.source === source) {
+          const newEntries = allEntries?.filter(
+            (e) => e.id !== link.data.target
+          );
           mutate(newEntries || []);
         }
         return null;
