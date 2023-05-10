@@ -47,8 +47,8 @@ export default defineComponent({
       const neighbourhood = data.value.perspective?.getNeighbourhoodProxy();
       if (neighbourhood) {
         const me = await client.agent.me();
-        others.value = await neighbourhood?.otherAgents();
-        others.value.push(me.did);
+        const agents = await neighbourhood?.otherAgents();
+        others.value = [...agents, me.did];
       }
     });
 

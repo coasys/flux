@@ -82,8 +82,9 @@ export default defineComponent({
       if (neighbourhood) {
         const me = await client.agent.me();
         const others = await neighbourhood?.otherAgents();
-        others.push(me.did);
-        members.value = await Promise.all(others.map((did) => getProfile(did)));
+        members.value = await Promise.all(
+          [...others, me.did].map((did) => getProfile(did))
+        );
       }
     });
 
