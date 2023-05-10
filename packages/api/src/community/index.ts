@@ -53,7 +53,7 @@ export class Community {
   thumbnail: string;
 
   @subjectCollection({ through: EntryType.Channel })
-  channels: string[];
+  channels: string[] = [];
 }
 
 export default Community;
