@@ -1,30 +1,33 @@
 import UIContext from "../../context/UIContext";
-import { useContext, useEffect, useMemo, useState } from "preact/hooks";
-import { getImage } from "@fluxapp/utils";
+import { useContext, useEffect, useState } from "preact/hooks";
 import { format, formatDistance } from "date-fns";
 import { getTimeSince } from "@fluxapp/utils";
 import Avatar from "../Avatar";
 import CommentSection from "../CommentSection";
 import { Member, Post as PostSubject } from "@fluxapp/api";
-import { CommunityContext, useEntry } from "@fluxapp/react-web";
+import {
+  CommunityContext,
+  useAgent,
+  useEntry,
+  useMe,
+} from "@fluxapp/react-web";
 import { getMe, Me } from "@fluxapp/api";
-
 import styles from "./index.module.css";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 
 export default function Post({
+  agent,
   perspective,
   id,
   source,
 }: {
+  agent: AgentClient;
   perspective: PerspectiveProxy;
   id: string;
   source: string;
 }) {
   const { methods: UIMethods } = useContext(UIContext);
-  const {
-    state: { members },
-  } = useContext(CommunityContext);
 
   const { entry: post, error } = useEntry({
     perspective,
@@ -33,6 +36,9 @@ export default function Post({
     model: PostSubject,
   });
 
+  const { agent: me } = useMe(agent);
+  const { profile } = useAgent({ client: agent, did: post?.author });
+
   const { entry: author } = useEntry({
     perspective,
     id: post?.author,
@@ -40,12 +46,6 @@ export default function Post({
   });
 
   const [ogData, setOgData] = useState<any>({});
-  const [agent, setAgent] = useState<Me>();
-
-  async function fetchAgent() {
-    const agent = await getMe();
-    setAgent(agent);
-  }
 
   async function fetchOgData(url) {
     try {
@@ -57,8 +57,6 @@ export default function Post({
   }
 
   useEffect(() => {
-    fetchAgent();
-
     if (post?.url) {
       fetchOgData(post.url);
     }
@@ -66,9 +64,7 @@ export default function Post({
 
   if (!post) return;
 
-  const isAuthor = author?.did === agent?.did;
-
-  console.log({ author });
+  const isAuthor = author?.did === me.did;
 
   const hasTitle = post.title;
   const hasImage = post.image;

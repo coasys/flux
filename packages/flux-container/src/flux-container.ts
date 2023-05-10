@@ -168,6 +168,9 @@ export class MyElement extends LitElement {
     this.source = channels[0]?.id || "ad4m://self";
 
     // @ts-ignore
+    this.appElement.agent = this.client.agent;
+
+    // @ts-ignore
     this.appElement.perspective = perspective;
 
     // @ts-ignore

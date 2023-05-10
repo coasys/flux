@@ -3,6 +3,7 @@ import { CommunityProvider, AgentProvider } from "@fluxapp/react-web";
 import UIContext, { UIProvider, View } from "./context/UIContext";
 import styles from "./index.module.css";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import { ChannelProvider } from "@fluxapp/react-web";
 import Header from "./components/Header";
 import { useContext } from "preact/hooks";
@@ -20,9 +21,11 @@ function Feed({ perspective, source }) {
 }
 
 function Main({
+  agent,
   perspective,
   source,
 }: {
+  agent: AgentClient;
   perspective: PerspectiveProxy;
   source: string;
 }) {
@@ -35,6 +38,7 @@ function Main({
       return (
         UIState.currentPost && (
           <Post
+            agent={agent}
             perspective={perspective}
             source={source}
             id={UIState.currentPost}
@@ -45,9 +49,11 @@ function Main({
 }
 
 export default function App({
+  agent,
   perspective,
   source,
 }: {
+  agent: AgentClient;
   perspective: PerspectiveProxy;
   source: string;
 }) {
@@ -61,7 +67,11 @@ export default function App({
         <CommunityProvider perspective={perspective}>
           <ChannelProvider communityId={perspective} channelId={source}>
             <div className={styles.container}>
-              <Main perspective={perspective} source={source}></Main>
+              <Main
+                agent={agent}
+                perspective={perspective}
+                source={source}
+              ></Main>
             </div>
             <Overlay perspective={perspective} source={source} />
           </ChannelProvider>
