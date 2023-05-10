@@ -12,7 +12,7 @@ export function useClient() {
 
   // Mutate shared/cached data for all subscribers
   const mutate = useCallback(
-    (client: Ad4mClient | null) => setCache(cacheKey, client),
+    (client: Ad4mClient | undefined) => setCache(cacheKey, client),
     [cacheKey]
   );
 
@@ -36,7 +36,7 @@ export function useClient() {
     return () => unsubscribe(cacheKey, forceUpdate);
   }, [cacheKey, forceUpdate]);
 
-  const client = getCache(cacheKey) as Ad4mClient | null;
+  const client = getCache<Ad4mClient>(cacheKey);
 
   return {
     client,

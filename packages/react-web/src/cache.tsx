@@ -1,10 +1,11 @@
-const cache: Map<string, unknown> = new Map();
+const cache: Map<string, any> = new Map();
 const subscribers: Map<string, Function[]> = new Map();
 
-export function getCache(key: string): unknown {
-  return cache.get(key);
+export function getCache<T>(key: string) {
+  const match: T | undefined = cache.get(key);
+  return match;
 }
-export function setCache(key: string, value: unknown) {
+export function setCache<T>(key: string, value: T) {
   cache.set(key, value);
   getSubscribers(key).forEach((cb) => cb());
 }

@@ -85,7 +85,7 @@ export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
     author: string;
   };
 
-  const entry = getCache(cacheKey) as ExtendedSubjectClass | undefined;
+  const entry = getCache<ExtendedSubjectClass>(cacheKey);
 
   return { entry, error, mutate, model: Model, reload: getData };
 }

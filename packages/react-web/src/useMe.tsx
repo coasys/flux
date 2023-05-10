@@ -3,7 +3,7 @@ import { getCache, setCache, subscribe, unsubscribe } from "./cache";
 import { Agent, AgentStatus } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import { mapLiteralLinks } from "@fluxapp/utils";
-import { profile } from "@fluxapp/constants";
+import { profile as profileConstants } from "@fluxapp/constants";
 import { Profile } from "@fluxapp/types";
 
 const {
@@ -16,14 +16,14 @@ const {
   HAS_PROFILE_IMAGE,
   HAS_THUMBNAIL_IMAGE,
   HAS_USERNAME,
-} = profile;
+} = profileConstants;
 
 type MeData = {
   agent?: Agent;
   status?: AgentStatus;
 };
 
-export function useMe(agent: AgentClient) {
+export function useMe(agent: AgentClient | undefined) {
   const forceUpdate = useForceUpdate();
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -38,6 +38,10 @@ export function useMe(agent: AgentClient) {
 
   // Fetch data from AD4M and save to cache
   const getData = useCallback(() => {
+    if (!agent) {
+      return;
+    }
+
     const promises = Promise.all([agent.status(), agent.me()]);
     promises
       .then(async ([status, agent]) => {
@@ -45,7 +49,7 @@ export function useMe(agent: AgentClient) {
         mutate({ agent, status });
       })
       .catch((error) => setError(error.toString()));
-  }, [mutate]);
+  }, [agent, mutate]);
 
   // Trigger initial fetch
   useEffect(getData, [getData]);
@@ -70,16 +74,20 @@ export function useMe(agent: AgentClient) {
       return null;
     };
 
-    agent.addAgentStatusChangedListener(changed);
-    agent.addUpdatedListener(updated);
+    if (agent) {
+      console.log("ADDING LISTERNER!");
+
+      agent.addAgentStatusChangedListener(changed);
+      agent.addUpdatedListener(updated);
+    }
 
     return () => {
       // agent.removeListener(added);
       // agent.removeListener(removed);
     };
-  }, []);
+  }, [agent]);
 
-  const data = getCache(cacheKey) as MeData | undefined;
+  const data = getCache<MeData>(cacheKey);
   let profile = null as Profile | null;
   const perspective = data?.agent?.perspective;
 
