@@ -118,10 +118,24 @@ export class MyElement extends LitElement {
     ui.connect();
     ui.addEventListener("authstatechange", async () => {
       if (ui.authState === "authenticated") {
-        const client = await getAd4mClient();
+        const client: Ad4mClient = await getAd4mClient();
         this.client = client;
 
         const perspectives = await client.perspective.all();
+
+        client.perspective.addPerspectiveAddedListener(async (handle) => {
+          const perspective = await client.perspective.byUUID(handle.uuid);
+          if (perspective.sharedUrl) {
+            this.perspectives.push(perspective);
+          }
+        });
+
+        client.perspective.addPerspectiveUpdatedListener(async (handle) => {
+          const perspective = await client.perspective.byUUID(handle.uuid);
+          this.perspectives = this.perspectives.map((p) =>
+            p.uuid === perspective.uuid ? perspective : p
+          );
+        });
 
         this.perspectives = perspectives;
 
@@ -262,8 +276,8 @@ export class MyElement extends LitElement {
             </div>
 
             <j-input
-              label="Give your perspective a name"
-              placeholder="Perspective name"
+              label="Create new community"
+              placeholder="Community name"
               .value=${this.title}
               @change=${(e: Event) => {
                 const target = e.target as HTMLInputElement;
@@ -271,19 +285,21 @@ export class MyElement extends LitElement {
               }}
             ></j-input>
             <j-button
+              variant="primary"
               ?loading=${this.isCreatingCommunity}
-              ?disabled=${this.isLoading}
+              ?disabled=${this.isCreatingCommunity}
               @click=${() => this.onCreateCommunity()}
               full
               size="sm"
             >
-              Create new Flux community
+              Create community
             </j-button>
-            ${this.isLoading && html`<j-spinner></j-spinner>`}
           </j-flex>
         </aside>
         <div class="content">
-          <slot></slot>
+          ${this.isLoading
+            ? html`<j-spinner></j-spinner>`
+            : html`<slot></slot>`}
         </div>
       </div>
     `;
