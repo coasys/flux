@@ -35,7 +35,6 @@ import { updateSDNA } from "./updateSDNA";
 
 import Channel from "./channel";
 import Community from "./community";
-import Member from "./member";
 import Message from "./message";
 import Post from "./post";
 import updateProfile from "./updateProfile";
@@ -52,7 +51,6 @@ export {
   Me,
   Channel,
   Community,
-  Member,
   Message,
   Post,
   createCommunity,

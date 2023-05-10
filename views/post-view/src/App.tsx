@@ -13,7 +13,7 @@ function Feed({ agent, perspective, source }) {
   return (
     <>
       <Header agent={agent}></Header>
-      <PostList perspective={perspective} source={source} />
+      <PostList agent={agent} perspective={perspective} source={source} />
     </>
   );
 }

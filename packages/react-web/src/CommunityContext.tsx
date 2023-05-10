@@ -3,12 +3,10 @@ import { useEntries } from "./useEntries";
 import { useEntry } from "./useEntry";
 import {
   Channel as ChannelModel,
-  Member as MemberModel,
   Community as CommunityModel,
   getProfile,
 } from "@fluxapp/api";
-import { EntryType } from "@fluxapp/types";
-import { asyncFilter } from "@fluxapp/utils";
+import { PerspectiveProxy } from "@perspect3vism/ad4m";
 
 type State = {
   uuid: string;
@@ -38,7 +36,12 @@ const initialState: ContextProps = {
 
 const CommunityContext = createContext<ContextProps>(initialState);
 
-export function CommunityProvider({ perspective, children }: any) {
+type ProviderProps = {
+  perspective: PerspectiveProxy;
+  children: any;
+};
+
+export function CommunityProvider({ perspective, children }: ProviderProps) {
   const [state, setState] = useState({
     ...initialState.state,
   });
@@ -54,31 +57,16 @@ export function CommunityProvider({ perspective, children }: any) {
     source: community?.id || null,
   });
 
-  const { entries: memberEntries } = useEntries({
-    perspective,
-    model: MemberModel,
-  });
-
   useEffect(() => {
     fetchProfiles();
     fetchChannels();
-  }, [memberEntries.length, channelEntries.length]);
+  }, [channelEntries.length]);
 
   async function fetchProfiles() {
-    const filteredProfiles = await asyncFilter(
-      memberEntries,
-      async (member: any) => {
-        const type = await member.type;
-        const did = await member.did;
-        return (
-          type === EntryType.Member && did !== undefined && !state.members[did]
-        );
-      }
-    );
+    const neighbourhood = perspective.getNeighbourhoodProxy();
+    const others = await neighbourhood.otherAgents();
 
-    const profilePromises = filteredProfiles.map(async (member) =>
-      getProfile(await member.did)
-    );
+    const profilePromises = others.map(async (did) => getProfile(did));
 
     const newProfiles = await Promise.all(profilePromises);
 

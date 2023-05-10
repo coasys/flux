@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { Community as FluxCommunity } from "@fluxapp/types";
-import { Perspective } from "@perspect3vism/ad4m";
+import { Ad4mClient, Perspective } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import {
   blobToDataURL,
@@ -27,7 +27,7 @@ export default async function createCommunity({
   perspectiveUuid,
 }: Payload): Promise<FluxCommunity> {
   try {
-    const client = await getAd4mClient();
+    const client: Ad4mClient = await getAd4mClient();
     const agent = await client.agent.me();
 
     const author = agent.did;
@@ -97,13 +97,7 @@ export default async function createCommunity({
         : undefined,
     };
 
-    const community = await CommunityModel.create(metaData);
-
-    const MemberFactory = new SubjectRepository(Member, {
-      perspective: perspective,
-    });
-
-    await MemberFactory.create({ did: author }, author);
+    const community = await CommunityModel.create(metaData, "ad4m://self");
 
     //Default popular setting is 3 upvotes on thumbsup emoji
     const socialDnaLink = await createSDNA(perspective!.uuid);

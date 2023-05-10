@@ -54,11 +54,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import { Community, Member } from "@fluxapp/api";
+import { defineComponent, watchEffect, ref } from "vue";
+import { Community, getProfile } from "@fluxapp/api";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Avatar from "@/components/avatar/Avatar.vue";
-import { usePerspective, useEntry, useEntries } from "@fluxapp/vue";
+import { usePerspective, useEntry } from "@fluxapp/vue";
 import { useRoute } from "vue-router";
 
 export default defineComponent({
@@ -66,6 +66,7 @@ export default defineComponent({
   components: { Avatar },
   async setup() {
     const route = useRoute();
+    const members = ref<any[]>([]);
     const client = await getAd4mClient();
     const { data } = usePerspective(client, () => route.params.communityId);
 
@@ -74,9 +75,12 @@ export default defineComponent({
       model: Community,
     });
 
-    const { entries: members } = useEntries({
-      perspective: () => data.value.perspective,
-      model: Member,
+    watchEffect(async () => {
+      const neighbourhood = data.value.perspective?.getNeighbourhoodProxy();
+      if (neighbourhood) {
+        const others = await neighbourhood?.otherAgents();
+        members.value = await Promise.all(others.map((did) => getProfile(did)));
+      }
     });
 
     return {

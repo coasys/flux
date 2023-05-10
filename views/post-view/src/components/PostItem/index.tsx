@@ -2,18 +2,15 @@ import { useContext, useState, useEffect } from "preact/hooks";
 import { useEntry } from "@fluxapp/react-web";
 import styles from "./index.module.css";
 import { format, formatDistance } from "date-fns/esm";
-import { Profile } from "@fluxapp/types";
-import { getTimeSince } from "@fluxapp/utils";
 import { DisplayView } from "../../constants/options";
-import { getImage } from "@fluxapp/utils";
 import UIContext from "../../context/UIContext";
 import Avatar from "../Avatar";
-import { Member } from "@fluxapp/api";
+import { useAgent } from "@fluxapp/react-web";
 
-export default function PostItem({ perspective, post, displayView }) {
+export default function PostItem({ agent, perspective, post, displayView }) {
   const { methods: UIMehthods } = useContext(UIContext);
 
-  const { entry: author } = useEntry({ perspective, model: Member });
+  const { entry: author } = useAgent({ client: agent, did: post.author });
 
   const [ogData, setOgData] = useState(null);
 

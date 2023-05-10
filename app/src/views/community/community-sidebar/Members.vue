@@ -1,6 +1,6 @@
 <template>
   <j-box pt="500">
-    <j-menu-group open :title="`Members (${dids?.length})`">
+    <j-menu-group open :title="`Members (${others?.length})`">
       <j-button
         @click.prevent="() => setShowInviteCode(true)"
         size="sm"
@@ -12,7 +12,7 @@
       <j-box px="500">
         <avatar-group
           @click="() => setShowCommunityMembers(true)"
-          :users="dids || []"
+          :users="others || []"
         />
       </j-box>
     </j-menu-group>
@@ -20,13 +20,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref, watchEffect } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
-import { useEntries, useEntry, usePerspective } from "@fluxapp/vue";
+import { usePerspective } from "@fluxapp/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { Member } from "@fluxapp/api";
 import { useRoute } from "vue-router";
 import { computed } from "@vue/reactivity";
 
@@ -35,19 +34,20 @@ export default defineComponent({
   async setup() {
     const { params } = useRoute();
     const client = await getAd4mClient();
+    const others = ref<string[]>([]);
 
     const { data } = usePerspective(client, () => params.communityId as string);
 
-    const { entries: members } = useEntries({
-      perspective: () => data.value.perspective,
-      model: Member,
+    watchEffect(async () => {
+      const neighbourhood = data.value.perspective?.getNeighbourhoodProxy();
+      if (neighbourhood) {
+        others.value = await neighbourhood?.otherAgents();
+      }
     });
-
-    const dids = computed(() => members.value.map((m) => m.id));
 
     return {
       data,
-      dids,
+      others,
     };
   },
   methods: {

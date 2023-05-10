@@ -72,6 +72,7 @@
         v-if="filteredViewOptions.find((v) => v.type === ChannelView.Chat)"
         class="perspective-view"
         :source="channel.id"
+        :agent.prop="agentClient"
         :perspective.prop="data.perspective"
         @click="onViewClick"
         @hide-notification-indicator="onHideNotificationIndicator"
@@ -80,6 +81,7 @@
         v-show="currentView === ChannelView.Post"
         v-if="filteredViewOptions.find((v) => v.type === ChannelView.Post)"
         class="perspective-view"
+        :agent.prop="agentClient"
         :perspective.prop="data.perspective"
         :source="channel.id"
         @click="onViewClick"
@@ -93,6 +95,7 @@
         v-if="filteredViewOptions.find((v) => v.type === ChannelView.Graph)"
         class="perspective-view"
         :source="channel.id"
+        :agent.prop="agentClient"
         :perspective.prop="data.perspective"
         @click="onViewClick"
         @hide-notification-indicator="onHideNotificationIndicator"
@@ -102,6 +105,7 @@
         v-if="filteredViewOptions.find((v) => v.type === ChannelView.Voice)"
         class="perspective-view"
         :source="channel.id"
+        :agent.prop="agentClient"
         :perspective.prop="data.perspective"
         @click="onViewClick"
         @hide-notification-indicator="onHideNotificationIndicator"
@@ -111,6 +115,7 @@
         v-if="filteredViewOptions.find((v) => v.type === ChannelView.Debug)"
         class="perspective-view"
         :source="channel.id"
+        :agent.prop="agentClient"
         :perspective.prop="data.perspective"
         @click="onViewClick"
         @hide-notification-indicator="onHideNotificationIndicator"
@@ -152,6 +157,7 @@ import { viewOptions } from "@/constants";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 import { useEntry, usePerspective, usePerspectives, useMe } from "@fluxapp/vue";
 import { Community, Channel, joinCommunity } from "@fluxapp/api";
+import { Ad4mClient } from "@perspect3vism/ad4m";
 
 interface MentionTrigger {
   label: string;
@@ -170,7 +176,7 @@ export default defineComponent({
     Hourglass,
   },
   async setup(props) {
-    const client = await getAd4mClient();
+    const client: Ad4mClient = await getAd4mClient();
 
     const { perspectives } = usePerspectives(client);
 
@@ -190,6 +196,7 @@ export default defineComponent({
     const { agent } = useMe(client.agent);
 
     return {
+      agentClient: client.agent,
       agent,
       perspectives,
       data,

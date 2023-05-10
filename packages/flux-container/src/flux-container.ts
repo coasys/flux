@@ -160,6 +160,12 @@ export class MyElement extends LitElement {
       return;
     }
 
+    const neighbourhood = perspective.getNeighbourhoodProxy();
+
+    const agents = await neighbourhood.otherAgents();
+
+    console.log({ agents });
+
     this.perspectiveUuid = uuid;
 
     const community = await new SubjectRepository(Community, {

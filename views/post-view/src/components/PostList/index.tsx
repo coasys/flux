@@ -6,11 +6,14 @@ import { useEntries } from "@fluxapp/react-web";
 import { Post } from "@fluxapp/api";
 import { useMemo } from "react";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 
 export default function PostList({
+  agent,
   perspective,
   source,
 }: {
+  agent: AgentClient;
   perspective: PerspectiveProxy;
   source: string;
 }) {
@@ -89,6 +92,7 @@ export default function PostList({
         {sortedPosts.map((post) => (
           <PostItem
             key={post.id}
+            agent={agent}
             perspective={perspective}
             post={post}
             displayView={view}
