@@ -76,9 +76,13 @@ export default defineComponent({
     });
 
     watchEffect(async () => {
+      // TODO: how to watch for the uuid change, without having an unused var
+      const uuid = data.value.perspective?.uuid;
       const neighbourhood = data.value.perspective?.getNeighbourhoodProxy();
       if (neighbourhood) {
+        const me = await client.agent.me();
         const others = await neighbourhood?.otherAgents();
+        others.push(me.did);
         members.value = await Promise.all(others.map((did) => getProfile(did)));
       }
     });

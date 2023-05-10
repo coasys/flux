@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watchEffect } from "vue";
+import { defineComponent, ref, watch, watchEffect } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
@@ -32,16 +32,23 @@ import { computed } from "@vue/reactivity";
 export default defineComponent({
   components: { AvatarGroup },
   async setup() {
-    const { params } = useRoute();
+    const route = useRoute();
     const client = await getAd4mClient();
     const others = ref<string[]>([]);
 
-    const { data } = usePerspective(client, () => params.communityId as string);
+    const { data } = usePerspective(
+      client,
+      () => route.params.communityId as string
+    );
 
     watchEffect(async () => {
+      // TODO: how to watch for the uuid change, without having an unused var
+      const uuid = data.value.perspective?.uuid;
       const neighbourhood = data.value.perspective?.getNeighbourhoodProxy();
       if (neighbourhood) {
+        const me = await client.agent.me();
         others.value = await neighbourhood?.otherAgents();
+        others.value.push(me.did);
       }
     });
 
