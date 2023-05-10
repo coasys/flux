@@ -57,7 +57,7 @@ export function useAgent(props: Props) {
     return () => unsubscribe(cacheKey, forceUpdate);
   }, [cacheKey, forceUpdate]);
 
-  const agent = getCache(cacheKey) as Agent | undefined;
+  const agent = getCache<Agent>(cacheKey);
   let profile = null as Profile | null;
   const perspective = agent?.perspective;
 
