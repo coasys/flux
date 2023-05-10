@@ -162,8 +162,6 @@ export class MyElement extends LitElement {
       perspective: perspective,
     }).getAllData();
 
-    console.log({ channels, community });
-
     this.channels = channels;
     this.source = channels[0]?.id || "ad4m://self";
 
