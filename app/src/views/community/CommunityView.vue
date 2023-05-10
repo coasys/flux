@@ -243,8 +243,6 @@ export default defineComponent({
       model: Channel,
     });
 
-    console.log("channels: ", channels);
-
     return {
       community,
       channels,

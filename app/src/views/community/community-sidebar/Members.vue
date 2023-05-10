@@ -27,7 +27,6 @@ import { useAppStore } from "@/store/app";
 import { usePerspective } from "@fluxapp/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { useRoute } from "vue-router";
-import { computed } from "@vue/reactivity";
 
 export default defineComponent({
   components: { AvatarGroup },
