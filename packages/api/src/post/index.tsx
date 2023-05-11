@@ -44,20 +44,6 @@ export class Post {
   })
   image: string;
 
-  @subjectProperty({
-    through: START_DATE,
-    writable: true,
-    resolveLanguage: "literal",
-  })
-  startDate: string;
-
-  @subjectProperty({
-    through: END_DATE,
-    writable: true,
-    resolveLanguage: "literal",
-  })
-  endDate: string;
-
   @subjectProperty({ through: URL, writable: true, resolveLanguage: "literal" })
   url: string;
 

@@ -1,7 +1,7 @@
 .editorWrapper {
   display: block;
   width: 100%;
-  background-color: rgba(0,0,0,0.1);
+  background: var(--j-color-white);
   border: 1px solid var(--j-border-color);
   border-radius: var(--j-border-radius);
 }
@@ -30,5 +30,8 @@
 }
 
 .menuBar {
+  background: var(--j-color-ui-50);
+  border-top-left-radius: var(--j-border-radius);
+  border-top-right-radius: var(--j-border-radius);
   border-bottom: 1px solid var(--j-color-ui-100);
 }
