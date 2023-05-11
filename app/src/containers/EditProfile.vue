@@ -8,7 +8,7 @@
         @hide="(val) => (hideContainer = val)"
       ></img-upload>
       <avatar-upload
-        :hash="agent?.did"
+        :hash="me?.did"
         :value="profilePicture"
         @change="(url) => (profilePicture = url)"
       ></avatar-upload>
@@ -56,9 +56,9 @@ export default defineComponent({
   async setup() {
     const appStore = useAppStore();
     const client = await getAd4mClient();
-    const { profile, agent } = useMe(client.agent);
+    const { profile, me } = useMe(client.agent);
     return {
-      agent,
+      me,
       profile,
       appStore,
     };

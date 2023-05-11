@@ -64,5 +64,5 @@ export function useMe(client: AgentClient) {
     }
   });
 
-  return { status, agent, profile };
+  return { status, me: agent, profile };
 }

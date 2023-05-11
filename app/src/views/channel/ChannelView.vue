@@ -193,11 +193,11 @@ export default defineComponent({
       model: Channel,
     });
 
-    const { agent } = useMe(client.agent);
+    const { me } = useMe(client.agent);
 
     return {
       agentClient: client.agent,
-      agent,
+      agent: me,
       perspectives,
       data,
       community,

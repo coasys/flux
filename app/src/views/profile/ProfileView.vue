@@ -202,7 +202,7 @@ export default defineComponent({
     const { neighbourhoods } = usePerspectives(client);
     const { communities } = useCommunities(neighbourhoods);
 
-    const { agent: me } = useMe(client.agent);
+    const { me } = useMe(client.agent);
 
     const { profile } = useAgent(
       client.agent,

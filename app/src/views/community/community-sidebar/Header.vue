@@ -122,7 +122,7 @@ export default defineComponent({
   async setup(props) {
     const client = await getAd4mClient();
 
-    const { status, agent: me, profile } = useMe(client.agent);
+    const { status, me, profile } = useMe(client.agent);
 
     return {
       profile,

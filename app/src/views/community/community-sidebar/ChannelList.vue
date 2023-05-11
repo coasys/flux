@@ -138,7 +138,7 @@ export default defineComponent({
 
     const { data } = usePerspective(client, () => route.params.communityId);
 
-    const { agent } = useMe(client.agent);
+    const { me } = useMe(client.agent);
 
     const { entries: channels, repo: channelRepo } = useEntries({
       perspective: () => data.value.perspective,
@@ -147,7 +147,7 @@ export default defineComponent({
     });
 
     return {
-      agent,
+      me,
       channelRepo,
       channels,
       userProfileImage: ref<null | string>(null),
@@ -188,7 +188,7 @@ export default defineComponent({
       const channel = this.channels.find((e) => e.id === channelId);
 
       if (channel) {
-        return channel.author === this.agent?.did;
+        return channel.author === this.me?.did;
       } else {
         throw new Error("Did not find channel");
       }

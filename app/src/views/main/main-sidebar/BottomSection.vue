@@ -15,7 +15,7 @@
       <j-tooltip title="Profile">
         <Avatar
           class="left-nav__profile-icon"
-          :did="agent?.did"
+          :did="me?.did"
           :url="profile?.profileThumbnailPicture"
           @click="() => navigate()"
         ></Avatar>
@@ -41,10 +41,10 @@ export default defineComponent({
 
     const client = await getAd4mClient();
 
-    const { profile, agent } = useMe(client.agent);
+    const { profile, me } = useMe(client.agent);
 
     return {
-      agent,
+      me,
       profile,
       appStore,
     };
