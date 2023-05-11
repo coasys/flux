@@ -18,7 +18,7 @@
     "@fluxapp/types": "*"
   },
   "peerDependencies": {
-    "@perspect3vism/ad4m": "^0.3.4"
+    "@perspect3vism/ad4m": "0.3.4-fix1"
   },
   "keywords": [],
   "author": "",

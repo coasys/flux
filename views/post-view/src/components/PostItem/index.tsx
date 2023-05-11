@@ -10,7 +10,10 @@ import { useAgent } from "@fluxapp/react-web";
 export default function PostItem({ agent, perspective, post, displayView }) {
   const { methods: UIMehthods } = useContext(UIContext);
 
-  const { entry: author } = useAgent({ client: agent, did: post.author });
+  const { agent: author, profile } = useAgent({
+    client: agent,
+    did: post.author,
+  });
 
   const [ogData, setOgData] = useState(null);
 
@@ -39,9 +42,10 @@ export default function PostItem({ agent, perspective, post, displayView }) {
 
   const showTite = post.title;
   const showImage = post.image;
-  const showBody = post.body;
   const showUrl = post.url;
   const showDates = post.startDate && post.endDate;
+
+  console.log(author);
 
   return (
     <div
@@ -61,12 +65,12 @@ export default function PostItem({ agent, perspective, post, displayView }) {
               <Avatar
                 size="xxs"
                 did={author?.did}
-                url={author?.profileThumbnailPicture}
+                src={profile?.profileThumbnailPicture}
               ></Avatar>
             </a>
             <j-flex a="center" gap="200">
               <a className={styles.authorName} href={author?.did}>
-                {author?.username || (
+                {profile?.username || (
                   <j-skeleton width="lg" height="text"></j-skeleton>
                 )}
               </a>

@@ -31,8 +31,11 @@ export default function Post({
     model: PostSubject,
   });
 
-  const { agent: me } = useMe(agent);
-  const { profile } = useAgent({ client: agent, did: post?.author });
+  const { me } = useMe(agent);
+  const { profile, agent: author } = useAgent({
+    client: agent,
+    did: post?.author,
+  });
 
   const [ogData, setOgData] = useState<any>({});
 
@@ -53,7 +56,7 @@ export default function Post({
 
   if (!post) return;
 
-  const isAuthor = profile?.did === me.did;
+  const isAuthor = author?.did === me?.did;
 
   const hasTitle = post.title;
   const hasImage = post.image;
@@ -98,15 +101,15 @@ export default function Post({
 
       <j-box pt="200">
         <j-flex a="center" gap="400">
-          <a href={profile?.did}>
+          <a href={author?.did}>
             <Avatar
               size="sm"
-              did={profile?.did}
+              did={author?.did}
               url={profile?.profileThumbnailPicture}
             ></Avatar>
           </a>
           <div>
-            <a className={styles.authorName} href={profile?.did}>
+            <a className={styles.authorName} href={author?.did}>
               {profile?.username || (
                 <j-skeleton width="lg" height="text"></j-skeleton>
               )}

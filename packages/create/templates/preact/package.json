@@ -25,7 +25,7 @@
   "description": "",
   "dependencies": {
     "@fluxapp/flux-container": "*",
-    "@perspect3vism/ad4m": "^0.3.1",
+    "@perspect3vism/ad4m": "0.3.4-fix1",
     "preact": "^10.13.1",
     "@fluxapp/api": "*"
   },

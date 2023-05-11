@@ -1695,10 +1695,10 @@
     electron "^20.0.3"
     lit "^2.3.1"
 
-"@perspect3vism/ad4m@0.3.4", "@perspect3vism/ad4m@^0.3.1":
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.3.4.tgz#2b879a0761288980706f0fff98959ce39cbff428"
-  integrity sha512-3GZF4j18ynPAeAkI3N1D/aKwSk78tsfC7P0V0Zmv3Rz2fbksWdDy0V+OGkyaPyTm9+W/DxDtexd/BBxzl2DzOg==
+"@perspect3vism/ad4m@0.3.4-fix1":
+  version "0.3.4-fix1"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.3.4-fix1.tgz#050789e2049eab74aa8db2501d61557114e3cce4"
+  integrity sha512-RizCdraxUrqaCNr+kQI6WN8r3fW6fDCdf0wPvyVYIqwMXRB1kdqepZLiUlxBeYcFdnbqhHXHL4tydC+2QuOWaw==
   dependencies:
     "@apollo/client" "3.7.10"
     "@holochain/client" "0.12.5"

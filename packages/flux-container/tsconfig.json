@@ -8,6 +8,7 @@
     "sourceMap": true,
     "outDir": "./",
     "rootDir": "./src",
+    "strict": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "node",

@@ -107,7 +107,7 @@ export function useMe(agent: AgentClient | undefined) {
 
   return {
     status: data?.status,
-    agent: data?.agent,
+    me: data?.agent,
     profile,
     error,
     mutate,

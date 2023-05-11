@@ -67,9 +67,6 @@ export class MyElement extends LitElement {
   isLoading = false;
 
   @state()
-  perspectiveHasNoCommunity = false;
-
-  @state()
   isCreatingCommunity = false;
 
   @state()
@@ -101,6 +98,10 @@ export class MyElement extends LitElement {
     return this.perspectives.find((p) => p.uuid === this.perspectiveUuid);
   }
 
+  get neighbourhoods() {
+    return this.perspectives.filter((p) => p.sharedUrl);
+  }
+
   get appElement() {
     return this.children[0];
   }
@@ -122,12 +123,11 @@ export class MyElement extends LitElement {
         this.client = client;
 
         const perspectives = await client.perspective.all();
+        this.perspectives = perspectives;
 
         client.perspective.addPerspectiveAddedListener(async (handle) => {
           const perspective = await client.perspective.byUUID(handle.uuid);
-          if (perspective.sharedUrl) {
-            this.perspectives.push(perspective);
-          }
+          this.perspectives.push(perspective);
         });
 
         client.perspective.addPerspectiveUpdatedListener(async (handle) => {
@@ -137,7 +137,10 @@ export class MyElement extends LitElement {
           );
         });
 
-        this.perspectives = perspectives;
+        client.perspective.addPerspectiveRemovedListener((uuid: string) => {
+          this.perspectives = this.perspectives.filter((p) => p.uuid !== uuid);
+          return null;
+        });
 
         if (this.perspectiveUuid) {
           this.setPerspective(this.perspectiveUuid);
@@ -150,61 +153,45 @@ export class MyElement extends LitElement {
   }
 
   async setPerspective(uuid: string) {
-    this.isLoading = true;
-    this.perspectiveHasNoCommunity = false;
-
     const perspective = this.perspectives.find((p) => p.uuid === uuid);
-    localStorage.setItem("perspectiveUuid", uuid);
 
     if (!perspective) {
       return;
     }
 
-    const neighbourhood = perspective.getNeighbourhoodProxy();
-
-    const agents = await neighbourhood.otherAgents();
-
-    console.log({ agents });
-
+    localStorage.setItem("perspectiveUuid", uuid);
     this.perspectiveUuid = uuid;
 
-    const community = await new SubjectRepository(Community, {
-      perspective: perspective,
-    }).getData();
+    try {
+      this.isLoading = true;
 
-    if (!community) {
-      this.isLoading = false;
-      this.perspectiveHasNoCommunity = true;
-      return;
-    }
+      const channels = await new SubjectRepository(Channel, {
+        perspective: perspective,
+      }).getAllData();
 
-    const channels = await new SubjectRepository(Channel, {
-      perspective: perspective,
-    }).getAllData();
+      this.channels = channels;
+      this.source = channels[0]?.id || "ad4m://self";
 
-    this.channels = channels;
-    this.source = channels[0]?.id || "ad4m://self";
-
-    // @ts-ignore
-    this.appElement.perspective = perspective;
-
-    // @ts-ignore
-    if (!this.appElement.agent) {
       // @ts-ignore
-      this.appElement.agent = this.client.agent;
-    }
+      this.appElement.perspective = perspective;
 
-    // @ts-ignore
-    const defaultSource = channels[0]?.id || "ad4m://self";
-    if (this.appElement.getAttribute("source") !== defaultSource) {
-      this.appElement.setAttribute("source", defaultSource);
-    }
+      // @ts-ignore
+      if (!this.appElement.agent) {
+        // @ts-ignore
+        this.appElement.agent = this.client.agent;
+      }
 
-    this.isLoading = false;
+      if (this.appElement.getAttribute("source") !== this.source) {
+        this.appElement.setAttribute("source", this.source);
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   setChannel(source: string) {
-    console.log("setting", source);
     this.source = source;
     localStorage.setItem("source", source);
     this.appElement.setAttribute("source", source);
@@ -221,7 +208,8 @@ export class MyElement extends LitElement {
     try {
       await createCommunity({ name: this.title });
       this.title = "";
-      console.log("created community");
+    } catch (e) {
+      console.log(e);
     } finally {
       this.isCreatingCommunity = false;
     }
@@ -246,7 +234,7 @@ export class MyElement extends LitElement {
               <j-text variant="label">Select perspective:</j-text>
               <j-flex gap="200" wrap>
                 ${map(
-                  this.perspectives,
+                  this.neighbourhoods,
                   (p) => html`<j-tooltip title=${p.name}>
                     <j-avatar
                       ?selected=${this.perspectiveUuid === p.uuid}
@@ -263,20 +251,14 @@ export class MyElement extends LitElement {
             </div>
 
             <div>
-              <j-text variant="label">
-                ${this.perspectiveHasNoCommunity
-                  ? "No community!"
-                  : "Current channel:"}
-              </j-text>
               <select
                 .value=${this.source}
                 @change=${(e: any) => this.setChannel(e.target.value)}
-                ?disabled=${this.perspectiveHasNoCommunity}
               >
                 <option value="ad4m://self" selected>Self (ad4m://self)</option>
                 ${map(
                   this.channels,
-                  (i) => html`<option value=${i.id}>${i.name}</option>`
+                  (c) => html`<option value=${c.id}>${c.name}</option>`
                 )}
               </select>
             </div>

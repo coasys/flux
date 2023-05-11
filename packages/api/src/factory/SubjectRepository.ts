@@ -111,7 +111,6 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     this.source = props.source || this.source;
     this.subject = new subject();
     this.tempSubject = subject;
-    this.ensureSubject();
   }
 
   async ensureSubject() {

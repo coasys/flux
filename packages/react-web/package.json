@@ -23,7 +23,7 @@
     "@fluxapp/utils": "*"
   },
   "peerDependencies": {
-    "@perspect3vism/ad4m": "^0.3.4",
+    "@perspect3vism/ad4m": "0.3.4-fix1",
     "react": "^18.2.0"
   }
 }

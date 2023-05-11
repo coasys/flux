@@ -48,8 +48,13 @@ export default function CreatePost({
   // Fetch post if editing
   useEffect(() => {
     if (postId) {
-      Post.getData(postId).then((entry: any) => {
-        setState(entry);
+      Post.getData(postId).then((entry) => {
+        setState({
+          title: entry.title || undefined,
+          body: entry.body || undefined,
+          url: entry.url || undefined,
+          image: entry.image || undefined,
+        });
         setInitState(entry);
         setIsLoading(false);
 
@@ -91,6 +96,7 @@ export default function CreatePost({
     setIsCreating(true);
 
     let data = state;
+
     let newPost = undefined;
 
     try {
@@ -98,7 +104,7 @@ export default function CreatePost({
         await Post.update(postId, {
           ...data,
           // if we send in null the property does not get updated
-          image: imageReplaced ? data.image : null,
+          image: imageReplaced ? data.image : undefined,
         });
       } else {
         newPost = await Post.create(data);

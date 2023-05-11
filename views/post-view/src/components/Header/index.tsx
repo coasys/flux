@@ -8,7 +8,7 @@ import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import styles from "./index.module.css";
 
 export default function Header({ agent }: { agent: AgentClient }) {
-  const { profile } = useMe(agent);
+  const { profile, me } = useMe(agent);
   const { methods } = useContext(UIContext);
 
   function handlePostClick(type) {
@@ -18,10 +18,10 @@ export default function Header({ agent }: { agent: AgentClient }) {
   return (
     <header>
       <j-flex a="center" gap="500">
-        <a href={profile?.did}>
+        <a href={me?.did}>
           <Avatar
             size="lg"
-            did={profile?.did}
+            did={me?.did}
             url={profile?.profileThumbnailPicture}
           ></Avatar>
         </a>
