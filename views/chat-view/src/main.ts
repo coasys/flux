@@ -7,7 +7,7 @@ import MyComponent from "./App";
 
 const CustomElement = register.toCustomElement(
   MyComponent,
-  ["perspective", "source"],
+  ["perspective", "agent", "source"],
   { shadow: false }
 );
 

@@ -10,6 +10,7 @@ import { useState } from "preact/hooks";
 import styles from "./index.module.css";
 import { EditorProvider } from "./context/EditorContext";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 
 // dynamic import of emoji picker only if it's not defined already
 if (customElements.get("emoji-picker") === undefined) {
@@ -35,8 +36,10 @@ const MainComponent = ({ perspective, source }) => {
 
 export default function App({
   perspective,
+  agent,
   source,
 }: {
+  agent: AgentClient;
   perspective: PerspectiveProxy;
   source: string;
 }) {
@@ -47,7 +50,7 @@ export default function App({
   return (
     <UIProvider>
       <AgentProvider>
-        <CommunityProvider perspective={perspective}>
+        <CommunityProvider agent={agent} perspective={perspective}>
           <ChatProvider perspectiveUuid={perspective.uuid} channelId={source}>
             <MainComponent
               perspective={perspective.uuid}

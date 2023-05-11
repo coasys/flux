@@ -7,6 +7,7 @@ import {
   getProfile,
 } from "@fluxapp/api";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 
 type State = {
   uuid: string;
@@ -37,11 +38,16 @@ const initialState: ContextProps = {
 const CommunityContext = createContext<ContextProps>(initialState);
 
 type ProviderProps = {
+  agent: AgentClient;
   perspective: PerspectiveProxy;
   children: any;
 };
 
-export function CommunityProvider({ perspective, children }: ProviderProps) {
+export function CommunityProvider({
+  agent,
+  perspective,
+  children,
+}: ProviderProps) {
   const [state, setState] = useState({
     ...initialState.state,
   });
@@ -65,8 +71,10 @@ export function CommunityProvider({ perspective, children }: ProviderProps) {
   async function fetchProfiles() {
     const neighbourhood = perspective.getNeighbourhoodProxy();
     const others = await neighbourhood.otherAgents();
+    const me = await agent?.me();
+    const dids = me?.did ? [...others, me.did] : others;
 
-    const profilePromises = others.map(async (did) => getProfile(did));
+    const profilePromises = dids.map(async (did) => getProfile(did));
 
     const newProfiles = await Promise.all(profilePromises);
 
