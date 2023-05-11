@@ -1,10 +1,5 @@
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
-import { useEntry, useEntries } from "@fluxapp/react-web";
-
-import { Community, Post } from "@fluxapp/api";
-import Todo from "../models/Todo";
-
 import styles from "../App.module.css";
 
 type Props = {
@@ -12,90 +7,86 @@ type Props = {
   source: string;
 };
 
+async function getEntries(entries) {
+  return Promise.all(
+    entries.map(async (e) => {
+      const getters = Object.entries(Object.getOwnPropertyDescriptors(e))
+        .filter(([key, descriptor]) => typeof descriptor.get === "function")
+        .map(([key]) => key);
+
+      const promises = getters.map((getter) => e[getter]);
+      return Promise.all(promises).then((values) => {
+        return getters.reduce((acc, getter, index) => {
+          return { ...acc, [getter]: values[index] };
+        }, {});
+      });
+    })
+  );
+}
+
 export default function TableView({ perspective, source }: Props) {
-  const [title, setTitle] = useState("");
+  const [classes, setClasses] = useState<string[]>([]);
+  const [selected, setSelected] = useState("");
+  const [entries, setEntries] = useState<any[]>([]);
 
-  const { entry: community } = useEntry({
-    perspective,
-    model: Community,
-  });
+  useEffect(() => {
+    perspective.subjectClasses().then((c) => setClasses([...new Set(c)]));
+  }, [perspective.uuid]);
 
-  const { entries: todos, model } = useEntries({
-    perspective,
-    source,
-    model: Todo,
-  });
-
-  function createTodo(event: React.KeyboardEvent<Element>) {
-    if (event.key !== "Enter") return;
-    model
-      .create({ title: title })
-      .then(() => {
-        setTitle("");
-      })
-      .catch(console.log);
-  }
-
-  function toggleTodo({ id, done }) {
-    model.update(id, { done }).catch(console.log);
-  }
-
-  function deleteTodo(id: string) {
-    model.remove(id).catch(console.log);
-  }
+  useEffect(() => {
+    if (selected) {
+      perspective.getAllSubjectInstances(selected).then((entries) => {
+        if (Array.isArray(entries)) {
+          getEntries(entries).then((e) => {
+            console.log(e);
+            setEntries(e);
+          });
+        }
+      });
+    }
+  }, [selected]);
 
   return (
     <div>
-      <j-box pt="900" pb="400">
-        <j-text
-          uppercase
-          size="300"
-          weight="800"
-          color="primary-500"
-          variant="success"
-        >
-          {community?.name}
-        </j-text>
-      </j-box>
-
-      <input
-        autoFocus
-        className={styles.titleInput}
-        placeholder="Write a title"
-        value={title}
-        onKeyDown={createTodo}
-        onChange={(e) => setTitle(e.target.value)}
-      ></input>
-
-      <j-box pt="500">
-        <j-flex gap="300" direction="column">
-          {todos.map((todo) => (
-            <j-box bg="ui-50" p="400" radius="md">
-              <j-flex j="between">
-                <div className={todo.done ? styles.doneTodo : ""}>
-                  <j-checkbox
-                    onChange={(e) =>
-                      toggleTodo({ id: todo.id, done: e.target.checked })
-                    }
-                    checked={todo.done}
-                    style="--j-border-radius: 50%;"
-                    size="sm"
-                  >
-                    <j-icon slot="checkmark" size="xs" name="check"></j-icon>
-                    <j-text size="500" nomargin>
-                      {todo.title}
-                    </j-text>
-                    <j-text size="500" nomargin>
-                      {todo.desc}
-                    </j-text>
-                  </j-checkbox>
-                </div>
-                <j-button onClick={() => deleteTodo(todo.id)}>Delete</j-button>
-              </j-flex>
-            </j-box>
-          ))}
-        </j-flex>
+      <j-tabs
+        size="sm"
+        value={selected}
+        onChange={(e) => setSelected(e.target.value)}
+      >
+        {classes.map((c) => {
+          return <j-tab-item value={c}>{c}</j-tab-item>;
+        })}
+      </j-tabs>
+      <j-box pt="800">
+        <Table data={entries}></Table>
       </j-box>
     </div>
+  );
+}
+
+function Table({ data }) {
+  if (!data?.length) return null;
+  // Extracting the property names from the first object in the array
+  const headers = Object.keys(data[0]);
+
+  return (
+    <table className={styles.table}>
+      <thead>
+        <tr>
+          {headers.map((header, index) => (
+            <th key={index}>{header}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {data.map((item, index) => (
+          <tr key={index}>
+            {headers.map((header, index) => (
+              <td key={index}>{item[header]}</td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
