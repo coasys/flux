@@ -1,4 +1,3 @@
-import { CommunityProvider, AgentProvider } from "@fluxapp/react-web";
 import { UiProvider } from "./context/UiContext";
 import Channel from "./components/Channel";
 
@@ -8,12 +7,8 @@ export default function App({ perspective, source }) {
   }
 
   return (
-    <AgentProvider>
-      <CommunityProvider perspectiveUuid={perspective.uuid}>
-        <UiProvider>
-          <Channel source={source} uuid={perspective.uuid} />
-        </UiProvider>
-      </CommunityProvider>
-    </AgentProvider>
+    <UiProvider>
+      <Channel source={source} uuid={perspective.uuid} />
+    </UiProvider>
   );
 }

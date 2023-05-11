@@ -3,6 +3,7 @@ import {
   AgentContext,
   ChatContext,
   CommunityContext,
+  useMe,
 } from "@fluxapp/react-web";
 import { getMe } from "@fluxapp/api";
 import MessageToolbar from "./MessageToolbar";
@@ -25,6 +26,7 @@ export default function MessageItem({
   showAvatar,
   onOpenEmojiPicker,
   mainRef,
+  agent,
   perspectiveUuid,
   hideToolbar = false,
   noPadding = false,
@@ -55,7 +57,7 @@ export default function MessageItem({
     methods: { setInputValue },
   } = useContext(EditorContext);
 
-  const { state: agentState } = useContext(AgentContext);
+  const { me: agentState } = useMe(agent);
 
   function onReplyClick() {
     setCurrentReply(message.id);
@@ -207,6 +209,7 @@ export default function MessageItem({
 
           {hasReactions && (
             <MessageReactions
+              agent={agent}
               onEmojiClick={onEmojiClick}
               reactions={message.reactions}
             />

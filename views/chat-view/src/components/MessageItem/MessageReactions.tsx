@@ -1,4 +1,4 @@
-import { AgentContext } from "@fluxapp/react-web";
+import { AgentContext, useMe } from "@fluxapp/react-web";
 import { Reaction } from "@fluxapp/types";
 import { useContext, useMemo, useState } from "preact/hooks";
 import styles from "./index.module.css";
@@ -67,7 +67,11 @@ function generateReactionText(
   }
 }
 
-export default function MessageReactions({ onEmojiClick, reactions = [] }) {
+export default function MessageReactions({
+  agent,
+  onEmojiClick,
+  reactions = [],
+}) {
   const sortedReactions = useMemo(() => {
     return sortReactions(reactions);
   }, [reactions]);
@@ -77,6 +81,7 @@ export default function MessageReactions({ onEmojiClick, reactions = [] }) {
       {sortedReactions.map((reaction: any, i) => {
         return (
           <ReactionButton
+            agent={agent}
             key={i}
             reaction={reaction}
             onEmojiClick={onEmojiClick}
@@ -87,8 +92,8 @@ export default function MessageReactions({ onEmojiClick, reactions = [] }) {
   );
 }
 
-function ReactionButton({ reaction, onEmojiClick }) {
-  const { state: agentState } = useContext(AgentContext);
+function ReactionButton({ agent, reaction, onEmojiClick }) {
+  const { me: agentState } = useMe(agent);
 
   const activeClass = useMemo(() => {
     return [

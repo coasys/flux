@@ -10,6 +10,7 @@ import {
   AgentContext,
   ChatContext,
   CommunityContext,
+  useMe,
 } from "@fluxapp/react-web";
 import UIContext from "./UIContext";
 import useTiptapEditor from "../components/TipTap/useTiptapEditor";
@@ -41,7 +42,12 @@ const initialState: ContextProps = {
 
 const EditorContext = createContext(initialState);
 
-export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
+export function EditorProvider({
+  children,
+  agent,
+  perspectiveUuid,
+  channelId,
+}: any) {
   const [state, setState] = useState(initialState.state);
   const {
     state: { members, channels },
@@ -57,7 +63,7 @@ export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
     methods: { setCurrentReply, setCurrentEditMessage },
   } = useContext(UIContext);
 
-  const { state: agentState } = useContext(AgentContext);
+  const { me: agentState } = useMe(agent);
 
   const currentReplyMessage = keyedMessages[currentReply];
 
@@ -115,7 +121,7 @@ export function EditorProvider({ children, perspectiveUuid, channelId }: any) {
   const onMessageEdit = useCallback(() => {
     if (messages.length) {
       const message = messages.findLast(
-        (message) => message.author === agentState.did
+        (message) => message.author === agentState?.did
       );
       if (message) {
         setCurrentEditMessage(message.id);

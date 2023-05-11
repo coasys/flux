@@ -23,7 +23,12 @@ const { REACTION } = community;
 
 const ReactHint = ReactHintFactory({ createElement: h, Component, createRef });
 
-export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
+export default function MessageList({
+  perspectiveUuid,
+  agent,
+  mainRef,
+  channelId,
+}) {
   const emojiPicker = useMemo(() => {
     const el = document.createElement("emoji-picker");
     el.classList.add(styles.picker);
@@ -330,6 +335,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
         initialTopMostItemIndex={messages.length - 1}
         itemContent={(index, message) => (
           <MessageItem
+            agent={agent}
             message={message}
             onOpenEmojiPicker={(unicode) => openEmojiPicker(unicode, index)}
             showAvatar={showAvatar(index)}
@@ -352,6 +358,7 @@ export default function MessageList({ perspectiveUuid, mainRef, channelId }) {
                 Reply
               </j-text>
               <MessageItem
+                agent={agent}
                 message={{
                   ...selectedReplies.replies[0],
                   editMessages: [
