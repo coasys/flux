@@ -16,7 +16,7 @@ export default function Header({ agent }: { agent: AgentClient }) {
   }
 
   return (
-    <header>
+    <header className={styles.header}>
       <j-flex a="center" gap="500">
         <a href={me?.did}>
           <Avatar
