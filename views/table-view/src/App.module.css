@@ -1,25 +1,5 @@
 .appContainer {
   margin: 0 auto;
-  padding: var(--j-space-800);
   width: 100%;
   max-width: 1200px;
-}
-
-.table {
-  border: 0;
-  background: var(--j-color-ui-100);
-  border-radius: var(--j-border-radius);
-  width: 100%;
-  text-align: left;
-}
-
-.table th,
-.table td {
-  padding: var(--j-space-300);
-}
-
-.table thead th {
-  color: var(--j-color-black);
-  font-weight: 800;
-  text-transform: capitalize;
 }

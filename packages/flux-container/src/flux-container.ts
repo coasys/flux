@@ -31,7 +31,6 @@ export class MyElement extends LitElement {
       box-sizing: border-box;
     }
     .content {
-      margin-left: var(--j-space-500);
     }
     select {
       width: 100%;
@@ -230,38 +229,43 @@ export class MyElement extends LitElement {
                 <option value="dark">Dark</option>
               </select>
             </div>
-            <div>
-              <j-text variant="label">Select perspective:</j-text>
-              <j-flex gap="200" wrap>
-                ${map(
-                  this.neighbourhoods,
-                  (p) => html`<j-tooltip title=${p.name}>
-                    <j-avatar
-                      ?selected=${this.perspectiveUuid === p.uuid}
-                      hash=${p.uuid}
-                      @click=${() => this.setPerspective(p.uuid)}
-                      :value=${p.uuid}
-                      ?disabled=${this.isLoading}
-                    >
-                      ${p.name}
-                    </j-avatar>
-                  </j-tooltip>`
-                )}
-              </j-flex>
-            </div>
-
-            <div>
-              <select
-                .value=${this.source}
-                @change=${(e: any) => this.setChannel(e.target.value)}
-              >
-                <option value="ad4m://self" selected>Self (ad4m://self)</option>
-                ${map(
-                  this.channels,
-                  (c) => html`<option value=${c.id}>${c.name}</option>`
-                )}
-              </select>
-            </div>
+            ${this.neighbourhoods.length
+              ? html` <div>
+                  <j-text variant="label">Select perspective:</j-text>
+                  <j-flex gap="200" wrap>
+                    ${map(
+                      this.neighbourhoods,
+                      (p) => html`<j-tooltip title=${p.name}>
+                        <j-avatar
+                          ?selected=${this.perspectiveUuid === p.uuid}
+                          hash=${p.uuid}
+                          @click=${() => this.setPerspective(p.uuid)}
+                          :value=${p.uuid}
+                          ?disabled=${this.isLoading}
+                        >
+                          ${p.name}
+                        </j-avatar>
+                      </j-tooltip>`
+                    )}
+                  </j-flex>
+                </div>`
+              : ``}
+            ${this.perspective
+              ? html`<div>
+                  <select
+                    .value=${this.source}
+                    @change=${(e: any) => this.setChannel(e.target.value)}
+                  >
+                    <option value="ad4m://self" selected>
+                      Self (ad4m://self)
+                    </option>
+                    ${map(
+                      this.channels,
+                      (c) => html`<option value=${c.id}>${c.name}</option>`
+                    )}
+                  </select>
+                </div>`
+              : ``}
 
             <j-input
               label="Create new community"
