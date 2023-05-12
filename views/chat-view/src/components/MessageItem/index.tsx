@@ -41,12 +41,12 @@ export default function MessageItem({
 
   const [showToolbar, setShowToolbar] = useState(false);
 
-  const { profile: author } = useAgent({
+  const { profile: authorProfile, agent: authorAgent } = useAgent({
     client: agent,
-    did: () => message.author,
+    did: message.author,
   });
 
-  const { profile: replyAuthor } = useAgent({
+  const { profile: replyProfile, agent: replyAgent } = useAgent({
     client: agent,
     did: () => message?.replies[0]?.author,
   });
@@ -129,15 +129,19 @@ export default function MessageItem({
       <div className={styles.messageItemWrapper}>
         {replyMessage && (
           <MessageReply
-            replyAuthor={replyAuthor}
+            did={replyAgent?.did}
+            replyAuthor={replyProfile}
             replyMessage={replyMessage}
             onMessageClick={onReplyNavClick}
           ></MessageReply>
         )}
         <div>
           {showAuthor ? (
-            <a href={author?.did}>
-              <Avatar did={author?.did} url={author?.profileThumbnailPicture} />
+            <a href={authorAgent?.did}>
+              <Avatar
+                did={authorAgent?.did}
+                src={authorProfile?.profileThumbnailPicture}
+              />
             </a>
           ) : (
             showToolbar && (
@@ -158,8 +162,8 @@ export default function MessageItem({
         <div className={styles.messageItemContentWrapper}>
           {showAuthor && (
             <header className={styles.messageItemHeader}>
-              <a href={author?.did} className={styles.messageUsername}>
-                {author?.username || (
+              <a href={authorAgent?.did} className={styles.messageUsername}>
+                {authorProfile?.username || (
                   <j-skeleton width="xl" height="text"></j-skeleton>
                 )}
               </a>

@@ -2,6 +2,7 @@ import styles from "./index.module.css";
 import Avatar from "../../components/Avatar";
 
 export default function MessageReply({
+  did,
   replyAuthor,
   replyMessage,
   onMessageClick,
@@ -18,14 +19,14 @@ export default function MessageReply({
         <div className={styles.replyLine} />
       </div>
       <div className={styles.replyMessage}>
-        <a className={styles.replyAuthor} href={replyAuthor?.did}>
+        <a className={styles.replyAuthor} href={did}>
           <Avatar
-            did={replyAuthor.did}
-            url={replyAuthor.profileThumbnailPicture}
+            did={did}
+            url={replyAuthor?.profileThumbnailPicture}
             size="xxs"
           ></Avatar>
           <div className={styles.replyUsername}>
-            {replyAuthor.username || <j-skeleton width="xl" height="text" />}
+            {replyAuthor?.username || <j-skeleton width="xl" height="text" />}
           </div>
         </a>
         <div

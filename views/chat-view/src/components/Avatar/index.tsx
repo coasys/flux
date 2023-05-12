@@ -3,7 +3,8 @@ import { useEffect, useState } from "preact/hooks";
 
 type AvatarProps = {
   did: string;
-  url: string;
+  url?: string;
+  src?: string;
   style?: any;
   onClick?: (event: any) => void;
   size?: "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
@@ -12,6 +13,7 @@ type AvatarProps = {
 export default function Avatar({
   did,
   url,
+  src,
   style,
   onClick,
   size = "md",
@@ -38,7 +40,7 @@ export default function Avatar({
   return (
     <j-avatar
       style={{ ...style, cursor: onClick ? "pointer" : "default" }}
-      src={img}
+      src={img || src}
       hash={did}
       onClick={(e: any) => onClick && onClick(e)}
       size={size}

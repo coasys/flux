@@ -113,6 +113,7 @@ export default defineComponent({
   async setup() {
     const client = await getAd4mClient();
     const appStore = useAppStore();
+
     const { perspectives, onLinkAdded } = usePerspectives(client);
 
     const { data } = usePerspective(client, () => appStore.activeCommunity);

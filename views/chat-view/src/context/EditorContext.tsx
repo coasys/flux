@@ -71,15 +71,17 @@ export function EditorProvider({
   }, [perspective.uuid]);
 
   useEffect(() => {
-    neighbourhood?.otherAgents().then((dids) => {
-      const profilePromises = [...dids, agentState?.did].map(async (did) =>
-        getProfile(did)
-      );
+    if (agentState?.did) {
+      neighbourhood?.otherAgents().then((dids) => {
+        const profilePromises = [...dids, agentState.did].map(async (did) =>
+          getProfile(did)
+        );
 
-      Promise.all(profilePromises).then((profiles) => {
-        setMembers(profiles);
+        Promise.all(profilePromises).then((profiles) => {
+          setMembers(profiles);
+        });
       });
-    });
+    }
   }, [neighbourhood, agentState?.did]);
 
   const {
