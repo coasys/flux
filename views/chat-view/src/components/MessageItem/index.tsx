@@ -3,6 +3,7 @@ import {
   AgentContext,
   ChatContext,
   CommunityContext,
+  useAgent,
   useMe,
 } from "@fluxapp/react-web";
 import { getMe } from "@fluxapp/api";
@@ -40,9 +41,15 @@ export default function MessageItem({
 
   const [showToolbar, setShowToolbar] = useState(false);
 
-  const {
-    state: { members },
-  } = useContext(CommunityContext);
+  const { profile: author } = useAgent({
+    client: agent,
+    did: () => message.author,
+  });
+
+  const { profile: replyAuthor } = useAgent({
+    client: agent,
+    did: () => message?.replies[0]?.author,
+  });
 
   const {
     methods: { addReaction, removeReaction },
@@ -98,8 +105,6 @@ export default function MessageItem({
     }
   }
 
-  const author: Profile = members[message.author] || {};
-  const replyAuthor: Profile = members[message?.replies[0]?.author] || {};
   const replyMessage: Message = message?.replies[0];
   const popularStyle: string = message.isPopular ? styles.popularMessage : "";
   const highlightStyle: string = highlight ? styles.highlightMessage : "";

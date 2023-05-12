@@ -6,15 +6,13 @@ import {
   useState,
 } from "preact/hooks";
 import { createContext } from "preact";
-import {
-  AgentContext,
-  ChatContext,
-  CommunityContext,
-  useMe,
-} from "@fluxapp/react-web";
+import { ChatContext, useEntries, useMe } from "@fluxapp/react-web";
 import UIContext from "./UIContext";
 import useTiptapEditor from "../components/TipTap/useTiptapEditor";
 import { Editor } from "@tiptap/core";
+import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { AgentClient } from "@perspect3vism/ad4m/src/agent/AgentClient";
+import { Channel, getProfile } from "@fluxapp/api";
 
 type State = {
   editor: Editor;
@@ -42,16 +40,47 @@ const initialState: ContextProps = {
 
 const EditorContext = createContext(initialState);
 
+type EditorProps = {
+  children: any;
+  agent: AgentClient;
+  perspective: PerspectiveProxy;
+  perspectiveUuid: string;
+  channelId: string;
+};
+
 export function EditorProvider({
   children,
   agent,
+  perspective,
   perspectiveUuid,
   channelId,
-}: any) {
+}: EditorProps) {
+  const [members, setMembers] = useState([]);
   const [state, setState] = useState(initialState.state);
-  const {
-    state: { members, channels },
-  } = useContext(CommunityContext);
+
+  const { me: agentState } = useMe(agent);
+
+  const { entries: channels } = useEntries({
+    perspective,
+    source: channelId,
+    model: Channel,
+  });
+
+  const neighbourhood = useMemo(() => {
+    return perspective?.getNeighbourhoodProxy();
+  }, [perspective.uuid]);
+
+  useEffect(() => {
+    neighbourhood?.otherAgents().then((dids) => {
+      const profilePromises = [...dids, agentState?.did].map(async (did) =>
+        getProfile(did)
+      );
+
+      Promise.all(profilePromises).then((profiles) => {
+        setMembers(profiles);
+      });
+    });
+  }, [neighbourhood, agentState?.did]);
 
   const {
     state: { keyedMessages, messages },
@@ -62,8 +91,6 @@ export function EditorProvider({
     state: { currentReply, currentMessageEdit },
     methods: { setCurrentReply, setCurrentEditMessage },
   } = useContext(UIContext);
-
-  const { me: agentState } = useMe(agent);
 
   const currentReplyMessage = keyedMessages[currentReply];
 

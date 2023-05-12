@@ -1,14 +1,10 @@
-import { ChatContext, CommunityContext } from "@fluxapp/react-web";
+import { ChatContext, useAgent } from "@fluxapp/react-web";
 import { useContext } from "preact/hooks";
 import UIContext from "../../context/UIContext";
 import TipTap from "../TipTap";
 import styles from "./index.module.css";
 
-export default function Footer({ perspectiveUuid, channelId }) {
-  const {
-    state: { members },
-  } = useContext(CommunityContext);
-
+export default function Footer({ agent, perspectiveUuid, channelId }) {
   const {
     state: { keyedMessages },
   } = useContext(ChatContext);
@@ -19,7 +15,12 @@ export default function Footer({ perspectiveUuid, channelId }) {
   } = useContext(UIContext);
 
   const currentReplyMessage = keyedMessages[currentReply];
-  const currentReplyProfile = members[currentReplyMessage?.author] || {};
+
+  const { profile: currentReplyProfile } = useAgent({
+    client: agent,
+    did: currentReplyMessage?.author,
+  });
+
   const currentMessageEditMessage = keyedMessages[currentMessageEdit];
 
   return (

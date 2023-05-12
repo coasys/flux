@@ -1,6 +1,6 @@
 import Footer from "./components/Footer";
 import MessageList from "./components/MessageList";
-import { ChatProvider, CommunityProvider } from "@fluxapp/react-web";
+import { ChatProvider } from "@fluxapp/react-web";
 import { UIProvider } from "./context/UIContext";
 import { useState } from "preact/hooks";
 import styles from "./index.module.css";
@@ -18,18 +18,23 @@ const MainComponent = ({ perspective, agent, source }) => {
 
   return (
     <EditorProvider
+      perspective={perspective}
       agent={agent}
-      perspectiveUuid={perspective}
+      perspectiveUuid={perspective.uuid}
       channelId={source}
     >
       <div className={styles.container} ref={setRef}>
         <MessageList
           agent={agent}
-          perspectiveUuid={perspective}
+          perspectiveUuid={perspective.uuid}
           channelId={source}
           mainRef={ref}
         />
-        <Footer perspectiveUuid={perspective} channelId={source} />
+        <Footer
+          agent={agent}
+          perspectiveUuid={perspective.uuid}
+          channelId={source}
+        />
       </div>
     </EditorProvider>
   );
@@ -50,15 +55,13 @@ export default function App({
 
   return (
     <UIProvider>
-      <CommunityProvider agent={agent} perspective={perspective}>
-        <ChatProvider perspectiveUuid={perspective.uuid} channelId={source}>
-          <MainComponent
-            agent={agent}
-            perspective={perspective.uuid}
-            source={source}
-          ></MainComponent>
-        </ChatProvider>
-      </CommunityProvider>
+      <ChatProvider perspectiveUuid={perspective.uuid} channelId={source}>
+        <MainComponent
+          agent={agent}
+          perspective={perspective}
+          source={source}
+        ></MainComponent>
+      </ChatProvider>
     </UIProvider>
   );
 }
