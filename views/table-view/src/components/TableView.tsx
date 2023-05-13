@@ -50,7 +50,27 @@ export default function TableView({
 
   return (
     <div>
-      <j-box pt="500" px="900">
+      {history.length > 1 && (
+        <j-box bg="primary-500" px="500">
+          <div className={styles.history}>
+            {history.map((s, index) => {
+              return (
+                <button
+                  className={styles.historyItem}
+                  onClick={() => goTo(index + 1)}
+                  nomargin
+                >
+                  {new Intl.PluralRules("en-US", { type: "ordinal" }).select(
+                    index + 1
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </j-box>
+      )}
+
+      <j-box bg="primary-500" pt="500" pb="500" px="500">
         <EntryInfo
           perspective={perspective}
           source={source}
@@ -58,23 +78,7 @@ export default function TableView({
         ></EntryInfo>
       </j-box>
 
-      <j-box px="900" pt="500">
-        <div className={styles.history}>
-          {history.map((s, index) => {
-            return (
-              <button
-                className={styles.historyItem}
-                onClick={() => goTo(index + 1)}
-                nomargin
-              >
-                {generateHash(s)}
-              </button>
-            );
-          })}
-        </div>
-      </j-box>
-
-      <j-box px="800" pt="500">
+      <j-box bg="primary-500" px="500">
         <div className={styles.tabs}>
           {classes.map((c) => {
             return (
@@ -92,7 +96,8 @@ export default function TableView({
           })}
         </div>
       </j-box>
-      <j-box px="800">
+
+      <j-box>
         <Table
           onUrlClick={onUrlClick}
           perspective={perspective}
@@ -141,28 +146,32 @@ function EntryInfo({ perspective, source, onUrlClick }: EntryInfoProps) {
 
     return (
       <div>
-        <j-badge size="sm" variant="primary">
+        <j-text uppercase size="200" weight="700" color="white">
           {classes[0]}
-        </j-badge>
-        <j-box pt="300">
-          {defaultName && (
-            <j-text nomargin variant="heading-lg">
-              {defaultName}
-            </j-text>
-          )}
-        </j-box>
-        {/* <j-flex direction="row" gap="600">
-          {properties.map(([key, value]) => (
-            <j-flex gap="200" direction="column">
-              <j-text size="300" uppercase nomargin>
-                {key}
-              </j-text>
-              <div>
-                <DisplayValue onUrlClick={onUrlClick} value={value} />
-              </div>
+        </j-text>
+
+        <j-text nomargin variant="heading" color="white">
+          {defaultName}
+        </j-text>
+
+        {/*<j-box pt="500">
+          <details>
+            <summary>More info</summary>
+
+            <j-flex direction="column" gap="600">
+              {properties.map(([key, value]) => (
+                <j-flex gap="200" direction="column">
+                  <j-text size="200" uppercase nomargin color="white">
+                    {key}
+                  </j-text>
+                  <j-text color="white">
+                    <DisplayValue onUrlClick={onUrlClick} value={value} />
+                  </j-text>
+                </j-flex>
+              ))}
             </j-flex>
-          ))}
-        </j-flex>*/}
+          </details>
+              </j-box>*/}
       </div>
     );
   }
@@ -214,41 +223,38 @@ function Table({
   }, [subjectInstance, perspective.uuid, source]);
 
   if (!entries?.length) return null;
+
   // Extracting the property names from the first object in the array
-  const headers = Object.keys(entries[0]);
+  const headers = Object.keys(entries[0]).filter((header, index) => {
+    const isCollection = Array.isArray(entries[0][header]);
+    return isCollection ? false : header === "id" ? false : true;
+  });
 
   return (
     <div className={styles.tableWrapper}>
       <table className={styles.table}>
         <thead>
           <tr>
-            {headers
-              .filter(
-                (header, index) =>
-                  header !== "id" || !Array.isArray(entries[0][header])
-              )
-              .map((header, index) => {
-                return (
-                  <th key={index}>
-                    <span>{header}</span>
-                  </th>
-                );
-              })}
+            {headers.map((header, index) => {
+              return (
+                <th key={index}>
+                  <span>{header}</span>
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody>
           {entries.map((item, index) => (
             <tr key={index}>
-              {headers
-                .filter((header) => header !== "id")
-                .map((header, index) => {
-                  const value = item[header];
-                  return (
-                    <td key={index} onClick={() => onUrlClick(item.id)}>
-                      <DisplayValue onUrlClick={onUrlClick} value={value} />
-                    </td>
-                  );
-                })}
+              {headers.map((header, index) => {
+                const value = item[header];
+                return (
+                  <td key={index} onClick={() => onUrlClick(item.id)}>
+                    <DisplayValue value={value} />
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>
@@ -259,21 +265,20 @@ function Table({
 
 type DisplayValueProps = {
   value: any;
-  onUrlClick: Function;
+  onUrlClick?: Function;
 };
 
-function DisplayValue({ value, onUrlClick }: DisplayValueProps) {
+function DisplayValue({ value, onUrlClick = () => {} }: DisplayValueProps) {
   const isCollection = Array.isArray(value);
 
   if (isCollection) {
-    return null;
-    // return (
-    //   <j-flex gap="200" wrap>
-    //     {value.map((v, index) => {
-    //       return <DisplayValue onUrlClick={onUrlClick} value={v} />;
-    //     })}
-    //   </j-flex>
-    // )
+    return (
+      <j-flex gap="200" wrap>
+        {value.map((v, index) => {
+          return <DisplayValue onUrlClick={onUrlClick} value={v} />;
+        })}
+      </j-flex>
+    );
   }
 
   if (typeof value === "string") {
@@ -307,13 +312,11 @@ function DisplayValue({ value, onUrlClick }: DisplayValueProps) {
     return <ShowObjectInfo value={value} />;
   }
 
-  return value === null ? (
-    <span>null</span>
-  ) : value === false ? (
-    <span>false</span>
-  ) : (
-    value
-  );
+  if (value === true) return <j-toggle size="sm" checked></j-toggle>;
+
+  if (value === false) return <span></span>;
+
+  return value === null ? <span></span> : value;
 }
 
 function ShowObjectInfo({ value }) {
@@ -329,7 +332,7 @@ function ShowObjectInfo({ value }) {
   return (
     <div>
       <j-button variant="primary" size="xs" onClick={onClick}>
-        Show more
+        Show
       </j-button>
       {open && (
         <j-modal open={open} onToggle={(e) => setOpen(e.target.open)}>
