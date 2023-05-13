@@ -102,6 +102,7 @@
   border-collapse: collapse;
   background: var(--j-color-white);
   width: 100%;
+  font-size: var(--j-font-size-400);
   text-align: left;
 }
 
@@ -114,12 +115,18 @@
 .table thead th {
   background: var(--j-color-ui-50);
   color: var(--j-color-black);
-  font-weight: 500;
+  font-weight: 400;
   text-transform: capitalize;
 }
 
 .table tbody td {
+  cursor: pointer;
+  font-weight: 400;
   color: var(--j-color-black);
+}
+
+.table tbody tr:hover {
+  background-color: var(--j-color-ui-50);
 }
 
 .table thead th:first-of-type {
