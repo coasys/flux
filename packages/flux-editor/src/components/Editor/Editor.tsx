@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
-import { useEntries } from "@fluxapp/react-web";
+import { useEntry } from "@fluxapp/react-web";
 import { createEditor, BaseEditor, Transforms } from "slate";
 import { Slate, Editable, withReact, ReactEditor } from "slate-react";
 import { Message, getProfile } from "@fluxapp/api";
 
-import deserialize from "../utils/deserialize";
-import serialize from "../utils/serialize";
-import { withMentions, insertMention } from "../utils/mentions";
+import deserialize from "../../utils/deserialize";
+import serialize from "../../utils/serialize";
+import { withMentions, insertMention } from "../../utils/mentions";
 
 import styles from "./Editor.module.css";
 import { Profile } from "@fluxapp/types";
+import Toolbar from "./Toolbar";
+import Element from "./Element";
+import Leaf from "./Leaf";
 
 const defautValue = [{ type: "paragraph", children: [{ text: "" }] }];
 type CustomElement = { type: "paragraph"; children: CustomText[] };
@@ -42,6 +45,9 @@ export default function Editor({ perspective, source, initialValue }: Props) {
     []
   );
 
+  const renderElement = useCallback((props) => <Element {...props} />, []);
+  const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
+
   // Get all mentionable agents
   async function fetchProfiles() {
     const neighbourhood = perspective.getNeighbourhoodProxy();
@@ -56,7 +62,7 @@ export default function Editor({ perspective, source, initialValue }: Props) {
     fetchProfiles();
   }, []);
 
-  const { model } = useEntries({
+  const { model } = useEntry({
     perspective,
     source,
     model: Message,
@@ -120,7 +126,13 @@ export default function Editor({ perspective, source, initialValue }: Props) {
           }
         }}
       >
-        <Editable className={styles.wrapper} onKeyDown={onKeyDown} />
+        <Toolbar editor={editor} />
+        <Editable
+          className={styles.wrapper}
+          onKeyDown={onKeyDown}
+          renderElement={renderElement}
+          renderLeaf={renderLeaf}
+        />
       </Slate>
       <j-button onclick={createMessage}>Post</j-button>
     </div>
