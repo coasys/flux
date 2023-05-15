@@ -31,6 +31,7 @@ export class MyElement extends LitElement {
       height: 100vh;
       background: var(--j-color-ui-50);
       border-radius: var(--j-border-radius);
+      border-right: 1px solid var(--j-color-ui-100);
       box-sizing: border-box;
     }
     .content {
@@ -217,8 +218,8 @@ export class MyElement extends LitElement {
 
   render() {
     return html`
-      <div class="sidebar-layout">
-        <aside class="sidebar">
+      <div class="sidebar-layout" part="layout">
+        <aside class="sidebar" part="sidebar">
           <j-flex direction="column" gap="500">
             <div>
               <j-text variant="label">Current theme:</j-text>
@@ -251,7 +252,7 @@ export class MyElement extends LitElement {
                   </j-flex>
                 </div>`
               : ``}
-            ${this.perspective.uuid
+            ${this.perspective?.uuid
               ? html`<div>
                   <select
                     @change=${(e: any) => this.setChannel(e.target.value)}
@@ -297,7 +298,7 @@ export class MyElement extends LitElement {
             </j-button>
           </j-flex>
         </aside>
-        <div class="content">
+        <div class="content" part="content">
           ${this.isLoading
             ? html`<j-spinner></j-spinner>`
             : html`<slot></slot>`}

@@ -55,7 +55,6 @@ export default function TableView({
   }, [perspective.uuid, history]);
 
   async function onUrlClick(baseExpression: string, useHistory: boolean) {
-    if (source === baseExpression) return;
     setCurrentEntry(baseExpression);
     if (useHistory) {
       setHistory([...history, baseExpression]);
@@ -219,12 +218,17 @@ function Header({ perspective, source, onUrlClick = () => {} }: HeaderProps) {
 
     return (
       <div>
-        <j-text uppercase size="200" weight="700" color="white">
-          {classes[0]}
-        </j-text>
-        <j-text variant="heading" color="white">
-          {defaultName}
-        </j-text>
+        <j-button variant="subtle" onclick={() => onUrlClick(source)}>
+          <j-text nomargin variant="heading" color="white">
+            {defaultName}
+          </j-text>
+          <j-icon
+            color="white"
+            size="xs"
+            slot="end"
+            name="arrows-angle-expand"
+          ></j-icon>
+        </j-button>
       </div>
     );
   }
@@ -300,8 +304,7 @@ type TableProps = {
 
 function Table({ entries, onUrlClick = () => {} }: TableProps) {
   const headers = Object.keys(entries[0]).filter((header, index) => {
-    const isCollection = Array.isArray(entries[0][header]);
-    return isCollection ? false : header === "id" ? false : true;
+    return header === "id" ? false : true;
   });
 
   return (
@@ -494,7 +497,6 @@ function useChildren({ perspective, subjectInstance, source }: UseEntryProps) {
 
   useEffect(() => {
     if (subjectInstance) {
-      console.log({ subjectInstance, source });
       perspective
         .infer(
           `subject_class("${subjectInstance}", C), instance(C, Base), triple( "${source}", _, Base).`

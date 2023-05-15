@@ -45,8 +45,9 @@
   font-size: var(--j-font-size-300);
   display: inline-block;
   text-decoration: none;
-  color: inherit;
-  padding: var(--j-space-100);
+  background: var(--j-color-primary-100);
+  color: var(--j-color-primary-500);
+  padding: var(--j-space-200);
   border-radius: var(--j-border-radius);
 }
 
