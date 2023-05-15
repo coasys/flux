@@ -202,7 +202,9 @@ export default function Editor({ perspective, source, initialValue }: Props) {
           )}
         </Slate>
       </div>
-      <j-button onclick={createMessage}>Post</j-button>
+      <div className={styles.footer}>
+        <j-button onclick={createMessage}>Post</j-button>
+      </div>
     </>
   );
 }

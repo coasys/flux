@@ -10,11 +10,17 @@
 }
 
 .toolbar {
-
+    display: block;
 }
 
 .body {
     padding: var(--j-space-400);
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--j-space-400);
 }
 
 .wrapper:hover:not(:focus-within) {
@@ -25,11 +31,15 @@
     border: 1px solid var(--j-color-focus);
 }
   
-.wrapper *:first-of-type {
+.body > div > *:first-of-type {
     margin-top: 0;
 }
   
-.wrapper code {
+.body > div > *:last-of-type {
+    margin-bottom: 0;
+}
+  
+.body > div > code {
     background-color: rgba(0, 0, 0, 0.1);
     padding: var(--j-space-200);
 }
