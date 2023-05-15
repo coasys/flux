@@ -1,8 +1,11 @@
 import { LitElement, html, customElement, state, css } from "lit-element";
 import { map } from "lit/directives/map.js";
-import "@fluxapp/ui";
-import "@fluxapp/ui/dist/main.css";
-import "@fluxapp/ui/dist/themes/dark.css";
+
+if (!customElements.get("j-button")) {
+  import("@fluxapp/ui");
+  import("@fluxapp/ui/dist/main.css");
+  import("@fluxapp/ui/dist/themes/dark.css");
+}
 
 import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
@@ -143,9 +146,6 @@ export class MyElement extends LitElement {
 
         if (this.perspectiveUuid) {
           this.setPerspective(this.perspectiveUuid);
-          if (this.source) {
-            this.setChannel(this.source);
-          }
         }
       }
     });
@@ -169,7 +169,6 @@ export class MyElement extends LitElement {
       }).getAllData();
 
       this.channels = channels;
-      this.source = channels[0]?.id || "ad4m://self";
 
       // @ts-ignore
       this.appElement.perspective = perspective;
@@ -192,8 +191,10 @@ export class MyElement extends LitElement {
 
   setChannel(source: string) {
     this.source = source;
+    console.log("set channel", source);
     localStorage.setItem("source", source);
     this.appElement.setAttribute("source", source);
+    this.requestUpdate();
   }
 
   setTheme(e: Event) {
@@ -250,18 +251,26 @@ export class MyElement extends LitElement {
                   </j-flex>
                 </div>`
               : ``}
-            ${this.perspective
+            ${this.perspective.uuid
               ? html`<div>
                   <select
-                    .value=${this.source}
                     @change=${(e: any) => this.setChannel(e.target.value)}
                   >
-                    <option value="ad4m://self" selected>
+                    <option
+                      ?selected=${this.source === "ad4m://self"}
+                      value="ad4m://self"
+                    >
                       Self (ad4m://self)
                     </option>
                     ${map(
                       this.channels,
-                      (c) => html`<option value=${c.id}>${c.name}</option>`
+                      (c) =>
+                        html`<option
+                          ?selected=${this.source === c.id}
+                          value=${c.id}
+                        >
+                          ${c.name}
+                        </option>`
                     )}
                   </select>
                 </div>`

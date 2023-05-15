@@ -1,8 +1,16 @@
 {
   "name": "@fluxapp/chat-view",
-  "version": "0.5.9",
+  "version": "0.5.10",
   "description": "",
   "type": "module",
+  "fluxapp": {
+    "name": "Chat",
+    "description": "Make a new conversation",
+    "icon": "chat"
+  },
+  "keywords": [
+    "flux-app"
+  ],
   "files": [
     "dist"
   ],
@@ -23,7 +31,6 @@
     "dev:dist": "vite build --watch",
     "release": "np --no-tests"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {

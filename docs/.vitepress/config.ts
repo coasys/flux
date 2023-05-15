@@ -22,6 +22,10 @@ export default defineConfig({
         link: "/ui-library/getting-started/introduction",
       },
       {
+        text: "Apps",
+        link: "/app-library",
+      },
+      {
         text: "Playground",
         link: "/playground",
       },
@@ -59,7 +63,7 @@ export default defineConfig({
             {
               text: "Data",
               link: "/create-flux-app/basics/data",
-            }
+            },
           ],
         },
         {

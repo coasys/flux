@@ -1,7 +1,15 @@
 {
   "name": "@fluxapp/graph-view",
-  "version": "0.5.9",
+  "version": "0.5.10",
   "type": "module",
+  "fluxapp": {
+    "name": "Graph",
+    "description": "View your channel data in a graph",
+    "icon": "share"
+  },
+  "keywords": [
+    "flux-app"
+  ],
   "files": [
     "dist"
   ],
@@ -21,7 +29,6 @@
     "build": "vite build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",

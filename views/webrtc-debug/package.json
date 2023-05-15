@@ -5,7 +5,7 @@
   "fluxapp": {
     "name": "DebugRTC",
     "description": "WebRTC-debugger for flux",
-    "icon": "share"
+    "icon": "bug"
   },
   "keywords": [
     "flux-app"

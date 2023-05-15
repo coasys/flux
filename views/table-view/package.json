@@ -1,6 +1,14 @@
 {
   "name": "@fluxapp/table-view",
-  "version": "1.0.0",
+  "version": "0.5.10",
+  "fluxapp": {
+    "name": "Table",
+    "description": "View and edit your channel data",
+    "icon": "file-earmark-spreadsheet"
+  },
+  "keywords": [
+    "adam-perspective-view"
+  ],
   "type": "module",
   "files": [
     "dist"
@@ -19,7 +27,6 @@
     "build": "vite build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",

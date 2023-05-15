@@ -1,7 +1,15 @@
 {
   "name": "@fluxapp/webrtc-view",
-  "version": "0.5.9",
+  "version": "0.5.10",
   "type": "module",
+  "fluxapp": {
+    "name": "Audio",
+    "description": "Talk with your community members using audio/video",
+    "icon": "mic"
+  },
+  "keywords": [
+    "flux-app"
+  ],
   "files": [
     "dist"
   ],
@@ -30,7 +38,6 @@
     "build": "vite build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",

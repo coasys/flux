@@ -1,6 +1,14 @@
 {
   "name": "flux-app",
   "version": "1.0.0",
+  "fluxapp": {
+    "name": "Todos",
+    "description": "Work on a collaborative todo list",
+    "icon": "list-check"
+  },
+  "keywords": [
+    "flux-app"
+  ],
   "type": "module",
   "files": [
     "dist"
@@ -19,7 +27,6 @@
     "build": "vite build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",

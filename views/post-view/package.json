@@ -1,7 +1,15 @@
 {
   "name": "@fluxapp/post-view",
-  "version": "0.5.9",
+  "version": "0.5.10",
   "description": "",
+  "fluxapp": {
+    "name": "Posts",
+    "description": "Create a feed of posts",
+    "icon": "postcard"
+  },
+  "keywords": [
+    "flux-app"
+  ],
   "type": "module",
   "files": [
     "dist"
@@ -23,7 +31,6 @@
     "dev:dist": "vite build --watch",
     "release": "np --no-tests"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {

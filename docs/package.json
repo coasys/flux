@@ -1,6 +1,6 @@
 {
   "name": "@fluxapp/docs",
-  "version": "0.5.9",
+  "version": "0.5.10",
   "description": "",
   "homepage": "https://docs.fluxsocial.io",
   "scripts": {
@@ -9,6 +9,7 @@
     "dev": "vitepress dev"
   },
   "dependencies": {
+    "@fluxapp/flux-container": "*",
     "@fluxapp/ui": "*",
     "vitepress": "1.0.0-alpha.74",
     "three": "^0.151.3",
