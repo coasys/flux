@@ -260,7 +260,7 @@ function Entry({ perspective, source, onUrlClick = () => {} }: HeaderProps) {
       const className = classResults[0].ClassName;
       const subjectProxy = await perspective.getSubjectProxy(source, className);
       const entry = await getEntry(subjectProxy);
-      console.log({ subjectProxy, entry });
+
       setEntry(entry);
     } else {
       setClasses([]);
@@ -269,7 +269,9 @@ function Entry({ perspective, source, onUrlClick = () => {} }: HeaderProps) {
   }
 
   if (entry) {
-    const properties = Object.entries(entry);
+    const properties = Object.entries(entry).filter(
+      ([key, value]) => key !== "id"
+    );
     const defaultName = entry?.name || entry?.title || source;
 
     return (
@@ -280,9 +282,12 @@ function Entry({ perspective, source, onUrlClick = () => {} }: HeaderProps) {
           </j-text>
         </j-flex>
         <j-box pt="100" pb="800">
-          <j-text variant="heading-lg" nomargin>
+          <h2
+            className={styles.entryTitle}
+            onClick={() => onUrlClick(source, true)}
+          >
             {defaultName}
-          </j-text>
+          </h2>
         </j-box>
 
         <j-flex direction="column" gap="400">
