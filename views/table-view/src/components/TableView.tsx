@@ -87,6 +87,21 @@ export default function TableView({
   return (
     <div>
       <j-box bg="primary-500" pt="500" pb="500" px="500">
+        {history.length > 1 && (
+          <div className={styles.history}>
+            {history.map((s, index) => {
+              return (
+                <button
+                  className={styles.historyItem}
+                  onClick={() => goTo(index + 1)}
+                  nomargin
+                >
+                  {s}
+                </button>
+              );
+            })}
+          </div>
+        )}
         <Header
           perspective={perspective}
           source={source}
@@ -114,23 +129,6 @@ export default function TableView({
       </j-box>
 
       <j-box px="500" py="300">
-        {history.length > 1 && (
-          <div className={styles.history}>
-            {history.map((s, index) => {
-              return (
-                <button
-                  className={styles.historyItem}
-                  onClick={() => goTo(index + 1)}
-                  nomargin
-                >
-                  {new Intl.PluralRules("en-US", { type: "ordinal" }).select(
-                    index + 1
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
         {entries.length > 0 && (
           <j-flex gap="500">
             <j-popover>

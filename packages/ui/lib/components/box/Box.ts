@@ -15,11 +15,13 @@ const styles = css`
     --j-box-display: block;
     --j-box-padding: 0px;
     --j-box-margin: 0px;
+    --j-box-color: inherit;
   }
   :host([inline]) {
     --j-box-display: inline-block;
   }
   [part="base"] {
+    color: var(--j-box-color);
     border-radius: var(--j-box-border-radius);
     background-color: var(--j-box-bg-color);
     padding: var(--j-box-padding);
@@ -145,11 +147,19 @@ export default class Box extends LitElement {
 
   /**
    * Background color
-   * @type {""|"ui-100"|"ui-200"|"ui-300"|"ui-400"|"ui-500"|"ui-600"|"ui-700"|"ui-800"|"ui-900"}
+   * @type {""}
    * @attr
    */
   @property({ type: String, reflect: true })
   bg = null;
+
+  /**
+   * Color
+   * @type {""}
+   * @attr
+   */
+  @property({ type: String, reflect: true })
+  color = null;
 
   /**
    * Border radius
@@ -164,6 +174,7 @@ export default class Box extends LitElement {
     sheet.replaceSync(`
       :host {
         --j-box-bg-color: var(--j-color-${this.bg});
+        --j-box-color: var(--j-color-${this.color});
         --j-box-border-radius: var(--j-border-radius-${this.radius});
         --j-box-padding: 
           ${generateVariable("j-space", this.pt || this.py || this.p)}
