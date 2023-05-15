@@ -1,6 +1,6 @@
 import { h, cloneElement, render, hydrate } from "preact";
 
-function toCustomElement(Component, propNames, options) {
+export function toCustomElement(Component, propNames, options) {
   function PreactElement() {
     const inst = Reflect.construct(HTMLElement, [], PreactElement);
     inst._vdomComponent = Component;

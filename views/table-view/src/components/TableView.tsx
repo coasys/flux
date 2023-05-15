@@ -1,4 +1,4 @@
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useState, useRef } from "preact/hooks";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import styles from "./TableView.module.css";
 
@@ -11,11 +11,27 @@ export default function TableView({
   perspective,
   source: initialSource,
 }: Props) {
+  const [view, setView] = useState<"grid" | "table">("table");
   const [history, setHistory] = useState([initialSource]);
+  const prevHistory = usePrevious(history);
   const [classes, setClasses] = useState<string[]>([]);
   const [selected, setSelected] = useState("");
+  const [currentEntry, setCurrentEntry] = useState("");
+  const [openCurrentEntry, setOpenCurrentEntry] = useState(false);
 
   const source = history.length ? history[history.length - 1] : "ad4m://self";
+
+  const { entries } = useChildren({
+    perspective,
+    source,
+    subjectInstance: selected,
+  });
+
+  useEffect(() => {
+    const wentBack = history.length < (prevHistory?.length || 0);
+    if (wentBack) {
+    }
+  }, history);
 
   useEffect(() => {
     setHistory([initialSource]);
@@ -38,9 +54,15 @@ export default function TableView({
       });
   }, [perspective.uuid, history]);
 
-  async function onUrlClick(baseExpression) {
+  async function onUrlClick(baseExpression: string, useHistory: boolean) {
     if (source === baseExpression) return;
-    setHistory([...history, baseExpression]);
+    setCurrentEntry(baseExpression);
+    if (useHistory) {
+      setHistory([...history, baseExpression]);
+      setOpenCurrentEntry(false);
+    } else {
+      setOpenCurrentEntry(true);
+    }
   }
 
   async function goTo(index: number) {
@@ -48,34 +70,25 @@ export default function TableView({
     setHistory(newHistory);
   }
 
+  const viewComp = {
+    table: () => <Table onUrlClick={onUrlClick} entries={entries}></Table>,
+    grid: () => (
+      <j-box px="500">
+        <Grid onUrlClick={onUrlClick} entries={entries}></Grid>
+      </j-box>
+    ),
+  };
+
+  const View = viewComp[view];
+
   return (
     <div>
-      {history.length > 1 && (
-        <j-box bg="primary-500" px="500">
-          <div className={styles.history}>
-            {history.map((s, index) => {
-              return (
-                <button
-                  className={styles.historyItem}
-                  onClick={() => goTo(index + 1)}
-                  nomargin
-                >
-                  {new Intl.PluralRules("en-US", { type: "ordinal" }).select(
-                    index + 1
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </j-box>
-      )}
-
       <j-box bg="primary-500" pt="500" pb="500" px="500">
-        <EntryInfo
+        <Header
           perspective={perspective}
           source={source}
           onUrlClick={onUrlClick}
-        ></EntryInfo>
+        ></Header>
       </j-box>
 
       <j-box bg="primary-500" px="500">
@@ -97,25 +110,85 @@ export default function TableView({
         </div>
       </j-box>
 
-      <j-box>
-        <Table
-          onUrlClick={onUrlClick}
-          perspective={perspective}
-          subjectInstance={selected}
-          source={source}
-        ></Table>
+      <j-box px="500" py="300">
+        {history.length > 1 && (
+          <div className={styles.history}>
+            {history.map((s, index) => {
+              return (
+                <button
+                  className={styles.historyItem}
+                  onClick={() => goTo(index + 1)}
+                  nomargin
+                >
+                  {new Intl.PluralRules("en-US", { type: "ordinal" }).select(
+                    index + 1
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
+        {entries.length > 0 && (
+          <j-flex gap="500">
+            <j-popover>
+              <j-button size="sm" variant="ghost" slot="trigger">
+                Grid
+                <j-icon slot="end" name="chevron-down" size="xs"></j-icon>
+              </j-button>
+              <j-menu
+                value={view}
+                onClick={(e) => setView(e.target.value)}
+                size="sm"
+                slot="content"
+              >
+                <j-menu-item value="table" selected={view === "table"}>
+                  Table
+                </j-menu-item>
+                <j-menu-item value="grid" selected={view === "grid"}>
+                  Grid
+                </j-menu-item>
+              </j-menu>
+            </j-popover>
+            <j-input size="sm" placeholder="Search">
+              <j-icon name="search" size="xs" slot="end"></j-icon>
+            </j-input>
+          </j-flex>
+        )}
       </j-box>
+
+      <j-box>
+        {entries.length > 0 ? (
+          <View />
+        ) : (
+          <j-box px="500">
+            <j-text>No entries here</j-text>
+          </j-box>
+        )}
+      </j-box>
+
+      <j-modal
+        open={openCurrentEntry}
+        onToggle={(e) => setOpenCurrentEntry(e.target.open)}
+      >
+        <j-box p="500">
+          <Entry
+            perspective={perspective}
+            source={currentEntry}
+            onUrlClick={(url) => onUrlClick(url, true)}
+          ></Entry>
+        </j-box>
+      </j-modal>
     </div>
   );
 }
 
-type EntryInfoProps = {
+type HeaderProps = {
   perspective: PerspectiveProxy;
   source: string;
-  onUrlClick: Function;
+  onUrlClick?: Function;
 };
 
-function EntryInfo({ perspective, source, onUrlClick }: EntryInfoProps) {
+function Header({ perspective, source, onUrlClick = () => {} }: HeaderProps) {
   const [entry, setEntry] = useState({});
   const [classes, setClasses] = useState([]);
 
@@ -133,6 +206,51 @@ function EntryInfo({ perspective, source, onUrlClick }: EntryInfoProps) {
       const className = classResults[0].ClassName;
       const subjectProxy = await perspective.getSubjectProxy(source, className);
       const entry = await getEntry(subjectProxy);
+      console.log({ subjectProxy, entry });
+      setEntry(entry);
+    } else {
+      setClasses([]);
+      setEntry({ id: source });
+    }
+  }
+
+  if (entry) {
+    const defaultName = entry?.name || entry?.title || source;
+
+    return (
+      <div>
+        <j-text uppercase size="200" weight="700" color="white">
+          {classes[0]}
+        </j-text>
+        <j-text variant="heading" color="white">
+          {defaultName}
+        </j-text>
+      </div>
+    );
+  }
+
+  return <span>{source}</span>;
+}
+
+function Entry({ perspective, source, onUrlClick = () => {} }: HeaderProps) {
+  const [entry, setEntry] = useState({});
+  const [classes, setClasses] = useState([]);
+
+  useEffect(() => {
+    fetchSourceClasses(source);
+  }, [source, perspective.uuid]);
+
+  async function fetchSourceClasses(source) {
+    const classResults = await perspective.infer(
+      `subject_class(ClassName, C), instance(C, "${source}").`
+    );
+
+    if (classResults?.length > 0) {
+      setClasses(classResults.map((c) => c.ClassName));
+      const className = classResults[0].ClassName;
+      const subjectProxy = await perspective.getSubjectProxy(source, className);
+      const entry = await getEntry(subjectProxy);
+      console.log({ subjectProxy, entry });
       setEntry(entry);
     } else {
       setClasses([]);
@@ -146,32 +264,30 @@ function EntryInfo({ perspective, source, onUrlClick }: EntryInfoProps) {
 
     return (
       <div>
-        <j-text uppercase size="200" weight="700" color="white">
-          {classes[0]}
-        </j-text>
+        <j-flex gap="300">
+          {classes.map((c) => (
+            <j-badge variant="primary" size="sm">
+              {c}
+            </j-badge>
+          ))}
+        </j-flex>
 
-        <j-text nomargin variant="heading" color="white">
-          {defaultName}
-        </j-text>
+        <j-box pt="300">
+          <j-text variant="heading">{defaultName}</j-text>
+        </j-box>
 
-        {/*<j-box pt="500">
-          <details>
-            <summary>More info</summary>
-
-            <j-flex direction="column" gap="600">
-              {properties.map(([key, value]) => (
-                <j-flex gap="200" direction="column">
-                  <j-text size="200" uppercase nomargin color="white">
-                    {key}
-                  </j-text>
-                  <j-text color="white">
-                    <DisplayValue onUrlClick={onUrlClick} value={value} />
-                  </j-text>
-                </j-flex>
-              ))}
+        <j-flex direction="column" gap="600">
+          {properties.map(([key, value]) => (
+            <j-flex gap="200" direction="column">
+              <j-text size="200" uppercase nomargin>
+                {key}
+              </j-text>
+              <j-text>
+                <DisplayValue onUrlClick={onUrlClick} value={value} />
+              </j-text>
             </j-flex>
-          </details>
-              </j-box>*/}
+          ))}
+        </j-flex>
       </div>
     );
   }
@@ -180,51 +296,11 @@ function EntryInfo({ perspective, source, onUrlClick }: EntryInfoProps) {
 }
 
 type TableProps = {
-  perspective: PerspectiveProxy;
-  subjectInstance: any;
-  source: string;
+  entries: any[];
   onUrlClick: Function;
 };
 
-function Table({
-  perspective,
-  subjectInstance,
-  source,
-  onUrlClick = () => {},
-}: TableProps) {
-  const [entries, setEntries] = useState<any[]>([]);
-
-  useEffect(() => {
-    if (subjectInstance) {
-      console.log({ subjectInstance, source });
-      perspective
-        .infer(
-          `subject_class("${subjectInstance}", C), instance(C, Base), triple( "${source}", _, Base).`
-        )
-        .then(async (result) => {
-          if (result) {
-            const entries = await Promise.all(
-              result.map((r) =>
-                perspective.getSubjectProxy(r.Base, subjectInstance)
-              )
-            );
-            const resolved = await getEntries(entries);
-            setEntries(resolved);
-          } else {
-            setEntries([]);
-          }
-        })
-        .catch((e) => {
-          setEntries([]);
-        });
-    } else {
-      setEntries([]);
-    }
-  }, [subjectInstance, perspective.uuid, source]);
-
-  if (!entries?.length) return null;
-
-  // Extracting the property names from the first object in the array
+function Table({ entries, onUrlClick = () => {} }: TableProps) {
   const headers = Object.keys(entries[0]).filter((header, index) => {
     const isCollection = Array.isArray(entries[0][header]);
     return isCollection ? false : header === "id" ? false : true;
@@ -263,6 +339,32 @@ function Table({
   );
 }
 
+type GridProps = {
+  entries: any[];
+  onUrlClick: Function;
+};
+
+function Grid({ entries, onUrlClick = () => {} }: GridProps) {
+  return (
+    <div className={styles.grid}>
+      {entries.map((e) => (
+        <button className={styles.gridItem} onClick={() => onUrlClick(e.id)}>
+          {Object.entries(e).map(([key, value]) => (
+            <j-flex gap="200" direction="column">
+              <j-text size="200" uppercase nomargin>
+                {key}
+              </j-text>
+              <j-text color="black">
+                <DisplayValue onUrlClick={onUrlClick} value={value} />
+              </j-text>
+            </j-flex>
+          ))}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 type DisplayValueProps = {
   value: any;
   onUrlClick?: Function;
@@ -282,7 +384,7 @@ function DisplayValue({ value, onUrlClick = () => {} }: DisplayValueProps) {
   }
 
   if (typeof value === "string") {
-    if (value.length > 200)
+    if (value.length > 1000)
       return (
         <img className={styles.img} src={`data:image/png;base64,${value}`} />
       );
@@ -293,7 +395,7 @@ function DisplayValue({ value, onUrlClick = () => {} }: DisplayValueProps) {
           href={value}
           onClick={() => onUrlClick(value)}
         >
-          {generateHash(value)}
+          {value}
         </a>
       );
     }
@@ -371,11 +473,50 @@ async function getEntries(entries) {
   return Promise.all(entries.map(getEntry));
 }
 
-function generateHash(str: string): string {
-  return str;
-  let hash = Array.from(str).reduce(
-    (prevHash, currChar) => (prevHash << 5) - prevHash + currChar.charCodeAt(0),
-    0
-  );
-  return hash.toString(36).substr(2, 8);
+function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value; //assign the value of ref to the argument
+  }, [value]); //this code will run when the value of 'value' changes
+  return ref.current; //in the end, return the current ref value.
+}
+
+type UseEntryProps = {
+  perspective: PerspectiveProxy;
+  subjectInstance: string;
+  source: string;
+};
+
+function useChildren({ perspective, subjectInstance, source }: UseEntryProps) {
+  const [entries, setEntries] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (subjectInstance) {
+      console.log({ subjectInstance, source });
+      perspective
+        .infer(
+          `subject_class("${subjectInstance}", C), instance(C, Base), triple( "${source}", _, Base).`
+        )
+        .then(async (result) => {
+          if (result) {
+            const entries = await Promise.all(
+              result.map((r) =>
+                perspective.getSubjectProxy(r.Base, subjectInstance)
+              )
+            );
+            const resolved = await getEntries(entries);
+            setEntries(resolved);
+          } else {
+            setEntries([]);
+          }
+        })
+        .catch((e) => {
+          setEntries([]);
+        });
+    } else {
+      setEntries([]);
+    }
+  }, [subjectInstance, perspective.uuid, source]);
+
+  return { entries };
 }

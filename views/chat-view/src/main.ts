@@ -2,10 +2,10 @@ import "preact/debug";
 
 if (!window.ResizeObserver) window.ResizeObserver = ResizeObserver;
 
-import register from "./custom-element.js";
+import { toCustomElement } from "@fluxapp/react-web";
 import MyComponent from "./App";
 
-const CustomElement = register.toCustomElement(
+const CustomElement = toCustomElement(
   MyComponent,
   ["perspective", "agent", "source"],
   { shadow: false }

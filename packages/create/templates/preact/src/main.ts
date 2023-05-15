@@ -1,14 +1,10 @@
 import "preact/debug";
 
-import register from "../utils/custom-element.js";
+import { toCustomElement } from "@fluxapp/react-web";
 import App from "./App";
 
-const CustomElement = register.toCustomElement(
-  App,
-  ["perspective", "agent", "source"],
-  {
-    shadow: false,
-  }
-);
+const CustomElement = toCustomElement(App, ["perspective", "agent", "source"], {
+  shadow: false,
+});
 
 export default CustomElement;

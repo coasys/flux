@@ -17,15 +17,15 @@
   position: relative;
   padding: var(--j-space-200);
   border-radius: var(--j-border-radius);
-  color: var(--j-color-primary-300);
+  color: var(--j-color-ui-800);
   text-transform: uppercase;
   font-size: var(--j-font-size-200);
 }
 
 .historyItem:hover:not(:last-child) {
   cursor: pointer;
-  background: rgba(0, 0, 0, 0.1);
-  color: var(--j-color-white);
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--j-color-black);
 }
 
 .historyItem:not(:last-child)::after {
@@ -154,4 +154,39 @@
   border-radius: 0;
   border-left: 0;
   border-left: 0;
+}
+
+.details {
+  color: var(--j-color-white);
+  border-radius: 4px;
+}
+
+.details summary {
+  font-size: var(--j-font-size-600);
+  cursor: pointer;
+  font-weight: bold;
+  padding: 0.5em;
+}
+
+.details[open] summary {
+  margin-bottom: 0.5em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--j-space-500);
+}
+
+.gridItem {
+  text-align: left;
+  cursor: pointer;
+  background: var(--j-color-white);
+  border-radius: var(--j-border-radius);
+  padding: var(--j-space-500);
+  border: 1px solid var(--j-color-ui-100);
+}
+
+.gridItem:hover {
+  border: 1px solid var(--j-color-primary-500);
 }
