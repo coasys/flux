@@ -61,7 +61,9 @@ export default function TableView({
   async function onUrlClick(baseExpression: string, useHistory: boolean) {
     setCurrentEntry(baseExpression);
     if (useHistory) {
-      setHistory([...history, baseExpression]);
+      if (baseExpression !== source) {
+        setHistory([...history, baseExpression]);
+      }
       setOpenCurrentEntry(false);
     } else {
       setOpenCurrentEntry(true);
