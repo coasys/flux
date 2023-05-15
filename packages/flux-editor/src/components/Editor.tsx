@@ -1,15 +1,13 @@
-import { useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
-import { useEntry, useEntries } from "@fluxapp/react-web";
-
-// Import the Slate editor factory.
-import { createEditor, BaseEditor, Descendant } from "slate";
-
-// Import the Slate components and React plugin.
+import { useEntries } from "@fluxapp/react-web";
+import { createEditor, BaseEditor } from "slate";
 import { Slate, Editable, withReact, ReactEditor } from "slate-react";
+import { Message } from "@fluxapp/api";
 
-import { Community, Post } from "@fluxapp/api";
-import Todo from "../models/Todo";
+import deserialize from "../utils/deserialize";
+import serialize from "../utils/serialize";
+import withMentions from "../utils/withMentions";
 
 import styles from "./Editor.module.css";
 
@@ -27,53 +25,63 @@ declare module "slate" {
 type Props = {
   perspective: PerspectiveProxy;
   source: string;
+  initialValue?: string;
 };
 
-export default function Editor({ perspective, source }: Props) {
-  // Create a Slate editor object that won't change across renders.
-  const [editor] = useState(() => withReact(createEditor()));
+export default function Editor({ perspective, source, initialValue }: Props) {
+  const [content, setContent] = useState([]);
+  const editor = useMemo(() => withMentions(withReact(createEditor())), []);
 
-  const initialValue = [
-    {
-      type: "paragraph",
-      children: [{ text: "A line of text in a paragraph." }],
-    },
-  ];
+  const initialValueMemo = useMemo(
+    () =>
+      initialValue
+        ? deserialize(initialValue)
+        : [
+            {
+              type: "paragraph",
+              children: [{ text: "" }],
+            },
+          ],
+    []
+  );
 
-  // const { entry: community } = useEntry({
-  //   perspective,
-  //   model: Community,
-  // });
+  const { model } = useEntries({
+    perspective,
+    source,
+    model: Message,
+  });
 
-  // const { entries: todos, model } = useEntries({
-  //   perspective,
-  //   source,
-  //   model: Todo,
-  // });
+  function onKeyDown(event: React.KeyboardEvent<Element>) {
+    if (event.key !== "Enter") return;
+    createMessage();
+  }
 
-  // function createTodo(event: React.KeyboardEvent<Element>) {
-  //   if (event.key !== "Enter") return;
-  //   model
-  //     .create({ title: title })
-  //     .then(() => {
-  //       setTitle("");
-  //     })
-  //     .catch(console.log);
-  // }
-
-  // function toggleTodo({ id, done }) {
-  //   model.update(id, { done }).catch(console.log);
-  // }
-
-  // function deleteTodo(id: string) {
-  //   model.remove(id).catch(console.log);
-  // }
+  function createMessage() {
+    model
+      .create({ body: content })
+      .then((result) => {
+        console.log("CREATED: ", result);
+      })
+      .catch(console.log);
+  }
 
   return (
     <div>
-      <Slate editor={editor} value={initialValue}>
-        <Editable className={styles.wrapper} />
+      <Slate
+        editor={editor}
+        value={initialValueMemo}
+        onChange={(value) => {
+          const isLastChange = editor.operations.some(
+            (op) => "set_selection" !== op.type
+          );
+          if (isLastChange) {
+            setContent(serialize(value));
+          }
+        }}
+      >
+        <Editable className={styles.wrapper} onKeyDown={onKeyDown} />
       </Slate>
+      <j-button onclick={createMessage}>Post</j-button>
     </div>
   );
 }
