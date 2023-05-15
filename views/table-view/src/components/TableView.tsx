@@ -34,8 +34,12 @@ export default function TableView({
   }, history);
 
   useEffect(() => {
+    setSelected("");
+  }, [perspective?.uuid, initialSource]);
+
+  useEffect(() => {
     setHistory([initialSource]);
-  }, [initialSource]);
+  }, [initialSource, perspective.uuid]);
 
   useEffect(() => {
     perspective
@@ -140,10 +144,14 @@ export default function TableView({
                 size="sm"
                 slot="content"
               >
-                <j-menu-item value="table" selected={view === "table"}>
+                <j-menu-item
+                  size="sm"
+                  value="table"
+                  selected={view === "table"}
+                >
                   Table
                 </j-menu-item>
-                <j-menu-item value="grid" selected={view === "grid"}>
+                <j-menu-item size="sm" value="grid" selected={view === "grid"}>
                   Grid
                 </j-menu-item>
               </j-menu>
@@ -503,6 +511,7 @@ function useChildren({ perspective, subjectInstance, source }: UseEntryProps) {
         )
         .then(async (result) => {
           if (result) {
+            console.log({ result });
             const entries = await Promise.all(
               result.map((r) =>
                 perspective.getSubjectProxy(r.Base, subjectInstance)
