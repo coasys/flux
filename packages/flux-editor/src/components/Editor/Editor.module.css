@@ -5,9 +5,16 @@
     border: 1px solid var(--j-border-color);
     border-radius: var(--j-border-radius);
     outline: 0;
-    padding: var(--j-space-400);
     min-height: 100px;
     box-sizing: border-box;
+}
+
+.toolbar {
+
+}
+
+.body {
+    padding: var(--j-space-400);
 }
 
 .wrapper:hover:not(:focus-within) {
@@ -18,11 +25,11 @@
     border: 1px solid var(--j-color-focus);
 }
   
-.editor *:first-of-type {
+.wrapper *:first-of-type {
     margin-top: 0;
 }
   
-.editor pre {
+.wrapper code {
     background-color: rgba(0, 0, 0, 0.1);
     padding: var(--j-space-200);
 }
