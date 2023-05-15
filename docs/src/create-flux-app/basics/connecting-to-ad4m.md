@@ -18,18 +18,26 @@ With create-flux-app the AD4M Connect logic is included (through the `flux-conta
 
 ### Manual setup
 
-If you're not using `create-flux-app` you'll have to wire up Ad4m Connect yourself. In the entry point of your application, add the following code:
+If you're not using `create-flux-app` you can just install our `@fluxapp/flux-wrapper` web-component and put your Flux app inside the container for testing purposes.
 
-```ts
-import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
+```html
+<html>
+  <head>
+    ...
+  </head>
+  <body>
+    <flux-container>
+      <flux-app></flux-app>
+    </flux-container>
+    <script type="module">
+      // Flux wrapper for testing
+      import "@fluxapp/flux-container";
 
-const ui = Ad4mConnectUI({
-  appName: "Flux App",
-  appDesc: "A flux app",
-  appDomain: "app.flux.io",
-  capabilities: [{ with: { domain: "*", pointers: ["*"] }, can: ["*"] }],
-});
+      // Your Flux app (web component)
+      import MyFluxApp from "./App.js";
 
-// Trigger connection on mount
-ui.connect();
+      customElements.define("flux-app", MyFluxApp);
+    </script>
+  </body>
+</html>
 ```

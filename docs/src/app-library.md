@@ -6,6 +6,12 @@ layout: home
 <j-box pt="500">
 <j-text variant="heading">Flux App Directory</j-text>
 </j-box>
+<j-box v-if="loading" py="900" align="center">
+<j-flex direction="column" a="center" j="center">
+<j-text>Loading Apps..</j-text>
+<j-spinner></j-spinner>
+</j-flex>
+</j-box>
 <j-box pt="900">
 <div class="grid">
 <a :href="`/app-library/app?pkg=${app.pkg}`" class="grid-item" v-for="app in apps">
@@ -52,7 +58,8 @@ layout: home
 <script setup lang="ts">
 import {onMounted, ref} from 'vue';
 
-const apps = ref([])
+const apps = ref([]);
+const loading = ref(false);
 
 onMounted(async () => {
     apps.value = await getAllFluxApps();
@@ -75,6 +82,11 @@ async function getApp(name: string): Promise<FluxApp> {
 }
 
 async function getAllFluxApps(): Promise<FluxApp[]> {
+
+  loading.value = true;
+
+  try {
+
   const res = await fetch(
     "https://registry.npmjs.org/-/v1/search?text=keywords:flux-app"
   );
@@ -89,6 +101,12 @@ async function getAllFluxApps(): Promise<FluxApp[]> {
   console.log(resolved)
 
   return resolved.filter(p => p.pkg.includes("@fluxapp/"))
+
+  } catch(e) {
+    console.log(e)
+  } finally {
+    loading.value = false
+  }
 
 }
 

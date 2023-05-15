@@ -274,17 +274,18 @@ function Entry({ perspective, source, onUrlClick = () => {} }: HeaderProps) {
 
     return (
       <div>
-        <j-box pt="300" pb="800">
-          <j-text variant="heading">{defaultName}</j-text>
+        <j-flex gap="200" direction="column">
+          <j-text color="primary-500" uppercase weight="bold" size="300">
+            {classes.toString()}
+          </j-text>
+        </j-flex>
+        <j-box pt="100" pb="800">
+          <j-text variant="heading-lg" nomargin>
+            {defaultName}
+          </j-text>
         </j-box>
 
         <j-flex direction="column" gap="400">
-          <j-flex gap="200" direction="column">
-            <j-text size="200" uppercase nomargin>
-              Classes
-            </j-text>
-            <j-text>{classes.toString()}</j-text>
-          </j-flex>
           {properties.map(([key, value]) => (
             <j-flex gap="200" direction="column">
               <j-text size="200" uppercase nomargin>

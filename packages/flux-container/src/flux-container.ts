@@ -222,7 +222,7 @@ export class MyElement extends LitElement {
         <aside class="sidebar" part="sidebar">
           <j-flex direction="column" gap="500">
             <div>
-              <j-text variant="label">Current theme:</j-text>
+              <j-text variant="label">Theme</j-text>
               <select
                 @change=${(e: Event) => this.setTheme(e)}
                 value=${this.theme}
@@ -233,7 +233,7 @@ export class MyElement extends LitElement {
             </div>
             ${this.neighbourhoods.length
               ? html` <div>
-                  <j-text variant="label">Select perspective:</j-text>
+                  <j-text variant="label">Community</j-text>
                   <j-flex gap="200" wrap>
                     ${map(
                       this.neighbourhoods,
@@ -254,6 +254,7 @@ export class MyElement extends LitElement {
               : ``}
             ${this.perspective?.uuid
               ? html`<div>
+                  <j-text variant="label">Channel</j-text>
                   <select
                     @change=${(e: any) => this.setChannel(e.target.value)}
                   >
@@ -278,8 +279,8 @@ export class MyElement extends LitElement {
               : ``}
 
             <j-input
-              label="Create new community"
-              placeholder="Community name"
+              label="New Community"
+              placeholder="Name"
               .value=${this.title}
               @change=${(e: Event) => {
                 const target = e.target as HTMLInputElement;
@@ -300,8 +301,18 @@ export class MyElement extends LitElement {
         </aside>
         <div class="content" part="content">
           ${this.isLoading
-            ? html`<j-spinner></j-spinner>`
-            : html`<slot></slot>`}
+            ? html`<j-box py="900">
+                <j-flex a="center" j="center">
+                  <j-spinner></j-spinner>
+                </j-flex>
+              </j-box>`
+            : this.perspective?.uuid
+            ? html`<slot></slot>`
+            : html`<j-box py="900">
+                <j-flex a="center" j="center">
+                  <j-text>Please select a community</j-text>
+                </j-flex>
+              </j-box>`}
         </div>
       </div>
     `;

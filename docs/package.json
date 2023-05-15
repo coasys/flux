@@ -2,6 +2,7 @@
   "name": "@fluxapp/docs",
   "version": "0.5.10",
   "description": "",
+  "type": "module",
   "homepage": "https://docs.fluxsocial.io",
   "scripts": {
     "start": "yarn dev",
