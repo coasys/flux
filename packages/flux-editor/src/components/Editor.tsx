@@ -1,16 +1,18 @@
-import { useMemo, useState } from "preact/hooks";
+import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useEntries } from "@fluxapp/react-web";
-import { createEditor, BaseEditor } from "slate";
+import { createEditor, BaseEditor, Transforms } from "slate";
 import { Slate, Editable, withReact, ReactEditor } from "slate-react";
-import { Message } from "@fluxapp/api";
+import { Message, getProfile } from "@fluxapp/api";
 
 import deserialize from "../utils/deserialize";
 import serialize from "../utils/serialize";
-import withMentions from "../utils/withMentions";
+import { withMentions, insertMention } from "../utils/mentions";
 
 import styles from "./Editor.module.css";
+import { Profile } from "@fluxapp/types";
 
+const defautValue = [{ type: "paragraph", children: [{ text: "" }] }];
 type CustomElement = { type: "paragraph"; children: CustomText[] };
 type CustomText = { text: string };
 
@@ -29,21 +31,30 @@ type Props = {
 };
 
 export default function Editor({ perspective, source, initialValue }: Props) {
-  const [content, setContent] = useState([]);
+  const [content, setContent] = useState("");
+  const [members, setMembers] = useState<Profile[]>([]);
+  const [target, setTarget] = useState<Range | undefined>();
+  const [index, setIndex] = useState(0);
+  const [search, setSearch] = useState("");
   const editor = useMemo(() => withMentions(withReact(createEditor())), []);
-
   const initialValueMemo = useMemo(
-    () =>
-      initialValue
-        ? deserialize(initialValue)
-        : [
-            {
-              type: "paragraph",
-              children: [{ text: "" }],
-            },
-          ],
+    () => (initialValue ? deserialize(initialValue) : defautValue),
     []
   );
+
+  // Get all mentionable agents
+  async function fetchProfiles() {
+    const neighbourhood = perspective.getNeighbourhoodProxy();
+    const othersDids = await neighbourhood.otherAgents();
+    const profilePromises = othersDids.map(async (did) => getProfile(did));
+    const newProfiles = await Promise.all(profilePromises);
+
+    setMembers(newProfiles);
+  }
+
+  useEffect(() => {
+    fetchProfiles();
+  }, []);
 
   const { model } = useEntries({
     perspective,
@@ -51,10 +62,40 @@ export default function Editor({ perspective, source, initialValue }: Props) {
     model: Message,
   });
 
-  function onKeyDown(event: React.KeyboardEvent<Element>) {
-    if (event.key !== "Enter") return;
-    createMessage();
-  }
+  const people = members
+    ?.filter((m) => m.username.toLowerCase().startsWith(search.toLowerCase()))
+    .slice(0, 10);
+
+  const onKeyDown = useCallback(
+    (event) => {
+      if (target && people.length > 0) {
+        switch (event.key) {
+          case "ArrowDown":
+            event.preventDefault();
+            const prevIndex = index >= people.length - 1 ? 0 : index + 1;
+            setIndex(prevIndex);
+            break;
+          case "ArrowUp":
+            event.preventDefault();
+            const nextIndex = index <= 0 ? people.length - 1 : index - 1;
+            setIndex(nextIndex);
+            break;
+          case "Tab":
+          case "Enter":
+            event.preventDefault();
+            Transforms.select(editor, target);
+            insertMention(editor, people[index]);
+            setTarget(null);
+            break;
+          case "Escape":
+            event.preventDefault();
+            setTarget(null);
+            break;
+        }
+      }
+    },
+    [people, editor, index, target]
+  );
 
   function createMessage() {
     model

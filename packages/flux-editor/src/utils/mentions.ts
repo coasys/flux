@@ -1,5 +1,6 @@
 import { BaseEditor } from "slate";
 import { ReactEditor } from "slate-react";
+import { Transforms } from "slate";
 
 const withMentions = (editor: BaseEditor & ReactEditor) => {
   const { isInline, isVoid, markableVoid } = editor;
@@ -19,4 +20,27 @@ const withMentions = (editor: BaseEditor & ReactEditor) => {
   return editor;
 };
 
-export default withMentions;
+export type CustomText = {
+  bold?: boolean;
+  italic?: boolean;
+  code?: boolean;
+  text: string;
+};
+
+export type MentionElement = {
+  type: "mention";
+  character: string;
+  children: CustomText[];
+};
+
+const insertMention = (editor: BaseEditor & ReactEditor, character) => {
+  const mention: MentionElement = {
+    type: "mention",
+    character,
+    children: [{ text: "" }],
+  };
+  Transforms.insertNodes(editor, mention);
+  Transforms.move(editor);
+};
+
+export { withMentions, insertMention };
