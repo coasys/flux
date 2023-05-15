@@ -246,7 +246,7 @@ function Entry({ perspective, source, onUrlClick = () => {} }: HeaderProps) {
     );
 
     if (classResults?.length > 0) {
-      setClasses(classResults.map((c) => c.ClassName));
+      setClasses([...new Set(classResults.map((c) => c.ClassName))]);
       const className = classResults[0].ClassName;
       const subjectProxy = await perspective.getSubjectProxy(source, className);
       const entry = await getEntry(subjectProxy);
@@ -264,19 +264,17 @@ function Entry({ perspective, source, onUrlClick = () => {} }: HeaderProps) {
 
     return (
       <div>
-        <j-flex gap="300">
-          {classes.map((c) => (
-            <j-badge variant="primary" size="sm">
-              {c}
-            </j-badge>
-          ))}
-        </j-flex>
-
-        <j-box pt="300">
+        <j-box pt="300" pb="800">
           <j-text variant="heading">{defaultName}</j-text>
         </j-box>
 
-        <j-flex direction="column" gap="600">
+        <j-flex direction="column" gap="400">
+          <j-flex gap="200" direction="column">
+            <j-text size="200" uppercase nomargin>
+              Classes
+            </j-text>
+            <j-text>{classes.toString()}</j-text>
+          </j-flex>
           {properties.map(([key, value]) => (
             <j-flex gap="200" direction="column">
               <j-text size="200" uppercase nomargin>
@@ -433,11 +431,15 @@ function ShowObjectInfo({ value }) {
 
   return (
     <div>
-      <j-button variant="primary" size="xs" onClick={onClick}>
+      <j-button variant="subtle" size="xs" onClick={onClick}>
         Show
       </j-button>
       {open && (
-        <j-modal open={open} onToggle={(e) => setOpen(e.target.open)}>
+        <j-modal
+          open={open}
+          onClick={(e) => e.stopImmediatePropagation()}
+          onToggle={(e) => setOpen(e.target.open)}
+        >
           <j-box p="500">
             <j-flex p="500" direction="column" gap="400">
               {properties.map(([key, value]) => (
