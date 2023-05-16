@@ -35,7 +35,7 @@
               <j-box pb="500">
                 <j-badge
                   size="sm"
-                  v-if="pkg.packageName.startsWith('@fluxapp')"
+                  v-if="pkg.pkg.startsWith('@fluxapp')"
                   variant="success"
                 >
                   Official App
