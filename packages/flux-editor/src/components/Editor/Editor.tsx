@@ -190,12 +190,12 @@ export default function Editor({ perspective, source, initialValue }: Props) {
 
   return (
     <>
-      <div className={styles.wrapper}>
+      <div className={styles.wrapper} part="wrapper">
         <Slate editor={editor} value={value} onChange={onChange}>
-          <div className={styles.toolbar}>
+          <div className={styles.toolbar} part="toolbar">
             <Toolbar editor={editor} />
           </div>
-          <div className={styles.body}>
+          <div className={styles.body} part="body">
             <Editable
               className={styles.field}
               onKeyDown={onKeyDown}
@@ -218,7 +218,7 @@ export default function Editor({ perspective, source, initialValue }: Props) {
           )}
         </Slate>
       </div>
-      <div className={styles.footer}>
+      <div className={styles.footer} part="footer">
         <j-button onclick={onSubmit}>Post</j-button>
       </div>
     </>
