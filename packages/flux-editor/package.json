@@ -24,9 +24,10 @@
     "@perspect3vism/ad4m": "0.3.4-fix1",
     "@perspect3vism/ad4m-connect": "^0.3.1",
     "@tiptap/core": "^2.0.3",
-    "@tiptap/extension-bold": "^2.0.3",
+    "@tiptap/extension-mention": "^2.0.3",
     "@tiptap/pm": "^2.0.3",
     "@tiptap/starter-kit": "^2.0.3",
+    "@tiptap/suggestion": "^2.0.3",
     "lit-element": "^2.4.0"
   },
   "devDependencies": {

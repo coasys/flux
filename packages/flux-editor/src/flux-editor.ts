@@ -7,14 +7,13 @@ import {
   css,
 } from "lit-element";
 import { map } from "lit/directives/map.js";
-
-import Bold from "@tiptap/extension-bold";
 import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
-
+import Mention from "@tiptap/extension-mention";
 import { Message, SubjectRepository, getProfile } from "@fluxapp/api";
 import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { Profile } from "@fluxapp/types";
+import defaultActions from "./defaultActions";
 
 @customElement("flux-editor")
 export class MyElement extends LitElement {
@@ -106,7 +105,14 @@ export class MyElement extends LitElement {
   firstUpdated() {
     this.editor = new Editor({
       element: this.editorElement,
-      extensions: [StarterKit, Bold],
+      extensions: [
+        StarterKit,
+        Mention.configure({
+          HTMLAttributes: {
+            class: "mention",
+          },
+        }),
+      ],
       content: "<p>Hello World!</p>",
     });
   }
@@ -138,96 +144,21 @@ export class MyElement extends LitElement {
   }
 
   render() {
-    console.log("perspective: ", this.perspective);
-
     return html`
       <div class="base" part="base">
         <div class="wrapper" part="wrapper">
           <div class="header" part="header">
-            <j-button
-              square
-              variant="ghost"
-              @click=${() => this.editor?.commands.toggleBold()}
-            >
-              <j-icon
-                name="type-bold"
-                color=${this.editor?.isActive("bold")
-                  ? "primary-500"
-                  : "ui-500"}
-              ></j-icon>
-            </j-button>
-            <j-button
-              square
-              variant="ghost"
-              @click=${() => this.editor?.commands.toggleItalic()}
-            >
-              <j-icon
-                name="type-italic"
-                color=${this.editor?.isActive("italic")
-                  ? "primary-500"
-                  : "ui-500"}
-              ></j-icon>
-            </j-button>
-            <j-button
-              square
-              variant="ghost"
-              @click=${() => this.editor?.commands.toggleStrike()}
-            >
-              <j-icon
-                name="type-strikethrough"
-                color=${this.editor?.isActive("strike")
-                  ? "primary-500"
-                  : "ui-500"}
-              ></j-icon>
-            </j-button>
-            <j-button
-              square
-              variant="ghost"
-              @click=${() => this.editor?.commands.toggleBulletList()}
-            >
-              <j-icon
-                name="list-ul"
-                color=${this.editor?.isActive("bulletList")
-                  ? "primary-500"
-                  : "ui-500"}
-              ></j-icon>
-            </j-button>
-            <j-button
-              square
-              variant="ghost"
-              @click=${() => this.editor?.commands.toggleOrderedList()}
-            >
-              <j-icon
-                name="list-ol"
-                color=${this.editor?.isActive("orderedList")
-                  ? "primary-500"
-                  : "ui-500"}
-              ></j-icon>
-            </j-button>
-            <j-button
-              square
-              variant="ghost"
-              @click=${() => this.editor?.commands.toggleCodeBlock()}
-            >
-              <j-icon
-                name="braces"
-                color=${this.editor?.isActive("codeBlock")
-                  ? "primary-500"
-                  : "ui-500"}
-              ></j-icon>
-            </j-button>
-            <j-button
-              square
-              variant="ghost"
-              @click=${() => this.editor?.commands.toggleBlockquote()}
-            >
-              <j-icon
-                name="quote"
-                color=${this.editor?.isActive("blockquote")
-                  ? "primary-500"
-                  : "ui-500"}
-              ></j-icon>
-            </j-button>
+            ${map(
+              defaultActions,
+              (a) => html`<j-button square variant="ghost" @click=${() =>
+                this.editor?.commands[a.command]()}>
+                <j-icon name=${a.icon}
+                  color=${
+                    this.editor?.isActive([a.name]) ? "primary-500" : "ui-500"
+                  }
+                ></j-icon>
+              </j-tooltip>`
+            )}
           </div>
 
           <div class="body" part="body">
