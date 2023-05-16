@@ -145,11 +145,6 @@ export class MyElement extends LitElement {
           HTMLAttributes: {
             class: "mention",
           },
-          renderLabel({ options, node }) {
-            return `${options.suggestion.char}${
-              node.attrs.label ?? node.attrs.id
-            }`;
-          },
           suggestion: {
             items: ({ query }) => this.getSuggestions(query),
             render: this.renderSuggestions,
@@ -165,10 +160,11 @@ export class MyElement extends LitElement {
       onStart: (props: SuggestionProps<any>) => {
         console.log("onStart", props);
 
-        const { x, y, height } = props.clientRect();
-
-        this.suggestionsEl.style.top = `${y + height}px`;
-        this.suggestionsEl.style.left = `${x}px`;
+        if (this.suggestionsEl) {
+          const { x, y, height } = props.clientRect();
+          this.suggestionsEl.style.top = `${y + height}px`;
+          this.suggestionsEl.style.left = `${x}px`;
+        }
 
         // Save select callback
         this.suggestionCallback = props.command;
@@ -177,10 +173,14 @@ export class MyElement extends LitElement {
       onUpdate: (props: SuggestionProps<any>) => {
         console.log("onUpdate", props);
 
-        const { x, y, height } = props.clientRect();
+        if (this.suggestionsEl) {
+          const { x, y, height } = props.clientRect();
+          this.suggestionsEl.style.top = `${y + height}px`;
+          this.suggestionsEl.style.left = `${x}px`;
+        }
 
-        this.suggestionsEl.style.top = `${y + height}px`;
-        this.suggestionsEl.style.left = `${x}px`;
+        // Save select callback
+        this.suggestionCallback = props.command;
       },
 
       onKeyDown: (props: SuggestionKeyDownProps) => {
@@ -208,7 +208,6 @@ export class MyElement extends LitElement {
         console.log("onExit");
 
         this.suggestions = [];
-        this.suggestionCallback = null;
       },
     };
   }
@@ -226,7 +225,7 @@ export class MyElement extends LitElement {
   selectSuggestion(index: number) {
     const item = this.suggestions[index];
     this.suggestionCallback({
-      id: this.suggestionIndex,
+      id: item.did,
       label: item.username,
     });
   }
