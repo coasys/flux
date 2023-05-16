@@ -1,26 +1,23 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
-import preact from "@preact/preset-vite";
 import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
 
+// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    preact({
-      babel: {
-        plugins: [
-          ["@babel/plugin-proposal-decorators", { legacy: true }],
-          ["@babel/plugin-proposal-class-properties"],
-        ],
-      },
-    }),
-    ,
-    cssInjectedByJsPlugin(),
-  ],
+  base: "/",
+  // @ts-ignore
+  plugins: [cssInjectedByJsPlugin()],
   build: {
+    outDir: "build",
     lib: {
-      entry: resolve(__dirname, "./src/main.ts"),
-      name: "Main",
-      fileName: "main",
+      entry: "src/flux-container.ts",
+      formats: ["es"],
+    },
+    manifest: true,
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, "index.html"),
+      },
     },
   },
 });

@@ -1,20 +1,6 @@
 node_modules
+.DS_Store
 dist
-package-lock.json
-
-# Log files
-*.log
-
-# Editor directories and files
-.idea
-.vscode
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-*.turbo
-dev-dist
-vite.config.ts.timestamp*
-
-cachedb
+types
+*.local
+build
