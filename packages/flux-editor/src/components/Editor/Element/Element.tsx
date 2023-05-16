@@ -1,3 +1,5 @@
+import Mention from "../Mention";
+
 export default function Element({ attributes, children, element }) {
   const style = { textAlign: element.align };
   switch (element.type) {
@@ -36,6 +38,14 @@ export default function Element({ attributes, children, element }) {
         <ol style={style} {...attributes}>
           {children}
         </ol>
+      );
+    case "mention":
+      return (
+        <Mention
+          attributes={attributes}
+          children={children}
+          element={element}
+        />
       );
     default:
       return (

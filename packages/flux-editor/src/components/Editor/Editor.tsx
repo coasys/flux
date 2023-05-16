@@ -7,7 +7,13 @@ import {
 } from "preact/hooks";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useEntry } from "@fluxapp/react-web";
-import { createEditor, BaseEditor, Transforms } from "slate";
+import {
+  Editor as SlateEditor,
+  createEditor,
+  BaseEditor,
+  Transforms,
+  Range,
+} from "slate";
 import { Slate, Editable, withReact, ReactEditor } from "slate-react";
 import { Message, getProfile } from "@fluxapp/api";
 import { Profile } from "@fluxapp/types";
@@ -21,6 +27,7 @@ import Toolbar from "./Toolbar";
 import Element from "./Element";
 import Leaf from "./Leaf";
 import Portal from "../Portal";
+import MentionMenu from "./MentionMenu";
 
 const defautValue = [{ type: "paragraph", children: [{ text: "" }] }];
 type CustomElement = { type: "paragraph"; children: CustomText[] };
@@ -76,13 +83,22 @@ export default function Editor({ perspective, source, initialValue }: Props) {
   });
 
   // Get all mentionable people
-  const people = members
-    ?.filter((m) => m.username.toLowerCase().startsWith(search.toLowerCase()))
-    .slice(0, 10);
+  // const people = members
+  //   ?.filter((m) => m.username.toLowerCase().startsWith(search.toLowerCase()))
+  //   .slice(0, 10);
 
   useEffect(() => {
     fetchProfiles();
   }, []);
+
+  const people = [
+    { did: "123", username: "BambinoToad" },
+    { did: "223", username: "ToadChrisT" },
+    { did: "323", username: "Toad" },
+    { did: "423", username: "ToadRoxblang" },
+  ]
+    .filter((m) => m.username.toLowerCase().startsWith(search.toLowerCase()))
+    .slice(0, 10) as Profile[];
 
   useEffect(() => {
     if (target && people.length > 0) {
@@ -144,12 +160,41 @@ export default function Editor({ perspective, source, initialValue }: Props) {
           editor={editor}
           value={value}
           onChange={(value) => {
-            const isLastChange = editor.operations.some(
-              (op) => "set_selection" !== op.type
-            );
-            if (isLastChange) {
-              setContent(serialize(value));
+            const { selection, operations } = editor;
+
+            if (selection && Range.isCollapsed(selection)) {
+              const [start] = Range.edges(selection);
+              const wordBefore = SlateEditor.before(editor, start, {
+                unit: "word",
+              });
+              const before =
+                wordBefore && SlateEditor.before(editor, wordBefore);
+              const beforeRange =
+                before && SlateEditor.range(editor, before, start);
+              const beforeText =
+                beforeRange && SlateEditor.string(editor, beforeRange);
+              const beforeMatch = beforeText && beforeText.match(/^@(\w+)$/);
+              const after = SlateEditor.after(editor, start);
+              const afterRange = SlateEditor.range(editor, start, after);
+              const afterText = SlateEditor.string(editor, afterRange);
+              const afterMatch = afterText.match(/^(\s|$)/);
+
+              if (beforeMatch && afterMatch) {
+                setTarget(beforeRange);
+                setSearch(beforeMatch[1]);
+                setIndex(0);
+                return;
+              }
             }
+
+            setTarget(null);
+
+            // const isLastChange = operations.some(
+            //   (op) => "set_selection" !== op.type
+            // );
+            // if (isLastChange) {
+            //   setContent(serialize(value));
+            // }
           }}
         >
           <div className={styles.toolbar}>
@@ -173,30 +218,14 @@ export default function Editor({ perspective, source, initialValue }: Props) {
                   left: "-9999px",
                   position: "absolute",
                   zIndex: 1,
-                  padding: "3px",
-                  background: "white",
-                  borderRadius: "4px",
-                  boxShadow: "0 1px 5px rgba(0,0,0,.2)",
                 }}
-                data-cy="mentions-portal"
               >
-                {people.map((person, i) => (
-                  <div
-                    key={person.did}
-                    onClick={() => {
-                      Transforms.select(editor, target);
-                      insertMention(editor, person);
-                      setTarget(null);
-                    }}
-                    style={{
-                      padding: "1px 3px",
-                      borderRadius: "3px",
-                      background: i === index ? "#B4D5FF" : "transparent",
-                    }}
-                  >
-                    {person.username}
-                  </div>
-                ))}
+                <MentionMenu
+                  editor={editor}
+                  index={index}
+                  people={people}
+                  setTarget={setTarget}
+                />
               </div>
             </Portal>
           )}

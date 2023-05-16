@@ -1,6 +1,7 @@
 import { BaseEditor } from "slate";
 import { ReactEditor } from "slate-react";
 import { Transforms } from "slate";
+import { Profile } from "@fluxapp/types";
 
 const withMentions = (editor: BaseEditor & ReactEditor) => {
   const { isInline, isVoid, markableVoid } = editor;
@@ -29,14 +30,14 @@ export type CustomText = {
 
 export type MentionElement = {
   type: "mention";
-  character: string;
+  person: Profile;
   children: CustomText[];
 };
 
-const insertMention = (editor: BaseEditor & ReactEditor, character) => {
+const insertMention = (editor: BaseEditor & ReactEditor, person) => {
   const mention: MentionElement = {
     type: "mention",
-    character,
+    person,
     children: [{ text: "" }],
   };
   Transforms.insertNodes(editor, mention);
