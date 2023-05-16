@@ -192,7 +192,6 @@ export class MyElement extends LitElement {
 
   setChannel(source: string) {
     this.source = source;
-    console.log("set channel", source);
     localStorage.setItem("source", source);
     this.appElement.setAttribute("source", source);
     this.requestUpdate();

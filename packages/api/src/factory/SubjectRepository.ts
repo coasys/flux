@@ -86,7 +86,6 @@ export function setProperties(
         // it's a collection
         setter(key, properties[key]);
       }
-      // console.log('llll 5', key, adderName, subject,adderFunction, properties[key])
     } else {
       // it's a property
       const setterName = propertyNameToSetterName(key);
@@ -117,7 +116,11 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     await this.perspective.ensureSDNASubjectClass(this.tempSubject);
   }
 
-  async create(data: SubjectClass, id?: string): Promise<SubjectClass> {
+  async create(
+    data: SubjectClass,
+    id?: string,
+    source?: string
+  ): Promise<SubjectClass> {
     await this.ensureSubject();
     const base = id || Literal.from(uuidv4()).toUrl();
 
@@ -130,7 +133,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     // Connect new instance to source
     await this.perspective.add(
       new Link({
-        source: this.source,
+        source: source || this.source,
         predicate: await newInstance.type,
         target: base,
       })

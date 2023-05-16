@@ -108,7 +108,6 @@ export default function CreatePost({
         });
       } else {
         newPost = await Post.create(data);
-        console.log({ newPost, data });
       }
 
       onPublished(isEditing ? postId : newPost?.id);

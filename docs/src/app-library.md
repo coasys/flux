@@ -98,8 +98,6 @@ async function getAllFluxApps(): Promise<FluxApp[]> {
 
   const resolved = await Promise.all(packages);
 
-  console.log(resolved)
-
   return resolved.filter(p => p.pkg.includes("@fluxapp/"))
 
   } catch(e) {

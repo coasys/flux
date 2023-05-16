@@ -24,16 +24,15 @@
             </j-flex>
           </j-box>
           <div class="channel-view__tabs">
-            <label class="channel-view-tab" v-for="view in filteredViewOptions">
+            <label class="channel-view-tab" v-for="app in apps || []">
               <input
                 :name="channel?.id"
                 type="radio"
-                :checked.prop="view.type === currentView"
-                :value.prop="view.type"
+                :checked.prop="app.pkg === currentView"
+                :value.prop="app.pkg"
                 @change="changeCurrentView"
               />
-              <j-icon size="xs" :name="view.icon"></j-icon>
-              <span>{{ view.title }}</span>
+              <span>{{ app.name }}</span>
             </label>
             <j-tooltip placement="auto" title="Manage views">
               <j-button
@@ -66,64 +65,18 @@
       </div>
     </div>
 
-    <template v-if="allDefined && data.perspective?.uuid && channel?.id">
-      <chat-view
-        v-show="currentView === ChannelView.Chat"
-        v-if="filteredViewOptions.find((v) => v.type === ChannelView.Chat)"
+    <template v-for="app in apps">
+      <component
+        style="display: block; height: calc(100% - var(--app-header-height))"
+        v-show="currentView === app.pkg && wcNames[app.pkg]"
+        :is="wcNames[app.pkg]"
         class="perspective-view"
-        :source="channel.id"
+        :source="channel?.id"
         :agent.prop="agentClient"
         :perspective.prop="data.perspective"
         @click="onViewClick"
         @hide-notification-indicator="onHideNotificationIndicator"
-      ></chat-view>
-      <post-view
-        v-show="currentView === ChannelView.Post"
-        v-if="filteredViewOptions.find((v) => v.type === ChannelView.Post)"
-        class="perspective-view"
-        :agent.prop="agentClient"
-        :perspective.prop="data.perspective"
-        :source="channel.id"
-        @click="onViewClick"
-        @agent-click="onAgentClick"
-        @channel-click="onChannelClick"
-        @neighbourhood-click="onNeighbourhoodClick"
-        @hide-notification-indicator="onHideNotificationIndicator"
-      ></post-view>
-      <graph-view
-        v-show="currentView === ChannelView.Graph"
-        v-if="filteredViewOptions.find((v) => v.type === ChannelView.Graph)"
-        class="perspective-view"
-        :source="channel.id"
-        :agent.prop="agentClient"
-        :perspective.prop="data.perspective"
-        @click="onViewClick"
-        @hide-notification-indicator="onHideNotificationIndicator"
-      ></graph-view>
-      <webrtc-view
-        v-show="currentView === ChannelView.Voice"
-        v-if="filteredViewOptions.find((v) => v.type === ChannelView.Voice)"
-        class="perspective-view"
-        :source="channel.id"
-        :agent.prop="agentClient"
-        :perspective.prop="data.perspective"
-        @click="onViewClick"
-        @hide-notification-indicator="onHideNotificationIndicator"
-      ></webrtc-view>
-      <webrtc-debug-view
-        v-show="currentView === ChannelView.Debug"
-        v-if="filteredViewOptions.find((v) => v.type === ChannelView.Debug)"
-        class="perspective-view"
-        :source="channel.id"
-        :agent.prop="agentClient"
-        :perspective.prop="data.perspective"
-        @click="onViewClick"
-        @hide-notification-indicator="onHideNotificationIndicator"
-      ></webrtc-debug-view>
-    </template>
-
-    <template v-else>
-      <j-spinner></j-spinner>
+      />
     </template>
 
     <j-modal
@@ -152,11 +105,22 @@ import { defineComponent, ref, watch } from "vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Profile from "@/containers/Profile.vue";
 import { useAppStore } from "@/store/app";
-import { ChannelView, EntryType } from "@fluxapp/types";
-import { viewOptions } from "@/constants";
+import { ChannelView } from "@fluxapp/types";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
-import { useEntry, usePerspective, usePerspectives, useMe } from "@fluxapp/vue";
-import { Community, Channel, joinCommunity } from "@fluxapp/api";
+import {
+  useEntry,
+  usePerspective,
+  usePerspectives,
+  useMe,
+  useEntries,
+} from "@fluxapp/vue";
+import {
+  Community,
+  Channel,
+  App,
+  joinCommunity,
+  generateWCName,
+} from "@fluxapp/api";
 import { Ad4mClient } from "@perspect3vism/ad4m";
 
 interface MentionTrigger {
@@ -193,11 +157,19 @@ export default defineComponent({
       model: Channel,
     });
 
+    const { entries: apps } = useEntries({
+      perspective: () => data.value.perspective,
+      source: () => props.channelId,
+      model: App,
+    });
+
     const { me } = useMe(client.agent);
 
     return {
       agentClient: client.agent,
       agent: me,
+      wcNames: {} as Record<string, string>,
+      apps,
       perspectives,
       data,
       community,
@@ -220,44 +192,27 @@ export default defineComponent({
       isExpanded: ref(false),
     };
   },
-  async mounted() {
-    try {
-      this.allDefined = false;
-
-      if (!customElements.get("chat-view")) {
-        const module = await import(`@fluxapp/chat-view`);
-        customElements.define("chat-view", module.default);
-      }
-      if (!customElements.get("post-view")) {
-        const module = await import(`@fluxapp/post-view`);
-        customElements.define("post-view", module.default);
-      }
-      if (!customElements.get("graph-view")) {
-        const module = await import(`@fluxapp/graph-view`);
-        customElements.define("graph-view", module.default);
-      }
-      if (!customElements.get("webrtc-view")) {
-        const module = await import(`@fluxapp/webrtc-view`);
-        customElements.define("webrtc-view", module.default);
-      }
-      if (!customElements.get("webrtc-debug-view")) {
-        const module = await import(`flux-webrtc-debug-view`);
-        customElements.define("webrtc-debug-view", module.default);
-      }
-
-      this.allDefined = true;
-    } catch (e) {
-      console.log(e);
-    }
-  },
   computed: {
     sameAgent() {
       return this.channel?.author === this.agent?.did;
     },
-    filteredViewOptions() {
-      return viewOptions.filter((view) =>
-        this.channel?.views.includes(view.type)
-      );
+  },
+  watch: {
+    apps: {
+      handler: function (val) {
+        // Add new views
+        val.forEach(async (app: App) => {
+          const wcName = await generateWCName(app.pkg);
+          this.wcNames = { ...this.wcNames, [app.pkg]: wcName };
+          if (!customElements.get(wcName)) {
+            const module = await import(
+              `https://cdn.jsdelivr.net/npm/${app.pkg}/+esm`
+            );
+            customElements.define(wcName, module.default);
+          }
+        });
+      },
+      immediate: true,
     },
   },
   methods: {

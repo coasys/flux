@@ -25,10 +25,45 @@
           <j-box pb="300">
             <j-text variant="label">Select at least one view</j-text>
           </j-box>
-          <ChannelViewOptions
-            :views="selectedViews"
-            @change="(views: ChannelView[]) => (selectedViews = views)"
-          ></ChannelViewOptions>
+
+          <j-box v-if="isLoading" align="center" p="500">
+            <j-spinner></j-spinner>
+          </j-box>
+
+          <j-flex v-if="!isLoading" direction="column" gap="500">
+            <div class="app-card" v-for="pkg in packages" :key="pkg.name">
+              <j-box pb="500">
+                <j-badge
+                  size="sm"
+                  v-if="pkg.packageName.startsWith('@fluxapp')"
+                  variant="success"
+                >
+                  Official App
+                </j-badge>
+              </j-box>
+              <j-flex a="center" j="between">
+                <j-flex gap="500" a="center" j="center">
+                  <j-icon size="lg" v-if="pkg.icon" :name="pkg.icon"></j-icon>
+                  <div>
+                    <j-text variant="heading-sm">
+                      {{ pkg.name }}
+                    </j-text>
+                    <j-text nomargin>
+                      {{ pkg.description }}
+                    </j-text>
+                  </div>
+                </j-flex>
+                <div>
+                  <j-button
+                    :variant="isSelected(pkg) ? 'subtle' : 'primary'"
+                    @click="() => toggleView(pkg)"
+                  >
+                    {{ isSelected(pkg) ? "Remove" : "Add" }}
+                  </j-button>
+                </div>
+              </j-flex>
+            </div>
+          </j-flex>
         </j-box>
 
         <j-box mt="500">
@@ -53,17 +88,20 @@
 </template>
 
 <script lang="ts">
-import { useEntry, usePerspective } from "@fluxapp/vue";
-import { ChannelView } from "@fluxapp/types";
-import { defineComponent } from "vue";
-import ChannelViewOptions from "@/components/channel-view-options/ChannelViewOptions.vue";
 import { useRoute } from "vue-router";
+import { Channel, getAllFluxApps, FluxApp, App } from "@fluxapp/api";
+import { usePerspective, useEntry } from "@fluxapp/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { Channel } from "@fluxapp/api";
+import { defineComponent } from "vue";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
-  components: { ChannelViewOptions },
+  async created() {
+    this.isLoading = true;
+    const res = await getAllFluxApps();
+    this.isLoading = false;
+    this.packages = res;
+  },
   async setup() {
     const route = useRoute();
 
@@ -76,13 +114,21 @@ export default defineComponent({
       model: Channel,
     });
 
+    const { repo: appRepo } = useEntry({
+      perspective: () => data.value.perspective,
+      model: App,
+    });
+
     return {
+      appRepo,
       repo,
     };
   },
   data() {
     return {
-      selectedViews: [] as ChannelView[],
+      isLoading: false,
+      packages: [] as FluxApp[],
+      selectedViews: [] as string[],
       channelView: "chat",
       channelName: "",
       isCreatingChannel: false,
@@ -95,21 +141,47 @@ export default defineComponent({
     canSubmit(): boolean {
       return this.hasName && this.validSelectedViews;
     },
+    selectedApps(): FluxApp[] {
+      return this.packages.filter((p) => this.selectedViews.includes(p.pkg));
+    },
     validSelectedViews() {
       return this.selectedViews.length >= 1;
     },
   },
   methods: {
+    isSelected(pkg: FluxApp) {
+      return this.selectedViews.some((view) => view === pkg.pkg);
+    },
+    toggleView(pkg: FluxApp) {
+      const isSelected = this.selectedViews.some((view) => view === pkg.pkg);
+      this.selectedViews = isSelected
+        ? this.selectedViews.filter((n) => n !== pkg.pkg)
+        : [...this.selectedViews, pkg.pkg];
+    },
     async createChannel() {
-      try {
-        const communityId = this.$route.params.communityId as string;
-        const name = this.channelName;
-        this.isCreatingChannel = true;
+      const communityId = this.$route.params.communityId as string;
+      const name = this.channelName;
+      this.isCreatingChannel = true;
 
+      try {
         const channel = await this.repo?.create({
-          name: name,
-          views: [...this.selectedViews],
+          name,
         });
+
+        const promises = this.selectedApps.map(async (app) => {
+          return this.appRepo?.create(
+            {
+              name: app.name,
+              description: app.description,
+              icon: app.icon,
+              pkg: app.pkg,
+            },
+            undefined,
+            channel.id
+          );
+        });
+
+        await Promise.all(promises);
 
         this.$emit("submit");
         this.channelName = "";
@@ -120,8 +192,6 @@ export default defineComponent({
             channelId: channel.id,
           },
         });
-      } catch (e) {
-        console.log(e);
       } finally {
         this.isCreatingChannel = false;
       }
@@ -129,3 +199,12 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.app-card {
+  padding: var(--j-space-500);
+  border-radius: var(--j-border-radius);
+  background: var(--j-color-ui-50);
+  border: 1px solid var(--j-color-ui-100);
+}
+</style>

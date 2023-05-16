@@ -37,8 +37,6 @@ export default function Avatar({
     }
   }, [did, url]);
 
-  console.log({ did });
-
   return (
     <j-avatar
       style={{ ...style, cursor: onClick ? "pointer" : "default" }}

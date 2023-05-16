@@ -37,6 +37,7 @@ import Channel from "./channel";
 import Community from "./community";
 import Message from "./message";
 import Post from "./post";
+import App from "./app";
 import updateProfile from "./updateProfile";
 import createProfile from "./createProfile";
 import createAgentWebLink from "./createAgentWebLink";
@@ -44,11 +45,13 @@ import getAgentWebLinks from "./getAgentWebLinks";
 import getAd4mProfile from "./getAd4mProfile";
 import subscribeToSyncState from "./subscribeToSyncState";
 import { SubjectRepository } from "./factory";
+export * from "./npmApi";
 
 export {
   checkUpdateSDNAVersion,
   SubjectRepository,
   Me,
+  App,
   Channel,
   Community,
   Message,

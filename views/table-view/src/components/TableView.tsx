@@ -93,13 +93,12 @@ export default function TableView({
           <div className={styles.history}>
             {history.map((s, index) => {
               return (
-                <button
-                  className={styles.historyItem}
+                <HistoryItem
+                  source={s}
                   onClick={() => goTo(index + 1)}
-                  nomargin
-                >
-                  {s}
-                </button>
+                  perspective={perspective}
+                  index={index}
+                ></HistoryItem>
               );
             })}
           </div>
@@ -189,6 +188,41 @@ export default function TableView({
   );
 }
 
+function HistoryItem({ source, perspective, onClick }) {
+  const [entry, setEntry] = useState({});
+  const [classes, setClasses] = useState([]);
+
+  useEffect(() => {
+    fetchSourceClasses(source);
+  }, [source, perspective.uuid]);
+
+  async function fetchSourceClasses(source) {
+    const classResults = await perspective.infer(
+      `subject_class(ClassName, C), instance(C, "${source}").`
+    );
+
+    if (classResults?.length > 0) {
+      setClasses(classResults.map((c) => c.ClassName));
+      const className = classResults[0].ClassName;
+      const subjectProxy = await perspective.getSubjectProxy(source, className);
+      const entry = await getEntry(subjectProxy);
+
+      setEntry(entry);
+    } else {
+      setClasses([]);
+      setEntry({ id: source });
+    }
+  }
+
+  const defaultName = entry?.name || entry?.title || source;
+
+  return (
+    <button className={styles.historyItem} onClick={onClick} nomargin>
+      {defaultName}
+    </button>
+  );
+}
+
 type HeaderProps = {
   perspective: PerspectiveProxy;
   source: string;
@@ -213,7 +247,7 @@ function Header({ perspective, source, onUrlClick = () => {} }: HeaderProps) {
       const className = classResults[0].ClassName;
       const subjectProxy = await perspective.getSubjectProxy(source, className);
       const entry = await getEntry(subjectProxy);
-      console.log({ subjectProxy, entry });
+
       setEntry(entry);
     } else {
       setClasses([]);
@@ -517,12 +551,12 @@ function useChildren({ perspective, subjectInstance, source }: UseEntryProps) {
         )
         .then(async (result) => {
           if (result) {
-            console.log({ result });
             const entries = await Promise.all(
               result.map((r) =>
                 perspective.getSubjectProxy(r.Base, subjectInstance)
               )
             );
+
             const resolved = await getEntries(entries);
             setEntries(resolved);
           } else {

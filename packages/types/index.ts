@@ -100,6 +100,7 @@ export enum EntryType {
   Message = "flux://has_message",
   Post = "flux://has_post",
   Member = "flux://has_member",
+  App = "flux://has_app",
 }
 
 //This represents an entry itself, which contains the default fields seen below

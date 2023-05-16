@@ -45,8 +45,6 @@ export default async function updateProfile(
       ...payload,
     } as Profile;
 
-    console.log({ newProfile });
-
     const { perspective } = await client.agent.me();
 
     if (!perspective) {
