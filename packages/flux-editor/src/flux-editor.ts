@@ -10,6 +10,7 @@ import { map } from "lit/directives/map.js";
 import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Mention from "@tiptap/extension-mention";
+import { SuggestionProps, SuggestionKeyDownProps } from "@tiptap/suggestion";
 import { Message, SubjectRepository, getProfile } from "@fluxapp/api";
 import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { Profile } from "@fluxapp/types";
@@ -63,6 +64,10 @@ export class MyElement extends LitElement {
       margin-bottom: 0;
     }
 
+    .suggestions {
+      position: absolute;
+    }
+
     .ProseMirror:focus {
       outline: none;
     }
@@ -91,13 +96,24 @@ export class MyElement extends LitElement {
   @state()
   suggestions: Profile[] = [];
 
+  @state()
+  suggestionIndex: number = -1;
+
+  @state()
+  suggestionCallback: (props: any) => void | null = null;
+
   constructor() {
     super();
     this.fetchProfiles();
+    this.renderSuggestions = this.renderSuggestions.bind(this);
   }
 
   get editorElement() {
-    return this.renderRoot.querySelector("#editor");
+    return this.renderRoot.querySelector("#editor") as HTMLElement;
+  }
+
+  get suggestionsEl() {
+    return this.renderRoot.querySelector("#suggestions") as HTMLElement;
   }
 
   connectedCallback() {
@@ -115,36 +131,79 @@ export class MyElement extends LitElement {
           },
           renderLabel({ options, node }) {
             return `${options.suggestion.char}${
-              node.attrs.username ?? node.attrs.did
+              node.attrs.username ?? node.attrs.id
             }`;
           },
           suggestion: {
             items: ({ query }) => this.getSuggestions(query),
-            render: () => {
-              return {
-                onStart: (props) => {
-                  console.log("onStart", props);
-                },
-
-                onUpdate(props) {
-                  console.log("onUpdate", props);
-                },
-
-                onKeyDown(props) {
-                  console.log("onKeyDown", props);
-                  return false;
-                },
-
-                onExit() {
-                  console.log("onExit");
-                  this.suggestions = [];
-                },
-              };
-            },
+            render: this.renderSuggestions,
           },
         }),
       ],
       content: "<p>Hello World!</p>",
+    });
+  }
+
+  renderSuggestions() {
+    return {
+      onStart: (props: SuggestionProps<any>) => {
+        const { x, y, height } = props.clientRect();
+
+        this.suggestionsEl.style.top = `${y + height}px`;
+        this.suggestionsEl.style.left = `${x}px`;
+
+        // Save select callback
+        this.suggestionCallback = props.command;
+      },
+
+      onUpdate: (props: SuggestionProps<any>) => {
+        const { x, y, height } = props.clientRect();
+
+        this.suggestionsEl.style.top = `${y + height}px`;
+        this.suggestionsEl.style.left = `${x}px`;
+      },
+
+      onKeyDown: (props: SuggestionKeyDownProps) => {
+        if (props.event.key === "ArrowUp") {
+          this.upHandler();
+          return true;
+        }
+
+        if (props.event.key === "ArrowDown") {
+          this.downHandler();
+          return true;
+        }
+
+        if (props.event.key === "Enter") {
+          this.selectSuggestion(this.suggestionIndex);
+          return true;
+        }
+
+        return false;
+      },
+
+      onExit: () => {
+        this.suggestions = [];
+        this.suggestionCallback = null;
+      },
+    };
+  }
+
+  upHandler() {
+    this.suggestionIndex =
+      (this.suggestionIndex + this.suggestions.length - 1) %
+      this.suggestions.length;
+  }
+
+  downHandler() {
+    this.suggestionIndex = (this.suggestionIndex + 1) % this.suggestions.length;
+  }
+
+  selectSuggestion(index: number) {
+    const item = this.suggestions[index];
+    this.suggestionCallback({
+      id: this.suggestionIndex,
+      username: item.username,
     });
   }
 
@@ -210,27 +269,33 @@ export class MyElement extends LitElement {
             <div class="editor" part="editor" id="editor"></div>
 
             ${this.suggestions.length
-              ? html`
-              <div class="suggestions" part="suggestions" id="suggestions">
-                <j-menu>
-                  ${map(
-                    this.suggestions,
-                    (p) => html`<j-menu-item
-                      square
-                      variant="ghost"
-                      @click=${() => {}}
-                    >
-                      <j-flex a="center" gap="300">
-                        <j-avatar
-                          hash=${`did:key:${p.did}`}
-                          size="xs"
-                        ></j-avatar>
-                        <j-text variant="body" nomargin> ${p.username} </j-text>
-                      </j-flex>
-                    </j-menu-item>`
-                  )}
-                <j-menu>
-              </div>`
+              ? html` <div
+                  class="suggestions"
+                  part="suggestions"
+                  id="suggestions"
+                >
+                  <j-menu>
+                    ${map(
+                      this.suggestions,
+                      (p, i) => html`<j-menu-item
+                        square
+                        variant="ghost"
+                        ?selected=${i === this.suggestionIndex}
+                        @click=${() => this.selectSuggestion(i)}
+                      >
+                        <j-flex a="center" gap="300">
+                          <j-avatar
+                            hash=${`did:key:${p.did}`}
+                            size="xs"
+                          ></j-avatar>
+                          <j-text variant="body" nomargin>
+                            ${p.username}
+                          </j-text>
+                        </j-flex>
+                      </j-menu-item>`
+                    )}
+                  </j-menu>
+                </div>`
               : ``}
           </div>
         </div>
