@@ -13,6 +13,7 @@ import {
   BaseEditor,
   Transforms,
   Range,
+  Descendant,
 } from "slate";
 import { Slate, Editable, withReact, ReactEditor } from "slate-react";
 import { Message, getProfile } from "@fluxapp/api";
@@ -142,7 +143,43 @@ export default function Editor({ perspective, source, initialValue }: Props) {
     [people, editor, index, target]
   );
 
-  function createMessage() {
+  function onChange(value: Descendant[]) {
+    const { selection, operations } = editor;
+
+    // Check for mentions
+    if (selection && Range.isCollapsed(selection)) {
+      const [start] = Range.edges(selection);
+      const wordBefore = SlateEditor.before(editor, start, {
+        unit: "word",
+      });
+      const before = wordBefore && SlateEditor.before(editor, wordBefore);
+      const beforeRange = before && SlateEditor.range(editor, before, start);
+      const beforeText = beforeRange && SlateEditor.string(editor, beforeRange);
+      const beforeMatch = beforeText && beforeText.match(/^@(\w+)$/);
+      const after = SlateEditor.after(editor, start);
+      const afterRange = SlateEditor.range(editor, start, after);
+      const afterText = SlateEditor.string(editor, afterRange);
+      const afterMatch = afterText.match(/^(\s|$)/);
+
+      if (beforeMatch && afterMatch) {
+        setTarget(beforeRange);
+        setSearch(beforeMatch[1]);
+        setIndex(0);
+        return;
+      }
+    }
+
+    setTarget(null);
+
+    // const isLastChange = operations.some(
+    //   (op) => "set_selection" !== op.type
+    // );
+    // if (isLastChange) {
+    //   setContent(serialize(value));
+    // }
+  }
+
+  function onSubmit() {
     model
       .create({ body: content })
       .then((result) => {
@@ -151,52 +188,10 @@ export default function Editor({ perspective, source, initialValue }: Props) {
       .catch(console.log);
   }
 
-  console.log("people: ", people);
-
   return (
     <>
       <div className={styles.wrapper}>
-        <Slate
-          editor={editor}
-          value={value}
-          onChange={(value) => {
-            const { selection, operations } = editor;
-
-            if (selection && Range.isCollapsed(selection)) {
-              const [start] = Range.edges(selection);
-              const wordBefore = SlateEditor.before(editor, start, {
-                unit: "word",
-              });
-              const before =
-                wordBefore && SlateEditor.before(editor, wordBefore);
-              const beforeRange =
-                before && SlateEditor.range(editor, before, start);
-              const beforeText =
-                beforeRange && SlateEditor.string(editor, beforeRange);
-              const beforeMatch = beforeText && beforeText.match(/^@(\w+)$/);
-              const after = SlateEditor.after(editor, start);
-              const afterRange = SlateEditor.range(editor, start, after);
-              const afterText = SlateEditor.string(editor, afterRange);
-              const afterMatch = afterText.match(/^(\s|$)/);
-
-              if (beforeMatch && afterMatch) {
-                setTarget(beforeRange);
-                setSearch(beforeMatch[1]);
-                setIndex(0);
-                return;
-              }
-            }
-
-            setTarget(null);
-
-            // const isLastChange = operations.some(
-            //   (op) => "set_selection" !== op.type
-            // );
-            // if (isLastChange) {
-            //   setContent(serialize(value));
-            // }
-          }}
-        >
+        <Slate editor={editor} value={value} onChange={onChange}>
           <div className={styles.toolbar}>
             <Toolbar editor={editor} />
           </div>
@@ -232,7 +227,7 @@ export default function Editor({ perspective, source, initialValue }: Props) {
         </Slate>
       </div>
       <div className={styles.footer}>
-        <j-button onclick={createMessage}>Post</j-button>
+        <j-button onclick={onSubmit}>Post</j-button>
       </div>
     </>
   );
