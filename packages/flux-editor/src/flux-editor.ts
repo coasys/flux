@@ -52,6 +52,16 @@ export class MyElement extends LitElement {
       padding-top: var(--j-space-400);
     }
 
+    .mention {
+      word-break: break-word;
+      text-decoration: none;
+      cursor: pointer;
+      padding: 2px var(--j-space-200);
+      border-radius: var(--j-border-radius);
+      background: var(--j-color-primary-100);
+      color: var(--j-color-primary-700);
+    }
+
     .editor > div {
       padding: var(--j-space-400);
     }
@@ -105,7 +115,13 @@ export class MyElement extends LitElement {
   constructor() {
     super();
     this.fetchProfiles();
+
+    this.upHandler = this.upHandler.bind(this);
+    this.downHandler = this.downHandler.bind(this);
+    this.selectSuggestion = this.selectSuggestion.bind(this);
+    this.getSuggestions = this.getSuggestions.bind(this);
     this.renderSuggestions = this.renderSuggestions.bind(this);
+    this.fetchProfiles = this.fetchProfiles.bind(this);
   }
 
   get editorElement() {
