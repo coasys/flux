@@ -12,7 +12,7 @@ import Bold from "@tiptap/extension-bold";
 import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 
-import { Message, getProfile } from "@fluxapp/api";
+import { Message, SubjectRepository, getProfile } from "@fluxapp/api";
 import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { Profile } from "@fluxapp/types";
 
@@ -82,6 +82,11 @@ export class MyElement extends LitElement {
   editor: Editor | null;
 
   @state()
+  model: SubjectRepository<{
+    [x: string]: any;
+  }>;
+
+  @state()
   members: Profile[] = [];
 
   constructor() {
@@ -117,12 +122,23 @@ export class MyElement extends LitElement {
     }
   }
 
-  async onSubmit(uuid: string) {
-    // todo
+  async onSubmit() {
+    const model = new SubjectRepository(Message, {
+      perspective: this.perspective,
+      source: this.source,
+    });
+    const html = this.editor.getHTML();
+
+    model
+      .create({ body: html })
+      .then((result) => {
+        console.log("CREATED: ", result);
+      })
+      .catch(console.log);
   }
 
   render() {
-    console.log(this.editor);
+    console.log("perspective: ", this.perspective);
 
     return html`
       <div class="base" part="base">
