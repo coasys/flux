@@ -206,15 +206,7 @@ export default function Editor({ perspective, source, initialValue }: Props) {
           </div>
           {target && people.length > 0 && (
             <Portal>
-              <div
-                ref={ref}
-                style={{
-                  top: "-9999px",
-                  left: "-9999px",
-                  position: "absolute",
-                  zIndex: 1,
-                }}
-              >
+              <div ref={ref} className={styles["mentions-popup"]}>
                 <MentionMenu
                   editor={editor}
                   index={index}

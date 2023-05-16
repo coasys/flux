@@ -43,3 +43,10 @@
     background-color: rgba(0, 0, 0, 0.1);
     padding: var(--j-space-200);
 }
+
+.mentions-popup {
+    top: -9999px;
+    left: -9999px;
+    position: absolute;
+    z-index: 1;
+}
