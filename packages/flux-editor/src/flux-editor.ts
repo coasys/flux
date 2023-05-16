@@ -88,9 +88,11 @@ export class MyElement extends LitElement {
   @state()
   members: Profile[] = [];
 
+  @state()
+  suggestions: Profile[] = [];
+
   constructor() {
     super();
-
     this.fetchProfiles();
   }
 
@@ -111,10 +113,53 @@ export class MyElement extends LitElement {
           HTMLAttributes: {
             class: "mention",
           },
+          renderLabel({ options, node }) {
+            return `${options.suggestion.char}${
+              node.attrs.username ?? node.attrs.did
+            }`;
+          },
+          suggestion: {
+            items: ({ query }) => this.getSuggestions(query),
+            render: () => {
+              return {
+                onStart: (props) => {
+                  console.log("onStart", props);
+                },
+
+                onUpdate(props) {
+                  console.log("onUpdate", props);
+                },
+
+                onKeyDown(props) {
+                  console.log("onKeyDown", props);
+                  return false;
+                },
+
+                onExit() {
+                  console.log("onExit");
+                  this.suggestions = [];
+                },
+              };
+            },
+          },
         }),
       ],
       content: "<p>Hello World!</p>",
     });
+  }
+
+  async getSuggestions(query: string) {
+    const matches = [
+      { did: "123", username: "BambinoToad" },
+      { did: "223", username: "ToadChrisT" },
+      { did: "323", username: "Toad" },
+      { did: "423", username: "ToadRoxblang" },
+    ]
+      .filter((m) => m.username.toLowerCase().startsWith(query.toLowerCase()))
+      .slice(0, 10) as Profile[];
+
+    this.suggestions = matches;
+    return matches;
   }
 
   async fetchProfiles() {
@@ -163,6 +208,30 @@ export class MyElement extends LitElement {
 
           <div class="body" part="body">
             <div class="editor" part="editor" id="editor"></div>
+
+            ${this.suggestions.length
+              ? html`
+              <div class="suggestions" part="suggestions" id="suggestions">
+                <j-menu>
+                  ${map(
+                    this.suggestions,
+                    (p) => html`<j-menu-item
+                      square
+                      variant="ghost"
+                      @click=${() => {}}
+                    >
+                      <j-flex a="center" gap="300">
+                        <j-avatar
+                          hash=${`did:key:${p.did}`}
+                          size="xs"
+                        ></j-avatar>
+                        <j-text variant="body" nomargin> ${p.username} </j-text>
+                      </j-flex>
+                    </j-menu-item>`
+                  )}
+                <j-menu>
+              </div>`
+              : ``}
           </div>
         </div>
 
