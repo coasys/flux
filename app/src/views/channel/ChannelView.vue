@@ -231,7 +231,8 @@ export default defineComponent({
         }
 
         if (url.startsWith("literal://")) {
-          this.onChannelClick(url);
+          // TODO: check if literal is channel
+          // this.onChannelClick(url);
         }
 
         if (!url.startsWith("http")) {
