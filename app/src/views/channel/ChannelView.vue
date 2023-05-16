@@ -182,7 +182,6 @@ export default defineComponent({
       ChannelView: ChannelView,
       selectedViews: ref<ChannelView[]>([]),
       showEditChannel: ref(false),
-      selectedChannelView: ref("chat"),
       appStore: useAppStore(),
       script: null as HTMLElement | null,
       memberMentions: ref<MentionTrigger[]>([]),
@@ -200,6 +199,8 @@ export default defineComponent({
   watch: {
     apps: {
       handler: function (val) {
+        console.log("whaat", val);
+        this.currentView = val[0]?.pkg;
         // Add new views
         val.forEach(async (app: App) => {
           const wcName = await generateWCName(app.pkg);
