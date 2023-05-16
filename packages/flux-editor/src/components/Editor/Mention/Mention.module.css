@@ -1,9 +1,0 @@
-.mention {
-    word-break: break-word;
-    text-decoration: none;
-    cursor: pointer;
-    padding: 2px var(--j-space-200);
-    border-radius: var(--j-border-radius);
-    background: var(--j-color-primary-100);
-    color: var(--j-color-primary-700);
-}

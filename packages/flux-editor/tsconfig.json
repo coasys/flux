@@ -1,16 +1,26 @@
 {
   "compilerOptions": {
-    "jsx": "preserve",
-    "jsxFactory": "h",
-    "jsxFragmentFactory": "Fragment",
-    "downlevelIteration": true,
+    "target": "es2020",
+    "module": "es2020",
+    "lib": ["es2017", "dom", "dom.iterable"],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./",
+    "rootDir": "./src",
+    "strict": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "skipLibCheck": true,
-    "baseUrl": "/",
-    "paths": {
-      "react": ["node_modules/preact/compat"],
-      "react-dom": ["node_modules/preact/compat"]
-    }
+    "plugins": [
+      {
+        "name": "ts-lit-plugin",
+        "strict": true
+      }
+    ]
   },
-  "include": ["./globals.d.ts", "src/**/*.tsx", "src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": []
 }

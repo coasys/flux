@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="icon" type="image/svg+xml" href="src/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Flux App</title>
+    <title>Flux Editor</title>
+
     <style>
       html {
         box-sizing: border-box;
@@ -20,23 +21,22 @@
       *:after {
         box-sizing: inherit;
       }
-      flux-app {
-        height: 100%;
+      flux-editor {
         display: block;
-        padding: 2rem 2rem 2rem 0;
+        width: 97%;
+        margin: 2rem 2rem 2rem 0;
       }
     </style>
   </head>
   <body>
+    <script type="module" src="/src/flux-editor.ts"></script>
+
     <flux-container>
-      <flux-app></flux-app>
+      <flux-editor></flux-editor>
     </flux-container>
 
     <script type="module">
-      import App from "./src/main.ts";
       import "@fluxapp/flux-container";
-
-      customElements.define("flux-app", App);
 
       window.__APP_VERSION__ = "test";
     </script>
