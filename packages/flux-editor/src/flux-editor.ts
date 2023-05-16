@@ -131,7 +131,7 @@ export class MyElement extends LitElement {
           },
           renderLabel({ options, node }) {
             return `${options.suggestion.char}${
-              node.attrs.username ?? node.attrs.id
+              node.attrs.label ?? node.attrs.id
             }`;
           },
           suggestion: {
@@ -147,6 +147,8 @@ export class MyElement extends LitElement {
   renderSuggestions() {
     return {
       onStart: (props: SuggestionProps<any>) => {
+        console.log("onStart", props);
+
         const { x, y, height } = props.clientRect();
 
         this.suggestionsEl.style.top = `${y + height}px`;
@@ -157,6 +159,8 @@ export class MyElement extends LitElement {
       },
 
       onUpdate: (props: SuggestionProps<any>) => {
+        console.log("onUpdate", props);
+
         const { x, y, height } = props.clientRect();
 
         this.suggestionsEl.style.top = `${y + height}px`;
@@ -164,6 +168,8 @@ export class MyElement extends LitElement {
       },
 
       onKeyDown: (props: SuggestionKeyDownProps) => {
+        console.log("onKeyDown", props);
+
         if (props.event.key === "ArrowUp") {
           this.upHandler();
           return true;
@@ -183,6 +189,8 @@ export class MyElement extends LitElement {
       },
 
       onExit: () => {
+        console.log("onExit");
+
         this.suggestions = [];
         this.suggestionCallback = null;
       },
@@ -203,7 +211,7 @@ export class MyElement extends LitElement {
     const item = this.suggestions[index];
     this.suggestionCallback({
       id: this.suggestionIndex,
-      username: item.username,
+      label: item.username,
     });
   }
 
