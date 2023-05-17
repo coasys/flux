@@ -1,11 +1,4 @@
-import {
-  LitElement,
-  html,
-  customElement,
-  property,
-  state,
-  css,
-} from "lit-element";
+import { LitElement, html, property, state, css } from "lit-element";
 import { map } from "lit/directives/map.js";
 import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
@@ -14,43 +7,52 @@ import Placeholder from "@tiptap/extension-placeholder";
 import { SuggestionProps, SuggestionKeyDownProps } from "@tiptap/suggestion";
 import { Message, SubjectRepository, getProfile } from "@fluxapp/api";
 import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
+import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import { Profile } from "@fluxapp/types";
 import defaultActions from "./defaultActions";
 
-@customElement("flux-editor")
-export class MyElement extends LitElement {
+export default class MyElement extends LitElement {
   static styles = css`
     :host {
+      --grid-template-areas: "toolbar" "body" "footer";
+      --body-min-height: 100px;
       display: block;
       width: 100%;
       box-sizing: border-box;
     }
-    .wrapper {
-      display: block;
-      width: 100%;
-      background: var(--j-color-white);
-      border: 1px solid var(--j-border-color);
+    .base {
       border-radius: var(--j-border-radius);
-      outline: 0;
-      min-height: 100px;
+      display: grid;
+      border: 1px solid var(--j-color-ui-100);
+      grid-template-areas: var(--grid-template-areas);
     }
-    .wrapper:hover:not(:focus-within) {
-      border: 1px solid var(--j-border-color-strong);
+    .base:hover:not(:focus-within) {
+      border: 1px solid var(--j-color-ui-200);
     }
-
-    .wrapper:focus-within {
+    .base:focus-within {
       border: 1px solid var(--j-color-focus);
     }
 
-    .header {
-      background: var(--j-color-ui-50);
+    .toolbar {
+      grid-area: toolbar;
+      background: var(--j-color-white);
       border-top-left-radius: var(--j-border-radius);
       border-top-right-radius: var(--j-border-radius);
       border-bottom: 1px solid var(--j-color-ui-100);
     }
 
+    .body {
+      grid-area: body;
+    }
+
     .footer {
-      padding-top: var(--j-space-400);
+      display: flex;
+      align-items: center;
+      justify-content: end;
+      gap: var(--j-space-300);
+      padding: var(--j-space-300);
+      border-top: 1px solid var(--j-color-ui-100);
+      grid-area: footer;
     }
 
     .mention {
@@ -77,6 +79,10 @@ export class MyElement extends LitElement {
 
     .suggestions {
       position: absolute;
+    }
+
+    .ProseMirror {
+      min-height: var(--body-min-height);
     }
 
     .ProseMirror:focus {
@@ -120,6 +126,9 @@ export class MyElement extends LitElement {
 
   @state()
   suggestionIndex: number = -1;
+
+  @state()
+  isCreating: boolean = false;
 
   @state()
   suggestionCallback: (props: any) => void | null = null;
@@ -269,84 +278,86 @@ export class MyElement extends LitElement {
     }
   }
 
-  async onSubmit() {
+  async submit() {
     const model = new SubjectRepository(Message, {
       perspective: this.perspective,
       source: this.source,
     });
-    const html = this.editor.getHTML();
 
-    model
-      .create({ body: html })
-      .then((result) => {
-        console.log("CREATED: ", result);
-      })
-      .catch(console.log);
+    try {
+      const html = this.editor.getHTML();
+      this.isCreating = true;
+      const result = await model.create({ body: html });
+      console.log("CREATED: ", result);
+      this.editor.commands.clearContent();
+    } catch (e) {
+      console.log(e);
+    } finally {
+      this.isCreating = false;
+    }
   }
 
   render() {
     return html`
       <div class="base" part="base">
-        <div class="wrapper" part="wrapper">
-          <div class="header" part="header">
-            ${map(
-              defaultActions,
-              (a) => html`<j-button square variant="ghost" @click=${() =>
-                this.editor?.commands[a.command]()}>
+        <div class="toolbar" part="toolbar">
+          ${map(
+            defaultActions,
+            (a) => html`<j-button square variant="ghost" @click=${() =>
+              this.editor?.commands[a.command]()}>
                 <j-icon name=${a.icon}
                   color=${
                     this.editor?.isActive([a.name]) ? "primary-500" : "ui-500"
                   }
                 ></j-icon>
               </j-tooltip>`
-            )}
-          </div>
-
-          <div class="body" part="body">
-            <div class="editor" part="editor" id="editor"></div>
-
-            ${this.suggestions.length
-              ? html` <div
-                  class="suggestions"
-                  part="suggestions"
-                  id="suggestions"
-                >
-                  <j-menu>
-                    ${map(
-                      this.suggestions,
-                      (p, i) => html`<j-menu-item
-                        square
-                        variant="ghost"
-                        ?selected=${i === this.suggestionIndex}
-                        @click=${() => this.selectSuggestion(i)}
-                      >
-                        <j-flex a="center" gap="300">
-                          <j-avatar
-                            hash=${`did:key:${p.did}`}
-                            size="xs"
-                          ></j-avatar>
-                          <j-text variant="body" nomargin>
-                            ${p.username}
-                          </j-text>
-                        </j-flex>
-                      </j-menu-item>`
-                    )}
-                  </j-menu>
-                </div>`
-              : ``}
-          </div>
+          )}
         </div>
 
-        <div class="footer" part="footer">
-          <j-button @click=${this.onSubmit}>Post</j-button>
+        <div class="body" part="body">
+          <div class="editor" part="editor" id="editor"></div>
+
+          ${this.suggestions.length
+            ? html` <div
+                class="suggestions"
+                part="suggestions"
+                id="suggestions"
+              >
+                <j-menu>
+                  ${map(
+                    this.suggestions,
+                    (p, i) => html`<j-menu-item
+                      square
+                      variant="ghost"
+                      ?selected=${i === this.suggestionIndex}
+                      @click=${() => this.selectSuggestion(i)}
+                    >
+                      <j-flex a="center" gap="300">
+                        <j-avatar
+                          hash=${`did:key:${p.did}`}
+                          size="xs"
+                        ></j-avatar>
+                        <j-text variant="body" nomargin> ${p.username} </j-text>
+                      </j-flex>
+                    </j-menu-item>`
+                  )}
+                </j-menu>
+              </div>`
+            : ``}
         </div>
+        <slot class="footer" name="footer" part="footer">
+          <slot name="trigger">
+            <j-button
+              ?loading=${this.isCreating}
+              variant="primary"
+              size="sm"
+              @click=${this.submit}
+            >
+              Create
+            </j-button>
+          </slot>
+        </slot>
       </div>
     `;
-  }
-}
-
-declare global {
-  interface HTMLElementTagNameMap {
-    "flux-editor>": MyElement;
   }
 }
