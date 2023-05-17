@@ -10,6 +10,7 @@ import { map } from "lit/directives/map.js";
 import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Mention from "@tiptap/extension-mention";
+import Placeholder from "@tiptap/extension-placeholder";
 import { SuggestionProps, SuggestionKeyDownProps } from "@tiptap/suggestion";
 import { Message, SubjectRepository, getProfile } from "@fluxapp/api";
 import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
@@ -81,6 +82,14 @@ export class MyElement extends LitElement {
     .ProseMirror:focus {
       outline: none;
     }
+
+    .ProseMirror p.is-editor-empty:first-child::before {
+      color: #adb5bd;
+      content: attr(data-placeholder);
+      float: left;
+      height: 0;
+      pointer-events: none;
+    }
   `;
 
   @property({ type: PerspectiveProxy })
@@ -91,6 +100,9 @@ export class MyElement extends LitElement {
 
   @property({ type: String })
   source: null;
+
+  @property({ type: String })
+  placeholder: "";
 
   @state()
   editor: Editor | null;
@@ -141,6 +153,9 @@ export class MyElement extends LitElement {
       element: this.editorElement,
       extensions: [
         StarterKit,
+        Placeholder.configure({
+          placeholder: this.placeholder || "",
+        }),
         Mention.configure({
           HTMLAttributes: {
             class: "mention",
@@ -151,7 +166,6 @@ export class MyElement extends LitElement {
           },
         }),
       ],
-      content: "<p>Hello World!</p>",
     });
   }
 

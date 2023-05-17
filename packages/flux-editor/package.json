@@ -25,6 +25,7 @@
     "@perspect3vism/ad4m-connect": "^0.3.1",
     "@tiptap/core": "^2.0.3",
     "@tiptap/extension-mention": "^2.0.3",
+    "@tiptap/extension-placeholder": "^2.0.3",
     "@tiptap/pm": "^2.0.3",
     "@tiptap/starter-kit": "^2.0.3",
     "@tiptap/suggestion": "^2.0.3",
