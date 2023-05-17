@@ -23,31 +23,31 @@
         ></j-input>
         <j-box pb="500" pt="300">
           <j-box pb="300">
-            <j-text variant="label">Select at least one view</j-text>
+            <j-text variant="label">Select at least one app</j-text>
           </j-box>
 
           <j-box v-if="isLoading" align="center" p="500">
             <j-spinner></j-spinner>
           </j-box>
 
-          <j-flex v-if="!isLoading" direction="column" gap="500">
+          <div class="app-grid" v-if="!isLoading">
             <div class="app-card" v-for="pkg in packages" :key="pkg.name">
-              <j-box pb="500">
-                <j-badge
-                  size="sm"
-                  v-if="pkg.pkg.startsWith('@fluxapp')"
-                  variant="success"
-                >
-                  Official App
-                </j-badge>
-              </j-box>
-              <j-flex a="center" j="between">
+              <j-flex a="center" direction="row" j="between" gap="500">
                 <j-flex gap="500" a="center" j="center">
                   <j-icon size="lg" v-if="pkg.icon" :name="pkg.icon"></j-icon>
                   <div>
-                    <j-text variant="heading-sm">
-                      {{ pkg.name }}
-                    </j-text>
+                    <j-flex gap="300">
+                      <j-text variant="heading-sm">
+                        {{ pkg.name }}
+                      </j-text>
+                      <j-badge
+                        size="sm"
+                        v-if="pkg.pkg.startsWith('@fluxapp')"
+                        variant="success"
+                      >
+                        Official App
+                      </j-badge>
+                    </j-flex>
                     <j-text nomargin>
                       {{ pkg.description }}
                     </j-text>
@@ -55,15 +55,15 @@
                 </j-flex>
                 <div>
                   <j-button
-                    :variant="isSelected(pkg) ? 'subtle' : 'primary'"
+                    :variant="isSelected(pkg) ? 'secondary' : 'primary'"
                     @click="() => toggleView(pkg)"
                   >
-                    {{ isSelected(pkg) ? "Remove" : "Add" }}
+                    {{ isSelected(pkg) ? "Remove" : "Install" }}
                   </j-button>
                 </div>
               </j-flex>
             </div>
-          </j-flex>
+          </div>
         </j-box>
 
         <j-box mt="500">
@@ -100,7 +100,9 @@ export default defineComponent({
     this.isLoading = true;
     const res = await getAllFluxApps();
     this.isLoading = false;
-    this.packages = res;
+    this.packages = res.filter(
+      (pkg) => new Date(pkg.created) > new Date("05-01-2023")
+    );
   },
   async setup() {
     const route = useRoute();
@@ -176,7 +178,7 @@ export default defineComponent({
               icon: app.icon,
               pkg: app.pkg,
             },
-            undefined,
+            app.pkg,
             channel.id
           );
         });
@@ -201,6 +203,12 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.app-grid {
+  width: 100%;
+  gap: var(--j-space-400);
+  display: grid;
+  grid-template-columns: 1fr;
+}
 .app-card {
   padding: var(--j-space-500);
   border-radius: var(--j-border-radius);

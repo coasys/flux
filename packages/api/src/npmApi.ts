@@ -1,4 +1,5 @@
 export type FluxApp = {
+  created: string;
   pkg: string;
   org: string;
   version: string;
@@ -12,9 +13,9 @@ export async function getApp(name: string): Promise<FluxApp> {
   const pkg = await res.json();
   const latest = pkg["dist-tags"].latest;
   const fluxapp = pkg.versions[latest]?.fluxapp;
-  const wcName = await generateWCName(pkg.name);
 
   return {
+    created: pkg.time.created,
     pkg: pkg.name,
     version: latest,
     org: "",

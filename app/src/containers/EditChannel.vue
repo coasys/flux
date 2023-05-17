@@ -11,7 +11,11 @@
         @input="(e) => (name = e.target.value)"
       ></j-input>
 
-      <j-flex direction="column" gap="500">
+      <j-box v-if="isLoading" align="center" p="500">
+        <j-spinner></j-spinner>
+      </j-box>
+
+      <j-flex v-if="!isLoading" direction="column" gap="500">
         <div class="app-card" v-for="app in packages" :key="app.name">
           <j-box pb="500">
             <j-badge
@@ -81,8 +85,12 @@ export default defineComponent({
   emits: ["cancel", "submit"],
   components: { ChannnelViewOptions },
   async created() {
+    this.isLoading = true;
     const res = await getAllFluxApps();
-    this.packages = res;
+    this.isLoading = false;
+    this.packages = res.filter(
+      (pkg) => new Date(pkg.created) > new Date("05-01-2023")
+    );
   },
   async setup(props) {
     const route = useRoute();
@@ -106,6 +114,7 @@ export default defineComponent({
       apps,
       appRepo,
       channel,
+      isLoading: ref(false),
       packages: ref<FluxApp[]>([]),
       name: ref(""),
       description: ref(""),
@@ -158,21 +167,27 @@ export default defineComponent({
       this.isSaving = true;
 
       try {
+        console.log("selected views", this.selectedViews);
+
         const removeApps = this.apps
           .filter((app) => this.selectedViews.some((a) => a.pkg !== app.pkg))
           .map((app) => {
-            this.appRepo?.remove(app.id);
+            console.log("remove?", app);
+            return this.appRepo?.remove(app.id);
           });
 
         await Promise.all(removeApps);
 
         const newApps = this.selectedViews.map((app) => {
-          this.appRepo?.create({
-            name: app.name,
-            description: app.description,
-            icon: app.icon,
-            pkg: app.pkg,
-          });
+          this.appRepo?.create(
+            {
+              name: app.name,
+              description: app.description,
+              icon: app.icon,
+              pkg: app.pkg,
+            },
+            app.pkg
+          );
         });
 
         await Promise.all(newApps);

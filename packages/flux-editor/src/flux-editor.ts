@@ -342,10 +342,7 @@ export default class MyElement extends LitElement {
                       @click=${() => this.selectSuggestion(i)}
                     >
                       <j-flex a="center" gap="300">
-                        <j-avatar
-                          hash=${`did:key:${p.did}`}
-                          size="xs"
-                        ></j-avatar>
+                        <j-avatar hash=${p.did} size="xs"></j-avatar>
                         <j-text variant="body" nomargin> ${p.username} </j-text>
                       </j-flex>
                     </j-menu-item>`
