@@ -2,12 +2,11 @@
   "name": "@fluxapp/flux-editor",
   "version": "0.5.10",
   "type": "module",
-  "module": "build/flux-editor.js",
-  "main": "build/flux-editor.js",
+  "module": "dist/main.js",
+  "main": "dist/main.js",
   "exports": {
-    ".": "./build/flux-editor.js"
+    ".": "./dist/main.js"
   },
-  "types": "types/flux-editor.d.ts",
   "files": [
     "build",
     "types"

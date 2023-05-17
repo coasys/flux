@@ -17,3 +17,7 @@
 .titleInput::part(input-field) {
   padding: 0;
 }
+
+.editor::part(footer) {
+  display: none;
+}

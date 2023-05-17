@@ -48,7 +48,7 @@
     <flux-container>
       <flux-editor class="chat" placeholder="Add a message...">
         <footer slot="footer">
-          <j-button circle square size="sm" variant="primary">
+          <j-button class="submit" circle square size="sm" variant="primary">
             <j-icon size="xs" name="send"></j-icon>
           </j-button>
           <j-button
@@ -73,6 +73,10 @@
         .addEventListener("click", () => {
           document.querySelector("flux-editor").classList.toggle("showToolbar");
         });
+
+      document.querySelector(".submit").addEventListener("click", () => {
+        document.querySelector("flux-editor").submit();
+      });
 
       customElements.define("flux-editor", Editor);
 

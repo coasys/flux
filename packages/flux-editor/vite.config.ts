@@ -8,16 +8,10 @@ export default defineConfig({
   // @ts-ignore
   plugins: [cssInjectedByJsPlugin()],
   build: {
-    outDir: "build",
     lib: {
-      entry: "src/flux-container.ts",
-      formats: ["es"],
-    },
-    manifest: true,
-    rollupOptions: {
-      input: {
-        main: resolve(__dirname, "index.html"),
-      },
+      entry: resolve(__dirname, "src/flux-editor.ts"),
+      name: "FluxEditor",
+      fileName: "main",
     },
   },
 });

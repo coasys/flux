@@ -1,8 +1,7 @@
-import { useContext, useEffect, useState, useMemo } from "preact/hooks";
+import { useState } from "preact/hooks";
 import { useAgent, useEntries } from "@fluxapp/react-web";
 import styles from "./index.module.css";
 import { getTimeSince } from "@fluxapp/utils";
-import { Profile } from "@fluxapp/types";
 import Avatar from "../Avatar";
 import Editor from "../Editor";
 import { Message as MessageModel } from "@fluxapp/api";
@@ -92,18 +91,12 @@ export default function CommentItem({ agent, comment, perspective }) {
         )}
         {showEditor && showComments && (
           <j-box pt="300" pb="500">
-            <Editor onChange={(content) => setComment(content)} />
-            <j-box pt="200">
-              <j-button
-                loading={isCreating}
-                disabled={isCreating}
-                onClick={submitComment}
-                size="sm"
-                variant="primary"
-              >
-                Comment
-              </j-button>
-            </j-box>
+            <flux-editor
+              placeholder="Add a comment..."
+              perspective={perspective}
+              agent={agent}
+              source={comment.id}
+            ></flux-editor>
           </j-box>
         )}
 

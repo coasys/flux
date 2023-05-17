@@ -15,7 +15,7 @@ export default class MyElement extends LitElement {
   static styles = css`
     :host {
       --grid-template-areas: "toolbar" "body" "footer";
-      --body-min-height: 100px;
+      --body-min-height: 80px;
       display: block;
       width: 100%;
       box-sizing: border-box;
@@ -175,6 +175,15 @@ export default class MyElement extends LitElement {
           },
         }),
       ],
+    });
+    this.editor.on("blur", (e) => {
+      let event = new CustomEvent("change", {
+        detail: {
+          json: e.editor.getJSON(),
+          html: e.editor.getHTML(),
+        },
+      });
+      this.dispatchEvent(event);
     });
   }
 

@@ -146,6 +146,11 @@ export default function CreatePost({
     FR.readAsDataURL(files[0]);
   }
 
+  function onEditorChange(e) {
+    const html = e.detail.html;
+    setState({ ...state, body: html });
+  }
+
   const showBody = true;
   const showUrl = entryType === PostOption.Link;
   const showImage = entryType === PostOption.Image;
@@ -220,13 +225,10 @@ export default function CreatePost({
               </j-box>
             )}
             {showBody && (
-              <Editor
-                style={{ minHeight: "200px" }}
-                initialContent={initState.body}
-                onChange={(e) =>
-                  setState((oldState) => ({ ...oldState, body: e }))
-                }
-              ></Editor>
+              <flux-editor
+                className={styles.editor}
+                onChange={onEditorChange}
+              ></flux-editor>
             )}
           </j-flex>
         </j-box>
