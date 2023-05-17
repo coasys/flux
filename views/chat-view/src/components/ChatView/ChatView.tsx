@@ -13,6 +13,19 @@ type Props = {
   source: string;
 };
 
+function differenceInMinutes(
+  timestamp1: string | number | Date,
+  timestamp2: string | number | Date
+): number {
+  const date1 = new Date(timestamp1);
+  const date2 = new Date(timestamp2);
+
+  const differenceInMilliseconds = date1.getTime() - date2.getTime();
+  const differenceInMinutes = differenceInMilliseconds / (1000 * 60);
+
+  return Math.floor(differenceInMinutes);
+}
+
 export default function ChatView({ agent, perspective, source }: Props) {
   const [showToolbar, setShowToolbar] = useState(false);
   const [content, setContent] = useState("");
@@ -40,6 +53,23 @@ export default function ChatView({ agent, perspective, source }: Props) {
     }
   }
 
+  function showAvatar(index: number): boolean {
+    const previousMessage = messages[index - 1];
+    const message = messages[index];
+
+    if (!previousMessage || !message) {
+      return true;
+    }
+
+    return previousMessage.author !== message.author
+      ? true
+      : previousMessage.author === message.author &&
+          differenceInMinutes(
+            new Date(message.timestamp),
+            new Date(previousMessage.timestamp)
+          ) >= 2;
+  }
+
   return (
     <>
       <div className={styles.messageList}>
@@ -54,6 +84,8 @@ export default function ChatView({ agent, perspective, source }: Props) {
           itemContent={(index) => {
             return (
               <MessageItem
+                perspective={perspective}
+                showAvatar={showAvatar(index)}
                 key={messages[index].id}
                 agent={agent}
                 message={messages[index]}

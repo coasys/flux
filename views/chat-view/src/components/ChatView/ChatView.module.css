@@ -25,7 +25,6 @@
 
 .scroller {
   height: 100%;
-  padding: 0 var(--j-space-500);
 }
 
 .footer {

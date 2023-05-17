@@ -1,4 +1,67 @@
+.message {
+  padding: var(--j-space-300) var(--j-space-500);
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: var(--j-space-500);
+  position: relative;
+}
+
+.message:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.toolbar {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--j-space-300);
+  padding: var(--j-space-100);
+  border-radius: var(--j-border-radius);
+  background: var(--j-color-white);
+  box-shadow: var(--j-depth-100);
+}
+
+.message:hover .toolbar {
+  display: flex;
+  position: absolute;
+  right: var(--j-space-500);
+  bottom: 0;
+}
+
+.reactions {
+  display: flex;
+  gap: var(--j-space-200);
+  flex-wrap: wrap;
+}
+
+.reaction {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  background: var(--j-color-white);
+  padding: 3px 10px;
+  font-size: var(--j-font-size-400);
+  border-radius: var(--j-border-radius);
+}
+
+.header {
+  display: flex;
+  gap: var(--j-space-300);
+  align-items: center;
+}
+
+.timestamp {
+  color: var(--j-color-ui-500);
+  font-size: var(--j-font-size-200);
+}
+
 .username {
   color: var(--j-color-black);
   text-decoration: none;
+}
+
+.username:hover {
+  text-decoration: underline;
 }
