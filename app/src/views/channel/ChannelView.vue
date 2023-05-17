@@ -67,7 +67,6 @@
 
     <template v-for="app in apps">
       <component
-        style="display: block; height: calc(100% - var(--app-header-height))"
         v-show="currentView === app.pkg && wcNames[app.pkg]"
         :is="wcNames[app.pkg]"
         class="perspective-view"
@@ -199,17 +198,21 @@ export default defineComponent({
   watch: {
     apps: {
       handler: function (val) {
-        console.log("whaat", val);
         this.currentView = val[0]?.pkg;
         // Add new views
         val.forEach(async (app: App) => {
           const wcName = await generateWCName(app.pkg);
-          this.wcNames = { ...this.wcNames, [app.pkg]: wcName };
+
           if (!customElements.get(wcName)) {
             const module = await import(
               `https://cdn.jsdelivr.net/npm/${app.pkg}/+esm`
             );
             customElements.define(wcName, module.default);
+            this.wcNames[app.pkg] = wcName;
+            this.$forceUpdate();
+          } else {
+            this.wcNames[app.pkg] = wcName;
+            this.$forceUpdate();
           }
         });
       },
@@ -236,7 +239,6 @@ export default defineComponent({
         }
 
         if (!url.startsWith("http")) {
-          console.log("test");
           e.preventDefault();
         }
       }
@@ -436,5 +438,10 @@ export default defineComponent({
     justify-content: space-between;
     gap: 0;
   }
+}
+
+.perspective-view {
+  display: block;
+  height: calc(100% - var(--app-header-height));
 }
 </style>

@@ -1,8 +1,7 @@
 import { useState } from "preact/hooks";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
-import { useEntry, useEntries } from "@fluxapp/react-web";
+import { useEntries } from "@fluxapp/react-web";
 
-import { Community, Post } from "@fluxapp/api";
 import Todo from "../models/Todo";
 
 import styles from "../App.module.css";
@@ -14,11 +13,6 @@ type Props = {
 
 export default function TodoView({ perspective, source }: Props) {
   const [title, setTitle] = useState("");
-
-  const { entry: community } = useEntry({
-    perspective,
-    model: Community,
-  });
 
   const { entries: todos, model } = useEntries({
     perspective,
@@ -54,7 +48,7 @@ export default function TodoView({ perspective, source }: Props) {
           color="primary-500"
           variant="success"
         >
-          {community?.name}
+          Make a new todo
         </j-text>
       </j-box>
 

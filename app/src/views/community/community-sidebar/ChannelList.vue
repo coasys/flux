@@ -38,7 +38,7 @@
               class="channel__notification"
               v-if="channel.hasNewMessages"
             ></div>
-
+            <!--
             <j-icon
               @click.stop="handleToggleClick(channel.id)"
               slot="start"
@@ -46,6 +46,7 @@
               v-if="channel.views.length > 1"
               :name="channel.expanded ? 'chevron-down' : 'chevron-right'"
             />
+            -->
             <j-icon
               slot="start"
               size="xs"

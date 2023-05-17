@@ -23,6 +23,7 @@ export default class MyElement extends LitElement {
     .base {
       border-radius: var(--j-border-radius);
       display: grid;
+      width: 100%;
       border: 1px solid var(--j-color-ui-100);
       grid-template-areas: var(--grid-template-areas);
     }
@@ -285,6 +286,10 @@ export default class MyElement extends LitElement {
 
       this.members = newProfiles;
     }
+  }
+
+  clear() {
+    this.editor.commands.clearContent();
   }
 
   async submit() {

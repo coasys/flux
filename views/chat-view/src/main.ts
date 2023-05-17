@@ -1,14 +1,15 @@
 import "preact/debug";
 
-if (!window.ResizeObserver) window.ResizeObserver = ResizeObserver;
-
 import { toCustomElement } from "@fluxapp/react-web";
-import MyComponent from "./App";
+import Editor from "@fluxapp/flux-editor";
+import App from "./App";
 
-const CustomElement = toCustomElement(
-  MyComponent,
-  ["perspective", "agent", "source"],
-  { shadow: false }
-);
+if (!customElements.get("flux-editor")) {
+  customElements.define("flux-editor", Editor);
+}
+
+const CustomElement = toCustomElement(App, ["perspective", "agent", "source"], {
+  shadow: false,
+});
 
 export default CustomElement;

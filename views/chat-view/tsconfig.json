@@ -4,13 +4,13 @@
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment",
     "downlevelIteration": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "baseUrl": "/",
+    "paths": {
+      "react": ["node_modules/preact/compat"],
+      "react-dom": ["node_modules/preact/compat"]
+    }
   },
-  "include": ["src**/*.ts"],
-  "exclude": [
-    "node_modules",
-    "../utils/node_modules",
-    "../../node_modules",
-    "**/*.spec.ts"
-  ]
+  "include": ["./globals.d.ts", "src/**/*.tsx", "src/**/*.ts"]
 }

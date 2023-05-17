@@ -18,7 +18,8 @@
       }"
     >
       <channel-view
-        v-if="loadedChannels[channel.id] && channel?.id === channelId"
+        v-if="loadedChannels[channel.id]"
+        v-show="channel?.id === channelId"
         :channelId="channel.id"
         :communityId="data.perspective?.uuid"
       ></channel-view>

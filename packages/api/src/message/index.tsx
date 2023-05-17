@@ -7,7 +7,7 @@ import {
   subjectFlag,
 } from "@perspect3vism/ad4m";
 
-const { BODY, REPLY_TO, ENTRY_TYPE } = community;
+const { BODY, REPLY_TO, ENTRY_TYPE, REACTION } = community;
 
 @SDNAClass({
   name: "Message",
@@ -25,6 +25,11 @@ export class Message {
     resolveLanguage: "literal",
   })
   body: string;
+
+  @subjectCollection({
+    through: REACTION,
+  })
+  reactions: string[] = [];
 
   @subjectCollection({
     through: REPLY_TO,
