@@ -1144,27 +1144,27 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@docsearch/css@3.3.4", "@docsearch/css@^3.3.3":
-  version "3.3.4"
-  resolved "https://registry.npmjs.org/@docsearch/css/-/css-3.3.4.tgz"
-  integrity sha512-vDwCDoVXDgopw/hvr0zEADew2wWaGP8Qq0Bxhgii1Ewz2t4fQeyJwIRN/mWADeLFYPVkpz8TpEbxya/i6Tm0WA==
+"@docsearch/css@3.3.5", "@docsearch/css@^3.3.4":
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/@docsearch/css/-/css-3.3.5.tgz#962b0ecd2c67772e44b39e1a3f84671bc8941af2"
+  integrity sha512-NaXVp3I8LdmJ54fn038KHgG7HmbIzZlKS2FkVf6mKcW5bYMJovkx4947joQyZk5yubxOZ+ddHSh79y39Aevufg==
 
-"@docsearch/js@^3.3.3":
-  version "3.3.4"
-  resolved "https://registry.npmjs.org/@docsearch/js/-/js-3.3.4.tgz"
-  integrity sha512-Xd2saBziXJ1UuVpcDz94zAFEFAM6ap993agh0za2e3LDZLhaW993b1f9gyUL4e1CZLsR076tztG2un2gVncvpA==
+"@docsearch/js@^3.3.4":
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/@docsearch/js/-/js-3.3.5.tgz#54a46e1c669aec1cda36d3947a4f6395181f811f"
+  integrity sha512-nZi074OCryZnzva2LNcbQkwBJIND6cvuFI4s1FIe6Ygf6n9g6B/IYUULXNx05rpoCZ+KEoEt3taROpsHBliuSw==
   dependencies:
-    "@docsearch/react" "3.3.4"
+    "@docsearch/react" "3.3.5"
     preact "^10.0.0"
 
-"@docsearch/react@3.3.4":
-  version "3.3.4"
-  resolved "https://registry.npmjs.org/@docsearch/react/-/react-3.3.4.tgz"
-  integrity sha512-aeOf1WC5zMzBEi2SI6WWznOmIo9rnpN4p7a3zHXxowVciqlI4HsZGtOR9nFOufLeolv7HibwLlaM0oyUqJxasw==
+"@docsearch/react@3.3.5":
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/@docsearch/react/-/react-3.3.5.tgz#5e51c18ab8c3f6373a1a624adbfd29fe7046f8a8"
+  integrity sha512-Zuxf4z5PZ9eIQkVCNu76v1H+KAztKItNn3rLzZa7kpBS+++TgNARITnZeUS7C1DKoAhJZFr6T/H+Lvc6h/iiYg==
   dependencies:
     "@algolia/autocomplete-core" "1.8.2"
     "@algolia/autocomplete-preset-algolia" "1.8.2"
-    "@docsearch/css" "3.3.4"
+    "@docsearch/css" "3.3.5"
     algoliasearch "^4.0.0"
 
 "@electron/get@^1.14.1":
@@ -2560,7 +2560,7 @@
   resolved "https://registry.npmjs.org/@virtuoso.dev/urx/-/urx-0.2.13.tgz"
   integrity sha512-iirJNv92A1ZWxoOHHDYW/1KPoi83939o83iUBQHIim0i3tMeSKEh+bxhJdTHQ86Mr4uXx9xGUTq69cp52ZP8Xw==
 
-"@vitejs/plugin-vue@^4.1.0", "@vitejs/plugin-vue@^4.2.1":
+"@vitejs/plugin-vue@^4.2.1":
   version "4.2.1"
   resolved "https://registry.npmjs.org/@vitejs/plugin-vue/-/plugin-vue-4.2.1.tgz"
   integrity sha512-ZTZjzo7bmxTRTkb8GSTwkPOYDIP7pwuyV+RV53c9PYUouwcbkIZIvWvNWlX2b1dYZqtOv7D6iUAnJLVNGcLrSw==
@@ -9595,9 +9595,9 @@ shellwords@^0.1.1:
   resolved "https://registry.npmjs.org/shellwords/-/shellwords-0.1.1.tgz"
   integrity sha512-vFwSUfQvqybiICwZY5+DAWIPLKsWO31Q91JSKl3UYv+K5c2QRPzn0qzec6QPu1Qc9eHYItiP3NdJqNVqetYAww==
 
-shiki@^0.14.1:
+shiki@^0.14.2:
   version "0.14.2"
-  resolved "https://registry.npmjs.org/shiki/-/shiki-0.14.2.tgz"
+  resolved "https://registry.yarnpkg.com/shiki/-/shiki-0.14.2.tgz#d51440800b701392b31ce2336036058e338247a1"
   integrity sha512-ltSZlSLOuSY0M0Y75KA+ieRaZ0Trf5Wl3gutE7jzLuIcWxLp5i/uEnLoQWNvgKXQ5OMpGkJnVMRLAuzjc0LJ2A==
   dependencies:
     ansi-sequence-parser "^1.1.0"
@@ -10156,11 +10156,6 @@ three@^0.150.1:
   version "0.150.1"
   resolved "https://registry.npmjs.org/three/-/three-0.150.1.tgz"
   integrity sha512-5C1MqKUWaHYo13BX0Q64qcdwImgnnjSOFgBscOzAo8MYCzEtqfQqorEKMcajnA3FHy1yVlIe9AmaMQ0OQracNA==
-
-three@^0.151.3:
-  version "0.151.3"
-  resolved "https://registry.npmjs.org/three/-/three-0.151.3.tgz"
-  integrity sha512-+vbuqxFy8kzLeO5MgpBHUvP/EAiecaDwDuOPPDe6SbrZr96kccF0ktLngXc7xA7bzyd3N0t2f6mw3Z9y6JCojQ==
 
 throat@^5.0.0:
   version "5.0.0"
@@ -10781,7 +10776,18 @@ vite@^3.1.0:
   optionalDependencies:
     fsevents "~2.3.2"
 
-vite@^4.3.1, vite@^4.3.5:
+vite@^4.3.3:
+  version "4.3.8"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-4.3.8.tgz#70cd6a294ab52d7fb8f37f5bc63d117dd19e9918"
+  integrity sha512-uYB8PwN7hbMrf4j1xzGDk/lqjsZvCDbt/JC5dyfxc19Pg8kRm14LinK/uq+HSLNswZEoKmweGdtpbnxRtrAXiQ==
+  dependencies:
+    esbuild "^0.17.5"
+    postcss "^8.4.23"
+    rollup "^3.21.0"
+  optionalDependencies:
+    fsevents "~2.3.2"
+
+vite@^4.3.5:
   version "4.3.5"
   resolved "https://registry.npmjs.org/vite/-/vite-4.3.5.tgz"
   integrity sha512-0gEnL9wiRFxgz40o/i/eTBwm+NEbpUeTWhzKrZDSdKm6nplj+z4lKz8ANDgildxHm47Vg8EUia0aicKbawUVVA==
@@ -10792,21 +10798,21 @@ vite@^4.3.1, vite@^4.3.5:
   optionalDependencies:
     fsevents "~2.3.2"
 
-vitepress@1.0.0-alpha.74:
-  version "1.0.0-alpha.74"
-  resolved "https://registry.npmjs.org/vitepress/-/vitepress-1.0.0-alpha.74.tgz"
-  integrity sha512-n5UHqsLJKaJ3V6BSiofS5ZVhtxzarNIn3/kyOzUp/vePmVbQyX/pZ6/MhZgNr0g5t4E55j7XM3AHf/Fo0hnrpw==
+vitepress@1.0.0-alpha.75:
+  version "1.0.0-alpha.75"
+  resolved "https://registry.yarnpkg.com/vitepress/-/vitepress-1.0.0-alpha.75.tgz#fbd03ef80b3877d41d0abd369560b7ea1124c017"
+  integrity sha512-twpPZ/6UnDR8X0Nmj767KwKhXlTQQM9V/J1i2BP9ryO29/w4hpxBfEum6nvfpNhJ4H3h+cIhwzAK/e9crZ6HEQ==
   dependencies:
-    "@docsearch/css" "^3.3.3"
-    "@docsearch/js" "^3.3.3"
-    "@vitejs/plugin-vue" "^4.1.0"
+    "@docsearch/css" "^3.3.4"
+    "@docsearch/js" "^3.3.4"
+    "@vitejs/plugin-vue" "^4.2.1"
     "@vue/devtools-api" "^6.5.0"
     "@vueuse/core" "^10.1.0"
     body-scroll-lock "4.0.0-beta.0"
     mark.js "8.11.1"
     minisearch "^6.0.1"
-    shiki "^0.14.1"
-    vite "^4.3.1"
+    shiki "^0.14.2"
+    vite "^4.3.3"
     vue "^3.2.47"
 
 vscode-oniguruma@^1.7.0:

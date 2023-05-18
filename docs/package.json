@@ -12,8 +12,7 @@
   "dependencies": {
     "@fluxapp/flux-container": "*",
     "@fluxapp/ui": "*",
-    "vitepress": "1.0.0-alpha.74",
-    "three": "^0.151.3",
+    "vitepress": "1.0.0-alpha.75",
     "eventsource-parser": "^1.0.0"
   },
   "devDependencies": {

@@ -10,21 +10,17 @@ export default function MessageItem({
   showAvatar,
   agent,
   message,
+  onEmojiClick,
+  onReplyClick,
 }: {
   perspective: PerspectiveProxy;
   showAvatar?: boolean;
   agent: AgentClient;
   message: Message;
+  onEmojiClick: (id: string) => {};
+  onReplyClick: (id: string) => {};
 }) {
   const { profile } = useAgent({ client: agent, did: message.author });
-
-  function addReply(emoji: string) {
-    perspective.add({
-      source: message.id,
-      predicate: community.REACTION,
-      target: Literal.from(emoji).toUrl(),
-    });
-  }
 
   return (
     <div className={styles.message}>
@@ -64,16 +60,16 @@ export default function MessageItem({
         </div>
       </div>
       <div className={styles.toolbar}>
+        <j-button size="sm" square variant="ghost">
+          <j-icon size="sm" name="emoji-smile"></j-icon>
+        </j-button>
         <j-button
-          onclick={() => addReply("😊")}
+          onClick={() => onReplyClick(message.id)}
           size="sm"
           square
           variant="ghost"
         >
-          <j-icon size="sm" name="emoji-smile"></j-icon>
-        </j-button>
-        <j-button size="sm" square variant="ghost">
-          <j-icon size="sm" name="emoji-smile"></j-icon>
+          <j-icon size="sm" name="reply"></j-icon>
         </j-button>
       </div>
     </div>

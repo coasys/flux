@@ -9,9 +9,7 @@ import {
   createNeighbourhoodMeta,
 } from "@fluxapp/utils";
 import { SubjectRepository } from "./factory";
-import { createSDNA } from "./createSDNA";
 import { Community } from "./community";
-import { Member } from "./member";
 
 export interface Payload {
   name: string;
@@ -99,15 +97,12 @@ export default async function createCommunity({
 
     const community = await CommunityModel.create(metaData, "ad4m://self");
 
-    //Default popular setting is 3 upvotes on thumbsup emoji
-    const socialDnaLink = await createSDNA(perspective!.uuid);
-
     // @ts-ignore
     return {
       uuid: perspective.uuid,
       author: author,
       id: community.id,
-      timestamp: socialDnaLink.timestamp,
+      timestamp: community.timestamp,
       name: community.name,
       description: community.description || "",
       image: community.image,
