@@ -226,6 +226,8 @@ export default function CreatePost({
             )}
             {showBody && (
               <flux-editor
+                perspective={perspective}
+                source={source}
                 className={styles.editor}
                 onChange={onEditorChange}
               ></flux-editor>

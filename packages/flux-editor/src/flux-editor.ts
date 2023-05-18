@@ -180,7 +180,9 @@ export default class MyElement extends LitElement {
     this.editor = new Editor({
       element: this.editorElement,
       extensions: [
-        StarterKit,
+        StarterKit.configure({
+          heading: false,
+        }),
         Placeholder.configure({
           placeholder: this.placeholder || "",
         }),
