@@ -4,6 +4,7 @@ import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Mention from "@tiptap/extension-mention";
 import Placeholder from "@tiptap/extension-placeholder";
+import Link from "@tiptap/extension-link";
 import { PluginKey } from "prosemirror-state";
 import { SuggestionProps, SuggestionKeyDownProps } from "@tiptap/suggestion";
 import { Channel, Message, SubjectRepository, getProfile } from "@fluxapp/api";
@@ -185,6 +186,9 @@ export default class MyElement extends LitElement {
         }),
         Placeholder.configure({
           placeholder: this.placeholder || "",
+        }),
+        Link.configure({
+          protocols: ["neighbourhood"],
         }),
         Mention.configure({
           HTMLAttributes: {
