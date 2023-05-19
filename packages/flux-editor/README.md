@@ -1,13 +1,19 @@
-# Flux Container
+# Flux Editor
 
-Wrapper web component to view your app in a flux perspective.
+Rich-text editor web component for your Flux-app.
+
+## Features
+
+- Standard RT formatting
+- Person tagging with `@`
+- Channel tagging with `#`
 
 ## How to use
 
-Import the component and wrap your app in `<flux-container/>`:
+Import the component and add in `<flux-editor/>`:
 
-```
-<flux-container>
-    <your-app />
-</flux-container>
-```
+## Props
+
+- `perspective` (required)
+- `source` (required)
+- `placeholder`

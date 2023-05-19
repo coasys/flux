@@ -4,12 +4,19 @@ import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Mention from "@tiptap/extension-mention";
 import Placeholder from "@tiptap/extension-placeholder";
+import Link from "@tiptap/extension-link";
+import { PluginKey } from "prosemirror-state";
 import { SuggestionProps, SuggestionKeyDownProps } from "@tiptap/suggestion";
-import { Message, SubjectRepository, getProfile } from "@fluxapp/api";
+import { Channel, Message, SubjectRepository, getProfile } from "@fluxapp/api";
 import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import { Profile } from "@fluxapp/types";
 import defaultActions from "./defaultActions";
+
+type Suggestion = {
+  id: string;
+  label: string;
+};
 
 export default class MyElement extends LitElement {
   static styles = css`
@@ -123,10 +130,16 @@ export default class MyElement extends LitElement {
   members: Profile[] = [];
 
   @state()
-  suggestions: Profile[] = [];
+  channels: Channel[] = [];
+
+  @state()
+  suggestions: Suggestion[] = [];
 
   @state()
   suggestionIndex: number = -1;
+
+  @state()
+  isSuggesting: boolean = false;
 
   @state()
   isCreating: boolean = false;
@@ -136,14 +149,14 @@ export default class MyElement extends LitElement {
 
   constructor() {
     super();
-    this.fetchProfiles();
 
     this.upHandler = this.upHandler.bind(this);
     this.downHandler = this.downHandler.bind(this);
     this.selectSuggestion = this.selectSuggestion.bind(this);
-    this.getSuggestions = this.getSuggestions.bind(this);
+    this.getMentionSuggestions = this.getMentionSuggestions.bind(this);
     this.renderSuggestions = this.renderSuggestions.bind(this);
     this.fetchProfiles = this.fetchProfiles.bind(this);
+    this.fetchChannels = this.fetchChannels.bind(this);
   }
 
   get editorElement() {
@@ -158,20 +171,45 @@ export default class MyElement extends LitElement {
     super.connectedCallback();
   }
 
+  async updated(changedProperties) {
+    if (changedProperties.has("perspective")) {
+      this.fetchProfiles();
+      this.fetchChannels();
+    }
+  }
+
   firstUpdated() {
     this.editor = new Editor({
       element: this.editorElement,
       extensions: [
-        StarterKit,
+        StarterKit.configure({
+          heading: false,
+        }),
         Placeholder.configure({
           placeholder: this.placeholder || "",
+        }),
+        Link.configure({
+          protocols: ["neighbourhood"],
         }),
         Mention.configure({
           HTMLAttributes: {
             class: "mention",
           },
           suggestion: {
-            items: ({ query }) => this.getSuggestions(query),
+            char: "@",
+            pluginKey: new PluginKey("atKey"),
+            items: ({ query }) => this.getMentionSuggestions(query),
+            render: this.renderSuggestions,
+          },
+        }),
+        Mention.configure({
+          HTMLAttributes: {
+            class: "mention",
+          },
+          suggestion: {
+            char: "#",
+            pluginKey: new PluginKey("hashKey"),
+            items: ({ query }) => this.getChannelSuggestions(query),
             render: this.renderSuggestions,
           },
         }),
@@ -191,7 +229,7 @@ export default class MyElement extends LitElement {
   renderSuggestions() {
     return {
       onStart: (props: SuggestionProps<any>) => {
-        console.log("onStart", props);
+        this.isSuggesting = true;
 
         if (this.suggestionsEl) {
           const { x, y, height } = props.clientRect();
@@ -204,8 +242,6 @@ export default class MyElement extends LitElement {
       },
 
       onUpdate: (props: SuggestionProps<any>) => {
-        console.log("onUpdate", props);
-
         if (this.suggestionsEl) {
           const { x, y, height } = props.clientRect();
           this.suggestionsEl.style.top = `${y + height}px`;
@@ -217,8 +253,6 @@ export default class MyElement extends LitElement {
       },
 
       onKeyDown: (props: SuggestionKeyDownProps) => {
-        console.log("onKeyDown", props);
-
         if (props.event.key === "ArrowUp") {
           this.upHandler();
           return true;
@@ -238,8 +272,6 @@ export default class MyElement extends LitElement {
       },
 
       onExit: () => {
-        console.log("onExit");
-
         this.suggestions = [];
       },
     };
@@ -257,21 +289,24 @@ export default class MyElement extends LitElement {
 
   selectSuggestion(index: number) {
     const item = this.suggestions[index];
-    this.suggestionCallback({
-      id: item.did,
-      label: item.username,
-    });
+    this.suggestionCallback({ id: item.id });
   }
 
-  async getSuggestions(query: string) {
-    const matches = [
-      { did: "123", username: "BambinoToad" },
-      { did: "223", username: "ToadChrisT" },
-      { did: "323", username: "Toad" },
-      { did: "423", username: "ToadRoxblang" },
-    ]
+  async getMentionSuggestions(query: string) {
+    const matches = this.members
       .filter((m) => m.username.toLowerCase().startsWith(query.toLowerCase()))
-      .slice(0, 10) as Profile[];
+      .map((m) => ({ id: m.did, label: m.username }))
+      .slice(0, 10) as Suggestion[];
+
+    this.suggestions = matches;
+    return matches;
+  }
+
+  async getChannelSuggestions(query: string) {
+    const matches = this.channels
+      .filter((c) => c.name.toLowerCase().startsWith(query.toLowerCase()))
+      .map((m) => ({ id: m.name, label: m.name }))
+      .slice(0, 10) as Suggestion[];
 
     this.suggestions = matches;
     return matches;
@@ -290,6 +325,22 @@ export default class MyElement extends LitElement {
 
   clear() {
     this.editor.commands.clearContent();
+  }
+
+  async fetchChannels() {
+    if (this.perspective) {
+      const model = new SubjectRepository(Channel, {
+        perspective: this.perspective,
+        source: "ad4m://self",
+      });
+
+      model
+        .getAllData()
+        .then((entries) => {
+          this.channels = entries;
+        })
+        .catch((error) => console.log);
+    }
   }
 
   async submit() {
@@ -340,15 +391,15 @@ export default class MyElement extends LitElement {
                 <j-menu>
                   ${map(
                     this.suggestions,
-                    (p, i) => html`<j-menu-item
+                    (s, i) => html`<j-menu-item
                       square
                       variant="ghost"
                       ?selected=${i === this.suggestionIndex}
                       @click=${() => this.selectSuggestion(i)}
                     >
                       <j-flex a="center" gap="300">
-                        <j-avatar hash=${p.did} size="xs"></j-avatar>
-                        <j-text variant="body" nomargin> ${p.username} </j-text>
+                        <j-avatar hash=${s.id} size="xs"></j-avatar>
+                        <j-text variant="body" nomargin> ${s.label} </j-text>
                       </j-flex>
                     </j-menu-item>`
                   )}
