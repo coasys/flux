@@ -12,21 +12,6 @@
   align-items: end;
 }
 
-.messageList {
-  display: grid;
-  flex: 1;
-  max-height: 100%;
-  overflow-y: auto;
-  grid-template-columns: 1fr;
-  gap: var(--j-space-500);
-  width: 100%;
-  padding: 0;
-}
-
-.scroller {
-  height: 100%;
-}
-
 .footer {
   background-color: var(--j-color-white);
   display: block;

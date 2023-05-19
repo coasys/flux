@@ -10,6 +10,23 @@
   background: rgba(0, 0, 0, 0.02);
 }
 
+.body {
+  padding-top: var(--j-space-300);
+  padding-bottom: var(--j-space-300);
+}
+
+.body *:first-child {
+  margin-top: 0;
+}
+
+.body *:last-child {
+  margin-bottom: 0;
+}
+
+.body *:last-child:empty {
+  margin-top: 0;
+}
+
 .toolbar {
   display: none;
   align-items: center;

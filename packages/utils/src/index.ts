@@ -1,4 +1,3 @@
-export * from "./cacheImage";
 export * from "./cacheLinks";
 export * from "./createNeighbourhoodMeta";
 export * from "./expressionHelpers";

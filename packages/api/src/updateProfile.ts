@@ -6,7 +6,6 @@ import {
   blobToDataURL,
   createLinks,
   createLiteralLinks,
-  cacheImage,
 } from "@fluxapp/utils";
 
 import getProfile from "./getProfile";
@@ -72,7 +71,6 @@ export default async function updateProfile(
         },
         FILE_STORAGE_LANGUAGE
       );
-      cacheImage(profileBackgroundUrl, compressedImage);
     }
 
     if (payload.profilePicture) {
@@ -88,7 +86,6 @@ export default async function updateProfile(
         },
         FILE_STORAGE_LANGUAGE
       );
-      cacheImage(profilePictureUrl, compressedImage);
     }
 
     if (payload.profilePicture) {
@@ -104,7 +101,6 @@ export default async function updateProfile(
         },
         FILE_STORAGE_LANGUAGE
       );
-      cacheImage(profileThumbnailUrl, compressedImage);
     }
 
     const removals = perspective.links.filter(
