@@ -21,7 +21,7 @@ export default function MessageItem({
   showAvatar?: boolean;
   agent: AgentClient;
   message: Message;
-  onEmojiClick?: (message: Message) => void;
+  onEmojiClick?: (message: Message, position: { x: number; y: number }) => void;
   onReplyClick?: (message: Message) => void;
 }) {
   const [replyId, setReplyId] = useState("");
@@ -108,7 +108,7 @@ export default function MessageItem({
       </div>
       <div className={styles.toolbar}>
         <j-button
-          onClick={() => onEmojiClick(message)}
+          onClick={(e) => onEmojiClick(message, { x: e.clientX, y: e.clientY })}
           size="sm"
           square
           variant="ghost"

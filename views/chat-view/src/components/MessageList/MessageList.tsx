@@ -10,7 +10,7 @@ type Props = {
   perspective: PerspectiveProxy;
   agent: AgentClient;
   source: string;
-  onEmojiClick?: (message: Message) => void;
+  onEmojiClick?: (message: Message, position: { x: number; y: number }) => void;
   onReplyClick?: (message: Message) => void;
 };
 
@@ -64,6 +64,7 @@ export default function MessageList({
               key={messages[index].id}
               agent={agent}
               message={messages[index]}
+              onEmojiClick={onEmojiClick}
               onReplyClick={onReplyClick}
             ></MessageItem>
           );

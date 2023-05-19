@@ -1,5 +1,5 @@
 import { useRef, useState } from "preact/hooks";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { PerspectiveProxy, Literal } from "@perspect3vism/ad4m";
 import { useEntries } from "@fluxapp/react-web";
 import { Message } from "@fluxapp/api";
 import styles from "./ChatView.module.css";
@@ -7,7 +7,7 @@ import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import MessageList from "../MessageList/MessageList";
 import { community } from "@fluxapp/constants";
 
-const { REPLY_TO } = community;
+const { REPLY_TO, REACTION } = community;
 
 type Props = {
   agent: AgentClient;
@@ -17,6 +17,11 @@ type Props = {
 
 export default function ChatView({ agent, perspective, source }: Props) {
   const [showToolbar, setShowToolbar] = useState(false);
+  const [pickerInfo, setPickerInfo] = useState<{
+    x: number;
+    y: number;
+    id: string;
+  } | null>(null);
   const [replyMessage, setReplyMessage] = useState<Message | null>(null);
   const editor = useRef(null);
 
@@ -54,9 +59,39 @@ export default function ChatView({ agent, perspective, source }: Props) {
     }
   }
 
+  function onOpenEmojiPicker(
+    message: Message,
+    position: { x: number; y: number }
+  ) {
+    setPickerInfo({ x: position.x, y: position.y, id: message.id });
+  }
+
+  function onEmojiClick(e) {
+    if (pickerInfo.id) {
+      perspective.add({
+        source: pickerInfo.id,
+        predicate: REACTION,
+        target: Literal.from(e.detail.native).toUrl(),
+      });
+    }
+    setPickerInfo(null);
+  }
+
   return (
     <>
+      {pickerInfo?.id && (
+        <j-emoji-picker
+          onChange={onEmojiClick}
+          style={{
+            position: "absolute",
+            zIndex: 999,
+            right: `calc(100% - ${pickerInfo.x}px)`,
+            top: pickerInfo.y,
+          }}
+        ></j-emoji-picker>
+      )}
       <MessageList
+        onEmojiClick={onOpenEmojiPicker}
         onReplyClick={(message) => setReplyMessage(message)}
         perspective={perspective}
         agent={agent}

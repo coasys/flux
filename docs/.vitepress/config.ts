@@ -137,6 +137,10 @@ export default defineConfig({
             { text: "Button", link: "/ui-library/components/button" },
             { text: "Box", link: "/ui-library/components/box" },
             { text: "Checkbox", link: "/ui-library/components/checkbox" },
+            {
+              text: "Emoji Picker",
+              link: "/ui-library/components/emoji-picker",
+            },
             { text: "Flex", link: "/ui-library/components/flex" },
             { text: "Input", link: "/ui-library/components/input" },
             { text: "Menu", link: "/ui-library/components/menu" },

@@ -2014,24 +2014,12 @@
   resolved "https://registry.npmjs.org/@tiptap/extension-italic/-/extension-italic-2.0.3.tgz"
   integrity sha512-cfS5sW0gu7qf4ihwnLtW/QMTBrBEXaT0sJl3RwkhjIBg/65ywJKE5Nz9ewnQHmDeT18hvMJJ1VIb4j4ze9jj9A==
 
-"@tiptap/extension-link@2.0.0-beta.217":
-  version "2.0.0-beta.217"
-  resolved "https://registry.yarnpkg.com/@tiptap/extension-link/-/extension-link-2.0.0-beta.217.tgz#5f0a3eca6ae2bd560d35036e3fffc3823cfbb2bd"
-  integrity sha512-pC1UnK1OrbW+NDdBdHE8sfmZ+tOpIOsHVAeeX6pg1fkdP/FlbPFFvcvILgJc20dr7DiM6dRqYq16H473G9vyEg==
-  dependencies:
-    linkifyjs "^3.0.5"
-
 "@tiptap/extension-link@^2.0.3":
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-link/-/extension-link-2.0.3.tgz#4714a4c23d04032e75b5b8364a9c532f7a385aba"
   integrity sha512-H72tXQ5rkVCkAhFaf08fbEU7EBUCK0uocsqOF+4th9sOlrhfgyJtc8Jv5EXPDpxNgG5jixSqWBo0zKXQm9s9eg==
   dependencies:
     linkifyjs "^4.1.0"
-
-"@tiptap/extension-list-item@2.0.0-beta.217":
-  version "2.0.0-beta.217"
-  resolved "https://registry.yarnpkg.com/@tiptap/extension-list-item/-/extension-list-item-2.0.0-beta.217.tgz#811c1197023bed2ed96f1e88f14ee66eac77d8f7"
-  integrity sha512-yJmB/Je6CAiyjjJyVl77PPv4AWNFejrhxxmIdPfkYNRuQx9xX5yccx/zXC5RMaUFZVttlC4+gXDZsCvxMiVF1g==
 
 "@tiptap/extension-list-item@^2.0.3":
   version "2.0.3"
@@ -4345,6 +4333,11 @@ emittery@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/emittery/-/emittery-1.0.1.tgz"
   integrity sha512-2ID6FdrMD9KDLldGesP6317G78K7km/kMcwItRtVFva7I/cSEOIaLpewaUb+YLXVwdAp3Ctfxh/V5zIl1sj7dQ==
+
+emoji-mart@^5.5.2:
+  version "5.5.2"
+  resolved "https://registry.yarnpkg.com/emoji-mart/-/emoji-mart-5.5.2.tgz#3ddbaf053139cf4aa217650078bc1c50ca8381af"
+  integrity sha512-Sqc/nso4cjxhOwWJsp9xkVm8OF5c+mJLZJFoFfzRuKO+yWiN7K8c96xmtughYb0d/fZ8UC6cLIQ/p4BR6Pv3/A==
 
 emoji-picker-element@^1.14.0:
   version "1.17.0"
@@ -7393,11 +7386,6 @@ linkify-it@^4.0.1:
   integrity sha512-C7bfi1UZmoj8+PQx22XyeXCuBlokoyWQL5pWSP+EI6nzRylyThouddufc2c1NDIcP9k5agmN9fLpA7VNJfIiqw==
   dependencies:
     uc.micro "^1.0.1"
-
-linkifyjs@^3.0.5:
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/linkifyjs/-/linkifyjs-3.0.5.tgz#99e51a3a0c0e232fcb63ebb89eea3ff923378f34"
-  integrity sha512-1Y9XQH65eQKA9p2xtk+zxvnTeQBG7rdAXSkUG97DmuI/Xhji9uaUzaWxRj6rf9YC0v8KKHkxav7tnLX82Sz5Fg==
 
 linkifyjs@^4.1.0:
   version "4.1.1"
