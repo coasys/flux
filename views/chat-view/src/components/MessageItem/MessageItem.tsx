@@ -50,6 +50,11 @@ export default function MessageItem({
       });
   }, [message.id]);
 
+  function onOpenPicker(e) {
+    e.stopPropagation();
+    onEmojiClick(message, { x: e.clientX, y: e.clientY });
+  }
+
   const isFullVersion = replyId || showAvatar;
 
   return (
@@ -107,12 +112,7 @@ export default function MessageItem({
         </div>
       </div>
       <div className={styles.toolbar}>
-        <j-button
-          onClick={(e) => onEmojiClick(message, { x: e.clientX, y: e.clientY })}
-          size="sm"
-          square
-          variant="ghost"
-        >
+        <j-button onClick={onOpenPicker} size="sm" square variant="ghost">
           <j-icon size="sm" name="emoji-smile"></j-icon>
         </j-button>
         <j-button

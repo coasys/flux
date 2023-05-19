@@ -34,6 +34,13 @@ export default class Box extends LitElement {
         });
         this.dispatchEvent(event);
       },
+      onClickOutside: () => {
+        console.log("click outside");
+        const event = new CustomEvent("clickoutside", {
+          bubbles: true,
+        });
+        this.dispatchEvent(event);
+      },
     });
     this.shadowRoot.appendChild(picker);
   }

@@ -1,4 +1,4 @@
-import { useRef, useState } from "preact/hooks";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { PerspectiveProxy, Literal } from "@perspect3vism/ad4m";
 import { useEntries } from "@fluxapp/react-web";
 import { Message } from "@fluxapp/api";
@@ -16,6 +16,7 @@ type Props = {
 };
 
 export default function ChatView({ agent, perspective, source }: Props) {
+  const emojiPicker = useRef();
   const [showToolbar, setShowToolbar] = useState(false);
   const [pickerInfo, setPickerInfo] = useState<{
     x: number;
@@ -63,6 +64,7 @@ export default function ChatView({ agent, perspective, source }: Props) {
     message: Message,
     position: { x: number; y: number }
   ) {
+    console.log("open");
     setPickerInfo({ x: position.x, y: position.y, id: message.id });
   }
 
@@ -79,17 +81,18 @@ export default function ChatView({ agent, perspective, source }: Props) {
 
   return (
     <>
-      {pickerInfo?.id && (
-        <j-emoji-picker
-          onChange={onEmojiClick}
-          style={{
-            position: "absolute",
-            zIndex: 999,
-            right: `calc(100% - ${pickerInfo.x}px)`,
-            top: pickerInfo.y,
-          }}
-        ></j-emoji-picker>
-      )}
+      <j-emoji-picker
+        onclickoutside={() => setPickerInfo(null)}
+        onChange={onEmojiClick}
+        ref={emojiPicker}
+        style={{
+          display: pickerInfo?.id ? "block" : "none",
+          position: "absolute",
+          zIndex: 999,
+          ...getPosition(pickerInfo?.x, pickerInfo?.y, emojiPicker?.current),
+        }}
+      ></j-emoji-picker>
+
       <MessageList
         onEmojiClick={onOpenEmojiPicker}
         onReplyClick={(message) => setReplyMessage(message)}
@@ -136,4 +139,53 @@ export default function ChatView({ agent, perspective, source }: Props) {
       </footer>
     </>
   );
+}
+
+type Position = {
+  left: string;
+  right: string;
+  top: string;
+  bottom: string;
+};
+
+function getPosition(x: number, y: number, el: HTMLElement): Position {
+  if (x === undefined || y === undefined || el === undefined) {
+    return { right: "", top: "", left: "", bottom: "" };
+  }
+
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  const elementWidth = el.offsetWidth;
+  const elementHeight = el.offsetHeight;
+
+  const right = viewportWidth - x;
+  const top = y;
+
+  let rightVal = "";
+  let leftVal = "";
+  let topVal = "";
+  let bottomVal = "";
+
+  if (right < elementWidth) {
+    rightVal = `${right}px`;
+    leftVal = "";
+  } else {
+    rightVal = "";
+    leftVal = `${x}px`;
+  }
+
+  if (top + elementHeight > viewportHeight) {
+    bottomVal = `${viewportHeight - y}px`;
+    topVal = "";
+  } else {
+    bottomVal = "";
+    topVal = `${y}px`;
+  }
+
+  return {
+    right: rightVal,
+    left: leftVal,
+    top: topVal,
+    bottom: bottomVal,
+  };
 }
