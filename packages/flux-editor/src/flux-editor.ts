@@ -2,7 +2,7 @@ import { LitElement, html, property, state, css } from "lit-element";
 import { map } from "lit/directives/map.js";
 import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
-import Mention from "@tiptap/extension-mention";
+import Mention from "./mention";
 import Placeholder from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
 import { PluginKey } from "prosemirror-state";
@@ -63,7 +63,11 @@ export default class MyElement extends LitElement {
       grid-area: footer;
     }
 
-    .mention {
+    a {
+      color: var(--j-color-primary-500);
+    }
+
+    a:not([href^="http"]) {
       word-break: break-word;
       text-decoration: none;
       cursor: pointer;
@@ -109,8 +113,8 @@ export default class MyElement extends LitElement {
   @property({ type: PerspectiveProxy })
   perspective: PerspectiveProxy | null;
 
-  @property({ type: Ad4mClient })
-  client: null;
+  @property({ type: Object })
+  agent: AgentClient | null;
 
   @property({ type: String })
   source: null;
@@ -192,9 +196,6 @@ export default class MyElement extends LitElement {
           protocols: ["neighbourhood"],
         }),
         Mention.configure({
-          HTMLAttributes: {
-            class: "mention",
-          },
           suggestion: {
             char: "@",
             pluginKey: new PluginKey("atKey"),
@@ -203,9 +204,6 @@ export default class MyElement extends LitElement {
           },
         }),
         Mention.configure({
-          HTMLAttributes: {
-            class: "mention",
-          },
           suggestion: {
             char: "#",
             pluginKey: new PluginKey("hashKey"),
@@ -305,7 +303,7 @@ export default class MyElement extends LitElement {
   async getChannelSuggestions(query: string) {
     const matches = this.channels
       .filter((c) => c.name.toLowerCase().startsWith(query.toLowerCase()))
-      .map((m) => ({ id: m.name, label: m.name }))
+      .map((channel) => ({ id: channel.id, label: channel.name }))
       .slice(0, 10) as Suggestion[];
 
     this.suggestions = matches;
@@ -314,11 +312,13 @@ export default class MyElement extends LitElement {
 
   async fetchProfiles() {
     if (this.perspective) {
+      const me = await this.agent.me();
       const neighbourhood = this.perspective.getNeighbourhoodProxy();
       const othersDids = await neighbourhood.otherAgents();
-      const profilePromises = othersDids.map(async (did) => getProfile(did));
+      const profilePromises = [...othersDids, me.did].map(async (did) =>
+        getProfile(did)
+      );
       const newProfiles = await Promise.all(profilePromises);
-
       this.members = newProfiles;
     }
   }
