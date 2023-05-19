@@ -8,7 +8,7 @@ import Link from "@tiptap/extension-link";
 import { PluginKey } from "prosemirror-state";
 import { SuggestionProps, SuggestionKeyDownProps } from "@tiptap/suggestion";
 import { Channel, Message, SubjectRepository, getProfile } from "@fluxapp/api";
-import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
+import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import { Profile } from "@fluxapp/types";
 import defaultActions from "./defaultActions";
@@ -196,17 +196,17 @@ export default class MyElement extends LitElement {
         }),
         Mention.configure({
           suggestion: {
-            char: "@",
-            pluginKey: new PluginKey("atKey"),
-            items: ({ query }) => this.getMentionSuggestions(query),
+            char: "#",
+            pluginKey: new PluginKey("hashKey"),
+            items: ({ query }) => this.getChannelSuggestions(query),
             render: this.renderSuggestions,
           },
         }),
         Mention.configure({
           suggestion: {
-            char: "#",
-            pluginKey: new PluginKey("hashKey"),
-            items: ({ query }) => this.getChannelSuggestions(query),
+            char: "@",
+            pluginKey: new PluginKey("atKey"),
+            items: ({ query }) => this.getMentionSuggestions(query),
             render: this.renderSuggestions,
           },
         }),
@@ -286,12 +286,23 @@ export default class MyElement extends LitElement {
 
   selectSuggestion(index: number) {
     const item = this.suggestions[index];
-    this.suggestionCallback({ id: item.id });
+    this.suggestionCallback({ id: item.id, label: item.label });
+  }
+
+  getSafeString(value: any = "") {
+    if (typeof value === "string") {
+      return value;
+    }
+    return String(value);
   }
 
   async getMentionSuggestions(query: string) {
     const matches = this.members
-      .filter((m) => m.username.toLowerCase().startsWith(query.toLowerCase()))
+      .filter((m) =>
+        this.getSafeString(m.username)
+          .toLowerCase()
+          .startsWith(query.toLowerCase())
+      )
       .map((m) => ({ id: m.did, label: m.username }))
       .slice(0, 10) as Suggestion[];
 
@@ -300,8 +311,11 @@ export default class MyElement extends LitElement {
   }
 
   async getChannelSuggestions(query: string) {
+    console.log("this.channels: ", this.channels);
     const matches = this.channels
-      .filter((c) => c.name.toLowerCase().startsWith(query.toLowerCase()))
+      .filter((c) =>
+        this.getSafeString(c.name).toLowerCase().startsWith(query.toLowerCase())
+      )
       .map((channel) => ({ id: channel.id, label: channel.name }))
       .slice(0, 10) as Suggestion[];
 

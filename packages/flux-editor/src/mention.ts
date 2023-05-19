@@ -20,8 +20,9 @@ export default Node.create<MentionOptions>({
   addOptions() {
     return {
       HTMLAttributes: {},
-      renderLabel({ options, node }) {
-        return `${options.suggestion.char}${node.attrs.label ?? node.attrs.id}`;
+      renderLabel({ node }) {
+        const isMention = node.attrs.id.startsWith("did:");
+        return `${isMention ? "@" : "#"}${node.attrs.label ?? node.attrs.id}`;
       },
       suggestion: {
         char: "@",
@@ -63,13 +64,9 @@ export default Node.create<MentionOptions>({
       },
     };
   },
-
   group: "inline",
-
   inline: true,
-
   selectable: false,
-
   atom: true,
 
   addAttributes() {
@@ -113,7 +110,6 @@ export default Node.create<MentionOptions>({
   },
 
   renderHTML({ node, HTMLAttributes }) {
-    console.log({ node, HTMLAttributes, options: this.options });
     return [
       "a",
       mergeAttributes(
