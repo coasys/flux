@@ -1,13 +1,14 @@
 {
-  "name": "flux-app",
-  "version": "1.0.0",
+  "name": "ad4m-todo-app",
+  "version": "0.0.1",
   "fluxapp": {
     "name": "Todos",
     "description": "Work on a collaborative todo list",
     "icon": "list-check"
   },
   "keywords": [
-    "flux-app"
+    "flux-app",
+    "ad4m-view"
   ],
   "type": "module",
   "files": [
