@@ -1,10 +1,10 @@
 {
   "name": "@fluxapp/chat-view",
-  "version": "0.5.10",
+  "version": "0.5.13",
   "fluxapp": {
     "name": "Chat View",
-    "description": "Chat together with your community",
-    "icon": "list-check"
+    "description": "Make a new conversation",
+    "icon": "chat"
   },
   "keywords": [
     "flux-app"
