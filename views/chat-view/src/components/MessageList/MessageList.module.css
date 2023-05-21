@@ -1,5 +1,6 @@
 .messageList {
   display: grid;
+  position: relative;
   flex: 1;
   max-height: 100%;
   overflow-y: auto;

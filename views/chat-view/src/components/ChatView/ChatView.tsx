@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { PerspectiveProxy, Literal } from "@perspect3vism/ad4m";
-import { useEntries } from "@fluxapp/react-web";
+import { useAgent, useEntries } from "@fluxapp/react-web";
 import { Message } from "@fluxapp/api";
 import styles from "./ChatView.module.css";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
@@ -26,6 +26,11 @@ export default function ChatView({ agent, perspective, source }: Props) {
   const [replyMessage, setReplyMessage] = useState<Message | null>(null);
   const editor = useRef(null);
 
+  const { profile: replyProfile } = useAgent({
+    client: agent,
+    did: replyMessage?.author,
+  });
+
   const { model } = useEntries({
     perspective,
     source,
@@ -35,7 +40,7 @@ export default function ChatView({ agent, perspective, source }: Props) {
   async function submit() {
     try {
       const html = editor.current?.editor.getHTML();
-      console.log({ html });
+      editor.current?.clear();
       const message = await model.create({
         body: html,
       });
@@ -47,14 +52,13 @@ export default function ChatView({ agent, perspective, source }: Props) {
         });
       }
       setReplyMessage(null);
-      editor.current?.clear();
     } catch (e) {
       console.log(e);
     }
   }
 
   function onKeydown(e) {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       submit();
     }
@@ -96,13 +100,35 @@ export default function ChatView({ agent, perspective, source }: Props) {
       <MessageList
         onEmojiClick={onOpenEmojiPicker}
         onReplyClick={(message) => setReplyMessage(message)}
+        replyId={replyMessage?.id}
         perspective={perspective}
         agent={agent}
         source={source}
       />
       <footer className={styles.footer}>
         {replyMessage && (
-          <div dangerouslySetInnerHTML={{ __html: replyMessage.body }}></div>
+          <j-box py="300">
+            <j-flex a="center" gap="400">
+              <j-button
+                onclick={() => setReplyMessage(null)}
+                size="xs"
+                circle
+                square
+                variant="primary"
+              >
+                <j-icon size="xs" name="x"></j-icon>
+              </j-button>
+              <j-text
+                uppercase
+                nomargin
+                color="primary-500"
+                weight="800"
+                size="300"
+              >
+                Replying to @{replyProfile.username}
+              </j-text>
+            </j-flex>
+          </j-box>
         )}
         <flux-editor
           ref={editor}

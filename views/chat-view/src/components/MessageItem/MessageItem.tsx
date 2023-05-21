@@ -14,13 +14,16 @@ export default function MessageItem({
   agent,
   perspective,
   message,
+  isReplying,
   onEmojiClick = () => {},
   onReplyClick = () => {},
 }: {
   perspective: PerspectiveProxy;
   showAvatar?: boolean;
+  isReplying?: boolean;
   agent: AgentClient;
   message: Message;
+
   onEmojiClick?: (message: Message, position: { x: number; y: number }) => void;
   onReplyClick?: (message: Message) => void;
 }) {
@@ -58,7 +61,7 @@ export default function MessageItem({
   const isFullVersion = replyId || showAvatar;
 
   return (
-    <div className={styles.message}>
+    <div className={`${styles.message} ${isReplying && styles.isReplying}`}>
       <div className={styles.messageLeft}>
         {isFullVersion && (
           <j-avatar
@@ -69,20 +72,23 @@ export default function MessageItem({
         )}
       </div>
       <div className={styles.messageRight}>
-        {replyMessage?.id && (
-          <j-flex a="center" gap="200">
-            <j-avatar
-              size="xxs"
-              src={replyProfile?.profileThumbnailPicture}
-              hash={replyMessage.author}
-            ></j-avatar>
-            <span>{replyProfile?.username}</span>
-            <j-text
-              size="300"
-              nomargin
-              dangerouslySetInnerHTML={{ __html: replyMessage.body }}
-            ></j-text>
-          </j-flex>
+        {replyId && replyMessage?.id && (
+          <j-box pb="300">
+            <j-flex a="center" gap="200">
+              <j-avatar
+                size="xxs"
+                src={replyProfile?.profileThumbnailPicture}
+                hash={replyMessage.author}
+              ></j-avatar>
+              <span>{replyProfile?.username}</span>
+              <j-text
+                size="300"
+                class={styles.body}
+                nomargin
+                dangerouslySetInnerHTML={{ __html: replyMessage.body }}
+              ></j-text>
+            </j-flex>
+          </j-box>
         )}
         {isFullVersion && (
           <header className={styles.header}>

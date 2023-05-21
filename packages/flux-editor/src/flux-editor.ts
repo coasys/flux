@@ -262,6 +262,7 @@ export default class MyElement extends LitElement {
         }
 
         if (props.event.key === "Enter") {
+          props.event.stopPropagation();
           this.selectSuggestion(this.suggestionIndex);
           return true;
         }

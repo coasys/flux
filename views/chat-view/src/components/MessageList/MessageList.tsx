@@ -5,11 +5,13 @@ import { Message } from "@fluxapp/api";
 import { Virtuoso } from "react-virtuoso";
 import MessageItem from "../MessageItem";
 import styles from "./MessageList.module.css";
+import { useEffect, useRef, useState } from "preact/hooks";
 
 type Props = {
   perspective: PerspectiveProxy;
   agent: AgentClient;
   source: string;
+  replyId: string | undefined | null;
   onEmojiClick?: (message: Message, position: { x: number; y: number }) => void;
   onReplyClick?: (message: Message) => void;
 };
@@ -18,9 +20,30 @@ export default function MessageList({
   perspective,
   agent,
   source,
+  replyId,
   onEmojiClick = () => {},
   onReplyClick = () => {},
 }: Props) {
+  const virtuosoRef = useRef(null);
+  const [atBottom, setAtBottom] = useState(false);
+  const showButtonTimeoutRef = useRef(null);
+  const [showButton, setShowButton] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(showButtonTimeoutRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    clearTimeout(showButtonTimeoutRef.current);
+    if (!atBottom) {
+      showButtonTimeoutRef.current = setTimeout(() => setShowButton(true), 500);
+    } else {
+      setShowButton(false);
+    }
+  }, [atBottom, setShowButton]);
+
   const { entries: messages } = useEntries({
     perspective,
     source,
@@ -48,7 +71,32 @@ export default function MessageList({
 
   return (
     <div className={styles.messageList}>
+      {showButton && (
+        <j-button
+          circle
+          squared
+          variant="primary"
+          onClick={() =>
+            virtuosoRef.current.scrollToIndex({
+              index: messages.length - 1,
+              behavior: "smooth",
+            })
+          }
+          style={{
+            position: "absolute",
+            right: "var(--j-space-500)",
+            zIndex: 10,
+            bottom: "var(--j-space-300)",
+            transform: "translate(-1rem, -2rem)",
+          }}
+        >
+          <j-icon size="sm" name="arrow-down"></j-icon>
+        </j-button>
+      )}
       <Virtuoso
+        ref={virtuosoRef}
+        followOutput={"auto"}
+        atBottomStateChange={setAtBottom}
         className={styles.scroller}
         alignToBottom
         overscan={{ main: 1000, reverse: 1000 }}
@@ -59,6 +107,7 @@ export default function MessageList({
         itemContent={(index) => {
           return (
             <MessageItem
+              isReplying={messages[index].id === replyId}
               perspective={perspective}
               showAvatar={showAvatar(index)}
               key={messages[index].id}

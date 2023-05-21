@@ -2,6 +2,8 @@
   --body-min-height: auto;
   --grid-template-areas: "toolbar toolbar toolbar" "body body footer";
 }
+.editor::part(base) {
+}
 .editor::part(toolbar) {
   display: none;
 }
@@ -10,13 +12,14 @@
 }
 .editor::part(footer) {
   align-items: end;
+  border: 0;
 }
 
 .footer {
   background-color: var(--j-color-white);
   display: block;
-  padding: 0 var(--j-space-500);
-  padding-bottom: var(--j-space-300);
+  padding: 0 var(--j-space-800);
+  padding-bottom: var(--j-space-400);
   bottom: 0;
   left: 0;
 }
