@@ -6,6 +6,7 @@
     "downlevelIteration": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,
+    "resolveJsonModule": true,
     "baseUrl": "/",
     "paths": {
       "react": ["node_modules/preact/compat"],

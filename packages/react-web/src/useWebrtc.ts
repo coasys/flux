@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "preact/hooks";
 import { getForVersion, setForVersion, throttle } from "@fluxapp/utils";
+import { version } from "../package.json";
 
 import {
   Connection,
@@ -322,7 +323,7 @@ export default function useWebRTC({
     }
 
     // Persist settings
-    setForVersion("cameraDeviceId", `${deviceId}`);
+    setForVersion(version, "cameraDeviceId", `${deviceId}`);
   }
 
   /**
@@ -347,7 +348,7 @@ export default function useWebRTC({
     }
 
     // Persist settings
-    setForVersion("audioDeviceId", `${deviceId}`);
+    setForVersion(version, "audioDeviceId", `${deviceId}`);
 
     // Notify others of state change
     onChangeState({ ...localState, settings: newSettings });
@@ -357,7 +358,10 @@ export default function useWebRTC({
    * Enable/disable video input
    */
   async function onToggleCamera(enabled: boolean) {
-    const videoDeviceIdFromLocalStorage = getForVersion("cameraDeviceId");
+    const videoDeviceIdFromLocalStorage = getForVersion(
+      version,
+      "cameraDeviceId"
+    );
 
     const newSettings = {
       audio: localState.settings.audio,
@@ -405,7 +409,10 @@ export default function useWebRTC({
    * Enable/disable audio input
    */
   async function onToggleAudio(enabled: boolean) {
-    const audioDeviceIdFromLocalStorage = getForVersion("audioDeviceId");
+    const audioDeviceIdFromLocalStorage = getForVersion(
+      version,
+      "audioDeviceId"
+    );
 
     const newSettings = {
       audio: enabled

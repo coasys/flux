@@ -305,7 +305,7 @@ export default class MyElement extends LitElement {
           .toLowerCase()
           .startsWith(query.toLowerCase())
       )
-      .map((m) => ({ id: m.did, label: m.username }))
+      .map((m) => ({ id: m.did, label: m.username || "anonymous" }))
       .slice(0, 10) as Suggestion[];
 
     this.suggestions = matches;
