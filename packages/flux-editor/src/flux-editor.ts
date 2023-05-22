@@ -12,6 +12,7 @@ import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import { Profile } from "@fluxapp/types";
 import defaultActions from "./defaultActions";
+import { shouldPlaceAbove } from "./utils";
 
 type Suggestion = {
   id: string;
@@ -90,7 +91,7 @@ export default class MyElement extends LitElement {
     }
 
     .suggestions {
-      position: absolute;
+      position: fixed;
     }
 
     .ProseMirror {
@@ -159,6 +160,7 @@ export default class MyElement extends LitElement {
     this.selectSuggestion = this.selectSuggestion.bind(this);
     this.getMentionSuggestions = this.getMentionSuggestions.bind(this);
     this.renderSuggestions = this.renderSuggestions.bind(this);
+    this.placeSuggestionContainer = this.placeSuggestionContainer.bind(this);
     this.fetchProfiles = this.fetchProfiles.bind(this);
     this.fetchChannels = this.fetchChannels.bind(this);
   }
@@ -224,27 +226,34 @@ export default class MyElement extends LitElement {
     });
   }
 
+  placeSuggestionContainer(props: SuggestionProps<any>) {
+    if (this.suggestionsEl) {
+      const { x, y, height } = props.clientRect();
+      const placeAbove = shouldPlaceAbove(props.decorationNode, 100);
+      this.suggestionsEl.style.left = `${x}px`;
+
+      if (placeAbove) {
+        const windowHeight = window.innerHeight;
+        this.suggestionsEl.style.bottom = `${windowHeight - y}px`;
+      } else {
+        this.suggestionsEl.style.top = `${y + height}px`;
+      }
+    }
+  }
+
   renderSuggestions() {
     return {
       onStart: (props: SuggestionProps<any>) => {
         this.isSuggesting = true;
 
-        if (this.suggestionsEl) {
-          const { x, y, height } = props.clientRect();
-          this.suggestionsEl.style.top = `${y + height}px`;
-          this.suggestionsEl.style.left = `${x}px`;
-        }
+        this.placeSuggestionContainer(props);
 
         // Save select callback
         this.suggestionCallback = props.command;
       },
 
       onUpdate: (props: SuggestionProps<any>) => {
-        if (this.suggestionsEl) {
-          const { x, y, height } = props.clientRect();
-          this.suggestionsEl.style.top = `${y + height}px`;
-          this.suggestionsEl.style.left = `${x}px`;
-        }
+        this.placeSuggestionContainer(props);
 
         // Save select callback
         this.suggestionCallback = props.command;
