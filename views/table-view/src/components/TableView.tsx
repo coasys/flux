@@ -215,9 +215,10 @@ function HistoryItem({ source, perspective, onClick }) {
   }
 
   const defaultName =
-    entry?.name || entry?.title || source?.startsWith("literal://")
-      ? Literal.fromUrl(source).get()
-      : source;
+    entry?.name ||
+    entry?.title ||
+    (source?.startsWith("literal://") && Literal.fromUrl(source).get()) ||
+    source;
 
   return (
     <button className={styles.historyItem} onClick={onClick} nomargin>
@@ -260,9 +261,10 @@ function Header({ perspective, source, onUrlClick = () => {} }: HeaderProps) {
 
   if (entry) {
     const defaultName =
-      entry?.name || entry?.title || source?.startsWith("literal://")
-        ? Literal.fromUrl(source).get()
-        : source;
+      entry?.name ||
+      entry?.title ||
+      (source?.startsWith("literal://") && Literal.fromUrl(source).get()) ||
+      source;
 
     return (
       <div>
@@ -315,9 +317,10 @@ function Entry({ perspective, source, onUrlClick = () => {} }: HeaderProps) {
       ([key, value]) => key !== "id"
     );
     const defaultName =
-      entry?.name || entry?.title || source?.startsWith("literal://")
-        ? Literal.fromUrl(source).get()
-        : source;
+      entry?.name ||
+      entry?.title ||
+      (source?.startsWith("literal://") && Literal.fromUrl(source).get()) ||
+      source;
 
     return (
       <div>
