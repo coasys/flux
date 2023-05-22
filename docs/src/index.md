@@ -29,7 +29,7 @@ layout: home
     </p>
     <button class="card-button">Try the playground</button>
   </a>
-  <a href="/create-flux-app/getting-started/introduction.html" class="card">
+  <a href="/create-flux-plugin/getting-started/introduction.html" class="card">
     <h2 class="card-title">Plugins</h2>
     <p class="card-desc">
     Get started building custom plugins and integrating with Flux in just a few clicks.
