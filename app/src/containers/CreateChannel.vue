@@ -24,6 +24,15 @@
         <j-box pb="500" pt="300">
           <j-box pb="300">
             <j-text variant="label">Select at least one app</j-text>
+            <j-text size="300" variant="label">
+              Can't find a suitable plugin?
+              <a
+                target="_blank"
+                style="color: var(--j-color-black)"
+                href="https://docs.fluxsocial.io"
+                >Create one</a
+              >
+            </j-text>
           </j-box>
 
           <j-box v-if="isLoading" align="center" p="500">

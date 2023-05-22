@@ -16,6 +16,18 @@
       </j-box>
 
       <j-flex v-if="!isLoading" direction="column" gap="500">
+        <j-box>
+          <j-text variant="label">Select at least one app</j-text>
+          <j-text size="300" variant="label">
+            Can't find a suitable plugin?
+            <a
+              target="_blank"
+              style="color: var(--j-color-black)"
+              href="https://docs.fluxsocial.io"
+              >Create one</a
+            >
+          </j-text>
+        </j-box>
         <div class="app-card" v-for="app in packages" :key="app.name">
           <j-box pb="500">
             <j-badge
