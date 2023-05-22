@@ -118,14 +118,14 @@ export default defineComponent({
       packages: ref<FluxApp[]>([]),
       name: ref(""),
       description: ref(""),
-      selectedViews: ref<App[]>([]),
+      selectedPlugins: ref<App[]>([]),
       isSaving: ref(false),
       appStore: useAppStore(),
     };
   },
   computed: {
     canSave() {
-      return this.selectedViews.length >= 1;
+      return this.selectedPlugins.length >= 1;
     },
     viewOptions() {
       return viewOptions;
@@ -135,7 +135,7 @@ export default defineComponent({
     apps: {
       handler: async function (apps) {
         if (apps) {
-          this.selectedViews = apps;
+          this.selectedPlugins = apps;
         }
       },
       deep: true,
@@ -154,42 +154,44 @@ export default defineComponent({
   },
   methods: {
     toggleView(app: App) {
-      const isSelected = this.selectedViews.some((a) => a.pkg === app.pkg);
+      const isSelected = this.selectedPlugins.some((a) => a.pkg === app.pkg);
 
-      this.selectedViews = isSelected
-        ? this.selectedViews.filter((a) => a.pkg !== app.pkg)
-        : [...this.selectedViews, app];
+      this.selectedPlugins = isSelected
+        ? this.selectedPlugins.filter((a) => a.pkg !== app.pkg)
+        : [...this.selectedPlugins, app];
     },
     isSelected(pkg: any) {
-      return this.selectedViews.some((app) => app.pkg === pkg);
+      return this.selectedPlugins.some((app) => app.pkg === pkg);
     },
     async updateChannel() {
       this.isSaving = true;
 
       try {
-        console.log("selected views", this.selectedViews, this.apps);
+        console.log("selected views", this.selectedPlugins, this.apps);
 
         const removeApps = this.apps
-          .filter((app) => !this.selectedViews.some((a) => a.pkg === app.pkg))
+          .filter((app) => !this.selectedPlugins.some((a) => a.pkg === app.pkg))
           .map((app) => {
             return this.appRepo?.remove(app.id);
           });
 
         await Promise.all(removeApps);
 
-        const newApps = this.selectedViews.map((app) => {
-          this.appRepo?.create(
-            {
-              name: app.name,
-              description: app.description,
-              icon: app.icon,
-              pkg: app.pkg,
-            },
-            app.pkg
-          );
-        });
+        const addedApps = this.selectedPlugins
+          .filter((app) => !this.apps.some((a) => a.pkg === app.pkg))
+          .map((app) => {
+            return this.appRepo?.create(
+              {
+                name: app.name,
+                description: app.description,
+                icon: app.icon,
+                pkg: app.pkg,
+              },
+              app.pkg
+            );
+          });
 
-        await Promise.all(newApps);
+        await Promise.all(addedApps);
 
         await this.repo?.update(this.$route.params.channelId as string, {
           name: this.name,
