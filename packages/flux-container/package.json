@@ -1,6 +1,6 @@
 {
   "name": "@fluxapp/flux-container",
-  "version": "0.5.14",
+  "version": "0.5.17",
   "type": "module",
   "module": "build/flux-container.js",
   "main": "build/flux-container.js",

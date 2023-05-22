@@ -1,6 +1,6 @@
 {
   "name": "@fluxapp/create",
-  "version": "0.5.14",
+  "version": "0.5.17",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
