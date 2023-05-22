@@ -22,10 +22,6 @@ export default defineConfig({
         link: "/ui-library/getting-started/introduction",
       },
       {
-        text: "Apps",
-        link: "/app-library",
-      },
-      {
         text: "Playground",
         link: "/playground",
       },
