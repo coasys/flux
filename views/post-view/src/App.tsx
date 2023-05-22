@@ -66,7 +66,7 @@ export default function App({
       <div className={styles.container}>
         <Main agent={agent} perspective={perspective} source={source}></Main>
       </div>
-      <Overlay perspective={perspective} source={source} />
+      <Overlay agent={agent} perspective={perspective} source={source} />
     </UIProvider>
   );
 }

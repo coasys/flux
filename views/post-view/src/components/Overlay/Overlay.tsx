@@ -2,7 +2,7 @@ import { useContext } from "preact/hooks";
 import UIContext from "../../context/UIContext";
 import CreatePost from "../CreatePost";
 
-export default function Overlay({ perspective, source }) {
+export default function Overlay({ perspective, agent, source }) {
   const { state: uiState, methods: UIMethods } = useContext(UIContext);
 
   const onPublished = (postId: string) => {
@@ -17,6 +17,7 @@ export default function Overlay({ perspective, source }) {
     >
       {uiState.showOverlay && (
         <CreatePost
+          agent={agent}
           postId={uiState.currentPost}
           onCancel={() => UIMethods.toggleOverlay(false)}
           perspective={perspective}

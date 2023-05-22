@@ -18,6 +18,7 @@ const initialState = {
 export default function CreatePost({
   postId,
   source,
+  agent,
   perspective,
   onPublished,
   onCancel,
@@ -226,6 +227,7 @@ export default function CreatePost({
             )}
             {showBody && (
               <flux-editor
+                agent={agent}
                 perspective={perspective}
                 source={source}
                 className={styles.editor}
