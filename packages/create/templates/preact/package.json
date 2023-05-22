@@ -35,6 +35,7 @@
     "@fluxapp/flux-container": "*",
     "@perspect3vism/ad4m": "0.3.4-fix1",
     "preact": "^10.13.1",
+    "@fluxapp/react-web": "*",
     "@fluxapp/api": "*"
   },
   "devDependencies": {
