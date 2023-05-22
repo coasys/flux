@@ -1,6 +1,6 @@
 {
   "name": "@fluxapp/api",
-  "version": "0.5.13",
+  "version": "0.5.14",
   "description": "",
   "main": "./src/index.ts",
   "module": "./src/index.ts",
@@ -13,9 +13,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@fluxapp/utils": "*",
     "@fluxapp/constants": "*",
-    "@fluxapp/types": "*"
+    "@fluxapp/types": "*",
+    "@fluxapp/utils": "*",
+    "uuid": "^9.0.0"
   },
   "peerDependencies": {
     "@perspect3vism/ad4m": "0.3.4-fix1"

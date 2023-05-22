@@ -1,6 +1,6 @@
 {
   "name": "@fluxapp/graph-view",
-  "version": "0.5.13",
+  "version": "0.5.14",
   "type": "module",
   "fluxapp": {
     "name": "Graph",
