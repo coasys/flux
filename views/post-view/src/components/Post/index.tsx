@@ -31,6 +31,7 @@ export default function Post({
   });
 
   const { me } = useMe(agent);
+
   const { profile, agent: author } = useAgent({
     client: agent,
     did: post?.author,

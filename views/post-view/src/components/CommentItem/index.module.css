@@ -41,6 +41,14 @@
   margin-top: 0;
 }
 
+.postBody a:not([href^="http"]) {
+  background: var(--j-color-primary-100);
+  color: var(--j-color-primary-600);
+  padding: var(--j-space-100) var(--j-space-200);
+  border-radius: var(--j-border-radius);
+  text-decoration: none;
+}
+
 .postBody pre {
   background-color: rgba(0, 0, 0, 0.1);
   padding: var(--j-space-200);

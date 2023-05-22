@@ -206,7 +206,7 @@ export default defineComponent({
           if (!customElements.get(wcName)) {
             const module = await import(
               /* @vite-ignore */
-              `https://cdn.jsdelivr.net/npm/${app.pkg}/+esm`
+              `https://cdn.jsdelivr.net/npm/${app.pkg}@latest/+esm`
             );
             customElements.define(wcName, module.default);
             this.wcNames[app.pkg] = wcName;

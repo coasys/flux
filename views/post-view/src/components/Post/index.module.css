@@ -38,6 +38,14 @@
   gap: var(--j-space-200);
 }
 
+.postBody a:not([href^="http"]) {
+  background: var(--j-color-primary-100);
+  color: var(--j-color-primary-600);
+  padding: var(--j-space-100) var(--j-space-200);
+  border-radius: var(--j-border-radius);
+  text-decoration: none;
+}
+
 .authorName {
   text-decoration: none;
   font-weight: 500;
