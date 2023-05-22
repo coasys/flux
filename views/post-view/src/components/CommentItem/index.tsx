@@ -1,9 +1,8 @@
 import { useState } from "preact/hooks";
 import { useAgent, useEntries } from "@fluxapp/react-web";
 import styles from "./index.module.css";
-import { getTimeSince } from "@fluxapp/utils";
+import { getTimeSince } from "../../utils";
 import Avatar from "../Avatar";
-import Editor from "../Editor";
 import { Message as MessageModel } from "@fluxapp/api";
 
 export default function CommentItem({ agent, comment, perspective }) {

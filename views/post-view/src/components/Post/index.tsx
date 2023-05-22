@@ -1,12 +1,11 @@
 import UIContext from "../../context/UIContext";
 import { useContext, useEffect, useState } from "preact/hooks";
 import { format, formatDistance } from "date-fns";
-import { getTimeSince } from "@fluxapp/utils";
+import { getTimeSince } from "../../utils";
 import Avatar from "../Avatar";
 import CommentSection from "../CommentSection";
-import { Member, Post as PostSubject } from "@fluxapp/api";
+import { Post as PostSubject } from "@fluxapp/api";
 import { useAgent, useEntry, useMe } from "@fluxapp/react-web";
-import { getMe, Me } from "@fluxapp/api";
 import styles from "./index.module.css";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";

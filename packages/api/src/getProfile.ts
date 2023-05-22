@@ -1,6 +1,6 @@
 import { profile } from "@fluxapp/constants";
 import { Profile } from "@fluxapp/types";
-import { mapLiteralLinks, DexieProfile } from "@fluxapp/utils";
+import { mapLiteralLinks } from "@fluxapp/utils";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 const {
@@ -36,18 +36,17 @@ export default async function getProfile(did: string): Promise<Profile> {
     did: "",
   };
 
-  const dexie = new DexieProfile(`flux://profile`);
-  let cachedProfile = await dexie.get(cleanedDid);
-
-  if (cachedProfile) {
-    return cachedProfile as Profile;
-  }
-
-  profile.did = cleanedDid;
   const agentPerspective = await client.agent.byDID(cleanedDid);
 
   if (agentPerspective) {
     const links = agentPerspective!.perspective!.links;
+
+    const mappedAd4mProfile: any = mapLiteralLinks(
+      links.filter((e) => e.data.source === did),
+      {
+        username: HAS_USERNAME,
+      }
+    );
 
     const mappedProfile: any = mapLiteralLinks(
       links.filter((e) => e.data.source === FLUX_PROFILE),
@@ -64,13 +63,10 @@ export default async function getProfile(did: string): Promise<Profile> {
     );
 
     profile = {
+      ...mappedAd4mProfile,
       ...mappedProfile,
-      did: cleanedDid,
+      did: did,
     };
-
-    if (links.length != 0) {
-      dexie.save(cleanedDid, profile as Profile);
-    }
   }
 
   return profile;

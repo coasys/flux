@@ -16,10 +16,8 @@
 }
 
 .footer {
-  background-color: var(--j-color-white);
   display: block;
-  padding: 0 var(--j-space-800);
-  padding-bottom: var(--j-space-400);
+  padding: var(--j-space-400) var(--j-space-500);
   bottom: 0;
   left: 0;
 }

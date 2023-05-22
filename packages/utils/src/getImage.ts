@@ -2,7 +2,6 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { languages } from "@fluxapp/constants";
 const { FILE_STORAGE_LANGUAGE } = languages;
 
-//Uses the dexie store to check for cached ipfs images and if it doesn't find it, it fetches it from ad4m and saves it to the dexie store
 export async function getImage(expUrl: string): Promise<string> {
   return new Promise(async (resolve, reject) => {
     if (expUrl) {

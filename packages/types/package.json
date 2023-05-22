@@ -1,12 +1,13 @@
 {
   "name": "@fluxapp/types",
-  "version": "0.5.10",
+  "version": "0.5.12",
   "description": "",
-  "main": "./index.ts",
-  "module": "./index.ts",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
   "type": "module",
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

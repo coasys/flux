@@ -1,5 +1,4 @@
 import createCommunity from "./createCommunity";
-
 import getAgentLinks from "./getAgentLinks";
 import getMe from "./getMe";
 import type { Me } from "./getMe";
@@ -7,7 +6,6 @@ import getPerspectiveMeta from "./getPerspectiveMeta";
 import getProfile from "./getProfile";
 import joinCommunity from "./joinCommunity";
 import subscribeToLinks from "./subscribeToLinks";
-
 import Channel from "./channel";
 import Community from "./community";
 import Message from "./message";
