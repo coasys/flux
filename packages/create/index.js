@@ -10,7 +10,7 @@ async function run() {
     {
       type: "text",
       name: "projectName",
-      message: `Give your app a name:`,
+      message: `Give your plugin a name:`,
     },
     {
       type: "multiselect",
@@ -57,7 +57,7 @@ async function run() {
 
   console.log("Success! Your new project is ready.");
   console.log(
-    `run cd ${projectName}, npm install, and npm run dev to start the app`
+    `run cd ${projectName}, npm install, and npm run dev to start the plugin`
   );
 }
 
