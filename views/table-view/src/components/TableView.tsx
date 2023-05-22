@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "preact/hooks";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
 import styles from "./TableView.module.css";
 
 type Props = {
@@ -214,7 +214,10 @@ function HistoryItem({ source, perspective, onClick }) {
     }
   }
 
-  const defaultName = entry?.name || entry?.title || source;
+  const defaultName =
+    entry?.name || entry?.title || source?.startsWith("literal://")
+      ? Literal.fromUrl(source).get()
+      : source;
 
   return (
     <button className={styles.historyItem} onClick={onClick} nomargin>
@@ -256,7 +259,10 @@ function Header({ perspective, source, onUrlClick = () => {} }: HeaderProps) {
   }
 
   if (entry) {
-    const defaultName = entry?.name || entry?.title || source;
+    const defaultName =
+      entry?.name || entry?.title || source?.startsWith("literal://")
+        ? Literal.fromUrl(source).get()
+        : source;
 
     return (
       <div>
@@ -308,7 +314,10 @@ function Entry({ perspective, source, onUrlClick = () => {} }: HeaderProps) {
     const properties = Object.entries(entry).filter(
       ([key, value]) => key !== "id"
     );
-    const defaultName = entry?.name || entry?.title || source;
+    const defaultName =
+      entry?.name || entry?.title || source?.startsWith("literal://")
+        ? Literal.fromUrl(source).get()
+        : source;
 
     return (
       <div>
@@ -437,7 +446,20 @@ function DisplayValue({ value, onUrlClick = () => {} }: DisplayValueProps) {
       return (
         <img className={styles.img} src={`data:image/png;base64,${value}`} />
       );
-    if (value.includes("://")) {
+    if (isValidUrl(value)) {
+      if (value.startsWith("literal://")) {
+        console.log({ value });
+        return (
+          <a
+            className={styles.entryUrl}
+            href={value}
+            onClick={() => onUrlClick(value)}
+          >
+            {Literal.fromUrl(value).get()}
+          </a>
+        );
+      }
+
       return (
         <a
           className={styles.entryUrl}
@@ -449,7 +471,7 @@ function DisplayValue({ value, onUrlClick = () => {} }: DisplayValueProps) {
       );
     }
 
-    if (value.includes("did:key")) {
+    if (value.startsWith("did:key")) {
       return (
         <div>
           <j-avatar size="xs" hash={value}></j-avatar>
@@ -572,4 +594,13 @@ function useChildren({ perspective, subjectInstance, source }: UseEntryProps) {
   }, [subjectInstance, perspective.uuid, source]);
 
   return { entries };
+}
+
+function isValidUrl(string) {
+  try {
+    new URL(string);
+    return true;
+  } catch (err) {
+    return false;
+  }
 }
