@@ -10,7 +10,7 @@ layout: home
 <div class="hero-content">
 <h1 class="hero-title">The <span class="funky">future</span> of collaboration</h1>
 
-<p class="hero-lead">Create custom apps for your community</p>
+<p class="hero-lead">Create custom plugins for your community</p>
 </div>
 </div>
 
@@ -30,9 +30,9 @@ layout: home
     <button class="card-button">Try the playground</button>
   </a>
   <a href="/create-flux-app/getting-started/introduction.html" class="card">
-    <h2 class="card-title">Create Flux App</h2>
+    <h2 class="card-title">Plugins</h2>
     <p class="card-desc">
-    Get started building custom components and integrating with Flux in just a few clicks.
+    Get started building custom plugins and integrating with Flux in just a few clicks.
     </p>
    <button class="card-button">Start building</button>
   </a>
