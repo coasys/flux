@@ -1,4 +1,5 @@
 import { Me } from "@fluxapp/api";
+import { version } from "../../../../package.json";
 import { getForVersion } from "@fluxapp/utils";
 import { WebRTC } from "@fluxapp/react-web";
 import Select from "../../Select";
@@ -21,13 +22,15 @@ export default function VoiceVideo({ webRTC }: Props) {
     typeof webRTC.localState.settings.video !== "boolean" &&
     webRTC.localState.settings.video?.deviceId
       ? webRTC.localState.settings.video?.deviceId
-      : videoTrack?.getSettings().deviceId || getForVersion("cameraDeviceId");
+      : videoTrack?.getSettings().deviceId ||
+        getForVersion(version, "cameraDeviceId");
 
   const selectedAudioDeviceId =
     typeof webRTC.localState.settings.audio !== "boolean" &&
     webRTC.localState.settings.audio?.deviceId
       ? webRTC.localState.settings.audio?.deviceId
-      : audioTrack?.getSettings().deviceId || getForVersion("audioDeviceId");
+      : audioTrack?.getSettings().deviceId ||
+        getForVersion(version, "audioDeviceId");
 
   const videoDevices = webRTC?.devices?.filter((d) => d.kind === "videoinput");
   const audioDevices = webRTC?.devices?.filter((d) => d.kind === "audioinput");

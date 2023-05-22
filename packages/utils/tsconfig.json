@@ -1,0 +1,6 @@
+{
+  "include": ["src/**/*.json"],
+  "compilerOptions": {
+    "resolveJsonModule": true
+  }
+}

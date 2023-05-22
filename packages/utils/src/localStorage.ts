@@ -27,21 +27,25 @@ export const remove = (key: string): void => {
   }
 };
 
-export const setForVersion = (key: string, value: string): void => {
+export const setForVersion = (
+  version: string,
+  key: string,
+  value: string
+): void => {
   if (isSupported()) {
-    localStorage.setItem(`${__APP_VERSION__}/${key}`, value);
+    localStorage.setItem(`${version}/${key}`, value);
   }
 };
 
-export const getForVersion = (key: string): string | null => {
+export const getForVersion = (version: string, key: string): string | null => {
   if (isSupported()) {
-    return localStorage.getItem(`${__APP_VERSION__}/${key}`);
+    return localStorage.getItem(`${version}/${key}`);
   }
   return null;
 };
 
-export const removeForVersion = (key: string): void => {
+export const removeForVersion = (version: string, key: string): void => {
   if (isSupported()) {
-    localStorage.removeItem(`${__APP_VERSION__}/${key}`);
+    localStorage.removeItem(`${version}/${key}`);
   }
 };

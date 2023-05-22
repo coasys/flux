@@ -2,6 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import { createContext } from "preact";
 import { PostOption } from "../constants/options";
 import * as localstorage from "@fluxapp/utils";
+import { version } from "../../package.json";
 
 export enum View {
   Feed = "FEED",
@@ -45,7 +46,8 @@ export function UIProvider({ children, channelId }: any) {
 
   // First load - Set current post from localstorage IF channel === currentChannel
   useEffect(() => {
-    const initialCurrentPost = localstorage.getForVersion("currentPost") || "";
+    const initialCurrentPost =
+      localstorage.getForVersion(version, "currentPost") || "";
     const [initialChannelId, initialPostId] = initialCurrentPost.split("@@@");
 
     if (initialPostId && channelId === initialChannelId) {
@@ -54,12 +56,12 @@ export function UIProvider({ children, channelId }: any) {
   }, []);
 
   function goToPost(id: string) {
-    localstorage.setForVersion("currentPost", `${channelId}@@@${id}`);
+    localstorage.setForVersion(version, "currentPost", `${channelId}@@@${id}`);
     setState({ ...state, view: View.Post, currentPost: id, showOverlay: null });
   }
 
   function goToFeed() {
-    localstorage.removeForVersion("currentPost");
+    localstorage.removeForVersion(version, "currentPost");
     setState({ ...state, view: View.Feed, currentPost: null });
   }
 
