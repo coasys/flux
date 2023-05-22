@@ -1,4 +1,4 @@
-After using `create-flux-app`, your project should look like this:
+After using `@fluxapp/create`, your project should look like this:
 
 ```
 my-app/

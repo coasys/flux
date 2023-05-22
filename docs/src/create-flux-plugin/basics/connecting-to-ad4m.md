@@ -6,19 +6,19 @@ After downloading AD4M, create new user (agent), and we are ready to go!
 
 <j-button href="https://ad4m.dev/download" variant="primary">Download AD4M</j-button>
 
-## Authorize your app
+## Authorize your plugin
 
-Once you have your app running you'll need to authorize your app to access your AD4M data. This is handled by `ad4m-connect` as shown below:
+Once you have your plugin running you'll need to authorize your plugin to access your AD4M data. This is handled by `ad4m-connect` as shown below:
 
 ![AD4m Launcher](../../assets/ad4m-launcher.jpg)
 
-### Using create-flux-app
+### Using @fluxapp/create
 
-With create-flux-app the AD4M Connect logic is included (through the `flux-container` web-component) and resides in the `index.html` file. Just make sure you have AD4M running.
+With `@fluxapp/create` the AD4M Connect logic is included (through the `flux-container` web-component) and resides in the `index.html` file. Just make sure you have AD4M running.
 
 ### Manual setup
 
-If you're not using `create-flux-app` you can just install our `@fluxapp/flux-wrapper` web-component and put your Flux app inside the container for testing purposes.
+If you're not using `@fluxapp/create` you can just install our `@fluxapp/flux-wrapper` web-component and put your Flux Plugin inside the container for testing purposes.
 
 ```html
 <html>

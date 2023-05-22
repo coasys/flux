@@ -6,13 +6,13 @@ This logic has been bundled into two hooks: `useEntry` and `useEntries`, for wor
 
 ## Getting a single item
 
-Let's look at the example Todo-app included in the `create-flux-app` setup. The first thing we do is fetch the community we're in using `useEntry` and the included `Community` Model:
+Let's look at the example Todo Plugin included in the `@fluxapp/create` setup. The first thing we do is fetch the community we're in using `useEntry` and the included `Community` Model:
 
 ```tsx
 import { useEntry } from "@fluxapp/react";
 import { Community } from "@fluxapp/api";
 
-export default function TodoView({ perspective, channelSource }) 
+export default function TodoView({ perspective, channelSource })
   const { entry: community } = useEntry({
     perspective,
     model: Community,
@@ -24,7 +24,7 @@ export default function TodoView({ perspective, channelSource })
 };
 ```
 
-A flux app will always recieve two things. The `perspective` which is the `id` of the Flux community that is running your app, and also the `channelSource`, which is the `id` of the channel your app is installed in.
+A Flux Plugin will always recieve two things. The `perspective` which is the `id` of the Flux community that is running your plugin, and also the `channelSource`, which is the `id` of the channel your plugin is installed in.
 
 ## Getting a list of items
 
@@ -35,7 +35,7 @@ import { useEntry, useEntries } from "@fluxapp/react";
 import { Community } from "@fluxapp/api";
 import Todo from "../models/Todo";  // [!code ++]
 
-export default function TodoView({ perspective, channelSource }) 
+export default function TodoView({ perspective, channelSource })
   const { entry: community } = useEntry({
     perspective,
     model: Community,
@@ -65,13 +65,12 @@ To create data, all we need to do is use `model.create()` on the model we want t
 Since we're subscribed to all changes, the list of Todos will automatically update when we create a new item!
 :::
 
-
 ```jsx
 import { useEntry, useEntries } from "@fluxapp/react";
 import { Community } from "@fluxapp/api";
 import Todo from "../models/Todo";
 
-export default function TodoView({ perspective, channelSource }) 
+export default function TodoView({ perspective, channelSource })
   const [title, setTitle] = useState(""); // [!code ++]
 
   const { entry: community } = useEntry({
@@ -79,10 +78,10 @@ export default function TodoView({ perspective, channelSource })
     model: Community,
   });
 
-  const { entries: todos, model } = useEntries({  
-    perspective,  
-    source: channelSource,  
-    model: Todo,  
+  const { entries: todos, model } = useEntries({
+    perspective,
+    source: channelSource,
+    model: Todo,
   });
 
   function createTodo(e) { // [!code ++]
@@ -99,26 +98,25 @@ export default function TodoView({ perspective, channelSource })
       onChange={(e) => setTitle(e.target.value)} // [!code ++]
     /> // [!code ++]
 
-    <ul> 
-      {todos?.map(todo => <li>{todo.name}</li>)} 
-    </ul>  
+    <ul>
+      {todos?.map(todo => <li>{todo.name}</li>)}
+    </ul>
   )
 };
 ```
-
 
 ## Updating data
 
 Next, let's add functionality to toggle a Todo's state using the `mode.update()` function.
 
-In this example we use the [j-checkbox](/ui-library/components/checkbox.html) web-component from Flux-UI:
+In this example we use the [j-checkbox](/ui-library/components/checkbox.html) web-component from Flux UI:
 
 ```jsx
 import { useEntry, useEntries } from "@fluxapp/react";
 import { Community } from "@fluxapp/api";
 import Todo from "../models/Todo";
 
-export default function TodoView({ perspective, channelSource }) 
+export default function TodoView({ perspective, channelSource }) {
   const [title, setTitle] = useState("");
 
   const { entry: community } = useEntry({
@@ -126,10 +124,10 @@ export default function TodoView({ perspective, channelSource })
     model: Community,
   });
 
-  const { entries: todos, model } = useEntries({  
-    perspective,  
-    source: channelSource,  
-    model: Todo,  
+  const { entries: todos, model } = useEntries({
+    perspective,
+    source: channelSource,
+    model: Todo,
   });
 
   function createTodo(e) {
@@ -150,7 +148,7 @@ export default function TodoView({ perspective, channelSource })
       onChange={(e) => setTitle(e.target.value)}
     />
 
-    <ul> 
+    <ul>
       {todos?.map(todo => (
         <li>
           <j-checkbox // [!code ++]
@@ -162,8 +160,8 @@ export default function TodoView({ perspective, channelSource })
             {todo.name}
           </j-checkbox>  // [!code ++]
         </li>
-      )} 
-    </ul>  
+      )}
+    </ul>
   )
 };
 ```
@@ -177,7 +175,7 @@ import { useEntry, useEntries } from "@fluxapp/react";
 import { Community } from "@fluxapp/api";
 import Todo from "../models/Todo";
 
-export default function TodoView({ perspective, channelSource }) 
+export default function TodoView({ perspective, channelSource }) {
   const [title, setTitle] = useState("");
 
   const { entry: community } = useEntry({
@@ -185,10 +183,10 @@ export default function TodoView({ perspective, channelSource })
     model: Community,
   });
 
-  const { entries: todos, model } = useEntries({  
-    perspective,  
-    source: channelSource,  
-    model: Todo,  
+  const { entries: todos, model } = useEntries({
+    perspective,
+    source: channelSource,
+    model: Todo,
   });
 
   function createTodo(e) {
@@ -213,7 +211,7 @@ export default function TodoView({ perspective, channelSource })
       onChange={(e) => setTitle(e.target.value)}
     />
 
-    <ul> 
+    <ul>
       {todos?.map(todo => (
         <li>
           <j-checkbox
@@ -226,8 +224,8 @@ export default function TodoView({ perspective, channelSource })
           </j-checkbox>
           <j-button onClick={() => deleteTodo(todo.id)}>Delete</j-button> // [!code ++]
         </li>
-      )} 
-    </ul>  
+      )}
+    </ul>
   )
 };
 ```

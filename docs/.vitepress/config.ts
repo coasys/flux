@@ -26,22 +26,22 @@ export default defineConfig({
         link: "/playground",
       },
       {
-        text: "Create an App",
-        link: "/create-flux-app/getting-started/introduction",
+        text: "Create a Plugin",
+        link: "/create-flux-plugin/getting-started/introduction",
       },
     ],
     sidebar: {
-      "/create-flux-app": [
+      "/create-flux-plugin": [
         {
           text: "Getting Started",
           items: [
             {
               text: "Introduction",
-              link: "/create-flux-app/getting-started/introduction",
+              link: "/create-flux-plugin/getting-started/introduction",
             },
             {
               text: "Quick Start",
-              link: "/create-flux-app/getting-started/installation",
+              link: "/create-flux-plugin/getting-started/installation",
             },
           ],
         },
@@ -50,15 +50,15 @@ export default defineConfig({
           items: [
             {
               text: "Connecting to AD4M",
-              link: "/create-flux-app/basics/connecting-to-ad4m",
+              link: "/create-flux-plugin/basics/connecting-to-ad4m",
             },
             {
               text: "Models",
-              link: "/create-flux-app/basics/models",
+              link: "/create-flux-plugin/basics/models",
             },
             {
               text: "Data",
-              link: "/create-flux-app/basics/data",
+              link: "/create-flux-plugin/basics/data",
             },
           ],
         },
@@ -67,11 +67,11 @@ export default defineConfig({
           items: [
             {
               text: "Real-time Signals",
-              link: "/create-flux-app/guides/real-time-signals",
+              link: "/create-flux-plugin/guides/real-time-signals",
             },
             {
               text: "Validation",
-              link: "/create-flux-app/guides/validation",
+              link: "/create-flux-plugin/guides/validation",
             },
           ],
         },
@@ -79,12 +79,12 @@ export default defineConfig({
           text: "Publishing",
           items: [
             {
-              text: "Creating app-store assets",
-              link: "/create-flux-app/publishing/creating-assets",
+              text: "Creating plugin assets",
+              link: "/create-flux-plugin/publishing/creating-assets",
             },
             {
               text: "Publish on npm",
-              link: "/create-flux-app/publishing/publish-on-npm",
+              link: "/create-flux-plugin/publishing/publish-on-npm",
             },
           ],
         },
@@ -93,11 +93,11 @@ export default defineConfig({
           items: [
             {
               text: "Tutorial: Whiteboard",
-              link: "/create-flux-app/tutorial",
+              link: "/create-flux-plugin/tutorial",
             },
             {
               text: "Tutorial: Minecraft Clone",
-              link: "/create-flux-app/tutorial",
+              link: "/create-flux-plugin/tutorial",
             },
           ],
         },

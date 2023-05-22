@@ -1,12 +1,12 @@
 # Models
 
-Because Flux is using the p2p framework AD4M, you don't have to worry about creating a database, or maintain server infrastructure. This makes it super easy to create new content in the community that is using your app.
+Because Flux is using the p2p framework AD4M, you don't have to worry about creating a database, or maintain server infrastructure. This makes it super easy to create new content in the community that is using your plugin.
 
 You are free to create any kind of model for your data, but let's start with the common types that are used by Flux.
 
 ## Built-in models
 
-Because Flux apps share a lot of functionality, it comes bundled with several commonly used models that can be imported from `@fluxapp/api`:
+Because Flux Plugins share a lot of functionality, it comes bundled with several commonly used models that can be imported from `@fluxapp/api`:
 
 - Me
 - Channel
@@ -14,7 +14,6 @@ Because Flux apps share a lot of functionality, it comes bundled with several co
 - Member
 - Message
 - Post
-
 
 ```ts
 import { useEntry } from "@fluxapp/react";
@@ -24,12 +23,11 @@ const { entry: community } = useEntry({
   perspective,
   model: Community,
 });
-
 ```
 
 ## Custom models
 
-Defining your own models can be done by creating a new `SDNAClass`. The below shows an example `Todo` model, which is included as an example in the `create-flux-app` boilerplate:
+Defining your own models can be done by creating a new `SDNAClass`. The below shows an example `Todo` model, which is included as an example in the `@fluxapp/create` boilerplate:
 
 ```ts
 // models/Todo.ts
@@ -67,6 +65,4 @@ export default class Todo {
   })
   done: boolean;
 }
-
-
 ```
