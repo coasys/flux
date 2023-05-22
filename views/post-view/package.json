@@ -1,6 +1,6 @@
 {
   "name": "@fluxapp/post-view",
-  "version": "0.5.22",
+  "version": "0.5.23",
   "description": "",
   "fluxapp": {
     "name": "Posts",
