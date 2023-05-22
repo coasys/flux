@@ -167,12 +167,11 @@ export default defineComponent({
       this.isSaving = true;
 
       try {
-        console.log("selected views", this.selectedViews);
+        console.log("selected views", this.selectedViews, this.apps);
 
         const removeApps = this.apps
-          .filter((app) => this.selectedViews.some((a) => a.pkg !== app.pkg))
+          .filter((app) => !this.selectedViews.some((a) => a.pkg === app.pkg))
           .map((app) => {
-            console.log("remove?", app);
             return this.appRepo?.remove(app.id);
           });
 
