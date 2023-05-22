@@ -1,9 +1,7 @@
 #!/usr/bin/env node
 
 // Usage: npx create-flux-app
-
 const prompts = require("prompts");
-const spawn = require("cross-spawn");
 const fs = require("fs");
 const path = require("path");
 
@@ -57,14 +55,10 @@ async function run() {
     JSON.stringify(projectPackageJson, null, 2)
   );
 
-  // Run `npm install` in the project directory to install
-  // the dependencies. We are using a third-party library
-  // called `cross-spawn` for cross-platform support.
-  // (Node has issues spawning child processes in Windows).
-  spawn.sync("npm", ["install"], { stdio: "inherit" });
-
   console.log("Success! Your new project is ready.");
-  console.log(`run cd ${projectName} and npm run dev to start the app`);
+  console.log(
+    `run cd ${projectName}, npm install, and npm run dev to start the app`
+  );
 }
 
 run();
