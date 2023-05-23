@@ -15,6 +15,7 @@ export default function Entry({
   source,
   onUrlClick = () => {},
 }: Props) {
+  const [proxy, setProxy] = useState();
   const [entry, setEntry] = useState({});
   const [classes, setClasses] = useState([]);
 
@@ -31,12 +32,22 @@ export default function Entry({
       setClasses([...new Set(classResults.map((c) => c.ClassName))]);
       const className = classResults[0].ClassName;
       const subjectProxy = await perspective.getSubjectProxy(source, className);
+      setProxy(subjectProxy);
       const entry = await getEntry(subjectProxy);
-
       setEntry(entry);
     } else {
       setClasses([]);
       setEntry({ id: source });
+    }
+  }
+
+  async function onUpdate(propName, value) {
+    if (proxy) {
+      await proxy.init();
+      const capitalized = propName.charAt(0).toUpperCase() + propName.slice(1);
+      await proxy[`set${capitalized}`](value);
+      const entry = await getEntry(proxy);
+      setEntry(entry);
     }
   }
 
@@ -73,7 +84,11 @@ export default function Entry({
                 {key}
               </j-text>
               <j-text>
-                <DisplayValue onUrlClick={onUrlClick} value={value} />
+                <DisplayValue
+                  onUpdate={(value) => onUpdate(key, value)}
+                  onUrlClick={onUrlClick}
+                  value={value}
+                />
               </j-text>
             </j-flex>
           ))}

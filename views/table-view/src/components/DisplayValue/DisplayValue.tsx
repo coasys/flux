@@ -100,9 +100,17 @@ export default function DisplayValue({
     return (
       <j-flex gap="500" a="center">
         <div onDoubleClick={onStartEdit}>{value}</div>
-        <j-button onClick={onStartEdit} square circle size="sm" variant="ghost">
-          <j-icon size="xs" name="pencil"></j-icon>
-        </j-button>
+        {onUpdate && (
+          <j-button
+            onClick={onStartEdit}
+            square
+            circle
+            size="sm"
+            variant="ghost"
+          >
+            <j-icon size="xs" name="pencil"></j-icon>
+          </j-button>
+        )}
       </j-flex>
     );
   }
