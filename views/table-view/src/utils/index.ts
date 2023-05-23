@@ -40,18 +40,32 @@ export function useChildren({
   const [entries, setEntries] = useState<any[]>([]);
 
   useEffect(() => {
-    if (subjectInstance) {
-      perspective
-        .infer(
-          `subject_class("${subjectInstance}", C), instance(C, Base), triple( "${source}", Predicate, Base).`
-        )
+    const callback = () => {
+      fetchEntries(perspective, subjectInstance, source);
+      return null;
+    };
+
+    perspective.addListener("link-added", callback);
+
+    return () => {
+      perspective.removeListener("link-added", callback);
+    };
+  }, [perspective.uuid, subjectInstance, source]);
+
+  useEffect(() => {
+    fetchEntries(perspective, subjectInstance, source);
+  }, [subjectInstance, perspective.uuid, source]);
+
+  function fetchEntries(p, name, s) {
+    if (name) {
+      p.infer(
+        `subject_class("${name}", C), instance(C, Base), triple( "${s}", Predicate, Base).`
+      )
         .then(async (result) => {
           if (result) {
             const uniqueResults = [...new Set(result.map((r) => r.Base))];
             const entries = await Promise.all(
-              uniqueResults.map((base: string) =>
-                perspective.getSubjectProxy(base, subjectInstance)
-              )
+              uniqueResults.map((base: string) => p.getSubjectProxy(base, name))
             );
 
             const resolved = await getEntries(entries);
@@ -66,7 +80,7 @@ export function useChildren({
     } else {
       setEntries([]);
     }
-  }, [subjectInstance, perspective.uuid, source]);
+  }
 
   return { entries };
 }

@@ -1,15 +1,30 @@
 import styles from "./Table.module.css";
 import DisplayValue from "../DisplayValue";
+import { PerspectiveProxy } from "@perspect3vism/ad4m";
 
 type Props = {
   entries: any[];
+  perspective: PerspectiveProxy;
   onUrlClick: Function;
+  subjectClass: string;
 };
 
-export default function Table({ entries, onUrlClick = () => {} }: Props) {
+export default function Table({
+  entries,
+  perspective,
+  subjectClass,
+  onUrlClick = () => {},
+}: Props) {
   const headers = Object.keys(entries[0]).filter((header, index) => {
     return header === "id" ? false : true;
   });
+
+  async function onUpdate(id, propName, value) {
+    const proxy = await perspective.getSubjectProxy(id, subjectClass);
+    await proxy.init();
+    const capitalized = propName.charAt(0).toUpperCase() + propName.slice(1);
+    proxy[`set${capitalized}`](value);
+  }
 
   return (
     <div className={styles.tableWrapper}>
@@ -32,7 +47,10 @@ export default function Table({ entries, onUrlClick = () => {} }: Props) {
                 const value = item[header];
                 return (
                   <td key={index} onClick={() => onUrlClick(item.id)}>
-                    <DisplayValue value={value} />
+                    <DisplayValue
+                      onUpdate={(val) => onUpdate(item.id, header, val)}
+                      value={value}
+                    />
                   </td>
                 );
               })}

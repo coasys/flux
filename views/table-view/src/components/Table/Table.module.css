@@ -5,6 +5,16 @@
   width: 100%;
   font-size: var(--j-font-size-400);
   text-align: left;
+  display: table;
+  table-layout: fixed;
+}
+
+.table tr {
+  display: table-row;
+}
+
+.table td {
+  display: table-cell;
 }
 
 .table th,

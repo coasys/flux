@@ -32,10 +32,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@fluxapp/api": "*",
     "@fluxapp/flux-container": "*",
     "@perspect3vism/ad4m": "0.3.4-fix1",
     "preact": "^10.13.1",
-    "@fluxapp/api": "*"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.18.6",

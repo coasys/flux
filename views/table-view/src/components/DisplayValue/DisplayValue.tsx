@@ -1,4 +1,4 @@
-import { useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { isValidUrl } from "../../utils";
 import { Literal } from "@perspect3vism/ad4m";
 import styles from "./DisplayValue.module.css";
@@ -6,9 +6,36 @@ import styles from "./DisplayValue.module.css";
 type Props = {
   value: any;
   onUrlClick?: Function;
+  onUpdate?: (value: string) => void;
 };
 
-export default function DisplayValue({ value, onUrlClick = () => {} }: Props) {
+export default function DisplayValue({
+  value,
+  onUpdate,
+  onUrlClick = () => {},
+}: Props) {
+  const inputRef = useRef();
+  const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isEditing]);
+
+  function onKeyDown(e) {
+    if (e.key === "Enter") {
+      e.stopPropagation();
+      onUpdate(e.target.value);
+      setIsEditing(false);
+    }
+  }
+
+  function onStartEdit(e) {
+    e.stopPropagation();
+    setIsEditing(true);
+  }
+
   const isCollection = Array.isArray(value);
 
   if (isCollection) {
@@ -22,13 +49,25 @@ export default function DisplayValue({ value, onUrlClick = () => {} }: Props) {
   }
 
   if (typeof value === "string") {
+    if (isEditing && onUpdate) {
+      return (
+        <j-input
+          ref={inputRef}
+          size="sm"
+          autoFocus
+          onBlur={() => setIsEditing(false)}
+          onKeyDown={onKeyDown}
+          value={value}
+        ></j-input>
+      );
+    }
+
     if (value.length > 1000)
       return (
         <img className={styles.img} src={`data:image/png;base64,${value}`} />
       );
     if (isValidUrl(value)) {
       if (value.startsWith("literal://")) {
-        console.log({ value });
         return (
           <a
             className={styles.entryUrl}
@@ -58,7 +97,14 @@ export default function DisplayValue({ value, onUrlClick = () => {} }: Props) {
         </div>
       );
     }
-    return <span>{value}</span>;
+    return (
+      <j-flex gap="500" a="center">
+        <div onDoubleClick={onStartEdit}>{value}</div>
+        <j-button onClick={onStartEdit} square circle size="sm" variant="ghost">
+          <j-icon size="xs" name="pencil"></j-icon>
+        </j-button>
+      </j-flex>
+    );
   }
 
   if (value?.constructor?.name === "Object") {

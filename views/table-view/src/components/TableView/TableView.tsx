@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "preact/hooks";
 import { Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
 import styles from "./TableView.module.css";
 import { usePrevious, useChildren } from "../../utils";
+import { v4 as uuidv4 } from "uuid";
 
 import Table from "../Table";
 import Grid from "../Grid";
@@ -28,6 +29,8 @@ export default function TableView({
   const [showCreate, setShowCreate] = useState(false);
 
   const source = history.length ? history[history.length - 1] : "ad4m://self";
+
+  console.log({ selected });
 
   const { entries } = useChildren({
     perspective,
@@ -84,7 +87,14 @@ export default function TableView({
   }
 
   const viewComp = {
-    table: () => <Table onUrlClick={onUrlClick} entries={entries}></Table>,
+    table: () => (
+      <Table
+        perspective={perspective}
+        subjectClass={selected}
+        onUrlClick={onUrlClick}
+        entries={entries}
+      ></Table>
+    ),
     grid: () => (
       <j-box px="500">
         <Grid onUrlClick={onUrlClick} entries={entries}></Grid>
@@ -157,7 +167,11 @@ export default function TableView({
             <j-input size="sm" placeholder="Search">
               <j-icon name="search" size="xs" slot="end"></j-icon>
             </j-input>
-            <j-button size="sm" variant="primary">
+            <j-button
+              onClick={() => setShowCreate(true)}
+              size="sm"
+              variant="primary"
+            >
               New {selected}
             </j-button>
           </j-flex>
@@ -174,13 +188,20 @@ export default function TableView({
         )}
       </j-box>
 
-      <j-modal open={showCreate} onToggle={(e) => setShowCreate(e.target.open)}>
-        <CreateEntry
-          perspective={perspective}
-          source={currentEntry}
-          subjectInstance={selected}
-        ></CreateEntry>
-      </j-modal>
+      {showCreate && (
+        <j-modal
+          open={showCreate}
+          onToggle={(e) => setShowCreate(e.target.open)}
+        >
+          <j-box p="800">
+            <CreateEntry
+              perspective={perspective}
+              source={source}
+              subjectClass={selected}
+            ></CreateEntry>
+          </j-box>
+        </j-modal>
+      )}
 
       <j-modal
         open={openCurrentEntry}
@@ -198,6 +219,52 @@ export default function TableView({
   );
 }
 
-function CreateEntry() {
-  return <div>Hello</div>;
+type CreatePops = {
+  perspective: PerspectiveProxy;
+  subjectClass: string;
+  source: string;
+};
+
+function CreateEntry({ perspective, subjectClass, source }: CreatePops) {
+  const [instance, setInstance] = useState<Object>({});
+
+  async function createNewSubject() {
+    const uuid = Literal.from(uuidv4()).toUrl();
+    const instance = await perspective.createSubject(subjectClass, uuid);
+
+    await instance.init();
+
+    const type = await perspective.add({
+      source: source || "ad4m://self",
+      predicate: await instance.type,
+      target: uuid,
+    });
+
+    setInstance(instance);
+  }
+
+  useEffect(() => {
+    if (subjectClass) {
+      createNewSubject();
+    }
+  }, []);
+
+  const result = Object.keys(instance).reduce((acc: string[], prop: string) => {
+    if (prop.startsWith("set") && !prop.startsWith("setCollection")) {
+      acc.push(prop);
+    }
+    return acc;
+  }, []);
+
+  return (
+    <div>
+      <j-text variant="heading">Create new {subjectClass}</j-text>
+      {result.map((name) => (
+        <j-input
+          label={name}
+          onChange={(e) => instance[name](e.target.value)}
+        ></j-input>
+      ))}
+    </div>
+  );
 }
