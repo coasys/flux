@@ -27,10 +27,9 @@ export default function TableView({
   const [currentEntry, setCurrentEntry] = useState("");
   const [openCurrentEntry, setOpenCurrentEntry] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const layoutRef = useRef();
 
   const source = history.length ? history[history.length - 1] : "ad4m://self";
-
-  console.log({ selected });
 
   const { entries } = useChildren({
     perspective,
@@ -40,7 +39,10 @@ export default function TableView({
 
   useEffect(() => {
     const wentBack = history.length < (prevHistory?.length || 0);
-    if (wentBack) {
+    if (wentBack && layoutRef.current) {
+      console.log("wentback");
+    } else {
+      console.log("wentforward");
     }
   }, history);
 
@@ -91,13 +93,16 @@ export default function TableView({
       <Table
         perspective={perspective}
         subjectClass={selected}
-        onUrlClick={onUrlClick}
+        onUrlClick={(url) => onUrlClick(url, true)}
         entries={entries}
       ></Table>
     ),
     grid: () => (
       <j-box px="500">
-        <Grid onUrlClick={onUrlClick} entries={entries}></Grid>
+        <Grid
+          onUrlClick={(url) => onUrlClick(url, true)}
+          entries={entries}
+        ></Grid>
       </j-box>
     ),
   };
@@ -105,88 +110,99 @@ export default function TableView({
   const View = viewComp[view];
 
   return (
-    <div>
-      <j-box bg="primary-500" pt="500" pb="500" px="500">
-        <History
-          perspective={perspective}
-          history={history}
-          onClick={goTo}
-        ></History>
-        <Header
-          perspective={perspective}
-          source={source}
-          onUrlClick={onUrlClick}
-        ></Header>
-      </j-box>
-
-      <j-box bg="primary-500" px="500">
-        <div className={styles.tabs}>
-          {classes.map((c) => {
-            return (
-              <label className={styles.tab}>
-                <input
-                  name="subject"
-                  onChange={(e) => setSelected(e.target.value)}
-                  checked={selected === c}
-                  value={c}
-                  type="radio"
-                ></input>
-                <span>{c}</span>
-              </label>
-            );
-          })}
+    <>
+      <div ref={layoutRef} className={styles.layout}>
+        <div className={styles.entry}>
+          <History
+            perspective={perspective}
+            history={history}
+            onClick={goTo}
+          ></History>
+          <Header
+            perspective={perspective}
+            source={source}
+            onUrlClick={onUrlClick}
+          ></Header>
         </div>
-      </j-box>
 
-      <j-box px="500" py="300">
-        {entries.length > 0 && (
-          <j-flex gap="500">
-            <j-popover>
-              <j-button size="sm" variant="ghost" slot="trigger">
-                Grid
-                <j-icon slot="end" name="chevron-down" size="xs"></j-icon>
-              </j-button>
-              <j-menu
-                value={view}
-                onClick={(e) => setView(e.target.value)}
-                size="sm"
-                slot="content"
-              >
-                <j-menu-item
-                  size="sm"
-                  value="table"
-                  selected={view === "table"}
-                >
-                  Table
-                </j-menu-item>
-                <j-menu-item size="sm" value="grid" selected={view === "grid"}>
-                  Grid
-                </j-menu-item>
-              </j-menu>
-            </j-popover>
-            <j-input size="sm" placeholder="Search">
-              <j-icon name="search" size="xs" slot="end"></j-icon>
-            </j-input>
-            <j-button
-              onClick={() => setShowCreate(true)}
-              size="sm"
-              variant="primary"
-            >
-              New {selected}
-            </j-button>
-          </j-flex>
-        )}
-      </j-box>
-
-      <j-box>
-        {entries.length > 0 ? (
-          <View />
-        ) : (
-          <j-box px="500">
-            <j-text>No entries here</j-text>
+        <div className={styles.children}>
+          <j-box bg="primary-500" px="500">
+            <div className={styles.tabs}>
+              {classes.map((c) => {
+                return (
+                  <label className={styles.tab}>
+                    <input
+                      name="subject"
+                      onChange={(e) => setSelected(e.target.value)}
+                      checked={selected === c}
+                      value={c}
+                      type="radio"
+                    ></input>
+                    <span>{c}</span>
+                  </label>
+                );
+              })}
+            </div>
           </j-box>
-        )}
-      </j-box>
+
+          <j-box px="500" py="300">
+            {entries.length > 0 && (
+              <j-flex gap="500">
+                <j-popover>
+                  <j-button size="sm" variant="ghost" slot="trigger">
+                    Grid
+                    <j-icon slot="end" name="chevron-down" size="xs"></j-icon>
+                  </j-button>
+                  <j-menu
+                    value={view}
+                    onClick={(e) => setView(e.target.value)}
+                    size="sm"
+                    slot="content"
+                  >
+                    <j-menu-item
+                      size="sm"
+                      value="table"
+                      selected={view === "table"}
+                    >
+                      Table
+                    </j-menu-item>
+                    <j-menu-item
+                      size="sm"
+                      value="grid"
+                      selected={view === "grid"}
+                    >
+                      Grid
+                    </j-menu-item>
+                  </j-menu>
+                </j-popover>
+                <j-input size="sm" placeholder="Search">
+                  <j-icon name="search" size="xs" slot="end"></j-icon>
+                </j-input>
+                <j-button
+                  onClick={() => setShowCreate(true)}
+                  size="sm"
+                  variant="primary"
+                >
+                  New {selected}
+                </j-button>
+              </j-flex>
+            )}
+          </j-box>
+
+          <j-box>
+            {entries.length > 0 ? (
+              <View />
+            ) : (
+              <j-box px="1000" py="1000">
+                <j-flex direction="column" a="center" j="center" gap="500">
+                  <j-icon size="lg" name="cone-striped"></j-icon>
+                  <j-text>Could not find any children...</j-text>
+                </j-flex>
+              </j-box>
+            )}
+          </j-box>
+        </div>
+      </div>
 
       {showCreate && (
         <j-modal
@@ -215,7 +231,7 @@ export default function TableView({
           ></Entry>
         </j-box>
       </j-modal>
-    </div>
+    </>
   );
 }
 

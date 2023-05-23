@@ -2,6 +2,7 @@
   color: var(--j-color-white);
   height: var(--j-size-md);
   padding: 0;
+  padding-left: var(--j-space-400);
   width: 100%;
   max-width: 100%;
   overflow-x: auto;

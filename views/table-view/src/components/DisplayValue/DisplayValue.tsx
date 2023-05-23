@@ -72,7 +72,10 @@ export default function DisplayValue({
           <a
             className={styles.entryUrl}
             href={value}
-            onClick={() => onUrlClick(value)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onUrlClick(value);
+            }}
           >
             {Literal.fromUrl(value).get()}
           </a>
@@ -83,7 +86,10 @@ export default function DisplayValue({
         <a
           className={styles.entryUrl}
           href={value}
-          onClick={() => onUrlClick(value)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onUrlClick(value);
+          }}
         >
           {value}
         </a>

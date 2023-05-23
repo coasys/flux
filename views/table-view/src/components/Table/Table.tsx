@@ -48,6 +48,7 @@ export default function Table({
                 return (
                   <td key={index} onClick={() => onUrlClick(item.id)}>
                     <DisplayValue
+                      onUrlClick={(url) => onUrlClick(url)}
                       onUpdate={(val) => onUpdate(item.id, header, val)}
                       value={value}
                     />

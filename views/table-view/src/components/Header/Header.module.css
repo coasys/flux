@@ -1,0 +1,21 @@
+.details {
+  display: inline-block;
+  padding: var(--j-space-500);
+  border-radius: var(--j-border-radius);
+}
+
+.details > summary {
+  list-style: none;
+}
+
+.details summary::-webkit-details-marker {
+  display: none;
+}
+
+.details summary {
+  cursor: pointer;
+}
+
+.details:has(summary:hover) {
+  background: rgba(0, 0, 0, 0.1);
+}
