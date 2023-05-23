@@ -1,0 +1,81 @@
+.entryUrl {
+  font-size: var(--j-font-size-300);
+  display: inline-block;
+  text-decoration: none;
+  background: var(--j-color-primary-100);
+  color: var(--j-color-primary-500);
+  padding: var(--j-space-200);
+  border-radius: var(--j-border-radius);
+}
+
+.tabs {
+  width: 100%;
+  padding: 0;
+  display: flex;
+  border: 0;
+  gap: var(--j-space-100);
+}
+
+.tab {
+  cursor: pointer;
+  font-size: var(--j-font-size-400);
+  border-top-right-radius: var(--j-border-radius);
+  border-top-left-radius: var(--j-border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--j-space-400);
+  height: var(--j-size-sm);
+  border: 0;
+  background-color: transparent;
+  color: var(--j-color-white);
+}
+
+.tab:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.tab:has(input:checked) {
+  background: var(--j-color-white);
+  color: var(--j-color-primary-500);
+  font-weight: 600;
+  border: 0;
+}
+
+.tab input {
+  position: absolute;
+  clip: rect(1px 1px 1px 1px);
+  clip: rect(1px, 1px, 1px, 1px);
+  vertical-align: middle;
+}
+
+.tabWrapper {
+  max-width: 800px;
+}
+
+.img {
+  max-width: 100%;
+  width: 100%;
+}
+
+.tableSearch::part(input-wrapper) {
+  border-radius: 0;
+  border-left: 0;
+  border-left: 0;
+}
+
+.details {
+  color: var(--j-color-white);
+  border-radius: 4px;
+}
+
+.details summary {
+  font-size: var(--j-font-size-600);
+  cursor: pointer;
+  font-weight: bold;
+  padding: 0.5em;
+}
+
+.details[open] summary {
+  margin-bottom: 0.5em;
+}

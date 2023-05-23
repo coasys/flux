@@ -1,0 +1,14 @@
+.img {
+  max-width: 100%;
+  width: 100%;
+}
+
+.entryUrl {
+  font-size: var(--j-font-size-300);
+  display: inline-block;
+  text-decoration: none;
+  background: var(--j-color-primary-100);
+  color: var(--j-color-primary-500);
+  padding: var(--j-space-200);
+  border-radius: var(--j-border-radius);
+}

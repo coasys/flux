@@ -1,0 +1,43 @@
+.history {
+  color: var(--j-color-white);
+  height: var(--j-size-md);
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  gap: var(--j-space-300);
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+}
+
+.historyItem {
+  border: 0;
+  background: 0;
+  position: relative;
+  padding: var(--j-space-200);
+  border-radius: var(--j-border-radius);
+  text-transform: uppercase;
+  font-size: var(--j-font-size-200);
+  opacity: 1;
+  color: inherit;
+}
+
+.historyItem:hover:not(:last-child) {
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.historyItem:not(:last-child)::after {
+  position: absolute;
+  right: calc(var(--j-space-300) * -1);
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-block;
+  content: "/";
+}
+
+.historyItem:last-of-type {
+  opacity: 0.8;
+}

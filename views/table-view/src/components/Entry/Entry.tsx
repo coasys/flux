@@ -1,0 +1,86 @@
+import { useEffect, useState } from "preact/hooks";
+import { PerspectiveProxy, Literal } from "@perspect3vism/ad4m";
+import { getEntry } from "../../utils";
+import DisplayValue from "../DisplayValue";
+import styles from "./Entry.module.css";
+
+type Props = {
+  perspective: PerspectiveProxy;
+  source: string;
+  onUrlClick?: Function;
+};
+
+export default function Entry({
+  perspective,
+  source,
+  onUrlClick = () => {},
+}: Props) {
+  const [entry, setEntry] = useState({});
+  const [classes, setClasses] = useState([]);
+
+  useEffect(() => {
+    fetchSourceClasses(source);
+  }, [source, perspective.uuid]);
+
+  async function fetchSourceClasses(source) {
+    const classResults = await perspective.infer(
+      `subject_class(ClassName, C), instance(C, "${source}").`
+    );
+
+    if (classResults?.length > 0) {
+      setClasses([...new Set(classResults.map((c) => c.ClassName))]);
+      const className = classResults[0].ClassName;
+      const subjectProxy = await perspective.getSubjectProxy(source, className);
+      const entry = await getEntry(subjectProxy);
+
+      setEntry(entry);
+    } else {
+      setClasses([]);
+      setEntry({ id: source });
+    }
+  }
+
+  if (entry) {
+    const properties = Object.entries(entry).filter(
+      ([key, value]) => key !== "id"
+    );
+    const defaultName =
+      entry?.name ||
+      entry?.title ||
+      (source?.startsWith("literal://") && Literal.fromUrl(source).get()) ||
+      source;
+
+    return (
+      <div>
+        <j-flex gap="200" direction="column">
+          <j-text color="primary-500" uppercase weight="bold" size="300">
+            {classes.toString()}
+          </j-text>
+        </j-flex>
+        <j-box pt="100" pb="800">
+          <h2
+            className={styles.entryTitle}
+            onClick={() => onUrlClick(source, true)}
+          >
+            {defaultName}
+          </h2>
+        </j-box>
+
+        <j-flex direction="column" gap="400">
+          {properties.map(([key, value]) => (
+            <j-flex gap="200" direction="column">
+              <j-text size="200" uppercase nomargin>
+                {key}
+              </j-text>
+              <j-text>
+                <DisplayValue onUrlClick={onUrlClick} value={value} />
+              </j-text>
+            </j-flex>
+          ))}
+        </j-flex>
+      </div>
+    );
+  }
+
+  return <span>{source}</span>;
+}
