@@ -41,9 +41,11 @@
 .thread {
   display: none;
   position: relative;
-  width: 40%;
+  background: var(--j-color-white);
+  width: 40vw;
   border-left: 1px solid var(--j-color-ui-100);
 }
+
 .thread[data-visible="true"] {
   display: block;
 }

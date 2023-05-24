@@ -108,6 +108,7 @@ export default function ChatView({
         el = document.createElement(wcName);
         container.append(el);
       }
+      el.className = styles.webComponent;
 
       el.perspective = perspective;
       el.setAttribute("source", message.id);
