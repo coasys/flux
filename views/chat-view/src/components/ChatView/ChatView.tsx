@@ -6,6 +6,7 @@ import styles from "./ChatView.module.css";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import MessageList from "../MessageList/MessageList";
 import { community } from "@fluxapp/constants";
+import { getPosition } from "../../utils/getPosition";
 
 const { REPLY_TO, REACTION } = community;
 
@@ -165,53 +166,4 @@ export default function ChatView({ agent, perspective, source }: Props) {
       </footer>
     </>
   );
-}
-
-type Position = {
-  left: string;
-  right: string;
-  top: string;
-  bottom: string;
-};
-
-function getPosition(x: number, y: number, el: HTMLElement): Position {
-  if (x === undefined || y === undefined || el === undefined) {
-    return { right: "", top: "", left: "", bottom: "" };
-  }
-
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-  const elementWidth = el.offsetWidth;
-  const elementHeight = el.offsetHeight;
-
-  const right = viewportWidth - x;
-  const top = y;
-
-  let rightVal = "";
-  let leftVal = "";
-  let topVal = "";
-  let bottomVal = "";
-
-  if (right < elementWidth) {
-    rightVal = `${right}px`;
-    leftVal = "";
-  } else {
-    rightVal = "";
-    leftVal = `${x}px`;
-  }
-
-  if (top + elementHeight > viewportHeight) {
-    bottomVal = `${viewportHeight - y}px`;
-    topVal = "";
-  } else {
-    bottomVal = "";
-    topVal = `${y}px`;
-  }
-
-  return {
-    right: rightVal,
-    left: leftVal,
-    top: topVal,
-    bottom: bottomVal,
-  };
 }
