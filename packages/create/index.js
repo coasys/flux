@@ -55,9 +55,9 @@ async function run() {
     JSON.stringify(projectPackageJson, null, 2)
   );
 
-  console.log("Success! Your new project is ready.");
+  console.log("Success! Your new plugin is ready.");
   console.log(
-    `run cd ${projectName}, npm install, and npm run dev to start the plugin`
+    `run cd ${projectName}, npm install, and npm run dev to start building`
   );
 }
 

@@ -29,14 +29,6 @@
             <j-icon size="xs" slot="start" name="pencil" />
             Edit community
           </j-menu-item>
-          <j-menu-item @click="goToSettings">
-            <j-icon size="xs" slot="start" name="gear" />
-            Settings
-          </j-menu-item>
-          <j-menu-item @click="goToTweaks">
-            <j-icon size="xs" slot="start" name="wrench" />
-            Community Tweaks
-          </j-menu-item>
           <j-menu-item @click="() => setShowInviteCode(true)">
             <j-icon size="xs" slot="start" name="person-plus" />
             Invite people
@@ -151,7 +143,6 @@ export default defineComponent({
       "setShowCommunityMembers",
       "setShowInviteCode",
       "setShowCommunitySettings",
-      "setShowCommunityTweaks",
     ]),
     goToLeaveCommunity() {
       this.appStore.setActiveCommunity(
@@ -161,10 +152,6 @@ export default defineComponent({
     },
     goToSettings() {
       this.setShowCommunitySettings(true);
-      this.showCommunityMenu = false;
-    },
-    goToTweaks() {
-      this.setShowCommunityTweaks(true);
       this.showCommunityMenu = false;
     },
   },
