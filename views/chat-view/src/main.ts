@@ -10,7 +10,7 @@ if (!customElements.get("flux-editor")) {
 
 const CustomElement = toCustomElement(
   App,
-  ["perspective", "agent", "source", "isThread"],
+  ["perspective", "agent", "source", "threaded"],
   {
     shadow: false,
   }

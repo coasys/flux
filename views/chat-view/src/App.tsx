@@ -8,10 +8,10 @@ type Props = {
   agent: AgentClient;
   perspective: PerspectiveProxy;
   source: string;
-  isThread: string;
+  threaded: string;
 };
 
-export default function App({ agent, perspective, source, isThread }: Props) {
+export default function App({ agent, perspective, source, threaded }: Props) {
   if (!perspective?.uuid || !agent || !source)
     return "No perspective or agent client";
 
@@ -21,7 +21,7 @@ export default function App({ agent, perspective, source, isThread }: Props) {
         agent={agent}
         perspective={perspective}
         source={source}
-        isThread={!!isThread}
+        threaded={!!threaded}
       ></ChatView>
     </div>
   );
