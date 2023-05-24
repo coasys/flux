@@ -18,23 +18,35 @@ import { SubjectRepository } from "@fluxapp/api";
 export class MyElement extends LitElement {
   static styles = css`
     :host {
-      height: calc(100vh - var(--j-size-xl));
+      height: 100%;
       display: block;
       box-sizing: border-box;
     }
     .sidebar-layout {
+      height: 100%;
       display: grid;
       grid-template-columns: 1fr 5fr;
     }
     .sidebar {
-      padding: var(--j-space-500);
+      height: 100%;
+      display: grid;
+      grid-template-columns: auto 200px;
       height: 100vh;
-      background: var(--j-color-ui-50);
-      border-radius: var(--j-border-radius);
-      border-right: 1px solid var(--j-color-ui-100);
+
       box-sizing: border-box;
     }
-    .content {
+    .hoods {
+      border-right: 1px solid var(--j-color-ui-100);
+      background: var(--j-color-white);
+      padding: var(--j-space-500);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .channels {
+      background: var(--j-color-ui-50);
+      border-right: 1px solid var(--j-color-ui-100);
     }
     select {
       width: 100%;
@@ -77,6 +89,9 @@ export class MyElement extends LitElement {
 
   @state()
   theme = "";
+
+  @state()
+  showCreate = false;
 
   @state()
   channels: Channel[] = [];
@@ -161,6 +176,7 @@ export class MyElement extends LitElement {
 
     localStorage.setItem("perspectiveUuid", uuid);
     this.perspectiveUuid = uuid;
+    this.source = "ad4m://self";
 
     try {
       this.isLoading = true;
@@ -197,10 +213,10 @@ export class MyElement extends LitElement {
     this.requestUpdate();
   }
 
-  setTheme(e: Event) {
-    const target = e.target as HTMLInputElement;
-    document.documentElement.className = target.value;
-    localStorage.setItem("theme", target.value);
+  setTheme(value: string) {
+    this.theme = value;
+    document.documentElement.className = value;
+    localStorage.setItem("theme", value);
   }
 
   async onCreateCommunity() {
@@ -208,6 +224,7 @@ export class MyElement extends LitElement {
     try {
       await createCommunity({ name: this.title });
       this.title = "";
+      this.showCreate = false;
     } catch (e) {
       console.log(e);
     } finally {
@@ -219,84 +236,83 @@ export class MyElement extends LitElement {
     return html`
       <div class="sidebar-layout" part="layout">
         <aside class="sidebar" part="sidebar">
-          <j-flex direction="column" gap="500">
-            <div>
-              <j-text variant="label">Theme</j-text>
-              <select
-                @change=${(e: Event) => this.setTheme(e)}
-                value=${this.theme}
+          <div class="hoods">
+            <j-flex gap="500" wrap>
+              ${this.neighbourhoods.length
+                ? map(
+                    this.neighbourhoods,
+                    (p) => html`<j-tooltip title=${p.name}>
+                      <j-avatar
+                        ?selected=${this.perspectiveUuid === p.uuid}
+                        initials=${p.name.charAt(0)}
+                        @click=${() => this.setPerspective(p.uuid)}
+                        :value=${p.uuid}
+                        ?disabled=${this.isLoading}
+                      >
+                        ${p.name}
+                      </j-avatar>
+                    </j-tooltip>`
+                  )
+                : ``}
+              <j-button
+                @click=${() => (this.showCreate = true)}
+                circle
+                square
+                variant="secondary"
               >
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-              </select>
-            </div>
-            ${this.neighbourhoods.length
-              ? html` <div>
-                  <j-text variant="label">Community</j-text>
-                  <j-flex gap="200" wrap>
-                    ${map(
-                      this.neighbourhoods,
-                      (p) => html`<j-tooltip title=${p.name}>
-                        <j-avatar
-                          ?selected=${this.perspectiveUuid === p.uuid}
-                          hash=${p.uuid}
-                          @click=${() => this.setPerspective(p.uuid)}
-                          :value=${p.uuid}
-                          ?disabled=${this.isLoading}
-                        >
-                          ${p.name}
-                        </j-avatar>
-                      </j-tooltip>`
-                    )}
-                  </j-flex>
-                </div>`
-              : ``}
+                <j-icon name="plus"></j-icon>
+              </j-button>
+            </j-flex>
+            <j-popover>
+              <j-button slot="trigger" variant="ghost" square circle>
+                <j-icon name="magic"></j-icon>
+              </j-button>
+              <j-menu slot="content">
+                <j-menu-item
+                  ?selected=${this.theme === "light"}
+                  @click=${() => this.setTheme("light")}
+                >
+                  Light
+                </j-menu-item>
+                <j-menu-item
+                  ?selected=${this.theme === "dark"}
+                  @click=${() => this.setTheme("dark")}
+                >
+                  Dark
+                </j-menu-item>
+              </j-menu>
+            </j-popover>
+          </div>
+
+          <div class="channels">
             ${this.perspective?.uuid
               ? html`<div>
-                  <j-text variant="label">Channel</j-text>
-                  <select
-                    @change=${(e: any) => this.setChannel(e.target.value)}
-                  >
-                    <option
-                      ?selected=${this.source === "ad4m://self"}
-                      value="ad4m://self"
+                  <j-box px="500" pt="800">
+                    <j-text
+                      size="300"
+                      weight="800"
+                      uppercase
+                      color="primary-500"
                     >
-                      Self (ad4m://self)
-                    </option>
-                    ${map(
-                      this.channels,
-                      (c) =>
-                        html`<option
-                          ?selected=${this.source === c.id}
-                          value=${c.id}
-                        >
-                          ${c.name}
-                        </option>`
-                    )}
-                  </select>
+                      Select channel
+                    </j-text>
+                  </j-box>
+                  <j-menu-item
+                    ?selected=${"ad4m://self" === this.source}
+                    @click=${() => this.setChannel("ad4m://self")}
+                  >
+                    Root (ad4m://self)
+                  </j-menu-item>
+                  ${this.channels.map((c) => {
+                    return html`<j-menu-item
+                      ?selected=${c.id === this.source}
+                      @click=${() => this.setChannel(c.id)}
+                      >${c.name}</j-menu-item
+                    >`;
+                  })}
                 </div>`
               : ``}
-
-            <j-input
-              label="New Community"
-              placeholder="Name"
-              .value=${this.title}
-              @change=${(e: Event) => {
-                const target = e.target as HTMLInputElement;
-                this.title = target.value;
-              }}
-            ></j-input>
-            <j-button
-              variant="primary"
-              ?loading=${this.isCreatingCommunity}
-              ?disabled=${this.isCreatingCommunity}
-              @click=${() => this.onCreateCommunity()}
-              full
-              size="sm"
-            >
-              Create community
-            </j-button>
-          </j-flex>
+          </div>
         </aside>
         <div class="content" part="content">
           ${this.isLoading
@@ -314,6 +330,37 @@ export class MyElement extends LitElement {
               </j-box>`}
         </div>
       </div>
+      <j-modal
+        ?open=${this.showCreate}
+        @toggle=${(e) => (this.showCreate = e.target.open)}
+      >
+        <j-box px="800" py="600">
+          <j-box pb="800">
+            <j-text nomargin variant="heading">Create new community</j-text>
+          </j-box>
+          <j-flex direction="column" gap="400">
+            <j-input
+              placeholder="Name"
+              size="lg"
+              .value=${this.title}
+              @change=${(e: Event) => {
+                const target = e.target as HTMLInputElement;
+                this.title = target.value;
+              }}
+            ></j-input>
+            <j-button
+              variant="primary"
+              ?loading=${this.isCreatingCommunity}
+              ?disabled=${this.isCreatingCommunity}
+              @click=${() => this.onCreateCommunity()}
+              full
+              size="lg"
+            >
+              Create community
+            </j-button>
+          </j-flex>
+        </j-box>
+      </j-modal>
     `;
   }
 }
