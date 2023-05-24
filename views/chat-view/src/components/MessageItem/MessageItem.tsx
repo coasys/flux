@@ -145,20 +145,16 @@ export default function MessageItem({
             <j-icon size="sm" name="emoji-smile"></j-icon>
           </j-button>
         </j-tooltip>
-        <>
-          {!isThread && (
-            <j-tooltip placement="top" title="Reply in thread">
-              <j-button
-                onClick={() => onThreadClick(message)}
-                size="sm"
-                square
-                variant="ghost"
-              >
-                <j-icon size="sm" name="chat-text"></j-icon>
-              </j-button>
-            </j-tooltip>
-          )}
-        </>
+        <j-tooltip placement="top" title="Reply in thread">
+          <j-button
+            onClick={() => onThreadClick(message)}
+            size="sm"
+            square
+            variant="ghost"
+          >
+            <j-icon size="sm" name="chat-text"></j-icon>
+          </j-button>
+        </j-tooltip>
         <j-tooltip placement="top" title="Reply">
           <j-button
             onClick={() => onReplyClick(message)}

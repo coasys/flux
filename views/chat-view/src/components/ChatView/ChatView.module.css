@@ -23,6 +23,23 @@
   overflow: hidden;
 }
 
+.wrapper[data-threaded="true"][data-show-thread="true"] > .inner {
+  display: none;
+}
+
+.wrapper[data-show-thread="true"] > .thread {
+  display: block;
+}
+
+.wrapper[data-threaded="true"][data-show-thread="true"] > .thread {
+  position: absolute;
+  right: 0;
+  width: 100%;
+  height: 100%;
+}
+
+
+
 .inner {
   width: 100%;
   height: 100%;
@@ -44,10 +61,6 @@
   background: var(--j-color-white);
   width: 40vw;
   border-left: 1px solid var(--j-color-ui-100);
-}
-
-.thread[data-visible="true"] {
-  display: block;
 }
 
 .threadHeader {

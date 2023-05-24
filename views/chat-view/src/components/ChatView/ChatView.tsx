@@ -17,14 +17,14 @@ type Props = {
   agent: AgentClient;
   perspective: PerspectiveProxy;
   source: string;
-  isThread?: boolean;
+  threaded?: boolean;
 };
 
 export default function ChatView({
   agent,
   perspective,
   source,
-  isThread,
+  threaded,
 }: Props) {
   const emojiPicker = useRef();
   const [showToolbar, setShowToolbar] = useState(false);
@@ -112,7 +112,7 @@ export default function ChatView({
 
       el.perspective = perspective;
       el.setAttribute("source", message.id);
-      el.setAttribute("isThread", "true");
+      el.setAttribute("threaded", "true");
       el.agent = agent;
     }
   }
@@ -134,7 +134,11 @@ export default function ChatView({
   }
 
   return (
-    <div className={styles.wrapper}>
+    <div
+      className={styles.wrapper}
+      data-threaded={threaded}
+      data-show-thread={!!threadSource}
+    >
       <j-emoji-picker
         onclickoutside={() => setPickerInfo(null)}
         onChange={onEmojiClick}
@@ -154,7 +158,7 @@ export default function ChatView({
           onThreadClick={(message) => onOpenThread(message)}
           replyId={replyMessage?.id}
           perspective={perspective}
-          isThread={isThread}
+          isThread={threaded}
           agent={agent}
           source={source}
         />
@@ -219,11 +223,7 @@ export default function ChatView({
         </footer>
       </div>
 
-      <div
-        ref={threadContainer}
-        className={styles.thread}
-        data-visible={!!threadSource}
-      >
+      <div ref={threadContainer} className={styles.thread}>
         <div className={styles.threadHeader}>
           <j-box p="400">
             <j-flex a="center" j="between" gap="200">

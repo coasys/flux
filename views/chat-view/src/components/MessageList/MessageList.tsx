@@ -54,8 +54,6 @@ export default function MessageList({
     model: Message,
   });
 
-  console.log({ messages });
-
   function showAvatar(index: number): boolean {
     const previousMessage = messages[index - 1];
     const message = messages[index];
