@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { PerspectiveProxy, Literal } from "@perspect3vism/ad4m";
 import { useAgent, useEntries } from "@fluxapp/react-web";
-import { Message } from "@fluxapp/api";
-import styles from "./ChatView.module.css";
+import { Message, generateWCName } from "@fluxapp/api";
+import { name } from "../../../package.json";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import MessageList from "../MessageList/MessageList";
 import { community } from "@fluxapp/constants";
 import { getPosition } from "../../utils/getPosition";
+
+import styles from "./ChatView.module.css";
 
 const { REPLY_TO, REACTION } = community;
 
@@ -14,9 +16,15 @@ type Props = {
   agent: AgentClient;
   perspective: PerspectiveProxy;
   source: string;
+  isThread?: boolean;
 };
 
-export default function ChatView({ agent, perspective, source }: Props) {
+export default function ChatView({
+  agent,
+  perspective,
+  source,
+  isThread,
+}: Props) {
   const emojiPicker = useRef();
   const [showToolbar, setShowToolbar] = useState(false);
   const [pickerInfo, setPickerInfo] = useState<{
@@ -24,8 +32,10 @@ export default function ChatView({ agent, perspective, source }: Props) {
     y: number;
     id: string;
   } | null>(null);
+  const [threadSource, setThreadSource] = useState<Message | null>(null);
   const [replyMessage, setReplyMessage] = useState<Message | null>(null);
   const editor = useRef(null);
+  const threadContainer = useRef(null);
 
   const { profile: replyProfile } = useAgent({
     client: agent,
@@ -36,6 +46,11 @@ export default function ChatView({ agent, perspective, source }: Props) {
     perspective,
     source,
     model: Message,
+  });
+
+  const { profile: threadProfile } = useAgent({
+    client: agent,
+    did: threadSource?.author,
   });
 
   async function submit() {
@@ -73,6 +88,24 @@ export default function ChatView({ agent, perspective, source }: Props) {
     setPickerInfo({ x: position.x, y: position.y, id: message.id });
   }
 
+  async function onOpenThread(message: Message) {
+    setThreadSource(message);
+    const wcName = await generateWCName(name);
+    const el = document.createElement(wcName);
+
+    el.perspective = perspective;
+    el.setAttribute("source", message.id);
+    el.setAttribute("isThread", "true");
+    el.agent = agent;
+
+    threadContainer?.current.append(el);
+  }
+
+  function onCloseThread() {
+    setThreadSource(null);
+    threadContainer?.current.lastChild.remove();
+  }
+
   function onEmojiClick(e) {
     if (pickerInfo.id) {
       perspective.add({
@@ -85,7 +118,7 @@ export default function ChatView({ agent, perspective, source }: Props) {
   }
 
   return (
-    <>
+    <div className={styles.wrapper}>
       <j-emoji-picker
         onclickoutside={() => setPickerInfo(null)}
         onChange={onEmojiClick}
@@ -98,20 +131,105 @@ export default function ChatView({ agent, perspective, source }: Props) {
         }}
       ></j-emoji-picker>
 
-      <MessageList
-        onEmojiClick={onOpenEmojiPicker}
-        onReplyClick={(message) => setReplyMessage(message)}
-        replyId={replyMessage?.id}
-        perspective={perspective}
-        agent={agent}
-        source={source}
-      />
-      <footer className={styles.footer}>
-        {replyMessage && (
-          <j-box py="300">
-            <j-flex a="center" gap="400">
+      <div className={styles.inner}>
+        <MessageList
+          onEmojiClick={onOpenEmojiPicker}
+          onReplyClick={(message) => setReplyMessage(message)}
+          onThreadClick={(message) => onOpenThread(message)}
+          replyId={replyMessage?.id}
+          perspective={perspective}
+          isThread={isThread}
+          agent={agent}
+          source={source}
+        />
+
+        <footer className={styles.footer}>
+          {replyMessage && (
+            <j-box py="300">
+              <j-flex a="center" gap="400">
+                <j-button
+                  onclick={() => setReplyMessage(null)}
+                  size="xs"
+                  circle
+                  square
+                  variant="primary"
+                >
+                  <j-icon size="xs" name="x"></j-icon>
+                </j-button>
+                <j-text
+                  uppercase
+                  nomargin
+                  color="primary-500"
+                  weight="800"
+                  size="300"
+                >
+                  Replying to @{replyProfile.username}
+                </j-text>
+              </j-flex>
+            </j-box>
+          )}
+          <flux-editor
+            ref={editor}
+            onKeydown={onKeydown}
+            className={styles.editor}
+            aria-expanded={showToolbar}
+            perspective={perspective}
+            agent={agent}
+            source={source}
+          >
+            <footer slot="footer">
               <j-button
-                onclick={() => setReplyMessage(null)}
+                onClick={submit}
+                class="submit"
+                circle
+                square
+                size="sm"
+                variant="primary"
+              >
+                <j-icon size="xs" name="send"></j-icon>
+              </j-button>
+              <j-button
+                class="toggle-formatting"
+                onClick={() => setShowToolbar(!showToolbar)}
+                circle
+                square
+                size="sm"
+                variant="ghost"
+              >
+                <j-icon size="sm" name="type"></j-icon>
+              </j-button>
+            </footer>
+          </flux-editor>
+        </footer>
+      </div>
+
+      <div
+        ref={threadContainer}
+        className={styles.thread}
+        data-visible={!!threadSource}
+      >
+        <div className={styles.threadHeader}>
+          <j-box p="400">
+            <j-flex a="center" j="between" gap="200">
+              <j-flex a="center" gap="200">
+                <j-text size="300" class={styles.body} nomargin uppercase>
+                  Thread with
+                </j-text>
+                <j-avatar
+                  size="xxs"
+                  src={threadProfile?.profileThumbnailPicture}
+                  hash={threadSource?.author}
+                ></j-avatar>
+                <span>{threadProfile?.username}</span>
+                <j-text
+                  size="300"
+                  class={styles.body}
+                  nomargin
+                  dangerouslySetInnerHTML={{ __html: threadProfile?.body }}
+                ></j-text>
+              </j-flex>
+              <j-button
+                onclick={onCloseThread}
                 size="xs"
                 circle
                 square
@@ -119,51 +237,10 @@ export default function ChatView({ agent, perspective, source }: Props) {
               >
                 <j-icon size="xs" name="x"></j-icon>
               </j-button>
-              <j-text
-                uppercase
-                nomargin
-                color="primary-500"
-                weight="800"
-                size="300"
-              >
-                Replying to @{replyProfile.username}
-              </j-text>
             </j-flex>
           </j-box>
-        )}
-        <flux-editor
-          ref={editor}
-          onKeydown={onKeydown}
-          className={styles.editor}
-          aria-expanded={showToolbar}
-          perspective={perspective}
-          agent={agent}
-          source={source}
-        >
-          <footer slot="footer">
-            <j-button
-              onClick={submit}
-              class="submit"
-              circle
-              square
-              size="sm"
-              variant="primary"
-            >
-              <j-icon size="xs" name="send"></j-icon>
-            </j-button>
-            <j-button
-              class="toggle-formatting"
-              onClick={() => setShowToolbar(!showToolbar)}
-              circle
-              square
-              size="sm"
-              variant="ghost"
-            >
-              <j-icon size="sm" name="type"></j-icon>
-            </j-button>
-          </footer>
-        </flux-editor>
-      </footer>
-    </>
+        </div>
+      </div>
+    </div>
   );
 }
