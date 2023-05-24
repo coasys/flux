@@ -221,7 +221,7 @@ export default defineComponent({
     },
   },
   methods: {
-    onViewClick(e: any) {
+    async onViewClick(e: any) {
       const parentLink = e.target.closest("a");
       if (parentLink) {
         const url = parentLink.href;
@@ -235,8 +235,19 @@ export default defineComponent({
         }
 
         if (url.startsWith("literal://")) {
-          // TODO: check if literal is channel
-          // this.onChannelClick(url);
+          const isChannel = this.data.perspective?.isSubjectInstance(
+            url,
+            Channel
+          );
+          if (isChannel) {
+            this.$router.push({
+              name: "channel",
+              params: {
+                communityId: this.communityId,
+                channelId: url,
+              },
+            });
+          }
         }
 
         if (!url.startsWith("http")) {

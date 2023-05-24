@@ -1,6 +1,6 @@
 {
   "name": "@fluxapp/table-view",
-  "version": "0.5.24",
+  "version": "0.5.25",
   "fluxapp": {
     "name": "Table",
     "description": "View and edit your channel data",
