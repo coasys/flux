@@ -12,8 +12,10 @@ type Props = {
   agent: AgentClient;
   source: string;
   replyId: string | undefined | null;
+  isThread?: boolean;
   onEmojiClick?: (message: Message, position: { x: number; y: number }) => void;
   onReplyClick?: (message: Message) => void;
+  onThreadClick?: (message: Message) => void;
 };
 
 export default function MessageList({
@@ -21,8 +23,10 @@ export default function MessageList({
   agent,
   source,
   replyId,
+  isThread,
   onEmojiClick = () => {},
   onReplyClick = () => {},
+  onThreadClick = () => {},
 }: Props) {
   const virtuosoRef = useRef(null);
   const [atBottom, setAtBottom] = useState(false);
@@ -113,8 +117,10 @@ export default function MessageList({
               key={messages[index].id}
               agent={agent}
               message={messages[index]}
+              isThread={isThread}
               onEmojiClick={onEmojiClick}
               onReplyClick={onReplyClick}
+              onThreadClick={onThreadClick}
             ></MessageItem>
           );
         }}

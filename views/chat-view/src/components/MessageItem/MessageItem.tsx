@@ -15,17 +15,21 @@ export default function MessageItem({
   perspective,
   message,
   isReplying,
+  isThread,
   onEmojiClick = () => {},
   onReplyClick = () => {},
+  onThreadClick = () => {},
 }: {
   perspective: PerspectiveProxy;
   showAvatar?: boolean;
   isReplying?: boolean;
+  isThread?: boolean;
   agent: AgentClient;
   message: Message;
 
   onEmojiClick?: (message: Message, position: { x: number; y: number }) => void;
   onReplyClick?: (message: Message) => void;
+  onThreadClick?: (message: Message) => void;
 }) {
   const [replyId, setReplyId] = useState("");
 
@@ -118,17 +122,35 @@ export default function MessageItem({
         </div>
       </div>
       <div className={styles.toolbar}>
-        <j-button onClick={onOpenPicker} size="sm" square variant="ghost">
-          <j-icon size="sm" name="emoji-smile"></j-icon>
-        </j-button>
-        <j-button
-          onClick={() => onReplyClick(message)}
-          size="sm"
-          square
-          variant="ghost"
-        >
-          <j-icon size="sm" name="reply"></j-icon>
-        </j-button>
+        <j-tooltip placement="top" title="Add reaction">
+          <j-button onClick={onOpenPicker} size="sm" square variant="ghost">
+            <j-icon size="sm" name="emoji-smile"></j-icon>
+          </j-button>
+        </j-tooltip>
+        <>
+          {!isThread && (
+            <j-tooltip placement="top" title="Reply in thread">
+              <j-button
+                onClick={() => onThreadClick(message)}
+                size="sm"
+                square
+                variant="ghost"
+              >
+                <j-icon size="sm" name="chat-text"></j-icon>
+              </j-button>
+            </j-tooltip>
+          )}
+        </>
+        <j-tooltip placement="top" title="Reply">
+          <j-button
+            onClick={() => onReplyClick(message)}
+            size="sm"
+            square
+            variant="ghost"
+          >
+            <j-icon size="sm" name="reply"></j-icon>
+          </j-button>
+        </j-tooltip>
       </div>
     </div>
   );
