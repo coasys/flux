@@ -9,6 +9,7 @@ import { community } from "@fluxapp/constants";
 import { getPosition } from "../../utils/getPosition";
 
 import styles from "./ChatView.module.css";
+import { EntryType } from "@fluxapp/types";
 
 const { REPLY_TO, REACTION } = community;
 
@@ -66,6 +67,11 @@ export default function ChatView({
           predicate: REPLY_TO,
           target: message.id,
         });
+        perspective.add({
+          source: replyMessage.id,
+          predicate: EntryType.Message,
+          target: message.id,
+        });
       }
       setReplyMessage(null);
     } catch (e) {
@@ -91,14 +97,23 @@ export default function ChatView({
   async function onOpenThread(message: Message) {
     setThreadSource(message);
     const wcName = await generateWCName(name);
-    const el = document.createElement(wcName);
 
-    el.perspective = perspective;
-    el.setAttribute("source", message.id);
-    el.setAttribute("isThread", "true");
-    el.agent = agent;
+    const container = threadContainer.current;
 
-    threadContainer?.current.append(el);
+    if (container) {
+      const wc = container.querySelector(wcName);
+      let el = wc;
+
+      if (!el) {
+        el = document.createElement(wcName);
+        container.append(el);
+      }
+
+      el.perspective = perspective;
+      el.setAttribute("source", message.id);
+      el.setAttribute("isThread", "true");
+      el.agent = agent;
+    }
   }
 
   function onCloseThread() {

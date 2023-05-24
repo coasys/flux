@@ -2,7 +2,7 @@ import { PerspectiveProxy, Literal, LinkQuery } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import { Message } from "@fluxapp/api";
 import { useState } from "preact/hooks";
-import { useAgent, useEntry } from "@fluxapp/react-web";
+import { useAgent, useEntries, useEntry } from "@fluxapp/react-web";
 import styles from "./MessageItem.module.css";
 import { useEffect } from "preact/hooks";
 import { community } from "@fluxapp/constants";
@@ -34,6 +34,12 @@ export default function MessageItem({
   const [replyId, setReplyId] = useState("");
 
   const { profile } = useAgent({ client: agent, did: message.author });
+
+  const { entries: threadMessages } = useEntries({
+    perspective,
+    source: message.id,
+    model: Message,
+  });
 
   const { entry: replyMessage } = useEntry({
     perspective,
@@ -120,6 +126,18 @@ export default function MessageItem({
             );
           })}
         </div>
+        {threadMessages?.length > 0 && (
+          <j-box py="300">
+            <button
+              className={styles.threadButton}
+              onClick={() => onThreadClick(message)}
+              variant="subtle"
+              size="sm"
+            >
+              Replies ({threadMessages.length})
+            </button>
+          </j-box>
+        )}
       </div>
       <div className={styles.toolbar}>
         <j-tooltip placement="top" title="Add reaction">

@@ -102,3 +102,17 @@ body:has(*:last-child:empty) *:first-child {
 .username:hover {
   text-decoration: underline;
 }
+
+.threadButton {
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-weight: 800;
+  font-size: var(--j-font-size-300);
+  color: var(--j-color-primary-500);
+}
+
+.threadButton:hover {
+  text-decoration: underline;
+}
