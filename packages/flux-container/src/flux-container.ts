@@ -10,7 +10,7 @@ if (!customElements.get("j-button")) {
 import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
-import { createCommunity } from "@fluxapp/api";
+import { createCommunity, joinCommunity } from "@fluxapp/api";
 import { Channel, Community } from "@fluxapp/api";
 import { SubjectRepository } from "@fluxapp/api";
 
@@ -82,7 +82,13 @@ export class MyElement extends LitElement {
   isLoading = false;
 
   @state()
+  title = "";
+
+  @state()
   isCreatingCommunity = false;
+
+  @state()
+  isJoiningCommunity = false;
 
   @state()
   source = "";
@@ -122,6 +128,10 @@ export class MyElement extends LitElement {
 
   get appElement() {
     return this.children[0];
+  }
+
+  get titleIsNeighbourhoodLink() {
+    return this.title.startsWith("neighbourhood://");
   }
 
   connectedCallback() {
@@ -232,6 +242,19 @@ export class MyElement extends LitElement {
     }
   }
 
+  async onJoinCommunity() {
+    this.isJoiningCommunity = true;
+    try {
+      await joinCommunity({ joiningLink: this.title });
+      this.title = "";
+      this.showCreate = false;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      this.isJoiningCommunity = false;
+    }
+  }
+
   render() {
     return html`
       <div class="sidebar-layout" part="layout">
@@ -336,28 +359,39 @@ export class MyElement extends LitElement {
       >
         <j-box px="800" py="600">
           <j-box pb="800">
-            <j-text nomargin variant="heading">Create new community</j-text>
+            <j-text nomargin variant="heading">Create or join community</j-text>
           </j-box>
           <j-flex direction="column" gap="400">
             <j-input
               placeholder="Name"
               size="lg"
               .value=${this.title}
-              @change=${(e: Event) => {
+              @input=${(e: Event) => {
                 const target = e.target as HTMLInputElement;
                 this.title = target.value;
               }}
             ></j-input>
-            <j-button
-              variant="primary"
-              ?loading=${this.isCreatingCommunity}
-              ?disabled=${this.isCreatingCommunity}
-              @click=${() => this.onCreateCommunity()}
-              full
-              size="lg"
-            >
-              Create community
-            </j-button>
+            ${this.titleIsNeighbourhoodLink
+              ? html`<j-button
+                  variant="primary"
+                  ?loading=${this.isJoiningCommunity}
+                  ?disabled=${this.isJoiningCommunity}
+                  @click=${() => this.onJoinCommunity()}
+                  full
+                  size="lg"
+                >
+                  Join
+                </j-button>`
+              : html`<j-button
+                  variant="primary"
+                  ?loading=${this.isCreatingCommunity}
+                  ?disabled=${this.isCreatingCommunity}
+                  @click=${() => this.onCreateCommunity()}
+                  full
+                  size="lg"
+                >
+                  Create
+                </j-button>`}
           </j-flex>
         </j-box>
       </j-modal>
