@@ -1,6 +1,6 @@
 {
   "name": "@fluxapp/ui",
-  "version": "0.5.25",
+  "version": "0.5.26",
   "description": "",
   "homepage": "https://docs.fluxsocial.io",
   "main": "dist/main.js",
