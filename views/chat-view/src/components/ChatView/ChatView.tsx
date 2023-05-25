@@ -49,6 +49,12 @@ export default function ChatView({
     model: Message,
   });
 
+  useEffect(() => {
+    // Reset reply and thread
+    setThreadSource(null);
+    setReplyMessage(null);
+  }, [perspective.uuid, source]);
+
   const { profile: threadProfile } = useAgent({
     client: agent,
     did: threadSource?.author,
