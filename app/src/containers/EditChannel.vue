@@ -11,12 +11,8 @@
         @input="(e) => (name = e.target.value)"
       ></j-input>
 
-      <j-box v-if="isLoading" align="center" p="500">
-        <j-spinner></j-spinner>
-      </j-box>
-
-      <j-flex v-if="!isLoading" direction="column" gap="500">
-        <j-box>
+      <j-box pb="500" pt="300">
+        <j-box pb="300">
           <j-text variant="label">Select at least one plugin</j-text>
           <j-text size="300" variant="label">
             Can't find a suitable plugin?
@@ -28,39 +24,57 @@
             >
           </j-text>
         </j-box>
-        <div class="app-card" v-for="app in packages" :key="app.name">
-          <j-box pb="500">
-            <j-badge
-              size="sm"
-              v-if="app.pkg.startsWith('@fluxapp')"
-              variant="success"
-            >
-              Official App
-            </j-badge>
-          </j-box>
-          <j-flex a="center" j="between">
-            <j-flex gap="500" a="center" j="center">
-              <j-icon size="lg" v-if="app.icon" :name="app.icon"></j-icon>
+
+        <j-box v-if="isLoading" align="center" p="500">
+          <j-spinner></j-spinner>
+        </j-box>
+
+        <j-box v-else pb="500">
+          <j-tabs
+            class="tabs"
+            :value="tab"
+            @change="(e) => (tab = e.target.value)"
+          >
+            <j-tab-item value="official">Official</j-tab-item>
+            <j-tab-item value="community">Community</j-tab-item>
+          </j-tabs>
+        </j-box>
+
+        <j-flex v-if="!isLoading" direction="column" gap="500">
+          <div class="app-card" v-for="app in filteredPackages" :key="app.name">
+            <j-box pb="500">
+              <j-badge
+                size="sm"
+                v-if="app.pkg.startsWith('@fluxapp')"
+                variant="success"
+              >
+                Official App
+              </j-badge>
+            </j-box>
+            <j-flex a="center" j="between">
+              <j-flex gap="500" a="center" j="center">
+                <j-icon size="lg" v-if="app.icon" :name="app.icon"></j-icon>
+                <div>
+                  <j-text variant="heading-sm">
+                    {{ app.name }}
+                  </j-text>
+                  <j-text nomargin>
+                    {{ app.description }}
+                  </j-text>
+                </div>
+              </j-flex>
               <div>
-                <j-text variant="heading-sm">
-                  {{ app.name }}
-                </j-text>
-                <j-text nomargin>
-                  {{ app.description }}
-                </j-text>
+                <j-button
+                  :variant="isSelected(app.pkg) ? 'link' : 'primary'"
+                  @click="() => toggleView(app)"
+                >
+                  {{ isSelected(app.pkg) ? "Remove" : "Add" }}
+                </j-button>
               </div>
             </j-flex>
-            <div>
-              <j-button
-                :variant="isSelected(app.pkg) ? 'subtle' : 'primary'"
-                @click="() => toggleView(app)"
-              >
-                {{ isSelected(app.pkg) ? "Remove" : "Add" }}
-              </j-button>
-            </div>
-          </j-flex>
-        </div>
-      </j-flex>
+          </div>
+        </j-flex>
+      </j-box>
 
       <j-box mt="500">
         <j-flex direction="row" j="end" gap="300">
@@ -126,8 +140,10 @@ export default defineComponent({
       apps,
       appRepo,
       channel,
+      tab: ref<"official" | "community">("official"),
       isLoading: ref(false),
       packages: ref<FluxApp[]>([]),
+      loadedApps: {} as Record<string, "loaded" | "loading" | undefined | null>,
       name: ref(""),
       description: ref(""),
       selectedPlugins: ref<App[]>([]),
@@ -141,6 +157,15 @@ export default defineComponent({
     },
     viewOptions() {
       return viewOptions;
+    },
+    officialApps(): FluxApp[] {
+      return this.packages.filter((p) => p.pkg.startsWith("@fluxapp/"));
+    },
+    communityApps(): FluxApp[] {
+      return this.packages.filter((p) => !p.pkg.startsWith("@fluxapp/"));
+    },
+    filteredPackages(): FluxApp[] {
+      return this.tab === "official" ? this.officialApps : this.communityApps;
     },
   },
   watch: {
@@ -159,6 +184,30 @@ export default defineComponent({
           this.name = channel.name;
           this.description = channel.description;
         }
+      },
+      deep: true,
+      immediate: true,
+    },
+    selectedApps: {
+      handler: async function (apps: FluxApp[]) {
+        apps.forEach(async (app) => {
+          const wcName = await generateWCName(app.pkg);
+          if (customElements.get(wcName)) {
+            console.log("already loaded");
+            this.loadedApps[wcName] = "loaded";
+          } else {
+            this.loadedApps[wcName] = "loading";
+            console.log("loading");
+            const module = await import(
+              /* @vite-ignore */
+              `https://cdn.jsdelivr.net/npm/${app.pkg}@latest/+esm`
+            );
+            customElements.define(wcName, module.default);
+            console.log("loaded");
+            this.loadedApps[wcName] = "loaded";
+            this.$forceUpdate();
+          }
+        });
       },
       deep: true,
       immediate: true,
@@ -224,5 +273,13 @@ export default defineComponent({
   border-radius: var(--j-border-radius);
   background: var(--j-color-ui-50);
   border: 1px solid var(--j-color-ui-100);
+}
+
+j-tabs::part(base) {
+  gap: var(--j-space-500);
+}
+
+j-tab-item::part(base) {
+  padding: 0;
 }
 </style>

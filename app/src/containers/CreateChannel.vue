@@ -21,6 +21,7 @@
           @keydown.enter="createChannel"
           @input="(e: any) => (channelName = e.target.value)"
         ></j-input>
+
         <j-box pb="500" pt="300">
           <j-box pb="300">
             <j-text variant="label">Select at least one plugin</j-text>
@@ -39,8 +40,23 @@
             <j-spinner></j-spinner>
           </j-box>
 
+          <j-box v-else pb="500">
+            <j-tabs
+              class="tabs"
+              :value="tab"
+              @change="(e) => (tab = e.target.value)"
+            >
+              <j-tab-item value="official">Official</j-tab-item>
+              <j-tab-item value="community">Community</j-tab-item>
+            </j-tabs>
+          </j-box>
+
           <div class="app-grid" v-if="!isLoading">
-            <div class="app-card" v-for="pkg in packages" :key="pkg.name">
+            <div
+              class="app-card"
+              v-for="pkg in filteredPackages"
+              :key="pkg.name"
+            >
               <j-flex a="center" direction="row" j="between" gap="500">
                 <j-flex gap="500" a="center" j="center">
                   <j-icon size="lg" v-if="pkg.icon" :name="pkg.icon"></j-icon>
@@ -64,10 +80,11 @@
                 </j-flex>
                 <div>
                   <j-button
-                    :variant="isSelected(pkg) ? 'secondary' : 'primary'"
+                    :loading="loadedApps[pkg.pkg] === 'loading'"
+                    :variant="isSelected(pkg) ? 'link' : 'primary'"
                     @click="() => toggleView(pkg)"
                   >
-                    {{ isSelected(pkg) ? "Remove" : "Install" }}
+                    {{ isSelected(pkg) ? "Remove" : "Add" }}
                   </j-button>
                 </div>
               </j-flex>
@@ -97,8 +114,15 @@
 </template>
 
 <script lang="ts">
+import { ref } from "vue";
 import { useRoute } from "vue-router";
-import { Channel, getAllFluxApps, FluxApp, App } from "@fluxapp/api";
+import {
+  Channel,
+  getAllFluxApps,
+  FluxApp,
+  App,
+  generateWCName,
+} from "@fluxapp/api";
 import { usePerspective, useEntry } from "@fluxapp/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { defineComponent } from "vue";
@@ -140,9 +164,11 @@ export default defineComponent({
   },
   data() {
     return {
+      tab: ref<"official" | "community">("official"),
       isLoading: false,
       packages: [] as FluxApp[],
       selectedViews: [] as string[],
+      loadedApps: {} as Record<string, "loaded" | "loading" | undefined | null>,
       channelView: "chat",
       channelName: "",
       isCreatingChannel: false,
@@ -158,8 +184,43 @@ export default defineComponent({
     selectedApps(): FluxApp[] {
       return this.packages.filter((p) => this.selectedViews.includes(p.pkg));
     },
+    officialApps(): FluxApp[] {
+      return this.packages.filter((p) => p.pkg.startsWith("@fluxapp/"));
+    },
+    communityApps(): FluxApp[] {
+      return this.packages.filter((p) => !p.pkg.startsWith("@fluxapp/"));
+    },
+    filteredPackages(): FluxApp[] {
+      return this.tab === "official" ? this.officialApps : this.communityApps;
+    },
     validSelectedViews() {
       return this.selectedViews.length >= 1;
+    },
+  },
+  watch: {
+    selectedApps: {
+      handler: async function (apps: FluxApp[]) {
+        apps.forEach(async (app) => {
+          const wcName = await generateWCName(app.pkg);
+          if (customElements.get(wcName)) {
+            console.log("already loaded");
+            this.loadedApps[wcName] = "loaded";
+          } else {
+            this.loadedApps[wcName] = "loading";
+            console.log("loading");
+            const module = await import(
+              /* @vite-ignore */
+              `https://cdn.jsdelivr.net/npm/${app.pkg}@latest/+esm`
+            );
+            customElements.define(wcName, module.default);
+            console.log("loaded");
+            this.loadedApps[wcName] = "loaded";
+            this.$forceUpdate();
+          }
+        });
+      },
+      deep: true,
+      immediate: true,
     },
   },
   methods: {
@@ -226,5 +287,13 @@ export default defineComponent({
   border-radius: var(--j-border-radius);
   background: var(--j-color-ui-50);
   border: 1px solid var(--j-color-ui-100);
+}
+
+j-tabs::part(base) {
+  gap: var(--j-space-500);
+}
+
+j-tab-item::part(base) {
+  padding: 0;
 }
 </style>
