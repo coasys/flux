@@ -5,7 +5,8 @@ import { PerspectiveProxy } from "@perspect3vism/ad4m";
 type Props = {
   entries: any[];
   perspective: PerspectiveProxy;
-  onUrlClick: Function;
+  onUrlClick: (url: string) => void;
+  onEntryClick: (url: string) => void;
   subjectClass: string;
 };
 
@@ -13,6 +14,7 @@ export default function Table({
   entries,
   perspective,
   subjectClass,
+  onEntryClick = () => {},
   onUrlClick = () => {},
 }: Props) {
   const headers = Object.keys(entries[0]).filter((header, index) => {
@@ -46,7 +48,7 @@ export default function Table({
               {headers.map((header, index) => {
                 const value = item[header];
                 return (
-                  <td key={index} onClick={() => onUrlClick(item.id)}>
+                  <td key={index} onClick={() => onEntryClick(item.id)}>
                     <DisplayValue
                       onUrlClick={(url) => onUrlClick(url)}
                       onUpdate={(val) => onUpdate(item.id, header, val)}

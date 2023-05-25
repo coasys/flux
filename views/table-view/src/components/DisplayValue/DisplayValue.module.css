@@ -7,8 +7,14 @@
   font-size: var(--j-font-size-300);
   display: inline-block;
   text-decoration: none;
-  background: var(--j-color-primary-100);
-  color: var(--j-color-primary-500);
+  background: var(--j-color-primary-200);
+  color: var(--j-color-primary-600);
   padding: var(--j-space-200);
+  font-weight: 500;
+  opacity: 0.8;
   border-radius: var(--j-border-radius);
+}
+
+.entryUrl:hover {
+  opacity: 1;
 }

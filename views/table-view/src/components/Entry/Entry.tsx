@@ -93,6 +93,16 @@ export default function Entry({
             </j-flex>
           ))}
         </j-flex>
+
+        <j-box pt="500">
+          <j-button
+            size="lg"
+            variant="primary"
+            onClick={() => onUrlClick(source, true)}
+          >
+            Go to {classes[0]}
+          </j-button>
+        </j-box>
       </div>
     );
   }

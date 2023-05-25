@@ -56,7 +56,7 @@ export default function TableView({
   useEffect(() => {
     perspective
       .infer(
-        `subject_class(ClassName, C), instance(C, Base), triple( "${source}", _, Base).`
+        `subject_class(ClassName, C), instance(C, Base), triple(_, _, Base).`
       )
       .then((result) => {
         if (Array.isArray(result)) {
@@ -68,7 +68,7 @@ export default function TableView({
           setSelected("");
         }
       });
-  }, [perspective.uuid, history]);
+  }, [perspective.uuid]);
 
   async function onUrlClick(baseExpression: string, useHistory: boolean) {
     setCurrentEntry(baseExpression);
@@ -92,7 +92,8 @@ export default function TableView({
       <Table
         perspective={perspective}
         subjectClass={selected}
-        onUrlClick={(url) => onUrlClick(url, true)}
+        onEntryClick={(url) => onUrlClick(url, true)}
+        onUrlClick={(url) => onUrlClick(url, false)}
         entries={entries}
       ></Table>
     ),
@@ -145,49 +146,47 @@ export default function TableView({
           </j-box>
 
           <j-box px="500" py="300">
-            {entries.length > 0 && (
-              <j-flex gap="500">
-                <j-popover>
-                  <j-button size="sm" variant="ghost" slot="trigger">
-                    Grid
-                    <j-icon slot="end" name="chevron-down" size="xs"></j-icon>
-                  </j-button>
-                  <j-menu
-                    value={view}
-                    onClick={(e) => setView(e.target.value)}
-                    size="sm"
-                    slot="content"
-                  >
-                    <j-menu-item
-                      size="sm"
-                      value="table"
-                      selected={view === "table"}
-                    >
-                      Table
-                    </j-menu-item>
-                    <j-menu-item
-                      size="sm"
-                      value="grid"
-                      selected={view === "grid"}
-                    >
-                      Grid
-                    </j-menu-item>
-                  </j-menu>
-                </j-popover>
-                <j-input size="sm" placeholder="Search">
-                  <j-icon name="search" size="xs" slot="end"></j-icon>
-                </j-input>
-                <j-button
-                  onClick={() =>
-                    createEntry({ perspective, source, subjectClass: selected })
-                  }
-                  size="sm"
-                  variant="primary"
-                >
-                  New {selected}
+            <j-flex gap="500">
+              <j-popover>
+                <j-button size="sm" variant="ghost" slot="trigger">
+                  Grid
+                  <j-icon slot="end" name="chevron-down" size="xs"></j-icon>
                 </j-button>
-              </j-flex>
-            )}
+                <j-menu
+                  value={view}
+                  onClick={(e) => setView(e.target.value)}
+                  size="sm"
+                  slot="content"
+                >
+                  <j-menu-item
+                    size="sm"
+                    value="table"
+                    selected={view === "table"}
+                  >
+                    Table
+                  </j-menu-item>
+                  <j-menu-item
+                    size="sm"
+                    value="grid"
+                    selected={view === "grid"}
+                  >
+                    Grid
+                  </j-menu-item>
+                </j-menu>
+              </j-popover>
+              <j-input size="sm" placeholder="Search">
+                <j-icon name="search" size="xs" slot="end"></j-icon>
+              </j-input>
+              <j-button
+                onClick={() =>
+                  createEntry({ perspective, source, subjectClass: selected })
+                }
+                size="sm"
+                variant="primary"
+              >
+                New {selected}
+              </j-button>
+            </j-flex>
           </j-box>
 
           <j-box>
@@ -197,7 +196,7 @@ export default function TableView({
               <j-box px="1000" py="1000">
                 <j-flex direction="column" a="center" j="center" gap="500">
                   <j-icon size="lg" name="cone-striped"></j-icon>
-                  <j-text>Could not find any children...</j-text>
+                  <j-text>No entries yet...</j-text>
                 </j-flex>
               </j-box>
             )}
