@@ -101,7 +101,7 @@ export default defineComponent({
     const res = await getAllFluxApps();
     this.isLoading = false;
     this.packages = res.filter(
-      (pkg) => new Date(pkg.created) > new Date("05-01-2023")
+      (pkg) => new Date(pkg.created) > new Date("2023-05-01")
     );
   },
   async setup(props) {
