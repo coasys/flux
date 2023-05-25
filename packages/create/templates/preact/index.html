@@ -28,14 +28,14 @@
   </head>
   <body>
     <flux-container>
-      <flux-app></flux-app>
+      <flux-plugin></flux-plugin>
     </flux-container>
 
     <script type="module">
-      import App from "./src/main.ts";
+      import Plugin from "./src/main.ts";
       import "@fluxapp/flux-container";
 
-      customElements.define("flux-app", App);
+      customElements.define("flux-plugin", Plugin);
     </script>
   </body>
 </html>

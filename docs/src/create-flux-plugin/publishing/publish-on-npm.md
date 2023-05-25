@@ -9,10 +9,10 @@ This example shows how to turn a preact app into a web component using the bundl
 ```ts
 // main.ts
 
-import register from "../utils/custom-element.js";
+import { toCustomElement } from "@fluxapp/react-web";
 import App from "./App";
 
-const CustomElement = register.toCustomElement(App, ["perspective", "source"], {
+const CustomElement = toCustomElement(App, ["perspective", "source"], {
   shadow: false,
 });
 
@@ -27,11 +27,11 @@ This will allow the app to be discovered by the Flux Plugin Store.
 
 ```json
 {
-  "name": "your-flux-app",
+  "name": "your-flux-plugin",
   "version": "1.0.0",
   "fluxplugin": {
     // [!code ++]
-    "name": "your-flux-plugin", // [!code ++]
+    "name": "My plugin", // [!code ++]
     "description": "Description of your plugin", // [!code ++]
     "icon": "icon-name" // [!code ++]
   }, // [!code ++]

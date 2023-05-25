@@ -8,7 +8,7 @@ We've created `@fluxapp/create` to get you quickly up and running with a minimal
 npx @fluxapp/create
 ```
 
-The terminal will ask you for the name of your Plugin, as well as what framework you want to use (for now we only support preact).
+The terminal will ask you for the name of your plugin, as well as what framework you want to use (for now we only support preact).
 
 Then install the dependencies and start your development server:
 
@@ -32,6 +32,6 @@ npx install @perspect3vism/ad4m-connect @perspect3vism/ad4m @fluxapp/flux-contai
 
 ```
 <flux-container>
-    <your-app />
+    <your-plugin />
 </flux-container>
 ```

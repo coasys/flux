@@ -1,6 +1,6 @@
 # Introduction
 
-Welcome to Create Flux Plugin, the bootstrapping tool designed to help you get started creating your own apps for Flux communities!
+Welcome to Create Flux Plugin, the bootstrapping tool designed to help you get started creating your own plugins for Flux communities!
 
 Flux Plugins run on top of [AD4M](https://ad4m.dev/), a framework for creating peer-to-peer applications, and comes bundled with [Flux UI](/ui-library/getting-started/introduction.html), a collection of web components designed specifically for Flux.
 

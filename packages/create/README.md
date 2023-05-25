@@ -1,6 +1,6 @@
 # Create Flux app
 
-Bootstrap a new [Flux](https://fluxsocial.io) app for your community
+Bootstrap a new [Flux](https://fluxsocial.io) plugin for your community
 
 ```
 npx create-flux-app
