@@ -23,7 +23,7 @@
         ></j-input>
         <j-box pb="500" pt="300">
           <j-box pb="300">
-            <j-text variant="label">Select at least one app</j-text>
+            <j-text variant="label">Select at least one plugin</j-text>
             <j-text size="300" variant="label">
               Can't find a suitable plugin?
               <a
@@ -108,10 +108,13 @@ export default defineComponent({
   async created() {
     this.isLoading = true;
     const res = await getAllFluxApps();
+
     this.isLoading = false;
-    this.packages = res.filter(
-      (pkg) => new Date(pkg.created) > new Date("05-01-2023")
+    const filtered = res.filter(
+      (pkg) => new Date(pkg.created) > new Date("2023-05-01")
     );
+    this.packages = filtered;
+    console.log({ packages: filtered, res });
   },
   async setup() {
     const route = useRoute();

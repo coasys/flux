@@ -17,7 +17,7 @@
 
       <j-flex v-if="!isLoading" direction="column" gap="500">
         <j-box>
-          <j-text variant="label">Select at least one app</j-text>
+          <j-text variant="label">Select at least one plugin</j-text>
           <j-text size="300" variant="label">
             Can't find a suitable plugin?
             <a
