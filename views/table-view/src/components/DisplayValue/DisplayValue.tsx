@@ -29,6 +29,10 @@ export default function DisplayValue({
       onUpdate(e.target.value);
       setIsEditing(false);
     }
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      setIsEditing(false);
+    }
   }
 
   function onStartEdit(e) {
@@ -48,20 +52,21 @@ export default function DisplayValue({
     );
   }
 
-  if (typeof value === "string") {
-    if (isEditing && onUpdate) {
-      return (
-        <j-input
-          ref={inputRef}
-          size="sm"
-          autoFocus
-          onBlur={() => setIsEditing(false)}
-          onKeyDown={onKeyDown}
-          value={value}
-        ></j-input>
-      );
-    }
+  if (isEditing && onUpdate) {
+    return (
+      <j-input
+        ref={inputRef}
+        size="sm"
+        autoFocus
+        onclick={(e) => e.stopPropagation()}
+        onBlur={() => setIsEditing(false)}
+        onKeyDown={onKeyDown}
+        value={value}
+      ></j-input>
+    );
+  }
 
+  if (typeof value === "string") {
     if (value.length > 1000)
       return (
         <img className={styles.img} src={`data:image/png;base64,${value}`} />
@@ -127,7 +132,14 @@ export default function DisplayValue({
 
   if (value === true) return <j-toggle size="sm" checked></j-toggle>;
 
-  if (value === false) return <span></span>;
+  if (value === false)
+    return onUpdate ? (
+      <j-button onClick={onStartEdit} square circle size="sm" variant="ghost">
+        <j-icon size="xs" name="pencil"></j-icon>
+      </j-button>
+    ) : (
+      <span></span>
+    );
 
   return value === null ? <span></span> : value;
 }

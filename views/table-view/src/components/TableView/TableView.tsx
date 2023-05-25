@@ -26,7 +26,6 @@ export default function TableView({
   const [selected, setSelected] = useState("");
   const [currentEntry, setCurrentEntry] = useState("");
   const [openCurrentEntry, setOpenCurrentEntry] = useState(false);
-  const [showCreate, setShowCreate] = useState(false);
   const layoutRef = useRef();
 
   const source = history.length ? history[history.length - 1] : "ad4m://self";
@@ -179,7 +178,9 @@ export default function TableView({
                   <j-icon name="search" size="xs" slot="end"></j-icon>
                 </j-input>
                 <j-button
-                  onClick={() => setShowCreate(true)}
+                  onClick={() =>
+                    createEntry({ perspective, source, subjectClass: selected })
+                  }
                   size="sm"
                   variant="primary"
                 >
@@ -204,21 +205,6 @@ export default function TableView({
         </div>
       </div>
 
-      {showCreate && (
-        <j-modal
-          open={showCreate}
-          onToggle={(e) => setShowCreate(e.target.open)}
-        >
-          <j-box p="800">
-            <CreateEntry
-              perspective={perspective}
-              source={source}
-              subjectClass={selected}
-            ></CreateEntry>
-          </j-box>
-        </j-modal>
-      )}
-
       <j-modal
         open={openCurrentEntry}
         onToggle={(e) => setOpenCurrentEntry(e.target.open)}
@@ -241,46 +227,15 @@ type CreatePops = {
   source: string;
 };
 
-function CreateEntry({ perspective, subjectClass, source }: CreatePops) {
-  const [instance, setInstance] = useState<Object>({});
+async function createEntry({ perspective, subjectClass, source }: CreatePops) {
+  const uuid = Literal.from(uuidv4()).toUrl();
+  const instance = await perspective.createSubject(subjectClass, uuid);
 
-  async function createNewSubject() {
-    const uuid = Literal.from(uuidv4()).toUrl();
-    const instance = await perspective.createSubject(subjectClass, uuid);
+  await instance.init();
 
-    await instance.init();
-
-    const type = await perspective.add({
-      source: source || "ad4m://self",
-      predicate: await instance.type,
-      target: uuid,
-    });
-
-    setInstance(instance);
-  }
-
-  useEffect(() => {
-    if (subjectClass) {
-      createNewSubject();
-    }
-  }, []);
-
-  const result = Object.keys(instance).reduce((acc: string[], prop: string) => {
-    if (prop.startsWith("set") && !prop.startsWith("setCollection")) {
-      acc.push(prop);
-    }
-    return acc;
-  }, []);
-
-  return (
-    <div>
-      <j-text variant="heading">Create new {subjectClass}</j-text>
-      {result.map((name) => (
-        <j-input
-          label={name}
-          onChange={(e) => instance[name](e.target.value)}
-        ></j-input>
-      ))}
-    </div>
-  );
+  const type = await perspective.add({
+    source: source || "ad4m://self",
+    predicate: await instance.type,
+    target: uuid,
+  });
 }

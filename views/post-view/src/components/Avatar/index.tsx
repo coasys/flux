@@ -7,7 +7,7 @@ type AvatarProps = {
   src?: string;
   style?: any;
   onClick?: (event: any) => void;
-  size?: "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl";
+  size?: "" | "xxs" | "xs" | "sm" | "lg" | "xl" | "xxl";
 };
 
 export default function Avatar({
@@ -16,7 +16,7 @@ export default function Avatar({
   url,
   style,
   onClick,
-  size = "md",
+  size = "",
 }: AvatarProps) {
   const [loading, setLoading] = useState(false);
   const [img, setImage] = useState(null);
