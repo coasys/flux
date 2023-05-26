@@ -24,7 +24,7 @@
             </j-flex>
           </j-box>
           <div class="channel-view__tabs">
-            <label class="channel-view-tab" v-for="app in apps || []">
+            <label class="channel-view-tab" v-for="app in apps">
               <input
                 :name="channel?.id"
                 type="radio"
@@ -139,6 +139,7 @@ export default defineComponent({
     Hourglass,
   },
   async setup(props) {
+    console.log({ props });
     const client: Ad4mClient = await getAd4mClient();
 
     const { perspectives } = usePerspectives(client);
@@ -210,10 +211,8 @@ export default defineComponent({
             );
             customElements.define(wcName, module.default);
             this.wcNames[app.pkg] = wcName;
-            this.$forceUpdate();
           } else {
             this.wcNames[app.pkg] = wcName;
-            this.$forceUpdate();
           }
         });
       },
@@ -261,6 +260,7 @@ export default defineComponent({
       this.appStore.setShowEditChannel(true);
     },
     changeCurrentView(e: any) {
+      console.log(e.target.value);
       const value = e.target.value;
       this.currentView = value;
     },

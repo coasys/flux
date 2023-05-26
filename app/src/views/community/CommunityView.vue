@@ -12,16 +12,16 @@
     <div
       style="height: 100%"
       v-for="channel in channels"
-      :key="channel.id"
+      :key="channel?.id"
       :style="{
-        height: channel.id === channelId ? '100%' : '0',
+        height: channel?.id === channelId ? '100%' : '0',
       }"
     >
       <channel-view
-        v-if="loadedChannels[channel.id]"
+        v-if="loadedChannels[channel?.id]"
         v-show="channel?.id === channelId"
-        :channelId="channel.id"
-        :communityId="data.perspective?.uuid"
+        :channelId="channelId"
+        :communityId="communityId"
       ></channel-view>
     </div>
 

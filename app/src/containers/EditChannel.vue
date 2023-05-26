@@ -190,7 +190,7 @@ export default defineComponent({
     },
     selectedApps: {
       handler: async function (apps: FluxApp[]) {
-        apps.forEach(async (app) => {
+        apps?.forEach(async (app) => {
           const wcName = await generateWCName(app.pkg);
           if (customElements.get(wcName)) {
             console.log("already loaded");
