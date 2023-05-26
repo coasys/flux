@@ -370,13 +370,13 @@ export default defineComponent({
         image: this.newProfileImage,
         perspectiveUuid: perspective.uuid,
       })
-        .then((community: any) => {
+        .then(() => {
           this.$emit("submit");
 
           this.$router.push({
             name: "community",
             params: {
-              communityId: community.neighbourhood.uuid,
+              communityId: perspective.uuid,
             },
           });
         })

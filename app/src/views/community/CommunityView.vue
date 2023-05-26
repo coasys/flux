@@ -196,7 +196,7 @@ import Hourglass from "@/components/hourglass/Hourglass.vue";
 import { Channel, Community } from "@fluxapp/api";
 import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
-import { mapActions, mapState } from "pinia";
+import { mapActions } from "pinia";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { useEntries, useEntry } from "@fluxapp/vue";
 import { usePerspective } from "@fluxapp/vue";
@@ -226,12 +226,12 @@ export default defineComponent({
 
     const { entry: community } = useEntry({
       perspective: () => data.value.perspective,
+      id: "ad4m://self",
       model: Community,
     });
 
     const { entries: channels } = useEntries({
       perspective: () => data.value.perspective,
-      source: () => "ad4m://self",
       model: Channel,
     });
 
@@ -249,6 +249,12 @@ export default defineComponent({
     };
   },
   watch: {
+    community: {
+      handler: function (comm) {
+        console.log({ comm });
+      },
+      immediate: true,
+    },
     "$route.params.communityId": {
       handler: function (id: string) {
         if (id) {

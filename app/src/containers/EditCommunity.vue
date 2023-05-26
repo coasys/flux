@@ -58,6 +58,7 @@ export default defineComponent({
     const { data } = usePerspective(client, () => props.communityId);
     const { entry: community, repo } = useEntry({
       perspective: () => data.value.perspective,
+      id: "ad4m://self",
       model: Community,
     });
 
@@ -99,7 +100,7 @@ export default defineComponent({
           );
         }
 
-        await this.repo?.update(this.community.id, {
+        await this.repo?.update(this.community?.id, {
           name: this.communityName || undefined,
           description: this.communityDescription || undefined,
           image: compressedImage

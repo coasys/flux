@@ -60,11 +60,20 @@ export function useEntry<SubjectClass>({
       const isNewEntry = link.data.source === s;
       const isUpdated = entry.value?.id === link.data.source;
 
-      const id = isNewEntry
-        ? link.data.target
-        : isUpdated
+      const id = isUpdated
         ? link.data.source
+        : isNewEntry
+        ? link.data.target
         : false;
+
+      console.log({
+        isNewEntry,
+        isUpdated,
+        id,
+        linkData: link.data,
+        entry: entry.value,
+        s,
+      });
 
       if (id) {
         const isInstance = await p.isSubjectInstance(id, new model());
