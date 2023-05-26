@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "preact/hooks";
 import { Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
 import styles from "./TableView.module.css";
-import { usePrevious, useChildren } from "../../utils";
+import { usePrevious, useChildren, pluralize } from "../../utils";
 import { v4 as uuidv4 } from "uuid";
 
 import Table from "../Table";
@@ -138,7 +138,8 @@ export default function TableView({
                       value={c}
                       type="radio"
                     ></input>
-                    <span>{c}</span>
+
+                    <span>{pluralize(c)}</span>
                   </label>
                 );
               })}
@@ -184,7 +185,7 @@ export default function TableView({
                 size="sm"
                 variant="primary"
               >
-                New {selected}
+                New {selected.toLowerCase()}
               </j-button>
             </j-flex>
           </j-box>
@@ -196,7 +197,7 @@ export default function TableView({
               <j-box px="1000" py="1000">
                 <j-flex direction="column" a="center" j="center" gap="500">
                   <j-icon size="lg" name="cone-striped"></j-icon>
-                  <j-text>No entries yet...</j-text>
+                  <j-text>No {pluralize(selected).toLowerCase()} yet...</j-text>
                 </j-flex>
               </j-box>
             )}

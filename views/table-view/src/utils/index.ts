@@ -93,3 +93,25 @@ export function isValidUrl(string) {
     return false;
   }
 }
+
+export function pluralize(word: string): string {
+  const lastChar = word[word.length - 1];
+  const secondLastChar = word[word.length - 2];
+  if (lastChar === "y" && !isVowel(secondLastChar)) {
+    return word.slice(0, -1) + "ies";
+  } else if (
+    lastChar === "s" ||
+    lastChar === "x" ||
+    lastChar === "z" ||
+    (secondLastChar === "c" && lastChar === "h") ||
+    (secondLastChar === "s" && lastChar === "h")
+  ) {
+    return word + "es";
+  } else {
+    return word + "s";
+  }
+}
+
+export function isVowel(char: string): boolean {
+  return ["a", "e", "i", "o", "u"].includes(char.toLowerCase());
+}
