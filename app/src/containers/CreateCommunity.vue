@@ -134,11 +134,13 @@
       </j-flex>
       <div v-if="tabView === 'Load'">
         <j-flex direction="column" gap="500" v-if="!isCreatingCommunity">
-          <j-text variant="body" v-if="nonFluxPerspectives.length === 0"
+          <j-text
+            variant="body"
+            v-if="Object.keys(nonFluxCommunities).length === 0"
             >No perspective found that is not a flux community</j-text
           >
           <j-menu-item
-            v-for="perspective of nonFluxPerspectives"
+            v-for="perspective in nonFluxCommunities"
             :key="perspective.uuid"
             class="choice-button"
             size="xl"
@@ -181,12 +183,17 @@
 
 <script lang="ts">
 import { isValid } from "@/utils/validation";
-import { defineComponent } from "vue";
+import { defineComponent, shallowRef } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useAppStore } from "@/store/app";
-import { joinCommunity, createCommunity } from "@fluxapp/api";
+import {
+  joinCommunity,
+  createCommunity,
+  SubjectRepository,
+  Community,
+} from "@fluxapp/api";
 import { usePerspectives } from "@fluxapp/vue";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 
@@ -211,8 +218,42 @@ export default defineComponent({
       newProfileImage: undefined,
       isJoiningCommunity: false,
       isCreatingCommunity: false,
-      nonFluxPerspectives: [] as PerspectiveProxy[],
+      nonFluxCommunities: {} as Record<string, PerspectiveProxy>,
     };
+  },
+  watch: {
+    perspectives: {
+      handler: async function (val) {
+        const perspectives: PerspectiveProxy[] = Object.values(val);
+
+        const promises = perspectives.map(async (p) => {
+          const repo = new SubjectRepository(Community, {
+            perspective: p,
+            source: "ad4m://self",
+          });
+          try {
+            const community = await repo.getData();
+            if (!community) return p;
+            else return null;
+          } catch (e) {
+            return p;
+          }
+        });
+
+        const pers = await Promise.all(promises);
+
+        this.nonFluxCommunities = pers
+          .filter((p) => p !== null)
+          .reduce((acc, p) => {
+            if (!p) return acc;
+            return {
+              ...acc,
+              [p.uuid]: shallowRef(p),
+            };
+          }, {});
+      },
+      immediate: true,
+    },
   },
   computed: {
     hasAlreadyJoinedTestingCommunity(): boolean {
