@@ -20,7 +20,7 @@
       <channel-view
         v-if="loadedChannels[channel?.id]"
         v-show="channel?.id === channelId"
-        :channelId="channelId"
+        :channelId="channel?.id"
         :communityId="communityId"
       ></channel-view>
     </div>

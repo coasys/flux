@@ -99,7 +99,13 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { useAppStore } from "@/store/app";
-import { App, Channel, getAllFluxApps, FluxApp } from "@fluxapp/api";
+import {
+  App,
+  Channel,
+  getAllFluxApps,
+  FluxApp,
+  generateWCName,
+} from "@fluxapp/api";
 import ChannnelViewOptions from "@/components/channel-view-options/ChannelViewOptions.vue";
 import { viewOptions } from "@/constants";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";

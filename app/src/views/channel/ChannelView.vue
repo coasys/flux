@@ -67,10 +67,11 @@
 
     <template v-for="app in apps">
       <component
+        v-if="wcNames[app.pkg]"
         v-show="currentView === app.pkg && wcNames[app.pkg]"
         :is="wcNames[app.pkg]"
         class="perspective-view"
-        :source="channel?.id"
+        :source="channelId"
         :agent.prop="agentClient"
         :perspective.prop="data.perspective"
         @click="onViewClick"
@@ -168,7 +169,7 @@ export default defineComponent({
     return {
       agentClient: client.agent,
       agent: me,
-      wcNames: {} as Record<string, string>,
+      wcNames: ref<Record<string, string>>({}),
       apps,
       perspectives,
       data,
@@ -201,7 +202,7 @@ export default defineComponent({
       handler: function (val) {
         this.currentView = val[0]?.pkg;
         // Add new views
-        val.forEach(async (app: App) => {
+        val?.forEach(async (app: App) => {
           const wcName = await generateWCName(app.pkg);
 
           if (!customElements.get(wcName)) {
@@ -209,8 +210,10 @@ export default defineComponent({
               /* @vite-ignore */
               `https://cdn.jsdelivr.net/npm/${app.pkg}@latest/+esm`
             );
-            customElements.define(wcName, module.default);
-            this.wcNames[app.pkg] = wcName;
+            await customElements.define(wcName, module.default);
+            setTimeout(() => {
+              this.wcNames[app.pkg] = wcName;
+            }, 200);
           } else {
             this.wcNames[app.pkg] = wcName;
           }
