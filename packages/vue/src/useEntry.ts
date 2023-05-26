@@ -66,15 +66,6 @@ export function useEntry<SubjectClass>({
         ? link.data.target
         : false;
 
-      console.log({
-        isNewEntry,
-        isUpdated,
-        id,
-        linkData: link.data,
-        entry: entry.value,
-        s,
-      });
-
       if (id) {
         const isInstance = await p.isSubjectInstance(id, new model());
 
@@ -87,7 +78,9 @@ export function useEntry<SubjectClass>({
     };
 
     const removed = async (link: LinkExpression) => {
-      const removedEntry = link.data.source === s;
+      // TODO: When a channel or something else attached to AD4M get removed
+      // the community also thinks it's getting remove as it also point to self
+      const removedEntry = link.data.source === s && s !== "ad4m://self";
       if (removedEntry) {
         const isInstance = await p.isSubjectInstance(
           link.data.source,

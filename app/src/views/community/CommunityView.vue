@@ -226,7 +226,6 @@ export default defineComponent({
 
     const { entry: community } = useEntry({
       perspective: () => data.value.perspective,
-      id: "ad4m://self",
       model: Community,
     });
 
