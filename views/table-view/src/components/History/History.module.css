@@ -1,5 +1,5 @@
 .history {
-  color: var(--j-color-white);
+  color: var(--j-color-ui-200);
   height: var(--j-size-md);
   padding: 0;
   padding-left: var(--j-space-400);
@@ -14,31 +14,21 @@
 }
 
 .historyItem {
-  border: 0;
-  background: 0;
+  border: none;
+  background: none;
   position: relative;
   padding: var(--j-space-200);
   border-radius: var(--j-border-radius);
-  text-transform: uppercase;
-  font-size: var(--j-font-size-200);
-  opacity: 1;
-  color: inherit;
+  font-size: var(--j-font-size-500);
+  font-weight: 600;
+  color: var(--j-color-ui-200);
 }
 
-.historyItem:hover:not(:last-child) {
+.historyItem.isLast {
+  color: var(--j-color-white);
+}
+
+.historyItem:hover:not(.isLast) {
   cursor: pointer;
-  opacity: 0.8;
-}
-
-.historyItem:not(:last-child)::after {
-  position: absolute;
-  right: calc(var(--j-space-300) * -1);
-  top: 50%;
-  transform: translateY(-50%);
-  display: inline-block;
-  content: "/";
-}
-
-.historyItem:last-of-type {
-  opacity: 0.8;
+  color: var(--j-color-ui-100);
 }

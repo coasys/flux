@@ -1,6 +1,7 @@
+import { useState } from "preact/hooks";
 import styles from "./Table.module.css";
 import DisplayValue from "../DisplayValue";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { LinkQuery, PerspectiveProxy } from "@perspect3vism/ad4m";
 
 type Props = {
   entries: any[];
@@ -17,8 +18,10 @@ export default function Table({
   onEntryClick = () => {},
   onUrlClick = () => {},
 }: Props) {
-  const headers = Object.keys(entries[0]).filter((header, index) => {
-    return header === "id" ? false : true;
+  const [selectedEntries, setSelected] = useState([]);
+
+  const headers = Object.keys(entries[0]).filter((key, index) => {
+    return !(key === "id" || key === "type");
   });
 
   async function onUpdate(id, propName, value) {
@@ -28,11 +31,36 @@ export default function Table({
     proxy[`set${capitalized}`](value);
   }
 
+  function onDelete(id) {
+    perspective.get(new LinkQuery({ target: id })).then((links) => {
+      perspective.removeLinks(links);
+    });
+    perspective.get(new LinkQuery({ source: id })).then((links) => {
+      perspective.removeLinks(links);
+    });
+  }
+
+  function onToggleSelect(e) {
+    const { checked, value } = e.target;
+    if (checked) {
+      setSelected([...selectedEntries, value]);
+    } else {
+      setSelected(selectedEntries.filter((id) => id === value));
+    }
+  }
+
+  function onDeleteSelected() {
+    selectedEntries.forEach((id) => {
+      onDelete(id);
+    });
+  }
+
   return (
     <div className={styles.tableWrapper}>
       <table className={styles.table}>
         <thead>
           <tr>
+            <th width="10"></th>
             {headers.map((header, index) => {
               return (
                 <th key={index}>
@@ -43,17 +71,81 @@ export default function Table({
           </tr>
         </thead>
         <tbody>
-          {entries.map((item, index) => (
+          {entries.map((entry, index) => (
             <tr key={index}>
+              <td>
+                <j-flex>
+                  <input
+                    onChange={onToggleSelect}
+                    name="select"
+                    value={entry.id}
+                    type="checkbox"
+                  />
+                  <j-button
+                    onclick={() => onUrlClick(entry.id)}
+                    circle
+                    variant="ghost"
+                    square
+                    size="xs"
+                  >
+                    <j-icon
+                      style="--j-icon-size: 0.7rem"
+                      name="arrows-angle-expand"
+                    ></j-icon>
+                  </j-button>
+                </j-flex>
+              </td>
               {headers.map((header, index) => {
-                const value = item[header];
+                const value = entry[header];
                 return (
-                  <td key={index} onClick={() => onEntryClick(item.id)}>
-                    <DisplayValue
-                      onUrlClick={(url) => onUrlClick(url)}
-                      onUpdate={(val) => onUpdate(item.id, header, val)}
-                      value={value}
-                    />
+                  <td key={index} onClick={() => onEntryClick(entry.id)}>
+                    <j-popover event="contextmenu">
+                      <div className={styles.trigger} slot="trigger">
+                        <DisplayValue
+                          onUrlClick={(url) => onUrlClick(url)}
+                          onUpdate={(val) => onUpdate(entry.id, header, val)}
+                          value={value}
+                        />
+                      </div>
+                      <j-menu
+                        onClick={(e) => e.stopPropagation()}
+                        slot="content"
+                      >
+                        {selectedEntries.length ? (
+                          <j-menu-item onClick={onDeleteSelected}>
+                            <j-icon
+                              name="trash"
+                              size="xs"
+                              slot="start"
+                            ></j-icon>
+                            <j-text
+                              color="danger-500"
+                              size="400"
+                              weight="500"
+                              nomargin
+                            >
+                              Delete selected entries
+                            </j-text>
+                          </j-menu-item>
+                        ) : (
+                          <j-menu-item onClick={() => onDelete(entry.id)}>
+                            <j-icon
+                              name="trash"
+                              size="xs"
+                              slot="start"
+                            ></j-icon>
+                            <j-text
+                              color="danger-500"
+                              size="400"
+                              weight="500"
+                              nomargin
+                            >
+                              Delete entry
+                            </j-text>
+                          </j-menu-item>
+                        )}
+                      </j-menu>
+                    </j-popover>
                   </td>
                 );
               })}

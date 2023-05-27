@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "preact/hooks";
+import { useEffect, useState, useRef, useMemo } from "preact/hooks";
 import { Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
 import styles from "./TableView.module.css";
 import { usePrevious, useChildren, pluralize } from "../../utils";
@@ -19,6 +19,7 @@ export default function TableView({
   perspective,
   source: initialSource,
 }: Props) {
+  const [search, setSearch] = useState("");
   const [view, setView] = useState<"grid" | "table">("table");
   const [history, setHistory] = useState([initialSource]);
   const prevHistory = usePrevious(history);
@@ -87,6 +88,17 @@ export default function TableView({
     setHistory(newHistory);
   }
 
+  const filteredEntries = useMemo(() => {
+    if (search === "") return entries;
+    return entries.filter((entry) => {
+      return Object.values(entry).some(
+        (value: any) =>
+          typeof value === "string" &&
+          value.toLowerCase().includes(search.toLowerCase())
+      );
+    });
+  }, [search, entries]);
+
   const viewComp = {
     table: () => (
       <Table
@@ -94,14 +106,14 @@ export default function TableView({
         subjectClass={selected}
         onEntryClick={(url) => onUrlClick(url, true)}
         onUrlClick={(url) => onUrlClick(url, false)}
-        entries={entries}
+        entries={filteredEntries}
       ></Table>
     ),
     grid: () => (
       <j-box px="500">
         <Grid
           onUrlClick={(url) => onUrlClick(url, true)}
-          entries={entries}
+          entries={filteredEntries}
         ></Grid>
       </j-box>
     ),
@@ -146,62 +158,64 @@ export default function TableView({
             </div>
           </j-box>
 
-          <j-box px="500" py="300">
-            <j-flex gap="500">
-              <j-popover>
-                <j-button size="sm" variant="ghost" slot="trigger">
-                  Grid
-                  <j-icon slot="end" name="chevron-down" size="xs"></j-icon>
-                </j-button>
-                <j-menu
-                  value={view}
-                  onClick={(e) => setView(e.target.value)}
-                  size="sm"
-                  slot="content"
-                >
-                  <j-menu-item
-                    size="sm"
-                    value="table"
-                    selected={view === "table"}
-                  >
-                    Table
-                  </j-menu-item>
-                  <j-menu-item
-                    size="sm"
-                    value="grid"
-                    selected={view === "grid"}
-                  >
-                    Grid
-                  </j-menu-item>
-                </j-menu>
-              </j-popover>
-              <j-input size="sm" placeholder="Search">
-                <j-icon name="search" size="xs" slot="end"></j-icon>
-              </j-input>
-              <j-button
-                onClick={() =>
-                  createEntry({ perspective, source, subjectClass: selected })
-                }
-                size="sm"
-                variant="primary"
-              >
-                New {selected.toLowerCase()}
+          <div className={styles.options}>
+            <j-popover>
+              <j-button size="sm" variant="ghost" slot="trigger">
+                View
+                <j-icon slot="end" name="chevron-down" size="xs"></j-icon>
               </j-button>
-            </j-flex>
-          </j-box>
+              <j-menu
+                value={view}
+                onClick={(e) => setView(e.target.value)}
+                size="sm"
+                slot="content"
+              >
+                <j-menu-item
+                  size="sm"
+                  value="table"
+                  selected={view === "table"}
+                >
+                  Table
+                </j-menu-item>
+                <j-menu-item size="sm" value="grid" selected={view === "grid"}>
+                  Grid
+                </j-menu-item>
+              </j-menu>
+            </j-popover>
+            <j-input
+              value={search}
+              onInput={(e) => setSearch(e.target.value)}
+              size="sm"
+              placeholder="Search"
+            >
+              <j-icon
+                name="search"
+                color="ui-500"
+                style="--j-icon-size: 0.8rem"
+                slot="end"
+              ></j-icon>
+            </j-input>
+            <j-button
+              onClick={() =>
+                createEntry({ perspective, source, subjectClass: selected })
+              }
+              size="sm"
+              variant="secondary"
+            >
+              New {selected.toLowerCase()}
+            </j-button>
+          </div>
 
-          <j-box>
-            {entries.length > 0 ? (
-              <View />
-            ) : (
-              <j-box px="1000" py="1000">
-                <j-flex direction="column" a="center" j="center" gap="500">
-                  <j-icon size="lg" name="cone-striped"></j-icon>
-                  <j-text>No {pluralize(selected).toLowerCase()} yet...</j-text>
-                </j-flex>
-              </j-box>
-            )}
-          </j-box>
+          {filteredEntries.length > 0 ? (
+            <View />
+          ) : (
+            <j-box px="1000" py="1000">
+              <j-flex direction="column" a="center" j="center" gap="500">
+                <j-icon size="lg" name="cone-striped"></j-icon>
+                <j-text>No {pluralize(selected).toLowerCase()} yet...</j-text>
+              </j-flex>
+            </j-box>
+          )}
         </div>
       </div>
 

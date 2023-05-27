@@ -53,7 +53,7 @@ export default function Entry({
 
   if (entry) {
     const properties = Object.entries(entry).filter(
-      ([key, value]) => key !== "id"
+      ([key, value]) => !(key === "id" || key === "type")
     );
     const defaultName =
       entry?.name ||
@@ -77,13 +77,13 @@ export default function Entry({
           </h2>
         </j-box>
 
-        <j-flex direction="column" gap="400">
+        <j-flex direction="column" gap="500">
           {properties.map(([key, value]) => (
             <j-flex gap="200" direction="column">
-              <j-text size="200" uppercase nomargin>
+              <j-text style="text-transform: capitalize" size="300" nomargin>
                 {key}
               </j-text>
-              <j-text>
+              <j-text nomargin color="black">
                 <DisplayValue
                   onUpdate={(value) => onUpdate(key, value)}
                   onUrlClick={onUrlClick}
@@ -94,7 +94,7 @@ export default function Entry({
           ))}
         </j-flex>
 
-        <j-box pt="500">
+        <j-box pt="800">
           <j-button
             size="lg"
             variant="primary"

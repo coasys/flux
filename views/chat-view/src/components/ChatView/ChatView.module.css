@@ -3,6 +3,7 @@
   --grid-template-areas: "toolbar toolbar toolbar" "body body footer";
 }
 .editor::part(base) {
+  background: var(--j-color-white);
 }
 .editor::part(toolbar) {
   display: none;

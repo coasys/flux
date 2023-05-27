@@ -1,8 +1,15 @@
+.tableWrapper {
+  background: var(--j-color-ui-50);
+  height: 100%;
+  display: block;
+  overflow-x: scroll;
+  max-width: 100%;
+}
+
 .table {
   border-spacing: 0;
   border-collapse: collapse;
   background: var(--j-color-white);
-  width: 100%;
   font-size: var(--j-font-size-400);
   text-align: left;
   display: table;
@@ -18,15 +25,32 @@
 
 .table th,
 .table td {
-  border: 1px solid var(--j-color-ui-200);
-  padding: var(--j-space-300) var(--j-space-400);
+  min-width: 200px;
+  border-right: 1px solid var(--j-color-ui-100);
+  border-top: 1px solid var(--j-color-ui-100);
+  border-bottom: 1px solid var(--j-color-ui-100);
+  height: var(--j-size-md);
+  padding: 0 var(--j-space-300);
+}
+
+.table th:last-of-type,
+.table td:last-of-type {
+  border-right: 1px solid var(--j-color-ui-100);
+}
+
+.table th:first-of-type,
+.table td:first-of-type {
+  min-width: auto;
+  border-right: 0;
 }
 
 .table thead th {
+  border-top: 0;
   background: var(--j-color-ui-50);
   color: var(--j-color-black);
   font-weight: 400;
   text-transform: capitalize;
+  border-bottom: 1px solid var(--j-color-ui-200);
 }
 
 .table tbody td {
@@ -37,22 +61,4 @@
 
 .table tbody tr:hover {
   background-color: var(--j-color-ui-50);
-}
-
-.table thead th:first-of-type {
-  border-top-left-radius: var(--j-border-radius);
-}
-
-.table thead th:last-of-type {
-  border-top-right-radius: var(--j-border-radius);
-}
-
-.table thead th:first-of-type,
-.table tbody td:first-of-type {
-  border-left: 0;
-}
-
-.table thead th:last-of-type,
-.table tbody td:last-of-type {
-  border-right: 0;
 }

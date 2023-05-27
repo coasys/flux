@@ -46,9 +46,11 @@ export function useChildren({
     };
 
     perspective.addListener("link-added", callback);
+    perspective.addListener("link-removed", callback);
 
     return () => {
       perspective.removeListener("link-added", callback);
+      perspective.removeListener("link-removed", callback);
     };
   }, [perspective.uuid, subjectInstance, source]);
 

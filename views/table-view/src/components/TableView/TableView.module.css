@@ -12,6 +12,14 @@
 }
 
 .children {
+  height: 100%;
+}
+
+.options {
+  display: flex;
+  gap: var(--j-space-200);
+  padding: var(--j-space-300);
+  border-bottom: 1px solid var(--j-color-ui-200);
 }
 
 .tabs {

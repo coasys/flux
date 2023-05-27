@@ -88,17 +88,25 @@ export default function Header({
                   {defaultName}
                 </j-text>
               </div>
-              <j-icon
-                size="sm"
-                name={isExpanded ? "chevron-down" : "chevron-right"}
-              ></j-icon>
+              <j-button square size="sm" variant="subtle">
+                <j-icon
+                  color="white"
+                  size="xs"
+                  name={isExpanded ? "chevron-down" : "chevron-right"}
+                ></j-icon>
+              </j-button>
             </j-flex>
           </summary>
           <j-box pt="500">
-            <j-flex direction="row" gap="500" wrap>
+            <j-flex direction="column" gap="500" wrap>
               {properties.map(([key, value]) => (
-                <j-flex gap="200" direction="column">
-                  <j-text color="white" size="200" uppercase nomargin>
+                <j-flex gap="500" direction="row" a="center">
+                  <j-text
+                    style="text-transform: capitalize"
+                    color="ui-200"
+                    size="300"
+                    nomargin
+                  >
                     {key}
                   </j-text>
                   <div>

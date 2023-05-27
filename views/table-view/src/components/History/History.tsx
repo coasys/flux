@@ -16,6 +16,7 @@ export default function History({ perspective, history, onClick }: Props) {
         {history.map((s, index) => {
           return (
             <HistoryItem
+              isLast={history.length === index + 1}
               source={s}
               onClick={() => onClick(index + 1)}
               perspective={perspective}
@@ -28,12 +29,13 @@ export default function History({ perspective, history, onClick }: Props) {
 }
 
 type ItemProps = {
+  isLast: boolean;
   perspective: PerspectiveProxy;
   source: string;
   onClick: (index: number) => void;
 };
 
-function HistoryItem({ source, perspective, onClick }: ItemProps) {
+function HistoryItem({ isLast, source, perspective, onClick }: ItemProps) {
   const [entry, setEntry] = useState({});
   const [classes, setClasses] = useState([]);
 
@@ -51,7 +53,6 @@ function HistoryItem({ source, perspective, onClick }: ItemProps) {
       const className = classResults[0].ClassName;
       const subjectProxy = await perspective.getSubjectProxy(source, className);
       const entry = await getEntry(subjectProxy);
-
       setEntry(entry);
     } else {
       setClasses([]);
@@ -60,14 +61,30 @@ function HistoryItem({ source, perspective, onClick }: ItemProps) {
   }
 
   const defaultName =
+    classes[0] ||
+    entry?.name ||
+    entry?.title ||
+    (source?.startsWith("literal://") && Literal.fromUrl(source).get()) ||
+    source;
+
+  const title =
     entry?.name ||
     entry?.title ||
     (source?.startsWith("literal://") && Literal.fromUrl(source).get()) ||
     source;
 
   return (
-    <button className={styles.historyItem} onClick={onClick} nomargin>
-      {defaultName}
-    </button>
+    <>
+      <j-tooltip title={title} placement="bottom">
+        <button
+          className={`${styles.historyItem} ${isLast && styles.isLast}`}
+          onClick={onClick}
+          nomargin
+        >
+          {defaultName}
+        </button>
+      </j-tooltip>
+      {!isLast && <j-icon size="xs" name="chevron-right"></j-icon>}
+    </>
   );
 }
