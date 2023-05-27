@@ -84,7 +84,7 @@ export default function Header({
                     Current Entry
                   </j-text>
                 </j-box>
-                <j-text nomargin variant="heading" color="white">
+                <j-text nomargin variant="heading-lg" color="white">
                   {defaultName}
                 </j-text>
               </div>
