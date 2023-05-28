@@ -3,7 +3,7 @@
     :slot="slot"
     :initials="initials"
     :hash="did"
-    :src="realSrc"
+    :src="realSrc || src"
     :size="size"
     :online="online"
   ></j-avatar>

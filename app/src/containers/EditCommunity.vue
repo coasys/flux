@@ -80,7 +80,7 @@ export default defineComponent({
       handler: async function (community) {
         this.communityName = community?.name;
         this.communityDescription = community?.description;
-        this.communityImage = await getImage(community?.image);
+        this.communityImage = community?.image;
       },
       deep: true,
       immediate: true,

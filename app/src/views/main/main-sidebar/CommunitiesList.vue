@@ -11,7 +11,7 @@
           class="left-nav__community-item"
           :selected="communityIsActive(uuid as string)"
           :online="false"
-          :url="community.image || undefined"
+          :src="community.image || undefined"
           :initials="community.name?.charAt(0).toUpperCase()"
           @click="() => handleCommunityClick(uuid as string)"
         ></Avatar>
