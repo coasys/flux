@@ -45,8 +45,6 @@ export default function PostItem({ agent, perspective, post, displayView }) {
   const showUrl = post.url;
   const showDates = post.startDate && post.endDate;
 
-  console.log(author);
-
   return (
     <div
       onClick={() => UIMehthods.goToPost(post.id)}

@@ -55,20 +55,16 @@ export default function TableView({
   }, [initialSource, perspective.uuid]);
 
   useEffect(() => {
-    perspective
-      .infer(
-        `subject_class(ClassName, C), instance(C, Base), triple(_, _, Base).`
-      )
-      .then((result) => {
-        if (Array.isArray(result)) {
-          const uniqueClasses = [...new Set(result.map((c) => c.ClassName))];
-          setClasses(uniqueClasses);
-          setSelected(uniqueClasses[0] || "");
-        } else {
-          setClasses([]);
-          setSelected("");
-        }
-      });
+    perspective.infer(`subject_class(ClassName, C).`).then((result) => {
+      if (Array.isArray(result)) {
+        const uniqueClasses = [...new Set(result.map((c) => c.ClassName))];
+        setClasses(uniqueClasses);
+        setSelected(uniqueClasses[0] || "");
+      } else {
+        setClasses([]);
+        setSelected("");
+      }
+    });
   }, [perspective.uuid]);
 
   async function onUrlClick(baseExpression: string, useHistory: boolean) {
@@ -249,7 +245,7 @@ async function createEntry({ perspective, subjectClass, source }: CreatePops) {
 
   const type = await perspective.add({
     source: source || "ad4m://self",
-    predicate: await instance.type,
+    predicate: "has_child",
     target: uuid,
   });
 }
