@@ -4,27 +4,10 @@ With your Models defined, writing and reading data can be done by writing and su
 
 This logic has been bundled into two hooks: `useEntry` and `useEntries`, for working with a single item and lists of items respectively.
 
-## Getting a single item
+A Flux Plugin will always recieve two things.
 
-Let's look at the example Todo Plugin included in the `@fluxapp/create` setup. The first thing we do is fetch the community we're in using `useEntry` and the included `Community` Model:
-
-```tsx
-import { useEntry } from "@fluxapp/react";
-import { Community } from "@fluxapp/api";
-
-export default function TodoView({ perspective, channelSource })
-  const { entry: community } = useEntry({
-    perspective,
-    model: Community,
-  });
-
-  return (
-    <h1>{community?.name}</h1>
-  )
-};
-```
-
-A Flux Plugin will always recieve two things. The `perspective` which is the `id` of the Flux community that is running your plugin, and also the `channelSource`, which is the `id` of the channel your plugin is installed in.
+- `perspective` which is a [`PerspectiveProxy`](https://docs.ad4m.dev/jsdoc/classes/PerspectiveProxy/).
+- `channelSource` which is the `id` of the channel your plugin is installed in.
 
 ## Getting a list of items
 
@@ -53,6 +36,27 @@ export default function TodoView({ perspective, channelSource })
     <ul> // [!code ++]
       {todos?.map(todo => <li>{todo.name}</li>)} // [!code ++]
     </ul>  // [!code ++]
+  )
+};
+```
+
+## Getting a single item
+
+If we want to fetch a single entry based on it's id. We can use the `useEntry` hook and just pass in an id.
+
+```tsx
+import { useEntry } from "@fluxapp/react";
+import { Todo } from "@fluxapp/api";
+
+export default function Todo({ perspective, id })
+  const { entry: todo } = useEntry({
+    perspective,
+    id:
+    model: Todo,
+  });
+
+  return (
+    <h1>{todo?.title}</h1>
   )
 };
 ```

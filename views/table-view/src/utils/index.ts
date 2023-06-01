@@ -61,7 +61,7 @@ export function useChildren({
   function fetchEntries(p, name, s) {
     if (name) {
       p.infer(
-        `subject_class("${name}", C), instance(C, Base), triple( "${s}", Predicate, Base).`
+        `subject_class("${name}", C), instance(C, Base), triple("${s}", Predicate, Base).`
       )
         .then(async (result) => {
           if (result) {

@@ -239,24 +239,22 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     const subjectClass =
       await this.perspective.stringOrTemplateObjectToSubjectClass(this.subject);
 
-    // TODO: This return too many
     const res = await this.perspective.infer(
-      `triple("${tempSource}", ${
-        tempSource !== SELF ? `"${this.tempSubject.prototype.type}"` : "_"
-      }, X), instance(Class, X), subject_class("${subjectClass}", Class)`
+      `subject_class("${subjectClass}", C), instance(C, Base), triple("${tempSource}", Predicate, Base).`
     );
 
     const results =
       res &&
       res.filter(
-        (obj, index, self) => index === self.findIndex((t) => t.X === obj.X)
+        (obj, index, self) =>
+          index === self.findIndex((t) => t.Base === obj.Base)
       );
 
     if (!results) return [];
 
     return await Promise.all(
       results.map(async (result) => {
-        let subject = new Subject(this.perspective!, result.X, subjectClass);
+        let subject = new Subject(this.perspective!, result.Base, subjectClass);
         await subject.init();
 
         return subject;

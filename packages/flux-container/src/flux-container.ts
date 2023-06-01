@@ -32,7 +32,6 @@ export class MyElement extends LitElement {
       display: grid;
       grid-template-columns: auto 200px;
       height: 100vh;
-
       box-sizing: border-box;
     }
     .hoods {
@@ -45,7 +44,7 @@ export class MyElement extends LitElement {
       justify-content: space-between;
     }
     .channels {
-      background: var(--j-color-ui-50);
+      background: var(--j-color-white);
       border-right: 1px solid var(--j-color-ui-100);
     }
     select {
@@ -88,6 +87,9 @@ export class MyElement extends LitElement {
   isCreatingCommunity = false;
 
   @state()
+  isCreatingChannel = false;
+
+  @state()
   isJoiningCommunity = false;
 
   @state()
@@ -98,6 +100,12 @@ export class MyElement extends LitElement {
 
   @state()
   showCreate = false;
+
+  @state()
+  showCreateChannel = false;
+
+  @state()
+  listeners = new Map();
 
   @state()
   channels: Channel[] = [];
@@ -184,9 +192,24 @@ export class MyElement extends LitElement {
       return;
     }
 
+    if (!this.listeners[perspective.uuid]) {
+      this.listeners[perspective.uuid] = true;
+      perspective.addListener("link-added", async (link) => {
+        const isChannel = await perspective.isSubjectInstance(
+          link.data.source,
+          Channel.prototype.className
+        );
+        if (isChannel) {
+          this.channels = await new SubjectRepository(Channel, {
+            perspective,
+          }).getAllData();
+        }
+        return null;
+      });
+    }
+
     localStorage.setItem("perspectiveUuid", uuid);
     this.perspectiveUuid = uuid;
-    this.source = "ad4m://self";
 
     try {
       this.isLoading = true;
@@ -197,6 +220,8 @@ export class MyElement extends LitElement {
 
       this.channels = channels;
 
+      this.source = channels[0]?.id || "";
+
       // @ts-ignore
       this.appElement.perspective = perspective;
 
@@ -206,9 +231,7 @@ export class MyElement extends LitElement {
         this.appElement.agent = this.client.agent;
       }
 
-      if (this.appElement.getAttribute("source") !== this.source) {
-        this.appElement.setAttribute("source", this.source);
-      }
+      this.appElement.setAttribute("source", this.source);
     } catch (e) {
       console.log(e);
     } finally {
@@ -218,7 +241,6 @@ export class MyElement extends LitElement {
 
   setChannel(source: string) {
     this.source = source;
-    localStorage.setItem("source", source);
     this.appElement.setAttribute("source", source);
     this.requestUpdate();
   }
@@ -239,6 +261,23 @@ export class MyElement extends LitElement {
       console.log(e);
     } finally {
       this.isCreatingCommunity = false;
+    }
+  }
+
+  async onCreateChannel() {
+    this.isCreatingChannel = true;
+    try {
+      const model = new SubjectRepository(Channel, {
+        perspective: this.perspective,
+        source: "ad4m://self",
+      });
+      await model.create({ name: this.title });
+      this.title = "";
+      this.showCreateChannel = false;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      this.isCreatingChannel = false;
     }
   }
 
@@ -317,15 +356,9 @@ export class MyElement extends LitElement {
                       uppercase
                       color="primary-500"
                     >
-                      Select channel
+                      Channels
                     </j-text>
                   </j-box>
-                  <j-menu-item
-                    ?selected=${"ad4m://self" === this.source}
-                    @click=${() => this.setChannel("ad4m://self")}
-                  >
-                    Root (ad4m://self)
-                  </j-menu-item>
                   ${this.channels.map((c) => {
                     return html`<j-menu-item
                       ?selected=${c.id === this.source}
@@ -335,6 +368,10 @@ export class MyElement extends LitElement {
                   })}
                 </div>`
               : ``}
+            <j-menu-item @click=${() => (this.showCreateChannel = true)}>
+              Create channel
+              <j-icon slot="end" name="plus" size="xs"></j-icon>
+            </j-menu-item>
           </div>
         </aside>
         <div class="content" part="content">
@@ -392,6 +429,37 @@ export class MyElement extends LitElement {
                 >
                   Create
                 </j-button>`}
+          </j-flex>
+        </j-box>
+      </j-modal>
+      <j-modal
+        ?open=${this.showCreateChannel}
+        @toggle=${(e) => (this.showCreateChannel = e.target.open)}
+      >
+        <j-box px="800" py="600">
+          <j-box pb="800">
+            <j-text nomargin variant="heading">Create a channel</j-text>
+          </j-box>
+          <j-flex direction="column" gap="400">
+            <j-input
+              placeholder="Name"
+              size="lg"
+              .value=${this.title}
+              @input=${(e: Event) => {
+                const target = e.target as HTMLInputElement;
+                this.title = target.value;
+              }}
+            ></j-input>
+            <j-button
+              variant="primary"
+              ?loading=${this.isCreatingChannel}
+              ?disabled=${this.isCreatingChannel}
+              @click=${() => this.onCreateChannel()}
+              full
+              size="lg"
+            >
+              Create
+            </j-button>
           </j-flex>
         </j-box>
       </j-modal>

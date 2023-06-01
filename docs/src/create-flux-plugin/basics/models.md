@@ -8,10 +8,9 @@ You are free to create any kind of model for your data, but let's start with the
 
 Because Flux Plugins share a lot of functionality, it comes bundled with several commonly used models that can be imported from `@fluxapp/api`:
 
-- Me
-- Channel
 - Community
-- Member
+- Channel
+- Plugin
 - Message
 - Post
 
