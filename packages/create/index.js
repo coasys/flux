@@ -16,7 +16,8 @@ async function run() {
       type: "multiselect",
       name: "template",
       message: "Pick a template",
-      choices: [{ title: "preact", value: "preact" }],
+      choices: [{ title: "preact", value: "preact", selected: true }],
+      hint: "- Space to select. Return to submit",
     },
   ]);
 
