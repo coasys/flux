@@ -347,18 +347,13 @@ export class MyElement extends LitElement {
           </div>
 
           <div class="channels">
+            <j-box px="500" pt="800"
+              ><j-text size="300" weight="800" uppercase color="primary-500">
+                Channels
+              </j-text>
+            </j-box>
             ${this.perspective?.uuid
               ? html`<div>
-                  <j-box px="500" pt="800">
-                    <j-text
-                      size="300"
-                      weight="800"
-                      uppercase
-                      color="primary-500"
-                    >
-                      Channels
-                    </j-text>
-                  </j-box>
                   ${this.channels.map((c) => {
                     return html`<j-menu-item
                       ?selected=${c.id === this.source}
