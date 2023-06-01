@@ -1,11 +1,11 @@
-# Create Flux app
+# Create Flux Plugin
 
 Bootstrap a new [Flux](https://fluxsocial.io) plugin for your community
 
 Install deps and start building
 
 ```bash [npm]
-cd [app-name]
+cd [plugin-name]
 npm install
 npm run dev
 ```
