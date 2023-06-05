@@ -1,0 +1,39 @@
+.board {
+  width: 100%;
+}
+
+.columns {
+  display: flex;
+  gap: var(--j-space-500);
+  width: 100%;
+}
+
+.column {
+  border-radius: var(--j-border-radius);
+  background: var(--j-color-ui-100);
+  width: 500px;
+  height: 100%;
+  flex-grow: 1;
+  padding: var(--j-space-400);
+}
+
+.column:has(.tasks.isDraggingOver) {
+  background: var(--j-color-ui-200);
+}
+
+.tasks {
+  margin-top: var(--j-space-500);
+  margin-bottom: var(--j-space-500);
+  height: 100%;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--j-space-300);
+}
+
+.task {
+  border-radius: var(--j-border-radius);
+  box-shadow: var(--j-depth-100);
+  padding: var(--j-space-300);
+  background: var(--j-color-white);
+}
