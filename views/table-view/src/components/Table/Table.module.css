@@ -54,11 +54,6 @@
 }
 
 .table tbody td {
-  cursor: pointer;
   font-weight: 400;
   color: var(--j-color-black);
-}
-
-.table tbody tr:hover {
-  background-color: var(--j-color-ui-50);
 }

@@ -93,12 +93,22 @@ export default function Table({
                       name="arrows-angle-expand"
                     ></j-icon>
                   </j-button>
+                  <j-button
+                    onclick={() => onEntryClick(entry.id)}
+                    variant="ghost"
+                    size="xs"
+                  >
+                    <j-icon
+                      style="--j-icon-size: 1.5rem"
+                      name="arrow-right-circle-fill"
+                    ></j-icon>
+                  </j-button>
                 </j-flex>
               </td>
               {headers.map((header, index) => {
                 const value = entry[header];
                 return (
-                  <td key={index} onClick={() => onEntryClick(entry.id)}>
+                  <td key={index}>
                     <j-popover event="contextmenu">
                       <div className={styles.trigger} slot="trigger">
                         <DisplayValue

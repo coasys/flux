@@ -1,10 +1,10 @@
 {
-  "name": "trello-board",
+  "name": "@fluxapp/kanban-view",
   "version": "0.0.1",
   "fluxapp": {
-    "name": "Todos",
+    "name": "Kanban",
     "description": "Work on a collaborative todo list",
-    "icon": "list-check"
+    "icon": "kanban"
   },
   "keywords": [
     "flux-app",
