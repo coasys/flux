@@ -1,4 +1,4 @@
-import { useState } from "preact/hooks";
+import { useState, useEffect } from "preact/hooks";
 import styles from "./Table.module.css";
 import DisplayValue from "../DisplayValue";
 import { LinkQuery, PerspectiveProxy } from "@perspect3vism/ad4m";
@@ -18,7 +18,29 @@ export default function Table({
   onEntryClick = () => {},
   onUrlClick = () => {},
 }: Props) {
+  const [namedOptions, setNamedOptions] = useState({});
   const [selectedEntries, setSelected] = useState([]);
+
+  useEffect(() => {
+    perspective
+      .infer(
+        `subject_class("${subjectClass}", Atom), property_named_option(Atom, Property, Value, Name).`
+      )
+      .then((res) => {
+        if (res?.length) {
+          const options = res.reduce((acc, option) => {
+            return {
+              ...acc,
+              [option.Property]: [
+                ...(acc[option.Property] || []),
+                { name: option.Name, value: option.Value },
+              ],
+            };
+          }, {});
+          setNamedOptions(options);
+        }
+      });
+  }, [subjectClass]);
 
   const headers = Object.keys(entries[0]).filter((key, index) => {
     return !(key === "id" || key === "type");
@@ -107,11 +129,13 @@ export default function Table({
               </td>
               {headers.map((header, index) => {
                 const value = entry[header];
+                console.log(namedOptions);
                 return (
                   <td key={index}>
                     <j-popover event="contextmenu">
                       <div className={styles.trigger} slot="trigger">
                         <DisplayValue
+                          options={namedOptions[header]}
                           onUrlClick={(url) => onUrlClick(url)}
                           onUpdate={(val) => onUpdate(entry.id, header, val)}
                           value={value}

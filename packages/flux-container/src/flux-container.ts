@@ -131,7 +131,7 @@ export class MyElement extends LitElement {
   }
 
   get neighbourhoods() {
-    return this.perspectives.filter((p) => p.sharedUrl);
+    return this.perspectives;
   }
 
   get appElement() {
@@ -346,28 +346,35 @@ export class MyElement extends LitElement {
             </j-popover>
           </div>
 
-          <div class="channels">
-            <j-box px="500" pt="800"
-              ><j-text size="300" weight="800" uppercase color="primary-500">
-                Channels
-              </j-text>
-            </j-box>
-            ${this.perspective?.uuid
-              ? html`<div>
-                  ${this.channels.map((c) => {
-                    return html`<j-menu-item
-                      ?selected=${c.id === this.source}
-                      @click=${() => this.setChannel(c.id)}
-                      >${c.name}</j-menu-item
-                    >`;
-                  })}
-                </div>`
-              : ``}
-            <j-menu-item @click=${() => (this.showCreateChannel = true)}>
-              Create channel
-              <j-icon slot="end" name="plus" size="xs"></j-icon>
-            </j-menu-item>
-          </div>
+          ${this.perspective
+            ? html` <div class="channels">
+                <j-box px="500" pt="800"
+                  ><j-text
+                    size="300"
+                    weight="800"
+                    uppercase
+                    color="primary-500"
+                  >
+                    Channels
+                  </j-text>
+                </j-box>
+                ${this.perspective?.uuid
+                  ? html`<div>
+                      ${this.channels.map((c) => {
+                        return html`<j-menu-item
+                          ?selected=${c.id === this.source}
+                          @click=${() => this.setChannel(c.id)}
+                          >${c.name}</j-menu-item
+                        >`;
+                      })}
+                    </div>`
+                  : ``}
+                <j-menu-item @click=${() => (this.showCreateChannel = true)}>
+                  Create channel
+                  <j-icon slot="end" name="plus" size="xs"></j-icon>
+                </j-menu-item>
+              </div>`
+            : ""}
         </aside>
         <div class="content" part="content">
           ${this.isLoading
@@ -376,11 +383,11 @@ export class MyElement extends LitElement {
                   <j-spinner></j-spinner>
                 </j-flex>
               </j-box>`
-            : this.perspective?.uuid
+            : this.perspective?.uuid && this.source
             ? html`<slot></slot>`
             : html`<j-box py="900">
                 <j-flex a="center" j="center">
-                  <j-text>Please select a community</j-text>
+                  <j-text>Please select a community and a channel</j-text>
                 </j-flex>
               </j-box>`}
         </div>
