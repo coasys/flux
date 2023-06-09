@@ -5,12 +5,14 @@ import styles from "./DisplayValue.module.css";
 
 type Props = {
   value: any;
+  options?: any;
   onUrlClick?: Function;
   onUpdate?: (value: string) => void;
 };
 
 export default function DisplayValue({
   value,
+  options,
   onUpdate,
   onUrlClick = () => {},
 }: Props) {
@@ -35,6 +37,13 @@ export default function DisplayValue({
     }
   }
 
+  function onBlur(e) {
+    if (e.key !== "Escape") {
+      onUpdate(e.target.value);
+      setIsEditing(false);
+    }
+  }
+
   function onStartEdit(e) {
     e.stopPropagation();
     setIsEditing(true);
@@ -52,17 +61,32 @@ export default function DisplayValue({
     );
   }
 
+  if (options) {
+    return (
+      <select
+        className={styles.select}
+        value={value}
+        onChange={(e) => onUpdate(e.target.value)}
+      >
+        {options.map((option) => (
+          <option value={option.value}>{option.name}</option>
+        ))}
+      </select>
+    );
+  }
+
   if (isEditing && onUpdate) {
     return (
-      <j-input
+      <input
         ref={inputRef}
         size="sm"
+        className={styles.input}
         autoFocus
-        onclick={(e) => e.stopPropagation()}
-        onBlur={() => setIsEditing(false)}
+        onClick={(e) => e.stopPropagation()}
+        onBlur={onBlur}
         onKeyDown={onKeyDown}
         value={value}
-      ></j-input>
+      ></input>
     );
   }
 

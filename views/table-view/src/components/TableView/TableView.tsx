@@ -9,6 +9,7 @@ import Grid from "../Grid";
 import Header from "../Header";
 import History from "../History";
 import Entry from "../Entry";
+import NewClass from "../NewClass";
 
 type Props = {
   perspective: PerspectiveProxy;
@@ -26,6 +27,7 @@ export default function TableView({
   const [classes, setClasses] = useState<string[]>([]);
   const [selected, setSelected] = useState("");
   const [currentEntry, setCurrentEntry] = useState("");
+  const [openNewClass, setOpenNewClass] = useState(false);
   const [openCurrentEntry, setOpenCurrentEntry] = useState(false);
   const layoutRef = useRef();
 
@@ -151,6 +153,12 @@ export default function TableView({
                   </label>
                 );
               })}
+              <button
+                onClick={() => setOpenNewClass(true)}
+                className={styles.tab}
+              >
+                <j-icon name="plus"></j-icon>
+              </button>
             </div>
           </j-box>
 
@@ -214,6 +222,19 @@ export default function TableView({
           )}
         </div>
       </div>
+
+      <j-modal
+        size="sm"
+        open={openNewClass}
+        onToggle={(e) => setOpenNewClass(e.target.open)}
+      >
+        <j-box p="500">
+          <NewClass
+            onSaved={() => setOpenNewClass(false)}
+            perspective={perspective}
+          ></NewClass>
+        </j-box>
+      </j-modal>
 
       <j-modal
         open={openCurrentEntry}

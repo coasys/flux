@@ -64,64 +64,28 @@ export default function Header({
       source;
 
     return (
-      <div>
-        <details
-          open={isExpanded}
-          onToggle={(e) => setIsExpanded(e.target.open)}
-          className={styles.details}
-        >
-          <summary>
-            <j-flex a="end" gap="400">
-              <div>
-                <j-box pb="200">
-                  <j-text
-                    uppercase
-                    nomargin
-                    size="200"
-                    weight="800"
-                    color="white"
-                  >
-                    Current Entry
-                  </j-text>
-                </j-box>
-                <j-text nomargin variant="heading-lg" color="white">
-                  {defaultName}
-                </j-text>
-              </div>
-              <j-button square size="sm" variant="subtle">
-                <j-icon
-                  color="white"
-                  size="xs"
-                  name={isExpanded ? "chevron-down" : "chevron-right"}
-                ></j-icon>
-              </j-button>
-            </j-flex>
-          </summary>
-          <j-box pt="500">
-            <j-flex direction="column" gap="500" wrap>
-              {properties.map(([key, value]) => (
-                <j-flex gap="500" direction="row" a="center">
-                  <j-text
-                    style="text-transform: capitalize"
-                    color="ui-200"
-                    size="300"
-                    nomargin
-                  >
-                    {key}
-                  </j-text>
-                  <div>
-                    <DisplayValue
-                      onUpdate={(value) => onUpdate(key, value)}
-                      onUrlClick={onUrlClick}
-                      value={value}
-                    />
-                  </div>
-                </j-flex>
-              ))}
-            </j-flex>
-          </j-box>
-        </details>
-      </div>
+      <j-box pt="500">
+        <j-flex a="end" gap="400">
+          <div>
+            <j-box pb="200">
+              <j-text uppercase nomargin size="200" weight="800" color="white">
+                Current Entry
+              </j-text>
+            </j-box>
+            <j-text nomargin variant="heading-lg" color="white">
+              {defaultName}
+            </j-text>
+          </div>
+          <j-button
+            square
+            size="sm"
+            variant="ghost"
+            onclick={() => onUrlClick(entry.id, false)}
+          >
+            <j-icon color="white" size="xs" name="arrows-angle-expand"></j-icon>
+          </j-button>
+        </j-flex>
+      </j-box>
     );
   }
 

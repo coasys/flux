@@ -29,6 +29,7 @@
   border-right: 1px solid var(--j-color-ui-100);
   border-top: 1px solid var(--j-color-ui-100);
   border-bottom: 1px solid var(--j-color-ui-100);
+  border-left: 1px solid transparent;
   height: var(--j-size-md);
   padding: 0 var(--j-space-300);
 }
@@ -41,7 +42,7 @@
 .table th:first-of-type,
 .table td:first-of-type {
   min-width: auto;
-  border-right: 0;
+  border-right: 1px solid var(--j-color-ui-100);
 }
 
 .table thead th {
@@ -54,11 +55,10 @@
 }
 
 .table tbody td {
-  cursor: pointer;
   font-weight: 400;
   color: var(--j-color-black);
 }
 
-.table tbody tr:hover {
-  background-color: var(--j-color-ui-50);
+.table tbody td:focus-within {
+  outline: 1px solid var(--j-color-focus);
 }

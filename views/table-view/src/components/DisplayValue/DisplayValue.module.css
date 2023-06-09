@@ -18,3 +18,24 @@
 .entryUrl:hover {
   opacity: 1;
 }
+
+.input {
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+  border: 0;
+  outline: 0;
+  width: 100%;
+}
+
+.select {
+  background: transparent;
+  width: 100%;
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+  height: 100%;
+  border: 0;
+  outline: 0;
+}

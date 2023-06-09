@@ -1,0 +1,40 @@
+.columnGrid {
+  display: grid;
+  width: 100%;
+  gap: var(--j-space-500);
+  grid-template-columns: 1fr;
+}
+
+.input::part(input-wrapper) {
+  min-width: auto;
+  background: transparent;
+}
+
+.details {
+  outline: 1px solid var(--j-color-ui-200);
+  border-radius: var(--j-border-radius);
+  background-color: var(--j-color-white);
+  padding: var(--j-space-400);
+}
+
+.details summary {
+  cursor: pointer;
+  border-radius: var(--j-border-radius);
+}
+
+.details:hover {
+  outline: 1px solid var(--j-color-primary-500);
+  background-color: var(--j-color-ui-50);
+}
+
+.details[open] {
+  outline: 1px solid var(--j-color-white);
+  background-color: var(--j-color-ui-50);
+}
+
+.details > summary {
+  list-style: none;
+}
+.details > summary::-webkit-details-marker {
+  display: none;
+}
