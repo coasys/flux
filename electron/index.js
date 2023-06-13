@@ -10,10 +10,12 @@ function createWindow() {
     },
   });
 
-  mainWindow.loadFile("index.html");
+  mainWindow.loadFile("../app/dist/index.html");
 
   mainWindow.webContents.openDevTools();
 }
+
+if (require("electron-squirrel-startup")) app.quit();
 
 app.whenReady().then(() => {
   createWindow();

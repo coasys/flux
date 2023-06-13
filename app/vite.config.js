@@ -4,6 +4,7 @@ import path from "path";
 import babel from "vite-plugin-babel-compiler";
 
 export default {
+  base: "./" /* Needed to make electron app work, remove if going away from SPA */,
   plugins: [
     babel({
       babel: {
