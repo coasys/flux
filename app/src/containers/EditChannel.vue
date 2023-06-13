@@ -111,6 +111,7 @@ import { viewOptions } from "@/constants";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { useEntries, useEntry, usePerspective } from "@fluxapp/vue";
 import { useRoute } from "vue-router";
+import fetchFluxApp from "@/utils/fetchFluxApp";
 
 export default defineComponent({
   props: ["channelId"],
@@ -204,10 +205,7 @@ export default defineComponent({
           } else {
             this.loadedApps[wcName] = "loading";
             console.log("loading");
-            const module = await import(
-              /* @vite-ignore */
-              `https://cdn.jsdelivr.net/npm/${app.pkg}@latest/+esm`
-            );
+            const module = await fetchFluxApp(app.pkg);
             customElements.define(wcName, module.default);
             console.log("loaded");
             this.loadedApps[wcName] = "loaded";

@@ -122,6 +122,7 @@ import {
   generateWCName,
 } from "@fluxapp/api";
 import { Ad4mClient } from "@perspect3vism/ad4m";
+import fetchFluxApp from "@/utils/fetchFluxApp";
 
 interface MentionTrigger {
   label: string;
@@ -206,10 +207,7 @@ export default defineComponent({
           const wcName = await generateWCName(app.pkg);
 
           if (!customElements.get(wcName)) {
-            const module = await import(
-              /* @vite-ignore */
-              `https://cdn.jsdelivr.net/npm/${app.pkg}@latest/+esm`
-            );
+            const module = await fetchFluxApp(app.pkg);
             await customElements.define(wcName, module.default);
             setTimeout(() => {
               this.wcNames[app.pkg] = wcName;

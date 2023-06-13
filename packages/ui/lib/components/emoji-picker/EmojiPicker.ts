@@ -21,6 +21,7 @@ export default class Box extends LitElement {
     super.connectedCallback();
     const picker = new Picker({
       data: async () => {
+        // Sjekk emojimart docs
         const response = await fetch(
           "https://cdn.jsdelivr.net/npm/@emoji-mart/data"
         );

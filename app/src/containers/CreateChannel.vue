@@ -126,6 +126,7 @@ import {
 import { usePerspective, useEntry } from "@fluxapp/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { defineComponent } from "vue";
+import fetchFluxApp from "@/utils/fetchFluxApp";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -208,10 +209,7 @@ export default defineComponent({
           } else {
             this.loadedApps[wcName] = "loading";
             console.log("loading");
-            const module = await import(
-              /* @vite-ignore */
-              `https://cdn.jsdelivr.net/npm/${app.pkg}@latest/+esm`
-            );
+            const module = await fetchFluxApp(app.pkg);
             customElements.define(wcName, module.default);
             console.log("loaded");
             this.loadedApps[wcName] = "loaded";
