@@ -22,11 +22,9 @@ export default class Box extends LitElement {
     const picker = new Picker({
       data: async () => {
         // Sjekk emojimart docs
-        const response = await fetch(
-          "https://cdn.jsdelivr.net/npm/@emoji-mart/data"
-        );
+        const response = await import("./data.json");
 
-        return response.json();
+        return response;
       },
       onEmojiSelect: (emoji) => {
         const event = new CustomEvent("change", {
