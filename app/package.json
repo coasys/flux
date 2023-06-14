@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build",
+    "build": "vite --force build",
     "preview": "vite preview",
     "lint": "eslint src/**/*.ts src/**/*.js src/**/*.vue",
     "test": "jest --env=jsdom"
