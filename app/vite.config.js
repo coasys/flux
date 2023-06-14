@@ -9,6 +9,18 @@ export default ({ mode }) => {
 
   return defineConfig({
     base: process.env.VITE_BASE || "/",
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            "@fluxapp/chat-view": ["@fluxapp/chat-view"],
+            "@fluxapp/post-view": ["@fluxapp/post-view"],
+            "@fluxapp/graph-view": ["@fluxapp/graph-view"],
+            "@fluxapp/webrtc-view": ["@fluxapp/webrtc-view"],
+          },
+        },
+      },
+    },
     plugins: [
       babel({
         babel: {
