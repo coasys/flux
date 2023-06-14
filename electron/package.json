@@ -25,7 +25,11 @@
   },
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "name": "FluxApp",
+        "icon": "./assets/icon",
+        "extraResource": "../app/dist"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",

@@ -10,15 +10,23 @@ function createWindow() {
     },
   });
 
-  mainWindow.loadFile("../app/dist/index.html");
+  if (!app.isPackaged) {
+    // Prod environment
+    mainWindow.loadFile("./../app/dist/index.html");
+  } else {
+    // Dev environment
+    mainWindow.loadFile("./../dist/index.html");
 
-  mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
+  }
 }
 
 if (require("electron-squirrel-startup")) app.quit();
 
 app.whenReady().then(() => {
   createWindow();
+
+  app.dock.setIcon("/assets/icon");
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
