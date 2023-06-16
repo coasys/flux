@@ -52,9 +52,7 @@ export default function Entry({
   }
 
   if (entry) {
-    const properties = Object.entries(entry).filter(
-      ([key, value]) => !(key === "id" || key === "type")
-    );
+    const properties = Object.entries(entry);
     const defaultName =
       entry?.name ||
       entry?.title ||

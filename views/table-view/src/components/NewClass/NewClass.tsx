@@ -286,6 +286,14 @@ async function generateSDNA(
       instancePredicates += `triple(Base, "${predicate}", _),`;
     }
 
+    /*
+    if (required && column.options.length > 0) {
+      for (const option of column.options) {
+        instancePredicates += `triple(Base, "${predicate}", "${option.value}");`;
+      }
+    }
+    */
+
     let namedOptionsString = "";
 
     for (const option of column.options) {
@@ -305,6 +313,8 @@ async function generateSDNA(
   // Replace the last comma with a space to format the Prolog string properly
   constructorActions = constructorActions.replace(/,*$/, "");
   instancePredicates = instancePredicates.replace(/,*$/, "");
+  // Replace the or operator (;)
+  instancePredicates = instancePredicates.replace(/;*$/, "");
 
   const prologString = `
     subject_class("${name}", ${atom}).
