@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { Me } from "@fluxapp/api";
 import { WebRTC } from "@fluxapp/react-web";
 
-import General from "./General";
 import Debug from "./Debug";
 import VoiceVideo from "./VoiceVideo";
+import Connection from "./Connection";
 
 import styles from "./Settings.module.css";
 
@@ -15,9 +15,6 @@ type Props = {
 
 export default function Settings({ webRTC, currentUser }: Props) {
   const [currentTab, setCurrentTab] = useState("voice-video");
-  const test = (event) => {
-    // test
-  };
 
   return (
     <div className={styles.wrapper}>
@@ -30,6 +27,12 @@ export default function Settings({ webRTC, currentUser }: Props) {
             Voice & Video
           </j-menu-item>
           <j-menu-item
+            selected={currentTab === "connection"}
+            onClick={() => setCurrentTab("connection")}
+          >
+            Connection
+          </j-menu-item>
+          <j-menu-item
             selected={currentTab === "debug"}
             onClick={() => setCurrentTab("debug")}
           >
@@ -39,11 +42,8 @@ export default function Settings({ webRTC, currentUser }: Props) {
       </div>
 
       <div className={styles.contents}>
-        <>
-          {currentTab === "voice-video" && (
-            <VoiceVideo webRTC={webRTC} currentUser={currentUser} />
-          )}
-        </>
+        <>{currentTab === "voice-video" && <VoiceVideo webRTC={webRTC} />}</>
+        <>{currentTab === "connection" && <Connection webRTC={webRTC} />}</>
         <>
           {currentTab === "debug" && (
             <Debug webRTC={webRTC} currentUser={currentUser} />

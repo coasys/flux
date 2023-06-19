@@ -208,10 +208,11 @@ export default defineComponent({
             this.loadedApps[wcName] = "loaded";
           } else {
             this.loadedApps[wcName] = "loading";
-            console.log("loading");
             const module = await fetchFluxApp(app.pkg);
-            customElements.define(wcName, module.default);
-            console.log("loaded");
+            if (module) {
+              customElements.define(wcName, module.default);
+            }
+
             this.loadedApps[wcName] = "loaded";
             this.$forceUpdate();
           }
@@ -230,6 +231,11 @@ export default defineComponent({
       this.selectedViews = isSelected
         ? this.selectedViews.filter((n) => n !== pkg.pkg)
         : [...this.selectedViews, pkg.pkg];
+
+      // Preload view when selected to remove loading on submit
+      if (!isSelected) {
+        fetchFluxApp(pkg.pkg);
+      }
     },
     async createChannel() {
       const communityId = this.$route.params.communityId as string;

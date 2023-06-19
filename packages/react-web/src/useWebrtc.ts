@@ -8,12 +8,13 @@ import {
   Settings,
   EventLogItem,
   WebRTCManager,
+  IceServer,
 } from "@fluxapp/webrtc";
 
 import { getMe, Me } from "@fluxapp/api";
 import { videoSettings } from "@fluxapp/constants";
 
-const { defaultSettings, videoDimensions } = videoSettings;
+const { defaultSettings, videoDimensions, defaultIceServers } = videoSettings;
 
 export type Peer = {
   did: string;
@@ -49,6 +50,7 @@ export type WebRTC = {
   localState: Peer["state"];
   connections: Peer[];
   devices: MediaDeviceInfo[];
+  iceServers: IceServer[];
   reactions: Reaction[];
   localEventLog: EventLogItem[];
   isInitialised: boolean;
@@ -65,6 +67,7 @@ export type WebRTC = {
   onChangeAudio: (deviceId: string) => void;
   onToggleScreenShare: (enabled: boolean) => void;
   onChangeState: (newState: Peer["state"]) => void;
+  onChangeIceServers: (servers: IceServer[]) => void;
 };
 
 export default function useWebRTC({
@@ -82,6 +85,7 @@ export default function useWebRTC({
   const [showPreview, setShowPreview] = useState(true);
   const [agent, setAgent] = useState<Me>();
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [iceServers, setIceServers] = useState<IceServer[]>(defaultIceServers);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [isInitialised, setIsInitialised] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
@@ -570,6 +574,11 @@ export default function useWebRTC({
     throttledStateBroadcast(newState);
   }
 
+  function onChangeIceServers(newServers: IceServer[]) {
+    setIceServers(newServers);
+    manager.current.iceServers = newServers;
+  }
+
   async function onJoin({ initialState }) {
     setIsLoading(true);
 
@@ -607,6 +616,7 @@ export default function useWebRTC({
     localEventLog,
     connections,
     devices,
+    iceServers,
     reactions,
     isInitialised,
     hasJoined,
@@ -622,5 +632,6 @@ export default function useWebRTC({
     onChangeAudio,
     onToggleScreenShare,
     onChangeState,
+    onChangeIceServers,
   };
 }

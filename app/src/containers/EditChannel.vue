@@ -204,10 +204,11 @@ export default defineComponent({
             this.loadedApps[wcName] = "loaded";
           } else {
             this.loadedApps[wcName] = "loading";
-            console.log("loading");
             const module = await fetchFluxApp(app.pkg);
-            customElements.define(wcName, module.default);
-            console.log("loaded");
+            if (module) {
+              customElements.define(wcName, module.default);
+            }
+
             this.loadedApps[wcName] = "loaded";
             this.$forceUpdate();
           }
@@ -219,11 +220,17 @@ export default defineComponent({
   },
   methods: {
     toggleView(app: App) {
+      console.log("toggleView");
       const isSelected = this.selectedPlugins.some((a) => a.pkg === app.pkg);
 
       this.selectedPlugins = isSelected
         ? this.selectedPlugins.filter((a) => a.pkg !== app.pkg)
         : [...this.selectedPlugins, app];
+
+      // Preload view when selected to remove loading on submit
+      if (!isSelected) {
+        fetchFluxApp(app.pkg);
+      }
     },
     isSelected(pkg: any) {
       return this.selectedPlugins.some((app) => app.pkg === pkg);
