@@ -56,32 +56,32 @@ export default function Connection({ webRTC }: Props) {
                   {s.urls}
                 </j-text>
 
-                <>
-                  {(s.username || s.credential) && (
-                    <j-text variant="footnote" noMargin>
-                      ({s.username}/{s.credential})
-                    </j-text>
-                  )}
-                </>
+                {(s.username || s.credential) && (
+                  <j-text variant="footnote" noMargin>
+                    ({s.username}/{s.credential})
+                  </j-text>
+                )}
               </div>
 
-              <div className={styles.actions}>
-                <j-button
-                  size="sm"
-                  squared
-                  class="delete-button"
-                  variant="ghost"
-                  onClick={() => removeServer(s.urls)}
-                >
-                  <j-icon name="x"></j-icon>
-                </j-button>
-              </div>
+              {!webRTC.hasJoined && (
+                <div className={styles.actions}>
+                  <j-button
+                    size="sm"
+                    squared
+                    class="delete-button"
+                    variant="ghost"
+                    onClick={() => removeServer(s.urls)}
+                  >
+                    <j-icon name="x"></j-icon>
+                  </j-button>
+                </div>
+              )}
             </div>
           ))}
         </>
       )}
 
-      {!showAddNew && (
+      {!showAddNew && !webRTC.hasJoined && (
         <j-box pt="500">
           <div className={styles.footer}>
             <j-button onClick={() => setShowAddNew(!showAddNew)}>
@@ -91,6 +91,11 @@ export default function Connection({ webRTC }: Props) {
               Use default
             </j-button>
           </div>
+        </j-box>
+      )}
+      {webRTC.hasJoined && (
+        <j-box pt="500">
+          <j-text>Leave the current call to make changes.</j-text>
         </j-box>
       )}
 
