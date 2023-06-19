@@ -122,6 +122,7 @@ import {
   FluxApp,
   App,
   generateWCName,
+  getOfflineFluxApps,
 } from "@fluxapp/api";
 import { usePerspective, useEntry } from "@fluxapp/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
@@ -132,14 +133,24 @@ export default defineComponent({
   emits: ["cancel", "submit"],
   async created() {
     this.isLoading = true;
-    const res = await getAllFluxApps();
 
-    this.isLoading = false;
-    const filtered = res.filter(
-      (pkg) => new Date(pkg.created) > new Date("2023-05-01")
-    );
-    this.packages = filtered;
-    console.log({ packages: filtered, res });
+    // Fetch apps from npm, use local apps if request fails
+    try {
+      const res = await getAllFluxApps();
+
+      this.isLoading = false;
+      const filtered = res.filter(
+        (pkg) => new Date(pkg.created) > new Date("2023-05-01")
+      );
+      this.packages = filtered;
+      console.log({ packages: filtered, res });
+    } catch (error) {
+      console.info("Flux is offline, using fallback apps");
+
+      const offlineApps = await getOfflineFluxApps();
+      this.packages = offlineApps;
+      this.isLoading = false;
+    }
   },
   async setup() {
     const route = useRoute();

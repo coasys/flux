@@ -37,6 +37,22 @@ export async function getAllFluxApps(): Promise<FluxApp[]> {
   return Promise.all(packages);
 }
 
+export function getOfflineFluxApps(): FluxApp[] {
+  const packages = ["chat-view", "post-view", "graph-view", "webrtc-view"];
+
+  const fluxApps = packages.map((name) => ({
+    created: "",
+    pkg: `@fluxapp/${name}`,
+    version: "latest",
+    org: "",
+    name,
+    description: "Offline fallback",
+    icon: "",
+  }));
+
+  return fluxApps;
+}
+
 export async function generateWCName(str: string) {
   const encoder = new TextEncoder();
   const data = encoder.encode(str);

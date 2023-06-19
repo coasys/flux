@@ -3,7 +3,8 @@
     "module": "commonjs",
     "outDir": "dist",
     "target": "es6",
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "resolveJsonModule": true
   },
   "exclude": ["node_modules", "dist"],
   "lib": ["esnext"]

@@ -11,13 +11,13 @@ function createWindow() {
   });
 
   if (!app.isPackaged) {
-    // Prod environment
-    mainWindow.loadFile("./../app/dist/index.html");
-  } else {
     // Dev environment
-    mainWindow.loadFile("./../dist/index.html");
+    mainWindow.loadFile("./../app/dist/index.html");
 
     mainWindow.webContents.openDevTools();
+  } else {
+    // Prod environment
+    mainWindow.loadFile("./../dist/index.html");
   }
 }
 

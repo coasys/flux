@@ -7,6 +7,7 @@
     "start": "electron-forge start",
     "make": "electron-forge make",
     "package": "electron-forge package",
+    "package-x64": "electron-forge package --arch=x64",
     "build": "VITE_BASE='./' yarn workspace flux build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -21,6 +22,7 @@
     "electron": "^25.1.0"
   },
   "dependencies": {
+    "@electron-forge/maker-dmg": "^6.2.1",
     "electron-squirrel-startup": "^1.0.0"
   },
   "config": {
