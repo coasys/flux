@@ -11,11 +11,24 @@ type Props = {
 
 export default function Connection({ webRTC }: Props) {
   const [showAddNew, setShowAddNew] = useState(false);
-  const [newServer, setNewServer] = useState("");
+  const [url, setUrl] = useState("");
+  const [username, setUsername] = useState("");
+  const [credential, setCredential] = useState("");
 
-  async function addServer(url: string) {
-    const newServers = [...webRTC.iceServers];
+  async function addServer() {
+    const newServer = {
+      urls: url,
+      username,
+      credential,
+    };
+    const newServers = [...webRTC.iceServers, newServer];
     webRTC.onChangeIceServers(newServers);
+
+    // reset form
+    setUrl("");
+    setUsername("");
+    setCredential("");
+    setShowAddNew(false);
   }
 
   async function removeServer(url: string) {
@@ -34,40 +47,42 @@ export default function Connection({ webRTC }: Props) {
         <j-text variant="body">ICE/STUN servers</j-text>
       </j-box>
 
-      <>
-        {webRTC.iceServers.map((s, i) => (
-          <div key={s.urls} className={styles.card}>
-            <div className={styles.contents}>
-              <j-text variant="footnote" color="black" noMargin>
-                {s.urls}
-              </j-text>
+      {!showAddNew && (
+        <>
+          {webRTC.iceServers.map((s, i) => (
+            <div key={s.urls} className={styles.card}>
+              <div className={styles.contents}>
+                <j-text variant="footnote" color="black" noMargin>
+                  {s.urls}
+                </j-text>
 
-              <>
-                {(s.username || s.credential) && (
-                  <j-text variant="footnote" noMargin>
-                    ({s.username}/{s.credential})
-                  </j-text>
-                )}
-              </>
+                <>
+                  {(s.username || s.credential) && (
+                    <j-text variant="footnote" noMargin>
+                      ({s.username}/{s.credential})
+                    </j-text>
+                  )}
+                </>
+              </div>
+
+              <div className={styles.actions}>
+                <j-button
+                  size="sm"
+                  squared
+                  class="delete-button"
+                  variant="ghost"
+                  onClick={() => removeServer(s.urls)}
+                >
+                  <j-icon name="x"></j-icon>
+                </j-button>
+              </div>
             </div>
+          ))}
+        </>
+      )}
 
-            <div className={styles.actions}>
-              <j-button
-                size="sm"
-                squared
-                class="delete-button"
-                variant="ghost"
-                onClick={() => removeServer(s.urls)}
-              >
-                <j-icon name="x"></j-icon>
-              </j-button>
-            </div>
-          </div>
-        ))}
-      </>
-
-      <j-box pt="500">
-        {!showAddNew && (
+      {!showAddNew && (
+        <j-box pt="500">
           <div className={styles.footer}>
             <j-button onClick={() => setShowAddNew(!showAddNew)}>
               Add new server
@@ -76,18 +91,45 @@ export default function Connection({ webRTC }: Props) {
               Use default
             </j-button>
           </div>
-        )}
+        </j-box>
+      )}
 
+      {showAddNew && (
         <>
-          {showAddNew && (
+          <div className={styles.form}>
             <j-input
-              value={newServer}
+              value={url}
               placeholder="New STUN/TURN server"
-              onchange={(e) => setNewServer(e.target.value)}
+              onchange={(e) => setUrl(e.target.value)}
             ></j-input>
-          )}
+
+            <j-box pt="400">
+              <j-flex a="center" gap="400" direction="row">
+                <j-input
+                  value={username}
+                  placeholder="username"
+                  full
+                  onchange={(e) => setUsername(e.target.value)}
+                ></j-input>
+                <j-input
+                  value={credential}
+                  placeholder="password"
+                  full
+                  onchange={(e) => setCredential(e.target.value)}
+                ></j-input>
+              </j-flex>
+            </j-box>
+          </div>
+          <j-box pt="500">
+            <div className={styles.footer}>
+              <j-button onClick={() => addServer()}>Submit</j-button>
+              <j-button variant="ghost" onClick={() => setShowAddNew(false)}>
+                Cancel
+              </j-button>
+            </div>
+          </j-box>
         </>
-      </j-box>
+      )}
     </div>
   );
 }
