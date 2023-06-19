@@ -1,5 +1,10 @@
 import { useEffect, useState, useRef, useCallback } from "preact/hooks";
-import { getForVersion, setForVersion, throttle } from "@fluxapp/utils";
+import {
+  getForVersion,
+  setForVersion,
+  throttle,
+  getDefaultIceServers,
+} from "@fluxapp/utils";
 import { version } from "../package.json";
 
 import {
@@ -14,7 +19,7 @@ import {
 import { getMe, Me } from "@fluxapp/api";
 import { videoSettings } from "@fluxapp/constants";
 
-const { defaultSettings, videoDimensions, defaultIceServers } = videoSettings;
+const { defaultSettings, videoDimensions } = videoSettings;
 
 export type Peer = {
   did: string;
@@ -85,7 +90,9 @@ export default function useWebRTC({
   const [showPreview, setShowPreview] = useState(true);
   const [agent, setAgent] = useState<Me>();
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
-  const [iceServers, setIceServers] = useState<IceServer[]>(defaultIceServers);
+  const [iceServers, setIceServers] = useState<IceServer[]>(
+    getDefaultIceServers()
+  );
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [isInitialised, setIsInitialised] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
@@ -576,6 +583,7 @@ export default function useWebRTC({
 
   function onChangeIceServers(newServers: IceServer[]) {
     setIceServers(newServers);
+    setForVersion(version, "iceServers", JSON.stringify(newServers));
     manager.current.iceServers = newServers;
   }
 

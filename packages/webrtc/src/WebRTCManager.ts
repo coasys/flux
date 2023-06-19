@@ -10,6 +10,7 @@ import {
 } from "@perspect3vism/ad4m";
 
 import { AD4MPeer, AD4MPeerInstance } from "./ad4mPeer";
+import { getDefaultIceServers } from "@fluxapp/utils";
 
 function getExpressionData(data: any) {
   let parsedData;
@@ -110,7 +111,7 @@ export class WebRTCManager {
   localStream: MediaStream;
   localEventLog: EventLogItem[];
   connections = new Map<string, Connection>();
-  iceServers: IceServer[] = videoSettings.defaultIceServers;
+  iceServers: IceServer[] = getDefaultIceServers();
 
   constructor(props: Props) {
     this.init(props);
