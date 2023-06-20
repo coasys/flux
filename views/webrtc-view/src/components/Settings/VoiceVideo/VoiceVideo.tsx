@@ -7,7 +7,6 @@ import Select from "../../Select";
 
 type Props = {
   webRTC: WebRTC;
-  currentUser?: Me;
 };
 
 export default function VoiceVideo({ webRTC }: Props) {
