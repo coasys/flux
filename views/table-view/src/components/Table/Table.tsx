@@ -43,7 +43,7 @@ export default function Table({
   }, [subjectClass]);
 
   const headers = Object.keys(entries[0]).filter((key, index) => {
-    return !(key === "id" || key === "type");
+    return !(key === "id" || key === "author" || key === "timestamp");
   });
 
   async function onUpdate(id, propName, value) {

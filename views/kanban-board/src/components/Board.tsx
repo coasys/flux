@@ -19,6 +19,8 @@ type NamedOption = {
 type NamedOptions = Record<string, NamedOption[]>;
 
 export default function Board({ perspective, source }: BoardProps) {
+  const [showAddColumn, setShowAddColumn] = useState(false);
+  const [columnName, setColumnName] = useState("");
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedProperty, setSelectedProperty] = useState("");
@@ -31,15 +33,7 @@ export default function Board({ perspective, source }: BoardProps) {
     model: selectedClass,
   });
 
-  useEffect(() => {
-    setTasks(entries);
-  }, entries);
-
-  useEffect(() => {
-    getClasses(perspective, source).then(setClasses);
-  }, [perspective.uuid]);
-
-  useEffect(() => {
+  function loadColumns() {
     getNamedOptions(perspective, selectedClass).then((namedOpts) => {
       setNamedOptions(namedOpts);
       Object.keys(namedOpts).forEach((key, index) => {
@@ -48,6 +42,18 @@ export default function Board({ perspective, source }: BoardProps) {
         }
       });
     });
+  }
+
+  useEffect(() => {
+    setTasks(entries);
+  }, [entries, perspective.uuid]);
+
+  useEffect(() => {
+    getClasses(perspective, source).then(setClasses);
+  }, [perspective.uuid]);
+
+  useEffect(() => {
+    loadColumns();
   }, [perspective.uuid, selectedClass]);
 
   const data = useMemo(() => {
@@ -56,7 +62,7 @@ export default function Board({ perspective, source }: BoardProps) {
       selectedProperty,
       namedOptions[selectedProperty] || []
     );
-  }, [tasks, selectedProperty]);
+  }, [tasks, selectedProperty, perspective.uuid, namedOptions]);
 
   function createNewTodo() {
     model.create({});
@@ -85,6 +91,23 @@ export default function Board({ perspective, source }: BoardProps) {
     model.update(draggableId, { status });
   };
 
+  async function addColumn() {
+    const res = await perspective.infer(
+      `subject_class("${selectedClass}", Atom)`
+    );
+
+    if (res?.length) {
+      const atom = res[0].Atom;
+      await perspective.addSdna(
+        `property_named_option(${atom}, "${selectedProperty}", "${columnName}", "${columnName}").`
+      );
+      loadColumns();
+    }
+
+    setColumnName("");
+    setShowAddColumn(false);
+  }
+
   return (
     <>
       <j-box pb="500">
@@ -94,7 +117,7 @@ export default function Board({ perspective, source }: BoardProps) {
             onChange={(e) => setSelectedClass(e.target.value)}
           >
             <option disabled selected>
-              Choose SDNA
+              Select type
             </option>
             {classes.map((className) => (
               <option value={className}>{className}</option>
@@ -113,16 +136,16 @@ export default function Board({ perspective, source }: BoardProps) {
       <div className={styles.board}>
         <div className={styles.columns}>
           <DragDropContext onDragEnd={onDragEnd}>
-            {data.columnOrder.map((columnId) => {
+            {data.columnOrder.map((columnId, index) => {
               const column = data.columns[columnId];
               const tasks = column.taskIds.map((taskId) => data.tasks[taskId]);
 
               return (
-                <div key={column.id} className={styles.column}>
+                <div key={index} className={styles.column}>
                   <j-text nomargin variant="heading-sm">
                     {column.title}
                   </j-text>
-                  <Droppable droppableId={column.id}>
+                  <Droppable droppableId={index.toString()}>
                     {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
@@ -158,14 +181,49 @@ export default function Board({ perspective, source }: BoardProps) {
                   </Droppable>
                   <j-button variant="link" onClick={createNewTodo}>
                     Add card
-                    <j-icon name="plus" size="sm" slot="start"></j-icon>
+                    <j-icon name="plus" size="md" slot="start"></j-icon>
                   </j-button>
                 </div>
               );
             })}
+            {selectedClass && (
+              <div>
+                <j-button
+                  variant="subtle"
+                  onClick={() => setShowAddColumn(true)}
+                >
+                  <j-icon name="plus" size="md" slot="start"></j-icon>
+                </j-button>
+              </div>
+            )}
           </DragDropContext>
         </div>
       </div>
+      <j-modal
+        open={showAddColumn}
+        onToggle={(e) => setShowAddColumn(e.target.open)}
+      >
+        <j-box px="800" py="600">
+          <j-box pb="800">
+            <j-text nomargin variant="heading">
+              Add Column
+            </j-text>
+          </j-box>
+          <j-flex direction="column" gap="400">
+            <j-input
+              placeholder="Name"
+              size="lg"
+              value={columnName}
+              onInput={(e: Event) => {
+                setColumnName(e.target.value);
+              }}
+            ></j-input>
+            <j-button variant="primary" onClick={addColumn} full size="lg">
+              Create
+            </j-button>
+          </j-flex>
+        </j-box>
+      </j-modal>
     </>
   );
 }
@@ -260,7 +318,6 @@ function getClasses(perspective: PerspectiveProxy, source) {
       `subject_class(ClassName, Atom), property_named_option(Atom, Property, Value, Name).`
     )
     .then((result) => {
-      console.log({ result });
       if (Array.isArray(result)) {
         const uniqueClasses = [...new Set(result.map((c) => c.ClassName))];
         return uniqueClasses;

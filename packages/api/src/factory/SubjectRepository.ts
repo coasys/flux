@@ -144,7 +144,6 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   }
 
   async getAll(source?: string): Promise<SubjectClass[]> {
-    console.log({ cn: this.className });
     await this.ensureSubject();
 
     const tempSource = source || this.source;

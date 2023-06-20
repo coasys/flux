@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useMemo } from "preact/hooks";
 import { Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
 import styles from "./TableView.module.css";
-import { usePrevious, useChildren, pluralize } from "../../utils";
+import { usePrevious, pluralize } from "../../utils";
 import { v4 as uuidv4 } from "uuid";
 
 import Table from "../Table";
@@ -10,6 +10,7 @@ import Header from "../Header";
 import History from "../History";
 import Entry from "../Entry";
 import NewClass from "../NewClass";
+import { useEntries } from "@fluxapp/react-web";
 
 type Props = {
   perspective: PerspectiveProxy;
@@ -33,11 +34,7 @@ export default function TableView({
 
   const source = history.length ? history[history.length - 1] : "ad4m://self";
 
-  const { entries } = useChildren({
-    perspective,
-    source,
-    subjectInstance: selected,
-  });
+  const { entries } = useEntries({ perspective, source, model: selected });
 
   useEffect(() => {
     const wentBack = history.length < (prevHistory?.length || 0);
