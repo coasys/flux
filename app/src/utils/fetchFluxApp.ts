@@ -1,6 +1,12 @@
 const fetchFluxApp = async function (packageName: string) {
   let module;
-  const isOfficialApp = packageName.startsWith("@fluxapp");
+  const officialPackages = [
+    "@fluxapp/chat-view",
+    "@fluxapp/post-view",
+    "@fluxapp/graph-view",
+    "@fluxapp/webrtc-view",
+  ];
+  const isOfficialApp = officialPackages.includes(packageName);
 
   try {
     if (isOfficialApp) {
