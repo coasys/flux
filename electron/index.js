@@ -35,6 +35,11 @@ async function createWindow() {
       style.setAttribute('type', 'text/css');
       style.appendChild(document.createTextNode("@font-face { font-family: 'DM Sans'; src: url('file://${__dirname}/assets/fonts/flux.woff2'); } "));
       head.appendChild(style);
+
+      const style2 = document.createElement('style');
+      style2.setAttribute('type', 'text/css');
+      style2.appendChild(document.createTextNode("@font-face { font-family: 'bootstrap-icons'; src: url('file://${__dirname}/assets/fonts/bootstrap-icons.woff2'); } "));
+      head.appendChild(style2);
     `);
   });
 }
