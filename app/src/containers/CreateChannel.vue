@@ -122,23 +122,35 @@ import {
   FluxApp,
   App,
   generateWCName,
+  getOfflineFluxApps,
 } from "@fluxapp/api";
 import { usePerspective, useEntry } from "@fluxapp/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { defineComponent } from "vue";
+import fetchFluxApp from "@/utils/fetchFluxApp";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
   async created() {
     this.isLoading = true;
-    const res = await getAllFluxApps();
 
-    this.isLoading = false;
-    const filtered = res.filter(
-      (pkg) => new Date(pkg.created) > new Date("2023-05-01")
-    );
-    this.packages = filtered;
-    console.log({ packages: filtered, res });
+    // Fetch apps from npm, use local apps if request fails
+    try {
+      const res = await getAllFluxApps();
+
+      this.isLoading = false;
+      const filtered = res.filter(
+        (pkg) => new Date(pkg.created) > new Date("2023-05-01")
+      );
+      this.packages = filtered;
+      console.log({ packages: filtered, res });
+    } catch (error) {
+      console.info("Flux is offline, using fallback apps");
+
+      const offlineApps = await getOfflineFluxApps();
+      this.packages = offlineApps;
+      this.isLoading = false;
+    }
   },
   async setup() {
     const route = useRoute();
@@ -207,13 +219,11 @@ export default defineComponent({
             this.loadedApps[wcName] = "loaded";
           } else {
             this.loadedApps[wcName] = "loading";
-            console.log("loading");
-            const module = await import(
-              /* @vite-ignore */
-              `https://cdn.jsdelivr.net/npm/${app.pkg}@latest/+esm`
-            );
-            customElements.define(wcName, module.default);
-            console.log("loaded");
+            const module = await fetchFluxApp(app.pkg);
+            if (module) {
+              customElements.define(wcName, module.default);
+            }
+
             this.loadedApps[wcName] = "loaded";
             this.$forceUpdate();
           }
@@ -232,6 +242,11 @@ export default defineComponent({
       this.selectedViews = isSelected
         ? this.selectedViews.filter((n) => n !== pkg.pkg)
         : [...this.selectedViews, pkg.pkg];
+
+      // Preload view when selected to remove loading on submit
+      if (!isSelected) {
+        fetchFluxApp(pkg.pkg);
+      }
     },
     async createChannel() {
       const communityId = this.$route.params.communityId as string;

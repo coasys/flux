@@ -1,8 +1,10 @@
 # Create Flux Plugin
 
-Bootstrap a new [Flux](https://fluxsocial.io) plugin for your community
+Bootstrap a new [Flux](https://fluxsocial.io) plugin for your community.
 
-Install deps and start building
+[Documentation](https://docs.fluxsocial.io/create-flux-plugin/getting-started/introduction.html)
+
+Install deps and start building:
 
 ```bash [npm]
 cd [plugin-name]

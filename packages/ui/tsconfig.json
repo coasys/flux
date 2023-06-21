@@ -4,6 +4,7 @@
     "outDir": "dist",
     "target": "es6",
     "experimentalDecorators": true,
+    "resolveJsonModule": true,
     "allowJs": true
   },
   "exclude": ["node_modules", "dist"],

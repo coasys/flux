@@ -1,5 +1,5 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-
+import { videoSettings } from "@fluxapp/constants";
 import {
   Ad4mClient,
   PerspectiveProxy,
@@ -10,25 +10,7 @@ import {
 } from "@perspect3vism/ad4m";
 
 import { AD4MPeer, AD4MPeerInstance } from "./ad4mPeer";
-
-const iceServers = [
-  {
-    urls: "stun:relay.ad4m.dev:3478",
-    username: "openrelay",
-    credential: "openrelay",
-  },
-  {
-    urls: "stun:stun.l.google.com:19302",
-  },
-  {
-    urls: "stun:global.stun.twilio.com:3478",
-  },
-  {
-    urls: "turn:relay.ad4m.dev:443",
-    username: "openrelay",
-    credential: "openrelay",
-  },
-];
+import { getDefaultIceServers } from "@fluxapp/utils";
 
 function getExpressionData(data: any) {
   let parsedData;
@@ -86,6 +68,12 @@ export type Settings = {
   screen: boolean;
 };
 
+export type IceServer = {
+  urls: string;
+  username?: string;
+  credential?: string;
+};
+
 type Props = {
   uuid: string;
   source: string;
@@ -123,6 +111,7 @@ export class WebRTCManager {
   localStream: MediaStream;
   localEventLog: EventLogItem[];
   connections = new Map<string, Connection>();
+  iceServers: IceServer[] = getDefaultIceServers();
 
   constructor(props: Props) {
     this.init(props);
@@ -295,7 +284,7 @@ export class WebRTCManager {
       neighbourhood: this.neighbourhood,
       stream: this.localStream,
       initiator: initiator,
-      options: { config: { iceServers } },
+      options: { config: { iceServers: this.iceServers } },
     });
 
     const peer = ad4mPeer.connect();
@@ -535,5 +524,10 @@ export class WebRTCManager {
         },
       ],
     });
+  }
+
+  setIceServers(iceServers: IceServer[]) {
+    console.log("⚙️ Setting ICE servers: ", iceServers);
+    this.iceServers = iceServers;
   }
 }
