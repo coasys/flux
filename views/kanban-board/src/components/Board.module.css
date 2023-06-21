@@ -1,0 +1,65 @@
+.board {
+  width: 100%;
+}
+
+.columns {
+  display: flex;
+  gap: var(--j-space-500);
+  width: 100%;
+  overflow-x: scroll;
+}
+
+.column {
+  border-radius: var(--j-border-radius);
+  background: var(--j-color-ui-100);
+  width: 500px;
+  height: 100%;
+  min-width: 250px;
+  flex-grow: 1;
+  padding: var(--j-space-400);
+}
+
+.column:has(.tasks.isDraggingOver) {
+  background: var(--j-color-ui-200);
+}
+
+.tasks {
+  margin-top: var(--j-space-500);
+  margin-bottom: var(--j-space-500);
+  height: 100%;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--j-space-300);
+}
+
+.task {
+  border-radius: var(--j-border-radius);
+  box-shadow: var(--j-depth-100);
+  padding: var(--j-space-300);
+  background: var(--j-color-white);
+}
+
+.select {
+  outline: 0;
+  border-radius: var(--j-border-radius);
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+  background: var(--j-color-white);
+  padding: 0 var(--j-space-300);
+  height: var(--j-size-md);
+  background: transparent;
+  border: 0;
+  outline: 1px solid var(--j-color-ui-300);
+  border-right: 16px solid transparent;
+}
+
+.select:hover {
+  outline: 1px solid var(--j-color-ui-500);
+  background: var(--j-color-ui-50);
+}
+
+.select:focus {
+  outline: 2px solid var(--j-color-primary-500);
+}

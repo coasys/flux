@@ -6,11 +6,7 @@ import {
   LinkQuery,
 } from "@perspect3vism/ad4m";
 import { community } from "@fluxapp/constants";
-import {
-  collectionToAdderName,
-  collectionToSetterName,
-  SubjectEntry,
-} from "./model";
+import { setProperties } from "./model";
 import { v4 as uuidv4 } from "uuid";
 
 const { SELF } = community;
@@ -20,99 +16,27 @@ export type ModelProps = {
   source?: string;
 };
 
-export function capitalize(str: string) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-// e.g. "name" -> "setName"
-export function propertyNameToSetterName(property: string): string {
-  return `set${capitalize(property)}`;
-}
-
-export function pluralToSingular(plural: string): string {
-  if (plural.endsWith("ies")) {
-    return plural.slice(0, -3) + "y";
-  } else if (plural.endsWith("s")) {
-    return plural.slice(0, -1);
-  } else {
-    return plural;
-  }
-}
-
-export function setProperties(
-  subject: any,
-  properties: QueryPartialEntity<{ [x: string]: any }>
-) {
-  const adder = (key: string, value: any) => {
-    // it's a collection
-    const adderName = collectionToAdderName(key);
-    const adderFunction = subject[adderName];
-    if (adderFunction) {
-      adderFunction(value);
-    } else {
-      throw "No adder function found for collection: " + key;
-    }
-  };
-
-  const setter = (key: string, value: any) => {
-    // it's a collection
-    const setterName = collectionToSetterName(key);
-    const setterFunction = subject[setterName];
-    if (setterFunction) {
-      setterFunction(value);
-    } else {
-      throw "No adder function found for collection: " + key;
-    }
-  };
-
-  Object.keys(properties).forEach((key) => {
-    if (
-      Array.isArray(properties[key]) ||
-      Array.isArray(properties[key]?.value)
-    ) {
-      if (properties[key].action) {
-        switch (properties[key].action) {
-          case "setter":
-            setter(key, properties[key].value);
-            break;
-          case "adder":
-            adder(key, properties[key].value);
-            break;
-          default:
-            setter(key, properties[key].value);
-            break;
-        }
-      } else {
-        // it's a collection
-        setter(key, properties[key]);
-      }
-    } else {
-      // it's a property
-      const setterName = propertyNameToSetterName(key);
-      const setterFunction = subject[setterName];
-      if (setterFunction) {
-        setterFunction(properties[key]);
-      } else {
-        throw "No setter function found for property: " + key;
-      }
-    }
-  });
-}
-
 export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   source = SELF;
-  subject: SubjectClass;
+  subject: SubjectClass | string;
   perspective: PerspectiveProxy;
-  tempSubject: any;
+  tempSubject: any | string;
 
   constructor(subject: { new (): SubjectClass }, props: ModelProps) {
     this.perspective = props.perspective;
     this.source = props.source || this.source;
-    this.subject = new subject();
+    this.subject = typeof subject === "string" ? subject : new subject();
     this.tempSubject = subject;
   }
 
+  get className(): string {
+    return typeof this.subject === "string"
+      ? this.subject
+      : this.subject.className;
+  }
+
   async ensureSubject() {
+    if (typeof this.tempSubject === "string") return;
     await this.perspective.ensureSDNASubjectClass(this.tempSubject);
   }
 
@@ -127,14 +51,14 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     let newInstance = await this.perspective.createSubject(this.subject, base);
 
     if (!newInstance) {
-      throw "Failed to create new instance of " + this.subject.type;
+      throw "Failed to create new instance of " + this.subject;
     }
 
     // Connect new instance to source
     await this.perspective.add(
       new Link({
         source: source || this.source,
-        predicate: await newInstance.type,
+        predicate: "rdf://has_child",
         target: base,
       })
     );
@@ -152,9 +76,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     await this.ensureSubject();
     const instance = await this.get(id);
     if (!instance) {
-      throw (
-        "Failed to find instance of " + this.subject.type + " with id " + id
-      );
+      throw "Failed to find instance of " + this.subject + " with id " + id;
     }
 
     Object.keys(data).forEach((key) =>
@@ -199,36 +121,26 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   }
 
   private async getSubjectData(entry: any) {
-    await this.ensureSubject();
-    const dataEntry = new SubjectEntry(entry, this.perspective);
-
-    await dataEntry.load();
-
-    const properties = this.tempSubject.prototype.__properties || {};
-    const collections = this.tempSubject.prototype.__collections || {};
-
-    const obj: SubjectClass = {};
-
-    await Promise.all(
-      Object.entries(properties).map(async ([key, opts]) => {
-        const value = await entry[key];
-        obj[key] = opts?.transform ? opts.transform(value) : value;
-      })
+    let links = await this.perspective.get(
+      new LinkQuery({ source: entry.baseExpression })
     );
 
-    await Promise.all(
-      Object.entries(collections).map(async ([key, opts]) => {
-        const value = await entry[key];
-        obj[key] = opts?.transform ? opts.transform(value) : value;
-      })
-    );
+    const getters = Object.entries(Object.getOwnPropertyDescriptors(entry))
+      .filter(([key, descriptor]) => typeof descriptor.get === "function")
+      .map(([key]) => key);
 
-    return {
-      ...obj,
-      id: await entry.baseExpression,
-      timestamp: dataEntry.timestamp,
-      author: dataEntry.author,
-    };
+    const promises = getters.map((getter) => entry[getter]);
+    return Promise.all(promises).then((values) => {
+      return getters.reduce((acc, getter, index) => {
+        return {
+          ...acc,
+          id: entry.baseExpression,
+          timestamp: links[0].timestamp,
+          author: links[0].author,
+          [getter]: values[index],
+        };
+      }, {});
+    });
   }
 
   async getAll(source?: string): Promise<SubjectClass[]> {
@@ -236,11 +148,8 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
 
     const tempSource = source || this.source;
 
-    const subjectClass =
-      await this.perspective.stringOrTemplateObjectToSubjectClass(this.subject);
-
     const res = await this.perspective.infer(
-      `subject_class("${subjectClass}", C), instance(C, Base), triple("${tempSource}", Predicate, Base).`
+      `subject_class("${this.className}", C), instance(C, Base), triple("${tempSource}", Predicate, Base).`
     );
 
     const results =
@@ -254,7 +163,11 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
 
     return await Promise.all(
       results.map(async (result) => {
-        let subject = new Subject(this.perspective!, result.Base, subjectClass);
+        let subject = new Subject(
+          this.perspective!,
+          result.Base,
+          this.className
+        );
         await subject.init();
 
         return subject;
@@ -264,7 +177,9 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
 
   async getAllData(source?: string): Promise<SubjectClass[]> {
     await this.ensureSubject();
+
     const entries = await this.getAll(source);
+
     return await Promise.all(entries.map((e) => this.getSubjectData(e)));
   }
 }

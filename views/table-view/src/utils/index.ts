@@ -1,5 +1,4 @@
-import { useRef, useEffect, useState } from "preact/hooks";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { useRef, useEffect } from "preact/hooks";
 
 export async function getEntry(entry) {
   const getters = Object.entries(Object.getOwnPropertyDescriptors(entry))
@@ -24,67 +23,6 @@ export function usePrevious(value) {
     ref.current = value; //assign the value of ref to the argument
   }, [value]); //this code will run when the value of 'value' changes
   return ref.current; //in the end, return the current ref value.
-}
-
-type UseEntryProps = {
-  perspective: PerspectiveProxy;
-  subjectInstance: string;
-  source: string;
-};
-
-export function useChildren({
-  perspective,
-  subjectInstance,
-  source,
-}: UseEntryProps) {
-  const [entries, setEntries] = useState<any[]>([]);
-
-  useEffect(() => {
-    const callback = () => {
-      fetchEntries(perspective, subjectInstance, source);
-      return null;
-    };
-
-    perspective.addListener("link-added", callback);
-    perspective.addListener("link-removed", callback);
-
-    return () => {
-      perspective.removeListener("link-added", callback);
-      perspective.removeListener("link-removed", callback);
-    };
-  }, [perspective.uuid, subjectInstance, source]);
-
-  useEffect(() => {
-    fetchEntries(perspective, subjectInstance, source);
-  }, [subjectInstance, perspective.uuid, source]);
-
-  function fetchEntries(p, name, s) {
-    if (name) {
-      p.infer(
-        `subject_class("${name}", C), instance(C, Base), triple("${s}", Predicate, Base).`
-      )
-        .then(async (result) => {
-          if (result) {
-            const uniqueResults = [...new Set(result.map((r) => r.Base))];
-            const entries = await Promise.all(
-              uniqueResults.map((base: string) => p.getSubjectProxy(base, name))
-            );
-
-            const resolved = await getEntries(entries);
-            setEntries(resolved);
-          } else {
-            setEntries([]);
-          }
-        })
-        .catch((e) => {
-          setEntries([]);
-        });
-    } else {
-      setEntries([]);
-    }
-  }
-
-  return { entries };
 }
 
 export function isValidUrl(string) {

@@ -6,7 +6,7 @@ import { SubjectRepository } from "@fluxapp/api";
 type Props<SubjectClass> = {
   source?: string;
   perspective: PerspectiveProxy;
-  model: new () => SubjectClass;
+  model: (new () => SubjectClass) | "string";
 };
 
 export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
@@ -15,16 +15,18 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
   const [isLoading, setIsLoading] = useState(false);
   const { perspective, source = "ad4m://self", model } = props;
 
+  // Create cache key for entry
+  const cacheKey = `${perspective.uuid}/${source || ""}/${
+    typeof model === "string" ? model : model.prototype.className
+  }`;
+
   // Create model
   const Model = useMemo(() => {
     return new SubjectRepository(model, {
       perspective: perspective,
       source,
     });
-  }, [perspective.uuid, source]);
-
-  // Create cache key for entry
-  const cacheKey = `${perspective.uuid}/${source || ""}/${model.name}/`;
+  }, [cacheKey]);
 
   // Mutate shared/cached data for all subscribers
   const mutate = useCallback(
@@ -46,16 +48,16 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [Model, mutate]);
+  }, [Model, mutate, cacheKey]);
 
   // Trigger initial fetch
-  useEffect(getData, [getData]);
+  useEffect(getData, [getData, cacheKey]);
 
   // Get single entry
   async function fetchEntry(id) {
     const entry = (await Model.getData(id)) as SubjectClass;
-    const oldEntries = getCache(cacheKey) as SubjectClass[] | undefined;
-    const isOldEntry = oldEntries.some((i) => i.id === id);
+    const oldEntries = (getCache(cacheKey) as SubjectClass[]) || [];
+    const isOldEntry = oldEntries?.some((i) => i.id === id);
 
     const newEntries = isOldEntry
       ? oldEntries?.map((oldEntry) => {
@@ -84,7 +86,7 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
         if (id) {
           const isInstance = await perspective.isSubjectInstance(
             id,
-            new model()
+            typeof model === "string" ? model : new model()
           );
 
           if (isInstance) {
@@ -115,7 +117,7 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
         perspective.removeListener("link-removed", removed);
       };
     }
-  }, [perspective.uuid, source]);
+  }, [cacheKey]);
 
   // Subscribe to changes (re-render on data change)
   useEffect(() => {
