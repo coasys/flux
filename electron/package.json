@@ -32,7 +32,10 @@
       "packagerConfig": {
         "name": "FluxApp",
         "icon": "./assets/icon",
-        "extraResource": "../app/dist"
+        "extraResource": [
+          "../app/dist",
+          "./assets/fonts"
+        ]
       },
       "makers": [
         {

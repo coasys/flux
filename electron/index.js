@@ -1,7 +1,7 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
 
-function createWindow() {
+async function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 960,
@@ -12,13 +12,31 @@ function createWindow() {
 
   if (!app.isPackaged) {
     // Dev environment
-    mainWindow.loadFile("./../app/dist/index.html");
+    await mainWindow.loadFile("./../app/dist/index.html");
 
     mainWindow.webContents.openDevTools();
   } else {
     // Prod environment
-    mainWindow.loadFile("./../dist/index.html");
+    await mainWindow.loadFile("./../dist/index.html");
   }
+
+  mainWindow.webContents.on("did-finish-load", () => {
+    mainWindow.webContents.executeJavaScript(`
+      const head = document.getElementsByTagName('head')[0];
+
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = 'file://${__dirname}/assets/fonts/bootstrap-icons.css';
+      link.media = 'all';
+      head.appendChild(link);
+
+      const style = document.createElement('style');
+      style.setAttribute('type', 'text/css');
+      style.appendChild(document.createTextNode("@font-face { font-family: 'DM Sans'; src: url('file://${__dirname}/assets/fonts/flux.woff2'); } "));
+      head.appendChild(style);
+    `);
+  });
 }
 
 if (require("electron-squirrel-startup")) app.quit();

@@ -22,5 +22,5 @@ yarn start
 
 ## Known limitations
 
-- Icons not currently working
-- Font not currently working
+- When on a network without internet access, the app takes a while to load as it first tries to fetch CDN assets.
+- When truly offline (no network at all) chrome rejects any connections, even to localhost.
