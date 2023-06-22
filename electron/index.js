@@ -1,7 +1,7 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, session } = require("electron");
 const path = require("path");
 
-async function createWindow() {
+async function createWindow(s) {
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 960,
@@ -9,6 +9,8 @@ async function createWindow() {
       preload: path.join(__dirname, "preload.js"),
     },
   });
+
+  mainWindow.webContents.session = s;
 
   if (!app.isPackaged) {
     // Dev environment
@@ -19,35 +21,38 @@ async function createWindow() {
     // Prod environment
     await mainWindow.loadFile("./../dist/index.html");
   }
-
-  mainWindow.webContents.on("did-finish-load", () => {
-    mainWindow.webContents.executeJavaScript(`
-      const head = document.getElementsByTagName('head')[0];
-
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.type = 'text/css';
-      link.href = 'file://${__dirname}/assets/fonts/bootstrap-icons.css';
-      link.media = 'all';
-      head.appendChild(link);
-
-      const style = document.createElement('style');
-      style.setAttribute('type', 'text/css');
-      style.appendChild(document.createTextNode("@font-face { font-family: 'DM Sans'; src: url('file://${__dirname}/assets/fonts/flux.woff2'); } "));
-      head.appendChild(style);
-
-      const style2 = document.createElement('style');
-      style2.setAttribute('type', 'text/css');
-      style2.appendChild(document.createTextNode("@font-face { font-family: 'bootstrap-icons'; src: url('file://${__dirname}/assets/fonts/bootstrap-icons.woff2'); } "));
-      head.appendChild(style2);
-    `);
-  });
 }
 
 if (require("electron-squirrel-startup")) app.quit();
 
 app.whenReady().then(() => {
-  createWindow();
+  const proxySession = session.fromPartition("proxy-partition", {
+    cache: false,
+  });
+
+  createWindow(proxySession);
+
+  // Intercept network requests
+  customSession.webRequest.onBeforeRequest((details, callback) => {
+    if (
+      details.url ===
+      "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+    ) {
+      callback({
+        redirectURL: `file://${__dirname}/assets/fonts/bootstrap-icons.css`,
+      });
+    } else if (
+      details.url ===
+      "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/fonts/bootstrap-icons.woff2?2ab2cbbe07fcebb53bdaa7313bb290f2"
+    ) {
+      callback({
+        redirectURL: `file://${__dirname}/assets/fonts/bootstrap-icons.woff2`,
+      });
+    } else {
+      // Continue with the original request
+      callback({});
+    }
+  });
 
   app.dock.setIcon("/assets/icon");
 
