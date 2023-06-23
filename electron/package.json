@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "flux electron app",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fluxsocial/flux"
+  },
   "scripts": {
     "start": "electron-forge start",
     "make": "electron-forge make",
