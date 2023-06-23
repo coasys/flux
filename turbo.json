@@ -10,6 +10,30 @@
     },
     "dev": {
       "cache": false
+    },
+    "@fluxapp/chat-view#build":{
+      "dependsOn": ["@fluxapp/ui#build"],
+      "outputs": ["dist/**"]
+    },
+    "@fluxapp/forum-view#build":{
+      "dependsOn": ["@fluxapp/ui#build"],
+      "outputs": ["dist/**"]
+    },
+    "@fluxapp/graph-view#build":{
+      "dependsOn": ["@fluxapp/ui#build"],
+      "outputs": ["dist/**"]
+    },
+    "@fluxapp/webrtc-view#build":{
+      "dependsOn": ["@fluxapp/ui#build"],
+      "outputs": ["dist/**"]
+    },
+    "flux-webrtc-debug-view#build":{
+      "dependsOn": ["@fluxapp/ui#build"],
+      "outputs": ["dist/**"]
+    },
+    "flux#build":{
+      "dependsOn": ["@fluxapp/ui#build", "@fluxapp/chat-view#build", "@fluxapp/forum-view#build", "@fluxapp/graph-view#build", "flux-webrtc-debug-view#build", "@fluxapp/webrtc-view#build"],
+      "outputs": ["dist/**"]
     }
   }
 }
