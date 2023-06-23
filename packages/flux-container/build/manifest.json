@@ -1,0 +1,27 @@
+{
+  "../ui/dist/main.css?used": {
+    "file": "main-71e6e1ce.js",
+    "isDynamicEntry": true,
+    "src": "../ui/dist/main.css?used"
+  },
+  "../ui/dist/main.js": {
+    "file": "main-b8da05d2.js",
+    "isDynamicEntry": true,
+    "src": "../ui/dist/main.js"
+  },
+  "../ui/dist/themes/dark.css?used": {
+    "file": "dark-8d983aba.js",
+    "isDynamicEntry": true,
+    "src": "../ui/dist/themes/dark.css?used"
+  },
+  "index.html": {
+    "dynamicImports": [
+      "../ui/dist/main.js",
+      "../ui/dist/main.css?used",
+      "../ui/dist/themes/dark.css?used"
+    ],
+    "file": "flux-container.js",
+    "isEntry": true,
+    "src": "index.html"
+  }
+}

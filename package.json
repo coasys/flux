@@ -5,7 +5,16 @@
     "packages/**/*",
     "views/**/*",
     "app",
-    "docs"
+    "docs",
+    "electron"
+  ],
+  "nohoist": [
+    "**/electron",
+    "**/electron/**",
+    "**/electron-squirrel-startup",
+    "**/electron-squirrel-startup/**",
+    "**/@electron-forge",
+    "**/@electron-forge/**"
   ],
   "private": true,
   "scripts": {

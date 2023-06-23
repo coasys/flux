@@ -20,10 +20,10 @@
     "start": "run-p dev:*",
     "build": "run-s build:*",
     "dev": "run-p dev:*",
-    "dev:lib": "NODE_ENV=dev node esbuild.js",
+    "dev:lib": "node esbuild.js",
     "build:types": "node buildTypes.js",
     "build:analyze": "web-component-analyzer src --outFile components.json",
-    "build:lib": "NODE_ENV=production node esbuild.js"
+    "build:lib": "node esbuild.js"
   },
   "dependencies": {
     "@popperjs/core": "^2.9.2",

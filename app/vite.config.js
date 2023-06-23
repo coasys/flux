@@ -3,6 +3,7 @@ import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
 
 export default {
+  base: "./",
   plugins: [
     vue({
       template: {
