@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "preact/hooks";
-import WebRTCManager, {
+import {
+  WebRTCManager,
   Connection,
   Event,
   Settings,
@@ -9,9 +10,11 @@ import {
   defaultSettings,
   videoDimensions,
 } from "utils/constants/videoSettings";
+import { getForVersion, setForVersion } from "utils/helpers/localStorage";
 import getMe, { Me } from "utils/api/getMe";
 import throttle from "utils/helpers/throttle";
-import * as localstorage from "utils/helpers/localStorage";
+import { IceServer } from "utils/helpers/WebRTCManager";
+import { getDefaultIceServers } from "utils/helpers/getDefaultIceServers";
 
 export type Peer = {
   did: string;
@@ -47,6 +50,7 @@ export type WebRTC = {
   localState: Peer["state"];
   connections: Peer[];
   devices: MediaDeviceInfo[];
+  iceServers: IceServer[];
   reactions: Reaction[];
   localEventLog: EventLogItem[];
   isInitialised: boolean;
@@ -63,6 +67,7 @@ export type WebRTC = {
   onChangeAudio: (deviceId: string) => void;
   onToggleScreenShare: (enabled: boolean) => void;
   onChangeState: (newState: Peer["state"]) => void;
+  onChangeIceServers: (servers: IceServer[]) => void;
 };
 
 export default function useWebRTC({
@@ -80,6 +85,9 @@ export default function useWebRTC({
   const [showPreview, setShowPreview] = useState(true);
   const [agent, setAgent] = useState<Me>();
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [iceServers, setIceServers] = useState<IceServer[]>(
+    getDefaultIceServers()
+  );
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [isInitialised, setIsInitialised] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
@@ -321,7 +329,7 @@ export default function useWebRTC({
     }
 
     // Persist settings
-    localstorage.setForVersion("cameraDeviceId", `${deviceId}`);
+    setForVersion("cameraDeviceId", `${deviceId}`);
   }
 
   /**
@@ -346,7 +354,7 @@ export default function useWebRTC({
     }
 
     // Persist settings
-    localstorage.setForVersion("audioDeviceId", `${deviceId}`);
+    setForVersion("audioDeviceId", `${deviceId}`);
 
     // Notify others of state change
     onChangeState({ ...localState, settings: newSettings });
@@ -356,8 +364,7 @@ export default function useWebRTC({
    * Enable/disable video input
    */
   async function onToggleCamera(enabled: boolean) {
-    const videoDeviceIdFromLocalStorage =
-      localstorage.getForVersion("cameraDeviceId");
+    const videoDeviceIdFromLocalStorage = getForVersion("cameraDeviceId");
 
     const newSettings = {
       audio: localState.settings.audio,
@@ -405,8 +412,7 @@ export default function useWebRTC({
    * Enable/disable audio input
    */
   async function onToggleAudio(enabled: boolean) {
-    const audioDeviceIdFromLocalStorage =
-      localstorage.getForVersion("audioDeviceId");
+    const audioDeviceIdFromLocalStorage = getForVersion("audioDeviceId");
 
     const newSettings = {
       audio: enabled
@@ -564,6 +570,12 @@ export default function useWebRTC({
     throttledStateBroadcast(newState);
   }
 
+  function onChangeIceServers(newServers: IceServer[]) {
+    setIceServers(newServers);
+    setForVersion("iceServers", JSON.stringify(newServers));
+    manager.current.iceServers = newServers;
+  }
+
   async function onJoin({ initialState }) {
     setIsLoading(true);
 
@@ -601,6 +613,7 @@ export default function useWebRTC({
     localEventLog,
     connections,
     devices,
+    iceServers,
     reactions,
     isInitialised,
     hasJoined,
@@ -616,5 +629,6 @@ export default function useWebRTC({
     onChangeAudio,
     onToggleScreenShare,
     onChangeState,
+    onChangeIceServers,
   };
 }

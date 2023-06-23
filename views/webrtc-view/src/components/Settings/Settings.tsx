@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { WebRTC } from "utils/react/useWebrtc";
 import { Me } from "utils/api/getMe";
 
-import General from "./General";
 import Debug from "./Debug";
 import VoiceVideo from "./VoiceVideo";
+import Connection from "./Connection";
 
 import styles from "./Settings.module.css";
 
@@ -30,6 +30,12 @@ export default function Settings({ webRTC, currentUser }: Props) {
             Voice & Video
           </j-menu-item>
           <j-menu-item
+            selected={currentTab === "connection"}
+            onClick={() => setCurrentTab("connection")}
+          >
+            Connection
+          </j-menu-item>
+          <j-menu-item
             selected={currentTab === "debug"}
             onClick={() => setCurrentTab("debug")}
           >
@@ -44,6 +50,7 @@ export default function Settings({ webRTC, currentUser }: Props) {
             <VoiceVideo webRTC={webRTC} currentUser={currentUser} />
           )}
         </>
+        <>{currentTab === "connection" && <Connection webRTC={webRTC} />}</>
         <>
           {currentTab === "debug" && (
             <Debug webRTC={webRTC} currentUser={currentUser} />
