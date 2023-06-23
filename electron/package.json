@@ -1,7 +1,7 @@
 {
   "name": "flux-electron",
   "version": "1.0.0",
-  "description": "",
+  "description": "flux electron app",
   "main": "index.js",
   "scripts": {
     "start": "electron-forge start",
@@ -13,7 +13,7 @@
     "build": "yarn workspace flux build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "fayeed",
   "license": "ISC",
   "devDependencies": {
     "@electron-forge/cli": "^6.1.1",
@@ -33,16 +33,13 @@
         "name": "FluxApp",
         "icon": "./assets/icon",
         "extraResource": [
-          "../app/dist",
+          "./../app/dist",
           "./assets/fonts"
         ]
       },
       "makers": [
         {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "electron_quick_start"
-          }
+          "name": "@electron-forge/maker-squirrel"
         },
         {
           "name": "@electron-forge/maker-zip",

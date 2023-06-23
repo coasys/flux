@@ -14,16 +14,16 @@ async function createWindow(s) {
 
   if (!app.isPackaged) {
     // Dev environment
-    await mainWindow.loadFile("../app/dist/index.html");
+    await mainWindow.loadFile("./../dist/index.html");
 
     mainWindow.webContents.openDevTools();
   } else {
     // Prod environment
-    await mainWindow.loadFile("../app/dist/index.html");
+    await mainWindow.loadFile("./../dist/index.html");
   }
 }
 
-if (require("electron-squirrel-startup")) app.quit();
+// if (require("electron-squirrel-startup")) app.quit();
 
 app.whenReady().then(() => {
   const proxySession = session.fromPartition("proxy-partition", {

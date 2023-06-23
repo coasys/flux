@@ -1,21 +1,23 @@
 {
   "name": "flux-monorepo",
   "version": "0.5.9",
-  "workspaces": [
-    "packages/**/*",
-    "views/**/*",
-    "app",
-    "docs",
-    "electron"
-  ],
-  "nohoist": [
-    "**/electron",
-    "**/electron/**",
-    "**/electron-squirrel-startup",
-    "**/electron-squirrel-startup/**",
-    "**/@electron-forge",
-    "**/@electron-forge/**"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/**/*",
+      "views/**/*",
+      "app",
+      "docs",
+      "electron"
+    ],
+    "nohoist": [
+      "**/electron",
+      "**/electron/**",
+      "**/electron-squirrel-startup",
+      "**/electron-squirrel-startup/**",
+      "**/@electron-forge",
+      "**/@electron-forge/**"
+    ]
+  },
   "private": true,
   "scripts": {
     "build": "turbo run build",
