@@ -5,6 +5,10 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    "build:app": {
+      "dependsOn": ["@fluxapp/ui#build", "@fluxapp/chat-view#build", "@fluxapp/forum-view#build", "@fluxapp/graph-view#build", "flux-webrtc-debug-view#build", "@fluxapp/webrtc-view#build", "flux#build"],
+      "outputs": ["dist/**"]
+    },
     "lint": {
       "outputs": []
     },
