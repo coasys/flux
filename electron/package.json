@@ -1,5 +1,5 @@
 {
-  "name": "Flux Electron",
+  "name": "flux-electron",
   "version": "0.5.1",
   "description": "Flux Electron app",
   "main": "index.js",
