@@ -1,6 +1,6 @@
 {
   "name": "flux-electron",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Flux Electron app",
   "main": "index.js",
   "repository": {
