@@ -15,7 +15,9 @@
       "**/electron-squirrel-startup",
       "**/electron-squirrel-startup/**",
       "**/@electron-forge",
-      "**/@electron-forge/**"
+      "**/@electron-forge/**",
+      "**/electron-builder",      
+      "**/electron-builder/**"
     ]
   },
   "private": true,
