@@ -1,5 +1,5 @@
 import styles from "./App.module.css";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { PerspectiveProxy, Ad4mClient } from "@perspect3vism/ad4m";
 import ChatView from "./components/ChatView/ChatView";
 import "@fluxapp/ui/dist/main.d.ts";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
@@ -11,7 +11,12 @@ type Props = {
   threaded: string;
 };
 
-export default function App({ agent, perspective, source, threaded }: Props) {
+export default async function App({
+  agent,
+  perspective,
+  source,
+  threaded,
+}: Props) {
   if (!perspective?.uuid || !agent || !source)
     return "No perspective or agent client";
 

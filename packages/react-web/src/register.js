@@ -1,4 +1,4 @@
-import { h, cloneElement, render, hydrate } from "preact";
+import { createElement as h, cloneElement, render, hydrate } from "react";
 
 export function toCustomElement(Component, propNames, options) {
   function PreactElement() {

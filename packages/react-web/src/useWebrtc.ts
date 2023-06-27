@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "preact/hooks";
+import { useEffect, useState, useRef, useCallback } from "react";
 import {
   getForVersion,
   setForVersion,
