@@ -194,7 +194,7 @@ import {
   SubjectRepository,
   Community,
 } from "@fluxapp/api";
-import { usePerspectives } from "@fluxapp/vue";
+import { usePerspectives, useCommunities } from "@fluxapp/vue";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 
 export default defineComponent({
@@ -203,8 +203,10 @@ export default defineComponent({
   async setup() {
     const appStore = useAppStore();
     const client = await getAd4mClient();
-    const { perspectives } = usePerspectives(client);
+    const { perspectives, neighbourhoods } = usePerspectives(client);
+    const { communities } = useCommunities(neighbourhoods);
     return {
+      communities,
       perspectives,
       appStore,
     };
@@ -221,41 +223,23 @@ export default defineComponent({
       nonFluxCommunities: {} as Record<string, PerspectiveProxy>,
     };
   },
-  watch: {
-    perspectives: {
-      handler: async function (val) {
-        const perspectives: PerspectiveProxy[] = Object.values(val);
-
-        const promises = perspectives.map(async (p) => {
-          const repo = new SubjectRepository(Community, {
-            perspective: p,
-            source: "ad4m://self",
-          });
-          try {
-            const community = await repo.getData();
-            if (!community) return p;
-            else return null;
-          } catch (e) {
-            return p;
-          }
-        });
-
-        const pers = await Promise.all(promises);
-
-        this.nonFluxCommunities = pers
-          .filter((p) => p !== null)
-          .reduce((acc, p) => {
-            if (!p) return acc;
-            return {
-              ...acc,
-              [p.uuid]: shallowRef(p),
-            };
-          }, {});
-      },
-      immediate: true,
-    },
-  },
   computed: {
+    nonFluxCommunities(): Record<string, PerspectiveProxy> {
+      const nonFlux = Object.keys(this.perspectives).map((key) =>
+        Object.keys(this.communities).some((uuid) => uuid !== key)
+      );
+      return Object.entries(this.perspectives).reduce((acc, [uuid, value]) => {
+        const isNotFluxCommunity = Object.keys(this.communities).some(
+          (id) => uuid !== id
+        );
+        if (isNotFluxCommunity)
+          return {
+            ...acc,
+            [uuid]: value,
+          };
+        return acc;
+      }, {});
+    },
     hasAlreadyJoinedTestingCommunity(): boolean {
       const p = Object.values(this.perspectives).find(
         (p) => p.uuid === DEFAULT_TESTING_NEIGHBOURHOOD
