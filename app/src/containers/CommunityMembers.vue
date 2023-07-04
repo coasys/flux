@@ -2,7 +2,7 @@
   <j-box p="800">
     <j-flex gap="500" direction="column">
       <j-text nomargin variant="heading-sm">
-        Members ({{ Object.keys(community.members).length ?? 0 }})
+        Members ({{ otherAgents.length + 1 }})
       </j-text>
       <j-input
         size="lg"
@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import { Profile } from "utils/types";
 import { useDataStore } from "@/store/data";
 
@@ -66,10 +66,21 @@ import { Community } from "utils/types";
 export default defineComponent({
   emits: ["close", "submit"],
   components: { Avatar },
+  async mounted() {
+    const client = await getAd4mClient();
+    const perspective = await client.perspective.byUUID(
+      this.$route.params.communityId as string
+    );
+    const otherAgents = await perspective
+      ?.getNeighbourhoodProxy()
+      .otherAgents();
+    this.otherAgents = otherAgents || [];
+  },
   setup() {
     const dataStore = useDataStore();
 
     return {
+      otherAgents: ref([]),
       dataStore,
     };
   },
@@ -81,7 +92,7 @@ export default defineComponent({
     };
   },
   watch: {
-    "community.members": {
+    otherAgents: {
       handler: async function (users) {
         // reset before fetching again
         this.memberList = [];

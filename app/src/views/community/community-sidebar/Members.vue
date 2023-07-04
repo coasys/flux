@@ -1,9 +1,6 @@
 <template>
   <j-box pt="500">
-    <j-menu-group
-      open
-      :title="`Members (${community.neighbourhood.members.length})`"
-    >
+    <j-menu-group open :title="`Members (${otherAgents.length + 1})`">
       <j-button
         @click.prevent="() => setShowInviteCode(true)"
         size="sm"
@@ -15,7 +12,7 @@
       <j-box px="500">
         <avatar-group
           @click="() => setShowCommunityMembers(true)"
-          :users="community.neighbourhood.members"
+          :users="otherAgents"
         />
       </j-box>
     </j-menu-group>
@@ -23,17 +20,29 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { mapActions } from "pinia";
 import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect";
 
 export default defineComponent({
   components: { AvatarGroup },
+  async mounted() {
+    const client = await getAd4mClient();
+    const perspective = await client.perspective.byUUID(
+      this.$route.params.communityId as string
+    );
+    const otherAgents = await perspective
+      ?.getNeighbourhoodProxy()
+      .otherAgents();
+    this.otherAgents = otherAgents || [];
+  },
   setup() {
     return {
       dataStore: useDataStore(),
+      otherAgents: ref<string[]>([]),
     };
   },
   computed: {

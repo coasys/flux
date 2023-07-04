@@ -35,13 +35,6 @@ export default async function getProfile(did: string): Promise<Profile> {
     did: "",
   };
 
-  const dexie = new DexieProfile(`flux://profile`);
-  let cachedProfile = await dexie.get(cleanedDid);
-
-  if (cachedProfile) {
-    return cachedProfile as Profile;
-  }
-
   profile.did = cleanedDid;
   const agentPerspective = await client.agent.byDID(cleanedDid);
 
@@ -66,10 +59,6 @@ export default async function getProfile(did: string): Promise<Profile> {
       ...mappedProfile,
       did: cleanedDid,
     };
-
-    if (links.length != 0) {
-      dexie.save(cleanedDid, profile as Profile);
-    }
   }
 
   return profile;

@@ -61,6 +61,8 @@ export async function hydrateState() {
 
   userStore.updateAgentStatus(status);
 
+  console.log("what");
+
   const deletedCommunities = dataStore.getCommunities.filter((community) => {
     const stillExist = neighbourhoods.some(
       (n) => n.uuid === community.state.perspectiveUuid
@@ -83,6 +85,8 @@ export async function hydrateState() {
   const newCommunities = await Promise.all(
     newNeighbourhoods.map((p) => buildCommunity(p))
   );
+
+  console.log({ newCommunities });
 
   newCommunities.forEach((c) => dataStore.addCommunity(c));
 }
