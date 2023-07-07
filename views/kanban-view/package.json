@@ -1,9 +1,9 @@
 {
   "name": "@fluxapp/kanban-view",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "fluxapp": {
     "name": "Kanban",
-    "description": "Work on a collaborative todo list",
+    "description": "Move items on a kanban board",
     "icon": "kanban"
   },
   "keywords": [

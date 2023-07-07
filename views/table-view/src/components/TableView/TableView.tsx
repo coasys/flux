@@ -54,7 +54,7 @@ export default function TableView({
   }, [initialSource, perspective.uuid]);
 
   useEffect(() => {
-    perspective.infer(`subject_class(ClassName, C).`).then((result) => {
+    perspective.infer(`subject_class(ClassName, C)`).then((result) => {
       if (Array.isArray(result)) {
         const uniqueClasses = [...new Set(result.map((c) => c.ClassName))];
         setClasses(uniqueClasses);

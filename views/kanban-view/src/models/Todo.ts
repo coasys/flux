@@ -1,14 +1,9 @@
-import {
-  SDNAClass,
-  subjectProperty,
-  subjectFlag,
-  Literal,
-} from "@perspect3vism/ad4m";
+import { SDNAClass, subjectProperty } from "@perspect3vism/ad4m";
 
 @SDNAClass({
-  name: "Todo",
+  name: "Task",
 })
-export default class Todo {
+export default class Task {
   @subjectProperty({
     through: "rdf://title",
     initial: "literal://string:Hello",

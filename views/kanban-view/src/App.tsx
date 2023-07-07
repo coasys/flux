@@ -1,7 +1,6 @@
 import styles from "./App.module.css";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import TodoView from "./components/Board";
-import "@fluxapp/ui/dist/main";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 
 type Props = {
