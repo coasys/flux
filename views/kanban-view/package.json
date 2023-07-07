@@ -1,6 +1,6 @@
 {
   "name": "@fluxapp/kanban-view",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "fluxapp": {
     "name": "Kanban",
     "description": "Move items on a kanban board",

@@ -136,6 +136,26 @@ export default function CommunityOverview({ uuid, source }) {
         .linkDirectionalArrowRelPos(0.9)
         .linkDirectionalArrowLength(3.5)
         .linkThreeObjectExtend(true)
+        .onNodeClick((node) => {
+          // Aim at node from outside it
+          const distance = 40;
+          const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
+
+          const newPos =
+            node.x || node.y || node.z
+              ? {
+                  x: node.x * distRatio,
+                  y: node.y * distRatio,
+                  z: node.z * distRatio,
+                }
+              : { x: 0, y: 0, z: distance }; // special case if node is in (0,0,0)
+
+          graph.current.cameraPosition(
+            newPos, // new position
+            node, // lookAt ({ x, y, z })
+            3000 // ms transition duration
+          );
+        })
         .linkThreeObject((link: any) => {
           // extend link with text sprite
           const sprite = new SpriteText(`${link.predicate}`);
