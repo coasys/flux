@@ -237,7 +237,6 @@ export default defineComponent({
     });
 
     return {
-      perspective: data.value.perspective,
       community,
       channels,
       data,
@@ -340,7 +339,7 @@ export default defineComponent({
   },
   computed: {
     isSynced(): boolean {
-      return this.perspective?.state === PerspectiveState.Synced;
+      return this.data.perspective?.state === PerspectiveState.Synced;
     },
     communityId() {
       return this.$route.params.communityId as string;
