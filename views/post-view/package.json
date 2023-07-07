@@ -34,6 +34,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@fluxapp/react-web": "*",
     "@fluxapp/flux-editor": "*",
     "classnames": "^2.3.2",
     "date-fns": "^2.24.0",

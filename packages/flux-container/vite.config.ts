@@ -8,7 +8,7 @@ export default defineConfig({
   // @ts-ignore
   plugins: [cssInjectedByJsPlugin()],
   build: {
-    outDir: "build",
+    outDir: "dist",
     lib: {
       entry: "src/flux-container.ts",
       formats: ["es"],

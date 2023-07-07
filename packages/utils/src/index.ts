@@ -8,7 +8,6 @@ export * from "./linkHelpers";
 export * from "./localStorage";
 export * from "./profileHelpers";
 export * from "./prologHelpers";
-export * from "./queue";
 export * from "./retry";
 export * from "./scrollHelpers";
 export * from "./sleep";

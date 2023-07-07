@@ -1,5 +1,4 @@
 import "preact/debug";
-
 import { toCustomElement } from "@fluxapp/react-web";
 import MyComponent from "./App";
 

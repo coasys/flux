@@ -31,6 +31,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@fluxapp/react-web": "*",
+    "@fluxapp/flux-container": "*",
     "@fluxapp/ui": "*",
     "@fluxapp/constants": "*",
     "@fluxapp/api": "*",
@@ -42,7 +44,6 @@
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.18.6",
     "@babel/plugin-proposal-decorators": "^7.21.0",
-    "@fluxapp/flux-container": "*",
     "@preact/preset-vite": "^2.5.0",
     "vite": "^4.3.5",
     "vite-plugin-css-injected-by-js": "^3.1.0"

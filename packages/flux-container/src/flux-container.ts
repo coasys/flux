@@ -13,6 +13,7 @@ import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { createCommunity, joinCommunity } from "@fluxapp/api";
 import { Channel, Community } from "@fluxapp/api";
 import { SubjectRepository } from "@fluxapp/api";
+import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 
 @customElement("flux-container")
 export class MyElement extends LitElement {
@@ -186,6 +187,8 @@ export class MyElement extends LitElement {
   }
 
   async setPerspective(uuid: string) {
+    console.log("setting perspective");
+
     const perspective = this.perspectives.find((p) => p.uuid === uuid);
 
     if (!perspective) {
@@ -222,14 +225,19 @@ export class MyElement extends LitElement {
 
       this.source = channels[0]?.id || "";
 
+      console.log("setting perspective");
+
       // @ts-ignore
       this.appElement.perspective = perspective;
 
       // @ts-ignore
       if (!this.appElement.agent) {
         // @ts-ignore
+        console.log("setting agent", this.appElement);
         this.appElement.agent = this.client.agent;
       }
+
+      console.log("setting source");
 
       this.appElement.setAttribute("source", this.source);
     } catch (e) {

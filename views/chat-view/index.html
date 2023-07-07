@@ -30,24 +30,15 @@
     </style>
   </head>
   <body>
-    <flux-container></flux-container>
+    <flux-container>
+      <flux-app></flux-app>
+    </flux-container>
 
     <script type="module">
       import App from "./src/main.ts";
       import "@fluxapp/flux-container";
-      import { name } from "./package.json";
-      import { generateWCName } from "@fluxapp/api";
 
-      const defineApp = async () => {
-        const container = document.querySelector("flux-container");
-        const wcName = await generateWCName(name);
-        customElements.define(wcName, App);
-
-        const el = document.createElement(wcName);
-        container.append(el);
-      };
-
-      defineApp();
+      customElements.define("flux-app", App);
     </script>
   </body>
 </html>

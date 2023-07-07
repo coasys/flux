@@ -11,14 +11,9 @@ type Props = {
   threaded: string;
 };
 
-export default async function App({
-  agent,
-  perspective,
-  source,
-  threaded,
-}: Props) {
-  if (!perspective?.uuid || !agent || !source)
-    return "No perspective or agent client";
+export default function App({ agent, perspective, source, threaded }: Props) {
+  if (!perspective?.uuid || !agent)
+    return <div>"No perspective or agent client"</div>;
 
   return (
     <div className={styles.appContainer}>
