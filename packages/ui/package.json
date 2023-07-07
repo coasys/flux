@@ -18,7 +18,7 @@
     "release": "np --no-2fa --no-tests --tag=latest",
     "release:beta": "np --no-2fa --no-tests --tag=beta",
     "start": "run-p dev:*",
-    "build": "run-s build:*",
+    "build": "yarn build:lib && yarn build:types && yarn build:analyze && yarn build:lib",
     "dev": "run-p dev:*",
     "dev:lib": "NODE_ENV=dev node esbuild-dev.js",
     "build:types": "node buildTypes.js",
