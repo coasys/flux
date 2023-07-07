@@ -10,7 +10,7 @@
     "make-windows": "electron-forge make --platform win32",
     "package": "electron-forge package",
     "package-x64": "electron-forge package --arch=x64",
-    "build": "VITE_BASE='./' yarn workspace flux build",
+    "build-electron": "VITE_BASE='./' yarn workspace flux build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
