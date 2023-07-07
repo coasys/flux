@@ -143,7 +143,6 @@ export default defineComponent({
         (pkg) => new Date(pkg.created) > new Date("2023-05-01")
       );
       this.packages = filtered;
-      console.log({ packages: filtered, res });
     } catch (error) {
       console.info("Flux is offline, using fallback apps");
 

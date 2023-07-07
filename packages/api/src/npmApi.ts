@@ -27,7 +27,10 @@ export async function getApp(name: string): Promise<FluxApp> {
 
 export async function getAllFluxApps(): Promise<FluxApp[]> {
   const res = await fetch(
-    "https://registry.npmjs.org/-/v1/search?text=keywords:flux-app"
+    "https://registry.npmjs.org/-/v1/search?text=keywords:flux-app",
+    {
+      cache: "no-store",
+    }
   );
 
   const json = await res.json();
@@ -38,7 +41,14 @@ export async function getAllFluxApps(): Promise<FluxApp[]> {
 }
 
 export function getOfflineFluxApps(): FluxApp[] {
-  const packages = ["chat-view", "post-view", "graph-view", "webrtc-view"];
+  const packages = [
+    "chat-view",
+    "post-view",
+    "graph-view",
+    "webrtc-view",
+    "table-view",
+    "kanban-board",
+  ];
 
   const fluxApps = packages.map((name) => ({
     created: "",

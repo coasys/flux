@@ -12,7 +12,7 @@
           :selected="communityIsActive(uuid as string)"
           :online="false"
           :src="community.image || undefined"
-          :initials="community.name?.charAt(0).toUpperCase()"
+          :initials="community?.name?.charAt(0).toUpperCase()"
           @click="() => handleCommunityClick(uuid as string)"
         ></Avatar>
         <j-menu slot="content">

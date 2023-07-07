@@ -34,31 +34,12 @@ export default async function createCommunity({
       ? await client.perspective.byUUID(perspectiveUuid)
       : await client.perspective.add(name);
 
-    const uid = uuidv4().toString();
-
-    const langs = await client.runtime.knownLinkLanguageTemplates();
-
-    //Create unique social-context
-    const linkLanguage = await client.languages.applyTemplateAndPublish(
-      langs[0],
-      JSON.stringify({
-        uid: uid,
-        name: `${name}-link-language`,
-      })
-    );
-
-    //Publish perspective
+    //Create metadata
     const metaLinks = await createNeighbourhoodMeta(name, description, author);
 
-    let sharedUrl = perspective!.sharedUrl;
-
-    if (!sharedUrl) {
-      sharedUrl = await client.neighbourhood.publishFromPerspective(
-        perspective!.uuid,
-        linkLanguage.address,
-        new Perspective(metaLinks)
-      );
-    }
+    const CommunityModel = new SubjectRepository(Community, {
+      perspective: perspective,
+    });
 
     let thumbnail: string | undefined = undefined;
     let compressedImage: string | undefined = undefined;
@@ -71,10 +52,6 @@ export default async function createCommunity({
         await resizeImage(dataURItoBlob(image as string), 0.3)
       );
     }
-
-    const CommunityModel = new SubjectRepository(Community, {
-      perspective: perspective,
-    });
 
     const metaData = {
       name,
@@ -96,6 +73,29 @@ export default async function createCommunity({
     };
 
     const community = await CommunityModel.create(metaData, "ad4m://self");
+
+    const uid = uuidv4().toString();
+
+    const langs = await client.runtime.knownLinkLanguageTemplates();
+
+    //Create unique social-context
+    const linkLanguage = await client.languages.applyTemplateAndPublish(
+      langs[0],
+      JSON.stringify({
+        uid: uid,
+        name: `${name}-link-language`,
+      })
+    );
+
+    let sharedUrl = perspective!.sharedUrl;
+
+    if (!sharedUrl) {
+      sharedUrl = await client.neighbourhood.publishFromPerspective(
+        perspective!.uuid,
+        linkLanguage.address,
+        new Perspective(metaLinks)
+      );
+    }
 
     // @ts-ignore
     return {

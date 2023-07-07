@@ -100,15 +100,16 @@
         </j-flex>
         <div v-if="isCreatingCommunity" style="text-align: center">
           <j-text variant="heading-sm">
-            Please wait while your community is being created
+            Your community is being created
           </j-text>
           <j-text variant="body">
-            Right now this proccess might take a couple of minutes, so please be
-            patient
+            Please be patient, this might take a while right now.
           </j-text>
-          <j-flex j="center">
-            <j-spinner size="lg"></j-spinner>
-          </j-flex>
+          <j-box pt="500">
+            <j-flex j="center">
+              <HourGlass width="50" />
+            </j-flex>
+          </j-box>
         </div>
       </div>
       <j-flex direction="column" gap="500" v-if="tabView === 'Join'">
@@ -183,22 +184,18 @@
 
 <script lang="ts">
 import { isValid } from "@/utils/validation";
-import { defineComponent, shallowRef } from "vue";
+import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useAppStore } from "@/store/app";
-import {
-  joinCommunity,
-  createCommunity,
-  SubjectRepository,
-  Community,
-} from "@fluxapp/api";
+import { joinCommunity, createCommunity } from "@fluxapp/api";
 import { usePerspectives, useCommunities } from "@fluxapp/vue";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
+import HourGlass from "@/components/hourglass/Hourglass.vue";
 
 export default defineComponent({
-  components: { AvatarUpload },
+  components: { AvatarUpload, HourGlass },
   emits: ["cancel", "submit"],
   async setup() {
     const appStore = useAppStore();
@@ -220,25 +217,26 @@ export default defineComponent({
       newProfileImage: undefined,
       isJoiningCommunity: false,
       isCreatingCommunity: false,
-      nonFluxCommunities: {} as Record<string, PerspectiveProxy>,
     };
   },
   computed: {
     nonFluxCommunities(): Record<string, PerspectiveProxy> {
-      const nonFlux = Object.keys(this.perspectives).map((key) =>
-        Object.keys(this.communities).some((uuid) => uuid !== key)
+      console.log({ c: this.communities, p: this.perspectives });
+      return Object.entries(this.perspectives).reduce(
+        (acc, [uuid, perspective]) => {
+          const perspectiveIsCommunity = Object.keys(this.communities).some(
+            (id) => uuid === id
+          );
+
+          if (!perspectiveIsCommunity)
+            return {
+              ...acc,
+              [uuid]: perspective,
+            };
+          return acc;
+        },
+        {}
       );
-      return Object.entries(this.perspectives).reduce((acc, [uuid, value]) => {
-        const isNotFluxCommunity = Object.keys(this.communities).some(
-          (id) => uuid !== id
-        );
-        if (isNotFluxCommunity)
-          return {
-            ...acc,
-            [uuid]: value,
-          };
-        return acc;
-      }, {});
     },
     hasAlreadyJoinedTestingCommunity(): boolean {
       const p = Object.values(this.perspectives).find(

@@ -4,6 +4,8 @@ const fetchFluxApp = async function (packageName: string) {
     "@fluxapp/chat-view",
     "@fluxapp/post-view",
     "@fluxapp/graph-view",
+    "@fluxapp/table-view",
+    "@fluxapp/kanban-view",
     "@fluxapp/webrtc-view",
   ];
   const isOfficialApp = officialPackages.includes(packageName);
@@ -21,6 +23,12 @@ const fetchFluxApp = async function (packageName: string) {
       }
       if (packageName === "@fluxapp/webrtc-view") {
         module = await import("@fluxapp/webrtc-view");
+      }
+      if (packageName === "@fluxapp/table-view") {
+        module = await import("@fluxapp/table-view");
+      }
+      if (packageName === "@fluxapp/kanban-view") {
+        module = await import("@fluxapp/kanban-view");
       }
     } else {
       module = await import(

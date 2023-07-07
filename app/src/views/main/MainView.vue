@@ -179,7 +179,9 @@ export default defineComponent({
       const client = await getAd4mClient();
       const activeCommunity = this.appStore.activeCommunity;
       await this.$router.push({ name: "home" });
+      console.log("removing");
       await client.perspective.remove(activeCommunity);
+      console.log("removed");
       this.appStore.setShowLeaveCommunity(false);
     },
     async joinTestingCommunity() {

@@ -2052,17 +2052,14 @@
   dependencies:
     semver "^7.3.5"
 
-"@perspect3vism/ad4m-connect@0.3.4-hotfix.2":
-  version "0.3.4-hotfix.2"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.3.4-hotfix.2.tgz#ad21fe00abc8f30554c348a16027d722f89632a7"
-  integrity sha512-kpZ1NEqdFgx4WcmVdO2+LzPDpmVhcX7Wc12xgLyYn2xNjVMuR+a0oJsW83/p0f2R8SDbipx1eC9uOefLZB0/8w==
+"@perspect3vism/ad4m-connect@0.3.4":
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.3.4.tgz#7a5543a680eacb63721f864f1e48ce3ada820997"
+  integrity sha512-6HtpLkTHRNBgeeFo6rdaAKtjWOsSKGszOstpJhtNypO0Ro6RODUUFxjzQMHvegYTtK/jj8C35YdSei9tFY1YHw==
   dependencies:
     "@undecaf/barcode-detector-polyfill" "^0.9.15"
-    "@undecaf/zbar-wasm" "^0.9.12"
     auto-bind "^5.0.1"
     electron "^20.0.3"
-    esbuild-plugin-copy "^2.1.1"
-    esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
 "@perspect3vism/ad4m@0.3.4-fix1":
@@ -2969,7 +2966,7 @@
   dependencies:
     "@undecaf/zbar-wasm" "^0.9.14"
 
-"@undecaf/zbar-wasm@^0.9.12", "@undecaf/zbar-wasm@^0.9.14":
+"@undecaf/zbar-wasm@^0.9.14":
   version "0.9.14"
   resolved "https://registry.yarnpkg.com/@undecaf/zbar-wasm/-/zbar-wasm-0.9.14.tgz#b80e42ddaad86a9827a972a583ccc1d2d6d9f68b"
   integrity sha512-ROGIgA/zzN6HnZuWgYTBTTtOTdgg5Phi6nM2cYCbcXu5JzzTY1dVCX3shsKM6a+lq1E/2Grz+IFuMDP5n+sepg==
@@ -5414,13 +5411,6 @@ esbuild-plugin-minify-html-literals@^1.0.4:
   integrity sha512-UkMWUQgLHBW/C51QvnEScxWps6bZbFEMCcRpBqkQSIYBLaG+mlcIzyCvs2TANqKA8EEwfQZgQHEEsAutSC6COg==
   dependencies:
     minify-html-literals "^1.3.5"
-
-esbuild-plugin-replace@^1.4.0:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/esbuild-plugin-replace/-/esbuild-plugin-replace-1.4.0.tgz#2051eb35e21699e41dcf75630f613bdaa5039be6"
-  integrity sha512-lP3ZAyzyRa5JXoOd59lJbRKNObtK8pJ/RO7o6vdjwLi71GfbL32NR22ZuS7/cLZkr10/L1lutoLma8E4DLngYg==
-  dependencies:
-    magic-string "^0.25.7"
 
 esbuild-sunos-64@0.15.18:
   version "0.15.18"

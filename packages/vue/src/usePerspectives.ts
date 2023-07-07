@@ -1,4 +1,4 @@
-import { ref, effect, shallowRef, triggerRef, watch } from "vue";
+import { ref, effect, shallowRef, watch, triggerRef } from "vue";
 import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
 
 type UUID = string;
@@ -13,11 +13,14 @@ watch(
   () => perspectives.value,
   (newPers) => {
     neighbourhoods.value = Object.keys(newPers).reduce((acc, key) => {
-      const p = newPers[key];
-      return {
-        ...acc,
-        [key]: p,
-      };
+      if (newPers[key]?.sharedUrl) {
+        return {
+          ...acc,
+          [key]: newPers[key],
+        };
+      } else {
+        return acc;
+      }
     }, {});
   },
   { immediate: true }
@@ -30,6 +33,7 @@ function addListeners(p: PerspectiveProxy) {
     });
     return null;
   });
+
   p.removeListener("link-removed", (link) => {
     onAddedLinkCbs.value.forEach((cb) => {
       cb(p, link);
@@ -58,7 +62,16 @@ export function usePerspectives(client: Ad4mClient) {
     });
 
     client.perspective.addPerspectiveUpdatedListener(async (handle) => {
-      triggerRef(perspectives);
+      const perspective = await client.perspective.byUUID(handle.uuid);
+
+      console.log("updated", perspective?.sharedUrl, handle.name);
+
+      if (perspective) {
+        perspectives.value = {
+          ...perspectives.value,
+          [handle.uuid]: perspective,
+        };
+      }
       return null;
     });
 
@@ -66,6 +79,9 @@ export function usePerspectives(client: Ad4mClient) {
     // @ts-ignore
     client.perspective.addPerspectiveAddedListener(async (handle) => {
       const perspective = await client.perspective.byUUID(handle.uuid);
+
+      console.log("added", perspective?.uuid, handle.name);
+
       if (perspective) {
         perspectives.value = {
           ...perspectives.value,
@@ -87,6 +103,8 @@ export function usePerspectives(client: Ad4mClient) {
       return null;
     });
   }, {});
+
+  function fetchPerspectives() {}
 
   function onLinkAdded(cb: Function) {
     onAddedLinkCbs.value.push(cb);

@@ -22,7 +22,7 @@
     "@fluxapp/api": "*",
     "@fluxapp/ui": "*",
     "@perspect3vism/ad4m": "0.3.4-fix1",
-    "@perspect3vism/ad4m-connect": "0.3.4-hotfix.2",
+    "@perspect3vism/ad4m-connect": "0.3.4",
     "lit-element": "^2.4.0"
   },
   "devDependencies": {

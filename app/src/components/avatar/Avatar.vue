@@ -30,8 +30,8 @@ export default defineComponent({
   },
   watch: {
     url: {
-      handler(url: string) {
-        if (url) {
+      handler(url: any) {
+        if (typeof url === "string") {
           if (url.includes("base64")) {
             this.realSrc = url;
           } else {
