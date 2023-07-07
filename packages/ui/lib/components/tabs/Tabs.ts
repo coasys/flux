@@ -54,6 +54,11 @@ const styles = css`
     --j-tab-item-color: var(--j-color-black);
     --j-tab-item-box-shadow: 0px 2px 0px 0px var(--j-color-primary-500);
   }
+  :host([variant="button"]) [part="base"] {
+    border-radius: var(--j-border-radius);
+    padding: var(--j-space-300);
+    background: var(--j-color-ui-50);
+  }
   :host([variant="button"]) ::slotted(*) {
     --j-tab-item-border-radius: var(--j-border-radius);
     --j-tab-item-box-shadow: none;
