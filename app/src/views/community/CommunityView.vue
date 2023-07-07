@@ -71,30 +71,31 @@
           </div>
         </j-flex>
       </div>
+      </div>
 
-      <div
-        class="center"
-        v-if="isSynced && !channelId && channels.length === 0"
-      >
-        <div class="center-inner">
-          <j-flex gap="400" direction="column" a="center" j="center">
-            <j-icon color="ui-500" size="xl" name="balloon"></j-icon>
-            <j-flex direction="column" a="center">
-              <j-text nomargin color="black" size="700" weight="800">
-                No channels yet
-              </j-text>
-              <j-text size="400" weight="400">Be the first to make one!</j-text>
-              <j-button
-                variant="primary"
-                @click="() => setShowCreateChannel(true)"
-              >
-                Create a new channel
-              </j-button>
-            </j-flex>
+    <div
+      class="center"
+      v-if="isSynced && !channelId && channels.length === 0"
+    >
+      <div class="center-inner">
+        <j-flex gap="400" direction="column" a="center" j="center">
+          <j-icon color="ui-500" size="xl" name="balloon"></j-icon>
+          <j-flex direction="column" a="center">
+            <j-text nomargin color="black" size="700" weight="800">
+              No channels yet
+            </j-text>
+            <j-text size="400" weight="400">Be the first to make one!</j-text>
+            <j-button
+              variant="primary"
+              @click="() => setShowCreateChannel(true)"
+            >
+              Create a new channel
+            </j-button>
           </j-flex>
-        </div>
+        </j-flex>
       </div>
     </div>
+    
     <j-modal
       size="sm"
       :open="modals.showCommunityMembers"
@@ -200,6 +201,7 @@ import { mapActions } from "pinia";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { useEntries, useEntry } from "@fluxapp/vue";
 import { usePerspective } from "@fluxapp/vue";
+import { PerspectiveState } from "@perspect3vism/ad4m";
 
 type LoadedChannels = {
   [channelId: string]: boolean;
@@ -235,6 +237,7 @@ export default defineComponent({
     });
 
     return {
+      perspective: data.value.perspective,
       community,
       channels,
       data,
@@ -337,7 +340,7 @@ export default defineComponent({
   },
   computed: {
     isSynced(): boolean {
-      return true;
+      return this.perspective?.state === PerspectiveState.Synced;
     },
     communityId() {
       return this.$route.params.communityId as string;

@@ -61,12 +61,12 @@
         </j-text>
         <j-text nomargin size="400" color="ui-500">
           {{
-            isSynced && isPerspectiveSynced
+            isSynced
               ? community.description || "No description"
               : "syncing community..."
           }}
         </j-text>
-        <j-box pt="400" v-if="!isSynced || !isPerspectiveSynced">
+        <j-box pt="400" v-if="!isSynced">
           <LoadingBar></LoadingBar>
         </j-box>
       </div>
@@ -94,13 +94,15 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
+import { useRoute } from 'vue-router';
 import { Profile } from "@fluxapp/types";
-import { mapActions, mapState } from "pinia";
+import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
 import Avatar from "@/components/avatar/Avatar.vue";
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { useMe } from "@fluxapp/vue";
+import { Ad4mClient } from "@perspect3vism/ad4m";
 
 export default defineComponent({
   components: { Avatar, LoadingBar },
@@ -112,7 +114,7 @@ export default defineComponent({
     },
   },
   async setup(props) {
-    const client = await getAd4mClient();
+     const client: Ad4mClient = await getAd4mClient();
 
     const { status, me, profile } = useMe(client.agent);
 
@@ -125,9 +127,6 @@ export default defineComponent({
     };
   },
   computed: {
-    isPerspectiveSynced() {
-      return true;
-    },
     isCreator(): boolean {
       return this.community.author === this.me?.did;
     },
