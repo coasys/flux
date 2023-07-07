@@ -6,8 +6,7 @@
       "packages/**/*",
       "views/**/*",
       "app",
-      "docs",
-      "electron"
+      "docs"
     ],
     "nohoist": [
       "**/electron",
