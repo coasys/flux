@@ -72,7 +72,6 @@ export default async function createCommunity({
         : undefined,
     };
 
-    const community = await CommunityModel.create(metaData, "ad4m://self");
 
     const uid = uuidv4().toString();
 
@@ -96,6 +95,8 @@ export default async function createCommunity({
         new Perspective(metaLinks)
       );
     }
+
+    const community = await CommunityModel.create(metaData, "ad4m://self");
 
     // @ts-ignore
     return {
