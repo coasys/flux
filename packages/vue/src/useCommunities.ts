@@ -21,23 +21,67 @@ export function useCommunities(
       });
 
       Object.entries(newNeighbourhoods).forEach(async ([uuid, p]) => {
-        const subject = new SubjectRepository(Community, {
-          perspective: p,
-        });
+        p.addSyncStateChangeListener(async (state) => {
+          if (state === 'Synced') {
+            const subject = new SubjectRepository(Community, {
+              perspective: p,
+            });
+    
+            const community = await subject.getData();
+            if (community) {
+              communities.value = { ...communities.value, [uuid]: community };
+            }
+          }
+        })
 
-        const community = await subject.getData();
+        if (p.state === 'Synced') {
+          const subject = new SubjectRepository(Community, {
+            perspective: p,
+          });
+  
+          const community = await subject.getData();
+          if (community) {
+            communities.value = { ...communities.value, [uuid]: community};
+          } else {
+            const community = {
+              uuid: uuid,
+              author: "",
+              timestamp: new Date(),
+              name: p.name || "",
+              description: "",
+              image: "",
+              thumbnail: "",
+              neighbourhoodUrl: p.sharedUrl!,
+              members: [],
+              id: "",
+              state: p.state
+            }
+  
+            // @ts-ignore
+            communities.value = { ...communities.value, [uuid]: community };
+          }
+        } else {
+          const community = {
+            uuid: uuid,
+            author: "",
+            timestamp: new Date(),
+            name: "",
+            description: "",
+            image: "",
+            thumbnail: "",
+            neighbourhoodUrl: p.sharedUrl!,
+            members: [],
+            id: "",
+            state: p.state
+          }
 
-        console.log({ community });
-
-        if (community) {
+          // @ts-ignore
           communities.value = { ...communities.value, [uuid]: community };
         }
       }, {});
     },
     { immediate: true }
   );
-
-  // communities.value =
 
   return { communities };
 }
