@@ -65,7 +65,7 @@ export function useCommunities(
             uuid: uuid,
             author: "",
             timestamp: new Date(),
-            name: "",
+            name: p.name,
             description: "",
             image: "",
             thumbnail: "",
