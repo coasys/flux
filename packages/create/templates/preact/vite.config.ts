@@ -16,6 +16,15 @@ export default defineConfig({
     ,
     cssInjectedByJsPlugin(),
   ],
+  optimizeDeps: {
+    esbuildOptions: {
+      tsconfigRaw: {
+        compilerOptions: {
+          experimentalDecorators: true,
+        },
+      },
+    },
+  },
   build: {
     lib: {
       entry: resolve(__dirname, "./src/main.ts"),
