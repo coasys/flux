@@ -299,11 +299,11 @@ export default defineComponent({
     joinCommunity(url: string) {
       this.isJoiningCommunity = true;
       joinCommunity({ joiningLink: url })
-        .then(() => {
+        .then((community) => {
           this.$router.push({
             name: "community",
             params: {
-              communityId: this.$route.params.communityId,
+              communityId: community.uuid,
             },
           });
         })

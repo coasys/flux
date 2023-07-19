@@ -6,6 +6,7 @@ import { useAgent, useEntries, useEntry } from "@fluxapp/react-web";
 import styles from "./MessageItem.module.css";
 import { useEffect } from "preact/hooks";
 import { community } from "@fluxapp/constants";
+import Avatar from "../Avatar";
 
 const { REPLY_TO } = community;
 
@@ -74,22 +75,22 @@ export default function MessageItem({
     <div className={`${styles.message} ${isReplying && styles.isReplying}`}>
       <div className={styles.messageLeft}>
         {isFullVersion && (
-          <j-avatar
+          <Avatar
             size="md"
-            src={profile?.profileThumbnailPicture}
+            profileAddress={profile?.profileThumbnailPicture}
             hash={message.author}
-          ></j-avatar>
+          ></Avatar>
         )}
       </div>
       <div className={styles.messageRight}>
         {replyId && replyMessage?.id && (
           <j-box pb="300">
             <j-flex a="center" gap="200">
-              <j-avatar
+              <Avatar
                 size="xxs"
-                src={replyProfile?.profileThumbnailPicture}
+                profileAddress={replyProfile?.profileThumbnailPicture}
                 hash={replyMessage.author}
-              ></j-avatar>
+              ></Avatar>
               <span>{replyProfile?.username}</span>
               <j-text
                 size="300"
