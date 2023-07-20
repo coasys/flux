@@ -65,7 +65,12 @@
               </j-flex>
               <div>
                 <j-button
-                  :variant="isSelected(app.pkg) ? 'link' : 'primary'"
+                  :variant="
+                    isSelected(app.pkg) && loadedPlugins[app.pkg] === 'loaded'
+                      ? 'link'
+                      : 'primary'
+                  "
+                  :loading="loadedPlugins[app.pkg] === 'loading'"
                   @click="() => toggleView(app)"
                 >
                   {{ isSelected(app.pkg) ? "Remove" : "Add" }}
@@ -150,7 +155,10 @@ export default defineComponent({
       tab: ref<"official" | "community">("official"),
       isLoading: ref(false),
       packages: ref<FluxApp[]>([]),
-      loadedApps: {} as Record<string, "loaded" | "loading" | undefined | null>,
+      loadedPlugins: {} as Record<
+        string,
+        "loaded" | "loading" | undefined | null
+      >,
       name: ref(""),
       description: ref(""),
       selectedPlugins: ref<App[]>([]),
@@ -195,21 +203,21 @@ export default defineComponent({
       deep: true,
       immediate: true,
     },
-    selectedApps: {
+    selectedPlugins: {
       handler: async function (apps: FluxApp[]) {
         apps?.forEach(async (app) => {
           const wcName = await generateWCName(app.pkg);
           if (customElements.get(wcName)) {
-            console.log("already loaded");
-            this.loadedApps[wcName] = "loaded";
+            this.loadedPlugins[app.pkg] = "loaded";
           } else {
-            this.loadedApps[wcName] = "loading";
+            this.loadedPlugins[app.pkg] = "loading";
+
             const module = await fetchFluxApp(app.pkg);
             if (module) {
               customElements.define(wcName, module.default);
             }
 
-            this.loadedApps[wcName] = "loaded";
+            this.loadedPlugins[app.pkg] = "loaded";
             this.$forceUpdate();
           }
         });

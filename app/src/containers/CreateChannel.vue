@@ -54,37 +54,41 @@
           <div class="app-grid" v-if="!isLoading">
             <div
               class="app-card"
-              v-for="pkg in filteredPackages"
-              :key="pkg.name"
+              v-for="app in filteredPackages"
+              :key="app.name"
             >
               <j-flex a="center" direction="row" j="between" gap="500">
                 <j-flex gap="500" a="center" j="center">
-                  <j-icon size="lg" v-if="pkg.icon" :name="pkg.icon"></j-icon>
+                  <j-icon size="lg" v-if="app.icon" :name="app.icon"></j-icon>
                   <div>
                     <j-flex gap="300">
                       <j-text variant="heading-sm">
-                        {{ pkg.name }}
+                        {{ app.name }}
                       </j-text>
                       <j-badge
                         size="sm"
-                        v-if="pkg.pkg.startsWith('@fluxapp')"
+                        v-if="app.pkg.startsWith('@fluxapp')"
                         variant="success"
                       >
                         Official App
                       </j-badge>
                     </j-flex>
                     <j-text nomargin>
-                      {{ pkg.description }}
+                      {{ app.description }}
                     </j-text>
                   </div>
                 </j-flex>
                 <div>
                   <j-button
-                    :loading="loadedApps[pkg.pkg] === 'loading'"
-                    :variant="isSelected(pkg) ? 'link' : 'primary'"
-                    @click="() => toggleView(pkg)"
+                    :loading="loadedPlugins[app.pkg] === 'loading'"
+                    :variant="
+                      isSelected(app) && loadedPlugins[app.pkg] === 'loaded'
+                        ? 'link'
+                        : 'primary'
+                    "
+                    @click="() => toggleView(app)"
                   >
-                    {{ isSelected(pkg) ? "Remove" : "Add" }}
+                    {{ isSelected(app) ? "Remove" : "Add" }}
                   </j-button>
                 </div>
               </j-flex>
@@ -179,7 +183,10 @@ export default defineComponent({
       isLoading: false,
       packages: [] as FluxApp[],
       selectedViews: [] as string[],
-      loadedApps: {} as Record<string, "loaded" | "loading" | undefined | null>,
+      loadedPlugins: {} as Record<
+        string,
+        "loaded" | "loading" | undefined | null
+      >,
       channelView: "chat",
       channelName: "",
       isCreatingChannel: false,
@@ -192,7 +199,7 @@ export default defineComponent({
     canSubmit(): boolean {
       return this.hasName && this.validSelectedViews;
     },
-    selectedApps(): FluxApp[] {
+    selectedPlugins(): FluxApp[] {
       return this.packages.filter((p) => this.selectedViews.includes(p.pkg));
     },
     officialApps(): FluxApp[] {
@@ -209,21 +216,20 @@ export default defineComponent({
     },
   },
   watch: {
-    selectedApps: {
+    selectedPlugins: {
       handler: async function (apps: FluxApp[]) {
         apps.forEach(async (app) => {
           const wcName = await generateWCName(app.pkg);
           if (customElements.get(wcName)) {
-            console.log("already loaded");
-            this.loadedApps[wcName] = "loaded";
+            this.loadedPlugins[app.pkg] = "loaded";
           } else {
-            this.loadedApps[wcName] = "loading";
+            this.loadedPlugins[app.pkg] = "loading";
             const module = await fetchFluxApp(app.pkg);
             if (module) {
               customElements.define(wcName, module.default);
             }
 
-            this.loadedApps[wcName] = "loaded";
+            this.loadedPlugins[app.pkg] = "loaded";
             this.$forceUpdate();
           }
         });
@@ -257,7 +263,7 @@ export default defineComponent({
           name,
         });
 
-        const promises = this.selectedApps.map(async (app) => {
+        const promises = this.selectedPlugins.map(async (app) => {
           return this.appRepo?.create(
             {
               name: app.name,
