@@ -21,6 +21,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
+    "publish": "turbo run publish",
     "lint": "turbo run lint"
   },
   "devDependencies": {

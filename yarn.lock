@@ -1868,10 +1868,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@perspect3vism/ad4m-connect@0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.5.0.tgz#abac4c2f43ac711b8bac8f8ee436c08c738a8b27"
-  integrity sha512-cIisF+IBhI/sOdjEv/pdVnq0z9KgR4qpdzBdtybAH4WPXw3IuyNNFBqRV5H4ZKVgcB4z6r6ehgH6CiC+6Lbdqw==
+"@perspect3vism/ad4m-connect@0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.5.1.tgz#b12be114cdaa591be2694e8db32c3d9588155c90"
+  integrity sha512-wfND22M5thGQPoATTPKGq5YLImwp1yiIxXtBoseKslj0z2YU+ju22bgde1+xC6B9vk0SOkPYRb7/i8U92DWj2w==
   dependencies:
     "@undecaf/barcode-detector-polyfill" "^0.9.15"
     "@undecaf/zbar-wasm" "^0.9.12"
@@ -1881,10 +1881,10 @@
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
-"@perspect3vism/ad4m@0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.5.0.tgz#fd0334322f04cd7efb22b622f012c122da8b7135"
-  integrity sha512-tcwa0Xbo1wjd0l3kGH64QJ4ZtkMRaMJvbtxlIXZ8l5yLGmhEVMvAINr1smz4+sOEKxp1fbRrmVJod3qe5i8OAw==
+"@perspect3vism/ad4m@0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.5.1.tgz#ba5ca764bbdde187f8ca8e3d9edbe3a17338fd61"
+  integrity sha512-6F4E8x3z4rJXWsQw2XRbU3HAvReyqyzslo8HNFFlpUYkoVEyophiljcLdZFQrdNQlJB3q/PhjxsLNd1SCeUOVg==
   dependencies:
     "@apollo/client" "3.7.10"
     "@holochain/client" "0.12.5"
