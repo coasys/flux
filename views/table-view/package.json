@@ -1,6 +1,6 @@
 {
   "name": "@fluxapp/table-view",
-  "version": "0.5.30",
+  "version": "0.5.31",
   "fluxapp": {
     "name": "Table",
     "description": "View and edit your channel data",
@@ -35,7 +35,7 @@
     "@fluxapp/api": "*",
     "@fluxapp/react-web": "*",
     "@fluxapp/flux-container": "*",
-    "@perspect3vism/ad4m": "0.5.0",
+    "@perspect3vism/ad4m": "0.5.1",
     "preact": "^10.13.1",
     "uuid": "^9.0.0"
   },

@@ -1,6 +1,6 @@
 {
   "name": "flux",
-  "version": "0.5.30",
+  "version": "0.5.31",
   "description": "A social web3 tool kit for communities",
   "author": "josh@junto.foundation",
   "repository": {
@@ -25,8 +25,8 @@
     "@fluxapp/vue": "*",
     "@fluxapp/ui": "*",
     "@fluxapp/types": "*",
-    "@perspect3vism/ad4m": "0.5.0",
-    "@perspect3vism/ad4m-connect": "0.5.0",
+    "@perspect3vism/ad4m": "0.5.1",
+    "@perspect3vism/ad4m-connect": "0.5.1",
     "construct-style-sheets-polyfill": "^3.1.0",
     "date-fns": "^2.29.3",
     "dexie": "^3.2.2",
