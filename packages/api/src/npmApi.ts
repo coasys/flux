@@ -27,7 +27,7 @@ export async function getApp(name: string): Promise<FluxApp> {
 
 export async function getAllFluxApps(): Promise<FluxApp[]> {
   const res = await fetch(
-    "https://registry.npmjs.org/-/v1/search?text=keywords:flux-app",
+    "https://registry.npmjs.org/-/v1/search?text=keywords:flux-plugin",
     {
       cache: "no-store",
     }

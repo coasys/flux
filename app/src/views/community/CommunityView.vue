@@ -2,7 +2,7 @@
   <sidebar-layout>
     <template v-slot:sidebar>
       <community-sidebar
-        v-if="community?.id && data.perspective?.uuid"
+        v-if="community?.name && data.perspective?.uuid"
         :perspective="data.perspective"
         :community="community"
         :isSynced="isSynced"
@@ -71,12 +71,9 @@
           </div>
         </j-flex>
       </div>
-      </div>
+    </div>
 
-    <div
-      class="center"
-      v-if="isSynced && !channelId && channels.length === 0"
-    >
+    <div class="center" v-if="isSynced && !channelId && channels.length === 0">
       <div class="center-inner">
         <j-flex gap="400" direction="column" a="center" j="center">
           <j-icon color="ui-500" size="xl" name="balloon"></j-icon>
@@ -95,7 +92,7 @@
         </j-flex>
       </div>
     </div>
-    
+
     <j-modal
       size="sm"
       :open="modals.showCommunityMembers"
@@ -199,7 +196,7 @@ import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { useEntries, useEntry } from "@fluxapp/vue";
+import { useEntries, useCommunities, usePerspectives } from "@fluxapp/vue";
 import { usePerspective } from "@fluxapp/vue";
 import { PerspectiveState } from "@perspect3vism/ad4m";
 
@@ -226,10 +223,9 @@ export default defineComponent({
     const client = await getAd4mClient();
     const { data } = usePerspective(client, () => route.params.communityId);
 
-    const { entry: community } = useEntry({
-      perspective: () => data.value.perspective,
-      model: Community,
-    });
+    const { neighbourhoods } = usePerspectives(client);
+
+    const { communities } = useCommunities(neighbourhoods);
 
     const { entries: channels } = useEntries({
       perspective: () => data.value.perspective,
@@ -237,16 +233,12 @@ export default defineComponent({
     });
 
     return {
-      community,
+      communities,
       channels,
       data,
+      hasCopied: ref(false),
       loadedChannels: ref<LoadedChannels>({}),
       appStore: useAppStore(),
-    };
-  },
-  data() {
-    return {
-      hasCopied: false,
     };
   },
   watch: {
@@ -298,14 +290,14 @@ export default defineComponent({
       });
     },
     goToActiveChannel(communityId: string) {
-      const firstChannel = this.community?.channels[0];
+      const firstChannel = this.channels[0];
 
       if (firstChannel) {
         this.$router.push({
           name: "channel",
           params: {
             communityId,
-            channelId: firstChannel,
+            channelId: firstChannel.id,
           },
         });
       }
@@ -340,6 +332,9 @@ export default defineComponent({
   computed: {
     isSynced(): boolean {
       return this.data.perspective?.state === PerspectiveState.Synced;
+    },
+    community(): Community | null {
+      return this.communities[this.$route.params.communityId as string];
     },
     communityId() {
       return this.$route.params.communityId as string;
