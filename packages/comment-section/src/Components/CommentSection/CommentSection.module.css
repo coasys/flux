@@ -1,0 +1,30 @@
+.base {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--j-space-500);
+}
+
+.editor {
+  padding: 0;
+  --body-min-height: auto;
+  --grid-template-areas: "toolbar toolbar toolbar" "body body footer";
+}
+.editor::part(base) {
+  background: var(--j-color-ui-50);
+}
+.editor::part(toolbar) {
+  display: none;
+}
+.editor[aria-expanded="true"]::part(toolbar) {
+  display: block;
+}
+.editor::part(footer) {
+  align-items: end;
+  border: 0;
+}
+
+.comments {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--j-space-500);
+}

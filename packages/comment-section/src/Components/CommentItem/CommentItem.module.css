@@ -1,0 +1,50 @@
+.container {
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  gap: var(--j-space-300);
+}
+
+.link {
+  color: currentColor;
+  text-decoration: none;
+}
+
+.author {
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-200);
+}
+
+.username:hover {
+  text-decoration: underline;
+}
+
+.timestamp {
+  font-size: var(--j-font-size-300);
+}
+
+.postContentWrapper {
+  display: block;
+  width: 100%;
+}
+
+.comment {
+  color: var(--j-color-ui-800);
+}
+
+.comment *:first-of-type {
+  margin-top: 0;
+}
+
+.comment a:not([href^="http"]) {
+  background: var(--j-color-primary-100);
+  color: var(--j-color-primary-600);
+  padding: var(--j-space-100) var(--j-space-200);
+  border-radius: var(--j-border-radius);
+  text-decoration: none;
+}
+
+.comment pre {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: var(--j-space-200);
+}
