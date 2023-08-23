@@ -31,6 +31,7 @@
   "engines": {
     "node": ">=18.16.0"
   },
+  "private": true,
   "dependencies": {},
   "packageManager": "yarn@1.22.19"
 }
