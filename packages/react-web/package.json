@@ -1,6 +1,6 @@
 {
   "name": "@fluxapp/react-web",
-  "version": "0.5.32",
+  "version": "0.5.33",
   "description": "",
   "main": "./src/index.ts",
   "module": "./src/index.ts",

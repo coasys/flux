@@ -1,6 +1,6 @@
 {
   "name": "@fluxapp/webrtc-view",
-  "version": "0.5.32",
+  "version": "0.5.33",
   "type": "module",
   "fluxapp": {
     "name": "Audio",
@@ -8,7 +8,8 @@
     "icon": "mic"
   },
   "keywords": [
-    "flux-app"
+    "flux-plugin",
+    "ad4m-view"
   ],
   "files": [
     "dist"

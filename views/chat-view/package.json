@@ -1,13 +1,14 @@
 {
   "name": "@fluxapp/chat-view",
-  "version": "0.5.32",
+  "version": "0.5.33",
   "fluxapp": {
     "name": "Chat",
     "description": "Make a new conversation",
     "icon": "chat"
   },
   "keywords": [
-    "flux-app"
+    "flux-plugin",
+    "ad4m-view"
   ],
   "type": "module",
   "files": [
