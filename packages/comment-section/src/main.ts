@@ -8,7 +8,7 @@ customElements.define("flux-editor", Editor);
 const CustomElement = toCustomElement(
   MyComponent,
   ["perspective", "agent", "source"],
-  { shadow: false }
+  { shadow: true }
 );
 
 export default CustomElement;

@@ -45,17 +45,6 @@ export default function CommentSection({
 
   return (
     <div className={styles.base} part="base">
-      {comments.length > 0 && (
-        <div className={styles.comments} part="comments">
-          {comments.map((comment) => (
-            <CommentItem
-              agent={agent}
-              perspective={perspective}
-              comment={comment}
-            ></CommentItem>
-          ))}
-        </div>
-      )}
       <flux-editor
         part="editor"
         ref={editor}
@@ -82,6 +71,17 @@ export default function CommentSection({
           </j-button>
         </footer>
       </flux-editor>
+      {comments.length > 0 && (
+        <div className={styles.comments} part="comments">
+          {comments.map((comment) => (
+            <CommentItem
+              agent={agent}
+              perspective={perspective}
+              comment={comment}
+            ></CommentItem>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
