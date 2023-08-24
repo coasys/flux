@@ -129,7 +129,6 @@ export default function Table({
               </td>
               {headers.map((header, index) => {
                 const value = entry[header];
-                console.log(namedOptions);
                 return (
                   <td key={index}>
                     <j-popover event="contextmenu">

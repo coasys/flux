@@ -1,0 +1,13 @@
+.cardDetails {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  padding: var(--j-space-500);
+}
+
+.commentSection::part(editor) {
+  order: 1;
+}
+
+.commentSection::part(footer) {
+  order: 2;
+}

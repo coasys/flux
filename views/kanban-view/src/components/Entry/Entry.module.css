@@ -1,0 +1,8 @@
+.entryTitle {
+  font-size: var(--j-font-size-800);
+  margin: 0;
+  display: inline-block;
+  text-decoration: none;
+  color: var(--j-color-black);
+  border-radius: var(--j-border-radius);
+}

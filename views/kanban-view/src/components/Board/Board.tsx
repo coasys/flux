@@ -5,10 +5,14 @@ import Todo from "../models/Todo";
 import { useEntries } from "@fluxapp/react-web";
 import { useEffect, useMemo } from "preact/hooks";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import Card from "../Card";
+import CardDetails from "../CardDetails";
+import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 
 type BoardProps = {
   perspective: PerspectiveProxy;
   source: string;
+  agent: AgentClient;
 };
 
 type NamedOption = {
@@ -18,8 +22,9 @@ type NamedOption = {
 
 type NamedOptions = Record<string, NamedOption[]>;
 
-export default function Board({ perspective, source }: BoardProps) {
+export default function Board({ perspective, source, agent }: BoardProps) {
   const [showAddColumn, setShowAddColumn] = useState(false);
+  const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
   const [columnName, setColumnName] = useState("");
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState("");
@@ -66,7 +71,6 @@ export default function Board({ perspective, source }: BoardProps) {
 
   function loadColumns() {
     getNamedOptions(perspective, selectedClass).then((namedOpts) => {
-      console.log({ namedOptions, selectedClass });
       setNamedOptions(namedOpts);
       Object.keys(namedOpts).forEach((key, index) => {
         if (index === 0) {
@@ -77,11 +81,17 @@ export default function Board({ perspective, source }: BoardProps) {
   }
 
   useEffect(() => {
+    setSelectedClass(classes[0] || "");
+  }, [classes.length]);
+
+  useEffect(() => {
     setTasks(entries);
   }, [entries, perspective.uuid]);
 
   useEffect(() => {
-    getClasses(perspective, source).then(setClasses);
+    getClasses(perspective, source).then((classes) => {
+      setClasses(classes);
+    });
   }, [perspective.uuid, selectedClass]);
 
   useEffect(() => {
@@ -120,8 +130,8 @@ export default function Board({ perspective, source }: BoardProps) {
     setTasks((oldTasks) => {
       return oldTasks.map((t) => (t.id === draggableId ? { ...t, status } : t));
     });
-    console.log({ destination, draggableId });
-    model.update(draggableId, { status });
+
+    model.update(draggableId, { [selectedProperty]: status });
   };
 
   async function addColumn() {
@@ -146,8 +156,10 @@ export default function Board({ perspective, source }: BoardProps) {
       <j-box pb="500">
         <j-flex gap="300">
           <select
+            placeholder="Select a class"
             className={styles.select}
             onChange={(e) => setSelectedClass(e.target.value)}
+            value={selectedClass}
           >
             <option disabled selected>
               Select type
@@ -202,8 +214,12 @@ export default function Board({ perspective, source }: BoardProps) {
                                   snapshot.isDragging ? styles.isDragging : ""
                                 }`}
                               >
-                                <j-text>{task.content}</j-text>
-                                <j-avatar size="xs" hash="123"></j-avatar>
+                                <Card
+                                  perspective={perspective}
+                                  selectedClass={selectedClass}
+                                  onClick={() => setCurrentTaskId(task.id)}
+                                  id={task.id}
+                                ></Card>
                               </div>
                             )}
                           </Draggable>
@@ -228,13 +244,26 @@ export default function Board({ perspective, source }: BoardProps) {
                   variant="subtle"
                   onClick={() => setShowAddColumn(true)}
                 >
-                  <j-icon name="plus" size="md" slot="start"></j-icon>
+                  <j-icon name="plus" size="sm" slot="start"></j-icon>
                 </j-button>
               </div>
             )}
           </DragDropContext>
         </div>
       </div>
+      <j-modal
+        open={currentTaskId ? true : false}
+        onToggle={(e) =>
+          setCurrentTaskId(e.target.open ? currentTaskId : false)
+        }
+      >
+        <CardDetails
+          agent={agent}
+          perspective={perspective}
+          id={currentTaskId}
+          selectedClass={selectedClass}
+        ></CardDetails>
+      </j-modal>
       <j-modal
         open={showAddColumn}
         onToggle={(e) => setShowAddColumn(e.target.open)}
@@ -295,7 +324,7 @@ function transformData(tasks: any[], property: string, options: NamedOption[]) {
           ...acc.tasks,
           [task.id]: {
             id: task.id,
-            content: task.title || task.name || task.id,
+            title: task.title || task.name || task.id,
           },
         },
         columns: addTaskToColumn(acc.columns, task, property),

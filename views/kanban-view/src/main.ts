@@ -1,5 +1,6 @@
 import "preact/debug";
 
+import "@fluxapp/ui/dist/main.d.ts";
 import { toCustomElement } from "@fluxapp/react-web";
 import App from "./App";
 
