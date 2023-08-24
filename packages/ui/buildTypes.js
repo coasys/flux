@@ -26,10 +26,10 @@ for (const tag of components.tags) {
     for (const attribute of tag.attributes) {
       let type = attribute.type;
 
-      if (attribute.type === 'String') {
-        type = "string"
-      } else if (attribute.type === 'Boolean') {
-        type = "boolean"
+      if (attribute.type === "String") {
+        type = "string";
+      } else if (attribute.type === "Boolean") {
+        type = "boolean";
       }
 
       list.push(`${attribute.name}?: ${type};\n\t`);
@@ -38,7 +38,7 @@ for (const tag of components.tags) {
   list.push("children?: any");
 
   const newType = `
-type ${snakeToPascal(tag.name)}Props = HTMLElement & {
+type ${snakeToPascal(tag.name)}Props = Partial<HTMLElement> & {
   ${list.join("")}
 }
   `;
