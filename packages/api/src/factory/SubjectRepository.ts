@@ -74,7 +74,9 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
 
   async update(id: string, data: QueryPartialEntity<SubjectClass>) {
     await this.ensureSubject();
+
     const instance = await this.get(id);
+
     if (!instance) {
       throw "Failed to find instance of " + this.subject + " with id " + id;
     }
@@ -84,6 +86,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     );
 
     setProperties(instance, data);
+
     return this.getSubjectData(instance);
   }
 
@@ -99,6 +102,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   async get(id?: string): Promise<SubjectClass | null> {
     await this.ensureSubject();
     if (id) {
+      console.log({ subject: this.subject });
       const subjectProxy = await this.perspective.getSubjectProxy(
         id,
         this.subject
@@ -110,7 +114,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     }
   }
 
-  async getData(id?: string): Promise<SubjectClass | null> {
+  async getData(id?: string): Promise<SubjectClass | string | null> {
     await this.ensureSubject();
     const entry = await this.get(id);
     if (entry) {

@@ -21,7 +21,7 @@ export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
       perspective: perspective,
       source,
     });
-  }, [perspective.uuid, source]);
+  }, [perspective.uuid, source, model]);
 
   // Create cache key for entry
   const cacheKey = `${perspective.uuid}/${source || ""}/${model.name}/${id}`;
@@ -49,10 +49,12 @@ export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
   useEffect(() => {
     if (perspective.uuid) {
       const added = (link: LinkExpression) => {
-        const isNewEntry = link.data.source === source;
-        if (isNewEntry) {
-          // WIP
+        const isUpdated = link.data.source === id;
+
+        if (isUpdated) {
+          getData();
         }
+
         return null;
       };
 
