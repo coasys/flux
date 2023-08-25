@@ -92,10 +92,11 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
 
   async remove(id: string) {
     if (this.perspective) {
-      const links = await this.perspective.get(
-        new LinkQuery({ source: this.source, target: id })
+      const linksTo = await this.perspective.get(new LinkQuery({ target: id }));
+      const linksFrom = await this.perspective.get(
+        new LinkQuery({ source: id })
       );
-      this.perspective.removeLinks(links);
+      this.perspective.removeLinks([...linksFrom, ...linksTo]);
     }
   }
 
