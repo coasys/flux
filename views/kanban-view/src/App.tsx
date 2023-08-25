@@ -4,7 +4,9 @@ import TodoView from "./components/Board";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import CommentSection from "@fluxapp/comment-section";
 
-customElements.define("comment-section", CommentSection);
+if (!customElements.get("comment-section")) {
+  customElements.define("comment-section", CommentSection);
+}
 
 type Props = {
   agent: AgentClient;

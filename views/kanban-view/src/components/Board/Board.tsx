@@ -128,7 +128,9 @@ export default function Board({ perspective, source, agent }: BoardProps) {
 
     const status = destination.droppableId;
     setTasks((oldTasks) => {
-      return oldTasks.map((t) => (t.id === draggableId ? { ...t, status } : t));
+      return oldTasks.map((t) =>
+        t.id === draggableId ? { ...t, [selectedProperty]: status } : t
+      );
     });
 
     model.update(draggableId, { [selectedProperty]: status });
@@ -253,15 +255,14 @@ export default function Board({ perspective, source, agent }: BoardProps) {
       </div>
       <j-modal
         open={currentTaskId ? true : false}
-        onToggle={(e) =>
-          setCurrentTaskId(e.target.open ? currentTaskId : false)
-        }
+        onToggle={(e) => setCurrentTaskId(e.target.open ? currentTaskId : null)}
       >
         <CardDetails
           agent={agent}
           perspective={perspective}
           id={currentTaskId}
           selectedClass={selectedClass}
+          onDeleted={() => setCurrentTaskId(null)}
         ></CardDetails>
       </j-modal>
       <j-modal

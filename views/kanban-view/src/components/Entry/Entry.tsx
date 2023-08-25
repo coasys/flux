@@ -63,26 +63,38 @@ export default function Entry({
       ? "title"
       : "";
 
-    const defaultName = entry?.name || entry?.title || "No title";
+    const defaultName = entry?.name || entry?.title || "";
 
     return (
       <div>
-        <j-box pt="100" pb="800">
-          <j-text size="800" weight="600" nomargin color="black">
-            <DisplayValue
-              onUpdate={(value) => onUpdate(titleName, value)}
-              onUrlClick={onUrlClick}
-              value={defaultName}
-            />
-          </j-text>
-        </j-box>
+        {defaultName && (
+          <j-box pt="100" pb="800">
+            <j-flex gap="400" direction="column">
+              <j-text
+                style="text-transform: capitalize"
+                size="500"
+                weight="600"
+                nomargin
+              >
+                {titleName}
+              </j-text>
+              <j-text size="700" weight="600" nomargin color="black">
+                <DisplayValue
+                  onUpdate={(value) => onUpdate(titleName, value)}
+                  onUrlClick={onUrlClick}
+                  value={defaultName}
+                />
+              </j-text>
+            </j-flex>
+          </j-box>
+        )}
 
         <j-flex direction="column" gap="800">
           {properties.map(([key, value]) => (
-            <j-flex gap="500" direction="column">
+            <j-flex gap="400" direction="column">
               <j-text
                 style="text-transform: capitalize"
-                size="600"
+                size="500"
                 weight="600"
                 nomargin
               >

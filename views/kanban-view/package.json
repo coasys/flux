@@ -37,6 +37,7 @@
     "@fluxapp/comment-section": "^0.5.33",
     "@fluxapp/flux-container": "*",
     "@fluxapp/react-web": "*",
+    "@fluxapp/types": "^0.5.32",
     "@perspect3vism/ad4m": "0.5.1",
     "preact": "^10.13.1",
     "react-beautiful-dnd": "^13.1.1"

@@ -1,7 +1,9 @@
 .cardDetails {
   display: grid;
-  grid-template-columns: 1fr 200px;
+  box-sizing: border-box;
+  grid-template-columns: 1fr 250px;
   padding: var(--j-space-500);
+  gap: var(--j-space-500);
 }
 
 .commentSection::part(editor) {
@@ -10,4 +12,59 @@
 
 .commentSection::part(footer) {
   order: 2;
+}
+
+.actionButton {
+  border: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: var(--j-space-400);
+  cursor: pointer;
+  border-radius: var(--j-border-radius);
+  color: inherit;
+  font-weight: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  padding: var(--j-space-300);
+  background-color: var(--j-color-ui-50);
+}
+
+.dangerActionButton {
+  border: 0;
+  width: 100%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: var(--j-space-400);
+  border-radius: var(--j-border-radius);
+  font-weight: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  padding: var(--j-space-300);
+  color: var(--j-color-danger-500);
+  background-color: var(--j-color-danger-50);
+}
+
+.dangerActionButton:hover {
+  background-color: var(--j-color-danger-100);
+}
+
+.actionButton:hover {
+  background-color: var(--j-color-ui-100);
+}
+
+.menu::part(base) {
+  box-sizing: border-box;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.suggestion {
+  align-items: center;
+  display: flex;
+  gap: var(--j-space-300);
+  width: 100%;
 }
