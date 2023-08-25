@@ -77,7 +77,7 @@
         @click="onViewClick"
         @hide-notification-indicator="onHideNotificationIndicator"
       />
-      <j-box pt="1000" v-show="currentView === app.pkg" v-else>
+      <j-box pt="1000" v-show="currentView && currentView === app.pkg" v-else>
         <j-flex direction="column" a="center" j="center" gap="500">
           <j-spinner></j-spinner>
           <span>Loading plugin...</span>
