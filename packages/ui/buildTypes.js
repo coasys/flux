@@ -35,10 +35,11 @@ for (const tag of components.tags) {
       list.push(`${attribute.name}?: ${type};\n\t`);
     }
   }
-  list.push("children?: any");
 
   const newType = `
-type ${snakeToPascal(tag.name)}Props = Partial<HTMLElement> & {
+type ${snakeToPascal(
+    tag.name
+  )}Props = React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> & {
   ${list.join("")}
 }
   `;
