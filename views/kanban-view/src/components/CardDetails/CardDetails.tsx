@@ -7,6 +7,7 @@ import Entry from "../Entry";
 import { useEffect } from "preact/hooks";
 import { Profile } from "@fluxapp/types";
 import { getProfile } from "@fluxapp/api";
+import { useAssociations } from "../../hooks/useAssociations";
 
 type Props = {
   id: string;
@@ -24,6 +25,16 @@ export default function CardDetails({
   perspective,
 }: Props) {
   const { entry, model } = useEntry({ perspective, id, model: selectedClass });
+
+  const {
+    associations: assignees,
+    add: addAssignee,
+    remove: removeAssignee,
+  } = useAssociations({
+    perspective,
+    source: id,
+    predicate: "rdf://has_assignee",
+  });
 
   const [showAssign, setShowAssign] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -53,11 +64,40 @@ export default function CardDetails({
     }
   }
 
-  console.log({ profiles, showAssign });
+  function toggleAssignee(val: boolean, did: string) {
+    if (val) {
+      addAssignee(did);
+    } else {
+      removeAssignee(did);
+    }
+  }
+
+  const assignedProfiles = profiles.filter((p) =>
+    assignees.some((l) => l.data.target === p.did)
+  );
+
+  console.log({ assignees });
 
   return (
     <div className={styles.cardDetails}>
       <div className={styles.cardMain}>
+        <j-box pb="500">
+          <j-flex wrap gap="500">
+            {assignedProfiles.map((p) => (
+              <j-flex a="center" gap="300" key={p.did}>
+                <j-avatar
+                  size="xs"
+                  src={p?.profileThumbnailPicture}
+                  hash={p.did}
+                ></j-avatar>
+                <j-text nomargin size="400" color="ui-700">
+                  {p?.username}
+                </j-text>
+              </j-flex>
+            ))}
+          </j-flex>
+        </j-box>
+
         <j-box pb="800">
           <Entry
             id={id}
@@ -109,7 +149,17 @@ export default function CardDetails({
                 <j-box pt="300">
                   {profiles.map((profile) => (
                     <j-menu-item key={profile.did}>
-                      <j-checkbox size="sm" slot="start">
+                      <j-checkbox
+                        full
+                        checked={assignees.some(
+                          (l) => l.data.target === profile.did
+                        )}
+                        onChange={(e) =>
+                          toggleAssignee(e.target.checked, profile.did)
+                        }
+                        size="sm"
+                        slot="start"
+                      >
                         <div className={styles.suggestion}>
                           <j-avatar
                             size="xs"

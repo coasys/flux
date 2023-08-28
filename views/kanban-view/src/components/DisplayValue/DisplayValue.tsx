@@ -71,15 +71,18 @@ export default function DisplayValue({
 
   if (options) {
     return (
-      <select
-        className={styles.select}
-        value={value}
-        onChange={(e) => onUpdate(e.target.value)}
-      >
-        {options.map((option) => (
-          <option value={option.value}>{option.name}</option>
-        ))}
-      </select>
+      <div className={styles.selectWrapper}>
+        <select
+          className={styles.select}
+          value={value}
+          onChange={(e) => onUpdate(e.target.value)}
+        >
+          {options.map((option) => (
+            <option value={option.value}>{option.name}</option>
+          ))}
+        </select>
+        <j-icon name="chevron-down" size="xs"></j-icon>
+      </div>
     );
   }
 
