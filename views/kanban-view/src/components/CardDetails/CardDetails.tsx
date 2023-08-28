@@ -81,23 +81,6 @@ export default function CardDetails({
   return (
     <div className={styles.cardDetails}>
       <div className={styles.cardMain}>
-        <j-box pb="500">
-          <j-flex wrap gap="500">
-            {assignedProfiles.map((p) => (
-              <j-flex a="center" gap="300" key={p.did}>
-                <j-avatar
-                  size="xs"
-                  src={p?.profileThumbnailPicture}
-                  hash={p.did}
-                ></j-avatar>
-                <j-text nomargin size="400" color="ui-700">
-                  {p?.username}
-                </j-text>
-              </j-flex>
-            ))}
-          </j-flex>
-        </j-box>
-
         <j-box pb="800">
           <Entry
             id={id}
@@ -176,6 +159,24 @@ export default function CardDetails({
                 </j-box>
               </j-box>
             </j-menu>
+          )}
+          {!showAssign && assignedProfiles.length > 0 && (
+            <j-box pb="500">
+              {assignedProfiles.map((p) => (
+                <j-box pt="300" key={p.did}>
+                  <j-flex a="center" gap="300">
+                    <j-avatar
+                      size="xs"
+                      src={p?.profileThumbnailPicture}
+                      hash={p.did}
+                    ></j-avatar>
+                    <j-text nomargin size="400" color="ui-700">
+                      {p?.username}
+                    </j-text>
+                  </j-flex>
+                </j-box>
+              ))}
+            </j-box>
           )}
         </j-box>
         <j-box pt="300">

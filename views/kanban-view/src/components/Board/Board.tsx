@@ -56,6 +56,12 @@ export default function Board({ perspective, source, agent }: BoardProps) {
               property_named_option(pvwrkd, "status", "todo", "todo").
               property_named_option(pvwrkd, "status", "doing", "doing").
               property_named_option(pvwrkd, "status", "done", "done").
+
+              collection(pvwrkd, "assignees").
+              collection_getter(pvwrkd, Base, "assignees", List) :- findall(C, triple(Base, "rdf://has_assignee", C), List).
+              collection_adder(pvwrkd, "assigneess", '[{action: "addLink", source: "this", predicate: "rdf://has_assignee", target: "value"}]').
+              collection_remover(pvwrkd, "assigneess", '[{action: "removeLink", source: "this", predicate: "rdf://has_assignee", target: "value"}]').
+              collection_setter(pvwrkd, "assigneess", '[{action: "collectionSetter", source: "this", predicate: "rdf://has_assignee", target: "value"}]').
             `
           )
           .then(() => getClasses(perspective, source).then(setClasses));
