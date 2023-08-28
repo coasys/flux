@@ -147,7 +147,6 @@ export default defineComponent({
     Hourglass,
   },
   async setup(props) {
-    console.log({ props });
     const client: Ad4mClient = await getAd4mClient();
 
     const { perspectives } = usePerspectives(client);
@@ -207,7 +206,10 @@ export default defineComponent({
   watch: {
     apps: {
       handler: function (val) {
-        this.currentView = val[0]?.pkg;
+        if (!this.currentView) {
+          this.currentView = val[0]?.pkg;
+        }
+
         // Add new views
         val?.forEach(async (app: App) => {
           const wcName = await generateWCName(app.pkg);
@@ -267,6 +269,7 @@ export default defineComponent({
       this.appStore.setShowEditChannel(true);
     },
     changeCurrentView(e: any) {
+      console.log("does this rerender inside changeCurrentView?");
       console.log(e.target.value);
       const value = e.target.value;
       this.currentView = value;

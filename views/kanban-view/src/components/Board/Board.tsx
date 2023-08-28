@@ -189,7 +189,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
 
               return (
                 <div key={index} className={styles.column}>
-                  <j-text nomargin variant="heading-sm">
+                  <j-text nomargin size="500" weight="600" color="black">
                     {column.title}
                   </j-text>
                   <Droppable droppableId={columnId}>
