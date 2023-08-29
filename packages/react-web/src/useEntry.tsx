@@ -62,6 +62,9 @@ export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
         if (link.data.target === source) {
           mutate(null);
         }
+        if (link.data.source === id) {
+          getData();
+        }
         return null;
       };
 

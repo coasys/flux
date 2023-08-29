@@ -24,7 +24,7 @@ export default function Table({
   useEffect(() => {
     perspective
       .infer(
-        `subject_class("${subjectClass}", Atom), property_named_option(Atom, Property, Value, Name).`
+        `subject_class("${subjectClass}", Atom), property_named_option(Atom, Property, Value, Label).`
       )
       .then((res) => {
         if (res?.length) {
@@ -33,7 +33,7 @@ export default function Table({
               ...acc,
               [option.Property]: [
                 ...(acc[option.Property] || []),
-                { name: option.Name, value: option.Value },
+                { label: option.Label, value: option.Value },
               ],
             };
           }, {});

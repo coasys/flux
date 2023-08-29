@@ -1,6 +1,5 @@
 .appContainer {
-  margin: 0 auto;
-  padding: var(--j-space-800);
+  padding: var(--j-space-500);
   width: 100%;
-  max-width: 1200px;
+  box-sizing: border-box;
 }

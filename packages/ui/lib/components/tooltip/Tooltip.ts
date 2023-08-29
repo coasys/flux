@@ -97,6 +97,14 @@ export default class Tooltip extends LitElement {
   title = null;
 
   /**
+   * Strategy
+   * @type {"absolute"|"fixed"}
+   * @attr
+   */
+  @property({ type: String, reflect: true })
+  strategy: "absolute" | "fixed" = "absolute";
+
+  /**
    * Placement
    * @type {"auto"|"auto-start"|"auto-end"|"top"|"top-start"|"top-end"|"bottom"|"bottom-start"|"bottom-end"|"right"|"right-start"|"right-end"|"left"|"left-start"|"left-end"}
    * @attr
@@ -134,9 +142,10 @@ export default class Tooltip extends LitElement {
 
   createTooltip() {
     if (this.contentEl && this.tooltipEl) {
+      console.log("created with strategy", this.strategy);
       this.popperInstance = createPopper(this.contentEl, this.tooltipEl, {
         placement: this.placement as Placement,
-        strategy: "absolute",
+        strategy: this.strategy,
         modifiers: [
           {
             name: "offset",

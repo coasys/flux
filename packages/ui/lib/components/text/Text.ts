@@ -122,7 +122,7 @@ export default class Text extends LitElement {
 
   /**
    * Variants
-   * @type {""|"heading-lg"|"heading"|"heading-sm"|"subheading"|""ingress"|"body"|"label"|"footnote"}
+   * @type {""|"heading-lg"|"heading"|"heading-sm"|"subheading"|"ingress"|"body"|"label"|"footnote"}
    * @attr
    */
   @property({ type: String, reflect: true }) variant = "body";

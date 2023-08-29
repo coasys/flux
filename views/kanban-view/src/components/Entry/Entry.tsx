@@ -23,7 +23,7 @@ export default function Entry({
   useEffect(() => {
     perspective
       .infer(
-        `subject_class("${selectedClass}", Atom), property_named_option(Atom, Property, Value, Name).`
+        `subject_class("${selectedClass}", Atom), property_named_option(Atom, Property, Value, Label).`
       )
       .then((res) => {
         if (res?.length) {
@@ -32,7 +32,7 @@ export default function Entry({
               ...acc,
               [option.Property]: [
                 ...(acc[option.Property] || []),
-                { name: option.Name, value: option.Value },
+                { label: option.Label, value: option.Value },
               ],
             };
           }, {});
@@ -70,14 +70,17 @@ export default function Entry({
         {defaultName && (
           <j-box pt="100" pb="800">
             <j-flex gap="400" direction="column">
-              <j-text
-                style="text-transform: capitalize"
-                size="500"
-                weight="600"
-                nomargin
-              >
-                {titleName}
-              </j-text>
+              <j-flex gap="300" a="center">
+                <j-icon name="justify-left" color="ui-500" size="xs"></j-icon>
+                <j-text
+                  style="text-transform: capitalize"
+                  size="500"
+                  weight="500"
+                  nomargin
+                >
+                  {titleName}
+                </j-text>
+              </j-flex>
               <j-text size="700" weight="600" nomargin color="black">
                 <DisplayValue
                   onUpdate={(value) => onUpdate(titleName, value)}
@@ -92,14 +95,17 @@ export default function Entry({
         <j-flex direction="column" gap="800">
           {properties.map(([key, value]) => (
             <j-flex gap="400" direction="column">
-              <j-text
-                style="text-transform: capitalize"
-                size="500"
-                weight="600"
-                nomargin
-              >
-                {key}
-              </j-text>
+              <j-flex gap="300" a="center">
+                <j-icon name="justify-left" color="ui-500" size="xs"></j-icon>
+                <j-text
+                  style="text-transform: capitalize"
+                  size="500"
+                  weight="600"
+                  nomargin
+                >
+                  {key}
+                </j-text>
+              </j-flex>
               <j-text nomargin color="black">
                 <DisplayValue
                   options={namedOptions[key]}

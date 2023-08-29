@@ -28,18 +28,17 @@ export default function NewClass({ perspective, onSaved }: Props) {
 
   const [columns, setColumns] = useState<Record<string, Column>>({
     dj4523ljd: {
-      name: "name",
+      name: "title",
       defaultValue: "Title",
       options: [],
       language: "literal",
-      predicate: "rdf://name",
+      predicate: "rdf://title",
       required: true,
     },
   });
 
   async function addClass() {
     const sdna = await generateSDNA(name, columns, perspective);
-    console.log({ sdna });
     await perspective.addSdna(sdna);
     onSaved();
   }
@@ -134,7 +133,7 @@ export default function NewClass({ perspective, onSaved }: Props) {
       <div className={styles.columnGrid}>
         {Object.entries(columns).map(([id, column]) => {
           return (
-            <details open key={id} className={styles.details}>
+            <details key={id} className={styles.details}>
               <summary className={styles.summary}>
                 <j-flex j="between" a="center">
                   <j-flex gap="400">

@@ -163,7 +163,7 @@ export default class Button extends LitElement {
 
   /**
    * Variations
-   * @type {""|"link"|"primary"|"subtle"|"transparent"|"ghost"|}
+   * @type {""|"link"|"primary"|"subtle"|"transparent"|"ghost"}
    * @attr
    */
   @property({ type: String, reflect: true })

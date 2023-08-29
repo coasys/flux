@@ -69,7 +69,7 @@ export default function DisplayValue({
         onChange={(e) => onUpdate(e.target.value)}
       >
         {options.map((option) => (
-          <option value={option.value}>{option.name}</option>
+          <option value={option.value}>{option.label}</option>
         ))}
       </select>
     );
@@ -91,6 +91,14 @@ export default function DisplayValue({
   }
 
   if (typeof value === "string") {
+    if (value.startsWith("did:key")) {
+      return (
+        <div>
+          <j-avatar size="xs" hash={value}></j-avatar>
+        </div>
+      );
+    }
+
     if (value.length > 1000)
       return (
         <img className={styles.img} src={`data:image/png;base64,${value}`} />
@@ -125,13 +133,6 @@ export default function DisplayValue({
       );
     }
 
-    if (value.startsWith("did:key")) {
-      return (
-        <div>
-          <j-avatar size="xs" hash={value}></j-avatar>
-        </div>
-      );
-    }
     return (
       <j-flex gap="500" a="center">
         <div onDoubleClick={onStartEdit}>{value}</div>
@@ -165,7 +166,7 @@ export default function DisplayValue({
       <span></span>
     );
 
-  return value === null ? <span></span> : value;
+  return value === null || value === undefined ? <span></span> : value;
 }
 
 function ShowObjectInfo({ value }) {

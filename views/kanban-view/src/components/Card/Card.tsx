@@ -40,14 +40,12 @@ export default function Card({
 
   return (
     <div className={styles.card} onClick={onClick}>
-      <j-box pb="300">
-        <j-text size="500" color="ui-800" nomargin>
-          {entry?.name || entry?.title || "Unnamed"}
-        </j-text>
-      </j-box>
+      <j-text size="500" color="ui-800" nomargin>
+        {entry?.name || entry?.title || "Unnamed"}
+      </j-text>
 
       {assignedProfiles.length > 0 && (
-        <j-box>
+        <j-box pt="300">
           <j-flex wrap gap="200">
             {assignedProfiles.map((p) => (
               <j-avatar
@@ -64,8 +62,8 @@ export default function Card({
       <j-icon
         color="ui-400"
         className={styles.editIcon}
-        size="sm"
-        name="pencil"
+        size="xs"
+        name="pencil-square"
       ></j-icon>
     </div>
   );

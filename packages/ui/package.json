@@ -18,11 +18,11 @@
     "release": "np --no-2fa --no-tests --tag=latest",
     "release:beta": "np --no-2fa --no-tests --tag=beta",
     "start": "run-p dev:*",
-    "build": "yarn build:lib && yarn build:types && yarn build:analyze && yarn build:lib",
+    "build": "yarn build:analyze && yarn build:types && yarn build:lib",
     "dev": "run-p dev:*",
     "dev:lib": "NODE_ENV=dev node esbuild-dev.js",
+    "build:analyze": "web-component-analyzer lib --outFile components.json",
     "build:types": "node buildTypes.js",
-    "build:analyze": "web-component-analyzer src --outFile components.json",
     "build:lib": "NODE_ENV=production node esbuild-prod.js",
     "visualize": "esbuild-visualizer --metadata ./meta.json"
   },

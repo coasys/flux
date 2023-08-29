@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import styles from "./Board.module.css";
-import Todo from "../models/Todo";
-import { useEntries, useEntry } from "@fluxapp/react-web";
+import { useEntries } from "@fluxapp/react-web";
 import { useEffect, useMemo } from "preact/hooks";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import Card from "../Card";
 import CardDetails from "../CardDetails";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
+
+// @ts-ignore
+import taskSDNA from "./Task.pl?raw";
 
 type BoardProps = {
   perspective: PerspectiveProxy;
@@ -17,7 +19,7 @@ type BoardProps = {
 
 type NamedOption = {
   value: string;
-  name: string;
+  label: string;
 };
 
 type NamedOptions = Record<string, NamedOption[]>;
@@ -36,34 +38,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     perspective.infer(`subject_class("Task", Atom)`).then((hasTask) => {
       if (!hasTask) {
         perspective
-          .addSdna(
-            `
-              subject_class("Task", pvwrkd).
-              constructor(pvwrkd, '[{action: "addLink", source: "this", predicate: "rdf://name", target: "literal://json:%7B%22author%22%3A%22did%3Akey%3AzQ3shWhAZydqDE1s5Ka3gJTDpjdYg1Ajw6PFywSP7QJD8x8ki%22%2C%22timestamp%22%3A%222023-07-06T16%3A25%3A41.597Z%22%2C%22data%22%3A%22New%20task%22%2C%22proof%22%3A%7B%22key%22%3A%22%23zQ3shWhAZydqDE1s5Ka3gJTDpjdYg1Ajw6PFywSP7QJD8x8ki%22%2C%22signature%22%3A%2281a4f1b56d73e3069cd0a35addc31bd418c2d15a336110de3c1c8639bcc01c857a888846e5cd0714f6a0457bcef609a7cd23ecb578dcf00a25f848951013de3d%22%2C%22valid%22%3Atrue%2C%22invalid%22%3Afalse%7D%7D"},{action: "addLink", source: "this", predicate: "rdf://status", target: "literal://json:%7B%22author%22%3A%22did%3Akey%3AzQ3shWhAZydqDE1s5Ka3gJTDpjdYg1Ajw6PFywSP7QJD8x8ki%22%2C%22timestamp%22%3A%222023-07-06T16%3A25%3A41.606Z%22%2C%22data%22%3A%22todo%22%2C%22proof%22%3A%7B%22key%22%3A%22%23zQ3shWhAZydqDE1s5Ka3gJTDpjdYg1Ajw6PFywSP7QJD8x8ki%22%2C%22signature%22%3A%226ca7bb8bc2db7d90b995902f6278974a879eeafe871885614933cc553f1afe935cc4e0221c7de7e7b2c46d1d6dbc4c752879a782e24cd134afaa63812297a05e%22%2C%22valid%22%3Atrue%2C%22invalid%22%3Afalse%7D%7D"}]').
-              instance(pvwrkd, Base) :- triple(Base, "rdf://name", _),triple(Base, "rdf://status", _).
-              
-              property(pvwrkd, "name").
-              property_resolve(pvwrkd, "name").
-              property_resolve_language(pvwrkd, "name", "literal").
-              property_getter(pvwrkd, Base, "name", Value) :- triple(Base, "rdf://name", Value).
-              property_setter(pvwrkd, "name", '[{action: "setSingleTarget", source: "this", predicate: "rdf://name", target: "value"}]').
-                  
-              property(pvwrkd, "status").
-              property_resolve(pvwrkd, "status").
-              property_resolve_language(pvwrkd, "status", "literal").
-              property_getter(pvwrkd, Base, "status", Value) :- triple(Base, "rdf://status", Value).
-              property_setter(pvwrkd, "status", '[{action: "setSingleTarget", source: "this", predicate: "rdf://status", target: "value"}]').
-              property_named_option(pvwrkd, "status", "todo", "todo").
-              property_named_option(pvwrkd, "status", "doing", "doing").
-              property_named_option(pvwrkd, "status", "done", "done").
-
-              collection(pvwrkd, "assignees").
-              collection_getter(pvwrkd, Base, "assignees", List) :- findall(C, triple(Base, "rdf://has_assignee", C), List).
-              collection_adder(pvwrkd, "assigneess", '[{action: "addLink", source: "this", predicate: "rdf://has_assignee", target: "value"}]').
-              collection_remover(pvwrkd, "assigneess", '[{action: "removeLink", source: "this", predicate: "rdf://has_assignee", target: "value"}]').
-              collection_setter(pvwrkd, "assigneess", '[{action: "collectionSetter", source: "this", predicate: "rdf://has_assignee", target: "value"}]').
-            `
-          )
+          .addSdna(taskSDNA)
           .then(() => getClasses(perspective, source).then(setClasses));
       }
     });
@@ -159,6 +134,8 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     setShowAddColumn(false);
   }
 
+  console.log("rerender", tasks);
+
   return (
     <>
       <j-box pb="500">
@@ -195,54 +172,60 @@ export default function Board({ perspective, source, agent }: BoardProps) {
 
               return (
                 <div key={index} className={styles.column}>
-                  <j-text nomargin size="500" weight="600" color="black">
-                    {column.title}
-                  </j-text>
-                  <Droppable droppableId={columnId}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={`${styles.tasks} ${
-                          snapshot.isDraggingOver ? styles.isDraggingOver : ""
-                        }`}
-                      >
-                        {tasks.map((task, index) => (
-                          <Draggable
-                            key={task.id}
-                            draggableId={task.id}
-                            index={index}
-                          >
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className={`${styles.task} ${
-                                  snapshot.isDragging ? styles.isDragging : ""
-                                }`}
-                              >
-                                <Card
-                                  perspective={perspective}
-                                  selectedClass={selectedClass}
-                                  onClick={() => setCurrentTaskId(task.id)}
-                                  id={task.id}
-                                ></Card>
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                  <j-button
-                    variant="link"
-                    onClick={() => createNewTodo(selectedProperty, columnId)}
-                  >
-                    Add card
-                    <j-icon name="plus" size="md" slot="start"></j-icon>
-                  </j-button>
+                  <header className={styles.columnHeader}>
+                    <j-text nomargin size="500" weight="600" color="black">
+                      {column.title}
+                    </j-text>
+                  </header>
+                  <div className={styles.columnContent}>
+                    <Droppable droppableId={columnId}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className={`${styles.tasks} ${
+                            snapshot.isDraggingOver ? styles.isDraggingOver : ""
+                          }`}
+                        >
+                          {tasks.map((task, index) => (
+                            <Draggable
+                              key={task.id}
+                              draggableId={task.id}
+                              index={index}
+                            >
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  className={`${styles.task} ${
+                                    snapshot.isDragging ? styles.isDragging : ""
+                                  }`}
+                                >
+                                  <Card
+                                    perspective={perspective}
+                                    selectedClass={selectedClass}
+                                    onClick={() => setCurrentTaskId(task.id)}
+                                    id={task.id}
+                                  ></Card>
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  </div>
+                  <footer className={styles.columnFooter}>
+                    <j-button
+                      variant="link"
+                      onClick={() => createNewTodo(selectedProperty, columnId)}
+                    >
+                      Add card
+                      <j-icon name="plus" size="md" slot="start"></j-icon>
+                    </j-button>
+                  </footer>
                 </div>
               );
             })}
@@ -259,21 +242,25 @@ export default function Board({ perspective, source, agent }: BoardProps) {
           </DragDropContext>
         </div>
       </div>
-      <j-modal
-        open={currentTaskId ? true : false}
-        onToggle={(e) => setCurrentTaskId(e.target.open ? currentTaskId : null)}
-      >
-        <CardDetails
-          agent={agent}
-          perspective={perspective}
-          id={currentTaskId}
-          selectedClass={selectedClass}
-          onDeleted={() => setCurrentTaskId(null)}
-        ></CardDetails>
-      </j-modal>
+      {currentTaskId && (
+        <j-modal
+          open={currentTaskId ? true : false}
+          onToggle={(e) =>
+            setCurrentTaskId(e.currentTarget.open ? currentTaskId : null)
+          }
+        >
+          <CardDetails
+            agent={agent}
+            perspective={perspective}
+            id={currentTaskId}
+            selectedClass={selectedClass}
+            onDeleted={() => setCurrentTaskId(null)}
+          ></CardDetails>
+        </j-modal>
+      )}
       <j-modal
         open={showAddColumn}
-        onToggle={(e) => setShowAddColumn(e.target.open)}
+        onToggle={(e) => setShowAddColumn(e.currentTarget.open)}
       >
         <j-box px="800" py="600">
           <j-box pb="800">
@@ -305,9 +292,9 @@ function transformData(tasks: any[], property: string, options: NamedOption[]) {
     (acc, opt) => {
       return {
         ...acc,
-        [opt.name]: {
+        [opt.label]: {
           id: opt.value,
-          title: opt.name,
+          title: opt.label,
           taskIds: [],
         },
       };
@@ -341,7 +328,7 @@ function transformData(tasks: any[], property: string, options: NamedOption[]) {
     {
       tasks: {},
       columns: defaultColumns,
-      columnOrder: options.map((c) => c.name),
+      columnOrder: options.map((c) => c.label),
     }
   );
 }
@@ -349,7 +336,7 @@ function transformData(tasks: any[], property: string, options: NamedOption[]) {
 async function getNamedOptions(perspective, className): Promise<NamedOptions> {
   return perspective
     .infer(
-      `subject_class("${className}", Atom), property_named_option(Atom, Property, Value, Name).`
+      `subject_class("${className}", Atom), property_named_option(Atom, Property, Value, Label).`
     )
     .then((res) => {
       if (res?.length) {
@@ -358,7 +345,7 @@ async function getNamedOptions(perspective, className): Promise<NamedOptions> {
             ...acc,
             [option.Property]: [
               ...(acc[option.Property] || []),
-              { name: option.Name, value: option.Value },
+              { label: option.Label, value: option.Value },
             ],
           };
         }, {});

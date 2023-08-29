@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { Literal } from "@perspect3vism/ad4m";
 import styles from "./DisplayValue.module.css";
+import type { Profile } from "@fluxapp/types";
+import { getProfile } from "@fluxapp/api";
 
 export function isValidUrl(string) {
   try {
@@ -78,7 +80,7 @@ export default function DisplayValue({
           onChange={(e) => onUpdate(e.target.value)}
         >
           {options.map((option) => (
-            <option value={option.value}>{option.name}</option>
+            <option value={option.value}>{option.label}</option>
           ))}
         </select>
         <j-icon name="chevron-down" size="xs"></j-icon>
@@ -102,6 +104,10 @@ export default function DisplayValue({
   }
 
   if (typeof value === "string") {
+    if (value.startsWith("did:key")) {
+      return <Profile did={value}></Profile>;
+    }
+
     if (value.length > 1000)
       return (
         <img className={styles.img} src={`data:image/png;base64,${value}`} />
@@ -136,13 +142,6 @@ export default function DisplayValue({
       );
     }
 
-    if (value.startsWith("did:key")) {
-      return (
-        <div>
-          <j-avatar size="xs" hash={value}></j-avatar>
-        </div>
-      );
-    }
     return (
       <j-flex gap="500" a="center">
         <div className={styles.value} onClick={onStartEdit}>
@@ -206,5 +205,23 @@ function ShowObjectInfo({ value }) {
         </j-modal>
       )}
     </div>
+  );
+}
+
+function Profile({ did }: { did: string }) {
+  const [profile, setProfile] = useState<Profile | null>(null);
+
+  useEffect(() => {
+    getProfile(did).then(setProfile);
+  }, [did]);
+
+  return (
+    <j-tooltip strategy="fixed" title={profile?.username}>
+      <j-avatar
+        size="xs"
+        hash={did}
+        src={profile?.profileThumbnailPicture}
+      ></j-avatar>
+    </j-tooltip>
   );
 }

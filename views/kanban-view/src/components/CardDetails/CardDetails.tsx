@@ -76,8 +76,6 @@ export default function CardDetails({
     assignees.some((l) => l.data.target === p.did)
   );
 
-  console.log({ assignees });
-
   return (
     <div className={styles.cardDetails}>
       <div className={styles.cardMain}>
@@ -90,8 +88,8 @@ export default function CardDetails({
         </j-box>
 
         <j-box pb="500">
-          <j-flex a="center" gap="400">
-            <j-icon size="sm" color="ui-500" name="chat-left"></j-icon>
+          <j-flex a="center" gap="300">
+            <j-icon size="xs" color="ui-500" name="chat-left"></j-icon>
             <j-text nomargin size="500" weight="700">
               Comments
             </j-text>

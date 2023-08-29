@@ -12,23 +12,46 @@
 .column {
   border-radius: var(--j-border-radius);
   background: var(--j-color-ui-100);
-  width: 500px;
+  width: 300px;
   height: 100%;
-  min-width: 250px;
-  flex-grow: 1;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.columnHeader {
+  z-index: 1;
+  padding: var(--j-space-400);
+  background-color: var(--j-color-ui-100);
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.columnFooter {
+  z-index: 1;
+  padding: var(--j-space-400);
+  background-color: var(--j-color-ui-100);
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+.columnContent {
   padding: var(--j-space-400);
 }
 
-.column:has(.tasks.isDraggingOver) {
-  background: var(--j-color-ui-200);
+.column:has(.tasks.isDraggingOver) .columnContent,
+.column:has(.tasks.isDraggingOver) .columnHeader,
+.column:has(.tasks.isDraggingOver) .columnFooter {
+  background-color: var(--j-color-ui-200);
 }
 
 .tasks {
-  margin-top: var(--j-space-500);
-  margin-bottom: var(--j-space-500);
   height: 100%;
-  min-height: 200px;
   display: flex;
+  min-height: 200px;
   flex-direction: column;
   gap: var(--j-space-300);
 }
