@@ -1,10 +1,10 @@
 import { useEffect, useState } from "preact/hooks";
-import { useEntry } from "@fluxapp/react-web/src";
+import { useEntries, useEntry } from "@fluxapp/react-web/src";
 import styles from "./Card.module.css";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useAssociations } from "../../hooks/useAssociations";
 import { Profile } from "@fluxapp/types";
-import { getProfile } from "@fluxapp/api";
+import { Message, getProfile } from "@fluxapp/api";
 
 type Props = {
   id: string;
@@ -21,6 +21,13 @@ export default function Card({
 }: Props) {
   const [assignedProfiles, setAssignedProfiles] = useState<Profile[]>([]);
   const { entry } = useEntry({ perspective, id, model: selectedClass });
+
+  const { entries: comments } = useEntries({
+    perspective,
+    source: id,
+    model: Message,
+  });
+
   const { associations } = useAssociations({
     source: id,
     perspective,
@@ -44,20 +51,31 @@ export default function Card({
         {entry?.name || entry?.title || "Unnamed"}
       </j-text>
 
-      {assignedProfiles.length > 0 && (
-        <j-box pt="300">
-          <j-flex wrap gap="200">
-            {assignedProfiles.map((p) => (
-              <j-avatar
-                key={p.did}
-                size="xs"
-                src={p?.profileThumbnailPicture}
-                hash={p.did}
-              ></j-avatar>
-            ))}
+      <j-flex full a="center" j="between">
+        <j-box pt="400">
+          <j-flex a="center" gap="200">
+            <j-icon color="ui-400" size="xs" name="chat-square"></j-icon>
+            <j-text nomargin size="400" color="ui-400">
+              {comments.length}
+            </j-text>
           </j-flex>
         </j-box>
-      )}
+
+        {assignedProfiles.length > 0 && (
+          <j-box pt="400">
+            <j-flex className={styles.assignees} wrap gap="200">
+              {assignedProfiles.map((p) => (
+                <j-avatar
+                  key={p.did}
+                  size="xs"
+                  src={p?.profileThumbnailPicture}
+                  hash={p.did}
+                ></j-avatar>
+              ))}
+            </j-flex>
+          </j-box>
+        )}
+      </j-flex>
 
       <j-icon
         color="ui-400"
