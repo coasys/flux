@@ -140,7 +140,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
         let value = values[index];
         if (this.tempSubject.prototype?.__properties[getter]?.transform) {
           value =
-            this.tempSubject.prototype.__properties[getter]?.transform(value);
+            this.tempSubject.prototype.__properties[getter].transform(value);
         }
 
         return {
