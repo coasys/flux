@@ -37,12 +37,13 @@ export default function Board({ perspective, source, agent }: BoardProps) {
   useEffect(() => {
     perspective.infer(`subject_class("Task", Atom)`).then((hasTask) => {
       if (!hasTask) {
+        console.log("adding", taskSDNA);
         perspective
           .addSdna(taskSDNA)
           .then(() => getClasses(perspective, source).then(setClasses));
       }
     });
-  }, []);
+  }, [perspective.uuid]);
 
   const { entries, model } = useEntries({
     perspective,
@@ -113,6 +114,8 @@ export default function Board({ perspective, source, agent }: BoardProps) {
         t.id === draggableId ? { ...t, [selectedProperty]: status } : t
       );
     });
+
+    console.log({ status, id: destination.droppableId, selectedProperty });
 
     model.update(draggableId, { [selectedProperty]: status });
   };
@@ -292,7 +295,7 @@ function transformData(tasks: any[], property: string, options: NamedOption[]) {
     (acc, opt) => {
       return {
         ...acc,
-        [opt.label]: {
+        [opt.value]: {
           id: opt.value,
           title: opt.label,
           taskIds: [],
@@ -328,7 +331,7 @@ function transformData(tasks: any[], property: string, options: NamedOption[]) {
     {
       tasks: {},
       columns: defaultColumns,
-      columnOrder: options.map((c) => c.label),
+      columnOrder: options.map((c) => c.value),
     }
   );
 }
@@ -356,6 +359,7 @@ async function getNamedOptions(perspective, className): Promise<NamedOptions> {
 }
 
 function addTaskToColumn(columns, task, propertyName) {
+  console.log({ columns, task, propertyName });
   return Object.keys(columns).reduce((acc, key) => {
     const column = columns[key];
     return {
