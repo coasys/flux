@@ -1,5 +1,12 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { getCache, setCache, subscribe, unsubscribe } from "./cache";
+import {
+  getCache,
+  setCache,
+  subscribe,
+  subscribeToPerspective,
+  unsubscribe,
+  unsubscribeToPerspective,
+} from "./cache";
 import { PerspectiveProxy, LinkExpression } from "@perspect3vism/ad4m";
 import { SubjectRepository } from "@fluxapp/api";
 
@@ -45,35 +52,33 @@ export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
   // Trigger initial fetch
   useEffect(getData, [getData]);
 
+  async function linkAdded(link: LinkExpression) {
+    const isUpdated = link.data.source === id;
+
+    if (isUpdated) {
+      getData();
+    }
+
+    return null;
+  }
+
+  async function linkRemoved(link: LinkExpression) {
+    if (link.data.target === source) {
+      mutate(null);
+    }
+    if (link.data.source === id) {
+      getData();
+    }
+    return null;
+  }
+
   // Listen to remote changes
   useEffect(() => {
     if (perspective.uuid) {
-      const added = (link: LinkExpression) => {
-        const isUpdated = link.data.source === id;
-
-        if (isUpdated) {
-          getData();
-        }
-
-        return null;
-      };
-
-      const removed = (link: LinkExpression) => {
-        if (link.data.target === source) {
-          mutate(null);
-        }
-        if (link.data.source === id) {
-          getData();
-        }
-        return null;
-      };
-
-      perspective.addListener("link-added", added);
-      perspective.addListener("link-removed", removed);
+      subscribeToPerspective(perspective, linkAdded, linkRemoved);
 
       return () => {
-        perspective.removeListener("link-added", added);
-        perspective.removeListener("link-removed", removed);
+        unsubscribeToPerspective(perspective, linkAdded, linkRemoved);
       };
     }
   }, [perspective.uuid, source, id]);

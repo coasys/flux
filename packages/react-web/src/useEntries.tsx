@@ -1,5 +1,12 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { getCache, setCache, subscribe, unsubscribe } from "./cache";
+import {
+  getCache,
+  setCache,
+  subscribe,
+  subscribeToPerspective,
+  unsubscribe,
+  unsubscribeToPerspective,
+} from "./cache";
 import { PerspectiveProxy, LinkExpression } from "@perspect3vism/ad4m";
 import { SubjectRepository } from "@fluxapp/api";
 
@@ -69,55 +76,51 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
     mutate(newEntries);
   }
 
+  async function linkAdded(link: LinkExpression) {
+    const allEntries = (getCache(cacheKey) || []) as SubjectClass[];
+    const isNewEntry = link.data.source === source;
+    const isUpdated = allEntries?.find((e) => e.id === link.data.source);
+
+    const id = isNewEntry
+      ? link.data.target
+      : isUpdated
+      ? link.data.source
+      : false;
+
+    if (id) {
+      const isInstance = await perspective.isSubjectInstance(
+        id,
+        typeof model === "string" ? model : new model()
+      );
+
+      if (isInstance) {
+        fetchEntry(id);
+      }
+    }
+
+    return null;
+  }
+
+  async function linkRemoved(link: LinkExpression) {
+    const allEntries = (getCache(cacheKey) || []) as SubjectClass[];
+
+    if (link.data.source === source) {
+      const newEntries = allEntries?.filter((e) => e.id !== link.data.target);
+      mutate(newEntries || []);
+    }
+    return null;
+  }
+
   // Listen to remote changes
   useEffect(() => {
     if (perspective.uuid) {
-      const added = async (link: LinkExpression) => {
-        const allEntries = (getCache(cacheKey) || []) as SubjectClass[];
-        const isNewEntry = link.data.source === source;
-        const isUpdated = allEntries?.find((e) => e.id === link.data.source);
-
-        const id = isNewEntry
-          ? link.data.target
-          : isUpdated
-          ? link.data.source
-          : false;
-
-        if (id) {
-          const isInstance = await perspective.isSubjectInstance(
-            id,
-            typeof model === "string" ? model : new model()
-          );
-
-          if (isInstance) {
-            fetchEntry(id);
-          }
-        }
-
-        return null;
-      };
-
-      const removed = (link: LinkExpression) => {
-        const allEntries = (getCache(cacheKey) || []) as SubjectClass[];
-
-        if (link.data.source === source) {
-          const newEntries = allEntries?.filter(
-            (e) => e.id !== link.data.target
-          );
-          mutate(newEntries || []);
-        }
-        return null;
-      };
-
-      perspective.addListener("link-added", added);
-      perspective.addListener("link-removed", removed);
+      subscribeToPerspective(perspective, linkAdded, linkRemoved);
 
       return () => {
-        perspective.removeListener("link-added", added);
-        perspective.removeListener("link-removed", removed);
+        unsubscribeToPerspective(perspective, linkAdded, linkRemoved);
       };
     }
-  }, [cacheKey]);
+  }, [perspective.uuid, cacheKey]);
 
   // Subscribe to changes (re-render on data change)
   useEffect(() => {
