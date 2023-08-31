@@ -118,7 +118,6 @@ export class WebRTCManager {
   }
 
   async init(props: Props) {
-    console.log("init constructor");
     this.localStream = new MediaStream();
     this.localEventLog = [];
     this.source = props.source;

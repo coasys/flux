@@ -96,7 +96,6 @@ export default function ChatView({
     message: Message,
     position: { x: number; y: number }
   ) {
-    console.log("open");
     setPickerInfo({ x: position.x, y: position.y, id: message.id });
   }
 

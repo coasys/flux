@@ -142,7 +142,6 @@ export default class Tooltip extends LitElement {
 
   createTooltip() {
     if (this.contentEl && this.tooltipEl) {
-      console.log("created with strategy", this.strategy);
       this.popperInstance = createPopper(this.contentEl, this.tooltipEl, {
         placement: this.placement as Placement,
         strategy: this.strategy,

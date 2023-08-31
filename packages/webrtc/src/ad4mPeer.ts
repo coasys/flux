@@ -39,8 +39,6 @@ export class AD4MPeer {
   }
 
   private createPeer(): AD4MPeerInstance {
-    console.log("createPeer(): initiator: %s, %s", this.initiator, this.did);
-
     const peer = new SimplePeer({
       initiator: this.initiator,
       stream: this.stream,
@@ -50,8 +48,6 @@ export class AD4MPeer {
 
     // Local peerjs instance has data it wants to send to remote peer
     peer.on("signal", (signal) => {
-      console.log("🔵 SIMPLE-PEER: sending ", signal.type, " to ", this.did);
-
       const data = {
         signalData: signal,
         targetPeer: this.did,
@@ -73,15 +69,12 @@ export class AD4MPeer {
     };
 
     peer.on("error", (err) => {
-      console.log(err.message);
       cleanup();
     });
 
     peer.on("close", cleanup);
 
     peer.on("connect", () => {
-      console.log("connection established");
-
       cleanup();
     });
 

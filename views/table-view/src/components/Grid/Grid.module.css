@@ -14,5 +14,5 @@
 }
 
 .gridItem:hover {
-  border: 1px solid var(--j-color-primary-500);
+  background-color: var(--j-color-ui-50);
 }

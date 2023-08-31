@@ -242,12 +242,6 @@ export default defineComponent({
     };
   },
   watch: {
-    community: {
-      handler: function (comm) {
-        console.log({ comm });
-      },
-      immediate: true,
-    },
     "$route.params.communityId": {
       handler: function (id: string) {
         if (id) {

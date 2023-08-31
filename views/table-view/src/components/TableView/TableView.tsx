@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useMemo } from "preact/hooks";
-import { Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
+import { Agent, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
 import styles from "./TableView.module.css";
 import { usePrevious, pluralize } from "../../utils";
 import { v4 as uuidv4 } from "uuid";
@@ -11,18 +11,21 @@ import History from "../History";
 import Entry from "../Entry";
 import NewClass from "../NewClass";
 import { useEntries } from "@fluxapp/react-web";
+import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 
 type Props = {
   perspective: PerspectiveProxy;
   source: string;
+  agent: AgentClient;
 };
 
 export default function TableView({
   perspective,
+  agent,
   source: initialSource,
 }: Props) {
   const [search, setSearch] = useState("");
-  const [view, setView] = useState<"grid" | "table">("table");
+  const [view, setView] = useState<"grid" | "table" | "calendar">("table");
   const [history, setHistory] = useState([initialSource]);
   const prevHistory = usePrevious(history);
   const [classes, setClasses] = useState<string[]>([]);
@@ -30,6 +33,7 @@ export default function TableView({
   const [currentEntry, setCurrentEntry] = useState("");
   const [openNewClass, setOpenNewClass] = useState(false);
   const [openCurrentEntry, setOpenCurrentEntry] = useState(false);
+  const [me, setMe] = useState<Agent | null>(null);
   const layoutRef = useRef();
 
   const source = history.length ? history[history.length - 1] : "ad4m://self";
@@ -44,6 +48,10 @@ export default function TableView({
       console.log("wentforward");
     }
   }, history);
+
+  useEffect(() => {
+    agent.me().then(setMe);
+  }, []);
 
   useEffect(() => {
     setSelected("");
@@ -97,6 +105,7 @@ export default function TableView({
   const viewComp = {
     table: () => (
       <Table
+        me={me}
         perspective={perspective}
         subjectClass={selected}
         onEntryClick={(url) => onUrlClick(url, true)}
@@ -105,7 +114,7 @@ export default function TableView({
       ></Table>
     ),
     grid: () => (
-      <j-box px="500">
+      <j-box px="500" pt="500">
         <Grid
           onUrlClick={(url) => onUrlClick(url, true)}
           entries={filteredEntries}
@@ -160,29 +169,6 @@ export default function TableView({
           </j-box>
 
           <div className={styles.options}>
-            <j-popover>
-              <j-button size="sm" variant="ghost" slot="trigger">
-                View
-                <j-icon slot="end" name="chevron-down" size="xs"></j-icon>
-              </j-button>
-              <j-menu
-                value={view}
-                onClick={(e) => setView(e.target.value)}
-                size="sm"
-                slot="content"
-              >
-                <j-menu-item
-                  size="sm"
-                  value="table"
-                  selected={view === "table"}
-                >
-                  Table
-                </j-menu-item>
-                <j-menu-item size="sm" value="grid" selected={view === "grid"}>
-                  Grid
-                </j-menu-item>
-              </j-menu>
-            </j-popover>
             <j-input
               value={search}
               onInput={(e) => setSearch(e.target.value)}
@@ -201,10 +187,52 @@ export default function TableView({
                 createEntry({ perspective, source, subjectClass: selected })
               }
               size="sm"
-              variant="secondary"
+              variant="primary"
             >
               New {selected.toLowerCase()}
             </j-button>
+            <div>
+              <j-tabs
+                className={styles.viewSelector}
+                size="sm"
+                variant="button"
+                value={view}
+                onChange={(e) => setView(e.target.value)}
+              >
+                <j-tab-item className={styles.viewSelectorTab} value="table">
+                  <j-icon
+                    size="xs"
+                    name="table"
+                    slot="start"
+                    color={view === "table" ? "primary-500" : "primary-300"}
+                  ></j-icon>
+                  Table
+                </j-tab-item>
+                <j-tab-item
+                  size="xs"
+                  style="--j-icon-size: 0.6rem"
+                  className={styles.viewSelectorTab}
+                  value="grid"
+                >
+                  <j-icon
+                    color={view === "grid" ? "primary-500" : "primary-300"}
+                    style="--j-icon-size: 0.8rem"
+                    name="grid"
+                    slot="start"
+                  ></j-icon>
+                  Grid
+                </j-tab-item>
+                <j-tab-item className={styles.viewSelectorTab} value="calendar">
+                  <j-icon
+                    size="xs"
+                    name="calendar"
+                    slot="start"
+                    color={view === "calendar" ? "primary-500" : "primary-300"}
+                  ></j-icon>
+                  Table
+                </j-tab-item>
+              </j-tabs>
+            </div>
           </div>
 
           {filteredEntries.length > 0 ? (

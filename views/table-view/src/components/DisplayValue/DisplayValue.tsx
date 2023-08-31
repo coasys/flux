@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { isValidUrl } from "../../utils";
+import { isValidDate, isValidUrl } from "../../utils";
 import { Literal } from "@perspect3vism/ad4m";
 import styles from "./DisplayValue.module.css";
 
 type Props = {
+  canEdit: boolean;
   value: any;
   options?: any;
   onUrlClick?: Function;
@@ -13,6 +14,7 @@ type Props = {
 export default function DisplayValue({
   value,
   options,
+  canEdit,
   onUpdate,
   onUrlClick = () => {},
 }: Props) {
@@ -20,7 +22,7 @@ export default function DisplayValue({
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    if (isEditing && inputRef.current) {
+    if (isEditing && inputRef.current && canEdit) {
       inputRef.current.focus();
     }
   }, [isEditing]);
@@ -46,7 +48,9 @@ export default function DisplayValue({
 
   function onStartEdit(e) {
     e.stopPropagation();
-    setIsEditing(true);
+    if (canEdit) {
+      setIsEditing(true);
+    }
   }
 
   const isCollection = Array.isArray(value);
@@ -103,6 +107,7 @@ export default function DisplayValue({
       return (
         <img className={styles.img} src={`data:image/png;base64,${value}`} />
       );
+
     if (isValidUrl(value)) {
       if (value.startsWith("literal://")) {
         return (
@@ -134,7 +139,7 @@ export default function DisplayValue({
     }
 
     return (
-      <j-flex gap="500" a="center">
+      <j-flex gap="200" a="center">
         <div onDoubleClick={onStartEdit}>{value}</div>
         {onUpdate && (
           <j-button
@@ -144,7 +149,9 @@ export default function DisplayValue({
             size="sm"
             variant="ghost"
           >
-            <j-icon size="xs" name="pencil"></j-icon>
+            {canEdit && (
+              <j-icon size="xs" color="ui-500" name="pencil-square"></j-icon>
+            )}
           </j-button>
         )}
       </j-flex>
@@ -160,13 +167,34 @@ export default function DisplayValue({
   if (value === false)
     return onUpdate ? (
       <j-button onClick={onStartEdit} square circle size="sm" variant="ghost">
-        <j-icon size="xs" name="pencil"></j-icon>
+        <j-icon size="xs" color="ui-500" name="pencil-square"></j-icon>
       </j-button>
     ) : (
       <span></span>
     );
 
-  return value === null || value === undefined ? <span></span> : value;
+  if (value === undefined) {
+    return (
+      <j-flex gap="500" a="center">
+        <div onDoubleClick={onStartEdit}>{value}</div>
+        {onUpdate && (
+          <j-button
+            onClick={onStartEdit}
+            square
+            circle
+            size="sm"
+            variant="ghost"
+          >
+            {canEdit && (
+              <j-icon size="xs" color="ui-500" name="pencil-square"></j-icon>
+            )}
+          </j-button>
+        )}
+      </j-flex>
+    );
+  }
+
+  return value === null ? <span></span> : value;
 }
 
 function ShowObjectInfo({ value }) {

@@ -34,6 +34,16 @@ export function isValidUrl(string) {
   }
 }
 
+export function isValidDate(string) {
+  try {
+    const date = new Date(string).getDate();
+    if (Number.isNaN(date)) return false;
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
 export function pluralize(word: string): string {
   const lastChar = word[word.length - 1];
   const secondLastChar = word[word.length - 2];

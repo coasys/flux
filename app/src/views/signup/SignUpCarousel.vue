@@ -162,7 +162,6 @@ export default defineComponent({
   },
   created() {
     window.addEventListener("beforeinstallprompt", (e) => {
-      console.log("before install");
       e.preventDefault();
       this.deferredPrompt = e;
     });

@@ -42,7 +42,6 @@ export default function Entry({
   }, [selectedClass, perspective.uuid]);
 
   async function onUpdate(propName, value) {
-    console.log({ id, propName, value, selectedClass });
     model.update(id, { [propName]: value });
   }
 

@@ -4,6 +4,18 @@
   height: 100%;
 }
 
+.viewSelector::part(base) {
+  height: var(--j-size-sm);
+  gap: var(--j-space-400);
+}
+
+.viewSelectorTab::part(base) {
+  gap: var(--j-space-200);
+  padding-left: var(--j-space-200);
+  padding-right: var(--j-space-200);
+  height: calc(var(--j-size-sm) - var(--j-space-200));
+}
+
 .entry {
   color: var(--j-color-white);
   background: var(--j-color-primary-500);

@@ -64,8 +64,6 @@ export function usePerspectives(client: Ad4mClient) {
     client.perspective.addPerspectiveUpdatedListener(async (handle) => {
       const perspective = await client.perspective.byUUID(handle.uuid);
 
-      console.log("updated", perspective?.sharedUrl, handle.name);
-
       if (perspective) {
         perspectives.value = {
           ...perspectives.value,
@@ -79,8 +77,6 @@ export function usePerspectives(client: Ad4mClient) {
     // @ts-ignore
     client.perspective.addPerspectiveAddedListener(async (handle) => {
       const perspective = await client.perspective.byUUID(handle.uuid);
-
-      console.log("added", perspective?.uuid, handle.name);
 
       if (perspective) {
         perspectives.value = {
