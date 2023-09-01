@@ -31,6 +31,11 @@ export class Message {
   })
   reactions: string[] = [];
 
+  @subjectProperty({
+    getter: `triple(Target, "flux://has_reaction", "emoji://1f44d"), Value = true`,
+  })
+  isPopular: boolean = false;
+
   @subjectCollection({
     through: "rdf://has_child",
     where: {

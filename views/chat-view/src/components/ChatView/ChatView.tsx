@@ -130,10 +130,11 @@ export default function ChatView({
 
   function onEmojiClick(e) {
     if (pickerInfo.id) {
+      console.log(e.detail);
       perspective.add({
         source: pickerInfo.id,
         predicate: REACTION,
-        target: Literal.from(e.detail.native).toUrl(),
+        target: `emoji://${e.detail.unified}`,
       });
     }
     setPickerInfo(null);

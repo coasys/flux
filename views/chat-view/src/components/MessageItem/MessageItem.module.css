@@ -6,11 +6,17 @@
   position: relative;
 }
 
-.message:hover:not(.isReplying) {
+.message:hover {
   background: rgba(0, 0, 0, 0.02);
 }
 
-.isReplying {
+.isPopular,
+.isPopular:hover {
+  background-color: rgba(255, 230, 0, 0.3);
+}
+
+.isReplying,
+.isReplying:hover {
   background-color: var(--j-color-primary-50);
   border-left: 3px solid var(--j-color-primary-500);
 }
@@ -67,6 +73,7 @@ body:has(*:last-child:empty) *:first-child {
 
 .reactions {
   display: flex;
+  padding-top: var(--j-space-200);
   gap: var(--j-space-200);
   flex-wrap: wrap;
 }
