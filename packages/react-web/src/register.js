@@ -169,5 +169,9 @@ function toVdom(element, nodeName) {
 
   // Only wrap the topmost node with a slot
   const wrappedChildren = nodeName ? h(Slot, null, children) : children;
-  return h(nodeName || element.nodeName.toLowerCase(), props, wrappedChildren);
+  return h(
+    nodeName || element.nodeName.toLowerCase(),
+    { ...props, element },
+    wrappedChildren
+  );
 }

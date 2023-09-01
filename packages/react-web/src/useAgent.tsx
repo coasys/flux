@@ -39,14 +39,16 @@ export function useAgent(props: Props) {
 
   // Fetch data from AD4M and save to cache
   const getData = useCallback(() => {
-    props.client
-      .byDID(didRef)
-      .then(async (agent) => {
-        setError(undefined);
-        mutate(agent);
-      })
-      .catch((error) => setError(error.toString()));
-  }, [mutate]);
+    if (didRef) {
+      props.client
+        .byDID(didRef)
+        .then(async (agent) => {
+          setError(undefined);
+          mutate(agent);
+        })
+        .catch((error) => setError(error.toString()));
+    }
+  }, [cacheKey]);
 
   // Trigger initial fetch
   useEffect(getData, [getData]);
@@ -63,7 +65,9 @@ export function useAgent(props: Props) {
 
   if (perspective) {
     profile = mapLiteralLinks(
-      perspective.links.filter((e) => e.data.source === FLUX_PROFILE),
+      perspective.links.filter(
+        (e) => e.data.source === FLUX_PROFILE || e.data.source === didRef
+      ),
       {
         username: HAS_USERNAME,
         bio: HAS_BIO,

@@ -179,6 +179,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
           result.Base,
           this.className
         );
+
         await subject.init();
 
         return subject;
@@ -189,9 +190,13 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   async getAllData(source?: string): Promise<SubjectClass[]> {
     await this.ensureSubject();
 
-    const entries = await this.getAll(source);
+    const subjects = await this.getAll(source);
 
-    return await Promise.all(entries.map((e) => this.getSubjectData(e)));
+    const entries = await Promise.all(
+      subjects.map((e) => this.getSubjectData(e))
+    );
+
+    return entries;
   }
 }
 

@@ -688,7 +688,7 @@
         {
           "name": "size",
           "description": "Size",
-          "type": "\"\"|\"sm\"|\"lg\""
+          "type": "\"\"|\"xs\"|\"sm\"|\"lg\"|\"xl\""
         },
         {
           "name": "color",
@@ -712,7 +712,7 @@
           "name": "size",
           "attribute": "size",
           "description": "Size",
-          "type": "\"\"|\"sm\"|\"lg\""
+          "type": "\"\"|\"xs\"|\"sm\"|\"lg\"|\"xl\""
         },
         {
           "name": "color",

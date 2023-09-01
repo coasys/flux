@@ -23,9 +23,8 @@ export default function Post({
 }) {
   const { methods: UIMethods } = useContext(UIContext);
 
-  const { entry: post, error } = useEntry({
+  const { entry: post } = useEntry({
     perspective,
-    source,
     id,
     model: PostSubject,
   });

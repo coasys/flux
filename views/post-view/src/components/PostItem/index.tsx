@@ -1,5 +1,4 @@
 import { useContext, useState, useEffect } from "preact/hooks";
-import { useEntry } from "@fluxapp/react-web";
 import styles from "./index.module.css";
 import { format, formatDistance } from "date-fns/esm";
 import { DisplayView } from "../../constants/options";

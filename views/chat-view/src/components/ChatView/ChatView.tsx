@@ -18,6 +18,7 @@ type Props = {
   perspective: PerspectiveProxy;
   source: string;
   threaded?: boolean;
+  element: HTMLElement;
 };
 
 export default function ChatView({
@@ -25,6 +26,7 @@ export default function ChatView({
   perspective,
   source,
   threaded,
+  element,
 }: Props) {
   const emojiPicker = useRef();
   const [showToolbar, setShowToolbar] = useState(false);
@@ -106,19 +108,18 @@ export default function ChatView({
     const container = threadContainer.current;
 
     if (container) {
-      const wc = container.querySelector(wcName);
+      const wc = container.querySelector(element.localName);
       let el = wc;
 
       if (!el) {
-        el = document.createElement(wcName);
+        el = document.createElement(element.localName);
         container.append(el);
       }
       el.className = styles.webComponent;
-
       el.perspective = perspective;
+      el.agent = agent;
       el.setAttribute("source", message.id);
       el.setAttribute("threaded", "true");
-      el.agent = agent;
     }
   }
 
@@ -205,7 +206,7 @@ export default function ChatView({
             <footer slot="footer">
               <j-button
                 onClick={submit}
-                class="submit"
+                className="submit"
                 circle
                 square
                 size="sm"
@@ -214,7 +215,7 @@ export default function ChatView({
                 <j-icon size="xs" name="send"></j-icon>
               </j-button>
               <j-button
-                class="toggle-formatting"
+                className="toggle-formatting"
                 onClick={() => setShowToolbar(!showToolbar)}
                 circle
                 square
@@ -233,7 +234,7 @@ export default function ChatView({
           <j-box p="400">
             <j-flex a="center" j="between" gap="200">
               <j-flex a="center" gap="200">
-                <j-text size="300" class={styles.body} nomargin uppercase>
+                <j-text size="300" className={styles.body} nomargin uppercase>
                   Thread with
                 </j-text>
                 <j-avatar
@@ -244,13 +245,13 @@ export default function ChatView({
                 <span>{threadProfile?.username}</span>
                 <j-text
                   size="300"
-                  class={styles.body}
+                  className={styles.body}
                   nomargin
                   dangerouslySetInnerHTML={{ __html: threadProfile?.body }}
                 ></j-text>
               </j-flex>
               <j-button
-                onclick={onCloseThread}
+                onClick={onCloseThread}
                 size="xs"
                 circle
                 square

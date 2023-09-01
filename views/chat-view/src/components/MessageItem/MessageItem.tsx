@@ -36,16 +36,9 @@ export default function MessageItem({
 
   const { profile } = useAgent({ client: agent, did: message.author });
 
-  const { entries: threadMessages } = useEntries({
-    perspective,
-    source: message.id,
-    model: Message,
-  });
-
   const { entry: replyMessage } = useEntry({
     perspective,
     id: replyId,
-    source: null,
     model: Message,
   });
 
@@ -72,100 +65,104 @@ export default function MessageItem({
   const isFullVersion = replyId || showAvatar;
 
   return (
-    <div className={`${styles.message} ${isReplying && styles.isReplying}`}>
-      <div className={styles.messageLeft}>
-        {isFullVersion && (
-          <Avatar
-            size="md"
-            profileAddress={profile?.profileThumbnailPicture}
-            hash={message.author}
-          ></Avatar>
-        )}
-      </div>
-      <div className={styles.messageRight}>
-        {replyId && replyMessage?.id && (
-          <j-box pb="300">
-            <j-flex a="center" gap="200">
+    <div>
+      <div className={`${styles.message} ${isReplying && styles.isReplying}`}>
+        <div className={styles.messageLeft}>
+          {isFullVersion && (
+            <j-box pt={replyId && replyMessage?.id ? "500" : ""}>
               <Avatar
-                size="xxs"
-                profileAddress={replyProfile?.profileThumbnailPicture}
-                hash={replyMessage.author}
+                size="md"
+                profileAddress={profile?.profileThumbnailPicture}
+                hash={message.author}
               ></Avatar>
-              <span>{replyProfile?.username}</span>
-              <j-text
-                size="300"
-                class={styles.body}
-                nomargin
-                dangerouslySetInnerHTML={{ __html: replyMessage.body }}
-              ></j-text>
-            </j-flex>
-          </j-box>
-        )}
-        {isFullVersion && (
-          <header className={styles.header}>
-            <a href={message.author} className={styles.username}>
-              {profile?.username}
-            </a>
-            <j-timestamp
-              className={styles.timestamp}
-              relative
-              value={message.timestamp}
-            ></j-timestamp>
-          </header>
-        )}
-        <div
-          className={styles.body}
-          dangerouslySetInnerHTML={{ __html: message.body }}
-        ></div>
-        <div className={styles.reactions}>
-          {message.reactions.map((r) => {
-            if (!r.startsWith("literal://")) return null;
-            return (
-              <span className={styles.reaction}>
-                {Literal.fromUrl(r).get()}
-              </span>
-            );
-          })}
+            </j-box>
+          )}
         </div>
-        {threadMessages?.length > 0 && (
-          <j-box py="300">
-            <button
-              className={styles.threadButton}
+        <div className={styles.messageRight}>
+          {replyId && replyMessage?.id && (
+            <j-box pb="300">
+              <j-flex a="center" gap="200">
+                <Avatar
+                  size="xxs"
+                  profileAddress={replyProfile?.profileThumbnailPicture}
+                  hash={replyMessage.author}
+                ></Avatar>
+                <span>{replyProfile?.username}</span>
+                <j-text
+                  size="300"
+                  class={styles.body}
+                  nomargin
+                  dangerouslySetInnerHTML={{ __html: replyMessage.body }}
+                ></j-text>
+              </j-flex>
+            </j-box>
+          )}
+          {isFullVersion && (
+            <header className={styles.header}>
+              <a href={message.author} className={styles.username}>
+                {profile?.username}
+              </a>
+              <j-timestamp
+                className={styles.timestamp}
+                relative
+                value={message.timestamp}
+              ></j-timestamp>
+            </header>
+          )}
+          <div
+            className={styles.body}
+            dangerouslySetInnerHTML={{ __html: message.body }}
+          ></div>
+          <div className={styles.reactions}>
+            {message.reactions.map((r) => {
+              if (!r.startsWith("literal://")) return null;
+              return (
+                <span className={styles.reaction}>
+                  {Literal.fromUrl(r).get()}
+                </span>
+              );
+            })}
+          </div>
+          {message.thread?.length > 0 && (
+            <j-box py="300">
+              <button
+                className={styles.threadButton}
+                onClick={() => onThreadClick(message)}
+                variant="subtle"
+                size="sm"
+              >
+                Replies ({message.thread.length})
+              </button>
+            </j-box>
+          )}
+        </div>
+        <div className={styles.toolbar}>
+          <j-tooltip placement="top" title="Add reaction">
+            <j-button onClick={onOpenPicker} size="sm" square variant="ghost">
+              <j-icon size="sm" name="emoji-smile"></j-icon>
+            </j-button>
+          </j-tooltip>
+          <j-tooltip placement="top" title="Reply in thread">
+            <j-button
               onClick={() => onThreadClick(message)}
-              variant="subtle"
               size="sm"
+              square
+              variant="ghost"
             >
-              Replies ({threadMessages.length})
-            </button>
-          </j-box>
-        )}
-      </div>
-      <div className={styles.toolbar}>
-        <j-tooltip placement="top" title="Add reaction">
-          <j-button onClick={onOpenPicker} size="sm" square variant="ghost">
-            <j-icon size="sm" name="emoji-smile"></j-icon>
-          </j-button>
-        </j-tooltip>
-        <j-tooltip placement="top" title="Reply in thread">
-          <j-button
-            onClick={() => onThreadClick(message)}
-            size="sm"
-            square
-            variant="ghost"
-          >
-            <j-icon size="sm" name="chat-text"></j-icon>
-          </j-button>
-        </j-tooltip>
-        <j-tooltip placement="top" title="Reply">
-          <j-button
-            onClick={() => onReplyClick(message)}
-            size="sm"
-            square
-            variant="ghost"
-          >
-            <j-icon size="sm" name="reply"></j-icon>
-          </j-button>
-        </j-tooltip>
+              <j-icon size="sm" name="chat-text"></j-icon>
+            </j-button>
+          </j-tooltip>
+          <j-tooltip placement="top" title="Reply">
+            <j-button
+              onClick={() => onReplyClick(message)}
+              size="sm"
+              square
+              variant="ghost"
+            >
+              <j-icon size="sm" name="reply"></j-icon>
+            </j-button>
+          </j-tooltip>
+        </div>
       </div>
     </div>
   );

@@ -11,27 +11,26 @@ import { PerspectiveProxy, LinkExpression } from "@perspect3vism/ad4m";
 import { SubjectRepository } from "@fluxapp/api";
 
 type Props<SubjectClass> = {
-  id?: string;
-  source?: string;
+  id: string;
   perspective: PerspectiveProxy;
-  model: new () => SubjectClass;
+  model: string | (new () => SubjectClass);
 };
 
 export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
   const forceUpdate = useForceUpdate();
   const [error, setError] = useState<string | undefined>(undefined);
-  const { perspective, source = "ad4m://self", id, model } = props;
+  const { perspective, id, model } = props;
 
   // Create model
   const Model = useMemo(() => {
     return new SubjectRepository(model, {
       perspective: perspective,
-      source,
+      source: null,
     });
-  }, [perspective.uuid, source, model]);
+  }, [perspective.uuid, model]);
 
   // Create cache key for entry
-  const cacheKey = `${perspective.uuid}/${source || ""}/${model.name}/${id}`;
+  const cacheKey = `${perspective.uuid}/${model.name}/${id}`;
 
   // Mutate shared/cached data for all subscribers
   const mutate = useCallback(
@@ -41,13 +40,15 @@ export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
 
   // Fetch data from AD4M and save to cache
   const getData = useCallback(() => {
-    Model.getData(id)
-      .then(async (entry) => {
-        setError(undefined);
-        mutate(entry);
-      })
-      .catch((error) => setError(error.toString()));
-  }, [Model, mutate]);
+    if (id) {
+      Model.getData(id)
+        .then(async (entry) => {
+          setError(undefined);
+          mutate(entry);
+        })
+        .catch((error) => setError(error.toString()));
+    }
+  }, [cacheKey]);
 
   // Trigger initial fetch
   useEffect(getData, [getData]);
@@ -63,9 +64,6 @@ export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
   }
 
   async function linkRemoved(link: LinkExpression) {
-    if (link.data.target === source) {
-      mutate(null);
-    }
     if (link.data.source === id) {
       getData();
     }
@@ -81,7 +79,7 @@ export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
         unsubscribeToPerspective(perspective, linkAdded, linkRemoved);
       };
     }
-  }, [perspective.uuid, source, id]);
+  }, [perspective.uuid, id]);
 
   // Subscribe to changes (re-render on data change)
   useEffect(() => {

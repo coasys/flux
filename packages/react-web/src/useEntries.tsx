@@ -11,7 +11,7 @@ import { PerspectiveProxy, LinkExpression } from "@perspect3vism/ad4m";
 import { SubjectRepository } from "@fluxapp/api";
 
 type Props<SubjectClass> = {
-  source?: string;
+  source: string;
   perspective: PerspectiveProxy;
   model: (new () => SubjectClass) | "string";
 };
@@ -20,7 +20,7 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
   const forceUpdate = useForceUpdate();
   const [error, setError] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
-  const { perspective, source = "ad4m://self", model } = props;
+  const { perspective, source, model } = props;
 
   // Create cache key for entry
   const cacheKey = `${perspective.uuid}/${source || ""}/${
@@ -44,21 +44,24 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
   // Fetch data from AD4M and save to cache
   const getData = useCallback(() => {
     // setIsLoading(true);
-    Model.getAllData()
-      .then((entries) => {
-        setError(undefined);
-        mutate(entries);
-      })
-      .catch((error) => {
-        setError(error.toString());
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [Model, mutate, cacheKey]);
+    if (source) {
+      Model.getAllData()
+        .then((entries) => {
+          console.log("got entries", entries);
+          setError(undefined);
+          mutate(entries);
+        })
+        .catch((error) => {
+          setError(error.toString());
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
+  }, [cacheKey]);
 
   // Trigger initial fetch
-  useEffect(getData, [getData, cacheKey]);
+  useEffect(getData, [cacheKey]);
 
   // Get single entry
   async function fetchEntry(id) {
@@ -128,7 +131,13 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
     return () => unsubscribe(cacheKey, forceUpdate);
   }, [cacheKey, forceUpdate]);
 
-  const entries = (getCache(cacheKey) || []) as SubjectClass[];
+  type ExtendedSubjectClass = SubjectClass & {
+    id: string;
+    timestamp: number;
+    author: string;
+  };
+
+  const entries = (getCache(cacheKey) || []) as ExtendedSubjectClass[];
 
   return { entries, error, mutate, model: Model, isLoading, reload: getData };
 }

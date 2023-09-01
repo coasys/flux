@@ -32,6 +32,14 @@ export class Message {
   reactions: string[] = [];
 
   @subjectCollection({
+    through: "rdf://has_child",
+    where: {
+      condition: `subject_class("Message", Class), instance(Class, Target)`,
+    },
+  })
+  thread: string[] = [];
+
+  @subjectCollection({
     through: REPLY_TO,
   })
   replies: string[] = [];
