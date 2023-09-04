@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
 import {
   getCache,
+  getSubscribers,
   setCache,
   subscribe,
   subscribeToPerspective,
@@ -43,11 +44,12 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
 
   // Fetch data from AD4M and save to cache
   const getData = useCallback(() => {
-    // setIsLoading(true);
+    const subs = getSubscribers(cacheKey);
+
     if (source) {
+      console.log(`fetching data from remote`, subs);
       Model.getAllData()
         .then((entries) => {
-          console.log("got entries", entries);
           setError(undefined);
           mutate(entries);
         })
@@ -107,6 +109,16 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
   async function linkRemoved(link: LinkExpression) {
     const allEntries = (getCache(cacheKey) || []) as SubjectClass[];
 
+    // Check if an association/property was removed
+    const removedAssociation = allEntries.some(
+      (e) => e.id === link.data.source
+    );
+
+    if (removedAssociation) {
+      getData();
+    }
+
+    // Remove entries if they are removed from source
     if (link.data.source === source) {
       const newEntries = allEntries?.filter((e) => e.id !== link.data.target);
       mutate(newEntries || []);

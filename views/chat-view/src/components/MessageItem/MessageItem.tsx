@@ -1,14 +1,10 @@
-import { PerspectiveProxy, Literal, LinkQuery } from "@perspect3vism/ad4m";
+import { LinkQuery, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import { Message } from "@fluxapp/api";
-import { useState } from "preact/hooks";
-import { useAgent, useEntries, useEntry } from "@fluxapp/react-web";
+import { useAgent, useEntry } from "@fluxapp/react-web";
 import styles from "./MessageItem.module.css";
-import { useEffect } from "preact/hooks";
-import { community } from "@fluxapp/constants";
 import Avatar from "../Avatar";
-
-const { REPLY_TO } = community;
+import { REACTION } from "@fluxapp/constants/src/communityPredicates";
 
 export default function MessageItem({
   showAvatar,
@@ -27,18 +23,15 @@ export default function MessageItem({
   isThread?: boolean;
   agent: AgentClient;
   message: Message;
-
   onEmojiClick?: (message: Message, position: { x: number; y: number }) => void;
   onReplyClick?: (message: Message) => void;
   onThreadClick?: (message: Message) => void;
 }) {
-  const [replyId, setReplyId] = useState("");
-
   const { profile } = useAgent({ client: agent, did: message.author });
 
   const { entry: replyMessage } = useEntry({
     perspective,
-    id: replyId,
+    id: message.replyingTo,
     model: Message,
   });
 
@@ -47,22 +40,12 @@ export default function MessageItem({
     did: replyMessage?.author,
   });
 
-  useEffect(() => {
-    perspective
-      .get(new LinkQuery({ target: message.id, predicate: REPLY_TO }))
-      .then((res) => {
-        if (res.length > 0) {
-          setReplyId(res[0].data.source);
-        }
-      });
-  }, [message.id]);
-
   function onOpenPicker(e) {
     e.stopPropagation();
     onEmojiClick(message, { x: e.clientX, y: e.clientY });
   }
 
-  const isFullVersion = replyId || showAvatar;
+  const isFullVersion = message.replyingTo || showAvatar;
 
   const reactionCounts = message.reactions.reduce((acc, reaction) => {
     return {
@@ -70,6 +53,29 @@ export default function MessageItem({
       [reaction]: acc[reaction] ? acc[reaction] + 1 : 1,
     };
   }, {});
+
+  async function onTogggleEmoji(expression) {
+    const me = await agent.me();
+    const reactions = await perspective.get(
+      new LinkQuery({
+        source: message.id,
+        predicate: REACTION,
+        target: expression,
+      })
+    );
+
+    const myReactions = reactions.filter((l) => l.author === me.did);
+
+    if (myReactions.length > 0) {
+      perspective.removeLinks(myReactions);
+    } else {
+      perspective.add({
+        source: message.id,
+        predicate: REACTION,
+        target: expression,
+      });
+    }
+  }
 
   return (
     <div
@@ -79,7 +85,7 @@ export default function MessageItem({
     >
       <div className={styles.messageLeft}>
         {isFullVersion && (
-          <j-box pt={replyId && replyMessage?.id ? "500" : ""}>
+          <j-box pt={message.replyingTo && replyMessage?.id ? "500" : ""}>
             <Avatar
               size="md"
               profileAddress={profile?.profileThumbnailPicture}
@@ -89,20 +95,20 @@ export default function MessageItem({
         )}
       </div>
       <div className={styles.messageRight}>
-        {replyId && replyMessage?.id && (
+        {message.replyingTo && (
           <j-box pb="300">
             <j-flex a="center" gap="200">
               <Avatar
                 size="xxs"
                 profileAddress={replyProfile?.profileThumbnailPicture}
-                hash={replyMessage.author}
+                hash={replyMessage?.author}
               ></Avatar>
               <span>{replyProfile?.username}</span>
               <j-text
                 size="300"
                 className={styles.body}
                 nomargin
-                dangerouslySetInnerHTML={{ __html: replyMessage.body }}
+                dangerouslySetInnerHTML={{ __html: replyMessage?.body }}
               ></j-text>
             </j-flex>
           </j-box>
@@ -127,7 +133,10 @@ export default function MessageItem({
           {Object.entries(reactionCounts).map(([emoji, count]) => {
             if (!emoji.startsWith("emoji://")) return null;
             return (
-              <span className={styles.reaction}>
+              <span
+                className={styles.reaction}
+                onClick={() => onTogggleEmoji(emoji)}
+              >
                 {hexToEmoji(emoji.split("emoji://")[1])} {count}
               </span>
             );

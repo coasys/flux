@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
-import { PerspectiveProxy, Literal } from "@perspect3vism/ad4m";
+import { PerspectiveProxy, Literal, LinkQuery } from "@perspect3vism/ad4m";
 import { useAgent, useEntries } from "@fluxapp/react-web";
 import { Message, generateWCName } from "@fluxapp/api";
 import { name } from "../../../package.json";
@@ -128,14 +128,31 @@ export default function ChatView({
     threadContainer?.current.lastChild.remove();
   }
 
-  function onEmojiClick(e) {
+  async function onEmojiClick(e) {
     if (pickerInfo.id) {
-      console.log(e.detail);
-      perspective.add({
-        source: pickerInfo.id,
-        predicate: REACTION,
-        target: `emoji://${e.detail.unified}`,
-      });
+      const emojiExpression = `emoji://${e.detail.unified}`;
+      const me = await agent.me();
+      const reactions = await perspective.get(
+        new LinkQuery({
+          source: pickerInfo.id,
+          predicate: REACTION,
+          target: emojiExpression,
+        })
+      );
+
+      const myReactions = reactions.filter((l) => l.author === me.did);
+
+      if (myReactions.length > 0) {
+        console.log(`removing`, myReactions);
+        perspective.removeLinks(myReactions);
+      } else {
+        console.log(`adding emoji`);
+        perspective.add({
+          source: pickerInfo.id,
+          predicate: REACTION,
+          target: emojiExpression,
+        });
+      }
     }
     setPickerInfo(null);
   }

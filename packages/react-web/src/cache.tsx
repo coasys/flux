@@ -25,7 +25,7 @@ export function unsubscribe(key: string, callback: Function) {
   }
 }
 
-function getSubscribers(key: string) {
+export function getSubscribers(key: string) {
   if (!subscribers.has(key)) subscribers.set(key, []);
   return subscribers.get(key)!;
 }

@@ -10,9 +10,16 @@
   background: rgba(0, 0, 0, 0.02);
 }
 
-.isPopular,
+.isPopular {
+  padding: var(--j-space-500);
+  margin: var(--j-space-300);
+  border-radius: var(--j-border-radius);
+  border: 2px solid rgba(255, 230, 0, 0.2);
+  background-color: rgba(255, 230, 0, 0.1);
+}
+
 .isPopular:hover {
-  background-color: rgba(255, 230, 0, 0.3);
+  background-color: rgba(255, 230, 0, 0.16);
 }
 
 .isReplying,
@@ -73,7 +80,7 @@ body:has(*:last-child:empty) *:first-child {
 
 .reactions {
   display: flex;
-  padding-top: var(--j-space-200);
+  padding-top: var(--j-space-400);
   gap: var(--j-space-200);
   flex-wrap: wrap;
 }
@@ -83,11 +90,16 @@ body:has(*:last-child:empty) *:first-child {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(0, 0, 0, 0.09);
+  border: 1px solid var(--j-color-ui-300);
   background: var(--j-color-white);
-  padding: 3px 10px;
+  padding: 3px 7px;
   font-size: var(--j-font-size-400);
   border-radius: var(--j-border-radius);
+}
+
+.reaction:hover {
+  border-color: var(--j-color-primary-500);
+  background-color: var(--j-color-primary-50);
 }
 
 .header {

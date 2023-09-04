@@ -32,7 +32,12 @@ export class Message {
   reactions: string[] = [];
 
   @subjectProperty({
-    getter: `triple(Target, "flux://has_reaction", "emoji://1f44d"), Value = true`,
+    getter: `triple(Reply, "${REPLY_TO}", Base), Value = Reply`,
+  })
+  replyingTo: string | undefined = "";
+
+  @subjectProperty({
+    getter: `triple(Base, "flux://has_reaction", "emoji://1f44d"), Value = true`,
   })
   isPopular: boolean = false;
 
