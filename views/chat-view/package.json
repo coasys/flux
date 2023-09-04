@@ -1,6 +1,6 @@
 {
   "name": "@fluxapp/chat-view",
-  "version": "0.5.33",
+  "version": "0.5.35",
   "fluxapp": {
     "name": "Chat",
     "description": "Make a new conversation",

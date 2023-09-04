@@ -1,6 +1,6 @@
 {
   "name": "@fluxapp/comment-section",
-  "version": "0.5.33",
+  "version": "0.5.35",
   "type": "module",
   "files": [
     "dist"
