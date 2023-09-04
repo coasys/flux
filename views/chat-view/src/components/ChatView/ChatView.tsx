@@ -143,10 +143,8 @@ export default function ChatView({
       const myReactions = reactions.filter((l) => l.author === me.did);
 
       if (myReactions.length > 0) {
-        console.log(`removing`, myReactions);
         perspective.removeLinks(myReactions);
       } else {
-        console.log(`adding emoji`);
         perspective.add({
           source: pickerInfo.id,
           predicate: REACTION,

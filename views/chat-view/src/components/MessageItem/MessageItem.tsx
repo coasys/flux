@@ -129,19 +129,21 @@ export default function MessageItem({
           className={styles.body}
           dangerouslySetInnerHTML={{ __html: message.body }}
         ></div>
-        <div className={styles.reactions}>
-          {Object.entries(reactionCounts).map(([emoji, count]) => {
-            if (!emoji.startsWith("emoji://")) return null;
-            return (
-              <span
-                className={styles.reaction}
-                onClick={() => onTogggleEmoji(emoji)}
-              >
-                {hexToEmoji(emoji.split("emoji://")[1])} {count}
-              </span>
-            );
-          })}
-        </div>
+        {message.reactions.length > 0 && (
+          <div className={styles.reactions}>
+            {Object.entries(reactionCounts).map(([emoji, count]) => {
+              if (!emoji.startsWith("emoji://")) return null;
+              return (
+                <span
+                  className={styles.reaction}
+                  onClick={() => onTogggleEmoji(emoji)}
+                >
+                  {hexToEmoji(emoji.split("emoji://")[1])} {count}
+                </span>
+              );
+            })}
+          </div>
+        )}
         {message.thread?.length > 0 && (
           <j-box py="300">
             <button
