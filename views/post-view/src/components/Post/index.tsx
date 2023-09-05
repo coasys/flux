@@ -3,7 +3,6 @@ import { useContext, useEffect, useState } from "preact/hooks";
 import { format, formatDistance } from "date-fns";
 import { getTimeSince } from "../../utils";
 import Avatar from "../Avatar";
-import CommentSection from "../CommentSection";
 import { Post as PostSubject } from "@fluxapp/api";
 import { useAgent, useEntry, useMe } from "@fluxapp/react-web";
 import styles from "./index.module.css";
@@ -187,12 +186,16 @@ export default function Post({
           />
         </j-box>
       )}
-
-      <CommentSection
-        agent={agent}
-        perspective={perspective}
-        source={post.id}
-      ></CommentSection>
+      <j-box pt="800">
+        <j-text size="500" color="ui-500" weight="600">
+          Comments ({post.comments?.length})
+        </j-text>
+        <comment-section
+          agent={agent}
+          perspective={perspective}
+          source={post.id}
+        ></comment-section>
+      </j-box>
     </div>
   );
 }
