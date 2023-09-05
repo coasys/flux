@@ -125,7 +125,7 @@ export default function TableView({
     calendar: () => (
       <j-box px="500" pt="500">
         <Calendar
-          onUrlClick={(url) => onUrlClick(url, true)}
+          onEntryClick={(url) => onUrlClick(url, false)}
           entries={filteredEntries}
         ></Calendar>
       </j-box>

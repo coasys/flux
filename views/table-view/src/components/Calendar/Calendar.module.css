@@ -1,18 +1,45 @@
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(7, 1fr);
   gap: var(--j-space-500);
 }
 
 .gridItem {
+  min-height: 200px;
   text-align: left;
-  cursor: pointer;
   background: var(--j-color-white);
   border-radius: var(--j-border-radius);
-  padding: var(--j-space-500);
+  padding: var(--j-space-300);
   border: 1px solid var(--j-color-ui-100);
 }
 
-.gridItem:hover {
-  background-color: var(--j-color-ui-50);
+.entry {
+  cursor: pointer;
+  font-size: var(--j-font-size-300);
+  display: inline-block;
+  text-decoration: none;
+  background: var(--j-color-primary-200);
+  color: var(--j-color-primary-600);
+  padding: var(--j-space-200);
+  font-weight: 500;
+  opacity: 0.8;
+  border-radius: var(--j-border-radius);
+}
+
+.entry:hover {
+  background: var(--j-color-primary-300);
+}
+
+.select {
+  height: var(--j-size-sm);
+  min-width: 150px;
+  color: var(--j-color-black);
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+  padding-left: var(--j-space-300);
+  padding-right: var(--j-space-300);
+  background-color: var(--j-color-white);
+  border-radius: var(--j-border-radius);
+  border: 1px solid var(--j-color-ui-200);
 }
