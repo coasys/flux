@@ -27,6 +27,19 @@
   height: 100%;
 }
 
+.currentEntryGrid {
+  padding: var(--j-space-500);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--j-space-200);
+}
+
+@media (min-width: 800px) {
+  .currentEntryGrid {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
 .options {
   display: flex;
   gap: var(--j-space-200);

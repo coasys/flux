@@ -271,16 +271,29 @@ export default function TableView({
       </j-modal>
 
       <j-modal
+        size="lg"
         open={openCurrentEntry}
         onToggle={(e) => setOpenCurrentEntry(e.target.open)}
       >
-        <j-box p="500">
+        <div className={styles.currentEntryGrid}>
           <Entry
             perspective={perspective}
             source={currentEntry}
             onUrlClick={(url) => onUrlClick(url, true)}
           ></Entry>
-        </j-box>
+          <aside>
+            <j-box pt="800">
+              <j-text size="500" weight="600" color="ui-500">
+                Comments
+              </j-text>
+              <comment-section
+                perspective={perspective}
+                source={currentEntry}
+                agent={agent}
+              ></comment-section>
+            </j-box>
+          </aside>
+        </div>
       </j-modal>
     </>
   );

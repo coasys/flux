@@ -33,6 +33,7 @@
   "description": "",
   "dependencies": {
     "@fluxapp/api": "*",
+    "@fluxapp/comment-section": "*",
     "@fluxapp/react-web": "*",
     "@fluxapp/flux-container": "*",
     "@perspect3vism/ad4m": "0.5.1",
