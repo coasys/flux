@@ -66,8 +66,6 @@
     </div>
 
     <template v-for="app in apps">
-      {{ wcNames }}
-
       <component
         v-if="wcNames[app.pkg]"
         v-show="currentView === app.pkg && wcNames[app.pkg]"
