@@ -60,7 +60,6 @@ export default function Post({
   const hasImage = post.image;
   const hasBody = post.body;
   const hasUrl = post.url;
-  const hasDates = post.startDate && post.endDate;
 
   return (
     <div className={styles.post}>
@@ -156,28 +155,6 @@ export default function Post({
         </j-box>
       )}
 
-      {hasDates && (
-        <j-box pt="500">
-          <j-flex gap="300" direction="column">
-            <div className={styles.postDate}>
-              <j-icon size="xs" name="calendar-event"></j-icon>
-              {format(new Date(post.startDate), "dd.MMMM HH:HH")}
-            </div>
-            <div className={styles.postDate}>
-              <j-icon size="xs" name="clock"></j-icon>
-              <j-tooltip
-                title={format(new Date(post.endDate), "dd.MMMM HH:HH")}
-              >
-                {formatDistance(
-                  new Date(post.startDate),
-                  new Date(post.endDate)
-                )}
-              </j-tooltip>
-            </div>
-          </j-flex>
-        </j-box>
-      )}
-
       {hasBody && (
         <j-box pt="500">
           <div
@@ -186,6 +163,7 @@ export default function Post({
           />
         </j-box>
       )}
+
       <j-box pt="800">
         <j-text size="500" color="ui-500" weight="600">
           Comments ({post.comments?.length})
