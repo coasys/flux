@@ -182,7 +182,7 @@ export default defineComponent({
       community,
       channel,
       channelRepo,
-      currentView: "",
+      currentView: ref(""),
       allDefined: ref(false),
       ChannelView: ChannelView,
       selectedViews: ref<ChannelView[]>([]),
