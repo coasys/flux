@@ -66,6 +66,8 @@
     </div>
 
     <template v-for="app in apps">
+      {{ wcNames }}
+
       <component
         v-if="wcNames[app.pkg]"
         v-show="currentView === app.pkg && wcNames[app.pkg]"
@@ -182,9 +184,7 @@ export default defineComponent({
       community,
       channel,
       channelRepo,
-      currentView: channel.value?.views[0]
-        ? ref(channel.value?.views[0])
-        : ref(ChannelView.Chat),
+      currentView: "",
       allDefined: ref(false),
       ChannelView: ChannelView,
       selectedViews: ref<ChannelView[]>([]),
@@ -269,8 +269,6 @@ export default defineComponent({
       this.appStore.setShowEditChannel(true);
     },
     changeCurrentView(e: any) {
-      console.log("does this rerender inside changeCurrentView?");
-      console.log(e.target.value);
       const value = e.target.value;
       this.currentView = value;
     },
