@@ -191,15 +191,6 @@ export default function TableView({
                 slot="end"
               ></j-icon>
             </j-input>
-            <j-button
-              onClick={() =>
-                createEntry({ perspective, source, subjectClass: selected })
-              }
-              size="sm"
-              variant="primary"
-            >
-              New {selected.toLowerCase()}
-            </j-button>
             <div>
               <j-tabs
                 className={styles.viewSelector}
@@ -242,6 +233,15 @@ export default function TableView({
                 </j-tab-item>
               </j-tabs>
             </div>
+            <j-button
+              onClick={() =>
+                createEntry({ perspective, source, subjectClass: selected })
+              }
+              size="sm"
+              variant="primary"
+            >
+              + {selected}
+            </j-button>
           </div>
 
           {filteredEntries.length > 0 ? (
