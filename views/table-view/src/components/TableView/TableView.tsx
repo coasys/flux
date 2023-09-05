@@ -117,7 +117,7 @@ export default function TableView({
     grid: () => (
       <j-box px="500" pt="500">
         <Grid
-          onUrlClick={(url) => onUrlClick(url, true)}
+          onUrlClick={(url) => onUrlClick(url, false)}
           entries={filteredEntries}
         ></Grid>
       </j-box>
