@@ -37,7 +37,8 @@ export class Message {
   replyingTo: string | undefined = "";
 
   @subjectProperty({
-    getter: `triple(Base, "flux://has_reaction", "emoji://1f44d"), Value = true ; Value = false)`,
+    getter: `findall(Base, triple(Base, "flux://has_reaction", "emoji://1f44d"), List), 
+    (length(List, Length), Length > 5 -> Value = true ; Value = false)`,
   })
   isPopular: boolean = false;
 
