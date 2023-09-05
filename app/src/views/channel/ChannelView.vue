@@ -77,7 +77,7 @@
         @click="onViewClick"
         @hide-notification-indicator="onHideNotificationIndicator"
       />
-      <j-box pt="1000" v-show="currentView && currentView === app.pkg" v-else>
+      <j-box pt="1000" v-show="currentView === app.pkg" v-else>
         <j-flex direction="column" a="center" j="center" gap="500">
           <j-spinner></j-spinner>
           <span>Loading plugin...</span>
@@ -185,7 +185,6 @@ export default defineComponent({
       currentView: ref(""),
       allDefined: ref(false),
       ChannelView: ChannelView,
-      selectedViews: ref<ChannelView[]>([]),
       showEditChannel: ref(false),
       appStore: useAppStore(),
       script: null as HTMLElement | null,
@@ -208,6 +207,8 @@ export default defineComponent({
           this.currentView = val[0]?.pkg;
         }
 
+        console.log(JSON.stringify(val));
+
         // Add new views
         val?.forEach(async (app: App) => {
           const wcName = await generateWCName(app.pkg);
@@ -215,14 +216,18 @@ export default defineComponent({
           if (!customElements.get(wcName)) {
             const module = await fetchFluxApp(app.pkg);
             await customElements.define(wcName, module.default);
+            console.log("fetched the new app");
             setTimeout(() => {
+              console.log("why this not updating", wcName, app.pkg);
               this.wcNames[app.pkg] = wcName;
             }, 200);
           } else {
+            console.log("this should update", app.pkg, wcName, this.wcNames);
             this.wcNames[app.pkg] = wcName;
           }
         });
       },
+      deep: true,
       immediate: true,
     },
   },
