@@ -66,7 +66,7 @@
               @click="() => navigateToChannel(channel.id)"
               v-for="channel in channels"
             >
-              {{ channel.name }}
+              # {{ channel.name }}
             </button>
           </div>
         </j-flex>
@@ -246,11 +246,11 @@ export default defineComponent({
       handler: function (id: string) {
         if (id) {
           this.handleThemeChange(id);
-          this.goToActiveChannel(id);
         } else {
           this.handleThemeChange();
         }
       },
+      deep: true,
       immediate: true,
     },
     "$route.params.channelId": {
@@ -282,19 +282,6 @@ export default defineComponent({
           channelId: channelId,
         },
       });
-    },
-    goToActiveChannel(communityId: string) {
-      const firstChannel = this.channels[0];
-
-      if (firstChannel) {
-        this.$router.push({
-          name: "channel",
-          params: {
-            communityId,
-            channelId: firstChannel.id,
-          },
-        });
-      }
     },
     handleThemeChange(id?: string) {
       if (!id) {
