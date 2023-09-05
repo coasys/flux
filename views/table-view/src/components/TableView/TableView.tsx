@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import Table from "../Table";
 import Grid from "../Grid";
+import Calendar from "../Calendar";
 import Header from "../Header";
 import History from "../History";
 import Entry from "../Entry";
@@ -121,6 +122,14 @@ export default function TableView({
         ></Grid>
       </j-box>
     ),
+    calendar: () => (
+      <j-box px="500" pt="500">
+        <Calendar
+          onUrlClick={(url) => onUrlClick(url, true)}
+          entries={filteredEntries}
+        ></Calendar>
+      </j-box>
+    ),
   };
 
   const View = viewComp[view];
@@ -229,7 +238,7 @@ export default function TableView({
                     slot="start"
                     color={view === "calendar" ? "primary-500" : "primary-300"}
                   ></j-icon>
-                  Table
+                  Calendar
                 </j-tab-item>
               </j-tabs>
             </div>
