@@ -1,4 +1,4 @@
-import styles from "./Grid.module.css";
+import styles from "./Calendar.module.css";
 import DisplayValue from "../DisplayValue";
 
 type Props = {
