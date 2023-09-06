@@ -27,17 +27,26 @@ export default function Calendar({ entries, onEntryClick = () => {} }: Props) {
 
   return (
     <div className={styles.calendar}>
-      <j-box pb="500">
+      <j-box p="500">
         <j-flex a="center" j="between" gap="200">
           <j-text size="600" weight="600" color="ui-500">
             {monthName}
           </j-text>
           <j-flex gap="200" a="center">
+            <select value={"createdAt"} className={styles.select}>
+              <option disabled selected>
+                Select date field
+              </option>
+              <option value="createdAt">timestamp</option>
+            </select>
             <select
               value={year}
               onChange={(e) => setYear(parseInt(e.target.value))}
               className={styles.select}
             >
+              <option disabled selected>
+                Select year
+              </option>
               {[...Array(40).keys()].map((i) => {
                 return <option>{currentYear - i}</option>;
               })}

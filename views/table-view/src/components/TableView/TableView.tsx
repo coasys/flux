@@ -276,13 +276,15 @@ export default function TableView({
         onToggle={(e) => setOpenCurrentEntry(e.target.open)}
       >
         <div className={styles.currentEntryGrid}>
-          <Entry
-            perspective={perspective}
-            source={currentEntry}
-            onUrlClick={(url) => onUrlClick(url, true)}
-          ></Entry>
+          <div className={styles.entryItem}>
+            <Entry
+              perspective={perspective}
+              source={currentEntry}
+              onUrlClick={(url) => onUrlClick(url, true)}
+            ></Entry>
+          </div>
           <aside>
-            <j-box pt="800">
+            <j-box pt="500">
               <j-text size="500" weight="600" color="ui-500">
                 Comments
               </j-text>
