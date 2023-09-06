@@ -65,9 +65,9 @@ export default function CommentSection({
           agent={agent}
           source={source}
         >
-          <footer slot="footer">
+          <footer className={styles.footer} slot="footer">
             <j-button
-              class="toggle-formatting"
+              className="toggle-formatting"
               onClick={() => setShowToolbar(!showToolbar)}
               circle
               square
@@ -78,7 +78,7 @@ export default function CommentSection({
             </j-button>
             <j-button
               onClick={submit}
-              class="submit"
+              className={styles.submitButton}
               size="sm"
               variant="primary"
             >

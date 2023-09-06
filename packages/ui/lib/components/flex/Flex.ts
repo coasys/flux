@@ -72,7 +72,7 @@ export default class Box extends LitElement {
 
   /**
    * Justify content
-   * @type {""|"center"|"start"|"end"}
+   * @type {""|"center"|"start"|"end"|"between"|"around"}
    * @attr
    */
   @property({ type: String, reflect: true })

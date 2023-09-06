@@ -1,7 +1,7 @@
 .container {
   display: grid;
   grid-template-columns: 40px 1fr;
-  gap: var(--j-space-400);
+  column-gap: var(--j-space-400);
 }
 
 .link {
