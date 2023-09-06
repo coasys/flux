@@ -1,7 +1,7 @@
 import CommentItem from "../CommentItem";
 import { useState, useRef } from "preact/hooks";
 import { Message as MessageModel } from "@fluxapp/api";
-import { useEntries } from "@fluxapp/react-web";
+import { useEntries, useMe } from "@fluxapp/react-web";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import styles from "./CommentSection.module.css";
@@ -15,6 +15,8 @@ export default function CommentSection({
   perspective: PerspectiveProxy;
   source: string;
 }) {
+  const myAgent = useMe(agent);
+
   const editor = useRef(null);
   const [showToolbar, setShowToolbar] = useState(false);
 
@@ -45,32 +47,46 @@ export default function CommentSection({
 
   return (
     <div className={styles.base} part="base">
-      <flux-editor
-        part="editor"
-        ref={editor}
-        onKeydown={onKeydown}
-        aria-expanded={showToolbar}
-        className={styles.editor}
-        perspective={perspective}
-        agent={agent}
-        source={source}
-      >
-        <footer slot="footer">
-          <j-button
-            class="toggle-formatting"
-            onClick={() => setShowToolbar(!showToolbar)}
-            circle
-            square
+      <j-flex a="center" gap="400">
+        <div>
+          <j-avatar
             size="sm"
-            variant="ghost"
-          >
-            <j-icon size="sm" name="type"></j-icon>
-          </j-button>
-          <j-button onClick={submit} class="submit" size="sm" variant="primary">
-            Publish
-          </j-button>
-        </footer>
-      </flux-editor>
+            hash={myAgent.me?.did}
+            src={myAgent.profile?.profileThumbnailPicture}
+          ></j-avatar>
+        </div>
+        <flux-editor
+          part="editor"
+          ref={editor}
+          onKeydown={onKeydown}
+          aria-expanded={showToolbar}
+          className={styles.editor}
+          perspective={perspective}
+          agent={agent}
+          source={source}
+        >
+          <footer slot="footer">
+            <j-button
+              class="toggle-formatting"
+              onClick={() => setShowToolbar(!showToolbar)}
+              circle
+              square
+              size="sm"
+              variant="ghost"
+            >
+              <j-icon size="sm" name="type"></j-icon>
+            </j-button>
+            <j-button
+              onClick={submit}
+              class="submit"
+              size="sm"
+              variant="primary"
+            >
+              Publish
+            </j-button>
+          </footer>
+        </flux-editor>
+      </j-flex>
       {comments.length > 0 && (
         <div className={styles.comments} part="comments">
           {comments.map((comment) => (
