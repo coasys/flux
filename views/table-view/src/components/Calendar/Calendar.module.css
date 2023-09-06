@@ -31,7 +31,7 @@
 }
 
 .select {
-  height: var(--j-size-sm);
+  height: var(--j-size-md);
   min-width: 150px;
   color: var(--j-color-black);
   font-size: inherit;
