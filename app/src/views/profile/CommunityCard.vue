@@ -42,17 +42,18 @@ export default defineComponent({
   gap: var(--j-space-700);
   border-radius: var(--j-border-radius);
   text-decoration: none;
-  background-color: var(--j-color-ui-50);
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--j-color-ui-100);
   border-radius: var(--j-border-radius);
   padding: var(--j-space-500);
 }
 
-.community-card__image {
-  --j-avatar-size: 70px;
+.community-card:hover {
+  border: 1px solid var(--j-color-primary-500);
 }
 
-.community-card:hover {
-  background-color: var(--j-color-ui-50);
+.community-card__image {
+  --j-avatar-size: 70px;
 }
 
 @media (min-width: 800px) {
