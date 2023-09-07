@@ -1513,19 +1513,21 @@
   resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.2.0.tgz#5f3d96ec6b2354ad6d8a28bf216a1d97b5426861"
   integrity sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==
 
-"@holochain/client@0.12.5":
-  version "0.12.5"
-  resolved "https://registry.yarnpkg.com/@holochain/client/-/client-0.12.5.tgz#6cbfe32c33f94fb0689d986adeb43f2b43813303"
-  integrity sha512-9Q1G8sKEGsqnCl067CaRbzwPZZ5zeDCJdvQ8TJpb+psP2kLJBbHZ2qulMXAlNUz7Pg0l4B1Eh/BFJByJHRLlow==
+"@holochain/client@0.16.0":
+  version "0.16.0"
+  resolved "https://registry.yarnpkg.com/@holochain/client/-/client-0.16.0.tgz#3800ecc0551eef9a2b8e3534f6a6651f87b9af82"
+  integrity sha512-GJEl6F3OSlDX71H+rtyUXpEuor7O9MhvNIi+Tq6obrysu71JsbXfR1rtmSBiNb9fttHOZLW60EzY/Lj3I9dv8g==
   dependencies:
     "@holochain/serialization" "^0.1.0-beta-rc.3"
     "@msgpack/msgpack" "^2.7.2"
+    "@noble/ed25519" "^2.0.0"
     "@tauri-apps/api" "^1.2.0"
     emittery "^1.0.1"
     isomorphic-ws "^5.0.0"
     js-base64 "^3.7.3"
+    libsodium-wrappers "^0.7.11"
     lodash-es "^4.17.21"
-    tweetnacl "^1.0.3"
+    ws "^8.13.0"
 
 "@holochain/serialization@^0.1.0-beta-rc.3":
   version "0.1.0-beta-rc.3"
@@ -1847,6 +1849,11 @@
   resolved "https://registry.yarnpkg.com/@nicolo-ribaudo/semver-v6/-/semver-v6-6.3.3.tgz#ea6d23ade78a325f7a52750aab1526b02b628c29"
   integrity sha512-3Yc1fUTs69MG/uZbJlLSI3JISMn2UV2rg+1D/vROUqZyh3l6iYHCs7GMp+M40ZD7yOdDbYjJcU1oTJhrc+dGKg==
 
+"@noble/ed25519@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@noble/ed25519/-/ed25519-2.0.0.tgz#5964c8190a4b4b804985717ca566113b93379e43"
+  integrity sha512-/extjhkwFupyopDrt80OMWKdLgP429qLZj+z6sYJz90rF2Iz0gjZh2ArMKPImUl13Kx+0EXI2hN9T/KJV0/Zng==
+
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz#7619c2eb21b25483f6d167548b4cfd5a7488c3d5"
@@ -1868,10 +1875,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@perspect3vism/ad4m-connect@0.5.1":
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.5.1.tgz#b12be114cdaa591be2694e8db32c3d9588155c90"
-  integrity sha512-wfND22M5thGQPoATTPKGq5YLImwp1yiIxXtBoseKslj0z2YU+ju22bgde1+xC6B9vk0SOkPYRb7/i8U92DWj2w==
+"@perspect3vism/ad4m-connect@0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.6.0.tgz#07e94d2e74cdc9efd1cb2f4105de0297eb2b84b1"
+  integrity sha512-LOMTT3+UeLhHARTbJ4GRTTK7Q65w6ZVxa+jVthChHWpll2BM4pktzteptzYL+I1ytvJsQ/HkusuaEfFnSPm4hg==
   dependencies:
     "@undecaf/barcode-detector-polyfill" "^0.9.15"
     "@undecaf/zbar-wasm" "^0.9.12"
@@ -1881,13 +1888,13 @@
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
-"@perspect3vism/ad4m@0.5.1":
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.5.1.tgz#ba5ca764bbdde187f8ca8e3d9edbe3a17338fd61"
-  integrity sha512-6F4E8x3z4rJXWsQw2XRbU3HAvReyqyzslo8HNFFlpUYkoVEyophiljcLdZFQrdNQlJB3q/PhjxsLNd1SCeUOVg==
+"@perspect3vism/ad4m@0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.6.0.tgz#594c50189133f6a7becaa7908c146f5e42707fa3"
+  integrity sha512-E069bVC7WTR7eN6dB5WXN7rc+9TWbd4KkLvJVdHyJty02RxfOyFIbDAGy4C5tgmbg5wTKJI+tka8xZ9QTiXEaQ==
   dependencies:
     "@apollo/client" "3.7.10"
-    "@holochain/client" "0.12.5"
+    "@holochain/client" "0.16.0"
     "@types/jest" "^26.0.14"
     class-validator "^0.13.1"
     express "4.18.2"
@@ -7636,6 +7643,18 @@ libphonenumber-js@^1.9.43:
   resolved "https://registry.yarnpkg.com/libphonenumber-js/-/libphonenumber-js-1.10.37.tgz#185264130c9375f17d0c487a288223294579929c"
   integrity sha512-Z10PCaOCiAxbUxLyR31DNeeNugSVP6iv/m7UrSKS5JHziEMApJtgku4e9Q69pzzSC9LnQiM09sqsGf2ticZnMw==
 
+libsodium-wrappers@^0.7.11:
+  version "0.7.11"
+  resolved "https://registry.yarnpkg.com/libsodium-wrappers/-/libsodium-wrappers-0.7.11.tgz#53bd20606dffcc54ea2122133c7da38218f575f7"
+  integrity sha512-SrcLtXj7BM19vUKtQuyQKiQCRJPgbpauzl3s0rSwD+60wtHqSUuqcoawlMDheCJga85nKOQwxNYQxf/CKAvs6Q==
+  dependencies:
+    libsodium "^0.7.11"
+
+libsodium@^0.7.11:
+  version "0.7.11"
+  resolved "https://registry.yarnpkg.com/libsodium/-/libsodium-0.7.11.tgz#cd10aae7bcc34a300cc6ad0ac88fcca674cfbc2e"
+  integrity sha512-WPfJ7sS53I2s4iM58QxY3Inb83/6mjlYgcmZs7DJsvDlnmVUwNinBCi5vBT43P6bHRy01O4zsMU2CoVR6xJ40A==
+
 lines-and-columns@^1.1.6:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/lines-and-columns/-/lines-and-columns-1.2.4.tgz#eca284f75d2965079309dc0ad9255abb2ebc1632"
@@ -10704,11 +10723,6 @@ turbo@latest:
     turbo-windows-64 "1.10.7"
     turbo-windows-arm64 "1.10.7"
 
-tweetnacl@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-1.0.3.tgz#ac0af71680458d8a6378d0d0d050ab1407d35596"
-  integrity sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==
-
 type-check@^0.4.0, type-check@~0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/type-check/-/type-check-0.4.0.tgz#07b8203bfa7056c0657050e3ccd2c37730bab8f1"
@@ -11560,6 +11574,11 @@ ws@^7.4.6:
   version "7.5.9"
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.9.tgz#54fa7db29f4c7cec68b1ddd3a89de099942bb591"
   integrity sha512-F+P9Jil7UiSKSkppIiD94dN07AwvFixvLIj1Og1Rl9GGMuNipJnV9JzjD6XuqmAeiswGvUmNLjr5cFuXwNS77Q==
+
+ws@^8.13.0:
+  version "8.14.0"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.14.0.tgz#6c5792c5316dc9266ba8e780433fc45e6680aecd"
+  integrity sha512-WR0RJE9Ehsio6U4TuM+LmunEsjQ5ncHlw4sn9ihD6RoJKZrVyH9FWV3dmnwu8B2aNib1OvG2X6adUCyFpQyWcg==
 
 xdg-basedir@^4.0.0:
   version "4.0.0"

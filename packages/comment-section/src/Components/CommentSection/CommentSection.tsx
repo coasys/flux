@@ -82,7 +82,7 @@ export default function CommentSection({
               size="sm"
               variant="primary"
             >
-              Publish
+              Send
             </j-button>
           </footer>
         </flux-editor>

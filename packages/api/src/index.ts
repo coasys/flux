@@ -9,6 +9,7 @@ import subscribeToLinks from "./subscribeToLinks";
 import Channel from "./channel";
 import Community from "./community";
 import Message from "./message";
+import List from "./list";
 import Post from "./post";
 import App from "./app";
 import updateProfile from "./updateProfile";
@@ -25,6 +26,7 @@ export {
   Me,
   App,
   Channel,
+  List,
   Community,
   Message,
   Post,

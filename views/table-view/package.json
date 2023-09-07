@@ -36,7 +36,7 @@
     "@fluxapp/comment-section": "*",
     "@fluxapp/react-web": "*",
     "@fluxapp/flux-container": "*",
-    "@perspect3vism/ad4m": "0.5.1",
+    "@perspect3vism/ad4m": "0.6.0",
     "preact": "^10.13.1",
     "uuid": "^9.0.0"
   },
