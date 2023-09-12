@@ -16,7 +16,7 @@ export default function Calendar({ entries, onEntryClick = () => {} }: Props) {
   }, [month, year]);
 
   const monthName = useMemo(() => {
-    return new Date(year, month, 0).toLocaleString("default", {
+    return new Date(year, month + 1, 0).toLocaleString("default", {
       month: "long",
     });
   }, [month, year]);
@@ -25,37 +25,44 @@ export default function Calendar({ entries, onEntryClick = () => {} }: Props) {
 
   const currentYear = new Date().getFullYear();
 
+  console.log({ entries });
+
   return (
     <div className={styles.calendar}>
       <j-box pb="500">
         <j-flex a="center" j="between" gap="200">
-          <j-text size="600" weight="600" color="ui-500">
-            {monthName}
-          </j-text>
           <j-flex gap="200" a="center">
-            <select
-              value={year}
-              onChange={(e) => setYear(parseInt(e.target.value))}
-              className={styles.select}
-            >
-              {[...Array(40).keys()].map((i) => {
-                return <option>{currentYear - i}</option>;
-              })}
-            </select>
             <j-button
               onClick={() => setMonth((month - 1) % 12)}
               size="sm"
-              variant="primary"
+              variant="ghost"
+              square
             >
-              Previous
+              <j-icon size="sm" name="chevron-left"></j-icon>
             </j-button>
             <j-button
               onClick={() => setMonth((month + 1) % 12)}
               size="sm"
-              variant="primary"
+              square
+              variant="ghost"
             >
-              Next
+              <j-icon size="sm" name="chevron-right"></j-icon>
             </j-button>
+            <j-text nomargin size="600" weight="600" color="ui-500">
+              {monthName} {currentYear}
+            </j-text>
+          </j-flex>
+
+          <j-flex gap="200" a="center">
+            <j-text variant="label" nomargin>
+              Sort by
+            </j-text>
+            <select value={"createdAt"} className={styles.select}>
+              <option disabled selected>
+                Select property
+              </option>
+              <option value="createdAt">timestamp</option>
+            </select>
           </j-flex>
         </j-flex>
       </j-box>
@@ -63,7 +70,7 @@ export default function Calendar({ entries, onEntryClick = () => {} }: Props) {
         {dayArray.map((i) => {
           const entriesInDay = entries.filter(
             (e) =>
-              new Date(e.timestamp).getDay() === i + 1 &&
+              new Date(e.timestamp).getDate() === i + 1 &&
               new Date(e.timestamp).getMonth() === month &&
               new Date(e.timestamp).getFullYear() === year
           );

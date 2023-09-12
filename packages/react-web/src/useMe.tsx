@@ -23,7 +23,16 @@ type MeData = {
   status?: AgentStatus;
 };
 
-export function useMe(agent: AgentClient | undefined) {
+type MyInfo = {
+  me?: Agent;
+  status?: AgentStatus;
+  profile: Profile | null;
+  error: string | undefined;
+  mutate: Function;
+  reload: Function;
+};
+
+export function useMe(agent: AgentClient | undefined): MyInfo {
   const forceUpdate = useForceUpdate();
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -43,6 +52,7 @@ export function useMe(agent: AgentClient | undefined) {
     }
 
     const promises = Promise.all([agent.status(), agent.me()]);
+
     promises
       .then(async ([status, agent]) => {
         setError(undefined);
@@ -74,16 +84,13 @@ export function useMe(agent: AgentClient | undefined) {
       return null;
     };
 
-    console.log("ADDING LISTERNER!");
+    if (agent) {
+      agent.addAgentStatusChangedListener(changed);
+      agent.addUpdatedListener(updated);
 
-    agent.addAgentStatusChangedListener(changed);
-    agent.addUpdatedListener(updated);
-
-    return () => {
-      // agent.removeListener(added);
-      // agent.removeListener(removed);
-    };
-  }, []);
+      // TODO need a way to remove listeners
+    }
+  }, [agent]);
 
   const data = getCache<MeData>(cacheKey);
   let profile = null as Profile | null;
@@ -91,7 +98,10 @@ export function useMe(agent: AgentClient | undefined) {
 
   if (perspective) {
     profile = mapLiteralLinks(
-      perspective.links.filter((e) => e.data.source === FLUX_PROFILE),
+      perspective.links.filter(
+        (e) =>
+          e.data.source === FLUX_PROFILE || e.data.source === data?.agent?.did
+      ),
       {
         username: HAS_USERNAME,
         bio: HAS_BIO,

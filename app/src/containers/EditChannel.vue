@@ -73,7 +73,11 @@
                   :loading="loadedPlugins[app.pkg] === 'loading'"
                   @click="() => toggleView(app)"
                 >
-                  {{ isSelected(app.pkg) ? "Remove" : "Add" }}
+                  {{
+                    isSelected(app.pkg) && loadedPlugins[app.pkg] === "loaded"
+                      ? "Remove"
+                      : "Add"
+                  }}
                 </j-button>
               </div>
             </j-flex>
@@ -155,10 +159,9 @@ export default defineComponent({
       tab: ref<"official" | "community">("official"),
       isLoading: ref(false),
       packages: ref<FluxApp[]>([]),
-      loadedPlugins: {} as Record<
-        string,
-        "loaded" | "loading" | undefined | null
-      >,
+      loadedPlugins: ref<
+        Record<string, "loaded" | "loading" | undefined | null>
+      >({}),
       name: ref(""),
       description: ref(""),
       selectedPlugins: ref<App[]>([]),

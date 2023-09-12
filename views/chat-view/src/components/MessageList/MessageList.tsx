@@ -4,6 +4,7 @@ import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { Message } from "@fluxapp/api";
 import { Virtuoso } from "react-virtuoso";
 import MessageItem from "../MessageItem";
+import { useMemo } from "preact/hooks";
 import styles from "./MessageList.module.css";
 import { useEffect, useRef, useState } from "preact/hooks";
 
@@ -48,11 +49,17 @@ export default function MessageList({
     }
   }, [atBottom, setShowButton]);
 
-  const { entries: messages } = useEntries({
+  const { entries } = useEntries({
     perspective,
     source,
     model: Message,
   });
+
+  const messages = useMemo(() => {
+    return entries
+      .slice()
+      .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  }, [entries.length]);
 
   function showAvatar(index: number): boolean {
     const previousMessage = messages[index - 1];

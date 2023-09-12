@@ -31,7 +31,7 @@ export class MyElement extends LitElement {
     .sidebar {
       height: 100%;
       display: grid;
-      grid-template-columns: auto 200px;
+      grid-template-columns: 100px auto;
       height: 100vh;
       box-sizing: border-box;
     }
@@ -45,6 +45,7 @@ export class MyElement extends LitElement {
       justify-content: space-between;
     }
     .channels {
+      z-index: 1;
       background: var(--j-color-white);
       border-right: 1px solid var(--j-color-ui-100);
     }
@@ -307,21 +308,22 @@ export class MyElement extends LitElement {
       <div class="sidebar-layout" part="layout">
         <aside class="sidebar" part="sidebar">
           <div class="hoods">
-            <j-flex gap="500" wrap>
+            <j-flex direction="column" a="center" gap="500">
               ${this.neighbourhoods.length
                 ? map(
                     this.neighbourhoods,
-                    (p) => html`<j-tooltip title=${p.name}>
-                      <j-avatar
-                        ?selected=${this.perspectiveUuid === p.uuid}
-                        initials=${p.name.charAt(0)}
-                        @click=${() => this.setPerspective(p.uuid)}
-                        :value=${p.uuid}
-                        ?disabled=${this.isLoading}
-                      >
-                        ${p.name}
-                      </j-avatar>
-                    </j-tooltip>`
+                    (p) =>
+                      html`<j-tooltip title=${p.name}>
+                        <j-avatar
+                          ?selected=${this.perspectiveUuid === p.uuid}
+                          initials=${p.name.charAt(0)}
+                          @click=${() => this.setPerspective(p.uuid)}
+                          :value=${p.uuid}
+                          ?disabled=${this.isLoading}
+                        >
+                          ${p.name}
+                        </j-avatar>
+                      </j-tooltip>`
                   )
                 : ``}
               <j-button

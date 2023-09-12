@@ -1,7 +1,7 @@
 .container {
   display: grid;
   grid-template-columns: 40px 1fr;
-  gap: var(--j-space-300);
+  column-gap: var(--j-space-400);
 }
 
 .link {
@@ -13,6 +13,12 @@
   display: flex;
   align-items: center;
   gap: var(--j-space-200);
+}
+
+.username {
+  font-weight: 600;
+  font-family: inherit;
+  font-size: var(--j-font-size-500);
 }
 
 .username:hover {

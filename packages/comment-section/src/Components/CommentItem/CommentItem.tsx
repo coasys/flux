@@ -26,7 +26,7 @@ export default function CommentItem({
     <div className={styles.container}>
       <a href={comment.author} className={styles.link}>
         <j-avatar
-          size="xs"
+          size="sm"
           hash={comment.author}
           src={profile?.profileThumbnailPicture}
         ></j-avatar>

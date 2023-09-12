@@ -24,7 +24,13 @@
             </j-flex>
           </j-box>
           <div class="channel-view__tabs">
-            <label class="channel-view-tab" v-for="app in apps">
+            <label
+              :class="{
+                'channel-view-tab': true,
+                checked: app.pkg === currentView,
+              }"
+              v-for="app in apps"
+            >
               <input
                 :name="channel?.id"
                 type="radio"
@@ -32,6 +38,7 @@
                 :value.prop="app.pkg"
                 @change="changeCurrentView"
               />
+              <j-icon :name="app.icon" size="xs"></j-icon>
               <span>{{ app.name }}</span>
             </label>
             <j-tooltip placement="auto" title="Manage views">
@@ -439,7 +446,7 @@ export default defineComponent({
   color: var(--j-color-black);
 }
 
-.channel-view-tab:has(input:checked) {
+.channel-view-tab.checked {
   position: relative;
   border-bottom: 1px solid var(--j-color-primary-500);
   color: var(--j-color-black);
