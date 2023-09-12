@@ -613,7 +613,7 @@
         {
           "name": "j",
           "description": "Justify content",
-          "type": "\"\"|\"center\"|\"start\"|\"end\""
+          "type": "\"\"|\"center\"|\"start\"|\"end\"|\"between\"|\"around\""
         },
         {
           "name": "a",
@@ -647,7 +647,7 @@
           "name": "j",
           "attribute": "j",
           "description": "Justify content",
-          "type": "\"\"|\"center\"|\"start\"|\"end\""
+          "type": "\"\"|\"center\"|\"start\"|\"end\"|\"between\"|\"around\""
         },
         {
           "name": "a",
