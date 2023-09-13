@@ -10,6 +10,7 @@ import { getPosition } from "../../utils/getPosition";
 
 import styles from "./ChatView.module.css";
 import { EntryType } from "@fluxapp/types";
+import Avatar from "../Avatar";
 
 const { REPLY_TO, REACTION } = community;
 
@@ -255,11 +256,11 @@ export default function ChatView({
                 <j-text size="300" className={styles.body} nomargin uppercase>
                   Thread with
                 </j-text>
-                <j-avatar
+                <Avatar
                   size="xxs"
-                  src={threadProfile?.profileThumbnailPicture}
+                  profileAddress={threadProfile?.profileThumbnailPicture}
                   hash={threadSource?.author}
-                ></j-avatar>
+                />
                 <span>{threadProfile?.username}</span>
                 <j-text
                   size="300"
