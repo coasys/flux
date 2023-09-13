@@ -4,6 +4,7 @@ import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import { useEffect, useState } from "preact/hooks";
 import { Profile } from "@fluxapp/types";
 import styles from "./CommentItem.module.css";
+import Avatar from "../Avatar";
 
 export default function CommentItem({
   agent,
@@ -25,11 +26,11 @@ export default function CommentItem({
   return (
     <div className={styles.container}>
       <a href={comment.author} className={styles.link}>
-        <j-avatar
+        <Avatar
           size="sm"
-          hash={comment.author}
-          src={profile?.profileThumbnailPicture}
-        ></j-avatar>
+          did={comment.author}
+          url={profile?.profileThumbnailPicture}
+        ></Avatar>
       </a>
       <div className={styles.author}>
         <a href={comment.author} className={styles.link}>
