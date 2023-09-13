@@ -10,6 +10,7 @@ import {
   subjectCollection,
   subjectFlag,
 } from "@perspect3vism/ad4m";
+import Channel from "../channel";
 
 @SDNAClass({
   name: "Community",
@@ -52,7 +53,11 @@ export class Community {
   })
   thumbnail: string;
 
-  @subjectCollection({ through: EntryType.Channel })
+  @subjectCollection({
+    through: "rdf://has_child",
+    where: {
+      isInstance: Channel
+    }, })
   channels: string[] = [];
 }
 
