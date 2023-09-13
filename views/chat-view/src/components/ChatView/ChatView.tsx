@@ -70,16 +70,18 @@ export default function ChatView({
         body: html,
       });
       if (replyMessage) {
-        perspective.add({
-          source: replyMessage.id,
-          predicate: REPLY_TO,
-          target: message.id,
-        });
-        perspective.add({
-          source: replyMessage.id,
-          predicate: EntryType.Message,
-          target: message.id,
-        });
+        perspective.addLinks([
+          {
+            source: replyMessage.id,
+            predicate: REPLY_TO,
+            target: message.id,
+          },
+          {
+            source: replyMessage.id,
+            predicate: EntryType.Message,
+            target: message.id,
+          }
+        ]);
       }
       setReplyMessage(null);
     } catch (e) {
