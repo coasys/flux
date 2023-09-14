@@ -151,7 +151,7 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
 
   const entries = (getCache(cacheKey) || []) as ExtendedSubjectClass[];
 
-  return { entries, error, mutate, model: Model, isLoading, reload: getData };
+  return { entries: [...entries], error, mutate, model: Model, isLoading, reload: getData };
 }
 
 function useForceUpdate() {
