@@ -5,6 +5,7 @@ import { useEntries, useMe } from "@fluxapp/react-web";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import styles from "./CommentSection.module.css";
+import Avatar from "../Avatar";
 
 export default function CommentSection({
   agent,
@@ -49,11 +50,11 @@ export default function CommentSection({
     <div className={styles.base} part="base">
       <j-flex a="center" gap="400">
         <div>
-          <j-avatar
+          <Avatar
             size="sm"
-            hash={myAgent.me?.did}
-            src={myAgent.profile?.profileThumbnailPicture}
-          ></j-avatar>
+            did={myAgent.me?.did}
+            url={myAgent.profile?.profileThumbnailPicture}
+          ></Avatar>
         </div>
         <flux-editor
           part="editor"

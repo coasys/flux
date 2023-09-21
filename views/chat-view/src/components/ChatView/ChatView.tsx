@@ -10,6 +10,7 @@ import { getPosition } from "../../utils/getPosition";
 
 import styles from "./ChatView.module.css";
 import { EntryType } from "@fluxapp/types";
+import Avatar from "../Avatar";
 
 const { REPLY_TO, REACTION } = community;
 
@@ -70,16 +71,18 @@ export default function ChatView({
         body: html,
       });
       if (replyMessage) {
-        perspective.add({
-          source: replyMessage.id,
-          predicate: REPLY_TO,
-          target: message.id,
-        });
-        perspective.add({
-          source: replyMessage.id,
-          predicate: EntryType.Message,
-          target: message.id,
-        });
+        perspective.addLinks([
+          {
+            source: replyMessage.id,
+            predicate: REPLY_TO,
+            target: message.id,
+          },
+          {
+            source: replyMessage.id,
+            predicate: EntryType.Message,
+            target: message.id,
+          }
+        ]);
       }
       setReplyMessage(null);
     } catch (e) {
@@ -253,11 +256,11 @@ export default function ChatView({
                 <j-text size="300" className={styles.body} nomargin uppercase>
                   Thread with
                 </j-text>
-                <j-avatar
+                <Avatar
                   size="xxs"
-                  src={threadProfile?.profileThumbnailPicture}
+                  profileAddress={threadProfile?.profileThumbnailPicture}
                   hash={threadSource?.author}
-                ></j-avatar>
+                />
                 <span>{threadProfile?.username}</span>
                 <j-text
                   size="300"

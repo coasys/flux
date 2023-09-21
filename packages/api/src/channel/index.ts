@@ -28,8 +28,10 @@ export class Channel {
   name: string;
 
   @subjectCollection({
-    through: FLUX_APP,
-    where: { isInstance: App },
+    through: "rdf://has_child",
+    where: {
+      isInstance: App
+    },
   })
   views: string[] = [];
 }

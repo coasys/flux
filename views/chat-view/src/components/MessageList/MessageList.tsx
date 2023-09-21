@@ -59,7 +59,7 @@ export default function MessageList({
     return entries
       .slice()
       .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-  }, [entries.length]);
+  }, [entries]);
 
   function showAvatar(index: number): boolean {
     const previousMessage = messages[index - 1];
