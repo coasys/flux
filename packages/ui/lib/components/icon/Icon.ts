@@ -45,7 +45,7 @@ export default class Icon extends LitElement {
 
   /**
    * Size
-   * @type {""|"sm"|"lg"}
+   * @type {""|"xs"|"sm"|"lg"|"xl"}
    * @attr
    */
   @property({ type: String, reflect: true })

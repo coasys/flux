@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="src/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flux Editor</title>
+
+    <style>
+      html {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        color: var(--j-color-ui-800);
+        background: var(--j-color-white);
+      }
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
+      flux-editor {
+        box-sizing: border-box;
+        display: block;
+        width: 100%;
+        padding: 10px;
+      }
+      flux-editor.chat {
+        --body-min-height: auto;
+        --grid-template-areas: "toolbar toolbar toolbar" "body body footer";
+      }
+      flux-editor.chat::part(toolbar) {
+        display: none;
+      }
+      flux-editor.chat.showToolbar::part(toolbar) {
+        display: block;
+      }
+      flux-editor.chat::part(footer) {
+        align-items: end;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module" src="/src/flux-editor.ts"></script>
+
+    <flux-container>
+      <comment-section></comment-section>
+    </flux-container>
+
+    <script type="module">
+      import "@fluxapp/flux-container";
+      import CommentSection from "./src/main.ts";
+
+      customElements.define("comment-section", CommentSection);
+    </script>
+  </body>
+</html>

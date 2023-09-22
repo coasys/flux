@@ -1,8 +1,8 @@
 import { useEffect, useState } from "preact/hooks";
 import { Howl } from "howler";
-import { Me } from "utils/api/getMe";
+import { Me } from "@fluxapp/api";
 import { Reaction } from "../../types";
-import { WebRTC } from "utils/react/useWebrtc";
+import { WebRTC } from "@fluxapp/react-web";
 import popWav from "../../assets/pop.wav";
 import guitarWav from "../../assets/guitar.wav";
 import kissWav from "../../assets/kiss.wav";

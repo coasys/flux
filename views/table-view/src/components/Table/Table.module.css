@@ -1,0 +1,64 @@
+.tableWrapper {
+  background: var(--j-color-ui-50);
+  height: 100%;
+  display: block;
+  overflow-x: scroll;
+  max-width: 100%;
+}
+
+.table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  background: var(--j-color-white);
+  font-size: var(--j-font-size-400);
+  text-align: left;
+  display: table;
+}
+
+.table tr {
+  display: table-row;
+}
+
+.table td {
+  display: table-cell;
+}
+
+.table th,
+.table td {
+  min-width: 200px;
+  border-right: 1px solid var(--j-color-ui-100);
+  border-top: 1px solid var(--j-color-ui-100);
+  border-bottom: 1px solid var(--j-color-ui-100);
+  border-left: 1px solid transparent;
+  height: var(--j-size-md);
+  padding: 0 var(--j-space-300);
+}
+
+.table th:last-of-type,
+.table td:last-of-type {
+  border-right: 1px solid var(--j-color-ui-100);
+}
+
+.table th:first-of-type,
+.table td:first-of-type {
+  min-width: auto;
+  border-right: 1px solid var(--j-color-ui-100);
+}
+
+.table thead th {
+  border-top: 0;
+  background: var(--j-color-ui-50);
+  color: var(--j-color-black);
+  font-weight: 400;
+  text-transform: capitalize;
+  border-bottom: 1px solid var(--j-color-ui-200);
+}
+
+.table tbody td {
+  font-weight: 400;
+  color: var(--j-color-black);
+}
+
+.table tbody td:focus-within {
+  outline: 1px solid var(--j-color-focus);
+}

@@ -1,0 +1,5 @@
+.appContainer {
+  padding: var(--j-space-500);
+  width: 100%;
+  box-sizing: border-box;
+}

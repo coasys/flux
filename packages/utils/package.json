@@ -1,29 +1,22 @@
 {
-  "name": "utils",
-  "version": "0.5.9",
+  "name": "@fluxapp/utils",
+  "version": "0.6.0",
   "description": "",
-  "main": "index.js",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "type": "module",
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "dependencies": {
+    "@fluxapp/types": "*",
+    "@fluxapp/constants": "*"
+  },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@perspect3vism/ad4m": "0.3.3",
-    "date-fns": "^2.28.0",
-    "dexie": "^3.2.0",
-    "dexie-react-hooks": "^1.1.1",
-    "events": "^3.3.0",
-    "simple-peer": "^9.11.1"
-  },
-  "devDependencies": {
-    "@types/simple-peer": "^9.11.5",
-    "@types/react": "^17.0.2"
-  },
-  "peerDependencies": {
-    "@perspect3vism/ad4m-connect": "0.3.3",
-    "react": "^17.0.2",
-    "vue": "^3.2.12"
-  }
+  "license": "ISC"
 }

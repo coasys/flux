@@ -121,19 +121,21 @@
         </svg>
       </j-button>
     </j-box>
-    <j-box align="center">
-      <j-button
-        :size="deferredPrompt ? 'md' : 'xl'"
-        :variant="deferredPrompt ? 'secondary' : 'primary'"
-        @click="connect"
-      >
-        <j-icon
-          :size="deferredPrompt ? 'xs' : 'sm'"
-          slot="end"
-          name="arrow-repeat"
-        ></j-icon>
-        Connect to AD4M
-      </j-button>
+    <j-box>
+      <j-flex a="center" j="center">
+        <j-button
+          :size="deferredPrompt ? 'md' : 'xl'"
+          :variant="deferredPrompt ? 'secondary' : 'primary'"
+          @click="connect"
+        >
+          <j-icon
+            :size="deferredPrompt ? 'xs' : 'sm'"
+            slot="end"
+            name="arrow-repeat"
+          ></j-icon>
+          Connect to AD4M
+        </j-button>
+      </j-flex>
     </j-box>
   </j-box>
 </template>
@@ -160,7 +162,6 @@ export default defineComponent({
   },
   created() {
     window.addEventListener("beforeinstallprompt", (e) => {
-      console.log("before install");
       e.preventDefault();
       this.deferredPrompt = e;
     });

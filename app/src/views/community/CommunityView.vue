@@ -1,22 +1,27 @@
 <template>
   <sidebar-layout>
     <template v-slot:sidebar>
-      <community-sidebar :isSynced="isSynced"></community-sidebar>
+      <community-sidebar
+        v-if="community?.name && data.perspective?.uuid"
+        :perspective="data.perspective"
+        :community="community"
+        :isSynced="isSynced"
+      ></community-sidebar>
     </template>
 
     <div
       style="height: 100%"
       v-for="channel in channels"
-      :key="channel.id"
+      :key="channel?.id"
       :style="{
-        height: channel.id === channelId ? '100%' : '0',
+        height: channel?.id === channelId ? '100%' : '0',
       }"
     >
       <channel-view
-        v-if="loadedChannels[channel.id]"
-        v-show="channel.id === channelId"
-        :channelId="channel.id"
-        :communityId="channel.sourcePerspective"
+        v-if="loadedChannels[channel?.id]"
+        v-show="channel?.id === channelId"
+        :channelId="channel?.id"
+        :communityId="communityId"
       ></channel-view>
     </div>
 
@@ -41,19 +46,17 @@
 
     <div
       class="center"
-      v-if="isSynced && communityChannels.length > 0 && !channelId"
+      v-if="isSynced && !channelId && community && channels.length"
     >
       <div class="center-inner">
         <j-flex gap="600" direction="column" a="center" j="center">
           <Avatar
-            :initials="community.neighbourhood.name.charAt(0)"
+            :initials="community.name?.charAt(0)"
             size="xxl"
-            :url="community.neighbourhood.thumbnail"
+            :url="community.thumbnail || null"
           ></Avatar>
           <j-box align="center" pb="300">
-            <j-text variant="heading">
-              Welcome to {{ community.neighbourhood.name }}
-            </j-text>
+            <j-text variant="heading"> Welcome to {{ community.name }} </j-text>
             <j-text variant="ingress">Pick a channel</j-text>
           </j-box>
 
@@ -61,16 +64,16 @@
             <button
               class="channel-card"
               @click="() => navigateToChannel(channel.id)"
-              v-for="channel in communityChannels"
+              v-for="channel in channels"
             >
-              {{ channel.name }}
+              # {{ channel.name }}
             </button>
           </div>
         </j-flex>
       </div>
     </div>
 
-    <div class="center" v-if="isSynced && communityChannels.length === 0">
+    <div class="center" v-if="isSynced && !channelId && channels.length === 0">
       <div class="center-inner">
         <j-flex gap="400" direction="column" a="center" j="center">
           <j-icon color="ui-500" size="xl" name="balloon"></j-icon>
@@ -89,97 +92,93 @@
         </j-flex>
       </div>
     </div>
-  </sidebar-layout>
 
-  <j-modal
-    size="sm"
-    :open="modals.showCommunityMembers"
-    @toggle="(e) => setShowCommunityMembers(e.target.open)"
-  >
-    <community-members
-      @close="() => setShowCommunityMembers(false)"
-      v-if="modals.showCommunityMembers"
-    />
-  </j-modal>
+    <j-modal
+      size="sm"
+      :open="modals.showCommunityMembers"
+      @toggle="(e) => setShowCommunityMembers(e.target.open)"
+    >
+      <community-members
+        @close="() => setShowCommunityMembers(false)"
+        v-if="modals.showCommunityMembers"
+      />
+    </j-modal>
 
-  <j-modal
-    size="sm"
-    :open="modals.showEditCommunity"
-    @toggle="(e) => setShowEditCommunity(e.target.open)"
-  >
-    <edit-community
-      v-if="modals.showEditCommunity"
-      @submit="() => setShowEditCommunity(false)"
-      @cancel="() => setShowEditCommunity(false)"
-    />
-  </j-modal>
+    <j-modal
+      size="sm"
+      :open="modals.showEditCommunity"
+      @toggle="(e) => setShowEditCommunity(e.target.open)"
+    >
+      <edit-community
+        :communityId="communityId"
+        v-if="modals.showEditCommunity"
+        @submit="() => setShowEditCommunity(false)"
+        @cancel="() => setShowEditCommunity(false)"
+      />
+    </j-modal>
 
-  <j-modal
-    :open="modals.showCreateChannel"
-    @toggle="(e) => setShowCreateChannel(e.target.open)"
-  >
-    <create-channel
-      v-if="modals.showCreateChannel"
-      @submit="() => setShowCreateChannel(false)"
-      @cancel="() => setShowCreateChannel(false)"
-    />
-  </j-modal>
+    <j-modal
+      :open="modals.showCreateChannel"
+      @toggle="(e) => setShowCreateChannel(e.target.open)"
+    >
+      <create-channel
+        v-if="modals.showCreateChannel"
+        @submit="() => setShowCreateChannel(false)"
+        @cancel="() => setShowCreateChannel(false)"
+      />
+    </j-modal>
 
-  <j-modal
-    size="sm"
-    :open="modals.showInviteCode"
-    @toggle="(e) => setShowInviteCode(e.target.open)"
-  >
-    <j-box p="800">
-      <j-box pb="500">
-        <j-text variant="heading">Invite people</j-text>
-        <j-text variant="body">
-          Copy and send this code to the people you want to join your community
-        </j-text>
+    <j-modal
+      size="sm"
+      :open="modals.showInviteCode"
+      @toggle="(e) => setShowInviteCode(e.target.open)"
+    >
+      <j-box p="800">
+        <j-box pb="500">
+          <j-text variant="heading">Invite people</j-text>
+          <j-text variant="body">
+            Copy and send this code to the people you want to join your
+            community
+          </j-text>
+        </j-box>
+        <j-input
+          @click="(e) => e.target.select()"
+          size="lg"
+          readonly
+          :value="data.perspective?.sharedUrl"
+        >
+          <j-button @click.stop="getInviteCode" variant="ghost" slot="end"
+            ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
+          /></j-button>
+        </j-input>
       </j-box>
-      <j-input
-        @click="(e) => e.target.select()"
-        size="lg"
-        readonly
-        :value="community.neighbourhood.neighbourhoodUrl"
-      >
-        <j-button @click.stop="getInviteCode" variant="ghost" slot="end"
-          ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
-        /></j-button>
-      </j-input>
-    </j-box>
-  </j-modal>
+    </j-modal>
 
-  <j-modal
-    v-if="modals.showEditChannel && appStore.activeChannel"
-    :open="modals.showEditChannel"
-    @toggle="(e) => setShowEditChannel(e.target.open)"
-  >
-    <EditChannel
-      v-if="modals.showEditChannel"
-      @cancel="() => setShowEditChannel(false)"
-      @submit="() => setShowEditChannel(false)"
-      :channelId="appStore.activeChannel"
-    ></EditChannel>
-  </j-modal>
+    <j-modal
+      v-if="modals.showEditChannel && appStore.activeChannel"
+      :open="modals.showEditChannel"
+      @toggle="(e) => setShowEditChannel(e.target.open)"
+    >
+      <EditChannel
+        v-if="modals.showEditChannel"
+        @cancel="() => setShowEditChannel(false)"
+        @submit="() => setShowEditChannel(false)"
+        :channelId="appStore.activeChannel"
+      ></EditChannel>
+    </j-modal>
 
-  <j-modal
-    :open="modals.showCommunitySettings"
-    @toggle="(e) => setShowCommunitySettings(e.target.open)"
-  >
-    <community-settings />
-  </j-modal>
-
-  <j-modal
-    :open="modals.showCommunityTweaks"
-    @toggle="(e) => setShowCommunityTweaks(e.target.open)"
-  >
-    <community-tweaks v-if="modals.showCommunityTweaks" />
-  </j-modal>
+    <j-modal
+      :open="modals.showCommunitySettings"
+      @toggle="(e) => setShowCommunitySettings(e.target.open)"
+    >
+      <community-settings />
+    </j-modal>
+  </sidebar-layout>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, computed } from "vue";
+import { useRoute } from "vue-router";
 import SidebarLayout from "@/layout/SidebarLayout.vue";
 import CommunitySidebar from "./community-sidebar/CommunitySidebar.vue";
 
@@ -189,17 +188,17 @@ import CreateChannel from "@/containers/CreateChannel.vue";
 import CommunityMembers from "@/containers/CommunityMembers.vue";
 import CommunitySettings from "@/containers/CommunitySettings.vue";
 import ChannelView from "@/views/channel/ChannelView.vue";
-import CommunityTweaks from "@/containers/CommunityTweaks.vue";
 import Avatar from "@/components/avatar/Avatar.vue";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 
-import ChannelModel, { Channel } from "utils/api/channel";
-import MemberModel, { Member } from "utils/api/member";
-import { CommunityState, ModalsState, ChannelState } from "@/store/types";
+import { Channel, Community } from "@fluxapp/api";
+import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
-import { useUserStore } from "@/store/user";
-import { useDataStore } from "@/store/data";
-import { mapActions, mapState } from "pinia";
+import { mapActions } from "pinia";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { useEntries, useCommunities, usePerspectives } from "@fluxapp/vue";
+import { usePerspective } from "@fluxapp/vue";
+import { PerspectiveState } from "@perspect3vism/ad4m";
 
 type LoadedChannels = {
   [channelId: string]: boolean;
@@ -216,66 +215,57 @@ export default defineComponent({
     CommunitySidebar,
     CommunitySettings,
     SidebarLayout,
-    CommunityTweaks,
     Avatar,
     Hourglass,
   },
-  setup() {
+  async setup() {
+    const route = useRoute();
+    const client = await getAd4mClient();
+    const { data } = usePerspective(client, () => route.params.communityId);
+
+    const { neighbourhoods } = usePerspectives(client);
+
+    const { communities } = useCommunities(neighbourhoods);
+
+    const { entries: channels } = useEntries({
+      perspective: () => data.value.perspective,
+      model: Channel,
+    });
+
     return {
-      memberModel: ref<MemberModel | null>(null),
-      channelModel: ref<ChannelModel | null>(null),
+      communities,
+      channels,
+      data,
+      hasCopied: ref(false),
       loadedChannels: ref<LoadedChannels>({}),
       appStore: useAppStore(),
-      dataStore: useDataStore(),
-      userStore: useUserStore(),
-    };
-  },
-  data() {
-    return {
-      hasCopied: false,
     };
   },
   watch: {
     "$route.params.communityId": {
       handler: function (id: string) {
         if (id) {
-          this.dataStore.fetchCommunityMembers(id);
-          this.dataStore.fetchCommunityMetadata(id);
-          this.dataStore.fetchCommunityChannels(id);
-          this.startWatching(id);
           this.handleThemeChange(id);
-          this.goToActiveChannel(id);
         } else {
-          this.channelModel && this.channelModel.unsubscribe();
-          this.memberModel && this.memberModel.unsubscribe();
           this.handleThemeChange();
         }
       },
+      deep: true,
       immediate: true,
     },
     "$route.params.channelId": {
       handler: function (id: string) {
         if (id) {
-          this.dataStore.setCurrentChannelId({
-            communityId: this.communityId,
-            channelId: id,
-          });
-
-          const channel = this.dataStore.getChannel(id);
-
-          if (channel) {
-            this.loadedChannels = {
-              ...this.loadedChannels,
-              [channel.id]: true,
-            };
-          }
+          this.loadedChannels = {
+            ...this.loadedChannels,
+            [id]: true,
+          };
         }
       },
       immediate: true,
     },
   },
   methods: {
-    ...mapState(useDataStore, ["getChannelStates"]),
     ...mapActions(useAppStore, [
       "setShowCreateChannel",
       "setShowEditCommunity",
@@ -283,46 +273,7 @@ export default defineComponent({
       "setShowCommunityMembers",
       "setShowInviteCode",
       "setShowCommunitySettings",
-      "setShowCommunityTweaks",
     ]),
-    startWatching(id: string) {
-      this.channelModel && this.channelModel.unsubscribe();
-      this.memberModel && this.memberModel.unsubscribe();
-
-      this.channelModel = new ChannelModel({ perspectiveUuid: id });
-      this.memberModel = new MemberModel({ perspectiveUuid: id });
-
-      this.memberModel.onAdded((member: Member) => {
-        this.dataStore.setNeighbourhoodMember({
-          did: member.did,
-          perspectiveUuid: id,
-        });
-      });
-
-      this.channelModel.onRemoved((id) => {
-        this.dataStore.removeChannel({ channelId: id });
-      });
-
-      this.channelModel.onAdded((channel: Channel) => {
-        this.dataStore.addChannel({
-          communityId: id,
-          channel: {
-            id: channel.id,
-            name: channel.name,
-            timestamp: new Date(channel.timestamp),
-            author: channel.author,
-            expanded: false,
-            sourcePerspective: id,
-            currentView: channel.views[0],
-            views: channel.views,
-            hasNewMessages: false,
-            notifications: {
-              mute: false,
-            },
-          },
-        });
-      });
-    },
     navigateToChannel(channelId: string) {
       this.$router.push({
         name: "channel",
@@ -332,37 +283,20 @@ export default defineComponent({
         },
       });
     },
-    goToActiveChannel(communityId: string) {
-      const channels = this.dataStore.getChannelStates(communityId);
-      if (channels.length > 0) {
-        const firstChannel = this.dataStore.getChannelStates(communityId)[0].id;
-        const currentChannelId =
-          this.community.state.currentChannelId || firstChannel;
-
-        if (currentChannelId) {
-          this.$router.push({
-            name: "channel",
-            params: {
-              communityId,
-              channelId: currentChannelId,
-            },
-          });
-        }
-      }
-    },
     handleThemeChange(id?: string) {
       if (!id) {
         this.appStore.changeCurrentTheme("global");
         return;
       } else {
-        this.appStore.changeCurrentTheme(
-          this.community.state?.useLocalTheme ? id : "global"
-        );
+        // TODO: Change community theme
+        // this.appStore.changeCurrentTheme(
+        //   this.communityState.state?.useLocalTheme ? id : "global"
+        // );
       }
     },
     getInviteCode() {
       // Get the invite code to join community and copy to clipboard
-      const url = this.community.neighbourhood.neighbourhoodUrl;
+      const url = this.data.perspective?.sharedUrl;
       const el = document.createElement("textarea");
       el.value = `Hey! Here is an invite code to join my private community on Flux: ${url}`;
       document.body.appendChild(el);
@@ -378,12 +312,10 @@ export default defineComponent({
   },
   computed: {
     isSynced(): boolean {
-      const community = this.dataStore.getCommunity(this.communityId);
-      const isMadeByMe = community.author === this.userStore.profile?.did;
-
-      return isMadeByMe
-        ? community.members.length >= 1
-        : community.members.length >= 2;
+      return this.data.perspective?.state === PerspectiveState.Synced;
+    },
+    community(): Community | null {
+      return this.communities[this.$route.params.communityId as string];
     },
     communityId() {
       return this.$route.params.communityId as string;
@@ -393,20 +325,6 @@ export default defineComponent({
     },
     modals(): ModalsState {
       return this.appStore.modals;
-    },
-    community(): CommunityState {
-      const communityId = this.communityId;
-      return this.dataStore.getCommunityState(communityId);
-    },
-    communityChannels(): ChannelState[] {
-      return this.channels.filter(
-        (c) => c.sourcePerspective === this.communityId
-      );
-    },
-    channels(): ChannelState[] {
-      const channels = this.dataStore.getChannels;
-
-      return channels;
     },
   },
 });

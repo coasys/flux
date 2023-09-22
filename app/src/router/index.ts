@@ -1,5 +1,4 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect";
 import { ad4mConnect } from "@/ad4mConnect";
 
 const routes: Array<RouteRecordRaw> = [
@@ -26,11 +25,13 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: "communities/:communityId",
+        props: true,
         name: "community",
         component: () => import(`@/views/community/CommunityView.vue`),
         children: [
           {
             path: ":channelId",
+            props: true,
             name: "channel",
             component: () => import(`@/views/channel/ChannelView.vue`),
           },
@@ -38,6 +39,7 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: "profile/:did",
+        props: true,
         name: "profile",
         component: () => import(`@/views/profile/ProfileView.vue`),
       },

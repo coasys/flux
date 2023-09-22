@@ -3,7 +3,7 @@
     :slot="slot"
     :initials="initials"
     :hash="did"
-    :src="realSrc"
+    :src="realSrc || src"
     :size="size"
     :online="online"
   ></j-avatar>
@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { getImage } from "utils/helpers/getImage";
+import { getImage } from "@fluxapp/utils";
 export default defineComponent({
   props: {
     did: String,
@@ -30,9 +30,13 @@ export default defineComponent({
   },
   watch: {
     url: {
-      handler(url: string) {
-        if (url) {
-          this.getProfileImage(url);
+      handler(url: any) {
+        if (typeof url === "string") {
+          if (url.includes("base64")) {
+            this.realSrc = url;
+          } else {
+            this.getProfileImage(url);
+          }
         } else {
           this.realSrc = null;
         }

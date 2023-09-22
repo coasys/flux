@@ -1,0 +1,38 @@
+.card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: var(--j-space-300);
+    border-radius: var(--j-border-radius);
+    text-decoration: none;
+    background-color: var(--j-color-ui-50);
+    overflow: hidden;
+}
+
+.card + .card {
+    margin-top: var(--j-space-400);
+}
+
+.contents {
+    display: flex;
+    gap: var(--j-space-300);
+    padding: var(--j-space-400) var(--j-space-400);
+}
+
+.credentials {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+    margin-bottom: var(--j-space-300);
+    font-size: var(--j-font-size-500);
+    font-weight: 400;
+    color: var(--j-color-ui-500);
+}
+
+.footer {
+    display: flex;
+    gap: var(--j-space-400);
+}

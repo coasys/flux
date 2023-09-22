@@ -29,14 +29,6 @@
             <j-icon size="xs" slot="start" name="pencil" />
             Edit community
           </j-menu-item>
-          <j-menu-item @click="goToSettings">
-            <j-icon size="xs" slot="start" name="gear" />
-            Settings
-          </j-menu-item>
-          <j-menu-item @click="goToTweaks">
-            <j-icon size="xs" slot="start" name="wrench" />
-            Community Tweaks
-          </j-menu-item>
           <j-menu-item @click="() => setShowInviteCode(true)">
             <j-icon size="xs" slot="start" name="person-plus" />
             Invite people
@@ -46,24 +38,11 @@
             <j-icon size="xs" slot="start" name="plus" />
             Create channel
           </j-menu-item>
-          <j-menu-item
-            @click="
-              () =>
-                toggleHideMutedChannels({
-                  communityId: community.neighbourhood.uuid,
-                })
-            "
-          >
-            <j-icon
-              size="xs"
-              slot="start"
-              :name="
-                community.state.hideMutedChannels ? 'toggle-on' : 'toggle-off'
-              "
-            />
+          <j-menu-item>
+            <j-icon size="xs" slot="start" name="toggle-on" />
             Hide muted channels
           </j-menu-item>
-          <j-menu-item @click="() => goToLeaveChannel()">
+          <j-menu-item @click="() => goToLeaveCommunity()">
             <j-icon size="xs" slot="start" name="box-arrow-left" />
             Leave community
           </j-menu-item>
@@ -73,21 +52,21 @@
     <div class="community-info">
       <Avatar
         size="xl"
-        :initials="community.neighbourhood.name.charAt(0).toUpperCase()"
-        :url="community.neighbourhood.image"
+        :initials="community.name?.charAt(0).toUpperCase()"
+        :src="community.image || null"
       ></Avatar>
       <div class="community-info-content">
         <j-text size="500" nomargin color="black">
-          {{ community.neighbourhood.name }}
+          {{ community.name || "No name" }}
         </j-text>
         <j-text nomargin size="400" color="ui-500">
           {{
-            isSynced && isPerspectiveSynced
-              ? community.neighbourhood.description || "No description"
+            isSynced
+              ? community.description || "No description"
               : "syncing community..."
           }}
         </j-text>
-        <j-box pt="400" v-if="!isSynced || !isPerspectiveSynced">
+        <j-box pt="400" v-if="!isSynced">
           <LoadingBar></LoadingBar>
         </j-box>
       </div>
@@ -115,73 +94,47 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import { Profile } from "utils/types";
-import { ChannelState } from "@/store/types";
-import { mapActions, mapState } from "pinia";
-import { useDataStore } from "@/store/data";
+import { useRoute } from 'vue-router';
+import { Profile } from "@fluxapp/types";
+import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
-import { useUserStore } from "@/store/user";
 import Avatar from "@/components/avatar/Avatar.vue";
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
-import { PerspectiveState } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { useMe } from "@fluxapp/vue";
+import { Ad4mClient } from "@perspect3vism/ad4m";
 
 export default defineComponent({
   components: { Avatar, LoadingBar },
-  props: { isSynced: Boolean },
-  setup() {
+  props: {
+    isSynced: Boolean,
+    community: {
+      type: Object,
+      required: true,
+    },
+  },
+  async setup(props) {
+     const client: Ad4mClient = await getAd4mClient();
+
+    const { status, me, profile } = useMe(client.agent);
+
     return {
+      profile,
+      status,
+      me,
       showCommunityMenu: ref(false),
       appStore: useAppStore(),
-      userStore: useUserStore(),
-      dataStore: useDataStore(),
     };
   },
   computed: {
-    community() {
-      const communityId = this.$route.params.communityId as string;
-      return this.dataStore.getCommunityState(communityId);
-    },
-    isPerspectiveSynced() {
-      const communityId = this.$route.params.communityId as string;
-      const localCommunity = this.dataStore.getLocalCommunityState(communityId);
-
-      if (
-        localCommunity.syncState ===
-          PerspectiveState.LinkLanguageInstalledButNotSynced ||
-        localCommunity.syncState === PerspectiveState.NeighbourhoodJoinInitiated
-      ) {
-        return false;
-      }
-
-      return true;
-    },
-    channels(): ChannelState[] {
-      const communityId = this.$route.params.communityId as string;
-
-      const channels = this.getChannelStates()(communityId);
-
-      if (this.community.state.hideMutedChannels) {
-        return channels.filter((e) => !e.notifications.mute);
-      }
-
-      return channels;
-    },
     isCreator(): boolean {
-      return (
-        this.community.neighbourhood.author ===
-        this.userStore.getUser?.agent.did
-      );
+      return this.community.author === this.me?.did;
     },
     userProfile(): Profile | null {
-      return this.userStore.profile;
-    },
-    userDid(): string {
-      return this.userStore.agent.did!;
+      return this.profile;
     },
   },
   methods: {
-    ...mapActions(useDataStore, ["toggleHideMutedChannels"]),
-    ...mapState(useDataStore, ["getChannelStates"]),
     ...mapActions(useAppStore, [
       "setSidebar",
       "setShowCreateChannel",
@@ -189,18 +142,15 @@ export default defineComponent({
       "setShowCommunityMembers",
       "setShowInviteCode",
       "setShowCommunitySettings",
-      "setShowCommunityTweaks",
     ]),
-    goToLeaveChannel() {
-      this.appStore.setActiveCommunity(this.community.neighbourhood.uuid);
+    goToLeaveCommunity() {
+      this.appStore.setActiveCommunity(
+        this.$route.params.communityId as string
+      );
       this.appStore.setShowLeaveCommunity(true);
     },
     goToSettings() {
       this.setShowCommunitySettings(true);
-      this.showCommunityMenu = false;
-    },
-    goToTweaks() {
-      this.setShowCommunityTweaks(true);
       this.showCommunityMenu = false;
     },
   },
@@ -209,7 +159,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .sidebar-header {
-  background: var(--app-drawer-bg-color);
   z-index: 1;
   display: block;
   padding-left: var(--j-space-400);

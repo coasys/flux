@@ -24,13 +24,22 @@ for (const tag of components.tags) {
 
   if (tag.attributes) {
     for (const attribute of tag.attributes) {
-      list.push(`${attribute.name}?: string;\n\t`);
+      let type = attribute.type;
+
+      if (attribute.type === "String") {
+        type = "string";
+      } else if (attribute.type === "Boolean") {
+        type = "boolean";
+      }
+
+      list.push(`${attribute.name}?: ${type};\n\t`);
     }
   }
-  list.push("children?: any");
 
   const newType = `
-type ${snakeToPascal(tag.name)}Props = {
+type ${snakeToPascal(
+    tag.name
+  )}Props = React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> & {
   ${list.join("")}
 }
   `;
@@ -49,7 +58,7 @@ declare module 'preact' {
   }
 }
 
-declare module global {
+declare global {
   namespace JSX {
       interface IntrinsicElements {
         ${componentList.join("\t\t\t\t")}

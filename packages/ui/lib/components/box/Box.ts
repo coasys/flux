@@ -15,11 +15,13 @@ const styles = css`
     --j-box-display: block;
     --j-box-padding: 0px;
     --j-box-margin: 0px;
+    --j-box-color: inherit;
   }
   :host([inline]) {
     --j-box-display: inline-block;
   }
   [part="base"] {
+    color: var(--j-box-color);
     border-radius: var(--j-box-border-radius);
     background-color: var(--j-box-bg-color);
     padding: var(--j-box-padding);
@@ -33,7 +35,7 @@ export default class Box extends LitElement {
 
   /**
    * Padding
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -41,7 +43,7 @@ export default class Box extends LitElement {
 
   /**
    * Padding left
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -49,7 +51,7 @@ export default class Box extends LitElement {
 
   /**
    * Padding right
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -57,7 +59,7 @@ export default class Box extends LitElement {
 
   /**
    * Padding top
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -65,7 +67,7 @@ export default class Box extends LitElement {
 
   /**
    * Padding bottom
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -73,7 +75,7 @@ export default class Box extends LitElement {
 
   /**
    * Padding horistonal
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -81,7 +83,7 @@ export default class Box extends LitElement {
 
   /**
    * Padding vertical
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -89,7 +91,7 @@ export default class Box extends LitElement {
 
   /**
    * Margin
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -97,7 +99,7 @@ export default class Box extends LitElement {
 
   /**
    * Margin left
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -105,7 +107,7 @@ export default class Box extends LitElement {
 
   /**
    * Margin right
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -113,7 +115,7 @@ export default class Box extends LitElement {
 
   /**
    * Margin top
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -121,7 +123,7 @@ export default class Box extends LitElement {
 
   /**
    * Margin bottom
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -129,7 +131,7 @@ export default class Box extends LitElement {
 
   /**
    * Margin horistonal
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -137,7 +139,7 @@ export default class Box extends LitElement {
 
   /**
    * Margin vertical
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -145,11 +147,19 @@ export default class Box extends LitElement {
 
   /**
    * Background color
-   * @type {""|"ui-100"|"ui-200"|"ui-300"|"ui-400"|"ui-500"|"ui-600"|"ui-700"|"ui-800"|"ui-900}
+   * @type {""}
    * @attr
    */
   @property({ type: String, reflect: true })
   bg = null;
+
+  /**
+   * Color
+   * @type {""}
+   * @attr
+   */
+  @property({ type: String, reflect: true })
+  color = null;
 
   /**
    * Border radius
@@ -164,6 +174,7 @@ export default class Box extends LitElement {
     sheet.replaceSync(`
       :host {
         --j-box-bg-color: var(--j-color-${this.bg});
+        --j-box-color: var(--j-color-${this.color});
         --j-box-border-radius: var(--j-border-radius-${this.radius});
         --j-box-padding: 
           ${generateVariable("j-space", this.pt || this.py || this.p)}

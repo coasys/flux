@@ -1,18 +1,18 @@
 {
   "name": "@fluxapp/docs",
-  "version": "0.5.9",
+  "version": "0.6.0",
   "description": "",
+  "type": "module",
   "homepage": "https://docs.fluxsocial.io",
   "scripts": {
     "start": "yarn dev",
     "build": "vitepress build",
-    "build:all": "yarn workspace @fluxapp/ui build && yarn build",
     "dev": "vitepress dev"
   },
   "dependencies": {
+    "@fluxapp/flux-container": "*",
     "@fluxapp/ui": "*",
-    "vitepress": "^1.0.0-alpha.65",
-    "three": "^0.151.3",
+    "vitepress": "1.0.0-alpha.75",
     "eventsource-parser": "^1.0.0"
   },
   "devDependencies": {

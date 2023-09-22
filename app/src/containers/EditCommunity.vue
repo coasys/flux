@@ -37,21 +37,34 @@
 </template>
 
 <script lang="ts">
-import { Community } from "utils/types";
 import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
-import { useDataStore } from "@/store/data";
-import { DexieIPFS } from "utils/helpers/storageHelpers";
-import { getImage } from "utils/helpers/getImage";
+import {
+  blobToDataURL,
+  dataURItoBlob,
+  getImage,
+  resizeImage,
+} from "@fluxapp/utils";
+import { useEntry, usePerspective } from "@fluxapp/vue";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { Community } from "@fluxapp/api";
 
 export default defineComponent({
   components: { AvatarUpload },
+  props: ["communityId"],
   emits: ["cancel", "submit"],
-  setup() {
-    const dataStore = useDataStore();
+  async setup(props) {
+    const client = getAd4mClient;
+    const { data } = usePerspective(client, () => props.communityId);
+    const { entry: community, repo } = useEntry({
+      perspective: () => data.value.perspective,
+      id: "ad4m://self",
+      model: Community,
+    });
 
     return {
-      dataStore,
+      repo,
+      community,
     };
   },
   data() {
@@ -64,46 +77,46 @@ export default defineComponent({
   },
   watch: {
     community: {
-      handler: async function ({ id, name, description, image }) {
-        this.communityName = name;
-        this.communityDescription = description;
-        this.communityImage = await getImage(image);
+      handler: async function (community) {
+        this.communityName = community?.name;
+        this.communityDescription = community?.description;
+        this.communityImage = community?.image;
       },
       deep: true,
       immediate: true,
     },
   },
-  computed: {
-    community(): Community {
-      const id = this.$route.params.communityId as string;
-      return this.dataStore.getCommunity(id);
-    },
-  },
   methods: {
     async updateCommunity() {
-      const communityId = this.$route.params.communityId as string;
-      this.isUpdatingCommunity = true;
-      this.dataStore
-        .updateCommunity(communityId, {
-          name:
-            this.communityName !== this.community.name
-              ? this.communityName
-              : undefined,
-          description:
-            this.communityDescription !== this.community.description
-              ? this.communityDescription
-              : undefined,
-          image:
-            this.communityImage !== this.community.image
-              ? this.communityImage
-              : undefined,
-        })
-        .then(() => {
-          this.$emit("submit");
-        })
-        .finally(() => {
-          this.isUpdatingCommunity = false;
+      try {
+        this.isUpdatingCommunity = true;
+
+        let compressedImage = undefined;
+
+        if (this.communityImage) {
+          // TODO: Compression should maybe happen on the language level?
+          compressedImage = await blobToDataURL(
+            await resizeImage(dataURItoBlob(this.communityImage as string), 0.6)
+          );
+        }
+
+        await this.repo?.update(this.community?.id, {
+          name: this.communityName || undefined,
+          description: this.communityDescription || undefined,
+          image: compressedImage
+            ? {
+                data_base64: compressedImage,
+                name: "form-image",
+                file_type: "image/png",
+              }
+            : undefined,
         });
+      } catch (e) {
+        console.log(e);
+      } finally {
+        this.$emit("submit");
+        this.isUpdatingCommunity = false;
+      }
     },
   },
 });

@@ -1,0 +1,88 @@
+.board {
+  width: 100%;
+}
+
+.columns {
+  display: flex;
+  gap: var(--j-space-500);
+  width: 100%;
+  overflow-x: auto;
+}
+
+.column {
+  border-radius: var(--j-border-radius);
+  background: var(--j-color-ui-100);
+  width: 300px;
+  height: 100%;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.columnHeader {
+  z-index: 1;
+  padding: var(--j-space-400);
+  background-color: var(--j-color-ui-100);
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.columnFooter {
+  z-index: 1;
+  padding: var(--j-space-400);
+  background-color: var(--j-color-ui-100);
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+.columnContent {
+  padding: var(--j-space-400);
+}
+
+.column:has(.tasks.isDraggingOver) .columnContent,
+.column:has(.tasks.isDraggingOver) .columnHeader,
+.column:has(.tasks.isDraggingOver) .columnFooter {
+  background-color: var(--j-color-ui-200);
+}
+
+.tasks {
+  height: 100%;
+  display: flex;
+  min-height: 200px;
+  flex-direction: column;
+  gap: var(--j-space-300);
+}
+
+.task {
+  border-radius: var(--j-border-radius);
+  box-shadow: var(--j-depth-100);
+  padding: var(--j-space-300);
+  background: var(--j-color-white);
+}
+
+.select {
+  outline: 0;
+  border-radius: var(--j-border-radius);
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+  background: var(--j-color-white);
+  padding: 0 var(--j-space-300);
+  height: var(--j-size-md);
+  background: transparent;
+  border: 0;
+  outline: 1px solid var(--j-color-ui-300);
+  border-right: 16px solid transparent;
+}
+
+.select:hover {
+  outline: 1px solid var(--j-color-ui-500);
+  background: var(--j-color-ui-50);
+}
+
+.select:focus {
+  outline: 2px solid var(--j-color-primary-500);
+}

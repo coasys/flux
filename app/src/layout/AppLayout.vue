@@ -90,6 +90,7 @@ export default defineComponent({
 }
 .app-layout__main {
   height: 100%;
+  background: var(--app-main-bg-color);
   overflow-y: auto;
   overflow-x: hidden;
   transition: all 0.3s ease;

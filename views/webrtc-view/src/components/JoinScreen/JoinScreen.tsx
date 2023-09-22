@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { Profile } from "utils/types";
-import getProfile from "utils/api/getProfile";
-import { Me } from "utils/api/getMe";
-import { WebRTC } from "utils/react/useWebrtc";
+import { Profile } from "@fluxapp/types";
+import { getProfile } from "@fluxapp/api";
+import { Me } from "@fluxapp/api";
+import { WebRTC } from "@fluxapp/react-web";
 
 import styles from "./JoinScreen.module.css";
 import Disclaimer from "../Disclaimer";

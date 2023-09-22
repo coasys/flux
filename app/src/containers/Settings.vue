@@ -69,20 +69,12 @@ export default defineComponent({
 
 <style scoped>
 .settings {
-  max-width: 1000px;
-  display: grid;
-  gap: var(--j-space-1000);
-  grid-template-columns: 1fr;
-  overflow-y: auto;
-}
-
-@media (min-width: 800px) {
-  .settings {
-    grid-template-columns: 1fr 4fr;
-  }
+  display: flex;
+  gap: var(--j-space-800);
 }
 
 .settings__sidebar {
+  width: 300px;
   position: sticky;
   top: 0;
   left: 0;

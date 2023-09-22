@@ -96,28 +96,40 @@ import MainSidebar from "./main-sidebar/MainSidebar.vue";
 import { defineComponent, ref, watch } from "vue";
 
 import CreateCommunity from "@/containers/CreateCommunity.vue";
-import { CommunityState, ModalsState } from "@/store/types";
+import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
-import { useDataStore } from "@/store/data";
 import { mapActions } from "pinia";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
-import { Community, EntryType } from "utils/types";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect";
-import { hydrateState } from "@/store/data/hydrateState";
+import { EntryType } from "@fluxapp/types";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import semver from "semver";
 import { dependencies } from "../../../package.json";
-import subscribeToLinks from "utils/api/subscribeToLinks";
-import subscribeToSyncState from "utils/api/subscribeToSyncState";
-import { LinkExpression, Literal, PerspectiveState } from "@perspect3vism/ad4m";
+import { LinkExpression, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
+import { useEntry, usePerspective, usePerspectives } from "@fluxapp/vue";
+import { Community } from "@fluxapp/api";
 
 export default defineComponent({
   name: "MainAppView",
-  setup() {
+  async setup() {
+    const client = await getAd4mClient();
+    const appStore = useAppStore();
+
+    const { perspectives, onLinkAdded } = usePerspectives(client);
+
+    const { data } = usePerspective(client, () => appStore.activeCommunity);
+
+    const { entry: community } = useEntry({
+      perspective: () => data.value.perspective,
+      model: Community,
+    });
+
     return {
-      dataStore: useDataStore(),
+      client,
+      activeCommunity: community,
+      onLinkAdded,
+      perspectives,
       isJoining: ref(false),
-      watcherStarted: ref(false),
-      appStore: useAppStore(),
+      appStore,
       isInit: ref(false),
     };
   },
@@ -127,21 +139,15 @@ export default defineComponent({
     CreateCommunity,
   },
   async mounted() {
-    if (!this.watcherStarted) {
-      this.startWatcher();
-    }
-
-    hydrateState();
-
-    const client = await getAd4mClient();
-
+    this.onLinkAdded((p: PerspectiveProxy, link: LinkExpression) => {
+      if (link.data.predicate === EntryType.Message) {
+        this.gotNewMessage(p, link);
+      }
+    });
     //Do version checking for ad4m / flux compatibility
-    const { ad4mExecutorVersion } = await client.runtime.info();
+    const { ad4mExecutorVersion } = await this.client.runtime.info();
 
-    const isIncompatible = semver.gt(
-      dependencies["@perspect3vism/ad4m"],
-      ad4mExecutorVersion
-    );
+    const isIncompatible = semver.gt("0.5.0", ad4mExecutorVersion);
 
     if (isIncompatible) {
       this.$router.push({ name: "update-ad4m" });
@@ -149,14 +155,10 @@ export default defineComponent({
   },
   computed: {
     hasAlreadyJoinedTestingCommunity(): boolean {
-      const community = this.dataStore.getCommunityByNeighbourhoodUrl(
-        DEFAULT_TESTING_NEIGHBOURHOOD
+      const community = Object.values(this.perspectives).find(
+        (p) => p.sharedUrl === DEFAULT_TESTING_NEIGHBOURHOOD
       );
       return community ? true : false;
-    },
-    activeCommunity(): Community {
-      const activeCommunity = this.appStore.activeCommunity;
-      return this.dataStore.getCommunity(activeCommunity);
     },
     modals(): ModalsState {
       return this.appStore.modals;
@@ -170,16 +172,12 @@ export default defineComponent({
       "setShowDisclaimer",
       "setShowLeaveCommunity",
     ]),
-    leaveCommunity() {
+    async leaveCommunity() {
+      const client = await getAd4mClient();
       const activeCommunity = this.appStore.activeCommunity;
-
-      this.$router.push({ name: "home" }).then(() => {
-        this.dataStore
-          .removeCommunity({ communityId: activeCommunity })
-          .then(() => {
-            this.appStore.setShowLeaveCommunity(false);
-          });
-      });
+      await this.$router.push({ name: "home" });
+      await client.perspective.remove(activeCommunity);
+      this.appStore.setShowLeaveCommunity(false);
     },
     async joinTestingCommunity() {
       try {
@@ -192,83 +190,22 @@ export default defineComponent({
         this.isJoining = false;
       }
     },
-    async startWatcher() {
-      this.watcherStarted = true;
-      const client = await getAd4mClient();
-      const watching: string[] = [];
+    gotNewMessage(p: PerspectiveProxy, link: LinkExpression) {
+      const routeChannelId = this.$route.params.channelId;
+      const channelId = link.data.source;
+      const isCurrentChannel = routeChannelId === channelId;
+      if (isCurrentChannel) return;
 
-      watch(
-        this.dataStore.neighbourhoods,
-        async (newValue) => {
-          Object.entries(newValue).forEach(([perspectiveUuid]) => {
-            const alreadyListening = watching.includes(perspectiveUuid);
-            if (!alreadyListening) {
-              watching.push(perspectiveUuid);
+      // TODO: Update channel to say it has a new message
 
-              subscribeToLinks({
-                perspectiveUuid,
-                added: async (link: LinkExpression) => {
-                  if (link.data.predicate === EntryType.Message) {
-                    try {
-                      const routeChannelId = this.$route.params.channelId;
-                      const channelId = link.data.source;
-                      const isCurrentChannel = routeChannelId === channelId;
+      const expression = Literal.fromUrl(link.data.target).get();
 
-                      if (!isCurrentChannel) {
-                        this.dataStore.setHasNewMessages({
-                          communityId: perspectiveUuid,
-                          channelId,
-                          value: true,
-                        });
-
-                        const expression = Literal.fromUrl(
-                          link.data.target
-                        ).get();
-
-                        const expressionDate = new Date(expression.timestamp);
-                        let minuteAgo = new Date();
-                        minuteAgo.setSeconds(minuteAgo.getSeconds() - 30);
-                        if (expressionDate > minuteAgo) {
-                          this.dataStore.showMessageNotification({
-                            router: this.$router,
-                            communityId: perspectiveUuid,
-                            channelId,
-                            authorDid: expression.author,
-                            message: expression.data,
-                            timestamp: expression.timestamp,
-                          });
-                        }
-                      }
-                    } catch (e: any) {
-                      throw new Error(e);
-                    }
-                  }
-                },
-              });
-
-              subscribeToSyncState({
-                perspectiveUuid,
-                callback: (syncState: PerspectiveState) => {
-                  this.dataStore.setCommunitySyncState({
-                    communityId: perspectiveUuid,
-                    syncState,
-                  });
-                  return null;
-                },
-              });
-            }
-          });
-        },
-        { immediate: true, deep: true }
-      );
-
-      // @ts-ignore
-      client!.perspective.addPerspectiveRemovedListener((perspective) => {
-        const isCommunity = this.dataStore.getCommunity(perspective);
-        if (isCommunity) {
-          this.dataStore.removeCommunity({ communityId: perspective });
-        }
-      });
+      const expressionDate = new Date(expression.timestamp);
+      let minuteAgo = new Date();
+      minuteAgo.setSeconds(minuteAgo.getSeconds() - 30);
+      if (expressionDate > minuteAgo) {
+        // TODO: Show message notification
+      }
     },
   },
 });

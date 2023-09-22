@@ -1,0 +1,33 @@
+.history {
+  color: var(--j-color-ui-200);
+  height: var(--j-size-md);
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  gap: var(--j-space-300);
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+}
+
+.historyItem {
+  border: none;
+  background: none;
+  position: relative;
+  padding: var(--j-space-200);
+  border-radius: var(--j-border-radius);
+  font-size: var(--j-font-size-500);
+  font-weight: 600;
+  color: var(--j-color-ui-200);
+}
+
+.historyItem.isLast {
+  color: var(--j-color-white);
+}
+
+.historyItem:hover:not(.isLast) {
+  cursor: pointer;
+  color: var(--j-color-ui-100);
+}

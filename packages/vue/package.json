@@ -1,0 +1,28 @@
+{
+  "name": "@fluxapp/vue",
+  "version": "0.6.0",
+  "description": "",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "type": "module",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fluxapp/api": "*",
+    "@fluxapp/types": "*",
+    "@fluxapp/constants": "*",
+    "@fluxapp/utils": "*"
+  },
+  "peerDependencies": {
+    "vue": "^3.2.47",
+    "@perspect3vism/ad4m": "0.6.0"
+  }
+}

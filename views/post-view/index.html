@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Forum View</title>
+    <style>
+      html {
+        box-sizing: border-box;
+      }
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        color: var(--j-color-ui-800);
+        background: var(--j-color-white);
+      }
+      flux-app {
+        height: 100vh;
+        max-height: 100vh;
+        overflow-y: scroll;
+        display: block;
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body>
+    <flux-container>
+      <flux-app></flux-app>
+    </flux-container>
+
+    <script type="module">
+      import App from "./src/main.ts";
+      import "@fluxapp/flux-container";
+
+      customElements.define("flux-app", App);
+    </script>
+  </body>
+</html>

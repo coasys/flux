@@ -72,7 +72,7 @@ export default class Box extends LitElement {
 
   /**
    * Justify content
-   * @type {""|"center"|"start"|"end"}
+   * @type {""|"center"|"start"|"end"|"between"|"around"}
    * @attr
    */
   @property({ type: String, reflect: true })
@@ -96,7 +96,7 @@ export default class Box extends LitElement {
 
   /**
    * Gap
-   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900}
+   * @type {""|"100"|"200"|"300"|"400"|"500"|"600"|"700"|"800"|"900"}
    * @attr
    */
   @property({ type: String, reflect: true })

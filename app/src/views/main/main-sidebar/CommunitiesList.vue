@@ -1,66 +1,40 @@
 <template>
   <div class="left-nav__communities-list">
     <j-tooltip
-      v-for="community in communities"
-      :key="community.state.perspectiveUuid"
-      :title="community.neighbourhood.name || 'Unknown Community'"
+      v-for="(community, uuid) in communities"
+      :key="uuid"
+      :title="community.name || 'Unknown Community'"
     >
       <j-popover event="contextmenu">
         <Avatar
           slot="trigger"
           class="left-nav__community-item"
-          :selected="communityIsActive(community.state.perspectiveUuid)"
-          :online="hasNotification(community.state.perspectiveUuid)"
-          :url="community.neighbourhood.image"
-          :initials="community.neighbourhood.name.charAt(0).toUpperCase()"
-          @click="() => handleCommunityClick(community.state.perspectiveUuid)"
+          :selected="communityIsActive(uuid as string)"
+          :online="false"
+          :src="community.image || undefined"
+          :initials="community?.name?.charAt(0).toUpperCase()"
+          @click="() => handleCommunityClick(uuid as string)"
         ></Avatar>
         <j-menu slot="content">
           <j-menu-item
             @click="
-              () => setShowLeaveCommunity(true, community.state.perspectiveUuid)
+              () => setShowLeaveCommunity(true, uuid as string)
             "
           >
             <j-icon slot="start" size="xs" name="box-arrow-left"></j-icon>
             Leave community
           </j-menu-item>
 
-          <j-menu-item
-            @click="() => muteCommunity(community.state.perspectiveUuid)"
-            ><j-icon
-              size="xs"
-              slot="start"
-              :name="
-                getCommunityState(community.state.perspectiveUuid).notifications
-                  ?.mute
-                  ? 'bell-slash'
-                  : 'bell'
-              "
-            />
-            {{
-              `${
-                getCommunityState(community.state.perspectiveUuid).notifications
-                  ?.mute
-                  ? "Unmute"
-                  : "Mute"
-              } Community`
-            }}
+          <j-menu-item @click="() => muteCommunity(uuid as string)"
+            ><j-icon size="xs" slot="start" name="bell" />
+            Mute Community
           </j-menu-item>
           <j-menu-item
             @click="
-              () => toggleHideMutedChannels(community.state.perspectiveUuid)
+              () => toggleHideMutedChannels(uuid as string)
             "
           >
-            <j-icon
-              size="xs"
-              slot="start"
-              :name="
-                getCommunityState(community.state.perspectiveUuid)
-                  .hideMutedChannels
-                  ? 'toggle-on'
-                  : 'toggle-off'
-              "
-            />
+            <j-icon size="xs" slot="start" name="toggle-on" />
             Hide muted channels
           </j-menu-item>
         </j-menu>
@@ -82,30 +56,39 @@
 <script lang="ts">
 import { ref } from "vue";
 import { useAppStore } from "@/store/app";
-import { useDataStore } from "@/store/data";
 import { defineComponent } from "vue";
 import Avatar from "@/components/avatar/Avatar.vue";
+import { usePerspectives, useCommunities } from "@fluxapp/vue";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export default defineComponent({
   components: {
     Avatar,
   },
-  setup() {
+  async setup() {
     const appStore = useAppStore();
-    const dataStore = useDataStore();
+
+    const client = await getAd4mClient();
+
+    const { neighbourhoods } = usePerspectives(client);
+    const { communities } = useCommunities(neighbourhoods);
 
     return {
+      communities,
       showLeaveCommunity: ref(false),
       appStore,
-      dataStore,
     };
   },
   methods: {
     toggleHideMutedChannels(id: string) {
+      /*
       this.dataStore.toggleHideMutedChannels({ communityId: id });
+      */
     },
     muteCommunity(id: string) {
+      /*
       this.dataStore.toggleCommunityMute({ communityId: id });
+      */
     },
     setShowLeaveCommunity(show: boolean, uuid: string) {
       this.appStore.setActiveCommunity(uuid);
@@ -121,19 +104,8 @@ export default defineComponent({
     },
   },
   computed: {
-    communities() {
-      return this.dataStore.getCommunities;
-    },
     communityIsActive() {
       return (id: string) => this.$route.params.communityId === id;
-    },
-    hasNotification() {
-      return (id: string) => {
-        return this.dataStore.getCommunityState(id)?.state?.hasNewMessages;
-      };
-    },
-    getCommunityState() {
-      return (id: string) => this.dataStore.getLocalCommunityState(id);
     },
   },
 });

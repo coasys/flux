@@ -1,0 +1,69 @@
+.editor {
+  --body-min-height: auto;
+  --grid-template-areas: "toolbar toolbar toolbar" "body body footer";
+}
+.editor::part(base) {
+  background: var(--j-color-white);
+}
+.editor::part(toolbar) {
+  display: none;
+}
+.editor[aria-expanded="true"]::part(toolbar) {
+  display: block;
+}
+.editor::part(footer) {
+  align-items: end;
+  border: 0;
+}
+
+.wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+}
+
+.wrapper[data-threaded="true"][data-show-thread="true"] > .inner {
+  display: none;
+}
+
+.wrapper[data-show-thread="true"] > .thread {
+  display: block;
+}
+
+.wrapper[data-threaded="true"][data-show-thread="true"] > .thread {
+  position: absolute;
+  right: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.footer {
+  display: block;
+  padding: var(--j-space-400) var(--j-space-500);
+  bottom: 0;
+  left: 0;
+}
+
+.thread {
+  display: none;
+  position: relative;
+  width: 40vw;
+  border-left: 1px solid var(--j-color-ui-100);
+}
+
+.threadHeader {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 1;
+}

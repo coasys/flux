@@ -1,0 +1,39 @@
+{
+  "name": "@fluxapp/flux-editor",
+  "version": "0.6.0",
+  "type": "module",
+  "module": "dist/main.js",
+  "main": "dist/main.js",
+  "exports": {
+    ".": "./dist/main.js"
+  },
+  "files": [
+    "build",
+    "types"
+  ],
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "@fluxapp/api": "*",
+    "@fluxapp/ui": "*",
+    "@perspect3vism/ad4m": "0.6.0",
+    "@perspect3vism/ad4m-connect": "0.6.0",
+    "@tiptap/core": "^2.0.3",
+    "@tiptap/extension-link": "^2.0.3",
+    "@tiptap/extension-mention": "^2.0.3",
+    "@tiptap/extension-placeholder": "^2.0.3",
+    "@tiptap/pm": "^2.0.3",
+    "@tiptap/starter-kit": "^2.0.3",
+    "@tiptap/suggestion": "^2.0.3",
+    "lit-element": "^2.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.4",
+    "vite": "^4.3.5",
+    "vite-plugin-css-injected-by-js": "^3.1.0"
+  }
+}

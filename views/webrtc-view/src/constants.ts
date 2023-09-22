@@ -1,4 +1,4 @@
-import { Settings } from "utils/helpers/WebRTCManager";
+import { Settings } from "@fluxapp/utils";
 
 const frameRate = {
   min: 5,

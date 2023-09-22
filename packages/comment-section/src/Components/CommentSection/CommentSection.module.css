@@ -1,0 +1,57 @@
+.base {
+  box-sizing: border-box;
+  --comment-section-size: var(--j-size-sm);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--j-space-500);
+}
+
+.editor {
+  padding: 0;
+  --body-min-height: var(--j-comment-section-size);
+  --grid-template-areas: "toolbar toolbar toolbar" "body body footer";
+}
+.editor::part(base) {
+  background: var(--j-color-white);
+}
+.editor::part(toolbar) {
+  display: none;
+}
+.editor::part(editor) > div {
+  padding: 0;
+}
+
+.editor[aria-expanded="true"]::part(toolbar) {
+  display: block;
+}
+.editor::part(footer) {
+  align-items: end;
+  border: 0;
+}
+
+.comments {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--j-space-200);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+}
+
+.submitButton {
+  height: calc(var(--comment-section-size) - var(--j-space-200));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--j-color-primary-600);
+  color: var(--j-color-white);
+  border: 1px solid transparent;
+  border-radius: var(--j-border-radius);
+}
+
+.submitButton:hover {
+  background: var(--j-color-primary-700);
+  cursor: pointer;
+}

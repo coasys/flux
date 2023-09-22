@@ -1,0 +1,23 @@
+.createPost {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.titleInput {
+  border: 0;
+  outline: 0;
+  width: 100%;
+  display: block;
+  background: transparent;
+  height: var(--j-size-xl);
+  color: var(--j-color-black);
+  font-size: var(--j-font-size-800);
+}
+
+.titleInput::part(input-field) {
+  padding: 0;
+}
+
+.editor::part(footer) {
+  display: none;
+}

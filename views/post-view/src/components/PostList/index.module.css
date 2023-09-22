@@ -1,0 +1,26 @@
+.messageList {
+  width: 100%;
+  padding: 0;
+}
+
+.posts {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--j-space-500);
+}
+
+.posts.compact {
+  gap: 0;
+}
+
+.posts.card {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--j-space-500);
+}
+
+.posts.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--j-space-600);
+}

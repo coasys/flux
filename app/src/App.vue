@@ -1,5 +1,7 @@
 <template>
-  <router-view></router-view>
+  <Suspense>
+    <router-view></router-view>
+  </Suspense>
   <div class="global-modal" v-if="ui.showGlobalLoading">
     <div class="global-modal__backdrop"></div>
     <div class="global-modal__content">
@@ -26,12 +28,12 @@
   </div>
 
   <j-toast
-    autohide="10"
+    autohide="5"
     :variant="ui.toast.variant"
     :open="ui.toast.open"
     @toggle="(e: any) => appStore.setToast({ open: e.target.open })"
   >
-    <j-text>{{ ui.toast.message }}</j-text>
+    {{ ui.toast.message }}
   </j-toast>
 </template>
 
@@ -39,29 +41,14 @@
 import { defineComponent, ref } from "vue";
 import { useAppStore } from "./store/app";
 import { ApplicationState, ModalsState } from "@/store/types";
-import { useRoute, useRouter } from "vue-router";
-import { useDataStore } from "./store/data";
-import { useUserStore } from "./store/user";
-import { ad4mConnect } from "./ad4mConnect";
 
 export default defineComponent({
   name: "App",
   setup() {
     const appStore = useAppStore();
-    const router = useRouter();
-    const route = useRoute();
-    const dataStore = useDataStore();
-    const userStore = useUserStore();
-    const watcherStarted = ref(false);
 
     return {
-      ad4mConnect,
       appStore,
-      router,
-      route,
-      dataStore,
-      userStore,
-      watcherStarted,
     };
   },
   async created() {
@@ -97,6 +84,7 @@ export default defineComponent({
 html {
   height: 100%;
   width: 100%;
+  box-sizing: border-box;
   font-size: var(--j-font-base-size);
 }
 

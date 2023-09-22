@@ -1,5 +1,5 @@
-import { WebRTC } from "utils/react/useWebrtc";
-import { Me } from "utils/api/getMe";
+import { Me } from "@fluxapp/api";
+import { WebRTC } from "@fluxapp/react-web";
 import UiContext from "../../context/UiContext";
 import { useContext } from "preact/hooks";
 

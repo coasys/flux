@@ -1,6 +1,6 @@
 <template>
   <j-box pt="500">
-    <j-menu-group open :title="`Members (${otherAgents.length + 1})`">
+    <j-menu-group open :title="`Members (${others?.length})`">
       <j-button
         @click.prevent="() => setShowInviteCode(true)"
         size="sm"
@@ -12,7 +12,7 @@
       <j-box px="500">
         <avatar-group
           @click="() => setShowCommunityMembers(true)"
-          :users="otherAgents"
+          :users="others || []"
         />
       </j-box>
     </j-menu-group>
@@ -20,36 +20,41 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch, watchEffect } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { mapActions } from "pinia";
-import { useDataStore } from "@/store/data";
 import { useAppStore } from "@/store/app";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect";
+import { usePerspective } from "@fluxapp/vue";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { useRoute } from "vue-router";
 
 export default defineComponent({
   components: { AvatarGroup },
-  async mounted() {
+  async setup() {
+    const route = useRoute();
     const client = await getAd4mClient();
-    const perspective = await client.perspective.byUUID(
-      this.$route.params.communityId as string
+    const others = ref<string[]>([]);
+
+    const { data } = usePerspective(
+      client,
+      () => route.params.communityId as string
     );
-    const otherAgents = await perspective
-      ?.getNeighbourhoodProxy()
-      .otherAgents();
-    this.otherAgents = otherAgents || [];
-  },
-  setup() {
+
+    watchEffect(async () => {
+      // TODO: how to watch for the uuid change, without having an unused var
+      const uuid = data.value.perspective?.uuid;
+      const neighbourhood = data.value.perspective?.getNeighbourhoodProxy();
+      if (neighbourhood) {
+        const me = await client.agent.me();
+        const agents = await neighbourhood?.otherAgents();
+        others.value = [...agents, me.did];
+      }
+    });
+
     return {
-      dataStore: useDataStore(),
-      otherAgents: ref<string[]>([]),
+      data,
+      others,
     };
-  },
-  computed: {
-    community() {
-      const communityId = this.$route.params.communityId as string;
-      return this.dataStore.getCommunityState(communityId);
-    },
   },
   methods: {
     ...mapActions(useAppStore, [

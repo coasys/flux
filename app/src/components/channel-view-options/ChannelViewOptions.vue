@@ -21,8 +21,7 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { useAppStore } from "@/store/app";
-import { useDataStore } from "@/store/data";
-import { ChannelView } from "utils/types";
+import { ChannelView } from "@fluxapp/types";
 import { viewOptions } from "@/constants";
 
 export default defineComponent({
@@ -34,7 +33,6 @@ export default defineComponent({
     return {
       proxySel: ref<ChannelView[]>([]),
       appStore: useAppStore(),
-      dataStore: useDataStore(),
     };
   },
   watch: {

@@ -1,41 +1,35 @@
-import Footer from "./components/Footer";
-import MessageList from "./components/MessageList";
-import { ChatProvider, CommunityProvider, AgentProvider } from "utils/react";
-import { UIProvider } from "./context/UIContext";
-import { useState } from "preact/hooks";
-import styles from "./index.module.css";
-import { EditorProvider } from "./context/EditorContext";
+import styles from "./App.module.css";
+import { PerspectiveProxy, Ad4mClient } from "@perspect3vism/ad4m";
+import ChatView from "./components/ChatView/ChatView";
+import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 
-const MainComponent = ({ perspective, source }) => {
-  const [ref, setRef] = useState(null);
-
-  return (
-    <EditorProvider perspectiveUuid={perspective} channelId={source}>
-      <div class={styles.container} ref={setRef}>
-        <MessageList
-          perspectiveUuid={perspective}
-          channelId={source}
-          mainRef={ref}
-        />
-        <Footer perspectiveUuid={perspective} channelId={source} />
-      </div>
-    </EditorProvider>
-  );
+type Props = {
+  agent: AgentClient;
+  perspective: PerspectiveProxy;
+  source: string;
+  threaded: string;
+  element: HTMLElement;
 };
 
-export default ({ perspective = "", source = "" }) => {
+export default function App({
+  agent,
+  perspective,
+  source,
+  threaded,
+  element,
+}: Props) {
+  if (!perspective?.uuid || !agent)
+    return <div>"No perspective or agent client"</div>;
+
   return (
-    <UIProvider>
-      <AgentProvider>
-        <CommunityProvider perspectiveUuid={perspective}>
-          <ChatProvider perspectiveUuid={perspective} channelId={source}>
-            <MainComponent
-              perspective={perspective}
-              source={source}
-            ></MainComponent>
-          </ChatProvider>
-        </CommunityProvider>
-      </AgentProvider>
-    </UIProvider>
+    <div className={styles.appContainer}>
+      <ChatView
+        element={element}
+        agent={agent}
+        perspective={perspective}
+        source={source}
+        threaded={!!threaded}
+      ></ChatView>
+    </div>
   );
-};
+}

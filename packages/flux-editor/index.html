@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="src/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flux Editor</title>
+
+    <style>
+      html {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        color: var(--j-color-ui-800);
+        background: var(--j-color-white);
+      }
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
+      flux-editor {
+        box-sizing: border-box;
+        display: block;
+        width: 100%;
+        padding: 10px;
+      }
+      flux-editor.chat {
+        --body-min-height: auto;
+        --grid-template-areas: "toolbar toolbar toolbar" "body body footer";
+      }
+      flux-editor.chat::part(toolbar) {
+        display: none;
+      }
+      flux-editor.chat.showToolbar::part(toolbar) {
+        display: block;
+      }
+      flux-editor.chat::part(footer) {
+        align-items: end;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module" src="/src/flux-editor.ts"></script>
+
+    <flux-container>
+      <flux-editor class="chat" placeholder="Add a message...">
+        <footer slot="footer">
+          <j-button class="submit" circle square size="sm" variant="primary">
+            <j-icon size="xs" name="send"></j-icon>
+          </j-button>
+          <j-button
+            class="toggle-formatting"
+            circle
+            square
+            size="sm"
+            variant="ghost"
+          >
+            <j-icon size="sm" name="type"></j-icon>
+          </j-button>
+        </footer>
+      </flux-editor>
+    </flux-container>
+
+    <script type="module">
+      import "@fluxapp/flux-container";
+      import Editor from "./src/flux-editor.ts";
+
+      document
+        .querySelector(".toggle-formatting")
+        .addEventListener("click", () => {
+          document.querySelector("flux-editor").classList.toggle("showToolbar");
+        });
+
+      document.querySelector(".submit").addEventListener("click", () => {
+        document.querySelector("flux-editor").submit();
+      });
+
+      customElements.define("flux-editor", Editor);
+    </script>
+  </body>
+</html>

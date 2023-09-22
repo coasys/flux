@@ -1,23 +1,19 @@
 import "preact/debug";
+import "@fluxapp/ui/dist/main.d.ts";
+import { toCustomElement } from "@fluxapp/react-web";
+import Editor from "@fluxapp/flux-editor";
+import App from "./App";
 
-if (!window.ResizeObserver) window.ResizeObserver = ResizeObserver;
-
-// dynamic import of emoji picker only if it's not defined already
-if (customElements.get("emoji-picker") === undefined) {
-  import("emoji-picker-element");
+if (!customElements.get("flux-editor")) {
+  customElements.define("flux-editor", Editor);
 }
 
-if (customElements.get("ad4m-connect") === undefined) {
-  import("@perspect3vism/ad4m-connect");
-}
-
-import register from "./custom-element.js";
-import MyComponent from "./App";
-
-const CustomElement = register.toCustomElement(
-  MyComponent,
-  ["perspective", "source"],
-  { shadow: false }
+const CustomElement: HTMLElement = toCustomElement(
+  App,
+  ["perspective", "agent", "source", "threaded"],
+  {
+    shadow: false,
+  }
 );
 
 export default CustomElement;

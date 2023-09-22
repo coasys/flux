@@ -15,8 +15,8 @@
       <j-tooltip title="Profile">
         <Avatar
           class="left-nav__profile-icon"
-          :did="userStore.agent.did"
-          :url="userStore.profile?.profileThumbnailPicture"
+          :did="me?.did"
+          :url="profile?.profileThumbnailPicture"
           @click="() => navigate()"
         ></Avatar>
       </j-tooltip>
@@ -27,21 +27,26 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { useAppStore } from "@/store/app";
-import { useUserStore } from "@/store/user";
 import { mapActions, mapState } from "pinia";
 import Avatar from "@/components/avatar/Avatar.vue";
+import { useMe } from "@fluxapp/vue";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export default defineComponent({
   components: {
     Avatar,
   },
-  setup() {
+  async setup() {
     const appStore = useAppStore();
-    const userStore = useUserStore();
+
+    const client = await getAd4mClient();
+
+    const { profile, me } = useMe(client.agent);
 
     return {
+      me,
+      profile,
       appStore,
-      userStore,
     };
   },
   data() {
@@ -51,7 +56,6 @@ export default defineComponent({
   },
 
   methods: {
-    ...mapState(useUserStore, ["profile", "agent"]),
     ...mapActions(useAppStore, ["setShowEditProfile", "setShowSettings"]),
     logOut(): void {
       this.$router.replace({ name: "login" });

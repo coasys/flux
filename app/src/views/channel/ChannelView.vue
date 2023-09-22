@@ -19,26 +19,32 @@
             <j-flex a="center" gap="200">
               <j-icon name="hash" size="md" color="ui-300"></j-icon>
               <j-text color="black" weight="700" size="500" nomargin>
-                {{ channel.name }}
+                {{ channel?.name }}
               </j-text>
             </j-flex>
           </j-box>
           <div class="channel-view__tabs">
-            <label class="channel-view-tab" v-for="view in filteredViewOptions">
+            <label
+              :class="{
+                'channel-view-tab': true,
+                checked: app.pkg === currentView,
+              }"
+              v-for="app in apps"
+            >
               <input
-                :name="channel.id"
+                :name="channel?.id"
                 type="radio"
-                :checked.prop="view.type === currentView"
-                :value.prop="view.type"
+                :checked.prop="app.pkg === currentView"
+                :value.prop="app.pkg"
                 @change="changeCurrentView"
               />
-              <j-icon size="xs" :name="view.icon"></j-icon>
-              <span>{{ view.title }}</span>
+              <j-icon :name="app.icon" size="xs"></j-icon>
+              <span>{{ app.name }}</span>
             </label>
             <j-tooltip placement="auto" title="Manage views">
               <j-button
                 v-if="sameAgent"
-                @click="() => goToEditChannel(channel.id)"
+                @click="() => goToEditChannel(channel?.id)"
                 size="sm"
                 variant="ghost"
               >
@@ -66,61 +72,25 @@
       </div>
     </div>
 
-    <forum-view
-      v-show="currentView === ChannelView.Forum"
-      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Forum)"
-      class="perspective-view"
-      :source="channel.id"
-      :perspective="communityId"
-      @agent-click="onAgentClick"
-      @channel-click="onChannelClick"
-      @neighbourhood-click="onNeighbourhoodClick"
-      @hide-notification-indicator="onHideNotificationIndicator"
-    ></forum-view>
-    <graph-view
-      v-show="currentView === ChannelView.Graph"
-      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Graph)"
-      class="perspective-view"
-      :source="channel.id"
-      :perspective="communityId"
-      @agent-click="onAgentClick"
-      @channel-click="onChannelClick"
-      @neighbourhood-click="onNeighbourhoodClick"
-      @hide-notification-indicator="onHideNotificationIndicator"
-    ></graph-view>
-    <webrtc-view
-      v-show="currentView === ChannelView.Voice"
-      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Voice)"
-      class="perspective-view"
-      :source="channel.id"
-      :perspective="communityId"
-      @agent-click="onAgentClick"
-      @channel-click="onChannelClick"
-      @neighbourhood-click="onNeighbourhoodClick"
-      @hide-notification-indicator="onHideNotificationIndicator"
-    ></webrtc-view>
-    <webrtc-debug-view
-      v-show="currentView === ChannelView.Debug"
-      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Debug)"
-      class="perspective-view"
-      :source="channel.id"
-      :perspective="communityId"
-      @agent-click="onAgentClick"
-      @channel-click="onChannelClick"
-      @neighbourhood-click="onNeighbourhoodClick"
-      @hide-notification-indicator="onHideNotificationIndicator"
-    ></webrtc-debug-view>
-    <chat-view
-      v-show="currentView === ChannelView.Chat"
-      v-if="filteredViewOptions.find((v) => v.type === ChannelView.Chat)"
-      class="perspective-view"
-      :source="channel.id"
-      :perspective="communityId"
-      @agent-click="onAgentClick"
-      @channel-click="onChannelClick"
-      @neighbourhood-click="onNeighbourhoodClick"
-      @hide-notification-indicator="onHideNotificationIndicator"
-    ></chat-view>
+    <template v-for="app in apps">
+      <component
+        v-if="wcNames[app.pkg]"
+        v-show="currentView === app.pkg && wcNames[app.pkg]"
+        :is="wcNames[app.pkg]"
+        class="perspective-view"
+        :source="channelId"
+        :agent.prop="agentClient"
+        :perspective.prop="data.perspective"
+        @click="onViewClick"
+        @hide-notification-indicator="onHideNotificationIndicator"
+      />
+      <j-box pt="1000" v-show="currentView === app.pkg" v-else>
+        <j-flex direction="column" a="center" j="center" gap="500">
+          <j-spinner></j-spinner>
+          <span>Loading plugin...</span>
+        </j-flex>
+      </j-box>
+    </template>
 
     <j-modal
       size="xs"
@@ -144,20 +114,28 @@
 </template>
 
 <script lang="ts">
-import ForumView from "@fluxapp/forum-view";
-import ChatView from "@fluxapp/chat-view";
-import GraphView from "@fluxapp/graph-view";
-import VoiceView from "@fluxapp/webrtc-view";
-import { defineComponent, ref } from "vue";
-import { ChannelState, CommunityState } from "@/store/types";
-import { useDataStore } from "@/store/data";
+import { defineComponent, ref, watch } from "vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Profile from "@/containers/Profile.vue";
 import { useAppStore } from "@/store/app";
-import { useUserStore } from "@/store/user";
-import { ChannelView } from "utils/types";
-import { viewOptions } from "@/constants";
+import { ChannelView } from "@fluxapp/types";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
+import {
+  useEntry,
+  usePerspective,
+  usePerspectives,
+  useMe,
+  useEntries,
+} from "@fluxapp/vue";
+import {
+  Community,
+  Channel,
+  App,
+  joinCommunity,
+  generateWCName,
+} from "@fluxapp/api";
+import { Ad4mClient } from "@perspect3vism/ad4m";
+import fetchFluxApp from "@/utils/fetchFluxApp";
 
 interface MentionTrigger {
   label: string;
@@ -167,20 +145,55 @@ interface MentionTrigger {
 
 export default defineComponent({
   name: "ChannelView",
-  props: ["channelId", "communityId"],
+  props: {
+    communityId: String,
+    channelId: String,
+  },
   components: {
     Profile,
     Hourglass,
   },
-  setup() {
+  async setup(props) {
+    const client: Ad4mClient = await getAd4mClient();
+
+    const { perspectives } = usePerspectives(client);
+
+    const { data } = usePerspective(client, () => props.communityId);
+
+    const { entry: community } = useEntry({
+      perspective: () => data.value.perspective,
+      model: Community,
+    });
+
+    const { entry: channel, repo: channelRepo } = useEntry({
+      perspective: () => data.value.perspective,
+      id: () => props.channelId,
+      model: Channel,
+    });
+
+    const { entries: apps } = useEntries({
+      perspective: () => data.value.perspective,
+      source: () => props.channelId,
+      model: App,
+    });
+
+    const { me } = useMe(client.agent);
+
     return {
+      agentClient: client.agent,
+      agent: me,
+      wcNames: ref<Record<string, string>>({}),
+      apps,
+      perspectives,
+      data,
+      community,
+      channel,
+      channelRepo,
+      currentView: ref(""),
+      allDefined: ref(false),
       ChannelView: ChannelView,
-      selectedViews: ref<ChannelView[]>([]),
       showEditChannel: ref(false),
-      selectedChannelView: ref("chat"),
       appStore: useAppStore(),
-      dataStore: useDataStore(),
-      userStore: useUserStore(),
       script: null as HTMLElement | null,
       memberMentions: ref<MentionTrigger[]>([]),
       activeProfile: ref<string>(""),
@@ -189,100 +202,125 @@ export default defineComponent({
       isExpanded: ref(false),
     };
   },
-  async mounted() {
-    if (!customElements.get("chat-view")) {
-      const module = await import(`@fluxapp/chat-view`);
-      customElements.define("chat-view", module.default);
-    }
-    if (!customElements.get("forum-view")) {
-      const module = await import(`@fluxapp/forum-view`);
-      customElements.define("forum-view", module.default);
-    }
-    if (!customElements.get("graph-view")) {
-      const module = await import(`@fluxapp/graph-view`);
-      customElements.define("graph-view", module.default);
-    }
-    if (!customElements.get("webrtc-view")) {
-      const module = await import(`@fluxapp/webrtc-view`);
-      customElements.define("webrtc-view", module.default);
-    }
-    if (!customElements.get("webrtc-debug-view")) {
-      const module = await import(`flux-webrtc-debug-view`);
-      customElements.define("webrtc-debug-view", module.default);
-    }
-  },
   computed: {
     sameAgent() {
-      return this.channel.author === this.userStore.agent.did;
+      return this.channel?.author === this.agent?.did;
     },
-    currentView(): string {
-      return this.channel.currentView || this.channel.views[0] || "";
-    },
-    filteredViewOptions() {
-      return viewOptions.filter((view) =>
-        this.channel.views.includes(view.type)
-      );
-    },
-    community(): CommunityState {
-      const communityId = this.communityId;
-      return this.dataStore.getCommunityState(communityId as string);
-    },
-    channel(): ChannelState {
-      return this.dataStore.channels[this.channelId];
+  },
+  watch: {
+    apps: {
+      handler: function (val) {
+        if (!this.currentView) {
+          this.currentView = val[0]?.pkg;
+        }
+
+        console.log(JSON.stringify(val));
+
+        // Add new views
+        val?.forEach(async (app: App) => {
+          const wcName = await generateWCName(app.pkg);
+
+          if (!customElements.get(wcName)) {
+            const module = await fetchFluxApp(app.pkg);
+            await customElements.define(wcName, module.default);
+            console.log("fetched the new app");
+            setTimeout(() => {
+              console.log("why this not updating", wcName, app.pkg);
+              this.wcNames[app.pkg] = wcName;
+            }, 200);
+          } else {
+            console.log("this should update", app.pkg, wcName, this.wcNames);
+            this.wcNames[app.pkg] = wcName;
+          }
+        });
+      },
+      deep: true,
+      immediate: true,
     },
   },
   methods: {
+    async onViewClick(e: any) {
+      const parentLink = e.target.closest("a");
+      if (parentLink) {
+        const url = parentLink.href;
+
+        if (url.startsWith("neighbourhood://")) {
+          this.onNeighbourhoodClick(url);
+        }
+
+        if (url.startsWith("did:")) {
+          this.onAgentClick(url);
+        }
+
+        if (url.startsWith("literal://")) {
+          const isChannel = this.data.perspective?.isSubjectInstance(
+            url,
+            Channel
+          );
+          if (isChannel) {
+            this.$router.push({
+              name: "channel",
+              params: {
+                communityId: this.communityId,
+                channelId: url,
+              },
+            });
+          }
+        }
+
+        if (!url.startsWith("http")) {
+          e.preventDefault();
+        }
+      }
+    },
+
     goToEditChannel(id: string) {
       this.appStore.setActiveChannel(id);
       this.appStore.setShowEditChannel(true);
     },
     changeCurrentView(e: any) {
       const value = e.target.value;
-      this.dataStore.setCurrentChannelView({
-        channelId: this.channel.id,
-        view: value,
-      });
+      this.currentView = value;
     },
     toggleSidebar() {
       this.appStore.toggleSidebar();
     },
-    onAgentClick({ detail }: any) {
-      this.toggleProfile(true, detail.did);
+    onAgentClick(did: string) {
+      this.toggleProfile(true, did);
     },
-    onChannelClick({ detail }: any) {
+    onChannelClick(channel: string) {
       this.$router.push({
         name: "channel",
         params: {
-          channelId: detail.channel,
-          communityId: detail.uuid || this.community.neighbourhood.uuid,
+          channelId: channel,
+          communityId: this.$route.params.communityId,
         },
       });
     },
-    onNeighbourhoodClick({ detail }: any) {
-      let community = this.dataStore.getCommunities.find(
-        (e) => e.neighbourhood.neighbourhoodUrl === detail.url
+    onNeighbourhoodClick(url: any) {
+      let neighbourhood = Object.values(this.perspectives).find(
+        (e) => e.sharedUrl === url
       );
 
-      if (!community) {
-        this.joinCommunity(detail.url);
+      if (!neighbourhood) {
+        this.joinCommunity(url);
       } else {
         this.$router.push({
           name: "community",
           params: {
-            communityId: community.neighbourhood.uuid,
+            communityId: neighbourhood.uuid,
           },
         });
       }
     },
     joinCommunity(url: string) {
       this.isJoiningCommunity = true;
-      this.dataStore
-        .joinCommunity({ joiningLink: url })
+      joinCommunity({ joiningLink: url })
         .then((community) => {
           this.$router.push({
             name: "community",
             params: {
-              communityId: community.neighbourhood.uuid,
+              communityId: community.uuid,
             },
           });
         })
@@ -294,11 +332,12 @@ export default defineComponent({
       const { channelId } = this.$route.params;
 
       if (channelId) {
-        this.dataStore.setHasNewMessages({
-          communityId: this.community.neighbourhood.uuid,
-          channelId: channelId as string,
-          value: false,
-        });
+        // TODO: Set channel has new messages
+        // this.dataStore.setHasNewMessages({
+        //   communityId: this.$route.params.communityId as string,
+        //   channelId: channelId as string,
+        //   value: false,
+        // });
       }
     },
     toggleProfile(open: boolean, did?: any): void {
@@ -322,7 +361,7 @@ export default defineComponent({
           name: "profile",
           params: {
             did,
-            communityId: this.community.neighbourhood.uuid,
+            communityId: this.$route.params.communityId,
           },
         });
       }
@@ -342,7 +381,7 @@ export default defineComponent({
 }
 
 .channel-view {
-  background-color: var(--app-channel-bg-color, transparent);
+  background: var(--app-channel-bg-color, transparent);
 }
 
 .channel-view__header {
@@ -351,7 +390,7 @@ export default defineComponent({
   gap: var(--j-space-400);
   padding: 0 var(--j-space-200);
   position: sticky;
-  background-color: var(--app-channel-header-bg-color, transparent);
+  background: var(--app-channel-header-bg-color, transparent);
   border-bottom: 1px solid
     var(--app-channel-header-border-color, var(--j-border-color));
   height: var(--app-header-height);
@@ -407,7 +446,7 @@ export default defineComponent({
   color: var(--j-color-black);
 }
 
-.channel-view-tab:has(input:checked) {
+.channel-view-tab.checked {
   position: relative;
   border-bottom: 1px solid var(--j-color-primary-500);
   color: var(--j-color-black);
@@ -429,5 +468,10 @@ export default defineComponent({
     justify-content: space-between;
     gap: 0;
   }
+}
+
+.perspective-view {
+  display: block;
+  height: calc(100% - var(--app-header-height));
 }
 </style>

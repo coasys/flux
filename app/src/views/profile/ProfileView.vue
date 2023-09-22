@@ -66,7 +66,7 @@
               :value="currentTab"
             >
               <j-tab-item value="communities">
-                Communities ({{ communities.length }})
+                Communities ({{ Object.keys(communities).length }})
               </j-tab-item>
               <j-tab-item value="weblinks">
                 Weblinks ({{ weblinks.length }})
@@ -76,7 +76,7 @@
             <div v-show="currentTab === 'communities'">
               <j-box py="500" align="right">
                 <j-button
-                  variant="subtle"
+                  variant="primary"
                   @click="() => setShowCreateCommunity(true)"
                   v-if="sameAgent"
                 >
@@ -88,17 +88,17 @@
                 <CommunityCard
                   v-for="(community, key) in communities"
                   :key="key"
-                  :name="community.neighbourhood.name"
-                  :description="community.neighbourhood.description"
-                  :url="community.neighbourhood.image"
-                  :uuid="community.neighbourhood.uuid"
+                  :name="community.name"
+                  :description="community.description"
+                  :url="community.image || null"
+                  :uuid="key"
                 ></CommunityCard>
               </div>
             </div>
             <div v-show="currentTab === 'weblinks'">
               <j-box py="500" align="right">
                 <j-button
-                  variant="subtle"
+                  variant="primary"
                   @click="() => (showAddlinkModal = true)"
                 >
                   <j-icon slot="start" name="plus" size="sm"></j-icon>
@@ -167,23 +167,23 @@
 </template>
 
 <script lang="ts">
-import { useDataStore } from "@/store/data";
-import { Profile } from "utils/types";
+import { Profile } from "@fluxapp/types";
 import { ModalsState } from "@/store/types";
-import { LinkExpression, Literal } from "@perspect3vism/ad4m";
+import { LinkExpression } from "@perspect3vism/ad4m";
 import { defineComponent } from "vue";
 import WebLinkCard from "./WebLinkCard.vue";
 import CommunityCard from "./CommunityCard.vue";
 import ProfileJoinLink from "./ProfileJoinLink.vue";
 import EditProfile from "@/containers/EditProfile.vue";
 import { useAppStore } from "@/store/app";
-import { useUserStore } from "@/store/user";
 import { mapActions } from "pinia";
 import Avatar from "@/components/avatar/Avatar.vue";
-import getProfile from "utils/api/getProfile";
-import { getImage } from "utils/helpers/getImage";
+import { getImage } from "@fluxapp/utils";
 import WebLinkAdd from "./WebLinkAdd.vue";
-import getAgentWebLinks from "utils/api/getAgentWebLinks";
+import { getAgentWebLinks } from "@fluxapp/api";
+import { usePerspectives, useCommunities, useAgent, useMe } from "@fluxapp/vue";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { useRoute } from "vue-router";
 
 export default defineComponent({
   name: "ProfileView",
@@ -195,14 +195,27 @@ export default defineComponent({
     WebLinkAdd,
     Avatar,
   },
-  setup() {
+  async setup() {
+    const route = useRoute();
+
+    const client = await getAd4mClient();
+    const { neighbourhoods } = usePerspectives(client);
+    const { communities } = useCommunities(neighbourhoods);
+
+    const { me } = useMe(client.agent);
+
+    const { profile } = useAgent(
+      client.agent,
+      () => route.params.did || me.value?.did
+    );
     const appStore = useAppStore();
-    const dataStore = useDataStore();
-    const userStore = useUserStore();
+
     return {
+      me,
+      profile,
+      neighbourhoods,
+      communities,
       appStore,
-      dataStore,
-      userStore,
     };
   },
   data() {
@@ -222,13 +235,6 @@ export default defineComponent({
     this.appStore.changeCurrentTheme("global");
   },
   methods: {
-    async getProfile() {
-      if (this.sameAgent) {
-        this.profile = this.userStore.profile;
-      } else {
-        this.profile = await getProfile(this.did);
-      }
-    },
     setAddLinkModal(value: boolean): void {
       this.showAddlinkModal = value;
     },
@@ -255,24 +261,20 @@ export default defineComponent({
     showAddlinkModal() {
       if (!this.showAddlinkModal) {
         this.getAgentAreas();
-        this.getProfile();
       }
     },
     showEditlinkModal() {
       if (!this.showEditlinkModal) {
         this.getAgentAreas();
-        this.getProfile();
       }
     },
     "modals.showEditProfile"() {
       if (!this.modals.showEditProfile) {
         this.getAgentAreas();
-        this.getProfile();
       }
     },
     did: {
       handler: async function () {
-        this.getProfile();
         this.getAgentAreas();
       },
       immediate: true,
@@ -291,15 +293,10 @@ export default defineComponent({
       return this.$router.options.history.state.back;
     },
     did(): string {
-      return (
-        (this.$route.params.did as string) || this.userStore.agent.did || ""
-      );
+      return (this.$route.params.did as string) || this.me?.did || "";
     },
     sameAgent() {
-      return this.did === this.userStore.agent.did;
-    },
-    communities() {
-      return this.dataStore.getCommunities;
+      return this.did === this.me?.did;
     },
     modals(): ModalsState {
       return this.appStore.modals;
@@ -310,17 +307,29 @@ export default defineComponent({
 
 <style lang="css" scoped>
 .profile {
+  --avatar-size: clamp(var(--j-size-xxl), 10vw, 160px);
   width: 100%;
-  max-width: 1200px;
+  max-width: 900px;
   margin: auto;
   padding-left: var(--j-space-500);
   padding-right: var(--j-space-500);
 }
 
 .avatar {
-  --j-avatar-size: 100px;
-  --j-skeleton-height: 100px;
-  --j-skeleton-width: 100px;
+  --j-avatar-size: var(--avatar-size);
+  --j-skeleton-height: var(--avatar-size);
+  --j-skeleton-width: var(--avatar-size);
+}
+
+.avatar::part(base) {
+  border-radius: 20px;
+  display: inline-block;
+  border-radius: 30px;
+  border: 7px solid var(--j-color-white);
+}
+
+.avatar::part(img) {
+  border-radius: 20px;
 }
 
 .profile__layout {
@@ -329,13 +338,6 @@ export default defineComponent({
   gap: var(--j-space-500);
 }
 
-@media (min-width: 800px) {
-  .profile__layout {
-    display: grid;
-    grid-template-columns: 2fr 5fr;
-    gap: var(--j-space-900);
-  }
-}
 .profile__container {
   width: 100%;
   height: 100%;
@@ -367,11 +369,7 @@ export default defineComponent({
   align-items: end;
   justify-content: space-between;
   width: 100%;
-  margin-top: -60px;
-}
-
-.profile__info {
-  padding: var(--j-space-500);
+  margin-top: calc(var(--avatar-size) * -0.5);
 }
 
 .add {

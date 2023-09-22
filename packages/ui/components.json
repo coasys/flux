@@ -3,7 +3,7 @@
   "tags": [
     {
       "name": "j-component",
-      "path": "./src/components/_template/Component.ts",
+      "path": "./lib/components/_template/Component.ts",
       "attributes": [
         {
           "name": "variant",
@@ -25,7 +25,7 @@
     },
     {
       "name": "j-avatar",
-      "path": "./src/components/avatar/Avatar.ts",
+      "path": "./lib/components/avatar/Avatar.ts",
       "attributes": [
         {
           "name": "src",
@@ -121,7 +121,7 @@
     },
     {
       "name": "j-badge",
-      "path": "./src/components/badge/Badge.ts",
+      "path": "./lib/components/badge/Badge.ts",
       "attributes": [
         {
           "name": "variant",
@@ -156,82 +156,92 @@
     },
     {
       "name": "j-box",
-      "path": "./src/components/box/Box.ts",
+      "path": "./lib/components/box/Box.ts",
       "attributes": [
         {
           "name": "p",
           "description": "Padding",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "pl",
           "description": "Padding left",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "pr",
           "description": "Padding right",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "pt",
           "description": "Padding top",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "pb",
           "description": "Padding bottom",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "px",
           "description": "Padding horistonal",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "py",
           "description": "Padding vertical",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "m",
           "description": "Margin",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "ml",
           "description": "Margin left",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "mr",
           "description": "Margin right",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "mt",
           "description": "Margin top",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "mb",
           "description": "Margin bottom",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "mx",
           "description": "Margin horistonal",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "my",
           "description": "Margin vertical",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "bg",
           "description": "Background color",
-          "type": "\"\"|\"ui-100\"|\"ui-200\"|\"ui-300\"|\"ui-400\"|\"ui-500\"|\"ui-600\"|\"ui-700\"|\"ui-800\"|\"ui-900"
+          "type": "\"\""
+        },
+        {
+          "name": "color",
+          "description": "Color",
+          "type": "\"\""
+        },
+        {
+          "name": "radius",
+          "description": "Border radius",
+          "type": "\"\"|\"sm\"|\"md\"|\"lg\""
         }
       ],
       "properties": [
@@ -244,102 +254,119 @@
           "name": "p",
           "attribute": "p",
           "description": "Padding",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "pl",
           "attribute": "pl",
           "description": "Padding left",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "pr",
           "attribute": "pr",
           "description": "Padding right",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "pt",
           "attribute": "pt",
           "description": "Padding top",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "pb",
           "attribute": "pb",
           "description": "Padding bottom",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "px",
           "attribute": "px",
           "description": "Padding horistonal",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "py",
           "attribute": "py",
           "description": "Padding vertical",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "m",
           "attribute": "m",
           "description": "Margin",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "ml",
           "attribute": "ml",
           "description": "Margin left",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "mr",
           "attribute": "mr",
           "description": "Margin right",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "mt",
           "attribute": "mt",
           "description": "Margin top",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "mb",
           "attribute": "mb",
           "description": "Margin bottom",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "mx",
           "attribute": "mx",
           "description": "Margin horistonal",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "my",
           "attribute": "my",
           "description": "Margin vertical",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "bg",
           "attribute": "bg",
           "description": "Background color",
-          "type": "\"\"|\"ui-100\"|\"ui-200\"|\"ui-300\"|\"ui-400\"|\"ui-500\"|\"ui-600\"|\"ui-700\"|\"ui-800\"|\"ui-900"
+          "type": "\"\""
+        },
+        {
+          "name": "color",
+          "attribute": "color",
+          "description": "Color",
+          "type": "\"\""
+        },
+        {
+          "name": "radius",
+          "attribute": "radius",
+          "description": "Border radius",
+          "type": "\"\"|\"sm\"|\"md\"|\"lg\""
         }
       ]
     },
     {
       "name": "j-button",
-      "path": "./src/components/button/Button.ts",
+      "path": "./lib/components/button/Button.ts",
       "attributes": [
         {
           "name": "variant",
           "description": "Variations",
-          "type": "\"\"|\"link\"|\"primary\"|\"subtle\"|\"transparent\"|"
+          "type": "\"\"|\"link\"|\"primary\"|\"subtle\"|\"transparent\"|\"ghost\""
+        },
+        {
+          "name": "href",
+          "description": "Href",
+          "type": "string"
         },
         {
           "name": "size",
@@ -387,7 +414,13 @@
           "name": "variant",
           "attribute": "variant",
           "description": "Variations",
-          "type": "\"\"|\"link\"|\"primary\"|\"subtle\"|\"transparent\"|"
+          "type": "\"\"|\"link\"|\"primary\"|\"subtle\"|\"transparent\"|\"ghost\""
+        },
+        {
+          "name": "href",
+          "attribute": "href",
+          "description": "Href",
+          "type": "string"
         },
         {
           "name": "size",
@@ -434,12 +467,12 @@
     },
     {
       "name": "j-carousel",
-      "path": "./src/components/carousel/Carousel.ts",
+      "path": "./lib/components/carousel/Carousel.ts",
       "attributes": [
         {
           "name": "gap",
           "description": "Gap",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         }
       ],
       "properties": [
@@ -452,7 +485,7 @@
           "name": "gap",
           "attribute": "gap",
           "description": "Gap",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "nearestIndex",
@@ -482,7 +515,7 @@
     },
     {
       "name": "j-checkbox",
-      "path": "./src/components/checkbox/Checkbox.js",
+      "path": "./lib/components/checkbox/Checkbox.js",
       "attributes": [
         {
           "name": "checked",
@@ -555,13 +588,32 @@
       ]
     },
     {
+      "name": "j-emoji-picker",
+      "path": "./lib/components/emoji-picker/EmojiPicker.ts",
+      "properties": [
+        {
+          "name": "styles",
+          "type": "CSSResult[]",
+          "default": "[\"sharedStyles\",\"styles\"]"
+        }
+      ],
+      "events": [
+        {
+          "name": "change"
+        },
+        {
+          "name": "clickoutside"
+        }
+      ]
+    },
+    {
       "name": "j-flex",
-      "path": "./src/components/flex/Flex.ts",
+      "path": "./lib/components/flex/Flex.ts",
       "attributes": [
         {
           "name": "j",
           "description": "Justify content",
-          "type": "\"\"|\"center\"|\"start\"|\"end\""
+          "type": "\"\"|\"center\"|\"start\"|\"end\"|\"between\"|\"around\""
         },
         {
           "name": "a",
@@ -577,7 +629,7 @@
         {
           "name": "gap",
           "description": "Gap",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "direction",
@@ -595,7 +647,7 @@
           "name": "j",
           "attribute": "j",
           "description": "Justify content",
-          "type": "\"\"|\"center\"|\"start\"|\"end\""
+          "type": "\"\"|\"center\"|\"start\"|\"end\"|\"between\"|\"around\""
         },
         {
           "name": "a",
@@ -614,7 +666,7 @@
           "name": "gap",
           "attribute": "gap",
           "description": "Gap",
-          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900"
+          "type": "\"\"|\"100\"|\"200\"|\"300\"|\"400\"|\"500\"|\"600\"|\"700\"|\"800\"|\"900\""
         },
         {
           "name": "direction",
@@ -626,7 +678,7 @@
     },
     {
       "name": "j-icon",
-      "path": "./src/components/icon/Icon.ts",
+      "path": "./lib/components/icon/Icon.ts",
       "attributes": [
         {
           "name": "name",
@@ -636,7 +688,7 @@
         {
           "name": "size",
           "description": "Size",
-          "type": "\"\"|\"sm\"|\"lg\""
+          "type": "\"\"|\"xs\"|\"sm\"|\"lg\"|\"xl\""
         },
         {
           "name": "color",
@@ -660,7 +712,7 @@
           "name": "size",
           "attribute": "size",
           "description": "Size",
-          "type": "\"\"|\"sm\"|\"lg\""
+          "type": "\"\"|\"xs\"|\"sm\"|\"lg\"|\"xl\""
         },
         {
           "name": "color",
@@ -677,7 +729,7 @@
     },
     {
       "name": "j-input",
-      "path": "./src/components/input/Input.js",
+      "path": "./lib/components/input/Input.js",
       "attributes": [
         {
           "name": "value",
@@ -935,8 +987,8 @@
       ]
     },
     {
-      "name": "j-menu-group-item",
-      "path": "./src/components/menu-group-item/MenuGroupItem.ts",
+      "name": "j-menu-group",
+      "path": "./lib/components/menu-group/MenuGroup.ts",
       "attributes": [
         {
           "name": "collapsible",
@@ -986,7 +1038,7 @@
     },
     {
       "name": "j-menu-item",
-      "path": "./src/components/menu-item/MenuItem.ts",
+      "path": "./lib/components/menu-item/MenuItem.ts",
       "attributes": [
         {
           "name": "selected",
@@ -1033,7 +1085,7 @@
     },
     {
       "name": "j-menu",
-      "path": "./src/components/menu/Menu.ts",
+      "path": "./lib/components/menu/Menu.ts",
       "properties": [
         {
           "name": "styles",
@@ -1044,7 +1096,7 @@
     },
     {
       "name": "j-modal",
-      "path": "./src/components/modal/Modal.ts",
+      "path": "./lib/components/modal/Modal.ts",
       "attributes": [
         {
           "name": "size",
@@ -1086,7 +1138,7 @@
     },
     {
       "name": "j-popover",
-      "path": "./src/components/popover/Popover.ts",
+      "path": "./lib/components/popover/Popover.ts",
       "attributes": [
         {
           "name": "open",
@@ -1097,7 +1149,7 @@
         {
           "name": "placement",
           "description": "Placement",
-          "type": "\"auto\"|\"auto-start\"|\"auto-end\"|\"top\"|\"top-start\"|\"top-end\"|\"bottom\"|\"bottom-start\"|\"bottom-end\"|\"right\"|\"right-start\"|\"right-end\"|\"left\"|\"left-start\"|\"left-end",
+          "type": "\"auto\"|\"auto-start\"|\"auto-end\"|\"top\"|\"top-start\"|\"top-end\"|\"bottom\"|\"bottom-start\"|\"bottom-end\"|\"right\"|\"right-start\"|\"right-end\"|\"left\"|\"left-start\"|\"left-end\"",
           "default": "\"auto\""
         },
         {
@@ -1124,7 +1176,7 @@
           "name": "placement",
           "attribute": "placement",
           "description": "Placement",
-          "type": "\"auto\"|\"auto-start\"|\"auto-end\"|\"top\"|\"top-start\"|\"top-end\"|\"bottom\"|\"bottom-start\"|\"bottom-end\"|\"right\"|\"right-start\"|\"right-end\"|\"left\"|\"left-start\"|\"left-end",
+          "type": "\"auto\"|\"auto-start\"|\"auto-end\"|\"top\"|\"top-start\"|\"top-end\"|\"bottom\"|\"bottom-start\"|\"bottom-end\"|\"right\"|\"right-start\"|\"right-end\"|\"left\"|\"left-start\"|\"left-end\"",
           "default": "\"auto\""
         },
         {
@@ -1169,7 +1221,7 @@
     },
     {
       "name": "j-radio-button",
-      "path": "./src/components/radio-button/RadioButton.js",
+      "path": "./lib/components/radio-button/RadioButton.js",
       "attributes": [
         {
           "name": "checked",
@@ -1263,7 +1315,7 @@
     },
     {
       "name": "j-select",
-      "path": "./src/components/select/Select.ts",
+      "path": "./lib/components/select/Select.ts",
       "attributes": [
         {
           "name": "value",
@@ -1338,7 +1390,7 @@
     },
     {
       "name": "j-skeleton",
-      "path": "./src/components/skeleton/Skeleton.ts",
+      "path": "./lib/components/skeleton/Skeleton.ts",
       "attributes": [
         {
           "name": "variant",
@@ -1348,12 +1400,14 @@
         {
           "name": "height",
           "description": "Height",
-          "type": "\"\"|\"xxs\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\"|\"xxl\"|\"text\""
+          "type": "\"\"|\"xxs\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\"|\"xxl\"|\"text\"",
+          "default": "\"md\""
         },
         {
           "name": "width",
           "description": "Width",
-          "type": "\"\"|\"xxs\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\"|\"xxl\"|\"text\""
+          "type": "\"\"|\"xxs\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\"|\"xxl\"|\"text\"",
+          "default": "\"md\""
         }
       ],
       "properties": [
@@ -1372,19 +1426,21 @@
           "name": "height",
           "attribute": "height",
           "description": "Height",
-          "type": "\"\"|\"xxs\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\"|\"xxl\"|\"text\""
+          "type": "\"\"|\"xxs\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\"|\"xxl\"|\"text\"",
+          "default": "\"md\""
         },
         {
           "name": "width",
           "attribute": "width",
           "description": "Width",
-          "type": "\"\"|\"xxs\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\"|\"xxl\"|\"text\""
+          "type": "\"\"|\"xxs\"|\"xs\"|\"sm\"|\"md\"|\"lg\"|\"xl\"|\"xxl\"|\"text\"",
+          "default": "\"md\""
         }
       ]
     },
     {
       "name": "j-spinner",
-      "path": "./src/components/spinner/Spinner.ts",
+      "path": "./lib/components/spinner/Spinner.ts",
       "attributes": [
         {
           "name": "size",
@@ -1408,7 +1464,7 @@
     },
     {
       "name": "j-tab-item",
-      "path": "./src/components/tab-item/TabItem.ts",
+      "path": "./lib/components/tab-item/TabItem.ts",
       "attributes": [
         {
           "name": "checked",
@@ -1421,16 +1477,6 @@
           "description": "Disabled",
           "type": "Boolean",
           "default": "false"
-        },
-        {
-          "name": "size",
-          "description": "Size",
-          "type": "\"sm\"|\"lg\""
-        },
-        {
-          "name": "variant",
-          "description": "Variant",
-          "type": "\"\"|\"button\""
         }
       ],
       "properties": [
@@ -1449,18 +1495,6 @@
           "default": "false"
         },
         {
-          "name": "size",
-          "attribute": "size",
-          "description": "Size",
-          "type": "\"sm\"|\"lg\""
-        },
-        {
-          "name": "variant",
-          "attribute": "variant",
-          "description": "Variant",
-          "type": "\"\"|\"button\""
-        },
-        {
           "name": "label",
           "type": "string"
         },
@@ -1477,7 +1511,7 @@
     },
     {
       "name": "j-tabs",
-      "path": "./src/components/tabs/Tabs.ts",
+      "path": "./lib/components/tabs/Tabs.ts",
       "attributes": [
         {
           "name": "value",
@@ -1485,8 +1519,24 @@
           "type": "String"
         },
         {
+          "name": "variant",
+          "description": "Variant",
+          "type": "String"
+        },
+        {
+          "name": "size",
+          "description": "Size",
+          "type": "\"sm\"|\"lg\""
+        },
+        {
           "name": "vertical",
           "description": "Vertical",
+          "type": "Boolean",
+          "default": "false"
+        },
+        {
+          "name": "wrap",
+          "description": "Wrap",
           "type": "Boolean",
           "default": "false"
         },
@@ -1510,9 +1560,28 @@
           "type": "String"
         },
         {
+          "name": "variant",
+          "attribute": "variant",
+          "description": "Variant",
+          "type": "String"
+        },
+        {
+          "name": "size",
+          "attribute": "size",
+          "description": "Size",
+          "type": "\"sm\"|\"lg\""
+        },
+        {
           "name": "vertical",
           "attribute": "vertical",
           "description": "Vertical",
+          "type": "Boolean",
+          "default": "false"
+        },
+        {
+          "name": "wrap",
+          "attribute": "wrap",
+          "description": "Wrap",
           "type": "Boolean",
           "default": "false"
         },
@@ -1539,7 +1608,7 @@
     },
     {
       "name": "j-text",
-      "path": "./src/components/text/Text.ts",
+      "path": "./lib/components/text/Text.ts",
       "attributes": [
         {
           "name": "size",
@@ -1549,7 +1618,7 @@
         {
           "name": "variant",
           "description": "Variants",
-          "type": "\"\"|\"heading-lg\"|\"heading\"|\"heading-sm\"|\"subheading\"|\"\"  ingress\"|\"body\"|\"label\"|\"footnote\"",
+          "type": "\"\"|\"heading-lg\"|\"heading\"|\"heading-sm\"|\"subheading\"|\"ingress\"|\"body\"|\"label\"|\"footnote\"",
           "default": "\"body\""
         },
         {
@@ -1602,7 +1671,7 @@
           "name": "variant",
           "attribute": "variant",
           "description": "Variants",
-          "type": "\"\"|\"heading-lg\"|\"heading\"|\"heading-sm\"|\"subheading\"|\"\"  ingress\"|\"body\"|\"label\"|\"footnote\"",
+          "type": "\"\"|\"heading-lg\"|\"heading\"|\"heading-sm\"|\"subheading\"|\"ingress\"|\"body\"|\"label\"|\"footnote\"",
           "default": "\"body\""
         },
         {
@@ -1648,7 +1717,7 @@
     },
     {
       "name": "j-timestamp",
-      "path": "./src/components/timestamp/Timestamp.ts",
+      "path": "./lib/components/timestamp/Timestamp.ts",
       "attributes": [
         {
           "name": "value",
@@ -1849,7 +1918,7 @@
     },
     {
       "name": "j-toast",
-      "path": "./src/components/toast/Toast.ts",
+      "path": "./lib/components/toast/Toast.ts",
       "attributes": [
         {
           "name": "variant",
@@ -1904,7 +1973,7 @@
     },
     {
       "name": "j-toggle",
-      "path": "./src/components/toggle/Toggle.js",
+      "path": "./lib/components/toggle/Toggle.js",
       "attributes": [
         {
           "name": "checked",
@@ -1978,7 +2047,7 @@
     },
     {
       "name": "j-tooltip",
-      "path": "./src/components/tooltip/Tooltip.ts",
+      "path": "./lib/components/tooltip/Tooltip.ts",
       "attributes": [
         {
           "name": "open",
@@ -1992,9 +2061,15 @@
           "type": "String"
         },
         {
+          "name": "strategy",
+          "description": "Strategy",
+          "type": "\"absolute\"|\"fixed\"",
+          "default": "\"absolute\""
+        },
+        {
           "name": "placement",
           "description": "Placement",
-          "type": "\"auto\"|\"auto-start\"|\"auto-end\"|\"top\"|\"top-start\"|\"top-end\"|\"bottom\"|\"bottom-start\"|\"bottom-end\"|\"right\"|\"right-start\"|\"right-end\"|\"left\"|\"left-start\"|\"left-end",
+          "type": "\"auto\"|\"auto-start\"|\"auto-end\"|\"top\"|\"top-start\"|\"top-end\"|\"bottom\"|\"bottom-start\"|\"bottom-end\"|\"right\"|\"right-start\"|\"right-end\"|\"left\"|\"left-start\"|\"left-end\"",
           "default": "\"auto\""
         }
       ],
@@ -2018,10 +2093,17 @@
           "type": "String"
         },
         {
+          "name": "strategy",
+          "attribute": "strategy",
+          "description": "Strategy",
+          "type": "\"absolute\"|\"fixed\"",
+          "default": "\"absolute\""
+        },
+        {
           "name": "placement",
           "attribute": "placement",
           "description": "Placement",
-          "type": "\"auto\"|\"auto-start\"|\"auto-end\"|\"top\"|\"top-start\"|\"top-end\"|\"bottom\"|\"bottom-start\"|\"bottom-end\"|\"right\"|\"right-start\"|\"right-end\"|\"left\"|\"left-start\"|\"left-end",
+          "type": "\"auto\"|\"auto-start\"|\"auto-end\"|\"top\"|\"top-start\"|\"top-end\"|\"bottom\"|\"bottom-start\"|\"bottom-end\"|\"right\"|\"right-start\"|\"right-end\"|\"left\"|\"left-start\"|\"left-end\"",
           "default": "\"auto\""
         },
         {

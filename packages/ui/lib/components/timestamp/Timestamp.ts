@@ -1,7 +1,6 @@
-import { html, css, LitElement } from "lit";
+import { html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import sharedStyles from "../../shared/styles";
-import { getRelativeTime } from "utils/helpers/timeHelpers";
 
 @customElement("j-timestamp")
 export default class Component extends LitElement {
@@ -173,5 +172,26 @@ export default class Component extends LitElement {
 
   render() {
     return html`<span>${this.formattedTime}</span>`;
+  }
+}
+
+// in miliseconds
+var units = {
+  year: 24 * 60 * 60 * 1000 * 365,
+  month: (24 * 60 * 60 * 1000 * 365) / 12,
+  day: 24 * 60 * 60 * 1000,
+  hour: 60 * 60 * 1000,
+  minute: 60 * 1000,
+  second: 1000,
+};
+
+export function getRelativeTime(d1, d2 = new Date(), rtf) {
+  var elapsed = d1 - d2;
+
+  // "Math.abs" accounts for both "past" & "future" scenarios
+  for (var u in units) {
+    if (Math.abs(elapsed) > units[u] || u == "second") {
+      return rtf.format(Math.round(elapsed / units[u]), u);
+    }
   }
 }

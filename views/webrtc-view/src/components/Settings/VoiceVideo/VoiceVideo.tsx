@@ -1,12 +1,12 @@
-import { WebRTC } from "utils/react/useWebrtc";
-import { Me } from "utils/api/getMe";
-import * as localstorage from "utils/helpers/localStorage";
-import { defaultSettings } from "utils/constants/videoSettings";
+import { Me } from "@fluxapp/api";
+import { version } from "../../../../package.json";
+import { getForVersion } from "@fluxapp/utils";
+import { WebRTC } from "@fluxapp/react-web";
+
 import Select from "../../Select";
 
 type Props = {
   webRTC: WebRTC;
-  currentUser?: Me;
 };
 
 export default function VoiceVideo({ webRTC }: Props) {
@@ -23,14 +23,14 @@ export default function VoiceVideo({ webRTC }: Props) {
     webRTC.localState.settings.video?.deviceId
       ? webRTC.localState.settings.video?.deviceId
       : videoTrack?.getSettings().deviceId ||
-        localstorage.getForVersion("cameraDeviceId");
+        getForVersion(version, "cameraDeviceId");
 
   const selectedAudioDeviceId =
     typeof webRTC.localState.settings.audio !== "boolean" &&
     webRTC.localState.settings.audio?.deviceId
       ? webRTC.localState.settings.audio?.deviceId
       : audioTrack?.getSettings().deviceId ||
-        localstorage.getForVersion("audioDeviceId");
+        getForVersion(version, "audioDeviceId");
 
   const videoDevices = webRTC?.devices
     ?.filter((d) => d.kind === "videoinput")

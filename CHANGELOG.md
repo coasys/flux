@@ -3,6 +3,24 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.6.0] - 22/09/2023
+
+This new release includes a revolutionary new plugin system for Flux!
+Plugins can now be created by anyone to add new capabilities for their communities.
+This is a new feature we are really excited about as it encapsulates one of the main visions for Flux, creating a tool for communities to empower themselves.
+
+Read more about how to make plugins [here](https://docs.fluxsocial.io/)
+
+### Added
+
+- New chat view using Subject Classes API
+- New Kanban board
+- New table view
+
+### Changed
+
+- Updated the ADAM Layer version to the latest Rust refactor
+
 ## [0.5.9] - 13/04/2023
 
 ### Added

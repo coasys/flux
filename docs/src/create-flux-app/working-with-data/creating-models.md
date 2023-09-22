@@ -1,3 +1,0 @@
-# Creating Models
-
-Coming soon.

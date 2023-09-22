@@ -5,10 +5,11 @@
   "fluxapp": {
     "name": "DebugRTC",
     "description": "WebRTC-debugger for flux",
-    "icon": "share"
+    "icon": "bug"
   },
   "keywords": [
-    "flux-app"
+    "flux-plugin",
+    "ad4m-view"
   ],
   "type": "module",
   "files": [
@@ -42,8 +43,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@perspect3vism/ad4m": "0.3.3",
-    "@perspect3vism/ad4m-connect": "0.3.3",
+    "@fluxapp/webrtc": "*",
+    "@fluxapp/react-web": "*",
+    "@fluxapp/utils": "*",
+    "@fluxapp/flux-container": "*",
     "classnames": "^2.3.2",
     "date-fns": "^2.29.3",
     "emoji-picker-element": "^1.14.0",
@@ -54,7 +57,7 @@
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.5.0",
-    "vite": "^4.0.3",
+    "vite": "^4.3.5",
     "vite-plugin-css-injected-by-js": "^2.3.1"
   }
 }

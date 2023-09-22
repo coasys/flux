@@ -1,0 +1,61 @@
+{
+  "name": "@fluxapp/post-view",
+  "version": "0.6.0",
+  "description": "",
+  "fluxapp": {
+    "name": "Posts",
+    "description": "Create a feed of posts",
+    "icon": "postcard"
+  },
+  "keywords": [
+    "flux-plugin",
+    "ad4m-view"
+  ],
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/main.umd.cjs",
+  "module": "./dist/main.js",
+  "exports": {
+    ".": {
+      "import": "./dist/main.js",
+      "require": "./dist/main.umd.cjs"
+    }
+  },
+  "scripts": {
+    "prepare": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "vite build",
+    "dev": "npm-run-all --parallel dev:**",
+    "dev:server": "vite",
+    "dev:dist": "vite build --watch",
+    "release": "np --no-tests"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fluxapp/react-web": "*",
+    "@fluxapp/flux-editor": "*",
+    "@fluxapp/comment-section": "*",
+    "classnames": "^2.3.2",
+    "date-fns": "^2.24.0",
+    "emoji-picker-element": "^1.14.0",
+    "emoji-short-name": "^2.0.0",
+    "node-emoji": "^1.11.0",
+    "preact": "^10.5.14",
+    "react-dropzone": "^14.2.3",
+    "react-hint": "^3.2.1",
+    "react-virtuoso": "^3.1.1",
+    "tippy.js": "^6.3.1"
+  },
+  "devDependencies": {
+    "@fluxapp/flux-container": "*",
+    "@types/react": "^17.0.2",
+    "np": "^7.5.0",
+    "npm-run-all": "^4.1.5",
+    "vite": "^4.3.5",
+    "@preact/preset-vite": "^2.5.0",
+    "vite-plugin-css-injected-by-js": "^2.3.1"
+  }
+}

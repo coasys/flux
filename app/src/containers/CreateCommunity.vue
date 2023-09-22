@@ -100,15 +100,16 @@
         </j-flex>
         <div v-if="isCreatingCommunity" style="text-align: center">
           <j-text variant="heading-sm">
-            Please wait while your community is being created
+            Your community is being created
           </j-text>
           <j-text variant="body">
-            Right now this proccess might take a couple of minutes, so please be
-            patient
+            Please be patient, this might take a while right now.
           </j-text>
-          <j-flex j="center">
-            <j-spinner size="lg"></j-spinner>
-          </j-flex>
+          <j-box pt="500">
+            <j-flex j="center">
+              <HourGlass width="50" />
+            </j-flex>
+          </j-box>
         </div>
       </div>
       <j-flex direction="column" gap="500" v-if="tabView === 'Join'">
@@ -134,11 +135,13 @@
       </j-flex>
       <div v-if="tabView === 'Load'">
         <j-flex direction="column" gap="500" v-if="!isCreatingCommunity">
-          <j-text variant="body" v-if="nonFluxPerspectives.length === 0"
+          <j-text
+            variant="body"
+            v-if="Object.keys(nonFluxCommunities).length === 0"
             >No perspective found that is not a flux community</j-text
           >
           <j-menu-item
-            v-for="perspective of nonFluxPerspectives"
+            v-for="perspective in nonFluxCommunities"
             :key="perspective.uuid"
             class="choice-button"
             size="xl"
@@ -181,24 +184,27 @@
 
 <script lang="ts">
 import { isValid } from "@/utils/validation";
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
-import { useDataStore } from "@/store/data";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { CommunityState } from "@/store/types";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useAppStore } from "@/store/app";
+import { joinCommunity, createCommunity } from "@fluxapp/api";
+import { usePerspectives, useCommunities } from "@fluxapp/vue";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
+import HourGlass from "@/components/hourglass/Hourglass.vue";
 
 export default defineComponent({
-  components: { AvatarUpload },
+  components: { AvatarUpload, HourGlass },
   emits: ["cancel", "submit"],
-  setup() {
-    const dataStore = useDataStore();
+  async setup() {
     const appStore = useAppStore();
-
+    const client = await getAd4mClient();
+    const { perspectives, neighbourhoods } = usePerspectives(client);
+    const { communities } = useCommunities(neighbourhoods);
     return {
-      dataStore,
+      communities,
+      perspectives,
       appStore,
     };
   },
@@ -211,18 +217,32 @@ export default defineComponent({
       newProfileImage: undefined,
       isJoiningCommunity: false,
       isCreatingCommunity: false,
-      nonFluxPerspectives: [] as PerspectiveProxy[],
     };
   },
-  mounted() {
-    this.getPerspectives();
-  },
   computed: {
-    hasAlreadyJoinedTestingCommunity(): boolean {
-      const community = this.dataStore.getCommunityByNeighbourhoodUrl(
-        DEFAULT_TESTING_NEIGHBOURHOOD
+    nonFluxCommunities(): Record<string, PerspectiveProxy> {
+      console.log({ c: this.communities, p: this.perspectives });
+      return Object.entries(this.perspectives).reduce(
+        (acc, [uuid, perspective]) => {
+          const perspectiveIsCommunity = Object.keys(this.communities).some(
+            (id) => uuid === id
+          );
+
+          if (!perspectiveIsCommunity)
+            return {
+              ...acc,
+              [uuid]: perspective,
+            };
+          return acc;
+        },
+        {}
       );
-      return community ? true : false;
+    },
+    hasAlreadyJoinedTestingCommunity(): boolean {
+      const p = Object.values(this.perspectives).find(
+        (p) => p.uuid === DEFAULT_TESTING_NEIGHBOURHOOD
+      );
+      return p ? true : false;
     },
     canJoin(): boolean {
       return isValid(
@@ -270,10 +290,8 @@ export default defineComponent({
 
       const neighbourhoodUrl = this.joiningLink;
 
-      const existingPerspective = (await client.perspective.all()).find(
-        (perspective) => {
-          return perspective.sharedUrl === neighbourhoodUrl;
-        }
+      const existingPerspective = Object.values(this.perspectives).find(
+        (p) => p.sharedUrl === neighbourhoodUrl
       );
 
       if (existingPerspective) {
@@ -284,35 +302,16 @@ export default defineComponent({
         });
         this.isJoiningCommunity = false;
         this.appStore.setShowCreateCommunity(false);
-
-        const community = await this.dataStore.getCommunityByNeighbourhoodUrl(
-          neighbourhoodUrl
-        );
-
-        if (!community) {
-          console.error(
-            "Did not find community when trying to redirect after join"
-          );
-          return;
-        }
-
-        this.$router.push({
-          name: "community",
-          params: {
-            communityId: community.neighbourhood.uuid,
-          },
-        });
         return;
       }
 
-      this.dataStore
-        .joinCommunity({ joiningLink: neighbourhoodUrl })
+      joinCommunity({ joiningLink: neighbourhoodUrl })
         .then((community) => {
           this.$emit("submit");
           this.$router.push({
             name: "community",
             params: {
-              communityId: community.neighbourhood.uuid,
+              communityId: community.uuid,
             },
           });
         })
@@ -323,23 +322,21 @@ export default defineComponent({
     createCommunity() {
       this.isCreatingCommunity = true;
 
-      this.dataStore
-        .createCommunity({
-          perspectiveName: this.newCommunityName,
-          description: this.newCommunityDesc,
-          image: this.newProfileImage,
-          thumbnail: this.newProfileImage,
-        })
-        .then((community: CommunityState) => {
+      createCommunity({
+        name: this.newCommunityName,
+        description: this.newCommunityDesc,
+        image: this.newProfileImage,
+      })
+        .then((community) => {
           this.$emit("submit");
           this.newCommunityName = "";
           this.newCommunityDesc = "";
-          this.newProfileImage = "";
+          this.newProfileImage = undefined;
 
           this.$router.push({
             name: "community",
             params: {
-              communityId: community.neighbourhood.uuid,
+              communityId: community.uuid,
             },
           });
         })
@@ -349,50 +346,25 @@ export default defineComponent({
     },
     createCommunityFromPerspective(perspective: any) {
       this.isCreatingCommunity = true;
-      this.dataStore
-        .createCommunity({
-          perspectiveName: perspective.name,
-          description: this.newCommunityDesc,
-          image: this.newProfileImage,
-          thumbnail: this.newProfileImage,
-          perspectiveUuid: perspective.uuid,
-        })
-        .then((community: any) => {
+      createCommunity({
+        name: perspective.name,
+        description: this.newCommunityDesc,
+        image: this.newProfileImage,
+        perspectiveUuid: perspective.uuid,
+      })
+        .then(() => {
           this.$emit("submit");
-          const channels = this.dataStore.getChannelStates(
-            community.neighbourhood.uuid
-          );
 
           this.$router.push({
-            name: "channel",
+            name: "community",
             params: {
-              communityId: community.neighbourhood.uuid,
-              channelId: channels[0].id,
+              communityId: perspective.uuid,
             },
           });
         })
         .finally(() => {
           this.isCreatingCommunity = false;
         });
-    },
-    async getPerspectives() {
-      const client = await getAd4mClient();
-      const keys = Object.keys(this.dataStore.neighbourhoods);
-      const perspectives = await client.perspective.all();
-
-      const nonFluxPerspectives = perspectives.filter(
-        (perspective) => !keys.includes(perspective.uuid)
-      );
-
-      //@ts-ignore
-      this.nonFluxPerspectives = nonFluxPerspectives.map((perspective) => {
-        return {
-          name: perspective.name,
-          neighbourhood: perspective.neighbourhood,
-          sharedUrl: perspective.sharedUrl,
-          uuid: perspective.uuid,
-        };
-      });
     },
     async joinTestingCommunity() {
       try {

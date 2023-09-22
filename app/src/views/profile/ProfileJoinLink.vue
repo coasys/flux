@@ -19,25 +19,22 @@
 </template>
 
 <script lang="ts">
-import { useDataStore } from "@/store/data";
 import { defineComponent, ref } from "vue";
+import { joinCommunity } from "@fluxapp/api";
 
 export default defineComponent({
   props: ["joiningLink"],
   emits: ["cancel", "submit"],
   setup() {
-    const dataStore = useDataStore();
-
     return {
-      dataStore,
       isJoiningCommunity: ref(false),
     };
   },
   methods: {
     joinCommunity() {
       this.isJoiningCommunity = true;
-      this.dataStore
-        .joinCommunity({ joiningLink: this.joiningLink })
+
+      joinCommunity({ joiningLink: this.joiningLink })
         .then(() => {
           this.$emit("submit");
         })

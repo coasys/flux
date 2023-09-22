@@ -1,0 +1,33 @@
+{
+  "name": "@fluxapp/flux-container",
+  "version": "0.6.0",
+  "type": "module",
+  "module": "dist/flux-container.js",
+  "main": "dist/flux-container.js",
+  "exports": {
+    ".": "./dist/flux-container.js"
+  },
+  "types": "types/flux-container.d.ts",
+  "files": [
+    "dist",
+    "types"
+  ],
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "@fluxapp/api": "*",
+    "@fluxapp/ui": "*",
+    "@perspect3vism/ad4m": "0.6.0",
+    "@perspect3vism/ad4m-connect": "0.6.0",
+    "lit-element": "^2.4.0"
+  },
+  "devDependencies": {
+    "vite-plugin-css-injected-by-js": "^3.1.0",
+    "typescript": "^5.0.4",
+    "vite": "^4.3.5"
+  }
+}

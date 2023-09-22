@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef } from "preact/hooks";
 import UiContext from "../../context/UiContext";
-import { WebRTC } from "utils/react/useWebrtc";
+import { WebRTC } from "@fluxapp/react-web";
 
 import styles from "./Footer.module.css";
 
@@ -15,24 +15,12 @@ export default function Footer({ webRTC, onToggleSettings }: Props) {
     methods: { toggleShowSettings },
   } = useContext(UiContext);
 
-  const emojiPicker = useRef();
-
-  useEffect(() => {
-    if (emojiPicker.current) {
-      emojiPicker.current.addEventListener("emoji-click", onEmojiClick);
-    }
-
-    return () => {
-      if (emojiPicker.current) {
-        emojiPicker.current.removeEventListener("emoji-click", onEmojiClick);
-      }
-    };
-  }, [emojiPicker.current]);
+  const popOver = useRef();
 
   const onEmojiClick = (event) => {
-    webRTC.onReaction(event.detail.unicode);
-    if (emojiPicker.current) {
-      // emojiPicker.current.close();
+    webRTC.onReaction(event.detail.native);
+    if (popOver.current) {
+      popOver.current?.removeAttribute("open");
     }
   };
 
@@ -116,7 +104,7 @@ export default function Footer({ webRTC, onToggleSettings }: Props) {
           </j-button>
         </j-tooltip>
 
-        <j-popover placement="top">
+        <j-popover ref={popOver} placement="top">
           <j-tooltip slot="trigger" placement="top" title="Send reaction">
             <j-button
               variant="transparent"
@@ -129,7 +117,11 @@ export default function Footer({ webRTC, onToggleSettings }: Props) {
             </j-button>
           </j-tooltip>
           <div slot="content">
-            <emoji-picker class={styles.picker} ref={emojiPicker} />
+            <j-emoji-picker
+              className={styles.picker}
+              onclickoutside={() => {}}
+              onChange={onEmojiClick}
+            ></j-emoji-picker>
           </div>
         </j-popover>
 

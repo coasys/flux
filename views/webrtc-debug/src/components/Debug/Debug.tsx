@@ -1,5 +1,5 @@
-import { WebRTC } from "utils/react/useWebrtc";
-import { Me } from "utils/api/getMe";
+import { Me } from "@fluxapp/api";
+import { WebRTC } from "@fluxapp/react-web";
 
 import Item from "./Item";
 import ItemMe from "./ItemMe";

@@ -38,7 +38,7 @@
               class="channel__notification"
               v-if="channel.hasNewMessages"
             ></div>
-
+            <!--
             <j-icon
               @click.stop="handleToggleClick(channel.id)"
               slot="start"
@@ -46,6 +46,7 @@
               v-if="channel.views.length > 1"
               :name="channel.expanded ? 'chevron-down' : 'chevron-right'"
             />
+            -->
             <j-icon
               slot="start"
               size="xs"
@@ -109,23 +110,49 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
-import { ChannelState } from "@/store/types";
-import { mapActions, mapState } from "pinia";
-import { useDataStore } from "@/store/data";
+import { defineComponent, ref, watch } from "vue";
+import { useRoute } from "vue-router";
+import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
-import { useUserStore } from "@/store/user";
-import { deleteChannel } from "utils/api/deleteChannel";
-import { ChannelView } from "utils/types";
+import { Channel } from "@fluxapp/api";
+import { useEntries, usePerspective, useMe } from "@fluxapp/vue";
+import { ChannelView } from "@fluxapp/types";
 import { viewOptions as channelViewOptions } from "@/constants";
+import { Ad4mClient } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export default defineComponent({
-  setup() {
+  props: {
+    community: {
+      type: Object,
+      required: true,
+    },
+    perspective: {
+      type: Object,
+      required: true,
+    },
+  },
+  async setup(props) {
+    const route = useRoute();
+
+    const client: Ad4mClient = await getAd4mClient();
+
+    const { data } = usePerspective(client, () => route.params.communityId);
+
+    const { me } = useMe(client.agent);
+
+    const { entries: channels, repo: channelRepo } = useEntries({
+      perspective: () => data.value.perspective,
+      source: () => "ad4m://self",
+      model: Channel,
+    });
+
     return {
+      me,
+      channelRepo,
+      channels,
       userProfileImage: ref<null | string>(null),
       appStore: useAppStore(),
-      userStore: useUserStore(),
-      dataStore: useDataStore(),
     };
   },
   data: function () {
@@ -134,35 +161,18 @@ export default defineComponent({
       communityImage: null,
     };
   },
-  computed: {
-    community() {
-      const communityId = this.$route.params.communityId as string;
-      return this.dataStore.getCommunityState(communityId);
-    },
-    channels(): ChannelState[] {
-      const communityId = this.$route.params.communityId as string;
-      const channels = this.getChannelStates()(communityId);
-
-      if (this.community.state.hideMutedChannels) {
-        return channels.filter((e) => !e.notifications.mute);
-      }
-
-      return channels;
-    },
-  },
   methods: {
-    ...mapActions(useDataStore, ["setChannelNotificationState"]),
-    ...mapState(useDataStore, ["getChannelStates"]),
     ...mapActions(useAppStore, ["setSidebar", "setShowCreateChannel"]),
     handleToggleClick(channelId: string) {
-      this.dataStore.toggleChannelCollapse(channelId);
+      // TODO: Toggle channel collapse
     },
     goToEditChannel(id: string) {
       this.appStore.setActiveChannel(id);
       this.appStore.setShowEditChannel(true);
     },
     handleChangeView(channelId: string, view: ChannelView) {
-      this.dataStore.setCurrentChannelView({ channelId, view });
+      // TODO: Set current channel view
+      //this.dataStore.setCurrentChannelView({ channelId, view });
       this.navigateToChannel(channelId);
     },
     navigateToChannel(channelName: string) {
@@ -170,7 +180,7 @@ export default defineComponent({
       this.$router.push({
         name: "channel",
         params: {
-          communityId: this.community.neighbourhood.uuid,
+          communityId: this.perspective.uuid,
           channelId: channelName,
         },
       });
@@ -179,7 +189,7 @@ export default defineComponent({
       const channel = this.channels.find((e) => e.id === channelId);
 
       if (channel) {
-        return channel.author === this.userStore.getUser?.agent.did;
+        return channel.author === this.me?.did;
       } else {
         throw new Error("Did not find channel");
       }
@@ -191,33 +201,13 @@ export default defineComponent({
       return channelViewOptions.find((o) => o.type === view)?.icon || "hash";
     },
     async deleteChannel(channelId: string) {
-      const channel = this.channels.find((e) => e.id === channelId);
-
-      if (channel) {
-        await deleteChannel(channel.sourcePerspective, {
-          id: channelId,
-          timestamp: channel.timestamp,
-          author: channel.author,
-        });
-
-        this.dataStore.removeChannel({
-          channelId: channel.id,
-        });
-
-        const isSameChannel = this.$route.params.channelId === channel.name;
-
-        if (isSameChannel) {
-          this.$router.push({
-            name: "channel",
-            params: {
-              communityId: channel.sourcePerspective,
-              channelId: "Home",
-            },
-          });
-        }
-      } else {
-        throw new Error("Did not find channel");
-      }
+      await this.channelRepo?.remove(channelId);
+      this.$router.push({
+        name: "community",
+        params: {
+          communityId: this.perspective.uuid,
+        },
+      });
     },
   },
 });

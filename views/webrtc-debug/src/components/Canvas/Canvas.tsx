@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import { Peer } from "utils/react/useWebrtc";
+import { Peer } from "@fluxapp/react-web";
 
 interface CanvasProps {
   peers: Peer[];

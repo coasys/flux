@@ -2,7 +2,7 @@
   <j-box p="800">
     <j-flex gap="500" direction="column">
       <j-text nomargin variant="heading-sm">
-        Members ({{ otherAgents.length + 1 }})
+        Members ({{ members.length ?? 0 }})
       </j-text>
       <j-input
         size="lg"
@@ -17,8 +17,8 @@
         <j-flex
           gap="500"
           style="cursor: pointer"
-          v-for="communityMember in filteredCommunityMemberList"
-          :key="communityMember.did"
+          v-for="member in members"
+          :key="member.did"
           inline
           direction="row"
           j="center"
@@ -26,12 +26,12 @@
         >
           <Avatar
             size="xl"
-            :hash="communityMember.did"
-            :url="communityMember.profileThumbnailPicture"
-            @click="() => profileClick(communityMember.did)"
+            :hash="member.did"
+            :url="member.profileThumbnailPicture"
+            @click="() => profileClick(member.did)"
           ></Avatar>
           <j-text color="black" nomargin variant="body">
-            {{ communityMember.username }}
+            {{ member.username }}
           </j-text>
         </j-flex>
       </j-flex>
@@ -54,73 +54,50 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
-import { Profile } from "utils/types";
-import { useDataStore } from "@/store/data";
-
-import getProfile from "utils/api/getProfile";
+import { defineComponent, watchEffect, ref } from "vue";
+import { Community, getProfile } from "@fluxapp/api";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Avatar from "@/components/avatar/Avatar.vue";
-import { Community } from "utils/types";
+import { usePerspective, useEntry } from "@fluxapp/vue";
+import { useRoute } from "vue-router";
 
 export default defineComponent({
   emits: ["close", "submit"],
   components: { Avatar },
-  async mounted() {
+  async setup() {
+    const route = useRoute();
+    const members = ref<any[]>([]);
     const client = await getAd4mClient();
-    const perspective = await client.perspective.byUUID(
-      this.$route.params.communityId as string
-    );
-    const otherAgents = await perspective
-      ?.getNeighbourhoodProxy()
-      .otherAgents();
-    this.otherAgents = otherAgents || [];
-  },
-  setup() {
-    const dataStore = useDataStore();
+    const { data } = usePerspective(client, () => route.params.communityId);
+
+    const { entry: community } = useEntry({
+      perspective: () => data.value.perspective,
+      model: Community,
+    });
+
+    watchEffect(async () => {
+      // TODO: how to watch for the uuid change, without having an unused var
+      const uuid = data.value.perspective?.uuid;
+      const neighbourhood = data.value.perspective?.getNeighbourhoodProxy();
+      if (neighbourhood) {
+        const me = await client.agent.me();
+        const others = await neighbourhood?.otherAgents();
+        members.value = await Promise.all(
+          [...others, me.did].map((did) => getProfile(did))
+        );
+      }
+    });
 
     return {
-      otherAgents: ref([]),
-      dataStore,
+      members,
+      community,
     };
   },
   data() {
     return {
       searchValue: "",
-      memberList: [] as Profile[],
       loading: false,
     };
-  },
-  watch: {
-    otherAgents: {
-      handler: async function (users) {
-        // reset before fetching again
-        this.memberList = [];
-        if (!users) return;
-        this.loading = true;
-        for (const user of users) {
-          if (user) {
-            const member = await getProfile(user);
-            if (member) {
-              this.memberList.push(member);
-            }
-          }
-        }
-        this.loading = false;
-      },
-      immediate: true,
-    },
-  },
-  computed: {
-    filteredCommunityMemberList() {
-      return this.memberList.filter((member) => {
-        return member.username?.includes(this.searchValue);
-      });
-    },
-    community(): Community {
-      const id = this.$route.params.communityId as string;
-      return this.dataStore.getCommunity(id);
-    },
   },
   methods: {
     async profileClick(did: string) {

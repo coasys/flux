@@ -1,18 +1,16 @@
-import AllCommunities from "./components/AllCommunities";
 import CommunityGraph from "./components/CommunityGraph";
+import { PerspectiveProxy } from "@perspect3vism/ad4m";
 
-import styles from "./App.module.css";
+export default function App({
+  perspective,
+  source,
+}: {
+  perspective: PerspectiveProxy;
+  source: string;
+}) {
+  if (!perspective?.uuid || !source) {
+    return null;
+  }
 
-export default function App({ perspective, source }) {
-  return (
-    <div>
-      {perspective ? (
-        <CommunityGraph source={source} uuid={perspective} />
-      ) : (
-        <div className={styles.appContainer}>
-          <AllCommunities />
-        </div>
-      )}
-    </div>
-  );
+  return <CommunityGraph source={source} uuid={perspective.uuid} />;
 }

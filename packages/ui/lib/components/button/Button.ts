@@ -91,14 +91,14 @@ const styles = css`
   }
 
   :host([variant="subtle"]) {
-    --j-button-bg: rgb(0 0 0 / 16%);
+    --j-button-bg: rgb(0 0 0 / 10%);
     --j-button-color: var(--j-color-ui-800);
     --j-button-border: 1px solid transparent;
   }
 
   :host([variant="subtle"]:hover) {
     --j-button-color: var(--j-color-black);
-    --j-button-bg: rgb(0 0 0 / 20%);
+    --j-button-bg: rgb(0 0 0 / 15%);
   }
 
   :host([variant="ghost"]) {
@@ -163,11 +163,19 @@ export default class Button extends LitElement {
 
   /**
    * Variations
-   * @type {""|"link"|"primary"|"subtle"|"transparent"|}
+   * @type {""|"link"|"primary"|"subtle"|"transparent"|"ghost"}
    * @attr
    */
   @property({ type: String, reflect: true })
   variant = null;
+
+  /**
+   * Href
+   * @type {string}
+   * @attr
+   */
+  @property({ type: String, reflect: true })
+  href = null;
 
   /**
    * Sizes
@@ -225,13 +233,31 @@ export default class Button extends LitElement {
   }
 
   render() {
-    return html`
-      <button @click=${this.handleClick} part="base">
-        <j-spinner></j-spinner>
-        <slot name="start"></slot>
-        <slot></slot>
-        <slot name="end"></slot>
-      </button>
-    `;
+    return this.href
+      ? html`
+          <a
+            href=${this.href}
+            @click=${this.handleClick}
+            target="_blank"
+            part="base"
+          >
+            <j-spinner></j-spinner>
+            <slot name="start"></slot>
+            <slot></slot>
+            <slot name="end"></slot>
+          </a>
+        `
+      : html`
+          <button
+            ?disabled=${this.disabled || this.loading}
+            @click=${this.handleClick}
+            part="base"
+          >
+            <j-spinner></j-spinner>
+            <slot name="start"></slot>
+            <slot></slot>
+            <slot name="end"></slot>
+          </button>
+        `;
   }
 }

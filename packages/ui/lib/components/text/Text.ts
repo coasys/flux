@@ -14,10 +14,12 @@ const styles = css`
     --j-text-letter-spacing: normal;
     --j-text-heading-letter-spacing: 1px;
     --j-text-heading-family: inherit;
+    --j-text-line-height: inherit;
   }
 
   :host > *:first-child {
     margin: 0;
+    line-height: var(--j-text-line-height);
     letter-spacing: var(--j-text-letter-spacing);
     font-family: var(--j-text-family);
     text-transform: var(--j-text-transform);
@@ -60,6 +62,7 @@ const styles = css`
     --j-text-weight: 600;
     --j-text-margin-bottom: var(--j-space-600);
     --j-text-family: var(--j-text-heading-family);
+    --j-text-line-height: 1;
     --j-text-letter-spacing: var(--j-text-heading-letter-spacing);
   }
 
@@ -119,7 +122,7 @@ export default class Text extends LitElement {
 
   /**
    * Variants
-   * @type {""|"heading-lg"|"heading"|"heading-sm"|"subheading"|""ingress"|"body"|"label"|"footnote"}
+   * @type {""|"heading-lg"|"heading"|"heading-sm"|"subheading"|"ingress"|"body"|"label"|"footnote"}
    * @attr
    */
   @property({ type: String, reflect: true }) variant = "body";

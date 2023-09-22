@@ -1,0 +1,137 @@
+.message {
+  padding: var(--j-space-300) var(--j-space-500);
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  column-gap: var(--j-space-500);
+  position: relative;
+}
+
+.message:hover {
+  background: var(--j-color-ui-50);
+}
+
+.isPopular {
+  padding: var(--j-space-500);
+  margin: var(--j-space-300);
+  border-radius: var(--j-border-radius);
+  border: 2px solid rgba(255, 230, 0, 0.2);
+  background-color: rgba(255, 230, 0, 0.1);
+}
+
+.isPopular:hover {
+  background-color: rgba(255, 230, 0, 0.16);
+}
+
+.isReplying,
+.isReplying:hover {
+  background-color: var(--j-color-primary-50);
+  border-left: 3px solid var(--j-color-primary-500);
+}
+
+.header {
+  margin-bottom: var(--j-space-300);
+}
+
+.body {
+  font-size: var(--j-font-size-500);
+}
+
+body:has(*:last-child:empty) *:first-child {
+  margin-top: 0;
+}
+
+.body *:first-child {
+  margin-bottom: 0;
+}
+
+.body *:last-child {
+  margin-bottom: 0;
+}
+
+.body *:last-child:empty {
+  display: none;
+}
+
+.body a:not([href^="http"]) {
+  text-decoration: none;
+  background: var(--j-color-primary-100);
+  color: var(--j-color-primary-500);
+  padding: var(--j-space-100);
+  border-radius: var(--j-border-radius);
+}
+
+.toolbar {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--j-space-300);
+  padding: var(--j-space-100);
+  border-radius: var(--j-border-radius);
+  background: var(--j-color-white);
+  box-shadow: var(--j-depth-100);
+}
+
+.message:hover .toolbar {
+  display: flex;
+  position: absolute;
+  right: var(--j-space-500);
+  bottom: 0;
+}
+
+.reactions {
+  display: flex;
+  padding-top: var(--j-space-400);
+  gap: var(--j-space-200);
+  flex-wrap: wrap;
+}
+
+.reaction {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--j-color-ui-300);
+  background: var(--j-color-white);
+  padding: 3px 7px;
+  font-size: var(--j-font-size-400);
+  border-radius: var(--j-border-radius);
+}
+
+.reaction:hover {
+  border-color: var(--j-color-primary-500);
+  background-color: var(--j-color-primary-50);
+}
+
+.header {
+  display: flex;
+  gap: var(--j-space-300);
+  align-items: center;
+}
+
+.timestamp {
+  color: var(--j-color-ui-500);
+  font-size: var(--j-font-size-200);
+}
+
+.username {
+  color: var(--j-color-black);
+  text-decoration: none;
+}
+
+.username:hover {
+  text-decoration: underline;
+}
+
+.threadButton {
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-weight: 800;
+  font-size: var(--j-font-size-300);
+  color: var(--j-color-primary-500);
+}
+
+.threadButton:hover {
+  text-decoration: underline;
+}

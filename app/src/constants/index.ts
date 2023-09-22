@@ -1,4 +1,4 @@
-import { ChannelView } from "utils/types";
+import { ChannelView } from "@fluxapp/types";
 
 export const viewOptions = [
   {
@@ -12,8 +12,8 @@ export const viewOptions = [
     title: "Posts",
     description: "A feed of posts that users can publish",
     icon: "card-heading",
-    type: ChannelView.Forum,
-    component: "forum-view",
+    type: ChannelView.Post,
+    component: "post-view",
   },
   {
     title: "Graph",

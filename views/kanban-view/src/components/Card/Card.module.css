@@ -1,0 +1,15 @@
+.card {
+  padding: var(--j-space-300);
+  position: relative;
+}
+
+.editIcon {
+  display: none;
+  position: absolute;
+  right: var(--j-space-200);
+  top: var(--j-space-300);
+}
+
+.card:hover .editIcon {
+  display: block;
+}

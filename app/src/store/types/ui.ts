@@ -6,8 +6,6 @@ export interface ToastState {
   open: boolean;
 }
 
-export type CurrentThemeState = "global" | string;
-
 export interface ThemeState {
   name: string;
   fontFamily: string;
