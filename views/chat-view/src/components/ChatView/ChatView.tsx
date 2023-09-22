@@ -81,7 +81,7 @@ export default function ChatView({
             source: replyMessage.id,
             predicate: EntryType.Message,
             target: message.id,
-          }
+          },
         ]);
       }
       setReplyMessage(null);
@@ -208,7 +208,7 @@ export default function ChatView({
                   weight="800"
                   size="300"
                 >
-                  Replying to @{replyProfile.username}
+                  Replying to @{replyProfile?.username}
                 </j-text>
               </j-flex>
             </j-box>
