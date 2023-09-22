@@ -5,6 +5,7 @@ import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import { mapLiteralLinks } from "@fluxapp/utils";
 import { profile } from "@fluxapp/constants";
 import { Profile } from "@fluxapp/types";
+import { getProfile } from "@fluxapp/api";
 
 const {
   FLUX_PROFILE,
@@ -26,6 +27,7 @@ type Props = {
 export function useAgent(props: Props) {
   const forceUpdate = useForceUpdate();
   const [error, setError] = useState<string | undefined>(undefined);
+  const [profile, setProfile] = useState<Profile>(null);
   const didRef = typeof props.did === "function" ? props.did() : props.did;
 
   // Create cache key for entry
@@ -40,6 +42,8 @@ export function useAgent(props: Props) {
   // Fetch data from AD4M and save to cache
   const getData = useCallback(() => {
     if (didRef) {
+      getProfile(didRef).then(setProfile);
+
       props.client
         .byDID(didRef)
         .then(async (agent) => {
@@ -60,26 +64,6 @@ export function useAgent(props: Props) {
   }, [cacheKey, forceUpdate]);
 
   const agent = getCache<Agent>(cacheKey);
-  let profile = null as Profile | null;
-  const perspective = agent?.perspective;
-
-  if (perspective) {
-    profile = mapLiteralLinks(
-      perspective.links.filter(
-        (e) => e.data.source === FLUX_PROFILE || e.data.source === didRef
-      ),
-      {
-        username: HAS_USERNAME,
-        bio: HAS_BIO,
-        givenName: HAS_GIVEN_NAME,
-        email: HAS_EMAIL,
-        familyName: HAS_FAMILY_NAME,
-        profilePicture: HAS_PROFILE_IMAGE,
-        profileThumbnailPicture: HAS_THUMBNAIL_IMAGE,
-        profileBackground: HAS_BG_IMAGE,
-      }
-    ) as Profile;
-  }
 
   return { agent, profile, error, mutate, reload: getData };
 }
