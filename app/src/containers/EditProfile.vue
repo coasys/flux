@@ -26,7 +26,7 @@
         :value="bio"
         @input="(e: any) => (bio = e.target.value)"
       ></j-input>
-      <div>
+      <j-flex gap="200">
         <j-button size="lg" @click="$emit('cancel')"> Cancel </j-button>
         <j-button
           :disabled="isUpdatingProfile"
@@ -37,7 +37,7 @@
         >
           Save
         </j-button>
-      </div>
+      </j-flex>
     </j-flex>
   </j-box>
 </template>

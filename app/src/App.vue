@@ -84,6 +84,7 @@ export default defineComponent({
 html {
   height: 100%;
   width: 100%;
+  box-sizing: border-box;
   font-size: var(--j-font-base-size);
 }
 

@@ -76,7 +76,7 @@
             <div v-show="currentTab === 'communities'">
               <j-box py="500" align="right">
                 <j-button
-                  variant="subtle"
+                  variant="primary"
                   @click="() => setShowCreateCommunity(true)"
                   v-if="sameAgent"
                 >
@@ -98,7 +98,7 @@
             <div v-show="currentTab === 'weblinks'">
               <j-box py="500" align="right">
                 <j-button
-                  variant="subtle"
+                  variant="primary"
                   @click="() => (showAddlinkModal = true)"
                 >
                   <j-icon slot="start" name="plus" size="sm"></j-icon>
@@ -307,17 +307,29 @@ export default defineComponent({
 
 <style lang="css" scoped>
 .profile {
+  --avatar-size: clamp(var(--j-size-xxl), 10vw, 160px);
   width: 100%;
-  max-width: 1200px;
+  max-width: 900px;
   margin: auto;
   padding-left: var(--j-space-500);
   padding-right: var(--j-space-500);
 }
 
 .avatar {
-  --j-avatar-size: 100px;
-  --j-skeleton-height: 100px;
-  --j-skeleton-width: 100px;
+  --j-avatar-size: var(--avatar-size);
+  --j-skeleton-height: var(--avatar-size);
+  --j-skeleton-width: var(--avatar-size);
+}
+
+.avatar::part(base) {
+  border-radius: 20px;
+  display: inline-block;
+  border-radius: 30px;
+  border: 7px solid var(--j-color-white);
+}
+
+.avatar::part(img) {
+  border-radius: 20px;
 }
 
 .profile__layout {
@@ -326,13 +338,6 @@ export default defineComponent({
   gap: var(--j-space-500);
 }
 
-@media (min-width: 800px) {
-  .profile__layout {
-    display: grid;
-    grid-template-columns: 2fr 5fr;
-    gap: var(--j-space-900);
-  }
-}
 .profile__container {
   width: 100%;
   height: 100%;
@@ -364,11 +369,7 @@ export default defineComponent({
   align-items: end;
   justify-content: space-between;
   width: 100%;
-  margin-top: -60px;
-}
-
-.profile__info {
-  padding: var(--j-space-500);
+  margin-top: calc(var(--avatar-size) * -0.5);
 }
 
 .add {
