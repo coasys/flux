@@ -1,6 +1,7 @@
 import { profile } from "@fluxapp/constants";
 import { Profile } from "@fluxapp/types";
 import { mapLiteralLinks } from "@fluxapp/utils";
+import { Ad4mClient } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 const {
@@ -22,7 +23,7 @@ export interface Payload {
 
 export default async function getProfile(did: string): Promise<Profile> {
   const cleanedDid = did.replace("did://", "");
-  const client = await getAd4mClient();
+  const client: Ad4mClient = await getAd4mClient();
 
   let profile: Profile = {
     username: "",
@@ -48,7 +49,7 @@ export default async function getProfile(did: string): Promise<Profile> {
       }
     );
 
-    const mappedProfile: any = mapLiteralLinks(
+    let mappedProfile: any = mapLiteralLinks(
       links.filter((e) => e.data.source === FLUX_PROFILE),
       {
         username: HAS_USERNAME,
@@ -61,6 +62,25 @@ export default async function getProfile(did: string): Promise<Profile> {
         profileBackground: HAS_BG_IMAGE,
       }
     );
+
+    if (mappedProfile.profilePicture) {
+      const { data } = await client.expression.get(
+        mappedProfile.profilePicture
+      );
+      const { data_base64, file_type } = JSON.parse(data);
+      mappedProfile.profilePicture =
+        data_base64 && `data:${file_type};base64, ${data_base64}`;
+    }
+
+    if (mappedProfile.profileThumbnailPicture) {
+      const { data } = await client.expression.get(
+        mappedProfile.profileThumbnailPicture
+      );
+      const { data_base64, file_type } = JSON.parse(data);
+
+      mappedProfile.profileThumbnailPicture =
+        data_base64 && `data:${file_type};base64, ${data_base64}`;
+    }
 
     profile = {
       ...mappedAd4mProfile,

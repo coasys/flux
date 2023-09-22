@@ -23,7 +23,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
   const [columnName, setColumnName] = useState("");
   const [classes, setClasses] = useState([]);
-  const [selectedClass, setSelectedClass] = useState("");
+  const [selectedClass, setSelectedClass] = useState("Task");
   const [optimisticColumns, setOptimisticColumns] = useState([]);
 
   const { entries: columns, model: columnModel } = useEntries({
@@ -56,16 +56,6 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     });
   }, [perspective.uuid]);
 
-  useEffect(() => {
-    setSelectedClass(classes[0] || "");
-  }, [classes.length]);
-
-  useEffect(() => {
-    getClasses(perspective, source).then((classes) => {
-      setClasses(classes);
-    });
-  }, [perspective.uuid, selectedClass]);
-
   const onDragEnd = useCallback(
     async (result) => {
       const { destination, source, draggableId, type } = result;
@@ -87,11 +77,8 @@ export default function Board({ perspective, source, agent }: BoardProps) {
         const before = orderedColumns[destination.index - 1]?.order || null;
         const after = orderedColumns[destination.index + 1]?.order || null;
 
-        console.log({ before, after });
-
         try {
           let newOrder = await generateKeyBetween(before, after);
-          console.log({ newOrder });
 
           setOptimisticColumns((oldState) => {
             return oldState.map((c) =>
@@ -156,25 +143,10 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     columnModel.create({ name: columnName, order });
   }, [perspective.uuid, source, orderedColumns]);
 
+  console.log(`recieved updates`, columns);
+
   return (
     <>
-      <j-box pb="500">
-        <j-flex gap="300">
-          <select
-            placeholder="Select a class"
-            className={styles.select}
-            onChange={(e) => setSelectedClass(e.target.value)}
-            value={selectedClass}
-          >
-            <option disabled selected>
-              Select SDNA
-            </option>
-            {classes.map((className) => (
-              <option value={className}>{className}</option>
-            ))}
-          </select>
-        </j-flex>
-      </j-box>
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable
           ignoreContainerClipping={true}
@@ -219,13 +191,12 @@ export default function Board({ perspective, source, agent }: BoardProps) {
             </div>
           )}
         </Droppable>
-        {selectedClass && (
-          <div>
-            <j-button variant="subtle" onClick={() => setShowAddColumn(true)}>
-              <j-icon name="plus" size="sm" slot="start"></j-icon>
-            </j-button>
-          </div>
-        )}
+
+        <div>
+          <j-button variant="subtle" onClick={() => setShowAddColumn(true)}>
+            <j-icon name="plus" size="sm" slot="start"></j-icon>
+          </j-button>
+        </div>
       </DragDropContext>
       {currentTaskId && (
         <j-modal

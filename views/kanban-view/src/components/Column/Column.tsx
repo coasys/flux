@@ -70,7 +70,7 @@ export default function Column({
         </Droppable>
       </div>
       <footer className={styles.columnFooter}>
-        <j-button variant="link" onClick={() => taskModel.create({})}>
+        <j-button onClick={() => taskModel.create({})} variant="link">
           Add {selectedClass}
           <j-icon name="plus" size="md" slot="start"></j-icon>
         </j-button>
