@@ -29,7 +29,7 @@ export default function CommentItem({
         <Avatar
           size="sm"
           did={comment.author}
-          url={profile?.profileThumbnailPicture}
+          src={profile?.profileThumbnailPicture}
         ></Avatar>
       </a>
       <div className={styles.author}>
