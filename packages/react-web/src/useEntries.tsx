@@ -14,7 +14,7 @@ import { SubjectRepository } from "@fluxapp/api";
 type Props<SubjectClass> = {
   source: string;
   perspective: PerspectiveProxy;
-  model: (new () => SubjectClass) | "string";
+  model: (new () => SubjectClass) | string;
 };
 
 export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
@@ -151,7 +151,14 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
 
   const entries = (getCache(cacheKey) || []) as ExtendedSubjectClass[];
 
-  return { entries: [...entries], error, mutate, model: Model, isLoading, reload: getData };
+  return {
+    entries: [...entries],
+    error,
+    mutate,
+    model: Model,
+    isLoading,
+    reload: getData,
+  };
 }
 
 function useForceUpdate() {

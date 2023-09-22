@@ -22,7 +22,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
   perspective: PerspectiveProxy;
   tempSubject: any | string;
 
-  constructor(subject: { new (): SubjectClass }, props: ModelProps) {
+  constructor(subject: { new (): SubjectClass } | string, props: ModelProps) {
     this.perspective = props.perspective;
     this.source = props.source || this.source;
     this.subject = typeof subject === "string" ? subject : new subject();

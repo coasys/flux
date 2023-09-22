@@ -67,7 +67,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
 
   useEffect(() => {
     setTasks(entries);
-  }, [entries, perspective.uuid]);
+  }, [JSON.stringify(entries), perspective.uuid]);
 
   useEffect(() => {
     getClasses(perspective, source).then((classes) => {
@@ -85,7 +85,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
       selectedProperty,
       namedOptions[selectedProperty] || []
     );
-  }, [tasks, selectedProperty, perspective.uuid, namedOptions]);
+  }, [JSON.stringify(tasks), selectedProperty, perspective.uuid, namedOptions]);
 
   function createNewTodo(propertyName, value) {
     model.create({ [propertyName]: value });
@@ -108,6 +108,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     }
 
     const status = destination.droppableId;
+
     setTasks((oldTasks) => {
       return oldTasks.map((t) =>
         t.id === draggableId ? { ...t, [selectedProperty]: status } : t
