@@ -83,9 +83,28 @@ export default function MessageItem({
         message.isPopular && styles.isPopular
       }`}
     >
-      <div className={styles.messageLeft}>
+      {message.replyingTo && (
+        <>
+          <div></div>
+          <div>
+            <j-text nomargin size="300" color="ui-400">
+              <j-icon size="xs" name="reply-fill"></j-icon>
+              {profile?.username} replied to {replyProfile?.username}
+            </j-text>
+            <j-box pb="300">
+              <j-text
+                size="300"
+                className={styles.body}
+                nomargin
+                dangerouslySetInnerHTML={{ __html: replyMessage?.body }}
+              ></j-text>
+            </j-box>
+          </div>
+        </>
+      )}
+      <div>
         {isFullVersion && (
-          <j-box pt={message.replyingTo && replyMessage?.id ? "500" : ""}>
+          <j-box>
             <Avatar
               size="md"
               profileAddress={profile?.profileThumbnailPicture}
@@ -94,25 +113,7 @@ export default function MessageItem({
           </j-box>
         )}
       </div>
-      <div className={styles.messageRight}>
-        {message.replyingTo && (
-          <j-box pb="300">
-            <j-flex a="center" gap="200">
-              <Avatar
-                size="xxs"
-                profileAddress={replyProfile?.profileThumbnailPicture}
-                hash={replyMessage?.author}
-              ></Avatar>
-              <span>{replyProfile?.username}</span>
-              <j-text
-                size="300"
-                className={styles.body}
-                nomargin
-                dangerouslySetInnerHTML={{ __html: replyMessage?.body }}
-              ></j-text>
-            </j-flex>
-          </j-box>
-        )}
+      <div>
         {isFullVersion && (
           <header className={styles.header}>
             <a href={message.author} className={styles.username}>

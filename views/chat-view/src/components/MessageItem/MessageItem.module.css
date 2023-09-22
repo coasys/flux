@@ -2,12 +2,12 @@
   padding: var(--j-space-300) var(--j-space-500);
   display: grid;
   grid-template-columns: 40px 1fr;
-  gap: var(--j-space-500);
+  column-gap: var(--j-space-500);
   position: relative;
 }
 
 .message:hover {
-  background: rgba(0, 0, 0, 0.02);
+  background: var(--j-color-ui-50);
 }
 
 .isPopular {
