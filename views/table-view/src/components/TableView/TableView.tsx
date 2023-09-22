@@ -168,12 +168,14 @@ export default function TableView({
                   </label>
                 );
               })}
+              {/*
               <button
                 onClick={() => setOpenNewClass(true)}
                 className={styles.tab}
               >
                 <j-icon name="plus"></j-icon>
               </button>
+            */}
             </div>
           </j-box>
 
