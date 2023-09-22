@@ -47,7 +47,12 @@ export class Post {
   @subjectProperty({ through: URL, writable: true, resolveLanguage: "literal" })
   url: string;
 
-  @subjectCollection({ through: EntryType.Message })
+  @subjectCollection({
+    through: "rdf://has_child",
+    where: {
+      condition: `subject_class("Message", Class), instance(Class, Target)`,
+    },
+  })
   comments: string[] = [];
 }
 
