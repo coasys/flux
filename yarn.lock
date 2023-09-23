@@ -1508,10 +1508,69 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
+"@fluxapp/comment-section@^0.5.33":
+  version "0.5.33"
+  resolved "https://registry.yarnpkg.com/@fluxapp/comment-section/-/comment-section-0.5.33.tgz#85374050e0be63f62a550a7edc441931543ada43"
+  integrity sha512-TEKgJJuaJt3ML3o8wI9s05pNYM0vUpD6TXWKt2W/fdoiJrlg+b8RNStHl3UJ4cIykWzi88BojlNE8ujLf02gcw==
+  dependencies:
+    "@fluxapp/flux-editor" "^0.5.32"
+    "@fluxapp/types" "^0.5.32"
+    "@fluxapp/ui" "^0.5.32"
+    preact "^10.11.3"
+
+"@fluxapp/flux-editor@^0.5.32":
+  version "0.5.32"
+  resolved "https://registry.yarnpkg.com/@fluxapp/flux-editor/-/flux-editor-0.5.32.tgz#22c361300293ad175b80f64734deb4ead785809c"
+  integrity sha512-KUdCT0tZoVXChH61Cew/j7pGpZKIGkhTuM7kuN6VvFbZcT5oONV1iKV2avuj234uHskwWIgF/rbUEiEt2e0FQQ==
+  dependencies:
+    "@fluxapp/api" "*"
+    "@fluxapp/ui" "*"
+    "@perspect3vism/ad4m" "0.5.1"
+    "@perspect3vism/ad4m-connect" "0.5.1"
+    "@tiptap/core" "^2.0.3"
+    "@tiptap/extension-link" "^2.0.3"
+    "@tiptap/extension-mention" "^2.0.3"
+    "@tiptap/extension-placeholder" "^2.0.3"
+    "@tiptap/pm" "^2.0.3"
+    "@tiptap/starter-kit" "^2.0.3"
+    "@tiptap/suggestion" "^2.0.3"
+    lit-element "^2.4.0"
+
+"@fluxapp/types@^0.5.32":
+  version "0.5.32"
+  resolved "https://registry.yarnpkg.com/@fluxapp/types/-/types-0.5.32.tgz#befb40308e3ec4fcb468e721a541855576d04fc2"
+  integrity sha512-PhG6qNE0GHgMcBcNybV/bFHClBXuYaFVVidw2+PbJxjsCjBGNPrRgju5IloX1W/16LxWK2dXe5T5MB4KIBQC8Q==
+
+"@fluxapp/ui@^0.5.32":
+  version "0.5.32"
+  resolved "https://registry.yarnpkg.com/@fluxapp/ui/-/ui-0.5.32.tgz#98797d0f226c126187bded3e74e79652ddb86a8d"
+  integrity sha512-5MprMXnshuQFxjm6NAaaSTaeJihpg+vClfKhAI2pcJdqsyz9f9T5UARmVKUAgiMTL2UipsQ2U3muCn5BB5TjRw==
+  dependencies:
+    "@fluxapp/utils" "*"
+    "@popperjs/core" "^2.11.7"
+    construct-style-sheets-polyfill "^3.1.0"
+    emoji-mart "^5.5.2"
+    jdenticon "^3.2.0"
+    lit "^2.7.3"
+
 "@graphql-typed-document-node/core@^3.1.1":
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.2.0.tgz#5f3d96ec6b2354ad6d8a28bf216a1d97b5426861"
   integrity sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==
+
+"@holochain/client@0.12.5":
+  version "0.12.5"
+  resolved "https://registry.yarnpkg.com/@holochain/client/-/client-0.12.5.tgz#6cbfe32c33f94fb0689d986adeb43f2b43813303"
+  integrity sha512-9Q1G8sKEGsqnCl067CaRbzwPZZ5zeDCJdvQ8TJpb+psP2kLJBbHZ2qulMXAlNUz7Pg0l4B1Eh/BFJByJHRLlow==
+  dependencies:
+    "@holochain/serialization" "^0.1.0-beta-rc.3"
+    "@msgpack/msgpack" "^2.7.2"
+    "@tauri-apps/api" "^1.2.0"
+    emittery "^1.0.1"
+    isomorphic-ws "^5.0.0"
+    js-base64 "^3.7.3"
+    lodash-es "^4.17.21"
+    tweetnacl "^1.0.3"
 
 "@holochain/client@0.16.0":
   version "0.16.0"
@@ -1875,6 +1934,19 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+"@perspect3vism/ad4m-connect@0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.5.1.tgz#b12be114cdaa591be2694e8db32c3d9588155c90"
+  integrity sha512-wfND22M5thGQPoATTPKGq5YLImwp1yiIxXtBoseKslj0z2YU+ju22bgde1+xC6B9vk0SOkPYRb7/i8U92DWj2w==
+  dependencies:
+    "@undecaf/barcode-detector-polyfill" "^0.9.15"
+    "@undecaf/zbar-wasm" "^0.9.12"
+    auto-bind "^5.0.1"
+    electron "^20.0.3"
+    esbuild-plugin-copy "^2.1.1"
+    esbuild-plugin-replace "^1.4.0"
+    lit "^2.3.1"
+
 "@perspect3vism/ad4m-connect@0.6.0":
   version "0.6.0"
   resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.6.0.tgz#07e94d2e74cdc9efd1cb2f4105de0297eb2b84b1"
@@ -1887,6 +1959,20 @@
     esbuild-plugin-copy "^2.1.1"
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
+
+"@perspect3vism/ad4m@0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.5.1.tgz#ba5ca764bbdde187f8ca8e3d9edbe3a17338fd61"
+  integrity sha512-6F4E8x3z4rJXWsQw2XRbU3HAvReyqyzslo8HNFFlpUYkoVEyophiljcLdZFQrdNQlJB3q/PhjxsLNd1SCeUOVg==
+  dependencies:
+    "@apollo/client" "3.7.10"
+    "@holochain/client" "0.12.5"
+    "@types/jest" "^26.0.14"
+    class-validator "^0.13.1"
+    express "4.18.2"
+    graphql "15.7.2"
+    reflect-metadata "^0.1.13"
+    type-graphql "1.1.1"
 
 "@perspect3vism/ad4m@0.6.0":
   version "0.6.0"
@@ -10722,6 +10808,11 @@ turbo@latest:
     turbo-linux-arm64 "1.10.7"
     turbo-windows-64 "1.10.7"
     turbo-windows-arm64 "1.10.7"
+
+tweetnacl@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-1.0.3.tgz#ac0af71680458d8a6378d0d0d050ab1407d35596"
+  integrity sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==
 
 type-check@^0.4.0, type-check@~0.4.0:
   version "0.4.0"
