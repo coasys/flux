@@ -41,11 +41,18 @@
         variant="secondary"
         @click="joinTestingCommunity"
       >
-        <j-icon slot="start" name="stars" size="xl"></j-icon>
+        <j-icon
+          slot="start"
+          color="primary-700"
+          name="stars"
+          size="xl"
+        ></j-icon>
         <div class="option-body">
-          <j-text variant="heading-sm">Latest Testing Community</j-text>
+          <j-text variant="heading-sm" color="primary-800"
+            >Join Testing Community</j-text
+          >
           <j-text variant="body" nomargin
-            >Join the Flux Alpha testing community</j-text
+            >Try the Flux Alpha testing community</j-text
           >
         </div>
         <j-icon slot="end" name="plus-lg"></j-icon>
@@ -116,7 +123,7 @@
         <j-input
           :value="joiningLink"
           @keydown.enter="joinCommunity"
-          @input="(e: any) => joiningLink = e.target.value"
+          @input="(e: any) => (joiningLink = e.target.value)"
           @change="(e: any) => cleanInviteLink(e.target.value)"
           size="lg"
           label="Invite link"
@@ -395,16 +402,11 @@ export default defineComponent({
   text-align: left;
   color: currentColor;
   justify-content: space-between;
-  border: 2px solid transparent;
-  background-color: var(--j-color-ui-50);
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--j-color-ui-100);
   border-radius: var(--j-border-radius);
   padding: var(--j-space-500);
   gap: var(--j-space-500);
-}
-
-.option[variant="secondary"] {
-  background: transparent;
-  border: 2px solid var(--j-color-ui-50);
 }
 
 .option-body {
@@ -413,10 +415,19 @@ export default defineComponent({
 }
 
 .option:hover {
-  border: 2px solid var(--j-color-ui-100);
+  border: 1px solid var(--j-color-primary-500);
 }
 
 .option:active {
-  border: 2px solid var(--j-color-primary-500);
+  border: 1px solid var(--j-color-primary-500);
+}
+
+.option[variant="secondary"] {
+  background: var(--j-color-primary-100);
+  border: 1px solid var(--j-color-primary-300);
+}
+
+.option[variant="secondary"]:hover {
+  border: 1px solid var(--j-color-primary-500);
 }
 </style>

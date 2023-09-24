@@ -62,6 +62,7 @@
 
           <j-box my="500" v-if="sameAgent">
             <j-tabs
+              class="tabs"
               @change="(e: any) => (currentTab = e.target.value)"
               :value="currentTab"
             >

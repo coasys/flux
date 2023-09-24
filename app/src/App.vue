@@ -88,6 +88,28 @@ html {
   font-size: var(--j-font-base-size);
 }
 
+/* Style the scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: var(--j-color-white);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--j-color-ui-100);
+  border-radius: var(--j-border-radius);
+  border: 1px solid var(--j-color-white);
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--j-color-ui-100);
+}
+
 body {
   -webkit-font-smoothing: antialiased;
   height: 100%;
