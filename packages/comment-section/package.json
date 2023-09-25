@@ -25,9 +25,9 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@fluxapp/flux-editor": "^0.5.32",
-    "@fluxapp/types": "^0.5.32",
-    "@fluxapp/ui": "^0.5.32",
+    "@fluxapp/flux-editor": "*",
+    "@fluxapp/types": "*",
+    "@fluxapp/ui": "*",
     "preact": "^10.11.3"
   },
   "devDependencies": {

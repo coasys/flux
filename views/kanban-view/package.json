@@ -34,10 +34,10 @@
   "description": "",
   "dependencies": {
     "@fluxapp/api": "*",
-    "@fluxapp/comment-section": "^0.5.33",
+    "@fluxapp/comment-section": "*",
     "@fluxapp/flux-container": "*",
     "@fluxapp/react-web": "*",
-    "@fluxapp/types": "^0.5.32",
+    "@fluxapp/types": "*",
     "@perspect3vism/ad4m": "0.6.0",
     "fractional-indexing": "^3.2.0",
     "preact": "^10.13.1",

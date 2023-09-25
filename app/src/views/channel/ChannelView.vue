@@ -222,12 +222,12 @@ export default defineComponent({
 
           if (!customElements.get(wcName)) {
             const module = await fetchFluxApp(app.pkg);
-            await customElements.define(wcName, module.default);
-            console.log("fetched the new app");
-            setTimeout(() => {
-              console.log("why this not updating", wcName, app.pkg);
+            if (module?.default) {
+              await customElements.define(wcName, module.default);
+              console.log("fetched the new app");
+
               this.wcNames[app.pkg] = wcName;
-            }, 200);
+            }
           } else {
             console.log("this should update", app.pkg, wcName, this.wcNames);
             this.wcNames[app.pkg] = wcName;

@@ -1,5 +1,5 @@
 import { useState } from "preact/hooks";
-import { useEntry } from "@fluxapp/react-web/src";
+import { useEntry } from "@fluxapp/react-web";
 import styles from "./CardDetails.module.css";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";

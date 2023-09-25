@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import { useEntries, useEntry } from "@fluxapp/react-web/src";
+import { useEntries, useEntry } from "@fluxapp/react-web";
 import styles from "./Card.module.css";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useAssociations } from "../../hooks/useAssociations";
