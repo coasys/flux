@@ -354,6 +354,7 @@ export default defineComponent({
       this.isCreatingCommunity = true;
 
       createCommunity({
+        linkLangAddress: this.selectedLang,
         name: this.newCommunityName,
         description: this.newCommunityDesc,
         image: this.newProfileImage,
