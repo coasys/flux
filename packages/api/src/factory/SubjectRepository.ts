@@ -100,7 +100,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     }
   }
 
-  async get(id?: string): Promise<SubjectClass | null> {
+  async get(id: string): Promise<SubjectClass | null> {
     await this.ensureSubject();
     if (id) {
       const subjectProxy = await this.perspective.getSubjectProxy(
@@ -114,7 +114,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     }
   }
 
-  async getData(id?: string): Promise<SubjectClass | string | null> {
+  async getData(id: string): Promise<SubjectClass | string | null> {
     await this.ensureSubject();
     const entry = await this.get(id);
     if (entry) {
@@ -153,14 +153,24 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     });
   }
 
-  async getAll(source?: string): Promise<SubjectClass[]> {
+  async getAll(source?: string, query?: QueryOptions): Promise<SubjectClass[]> {
     await this.ensureSubject();
 
     const tempSource = source || this.source;
 
-    const res = await this.perspective.infer(
-      `subject_class("${this.className}", C), instance(C, Base), triple("${tempSource}", Predicate, Base).`
-    );
+    let res = [];
+
+    if (query) {
+      console.log("trying");
+      res = await this.perspective.infer(
+        `findall([Base, Timestamp], (subject_class("${this.className}", C), instance(C, Base), link("${tempSource}", Predicate, Base, Timestamp, Author)), AllData), paginate(SortedData, ${query.page}, ${query.size}, PageData).`
+      );
+      console.log("tried");
+    } else {
+      res = await this.perspective.infer(
+        `subject_class("${this.className}", C), instance(C, Base), triple("${tempSource}", Predicate, Base).`
+      );
+    }
 
     const results =
       res &&
@@ -186,10 +196,13 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     );
   }
 
-  async getAllData(source?: string): Promise<SubjectClass[]> {
+  async getAllData(
+    source?: string,
+    query?: QueryOptions
+  ): Promise<SubjectClass[]> {
     await this.ensureSubject();
 
-    const subjects = await this.getAll(source);
+    const subjects = await this.getAll(source, query);
 
     const entries = await Promise.all(
       subjects.map((e) => this.getSubjectData(e))
@@ -201,4 +214,10 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
 
 export type QueryPartialEntity<T> = {
   [P in keyof T]?: T[P] | (() => string);
+};
+
+export type QueryOptions = {
+  page: number;
+  size: number;
+  infinite: boolean;
 };

@@ -53,6 +53,11 @@ export default function MessageList({
     perspective,
     source,
     model: Message,
+    query: {
+      page: 1,
+      size: 10,
+      infinite: true,
+    },
   });
 
   const messages = useMemo(() => {
