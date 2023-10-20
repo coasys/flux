@@ -226,4 +226,5 @@ export type QueryOptions = {
   page: number;
   size: number;
   infinite: boolean;
+  uniqueKey: string;
 };

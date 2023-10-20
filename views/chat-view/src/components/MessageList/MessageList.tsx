@@ -19,6 +19,22 @@ type Props = {
   onThreadClick?: (message: Message) => void;
 };
 
+function generateHashSync(str1, str2) {
+  const combinedString = str1 + str2;
+
+  function hashString(input) {
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) {
+      hash ^= input.charCodeAt(i);
+    }
+    return hash.toString(16).padStart(2, '0');
+  }
+
+  const hash = hashString(combinedString);
+
+  return hash;
+}
+
 export default function MessageList({
   perspective,
   agent,
@@ -35,6 +51,8 @@ export default function MessageList({
   const [showButton, setShowButton] = useState(false);
   const [page, setPage] = useState(1);
 
+  const uniqueKey = useRef(generateHashSync(perspective.uuid, source));
+
   useEffect(() => {
     return () => {
       clearTimeout(showButtonTimeoutRef.current);
@@ -50,7 +68,7 @@ export default function MessageList({
     }
   }, [atBottom, setShowButton]);
 
-  const { entries } = useEntries({
+  const { entries, setQuery, isMore } = useEntries({
     perspective,
     source,
     model: Message,
@@ -58,6 +76,7 @@ export default function MessageList({
       page,
       size: 2,
       infinite: true,
+      uniqueKey: uniqueKey.current
     },
   });
 
@@ -86,6 +105,19 @@ export default function MessageList({
 
   return (
     <div className={styles.messageList}>
+      {isMore && 
+      <div className={styles.loadMore}>
+        <j-button onClick={() => {
+          setQuery({
+            page: page+1,
+            size: 2,
+            infinite: true,
+            uniqueKey: uniqueKey.current
+          });
+  
+          setPage(page+1)
+        }}>load more</j-button>
+      </div>}
       {showButton && (
         <j-button
           circle

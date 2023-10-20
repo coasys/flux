@@ -22,6 +22,7 @@ type Props<SubjectClass> = {
 export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
   const forceUpdate = useForceUpdate();
   const [query, setQuery] = useState(props.query);
+  const [isMore, setIsMore] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const { perspective, source, model } = props;
@@ -29,7 +30,7 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
   // Create cache key for entry
   const cacheKey = `${perspective.uuid}/${source || ""}/${
     typeof model === "string" ? model : model.prototype.className
-  }/${JSON.stringify(query)}`;
+  }/${query?.uniqueKey}`;
 
   // Create model
   const Model = useMemo(() => {
@@ -53,6 +54,7 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
         .then((newEntries) => {
           setError(undefined);
           if (query?.infinite) {
+            setIsMore(newEntries.length !== 0)
             const updated = mergeArrays(entries, newEntries);
             mutate(updated);
           } else {
@@ -165,6 +167,7 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
     model: Model,
     isLoading,
     reload: getData,
+    isMore
   };
 }
 
