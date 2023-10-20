@@ -49,12 +49,13 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
   // Fetch data from AD4M and save to cache
   const getData = useCallback(() => {
     if (source) {
+      setIsLoading(true);
       console.log(`fetching data from remote`, source, query, cacheKey);
       Model.getAllData(source, query)
         .then((newEntries) => {
           setError(undefined);
           if (query?.infinite) {
-            setIsMore(newEntries.length >= query.size)
+            setIsMore(newEntries.length >= query.size);
             const updated = mergeArrays(entries, newEntries);
             mutate(updated);
           } else {
@@ -167,7 +168,7 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
     model: Model,
     isLoading,
     reload: getData,
-    isMore
+    isMore,
   };
 }
 

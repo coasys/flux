@@ -70,7 +70,7 @@ export default function MessageList({
     }
   }, [atBottom, setShowButton]);
 
-  const { entries, setQuery, isMore } = useEntries({
+  const { entries, setQuery, isMore, isLoading } = useEntries({
     perspective,
     source,
     model: Message,
@@ -131,26 +131,36 @@ export default function MessageList({
       )}
       <Virtuoso
         components={{
-          Header: () =>
-            isMore && (
-              <div className={styles.loadMore}>
-                <j-button
-                  variant="subtle"
-                  onClick={() => {
-                    setQuery({
-                      page: page + 1,
-                      size: PAGE_SIZE,
-                      infinite: true,
-                      uniqueKey: uniqueKey.current,
-                    });
+          Header: () => {
+            if (isLoading)
+              return (
+                <div className={styles.loadMore}>
+                  <j-spinner></j-spinner>
+                </div>
+              );
 
-                    setPage(page + 1);
-                  }}
-                >
-                  load more
-                </j-button>
-              </div>
-            ),
+            return (
+              isMore && (
+                <div className={styles.loadMore}>
+                  <j-button
+                    variant="subtle"
+                    onClick={() => {
+                      setQuery({
+                        page: page + 1,
+                        size: PAGE_SIZE,
+                        infinite: true,
+                        uniqueKey: uniqueKey.current,
+                      });
+
+                      setPage(page + 1);
+                    }}
+                  >
+                    load more
+                  </j-button>
+                </div>
+              )
+            );
+          },
         }}
         ref={virtuosoRef}
         followOutput={"auto"}
