@@ -54,7 +54,7 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
         .then((newEntries) => {
           setError(undefined);
           if (query?.infinite) {
-            setIsMore(newEntries.length !== 0)
+            setIsMore(newEntries.length >= query.size)
             const updated = mergeArrays(entries, newEntries);
             mutate(updated);
           } else {
@@ -143,13 +143,13 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
         unsubscribeToPerspective(perspective, linkAdded, linkRemoved);
       };
     }
-  }, [perspective.uuid, cacheKey]);
+  }, [perspective.uuid, cacheKey, query]);
 
   // Subscribe to changes (re-render on data change)
   useEffect(() => {
     subscribe(cacheKey, forceUpdate);
     return () => unsubscribe(cacheKey, forceUpdate);
-  }, [cacheKey, forceUpdate]);
+  }, [cacheKey, forceUpdate, query]);
 
   type ExtendedSubjectClass = SubjectClass & {
     id: string;
