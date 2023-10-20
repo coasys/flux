@@ -161,11 +161,17 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     let res = [];
 
     if (query) {
-      console.log("trying");
-      res = await this.perspective.infer(
-        `findall([Base, Timestamp], (subject_class("${this.className}", C), instance(C, Base), link("${tempSource}", Predicate, Base, Timestamp, Author)), AllData), paginate(SortedData, ${query.page}, ${query.size}, PageData).`
-      );
-      console.log("tried");
+      try {
+        const mainQuery = `findall([Timestamp, Base], (subject_class("${this.className}", C), instance(C, Base), link("${tempSource}", Predicate, Base, Timestamp, Author)), AllData), sort(AllData, SortedData), reverse(SortedData, ReverseSortedData), paginate(ReverseSortedData, ${query.page}, ${query.size}, PageData).`
+        res = await this.perspective.infer(mainQuery);
+
+        res = res[0].PageData.map(r => ({
+          Base: r[1],
+          Timestamp: r[0]
+        }))
+      } catch (e) {
+        console.log("Query failed", e);
+      }
     } else {
       res = await this.perspective.infer(
         `subject_class("${this.className}", C), instance(C, Base), triple("${tempSource}", Predicate, Base).`

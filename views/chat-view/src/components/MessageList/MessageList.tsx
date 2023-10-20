@@ -33,6 +33,7 @@ export default function MessageList({
   const [atBottom, setAtBottom] = useState(false);
   const showButtonTimeoutRef = useRef(null);
   const [showButton, setShowButton] = useState(false);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     return () => {
@@ -54,8 +55,8 @@ export default function MessageList({
     source,
     model: Message,
     query: {
-      page: 1,
-      size: 10,
+      page,
+      size: 2,
       infinite: true,
     },
   });
