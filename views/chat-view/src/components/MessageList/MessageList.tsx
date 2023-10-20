@@ -27,7 +27,7 @@ function generateHashSync(str1, str2) {
     for (let i = 0; i < input.length; i++) {
       hash ^= input.charCodeAt(i);
     }
-    return hash.toString(16).padStart(2, '0');
+    return hash.toString(16).padStart(2, "0");
   }
 
   const hash = hashString(combinedString);
@@ -35,7 +35,7 @@ function generateHashSync(str1, str2) {
   return hash;
 }
 
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 30;
 
 export default function MessageList({
   perspective,
@@ -78,7 +78,7 @@ export default function MessageList({
       page,
       size: PAGE_SIZE,
       infinite: true,
-      uniqueKey: uniqueKey.current
+      uniqueKey: uniqueKey.current,
     },
   });
 
@@ -107,19 +107,6 @@ export default function MessageList({
 
   return (
     <div className={styles.messageList}>
-      {isMore && 
-      <div className={styles.loadMore}>
-        <j-button onClick={() => {
-          setQuery({
-            page: page+1,
-            size: PAGE_SIZE,
-            infinite: true,
-            uniqueKey: uniqueKey.current
-          });
-  
-          setPage(page+1)
-        }}>load more</j-button>
-      </div>}
       {showButton && (
         <j-button
           circle
@@ -143,6 +130,28 @@ export default function MessageList({
         </j-button>
       )}
       <Virtuoso
+        components={{
+          Header: () =>
+            isMore && (
+              <div className={styles.loadMore}>
+                <j-button
+                  variant="subtle"
+                  onClick={() => {
+                    setQuery({
+                      page: page + 1,
+                      size: PAGE_SIZE,
+                      infinite: true,
+                      uniqueKey: uniqueKey.current,
+                    });
+
+                    setPage(page + 1);
+                  }}
+                >
+                  load more
+                </j-button>
+              </div>
+            ),
+        }}
         ref={virtuosoRef}
         followOutput={"auto"}
         atBottomStateChange={setAtBottom}

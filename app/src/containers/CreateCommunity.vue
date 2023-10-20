@@ -94,7 +94,7 @@
             @input="(e: any) => (newCommunityDesc = e.target.value)"
           ></j-input>
           <div>
-            <j-text variant="label">Select a language</j-text>
+            <j-text variant="label">Select a strategy</j-text>
             <select
               class="select"
               @change="(e) => (selectedLang = e.target.value)"
@@ -103,8 +103,11 @@
               label="Select Language"
               placeholder="Select a language"
             >
-              <option :value="meta.address" v-for="meta in langMeta">
-                {{ meta.description }}
+              <option :value="meta.address" v-for="(meta, index) in langMeta">
+                <template v-if="index === 0">Full P2P Badass</template>
+                <template v-else-if="index === 1">Hybrid P2P</template>
+                <template v-else-if="index === 1">Centralized</template>
+                <template v-else> {{ meta.description }}</template>
               </option>
             </select>
           </div>
@@ -414,6 +417,7 @@ export default defineComponent({
 
 <style scoped>
 .select {
+  width: 100%;
   height: var(--j-size-lg);
   padding-left: var(--j-space-300);
   padding-right: var(--j-space-300);
