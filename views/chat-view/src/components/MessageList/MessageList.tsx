@@ -35,6 +35,8 @@ function generateHashSync(str1, str2) {
   return hash;
 }
 
+const PAGE_SIZE = 2;
+
 export default function MessageList({
   perspective,
   agent,
@@ -74,7 +76,7 @@ export default function MessageList({
     model: Message,
     query: {
       page,
-      size: 2,
+      size: PAGE_SIZE,
       infinite: true,
       uniqueKey: uniqueKey.current
     },
@@ -110,7 +112,7 @@ export default function MessageList({
         <j-button onClick={() => {
           setQuery({
             page: page+1,
-            size: 2,
+            size: PAGE_SIZE,
             infinite: true,
             uniqueKey: uniqueKey.current
           });
