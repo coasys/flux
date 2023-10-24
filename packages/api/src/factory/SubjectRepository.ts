@@ -165,10 +165,14 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
         const queryResponse = (await this.perspective.infer(`findall([Timestamp, Base], (subject_class("${this.className}", C), instance(C, Base), link("${tempSource}", Predicate, Base, Timestamp, Author)), AllData), length(AllData, DataLength).`))[0]
 
         if (queryResponse.DataLength >= query.size) {
-          const mainQuery = `findall([Timestamp, Base], (subject_class("${this.className}", C), instance(C, Base), link("${tempSource}", Predicate, Base, Timestamp, Author)), AllData), sort(AllData, SortedData), reverse(SortedData, ReverseSortedData), paginate(ReverseSortedData, ${query.page}, ${query.size}, PageData).`
+          const isOutofBound = query.size * query.page > queryResponse.DataLength;
+
+          const newPageSize = isOutofBound ? queryResponse.DataLength - (query.size * (query.page - 1)) : query.size;
+
+          const mainQuery = `findall([Timestamp, Base], (subject_class("${this.className}", C), instance(C, Base), link("${tempSource}", Predicate, Base, Timestamp, Author)), AllData), sort(AllData, SortedData), reverse(SortedData, ReverseSortedData), paginate(ReverseSortedData, ${query.page}, ${newPageSize}, PageData).`
 
           res = await this.perspective.infer(mainQuery);
-  
+
           res = res[0].PageData.map(r => ({
             Base: r[1],
             Timestamp: r[0]
