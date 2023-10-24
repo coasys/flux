@@ -19,6 +19,24 @@ type Props = {
   onThreadClick?: (message: Message) => void;
 };
 
+function generateHashSync(str1, str2) {
+  const combinedString = str1 + str2;
+
+  function hashString(input) {
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) {
+      hash ^= input.charCodeAt(i);
+    }
+    return hash.toString(16).padStart(2, "0");
+  }
+
+  const hash = hashString(combinedString);
+
+  return hash;
+}
+
+const PAGE_SIZE = 30;
+
 export default function MessageList({
   perspective,
   agent,
@@ -33,6 +51,9 @@ export default function MessageList({
   const [atBottom, setAtBottom] = useState(false);
   const showButtonTimeoutRef = useRef(null);
   const [showButton, setShowButton] = useState(false);
+  const [page, setPage] = useState(1);
+
+  const uniqueKey = useRef(generateHashSync(perspective.uuid, source));
 
   useEffect(() => {
     return () => {
@@ -49,10 +70,16 @@ export default function MessageList({
     }
   }, [atBottom, setShowButton]);
 
-  const { entries } = useEntries({
+  const { entries, setQuery, isMore, isLoading } = useEntries({
     perspective,
     source,
     model: Message,
+    query: {
+      page,
+      size: PAGE_SIZE,
+      infinite: true,
+      uniqueKey: uniqueKey.current,
+    },
   });
 
   const messages = useMemo(() => {
@@ -103,6 +130,38 @@ export default function MessageList({
         </j-button>
       )}
       <Virtuoso
+        components={{
+          Header: () => {
+            if (isLoading)
+              return (
+                <div className={styles.loadMore}>
+                  <j-spinner></j-spinner>
+                </div>
+              );
+
+            return (
+              isMore && (
+                <div className={styles.loadMore}>
+                  <j-button
+                    variant="subtle"
+                    onClick={() => {
+                      setQuery({
+                        page: page + 1,
+                        size: PAGE_SIZE,
+                        infinite: true,
+                        uniqueKey: uniqueKey.current,
+                      });
+
+                      setPage(page + 1);
+                    }}
+                  >
+                    load more
+                  </j-button>
+                </div>
+              )
+            );
+          },
+        }}
         ref={virtuosoRef}
         followOutput={"auto"}
         atBottomStateChange={setAtBottom}

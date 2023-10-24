@@ -100,7 +100,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     }
   }
 
-  async get(id?: string): Promise<SubjectClass | null> {
+  async get(id: string): Promise<SubjectClass | null> {
     await this.ensureSubject();
     if (id) {
       const subjectProxy = await this.perspective.getSubjectProxy(
@@ -114,7 +114,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     }
   }
 
-  async getData(id?: string): Promise<SubjectClass | string | null> {
+  async getData(id: string): Promise<SubjectClass | string | null> {
     await this.ensureSubject();
     const entry = await this.get(id);
     if (entry) {
@@ -153,14 +153,43 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     });
   }
 
-  async getAll(source?: string): Promise<SubjectClass[]> {
+  async getAll(source?: string, query?: QueryOptions): Promise<SubjectClass[]> {
     await this.ensureSubject();
 
     const tempSource = source || this.source;
 
-    const res = await this.perspective.infer(
-      `subject_class("${this.className}", C), instance(C, Base), triple("${tempSource}", Predicate, Base).`
-    );
+    let res = [];
+
+    if (query) {
+      try {
+        const queryResponse = (await this.perspective.infer(`findall([Timestamp, Base], (subject_class("${this.className}", C), instance(C, Base), link("${tempSource}", Predicate, Base, Timestamp, Author)), AllData), length(AllData, DataLength).`))[0]
+
+        if (queryResponse.DataLength >= query.size) {
+          const isOutofBound = query.size * query.page > queryResponse.DataLength;
+
+          const newPageSize = isOutofBound ? queryResponse.DataLength - (query.size * (query.page - 1)) : query.size;
+
+          const mainQuery = `findall([Timestamp, Base], (subject_class("${this.className}", C), instance(C, Base), link("${tempSource}", Predicate, Base, Timestamp, Author)), AllData), sort(AllData, SortedData), reverse(SortedData, ReverseSortedData), paginate(ReverseSortedData, ${query.page}, ${newPageSize}, PageData).`
+
+          res = await this.perspective.infer(mainQuery);
+
+          res = res[0].PageData.map(r => ({
+            Base: r[1],
+            Timestamp: r[0]
+          }))
+        } else {
+          res = await this.perspective.infer(
+            `subject_class("${this.className}", C), instance(C, Base), triple("${tempSource}", Predicate, Base).`
+          );
+        }
+      } catch (e) {
+        console.log("Query failed", e);
+      }
+    } else {
+      res = await this.perspective.infer(
+        `subject_class("${this.className}", C), instance(C, Base), triple("${tempSource}", Predicate, Base).`
+      );
+    }
 
     const results =
       res &&
@@ -186,10 +215,13 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     );
   }
 
-  async getAllData(source?: string): Promise<SubjectClass[]> {
+  async getAllData(
+    source?: string,
+    query?: QueryOptions
+  ): Promise<SubjectClass[]> {
     await this.ensureSubject();
 
-    const subjects = await this.getAll(source);
+    const subjects = await this.getAll(source, query);
 
     const entries = await Promise.all(
       subjects.map((e) => this.getSubjectData(e))
@@ -201,4 +233,11 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
 
 export type QueryPartialEntity<T> = {
   [P in keyof T]?: T[P] | (() => string);
+};
+
+export type QueryOptions = {
+  page: number;
+  size: number;
+  infinite: boolean;
+  uniqueKey: string;
 };

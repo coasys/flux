@@ -13,3 +13,8 @@
 .scroller {
   height: 100%;
 }
+
+.loadMore {
+  padding: var(--j-space-500);
+  text-align: center;
+}

@@ -10,15 +10,19 @@ import {
 } from "./cache";
 import { PerspectiveProxy, LinkExpression } from "@perspect3vism/ad4m";
 import { SubjectRepository } from "@fluxapp/api";
+import { QueryOptions } from "@fluxapp/api/src/factory";
 
 type Props<SubjectClass> = {
   source: string;
   perspective: PerspectiveProxy;
   model: (new () => SubjectClass) | string;
+  query?: QueryOptions;
 };
 
 export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
   const forceUpdate = useForceUpdate();
+  const [query, setQuery] = useState(props.query);
+  const [isMore, setIsMore] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const { perspective, source, model } = props;
@@ -26,7 +30,7 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
   // Create cache key for entry
   const cacheKey = `${perspective.uuid}/${source || ""}/${
     typeof model === "string" ? model : model.prototype.className
-  }`;
+  }/${query?.uniqueKey}`;
 
   // Create model
   const Model = useMemo(() => {
@@ -38,20 +42,25 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
 
   // Mutate shared/cached data for all subscribers
   const mutate = useCallback(
-    (entry: SubjectClass[]) => setCache(cacheKey, entry),
+    (entries: SubjectClass[]) => setCache(cacheKey, entries),
     [cacheKey]
   );
 
   // Fetch data from AD4M and save to cache
   const getData = useCallback(() => {
-    const subs = getSubscribers(cacheKey);
-
     if (source) {
-      console.log(`fetching data from remote`, subs);
-      Model.getAllData()
-        .then((entries) => {
+      setIsLoading(true);
+      console.log(`fetching data from remote`, source, query, cacheKey);
+      Model.getAllData(source, query)
+        .then((newEntries) => {
           setError(undefined);
-          mutate(entries);
+          if (query?.infinite) {
+            setIsMore(newEntries.length >= query.size);
+            const updated = mergeArrays(entries, newEntries);
+            mutate(updated);
+          } else {
+            mutate(newEntries);
+          }
         })
         .catch((error) => {
           setError(error.toString());
@@ -60,10 +69,10 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
           setIsLoading(false);
         });
     }
-  }, [cacheKey]);
+  }, [cacheKey, query?.page, query?.infinite, query?.size]);
 
   // Trigger initial fetch
-  useEffect(getData, [cacheKey]);
+  useEffect(getData, [cacheKey, query?.page, query?.infinite, query?.size]);
 
   // Get single entry
   async function fetchEntry(id) {
@@ -135,13 +144,13 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
         unsubscribeToPerspective(perspective, linkAdded, linkRemoved);
       };
     }
-  }, [perspective.uuid, cacheKey]);
+  }, [perspective.uuid, cacheKey, query]);
 
   // Subscribe to changes (re-render on data change)
   useEffect(() => {
     subscribe(cacheKey, forceUpdate);
     return () => unsubscribe(cacheKey, forceUpdate);
-  }, [cacheKey, forceUpdate]);
+  }, [cacheKey, forceUpdate, query]);
 
   type ExtendedSubjectClass = SubjectClass & {
     id: string;
@@ -155,13 +164,41 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
     entries: [...entries],
     error,
     mutate,
+    setQuery,
     model: Model,
     isLoading,
     reload: getData,
+    isMore,
   };
 }
 
 function useForceUpdate() {
   const [, setState] = useState<number[]>([]);
   return useCallback(() => setState([]), [setState]);
+}
+
+interface MyObject {
+  id: number;
+  [key: string]: any;
+}
+
+function mergeArrays(arr1: MyObject[], arr2: MyObject[]): MyObject[] {
+  const map = new Map<number, MyObject>();
+
+  // Function to add objects from array to map
+  function addArrayToMap(arr: MyObject[]) {
+    for (const obj of arr) {
+      if (obj && obj.id != null) {
+        // Ensure object and id property exist
+        map.set(obj.id, obj);
+      }
+    }
+  }
+
+  // Add objects from both arrays to map
+  addArrayToMap(arr1);
+  addArrayToMap(arr2);
+
+  // Convert map values to an array and return it
+  return Array.from(map.values());
 }

@@ -12,6 +12,7 @@ import { SubjectRepository } from "./factory";
 import { Community } from "./community";
 
 export interface Payload {
+  linkLangAddress?: string;
   name: string;
   image?: string;
   description?: string;
@@ -19,6 +20,7 @@ export interface Payload {
 }
 
 export default async function createCommunity({
+  linkLangAddress,
   name,
   description = "",
   image = undefined,
@@ -72,14 +74,13 @@ export default async function createCommunity({
         : undefined,
     };
 
-
     const uid = uuidv4().toString();
 
     const langs = await client.runtime.knownLinkLanguageTemplates();
 
     //Create unique social-context
     const linkLanguage = await client.languages.applyTemplateAndPublish(
-      langs[0],
+      linkLangAddress || langs[0],
       JSON.stringify({
         uid: uid,
         name: `${name}-link-language`,

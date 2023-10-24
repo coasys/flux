@@ -3,6 +3,13 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). More specifically:
 
+## [0.6.1] - 24/10/2023
+
+### Added
+
+- Paginated results to Subject definition for chat messages
+- Ability to switch between multiple new link languages in AD4M; Full P2P badass, Hybrid, Centralized
+
 ## [0.6.0] - 22/09/2023
 
 This new release includes a revolutionary new plugin system for Flux!

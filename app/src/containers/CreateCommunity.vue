@@ -93,7 +93,24 @@
             @keydown.enter="createCommunity"
             @input="(e: any) => (newCommunityDesc = e.target.value)"
           ></j-input>
-
+          <div>
+            <j-text variant="label">Select a strategy</j-text>
+            <select
+              class="select"
+              @change="(e) => (selectedLang = e.target.value)"
+              :value="selectedLang"
+              size="lg"
+              label="Select Language"
+              placeholder="Select a language"
+            >
+              <option :value="meta.address" v-for="(meta, index) in langMeta">
+                <template v-if="index === 0">Full P2P Badass</template>
+                <template v-else-if="index === 1">Hybrid P2P</template>
+                <template v-else-if="index === 1">Centralized</template>
+                <template v-else> {{ meta.description }}</template>
+              </option>
+            </select>
+          </div>
           <j-button
             full
             :loading="isCreatingCommunity"
@@ -191,10 +208,10 @@
 
 <script lang="ts">
 import { isValid } from "@/utils/validation";
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useAppStore } from "@/store/app";
 import { joinCommunity, createCommunity } from "@fluxapp/api";
 import { usePerspectives, useCommunities } from "@fluxapp/vue";
@@ -206,10 +223,20 @@ export default defineComponent({
   emits: ["cancel", "submit"],
   async setup() {
     const appStore = useAppStore();
-    const client = await getAd4mClient();
+    const client: Ad4mClient = await getAd4mClient();
+
+    const linkLangs = await client.runtime.knownLinkLanguageTemplates();
+    const langExpression = await client.expression.getMany(
+      linkLangs.map((l) => `lang://${l}`)
+    );
+    const langMeta = langExpression.map((l) => JSON.parse(l.data));
+
     const { perspectives, neighbourhoods } = usePerspectives(client);
     const { communities } = useCommunities(neighbourhoods);
+
     return {
+      selectedLang: ref(langMeta[0].address),
+      langMeta: ref(langMeta),
       communities,
       perspectives,
       appStore,
@@ -330,6 +357,7 @@ export default defineComponent({
       this.isCreatingCommunity = true;
 
       createCommunity({
+        linkLangAddress: this.selectedLang,
         name: this.newCommunityName,
         description: this.newCommunityDesc,
         image: this.newProfileImage,
@@ -388,6 +416,27 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.select {
+  width: 100%;
+  height: var(--j-size-lg);
+  padding-left: var(--j-space-300);
+  padding-right: var(--j-space-300);
+  font-size: inherit;
+  font-family: inherit;
+  background-color: transparent;
+  color: var(--j-color-black);
+  border-radius: var(--j-border-radius);
+  border: 1px solid var(--j-color-primary-100);
+}
+
+.select:hover {
+  border: 1px solid var(--j-color-primary-200);
+}
+
+.select:focus {
+  outline: 0;
+  border: 1px solid var(--j-color-primary-500);
+}
 .options {
   display: grid;
   grid-template-columns: 1fr;
