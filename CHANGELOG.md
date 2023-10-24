@@ -8,6 +8,7 @@ This project _loosely_ adheres to [Semantic Versioning](https://semver.org/spec/
 ### Added
 
 - Paginated results to Subject definition for chat messages
+- Ability to switch between multiple new link languages in AD4M; Full P2P badass, Hybrid, Centralized
 
 ## [0.6.0] - 22/09/2023
 
