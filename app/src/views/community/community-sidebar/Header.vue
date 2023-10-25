@@ -84,8 +84,8 @@
       </j-flex>
       <j-text nomargin size="300" color="warning-500">
         Flux is still in the alpha phase, things may break.
-        <a href="https://github.com/fluxsocial/flux/issues" target="_blank">
-          Report bugs here
+        <a href="https://discord.gg/pWCA3wQrtE" target="_blank">
+          Join our Discord and report bugs here.
         </a>
       </j-text>
     </div>
@@ -94,7 +94,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import { useRoute } from 'vue-router';
+import { useRoute } from "vue-router";
 import { Profile } from "@fluxapp/types";
 import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
@@ -114,7 +114,7 @@ export default defineComponent({
     },
   },
   async setup(props) {
-     const client: Ad4mClient = await getAd4mClient();
+    const client: Ad4mClient = await getAd4mClient();
 
     const { status, me, profile } = useMe(client.agent);
 
