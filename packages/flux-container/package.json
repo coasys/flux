@@ -21,8 +21,8 @@
   "dependencies": {
     "@fluxapp/api": "*",
     "@fluxapp/ui": "*",
-    "@perspect3vism/ad4m": "0.6.0",
-    "@perspect3vism/ad4m-connect": "0.6.0",
+    "@perspect3vism/ad4m": "0.7.1",
+    "@perspect3vism/ad4m-connect": "0.7.1",
     "lit-element": "^2.4.0"
   },
   "devDependencies": {

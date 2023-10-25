@@ -19,7 +19,7 @@
     "uuid": "^9.0.0"
   },
   "peerDependencies": {
-    "@perspect3vism/ad4m": "0.6.0"
+    "@perspect3vism/ad4m": "0.7.1"
   },
   "keywords": [],
   "author": "",
