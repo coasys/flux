@@ -64,22 +64,28 @@ export default async function getProfile(did: string): Promise<Profile> {
     );
 
     if (mappedProfile.profilePicture) {
-      const { data } = await client.expression.get(
+      const res = await client.expression.get(
         mappedProfile.profilePicture
       );
-      const { data_base64, file_type } = JSON.parse(data);
-      mappedProfile.profilePicture =
-        data_base64 && `data:${file_type};base64, ${data_base64}`;
+      if (res) {
+        const { data } = res;
+        const { data_base64, file_type } = JSON.parse(data);
+        mappedProfile.profilePicture =
+          data_base64 && `data:${file_type};base64, ${data_base64}`;
+      }
     }
 
     if (mappedProfile.profileThumbnailPicture) {
-      const { data } = await client.expression.get(
+      const res = await client.expression.get(
         mappedProfile.profileThumbnailPicture
       );
-      const { data_base64, file_type } = JSON.parse(data);
+      if (res) {
+        const { data } = res;
+        const { data_base64, file_type } = JSON.parse(data);
 
-      mappedProfile.profileThumbnailPicture =
-        data_base64 && `data:${file_type};base64, ${data_base64}`;
+        mappedProfile.profileThumbnailPicture =
+          data_base64 && `data:${file_type};base64, ${data_base64}`;
+      }
     }
 
     profile = {
