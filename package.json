@@ -25,14 +25,16 @@
   },
   "devDependencies": {
     "eslint-config-custom": "*",
+    "patch-package": "*",
     "prettier": "latest",
-    "turbo": "latest",
-    "patch-package": "*"
+    "turbo": "latest"
   },
   "engines": {
     "node": ">=18.16.0"
   },
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "graphql": "^15.7.2"
+  },
   "packageManager": "yarn@1.22.19"
 }
