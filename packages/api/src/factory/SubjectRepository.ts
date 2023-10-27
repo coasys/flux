@@ -162,15 +162,14 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
 
     if (query) {
       try {
-        const queryResponse = (await this.perspective.infer(`findall([Timestamp, Base], (subject_class("${this.className}", C), instance(C, Base), link("${tempSource}", Predicate, Base, Timestamp, Author)), AllData), length(AllData, DataLength).`))[0]
+        const queryResponse = (await this.perspective.infer(`findall([Timestamp, Base], (subject_class("${this.className}", C), instance(C, Base), link("${tempSource}", Predicate, Base, Timestamp, Author)), AllData), length(AllData, DataLength), sort(AllData, SortedData).`))[0]
 
-        if (queryResponse.DataLength >= query.size) {
+        if (queryResponse.SortedData >= query.size) {
           const isOutofBound = query.size * query.page > queryResponse.DataLength;
 
           const newPageSize = isOutofBound ? queryResponse.DataLength - (query.size * (query.page - 1)) : query.size;
 
           const mainQuery = `findall([Timestamp, Base], (subject_class("${this.className}", C), instance(C, Base), link("${tempSource}", Predicate, Base, Timestamp, Author)), AllData), sort(AllData, SortedData), reverse(SortedData, ReverseSortedData), paginate(ReverseSortedData, ${query.page}, ${newPageSize}, PageData).`
-
           res = await this.perspective.infer(mainQuery);
 
           res = res[0].PageData.map(r => ({
@@ -191,17 +190,10 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
       );
     }
 
-    const results =
-      res &&
-      res.filter(
-        (obj, index, self) =>
-          index === self.findIndex((t) => t.Base === obj.Base)
-      );
+    if (!res) return [];
 
-    if (!results) return [];
-
-    return await Promise.all(
-      results.map(async (result) => {
+    const data = await Promise.all(
+      res.map(async (result) => {
         let subject = new Subject(
           this.perspective!,
           result.Base,
@@ -213,6 +205,8 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
         return subject;
       })
     );
+
+    return data
   }
 
   async getAllData(
