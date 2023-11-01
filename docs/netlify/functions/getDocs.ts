@@ -3,6 +3,9 @@ import path from "path";
 
 function getAllMarkdownFiles(dirPath, fileArr?) {
   const files = fs.readdirSync(dirPath);
+
+  console.log({ files });
+
   fileArr = fileArr || [];
 
   files.forEach(function (file) {
