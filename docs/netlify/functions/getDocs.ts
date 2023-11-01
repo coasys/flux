@@ -24,7 +24,7 @@ function getAllMarkdownFiles(dirPath, fileArr?) {
 }
 
 const handler: any = async (event, context) => {
-  const allMarkdownFiles = getAllMarkdownFiles(process.cwd());
+  const allMarkdownFiles = getAllMarkdownFiles(path.join(process.cwd(), "docs"));
   const output = allMarkdownFiles.join("");
 
   return {
