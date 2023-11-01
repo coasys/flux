@@ -16,7 +16,11 @@ function getAllMarkdownFiles(dirPath, fileArr?) {
       fileArr = getAllMarkdownFiles(filePath, fileArr);
     } else if (path.extname(filePath).toLowerCase() === ".md") {
       const fileContent = fs.readFileSync(filePath, "utf8");
-      fileArr.push("DOCUMENT: " + filePath.split("/")[-1] + " " + fileContent);
+      //Get the filename
+      const parts = filePath.split('/');
+      const filename = parts[parts.length - 1];
+
+      fileArr.push("DOCUMENT: " + filename + " " + fileContent);
     }
   });
 
