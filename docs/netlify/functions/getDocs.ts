@@ -34,6 +34,9 @@ const handler: any = async (event, context) => {
   return {
     statusCode: 200,
     body: JSON.stringify(output),
+    headers: {
+      'Allow-Access-Control-Origin': '*'
+    }
   };
 };
 
