@@ -190,10 +190,18 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
       );
     }
 
+    const results =
+    res &&
+    res.filter(
+      (obj, index, self) =>
+        index === self.findIndex((t) => t.Base === obj.Base)
+    );
+
+
     if (!res) return [];
 
     const data = await Promise.all(
-      res.map(async (result) => {
+      results.map(async (result) => {
         let subject = new Subject(
           this.perspective!,
           result.Base,

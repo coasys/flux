@@ -38,7 +38,7 @@
               class="channel__notification"
               v-if="channel.hasNewMessages"
             ></div>
-            <!--
+<!--             
             <j-icon
               @click.stop="handleToggleClick(channel.id)"
               slot="start"
@@ -198,7 +198,7 @@ export default defineComponent({
       return channelViewOptions.filter((o) => views.includes(o.type));
     },
     getIcon(view: ChannelView) {
-      return channelViewOptions.find((o) => o.type === view)?.icon || "hash";
+      return channelViewOptions.find((o) => o.pkg === view)?.icon || "hash";
     },
     async deleteChannel(channelId: string) {
       await this.channelRepo?.remove(channelId);
