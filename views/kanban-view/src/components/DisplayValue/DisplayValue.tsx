@@ -37,8 +37,7 @@ export default function DisplayValue({
 
   function onKeyDown(e) {
     if (e.key === "Enter") {
-      e.stopPropagation();
-      onUpdate(e.target.value);
+      e.preventDefault();
       setIsEditing(false);
     }
     if (e.key === "Escape") {
@@ -48,10 +47,8 @@ export default function DisplayValue({
   }
 
   function onBlur(e) {
-    if (e.key !== "Escape") {
-      onUpdate(e.target.value);
-      setIsEditing(false);
-    }
+    onUpdate(e.target.value);
+    setIsEditing(false);
   }
 
   function onStartEdit(e) {
