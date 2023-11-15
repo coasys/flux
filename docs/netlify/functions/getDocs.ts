@@ -3,6 +3,9 @@ import path from "path";
 
 function getAllMarkdownFiles(dirPath, fileArr?) {
   const files = fs.readdirSync(dirPath);
+
+  console.log({ files });
+
   fileArr = fileArr || [];
 
   files.forEach(function (file) {
@@ -13,7 +16,11 @@ function getAllMarkdownFiles(dirPath, fileArr?) {
       fileArr = getAllMarkdownFiles(filePath, fileArr);
     } else if (path.extname(filePath).toLowerCase() === ".md") {
       const fileContent = fs.readFileSync(filePath, "utf8");
-      fileArr.push(fileContent);
+      //Get the filename
+      const parts = filePath.split('/');
+      const filename = parts[parts.length - 1];
+
+      fileArr.push("DOCUMENT: " + filename + " " + fileContent);
     }
   });
 
@@ -27,6 +34,9 @@ const handler: any = async (event, context) => {
   return {
     statusCode: 200,
     body: JSON.stringify(output),
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    }
   };
 };
 

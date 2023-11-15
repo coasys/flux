@@ -6,6 +6,7 @@ export const viewOptions = [
     description: "Real time message with your community members",
     icon: "chat",
     type: ChannelView.Chat,
+    pkg: "@fluxapp/chat-view",
     component: "chat-view",
   },
   {
@@ -13,6 +14,7 @@ export const viewOptions = [
     description: "A feed of posts that users can publish",
     icon: "card-heading",
     type: ChannelView.Post,
+    pkg: "@fluxapp/post-view",
     component: "post-view",
   },
   {
@@ -20,6 +22,7 @@ export const viewOptions = [
     description: "A graph view of the channel's data",
     icon: "share",
     type: ChannelView.Graph,
+    pkg: "@fluxapp/graph-view",
     component: "graph-view",
   },
   {
@@ -27,6 +30,7 @@ export const viewOptions = [
     description: "Audio/Video channel",
     icon: "mic",
     type: ChannelView.Voice,
+    pkg: "@fluxapp/webrtc-view",
     component: "webrtc-view",
   },
   {
@@ -34,6 +38,7 @@ export const viewOptions = [
     description: "WebRTC debugger",
     icon: "bug",
     type: ChannelView.Debug,
+    pkg: "@fluxapp/webrtc-debug-view",
     component: "webrtc-debug-view",
   },
 ];
