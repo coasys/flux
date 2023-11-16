@@ -2,7 +2,7 @@ import { useState } from "preact/hooks";
 import PostItem from "../PostItem";
 import style from "./index.module.css";
 import { DisplayView, displayOptions } from "../../constants/options";
-import { useEntries } from "@fluxapp/react-web";
+import { useSubjects } from "@fluxapp/react-web";
 import { Post } from "@fluxapp/api";
 import { useMemo } from "react";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
@@ -19,7 +19,7 @@ export default function PostList({
 }) {
   const [view, setView] = useState(DisplayView.Compact);
 
-  const { entries: posts, isLoading } = useEntries({
+  const { entries: posts, isLoading } = useSubjects({
     perspective: perspective,
     source: source,
     subject: Post,

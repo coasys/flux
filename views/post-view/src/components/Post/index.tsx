@@ -4,7 +4,7 @@ import { format, formatDistance } from "date-fns";
 import { getTimeSince } from "../../utils";
 import Avatar from "../Avatar";
 import { Post as PostSubject } from "@fluxapp/api";
-import { useAgent, useEntry, useMe } from "@fluxapp/react-web";
+import { useAgent, useSubject, useMe } from "@fluxapp/react-web";
 import styles from "./index.module.css";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
@@ -22,7 +22,7 @@ export default function Post({
 }) {
   const { methods: UIMethods } = useContext(UIContext);
 
-  const { entry: post } = useEntry({
+  const { entry: post } = useSubject({
     perspective,
     id,
     subject: PostSubject,

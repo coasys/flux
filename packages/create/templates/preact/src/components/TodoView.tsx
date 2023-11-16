@@ -1,6 +1,6 @@
 import { useState } from "preact/hooks";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
-import { useEntries } from "@fluxapp/react-web";
+import { useSubjects } from "@fluxapp/react-web";
 
 import Todo from "../subjects/Todo";
 
@@ -14,7 +14,7 @@ type Props = {
 export default function TodoView({ perspective, source }: Props) {
   const [title, setTitle] = useState("");
 
-  const { entries: todos, repo } = useEntries({
+  const { entries: todos, repo } = useSubjects({
     perspective,
     source,
     subject: Todo,

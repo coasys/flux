@@ -121,11 +121,11 @@ import { useAppStore } from "@/store/app";
 import { ChannelView } from "@fluxapp/types";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 import {
-  useEntry,
+  useSubject,
   usePerspective,
   usePerspectives,
   useMe,
-  useEntries,
+  useSubjects,
 } from "@fluxapp/vue";
 import {
   Community,
@@ -160,18 +160,18 @@ export default defineComponent({
 
     const { data } = usePerspective(client, () => props.communityId);
 
-    const { entry: community } = useEntry({
+    const { entry: community } = useSubject({
       perspective: () => data.value.perspective,
       subject: Community,
     });
 
-    const { entry: channel, repo: channelRepo } = useEntry({
+    const { entry: channel, repo: channelRepo } = useSubject({
       perspective: () => data.value.perspective,
       id: () => props.channelId,
       subject: Channel,
     });
 
-    const { entries: apps } = useEntries({
+    const { entries: apps } = useSubjects({
       perspective: () => data.value.perspective,
       source: () => props.channelId,
       subject: App,

@@ -2,7 +2,7 @@
 
 With your Subjects defined, writing and reading data can be done by writing and subscribing to the AD4M perspective.
 
-This logic has been bundled into two hooks: `useEntry` and `useEntries`, for working with a single item and lists of items respectively.
+This logic has been bundled into two hooks: `useSubject` and `useSubjects`, for working with a single item and lists of items respectively.
 
 A Flux Plugin will always recieve two things.
 
@@ -15,17 +15,17 @@ A Flux Plugin will always recieve two things.
 Now, let's get a list of Todo's, which is also part of the boilerplate. This assumes we've created a Subject Class called `Todo` with a given set of fields.
 
 ```jsx
-import { useEntry, useEntries } from "@fluxapp/react";
+import { useSubject, useSubjects } from "@fluxapp/react";
 import { Community } from "@fluxapp/api";
 import Todo from "../subjects/Todo";  // [!code ++]
 
 export default function TodoView({ perspective, channelSource })
-  const { entry: community } = useEntry({
+  const { entry: community } = useSubject({
     perspective,
     subject: Community,
   });
 
-  const { entries: todos, repo } = useEntries({  // [!code ++]
+  const { entries: todos, repo } = useSubjects({  // [!code ++]
     perspective,  // [!code ++]
     source: channelSource,  // [!code ++]
     subject: Todo,  // [!code ++]
@@ -43,14 +43,14 @@ export default function TodoView({ perspective, channelSource })
 
 ## Getting a single item
 
-If we want to fetch a single entry based on it's id. We can use the `useEntry` hook and just pass in an id.
+If we want to fetch a single entry based on it's id. We can use the `useSubject` hook and just pass in an id.
 
 ```tsx
-import { useEntry } from "@fluxapp/react";
+import { useSubject } from "@fluxapp/react";
 import { Todo } from "@fluxapp/api";
 
 export default function Todo({ perspective, id }) {
-  const { entry: todo } = useEntry({
+  const { entry: todo } = useSubject({
     perspective,
     id:
     subject: Todo,
@@ -71,19 +71,19 @@ Since we're subscribed to all changes, the list of Todos will automatically upda
 :::
 
 ```jsx
-import { useEntry, useEntries } from "@fluxapp/react";
+import { useSubject, useSubjects } from "@fluxapp/react";
 import { Community } from "@fluxapp/api";
 import Todo from "../subjects/Todo";
 
 export default function TodoView({ perspective, channelSource }) {
   const [title, setTitle] = useState(""); // [!code ++]
 
-  const { entry: community } = useEntry({
+  const { entry: community } = useSubject({
     perspective,
     subject: Community,
   });
 
-  const { entries: todos, repo } = useEntries({
+  const { entries: todos, repo } = useSubjects({
     perspective,
     source: channelSource,
     subject: Todo,
@@ -117,19 +117,19 @@ Next, let's add functionality to toggle a Todo's state using the `repo.update()`
 In this example we use the [j-checkbox](/ui-library/components/checkbox.html) web-component from Flux UI:
 
 ```jsx
-import { useEntry, useEntries } from "@fluxapp/react";
+import { useSubject, useSubjects } from "@fluxapp/react";
 import { Community } from "@fluxapp/api";
 import Todo from "../subjects/Todo";
 
 export default function TodoView({ perspective, channelSource }) {
   const [title, setTitle] = useState("");
 
-  const { entry: community } = useEntry({
+  const { entry: community } = useSubject({
     perspective,
     subject: Community,
   });
 
-  const { entries: todos, repo } = useEntries({
+  const { entries: todos, repo } = useSubjects({
     perspective,
     source: channelSource,
     subject: Todo,
@@ -176,19 +176,19 @@ export default function TodoView({ perspective, channelSource }) {
 Deleting data, as you might guess, is done with `repo.remove()`. Let's add a button for deleting Todo-items:
 
 ```jsx
-import { useEntry, useEntries } from "@fluxapp/react";
+import { useSubject, useSubjects } from "@fluxapp/react";
 import { Community } from "@fluxapp/api";
 import Todo from "../subjects/Todo";
 
 export default function TodoView({ perspective, channelSource }) {
   const [title, setTitle] = useState("");
 
-  const { entry: community } = useEntry({
+  const { entry: community } = useSubject({
     perspective,
     subject: Community,
   });
 
-  const { entries: todos, repo } = useEntries({
+  const { entries: todos, repo } = useSubjects({
     perspective,
     source: channelSource,
     subject: Todo,

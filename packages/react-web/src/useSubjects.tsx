@@ -19,7 +19,7 @@ type Props<SubjectClass> = {
   query?: QueryOptions;
 };
 
-export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
+export function useSubjects<SubjectClass>(props: Props<SubjectClass>) {
   const forceUpdate = useForceUpdate();
   const [query, setQuery] = useState(props.query);
   const [isMore, setIsMore] = useState(false);

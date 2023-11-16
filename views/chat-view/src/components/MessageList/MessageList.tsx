@@ -1,4 +1,4 @@
-import { useEntries } from "@fluxapp/react-web";
+import { useSubjects } from "@fluxapp/react-web";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { Message } from "@fluxapp/api";
@@ -70,7 +70,7 @@ export default function MessageList({
     }
   }, [atBottom, setShowButton]);
 
-  const { entries, setQuery, isMore, isLoading } = useEntries({
+  const { entries, setQuery, isMore, isLoading } = useSubjects({
     perspective,
     source,
     subject: Message,

@@ -58,7 +58,7 @@ import { defineComponent, watchEffect, ref } from "vue";
 import { Community, getProfile } from "@fluxapp/api";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Avatar from "@/components/avatar/Avatar.vue";
-import { usePerspective, useEntry } from "@fluxapp/vue";
+import { usePerspective, useSubject } from "@fluxapp/vue";
 import { useRoute } from "vue-router";
 
 export default defineComponent({
@@ -70,7 +70,7 @@ export default defineComponent({
     const client = await getAd4mClient();
     const { data } = usePerspective(client, () => route.params.communityId);
 
-    const { entry: community } = useEntry({
+    const { entry: community } = useSubject({
       perspective: () => data.value.perspective,
       subject: Community,
     });

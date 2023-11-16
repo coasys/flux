@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import { useEntries, useEntry } from "@fluxapp/react-web";
+import { useSubjects, useSubject } from "@fluxapp/react-web";
 import styles from "./Card.module.css";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useAssociations } from "../../hooks/useAssociations";
@@ -20,9 +20,9 @@ export default function Card({
   perspective,
 }: Props) {
   const [assignedProfiles, setAssignedProfiles] = useState<Profile[]>([]);
-  const { entry } = useEntry({ perspective, id, subject: selectedClass });
+  const { entry } = useSubject({ perspective, id, subject: selectedClass });
 
-  const { entries: comments } = useEntries({
+  const { entries: comments } = useSubjects({
     perspective,
     source: id,
     subject: Message,

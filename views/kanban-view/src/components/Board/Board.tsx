@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import styles from "./Board.module.css";
-import { useEntries } from "@fluxapp/react-web";
+import { useSubjects } from "@fluxapp/react-web";
 import { useEffect, useMemo } from "preact/hooks";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import Card from "../Card";
@@ -44,7 +44,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     });
   }, [perspective.uuid]);
 
-  const { entries, repo } = useEntries({
+  const { entries, repo } = useSubjects({
     perspective,
     source,
     subject: selectedClass,

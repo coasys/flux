@@ -118,7 +118,7 @@ import {
 import ChannnelViewOptions from "@/components/channel-view-options/ChannelViewOptions.vue";
 import { viewOptions } from "@/constants";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { useEntries, useEntry, usePerspective } from "@fluxapp/vue";
+import { useSubjects, useSubject, usePerspective } from "@fluxapp/vue";
 import { useRoute } from "vue-router";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 
@@ -139,13 +139,13 @@ export default defineComponent({
     const client = await getAd4mClient();
     const { data } = usePerspective(client, () => route.params.communityId);
 
-    const { entry: channel, repo } = useEntry({
+    const { entry: channel, repo } = useSubject({
       perspective: () => data.value.perspective,
       id: props.channelId,
       subject: Channel,
     });
 
-    const { entries: apps, repo: appRepo } = useEntries({
+    const { entries: apps, repo: appRepo } = useSubjects({
       perspective: () => data.value.perspective,
       source: () => props.channelId,
       subject: App,

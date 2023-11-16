@@ -128,7 +128,7 @@ import {
   generateWCName,
   getOfflineFluxApps,
 } from "@fluxapp/api";
-import { usePerspective, useEntry } from "@fluxapp/vue";
+import { usePerspective, useSubject } from "@fluxapp/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { defineComponent } from "vue";
 import fetchFluxApp from "@/utils/fetchFluxApp";
@@ -162,12 +162,12 @@ export default defineComponent({
 
     const { data } = usePerspective(client, () => route.params.communityId);
 
-    const { repo } = useEntry({
+    const { repo } = useSubject({
       perspective: () => data.value.perspective,
       subject: Channel,
     });
 
-    const { repo: appRepo } = useEntry({
+    const { repo: appRepo } = useSubject({
       perspective: () => data.value.perspective,
       subject: App,
     });

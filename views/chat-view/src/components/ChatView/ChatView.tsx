@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { PerspectiveProxy, Literal, LinkQuery } from "@perspect3vism/ad4m";
-import { useAgent, useEntries } from "@fluxapp/react-web";
+import { useAgent, useSubjects } from "@fluxapp/react-web";
 import { Message, generateWCName } from "@fluxapp/api";
 import { name } from "../../../package.json";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
@@ -46,7 +46,7 @@ export default function ChatView({
     did: replyMessage?.author,
   });
 
-  const { model } = useEntries({
+  const { model } = useSubjects({
     perspective,
     source,
     subject: Message,

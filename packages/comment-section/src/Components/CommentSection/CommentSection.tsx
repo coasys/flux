@@ -1,7 +1,7 @@
 import CommentItem from "../CommentItem";
 import { useState, useRef } from "preact/hooks";
 import { Message as MessageModel } from "@fluxapp/api";
-import { useEntries, useMe } from "@fluxapp/react-web";
+import { useSubjects, useMe } from "@fluxapp/react-web";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import styles from "./CommentSection.module.css";
@@ -21,7 +21,7 @@ export default function CommentSection({
   const editor = useRef(null);
   const [showToolbar, setShowToolbar] = useState(false);
 
-  const { entries: comments, repo } = useEntries({
+  const { entries: comments, repo } = useSubjects({
     perspective,
     source: source || null,
     subject: MessageModel,

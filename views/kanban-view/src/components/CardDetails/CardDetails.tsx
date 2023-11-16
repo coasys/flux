@@ -1,5 +1,5 @@
 import { useState } from "preact/hooks";
-import { useEntry } from "@fluxapp/react-web";
+import { useSubject } from "@fluxapp/react-web";
 import styles from "./CardDetails.module.css";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
@@ -24,7 +24,7 @@ export default function CardDetails({
   onDeleted = () => {},
   perspective,
 }: Props) {
-  const { entry, repo } = useEntry({
+  const { entry, repo } = useSubject({
     perspective,
     id,
     subject: selectedClass,

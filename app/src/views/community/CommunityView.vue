@@ -196,7 +196,7 @@ import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { useEntries, useCommunities, usePerspectives } from "@fluxapp/vue";
+import { useSubjects, useCommunities, usePerspectives } from "@fluxapp/vue";
 import { usePerspective } from "@fluxapp/vue";
 import { PerspectiveState } from "@perspect3vism/ad4m";
 
@@ -227,7 +227,7 @@ export default defineComponent({
 
     const { communities } = useCommunities(neighbourhoods);
 
-    const { entries: channels } = useEntries({
+    const { entries: channels } = useSubjects({
       perspective: () => data.value.perspective,
       subject: Channel,
     });

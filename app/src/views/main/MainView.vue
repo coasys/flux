@@ -105,7 +105,7 @@ import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import semver from "semver";
 import { dependencies } from "../../../package.json";
 import { LinkExpression, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
-import { useEntry, usePerspective, usePerspectives } from "@fluxapp/vue";
+import { useSubject, usePerspective, usePerspectives } from "@fluxapp/vue";
 import { Community } from "@fluxapp/api";
 
 export default defineComponent({
@@ -118,7 +118,7 @@ export default defineComponent({
 
     const { data } = usePerspective(client, () => appStore.activeCommunity);
 
-    const { entry: community } = useEntry({
+    const { entry: community } = useSubject({
       perspective: () => data.value.perspective,
       subject: Community,
     });

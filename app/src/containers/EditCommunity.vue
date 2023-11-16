@@ -45,7 +45,7 @@ import {
   getImage,
   resizeImage,
 } from "@fluxapp/utils";
-import { useEntry, usePerspective } from "@fluxapp/vue";
+import { useSubject, usePerspective } from "@fluxapp/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { Community } from "@fluxapp/api";
 
@@ -56,7 +56,7 @@ export default defineComponent({
   async setup(props) {
     const client = getAd4mClient;
     const { data } = usePerspective(client, () => props.communityId);
-    const { entry: community, repo } = useEntry({
+    const { entry: community, repo } = useSubject({
       perspective: () => data.value.perspective,
       id: "ad4m://self",
       subject: Community,

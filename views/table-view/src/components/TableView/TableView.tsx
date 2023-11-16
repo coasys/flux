@@ -11,7 +11,7 @@ import Header from "../Header";
 import History from "../History";
 import Entry from "../Entry";
 import NewClass from "../NewClass";
-import { useEntries } from "@fluxapp/react-web";
+import { useSubjects } from "@fluxapp/react-web";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 
 type Props = {
@@ -39,7 +39,7 @@ export default function TableView({
 
   const source = history.length ? history[history.length - 1] : "ad4m://self";
 
-  const { entries } = useEntries({ perspective, source, subject: selected });
+  const { entries } = useSubjects({ perspective, source, subject: selected });
 
   useEffect(() => {
     const wentBack = history.length < (prevHistory?.length || 0);

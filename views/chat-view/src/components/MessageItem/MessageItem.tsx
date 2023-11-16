@@ -1,7 +1,7 @@
 import { LinkQuery, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import { Message } from "@fluxapp/api";
-import { useAgent, useEntry } from "@fluxapp/react-web";
+import { useAgent, useSubject } from "@fluxapp/react-web";
 import styles from "./MessageItem.module.css";
 import Avatar from "../Avatar";
 import { REACTION } from "@fluxapp/constants/src/communityPredicates";
@@ -29,7 +29,7 @@ export default function MessageItem({
 }) {
   const { profile } = useAgent({ client: agent, did: message.author });
 
-  const { entry: replyMessage } = useEntry({
+  const { entry: replyMessage } = useSubject({
     perspective,
     id: message.replyingTo,
     subject: Message,

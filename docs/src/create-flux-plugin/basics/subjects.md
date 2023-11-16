@@ -17,10 +17,10 @@ Because Flux Plugins share a lot of functionality, it comes bundled with several
 - Post
 
 ```ts
-import { useEntry } from "@fluxapp/react";
+import { useSubject } from "@fluxapp/react";
 import { Community } from "@fluxapp/api";
 
-const { entry: community } = useEntry({
+const { entry: community } = useSubject({
   perspective,
   subject: Community,
 });

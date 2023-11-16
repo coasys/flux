@@ -2,7 +2,7 @@ import { watch, ref, shallowRef, triggerRef } from "vue";
 import { SubjectRepository } from "@fluxapp/api";
 import { PerspectiveProxy, LinkExpression } from "@perspect3vism/ad4m";
 
-export function useEntry<SubjectClass>({
+export function useSubject<SubjectClass>({
   perspective,
   source,
   id,

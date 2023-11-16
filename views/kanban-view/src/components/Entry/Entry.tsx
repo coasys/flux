@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { PerspectiveProxy, Literal } from "@perspect3vism/ad4m";
-import { useEntry } from "@fluxapp/react-web";
+import { useSubject } from "@fluxapp/react-web";
 import DisplayValue from "../DisplayValue";
 import styles from "./Entry.module.css";
 
@@ -18,7 +18,7 @@ export default function Entry({
   onUrlClick = () => {},
 }: Props) {
   const [namedOptions, setNamedOptions] = useState({});
-  const { entry, repo } = useEntry({
+  const { entry, repo } = useSubject({
     perspective,
     subject: selectedClass,
     id,

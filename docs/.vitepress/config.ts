@@ -46,15 +46,15 @@ export default defineConfig({
           ],
         },
         {
-          text: "Bascis",
+          text: "Basics",
           items: [
             {
               text: "Connecting to AD4M",
               link: "/create-flux-plugin/basics/connecting-to-ad4m",
             },
             {
-              text: "Models",
-              link: "/create-flux-plugin/basics/models",
+              text: "Subjects",
+              link: "/create-flux-plugin/basics/subjects",
             },
             {
               text: "Data",

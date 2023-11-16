@@ -115,7 +115,7 @@ import { useRoute } from "vue-router";
 import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
 import { Channel } from "@fluxapp/api";
-import { useEntries, usePerspective, useMe } from "@fluxapp/vue";
+import { useSubjects, usePerspective, useMe } from "@fluxapp/vue";
 import { ChannelView } from "@fluxapp/types";
 import { viewOptions as channelViewOptions } from "@/constants";
 import { Ad4mClient } from "@perspect3vism/ad4m";
@@ -141,7 +141,7 @@ export default defineComponent({
 
     const { me } = useMe(client.agent);
 
-    const { entries: channels, repo: channelRepo } = useEntries({
+    const { entries: channels, repo: channelRepo } = useSubjects({
       perspective: () => data.value.perspective,
       source: () => "ad4m://self",
       subject: Channel,

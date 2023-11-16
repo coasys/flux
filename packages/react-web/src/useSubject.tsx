@@ -16,7 +16,7 @@ type Props<SubjectClass> = {
   subject: string | (new () => SubjectClass);
 };
 
-export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
+export function useSubject<SubjectClass>(props: Props<SubjectClass>) {
   const forceUpdate = useForceUpdate();
   const [error, setError] = useState<string | undefined>(undefined);
   const { perspective, id, subject } = props;
