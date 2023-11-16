@@ -4,7 +4,7 @@ import { useSubjects } from "@fluxapp/react-web";
 
 import Todo from "../subjects/Todo";
 
-import styles from "../App.module.css";
+import styles from "../Plugin.module.css";
 
 type Props = {
   perspective: PerspectiveProxy;
