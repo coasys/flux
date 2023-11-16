@@ -49,7 +49,7 @@ export default function ChatView({
   const { model } = useEntries({
     perspective,
     source,
-    model: Message,
+    subject: Message,
   });
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export default function ChatView({
     try {
       const html = editor.current?.editor.getHTML();
       editor.current?.clear();
-      const message = await model.create({
+      const message = await repo.create({
         body: html,
       });
       if (replyMessage) {

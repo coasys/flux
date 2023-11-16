@@ -15,7 +15,7 @@ import { QueryOptions } from "@fluxapp/api/src/factory";
 type Props<SubjectClass> = {
   source: string;
   perspective: PerspectiveProxy;
-  model: (new () => SubjectClass) | string;
+  subject: (new () => SubjectClass) | string;
   query?: QueryOptions;
 };
 
@@ -25,16 +25,16 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
   const [isMore, setIsMore] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
-  const { perspective, source, model } = props;
+  const { perspective, source, subject } = props;
 
   // Create cache key for entry
   const cacheKey = `${perspective.uuid}/${source || ""}/${
-    typeof model === "string" ? model : model.prototype.className
+    typeof subject === "string" ? subject : subject.prototype.className
   }/${query?.uniqueKey}`;
 
   // Create model
-  const Model = useMemo(() => {
-    return new SubjectRepository(model, {
+  const Repo = useMemo(() => {
+    return new SubjectRepository(subject, {
       perspective: perspective,
       source,
     });
@@ -51,7 +51,7 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
     if (source) {
       setIsLoading(true);
       console.log(`fetching data from remote`, source, query, cacheKey);
-      Model.getAllData(source, query)
+      Repo.getAllData(source, query)
         .then((newEntries) => {
           setError(undefined);
           if (query?.infinite) {
@@ -76,7 +76,7 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
 
   // Get single entry
   async function fetchEntry(id) {
-    const entry = (await Model.getData(id)) as SubjectClass;
+    const entry = (await Repo.getData(id)) as SubjectClass;
     const oldEntries = (getCache(cacheKey) as SubjectClass[]) || [];
     const isOldEntry = oldEntries?.some((i) => i.id === id);
 
@@ -104,7 +104,7 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
     if (id) {
       const isInstance = await perspective.isSubjectInstance(
         id,
-        typeof model === "string" ? model : new model()
+        typeof subject === "string" ? subject : new subject()
       );
 
       if (isInstance) {
@@ -165,7 +165,7 @@ export function useEntries<SubjectClass>(props: Props<SubjectClass>) {
     error,
     mutate,
     setQuery,
-    model: Model,
+    repo: Repo,
     isLoading,
     reload: getData,
     isMore,

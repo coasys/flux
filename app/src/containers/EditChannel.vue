@@ -142,13 +142,13 @@ export default defineComponent({
     const { entry: channel, repo } = useEntry({
       perspective: () => data.value.perspective,
       id: props.channelId,
-      model: Channel,
+      subject: Channel,
     });
 
     const { entries: apps, repo: appRepo } = useEntries({
       perspective: () => data.value.perspective,
       source: () => props.channelId,
-      model: App,
+      subject: App,
     });
 
     return {

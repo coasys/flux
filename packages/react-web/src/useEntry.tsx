@@ -13,24 +13,24 @@ import { SubjectRepository } from "@fluxapp/api";
 type Props<SubjectClass> = {
   id: string;
   perspective: PerspectiveProxy;
-  model: string | (new () => SubjectClass);
+  subject: string | (new () => SubjectClass);
 };
 
 export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
   const forceUpdate = useForceUpdate();
   const [error, setError] = useState<string | undefined>(undefined);
-  const { perspective, id, model } = props;
+  const { perspective, id, subject } = props;
 
-  // Create model
-  const Model = useMemo(() => {
-    return new SubjectRepository(model, {
+  // Create subject
+  const Repo = useMemo(() => {
+    return new SubjectRepository(subject, {
       perspective: perspective,
       source: null,
     });
-  }, [perspective.uuid, model]);
+  }, [perspective.uuid, subject]);
 
   // Create cache key for entry
-  const cacheKey = `${perspective.uuid}/${model.name}/${id}`;
+  const cacheKey = `${perspective.uuid}/${subject.name}/${id}`;
 
   // Mutate shared/cached data for all subscribers
   const mutate = useCallback(
@@ -41,7 +41,7 @@ export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
   // Fetch data from AD4M and save to cache
   const getData = useCallback(() => {
     if (id) {
-      Model.getData(id)
+      Repo.getData(id)
         .then(async (entry) => {
           setError(undefined);
           mutate(entry);
@@ -95,7 +95,7 @@ export function useEntry<SubjectClass>(props: Props<SubjectClass>) {
 
   const entry = getCache<ExtendedSubjectClass>(cacheKey);
 
-  return { entry, error, mutate, model: Model, reload: getData };
+  return { entry, error, mutate, repo: Repo, reload: getData };
 }
 
 function useForceUpdate() {

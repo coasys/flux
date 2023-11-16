@@ -127,7 +127,7 @@ export default class MyElement extends LitElement {
   editor: Editor | null;
 
   @state()
-  model: SubjectRepository<{
+  subject: SubjectRepository<{
     [x: string]: any;
   }>;
 
@@ -376,7 +376,7 @@ export default class MyElement extends LitElement {
     try {
       const html = this.editor.getHTML();
       this.isCreating = true;
-      const result = await model.create({ body: html });
+      const result = await repo.create({ body: html });
       console.log("CREATED: ", result);
       this.editor.commands.clearContent();
     } catch (e) {
@@ -415,17 +415,18 @@ export default class MyElement extends LitElement {
                 <j-menu>
                   ${map(
                     this.suggestions,
-                    (s, i) => html`<j-menu-item
-                      square
-                      variant="ghost"
-                      ?selected=${i === this.suggestionIndex}
-                      @click=${() => this.selectSuggestion(i)}
-                    >
-                      <j-flex a="center" gap="300">
-                        <j-avatar hash=${s.id} size="xs"></j-avatar>
-                        <j-text variant="body" nomargin> ${s.label} </j-text>
-                      </j-flex>
-                    </j-menu-item>`
+                    (s, i) =>
+                      html`<j-menu-item
+                        square
+                        variant="ghost"
+                        ?selected=${i === this.suggestionIndex}
+                        @click=${() => this.selectSuggestion(i)}
+                      >
+                        <j-flex a="center" gap="300">
+                          <j-avatar hash=${s.id} size="xs"></j-avatar>
+                          <j-text variant="body" nomargin> ${s.label} </j-text>
+                        </j-flex>
+                      </j-menu-item>`
                   )}
                 </j-menu>
               </div>`

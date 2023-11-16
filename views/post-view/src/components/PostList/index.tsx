@@ -22,7 +22,7 @@ export default function PostList({
   const { entries: posts, isLoading } = useEntries({
     perspective: perspective,
     source: source,
-    model: Post,
+    subject: Post,
   });
 
   const sortedPosts = useMemo(() => {

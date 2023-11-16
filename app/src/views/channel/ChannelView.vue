@@ -162,19 +162,19 @@ export default defineComponent({
 
     const { entry: community } = useEntry({
       perspective: () => data.value.perspective,
-      model: Community,
+      subject: Community,
     });
 
     const { entry: channel, repo: channelRepo } = useEntry({
       perspective: () => data.value.perspective,
       id: () => props.channelId,
-      model: Channel,
+      subject: Channel,
     });
 
     const { entries: apps } = useEntries({
       perspective: () => data.value.perspective,
       source: () => props.channelId,
-      model: App,
+      subject: App,
     });
 
     const { me } = useMe(client.agent);

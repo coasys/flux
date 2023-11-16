@@ -2,7 +2,7 @@ import { useState } from "preact/hooks";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useEntries } from "@fluxapp/react-web";
 
-import Todo from "../models/Todo";
+import Todo from "../subjects/Todo";
 
 import styles from "../App.module.css";
 
@@ -14,15 +14,15 @@ type Props = {
 export default function TodoView({ perspective, source }: Props) {
   const [title, setTitle] = useState("");
 
-  const { entries: todos, model } = useEntries({
+  const { entries: todos, repo } = useEntries({
     perspective,
     source,
-    model: Todo,
+    subject: Todo,
   });
 
   function createTodo(event: React.KeyboardEvent<Element>) {
     if (event.key !== "Enter") return;
-    model
+    repo
       .create({ title: title })
       .then(() => {
         setTitle("");
@@ -31,11 +31,11 @@ export default function TodoView({ perspective, source }: Props) {
   }
 
   function toggleTodo({ id, done }) {
-    model.update(id, { done }).catch(console.log);
+    repo.update(id, { done }).catch(console.log);
   }
 
   function deleteTodo(id: string) {
-    model.remove(id).catch(console.log);
+    repo.remove(id).catch(console.log);
   }
 
   return (

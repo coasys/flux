@@ -18,7 +18,11 @@ export default function Entry({
   onUrlClick = () => {},
 }: Props) {
   const [namedOptions, setNamedOptions] = useState({});
-  const { entry, model } = useEntry({ perspective, model: selectedClass, id });
+  const { entry, repo } = useEntry({
+    perspective,
+    subject: selectedClass,
+    id,
+  });
 
   useEffect(() => {
     perspective
@@ -42,7 +46,7 @@ export default function Entry({
   }, [selectedClass, perspective.uuid]);
 
   async function onUpdate(propName, value) {
-    model.update(id, { [propName]: value });
+    repo.update(id, { [propName]: value });
   }
 
   if (entry) {

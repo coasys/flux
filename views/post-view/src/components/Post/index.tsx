@@ -25,7 +25,7 @@ export default function Post({
   const { entry: post } = useEntry({
     perspective,
     id,
-    model: PostSubject,
+    subject: PostSubject,
   });
 
   const { me } = useMe(agent);

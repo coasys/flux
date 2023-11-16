@@ -73,7 +73,7 @@ export default function MessageList({
   const { entries, setQuery, isMore, isLoading } = useEntries({
     perspective,
     source,
-    model: Message,
+    subject: Message,
     query: {
       page,
       size: PAGE_SIZE,

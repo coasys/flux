@@ -280,7 +280,7 @@ export class MyElement extends LitElement {
         perspective: this.perspective,
         source: "ad4m://self",
       });
-      await model.create({ name: this.title });
+      await repo.create({ name: this.title });
       this.title = "";
       this.showCreateChannel = false;
     } catch (e) {

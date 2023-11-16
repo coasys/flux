@@ -11,7 +11,7 @@ const handler = async (req: Request, context: Context): Promise<Response> => {
 
   const stream = await OpenAIStream(
     {
-      model: "gpt-4",
+      subject: "gpt-4",
       messages: [
         {
           role: "system",

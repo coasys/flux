@@ -39,7 +39,7 @@ export default function TableView({
 
   const source = history.length ? history[history.length - 1] : "ad4m://self";
 
-  const { entries } = useEntries({ perspective, source, model: selected });
+  const { entries } = useEntries({ perspective, source, subject: selected });
 
   useEffect(() => {
     const wentBack = history.length < (prevHistory?.length || 0);

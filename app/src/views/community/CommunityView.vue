@@ -229,7 +229,7 @@ export default defineComponent({
 
     const { entries: channels } = useEntries({
       perspective: () => data.value.perspective,
-      model: Channel,
+      subject: Channel,
     });
 
     return {

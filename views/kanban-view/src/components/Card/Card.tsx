@@ -20,12 +20,12 @@ export default function Card({
   perspective,
 }: Props) {
   const [assignedProfiles, setAssignedProfiles] = useState<Profile[]>([]);
-  const { entry } = useEntry({ perspective, id, model: selectedClass });
+  const { entry } = useEntry({ perspective, id, subject: selectedClass });
 
   const { entries: comments } = useEntries({
     perspective,
     source: id,
-    model: Message,
+    subject: Message,
   });
 
   const { associations } = useAssociations({

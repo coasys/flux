@@ -21,10 +21,10 @@ export default function CommentSection({
   const editor = useRef(null);
   const [showToolbar, setShowToolbar] = useState(false);
 
-  const { entries: comments, model } = useEntries({
+  const { entries: comments, repo } = useEntries({
     perspective,
     source: source || null,
-    model: MessageModel,
+    subject: MessageModel,
   });
 
   function onKeydown(e) {
@@ -38,7 +38,7 @@ export default function CommentSection({
     try {
       const html = editor.current?.editor.getHTML();
       editor.current?.clear();
-      const message = await model.create({
+      const message = await repo.create({
         body: html,
       });
     } catch (e) {

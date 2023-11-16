@@ -32,7 +32,7 @@ export default function MessageItem({
   const { entry: replyMessage } = useEntry({
     perspective,
     id: message.replyingTo,
-    model: Message,
+    subject: Message,
   });
 
   const { profile: replyProfile } = useAgent({

@@ -6,12 +6,12 @@ export function useEntry<SubjectClass>({
   perspective,
   source,
   id,
-  model,
+  subject,
 }: {
   perspective: PerspectiveProxy | Function;
   id?: string | Function;
   source?: string | Function;
-  model: SubjectClass;
+  subject: SubjectClass;
 }) {
   const idRef = typeof id === "function" ? (id as any) : ref(id);
   const sourceRef =
@@ -28,7 +28,7 @@ export function useEntry<SubjectClass>({
     [perspectiveRef, sourceRef, idRef],
     async ([p, s, id]) => {
       if (p?.uuid) {
-        const r = new SubjectRepository(model, {
+        const r = new SubjectRepository(subject, {
           perspective: p,
           source: s,
         });
@@ -67,7 +67,7 @@ export function useEntry<SubjectClass>({
         : false;
 
       if (id) {
-        const isInstance = await p.isSubjectInstance(id, new model());
+        const isInstance = await p.isSubjectInstance(id, new subject());
 
         if (isInstance) {
           fetchEntry(id);
@@ -84,7 +84,7 @@ export function useEntry<SubjectClass>({
       if (removedEntry) {
         const isInstance = await p.isSubjectInstance(
           link.data.source,
-          new model()
+          new subject()
         );
         if (isInstance) {
           entry.value = null;

@@ -38,7 +38,7 @@
               class="channel__notification"
               v-if="channel.hasNewMessages"
             ></div>
-<!--             
+            <!--             
             <j-icon
               @click.stop="handleToggleClick(channel.id)"
               slot="start"
@@ -144,7 +144,7 @@ export default defineComponent({
     const { entries: channels, repo: channelRepo } = useEntries({
       perspective: () => data.value.perspective,
       source: () => "ad4m://self",
-      model: Channel,
+      subject: Channel,
     });
 
     return {

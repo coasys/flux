@@ -72,7 +72,7 @@ export default defineComponent({
 
     const { entry: community } = useEntry({
       perspective: () => data.value.perspective,
-      model: Community,
+      subject: Community,
     });
 
     watchEffect(async () => {

@@ -44,10 +44,10 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     });
   }, [perspective.uuid]);
 
-  const { entries, model } = useEntries({
+  const { entries, repo } = useEntries({
     perspective,
     source,
-    model: selectedClass,
+    subject: selectedClass,
   });
 
   function loadColumns() {
@@ -88,7 +88,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
   }, [JSON.stringify(tasks), selectedProperty, perspective.uuid, namedOptions]);
 
   function createNewTodo(propertyName, value) {
-    model.create({ [propertyName]: value });
+    repo.create({ [propertyName]: value });
   }
 
   const onDragEnd = (result) => {
@@ -115,7 +115,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
       );
     });
 
-    model.update(draggableId, { [selectedProperty]: status });
+    repo.update(draggableId, { [selectedProperty]: status });
   };
 
   async function addColumn() {

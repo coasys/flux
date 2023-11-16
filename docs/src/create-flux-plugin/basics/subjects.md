@@ -1,8 +1,10 @@
-# Models
+# Subjects
 
 Because Flux is using the p2p framework AD4M, you don't have to worry about creating a database, or maintain server infrastructure. This makes it super easy to create new content in the community that is using your plugin.
 
-You are free to create any kind of model for your data, but let's start with the common types that are used by Flux.
+Subjects in ADAM is basically a way to create definitions of "concepts" in Neighbourhood that can be used similar to a database schema.
+
+You are free to create any kind of Subject for your data, but let's start with the common types that are used by Flux.
 
 ## Built-in models
 
@@ -20,13 +22,13 @@ import { Community } from "@fluxapp/api";
 
 const { entry: community } = useEntry({
   perspective,
-  model: Community,
+  subject: Community,
 });
 ```
 
 ## Custom models
 
-Defining your own models can be done by creating a new `SDNAClass`. The below shows an example `Todo` model, which is included as an example in the `@fluxapp/create` boilerplate:
+Defining your own models can be done by creating a new `SDNAClass`. The below shows an example `Todo` subject, which is included as an example in the `@fluxapp/create` boilerplate:
 
 ```ts
 // models/Todo.ts

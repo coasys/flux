@@ -5,11 +5,11 @@ import { PerspectiveProxy, LinkExpression } from "@perspect3vism/ad4m";
 export function useEntries<SubjectClass>({
   perspective,
   source,
-  model,
+  subject,
 }: {
   perspective: PerspectiveProxy | Function;
   source?: string | Function;
-  model: SubjectClass;
+  subject: SubjectClass;
 }) {
   const sourceRef =
     typeof source === "function"
@@ -25,7 +25,7 @@ export function useEntries<SubjectClass>({
     [perspectiveRef, sourceRef],
     ([p, s]) => {
       if (p?.uuid) {
-        const rep = new SubjectRepository(model, {
+        const rep = new SubjectRepository(subject, {
           perspective: p,
           source: s,
         });
@@ -72,7 +72,7 @@ export function useEntries<SubjectClass>({
         : false;
 
       if (id) {
-        const isInstance = await p.isSubjectInstance(id, new model());
+        const isInstance = await p.isSubjectInstance(id, new subject());
 
         if (isInstance) {
           fetchEntry(id);

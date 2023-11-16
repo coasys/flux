@@ -24,7 +24,11 @@ export default function CardDetails({
   onDeleted = () => {},
   perspective,
 }: Props) {
-  const { entry, model } = useEntry({ perspective, id, model: selectedClass });
+  const { entry, repo } = useEntry({
+    perspective,
+    id,
+    subject: selectedClass,
+  });
 
   const {
     associations: assignees,
@@ -56,7 +60,7 @@ export default function CardDetails({
 
   async function onDelete() {
     try {
-      await model.remove(entry.id);
+      await repo.remove(entry.id);
       onDeleted();
     } catch (e) {
       // Todo: error handling
