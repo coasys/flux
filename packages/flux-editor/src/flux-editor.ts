@@ -127,7 +127,7 @@ export default class MyElement extends LitElement {
   editor: Editor | null;
 
   @state()
-  subject: SubjectRepository<{
+  repo: SubjectRepository<{
     [x: string]: any;
   }>;
 
@@ -368,7 +368,7 @@ export default class MyElement extends LitElement {
   }
 
   async submit() {
-    const model = new SubjectRepository(Message, {
+    const repo = new SubjectRepository(Message, {
       perspective: this.perspective,
       source: this.source,
     });
