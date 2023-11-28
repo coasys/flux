@@ -46,7 +46,7 @@ export default function ChatView({
     did: replyMessage?.author,
   });
 
-  const { model } = useSubjects({
+  const { repo } = useSubjects({
     perspective,
     source,
     subject: Message,
