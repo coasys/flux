@@ -42,7 +42,7 @@
         </div>
 
         <div class="profile__content">
-          <j-box my="500" v-if="!sameAgent">
+          <j-box my="500">
             <j-tabs
               class="tabs"
               @change="(e: any) => (currentTab = e.target.value)"
