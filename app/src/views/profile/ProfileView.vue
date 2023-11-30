@@ -43,24 +43,6 @@
 
         <div class="profile__content">
           <j-box my="500" v-if="!sameAgent">
-            <j-text>Links ({{ weblinks.length }})</j-text>
-            <div class="profile__links">
-              <WebLinkCard
-                v-for="(link, i) in weblinks"
-                :key="i"
-                :id="link.id"
-                :url="link.url"
-                :title="link.title"
-                :description="link.description"
-                :image="link.image"
-                :sameAgent="sameAgent"
-                @edit="() => setEditLinkModal(true, link)"
-                @delete="() => deleteWebLink(link)"
-              />
-            </div>
-          </j-box>
-
-          <j-box my="500" v-if="sameAgent">
             <j-tabs
               class="tabs"
               @change="(e: any) => (currentTab = e.target.value)"
@@ -70,30 +52,10 @@
               <j-tab-item value="web3">Web3</j-tab-item>
             </j-tabs>
 
-            <div v-show="currentTab === 'communities'">
-              <j-box py="500" align="right">
-                <j-button
-                  variant="primary"
-                  @click="() => setShowCreateCommunity(true)"
-                  v-if="sameAgent"
-                >
-                  Add Community
-                </j-button>
-              </j-box>
-              <div class="profile__links">
-                <CommunityCard
-                  v-for="(community, key) in communities"
-                  :key="key"
-                  :name="community.name"
-                  :description="community.description"
-                  :url="community.image || null"
-                  :uuid="key"
-                ></CommunityCard>
-              </div>
-            </div>
             <div v-show="currentTab === 'web2'">
               <j-box py="500" align="right">
                 <j-button
+                  v-if="sameAgent"
                   variant="primary"
                   @click="() => (showAddlinkModal = true)"
                 >
