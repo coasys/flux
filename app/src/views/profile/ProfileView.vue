@@ -143,11 +143,19 @@
                         {{ shortETH(proof.deviceKey) }}
                       </j-text>
                     </j-box>
-                    <j-button variant="link" @click="() => removeProof(proof)">
+                    <j-button
+                      v-if="sameAgent"
+                      variant="link"
+                      @click="() => removeProof(proof)"
+                    >
                       Remove wallet
                     </j-button>
                   </div>
-                  <div class="wallet" @click="() => (showAddProofModal = true)">
+                  <div
+                    v-if="sameAgent"
+                    class="wallet"
+                    @click="() => (showAddProofModal = true)"
+                  >
                     Add wallet
                   </div>
                 </div>
