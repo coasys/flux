@@ -49,6 +49,7 @@ import { useAppStore } from "@/store/app";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
 import { useMe } from "@fluxapp/vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { updateProfile } from "@fluxapp/api";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -83,21 +84,17 @@ export default defineComponent({
     async updateProfile() {
       this.isUpdatingProfile = true;
 
-      // TODO: Update user profile
-
-      // this.userStore
-      //   .updateProfile({
-      //     username: this.username,
-      //     profilePicture: this.profilePicture,
-      //     bio: this.bio,
-      //     profileBackground: this.profileBackground,
-      //   })
-      //   .then(() => {
-      //     this.$emit("submit");
-      //   })
-      //   .finally(() => {
-      //     this.isUpdatingProfile = false;
-      //   });
+      try {
+        await updateProfile({
+          username: this.username,
+          profilePicture: this.profilePicture,
+          bio: this.bio,
+          profileBackground: this.profileBackground,
+        });
+      } catch (e) {
+      } finally {
+        this.isUpdatingProfile = false;
+      }
     },
   },
 });

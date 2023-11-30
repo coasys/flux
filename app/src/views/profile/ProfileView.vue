@@ -66,12 +66,8 @@
               @change="(e: any) => (currentTab = e.target.value)"
               :value="currentTab"
             >
-              <j-tab-item value="communities">
-                Communities ({{ Object.keys(communities).length }})
-              </j-tab-item>
-              <j-tab-item value="weblinks">
-                Weblinks ({{ weblinks.length }})
-              </j-tab-item>
+              <j-tab-item value="web2">Web2</j-tab-item>
+              <j-tab-item value="web3">Web3</j-tab-item>
             </j-tabs>
 
             <div v-show="currentTab === 'communities'">
@@ -81,7 +77,6 @@
                   @click="() => setShowCreateCommunity(true)"
                   v-if="sameAgent"
                 >
-                  <j-icon slot="start" name="plus" size="sm"></j-icon>
                   Add Community
                 </j-button>
               </j-box>
@@ -96,13 +91,12 @@
                 ></CommunityCard>
               </div>
             </div>
-            <div v-show="currentTab === 'weblinks'">
+            <div v-show="currentTab === 'web2'">
               <j-box py="500" align="right">
                 <j-button
                   variant="primary"
                   @click="() => (showAddlinkModal = true)"
                 >
-                  <j-icon slot="start" name="plus" size="sm"></j-icon>
                   Add Link
                 </j-button>
               </j-box>
@@ -120,6 +114,47 @@
                   @delete="() => deleteWebLink(link)"
                 />
               </div>
+            </div>
+            <div v-show="currentTab === 'web3'">
+              <j-box pt="500">
+                <div class="wallets">
+                  <div
+                    class="wallet"
+                    :class="{ selected: selectedAddress === proof.deviceKey }"
+                    :key="proof.deviceKey"
+                    @click="() => (selectedAddress = proof.deviceKey)"
+                    v-for="(proof, i) in proofs"
+                  >
+                    <div
+                      class="wallet__avatar"
+                      v-html="getIcon(proof.deviceKey)"
+                    ></div>
+                    <j-badge size="sm" variant="primary">
+                      <j-icon
+                        size="xs"
+                        v-if="me?.did === proof?.did"
+                        color="success-500"
+                        name="check"
+                      ></j-icon>
+                      Verified
+                    </j-badge>
+                    <j-box pt="200">
+                      <j-text nomargin color="black">
+                        {{ shortETH(proof.deviceKey) }}
+                      </j-text>
+                    </j-box>
+                    <j-button variant="link" @click="() => removeProof(proof)">
+                      Remove wallet
+                    </j-button>
+                  </div>
+                  <div class="wallet" @click="() => (showAddProofModal = true)">
+                    Add wallet
+                  </div>
+                </div>
+              </j-box>
+              <j-box pt="500">
+                <Attestations :address="selectedAddress" />
+              </j-box>
             </div>
           </j-box>
         </div>
@@ -140,6 +175,17 @@
       @cancel="() => setAddLinkModal(false)"
       @submit="() => setAddLinkModal(false)"
     />
+  </j-modal>
+
+  <j-modal
+    v-if="showAddProofModal"
+    size="lg"
+    :open="showAddProofModal"
+    @toggle="(e: any) => (showAddProofModal = e.target.open)"
+  >
+    <add-entanglement-proof
+      @close="() => (showAddProofModal = false)"
+    ></add-entanglement-proof>
   </j-modal>
 
   <j-modal
@@ -170,8 +216,13 @@
 <script lang="ts">
 import { Profile } from "@fluxapp/types";
 import { ModalsState } from "@/store/types";
-import { LinkExpression } from "@perspect3vism/ad4m";
-import { defineComponent } from "vue";
+import {
+  Ad4mClient,
+  EntanglementProof,
+  LinkExpression,
+  Literal,
+} from "@perspect3vism/ad4m";
+import { defineComponent, ref } from "vue";
 import WebLinkCard from "./WebLinkCard.vue";
 import CommunityCard from "./CommunityCard.vue";
 import ProfileJoinLink from "./ProfileJoinLink.vue";
@@ -183,23 +234,30 @@ import { getImage } from "@fluxapp/utils";
 import WebLinkAdd from "./WebLinkAdd.vue";
 import { getAgentWebLinks } from "@fluxapp/api";
 import { usePerspectives, useCommunities, useAgent, useMe } from "@fluxapp/vue";
+// @ts-ignore
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { useRoute } from "vue-router";
+import AddEntanglementProof from "./AddEntanglementProof.vue";
+import Attestations from "./Attestations.vue";
+// @ts-ignore
+import jazzicon from "@metamask/jazzicon";
 
 export default defineComponent({
   name: "ProfileView",
   components: {
+    AddEntanglementProof,
     CommunityCard,
     WebLinkCard,
     ProfileJoinLink,
     EditProfile,
     WebLinkAdd,
     Avatar,
+    Attestations,
   },
   async setup() {
     const route = useRoute();
 
-    const client = await getAd4mClient();
+    const client: Ad4mClient = await getAd4mClient();
     const { neighbourhoods } = usePerspectives(client);
     const { communities } = useCommunities(neighbourhoods);
 
@@ -209,9 +267,13 @@ export default defineComponent({
       client.agent,
       () => route.params.did || me.value?.did
     );
+
     const appStore = useAppStore();
 
     return {
+      client,
+      selectedAddress: ref(""),
+      proofs: ref<EntanglementProof[]>([]),
       me,
       profile,
       neighbourhoods,
@@ -221,8 +283,9 @@ export default defineComponent({
   },
   data() {
     return {
-      currentTab: "communities",
+      currentTab: "web3",
       showAddlinkModal: false,
+      showAddProofModal: false,
       showEditlinkModal: false,
       showJoinCommunityModal: false,
       weblinks: [] as any,
@@ -236,6 +299,80 @@ export default defineComponent({
     this.appStore.changeCurrentTheme("global");
   },
   methods: {
+    getIcon(address: string) {
+      if (address) {
+        const seed = parseInt(address.slice(2, 10), 16);
+        const diameter = 40;
+        const icon = jazzicon(diameter, seed);
+        icon.innerHTML;
+        return icon.innerHTML;
+      }
+    },
+    shortETH(address: string) {
+      if (!address || address.length !== 42 || !address.startsWith("0x")) {
+        return "Invalid ETH Address";
+      }
+      return `${address.substring(0, 8)}...${address.substring(
+        address.length - 4
+      )}`;
+    },
+    async getEntanglementProofs() {
+      const agent = await this.client.agent.byDID(this.did);
+
+      if (agent) {
+        // Map to dedupe array
+        const seen = new Set<string>();
+        const proofLinks = agent.perspective?.links
+          ? agent.perspective.links.filter(
+              (l) => l.data.predicate === "ad4m://entanglement_proof"
+            )
+          : [];
+
+        const expressions = await Promise.all(
+          proofLinks?.map((link) =>
+            this.client.expression.get(link.data.target)
+          )
+        );
+
+        const proofs = expressions.map((e) => JSON.parse(e.data));
+
+        const filteredProofs = proofs.filter((p: EntanglementProof) => {
+          if (seen.has(p.deviceKey)) {
+            return false;
+          } else {
+            seen.add(p.deviceKey);
+            return true;
+          }
+        });
+
+        this.proofs = filteredProofs;
+        this.selectedAddress =
+          filteredProofs.length && filteredProofs[0].deviceKey;
+      }
+    },
+    async removeProof(proof: EntanglementProof) {
+      const proofLink =
+        this.me?.perspective?.links.filter((l) => {
+          console.log(
+            l.data.target.startsWith("literal://") &&
+              Literal.fromUrl(l.data.target).get()
+          );
+          return (
+            l.data.predicate === "ad4m://entanglement_proof" &&
+            l.data.target.startsWith("literal://") &&
+            Literal.fromUrl(l.data.target).get().data.deviceKey ===
+              proof.deviceKey
+          );
+        }) || [];
+
+      if (proofLink.length > 0) {
+        await this.client.agent.mutatePublicPerspective({
+          additions: [],
+          removals: proofLink,
+        });
+        this.getEntanglementProofs();
+      }
+    },
     setAddLinkModal(value: boolean): void {
       this.showAddlinkModal = value;
     },
@@ -264,6 +401,11 @@ export default defineComponent({
         this.getAgentAreas();
       }
     },
+    showAddProofModal() {
+      if (!this.showAddProofModal) {
+        this.getEntanglementProofs();
+      }
+    },
     showEditlinkModal() {
       if (!this.showEditlinkModal) {
         this.getAgentAreas();
@@ -277,6 +419,7 @@ export default defineComponent({
     did: {
       handler: async function () {
         this.getAgentAreas();
+        this.getEntanglementProofs();
       },
       immediate: true,
     },
@@ -396,5 +539,45 @@ export default defineComponent({
   top: 20px;
   left: 20px;
   cursor: pointer;
+}
+
+.tabs {
+  border-bottom: 1px solid var(--j-color-ui-100);
+}
+
+.wallets {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: var(--j-space-500);
+}
+
+.wallet {
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--j-border-radius-md);
+  background-color: var(--j-color-ui-50);
+  border: 1px solid var(--j-color-ui-200);
+}
+
+.wallet:hover {
+  background-color: var(--j-color-ui-50);
+  border: 1px solid var(--j-color-ui-400);
+}
+
+.wallet__avatar {
+  border-radius: 50%;
+  display: flex;
+  overflow: hidden;
+  margin: 0 auto;
+  margin-bottom: var(--j-space-400);
+}
+
+.wallet.selected {
+  border: 1px solid var(--j-color-primary-500);
+  background-color: var(--j-color-ui-100);
 }
 </style>
