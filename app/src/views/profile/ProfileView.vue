@@ -98,7 +98,7 @@
                         color="success-500"
                         name="check"
                       ></j-icon>
-                      Verified
+                      {{ verifiedProofs[proof.deviceKey] }}
                     </j-badge>
                     <j-box pt="200">
                       <j-text nomargin color="black">
@@ -113,13 +113,17 @@
                       Remove wallet
                     </j-button>
                   </div>
-                  <div
+                  <a
                     v-if="sameAgent"
                     class="wallet"
-                    @click="() => (showAddProofModal = true)"
+                    href="https://web3-adam.netlify.app/"
+                    target="_blank"
                   >
-                    Add wallet
-                  </div>
+                    <j-text size="600" nomargin>
+                      <j-icon name="plus"></j-icon>
+                      Add
+                    </j-text>
+                  </a>
                 </div>
               </j-box>
               <j-box pt="500">
@@ -145,17 +149,6 @@
       @cancel="() => setAddLinkModal(false)"
       @submit="() => setAddLinkModal(false)"
     />
-  </j-modal>
-
-  <j-modal
-    v-if="showAddProofModal"
-    size="lg"
-    :open="showAddProofModal"
-    @toggle="(e: any) => (showAddProofModal = e.target.open)"
-  >
-    <add-entanglement-proof
-      @close="() => (showAddProofModal = false)"
-    ></add-entanglement-proof>
   </j-modal>
 
   <j-modal
@@ -207,7 +200,6 @@ import { usePerspectives, useCommunities, useAgent, useMe } from "@fluxapp/vue";
 // @ts-ignore
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { useRoute } from "vue-router";
-import AddEntanglementProof from "./AddEntanglementProof.vue";
 import Attestations from "./Attestations.vue";
 // @ts-ignore
 import jazzicon from "@metamask/jazzicon";
@@ -215,7 +207,6 @@ import jazzicon from "@metamask/jazzicon";
 export default defineComponent({
   name: "ProfileView",
   components: {
-    AddEntanglementProof,
     CommunityCard,
     WebLinkCard,
     ProfileJoinLink,
@@ -242,6 +233,7 @@ export default defineComponent({
 
     return {
       client,
+      verifiedProofs: ref<Record<string, boolean>>({}),
       selectedAddress: ref(""),
       proofs: ref<EntanglementProof[]>([]),
       me,
@@ -522,6 +514,8 @@ export default defineComponent({
 }
 
 .wallet {
+  text-decoration: none;
+  color: currentColor;
   cursor: pointer;
   display: grid;
   place-content: center;
