@@ -24,7 +24,7 @@ export default async ({ joiningLink }: Payload): Promise<Community> => {
     const perspective = await client.neighbourhood.joinFromUrl(joiningLink);
 
     const neighbourhoodMeta = getMetaFromLinks(
-      perspective.neighbourhood!.meta.links
+      perspective.neighbourhood!.data.meta.links
     );
       
     await client.perspective.update(perspective.uuid, neighbourhoodMeta.name);
