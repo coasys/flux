@@ -20,8 +20,8 @@
   "dependencies": {
     "@fluxapp/api": "*",
     "@fluxapp/ui": "*",
-    "@perspect3vism/ad4m": "0.7.1-fix",
-    "@perspect3vism/ad4m-connect": "0.7.1-fix",
+    "@perspect3vism/ad4m": "link:../../../ad4m/core",
+    "@perspect3vism/ad4m-connect": "link:../../../ad4m/connect",
     "@tiptap/core": "^2.0.3",
     "@tiptap/extension-link": "^2.0.3",
     "@tiptap/extension-mention": "^2.0.3",

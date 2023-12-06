@@ -39,6 +39,8 @@ export default async function getProfile(did: string): Promise<Profile> {
 
   const agentPerspective = await client.agent.byDID(cleanedDid);
 
+  console.log('meow', did, agentPerspective)
+
   if (agentPerspective) {
     const links = agentPerspective!.perspective!.links;
 

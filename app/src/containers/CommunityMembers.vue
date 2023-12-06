@@ -82,6 +82,7 @@ export default defineComponent({
       if (neighbourhood) {
         const me = await client.agent.me();
         const others = await neighbourhood?.otherAgents();
+        console.log('wow', others)
         members.value = await Promise.all(
           [...others, me.did].map((did) => getProfile(did))
         );

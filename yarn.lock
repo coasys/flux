@@ -1983,33 +1983,13 @@
   resolved "https://registry.yarnpkg.com/@one-ini/wasm/-/wasm-0.1.1.tgz#6013659736c9dbfccc96e8a9c2b3de317df39323"
   integrity sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw==
 
-"@perspect3vism/ad4m-connect@0.7.1-fix":
-  version "0.7.1-fix"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m-connect/-/ad4m-connect-0.7.1-fix.tgz#9635ede0cac98ddf1deb59e843896801e3c4892e"
-  integrity sha512-UXJlfOJJ7SMC3hcoTlRATIEvcw5cwaXtSNN9nAX8qYzEIve+vGpT3k1/55PWh+Jn6cUe9eYyfvnGiBnZSJ6nug==
-  dependencies:
-    "@undecaf/barcode-detector-polyfill" "^0.9.15"
-    "@undecaf/zbar-wasm" "^0.9.12"
-    auto-bind "^5.0.1"
-    electron "^20.0.3"
-    esbuild-plugin-copy "^2.1.1"
-    esbuild-plugin-replace "^1.4.0"
-    lit "^2.3.1"
+"@perspect3vism/ad4m-connect@link:../ad4m/connect":
+  version "0.0.0"
+  uid ""
 
-"@perspect3vism/ad4m@0.7.1-fix":
-  version "0.7.1-fix"
-  resolved "https://registry.yarnpkg.com/@perspect3vism/ad4m/-/ad4m-0.7.1-fix.tgz#7a0fd3e5ae0865e760eaedee57ca762fc84cac4d"
-  integrity sha512-RcR/Xxp6u2nWNhWJpvL6PXV5QlDmPoJ7TVUiYUmTDmDQs8ef8m7JnTcp66zFyPyQ5s/n1mDhfINtF2t4XmrL5Q==
-  dependencies:
-    "@apollo/client" "3.7.10"
-    "@apollo/server" "^4.9.4"
-    "@holochain/client" "0.16.0"
-    "@types/jest" "^26.0.14"
-    class-validator "^0.13.1"
-    express "4.18.2"
-    graphql "15.7.2"
-    reflect-metadata "^0.1.13"
-    type-graphql "1.1.1"
+"@perspect3vism/ad4m@link:../ad4m/core":
+  version "0.0.0"
+  uid ""
 
 "@popperjs/core@^2.11.7", "@popperjs/core@^2.9.0":
   version "2.11.8"
