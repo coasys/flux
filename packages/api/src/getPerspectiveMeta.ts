@@ -10,7 +10,7 @@ export default async function getPerspectiveMeta(uuid: string) {
     throw new Error("Could not load meta data from perspective");
   }
 
-  const neighbourhood = perspective.neighbourhood;
+  const neighbourhood = perspective.neighbourhood.data;
 
   const links = (neighbourhood.meta?.links as Array<any>) || [];
   const languageLinks = links.filter(findLink.language);
