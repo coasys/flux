@@ -38,7 +38,7 @@
     "@fluxapp/constants": "*",
     "@fluxapp/api": "*",
     "@fluxapp/flux-editor": "*",
-    "@perspect3vism/ad4m": "0.7.1-fix",
+    "@perspect3vism/ad4m": "0.8.0-prerelease",
     "preact": "^10.13.1",
     "react-virtuoso": "^4.3.6"
   },
