@@ -315,10 +315,6 @@ export default defineComponent({
     async removeProof(proof: EntanglementProof) {
       const proofLink =
         this.me?.perspective?.links.filter((l) => {
-          console.log(
-            l.data.target.startsWith("literal://") &&
-              Literal.fromUrl(l.data.target).get()
-          );
           return (
             l.data.predicate === "ad4m://entanglement_proof" &&
             l.data.target.startsWith("literal://") &&
@@ -332,8 +328,8 @@ export default defineComponent({
           additions: [],
           removals: proofLink,
         });
-        this.getEntanglementProofs();
       }
+      this.getEntanglementProofs();
     },
     setAddLinkModal(value: boolean): void {
       this.showAddlinkModal = value;
