@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "preact/hooks";
 import { Reaction } from "../../../types";
-import { Profile } from "@coasys/flux-types";
-import { getProfile } from "@coasys/flux-api";
-import { WebRTC } from "@coasys/flux-react-web";
+import { WebRTC, useAgent } from "@coasys/flux-react-web";
+import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 
 import styles from "./Item.module.css";
 
@@ -10,6 +9,7 @@ type Props = {
   webRTC: WebRTC;
   isMe?: boolean;
   userId: string;
+  agentClient: AgentClient;
   reaction?: Reaction;
   mirrored?: boolean;
   focused?: boolean;
@@ -21,6 +21,7 @@ export default function Item({
   webRTC,
   isMe,
   userId,
+  agentClient,
   focused,
   minimised,
   reaction,
@@ -28,23 +29,13 @@ export default function Item({
   onToggleFocus,
 }: Props) {
   const videoRef = useRef(null);
-  const [profile, setProfile] = useState<Profile>();
+
   const [isConnecting, setIsConnecting] = useState(isMe ? false : true);
+
+  const { profile } = useAgent({ client: agentClient, did: () => userId });
 
   const peer = webRTC.connections.find((p) => p.did === userId);
   const settings = isMe ? webRTC.localState.settings : peer?.state?.settings;
-
-  // Get user details
-  useEffect(() => {
-    async function fetchAgent() {
-      const profileResponse = await getProfile(userId);
-      setProfile(profileResponse);
-    }
-
-    if (!profile) {
-      fetchAgent();
-    }
-  }, [profile, userId]);
 
   // Get loading state
   useEffect(() => {
@@ -72,7 +63,7 @@ export default function Item({
   return (
     <div
       className={styles.item}
-      data-camera-enabled={!!settings?.video}
+      data-camera-enabled={!!settings?.video || !!settings.screen}
       data-focused={focused}
       data-minimised={minimised}
       data-mirrored={mirrored}
@@ -90,7 +81,7 @@ export default function Item({
       <div className={styles.details} onClick={onToggleFocus}>
         <div className={styles.avatar}>
           <j-avatar
-            initials={profile?.username ? profile.username?.charAt(0) : "?"}
+            initials={profile?.username?.charAt(0) || "?"}
             hash={userId}
             size="xl"
           ></j-avatar>

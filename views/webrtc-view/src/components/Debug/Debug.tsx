@@ -1,4 +1,4 @@
-import { Me } from "@coasys/flux-api";
+import { Profile } from "@coasys/flux-types";
 import { WebRTC } from "@coasys/flux-react-web";
 import UiContext from "../../context/UiContext";
 import { useContext } from "preact/hooks";
@@ -10,10 +10,10 @@ import styles from "./Debug.module.css";
 
 type Props = {
   webRTC: WebRTC;
-  currentUser?: Me;
+  profile?: Profile;
 };
 
-export default function Debugger({ webRTC, currentUser }: Props) {
+export default function Debugger({ webRTC, profile }: Props) {
   const {
     methods: { toggleShowDebug },
   } = useContext(UiContext);
@@ -23,7 +23,7 @@ export default function Debugger({ webRTC, currentUser }: Props) {
       <div className={styles.inner}>
         <ul className={styles.list}>
           <li>
-            <ItemMe currentUser={currentUser} webRTC={webRTC} />
+            <ItemMe profile={profile} webRTC={webRTC} />
           </li>
           {webRTC.connections.map((p, i) => (
             <li key={p.did}>

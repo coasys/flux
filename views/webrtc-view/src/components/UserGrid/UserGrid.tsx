@@ -1,6 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
 import { Howl } from "howler";
-import { Me } from "@coasys/flux-api";
 import { Reaction } from "../../types";
 import { WebRTC } from "@coasys/flux-react-web";
 import popWav from "../../assets/pop.wav";
@@ -8,15 +7,18 @@ import guitarWav from "../../assets/guitar.wav";
 import kissWav from "../../assets/kiss.wav";
 import pigWav from "../../assets/pig.wav";
 import Item from "./Item";
+import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 
 import styles from "./UserGrid.module.css";
+import { Profile } from "@coasys/flux-types";
 
 type Props = {
   webRTC: WebRTC;
-  currentUser?: Me;
+  agentClient: AgentClient;
+  profile?: Profile;
 };
 
-export default function UserGrid({ webRTC, currentUser }: Props) {
+export default function UserGrid({ webRTC, profile, agentClient }: Props) {
   const [currentReaction, setCurrentReaction] = useState<Reaction>(null);
   const [focusedPeerId, setFocusedPeerId] = useState(null);
 
@@ -35,7 +37,7 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
 
   const userCount = webRTC.connections.length + (webRTC.localStream ? 1 : 0);
   const myReaction =
-    currentReaction && currentReaction.did === currentUser.did
+    currentReaction && currentReaction.did === profile?.did
       ? currentReaction
       : null;
 
@@ -87,6 +89,7 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
           key={peer.did}
           webRTC={webRTC}
           userId={peer.did}
+          agentClient={agentClient}
           reaction={peerReaction}
           focused={focusedPeerId === peer.did}
           minimised={focusedPeerId && focusedPeerId !== peer.did}
@@ -108,18 +111,17 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
         <Item
           webRTC={webRTC}
           isMe
+          agentClient={agentClient}
           mirrored={
             webRTC.localState.settings.video &&
             !webRTC.localState.settings.screen
           }
-          userId={currentUser.did}
+          userId={profile.did}
           reaction={myReaction}
-          focused={focusedPeerId === currentUser.did}
-          minimised={focusedPeerId && focusedPeerId !== currentUser.did}
+          focused={focusedPeerId === profile.did}
+          minimised={focusedPeerId && focusedPeerId !== profile.did}
           onToggleFocus={() =>
-            setFocusedPeerId(
-              focusedPeerId === currentUser.did ? null : currentUser.did
-            )
+            setFocusedPeerId(focusedPeerId === profile.did ? null : profile.did)
           }
         />
       )}

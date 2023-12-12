@@ -1,13 +1,12 @@
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { videoSettings } from "@coasys/flux-constants";
 import {
-  Ad4mClient,
   PerspectiveProxy,
   Agent,
   Literal,
   NeighbourhoodProxy,
   PerspectiveExpression,
 } from "@perspect3vism/ad4m";
+import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 
 import { AD4MPeer, AD4MPeerInstance } from "./ad4mPeer";
 import { getDefaultIceServers } from "@coasys/flux-utils";
@@ -75,7 +74,8 @@ export type IceServer = {
 };
 
 type Props = {
-  uuid: string;
+  agent: AgentClient;
+  perspective: PerspectiveProxy;
   source: string;
 };
 
@@ -93,7 +93,6 @@ export class WebRTCManager {
   private addedListener: boolean = false;
   private isListening: boolean = false;
   private agent: Agent;
-  private client: Ad4mClient;
   private perspective: PerspectiveProxy | null;
   private neighbourhood: NeighbourhoodProxy;
   private source: string;
@@ -121,13 +120,9 @@ export class WebRTCManager {
     this.localStream = new MediaStream();
     this.localEventLog = [];
     this.source = props.source;
-    this.client = await getAd4mClient();
-    this.agent = await this.client.agent.me();
-    this.perspective = await this.client.perspective.byUUID(props.uuid);
-    this.neighbourhood = new NeighbourhoodProxy(
-      this.client.neighbourhood,
-      this.perspective?.uuid || ""
-    );
+    this.agent = await props.agent.me();
+    this.perspective = props.perspective;
+    this.neighbourhood = this.perspective.getNeighbourhoodProxy();
     this.emitPeerEvents();
 
     // Bind methods
