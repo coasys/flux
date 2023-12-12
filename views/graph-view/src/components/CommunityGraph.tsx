@@ -1,10 +1,10 @@
 import ForceGraph3D, { ForceGraph3DInstance } from "3d-force-graph";
 import { useEffect, useState, useRef } from "preact/hooks";
 import SpriteText from "three-spritetext";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { Ad4mClient, Literal } from "@perspect3vism/ad4m";
 import useIntersectionObserver from "../hooks/useIntersectionObserver";
 import styles from "../App.module.css";
+import { PerspectiveProxy } from "@perspect3vism/ad4m";
 
 function findNodes(links, source) {
   return links.reduce((acc, link) => {
@@ -44,13 +44,17 @@ function extractProtocol(string: string) {
   }
 }
 
-export default function CommunityOverview({ uuid, source }) {
+export default function CommunityOverview({
+  perspective,
+  source,
+}: {
+  perspective: PerspectiveProxy;
+  source: string;
+}) {
   const containerRef = useRef<HTMLDivElement>();
   const graph = useRef<ForceGraph3DInstance>(undefined);
   const graphEl = useRef<HTMLDivElement | null>(null);
-
   const [containerSize, setContainerSize] = useState([0, 0]);
-  const [ad4mInitialised, setAd4mInitialised] = useState(false);
   const [graphInitialised, setGraphInitialised] = useState(false);
   const [nodes, setNodes] = useState<{ id: string; group: string }[]>([]);
   const [links, setLinks] = useState<
@@ -88,7 +92,7 @@ export default function CommunityOverview({ uuid, source }) {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  });
+  }, []);
 
   // Resize graph on resize
   useEffect(() => {
@@ -100,26 +104,22 @@ export default function CommunityOverview({ uuid, source }) {
 
   // Fetch initial snapshot
   useEffect(() => {
-    const init = async () => {
-      setAd4mInitialised(true);
+    fetchSnapShot(perspective, source).then(({ links, nodes }) => {
+      console.log(links, nodes);
+      setNodes(nodes);
+      setLinks(links);
+    });
 
-      const client: Ad4mClient = await getAd4mClient();
-      const perspective = await client.perspective.byUUID(uuid);
-
-      fetchSnapShot();
-
-      perspective?.addListener("link-added", (link) => {
-        if (link.data.source === source || link.data.target === source) {
-          fetchSnapShot();
-        }
-        return null;
-      });
-    };
-
-    if (!ad4mInitialised && uuid && source) {
-      init();
-    }
-  }, [ad4mInitialised, uuid, source]);
+    perspective?.addListener("link-added", (link) => {
+      if (link.data.source === source || link.data.target === source) {
+        fetchSnapShot(perspective, source).then(({ links, nodes }) => {
+          setNodes(nodes);
+          setLinks(links);
+        });
+      }
+      return null;
+    });
+  }, [perspective.uuid, source]);
 
   // Setup graph
   useEffect(() => {
@@ -181,44 +181,41 @@ export default function CommunityOverview({ uuid, source }) {
     if (!graphInitialised) {
       setupGraph();
     }
-  }, [graphInitialised, nodes, links]);
+  }, [graphInitialised, nodes, links, perspective.uuid, source]);
 
   // Add data on change
   useEffect(() => {
     if (graphInitialised && graph.current) {
       graph.current.graphData({ nodes, links });
     }
-  }, [graphInitialised, nodes, links]);
-
-  async function fetchSnapShot() {
-    const client: Ad4mClient = await getAd4mClient();
-    const snapshot = await client.perspective.snapshotByUUID(uuid);
-
-    const subLinks = findNodes(snapshot?.links || [], source);
-
-    const initialNodes = uniqueNodes(
-      subLinks
-        .map((link) => [
-          { id: link.data.source, group: extractProtocol(link.data.source) },
-          { id: link.data.target, group: extractProtocol(link.data.target) },
-        ])
-        .flat()
-    );
-
-    setNodes(initialNodes);
-
-    const initialLinks = subLinks.map((l) => ({
-      source: l.data.target,
-      target: l.data.source,
-      predicate: l.data.predicate,
-    }));
-
-    setLinks(initialLinks);
-  }
+  }, [graphInitialised, nodes, links, perspective.uuid, source]);
 
   return (
     <div ref={containerRef}>
       <div className={styles.graph} ref={graphEl} id="graph" />
     </div>
   );
+}
+
+async function fetchSnapShot(perspective: PerspectiveProxy, source: string) {
+  const snapshot = await perspective.snapshot();
+
+  const subLinks = findNodes(snapshot?.links || [], source);
+
+  const initialNodes = uniqueNodes(
+    subLinks
+      .map((link) => [
+        { id: link.data.source, group: extractProtocol(link.data.source) },
+        { id: link.data.target, group: extractProtocol(link.data.target) },
+      ])
+      .flat()
+  );
+
+  const initialLinks = subLinks.map((l) => ({
+    source: l.data.target,
+    target: l.data.source,
+    predicate: l.data.predicate,
+  }));
+
+  return { nodes: initialNodes, links: initialLinks };
 }

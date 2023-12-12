@@ -12,5 +12,5 @@ export default function App({
     return null;
   }
 
-  return <CommunityGraph source={source} uuid={perspective.uuid} />;
+  return <CommunityGraph source={source} perspective={perspective} />;
 }

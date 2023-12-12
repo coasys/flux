@@ -1,6 +1,6 @@
 {
   "name": "@fluxapp/flux-editor",
-  "version": "0.7.1",
+  "version": "0.7.3",
   "type": "module",
   "module": "dist/main.js",
   "main": "dist/main.js",
