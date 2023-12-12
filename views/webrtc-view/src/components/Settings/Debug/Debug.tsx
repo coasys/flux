@@ -1,4 +1,4 @@
-import { Me } from "@coasys/flux-api";
+import { Profile } from "@coasys/flux-types";
 import { WebRTC } from "@coasys/flux-react-web";
 
 import Item from "./Item";
@@ -11,10 +11,10 @@ import UiContext from "../../../context/UiContext";
 
 type Props = {
   webRTC: WebRTC;
-  currentUser?: Me;
+  profile?: Profile;
 };
 
-export default function VoiceVideo({ webRTC, currentUser }: Props) {
+export default function VoiceVideo({ webRTC, profile }: Props) {
   const {
     methods: { toggleShowDebug },
   } = useContext(UiContext);

@@ -16,8 +16,9 @@ import {
   IceServer,
 } from "@fluxapp/webrtc";
 
-import { getMe, Me } from "@coasys/flux-api";
 import { videoSettings } from "@coasys/flux-constants";
+import { PerspectiveProxy, Agent } from "@perspect3vism/ad4m";
+import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 
 const { defaultSettings, videoDimensions } = videoSettings;
 
@@ -38,7 +39,8 @@ export type Reaction = {
 type Props = {
   enabled: boolean;
   source: string;
-  uuid: string;
+  perspective: PerspectiveProxy;
+  agent: AgentClient;
   defaultState?: Peer["state"];
   events?: {
     onPeerJoin?: (uuid: string) => void;
@@ -78,7 +80,8 @@ export type WebRTC = {
 export default function useWebRTC({
   enabled,
   source,
-  uuid,
+  perspective,
+  agent: agentClient,
   events,
 }: Props): WebRTC {
   const defaultState = { settings: defaultSettings };
@@ -88,7 +91,7 @@ export default function useWebRTC({
   const [audioPermissionGranted, setAudioPermissionGranted] = useState(false);
   const [videoPermissionGranted, setVideoPermissionGranted] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
-  const [agent, setAgent] = useState<Me>();
+  const [agent, setAgent] = useState<Agent>();
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [iceServers, setIceServers] = useState<IceServer[]>(
     getDefaultIceServers()
@@ -111,7 +114,7 @@ export default function useWebRTC({
   // Get agent/me
   useEffect(() => {
     async function fetchAgent() {
-      const agent = await getMe();
+      const agent = await agentClient.me();
       setAgent(agent);
     }
 
@@ -222,8 +225,12 @@ export default function useWebRTC({
    * Attach signal listeners
    */
   useEffect(() => {
-    if (source && uuid && agent && !isInitialised) {
-      manager.current = new WebRTCManager({ source, uuid });
+    if (source && perspective.uuid && agent && !isInitialised) {
+      manager.current = new WebRTCManager({
+        source,
+        perspective,
+        agent: agentClient,
+      });
 
       manager.current.on(
         Event.PEER_ADDED,
@@ -290,14 +297,15 @@ export default function useWebRTC({
 
       setIsInitialised(true);
 
-      return async () => {
+      return () => {
         if (hasJoined) {
-          await manager.current?.leave();
-          manager.current = null;
+          manager.current?.leave().then(() => {
+            manager.current = null;
+          });
         }
       };
     }
-  }, [source, uuid, isInitialised, hasJoined, agent, localState]);
+  }, [source, perspective.uuid, isInitialised, hasJoined, agent, localState]);
 
   /**
    * Handle reactions

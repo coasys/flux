@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "preact/hooks";
 import { getMe, Me } from "@coasys/flux-api";
-import { useWebRTC } from "@coasys/flux-react-web";
+import { useAgent, useWebRTC } from "@coasys/flux-react-web";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
 
 import UserGrid from "../UserGrid";
@@ -10,12 +10,28 @@ import UiContext from "../../context/UiContext";
 import Overlay from "../Overlay/Overlay";
 import JoinScreen from "../JoinScreen";
 
+import { PerspectiveProxy, Agent } from "@perspect3vism/ad4m";
+import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
+
+// @ts-ignore
 import styles from "./Channel.module.css";
 import Debug from "../Debug";
 
-export default function Channel({ source, uuid }) {
-  const [agent, setAgent] = useState<Me | null>(null);
+type Props = {
+  source: string;
+  perspective: PerspectiveProxy;
+  agent: AgentClient;
+};
+
+export default function Channel({
+  source,
+  perspective,
+  agent: agentClient,
+}: Props) {
+  const [agent, setAgent] = useState<Agent | null>(null);
   const wrapperEl = useRef<HTMLDivElement | null>(null);
+
+  const { profile } = useAgent({ client: agentClient, did: () => agent?.did });
 
   const wrapperObserver = useIntersectionObserver(wrapperEl, {});
   const isPageActive = !!wrapperObserver?.isIntersecting;
@@ -28,17 +44,20 @@ export default function Channel({ source, uuid }) {
   const webRTC = useWebRTC({
     enabled: isPageActive,
     source,
-    uuid,
+    agent: agentClient,
+    perspective,
     events: {
-      onPeerJoin: (userId) => addNotification({ userId, type: "join" }),
-      onPeerLeave: (userId) => addNotification({ userId, type: "leave" }),
+      onPeerJoin: (userId) =>
+        addNotification({ id: userId, userId, type: "join" }),
+      onPeerLeave: (userId) =>
+        addNotification({ id: userId, userId, type: "leave" }),
     },
   });
 
   // Get agent/me
   useEffect(() => {
     async function fetchAgent() {
-      const agent = await getMe();
+      const agent = await agentClient.me();
       setAgent(agent);
     }
 
@@ -52,14 +71,18 @@ export default function Channel({ source, uuid }) {
       {!webRTC.hasJoined && (
         <JoinScreen
           webRTC={webRTC}
-          currentUser={agent}
+          profile={profile}
           onToggleSettings={() => toggleShowSettings(!showSettings)}
         />
       )}
 
       {webRTC.hasJoined && (
         <>
-          <UserGrid webRTC={webRTC} currentUser={agent} />
+          <UserGrid
+            webRTC={webRTC}
+            agentClient={agentClient}
+            profile={profile}
+          />
           <Footer
             webRTC={webRTC}
             onToggleSettings={() => toggleShowSettings(!showSettings)}
@@ -67,9 +90,9 @@ export default function Channel({ source, uuid }) {
         </>
       )}
 
-      <Overlay webRTC={webRTC} currentUser={agent} />
+      <Overlay webRTC={webRTC} profile={profile} />
 
-      <>{showDebug && <Debug webRTC={webRTC} currentUser={agent} />}</>
+      <>{showDebug && <Debug webRTC={webRTC} profile={profile} />}</>
 
       <Notifications />
     </section>

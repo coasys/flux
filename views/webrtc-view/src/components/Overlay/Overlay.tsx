@@ -1,15 +1,15 @@
 import { useContext } from "preact/hooks";
 import UiContext from "../../context/UiContext";
 import Settings from "../Settings";
-import { Me } from "@coasys/flux-api";
+import { Profile } from "@coasys/flux-types";
 import { WebRTC } from "@coasys/flux-react-web";
 
 type Props = {
   webRTC: WebRTC;
-  currentUser?: Me;
+  profile?: Profile;
 };
 
-export default function Overlay({ webRTC, currentUser }: Props) {
+export default function Overlay({ webRTC, profile }: Props) {
   const { state: uiState, methods: UIMethods } = useContext(UiContext);
 
   // const onPublished = (postId: string) => {
@@ -27,9 +27,7 @@ export default function Overlay({ webRTC, currentUser }: Props) {
       open={uiState.showSettings}
       onToggle={(e) => UIMethods.toggleShowSettings(e.target.open)}
     >
-      {uiState.showSettings && (
-        <Settings webRTC={webRTC} currentUser={currentUser} />
-      )}
+      {uiState.showSettings && <Settings webRTC={webRTC} profile={profile} />}
     </j-modal>
   );
 }

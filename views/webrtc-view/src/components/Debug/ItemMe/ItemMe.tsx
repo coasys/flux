@@ -1,4 +1,4 @@
-import { Me } from "@coasys/flux-api";
+import { Profile } from "@coasys/flux-types";
 import { WebRTC } from "@coasys/flux-react-web";
 import { format } from "date-fns";
 
@@ -6,10 +6,10 @@ import styles from "./ItemMe.module.css";
 
 type Props = {
   webRTC: WebRTC;
-  currentUser?: Me;
+  profile?: Profile;
 };
 
-export default function ItemMe({ currentUser, webRTC }: Props) {
+export default function ItemMe({ profile, webRTC }: Props) {
   const sortedEvents = webRTC?.localEventLog?.sort((a, b) =>
     b.timeStamp.localeCompare(a.timeStamp)
   );
@@ -17,7 +17,7 @@ export default function ItemMe({ currentUser, webRTC }: Props) {
   return (
     <div className={styles.item}>
       <j-text variant="heading">Connection #1 (me)</j-text>
-      <j-text variant="footnote">{currentUser?.did}</j-text>
+      <j-text variant="footnote">{profile?.did}</j-text>
 
       <div className={styles.row}>
         <j-text variant="label" nomargin>

@@ -1,10 +1,8 @@
-import SimplePeer from "simple-peer/simplepeer.min.js";
-import { Instance as SimplePeerInstance } from "simple-peer";
+import * as SimplePeer from "simple-peer";
+
 import { Literal, NeighbourhoodProxy } from "@perspect3vism/ad4m";
 
-export interface AD4MPeerInstance extends SimplePeerInstance {
-  // WIP
-}
+export interface AD4MPeerInstance extends SimplePeer.Instance {}
 
 export type Props = {
   did: string;
@@ -35,6 +33,7 @@ export class AD4MPeer {
 
   public connect() {
     this.peer = this.createPeer();
+
     return this.peer;
   }
 
@@ -44,7 +43,7 @@ export class AD4MPeer {
       stream: this.stream,
       ...this.options,
       trickle: false,
-    }) as SimplePeerInstance;
+    });
 
     // Local peerjs instance has data it wants to send to remote peer
     peer.on("signal", (signal) => {

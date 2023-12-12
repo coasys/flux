@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "preact/hooks";
-import { Me } from "@coasys/flux-api";
+import { useState } from "preact/hooks";
+import { Profile } from "@coasys/flux-types";
 import { WebRTC } from "@coasys/flux-react-web";
 
 import Debug from "./Debug";
@@ -10,10 +10,10 @@ import styles from "./Settings.module.css";
 
 type Props = {
   webRTC: WebRTC;
-  currentUser?: Me;
+  profile?: Profile;
 };
 
-export default function Settings({ webRTC, currentUser }: Props) {
+export default function Settings({ webRTC, profile }: Props) {
   const [currentTab, setCurrentTab] = useState("voice-video");
 
   return (
@@ -46,7 +46,7 @@ export default function Settings({ webRTC, currentUser }: Props) {
         <>{currentTab === "connection" && <Connection webRTC={webRTC} />}</>
         <>
           {currentTab === "debug" && (
-            <Debug webRTC={webRTC} currentUser={currentUser} />
+            <Debug webRTC={webRTC} profile={profile} />
           )}
         </>
       </div>

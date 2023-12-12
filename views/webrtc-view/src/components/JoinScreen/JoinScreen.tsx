@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { Profile } from "@coasys/flux-types";
+import { Profile, Profiles } from "@coasys/flux-types";
 import { getProfile } from "@coasys/flux-api";
-import { Me } from "@coasys/flux-api";
 import { WebRTC } from "@coasys/flux-react-web";
 
 import styles from "./JoinScreen.module.css";
@@ -9,29 +8,16 @@ import Disclaimer from "../Disclaimer";
 
 type Props = {
   webRTC: WebRTC;
-  currentUser?: Me;
+  profile?: Profile;
   onToggleSettings: () => void;
 };
 
 export default function JoinScreen({
   webRTC,
-  currentUser,
+  profile,
   onToggleSettings,
 }: Props) {
   const videoRef = useRef(null);
-  const [profile, setProfile] = useState<Profile>();
-
-  // Get user details
-  useEffect(() => {
-    async function fetchAgent() {
-      const profileResponse = await getProfile(currentUser?.did);
-      setProfile(profileResponse);
-    }
-
-    if (!profile && currentUser) {
-      fetchAgent();
-    }
-  }, [profile, currentUser]);
 
   useEffect(() => {
     if (videoRef.current && webRTC.localStream) {
@@ -62,10 +48,10 @@ export default function JoinScreen({
           <div className={styles.details}>
             <div className={styles.avatar}>
               <>
-                {currentUser && profile && (
+                {profile && (
                   <j-avatar
-                    initials={profile ? profile.username?.charAt(0) : "?"}
-                    hash={currentUser ? currentUser?.did : "?"}
+                    initials={profile.username?.charAt(0) || "?"}
+                    hash={profile.did || "?"}
                     size="xl"
                   ></j-avatar>
                 )}
@@ -85,13 +71,7 @@ export default function JoinScreen({
           <div className={styles.settings}>
             <div>
               <j-tooltip placement="top" title="Settings">
-                <j-button
-                  variant="secondary"
-                  onClick={onToggleSettings}
-                  square
-                  circle
-                  size="lg"
-                >
+                <j-button onClick={onToggleSettings} square circle size="lg">
                   <j-icon name="gear"></j-icon>
                 </j-button>
               </j-tooltip>
@@ -102,7 +82,7 @@ export default function JoinScreen({
 
       <j-box pt="400">
         <j-toggle
-          checked={webRTC.localState.settings.video}
+          checked={webRTC.localState.settings.video ? true : false}
           disabled={
             webRTC.isLoading ||
             !webRTC.audioPermissionGranted ||
