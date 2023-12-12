@@ -3,7 +3,7 @@ import channel from "../../../fixtures/channel.json";
 import initAgentFixture from "../../../fixtures/initAgent.json";
 import getProfileFixture from "../../../fixtures/getProfile.json";
 import lockAgentFixture from "../../../fixtures/lockAgent.json";
-import { AgentStatus, Expression } from "@perspect3vism/ad4m";
+import { AgentStatus, Expression } from "@coasys/ad4m";
 import { ExpressionTypes, ProfileExpression } from "@/store/types";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useUserStore } from "@/store/user";
@@ -22,18 +22,18 @@ describe("Show Message Notification", () => {
   let did: string;
   let profileLink: string;
 
-  beforeAll(async () => {  
+  beforeAll(async () => {
     Object.defineProperty(global, "Notification", {
       value: jest.fn(),
     });
 
     const staticMembers = {
       requestPermission: jest.fn().mockImplementation(async () => {
-        return 'granted';
+        return "granted";
       }),
-      permission: 'granted',
+      permission: "granted",
     };
-  
+
     Object.assign(global.Notification, staticMembers);
 
     profileLangAddress = community.neighbourhood.typedExpressionLanguages.find(
@@ -60,12 +60,12 @@ describe("Show Message Notification", () => {
       .spyOn(ad4mClient.agent, "byDID")
       // @ts-ignore
       .mockImplementation(async (did) => {
-        if (did.includes('101')) {
+        if (did.includes("101")) {
           return {
             perspective: {
-              links: []
-            }
-          }
+              links: [],
+            },
+          };
         }
         return agentByDIDLinksFixture;
       });

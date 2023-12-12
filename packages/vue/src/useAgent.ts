@@ -1,6 +1,6 @@
 import { computed, ref, watch } from "vue";
-import { Agent } from "@perspect3vism/ad4m";
-import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
+import { Agent } from "@coasys/ad4m";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { mapLiteralLinks } from "@coasys/flux-utils";
 import { profile } from "@coasys/flux-constants";
 import { Profile } from "@coasys/flux-types";

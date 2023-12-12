@@ -1,5 +1,5 @@
 import { useState } from "preact/hooks";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { PerspectiveProxy } from "@coasys/ad4m";
 import { useSubjects } from "@coasys/flux-react-web";
 
 import Todo from "../subjects/Todo";

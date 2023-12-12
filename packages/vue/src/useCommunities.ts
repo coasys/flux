@@ -1,6 +1,6 @@
 import { ref, watch, ShallowRef } from "vue";
 import { SubjectRepository, getPerspectiveMeta } from "@coasys/flux-api";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { PerspectiveProxy } from "@coasys/ad4m";
 import { Community } from "@coasys/flux-api";
 
 async function getCommunity(p: PerspectiveProxy): Promise<Community> {

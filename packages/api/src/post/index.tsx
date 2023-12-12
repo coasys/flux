@@ -5,7 +5,7 @@ import {
   subjectProperty,
   subjectCollection,
   subjectFlag,
-} from "@perspect3vism/ad4m";
+} from "@coasys/ad4m";
 
 const { BODY, END_DATE, IMAGE, START_DATE, TITLE, URL, ENTRY_TYPE } = community;
 const { FILE_STORAGE_LANGUAGE } = languages;

@@ -190,7 +190,7 @@ import {
   EntanglementProof,
   LinkExpression,
   Literal,
-} from "@perspect3vism/ad4m";
+} from "@coasys/ad4m";
 import { defineComponent, ref } from "vue";
 import WebLinkCard from "./WebLinkCard.vue";
 import CommunityCard from "./CommunityCard.vue";
@@ -209,7 +209,7 @@ import {
   useMe,
 } from "@coasys/flux-vue";
 // @ts-ignore
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { useRoute } from "vue-router";
 import Attestations from "./Attestations.vue";
 // @ts-ignore

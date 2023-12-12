@@ -23,7 +23,7 @@
     "@coasys/flux-utils": "*"
   },
   "peerDependencies": {
-    "@perspect3vism/ad4m": "0.8.0-prerelease",
+    "@coasys/ad4m": "0.8.0",
     "react": "^18.2.0"
   }
 }

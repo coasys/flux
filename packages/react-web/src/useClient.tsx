@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { getCache, setCache, subscribe, unsubscribe } from "./cache";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { Ad4mClient } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { Ad4mClient } from "@coasys/ad4m";
 
 export function useClient() {
   const forceUpdate = useForceUpdate();

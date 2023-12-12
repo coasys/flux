@@ -4,7 +4,7 @@ import {
   Subject,
   Literal,
   LinkQuery,
-} from "@perspect3vism/ad4m";
+} from "@coasys/ad4m";
 import { community } from "@coasys/flux-constants";
 import { setProperties } from "./model";
 import { v4 as uuidv4 } from "uuid";

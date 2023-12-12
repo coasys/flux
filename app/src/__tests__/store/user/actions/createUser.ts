@@ -1,6 +1,6 @@
 import initAgentFixture from "../../../fixtures/initAgent.json";
 import addPerspectiveFixture from "../../../fixtures/addPerspective.json";
-import { AgentStatus, PerspectiveHandle } from "@perspect3vism/ad4m";
+import { AgentStatus, PerspectiveHandle } from "@coasys/ad4m";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useUserStore } from "@/store/user";
 import { ad4mClient } from "@/app";

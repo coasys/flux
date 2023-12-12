@@ -1,9 +1,5 @@
 import { community } from "@coasys/flux-constants";
-import {
-  subjectProperty,
-  subjectCollection,
-  SDNAClass,
-} from "@perspect3vism/ad4m";
+import { subjectProperty, subjectCollection, SDNAClass } from "@coasys/ad4m";
 
 const { NAME } = community;
 

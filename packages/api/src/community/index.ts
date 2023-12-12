@@ -9,7 +9,7 @@ import {
   subjectProperty,
   subjectCollection,
   subjectFlag,
-} from "@perspect3vism/ad4m";
+} from "@coasys/ad4m";
 import Channel from "../channel";
 
 @SDNAClass({

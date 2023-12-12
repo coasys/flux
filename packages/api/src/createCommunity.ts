@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { Community as FluxCommunity } from "@coasys/flux-types";
-import { Ad4mClient, Perspective } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { Ad4mClient, Perspective } from "@coasys/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import {
   blobToDataURL,
   dataURItoBlob,

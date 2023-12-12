@@ -1,5 +1,5 @@
 import { useState, useEffect } from "preact/hooks";
-import { PerspectiveProxy, Literal } from "@perspect3vism/ad4m";
+import { PerspectiveProxy, Literal } from "@coasys/ad4m";
 import { getEntry } from "../../utils";
 import DisplayValue from "../DisplayValue";
 import styles from "./Header.module.css";

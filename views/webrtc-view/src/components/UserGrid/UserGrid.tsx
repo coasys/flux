@@ -7,7 +7,7 @@ import guitarWav from "../../assets/guitar.wav";
 import kissWav from "../../assets/kiss.wav";
 import pigWav from "../../assets/pig.wav";
 import Item from "./Item";
-import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
 import styles from "./UserGrid.module.css";
 import { Profile } from "@coasys/flux-types";

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { isValidDate, isValidUrl } from "../../utils";
-import { Literal } from "@perspect3vism/ad4m";
+import { Literal } from "@coasys/ad4m";
 import styles from "./DisplayValue.module.css";
 
 type Props = {

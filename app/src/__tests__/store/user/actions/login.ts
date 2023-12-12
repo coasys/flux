@@ -1,6 +1,6 @@
 import "@testing-library/vue";
 import lockAgentFixture from "../../../fixtures/lockAgent.json";
-import { AgentStatus } from "@perspect3vism/ad4m";
+import { AgentStatus } from "@coasys/ad4m";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useUserStore } from "@/store/user";
 import { ad4mClient } from "@/app";

@@ -38,7 +38,7 @@
     "@coasys/flux-container": "*",
     "@coasys/flux-react-web": "*",
     "@coasys/flux-types": "*",
-    "@perspect3vism/ad4m": "0.8.0-prerelease",
+    "@coasys/ad4m": "0.8.0",
     "fractional-indexing": "^3.2.0",
     "preact": "^10.13.1",
     "react-beautiful-dnd": "^13.1.1"

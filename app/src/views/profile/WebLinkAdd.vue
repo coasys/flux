@@ -59,7 +59,7 @@
 </template>
 
 <script lang="ts">
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { useAppStore } from "@/store/app";
 import { defineComponent, ref } from "vue";
 import { createAgentWebLink } from "@coasys/flux-api";

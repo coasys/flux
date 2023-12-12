@@ -9,8 +9,8 @@ import {
 } from "@coasys/flux-utils";
 
 import getProfile from "./getProfile";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { LinkExpression } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { LinkExpression } from "@coasys/ad4m";
 
 const { FILE_STORAGE_LANGUAGE } = languages;
 const {

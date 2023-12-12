@@ -1,8 +1,4 @@
-import {
-  LinkExpression,
-  LinkQuery,
-  PerspectiveProxy,
-} from "@perspect3vism/ad4m";
+import { LinkExpression, LinkQuery, PerspectiveProxy } from "@coasys/ad4m";
 import { useState, useEffect } from "preact/hooks";
 
 export function useAssociations({

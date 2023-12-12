@@ -1,7 +1,7 @@
 import styles from "./App.module.css";
-import { PerspectiveProxy, Ad4mClient } from "@perspect3vism/ad4m";
+import { PerspectiveProxy, Ad4mClient } from "@coasys/ad4m";
 import ChatView from "./components/ChatView/ChatView";
-import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
 type Props = {
   agent: AgentClient;

@@ -33,7 +33,7 @@
   "description": "",
   "dependencies": {
     "@coasys/flux-container": "*",
-    "@perspect3vism/ad4m": "0.8.0-prerelease",
+    "@coasys/ad4m": "0.8.0",
     "preact": "^10.13.1",
     "@coasys/flux-react-web": "*",
     "@coasys/flux-api": "*"

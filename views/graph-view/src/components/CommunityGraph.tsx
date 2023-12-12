@@ -1,10 +1,10 @@
 import ForceGraph3D, { ForceGraph3DInstance } from "3d-force-graph";
 import { useEffect, useState, useRef } from "preact/hooks";
 import SpriteText from "three-spritetext";
-import { Ad4mClient, Literal } from "@perspect3vism/ad4m";
+import { Ad4mClient, Literal } from "@coasys/ad4m";
 import useIntersectionObserver from "../hooks/useIntersectionObserver";
 import styles from "../App.module.css";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { PerspectiveProxy } from "@coasys/ad4m";
 
 function findNodes(links, source) {
   return links.reduce((acc, link) => {

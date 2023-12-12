@@ -6,8 +6,8 @@ import Avatar from "../Avatar";
 import { Post as PostSubject } from "@coasys/flux-api";
 import { useAgent, useSubject, useMe } from "@coasys/flux-react-web";
 import styles from "./index.module.css";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
-import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
+import { PerspectiveProxy } from "@coasys/ad4m";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
 export default function Post({
   agent,
