@@ -223,6 +223,16 @@ export default defineComponent({
   emits: ["cancel", "submit"],
   async setup() {
     const appStore = useAppStore();
+
+    return {
+      selectedLang: ref<any>(null),
+      langMeta: ref<any>(null),
+      communities: [],
+      perspectives: [],
+      appStore,
+    };
+  },
+  async mounted() {
     const client: Ad4mClient = await getAd4mClient();
 
     const linkLangs = await client.runtime.knownLinkLanguageTemplates();
@@ -234,13 +244,12 @@ export default defineComponent({
     const { perspectives, neighbourhoods } = usePerspectives(client);
     const { communities } = useCommunities(neighbourhoods);
 
-    return {
-      selectedLang: ref(langMeta[0].address),
-      langMeta: ref(langMeta),
-      communities,
-      perspectives,
-      appStore,
-    };
+    this.selectedLang = langMeta[0].address;
+    this.langMeta = langMeta;
+    // @ts-ignore
+    this.communities = communities;
+    // @ts-ignore
+    this.perspectives = perspectives;
   },
   data() {
     return {
