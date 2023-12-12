@@ -1,5 +1,5 @@
 {
-  "name": "@fluxapp/kanban-view",
+  "name": "@coasys/flux-kanban-view",
   "version": "0.7.3",
   "fluxapp": {
     "name": "Kanban",
@@ -33,11 +33,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@fluxapp/api": "*",
-    "@fluxapp/comment-section": "*",
-    "@fluxapp/flux-container": "*",
-    "@fluxapp/react-web": "*",
-    "@fluxapp/types": "*",
+    "@coasys/flux-api": "*",
+    "@coasys/flux-comment-section": "*",
+    "@coasys/flux-container": "*",
+    "@coasys/flux-react-web": "*",
+    "@coasys/flux-types": "*",
     "@perspect3vism/ad4m": "0.8.0-prerelease",
     "fractional-indexing": "^3.2.0",
     "preact": "^10.13.1",

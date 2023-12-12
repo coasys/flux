@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "preact/hooks";
 import { Reaction } from "../../../types";
-import { Profile } from "@fluxapp/types";
-import { getProfile } from "@fluxapp/api";
-import { WebRTC } from "@fluxapp/react-web";
+import { Profile } from "@coasys/flux-types";
+import { getProfile } from "@coasys/flux-api";
+import { WebRTC } from "@coasys/flux-react-web";
 
 import styles from "./Item.module.css";
 

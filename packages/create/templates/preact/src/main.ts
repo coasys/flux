@@ -1,7 +1,7 @@
 import "preact/debug";
 
-import "@fluxapp/ui/dist/main.d.ts";
-import { toCustomElement } from "@fluxapp/react-web";
+import "@coasys/flux-ui/dist/main.d.ts";
+import { toCustomElement } from "@coasys/flux-react-web";
 import Plugin from "./Plugin";
 
 const CustomElement = toCustomElement(

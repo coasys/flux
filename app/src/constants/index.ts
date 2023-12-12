@@ -1,4 +1,4 @@
-import { ChannelView } from "@fluxapp/types";
+import { ChannelView } from "@coasys/flux-types";
 
 export const viewOptions = [
   {
@@ -6,7 +6,7 @@ export const viewOptions = [
     description: "Real time message with your community members",
     icon: "chat",
     type: ChannelView.Chat,
-    pkg: "@fluxapp/chat-view",
+    pkg: "@coasys/flux-chat-view",
     component: "chat-view",
   },
   {
@@ -14,7 +14,7 @@ export const viewOptions = [
     description: "A feed of posts that users can publish",
     icon: "card-heading",
     type: ChannelView.Post,
-    pkg: "@fluxapp/post-view",
+    pkg: "@coasys/flux-post-view",
     component: "post-view",
   },
   {
@@ -22,7 +22,7 @@ export const viewOptions = [
     description: "A graph view of the channel's data",
     icon: "share",
     type: ChannelView.Graph,
-    pkg: "@fluxapp/graph-view",
+    pkg: "@coasys/flux-graph-view",
     component: "graph-view",
   },
   {
@@ -30,7 +30,7 @@ export const viewOptions = [
     description: "Audio/Video channel",
     icon: "mic",
     type: ChannelView.Voice,
-    pkg: "@fluxapp/webrtc-view",
+    pkg: "@coasys/flux-webrtc-view",
     component: "webrtc-view",
   },
   {

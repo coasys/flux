@@ -47,9 +47,9 @@ import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { defineComponent } from "vue";
 import { useAppStore } from "@/store/app";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
-import { useMe } from "@fluxapp/vue";
+import { useMe } from "@coasys/flux-vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { getProfile, updateProfile } from "@fluxapp/api";
+import { getProfile, updateProfile } from "@coasys/flux-api";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -75,12 +75,12 @@ export default defineComponent({
     };
   },
   async mounted() {
-    console.log(this.profile)
+    console.log(this.profile);
     if (this.me?.did) {
-      getProfile(this.me?.did).then(profile => {
+      getProfile(this.me?.did).then((profile) => {
         this.profilePicture = profile.profilePicture || "";
         this.profileBackground = profile.profileBackground || "";
-      })
+      });
       this.username = this.profile?.username || "";
       this.bio = this.profile?.bio || "";
     }

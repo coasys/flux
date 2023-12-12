@@ -1,12 +1,12 @@
 import { useState } from "preact/hooks";
-import { useSubject } from "@fluxapp/react-web";
+import { useSubject } from "@coasys/flux-react-web";
 import styles from "./CardDetails.module.css";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import Entry from "../Entry";
 import { useEffect } from "preact/hooks";
-import { Profile } from "@fluxapp/types";
-import { getProfile } from "@fluxapp/api";
+import { Profile } from "@coasys/flux-types";
+import { getProfile } from "@coasys/flux-api";
 import { useAssociations } from "../../hooks/useAssociations";
 
 type Props = {

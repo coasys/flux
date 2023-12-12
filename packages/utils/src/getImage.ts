@@ -1,5 +1,5 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { languages } from "@fluxapp/constants";
+import { languages } from "@coasys/flux-constants";
 const { FILE_STORAGE_LANGUAGE } = languages;
 
 export async function getImage(expUrl: string): Promise<string> {

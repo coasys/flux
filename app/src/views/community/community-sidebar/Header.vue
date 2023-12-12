@@ -95,13 +95,13 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { useRoute } from "vue-router";
-import { Profile } from "@fluxapp/types";
+import { Profile } from "@coasys/flux-types";
 import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
 import Avatar from "@/components/avatar/Avatar.vue";
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { useMe } from "@fluxapp/vue";
+import { useMe } from "@coasys/flux-vue";
 import { Ad4mClient } from "@perspect3vism/ad4m";
 
 export default defineComponent({

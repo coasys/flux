@@ -118,7 +118,7 @@ import { defineComponent, ref, watch } from "vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Profile from "@/containers/Profile.vue";
 import { useAppStore } from "@/store/app";
-import { ChannelView } from "@fluxapp/types";
+import { ChannelView } from "@coasys/flux-types";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 import {
   useSubject,
@@ -126,14 +126,14 @@ import {
   usePerspectives,
   useMe,
   useSubjects,
-} from "@fluxapp/vue";
+} from "@coasys/flux-vue";
 import {
   Community,
   Channel,
   App,
   joinCommunity,
   generateWCName,
-} from "@fluxapp/api";
+} from "@coasys/flux-api";
 import { Ad4mClient } from "@perspect3vism/ad4m";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 

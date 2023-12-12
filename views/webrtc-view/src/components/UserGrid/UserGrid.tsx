@@ -1,8 +1,8 @@
 import { useEffect, useState } from "preact/hooks";
 import { Howl } from "howler";
-import { Me } from "@fluxapp/api";
+import { Me } from "@coasys/flux-api";
 import { Reaction } from "../../types";
-import { WebRTC } from "@fluxapp/react-web";
+import { WebRTC } from "@coasys/flux-react-web";
 import popWav from "../../assets/pop.wav";
 import guitarWav from "../../assets/guitar.wav";
 import kissWav from "../../assets/kiss.wav";
@@ -44,12 +44,12 @@ export default function UserGrid({ webRTC, currentUser }: Props) {
   const gridColSize = focusedPeerId
     ? 1
     : userCount === 1
-    ? 1
-    : userCount > 1 && userCount <= 4
-    ? 2
-    : userCount > 4 && userCount <= 9
-    ? 3
-    : 4;
+      ? 1
+      : userCount > 1 && userCount <= 4
+        ? 2
+        : userCount > 4 && userCount <= 9
+          ? 3
+          : 4;
 
   useEffect(() => {
     if (webRTC.reactions.length < 1) {

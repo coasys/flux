@@ -4,7 +4,7 @@ import {
   EDITED_TO,
   CARD_HIDDEN,
 } from "./communityPredicates";
-import { EntryType } from "@fluxapp/types";
+import { EntryType } from "@coasys/flux-types";
 
 export const emojiCount = 3;
 export const emoji = "1f44d";

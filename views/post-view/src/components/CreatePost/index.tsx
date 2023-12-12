@@ -3,10 +3,10 @@ import Editor from "../Editor";
 import { PostOption, postOptions } from "../../constants/options";
 import FileUpload from "../FileUpload";
 import styles from "./index.module.css";
-import { blobToDataURL, dataURItoBlob, resizeImage } from "@fluxapp/utils";
+import { blobToDataURL, dataURItoBlob, resizeImage } from "@coasys/flux-utils";
 import PostImagePreview from "../PostImagePreview";
-import { SubjectRepository } from "@fluxapp/api";
-import { Post as PostSubject } from "@fluxapp/api";
+import { SubjectRepository } from "@coasys/flux-api";
+import { Post as PostSubject } from "@coasys/flux-api";
 
 const initialState = {
   title: null,

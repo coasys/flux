@@ -1,6 +1,6 @@
 import { useState, useEffect } from "preact/hooks";
-import { Profile } from "@fluxapp/types";
-import { getProfile } from "@fluxapp/api";
+import { Profile } from "@coasys/flux-types";
+import { getProfile } from "@coasys/flux-api";
 import { Notification } from "../../../context/UiContext";
 
 import styles from "./Item.module.css";

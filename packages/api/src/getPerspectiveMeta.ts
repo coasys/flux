@@ -1,4 +1,4 @@
-import { findLink, getMetaFromLinks, keyedLanguages } from "@fluxapp/utils";
+import { findLink, getMetaFromLinks, keyedLanguages } from "@coasys/flux-utils";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export default async function getPerspectiveMeta(uuid: string) {

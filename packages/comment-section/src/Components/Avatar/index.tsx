@@ -1,4 +1,4 @@
-import { getImage } from "@fluxapp/utils";
+import { getImage } from "@coasys/flux-utils";
 import { useEffect, useState } from "preact/hooks";
 
 type AvatarProps = {

@@ -16,7 +16,7 @@ Now, let's get a list of Todo's, which is also part of the boilerplate. This ass
 
 ```jsx
 import { useSubject, useSubjects } from "@fluxapp/react";
-import { Community } from "@fluxapp/api";
+import { Community } from "@coasys/flux-api";
 import Todo from "../subjects/Todo";  // [!code ++]
 
 export default function TodoView({ perspective, channelSource })
@@ -47,7 +47,7 @@ If we want to fetch a single entry based on it's id. We can use the `useSubject`
 
 ```tsx
 import { useSubject } from "@fluxapp/react";
-import { Todo } from "@fluxapp/api";
+import { Todo } from "@coasys/flux-api";
 
 export default function Todo({ perspective, id }) {
   const { entry: todo } = useSubject({
@@ -72,7 +72,7 @@ Since we're subscribed to all changes, the list of Todos will automatically upda
 
 ```jsx
 import { useSubject, useSubjects } from "@fluxapp/react";
-import { Community } from "@fluxapp/api";
+import { Community } from "@coasys/flux-api";
 import Todo from "../subjects/Todo";
 
 export default function TodoView({ perspective, channelSource }) {
@@ -118,7 +118,7 @@ In this example we use the [j-checkbox](/ui-library/components/checkbox.html) we
 
 ```jsx
 import { useSubject, useSubjects } from "@fluxapp/react";
-import { Community } from "@fluxapp/api";
+import { Community } from "@coasys/flux-api";
 import Todo from "../subjects/Todo";
 
 export default function TodoView({ perspective, channelSource }) {
@@ -177,7 +177,7 @@ Deleting data, as you might guess, is done with `repo.remove()`. Let's add a but
 
 ```jsx
 import { useSubject, useSubjects } from "@fluxapp/react";
-import { Community } from "@fluxapp/api";
+import { Community } from "@coasys/flux-api";
 import Todo from "../subjects/Todo";
 
 export default function TodoView({ perspective, channelSource }) {

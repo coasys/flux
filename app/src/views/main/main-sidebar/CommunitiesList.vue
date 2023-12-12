@@ -17,9 +17,7 @@
         ></Avatar>
         <j-menu slot="content">
           <j-menu-item
-            @click="
-              () => setShowLeaveCommunity(true, uuid as string)
-            "
+            @click="() => setShowLeaveCommunity(true, uuid as string)"
           >
             <j-icon slot="start" size="xs" name="box-arrow-left"></j-icon>
             Leave community
@@ -29,11 +27,7 @@
             ><j-icon size="xs" slot="start" name="bell" />
             Mute Community
           </j-menu-item>
-          <j-menu-item
-            @click="
-              () => toggleHideMutedChannels(uuid as string)
-            "
-          >
+          <j-menu-item @click="() => toggleHideMutedChannels(uuid as string)">
             <j-icon size="xs" slot="start" name="toggle-on" />
             Hide muted channels
           </j-menu-item>
@@ -58,7 +52,7 @@ import { ref } from "vue";
 import { useAppStore } from "@/store/app";
 import { defineComponent } from "vue";
 import Avatar from "@/components/avatar/Avatar.vue";
-import { usePerspectives, useCommunities } from "@fluxapp/vue";
+import { usePerspectives, useCommunities } from "@coasys/flux-vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 export default defineComponent({

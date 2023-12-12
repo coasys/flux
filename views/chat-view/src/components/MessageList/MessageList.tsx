@@ -1,7 +1,7 @@
-import { useSubjects } from "@fluxapp/react-web";
+import { useSubjects } from "@coasys/flux-react-web";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
-import { Message } from "@fluxapp/api";
+import { Message } from "@coasys/flux-api";
 import { Virtuoso } from "react-virtuoso";
 import MessageItem from "../MessageItem";
 import { useMemo } from "preact/hooks";

@@ -1,5 +1,5 @@
 import { useContext } from "preact/hooks";
-import { useMe } from "@fluxapp/react-web";
+import { useMe } from "@coasys/flux-react-web";
 import Avatar from "../Avatar";
 import { PostOption, postOptions } from "../../constants/options";
 import UIContext from "../../context/UIContext";

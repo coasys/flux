@@ -21,7 +21,7 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { useAppStore } from "@/store/app";
-import { ChannelView } from "@fluxapp/types";
+import { ChannelView } from "@coasys/flux-types";
 import { viewOptions } from "@/constants";
 
 export default defineComponent({

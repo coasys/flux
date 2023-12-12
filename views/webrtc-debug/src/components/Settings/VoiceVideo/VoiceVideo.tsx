@@ -1,7 +1,7 @@
-import { Me } from "@fluxapp/api";
+import { Me } from "@coasys/flux-api";
 import { version } from "../../../../package.json";
-import { getForVersion } from "@fluxapp/utils";
-import { WebRTC } from "@fluxapp/react-web";
+import { getForVersion } from "@coasys/flux-utils";
+import { WebRTC } from "@coasys/flux-react-web";
 import Select from "../../Select";
 
 type Props = {

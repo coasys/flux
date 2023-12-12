@@ -1,4 +1,4 @@
-import { Settings } from "@fluxapp/utils";
+import { Settings } from "@coasys/flux-utils";
 
 const frameRate = {
   min: 5,

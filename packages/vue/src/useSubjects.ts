@@ -1,5 +1,5 @@
 import { ref, shallowRef, triggerRef, watch } from "vue";
-import { SubjectRepository } from "@fluxapp/api";
+import { SubjectRepository } from "@coasys/flux-api";
 import { PerspectiveProxy, LinkExpression } from "@perspect3vism/ad4m";
 
 export function useSubjects<SubjectClass>({
@@ -68,8 +68,8 @@ export function useSubjects<SubjectClass>({
       const id = isNewEntry
         ? link.data.target
         : isUpdated
-        ? link.data.source
-        : false;
+          ? link.data.source
+          : false;
 
       if (id) {
         const isInstance = await p.isSubjectInstance(id, new subject());

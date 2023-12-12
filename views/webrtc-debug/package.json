@@ -44,9 +44,9 @@
   "license": "ISC",
   "dependencies": {
     "@fluxapp/webrtc": "*",
-    "@fluxapp/react-web": "*",
-    "@fluxapp/utils": "*",
-    "@fluxapp/flux-container": "*",
+    "@coasys/flux-react-web": "*",
+    "@coasys/flux-utils": "*",
+    "@coasys/flux-container": "*",
     "classnames": "^2.3.2",
     "date-fns": "^2.29.3",
     "emoji-picker-element": "^1.14.0",

@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState, useLayoutEffect } from "preact/hooks";
-import { Me } from "@fluxapp/api";
+import { Me } from "@coasys/flux-api";
 import useContextMenu from "../../hooks/useContextMenu";
-import { WebRTC } from "@fluxapp/react-web";
+import { WebRTC } from "@coasys/flux-react-web";
 import items from "../../sprites/items";
 import Canvas from "../Canvas";
 import Sprite from "../Sprite/Sprite";

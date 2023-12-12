@@ -64,7 +64,7 @@ _To publish to production:_
 
 The documentation is hosted on [Netlify](https://netlify.com). Each time code is pushed to the `master` branch, a new build of the documentation will be deployed. Netlify also creates a unique build per pull request so it's easy for other people to review and see the changes live.
 
-Flux Elements is published on NPM and can be installed simply by running `npm install --save @fluxapp/ui`. If you want to use a CDN, we reccommend that you use [JSDeliver](https://www.jsdelivr.com/).
+Flux Elements is published on NPM and can be installed simply by running `npm install --save @coasys/flux-ui`. If you want to use a CDN, we reccommend that you use [JSDeliver](https://www.jsdelivr.com/).
 
 ## ⭐ Adding icons
 

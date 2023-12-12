@@ -1,4 +1,4 @@
-import { community } from "@fluxapp/constants";
+import { community } from "@coasys/flux-constants";
 import {
   subjectProperty,
   subjectCollection,

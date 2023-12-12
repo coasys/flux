@@ -1,8 +1,8 @@
 import { useContext } from "preact/hooks";
 import UiContext from "../../context/UiContext";
 import Settings from "../Settings";
-import { Me } from "@fluxapp/api";
-import { WebRTC } from "@fluxapp/react-web";
+import { Me } from "@coasys/flux-api";
+import { WebRTC } from "@coasys/flux-react-web";
 
 type Props = {
   webRTC: WebRTC;

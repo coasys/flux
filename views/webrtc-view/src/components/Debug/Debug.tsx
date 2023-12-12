@@ -1,5 +1,5 @@
-import { Me } from "@fluxapp/api";
-import { WebRTC } from "@fluxapp/react-web";
+import { Me } from "@coasys/flux-api";
+import { WebRTC } from "@coasys/flux-react-web";
 import UiContext from "../../context/UiContext";
 import { useContext } from "preact/hooks";
 

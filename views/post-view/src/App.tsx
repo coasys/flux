@@ -1,4 +1,4 @@
-import "@fluxapp/ui/dist/main.d.ts";
+import "@coasys/flux-ui/dist/main.d.ts";
 import PostList from "./components/PostList";
 import UIContext, { UIProvider, View } from "./context/UIContext";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";

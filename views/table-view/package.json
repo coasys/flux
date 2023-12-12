@@ -1,5 +1,5 @@
 {
-  "name": "@fluxapp/table-view",
+  "name": "@coasys/flux-table-view",
   "version": "0.7.3",
   "fluxapp": {
     "name": "Table",
@@ -32,10 +32,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@fluxapp/api": "*",
-    "@fluxapp/comment-section": "*",
-    "@fluxapp/react-web": "*",
-    "@fluxapp/flux-container": "*",
+    "@coasys/flux-api": "*",
+    "@coasys/flux-comment-section": "*",
+    "@coasys/flux-react-web": "*",
+    "@coasys/flux-container": "*",
     "@perspect3vism/ad4m": "0.8.0-prerelease",
     "preact": "^10.13.1",
     "uuid": "^9.0.0"

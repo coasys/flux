@@ -8,7 +8,7 @@ import {
   unsubscribeToPerspective,
 } from "./cache";
 import { PerspectiveProxy, LinkExpression } from "@perspect3vism/ad4m";
-import { SubjectRepository } from "@fluxapp/api";
+import { SubjectRepository } from "@coasys/flux-api";
 
 type Props<SubjectClass> = {
   id: string;

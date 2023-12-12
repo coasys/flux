@@ -37,7 +37,7 @@ Read more about how to make plugins [here](https://docs.fluxsocial.io/)
 ### Changed
 
 - Complete revamp of documentation for UI elements
-- Move themes into `@fluxapp/ui` package, making it easy for people to style their apps in different themes
+- Move themes into `@coasys/flux-ui` package, making it easy for people to style their apps in different themes
 - npm package names are renamed from `@junto-foundation` to `@fluxapp`
 - `j-tabs` takes `variant` prop instead of each `j-tab-item` element
 - WebRTC Video chat is now using SimplePeer and should be more stable

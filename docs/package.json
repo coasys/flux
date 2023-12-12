@@ -1,5 +1,5 @@
 {
-  "name": "@fluxapp/docs",
+  "name": "@coasys/flux-docs",
   "version": "0.7.3",
   "description": "",
   "type": "module",
@@ -10,8 +10,8 @@
     "dev": "vitepress dev"
   },
   "dependencies": {
-    "@fluxapp/flux-container": "*",
-    "@fluxapp/ui": "*",
+    "@coasys/flux-container": "*",
+    "@coasys/flux-ui": "*",
     "vitepress": "1.0.0-alpha.75",
     "eventsource-parser": "^1.0.0"
   },

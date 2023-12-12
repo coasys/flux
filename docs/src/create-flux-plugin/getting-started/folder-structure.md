@@ -1,4 +1,4 @@
-After using `@fluxapp/create`, your project should look like this:
+After using `@coasys/flux-create-plugin`, your project should look like this:
 
 ```
 my-app/

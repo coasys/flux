@@ -8,7 +8,7 @@ You are free to create any kind of Subject for your data, but let's start with t
 
 ## Built-in models
 
-Because Flux Plugins share a lot of functionality, it comes bundled with several commonly used models that can be imported from `@fluxapp/api`:
+Because Flux Plugins share a lot of functionality, it comes bundled with several commonly used models that can be imported from `@coasys/flux-api`:
 
 - Community
 - Channel
@@ -18,7 +18,7 @@ Because Flux Plugins share a lot of functionality, it comes bundled with several
 
 ```ts
 import { useSubject } from "@fluxapp/react";
-import { Community } from "@fluxapp/api";
+import { Community } from "@coasys/flux-api";
 
 const { entry: community } = useSubject({
   perspective,
@@ -28,7 +28,7 @@ const { entry: community } = useSubject({
 
 ## Custom models
 
-Defining your own models can be done by creating a new `SDNAClass`. The below shows an example `Todo` subject, which is included as an example in the `@fluxapp/create` boilerplate:
+Defining your own models can be done by creating a new `SDNAClass`. The below shows an example `Todo` subject, which is included as an example in the `@coasys/flux-create-plugin` boilerplate:
 
 ```ts
 // models/Todo.ts

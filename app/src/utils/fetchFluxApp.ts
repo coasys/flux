@@ -1,34 +1,34 @@
 const fetchFluxApp = async function (packageName: string) {
   let module;
   const officialPackages = [
-    "@fluxapp/chat-view",
-    "@fluxapp/post-view",
-    "@fluxapp/graph-view",
-    "@fluxapp/table-view",
-    "@fluxapp/kanban-view",
-    "@fluxapp/webrtc-view",
+    "@coasys/flux-chat-view",
+    "@coasys/flux-post-view",
+    "@coasys/flux-graph-view",
+    "@coasys/flux-table-view",
+    "@coasys/flux-kanban-view",
+    "@coasys/flux-webrtc-view",
   ];
   const isOfficialApp = officialPackages.includes(packageName);
 
   try {
     if (isOfficialApp) {
-      if (packageName === "@fluxapp/chat-view") {
-        module = await import("@fluxapp/chat-view");
+      if (packageName === "@coasys/flux-chat-view") {
+        module = await import("@coasys/flux-chat-view");
       }
-      if (packageName === "@fluxapp/post-view") {
-        module = await import("@fluxapp/post-view");
+      if (packageName === "@coasys/flux-post-view") {
+        module = await import("@coasys/flux-post-view");
       }
-      if (packageName === "@fluxapp/graph-view") {
-        module = await import("@fluxapp/graph-view");
+      if (packageName === "@coasys/flux-graph-view") {
+        module = await import("@coasys/flux-graph-view");
       }
-      if (packageName === "@fluxapp/webrtc-view") {
-        module = await import("@fluxapp/webrtc-view");
+      if (packageName === "@coasys/flux-webrtc-view") {
+        module = await import("@coasys/flux-webrtc-view");
       }
-      if (packageName === "@fluxapp/table-view") {
-        module = await import("@fluxapp/table-view");
+      if (packageName === "@coasys/flux-table-view") {
+        module = await import("@coasys/flux-table-view");
       }
-      if (packageName === "@fluxapp/kanban-view") {
-        module = await import("@fluxapp/kanban-view");
+      if (packageName === "@coasys/flux-kanban-view") {
+        module = await import("@coasys/flux-kanban-view");
       }
     } else {
       module = await import(

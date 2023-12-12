@@ -183,7 +183,7 @@
 </template>
 
 <script lang="ts">
-import { Profile } from "@fluxapp/types";
+import { Profile } from "@coasys/flux-types";
 import { ModalsState } from "@/store/types";
 import {
   Ad4mClient,
@@ -199,10 +199,15 @@ import EditProfile from "@/containers/EditProfile.vue";
 import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
 import Avatar from "@/components/avatar/Avatar.vue";
-import { getImage } from "@fluxapp/utils";
+import { getImage } from "@coasys/flux-utils";
 import WebLinkAdd from "./WebLinkAdd.vue";
-import { getAgentWebLinks } from "@fluxapp/api";
-import { usePerspectives, useCommunities, useAgent, useMe } from "@fluxapp/vue";
+import { getAgentWebLinks } from "@coasys/flux-api";
+import {
+  usePerspectives,
+  useCommunities,
+  useAgent,
+  useMe,
+} from "@coasys/flux-vue";
 // @ts-ignore
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { useRoute } from "vue-router";

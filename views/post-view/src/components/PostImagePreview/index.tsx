@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import { getImage } from "@fluxapp/utils";
+import { getImage } from "@coasys/flux-utils";
 import styles from "./index.module.css";
 
 type Props = {

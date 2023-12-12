@@ -100,13 +100,13 @@ import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
-import { EntryType } from "@fluxapp/types";
+import { EntryType } from "@coasys/flux-types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import semver from "semver";
 import { dependencies } from "../../../package.json";
 import { LinkExpression, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
-import { useSubject, usePerspective, usePerspectives } from "@fluxapp/vue";
-import { Community } from "@fluxapp/api";
+import { useSubject, usePerspective, usePerspectives } from "@coasys/flux-vue";
+import { Community } from "@coasys/flux-api";
 
 export default defineComponent({
   name: "MainAppView",

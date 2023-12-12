@@ -10,12 +10,12 @@ A comment section to show comments in your flux plugin
 
 ## How to use
 
-Install the package `npm install --save @fluxapp/comment-section`.
+Install the package `npm install --save @coasys/flux-comment-section`.
 
 Define a new web component:
 
 ```js
-import CommentSection from "@fluxapp/comment-section";
+import CommentSection from "@coasys/flux-comment-section";
 
 customElements.define("comment-section", CommentSection);
 ```

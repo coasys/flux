@@ -20,8 +20,8 @@
 </template>
 
 <script lang="ts">
-import { Profile } from "@fluxapp/types";
-import { getProfile } from "@fluxapp/api";
+import { Profile } from "@coasys/flux-types";
+import { getProfile } from "@coasys/flux-api";
 import { defineComponent } from "vue";
 import Avatar from "@/components/avatar/Avatar.vue";
 

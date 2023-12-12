@@ -5,7 +5,7 @@ import {
   Literal,
   LinkQuery,
 } from "@perspect3vism/ad4m";
-import { community } from "@fluxapp/constants";
+import { community } from "@coasys/flux-constants";
 import { setProperties } from "./model";
 import { v4 as uuidv4 } from "uuid";
 
@@ -162,20 +162,27 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
 
     if (query) {
       try {
-        const queryResponse = (await this.perspective.infer(`findall([Timestamp, Base], (subject_class("${this.className}", C), instance(C, Base), link("${tempSource}", Predicate, Base, Timestamp, Author)), AllData), length(AllData, DataLength), sort(AllData, SortedData).`))[0]
+        const queryResponse = (
+          await this.perspective.infer(
+            `findall([Timestamp, Base], (subject_class("${this.className}", C), instance(C, Base), link("${tempSource}", Predicate, Base, Timestamp, Author)), AllData), length(AllData, DataLength), sort(AllData, SortedData).`
+          )
+        )[0];
 
         if (queryResponse.SortedData >= query.size) {
-          const isOutofBound = query.size * query.page > queryResponse.DataLength;
+          const isOutofBound =
+            query.size * query.page > queryResponse.DataLength;
 
-          const newPageSize = isOutofBound ? queryResponse.DataLength - (query.size * (query.page - 1)) : query.size;
+          const newPageSize = isOutofBound
+            ? queryResponse.DataLength - query.size * (query.page - 1)
+            : query.size;
 
-          const mainQuery = `findall([Timestamp, Base], (subject_class("${this.className}", C), instance(C, Base), link("${tempSource}", Predicate, Base, Timestamp, Author)), AllData), sort(AllData, SortedData), reverse(SortedData, ReverseSortedData), paginate(ReverseSortedData, ${query.page}, ${newPageSize}, PageData).`
+          const mainQuery = `findall([Timestamp, Base], (subject_class("${this.className}", C), instance(C, Base), link("${tempSource}", Predicate, Base, Timestamp, Author)), AllData), sort(AllData, SortedData), reverse(SortedData, ReverseSortedData), paginate(ReverseSortedData, ${query.page}, ${newPageSize}, PageData).`;
           res = await this.perspective.infer(mainQuery);
 
-          res = res[0].PageData.map(r => ({
+          res = res[0].PageData.map((r) => ({
             Base: r[1],
-            Timestamp: r[0]
-          }))
+            Timestamp: r[0],
+          }));
         } else {
           res = await this.perspective.infer(
             `subject_class("${this.className}", C), instance(C, Base), triple("${tempSource}", Predicate, Base).`
@@ -191,12 +198,11 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     }
 
     const results =
-    res &&
-    res.filter(
-      (obj, index, self) =>
-        index === self.findIndex((t) => t.Base === obj.Base)
-    );
-
+      res &&
+      res.filter(
+        (obj, index, self) =>
+          index === self.findIndex((t) => t.Base === obj.Base)
+      );
 
     if (!res) return [];
 
@@ -214,7 +220,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
       })
     );
 
-    return data
+    return data;
   }
 
   async getAllData(

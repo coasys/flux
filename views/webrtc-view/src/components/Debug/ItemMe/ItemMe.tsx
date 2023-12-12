@@ -1,5 +1,5 @@
-import { Me } from "@fluxapp/api";
-import { WebRTC } from "@fluxapp/react-web";
+import { Me } from "@coasys/flux-api";
+import { WebRTC } from "@coasys/flux-react-web";
 import { format } from "date-fns";
 
 import styles from "./ItemMe.module.css";

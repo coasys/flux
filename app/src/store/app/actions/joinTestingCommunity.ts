@@ -1,6 +1,6 @@
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 import { useAppStore } from "..";
-import { joinCommunity } from "@fluxapp/api";
+import { joinCommunity } from "@coasys/flux-api";
 
 export async function joinTestingCommunity() {
   const appStore = useAppStore();

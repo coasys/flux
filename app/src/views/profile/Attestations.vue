@@ -22,7 +22,7 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect";
-import { useMe } from "@fluxapp/vue";
+import { useMe } from "@coasys/flux-vue";
 const EAS_LANG = "QmzSYwdiqjYXRAaoJdARpP7xRj4VQfdTT3J4HNGLohdKeuBgo1E";
 
 export default defineComponent({

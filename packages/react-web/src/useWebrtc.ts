@@ -4,7 +4,7 @@ import {
   setForVersion,
   throttle,
   getDefaultIceServers,
-} from "@fluxapp/utils";
+} from "@coasys/flux-utils";
 import { version } from "../package.json";
 
 import {
@@ -16,8 +16,8 @@ import {
   IceServer,
 } from "@fluxapp/webrtc";
 
-import { getMe, Me } from "@fluxapp/api";
-import { videoSettings } from "@fluxapp/constants";
+import { getMe, Me } from "@coasys/flux-api";
+import { videoSettings } from "@coasys/flux-constants";
 
 const { defaultSettings, videoDimensions } = videoSettings;
 
@@ -316,9 +316,8 @@ export default function useWebRTC({
       video: { ...videoDimensions, deviceId: deviceId },
     };
 
-    const newLocalStream = await navigator.mediaDevices.getUserMedia(
-      newSettings
-    );
+    const newLocalStream =
+      await navigator.mediaDevices.getUserMedia(newSettings);
 
     if (localStream) {
       localStream.getTracks().forEach((track) => {
@@ -352,9 +351,8 @@ export default function useWebRTC({
         track.stop();
       });
 
-      const newLocalStream = await navigator.mediaDevices.getUserMedia(
-        newSettings
-      );
+      const newLocalStream =
+        await navigator.mediaDevices.getUserMedia(newSettings);
       updateStream(newLocalStream);
     }
 

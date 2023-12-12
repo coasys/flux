@@ -1,4 +1,4 @@
-import { Settings, EventLogItem } from "@fluxapp/utils";
+import { Settings, EventLogItem } from "@coasys/flux-utils";
 
 export type peerState = {
   spriteIndex: number;

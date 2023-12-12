@@ -1,5 +1,5 @@
 {
-  "name": "@fluxapp/post-view",
+  "name": "@coasys/flux-post-view",
   "version": "0.7.3",
   "description": "",
   "fluxapp": {
@@ -35,9 +35,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@fluxapp/react-web": "*",
-    "@fluxapp/flux-editor": "*",
-    "@fluxapp/comment-section": "*",
+    "@coasys/flux-react-web": "*",
+    "@coasys/flux-editor": "*",
+    "@coasys/flux-comment-section": "*",
     "classnames": "^2.3.2",
     "date-fns": "^2.24.0",
     "emoji-picker-element": "^1.14.0",
@@ -50,7 +50,7 @@
     "tippy.js": "^6.3.1"
   },
   "devDependencies": {
-    "@fluxapp/flux-container": "*",
+    "@coasys/flux-container": "*",
     "@types/react": "^17.0.2",
     "np": "^7.5.0",
     "npm-run-all": "^4.1.5",

@@ -2,17 +2,17 @@ import { LitElement, html, customElement, state, css } from "lit-element";
 import { map } from "lit/directives/map.js";
 
 if (!customElements.get("j-button")) {
-  import("@fluxapp/ui");
-  import("@fluxapp/ui/dist/main.css");
-  import("@fluxapp/ui/dist/themes/dark.css");
+  import("@coasys/flux-ui");
+  import("@coasys/flux-ui/dist/main.css");
+  import("@coasys/flux-ui/dist/themes/dark.css");
 }
 
 import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
-import { createCommunity, joinCommunity } from "@fluxapp/api";
-import { Channel, Community } from "@fluxapp/api";
-import { SubjectRepository } from "@fluxapp/api";
+import { createCommunity, joinCommunity } from "@coasys/flux-api";
+import { Channel, Community } from "@coasys/flux-api";
+import { SubjectRepository } from "@coasys/flux-api";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 
 @customElement("flux-container")
@@ -394,12 +394,12 @@ export class MyElement extends LitElement {
                 </j-flex>
               </j-box>`
             : this.perspective?.uuid && this.source
-            ? html`<slot></slot>`
-            : html`<j-box py="900">
-                <j-flex a="center" j="center">
-                  <j-text>Please select a community and a channel</j-text>
-                </j-flex>
-              </j-box>`}
+              ? html`<slot></slot>`
+              : html`<j-box py="900">
+                  <j-flex a="center" j="center">
+                    <j-text>Please select a community and a channel</j-text>
+                  </j-flex>
+                </j-box>`}
         </div>
       </div>
       <j-modal

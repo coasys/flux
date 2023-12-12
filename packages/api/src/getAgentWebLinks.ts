@@ -1,8 +1,8 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
-import { mapLiteralLinks } from "@fluxapp/utils";
-import { profile } from "@fluxapp/constants";
-import { WebLink } from "@fluxapp/types";
+import { mapLiteralLinks } from "@coasys/flux-utils";
+import { profile } from "@coasys/flux-constants";
+import { WebLink } from "@coasys/flux-types";
 
 const { OG_DESCRIPTION, OG_TITLE, OG_IMAGE, AREA_WEBLINK, OG_LINK } = profile;
 
