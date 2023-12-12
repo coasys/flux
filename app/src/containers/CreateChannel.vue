@@ -127,8 +127,8 @@ import {
   App,
   generateWCName,
   getOfflineFluxApps,
-} from "@fluxapp/api";
-import { usePerspective, useSubject } from "@fluxapp/vue";
+} from "@coasys/flux-api";
+import { usePerspective, useSubject } from "@coasys/flux-vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { defineComponent } from "vue";
 import fetchFluxApp from "@/utils/fetchFluxApp";

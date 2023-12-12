@@ -1,7 +1,7 @@
 import { LinkExpression, Literal } from "@perspect3vism/ad4m";
-import { NeighbourhoodMetaData } from "@fluxapp/types";
+import { NeighbourhoodMetaData } from "@coasys/flux-types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { community } from "@fluxapp/constants";
+import { community } from "@coasys/flux-constants";
 
 const { DESCRIPTION, NAME, CREATOR, CREATED_AT } = community;
 

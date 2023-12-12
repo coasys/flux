@@ -6,13 +6,13 @@ import App from "./App.vue";
 import router from "./router";
 import { createPinia } from "pinia";
 
-import "@fluxapp/ui";
+import "@coasys/flux-ui";
 import "./themes/themes.css";
-import "@fluxapp/ui/dist/main.css";
-import "@fluxapp/ui/dist/themes/dark.css";
-import "@fluxapp/ui/dist/themes/retro.css";
-import "@fluxapp/ui/dist/themes/black.css";
-import "@fluxapp/ui/dist/themes/cyberpunk.css";
+import "@coasys/flux-ui/dist/main.css";
+import "@coasys/flux-ui/dist/themes/dark.css";
+import "@coasys/flux-ui/dist/themes/retro.css";
+import "@coasys/flux-ui/dist/themes/black.css";
+import "@coasys/flux-ui/dist/themes/cyberpunk.css";
 
 export const pinia = createPinia();
 

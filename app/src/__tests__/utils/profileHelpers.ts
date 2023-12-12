@@ -1,5 +1,5 @@
 import { ProfileWithDID } from "@/store/types";
-import { getProfile } from "@fluxapp/api";
+import { getProfile } from "@coasys/flux-api";
 import agentByDIDLinksFixture from "../fixtures/agentByDIDLinks.json";
 import { ad4mClient } from "@/app";
 

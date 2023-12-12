@@ -1,7 +1,7 @@
-import { Me } from "@fluxapp/api";
-import { WebRTC } from "@fluxapp/react-web";
+import { Me } from "@coasys/flux-api";
+import { WebRTC } from "@coasys/flux-react-web";
 import { useState } from "preact/hooks";
-import { videoSettings } from "@fluxapp/constants";
+import { videoSettings } from "@coasys/flux-constants";
 
 import styles from "./Connection.module.css";
 

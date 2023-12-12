@@ -213,8 +213,8 @@ import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { useAppStore } from "@/store/app";
-import { joinCommunity, createCommunity } from "@fluxapp/api";
-import { usePerspectives, useCommunities } from "@fluxapp/vue";
+import { joinCommunity, createCommunity } from "@coasys/flux-api";
+import { usePerspectives, useCommunities } from "@coasys/flux-vue";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 import HourGlass from "@/components/hourglass/Hourglass.vue";
 

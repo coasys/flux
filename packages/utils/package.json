@@ -1,5 +1,5 @@
 {
-  "name": "@fluxapp/utils",
+  "name": "@coasys/flux-utils",
   "version": "0.7.3",
   "description": "",
   "main": "./src/index.ts",
@@ -13,8 +13,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@fluxapp/types": "*",
-    "@fluxapp/constants": "*"
+    "@coasys/flux-types": "*",
+    "@coasys/flux-constants": "*"
   },
   "keywords": [],
   "author": "",

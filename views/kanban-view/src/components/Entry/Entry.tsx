@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { PerspectiveProxy, Literal } from "@perspect3vism/ad4m";
-import { useSubject } from "@fluxapp/react-web";
+import { useSubject } from "@coasys/flux-react-web";
 import DisplayValue from "../DisplayValue";
 import styles from "./Entry.module.css";
 
@@ -63,8 +63,8 @@ export default function Entry({
     const titleName = entry.hasOwnProperty("name")
       ? "name"
       : entry.hasOwnProperty("title")
-      ? "title"
-      : "";
+        ? "title"
+        : "";
 
     const defaultName = entry?.name || entry?.title || "";
 

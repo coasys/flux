@@ -4,7 +4,7 @@ import { format, formatDistance } from "date-fns/esm";
 import { DisplayView } from "../../constants/options";
 import UIContext from "../../context/UIContext";
 import Avatar from "../Avatar";
-import { useAgent } from "@fluxapp/react-web";
+import { useAgent } from "@coasys/flux-react-web";
 
 export default function PostItem({ agent, perspective, post, displayView }) {
   const { methods: UIMehthods } = useContext(UIContext);
@@ -36,8 +36,8 @@ export default function PostItem({ agent, perspective, post, displayView }) {
     displayView === DisplayView.Compact
       ? styles.compact
       : displayView === DisplayView.Grid
-      ? styles.grid
-      : styles.card;
+        ? styles.grid
+        : styles.card;
 
   const showTite = post.title;
   const showImage = post.image;

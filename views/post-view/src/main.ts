@@ -2,10 +2,10 @@ import "preact/debug";
 
 if (!window.ResizeObserver) window.ResizeObserver = ResizeObserver;
 
-import { toCustomElement } from "@fluxapp/react-web";
+import { toCustomElement } from "@coasys/flux-react-web";
 import MyComponent from "./App";
-import FluxEditor from "@fluxapp/flux-editor";
-import CommentSection from "@fluxapp/comment-section";
+import FluxEditor from "@coasys/flux-editor";
+import CommentSection from "@coasys/flux-comment-section";
 
 if (!customElements.get("comment-section")) {
   customElements.define("comment-section", CommentSection);

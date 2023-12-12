@@ -1,12 +1,12 @@
-import { Profile } from "@fluxapp/types";
-import { languages, profile } from "@fluxapp/constants";
+import { Profile } from "@coasys/flux-types";
+import { languages, profile } from "@coasys/flux-constants";
 import {
   resizeImage,
   dataURItoBlob,
   blobToDataURL,
   createLinks,
   createLiteralLinks,
-} from "@fluxapp/utils";
+} from "@coasys/flux-utils";
 
 import getProfile from "./getProfile";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";

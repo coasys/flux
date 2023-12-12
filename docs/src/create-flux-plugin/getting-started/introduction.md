@@ -8,4 +8,4 @@ Flux Plugins run on top of [AD4M](https://ad4m.dev/), a framework for creating p
 
 At Flux, we believe that the future of decentralized applications is limitless. That's why we designed our platform to be as flexible and adaptable as possible, enabling you to bring your ideas to life and create innovative solutions that can change the way your community interacts and engages with each other.
 
-Whether you want to create games, collaboration tools, or anything in between, `@fluxapp/create` is the perfect tool to help you bring your ideas to life. So if you're ready to take your Flux community to the next level, don't wait any longer!
+Whether you want to create games, collaboration tools, or anything in between, `@coasys/flux-create-plugin` is the perfect tool to help you bring your ideas to life. So if you're ready to take your Flux community to the next level, don't wait any longer!

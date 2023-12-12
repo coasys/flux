@@ -1,6 +1,6 @@
-import { Community } from "@fluxapp/types";
+import { Community } from "@coasys/flux-types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { getMetaFromLinks } from "@fluxapp/utils";
+import { getMetaFromLinks } from "@coasys/flux-utils";
 import { Ad4mClient } from "@perspect3vism/ad4m";
 
 export interface Payload {
@@ -26,7 +26,7 @@ export default async ({ joiningLink }: Payload): Promise<Community> => {
     const neighbourhoodMeta = getMetaFromLinks(
       perspective.neighbourhood!.data.meta.links
     );
-      
+
     await client.perspective.update(perspective.uuid, neighbourhoodMeta.name);
 
     return {

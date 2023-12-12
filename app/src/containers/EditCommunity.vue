@@ -44,10 +44,10 @@ import {
   dataURItoBlob,
   getImage,
   resizeImage,
-} from "@fluxapp/utils";
-import { useSubject, usePerspective } from "@fluxapp/vue";
+} from "@coasys/flux-utils";
+import { useSubject, usePerspective } from "@coasys/flux-vue";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { Community } from "@fluxapp/api";
+import { Community } from "@coasys/flux-api";
 
 export default defineComponent({
   components: { AvatarUpload },

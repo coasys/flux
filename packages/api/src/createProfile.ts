@@ -1,12 +1,12 @@
-import { agents, languages, profile } from "@fluxapp/constants";
-import { resizeImage, dataURItoBlob, blobToDataURL } from "@fluxapp/utils";
+import { agents, languages, profile } from "@coasys/flux-constants";
+import { resizeImage, dataURItoBlob, blobToDataURL } from "@coasys/flux-utils";
 import {
   Ad4mClient,
   Link,
   LinkExpression,
   LinkMutations,
 } from "@perspect3vism/ad4m";
-import { Profile } from "@fluxapp/types";
+import { Profile } from "@coasys/flux-types";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
 const { AD4M_AGENT, KAICHAO_AGENT, JUNTO_AGENT, NOTE_IPFS_AUTHOR } = agents;

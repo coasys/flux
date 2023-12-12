@@ -1,5 +1,5 @@
 {
-  "name": "@fluxapp/chat-view",
+  "name": "@coasys/flux-chat-view",
   "version": "0.7.3",
   "fluxapp": {
     "name": "Chat",
@@ -32,12 +32,12 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@fluxapp/react-web": "*",
-    "@fluxapp/flux-container": "*",
-    "@fluxapp/ui": "*",
-    "@fluxapp/constants": "*",
-    "@fluxapp/api": "*",
-    "@fluxapp/flux-editor": "*",
+    "@coasys/flux-react-web": "*",
+    "@coasys/flux-container": "*",
+    "@coasys/flux-ui": "*",
+    "@coasys/flux-constants": "*",
+    "@coasys/flux-api": "*",
+    "@coasys/flux-editor": "*",
     "@perspect3vism/ad4m": "0.8.0-prerelease",
     "preact": "^10.13.1",
     "react-virtuoso": "^4.3.6"

@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { PerspectiveProxy, Literal, LinkQuery } from "@perspect3vism/ad4m";
-import { useAgent, useSubjects } from "@fluxapp/react-web";
-import { Message, generateWCName } from "@fluxapp/api";
+import { useAgent, useSubjects } from "@coasys/flux-react-web";
+import { Message, generateWCName } from "@coasys/flux-api";
 import { name } from "../../../package.json";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import MessageList from "../MessageList/MessageList";
-import { community } from "@fluxapp/constants";
+import { community } from "@coasys/flux-constants";
 import { getPosition } from "../../utils/getPosition";
 
 import styles from "./ChatView.module.css";
-import { EntryType } from "@fluxapp/types";
+import { EntryType } from "@coasys/flux-types";
 import Avatar from "../Avatar";
 
 const { REPLY_TO, REACTION } = community;

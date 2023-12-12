@@ -1,8 +1,8 @@
 import "preact/debug";
-import "@fluxapp/ui/dist/main.d.ts";
-import { toCustomElement } from "@fluxapp/react-web";
+import "@coasys/flux-ui/dist/main.d.ts";
+import { toCustomElement } from "@coasys/flux-react-web";
 import App from "./App";
-import CommentSection from "@fluxapp/comment-section";
+import CommentSection from "@coasys/flux-comment-section";
 
 if (!customElements.get("comment-section")) {
   customElements.define("comment-section", CommentSection);

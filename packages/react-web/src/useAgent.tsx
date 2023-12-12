@@ -2,10 +2,10 @@ import { useState, useCallback, useEffect, useMemo } from "react";
 import { getCache, setCache, subscribe, unsubscribe } from "./cache";
 import { Agent } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
-import { mapLiteralLinks } from "@fluxapp/utils";
-import { profile } from "@fluxapp/constants";
-import { Profile } from "@fluxapp/types";
-import { getProfile } from "@fluxapp/api";
+import { mapLiteralLinks } from "@coasys/flux-utils";
+import { profile } from "@coasys/flux-constants";
+import { Profile } from "@coasys/flux-types";
+import { getProfile } from "@coasys/flux-api";
 
 const {
   FLUX_PROFILE,

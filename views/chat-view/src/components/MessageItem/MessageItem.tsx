@@ -1,10 +1,10 @@
 import { LinkQuery, PerspectiveProxy } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
-import { Message } from "@fluxapp/api";
-import { useAgent, useSubject } from "@fluxapp/react-web";
+import { Message } from "@coasys/flux-api";
+import { useAgent, useSubject } from "@coasys/flux-react-web";
 import styles from "./MessageItem.module.css";
 import Avatar from "../Avatar";
-import { REACTION } from "@fluxapp/constants/src/communityPredicates";
+import { REACTION } from "@coasys/flux-constants/src/communityPredicates";
 
 export default function MessageItem({
   showAvatar,

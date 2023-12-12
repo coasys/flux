@@ -1,5 +1,5 @@
 {
-  "name": "@fluxapp/flux-container",
+  "name": "@coasys/flux-container",
   "version": "0.7.3",
   "type": "module",
   "module": "dist/flux-container.js",
@@ -19,8 +19,8 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "@fluxapp/api": "*",
-    "@fluxapp/ui": "*",
+    "@coasys/flux-api": "*",
+    "@coasys/flux-ui": "*",
     "@perspect3vism/ad4m": "0.8.0-prerelease",
     "@perspect3vism/ad4m-connect": "0.8.0-prerelease",
     "lit-element": "^2.4.0"

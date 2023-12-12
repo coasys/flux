@@ -1,5 +1,5 @@
 {
-  "name": "@fluxapp/webrtc-view",
+  "name": "@coasys/flux-webrtc-view",
   "version": "0.7.3",
   "type": "module",
   "fluxapp": {
@@ -43,9 +43,9 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@fluxapp/react-web": "*",
+    "@coasys/flux-react-web": "*",
     "@fluxapp/webrtc": "*",
-    "@fluxapp/flux-container": "*",
+    "@coasys/flux-container": "*",
     "classnames": "^2.3.2",
     "emoji-picker-element": "^1.14.0",
     "hark": "^1.2.3",

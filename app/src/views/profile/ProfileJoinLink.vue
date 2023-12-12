@@ -20,7 +20,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import { joinCommunity } from "@fluxapp/api";
+import { joinCommunity } from "@coasys/flux-api";
 
 export default defineComponent({
   props: ["joiningLink"],

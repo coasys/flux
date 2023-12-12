@@ -1,7 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 import { createContext } from "preact";
 import { PostOption } from "../constants/options";
-import * as localstorage from "@fluxapp/utils";
+import * as localstorage from "@coasys/flux-utils";
 import { version } from "../../package.json";
 
 export enum View {

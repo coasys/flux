@@ -191,13 +191,13 @@ import ChannelView from "@/views/channel/ChannelView.vue";
 import Avatar from "@/components/avatar/Avatar.vue";
 import Hourglass from "@/components/hourglass/Hourglass.vue";
 
-import { Channel, Community } from "@fluxapp/api";
+import { Channel, Community } from "@coasys/flux-api";
 import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { useSubjects, useCommunities, usePerspectives } from "@fluxapp/vue";
-import { usePerspective } from "@fluxapp/vue";
+import { useSubjects, useCommunities, usePerspectives } from "@coasys/flux-vue";
+import { usePerspective } from "@coasys/flux-vue";
 import { PerspectiveState } from "@perspect3vism/ad4m";
 
 type LoadedChannels = {

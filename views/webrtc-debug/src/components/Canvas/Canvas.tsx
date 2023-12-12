@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import { Peer } from "@fluxapp/react-web";
+import { Peer } from "@coasys/flux-react-web";
 
 interface CanvasProps {
   peers: Peer[];

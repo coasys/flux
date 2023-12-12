@@ -1,6 +1,6 @@
-import { profile } from "@fluxapp/constants";
-import { Profile } from "@fluxapp/types";
-import { mapLiteralLinks } from "@fluxapp/utils";
+import { profile } from "@coasys/flux-constants";
+import { Profile } from "@coasys/flux-types";
+import { mapLiteralLinks } from "@coasys/flux-utils";
 import { Ad4mClient } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 
@@ -64,9 +64,7 @@ export default async function getProfile(did: string): Promise<Profile> {
     );
 
     if (mappedProfile.profilePicture) {
-      const res = await client.expression.get(
-        mappedProfile.profilePicture
-      );
+      const res = await client.expression.get(mappedProfile.profilePicture);
       if (res) {
         const { data } = res;
         const { data_base64, file_type } = JSON.parse(data);
@@ -89,9 +87,7 @@ export default async function getProfile(did: string): Promise<Profile> {
     }
 
     if (mappedProfile.profileBackground) {
-      const res = await client.expression.get(
-        mappedProfile.profileBackground
-      );
+      const res = await client.expression.get(mappedProfile.profileBackground);
       if (res) {
         const { data } = res;
         const { data_base64, file_type } = JSON.parse(data);

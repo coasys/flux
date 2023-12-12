@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { Literal } from "@perspect3vism/ad4m";
 import styles from "./DisplayValue.module.css";
-import type { Profile } from "@fluxapp/types";
-import { getProfile } from "@fluxapp/api";
+import type { Profile } from "@coasys/flux-types";
+import { getProfile } from "@coasys/flux-api";
 
 export function isValidUrl(string) {
   try {

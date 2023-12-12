@@ -1,5 +1,5 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { videoSettings } from "@fluxapp/constants";
+import { videoSettings } from "@coasys/flux-constants";
 import {
   Ad4mClient,
   PerspectiveProxy,
@@ -10,7 +10,7 @@ import {
 } from "@perspect3vism/ad4m";
 
 import { AD4MPeer, AD4MPeerInstance } from "./ad4mPeer";
-import { getDefaultIceServers } from "@fluxapp/utils";
+import { getDefaultIceServers } from "@coasys/flux-utils";
 
 function getExpressionData(data: any) {
   let parsedData;

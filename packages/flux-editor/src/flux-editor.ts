@@ -7,10 +7,15 @@ import Placeholder from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
 import { PluginKey } from "prosemirror-state";
 import { SuggestionProps, SuggestionKeyDownProps } from "@tiptap/suggestion";
-import { Channel, Message, SubjectRepository, getProfile } from "@fluxapp/api";
+import {
+  Channel,
+  Message,
+  SubjectRepository,
+  getProfile,
+} from "@coasys/flux-api";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
-import { Profile } from "@fluxapp/types";
+import { Profile } from "@coasys/flux-types";
 import defaultActions from "./defaultActions";
 import { shouldPlaceAbove } from "./utils";
 

@@ -1,5 +1,5 @@
 {
-  "name": "@fluxapp/flux-editor",
+  "name": "@coasys/flux-editor",
   "version": "0.7.3",
   "type": "module",
   "module": "dist/main.js",
@@ -18,8 +18,8 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "@fluxapp/api": "*",
-    "@fluxapp/ui": "*",
+    "@coasys/flux-api": "*",
+    "@coasys/flux-ui": "*",
     "@perspect3vism/ad4m": "0.8.0-prerelease",
     "@perspect3vism/ad4m-connect": "0.8.0-prerelease",
     "@tiptap/core": "^2.0.3",

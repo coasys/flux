@@ -1,5 +1,5 @@
 {
-  "name": "@fluxapp/graph-view",
+  "name": "@coasys/flux-graph-view",
   "version": "0.7.3",
   "type": "module",
   "fluxapp": {
@@ -35,7 +35,7 @@
   "description": "",
   "dependencies": {
     "3d-force-graph": "^1.70.19",
-    "@fluxapp/flux-container": "*",
+    "@coasys/flux-container": "*",
     "preact": "^10.11.3",
     "three-spritetext": "^1.6.5"
   },

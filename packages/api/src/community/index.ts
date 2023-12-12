@@ -1,5 +1,5 @@
-import { EntryType } from "@fluxapp/types";
-import { community, languages } from "@fluxapp/constants";
+import { EntryType } from "@coasys/flux-types";
+import { community, languages } from "@coasys/flux-constants";
 
 const { FILE_STORAGE_LANGUAGE } = languages;
 const { DESCRIPTION, IMAGE, NAME, THUMBNAIL, ENTRY_TYPE } = community;
@@ -56,8 +56,9 @@ export class Community {
   @subjectCollection({
     through: "rdf://has_child",
     where: {
-      isInstance: Channel
-    }, })
+      isInstance: Channel,
+    },
+  })
   channels: string[] = [];
 }
 

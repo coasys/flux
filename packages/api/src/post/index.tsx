@@ -1,5 +1,5 @@
-import { community, languages } from "@fluxapp/constants";
-import { EntryType } from "@fluxapp/types";
+import { community, languages } from "@coasys/flux-constants";
+import { EntryType } from "@coasys/flux-types";
 import {
   SDNAClass,
   subjectProperty,

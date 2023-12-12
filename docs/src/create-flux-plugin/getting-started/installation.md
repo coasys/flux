@@ -1,11 +1,11 @@
 # Quick Start
 
-## Using @fluxapp/create
+## Using @coasys/flux-create-plugin
 
-We've created `@fluxapp/create` to get you quickly up and running with a minimal boilerplate. To create a new Flux Plugin, run in your terminal:
+We've created `@coasys/flux-create-plugin` to get you quickly up and running with a minimal boilerplate. To create a new Flux Plugin, run in your terminal:
 
 ```bash
-npx @fluxapp/create
+npx @coasys/flux-create-plugin
 ```
 
 The terminal will ask you for the name of your plugin, as well as what framework you want to use (for now we only support preact).
@@ -25,7 +25,7 @@ If you'd rather use another framework, or just prefer to set everything up yours
 - 1: Initialize a new project and add the required packages:
 
 ```bash
-npx install @perspect3vism/ad4m-connect @perspect3vism/ad4m @fluxapp/flux-container
+npx install @perspect3vism/ad4m-connect @perspect3vism/ad4m @coasys/flux-container
 ```
 
 - 2: Wrap your Plugin in the flux-container web-component

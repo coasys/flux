@@ -1,8 +1,8 @@
 import { useContext, useEffect, useRef, useState } from "preact/hooks";
-import { useWebRTC } from "@fluxapp/react-web";
+import { useWebRTC } from "@coasys/flux-react-web";
 import useKeyEvent from "../../hooks/useKeyEvent";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
-import { getMe, Me } from "@fluxapp/api";
+import { getMe, Me } from "@coasys/flux-api";
 
 import UserGrid from "../UserGrid";
 import UiContext from "../../context/UiContext";

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "preact/hooks";
 import { Peer } from "../../../../types";
-import { Profile } from "@fluxapp/types";
-import { getProfile } from "@fluxapp/api";
+import { Profile } from "@coasys/flux-types";
+import { getProfile } from "@coasys/flux-api";
 
 import styles from "./Item.module.css";
 

@@ -1,6 +1,6 @@
 import { useState } from "preact/hooks";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
-import { useSubjects } from "@fluxapp/react-web";
+import { useSubjects } from "@coasys/flux-react-web";
 
 import Todo from "../subjects/Todo";
 

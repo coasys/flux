@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { Community as FluxCommunity } from "@fluxapp/types";
+import { Community as FluxCommunity } from "@coasys/flux-types";
 import { Ad4mClient, Perspective } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import {
@@ -7,7 +7,7 @@ import {
   dataURItoBlob,
   resizeImage,
   createNeighbourhoodMeta,
-} from "@fluxapp/utils";
+} from "@coasys/flux-utils";
 import { SubjectRepository } from "./factory";
 import { Community } from "./community";
 

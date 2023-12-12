@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { getImage } from "@fluxapp/utils";
+import { getImage } from "@coasys/flux-utils";
 export default defineComponent({
   props: {
     did: String,

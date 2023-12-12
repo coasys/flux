@@ -11,7 +11,7 @@ import Header from "../Header";
 import History from "../History";
 import Entry from "../Entry";
 import NewClass from "../NewClass";
-import { useSubjects } from "@fluxapp/react-web";
+import { useSubjects } from "@coasys/flux-react-web";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 
 type Props = {

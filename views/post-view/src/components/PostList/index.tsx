@@ -2,8 +2,8 @@ import { useState } from "preact/hooks";
 import PostItem from "../PostItem";
 import style from "./index.module.css";
 import { DisplayView, displayOptions } from "../../constants/options";
-import { useSubjects } from "@fluxapp/react-web";
-import { Post } from "@fluxapp/api";
+import { useSubjects } from "@coasys/flux-react-web";
+import { Post } from "@coasys/flux-api";
 import { useMemo } from "react";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
@@ -36,8 +36,8 @@ export default function PostList({
     view === DisplayView.Compact
       ? style.compact
       : view === DisplayView.Grid
-      ? style.grid
-      : style.card;
+        ? style.grid
+        : style.card;
 
   const currentOption = displayOptions.find((o) => o.value === view);
 

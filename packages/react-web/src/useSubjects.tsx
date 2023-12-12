@@ -9,8 +9,8 @@ import {
   unsubscribeToPerspective,
 } from "./cache";
 import { PerspectiveProxy, LinkExpression } from "@perspect3vism/ad4m";
-import { SubjectRepository } from "@fluxapp/api";
-import { QueryOptions } from "@fluxapp/api/src/factory";
+import { SubjectRepository } from "@coasys/flux-api";
+import { QueryOptions } from "@coasys/flux-api/src/factory";
 
 type Props<SubjectClass> = {
   source: string;
@@ -98,8 +98,8 @@ export function useSubjects<SubjectClass>(props: Props<SubjectClass>) {
     const id = isNewEntry
       ? link.data.target
       : isUpdated
-      ? link.data.source
-      : false;
+        ? link.data.source
+        : false;
 
     if (id) {
       const isInstance = await perspective.isSubjectInstance(

@@ -1,7 +1,7 @@
 import "preact/debug";
-import "@fluxapp/ui/dist/main.d.ts";
-import { toCustomElement } from "@fluxapp/react-web";
-import Editor from "@fluxapp/flux-editor";
+import "@coasys/flux-ui/dist/main.d.ts";
+import { toCustomElement } from "@coasys/flux-react-web";
+import Editor from "@coasys/flux-editor";
 import App from "./App";
 
 if (!customElements.get("flux-editor")) {

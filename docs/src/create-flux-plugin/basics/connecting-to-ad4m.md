@@ -12,13 +12,13 @@ Once you have your plugin running you'll need to authorize your plugin to access
 
 ![AD4m Launcher](../../assets/ad4m-launcher.jpg)
 
-### Using @fluxapp/create
+### Using @coasys/flux-create-plugin
 
-With `@fluxapp/create` the AD4M Connect logic is included (through the `flux-container` web-component) and resides in the `index.html` file. Just make sure you have AD4M running.
+With `@coasys/flux-create-plugin` the AD4M Connect logic is included (through the `flux-container` web-component) and resides in the `index.html` file. Just make sure you have AD4M running.
 
 ### Manual setup
 
-If you're not using `@fluxapp/create` you can just install our `@fluxapp/flux-wrapper` web-component and put your Flux Plugin inside the container for testing purposes.
+If you're not using `@coasys/flux-create-plugin` you can just install our `@fluxapp/flux-wrapper` web-component and put your Flux Plugin inside the container for testing purposes.
 
 ```html
 <html>
@@ -31,7 +31,7 @@ If you're not using `@fluxapp/create` you can just install our `@fluxapp/flux-wr
     </flux-container>
     <script type="module">
       // Flux wrapper for testing
-      import "@fluxapp/flux-container";
+      import "@coasys/flux-container";
 
       // Your Flux app (web component)
       import MyFluxApp from "./App.js";

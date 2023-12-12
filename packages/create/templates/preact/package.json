@@ -32,11 +32,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@fluxapp/flux-container": "*",
+    "@coasys/flux-container": "*",
     "@perspect3vism/ad4m": "0.8.0-prerelease",
     "preact": "^10.13.1",
-    "@fluxapp/react-web": "*",
-    "@fluxapp/api": "*"
+    "@coasys/flux-react-web": "*",
+    "@coasys/flux-api": "*"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.18.6",

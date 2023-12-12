@@ -1,5 +1,5 @@
-import { community } from "@fluxapp/constants";
-import { EntryType } from "@fluxapp/types";
+import { community } from "@coasys/flux-constants";
+import { EntryType } from "@coasys/flux-types";
 import {
   subjectProperty,
   subjectCollection,
@@ -30,7 +30,7 @@ export class Channel {
   @subjectCollection({
     through: "rdf://has_child",
     where: {
-      isInstance: App
+      isInstance: App,
     },
   })
   views: string[] = [];

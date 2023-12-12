@@ -55,10 +55,10 @@
 
 <script lang="ts">
 import { defineComponent, watchEffect, ref } from "vue";
-import { Community, getProfile } from "@fluxapp/api";
+import { Community, getProfile } from "@coasys/flux-api";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
 import Avatar from "@/components/avatar/Avatar.vue";
-import { usePerspective, useSubject } from "@fluxapp/vue";
+import { usePerspective, useSubject } from "@coasys/flux-vue";
 import { useRoute } from "vue-router";
 
 export default defineComponent({

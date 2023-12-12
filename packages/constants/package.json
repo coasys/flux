@@ -1,5 +1,5 @@
 {
-  "name": "@fluxapp/constants",
+  "name": "@coasys/flux-constants",
   "version": "0.7.3",
   "description": "",
   "main": "./src/index.ts",

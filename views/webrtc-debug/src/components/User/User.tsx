@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { Profile } from "@fluxapp/types";
-import { getProfile } from "@fluxapp/api";
-import { WebRTC } from "@fluxapp/react-web";
+import { Profile } from "@coasys/flux-types";
+import { getProfile } from "@coasys/flux-api";
+import { WebRTC } from "@coasys/flux-react-web";
 import characters from "../../sprites/characters";
 
 import Sprite from "../Sprite/Sprite";

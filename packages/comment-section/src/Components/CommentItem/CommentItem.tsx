@@ -1,8 +1,8 @@
-import { Message, getProfile } from "@fluxapp/api";
+import { Message, getProfile } from "@coasys/flux-api";
 import { PerspectiveProxy } from "@perspect3vism/ad4m";
 import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
 import { useEffect, useState } from "preact/hooks";
-import { Profile } from "@fluxapp/types";
+import { Profile } from "@coasys/flux-types";
 import styles from "./CommentItem.module.css";
 import Avatar from "../Avatar";
 

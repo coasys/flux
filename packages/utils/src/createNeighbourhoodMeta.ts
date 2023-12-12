@@ -1,6 +1,6 @@
 import { Link, LinkExpression } from "@perspect3vism/ad4m";
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { community } from "@fluxapp/constants";
+import { community } from "@coasys/flux-constants";
 const { CREATOR, DESCRIPTION, NAME, SELF, CREATED_AT } = community;
 
 export async function createNeighbourhoodMeta(

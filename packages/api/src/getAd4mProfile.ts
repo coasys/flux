@@ -1,6 +1,6 @@
 import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { profile } from "@fluxapp/constants";
-import { mapLiteralLinks } from "@fluxapp/utils";
+import { profile } from "@coasys/flux-constants";
+import { mapLiteralLinks } from "@coasys/flux-utils";
 
 const {
   AD4M_PREDICATE_USERNAME,
