@@ -88,6 +88,19 @@ export default async function getProfile(did: string): Promise<Profile> {
       }
     }
 
+    if (mappedProfile.profileBackground) {
+      const res = await client.expression.get(
+        mappedProfile.profileBackground
+      );
+      if (res) {
+        const { data } = res;
+        const { data_base64, file_type } = JSON.parse(data);
+
+        mappedProfile.profileBackground =
+          data_base64 && `data:${file_type};base64, ${data_base64}`;
+      }
+    }
+
     profile = {
       ...mappedAd4mProfile,
       ...mappedProfile,

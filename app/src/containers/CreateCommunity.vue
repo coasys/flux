@@ -104,9 +104,9 @@
               placeholder="Select a language"
             >
               <option :value="meta.address" v-for="(meta, index) in langMeta">
-                <template v-if="index === 0">Full P2P Badass</template>
-                <template v-else-if="index === 1">Hybrid P2P</template>
-                <template v-else-if="index === 1">Centralized</template>
+                <!-- <template v-if="index === 0">Full P2P Badass</template> -->
+                <!-- <template v-else-if="index === 1">Hybrid P2P</template> -->
+                <template v-if="index === 0">Centralized</template>
                 <template v-else> {{ meta.description }}</template>
               </option>
             </select>
@@ -223,24 +223,32 @@ export default defineComponent({
   emits: ["cancel", "submit"],
   async setup() {
     const appStore = useAppStore();
+
+    return {
+      selectedLang: ref<any>(null),
+      langMeta: ref<any>(null),
+      communities: [],
+      perspectives: [],
+      appStore,
+    };
+  },
+  async mounted() {
     const client: Ad4mClient = await getAd4mClient();
 
     const linkLangs = await client.runtime.knownLinkLanguageTemplates();
     const langExpression = await client.expression.getMany(
       linkLangs.map((l) => `lang://${l}`)
     );
-    const langMeta = langExpression.map((l) => JSON.parse(l.data));
-
+    const langMeta = langExpression.map((l) => JSON.parse(l.data)).filter(l => !l.description.includes("Holochain"));
     const { perspectives, neighbourhoods } = usePerspectives(client);
     const { communities } = useCommunities(neighbourhoods);
 
-    return {
-      selectedLang: ref(langMeta[0].address),
-      langMeta: ref(langMeta),
-      communities,
-      perspectives,
-      appStore,
-    };
+    this.selectedLang = langMeta[0].address;
+    this.langMeta = langMeta;
+    // @ts-ignore
+    this.communities = communities;
+    // @ts-ignore
+    this.perspectives = perspectives;
   },
   data() {
     return {
