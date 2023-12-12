@@ -94,11 +94,17 @@
                     <j-badge size="sm" variant="primary">
                       <j-icon
                         size="xs"
-                        v-if="me?.did === proof?.did"
+                        v-if="verifiedProofs[proof.deviceKey]"
                         color="success-500"
                         name="check"
                       ></j-icon>
-                      {{ verifiedProofs[proof.deviceKey] }}
+                      <j-icon size="xs" color="danger-500" name="cross" v-else>
+                      </j-icon>
+                      {{
+                        verifiedProofs[proof.deviceKey]
+                          ? "Verified"
+                          : "Not verified"
+                      }}
                     </j-badge>
                     <j-box pt="200">
                       <j-text nomargin color="black">
@@ -296,7 +302,9 @@ export default defineComponent({
           )
         );
 
-        const proofs = expressions.map((e) => JSON.parse(e.data));
+        const proofs = expressions.map((e) =>
+          JSON.parse(e.data)
+        ) as EntanglementProof[];
 
         const filteredProofs = proofs.filter((p: EntanglementProof) => {
           if (seen.has(p.deviceKey)) {
@@ -307,9 +315,19 @@ export default defineComponent({
           }
         });
 
+        filteredProofs.forEach(async (proof) => {
+          const isVerified = await this.client.runtime.verifyStringSignedByDid(
+            agent.did,
+            proof.did,
+            proof.deviceKey,
+            proof.deviceKeySignedByDid
+          );
+          this.verifiedProofs[proof.deviceKey] = isVerified;
+        });
+
         this.proofs = filteredProofs;
         this.selectedAddress =
-          filteredProofs.length && filteredProofs[0].deviceKey;
+          filteredProofs.length > 0 ? filteredProofs[0].deviceKey : "";
       }
     },
     async removeProof(proof: EntanglementProof) {
