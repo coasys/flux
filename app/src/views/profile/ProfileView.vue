@@ -122,7 +122,7 @@
                   <a
                     v-if="sameAgent"
                     class="wallet"
-                    href="https://web3-adam.netlify.app/"
+                    href="https://dapp.ad4m.dev/"
                     target="_blank"
                   >
                     <j-text size="600" nomargin>
