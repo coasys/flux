@@ -1,11 +1,11 @@
 # Quick Start
 
-## Using @coasys/flux-create-plugin
+## Using @coasys/create-flux-plugin
 
-We've created `@coasys/flux-create-plugin` to get you quickly up and running with a minimal boilerplate. To create a new Flux Plugin, run in your terminal:
+We've created `@coasys/create-flux-plugin` to get you quickly up and running with a minimal boilerplate. To create a new Flux Plugin, run in your terminal:
 
 ```bash
-npx @coasys/flux-create-plugin
+npx @coasys/create-flux-plugin
 ```
 
 The terminal will ask you for the name of your plugin, as well as what framework you want to use (for now we only support preact).
