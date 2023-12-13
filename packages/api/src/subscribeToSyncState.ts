@@ -1,5 +1,5 @@
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { Ad4mClient, PerspectiveState } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { Ad4mClient, PerspectiveState } from "@coasys/ad4m";
 
 export interface Payload {
   perspectiveUuid: string;

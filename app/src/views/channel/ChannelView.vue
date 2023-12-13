@@ -115,7 +115,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import Profile from "@/containers/Profile.vue";
 import { useAppStore } from "@/store/app";
 import { ChannelView } from "@coasys/flux-types";
@@ -134,7 +134,7 @@ import {
   joinCommunity,
   generateWCName,
 } from "@coasys/flux-api";
-import { Ad4mClient } from "@perspect3vism/ad4m";
+import { Ad4mClient } from "@coasys/ad4m";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 
 interface MentionTrigger {

@@ -210,8 +210,8 @@
 import { isValid } from "@/utils/validation";
 import { defineComponent, ref } from "vue";
 import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { Ad4mClient, PerspectiveProxy } from "@coasys/ad4m";
 import { useAppStore } from "@/store/app";
 import { joinCommunity, createCommunity } from "@coasys/flux-api";
 import { usePerspectives, useCommunities } from "@coasys/flux-vue";

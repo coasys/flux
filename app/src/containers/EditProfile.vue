@@ -48,7 +48,7 @@ import { defineComponent } from "vue";
 import { useAppStore } from "@/store/app";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
 import { useMe } from "@coasys/flux-vue";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { getProfile, updateProfile } from "@coasys/flux-api";
 
 export default defineComponent({

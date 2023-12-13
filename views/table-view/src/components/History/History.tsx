@@ -1,7 +1,7 @@
 import styles from "./History.module.css";
 import { useEffect, useState } from "preact/hooks";
 import { getEntry } from "../../utils";
-import { PerspectiveProxy, Literal } from "@perspect3vism/ad4m";
+import { PerspectiveProxy, Literal } from "@coasys/ad4m";
 
 type Props = {
   perspective: PerspectiveProxy;

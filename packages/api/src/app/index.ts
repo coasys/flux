@@ -1,6 +1,6 @@
 import { community } from "@coasys/flux-constants";
 import { EntryType } from "@coasys/flux-types";
-import { subjectProperty, SDNAClass, subjectFlag } from "@perspect3vism/ad4m";
+import { subjectProperty, SDNAClass, subjectFlag } from "@coasys/ad4m";
 
 const { DESCRIPTION, NAME, ENTRY_TYPE } = community;
 

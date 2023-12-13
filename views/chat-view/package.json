@@ -38,7 +38,7 @@
     "@coasys/flux-constants": "*",
     "@coasys/flux-api": "*",
     "@coasys/flux-editor": "*",
-    "@perspect3vism/ad4m": "0.8.0-prerelease",
+    "@coasys/ad4m": "0.8.0-fix",
     "preact": "^10.13.1",
     "react-virtuoso": "^4.3.6"
   },

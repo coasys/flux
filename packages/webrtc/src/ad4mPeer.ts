@@ -1,6 +1,6 @@
 import * as SimplePeer from "simple-peer";
 
-import { Literal, NeighbourhoodProxy } from "@perspect3vism/ad4m";
+import { Literal, NeighbourhoodProxy } from "@coasys/ad4m";
 
 export interface AD4MPeerInstance extends SimplePeer.Instance {}
 

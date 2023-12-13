@@ -1,8 +1,8 @@
 import { useState } from "preact/hooks";
 import { useSubject } from "@coasys/flux-react-web";
 import styles from "./CardDetails.module.css";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
-import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
+import { PerspectiveProxy } from "@coasys/ad4m";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import Entry from "../Entry";
 import { useEffect } from "preact/hooks";
 import { Profile } from "@coasys/flux-types";

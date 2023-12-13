@@ -1,4 +1,4 @@
-import { SDNAClass, subjectProperty, subjectFlag } from "@perspect3vism/ad4m";
+import { SDNAClass, subjectProperty, subjectFlag } from "@coasys/ad4m";
 
 @SDNAClass({
   name: "Todo",

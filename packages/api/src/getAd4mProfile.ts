@@ -1,4 +1,4 @@
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { profile } from "@coasys/flux-constants";
 import { mapLiteralLinks } from "@coasys/flux-utils";
 

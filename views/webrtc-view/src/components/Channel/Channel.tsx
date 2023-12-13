@@ -10,8 +10,8 @@ import UiContext from "../../context/UiContext";
 import Overlay from "../Overlay/Overlay";
 import JoinScreen from "../JoinScreen";
 
-import { PerspectiveProxy, Agent } from "@perspect3vism/ad4m";
-import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
+import { PerspectiveProxy, Agent } from "@coasys/ad4m";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
 // @ts-ignore
 import styles from "./Channel.module.css";

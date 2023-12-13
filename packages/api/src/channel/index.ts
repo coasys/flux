@@ -5,7 +5,7 @@ import {
   subjectCollection,
   SDNAClass,
   subjectFlag,
-} from "@perspect3vism/ad4m";
+} from "@coasys/ad4m";
 import App from "../app";
 
 const { FLUX_APP, NAME, ENTRY_TYPE } = community;

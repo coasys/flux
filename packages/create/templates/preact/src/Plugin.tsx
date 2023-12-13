@@ -1,7 +1,7 @@
 import styles from "./Plugin.module.css";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { PerspectiveProxy } from "@coasys/ad4m";
 import TodoView from "./components/TodoView";
-import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
 type Props = {
   agent: AgentClient;

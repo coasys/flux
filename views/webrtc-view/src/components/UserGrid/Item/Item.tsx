@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "preact/hooks";
 import { Reaction } from "../../../types";
 import { WebRTC, useAgent } from "@coasys/flux-react-web";
-import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
 import styles from "./Item.module.css";
 

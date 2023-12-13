@@ -1187,6 +1187,33 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
+"@coasys/ad4m-connect@0.8.0-fix":
+  version "0.8.0-fix"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.8.0-fix.tgz#01994d4ddf1d088327a24156f840f65a424fd335"
+  integrity sha512-Yg3ORQ3+VkE5PpTl02Io6L7yQPUVWtT6BC/W9cAQ2NC64uVSo6jwk6fe9ERMSVK8a7xgb2LM4UlMzNjwrgezcQ==
+  dependencies:
+    "@undecaf/barcode-detector-polyfill" "^0.9.15"
+    "@undecaf/zbar-wasm" "^0.9.12"
+    auto-bind "^5.0.1"
+    electron "^20.0.3"
+    esbuild-plugin-copy "^2.1.1"
+    esbuild-plugin-replace "^1.4.0"
+    lit "^2.3.1"
+
+"@coasys/ad4m@0.8.0-fix":
+  version "0.8.0-fix"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.8.0-fix.tgz#b2b6422c84c59eec67d9400c7c76bea5755b8a84"
+  integrity sha512-rTTel4Wnt2+xDdaupFnKkjV+l7BmMt3BLqz9v5Iz+BYaZGe1FTjObYubOf2o/19BiUxKyl7lFTEXWgXVOTt98A==
+  dependencies:
+    "@apollo/client" "3.7.10"
+    "@holochain/client" "0.16.0"
+    "@types/jest" "^26.0.14"
+    class-validator "^0.13.1"
+    express "4.18.2"
+    graphql "15.7.2"
+    reflect-metadata "^0.1.13"
+    type-graphql "1.1.1"
+
 "@docsearch/css@3.5.2", "@docsearch/css@^3.3.4":
   version "3.5.2"
   resolved "https://registry.npmjs.org/@docsearch/css/-/css-3.5.2.tgz"
@@ -1812,33 +1839,6 @@
   version "0.1.1"
   resolved "https://registry.npmjs.org/@one-ini/wasm/-/wasm-0.1.1.tgz"
   integrity sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw==
-
-"@perspect3vism/ad4m-connect@0.8.0-prerelease":
-  version "0.8.0-prerelease"
-  resolved "https://registry.npmjs.org/@perspect3vism/ad4m-connect/-/ad4m-connect-0.8.0-prerelease.tgz"
-  integrity sha512-dIf4m+8xMuKlkuKBawzIUkuhd36/xUzSVYym2XhfqHv7TKZOgRkMz5QEtAG55KIdFXgjdvqzTI/eJmD0DI3lvQ==
-  dependencies:
-    "@undecaf/barcode-detector-polyfill" "^0.9.15"
-    "@undecaf/zbar-wasm" "^0.9.12"
-    auto-bind "^5.0.1"
-    electron "^20.0.3"
-    esbuild-plugin-copy "^2.1.1"
-    esbuild-plugin-replace "^1.4.0"
-    lit "^2.3.1"
-
-"@perspect3vism/ad4m@0.8.0-prerelease":
-  version "0.8.0-prerelease"
-  resolved "https://registry.npmjs.org/@perspect3vism/ad4m/-/ad4m-0.8.0-prerelease.tgz"
-  integrity sha512-VtUw/vGEysCJQjk0VftfeMPYnzyOMKPSH775fgQW1o6JxKpvtX46KthhNNlMzYLdSdEE0PyeYj5lxQVoWkdhOA==
-  dependencies:
-    "@apollo/client" "3.7.10"
-    "@holochain/client" "0.16.0"
-    "@types/jest" "^26.0.14"
-    class-validator "^0.13.1"
-    express "4.18.2"
-    graphql "15.7.2"
-    reflect-metadata "^0.1.13"
-    type-graphql "1.1.1"
 
 "@popperjs/core@^2.11.7", "@popperjs/core@^2.9.0":
   version "2.11.8"
