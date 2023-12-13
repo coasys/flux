@@ -1,5 +1,5 @@
 import { useState } from "preact/hooks";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { PerspectiveProxy } from "@coasys/ad4m";
 import styles from "./NewClass.module.css";
 
 type Props = {

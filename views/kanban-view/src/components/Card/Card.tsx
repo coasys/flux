@@ -1,7 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 import { useSubjects, useSubject } from "@coasys/flux-react-web";
 import styles from "./Card.module.css";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { PerspectiveProxy } from "@coasys/ad4m";
 import { useAssociations } from "../../hooks/useAssociations";
 import { Profile } from "@coasys/flux-types";
 import { Message, getProfile } from "@coasys/flux-api";

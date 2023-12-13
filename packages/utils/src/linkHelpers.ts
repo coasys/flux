@@ -1,6 +1,6 @@
-import { Link, LinkInput } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { LinkExpression, Literal } from "@perspect3vism/ad4m";
+import { Link, LinkInput } from "@coasys/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { LinkExpression, Literal } from "@coasys/ad4m";
 import { community } from "@coasys/flux-constants";
 import { EntryType, PropertyMap, PredicateMap } from "@coasys/flux-types";
 

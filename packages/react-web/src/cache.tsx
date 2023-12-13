@@ -1,4 +1,4 @@
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { PerspectiveProxy } from "@coasys/ad4m";
 
 const cache: Map<string, any> = new Map();
 const subscribers: Map<string, Function[]> = new Map();

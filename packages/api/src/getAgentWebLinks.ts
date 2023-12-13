@@ -1,5 +1,5 @@
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { LinkExpression, Literal } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { LinkExpression, Literal } from "@coasys/ad4m";
 import { mapLiteralLinks } from "@coasys/flux-utils";
 import { profile } from "@coasys/flux-constants";
 import { WebLink } from "@coasys/flux-types";

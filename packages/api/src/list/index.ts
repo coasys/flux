@@ -3,7 +3,7 @@ import {
   subjectProperty,
   subjectCollection,
   SDNAClass,
-} from "@perspect3vism/ad4m";
+} from "@coasys/ad4m";
 
 const { NAME } = community;
 

@@ -195,10 +195,10 @@ import { Channel, Community } from "@coasys/flux-api";
 import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { useSubjects, useCommunities, usePerspectives } from "@coasys/flux-vue";
 import { usePerspective } from "@coasys/flux-vue";
-import { PerspectiveState } from "@perspect3vism/ad4m";
+import { PerspectiveState } from "@coasys/ad4m";
 
 type LoadedChannels = {
   [channelId: string]: boolean;

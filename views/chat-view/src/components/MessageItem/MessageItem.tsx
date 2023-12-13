@@ -1,5 +1,5 @@
-import { LinkQuery, PerspectiveProxy } from "@perspect3vism/ad4m";
-import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
+import { LinkQuery, PerspectiveProxy } from "@coasys/ad4m";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { Message } from "@coasys/flux-api";
 import { useAgent, useSubject } from "@coasys/flux-react-web";
 import styles from "./MessageItem.module.css";

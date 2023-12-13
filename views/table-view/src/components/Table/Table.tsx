@@ -1,7 +1,7 @@
 import { useState, useEffect } from "preact/hooks";
 import styles from "./Table.module.css";
 import DisplayValue from "../DisplayValue";
-import { LinkQuery, PerspectiveProxy, Agent } from "@perspect3vism/ad4m";
+import { LinkQuery, PerspectiveProxy, Agent } from "@coasys/ad4m";
 
 type Props = {
   me: null | Agent;

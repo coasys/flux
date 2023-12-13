@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import { PerspectiveProxy, Literal } from "@perspect3vism/ad4m";
+import { PerspectiveProxy, Literal } from "@coasys/ad4m";
 import { useSubject } from "@coasys/flux-react-web";
 import DisplayValue from "../DisplayValue";
 import styles from "./Entry.module.css";

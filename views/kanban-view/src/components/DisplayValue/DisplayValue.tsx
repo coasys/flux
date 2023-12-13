@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { Literal } from "@perspect3vism/ad4m";
+import { Literal } from "@coasys/ad4m";
 import styles from "./DisplayValue.module.css";
 import type { Profile } from "@coasys/flux-types";
 import { getProfile } from "@coasys/flux-api";

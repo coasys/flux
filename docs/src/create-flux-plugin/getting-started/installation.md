@@ -25,7 +25,7 @@ If you'd rather use another framework, or just prefer to set everything up yours
 - 1: Initialize a new project and add the required packages:
 
 ```bash
-npx install @perspect3vism/ad4m-connect @perspect3vism/ad4m @coasys/flux-container
+npx install @coasys/ad4m-connect @coasys/ad4m @coasys/flux-container
 ```
 
 - 2: Wrap your Plugin in the flux-container web-component

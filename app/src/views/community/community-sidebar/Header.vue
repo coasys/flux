@@ -100,9 +100,9 @@ import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
 import Avatar from "@/components/avatar/Avatar.vue";
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { useMe } from "@coasys/flux-vue";
-import { Ad4mClient } from "@perspect3vism/ad4m";
+import { Ad4mClient } from "@coasys/ad4m";
 
 export default defineComponent({
   components: { Avatar, LoadingBar },

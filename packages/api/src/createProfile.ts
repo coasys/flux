@@ -5,9 +5,9 @@ import {
   Link,
   LinkExpression,
   LinkMutations,
-} from "@perspect3vism/ad4m";
+} from "@coasys/ad4m";
 import { Profile } from "@coasys/flux-types";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 
 const { AD4M_AGENT, KAICHAO_AGENT, JUNTO_AGENT, NOTE_IPFS_AUTHOR } = agents;
 const { FILE_STORAGE_LANGUAGE } = languages;

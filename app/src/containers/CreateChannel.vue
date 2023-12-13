@@ -129,7 +129,7 @@ import {
   getOfflineFluxApps,
 } from "@coasys/flux-api";
 import { usePerspective, useSubject } from "@coasys/flux-vue";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { defineComponent } from "vue";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 

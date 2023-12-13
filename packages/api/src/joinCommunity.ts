@@ -1,7 +1,7 @@
 import { Community } from "@coasys/flux-types";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { getMetaFromLinks } from "@coasys/flux-utils";
-import { Ad4mClient } from "@perspect3vism/ad4m";
+import { Ad4mClient } from "@coasys/ad4m";
 
 export interface Payload {
   joiningLink: string;

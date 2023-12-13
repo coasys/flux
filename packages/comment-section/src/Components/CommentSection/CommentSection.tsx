@@ -2,8 +2,8 @@ import CommentItem from "../CommentItem";
 import { useState, useRef } from "preact/hooks";
 import { Message as MessageModel } from "@coasys/flux-api";
 import { useSubjects, useMe } from "@coasys/flux-react-web";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
-import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
+import { PerspectiveProxy } from "@coasys/ad4m";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import styles from "./CommentSection.module.css";
 import Avatar from "../Avatar";
 

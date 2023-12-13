@@ -5,8 +5,8 @@ import { DisplayView, displayOptions } from "../../constants/options";
 import { useSubjects } from "@coasys/flux-react-web";
 import { Post } from "@coasys/flux-api";
 import { useMemo } from "react";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
-import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
+import { PerspectiveProxy } from "@coasys/ad4m";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
 export default function PostList({
   agent,

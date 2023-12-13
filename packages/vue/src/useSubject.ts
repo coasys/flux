@@ -1,6 +1,6 @@
 import { watch, ref, shallowRef, triggerRef } from "vue";
 import { SubjectRepository } from "@coasys/flux-api";
-import { PerspectiveProxy, LinkExpression } from "@perspect3vism/ad4m";
+import { PerspectiveProxy, LinkExpression } from "@coasys/ad4m";
 
 export function useSubject<SubjectClass>({
   perspective,

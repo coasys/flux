@@ -1,8 +1,8 @@
 import "@coasys/flux-ui/dist/main.d.ts";
 import PostList from "./components/PostList";
 import UIContext, { UIProvider, View } from "./context/UIContext";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
-import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
+import { PerspectiveProxy } from "@coasys/ad4m";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import Header from "./components/Header";
 import { useContext } from "preact/hooks";
 import Post from "./components/Post";
