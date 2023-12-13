@@ -38,19 +38,9 @@
               class="channel__notification"
               v-if="channel.hasNewMessages"
             ></div>
-            <!--             
-            <j-icon
-              @click.stop="handleToggleClick(channel.id)"
-              slot="start"
-              style="--j-icon-size: 13px"
-              v-if="channel.views.length > 1"
-              :name="channel.expanded ? 'chevron-down' : 'chevron-right'"
-            />
-            -->
             <j-icon
               slot="start"
               size="xs"
-              v-else
               :name="getIcon(channel.views[0])"
             ></j-icon>
           </j-menu-item>
@@ -198,6 +188,7 @@ export default defineComponent({
       return channelViewOptions.filter((o) => views.includes(o.type));
     },
     getIcon(view: ChannelView) {
+      console.log({channelViewOptions, view, channels: this.channels})
       return channelViewOptions.find((o) => o.pkg === view)?.icon || "hash";
     },
     async deleteChannel(channelId: string) {

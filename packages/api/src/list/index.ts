@@ -26,7 +26,7 @@ export class List {
   order: string;
 
   @subjectCollection({
-    through: "rdf://has_child",
+    through: "ad4m://has_child",
     where: {
       condition: `instance(_, Target)`,
     },

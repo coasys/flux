@@ -54,7 +54,7 @@ export class Community {
   thumbnail: string;
 
   @subjectCollection({
-    through: "rdf://has_child",
+    through: "ad4m://has_child",
     where: {
       isInstance: Channel,
     },

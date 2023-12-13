@@ -58,7 +58,7 @@ export class SubjectRepository<SubjectClass extends { [x: string]: any }> {
     await this.perspective.add(
       new Link({
         source: source || this.source,
-        predicate: "rdf://has_child",
+        predicate: "ad4m://has_child",
         target: base,
       })
     );

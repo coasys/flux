@@ -1,6 +1,6 @@
 {
   "name": "@coasys/flux-chat-view",
-  "version": "0.7.4",
+  "version": "0.7.5",
   "fluxapp": {
     "name": "Chat",
     "description": "Make a new conversation",

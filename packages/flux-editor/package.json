@@ -1,6 +1,6 @@
 {
   "name": "@coasys/flux-editor",
-  "version": "0.7.4",
+  "version": "0.7.5",
   "type": "module",
   "module": "dist/main.js",
   "main": "dist/main.js",

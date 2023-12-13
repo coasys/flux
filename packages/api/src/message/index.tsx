@@ -43,7 +43,7 @@ export class Message {
   isPopular: boolean = false;
 
   @subjectCollection({
-    through: "rdf://has_child",
+    through: "ad4m://has_child",
     where: {
       condition: `subject_class("Message", Class), instance(Class, Target)`,
     },
