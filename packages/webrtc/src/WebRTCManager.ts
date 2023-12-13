@@ -1,4 +1,3 @@
-import { videoSettings } from "@coasys/flux-constants";
 import {
   PerspectiveProxy,
   Agent,

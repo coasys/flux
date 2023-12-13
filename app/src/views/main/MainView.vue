@@ -147,7 +147,10 @@ export default defineComponent({
     //Do version checking for ad4m / flux compatibility
     const { ad4mExecutorVersion } = await this.client.runtime.info();
 
-    const isIncompatible = semver.gt("0.5.0", ad4mExecutorVersion);
+    const isIncompatible = semver.gte(
+      dependencies["@coasys/ad4m"],
+      ad4mExecutorVersion
+    );
 
     if (isIncompatible) {
       this.$router.push({ name: "update-ad4m" });

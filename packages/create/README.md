@@ -3,7 +3,7 @@
 Bootstrap a new [Flux](https://fluxsocial.io) plugin for your community
 
 ```
-npx create-flux-app
+npx @coasys/create-flux-plugin
 ```
 
 Then install deps and start building

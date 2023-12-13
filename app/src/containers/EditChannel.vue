@@ -121,6 +121,8 @@ import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { useSubjects, useSubject, usePerspective } from "@coasys/flux-vue";
 import { useRoute } from "vue-router";
 import fetchFluxApp from "@/utils/fetchFluxApp";
+import semver from "semver";
+import { dependencies } from "../../package.json";
 
 export default defineComponent({
   props: ["channelId"],
@@ -130,9 +132,10 @@ export default defineComponent({
     this.isLoading = true;
     const res = await getAllFluxApps();
     this.isLoading = false;
-    this.packages = res.filter(
-      (pkg) => new Date(pkg.created) > new Date("2023-05-01")
-    );
+    const filtered = res.filter((pkg) =>
+        semver.gte(pkg.ad4mVersion || "0.0.0", dependencies["@coasys/ad4m"])
+      );
+      this.packages = filtered
   },
   async setup(props) {
     const route = useRoute();
@@ -177,10 +180,10 @@ export default defineComponent({
       return viewOptions;
     },
     officialApps(): FluxApp[] {
-      return this.packages.filter((p) => p.pkg.startsWith("@fluxapp/"));
+      return this.packages.filter((p) => p.pkg.startsWith("@coasys/"));
     },
     communityApps(): FluxApp[] {
-      return this.packages.filter((p) => !p.pkg.startsWith("@fluxapp/"));
+      return this.packages.filter((p) => !p.pkg.startsWith("@coasys/"));
     },
     filteredPackages(): FluxApp[] {
       return this.tab === "official" ? this.officialApps : this.communityApps;

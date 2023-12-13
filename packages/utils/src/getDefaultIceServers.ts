@@ -1,7 +1,7 @@
 import { version } from "../package.json";
 import { getForVersion } from "@coasys/flux-utils";
 import { videoSettings } from "@coasys/flux-constants";
-import { IceServer } from "@fluxapp/webrtc";
+import { IceServer } from "@coasys/flux-webrtc";
 
 export function getDefaultIceServers() {
   let defaultServers = videoSettings.defaultIceServers;

@@ -67,7 +67,7 @@
                       </j-text>
                       <j-badge
                         size="sm"
-                        v-if="app.pkg.startsWith('@fluxapp')"
+                        v-if="app.pkg.startsWith('@coasys')"
                         variant="success"
                       >
                         Official App
@@ -128,10 +128,12 @@ import {
   generateWCName,
   getOfflineFluxApps,
 } from "@coasys/flux-api";
+import semver from "semver";
 import { usePerspective, useSubject } from "@coasys/flux-vue";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { defineComponent } from "vue";
 import fetchFluxApp from "@/utils/fetchFluxApp";
+import { dependencies } from "../../package.json";
 
 export default defineComponent({
   emits: ["cancel", "submit"],
@@ -143,9 +145,10 @@ export default defineComponent({
       const res = await getAllFluxApps();
 
       this.isLoading = false;
-      const filtered = res.filter(
-        (pkg) => new Date(pkg.created) > new Date("2023-05-01")
+      const filtered = res.filter((pkg) =>
+        semver.gte(pkg.ad4mVersion || "0.0.0", dependencies["@coasys/ad4m"])
       );
+      
       this.packages = filtered;
     } catch (error) {
       console.info("Flux is offline, using fallback apps");

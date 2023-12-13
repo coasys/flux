@@ -17,3 +17,4 @@ const CustomElement: HTMLElement = toCustomElement(
 );
 
 export default CustomElement;
+

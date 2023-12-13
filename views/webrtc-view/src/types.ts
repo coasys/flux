@@ -1,4 +1,4 @@
-import { Settings, Connection } from "@fluxapp/webrtc";
+import { Settings, Connection } from "@coasys/flux-webrtc";
 
 export type Peer = {
   did: string;

@@ -43,7 +43,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@fluxapp/webrtc": "*",
+    "@coasys/flux-webrtc": "*",
     "@coasys/flux-react-web": "*",
     "@coasys/flux-utils": "*",
     "@coasys/flux-container": "*",

@@ -1,6 +1,6 @@
 {
-  "name": "@coasys/flux-create-plugin",
-  "version": "0.7.3",
+  "name": "@coasys/create-flux-plugin",
+  "version": "0.7.4",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

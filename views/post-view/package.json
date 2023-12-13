@@ -1,6 +1,6 @@
 {
   "name": "@coasys/flux-post-view",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "",
   "fluxapp": {
     "name": "Posts",
@@ -38,6 +38,7 @@
     "@coasys/flux-react-web": "*",
     "@coasys/flux-editor": "*",
     "@coasys/flux-comment-section": "*",
+    "@coasys/ad4m": "0.8.0-fix",
     "classnames": "^2.3.2",
     "date-fns": "^2.24.0",
     "emoji-picker-element": "^1.14.0",

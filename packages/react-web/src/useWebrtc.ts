@@ -14,7 +14,7 @@ import {
   EventLogItem,
   WebRTCManager,
   IceServer,
-} from "@fluxapp/webrtc";
+} from "@coasys/flux-webrtc";
 
 import { videoSettings } from "@coasys/flux-constants";
 import { PerspectiveProxy, Agent } from "@coasys/ad4m";

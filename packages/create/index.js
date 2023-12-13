@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// Usage: npx create-flux-app
+// Usage: npx @coasys/create-flux-plugin
 const prompts = require("prompts");
 const fs = require("fs");
 const path = require("path");

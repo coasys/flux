@@ -106,7 +106,6 @@ export default function ChatView({
 
   async function onOpenThread(message: Message) {
     setThreadSource(message);
-    const wcName = await generateWCName(name);
 
     const container = threadContainer.current;
 

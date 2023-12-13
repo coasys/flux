@@ -6,13 +6,16 @@ export type FluxApp = {
   name: string;
   description: string;
   icon: string;
+  ad4mVersion?: string;
 };
 
 export async function getApp(name: string): Promise<FluxApp> {
   const res = await fetch(`https://registry.npmjs.org/${name}`);
   const pkg = await res.json();
   const latest = pkg["dist-tags"].latest;
-  const fluxapp = pkg.versions[latest]?.fluxapp;
+  const { fluxapp, dependencies } = pkg.versions[latest];
+
+  const ad4mVersion = (dependencies && dependencies["@coasys/ad4m"]) || "0.0.0";
 
   return {
     created: pkg.time.created,
@@ -22,6 +25,7 @@ export async function getApp(name: string): Promise<FluxApp> {
     name: fluxapp?.name || pkg.name,
     description: fluxapp?.description || pkg.description,
     icon: fluxapp?.icon || "",
+    ad4mVersion,
   };
 }
 

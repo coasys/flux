@@ -1,6 +1,6 @@
 {
   "name": "@coasys/flux-table-view",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "fluxapp": {
     "name": "Table",
     "description": "View and edit your channel data",
