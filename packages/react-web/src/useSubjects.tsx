@@ -8,7 +8,7 @@ import {
   unsubscribe,
   unsubscribeToPerspective,
 } from "./cache";
-import { PerspectiveProxy, LinkExpression } from "@perspect3vism/ad4m";
+import { PerspectiveProxy, LinkExpression } from "@coasys/ad4m";
 import { SubjectRepository } from "@coasys/flux-api";
 import { QueryOptions } from "@coasys/flux-api/src/factory";
 

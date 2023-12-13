@@ -118,8 +118,8 @@ import { Channel } from "@coasys/flux-api";
 import { useSubjects, usePerspective, useMe } from "@coasys/flux-vue";
 import { ChannelView } from "@coasys/flux-types";
 import { viewOptions as channelViewOptions } from "@/constants";
-import { Ad4mClient } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { Ad4mClient } from "@coasys/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 
 export default defineComponent({
   props: {

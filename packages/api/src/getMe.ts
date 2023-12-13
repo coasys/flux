@@ -1,5 +1,5 @@
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { Ad4mClient, Perspective } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { Ad4mClient, Perspective } from "@coasys/ad4m";
 
 export type Me = {
   did: string;

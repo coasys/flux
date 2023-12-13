@@ -1,8 +1,8 @@
 import { profile } from "@coasys/flux-constants";
 import { Profile } from "@coasys/flux-types";
 import { mapLiteralLinks } from "@coasys/flux-utils";
-import { Ad4mClient } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { Ad4mClient } from "@coasys/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 
 const {
   HAS_USERNAME,

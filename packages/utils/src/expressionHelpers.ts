@@ -1,6 +1,6 @@
 import { Message, Messages } from "@coasys/flux-types";
-import { Expression, LinkExpression } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { Expression, LinkExpression } from "@coasys/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 
 export async function getExpression(
   link: LinkExpression

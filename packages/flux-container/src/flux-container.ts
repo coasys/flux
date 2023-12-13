@@ -7,13 +7,13 @@ if (!customElements.get("j-button")) {
   import("@coasys/flux-ui/dist/themes/dark.css");
 }
 
-import Ad4mConnectUI from "@perspect3vism/ad4m-connect";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
+import Ad4mConnectUI from "@coasys/ad4m-connect";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { Ad4mClient, PerspectiveProxy } from "@coasys/ad4m";
 import { createCommunity, joinCommunity } from "@coasys/flux-api";
 import { Channel, Community } from "@coasys/flux-api";
 import { SubjectRepository } from "@coasys/flux-api";
-import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
 @customElement("flux-container")
 export class MyElement extends LitElement {

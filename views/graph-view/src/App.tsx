@@ -1,5 +1,5 @@
 import CommunityGraph from "./components/CommunityGraph";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { PerspectiveProxy } from "@coasys/ad4m";
 
 export default function App({
   perspective,

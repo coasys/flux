@@ -1,6 +1,6 @@
 import { EntryType, ModelProperty, Entry } from "@coasys/flux-types";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
-import { Literal } from "@perspect3vism/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { Literal } from "@coasys/ad4m";
 
 export function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);

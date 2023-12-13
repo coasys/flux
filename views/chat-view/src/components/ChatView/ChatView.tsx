@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
-import { PerspectiveProxy, Literal, LinkQuery } from "@perspect3vism/ad4m";
+import { PerspectiveProxy, Literal, LinkQuery } from "@coasys/ad4m";
 import { useAgent, useSubjects } from "@coasys/flux-react-web";
 import { Message, generateWCName } from "@coasys/flux-api";
 import { name } from "../../../package.json";
-import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import MessageList from "../MessageList/MessageList";
 import { community } from "@coasys/flux-constants";
 import { getPosition } from "../../utils/getPosition";

@@ -1,6 +1,6 @@
 import { ref, watch, shallowRef } from "vue";
 import { usePerspectives } from "./usePerspectives";
-import { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m";
+import { Ad4mClient, PerspectiveProxy } from "@coasys/ad4m";
 
 export function usePerspective(client: Ad4mClient, uuid: string | Function) {
   const uuidRef = typeof uuid === "function" ? ref(uuid()) : ref(uuid);

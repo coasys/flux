@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useMemo } from "preact/hooks";
-import { Agent, Literal, PerspectiveProxy } from "@perspect3vism/ad4m";
+import { Agent, Literal, PerspectiveProxy } from "@coasys/ad4m";
 import styles from "./TableView.module.css";
 import { usePrevious, pluralize } from "../../utils";
 import { v4 as uuidv4 } from "uuid";
@@ -12,7 +12,7 @@ import History from "../History";
 import Entry from "../Entry";
 import NewClass from "../NewClass";
 import { useSubjects } from "@coasys/flux-react-web";
-import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
 type Props = {
   perspective: PerspectiveProxy;

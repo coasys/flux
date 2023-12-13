@@ -1,5 +1,5 @@
-import { Link, LinkExpression } from "@perspect3vism/ad4m";
-import { getAd4mClient } from "@perspect3vism/ad4m-connect/utils";
+import { Link, LinkExpression } from "@coasys/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { community } from "@coasys/flux-constants";
 const { CREATOR, DESCRIPTION, NAME, SELF, CREATED_AT } = community;
 

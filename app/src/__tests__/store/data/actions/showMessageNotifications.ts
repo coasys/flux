@@ -3,7 +3,7 @@ import channel from "../../../fixtures/channel.json";
 import initAgentFixture from "../../../fixtures/initAgent.json";
 import getProfileFixture from "../../../fixtures/getProfile.json";
 import lockAgentFixture from "../../../fixtures/lockAgent.json";
-import { AgentStatus, Expression } from "@perspect3vism/ad4m";
+import { AgentStatus, Expression } from "@coasys/ad4m";
 import { ExpressionTypes, ProfileExpression } from "@/store/types";
 import { createPinia, Pinia, setActivePinia } from "pinia";
 import { useUserStore } from "@/store/user";

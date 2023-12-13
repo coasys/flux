@@ -3,10 +3,10 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import styles from "./Board.module.css";
 import { useSubjects } from "@coasys/flux-react-web";
 import { useEffect, useMemo } from "preact/hooks";
-import { PerspectiveProxy } from "@perspect3vism/ad4m";
+import { PerspectiveProxy } from "@coasys/ad4m";
 import Card from "../Card";
 import CardDetails from "../CardDetails";
-import { AgentClient } from "@perspect3vism/ad4m/lib/src/agent/AgentClient";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
 // @ts-ignore
 import taskSDNA from "./Task.pl?raw";
