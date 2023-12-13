@@ -33,7 +33,11 @@
     <flux-container>
       <flux-app></flux-app>
     </flux-container>
-
+    <script>
+      if (global === undefined) {
+        var global = window;
+      }
+    </script>
     <script type="module">
       import App from "./src/main.ts";
       import "@coasys/flux-container";

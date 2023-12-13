@@ -52,7 +52,7 @@ export function getOfflineFluxApps(): FluxApp[] {
 
   const fluxApps = packages.map((name) => ({
     created: "",
-    pkg: `@fluxapp/${name}`,
+    pkg: `@coasys/${name}`,
     version: "latest",
     org: "",
     name,

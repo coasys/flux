@@ -203,10 +203,10 @@ export default defineComponent({
       return this.packages.filter((p) => this.selectedViews.includes(p.pkg));
     },
     officialApps(): FluxApp[] {
-      return this.packages.filter((p) => p.pkg.startsWith("@fluxapp/"));
+      return this.packages.filter((p) => p.pkg.startsWith("@coasys/"));
     },
     communityApps(): FluxApp[] {
-      return this.packages.filter((p) => !p.pkg.startsWith("@fluxapp/"));
+      return this.packages.filter((p) => !p.pkg.startsWith("@coasys/"));
     },
     filteredPackages(): FluxApp[] {
       return this.tab === "official" ? this.officialApps : this.communityApps;

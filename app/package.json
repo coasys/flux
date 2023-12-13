@@ -24,6 +24,7 @@
     "@coasys/flux-types": "*",
     "@coasys/flux-ui": "*",
     "@coasys/flux-vue": "*",
+    "@coasys/flux-api": "*",
     "@coasys/flux-webrtc-view": "*",
     "@metamask/jazzicon": "^2.0.0",
     "@perspect3vism/ad4m": "0.8.0-prerelease",
