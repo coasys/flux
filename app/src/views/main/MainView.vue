@@ -147,7 +147,7 @@ export default defineComponent({
     //Do version checking for ad4m / flux compatibility
     const { ad4mExecutorVersion } = await this.client.runtime.info();
 
-    const isIncompatible = semver.gte(
+    const isIncompatible = semver.gt(
       dependencies["@coasys/ad4m"],
       ad4mExecutorVersion
     );
