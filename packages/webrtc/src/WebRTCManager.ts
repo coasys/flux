@@ -422,6 +422,8 @@ export class WebRTCManager {
    * Join the chat room, listen for signals
    */
   async join(initialSettings?: Settings) {
+    console.log("trying to join");
+
     let settings = { audio: true, video: false, ...initialSettings };
 
     this.localStream = await navigator.mediaDevices.getUserMedia({
