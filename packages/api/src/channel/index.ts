@@ -22,7 +22,6 @@ export class Channel {
 
   @subjectProperty({
     through: NAME,
-    required: true,
     writable: true,
     resolveLanguage: "literal",
   })

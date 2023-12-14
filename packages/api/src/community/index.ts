@@ -22,7 +22,6 @@ export class Community {
   @subjectProperty({
     through: NAME,
     writable: true,
-    required: true,
     resolveLanguage: "literal",
   })
   name: string;
