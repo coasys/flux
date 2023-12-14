@@ -25,12 +25,6 @@
             @click="() => navigateToChannel(channel.id)"
           >
             {{ channel.name }}
-            <j-icon
-              size="xs"
-              slot="end"
-              v-if="channel?.notifications?.mute"
-              name="bell-slash"
-            />
             <div
               slot="end"
               class="channel__notification"
@@ -72,21 +66,6 @@
           >
             <j-icon size="xs" slot="start" name="pencil" />
             Edit Channel
-          </j-menu-item>
-          <j-menu-item
-            @click="
-              () =>
-                setChannelNotificationState({
-                  channelId: channel.id,
-                })
-            "
-          >
-            <j-icon
-              size="xs"
-              slot="start"
-              :name="channel?.notifications?.mute ? 'bell-slash' : 'bell'"
-            />
-            {{ `${channel?.notifications?.mute ? "Unmute" : "Mute"} Channel` }}
           </j-menu-item>
           <j-menu-item
             v-if="isChannelCreator(channel.id)"
