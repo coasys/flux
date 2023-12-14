@@ -1,6 +1,6 @@
 {
   "name": "@coasys/flux-container",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "type": "module",
   "module": "dist/flux-container.js",
   "main": "dist/flux-container.js",
