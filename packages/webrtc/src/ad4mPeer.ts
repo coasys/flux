@@ -1,8 +1,9 @@
-import * as SimplePeer from "simple-peer";
+import SimplePeerInstance from "simple-peer/simplepeer.min.js";
+import type { SimplePeer, Options, Instance } from "simple-peer";
 
 import { Literal, NeighbourhoodProxy } from "@coasys/ad4m";
 
-export interface AD4MPeerInstance extends SimplePeer.Instance {}
+export interface AD4MPeerInstance extends Instance {}
 
 export type Props = {
   did: string;
@@ -10,7 +11,7 @@ export type Props = {
   neighbourhood: NeighbourhoodProxy;
   initiator: boolean;
   stream: MediaStream;
-  options?: SimplePeer.Options;
+  options?: Options;
 };
 
 export class AD4MPeer {
@@ -20,7 +21,7 @@ export class AD4MPeer {
   private source: string;
   private stream: MediaStream;
   private neighbourhood: NeighbourhoodProxy;
-  private options?: SimplePeer.Options;
+  private options?: Options;
 
   constructor(props: Props) {
     this.did = props.did;
@@ -32,18 +33,19 @@ export class AD4MPeer {
   }
 
   public connect() {
+    console.log("creating peer");
     this.peer = this.createPeer();
 
     return this.peer;
   }
 
   private createPeer(): AD4MPeerInstance {
-    const peer = new SimplePeer({
+    const peer = new SimplePeerInstance({
       initiator: this.initiator,
       stream: this.stream,
       ...this.options,
       trickle: false,
-    });
+    }) as Instance;
 
     // Local peerjs instance has data it wants to send to remote peer
     peer.on("signal", (signal) => {

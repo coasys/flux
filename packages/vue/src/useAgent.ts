@@ -17,9 +17,8 @@ const {
   HAS_USERNAME,
 } = profile;
 
-const agent = ref<Agent | null>(null);
-
 export function useAgent(client: AgentClient, did: string | Function) {
+  const agent = ref<Agent | null>(null);
   const didRef = typeof did === "function" ? (did as any) : ref(did);
 
   watch(
@@ -35,7 +34,7 @@ export function useAgent(client: AgentClient, did: string | Function) {
   const profile = computed<Profile | null>(() => {
     if (agent.value?.perspective) {
       const perspective = agent.value.perspective;
-      return mapLiteralLinks(
+      const prof = mapLiteralLinks(
         perspective.links.filter((e) => e.data.source === FLUX_PROFILE),
         {
           username: HAS_USERNAME,
@@ -47,7 +46,8 @@ export function useAgent(client: AgentClient, did: string | Function) {
           profileThumbnailPicture: HAS_THUMBNAIL_IMAGE,
           profileBackground: HAS_BG_IMAGE,
         }
-      ) as Profile;
+      );
+      return { ...prof, did: didRef.value } as Profile;
     } else {
       return null;
     }

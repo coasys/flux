@@ -23,6 +23,7 @@ export class Post {
   @subjectProperty({
     through: TITLE,
     writable: true,
+    required: true,
     resolveLanguage: "literal",
   })
   title: string;

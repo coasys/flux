@@ -239,7 +239,11 @@ export default defineComponent({
     const langExpression = await client.expression.getMany(
       linkLangs.map((l) => `lang://${l}`)
     );
-    const langMeta = langExpression.map((l) => JSON.parse(l.data)).filter(l => !l.description.includes("Holochain"));
+
+      
+    const langMeta = langExpression
+      .map((l) => JSON.parse(l.data))
+      .filter((l) => !l.description.includes("Holochain"));
     const { perspectives, neighbourhoods } = usePerspectives(client);
     const { communities } = useCommunities(neighbourhoods);
 
