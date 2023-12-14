@@ -21,8 +21,8 @@
   "dependencies": {
     "@coasys/flux-api": "*",
     "@coasys/flux-ui": "*",
-    "@coasys/ad4m": "0.8.0-fix",
-    "@coasys/ad4m-connect": "0.8.0-fix",
+    "@coasys/ad4m": "0.8.1",
+    "@coasys/ad4m-connect": "0.8.1",
     "lit-element": "^2.4.0"
   },
   "devDependencies": {

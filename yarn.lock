@@ -1197,10 +1197,10 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@coasys/ad4m-connect@0.8.0-fix":
-  version "0.8.0-fix"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.8.0-fix.tgz#01994d4ddf1d088327a24156f840f65a424fd335"
-  integrity sha512-Yg3ORQ3+VkE5PpTl02Io6L7yQPUVWtT6BC/W9cAQ2NC64uVSo6jwk6fe9ERMSVK8a7xgb2LM4UlMzNjwrgezcQ==
+"@coasys/ad4m-connect@0.8.1":
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.8.1.tgz#16e0cf68ccb9ef819092d0733ab078486c6c6115"
+  integrity sha512-pbyeescsVOVAnXjn2Uh4BV0oWbuiseHT0HvGmDISdaJztaFv1MNglka2oOFf9xYmwz7PBExYNprnE5g75YVyNQ==
   dependencies:
     "@undecaf/barcode-detector-polyfill" "^0.9.15"
     "@undecaf/zbar-wasm" "^0.9.12"
@@ -1210,10 +1210,10 @@
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
-"@coasys/ad4m@0.8.0-fix":
-  version "0.8.0-fix"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.8.0-fix.tgz#b2b6422c84c59eec67d9400c7c76bea5755b8a84"
-  integrity sha512-rTTel4Wnt2+xDdaupFnKkjV+l7BmMt3BLqz9v5Iz+BYaZGe1FTjObYubOf2o/19BiUxKyl7lFTEXWgXVOTt98A==
+"@coasys/ad4m@0.8.1":
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.8.1.tgz#80730bdbb5b36be8dbd2d81533f0763949ae8743"
+  integrity sha512-2or0Ykc+F+geDumBABYD/us5Iu9Se2xVRdVcj4h0l7etd9Zx3u5m/Q32YHywJz61DbPQV8Q+zTkYiqF54y9GrA==
   dependencies:
     "@apollo/client" "3.7.10"
     "@holochain/client" "0.16.0"

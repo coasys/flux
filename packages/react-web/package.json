@@ -23,7 +23,7 @@
     "@coasys/flux-utils": "*"
   },
   "peerDependencies": {
-    "@coasys/ad4m": "0.8.0-fix",
+    "@coasys/ad4m": "0.8.1",
     "react": "^18.2.0"
   }
 }

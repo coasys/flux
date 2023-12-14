@@ -23,6 +23,6 @@
   },
   "peerDependencies": {
     "vue": "^3.2.47",
-    "@coasys/ad4m": "0.8.0-fix"
+    "@coasys/ad4m": "0.8.1"
   }
 }
