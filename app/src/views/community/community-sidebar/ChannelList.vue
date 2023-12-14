@@ -43,6 +43,11 @@
               size="xs"
               :name="getIcon(channel.views[0])"
             ></j-icon>
+            <div class="active-agents">
+              <j-box v-for="(agent, did) in activeAgents[channel.id]">
+                <ActiveAgent :did="did" v-if="agent" />
+              </j-box>
+            </div>
           </j-menu-item>
           <div class="channel-views" v-if="channel.expanded">
             <j-menu-item
@@ -100,45 +105,59 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { defineComponent, ref } from "vue";
 import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
 import { Channel } from "@coasys/flux-api";
-import { useSubjects, usePerspective, useMe } from "@coasys/flux-vue";
+import { useSubjects, useMe } from "@coasys/flux-vue";
 import { ChannelView } from "@coasys/flux-types";
 import { viewOptions as channelViewOptions } from "@/constants";
-import { Ad4mClient } from "@coasys/ad4m";
+import {
+  Ad4mClient,
+  NeighbourhoodProxy,
+  PerspectiveProxy,
+  PerspectiveExpression,
+} from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import ActiveAgent from "./ActiveAgent.vue";
 
 export default defineComponent({
+  components: { ActiveAgent },
   props: {
     community: {
       type: Object,
       required: true,
     },
     perspective: {
-      type: Object,
+      type: PerspectiveProxy,
       required: true,
     },
   },
+  mounted() {
+    setInterval(() => {
+      this.checkWhoIsHere();
+    }, 5000);
+
+    this.checkWhoIsHere();
+
+    this.neighbhourhoodProxy.addSignalHandler(this.handleBroadcastCb);
+  },
+  unmounted() {
+    this.neighbhourhoodProxy.removeSignalHandler(this.handleBroadcastCb);
+  },
   async setup(props) {
-    const route = useRoute();
-
     const client: Ad4mClient = await getAd4mClient();
-
-    const { data } = usePerspective(client, () => route.params.communityId);
-
+    const neighbhourhoodProxy = props.perspective.getNeighbourhoodProxy();
     const { me } = useMe(client.agent);
-
     const { entries: channels, repo: channelRepo } = useSubjects({
-      perspective: () => data.value.perspective,
+      perspective: () => props.perspective,
       source: () => "ad4m://self",
       subject: Channel,
     });
-
     return {
       me,
+      activeAgents: ref<Record<string, Record<string, boolean>>>({}),
+      neighbhourhoodProxy,
       channelRepo,
       channels,
       userProfileImage: ref<null | string>(null),
@@ -147,11 +166,50 @@ export default defineComponent({
   },
   data: function () {
     return {
+      neighbhourhoodProxy: null as NeighbourhoodProxy | null,
       showCommunityMenu: false,
       communityImage: null,
     };
   },
   methods: {
+    checkWhoIsHere() {
+      if (this.neighbhourhoodProxy) {
+        this.channels.forEach((channel) => {
+          this.neighbhourhoodProxy.sendBroadcastU({
+            links: [
+              {
+                source: channel.id,
+                predicate: "is-anyone-here",
+                target: "just checking",
+              },
+            ],
+          });
+        });
+      }
+    },
+    handleBroadcastCb(perspectiveExpression: PerspectiveExpression) {
+      const link = perspectiveExpression.data.links[0];
+      if (
+        link &&
+        link.author !== this.me?.did &&
+        link.data.predicate === "i-am-here"
+      ) {
+        this.activeAgents[link.data.source] = {
+          ...this.activeAgents[link.data.source],
+          [link.author]: true,
+        };
+      }
+      if (
+        link &&
+        link.author !== this.me?.did &&
+        link.data.predicate === "leave"
+      ) {
+        this.activeAgents[link.data.source] = {
+          ...this.activeAgents[link.data.source],
+          [link.author]: false,
+        };
+      }
+    },
     ...mapActions(useAppStore, ["setSidebar", "setShowCreateChannel"]),
     handleToggleClick(channelId: string) {
       // TODO: Toggle channel collapse
@@ -177,7 +235,6 @@ export default defineComponent({
     },
     isChannelCreator(channelId: string): boolean {
       const channel = this.channels.find((e) => e.id === channelId);
-
       if (channel) {
         return channel.author === this.me?.did;
       } else {
@@ -188,7 +245,7 @@ export default defineComponent({
       return channelViewOptions.filter((o) => views.includes(o.type));
     },
     getIcon(view: ChannelView) {
-      console.log({channelViewOptions, view, channels: this.channels})
+      console.log({ channelViewOptions, view, channels: this.channels });
       return channelViewOptions.find((o) => o.pkg === view)?.icon || "hash";
     },
     async deleteChannel(channelId: string) {
@@ -223,5 +280,12 @@ export default defineComponent({
   height: 10px;
   border-radius: 50%;
   background: var(--j-color-primary-500);
+}
+
+.active-agents {
+  position: absolute;
+  right: var(--j-space-400);
+  top: 50%;
+  transform: translateY(-50%);
 }
 </style>

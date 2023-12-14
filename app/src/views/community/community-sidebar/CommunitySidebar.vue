@@ -9,6 +9,7 @@ import { defineComponent } from "vue";
 import ChannelList from "./ChannelList.vue";
 import Members from "./Members.vue";
 import Header from "./Header.vue";
+import { PerspectiveProxy } from "@coasys/ad4m";
 
 export default defineComponent({
   components: { ChannelList, Members, Header },
@@ -18,7 +19,7 @@ export default defineComponent({
       required: true,
     },
     perspective: {
-      type: Object,
+      type: PerspectiveProxy,
       required: true,
     },
     isSynced: Boolean,

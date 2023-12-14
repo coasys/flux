@@ -17,6 +17,7 @@ export class App {
   @subjectProperty({
     through: NAME,
     writable: true,
+    required: true,
     resolveLanguage: "literal",
   })
   name: string;
@@ -24,6 +25,7 @@ export class App {
   @subjectProperty({
     through: DESCRIPTION,
     writable: true,
+    required: true,
     resolveLanguage: "literal",
   })
   description: string;
@@ -31,6 +33,7 @@ export class App {
   @subjectProperty({
     through: "rdf://icon",
     writable: true,
+    required: true,
     resolveLanguage: "literal",
   })
   icon: string;
@@ -38,6 +41,7 @@ export class App {
   @subjectProperty({
     through: "rdf://pkg",
     writable: true,
+    required: true,
     resolveLanguage: "literal",
   })
   pkg: string;
