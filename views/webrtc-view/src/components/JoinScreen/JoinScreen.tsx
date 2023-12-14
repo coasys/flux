@@ -52,6 +52,7 @@ export default function JoinScreen({
                   <j-avatar
                     initials={profile.username?.charAt(0) || "?"}
                     hash={profile.did || "?"}
+                    src={profile?.profileThumbnailPicture}
                     size="xl"
                   ></j-avatar>
                 )}

@@ -83,6 +83,7 @@ export default function Item({
           <j-avatar
             initials={profile?.username?.charAt(0) || "?"}
             hash={userId}
+            src={profile?.profileThumbnailPicture}
             size="xl"
           ></j-avatar>
         </div>

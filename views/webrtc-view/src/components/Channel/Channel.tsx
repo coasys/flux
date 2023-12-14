@@ -47,8 +47,10 @@ export default function Channel({
     agent: agentClient,
     perspective,
     events: {
-      onPeerJoin: (userId) =>
-        addNotification({ id: userId, userId, type: "join" }),
+      onPeerJoin: (userId) => {
+        // TODO: Fix this
+        // addNotification({ id: userId, userId, type: "join" });
+      },
       onPeerLeave: (userId) =>
         addNotification({ id: userId, userId, type: "leave" }),
     },
