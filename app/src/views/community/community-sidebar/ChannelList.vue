@@ -21,9 +21,7 @@
             tag="j-menu-item"
             class="channel"
             :class="{ 'channel--muted': channel.notifications?.mute }"
-            :selected="
-              channel.id === $route.params.channelId && !channel.expanded
-            "
+            :selected="channel.id === activeChannelId && !channel.expanded"
             @click="() => navigateToChannel(channel.id)"
           >
             {{ channel.name }}
@@ -44,8 +42,11 @@
               :name="getIcon(channel.views[0])"
             ></j-icon>
             <div class="active-agents">
-              <j-box v-for="(agent, did) in activeAgents[channel.id]">
-                <ActiveAgent :did="did" v-if="agent" />
+              <j-box
+                v-for="(agent, did) in activeAgents[channel.id]"
+                :key="did"
+              >
+                <ActiveAgent :key="did" :did="did" v-if="agent" />
               </j-box>
             </div>
           </j-menu-item>
@@ -134,15 +135,16 @@ export default defineComponent({
     },
   },
   mounted() {
-    setInterval(() => {
+    this.neighbhourhoodProxy.addSignalHandler(this.handleBroadcastCb);
+
+    this.polling = setInterval(() => {
       this.checkWhoIsHere();
     }, 5000);
 
     this.checkWhoIsHere();
-
-    this.neighbhourhoodProxy.addSignalHandler(this.handleBroadcastCb);
   },
   unmounted() {
+    clearInterval(this.polling);
     this.neighbhourhoodProxy.removeSignalHandler(this.handleBroadcastCb);
   },
   async setup(props) {
@@ -166,10 +168,16 @@ export default defineComponent({
   },
   data: function () {
     return {
+      polling: null as any,
       neighbhourhoodProxy: null as NeighbourhoodProxy | null,
       showCommunityMenu: false,
       communityImage: null,
     };
+  },
+  computed: {
+    activeChannelId() {
+      return this.$route.params.channelId as string;
+    },
   },
   methods: {
     checkWhoIsHere() {
@@ -207,6 +215,28 @@ export default defineComponent({
         this.activeAgents[link.data.source] = {
           ...this.activeAgents[link.data.source],
           [link.author]: false,
+        };
+      }
+      if (
+        link &&
+        link.author === this.me?.did &&
+        link.data.predicate === "leave" &&
+        this.me?.did
+      ) {
+        this.activeAgents[link.data.source] = {
+          ...this.activeAgents[link.data.source],
+          [this.me.did]: false,
+        };
+      }
+      if (
+        link &&
+        link.author === this.me?.did &&
+        link.data.predicate === "peer-signal" &&
+        this.me?.did
+      ) {
+        this.activeAgents[link.data.source] = {
+          ...this.activeAgents[link.data.source],
+          [this.me.did]: true,
         };
       }
     },
@@ -283,7 +313,10 @@ export default defineComponent({
 }
 
 .active-agents {
+  display: flex;
+  align-items: center;
   position: absolute;
+  gap: var(--j-space-100);
   right: var(--j-space-400);
   top: 50%;
   transform: translateY(-50%);

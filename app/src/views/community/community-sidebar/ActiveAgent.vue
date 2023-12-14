@@ -1,11 +1,11 @@
 <template>
-  <j-flex gap="300">
+  <div>
     <Avatar
       size="xxs"
-      :did="profile?.did"
+      :did="did"
       :url="profile?.profileThumbnailPicture"
     ></Avatar>
-  </j-flex>
+  </div>
 </template>
 
 <script lang="ts">
