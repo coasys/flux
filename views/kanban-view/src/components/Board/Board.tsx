@@ -38,7 +38,7 @@ export default function Board({ perspective, source, agent }: BoardProps) {
     perspective.infer(`subject_class("Task", Atom)`).then((hasTask) => {
       if (!hasTask) {
         perspective
-          .addSdna(taskSDNA)
+          .addSdna("Task", taskSDNA, "subject_class")
           .then(() => getClasses(perspective, source).then(setClasses));
       }
     });

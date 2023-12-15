@@ -1,6 +1,6 @@
 {
   "name": "@coasys/flux-kanban-view",
-  "version": "0.7.6",
+  "version": "0.7.7",
   "fluxapp": {
     "name": "Kanban",
     "description": "Move items on a kanban board",
