@@ -51,8 +51,10 @@ export default function Channel({
         // TODO: Fix this
         // addNotification({ id: userId, userId, type: "join" });
       },
-      onPeerLeave: (userId) =>
-        addNotification({ id: userId, userId, type: "leave" }),
+      onPeerLeave: (userId) => {
+        // TODO: Fix this
+        // addNotification({ id: userId, userId, type: "leave" });
+      },
     },
   });
 
