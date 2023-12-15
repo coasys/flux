@@ -141,8 +141,11 @@
       </div>
     </div>
 
-    <div v-if="hasHistory" class="back" @click="() => $router.back()">
-      <j-icon name="arrow-left" size="lg"></j-icon>
+    <div
+      class="sidebar"
+      @click="() => appStore.setMainSidebar(!appStore.showMainSidebar)"
+    >
+      <j-icon name="layout-sidebar" size="md"></j-icon>
     </div>
   </div>
   <j-modal
@@ -373,6 +376,7 @@ export default defineComponent({
     },
     ...mapActions(useAppStore, [
       "setShowEditProfile",
+      "setSidebar",
       "setShowCreateCommunity",
     ]),
   },
@@ -516,6 +520,13 @@ export default defineComponent({
 }
 
 .back {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  cursor: pointer;
+}
+
+.sidebar {
   position: absolute;
   top: 20px;
   left: 20px;
