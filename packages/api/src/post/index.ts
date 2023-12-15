@@ -6,6 +6,7 @@ import {
   subjectCollection,
   subjectFlag,
 } from "@coasys/ad4m";
+import Message from "../message";
 
 const { BODY, END_DATE, IMAGE, START_DATE, TITLE, URL, ENTRY_TYPE } = community;
 const { FILE_STORAGE_LANGUAGE } = languages;
@@ -23,7 +24,6 @@ export class Post {
   @subjectProperty({
     through: TITLE,
     writable: true,
-    required: true,
     resolveLanguage: "literal",
   })
   title: string;
@@ -51,7 +51,7 @@ export class Post {
   @subjectCollection({
     through: "ad4m://has_child",
     where: {
-      condition: `subject_class("Message", Class), instance(Class, Target)`,
+      isInstance: Message,
     },
   })
   comments: string[] = [];
