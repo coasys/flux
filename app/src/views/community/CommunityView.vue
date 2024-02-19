@@ -196,8 +196,9 @@ import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { useSubjects, useCommunities, usePerspectives } from "@coasys/flux-vue";
-import { usePerspective } from "@coasys/flux-vue";
+import { useSubjects, usePerspectives } from "@coasys/vue-hooks";
+import { useCommunities } from "@coasys/flux-vue";
+import { usePerspective } from "@coasys/vue-hooks";
 import { PerspectiveState } from "@coasys/ad4m";
 
 type LoadedChannels = {

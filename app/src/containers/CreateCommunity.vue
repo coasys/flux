@@ -214,7 +214,8 @@ import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { Ad4mClient, PerspectiveProxy } from "@coasys/ad4m";
 import { useAppStore } from "@/store/app";
 import { joinCommunity, createCommunity } from "@coasys/flux-api";
-import { usePerspectives, useCommunities } from "@coasys/flux-vue";
+import { useCommunities } from "@coasys/flux-vue";
+import { usePerspectives } from "@coasys/vue-hooks";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 import HourGlass from "@/components/hourglass/Hourglass.vue";
 

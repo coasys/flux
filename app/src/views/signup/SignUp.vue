@@ -72,7 +72,8 @@ import { useAppStore } from "@/store/app";
 import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";
 import SignUpCarousel from "./SignUpCarousel.vue";
 import { createProfile, getAd4mProfile } from "@coasys/flux-api";
-import { useMe } from "@coasys/flux-vue";
+import { useMe } from "@coasys/vue-hooks";
+import { profileFormatter } from "@coasys/flux-utils";
 
 export default defineComponent({
   name: "SignUp",
@@ -94,7 +95,7 @@ export default defineComponent({
 
     const client = await getAd4mClient();
 
-    const { status } = useMe(client.agent);
+    const { status } = useMe(client.agent, profileFormatter);
 
     const {
       value: username,
