@@ -19,15 +19,15 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "@coasys/flux-api": "*",
-    "@coasys/flux-ui": "*",
     "@coasys/ad4m": "0.8.1",
     "@coasys/ad4m-connect": "0.8.1",
+    "@coasys/flux-api": "*",
+    "@coasys/flux-ui": "*",
     "lit-element": "^2.4.0"
   },
   "devDependencies": {
-    "vite-plugin-css-injected-by-js": "^3.1.0",
     "typescript": "^5.0.4",
-    "vite": "^4.3.5"
+    "vite": "^4.3.5",
+    "vite-plugin-css-injected-by-js": "^3.1.0"
   }
 }
