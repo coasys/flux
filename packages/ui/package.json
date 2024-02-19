@@ -23,7 +23,7 @@
     "dev:lib": "NODE_ENV=dev node esbuild-dev.js",
     "build:analyze": "web-component-analyzer lib --outFile components.json",
     "build:types": "node buildTypes.js",
-    "build:lib": "NODE_ENV=production node esbuild-prod.js",
+    "build:lib": "node esbuild-prod.js",
     "visualize": "esbuild-visualizer --metadata ./meta.json"
   },
   "dependencies": {

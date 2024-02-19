@@ -1,11 +1,12 @@
 import CommentItem from "../CommentItem";
 import { useState, useRef } from "preact/hooks";
 import { Message as MessageModel } from "@coasys/flux-api";
-import { useSubjects, useMe } from "@coasys/flux-react-web";
+import { useSubjects, useMe } from "@coasys/react-hooks";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import styles from "./CommentSection.module.css";
 import Avatar from "../Avatar";
+import { profileFormatter } from "@coasys/flux-utils";
 
 export default function CommentSection({
   agent,
@@ -16,7 +17,7 @@ export default function CommentSection({
   perspective: PerspectiveProxy;
   source: string;
 }) {
-  const myAgent = useMe(agent);
+  const myAgent = useMe(agent, profileFormatter);
 
   const editor = useRef(null);
   const [showToolbar, setShowToolbar] = useState(false);

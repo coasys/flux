@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef } from "preact/hooks";
 import { Reaction } from "../../../types";
-import { WebRTC, useAgent } from "@coasys/flux-react-web";
+import { useAgent } from "@coasys/react-hooks";
+import { WebRTC } from "@coasys/flux-react-web";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import { profileFormatter } from "@coasys/flux-utils";
 
 import styles from "./Item.module.css";
+import { Profile } from "@coasys/flux-types";
 
 type Props = {
   webRTC: WebRTC;
@@ -32,7 +35,7 @@ export default function Item({
 
   const [isConnecting, setIsConnecting] = useState(isMe ? false : true);
 
-  const { profile } = useAgent({ client: agentClient, did: () => userId });
+  const { profile } = useAgent<Profile>({ client: agentClient, did: () => userId, formatter: profileFormatter });
 
   const peer = webRTC.connections.find((p) => p.did === userId);
   const settings = isMe ? webRTC.localState.settings : peer?.state?.settings;

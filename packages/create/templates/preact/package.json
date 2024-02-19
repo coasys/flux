@@ -32,11 +32,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@coasys/flux-container": "*",
     "@coasys/ad4m": "0.8.1",
-    "preact": "^10.13.1",
-    "@coasys/flux-react-web": "*",
-    "@coasys/flux-api": "*"
+    "@coasys/flux-api": "*",
+    "@coasys/flux-container": "*",
+    "@coasys/react-hooks": "*",
+    "preact": "^10.13.1"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.18.6",

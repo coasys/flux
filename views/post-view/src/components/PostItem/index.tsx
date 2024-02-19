@@ -4,14 +4,17 @@ import { format, formatDistance } from "date-fns/esm";
 import { DisplayView } from "../../constants/options";
 import UIContext from "../../context/UIContext";
 import Avatar from "../Avatar";
-import { useAgent } from "@coasys/flux-react-web";
+import { useAgent } from "@coasys/react-hooks";
+import { profileFormatter } from "@coasys/flux-utils";
+import { Profile } from "@coasys/flux-types";
 
 export default function PostItem({ agent, perspective, post, displayView }) {
   const { methods: UIMehthods } = useContext(UIContext);
 
-  const { agent: author, profile } = useAgent({
+  const { agent: author, profile } = useAgent<Profile>({
     client: agent,
     did: post.author,
+    formatter: profileFormatter,
   });
 
   const [ogData, setOgData] = useState(null);

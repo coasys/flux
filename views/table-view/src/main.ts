@@ -1,5 +1,5 @@
 import "preact/debug";
-import { toCustomElement } from "@coasys/flux-react-web";
+import { toCustomElement } from "@coasys/react-hooks";
 import MyComponent from "./App";
 import CommentSection from "@coasys/flux-comment-section";
 

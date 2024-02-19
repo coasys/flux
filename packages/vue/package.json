@@ -1,5 +1,5 @@
 {
-  "name": "@coasys/flux-vue",
+  "name": "@coasys/vue-hooks",
   "version": "0.7.6",
   "description": "",
   "main": "./src/index.ts",
@@ -17,12 +17,12 @@
   "license": "ISC",
   "dependencies": {
     "@coasys/flux-api": "*",
-    "@coasys/flux-types": "*",
     "@coasys/flux-constants": "*",
+    "@coasys/flux-types": "*",
     "@coasys/flux-utils": "*"
   },
   "peerDependencies": {
-    "vue": "^3.2.47",
-    "@coasys/ad4m": "0.8.1"
+    "@coasys/ad4m": "0.8.1",
+    "vue": "^3.2.47"
   }
 }

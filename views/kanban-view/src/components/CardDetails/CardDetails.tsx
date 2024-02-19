@@ -1,5 +1,5 @@
 import { useState } from "preact/hooks";
-import { useSubject } from "@coasys/flux-react-web";
+import { useSubject } from "@coasys/react-hooks";
 import styles from "./CardDetails.module.css";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";

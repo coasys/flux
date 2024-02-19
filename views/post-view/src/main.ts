@@ -2,7 +2,7 @@ import "preact/debug";
 
 if (!window.ResizeObserver) window.ResizeObserver = ResizeObserver;
 
-import { toCustomElement } from "@coasys/flux-react-web";
+import { toCustomElement } from "@coasys/react-hooks";
 import MyComponent from "./App";
 import FluxEditor from "@coasys/flux-editor";
 import CommentSection from "@coasys/flux-comment-section";

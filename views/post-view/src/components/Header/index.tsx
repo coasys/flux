@@ -1,14 +1,15 @@
 import { useContext } from "preact/hooks";
-import { useMe } from "@coasys/flux-react-web";
+import { useMe } from "@coasys/react-hooks";
 import Avatar from "../Avatar";
 import { PostOption, postOptions } from "../../constants/options";
 import UIContext from "../../context/UIContext";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
+import { profileFormatter } from "@coasys/flux-utils";
 
 import styles from "./index.module.css";
 
 export default function Header({ agent }: { agent: AgentClient }) {
-  const { profile, me } = useMe(agent);
+  const { profile, me } = useMe(agent, profileFormatter);
   const { methods } = useContext(UIContext);
 
   function handlePostClick(type) {

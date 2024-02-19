@@ -1,6 +1,6 @@
 import "preact/debug";
 
-import { toCustomElement } from "@coasys/flux-react-web";
+import { toCustomElement } from "@coasys/react-hooks";
 import MyComponent from "./App";
 
 const CustomElement = toCustomElement(

@@ -1,5 +1,5 @@
 import "preact/debug";
-import { toCustomElement } from "@coasys/flux-react-web";
+import { toCustomElement } from "@coasys/react-hooks";
 import MyComponent from "./App";
 import Editor from "@coasys/flux-editor";
 import "@coasys/flux-ui/dist/main.d.ts";
