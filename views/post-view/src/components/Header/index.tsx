@@ -1,5 +1,5 @@
 import { useContext } from "preact/hooks";
-import { useMe } from "@coasys/react-hooks";
+import { useMe } from "@coasys/ad4m-react-hooks";
 import Avatar from "../Avatar";
 import { PostOption, postOptions } from "../../constants/options";
 import UIContext from "../../context/UIContext";

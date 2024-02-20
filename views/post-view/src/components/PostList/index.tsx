@@ -2,7 +2,7 @@ import { useState } from "preact/hooks";
 import PostItem from "../PostItem";
 import style from "./index.module.css";
 import { DisplayView, displayOptions } from "../../constants/options";
-import { useSubjects } from "@coasys/react-hooks";
+import { useSubjects } from "@coasys/ad4m-react-hooks";
 import { Post } from "@coasys/flux-api";
 import { useMemo } from "react";
 import { PerspectiveProxy } from "@coasys/ad4m";

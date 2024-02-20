@@ -14,7 +14,7 @@ import Avatar from "@/components/avatar/Avatar.vue";
 
 // @ts-ignore
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { useAgent } from "@coasys/vue-hooks";
+import { useAgent } from "@coasys/ad4m-vue-hooks";
 import { Ad4mClient } from "@coasys/ad4m";
 import { profileFormatter } from "@coasys/flux-utils";
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { PerspectiveProxy, Literal, LinkQuery } from "@coasys/ad4m";
-import { useAgent, useSubjects } from "@coasys/react-hooks";
+import { useAgent, useSubjects } from "@coasys/ad4m-react-hooks";
 import { Message, generateWCName } from "@coasys/flux-api";
 import { name } from "../../../package.json";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";

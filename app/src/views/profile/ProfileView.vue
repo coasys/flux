@@ -206,7 +206,7 @@ import {
   usePerspectives,
   useAgent,
   useMe,
-} from "@coasys/vue-hooks";
+} from "@coasys/ad4m-vue-hooks";
 import { useCommunities } from "@coasys/flux-vue";
 // @ts-ignore
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";

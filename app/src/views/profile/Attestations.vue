@@ -22,7 +22,7 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { getAd4mClient } from "@coasys/ad4m-connect";
-import { useMe } from "@coasys/vue-hooks";
+import { useMe } from "@coasys/ad4m-vue-hooks";
 const EAS_LANG = "QmzSYwdiqjYXRAaoJdARpP7xRj4VQfdTT3J4HNGLohdKeuBgo1E";
 
 export default defineComponent({

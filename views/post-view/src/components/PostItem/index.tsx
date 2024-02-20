@@ -4,7 +4,7 @@ import { format, formatDistance } from "date-fns/esm";
 import { DisplayView } from "../../constants/options";
 import UIContext from "../../context/UIContext";
 import Avatar from "../Avatar";
-import { useAgent } from "@coasys/react-hooks";
+import { useAgent } from "@coasys/ad4m-react-hooks";
 import { profileFormatter } from "@coasys/flux-utils";
 import { Profile } from "@coasys/flux-types";
 

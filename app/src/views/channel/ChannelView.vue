@@ -126,7 +126,7 @@ import {
   usePerspectives,
   useMe,
   useSubjects,
-} from "@coasys/vue-hooks";
+} from "@coasys/ad4m-vue-hooks";
 import {
   Community,
   Channel,

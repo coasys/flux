@@ -89,7 +89,7 @@ import { defineComponent, ref } from "vue";
 import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
 import { Channel } from "@coasys/flux-api";
-import { useSubjects, useMe } from "@coasys/vue-hooks";
+import { useSubjects, useMe } from "@coasys/ad4m-vue-hooks";
 import { ChannelView } from "@coasys/flux-types";
 import { viewOptions as channelViewOptions } from "@/constants";
 import {

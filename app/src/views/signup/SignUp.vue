@@ -72,7 +72,7 @@ import { useAppStore } from "@/store/app";
 import Ad4mLogo from "@/components/ad4m-logo/Ad4mLogo.vue";
 import SignUpCarousel from "./SignUpCarousel.vue";
 import { createProfile, getAd4mProfile } from "@coasys/flux-api";
-import { useMe } from "@coasys/vue-hooks";
+import { useMe } from "@coasys/ad4m-vue-hooks";
 import { profileFormatter } from "@coasys/flux-utils";
 
 export default defineComponent({

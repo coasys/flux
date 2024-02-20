@@ -1,6 +1,6 @@
 import "preact/debug";
 import "@coasys/flux-ui/dist/main.d.ts";
-import { toCustomElement } from "@coasys/react-hooks";
+import { toCustomElement } from "@coasys/ad4m-react-hooks";
 import App from "./App";
 import CommentSection from "@coasys/flux-comment-section";
 

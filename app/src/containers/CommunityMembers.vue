@@ -58,7 +58,7 @@ import { defineComponent, watchEffect, ref } from "vue";
 import { Community, getProfile } from "@coasys/flux-api";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import Avatar from "@/components/avatar/Avatar.vue";
-import { usePerspective, useSubject } from "@coasys/vue-hooks";
+import { usePerspective, useSubject } from "@coasys/ad4m-vue-hooks";
 import { useRoute } from "vue-router";
 
 export default defineComponent({

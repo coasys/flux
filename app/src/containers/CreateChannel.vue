@@ -129,7 +129,7 @@ import {
   getOfflineFluxApps,
 } from "@coasys/flux-api";
 import semver from "semver";
-import { usePerspective, useSubject } from "@coasys/vue-hooks";
+import { usePerspective, useSubject } from "@coasys/ad4m-vue-hooks";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { defineComponent } from "vue";
 import fetchFluxApp from "@/utils/fetchFluxApp";

@@ -29,7 +29,7 @@ import { defineComponent } from "vue";
 import { useAppStore } from "@/store/app";
 import { mapActions, mapState } from "pinia";
 import Avatar from "@/components/avatar/Avatar.vue";
-import { useMe } from "@coasys/vue-hooks";
+import { useMe } from "@coasys/ad4m-vue-hooks";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { profileFormatter } from "@coasys/flux-utils";
 

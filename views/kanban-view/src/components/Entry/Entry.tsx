@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { PerspectiveProxy, Literal } from "@coasys/ad4m";
-import { useSubject } from "@coasys/react-hooks";
+import { useSubject } from "@coasys/ad4m-react-hooks";
 import DisplayValue from "../DisplayValue";
 import styles from "./Entry.module.css";
 

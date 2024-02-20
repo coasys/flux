@@ -47,7 +47,7 @@ import AvatarUpload from "@/components/avatar-upload/AvatarUpload.vue";
 import { defineComponent } from "vue";
 import { useAppStore } from "@/store/app";
 import ImgUpload from "@/components/img-upload/ImgUpload.vue";
-import { useMe } from "@coasys/vue-hooks";
+import { useMe } from "@coasys/ad4m-vue-hooks";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { getProfile, updateProfile } from "@coasys/flux-api";
 import { profileFormatter } from "@coasys/flux-utils";

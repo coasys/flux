@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "preact/hooks";
 import { getMe, Me } from "@coasys/flux-api";
 import { useWebRTC } from "@coasys/flux-react-web";
-import { useAgent } from "@coasys/react-hooks";
+import { useAgent } from "@coasys/ad4m-react-hooks";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
 
 import UserGrid from "../UserGrid";

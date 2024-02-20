@@ -118,7 +118,7 @@ import {
 import ChannnelViewOptions from "@/components/channel-view-options/ChannelViewOptions.vue";
 import { viewOptions } from "@/constants";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { useSubjects, useSubject, usePerspective } from "@coasys/vue-hooks";
+import { useSubjects, useSubject, usePerspective } from "@coasys/ad4m-vue-hooks";
 import { useRoute } from "vue-router";
 import fetchFluxApp from "@/utils/fetchFluxApp";
 import semver from "semver";

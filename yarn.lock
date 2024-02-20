@@ -1246,9 +1246,9 @@
     "@coasys/ad4m-connect" "*"
     uuid "*"
 
-"@coasys/react-hooks@0.8.2-prerelease.2":
+"@coasys/ad4m-react-hooks@0.8.2-prerelease.2":
   version "0.8.2-prerelease.2"
-  resolved "https://registry.yarnpkg.com/@coasys/react-hooks/-/react-hooks-0.8.2-prerelease.2.tgz#e74950f6dad423c6ee96dd8d26fe0754ea535c4a"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-react-hooks/-/react-hooks-0.8.2-prerelease.2.tgz#e74950f6dad423c6ee96dd8d26fe0754ea535c4a"
   integrity sha512-9XrwUemcachsynQZIDz+2ercgZq/XpZOyCreeaBujMQs50joPCZB/lYiNvfEu+atzb90HNT/Lgmd8qsLI+a4Rg==
   dependencies:
     "@coasys/ad4m" "*"

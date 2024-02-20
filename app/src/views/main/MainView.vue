@@ -105,7 +105,7 @@ import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import semver from "semver";
 import { dependencies } from "../../../package.json";
 import { LinkExpression, Literal, PerspectiveProxy } from "@coasys/ad4m";
-import { useSubject, usePerspective, usePerspectives } from "@coasys/vue-hooks";
+import { useSubject, usePerspective, usePerspectives } from "@coasys/ad4m-vue-hooks";
 import { Community } from "@coasys/flux-api";
 
 export default defineComponent({

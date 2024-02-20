@@ -1,6 +1,6 @@
 import { useState } from "preact/hooks";
 import { PerspectiveProxy } from "@coasys/ad4m";
-import { useSubjects } from "@coasys/react-hooks";
+import { useSubjects } from "@coasys/ad4m-react-hooks";
 
 import Todo from "../subjects/Todo";
 

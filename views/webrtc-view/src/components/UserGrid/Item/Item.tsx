@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "preact/hooks";
 import { Reaction } from "../../../types";
-import { useAgent } from "@coasys/react-hooks";
+import { useAgent } from "@coasys/ad4m-react-hooks";
 import { WebRTC } from "@coasys/flux-react-web";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { profileFormatter } from "@coasys/flux-utils";

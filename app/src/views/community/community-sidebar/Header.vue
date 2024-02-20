@@ -101,7 +101,7 @@ import { useAppStore } from "@/store/app";
 import Avatar from "@/components/avatar/Avatar.vue";
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { useMe } from "@coasys/vue-hooks";
+import { useMe } from "@coasys/ad4m-vue-hooks";
 import { Ad4mClient } from "@coasys/ad4m";
 import { profileFormatter } from "@coasys/flux-utils";
 

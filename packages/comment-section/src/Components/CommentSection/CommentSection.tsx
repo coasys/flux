@@ -1,7 +1,7 @@
 import CommentItem from "../CommentItem";
 import { useState, useRef } from "preact/hooks";
 import { Message as MessageModel } from "@coasys/flux-api";
-import { useSubjects, useMe } from "@coasys/react-hooks";
+import { useSubjects, useMe } from "@coasys/ad4m-react-hooks";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import styles from "./CommentSection.module.css";
