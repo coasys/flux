@@ -1205,24 +1205,16 @@
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
-"@coasys/ad4m-react-hooks@0.9.0-prerelease":
-  version "0.9.0-prerelease"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.9.0-prerelease.tgz#546ccf639294fa1b0a87b0dfb3893d57193adb3f"
-  integrity sha512-hwRJIvVGCBGtNOKSabNuorUNSmw34CzqG6kVBuOGVc+eKbvLIBvb/ivBw4jjqVNjqIxutxiVvWZoh3h118nb7Q==
+"@coasys/ad4m-react-hooks@*":
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.9.0.tgz#15f9a11a273a9f9dbe676722d5d6757814e9d077"
+  integrity sha512-pG7CszlLSbODr26jriJ8BGaJIyOSYQOKSdJcISf8lUltkgLPVhJW3DEa1K4dpRZ0t98BGgnen3NhOCyFWtUjYg==
   dependencies:
     "@coasys/ad4m" "*"
     "@coasys/ad4m-connect" "*"
     "@coasys/hooks-helpers" "*"
     "@types/react" "^18.2.55"
     "@types/react-dom" "^18.2.19"
-
-"@coasys/ad4m-vue-hooks@0.9.0-prerelease":
-  version "0.9.0-prerelease"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m-vue-hooks/-/ad4m-vue-hooks-0.9.0-prerelease.tgz#a94bb52047523d71631fe1094a0c1839692a4a6e"
-  integrity sha512-aOYkoesxyxqQVhIMj+W2UQTTLelLJmcvDf+6OOJ9xxlmKalwHk6CM9Qq8TgVUCfKilH9gcE39KKbTvQ5oYgC4w==
-  dependencies:
-    "@coasys/ad4m" "*"
-    "@coasys/hooks-helpers" "*"
 
 "@coasys/ad4m@*", "@coasys/ad4m@0.8.1":
   version "0.8.1"
@@ -1257,9 +1249,9 @@
     "@coasys/flux-utils" "*"
 
 "@coasys/hooks-helpers@*":
-  version "0.9.0-prerelease"
-  resolved "https://registry.yarnpkg.com/@coasys/hooks-helpers/-/hooks-helpers-0.9.0-prerelease.tgz#8e1b98d236a089fbccb1a452c5c261ff193fa41a"
-  integrity sha512-l6MhE3HziQEBYE1tYBVcE8WeUBc3mIWfyIMsQU2ERf5TXubEPahFhpYF7J+3OI6ML51XRQpiWRLUp7YHoWcU2A==
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/@coasys/hooks-helpers/-/hooks-helpers-0.9.0.tgz#ee1a76872d869d845892112e2c2188ed4ef834d2"
+  integrity sha512-21Wrg/LwosKpcSpz/Xq85eTONGHIMF1sJBihdxR3d3De91dz4uZZ1Twy4irLYjetwXMh4J1OS8Z5fNDWcwSigg==
   dependencies:
     "@coasys/ad4m" "*"
     "@coasys/ad4m-connect" "*"

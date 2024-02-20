@@ -30,7 +30,7 @@
     "@coasys/flux-utils": "0.7.6-aplha.0",
     "@coasys/flux-vue": "*",
     "@coasys/flux-webrtc-view": "*",
-    "@coasys/ad4m-vue-hooks": "0.9.0-prerelease",
+    "@coasys/ad4m-vue-hooks": "*",
     "@metamask/jazzicon": "^2.0.0",
     "construct-style-sheets-polyfill": "^3.1.0",
     "date-fns": "^2.29.3",

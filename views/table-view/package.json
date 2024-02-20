@@ -36,7 +36,7 @@
     "@coasys/flux-api": "*",
     "@coasys/flux-comment-section": "*",
     "@coasys/flux-container": "*",
-    "@coasys/ad4m-react-hooks": "0.9.0-prerelease",
+    "@coasys/ad4m-react-hooks": "*",
     "preact": "^10.13.1",
     "uuid": "^9.0.0"
   },
