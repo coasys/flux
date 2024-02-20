@@ -104,9 +104,9 @@
               placeholder="Select a language"
             >
               <option :value="meta.address" v-for="(meta, index) in langMeta">
-                <!-- <template v-if="index === 0">Full P2P Badass</template> -->
-                <!-- <template v-else-if="index === 1">Hybrid P2P</template> -->
-                <template v-if="index === 0">Centralized</template>
+                <template v-if="index === 0">Full P2P Badass</template>
+                <template v-else-if="index === 1">Hybrid P2P</template>
+                <template v-if="index === 2">Centralized</template>
                 <template v-else> {{ meta.description }}</template>
               </option>
             </select>
@@ -241,10 +241,12 @@ export default defineComponent({
       linkLangs.map((l) => `lang://${l}`)
     );
 
-      
     const langMeta = langExpression
-      .map((l) => JSON.parse(l.data))
-      .filter((l) => !l.description.includes("Holochain"));
+      .map((l) => JSON.parse(l.data));
+
+    // const langMeta = langExpression
+    //   .map((l) => JSON.parse(l.data))
+    //   .filter((l) => !l.description.includes("Holochain"));
     const { perspectives, neighbourhoods } = usePerspectives(client);
     const { communities } = useCommunities(neighbourhoods);
 
