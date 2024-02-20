@@ -19,7 +19,7 @@
     "@coasys/flux-api": "*",
     "@coasys/flux-constants": "*",
     "@coasys/flux-types": "*",
-    "@coasys/flux-utils": "*"
+    "@coasys/flux-utils": "0.7.6-aplha.0"
   },
   "peerDependencies": {
     "@coasys/ad4m": "0.8.1",

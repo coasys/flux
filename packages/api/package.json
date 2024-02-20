@@ -15,7 +15,7 @@
   "dependencies": {
     "@coasys/flux-constants": "*",
     "@coasys/flux-types": "*",
-    "@coasys/flux-utils": "*",
+    "@coasys/flux-utils": "0.7.6-aplha.0",
     "uuid": "^9.0.0"
   },
   "peerDependencies": {
