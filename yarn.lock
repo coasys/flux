@@ -1192,7 +1192,7 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@coasys/ad4m-connect@*", "@coasys/ad4m-connect@0.8.1":
+"@coasys/ad4m-connect@*":
   version "0.8.1"
   resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.8.1.tgz#16e0cf68ccb9ef819092d0733ab078486c6c6115"
   integrity sha512-pbyeescsVOVAnXjn2Uh4BV0oWbuiseHT0HvGmDISdaJztaFv1MNglka2oOFf9xYmwz7PBExYNprnE5g75YVyNQ==
@@ -1205,10 +1205,23 @@
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
-"@coasys/ad4m-react-hooks@*":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.9.0.tgz#15f9a11a273a9f9dbe676722d5d6757814e9d077"
-  integrity sha512-pG7CszlLSbODr26jriJ8BGaJIyOSYQOKSdJcISf8lUltkgLPVhJW3DEa1K4dpRZ0t98BGgnen3NhOCyFWtUjYg==
+"@coasys/ad4m-connect@0.9.0-rc2":
+  version "0.9.0-rc2"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.9.0-rc2.tgz#85c91fda7a1dd68013eb7c6f1b789dc805c4d090"
+  integrity sha512-Y8ZVVhZD225rhTyBtopf3EWjU0hw2rX3OMGkCOL+OlvV25UhMN118GSlxLrNA2eokmaJzzxomwDjqiZEUacLfA==
+  dependencies:
+    "@undecaf/barcode-detector-polyfill" "^0.9.15"
+    "@undecaf/zbar-wasm" "^0.9.12"
+    auto-bind "^5.0.1"
+    electron "^20.0.3"
+    esbuild-plugin-copy "^2.1.1"
+    esbuild-plugin-replace "^1.4.0"
+    lit "^2.3.1"
+
+"@coasys/ad4m-react-hooks@0.9.0-rc2-fix":
+  version "0.9.0-rc2-fix"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.9.0-rc2-fix.tgz#ad4310f4f829b4da6674428a238f548a66288112"
+  integrity sha512-6YB20S0s5L8jPPj/gOV7PqhsiSGyGWNqcH5f0/19cRsqvQhDBPrPmsPskZpwOLXR6OYOXNmUCQgurEvDs7wa3w==
   dependencies:
     "@coasys/ad4m" "*"
     "@coasys/ad4m-connect" "*"
@@ -1216,10 +1229,24 @@
     "@types/react" "^18.2.55"
     "@types/react-dom" "^18.2.19"
 
-"@coasys/ad4m@*", "@coasys/ad4m@0.8.1":
+"@coasys/ad4m@*":
   version "0.8.1"
   resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.8.1.tgz#80730bdbb5b36be8dbd2d81533f0763949ae8743"
   integrity sha512-2or0Ykc+F+geDumBABYD/us5Iu9Se2xVRdVcj4h0l7etd9Zx3u5m/Q32YHywJz61DbPQV8Q+zTkYiqF54y9GrA==
+  dependencies:
+    "@apollo/client" "3.7.10"
+    "@holochain/client" "0.16.0"
+    "@types/jest" "^26.0.14"
+    class-validator "^0.13.1"
+    express "4.18.2"
+    graphql "15.7.2"
+    reflect-metadata "^0.1.13"
+    type-graphql "1.1.1"
+
+"@coasys/ad4m@0.9.0-rc2":
+  version "0.9.0-rc2"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.9.0-rc2.tgz#43f9bb5ef045b57c0245b7745a74c57ae4f0edd1"
+  integrity sha512-0rthiSdOoHwKnH/zfJNP0b3UIlDe2v1ITZUw4ebQj3Jub6Ch9G/45DTdAHaIv0a7/rkNSmfub/JkXcHbKmIoAw==
   dependencies:
     "@apollo/client" "3.7.10"
     "@holochain/client" "0.16.0"

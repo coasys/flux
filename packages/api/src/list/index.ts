@@ -1,7 +1,7 @@
 import { community } from "@coasys/flux-constants";
 import {
-  subjectProperty,
-  subjectCollection,
+  SubjectProperty,
+  SubjectCollection,
   SDNAClass,
 } from "@coasys/ad4m";
 
@@ -11,21 +11,21 @@ const { NAME } = community;
   name: "List",
 })
 export class List {
-  @subjectProperty({
+  @SubjectProperty({
     through: NAME,
     writable: true,
     resolveLanguage: "literal",
   })
   name: string;
 
-  @subjectProperty({
+  @SubjectProperty({
     through: "rdf://order",
     writable: true,
     resolveLanguage: "literal",
   })
   order: string;
 
-  @subjectCollection({
+  @SubjectCollection({
     through: "ad4m://has_child",
     where: {
       condition: `instance(_, Target)`,

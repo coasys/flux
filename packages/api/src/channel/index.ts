@@ -1,10 +1,10 @@
 import { community } from "@coasys/flux-constants";
 import { EntryType } from "@coasys/flux-types";
 import {
-  subjectProperty,
-  subjectCollection,
+  SubjectProperty,
+  SubjectCollection,
   SDNAClass,
-  subjectFlag,
+  SubjectFlag,
 } from "@coasys/ad4m";
 import App from "../app";
 
@@ -14,20 +14,20 @@ const { FLUX_APP, NAME, ENTRY_TYPE } = community;
   name: "Channel",
 })
 export class Channel {
-  @subjectFlag({
+  @SubjectFlag({
     through: ENTRY_TYPE,
     value: EntryType.Channel,
   })
   type: string;
 
-  @subjectProperty({
+  @SubjectProperty({
     through: NAME,
     writable: true,
     resolveLanguage: "literal",
   })
   name: string;
 
-  @subjectCollection({
+  @SubjectCollection({
     through: "ad4m://has_child",
     where: {
       isInstance: App,

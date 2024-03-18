@@ -2,9 +2,9 @@ import { community, languages } from "@coasys/flux-constants";
 import { EntryType } from "@coasys/flux-types";
 import {
   SDNAClass,
-  subjectProperty,
-  subjectCollection,
-  subjectFlag,
+  SubjectProperty,
+  SubjectCollection,
+  SubjectFlag,
 } from "@coasys/ad4m";
 import Message from "../message";
 
@@ -15,27 +15,27 @@ const { FILE_STORAGE_LANGUAGE } = languages;
   name: "Post",
 })
 export class Post {
-  @subjectFlag({
+  @SubjectFlag({
     through: ENTRY_TYPE,
     value: EntryType.Post,
   })
   type: string;
 
-  @subjectProperty({
+  @SubjectProperty({
     through: TITLE,
     writable: true,
     resolveLanguage: "literal",
   })
   title: string;
 
-  @subjectProperty({
+  @SubjectProperty({
     through: BODY,
     writable: true,
     resolveLanguage: "literal",
   })
   body: string;
 
-  @subjectProperty({
+  @SubjectProperty({
     through: IMAGE,
     writable: true,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
@@ -45,10 +45,10 @@ export class Post {
   })
   image: string;
 
-  @subjectProperty({ through: URL, writable: true, resolveLanguage: "literal" })
+  @SubjectProperty({ through: URL, writable: true, resolveLanguage: "literal" })
   url: string;
 
-  @subjectCollection({
+  @SubjectCollection({
     through: "ad4m://has_child",
     where: {
       isInstance: Message,
