@@ -6,9 +6,9 @@ const { DESCRIPTION, IMAGE, NAME, THUMBNAIL, ENTRY_TYPE } = community;
 
 import {
   SDNAClass,
-  subjectProperty,
-  subjectCollection,
-  subjectFlag,
+  SubjectProperty,
+  SubjectCollection,
+  SubjectFlag,
 } from "@coasys/ad4m";
 import Channel from "../channel";
 
@@ -16,17 +16,17 @@ import Channel from "../channel";
   name: "Community",
 })
 export class Community {
-  @subjectFlag({ through: ENTRY_TYPE, value: EntryType.Community })
+  @SubjectFlag({ through: ENTRY_TYPE, value: EntryType.Community })
   type: string;
 
-  @subjectProperty({
+  @SubjectProperty({
     through: NAME,
     writable: true,
     resolveLanguage: "literal",
   })
   name: string;
 
-  @subjectProperty({
+  @SubjectProperty({
     through: DESCRIPTION,
     writable: true,
     resolveLanguage: "literal",
@@ -34,7 +34,7 @@ export class Community {
   description: string;
 
   // @ts-ignore
-  @subjectProperty({
+  @SubjectProperty({
     through: IMAGE,
     writable: true,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
@@ -44,7 +44,7 @@ export class Community {
   image: string;
 
   // @ts-ignore
-  @subjectProperty({
+  @SubjectProperty({
     through: THUMBNAIL,
     writable: true,
     resolveLanguage: FILE_STORAGE_LANGUAGE,
@@ -53,7 +53,7 @@ export class Community {
   })
   thumbnail: string;
 
-  @subjectCollection({
+  @SubjectCollection({
     through: "ad4m://has_child",
     where: {
       isInstance: Channel,
