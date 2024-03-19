@@ -146,9 +146,9 @@ export default defineComponent({
 
       this.isLoading = false;
       const filtered = res.filter((pkg) =>
-        semver.gte(pkg.ad4mVersion || "0.0.0", dependencies["@coasys/ad4m"])
+        semver.gte(pkg?.ad4mVersion || "0.0.0", "0.8.1")
       );
-      
+
       this.packages = filtered;
     } catch (error) {
       console.info("Flux is offline, using fallback apps");
