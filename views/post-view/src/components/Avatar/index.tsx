@@ -41,7 +41,7 @@ export default function Avatar({
     <j-avatar
       style={{ ...style, cursor: onClick ? "pointer" : "default" }}
       hash={did}
-      src={img || src}
+      src={img}
       onClick={(e: any) => onClick && onClick(e)}
       size={size}
     ></j-avatar>

@@ -105,7 +105,7 @@ export default function Post({
             <Avatar
               size="sm"
               did={author?.did}
-              src={profile?.profileThumbnailPicture}
+              url={profile?.profileThumbnailPicture}
             ></Avatar>
           </a>
           <div>

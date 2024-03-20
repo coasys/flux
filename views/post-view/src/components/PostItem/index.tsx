@@ -65,7 +65,7 @@ export default function PostItem({ agent, perspective, post, displayView }) {
               <Avatar
                 size="xxs"
                 did={author?.did}
-                src={profile?.profileThumbnailPicture}
+                url={profile?.profileThumbnailPicture}
               ></Avatar>
             </a>
             <j-flex a="center" gap="200">
