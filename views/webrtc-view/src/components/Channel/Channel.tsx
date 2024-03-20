@@ -79,6 +79,7 @@ export default function Channel({
         <JoinScreen
           webRTC={webRTC}
           profile={profile}
+          did={agent?.did}
           onToggleSettings={() => toggleShowSettings(!showSettings)}
         />
       )}

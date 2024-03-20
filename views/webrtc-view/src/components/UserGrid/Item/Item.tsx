@@ -7,6 +7,7 @@ import { profileFormatter } from "@coasys/flux-utils";
 
 import styles from "./Item.module.css";
 import { Profile } from "@coasys/flux-types";
+import Avatar from "../../Avatar";
 
 type Props = {
   webRTC: WebRTC;
@@ -83,12 +84,12 @@ export default function Item({
 
       <div className={styles.details} onClick={onToggleFocus}>
         <div className={styles.avatar}>
-          <j-avatar
+          <Avatar
             initials={profile?.username?.charAt(0) || "?"}
-            hash={userId}
-            src={profile?.profileThumbnailPicture}
             size="xl"
-          ></j-avatar>
+            profileAddress={profile?.profileThumbnailPicture}
+            hash={userId}
+          />
         </div>
       </div>
 
