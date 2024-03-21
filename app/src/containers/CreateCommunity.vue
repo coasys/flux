@@ -104,10 +104,10 @@
               placeholder="Select a language"
             >
               <option :value="meta.address" v-for="(meta, index) in langMeta">
-                <template v-if="index === 0">Full P2P Badass</template>
-                <template v-else-if="index === 1">Hybrid P2P</template>
-                <template v-if="index === 2">Centralized</template>
-                <template v-else> {{ meta.description }}</template>
+                <!-- <template v-if="index === 0">Full P2P Badass</template> -->
+                <!-- <template v-else-if="index === 1">Hybrid P2P</template> -->
+                <!-- <template v-if="index === 2">Centralized</template> -->
+                <template> {{ meta.description }}</template>
               </option>
             </select>
           </div>
