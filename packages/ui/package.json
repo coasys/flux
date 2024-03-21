@@ -23,11 +23,11 @@
     "dev:lib": "NODE_ENV=dev node esbuild-dev.js",
     "build:analyze": "web-component-analyzer lib --outFile components.json",
     "build:types": "node buildTypes.js",
-    "build:lib": "NODE_ENV=production node esbuild-prod.js",
+    "build:lib": "node esbuild-prod.js",
     "visualize": "esbuild-visualizer --metadata ./meta.json"
   },
   "dependencies": {
-    "@coasys/flux-utils": "*",
+    "@coasys/flux-utils": "0.7.6-aplha.0",
     "@popperjs/core": "^2.11.7",
     "construct-style-sheets-polyfill": "^3.1.0",
     "emoji-mart": "^5.5.2",

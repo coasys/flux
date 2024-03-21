@@ -5,6 +5,8 @@ import { useAgent, useSubject } from "@coasys/flux-react-web";
 import styles from "./MessageItem.module.css";
 import Avatar from "../Avatar";
 import { REACTION } from "@coasys/flux-constants/src/communityPredicates";
+import { profileFormatter } from "@coasys/flux-utils";
+import { Profile } from "@coasys/flux-types";
 
 export default function MessageItem({
   showAvatar,
@@ -27,7 +29,7 @@ export default function MessageItem({
   onReplyClick?: (message: Message) => void;
   onThreadClick?: (message: Message) => void;
 }) {
-  const { profile } = useAgent({ client: agent, did: message.author });
+  const { profile } = useAgent<Profile>({ client: agent, did: message.author, formatter: profileFormatter });
 
   const { entry: replyMessage } = useSubject({
     perspective,
@@ -35,9 +37,10 @@ export default function MessageItem({
     subject: Message,
   });
 
-  const { profile: replyProfile } = useAgent({
+  const { profile: replyProfile } = useAgent<Profile>({
     client: agent,
     did: replyMessage?.author,
+    formatter: profileFormatter,
   });
 
   function onOpenPicker(e) {

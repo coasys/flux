@@ -3,7 +3,7 @@
   "tags": [
     {
       "name": "j-component",
-      "path": "./lib/components/_template/Component.ts",
+      "path": "./lib\\components\\_template\\Component.ts",
       "attributes": [
         {
           "name": "variant",
@@ -25,7 +25,7 @@
     },
     {
       "name": "j-avatar",
-      "path": "./lib/components/avatar/Avatar.ts",
+      "path": "./lib\\components\\avatar\\Avatar.ts",
       "attributes": [
         {
           "name": "src",
@@ -121,7 +121,7 @@
     },
     {
       "name": "j-badge",
-      "path": "./lib/components/badge/Badge.ts",
+      "path": "./lib\\components\\badge\\Badge.ts",
       "attributes": [
         {
           "name": "variant",
@@ -156,7 +156,7 @@
     },
     {
       "name": "j-box",
-      "path": "./lib/components/box/Box.ts",
+      "path": "./lib\\components\\box\\Box.ts",
       "attributes": [
         {
           "name": "p",
@@ -356,7 +356,7 @@
     },
     {
       "name": "j-button",
-      "path": "./lib/components/button/Button.ts",
+      "path": "./lib\\components\\button\\Button.ts",
       "attributes": [
         {
           "name": "variant",
@@ -467,7 +467,7 @@
     },
     {
       "name": "j-carousel",
-      "path": "./lib/components/carousel/Carousel.ts",
+      "path": "./lib\\components\\carousel\\Carousel.ts",
       "attributes": [
         {
           "name": "gap",
@@ -515,7 +515,7 @@
     },
     {
       "name": "j-checkbox",
-      "path": "./lib/components/checkbox/Checkbox.js",
+      "path": "./lib\\components\\checkbox\\Checkbox.js",
       "attributes": [
         {
           "name": "checked",
@@ -589,7 +589,7 @@
     },
     {
       "name": "j-emoji-picker",
-      "path": "./lib/components/emoji-picker/EmojiPicker.ts",
+      "path": "./lib\\components\\emoji-picker\\EmojiPicker.ts",
       "properties": [
         {
           "name": "styles",
@@ -608,7 +608,7 @@
     },
     {
       "name": "j-flex",
-      "path": "./lib/components/flex/Flex.ts",
+      "path": "./lib\\components\\flex\\Flex.ts",
       "attributes": [
         {
           "name": "j",
@@ -678,7 +678,7 @@
     },
     {
       "name": "j-icon",
-      "path": "./lib/components/icon/Icon.ts",
+      "path": "./lib\\components\\icon\\Icon.ts",
       "attributes": [
         {
           "name": "name",
@@ -729,7 +729,7 @@
     },
     {
       "name": "j-input",
-      "path": "./lib/components/input/Input.js",
+      "path": "./lib\\components\\input\\Input.js",
       "attributes": [
         {
           "name": "value",
@@ -988,7 +988,7 @@
     },
     {
       "name": "j-menu-group",
-      "path": "./lib/components/menu-group/MenuGroup.ts",
+      "path": "./lib\\components\\menu-group\\MenuGroup.ts",
       "attributes": [
         {
           "name": "collapsible",
@@ -1038,7 +1038,7 @@
     },
     {
       "name": "j-menu-item",
-      "path": "./lib/components/menu-item/MenuItem.ts",
+      "path": "./lib\\components\\menu-item\\MenuItem.ts",
       "attributes": [
         {
           "name": "selected",
@@ -1085,7 +1085,7 @@
     },
     {
       "name": "j-menu",
-      "path": "./lib/components/menu/Menu.ts",
+      "path": "./lib\\components\\menu\\Menu.ts",
       "properties": [
         {
           "name": "styles",
@@ -1096,7 +1096,7 @@
     },
     {
       "name": "j-modal",
-      "path": "./lib/components/modal/Modal.ts",
+      "path": "./lib\\components\\modal\\Modal.ts",
       "attributes": [
         {
           "name": "size",
@@ -1138,7 +1138,7 @@
     },
     {
       "name": "j-popover",
-      "path": "./lib/components/popover/Popover.ts",
+      "path": "./lib\\components\\popover\\Popover.ts",
       "attributes": [
         {
           "name": "open",
@@ -1221,7 +1221,7 @@
     },
     {
       "name": "j-radio-button",
-      "path": "./lib/components/radio-button/RadioButton.js",
+      "path": "./lib\\components\\radio-button\\RadioButton.js",
       "attributes": [
         {
           "name": "checked",
@@ -1315,7 +1315,7 @@
     },
     {
       "name": "j-select",
-      "path": "./lib/components/select/Select.ts",
+      "path": "./lib\\components\\select\\Select.ts",
       "attributes": [
         {
           "name": "value",
@@ -1390,7 +1390,7 @@
     },
     {
       "name": "j-skeleton",
-      "path": "./lib/components/skeleton/Skeleton.ts",
+      "path": "./lib\\components\\skeleton\\Skeleton.ts",
       "attributes": [
         {
           "name": "variant",
@@ -1440,7 +1440,7 @@
     },
     {
       "name": "j-spinner",
-      "path": "./lib/components/spinner/Spinner.ts",
+      "path": "./lib\\components\\spinner\\Spinner.ts",
       "attributes": [
         {
           "name": "size",
@@ -1464,7 +1464,7 @@
     },
     {
       "name": "j-tab-item",
-      "path": "./lib/components/tab-item/TabItem.ts",
+      "path": "./lib\\components\\tab-item\\TabItem.ts",
       "attributes": [
         {
           "name": "checked",
@@ -1511,7 +1511,7 @@
     },
     {
       "name": "j-tabs",
-      "path": "./lib/components/tabs/Tabs.ts",
+      "path": "./lib\\components\\tabs\\Tabs.ts",
       "attributes": [
         {
           "name": "value",
@@ -1608,7 +1608,7 @@
     },
     {
       "name": "j-text",
-      "path": "./lib/components/text/Text.ts",
+      "path": "./lib\\components\\text\\Text.ts",
       "attributes": [
         {
           "name": "size",
@@ -1717,7 +1717,7 @@
     },
     {
       "name": "j-timestamp",
-      "path": "./lib/components/timestamp/Timestamp.ts",
+      "path": "./lib\\components\\timestamp\\Timestamp.ts",
       "attributes": [
         {
           "name": "value",
@@ -1918,7 +1918,7 @@
     },
     {
       "name": "j-toast",
-      "path": "./lib/components/toast/Toast.ts",
+      "path": "./lib\\components\\toast\\Toast.ts",
       "attributes": [
         {
           "name": "variant",
@@ -1973,7 +1973,7 @@
     },
     {
       "name": "j-toggle",
-      "path": "./lib/components/toggle/Toggle.js",
+      "path": "./lib\\components\\toggle\\Toggle.js",
       "attributes": [
         {
           "name": "checked",
@@ -2047,7 +2047,7 @@
     },
     {
       "name": "j-tooltip",
-      "path": "./lib/components/tooltip/Tooltip.ts",
+      "path": "./lib\\components\\tooltip\\Tooltip.ts",
       "attributes": [
         {
           "name": "open",

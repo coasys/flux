@@ -129,7 +129,7 @@ import {
   getOfflineFluxApps,
 } from "@coasys/flux-api";
 import semver from "semver";
-import { usePerspective, useSubject } from "@coasys/flux-vue";
+import { usePerspective, useSubject } from "@coasys/ad4m-vue-hooks";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { defineComponent } from "vue";
 import fetchFluxApp from "@/utils/fetchFluxApp";
@@ -146,9 +146,9 @@ export default defineComponent({
 
       this.isLoading = false;
       const filtered = res.filter((pkg) =>
-        semver.gte(pkg.ad4mVersion || "0.0.0", dependencies["@coasys/ad4m"])
+        semver.gte(pkg?.ad4mVersion || "0.0.0", "0.8.1")
       );
-      
+
       this.packages = filtered;
     } catch (error) {
       console.info("Flux is offline, using fallback apps");

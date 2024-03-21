@@ -204,16 +204,17 @@ import WebLinkAdd from "./WebLinkAdd.vue";
 import { getAgentWebLinks } from "@coasys/flux-api";
 import {
   usePerspectives,
-  useCommunities,
   useAgent,
   useMe,
-} from "@coasys/flux-vue";
+} from "@coasys/ad4m-vue-hooks";
+import { useCommunities } from "@coasys/flux-vue";
 // @ts-ignore
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { useRoute } from "vue-router";
 import Attestations from "./Attestations.vue";
 // @ts-ignore
 import jazzicon from "@metamask/jazzicon";
+import { profileFormatter } from "@coasys/flux-utils";
 
 export default defineComponent({
   name: "ProfileView",
@@ -233,11 +234,12 @@ export default defineComponent({
     const { neighbourhoods } = usePerspectives(client);
     const { communities } = useCommunities(neighbourhoods);
 
-    const { me } = useMe(client.agent);
+    const { me } = useMe(client.agent, profileFormatter);
 
     const { profile } = useAgent(
       client.agent,
-      () => route.params.did || me.value?.did
+      () => route.params.did || me.value?.did,
+      profileFormatter
     );
 
     const appStore = useAppStore();

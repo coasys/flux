@@ -1,30 +1,30 @@
-import { SDNAClass, subjectProperty, subjectFlag } from "@coasys/ad4m";
+import { SDNAClass, SubjectProperty, SubjectFlag } from "@coasys/ad4m";
 
 @SDNAClass({
   name: "Todo",
 })
 export default class Todo {
-  @subjectFlag({
+  @SubjectFlag({
     through: "flux://entry_type",
     value: "flux://has_todo",
   })
   type: string;
 
-  @subjectProperty({
+  @SubjectProperty({
     through: "rdf://title",
     writable: true,
     resolveLanguage: "literal",
   })
   title: string;
 
-  @subjectProperty({
+  @SubjectProperty({
     through: "rdf://description",
     writable: true,
     resolveLanguage: "literal",
   })
   desc: string;
 
-  @subjectProperty({
+  @SubjectProperty({
     through: "rdf://status",
     writable: true,
     resolveLanguage: "literal",

@@ -1,3 +1,20 @@
+import { LinkExpression } from "@coasys/ad4m";
+import { profile } from "@coasys/flux-constants";
+import { mapLiteralLinks } from "./linkHelpers";
+import { Profile } from "@coasys/flux-types";
+
+const {
+  FLUX_PROFILE,
+  HAS_BG_IMAGE,
+  HAS_BIO,
+  HAS_EMAIL,
+  HAS_FAMILY_NAME,
+  HAS_GIVEN_NAME,
+  HAS_PROFILE_IMAGE,
+  HAS_THUMBNAIL_IMAGE,
+  HAS_USERNAME,
+} = profile;
+
 export const dataURItoBlob = (dataURI: string) => {
   const bytes =
     dataURI.split(",")[0].indexOf("base64") >= 0
@@ -79,3 +96,19 @@ export const resizeImage = (
     reader.readAsDataURL(file);
   });
 };
+
+export const profileFormatter = (links: LinkExpression[]): Profile => {
+  return mapLiteralLinks(
+    links.filter((e) => e.data.source === FLUX_PROFILE),
+    {
+      username: HAS_USERNAME,
+      bio: HAS_BIO,
+      givenName: HAS_GIVEN_NAME,
+      email: HAS_EMAIL,
+      familyName: HAS_FAMILY_NAME,
+      profilePicture: HAS_PROFILE_IMAGE,
+      profileThumbnailPicture: HAS_THUMBNAIL_IMAGE,
+      profileBackground: HAS_BG_IMAGE,
+    }
+  ) as Profile;
+}

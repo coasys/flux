@@ -126,7 +126,7 @@ import {
   usePerspectives,
   useMe,
   useSubjects,
-} from "@coasys/flux-vue";
+} from "@coasys/ad4m-vue-hooks";
 import {
   Community,
   Channel,
@@ -136,6 +136,7 @@ import {
 } from "@coasys/flux-api";
 import { Ad4mClient } from "@coasys/ad4m";
 import fetchFluxApp from "@/utils/fetchFluxApp";
+import { profileFormatter } from "@coasys/flux-utils";
 
 interface MentionTrigger {
   label: string;
@@ -177,7 +178,7 @@ export default defineComponent({
       subject: App,
     });
 
-    const { me } = useMe(client.agent);
+    const { me } = useMe(client.agent, profileFormatter);
 
     return {
       agentClient: client.agent,

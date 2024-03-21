@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { PerspectiveProxy, Literal, LinkQuery } from "@coasys/ad4m";
-import { useAgent, useSubjects } from "@coasys/flux-react-web";
+import { useAgent, useSubjects } from "@coasys/ad4m-react-hooks";
 import { Message, generateWCName } from "@coasys/flux-api";
 import { name } from "../../../package.json";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
@@ -9,8 +9,9 @@ import { community } from "@coasys/flux-constants";
 import { getPosition } from "../../utils/getPosition";
 
 import styles from "./ChatView.module.css";
-import { EntryType } from "@coasys/flux-types";
+import { EntryType, Profile } from "@coasys/flux-types";
 import Avatar from "../Avatar";
+import { profileFormatter } from "@coasys/flux-utils";
 
 const { REPLY_TO, REACTION } = community;
 
@@ -41,9 +42,10 @@ export default function ChatView({
   const editor = useRef(null);
   const threadContainer = useRef(null);
 
-  const { profile: replyProfile } = useAgent({
+  const { profile: replyProfile } = useAgent<Profile>({
     client: agent,
     did: replyMessage?.author,
+    formatter: profileFormatter
   });
 
   const { repo } = useSubjects({
@@ -58,9 +60,10 @@ export default function ChatView({
     setReplyMessage(null);
   }, [perspective.uuid, source]);
 
-  const { profile: threadProfile } = useAgent({
+  const { profile: threadProfile } = useAgent<Profile>({
     client: agent,
     did: threadSource?.author,
+    formatter: profileFormatter
   });
 
   async function submit() {

@@ -1,6 +1,6 @@
 import { community } from "@coasys/flux-constants";
 import { EntryType } from "@coasys/flux-types";
-import { subjectProperty, SDNAClass, subjectFlag } from "@coasys/ad4m";
+import { SubjectProperty, SDNAClass, SubjectFlag } from "@coasys/ad4m";
 
 const { DESCRIPTION, NAME, ENTRY_TYPE } = community;
 
@@ -8,34 +8,34 @@ const { DESCRIPTION, NAME, ENTRY_TYPE } = community;
   name: "App",
 })
 export class App {
-  @subjectFlag({
+  @SubjectFlag({
     through: ENTRY_TYPE,
     value: EntryType.App,
   })
   type: string;
 
-  @subjectProperty({
+  @SubjectProperty({
     through: NAME,
     writable: true,
     resolveLanguage: "literal",
   })
   name: string;
 
-  @subjectProperty({
+  @SubjectProperty({
     through: DESCRIPTION,
     writable: true,
     resolveLanguage: "literal",
   })
   description: string;
 
-  @subjectProperty({
+  @SubjectProperty({
     through: "rdf://icon",
     writable: true,
     resolveLanguage: "literal",
   })
   icon: string;
 
-  @subjectProperty({
+  @SubjectProperty({
     through: "rdf://pkg",
     writable: true,
     resolveLanguage: "literal",

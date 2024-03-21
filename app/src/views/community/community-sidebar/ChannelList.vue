@@ -89,7 +89,7 @@ import { defineComponent, ref } from "vue";
 import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
 import { Channel } from "@coasys/flux-api";
-import { useSubjects, useMe } from "@coasys/flux-vue";
+import { useSubjects, useMe } from "@coasys/ad4m-vue-hooks";
 import { ChannelView } from "@coasys/flux-types";
 import { viewOptions as channelViewOptions } from "@/constants";
 import {
@@ -100,6 +100,7 @@ import {
 } from "@coasys/ad4m";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import ActiveAgent from "./ActiveAgent.vue";
+import { profileFormatter } from "@coasys/flux-utils";
 
 export default defineComponent({
   components: { ActiveAgent },
@@ -129,7 +130,7 @@ export default defineComponent({
   async setup(props) {
     const client: Ad4mClient = await getAd4mClient();
     const neighbhourhoodProxy = props.perspective.getNeighbourhoodProxy();
-    const { me } = useMe(client.agent);
+    const { me } = useMe(client.agent, profileFormatter);
     const { entries: channels, repo: channelRepo } = useSubjects({
       perspective: () => props.perspective,
       source: () => "ad4m://self",

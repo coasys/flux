@@ -14,8 +14,9 @@ import Avatar from "@/components/avatar/Avatar.vue";
 
 // @ts-ignore
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { useAgent } from "@coasys/flux-vue";
+import { useAgent } from "@coasys/ad4m-vue-hooks";
 import { Ad4mClient } from "@coasys/ad4m";
+import { profileFormatter } from "@coasys/flux-utils";
 
 export default defineComponent({
   components: { Avatar },
@@ -28,7 +29,7 @@ export default defineComponent({
   async setup(props) {
     const client: Ad4mClient = await getAd4mClient();
 
-    const { profile } = useAgent(client.agent, () => props.did);
+    const { profile } = useAgent(client.agent, () => props.did, profileFormatter);
 
     return {
       profile,

@@ -106,8 +106,8 @@
               <option :value="meta.address" v-for="(meta, index) in langMeta">
                 <!-- <template v-if="index === 0">Full P2P Badass</template> -->
                 <!-- <template v-else-if="index === 1">Hybrid P2P</template> -->
-                <template v-if="index === 0">Centralized</template>
-                <template v-else> {{ meta.description }}</template>
+                <!-- <template v-if="index === 2">Centralized</template> -->
+                <template> {{ meta.description }}</template>
               </option>
             </select>
           </div>
@@ -214,7 +214,8 @@ import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { Ad4mClient, PerspectiveProxy } from "@coasys/ad4m";
 import { useAppStore } from "@/store/app";
 import { joinCommunity, createCommunity } from "@coasys/flux-api";
-import { usePerspectives, useCommunities } from "@coasys/flux-vue";
+import { useCommunities } from "@coasys/flux-vue";
+import { usePerspectives } from "@coasys/ad4m-vue-hooks";
 import { DEFAULT_TESTING_NEIGHBOURHOOD } from "@/constants";
 import HourGlass from "@/components/hourglass/Hourglass.vue";
 
@@ -240,10 +241,12 @@ export default defineComponent({
       linkLangs.map((l) => `lang://${l}`)
     );
 
-      
     const langMeta = langExpression
-      .map((l) => JSON.parse(l.data))
-      .filter((l) => !l.description.includes("Holochain"));
+      .map((l) => JSON.parse(l.data));
+
+    // const langMeta = langExpression
+    //   .map((l) => JSON.parse(l.data))
+    //   .filter((l) => !l.description.includes("Holochain"));
     const { perspectives, neighbourhoods } = usePerspectives(client);
     const { communities } = useCommunities(neighbourhoods);
 

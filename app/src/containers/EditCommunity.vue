@@ -45,7 +45,7 @@ import {
   getImage,
   resizeImage,
 } from "@coasys/flux-utils";
-import { useSubject, usePerspective } from "@coasys/flux-vue";
+import { useSubject, usePerspective } from "@coasys/ad4m-vue-hooks";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { Community } from "@coasys/flux-api";
 

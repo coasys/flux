@@ -35,10 +35,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@coasys/flux-react-web": "*",
-    "@coasys/flux-editor": "*",
+    "@coasys/ad4m": "0.9.0-rc2",
+    "@coasys/flux-api": "*",
     "@coasys/flux-comment-section": "*",
-    "@coasys/ad4m": "0.8.1",
+    "@coasys/flux-editor": "*",
+    "@coasys/flux-ui": "*",
+    "@coasys/flux-utils": "0.7.6-aplha.0",
+    "@coasys/ad4m-react-hooks": "0.9.0-rc2-fix",
     "classnames": "^2.3.2",
     "date-fns": "^2.24.0",
     "emoji-picker-element": "^1.14.0",
@@ -52,11 +55,11 @@
   },
   "devDependencies": {
     "@coasys/flux-container": "*",
+    "@preact/preset-vite": "^2.5.0",
     "@types/react": "^17.0.2",
     "np": "^7.5.0",
     "npm-run-all": "^4.1.5",
     "vite": "^4.3.5",
-    "@preact/preset-vite": "^2.5.0",
     "vite-plugin-css-injected-by-js": "^2.3.1"
   }
 }
