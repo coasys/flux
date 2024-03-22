@@ -32,11 +32,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@coasys/ad4m": "0.9.0-rc2",
+    "@coasys/ad4m": "0.9.0-rc6",
     "@coasys/flux-api": "*",
     "@coasys/flux-comment-section": "*",
     "@coasys/flux-container": "*",
-    "@coasys/ad4m-react-hooks": "0.9.0-rc2-fix",
+    "@coasys/ad4m-react-hooks": "0.9.0-rc6",
     "preact": "^10.13.1",
     "uuid": "^9.0.0"
   },

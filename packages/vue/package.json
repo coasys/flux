@@ -22,7 +22,7 @@
     "@coasys/flux-utils": "0.7.6-aplha.0"
   },
   "peerDependencies": {
-    "@coasys/ad4m": "0.9.0-rc2",
+    "@coasys/ad4m": "0.9.0-rc6",
     "vue": "^3.2.47"
   }
 }
