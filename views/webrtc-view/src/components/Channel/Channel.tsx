@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "preact/hooks";
 import { getMe, Me } from "@coasys/flux-api";
-import { useAgent, useWebRTC } from "@coasys/flux-react-web";
+import { useWebRTC } from "@coasys/flux-react-web";
+import { useAgent } from "@coasys/ad4m-react-hooks";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
 
 import UserGrid from "../UserGrid";
@@ -16,6 +17,8 @@ import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 // @ts-ignore
 import styles from "./Channel.module.css";
 import Debug from "../Debug";
+import { profileFormatter } from "@coasys/flux-utils";
+import { Profile } from "@coasys/flux-types";
 
 type Props = {
   source: string;
@@ -31,7 +34,7 @@ export default function Channel({
   const [agent, setAgent] = useState<Agent | null>(null);
   const wrapperEl = useRef<HTMLDivElement | null>(null);
 
-  const { profile } = useAgent({ client: agentClient, did: () => agent?.did });
+  const { profile } = useAgent<Profile>({ client: agentClient, did: () => agent?.did, formatter: profileFormatter });
 
   const wrapperObserver = useIntersectionObserver(wrapperEl, {});
   const isPageActive = !!wrapperObserver?.isIntersecting;
@@ -76,6 +79,7 @@ export default function Channel({
         <JoinScreen
           webRTC={webRTC}
           profile={profile}
+          did={agent?.did}
           onToggleSettings={() => toggleShowSettings(!showSettings)}
         />
       )}

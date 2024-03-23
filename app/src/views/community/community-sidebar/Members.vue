@@ -24,7 +24,7 @@ import { defineComponent, ref, watch, watchEffect } from "vue";
 import AvatarGroup from "@/components/avatar-group/AvatarGroup.vue";
 import { mapActions } from "pinia";
 import { useAppStore } from "@/store/app";
-import { usePerspective } from "@coasys/flux-vue";
+import { usePerspective } from "@coasys/ad4m-vue-hooks";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import { useRoute } from "vue-router";
 

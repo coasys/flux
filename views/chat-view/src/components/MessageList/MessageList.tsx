@@ -1,4 +1,4 @@
-import { useSubjects } from "@coasys/flux-react-web";
+import { useSubjects } from "@coasys/ad4m-react-hooks";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import { Message } from "@coasys/flux-api";
@@ -52,6 +52,8 @@ export default function MessageList({
   const showButtonTimeoutRef = useRef(null);
   const [showButton, setShowButton] = useState(false);
   const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [key, setKey] = useState(0);
 
   const uniqueKey = useRef(generateHashSync(perspective.uuid, source));
 
@@ -86,7 +88,7 @@ export default function MessageList({
     return entries
       .slice()
       .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-  }, [entries]);
+  }, [JSON.stringify(entries)]);
 
   function showAvatar(index: number): boolean {
     const previousMessage = messages[index - 1];
@@ -105,8 +107,17 @@ export default function MessageList({
           ) >= 2;
   }
 
+
+useEffect(() => {
+  setTotalCount(messages.length);
+}, [messages]);
+
+useEffect(() => {
+    setKey(prevKey => prevKey + 1);
+  }, [JSON.stringify(messages)])
+
   return (
-    <div className={styles.messageList}>
+    <div className={styles.messageList} data-value={key}>
       {showButton && (
         <j-button
           circle
@@ -163,14 +174,14 @@ export default function MessageList({
           },
         }}
         ref={virtuosoRef}
-        followOutput={"auto"}
+        followOutput={"smooth"}
         atBottomStateChange={setAtBottom}
         className={styles.scroller}
         alignToBottom
         overscan={{ main: 1000, reverse: 1000 }}
         atBottomThreshold={10}
         computeItemKey={(index) => messages[index].id}
-        totalCount={messages.length}
+        totalCount={totalCount}
         initialTopMostItemIndex={messages.length - 1}
         itemContent={(index) => {
           return (

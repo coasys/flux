@@ -11,6 +11,8 @@ import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
 import styles from "./UserGrid.module.css";
 import { Profile } from "@coasys/flux-types";
+import { useMe } from "@coasys/ad4m-react-hooks";
+import { profileFormatter } from "@coasys/flux-utils";
 
 type Props = {
   webRTC: WebRTC;
@@ -21,6 +23,7 @@ type Props = {
 export default function UserGrid({ webRTC, profile, agentClient }: Props) {
   const [currentReaction, setCurrentReaction] = useState<Reaction>(null);
   const [focusedPeerId, setFocusedPeerId] = useState(null);
+  const {me} = useMe(agentClient, profileFormatter);
 
   const popSound = new Howl({
     src: [popWav],
@@ -100,6 +103,8 @@ export default function UserGrid({ webRTC, profile, agentClient }: Props) {
       );
     });
 
+    console.log("peer 1111", profile);
+
   return (
     <div
       className={styles.grid}
@@ -116,7 +121,7 @@ export default function UserGrid({ webRTC, profile, agentClient }: Props) {
             webRTC.localState.settings.video &&
             !webRTC.localState.settings.screen
           }
-          userId={profile.did}
+          userId={me?.did}
           reaction={myReaction}
           focused={focusedPeerId === profile.did}
           minimised={focusedPeerId && focusedPeerId !== profile.did}

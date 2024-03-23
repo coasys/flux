@@ -29,8 +29,9 @@ import { defineComponent } from "vue";
 import { useAppStore } from "@/store/app";
 import { mapActions, mapState } from "pinia";
 import Avatar from "@/components/avatar/Avatar.vue";
-import { useMe } from "@coasys/flux-vue";
+import { useMe } from "@coasys/ad4m-vue-hooks";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import { profileFormatter } from "@coasys/flux-utils";
 
 export default defineComponent({
   components: {
@@ -41,7 +42,7 @@ export default defineComponent({
 
     const client = await getAd4mClient();
 
-    const { profile, me } = useMe(client.agent);
+    const { profile, me } = useMe(client.agent, profileFormatter);
 
     return {
       me,

@@ -5,17 +5,20 @@ import { WebRTC } from "@coasys/flux-react-web";
 
 import styles from "./JoinScreen.module.css";
 import Disclaimer from "../Disclaimer";
+import Avatar from "../Avatar";
 
 type Props = {
   webRTC: WebRTC;
   profile?: Profile;
   onToggleSettings: () => void;
+  did?: string;
 };
 
 export default function JoinScreen({
   webRTC,
   profile,
   onToggleSettings,
+  did
 }: Props) {
   const videoRef = useRef(null);
 
@@ -49,12 +52,12 @@ export default function JoinScreen({
             <div className={styles.avatar}>
               <>
                 {profile && (
-                  <j-avatar
-                    initials={profile.username?.charAt(0) || "?"}
-                    hash={profile.did || "?"}
-                    src={profile?.profileThumbnailPicture}
+                  <Avatar
+                    initials={profile?.username?.charAt(0) || "?"}
                     size="xl"
-                  ></j-avatar>
+                    profileAddress={profile?.profileThumbnailPicture}
+                    hash={did}
+                  />
                 )}
               </>
             </div>

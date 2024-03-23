@@ -15,11 +15,11 @@
   "dependencies": {
     "@coasys/flux-constants": "*",
     "@coasys/flux-types": "*",
-    "@coasys/flux-utils": "*",
+    "@coasys/flux-utils": "0.7.6-aplha.0",
     "uuid": "^9.0.0"
   },
   "peerDependencies": {
-    "@coasys/ad4m": "0.8.1"
+    "@coasys/ad4m": "0.9.0-rc6"
   },
   "keywords": [],
   "author": "",

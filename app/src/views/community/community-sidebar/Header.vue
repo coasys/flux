@@ -101,8 +101,9 @@ import { useAppStore } from "@/store/app";
 import Avatar from "@/components/avatar/Avatar.vue";
 import LoadingBar from "@/components/loading-bar/LoadingBar.vue";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
-import { useMe } from "@coasys/flux-vue";
+import { useMe } from "@coasys/ad4m-vue-hooks";
 import { Ad4mClient } from "@coasys/ad4m";
+import { profileFormatter } from "@coasys/flux-utils";
 
 export default defineComponent({
   components: { Avatar, LoadingBar },
@@ -116,7 +117,7 @@ export default defineComponent({
   async setup(props) {
     const client: Ad4mClient = await getAd4mClient();
 
-    const { status, me, profile } = useMe(client.agent);
+    const { status, me, profile } = useMe(client.agent, profileFormatter);
 
     return {
       profile,

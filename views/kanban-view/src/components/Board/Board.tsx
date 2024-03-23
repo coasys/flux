@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import styles from "./Board.module.css";
-import { useSubjects } from "@coasys/flux-react-web";
+import { useSubjects } from "@coasys/ad4m-react-hooks";
 import { useEffect, useMemo } from "preact/hooks";
 import { PerspectiveProxy } from "@coasys/ad4m";
 import Card from "../Card";

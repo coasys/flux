@@ -52,7 +52,8 @@ import { ref } from "vue";
 import { useAppStore } from "@/store/app";
 import { defineComponent } from "vue";
 import Avatar from "@/components/avatar/Avatar.vue";
-import { usePerspectives, useCommunities } from "@coasys/flux-vue";
+import { usePerspectives } from "@coasys/ad4m-vue-hooks";
+import { useCommunities } from "@coasys/flux-vue";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 
 export default defineComponent({
