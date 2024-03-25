@@ -1,6 +1,6 @@
 {
   "name": "@coasys/flux-ui",
-  "version": "0.8.0",
+  "version": "0.8.0-rc1",
   "description": "",
   "homepage": "https://docs.fluxsocial.io",
   "main": "dist/main.js",
@@ -24,10 +24,11 @@
     "build:analyze": "web-component-analyzer lib --outFile components.json",
     "build:types": "node buildTypes.js",
     "build:lib": "node esbuild-prod.js",
-    "visualize": "esbuild-visualizer --metadata ./meta.json"
+    "visualize": "esbuild-visualizer --metadata ./meta.json",
+    "publish": "npm publish"
   },
   "dependencies": {
-    "@coasys/flux-utils": "0.8.0",
+    "@coasys/flux-utils": "0.8.0-rc1",
     "@popperjs/core": "^2.11.7",
     "construct-style-sheets-polyfill": "^3.1.0",
     "emoji-mart": "^5.5.2",

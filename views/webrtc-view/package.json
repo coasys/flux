@@ -1,6 +1,6 @@
 {
   "name": "@coasys/flux-webrtc-view",
-  "version": "0.8.0",
+  "version": "0.8.0-rc1",
   "type": "module",
   "fluxapp": {
     "name": "Audio",
@@ -37,7 +37,8 @@
     "dev:serve": "vite --host",
     "dev:watch": "vite build --watch",
     "build": "vite build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "publish": "npm publish"
   },
   "author": "",
   "license": "ISC",

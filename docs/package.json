@@ -1,6 +1,6 @@
 {
   "name": "@coasys/flux-docs",
-  "version": "0.8.0",
+  "version": "0.8.0-rc1",
   "description": "",
   "type": "module",
   "homepage": "https://docs.fluxsocial.io",

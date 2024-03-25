@@ -1,6 +1,6 @@
 {
   "name": "@coasys/flux-kanban-view",
-  "version": "0.7.7",
+  "version": "0.8.0-rc1",
   "fluxapp": {
     "name": "Kanban",
     "description": "Move items on a kanban board",
@@ -27,7 +27,8 @@
     "dev": "vite",
     "build": "vite build",
     "build:page": "vite build index.html",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "publish": "npm publish"
   },
   "author": "",
   "license": "ISC",
