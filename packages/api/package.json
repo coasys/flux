@@ -1,6 +1,6 @@
 {
   "name": "@coasys/flux-api",
-  "version": "0.7.6",
+  "version": "0.8.0",
   "description": "",
   "main": "./src/index.ts",
   "module": "./src/index.ts",
@@ -10,12 +10,13 @@
     "src"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "publish-package": "npm publish"
   },
   "dependencies": {
     "@coasys/flux-constants": "*",
     "@coasys/flux-types": "*",
-    "@coasys/flux-utils": "0.7.6-aplha.0",
+    "@coasys/flux-utils": "0.8.0",
     "uuid": "^9.0.0"
   },
   "peerDependencies": {
