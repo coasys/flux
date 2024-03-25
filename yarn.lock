@@ -1272,16 +1272,16 @@
     type-graphql "1.1.1"
 
 "@coasys/flux-utils@*":
-  version "0.7.6"
-  resolved "https://registry.yarnpkg.com/@coasys/flux-utils/-/flux-utils-0.7.6.tgz#7a4f9d9a956c513ff9193e1fc9efd0001ebb7841"
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@coasys/flux-utils/-/flux-utils-0.8.0.tgz#7a4f9d9a956c513ff9193e1fc9efd0001ebb7841"
   integrity sha512-4sGYpi7pCiJ4cM3q0liINW9u2WzoOTHkIkJQcs9/qe6EzX+sW6O2FV5mCatO4drhnzY6RSJz3TpPSo2kKRgeFg==
   dependencies:
     "@coasys/flux-constants" "*"
     "@coasys/flux-types" "*"
 
 "@coasys/flux-vue@*":
-  version "0.7.6"
-  resolved "https://registry.yarnpkg.com/@coasys/flux-vue/-/flux-vue-0.7.6.tgz#8acd77dafd7ed914eb1ec609df72534dcdc90e74"
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@coasys/flux-vue/-/flux-vue-0.8.0.tgz#8acd77dafd7ed914eb1ec609df72534dcdc90e74"
   integrity sha512-c3bDVJt3qSZpNAe98pSLFczUHoNp7KzQb/X2V7RzW9YQ/VWL1L9WUGkihweLTsJr7EPj6YrHdJwz86+KMGgojw==
   dependencies:
     "@coasys/flux-api" "*"

@@ -1,6 +1,6 @@
 {
   "name": "@coasys/flux-ui",
-  "version": "0.7.6",
+  "version": "0.8.0",
   "description": "",
   "homepage": "https://docs.fluxsocial.io",
   "main": "dist/main.js",
@@ -27,7 +27,7 @@
     "visualize": "esbuild-visualizer --metadata ./meta.json"
   },
   "dependencies": {
-    "@coasys/flux-utils": "0.7.6-aplha.0",
+    "@coasys/flux-utils": "0.8.0",
     "@popperjs/core": "^2.11.7",
     "construct-style-sheets-polyfill": "^3.1.0",
     "emoji-mart": "^5.5.2",
