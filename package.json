@@ -20,7 +20,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
-    "publish": "turbo run publish",
+    "publish-package": "turbo run publish-package",
     "lint": "turbo run lint"
   },
   "devDependencies": {

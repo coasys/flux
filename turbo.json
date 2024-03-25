@@ -11,6 +11,6 @@
     "dev": {
       "cache": false
     },
-    "publish": {}
+    "publish-package": {}
   }
 }
