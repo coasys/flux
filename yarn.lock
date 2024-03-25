@@ -1192,7 +1192,7 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@coasys/ad4m-connect@*", "@coasys/ad4m-connect@0.8.1":
+"@coasys/ad4m-connect@*":
   version "0.8.1"
   resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.8.1.tgz#16e0cf68ccb9ef819092d0733ab078486c6c6115"
   integrity sha512-pbyeescsVOVAnXjn2Uh4BV0oWbuiseHT0HvGmDISdaJztaFv1MNglka2oOFf9xYmwz7PBExYNprnE5g75YVyNQ==
@@ -1229,15 +1229,7 @@
     "@types/react" "^18.2.55"
     "@types/react-dom" "^18.2.19"
 
-"@coasys/ad4m-vue-hooks@*":
-  version "0.9.0"
-  resolved "https://registry.npmjs.org/@coasys/ad4m-vue-hooks/-/ad4m-vue-hooks-0.9.0.tgz#5dbb1bdb817757c55be169ac4b1638feb993f145"
-  integrity sha512-ZGjvYFohWXn6lzpzGRQbkvZ3JXQN2tEl3fA7eVmbTtgL0q6uTeVDMVI/0uMeFZMQKC/Ill0W01Mh2pIRYQevkg==
-  dependencies:
-    "@coasys/ad4m" "*"
-    "@coasys/hooks-helpers" "*"
-
-"@coasys/ad4m@*", "@coasys/ad4m@0.8.1":
+"@coasys/ad4m@*":
   version "0.8.1"
   resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.8.1.tgz#80730bdbb5b36be8dbd2d81533f0763949ae8743"
   integrity sha512-2or0Ykc+F+geDumBABYD/us5Iu9Se2xVRdVcj4h0l7etd9Zx3u5m/Q32YHywJz61DbPQV8Q+zTkYiqF54y9GrA==
@@ -1279,170 +1271,6 @@
     reflect-metadata "^0.1.13"
     type-graphql "1.1.1"
 
-"@coasys/flux-api@*":
-  version "0.7.6"
-  resolved "https://registry.npmjs.org/@coasys/flux-api/-/flux-api-0.7.6.tgz#cc04d52f98f3d35cb718b2d0f3dee2ebac742024"
-  integrity sha512-CoP/jplS+AWQcuWU6xcGv5rpbgDSKnDOFOlO/4qF9VHw2BMTpQIbIug1wYj1l1FG6Y4vGIdzQQ/RAYiX1D8hqQ==
-  dependencies:
-    "@coasys/flux-constants" "*"
-    "@coasys/flux-types" "*"
-    "@coasys/flux-utils" "*"
-    uuid "^9.0.0"
-
-"@coasys/flux-chat-view@*":
-  version "0.7.6"
-  resolved "https://registry.npmjs.org/@coasys/flux-chat-view/-/flux-chat-view-0.7.6.tgz#57b82755d117c887943717c8fad18854e1e39b39"
-  integrity sha512-ZWKB9e5SIyW8c54fa+sfSrnchP737H9TDHUbENM1qZY0Eqlxi9ppjjjG/lLDmDEpIeTjcFn3Rf7EoT1C3i9/4A==
-  dependencies:
-    "@coasys/ad4m" "0.8.1"
-    "@coasys/flux-api" "*"
-    "@coasys/flux-constants" "*"
-    "@coasys/flux-container" "*"
-    "@coasys/flux-editor" "*"
-    "@coasys/flux-react-web" "*"
-    "@coasys/flux-ui" "*"
-    preact "^10.13.1"
-    react-virtuoso "^4.3.6"
-
-"@coasys/flux-comment-section@*":
-  version "0.7.6"
-  resolved "https://registry.npmjs.org/@coasys/flux-comment-section/-/flux-comment-section-0.7.6.tgz#53d0189e89645287deb7befac3ae57504762c15a"
-  integrity sha512-M/03nSzV9f6loeJTM/lyiNYgyVNFfiM5VMk/Mr/o11i1pmsFhO7HpscMykpcrnWoVKZsDXoY+GdcOdZiCLCMiQ==
-  dependencies:
-    "@coasys/flux-editor" "*"
-    "@coasys/flux-types" "*"
-    "@coasys/flux-ui" "*"
-    preact "^10.11.3"
-
-"@coasys/flux-constants@*":
-  version "0.7.6"
-  resolved "https://registry.npmjs.org/@coasys/flux-constants/-/flux-constants-0.7.6.tgz#48dcfc7c02eaefa956f00972560c4c791d99fb0b"
-  integrity sha512-xTdlGgtDPEeoGjZk5I0KJY2BKDy2zPdwxwxDcW4JlH7oT/VrKgNsR99L0C6hU0Q7F4EUSNpUgCjzHUh6SlVSng==
-
-"@coasys/flux-container@*":
-  version "0.7.6"
-  resolved "https://registry.npmjs.org/@coasys/flux-container/-/flux-container-0.7.6.tgz#36d9b44e53dd4b42ddac7366e2700ae086989708"
-  integrity sha512-rncUyPu3Zbw5LJvrqx3hozAo14s0ioQrNOrYZKfuZHvCPOAWQZDQtwbpqT3bTvltXAH06yMq4QLB+n1KtbaOJg==
-  dependencies:
-    "@coasys/ad4m" "0.8.1"
-    "@coasys/ad4m-connect" "0.8.1"
-    "@coasys/flux-api" "*"
-    "@coasys/flux-ui" "*"
-    lit-element "^2.4.0"
-
-"@coasys/flux-editor@*":
-  version "0.7.6"
-  resolved "https://registry.npmjs.org/@coasys/flux-editor/-/flux-editor-0.7.6.tgz#8e7d002a79cd722770edf3c881cef55be5cee3bf"
-  integrity sha512-tqVYIFzGE9jX3Gm4fyawlVYP8FpqSKSP7a+qYXMk0KxoP3HPQuxQwPQfy1XYzHE2z9V+wV7JUJwAennqc9a7wQ==
-  dependencies:
-    "@coasys/ad4m" "0.8.1"
-    "@coasys/ad4m-connect" "0.8.1"
-    "@coasys/flux-api" "*"
-    "@coasys/flux-ui" "*"
-    "@tiptap/core" "^2.0.3"
-    "@tiptap/extension-link" "^2.0.3"
-    "@tiptap/extension-mention" "^2.0.3"
-    "@tiptap/extension-placeholder" "^2.0.3"
-    "@tiptap/pm" "^2.0.3"
-    "@tiptap/starter-kit" "^2.0.3"
-    "@tiptap/suggestion" "^2.0.3"
-    lit-element "^2.4.0"
-
-"@coasys/flux-graph-view@*":
-  version "0.7.6"
-  resolved "https://registry.npmjs.org/@coasys/flux-graph-view/-/flux-graph-view-0.7.6.tgz#d8bc52c3471e512f38ee901eeed26caa8b468cf1"
-  integrity sha512-daz41VjgsS5S3+tDyjIdabbzi6uv4rWbQJ/fwL/cWYTeRCLAEe2taHA66zve6OPaJzvzRlywDyrf1DWjh4/MWw==
-  dependencies:
-    "3d-force-graph" "^1.70.19"
-    "@coasys/ad4m" "0.8.1"
-    "@coasys/flux-container" "*"
-    preact "^10.11.3"
-    three-spritetext "^1.6.5"
-
-"@coasys/flux-kanban-view@*":
-  version "0.7.7"
-  resolved "https://registry.npmjs.org/@coasys/flux-kanban-view/-/flux-kanban-view-0.7.7.tgz#f6cdec48cba31c5d0dc1cf3d520d910cbf511e53"
-  integrity sha512-APL2qDnoCILqLJczbIDBWAfIawPrkwxEyRor/4pm2ssUKUiuAvuKEss808EF1Nze8MU8Iiu226ulXrSijjgwYw==
-  dependencies:
-    "@coasys/ad4m" "0.8.1"
-    "@coasys/flux-api" "*"
-    "@coasys/flux-comment-section" "*"
-    "@coasys/flux-container" "*"
-    "@coasys/flux-react-web" "*"
-    "@coasys/flux-types" "*"
-    fractional-indexing "^3.2.0"
-    preact "^10.13.1"
-    react-beautiful-dnd "^13.1.1"
-
-"@coasys/flux-post-view@*":
-  version "0.7.6"
-  resolved "https://registry.npmjs.org/@coasys/flux-post-view/-/flux-post-view-0.7.6.tgz#e8e93083f816c2e04c082a4034e509501cf16860"
-  integrity sha512-SvJpbGOMD7h1iEsjR5cO5OAv4Euz7dy+S0RTp1jvNq6Ork3JGd8tVEmJvKEGIsBvNAfmsbuirZVOjlvH36p2TA==
-  dependencies:
-    "@coasys/ad4m" "0.8.1"
-    "@coasys/flux-comment-section" "*"
-    "@coasys/flux-editor" "*"
-    "@coasys/flux-react-web" "*"
-    classnames "^2.3.2"
-    date-fns "^2.24.0"
-    emoji-picker-element "^1.14.0"
-    emoji-short-name "^2.0.0"
-    node-emoji "^1.11.0"
-    preact "^10.5.14"
-    react-dropzone "^14.2.3"
-    react-hint "^3.2.1"
-    react-virtuoso "^3.1.1"
-    tippy.js "^6.3.1"
-
-"@coasys/flux-react-web@*":
-  version "0.7.6"
-  resolved "https://registry.npmjs.org/@coasys/flux-react-web/-/flux-react-web-0.7.6.tgz#3ba8ee21f15235456ec624ae109f5a325200ba80"
-  integrity sha512-YpaNqOiFlczD4uJo/OrQjcKX2W7TlQ/Ci6Yz9DgfiyIUOofhv2P8AatuppnZp4AT+fArDfMOTb9Drp/2QqMGnA==
-  dependencies:
-    "@coasys/flux-api" "*"
-    "@coasys/flux-constants" "*"
-    "@coasys/flux-types" "*"
-    "@coasys/flux-utils" "*"
-    "@coasys/flux-webrtc" "*"
-
-"@coasys/flux-table-view@*":
-  version "0.7.6"
-  resolved "https://registry.npmjs.org/@coasys/flux-table-view/-/flux-table-view-0.7.6.tgz#f9380352731356cfb5bbd308558d556401117d44"
-  integrity sha512-WJLF35t30XqQdcsljbMvvC8CIpFkpqXMfE2vPtCC4w4y7W7DwvsFiKIKQzd/ZmAysc3NMtWDkU2/njzzuaUzIg==
-  dependencies:
-    "@coasys/ad4m" "0.8.1"
-    "@coasys/flux-api" "*"
-    "@coasys/flux-comment-section" "*"
-    "@coasys/flux-container" "*"
-    "@coasys/flux-react-web" "*"
-    preact "^10.13.1"
-    uuid "^9.0.0"
-
-"@coasys/flux-types@*":
-  version "0.7.6"
-  resolved "https://registry.npmjs.org/@coasys/flux-types/-/flux-types-0.7.6.tgz#25dbc0ae9592ad215545f39d667cc0a910c99d5a"
-  integrity sha512-8R7LQfC++iidSsMOY5xyX4V8Cp1tx93HVkTEgnHkTnhBJnPVdhFGH+vU0WF42KSNV1hxodhgUIvILUeqkTNYRA==
-
-"@coasys/flux-ui@*":
-  version "0.7.6"
-  resolved "https://registry.npmjs.org/@coasys/flux-ui/-/flux-ui-0.7.6.tgz#616ec8b5dcc19578dfb67cdd4d39f55b9ca86a66"
-  integrity sha512-IveoEmpGyXg5CbMR74yrAkhS+4w1kyTsJb5Plwx/dd7xKtDzmAk6za2pmvdVUvdBk8BQ8rGqqrdam2anB9wVSQ==
-  dependencies:
-    "@coasys/flux-utils" "*"
-    "@popperjs/core" "^2.11.7"
-    construct-style-sheets-polyfill "^3.1.0"
-    emoji-mart "^5.5.2"
-    jdenticon "^3.2.0"
-    lit "^2.7.3"
-
-"@coasys/flux-utils@*":
-  version "0.7.6"
-  resolved "https://registry.npmjs.org/@coasys/flux-utils/-/flux-utils-0.7.6.tgz#7a4f9d9a956c513ff9193e1fc9efd0001ebb7841"
-  integrity sha512-4sGYpi7pCiJ4cM3q0liINW9u2WzoOTHkIkJQcs9/qe6EzX+sW6O2FV5mCatO4drhnzY6RSJz3TpPSo2kKRgeFg==
-  dependencies:
-    "@coasys/flux-constants" "*"
-    "@coasys/flux-types" "*"
-
 "@coasys/flux-vue@*":
   version "0.7.6"
   resolved "https://registry.npmjs.org/@coasys/flux-vue/-/flux-vue-0.7.6.tgz#8acd77dafd7ed914eb1ec609df72534dcdc90e74"
@@ -1452,31 +1280,6 @@
     "@coasys/flux-constants" "*"
     "@coasys/flux-types" "*"
     "@coasys/flux-utils" "*"
-
-"@coasys/flux-webrtc-view@*":
-  version "0.7.6"
-  resolved "https://registry.npmjs.org/@coasys/flux-webrtc-view/-/flux-webrtc-view-0.7.6.tgz#7f096e07a05863b4853ed46d9c55ab94b7978183"
-  integrity sha512-OtnFTsZBxSanJBWqZ+Fv3Tdfm/2TEbHpZYTxv8D0ts3Tk290JY0PPSNBQ4V3+sfFbgqVufaNiDjPv3qO5rrRHQ==
-  dependencies:
-    "@coasys/ad4m" "0.8.1"
-    "@coasys/flux-container" "*"
-    "@coasys/flux-react-web" "*"
-    "@coasys/flux-webrtc" "*"
-    "@types/simple-peer" "^9.11.8"
-    classnames "^2.3.2"
-    emoji-picker-element "^1.14.0"
-    hark "^1.2.3"
-    howler "^2.2.3"
-    npm-run-all "^4.1.5"
-    preact "^10.11.3"
-
-"@coasys/flux-webrtc@*":
-  version "0.7.6"
-  resolved "https://registry.npmjs.org/@coasys/flux-webrtc/-/flux-webrtc-0.7.6.tgz#467bbdd999cab3e269b4177f66cff17c83fc2742"
-  integrity sha512-45FSqiGL2uMfQnVD3S852ZEKeqD53XqZtXDXdC3ca25YbYaMokB5YfA4QCb6FJNkbhBsu5kgfYMZ8l6wWzibLA==
-  dependencies:
-    "@coasys/ad4m" "0.8.1"
-    simple-peer "^9.11.1"
 
 "@coasys/hooks-helpers@*":
   version "0.9.0"

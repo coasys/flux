@@ -1,6 +1,6 @@
 {
   "name": "@coasys/flux-post-view",
-  "version": "0.8.0-rc1",
+  "version": "0.8.0",
   "description": "",
   "fluxapp": {
     "name": "Posts",
@@ -31,7 +31,7 @@
     "dev:server": "vite",
     "dev:dist": "vite build --watch",
     "release": "np --no-tests",
-    "publish": "npm publish"
+    "publish-package": "npm publish"
   },
   "author": "",
   "license": "ISC",
@@ -41,7 +41,7 @@
     "@coasys/flux-comment-section": "*",
     "@coasys/flux-editor": "*",
     "@coasys/flux-ui": "*",
-    "@coasys/flux-utils": "0.8.0-rc1",
+    "@coasys/flux-utils": "0.8.0",
     "@coasys/ad4m-react-hooks": "0.9.0-rc6",
     "classnames": "^2.3.2",
     "date-fns": "^2.24.0",

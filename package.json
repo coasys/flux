@@ -1,6 +1,6 @@
 {
   "name": "flux-monorepo",
-  "version": "0.8.0-rc1",
+  "version": "0.8.0",
   "workspaces": {
     "packages": [
       "packages/**/*",
