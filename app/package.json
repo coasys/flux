@@ -1,6 +1,6 @@
 {
   "name": "flux",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "A social web3 tool kit for communities",
   "author": "josh@junto.foundation",
   "repository": {
@@ -27,7 +27,7 @@
     "@coasys/flux-table-view": "*",
     "@coasys/flux-types": "*",
     "@coasys/flux-ui": "*",
-    "@coasys/flux-utils": "0.8.0",
+    "@coasys/flux-utils": "0.8.1",
     "@coasys/flux-vue": "*",
     "@coasys/flux-webrtc-view": "*",
     "@coasys/ad4m-vue-hooks": "*",

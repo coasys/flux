@@ -1,6 +1,6 @@
 {
   "name": "@coasys/flux-api",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "",
   "main": "./src/index.ts",
   "module": "./src/index.ts",
@@ -16,7 +16,7 @@
   "dependencies": {
     "@coasys/flux-constants": "*",
     "@coasys/flux-types": "*",
-    "@coasys/flux-utils": "0.8.0",
+    "@coasys/flux-utils": "0.8.1",
     "uuid": "^9.0.0"
   },
   "peerDependencies": {
