@@ -103,8 +103,6 @@ export default function UserGrid({ webRTC, profile, agentClient }: Props) {
       );
     });
 
-    console.log("peer 1111", profile);
-
   return (
     <div
       className={styles.grid}
