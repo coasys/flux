@@ -17,8 +17,8 @@
   "main": "background.js",
   "dependencies": {
     "@babel/core": "*",
-    "@coasys/ad4m": "0.9.0",
-    "@coasys/ad4m-connect": "0.9.0",
+    "@coasys/ad4m": "0.9.1-prerelease",
+    "@coasys/ad4m-connect": "0.9.1-prerelease",
     "@coasys/flux-api": "*",
     "@coasys/flux-chat-view": "*",
     "@coasys/flux-graph-view": "*",
