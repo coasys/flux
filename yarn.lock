@@ -1243,20 +1243,6 @@
     reflect-metadata "^0.1.13"
     type-graphql "1.1.1"
 
-"@coasys/ad4m@0.9.1-prerelease":
-  version "0.9.1-prerelease"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.9.1-prerelease.tgz#c4852aedf747ab7fa05c13e14aae52442827bf40"
-  integrity sha512-nVmmetWEZicOy5FXhJaWyLMP4bl//VBfyV4iW9/pC3OUIulldZM0ZXFueRAJuN0mmoeMFzcqTMLaXeGLr3jWcQ==
-  dependencies:
-    "@apollo/client" "3.7.10"
-    "@holochain/client" "0.16.0"
-    "@types/jest" "^26.0.14"
-    class-validator "^0.13.1"
-    express "4.18.2"
-    graphql "15.7.2"
-    reflect-metadata "^0.1.13"
-    type-graphql "1.1.1"
-
 "@coasys/flux-vue@*":
   version "0.7.6"
   resolved "https://registry.npmjs.org/@coasys/flux-vue/-/flux-vue-0.7.6.tgz#8acd77dafd7ed914eb1ec609df72534dcdc90e74"
