@@ -1205,10 +1205,10 @@
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
-"@coasys/ad4m-connect@0.9.1-prerelease":
-  version "0.9.1-prerelease"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.9.1-prerelease.tgz#49ef66cfa7a95b8f92b9a21395cf218f7ace8820"
-  integrity sha512-WGkki/D/hssO2Jp3jpYHllUI9bSTMDrZwF6cW+cTYPhFx8bNcUXPyJyERxp+8IEKUJ+rPu+QESh6M9oQIUQrQQ==
+"@coasys/ad4m-connect@0.10.0-prerelease-fix-1":
+  version "0.10.0-prerelease-fix-1"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.10.0-prerelease-fix-1.tgz#58694d0937ebe653aa9644cc6c0472608db2ad41"
+  integrity sha512-Jdx1z6FM7WjifDET+fqEVCDzJuPqVXiePCZTclbBI3W3KkiGht+/NeYfAoJglLtUIaITdU65bCOIFbLPpS88YA==
   dependencies:
     "@undecaf/barcode-detector-polyfill" "^0.9.15"
     "@undecaf/zbar-wasm" "^0.9.12"
@@ -1233,6 +1233,20 @@
   version "0.9.0"
   resolved "https://registry.npmjs.org/@coasys/ad4m/-/ad4m-0.9.0.tgz#39e917b7263f8d59ee6bca00cc8c16d4ca8f43c3"
   integrity sha512-7b+YYHC3JX05MJHkUjDA0ZbuKxH2/Rp4yiuMCLCDd5TKxVm04OMgo8JlI8vU79jOu5B7kSRSBUKhH+irTKWRFw==
+  dependencies:
+    "@apollo/client" "3.7.10"
+    "@holochain/client" "0.16.0"
+    "@types/jest" "^26.0.14"
+    class-validator "^0.13.1"
+    express "4.18.2"
+    graphql "15.7.2"
+    reflect-metadata "^0.1.13"
+    type-graphql "1.1.1"
+
+"@coasys/ad4m@0.10.0-prerelease":
+  version "0.10.0-prerelease"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.10.0-prerelease.tgz#2d2f70261bd1929502d9f04e58f783117f80c4cf"
+  integrity sha512-Q6pxs/0ZvplcYgwn1zRDVJ8wobmKdt6DukU6uM2LKNd+D6neP/gs173+gxDAB7SdtjGr0/IhvUFHAKDApt2/Fw==
   dependencies:
     "@apollo/client" "3.7.10"
     "@holochain/client" "0.16.0"
