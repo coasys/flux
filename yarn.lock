@@ -1229,6 +1229,14 @@
     "@types/react" "^18.2.55"
     "@types/react-dom" "^18.2.19"
 
+"@coasys/ad4m-vue-hooks@0.10.0-prerelease":
+  version "0.10.0-prerelease"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-vue-hooks/-/ad4m-vue-hooks-0.10.0-prerelease.tgz#5b1660259b09f9ca19745d6bcc96c1203d32be64"
+  integrity sha512-uRbIY9qGvDNiET0gWus9m5l+n1EpECPxgt5AhLdXtfEwz3zzEzIBR4ySlH9ZKLFf9dfTtGPYqlQj6QjU+hA++g==
+  dependencies:
+    "@coasys/ad4m" "*"
+    "@coasys/hooks-helpers" "*"
+
 "@coasys/ad4m@*", "@coasys/ad4m@0.9.0":
   version "0.9.0"
   resolved "https://registry.npmjs.org/@coasys/ad4m/-/ad4m-0.9.0.tgz#39e917b7263f8d59ee6bca00cc8c16d4ca8f43c3"
