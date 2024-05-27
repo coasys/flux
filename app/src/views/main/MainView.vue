@@ -152,9 +152,9 @@ export default defineComponent({
       ad4mExecutorVersion
     );
 
-    if (isIncompatible) {
-      this.$router.push({ name: "update-ad4m" });
-    }
+    //if (isIncompatible) {
+    //  this.$router.push({ name: "update-ad4m" });
+    //}
   },
   computed: {
     hasAlreadyJoinedTestingCommunity(): boolean {
