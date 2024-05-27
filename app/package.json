@@ -18,7 +18,7 @@
   "dependencies": {
     "@babel/core": "*",
     "@coasys/ad4m": "0.10.0-prerelease",
-    "@coasys/ad4m-connect": "0.10.0-prerelease-fix-1",
+    "@coasys/ad4m-connect": "0.10.0-prerelease-fix-2",
     "@coasys/flux-api": "*",
     "@coasys/flux-chat-view": "*",
     "@coasys/flux-graph-view": "*",
