@@ -136,6 +136,17 @@ export default async ({
       removals,
     } as LinkMutations);
 
+    await client.runtime.requestInstallNotification({
+      appName: "Flux",
+      description: "A Social Toolkit for the New Internet",
+      appUrl: window.location.origin,
+      appIconPath: "https://i.ibb.co/GnqjPJP/icon.png",
+      trigger: `triple(Source, Predicate, Target)`,
+      perspectiveIds: [],
+      webhookUrl: "http:localhost:3000/webhook",
+      webhookAuth: ""
+    });
+
     return {
       did: agent.did,
       username: username,
