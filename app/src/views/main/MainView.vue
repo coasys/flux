@@ -17,6 +17,87 @@
     </j-modal>
 
     <j-modal
+      :open="modals.showCreateChannel"
+      @toggle="(e) => setShowCreateChannel(e.target.open)"
+    >
+      <create-channel
+        v-if="modals.showCreateChannel"
+        @submit="() => setShowCreateChannel(false)"
+        @cancel="() => setShowCreateChannel(false)"
+      />
+    </j-modal>
+
+    <j-modal
+      size="sm"
+      :open="modals.showCommunityMembers"
+      @toggle="(e) => setShowCommunityMembers(e.target.open)"
+    >
+      <community-members
+        @close="() => setShowCommunityMembers(false)"
+        v-if="modals.showCommunityMembers"
+      />
+    </j-modal>
+
+    <j-modal
+      size="sm"
+      :open="modals.showEditCommunity"
+      @toggle="(e) => setShowEditCommunity(e.target.open)"
+    >
+      <edit-community
+        :communityId="communityId"
+        v-if="modals.showEditCommunity"
+        @submit="() => setShowEditCommunity(false)"
+        @cancel="() => setShowEditCommunity(false)"
+      />
+    </j-modal>
+
+    <j-modal
+      size="sm"
+      :open="modals.showInviteCode"
+      @toggle="(e) => setShowInviteCode(e.target.open)"
+    >
+      <j-box p="800">
+        <j-box pb="500">
+          <j-text variant="heading">Invite people</j-text>
+          <j-text variant="body">
+            Copy and send this code to the people you want to join your
+            community
+          </j-text>
+        </j-box>
+        <j-input
+          @click="(e) => e.target.select()"
+          size="lg"
+          readonly
+          :value="data.perspective?.sharedUrl"
+        >
+          <j-button @click.stop="getInviteCode" variant="ghost" slot="end"
+            ><j-icon :name="hasCopied ? 'clipboard-check' : 'clipboard'"
+          /></j-button>
+        </j-input>
+      </j-box>
+    </j-modal>
+
+    <j-modal
+      v-if="modals.showEditChannel && appStore.activeChannel"
+      :open="modals.showEditChannel"
+      @toggle="(e) => setShowEditChannel(e.target.open)"
+    >
+      <EditChannel
+        v-if="modals.showEditChannel"
+        @cancel="() => setShowEditChannel(false)"
+        @submit="() => setShowEditChannel(false)"
+        :channelId="appStore.activeChannel"
+      ></EditChannel>
+    </j-modal>
+
+    <j-modal
+      :open="modals.showCommunitySettings"
+      @toggle="(e) => setShowCommunitySettings(e.target.open)"
+    >
+      <community-settings />
+    </j-modal>
+
+    <j-modal
       v-if="modals.showLeaveCommunity && activeCommunity"
       size="sm"
       :open="modals.showLeaveCommunity"
@@ -107,16 +188,25 @@ import { dependencies } from "../../../package.json";
 import { LinkExpression, Literal, PerspectiveProxy } from "@coasys/ad4m";
 import { useSubject, usePerspective, usePerspectives } from "@coasys/ad4m-vue-hooks";
 import { Community } from "@coasys/flux-api";
+import CreateChannel from "@/containers/CreateChannel.vue";
+import EditCommunity from "@/containers/EditCommunity.vue";
+import EditChannel from "@/containers/EditChannel.vue";
+import CommunityMembers from "@/containers/CommunityMembers.vue";
+import CommunitySettings from "@/containers/CommunitySettings.vue";
+import { useRoute } from "vue-router";
 
 export default defineComponent({
   name: "MainAppView",
   async setup() {
+    const route = useRoute();
     const client = await getAd4mClient();
     const appStore = useAppStore();
 
     const { perspectives, onLinkAdded } = usePerspectives(client);
 
-    const { data } = usePerspective(client, () => appStore.activeCommunity);
+    const { data } = usePerspective(client, () => route.params.communityId);
+
+    console.log(data);
 
     const { entry: community } = useSubject({
       perspective: () => data.value.perspective,
@@ -131,12 +221,19 @@ export default defineComponent({
       isJoining: ref(false),
       appStore,
       isInit: ref(false),
+      hasCopied: ref(false),
+      data
     };
   },
   components: {
     MainSidebar,
     AppLayout,
     CreateCommunity,
+    CreateChannel,
+    EditCommunity,
+    EditChannel,
+    CommunityMembers,
+    CommunitySettings,
   },
   async mounted() {
     this.onLinkAdded((p: PerspectiveProxy, link: LinkExpression) => {
@@ -172,8 +269,14 @@ export default defineComponent({
       "setShowEditProfile",
       "setShowSettings",
       "setShowCreateCommunity",
+      "setShowCreateChannel",
       "setShowDisclaimer",
       "setShowLeaveCommunity",
+      "setShowCommunityMembers",
+      "setShowEditCommunity",
+      "setShowEditChannel",
+      "setShowCommunitySettings",
+      "setShowInviteCode",
     ]),
     async leaveCommunity() {
       const client = await getAd4mClient();
@@ -209,6 +312,21 @@ export default defineComponent({
       if (expressionDate > minuteAgo) {
         // TODO: Show message notification
       }
+    },
+    getInviteCode() {
+      // Get the invite code to join community and copy to clipboard
+      const url = this.data.perspective?.sharedUrl;
+      const el = document.createElement("textarea");
+      el.value = `Hey! Here is an invite code to join my private community on Flux: ${url}`;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+      this.hasCopied = true;
+
+      this.appStore.showSuccessToast({
+        message: "Your custom invite code is copied to your clipboard!",
+      });
     },
   },
 });
