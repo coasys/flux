@@ -148,10 +148,10 @@ export default async ({
         property_getter(C, Base, "body", Body),
         literal_from_url(Body, JsonString, _),
         json_property(JsonString, "data", MessageContent),
-        append("data-mention=\"", Did, MentionString),
+        append("data-type=\\\"mention\\\" href=\\\"", Did, MentionString),
         string_includes(MessageContent, MentionString),
         remove_html_tags(MessageContent, Description),
-        Title="You were mentioned"`,
+        Title="You were mentioned".`,
       perspectiveIds: [],
       webhookUrl: "",
       webhookAuth: ""
