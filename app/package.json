@@ -53,6 +53,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-decorators": "^7.20.13",
+    "@capacitor/assets": "^3.0.5",
     "@testing-library/vue": "^6.4.2",
     "@types/jest": "^29.5.12",
     "@types/level": "^6.0.0",
