@@ -1,0 +1,98 @@
+.layout {
+  display: block;
+  grid-template-columns: 1fr;
+  height: 100%;
+}
+
+.viewSelector::part(base) {
+  height: var(--j-size-sm);
+  gap: var(--j-space-400);
+}
+
+.viewSelectorTab::part(base) {
+  gap: var(--j-space-200);
+  padding-left: var(--j-space-200);
+  padding-right: var(--j-space-200);
+  height: calc(var(--j-size-sm) - var(--j-space-200));
+}
+
+.entry {
+  color: var(--j-color-white);
+  background: var(--j-color-primary-500);
+  padding: var(--j-space-500);
+  border-right: 1px solid var(--j-color-ui-100);
+}
+
+.children {
+  height: 100%;
+}
+
+.currentEntryGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--j-space-200);
+}
+
+.currentEntryGrid .entryItem {
+  padding: var(--j-space-500);
+}
+
+.currentEntryGrid aside {
+  padding: var(--j-space-500);
+  border-left: 1px solid var(--j-color-ui-100);
+}
+
+@media (min-width: 800px) {
+  .currentEntryGrid {
+    grid-template-columns: auto 400px;
+  }
+}
+
+.options {
+  display: flex;
+  gap: var(--j-space-200);
+  padding: var(--j-space-300);
+  border-bottom: 1px solid var(--j-color-ui-200);
+}
+
+.tabs {
+  width: 100%;
+  padding: 0;
+  padding-top: var(--j-space-300);
+  display: flex;
+  border: 0;
+  gap: var(--j-space-100);
+}
+
+.tab {
+  cursor: pointer;
+  font-size: var(--j-font-size-400);
+  border-top-right-radius: var(--j-border-radius);
+  border-top-left-radius: var(--j-border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--j-space-400);
+  height: var(--j-size-sm);
+  border: 0;
+  background-color: transparent;
+  color: var(--j-color-white);
+}
+
+.tab:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.tab:has(input:checked) {
+  background: var(--j-color-white);
+  color: var(--j-color-primary-500);
+  font-weight: 600;
+  border: 0;
+}
+
+.tab input {
+  position: absolute;
+  clip: rect(1px 1px 1px 1px);
+  clip: rect(1px, 1px, 1px, 1px);
+  vertical-align: middle;
+}
