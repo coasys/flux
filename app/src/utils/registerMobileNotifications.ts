@@ -67,7 +67,7 @@ export async function registerNotification() {
               remove_html_tags(MessageContent, Description),
               Title="You were mentioned".`,
             perspectiveIds: [],
-            webhookUrl: "localhost:3000/notification",
+            webhookUrl: "http://140.82.10.81:13000/notification",
             webhookAuth: result
         });
     } else {
@@ -88,7 +88,7 @@ export async function registerNotification() {
               remove_html_tags(MessageContent, Description),
               Title="You were mentioned".`,
             perspectiveIds: [],
-            webhookUrl: "",
+            webhookUrl: "http://140.82.10.81:13000/notification",
             webhookAuth: ""
         });
     }
