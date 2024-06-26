@@ -99,6 +99,19 @@ export default async function createCommunity({
 
     const community = await CommunityModel.create(metaData, "ad4m://self");
 
+    const notifications = await client.runtime.notifications();
+
+    const notification = notifications.find(notification => notification.appName === "Flux")
+
+    const notificationId = notification.id
+    delete notification.granted
+    delete notification.id
+
+    await client.runtime.updateNotification(notificationId, {
+      ...notification,
+      perspectiveIds: [...notification.perspectiveIds, perspective.uuid]
+    })
+
     // @ts-ignore
     return {
       uuid: perspective.uuid,

@@ -185,33 +185,35 @@ import { EntryType } from "@coasys/flux-types";
 import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import semver from "semver";
 import { dependencies } from "../../../package.json";
-import { LinkExpression, Literal, PerspectiveProxy } from "@coasys/ad4m";
+import { Ad4mClient, LinkExpression, Literal, PerspectiveProxy } from "@coasys/ad4m";
 import { useSubject, usePerspective, usePerspectives } from "@coasys/ad4m-vue-hooks";
 import { Community } from "@coasys/flux-api";
-import CreateChannel from "@/containers/CreateChannel.vue";
-import EditCommunity from "@/containers/EditCommunity.vue";
-import EditChannel from "@/containers/EditChannel.vue";
-import CommunityMembers from "@/containers/CommunityMembers.vue";
-import CommunitySettings from "@/containers/CommunitySettings.vue";
 import { useRoute } from "vue-router";
 
 export default defineComponent({
   name: "MainAppView",
   async setup() {
     const route = useRoute();
-    const client = await getAd4mClient();
+    const client: Ad4mClient = await getAd4mClient();
     const appStore = useAppStore();
 
     const { perspectives, onLinkAdded } = usePerspectives(client);
 
     const { data } = usePerspective(client, () => route.params.communityId);
 
-    console.log(data);
-
     const { entry: community } = useSubject({
       perspective: () => data.value.perspective,
       subject: Community,
     });
+
+    setTimeout(async () => {
+      if (data.value.perspective) {
+        // @ts-ignore
+        await client.runtime.addNotificationTriggeredCallback((notification: any) => {
+          console.log("notification", notification);
+        });
+      }
+    }, 1000)
 
     return {
       client,
@@ -250,7 +252,7 @@ export default defineComponent({
     );
 
     if (isIncompatible) {
-      this.$router.push({ name: "update-ad4m" });
+      // this.$router.push({ name: "update-ad4m" });
     }
   },
   computed: {

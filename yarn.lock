@@ -1279,7 +1279,7 @@
   resolved "https://registry.yarnpkg.com/@capacitor/push-notifications/-/push-notifications-6.0.1.tgz#d1cd1d2a42cb9e7bd16124100fad2c3bd42325c8"
   integrity sha512-NFVAnmBsyuTFScTMUrgOr3EKnCl9etGeXignC2Y5QsOoqjT+fhVhIUco9BR7Bi48JGdvK/evqzwt36LMF82bBw==
 
-"@coasys/ad4m-connect@*", "@coasys/ad4m-connect@0.9.0":
+"@coasys/ad4m-connect@*":
   version "0.9.0"
   resolved "https://registry.npmjs.org/@coasys/ad4m-connect/-/ad4m-connect-0.9.0.tgz#e420695c24fdf3d1aaafc023d8015e5878d43d86"
   integrity sha512-1SbIoGFioBhhTkzKkElZ6Xk34GQAL8Z3Yh6U35ZYY4q7KJDt+bYxowRATy+A1h0sD+2+MBCoAhfmxPHwb6Hp+w==
@@ -1292,10 +1292,23 @@
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
-"@coasys/ad4m-react-hooks@0.9.0":
-  version "0.9.0"
-  resolved "https://registry.npmjs.org/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.9.0.tgz#15f9a11a273a9f9dbe676722d5d6757814e9d077"
-  integrity sha512-pG7CszlLSbODr26jriJ8BGaJIyOSYQOKSdJcISf8lUltkgLPVhJW3DEa1K4dpRZ0t98BGgnen3NhOCyFWtUjYg==
+"@coasys/ad4m-connect@0.10.0-prerelease-fix-2":
+  version "0.10.0-prerelease-fix-2"
+  resolved "https://registry.npmjs.org/@coasys/ad4m-connect/-/ad4m-connect-0.10.0-prerelease-fix-2.tgz#3751d898ec2efa34e862de5e05441aead1c95e0b"
+  integrity sha512-LsrXTfDBSI33NbnhkGZ3MnraT5Uogojw/n+DyZEWQ8F94KS8zM1u+Ua3Pu4QXLqFdvLF4j8t9E29XjlYzdllxA==
+  dependencies:
+    "@undecaf/barcode-detector-polyfill" "^0.9.15"
+    "@undecaf/zbar-wasm" "^0.9.12"
+    auto-bind "^5.0.1"
+    electron "^20.0.3"
+    esbuild-plugin-copy "^2.1.1"
+    esbuild-plugin-replace "^1.4.0"
+    lit "^2.3.1"
+
+"@coasys/ad4m-react-hooks@0.10.0-prerelease":
+  version "0.10.0-prerelease"
+  resolved "https://registry.npmjs.org/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.10.0-prerelease.tgz#91abd945c17fd19011969f386777da03389fb751"
+  integrity sha512-utEwwTcM6kBd56947yA2EeCTbdrCuCZjkad4nPEcPuc9BOjHZe2iGymHPjsMb6IMgJi3nms2wD0cUmYvi8H+Nw==
   dependencies:
     "@coasys/ad4m" "*"
     "@coasys/ad4m-connect" "*"
@@ -1303,10 +1316,32 @@
     "@types/react" "^18.2.55"
     "@types/react-dom" "^18.2.19"
 
-"@coasys/ad4m@*", "@coasys/ad4m@0.9.0":
+"@coasys/ad4m-vue-hooks@0.10.0-prerelease":
+  version "0.10.0-prerelease"
+  resolved "https://registry.npmjs.org/@coasys/ad4m-vue-hooks/-/ad4m-vue-hooks-0.10.0-prerelease.tgz#5b1660259b09f9ca19745d6bcc96c1203d32be64"
+  integrity sha512-uRbIY9qGvDNiET0gWus9m5l+n1EpECPxgt5AhLdXtfEwz3zzEzIBR4ySlH9ZKLFf9dfTtGPYqlQj6QjU+hA++g==
+  dependencies:
+    "@coasys/ad4m" "*"
+    "@coasys/hooks-helpers" "*"
+
+"@coasys/ad4m@*":
   version "0.9.0"
   resolved "https://registry.npmjs.org/@coasys/ad4m/-/ad4m-0.9.0.tgz#39e917b7263f8d59ee6bca00cc8c16d4ca8f43c3"
   integrity sha512-7b+YYHC3JX05MJHkUjDA0ZbuKxH2/Rp4yiuMCLCDd5TKxVm04OMgo8JlI8vU79jOu5B7kSRSBUKhH+irTKWRFw==
+  dependencies:
+    "@apollo/client" "3.7.10"
+    "@holochain/client" "0.16.0"
+    "@types/jest" "^26.0.14"
+    class-validator "^0.13.1"
+    express "4.18.2"
+    graphql "15.7.2"
+    reflect-metadata "^0.1.13"
+    type-graphql "1.1.1"
+
+"@coasys/ad4m@0.10.0-prerelease":
+  version "0.10.0-prerelease"
+  resolved "https://registry.npmjs.org/@coasys/ad4m/-/ad4m-0.10.0-prerelease.tgz#2d2f70261bd1929502d9f04e58f783117f80c4cf"
+  integrity sha512-Q6pxs/0ZvplcYgwn1zRDVJ8wobmKdt6DukU6uM2LKNd+D6neP/gs173+gxDAB7SdtjGr0/IhvUFHAKDApt2/Fw==
   dependencies:
     "@apollo/client" "3.7.10"
     "@holochain/client" "0.16.0"
