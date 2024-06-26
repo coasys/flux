@@ -1,3 +1,3 @@
-import TableView from "./SynergyDemoView";
+import SynergyDemoView from "./SynergyDemoView";
 
-export default TableView;
+export default SynergyDemoView;

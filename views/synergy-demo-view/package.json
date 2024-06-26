@@ -3,9 +3,9 @@
   "version": "0.8.1",
   "private": false,
   "fluxapp": {
-    "name": "Table",
-    "description": "View and edit your channel data",
-    "icon": "file-earmark-spreadsheet"
+    "name": "Synergy",
+    "description": "Synergise your neighbourhoods data",
+    "icon": "flower2"
   },
   "keywords": [
     "flux-plugin",
@@ -35,10 +35,11 @@
   "description": "",
   "dependencies": {
     "@coasys/ad4m": "0.10.0-prerelease",
+    "@coasys/ad4m-react-hooks": "0.10.0-prerelease",
     "@coasys/flux-api": "*",
     "@coasys/flux-comment-section": "*",
     "@coasys/flux-container": "*",
-    "@coasys/ad4m-react-hooks": "0.10.0-prerelease",
+    "openai": "^4.52.0",
     "preact": "^10.13.1",
     "uuid": "^9.0.0"
   },
