@@ -14,20 +14,22 @@ export async function registerNotification() {
     if (Capacitor.isNativePlatform()) {
         const notificationPromise = new Promise<string>(async (resolve, reject) => {
             const result = await PushNotifications.requestPermissions();
-
+            console.log('Notification permission result:', result);
             if (result.receive === 'granted') {
+                console.log('Notification permission granted');
                 await PushNotifications.register();
+                console.log('Push registration success');
             } else {
                 console.error('Notification permission denied');
             }
 
             PushNotifications.addListener('registration', (token: Token) => {
-                alert('Push registration success, token: ' + token.value);
+                console.log('Push registration success, token: ' + token.value);
                 resolve(token.value);
             });
 
             PushNotifications.addListener('registrationError', (error: any) => {
-                alert('Error on registration: ' + JSON.stringify(error));
+                console.log('Error on registration: ' + JSON.stringify(error));
                 reject(error);
             });
         });
@@ -37,14 +39,14 @@ export async function registerNotification() {
         PushNotifications.addListener(
             'pushNotificationReceived',
             (notification: PushNotificationSchema) => {
-                alert('Push received: ' + JSON.stringify(notification));
+                console.log('Push received: ' + JSON.stringify(notification));
             },
         );
 
         PushNotifications.addListener(
             'pushNotificationActionPerformed',
             (notification: ActionPerformed) => {
-                alert('Push action performed: ' + JSON.stringify(notification));
+                console.log('Push action performed: ' + JSON.stringify(notification));
             },
         );
 
