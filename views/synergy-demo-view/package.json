@@ -1,6 +1,6 @@
 {
   "name": "@coasys/flux-synergy-demo-view",
-  "version": "0.8.1",
+  "version": "0.0.1",
   "private": false,
   "fluxapp": {
     "name": "Synergy",
@@ -37,11 +37,8 @@
     "@coasys/ad4m": "0.10.0-prerelease",
     "@coasys/ad4m-react-hooks": "0.10.0-prerelease",
     "@coasys/flux-api": "*",
-    "@coasys/flux-comment-section": "*",
-    "@coasys/flux-container": "*",
     "openai": "^4.52.0",
-    "preact": "^10.13.1",
-    "uuid": "^9.0.0"
+    "preact": "^10.13.1"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.18.6",
