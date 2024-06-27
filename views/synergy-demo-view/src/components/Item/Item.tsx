@@ -12,20 +12,20 @@ type Props = {
   perspective: any;
   source: any;
   item: any;
+  openAIKey: string;
 };
 
-const apiKey = "";
 const prompt =
   "Analyse the following block of text and return only a JSON object containing three values: topics, meaning, and intent. Topics will be a array of up to 5 strings (one word each in lowercase) describing the topic of the content. Meaning will be a max 3 sentence string summarising the meaning of the content. And Intent will be a single sentence string guessing the intent of the text. :<br/> <br/>";
 
-export default function Item({ perspective, source, item }: Props) {
+export default function Item({ perspective, source, item, openAIKey }: Props) {
   const { type, id, timestamp, text, icon } = item;
   const [processing, setProcessing] = useState(false);
   const [processed, setProcessed] = useState(false);
   const [synergizing, setSynergizing] = useState(false);
   const [synergized, setSynergized] = useState(false);
   const [matches, setMatches] = useState<any[]>([]);
-  const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
+  const [openAIKeyError, setOpenAIKeyError] = useState("");
   const { entries: topics, repo: topicRepo } = useSubjects({
     perspective,
     source: id,
@@ -43,8 +43,13 @@ export default function Item({ perspective, source, item }: Props) {
   });
 
   async function process() {
+    setOpenAIKeyError("");
     setProcessing(true);
     // send prompt & item text to Open AI
+    const openai = new OpenAI({
+      apiKey: openAIKey,
+      dangerouslyAllowBrowser: true,
+    });
     openai.chat.completions
       .create({
         messages: [{ role: "user", content: `${prompt} ${text}` }],
@@ -101,7 +106,14 @@ export default function Item({ perspective, source, item }: Props) {
           })
           .catch(console.log);
       })
-      .catch(console.log);
+      .catch((error) => {
+        console.log(error);
+        if (error.status === 401)
+          setOpenAIKeyError("Enter a valid OpenAI key at the top of the page");
+        if (error.status === 429)
+          setOpenAIKeyError("Your OpenAI key has run out of credits");
+        setProcessing(false);
+      });
   }
 
   async function findMatches(
@@ -250,6 +262,7 @@ export default function Item({ perspective, source, item }: Props) {
                       perspective={perspective}
                       source={source}
                       item={match}
+                      openAIKey={openAIKey}
                     />
                   ))}
                 </j-flex>
@@ -291,6 +304,21 @@ export default function Item({ perspective, source, item }: Props) {
         >
           Process
         </j-button>
+      )}
+
+      {openAIKeyError && (
+        <div className={styles.error}>
+          <j-flex a="center" gap="300">
+            <j-icon
+              name="exclamation-circle"
+              size="xs"
+              color="warning-400"
+            ></j-icon>
+            <j-text nomargin weight="700" size="400" color="warning-400">
+              {openAIKeyError}
+            </j-text>
+          </j-flex>
+        </div>
       )}
     </div>
   );

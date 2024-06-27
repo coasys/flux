@@ -20,3 +20,10 @@
   padding: var(--j-space-400);
   background-color: var(--j-color-ui-100);
 }
+
+.error {
+  margin-top: var(--j-space-400);
+  border: 1px solid var(--j-color-warning-400);
+  border-radius: var(--j-border-radius);
+  padding: var(--j-space-400);
+}
