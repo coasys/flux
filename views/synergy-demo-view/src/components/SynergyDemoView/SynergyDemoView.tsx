@@ -36,9 +36,9 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   useEffect(() => {
     // aggregate all items into array and sort by date
     const newItems = [
-      ...messages.map((message) => transformItem("Message", message)),
-      ...posts.map((post) => transformItem("Post", post)),
-      ...tasks.map((task) => transformItem("Task", task)),
+      ...messages.map((message) => transformItem(source, "Message", message)),
+      ...posts.map((post) => transformItem(source, "Post", post)),
+      ...tasks.map((task) => transformItem(source, "Task", task)),
     ].sort((a, b) => {
       return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });
@@ -67,12 +67,7 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
         </j-box>
         <j-flex direction="column" gap="400">
           {items.map((item) => (
-            <Item
-              perspective={perspective}
-              source={source}
-              item={item}
-              openAIKey={openAIKey}
-            />
+            <Item perspective={perspective} item={item} openAIKey={openAIKey} />
           ))}
         </j-flex>
       </j-box>

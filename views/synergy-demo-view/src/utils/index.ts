@@ -1,6 +1,7 @@
-export function transformItem(type, item) {
+export function transformItem(channelId, type, item) {
   // used to transform message, post, or task expressions into a common format
   const newItem = {
+    channelId,
     type,
     id: item.id,
     author: item.author,

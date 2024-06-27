@@ -10,7 +10,6 @@ import styles from "./Item.module.css";
 
 type Props = {
   perspective: any;
-  source: any;
   item: any;
   openAIKey: string;
 };
@@ -18,7 +17,7 @@ type Props = {
 const prompt =
   "Analyse the following block of text and return only a JSON object containing three values: topics, meaning, and intent. Topics will be a array of up to 5 strings (one word each in lowercase) describing the topic of the content. Meaning will be a max 3 sentence string summarising the meaning of the content. And Intent will be a single sentence string guessing the intent of the text. :<br/> <br/>";
 
-export default function Item({ perspective, source, item, openAIKey }: Props) {
+export default function Item({ perspective, item, openAIKey }: Props) {
   const { type, id, timestamp, text, icon } = item;
   const [processing, setProcessing] = useState(false);
   const [processed, setProcessed] = useState(false);
@@ -140,7 +139,9 @@ export default function Item({ perspective, source, item, openAIKey }: Props) {
               // search for matches with source topics
               instanceTopics.forEach((it: any) => {
                 if (topics.map((t) => t.topic).includes(it.topic))
-                  newMatches.push(transformItem(subjectClass, instance));
+                  newMatches.push(
+                    transformItem(channelId, subjectClass, instance)
+                  );
               });
               resolve();
             })
@@ -165,7 +166,7 @@ export default function Item({ perspective, source, item, openAIKey }: Props) {
     let newMatches = [];
     Promise.all(
       channels
-        .filter((channel: any) => channel.id !== source)
+        .filter((channel: any) => channel.id !== item.channelId)
         .map(
           (channel: any) =>
             new Promise(async (resolve: any) => {
@@ -260,7 +261,6 @@ export default function Item({ perspective, source, item, openAIKey }: Props) {
                   {matches.map((match) => (
                     <Item
                       perspective={perspective}
-                      source={source}
                       item={match}
                       openAIKey={openAIKey}
                     />
