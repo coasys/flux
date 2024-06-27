@@ -5,7 +5,7 @@ import { useEffect, useState } from "preact/hooks";
 import Intent from "../../models/Intent";
 import Meaning from "../../models/Meaning";
 import Topic from "../../models/Topic";
-import { transformItems } from "./../../utils";
+import { transformItem } from "./../../utils";
 import styles from "./Item.module.css";
 
 type Props = {
@@ -140,13 +140,13 @@ export default function Item({ perspective, source, item, openAIKey }: Props) {
               // search for matches with source topics
               instanceTopics.forEach((it: any) => {
                 if (topics.map((t) => t.topic).includes(it.topic))
-                  newMatches.push(instance);
+                  newMatches.push(transformItem(subjectClass, instance));
               });
               resolve();
             })
         )
       )
-        .then(() => resolveMatches(transformItems(subjectClass, newMatches)))
+        .then(() => resolveMatches(newMatches))
         .catch((error) => {
           console.log(error);
           resolveMatches([]);

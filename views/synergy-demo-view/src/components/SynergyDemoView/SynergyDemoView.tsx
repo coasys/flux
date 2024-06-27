@@ -4,7 +4,7 @@ import { Message, Post } from "@coasys/flux-api";
 import { isEqual } from "lodash";
 import { useEffect, useState } from "preact/hooks";
 import Item from "../Item";
-import { transformItems } from "./../../utils";
+import { transformItem } from "./../../utils";
 import styles from "./SynergyDemoView.module.css";
 // import { PerspectiveProxy } from "@coasys/ad4m";
 
@@ -36,9 +36,9 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
   useEffect(() => {
     // aggregate all items into array and sort by date
     const newItems = [
-      ...transformItems("Message", messages),
-      ...transformItems("Post", posts),
-      ...transformItems("Task", tasks),
+      ...messages.map((message) => transformItem("Message", message)),
+      ...posts.map((post) => transformItem("Post", post)),
+      ...tasks.map((task) => transformItem("Task", task)),
     ].sort((a, b) => {
       return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });
