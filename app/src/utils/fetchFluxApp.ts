@@ -7,6 +7,7 @@ const fetchFluxApp = async function (packageName: string) {
     "@coasys/flux-table-view",
     "@coasys/flux-kanban-view",
     "@coasys/flux-webrtc-view",
+    "@coasys/flux-synergy-demo-view"
   ];
   const isOfficialApp = officialPackages.includes(packageName);
 
@@ -26,6 +27,9 @@ const fetchFluxApp = async function (packageName: string) {
       }
       if (packageName === "@coasys/flux-table-view") {
         module = await import("@coasys/flux-table-view");
+      }
+      if (packageName === "@coasys/flux-synergy-demo-view") {
+        module = await import("@coasys/flux-synergy-demo-view");
       }
       if (packageName === "@coasys/flux-kanban-view") {
         module = await import("@coasys/flux-kanban-view");
