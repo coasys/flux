@@ -12,6 +12,12 @@ import { getAd4mClient } from '@coasys/ad4m-connect';
 export async function registerNotification() {
     const client: Ad4mClient = await getAd4mClient();
     if (Capacitor.isNativePlatform()) {
+        const isNotificationRegistered = localStorage.getItem('notificationRegistered');
+
+        if (isNotificationRegistered) {
+            return;
+        }
+        
         const notificationPromise = new Promise<string>(async (resolve, reject) => {
             const result = await PushNotifications.requestPermissions();
             console.log('Notification permission result:', result);
@@ -19,6 +25,8 @@ export async function registerNotification() {
                 console.log('Notification permission granted');
                 await PushNotifications.register();
                 console.log('Push registration success');
+
+                localStorage.setItem('notificationRegistered', 'true');
             } else {
                 console.error('Notification permission denied');
             }
