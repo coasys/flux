@@ -177,6 +177,11 @@ import MainSidebar from "./main-sidebar/MainSidebar.vue";
 import { defineComponent, ref, watch } from "vue";
 
 import CreateCommunity from "@/containers/CreateCommunity.vue";
+import CreateChannel from "@/containers/CreateChannel.vue";
+import EditCommunity from "@/containers/EditCommunity.vue";
+import CommunityMembers from "@/containers/CommunityMembers.vue";
+import EditChannel from "@/containers/EditChannel.vue";
+import CommunitySettings from "@/containers/CommunitySettings.vue";
 import { ModalsState } from "@/store/types";
 import { useAppStore } from "@/store/app";
 import { mapActions } from "pinia";
