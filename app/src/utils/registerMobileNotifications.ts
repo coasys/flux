@@ -11,6 +11,9 @@ import { getAd4mClient } from '@coasys/ad4m-connect';
 
 export async function registerNotification() {
     const client: Ad4mClient = await getAd4mClient();
+    const perspctives = await client.perspective.all();
+    const perspectiveIds = perspctives.map((p) => p.uuid);
+    
     if (Capacitor.isNativePlatform()) {
         console.log('Native platform detected');
         const isNotificationRegistered = localStorage.getItem('notificationRegistered');
@@ -76,7 +79,7 @@ export async function registerNotification() {
               string_includes(MessageContent, MentionString),
               remove_html_tags(MessageContent, Description),
               Title="You were mentioned".`,
-            perspectiveIds: [],
+            perspectiveIds: perspectiveIds,
             webhookUrl: "http://140.82.10.81:13000/notification",
             webhookAuth: result
         });
@@ -97,7 +100,7 @@ export async function registerNotification() {
               string_includes(MessageContent, MentionString),
               remove_html_tags(MessageContent, Description),
               Title="You were mentioned".`,
-            perspectiveIds: [],
+            perspectiveIds: perspectiveIds,
             webhookUrl: "http://140.82.10.81:13000/notification",
             webhookAuth: ""
         });
