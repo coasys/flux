@@ -13,7 +13,7 @@ export async function registerNotification() {
     const client: Ad4mClient = await getAd4mClient();
     const perspctives = await client.perspective.all();
     const perspectiveIds = perspctives.map((p) => p.uuid);
-    
+
     if (Capacitor.isNativePlatform()) {
         console.log('Native platform detected');
         const isNotificationRegistered = localStorage.getItem('notificationRegistered');
@@ -22,7 +22,7 @@ export async function registerNotification() {
             return;
         }
         console.log('Requesting notification permission');
-        
+
         const notificationPromise = new Promise<string>(async (resolve, reject) => {
             const result = await PushNotifications.requestPermissions();
             console.log('Notification permission result:', result);
@@ -38,6 +38,7 @@ export async function registerNotification() {
 
             PushNotifications.addListener('registration', (token: Token) => {
                 console.log('Push registration success, token: ' + token.value);
+                localStorage.setItem('notificationToken', token.value);
                 resolve(token.value);
             });
 
