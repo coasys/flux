@@ -29,6 +29,7 @@
     "@coasys/flux-kanban-view": "*",
     "@coasys/flux-post-view": "*",
     "@coasys/flux-table-view": "*",
+    "@coasys/flux-synergy-demo-view": "*",
     "@coasys/flux-types": "*",
     "@coasys/flux-ui": "*",
     "@coasys/flux-utils": "0.8.1",
