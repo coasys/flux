@@ -194,6 +194,7 @@ import { Ad4mClient, LinkExpression, Literal, PerspectiveProxy } from "@coasys/a
 import { useSubject, usePerspective, usePerspectives } from "@coasys/ad4m-vue-hooks";
 import { Community } from "@coasys/flux-api";
 import { useRoute } from "vue-router";
+import { registerNotification } from "../../utils/registerMobileNotifications";
 
 export default defineComponent({
   name: "MainAppView",
@@ -243,6 +244,8 @@ export default defineComponent({
     CommunitySettings,
   },
   async mounted() {
+    registerNotification();
+    
     this.onLinkAdded((p: PerspectiveProxy, link: LinkExpression) => {
       if (link.data.predicate === EntryType.Message) {
         this.gotNewMessage(p, link);
