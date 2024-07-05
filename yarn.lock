@@ -1305,6 +1305,19 @@
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
+"@coasys/ad4m-connect@0.10.0-prerelease-fix-3":
+  version "0.10.0-prerelease-fix-3"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.10.0-prerelease-fix-3.tgz#c0a5ef61af1b52a35a0c924c7eed052cce9556ae"
+  integrity sha512-mf/sC1r1YjV53xjjN8CHEa75VFgYlI5EfuTpQwyK4grLq2sI4CKVLWzzvbphPLqK+Rb7DFug7f2VhzFqCUZPGw==
+  dependencies:
+    "@undecaf/barcode-detector-polyfill" "^0.9.15"
+    "@undecaf/zbar-wasm" "^0.9.12"
+    auto-bind "^5.0.1"
+    electron "^20.0.3"
+    esbuild-plugin-copy "^2.1.1"
+    esbuild-plugin-replace "^1.4.0"
+    lit "^2.3.1"
+
 "@coasys/ad4m-react-hooks@0.10.0-prerelease":
   version "0.10.0-prerelease"
   resolved "https://registry.npmjs.org/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.10.0-prerelease.tgz#91abd945c17fd19011969f386777da03389fb751"
@@ -1318,7 +1331,7 @@
 
 "@coasys/ad4m-vue-hooks@0.10.0-prerelease":
   version "0.10.0-prerelease"
-  resolved "https://registry.npmjs.org/@coasys/ad4m-vue-hooks/-/ad4m-vue-hooks-0.10.0-prerelease.tgz#5b1660259b09f9ca19745d6bcc96c1203d32be64"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-vue-hooks/-/ad4m-vue-hooks-0.10.0-prerelease.tgz#5b1660259b09f9ca19745d6bcc96c1203d32be64"
   integrity sha512-uRbIY9qGvDNiET0gWus9m5l+n1EpECPxgt5AhLdXtfEwz3zzEzIBR4ySlH9ZKLFf9dfTtGPYqlQj6QjU+hA++g==
   dependencies:
     "@coasys/ad4m" "*"
@@ -1340,7 +1353,7 @@
 
 "@coasys/ad4m@0.10.0-prerelease":
   version "0.10.0-prerelease"
-  resolved "https://registry.npmjs.org/@coasys/ad4m/-/ad4m-0.10.0-prerelease.tgz#2d2f70261bd1929502d9f04e58f783117f80c4cf"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.10.0-prerelease.tgz#2d2f70261bd1929502d9f04e58f783117f80c4cf"
   integrity sha512-Q6pxs/0ZvplcYgwn1zRDVJ8wobmKdt6DukU6uM2LKNd+D6neP/gs173+gxDAB7SdtjGr0/IhvUFHAKDApt2/Fw==
   dependencies:
     "@apollo/client" "3.7.10"
