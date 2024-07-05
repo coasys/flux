@@ -1192,6 +1192,14 @@
   resolved "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@capacitor-community/barcode-scanner@^4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@capacitor-community/barcode-scanner/-/barcode-scanner-4.0.1.tgz#921aa5dda3d55aa888cf8dd4896fd56bdb63841d"
+  integrity sha512-acuhDU2mqskSeCIQMc5TGNnDszXXs4IqEES+3C2JDiq+MkJMTr+B2Dhq4k55hlkRFMOumMhlnbr2R9G6qyFPhw==
+  dependencies:
+    "@zxing/browser" "^0.1.3"
+    "@zxing/library" "^0.20.0"
+
 "@capacitor/android@^6.0.0":
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/@capacitor/android/-/android-6.0.0.tgz#eb24c64a5c6821fbbb8db48eedf50eca18876318"
@@ -1269,6 +1277,13 @@
   dependencies:
     tslib "^2.1.0"
 
+"@capacitor/core@^6.1.0":
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/@capacitor/core/-/core-6.1.0.tgz#1b4a93f3d5976ce3fd4a7f1b797c48c1243ec934"
+  integrity sha512-Kt4ONm0X9xxJXn9Q73oBaKdzep5B/VJw3VjXa2eGul4cD2k37mJwgjpXSMRnLH0Aju5bCiRL8J/hMAfTlokO6A==
+  dependencies:
+    tslib "^2.1.0"
+
 "@capacitor/ios@^6.0.0":
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/@capacitor/ios/-/ios-6.0.0.tgz#b04ce2967d732c73ebf29ec38b4b585255930e43"
@@ -1305,11 +1320,13 @@
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
-"@coasys/ad4m-connect@0.10.0-prerelease-fix-3":
-  version "0.10.0-prerelease-fix-3"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.10.0-prerelease-fix-3.tgz#c0a5ef61af1b52a35a0c924c7eed052cce9556ae"
-  integrity sha512-mf/sC1r1YjV53xjjN8CHEa75VFgYlI5EfuTpQwyK4grLq2sI4CKVLWzzvbphPLqK+Rb7DFug7f2VhzFqCUZPGw==
+"@coasys/ad4m-connect@0.10.0-rc1":
+  version "0.10.0-rc1"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-connect/-/ad4m-connect-0.10.0-rc1.tgz#e93f7d0dce4655d3fe6211c853832519aa175ca1"
+  integrity sha512-ANpwTuIC9HOLuSCPoa8Gk8aPQwrENHuqPnBlYppgnNtvASJWIfH17qla1UJdZSJdIyEpPJYo5Bu/zSdJ3NjGPg==
   dependencies:
+    "@capacitor-community/barcode-scanner" "^4.0.1"
+    "@capacitor/core" "^6.1.0"
     "@undecaf/barcode-detector-polyfill" "^0.9.15"
     "@undecaf/zbar-wasm" "^0.9.12"
     auto-bind "^5.0.1"
@@ -1318,10 +1335,10 @@
     esbuild-plugin-replace "^1.4.0"
     lit "^2.3.1"
 
-"@coasys/ad4m-react-hooks@0.10.0-prerelease":
-  version "0.10.0-prerelease"
-  resolved "https://registry.npmjs.org/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.10.0-prerelease.tgz#91abd945c17fd19011969f386777da03389fb751"
-  integrity sha512-utEwwTcM6kBd56947yA2EeCTbdrCuCZjkad4nPEcPuc9BOjHZe2iGymHPjsMb6IMgJi3nms2wD0cUmYvi8H+Nw==
+"@coasys/ad4m-react-hooks@0.10.0-rc1":
+  version "0.10.0-rc1"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-react-hooks/-/ad4m-react-hooks-0.10.0-rc1.tgz#3828e1ce3635db7dea88029838ff825e6305b122"
+  integrity sha512-Ye4Js4PP+5s52xByN4MCkKRr/z62vV25+Hs58Uest0dykEIwfW3MDQXQbTErp/0iEm9VAWolPxVpp989/cVhiQ==
   dependencies:
     "@coasys/ad4m" "*"
     "@coasys/ad4m-connect" "*"
@@ -1329,10 +1346,10 @@
     "@types/react" "^18.2.55"
     "@types/react-dom" "^18.2.19"
 
-"@coasys/ad4m-vue-hooks@0.10.0-prerelease":
-  version "0.10.0-prerelease"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m-vue-hooks/-/ad4m-vue-hooks-0.10.0-prerelease.tgz#5b1660259b09f9ca19745d6bcc96c1203d32be64"
-  integrity sha512-uRbIY9qGvDNiET0gWus9m5l+n1EpECPxgt5AhLdXtfEwz3zzEzIBR4ySlH9ZKLFf9dfTtGPYqlQj6QjU+hA++g==
+"@coasys/ad4m-vue-hooks@0.10.0-rc1":
+  version "0.10.0-rc1"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m-vue-hooks/-/ad4m-vue-hooks-0.10.0-rc1.tgz#9b4e6715b81176e39f090957269ecc17c77de8d0"
+  integrity sha512-+sYbgHGxNWSQzqmnfGjDL5KswGQgk0VSxPw/AAL61q5qmiwSyvG/adtRWdfqKrn+OCYNNN1wkldXFJDoJDX6Yg==
   dependencies:
     "@coasys/ad4m" "*"
     "@coasys/hooks-helpers" "*"
@@ -1351,10 +1368,10 @@
     reflect-metadata "^0.1.13"
     type-graphql "1.1.1"
 
-"@coasys/ad4m@0.10.0-prerelease":
-  version "0.10.0-prerelease"
-  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.10.0-prerelease.tgz#2d2f70261bd1929502d9f04e58f783117f80c4cf"
-  integrity sha512-Q6pxs/0ZvplcYgwn1zRDVJ8wobmKdt6DukU6uM2LKNd+D6neP/gs173+gxDAB7SdtjGr0/IhvUFHAKDApt2/Fw==
+"@coasys/ad4m@0.10.0-rc1":
+  version "0.10.0-rc1"
+  resolved "https://registry.yarnpkg.com/@coasys/ad4m/-/ad4m-0.10.0-rc1.tgz#40607e4262d6a98a3bd4805ce96e063ababe495f"
+  integrity sha512-tE2fRvmhYQC+WO1rR/mi5QCne6GdYFQICrp2f9ZQ0vknNHs+AxxAlbjG91URkWEFLCWevatvp3Z9PivBbDjhsg==
   dependencies:
     "@apollo/client" "3.7.10"
     "@holochain/client" "0.16.0"
@@ -3390,6 +3407,27 @@
   version "1.1.0"
   resolved "https://registry.npmjs.org/@yarnpkg/lockfile/-/lockfile-1.1.0.tgz#e77a97fbd345b76d83245edcd17d393b1b41fb31"
   integrity sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==
+
+"@zxing/browser@^0.1.3":
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/@zxing/browser/-/browser-0.1.5.tgz#94c0cdbc8ab5114a82dadee54939de6d9bf7e313"
+  integrity sha512-4Lmrn/il4+UNb87Gk8h1iWnhj39TASEHpd91CwwSJtY5u+wa0iH9qS0wNLAWbNVYXR66WmT5uiMhZ7oVTrKfxw==
+  optionalDependencies:
+    "@zxing/text-encoding" "^0.9.0"
+
+"@zxing/library@^0.20.0":
+  version "0.20.0"
+  resolved "https://registry.yarnpkg.com/@zxing/library/-/library-0.20.0.tgz#11bc411b87693015389555c589da61532879be7b"
+  integrity sha512-6Ev6rcqVjMakZFIDvbUf0dtpPGeZMTfyxYg4HkVWioWeN7cRcnUWT3bU6sdohc82O1nPXcjq6WiGfXX2Pnit6A==
+  dependencies:
+    ts-custom-error "^3.2.1"
+  optionalDependencies:
+    "@zxing/text-encoding" "~0.9.0"
+
+"@zxing/text-encoding@^0.9.0", "@zxing/text-encoding@~0.9.0":
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/@zxing/text-encoding/-/text-encoding-0.9.0.tgz#fb50ffabc6c7c66a0c96b4c03e3d9be74864b70b"
+  integrity sha512-U/4aVJ2mxI0aDNI8Uq0wEhMgY+u4CNtEb0om3+y3+niDAsoTCOB33UF0sxpzqzdqXLqmvc+vZyAt4O8pPdfkwA==
 
 JSONStream@^1.0.4:
   version "1.3.5"
@@ -11769,6 +11807,11 @@ trim-newlines@^3.0.0:
   version "3.0.1"
   resolved "https://registry.npmjs.org/trim-newlines/-/trim-newlines-3.0.1.tgz#260a5d962d8b752425b32f3a7db0dcacd176c144"
   integrity sha512-c1PTsA3tYrIsLGkJkzHF+w9F2EyxfXGo4UyJc4pFL++FMjnq0HJS69T3M7d//gKrFKwy429bouPescbjecU+Zw==
+
+ts-custom-error@^3.2.1:
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/ts-custom-error/-/ts-custom-error-3.3.1.tgz#8bd3c8fc6b8dc8e1cb329267c45200f1e17a65d1"
+  integrity sha512-5OX1tzOjxWEgsr/YEUWSuPrQ00deKLh6D7OTWcvNHm12/7QPyRh8SYpyWvA4IZv8H/+GQWQEh/kwo95Q9OVW1A==
 
 ts-invariant@^0.10.3:
   version "0.10.3"
