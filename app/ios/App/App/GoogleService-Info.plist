@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.coasys.flux</string>
+	<string>org.coasys.flux</string>
 	<key>PROJECT_ID</key>
 	<string>flux-6e299</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:440878613926:ios:18b2dc0704d14e5f627b67</string>
+	<string>1:440878613926:ios:6d6ec25d9c2dc148627b67</string>
 </dict>
 </plist>

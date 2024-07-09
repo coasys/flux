@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:440878613926:android:b57e0cb8e643e385627b67",
+        "mobilesdk_app_id": "1:440878613926:android:ceba9b4b3e917944627b67",
         "android_client_info": {
-          "package_name": "com.coasys.flux"
+          "package_name": "org.coasys.flux"
         }
       },
       "oauth_client": [],
