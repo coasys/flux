@@ -76,6 +76,7 @@ export default defineComponent({
   position: absolute;
   left: 0;
   top: 0;
+  padding-top: env(safe-area-inset-top);
   width: var(--app-main-sidebar-width);
   display: flex;
   flex-direction: column;
