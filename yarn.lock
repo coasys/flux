@@ -1294,6 +1294,11 @@
   resolved "https://registry.yarnpkg.com/@capacitor/push-notifications/-/push-notifications-6.0.1.tgz#d1cd1d2a42cb9e7bd16124100fad2c3bd42325c8"
   integrity sha512-NFVAnmBsyuTFScTMUrgOr3EKnCl9etGeXignC2Y5QsOoqjT+fhVhIUco9BR7Bi48JGdvK/evqzwt36LMF82bBw==
 
+"@capacitor/status-bar@^6.0.0":
+  version "6.0.0"
+  resolved "https://registry.npmjs.org/@capacitor/status-bar/-/status-bar-6.0.0.tgz#dd487b1e5fc7c5717de85f2ec8fcdfe1c9a6962c"
+  integrity sha512-Wo0ILugYlmENegKDgTzVCPjbvP8h1ObgHslLdgeVG643ViMS/diausHIq8e104WIKCXtKIELmQeYVp9mX7932g==
+
 "@coasys/ad4m-connect@*":
   version "0.9.0"
   resolved "https://registry.npmjs.org/@coasys/ad4m-connect/-/ad4m-connect-0.9.0.tgz#e420695c24fdf3d1aaafc023d8015e5878d43d86"
