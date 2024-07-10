@@ -35,7 +35,7 @@ export default function Channel({
   const wrapperEl = useRef<HTMLDivElement | null>(null);
 
   const { profile } = useAgent<Profile>({ client: agentClient, did: () => agent?.did, formatter: (profile: any) => {
-    return profileFormatter(profile.perspective.links)
+    return profileFormatter(profile?.perspective?.links || profile)
   } });
   const wrapperObserver = useIntersectionObserver(wrapperEl, {});
   const isPageActive = !!wrapperObserver?.isIntersecting;
