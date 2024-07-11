@@ -21,6 +21,9 @@
                 {{ channel?.name }}
               </j-text>
             </j-flex>
+            <j-box pl="600">
+              <j-text variant="label" size="200">Change View</j-text>
+            </j-box>
         </j-box>
           <j-tooltip placement="auto" title="Manage views">
               <j-button
