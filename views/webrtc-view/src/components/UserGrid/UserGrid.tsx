@@ -46,7 +46,7 @@ export default function UserGrid({ webRTC, profile, agentClient }: Props) {
 
   // Grid sizing
 
-  const gridColSize = focusedPeerId
+  const gridColSize = window.innerWidth <= 768 ? 1 : focusedPeerId
     ? 1
     : userCount === 1
       ? 1
