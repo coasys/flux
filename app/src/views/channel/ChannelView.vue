@@ -13,7 +13,27 @@
         <j-icon color="ui-800" size="md" name="arrow-left-short" />
       </j-button>
 
-      <div class="channel-view__header-actions">
+      <div v-if="isMobile" class="channel-view__header-actions">
+        <j-box pr="500" @click="onIsChannelChange">
+            <j-flex a="center" gap="200">
+              <j-icon name="hash" size="md" color="ui-300"></j-icon>
+              <j-text color="black" weight="700" size="500" nomargin>
+                {{ channel?.name }}
+              </j-text>
+            </j-flex>
+        </j-box>
+          <j-tooltip placement="auto" title="Manage views">
+              <j-button
+                v-if="sameAgent"
+                @click="() => goToEditChannel(channel?.id)"
+                size="sm"
+                variant="ghost"
+              >
+                <j-icon size="md" name="plus"></j-icon>
+              </j-button>
+            </j-tooltip>
+      </div>
+      <div class="channel-view__header-actions" v-if="!isMobile">
         <div class="channel-view__header-left">
           <j-box pr="500">
             <j-flex a="center" gap="200">
@@ -34,7 +54,6 @@
               <input
                 :name="channel?.id"
                 type="radio"
-                :checked.prop="app.pkg === currentView"
                 :value.prop="app.pkg"
                 @change="changeCurrentView"
               />
@@ -54,7 +73,7 @@
           </div>
         </div>
       </div>
-      <div class="channel-view__header-right">
+      <div v-if="!isMobile"  class="channel-view__header-right">
         <j-tooltip
           placement="auto"
           :title="isExpanded ? 'Minimize' : 'Fullsize'"
@@ -108,6 +127,30 @@
         <Hourglass width="30px"></Hourglass>
         <j-text variant="heading">Joining community</j-text>
         <j-text>Please wait...</j-text>
+      </j-box>
+    </j-modal>
+    <j-modal size="xs" v-if="isChangeChannel" :open="isChangeChannel">
+      <j-box pt="600" pb="800" px="400">
+        <j-box pb="300">
+          <j-text variant="heading-sm">Select a channel</j-text>
+        </j-box>
+            <label
+              :class="{
+                'channel-view-tab-2': true,
+                checked: app.pkg === currentView,
+              }"
+              v-for="app in apps"
+              @click="changeCurrentView"
+            >
+              <input
+                :name="channel?.id"
+                type="radio"
+                :checked.prop="app.pkg === currentView"
+                :value.prop="app.pkg"
+              />
+              <j-icon :name="app.icon" size="xs"></j-icon>
+              <span>{{ app.name }}</span>
+            </label>
       </j-box>
     </j-modal>
   </div>
@@ -201,11 +244,15 @@ export default defineComponent({
       showProfile: ref(false),
       isJoiningCommunity: ref(false),
       isExpanded: ref(false),
+      isChangeChannel: ref(false)
     };
   },
   computed: {
     sameAgent() {
       return this.channel?.author === this.agent?.did;
+    },
+    isMobile() {
+      return window.innerWidth <= 768;
     },
   },
   watch: {
@@ -282,12 +329,17 @@ export default defineComponent({
     changeCurrentView(e: any) {
       const value = e.target.value;
       this.currentView = value;
+      console.log("changed view", value);
+      this.isChangeChannel = false;
     },
     toggleSidebar() {
       this.appStore.toggleSidebar();
     },
     onAgentClick(did: string) {
       this.toggleProfile(true, did);
+    },
+    onIsChannelChange() {
+      this.isChangeChannel = !this.isChangeChannel;
     },
     onChannelClick(channel: string) {
       this.$router.push({
@@ -443,7 +495,26 @@ export default defineComponent({
   border-bottom: 1px solid transparent;
 }
 
+
+.channel-view-tab-2 {
+  height: 100%;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--j-space-300);
+  color: var(--j-color-ui-500);
+  font-size: var(--j-font-size-500);
+  cursor: pointer;
+  position: relative;
+  padding: var(--j-space-300);
+  border-radius: 6px;
+}
+
 .channel-view-tab:hover {
+  color: var(--j-color-black);
+}
+
+.channel-view-tab-2:hover {
   color: var(--j-color-black);
 }
 
@@ -453,7 +524,21 @@ export default defineComponent({
   color: var(--j-color-black);
 }
 
+.channel-view-tab-2.checked {
+  position: relative;
+  background: var(--j-color-primary-100);
+  color: var(--j-color-black);
+}
+
+
 .channel-view-tab input {
+  position: absolute;
+  clip: rect(1px 1px 1px 1px);
+  clip: rect(1px, 1px, 1px, 1px);
+  vertical-align: middle;
+}
+
+.channel-view-tab-2 input {
   position: absolute;
   clip: rect(1px 1px 1px 1px);
   clip: rect(1px, 1px, 1px, 1px);
