@@ -3,17 +3,30 @@ import { v4 as uuidv4 } from "uuid";
 import styles from "./Transcriber.module.css";
 import TranscriptionWorker from "./worker?worker";
 
+const defaultThreshold = 40;
+const defaultTimeout = 3;
+const models = [
+  "Xenova/whisper-tiny",
+  "Xenova/whisper-base",
+  "Xenova/whisper-small",
+  "Xenova/whisper-medium",
+  "distil-whisper/distil-medium",
+  "distil-whisper/distil-large-v2",
+];
+
 export default function Transcriber() {
   const [transcribeAudio, setTranscribeAudio] = useState(false);
   const [transcripts, setTranscripts] = useState<any[]>([]);
   const [speechDetected, setSpeechDetected] = useState(false);
-  const [threshold, setThreshold] = useState(10);
-  const [recordingTimeout, setRecordingTimeout] = useState(3);
+  const [threshold, setThreshold] = useState(defaultThreshold);
+  const thresholdRef = useRef(defaultThreshold);
+  const [silenceTimeout, setSilenceTimeout] = useState(defaultTimeout);
+  const silenceTimeoutRef = useRef(defaultTimeout);
   const [secondsOfSilence, setSecondsOfSilence] = useState(0);
-  const thresholdRef = useRef(10);
-  const recordingTimeoutRef = useRef(3);
   const silenceTimerRef = useRef(null);
   const silenceInterval = useRef(null);
+  const [selectedModel, setSelectedModel] = useState(models[0]);
+  const selectedModelRef = useRef(models[0]);
   const mediaRecorder = useRef(null);
   const audioChunks = useRef([]);
   const audioContext = useRef(null);
@@ -57,7 +70,7 @@ export default function Transcriber() {
           setSpeechDetected(false);
           clearInterval(silenceInterval.current);
           setSecondsOfSilence(0);
-        }, recordingTimeoutRef.current * 1000);
+        }, silenceTimeoutRef.current * 1000);
         // increment seconds of silence
         setSecondsOfSilence(0);
         silenceInterval.current = setInterval(() => {
@@ -75,7 +88,11 @@ export default function Transcriber() {
     const context = new AudioContext({ sampleRate: 16000 });
     const audioBuffer = await context.decodeAudioData(arrayBuffer);
     const float32Array = audioBuffer.getChannelData(0);
-    worker.current?.postMessage({ id, float32Array });
+    worker.current?.postMessage({
+      id,
+      float32Array,
+      model: selectedModelRef.current,
+    });
     context.close();
   }
 
@@ -106,10 +123,10 @@ export default function Transcriber() {
   }
 
   function incrementTimeout(value) {
-    const newValue = recordingTimeout + value;
+    const newValue = silenceTimeout + value;
     if (newValue >= 1 && newValue <= 10) {
-      recordingTimeoutRef.current = newValue;
-      setRecordingTimeout(newValue);
+      silenceTimeoutRef.current = newValue;
+      setSilenceTimeout(newValue);
     }
   }
 
@@ -136,7 +153,7 @@ export default function Transcriber() {
   return (
     <div className={styles.wrapper}>
       <j-flex a="center" gap="400">
-        <j-text nomargin>Transcribe Audio</j-text>
+        <j-text nomargin>Transcribe audio</j-text>
         <j-toggle
           checked={transcribeAudio}
           onChange={() => setTranscribeAudio(!transcribeAudio)}
@@ -145,31 +162,51 @@ export default function Transcriber() {
         </j-toggle>
       </j-flex>
       {transcribeAudio && (
-        <j-box mt="200" mb="600">
-          <j-flex a="center" gap="400">
-            <j-text nomargin style={{ flexShrink: 0 }}>
-              Volume Threshold
-            </j-text>
-            <div className={styles.volumeThreshold}>
-              <div id="volume" className={styles.volume} />
-              <div
-                className={styles.threshold}
-                style={{ left: `${(+threshold / 128) * 100}%` }}
-              />
-              <input
-                className={styles.slider}
-                type="range"
-                min="0"
-                max="128"
-                value={threshold}
-                onChange={(e) => {
-                  thresholdRef.current = +e.target.value;
-                  setThreshold(+e.target.value);
-                }}
-              />
-            </div>
-          </j-flex>
-          <j-box mt="400">
+        <j-box mt="200">
+          <j-flex direction="column" gap="500">
+            <j-flex a="center" gap="400">
+              <j-text nomargin style={{ flexShrink: 0 }}>
+                Model
+              </j-text>
+              <j-menu>
+                <j-menu-group collapsible title={selectedModel}>
+                  {models.map((model) => (
+                    <j-menu-item
+                      selected={model === selectedModel}
+                      onClick={() => {
+                        selectedModelRef.current = model;
+                        setSelectedModel(model);
+                      }}
+                    >
+                      {model}
+                    </j-menu-item>
+                  ))}
+                </j-menu-group>
+              </j-menu>
+            </j-flex>
+            <j-flex a="center" gap="400">
+              <j-text nomargin style={{ flexShrink: 0 }}>
+                Volume threshold
+              </j-text>
+              <div className={styles.volumeThreshold}>
+                <div id="volume" className={styles.volume} />
+                <div
+                  className={styles.threshold}
+                  style={{ left: `${(+threshold / 128) * 100}%` }}
+                />
+                <input
+                  className={styles.slider}
+                  type="range"
+                  min="0"
+                  max="128"
+                  value={threshold}
+                  onChange={(e) => {
+                    thresholdRef.current = +e.target.value;
+                    setThreshold(+e.target.value);
+                  }}
+                />
+              </div>
+            </j-flex>
             <j-flex a="center" gap="400">
               <j-text nomargin>
                 Seconds of silence before recording stops
@@ -177,13 +214,13 @@ export default function Transcriber() {
               <j-button size="xs" square onClick={() => incrementTimeout(-1)}>
                 <j-icon name="caret-left-fill" />
               </j-button>
-              <j-text nomargin>{recordingTimeout}</j-text>
+              <j-text nomargin color="color-white">
+                {silenceTimeout}
+              </j-text>
               <j-button size="xs" square onClick={() => incrementTimeout(1)}>
                 <j-icon name="caret-right-fill" />
               </j-button>
             </j-flex>
-          </j-box>
-          <j-box mt="400">
             <j-flex a="center" gap="400">
               <j-text nomargin>State:</j-text>
               <j-text color="color-white" nomargin>
@@ -191,42 +228,44 @@ export default function Transcriber() {
               </j-text>
               {secondsOfSilence > 0 && (
                 <j-text nomargin>
-                  (stopping in {recordingTimeout - secondsOfSilence}s)
+                  (stopping in {silenceTimeout - secondsOfSilence}s)
                 </j-text>
               )}
             </j-flex>
-          </j-box>
+          </j-flex>
         </j-box>
       )}
       {transcripts.length > 0 && (
-        <j-flex direction="column" gap="400">
-          {transcripts.map((transcript) => (
-            <j-flex
-              key={transcript.id}
-              direction="column"
-              gap="300"
-              className={styles.text}
-            >
-              <j-timestamp
-                value={transcript.timestamp}
-                dateStyle="short"
-                timeStyle="short"
-              />
-              {transcript.done ? (
-                <j-text nomargin size="600">
-                  {transcript.text}
-                </j-text>
-              ) : (
-                <j-flex gap="400" a="center">
-                  <j-spinner size="xs" />
-                  <j-text nomargin size="600" color="primary-600">
-                    Transcribing audio...
+        <j-box mt="600">
+          <j-flex direction="column" gap="400">
+            {transcripts.map((transcript) => (
+              <j-flex
+                key={transcript.id}
+                direction="column"
+                gap="300"
+                className={styles.text}
+              >
+                <j-timestamp
+                  value={transcript.timestamp}
+                  dateStyle="short"
+                  timeStyle="short"
+                />
+                {transcript.done ? (
+                  <j-text nomargin size="600">
+                    {transcript.text}
                   </j-text>
-                </j-flex>
-              )}
-            </j-flex>
-          ))}
-        </j-flex>
+                ) : (
+                  <j-flex gap="400" a="center">
+                    <j-spinner size="xs" />
+                    <j-text nomargin size="600" color="primary-600">
+                      Transcribing audio...
+                    </j-text>
+                  </j-flex>
+                )}
+              </j-flex>
+            ))}
+          </j-flex>
+        </j-box>
       )}
     </div>
   );

@@ -1,11 +1,14 @@
 import { pipeline } from "@xenova/transformers";
 
 onmessage = async function (message) {
-  const { id, float32Array } = message.data;
+  const { id, float32Array, model } = message.data;
   const pipe = await pipeline(
     "automatic-speech-recognition",
-    "Xenova/whisper-tiny.en",
-    { quantized: true }
+    `${model}${model === "distil-whisper/distil-large-v2" ? "" : ".en"}`,
+    {
+      quantized: true,
+      revision: model.includes("whisper-medium") ? "no_attentions" : "main",
+    }
   );
   const transcription = (await pipe(float32Array, {
     chunk_length_s: 30,
