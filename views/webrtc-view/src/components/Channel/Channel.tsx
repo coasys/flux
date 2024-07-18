@@ -1,24 +1,24 @@
-import { useContext, useEffect, useRef, useState } from "preact/hooks";
-import { getMe, Me } from "@coasys/flux-api";
-import { useWebRTC } from "@coasys/flux-react-web";
 import { useAgent } from "@coasys/ad4m-react-hooks";
+import { useWebRTC } from "@coasys/flux-react-web";
+import { useContext, useEffect, useRef, useState } from "preact/hooks";
 import useIntersectionObserver from "../../hooks/useIntersectionObserver";
 
-import UserGrid from "../UserGrid";
-import Footer from "../Footer";
-import Notifications from "../Notifications";
 import UiContext from "../../context/UiContext";
-import Overlay from "../Overlay/Overlay";
+import Footer from "../Footer";
 import JoinScreen from "../JoinScreen";
+import Notifications from "../Notifications";
+import Overlay from "../Overlay/Overlay";
+import UserGrid from "../UserGrid";
 
-import { PerspectiveProxy, Agent } from "@coasys/ad4m";
+import { Agent, PerspectiveProxy } from "@coasys/ad4m";
 import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
 // @ts-ignore
-import styles from "./Channel.module.css";
-import Debug from "../Debug";
-import { profileFormatter } from "@coasys/flux-utils";
 import { Profile } from "@coasys/flux-types";
+import { profileFormatter } from "@coasys/flux-utils";
+import Debug from "../Debug";
+import Transcriber from "../Transcriber";
+import styles from "./Channel.module.css";
 
 type Props = {
   source: string;
@@ -34,9 +34,13 @@ export default function Channel({
   const [agent, setAgent] = useState<Agent | null>(null);
   const wrapperEl = useRef<HTMLDivElement | null>(null);
 
-  const { profile } = useAgent<Profile>({ client: agentClient, did: () => agent?.did, formatter: (profile: any) => {
-    return profileFormatter(profile.perspective.links)
-  } });
+  const { profile } = useAgent<Profile>({
+    client: agentClient,
+    did: () => agent?.did,
+    formatter: (profile: any) => {
+      return profileFormatter(profile.perspective.links);
+    },
+  });
   const wrapperObserver = useIntersectionObserver(wrapperEl, {});
   const isPageActive = !!wrapperObserver?.isIntersecting;
 
@@ -92,6 +96,7 @@ export default function Channel({
             agentClient={agentClient}
             profile={profile}
           />
+          <Transcriber />
           <Footer
             webRTC={webRTC}
             onToggleSettings={() => toggleShowSettings(!showSettings)}
