@@ -1,7 +1,9 @@
+import { useSubjects } from "@coasys/ad4m-react-hooks";
+import { Message } from "@coasys/flux-api";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { v4 as uuidv4 } from "uuid";
 import styles from "./Transcriber.module.css";
-import TranscriptionWorker from "./worker?worker";
+import TranscriptionWorker from "./worker?worker&inline";
 
 const defaultThreshold = 40;
 const defaultTimeout = 3;
@@ -14,7 +16,12 @@ const models = [
   "distil-whisper/distil-large-v2",
 ];
 
-export default function Transcriber() {
+type Props = {
+  source: string;
+  perspective: any; // PerspectiveProxy;
+};
+
+export default function Transcriber({ source, perspective }: Props) {
   const [transcribeAudio, setTranscribeAudio] = useState(false);
   const [transcripts, setTranscripts] = useState<any[]>([]);
   const [speechDetected, setSpeechDetected] = useState(false);
@@ -36,6 +43,12 @@ export default function Transcriber() {
   const recording = useRef(false);
   const listening = useRef(false);
   const worker = useRef<Worker | null>(null);
+
+  const { repo: messageRepo } = useSubjects({
+    perspective,
+    source,
+    subject: Message,
+  });
 
   function detectSpeech() {
     if (listening.current) {
@@ -84,10 +97,12 @@ export default function Transcriber() {
   async function transcribe() {
     const id = uuidv4();
     setTranscripts((ts) => [...ts, { id, timestamp: new Date(), done: false }]);
+    // convert raw audio to float32Array for transcription
     const arrayBuffer = await audioChunks.current[0].arrayBuffer();
     const context = new AudioContext({ sampleRate: 16000 });
     const audioBuffer = await context.decodeAudioData(arrayBuffer);
     const float32Array = audioBuffer.getChannelData(0);
+    // send formatted audio to transcription worker
     worker.current?.postMessage({
       id,
       float32Array,
@@ -131,7 +146,7 @@ export default function Transcriber() {
   }
 
   useEffect(() => {
-    // set up transcription worker to run ML in seperate thread (prevents UI from stalling)
+    // set up worker to run transcriptions in a seperate thread & prevent the UI from stalling
     worker.current = new TranscriptionWorker();
     worker.current.onmessage = (e) => {
       const { id, text } = e.data;
@@ -141,6 +156,11 @@ export default function Transcriber() {
         match.done = true;
         return [...ts];
       });
+      messageRepo
+        // @ts-ignore
+        .create({ body: `<p>${text}</p>` })
+        .then((message) => console.log("message created: ", message))
+        .catch((error) => console.log("message error: ", error));
     };
     return () => worker.current?.terminate();
   }, []);
@@ -166,7 +186,7 @@ export default function Transcriber() {
           <j-flex direction="column" gap="500">
             <j-flex a="center" gap="400">
               <j-text nomargin style={{ flexShrink: 0 }}>
-                Model
+                AI model
               </j-text>
               <j-menu>
                 <j-menu-group collapsible title={selectedModel}>
@@ -186,7 +206,7 @@ export default function Transcriber() {
             </j-flex>
             <j-flex a="center" gap="400">
               <j-text nomargin style={{ flexShrink: 0 }}>
-                Volume threshold
+                Volume threshold to trigger recording
               </j-text>
               <div className={styles.volumeThreshold}>
                 <div id="volume" className={styles.volume} />

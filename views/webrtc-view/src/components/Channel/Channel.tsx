@@ -96,11 +96,11 @@ export default function Channel({
             agentClient={agentClient}
             profile={profile}
           />
-          <Transcriber />
           <Footer
             webRTC={webRTC}
             onToggleSettings={() => toggleShowSettings(!showSettings)}
           />
+          <Transcriber source={source} perspective={perspective} />
         </>
       )}
 
