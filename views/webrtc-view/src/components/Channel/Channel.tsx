@@ -24,12 +24,16 @@ type Props = {
   source: string;
   perspective: PerspectiveProxy;
   agent: AgentClient;
+  currentView: string;
+  setModalOpen: (state: boolean) => void;
 };
 
 export default function Channel({
   source,
   perspective,
   agent: agentClient,
+  currentView,
+  setModalOpen,
 }: Props) {
   const [agent, setAgent] = useState<Agent | null>(null);
   const wrapperEl = useRef<HTMLDivElement | null>(null);
@@ -80,12 +84,21 @@ export default function Channel({
 
   return (
     <section className={styles.outer} ref={wrapperEl}>
+      {currentView !== "@coasys/flux-webrtc-view" && (
+        <button
+          className={styles.closeButton}
+          onClick={() => setModalOpen(false)}
+        >
+          <j-icon name="x" color="color-white" />
+        </button>
+      )}
       {!webRTC.hasJoined && (
         <JoinScreen
           webRTC={webRTC}
           profile={profile}
           did={agent?.did}
           onToggleSettings={() => toggleShowSettings(!showSettings)}
+          currentView={currentView}
         />
       )}
 

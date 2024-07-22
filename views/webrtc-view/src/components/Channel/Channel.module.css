@@ -8,3 +8,18 @@
   height: 100%;
   padding: 0 var(--j-space-500);
 }
+
+.closeButton {
+  all: unset;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--j-color-ui-200);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 5px;
+  right: calc(var(--j-space-500) + 5px);
+  z-index: 5;
+}

@@ -276,6 +276,7 @@ export default function Transcriber({ source, perspective }: Props) {
                   </j-text>
                 ) : (
                   <j-flex gap="400" a="center">
+                    {/* @ts-ignore */}
                     <j-spinner size="xs" />
                     <j-text nomargin size="600" color="primary-600">
                       Transcribing audio...
