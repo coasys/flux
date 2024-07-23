@@ -1,18 +1,18 @@
-import { useEffect, useState } from "preact/hooks";
-import { Howl } from "howler";
-import { Reaction } from "../../types";
+import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 import { WebRTC } from "@coasys/flux-react-web";
-import popWav from "../../assets/pop.wav";
+import { Howl } from "howler";
+import { useEffect, useState } from "preact/hooks";
 import guitarWav from "../../assets/guitar.wav";
 import kissWav from "../../assets/kiss.wav";
 import pigWav from "../../assets/pig.wav";
+import popWav from "../../assets/pop.wav";
+import { Reaction } from "../../types";
 import Item from "./Item";
-import { AgentClient } from "@coasys/ad4m/lib/src/agent/AgentClient";
 
-import styles from "./UserGrid.module.css";
-import { Profile } from "@coasys/flux-types";
 import { useMe } from "@coasys/ad4m-react-hooks";
+import { Profile } from "@coasys/flux-types";
 import { profileFormatter } from "@coasys/flux-utils";
+import styles from "./UserGrid.module.css";
 
 type Props = {
   webRTC: WebRTC;
@@ -23,7 +23,7 @@ type Props = {
 export default function UserGrid({ webRTC, profile, agentClient }: Props) {
   const [currentReaction, setCurrentReaction] = useState<Reaction>(null);
   const [focusedPeerId, setFocusedPeerId] = useState(null);
-  const {me} = useMe(agentClient, profileFormatter);
+  const { me } = useMe(agentClient, profileFormatter);
 
   const popSound = new Howl({
     src: [popWav],
@@ -121,10 +121,10 @@ export default function UserGrid({ webRTC, profile, agentClient }: Props) {
           }
           userId={me?.did}
           reaction={myReaction}
-          focused={focusedPeerId === profile.did}
-          minimised={focusedPeerId && focusedPeerId !== profile.did}
-          onToggleFocus={() =>
-            setFocusedPeerId(focusedPeerId === profile.did ? null : profile.did)
+          focused={focusedPeerId === me?.did} // profile.did
+          minimised={focusedPeerId && focusedPeerId !== me?.did} // profile.did
+          onToggleFocus={
+            () => setFocusedPeerId(focusedPeerId === me?.did ? null : me?.did) // profile.did
           }
         />
       )}
