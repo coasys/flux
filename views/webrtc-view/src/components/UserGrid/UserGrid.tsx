@@ -104,12 +104,7 @@ export default function UserGrid({ webRTC, profile, agentClient }: Props) {
     });
 
   return (
-    <div
-      className={styles.grid}
-      style={{
-        "--grid-col-size": gridColSize,
-      }}
-    >
+    <div className={styles.grid} style={{ "--grid-col-size": gridColSize }}>
       {webRTC.localStream && (
         <Item
           webRTC={webRTC}
@@ -121,10 +116,10 @@ export default function UserGrid({ webRTC, profile, agentClient }: Props) {
           }
           userId={me?.did}
           reaction={myReaction}
-          focused={focusedPeerId === me?.did} // profile.did
-          minimised={focusedPeerId && focusedPeerId !== me?.did} // profile.did
-          onToggleFocus={
-            () => setFocusedPeerId(focusedPeerId === me?.did ? null : me?.did) // profile.did
+          focused={focusedPeerId === profile?.did}
+          minimised={focusedPeerId && focusedPeerId !== profile.did}
+          onToggleFocus={() =>
+            setFocusedPeerId(focusedPeerId === profile.did ? null : profile.did)
           }
         />
       )}

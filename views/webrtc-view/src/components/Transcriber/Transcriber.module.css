@@ -23,7 +23,7 @@
   background-color: var(--j-color-primary-500);
 }
 
-.threshold {
+.sliderLine {
   position: absolute;
   width: 5px;
   height: 30px;

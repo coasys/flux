@@ -5,8 +5,8 @@ import { v4 as uuidv4 } from "uuid";
 import styles from "./Transcriber.module.css";
 import TranscriptionWorker from "./worker?worker&inline";
 
-const defaultThreshold = 40;
-const defaultTimeout = 3;
+const defaultVolumeThreshold = 40; // 0 - 128
+const defaultSilenceTimeout = 3; // seconds
 const models = [
   "Xenova/whisper-tiny",
   "Xenova/whisper-base",
@@ -25,10 +25,12 @@ export default function Transcriber({ source, perspective }: Props) {
   const [transcribeAudio, setTranscribeAudio] = useState(false);
   const [transcripts, setTranscripts] = useState<any[]>([]);
   const [speechDetected, setSpeechDetected] = useState(false);
-  const [threshold, setThreshold] = useState(defaultThreshold);
-  const thresholdRef = useRef(defaultThreshold);
-  const [silenceTimeout, setSilenceTimeout] = useState(defaultTimeout);
-  const silenceTimeoutRef = useRef(defaultTimeout);
+  const [volumeThreshold, setVolumeThreshold] = useState(
+    defaultVolumeThreshold
+  );
+  const volumeThresholdRef = useRef(defaultVolumeThreshold);
+  const [silenceTimeout, setSilenceTimeout] = useState(defaultSilenceTimeout);
+  const silenceTimeoutRef = useRef(defaultSilenceTimeout);
   const [secondsOfSilence, setSecondsOfSilence] = useState(0);
   const silenceTimerRef = useRef(null);
   const silenceInterval = useRef(null);
@@ -59,7 +61,7 @@ export default function Transcriber({ source, perspective }: Props) {
       const volume = document.getElementById("volume");
       volume.style.width = `${((maxValue - 128) / 128) * 100}%`;
       // if volume threshold reached
-      if (maxValue > 128 + thresholdRef.current) {
+      if (maxValue > 128 + volumeThresholdRef.current) {
         // clear silence timeout & interval if present
         if (silenceTimerRef.current) {
           clearTimeout(silenceTimerRef.current);
@@ -112,22 +114,27 @@ export default function Transcriber({ source, perspective }: Props) {
   }
 
   function startListening() {
-    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-      audioContext.current = new (window.AudioContext ||
-        (window as any).webkitAudioContext)();
-      analyser.current = audioContext.current.createAnalyser();
-      sourceNode.current = audioContext.current.createMediaStreamSource(stream);
-      sourceNode.current.connect(analyser.current);
-      analyser.current.fftSize = 2048;
-      dataArray.current = new Uint8Array(analyser.current.fftSize);
-      mediaRecorder.current = new MediaRecorder(stream);
-      mediaRecorder.current.ondataavailable = (event) => {
-        audioChunks.current.push(event.data);
-      };
-      mediaRecorder.current.onstop = transcribe;
-      listening.current = true;
-      detectSpeech();
-    });
+    navigator.mediaDevices
+      .getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true },
+      })
+      .then((stream) => {
+        audioContext.current = new (window.AudioContext ||
+          (window as any).webkitAudioContext)();
+        analyser.current = audioContext.current.createAnalyser();
+        sourceNode.current =
+          audioContext.current.createMediaStreamSource(stream);
+        sourceNode.current.connect(analyser.current);
+        analyser.current.fftSize = 2048;
+        dataArray.current = new Uint8Array(analyser.current.fftSize);
+        mediaRecorder.current = new MediaRecorder(stream);
+        mediaRecorder.current.ondataavailable = (event) => {
+          audioChunks.current.push(event.data);
+        };
+        mediaRecorder.current.onstop = transcribe;
+        listening.current = true;
+        detectSpeech();
+      });
   }
 
   function stopListening() {
@@ -139,7 +146,7 @@ export default function Transcriber({ source, perspective }: Props) {
 
   function incrementTimeout(value) {
     const newValue = silenceTimeout + value;
-    if (newValue >= 1 && newValue <= 10) {
+    if (newValue > 0 && newValue < 11) {
       silenceTimeoutRef.current = newValue;
       setSilenceTimeout(newValue);
     }
@@ -211,18 +218,18 @@ export default function Transcriber({ source, perspective }: Props) {
               <div className={styles.volumeThreshold}>
                 <div id="volume" className={styles.volume} />
                 <div
-                  className={styles.threshold}
-                  style={{ left: `${(+threshold / 128) * 100}%` }}
+                  className={styles.sliderLine}
+                  style={{ left: `${(+volumeThreshold / 128) * 100}%` }}
                 />
                 <input
                   className={styles.slider}
                   type="range"
                   min="0"
                   max="128"
-                  value={threshold}
+                  value={volumeThreshold}
                   onChange={(e) => {
-                    thresholdRef.current = +e.target.value;
-                    setThreshold(+e.target.value);
+                    volumeThresholdRef.current = +e.target.value;
+                    setVolumeThreshold(+e.target.value);
                   }}
                 />
               </div>
