@@ -6,8 +6,7 @@
     <div class="settings">
       <aside class="settings__sidebar">
         <j-tabs
-          variant="button"
-          wrap
+          full
           :value="currentView"
           @change="(e: any) => (currentView = e.target.value)"
         >
@@ -20,7 +19,6 @@
             Notifications
           </j-tab-item>
         </j-tabs>
-      </aside>
       <div class="settings__content">
         <theme-editor
           v-if="currentView === 'theme-editor'"
@@ -29,6 +27,7 @@
         />
         <privacy v-if="currentView === 'privacy'" />
       </div>
+      </aside>
     </div>
   </j-box>
 </template>
@@ -74,7 +73,7 @@ export default defineComponent({
 }
 
 .settings__sidebar {
-  width: 300px;
+  width: 100%;
   position: sticky;
   top: 0;
   left: 0;

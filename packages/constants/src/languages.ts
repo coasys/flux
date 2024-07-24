@@ -1,2 +1,2 @@
 export const FILE_STORAGE_LANGUAGE =
-  "QmzSYwdb1g2SouHfv9Qv35CDCgthCZ8nXGGvTQBB4krriFiGFTN";
+  "QmzSYwdcHSt9ALKKMRzavTsWifrqfwZqy9JM2m3XJT2k555wzR6";

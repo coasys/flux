@@ -76,6 +76,7 @@ export default defineComponent({
   position: absolute;
   left: 0;
   top: 0;
+  padding-top: env(safe-area-inset-top);
   width: var(--app-main-sidebar-width);
   display: flex;
   flex-direction: column;
@@ -88,6 +89,13 @@ export default defineComponent({
   transition: all 0.3s ease;
   transform: translateX(calc(var(--app-main-sidebar-width) * -1));
 }
+
+@media (max-width: 800px) {
+  .app-layout__sidebar {
+    z-index: 0;
+  }
+}
+
 .app-layout__main {
   height: 100%;
   background: var(--app-main-bg-color);

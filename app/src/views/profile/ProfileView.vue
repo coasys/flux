@@ -471,9 +471,10 @@ export default defineComponent({
 
 .profile__container {
   width: 100%;
-  height: 100%;
+  height: calc(100% - env(safe-area-inset-top));
   overflow-y: auto;
   position: relative;
+  padding-top: env(safe-area-inset-top);
 }
 
 .profile__content {
@@ -530,7 +531,7 @@ export default defineComponent({
 
 .sidebar {
   position: absolute;
-  top: 20px;
+  top: calc(20px + env(safe-area-inset-top));
   left: 20px;
   cursor: pointer;
 }
