@@ -291,7 +291,9 @@ export default defineComponent({
     },
     changeCurrentView(e: any) {
       const value = e.target.value;
-      this.webrtcModalOpen = this.currentView === "@coasys/flux-webrtc-view";
+      this.webrtcModalOpen =
+        window.screen.width > 900 &&
+        this.currentView === "@coasys/flux-webrtc-view";
       this.currentView = value;
     },
     toggleSidebar() {
