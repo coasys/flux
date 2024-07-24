@@ -15,7 +15,9 @@ type Props = {
 };
 
 export default function SynergyDemoView({ perspective, agent, source }: Props) {
-  const [openAIKey, setOpenAIKey] = useState("");
+  const [openAIKey, setOpenAIKey] = useState(
+    localStorage?.getItem("openAIKey") || ""
+  );
   const [items, setItems] = useState<any[]>([]);
   const { entries: messages } = useSubjects({
     perspective,
@@ -60,10 +62,12 @@ export default function SynergyDemoView({ perspective, agent, source }: Props) {
             label="OpenAI Key"
             value={openAIKey}
             placeholder="Required to process content..."
-            onChange={(e) =>
-              setOpenAIKey((e.target as HTMLTextAreaElement).value)
-            }
-          ></j-input>
+            onInput={(event) => {
+              const value = (event.target as HTMLInputElement).value;
+              setOpenAIKey(value);
+              localStorage?.setItem("openAIKey", value);
+            }}
+          />
         </j-box>
         <j-flex direction="column" gap="400">
           {items.map((item) => (
