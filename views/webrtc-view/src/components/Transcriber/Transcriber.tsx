@@ -10,10 +10,10 @@ const defaultSilenceTimeout = 3; // seconds
 const models = [
   "Xenova/whisper-tiny",
   "Xenova/whisper-base",
-  "Xenova/whisper-small",
-  "Xenova/whisper-medium",
-  "distil-whisper/distil-medium",
-  "distil-whisper/distil-large-v2",
+  // "Xenova/whisper-small",
+  // "Xenova/whisper-medium",
+  // "distil-whisper/distil-medium",
+  // "distil-whisper/distil-large-v2",
 ];
 
 type Props = {

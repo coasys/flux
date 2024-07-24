@@ -80,7 +80,11 @@
           (webrtcModalOpen && app.pkg === `@coasys/flux-webrtc-view`)
         "
         :is="wcNames[app.pkg]"
-        :class="`perspective-view ${webrtcModalOpen && app.pkg === `@coasys/flux-webrtc-view` && 'modal'}`"
+        class="perspective-view"
+        :class="{
+          split: webrtcModalOpen,
+          right: webrtcModalOpen && app.pkg === '@coasys/flux-webrtc-view',
+        }"
         :source="channelId"
         :agent="agentClient"
         :perspective="data.perspective"
@@ -389,6 +393,7 @@ export default defineComponent({
 }
 
 .channel-view {
+  position: relative;
   background: var(--app-channel-bg-color, transparent);
 }
 
@@ -424,19 +429,22 @@ export default defineComponent({
 }
 
 .perspective-view {
+  position: relative;
   height: calc(100% - var(--app-header-height));
   overflow-y: auto;
   display: block;
 }
 
-.modal {
+.split {
+  width: 50%;
+}
+
+.right {
   position: absolute;
-  height: auto !important;
-  top: var(--j-space-1000);
-  right: var(--j-space-600);
-  background-color: var(--j-color-ui-100);
-  padding: var(--j-space-600) var(--j-space-300);
-  border-radius: 10px;
+  top: var(--app-header-height);
+  right: 0;
+  padding: var(--j-space-600);
+  width: 50%;
 }
 
 .channel-view__tabs {
