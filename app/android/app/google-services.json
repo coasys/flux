@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "440878613926",
+    "project_id": "flux-6e299",
+    "storage_bucket": "flux-6e299.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:440878613926:android:ceba9b4b3e917944627b67",
+        "android_client_info": {
+          "package_name": "org.coasys.flux"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB23tjIE8QduEdyL2EgvNOrRPhcPdCqXys"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

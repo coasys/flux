@@ -136,27 +136,6 @@ export default async ({
       removals,
     } as LinkMutations);
 
-    await client.runtime.requestInstallNotification({
-      appName: "Flux",
-      description: "Messages with mentions",
-      appUrl: window.location.origin,
-      appIconPath: "https://i.ibb.co/GnqjPJP/icon.png",
-      trigger: `
-        agent_did(Did),
-        subject_class("Message", C),
-        instance(C, Base),
-        property_getter(C, Base, "body", Body),
-        literal_from_url(Body, JsonString, _),
-        json_property(JsonString, "data", MessageContent),
-        append("data-type=\\\"mention\\\" href=\\\"", Did, MentionString),
-        string_includes(MessageContent, MentionString),
-        remove_html_tags(MessageContent, Description),
-        Title="You were mentioned".`,
-      perspectiveIds: [],
-      webhookUrl: "",
-      webhookAuth: ""
-    });
-
     return {
       did: agent.did,
       username: username,
