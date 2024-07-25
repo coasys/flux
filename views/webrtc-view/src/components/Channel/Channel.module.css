@@ -5,6 +5,21 @@
   width: 100%;
   max-width: 100%;
   grid-template-columns: 1fr;
-  height: 100%;
-  padding: 0 var(--j-space-500);
+  min-height: 100%;
+  padding: var(--j-space-500);
+}
+
+.closeButton {
+  all: unset;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-color: var(--j-color-ui-200);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: -16px;
+  right: calc(var(--j-space-500) + 5px);
+  z-index: 5;
 }

@@ -208,9 +208,12 @@ export default function Item({ perspective, item, openAIKey }: Props) {
         </j-flex>
       </j-box>
 
-      <j-text size="500" style={{ wordBreak: "break-word" }}>
-        {text}
-      </j-text>
+      <j-text
+        size="500"
+        color="color-white"
+        dangerouslySetInnerHTML={{ __html: text }}
+        style={{ wordBreak: "break-word" }}
+      />
 
       {processed && (
         <j-box mt="400" mb="400">

@@ -97,12 +97,21 @@
     <template v-for="app in apps">
       <component
         v-if="wcNames[app.pkg]"
-        v-show="currentView === app.pkg && wcNames[app.pkg]"
+        v-show="
+          (currentView === app.pkg && wcNames[app.pkg]) ||
+          (webrtcModalOpen && app.pkg === `@coasys/flux-webrtc-view`)
+        "
         :is="wcNames[app.pkg]"
         class="perspective-view"
+        :class="{
+          split: webrtcModalOpen,
+          right: webrtcModalOpen && app.pkg === '@coasys/flux-webrtc-view',
+        }"
         :source="channelId"
-        :agent.prop="agentClient"
-        :perspective.prop="data.perspective"
+        :agent="agentClient"
+        :perspective="data.perspective"
+        :currentView="currentView"
+        :setModalOpen="() => (webrtcModalOpen = false)"
         @click="onViewClick"
         @hide-notification-indicator="onHideNotificationIndicator"
       />
@@ -160,29 +169,29 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
-import { getAd4mClient } from "@coasys/ad4m-connect/utils";
+import Hourglass from "@/components/hourglass/Hourglass.vue";
 import Profile from "@/containers/Profile.vue";
 import { useAppStore } from "@/store/app";
-import { ChannelView } from "@coasys/flux-types";
-import Hourglass from "@/components/hourglass/Hourglass.vue";
+import fetchFluxApp from "@/utils/fetchFluxApp";
+import { Ad4mClient } from "@coasys/ad4m";
+import { getAd4mClient } from "@coasys/ad4m-connect/utils";
 import {
-  useSubject,
+  useMe,
   usePerspective,
   usePerspectives,
-  useMe,
+  useSubject,
   useSubjects,
 } from "@coasys/ad4m-vue-hooks";
 import {
-  Community,
-  Channel,
   App,
-  joinCommunity,
+  Channel,
+  Community,
   generateWCName,
+  joinCommunity,
 } from "@coasys/flux-api";
-import { Ad4mClient } from "@coasys/ad4m";
-import fetchFluxApp from "@/utils/fetchFluxApp";
+import { ChannelView } from "@coasys/flux-types";
 import { profileFormatter } from "@coasys/flux-utils";
+import { defineComponent, ref } from "vue";
 
 interface MentionTrigger {
   label: string;
@@ -237,6 +246,7 @@ export default defineComponent({
       channel,
       channelRepo,
       currentView: ref(""),
+      webrtcModalOpen: ref(false),
       allDefined: ref(false),
       ChannelView: ChannelView,
       showEditChannel: ref(false),
@@ -331,6 +341,9 @@ export default defineComponent({
     },
     changeCurrentView(e: any) {
       const value = e.target.value;
+      this.webrtcModalOpen =
+        window.screen.width > 900 &&
+        this.currentView === "@coasys/flux-webrtc-view";
       this.currentView = value;
       console.log("changed view", value);
       this.isChangeChannel = false;
@@ -437,6 +450,7 @@ export default defineComponent({
 }
 
 .channel-view {
+  position: relative;
   background: var(--app-channel-bg-color, transparent);
 }
 
@@ -472,9 +486,22 @@ export default defineComponent({
 }
 
 .perspective-view {
+  position: relative;
   height: calc(100% - var(--app-header-height));
   overflow-y: auto;
   display: block;
+}
+
+.split {
+  width: 50%;
+}
+
+.right {
+  position: absolute;
+  top: var(--app-header-height);
+  right: 0;
+  padding: var(--j-space-600);
+  width: 50%;
 }
 
 .channel-view__tabs {
