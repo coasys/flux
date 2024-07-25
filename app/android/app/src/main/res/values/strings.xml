@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">flux</string>
     <string name="title_activity_main">flux</string>
-    <string name="package_name">com.coasys.flux</string>
-    <string name="custom_url_scheme">com.coasys.flux</string>
+    <string name="package_name">org.coasys.flux</string>
+    <string name="custom_url_scheme">org.coasys.flux</string>
 </resources>

@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.coasys.flux',
+  appId: 'org.coasys.flux',
   appName: 'flux',
   webDir: 'dist',
   plugins: {

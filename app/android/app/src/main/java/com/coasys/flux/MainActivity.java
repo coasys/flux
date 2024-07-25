@@ -1,4 +1,4 @@
-package com.coasys.flux;
+package org.coasys.flux;
 
 import com.getcapacitor.BridgeActivity;
 
