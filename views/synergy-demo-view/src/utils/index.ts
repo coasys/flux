@@ -13,7 +13,7 @@ export function transformItem(channelId, type, item) {
     newItem.text = item.body;
     newItem.icon = "chat";
   } else if (type === "Post") {
-    newItem.text = item.body;
+    newItem.text = item.title || item.body;
     newItem.icon = "postcard";
   } else if (type === "Task") {
     newItem.text = item.name;
